@@ -25,6 +25,7 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.parser.AppointmentParser;
+import com.openexchange.ajax.request.AppointmentRequest;
 import com.openexchange.ajax.writer.AppointmentWriter;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api2.OXException;
@@ -127,6 +128,11 @@ public class AppointmentTest extends AbstractAJAXTest {
 			
 			throw new Exception(ex);
 		}
+	}
+
+	protected void compareObject(AppointmentObject appointmentObj1,
+			AppointmentObject appointmentObj2) throws Exception {
+		compareObject(appointmentObj1, appointmentObj2, appointmentObj1.getStartDate().getTime(), appointmentObj1.getEndDate().getTime());
 	}
 	
 	protected void compareObject(AppointmentObject appointmentObj1,
@@ -588,6 +594,14 @@ public class AppointmentTest extends AbstractAJAXTest {
 			WebConversation webCon, int inFolder, Date start, Date end,
 			Date modified, int[] cols, TimeZone userTimeZone, String host, String session)
 			throws Exception {
+			return listModifiedAppointment(webCon, inFolder, start, end, modified, cols, userTimeZone, false, host, session);
+	}
+	
+	
+	public static AppointmentObject[] listModifiedAppointment(
+			WebConversation webCon, int inFolder, Date start, Date end,
+			Date modified, int[] cols, TimeZone userTimeZone, boolean bRecurrenceMaster, String host, String session)
+			throws Exception {
 		host = appendPrefix(host);
 		
 		final URLParameter parameter = new URLParameter();
@@ -605,6 +619,10 @@ public class AppointmentTest extends AbstractAJAXTest {
 		parameter.setParameter(AJAXServlet.PARAMETER_END, end);
 		parameter.setParameter(AJAXServlet.PARAMETER_COLUMNS, URLParameter
 				.colsArray2String(cols));
+		
+		if (bRecurrenceMaster) {
+			parameter.setParameter(AppointmentRequest.RECURRENCE_MASTER, true);
+		}
 		
 		WebRequest req = new GetMethodWebRequest(host + APPOINTMENT_URL
 				+ parameter.getURLParameters());
@@ -901,6 +919,27 @@ public class AppointmentTest extends AbstractAJAXTest {
 				break;
 			case AppointmentObject.RECURRENCE_POSITION:
 				appointmentObj.setRecurrencePosition(jsonArray.getInt(pos));
+				break;
+			case AppointmentObject.RECURRENCE_TYPE:
+				appointmentObj.setRecurrenceType(jsonArray.getInt(pos));
+				break;
+			case AppointmentObject.INTERVAL:
+				appointmentObj.setInterval(jsonArray.getInt(pos));
+				break;
+			case AppointmentObject.DAYS:
+				appointmentObj.setDays(jsonArray.getInt(pos));
+				break;
+			case AppointmentObject.DAY_IN_MONTH:
+				appointmentObj.setDayInMonth(jsonArray.getInt(pos));
+				break;
+			case AppointmentObject.MONTH:
+				appointmentObj.setMonth(jsonArray.getInt(pos));
+				break;
+			case AppointmentObject.UNTIL:
+				appointmentObj.setUntil(new Date(jsonArray.getLong(pos)));
+				break;
+			case AppointmentObject.RECURRING_OCCURRENCE:
+				appointmentObj.setOccurrence(jsonArray.getInt(pos));
 				break;
 			case AppointmentObject.TIMEZONE:
 				appointmentObj.setTimezone(jsonArray.getString(pos));
