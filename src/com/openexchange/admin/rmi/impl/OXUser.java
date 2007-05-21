@@ -125,47 +125,45 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
     }
     
     public static Locale getLanguage(final User usr){
-        if(usr.getLanguage()==null){
-            usr.setLanguage(new Locale(FALLBACK_LANGUAGE_CREATE,FALLBACK_COUNTRY_CREATE));
+        if (usr.getLanguage() == null) {
+            usr.setLanguage(new Locale(FALLBACK_LANGUAGE_CREATE, FALLBACK_COUNTRY_CREATE));
         }
         return usr.getLanguage();
     }
 
     public int create(final Context ctx, final User usr, final UserModuleAccess access, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
-        
-        doNullCheck(ctx,usr,access,auth);        
-        
-        doAuthentication(auth,ctx);        
-        
-        Locale langus = OXUser.getLanguage(usr);
-        if (langus.getLanguage().indexOf('_') != -1 || langus.getCountry().indexOf('_') != -1) {
-            if (log.isDebugEnabled()) {
-                log.debug("Client sent invalid locale data(" + langus + ") in users language!");
-            }
-            throw new InvalidDataException("The specified locale data (Language:" + langus.getLanguage() + " - Country:" + langus.getCountry() + ") for users language is invalid!");
-        }
+        try {
+            doNullCheck(ctx,usr,access,auth);
+        } catch (final InvalidDataException e3) {
+            log.error("One of the given arguments for create is null", e3);
+            throw e3;
+        }        
         
         if (log.isDebugEnabled()) {
             log.debug(ctx.toString() + " - " + usr.toString() + " - " + access.toString() + " - " + auth.toString());
         }
         final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
 
-        if (!tools.existsContext(ctx)) {
-            throw new NoSuchContextException();
+
+        try {
+            checkContext(ctx);
+            
+            checkExistsContextAndSchemaBeingLocked(ctx, tools);
+
+            doAuthentication(auth,ctx);        
+            
+            checkCreateUserData(ctx, usr, this.prop);
+
+            if (tools.existsUser(ctx, usr.getUsername())) {
+                throw new InvalidDataException("User " + usr.getUsername() + " already exists in this context");
+            }
+
+            // validate email adresss
+            tools.checkPrimaryMail(ctx, usr.getPrimaryEmail());
+        } catch (final InvalidDataException e2) {
+            log.error(e2);
+            throw e2;
         }
-
-        if (tools.schemaBeingLockedOrNeedsUpdate(ctx)) {
-            throw new DatabaseUpdateException("Database must be updated or currently is beeing updated");
-        }
-
-        checkCreateUserData(ctx, usr, this.prop);
-
-        if (tools.existsUser(ctx, usr.getUsername())) {
-            throw new InvalidDataException("User " + usr.getUsername() + " already exists in this context");
-        }
-
-        // validate email adresss
-        tools.checkPrimaryMail(ctx, usr.getPrimaryEmail());
 
         final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
         final int retval = oxu.create(ctx, usr, access);
@@ -173,14 +171,13 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         final ArrayList<OXUserPluginInterface> interfacelist = new ArrayList<OXUserPluginInterface>();
 
         // homedirectory
-        String homedir = this.prop.getUserProp(AdminProperties.User.HOME_DIR_ROOT, "/home");
-        homedir += "/" + usr.getUsername();
+        final String homedir = this.prop.getUserProp(AdminProperties.User.HOME_DIR_ROOT, "/home") + "/" + usr.getUsername();
         if (this.prop.getUserProp(AdminProperties.User.CREATE_HOMEDIRECTORY, false) && !tools.isContextAdmin(ctx, usr.getId())) {
             if (!new File(homedir).mkdir()) {
                 log.error("unable to create directory: " + homedir);
             }
             final String CHOWN = "/bin/chown";
-            Process p;
+            final Process p;
             try {
                 p = Runtime.getRuntime().exec(new String[] { CHOWN, usr.getUsername() + ":", homedir });
                 p.waitFor();
@@ -194,11 +191,9 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
                     log.error("Unable to chown homedirectory: " + homedir);
                 }
             } catch (final IOException e) {
-                log.error("Unable to chown homedirectory: " + homedir);
-                log.error(e);
+                log.error("Unable to chown homedirectory: " + homedir, e);
             } catch (final InterruptedException e) {
-                log.error("Unable to chown homedirectory: " + homedir);
-                log.error(e);
+                log.error("Unable to chown homedirectory: " + homedir, e);
             }
         }
 
@@ -244,106 +239,56 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         return retval;
     }
 
-    private void validMailAddress(final String address) throws InvalidDataException {
-        if( address != null && ! GenericChecks.isValidMailAddress(address)) {  
-            throw new InvalidDataException("Invalid email address");
-        }
-    }
-    
-    public void checkCreateUserData(final Context ctx, final User usr, final PropertyHandler prop) throws InvalidDataException {
-        if (!usr.attributesforcreateset()) {
-            throw new InvalidDataException("Mandatory fields not set");
-        }
-
-        if (prop.getUserProp(AdminProperties.User.CHECK_NOT_ALLOWED_CHARS, true)) {
-            try {
-                validateUserName(usr.getUsername());
-            } catch (final OXUserException oxu) {
-                throw new InvalidDataException("Invalid username");
-            }
-        }
-
-        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, true)) {
-            usr.setUsername(usr.getUsername().toLowerCase());
-        }
-
-
-        try {
-            // checks below throw InvalidDataException
-            validMailAddress(usr.getPrimaryEmail());
-            validMailAddress(usr.getEmail1());
-            validMailAddress(usr.getEmail2());
-            validMailAddress(usr.getEmail3());
-            if( usr.getAliases() != null ) {
-                for(final String addr : usr.getAliases() ) {
-                    validMailAddress(addr);
-                }
-            }
-        } catch( final InvalidDataException e ) {
-            log.error(e);
-            throw e;
-        }
-            
-        // ### Do some mail attribute checks cause of bug 5444
-        // check if primaryemail address is also set in I_OXUser.EMAIL1,
-        if( !usr.getPrimaryEmail().equals(usr.getEmail1() )) {
-        	 throw new InvalidDataException("Primary mail must have the same value as email1");
-        }
-
-        // put primary mail in the aliases,
-        usr.addAlias(usr.getPrimaryEmail());
-
-        // check if privateemail1(before refacotring EMAIL1) set in aliases
-        if (usr.getAliases() != null) {
-            if (!usr.getAliases().contains(usr.getEmail1())) {
-                throw new InvalidDataException("email1 must also be set in the aliases");
-            }
-        }
-
-        // ############################################
-    }
-    
-
     public void change(final Context ctx, final User usrdata, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchUserException {
-        
-        doNullCheck(ctx,usrdata,auth);
-        
-        if(usrdata.getId()==null|| auth.getLogin()==null||auth.getPassword()==null){
-            throw new InvalidDataException();
+        try {
+            doNullCheck(ctx,usrdata,auth);
+        } catch (final InvalidDataException e2) {
+            log.error("One of the given arguments for change is null", e2);
+            throw e2;
         }
-        
         
         // SPECIAL USER AUTH CHECK FOR THIS METHOD!
-        // check if credentials are from oxadmin or from an user
+                // check if credentials are from oxadmin or from an user
         final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
-        final int auth_user_id = tools.getUserIDByUsername(ctx, auth.getLogin());
-        // check if given user is admin
-        if (tools.isContextAdmin(ctx, auth_user_id)) {
-            doAuthentication(auth, ctx);
-        } else {
-            doUserAuthentication(auth, ctx);
-            // now check if user which authed has the same id as the user he
-            // wants to change,else fail,
-            // cause then he/she wants to change not his own data!
-            if (usrdata.getId().intValue() != auth_user_id) {
-                throw new InvalidCredentialsException("Authenticated User`s Id does not match User.getId()");
+        
+        try {
+            if(usrdata.getId()==null){
+                throw new InvalidDataException("User has no id");
             }
-        } 
-        
-        
-        if (log.isDebugEnabled()) {
-            log.debug(ctx.toString() + " - " + usrdata.toString() + " - " + auth.toString());
-        }        
+            
+            checkContext(ctx);
+            checkExistsContextAndSchemaBeingLocked(ctx, tools);
+            
+            final int auth_user_id = tools.getUserIDByUsername(ctx, auth.getLogin());
+            // check if given user is admin
+            if (tools.isContextAdmin(ctx, auth_user_id)) {
+                doAuthentication(auth, ctx);
+            } else {
+                doUserAuthentication(auth, ctx);
+                // now check if user which authed has the same id as the user he
+                // wants to change,else fail,
+                // cause then he/she wants to change not his own data!
+                if (usrdata.getId().intValue() != auth_user_id) {
+                    throw new InvalidCredentialsException("Authenticated User`s Id does not match User.getId()");
+                }
+            } 
+            
+            if (log.isDebugEnabled()) {
+                log.debug(ctx.toString() + " - " + usrdata.toString() + " - " + auth.toString());
+            }        
 
-        if (tools.schemaBeingLockedOrNeedsUpdate(ctx)) {
-            throw new DatabaseUpdateException("Database must be updated or is currently beeing updated");
+            
+            checkChangeUserData(ctx, usrdata, this.prop);
+        } catch (final InvalidDataException e1) {
+            log.error(e1);
+            throw e1;
         }
         
         if (!tools.existsUser(ctx, usrdata.getId())) {
-            throw new NoSuchUserException("No such user " + usrdata.getId() + " in context " + ctx.getIdAsInt());
+            final NoSuchUserException noSuchUserException = new NoSuchUserException("No such user " + usrdata.getId() + " in context " + ctx.getIdAsInt());
+            log.error(noSuchUserException);
+            throw noSuchUserException;
         }
-
-        checkChangeUserData(ctx, usrdata, this.prop);
 
         final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
         oxu.change(ctx, usrdata);
@@ -381,8 +326,12 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
     }
 
     public void delete(final Context ctx, final User[] users, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchUserException {
-        
-        doNullCheck(ctx,users,auth);
+        try {
+            doNullCheck(ctx,users,auth);
+        } catch (final InvalidDataException e1) {
+            log.error("One of the given arguments for delete is null", e1);
+            throw e1;
+        }
         
         doAuthentication(auth,ctx);       
         
@@ -391,20 +340,26 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         }        
         final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();       
 
-        if( tools.schemaBeingLockedOrNeedsUpdate(ctx) ) {
-            throw new DatabaseUpdateException("Database must be updated or currently is beeing updated");
-        }
-
-        final int[] user_ids = getUserIdArrayFromUsers(users);
-        // FIXME: Change function form int to user object
-        if (!tools.existsUser(ctx, user_ids)) {
-            throw new NoSuchUserException("No such user " + Arrays.toString(users) + " in context " + ctx.getIdAsInt());
-            
-        }
-        for (final User user : users) {
-            if (tools.isContextAdmin(ctx, user.getId())) {
-                throw new InvalidDataException("Admin delete not supported");              
+        checkContext(ctx);
+        checkExistsContextAndSchemaBeingLocked(ctx, tools);
+        
+        int[] user_ids;
+        try {
+            user_ids = getUserIdArrayFromUsers(users);
+            // FIXME: Change function form int to user object
+            if (!tools.existsUser(ctx, user_ids)) {
+                final NoSuchUserException noSuchUserException = new NoSuchUserException("No such user " + Arrays.toString(users) + " in context " + ctx.getIdAsInt());
+                log.error(noSuchUserException);
+                throw noSuchUserException;
             }
+            for (final User user : users) {
+                if (tools.isContextAdmin(ctx, user.getId())) {
+                    throw new InvalidDataException("Admin delete not supported");              
+                }
+            }
+        } catch (final InvalidDataException e1) {
+            log.error(e1);
+            throw e1;
         }
 
         final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
@@ -460,71 +415,85 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         oxu.delete(ctx, user_ids);
     }
 
-    private int[] getUserIdArrayFromUsers(final User[] users) {
-        final int[] retval = new int[users.length];
-        for (int i = 0; i < users.length; i++) {
-            retval[i] = users[i].getId();
-        }
-        return retval;
-    }
-
     public UserModuleAccess getModuleAccess(final Context ctx, final int user_id, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchUserException {
-        
-        doNullCheck(ctx,auth);
-        
-        doAuthentication(auth,ctx);
+        try {
+            doNullCheck(ctx,auth);
+        } catch (final InvalidDataException e1) {
+            log.error("One of the given arguments for getModuleAccess is null", e1);
+            throw e1;
+        }
+
         
         if (log.isDebugEnabled()) {
             log.debug(ctx.toString() + " - " + user_id + " - " + auth.toString());
         }        
         
         final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
-
-        if( tools.schemaBeingLockedOrNeedsUpdate(ctx) ) {
-            throw new DatabaseUpdateException("Database must be updated or currently is beeing updated");
-        }
+        
+        try {
+            checkContext(ctx);
+        } catch (final InvalidDataException e) {
+            log.error(e);
+            throw e;
+        }        
+        checkExistsContextAndSchemaBeingLocked(ctx, tools);
+        
+        doAuthentication(auth,ctx);
 
         if (!tools.existsUser(ctx, user_id)) {
-            throw new NoSuchUserException("No such user " + user_id + " in context " + ctx.getIdAsInt());
+            final NoSuchUserException noSuchUserException = new NoSuchUserException("No such user " + user_id + " in context " + ctx.getIdAsInt());
+            log.error(noSuchUserException);
+            throw noSuchUserException;
            
         }
 
         final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
         return oxu.getModuleAccess(ctx, user_id);
-
     }
 
     public void changeModuleAccess(final Context ctx, final int user_id, final UserModuleAccess moduleAccess, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchUserException {
-    
-       doNullCheck(ctx,moduleAccess,auth);
-       
-       doAuthentication(auth,ctx);
+        try {
+           doNullCheck(ctx,moduleAccess,auth);
+        } catch (final InvalidDataException e1) {
+            log.error("One of the given arguments for changeModuleAccess is null", e1);
+            throw e1;
+        }
+
         
         if (log.isDebugEnabled()) {
             log.debug(ctx.toString() + " - " + user_id + " - "+ moduleAccess.toString() + " - " + auth.toString());
         }        
         final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
 
-
-        if( tools.schemaBeingLockedOrNeedsUpdate(ctx) ) {
-            throw new DatabaseUpdateException("Database must be updated or currently is beeing updated");
+        try {
+            checkContext(ctx);
+        } catch (final  InvalidDataException e) {
+            log.error(e);
+            throw e;
         }
+        
+        checkExistsContextAndSchemaBeingLocked(ctx, tools);
+
+        doAuthentication(auth,ctx);
 
         if (!tools.existsUser(ctx, user_id)) {
-            throw new NoSuchUserException("No such user " + user_id + " in context " + ctx.getIdAsInt());
-            
+            final NoSuchUserException noSuchUserException = new NoSuchUserException("No such user " + user_id + " in context " + ctx.getIdAsInt());
+            log.error(noSuchUserException);
+            throw noSuchUserException;
         }
 
         final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
         oxu.changeModuleAccess(ctx, user_id, moduleAccess);
-
     }
 
     public int[] getAll(final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
+        try {
+            doNullCheck(ctx,auth);
+        } catch (final InvalidDataException e1) {
+            log.error("One of the given arguments for getAll is null", e1);
+            throw e1;
+        }
         
-        doNullCheck(ctx,auth);
-        
-        doAuthentication(auth,ctx);
         
         if (log.isDebugEnabled()) {
             log.debug(ctx.toString() + " - " + auth.toString());
@@ -532,13 +501,18 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         
         final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();      
 
-        if( tools.schemaBeingLockedOrNeedsUpdate(ctx) ) {
-            throw new DatabaseUpdateException("Database must be updated or currently is beeing updated");
-        }
+        try {
+            checkContext(ctx);
+        } catch (final InvalidDataException e) {
+            log.error(e);
+            throw e;
+        }        
+        checkExistsContextAndSchemaBeingLocked(ctx, tools);
+
+        doAuthentication(auth,ctx);
 
         final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
         return oxu.getAll(ctx);
-
     }
 
     public User getData(final Context ctx, final int user_id, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException, DatabaseUpdateException {
@@ -546,8 +520,10 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
     }
 
     public User[] getData(final Context ctx, final int[] user_ids, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException, DatabaseUpdateException {
-        if (user_ids==null) {
-            throw new InvalidDataException();
+        if (null == user_ids) {
+            final InvalidDataException invalidDataException = new InvalidDataException("Array of user ids is empty");
+            log.error(invalidDataException);
+            throw invalidDataException;
         }
         
         final User[] users = new User[user_ids.length];
@@ -563,25 +539,40 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
     }
 
     public User[] getData(final Context ctx, final User[] users, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException, DatabaseUpdateException {        
-        
-        doNullCheck(ctx,users,auth);
-        
-        if (ctx.getIdAsInt() == null|| auth.getLogin() == null) {
-            throw new InvalidDataException();
+        try {
+            doNullCheck(ctx,users,auth);
+        } catch (final InvalidDataException e1) {
+            log.error("One of the given arguments for getAll is null", e1);
+            throw e1;
         }
         
-        if (users.length <= 0) {
-            throw new InvalidDataException();
+        try {
+            checkContext(ctx);
+            
+            if (users.length <= 0) {
+                throw new InvalidDataException();
+            }
+        } catch (final InvalidDataException e) {
+            log.error(e);
+            throw e;
         }
         
         if (log.isDebugEnabled()) {
             log.debug(ctx.toString() + " - " + Arrays.toString(users) + " - " + auth.toString());
         }
         
+        try {
+            checkContext(ctx);
+        } catch (final InvalidDataException e) {
+            log.error(e);
+            throw e;
+        }        
+        final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
+        checkExistsContextAndSchemaBeingLocked(ctx, tools);
+        
         // ok here its possible that a user wants to get his own data
         //  SPECIAL USER AUTH CHECK FOR THIS METHOD!
         // check if credentials are from oxadmin or from an user
-        final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
         final int auth_user_id = tools.getUserIDByUsername(ctx, auth.getLogin());
         // check if given user is not admin, if he is admin, the
         if (!tools.isContextAdmin(ctx, auth_user_id)) {
@@ -615,12 +606,6 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
             doAuthentication(auth, ctx);
         }
          
-              
-       
-        if (tools.schemaBeingLockedOrNeedsUpdate(ctx)) {
-            throw new DatabaseUpdateException("Database must be updated or currently is beeing updated");
-        }
-        
         for (final User usr : users) {
             if (usr.getId()!=null && !tools.existsUser(ctx, usr.getId())) {
                 throw new NoSuchUserException("No such user "+usr);
@@ -670,7 +655,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         return retusers;
     }
 
-    private void validateUserName( final String userName ) throws OXUserException {
+    private void validateUserName(final String userName) throws OXUserException {
         // Check for allowed chars:
         // abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-+.%$@
         final String usr_uid_regexp = this.prop.getUserProp("CHECK_USER_UID_REGEXP", "[$@%\\.+a-zA-Z0-9_-]");        
@@ -680,8 +665,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         }
     }
 
-    private void checkChangeUserData(final Context ctx, final User usrdata, final PropertyHandler prop) throws StorageException,InvalidDataException {
-    
+    private void checkChangeUserData(final Context ctx, final User usrdata, final PropertyHandler prop) throws StorageException, InvalidDataException {
         // MAIL ATTRIBUTE CHANGE SUPPORTED?? - currently disabled cause of a
         // discussion
         // if( usrdata.getPrimaryEmail()==null) {
@@ -696,70 +680,148 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         // show error.
         // cause he must set which adress is primarymail and email2 from the new
         // aliases
-        if (OXUser.getLanguage(usrdata) != null) {
-            Locale langus = OXUser.getLanguage(usrdata);
+        final Locale langus = OXUser.getLanguage(usrdata);
+        if (langus != null) {
             if (langus.getLanguage().indexOf('_') != -1 || langus.getCountry().indexOf('_') != -1) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Client sent invalid locale data(" + langus + ") in users language!");
-                }
                 throw new InvalidDataException("The specified locale data (Language:" + langus.getLanguage() + " - Country:" + langus.getCountry() + ") for users language is invalid!");
             }
         }
 
-        try {
-            // checks below throw InvalidDataException
-            validMailAddress(usrdata.getPrimaryEmail());
-            validMailAddress(usrdata.getEmail1());
-            validMailAddress(usrdata.getEmail2());
-            validMailAddress(usrdata.getEmail3());
-            if( usrdata.getAliases() != null ) {
-                for(final String addr : usrdata.getAliases() ) {
-                    validMailAddress(addr);
-                }
+        // checks below throw InvalidDataException
+        checkValidEmailsInUserObject(usrdata);
+        HashSet<String> useraliases = usrdata.getAliases();
+        final String primaryEmail = usrdata.getPrimaryEmail();
+        final String email1 = usrdata.getEmail1();
+        if( useraliases != null ) {
+            for(final String addr : useraliases ) {
+                GenericChecks.checkValidMailAddress(addr);
             }
-        } catch (final InvalidDataException e) {
-            log.error(e);
-            throw e;
-        }
-
-        if (usrdata.getAliases() != null) {
-            if (usrdata.getPrimaryEmail() == null || usrdata.getPrimaryEmail().length() < 1) {
+            if (primaryEmail == null || primaryEmail.length() < 1) {
                 throw new InvalidDataException("If ALIAS sent you need to send also primarymail!");
             }
-            if (usrdata.getEmail1() == null || usrdata.getEmail1().length() < 1) {
+            if (email1 == null || email1.length() < 1) {
                 throw new InvalidDataException("If ALIAS sent you need to send also mail1!");
             }
-        }
-    
-        HashSet<String> aliases = new HashSet<String>();
-        if (usrdata.getAliases() != null) {
-            aliases = usrdata.getAliases();
         } else {
             final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
             final User[] usr = oxu.getData(ctx, new User[]{usrdata});
-            aliases = usr[0].getAliases();
+            useraliases = usr[0].getAliases();
         }
     
-        if (usrdata.getPrimaryEmail() != null) {
-            if (aliases != null && !aliases.contains(usrdata.getPrimaryEmail())) {
+        if (primaryEmail != null) {
+            if (useraliases != null && !useraliases.contains(primaryEmail)) {
                 throw new InvalidDataException("primarymail sent but does not exists in aliases of the user!");
             }
         }
     
         // added "usrdata.getPrimaryEmail() != null" for this check, else we cannot update user data without mail data
         // which is not very good when just changing the displayname for example
-        if ((usrdata.getPrimaryEmail() != null && usrdata.getEmail1() == null)) {
+        if (primaryEmail != null && email1 == null) {
             throw new InvalidDataException("email1 not sent but required!");
            
         }
     
-        if (usrdata.getPrimaryEmail() != null && usrdata.getEmail1() != null) {
+        if (primaryEmail != null && email1 != null) {
             // primary mail value must be same with email1
-            if (!usrdata.getPrimaryEmail().equals(usrdata.getEmail1())) {
+            if (!primaryEmail.equals(email1)) {
                 throw new InvalidDataException("email1 not equal with primarymail!");
-                
             }
         }
     }
+
+    private void checkCreateUserData(final Context ctx, final User usr, final PropertyHandler prop) throws InvalidDataException {
+        final Locale langus = OXUser.getLanguage(usr);
+        if (langus.getLanguage().indexOf('_') != -1 || langus.getCountry().indexOf('_') != -1) {
+            throw new InvalidDataException("The specified locale data (Language:" + langus.getLanguage() + " - Country:" + langus.getCountry() + ") for users language is invalid!");
+        }
     
+        if (!usr.attributesforcreateset()) {
+            throw new InvalidDataException("Mandatory fields not set");
+        }
+    
+        if (prop.getUserProp(AdminProperties.User.CHECK_NOT_ALLOWED_CHARS, true)) {
+            try {
+                validateUserName(usr.getUsername());
+            } catch (final OXUserException oxu) {
+                throw new InvalidDataException("Invalid username");
+            }
+        }
+    
+        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, true)) {
+            usr.setUsername(usr.getUsername().toLowerCase());
+        }
+    
+        // checks below throw InvalidDataException
+        checkValidEmailsInUserObject(usr);
+        final HashSet<String> aliases = usr.getAliases();
+        if( aliases != null ) {
+            for(final String addr : aliases ) {
+                GenericChecks.checkValidMailAddress(addr);
+            }
+        }
+            
+        // ### Do some mail attribute checks cause of bug 5444
+        // check if primaryemail address is also set in I_OXUser.EMAIL1,
+        if (!usr.getPrimaryEmail().equals(usr.getEmail1())) {
+        	 throw new InvalidDataException("Primary mail must have the same value as email1");
+        }
+    
+        // put primary mail in the aliases,
+        usr.addAlias(usr.getPrimaryEmail());
+    
+        // check if privateemail1(before refacotring EMAIL1) set in aliases
+        if (aliases != null) {
+            if (!aliases.contains(usr.getEmail1())) {
+                throw new InvalidDataException("email1 must also be set in the aliases");
+            }
+        }
+        // ############################################
+    }
+
+    /**
+     * @param ctx
+     * @param tools
+     * @throws StorageException
+     * @throws DatabaseUpdateException
+     * @throws NoSuchContextException
+     */
+    private void checkExistsContextAndSchemaBeingLocked(final Context ctx, final OXToolStorageInterface tools) throws StorageException, DatabaseUpdateException, NoSuchContextException {
+        if (!tools.existsContext(ctx)) {
+            final NoSuchContextException noSuchContextException = new NoSuchContextException();
+            log.error(noSuchContextException);
+            throw noSuchContextException;
+        }
+    
+        if (tools.schemaBeingLockedOrNeedsUpdate(ctx)) {
+            final DatabaseUpdateException databaseUpdateException = new DatabaseUpdateException("Database must be updated or currently is beeing updated");
+            log.error(databaseUpdateException);
+            throw databaseUpdateException;
+        }
+    }
+
+    private int[] getUserIdArrayFromUsers(final User[] users) throws InvalidDataException {
+        final int[] retval = new int[users.length];
+        for (int i = 0; i < users.length; i++) {
+            final Integer id = users[i].getId();
+            if (null != id) {
+                retval[i] = id;
+            } else {
+                throw new InvalidDataException("One user object has no id");
+            }
+        }
+        return retval;
+    }
+
+    private void checkContext(final Context ctx) throws InvalidDataException {
+        if (null == ctx.getIdAsInt()) {
+            throw new InvalidDataException("Context invalid");
+        }
+    }
+    
+    private void checkValidEmailsInUserObject(final User usr) throws InvalidDataException {
+        GenericChecks.checkValidMailAddress(usr.getPrimaryEmail());
+        GenericChecks.checkValidMailAddress(usr.getEmail1());
+        GenericChecks.checkValidMailAddress(usr.getEmail2());
+        GenericChecks.checkValidMailAddress(usr.getEmail3());
+    }
 }
