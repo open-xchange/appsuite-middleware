@@ -4,6 +4,8 @@
    hold 'ADMINISTER' right on an IMAP folder.
  - Bugfix #7361: Avoiding too long argument(s) in IMAP request resulting
    from IMAPFolder.getMessagesByUIDs()
+ - Bugfix #7331: Changed error message if sending fails cause message is
+   too large
 
 * 2007-05-21 - tobias.prinz@open-xchange.com
 

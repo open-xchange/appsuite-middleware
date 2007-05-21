@@ -4719,6 +4719,8 @@ public class MailInterfaceImpl implements MailInterface {
 	private static final String ERR_AUTH_FAILED = "bad authentication failed";
 
 	private static final String ERR_TMP = "temporary error, please try again later";
+	
+	private static final String ERR_MSG_TOO_LARGE = "message too large";
 
 	public static OXMailException handleMessagingException(final MessagingException e, final IMAPProperties imapProps) {
 		final OXMailException oxme;
@@ -4767,7 +4769,11 @@ public class MailInterfaceImpl implements MailInterface {
 			oxme = new OXMailException(MailCode.SEARCH_ERROR, e, e.getMessage());
 		} else if (e instanceof SendFailedException) {
 			final SendFailedException exc = (SendFailedException) e;
-			oxme = new OXMailException(MailCode.SEND_FAILED, exc, Arrays.toString(exc.getInvalidAddresses()));
+			if (exc.getMessage().toLowerCase(Locale.ENGLISH).indexOf(ERR_MSG_TOO_LARGE) > -1) {
+				oxme = new OXMailException(MailCode.MESSAGE_TOO_LARGE, exc, new Object[0]);
+			} else {
+				oxme = new OXMailException(MailCode.SEND_FAILED, exc, Arrays.toString(exc.getInvalidAddresses()));
+			}
 		} else if (e instanceof StoreClosedException) {
 			oxme = new OXMailException(MailCode.STORE_CLOSED, e, e.getMessage());
 		} else {

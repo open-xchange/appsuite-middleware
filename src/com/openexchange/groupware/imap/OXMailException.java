@@ -545,7 +545,11 @@ public class OXMailException extends OXException {
 		/**
 		 * Folder owner's administer permission must not be removed from folder %s
 		 */
-		NO_FOLDER_OWNERACL_REMOVE("Folder owner's administer permission must not be removed from folder %s", Category.USER_INPUT, 100);
+		NO_FOLDER_OWNERACL_REMOVE("Folder owner's administer permission must not be removed from folder %s", Category.USER_INPUT, 100),
+		/**
+		 * Message could not be sent because it is too large
+		 */
+		MESSAGE_TOO_LARGE("Message could not be sent because it is too large", Category.INTERNAL_ERROR, 101);
 
 		/**
 		 * Message of the exception.
