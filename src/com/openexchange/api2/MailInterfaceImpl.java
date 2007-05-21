@@ -3436,6 +3436,8 @@ public class MailInterfaceImpl implements MailInterface {
 			throw handleMessagingException(e, sessionObj.getIMAPProperties());
 		}
 	}
+	
+	private static final String ERR_WORD_TOO_LONG = "word too long";
 
 	/*
 	 * (non-Javadoc)
@@ -3457,15 +3459,26 @@ public class MailInterfaceImpl implements MailInterface {
 					throw new OXMailException(MailCode.NO_DELETE_ACCESS, getUserName(), imapCon.getImapFolder()
 							.getFullName());
 				}
-			} catch (MessagingException e) {
+			} catch (final MessagingException e) {
 				throw new OXMailException(MailCode.NO_ACCESS, getUserName(), imapCon.getImapFolder().getFullName());
 			}
 			Message[] msgs;
-			long start = System.currentTimeMillis();
 			try {
+				final long start = System.currentTimeMillis();
 				msgs = imapCon.getImapFolder().getMessagesByUID(msgUIDs);
-			} finally {
 				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+			} catch (final MessagingException e) {
+				if (e.getMessage().toLowerCase(Locale.ENGLISH).indexOf(ERR_WORD_TOO_LONG) > -1) {
+					try {
+						final long start = System.currentTimeMillis();
+						final int[] msgnums = IMAPUtils.getSequenceNumbers(imapCon.getImapFolder(), msgUIDs, false);
+						mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+						msgs = imapCon.getImapFolder().getMessages(msgnums);
+					} catch (final ProtocolException e1) {
+						throw new OXMailException(MailCode.INTERNAL_ERROR, e1, e1.getMessage());
+					}
+				}
+				throw handleMessagingException(e, sessionObj.getIMAPProperties());
 			}
 			msgs = cleanMessageArray(msgs);
 			if (msgs == null || msgs.length == 0) {
@@ -3485,10 +3498,10 @@ public class MailInterfaceImpl implements MailInterface {
 				final IMAPFolder trashFolder = (IMAPFolder) imapCon.getIMAPStore().getFolder(
 						prepareMailFolderParam(getTrashFolder()));
 				checkAndCreateFolder(trashFolder, inboxFolder);
-				start = System.currentTimeMillis();
+				final long start = System.currentTimeMillis();
 				try {
 					imapCon.getImapFolder().copyMessages(msgs, trashFolder);
-				} catch (MessagingException e) {
+				} catch (final MessagingException e) {
 					if (e.getNextException() instanceof CommandFailedException) {
 						final CommandFailedException exc = (CommandFailedException) e.getNextException();
 						if (exc.getMessage().indexOf("Over quota") > -1) {
@@ -3509,7 +3522,7 @@ public class MailInterfaceImpl implements MailInterface {
 			IMAPUtils.setSystemFlags(imapCon.getImapFolder(), msgUIDs, false, FLAGS_DELETED, true);
 			imapCon.setExpunge(true);
 			return true;
-		} catch (MessagingException e) {
+		} catch (final MessagingException e) {
 			throw handleMessagingException(e, sessionObj.getIMAPProperties());
 		}
 	}
@@ -3569,7 +3582,7 @@ public class MailInterfaceImpl implements MailInterface {
 					throw new OXMailException(MailCode.NO_DELETE_ACCESS, getUserName(), imapCon.getImapFolder()
 							.getFullName());
 				}
-			} catch (MessagingException e) {
+			} catch (final MessagingException e) {
 				throw new OXMailException(MailCode.NO_ACCESS, getUserName(), imapCon.getImapFolder().getFullName());
 			}
 			/*
@@ -3582,7 +3595,7 @@ public class MailInterfaceImpl implements MailInterface {
 				} else if (IMAPProperties.isSupportsACLs() && !getTmpRights().contains(Rights.Right.INSERT)) {
 					throw new OXMailException(MailCode.NO_INSERT_ACCESS, getUserName(), tmpFolder.getFullName());
 				}
-			} catch (MessagingException e) {
+			} catch (final MessagingException e) {
 				throw new OXMailException(MailCode.NO_ACCESS, getUserName(), tmpFolder.getFullName());
 			}
 			/*
@@ -3606,11 +3619,11 @@ public class MailInterfaceImpl implements MailInterface {
 								try {
 									handleSpam(imapCon.getImapFolder().getMessageByUID(msgUIDs[i]),
 											spamAction == SPAM_SPAM, false);
-								} catch (OXException e) {
+								} catch (final OXException e) {
 									if (LOG.isWarnEnabled()) {
 										LOG.warn(e.getMessage(), e);
 									}
-								} catch (MessagingException e) {
+								} catch (final MessagingException e) {
 									if (LOG.isWarnEnabled()) {
 										LOG.warn(e.getMessage(), e);
 									}
@@ -3627,24 +3640,35 @@ public class MailInterfaceImpl implements MailInterface {
 						 */
 						try {
 							imapCon.getImapFolder().getProtocol().uidexpunge(IMAPUtils.toUIDSet(msgUIDs));
-						} catch (ProtocolException e) {
+						} catch (final ProtocolException e) {
 							throw new OXMailException(MailCode.MOVE_PARTIALLY_COMPLETED, e,
 									com.openexchange.tools.oxfolder.OXFolderManagerImpl.getUserName(sessionObj), Arrays
 											.toString(msgUIDs), imapCon.getImapFolder().getFullName(), e.getMessage());
 						}
 					}
 					return res;
-				} catch (MessagingException e) {
+				} catch (final MessagingException e) {
 					mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 					throw handleMessagingException(e);
 				}
 			}
 			Message[] msgs = null;
-			long start = System.currentTimeMillis();
 			try {
+				final long start = System.currentTimeMillis();
 				msgs = imapCon.getImapFolder().getMessagesByUID(msgUIDs);
-			} finally {
 				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+			} catch (final MessagingException e) {
+				if (e.getMessage().toLowerCase(Locale.ENGLISH).indexOf(ERR_WORD_TOO_LONG) > -1) {
+					try {
+						final long start = System.currentTimeMillis();
+						final int[] msgnums = IMAPUtils.getSequenceNumbers(imapCon.getImapFolder(), msgUIDs, false);
+						mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+						msgs = imapCon.getImapFolder().getMessages(msgnums);
+					} catch (final ProtocolException e1) {
+						throw new OXMailException(MailCode.INTERNAL_ERROR, e1, e1.getMessage());
+					}
+				}
+				throw handleMessagingException(e, sessionObj.getIMAPProperties());
 			}
 			msgs = cleanMessageArray(msgs);
 			if (msgs == null || msgs.length == 0) {
@@ -3668,7 +3692,7 @@ public class MailInterfaceImpl implements MailInterface {
 					retval[i] = uidNext++;
 				}
 			}
-			start = System.currentTimeMillis();
+			final long start = System.currentTimeMillis();
 			try {
 				imapCon.getImapFolder().copyMessages(msgs, tmpFolder);
 			} finally {
@@ -3709,7 +3733,7 @@ public class MailInterfaceImpl implements MailInterface {
 			 * Return new message id
 			 */
 			return retval;
-		} catch (MessagingException e) {
+		} catch (final MessagingException e) {
 			throw handleMessagingException(e, sessionObj.getIMAPProperties());
 		}
 	}
