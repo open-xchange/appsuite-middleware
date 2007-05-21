@@ -1448,9 +1448,12 @@ public class MailInterfaceImpl implements MailInterface {
 	 * @see com.openexchange.api2.MailInterface#getNewMessages(java.lang.String,
 	 *      int, int)
 	 */
-	public SearchIterator getNewMessages(final String folderArg, final int sortCol, final int order, final int[] fields)
+	public SearchIterator getNewMessages(final String folderArg, final int sortCol, final int order, final int[] fields, final int limit)
 			throws OXException {
 		try {
+			if (limit == 0) {
+				return SearchIterator.EMPTY_ITERATOR;
+			}
 			init();
 			final String folder = prepareMailFolderParam(folderArg);
 			setAndOpenFolder(folder == null ? STR_INBOX : folder, Folder.READ_ONLY);
@@ -1551,6 +1554,14 @@ public class MailInterfaceImpl implements MailInterface {
 				throw new OXMailException(MailCode.PROTOCOL_ERROR, e, e.getMessage());
 			} finally {
 				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+			}
+			if (limit > 0) {
+				final int newLength = Math.min(limit, newMsgs.length);
+				final Message[] retval = new Message[newLength];
+				for (int i = 0; i < newLength; i++) {
+					retval[i] = newMsgs[i];
+				}
+				return SearchIteratorAdapter.createArrayIterator(retval);
 			}
 			return SearchIteratorAdapter.createArrayIterator(newMsgs);
 		} catch (MessagingException e) {

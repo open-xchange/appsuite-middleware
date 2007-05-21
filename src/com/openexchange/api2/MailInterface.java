@@ -138,10 +138,11 @@ public interface MailInterface {
 	public long getQuotaUsage() throws OXException;
 
 	/**
-	 * Returns an instance of <code>SearchIterator</code> containing all new
-	 * (unseen) messages located in given folder.
+	 * Returns an instance of <code>SearchIterator</code> containing max.
+	 * <code>limit</code> new (unseen) messages located in given folder.
 	 */
-	public SearchIterator getNewMessages(String folder, int sortCol, int order, int[] fields) throws OXException;
+	public SearchIterator getNewMessages(String folder, int sortCol, int order, int[] fields, int limit)
+			throws OXException;
 
 	/**
 	 * Returns an instance of <code>SearchIterator</code> containing all

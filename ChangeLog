@@ -6,6 +6,8 @@
    from IMAPFolder.getMessagesByUIDs()
  - Bugfix #7331: Changed error message if sending fails cause message is
    too large
+ - Bugfix #7362: Added parameter 'limit' to 'action=newmsgs' request from
+   GUI as defined in HTTP spec
 
 * 2007-05-21 - tobias.prinz@open-xchange.com
 

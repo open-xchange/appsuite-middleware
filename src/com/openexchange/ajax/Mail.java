@@ -193,10 +193,6 @@ public class Mail extends PermissionServlet implements UploadListener {
 
 	private static final String STR_THREAD = "thread";
 
-//	private static final int PARAM_SRC_TYPE_REQUEST = 1;
-//
-//	private static final int PARAM_SRC_TYPE_JSON = 2;
-
 	private static final long serialVersionUID = 1980226522220313667L;
 
 	private static final transient Log LOG = LogFactory.getLog(Mail.class);
@@ -925,6 +921,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 			final int[] columns = paramContainer.checkIntArrayParam(PARAMETER_COLUMNS);
 			final String sort = paramContainer.getStringParam(PARAMETER_SORT);
 			final String order = paramContainer.getStringParam(PARAMETER_ORDER);
+			final int limit = paramContainer.getIntParam(PARAMETER_LIMIT);
 			/*
 			 * Get new mails
 			 */
@@ -955,7 +952,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 				 * Pre-Select field writers
 				 */
 				final MailFieldWriter[] writers = mailWriter.getMailFieldWriters(columns);
-				it = mailInterface.getNewMessages(folderId, sortCol, orderDir, columns);
+				it = mailInterface.getNewMessages(folderId, sortCol, orderDir, columns, limit == ParamContainer.NOT_FOUND ? -1 : limit);
 				final int size = it.size();
 				for (int i = 0; i < size; i++) {
 					final Message msg = (Message) it.next();
