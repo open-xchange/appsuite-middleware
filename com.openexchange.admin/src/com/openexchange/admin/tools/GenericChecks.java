@@ -49,6 +49,8 @@
 
 package com.openexchange.admin.tools;
 
+import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+
 /**
  * @author choeger
  *
@@ -56,9 +58,27 @@ package com.openexchange.admin.tools;
 public class GenericChecks {
 
     /**
+     * This method checks if an address contains invalid characters
+     * 
      * @param address
      */
-    public static boolean isValidMailAddress(final String address) {
-        return address.matches("[$%\\.+a-zA-Z0-9_-]+@[\\.a-zA-Z0-9_-]+");
+    public final static boolean isValidMailAddress(final String address)  {
+        if (null != address) {
+            return address.matches("[$%\\.+a-zA-Z0-9_-]+@[\\.a-zA-Z0-9_-]+");
+        } else {
+            return false;
+        }
+    }
+    
+    /**
+     * This method throws an exception if the address is != null and contains invalid characters
+     * 
+     * @param address
+     * @throws InvalidDataException
+     */
+    public final static void checkValidMailAddress(final String address) throws InvalidDataException {
+        if (null != address && !isValidMailAddress(address)) {
+            throw new InvalidDataException("Invalid email address");
+        }
     }
 }
