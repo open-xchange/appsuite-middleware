@@ -56,6 +56,7 @@ import com.openexchange.ajax.fields.ParticipantsFields;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
+import java.util.Date;
 import org.json.JSONException;
 
 /**
@@ -99,7 +100,7 @@ public class CalendarWriter extends CommonWriter {
 		
 		if (calendarObject.containsRecurrenceType()) {
 			writeParameter(CalendarFields.RECURRENCE_TYPE, recurrenceType);
-		} 
+		}
 		
 		switch (recurrenceType) {
 			case CalendarObject.NONE:
@@ -135,15 +136,15 @@ public class CalendarWriter extends CommonWriter {
 		
 		if (calendarObject.containsInterval()) {
 			writeParameter(CalendarFields.INTERVAL, calendarObject.getInterval());
-		} 
+		}
 		
 		if (calendarObject.containsUntil()) {
 			writeParameter(CalendarFields.UNTIL, calendarObject.getUntil());
-		} 
-
+		}
+		
 		if (calendarObject.containsOccurrence()) {
 			writeParameter(CalendarFields.OCCURRENCES, calendarObject.getOccurrence());
-		} 
+		}
 	}
 	
 	public void writeParticipant(int id, String displayname, String email, int type) throws JSONException {
@@ -161,14 +162,24 @@ public class CalendarWriter extends CommonWriter {
 		writeParameter("status", status);
 		jsonwriter.endObject();
 	}
-
+	
+	public void writeException(Date[] dateExceptions) throws JSONException {
+		if (dateExceptions != null) {
+			jsonwriter.array();
+			for (int a = 0; a < dateExceptions.length; a++) {
+				writeValue(dateExceptions[a]);
+			}
+			jsonwriter.endArray();
+		}
+	}
+	
 	private void writeParticipantUser(UserParticipant userParticipant) throws JSONException {
 		jsonwriter.object();
 		writeParameter("id", userParticipant.getIdentifier());
 		writeParameter(CalendarFields.CONFIRMATION, userParticipant.getConfirm());
-        if (userParticipant.containsConfirmMessage()) {
-            writeParameter(CalendarFields.CONFIRM_MESSAGE, userParticipant.getConfirmMessage());
-        }
+		if (userParticipant.containsConfirmMessage()) {
+			writeParameter(CalendarFields.CONFIRM_MESSAGE, userParticipant.getConfirmMessage());
+		}
 		jsonwriter.endObject();
 	}
 }
