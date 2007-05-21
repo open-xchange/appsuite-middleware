@@ -1,3 +1,9 @@
+* 2007-05-21 - thorben.betten@open-xchange.com
+
+ - Enhancements for mobility OXtender: New servlet for special sync
+   requests and new interface (and its implementation) to clear a folder's
+   content in API package
+
 * 2007-05-21 - tobias.prinz@open-xchange.com
 
   - Bugfix: Loading the contact folder via CSV import did not work properly
