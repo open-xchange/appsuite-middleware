@@ -159,7 +159,7 @@ public class GroupTest extends AbstractTest {
         addgroup.setId(group_id);
 
         // create user to add
-        final User usr = UserTest.getTestUserObject("groupmemberadduser" + VALID_CHAR_TESTUSER+System.currentTimeMillis(), "netline");
+        final User usr = UserTest.getTestUserObject("groupmemberadduser" + System.currentTimeMillis(), "netline");
         final UserModuleAccess access = new UserModuleAccess();
         final int usr_id = UserTest.addUser(ctx, usr, access);
         usr.setId(usr_id);
@@ -193,7 +193,7 @@ public class GroupTest extends AbstractTest {
 
         // create user to add
         
-        final User usr = UserTest.getTestUserObject("groupmemberadduser" + VALID_CHAR_TESTUSER+System.currentTimeMillis(), "netline");
+        final User usr = UserTest.getTestUserObject("groupmemberadduser" + System.currentTimeMillis(), "netline");
         final UserModuleAccess access = new UserModuleAccess();
         final int usr_id = UserTest.addUser(ctx, usr, access);
         usr.setId(usr_id);
@@ -273,7 +273,7 @@ public class GroupTest extends AbstractTest {
         addgroup.setId(group_id);
 
         // create user to add
-        final User usr = UserTest.getTestUserObject("groupmemberadduser" + VALID_CHAR_TESTUSER+System.currentTimeMillis(), "netline");
+        final User usr = UserTest.getTestUserObject("groupmemberadduser" + System.currentTimeMillis(), "netline");
         final UserModuleAccess access = new UserModuleAccess();
         final int usr_id = UserTest.addUser(ctx, usr, access);
         usr.setId(usr_id);
