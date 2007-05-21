@@ -1,3 +1,8 @@
+* 2007-05-21 - thorben.betten@open-xchange.com
+
+ - Bugfix #7323: Changed handling of ACL editing when multiple entities
+   hold 'ADMINISTER' right on an IMAP folder. 
+
 * 2007-05-21 - tobias.prinz@open-xchange.com
 
   - Bugfix: Changed behavior of CSVLibrary in case loaded folder

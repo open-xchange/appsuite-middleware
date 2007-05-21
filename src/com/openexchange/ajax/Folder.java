@@ -1635,7 +1635,7 @@ public class Folder extends SessionServlet {
 			try {
 				intArray[a] = Integer.parseInt(sa[a]);
 			} catch (NumberFormatException e) {
-				throw new OXFolderException(FolderCode.BAD_JSON_VALUE, STRING_EMPTY, sa[a], paramName);
+				throw new OXFolderException(FolderCode.BAD_PARAM_VALUE, STRING_EMPTY, sa[a], paramName);
 			}
 		}
 		return intArray;
@@ -1652,7 +1652,7 @@ public class Folder extends SessionServlet {
 				try {
 					intArray[i] = Integer.parseInt(tmp[i]);
 				} catch (NumberFormatException e) {
-					throw new OXFolderException(FolderCode.BAD_JSON_VALUE, STRING_EMPTY, tmp[i], paramName);
+					throw new OXFolderException(FolderCode.BAD_PARAM_VALUE, STRING_EMPTY, tmp[i], paramName);
 				}
 			}
 			return intArray;
@@ -1680,7 +1680,7 @@ public class Folder extends SessionServlet {
 		try {
 			return new Date(Long.parseLong(tmp));
 		} catch (NumberFormatException e) {
-			throw new OXFolderException(FolderCode.BAD_JSON_VALUE, e, tmp, paramName);
+			throw new OXFolderException(FolderCode.BAD_PARAM_VALUE, e, tmp, paramName);
 		}
 	}
 

@@ -4048,9 +4048,15 @@ public class MailInterfaceImpl implements MailInterface {
 			}
 			final List<MailFolderObject> list = new ArrayList<MailFolderObject>(childFolders.length);
 			for (int i = 0; i < childFolders.length; i++) {
-				list.add(new MailFolderObject((IMAPFolder) childFolders[i]));
+				final MailFolderObject mfo = new MailFolderObject((IMAPFolder) childFolders[i]);
+				if (mfo.exists()) {
+					list.add(mfo);
+				}
 			}
-			return new SearchIteratorAdapter(list.iterator(), childFolders.length);
+			if (list.isEmpty()) {
+				return SearchIterator.EMPTY_ITERATOR;
+			}
+			return new SearchIteratorAdapter(list.iterator(), list.size());
 		} catch (MessagingException e) {
 			throw handleMessagingException(e, sessionObj.getIMAPProperties());
 		}
@@ -4224,7 +4230,7 @@ public class MailInterfaceImpl implements MailInterface {
 									&& !destFolder.myRights().contains(Rights.Right.CREATE)) {
 								throw new OXMailException(MailCode.NO_CREATE_ACCESS, getUserName(), newParent);
 							}
-						} catch (MessagingException e) {
+						} catch (final MessagingException e) {
 							LOG.error(e.getMessage(), e);
 							throw new OXMailException(MailCode.NO_ACCESS, getUserName(), newParent);
 						}
@@ -4243,7 +4249,7 @@ public class MailInterfaceImpl implements MailInterface {
 								&& !updateMe.myRights().contains(Rights.Right.CREATE)) {
 							throw new OXMailException(MailCode.NO_CREATE_ACCESS, getUserName(), updateMe.getFullName());
 						}
-					} catch (MessagingException e) {
+					} catch (final MessagingException e) {
 						throw new OXMailException(MailCode.NO_ACCESS, getUserName(), updateMe.getFullName());
 					}
 					/*
@@ -4291,40 +4297,48 @@ public class MailInterfaceImpl implements MailInterface {
 					 * Wrapper object contains rights. No simple rename but a
 					 * whole ACL re-set
 					 */
-					ACL[] oldACLs = updateMe.getACL();
-					ACL[] newACLs = folderObj.getACL();
+					final ACL[] oldACLs = updateMe.getACL();
+					final ACL[] newACLs = folderObj.getACL();
 					if (equals(oldACLs, newACLs)) {
 						break ACLS;
 					}
 					if (isDefaultFolder(updateMe.getFullName())) {
 						throw new OXMailException(MailCode.NO_DEFAULT_FOLDER_UPDATE, updateMe.getFullName());
 					}
-					try {
-						if (IMAPProperties.isSupportsACLs() && !updateMe.myRights().contains(Rights.Right.ADMINISTER)) {
-							throw new OXMailException(MailCode.NO_ADMINISTER_ACCESS, getUserName(), updateMe
-									.getFullName());
-						}
-					} catch (MessagingException e) {
-						throw new OXMailException(MailCode.NO_ACCESS, getUserName(), updateMe.getFullName());
+					if (IMAPProperties.isSupportsACLs()
+							&& !updateMe.myRights().contains(Rights.Right.ADMINISTER)) {
+						throw new OXMailException(MailCode.NO_ADMINISTER_ACCESS, getUserName(), updateMe.getFullName());
 					}
 					/*
-					 * Delete old ACLs
+					 * Check new ACLs
 					 */
-					final String[] oldNames = new String[oldACLs.length];
-					for (int i = 0; i < oldACLs.length; i++) {
-						oldNames[i] = oldACLs[i].getName();
+					if (newACLs.length == 0) {
+						throw new OXMailException(MailCode.NO_ADMIN_ACL, getUserName(),
+								prepareMailFolderParam(folderObj.getFullName()));
 					}
-					oldACLs = null;
-					for (int i = 0; i < oldNames.length; i++) {
-						updateMe.removeACL(oldNames[i]);
+					boolean adminFound = false;
+					for (int i = 0; i < newACLs.length && !adminFound; i++) {
+						if (newACLs[i].getRights().contains(Rights.Right.ADMINISTER)) {
+							adminFound = true;
+						}
+					}
+					if (!adminFound) {
+						throw new OXMailException(MailCode.NO_ADMIN_ACL, getUserName(),
+								prepareMailFolderParam(folderObj.getFullName()));
 					}
 					/*
-					 * Add new ACLs from folderObj
+					 * Remove deleted ACLs
+					 */
+					final ACL[] removedACLs = getRemovedACLs(newACLs, oldACLs);
+					for (int i = 0; i < removedACLs.length; i++) {
+						updateMe.removeACL(removedACLs[i].getName());
+					}
+					/*
+					 * Change existing ACLs according to new ACLs
 					 */
 					for (int i = 0; i < newACLs.length; i++) {
 						updateMe.addACL(newACLs[i]);
 					}
-					newACLs = null;
 				}
 				if (!IMAPProperties.isIgnoreSubscription() && folderObj.containsSubscribe()) {
 					updateMe.setSubscribed(folderObj.isSubscribed());
@@ -4354,7 +4368,7 @@ public class MailInterfaceImpl implements MailInterface {
 						if (!parent.myRights().contains(Rights.Right.CREATE)) {
 							throw new OXMailException(MailCode.NO_CREATE_ACCESS, getUserName(), parentStr);
 						}
-					} catch (MessagingException e) {
+					} catch (final MessagingException e) {
 						throw new OXMailException(MailCode.NO_ACCESS, getUserName(), parentStr);
 					}
 				}
@@ -4378,6 +4392,17 @@ public class MailInterfaceImpl implements MailInterface {
 					mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 				}
 				if (folderObj.containsACLs()) {
+					final ACL[] newACLs = folderObj.getACL();
+					boolean adminFound = false;
+					for (int i = 0; i < newACLs.length && !adminFound; i++) {
+						if (newACLs[i].getRights().contains(Rights.Right.ADMINISTER)) {
+							adminFound = true;
+						}
+					}
+					if (!adminFound) {
+						throw new OXMailException(MailCode.NO_ADMIN_ACL, getUserName(),
+								prepareMailFolderParam(folderObj.getFullName()));
+					}
 					/*
 					 * Wrapper object contains rights. Add new ACLs from
 					 * folderObj
@@ -4389,9 +4414,25 @@ public class MailInterfaceImpl implements MailInterface {
 				retval = createMe.getFullName();
 			}
 			return retval;
-		} catch (MessagingException e) {
+		} catch (final MessagingException e) {
 			throw handleMessagingException(e, sessionObj.getIMAPProperties());
 		}
+	}
+	
+	private static final ACL[] getRemovedACLs(final ACL[] newACLs, final ACL[] oldACLs) {
+		final List<ACL> retval = new ArrayList<ACL>();
+		for (ACL oldACL : oldACLs) {
+			boolean found = false;
+			for (int i = 0; i < newACLs.length && !found; i++) {
+				if (newACLs[i].getName().equals(oldACL.getName())) {
+					found = true;
+				}
+			}
+			if (!found) {
+				retval.add(oldACL);
+			}
+		}
+		return retval.toArray(new ACL[retval.size()]);
 	}
 
 	private static final String STR_PAT = "p|P";
