@@ -86,6 +86,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
 import com.openexchange.admin.tools.AdminCache;
+import com.openexchange.admin.tools.GenericChecks;
 import com.openexchange.admin.tools.PropertyHandler;
 /**
  * @author cutmasta
@@ -243,6 +244,12 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         return retval;
     }
 
+    private void validMailAddress(final String address) throws InvalidDataException {
+        if( address != null && ! GenericChecks.isValidMailAddress(address)) {  
+            throw new InvalidDataException("Invalid email address");
+        }
+    }
+    
     public void checkCreateUserData(final Context ctx, final User usr, final PropertyHandler prop) throws InvalidDataException {
         if (!usr.attributesforcreateset()) {
             throw new InvalidDataException("Mandatory fields not set");
@@ -260,6 +267,18 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
             usr.setUsername(usr.getUsername().toLowerCase());
         }
 
+
+        // checks below throw InvalidDataException
+        validMailAddress(usr.getPrimaryEmail());
+        validMailAddress(usr.getEmail1());
+        validMailAddress(usr.getEmail2());
+        validMailAddress(usr.getEmail3());
+        if( usr.getAliases() != null ) {
+            for(final String addr : usr.getAliases() ) {
+                validMailAddress(addr);
+            }
+        }
+            
         // ### Do some mail attribute checks cause of bug 5444
         // check if primaryemail address is also set in I_OXUser.EMAIL1,
         if( !usr.getPrimaryEmail().equals(usr.getEmail1() )) {
@@ -681,7 +700,18 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
                 throw new InvalidDataException("The specified locale data (Language:" + langus.getLanguage() + " - Country:" + langus.getCountry() + ") for users language is invalid!");
             }
         }
-    
+
+        // checks below throw InvalidDataException
+        validMailAddress(usrdata.getPrimaryEmail());
+        validMailAddress(usrdata.getEmail1());
+        validMailAddress(usrdata.getEmail2());
+        validMailAddress(usrdata.getEmail3());
+        if( usrdata.getAliases() != null ) {
+            for(final String addr : usrdata.getAliases() ) {
+                validMailAddress(addr);
+            }
+        }
+
         if (usrdata.getAliases() != null) {
             if (usrdata.getPrimaryEmail() == null || usrdata.getPrimaryEmail().length() < 1) {
                 throw new InvalidDataException("If ALIAS sent you need to send also primarymail!");
