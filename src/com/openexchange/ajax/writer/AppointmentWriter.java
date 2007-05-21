@@ -81,7 +81,7 @@ public class AppointmentWriter extends CalendarWriter {
 		if (appointmentObj.getFullTime()) {
 			if (CalendarCommonCollection.inBetween(appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime(), betweenStart.getTime(), betweenEnd.getTime())) {
 				writeArray(appointmentObj, cols);
-			} 
+			}
 		} else {
 			writeArray(appointmentObj, cols);
 		}
@@ -114,7 +114,7 @@ public class AppointmentWriter extends CalendarWriter {
 			if (appointmentObject.getRecurrenceType() == AppointmentObject.NO_RECURRENCE) {
 				writeParameter(AppointmentFields.START_DATE, appointmentObject.getStartDate(), timeZone);
 				writeParameter(AppointmentFields.END_DATE, appointmentObject.getEndDate(), timeZone);
-			} else {			
+			} else {
 				writeParameter(AppointmentFields.START_DATE, appointmentObject.getStartDate(), appointmentObject.getStartDate(), timeZone);
 				writeParameter(AppointmentFields.END_DATE, appointmentObject.getEndDate(), appointmentObject.getEndDate(), timeZone);
 			}
@@ -146,12 +146,12 @@ public class AppointmentWriter extends CalendarWriter {
 		
 		if (appointmentObject.containsAlarm()) {
 			writeParameter(AppointmentFields.ALARM, appointmentObject.getAlarm());
-		} 
+		}
 		
 		if (appointmentObject.containsRecurrenceType()) {
 			writeRecurrenceParameter(appointmentObject);
 		}
-
+		
 		if (appointmentObject.containsRecurrencePosition()) {
 			writeParameter(AppointmentFields.RECURRENCE_POSITION, appointmentObject.getRecurrencePosition());
 		}
@@ -171,9 +171,7 @@ public class AppointmentWriter extends CalendarWriter {
 		}
 		
 		if (appointmentObject instanceof CalendarDataObject && ((CalendarDataObject)appointmentObject).isHardConflict()) {
-                    //if (((CalendarDataObject)appointmentObject).isHardConflict()) {
-                        writeParameter(AppointmentFields.HARD_CONFLICT, true);
-                    //}
+			writeParameter(AppointmentFields.HARD_CONFLICT, true);
 		}
 		
 		jsonwriter.endObject();
@@ -208,7 +206,7 @@ public class AppointmentWriter extends CalendarWriter {
 				if (isFullTime) {
 					writeValue(appointmentObject.getStartDate());
 				} else {
-					if (appointmentObject.getRecurrenceType() == AppointmentObject.NO_RECURRENCE) {					
+					if (appointmentObject.getRecurrenceType() == AppointmentObject.NO_RECURRENCE) {
 						writeValue(appointmentObject.getStartDate(), timeZone);
 					} else {
 						writeValue(appointmentObject.getStartDate(), appointmentObject.getStartDate(), timeZone);
@@ -219,7 +217,7 @@ public class AppointmentWriter extends CalendarWriter {
 				if (isFullTime) {
 					writeValue(appointmentObject.getEndDate());
 				} else {
-					if (appointmentObject.getRecurrenceType() == AppointmentObject.NO_RECURRENCE) {					
+					if (appointmentObject.getRecurrenceType() == AppointmentObject.NO_RECURRENCE) {
 						writeValue(appointmentObject.getEndDate(), timeZone);
 					} else {
 						writeValue(appointmentObject.getEndDate(), appointmentObject.getEndDate(), timeZone);
@@ -247,9 +245,38 @@ public class AppointmentWriter extends CalendarWriter {
 			case AppointmentObject.NOTE:
 				writeValue(appointmentObject.getNote());
 				break;
+				// modification for mobility support
 			case AppointmentObject.RECURRENCE_TYPE:
 				writeValue(appointmentObject.getRecurrenceType());
 				break;
+			case AppointmentObject.INTERVAL:
+				writeValue(appointmentObject.getInterval());
+				break;
+			case AppointmentObject.DAYS:
+				writeValue(appointmentObject.getDays());
+				break;
+			case AppointmentObject.DAY_IN_MONTH:
+				writeValue(appointmentObject.getDayInMonth());
+				break;
+			case AppointmentObject.MONTH:
+				writeValue(appointmentObject.getMonth());
+				break;
+			case AppointmentObject.UNTIL:
+				writeValue(appointmentObject.getUntil());
+				break;
+			case AppointmentObject.RECURRING_OCCURRENCE:
+				writeValue(appointmentObject.getOccurrence());
+				break;
+			case AppointmentObject.RECURRENCE_DATE_POSITION:
+				writeValue(appointmentObject.getRecurrenceDatePosition());
+				break;
+			case AppointmentObject.DELETE_EXCEPTIONS:
+				writeException(appointmentObject.getDeleteException());
+				break;
+			case AppointmentObject.CHANGE_EXCEPTIONS:
+				writeException(appointmentObject.getChangeException());
+				break;
+				// end of modification for mobility support
 			case AppointmentObject.RECURRENCE_POSITION:
 				writeValue(appointmentObject.getRecurrencePosition());
 				break;
