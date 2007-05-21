@@ -28,6 +28,8 @@ public class UpdatesTest extends AppointmentTest {
 		CalendarObject.END_DATE,
 		CalendarObject.NOTE,
 		CalendarObject.RECURRENCE_TYPE,
+		CalendarObject.INTERVAL,
+		CalendarObject.RECURRING_OCCURRENCE,
 		CalendarObject.PARTICIPANTS,
 		CalendarObject.USERS,
 		AppointmentObject.SHOWN_AS,
@@ -79,6 +81,8 @@ public class UpdatesTest extends AppointmentTest {
 		}
 		
 		assertTrue("created object not found in response", found);
+		
+		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId());
 	}
 	
 	public void testModifiedWithoutFolderIdExtended() throws Exception {
@@ -123,6 +127,9 @@ public class UpdatesTest extends AppointmentTest {
 		
 		assertFalse("invalid object id in reponse", found1);
 		assertTrue("created object not found in response", found2);
+		
+		deleteAppointment(getWebConversation(), objectId1, appointmentFolderId, getHostName(), getSessionId());
+		deleteAppointment(getWebConversation(), objectId2, appointmentFolderId, getHostName(), getSessionId());
 	}
 	
 	public void testModifiedWithoutFolderIdNoResponse() throws Exception {
@@ -146,6 +153,8 @@ public class UpdatesTest extends AppointmentTest {
 		}
 		
 		assertFalse("created object found in response", found);
+		
+		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId());
 	}
 	
 	public void testModifiedWithoutFolderIdWithFutureTimestamp() throws Exception {
@@ -161,7 +170,38 @@ public class UpdatesTest extends AppointmentTest {
 		AppointmentObject[] appointmentArray = AppointmentTest.listModifiedAppointment(getWebConversation(), start, end, since, _appointmentFields, timeZone, PROTOCOL + getHostName(), getSessionId());
 		
 		assertEquals("unexpected data in response", 0, appointmentArray.length);
-
+		
+		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId());
+	}
+	
+	public void testModifiedRecurrenceAppointment() throws Exception {
+		Date start = new Date(System.currentTimeMillis() - (7 * dayInMillis));
+		Date end = new Date(System.currentTimeMillis() + (7 * dayInMillis));
+		
+		AppointmentObject appointmentObj = createAppointmentObject("testModifiedRecurrenceAppointment");
+		appointmentObj.setRecurrenceType(AppointmentObject.DAILY);
+		appointmentObj.setInterval(1);
+		appointmentObj.setOccurrence(5);
+		appointmentObj.setIgnoreConflicts(true);
+		int objectId = AppointmentTest.insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
+		
+		appointmentObj.setObjectID(objectId);
+		
+		AppointmentObject[] appointmentArray = AppointmentTest.listModifiedAppointment(getWebConversation(), start, end, new Date(0), _appointmentFields, timeZone, getHostName(), getSessionId());
+		
+		boolean found = false;
+		
+		for (int a = 0; a < appointmentArray.length; a++) {
+			if (objectId == appointmentArray[a].getObjectID()) {
+				compareObject(appointmentObj, appointmentArray[a]);
+				found = true;
+				break;
+			}
+		}
+		
+		assertTrue("object with object_id: " + objectId + " not found in response", found);
+		
+		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId());
 	}
 }
 
