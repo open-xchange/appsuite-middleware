@@ -330,13 +330,13 @@ public class UserTest extends AbstractTest {
     @Test
     public void testChangeNullFields() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         final Credentials cred = DummyCredentials();
-        final OXLoginInterface oxl = (OXLoginInterface) Naming.lookup(OXLoginInterface.RMI_NAME);
+        final OXLoginInterface oxl = (OXLoginInterface) Naming.lookup(getRMIHostUrl() + OXLoginInterface.RMI_NAME);
         // Here we get the user object of the admin from the database
         // The admin has no company set by default, so we can test here, how a change work on field's which
         // aren't set by default
         final User usr = oxl.login2User(new Context(1), cred);
         
-        final OXUserInterface user = (OXUserInterface) Naming.lookup(OXUserInterface.RMI_NAME);
+        final OXUserInterface user = (OXUserInterface) Naming.lookup(getRMIHostUrl() + OXUserInterface.RMI_NAME);
         usr.setNickname("test");
 
         usr.setCompany("test");
