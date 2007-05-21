@@ -102,7 +102,7 @@ public class CSVLibrary {
 		FolderObject fo = null;
 		try {
 			if(FolderCacheManager.isEnabled()){
-				fo = FolderCacheManager.getInstance().getFolderObject(folderId, sessObj.getContext());
+				fo = FolderCacheManager.getInstance().getFolderObject(folderId, true, sessObj.getContext(), null);
 			} else {
 				fo = FolderObject.loadFolderObjectFromDB(folderId, sessObj.getContext());
 			}
