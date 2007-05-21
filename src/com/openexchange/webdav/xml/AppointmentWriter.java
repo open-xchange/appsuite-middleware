@@ -111,7 +111,7 @@ public class AppointmentWriter extends CalendarWriter {
 		AppointmentObject.DELETE_EXCEPTIONS,
 		AppointmentObject.RECURRENCE_ID,
 		AppointmentObject.RECURRENCE_POSITION,
-                AppointmentObject.RECURRENCE_CALCULATOR,
+        AppointmentObject.RECURRENCE_CALCULATOR,
 		CalendarDataObject.TIMEZONE
 	};
 	
@@ -226,13 +226,8 @@ public class AppointmentWriter extends CalendarWriter {
 					if (recuResults.size() == 1) {
 						ao.setStartDate(new Date(recuResults.getRecurringResult(0).getStart()));
 						ao.setEndDate(new Date(recuResults.getRecurringResult(0).getEnd()));
-						
-						if (fullTime && ao.getStartDate().equals(ao.getEndDate())) {
-							ao.setEndDate(new Date(ao.getStartDate().getTime() + (24*60*60*1000)));
-						}
 					} else {
-						//throw new OXCalendarException(OXCalendarException.Code.UNABLE_TO_CALCULATE_RECURRING_POSITION);
-						System.out.println("\n\n\nFIX ME (CalendarOperation.next();:"+ao.getRecurrenceType() + " / "+ao.getObjectID()+"\n\n\n");
+						LOG.warn("cannot load first recurring appointment from appointment object: " + +ao.getRecurrenceType() + " / "+ao.getObjectID()+"\n\n\n");
 					}
 				}
 				addElement(CalendarFields.START_DATE, ao.getStartDate(), e_prop);
