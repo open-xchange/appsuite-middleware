@@ -268,15 +268,20 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         }
 
 
-        // checks below throw InvalidDataException
-        validMailAddress(usr.getPrimaryEmail());
-        validMailAddress(usr.getEmail1());
-        validMailAddress(usr.getEmail2());
-        validMailAddress(usr.getEmail3());
-        if( usr.getAliases() != null ) {
-            for(final String addr : usr.getAliases() ) {
-                validMailAddress(addr);
+        try {
+            // checks below throw InvalidDataException
+            validMailAddress(usr.getPrimaryEmail());
+            validMailAddress(usr.getEmail1());
+            validMailAddress(usr.getEmail2());
+            validMailAddress(usr.getEmail3());
+            if( usr.getAliases() != null ) {
+                for(final String addr : usr.getAliases() ) {
+                    validMailAddress(addr);
+                }
             }
+        } catch( final InvalidDataException e ) {
+            log.error(e);
+            throw e;
         }
             
         // ### Do some mail attribute checks cause of bug 5444
@@ -701,15 +706,20 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
             }
         }
 
-        // checks below throw InvalidDataException
-        validMailAddress(usrdata.getPrimaryEmail());
-        validMailAddress(usrdata.getEmail1());
-        validMailAddress(usrdata.getEmail2());
-        validMailAddress(usrdata.getEmail3());
-        if( usrdata.getAliases() != null ) {
-            for(final String addr : usrdata.getAliases() ) {
-                validMailAddress(addr);
+        try {
+            // checks below throw InvalidDataException
+            validMailAddress(usrdata.getPrimaryEmail());
+            validMailAddress(usrdata.getEmail1());
+            validMailAddress(usrdata.getEmail2());
+            validMailAddress(usrdata.getEmail3());
+            if( usrdata.getAliases() != null ) {
+                for(final String addr : usrdata.getAliases() ) {
+                    validMailAddress(addr);
+                }
             }
+        } catch (final InvalidDataException e) {
+            log.error(e);
+            throw e;
         }
 
         if (usrdata.getAliases() != null) {
