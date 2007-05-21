@@ -47,7 +47,7 @@
  *
  */
 /*
- * $Id: OXResource.java,v 1.19 2007/05/18 13:09:04 cutmasta Exp $
+ * $Id: OXResource.java,v 1.20 2007/05/21 08:53:51 choeger Exp $
  */
 package com.openexchange.admin.rmi.impl;
 
@@ -83,6 +83,7 @@ import com.openexchange.admin.rmi.extensions.OXResourceExtensionInterface;
 import com.openexchange.admin.storage.interfaces.OXResourceStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.tools.AdminCache;
+import com.openexchange.admin.tools.GenericChecks;
 import com.openexchange.admin.tools.PropertyHandler;
 
 public class OXResource extends BasicAuthenticator implements OXResourceInterface{
@@ -151,6 +152,11 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
            }
        }
 
+       String resmail = res.getEmail();
+       if( resmail != null && ! GenericChecks.isValidMailAddress(resmail)) {  
+           throw new InvalidDataException("Invalid email address");
+       }
+       
        final OXResourceStorageInterface oxRes = OXResourceStorageInterface.getInstance();
        final int retval = oxRes.create(ctx, res);
        res.setId(retval);
@@ -241,7 +247,12 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
                 
             }
         }
-        
+
+        String resmail = res.getEmail();
+        if( resmail != null && ! GenericChecks.isValidMailAddress(resmail)) {  
+            throw new InvalidDataException("Invalid email address");
+        }
+
         final OXResourceStorageInterface oxRes = OXResourceStorageInterface.getInstance();
         oxRes.change(ctx, res);
         

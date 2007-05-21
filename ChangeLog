@@ -1,3 +1,8 @@
+* 2007-05-21 - choeger@open-xchange.com
+
+  - Bugfix ID#7340 user create -> can add aliases which are not acceptable
+  - Bugfix ID#7342 can create a group with invalid email address
+  
 * 2007-05-18 - manuel.kraft@open-xchange.com
 
   -  Bugfix ID#7345 After update, login as admin not possible
