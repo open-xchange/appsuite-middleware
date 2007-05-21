@@ -1,3 +1,8 @@
+* 2007-05-21 - tobias.prinz@open-xchange.com
+
+  - Bugfix: Changed behavior of CSVLibrary in case loaded folder
+    is not cached. Returned null earlier, now tries another attempt.
+
 * 2007-05-18 - tobias.prinz@open-xchange.com
 
   - Bugfix #7386: Forgot to add exception to exception list when 
