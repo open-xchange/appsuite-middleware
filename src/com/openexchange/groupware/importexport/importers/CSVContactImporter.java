@@ -92,7 +92,7 @@ import com.openexchange.sessiond.SessionObject;
 		Category.USER_INPUT,
 		Category.CODE_ERROR,
 		Category.CODE_ERROR,
-		Category.USER_INPUT,
+		Category.WARNING,
 		Category.USER_INPUT,
 		Category.USER_INPUT},
 	desc={"","","", "", "", ""}, 
@@ -243,7 +243,6 @@ public class CSVContactImporter implements Importer {
 				contactsql.insertContactObject(contactObj);
 			} else {
 				result.setException(EXCEPTIONS.create(5, Integer.valueOf(lineNumber)));
-				
 			}
 			result.setDate( contactObj.getLastModified() );
 			result.setObjectId( Integer.toString( contactObj.getObjectID() ) );
