@@ -213,7 +213,7 @@ public class MailInterfaceImpl implements MailInterface {
 	/*
 	 * MIME type constants
 	 */
-	private static final String MIME_TEXT_PLAIN_MDN_CHARSET_UTF8 = "text/plain; name=MDNPart1.txt; charset=UTF-8";
+	private static final String MIME_MSG_DISPNOT_MDN_CHARSET_UTF8 = "message/disposition-notification; name=MDNPart1.txt; charset=UTF-8";
 
 	private static final String MIME_TEXT_PLAIN_CHARSET_UTF_8 = "text/plain; charset=UTF-8";
 
@@ -282,6 +282,8 @@ public class MailInterfaceImpl implements MailInterface {
 	private static final String PROTOCOL_SMTP = "smtp";
 
 	private static final String MP_MIXED = "mixed";
+	
+	private static final String MP_REPORT_DISPNOT = "report; report-type=disposition-notification";
 
 	private static final String HTML_BR = "<br>";
 
@@ -2906,9 +2908,6 @@ public class MailInterfaceImpl implements MailInterface {
 			} catch (MessagingException e) {
 				throw new OXMailException(MailCode.NO_ACCESS, getUserName(), imapCon.getImapFolder().getFullName());
 			}
-			if ((imapCon.getImapFolder().getType() & Folder.HOLDS_MESSAGES) == 0) {
-				throw new OXMailException(MailCode.FOLDER_DOES_NOT_HOLD_MESSAGES, imapCon.getImapFolder().getFullName());
-			}
 			final MimeMessage msg;
 			final long start = System.currentTimeMillis();
 			try {
@@ -2922,7 +2921,7 @@ public class MailInterfaceImpl implements MailInterface {
 			}
 			InternetAddress[] to = null;
 			for (int i = 0; i < dispNotification.length; i++) {
-				final InternetAddress[] addrs = InternetAddress.parse(dispNotification[i], false);
+				final InternetAddress[] addrs = InternetAddress.parse(dispNotification[i], false); //TODO: Should be strict parsing
 				if (to == null) {
 					to = addrs;
 				} else {
@@ -2933,7 +2932,7 @@ public class MailInterfaceImpl implements MailInterface {
 				}
 			}
 			final String msgId = msg.getHeader(HDR_MESSAGE_ID, null);
-			sendReceiptAck(to, fromAddr, (msgId == null ? "[not available]" : msgId));
+			sendReceiptAck(to, fromAddr, (msgId == null ? "[not available]" : msgId), msg.getSubject());
 		} catch (MessagingException e) {
 			throw handleMessagingException(e, sessionObj.getIMAPProperties());
 		}
@@ -2942,9 +2941,9 @@ public class MailInterfaceImpl implements MailInterface {
 	private static final String ACK_TEXT = "Reporting-UA: OPEN-XCHANGE - WebMail\nFinal-Recipient: rfc822; #FROM#\n"
 			+ "Original-Message-ID: #MSG ID#\nDisposition: manual-action/MDN-sent-manually; displayed\n";
 
-	private final void sendReceiptAck(final InternetAddress[] to, final String fromAddr, final String msgID)
+	private final void sendReceiptAck(final InternetAddress[] to, final String fromAddr, final String msgID, final String origSubject)
 			throws OXException, MessagingException {
-		final MimeMessage msg = new MimeMessage(imapCon.getSession());
+		final SMTPMessage msg = new SMTPMessage(imapCon.getSession());
 		final StringHelper strHelper = new StringHelper(sessionObj.getLocale());
 		/*
 		 * Set from
@@ -2957,8 +2956,7 @@ public class MailInterfaceImpl implements MailInterface {
 		} else {
 			from = usm.getSendAddr() == null ? sessionObj.getUserObject().getMail() : usm.getSendAddr();
 		}
-		final Address[] addrs = InternetAddress.parse(from, false);
-		msg.addFrom(addrs);
+		msg.addFrom(InternetAddress.parse(from, false));
 		/*
 		 * Set to
 		 */
@@ -2978,22 +2976,33 @@ public class MailInterfaceImpl implements MailInterface {
 		final int offset = TimeZone.getTimeZone(sessionObj.getUserObject().getTimeZone()).getOffset(date.getTime());
 		msg.setSentDate(new Date(System.currentTimeMillis() - offset));
 		/*
+		 * ENVELOPE-FROM
+		 */
+		if (IMAPProperties.isSMTPEnvelopeFrom()) {
+			/*
+			 * Set ENVELOPE-FROM in SMTP message to user's primary email
+			 * address
+			 */
+			msg.setEnvelopeFrom(sessionObj.getUserObject().getMail());
+		}
+		/*
 		 * Compose body
 		 */
 		final ContentType ct = new ContentType(MIME_TEXT_PLAIN_CHARSET_UTF_8);
-		final Multipart mixedMultipart = new MimeMultipart(MP_MIXED);
+		final Multipart mixedMultipart = new MimeMultipart(MP_REPORT_DISPNOT);
 		/*
 		 * Define text content
 		 */
 		final MimeBodyPart text = new MimeBodyPart();
-		text.setText(strHelper.getString(MailStrings.ACK_RECEIPT_TEXT), IMAPProperties.getDefaultMimeCharset());
+		text.setText(strHelper.getString(MailStrings.ACK_NOTIFICATION_TEXT.replaceFirst("#RECIPIENT#", from)
+				.replaceFirst("#SUBJECT#", origSubject)), IMAPProperties.getDefaultMimeCharset());
 		text.setHeader(HDR_MIME_VERSION, STR_1DOT0);
 		text.setHeader(HDR_CONTENT_TYPE, ct.toString());
 		mixedMultipart.addBodyPart(text);
 		/*
 		 * Define ack
 		 */
-		ct.setContentType(MIME_TEXT_PLAIN_MDN_CHARSET_UTF8);
+		ct.setContentType(MIME_MSG_DISPNOT_MDN_CHARSET_UTF8);
 		final MimeBodyPart ack = new MimeBodyPart();
 		ack.setText(strHelper.getString(MailInterfaceImpl.ACK_TEXT).replaceFirst("#FROM#", fromAddr).replaceFirst(
 				"#MSG ID#", msgID), IMAPProperties.getDefaultMimeCharset());

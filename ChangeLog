@@ -1,3 +1,7 @@
+* 2007-05-22 - thorben.betten@open-xchange.com
+
+ - Bugfix #7401: Improved template for Message Disposition Notification (MDN)
+
 * 2007-05-21 - thorben.betten@open-xchange.com
 
  - Bugfix #7323: Changed handling of ACL editing when multiple entities
