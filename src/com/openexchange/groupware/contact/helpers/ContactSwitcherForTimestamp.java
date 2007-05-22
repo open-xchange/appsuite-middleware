@@ -72,8 +72,8 @@ import com.openexchange.groupware.contact.ContactExceptionFactory;
 	})
 /**
  * This switcher is able to convert a given String into a date by
- * interpreting is as a timestamp (type: Long) and then pass it on 
- * to its delegate.
+ * interpreting is as a timestamp (type: String holding a long) and 
+ * then pass it on to its delegate.
  * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  */
@@ -82,8 +82,8 @@ public class ContactSwitcherForTimestamp implements ContactSwitcher {
 	protected static final ContactExceptionFactory EXCEPTIONS = new ContactExceptionFactory(ContactSwitcherForSimpleDateFormat.class);
 	protected ContactSwitcher delegate;
 	
-	protected Object[] makeDate(final Object... objects) throws ParseException{
-		objects[1] = new Date( (Long) objects[1]);
+	protected Object[] makeDate(final Object... objects) throws ParseException, NumberFormatException{
+		objects[1] = new Date( Long.parseLong((String) objects[1]));
 		return objects;
 	}
 	
@@ -104,6 +104,8 @@ public class ContactSwitcherForTimestamp implements ContactSwitcher {
 			throw EXCEPTIONS.create(0, objects[1] ,   "CreationDate", e);
 		} catch (final ClassCastException e){
 			throw EXCEPTIONS.create(0, objects[1] ,   "CreationDate", e);
+		} catch (final NumberFormatException e){
+			throw EXCEPTIONS.create(0, objects[1] ,   "CreationDate", e);
 		}
 	}
 
@@ -113,6 +115,8 @@ public class ContactSwitcherForTimestamp implements ContactSwitcher {
 		} catch (final ParseException e) {
 			throw EXCEPTIONS.create(0, objects[1] ,   "Anniversary", e);
 		} catch (final ClassCastException e){
+			throw EXCEPTIONS.create(0, objects[1] ,   "Anniversary", e);
+		} catch (final NumberFormatException e){
 			throw EXCEPTIONS.create(0, objects[1] ,   "Anniversary", e);
 		}
 	}
@@ -124,6 +128,8 @@ public class ContactSwitcherForTimestamp implements ContactSwitcher {
 			throw EXCEPTIONS.create(0, objects[1] ,   "Birthday", e);
 		} catch (final ClassCastException e){
 			throw EXCEPTIONS.create(0, objects[1] ,   "Birthday", e);
+		} catch (final NumberFormatException e){
+			throw EXCEPTIONS.create(0, objects[1] ,   "Birthday", e);
 		}
 	}
 
@@ -134,6 +140,8 @@ public class ContactSwitcherForTimestamp implements ContactSwitcher {
 			throw EXCEPTIONS.create(0, objects[1] ,   "ImageLastModified", e);
 		} catch (final ClassCastException e){
 			throw EXCEPTIONS.create(0, objects[1] ,   "ImageLastModified", e);
+		} catch (final NumberFormatException e){
+			throw EXCEPTIONS.create(0, objects[1] ,   "ImageLastModified", e);
 		}
 	}
 
@@ -143,6 +151,8 @@ public class ContactSwitcherForTimestamp implements ContactSwitcher {
 		} catch (final ParseException e) {
 			throw EXCEPTIONS.create(0, objects[1] ,   "LastModified", e);
 		} catch (final ClassCastException e){
+			throw EXCEPTIONS.create(0, objects[1] ,   "LastModified", e);
+		} catch (final NumberFormatException e){
 			throw EXCEPTIONS.create(0, objects[1] ,   "LastModified", e);
 		}
 	}

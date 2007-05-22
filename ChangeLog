@@ -1,6 +1,7 @@
 * 2007-05-22 - tobias.prinz@open-xchange.com
 
  - Added new error category "WARNING".
+ - Bugfix #7109: Added server side solution using WARNING for partial inserts.
 
 * 2007-05-22 - francisco.laguna@open-xchange.com
 

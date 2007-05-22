@@ -220,6 +220,7 @@ public class CSVContactImporter implements Importer {
 		try{
 			final List<String> wrongFields = new LinkedList<String>();
 			boolean atLeastOneFieldWithWrongName = false;
+			boolean atLeastOneFieldWithWrongValue = false;
 			boolean atLeastOneFieldInserted = false;
 			for(int i = 0; i < fields.size(); i++){
 				final ContactField currField = getRelevantField(fields.get(i));
@@ -241,14 +242,11 @@ public class CSVContactImporter implements Importer {
 			contactObj.setParentFolderID(Integer.parseInt( folder.trim() ));
 			if(atLeastOneFieldInserted){
 				contactsql.insertContactObject(contactObj);
+				result.setObjectId( Integer.toString( contactObj.getObjectID() ) );
 			} else {
 				result.setException(EXCEPTIONS.create(5, Integer.valueOf(lineNumber)));
 			}
 			result.setDate( contactObj.getLastModified() );
-			result.setObjectId( Integer.toString( contactObj.getObjectID() ) );
-		} catch (final ContactException e) {
-			result.setException(e);
-			addErrorInformation(result, lineNumber , fields);
 		} catch (final OXException e) {
 			result.setException(e);
 			addErrorInformation(result, lineNumber , fields);
