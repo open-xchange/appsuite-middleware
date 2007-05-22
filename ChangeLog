@@ -1,3 +1,7 @@
+* 2007-05-22 - francisco.laguna@open-xchange.com
+
+ - Bugfix #7459: Add content-disposition headers for ordinary downloads also.
+
 * 2007-05-22 - thorben.betten@open-xchange.com
 
  - Bugfix #7401: Improved template for Message Disposition Notification (MDN)
