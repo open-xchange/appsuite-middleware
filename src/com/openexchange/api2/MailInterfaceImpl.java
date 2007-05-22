@@ -2445,7 +2445,11 @@ public class MailInterfaceImpl implements MailInterface {
 			 */
 			final String subjectHeader = HDR_SUBJECT;
 			final String subjectPrefix = PREFIX_RE;
-			final String rawSubject = removeHdrLineBreak(originalMsg.getHeader(subjectHeader, null));
+			String subjectHdrValue = originalMsg.getHeader(subjectHeader, null);
+			if (subjectHdrValue == null) {
+				subjectHdrValue = STR_EMPTY;
+			}
+			final String rawSubject = removeHdrLineBreak(subjectHdrValue);
 			try {
 				final String decodedSubject = decodeMultiEncodedHeader(MimeUtility.decodeText(rawSubject));
 				final String newSubject = decodedSubject.regionMatches(true, 0, subjectPrefix, 0, 4) ? decodedSubject
@@ -2998,10 +3002,10 @@ public class MailInterfaceImpl implements MailInterface {
 		 */
 		final MimeBodyPart text = new MimeBodyPart();
 		text.setText(performLineWrap(strHelper.getString(MailStrings.ACK_NOTIFICATION_TEXT.replaceFirst(
-				"#DATE#", sentDate == null ? "" : DateFormat.getDateInstance(DateFormat.LONG,
-				sessionObj.getLocale()).format(sentDate)).replaceFirst("#RECIPIENT#", from)
-				.replaceFirst("#SUBJECT#", origSubject)), false, usm.getAutoLinebreak()),
-				IMAPProperties.getDefaultMimeCharset());
+				"#DATE#",
+				sentDate == null ? STR_EMPTY : DateFormat.getDateInstance(DateFormat.LONG, sessionObj.getLocale())
+						.format(sentDate)).replaceFirst("#RECIPIENT#", from).replaceFirst("#SUBJECT#", origSubject)),
+				false, usm.getAutoLinebreak()), IMAPProperties.getDefaultMimeCharset());
 		text.setHeader(HDR_MIME_VERSION, STR_1DOT0);
 		text.setHeader(HDR_CONTENT_TYPE, ct.toString());
 		mixedMultipart.addBodyPart(text);
