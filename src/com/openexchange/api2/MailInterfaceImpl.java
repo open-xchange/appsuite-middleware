@@ -52,6 +52,7 @@ package com.openexchange.api2;
 import static com.openexchange.groupware.container.mail.parser.MessageUtils.decodeMultiEncodedHeader;
 import static com.openexchange.groupware.container.mail.parser.MessageUtils.getMessageUniqueIdentifier;
 import static com.openexchange.groupware.container.mail.parser.MessageUtils.removeHdrLineBreak;
+import static com.openexchange.groupware.container.mail.parser.MessageUtils.performLineWrap;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -2996,10 +2997,11 @@ public class MailInterfaceImpl implements MailInterface {
 		 * Define text content
 		 */
 		final MimeBodyPart text = new MimeBodyPart();
-		text.setText(strHelper.getString(MailStrings.ACK_NOTIFICATION_TEXT.replaceFirst(
+		text.setText(performLineWrap(strHelper.getString(MailStrings.ACK_NOTIFICATION_TEXT.replaceFirst(
 				"#DATE#", sentDate == null ? "" : DateFormat.getDateInstance(DateFormat.LONG,
 				sessionObj.getLocale()).format(sentDate)).replaceFirst("#RECIPIENT#", from)
-				.replaceFirst("#SUBJECT#", origSubject)), IMAPProperties.getDefaultMimeCharset());
+				.replaceFirst("#SUBJECT#", origSubject)), false, usm.getAutoLinebreak()),
+				IMAPProperties.getDefaultMimeCharset());
 		text.setHeader(HDR_MIME_VERSION, STR_1DOT0);
 		text.setHeader(HDR_CONTENT_TYPE, ct.toString());
 		mixedMultipart.addBodyPart(text);

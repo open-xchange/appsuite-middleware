@@ -5,6 +5,8 @@
 * 2007-05-22 - thorben.betten@open-xchange.com
 
  - Bugfix #7401: Improved template for Message Disposition Notification (MDN)
+ - Bugfix #7480: Fixed parsing of href elements occuring inside img's src
+   attribute
 
 * 2007-05-21 - thorben.betten@open-xchange.com
 
