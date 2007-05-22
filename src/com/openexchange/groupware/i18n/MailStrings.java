@@ -61,7 +61,7 @@ public class MailStrings {
 
 	public static final String ACK_SUBJECT = "Read Acknowledgement";
 	
-	public static final String ACK_NOTIFICATION_TEXT = "This is a Return Receipt for the mail that you sent to #RECIPIENT# with subject \"#SUBJECT#\" has been displayed\n\nNote: This return receipt only acknowledges that the message was displayed on the recipients computer. There is no guarantee that the recipient has read or understood the message contents.";
+	public static final String ACK_NOTIFICATION_TEXT = "This is a Return Receipt for the mail that you sent on #DATE# to #RECIPIENT# with subject \"#SUBJECT#\" has been displayed\n\nNote: This return receipt only acknowledges that the message was displayed on the recipients computer. There is no guarantee that the recipient has read or understood the message contents.";
 	
 	public static final String REPLY_PREFIX = "On #DATE# at #TIME# #SENDER# wrote:";
 	
