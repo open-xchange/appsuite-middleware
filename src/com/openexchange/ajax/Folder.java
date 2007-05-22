@@ -1577,11 +1577,11 @@ public class Folder extends SessionServlet {
 		}
 		final String[] sa = tmp.split(SPLIT_PAT);
 		tmp = null;
-		int intArray[] = new int[sa.length];
+		final int intArray[] = new int[sa.length];
 		for (int a = 0; a < sa.length; a++) {
 			try {
 				intArray[a] = Integer.parseInt(sa[a]);
-			} catch (NumberFormatException e) {
+			} catch (final NumberFormatException e) {
 				throw new OXFolderException(FolderCode.BAD_PARAM_VALUE, STRING_EMPTY, sa[a], paramName);
 			}
 		}
@@ -1591,7 +1591,7 @@ public class Folder extends SessionServlet {
 	public static final int getUnsignedInteger(final String str) {
 		try {
 			return Integer.parseInt(str);
-		} catch (NumberFormatException e) {
+		} catch (final NumberFormatException e) {
 			return -1;
 		}
 	}

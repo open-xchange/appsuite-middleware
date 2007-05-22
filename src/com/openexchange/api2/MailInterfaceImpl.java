@@ -61,6 +61,7 @@ import java.net.NoRouteToHostException;
 import java.net.PortUnreachableException;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -2905,7 +2906,7 @@ public class MailInterfaceImpl implements MailInterface {
 					throw new OXMailException(MailCode.NO_READ_ACCESS, getUserName(), imapCon.getImapFolder()
 							.getFullName());
 				}
-			} catch (MessagingException e) {
+			} catch (final MessagingException e) {
 				throw new OXMailException(MailCode.NO_ACCESS, getUserName(), imapCon.getImapFolder().getFullName());
 			}
 			final MimeMessage msg;
@@ -2932,8 +2933,9 @@ public class MailInterfaceImpl implements MailInterface {
 				}
 			}
 			final String msgId = msg.getHeader(HDR_MESSAGE_ID, null);
-			sendReceiptAck(to, fromAddr, (msgId == null ? "[not available]" : msgId), msg.getSubject());
-		} catch (MessagingException e) {
+			sendReceiptAck(to, fromAddr, (msgId == null ? "[not available]" : msgId), msg.getSubject(), msg
+					.getSentDate());
+		} catch (final MessagingException e) {
 			throw handleMessagingException(e, sessionObj.getIMAPProperties());
 		}
 	}
@@ -2941,8 +2943,8 @@ public class MailInterfaceImpl implements MailInterface {
 	private static final String ACK_TEXT = "Reporting-UA: OPEN-XCHANGE - WebMail\nFinal-Recipient: rfc822; #FROM#\n"
 			+ "Original-Message-ID: #MSG ID#\nDisposition: manual-action/MDN-sent-manually; displayed\n";
 
-	private final void sendReceiptAck(final InternetAddress[] to, final String fromAddr, final String msgID, final String origSubject)
-			throws OXException, MessagingException {
+	private final void sendReceiptAck(final InternetAddress[] to, final String fromAddr, final String msgID,
+			final String origSubject, final Date sentDate) throws OXException, MessagingException {
 		final SMTPMessage msg = new SMTPMessage(imapCon.getSession());
 		final StringHelper strHelper = new StringHelper(sessionObj.getLocale());
 		/*
@@ -2994,7 +2996,9 @@ public class MailInterfaceImpl implements MailInterface {
 		 * Define text content
 		 */
 		final MimeBodyPart text = new MimeBodyPart();
-		text.setText(strHelper.getString(MailStrings.ACK_NOTIFICATION_TEXT.replaceFirst("#RECIPIENT#", from)
+		text.setText(strHelper.getString(MailStrings.ACK_NOTIFICATION_TEXT.replaceFirst(
+				"#DATE#", sentDate == null ? "" : DateFormat.getDateInstance(DateFormat.LONG,
+				sessionObj.getLocale()).format(sentDate)).replaceFirst("#RECIPIENT#", from)
 				.replaceFirst("#SUBJECT#", origSubject)), IMAPProperties.getDefaultMimeCharset());
 		text.setHeader(HDR_MIME_VERSION, STR_1DOT0);
 		text.setHeader(HDR_CONTENT_TYPE, ct.toString());
