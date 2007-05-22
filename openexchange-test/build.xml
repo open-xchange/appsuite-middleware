@@ -74,7 +74,7 @@
   <target name="cc-test" depends="jar"> 
 	<delete dir="${test.xml.dir}"/> 
 	<mkdir dir="${test.xml.dir}"/> 
-	<junit errorProperty="test.failed" failureProperty="test.failed"  showoutput="yes"> 
+	<junit errorProperty="test.failed" failureProperty="test.failed"  showoutput="yes" printsummary="yes"> 
 		<classpath>
 			<path refid="project.classpath" />
 			<pathelement location="${lib}/mysql-connector-java-3.1.13-bin.jar" />
