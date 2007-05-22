@@ -397,24 +397,110 @@ public abstract class ParamContainer {
 		return new JSONParamContainer(jo, component);
 	}
 
+	/**
+	 * Gets a parameter as String
+	 * 
+	 * @param paramName -
+	 *            the parameter name
+	 * @return parameter value as <code>String</code> or <code>null</code>
+	 *         if not found
+	 * @throws AbstractOXException
+	 */
 	public abstract String getStringParam(String paramName) throws AbstractOXException;
 
+	/**
+	 * Requires a parameter as <code>String</code>
+	 * 
+	 * @param paramName -
+	 *            the parameter name
+	 * @return parameter value as <code>String</code>
+	 * @throws AbstractOXException
+	 *             if parameter could not be found
+	 */
 	public abstract String checkStringParam(String paramName) throws AbstractOXException;
 
+	/**
+	 * Gets a parameter as <code>int</code>
+	 * 
+	 * @param paramName -
+	 *            the parameter name
+	 * @return parameter value as <code>int</code> or constant
+	 *         <code>NOT_FOUND</code> if not found
+	 * @throws AbstractOXException
+	 */
 	public abstract int getIntParam(String paramName) throws AbstractOXException;
 
+	/**
+	 * Requires a paramater as <code>int</code>
+	 * 
+	 * @param paramName -
+	 *            the parameter name
+	 * @return parameter value as <code>int</code>
+	 * @throws AbstractOXException
+	 *             if parameter could not be found
+	 */
 	public abstract int checkIntParam(String paramName) throws AbstractOXException;
 
+	/**
+	 * Gets a parameter as an array of <code>int</code>
+	 * 
+	 * @param paramName -
+	 *            the parameter name
+	 * @return parameter value as an array of <code>int</code> or
+	 *         <code>null</code> if not found
+	 * @throws AbstractOXException
+	 */
 	public abstract int[] getIntArrayParam(String paramName) throws AbstractOXException;
 
+	/**
+	 * Requires a parameter as an array of <code>int</code>
+	 * 
+	 * @param paramName -
+	 *            the parameter name
+	 * @return parameter value as an array of <code>int</code>
+	 * @throws AbstractOXException
+	 *             if parameter could not be found
+	 */
 	public abstract int[] checkIntArrayParam(String paramName) throws AbstractOXException;
 
+	/**
+	 * Gets a parameter as a <code>java.util.Date</code>
+	 * 
+	 * @param paramName -
+	 *            the parameter name
+	 * @return parameter value as an array of <code>java.util.Date</code> or
+	 *         <code>null</code> if not found
+	 * @throws AbstractOXException
+	 */
 	public abstract Date getDateParam(String paramName) throws AbstractOXException;
 
+	/**
+	 * Requires a parameter as a <code>java.util.Date</code>
+	 * 
+	 * @param paramName -
+	 *            the parameter name
+	 * @return parameter value as <code>java.util.Date</code>
+	 * @throws AbstractOXException
+	 *             if parameter could not be found
+	 */
 	public abstract Date checkDateParam(String paramName) throws AbstractOXException;
 
+	/**
+	 * Gets a header
+	 * 
+	 * @param hdrName -
+	 *            the header name
+	 * @return the header as <code>String</code> or <code>null</code> if not
+	 *         found
+	 */
 	public abstract String getHeader(String hdrName);
 
+	/**
+	 * Gets the <code>javax.servlet.http.HttpServletResponse</code> instance
+	 * 
+	 * @return the <code>javax.servlet.http.HttpServletResponse</code>
+	 *         instance if present; otherwise <code>null</code>
+	 */
 	public abstract HttpServletResponse getHttpServletResponse();
 
 }
