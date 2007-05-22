@@ -1,3 +1,7 @@
+* 2007-05-22 - tobias.prinz@open-xchange.com
+
+ - Added new error category "WARNING".
+
 * 2007-05-22 - francisco.laguna@open-xchange.com
 
  - Bugfix #7459: Add content-disposition headers for ordinary downloads also.
