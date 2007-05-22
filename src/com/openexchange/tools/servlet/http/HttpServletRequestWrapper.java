@@ -232,33 +232,41 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
 		this.servletPath = servlet_path;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * 
 	 * @see javax.servlet.http.HttpServletRequest#getSession(boolean)
 	 */
 	public HttpSession getSession(final boolean create) {
-		if (create && session == null) {
-			final String id = ajpRequestHandler.getHttpSessionId();
-			final HttpSession httpSession = HttpSessionManagement.getHttpSession(id);
-			if (httpSession != null) {
-				if (!HttpSessionManagement.isHttpSessionExpired(httpSession)) {
-					session = (HttpSessionWrapper) httpSession;
-					session.setNew(false);
-					return session;
-				}
-				/*
-				 * Invalidate session
-				 */
-				httpSession.invalidate();
-				HttpSessionManagement.removeHttpSession(id);
+		/*
+		 * First look-up HttpSessionManagement if a session already exists
+		 */
+		final String id = ajpRequestHandler.getHttpSessionId();
+		final HttpSession httpSession = HttpSessionManagement.getHttpSession(id);
+		if (httpSession != null) {
+			if (!HttpSessionManagement.isHttpSessionExpired(httpSession)) {
+				session = (HttpSessionWrapper) httpSession;
+				session.setNew(false);
+				session.setServletContext(getServletContext());
+				return session;
 			}
+			/*
+			 * Invalidate session
+			 */
+			httpSession.invalidate();
+			HttpSessionManagement.removeHttpSession(id);
+		}
+		/*
+		 * Create a new session
+		 */
+		if (create) {
 			/*
 			 * Create new session
 			 */
 			session = (HttpSessionWrapper) HttpSessionManagement.createHttpSession(id);
 			session.setNew(true);
+			session.setServletContext(getServletContext());
 		}
-		session.setServletContext(getServletContext());
 		return session;
 	}
 
