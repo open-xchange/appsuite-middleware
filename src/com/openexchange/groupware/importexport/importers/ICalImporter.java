@@ -100,7 +100,7 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
 		Category.CODE_ERROR,
 		Category.CODE_ERROR,
 		Category.USER_INPUT,
-		Category.USER_INPUT,}, 
+		Category.USER_INPUT}, 
 	desc={"","","","","","",""}, 
 	exceptionId={0,1,2,3,4,5,6}, 
 	msg={
