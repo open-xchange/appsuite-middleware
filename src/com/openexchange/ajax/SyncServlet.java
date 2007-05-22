@@ -324,7 +324,7 @@ public class SyncServlet extends PermissionServlet {
 		try {
 			return new Date(Long.parseLong(tmp));
 		} catch (final NumberFormatException e) {
-			throw new OXFolderException(FolderCode.BAD_PARAM_VALUE, e, tmp, paramName);
+			throw new OXFolderException(FolderCode.BAD_JSON_VALUE, e, tmp, paramName);
 		}
 	}
 
