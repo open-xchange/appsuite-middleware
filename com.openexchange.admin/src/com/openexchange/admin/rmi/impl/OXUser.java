@@ -67,7 +67,6 @@ import org.osgi.framework.ServiceReference;
 
 import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.daemons.ClientAdminThread;
-import com.openexchange.admin.exceptions.OXUserException;
 import com.openexchange.admin.plugins.OXUserPluginInterface;
 import com.openexchange.admin.plugins.PluginException;
 import com.openexchange.admin.properties.AdminProperties;
@@ -269,7 +268,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
                 // wants to change,else fail,
                 // cause then he/she wants to change not his own data!
                 if (usrdata.getId().intValue() != auth_user_id) {
-                    throw new InvalidCredentialsException("Authenticated User`s Id does not match User.getId()");
+                    throw new InvalidCredentialsException("Permission denied");
                 }
             } 
             
@@ -570,63 +569,73 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
         checkExistsContextAndSchemaBeingLocked(ctx, tools);
         
-        // ok here its possible that a user wants to get his own data
-        //  SPECIAL USER AUTH CHECK FOR THIS METHOD!
-        // check if credentials are from oxadmin or from an user
-        final int auth_user_id = tools.getUserIDByUsername(ctx, auth.getLogin());
-        // check if given user is not admin, if he is admin, the
-        if (!tools.isContextAdmin(ctx, auth_user_id)) {
-            if (users.length > 1) {
-                log.debug("User sent more than >1 users to get data for!Thats not permitted for normal users!");
-                throw new InvalidCredentialsException("Authenticated User`s Id does not match!");
-                // one user cannot edit more than his own data
-            } else {
-                doUserAuthentication(auth, ctx);
-                // its possible that he wants his own data
-                if (users[0].getId() != null) {
-                    if (users[0].getId().intValue() != auth_user_id) {
-                        throw new InvalidCredentialsException("Authenticated User`s Id does not match User.getId()");
-                    }
+        try {
+            // ok here its possible that a user wants to get his own data
+            //  SPECIAL USER AUTH CHECK FOR THIS METHOD!
+            // check if credentials are from oxadmin or from an user
+            final int auth_user_id = tools.getUserIDByUsername(ctx, auth.getLogin());
+            // check if given user is not admin, if he is admin, the
+            if (!tools.isContextAdmin(ctx, auth_user_id)) {
+                if (users.length > 1) {
+                    log.error("User sent more than 1 users to get data for. Only context admin is allowed to do that");
+                    throw new InvalidCredentialsException("Permission denied");
+                    // one user cannot edit more than his own data
                 } else {
-                    // id not set, try to resolv id by username and then check
-                    // again
-                    if (users[0].getUsername() != null) {
-                        final int check_user_id = tools.getUserIDByUsername(ctx, users[0].getUsername());
-                        if (check_user_id != auth_user_id) {
-                            log.debug("user[0].getId() does not match id from Credentials.getLogin()");
-                            throw new InvalidCredentialsException("Authenticated User`s Id does not match User.getId()");
+                    doUserAuthentication(auth, ctx);
+                    // its possible that he wants his own data
+                    if (users[0].getId() != null) {
+                        if (users[0].getId().intValue() != auth_user_id) {
+                            throw new InvalidCredentialsException("Permission denied");
                         }
                     } else {
-                        log.debug("Cannot resolv user[0]`s internal id because the username is not set!");
-                        throw new InvalidDataException("Username and userid missing!Cannot resolve user data");
+                        // id not set, try to resolv id by username and then check
+                        // again
+                        if (users[0].getUsername() != null) {
+                            final int check_user_id = tools.getUserIDByUsername(ctx, users[0].getUsername());
+                            if (check_user_id != auth_user_id) {
+                                log.debug("user[0].getId() does not match id from Credentials.getLogin()");
+                                throw new InvalidCredentialsException("Permission denied");
+                            }
+                        } else {
+                            log.debug("Cannot resolv user[0]`s internal id because the username is not set!");
+                            throw new InvalidDataException("Username and userid missing.");
+                        }
+                    }
+                }
+            } else {
+                doAuthentication(auth, ctx);
+            }
+
+            for (final User usr : users) {
+                if (usr.getId()!=null && !tools.existsUser(ctx, usr.getId())) {
+                    throw new NoSuchUserException("No such user "+usr);
+                }
+                if (usr.getUsername() != null && !tools.existsUser(ctx, usr.getUsername())) {
+                    throw new NoSuchUserException("No such user " + usr);
+                }
+                final String username = usr.getUsername();
+                if (username == null && usr.getId() == null) {
+                    throw new InvalidDataException("Username and userid missing.");
+                } else {
+                    // ok , try to get the username by id or username
+                    if (username == null) {
+                        usr.setUsername(tools.getUsernameByUserID(ctx, usr.getId().intValue()));
+                    }
+
+                    if (usr.getId() == null) {
+                        usr.setId(new Integer(tools.getUserIDByUsername(ctx, username)));
                     }
                 }
             }
-        } else {
-            doAuthentication(auth, ctx);
+
+        } catch (final InvalidDataException e) {
+            log.error(e);
+            throw(e);
+        } catch (final InvalidCredentialsException e) {
+            log.error(e);
+            throw(e);
         }
          
-        for (final User usr : users) {
-            if (usr.getId()!=null && !tools.existsUser(ctx, usr.getId())) {
-                throw new NoSuchUserException("No such user "+usr);
-            }
-            if (usr.getUsername() != null && !tools.existsUser(ctx, usr.getUsername())) {
-                throw new NoSuchUserException("No such user " + usr);
-            }
-            final String username = usr.getUsername();
-            if (username == null && usr.getId() == null) {
-                throw new InvalidDataException("Username and userid missing!Cannot resolve user data");
-            } else {
-                // ok , try to get the username by id or username
-                if (username == null) {
-                    usr.setUsername(tools.getUsernameByUserID(ctx, usr.getId().intValue()));
-                }
-
-                if (usr.getId() == null) {
-                    usr.setId(new Integer(tools.getUserIDByUsername(ctx, username)));
-                }
-            }
-        }
         
         final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
         
@@ -655,23 +664,17 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         return retusers;
     }
 
-    private void validateUserName(final String userName) throws OXUserException {
+    private void validateUserName(final String userName) throws InvalidDataException {
         // Check for allowed chars:
         // abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-+.%$@
         final String usr_uid_regexp = this.prop.getUserProp("CHECK_USER_UID_REGEXP", "[$@%\\.+a-zA-Z0-9_-]");        
         final String illegal = userName.replaceAll(usr_uid_regexp,"");
         if( illegal.length() > 0 ) {
-            throw new OXUserException( OXUserException.ILLEGAL_CHARS + ": \""+illegal+"\"");
+            throw new InvalidDataException("Illegal chars: \""+illegal+"\"");
         }
     }
 
     private void checkChangeUserData(final Context ctx, final User usrdata, final PropertyHandler prop) throws StorageException, InvalidDataException {
-        // MAIL ATTRIBUTE CHANGE SUPPORTED?? - currently disabled cause of a
-        // discussion
-        // if( usrdata.getPrimaryEmail()==null) {
-        // //throw USER_EXCEPTIONS.create(23,"Changing mail attribute not
-        // allowed");
-        // }
     
         // Do some mail attribute checks cause of bug
         // http://www.open-xchange.org/bugzilla/show_bug.cgi?id=5444
@@ -696,11 +699,9 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
             for(final String addr : useraliases ) {
                 GenericChecks.checkValidMailAddress(addr);
             }
-            if (primaryEmail == null || primaryEmail.length() < 1) {
-                throw new InvalidDataException("If ALIAS sent you need to send also primarymail!");
-            }
-            if (email1 == null || email1.length() < 1) {
-                throw new InvalidDataException("If ALIAS sent you need to send also mail1!");
+            if ( ( primaryEmail == null || primaryEmail.length() < 1 ) ||
+                 ( email1 == null       || email1.length()       < 1 ) ) {
+                throw new InvalidDataException("When sending aliases, primarymail and mail1 must also be sent.");
             }
         } else {
             final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
@@ -740,11 +741,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         }
     
         if (prop.getUserProp(AdminProperties.User.CHECK_NOT_ALLOWED_CHARS, true)) {
-            try {
-                validateUserName(usr.getUsername());
-            } catch (final OXUserException oxu) {
-                throw new InvalidDataException("Invalid username");
-            }
+            validateUserName(usr.getUsername());
         }
     
         if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, true)) {
@@ -763,7 +760,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         // ### Do some mail attribute checks cause of bug 5444
         // check if primaryemail address is also set in I_OXUser.EMAIL1,
         if (!usr.getPrimaryEmail().equals(usr.getEmail1())) {
-        	 throw new InvalidDataException("Primary mail must have the same value as email1");
+        	 throw new InvalidDataException("primarymail must have the same value as email1");
         }
     
         // put primary mail in the aliases,
