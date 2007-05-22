@@ -107,7 +107,7 @@ public class MailObject {
 
 	private Session mailSession;
 
-	public MailObject(final SessionObject sessionObj, int objectId, int folderId, final int module) {
+	public MailObject(final SessionObject sessionObj, final int objectId, final int folderId, final int module) {
 		super();
 		this.sessionObj = sessionObj;
 		this.objectId = objectId;
@@ -148,6 +148,10 @@ public class MailObject {
 	private final static String HEADER_XOXREMINDER = "X-OX-Reminder";
 
 	private final static String VALUE_PRIORITYNROM = "3 (normal)";
+	
+	private final static String HEADER_ORGANIZATION = "Organization";
+	
+	private final static String HEADER_X_MAILER = "X-Mailer";
 
 	public final void send() throws OXException {
 		try {
@@ -224,6 +228,14 @@ public class MailObject {
 			 */
 			msg.setHeader(HEADER_XPRIORITY, VALUE_PRIORITYNROM);
 			/*
+			 * Set mailer TODO: Read in mailer from file
+			 */
+			msg.setHeader(HEADER_X_MAILER, "Open-Xchange v6.0 Mailer");
+			/*
+			 * Set organization TODO: read in organization from file
+			 */
+			msg.setHeader(HEADER_ORGANIZATION, "Open-Xchange, Inc.");
+			/*
 			 * Set ox reference
 			 */
 			if (folderId != DONT_SET) {
@@ -261,7 +273,7 @@ public class MailObject {
 					MailInterfaceImpl.mailInterfaceMonitor.changeNumActive(false);
 				}
 			}
-		} catch (MessagingException e) {
+		} catch (final MessagingException e) {
 			throw MailInterfaceImpl.handleMessagingException(e);
 		}
 	}

@@ -139,6 +139,8 @@ public class MessageFiller {
 	private static final String HDR_DISP_TO = "Disposition-Notification-To";
 
 	private static final String HDR_MIME_VERSION = "MIME-Version";
+	
+	private static final String HDR_ORGANIZATION = "Organization";
 
 	/*
 	 * Constants for MIME types
@@ -377,15 +379,15 @@ public class MessageFiller {
 					 * Append body part
 					 */
 					primaryMultipart.addBodyPart(vcardPart);
-				} catch (MessagingException e) {
+				} catch (final MessagingException e) {
 					LOG.error(VCARD_ERROR, e);
-				} catch (DBPoolingException e) {
+				} catch (final DBPoolingException e) {
 					LOG.error(VCARD_ERROR, e);
-				} catch (IOException e) {
+				} catch (final IOException e) {
 					LOG.error(VCARD_ERROR, e);
-				} catch (ConverterException e) {
+				} catch (final ConverterException e) {
 					LOG.error(VCARD_ERROR, e);
-				} catch (OXException e) {
+				} catch (final OXException e) {
 					LOG.error(VCARD_ERROR, e);
 				}
 			}
@@ -403,7 +405,7 @@ public class MessageFiller {
 					final MimeBodyPart origMsgPart = new MimeBodyPart();
 					origMsgPart.setDataHandler(new DataHandler(originalMsg, MIME_MESSAGE_RFC822));
 					primaryMultipart.addBodyPart(origMsgPart);
-				} catch (MessagingException e) {
+				} catch (final MessagingException e) {
 					LOG.error("Error while appending original message on forward", e);
 				}
 			}
@@ -526,7 +528,7 @@ public class MessageFiller {
 		try {
 			text.setText(performLineWrap(CONVERTER.convertWithQuotes(mailText), false, linewrap), IMAPProperties
 					.getDefaultMimeCharset());
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			throw new OXMailException(MailCode.HTML2TEXT_CONVERTER_ERROR, e, e.getMessage());
 		}
 		text.setHeader(HDR_MIME_VERSION, VERSION);
@@ -632,9 +634,9 @@ public class MessageFiller {
 					try {
 						msgBodyPart.setFileName(MimeUtility.encodeText(mao.getFileName(), IMAPProperties
 								.getDefaultMimeCharset(), ENC_Q));
-					} catch (UnsupportedEncodingException e) {
+					} catch (final UnsupportedEncodingException e) {
 						msgBodyPart.setFileName(mao.getFileName());
-					} catch (IMAPException e) {
+					} catch (final IMAPException e) {
 						msgBodyPart.setFileName(mao.getFileName());
 					}
 				} else {
@@ -644,9 +646,9 @@ public class MessageFiller {
 					try {
 						msgBodyPart.setFileName(MimeUtility.encodeText(mao.getFileName(), IMAPProperties
 								.getDefaultMimeCharset(), ENC_Q));
-					} catch (UnsupportedEncodingException e) {
+					} catch (final UnsupportedEncodingException e) {
 						msgBodyPart.setFileName(mao.getFileName());
-					} catch (IMAPException e) {
+					} catch (final IMAPException e) {
 						msgBodyPart.setFileName(mao.getFileName());
 					}
 				}
@@ -661,9 +663,9 @@ public class MessageFiller {
 				try {
 					messageBodyPart.setFileName(MimeUtility.encodeText(mao.getFileName(), IMAPProperties
 							.getDefaultMimeCharset(), ENC_Q));
-				} catch (UnsupportedEncodingException e) {
+				} catch (final UnsupportedEncodingException e) {
 					messageBodyPart.setFileName(mao.getFileName());
-				} catch (IMAPException e) {
+				} catch (final IMAPException e) {
 					messageBodyPart.setFileName(mao.getFileName());
 				}
 				messageBodyPart.setDisposition(mao.getDisposition() == null ? Part.ATTACHMENT : mao.getDisposition());
@@ -678,16 +680,16 @@ public class MessageFiller {
 				try {
 					dataSource = new MessageDataSource(mao.getInfostoreDocumentInputStream(), contentType.toString(),
 							mao.getFileName());
-				} catch (IOException e) {
+				} catch (final IOException e) {
 					throw new OXMailException(MailCode.INTERNAL_ERROR, e.getMessage());
 				}
 				messageBodyPart.setDataHandler(new DataHandler(dataSource));
 				try {
 					messageBodyPart.setFileName(MimeUtility.encodeText(mao.getFileName(), IMAPProperties
 							.getDefaultMimeCharset(), ENC_Q));
-				} catch (UnsupportedEncodingException e) {
+				} catch (final UnsupportedEncodingException e) {
 					messageBodyPart.setFileName(mao.getFileName());
-				} catch (IMAPException e) {
+				} catch (final IMAPException e) {
 					messageBodyPart.setFileName(mao.getFileName());
 				}
 				messageBodyPart.setDisposition(mao.getDisposition() == null ? Part.ATTACHMENT : mao.getDisposition());
@@ -809,6 +811,10 @@ public class MessageFiller {
 		 */
 		msgObj.addHeader(HDR_X_MAILER, "Open-Xchange v6.0 Mailer");
 		/*
+		 * Set organization TODO: Read in organization from file
+		 */
+		msg.setHeader(HDR_ORGANIZATION, "Open-Xchange, Inc.");
+		/*
 		 * Headers
 		 */
 		final int size = msgObj.getHeaders().size();
@@ -835,9 +841,9 @@ public class MessageFiller {
 			try {
 				contactObj = Contacts.getContactById(userObj.getContactId(), userObj.getId(), userObj.getGroups(),
 						session.getContext(), session.getUserConfiguration(), readCon);
-			} catch (OXException oxExc) {
+			} catch (final OXException oxExc) {
 				throw oxExc;
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				throw new OXMailException(MailCode.INTERNAL_ERROR, e, e.getMessage());
 			}
 			final VersitObject versitObj = converter.convertContact(contactObj, "3.0");
@@ -875,7 +881,7 @@ public class MessageFiller {
 		String[] tmp = null;
 		try {
 			tmp = IMAPProperties.getQuoteLineColors();
-		} catch (OXException e) {
+		} catch (final OXException e) {
 			tmp = new String[] { "#454545" };
 		}
 		COLORS = tmp;
@@ -921,7 +927,7 @@ public class MessageFiller {
 				try {
 					offset = offset < line.length() && Character.isWhitespace(line.charAt(offset)) ? offset + 1
 							: offset;
-				} catch (StringIndexOutOfBoundsException e) {
+				} catch (final StringIndexOutOfBoundsException e) {
 					if (LOG.isTraceEnabled()) {
 						LOG.trace(e.getMessage(), e);
 					}

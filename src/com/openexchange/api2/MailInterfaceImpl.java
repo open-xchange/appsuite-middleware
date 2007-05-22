@@ -211,6 +211,10 @@ public class MailInterfaceImpl implements MailInterface {
 	private static final String HDR_SUBJECT = "Subject";
 
 	private static final String HDR_DISP_TO = "Disposition-Notification-To";
+	
+	private static final String HDR_ORGANIZATION = "Organization";
+	
+	private static final String HDR_X_MAILER = "X-Mailer";
 
 	/*
 	 * MIME type constants
@@ -283,8 +287,6 @@ public class MailInterfaceImpl implements MailInterface {
 
 	private static final String PROTOCOL_SMTP = "smtp";
 
-	private static final String MP_MIXED = "mixed";
-	
 	private static final String MP_REPORT_DISPNOT = "report; report-type=disposition-notification";
 
 	private static final String HTML_BR = "<br>";
@@ -2992,6 +2994,14 @@ public class MailInterfaceImpl implements MailInterface {
 			 */
 			msg.setEnvelopeFrom(sessionObj.getUserObject().getMail());
 		}
+		/*
+		 * Set mailer TODO: Read in mailer from file
+		 */
+		msg.setHeader(HDR_X_MAILER, "Open-Xchange v6.0 Mailer");
+		/*
+		 * Set organization TODO: read in organization from file
+		 */
+		msg.setHeader(HDR_ORGANIZATION, "Open-Xchange, Inc.");
 		/*
 		 * Compose body
 		 */
