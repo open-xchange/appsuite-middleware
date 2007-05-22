@@ -86,6 +86,7 @@ import com.openexchange.tools.versit.VersitDefinition;
 import com.openexchange.tools.versit.VersitException;
 import com.openexchange.tools.versit.VersitObject;
 import com.openexchange.tools.versit.converter.ConverterException;
+import com.openexchange.tools.versit.converter.ConverterPrivacyException;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
 
 @OXExceptionSource(
@@ -98,20 +99,22 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
 		Category.USER_INPUT,
 		Category.CODE_ERROR,
 		Category.CODE_ERROR,
-		Category.USER_INPUT}, 
-	desc={"","","","","",""}, 
-	exceptionId={0,1,2,3,4,5}, 
+		Category.USER_INPUT,
+		Category.USER_INPUT,}, 
+	desc={"","","","","","",""}, 
+	exceptionId={0,1,2,3,4,5,6}, 
 	msg={
 		"Could not import into the folder %s.",
 		"Subsystem down",
 		"User input Error %s",
 		"Programming Error",
 		"Could not load folder %s",
-		"Broken file uploaded: %s"})
+		"Broken file uploaded: %s",
+		"Could not parse entry"})
 
 /**
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a> (minor: changes to new interface)
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a> (minor: changes to new interface, bugfixes)
  */
 public class ICalImporter implements Importer {
 	
@@ -232,21 +235,39 @@ public class ICalImporter implements Importer {
 					
 					if ("VEVENT".equals(versitObject.name) && importAppointment) {
 						importResult.setFolder(String.valueOf(appointmentFolderId));
-								
-						final CalendarDataObject appointmentObj = oxContainerConverter.convertAppointment(versitObject);
-						appointmentObj.setContext(sessObj.getContext());
-						appointmentObj.setParentFolderID(appointmentFolderId);
-						appointmentObj.setIgnoreConflicts(true);
-						appointmentInterface.insertAppointmentObject(appointmentObj);
-						
+						boolean storeData = true;
+						CalendarDataObject appointmentObj = null;
+						try {
+							appointmentObj = oxContainerConverter.convertAppointment(versitObject);
+						} catch (ConverterException e){
+							storeData = false;
+						}
+						if(storeData){
+							appointmentObj.setContext(sessObj.getContext());
+							appointmentObj.setParentFolderID(appointmentFolderId);
+							appointmentObj.setIgnoreConflicts(true);
+							appointmentInterface.insertAppointmentObject(appointmentObj);
+						} else {
+							importResult.setException(importExportExceptionFactory.create(6));
+						}
 						importResult.setObjectId(String.valueOf(appointmentObj.getObjectID()));
 						importResult.setDate(appointmentObj.getLastModified());
 					} else if ("VTODO".equals(versitObject.name) && importTask) {
 						importResult.setFolder(String.valueOf(taskFolderId));
+						boolean storeData = true;
 						
-						final Task taskObj = oxContainerConverter.convertTask(versitObject);
-						taskObj.setParentFolderID(taskFolderId);
-						taskInterface.insertTaskObject(taskObj);
+						Task taskObj = null;
+						try {
+							taskObj = oxContainerConverter.convertTask(versitObject);
+						} catch (ConverterException e){
+							storeData = false;
+						}
+						if(storeData){
+							taskObj.setParentFolderID(taskFolderId);
+							taskInterface.insertTaskObject(taskObj);
+						} else {
+							importResult.setException(importExportExceptionFactory.create(6));
+						}
 						
 						importResult.setObjectId(String.valueOf(taskObj.getObjectID()));
 						importResult.setDate(taskObj.getLastModified());
@@ -256,9 +277,6 @@ public class ICalImporter implements Importer {
 				} catch (OXException exc) {
 					LOG.error("cannot import calendar object", exc);
 					importResult.setException(exc);
-				} catch (ConverterException exc) {
-					LOG.error("cannot convert calendar object", exc);
-					importResult.setException(new OXException("cannot parse ical object", exc));
 				} catch (VersitException exc) {
 					LOG.error("cannot parse calendar object", exc);
 					importResult.setException(new OXException("cannot parse ical object", exc));

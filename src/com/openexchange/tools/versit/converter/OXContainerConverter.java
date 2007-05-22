@@ -95,7 +95,7 @@ import com.openexchange.tools.versit.values.RecurrenceValue;
 
 /**
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> (adapted Victor's parser for OX6)
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> (bugfix: 7248, 7249)
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> (bugfixes: 7248, 7249, 7472)
  * 
  */
 public class OXContainerConverter {
@@ -495,7 +495,8 @@ public class OXContainerConverter {
 	public Task convertTask(final VersitObject object) throws ConverterException {
 		try {
 			final Task taskContainer = new Task();
-			// TODO CLASS
+			// CLASS
+			PrivacyProperty(taskContainer, object, "CLASS", SET_BOOLEAN_METHODS.get(Task.PRIVATE_FLAG));
 			// COMPLETED
 			DateTimeProperty(taskContainer, object, "COMPLETED", SET_DATE_METHODS.get(Integer
 					.valueOf(Task.DATE_COMPLETED)));
@@ -598,7 +599,8 @@ public class OXContainerConverter {
 
 	public CalendarDataObject convertAppointment(final VersitObject object) throws ConverterException {
 		final CalendarDataObject appContainer = new CalendarDataObject();
-		// TODO CLASS
+		//CLASS
+		PrivacyProperty(appContainer, object, "CLASS", SET_BOOLEAN_METHODS.get(Task.PRIVATE_FLAG));
 		// CREATED is ignored
 		// DESCRIPTION
 		StringProperty(appContainer, object, "DESCRIPTION", SET_STRING_METHODS.get(AppointmentObject.NOTE));
@@ -1007,6 +1009,31 @@ public class OXContainerConverter {
 		}
 	}
 
+	private boolean PrivacyProperty(final Object containerObj, final VersitObject object, final String VersitName,
+			final Method setPrivacyMethod) throws ConverterException {
+		try {
+			final Property property = object.getProperty(VersitName);
+			if (property == null) {
+				return false;
+			}
+			String privacy = (String) property.getValue();
+			
+			boolean isPrivate = false;
+			if("PRIVATE".equals(privacy)){
+				isPrivate = true;
+			} 
+			if("CONFIDENTIAL".equals(privacy)){
+//				throw new ConverterPrivacyException();
+				isPrivate = true;
+			}
+			final Object[] args = { isPrivate };
+			setPrivacyMethod.invoke(containerObj, args);
+			return false;
+		} catch (Exception e){
+			throw new ConverterException(e);
+		}
+	}
+	
 	private boolean DateTimeProperty(final Object containerObj, final VersitObject object, final String VersitName,
 			final Method setDateMethod) throws ConverterException {
 		try {
