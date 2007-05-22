@@ -387,10 +387,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 	}
 
 	public static boolean containsParameter(final HttpServletRequest req, final String name) {
-		if (req.getParameter(name) != null) {
-			return true;
-		}
-		return false;
+		return (req.getParameter(name) != null);
 	}
 
 	/**
