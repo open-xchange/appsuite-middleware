@@ -238,6 +238,9 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
 	 * @see javax.servlet.http.HttpServletRequest#getSession(boolean)
 	 */
 	public HttpSession getSession(final boolean create) {
+		if (session != null) {
+			return session;
+		}
 		/*
 		 * First look-up HttpSessionManagement if a session already exists
 		 */
