@@ -726,26 +726,29 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
         PreparedStatement del_st = null;
         ResultSet rs = null;
         try {
-            del_st = write_ox_con.prepareStatement("SELECT identifier,displayName FROM groups WHERE id = ? AND cid = ?");
+            del_st = write_ox_con.prepareStatement("SELECT identifier,displayName,gidNumber FROM groups WHERE id = ? AND cid = ?");
             del_st.setInt(1, group_id);
             del_st.setInt(2, context_id);
             rs = del_st.executeQuery();
             String ident = null;
             String disp = null;
-
+            int gidNumber = -1;
+            
             if (rs.next()) {
                 ident = rs.getString("identifier");
                 disp = rs.getString("displayName");
+                gidNumber = rs.getInt("gidNumber");
             }
             del_st.close();
             rs.close();
 
-            del_st = write_ox_con.prepareStatement("" + "INSERT into del_groups (id,cid,lastModified,identifier,displayName) VALUES (?,?,?,?,?)");
+            del_st = write_ox_con.prepareStatement("" + "INSERT into del_groups (id,cid,lastModified,identifier,displayName,gidNumber) VALUES (?,?,?,?,?,?)");
             del_st.setInt(1, group_id);
             del_st.setInt(2, context_id);
             del_st.setLong(3, System.currentTimeMillis());
             del_st.setString(4, ident);
             del_st.setString(5, disp);
+            del_st.setInt(6, gidNumber);
             del_st.executeUpdate();
             del_st.close();
 
