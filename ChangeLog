@@ -1,5 +1,9 @@
 * 2007-05-23 - tobias.prinz@open-xchange.com
 
+ - Bugfix #7507: Resolve [hostname] to the hostname of the system in direct links
+
+* 2007-05-23 - tobias.prinz@open-xchange.com
+
  - Bugfix #7472: Added handling of CONFIDENTIAL flag: Entry flagged as such
    is not imported. Bug fixed.
 
