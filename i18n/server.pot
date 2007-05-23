@@ -100,7 +100,13 @@ msgid "Read Acknowledgement"
 msgstr ""
 
 #: com/openexchange/groupware/i18n/MailStrings.java:64
-msgid "Receipt Acknowledgement"
+msgid ""
+"This is a Return Receipt for the mail that you sent on #DATE# to #RECIPIENT# "
+"with subject \"#SUBJECT#\".\n"
+"\n"
+"Note: This return receipt only acknowledges that the message was displayed "
+"on the recipients computer. There is no guarantee that the recipient has "
+"read or understood the message contents."
 msgstr ""
 
 #: com/openexchange/groupware/i18n/MailStrings.java:66

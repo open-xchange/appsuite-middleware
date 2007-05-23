@@ -205,7 +205,7 @@ msgstr ""
 msgid "Attribute \"%s\" is not set in FolderObject instance %s in context %s"
 msgstr ""
 
-msgid "Bad JSON value %s in key %s"
+msgid "Bad value %s in parameter %s"
 msgstr ""
 
 msgid "Both %s and %s must not be present in message's JSON representation"
@@ -720,6 +720,9 @@ msgstr ""
 msgid "Folder not found: %s"
 msgstr ""
 
+msgid "Folder owner's administer permission must not be removed from folder %s"
+msgstr ""
+
 msgid "Folder read-only check failed"
 msgstr ""
 
@@ -929,6 +932,9 @@ msgstr ""
 msgid "Message could not be sent"
 msgstr ""
 
+msgid "Message could not be sent because it is too large"
+msgstr ""
+
 msgid "Message could not be sent to the following recipients: %s"
 msgstr ""
 
@@ -1051,6 +1057,9 @@ msgid "No admin permission found"
 msgstr ""
 
 msgid "No admin user found in context %s"
+msgstr ""
+
+msgid "No administer permission specified by user %s for folder %s"
 msgstr ""
 
 msgid "No attachment was found with id %s in message %s"
@@ -1694,6 +1703,9 @@ msgstr ""
 msgid "Update process initialization failed: %1$s."
 msgstr ""
 
+msgid "Updating database ... Try again later."
+msgstr ""
+
 msgid "Upload Quota (%d) exceeded"
 msgstr ""
 
@@ -1875,9 +1887,6 @@ msgid "You need write permissions to lock a document."
 msgstr ""
 
 msgid "You need write permissions to unlock a document."
-msgstr ""
-
-msgid "Your database is currently updated. Try again later."
 msgstr ""
 
 msgid "Your session %s expired. Please start a new browser session."
