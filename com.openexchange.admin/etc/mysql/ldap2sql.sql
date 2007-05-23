@@ -18,6 +18,7 @@ CREATE TABLE del_groups (
     identifier VARCHAR(128) NOT NULL,
     displayName VARCHAR(128) NOT NULL,
     lastModified INT8 NOT NULL,
+    gidNumber INT4 UNSIGNED NOT NULL,
     PRIMARY KEY (cid, id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
@@ -56,9 +57,13 @@ CREATE TABLE del_user (
     shadowLastChange INTEGER NOT NULL,
     smtpServer VARCHAR(128),
     timeZone VARCHAR(128) NOT NULL,
-    contactId INT4 UNSIGNED NOT NULL,
-    lastModified INT8 NOT NULL,
     userPassword VARCHAR(128),
+    contactId INT4 UNSIGNED NOT NULL,
+    passwordMech VARCHAR(32) NOT NULL,
+    uidNumber INT4 UNSIGNED NOT NULL,
+    gidNumber INT4 UNSIGNED NOT NULL,
+    homeDirectory VARCHAR(128) NOT NULL,
+    loginShell VARCHAR(128) NOT NULL,
     PRIMARY KEY (cid, id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
