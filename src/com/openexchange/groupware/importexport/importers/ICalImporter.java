@@ -110,7 +110,7 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
 		"Programming Error",
 		"Could not load folder %s",
 		"Broken file uploaded: %s",
-		"Could not parse entry"})
+		"Cowardly refusing to import an entry flagged as confidential."})
 
 /**
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
@@ -120,7 +120,7 @@ public class ICalImporter implements Importer {
 	
 	private static final Log LOG = LogFactory.getLog(ICalImporter.class);
 	
-	private static ImportExportExceptionFactory importExportExceptionFactory = new ImportExportExceptionFactory(ICalImporter.class);
+	private static final ImportExportExceptionFactory EXCEPTIONS = new ImportExportExceptionFactory(ICalImporter.class);
 	
 	public boolean canImport(final SessionObject sessObj, final Format format, final List<String> folders, final Map<String, String[]> optionalParams) throws ImportExportException{
 		if(!format.equals(Format.ICAL)){
@@ -148,9 +148,9 @@ public class ICalImporter implements Importer {
 			try {
 				perm = fo.getEffectiveUserPermission(sessObj.getUserObject().getId(), sessObj.getUserConfiguration());
 			} catch (DBPoolingException e) {
-				throw importExportExceptionFactory.create(1, folder);
+				throw EXCEPTIONS.create(1, folder);
 			} catch (SQLException e) {
-				throw importExportExceptionFactory.create(1, folder);
+				throw EXCEPTIONS.create(1, folder);
 			}
 			
 			if (perm.canCreateObjects()) {
@@ -175,7 +175,7 @@ public class ICalImporter implements Importer {
 			try {
 				fo = FolderObject.loadFolderObjectFromDB(folderId, sessObj.getContext());
 			} catch (OXException e) {
-				throw importExportExceptionFactory.create(4,folderId);
+				throw EXCEPTIONS.create(4,folderId);
 			}
 			if (fo.getModule() == FolderObject.CALENDAR) {
 				appointmentFolderId = folderId;
@@ -184,7 +184,7 @@ public class ICalImporter implements Importer {
 				taskFolderId = folderId;
 				importTask = true;
 			} else {
-				throw importExportExceptionFactory.create(0, fo.getModule()); 
+				throw EXCEPTIONS.create(0, fo.getModule()); 
 			}
 		}
 		
@@ -219,7 +219,7 @@ public class ICalImporter implements Importer {
 						versitObject=  def.parseChild(versitReader, rootVersitObject);
 					} catch (VersitException ve){
 						LOG.info("Trying to import ICAL file, but:\n" + ve);
-						importResult.setException(importExportExceptionFactory.create(5, ve.getLocalizedMessage()));
+						importResult.setException(EXCEPTIONS.create(5, ve.getLocalizedMessage()));
 						importResult.setDate(new Date(System.currentTimeMillis()));
 						list.add(importResult);
 						hasMoreObjects = false;
@@ -239,7 +239,7 @@ public class ICalImporter implements Importer {
 						CalendarDataObject appointmentObj = null;
 						try {
 							appointmentObj = oxContainerConverter.convertAppointment(versitObject);
-						} catch (ConverterException e){
+						} catch (ConverterPrivacyException e){
 							storeData = false;
 						}
 						if(storeData){
@@ -247,11 +247,13 @@ public class ICalImporter implements Importer {
 							appointmentObj.setParentFolderID(appointmentFolderId);
 							appointmentObj.setIgnoreConflicts(true);
 							appointmentInterface.insertAppointmentObject(appointmentObj);
+							importResult.setObjectId(String.valueOf(appointmentObj.getObjectID()));
+							importResult.setDate(appointmentObj.getLastModified());
 						} else {
-							importResult.setException(importExportExceptionFactory.create(6));
+							importResult.setException(EXCEPTIONS.create(6));
+							importResult.setDate(new Date());
 						}
-						importResult.setObjectId(String.valueOf(appointmentObj.getObjectID()));
-						importResult.setDate(appointmentObj.getLastModified());
+						
 					} else if ("VTODO".equals(versitObject.name) && importTask) {
 						importResult.setFolder(String.valueOf(taskFolderId));
 						boolean storeData = true;
@@ -259,18 +261,19 @@ public class ICalImporter implements Importer {
 						Task taskObj = null;
 						try {
 							taskObj = oxContainerConverter.convertTask(versitObject);
-						} catch (ConverterException e){
+						} catch (ConverterPrivacyException e){
 							storeData = false;
 						}
 						if(storeData){
 							taskObj.setParentFolderID(taskFolderId);
 							taskInterface.insertTaskObject(taskObj);
+							importResult.setObjectId(String.valueOf(taskObj.getObjectID()));
+							importResult.setDate(taskObj.getLastModified());
 						} else {
-							importResult.setException(importExportExceptionFactory.create(6));
+							importResult.setException(EXCEPTIONS.create(6));
+							importResult.setDate(new Date());
 						}
 						
-						importResult.setObjectId(String.valueOf(taskObj.getObjectID()));
-						importResult.setDate(taskObj.getLastModified());
 					} else {
 						LOG.warn("invalid versit object: " + versitObject.name);
 					}
@@ -285,7 +288,7 @@ public class ICalImporter implements Importer {
 				list.add(importResult);
 			}
 		} catch (Exception exc) {
-			throw importExportExceptionFactory.create(3, exc);
+			throw EXCEPTIONS.create(3, exc);
 		} finally {
 			oxContainerConverter.close();
 		}

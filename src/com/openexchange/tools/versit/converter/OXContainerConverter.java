@@ -1023,12 +1023,13 @@ public class OXContainerConverter {
 				isPrivate = true;
 			} 
 			if("CONFIDENTIAL".equals(privacy)){
-//				throw new ConverterPrivacyException();
-				isPrivate = true;
+				throw new ConverterPrivacyException();
 			}
 			final Object[] args = { isPrivate };
 			setPrivacyMethod.invoke(containerObj, args);
 			return false;
+		} catch (ConverterPrivacyException e){
+			throw e;
 		} catch (Exception e){
 			throw new ConverterException(e);
 		}

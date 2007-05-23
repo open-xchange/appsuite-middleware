@@ -1,7 +1,12 @@
+* 2007-05-23 - tobias.prinz@open-xchange.com
+
+ - Bugfix #7472: Added handling of CONFIDENTIAL flag: Entry flagged as such
+   is not imported. Bug fixed.
+
 * 2007-05-23 - marcus.klein@open-xchange.com
 
   - Bugfix #7275: Changed error message once again.
-
+   
 * 2007-05-22 - tobias.prinz@open-xchange.com
 
  - Added new error category "WARNING".
