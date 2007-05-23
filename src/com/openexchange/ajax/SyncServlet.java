@@ -68,6 +68,7 @@ import org.json.JSONException;
 import org.json.JSONWriter;
 
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.helper.ParamContainer;
 import com.openexchange.api2.MailInterface;
 import com.openexchange.api2.MailInterfaceImpl;
 import com.openexchange.api2.OXException;
@@ -100,7 +101,7 @@ public class SyncServlet extends PermissionServlet {
 			.getLog(SyncServlet.class);
 
 	public static final String ACTION_REFRESH_SERVER = "refresh_server";
-	
+
 	/**
 	 * Default constructor
 	 */
@@ -168,7 +169,8 @@ public class SyncServlet extends PermissionServlet {
 	/**
 	 * Assigns incoming PUT request to corresponding method
 	 */
-	private final void actionPut(final HttpServletRequest req, final HttpServletResponse resp) throws IOException, AbstractOXException {
+	private final void actionPut(final HttpServletRequest req, final HttpServletResponse resp) throws IOException,
+			AbstractOXException {
 		final String actionStr = checkStringParam(req, PARAMETER_ACTION);
 		if (actionStr.equalsIgnoreCase(ACTION_REFRESH_SERVER)) {
 			actionPutClearFolderContent(req, resp);
@@ -181,14 +183,15 @@ public class SyncServlet extends PermissionServlet {
 	private final void actionPutClearFolderContent(final HttpServletRequest req, final HttpServletResponse resp)
 			throws IOException {
 		try {
-			actionPutClearFolderContent(getSessionObject(req), resp.getWriter(), getBody(req), req);
+			actionPutClearFolderContent(getSessionObject(req), resp.getWriter(), getBody(req), ParamContainer
+					.getInstance(req, Component.SYNCML, resp));
 		} catch (final JSONException e) {
 			writeErrorResponse((HttpServletResponseWrapper) resp, e);
 		}
 	}
 
-	private final void actionPutClearFolderContent(final SessionObject sessionObj, final Writer writer, final String body,
-			final HttpServletRequest paramContainer) throws JSONException {
+	private final void actionPutClearFolderContent(final SessionObject sessionObj, final Writer writer,
+			final String body, final ParamContainer paramContainer) throws JSONException {
 		/*
 		 * Some variables
 		 */
@@ -215,7 +218,7 @@ public class SyncServlet extends PermissionServlet {
 					if ((delFolderId = getUnsignedInteger(deleteIdentifier)) != -1) {
 						delFolderId = mapVirtualID2SystemID(delFolderId);
 						if (timestamp == null) {
-							timestamp = checkDateParam(paramContainer, PARAMETER_TIMESTAMP);
+							timestamp = paramContainer.checkDateParam(PARAMETER_TIMESTAMP);
 						}
 						if (folderSyncInterface == null) {
 							folderSyncInterface = new RdbFolderSyncInterface(sessionObj, access);
@@ -228,6 +231,9 @@ public class SyncServlet extends PermissionServlet {
 							 * Folder could not be found and therefore need not
 							 * to be deleted
 							 */
+							if (LOG.isWarnEnabled()) {
+								LOG.warn(exc.getMessage(), exc);
+							}
 							continue NextId;
 						}
 						if (delFolderObj.getLastModified().getTime() > timestamp.getTime()) {
@@ -281,7 +287,8 @@ public class SyncServlet extends PermissionServlet {
 	 * ++++++++++++++++++++++ Helper methods +++++++++++++++++++++++
 	 */
 
-	private static final void writeErrorResponse(final HttpServletResponseWrapper resp, final Throwable e) throws IOException {
+	private static final void writeErrorResponse(final HttpServletResponseWrapper resp, final Throwable e)
+			throws IOException {
 		writeErrorResponse(resp, getWrappingOXException(e));
 	}
 
@@ -314,18 +321,6 @@ public class SyncServlet extends PermissionServlet {
 			throw new OXFolderException(FolderCode.MISSING_PARAMETER, STR_EMPTY, paramName);
 		}
 		return paramVal;
-	}
-
-	private static final Date checkDateParam(final HttpServletRequest req, final String paramName) throws OXException {
-		final String tmp = req.getParameter(paramName);
-		if (tmp == null) {
-			throw new OXFolderException(FolderCode.MISSING_PARAMETER, STR_EMPTY, paramName);
-		}
-		try {
-			return new Date(Long.parseLong(tmp));
-		} catch (final NumberFormatException e) {
-			throw new OXFolderException(FolderCode.BAD_JSON_VALUE, e, tmp, paramName);
-		}
 	}
 
 }

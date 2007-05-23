@@ -561,11 +561,13 @@ public class MessageCacheObject extends Message implements Serializable {
 
 	private static final String HDR_REPLY_TO = "Reply-To";
 
+	@Override
 	public Address[] getReplyTo() {
 		return replyTo != null ? replyTo : headers.containsKey(HDR_REPLY_TO) ? (replyTo = new InternetAddress[] { new DummyAddress(headers
 				.get(HDR_REPLY_TO)) }) : null;
 	}
 
+	@Override
 	public void setReplyTo(final Address[] addresses) {
 		this.replyTo = (InternetAddress[]) addresses;
 	}
@@ -595,6 +597,7 @@ public class MessageCacheObject extends Message implements Serializable {
 	 * 
 	 * @see java.lang.Object#toString()
 	 */
+	@Override
 	public String toString() {
 		final StringBuilder sb = new StringBuilder();
 		sb.append("uid=").append(uid);

@@ -447,9 +447,9 @@ public class OXFolderException extends OXException {
 		 */
 		MISSING_PARAMETER("Missing parameter %s", Category.CODE_ERROR, 57),
 		/**
-		 * Bad JSON value %s in key %s
+		 * Bad value %s in parameter %s
 		 */
-		BAD_JSON_VALUE("Bad JSON value %s in key %s", Category.USER_INPUT, 58),
+		BAD_PARAM_VALUE("Bad value %s in parameter %s", Category.USER_INPUT, 58),
 		/**
 		 * Unknown field: %d
 		 */

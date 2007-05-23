@@ -154,7 +154,6 @@ public class MailTools {
 	/**
 	 * Searching for links using a regexp pattern and convert them to valid href
 	 * 
-	 * @param line
 	 * @return
 	 */
 	public static String formatHrefLinks(final String lineArg) {
@@ -164,7 +163,7 @@ public class MailTools {
 			final StringBuffer sb = new StringBuffer(line.length());
 			final StringBuilder tmp = new StringBuilder(200);
 			while (m.find()) {
-				if (m.group(1) != null) {
+				if (m.group(1) != null && !isImgSrc(line, m.start(1))) {
 					tmp.setLength(0);
 					m.appendReplacement(sb, tmp.append("<a href=\"").append(
 							(m.group(1).startsWith("www") ? "http://" : "")).append(
@@ -179,6 +178,12 @@ public class MailTools {
 			LOG.error(e.getMessage(), e);
 		}
 		return line;
+	}
+	
+	private static final String STR_IMG_SRC = "src=\"";
+	
+	private static final boolean isImgSrc(final String line, final int start) {
+		return STR_IMG_SRC.equalsIgnoreCase(line.substring(start - 5, start));
 	}
 
 	public static String encodeUrl(final String url) {

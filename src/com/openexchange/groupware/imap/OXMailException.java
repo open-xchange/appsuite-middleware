@@ -537,7 +537,19 @@ public class OXMailException extends OXException {
 		/**
 		 * Message move aborted for user %s. Source and destination folder are equal: %s
 		 */
-		NO_EQUAL_MOVE("Message move aborted for user %s. Source and destination folder are equal: %s", Category.USER_INPUT, 98);
+		NO_EQUAL_MOVE("Message move aborted for user %s. Source and destination folder are equal: %s", Category.USER_INPUT, 98),
+		/**
+		 * No admin permission specified by user %s for folder %s
+		 */
+		NO_ADMIN_ACL("No administer permission specified by user %s for folder %s", Category.USER_INPUT, 99),
+		/**
+		 * Folder owner's administer permission must not be removed from folder %s
+		 */
+		NO_FOLDER_OWNERACL_REMOVE("Folder owner's administer permission must not be removed from folder %s", Category.USER_INPUT, 100),
+		/**
+		 * Message could not be sent because it is too large
+		 */
+		MESSAGE_TOO_LARGE("Message could not be sent because it is too large", Category.INTERNAL_ERROR, 101);
 
 		/**
 		 * Message of the exception.

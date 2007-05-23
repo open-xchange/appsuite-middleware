@@ -914,8 +914,8 @@ public class OXFolderSQL {
 		}
 	}
 
-	/**
-	 * Helper methods for OXFolderDeleteListener
+	/*
+	 * -------------- Helper methods for OXFolderDeleteListener (User removal) --------------
 	 */
 
 	private static final String SQL_GET_CONTEXT_MAILADMIN = "SELECT user FROM user_setting_admin WHERE cid = ?";

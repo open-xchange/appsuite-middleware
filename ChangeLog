@@ -1,6 +1,22 @@
 * 2007-05-23 - thorben.betten@open-xchange.com
 
  - Bugfix #7280: Changes to apply to new tnef.jar v.1.3.1
+ 
+ Changes made in bugfix branch:
+ - Bugfix #7401: Improved template for Message Disposition Notification (MDN)
+ - Bugfix #7480: Fixed parsing of href elements occuring inside img's src
+   attribute
+ - Bugfix #7288: Fixed empty message composer dialog if header "Subject" is
+   missing in original message on reply
+ - Bugfix #7260: Added missing header field 'Organization'
+ - Bugfix #7323: Changed handling of ACL editing when multiple entities
+   hold 'ADMINISTER' right on an IMAP folder.
+ - Bugfix #7361: Avoiding too long argument(s) in IMAP request resulting
+   from IMAPFolder.getMessagesByUIDs()
+ - Bugfix #7331: Changed error message if sending fails cause message is
+   too large
+ - Bugfix #7362: Added parameter 'limit' to 'action=newmsgs' request from
+   GUI as defined in HTTP spec
 
 * 2007-05-21 - thorben.betten@open-xchange.com
 
