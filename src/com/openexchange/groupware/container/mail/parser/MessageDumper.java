@@ -77,7 +77,9 @@ import net.freeutils.tnef.MAPIProp;
 import net.freeutils.tnef.RawInputStream;
 import net.freeutils.tnef.TNEFInputStream;
 import net.freeutils.tnef.TNEFUtils;
+import net.freeutils.tnef.mime.ContactHandler;
 import net.freeutils.tnef.mime.RawDataSource;
+import net.freeutils.tnef.mime.ReadReceiptHandler;
 import net.freeutils.tnef.mime.TNEFMime;
 
 import com.openexchange.api2.OXException;
@@ -142,6 +144,9 @@ public class MessageDumper {
 	 * +++++++++++++++++++ TNEF CONSTANTS +++++++++++++++++++
 	 */
 	private static final String TNEF_IPM_CONTACT = "IPM.Contact";
+	
+	private static final String TNEF_IPM_MS_READ_RECEIPT = "IPM.Microsoft Mail.Read Receipt";
+	
 
 	private final SessionObject session;
 
@@ -338,12 +343,42 @@ public class MessageDumper {
 			 * Handle special conversion
 			 */
 			final Attr messageClass = message.getAttribute(Attr.attMessageClass);
-			if (messageClass != null && TNEF_IPM_CONTACT.equalsIgnoreCase((String) messageClass.getValue())) {
+			final String messageClassName = messageClass == null ? "" : ((String) messageClass.getValue());
+			if (messageClass != null && TNEF_IPM_CONTACT.equalsIgnoreCase(messageClassName)) {
 				/*
-				 * Convert contact to standard vCard
+				 * Convert contact to standard vCard. Resulting Multipart object
+				 * consists of only ONE BodyPart object which encapsulates
+				 * converted VCard. But for consistency reasons keep the code
+				 * structure to iterate over Multipart's child objects.
 				 */
-				final BodyPart bodyPart = TNEFMime.convertContact(message);
-				dumpPart(bodyPart, msgHandler, prefix, partCount);
+				final Multipart mp = ContactHandler.convert(message);
+				final int mpsize = mp.getCount();
+				for (int i = 0; i < mpsize; i++) {
+					final BodyPart bodyPart = mp.getBodyPart(i);
+					dumpPart(bodyPart, msgHandler, prefix, partCount++);
+				}
+				/*
+				 * Stop to further process tnef attachment
+				 */
+				return;
+			} else if (messageClassName.equalsIgnoreCase(TNEF_IPM_MS_READ_RECEIPT)) {
+				/*
+				 * Convert read receipt to standard notification. Resulting
+				 * Multipart object consists both the human readable text part
+				 * and machine readable part.
+				 */
+				final Multipart mp = ReadReceiptHandler.convert(message);
+				final int mpsize = mp.getCount();
+				for (int i = 0; i < mpsize; i++) {
+					final BodyPart bodyPart = mp.getBodyPart(i);
+					/*
+					 * Do not increase part count for one vcard
+					 */
+					dumpPart(bodyPart, msgHandler, prefix, partCount++);
+				}
+				/*
+				 * Stop to further process tnef attachment
+				 */
 				return;
 			}
 			/*

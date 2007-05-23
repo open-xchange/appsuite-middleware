@@ -1,3 +1,7 @@
+* 2007-05-23 - thorben.betten@open-xchange.com
+
+ - Changes to apply to new tnef.jar v.1.3.1
+
 * 2007-05-21 - thorben.betten@open-xchange.com
 
  - Enhancements for mobility OXtender: New servlet for special sync
