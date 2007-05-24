@@ -84,6 +84,9 @@ import com.openexchange.tools.servlet.http.HttpServletManager;
  * @deprecated Use specialized config classes.
  */
 public class GlobalConfig {
+	
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(GlobalConfig.class);
 
     static final String parameterfile = "intranet.conf";
     static final String servletmappingfile = "servletmapping.properties";
@@ -670,9 +673,13 @@ public class GlobalConfig {
 
 						servletConstructorMap.put(name, Class.forName(value).getConstructor(new Class[] {}));
 					} catch (final SecurityException e) {
-						e.printStackTrace();
+						if (LOG.isWarnEnabled()) {
+							LOG.warn("Couldn't find class " + value, e);
+						}
 					} catch (final ClassNotFoundException e) {
-						e.printStackTrace();
+						if (LOG.isWarnEnabled()) {
+							LOG.warn("Couldn't find class " + value, e);
+						}
 					}
 				}
 				
