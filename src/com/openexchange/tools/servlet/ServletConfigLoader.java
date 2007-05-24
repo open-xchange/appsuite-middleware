@@ -64,9 +64,6 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 
 /**
- * 
- * @author francisco.laguna@open-xchange.com
- * 
  * The ServletConfigLoader is used to discover init parameters for servlets.
  * Some 3rd party servlets prefer to be configured via init parameters in the
  * web.xml. Our curstom Servlet Container doesn't implement any handling for the
@@ -85,11 +82,18 @@ import javax.servlet.ServletContext;
  * The discovery mechanism will ignore all wildcards in the paths (/some/path*
  * will be regarded as /some/path).
  * 
+ * @author francisco.laguna@open-xchange.com
+ * 
  */
-public class ServletConfigLoader {
+public final class ServletConfigLoader {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(ServletConfigLoader.class);
+
+	/**
+	 * The usual file extension for property files
+	 */
+	private static final String FILEEXT_PROPERTIES = ".properties";
 
 	// Minimize IO and remember failed lookups
 	private final transient Set<String> clazzGuardian = new HashSet<String>();
@@ -106,9 +110,12 @@ public class ServletConfigLoader {
 	private transient ServletContext defaultContext;
 
 	private File directory;
+	
+	private Map<String, String> globalProps;
 
 	public ServletConfigLoader(File directory) {
 		this.directory = directory;
+		globalProps = loadDirProps(this.directory);
 	}
 
 	public ServletConfigLoader() {
@@ -158,17 +165,36 @@ public class ServletConfigLoader {
 	}
 
 	protected ServletConfig lookupByClass(final String clazz) {
-		if (clazzGuardian.contains(clazz)) {
+		if (clazzGuardian.contains(clazz) && globalProps == null) {
+			/*
+			 * Loading of properties already failed before and no global
+			 * properties exist
+			 */
 			return null;
+		} else if (clazzGuardian.contains(clazz) && globalProps != null) {
+			/*
+			 * Loading of properties already failed before but global properties
+			 * exist
+			 */
+			final Map<String, String> props = new HashMap<String, String>();
+			props.putAll(globalProps);
+			return buildConfig(props);
 		}
 		Map<String, String> props = clazzProps.get(clazz);
 		if (props != null) {
+			if (globalProps != null) {
+				props.putAll(globalProps);
+			}
 			return buildConfig(props);
 		}
-		final File propFile = new File(directory, clazz + ".properties");
-		props = loadProperties(propFile);
+		props = loadProperties(new File(directory, clazz + FILEEXT_PROPERTIES));
 		if (props == null) {
 			clazzGuardian.add(clazz);
+			if (globalProps != null) {
+				props = new HashMap<String, String>();
+				props.putAll(globalProps);
+				return buildConfig(props);
+			}
 			return null;
 		}
 		clazzProps.put(clazz, props);
@@ -176,48 +202,65 @@ public class ServletConfigLoader {
 	}
 
 	protected ServletConfig lookupByClassAndPath(final String clazz, final String path) {
-		if (clazzGuardian.contains(clazz) && pathGuardian.contains(path)) {
+		if (clazzGuardian.contains(clazz) && pathGuardian.contains(path) && globalProps == null) {
 			return null;
 		}
-		final File propFile = new File(directory, clazz + ".properties");
-		final File propDir = new File(directory, path);
-
+		/*
+		 * Property containers
+		 */
 		Map<String, String> props = clazzProps.get(clazz);
 		Map<String, String> dirProps = pathProps.get(path);
-
-		
+		/*
+		 * Lookup class-specific properties
+		 */
 		if (props == null && !clazzGuardian.contains(clazz)) {
-			props = loadProperties(propFile);
+			props = loadProperties(new File(directory, clazz + FILEEXT_PROPERTIES));
 			if (null == props) {
 				clazzGuardian.add(clazz);
 			}
 			clazzProps.put(clazz, props);
 		}
-
+		/*
+		 * Lookup path-specific properties in directory
+		 */
 		if (dirProps == null && !pathGuardian.contains(path)) {
-			dirProps = loadDirProps(propDir);
+			dirProps = loadDirProps(new File(directory, path));
 			if (dirProps == null) {
 				pathGuardian.add(path);
 			}
 			pathProps.put(path, dirProps);
 		}
-
-		if (dirProps == null && props == null) {
+		/*
+		 * No properties present at all
+		 */
+		if (dirProps == null && props == null && globalProps == null) {
 			return null;
 		}
-
+		/*
+		 * Compose properties for servlet configuration
+		 */
 		if (props == null) {
 			props = new HashMap<String, String>();
 		}
-
 		if (dirProps != null) {
 			props.putAll(dirProps);
 		}
-
-		return buildConfig(new HashMap<String,String>(props)); // Clone
+		if (globalProps != null) {
+			props.putAll(globalProps);
+		}
+		return buildConfig(new HashMap<String, String>(props)); // Clone
 
 	}
 
+	/**
+	 * Constructs a <code>ServletConfig</code> instance from given property
+	 * map
+	 * 
+	 * @param props -
+	 *            the property map
+	 * @return a <code>ServletConfig</code> instance containing all elements
+	 *         of given property map
+	 */
 	protected ServletConfig buildConfig(final Map<String, String> props) {
 		final ServletConfigWrapper config = new ServletConfigWrapper();
 		config.setInitParameter(props);
@@ -245,19 +288,16 @@ public class ServletConfigLoader {
 				}
 			}
 		}
-
 		final Map<String, String> m = new HashMap<String, String>();
 		addProps(m, props);
-
 		return m;
 	}
 
 	protected Map<String, String> loadDirProps(final File dir) {
 		final Map<String, String> m = new HashMap<String, String>();
-
 		if (dir.exists() && dir.isDirectory()) {
 			for (File f : dir.listFiles()) {
-				if (f.isFile() && f.getName().endsWith(".properties")) {
+				if (f.isFile() && f.getName().endsWith(FILEEXT_PROPERTIES)) {
 					final Map<String, String> props = loadProperties(f);
 					m.putAll(props);
 				}
@@ -267,15 +307,22 @@ public class ServletConfigLoader {
 		return null;
 	}
 
-	/*private final String getStack() {
-		final StringBuilder builder = new StringBuilder();
-		for(StackTraceElement elem : Thread.currentThread().getStackTrace()) {
-			builder.append(elem).append("\n");
-		}
-		return builder.toString();
-	}*/
+	/*
+	 * private final String getStack() { final StringBuilder builder = new
+	 * StringBuilder(); for(StackTraceElement elem :
+	 * Thread.currentThread().getStackTrace()) {
+	 * builder.append(elem).append("\n"); } return builder.toString(); }
+	 */
 
-	private final void addProps(final Map<String, String> m, final Properties props) {
+	/**
+	 * Puts properties into map
+	 * 
+	 * @param m -
+	 *            the destination map
+	 * @param props -
+	 *            the source properties
+	 */
+	private void addProps(final Map<String, String> m, final Properties props) {
 		for (Map.Entry<Object, Object> entry : props.entrySet()) {
 			m.put((String) entry.getKey(), (String) entry.getValue());
 		}
@@ -291,6 +338,7 @@ public class ServletConfigLoader {
 
 	public void setDirectory(final File directory) {
 		this.directory = directory;
+		globalProps = loadDirProps(this.directory);
 	}
 
 }
