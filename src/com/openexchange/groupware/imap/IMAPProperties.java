@@ -89,6 +89,8 @@ public class IMAPProperties {
 	private static boolean imapSort;
 
 	private static boolean imapSearch;
+	
+	private static String smtpLocalhost;
 
 	private static int messageFetchLimit = 1000;
 
@@ -182,6 +184,19 @@ public class IMAPProperties {
 
 	public void setSmtpServer(final String smtpServer) {
 		this.smtpServer = smtpServer;
+	}
+
+	public static String getSmtpLocalhost() throws IMAPException {
+		checkGlobalImapProperties();
+		return smtpLocalhost;
+	}
+	
+	static String getSmtpLocalhostInternal() {
+		return smtpLocalhost;
+	}
+
+	public static void setSmtpLocalhost(final String smtpLocalhost) {
+		IMAPProperties.smtpLocalhost = smtpLocalhost;
 	}
 
 	public int getSmtpPort() {

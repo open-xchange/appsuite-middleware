@@ -247,6 +247,8 @@ public class MailInterfaceImpl implements MailInterface {
 	private static final String PROP_SMTPHOST = "mail.smtp.host";
 
 	private static final String PROP_SMTPPORT = "mail.smtp.port";
+	
+	private static final String PROP_SMTPLOCALHOST = "mail.smtp.localhost";
 
 	private static final String PROP_MAIL_SMTP_AUTH = "mail.smtp.auth";
 
@@ -393,34 +395,6 @@ public class MailInterfaceImpl implements MailInterface {
 		 * (pruned) from the connection pool.
 		 */
 		IMAP_PROPS.put(PROP_MAIL_IMAP_CONNECTIONPOOLTIMEOUT, "1000"); // 1 sec
-		try {
-			IMAP_PROPS.put(PROP_MAIL_MIME_CHARSET, IMAPProperties.getDefaultMimeCharset());
-		} catch (IMAPException e1) {
-			LOG.error(e1.getMessage(), e1);
-		}
-		/*
-		 * Following properties define if IMAPS and/or SMTPS should be enabled
-		 */
-		try {
-			if (IMAPProperties.isImapsEnabled()) {
-				IMAP_PROPS.put(PROP_MAIL_IMAP_SOCKET_FACTORY_CLASS, CLASS_TRUSTALLSSLSOCKETFACTORY);
-				IMAP_PROPS.put(PROP_MAIL_IMAP_SOCKET_FACTORY_PORT, String.valueOf(IMAPProperties.getImapsPort()));
-				IMAP_PROPS.put(PROP_MAIL_IMAP_SOCKET_FACTORY_FALLBACK, STR_FALSE);
-				IMAP_PROPS.put(PROP_MAIL_SMTP_STARTTLS_ENABLE, STR_TRUE);
-			}
-		} catch (IMAPException e) {
-			LOG.error(e.getMessage(), e);
-		}
-		try {
-			if (IMAPProperties.isSmtpsEnabled()) {
-				IMAP_PROPS.put(PROP_MAIL_SMTP_SOCKET_FACTORY_CLASS, CLASS_TRUSTALLSSLSOCKETFACTORY);
-				IMAP_PROPS.put(PROP_MAIL_SMTP_SOCKET_FACTORY_PORT, String.valueOf(IMAPProperties.getSmtpsPort()));
-				IMAP_PROPS.put(PROP_MAIL_SMTP_SOCKET_FACTORY_FALLBACK, STR_FALSE);
-				IMAP_PROPS.put(PROP_MAIL_SMTP_STARTTLS_ENABLE, STR_TRUE);
-			}
-		} catch (IMAPException e) {
-			LOG.error(e.getMessage(), e);
-		}
 	}
 
 	private final static void initializeCapabilities(final IMAPStore imapStore) throws MessagingException {
@@ -462,6 +436,40 @@ public class MailInterfaceImpl implements MailInterface {
 		 */
 		if (!IMAPProperties.isGlobalPropertiesLoaded()) {
 			IMAPPropertiesFactory.loadGlobalImapProperties();
+		}
+		/*
+		 * Initialize properties
+		 */
+		try {
+			IMAP_PROPS.put(PROP_MAIL_MIME_CHARSET, IMAPProperties.getDefaultMimeCharset());
+		} catch (IMAPException e1) {
+			LOG.error(e1.getMessage(), e1);
+		}
+		/*
+		 * Following properties define if IMAPS and/or SMTPS should be enabled
+		 */
+		try {
+			if (IMAPProperties.isImapsEnabled()) {
+				IMAP_PROPS.put(PROP_MAIL_IMAP_SOCKET_FACTORY_CLASS, CLASS_TRUSTALLSSLSOCKETFACTORY);
+				IMAP_PROPS.put(PROP_MAIL_IMAP_SOCKET_FACTORY_PORT, String.valueOf(IMAPProperties.getImapsPort()));
+				IMAP_PROPS.put(PROP_MAIL_IMAP_SOCKET_FACTORY_FALLBACK, STR_FALSE);
+				IMAP_PROPS.put(PROP_MAIL_SMTP_STARTTLS_ENABLE, STR_TRUE);
+			}
+		} catch (IMAPException e) {
+			LOG.error(e.getMessage(), e);
+		}
+		try {
+			if (IMAPProperties.isSmtpsEnabled()) {
+				IMAP_PROPS.put(PROP_MAIL_SMTP_SOCKET_FACTORY_CLASS, CLASS_TRUSTALLSSLSOCKETFACTORY);
+				IMAP_PROPS.put(PROP_MAIL_SMTP_SOCKET_FACTORY_PORT, String.valueOf(IMAPProperties.getSmtpsPort()));
+				IMAP_PROPS.put(PROP_MAIL_SMTP_SOCKET_FACTORY_FALLBACK, STR_FALSE);
+				IMAP_PROPS.put(PROP_MAIL_SMTP_STARTTLS_ENABLE, STR_TRUE);
+			}
+		} catch (IMAPException e) {
+			LOG.error(e.getMessage(), e);
+		}
+		if (IMAPProperties.getSmtpLocalhost() != null) {
+			IMAP_PROPS.put(PROP_SMTPLOCALHOST, IMAPProperties.getSmtpLocalhost());
 		}
 		try {
 			if (IMAPProperties.getJavaMailProperties() != null) {

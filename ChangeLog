@@ -3,6 +3,9 @@
  - Changed ServletConfigLoader to allow a global property file that applies
    to all servlets
  - Bugfix #7535: Fixed parsing of URLs in plain text messages
+ - Bugfix #7526: Added property 'smtLocalhost' to property file
+   'imap.properties' to specifiy the domain name that is going to be
+   transmitted on SMTP's HELO/EHLO command
 
 * 2007-05-23 - tobias.prinz@open-xchange.com
 

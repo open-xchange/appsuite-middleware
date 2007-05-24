@@ -130,6 +130,8 @@ public class IMAPPropertiesFactory {
 
 	private static final String PROP_SMTPSERVER = "smtpServer";
 	
+	private static final String PROP_SMTPLOCALHOST = "smtpLocalhost";
+	
 	private static final String PROP_IMAPS_ENABLED = "imaps";
 	
 	private static final String PROP_IMAPS_PORT = "imapsPort";
@@ -409,6 +411,11 @@ public class IMAPPropertiesFactory {
 
 				IMAPProperties.setImapSearch(STR_IMAP.equalsIgnoreCase(props.getProperty(PROP_IMAPSEARCH)));
 				logBuilder.append("\tIMAP-Search: ").append(IMAPProperties.isImapSearchInternal()).append('\n');
+				
+				final String propSmtpLocalhost = props.getProperty(PROP_SMTPLOCALHOST);
+				IMAPProperties.setSmtpLocalhost(propSmtpLocalhost == null || propSmtpLocalhost.length() == 0
+						|| "null".equalsIgnoreCase(propSmtpLocalhost) ? null : propSmtpLocalhost);
+				logBuilder.append("\tSMTP Localhost: ").append(IMAPProperties.getSmtpLocalhostInternal()).append('\n');
 				
 				final String loginType = props.getProperty(PROP_LOGINTYPE);
 				if (loginType == null) {
