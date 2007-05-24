@@ -735,6 +735,10 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         if (langus.getLanguage().indexOf('_') != -1 || langus.getCountry().indexOf('_') != -1) {
             throw new InvalidDataException("The specified locale data (Language:" + langus.getLanguage() + " - Country:" + langus.getCountry() + ") for users language is invalid!");
         }
+        
+        if(usr.getPassword()==null || usr.getPassword().trim().length()==0){
+            throw new InvalidDataException("Empty password is not allowed");
+        }
     
         if (!usr.attributesforcreateset()) {
             throw new InvalidDataException("Mandatory fields not set");
