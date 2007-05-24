@@ -47,7 +47,7 @@
  *
  */
 /*
- * $Id: OXResource.java,v 1.21 2007/05/22 13:23:17 choeger Exp $
+ * $Id: OXResource.java,v 1.22 2007/05/24 11:43:07 choeger Exp $
  */
 package com.openexchange.admin.rmi.impl;
 
@@ -146,7 +146,12 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
 
        try {
            if (tool.existsResource(ctx, res.getName())) {
-               throw new InvalidDataException("Resource with this name already exist");
+               throw new InvalidDataException("Resource with this name already exists");
+
+           }
+
+           if( res.getEmail() != null && tool.existsResourceAddress(ctx, res.getEmail())) {
+               throw new InvalidDataException("Resource with this email address already exists");
 
            }
 
@@ -262,13 +267,19 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
             throw new NoSuchResourceException("Resource with this id does not exists");
             
         }
-        
-        if ((null != res.getName()) && prop.getResourceProp(AdminProperties.Resource.AUTO_LOWERCASE, true)) {
-            final String rid = res.getName().toLowerCase();
-            res.setName(rid);
-        }
-        
+
         try {
+
+            if( res.getEmail() != null && tool.existsResourceAddress(ctx, res.getEmail())) {
+                throw new InvalidDataException("Resource with this email address already exists");
+
+            }
+
+            if ((null != res.getName()) && prop.getResourceProp(AdminProperties.Resource.AUTO_LOWERCASE, true)) {
+                final String rid = res.getName().toLowerCase();
+                res.setName(rid);
+            }
+        
             if ((null != res.getName()) && prop.getResourceProp(AdminProperties.Resource.CHECK_NOT_ALLOWED_CHARS, true)) {
                 validateResourceName(res.getName());
             }
