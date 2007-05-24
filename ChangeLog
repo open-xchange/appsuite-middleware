@@ -1,3 +1,8 @@
+* 2007-05-24 - thorben.betten@open-xchange.com
+
+ - Changed ServletConfigLoader to allow a global property file that applies
+   to all servlets
+
 * 2007-05-23 - tobias.prinz@open-xchange.com
 
  - Bugfix #7507: Resolve [hostname] to the hostname of the system in direct links

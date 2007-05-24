@@ -150,10 +150,7 @@ public class ServletContextWrapper implements ServletContext {
 	 * @see javax.servlet.ServletContext#getAttribute(java.lang.String)
 	 */
 	public Object getAttribute(final String name) {
-		if (attributes.containsKey(name)) {
-			return attributes.get(name);
-		}
-		return null;
+		return attributes.get(name);
 	}
 
 	/*

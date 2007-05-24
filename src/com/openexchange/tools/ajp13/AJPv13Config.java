@@ -226,17 +226,17 @@ public class AJPv13Config {
 				 */
 				checkMagicBytesStrict = trueStr.equalsIgnoreCase(ajpProperties.getProperty(
 						"AJP_CHECK_MAGIC_BYTES_STRICT", trueStr));
-
+				/*
+				 * AJP_SERVLET_CONFIG_DIR
+				 */
 				servletConfigs = ajpProperties.getProperty("AJP_SERVLET_CONFIG_DIR");
-				if (servletConfigs == null) {
-					servletConfigs = "/opt/open-xchange/etc/groupware/servletConfig";
+				if (servletConfigs == null || "null".equalsIgnoreCase(servletConfigs)) {
+					servletConfigs = SystemConfig.getProperty("CONFIGPATH") + "/servletConfig";
 				}
-
 				final File servletConfigsFile = new File(servletConfigs);
 				if ((!servletConfigsFile.exists() || !servletConfigsFile.isDirectory()) && LOG.isWarnEnabled()) {
 					LOG.warn(servletConfigsFile + " does not exist or is not a directory");
 				}
-
 				/*
 				 * Log info
 				 */
