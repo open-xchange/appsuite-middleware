@@ -2,6 +2,7 @@
 
  - Changed ServletConfigLoader to allow a global property file that applies
    to all servlets
+ - Bugfix #7535: Fixed parsing of URLs in plain text messages
 
 * 2007-05-23 - thorben.betten@open-xchange.com
 
