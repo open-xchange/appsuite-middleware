@@ -112,6 +112,7 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 			LOG.debug(message);
 			LOG.debug("\n\n============");
 		}
+		
 		if(folderId == -1) {
 			folderId = obj.getParentFolderID();
 		}
@@ -686,7 +687,11 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 			default : subst.put("module", "unknown"); break;
 			}
 			
-			subst.put("folder", String.valueOf(p.folderId));
+			int folder = p.folderId;
+			if(folder == -1)
+				folder = obj.getParentFolderID();
+			
+			subst.put("folder", String.valueOf(folder));
 			subst.put("object", String.valueOf(obj.getObjectID()));
 			subst.put("hostname", hostname);
 			
