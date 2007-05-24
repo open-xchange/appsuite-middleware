@@ -1,3 +1,10 @@
+* 2007-05-24 - tobias.prinz@open-xchange.com
+
+ - Bugfix #7538 : AJAXServlet.substitute used String.replaceAll which 
+   removed some backslashes. This lead to unescaped quotation marks in
+   error messages, which broke the JSON response. Fixed this for all
+   response callbacks upon a HTTP-POST.
+
 * 2007-05-24 - thorben.betten@open-xchange.com
 
  - Bugfix #7548 : Use objects parentFolderId if the user participant

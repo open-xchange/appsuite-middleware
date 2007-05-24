@@ -699,6 +699,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 		for (int i = 0; i < substitutions.length; i++) {
 			final String key = substitutions[i];
 			String value = substitutions[++i];
+			value = value.replaceAll("\\\\", "\\\\\\\\"); //fix for 7583: replaces \ with \\, because \\ is later replaced with \ in String.replaceAll()
 			value = value.replaceAll("\\$", "\\\\\\$"); // Escape-O-Rama. Turn
 														// all $ in \$
 			s = s.replaceAll("\\*\\*" + key + "\\*\\*", value);
