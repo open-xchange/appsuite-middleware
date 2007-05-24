@@ -12,10 +12,13 @@ import java.util.Date;
 import java.util.TimeZone;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONException;
 
 public class AbstractRecurrenceTest extends AppointmentTest {
 	
 	protected static final TimeZone timeZoneUTC = TimeZone.getTimeZone("UTC");
+	
+	protected SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 	
 	protected SimpleDateFormat simpleDateFormatUTC = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 
@@ -45,7 +48,12 @@ public class AbstractRecurrenceTest extends AppointmentTest {
 	
 	public AbstractRecurrenceTest(String name) {
 		super(name);
+	}
+	
+	public void setUp() throws Exception {
+		super.setUp();
 		simpleDateFormatUTC.setTimeZone(timeZoneUTC);
+		simpleDateFormat.setTimeZone(timeZone);
 	}
 	
 	protected Occurrence getOccurrenceByPosition(Occurrence[] occurrenceArray, int position) {
@@ -58,10 +66,19 @@ public class AbstractRecurrenceTest extends AppointmentTest {
 	}
 	
 	public static void assertOccurrence(int expectedPosition, Date expectedStartDate, Date expectedEndDate, Occurrence occurrence) throws Exception {
+		assertOccurrence(expectedPosition, expectedStartDate, expectedEndDate, occurrence, timeZoneUTC);
+	}
+	
+	public static void assertOccurrence(int expectedPosition, Date expectedStartDate, Date expectedEndDate, Occurrence occurrence, TimeZone timeZone) throws Exception {
 		assertNotNull("occurrence is null", occurrence);
 		assertEquals("position is not equals", expectedPosition, occurrence.getPosition());
-		assertEqualsAndNotNull("start date is not equals at position: " + expectedPosition, expectedStartDate, occurrence.getStartDate());
-		assertEqualsAndNotNull("end date is not equals at position: " + expectedPosition, expectedEndDate, occurrence.getEndDate());
+		assertEqualsAndNotNull("start date is not equals at position: " + expectedPosition, addOffsetToDate(expectedStartDate, timeZone), addOffsetToDate(occurrence.getStartDate(), timeZone));
+		assertEqualsAndNotNull("end date is not equals at position: " + expectedPosition, addOffsetToDate(expectedEndDate, timeZone), addOffsetToDate(occurrence.getEndDate(), timeZone));
+	}
+	
+	public static Date addOffsetToDate(final Date value, final TimeZone timeZone) throws JSONException {
+		final int offset = timeZone.getOffset(value.getTime());
+		return new Date(value.getTime()+offset);
 	}
 }
 
