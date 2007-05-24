@@ -414,6 +414,62 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         return selectwithstring(-1, "SELECT id FROM reason_text WHERE text = ?;", reason);
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.admin.storage.sqlStorage.OXToolSQLStorage#existsResourceAddress(com.openexchange.admin.rmi.dataobjects.Context, java.lang.String)
+     */
+    @Override
+    public boolean existsResourceAddress(Context ctx, String address) throws StorageException {
+        
+        final AdminCache cache = ClientAdminThread.cache;
+        Connection con = null;
+        PreparedStatement prep_check = null;
+        ResultSet rs = null;
+        try {
+            
+            con = cache.getWRITEConnectionForContext(ctx.getIdAsInt());
+           
+            prep_check = con.prepareStatement("SELECT mail FROM resource WHERE cid = ? AND mail = ?");
+            prep_check.setInt(1, ctx.getIdAsInt());
+            prep_check.setString(2, address);            
+            rs = prep_check.executeQuery();
+            if (rs.next()) {
+                return true;
+            }else{
+                return false;
+            }
+        } catch (final PoolException e) {
+            log.error("Pool Error",e);
+            throw new StorageException(e);
+        } catch (final SQLException e) {
+            log.error("SQL Error",e);
+            throw new StorageException(e);
+        } finally {
+            if (null != rs) {
+                try {
+                    rs.close();
+                } catch (final SQLException e) {
+                    log.error("Error closing resultset", e);
+                }
+            }
+            try {
+                if (null != prep_check) {
+                    prep_check.close();
+                }
+            } catch (final SQLException e) {
+                log.error("Error closing prepared statement!", e);
+            }
+
+            try {
+               if(con!=null){
+                cache.pushOXDBWrite(ctx.getIdAsInt(), con);
+               }
+            } catch (final PoolException e) {
+                log.error("Error pushing configdb write connection to pool!", e);
+            }
+
+        }
+    }
+
     /**
      * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsResource(int,
      *      java.lang.String, int)
@@ -1710,4 +1766,5 @@ public int getDefaultGroupForContext(final Context ctx, final Connection con) th
 
         }
     }
+
 }

@@ -127,7 +127,12 @@ public abstract class OXToolSQLStorage extends OXToolStorageInterface {
 	 */
 	public abstract boolean existsReason(final String reason) throws StorageException;
 
-	/**
+        /* (non-Javadoc)
+         * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsResourceAddress(com.openexchange.admin.rmi.dataobjects.Context, java.lang.String)
+         */
+        public abstract boolean existsResourceAddress(final Context ctx, final String address) throws StorageException;
+
+        /**
 	 * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsResource(int, java.lang.String, int)
 	 */
 	public abstract boolean existsResource(final Context ctx, final String identifier) throws StorageException;
