@@ -183,7 +183,7 @@ public class MailTools {
 	private static final String STR_IMG_SRC = "src=\"";
 	
 	private static final boolean isImgSrc(final String line, final int start) {
-		return STR_IMG_SRC.equalsIgnoreCase(line.substring(start - 5, start));
+		return start >= 5 && STR_IMG_SRC.equalsIgnoreCase(line.substring(start - 5, start));
 	}
 
 	public static String encodeUrl(final String url) {
