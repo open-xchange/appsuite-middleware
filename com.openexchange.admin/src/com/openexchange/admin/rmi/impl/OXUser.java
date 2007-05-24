@@ -683,6 +683,11 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         // show error.
         // cause he must set which adress is primarymail and email2 from the new
         // aliases
+        
+        if(usrdata.getPassword()!=null && usrdata.getPassword().trim().length()==0){
+            throw new InvalidDataException("Empty password is not allowed");
+        }
+        
         final Locale langus = OXUser.getLanguage(usrdata);
         if (langus != null) {
             if (langus.getLanguage().indexOf('_') != -1 || langus.getCountry().indexOf('_') != -1) {
