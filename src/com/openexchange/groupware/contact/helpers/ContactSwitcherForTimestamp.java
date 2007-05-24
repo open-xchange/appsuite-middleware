@@ -50,7 +50,9 @@
 package com.openexchange.groupware.contact.helpers;
 
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.OXExceptionSource;
@@ -83,7 +85,11 @@ public class ContactSwitcherForTimestamp implements ContactSwitcher {
 	protected ContactSwitcher delegate;
 	
 	protected Object[] makeDate(final Object... objects) throws ParseException, NumberFormatException{
-		objects[1] = new Date( Long.parseLong((String) objects[1]));
+		if(objects[1] instanceof String){
+			objects[1] = new Date( Long.parseLong((String) objects[1]));
+		} else {
+			objects[1] = new Date( (Long) objects[1] ); 
+		}
 		return objects;
 	}
 	

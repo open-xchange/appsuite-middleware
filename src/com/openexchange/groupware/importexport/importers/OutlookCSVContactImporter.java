@@ -135,11 +135,22 @@ public class OutlookCSVContactImporter extends CSVContactImporter implements Imp
 	@Override
 	protected ContactSwitcher getContactSwitcher() {
 		final ContactSwitcherForSimpleDateFormat switcher = new ContactSwitcherForSimpleDateFormat();
-		final SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
-		sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-		switcher.setDateFormat(sdf);
+		switcher.addDateFormat( getGermanDateNotation());
+		switcher.addDateFormat( getAmericanDateNotation());
 		switcher.setDelegate(new ContactSetter());
 		return switcher;
+	}
+	
+	public static final SimpleDateFormat getGermanDateNotation(){
+		final SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+		sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+		return sdf; 
+	}
+	
+	public static final SimpleDateFormat getAmericanDateNotation(){
+		final SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
+		sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+		return sdf; 
 	}
 	
 	

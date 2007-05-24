@@ -4,6 +4,7 @@
    removed some backslashes. This lead to unescaped quotation marks in
    error messages, which broke the JSON response. Fixed this for all
    response callbacks upon a HTTP-POST.
+ - Bugfix #7552 : Outlook imports now handle dd.MM.yyyy format, too.
 
 * 2007-05-24 - thorben.betten@open-xchange.com
 
