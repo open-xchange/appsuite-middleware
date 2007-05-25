@@ -76,10 +76,12 @@ import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.DataObject;
+import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Task;
@@ -1086,13 +1088,26 @@ public class OXContainerConverter {
 			throws ConverterException {
 		try {
 			final String mail = ((URI) property.getValue()).getSchemeSpecificPart();
-			final UserParticipant userParticipant = new UserParticipant();
-			userParticipant.setEmailAddress(mail);
-			calContainerObj.addParticipant(userParticipant);
-			// TODO: Look up users which matches found email address. If found
-			// USER participant else EXTERNAL participant
+			final Participant participant;
+			if(isInternalUser(mail)){
+				participant = new UserParticipant();
+			} else {
+				participant = new ExternalUserParticipant();
+			}
+			participant.setEmailAddress(mail);
+			calContainerObj.addParticipant(participant);
 		} catch (Exception e) {
 			throw new ConverterException(e);
+		}
+	}
+
+	public boolean isInternalUser(String mail) {
+		try {
+			final UserStorage us = UserStorage.getInstance(session.getContext());
+			final User uo = us.searchUser(mail);
+			return uo != null;
+		} catch (LdapException e){
+			return false;
 		}
 	}
 
@@ -1179,7 +1194,8 @@ public class OXContainerConverter {
 		for (int i = 0; i < count; i++) {
 			final VersitObject alarm = object.getChild(i);
 			Property property = alarm.getProperty("ACTION");
-			if (property != null && property.getValue().toString().equalsIgnoreCase("EMAIL")) {
+			//if (property != null && property.getValue().toString().equalsIgnoreCase("EMAIL")) {
+			if (property != null && property.getValue().toString().equalsIgnoreCase("DISPLAY")) { //bugfix: 7473
 				property = alarm.getProperty("TRIGGER");
 				if (property != null) {
 					int time;
@@ -1204,9 +1220,11 @@ public class OXContainerConverter {
 					if (calContainerObj instanceof AppointmentObject) {
 						final AppointmentObject appObj = (AppointmentObject) calContainerObj;
 						appObj.setAlarm(time);
+						appObj.setAlarmFlag(true); //bugfix: 7473
 					} else if (calContainerObj instanceof Task) {
 						final Task taskObj = (Task) calContainerObj;
 						taskObj.setAlarm(new Date(taskObj.getStartDate().getTime() - (time * 60 * 1000)));
+						taskObj.setAlarmFlag(true); //bugfix: 7473
 					}
 				}
 			}

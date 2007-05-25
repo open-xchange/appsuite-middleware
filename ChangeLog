@@ -1,3 +1,9 @@
+* 2007-05-25 - tobias.prinz@open-xchange.com
+
+ - Bugfix #6825 (part): OxContainerConverter did not discern between external
+   and internal users, which lead to the rather unhelpful UNEXPECTED_EXCEPTION.
+   This fixes the main problem with this bug report.
+
 * 2007-05-24 - tobias.prinz@open-xchange.com
 
  - Bugfix #7538 : AJAXServlet.substitute used String.replaceAll which 
