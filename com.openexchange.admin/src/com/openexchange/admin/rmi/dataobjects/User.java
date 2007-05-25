@@ -2273,8 +2273,12 @@ public class User implements Serializable, Cloneable {
     @Override
     public Object clone() throws CloneNotSupportedException {
         final User object = (User) super.clone();
-        object.extensions = new ArrayList<OXUserExtensionInterface>(this.extensions);
-        object.aliases = new HashSet<String>(this.aliases);
+        if( this.extensions != null ) {
+            object.extensions = new ArrayList<OXUserExtensionInterface>(this.extensions);
+        }
+        if( this.aliases != null ) {
+            object.aliases = new HashSet<String>(this.aliases);
+        }
         if (null != this.birthday) {
             object.birthday = (Date) this.birthday.clone();
         }        
