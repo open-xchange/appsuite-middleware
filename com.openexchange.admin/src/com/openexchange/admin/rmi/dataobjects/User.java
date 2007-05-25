@@ -2275,12 +2275,19 @@ public class User implements Serializable, Cloneable {
         final User object = (User) super.clone();
         object.extensions = new ArrayList<OXUserExtensionInterface>(this.extensions);
         object.aliases = new HashSet<String>(this.aliases);
-        object.birthday = (Date) this.birthday.clone();
-        object.anniversary = (Date) this.anniversary.clone();
-        object.language = (Locale) this.language.clone();
-        //object.default_group
-        object.timezone = (TimeZone) this.timezone.clone();
-        
+        if (null != this.birthday) {
+            object.birthday = (Date) this.birthday.clone();
+        }        
+        if (null != this.anniversary) {
+            object.anniversary = (Date) this.anniversary.clone();
+        }        
+        if (null != this.language) {
+            object.language = (Locale) this.language.clone();
+        }        
+        if (null != this.timezone) {
+            //object.default_group
+            object.timezone = (TimeZone) this.timezone.clone();
+        }        
         return object;
     }
     
