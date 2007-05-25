@@ -2271,8 +2271,17 @@ public class User implements Serializable, Cloneable {
     }
 
     @Override
-    public User clone() throws CloneNotSupportedException {
-        return (User) super.clone();
+    public Object clone() throws CloneNotSupportedException {
+        final User object = (User) super.clone();
+        object.extensions = new ArrayList<OXUserExtensionInterface>(this.extensions);
+        object.aliases = new HashSet<String>(this.aliases);
+        object.birthday = (Date) this.birthday.clone();
+        object.anniversary = (Date) this.anniversary.clone();
+        object.language = (Locale) this.language.clone();
+        //object.default_group
+        object.timezone = (TimeZone) this.timezone.clone();
+        
+        return object;
     }
     
     private void init() {
