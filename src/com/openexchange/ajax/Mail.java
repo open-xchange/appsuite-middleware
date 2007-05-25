@@ -2300,7 +2300,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 						.parseJSONObject(jsonMailObj);
 				if (uploadEvent.getAction().equals(ACTION_NEW)) {
 					/*
-					 * Add file & infostore attachments message
+					 * Add file & infostore attachments to message
 					 */
 					addUploadFilesAsAttachments(msgObj, uploadEvent, 0);
 					addInfostoreDocumentsAsAttachments(msgObj, infostoreDocIDs, 0, sessionObj);
@@ -2413,7 +2413,8 @@ public class Mail extends PermissionServlet implements UploadListener {
 				mao.setSize(docMeta.getFileSize());
 				mao.setContent(null);
 				mao.setContentID(JSONMessageAttachmentObject.CONTENT_NONE);
-				mao.setContentType(docMeta.getFileMIMEType());
+				mao.setContentType(docMeta.getFileMIMEType() == null ? MIME_APPLICATION_OCTET_STREAM : docMeta
+						.getFileMIMEType());
 				try {
 					mao.setFileName(MimeUtility.encodeText(docMeta.getFileName(), IMAPProperties
 							.getDefaultMimeCharset(), ENC_Q));

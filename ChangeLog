@@ -1,5 +1,10 @@
 * 2007-05-24 - thorben.betten@open-xchange.com
 
+ - Bugfix #7588: Avoiding NPE if content type is missing in infostore
+   document that ought to be sent as attachment
+
+* 2007-05-24 - thorben.betten@open-xchange.com
+
  - Changed ServletConfigLoader to allow a global property file that applies
    to all servlets
  - Bugfix #7535: Fixed parsing of URLs in plain text messages
