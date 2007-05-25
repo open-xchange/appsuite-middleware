@@ -1,3 +1,7 @@
+* 2007-05-25 - choeger@open-xchange.com
+
+  - Bugfix ID#7568 alias can't be set without the need to set PRIMARY_MAIL or EMAIL1
+  
 * 2007-05-21 - choeger@open-xchange.com
 
   - Bugfix ID#7340 user create -> can add aliases which are not acceptable
