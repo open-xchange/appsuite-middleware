@@ -741,14 +741,15 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             }
             del_st.close();
             rs.close();
-
-            del_st = write_ox_con.prepareStatement("" + "INSERT into del_groups (id,cid,lastModified,identifier,displayName,gidNumber) VALUES (?,?,?,?,?,?)");
+            del_st = write_ox_con.prepareStatement("INSERT into del_groups (id,cid,lastModified,identifier,displayName) VALUES (?,?,?,?,?)");
+            
+            //del_st = write_ox_con.prepareStatement("INSERT into del_groups (id,cid,lastModified,identifier,displayName,gidNumber) VALUES (?,?,?,?,?,?)");
             del_st.setInt(1, group_id);
             del_st.setInt(2, context_id);
             del_st.setLong(3, System.currentTimeMillis());
             del_st.setString(4, ident);
             del_st.setString(5, disp);
-            del_st.setInt(6, gidNumber);
+            //del_st.setInt(6, gidNumber);
             del_st.executeUpdate();
             del_st.close();
 
