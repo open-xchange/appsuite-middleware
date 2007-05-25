@@ -1093,6 +1093,7 @@ public class OXContainerConverter {
 				participant = new UserParticipant();
 			} else {
 				participant = new ExternalUserParticipant();
+				participant.setDisplayName(mail);
 			}
 			participant.setEmailAddress(mail);
 			calContainerObj.addParticipant(participant);
