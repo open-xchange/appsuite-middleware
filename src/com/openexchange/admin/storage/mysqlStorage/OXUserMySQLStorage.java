@@ -1261,7 +1261,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             read_ox_con = cache.getREADConnectionForContext(context_id);
             for (final User user : users) {
                 int user_id = user.getId();
-                final User newuser = user.clone();
+                final User newuser = (User) user.clone();
                 String username = user.getUsername();
                 if (-1 != user_id) {
                     if (null == username) {
