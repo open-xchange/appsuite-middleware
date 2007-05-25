@@ -672,7 +672,7 @@ public class UserTest extends AbstractTest {
 
     private User createChangeUserData(final User usr) throws CloneNotSupportedException{
         // change all fields of the user
-        final User retval = usr.clone();
+        final User retval = (User) usr.clone();
         retval.setEnabled(!usr.getEnabled());        
         retval.setPrimaryEmail(usr.getPrimaryEmail()+change_suffix);
         retval.setEmail1(usr.getEmail1()+change_suffix);
