@@ -75,10 +75,14 @@ public class OXTaskMgmtImpl extends BasicAuthenticator implements OXTaskMgmtInte
             throw new InvalidDataException("Task must be a value >= 0");
         }
         final ExtendedFutureTask<?> task = TaskManager.getInstance().getTask(id);
-        if (null != task && task.isDone()) {
-            return task.get();
+        if (null != task) {
+            if (task.isDone()) {
+                return task.get();
+            } else {
+                return null;
+            }
         } else {
-            return null;
+            throw new InvalidDataException("No such Task ID");
         }
     }
     
