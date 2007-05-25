@@ -276,8 +276,10 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
                 log.debug(ctx.toString() + " - " + usrdata.toString() + " - " + auth.toString());
             }        
 
+            final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
+            final User[] dbuser = oxu.getData(ctx, new User[]{usrdata});
             
-            checkChangeUserData(ctx, usrdata, this.prop);
+            checkChangeUserData(ctx, usrdata, dbuser[0], this.prop);
         } catch (final InvalidDataException e1) {
             log.error(e1);
             throw e1;
@@ -674,7 +676,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         }
     }
 
-    private void checkChangeUserData(final Context ctx, final User usrdata, final PropertyHandler prop) throws StorageException, InvalidDataException {
+    private void checkChangeUserData(final Context ctx, final User newuser, final User dbuser, final PropertyHandler prop) throws StorageException, InvalidDataException {
     
         // Do some mail attribute checks cause of bug
         // http://www.open-xchange.org/bugzilla/show_bug.cgi?id=5444
@@ -684,11 +686,11 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         // cause he must set which adress is primarymail and email2 from the new
         // aliases
         
-        if(usrdata.getPassword()!=null && usrdata.getPassword().trim().length()==0){
+        if(newuser.getPassword()!=null && newuser.getPassword().trim().length()==0){
             throw new InvalidDataException("Empty password is not allowed");
         }
         
-        final Locale langus = OXUser.getLanguage(usrdata);
+        final Locale langus = OXUser.getLanguage(newuser);
         if (langus != null) {
             if (langus.getLanguage().indexOf('_') != -1 || langus.getCountry().indexOf('_') != -1) {
                 throw new InvalidDataException("The specified locale data (Language:" + langus.getLanguage() + " - Country:" + langus.getCountry() + ") for users language is invalid!");
@@ -696,28 +698,46 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         }
 
         // checks below throw InvalidDataException
-        checkValidEmailsInUserObject(usrdata);
-        HashSet<String> useraliases = usrdata.getAliases();
-        final String primaryEmail = usrdata.getPrimaryEmail();
-        final String email1 = usrdata.getEmail1();
-        if( useraliases != null ) {
-            for(final String addr : useraliases ) {
-                GenericChecks.checkValidMailAddress(addr);
+        checkValidEmailsInUserObject(newuser);
+        HashSet<String> useraliases = newuser.getAliases();
+
+        final String primaryEmail = newuser.getPrimaryEmail();
+        final String email1 = newuser.getEmail1();
+        if (primaryEmail != null && email1 != null) {
+            // primary mail value must be same with email1
+            if (!primaryEmail.equals(email1)) {
+                throw new InvalidDataException("email1 not equal with primarymail!");
             }
-            if ( ( primaryEmail == null || primaryEmail.length() < 1 ) ||
-                 ( email1 == null       || email1.length()       < 1 ) ) {
-                throw new InvalidDataException("When sending aliases, primarymail and mail1 must also be sent.");
-            }
-        } else {
-            final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
-            final User[] usr = oxu.getData(ctx, new User[]{usrdata});
-            useraliases = usr[0].getAliases();
         }
-    
-        if (primaryEmail != null) {
-            if (useraliases != null && !useraliases.contains(primaryEmail)) {
-                throw new InvalidDataException("primarymail sent but does not exists in aliases of the user!");
+
+        if( useraliases == null ) {
+            useraliases = dbuser.getAliases();
+        }
+        String check_primary_mail;
+        String check_email1;
+        if( primaryEmail != null ) {
+            check_primary_mail = primaryEmail;
+        } else {
+            check_primary_mail = dbuser.getPrimaryEmail();
+        }
+        if( email1 != null ) {
+            check_email1 = email1;
+        } else {
+            check_email1 = dbuser.getPrimaryEmail();
+        }
+        boolean found_primary_mail = false;
+        boolean found_email1       = false;
+        for(final String addr : useraliases ) {
+            GenericChecks.checkValidMailAddress(addr);
+            if(check_primary_mail.equals(addr)) {
+                found_primary_mail = true;
             }
+            if(check_email1.equals(addr)) {
+                found_email1 = true;
+            }
+        }
+        if ( ! found_primary_mail || ! found_email1 ) {
+            throw new InvalidDataException("primarymail and mail1 must be present in set of aliases.");
         }
     
         // added "usrdata.getPrimaryEmail() != null" for this check, else we cannot update user data without mail data
@@ -727,12 +747,6 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
            
         }
     
-        if (primaryEmail != null && email1 != null) {
-            // primary mail value must be same with email1
-            if (!primaryEmail.equals(email1)) {
-                throw new InvalidDataException("email1 not equal with primarymail!");
-            }
-        }
     }
 
     private void checkCreateUserData(final Context ctx, final User usr, final PropertyHandler prop) throws InvalidDataException {
