@@ -2523,7 +2523,7 @@ public class User implements Serializable, Cloneable {
     /**
      * @param spam_filter_enabled the spam_filter_enabled to set
      */
-    public final void set_GUI_Spam_filter_capabilities_enabled(Boolean spam_filter_enabled) {
+    public final void setGUI_Spam_filter_capabilities_enabled(Boolean spam_filter_enabled) {
         if( spam_filter_enabled != null ) {
             this.spam_filter_enabledset = true;
         }
