@@ -67,6 +67,13 @@ public class OXTaskMgmtImpl extends BasicAuthenticator implements OXTaskMgmtInte
         doNullCheck(ctx,cred);
         contextcheck(ctx);
         doAuthentication(cred, ctx);
+        return getTaskResults(id);
+    }
+
+    public Object getTaskResults(final int id) throws InterruptedException, ExecutionException, InvalidDataException {
+        if (id < 0) {
+            throw new InvalidDataException("Task must be a value >= 0");
+        }
         final ExtendedFutureTask<?> task = TaskManager.getInstance().getTask(id);
         if (null != task && task.isDone()) {
             return task.get();
@@ -74,7 +81,19 @@ public class OXTaskMgmtImpl extends BasicAuthenticator implements OXTaskMgmtInte
             return null;
         }
     }
-
+    
+    public boolean isTaskDone(final int id) throws InvalidDataException {
+        if (id < 0) {
+            throw new InvalidDataException("Task must be a value >= 0");
+        }
+        final ExtendedFutureTask<?> task = TaskManager.getInstance().getTask(id);
+        if (null != task) {
+            return task.isDone();
+        } else {
+            throw new InvalidDataException("No such Task ID");
+        }
+    }
+    
     public String getJobList(final Context ctx, final Credentials cred) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException {
         doNullCheck(ctx,cred);
         contextcheck(ctx);
