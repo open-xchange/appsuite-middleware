@@ -531,8 +531,28 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
 
     @Override
     public int[] getMembers(final Context ctx, final int grp_id) throws StorageException {
-        int[] retval = null;
         Connection con = null;
+        final int context_id = ctx.getIdAsInt();
+        try {
+
+            con = cache.getREADConnectionForContext(context_id);
+            return getMembers(ctx, grp_id);
+        } catch (final PoolException e) {
+            log.error("Pool Error", e);            
+            throw new StorageException(e);
+        } finally {
+            try {
+                if(con!=null){
+                    cache.pushOXDBRead(context_id, con);
+                }
+            } catch (final PoolException e) {
+                log.error("Pool Error", e);
+            }
+        }
+    }
+    
+    private Integer[] getMembers(final Context ctx, final int grp_id, Connection con) throws StorageException {
+        Integer[] retval = null;
         PreparedStatement prep_list = null;
         final int context_id = ctx.getIdAsInt();
         try {
@@ -548,10 +568,13 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
                 ids.add(rs.getInt("member"));
             }
 
-            // Convert to int[] unfortunately there's no standard method
-            retval = new int[ids.size()];
-            for (int i = 0; i < ids.size(); i++) {
-                retval[i] = ids.get(i);
+            if( ids.size() == 0 ) {
+                return null;
+            } else {
+                retval = new Integer[ids.size()];
+                for (int i = 0; i < ids.size(); i++) {
+                    retval[i] = ids.get(i);
+                }
             }
         } catch (final PoolException e) {
             log.error("Pool Error", e);            
@@ -579,8 +602,8 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
 
         return retval;
     }
-    
-    private static Group get(final Context ctx, Group grp,Connection con) throws StorageException{
+
+    private Group get(final Context ctx, Group grp,Connection con) throws StorageException{
         PreparedStatement prep_list = null;
         final int context_ID = ctx.getIdAsInt();
         try {
@@ -595,6 +618,10 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
                 final String disp = rs.getString("displayName");
                 grp.setName(ident);
                 grp.setDisplayname(disp);
+            }
+            Integer []members = getMembers(ctx, grp.getId(), con);
+            if( members != null ) {
+                grp.setMembers(members);
             }
         } catch (final SQLException sql) {
             log.error("SQL Error", sql);            
@@ -664,7 +691,12 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
                 final String ident = rs.getString("identifier");
                 final String disp = rs.getString("displayName");
                 // data.put(I_OXGroup.CID,cid);
-                list.add(new Group(id, ident, disp));
+                Group retgrp = new Group(id, ident, disp);
+                Integer []members = getMembers(ctx, id, con);
+                if( members != null ) {
+                    retgrp.setMembers(members);
+                }
+                list.add(retgrp);
             }
             return (Group[])list.toArray(new Group[list.size()]);
         } catch (final SQLException sql) {
