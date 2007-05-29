@@ -66,6 +66,7 @@ import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 import com.sun.mirror.apt.AnnotationProcessorFactory;
 import com.sun.mirror.declaration.AnnotationTypeDeclaration;
 import com.sun.mirror.declaration.ClassDeclaration;
+import com.sun.mirror.declaration.Declaration;
 import com.sun.mirror.declaration.MethodDeclaration;
 import com.sun.mirror.declaration.TypeDeclaration;
 
@@ -136,6 +137,37 @@ public class OXExceptionAnnotationFactory implements AnnotationProcessorFactory 
 			processor.done();
 		}
 		
+		private void process(Declaration decl, OXExceptionSource exceptionSource, int classId, List<OXErrorCode> allCodes) {
+			final OXThrows throwsInfo = decl.getAnnotation(OXThrows.class);
+			if(throwsInfo != null) {
+				final OXErrorCode errorCode = new OXErrorCode();
+				errorCode.component = exceptionSource.component();
+				errorCode.category = throwsInfo.category();
+				errorCode.description = throwsInfo.desc();
+				errorCode.message = throwsInfo.msg();
+				errorCode.number=classId*100+throwsInfo.exceptionId();
+				allCodes.add(errorCode);
+			}
+				
+			
+			final OXThrowsMultiple multiple = decl.getAnnotation(OXThrowsMultiple.class);
+			if(multiple != null) {
+				for(int i = 0; i < multiple.exceptionId().length; i++) {
+					final OXErrorCode errorCode = new OXErrorCode();
+					errorCode.component = exceptionSource.component();
+					errorCode.category = multiple.category()[i];
+					if(multiple.desc().length > i) {
+						errorCode.description = multiple.desc()[i];
+					} else {
+						errorCode.description = "No Description";
+					}
+					errorCode.message = multiple.msg()[i];
+					errorCode.number=classId*100+multiple.exceptionId()[i];
+					allCodes.add(errorCode);
+				}
+			}
+		}
+		
 		private void analyze(final ClassDeclaration classDecl, final List<OXErrorCode> allCodes) {
 			final OXExceptionSource exceptionSource  = classDecl.getAnnotation(OXExceptionSource.class);
 			if(exceptionSource == null) {
@@ -143,36 +175,12 @@ public class OXExceptionAnnotationFactory implements AnnotationProcessorFactory 
 			}
 			
 			final int classId = exceptionSource.classId();
+			process(classDecl, exceptionSource,classId,allCodes);
+			
+			
 			
 			for(final MethodDeclaration methodDecl : classDecl.getMethods()) {
-				final OXThrows throwsInfo = methodDecl.getAnnotation(OXThrows.class);
-				if(throwsInfo != null) {
-					final OXErrorCode errorCode = new OXErrorCode();
-					errorCode.component = exceptionSource.component();
-					errorCode.category = throwsInfo.category();
-					errorCode.description = throwsInfo.desc();
-					errorCode.message = throwsInfo.msg();
-					errorCode.number=classId*100+throwsInfo.exceptionId();
-					allCodes.add(errorCode);
-				}
-					
-				
-				final OXThrowsMultiple multiple = methodDecl.getAnnotation(OXThrowsMultiple.class);
-				if(multiple != null) {
-					for(int i = 0; i < multiple.exceptionId().length; i++) {
-						final OXErrorCode errorCode = new OXErrorCode();
-						errorCode.component = exceptionSource.component();
-						errorCode.category = multiple.category()[i];
-						if(multiple.desc().length > i) {
-							errorCode.description = multiple.desc()[i];
-						} else {
-							errorCode.description = "No Description";
-						}
-						errorCode.message = multiple.msg()[i];
-						errorCode.number=classId*100+multiple.exceptionId()[i];
-						allCodes.add(errorCode);
-					}
-				}
+				process(methodDecl, exceptionSource,classId,allCodes);
 			}
 		}	
 	}
