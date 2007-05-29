@@ -1,0 +1,3 @@
+* 2007-05-29 - choeger@open-xchange.com
+
+  - Bugfix ID#7595 Groups member in several contexts are deleted on context delete
