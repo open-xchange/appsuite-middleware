@@ -109,7 +109,7 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
         }
     }
 
-    public int create(final Context ctx, final Group grp, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
+    public int create(final Context ctx, final Group grp, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         
         try {
             doNullCheck(ctx,grp,auth);
@@ -152,9 +152,24 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
             if (tool.existsGroup(ctx, grp.getName())) {
                 throw new InvalidDataException("Group already exists!");
             }
+            
+            // if members sent, check exist
+            if(grp.getMembers()!=null && grp.getMembers().length>0){
+                Integer[] mems = grp.getMembers();
+                int[] tmp_mems = new int[mems.length];
+                for (int i = 0; i < mems.length; i++) {
+                    tmp_mems[i] = mems[i];
+                } 
+                if (!tool.existsUser(ctx, tmp_mems)) {
+                    throw new NoSuchUserException("No such user");
+                }
+            }
         } catch (InvalidDataException e2) {
             log.error(e2);
             throw e2;
+        } catch (NoSuchUserException e) {
+            log.error(e);
+            throw e;
         }
 
         final OXGroupStorageInterface oxGroup = OXGroupStorageInterface.getInstance();
@@ -305,7 +320,7 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
         return retgrp;
     }
 
-    public void change(final Context ctx, final Group grp, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchGroupException {
+    public void change(final Context ctx, final Group grp, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchGroupException, NoSuchUserException {
         
         try {
             doNullCheck(ctx,grp,auth);
@@ -349,9 +364,25 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
             if (grp.getName() != null && prop.getGroupProp(AdminProperties.Group.CHECK_NOT_ALLOWED_CHARS, true)) {
                 validateGroupName(grp.getName());
             }
+            
+//          if members sent, check exist
+            if(grp.getMembers()!=null && grp.getMembers().length>0){
+                Integer[] mems = grp.getMembers();
+                int[] tmp_mems = new int[mems.length];
+                for (int i = 0; i < mems.length; i++) {
+                    tmp_mems[i] = mems[i];
+                } 
+                if (!tool.existsUser(ctx, tmp_mems)) {
+                    throw new NoSuchUserException("No such user");
+                }
+            }
+            
         } catch (InvalidDataException e1) {
             log.error(e1);
             throw e1;
+        } catch (NoSuchUserException e) {
+            log.error(e);
+            throw e;
         }
 
         if (!tool.existsGroup(ctx, grp.getId())) {

@@ -110,7 +110,7 @@ public interface OXGroupInterface extends Remote {
      * @throws DatabaseUpdateException 
      */
     public int create(final Context ctx, final Group grp, final Credentials auth) 
-    throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException, DatabaseUpdateException;
+    throws RemoteException,InvalidCredentialsException,NoSuchContextException,NoSuchUserException,StorageException,InvalidDataException, DatabaseUpdateException;
     
     
     /**
@@ -147,7 +147,7 @@ public interface OXGroupInterface extends Remote {
      * @throws NoSuchGroupException 
      */
     public void change(final Context ctx, final Group grp, final Credentials auth) 
-    throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException, DatabaseUpdateException, NoSuchGroupException;    
+    throws RemoteException,InvalidCredentialsException,NoSuchContextException,NoSuchUserException,StorageException,InvalidDataException, DatabaseUpdateException, NoSuchGroupException;    
     
     
     /**
