@@ -227,9 +227,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
             con_write = cache.getWRITEConnectionForCONFIGDB();
             con_write.setAutoCommit(false);
-            // delete from groups_member ehre context id like unsere
-            // delete from groups_member where id = (select id from groups where
-            // cid = 96);
 
             write_ox_con = cache.getWRITEConnectionForContext(context_id);
             try {
@@ -276,7 +273,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
                 log.debug("Deleting group members for context " + context_id);
                 // delete from members
-                del_stmt = write_ox_con.prepareStatement("DELETE FROM groups_member WHERE id = (SELECT id FROM groups WHERE cid = ?)");
+                del_stmt = write_ox_con.prepareStatement("DELETE FROM groups_member WHERE cid = ?)");
                 del_stmt.setInt(1, context_id);
                 del_stmt.executeUpdate();
                 del_stmt.close();
