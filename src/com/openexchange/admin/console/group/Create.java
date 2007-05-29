@@ -65,6 +65,7 @@ import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
+import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public class Create extends GroupAbstraction {
@@ -142,6 +143,9 @@ public class Create extends GroupAbstraction {
         } catch (final DatabaseUpdateException e) {
             printServerResponse(e.getMessage());
             sysexit(1);
+        } catch (NoSuchUserException e) {
+            printServerResponse(e.getMessage());
+            sysexit(SYSEXIT_NO_SUCH_USER);
         }
 
     }
