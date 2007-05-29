@@ -285,6 +285,8 @@
         <apply executable="${java_apt}" dir="${basedir}" parallel="true" verbose="true" relative="false">
             <arg value="-classpath" />
             <arg pathref="apt.classpath" />
+            <arg value="-d" />
+            <arg value="${build.dir}" />
             <arg value="-AerrorCodeProcessor=com.openexchange.tools.exceptions.SerializationProcessor" />
             <arg value="-factory" />
             <arg value="com.openexchange.tools.exceptions.OXExceptionAnnotationFactory" />
