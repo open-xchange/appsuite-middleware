@@ -70,6 +70,7 @@ import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.importexport.AbstractImporter;
 import com.openexchange.groupware.importexport.Format;
 import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.groupware.importexport.Importer;
@@ -85,7 +86,6 @@ import com.openexchange.tools.versit.ICalendar;
 import com.openexchange.tools.versit.VersitDefinition;
 import com.openexchange.tools.versit.VersitException;
 import com.openexchange.tools.versit.VersitObject;
-import com.openexchange.tools.versit.converter.ConverterException;
 import com.openexchange.tools.versit.converter.ConverterPrivacyException;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
 
@@ -116,7 +116,7 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a> (minor: changes to new interface, bugfixes)
  */
-public class ICalImporter implements Importer {
+public class ICalImporter extends AbstractImporter implements Importer {
 	
 	private static final Log LOG = LogFactory.getLog(ICalImporter.class);
 	
@@ -279,6 +279,7 @@ public class ICalImporter implements Importer {
 					}
 				} catch (OXException exc) {
 					LOG.error("cannot import calendar object", exc);
+					exc = handleDataTruncation(exc); 
 					importResult.setException(exc);
 				} catch (VersitException exc) {
 					LOG.error("cannot parse calendar object", exc);
@@ -295,4 +296,5 @@ public class ICalImporter implements Importer {
 		
 		return list;
 	}
+
 }

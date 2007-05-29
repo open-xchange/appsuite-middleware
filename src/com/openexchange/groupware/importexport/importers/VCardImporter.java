@@ -70,8 +70,10 @@ import com.openexchange.groupware.Component;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.importexport.AbstractImporter;
 import com.openexchange.groupware.importexport.Format;
 import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.groupware.importexport.Importer;
@@ -88,6 +90,7 @@ import com.openexchange.tools.versit.converter.ConverterException;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
 import com.openexchange.tools.versit.filetokenizer.VCardFileToken;
 import com.openexchange.tools.versit.filetokenizer.VCardTokenizer;
+import com.openexchange.groupware.contact.helpers.ContactField;
 
 @OXExceptionSource(
 		classId=ImportExportExceptionClasses.VCARDIMPORTER,
@@ -116,7 +119,7 @@ import com.openexchange.tools.versit.filetokenizer.VCardTokenizer;
 	 * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
 	 * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a> (minor: changes to new interface)
 	 */
-	public class VCardImporter implements Importer {
+	public class VCardImporter extends AbstractImporter implements Importer {
 	
 	private static final Log LOG = LogFactory.getLog(VCardImporter.class);
 	
@@ -203,13 +206,16 @@ import com.openexchange.tools.versit.filetokenizer.VCardTokenizer;
 						
 						final ContactObject contactObj = oxContainerConverter.convertContact(versitObject);
 						contactObj.setParentFolderID(contactFolderId);
-						contactInterface.insertContactObject(contactObj);
-						
+						importResult.setDate(new Date());
+						try {
+							contactInterface.insertContactObject(contactObj);
+						} catch (OXException oxEx){
+							oxEx = handleDataTruncation(oxEx);
+							LOG.debug("cannot import contact object", oxEx);
+							importResult.setException(oxEx);
+						}
 						importResult.setObjectId(String.valueOf(contactObj.getObjectID()));
 						importResult.setDate(contactObj.getLastModified());
-					} catch (OXException exc) {
-						LOG.debug("cannot import contact object", exc);
-						importResult.setException(exc);
 					} catch (ConverterException exc) {
 						LOG.error("cannot convert contact object", exc);
 						importResult.setException(new OXException("cannot parse vcard object", exc));
@@ -237,4 +243,5 @@ import com.openexchange.tools.versit.filetokenizer.VCardTokenizer;
 		
 		return list;
 	}
+
 }

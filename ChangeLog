@@ -1,3 +1,9 @@
+* 2007-05-29 - tobias.prinz@open-xchange.com
+
+ - Partial fix #6825: Now handling all messages where data given is too
+   long for our database. This makes part (3) of the bug report a lot better,
+   yet it still needs translation (and possibly i18n).
+ 
 * 2007-05-29 - francisco.laguna@open-xchange.com
 
  - Partial Fix 7557: Annotation Processor also checks class declarations
