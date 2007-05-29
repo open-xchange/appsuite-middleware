@@ -5,7 +5,8 @@ Bundle-SymbolicName: open_xchange_admin_plugin_hosting
 Bundle-Version: 1.0.0
 Bundle-Activator: com.openexchange.admin.Activator
 Bundle-Localization: plugin
-Import-Package: org.apache.commons.logging.impl,
+Import-Package: org.apache.commons.logging,
+ org.apache.commons.logging.impl,
  com.openexchange.api2,
  com.openexchange.groupware,
  com.openexchange.groupware.contexts,
