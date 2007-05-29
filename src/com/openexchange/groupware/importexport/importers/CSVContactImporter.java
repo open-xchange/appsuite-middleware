@@ -111,7 +111,7 @@ public class CSVContactImporter extends AbstractImporter implements Importer {
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(CSVContactImporter.class);
 
-	protected static ImportExportExceptionFactory EXCEPTIONS = new ImportExportExceptionFactory(CSVContactImporter.class);
+	private static ImportExportExceptionFactory EXCEPTIONS = new ImportExportExceptionFactory(CSVContactImporter.class);
 	
 	public boolean canImport(final SessionObject sessObj, final Format format, final List<String> folders,
 			final Map<String, String[]> optionalParams) throws ImportExportException {
