@@ -1,3 +1,8 @@
+* 2007-05-30 - thorben.betten@open-xchange.com
+
+ - Bugfix #7615: Setting equal size to VARCHAR field 'fname' in both tables
+   'oxfolder_tree' and 'del_oxfolder_tree'
+
 * 2007-05-25 - choeger@open-xchange.com
 
   - Bugfix ID#7568 alias can't be set without the need to set PRIMARY_MAIL or EMAIL1
