@@ -420,7 +420,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 
 	/**
 	 * 
-	 * @return the folder's type which is neither
+	 * @return the folder's type which is either
 	 *         <code>FolderObject.PUBLIC</code> or
 	 *         <code>FolderObject.PRIVATE</code>.
 	 *         <p>

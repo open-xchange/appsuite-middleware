@@ -489,7 +489,18 @@ public class OXFolderException extends OXException {
 		/**
 		 * This method is not applicable to an IMAP permission
 		 */
-		IMAP_PERMISSION_ERROR("This method is not applicable to an IMAP permission", Category.CODE_ERROR, 68);
+		IMAP_PERMISSION_ERROR("This method is not applicable to an IMAP permission", Category.CODE_ERROR, 68),
+		/**
+		 * No subfolder creation underneath shared folder %s in context %s
+		 */
+		NO_SUBFOLDER_BELOW_SHARED_FOLDER("No subfolder creation underneath shared folder %s in context %s",
+				Category.PERMISSION, 69),
+		/**
+		 * User %s must not grant \"create subfolder\" permission for another user on shared folder %s in context %s
+		 */
+		NO_SHARED_FOLDER_SUBFOLDER_PERMISSION(
+				"User %s must not grant \"create subfolder\" permission for another user on shared folder %s in context %s",
+				Category.PERMISSION, 70);
 
 		/**
 		 * Message of the exception.

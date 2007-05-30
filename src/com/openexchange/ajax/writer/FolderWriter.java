@@ -81,6 +81,7 @@ import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 import com.sun.mail.imap.ACL;
+import com.sun.mail.imap.Rights;
 
 /**
  * FolderWriter
@@ -357,6 +358,7 @@ public final class FolderWriter extends DataWriter {
 							if (IMAPProperties.isUserFlagsEnabled()
 									&& folder.exists()
 									&& folder.isHoldsMessages()
+									&& folder.getOwnRights().contains(Rights.Right.READ)
 									&& (IMAPUtils
 											.supportsUserDefinedFlags(folder
 													.getImapFolder()))) {
