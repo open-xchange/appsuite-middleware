@@ -2300,7 +2300,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 						.parseJSONObject(jsonMailObj);
 				if (uploadEvent.getAction().equals(ACTION_NEW)) {
 					/*
-					 * Add file & infostore attachments message
+					 * Add file & infostore attachments to message
 					 */
 					addUploadFilesAsAttachments(msgObj, uploadEvent, 0);
 					addInfostoreDocumentsAsAttachments(msgObj, infostoreDocIDs, 0, sessionObj);

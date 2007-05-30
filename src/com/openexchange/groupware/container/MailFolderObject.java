@@ -158,7 +158,7 @@ public final class MailFolderObject {
 		this.holdsMessages = this.exists ? ((folder.getType() & IMAPFolder.HOLDS_MESSAGES) > 0) : false;
 		this.ownRights = this.exists && holdsMessages ? getOwnRightsInternal(folder) : (Rights) RIGHTS_EMPTY.clone();
 		this.rootFolder = (folder instanceof DefaultFolder);
-		if (holdsMessages) {
+		if (holdsMessages && ownRights.contains(Rights.Right.READ)) {
 			this.summary = new StringBuilder().append('(').append(folder.getMessageCount()).append('/').append(
 					folder.getUnreadMessageCount()).append(')').toString();
 			this.total = folder.getMessageCount();
@@ -168,7 +168,8 @@ public final class MailFolderObject {
 		}
 		this.subscribed = folder.isSubscribed();
 		b_subscribed = true;
-		if (IMAPProperties.isSupportsACLs() && holdsMessages && this.exists && !(folder instanceof DefaultFolder)) {
+		if (IMAPProperties.isSupportsACLs() && holdsMessages && this.exists && ownRights.contains(Rights.Right.READ)
+				&& !(folder instanceof DefaultFolder)) {
 			try {
 				this.acls = folder.getACL();
 				b_acls = true;

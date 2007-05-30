@@ -4179,8 +4179,8 @@ public class MailInterfaceImpl implements MailInterface {
 					throw new OXMailException(MailCode.FOLDER_NOT_FOUND, folder);
 				} else if (IMAPProperties.isSupportsACLs() && ((retval.getType() & Folder.HOLDS_MESSAGES) > 0)) {
 					try {
-						if (!retval.myRights().contains(Rights.Right.READ)) {
-							throw new OXMailException(MailCode.NO_READ_ACCESS, getUserName(), retval.getFullName());
+						if (!retval.myRights().contains(Rights.Right.LOOKUP)) {
+							throw new OXMailException(MailCode.NO_LOOKUP_ACCESS, getUserName(), retval.getFullName());
 						}
 					} catch (MessagingException e) {
 						throw new OXMailException(MailCode.NO_ACCESS, getUserName(), retval.getFullName());
@@ -4211,8 +4211,8 @@ public class MailInterfaceImpl implements MailInterface {
 				throw new OXMailException(MailCode.FOLDER_NOT_FOUND, folder);
 			} else if (IMAPProperties.isSupportsACLs() && ((f.getType() & Folder.HOLDS_MESSAGES) > 0)) {
 				try {
-					if (!f.myRights().contains(Rights.Right.READ)) {
-						throw new OXMailException(MailCode.NO_READ_ACCESS, getUserName(), f.getFullName());
+					if (!f.myRights().contains(Rights.Right.LOOKUP)) {
+						throw new OXMailException(MailCode.NO_LOOKUP_ACCESS, getUserName(), f.getFullName());
 					}
 				} catch (MessagingException e) {
 					throw new OXMailException(MailCode.NO_ACCESS, getUserName(), f.getFullName());
