@@ -557,8 +557,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
         }
     }
     
-    private Integer[] getMembers(final Context ctx, final int grp_id, Connection con) throws StorageException {
-        Integer[] retval = null;
+    private Integer[] getMembers(final Context ctx, final int grp_id, Connection con) throws StorageException {        
         PreparedStatement prep_list = null;
         final int context_id = ctx.getIdAsInt();
         try {
@@ -571,15 +570,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             while (rs.next()) {
                 ids.add(rs.getInt("member"));
             }
-
-            if( ids.size() == 0 ) {
-                return null;
-            } else {
-                retval = new Integer[ids.size()];
-                for (int i = 0; i < ids.size(); i++) {
-                    retval[i] = ids.get(i);
-                }
-            }        
+            return ids.toArray(new Integer[ids.size()]);        
         } catch (final SQLException sql) {
             log.error("SQL Error", sql);            
             throw new StorageException(sql);
@@ -593,7 +584,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             }
         }
 
-        return retval;
+        
     }
 
     private Group get(final Context ctx, Group grp,Connection con) throws StorageException{
