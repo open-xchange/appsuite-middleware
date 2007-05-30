@@ -120,16 +120,19 @@ public class ServletRequestWrapper implements ServletRequest {
 
 	private OXServletInputStream is;
 
+	/**
+	 * Constructor
+	 */
+	public ServletRequestWrapper() throws AJPv13Exception {
+		setHeaderInternal(CONTENT_LENGTH, String.valueOf(-1), false);
+	}
+	
 	public void setContentLength(final int contentLength) throws AJPv13Exception {
-		setHeader(CONTENT_LENGTH, String.valueOf(contentLength), false);
+		setHeaderInternal(CONTENT_LENGTH, String.valueOf(contentLength), false);
 	}
 
 	public void setContentType(final String contentType) throws AJPv13Exception {
-		setHeader(CONTENT_TYPE, contentType, true);
-	}
-
-	public ServletRequestWrapper() throws AJPv13Exception {
-		setHeader(CONTENT_LENGTH, String.valueOf(-1), false);
+		setHeaderInternal(CONTENT_TYPE, contentType, true);
 	}
 
 	public void setParameter(final String name, final String value) {
@@ -146,7 +149,10 @@ public class ServletRequestWrapper implements ServletRequest {
 
 	public final void setHeader(final String nameArg, final String value, final boolean isContentType)
 			throws AJPv13Exception {
-		final String name = nameArg.toLowerCase(Locale.ENGLISH);
+		setHeaderInternal(nameArg.toLowerCase(Locale.ENGLISH), value, isContentType);
+	}
+	
+	private final void setHeaderInternal(final String name, final String value, final boolean isContentType) throws AJPv13Exception {
 		if (isContentType) {
 			handleContentType(value);
 		}
@@ -327,12 +333,10 @@ public class ServletRequestWrapper implements ServletRequest {
 	}
 
 	public String getCharacterEncoding() {
-		if (characterEncoding == null) {
-			/*
-			 * CHARACTER ENCODING MUST NOT BE NULL
-			 */
+		/*if (characterEncoding == null) {
+			// CHARACTER ENCODING MUST NOT BE NULL
 			characterEncoding = ServerConfig.getProperty(Property.DefaultEncoding);
-		}
+		}*/
 		return characterEncoding;
 	}
 

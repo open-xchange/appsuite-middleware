@@ -62,6 +62,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.openexchange.configuration.ServerConfig;
+import com.openexchange.configuration.ServerConfig.Property;
+
 public class ServletRequestAdapter implements SimpleRequest {
 	
 	private HttpServletRequest req;
@@ -106,7 +109,7 @@ public class ServletRequestAdapter implements SimpleRequest {
 	        }
 	        String characterEncoding = req.getCharacterEncoding();
 	        if (null == characterEncoding) {
-				characterEncoding="UTF-8";
+				characterEncoding=ServerConfig.getProperty(Property.DefaultEncoding);//"UTF-8";
 			}
 			final String body =  new String(baos.toByteArray(), characterEncoding);
 			

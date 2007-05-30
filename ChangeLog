@@ -9,6 +9,11 @@
    of a new folder underneath a shared folder
  - Bugfix #7677: Checking for imap.properties setting for "imapSupportsACL"
    when applying composed permissions to a mail folder
+ - Bugfix #7652: ServletRequestWrapper returns null in getContentType()
+   method and getCharacterEncoding() method if not set during request. This
+   bugfix forces to search for every usage of these methods and to insert
+   default value as defined through config:
+   ServerConfig.getProperty(Property.DefaultEncoding)
 
 * 2007-05-29 - tobias.prinz@open-xchange.com
 

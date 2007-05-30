@@ -67,6 +67,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.openexchange.ajax.container.Response;
+import com.openexchange.configuration.ServerConfig;
+import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.settings.ConfigTree;
 import com.openexchange.groupware.settings.Setting;
@@ -193,7 +195,7 @@ public class ConfigMenu extends SessionServlet {
         String encoding = req.getCharacterEncoding();
         if (null == encoding) {
             log("Client did not specify the character encoding.");
-            encoding = "UTF-8";
+            encoding = ServerConfig.getProperty(Property.DefaultEncoding);//"UTF-8";
         }
         String value = new String(baos.toByteArray(), encoding);
         if (value.length() > 0 && value.charAt(0) == '"') {

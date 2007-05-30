@@ -497,7 +497,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 		}
 		String characterEncoding = req.getCharacterEncoding();
 		if (null == characterEncoding) {
-			characterEncoding = "UTF-8";
+			characterEncoding = ServerConfig.getProperty(Property.DefaultEncoding);//"UTF-8";
 		}
 		return new String(baos.toByteArray(), characterEncoding);
 	}
@@ -771,12 +771,14 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 				 * Fill upload event instance
 				 */
 				final int size = items.size();
+				final String charEnc = req.getCharacterEncoding() == null ? ServerConfig
+						.getProperty(Property.DefaultEncoding) : req.getCharacterEncoding();
 				NextFileItem: for (int i = 0; i < size; i++) {
 					final FileItem fileItem = items.get(i);
 					if (fileItem.isFormField()) {
 						final String fieldName = fileItem.getFieldName();
 						try {
-							uploadEvent.addFormField(fieldName, fileItem.getString(req.getCharacterEncoding()));
+							uploadEvent.addFormField(fieldName, fileItem.getString(charEnc));
 						} catch (UnsupportedEncodingException e) {
 							throw new UploadException(UploadCode.UPLOAD_FAILED, action, e);
 						}

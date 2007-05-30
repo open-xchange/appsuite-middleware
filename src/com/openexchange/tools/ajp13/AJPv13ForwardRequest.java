@@ -342,7 +342,7 @@ public class AJPv13ForwardRequest extends AJPv13Request {
 			if (firstByte == (byte) 0xA0) {
 				headerName = httpHeaderMapping.get(Integer.valueOf(secondByte));
 				if (!contentTypeSet && secondByte == 0x07) {
-					servletRequest.setHeader(headerName, parseString(), true);
+					servletRequest.setContentType(parseString());
 					contentTypeSet = true;
 					continue NextHeader;
 				}
@@ -350,7 +350,7 @@ public class AJPv13ForwardRequest extends AJPv13Request {
 			} else {
 				headerName = parseString(firstByte, secondByte);
 				if (!contentTypeSet && HDR_CONTENT_TYPE.equalsIgnoreCase(headerName)) {
-					servletRequest.setHeader(headerName, parseString(), true);
+					servletRequest.setContentType(parseString());
 					contentTypeSet = true;
 					continue NextHeader;
 				}
@@ -539,7 +539,8 @@ public class AJPv13ForwardRequest extends AJPv13Request {
 
 	private final static String decodeQueryStringValue(final HttpServletRequestWrapper servletRequest,
 			final String queryStringValue) throws UnsupportedEncodingException {
-		return URLDecoder.decode(queryStringValue, servletRequest.getCharacterEncoding());
+		return URLDecoder.decode(queryStringValue, servletRequest.getCharacterEncoding() == null ? ServerConfig
+				.getProperty(Property.DefaultEncoding) : servletRequest.getCharacterEncoding());
 	}
 
 	private final static int getContentLength(final HttpServletRequestWrapper servletRequest) {
