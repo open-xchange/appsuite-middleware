@@ -14,6 +14,9 @@
    bugfix forces to search for every usage of these methods and to insert
    default value as defined through config:
    ServerConfig.getProperty(Property.DefaultEncoding)
+ - Bugfix #7615: Added new UpdateTask to equal field size of VARCHAR
+   column "fname" of table "del_oxfolder_tree" to the one located in table
+   "oxfolder_tree"
 
 * 2007-05-29 - francisco.laguna@open-xchange.com
 
