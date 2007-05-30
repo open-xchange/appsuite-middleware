@@ -4364,7 +4364,7 @@ public class MailInterfaceImpl implements MailInterface {
 					updateMe = (IMAPFolder) imapCon.getIMAPStore().getFolder(newFullName);
 					updateMe.setSubscribed(true);
 				}
-				ACLS: if (folderObj.containsACLs()) {
+				ACLS: if (folderObj.containsACLs() && IMAPProperties.isSupportsACLs()) {
 					/*
 					 * Wrapper object contains rights. No simple rename but a
 					 * whole ACL re-set
@@ -4377,8 +4377,7 @@ public class MailInterfaceImpl implements MailInterface {
 					if (isDefaultFolder(updateMe.getFullName())) {
 						throw new OXMailException(MailCode.NO_DEFAULT_FOLDER_UPDATE, updateMe.getFullName());
 					}
-					if (IMAPProperties.isSupportsACLs()
-							&& !updateMe.myRights().contains(Rights.Right.ADMINISTER)) {
+					if (!updateMe.myRights().contains(Rights.Right.ADMINISTER)) {
 						throw new OXMailException(MailCode.NO_ADMINISTER_ACCESS, getUserName(), updateMe.getFullName());
 					}
 					/*
@@ -4463,7 +4462,7 @@ public class MailInterfaceImpl implements MailInterface {
 				} finally {
 					mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 				}
-				ACLS: if (folderObj.containsACLs()) {
+				ACLS: if (folderObj.containsACLs() && IMAPProperties.isSupportsACLs()) {
 					final ACL[] initialACLs = createMe.getACL();
 					final ACL[] newACLs = folderObj.getACL();
 					if (equals(initialACLs, newACLs)) {

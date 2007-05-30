@@ -7,6 +7,8 @@
  - Bugfix 7603: Preventing the user from granting "create subfolder"
    permission on a shared folder for another user and denying the creation
    of a new folder underneath a shared folder
+ - Bugfix #7677: Checking for imap.properties setting for "imapSupportsACL"
+   when applying composed permissions to a mail folder
 
 * 2007-05-29 - tobias.prinz@open-xchange.com
 
