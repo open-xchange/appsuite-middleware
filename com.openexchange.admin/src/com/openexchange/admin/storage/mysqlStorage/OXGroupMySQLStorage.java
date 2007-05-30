@@ -536,7 +536,13 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
         try {
 
             con = cache.getREADConnectionForContext(context_id);
-            return getMembers(ctx, grp_id);
+            
+            Integer[] as =  getMembers(ctx, grp_id,con);
+            int[] ret = new int[as.length];
+            for(int i = 0;i<as.length;i++){
+                ret[i] = as[i];
+            }
+            return ret;
         } catch (final PoolException e) {
             log.error("Pool Error", e);            
             throw new StorageException(e);
@@ -556,9 +562,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
         PreparedStatement prep_list = null;
         final int context_id = ctx.getIdAsInt();
         try {
-
-            con = cache.getREADConnectionForContext(context_id);
-
+            
             prep_list = con.prepareStatement("SELECT member FROM groups_member WHERE groups_member.cid = ? AND groups_member.id = ?;");
             prep_list.setInt(1, context_id);
             prep_list.setInt(2, grp_id);
@@ -575,10 +579,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
                 for (int i = 0; i < ids.size(); i++) {
                     retval[i] = ids.get(i);
                 }
-            }
-        } catch (final PoolException e) {
-            log.error("Pool Error", e);            
-            throw new StorageException(e);
+            }        
         } catch (final SQLException sql) {
             log.error("SQL Error", sql);            
             throw new StorageException(sql);
@@ -589,14 +590,6 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
                 }
             } catch (final SQLException e) {
                 log.error("SQL Error", e);
-            }
-
-            try {
-                if(con!=null){
-                    cache.pushOXDBRead(context_id, con);
-                }
-            } catch (final PoolException e) {
-                log.error("Pool Error", e);
             }
         }
 
