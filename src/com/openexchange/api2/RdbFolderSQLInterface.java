@@ -536,7 +536,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 		} else if (folderId == FolderObject.SYSTEM_OX_PROJECT_FOLDER_ID) {
 			type = FolderObject.PROJECT;
 		} else {
-			type = oxfolderAccess.getFolderType(folderId, userId);
+			type = oxfolderAccess.getFolderType(folderId);
 		}
 		return type;
 	}

@@ -2,6 +2,11 @@
 
  - Bugfix #7457: Solved many problem arising from granting only LOOKUP
    right to an user
+ - Bugfix #7600: Checking initial mail folder rights on folder creation
+   before applying new ACLs to it.
+ - Bugfix 7603: Preventing the user from granting "create subfolder"
+   permission on a shared folder for another user and denying the creation
+   of a new folder underneath a shared folder
 
 * 2007-05-29 - tobias.prinz@open-xchange.com
 

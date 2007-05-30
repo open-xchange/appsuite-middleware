@@ -549,7 +549,11 @@ public class OXMailException extends OXException {
 		/**
 		 * Message could not be sent because it is too large
 		 */
-		MESSAGE_TOO_LARGE("Message could not be sent because it is too large", Category.INTERNAL_ERROR, 101);
+		MESSAGE_TOO_LARGE("Message could not be sent because it is too large", Category.INTERNAL_ERROR, 101),
+		/**
+		 * The rights choosed by user %s could not be applied to new folder %s due to missing administer right in its initial rights specified by IMAP server. The folder has been created anyway.
+		 */
+		NO_ADMINISTER_ACCESS_ON_INITIAL("The rights composed by user %s could not be applied to new folder %s due to missing administer right in its initial rights specified by IMAP server. The folder has been created anyway.", Category.PERMISSION, 102);
 
 		/**
 		 * Message of the exception.

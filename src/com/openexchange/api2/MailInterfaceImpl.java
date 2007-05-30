@@ -4463,8 +4463,21 @@ public class MailInterfaceImpl implements MailInterface {
 				} finally {
 					mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 				}
-				if (folderObj.containsACLs()) {
+				ACLS: if (folderObj.containsACLs()) {
+					final ACL[] initialACLs = createMe.getACL();
 					final ACL[] newACLs = folderObj.getACL();
+					if (equals(initialACLs, newACLs)) {
+						break ACLS;
+					}
+					boolean hasAdministerRight = false;
+					for (ACL current : initialACLs) {
+						if (sessionObj.getIMAPProperties().getImapLogin().equals(current.getName()) && current.getRights().contains(Rights.Right.ADMINISTER)) {
+							hasAdministerRight = true;
+						}
+					}
+					if (!hasAdministerRight) {
+						throw new OXMailException(MailCode.NO_ADMINISTER_ACCESS_ON_INITIAL, getUserName(), createMe.getFullName());
+					}
 					boolean adminFound = false;
 					for (int i = 0; i < newACLs.length && !adminFound; i++) {
 						if (newACLs[i].getRights().contains(Rights.Right.ADMINISTER)) {

@@ -190,6 +190,23 @@ public class OXFolderAccess {
 	public final int getFolderType(final int folderId, final int userId) throws OXException {
 		return getFolderObject(folderId).getType(userId);
 	}
+	
+	/**
+	 * Determines the <b>plain</b> folder type meaning the returned value is
+	 * either <code>FolderObject.PRIVATE</code> or
+	 * <code>FolderObject.PUBLIC</code>. <b>NOTE:</b> Do not use this method
+	 * to check if folder is shared (<code>FolderObject.SHARED</code>), use
+	 * {@link #getFolderType(int, int)} instead.
+	 * 
+	 * @param folderId -
+	 *            the folder ID
+	 * @return the folder type
+	 * @throws OXException
+	 * @see <code>getFolderType(int, int)</code>
+	 */
+	public final int getFolderType(final int folderId) throws OXException {
+		return getFolderObject(folderId).getType();
+	}
 
 	/**
 	 * Determines folder module

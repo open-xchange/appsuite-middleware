@@ -219,6 +219,7 @@ public class OXFolderManagerImpl implements OXFolderManager {
 			} catch (DBPoolingException e) {
 				throw new OXFolderException(FolderCode.DBPOOLING_ERROR, PREFIX_CREATE, e, true, Integer.valueOf(ctx.getContextId()));
 			}
+			
 		}
 		/*
 		 * Check folder types
@@ -226,6 +227,13 @@ public class OXFolderManagerImpl implements OXFolderManager {
 		if (!checkFolderTypeAgainstParentType(parentFolder, folderObj.getType())) {
 			throw new OXFolderLogicException(FolderCode.INVALID_TYPE, PREFIX_CREATE, getFolderName(parentFolder),
 					folderType2String(folderObj.getType()), Integer.valueOf(ctx.getContextId()));
+		}
+		/*
+		 * Check if parent folder is a shared folder
+		 */
+		if (parentFolder.isShared(user.getId())) {
+			throw new OXFolderLogicException(FolderCode.NO_SUBFOLDER_BELOW_SHARED_FOLDER, PREFIX_CREATE,
+					getFolderName(parentFolder), Integer.valueOf(ctx.getContextId()));
 		}
 		/*
 		 * Check folder module
@@ -1244,6 +1252,11 @@ public class OXFolderManagerImpl implements OXFolderManager {
 			final OCLPermission oclPerm = iter.next();
 			if (oclPerm.getEntity() < 0) {
 				throw new OXFolderException(FolderCode.INVALID_ENTITY, excPrefix, Integer.valueOf(oclPerm.getEntity()),
+						getFolderName(folderObj), Integer.valueOf(ctx.getContextId()));
+			} else if (isPrivate && oclPerm.getEntity() != userId
+					&& oclPerm.getFolderPermission() >= OCLPermission.CREATE_SUB_FOLDERS) {
+				throw new OXFolderException(FolderCode.NO_SHARED_FOLDER_SUBFOLDER_PERMISSION, excPrefix, getUserName(
+						userId, ctx), getFolderName(folderObj), Integer.valueOf(ctx.getContextId()),
 						getFolderName(folderObj), Integer.valueOf(ctx.getContextId()));
 			}
 			if (oclPerm.isFolderAdmin()) {
