@@ -87,7 +87,7 @@ public class CCTests
 		tests.addTest(com.openexchange.webdav.xml.attachment.AttachmentWebdavSuite.suite());	
 		tests.addTestSuite(com.openexchange.webdav.xml.GroupUserTest.class);
 //		tests.addTestSuite(com.openexchange.webdav.client.SmokeTest.class);
-		
+		tests.addTestSuite(com.openexchange.webdav.client.NaughtyClientTest.class);
 		
 		tests.addTestSuite(com.openexchange.groupware.infostore.URLHelperTest.class);
 		tests.addTestSuite(com.openexchange.ajax.infostore.InfostoreParserTest.class);

@@ -11,20 +11,23 @@ import java.util.Properties;
 import java.util.Set;
 
 import org.apache.commons.httpclient.HttpException;
+import org.apache.commons.httpclient.HttpMethodBase;
 import org.apache.commons.httpclient.HttpURL;
 import org.apache.webdav.lib.WebdavResource;
 import org.apache.webdav.lib.WebdavResources;
 
+import com.meterware.httpunit.Base64;
+import com.meterware.httpunit.WebRequest;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 
 import junit.framework.TestCase;
 
 public class WebdavClientTest extends TestCase {
-	private Properties webdavProps;
-	private String login;
-	private String password;
-	private String hostname;
+	protected Properties webdavProps;
+	protected String login;
+	protected String password;
+	protected String hostname;
 	
 	protected List<String> clean = new ArrayList<String>();
 
@@ -85,15 +88,41 @@ public class WebdavClientTest extends TestCase {
 	
 	public void assertBody(String path, InputStream body) throws HttpException, IOException {
 		InputStream is = getResource(path).getMethodData();
-		
+		assertEqualContent(is, body);
+	}
+	
+	public void assertEqualContent(InputStream is, InputStream body) throws IOException {
 		int i = 0;
+		int j = 0;
 		while((i = is.read()) != -1) {
-			assertEquals(body.read(), i);
+			j = body.read();
+			assertEquals(j, i);
 		}
 		assertEquals(-1, body.read());
 	}
-	
+
 	public void assertBody(String path, String content) throws HttpException, IOException {
 		assertEquals(content, getResource(path).getMethodDataAsString());
+	}
+	
+	// Many thanks to offspring for this snippet
+	public void setAuth(WebRequest req) {
+		if (password == null) {
+			password = "";
+		}
+		
+		String authData =  new String(Base64.encode(login + ":" + password)); 
+		req.setHeaderField("authorization", "Basic " + authData);
+	}
+	
+	public void setAuth(HttpMethodBase method) {
+		if (password == null) {
+			password = "";
+		}
+		
+		String authData =  new String(Base64.encode(login + ":" + password)); 
+		
+		method.setDoAuthentication(true);
+		method.setRequestHeader("authorization", "Basic " + authData);
 	}
 }
