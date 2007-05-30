@@ -64,6 +64,8 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.openexchange.configuration.ServerConfig;
+import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.webdav.protocol.WebdavFactory;
 
 public class ServletWebdavRequest extends AbstractWebdavRequest implements WebdavRequest {
@@ -134,14 +136,14 @@ public class ServletWebdavRequest extends AbstractWebdavRequest implements Webda
 			url =  url.substring(req.getServletPath().length());
 		}
 		try {
-			return URLDecoder.decode(url,req.getCharacterEncoding());
+			return URLDecoder.decode(url,req.getCharacterEncoding() == null ? ServerConfig.getProperty(Property.DefaultEncoding) : req.getCharacterEncoding());
 		} catch (UnsupportedEncodingException e) {
 			return url;
 		}
 	}
 
 	public String getCharset() {
-		return req.getCharacterEncoding();
+		return req.getCharacterEncoding() == null ? ServerConfig.getProperty(Property.DefaultEncoding) : req.getCharacterEncoding();
 	}
 
 }

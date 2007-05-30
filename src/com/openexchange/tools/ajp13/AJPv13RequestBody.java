@@ -54,6 +54,8 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 
+import com.openexchange.configuration.ServerConfig;
+import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.tools.ajp13.AJPv13Exception.AJPCode;
 
 /**
@@ -163,7 +165,10 @@ public class AJPv13RequestBody extends AJPv13Request {
 			/*
 			 * Turn form's post data into request parameters
 			 */
-			final String charEnc = ajpRequestHandler.getServletRequestObj().getCharacterEncoding();
+			String charEnc = ajpRequestHandler.getServletRequestObj().getCharacterEncoding();
+			if (charEnc == null) {
+				charEnc = ServerConfig.getProperty(Property.DefaultEncoding);
+			}
 			final String[] parameters = new String(contentBytes, charEnc).split(" *& *");
 			for (int i = 0; i < parameters.length; i++) {
 				final String parameterName = parameters[i].substring(0, parameters[i].indexOf('='));
