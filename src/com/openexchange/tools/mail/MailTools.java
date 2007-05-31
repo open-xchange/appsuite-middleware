@@ -49,20 +49,6 @@
 
 package com.openexchange.tools.mail;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
-import java.text.DateFormat;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
-import java.util.StringTokenizer;
-import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -78,10 +64,6 @@ public class MailTools {
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(MailTools.class);
 
-	private static final String[] tColor = new String[] { "tr-style-1", "tr-style-2" };
-
-	private boolean colorState;
-
 	private static final String[] tags = new String[] { "\"", "'", ">", "<", "(\\r)?\\n" };
 
 	private static final String[] replace = new String[] { "&quot;", "&#39;", "&gt;", "&lt;", "<br>" };
@@ -89,8 +71,6 @@ public class MailTools {
 	public static final String NUMBER_DIGITS = "###,##0.00";
 
 	public static final String NUMBER_WO_DIGITS = "#####0";
-
-	private static final String URL_CHARACTER_ENCODING = "UTF-8";
 
 	public static String htmlFormat(final String str, final boolean withQuote) {
 		String retval = str;
@@ -102,49 +82,6 @@ public class MailTools {
 
 	public static String htmlFormat(final String originalTag) {
 		return htmlFormat(originalTag, false);
-	}
-
-	public static String getFormatedSize(final int tmp, final String locale) {
-		try {
-			return (formatNumber((tmp / 1024d), locale, MailTools.NUMBER_DIGITS));
-		} catch (NumberFormatException nfe) {
-			return "0.00";
-		}
-	}
-
-	public static String formatNumber(final double tmp, final String locale, final String pattern) {
-		try {
-			final Locale l = new Locale(locale.toLowerCase(), locale);
-			final NumberFormat nf = NumberFormat.getInstance(l);
-			final DecimalFormat df = (DecimalFormat) nf;
-			// df.setMinimumFractionDigits(2);
-			// df.setMaximumFractionDigits(2);
-			df.setDecimalSeparatorAlwaysShown(true);
-			df.applyPattern(pattern);
-			return df.format(tmp);
-		} catch (NumberFormatException nfe) {
-			return "0.00";
-		}
-	}
-
-	public static String formatDate(final Date date, final String locale, final String format, final String timezone) {
-		try {
-			final Locale l = new Locale(locale, locale.toLowerCase());
-			final DateFormat df = new SimpleDateFormat(format, l);
-			df.setTimeZone(TimeZone.getTimeZone(timezone));
-			return (df.format(date));
-		} catch (Exception e) {
-			return (date.toString());
-		}
-	}
-
-	public String getColorChanger() {
-		if (!colorState) {
-			colorState = true;
-			return tColor[0];
-		}
-		colorState = false;
-		return tColor[1];
 	}
 
 	public static final Pattern PATTERN_HREF = Pattern.compile(
@@ -184,58 +121,6 @@ public class MailTools {
 	
 	private static final boolean isImgSrc(final String line, final int start) {
 		return start >= 5 && STR_IMG_SRC.equalsIgnoreCase(line.substring(start - 5, start));
-	}
-
-	public static String encodeUrl(final String url) {
-		String retval = "";
-		try {
-			retval = URLEncoder.encode(url, URL_CHARACTER_ENCODING);
-		} catch (UnsupportedEncodingException e) {
-			LOG.error(e.getMessage(), e);
-		}
-		return retval;
-	}
-
-	public static String decodeUrl(final String encodedUrl) {
-		String retval = "";
-		try {
-			retval = URLDecoder.decode(encodedUrl, URL_CHARACTER_ENCODING);
-		} catch (UnsupportedEncodingException e) {
-			LOG.error(e.getMessage(), e);
-		}
-		return retval;
-	}
-
-	public static String replaceLeadingWhitespace(final String originalTagArg, final String replaceWith) {
-		String originalTag = originalTagArg;
-		final StringBuilder retval = new StringBuilder();
-		try {
-			final StringReader sr = new StringReader(originalTag);
-			final BufferedReader br = new BufferedReader(sr);
-			String line;
-			while ((line = br.readLine()) != null) {
-				if (line.charAt(0) == ' ') {
-					final StringTokenizer st = new StringTokenizer(line, " ", true);
-					boolean end = false;
-					while (st.hasMoreTokens()) {
-						final String tmp = st.nextToken();
-						if (!end && " ".equals(tmp)) {
-							retval.append(replaceWith);
-						} else {
-							retval.append(tmp);
-							end = true;
-						}
-					}
-				} else {
-					retval.append(line);
-				}
-				retval.append("\n");
-			}
-			originalTag = retval.toString();
-		} catch (IOException e) {
-			LOG.error(e.getMessage(), e);
-		}
-		return originalTag;
 	}
 
 }
