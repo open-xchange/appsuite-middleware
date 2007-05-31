@@ -5,8 +5,7 @@
    handling of MAIL attribute to treat TLX differently.
  - Bugfix #7109 (re-open): VTIMEZONE was ignored. Now there is no information
    returned about the fact because it breaks the counting of successes.
- - Treating Outlook CSV files as Windows-1252 encoded per default. Solves
-   several encoding problems with those files.
+ - Bugfix #7632: Treating Outlook CSV files as Windows-1252 encoded per default.
 
 * 2007-05-31 - thorben.betten@open-xchange.com
 
