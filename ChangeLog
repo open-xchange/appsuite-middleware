@@ -1,3 +1,9 @@
+* 2007-05-31 - thorben.betten@open-xchange.com
+
+ - Bugfix #7588: Avoiding NPE if content type is missing in infostore
+   document that ought to be sent as attachment
+ - Bugfix #7720: Tabs are removed from address header field on reply
+
 * 2007-05-30 - thorben.betten@open-xchange.com
 
  - Bugfix #7457: Solved many problem arising from granting only LOOKUP
