@@ -426,7 +426,7 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 			try {
 				retVal.add(loadCollection(null, id, s)); // FIXME 101 SELECT PROBLEM
 			} catch (final WebdavException x) {
-				System.out.println(x.getStatus());
+				//System.out.println(x.getStatus());
 				if(x.getStatus() != HttpServletResponse.SC_FORBIDDEN) {
 					throw x;
 				}
