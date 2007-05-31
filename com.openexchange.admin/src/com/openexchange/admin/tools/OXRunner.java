@@ -55,11 +55,12 @@ import com.openexchange.cache.Configuration;
 import com.openexchange.cache.FolderCacheManager;
 import com.openexchange.cache.FolderCacheNotEnabledException;
 import com.openexchange.configuration.ConfigurationException;
+import com.openexchange.configuration.ConfigurationInit;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.database.DatabaseInit;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.ContextException;
 import com.openexchange.groupware.contexts.ContextStorage;
-import com.openexchange.server.ComfireConfig;
 import com.openexchange.server.DBPoolingException;
 
 
@@ -80,7 +81,12 @@ public class OXRunner {
 		} catch (ConfigurationException e1) {
 			throw new RuntimeException(e1);
 		}
-    	ComfireConfig.loadProperties(System.getProperty("openexchange.propfile"));
+    	//ComfireConfig.loadProperties(System.getProperty("openexchange.propfile"));
+    	try {
+            ConfigurationInit.init();
+        } catch (AbstractOXException e) {
+        	throw new RuntimeException(e);
+        }
         try {
             Configuration.load();
         } catch (IOException e) {
