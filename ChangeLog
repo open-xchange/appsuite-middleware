@@ -3,6 +3,7 @@
  - Bugfix #7588: Avoiding NPE if content type is missing in infostore
    document that ought to be sent as attachment
  - Bugfix #7720: Tabs are removed from address header field on reply
+ - Bugfix #7593: Removed check for INBOX folder on update
 
 * 2007-05-30 - thorben.betten@open-xchange.com
 

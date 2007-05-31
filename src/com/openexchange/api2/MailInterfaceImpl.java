@@ -4285,9 +4285,6 @@ public class MailInterfaceImpl implements MailInterface {
 				 * Update
 				 */
 				IMAPFolder updateMe = folderObj.getImapFolder();
-				if (updateMe.getFullName().equalsIgnoreCase(STR_INBOX)) {
-					throw new OXMailException(MailCode.NO_FOLDER_UPDATE, STR_INBOX);
-				}
 				/*
 				 * Is move operation?
 				 */
