@@ -63,9 +63,9 @@ public class StringScanner extends Scanner {
 
 	private final String Text;
 	
-	private String UpcaseText = null;
+	private String UpcaseText;
 
-	private int pos = 0;
+	private int pos;
 
 	/**
 	 * Creates a scanner for a string.

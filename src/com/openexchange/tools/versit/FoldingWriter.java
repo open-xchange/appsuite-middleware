@@ -58,9 +58,9 @@ public class FoldingWriter implements VersitDefinition.Writer {
 
 	private final Writer w;
 
-	private int LineLength = 0;
+	private int LineLength;
 
-	public FoldingWriter(Writer w) {
+	public FoldingWriter(final Writer w) {
 		this.w = w;
 	}
 
