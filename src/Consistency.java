@@ -78,7 +78,6 @@ import com.openexchange.groupware.filestore.FilestoreException;
 import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
 import com.openexchange.groupware.tx.DBPoolProvider;
-import com.openexchange.server.ComfireConfig;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.FileStorageException;
@@ -412,7 +411,7 @@ public class Consistency {
 	public void start(final String[] args) {
 		/*Properties p = System.getProperties();*/
 		/*String path = p.getProperty("user.dir");*/
-		ComfireConfig.loadProperties(System.getProperty("openexchange.propfile"));
+		//ComfireConfig.loadProperties(System.getProperty("openexchange.propfile"));
         try {
             ConfigurationInit.init();
         } catch (AbstractOXException e) {

@@ -52,8 +52,8 @@ package com.openexchange.push.udp;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.openexchange.configuration.SystemConfig;
 import com.openexchange.event.EventQueue;
-import com.openexchange.server.ComfireConfig;
 
 /**
  * EventInit
@@ -73,7 +73,7 @@ public class PushInit {
 		if (LOG.isInfoEnabled()) {
 			LOG.info("Parse Push properties");
 		}
-		final PushConfigInterface pushConfigInterface = new PushConfigInterfaceImpl(ComfireConfig.properties.getProperty("PUSHPROPERTIES"));
+		final PushConfigInterface pushConfigInterface = new PushConfigInterfaceImpl(SystemConfig.getProperty("PUSHPROPERTIES"));
 		final PushSocket pushSocket = new PushSocket(pushConfigInterface);
 		final PushOutputQueue pushOutputQueue = new PushOutputQueue(pushConfigInterface);
 

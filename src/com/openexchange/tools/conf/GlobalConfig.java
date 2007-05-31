@@ -59,22 +59,15 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Constructor;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
-import java.util.StringTokenizer;
 import java.util.Vector;
 
 import com.openexchange.groupware.calendar.CalendarRecurringCollection;
-import com.openexchange.server.ComfireConfig;
 import com.openexchange.server.ComfireLogger;
-import com.openexchange.tools.servlet.http.HttpServletManager;
 
 /**
  * GlobalConfig
@@ -142,7 +135,7 @@ public class GlobalConfig {
 	 
     public static void loadConf(final String propertyfile) {
 	if (propertyfile != null) {
-	    ComfireConfig.loadProperties(propertyfile);
+	    //ComfireConfig.loadProperties(propertyfile);
 	    loadConf();
 	} else {
 	    ComfireLogger.log("No property file given. Interface will not work!", 0);
@@ -150,10 +143,10 @@ public class GlobalConfig {
     }
     
     public static void loadConf() {
-	loadParametersFromFile(ComfireConfig.properties.getProperty("CONFIGPATH")+"/"+parameterfile);
-	checkReloadTimes();
-	checkCalendarConfig();
-	loadServletMapping(ComfireConfig.properties.getProperty("CONFIGPATH")+"/"+servletmappingfile);
+	//loadParametersFromFile(ComfireConfig.properties.getProperty("CONFIGPATH")+"/"+parameterfile);
+	//checkReloadTimes();
+	//checkCalendarConfig();
+	//loadServletMapping(ComfireConfig.properties.getProperty("CONFIGPATH")+"/"+servletmappingfile);
     }
 
 
@@ -683,7 +676,7 @@ public class GlobalConfig {
 					}
 				}
 				
-				HttpServletManager.setServletConstructorMap(servletConstructorMap);
+				//HttpServletManager.setServletConstructorMap(servletConstructorMap);
 			} else {
 				ComfireLogger.log("Cannot find property file: " + file, ComfireLogger.WARN);
 			}
@@ -692,16 +685,5 @@ public class GlobalConfig {
 			exc.printStackTrace();
 		}
 	 }
-         
-         public static String getCalendarSqlImplentation() {
-             if (CalendarSQLImpl == null) {
-                 if (ComfireConfig.properties.get("CalendarSQL") != null) {
-                     CalendarSQLImpl = (String)ComfireConfig.properties.get("CalendarSQL");
-                 } else {
-                    CalendarSQLImpl = "com.openexchange.groupware.calendar.CalendarMySQL";
-                 }
-             } 
-             return CalendarSQLImpl;
-         }
 
 }

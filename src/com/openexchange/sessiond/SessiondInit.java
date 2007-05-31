@@ -49,10 +49,10 @@
 
 package com.openexchange.sessiond;
 
-import com.openexchange.server.ComfireConfig;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.openexchange.configuration.SystemConfig;
 
 /**
  * SessiondInit
@@ -71,7 +71,7 @@ public class SessiondInit {
 		if (LOG.isInfoEnabled()) {
 			LOG.info("Parse Sessiond properties");
 		}
-		final SessiondConfigWrapper config = new SessiondConfigWrapper(ComfireConfig.properties.getProperty("SESSIONDPROPERTIES"));
+		final SessiondConfigWrapper config = new SessiondConfigWrapper(SystemConfig.getProperty("SESSIONDPROPERTIES"));
 		SessiondConnector.setConfig(config);
 
 		if (LOG.isInfoEnabled()) {

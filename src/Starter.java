@@ -49,7 +49,6 @@
 
 
 
-import java.net.ServerSocket;
 import java.text.DecimalFormat;
 import java.util.Properties;
 
@@ -62,10 +61,9 @@ import com.openexchange.database.Server;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.BackendServicesInit;
 import com.openexchange.groupware.GroupwareInit;
-import com.openexchange.server.ComfireConfig;
-import com.openexchange.server.ComfireInitWorker;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.server.Version;
+import com.openexchange.tools.servlet.http.HttpServletManager;
 
 /**
  * Starter
@@ -74,12 +72,6 @@ import com.openexchange.server.Version;
  */
 
 public class Starter {
-
-	private ComfireConfig cf;
-
-	private static String path;
-
-	private static ServerSocket ss;
 
 	private static final Log LOG = LogFactory.getLog(Starter.class);
 
@@ -95,7 +87,6 @@ public class Starter {
 			if (LOG.isInfoEnabled()) {
 				LOG.info(p.getProperty("os.name") + ' ' + p.getProperty("os.arch") + ' ' + p.getProperty("os.version"));
 			}
-			path = p.getProperty("user.dir");
 			if (LOG.isInfoEnabled()) {
 				LOG.info(p.getProperty("java.runtime.version"));
 			}
@@ -121,23 +112,21 @@ public class Starter {
 		}
 
 		/* Config done */
-        ComfireConfig.loadProperties(System.getProperty("openexchange.propfile"));
         try {
             ConfigurationInit.init();
         } catch (final AbstractOXException e) {
             LOG.error("Initializing the configuration failed.", e);
             System.exit(1);
         }
-        
+		
 		try {
 			if (LOG.isInfoEnabled()) {
-				LOG.info("DEBUG: CLL -> " + ComfireConfig.properties.getProperty("InitWorker"));
+				LOG.info("Initializing servlet instances");
 			}
-			Class.forName(ComfireConfig.properties.getProperty("InitWorker"));
-			final ComfireInitWorker worker = ComfireInitWorker.getWorker();
-			worker.doInit();
-		} catch (final ClassNotFoundException e1) {
-			e1.printStackTrace();
+			HttpServletManager.loadServletMapping();
+		} catch (AbstractOXException e1) {
+			LOG.error("Initializing servlet instances failed.", e1);
+			System.exit(1);
 		}
 
         try {

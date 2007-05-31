@@ -51,21 +51,29 @@
 
 package com.openexchange.tools.servlet.http;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.SingleThreadModel;
 import javax.servlet.http.HttpServlet;
 
+import com.openexchange.configuration.SystemConfig;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.FIFOQueue;
 import com.openexchange.tools.ajp13.AJPv13Config;
 import com.openexchange.tools.ajp13.AJPv13Server;
+import com.openexchange.tools.servlet.OXServletException;
 
 /**
  * HttpServletManager
@@ -76,20 +84,22 @@ public class HttpServletManager {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(HttpServletManager.class);
+	
+	private static final String SERVLET_MAPPING_FILE = "servletmapping.properties";
 
 	private static final Map<String, FIFOQueue<HttpServlet>> SERVLET_POOL = new HashMap<String, FIFOQueue<HttpServlet>>();
 
 	private static Map<String, Constructor> servletConstructorMap;
 
 	private static int numberOfWorkingServlets;
+	
+	private static final Lock INIT_LOCK = new ReentrantLock();
 
 	private static final ReadWriteLock RW_LOCK = new ReentrantReadWriteLock();
 
-	private static final Lock READ_LOCK = RW_LOCK.readLock(); // new
-																// ReentrantLock();
+	private static final Lock READ_LOCK = RW_LOCK.readLock();
 
-	private static final Lock WRITE_LOCK = RW_LOCK.writeLock(); // new
-																// ReentrantLock();
+	private static final Lock WRITE_LOCK = RW_LOCK.writeLock();
 	
 	private HttpServletManager() {
 		super();
@@ -194,9 +204,9 @@ public class HttpServletManager {
 		}
 	}
 
-	public static void setServletConstructorMap(final Map<String, Constructor> servletConstructorMap) {
-		HttpServletManager.servletConstructorMap = servletConstructorMap;
-	}
+//	public static void setServletConstructorMap(final Map<String, Constructor> servletConstructorMap) {
+//		HttpServletManager.servletConstructorMap = servletConstructorMap;
+//	}
 
 	public static Iterator<String> getServletKeysIterator() {
 		return servletConstructorMap.keySet().iterator();
@@ -212,6 +222,78 @@ public class HttpServletManager {
 			SERVLET_POOL.clear();
 		} finally {
 			WRITE_LOCK.unlock();
+		}
+	}
+	
+	public final static void loadServletMapping() throws AbstractOXException {
+		loadServletMapping(new StringBuilder(SystemConfig.getProperty("CONFIGPATH")).append('/').append(
+				SERVLET_MAPPING_FILE).toString());
+	}
+	
+	private final static Class[] CLASS_ARR = new Class[] {};
+	
+	public final static void loadServletMapping(final String file) throws AbstractOXException {
+		if (servletConstructorMap == null) {
+			INIT_LOCK.lock();
+			try {
+				if (servletConstructorMap != null) {
+					/*
+					 * Ensure servlets are only initialized one time
+					 */
+					return;
+				}
+				final File f = new File(file);
+				if (f.exists()) {
+					/*
+					 * Read properties from file
+					 */
+					Properties properties = null;
+					FileInputStream fis = null;
+					try {
+						fis = new FileInputStream(f);
+						properties = new Properties();
+						properties.load(fis);
+					} finally {
+						if (fis != null) {
+							fis.close();
+							fis = null;
+						}
+					}
+					/*
+					 * Initialize servlets' default constructor
+					 */
+					servletConstructorMap = new HashMap<String, Constructor>();
+					final int size = properties.keySet().size();
+					final Iterator<Object> iter = properties.keySet().iterator();
+					for (int k = 0; k < size; k++) {
+						String value = null;
+						try {
+							final String name = iter.next().toString();
+							value = properties.get(name).toString();
+							servletConstructorMap.put(name, Class.forName(value).getConstructor(CLASS_ARR));
+						} catch (final SecurityException e) {
+							if (LOG.isWarnEnabled()) {
+								LOG.warn("SecurityException while loading class " + value, e);
+							}
+						} catch (final ClassNotFoundException e) {
+							if (LOG.isWarnEnabled()) {
+								LOG.warn("Couldn't find class " + value, e);
+							}
+						} catch (NoSuchMethodException e) {
+							if (LOG.isWarnEnabled()) {
+								LOG.warn("No default constructor specified in class " + value, e);
+							}
+						}
+					}
+				} else {
+					throw new OXServletException(OXServletException.Code.SERVLET_MAPPINGS_NOT_FOUND, null, file);
+				}
+			} catch (final IOException exc) {
+				throw new OXServletException(OXServletException.Code.SERVLET_MAPPINGS_NOT_LOADED, exc, file, exc
+						.getMessage());
+			} finally {
+				INIT_LOCK.unlock();
+			}
 		}
 	}
 

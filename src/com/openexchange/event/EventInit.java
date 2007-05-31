@@ -52,6 +52,7 @@ package com.openexchange.event;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.openexchange.configuration.SystemConfig;
 import com.openexchange.groupware.FolderLockManagerImpl;
 import com.openexchange.groupware.attach.AttachmentCleaner;
 import com.openexchange.groupware.infostore.webdav.EntityLockManagerImpl;
@@ -61,7 +62,6 @@ import com.openexchange.groupware.infostore.webdav.PropertyStoreImpl;
 import com.openexchange.groupware.links.LinksEventHandler;
 import com.openexchange.groupware.notify.ParticipantNotify;
 import com.openexchange.groupware.tx.DBPoolProvider;
-import com.openexchange.server.ComfireConfig;
 
 /**
  * EventInit
@@ -81,7 +81,7 @@ public class EventInit {
 		if (LOG.isInfoEnabled()) {
 			LOG.info("Parse Event properties");
 		}
-		final EventConfig eventConfig = new EventConfigImpl(ComfireConfig.properties.getProperty("EVENTPROPERTIES"));
+		final EventConfig eventConfig = new EventConfigImpl(SystemConfig.getProperty("EVENTPROPERTIES"));
 		final EventQueue eventQueue = new EventQueue(eventConfig);
 
 		if (LOG.isInfoEnabled()) {

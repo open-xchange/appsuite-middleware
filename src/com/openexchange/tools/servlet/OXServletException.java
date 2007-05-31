@@ -47,28 +47,89 @@
  *
  */
 
+package com.openexchange.tools.servlet;
 
-package com.openexchange.server;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.Component;
 
 /**
+ * OXServletException
  * 
- * @author <a href="mailto:m.klein@comfire.de">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * 
  */
-public abstract class ComfireInitWorker {
+public class OXServletException extends AbstractOXException {
 
-	private static ComfireInitWorker worker = null;
-	
-	protected ComfireInitWorker() {
+	/**
+	 * serialVersionUID
+	 */
+	private static final long serialVersionUID = 3931776129684819019L;
+
+	/**
+	 * Code
+	 *
+	 * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+	 *
+	 */
+	public static enum Code {
+
+		/**
+		 * Property file %s could not be found
+		 */
+		SERVLET_MAPPINGS_NOT_FOUND("Property file %s could not be found", Category.SETUP_ERROR, 1),
+		/**
+		 * Cannot load property file %s due to following exception: %s
+		 */
+		SERVLET_MAPPINGS_NOT_LOADED("Cannot load property file %s due to following exception: %s", Category.INTERNAL_ERROR, 2);
+
+		/**
+		 * Message of the exception.
+		 */
+		private final String message;
+
+		/**
+		 * Category of the exception.
+		 */
+		private final Category category;
+
+		/**
+		 * Detail number of the exception.
+		 */
+		private final int number;
+
+		/**
+		 * Default constructor.
+		 * 
+		 * @param message
+		 *            message.
+		 * @param category
+		 *            category.
+		 * @param detailNumber
+		 *            detail number.
+		 */
+		private Code(final String message, final Category category, final int detailNumber) {
+			this.message = message;
+			this.category = category;
+			this.number = detailNumber;
+		}
+
+		public Category getCategory() {
+			return category;
+		}
+
+		public String getMessage() {
+			return message;
+		}
+
+		public int getNumber() {
+			return number;
+		}
 	}
-	
-	public static void registerWorker(ComfireInitWorker worker) {
-		ComfireInitWorker.worker = worker;
+
+	public OXServletException(final Code code, final Throwable cause, final Object... messageArgs) {
+		super(Component.SERVLET, code.category, code.number, null == code.message ? cause.getMessage() : code.message,
+				cause);
+		setMessageArgs(messageArgs);
 	}
-	
-	public static ComfireInitWorker getWorker() {
-		return worker;
-	}
-	
-	public abstract void doInit();
-	    
+
 }
