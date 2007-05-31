@@ -113,7 +113,7 @@ public final class ServletConfigLoader {
 	
 	private Map<String, String> globalProps;
 
-	public ServletConfigLoader(File directory) {
+	public ServletConfigLoader(final File directory) {
 		this.directory = directory;
 		globalProps = loadDirProps(this.directory);
 	}
@@ -277,13 +277,13 @@ public final class ServletConfigLoader {
 		try {
 			in = new BufferedInputStream(new FileInputStream(propFile));
 			props.load(in);
-		} catch (IOException x) {
+		} catch (final IOException x) {
 			return null;
 		} finally {
 			if (in != null) {
 				try {
 					in.close();
-				} catch (IOException e) {
+				} catch (final IOException e) {
 					LOG.error(e.getMessage(), e);
 				}
 			}
@@ -296,7 +296,7 @@ public final class ServletConfigLoader {
 	protected Map<String, String> loadDirProps(final File dir) {
 		final Map<String, String> m = new HashMap<String, String>();
 		if (dir.exists() && dir.isDirectory()) {
-			for (File f : dir.listFiles()) {
+			for (final File f : dir.listFiles()) {
 				if (f.isFile() && f.getName().endsWith(FILEEXT_PROPERTIES)) {
 					final Map<String, String> props = loadProperties(f);
 					m.putAll(props);
@@ -323,7 +323,7 @@ public final class ServletConfigLoader {
 	 *            the source properties
 	 */
 	private void addProps(final Map<String, String> m, final Properties props) {
-		for (Map.Entry<Object, Object> entry : props.entrySet()) {
+		for (final Map.Entry<Object, Object> entry : props.entrySet()) {
 			m.put((String) entry.getKey(), (String) entry.getValue());
 		}
 	}
