@@ -893,7 +893,7 @@ public class JSONMessageObject {
 	}
 
 	private static final String preparePersonal(final String personal) {
-		if (personal.charAt(0) == '"') {
+		if (personal.charAt(0) == '"' || personal.charAt(0) == '\'') {
 			/*
 			 * Assume personal is already surrounded with quotes
 			 */
