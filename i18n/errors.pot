@@ -174,6 +174,11 @@ msgid "An SQL error occurred while performing task CreateTableVersion: %1$s."
 msgstr ""
 
 msgid ""
+"An SQL error occurred while performing task DelFolderTreeTableUpdateTask: %1"
+"$s."
+msgstr ""
+
+msgid ""
 "An SQL error occurred while performing task PasswordMechUpdateTask: %1$s."
 msgstr ""
 
@@ -482,7 +487,8 @@ msgid ""
 "orphaned or belongs to another module."
 msgstr ""
 
-msgid "Could not find the following fields %s"
+msgid ""
+"Could not find equivalent fields for the following fields in the CSV file: %s"
 msgstr ""
 
 msgid "Could not generate new ID."
@@ -1184,6 +1190,9 @@ msgstr ""
 msgid "No send address could be found for user %s in user configuration"
 msgstr ""
 
+msgid "No subfolder creation underneath shared folder %s in context %s"
+msgstr ""
+
 msgid ""
 "Not allowed to change parent id of folder %s through an update call. Use "
 "move method instead"
@@ -1491,6 +1500,9 @@ msgstr ""
 msgid "The folder %d is not an Infostore Folder"
 msgstr ""
 
+msgid "The following field(s) are too long to be imported: %s"
+msgstr ""
+
 msgid ""
 "The image you tried to attach is not a valid picture. It may be broken or is "
 "not a valid file."
@@ -1519,6 +1531,12 @@ msgid "The required  value \"days\" is missing or wrong"
 msgstr ""
 
 msgid "The required value \"interval\" is missing or wrong"
+msgstr ""
+
+msgid ""
+"The rights composed by user %s could not be applied to new folder %s due to "
+"missing administer right in its initial rights specified by IMAP server. The "
+"folder has been created anyway."
 msgstr ""
 
 msgid "The session parameter is missing."
@@ -1762,6 +1780,9 @@ msgstr ""
 msgid "Unknown color label: %s"
 msgstr ""
 
+msgid "Unknown element %s was not imported."
+msgstr ""
+
 msgid "Unknown field: %d"
 msgstr ""
 
@@ -1892,6 +1913,11 @@ msgstr ""
 
 msgid ""
 "User %s is not allowed to move all subfolders of folder %s in context %s"
+msgstr ""
+
+msgid ""
+"User %s must not grant \"create subfolder\" permission for another user on "
+"shared folder %s in context %s"
 msgstr ""
 
 msgid "User dictionary could not be found."
