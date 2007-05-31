@@ -8,9 +8,9 @@ import java.util.List;
 import java.util.Properties;
 
 import com.openexchange.configuration.ConfigurationInit;
+import com.openexchange.configuration.SystemConfig;
 import com.openexchange.database.DatabaseInit;
 import com.openexchange.groupware.contexts.ContextInit;
-import com.openexchange.server.ComfireConfig;
 import com.openexchange.sessiond.Sessiond;
 import com.openexchange.sessiond.SessiondConfigWrapper;
 import com.openexchange.sessiond.SessiondConnector;
@@ -185,7 +185,7 @@ public final class Init {
                 "openexchange.propfile");
             System.setProperty("openexchange.propfile", propFileName); //FIXME 
             ConfigurationInit.init();
-            ComfireConfig.loadProperties(propFileName);
+            //ComfireConfig.loadProperties(propFileName);
 			systemPropertiesLoaded = true;
 		}
 	}
@@ -214,8 +214,7 @@ public final class Init {
     
 	public static void initSessiond() throws Exception {
 		if (!sessiondInit) {
-			String propfile = ComfireConfig.properties
-					.getProperty("SESSIONDPROPERTIES");
+			String propfile = SystemConfig.getProperty("SESSIONDPROPERTIES");
 
 			SessiondConfigWrapper config = new SessiondConfigWrapper(propfile);
 			SessiondConnector.setConfig(config);
