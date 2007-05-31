@@ -174,6 +174,11 @@ msgid "An SQL error occurred while performing task CreateTableVersion: %1$s."
 msgstr ""
 
 msgid ""
+"An SQL error occurred while performing task DelFolderTreeTableUpdateTask: %1"
+"$s."
+msgstr ""
+
+msgid ""
 "An SQL error occurred while performing task PasswordMechUpdateTask: %1$s."
 msgstr ""
 
@@ -205,10 +210,18 @@ msgstr ""
 msgid "Attribute \"%s\" is not set in FolderObject instance %s in context %s"
 msgstr ""
 
-msgid "Bad JSON value %s in key %s"
+msgid "Bad value %s in parameter %s"
 msgstr ""
 
 msgid "Both %s and %s must not be present in message's JSON representation"
+msgstr ""
+
+msgid ""
+"Broken CSV file: Lines have different number of cells, line #1 has %d, line #"
+"%d has %d. Is this really a CSV file?"
+msgstr ""
+
+msgid "Broken file uploaded: %s"
 msgstr ""
 
 msgid "Cache %s could not be initialized due to following error: %s"
@@ -218,6 +231,12 @@ msgid "CalendarOperation: Context not set."
 msgstr ""
 
 msgid "Caller does not allow to fetch a connection from pool in context %s"
+msgstr ""
+
+msgid "Can only handle one file, not %s"
+msgstr ""
+
+msgid "Can only import into one folder at a time."
 msgstr ""
 
 msgid "Cannot add external participant without email address."
@@ -251,6 +270,12 @@ msgid "Cannot create private task in public/shared folder %1$d."
 msgstr ""
 
 msgid "Cannot decrease number of attachments below zero."
+msgstr ""
+
+msgid "Cannot find an exporter for folder %s to format %s"
+msgstr ""
+
+msgid "Cannot find an importer for format %s into folders %s"
 msgstr ""
 
 msgid "Cannot find context %d."
@@ -304,6 +329,9 @@ msgstr ""
 msgid "Cannot get information for pool %d."
 msgstr ""
 
+msgid "Cannot import this kind of data. Use method canImport() first."
+msgstr ""
+
 msgid "Cannot instanciate class %1$s."
 msgstr ""
 
@@ -316,6 +344,9 @@ msgstr ""
 msgid "Cannot load class \"%s\"."
 msgstr ""
 
+msgid "Cannot load property file %s due to following exception: %s"
+msgstr ""
+
 msgid "Cannot pre-fetch results."
 msgstr ""
 
@@ -326,6 +357,9 @@ msgid "Cannot reach the file store so I cannot remove the documents."
 msgstr ""
 
 msgid "Cannot read file \"%s\"."
+msgstr ""
+
+msgid "Cannot read given InputStream."
 msgstr ""
 
 msgid ""
@@ -349,6 +383,12 @@ msgid "Cannot send event to event system."
 msgstr ""
 
 msgid "Cannot set schema in database connection."
+msgstr ""
+
+msgid "Cannot translate id=%d to a constant from FolderObject."
+msgstr ""
+
+msgid "Cannot translate id=%d to a constant from Types."
 msgstr ""
 
 msgid ""
@@ -410,7 +450,16 @@ msgstr ""
 msgid "Could not bind connection to local port %s"
 msgstr ""
 
+msgid "Could not convert given String %s to a date."
+msgstr ""
+
+msgid "Could not convert given object %s to a date when setting %s."
+msgstr ""
+
 msgid "Could not create a PartModifier instance from name %s"
+msgstr ""
+
+msgid "Could not create folderId from String %s"
 msgstr ""
 
 msgid "Could not delete DocumentMetadata %d. Please try again."
@@ -425,6 +474,12 @@ msgstr ""
 msgid "Could not delete file from file store. Filestore: %s Context: %s"
 msgstr ""
 
+msgid "Could not encode as UTF-8"
+msgstr ""
+
+msgid "Could not export the folder %s in the format %s."
+msgstr ""
+
 msgid ""
 "Could not fetch result from result set. Probably the database may be busy or "
 "not running. Please try again."
@@ -435,16 +490,34 @@ msgid ""
 "orphaned or belongs to another module."
 msgstr ""
 
+msgid "Could not find the following fields %s"
+msgstr ""
+
 msgid "Could not generate new ID."
 msgstr ""
 
 msgid "Could not get file store location."
 msgstr ""
 
+msgid "Could not import into the folder %s."
+msgstr ""
+
 msgid "Could not iterate result"
 msgstr ""
 
+msgid "Could not load contacts"
+msgstr ""
+
 msgid "Could not load documents to check the permissions"
+msgstr ""
+
+msgid "Could not load folder %s"
+msgstr ""
+
+msgid "Could not read InputStream as String"
+msgstr ""
+
+msgid "Could not recognize format of the following data: %s"
 msgstr ""
 
 msgid "Could not remove file from file store."
@@ -457,6 +530,19 @@ msgid "Could not retrieve file: %s"
 msgstr ""
 
 msgid "Could not save file to the file store."
+msgstr ""
+
+msgid "Could not send results of importing process."
+msgstr ""
+
+msgid "Could not translate a single column title. Is this a valid CSV file?"
+msgstr ""
+
+msgid ""
+"Could not translate a single field of information, did not insert entry %s."
+msgstr ""
+
+msgid "Could not use UTF-8 encoding."
 msgstr ""
 
 msgid "Couldn't reach the filestore: %s"
@@ -537,6 +623,9 @@ msgid "Either key %s or key %s is mssing in message's JSON representation"
 msgstr ""
 
 msgid "Empty SEND_BODY_CHUNK package MUST NOT be sent"
+msgstr ""
+
+msgid "Empty file uploaded."
 msgstr ""
 
 msgid "Encoding %s cannot be used."
@@ -720,6 +809,9 @@ msgstr ""
 msgid "Folder not found: %s"
 msgstr ""
 
+msgid "Folder owner's administer permission must not be removed from folder %s"
+msgstr ""
+
 msgid "Folder read-only check failed"
 msgstr ""
 
@@ -798,6 +890,9 @@ msgid ""
 msgstr ""
 
 msgid "Illegal Argument: Document %d contains no file"
+msgstr ""
+
+msgid "Illegal state: Found data after presumed last line."
 msgstr ""
 
 msgid "Illegal write attempt: %s"
@@ -929,6 +1024,9 @@ msgstr ""
 msgid "Message could not be sent"
 msgstr ""
 
+msgid "Message could not be sent because it is too large"
+msgstr ""
+
 msgid "Message could not be sent to the following recipients: %s"
 msgstr ""
 
@@ -951,6 +1049,9 @@ msgid "Missing %s folder in mail move operation"
 msgstr ""
 
 msgid "Missing SpellCheckConfig object."
+msgstr ""
+
+msgid "Missing ability to encode or decode UTF-8 on server, cannot read file."
 msgstr ""
 
 msgid "Missing affiliation id"
@@ -1038,6 +1139,12 @@ msgstr ""
 msgid "Multiple rows found."
 msgstr ""
 
+msgid "Need at least a ContactObject and a value to set %s"
+msgstr ""
+
+msgid "Need at least a ContactObject to get the value of %s"
+msgstr ""
+
 msgid "No Changes found. No Update requiered. Context %1$d Object %2$d"
 msgstr ""
 
@@ -1051,6 +1158,9 @@ msgid "No admin permission found"
 msgstr ""
 
 msgid "No admin user found in context %s"
+msgstr ""
+
+msgid "No administer permission specified by user %s for folder %s"
 msgstr ""
 
 msgid "No attachment was found with id %s in message %s"
@@ -1077,6 +1187,9 @@ msgid "No row found in table update."
 msgstr ""
 
 msgid "No send address could be found for user %s in user configuration"
+msgstr ""
+
+msgid "No subfolder creation underneath shared folder %s in context %s"
 msgstr ""
 
 msgid ""
@@ -1187,7 +1300,19 @@ msgid ""
 "again."
 msgstr ""
 
+msgid "Programming Error"
+msgstr ""
+
+msgid "Programming Error - Could not import into folder %s"
+msgstr ""
+
+msgid "Programming Error - Folder %s"
+msgstr ""
+
 msgid "Property \"%s\" is not defined."
+msgstr ""
+
+msgid "Property file %s could not be found"
 msgstr ""
 
 msgid "Public folder %s can only be moved to a public folder in context %s"
@@ -1286,6 +1411,12 @@ msgid "Store already closed: %s"
 msgstr ""
 
 msgid "String Parse Exception: No ending 0x00 found"
+msgstr ""
+
+msgid "Subsystem down"
+msgstr ""
+
+msgid "Subsystem down - Could not import into folder %s"
 msgstr ""
 
 msgid "System folder %s cannot be moved in context %s"
@@ -1399,6 +1530,12 @@ msgid "The required  value \"days\" is missing or wrong"
 msgstr ""
 
 msgid "The required value \"interval\" is missing or wrong"
+msgstr ""
+
+msgid ""
+"The rights composed by user %s could not be applied to new folder %s due to "
+"missing administer right in its initial rights specified by IMAP server. The "
+"folder has been created anyway."
 msgstr ""
 
 msgid "The session parameter is missing."
@@ -1645,6 +1782,9 @@ msgstr ""
 msgid "Unknown field: %d"
 msgstr ""
 
+msgid "Unknown format: %s"
+msgstr ""
+
 msgid "Unknown or unsupported action: %s"
 msgstr ""
 
@@ -1695,6 +1835,9 @@ msgid "Update process initialization failed: %1$s."
 msgstr ""
 
 msgid "Upload Quota (%d) exceeded"
+msgstr ""
+
+msgid "Uploaded file is of type %s, cannot handle that"
 msgstr ""
 
 msgid ""
@@ -1765,7 +1908,15 @@ msgid ""
 "User %s is not allowed to move all subfolders of folder %s in context %s"
 msgstr ""
 
+msgid ""
+"User %s must not grant \"create subfolder\" permission for another user on "
+"shared folder %s in context %s"
+msgstr ""
+
 msgid "User dictionary could not be found."
+msgstr ""
+
+msgid "User input Error %s"
 msgstr ""
 
 msgid "User's %s dictionary could not be loaded in context %d"
