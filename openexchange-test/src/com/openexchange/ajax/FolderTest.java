@@ -286,7 +286,7 @@ public class FolderTest extends AbstractAJAXTest {
 			jsonPermission = new JSONObject();
 			jsonPermission.put("entity", sharedForUserId);
 			jsonPermission.put("group", false);
-			jsonPermission.put("bits", createPermissionBits(8, 4, 0, 0, false));
+			jsonPermission.put("bits", createPermissionBits(OCLPermission.CREATE_OBJECTS_IN_FOLDER, 4, 0, 0, false));
 			perms.put(jsonPermission);
 		}
 		jsonFolder.put("permissions", perms);
