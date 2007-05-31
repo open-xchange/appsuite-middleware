@@ -148,7 +148,7 @@ public class MailTools {
 	}
 
 	public static final Pattern PATTERN_HREF = Pattern.compile(
-			"<a\\s+href[^>]+>.*?</a>|((?:http|https|ftp|mailto|news|www)(?::|://)[^<\\s]+)", Pattern.CASE_INSENSITIVE
+			"<a\\s+href[^>]+>.*?</a>|((?:http|https|ftp|mailto|news|www)(?::|://)[\\p{ASCII}&&[^<\\s]]+)", Pattern.CASE_INSENSITIVE
 					| Pattern.DOTALL);
 
 	/**
