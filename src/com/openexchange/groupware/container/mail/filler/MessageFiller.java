@@ -70,7 +70,6 @@ import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.activation.FileDataSource;
 import javax.activation.MimetypesFileTypeMap;
-import javax.mail.Address;
 import javax.mail.BodyPart;
 import javax.mail.Flags;
 import javax.mail.Message;
@@ -78,7 +77,6 @@ import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
 import javax.mail.Session;
-import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
@@ -727,25 +725,25 @@ public class MessageFiller {
 		 * Set from
 		 */
 		if (msgObj.getFrom() != null) {
-			msg.addFrom(convertToAddressArray(msgObj.getFrom()));
+			msg.addFrom(msgObj.getFromAsArray());
 		}
 		/*
 		 * Set to
 		 */
 		if (msgObj.getTo() != null) {
-			msg.addRecipients(Message.RecipientType.TO, convertToAddressArray(msgObj.getTo()));
+			msg.addRecipients(Message.RecipientType.TO, msgObj.getToAsArray());
 		}
 		/*
 		 * Set cc
 		 */
 		if (msgObj.getCc() != null) {
-			msg.addRecipients(Message.RecipientType.CC, convertToAddressArray(msgObj.getCc()));
+			msg.addRecipients(Message.RecipientType.CC, msgObj.getCcAsArray());
 		}
 		/*
 		 * Bcc
 		 */
 		if (msgObj.getBcc() != null) {
-			msg.addRecipients(Message.RecipientType.BCC, convertToAddressArray(msgObj.getBcc()));
+			msg.addRecipients(Message.RecipientType.BCC, msgObj.getBccAsArray());
 		}
 		/*
 		 * Set subject
@@ -823,12 +821,6 @@ public class MessageFiller {
 			final Map.Entry<String, String> entry = iter.next();
 			msg.addHeader(entry.getKey(), entry.getValue());
 		}
-	}
-
-	private final Address[] convertToAddressArray(final List<InternetAddress> list) {
-		final Address[] tmp = new Address[list.size()];
-		list.toArray(tmp);
-		return tmp;
 	}
 
 	private final String getUserVCard() throws DBPoolingException, IOException, ConverterException, OXException {

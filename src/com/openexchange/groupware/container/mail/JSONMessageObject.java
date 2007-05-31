@@ -52,11 +52,14 @@ package com.openexchange.groupware.container.mail;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -89,6 +92,8 @@ import com.openexchange.groupware.imap.OXMailException.MailCode;
  * 
  */
 public class JSONMessageObject {
+
+	private static final String STR_TRUE = "true";
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(JSONMessageObject.class);
@@ -332,13 +337,13 @@ public class JSONMessageObject {
 
 	private int flags;
 
-	private List<InternetAddress> from;
+	private final Set<InternetAddress> from;
 
-	private List<InternetAddress> to;
+	private final Set<InternetAddress> to;
 
-	private List<InternetAddress> cc;
+	private final Set<InternetAddress> cc;
 
-	private List<InternetAddress> bcc;
+	private final Set<InternetAddress> bcc;
 
 	private String subject;
 
@@ -383,10 +388,10 @@ public class JSONMessageObject {
 		super();
 		nestedMsgs = new ArrayList<JSONMessageObject>();
 		msgAttachments = new ArrayList<JSONMessageAttachmentObject>();
-		from = new ArrayList<InternetAddress>();
-		to = new ArrayList<InternetAddress>();
-		cc = new ArrayList<InternetAddress>();
-		bcc = new ArrayList<InternetAddress>();
+		from = new HashSet<InternetAddress>();
+		to = new HashSet<InternetAddress>();
+		cc = new HashSet<InternetAddress>();
+		bcc = new HashSet<InternetAddress>();
 		userFlags = new ArrayList<String>();
 		this.userSettingMail = userSettingMail;
 		this.userTimeZone = userTimeZone;
@@ -501,73 +506,67 @@ public class JSONMessageObject {
 		this.flags = flags;
 	}
 
-	public List<InternetAddress> getBcc() {
+	public Collection<InternetAddress> getBcc() {
 		return bcc;
+	}
+	
+	public InternetAddress[] getBccAsArray() {
+		return bcc.toArray(new InternetAddress[bcc.size()]);
 	}
 
 	public void addBccAddress(final String addr) throws AddressException {
-		final InternetAddress ia = new InternetAddress(addr, false);
-		if (!containsAddrs(ia, bcc)) {
-			bcc.add(ia);
-		}
+		bcc.add(new InternetAddress(addr, false));
 	}
 
 	public void addBccAddresses(final InternetAddress[] addrs) {
-		for (int i = 0; i < addrs.length; i++) {
-			if (!containsAddrs(addrs[i], cc)) {
-				bcc.add(addrs[i]);
-			}
-		}
+		bcc.addAll(Arrays.asList(addrs));
 	}
 
-	public void setBcc(final List<InternetAddress> bcc) {
-		this.bcc = bcc;
+	public void setBcc(final Collection<InternetAddress> bcc) {
+		this.bcc.clear();
+		this.bcc.addAll(bcc);
 	}
 
-	public List<InternetAddress> getCc() {
+	public Collection<InternetAddress> getCc() {
 		return cc;
+	}
+	
+	public InternetAddress[] getCcAsArray() {
+		return cc.toArray(new InternetAddress[cc.size()]);
 	}
 
 	public void addCCAddress(final String addr) throws AddressException {
-		final InternetAddress ia = new InternetAddress(addr, false);
-		if (!containsAddrs(ia, cc)) {
-			cc.add(ia);
-		}
+		cc.add(new InternetAddress(addr, false));
 	}
 
 	public void addCCAddresses(final InternetAddress[] addrs) {
-		for (int i = 0; i < addrs.length; i++) {
-			if (!containsAddrs(addrs[i], cc)) {
-				cc.add(addrs[i]);
-			}
-		}
+		cc.addAll(Arrays.asList(addrs));
 	}
 
-	public void setCc(final List<InternetAddress> cc) {
-		this.cc = cc;
+	public void setCc(final Collection<InternetAddress> cc) {
+		this.cc.clear();
+		this.cc.addAll(cc);
 	}
 
-	public List<InternetAddress> getFrom() {
+	public Collection<InternetAddress> getFrom() {
 		return from;
+	}
+	
+	public InternetAddress[] getFromAsArray() {
+		return from.toArray(new InternetAddress[from.size()]);
 	}
 
 	public void addFromAddress(final String addr) throws AddressException {
-		final InternetAddress ia = new InternetAddress(addr, false);
-		if (!containsAddrs(ia, from)) {
-			from.add(new InternetAddress(addr, false));
-		}
+		from.add(new InternetAddress(addr, false));
 	}
 
 	public void addFromAddresses(final InternetAddress[] addrs) {
-		for (int i = 0; i < addrs.length; i++) {
-			if (!containsAddrs(addrs[i], from)) {
-				from.add(addrs[i]);
-			}
-		}
+		from.addAll(Arrays.asList(addrs));
 	}
 
-	public void setFrom(final List<InternetAddress> from) {
-		this.from = from;
+	public void setFrom(final Collection<InternetAddress> from) {
+		this.from.clear();
+		this.from.addAll(from);
 	}
 
 	public Date getReceivedDate() {
@@ -618,27 +617,25 @@ public class JSONMessageObject {
 		this.subject = subject;
 	}
 
-	public List<InternetAddress> getTo() {
+	public Collection<InternetAddress> getTo() {
 		return to;
+	}
+	
+	public InternetAddress[] getToAsArray() {
+		return to.toArray(new InternetAddress[to.size()]);
 	}
 
 	public void addToAddress(final String addr) throws AddressException {
-		final InternetAddress ia = new InternetAddress(addr, false);
-		if (!containsAddrs(ia, to)) {
-			to.add(new InternetAddress(addr, false));
-		}
+		to.add(new InternetAddress(addr, false));
 	}
 
 	public void addToAddresses(final InternetAddress[] addrs) {
-		for (int i = 0; i < addrs.length; i++) {
-			if (!containsAddrs(addrs[i], to)) {
-				to.add(addrs[i]);
-			}
-		}
+		to.addAll(Arrays.asList(addrs));
 	}
 
-	public void setTo(final List<InternetAddress> to) {
-		this.to = to;
+	public void setTo(final Collection<InternetAddress> to) {
+		this.to.clear();
+		this.to.addAll(to);
 	}
 
 	public List<String> getUserFlags() {
@@ -747,16 +744,6 @@ public class JSONMessageObject {
 
 	public void setAppendVCard(final boolean appendVCard) {
 		this.appendVCard = appendVCard;
-	}
-
-	private final boolean containsAddrs(final InternetAddress addr, final List<InternetAddress> check) {
-		final int size = check.size();
-		for (int i = 0; i < size; i++) {
-			if (check.get(i).equals(addr)) {
-				return true;
-			}
-		}
-		return false;
 	}
 
 	public JSONObject getJSONObject() throws JSONException {
@@ -868,7 +855,7 @@ public class JSONMessageObject {
 	 * JSON-Array comforming to: [["The Personal", "someone@somewhere.com"],
 	 * ...]
 	 */
-	private static final JSONArray getAddressesAsArray(final List<InternetAddress> addrs) {
+	private static final JSONArray getAddressesAsArray(final Collection<InternetAddress> addrs) {
 		final JSONArray jsonArr = new JSONArray();
 		if (addrs != null) {
 			final int size = addrs.size();
@@ -893,7 +880,7 @@ public class JSONMessageObject {
 	}
 
 	private static final String preparePersonal(final String personal) {
-		if (personal.charAt(0) == '"') {
+		if (personal.charAt(0) == '"' || personal.charAt(0) == '\'') {
 			/*
 			 * Assume personal is already surrounded with quotes
 			 */
@@ -1023,11 +1010,11 @@ public class JSONMessageObject {
 				 * a valid email address
 				 */
 				final String dispVal = jo.getString(JSON_DISPOSITION_NOTIFICATION_TO);
-				if ("true".equalsIgnoreCase(dispVal)) {
+				if (STR_TRUE.equalsIgnoreCase(dispVal)) {
 					/*
 					 * Boolean value "true"
 					 */
-					setDispositionNotification(from.size() > 0 ? from.get(0).getAddress() : null);
+					setDispositionNotification(from.size() > 0 ? from.iterator().next().getAddress() : null);
 				} else if (isValidEmailAddress(dispVal)) {
 					/*
 					 * Valid email address

@@ -53,10 +53,8 @@ import static com.openexchange.api2.MailInterfaceImpl.handleMessagingException;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
@@ -126,7 +124,7 @@ public class JSONMessageHandler implements MessageHandler {
 	 * @see com.openexchange.groupware.container.mail.parser.MessageHandler#handleFrom(javax.mail.internet.InternetAddress[])
 	 */
 	public boolean handleFrom(final InternetAddress[] fromAddrs) throws OXException {
-		fillAddresses(fromAddrs, msgObj.getFrom());
+		msgObj.addFromAddresses(fromAddrs);
 		return true;
 	}
 
@@ -139,11 +137,11 @@ public class JSONMessageHandler implements MessageHandler {
 	public boolean handleRecipient(final RecipientType recipientType, final InternetAddress[] recipientAddrs)
 			throws OXException {
 		if (RecipientType.TO.equals(recipientType)) {
-			fillAddresses(recipientAddrs, msgObj.getTo());
+			msgObj.addToAddresses(recipientAddrs);
 		} else if (RecipientType.CC.equals(recipientType)) {
-			fillAddresses(recipientAddrs, msgObj.getCc());
+			msgObj.addCCAddresses(recipientAddrs);
 		} else if (RecipientType.BCC.equals(recipientType)) {
-			fillAddresses(recipientAddrs, msgObj.getBcc());
+			msgObj.addBccAddresses(recipientAddrs);
 		}
 		return true;
 	}
@@ -345,7 +343,7 @@ public class JSONMessageHandler implements MessageHandler {
 		return handleInlinePlainText(decodedTextContent, baseContentType, size, fileName, id);
 	}
 	
-	private final String MIME_APPL_OCTET_STREAM = "application/octet-stream";
+	private static final String MIME_APPL_OCTET_STREAM = "application/octet-stream";
 
 	/*
 	 * (non-Javadoc)
@@ -635,13 +633,6 @@ public class JSONMessageHandler implements MessageHandler {
 	 */
 	public JSONMessageObject getMessageObject() {
 		return msgObj;
-	}
-
-	private static final void fillAddresses(final InternetAddress[] addrs, final List<InternetAddress> addrsList) {
-		if (addrs == null || addrs.length == 0) {
-			return;
-		}
-		addrsList.addAll(Arrays.asList(addrs));
 	}
 
 	/*
