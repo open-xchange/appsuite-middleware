@@ -1,3 +1,13 @@
+* 2007-05-31 - tobias.prinz@open-xchange.com
+
+ - Bugfix #7718: OxContainerConverter ignored that element, added it.
+ - Bugfix #7719: OxContainerConverter ignored that element, changed 
+   handling of MAIL attribute to treat TLX differently.
+ - Bugfix #7109 (re-open): VTIMEZONE was ignored. Now there is no information
+   returned about the fact because it breaks the counting of successes.
+ - Treating Outlook CSV files as Windows-1252 encoded per default. Solves
+   several encoding problems with those files.
+
 * 2007-05-31 - thorben.betten@open-xchange.com
 
  - Bugfix #7588: Avoiding NPE if content type is missing in infostore

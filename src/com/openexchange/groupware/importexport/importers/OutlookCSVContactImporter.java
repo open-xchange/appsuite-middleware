@@ -53,7 +53,6 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.TimeZone;
 
-import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.OXExceptionSource;
@@ -68,7 +67,6 @@ import com.openexchange.groupware.contact.mappers.EnglishOutlookMapper;
 import com.openexchange.groupware.contact.mappers.FrenchOutlookMapper;
 import com.openexchange.groupware.contact.mappers.GermanOutlookMapper;
 import com.openexchange.groupware.importexport.Format;
-import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.groupware.importexport.Importer;
 import com.openexchange.groupware.importexport.csv.CSVParser;
 import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionClasses;
@@ -96,6 +94,12 @@ public class OutlookCSVContactImporter extends CSVContactImporter implements Imp
 	private static final ImportExportExceptionFactory EXCEPTIONS = new ImportExportExceptionFactory(OutlookCSVContactImporter.class);
 	
 	protected ContactFieldMapper fieldMapper;
+	protected String encoding;
+	
+	public OutlookCSVContactImporter(){
+		super();
+		encoding = "Cp1252";
+	}
 	
 	@Override
 	protected ContactField getRelevantField(final String name) {
@@ -186,4 +190,16 @@ public class OutlookCSVContactImporter extends CSVContactImporter implements Imp
 		}
 		return oxEx;
 	}
+
+	@Override
+	protected String getDefaultEncoding() {
+		return encoding;
+	}
+	
+
+	protected void setDefaultEncoding(String encoding) {
+		this.encoding = encoding;
+	}
+	
+	
 }

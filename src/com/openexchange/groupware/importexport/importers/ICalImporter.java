@@ -100,9 +100,10 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
 		Category.CODE_ERROR,
 		Category.CODE_ERROR,
 		Category.USER_INPUT,
-		Category.USER_INPUT}, 
-	desc={"","","","","","",""}, 
-	exceptionId={0,1,2,3,4,5,6}, 
+		Category.USER_INPUT,
+		Category.CODE_ERROR}, 
+	desc={"","","","","","","",""}, 
+	exceptionId={0,1,2,3,4,5,6,7}, 
 	msg={
 		"Could not import into the folder %s.",
 		"Subsystem down",
@@ -110,7 +111,8 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
 		"Programming Error",
 		"Could not load folder %s",
 		"Broken file uploaded: %s",
-		"Cowardly refusing to import an entry flagged as confidential."})
+		"Cowardly refusing to import an entry flagged as confidential.",
+		"Unknown element %s was not imported."})
 
 /**
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
@@ -275,20 +277,33 @@ public class ICalImporter extends AbstractImporter implements Importer {
 						}
 						
 					} else {
-						LOG.warn("invalid versit object: " + versitObject.name);
+						if("VTIMEZONE".equals(versitObject.name.toUpperCase())){
+							LOG.info("Ignoring timezone given in VCARD");
+							importResult = null;
+						} else {
+							LOG.warn("invalid versit object: " + versitObject.name);
+							importResult.setException(EXCEPTIONS.create(7, versitObject.name));
+							importResult.setDate(new Date());
+						}
 					}
 				} catch (OXException exc) {
 					LOG.error("cannot import calendar object", exc);
 					exc = handleDataTruncation(exc); 
 					importResult.setException(exc);
+					importResult.setDate(new Date() );
 				} catch (VersitException exc) {
 					LOG.error("cannot parse calendar object", exc);
 					importResult.setException(new OXException("cannot parse ical object", exc));
+					importResult.setDate(new Date() );
 				}
 				
-				list.add(importResult);
+				if(importResult != null){
+					list.add(importResult);
+				}
 			}
 		} catch (Exception exc) {
+			LOG.info("ICAL import encountered problem:\n" + exc);
+			exc.printStackTrace();
 			throw EXCEPTIONS.create(3, exc);
 		} finally {
 			oxContainerConverter.close();

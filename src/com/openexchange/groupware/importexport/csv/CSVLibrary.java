@@ -151,10 +151,10 @@ public class CSVLibrary {
 		return ret;
 	}
 	
-	public static String transformInputStreamToString(final InputStream is) throws ImportExportException{
+	public static String transformInputStreamToString(final InputStream is, String encoding) throws ImportExportException{
 		BufferedReader br = null;
 		try {
-			br = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+			br = new BufferedReader(new InputStreamReader(is, encoding));
 		} catch (UnsupportedEncodingException e1) {
 			LOG.fatal(e1);
 			throw EXCEPTIONS.create(3);
