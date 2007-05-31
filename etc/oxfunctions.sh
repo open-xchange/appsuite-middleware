@@ -239,3 +239,29 @@ ox_unregister_plugin() {
 	echo "plugin $plugin not registered"
     fi
 }
+
+ox_add_hosts_hostip() {
+    local fqhn=$1
+    local addr=$2
+    
+    test -z "$fqhn" && die \
+	"ox_addhostip: missing fqhn argument (arg 1)"
+    test -z "$addr" && die \
+	"ox_addhostip: missing addr argument (arg 1)"
+
+    local hostarr=( $(echo $fqhn | sed -e 's/\./ /g') )
+    local hn=${hostarr[0]}
+
+    echo -e "$addr\t\t$fqhn $hn" >> /etc/hosts
+}
+
+ox_remove_hosts_hostip() {
+    local addr=$1
+    
+    test -z "$addr" && die \
+	"ox_addhostip: missing addr argument (arg 1)"
+
+    local hosttmp=/etc/hosts.$$
+    grep -v "$addr" /etc/hosts > $hosttmp
+    mv $hosttmp /etc/hosts
+}
