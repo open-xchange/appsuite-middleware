@@ -64,14 +64,13 @@ public class BackendServicesInit {
 	private BackendServicesInit() {
 		super();
 	}
-
-	public static final void init() throws AbstractOXException {
+	
+	public static final void initAJP() throws AbstractOXException {
 		AJPv13Server.startAJPServer();
+	}
+	
+	public static final void initJMX() {
 		MonitorAgent.startMonitorAgent();
-		/*
-		 * Comment out following line to enable remote cache admin
-		 */
-		// RemoteCacheAdmin.startRemoteCacheAdmin();
 	}
 
 }

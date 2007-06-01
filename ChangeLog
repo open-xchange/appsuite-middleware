@@ -1,3 +1,9 @@
+* 2007-06-01 - thorben.betten@open-xchange.com
+
+ - Divided initialization of backend services into two parts: JMX & AJP.
+   The first one is now going to be started before database initialization
+   and the latter is started at the very end of initialization process.
+
 * 2007-05-31 - tobias.prinz@open-xchange.com
 
  - Bugfix #7718: OxContainerConverter ignored that element, added it.
