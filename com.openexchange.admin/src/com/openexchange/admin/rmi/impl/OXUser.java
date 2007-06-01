@@ -206,29 +206,32 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
                         final Object property = servicereference.getProperty("name");
                         if (null != property && property.toString().equalsIgnoreCase("oxuser")) {
                             final OXUserPluginInterface oxuser = (OXUserPluginInterface) this.context.getService(servicereference);
-                            try {
-                                if (log.isDebugEnabled()) {
-                                    log.debug("Calling create for plugin: " + bundlename);
-                                }                                
-                                oxuser.create(ctx, usr, access, auth);
-                                interfacelist.add(oxuser);
-                            } catch (final PluginException e) {
-                                log.error("Error while calling create for plugin: " + bundlename, e);
-                                log.error("Now doing rollback for everything until now...");
-                                for (final OXUserPluginInterface oxuserinterface : interfacelist) {
-                                    try {
-                                        oxuserinterface.delete(ctx, new User[]{usr}, auth);
-                                    } catch (final PluginException e1) {
-                                        log.error("Error doing rollback for plugin: "+ bundlename, e1);
-                                    }
-                                }
+                            
+                            if (oxuser.canHandleContextAdmin() || (!oxuser.canHandleContextAdmin() && !tools.isContextAdmin(ctx, usr.getId()))) {
                                 try {
-                                    oxu.delete(ctx, new int[]{usr.getId()});
-                                } catch (final StorageException e1) {
-                                    log.error("Error doing rollback for creating user in database", e1);
+                                    if (log.isDebugEnabled()) {
+                                        log.debug("Calling create for plugin: " + bundlename);
+                                    }
+                                    oxuser.create(ctx, usr, access, auth);
+                                    interfacelist.add(oxuser);
+                                } catch (final PluginException e) {
+                                    log.error("Error while calling create for plugin: " + bundlename, e);
+                                    log.error("Now doing rollback for everything until now...");
+                                    for (final OXUserPluginInterface oxuserinterface : interfacelist) {
+                                        try {
+                                            oxuserinterface.delete(ctx, new User[] { usr }, auth);
+                                        } catch (final PluginException e1) {
+                                            log.error("Error doing rollback for plugin: " + bundlename, e1);
+                                        }
+                                    }
+                                    try {
+                                        oxu.delete(ctx, new int[] { usr.getId() });
+                                    } catch (final StorageException e1) {
+                                        log.error("Error doing rollback for creating user in database", e1);
+                                    }
+                                    throw new StorageException(e);
                                 }
-                                throw new StorageException(e);
-                            }
+                            }                            
                         }
                     }
                     
@@ -304,15 +307,17 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
                         final Object property = servicereference.getProperty("name");
                         if (null != property && property.toString().equalsIgnoreCase("oxuser")) {
                             final OXUserPluginInterface oxuser = (OXUserPluginInterface) this.context.getService(servicereference);
-                            try {
-                                if (log.isDebugEnabled()) {
-                                    log.debug("Calling change for plugin: " + bundlename);
-                                }                                
-                                oxuser.change(ctx, usrdata, auth);
-                            } catch (final PluginException e) {
-                                log.error("Error while calling change for plugin: "+ bundlename, e);
-                                throw new StorageException(e);
-                            }
+                            if (oxuser.canHandleContextAdmin() || (!oxuser.canHandleContextAdmin() && !tools.isContextAdmin(ctx, usrdata.getId()))) {
+                                try {
+                                    if (log.isDebugEnabled()) {
+                                        log.debug("Calling change for plugin: " + bundlename);
+                                    }
+                                    oxuser.change(ctx, usrdata, auth);
+                                } catch (final PluginException e) {
+                                    log.error("Error while calling change for plugin: " + bundlename, e);
+                                    throw new StorageException(e);
+                                }
+                            }                            
                         }
                     }
                     
@@ -332,6 +337,11 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         } catch (final InvalidDataException e1) {
             log.error("One of the given arguments for delete is null", e1);
             throw e1;
+        }
+        if (users.length == 0) {
+            final InvalidDataException e = new InvalidDataException("User array is empty");
+            log.error(e);
+            throw e;
         }
         
         doAuthentication(auth,ctx);       
@@ -364,7 +374,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         }
 
         final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
-        final User[] retusers = oxu.getData(ctx, users);
+        User[] retusers = oxu.getData(ctx, users);
         
         final ArrayList<OXUserPluginInterface> interfacelist = new ArrayList<OXUserPluginInterface>();
 
@@ -382,14 +392,19 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
                         final Object property = servicereference.getProperty("name");
                         if (null != property && property.toString().equalsIgnoreCase("oxuser")) {
                             final OXUserPluginInterface oxuser = (OXUserPluginInterface) this.context.getService(servicereference);
-                            try {
+                            if (!oxuser.canHandleContextAdmin()) {
+                                retusers = removeContextAdmin(ctx, retusers);
+                                if (retusers.length > 0) {
+                                    if (log.isDebugEnabled()) {
+                                        log.debug("Calling delete for plugin: " + bundlename);
+                                    }
+                                    callDeleteForPlugin(ctx, auth, retusers, interfacelist, bundlename, oxuser);
+                                }
+                            } else {
                                 if (log.isDebugEnabled()) {
                                     log.debug("Calling delete for plugin: " + bundlename);
-                                }                                
-                                oxuser.delete(ctx, retusers, auth);
-                                interfacelist.add(oxuser);
-                            } catch (final PluginException e) {
-                                log.error("Error while calling delete for plugin: "+ bundlename, e);
+                                }
+                                callDeleteForPlugin(ctx, auth, retusers, interfacelist, bundlename, oxuser);
                             }
                         }
                     }
@@ -653,9 +668,10 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
                         final Object property = servicereference.getProperty("name");
                         if (null != property && property.toString().equalsIgnoreCase("oxuser")) {
                             final OXUserPluginInterface oxuserplugin = (OXUserPluginInterface) this.context.getService(servicereference);
+                            //TODO: Implement check for contextadmin here
                             if (log.isDebugEnabled()) {
                                 log.debug("Calling getData for plugin: " + bundlename);
-                            }                            
+                            }
                             retusers = oxuserplugin.getData(ctx, retusers, auth);
                         }
                     }
@@ -822,6 +838,17 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         }
     }
 
+    private User[] removeContextAdmin(final Context ctx, final User[] retusers) throws StorageException {
+        final OXToolStorageInterface oxtool = OXToolStorageInterface.getInstance();
+        final ArrayList<User> list = new ArrayList<User>();
+        for (final User user : retusers) {
+            if (!oxtool.isContextAdmin(ctx, user.getId())) {
+                list.add(user);
+            }
+        }
+        return list.toArray(new User[list.size()]);
+    }
+
     private int[] getUserIdArrayFromUsers(final User[] users) throws InvalidDataException {
         final int[] retval = new int[users.length];
         for (int i = 0; i < users.length; i++) {
@@ -833,6 +860,18 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
             }
         }
         return retval;
+    }
+
+    private void callDeleteForPlugin(final Context ctx, final Credentials auth, User[] retusers, final ArrayList<OXUserPluginInterface> interfacelist, final String bundlename, final OXUserPluginInterface oxuser) {
+        try {
+            if (log.isDebugEnabled()) {
+                log.debug("Calling delete for plugin: " + bundlename);
+            }
+            oxuser.delete(ctx, retusers, auth);
+            interfacelist.add(oxuser);
+        } catch (final PluginException e) {
+            log.error("Error while calling delete for plugin: " + bundlename, e);
+        }
     }
 
     private void checkContext(final Context ctx) throws InvalidDataException {
