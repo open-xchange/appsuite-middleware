@@ -52,34 +52,44 @@ package com.openexchange.tools.servlet;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 
+/**
+ * UploadServletException
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * 
+ */
 public class UploadServletException extends ServletException {
 
 	/**
-	 * 
+	 * serialVersionUID
 	 */
 	private static final long serialVersionUID = -5434167456158444917L;
+
 	private String data;
+
 	private transient HttpServletResponse res;
 
-	public UploadServletException(HttpServletResponse res, String data) {
+	public UploadServletException(final HttpServletResponse res, final String data) {
 		super();
 		this.data = data;
 		this.res = res;
 	}
 
-	public UploadServletException(HttpServletResponse res,String data, String message, Throwable arg1) {
+	public UploadServletException(final HttpServletResponse res, final String data, final String message,
+			final Throwable arg1) {
 		super(message, arg1);
 		this.data = data;
 		this.res = res;
 	}
 
-	public UploadServletException(HttpServletResponse res,String data, String message) {
+	public UploadServletException(final HttpServletResponse res, final String data, final String message) {
 		super(message);
 		this.data = data;
 		this.res = res;
 	}
 
-	public UploadServletException(HttpServletResponse res,String data, Throwable arg0) {
+	public UploadServletException(final HttpServletResponse res, final String data, final Throwable arg0) {
 		super(arg0);
 		this.data = data;
 		this.res = res;
@@ -101,5 +111,4 @@ public class UploadServletException extends ServletException {
 		this.res = res;
 	}
 
-	
 }
