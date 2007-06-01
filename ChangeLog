@@ -10,6 +10,8 @@
  - Added proper logging mechanism when servlet intialization is executed
  - Bugfix #7214: Additional check to ensure folder owner always is a folder
    admin of a default folder.
+ - Bugfix #7503: Unfortunately given writeable connection was not committed,
+   now it is if it's set to auto-commit
 
 * 2007-05-31 - tobias.prinz@open-xchange.com
 
