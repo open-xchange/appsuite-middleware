@@ -8,6 +8,7 @@
    admin of a default folder.
  - Bugfix #7503: Unfortunately given writeable connection was not committed,
    now it is if it's set to auto-commit
+ - Bugfix #7725: Changed error log to be a debug log only.
 
 * 2007-06-01 - marcus.klein@open-xchange.com
 

@@ -1086,7 +1086,9 @@ public class MailInterfaceImpl implements MailInterface {
 					mailInterfaceMonitor.changeNumActive(false);
 					mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 				} catch (final MessagingException e) {
-					LOG.error(e.getMessage(), e);
+					if (LOG.isDebugEnabled()) {
+						LOG.debug("IMAP folder could not be closed. Maybe it's already closed.", e);
+					}
 				} finally {
 					imapCon.resetImapFolder();
 				}
