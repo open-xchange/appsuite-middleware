@@ -49,6 +49,8 @@
 
 package com.openexchange.groupware.notify;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -98,7 +100,7 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 	//TODO: Signatur?
 	//TODO: Abgesagt / Zugesagt
 
-	private final Log LOG = LogFactory.getLog(ParticipantNotify.class);
+	private final static Log LOG = LogFactory.getLog(ParticipantNotify.class);
 	
 	public ParticipantNotify() {
 	}
@@ -650,17 +652,31 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 		public int getModule();
 	}
 	
-	private static abstract class LinkableState implements State {
+	public static abstract class LinkableState implements State {
 		
-		private static Template object_link_template;
+		protected static Template object_link_template;
+		private static String hostname = null;
+		private static UnknownHostException warnSpam;
+		static {
+			try {
+				hostname = InetAddress.getLocalHost().getHostName();
+			} catch (UnknownHostException e) {
+				hostname = "localhost";
+				warnSpam = e;
+			}
+		}
 		
 		public void addSpecial(final CalendarObject obj, final Map<String, String> subst, final EmailableParticipant p){
 			subst.put("link", generateLink(obj, p));
 		}
 
-		private String generateLink(final CalendarObject obj, final EmailableParticipant p) {
+		public String generateLink(final CalendarObject obj, final EmailableParticipant p) {
 			if(object_link_template == null) {
 				loadTemplate();
+			}
+			
+			if(warnSpam != null) {
+				LOG.error("Can't resolve my own hostname, using 'localhost' instead, which is certainly not what you want.!", warnSpam);
 			}
 			
 			final Map<String, String> subst = new HashMap<String,String>();
@@ -670,13 +686,18 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 			default : subst.put("module", "unknown"); break;
 			}
 			
-			subst.put("folder", String.valueOf(p.folderId));
+			int folder = p.folderId;
+			if(folder == -1)
+				folder = obj.getParentFolderID();
+			
+			subst.put("folder", String.valueOf(folder));
 			subst.put("object", String.valueOf(obj.getObjectID()));
+			subst.put("hostname", hostname);
 			
 			return object_link_template.render(subst);
 		}
 		
-		private static final void loadTemplate(){
+		public void loadTemplate(){
 			synchronized (LinkableState.class) {
 				object_link_template = new StringTemplate(NotificationConfig.getProperty(NotificationProperty.OBJECT_LINK, ""));
 			}

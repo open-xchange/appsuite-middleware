@@ -1,3 +1,7 @@
+* 2007-06-01 - francisco.laguna@open-xchange.com
+
+ - Bug 7683: Merged [hostname] resolution for direct link from bf_6_2 branch.
+
 * 2007-06-01 - thorben.betten@open-xchange.com
 
  - Divided initialization of backend services into two parts: JMX & AJP.
