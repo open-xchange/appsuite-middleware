@@ -115,17 +115,21 @@ public class CachingUserStorage extends UserStorage {
      */
     @Override
     public User getUser(final int uid) throws LdapException {
-        return CacheProxy.getCacheProxy(new OXObjectFactory<User>() {
+        final OXObjectFactory<User> factory = new OXObjectFactory<User>() {
             public Object getKey() {
                 return new CacheKey(context, uid);
             }
-            public User load() throws AbstractOXException {
+            public User load() throws LdapException {
                 return getUserStorage().getUser(uid);
             }
             public Lock getCacheLock() {
                 return CACHE_LOCK;
             }
-        }, CACHE, User.class);
+        };
+        if (null == CACHE.get(factory.getKey())) {
+            getUserStorage().getUser(uid);
+        }
+        return CacheProxy.getCacheProxy(factory, CACHE, User.class);
     }
 
     /**
