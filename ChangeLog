@@ -1,3 +1,7 @@
+* 2007-06-01 - marcus.klein@open-xchange.com
+
+  - Bugfix #7730: Enabled IMAP ACLs for OX EE.
+
 * 2007-06-01 - thorben.betten@open-xchange.com
 
  - Divided initialization of backend services into two parts: JMX & AJP.
