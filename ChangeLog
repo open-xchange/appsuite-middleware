@@ -1,3 +1,10 @@
+* 2007-06-01 - thorben.betten@open-xchange.com
+
+ - Divided initialization of backend services into two parts: JMX & AJP.
+   The first one is now going to be started before database initialization
+   and the latter is started at the very end of initialization process.
+ - Added proper logging mechanism when servlet intialization is executed
+
 * 2007-06-01 - marcus.klein@open-xchange.com
 
   - Bugfix #7730: Enabled IMAP ACLs for OX EE.

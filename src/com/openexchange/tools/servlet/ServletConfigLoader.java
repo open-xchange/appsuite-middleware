@@ -123,7 +123,7 @@ public final class ServletConfigLoader {
 	}
 
 	public ServletConfig getConfig(final String clazz) {
-		final ServletConfig conf = lookupByClass(clazz);
+		final ServletConfigWrapper conf = lookupByClass(clazz);
 		if (conf != null) {
 			return conf;
 		}
@@ -131,7 +131,7 @@ public final class ServletConfigLoader {
 	}
 
 	public ServletContext getContext(final String clazz) {
-		final ServletConfig conf = lookupByClass(clazz);
+		final ServletConfigWrapper conf = lookupByClass(clazz);
 		if (conf != null) {
 			return conf.getServletContext();
 		}
@@ -140,7 +140,7 @@ public final class ServletConfigLoader {
 
 	public ServletConfig getConfig(final String clazz, final String pathArg) {
 		final String path = ignoreWildcards(pathArg);
-		final ServletConfig conf = lookupByClassAndPath(clazz, path);
+		final ServletConfigWrapper conf = lookupByClassAndPath(clazz, path);
 		if (conf != null) {
 			return conf;
 		}
@@ -149,7 +149,7 @@ public final class ServletConfigLoader {
 
 	public ServletContext getContext(final String clazz, final String pathArg) {
 		final String path = ignoreWildcards(pathArg);
-		final ServletConfig conf = lookupByClassAndPath(clazz, path);
+		final ServletConfigWrapper conf = lookupByClassAndPath(clazz, path);
 		if (conf != null) {
 			return conf.getServletContext();
 		}
@@ -164,7 +164,7 @@ public final class ServletConfigLoader {
 		this.defaultContext = context;
 	}
 
-	protected ServletConfig lookupByClass(final String clazz) {
+	protected ServletConfigWrapper lookupByClass(final String clazz) {
 		if (clazzGuardian.contains(clazz) && globalProps == null) {
 			/*
 			 * Loading of properties already failed before and no global
@@ -178,14 +178,14 @@ public final class ServletConfigLoader {
 			 */
 			final Map<String, String> props = new HashMap<String, String>();
 			props.putAll(globalProps);
-			return buildConfig(props);
+			return buildConfig(props, clazz);
 		}
 		Map<String, String> props = clazzProps.get(clazz);
 		if (props != null) {
 			if (globalProps != null) {
 				props.putAll(globalProps);
 			}
-			return buildConfig(props);
+			return buildConfig(props, clazz);
 		}
 		props = loadProperties(new File(directory, clazz + FILEEXT_PROPERTIES));
 		if (props == null) {
@@ -193,15 +193,15 @@ public final class ServletConfigLoader {
 			if (globalProps != null) {
 				props = new HashMap<String, String>();
 				props.putAll(globalProps);
-				return buildConfig(props);
+				return buildConfig(props, clazz);
 			}
 			return null;
 		}
 		clazzProps.put(clazz, props);
-		return buildConfig(props);
+		return buildConfig(props, clazz);
 	}
 
-	protected ServletConfig lookupByClassAndPath(final String clazz, final String path) {
+	protected ServletConfigWrapper lookupByClassAndPath(final String clazz, final String path) {
 		if (clazzGuardian.contains(clazz) && pathGuardian.contains(path) && globalProps == null) {
 			return null;
 		}
@@ -248,7 +248,7 @@ public final class ServletConfigLoader {
 		if (globalProps != null) {
 			props.putAll(globalProps);
 		}
-		return buildConfig(new HashMap<String, String>(props)); // Clone
+		return buildConfig(new HashMap<String, String>(props), clazz); // Clone
 
 	}
 
@@ -261,10 +261,11 @@ public final class ServletConfigLoader {
 	 * @return a <code>ServletConfig</code> instance containing all elements
 	 *         of given property map
 	 */
-	protected ServletConfig buildConfig(final Map<String, String> props) {
+	protected ServletConfigWrapper buildConfig(final Map<String, String> props, final String clazz) {
 		final ServletConfigWrapper config = new ServletConfigWrapper();
 		config.setInitParameter(props);
 		config.setServletContextWrapper(new ServletContextWrapper(config));
+		config.setServletName(getClassName(clazz));
 		return config;
 	}
 
@@ -339,6 +340,14 @@ public final class ServletConfigLoader {
 	public void setDirectory(final File directory) {
 		this.directory = directory;
 		globalProps = loadDirProps(this.directory);
+	}
+	
+	private static String getClassName(final String fullyQualifiedName) {
+		final int pos;
+		if ((pos = fullyQualifiedName.lastIndexOf('.')) > 0) {
+			return fullyQualifiedName.substring(pos + 1);
+		}
+		return fullyQualifiedName;
 	}
 
 }
