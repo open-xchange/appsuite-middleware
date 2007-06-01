@@ -697,55 +697,58 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
             }
         }
 
-        // checks below throw InvalidDataException
-        checkValidEmailsInUserObject(newuser);
-        HashSet<String> useraliases = newuser.getAliases();
+        final OXToolStorageInterface oxtool = OXToolStorageInterface.getInstance();
+        
+        if (!oxtool.isContextAdmin(ctx, newuser.getId())) {
+            // checks below throw InvalidDataException
+            checkValidEmailsInUserObject(newuser);
+            HashSet<String> useraliases = newuser.getAliases();
+            final String primaryEmail = newuser.getPrimaryEmail();
+            final String email1 = newuser.getEmail1();
+            if (primaryEmail != null && email1 != null) {
+                // primary mail value must be same with email1
+                if (!primaryEmail.equals(email1)) {
+                    throw new InvalidDataException("email1 not equal with primarymail!");
+                }
+            }
+            if (useraliases == null) {
+                useraliases = dbuser.getAliases();
+            }
+            String check_primary_mail;
+            String check_email1;
+            if (primaryEmail != null) {
+                check_primary_mail = primaryEmail;
+            } else {
+                check_primary_mail = dbuser.getPrimaryEmail();
+            }
+            if (email1 != null) {
+                check_email1 = email1;
+            } else {
+                check_email1 = dbuser.getPrimaryEmail();
+            }
+            boolean found_primary_mail = false;
+            boolean found_email1 = false;
+            if (null != useraliases) {
+                for (final String addr : useraliases) {
+                    GenericChecks.checkValidMailAddress(addr);
+                    if (check_primary_mail.equals(addr)) {
+                        found_primary_mail = true;
+                    }
+                    if (check_email1.equals(addr)) {
+                        found_email1 = true;
+                    }
+                }
+            }
+            if (!found_primary_mail || !found_email1) {
+                throw new InvalidDataException("primarymail and mail1 must be present in set of aliases.");
+            }
+            // added "usrdata.getPrimaryEmail() != null" for this check, else we cannot update user data without mail data
+            // which is not very good when just changing the displayname for example
+            if (primaryEmail != null && email1 == null) {
+                throw new InvalidDataException("email1 not sent but required!");
 
-        final String primaryEmail = newuser.getPrimaryEmail();
-        final String email1 = newuser.getEmail1();
-        if (primaryEmail != null && email1 != null) {
-            // primary mail value must be same with email1
-            if (!primaryEmail.equals(email1)) {
-                throw new InvalidDataException("email1 not equal with primarymail!");
             }
-        }
-
-        if( useraliases == null ) {
-            useraliases = dbuser.getAliases();
-        }
-        String check_primary_mail;
-        String check_email1;
-        if( primaryEmail != null ) {
-            check_primary_mail = primaryEmail;
-        } else {
-            check_primary_mail = dbuser.getPrimaryEmail();
-        }
-        if( email1 != null ) {
-            check_email1 = email1;
-        } else {
-            check_email1 = dbuser.getPrimaryEmail();
-        }
-        boolean found_primary_mail = false;
-        boolean found_email1       = false;
-        for(final String addr : useraliases ) {
-            GenericChecks.checkValidMailAddress(addr);
-            if(check_primary_mail.equals(addr)) {
-                found_primary_mail = true;
-            }
-            if(check_email1.equals(addr)) {
-                found_email1 = true;
-            }
-        }
-        if ( ! found_primary_mail || ! found_email1 ) {
-            throw new InvalidDataException("primarymail and mail1 must be present in set of aliases.");
-        }
-    
-        // added "usrdata.getPrimaryEmail() != null" for this check, else we cannot update user data without mail data
-        // which is not very good when just changing the displayname for example
-        if (primaryEmail != null && email1 == null) {
-            throw new InvalidDataException("email1 not sent but required!");
-           
-        }
+        }        
     
     }
 
