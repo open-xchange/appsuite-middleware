@@ -144,6 +144,28 @@ public class UserTest extends AbstractTest {
         fail("user not exists expected");
     }
 
+    @Test(expected=InvalidDataException.class)
+    public void testDeleteEmptyUserList() throws Exception {
+        
+        // get context to create an user
+        final Credentials cred = DummyCredentials();
+        final Context ctx = getTestContextObject(cred);
+        
+        // create new user
+        final OXUserInterface oxu = getUserClient();
+        final UserModuleAccess access = new UserModuleAccess();
+        
+        final User urs = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
+        urs.setId(oxu.create(ctx,urs,access,cred));             
+        
+        // delete user
+        oxu.delete(ctx, new User[0] ,cred);
+        
+        // try to load user, this MUST fail       
+        oxu.getData(ctx,urs,cred);
+        fail("user not exists expected");
+    }
+
     @Test
     public void testGetData() throws Exception {
         
