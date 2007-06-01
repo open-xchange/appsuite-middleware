@@ -319,5 +319,26 @@ public interface OXUserInterface extends Remote {
      */
     public User getData(Context ctx, User user, Credentials auth) 
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException, DatabaseUpdateException;
-
+    
+    /**
+     * Checks if given User is Administrator for the given Context.
+     * 
+     * @param ctx
+     *          Context object.
+     * @param user
+     *          User object.
+     * @param auth
+     *          Credentials for authenticating against server.
+     * @return
+     * @throws RemoteException
+     * @throws StorageException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws InvalidDataException
+     * @throws NoSuchUserException
+     * @throws DatabaseUpdateException
+     */
+    public boolean isContextAdmin(Context ctx, User user, Credentials auth) 
+        throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException, DatabaseUpdateException;
+    
 }

@@ -844,4 +844,33 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         GenericChecks.checkValidMailAddress(usr.getEmail2());
         GenericChecks.checkValidMailAddress(usr.getEmail3());
     }
+
+    public boolean isContextAdmin(Context ctx, User user, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException, DatabaseUpdateException {
+        
+        try {
+            doNullCheck(ctx,user,auth);
+        } catch (final InvalidDataException e1) {
+            log.error("One of the given arguments is null", e1);
+            throw e1;
+        }
+        
+        try {
+            checkContext(ctx);
+        } catch (final InvalidDataException e) {
+            log.error(e);
+            throw e;
+        }        
+        
+        doUserAuthentication(auth,ctx);
+
+        final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
+        if (user.getId()!=null && !tools.existsUser(ctx, user.getId().intValue())) {
+            final NoSuchUserException noSuchUserException = new NoSuchUserException("No such user " + user.getId().intValue() + " in context " + ctx.getIdAsInt());
+            log.error(noSuchUserException);
+            throw noSuchUserException;           
+        }
+        
+        return tools.isContextAdmin(ctx, user.getId().intValue());
+                
+    }
 }
