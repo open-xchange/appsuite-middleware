@@ -500,7 +500,11 @@ public class OXFolderException extends OXException {
 		 */
 		NO_SHARED_FOLDER_SUBFOLDER_PERMISSION(
 				"User %s must not grant \"create subfolder\" permission for another user on shared folder %s in context %s",
-				Category.PERMISSION, 70);
+				Category.PERMISSION, 70),
+		/**		
+		 * Owner %s of default folder %s must keep the folder admin permission
+		 */
+		CREATOR_IS_NOT_ADMIN("Owner %s of default folder %s must keep the folder admin permission", Category.USER_INPUT, 71);
 
 		/**
 		 * Message of the exception.

@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.tools.servlet;
 
 import java.util.Enumeration;
@@ -61,6 +59,7 @@ import javax.servlet.ServletContext;
 
 /**
  * OXServletConfig
+ * 
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
 
@@ -92,21 +91,38 @@ public class ServletConfigWrapper implements ServletConfig {
 		this.servletcontextwrapper = servletcontextwrapper;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.servlet.ServletConfig#getInitParameter(java.lang.String)
+	 */
 	public String getInitParameter(final String name) {
-		if (init_parameter.containsKey(name)) {
-			return init_parameter.get(name);
-		}
-		return null;
+		return init_parameter.get(name);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.servlet.ServletConfig#getServletName()
+	 */
 	public String getServletName() {
 		return servlet_name;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.servlet.ServletConfig#getServletContext()
+	 */
 	public ServletContext getServletContext() {
 		return servletcontextwrapper;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.servlet.ServletConfig#getInitParameterNames()
+	 */
 	public Enumeration getInitParameterNames() {
 		return new IteratorEnumeration(init_parameter.keySet().iterator());
 	}
@@ -119,18 +135,28 @@ public class ServletConfigWrapper implements ServletConfig {
 	private static class IteratorEnumeration implements Enumeration {
 
 		private final Iterator iter;
-		
-		public IteratorEnumeration(Iterator iter) {
+
+		public IteratorEnumeration(final Iterator iter) {
 			this.iter = iter;
 		}
-		
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see java.util.Enumeration#hasMoreElements()
+		 */
 		public boolean hasMoreElements() {
 			return iter.hasNext();
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see java.util.Enumeration#nextElement()
+		 */
 		public Object nextElement() {
 			return iter.next();
 		}
-		
+
 	}
 }

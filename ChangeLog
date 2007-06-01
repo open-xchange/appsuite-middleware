@@ -4,6 +4,8 @@
    The first one is now going to be started before database initialization
    and the latter is started at the very end of initialization process.
  - Added proper logging mechanism when servlet intialization is executed
+ - Bugfix #7214: Additional check to ensure folder owner always is a folder
+   admin of a default folder.
 
 * 2007-06-01 - marcus.klein@open-xchange.com
 

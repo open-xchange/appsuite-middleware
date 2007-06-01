@@ -488,6 +488,7 @@ public class OXFolderManagerImpl implements OXFolderManager {
 		folderObj.setType(storageObj.getType());
 		folderObj.setModule(storageObj.getModule());
 		folderObj.setCreatedBy(storageObj.getCreatedBy());
+		folderObj.setDefaultFolder(storageObj.isDefaultFolder());
 		checkFolderPermissions(folderObj, user.getId(), PREFIX_UPDATE, ctx);
 		/*
 		 * Call SQL update
@@ -1248,12 +1249,15 @@ public class OXFolderManagerImpl implements OXFolderManager {
 		int adminPermissionCount = 0;
 		final int permissionsSize = folderObj.getPermissions().size();
 		final Iterator<OCLPermission> iter = folderObj.getPermissions().iterator();
+		final int creator = folderObj.containsCreatedBy() ? folderObj.getCreatedBy() : userId;
+		final boolean isDefaultFolder = folderObj.containsDefaultFolder() ? folderObj.isDefaultFolder() : false;
+		boolean creatorIsAdmin = false;
 		for (int i = 0; i < permissionsSize; i++) {
 			final OCLPermission oclPerm = iter.next();
 			if (oclPerm.getEntity() < 0) {
 				throw new OXFolderException(FolderCode.INVALID_ENTITY, excPrefix, Integer.valueOf(oclPerm.getEntity()),
 						getFolderName(folderObj), Integer.valueOf(ctx.getContextId()));
-			} else if (isPrivate && oclPerm.getEntity() != userId
+			} else if (isPrivate && oclPerm.getEntity() != creator
 					&& oclPerm.getFolderPermission() >= OCLPermission.CREATE_SUB_FOLDERS) {
 				throw new OXFolderException(FolderCode.NO_SHARED_FOLDER_SUBFOLDER_PERMISSION, excPrefix, getUserName(
 						userId, ctx), getFolderName(folderObj), Integer.valueOf(ctx.getContextId()),
@@ -1268,18 +1272,20 @@ public class OXFolderManagerImpl implements OXFolderManager {
 					if (oclPerm.isGroupPermission()) {
 						throw new OXFolderLogicException(FolderCode.NO_PRIVATE_FOLDER_ADMIN_GROUP, excPrefix);
 					}
-					if (folderObj.containsCreatedBy()) {
-						if (folderObj.getCreatedBy() != oclPerm.getEntity()) {
-							throw new OXFolderLogicException(FolderCode.ONLY_PRIVATE_FOLDER_OWNER_ADMIN, excPrefix);
-						}
-					} else if (userId != oclPerm.getEntity()) {
+					if (creator != oclPerm.getEntity()) {
 						throw new OXFolderLogicException(FolderCode.ONLY_PRIVATE_FOLDER_OWNER_ADMIN, excPrefix);
 					}
+				}
+				if (isDefaultFolder && !creatorIsAdmin) {
+					creatorIsAdmin = (oclPerm.getEntity() == creator);
 				}
 			}
 		}
 		if (adminPermissionCount == 0) {
 			throw new OXFolderLogicException(FolderCode.NO_FOLDER_ADMIN, excPrefix);
+		} else if (isDefaultFolder && !creatorIsAdmin) {
+			throw new OXFolderException(FolderCode.CREATOR_IS_NOT_ADMIN, STR_EMPTY, getUserName(creator, ctx),
+					getFolderName(folderObj.getObjectID(), ctx));
 		}
 	}
 	
