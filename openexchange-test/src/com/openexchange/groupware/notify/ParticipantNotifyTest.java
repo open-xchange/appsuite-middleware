@@ -1,6 +1,8 @@
 package com.openexchange.groupware.notify;
 
 import java.io.File;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,7 +17,9 @@ import junit.framework.TestCase;
 
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.groupware.Init;
+import com.openexchange.groupware.Types;
 import com.openexchange.groupware.UserConfiguration;
+import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.GroupParticipant;
@@ -33,8 +37,10 @@ import com.openexchange.groupware.ldap.Resource;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserConfigurationFactory;
 import com.openexchange.groupware.notify.ParticipantNotify.EmailableParticipant;
+import com.openexchange.groupware.notify.ParticipantNotify.LinkableState;
 import com.openexchange.groupware.notify.ParticipantNotify.State;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.i18n.StringTemplate;
 import com.openexchange.i18n.TemplateListResourceBundle;
 import com.openexchange.sessiond.SessionObject;
 
@@ -56,7 +62,69 @@ public class ParticipantNotifyTest extends TestCase{
 	private Date end = new Date();
 	private SessionObject session = null;
 	
+	// Bug 7507
+	public void testGenerateLink() {
+		EmailableParticipant p = new EmailableParticipant(0, 0, null, "", "", null, null, 0, 23); //FolderId: 23
+		Task task = new Task();
+		task.setObjectID(42);
+		AppointmentObject appointment = new AppointmentObject();
+		appointment.setObjectID(43);
+		String hostname = null;
+		try {
+			hostname = InetAddress.getLocalHost().getHostName();
+		} catch (UnknownHostException e) {
+			fail("Don't know my hostname");
+		}
 	
+	
+		TestLinkableState state = new TestLinkableState();
+		state.setTemplateString("[hostname]");
+		state.setModule(Types.TASK);
+		String link = state.generateLink(task, p);
+		assertEquals(hostname,link);
+		
+		state.setTemplateString("[module]");
+		link = state.generateLink(task, p);
+		assertEquals("task",link);
+		
+		state.setTemplateString("[object]");
+		link = state.generateLink(task, p);
+		assertEquals("42",link);
+		
+		state.setTemplateString("[folder]");
+		link = state.generateLink(task, p);
+		assertEquals("23",link);
+		
+		state.setModule(Types.APPOINTMENT);
+		state.setTemplateString("[hostname]");
+		link = state.generateLink(appointment, p);
+		assertEquals(hostname,link);
+
+		state.setTemplateString("[module]");
+		link = state.generateLink(appointment, p);
+		assertEquals("calendar",link);
+		
+		state.setTemplateString("[object]");
+		link = state.generateLink(appointment, p);
+		assertEquals("43",link);
+		
+		state.setTemplateString("[folder]");
+		link = state.generateLink(appointment, p);
+		assertEquals("23",link);
+		
+		state.setTemplateString("http://[hostname]/ox6/#m=[module]&i=[object]&f=[folder]");
+		link = state.generateLink(appointment, p);
+		assertEquals("http://"+hostname+"/ox6/#m=calendar&i=43&f=23",link);
+		
+		p.folderId = -1;
+		appointment.setParentFolderID(25);
+		state.setTemplateString("[folder]");
+		link = state.generateLink(appointment, p);
+		assertEquals("25",link);
+		
+		
+		
+	}
 	
 	public void testSimple() throws Exception{
 		Participant[] participants = getParticipants(U(2),G(),S(), R());
@@ -457,5 +525,33 @@ public class ParticipantNotifyTest extends TestCase{
 		protected void sendMessage(String messageTitle, String message, List<String> name, SessionObject session, CalendarObject obj, int folderId, State state, boolean suppressOXReminderHeader) {
 			messageCollector.add(new Message(messageTitle,message,name, folderId));
 		}		
+	}
+
+	private static final class TestLinkableState extends LinkableState {
+
+		private int module;
+
+		public void setModule(int module) {
+			this.module = module;
+}
+		public int getModule() {
+			return module;
+		}
+
+		public boolean sendMail(UserConfiguration userConfig) {
+			// TODO Auto-generated method stub
+			return false;
+		}
+
+		@Override
+		public void loadTemplate() {
+		}
+		
+		public void setTemplateString(String template) {
+			object_link_template = new StringTemplate(template);
+		}
+		
+		
+		
 	}
 }
