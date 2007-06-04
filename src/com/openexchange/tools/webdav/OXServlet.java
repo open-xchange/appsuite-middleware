@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.tools.webdav;
 
 import java.io.IOException;
@@ -198,6 +196,17 @@ public abstract class OXServlet extends WebDavServlet {
                 final Cookie cookie = new Cookie("sessionid", sessionId);
                 cookie.setMaxAge(0);
                 resp.addCookie(cookie);
+            }
+        } else {
+            final String address = req.getRemoteAddr();
+            if (null == address || !address.equals(session.getLocalIp())) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Wrong client IP address.");
+                }
+                addUnauthorizedHeader(resp);
+                resp.sendError(HttpServletResponse.SC_UNAUTHORIZED,
+                    "Authorization Required!");
+                return false;
             }
         }
         req.setAttribute(SESSION, session);
