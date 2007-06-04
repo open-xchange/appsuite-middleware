@@ -221,7 +221,9 @@ public class MonitoringInfo {
 	
 	private static final String TYPE_OUTLOOK = "servlet/webdav.";
 	
-	private static final String TYPE_SYNCML = "syncml";
+	private static final String TYPE_SYNCML = "ajax/sync";
+	
+	private static final String TYPE_OXADMIN_UMIN = "oxadmin/umin";
 	
 	public static final int getConnectionType(final String pathInfo) {
 		if (pathInfo.startsWith(TYPE_AJAX)) {
@@ -232,6 +234,8 @@ public class MonitoringInfo {
 			return MonitoringInfo.OUTLOOK;
 		} else if (pathInfo.startsWith(TYPE_SYNCML)) {
 			return MonitoringInfo.SYNCML;
+		} else if (pathInfo.startsWith(TYPE_OXADMIN_UMIN)) {
+			return MonitoringInfo.AJAX;
 		} else {
 			return -1;
 		}
