@@ -352,9 +352,9 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
 	protected static final String SAVE_AS_TYPE = "application/octet-stream";
 
-	protected static final String JS_FRAGMENT_JSON = "\\*\\*json\\*\\*";
+	public static final String JS_FRAGMENT_JSON = "\\*\\*json\\*\\*";
 
-	protected static final String JS_FRAGMENT_ACTION = "\\*\\*action\\*\\*";
+	public static final String JS_FRAGMENT_ACTION = "\\*\\*action\\*\\*";
 
 	protected static final String _doGet = "doGet";
 
