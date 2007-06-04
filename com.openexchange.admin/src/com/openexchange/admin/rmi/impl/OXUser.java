@@ -706,13 +706,6 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
             throw new InvalidDataException("Empty password is not allowed");
         }
         
-        final Locale langus = OXUser.getLanguage(newuser);
-        if (langus != null) {
-            if (langus.getLanguage().indexOf('_') != -1 || langus.getCountry().indexOf('_') != -1) {
-                throw new InvalidDataException("The specified locale data (Language:" + langus.getLanguage() + " - Country:" + langus.getCountry() + ") for users language is invalid!");
-            }
-        }
-
         final OXToolStorageInterface oxtool = OXToolStorageInterface.getInstance();
         
         if (!oxtool.isContextAdmin(ctx, newuser.getId())) {
