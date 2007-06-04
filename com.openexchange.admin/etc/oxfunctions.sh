@@ -45,9 +45,6 @@
 #    with this program; if not, write to the Free Software Foundation, Inc., 59
 #    Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-OXCONFIG=@oxscriptconf@
-. $OXCONFIG
-
 JAVA_BIN=
 
 ox_set_JAVA_BIN() {
@@ -172,10 +169,9 @@ die() {
 
 # checks if admindaemon is running
 ox_isrunning() {
-    if [ "$RESTART_ON_UPDATE" != "yes" ]; then
-	# we do not want to be restartet
-	return 1
-    fi
+    # FIXME: this check must always fail in OX EE
+    return 1
+
     local pidfile=/var/run/open-xchange-admin.pid
     if [ ! -f $pidfile ]; then
         # not running
