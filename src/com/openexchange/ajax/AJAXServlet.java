@@ -764,7 +764,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 				throw new UploadException(UploadCode.UPLOAD_FAILED, action, e);
 			}
 			if (action != null
-					&& (action.equals(ACTION_NEW) || action.equals(ACTION_APPEND) || action.equals(ACTION_UPDATE)
+					&& (action.equals(ACTION_NEW) || action.equals(ACTION_UPLOAD) || action.equals(ACTION_APPEND) || action.equals(ACTION_UPDATE)
 							|| action.equals(ACTION_ATTACH) || action.equals(ACTION_COPY) || com.openexchange.groupware.importexport.Format
 							.containsConstantName(action))) {
 				uploadEvent.setAction(action);
