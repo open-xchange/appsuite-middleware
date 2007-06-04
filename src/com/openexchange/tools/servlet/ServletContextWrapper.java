@@ -57,7 +57,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import javax.activation.MimetypesFileTypeMap;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
@@ -123,8 +122,8 @@ public class ServletContextWrapper implements ServletContext {
 	 * 
 	 * @see javax.servlet.ServletContext#getMimeType(java.lang.String)
 	 */
-	public String getMimeType(final String fileName) {
-		return MimetypesFileTypeMap.getDefaultFileTypeMap().getContentType(fileName);
+	public String getMimeType(final String string) {
+		return null;
 	}
 
 	/*
@@ -141,10 +140,7 @@ public class ServletContextWrapper implements ServletContext {
 	 * 
 	 * @see javax.servlet.ServletContext#getContext(java.lang.String)
 	 */
-	public ServletContext getContext(final String uri) {
-		if ((uri == null) || (uri.charAt(0) != '/')) {
-			return null;
-		}
+	public ServletContext getContext(final String string) {
 		return null;
 	}
 

@@ -199,10 +199,7 @@ public class OXFolderDeleteListener implements DeleteListener {
 						OXFolderSQL.handleEntityFolders(userId, mailadmin, lastModified, TABLE_BACKUP_FOLDER,
 								TABLE_BACKUP_PERMS, readCon, writeCon, ctx);
 					}
-					if (performTransaction) {
-						writeCon.commit();
-						writeCon.setAutoCommit(true);
-					}
+
 				} finally {
 					if (createReadCon && readCon != null) {
 						DBPool.closeReaderSilent(ctx, readCon);
@@ -287,10 +284,6 @@ public class OXFolderDeleteListener implements DeleteListener {
 					 */
 					OXFolderSQL.handleEntityPermissions(groupId, mailadmin, lastModified, TABLE_BACKUP_FOLDER,
 							TABLE_BACKUP_PERMS, readCon, writeCon, ctx);
-					if (performTransaction) {
-						writeCon.commit();
-						writeCon.setAutoCommit(true);
-					}
 				} finally {
 					if (createReadCon && readCon != null) {
 						DBPool.closeReaderSilent(ctx, readCon);

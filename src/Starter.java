@@ -139,16 +139,6 @@ public class Starter {
 		} catch (final ClassNotFoundException e1) {
 			e1.printStackTrace();
 		}
-		
-		try {
-        	BackendServicesInit.initJMX();
-        } catch (final Exception e) {
-            LOG.error("Initializing the JMX server failed.", e);
-            System.exit(1);
-        }
-		if (LOG.isInfoEnabled()) {
-			LOG.info("JMX server successfully initialized.");
-		}
 
         try {
         	if (LOG.isInfoEnabled()) {
@@ -178,13 +168,13 @@ public class Starter {
 		}
         
         try {
-        	BackendServicesInit.initAJP();
+        	BackendServicesInit.init();
         } catch (final AbstractOXException e) {
-            LOG.error("Initializing the AJP server failed.", e);
+            LOG.error("Initializing the backend services failed.", e);
             System.exit(1);
         }
 		if (LOG.isInfoEnabled()) {
-			LOG.info("AJP server successfully initialized.");
+			LOG.info("Backend services successfully initialized.");
 		}
         
         /*

@@ -113,7 +113,7 @@ public final class ServletConfigLoader {
 	
 	private Map<String, String> globalProps;
 
-	public ServletConfigLoader(final File directory) {
+	public ServletConfigLoader(File directory) {
 		this.directory = directory;
 		globalProps = loadDirProps(this.directory);
 	}
@@ -123,7 +123,7 @@ public final class ServletConfigLoader {
 	}
 
 	public ServletConfig getConfig(final String clazz) {
-		final ServletConfigWrapper conf = lookupByClass(clazz);
+		final ServletConfig conf = lookupByClass(clazz);
 		if (conf != null) {
 			return conf;
 		}
@@ -131,7 +131,7 @@ public final class ServletConfigLoader {
 	}
 
 	public ServletContext getContext(final String clazz) {
-		final ServletConfigWrapper conf = lookupByClass(clazz);
+		final ServletConfig conf = lookupByClass(clazz);
 		if (conf != null) {
 			return conf.getServletContext();
 		}
@@ -140,7 +140,7 @@ public final class ServletConfigLoader {
 
 	public ServletConfig getConfig(final String clazz, final String pathArg) {
 		final String path = ignoreWildcards(pathArg);
-		final ServletConfigWrapper conf = lookupByClassAndPath(clazz, path);
+		final ServletConfig conf = lookupByClassAndPath(clazz, path);
 		if (conf != null) {
 			return conf;
 		}
@@ -149,7 +149,7 @@ public final class ServletConfigLoader {
 
 	public ServletContext getContext(final String clazz, final String pathArg) {
 		final String path = ignoreWildcards(pathArg);
-		final ServletConfigWrapper conf = lookupByClassAndPath(clazz, path);
+		final ServletConfig conf = lookupByClassAndPath(clazz, path);
 		if (conf != null) {
 			return conf.getServletContext();
 		}
@@ -164,7 +164,7 @@ public final class ServletConfigLoader {
 		this.defaultContext = context;
 	}
 
-	protected ServletConfigWrapper lookupByClass(final String clazz) {
+	protected ServletConfig lookupByClass(final String clazz) {
 		if (clazzGuardian.contains(clazz) && globalProps == null) {
 			/*
 			 * Loading of properties already failed before and no global
@@ -178,14 +178,14 @@ public final class ServletConfigLoader {
 			 */
 			final Map<String, String> props = new HashMap<String, String>();
 			props.putAll(globalProps);
-			return buildConfig(props, clazz);
+			return buildConfig(props);
 		}
 		Map<String, String> props = clazzProps.get(clazz);
 		if (props != null) {
 			if (globalProps != null) {
 				props.putAll(globalProps);
 			}
-			return buildConfig(props, clazz);
+			return buildConfig(props);
 		}
 		props = loadProperties(new File(directory, clazz + FILEEXT_PROPERTIES));
 		if (props == null) {
@@ -193,15 +193,15 @@ public final class ServletConfigLoader {
 			if (globalProps != null) {
 				props = new HashMap<String, String>();
 				props.putAll(globalProps);
-				return buildConfig(props, clazz);
+				return buildConfig(props);
 			}
 			return null;
 		}
 		clazzProps.put(clazz, props);
-		return buildConfig(props, clazz);
+		return buildConfig(props);
 	}
 
-	protected ServletConfigWrapper lookupByClassAndPath(final String clazz, final String path) {
+	protected ServletConfig lookupByClassAndPath(final String clazz, final String path) {
 		if (clazzGuardian.contains(clazz) && pathGuardian.contains(path) && globalProps == null) {
 			return null;
 		}
@@ -248,7 +248,7 @@ public final class ServletConfigLoader {
 		if (globalProps != null) {
 			props.putAll(globalProps);
 		}
-		return buildConfig(new HashMap<String, String>(props), clazz); // Clone
+		return buildConfig(new HashMap<String, String>(props)); // Clone
 
 	}
 
@@ -261,11 +261,10 @@ public final class ServletConfigLoader {
 	 * @return a <code>ServletConfig</code> instance containing all elements
 	 *         of given property map
 	 */
-	protected ServletConfigWrapper buildConfig(final Map<String, String> props, final String clazz) {
+	protected ServletConfig buildConfig(final Map<String, String> props) {
 		final ServletConfigWrapper config = new ServletConfigWrapper();
 		config.setInitParameter(props);
 		config.setServletContextWrapper(new ServletContextWrapper(config));
-		config.setServletName(getClassName(clazz));
 		return config;
 	}
 
@@ -278,13 +277,13 @@ public final class ServletConfigLoader {
 		try {
 			in = new BufferedInputStream(new FileInputStream(propFile));
 			props.load(in);
-		} catch (final IOException x) {
+		} catch (IOException x) {
 			return null;
 		} finally {
 			if (in != null) {
 				try {
 					in.close();
-				} catch (final IOException e) {
+				} catch (IOException e) {
 					LOG.error(e.getMessage(), e);
 				}
 			}
@@ -297,7 +296,7 @@ public final class ServletConfigLoader {
 	protected Map<String, String> loadDirProps(final File dir) {
 		final Map<String, String> m = new HashMap<String, String>();
 		if (dir.exists() && dir.isDirectory()) {
-			for (final File f : dir.listFiles()) {
+			for (File f : dir.listFiles()) {
 				if (f.isFile() && f.getName().endsWith(FILEEXT_PROPERTIES)) {
 					final Map<String, String> props = loadProperties(f);
 					m.putAll(props);
@@ -324,7 +323,7 @@ public final class ServletConfigLoader {
 	 *            the source properties
 	 */
 	private void addProps(final Map<String, String> m, final Properties props) {
-		for (final Map.Entry<Object, Object> entry : props.entrySet()) {
+		for (Map.Entry<Object, Object> entry : props.entrySet()) {
 			m.put((String) entry.getKey(), (String) entry.getValue());
 		}
 	}
@@ -340,14 +339,6 @@ public final class ServletConfigLoader {
 	public void setDirectory(final File directory) {
 		this.directory = directory;
 		globalProps = loadDirProps(this.directory);
-	}
-	
-	private static String getClassName(final String fullyQualifiedName) {
-		final int pos;
-		if ((pos = fullyQualifiedName.lastIndexOf('.')) > 0) {
-			return fullyQualifiedName.substring(pos + 1);
-		}
-		return fullyQualifiedName;
 	}
 
 }

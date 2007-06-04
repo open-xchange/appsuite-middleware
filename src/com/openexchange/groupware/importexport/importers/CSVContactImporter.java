@@ -102,7 +102,7 @@ import com.openexchange.sessiond.SessionObject;
 		"Can only import into one folder at a time.",
 		"Cannot import this kind of data. Use method canImport() first.",
 		"Cannot read given InputStream.",
-		"Could not find equivalent fields for the following fields in the CSV file: %s",
+		"Could not find the following fields %s",
 		"Could not translate a single column title. Is this a valid CSV file?",
 		"Could not translate a single field of information, did not insert entry %s."})
 		
@@ -165,7 +165,7 @@ public class CSVContactImporter extends AbstractImporter implements Importer {
 			throw EXCEPTIONS.create(1);
 		}
 		final String folder = folders.get(0);
-		final String csvStr = transformInputStreamToString(is, getDefaultEncoding());
+		final String csvStr = transformInputStreamToString(is);
 		final CSVParser csvParser = getCSVParser();
 		final List <List <String> >csv = csvParser.parse(csvStr);
 		
@@ -280,10 +280,6 @@ public class CSVContactImporter extends AbstractImporter implements Importer {
 		final ContactSwitcherForTimestamp conSwitch  = new ContactSwitcherForTimestamp();
 		conSwitch.setDelegate(new ContactSetter());
 		return conSwitch;
-	}
-	
-	protected String getDefaultEncoding(){
-		return "UTF-8";
 	}
 	
 	

@@ -487,8 +487,7 @@ msgid ""
 "orphaned or belongs to another module."
 msgstr ""
 
-msgid ""
-"Could not find equivalent fields for the following fields in the CSV file: %s"
+msgid "Could not find the following fields %s"
 msgstr ""
 
 msgid "Could not generate new ID."
@@ -1247,9 +1246,6 @@ msgstr ""
 msgid "Operation not executeable on folder %s in context %s"
 msgstr ""
 
-msgid "Owner %s of default folder %s must keep the folder admin permission"
-msgstr ""
-
 msgid "Parameter %s does not match JSON key %s"
 msgstr ""
 
@@ -1781,9 +1777,6 @@ msgid "Unknown action: %s"
 msgstr ""
 
 msgid "Unknown color label: %s"
-msgstr ""
-
-msgid "Unknown element %s was not imported."
 msgstr ""
 
 msgid "Unknown field: %d"

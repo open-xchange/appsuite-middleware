@@ -2,30 +2,6 @@
 
   - Bugfix #7778: Checking client IP address to prevent session stealing.
 
-* 2007-06-01 - marcus.klein@open-xchange.com
-
-  - Bugfix #7730: Enabled IMAP ACLs for OX EE.
-
-* 2007-06-01 - thorben.betten@open-xchange.com
-
- - Divided initialization of backend services into two parts: JMX & AJP.
-   The first one is now going to be started before database initialization
-   and the latter is started at the very end of initialization process.
- - Added proper logging mechanism when servlet intialization is executed
- - Bugfix #7214: Additional check to ensure folder owner always is a folder
-   admin of a default folder.
- - Bugfix #7503: Unfortunately given writeable connection was not committed,
-   now it is if it's set to auto-commit
-
-* 2007-05-31 - tobias.prinz@open-xchange.com
-
- - Bugfix #7718: OxContainerConverter ignored that element, added it.
- - Bugfix #7719: OxContainerConverter ignored that element, changed 
-   handling of MAIL attribute to treat TLX differently.
- - Bugfix #7109 (re-open): VTIMEZONE was ignored. Now there is no information
-   returned about the fact because it breaks the counting of successes.
- - Bugfix #7632: Treating Outlook CSV files as Windows-1252 encoded per default.
-
 * 2007-05-31 - thorben.betten@open-xchange.com
 
  - Bugfix #7588: Avoiding NPE if content type is missing in infostore
