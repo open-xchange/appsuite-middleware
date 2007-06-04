@@ -285,7 +285,7 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
             }
 
             String resmail = res.getEmail();
-            if( resmail != null && ! GenericChecks.isValidMailAddress(resmail)) {  
+            if( resmail != null && resmail.trim().length()>0 &&  ! GenericChecks.isValidMailAddress(resmail)) {  
                 throw new InvalidDataException("Invalid email address");
             }
         } catch (InvalidDataException e1) {
