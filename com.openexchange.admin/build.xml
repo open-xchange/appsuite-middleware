@@ -262,7 +262,7 @@
             <fileset dir="sbin" excludes="*.in"/>
         </delete>
     	<delete>
-			<fileset dir="etc" includes="file-logging.properties,ox-admin-scriptconf.sh,AdminDaemon.properties,system.properties,Sql.properties"/>
+			<fileset dir="etc" includes="file-logging.properties,ox-admin-scriptconf.sh,AdminDaemon.properties,system.properties,Sql.properties,oxfunctions.sh"/>
     	</delete>
 	</target>
 
