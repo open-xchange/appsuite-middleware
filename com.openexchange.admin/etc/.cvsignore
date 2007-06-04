@@ -3,3 +3,4 @@ file-logging.properties
 AdminDaemon.properties
 Sql.properties
 system.properties
+oxfunctions.sh
