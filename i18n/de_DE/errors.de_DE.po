@@ -787,6 +787,8 @@
 # Antje Faber, 2007.
 # Antje Faber, 2007.
 # Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER.
 # Antje Faber, 2007.
 #
@@ -794,7 +796,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2007-06-01 11:58+0200\n"
+"PO-Revision-Date: 2007-06-04 16:38+0200\n"
 "Last-Translator: Antje Faber\n"
 "Language-Team:  <de@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -987,9 +989,7 @@ msgstr "SQL-Fehler beim Ausführen der Aufgabe CreateTableVersion: %1$s."
 msgid ""
 "An SQL error occurred while performing task DelFolderTreeTableUpdateTask: %1"
 "$s."
-msgstr ""
-"SQL-Fehler beim Ausführen der Aufgabe DelFolderTreeTableUpdateTask: %1"
-"$s."
+msgstr "SQL-Fehler beim Ausführen der Aufgabe DelFolderTreeTableUpdateTask: %1$s."
 
 msgid "An SQL error occurred while performing task PasswordMechUpdateTask: %1$s."
 msgstr "SQL-Fehler beim Ausführen der Aufgabe PasswordMechUpdateTask: %1$s."
@@ -1035,8 +1035,8 @@ msgid ""
 "Broken CSV file: Lines have different number of cells, line #1 has %d, line #"
 "%d has %d. Is this really a CSV file?"
 msgstr ""
-"Ungültige CSV-Datei: Zeilen haben unterschiedliche Zellenanzahl, Zeile #1 hat %d, Zeile #"
-"%d hat %d. Ist dies wirklich eine CSV-Datei?"
+"Ungültige CSV-Datei: Zeilen haben unterschiedliche Zellenanzahl, Zeile #1 "
+"hat %d, Zeile #%d hat %d. Ist dies wirklich eine CSV-Datei?"
 
 msgid "Broken file uploaded: %s"
 msgstr "Kaputte Datei hochgeladen: %s"
@@ -1151,7 +1151,9 @@ msgid "Cannot get information for pool %d."
 msgstr "Information für Pool %d kann nicht abgerufen werden"
 
 msgid "Cannot import this kind of data. Use method canImport() first."
-msgstr "Dieser Datentyp kann nicht importiert werden. Bitte zuerst Methode canImport() verwenden."
+msgstr ""
+"Dieser Datentyp kann nicht importiert werden. Bitte zuerst Methode canImport"
+"() verwenden."
 
 msgid "Cannot instanciate class %1$s."
 msgstr "Anlegen von Instanzen für Klasse %1$s nicht möglich"
@@ -1287,7 +1289,9 @@ msgid "Could not convert given String %s to a date."
 msgstr "Angegebener String %s kann nicht in ein Datum konvertiert werden."
 
 msgid "Could not convert given object %s to a date when setting %s."
-msgstr "Beim Setzen von %s konnte das angegebene Objekt %s nicht in ein Datum konvertiert werden."
+msgstr ""
+"Beim Setzen von %s konnte das angegebene Objekt %s nicht in ein Datum "
+"konvertiert werden."
 
 msgid "Could not create a PartModifier instance from name %s"
 msgstr "PartModifier-Instanz konnte nicht aus dem Namen %s erstellt werden"
@@ -1330,7 +1334,9 @@ msgstr ""
 "ist verwaist oder gehört zu einem anderen Modul."
 
 msgid "Could not find equivalent fields for the following fields in the CSV file: %s"
-msgstr "Für folgende Felder der CSV-Datei konnten keine equivalenten Felder gefunden werden: %s"
+msgstr ""
+"Für folgende Felder der CSV-Datei konnten keine equivalenten Felder gefunden "
+"werden: %s"
 
 msgid "Could not generate new ID."
 msgstr "Neue ID konnte nicht generiert werden"
@@ -1378,7 +1384,9 @@ msgid "Could not translate a single column title. Is this a valid CSV file?"
 msgstr "Spaltentitel konnten nicht übersetzt werden. Ist dies eine gültige CSV-Datei?"
 
 msgid "Could not translate a single field of information, did not insert entry %s."
-msgstr "Informationsfelder konnten nicht übersetzt werden. Eintrag %s konnte nicht vorgenommen werden."
+msgstr ""
+"Informationsfelder konnten nicht übersetzt werden. Eintrag %s konnte nicht "
+"vorgenommen werden."
 
 msgid "Could not use UTF-8 encoding."
 msgstr "Verwenden der UTF-8-Kodierung fehlgeschlagen"
@@ -1957,7 +1965,9 @@ msgid "Missing SpellCheckConfig object."
 msgstr "Fehlendes SpellCheckConfig-Objekt."
 
 msgid "Missing ability to encode or decode UTF-8 on server, cannot read file."
-msgstr "UTF-8-Kodierenung bzw. -Dekodierung auf Server nicht möglich. Datei kann nicht gelesen werden. "
+msgstr ""
+"UTF-8-Kodierenung bzw. -Dekodierung auf Server nicht möglich. Datei kann "
+"nicht gelesen werden. "
 
 msgid "Missing affiliation id"
 msgstr "Zugehörigkeits-ID fehlt"
@@ -2107,7 +2117,9 @@ msgid "No send address could be found for user %s in user configuration"
 msgstr "Keine Sende-Adresse in der Benutzerkonfiguration für Benutzer %s gefunden"
 
 msgid "No subfolder creation underneath shared folder %s in context %s"
-msgstr "Kein Erstellen eines Unterordners unterhalb des freigegebenen Ordners %s im Kontext %s"
+msgstr ""
+"Kein Erstellen eines Unterordners unterhalb des freigegebenen Ordners %s im "
+"Kontext %s"
 
 msgid ""
 "Not allowed to change parent id of folder %s through an update call. Use "
@@ -2173,6 +2185,9 @@ msgstr "Aktion nicht erlaubt für einen geschlossenen SearchIterator"
 
 msgid "Operation not executeable on folder %s in context %s"
 msgstr "Aktion für Ordner %s im Kontext %s nicht ausführbar"
+
+msgid "Owner %s of default folder %s must keep the folder admin permission"
+msgstr "Der Eigentümer %s des Standardordners %s muss die Administrationsrechte für den Ordner behalten."
 
 msgid "Parameter %s does not match JSON key %s"
 msgstr "Der Parameter %s stimmt nicht mit dem JSON-Key %s überein"
@@ -2500,7 +2515,10 @@ msgid ""
 "The rights composed by user %s could not be applied to new folder %s due to "
 "missing administer right in its initial rights specified by IMAP server. The "
 "folder has been created anyway."
-msgstr "Aufgrund fehlender Administratorrechte in den vom IMAP-Server initial festgelegten Rechten konnten die vom Benutzer %s erstellten Rechte nicht auf den neuen Ordner %s angewendet werden. Der Ordner wurde dennoch erstellt."
+msgstr ""
+"Aufgrund fehlender Administratorrechte in den vom IMAP-Server initial "
+"festgelegten Rechten konnten die vom Benutzer %s erstellten Rechte nicht auf "
+"den neuen Ordner %s angewendet werden. Der Ordner wurde dennoch erstellt."
 
 msgid "The session parameter is missing."
 msgstr "Fehlender Session-Parameter"
@@ -2955,7 +2973,9 @@ msgstr ""
 msgid ""
 "User %s must not grant \"create subfolder\" permission for another user on "
 "shared folder %s in context %s"
-msgstr "Benutzer %s kann anderen Benutzern im Kontext %s im freigegebenen Ordner %s keine Berechtigung zum Anlegen von Unterordner erteilen."
+msgstr ""
+"Benutzer %s kann anderen Benutzern im Kontext %s im freigegebenen Ordner %s "
+"keine Berechtigung zum Anlegen von Unterordner erteilen."
 
 msgid "User dictionary could not be found."
 msgstr "Das Wörterbuch des Benutzers konnte nicht gefunden werden."
@@ -2977,6 +2997,9 @@ msgstr "Wort enthält ungültige(s) Komma-Zeichen: %s"
 
 msgid "Writing the setting %1$s is not permitted."
 msgstr "Schreiben der Einstellung %1$s nicht erlaubt"
+
+msgid "Wrong client IP address."
+msgstr "Ungültige Client-IP-Adresse"
 
 msgid "Wrong filestore %1$d for context %2$d needing filestore %3$d."
 msgstr "Falscher Dateispeicher %1$d für Kontext %2$d. Benötigter Dateispeicher: %3$d"
