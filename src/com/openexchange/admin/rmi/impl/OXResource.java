@@ -47,7 +47,7 @@
  *
  */
 /*
- * $Id: OXResource.java,v 1.22 2007/05/24 11:43:07 choeger Exp $
+ * $Id: OXResource.java,v 1.23 2007/06/04 09:13:51 cutmasta Exp $
  */
 package com.openexchange.admin.rmi.impl;
 
@@ -285,7 +285,7 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
             }
 
             String resmail = res.getEmail();
-            if( resmail != null && ! GenericChecks.isValidMailAddress(resmail)) {  
+            if( resmail != null && resmail.trim().length()>0 &&  ! GenericChecks.isValidMailAddress(resmail)) {  
                 throw new InvalidDataException("Invalid email address");
             }
         } catch (InvalidDataException e1) {
