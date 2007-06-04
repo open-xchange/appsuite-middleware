@@ -1,3 +1,7 @@
+* 2007-06-04 - marcus.klein@open-xchange.com
+
+  - Bugfix #7778: Checking client IP address to prevent session stealing.
+
 * 2007-06-01 - francisco.laguna@open-xchange.com
 
  - Bug 7683: Merged [hostname] resolution for direct link from bf_6_2 branch.

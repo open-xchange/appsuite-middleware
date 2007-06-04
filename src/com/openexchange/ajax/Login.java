@@ -141,7 +141,7 @@ public class Login extends AJAXServlet {
 			SessionObject sessionObj = null;
             final Response response = new Response();
 			try {
-				sessionObj = sessiondConnector.addSession(name, password, req.getRemoteHost());
+				sessionObj = sessiondConnector.addSession(name, password, req.getRemoteAddr());
             } catch (LoginException e) {
                 if (LoginException.Source.USER == e.getSource()) {
                     LOG.debug(e.getMessage(), e);
