@@ -1,3 +1,8 @@
+* 2007-06-04 - thorben.betten@open-xchange.com
+
+ - Processing of an upload moved to a public static method to make it
+   available in admin servlets
+
 * 2007-06-04 - marcus.klein@open-xchange.com
 
   - Bugfix #7778: Checking client IP address to prevent session stealing.
