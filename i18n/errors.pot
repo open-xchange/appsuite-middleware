@@ -1247,6 +1247,9 @@ msgstr ""
 msgid "Operation not executeable on folder %s in context %s"
 msgstr ""
 
+msgid "Owner %s of default folder %s must keep the folder admin permission"
+msgstr ""
+
 msgid "Parameter %s does not match JSON key %s"
 msgstr ""
 
@@ -1939,6 +1942,9 @@ msgid "Word contains illegal comma character(s): %s"
 msgstr ""
 
 msgid "Writing the setting %1$s is not permitted."
+msgstr ""
+
+msgid "Wrong client IP address."
 msgstr ""
 
 msgid "Wrong filestore %1$d for context %2$d needing filestore %3$d."

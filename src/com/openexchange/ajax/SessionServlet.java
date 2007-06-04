@@ -115,7 +115,12 @@ public abstract class SessionServlet extends AJAXServlet {
      * {@inheritDoc}
      */
     @Override
-	@OXThrows(category=Category.TRY_AGAIN, desc="", exceptionId=4, msg="Context is locked.")
+	@OXThrows(
+        category=Category.TRY_AGAIN,
+        desc="",
+        exceptionId=4,
+        msg="Context is locked."
+    )
     protected void service(final HttpServletRequest req,
         final HttpServletResponse resp) throws ServletException, IOException {
         Tools.disableCaching(resp);
@@ -123,6 +128,7 @@ public abstract class SessionServlet extends AJAXServlet {
             final String cookieId = getCookieId(req);
             final String sessionId = getSessionId(req, cookieId);
             final SessionObject session = getSession(sessionId);
+            checkIP(session.getLocalIp(), req.getRemoteAddr());
             rememberSession(req, session);
             final Context ctx = session.getContext();
             if (!ctx.isEnabled()) {
@@ -141,6 +147,27 @@ public abstract class SessionServlet extends AJAXServlet {
                 log(RESPONSE_ERROR, e1);
                 sendError(resp);
             }
+        }
+    }
+
+    /**
+     * Checks if the client IP address of the current request matches the one
+     * through that the session has been created.
+     * @param remembered IP address stored in the session object.
+     * @param actual IP address of the current request.
+     * @throws SessionException if the IP addresses don't match.
+     */
+    @OXThrows(
+        category = Category.PERMISSION,
+        desc = "If a session exists every request is checked for its client IP "
+            + "address to match the one while creating the session.",
+        exceptionId = 5,
+        msg = "Wrong client IP address."
+    )
+    private static void checkIP(final String remembered, final String actual)
+        throws SessionException {
+        if (null == actual || !actual.equals(remembered)) {
+            throw EXCEPTION.create(5);
         }
     }
 
