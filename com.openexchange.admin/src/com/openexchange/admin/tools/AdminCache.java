@@ -74,6 +74,8 @@ public class AdminCache {
     
     // master credentials for authenticating master admin
     private Credentials masterCredentials = null;
+    
+    private Credentials adminCredentials = null;
 
     // the patterns for parsing the sql scripts
     public static final String PATTERN_REGEX_NORMAL = "(" + "CREATE\\s+TABLE|" + "DELETE|" + "UPDATE|" + "ALTER|" + "DROP|" + "SET|" + "RENAME)" + " (.*?)\\s*;";
@@ -96,6 +98,7 @@ public class AdminCache {
         initOXProccess();
         this.log.info("Init Cache");
         initPool();
+        this.adminCredentials = new Credentials();
     }
 
     protected void initPool() {
@@ -208,6 +211,24 @@ public class AdminCache {
 
     public boolean pushConfigDBWrite(final Connection con) throws PoolException {
         return this.pool.pushConfigDBWrite(con);
+    }
+
+    /**
+     * @return the adminCredentials
+     */
+    public final Credentials getAdminCredentials() {
+        synchronized (this.adminCredentials) {
+            return this.adminCredentials;
+        }
+    }
+
+    /**
+     * @param adminCredentials the adminCredentials to set
+     */
+    public final void setAdminCredentials(Credentials adminCredentials) {
+        synchronized (this.adminCredentials) {
+            this.adminCredentials = adminCredentials;
+       }
     }
 
 }
