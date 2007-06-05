@@ -52,7 +52,10 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.rmi.RemoteException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -87,6 +90,7 @@ import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.GenericChecks;
 import com.openexchange.admin.tools.PropertyHandler;
+import com.openexchange.admin.tools.UnixCrypt;
 /**
  * @author cutmasta
  */
@@ -294,6 +298,8 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
             throw noSuchUserException;
         }
 
+        boolean isContextAdmin = tools.isContextAdmin(ctx, usrdata.getId());
+
         final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
         oxu.change(ctx, usrdata);
 
@@ -307,7 +313,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
                         final Object property = servicereference.getProperty("name");
                         if (null != property && property.toString().equalsIgnoreCase("oxuser")) {
                             final OXUserPluginInterface oxuser = (OXUserPluginInterface) this.context.getService(servicereference);
-                            if (oxuser.canHandleContextAdmin() || (!oxuser.canHandleContextAdmin() && !tools.isContextAdmin(ctx, usrdata.getId()))) {
+                            if (oxuser.canHandleContextAdmin() || (!oxuser.canHandleContextAdmin() && !isContextAdmin)) {
                                 try {
                                     if (log.isDebugEnabled()) {
                                         log.debug("Calling change for plugin: " + bundlename);
@@ -324,7 +330,12 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
                 }
             }
         }
-
+        // change cached admin credentials if neccessary
+        if( isContextAdmin && usrdata.getPassword() != null ) {
+            Credentials cauth = ClientAdminThread.cache.getAdminCredentials();
+            cauth.setPassword(UnixCrypt.crypt(usrdata.getPassword()));
+            ClientAdminThread.cache.setAdminCredentials(cauth);
+        }
     }
 
     public void delete(final Context ctx, final User user, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
