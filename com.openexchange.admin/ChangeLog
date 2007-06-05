@@ -1,3 +1,7 @@
+* 2007-06-05 - choeger@open-xchange.com
+
+ - Implemented context admin authentication caching
+
 * 2007-05-30 - thorben.betten@open-xchange.com
 
  - Bugfix #7615: Setting equal size to VARCHAR field 'fname' in both tables
