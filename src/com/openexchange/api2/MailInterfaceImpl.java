@@ -298,10 +298,6 @@ public class MailInterfaceImpl implements MailInterface {
 
 	private static final String MP_REPORT_DISPNOT = "report; report-type=disposition-notification";
 
-	private static final String HTML_BR = "<br>";
-
-	private static final String REGEX_CRLF = "(\\r)?\\n";
-
 	private static final String PREFIX_RE = "Re: ";
 
 	private static final String STR_ALL = "ALL";
