@@ -87,6 +87,10 @@ import com.openexchange.tools.mail.UUEncodedPart;
  */
 public class ReplyTextMessageHandler implements MessageHandler {
 
+	private static final String TAG_BR = "<br>";
+
+	private static final String STR_CRLF = "(\\r)?\\n";
+
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(ReplyTextMessageHandler.class);
 
@@ -97,6 +101,14 @@ public class ReplyTextMessageHandler implements MessageHandler {
 	private static final String BLOCKQUOTE_START = "<blockquote type=\"cite\">\n";
 
 	private static final String BLOCKQUOTE_END = "</blockquote>\n<br>&nbsp;";
+	
+	private static final Properties DUMMY_PROPS;
+	
+	static {
+		DUMMY_PROPS = (Properties) System.getProperties().clone();
+		DUMMY_PROPS.put("mail.host", "smtp.dummydomain.com");
+		DUMMY_PROPS.put("mail.transport.protocol", "smtp");
+	}
 
 	private final SessionObject session;
 
@@ -228,7 +240,7 @@ public class ReplyTextMessageHandler implements MessageHandler {
 			/*
 			 * Html content was added before
 			 */
-			textBuilder.append(plainTextContent.replaceAll("(\\r)?\\n", "<br>"));
+			textBuilder.append(plainTextContent.replaceAll(STR_CRLF, TAG_BR));
 		} else {
 			textBuilder.append(plainTextContent);
 		}
@@ -291,7 +303,7 @@ public class ReplyTextMessageHandler implements MessageHandler {
 					throw new OXMailException(MailCode.INTERNAL_ERROR, e, e.getMessage());
 				}
 				if (isHtml) {
-					textBuilder.append(content.replaceAll("(\\r)?\\n", "<br>"));
+					textBuilder.append(content.replaceAll(STR_CRLF, TAG_BR));
 				} else {
 					textBuilder.append(content);
 				}
@@ -351,10 +363,7 @@ public class ReplyTextMessageHandler implements MessageHandler {
 				/*
 				 * Create dummy mail session
 				 */
-				final Properties props = System.getProperties();
-				props.put("mail.host", "smtp.dummydomain.com");
-				props.put("mail.transport.protocol", "smtp");
-				final Session mailSession = Session.getDefaultInstance(props, null);
+				final Session mailSession = Session.getDefaultInstance(DUMMY_PROPS, null);
 				/*
 				 * Create message from input stream
 				 */
@@ -405,7 +414,7 @@ public class ReplyTextMessageHandler implements MessageHandler {
 		return this.isHtml;
 	}
 
-	public String getReplyText() throws OXException {
+	public String getReplyText() {
 		return getReplyText(true);
 	}
 
