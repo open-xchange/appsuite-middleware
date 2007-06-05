@@ -87,7 +87,7 @@ public class ConnectionPool extends ReentrantLockPool<Connection> implements
     /**
      * Default time between checks if a connection still works.
      */
-    private static final long DEFAULT_CHECK_TIME = 120000;
+    public static final long DEFAULT_CHECK_TIME = 120000;
 
     /**
      * Reference to the lifecycle object.

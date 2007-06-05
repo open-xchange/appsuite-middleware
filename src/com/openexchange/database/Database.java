@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.database;
 
 import java.sql.Connection;
@@ -258,6 +256,18 @@ public final class Database {
      */
     public static void reset(final int contextId) throws DBPoolingException {
         AssignmentStorage.removeAssignments(contextId);
+    }
+
+    /**
+     * Sets a new check time for all database connetion pools. If the check time
+     * is exhausted since the last use of the connection a select statement is
+     * sent to the database to verify that the connection still works.
+     * @param checkTime new check time.
+     */
+    public static void setCheckTime(final long checkTime) {
+        for (ConnectionPool pool : Pools.getPools()) {
+            pool.setCheckTime(checkTime);
+        }
     }
 
     public static int getNumConnections(final Context ctx,

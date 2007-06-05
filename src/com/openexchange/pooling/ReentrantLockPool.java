@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.pooling;
 
 import java.util.ArrayList;
@@ -200,6 +198,13 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
     }
 
     /**
+     * @return the lifecycle
+     */
+    protected PoolableLifecycle<T> getLifecycle() {
+        return lifecycle;
+    }
+
+    /**
      * @return the testThreads
      */
     public boolean isTestThreads() {
@@ -316,13 +321,14 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
 	                        e.setStackTrace(other.getTrace());
 	                    }
                         if (LOG.isDebugEnabled()) {
-	                        LOG.debug("Found thread using two objects. First get.");
+	                        LOG.debug(
+                                "Found thread using two objects. First get.");
+	                        LOG.debug(e.getMessage(), e);
+	                        e = new PoolingException(
+                                "Found thread using two objects. Second get.");
+	                        e.setStackTrace(thread.getStackTrace());
 	                        LOG.debug(e.getMessage(), e);
                         }
-                        e = new PoolingException(
-                            "Found thread using two objects. Second get.");
-                        e.setStackTrace(thread.getStackTrace());
-                        LOG.debug(e.getMessage(), e);
                     }
                 }
                 retval = data.popIdle();
