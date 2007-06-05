@@ -299,7 +299,7 @@ public class ReplyTextMessageHandler implements MessageHandler {
 				final String content;
 				try {
 					content = converter.convertWithQuotes(htmlContent);
-				} catch (IOException e) {
+				} catch (final IOException e) {
 					throw new OXMailException(MailCode.INTERNAL_ERROR, e, e.getMessage());
 				}
 				if (isHtml) {
@@ -374,9 +374,9 @@ public class ReplyTextMessageHandler implements MessageHandler {
 				this.isHtml |= msgHandler.isHtml;
 			}
 			return true;
-		} catch (MessagingException e) {
+		} catch (final MessagingException e) {
 			throw MailInterfaceImpl.handleMessagingException(e, session.getIMAPProperties());
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			throw new OXMailException(MailCode.INTERNAL_ERROR, e, e.getMessage());
 		}
 	}
@@ -394,7 +394,7 @@ public class ReplyTextMessageHandler implements MessageHandler {
 			this.nestedTextBuilder.append(msgHandler.getReplyText(true));
 			this.isHtml |= msgHandler.isHtml;
 			return true;
-		} catch (MessagingException e) {
+		} catch (final MessagingException e) {
 			throw MailInterfaceImpl.handleMessagingException(e, session.getIMAPProperties());
 		}
 	}

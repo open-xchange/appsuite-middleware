@@ -84,6 +84,8 @@ import com.openexchange.tools.mail.UUEncodedPart;
  */
 public class ForwardTextMessageHandler implements MessageHandler {
 
+	private static final Pattern PATTERN_BODY = Pattern.compile("<body>", Pattern.CASE_INSENSITIVE);
+
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(ForwardTextMessageHandler.class);
 	
@@ -278,7 +280,7 @@ public class ForwardTextMessageHandler implements MessageHandler {
 			final String content;
 			try {
 				content = converter.convertWithQuotes(htmlContent);
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				throw new OXMailException(MailCode.INTERNAL_ERROR, e, e.getMessage());
 			}
 			this.firstText = MailTools.htmlFormat(content);
@@ -307,7 +309,7 @@ public class ForwardTextMessageHandler implements MessageHandler {
 				return false;
 			}
 			return true;
-		} catch (MessagingException e) {
+		} catch (final MessagingException e) {
 			throw MailInterfaceImpl.handleMessagingException(e, session.getIMAPProperties());
 		}
 	}
@@ -363,7 +365,7 @@ public class ForwardTextMessageHandler implements MessageHandler {
 				return false;
 			}
 			return true;
-		} catch (MessagingException e) {
+		} catch (final MessagingException e) {
 			throw MailInterfaceImpl.handleMessagingException(e, session.getIMAPProperties());
 		}
 	}
@@ -399,7 +401,7 @@ public class ForwardTextMessageHandler implements MessageHandler {
 		try {
 			forwardPrefix = forwardPrefix.replaceFirst("#DATE#", receivedDate == null ? STR_EMPTY : DateFormat.getDateInstance(
 					DateFormat.LONG, session.getLocale()).format(receivedDate));
-		} catch (Throwable t) {
+		} catch (final Throwable t) {
 			if (LOG.isWarnEnabled()) {
 				LOG.warn(t.getMessage(), t);
 			}
@@ -408,7 +410,7 @@ public class ForwardTextMessageHandler implements MessageHandler {
 		try {
 			forwardPrefix = forwardPrefix.replaceFirst("#TIME#", receivedDate == null ? STR_EMPTY : DateFormat.getTimeInstance(
 					DateFormat.SHORT, session.getLocale()).format(receivedDate));
-		} catch (Throwable t) {
+		} catch (final Throwable t) {
 			if (LOG.isWarnEnabled()) {
 				LOG.warn(t.getMessage(), t);
 			}
@@ -418,8 +420,7 @@ public class ForwardTextMessageHandler implements MessageHandler {
 		forwardPrefix = MailTools.htmlFormat(forwardPrefix);
 		final String doubleBreak = "<br><br>";
 		if (isHtml) {
-			final Pattern p = Pattern.compile("<body>", Pattern.CASE_INSENSITIVE);
-			final Matcher m = p.matcher(preparedText);
+			final Matcher m = PATTERN_BODY.matcher(preparedText);
 			final StringBuffer replaceBuffer = new StringBuffer(1000);
 			if (m.find()) {
 				m.appendReplacement(replaceBuffer, Matcher.quoteReplacement(new StringBuilder(100).append(doubleBreak)
