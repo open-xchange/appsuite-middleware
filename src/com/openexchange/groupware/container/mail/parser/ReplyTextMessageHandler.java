@@ -433,7 +433,7 @@ public class ReplyTextMessageHandler implements MessageHandler {
 		} else {
 			replyTextBody = MailTools.htmlFormat(quoteText(textBuilder.toString()));
 		}
-		return (replyText = new StringBuilder().append(replyPrefix).append(replyTextBody).append(nestedTextBuilder)
+		return (replyText = new StringBuilder(1000).append(replyPrefix).append(replyTextBody).append(nestedTextBuilder)
 				.toString());
 	}
 
