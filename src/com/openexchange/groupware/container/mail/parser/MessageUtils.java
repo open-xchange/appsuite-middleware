@@ -846,19 +846,14 @@ public class MessageUtils {
 	}
 
 	public static final String addr2String(final InternetAddress[] addrs) {
-		final StringBuilder sb = new StringBuilder(200);
-		if (addrs[0].getPersonal() == null || addrs[0].getPersonal().length() == 0) {
-			sb.append(addrs[0].getAddress());
-		} else {
-			sb.append(addrs[0].getPersonal());
+		if (addrs == null || addrs.length == 0) {
+			return STR_EMPTY;
 		}
+		final StringBuilder sb = new StringBuilder(200);
+		sb.append(addrs[0].toString());
 		for (int i = 1; i < addrs.length; i++) {
 			sb.append(", ");
-			if (addrs[i].getPersonal() == null || addrs[i].getPersonal().length() == 0) {
-				sb.append(addrs[i].getAddress());
-			} else {
-				sb.append(addrs[i].getPersonal());
-			}
+			sb.append(addrs[i].toString());
 		}
 		return sb.toString();
 	}

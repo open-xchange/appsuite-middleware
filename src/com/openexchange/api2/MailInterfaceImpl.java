@@ -2620,8 +2620,7 @@ public class MailInterfaceImpl implements MailInterface {
 				new MessageDumper(sessionObj).dumpMessage(originalMsg, msgHandler);
 				final JSONMessageAttachmentObject mao = new JSONMessageAttachmentObject();
 				mao.setContentID(JSONMessageAttachmentObject.CONTENT_STRING);
-				mao.setContent(msgHandler.isHtml() ? msgHandler.getReplyText() : msgHandler.getReplyText().replaceAll(
-						REGEX_CRLF, HTML_BR));
+				mao.setContent(msgHandler.getReplyText());
 				mao.setContentType(msgHandler.isHtml() ? MIME_TEXT_HTML : MIME_TEXT_PLAIN);
 				mao.setDisposition(Part.INLINE);
 				mao.setSize(-1);

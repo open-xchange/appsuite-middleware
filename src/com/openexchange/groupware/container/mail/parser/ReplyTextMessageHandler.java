@@ -76,6 +76,7 @@ import com.openexchange.groupware.imap.OXMailException.MailCode;
 import com.openexchange.i18n.StringHelper;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.mail.Html2TextConverter;
+import com.openexchange.tools.mail.MailTools;
 import com.openexchange.tools.mail.UUEncodedPart;
 
 /**
@@ -430,7 +431,7 @@ public class ReplyTextMessageHandler implements MessageHandler {
 		if (isHtml) {
 			replyTextBody = quoteHtml(textBuilder.toString());
 		} else {
-			replyTextBody = quoteText(textBuilder.toString());
+			replyTextBody = MailTools.htmlFormat(quoteText(textBuilder.toString()));
 		}
 		return (replyText = new StringBuilder().append(replyPrefix).append(replyTextBody).append(nestedTextBuilder)
 				.toString());
@@ -468,8 +469,8 @@ public class ReplyTextMessageHandler implements MessageHandler {
 		retval = retval.replaceFirst("#TIME#", sentDate == null ? "" : DateFormat.getTimeInstance(DateFormat.SHORT,
 				session.getLocale()).format(sentDate));
 		retval = retval.replaceFirst("#SENDER#", sender);
-		final String nextLine = isHtml ? "<br><br>" : "\n\n";
-		return new StringBuilder(retval.length() + 3).append(nextLine).append(retval).append(nextLine).toString();
+		final String nextLine = "\n\n";
+		return MailTools.htmlFormat(new StringBuilder(retval.length() + 3).append(nextLine).append(retval).append(nextLine).toString());
 	}
 
 }

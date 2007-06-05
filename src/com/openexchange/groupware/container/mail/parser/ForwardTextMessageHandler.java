@@ -415,9 +415,9 @@ public class ForwardTextMessageHandler implements MessageHandler {
 			forwardPrefix = forwardPrefix.replaceFirst("#TIME#", STR_EMPTY);
 		}
 		forwardPrefix = forwardPrefix.replaceFirst("#SUBJECT#", subject);
+		forwardPrefix = MailTools.htmlFormat(forwardPrefix);
 		final String doubleBreak = "<br><br>";
 		if (isHtml) {
-			forwardPrefix = forwardPrefix.replaceAll("(\\r)?\\n", "<br>");
 			final Pattern p = Pattern.compile("<body>", Pattern.CASE_INSENSITIVE);
 			final Matcher m = p.matcher(preparedText);
 			final StringBuffer replaceBuffer = new StringBuffer(1000);
@@ -430,7 +430,6 @@ public class ForwardTextMessageHandler implements MessageHandler {
 			m.appendTail(replaceBuffer);
 			preparedText = replaceBuffer.toString();
 		} else {
-			forwardPrefix = forwardPrefix.replaceAll("(\\r)?\\n", "<br>");
 			preparedText = new StringBuilder(1000).append(doubleBreak).append(forwardPrefix).append(doubleBreak)
 					.append(preparedText).toString();// replaceAll("<br/?>","\n");
 		}

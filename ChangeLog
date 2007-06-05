@@ -1,3 +1,7 @@
+* 2007-06-05 - thorben.betten@open-xchange.com
+
+ - Fixed formatting of forward/reply text
+
 * 2007-06-05 - marcus.klein@open-xchange.com
 
   - Added a method to database pooling API for changing the connection check
