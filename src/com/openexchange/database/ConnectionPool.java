@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.database;
 
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
@@ -87,9 +85,14 @@ public class ConnectionPool extends ReentrantLockPool<Connection> implements
     private static final Log LOG = LogFactory.getLog(ConnectionPool.class);
 
     /**
-     * Time between checks if a connection still works.
+     * Default time between checks if a connection still works.
      */
-    private static final long CHECK_TIME = 120000;
+    private static final long DEFAULT_CHECK_TIME = 120000;
+
+    /**
+     * Reference to the lifecycle object.
+     */
+    private final ConnectionLifecycle lifecycle;
 
     /**
      * Full constructor with all parameters.
@@ -100,6 +103,7 @@ public class ConnectionPool extends ReentrantLockPool<Connection> implements
     public ConnectionPool(final String url, final Properties info,
         final ReentrantLockPool.Config config) {
         super(new ConnectionLifecycle(url, info), config);
+        lifecycle = (ConnectionLifecycle) super.getLifecycle();
     }
 
 //    /**
@@ -132,6 +136,16 @@ public class ConnectionPool extends ReentrantLockPool<Connection> implements
     }
 
     /**
+     * Sets a new check time used for activating connections. If check time is
+     * exhausted since last use of the connection a select statement is sent to
+     * the database to check if the connection still works.
+     * @param checkTime new check time.
+     */
+    public void setCheckTime(final long checkTime) {
+        lifecycle.checkTime = checkTime;
+    }
+
+    /**
      * Life cycle for database connections.
      */
     private static class ConnectionLifecycle implements
@@ -148,6 +162,12 @@ public class ConnectionPool extends ReentrantLockPool<Connection> implements
          * Properties for new connections.
          */
         private final transient Properties info;
+
+        /**
+         * Time between checks if a connection still works.
+         */
+        private long checkTime = DEFAULT_CHECK_TIME;
+
         /**
          * Default constructor.
          * @param url URL to the database for creating new connections.
@@ -167,7 +187,7 @@ public class ConnectionPool extends ReentrantLockPool<Connection> implements
             ResultSet result = null;
             try {
                 retval = !con.isClosed();
-                if (data.getTimeDiff() > CHECK_TIME) {
+                if (data.getTimeDiff() > checkTime) {
                     stmt = con.createStatement();
                     result = stmt.executeQuery(TEST_SELECT);
                     if (result.next()) {
@@ -235,7 +255,8 @@ public class ConnectionPool extends ReentrantLockPool<Connection> implements
                     con.rollback();
                     con.setAutoCommit(true);
                 }
-                final Class connectionClass = con.getClass();
+                final Class< ? extends Connection> connectionClass = con
+                    .getClass();
                 try {
                     final Method method = connectionClass.getMethod(
                         "getActiveStatementCount");
@@ -243,7 +264,8 @@ public class ConnectionPool extends ReentrantLockPool<Connection> implements
                         new Object[0])).intValue();
                     if (active > 0) {
                         final DBPoolingException dbe = new DBPoolingException(
-                            DBPoolingException.Code.ACTIVE_STATEMENTS, Integer.valueOf(active));
+                            DBPoolingException.Code.ACTIVE_STATEMENTS, Integer
+                            .valueOf(active));
                         addTrace(dbe, data);
                         LOG.error(dbe.getMessage(), dbe);
                         retval = false;
@@ -255,7 +277,8 @@ public class ConnectionPool extends ReentrantLockPool<Connection> implements
                 }
                 if (data.getTimeDiff() > 2000) {
                     final DBPoolingException dbe = new DBPoolingException(
-                        DBPoolingException.Code.TOO_LONG, Long.valueOf(data.getTimeDiff()));
+                        DBPoolingException.Code.TOO_LONG, Long.valueOf(data
+                        .getTimeDiff()));
                     addTrace(dbe, data);
                     if (LOG.isWarnEnabled()) {
                     	LOG.warn(dbe.getMessage(), dbe);
