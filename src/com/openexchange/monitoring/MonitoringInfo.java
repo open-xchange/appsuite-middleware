@@ -225,6 +225,8 @@ public class MonitoringInfo {
 	
 	private static final String TYPE_OXADMIN_UMIN = "oxadmin/umin";
 	
+	private static final String TYPE_ADMIN_UMIN = "admin/umin";
+	
 	public static final int getConnectionType(final String pathInfo) {
 		if (pathInfo.startsWith(TYPE_AJAX)) {
 			return MonitoringInfo.AJAX;
@@ -235,6 +237,8 @@ public class MonitoringInfo {
 		} else if (pathInfo.startsWith(TYPE_SYNCML)) {
 			return MonitoringInfo.SYNCML;
 		} else if (pathInfo.startsWith(TYPE_OXADMIN_UMIN)) {
+			return MonitoringInfo.AJAX;
+		} else if (pathInfo.startsWith(TYPE_ADMIN_UMIN)) {
 			return MonitoringInfo.AJAX;
 		} else {
 			return -1;
