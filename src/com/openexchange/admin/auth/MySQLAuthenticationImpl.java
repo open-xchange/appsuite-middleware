@@ -89,61 +89,77 @@ public class MySQLAuthenticationImpl implements AuthenticationInterface {
     public boolean authenticate(final Credentials authdata, final Context ctx) throws StorageException {
 
         if (authdata != null && authdata.getLogin() != null && authdata.getPassword() != null) {
-            Connection sql_con = null;
-            PreparedStatement prep = null;
-            ResultSet rs = null;
-            try {
 
-                sql_con = ClientAdminThread.cache.getREADConnectionForContext(ctx.getIdAsInt());
-                prep = sql_con.prepareStatement("select u.userPassword,u.passwordMech from user u JOIN login2user l JOIN user_setting_admin usa ON u.id = l.id AND u.cid = l.cid AND u.cid = usa.cid AND u.id = usa.user WHERE u.cid = ? AND l.uid = ?");
+            if(ClientAdminThread.cache.getAdminCredentials().getLogin() == null ) {
+                Connection sql_con = null;
+                PreparedStatement prep = null;
+                ResultSet rs = null;
+                try {
 
-                prep.setInt(1, ctx.getIdAsInt());
-                prep.setString(2, authdata.getLogin());
+                    sql_con = ClientAdminThread.cache.getREADConnectionForContext(ctx.getIdAsInt());
+                    prep = sql_con.prepareStatement("select u.userPassword,u.passwordMech from user u JOIN login2user l JOIN user_setting_admin usa ON u.id = l.id AND u.cid = l.cid AND u.cid = usa.cid AND u.id = usa.user WHERE u.cid = ? AND l.uid = ?");
 
-                rs = prep.executeQuery();
-                if (!rs.next()) {
-                    // auth failed , admin user not found in context
-                    if (log.isDebugEnabled()) {
-                        log.debug("Admin user \"" + authdata.getLogin() + "\" not found in context \"" + ctx.getIdAsInt() + "\"!");
-                    }
-                    return false;
-                } else {
-                    // now check via our crypt mech the password
-                    if (UnixCrypt.matches(rs.getString("userPassword"), authdata.getPassword())) {
-                        return true;
-                    } else {
+                    prep.setInt(1, ctx.getIdAsInt());
+                    prep.setString(2, authdata.getLogin());
+
+                    rs = prep.executeQuery();
+                    if (!rs.next()) {
+                        // auth failed , admin user not found in context
                         if (log.isDebugEnabled()) {
-                            log.debug("Password for admin user \"" + authdata.getLogin() + "\" did not match!");
+                            log.debug("Admin user \"" + authdata.getLogin() + "\" not found in context \"" + ctx.getIdAsInt() + "\"!");
                         }
                         return false;
+                    } else {
+                        // now check via our crypt mech the password
+                        String pwcrypt = rs.getString("userPassword");
+                        if (UnixCrypt.matches(pwcrypt, authdata.getPassword())) {
+                            Credentials cauth = new Credentials(authdata.getLogin(),pwcrypt);
+                            ClientAdminThread.cache.setAdminCredentials(cauth);
+                            return true;
+                        } else {
+                            if (log.isDebugEnabled()) {
+                                log.debug("Password for admin user \"" + authdata.getLogin() + "\" did not match!");
+                            }
+                            return false;
+                        }
                     }
-                }
-            } catch (final SQLException sql) {
-                throw new StorageException(sql);
-            } catch (final PoolException ex) {
-                throw new StorageException(ex);
-            } finally {
-                try {
-                    if (rs != null) {
-                        rs.close();
+                } catch (final SQLException sql) {
+                    throw new StorageException(sql);
+                } catch (final PoolException ex) {
+                    throw new StorageException(ex);
+                } finally {
+                    try {
+                        if (rs != null) {
+                            rs.close();
+                        }
+                    } catch (final SQLException ecp) {
+                        log.error("Error closing resultset");
                     }
-                } catch (final SQLException ecp) {
-                    log.error("Error closing resultset");
-                }
 
-                try {
-                    if (prep != null) {
-                        prep.close();
+                    try {
+                        if (prep != null) {
+                            prep.close();
+                        }
+                    } catch (final SQLException ecp) {
+                        log.error("Error closing statement");
                     }
-                } catch (final SQLException ecp) {
-                    log.error("Error closing statement");
-                }
 
-                try {
-                    ClientAdminThread.cache.pushOXDBRead(ctx.getIdAsInt(), sql_con);
-                } catch (final PoolException ecp) {
-                    log.error("Pool Error", ecp);
+                    try {
+                        ClientAdminThread.cache.pushOXDBRead(ctx.getIdAsInt(), sql_con);
+                    } catch (final PoolException ecp) {
+                        log.error("Pool Error", ecp);
+                    }
                 }
+            } else {
+                if (UnixCrypt.matches(ClientAdminThread.cache.getAdminCredentials().getPassword(), authdata.getPassword())) {
+                    return true;
+                } else {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Password for admin user \"" + authdata.getLogin() + "\" did not match!");
+                    }
+                    return false;
+                }
+                
             }
         } else {
             return false;
