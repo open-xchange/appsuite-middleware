@@ -2301,7 +2301,8 @@ public class IMAPUtils {
 		if (seqNums == null || seqNums.length == 0) {
 			return null;
 		}
-		final List<String> tmp = new ArrayList<String>((seqNums.length / MAX_IMAP_COMMAND_LENGTH));
+		final int initCap = (seqNums.length / MAX_IMAP_COMMAND_LENGTH);
+		final List<String> tmp = new ArrayList<String>(initCap == 0 ? 10 : initCap);
 		final StringBuilder sb = new StringBuilder(MAX_IMAP_COMMAND_LENGTH);
 		sb.append(seqNums[0]);
 		for (int i = 1; i < seqNums.length; i++) {
@@ -2326,7 +2327,8 @@ public class IMAPUtils {
 		if (uids == null || uids.length == 0) {
 			return null;
 		}
-		final List<String> tmp = new ArrayList<String>((uids.length / MAX_IMAP_COMMAND_LENGTH));
+		final int initCap = (uids.length / MAX_IMAP_COMMAND_LENGTH);
+		final List<String> tmp = new ArrayList<String>(initCap == 0 ? 10 : initCap);
 		final StringBuilder sb = new StringBuilder(MAX_IMAP_COMMAND_LENGTH);
 		sb.append(uids[0]);
 		for (int i = 1; i < uids.length; i++) {
@@ -2351,7 +2353,8 @@ public class IMAPUtils {
 		if (msgs == null || msgs.length == 0) {
 			return null;
 		}
-		final List<String> tmp = new ArrayList<String>((msgs.length / MAX_IMAP_COMMAND_LENGTH));
+		final int initCap = (msgs.length / MAX_IMAP_COMMAND_LENGTH);
+		final List<String> tmp = new ArrayList<String>(initCap == 0 ? 10 : initCap);
 		final StringBuilder sb = new StringBuilder(MAX_IMAP_COMMAND_LENGTH);
 		sb.append(msgs[0].getMessageNumber());
 		for (int i = 1; i < msgs.length; i++) {
