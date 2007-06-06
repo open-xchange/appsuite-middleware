@@ -48,7 +48,7 @@
  */
 package com.openexchange.admin.storage.sqlStorage;
 
-
+import com.openexchange.admin.rmi.exceptions.DatabaseLockedException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Group;
@@ -56,56 +56,71 @@ import com.openexchange.admin.storage.interfaces.OXGroupStorageInterface;
 import java.sql.Connection;
 
 /**
- * This class implements the global storage interface and creates a layer between the abstract
- * storage definition and a storage in a SQL accessible database
+ * This class implements the global storage interface and creates a layer
+ * between the abstract storage definition and a storage in a SQL accessible
+ * database
  * 
  * @author d7
  * @author cutmasta
  */
 /**
  * @author d7
- *
+ * 
  */
 public abstract class OXGroupSQLStorage extends OXGroupStorageInterface {
-	
-	/**
-	 * @see com.openexchange.admin.storage.interfaces.OXGroupStorageInterface#addMember(com.openexchange.admin.rmi.dataobjects.Context, int, int[])
-	 */
-	abstract public void addMember(final Context ctx,final int grp_id,final int [] member_ids) throws StorageException;
-	
-	/**
-	 * @see com.openexchange.admin.storage.interfaces.OXGroupStorageInterface#change(com.openexchange.admin.rmi.dataobjects.Context, com.openexchange.admin.rmi.dataobjects.Group)
-	 */
-	abstract public void change(final Context ctx,final Group grp)  throws StorageException;
-	
-	/**
-	 * @see com.openexchange.admin.storage.interfaces.OXGroupStorageInterface#create(com.openexchange.admin.rmi.dataobjects.Context, com.openexchange.admin.rmi.dataobjects.Group)
-	 */
-	abstract public int create(final Context ctx,final Group grp) throws StorageException;
-	
-	/**
-	 * @see com.openexchange.admin.storage.interfaces.OXGroupStorageInterface#getMembers(com.openexchange.admin.rmi.dataobjects.Context, int)
-	 */
-	abstract public int[] getMembers(final Context ctx,final int grp_id) throws StorageException;
-	
-	/**
-	 * @see com.openexchange.admin.storage.interfaces.OXGroupStorageInterface#list(com.openexchange.admin.rmi.dataobjects.Context, java.lang.String)
-	 */
-	abstract public Group[] list(final Context ctx,final String pattern) throws StorageException;
-	
-	/**
-	 * @see com.openexchange.admin.storage.interfaces.OXGroupStorageInterface#removeMember(com.openexchange.admin.rmi.dataobjects.Context, int, int[])
-	 */
-	abstract public void removeMember(final Context ctx,final int grp_id,final int[] member_ids) throws StorageException;
-        
-	/**
-	 * @see com.openexchange.admin.storage.interfaces.OXGroupStorageInterface#deleteRecoveryData(com.openexchange.admin.rmi.dataobjects.Context, int, java.sql.Connection)
-	 */
-	abstract public void deleteRecoveryData(final Context ctx,final int group_id, Connection con) throws StorageException;
-        
-	/**
-	 * @see com.openexchange.admin.storage.interfaces.OXGroupStorageInterface#deleteAllRecoveryData(com.openexchange.admin.rmi.dataobjects.Context, java.sql.Connection)
-	 */
-	abstract public void deleteAllRecoveryData(final Context ctx, Connection con) throws StorageException;
+
+    /**
+     * @see com.openexchange.admin.storage.interfaces.OXGroupStorageInterface#addMember(com.openexchange.admin.rmi.dataobjects.Context,
+     *      int, int[])
+     */
+    abstract public void addMember(final Context ctx, final int grp_id, final int[] member_ids) throws StorageException;
+
+    /**
+     * @see com.openexchange.admin.storage.interfaces.OXGroupStorageInterface#change(com.openexchange.admin.rmi.dataobjects.Context,
+     *      com.openexchange.admin.rmi.dataobjects.Group)
+     */
+    abstract public void change(final Context ctx, final Group grp) throws StorageException;
+
+    /**
+     * @see com.openexchange.admin.storage.interfaces.OXGroupStorageInterface#create(com.openexchange.admin.rmi.dataobjects.Context,
+     *      com.openexchange.admin.rmi.dataobjects.Group)
+     */
+    abstract public int create(final Context ctx, final Group grp) throws StorageException;
+
+    /**
+     * @see com.openexchange.admin.storage.interfaces.OXGroupStorageInterface#getMembers(com.openexchange.admin.rmi.dataobjects.Context,
+     *      int)
+     */
+    abstract public int[] getMembers(final Context ctx, final int grp_id) throws StorageException;
+
+    /**
+     * @see com.openexchange.admin.storage.interfaces.OXGroupStorageInterface#list(com.openexchange.admin.rmi.dataobjects.Context,
+     *      java.lang.String)
+     */
+    abstract public Group[] list(final Context ctx, final String pattern) throws StorageException;
+
+    /**
+     * @see com.openexchange.admin.storage.interfaces.OXGroupStorageInterface#removeMember(com.openexchange.admin.rmi.dataobjects.Context,
+     *      int, int[])
+     */
+    abstract public void removeMember(final Context ctx, final int grp_id, final int[] member_ids) throws StorageException;
+
+    /**
+     * @see com.openexchange.admin.storage.interfaces.OXGroupStorageInterface#deleteRecoveryData(com.openexchange.admin.rmi.dataobjects.Context,
+     *      int, java.sql.Connection)
+     */
+    abstract public void deleteRecoveryData(final Context ctx, final int group_id, Connection con) throws StorageException;
+
+    /**
+     * @see com.openexchange.admin.storage.interfaces.OXGroupStorageInterface#deleteAllRecoveryData(com.openexchange.admin.rmi.dataobjects.Context,
+     *      java.sql.Connection)
+     */
+    abstract public void deleteAllRecoveryData(final Context ctx, Connection con) throws StorageException;
+
+    protected final void checkDatabaseLocked() throws StorageException {
+        if (cache.isLockdb()) {
+            throw new StorageException(new DatabaseLockedException("The database is locked due to an update"));
+        }
+    }
 
 }

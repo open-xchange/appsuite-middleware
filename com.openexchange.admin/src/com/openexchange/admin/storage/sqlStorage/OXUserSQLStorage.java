@@ -53,6 +53,7 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
 
+import com.openexchange.admin.rmi.exceptions.DatabaseLockedException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.User;
@@ -273,5 +274,11 @@ public abstract class OXUserSQLStorage extends OXUserStorageInterface {
      * 
      */
     abstract public UserModuleAccess getModuleAccess(final Context ctx, final int user_id) throws StorageException;
+
+    protected final void checkDatabaseLocked() throws StorageException {
+        if (cache.isLockdb()) {
+            throw new StorageException(new DatabaseLockedException("The database is locked due to an update"));
+        }
+    }
 
 }
