@@ -49,7 +49,8 @@
 
 package com.openexchange.admin.storage.sqlStorage;
 
-import com.openexchange.admin.exceptions.PoolException;
+import com.openexchange.admin.rmi.exceptions.PoolException;
+
 import java.sql.Connection;
 
 
