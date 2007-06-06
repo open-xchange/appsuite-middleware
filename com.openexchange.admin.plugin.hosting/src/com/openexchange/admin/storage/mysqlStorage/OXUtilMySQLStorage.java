@@ -49,7 +49,7 @@
 package com.openexchange.admin.storage.mysqlStorage;
 
 import com.openexchange.admin.exceptions.OXGenericException;
-import com.openexchange.admin.exceptions.PoolException;
+import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Filestore;

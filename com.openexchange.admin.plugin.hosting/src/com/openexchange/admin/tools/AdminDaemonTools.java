@@ -50,7 +50,6 @@ package com.openexchange.admin.tools;
 
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.exceptions.Classes;
-import com.openexchange.admin.exceptions.PoolException;
 import java.io.File;
 import java.net.URI;
 import java.sql.Connection;
@@ -62,6 +61,7 @@ import java.util.Vector;
 import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.exceptions.UserException;
 import com.openexchange.admin.exceptions.UserExceptionFactory;
+import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.OXExceptionSource;

@@ -16,7 +16,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.admin.exceptions.OXGenericException;
-import com.openexchange.admin.exceptions.PoolException;
+import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.storage.sqlStorage.OXAdminPoolDBPoolExtension;
 import com.openexchange.admin.storage.sqlStorage.OXAdminPoolInterfaceExtension;
 
