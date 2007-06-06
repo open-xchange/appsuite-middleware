@@ -48,8 +48,10 @@
  */
 package com.openexchange.admin.tools;
 
-import com.openexchange.admin.exceptions.PoolException;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.exceptions.DatabaseLockedException;
+import com.openexchange.admin.rmi.exceptions.PoolException;
+import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.sqlStorage.OXAdminPoolDBPool;
 import com.openexchange.admin.storage.sqlStorage.OXAdminPoolInterface;
 import com.openexchange.groupware.delete.DeleteRegistry;
@@ -120,10 +122,12 @@ public class AdminCache {
     }
 
     public Connection getREADConnectionForContext(final int context_id) throws PoolException {
+        checkDatabaseLocked();
         return this.pool.getREADConnectionForContext(context_id);
     }
 
     public Connection getWRITEConnectionForContext(final int context_id) throws PoolException {
+        checkDatabaseLocked();
         return this.pool.getWRITEConnectionForContext(context_id);
     }
 
@@ -215,6 +219,12 @@ public class AdminCache {
     
         }
     
+    }
+
+    private final void checkDatabaseLocked() throws PoolException {
+        if (this.isLockdb()) {
+            throw new PoolException(new DatabaseLockedException("The database is locked due to an update"));
+        }
     }
 
     private void initOXProccess() {
