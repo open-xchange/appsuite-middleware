@@ -48,7 +48,7 @@
  */
 package com.openexchange.admin.storage.sqlStorage;
 
-import com.openexchange.admin.exceptions.PoolException;
+import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.storage.sqlStorage.OXAdminPoolInterfaceExtension;
 import com.openexchange.admin.tools.PropertyHandler;
 import com.openexchange.database.Database;
