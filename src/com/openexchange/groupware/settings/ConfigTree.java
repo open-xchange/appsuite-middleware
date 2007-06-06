@@ -883,8 +883,10 @@ public final class ConfigTree {
         tmp.put(spamButton.getName(), new ReadOnlyValue() {
             public void getValue(final SessionObject session,
                 final Setting setting) throws SettingException {
+                final UserSettingMail settings = session.getUserConfiguration()
+                    .getUserSettingMail();
                 try {
-                    setting.setSingleValue(IMAPProperties.isSpamEnabled());
+                    setting.setSingleValue(settings.isSpamEnabled());
                 } catch (IMAPException e) {
                     throw new SettingException(e);
                 }
