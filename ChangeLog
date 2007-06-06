@@ -3,6 +3,9 @@
  - Bugfix #7825: Fixed communication problems if chunked transfer-encoding
    is used
  - Bugfix #7361: Fixed deletion of large number of mails
+ - Fixed bug that no structural view is allowed on a shared folder even if
+   a shared folder has a shared subfolder. All shared folders are displayed
+   as a list.
 
 * 2007-06-06 - marcus.klein@open-xchange.com
 

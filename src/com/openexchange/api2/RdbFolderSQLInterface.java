@@ -74,6 +74,7 @@ import com.openexchange.server.EffectivePermission;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.iterator.FolderObjectIterator;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderException;
@@ -554,6 +555,8 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 				throw new OXFolderPermissionException(FolderCode.NO_SHARED_FOLDER_ACCESS, STR_EMPTY,
 						getUserName(sessionObj), FolderObject.getFolderString(FolderObject.SYSTEM_SHARED_FOLDER_ID,
 								sessionObj.getLocale()), Integer.valueOf(ctx.getContextId()));
+			} else if (oxfolderAccess.isFolderShared(parentId, userId)) {
+				return SearchIteratorAdapter.EMPTY_ITERATOR;
 			}
 			return OXFolderIteratorSQL.getVisibleSubfoldersIterator(parentId, userId, groups, ctx, sessionObj
 					.getUserConfiguration(), since);

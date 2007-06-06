@@ -78,6 +78,7 @@ import com.openexchange.server.DBPoolingException;
 import com.openexchange.server.IMAPPermission;
 import com.openexchange.server.OCLPermission;
 import com.openexchange.tools.iterator.SearchIteratorException;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 import com.sun.mail.imap.ACL;
@@ -737,9 +738,10 @@ public final class FolderWriter extends DataWriter {
 						if (withKey) {
 							jsonwriter.key(FolderFields.SUBFOLDERS);
 						}
-						jsonwriter.value(hasSubfolders == -1 ? (fo.containsSubfolderFlag() ? Boolean.valueOf(fo
-								.hasVisibleSubfolders(userObj, userConfig, ctx)) : JSONObject.NULL) : Boolean
-								.valueOf(hasSubfolders > 0));
+						final boolean shared = fo.containsCreatedBy() && fo.containsType() && fo.isShared(userObj.getId());
+						jsonwriter.value(hasSubfolders == -1 ? (shared ? Boolean.FALSE
+								: (fo.containsSubfolderFlag() ? Boolean.valueOf(fo.hasVisibleSubfolders(userObj,
+										userConfig, ctx)) : JSONObject.NULL)) : Boolean.valueOf(hasSubfolders > 0));
 					}
 				};
 				break Fields;
