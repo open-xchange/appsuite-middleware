@@ -76,6 +76,9 @@ public class AdminCache {
     private Credentials masterCredentials = null;
     
     private Credentials adminCredentials = null;
+    
+    // A flag to lock the database if an update is made
+    private boolean lockdb = false;
 
     // the patterns for parsing the sql scripts
     public static final String PATTERN_REGEX_NORMAL = "(" + "CREATE\\s+TABLE|" + "DELETE|" + "UPDATE|" + "ALTER|" + "DROP|" + "SET|" + "RENAME)" + " (.*?)\\s*;";
@@ -109,76 +112,11 @@ public class AdminCache {
         return this.masterCredentials;
     }
 
-    private void readMasterCredentials() {
-        final String masterfile = this.prop.getProp("MASTER_AUTH_FILE", "/opt/open-xchange/admindaemon/etc/mpasswd");
-        final File tmp = new File(masterfile);
-        if (!tmp.exists()) {
-            this.log.fatal("Fatal! Master auth file does not exists:\n" + masterfile);
-        }
-        if (!tmp.canRead()) {
-            this.log.fatal("Cannot read master auth file " + masterfile + "!");
-        }
-        BufferedReader bf = null;
-        try {
-            bf = new BufferedReader(new FileReader(tmp));
-            String line = null;
-            while ((line = bf.readLine()) != null) {
-                if (!line.startsWith("#")) {
-                    if (line.indexOf(":") != -1) {
-                        // ok seems to be a line with user:pass entry
-                        final String[] user_pass_combination = line.split(":");
-                        if (user_pass_combination.length > 0) {
-                            this.masterCredentials = new Credentials(user_pass_combination[0], user_pass_combination[1]);
-                            this.log.debug("Master credentials successfully set!");
-                        }
-                    }
-                }
-            }
-        } catch (final Exception e) {
-            this.log.fatal("Error processing master auth file:\n" + masterfile, e);
-        } finally {
-            try {
-                if (bf != null) {
-                    bf.close();
-                }
-            } catch (final IOException e) {
-                e.printStackTrace();
-            }
-
-        }
-
-    }
-
     public PropertyHandler getProperties() {
         if (this.prop == null) {
             initCache();
         }
         return this.prop;
-    }
-
-    private void initOXProccess() {
-        try {
-            this.log.info("OX init starting...");
-            // String driver = prop.getSqlProp("CONFIGDB_WRITE_DRIVER",
-            // "com.mysql.jdbc.Driver" );
-            // String url = prop.getSqlProp("CONFIGDB_WRITE_URL",
-            // "jdbc:mysql://127.0.0.1:3306/configdb?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true"
-            // );
-            // String username =
-            // prop.getSqlProp("CONFIGDB_WRITE_USERNAME","openexchange");
-            // String password =
-            // prop.getSqlProp("CONFIGDB_WRITE_PASSWORD","secret");
-            // int pool_size =
-            // Integer.parseInt(prop.getSqlProp("CONFIGDB_WRITE_POOL_SIZE","5"));
-            // oxrunner = new
-            // OXRunner(pool_size,5,url,driver,username,password);
-
-            OXRunner.init();
-            delreg = DeleteRegistry.getInstance();
-            this.log.info("...OX init done!");
-        } catch (final Exception ecp) {
-            this.log.fatal("Error while init OX Process!", ecp);
-        }
     }
 
     public Connection getREADConnectionForContext(final int context_id) throws PoolException {
@@ -229,6 +167,79 @@ public class AdminCache {
         synchronized (this.adminCredentials) {
             this.adminCredentials = adminCredentials;
        }
+    }
+
+    public final synchronized boolean isLockdb() {
+        return lockdb;
+    }
+
+    public final synchronized void setLockdb(boolean lockdb) {
+        this.lockdb = lockdb;
+    }
+
+    private void readMasterCredentials() {
+        final String masterfile = this.prop.getProp("MASTER_AUTH_FILE", "/opt/open-xchange/admindaemon/etc/mpasswd");
+        final File tmp = new File(masterfile);
+        if (!tmp.exists()) {
+            this.log.fatal("Fatal! Master auth file does not exists:\n" + masterfile);
+        }
+        if (!tmp.canRead()) {
+            this.log.fatal("Cannot read master auth file " + masterfile + "!");
+        }
+        BufferedReader bf = null;
+        try {
+            bf = new BufferedReader(new FileReader(tmp));
+            String line = null;
+            while ((line = bf.readLine()) != null) {
+                if (!line.startsWith("#")) {
+                    if (line.indexOf(":") != -1) {
+                        // ok seems to be a line with user:pass entry
+                        final String[] user_pass_combination = line.split(":");
+                        if (user_pass_combination.length > 0) {
+                            this.masterCredentials = new Credentials(user_pass_combination[0], user_pass_combination[1]);
+                            this.log.debug("Master credentials successfully set!");
+                        }
+                    }
+                }
+            }
+        } catch (final IOException e) {
+            this.log.fatal("Error processing master auth file:\n" + masterfile, e);
+        } finally {
+            try {
+                if (bf != null) {
+                    bf.close();
+                }
+            } catch (final IOException e) {
+                e.printStackTrace();
+            }
+    
+        }
+    
+    }
+
+    private void initOXProccess() {
+        try {
+            this.log.info("OX init starting...");
+            // String driver = prop.getSqlProp("CONFIGDB_WRITE_DRIVER",
+            // "com.mysql.jdbc.Driver" );
+            // String url = prop.getSqlProp("CONFIGDB_WRITE_URL",
+            // "jdbc:mysql://127.0.0.1:3306/configdb?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true"
+            // );
+            // String username =
+            // prop.getSqlProp("CONFIGDB_WRITE_USERNAME","openexchange");
+            // String password =
+            // prop.getSqlProp("CONFIGDB_WRITE_PASSWORD","secret");
+            // int pool_size =
+            // Integer.parseInt(prop.getSqlProp("CONFIGDB_WRITE_POOL_SIZE","5"));
+            // oxrunner = new
+            // OXRunner(pool_size,5,url,driver,username,password);
+    
+            OXRunner.init();
+            delreg = DeleteRegistry.getInstance();
+            this.log.info("...OX init done!");
+        } catch (final Exception ecp) {
+            this.log.fatal("Error while init OX Process!", ecp);
+        }
     }
 
 }
