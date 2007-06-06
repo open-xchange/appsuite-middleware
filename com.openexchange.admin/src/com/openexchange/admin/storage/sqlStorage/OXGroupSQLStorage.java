@@ -48,7 +48,6 @@
  */
 package com.openexchange.admin.storage.sqlStorage;
 
-import com.openexchange.admin.rmi.exceptions.DatabaseLockedException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Group;
@@ -116,11 +115,5 @@ public abstract class OXGroupSQLStorage extends OXGroupStorageInterface {
      *      java.sql.Connection)
      */
     abstract public void deleteAllRecoveryData(final Context ctx, Connection con) throws StorageException;
-
-    protected final void checkDatabaseLocked() throws StorageException {
-        if (cache.isLockdb()) {
-            throw new StorageException(new DatabaseLockedException("The database is locked due to an update"));
-        }
-    }
 
 }

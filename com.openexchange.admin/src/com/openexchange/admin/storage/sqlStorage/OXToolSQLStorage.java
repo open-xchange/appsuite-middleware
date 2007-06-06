@@ -50,7 +50,6 @@
 package com.openexchange.admin.storage.sqlStorage;
 
 import com.openexchange.admin.rmi.dataobjects.Context;
-import com.openexchange.admin.rmi.exceptions.DatabaseLockedException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import java.sql.Connection;
 
@@ -243,11 +242,5 @@ public abstract class OXToolSQLStorage extends OXToolStorageInterface {
      * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#schemaBeingLockedOrNeedsUpdate(com.openexchange.admin.rmi.dataobjects.Context)
      */
     public abstract boolean schemaBeingLockedOrNeedsUpdate(Context ctx) throws StorageException;
-
-    protected final void checkDatabaseLocked() throws StorageException {
-        if (cache.isLockdb()) {
-            throw new StorageException(new DatabaseLockedException("The database is locked due to an update"));
-        }
-    }
 
 }
