@@ -65,7 +65,7 @@ import com.openexchange.tools.ajp13.AJPv13Response;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 
-public class OXServletOutputStream extends ServletOutputStream {
+public final class OXServletOutputStream extends ServletOutputStream {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(OXServletOutputStream.class);
@@ -78,7 +78,7 @@ public class OXServletOutputStream extends ServletOutputStream {
 
 	private boolean isClosed;
 
-	public OXServletOutputStream(AJPv13Connection ajpCon) {
+	public OXServletOutputStream(final AJPv13Connection ajpCon) {
 		this.ajpCon = ajpCon;
 		byteBuffer = new UnsynchronizedByteArrayOutputStream(AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE);
 	}
@@ -95,9 +95,6 @@ public class OXServletOutputStream extends ServletOutputStream {
 	@Override
 	public void close() throws IOException {
 		flushByteBuffer();
-		// ajpCon = null;
-		// byteBuffer = null;
-		// isClosed = true;
 	}
 
 	/*
@@ -241,7 +238,7 @@ public class OXServletOutputStream extends ServletOutputStream {
 			 * processPackage() method need not to be called.
 			 */
 			byteBuffer.reset();
-		} catch (SocketException e) {
+		} catch (final SocketException e) {
 			if (e.getMessage().indexOf(ERR_BROKEN_PIPE) != -1) {
 				LOG.warn(new StringBuilder("Underlying (TCP) protocol communication aborted:").append(e.getMessage())
 						.toString(), e);
@@ -249,7 +246,7 @@ public class OXServletOutputStream extends ServletOutputStream {
 				LOG.error(e.getMessage(), e);
 			}
 			throw new IOException(e.getMessage());
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOG.error(e.getMessage(), e);
 			throw new IOException(e.getMessage());
 		}
@@ -263,7 +260,7 @@ public class OXServletOutputStream extends ServletOutputStream {
 		try {
 			final String s = new String(chars);
 			write(s.getBytes(ajpCon.getAjpRequestHandler().getServletResponseObj().getCharacterEncoding()));
-		} catch (UnsupportedEncodingException e) {
+		} catch (final UnsupportedEncodingException e) {
 			LOG.error(e.getMessage(), e);
 			throw new IOException(e.getMessage());
 		}

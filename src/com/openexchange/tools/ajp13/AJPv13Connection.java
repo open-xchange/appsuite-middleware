@@ -63,7 +63,7 @@ import java.net.SocketException;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  *
  */
-public class AJPv13Connection {
+public final class AJPv13Connection {
 	
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AJPv13Connection.class);
 
@@ -84,16 +84,14 @@ public class AJPv13Connection {
 	private AJPv13RequestHandler ajpRequestHandler;
 	
 	public AJPv13Connection(AJPv13Listener listener) {
-		super();
+		this();
 		setAndApplyListener(listener);
-		state = IDLE_STATE;
-		packageNumber = 1;
 	}
 	
 	public AJPv13Connection() {
 		super();
 		state = IDLE_STATE;
-		packageNumber = 1;
+		packageNumber = 0;
 	}
 
 	/**
@@ -118,10 +116,10 @@ public class AJPv13Connection {
 			}
 		}
 		state = IDLE_STATE;
-		packageNumber = 1;
+		packageNumber = 0;
 	}
 	
-	private final void resetRequestHandler(final boolean release) {
+	private void resetRequestHandler(final boolean release) {
 		/*
 		 * Discard request handler's reference to this connection if it
 		 * ought to be released from it
@@ -263,7 +261,7 @@ public class AJPv13Connection {
 		setAndApplyListener(listener);
 	}
 
-	private final void setAndApplyListener(final AJPv13Listener listener) {
+	private void setAndApplyListener(final AJPv13Listener listener) {
 		this.listener = listener;
 		try {
 			this.inputStream = new BufferedInputStream(listener.getSocket().getInputStream());

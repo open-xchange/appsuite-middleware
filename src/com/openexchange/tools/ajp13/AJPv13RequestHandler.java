@@ -70,7 +70,7 @@ import com.openexchange.tools.servlet.http.HttpServletResponseWrapper;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public class AJPv13RequestHandler {
+public final class AJPv13RequestHandler {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(AJPv13RequestHandler.class);
@@ -112,6 +112,8 @@ public class AJPv13RequestHandler {
 	 * @value 10
 	 */
 	private static final int CPING_PREFIX_CODE = 10;
+	
+	private static final int NOT_SET = -1;
 
 	public static final String JSESSIONID_COOKIE = "JSESSIONID";
 	
@@ -166,7 +168,7 @@ public class AJPv13RequestHandler {
 	 * first two bytes and the payload data size in bytes in the following two
 	 * bytes.
 	 */
-	private final int readInitialBytes(final boolean enableTimeout) throws IOException, AJPv13Exception {
+	private int readInitialBytes(final boolean enableTimeout) throws IOException, AJPv13Exception {
 		int dataLength = -1;
 		if (enableTimeout) {
 			ajpCon.setSoTimeout(AJPv13Config.getAJPListenerReadTimeout());
@@ -182,7 +184,7 @@ public class AJPv13RequestHandler {
 				 * Read first two bytes
 				 */
 				magic = new int[] { ajpCon.getInputStream().read(), ajpCon.getInputStream().read() };
-			} catch (SocketException e) {
+			} catch (final SocketException e) {
 				throw new AJPv13SocketClosedException(AJPCode.SOCKET_CLOSED_BY_WEB_SERVER, false, e, Integer.valueOf(ajpCon.getPackageNumber()));
 			}
 			if (checkMagicBytes(magic)) {
@@ -206,14 +208,14 @@ public class AJPv13RequestHandler {
 		return dataLength;
 	}
 	
-	private static final boolean checkMagicBytes(final int[] magic) {
+	private static boolean checkMagicBytes(final int[] magic) {
 		if (AJPv13Config.getCheckMagicBytesStrict()) {
 			return (magic[0] == PACKAGE_FROM_SERVER_TO_CONTAINER[0] && magic[1] == PACKAGE_FROM_SERVER_TO_CONTAINER[1]);
 		}
 		return (magic[0] == PACKAGE_FROM_SERVER_TO_CONTAINER[0] || magic[1] == PACKAGE_FROM_SERVER_TO_CONTAINER[1]);
 	}
 	
-	private static final String dumpBytes(final byte magic1, final byte magic2, final byte[] bytes) {
+	private static String dumpBytes(final byte magic1, final byte magic2, final byte[] bytes) {
 		if (bytes == null) {
 			return "";
 		}
@@ -223,7 +225,7 @@ public class AJPv13RequestHandler {
 				Integer.toHexString(magic2).toUpperCase());
 		int c = 2;
 		int l = 0;
-		for (byte b : bytes) {
+		for (final byte b : bytes) {
 			if (c == 16) {
 				sb.append('\n');
 				c = 0;
@@ -243,11 +245,12 @@ public class AJPv13RequestHandler {
 		return sb.toString();
 	}
 
-	public final void processPackage() throws AJPv13Exception {
+	public void processPackage() throws AJPv13Exception {
 		try {
 			if (state.equals(State.IDLE)) {
 				state = State.ASSIGNED;
 			}
+			ajpCon.increasePackageNumber();
 			int dataLength = -1;
 			final boolean firstPackage = (ajpCon.getPackageNumber() == 1);
 			dataLength = readInitialBytes(firstPackage && AJPv13Config.getAJPListenerReadTimeout() > 0);
@@ -278,7 +281,14 @@ public class AJPv13RequestHandler {
 					ajpRequest = new AJPv13CPingRequest(getPayloadData(dataLength - 1, ajpCon.getInputStream(), true));
 					break;
 				default:
-					throw new AJPv13UnknownPrefixCodeException(prefixCode);
+					/*
+					 * Unknow prefix code in first package: Leave routine
+					 */
+					if (LOG.isWarnEnabled()) {
+						final AJPv13Exception ajpExc = new AJPv13UnknownPrefixCodeException(prefixCode);
+						LOG.warn(ajpExc.getMessage(), ajpExc);
+					}
+					return;
 				}
 			} else {
 				/*
@@ -289,7 +299,23 @@ public class AJPv13RequestHandler {
 			}
 			ajpRequest.processRequest(this);
 			if (prefixCode == FORWARD_REQUEST_PREFIX_CODE) {
-				if (b_contentLength && contentLength > 0) {
+				if (contentLength == NOT_SET) {
+					/*
+					 * This condition is reached when no content-length
+					 * header was present in forward request package
+					 * (transfer-encoding: chunked)
+					 */
+					servletRequestObj.getOXInputStream().setData(new byte[0]);
+				} else if (contentLength == 0) {
+					/*
+					 * This condition is reached when content-length
+					 * header's value is set to '0'
+					 */
+					servletRequestObj.getOXInputStream().setData(null);
+				} else {
+					/*
+					 * Forward request is immediately followed by a data package
+					 */
 					ajpCon.increasePackageNumber();
 					/*
 					 * Processed package is an AJP forward request which
@@ -298,30 +324,14 @@ public class AJPv13RequestHandler {
 					dataLength = readInitialBytes(false);
 					ajpRequest = new AJPv13RequestBody(getPayloadData(dataLength, ajpCon.getInputStream(), true));
 					ajpRequest.processRequest(this);
-				} else {
-					if (b_contentLength) {
-						/*
-						 * This condition is reached when content-length
-						 * header's value is set to '0'
-						 */
-						servletRequestObj.getOXInputStream().setData(null);
-					} else {
-						/*
-						 * This condition is reached when no content-length
-						 * header was present in forward request package
-						 * (transfer-encoding: chunked)
-						 */
-						servletRequestObj.getOXInputStream().setData(new byte[0]);
-					}
 				}
 			}
-			ajpCon.increasePackageNumber();
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			throw new AJPv13Exception(AJPCode.IO_ERROR, e, e.getMessage());
 		}
 	}
 
-	public final void createResponse() throws AJPv13Exception, ServletException {
+	public void createResponse() throws AJPv13Exception, ServletException {
 		try {
 			if (ajpRequest == null) {
 				/*
@@ -333,7 +343,7 @@ public class AJPv13RequestHandler {
 				return;
 			}
 			ajpRequest.response(ajpCon.getOutputStream(), this);
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			throw new AJPv13Exception(AJPCode.IO_ERROR, e, e.getMessage());
 		}
 	}
@@ -358,7 +368,7 @@ public class AJPv13RequestHandler {
 	 * @return
 	 * @throws IOException
 	 */
-	private static final byte[] getPayloadData(final int payloadLength, final InputStream in, final boolean strict)
+	private static byte[] getPayloadData(final int payloadLength, final InputStream in, final boolean strict)
 			throws IOException {
 		byte[] bytes = null;
 		if (strict) {
@@ -401,7 +411,7 @@ public class AJPv13RequestHandler {
 		return bytes;
 	}
 
-	private final void releaseServlet() {
+	private void releaseServlet() {
 		if (servletId != null) {
 			HttpServletManager.putServlet(servletId, servletInstance);
 			MonitoringInfo.decrementNumberOfConnections(connectionType);
@@ -425,7 +435,7 @@ public class AJPv13RequestHandler {
 				servletRequestObj.getInputStream().close();
 				servletRequestObj.removeInputStream();
 			}
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOG.error(e.getMessage(), e);
 		}
 		try {
@@ -433,7 +443,7 @@ public class AJPv13RequestHandler {
 				servletResponseObj.getOXOutputStream().close();
 				servletResponseObj.removeOXOutputStream();
 			}
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOG.error(e.getMessage(), e);
 		}
 		servletRequestObj = null;
@@ -628,6 +638,10 @@ public class AJPv13RequestHandler {
 	 * @return
 	 */
 	public boolean isAllDataRead() {
+		/*
+		 * This method will always return false if content-length is not set
+		 * unless method makeEqual() is invoked
+		 */
 		return (totalRequestedContentLength == contentLength);
 	}
 
@@ -638,7 +652,15 @@ public class AJPv13RequestHandler {
 	 * @return
 	 */
 	public boolean isMoreDataExpected() {
-		return (totalRequestedContentLength < contentLength);
+		/*
+		 * No empty data package received AND requested data length is still
+		 * less than header Content-Length
+		 */
+		return (contentLength != NOT_SET && totalRequestedContentLength < contentLength);
+	}
+	
+	public boolean isNotSet() {
+		return (contentLength == NOT_SET);
 	}
 
 	/**
@@ -648,7 +670,7 @@ public class AJPv13RequestHandler {
 	 * @return
 	 */
 	public boolean isMoreDataReadThanExpected() {
-		return (totalRequestedContentLength > contentLength);
+		return (contentLength != NOT_SET && totalRequestedContentLength > contentLength);
 	}
 
 	/**
@@ -686,7 +708,7 @@ public class AJPv13RequestHandler {
 		this.servletId = servletId;
 	}
 	
-	private final void supplyRequestWrapperWithServlet() {
+	private void supplyRequestWrapperWithServlet() {
 		if(servletRequestObj != null && servletInstance != null) {
 			servletRequestObj.setServletInstance(servletInstance);
 		}

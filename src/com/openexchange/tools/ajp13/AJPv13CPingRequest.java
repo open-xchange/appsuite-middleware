@@ -60,7 +60,7 @@ import javax.servlet.ServletException;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public class AJPv13CPingRequest extends AJPv13Request {
+public final class AJPv13CPingRequest extends AJPv13Request {
 
 	private static final String STR_RECEIVED_CPING = "Received CPing";
 

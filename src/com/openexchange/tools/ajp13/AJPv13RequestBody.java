@@ -63,7 +63,7 @@ import com.openexchange.tools.ajp13.AJPv13Exception.AJPCode;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public class AJPv13RequestBody extends AJPv13Request {
+public final class AJPv13RequestBody extends AJPv13Request {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(AJPv13RequestBody.class);
@@ -90,37 +90,19 @@ public class AJPv13RequestBody extends AJPv13Request {
 				/*
 				 * Hmm... we actually expect more data
 				 */
-				if (ajpRequestHandler.emptyDataPackageAlreadyReceived()) {
-					/*
-					 * Ok, we detected an empty data package twice. Assume that
-					 * client really sent all data to servlet container although
-					 * client indicated that data is still left to send because
-					 * total requested content length is less than data's
-					 * content length
-					 */
-					if (LOG.isWarnEnabled()) {
-						final AJPv13Exception ajpExc = new AJPv13Exception(AJPCode.UNEXPECTED_EMPTY_DATA_PACKAGE,
-								Integer.valueOf(ajpRequestHandler.getTotalRequestedContentLength()), Integer
-										.valueOf(ajpRequestHandler.getContentLength()));
-						ajpExc.fillInStackTrace();
-						LOG.warn(ajpExc.getMessage(), ajpExc);
-					}
-					/*
-					 * Set data to null to indicate that no more data is
-					 * available from web server
-					 */
-					ajpRequestHandler.makeEqual();
-					ajpRequestHandler.getServletRequestObj().getOXInputStream().setData(null);
-				} else {
-					/*
-					 * Request expected data one more time
-					 */
-					final OutputStream out = ajpRequestHandler.getAJPConnection().getOutputStream();
-					out.write(AJPv13Response.getGetBodyChunkBytes(ajpRequestHandler.getNumOfBytesToRequestFor()));
-					out.flush();
-					ajpRequestHandler.setEmptyDataPackageReceived(true);
-					ajpRequestHandler.processPackage();
+				if (LOG.isWarnEnabled()) {
+					final AJPv13Exception ajpExc = new AJPv13Exception(AJPCode.UNEXPECTED_EMPTY_DATA_PACKAGE,
+							Integer.valueOf(ajpRequestHandler.getTotalRequestedContentLength()), Integer
+									.valueOf(ajpRequestHandler.getContentLength()));
+					ajpExc.fillInStackTrace();
+					LOG.warn(ajpExc.getMessage(), ajpExc);
 				}
+				/*
+				 * Set data to null to indicate that no more data is
+				 * available from web server
+				 */
+				ajpRequestHandler.makeEqual();
+				ajpRequestHandler.getServletRequestObj().getOXInputStream().setData(null);
 				return;
 			}
 			/*
@@ -128,7 +110,7 @@ public class AJPv13RequestBody extends AJPv13Request {
 			 * transfer-encoding: chunked - , then 'content-length' header has
 			 * not been set
 			 */
-			if (!ajpRequestHandler.containsContentLength() || ajpRequestHandler.isMoreDataReadThanExpected()) {
+			if (ajpRequestHandler.isNotSet() || ajpRequestHandler.isMoreDataReadThanExpected()) {
 				ajpRequestHandler.makeEqual();
 			}
 			ajpRequestHandler.getServletRequestObj().getOXInputStream().setData(null);
@@ -179,19 +161,13 @@ public class AJPv13RequestBody extends AJPv13Request {
 		}
 	}
 
-	private static final String decodeURL(final String encodedURL, final String characterEncoding) {
+	private static String decodeURL(final String encodedURL, final String characterEncoding) {
 		try {
 			return URLDecoder.decode(encodedURL, characterEncoding);
-		} catch (UnsupportedEncodingException e) {
+		} catch (final UnsupportedEncodingException e) {
 			LOG.error(e);
 		}
 		return "";
 	}
-
-	// private final byte[] getData() {
-	// final byte[] retval = new byte[payloadData.length - 2];
-	// System.arraycopy(payloadData, 2, retval, 0, retval.length);
-	// return retval;
-	// }
 
 }

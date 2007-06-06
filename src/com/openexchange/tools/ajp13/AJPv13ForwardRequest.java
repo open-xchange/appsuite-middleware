@@ -81,7 +81,7 @@ import com.openexchange.tools.servlet.http.HttpSessionManagement;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public class AJPv13ForwardRequest extends AJPv13Request {
+public final class AJPv13ForwardRequest extends AJPv13Request {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(AJPv13ForwardRequest.class);
@@ -247,13 +247,12 @@ public class AJPv13ForwardRequest extends AJPv13Request {
 		 */
 		parseRequestHeaders(servletRequest, numHeaders);
 		/*
-		 * Set important header CONTENT_TYPE which decides whether to further
+		 * Set important header CONTENT_LENGTH which decides whether to further
 		 * process an upcoming body request from web server or to terminate
-		 * communication after this forward request.
+		 * communication after this forward request. Since this header is always
+		 * set in servlet request we don't need to check if it's present.
 		 */
-		if (servletRequest.containsHeader(HDR_CONTENT_LENGTH)) {
-			ajpRequestHandler.setContentLength(getContentLength(servletRequest));
-		}
+		ajpRequestHandler.setContentLength(servletRequest.getIntHeader(HDR_CONTENT_LENGTH));
 		/*
 		 * Determine if content type inidicates form data
 		 */
@@ -327,7 +326,7 @@ public class AJPv13ForwardRequest extends AJPv13Request {
 				.toString());
 	}
 
-	private final void parseRequestHeaders(final HttpServletRequestWrapper servletRequest, final int numHeaders)
+	private void parseRequestHeaders(final HttpServletRequestWrapper servletRequest, final int numHeaders)
 			throws AJPv13Exception {
 		boolean contentTypeSet = false;
 		NextHeader: for (int i = 1; i <= numHeaders; i++) {
@@ -407,7 +406,7 @@ public class AJPv13ForwardRequest extends AJPv13Request {
 		}
 	}
 
-	private final void parseAttributes(final HttpServletRequestWrapper servletRequest) throws AJPv13Exception {
+	private void parseAttributes(final HttpServletRequestWrapper servletRequest) throws AJPv13Exception {
 		byte nextByte = (byte) REQUEST_TERMINATOR;
 		while ((nextByte = nextByte()) != ((byte) REQUEST_TERMINATOR)) {
 			String attributeName = null;
@@ -423,7 +422,7 @@ public class AJPv13ForwardRequest extends AJPv13Request {
 		}
 	}
 
-	private static final void checkJSessionIDCookie(final HttpServletRequestWrapper servletRequest,
+	private static void checkJSessionIDCookie(final HttpServletRequestWrapper servletRequest,
 			final HttpServletResponse resp, final AJPv13RequestHandler ajpRequestHandler) {
 		final Cookie[] cookies = servletRequest.getCookies();
 		Cookie jsessionIDCookie = null;
@@ -462,12 +461,12 @@ public class AJPv13ForwardRequest extends AJPv13Request {
 		}
 	}
 
-	private static final void createJSessionIDCookie(final HttpServletResponse resp,
+	private static void createJSessionIDCookie(final HttpServletResponse resp,
 			final AJPv13RequestHandler ajpRequestHandler) {
 		addJSessionIDCookie(null, resp, ajpRequestHandler);
 	}
 
-	private static final void addJSessionIDCookie(final String id, final HttpServletResponse resp,
+	private static void addJSessionIDCookie(final String id, final HttpServletResponse resp,
 			final AJPv13RequestHandler ajpRequestHandler) {
 		final String jsessionIdVal;
 		final boolean join;
@@ -492,14 +491,14 @@ public class AJPv13ForwardRequest extends AJPv13Request {
 		resp.addCookie(jsessionIDCookie);
 	}
 
-	private final String parseString() throws AJPv13Exception {
+	private String parseString() throws AJPv13Exception {
 		return parseString(nextByte(), nextByte());
 	}
 
 	/**
 	 * First two bytes, which indicate length of string, already consumed.
 	 */
-	private final String parseString(final byte firstByte, final byte secondByte) throws AJPv13Exception {
+	private String parseString(final byte firstByte, final byte secondByte) throws AJPv13Exception {
 		/*
 		 * Special Byte 0xFF indicates absence of current string value.
 		 */
@@ -533,20 +532,13 @@ public class AJPv13ForwardRequest extends AJPv13Request {
 		return sb.toString();
 	}
 
-	private final boolean parseBoolean() {
+	private boolean parseBoolean() {
 		return (nextByte() > 0);
 	}
 
-	private final static String decodeQueryStringValue(final HttpServletRequestWrapper servletRequest,
+	private static String decodeQueryStringValue(final HttpServletRequestWrapper servletRequest,
 			final String queryStringValue) throws UnsupportedEncodingException {
 		return URLDecoder.decode(queryStringValue, servletRequest.getCharacterEncoding() == null ? ServerConfig
 				.getProperty(Property.DefaultEncoding) : servletRequest.getCharacterEncoding());
-	}
-
-	private final static int getContentLength(final HttpServletRequestWrapper servletRequest) {
-		if (servletRequest.containsHeader(HDR_CONTENT_LENGTH)) {
-			return servletRequest.getIntHeader(HDR_CONTENT_LENGTH);
-		}
-		return -1;
 	}
 }

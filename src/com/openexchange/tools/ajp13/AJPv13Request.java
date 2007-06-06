@@ -97,53 +97,46 @@ public abstract class AJPv13Request {
 			}
 			ajpRequestHandler.setServiceMethodCalled(true);
 		}
-		if (ajpRequestHandler.isAllDataRead()) {
+		/*
+		 * Send response headers first.
+		 */
+		if (!ajpRequestHandler.isHeadersSent()) {
+			writeResponse(AJPv13Response.getSendHeadersBytes(ajpRequestHandler.getServletResponseObj()), out, true);
+			ajpRequestHandler.setHeadersSent(true);
+			ajpRequestHandler.getServletResponseObj().setCommitted(true);
+		}
+		byte[] remainingData = null;
+		try {
+			remainingData = ajpRequestHandler.getServletResponseObj().getOXOutputStream().getData();
+			ajpRequestHandler.getServletResponseObj().getOXOutputStream().clearByteBuffer();
+		} catch (final IOException e) {
+			remainingData = new byte[0];
+		}
+		if (remainingData.length > 0) {
 			/*
-			 * All data read now. Start creating response. Send response headers
-			 * first.
+			 * Send rest of data cut into MAX_BODY_CHUNK_SIZE pieces
 			 */
-			if (!ajpRequestHandler.isHeadersSent()) {
-				writeResponse(AJPv13Response.getSendHeadersBytes(ajpRequestHandler.getServletResponseObj()), out, true);
-				ajpRequestHandler.setHeadersSent(true);
-				ajpRequestHandler.getServletResponseObj().setCommitted(true);
-			}
-			byte[] remainingData = null;
-			try {
-				remainingData = ajpRequestHandler.getServletResponseObj().getOXOutputStream().getData();
-				ajpRequestHandler.getServletResponseObj().getOXOutputStream().clearByteBuffer();
-			} catch (IOException e) {
-				remainingData = new byte[0];
+			while (remainingData.length > AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE) {
+				final byte[] currentData = new byte[AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE];
+				final byte[] tmp = new byte[remainingData.length - currentData.length];
+				System.arraycopy(remainingData, 0, currentData, 0, currentData.length);
+				System.arraycopy(remainingData, currentData.length, tmp, 0, tmp.length);
+				writeResponse(AJPv13Response.getSendBodyChunkBytes(currentData), out, true);
+				remainingData = tmp;
 			}
 			if (remainingData.length > 0) {
 				/*
-				 * Send rest of data cut into MAX_BODY_CHUNK_SIZE pieces
+				 * Send final SEND_BODY_CHUNK package
 				 */
-				while (remainingData.length > AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE) {
-					final byte[] currentData = new byte[AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE];
-					final byte[] tmp = new byte[remainingData.length - currentData.length];
-					System.arraycopy(remainingData, 0, currentData, 0, currentData.length);
-					System.arraycopy(remainingData, currentData.length, tmp, 0, tmp.length);
-					writeResponse(AJPv13Response.getSendBodyChunkBytes(currentData), out, true);
-					remainingData = tmp;
-				}
-				if (remainingData.length > 0) {
-					/*
-					 * Send final SEND_BODY_CHUNK package
-					 */
-					writeResponse(AJPv13Response.getSendBodyChunkBytes(remainingData), out, false);
-				}
+				writeResponse(AJPv13Response.getSendBodyChunkBytes(remainingData), out, false);
 			}
-			/*
-			 * Write END_RESPONSE package
-			 */
-			writeResponse(AJPv13Response.getEndResponseBytes(), out, true);
-			ajpRequestHandler.setEndResponseSent(true);
-			return;
 		}
 		/*
-		 * Request next body chunk package from web sever
+		 * Write END_RESPONSE package
 		 */
-		writeResponse(AJPv13Response.getGetBodyChunkBytes(ajpRequestHandler.getNumOfBytesToRequestFor()), out, true);
+		writeResponse(AJPv13Response.getEndResponseBytes(), out, true);
+		ajpRequestHandler.setEndResponseSent(true);
+		return;
 	}
 
 	/**

@@ -67,7 +67,7 @@ import com.openexchange.tools.ajp13.AJPv13Response;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public class OXServletInputStream extends ServletInputStream {
+public final class OXServletInputStream extends ServletInputStream {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(OXServletInputStream.class);
@@ -100,7 +100,7 @@ public class OXServletInputStream extends ServletInputStream {
 	 * @param ajpCon -
 	 *            associated AJP connection
 	 */
-	public OXServletInputStream(AJPv13Connection ajpCon) {
+	public OXServletInputStream(final AJPv13Connection ajpCon) {
 		this.ajpCon = ajpCon;
 	}
 
@@ -113,7 +113,7 @@ public class OXServletInputStream extends ServletInputStream {
 	 *            the new data
 	 * @throws IOException
 	 */
-	public final void setData(final byte[] newData) throws IOException {
+	public void setData(final byte[] newData) throws IOException {
 		MUTEX.lock();
 		try {
 			if (isClosed) {
@@ -174,13 +174,6 @@ public class OXServletInputStream extends ServletInputStream {
 			}
 			if (pos >= data.length) {
 				dataSet = false;
-				/*
-				 * All data were read from buffer, ask web server for more data
-				 * packages if exist, else return -1.
-				 */
-				if (ajpCon.getAjpRequestHandler().isAllDataRead()) {
-					return -1;
-				}
 				if (!requestMoreDataFromWebServer()) {
 					/*
 					 * Web server sent an empty data package to indicate no more
@@ -370,7 +363,7 @@ public class OXServletInputStream extends ServletInputStream {
 			 */
 			ajpCon.getAjpRequestHandler().processPackage();
 			return (data != null);
-		} catch (AJPv13Exception e) {
+		} catch (final AJPv13Exception e) {
 			LOG.error(e.getMessage(), e);
 			throw new IOException(e.getMessage());
 		}
