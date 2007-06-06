@@ -46,22 +46,39 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.admin.exceptions;
+package com.openexchange.admin.rmi.exceptions;
+
+import java.io.Serializable;
 
 /**
- *
+ * 
  * @author cutmasta
  */
-public class PoolException extends Exception{
-    
-    
-    /**
-	 * For serialization
-	 */
-	private static final long serialVersionUID = -5277939890000030683L;
+public class PoolException extends Exception implements Serializable {
 
-	public PoolException(String s) {
-        super( s );
+    /**
+     * For serialization
+     */
+    private static final long serialVersionUID = -5277939890000030683L;
+
+    public PoolException(String s) {
+        super(s);
     }
-    
+
+    /**
+     * @param cause
+     */
+    public PoolException(Throwable cause) {
+        super(cause);
+
+    }
+
+    /**
+     * @param message
+     * @param cause
+     */
+    public PoolException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
 }
