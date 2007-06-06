@@ -2,6 +2,7 @@
 
  - Bugfix #7825: Fixed communication problems if chunked transfer-encoding
    is used
+ - Bugfix #7361: Fixed deletion of large number of mails
 
 * 2007-06-06 - marcus.klein@open-xchange.com
 

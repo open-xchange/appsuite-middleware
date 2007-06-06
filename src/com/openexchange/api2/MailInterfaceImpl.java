@@ -3533,15 +3533,28 @@ public class MailInterfaceImpl implements MailInterface {
 			} catch (final MessagingException e) {
 				if (e.getMessage().toLowerCase(Locale.ENGLISH).indexOf(ERR_WORD_TOO_LONG) > -1) {
 					try {
+						/*
+						 * Reopen folder cause its protocol instance is set to
+						 * null due to caught exception
+						 */
+						imapCon.getImapFolder().close(false);
+						imapCon.getImapFolder().open(Folder.READ_WRITE);
 						final long start = System.currentTimeMillis();
 						final int[] msgnums = IMAPUtils.getSequenceNumbers(imapCon.getImapFolder(), msgUIDs, false);
+						if (msgnums.length != msgUIDs.length) {
+							/*
+							 * Should never occur; just for the sake of order
+							 */
+							throw new OXMailException(MailCode.INTERNAL_ERROR, null, "Sequence numbers do not match UIDs!");
+						}
 						mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 						msgs = imapCon.getImapFolder().getMessages(msgnums);
 					} catch (final ProtocolException e1) {
 						throw new OXMailException(MailCode.INTERNAL_ERROR, e1, e1.getMessage());
 					}
+				} else {
+					throw handleMessagingException(e, sessionObj.getIMAPProperties());
 				}
-				throw handleMessagingException(e, sessionObj.getIMAPProperties());
 			}
 			msgs = cleanMessageArray(msgs);
 			if (msgs == null || msgs.length == 0) {

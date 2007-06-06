@@ -1861,8 +1861,9 @@ public class IMAPUtils {
 				if (!response.isOK()) {
 					throw new OXMailException(MailCode.PROTOCOL_ERROR, "UID FETCH not supported");
 				}
-				NextResponse: for (int index = 0; index < r.length && index < uids.length; index++) {
-					final long correspondingUID = uids[uidIndex];
+				final int decLength = r.length - 1;
+				NextResponse: for (int index = 0; index < decLength && uidIndex < uids.length; index++) {
+					final long correspondingUID = uids[uidIndex++];
 					if (!(r[index] instanceof FetchResponse)) {
 						continue;
 					}
@@ -1879,10 +1880,11 @@ public class IMAPUtils {
 						}
 					}
 					if (correspondingUID != currentUID) {
+						LOG.warn("UID mismatch");
 						continue NextResponse;
 					}
 					seqNums.append(f.getNumber());
-					uidIndex++;
+					//uidIndex++;
 				}
 			} finally {
 				p.notifyResponseHandlers(r);
@@ -2099,7 +2101,8 @@ public class IMAPUtils {
 					throw new OXMailException(MailCode.PROTOCOL_ERROR, "FETCH not supported");
 				}
 				FetchItemHandler[] itemHandlers = null;
-				NextResponse: for (int index = 0; index < r.length && messageIndex < fetchLength; index++) {
+				final int decLength = r.length - 1;
+				NextResponse: for (int index = 0; index < decLength && messageIndex < fetchLength; index++) {
 					final Response currentReponse = r[index];
 					/*
 					 * Response is null or not a FetchResponse
@@ -2298,15 +2301,21 @@ public class IMAPUtils {
 		if (seqNums == null || seqNums.length == 0) {
 			return null;
 		}
-		final StringBuilder sb = new StringBuilder();
+		final List<String> tmp = new ArrayList<String>((seqNums.length / MAX_IMAP_COMMAND_LENGTH));
+		final StringBuilder sb = new StringBuilder(MAX_IMAP_COMMAND_LENGTH);
 		sb.append(seqNums[0]);
 		for (int i = 1; i < seqNums.length; i++) {
-			sb.append(',').append(seqNums[i]);
+			final String sMsgnum = String.valueOf(seqNums[i]);
+			if (sb.length() + sMsgnum.length() + 1 > MAX_IMAP_COMMAND_LENGTH) {
+				tmp.add(sb.toString());
+				sb.setLength(0);
+			} else {
+				sb.append(',');
+			}
+			sb.append(sMsgnum);
 		}
-		/*
-		 * Split into fitting blocks
-		 */
-		return splitCommaSeparatedList(sb.toString(), MAX_IMAP_COMMAND_LENGTH);
+		tmp.add(sb.toString());
+		return tmp.toArray(new String[tmp.size()]);
 	}
 
 	private static final String[] getUIDs(final long[] uids) {
@@ -2317,15 +2326,21 @@ public class IMAPUtils {
 		if (uids == null || uids.length == 0) {
 			return null;
 		}
-		final StringBuilder sb = new StringBuilder();
+		final List<String> tmp = new ArrayList<String>((uids.length / MAX_IMAP_COMMAND_LENGTH));
+		final StringBuilder sb = new StringBuilder(MAX_IMAP_COMMAND_LENGTH);
 		sb.append(uids[0]);
 		for (int i = 1; i < uids.length; i++) {
-			sb.append(',').append(uids[i]);
+			final String sUid = String.valueOf(uids[i]);
+			if (sb.length() + sUid.length() + 1 > MAX_IMAP_COMMAND_LENGTH) {
+				tmp.add(sb.toString());
+				sb.setLength(0);
+			} else {
+				sb.append(',');
+			}
+			sb.append(sUid);
 		}
-		/*
-		 * Split into fitting blocks
-		 */
-		return splitCommaSeparatedList(sb.toString(), MAX_IMAP_COMMAND_LENGTH);
+		tmp.add(sb.toString());
+		return tmp.toArray(new String[tmp.size()]);
 	}
 
 	private static final String[] getMessageSeqNums(final Message[] msgs) {
@@ -2336,42 +2351,20 @@ public class IMAPUtils {
 		if (msgs == null || msgs.length == 0) {
 			return null;
 		}
-		final StringBuilder sb = new StringBuilder();
+		final List<String> tmp = new ArrayList<String>((msgs.length / MAX_IMAP_COMMAND_LENGTH));
+		final StringBuilder sb = new StringBuilder(MAX_IMAP_COMMAND_LENGTH);
 		sb.append(msgs[0].getMessageNumber());
 		for (int i = 1; i < msgs.length; i++) {
-			if (msgs[i] != null) {
-				sb.append(',').append(msgs[i].getMessageNumber());
+			final String sMsgnum = String.valueOf(msgs[i].getMessageNumber());
+			if (sb.length() + sMsgnum.length() + 1 > MAX_IMAP_COMMAND_LENGTH) {
+				tmp.add(sb.toString());
+				sb.setLength(0);
+			} else {
+				sb.append(',');
 			}
+			sb.append(sMsgnum);
 		}
-		/*
-		 * Split into fitting blocks
-		 */
-		return splitCommaSeparatedList(sb.toString(), MAX_IMAP_COMMAND_LENGTH);
-	}
-
-	/**
-	 * Splits a comma-separated string arrays with max. <code>blockSize</code>
-	 * length
-	 */
-	private static final String[] splitCommaSeparatedList(final String csw, final int blockSize) {
-		final List<String> tmp = new ArrayList<String>();
-		String s = csw;
-		while (s.length() > blockSize) {
-			int pos = blockSize - 1;
-			while (s.charAt(pos) != ',') {
-				pos--;
-			}
-			final String substr = s.substring(0, pos);
-			tmp.add(substr);
-			try {
-				s = s.substring(pos + 1);
-			} catch (StringIndexOutOfBoundsException e) {
-				s = "";
-			}
-		}
-		if (s.length() > 0) {
-			tmp.add(s);
-		}
+		tmp.add(sb.toString());
 		return tmp.toArray(new String[tmp.size()]);
 	}
 
