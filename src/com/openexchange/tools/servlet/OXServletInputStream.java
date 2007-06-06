@@ -174,13 +174,6 @@ public class OXServletInputStream extends ServletInputStream {
 			}
 			if (pos >= data.length) {
 				dataSet = false;
-				/*
-				 * All data were read from buffer, ask web server for more data
-				 * packages if exist, else return -1.
-				 */
-				if (ajpCon.getAjpRequestHandler().isAllDataRead()) {
-					return -1;
-				}
 				if (!requestMoreDataFromWebServer()) {
 					/*
 					 * Web server sent an empty data package to indicate no more

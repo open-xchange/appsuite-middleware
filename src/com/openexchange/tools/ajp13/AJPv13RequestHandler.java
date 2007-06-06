@@ -112,6 +112,8 @@ public class AJPv13RequestHandler {
 	 * @value 10
 	 */
 	private static final int CPING_PREFIX_CODE = 10;
+	
+	private static final int NOT_SET = -1;
 
 	public static final String JSESSIONID_COOKIE = "JSESSIONID";
 	
@@ -248,6 +250,7 @@ public class AJPv13RequestHandler {
 			if (state.equals(State.IDLE)) {
 				state = State.ASSIGNED;
 			}
+			ajpCon.increasePackageNumber();
 			int dataLength = -1;
 			final boolean firstPackage = (ajpCon.getPackageNumber() == 1);
 			dataLength = readInitialBytes(firstPackage && AJPv13Config.getAJPListenerReadTimeout() > 0);
@@ -278,7 +281,14 @@ public class AJPv13RequestHandler {
 					ajpRequest = new AJPv13CPingRequest(getPayloadData(dataLength - 1, ajpCon.getInputStream(), true));
 					break;
 				default:
-					throw new AJPv13UnknownPrefixCodeException(prefixCode);
+					/*
+					 * Unknow prefix code in first package: Leave routine
+					 */
+					if (LOG.isWarnEnabled()) {
+						final AJPv13Exception ajpExc = new AJPv13UnknownPrefixCodeException(prefixCode);
+						LOG.warn(ajpExc.getMessage(), ajpExc);
+					}
+					return;
 				}
 			} else {
 				/*
@@ -289,7 +299,23 @@ public class AJPv13RequestHandler {
 			}
 			ajpRequest.processRequest(this);
 			if (prefixCode == FORWARD_REQUEST_PREFIX_CODE) {
-				if (b_contentLength && contentLength > 0) {
+				if (contentLength == NOT_SET) {
+					/*
+					 * This condition is reached when no content-length
+					 * header was present in forward request package
+					 * (transfer-encoding: chunked)
+					 */
+					servletRequestObj.getOXInputStream().setData(new byte[0]);
+				} else if (contentLength == 0) {
+					/*
+					 * This condition is reached when content-length
+					 * header's value is set to '0'
+					 */
+					servletRequestObj.getOXInputStream().setData(null);
+				} else {
+					/*
+					 * Forward request is immediately followed by a data package
+					 */
 					ajpCon.increasePackageNumber();
 					/*
 					 * Processed package is an AJP forward request which
@@ -298,24 +324,8 @@ public class AJPv13RequestHandler {
 					dataLength = readInitialBytes(false);
 					ajpRequest = new AJPv13RequestBody(getPayloadData(dataLength, ajpCon.getInputStream(), true));
 					ajpRequest.processRequest(this);
-				} else {
-					if (b_contentLength) {
-						/*
-						 * This condition is reached when content-length
-						 * header's value is set to '0'
-						 */
-						servletRequestObj.getOXInputStream().setData(null);
-					} else {
-						/*
-						 * This condition is reached when no content-length
-						 * header was present in forward request package
-						 * (transfer-encoding: chunked)
-						 */
-						servletRequestObj.getOXInputStream().setData(new byte[0]);
-					}
 				}
 			}
-			ajpCon.increasePackageNumber();
 		} catch (IOException e) {
 			throw new AJPv13Exception(AJPCode.IO_ERROR, e, e.getMessage());
 		}
@@ -628,6 +638,10 @@ public class AJPv13RequestHandler {
 	 * @return
 	 */
 	public boolean isAllDataRead() {
+		/*
+		 * This method will always return false if content-length is not set
+		 * unless method makeEqual() is invoked
+		 */
 		return (totalRequestedContentLength == contentLength);
 	}
 
@@ -638,7 +652,15 @@ public class AJPv13RequestHandler {
 	 * @return
 	 */
 	public boolean isMoreDataExpected() {
-		return (totalRequestedContentLength < contentLength);
+		/*
+		 * No empty data package received AND requested data length is still
+		 * less than header Content-Length
+		 */
+		return (contentLength != NOT_SET && totalRequestedContentLength < contentLength);
+	}
+	
+	public boolean isNotSet() {
+		return (contentLength == NOT_SET);
 	}
 
 	/**
@@ -648,7 +670,7 @@ public class AJPv13RequestHandler {
 	 * @return
 	 */
 	public boolean isMoreDataReadThanExpected() {
-		return (totalRequestedContentLength > contentLength);
+		return (contentLength != NOT_SET && totalRequestedContentLength > contentLength);
 	}
 
 	/**

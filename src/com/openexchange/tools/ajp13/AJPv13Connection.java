@@ -84,16 +84,14 @@ public class AJPv13Connection {
 	private AJPv13RequestHandler ajpRequestHandler;
 	
 	public AJPv13Connection(AJPv13Listener listener) {
-		super();
+		this();
 		setAndApplyListener(listener);
-		state = IDLE_STATE;
-		packageNumber = 1;
 	}
 	
 	public AJPv13Connection() {
 		super();
 		state = IDLE_STATE;
-		packageNumber = 1;
+		packageNumber = 0;
 	}
 
 	/**
@@ -118,7 +116,7 @@ public class AJPv13Connection {
 			}
 		}
 		state = IDLE_STATE;
-		packageNumber = 1;
+		packageNumber = 0;
 	}
 	
 	private final void resetRequestHandler(final boolean release) {
