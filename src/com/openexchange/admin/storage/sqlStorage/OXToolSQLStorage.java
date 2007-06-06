@@ -50,6 +50,7 @@
 package com.openexchange.admin.storage.sqlStorage;
 
 import com.openexchange.admin.rmi.dataobjects.Context;
+import com.openexchange.admin.rmi.exceptions.DatabaseLockedException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import java.sql.Connection;
 
@@ -62,178 +63,191 @@ import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
  */
 public abstract class OXToolSQLStorage extends OXToolStorageInterface {
 
+    /**
+     * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#checkPrimaryMail(int,
+     *      java.lang.String)
+     */
+    public abstract void checkPrimaryMail(final Context ctx, final String primary_mail) throws StorageException, InvalidDataException;
 
     /**
-	 * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#checkPrimaryMail(int, java.lang.String)
-	 */
-	public abstract void checkPrimaryMail(final Context ctx, final String primary_mail)
-			throws StorageException,InvalidDataException;
-	
-	/**
-	 * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsContext(int)
-	 */
-	public abstract boolean existsContext(final Context ctx) throws StorageException;
+     * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsContext(int)
+     */
+    public abstract boolean existsContext(final Context ctx) throws StorageException;
 
-	/**
-	 * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsDatabase(int)
-	 */
-	public abstract boolean existsDatabase(final int db_id) throws StorageException;
+    /**
+     * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsDatabase(int)
+     */
+    public abstract boolean existsDatabase(final int db_id) throws StorageException;
 
-	/**
-	 * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsDatabase(java.lang.String)
-	 */
-	public abstract boolean existsDatabase(final String db_name) throws StorageException;
+    /**
+     * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsDatabase(java.lang.String)
+     */
+    public abstract boolean existsDatabase(final String db_name) throws StorageException;
 
-	/**
-	 * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsGroup(int, int)
-	 */
-	public abstract boolean existsGroup(final Context ctx, final int gid) throws StorageException;
+    /**
+     * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsGroup(int,
+     *      int)
+     */
+    public abstract boolean existsGroup(final Context ctx, final int gid) throws StorageException;
 
-        public abstract boolean existsContextLoginMappings(Context ctx,Connection configdb_connection) throws StorageException;
-            
-        public abstract boolean existsContextLoginMappings(Context ctx) throws StorageException;
-        
-        
-	/**
-	 * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsGroup(int, int[])
-	 */
-	public abstract boolean existsGroup( final Context ctx, final int[] gid ) throws StorageException;
-	
-	/**
-	 * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsGroup(int, java.lang.String)
-	 */
-	public abstract boolean existsGroup(final Context ctx, final String identifier)
-			throws StorageException;
+    public abstract boolean existsContextLoginMappings(Context ctx, Connection configdb_connection) throws StorageException;
 
-	/**
-	 * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsGroupMember(int, int, int[])
-	 */
-	public abstract boolean existsGroupMember(final Context ctx, final int group_ID,
-			final int[] user_ids) throws StorageException;
+    public abstract boolean existsContextLoginMappings(Context ctx) throws StorageException;
 
-	/**
-	 * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsGroupMember(int, int, int)
-	 */
-	public abstract boolean existsGroupMember(final Context ctx, final int group_ID, final int member_ID)
-			throws StorageException;
+    /**
+     * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsGroup(int,
+     *      int[])
+     */
+    public abstract boolean existsGroup(final Context ctx, final int[] gid) throws StorageException;
 
-	/**
-	 * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsReason(int)
-	 */
-	public abstract boolean existsReason(final int rid) throws StorageException;
+    /**
+     * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsGroup(int,
+     *      java.lang.String)
+     */
+    public abstract boolean existsGroup(final Context ctx, final String identifier) throws StorageException;
 
-	/**
-	 * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsReason(java.lang.String)
-	 */
-	public abstract boolean existsReason(final String reason) throws StorageException;
+    /**
+     * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsGroupMember(int,
+     *      int, int[])
+     */
+    public abstract boolean existsGroupMember(final Context ctx, final int group_ID, final int[] user_ids) throws StorageException;
 
-        /* (non-Javadoc)
-         * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsResourceAddress(com.openexchange.admin.rmi.dataobjects.Context, java.lang.String)
-         */
-        public abstract boolean existsResourceAddress(final Context ctx, final String address) throws StorageException;
+    /**
+     * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsGroupMember(int,
+     *      int, int)
+     */
+    public abstract boolean existsGroupMember(final Context ctx, final int group_ID, final int member_ID) throws StorageException;
 
-        /**
-	 * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsResource(int, java.lang.String, int)
-	 */
-	public abstract boolean existsResource(final Context ctx, final String identifier) throws StorageException;
+    /**
+     * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsReason(int)
+     */
+    public abstract boolean existsReason(final int rid) throws StorageException;
 
-	/**
-	 * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsResource(int, int)
-	 */
-	public abstract boolean existsResource(final Context ctx, final int resource_id)
-			throws StorageException;
+    /**
+     * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsReason(java.lang.String)
+     */
+    public abstract boolean existsReason(final String reason) throws StorageException;
 
-	/**
-	 * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsServer(int)
-	 */
-	public abstract boolean existsServer(final int server_id) throws StorageException;
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsResourceAddress(com.openexchange.admin.rmi.dataobjects.Context,
+     *      java.lang.String)
+     */
+    public abstract boolean existsResourceAddress(final Context ctx, final String address) throws StorageException;
 
-	/**
-	 * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsServer(java.lang.String)
-	 */
-	public abstract boolean existsServer(final String server_name) throws StorageException;
-	
-	/**
-	 * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsServerID(int, java.lang.String, java.lang.String)
-	 */
-	public abstract boolean existsServerID(final int check_ID, final String table, final String field)
-			throws StorageException;
+    /**
+     * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsResource(int,
+     *      java.lang.String, int)
+     */
+    public abstract boolean existsResource(final Context ctx, final String identifier) throws StorageException;
 
-	/**
-	 * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsStore(int)
-	 */
-	public abstract boolean existsStore(final int store_id) throws StorageException;
+    /**
+     * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsResource(int,
+     *      int)
+     */
+    public abstract boolean existsResource(final Context ctx, final int resource_id) throws StorageException;
 
-	/**
-	 * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsStore(java.lang.String)
-	 */
-	public abstract boolean existsStore(final String url) throws StorageException;
+    /**
+     * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsServer(int)
+     */
+    public abstract boolean existsServer(final int server_id) throws StorageException;
 
-	/**
-	 * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsUser(int, java.lang.String)
-	 */
-	public abstract boolean existsUser(final Context ctx, final String username)
-			throws StorageException;
+    /**
+     * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsServer(java.lang.String)
+     */
+    public abstract boolean existsServer(final String server_name) throws StorageException;
 
-	/**
-	 * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsUser(int, int)
-	 */
-	public abstract boolean existsUser(final Context ctx, final int uid) throws StorageException;
+    /**
+     * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsServerID(int,
+     *      java.lang.String, java.lang.String)
+     */
+    public abstract boolean existsServerID(final int check_ID, final String table, final String field) throws StorageException;
 
-	/**
-	 * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsUser(int, int[])
-	 */
-	public abstract boolean existsUser(final Context ctx, final int[] user_ids)
-			throws StorageException;
+    /**
+     * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsStore(int)
+     */
+    public abstract boolean existsStore(final int store_id) throws StorageException;
 
-	/**
-	 * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#getAdminForContext(int, java.sql.Connection)
-	 */
-	public abstract int getAdminForContext(final Context ctx, final Connection con)
-			throws StorageException;
+    /**
+     * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsStore(java.lang.String)
+     */
+    public abstract boolean existsStore(final String url) throws StorageException;
 
-	/**
-	 * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#getDefaultGroupForContext(int, java.sql.Connection)
-	 */
-	public abstract int getDefaultGroupForContext(final Context ctx, final Connection con)
-			throws StorageException;
-        
-        public abstract int getGidNumberOfGroup(final Context ctx,final int group_id, final Connection con) 
-                        throws StorageException;
+    /**
+     * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsUser(int,
+     *      java.lang.String)
+     */
+    public abstract boolean existsUser(final Context ctx, final String username) throws StorageException;
 
-	/**
-	 * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#isContextAdmin(int, int)
-	 */
-    public abstract boolean isContextAdmin(final Context ctx, final int user_id)
-			throws StorageException;
+    /**
+     * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsUser(int,
+     *      int)
+     */
+    public abstract boolean existsUser(final Context ctx, final int uid) throws StorageException;
 
-	/**
-	 * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#isContextEnabled(int)
-	 */
-	public abstract boolean isContextEnabled(final Context ctx) throws StorageException;
+    /**
+     * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsUser(int,
+     *      int[])
+     */
+    public abstract boolean existsUser(final Context ctx, final int[] user_ids) throws StorageException;
 
-	/**
-	 * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#isMasterDatabase(int)
-	 */
-	public abstract boolean isMasterDatabase(final int database_id) throws StorageException;
+    /**
+     * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#getAdminForContext(int,
+     *      java.sql.Connection)
+     */
+    public abstract int getAdminForContext(final Context ctx, final Connection con) throws StorageException;
 
-	/**
-	 * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#poolInUse(long)
-	 */
-	public abstract boolean poolInUse(final int pool_id) throws StorageException;
+    /**
+     * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#getDefaultGroupForContext(int,
+     *      java.sql.Connection)
+     */
+    public abstract int getDefaultGroupForContext(final Context ctx, final Connection con) throws StorageException;
 
-	/**
-	 * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#serverInUse(long)
-	 */
-	public abstract boolean serverInUse(final int server_id) throws StorageException;
+    public abstract int getGidNumberOfGroup(final Context ctx, final int group_id, final Connection con) throws StorageException;
 
-	/**
-	 * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#storeInUse(long)
-	 */
-	public abstract boolean storeInUse(final int store_id) throws StorageException;
+    /**
+     * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#isContextAdmin(int,
+     *      int)
+     */
+    public abstract boolean isContextAdmin(final Context ctx, final int user_id) throws StorageException;
 
-        /* (non-Javadoc)
-         * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#schemaBeingLockedOrNeedsUpdate(com.openexchange.admin.rmi.dataobjects.Context)
-         */
-        public abstract boolean schemaBeingLockedOrNeedsUpdate(Context ctx) throws StorageException;
+    /**
+     * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#isContextEnabled(int)
+     */
+    public abstract boolean isContextEnabled(final Context ctx) throws StorageException;
+
+    /**
+     * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#isMasterDatabase(int)
+     */
+    public abstract boolean isMasterDatabase(final int database_id) throws StorageException;
+
+    /**
+     * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#poolInUse(long)
+     */
+    public abstract boolean poolInUse(final int pool_id) throws StorageException;
+
+    /**
+     * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#serverInUse(long)
+     */
+    public abstract boolean serverInUse(final int server_id) throws StorageException;
+
+    /**
+     * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#storeInUse(long)
+     */
+    public abstract boolean storeInUse(final int store_id) throws StorageException;
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#schemaBeingLockedOrNeedsUpdate(com.openexchange.admin.rmi.dataobjects.Context)
+     */
+    public abstract boolean schemaBeingLockedOrNeedsUpdate(Context ctx) throws StorageException;
+
+    protected final void checkDatabaseLocked() throws StorageException {
+        if (cache.isLockdb()) {
+            throw new StorageException(new DatabaseLockedException("The database is locked due to an update"));
+        }
+    }
+
 }

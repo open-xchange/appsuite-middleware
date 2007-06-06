@@ -50,6 +50,7 @@ package com.openexchange.admin.storage.sqlStorage;
 
 import java.sql.Connection;
 
+import com.openexchange.admin.rmi.exceptions.DatabaseLockedException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Resource;
@@ -84,4 +85,9 @@ public abstract class OXResourceSQLStorage extends OXResourceStorageInterface {
 
     abstract public Resource[] list(final Context ctx, final String pattern) throws StorageException;
 
+    protected final void checkDatabaseLocked() throws StorageException {
+        if (cache.isLockdb()) {
+            throw new StorageException(new DatabaseLockedException("The database is locked due to an update"));
+        }
+    }
 }

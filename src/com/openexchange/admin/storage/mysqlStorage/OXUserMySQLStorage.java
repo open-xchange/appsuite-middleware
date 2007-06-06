@@ -146,6 +146,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     @Override
     public void change(final Context ctx, final User usrdata)
             throws StorageException {
+        checkDatabaseLocked();
         Connection write_ox_con = null;
         PreparedStatement stmt = null;
         PreparedStatement folder_update = null;
@@ -609,35 +610,12 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         }
     }
 
-    /**
-     * @param user
-     * @return
-     * @throws StorageException
-     * @throws NoSuchAlgorithmException
-     */
-    private String password2crypt(final User user) throws StorageException,
-            NoSuchAlgorithmException {
-        String passwd = null;
-        if (user.getPasswordMech() == null) {
-            // TODO: configurable in AdminDaemon.properties
-            user.setPasswordMech(User.PASSWORDMECH.CRYPT);
-        }
-        if (user.getPasswordMech() == User.PASSWORDMECH.CRYPT) {
-            passwd = UnixCrypt.crypt(user.getPassword());
-        } else if (user.getPasswordMech() == User.PASSWORDMECH.SHA) {
-            passwd = makeSHAPasswd(user.getPassword());
-        } else {
-            throw new StorageException("unsupported password mechanism: "
-                    + user.getPasswordMech());
-        }
-        return passwd;
-    }
-
     @Override
     public int create(final Context ctx, final User usrdata,
             final UserModuleAccess moduleAccess, final Connection write_ox_con,
             final int internal_user_id, final int contact_id,
             final int uid_number) throws StorageException {
+        checkDatabaseLocked();
         PreparedStatement ps = null;
         PreparedStatement return_db_id = null;
         final String LOGINSHELL = "/bin/bash";
@@ -1110,6 +1088,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     @Override
     public int create(final Context ctx, final User usrdata,
             final UserModuleAccess moduleAccess) throws StorageException {
+        checkDatabaseLocked();
         final int context_id = ctx.getIdAsInt();
         Connection write_ox_con = null;
         try {
@@ -1167,6 +1146,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
     @Override
     public int[] getAll(final Context ctx) throws StorageException {
+        checkDatabaseLocked();
         Connection read_ox_con = null;
         PreparedStatement stmt = null;
         final int context_id = ctx.getIdAsInt();
@@ -1216,6 +1196,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     @Override
     public User[] getData(final Context ctx, final User[] users)
             throws StorageException {
+        checkDatabaseLocked();
         final int context_id = ctx.getIdAsInt();
         final Class c = User.class;
         final Method[] theMethods = c.getMethods();
@@ -1419,6 +1400,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     @Override
     public void delete(final Context ctx, final int[] user_ids,
             final Connection write_ox_con) throws StorageException {
+        checkDatabaseLocked();
         PreparedStatement stmt = null;
         try {
             // delete all users
@@ -1531,6 +1513,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     @Override
     public void delete(final Context ctx, final int[] user_ids)
             throws StorageException {
+        checkDatabaseLocked();
         Connection write_ox_con = null;
 
         try {
@@ -1580,6 +1563,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     @Override
     public void changeModuleAccess(final Context ctx, final int user_id,
             final UserModuleAccess moduleAccess) throws StorageException {
+        checkDatabaseLocked();
         Connection read_ox_con = null;
         Connection write_ox_con = null;
 
@@ -1620,6 +1604,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     @Override
     public UserModuleAccess getModuleAccess(final Context ctx, final int user_id)
             throws StorageException {
+        checkDatabaseLocked();
         Connection read_ox_con = null;
         try {
             read_ox_con = cache.getREADConnectionForContext(ctx.getIdAsInt());
@@ -1674,6 +1659,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
     public void changeLastModified(final int user_id, final Context ctx,
             final Connection write_ox_con) throws StorageException {
+        checkDatabaseLocked();
         PreparedStatement prep_edit_user = null;
         try {
             prep_edit_user = write_ox_con
@@ -1698,6 +1684,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
     public void createRecoveryData(final Context ctx, final int user_id,
             final Connection write_ox_con) throws StorageException {
+        checkDatabaseLocked();
         // move user to del_user table if table is ready
         PreparedStatement del_st = null;
         ResultSet rs = null;
@@ -1872,6 +1859,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
     public void deleteRecoveryData(final Context ctx, final int user_id,
             final Connection con) throws StorageException {
+        checkDatabaseLocked();
         // delete from del_user table
         PreparedStatement del_st = null;
         try {
@@ -1908,6 +1896,30 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         } else {
             return false;
         }
+    }
+
+    /**
+     * @param user
+     * @return
+     * @throws StorageException
+     * @throws NoSuchAlgorithmException
+     */
+    private String password2crypt(final User user) throws StorageException,
+            NoSuchAlgorithmException {
+        String passwd = null;
+        if (user.getPasswordMech() == null) {
+            // TODO: configurable in AdminDaemon.properties
+            user.setPasswordMech(User.PASSWORDMECH.CRYPT);
+        }
+        if (user.getPasswordMech() == User.PASSWORDMECH.CRYPT) {
+            passwd = UnixCrypt.crypt(user.getPassword());
+        } else if (user.getPasswordMech() == User.PASSWORDMECH.SHA) {
+            passwd = makeSHAPasswd(user.getPassword());
+        } else {
+            throw new StorageException("unsupported password mechanism: "
+                    + user.getPasswordMech());
+        }
+        return passwd;
     }
 
     private int[] getGroupsForUser(final Context ctx, final int user_id,
