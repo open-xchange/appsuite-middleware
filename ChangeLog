@@ -1,3 +1,8 @@
+* 2007-06-08 - francisco.laguna@open-xchange.com
+
+ - Bugfix #7683: Changed default path in notification.properties for direct
+   link in notification mails.
+
 * 2007-06-06 - thorben.betten@open-xchange.com
 
  - Bugfix #7825: Fixed communication problems if chunked transfer-encoding
