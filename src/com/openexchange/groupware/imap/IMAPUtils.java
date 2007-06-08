@@ -1880,11 +1880,10 @@ public class IMAPUtils {
 						}
 					}
 					if (correspondingUID != currentUID) {
-						LOG.warn("UID mismatch");
+						LOG.warn("IMAPUtils.getSequenceNumbers(): UID mismatch");
 						continue NextResponse;
 					}
 					seqNums.append(f.getNumber());
-					//uidIndex++;
 				}
 			} finally {
 				p.notifyResponseHandlers(r);

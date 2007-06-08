@@ -52,9 +52,14 @@
 package com.openexchange.sessiond;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
+import javax.mail.MessagingException;
 import javax.mail.Session;
 
 import com.openexchange.api2.OXException;
@@ -63,6 +68,8 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.imap.IMAPProperties;
 import com.openexchange.groupware.ldap.Credentials;
 import com.openexchange.groupware.ldap.User;
+import com.sun.mail.imap.IMAPFolder;
+import com.sun.mail.imap.Rights;
 
 /**
  * SessionObject
@@ -103,8 +110,33 @@ public class SessionObject {
 	
 	private Session mailSession;
 	
+	private final transient Map<String, Rights> cachedRights;
+	
 	public SessionObject(final String sessionid) {
 		this.sessionid = sessionid;
+		cachedRights = new ConcurrentHashMap<String, Rights>();
+	}
+	
+	public final Rights getCachedRights(final IMAPFolder f, final boolean load) throws MessagingException {
+		Rights r = cachedRights.get(f.getFullName());
+		if (load && r == null) {
+			r = f.myRights();
+			cachedRights.put(f.getFullName(), r);
+		}
+		return r;
+		
+	}
+	
+	public final void removeCachedRights(final IMAPFolder f) {
+		cachedRights.remove(f.getFullName());
+	}
+
+	public final void setCachedRights(final IMAPFolder f) throws MessagingException {
+		cachedRights.put(f.getFullName(), f.myRights());
+	}
+
+	public final boolean containsCachedRights(final IMAPFolder f) {
+		return cachedRights.containsKey(f.getFullName());
 	}
 	
 	public void setUsername(final String username) {

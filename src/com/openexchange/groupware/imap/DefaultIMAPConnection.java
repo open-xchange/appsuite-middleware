@@ -63,7 +63,6 @@ import com.openexchange.api2.MailInterfaceImpl;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
-import com.sun.mail.imap.Rights;
 
 /**
  * DefaultIMAPConnection Interface for handling the imap connections. NOTE: The
@@ -106,8 +105,6 @@ public class DefaultIMAPConnection implements IMAPConnection, Serializable {
 	private boolean expunge;
 
 	private transient IMAPFolder imapFolder;
-
-	private transient Rights myRights;
 
 	private int holdsMessages = -1;
 
@@ -258,17 +255,6 @@ public class DefaultIMAPConnection implements IMAPConnection, Serializable {
 
 	public void resetImapFolder() {
 		this.imapFolder = null;
-	}
-
-	public Rights getMyRights() throws MessagingException {
-		if (myRights == null) {
-			myRights = imapFolder.myRights();
-		}
-		return myRights;
-	}
-
-	public void resetMyRights() {
-		this.myRights = null;
 	}
 
 	public boolean isHoldsMessages() throws MessagingException {

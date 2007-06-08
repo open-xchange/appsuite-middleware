@@ -1,7 +1,7 @@
-* 2007-06-08 - francisco.laguna@open-xchange.com
+* 2007-06-08 - thorben.betten@open-xchange.com
 
- - Bugfix #7683: Changed default path in notification.properties for direct
-   link in notification mails.
+ - IMAP folder rights are now cached in user's session to decrease
+   execution of IMAP command MYRIGHTS
 
 * 2007-06-06 - thorben.betten@open-xchange.com
 
