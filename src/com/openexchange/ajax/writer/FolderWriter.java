@@ -78,7 +78,6 @@ import com.openexchange.server.DBPoolingException;
 import com.openexchange.server.IMAPPermission;
 import com.openexchange.server.OCLPermission;
 import com.openexchange.tools.iterator.SearchIteratorException;
-import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 import com.sun.mail.imap.ACL;
