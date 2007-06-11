@@ -1,16 +1,23 @@
+# translation of errors.po to
 # translation of errors.po to Français
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
 # Éric Bischoff <eric@bureau-cornavin.com>, 2007.
+# Antje Faber, 2007.
 msgid ""
 msgstr ""
 "Project-Id-Version: errors\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2007-06-09 18:49+0200\n"
-"Last-Translator: Éric Bischoff <eric@bureau-cornavin.com>\n"
-"Language-Team: Français <fr@bureau-cornavin.com>\n"
+"PO-Revision-Date: 2007-06-11 15:54+0200\n"
+"Last-Translator: Antje Faber\n"
+"Language-Team:  <de@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: KBabel 1.11.2\n"
+"X-Generator: KBabel 1.10.2\n"
 
 msgid "%1$d statements aren't closed."
 msgstr "%1$d instructions ne sont pas closes."
@@ -88,11 +95,9 @@ msgstr ""
 "Un dossier source du module %s ne doit pas être déplacé "
 "dans un dossier cible du module %s"
 
-#, fuzzy
 msgid "AJP Connection is not set to status \"ASSIGNED\""
 msgstr "La connexion AJP n'est pas été mise dans l'état \"ASSIGNED\""
 
-#, fuzzy
 msgid ""
 "AJP Server socket could not be bind to port %d. Probably another process is "
 "already listening on this port."
@@ -112,7 +117,6 @@ msgstr "L'action %s n'est pas prise en charge par %s"
 msgid "Action type not supported : %d"
 msgstr "Type d'action non pris en charge : %d"
 
-#, fuzzy
 msgid ""
 "An Error occurred during the load of Folder Objects by a extended search. "
 "Context %1$d Folder %2$d User %3$d"
@@ -120,7 +124,6 @@ msgstr ""
 "Une erreur s'est produite pendant le chargement d'objets de dossier par "
 "une recherche étendue. Contexte : %1$d Dossier %2$d Utilisateur %3$d"
 
-#, fuzzy
 msgid ""
 "An Error occurred during the load of Folder Objects by a simple search. "
 "Context %1$d Folder %2$d User %3$d"
@@ -128,7 +131,6 @@ msgstr ""
 "Une erreur s'est produite pendant le chargement d'objets de dossier par "
 "une recherche simple. Contexte : %1$d Dossier %2$d Utilisateur %3$d"
 
-#, fuzzy
 msgid ""
 "An Error occurred during the load of Folder Objects. Context %1$d Folder %2"
 "$d User %3$d"
@@ -136,7 +138,6 @@ msgstr ""
 "Une erreur s'est produite pendant le chargement d'objets de dossier. "
 "Contexte : %1$d Dossier %2$d Utilisateur %3$d"
 
-#, fuzzy
 msgid ""
 "An Error occurred during the load of deleted Objects from a Folder. Context %"
 "1$d Folder %2$d User %3$d"
@@ -144,7 +145,6 @@ msgstr ""
 "Une erreur s'est produite pendant le chargement d'objets supprimés d'un dossier. "
 "Contexte %1$d Dossier %2$d Utilisateur %3$d"
 
-#, fuzzy
 msgid ""
 "An Error occurred during the load of modified Objects from a Folder. Context "
 "%1$d Folder %2$d User %3$d"
@@ -152,7 +152,6 @@ msgstr ""
 "Une erreur s'est produite en chargeant des objets modifiés d'un dossier. Contexte "
 "%1$d Dossier %2$d Utilisateur %3$d"
 
-#, fuzzy
 msgid ""
 "An Error occurred. Unable to delete some links from this Objects. Object %1"
 "$d Folder %2$d Context %3$d"
@@ -160,7 +159,6 @@ msgstr ""
 "Une erreur s'est produite. Impossible de supprimer des liens partant de cet objet. Objet %1$d "
 "Dossier %2$d Contexte %3$d"
 
-#, fuzzy
 msgid ""
 "An Error occurred. Unable to load some links for this Objects. 1. Object %1"
 "$d 2. Object %2$d Context %3$d"
@@ -168,7 +166,6 @@ msgstr ""
 "Une erreur s'est produite. Impossible de charger certains liens de cet objet. 1er objet %1$d "
 "2ème objet %2$d Contexte %3$d"
 
-#, fuzzy
 msgid ""
 "An Error occurred. Unable to save this linking between those two Objects.1. "
 "Object %1$d Folder %2$d 2. Object %3$d Folder %4$d Context %5$d"
@@ -176,7 +173,6 @@ msgstr ""
 "Une erreur s'est produite. Impossible d'enregistrer le lien entre ces deux objets. "
 "1er objet %1$d Dolder %2$d 2ème objet %3$d Dossier %4$d Contexte %5$d"
 
-#, fuzzy
 msgid "An Error occurred: Object ID is -1"
 msgstr "Une erreur s'est produite : l'identifiant d'objet est -1"
 
@@ -189,7 +185,6 @@ msgstr "Une erreur d'E/S s'est produite : %s"
 msgid "An IMAP error occurred: %s"
 msgstr "Une erreur IMAP s'est produite : %s"
 
-#, fuzzy
 msgid "An IOError occurred: %s"
 msgstr "Une erreur d'E/S s'est produite : %s"
 
@@ -259,7 +254,6 @@ msgstr "Fichier endommagé chargé : %s"
 msgid "Cache %s could not be initialized due to following error: %s"
 msgstr "Le cache %s n'a pas pu être initialisé suite à l'erreur suivante : %s"
 
-#, fuzzy
 msgid "CalendarOperation: Context not set."
 msgstr "Opération sur le calendrier : contexte absent."
 
@@ -493,7 +487,6 @@ msgstr "Impossible d'accéder à l'entrepôt de fichiers."
 msgid "Could not bind connection to local port %s"
 msgstr "Impossible d'établir la connexion avec le port local %s"
 
-#, fuzzy
 msgid "Could not convert given String %s to a date."
 msgstr "Impossible de convertir la chaîne %s indiquée en date."
 
@@ -503,7 +496,6 @@ msgstr "Impossible de convertir l'objet %s indiqué en date lors de l'initialisa
 msgid "Could not create a PartModifier instance from name %s"
 msgstr "Impossible de créer une instance de PartModifier à partir du nom %s"
 
-#, fuzzy
 msgid "Could not create folderId from String %s"
 msgstr "Impossible de créer un folderId à partir de la chaîne %s"
 
@@ -565,7 +557,6 @@ msgstr "Impossible de charger des documents pour vérifier les droits"
 msgid "Could not load folder %s"
 msgstr "Impossible de charger le dossier %s"
 
-#, fuzzy
 msgid "Could not read InputStream as String"
 msgstr "Impossible de lire le InputStream comme chaîne"
 
@@ -676,7 +667,6 @@ msgstr "ERREUR : valeur de drapeau privé non prise en charge : %d"
 msgid "ERROR:: Unsupported \"shown as\"  value %d"
 msgstr "ERREUR : valeur \"affiché comme\" non prise en charge : %d"
 
-#, fuzzy
 msgid ""
 "Effective permission of Folder %s could not determined for user %s in "
 "context %s"
@@ -752,7 +742,6 @@ msgstr ""
 "dispose ni de l'emplacement se répétant ni de l'emplacement d'une date qui "
 "se répète"
 
-#, fuzzy
 msgid "Fatal error. (DAILY) Missing or wrong value interval : %d"
 msgstr "Erreur fatale. (CHAQUE JOUR) Valeur Interval manquante ou incorrecte : %d"
 
@@ -762,33 +751,27 @@ msgstr "Erreur fatale. (CHAQUE MOIS) Valeur DayInMonth manquante ou incorrecte :
 msgid "Fatal error. (MONTHLY) Missing or wrong value Month : %d"
 msgstr "Erreur fatale. (CHAQUE MOIS) Valeur Month manquante ou incorrecte : %d"
 
-#, fuzzy
 msgid "Fatal error. (MONTHLY2) Missing or wrong DayInMonthvalue day : %d"
 msgstr "Erreur fatale. (CHAQUE MOIS 2) Valeur DayInMonth manquante ou incorrecte : %d"
 
-#, fuzzy
 msgid "Fatal error. (MONTHLY2) Missing or wrong value day : %d"
 msgstr "Erreur fatale. (CHAQUE MOIS 2) Valeur Day manquante ou incorrecte : %d"
 
-#, fuzzy
 msgid "Fatal error. (WEEKLY) Missing or wrong value interval : %d"
 msgstr "Erreur fatale. (CHAQUE SEMAINE) Valeur Interval manquante ou incorrecte : %d"
 
 msgid "Fatal error. (YEARLY) Missing or wrong value DayInMonth : %d"
 msgstr "Erreur fatale. (CHAQUE ANNÉE) Valeur DayInMonth manquante ou incorrecte : %d"
 
-#, fuzzy
 msgid "Fatal error. (YEARLY) Missing or wrong value month : %d"
 msgstr "Erreur fatale. (CHAQUE ANNÉE) Valeur Month manquante ou incorrecte : %d"
 
 msgid "Fatal error. (YEARLY2) Missing or wrong day_or_type : %d"
 msgstr "Erreur fatale. (CHAQUE ANNÉE 2) Valeur day_or_type manquante ou incorrecte : %d"
 
-#, fuzzy
 msgid "Fatal error. (YEARLY2) Missing or wrong interval : %d"
 msgstr "Erreur fatale. (CHAQUE ANNÉE 2) Valeur Interval manquante ou incorrecte : %d"
 
-#, fuzzy
 msgid "Fatal error. (YEARLY2) Missing or wrong value day : %d"
 msgstr "Erreur fatale. (CHAQUE ANNÉE 2) Valeur Day manquante ou incorrecte : %d"
 
@@ -807,7 +790,6 @@ msgstr "Le fichier \"%s\" ne peut pas être lu."
 msgid "File upload failed: %s"
 msgstr "Le chargement du fichier a échoué : %s"
 
-#, fuzzy
 msgid "FileStorage is full."
 msgstr "Le stockage de fichiers est plein."
 
@@ -887,7 +869,6 @@ msgstr "L'existence du dossier ne peut pas être vérifiée par manque d'informa
 msgid "Folder is closed: %s"
 msgstr "Le dossier est fermé : %s"
 
-#, fuzzy
 msgid "Folder is not of type Calendar"
 msgstr "Le dossier n'est pas de type calendrier"
 
@@ -932,7 +913,6 @@ msgstr "Problème de calcul de FreeBusyResults avec l'oid %d"
 msgid "Got a -1 ID from IDGenerator"
 msgstr "IDGenerator a renvoyé -1"
 
-#, fuzzy
 msgid ""
 "Got a FileStorageException for FileStorage with id %s in Context %s . "
 "Underlying message is: %s. Check the StackTrace"
@@ -963,11 +943,9 @@ msgstr "L'en-tête \"content-type\" n'indique pas un contenu multi-partie."
 msgid "Html-2-Text conversion failed: %s"
 msgstr "La conversion de HTML en texte a échoué : %s"
 
-#, fuzzy
 msgid "I/O error while writing to Writer Object: %s"
 msgstr "Erreur d'E/S lors de l'écriture dans l'objet Writer : %s"
 
-#, fuzzy
 msgid "IMAP Property error: %s"
 msgstr "Erreur de propriété IMAP : %s"
 
@@ -986,7 +964,6 @@ msgid ""
 "sorting"
 msgstr "Le tri IMAP a échoué parce que : %s. On se rabat sur le tri intégré à l'application."
 
-#, fuzzy
 msgid "Illegal Argument: Document %d contains no file"
 msgstr "Argument illégal : le document %d ne contient pas de fichier"
 
@@ -1002,7 +979,6 @@ msgstr "Requête SQL incorrecte."
 msgid "Incorrect SQL Query: %s"
 msgstr "Requête SQL incorrecte : %s"
 
-#, fuzzy
 msgid "Insert expected but the objectid is already given. Aborting action"
 msgstr "Insertion attendue mais l'identifiant de l'objet est déjà fourni. Action abandonnée."
 
@@ -1015,7 +991,6 @@ msgstr "Droits de lecture insuffisants sur ce dossier."
 msgid "Insufficient rights to attach/detach an attachment to this folder!"
 msgstr "Droits insuffisants pour ajouter ou retirer une pièce jointe dans ce dossier."
 
-#, fuzzy
 msgid ""
 "Insufficient write rights for this folder. Unable to attach Document. "
 "Context %4$d Folder %1$d Object %2$d User %3$d"
@@ -1032,11 +1007,9 @@ msgstr "Erreur interne : %s"
 msgid "Invalid Content-Type value: %s"
 msgstr "Valeur \"Content-type\" invalide : %s"
 
-#, fuzzy
 msgid "Invalid SQL Query : %s"
 msgstr "Requête SQL invalide : %s"
 
-#, fuzzy
 msgid "Invalid SQL Query: %s"
 msgstr "Requête SQL invalide : %s"
 
@@ -1259,14 +1232,12 @@ msgstr "Il n'est pas permis de déplacer des éléments depuis ou vers le dossie
 msgid "Multiple rows found."
 msgstr "Plusieurs enregistrements trouvés."
 
-#, fuzzy
 msgid "Need at least a ContactObject and a value to set %s"
 msgstr "On doit disposer d'au moins un ContactObject et d'une valeur pour initialiser %s"
 
 msgid "Need at least a ContactObject to get the value of %s"
 msgstr "On doit disposer d'au moins un ContactObject pour récupérer la valeur de %s"
 
-#, fuzzy
 msgid "No Changes found. No Update requiered. Context %1$d Object %2$d"
 msgstr "Pas de changements, la mise à jour n'est pas nécessaire. Contexte %1$d Objet %2$d"
 
@@ -1395,7 +1366,6 @@ msgstr "Le dossier parent %s ne permet pas de régler le type du dossier (%s) da
 msgid "Participant %d for task %d is not found."
 msgstr "Le participant %d de la tâche %d n'a pas été trouvé."
 
-#, fuzzy
 msgid "Per-File Upload Quota (%d) exceeded for file %s (size=%d)"
 msgstr "Le quota par fichier (%d) a été dépassé pour le fichier %s de taille %d"
 
@@ -1439,15 +1409,12 @@ msgstr ""
 "Le processus a été interrompu pendant l'attente d'une connexion IMAP libre. "
 "Veuillez réessayer."
 
-#, fuzzy
 msgid "Programming Error"
 msgstr "Erreur de programmation"
 
-#, fuzzy
 msgid "Programming Error - Could not import into folder %s"
 msgstr "Erreur de programmation - impossible d'importer dans le dossier %s"
 
-#, fuzzy
 msgid "Programming Error - Folder %s"
 msgstr "Erreur de programmation - dossier %s"
 
@@ -1486,11 +1453,9 @@ msgstr "Échec en déterminant le schéma du contexte %1$d."
 msgid "Response package exceeds max package size value of 8192k: %s"
 msgstr "La taille du paquetage réponse dépasse la valeur maximale de 8192 ko : %s"
 
-#, fuzzy
 msgid "SQL Problem: \"%s\""
 msgstr "Problème SQL : \"%s\""
 
-#, fuzzy
 msgid "SQL Problem: \"%s\"."
 msgstr "Problème SQL : \"%s\"."
 
@@ -1585,7 +1550,6 @@ msgstr "La tâche avec des drapeaux privés ne peut être déplacée dans un dos
 msgid "Tasks are disable for you (%d)."
 msgstr "Les tâches sont desactivées pour vous (%d)."
 
-#, fuzzy
 msgid ""
 "The Application was unable to validate a given email address from this "
 "contact: %s"
@@ -1594,13 +1558,11 @@ msgstr "Impossible de valider une adresse de courrier électronique de ce contac
 msgid "The IP address of host \"%s\" could not be determined"
 msgstr "L'adresse IP de l'hôte \"%s\" n'a pas pu être déterminée"
 
-#, fuzzy
 msgid ""
 "The Object could not be detached because the update to an underlying object "
 "failed."
 msgstr "L'objet n'a pas pu être détaché car la mise à jour d'un objet de niveau inférieur a échoué."
 
-#, fuzzy
 msgid ""
 "The Object you requested can not be found. Try again. Context %1$d Folder %2"
 "$d User %3$d Object %4$d"
@@ -1652,7 +1614,6 @@ msgstr "Impossible d'accéder à l'entrepôt de fichiers."
 msgid "The file store could not be reched"
 msgstr "Impossible d'accéder à l'entrepôt de fichiers."
 
-#, fuzzy
 msgid "The folder %d is not an Infostore Folder"
 msgstr "Le dossier %d n'est pas un dossier du dépôt de données"
 
@@ -1718,7 +1679,6 @@ msgstr ""
 msgid "There are no recipient(s) for the new message."
 msgstr "Il n'y a pas de destinataires pour le nouveau message."
 
-#, fuzzy
 msgid "This Contact has no FolderID: Entry %1$d Context %2$d"
 msgstr "Ce contact n'a pas d'identifiant de dossier : Élément %1$d Contexte %2$d"
 
@@ -1728,7 +1688,6 @@ msgstr "Ce document est verrouillé."
 msgid "This folder is a virtual folder. It cannot contain documents."
 msgstr "Ce dossier est un dossier virtuel, il ne peut pas contenir de documents."
 
-#, fuzzy
 msgid "This gif Image is to large. It can not be scaled and will not be accepted"
 msgstr "Cette image GIF est trop grande, elle ne peut pas être mise à l'échelle et ne sera pas acceptée"
 
@@ -1770,15 +1729,12 @@ msgstr ""
 "Impossible d'obtenir le nombre d'éléments dans ce dossier. Contexte %1$d Dossier %2$d "
 "Utilisateur %3$d"
 
-#, fuzzy
 msgid "Unable to Insert Contacts! Context: %d"
 msgstr "Impossible d'ajouter les contacts. Contexte : %d"
 
-#, fuzzy
 msgid "Unable to Load Linked Contacts : Context %1$d Contact %2$d"
 msgstr "Impossible de charger les contacts liés : Contexte %1$d Contact %2$d"
 
-#, fuzzy
 msgid ""
 "Unable to create a link between these two Objects. Insufficient Rights. 1. "
 "Object %1$d 2. Object %2$d Context %3$d"
@@ -1786,7 +1742,6 @@ msgstr ""
 "Impossible de créer un lien entre ces deux objets. Droits insuffisants. "
 "Premier objet %1$d Deuxième objet %2$d Contexte %3$d"
 
-#, fuzzy
 msgid ""
 "Unable to create a link between these two Objects. Insufficient Rights. 1. "
 "Object %1$d Folder %2$d 2. Object %3$d Folder %4$d Context %5$d"
@@ -1794,7 +1749,6 @@ msgstr ""
 "Impossible de créer un lien entre ces deux objets. Droits insuffisants. "
 "Premier objet %1$d Dossier %2$d Deuxième objet %3$d Dossier %4$d Contexte %5$d"
 
-#, fuzzy
 msgid ""
 "Unable to create a link between these two Objects. Insufficient Rights. "
 "Object %1$d Folder %2$d Context %3$d"
@@ -1812,7 +1766,6 @@ msgstr ""
 msgid "Unable to create exception, recurring position can not be calculated !"
 msgstr "Impossible de créer une exception, l'emplacement de la série ne peut pas être calculé."
 
-#, fuzzy
 msgid ""
 "Unable to delete Contact Object. Context %1$d Folder %2$d User %3$d Object %4"
 "$d"
@@ -1823,23 +1776,18 @@ msgstr ""
 msgid "Unable to delete Contact: Context %1$d Contact %2$d"
 msgstr "Impossible de supprimer le contact : Contexte %1$d Contact %2$d"
 
-#, fuzzy
 msgid "Unable to delete Contacts from User. Context %1$d User %2$d"
 msgstr "Impossible de supprimer les contacts de l'utilisateur : Contexte %1$d Utilisateur %2$d"
 
-#, fuzzy
 msgid "Unable to delete Contacts from this folder. Context %1$d Folder %2$d"
 msgstr "Impossible de supprimer les contacts de ce dossier. Contexte %1$d Dossier %2$d"
 
-#, fuzzy
 msgid "Unable to delete Dristributionlist by Id : Context %1$d Contact %2$d"
 msgstr "Impossible de supprimer la liste de diffusion selon son identifiant. Contexte %1$d Contact %2$d"
 
-#, fuzzy
 msgid "Unable to delete Linking between Contacts : Context %1$d Contact %2$d"
 msgstr "Impossible de supprimer les liaisons entre contacts : Contexte %1$d Contact %2$d"
 
-#, fuzzy
 msgid "Unable to delete all links from this Objects. Object %1$d Context %2$d"
 msgstr "Impossible de supprimer les liens de cet objet. Objet %1$d Contexte %2$d"
 
@@ -1850,7 +1798,6 @@ msgstr ""
 "Impossible de supprimer les contacts de l'utilisateur car ceci est un dossier non consacré aux contacts. "
 "Contexte %1$d Dossier %2$d Utilisateur %3$d"
 
-#, fuzzy
 msgid ""
 "Unable to delete this Contact. Object not found. Context %1$d Folder %2$d "
 "User %3$d Object %4$d"
@@ -1861,27 +1808,21 @@ msgstr ""
 msgid "Unable to initialize Event queue"
 msgstr "Impossible d'initialiser la file d'attente des évènements"
 
-#, fuzzy
 msgid "Unable to insert Contact. Context: %d"
 msgstr "Impossible d'ajouter le contact. Contexte : %d"
 
-#, fuzzy
 msgid "Unable to load Contact Image : Context %1$d Contact %2$d"
 msgstr "Impossible de charger l'image du contact. Contexte %1$d Contact %2$d"
 
-#, fuzzy
 msgid "Unable to load Contact: Context %1$d"
 msgstr "Impossible de charger le contact : Contexte %1$d"
 
-#, fuzzy
 msgid "Unable to load Dristributionlist : Context %1$d Contact %2$d"
 msgstr "Impossible de charger la liste de diffusion : Contexte %1$d Contact %2$d"
 
-#, fuzzy
 msgid "Unable to load Objects. Context %1$d User %2$d"
 msgstr "Impossible de charger des objets. Contexte %1$d Utilisateur %2$d"
 
-#, fuzzy
 msgid ""
 "Unable to load all links from this Objects. Object %1$d Folder %2$d User %3"
 "$d Context %4$d"
@@ -1892,7 +1833,6 @@ msgstr ""
 msgid "Unable to map OCL permission value %s to a JSON permission value"
 msgstr "Impossible de convertir la valeur de droit OCL %s en valeur de droit JSON"
 
-#, fuzzy
 msgid ""
 "Unable to perform Contact Folder check for readable content: Context %1$d "
 "Folder %2$d"
@@ -1900,23 +1840,18 @@ msgstr ""
 "Impossible de vérifier si le contenu du dossier de contacts peut être lu : "
 "Contexte %1$d Dossier %2$d"
 
-#, fuzzy
 msgid "Unable to pickup a connection from the DBPool"
 msgstr "Impossible de prendre une connexion dans le DBPool"
 
-#, fuzzy
 msgid "Unable to remove Participant %d"
 msgstr "Impossible de supprimer le participant %d"
 
-#, fuzzy
 msgid "Unable to remove Participant because this participant is the last one"
 msgstr "Impossible de supprimer le participant car il s'agit du dernier participant"
 
-#, fuzzy
 msgid "Unable to save Contact Image: Context %1$d Contact %2$d"
 msgstr "Impossible d'enregistrer l'image du contact : Contexte %1$d Contact %2$d"
 
-#, fuzzy
 msgid "Unable to save Dristributionlist : Context %1$d Contact %2$d"
 msgstr "Impossible d'enregistrer la liste de diffusion : Contexte %1$d Contact %2$d"
 
@@ -1926,11 +1861,9 @@ msgstr "Impossible d'enregistrer le lien entre contacts : Contexte %1$d Contact 
 msgid "Unable to save contact image. The image appears to be broken."
 msgstr "Impossible d'enregistrer l'image du contact. L'image semble être corrompue."
 
-#, fuzzy
 msgid "Unable to scale Image down."
 msgstr "Impossible de réduire l'image à l'échelle."
 
-#, fuzzy
 msgid ""
 "Unable to scale the contact image. This is a not supported file type or it "
 "is too large! Your mime type is %1$s and your image size is %2$d KB. The "
@@ -1940,7 +1873,6 @@ msgstr ""
 "charge ou il est trop grand. Le type MIME est %1$s et le type d'image est %2$d ko. La "
 "taille d'image maximale autorisée est %3$d ko."
 
-#, fuzzy
 msgid ""
 "Unable to syncronice the old contact with the new changes: Context %1$d "
 "Object %2$d"
@@ -1948,29 +1880,24 @@ msgstr ""
 "Impossible de synchroniser le vieux contact avec les nouvelles modifications. "
 "Contexte %1$d Objet %2$d"
 
-#, fuzzy
 msgid "Unable to trigger Object Events: Context %1$d Folder %2$d"
 msgstr ""
 "Impossible de déclencher les évènements de l'objet. "
 "Contexte %1$d Dossier %2$d"
 
-#, fuzzy
 msgid "Unable to trigger Object Events: Context %1$d User %2$d"
 msgstr ""
 "Impossible de déclencher les évènements de l'objet. "
 "Contexte %1$d Utilisateur %2$d"
 
-#, fuzzy
 msgid "Unable to update Contact Image: Context %1$d Contact %2$d"
 msgstr ""
 "Impossible de mettre à jour l'image du contact. "
 "Contexte %1$d Contact %2$d"
 
-#, fuzzy
 msgid "Unable to update Contact. Context %1$d Object %2$d"
 msgstr "Impossible de mettre à jour le contact. Contexte %1$d Objet %2$d"
 
-#, fuzzy
 msgid "Unable to update Dristributionlist : Context %1$d Contact %2$d"
 msgstr "Impossible de mettre à jour la liste de diffusion : Contexte %1$d Contact %2$d"
 
@@ -2003,7 +1930,6 @@ msgstr "Mode d'ouverture de dossier inconnu (IMAP) %d"
 msgid "Unknown AJAX action: %s."
 msgstr "Action AJAX inconnue : %s."
 
-#, fuzzy
 msgid "Unknown Problem: \"%s\"."
 msgstr "Problème inconnu : \"%s\"."
 
@@ -2073,7 +1999,6 @@ msgstr ""
 "Un conflit de mise à jour a été détecté. Le schéma %1$s n'est pas "
 "marqué comme VERROUILLÉ."
 
-#, fuzzy
 msgid "Update expected but no objectid is given. Aborting action"
 msgstr ""
 "Mise à jour attendue mais l'identifiant de l'objet n'a pas été fourni. "
@@ -2088,7 +2013,6 @@ msgstr "L'initialisation du processus de mise a jour a échoué : %1$s."
 msgid "Updating database ... Try again later."
 msgstr "Mise à jour de la base de données en cours... Réessayez plus tard."
 
-#, fuzzy
 msgid "Upload Quota (%d) exceeded"
 msgstr "Le quota de chargement (%d) a été dépassé"
 
@@ -2148,7 +2072,6 @@ msgstr "L'utilisateur %s n'a pas accès au module de courrier à cause de la con
 msgid "User %s has no read access to mail folder %s"
 msgstr "L'utilisateur %s n'a pas d'accès en lecture au dossier de courrier %s"
 
-#, fuzzy
 msgid "User %s has no write access on IMAP-Folder %s"
 msgstr "L'utilisateur %s n'a pas d'accès en écriture au dossier IMAP %s"
 
@@ -2194,7 +2117,6 @@ msgstr ""
 msgid "User dictionary could not be found."
 msgstr "Le dictionnaire de l'utilisateur n'a pas été trouvé."
 
-#, fuzzy
 msgid "User input Error %s"
 msgstr "Erreur de saisie de l'utilisateur %s"
 
@@ -2219,7 +2141,6 @@ msgstr ""
 "Entrepôt de fichiers %1$d incorrect dans le contexte %2$d alors que l'on a besoin "
 "de l'entrepôt de fichiers %3$d."
 
-#, fuzzy
 msgid "Wrong message %sheader: %s"
 msgstr "En-tête du message incorrect %s : %s"
 
@@ -2274,7 +2195,6 @@ msgstr "Vous n'avez pas le droit de déplacer un élément d'un rendez-vous rép
 msgid "You cannot unlock this document."
 msgstr "Vous ne pouvez pas déverrouiller ce document."
 
-#, fuzzy
 msgid ""
 "You do not have permission to delete objects from Folder %1$d in Context %2"
 "$d with User %3$d"
@@ -2282,7 +2202,6 @@ msgstr ""
 "Vous n'avez pas le droit de détruire des objets du dossier %1$d dans le contexte %2"
 "$d avec l'utilisateur %3$d"
 
-#, fuzzy
 msgid ""
 "You do not have permission to store objects in Folder %1$d in Context %2$d "
 "with User %3$d"
