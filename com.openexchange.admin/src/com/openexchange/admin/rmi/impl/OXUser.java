@@ -52,10 +52,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.rmi.RemoteException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -64,6 +61,8 @@ import java.util.Locale;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.jcs.JCS;
+import org.apache.jcs.access.exception.CacheException;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -91,6 +90,7 @@ import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.GenericChecks;
 import com.openexchange.admin.tools.PropertyHandler;
 import com.openexchange.admin.tools.UnixCrypt;
+import com.openexchange.cache.CacheKey;
 /**
  * @author cutmasta
  */
@@ -335,6 +335,12 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
             Credentials cauth = ClientAdminThread.cache.getAdminCredentials();
             cauth.setPassword(UnixCrypt.crypt(usrdata.getPassword()));
             ClientAdminThread.cache.setAdminCredentials(cauth);
+        }
+        try {
+            JCS cache = JCS.getInstance("User");
+            cache.remove(new CacheKey(ctx.getIdAsInt(), usrdata.getId()));
+        } catch (final CacheException e) {
+            log.error(e);
         }
     }
 
