@@ -71,7 +71,7 @@ public class ParticipantNotifyTest extends TestCase{
 		appointment.setObjectID(43);
 		String hostname = null;
 		try {
-			hostname = InetAddress.getLocalHost().getHostName();
+			hostname = InetAddress.getLocalHost().getCanonicalHostName();
 		} catch (UnknownHostException e) {
 			fail("Don't know my hostname");
 		}
