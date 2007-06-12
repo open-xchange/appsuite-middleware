@@ -1,3 +1,7 @@
+* 2007-06-12 - manuel.kraft@open-xchange.com
+
+ - Bugfix #7886:  	Translation of "Spam"
+
 * 2007-06-11 - dennis.sieben@open-xchange.com
 
  - Bugfix #7855: (umin) changing password of user imap is no longer available for user
