@@ -1,3 +1,7 @@
+* 2007-06-12 - choeger@open-xchange.com
+
+ - Bugfix ID#7859 OXEE: Groupware server must not be restarted while update
+
 * 2007-06-08 - thorben.betten@open-xchange.com
 
  - IMAP folder rights are now cached in user's session to decrease
