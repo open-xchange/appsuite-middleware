@@ -1,3 +1,7 @@
+* 2007-06-12 - francisco.laguna@open-xchange.com
+
+ - Bugfix #7683 OXEE: Use fully qualified hostname in direct link generation.
+
 * 2007-06-12 - choeger@open-xchange.com
 
  - Bugfix ID#7859 OXEE: Groupware server must not be restarted while update

@@ -659,7 +659,7 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 		private static UnknownHostException warnSpam;
 		static {
 			try {
-				hostname = InetAddress.getLocalHost().getHostName();
+				hostname = InetAddress.getLocalHost().getCanonicalHostName();
 			} catch (UnknownHostException e) {
 				hostname = "localhost";
 				warnSpam = e;
