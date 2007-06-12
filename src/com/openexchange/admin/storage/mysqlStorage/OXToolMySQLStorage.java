@@ -944,7 +944,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             throw new StorageException(e);
         } finally {
             try {
-                if(rs!=null){
+                if (rs != null) {
                     rs.close();
                 }
             } catch (final SQLException e) {
@@ -966,12 +966,14 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
      * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#getDefaultGroupForContext(int,
      *      java.sql.Connection)
      */
-public int getDefaultGroupForContext(final Context ctx, final Connection con) throws StorageException {
+public int getDefaultGroupForContext(final Context ctx) throws StorageException {
         int group_id = 0;
-
+        Connection con = null;
+        
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
+            con = cache.getREADConnectionForContext(ctx.getIdAsInt());
             stmt = con.prepareStatement("SELECT MIN(id) FROM groups WHERE cid=?");
             stmt.setInt(1, ctx.getIdAsInt());
             rs = stmt.executeQuery();
@@ -983,9 +985,14 @@ public int getDefaultGroupForContext(final Context ctx, final Connection con) th
         } catch (final SQLException e) {
             log.error("SQL Error",e);
             throw new StorageException(e);
+        } catch (final PoolException e) {
+            log.error("Pool Error",e);
+            throw new StorageException(e);
         } finally {
             try {
-                rs.close();
+                if (rs != null) {
+                    rs.close();
+                }
             } catch (final SQLException e) {
                 log.error("Error closing resultset!", e);
             }
@@ -995,6 +1002,13 @@ public int getDefaultGroupForContext(final Context ctx, final Connection con) th
                 }
             } catch (final SQLException e) {
                 log.error("Error closing prepared statement!", e);
+            }
+            try {
+                if (con != null) {
+                    cache.pushOXDBRead(ctx.getIdAsInt(), con);
+                }
+            } catch (final PoolException e) {
+                log.error("Error pushing oxdb read connection to pool!", e);
             }
         }
 
