@@ -1,3 +1,7 @@
+* 2007-06-12 - dennis.sieben@open-xchange.com
+
+  -  Bugfix ID#7657 console clients check extension errors in the wrong place
+  
 * 2007-05-29 - choeger@open-xchange.com
 
   - Bugfix ID#7595 Groups member in several contexts are deleted on context delete
