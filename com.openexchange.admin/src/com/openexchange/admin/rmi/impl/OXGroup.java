@@ -464,16 +464,24 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
         }
 
         try {
-            if (tool.existsGroupMember(ctx, grp_id, member_ids)) {
-                throw new InvalidDataException("Member already exists in group");
+            if (tool.getDefaultGroupForContext(ctx) != grp_id) {
+                if (tool.existsGroupMember(ctx, grp_id, member_ids)) {
+                    throw new InvalidDataException("Member already exists in group");
+                }
             }
-        } catch (InvalidDataException e) {
+        } catch (final InvalidDataException e) {
             log.error(e);
             throw e;
         }
-
-        final OXGroupStorageInterface oxGroup = OXGroupStorageInterface.getInstance();
-        oxGroup.addMember(ctx, grp_id, member_ids);
+        
+        // TODO: This is a workaround for the problem that a new created user is per default in the default group
+        // If you afterwards try to add the member to the default group (what the GUI and the servlet do ATM) you
+        // get an error here. This is fixed. But it should be handled in the servlet or the GUI somehow. Also
+        // see #7816
+        if (tool.getDefaultGroupForContext(ctx) != grp_id) {
+            final OXGroupStorageInterface oxGroup = OXGroupStorageInterface.getInstance();
+            oxGroup.addMember(ctx, grp_id, member_ids);
+        }
 
     }
 

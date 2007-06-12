@@ -1,3 +1,7 @@
+* 2007-06-12 - dennis.sieben@open-xchange.com
+
+ - Bugfix #7816: User: Error when explicitly adding a new user to Group users
+
 * 2007-06-12 - manuel.kraft@open-xchange.com
 
  - Bugfix #7886:  	Translation of "Spam"
