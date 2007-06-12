@@ -92,13 +92,13 @@ public class Delete extends ResourceAbstraction {
 
             final Credentials auth = new Credentials((String) parser.getOptionValue(this.adminUserOption), (String) parser.getOptionValue(this.adminPassOption));
 
-            final OXResourceInterface oxres = (OXResourceInterface) Naming.lookup(RMI_HOSTNAME +OXResourceInterface.RMI_NAME);
+            final OXResourceInterface oxres = (OXResourceInterface) Naming.lookup(RMI_HOSTNAME + OXResourceInterface.RMI_NAME);
 
             final int resource_id = Integer.valueOf((String) parser.getOptionValue(this.resourceIdOption));
 
             final Resource res = new Resource(resource_id);
             oxres.delete(ctx, res, auth);
-            printExtensionsError(res);
+
             sysexit(0);
         } catch (final java.rmi.ConnectException neti) {
             printError(neti.getMessage());
@@ -142,11 +142,10 @@ public class Delete extends ResourceAbstraction {
         } catch (final DatabaseUpdateException e) {
             printServerResponse(e.getMessage());
             sysexit(1);
-        } catch (NoSuchResourceException e) {
+        } catch (final NoSuchResourceException e) {
             printServerResponse(e.getMessage());
-            sysexit(1);
+            sysexit(SYSEXIT_NO_SUCH_RESOURCE);
         }
-
     }
 
     protected void sysexit(final int exitcode) {

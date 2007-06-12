@@ -100,7 +100,7 @@ public class List extends GroupAbstraction {
 
             final Credentials auth = new Credentials((String) parser.getOptionValue(this.adminUserOption), (String) parser.getOptionValue(this.adminPassOption));
 
-            final OXGroupInterface oxgrp = (OXGroupInterface) Naming.lookup(RMI_HOSTNAME +OXGroupInterface.RMI_NAME);
+            final OXGroupInterface oxgrp = (OXGroupInterface) Naming.lookup(RMI_HOSTNAME + OXGroupInterface.RMI_NAME);
 
             String pattern = (String) parser.getOptionValue(this.searchOption);
 
@@ -117,7 +117,7 @@ public class List extends GroupAbstraction {
 
             if (parser.getOptionValue(this.csvOutputOption) != null) {
                 // DO csv output if needed
-                precvsinfos(grplist);
+                precsvinfos(grplist);
             } else {
                 sysoutOutput(grplist);
             }
@@ -164,9 +164,9 @@ public class List extends GroupAbstraction {
         } catch (final DatabaseUpdateException e) {
             printServerResponse(e.getMessage());
             sysexit(1);
-        } catch (NoSuchGroupException e) {
+        } catch (final NoSuchGroupException e) {
             printServerResponse(e.getMessage());
-            sysexit(1);
+            sysexit(SYSEXIT_NO_SUCH_GROUP);
         }
 
     }
@@ -177,14 +177,16 @@ public class List extends GroupAbstraction {
             System.out.println(group);
             System.out.println("  Members:");
             final Integer[] members = group.getMembers();
-            for (final int id : members) {
-                System.out.println("   " + id);
+            if (members != null) {
+                for (final int id : members) {
+                    System.out.println("   " + id);
+                }
             }
             printExtensionsError(group);
         }
     }
 
-    private void precvsinfos(final ArrayList<Group> grplist) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
+    private void precsvinfos(final ArrayList<Group> grplist) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
         // needed for csv output, KEEP AN EYE ON ORDER!!!
         final ArrayList<String> columns = new ArrayList<String>();
         columns.add("id");
@@ -198,6 +200,7 @@ public class List extends GroupAbstraction {
 
         for (final Group my_grp : grplist) {
             data.add(makeDataForCsv(my_grp, my_grp.getMembers()));
+            printExtensionsError(my_grp);
         }
         doCSVOutput(columns, data);
     }
