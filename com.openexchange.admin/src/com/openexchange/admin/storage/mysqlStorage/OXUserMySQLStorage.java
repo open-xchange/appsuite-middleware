@@ -728,7 +728,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
                 final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
 
-                int def_group_id = tool.getDefaultGroupForContext(ctx, write_ox_con);
+                int def_group_id = tool.getDefaultGroupForContext(ctx);
                 if (usrdata.getDefault_group() != null) {
                     def_group_id = usrdata.getDefault_group().getId();
                 }

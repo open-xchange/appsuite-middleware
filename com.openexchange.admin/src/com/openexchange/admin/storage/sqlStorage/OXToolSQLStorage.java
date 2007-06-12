@@ -201,7 +201,7 @@ public abstract class OXToolSQLStorage extends OXToolStorageInterface {
      * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#getDefaultGroupForContext(int,
      *      java.sql.Connection)
      */
-    public abstract int getDefaultGroupForContext(final Context ctx, final Connection con) throws StorageException;
+    public abstract int getDefaultGroupForContext(final Context ctx) throws StorageException;
 
     public abstract int getGidNumberOfGroup(final Context ctx, final int group_id, final Connection con) throws StorageException;
 
