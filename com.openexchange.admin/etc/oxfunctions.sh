@@ -249,7 +249,7 @@ ox_add_hosts_hostip() {
     test -z "$fqhn" && die \
 	"ox_addhostip: missing fqhn argument (arg 1)"
     test -z "$addr" && die \
-	"ox_addhostip: missing addr argument (arg 1)"
+	"ox_addhostip: missing addr argument (arg 2)"
 
     local hostarr=( $(echo $fqhn | sed -e 's/\./ /g') )
     local hn=${hostarr[0]}
