@@ -94,7 +94,7 @@ public class Change extends GroupAbstraction {
 
             final Credentials auth = new Credentials((String) parser.getOptionValue(this.adminUserOption), (String) parser.getOptionValue(this.adminPassOption));
 
-            final OXGroupInterface oxgrp = (OXGroupInterface) Naming.lookup(RMI_HOSTNAME +OXGroupInterface.RMI_NAME);
+            final OXGroupInterface oxgrp = (OXGroupInterface) Naming.lookup(RMI_HOSTNAME +  OXGroupInterface.RMI_NAME);
             final Group grp = new Group();
 
             grp.setId(Integer.valueOf((String) parser.getOptionValue(this.IdOption)));
@@ -142,7 +142,7 @@ public class Change extends GroupAbstraction {
             }
 
             oxgrp.change(ctx, grp, auth);
-            printExtensionsError(grp);
+
             sysexit(0);
         } catch (final java.rmi.ConnectException neti) {
             printError(neti.getMessage());
@@ -183,12 +183,12 @@ public class Change extends GroupAbstraction {
         } catch (final DatabaseUpdateException e) {
             printServerResponse(e.getMessage());
             sysexit(1);
-        } catch (NoSuchUserException e) {
+        } catch (final NoSuchUserException e) {
             printServerResponse(e.getMessage());
-            sysexit(1);
-        } catch (NoSuchGroupException e) {
+            sysexit(SYSEXIT_NO_SUCH_USER);
+        } catch (final NoSuchGroupException e) {
             printServerResponse(e.getMessage());
-            sysexit(1);
+            sysexit(SYSEXIT_NO_SUCH_GROUP);
         }
     }
 

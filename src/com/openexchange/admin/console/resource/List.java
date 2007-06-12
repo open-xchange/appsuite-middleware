@@ -100,7 +100,7 @@ public class List extends ResourceAbstraction {
                 pattern = "*";
             }
 
-            final OXResourceInterface oxres = (OXResourceInterface) Naming.lookup(RMI_HOSTNAME +OXResourceInterface.RMI_NAME);
+            final OXResourceInterface oxres = (OXResourceInterface) Naming.lookup(RMI_HOSTNAME + OXResourceInterface.RMI_NAME);
 
             final Resource[] allres = oxres.list(ctx, pattern, auth);
 
@@ -112,7 +112,7 @@ public class List extends ResourceAbstraction {
 
             if (parser.getOptionValue(this.csvOutputOption) != null) {
                 // do CSV output
-                precvsinfos(resourceList);
+                precsvinfos(resourceList);
             } else {
                 sysoutOutput(resourceList);
             }
@@ -159,14 +159,14 @@ public class List extends ResourceAbstraction {
         } catch (final DatabaseUpdateException e) {
             printServerResponse(e.getMessage());
             sysexit(1);
-        } catch (NoSuchResourceException e) {
+        } catch (final NoSuchResourceException e) {
             printServerResponse(e.getMessage());
-            sysexit(1);
+            sysexit(SYSEXIT_NO_SUCH_RESOURCE);
         }
 
     }
 
-    private void precvsinfos(final ArrayList<Resource> resourceList) {
+    private void precsvinfos(final ArrayList<Resource> resourceList) {
         // needed for csv output, KEEP AN EYE ON ORDER!!!
         final ArrayList<String> columns = new ArrayList<String>();
         columns.add("id");
@@ -179,6 +179,7 @@ public class List extends ResourceAbstraction {
 
         for (final Resource my_res : resourceList) {
             data.add(makeCsvData(my_res));
+            printExtensionsError(my_res);
         }
         doCSVOutput(columns, data);
     }

@@ -100,7 +100,7 @@ public class Change extends UserAbstraction {
             final Credentials auth = new Credentials((String) parser.getOptionValue(this.adminUserOption), (String) parser.getOptionValue(this.adminPassOption));
 
             // get rmi ref
-            final OXUserInterface oxres = (OXUserInterface) Naming.lookup(RMI_HOSTNAME +OXUserInterface.RMI_NAME);
+            final OXUserInterface oxres = (OXUserInterface) Naming.lookup(RMI_HOSTNAME + OXUserInterface.RMI_NAME);
 
             // create user obj
             final User usr = new User();
@@ -173,9 +173,9 @@ public class Change extends UserAbstraction {
         } catch (final InvocationTargetException e) {
             printError(e.getMessage());
             sysexit(1);
-        } catch (NoSuchUserException e) {
+        } catch (final NoSuchUserException e) {
             printServerResponse(e.getMessage());
-            sysexit(1);
+            sysexit(SYSEXIT_NO_SUCH_USER);
         }
     }
 

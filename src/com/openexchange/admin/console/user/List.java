@@ -102,7 +102,7 @@ public class List extends UserAbstraction {
             
             final Credentials auth = new Credentials((String) parser.getOptionValue(this.adminUserOption), (String) parser.getOptionValue(this.adminPassOption));
 
-            final OXUserInterface oxu = (OXUserInterface) Naming.lookup(RMI_HOSTNAME +OXUserInterface.RMI_NAME);
+            final OXUserInterface oxu = (OXUserInterface) Naming.lookup(RMI_HOSTNAME + OXUserInterface.RMI_NAME);
 
             final int[] allusers = oxu.getAll(ctx, auth);
             
@@ -115,7 +115,7 @@ public class List extends UserAbstraction {
             final User[] newusers = oxu.getData(ctx, users.toArray(new User[users.size()]), auth);
             
             if (null != parser.getOptionValue(this.csvOutputOption)) {
-                precvsinfos(newusers);
+                precsvinfos(newusers);
             } else {
                 sysoutOutput(newusers);
             }
@@ -185,7 +185,7 @@ public class List extends UserAbstraction {
      * @throws IllegalArgumentException 
      * 
      */
-    private void precvsinfos(final User[] users) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+    private void precsvinfos(final User[] users) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
         final Method[] methods = User.class.getMethods();
         final ArrayList<MethodAndNames> methArrayList = getGetters(methods, new HashSet<String>());
         
@@ -216,6 +216,7 @@ public class List extends UserAbstraction {
                 }
             }
             data.add(datarow);
+            printExtensionsError(user);
         }
         doCSVOutput(columnnames, data);
     }

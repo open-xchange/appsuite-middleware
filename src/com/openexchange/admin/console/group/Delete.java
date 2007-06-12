@@ -98,14 +98,13 @@ public class Delete extends GroupAbstraction {
 
             final Credentials auth = new Credentials((String) parser.getOptionValue(this.adminUserOption), (String) parser.getOptionValue(this.adminPassOption));
 
-            final OXGroupInterface oxgrp = (OXGroupInterface) Naming.lookup(RMI_HOSTNAME +OXGroupInterface.RMI_NAME);
+            final OXGroupInterface oxgrp = (OXGroupInterface) Naming.lookup(RMI_HOSTNAME + OXGroupInterface.RMI_NAME);
 
             final int groupid = Integer.valueOf((String) parser.getOptionValue(this.IdOption));
 
             final Group grp = new Group(groupid);
 
             oxgrp.delete(ctx, new Group[] { grp }, auth);
-            printExtensionsError(grp);
             sysexit(0);
         } catch (final java.rmi.ConnectException neti) {
             printError(neti.getMessage());
@@ -149,9 +148,9 @@ public class Delete extends GroupAbstraction {
         } catch (final DatabaseUpdateException e) {
             printServerResponse(e.getMessage());
             sysexit(1);
-        } catch (NoSuchGroupException e) {
+        } catch (final NoSuchGroupException e) {
             printServerResponse(e.getMessage());
-            sysexit(1);
+            sysexit(SYSEXIT_NO_SUCH_GROUP);
         }
     }
 

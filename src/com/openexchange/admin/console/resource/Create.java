@@ -76,7 +76,7 @@ public class Create extends ResourceAbstraction {
 
     public Create(final String[] args2) {
 
-        final AdminParser parser = new AdminParser("delete");
+        final AdminParser parser = new AdminParser("create");
 
         setOptions(parser);
 
@@ -91,7 +91,7 @@ public class Create extends ResourceAbstraction {
 
             final Credentials auth = new Credentials((String) parser.getOptionValue(this.adminUserOption), (String) parser.getOptionValue(this.adminPassOption));
 
-            final OXResourceInterface oxres = (OXResourceInterface) Naming.lookup(RMI_HOSTNAME +OXResourceInterface.RMI_NAME);
+            final OXResourceInterface oxres = (OXResourceInterface) Naming.lookup(RMI_HOSTNAME + OXResourceInterface.RMI_NAME);
             final Resource res = new Resource();
 
             res.setAvailable(Boolean.parseBoolean((String) parser.getOptionValue(this.resourceAvailableOption)));
@@ -114,7 +114,7 @@ public class Create extends ResourceAbstraction {
             res.setEmail((String) parser.getOptionValue(this.resourceEmailOption));
             res.setName((String) parser.getOptionValue(this.resourceNameOption));
             System.out.println(oxres.create(ctx, res, auth));
-            printExtensionsError(res);
+
             sysexit(0);
         } catch (final java.rmi.ConnectException neti) {
             printError(neti.getMessage());
@@ -166,7 +166,7 @@ public class Create extends ResourceAbstraction {
 
         setNameOption(parser, true);
         setDisplayNameOption(parser, true);
-        setAvailableOption(parser, true);
+        setAvailableOption(parser, false);
         setDescriptionOption(parser, false);
         setEmailOption(parser, true);
         setRecipientsOption(parser, false);

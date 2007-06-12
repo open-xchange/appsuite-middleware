@@ -94,7 +94,7 @@ public class Create extends GroupAbstraction {
 
             final Credentials auth = new Credentials((String) parser.getOptionValue(this.adminUserOption), (String) parser.getOptionValue(this.adminPassOption));
 
-            final OXGroupInterface oxgrp = (OXGroupInterface) Naming.lookup(RMI_HOSTNAME +OXGroupInterface.RMI_NAME);
+            final OXGroupInterface oxgrp = (OXGroupInterface) Naming.lookup(RMI_HOSTNAME + OXGroupInterface.RMI_NAME);
             final Group grp = new Group();
 
             grp.setName((String) parser.getOptionValue(this.nameOption));
@@ -102,7 +102,6 @@ public class Create extends GroupAbstraction {
 
             System.out.println(oxgrp.create(ctx, grp, auth));
 
-            printExtensionsError(grp);
             sysexit(0);
         } catch (final java.rmi.ConnectException neti) {
             printError(neti.getMessage());
@@ -143,9 +142,9 @@ public class Create extends GroupAbstraction {
         } catch (final DatabaseUpdateException e) {
             printServerResponse(e.getMessage());
             sysexit(1);
-        } catch (NoSuchUserException e) {
-            printServerResponse(e.getMessage());
-            sysexit(SYSEXIT_NO_SUCH_USER);
+        } catch (final NoSuchUserException e) {
+           printServerResponse(e.getMessage());
+           sysexit(SYSEXIT_NO_SUCH_USER);
         }
 
     }
