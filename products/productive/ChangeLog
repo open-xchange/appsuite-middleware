@@ -1,3 +1,7 @@
+* 2007-06-12 - marcus.klein@open-xchange.com
+
+  - Disabled UDP discovery for cache.
+
 * 2007-05-31 - marcus.klein@open-xchange.com
 
   - Merged changes.
