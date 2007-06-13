@@ -1,6 +1,7 @@
 * 2007-06-13 - choeger@open-xchange.com
 
  - Bugfix ID#7972 Fresh install - admin cannot login
+ - Bugfix ID#7803 FQDN is replaced by a DHCP value after installation
  
 * 2007-06-12 - dennis.sieben@open-xchange.com
 

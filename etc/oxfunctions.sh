@@ -257,7 +257,12 @@ ox_add_hosts_hostip() {
     local hostarr=( $(echo $fqhn | sed -e 's/\./ /g') )
     local hn=${hostarr[0]}
 
-    echo -e "$addr\t\t$fqhn $hn" >> /etc/hosts
+    # workaround for Bug ID#7803 FQDN is replaced by a DHCP value after installation
+    # something's adding non fqhn to hosts, so add own entry on top
+    local htmp=/etc/hosts.$$
+    echo -e "$addr\t\t$fqhn $hn" > $htmp
+    cat /etc/hosts >> $htmp
+    mv $htmp /etc/hosts
 }
 
 ox_remove_hosts_hostip() {
