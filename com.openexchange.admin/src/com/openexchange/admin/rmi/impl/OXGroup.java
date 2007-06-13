@@ -810,4 +810,28 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
         return (Group[]) retval.toArray(new Group[retval.size()]);
 
     }
+
+    public int getDefaultGroup(Context ctx, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
+        try {
+            doNullCheck(ctx,auth);
+        } catch (final InvalidDataException e3) {
+            log.error("One of the given arguments for getDefaultGroup is null", e3);
+            throw e3;
+        }        
+        
+        checkContext(ctx);
+        
+        doAuthentication(auth, ctx);       
+        if (log.isDebugEnabled()) {
+            log.debug("" + ctx.toString() + " -  " + auth.toString());
+        }
+        final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
+        try{
+           return  tool.getDefaultGroupForContextWithOutConnection(ctx);
+        }catch (StorageException e) {
+            log.error("Error resolving default group for context",e);
+            throw e;
+        }
+        
+    }
 }

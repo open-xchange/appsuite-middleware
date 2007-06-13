@@ -277,6 +277,18 @@ public interface OXGroupInterface extends Remote {
      */
     public Group[] getData(Context ctx, Group[] grps, Credentials auth) 
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchGroupException, DatabaseUpdateException;
-
+    /**
+     * 
+     * @param ctx
+     * @param auth
+     * @return The id of the default group of the context
+     * @throws RemoteException
+     * @throws StorageException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws InvalidDataException
+     * @throws DatabaseUpdateException
+     */
+    public int getDefaultGroup(Context ctx,Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException;
     
 }
