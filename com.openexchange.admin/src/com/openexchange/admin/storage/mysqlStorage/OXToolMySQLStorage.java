@@ -925,48 +925,11 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         return admin_id;
     }
     
-    public int getGidNumberOfGroup(final Context ctx,final int group_id, final Connection con) throws StorageException {
-        int gid_number = -1;
-
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            stmt = con.prepareStatement("SELECT gidNumber FROM groups WHERE cid=? AND id=?");
-            stmt.setInt(1, ctx.getIdAsInt().intValue());
-            stmt.setInt(2, group_id);
-            rs = stmt.executeQuery();
-            if(rs.next()){
-                gid_number = rs.getInt("gidNumber");
-            }
-            rs.close();
-        } catch (final SQLException e) {
-            log.error("SQL Error",e);
-            throw new StorageException(e);
-        } finally {
-            try {
-                if (rs != null) {
-                    rs.close();
-                }
-            } catch (final SQLException e) {
-                log.error("Error closing resultset!", e);
-            }
-            try {
-                if (stmt != null) {
-                    stmt.close();
-                }
-            } catch (final SQLException e) {
-                log.error("Error closing prepared statement!", e);
-            }
-        }
-
-        return gid_number;
-    }
-
     /**
      * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#getDefaultGroupForContext(int,
      *      java.sql.Connection)
      */
-public int getDefaultGroupForContext(final Context ctx) throws StorageException {
+public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws StorageException {
         int group_id = 0;
         Connection con = null;
         
@@ -1009,6 +972,82 @@ public int getDefaultGroupForContext(final Context ctx) throws StorageException 
                 }
             } catch (final PoolException e) {
                 log.error("Error pushing oxdb read connection to pool!", e);
+            }
+        }
+
+        return group_id;
+    }
+
+    public int getGidNumberOfGroup(final Context ctx,final int group_id, final Connection con) throws StorageException {
+        int gid_number = -1;
+
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT gidNumber FROM groups WHERE cid=? AND id=?");
+            stmt.setInt(1, ctx.getIdAsInt().intValue());
+            stmt.setInt(2, group_id);
+            rs = stmt.executeQuery();
+            if(rs.next()){
+                gid_number = rs.getInt("gidNumber");
+            }
+            rs.close();
+        } catch (final SQLException e) {
+            log.error("SQL Error",e);
+            throw new StorageException(e);
+        } finally {
+            try {
+                if(rs!=null){
+                    rs.close();
+                }
+            } catch (final SQLException e) {
+                log.error("Error closing resultset!", e);
+            }
+            try {
+                if (stmt != null) {
+                    stmt.close();
+                }
+            } catch (final SQLException e) {
+                log.error("Error closing prepared statement!", e);
+            }
+        }
+
+        return gid_number;
+    }
+
+    /**
+     * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#getDefaultGroupForContext(int,
+     *      java.sql.Connection)
+     */
+public int getDefaultGroupForContext(final Context ctx, final Connection con) throws StorageException {
+        int group_id = 0;
+
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT MIN(id) FROM groups WHERE cid=?");
+            stmt.setInt(1, ctx.getIdAsInt());
+            rs = stmt.executeQuery();
+            if (rs.next()) {
+                group_id = rs.getInt("MIN(id)");
+            } else {
+                throw new SQLException("UNABLE TO GET DEFAULT GROUP FOR CONTEXT " + ctx.getIdAsInt());
+            }
+        } catch (final SQLException e) {
+            log.error("SQL Error",e);
+            throw new StorageException(e);
+        } finally {
+            try {
+                rs.close();
+            } catch (final SQLException e) {
+                log.error("Error closing resultset!", e);
+            }
+            try {
+                if (stmt != null) {
+                    stmt.close();
+                }
+            } catch (final SQLException e) {
+                log.error("Error closing prepared statement!", e);
             }
         }
 
