@@ -1,3 +1,7 @@
+* 2007-06-13 - choeger@open-xchange.com
+
+ - Bugfix ID#7972 Fresh install - admin cannot login
+ 
 * 2007-06-12 - dennis.sieben@open-xchange.com
 
  - Bugfix #7816: User: Error when explicitly adding a new user to Group users
