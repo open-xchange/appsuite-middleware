@@ -1,3 +1,8 @@
+* 2007-06-07 - thorben.betten@open-xchange.com
+
+ - Bugfix #7503: Context's admin is assigned to public folders if a user is
+   deleted
+
 * 2007-06-06 - thorben.betten@open-xchange.com
 
  - Bugfix #7825: Fixed communication problems if chunked transfer-encoding
@@ -7,11 +12,6 @@
 
   - Bugfix #7778: Checking client IP address to prevent session stealing.
   
-* 2007-06-01 - thorben.betten@open-xchange.com
-
- - Bugfix #7503: Context's admin is assigned to public folders if a user is
-   deleted
-
 * 2007-05-31 - thorben.betten@open-xchange.com
 
  - Bugfix #7588: Avoiding NPE if content type is missing in infostore
