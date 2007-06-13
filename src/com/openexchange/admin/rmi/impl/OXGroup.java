@@ -464,7 +464,7 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
         }
 
         try {
-            if (tool.getDefaultGroupForContext(ctx) != grp_id) {
+            if (tool.getDefaultGroupForContextWithOutConnection(ctx) != grp_id) {
                 if (tool.existsGroupMember(ctx, grp_id, member_ids)) {
                     throw new InvalidDataException("Member already exists in group");
                 }
@@ -478,7 +478,7 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
         // If you afterwards try to add the member to the default group (what the GUI and the servlet do ATM) you
         // get an error here. This is fixed. But it should be handled in the servlet or the GUI somehow. Also
         // see #7816
-        if (tool.getDefaultGroupForContext(ctx) != grp_id) {
+        if (tool.getDefaultGroupForContextWithOutConnection(ctx) != grp_id) {
             final OXGroupStorageInterface oxGroup = OXGroupStorageInterface.getInstance();
             oxGroup.addMember(ctx, grp_id, member_ids);
         }
