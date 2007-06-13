@@ -192,13 +192,16 @@ ox_register_plugin() {
     local plugin=$1
     local osgicf=$2
     local plugpath=$3
+    local level=$4
 
     test -z "$plugin" && die \
-	"ox_unregister_plugin: missing plugin argument (arg 1)"
+	"ox_register_plugin: missing plugin argument (arg 1)"
     test -z "$osgicf" && die \
-	"ox_unregister_plugin: missing osgicf argument (arg 2)"
+	"ox_register_plugin: missing osgicf argument (arg 2)"
     test -z "$plugpath" && die \
-	"ox_unregister_plugin: missing plugpath argument (arg 3)"
+	"ox_register_plugin: missing plugpath argument (arg 3)"
+    test -z "$level" && die \
+	"ox_register_plugin: missing level argument (arg 4)"
 
     if grep $plugin $osgicf >/dev/null; then
 	echo "plugin $plugin already registered"
@@ -206,7 +209,7 @@ ox_register_plugin() {
 	echo "registering plugin $plugin"
 
 	local osgicftmp=${osgicf}.$$
-	sed -e "s;\(^osgi.bundles=.*\)$;\1,reference\\:file\\:${plugpath}/${plugin}@2\\:start;" \
+	sed -e "s;\(^osgi.bundles=.*\)$;\1,reference\\:file\\:${plugpath}/${plugin}@${level}\\:start;" \
 	    < $osgicf > $osgicftmp
 	mv $osgicftmp $osgicf
     fi
