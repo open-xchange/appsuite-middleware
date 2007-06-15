@@ -1,3 +1,7 @@
+* 2007-06-15 - manuel.kraft@open-xchange.com
+
+ - Bugfix #8019  	OXEE password of new created contexts is always secret
+
 * 2007-06-13 - choeger@open-xchange.com
 
  - Bugfix ID#7972 Fresh install - admin cannot login
