@@ -273,7 +273,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
                 log.debug("Deleting group members for context " + context_id);
                 // delete from members
-                del_stmt = write_ox_con.prepareStatement("DELETE FROM groups_member WHERE cid = ?)");
+                del_stmt = write_ox_con.prepareStatement("DELETE FROM groups_member WHERE cid = ?");
                 del_stmt.setInt(1, context_id);
                 del_stmt.executeUpdate();
                 del_stmt.close();
