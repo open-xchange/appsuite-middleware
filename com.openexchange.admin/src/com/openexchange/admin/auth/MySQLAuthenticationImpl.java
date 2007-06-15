@@ -90,7 +90,7 @@ public class MySQLAuthenticationImpl implements AuthenticationInterface {
 
         if (authdata != null && authdata.getLogin() != null && authdata.getPassword() != null) {
 
-            if(ClientAdminThread.cache.getAdminCredentials().getLogin() == null ) {
+            if(ClientAdminThread.cache.getAdminCredentials(ctx) == null ) {
                 Connection sql_con = null;
                 PreparedStatement prep = null;
                 ResultSet rs = null;
@@ -114,7 +114,7 @@ public class MySQLAuthenticationImpl implements AuthenticationInterface {
                         String pwcrypt = rs.getString("userPassword");
                         if (UnixCrypt.matches(pwcrypt, authdata.getPassword())) {
                             Credentials cauth = new Credentials(authdata.getLogin(),pwcrypt);
-                            ClientAdminThread.cache.setAdminCredentials(cauth);
+                            ClientAdminThread.cache.setAdminCredentials(ctx,cauth);
                             return true;
                         } else {
                             if (log.isDebugEnabled()) {
@@ -151,7 +151,7 @@ public class MySQLAuthenticationImpl implements AuthenticationInterface {
                     }
                 }
             } else {
-                if (UnixCrypt.matches(ClientAdminThread.cache.getAdminCredentials().getPassword(), authdata.getPassword())) {
+                if (UnixCrypt.matches(ClientAdminThread.cache.getAdminCredentials(ctx).getPassword(), authdata.getPassword())) {
                     return true;
                 } else {
                     if (log.isDebugEnabled()) {
