@@ -48,18 +48,23 @@
  */
 package com.openexchange.admin.tools;
 
-import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.admin.rmi.exceptions.DatabaseLockedException;
-import com.openexchange.admin.rmi.exceptions.PoolException;
-import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.admin.storage.sqlStorage.OXAdminPoolDBPool;
-import com.openexchange.admin.storage.sqlStorage.OXAdminPoolInterface;
-import com.openexchange.groupware.delete.DeleteRegistry;
-import java.sql.*;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.sql.Connection;
+import java.util.Hashtable;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.openexchange.admin.rmi.dataobjects.Context;
+import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.exceptions.DatabaseLockedException;
+import com.openexchange.admin.rmi.exceptions.PoolException;
+import com.openexchange.admin.storage.sqlStorage.OXAdminPoolDBPool;
+import com.openexchange.admin.storage.sqlStorage.OXAdminPoolInterface;
+import com.openexchange.groupware.delete.DeleteRegistry;
 
 public class AdminCache {
 
@@ -77,7 +82,11 @@ public class AdminCache {
     // master credentials for authenticating master admin
     private Credentials masterCredentials = null;
     
-    private Credentials adminCredentials = null;
+    // OLD NOT CONTEXT BASED CACHED CREDENTIALS
+    //private Credentials adminCredentials = null;    
+    
+    // bugfix for context wide credentials caching
+    private Hashtable<Integer, Credentials> adminCredentialsCache = null;
     
     // A flag to lock the database if an update is made
     private boolean lockdb = false;
@@ -103,7 +112,7 @@ public class AdminCache {
         initOXProccess();
         this.log.info("Init Cache");
         initPool();
-        this.adminCredentials = new Credentials();
+        this.adminCredentialsCache = new Hashtable<Integer, Credentials>();
     }
 
     protected void initPool() {
@@ -158,19 +167,21 @@ public class AdminCache {
     /**
      * @return the adminCredentials
      */
-    public final Credentials getAdminCredentials() {
-        synchronized (this.adminCredentials) {
-            return this.adminCredentials;
-        }
+    public final Credentials getAdminCredentials(Context ctx) {        
+        return this.adminCredentialsCache.get(ctx.getIdAsInt());
+//        synchronized (this.adminCredentials) {
+//            return this.adminCredentials;
+//        }
     }
 
     /**
      * @param adminCredentials the adminCredentials to set
      */
-    public final void setAdminCredentials(Credentials adminCredentials) {
-        synchronized (this.adminCredentials) {
-            this.adminCredentials = adminCredentials;
-       }
+    public final void setAdminCredentials(Context ctx,Credentials adminCredentials) {
+        this.adminCredentialsCache.put(ctx.getIdAsInt(),adminCredentials);
+//        synchronized (this.adminCredentials) {
+//            this.adminCredentials = adminCredentials;
+//       }
     }
 
     public final synchronized boolean isLockdb() {

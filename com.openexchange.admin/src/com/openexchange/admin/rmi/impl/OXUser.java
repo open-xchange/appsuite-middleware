@@ -332,9 +332,9 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         }
         // change cached admin credentials if neccessary
         if( isContextAdmin && usrdata.getPassword() != null ) {
-            Credentials cauth = ClientAdminThread.cache.getAdminCredentials();
+            Credentials cauth = ClientAdminThread.cache.getAdminCredentials(ctx);
             cauth.setPassword(UnixCrypt.crypt(usrdata.getPassword()));
-            ClientAdminThread.cache.setAdminCredentials(cauth);
+            ClientAdminThread.cache.setAdminCredentials(ctx,cauth);
         }
         try {
             JCS cache = JCS.getInstance("User");
