@@ -49,6 +49,8 @@
 
 package com.openexchange.admin.auth;
 
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -62,6 +64,7 @@ import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.tools.SHACrypt;
 import com.openexchange.admin.tools.UnixCrypt;
 
 /**
@@ -110,23 +113,28 @@ public class MySQLAuthenticationImpl implements AuthenticationInterface {
                         }
                         return false;
                     } else {
-                        // now check via our crypt mech the password
+                        Boolean retval = false;
                         String pwcrypt = rs.getString("userPassword");
-                        if (UnixCrypt.matches(pwcrypt, authdata.getPassword())) {
+                        String pwmech  = rs.getString("passwordMech");
+                        if("{CRYPT}".equals(pwmech)) {
+                            retval = UnixCrypt.matches(pwcrypt, authdata.getPassword());
+                        } else if("{SHA}".equals(pwmech)) {
+                            retval = SHACrypt.makeSHAPasswd(authdata.getPassword()).equals(pwcrypt);
+                        }
+                        if( retval ) {
                             Credentials cauth = new Credentials(authdata.getLogin(),pwcrypt);
                             ClientAdminThread.cache.setAdminCredentials(ctx,cauth);
-                            return true;
-                        } else {
-                            if (log.isDebugEnabled()) {
-                                log.debug("Password for admin user \"" + authdata.getLogin() + "\" did not match!");
-                            }
-                            return false;
                         }
+                        return retval;
                     }
                 } catch (final SQLException sql) {
                     throw new StorageException(sql);
                 } catch (final PoolException ex) {
                     throw new StorageException(ex);
+                } catch (NoSuchAlgorithmException e) {
+                    throw new StorageException(e);
+                } catch (UnsupportedEncodingException e) {
+                    throw new StorageException(e);
                 } finally {
                     try {
                         if (rs != null) {

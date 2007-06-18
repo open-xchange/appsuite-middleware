@@ -61,7 +61,6 @@ import com.openexchange.server.DBPoolingException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -80,6 +79,7 @@ import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.storage.sqlStorage.OXUserSQLStorage;
 import com.openexchange.admin.tools.AdminCache;
+import com.openexchange.admin.tools.SHACrypt;
 import com.openexchange.admin.tools.UnixCrypt;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.IDGenerator;
@@ -582,6 +582,14 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 log.error("Error doing rollback", e2);
             }
             throw new StorageException(e);
+        } catch (UnsupportedEncodingException e) {
+            log.error("Error", e);
+            try {
+                write_ox_con.rollback();
+            } catch (final SQLException e2) {
+                log.error("Error doing rollback", e2);
+            }
+            throw new StorageException(e);
         } finally {
             try {
                 if (folder_update != null) {
@@ -614,9 +622,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
      * @return
      * @throws StorageException
      * @throws NoSuchAlgorithmException
+     * @throws UnsupportedEncodingException 
      */
     private String password2crypt(final User user) throws StorageException,
-            NoSuchAlgorithmException {
+            NoSuchAlgorithmException, UnsupportedEncodingException {
         String passwd = null;
         if (user.getPasswordMech() == null) {
             // TODO: configurable in AdminDaemon.properties
@@ -625,7 +634,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         if (user.getPasswordMech() == User.PASSWORDMECH.CRYPT) {
             passwd = UnixCrypt.crypt(user.getPassword());
         } else if (user.getPasswordMech() == User.PASSWORDMECH.SHA) {
-            passwd = makeSHAPasswd(user.getPassword());
+            passwd = SHACrypt.makeSHAPasswd(user.getPassword());
         } else {
             throw new StorageException("unsupported password mechanism: "
                     + user.getPasswordMech());
@@ -1058,6 +1067,11 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
             throw new StorageException(e);
         } catch (final NoSuchAlgorithmException e) {
+            // Here we throw without rollback, because at the point this
+            // exception is thrown
+            // no database activity has happened
+            throw new StorageException(e);
+        } catch (UnsupportedEncodingException e) {
             // Here we throw without rollback, because at the point this
             // exception is thrown
             // no database activity has happened
@@ -1987,28 +2001,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             log.error("SQL Error", sqle);
             throw new StorageException(sqle);
         }
-    }
-
-    private String makeSHAPasswd(final String raw)
-            throws NoSuchAlgorithmException {
-        MessageDigest md;
-
-        md = MessageDigest.getInstance("SHA-1");
-
-        final byte[] salt = {};
-
-        md.reset();
-        try {
-            md.update(raw.getBytes("UTF-8"));
-        } catch (final UnsupportedEncodingException e) {
-            log.error("Error Encoding Password", e);
-        }
-        md.update(salt);
-
-        final byte[] pwhash = md.digest();
-        final String ret = (new sun.misc.BASE64Encoder().encode(pwhash));
-
-        return ret;
     }
 
     private ArrayList<MethodAndNames> getGetters(final Method[] theMethods) {
