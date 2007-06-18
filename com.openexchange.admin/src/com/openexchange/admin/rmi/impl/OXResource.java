@@ -47,7 +47,7 @@
  *
  */
 /*
- * $Id: OXResource.java,v 1.23 2007/06/04 09:13:51 cutmasta Exp $
+ * $Id: OXResource.java,v 1.24 2007/06/18 10:06:51 cutmasta Exp $
  */
 package com.openexchange.admin.rmi.impl;
 
@@ -270,7 +270,7 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
 
         try {
 
-            if( res.getEmail() != null && tool.existsResourceAddress(ctx, res.getEmail())) {
+            if( res.getEmail() != null && tool.existsResourceAddress(ctx, res.getEmail(),res.getId())) {
                 throw new InvalidDataException("Resource with this email address already exists");
 
             }
