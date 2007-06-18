@@ -69,9 +69,9 @@ IMAP_SERVER_LONG=imapserver
 IMAP_LOGIN_TYPE=user
 IMAP_LOGIN_TYPE_LONG=imaplogintype
 IMAP_LOGIN_TYPE_VALUES="global user"
-LOGIN_IMPL_TYPE=1u1
+LOGIN_IMPL_TYPE=database
 LOGIN_IMPL_TYPE_LONG=logintype
-LOGIN_IMPL_TYPE_VALUES="1u1 database"
+LOGIN_IMPL_TYPE_VALUES="database"
 SERVER_MEMORY=50
 SERVER_MEMORY_LONG=servermemory
 TMPDIR_PATH=/tmp
@@ -123,7 +123,6 @@ EOF
     echo
 }
 
-# be verbose for Holger
 v_setprop() {
     local prop="$1"
     local val="$2"
@@ -278,10 +277,6 @@ v_setprop imapServer $IMAP_SERVER ${SERVERCONF}/imap.properties
 v_setprop imapLoginType $IMAP_LOGIN_TYPE ${SERVERCONF}/imap.properties
 
 case $LOGIN_IMPL_TYPE in
-    1u1)
-	v_setprop LoginInfo com.openexchange.groupware.contexts.LoginOneAndOneImpl ${SERVERCONF}/system.properties
-	v_setprop checkPassword false ${SERVERCONF}/ldap.properties
-	;;
     database)
 	v_setprop LoginInfo com.openexchange.groupware.contexts.RdbLoginInfo ${SERVERCONF}/system.properties
 	v_setprop checkPassword true ${SERVERCONF}/ldap.properties
