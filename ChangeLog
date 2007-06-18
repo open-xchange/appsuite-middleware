@@ -5,7 +5,9 @@
 * 2007-06-18 - choeger@open-xchange.com
 
  - Bugfix ID#7843 admin can only handle unix crypt in RMI auth
-
+ - Bugfix ID#7757 (spam) spam training in GUI is available if spam is disabled for user
+   added missing spam_trainer disable method
+   
 * 2007-06-15 - manuel.kraft@open-xchange.com
 
  - Bugfix #8019  	OXEE password of new created contexts is always secret
