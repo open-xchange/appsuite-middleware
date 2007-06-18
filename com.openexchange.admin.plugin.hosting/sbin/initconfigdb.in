@@ -192,11 +192,9 @@ create database \`${CONFIGDB_DBNAME}\`;
 EOF
 fi
 
+mysqladmin flush-privileges
+
 cat $ADMINCONF/mysql/configdb.sql \
-    | mysql -h $CONFIGDB_HOST -P $CONFIGDB_PORT -u $CONFIGDB_USER -p${CONFIGDB_PASS} ${CONFIGDB_DBNAME}
-cat $ADMINCONF/mysql/optimize/configdb.sql \
-    | mysql -h $CONFIGDB_HOST -P $CONFIGDB_PORT -u $CONFIGDB_USER -p${CONFIGDB_PASS} ${CONFIGDB_DBNAME}
-cat $ADMINCONF/mysql/consistency/configdb.sql \
     | mysql -h $CONFIGDB_HOST -P $CONFIGDB_PORT -u $CONFIGDB_USER -p${CONFIGDB_PASS} ${CONFIGDB_DBNAME}
 
 echo " done"
