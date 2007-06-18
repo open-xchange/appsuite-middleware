@@ -1,3 +1,7 @@
+* 2007-06-18 - manuel.kraft@open-xchange.com
+
+ - Bugfix #7833	  	Renaming a resource with the same mail address doesn't work
+
 * 2007-06-18 - choeger@open-xchange.com
 
  - Bugfix ID#7843 admin can only handle unix crypt in RMI auth
