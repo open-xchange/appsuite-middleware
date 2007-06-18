@@ -1,3 +1,7 @@
+* 2007-06-18 - choeger@open-xchange.com
+
+ - Bugfix ID#7843 admin can only handle unix crypt in RMI auth
+
 * 2007-06-15 - manuel.kraft@open-xchange.com
 
  - Bugfix #8019  	OXEE password of new created contexts is always secret
