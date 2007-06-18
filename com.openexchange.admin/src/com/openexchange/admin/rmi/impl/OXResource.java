@@ -270,7 +270,7 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
 
         try {
 
-            if( res.getEmail() != null && tool.existsResourceAddress(ctx, res.getEmail())) {
+            if( res.getEmail() != null && tool.existsResourceAddress(ctx, res.getEmail(),res.getId())) {
                 throw new InvalidDataException("Resource with this email address already exists");
 
             }
