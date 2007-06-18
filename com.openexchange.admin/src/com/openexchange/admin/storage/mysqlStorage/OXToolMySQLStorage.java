@@ -1679,6 +1679,49 @@ public int getDefaultGroupForContext(final Context ctx, final Connection con) th
     }
 
     @Override
+    public void unsetUserSettingMailBit(final Context ctx, final User user, final int bit, final Connection con) throws StorageException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT bits FROM user_setting_mail WHERE cid = ? AND user = ?");
+            stmt.setInt(1, ctx.getIdAsInt());
+            stmt.setInt(2, user.getId());
+            rs = stmt.executeQuery();
+            if (rs.next()) {
+                int bits = rs.getInt("bits");
+                rs.close();
+                stmt.close();
+                bits &= ~bit;
+                stmt = con.prepareStatement("UPDATE user_setting_mail SET bits = ? WHERE cid = ? AND user = ?");
+                stmt.setInt(1, bits);
+                stmt.setInt(2, ctx.getIdAsInt());
+                stmt.setInt(3, user.getId());
+                stmt.executeUpdate();
+            } else {
+                throw new SQLException("Unable to set features from bitfield for User: " + user.getId() + ", Context: " + ctx.getIdAsInt());
+            }
+        } catch (final SQLException e) {
+            log.error("SQL Error",e);
+            throw new StorageException(e);
+        } finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (final SQLException e) {
+                    log.error("Error closing resultset", e);
+                }
+            }
+            try {
+                if (null != stmt) {
+                    stmt.close();
+                }
+            } catch (final SQLException e) {
+                log.error("Error closing prepared statement!", e);
+            }
+        }
+    }
+
+    @Override
     public int getGroupIDByGroupname(Context ctx, String groupname) throws StorageException {
         Connection con = null;
         PreparedStatement prep_check = null;

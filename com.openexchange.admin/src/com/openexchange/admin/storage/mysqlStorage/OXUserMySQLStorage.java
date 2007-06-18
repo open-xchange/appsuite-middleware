@@ -431,8 +431,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             final Boolean spam_filter_enabled = usrdata.getSpam_filter_enabled();
             if(null != spam_filter_enabled ) {
                 final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
-                if( ! tool.isUserSettingMailBitSet(ctx, usrdata, UserSettingMail.INT_SPAM_ENABLED, write_ox_con) ) {
+                if( spam_filter_enabled ) {
                     tool.setUserSettingMailBit(ctx, usrdata, UserSettingMail.INT_SPAM_ENABLED, write_ox_con);
+                } else {
+                    tool.unsetUserSettingMailBit(ctx, usrdata, UserSettingMail.INT_SPAM_ENABLED, write_ox_con);
                 }
             }
             

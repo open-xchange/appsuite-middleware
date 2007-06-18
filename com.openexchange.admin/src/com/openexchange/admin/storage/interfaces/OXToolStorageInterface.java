@@ -222,4 +222,6 @@ public abstract class OXToolStorageInterface {
     public abstract boolean isUserSettingMailBitSet(final Context ctx, final User user, final int bit, final Connection con) throws StorageException;
 
     public abstract void setUserSettingMailBit(final Context ctx, final User user, final int bit, final Connection con) throws StorageException;
+    
+    public abstract void unsetUserSettingMailBit(final Context ctx, final User user, final int bit, final Connection con) throws StorageException;
 }
