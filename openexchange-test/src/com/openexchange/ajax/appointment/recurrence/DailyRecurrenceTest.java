@@ -77,13 +77,13 @@ public class DailyRecurrenceTest extends AbstractRecurrenceTest {
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
 
-	public void _notestFullTimeDailyRecurrenceFromWinter2SummerTime() throws Exception {
+	public void testFullTimeDailyRecurrenceFromWinter2SummerTime() throws Exception {
 		Date until = simpleDateFormatUTC.parse("2007-04-01 00:00:00");
 		
 		Date start = simpleDateFormatUTC.parse("2007-02-01 00:00:00");
 		Date end = simpleDateFormatUTC.parse("2007-05-01 00:00:00");
 		
-		Date startDate = simpleDateFormat.parse("2007-03-01 00:00:00");
+		Date startDate = simpleDateFormatUTC.parse("2007-03-01 00:00:00");
 		Date endDate = simpleDateFormatUTC.parse("2007-03-02 00:00:00");
 		
 		AppointmentObject appointmentObj = new AppointmentObject();
@@ -192,7 +192,7 @@ public class DailyRecurrenceTest extends AbstractRecurrenceTest {
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
 	
-	public void _notestFullTimeDailyRecurrenceFromSummer2WinterTime() throws Exception {
+	public void testFullTimeDailyRecurrenceFromSummer2WinterTime() throws Exception {
 		Date until = simpleDateFormatUTC.parse("2007-11-01 00:00:00");
 		
 		Date start = simpleDateFormatUTC.parse("2007-09-01 00:00:00");
@@ -210,6 +210,7 @@ public class DailyRecurrenceTest extends AbstractRecurrenceTest {
 		appointmentObj.setRecurrenceType(AppointmentObject.DAILY);
 		appointmentObj.setInterval(1);
 		appointmentObj.setUntil(until);
+                appointmentObj.setFullTime(true);
 		appointmentObj.setIgnoreConflicts(true);
 		int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		appointmentObj.setObjectID(objectId);
