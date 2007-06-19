@@ -48,12 +48,6 @@
  */
 package com.openexchange.admin.storage.interfaces;
 
-import com.openexchange.admin.daemons.ClientAdminThread;
-import com.openexchange.admin.rmi.dataobjects.Context;
-import com.openexchange.admin.rmi.dataobjects.Group;
-import com.openexchange.admin.rmi.dataobjects.User;
-import com.openexchange.admin.rmi.exceptions.InvalidDataException;
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
@@ -61,6 +55,12 @@ import java.sql.Connection;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.openexchange.admin.daemons.ClientAdminThread;
+import com.openexchange.admin.rmi.dataobjects.Context;
+import com.openexchange.admin.rmi.dataobjects.Group;
+import com.openexchange.admin.rmi.dataobjects.Resource;
+import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
@@ -202,6 +202,38 @@ public abstract class OXToolStorageInterface {
     public abstract boolean poolInUse(final int pool_id) throws StorageException;
 
     public abstract boolean serverInUse(final int server_id) throws StorageException;
+    
+    /**
+     * Checks if given domain is used as alias or primary mail address of any user in given context.
+     * @param domain
+     * @return Users which use this domain. null if no user uses this domain.
+     * @throws StorageException
+     */
+    public abstract User[] domainInUseByUser(final Context ctx,final String domain) throws StorageException;
+    
+    /**
+     * Checks if given domain is used as mail address of any resource in given context.
+     * @param domain
+     * @return Resources which use this domain. null if no resource uses this domain.
+     * @throws StorageException
+     */
+    public abstract Resource[] domainInUseByResource(final Context ctx,final String domain) throws StorageException;
+    
+    /**
+     * Checks if given domain is used as mail address of any group in given context.
+     * @param domain
+     * @return Groups which use this domain.null if no group uses this domain.
+     * @throws StorageException
+     */
+    public abstract Group[] domainInUseByGroup(final Context ctx,final String domain) throws StorageException;
+    
+    /**
+     * Checks if given domain is used by any user,group or resource as mailaddress in given context.
+     * @param domain
+     * @return
+     * @throws StorageException
+     */
+    public abstract boolean domainInUse(final Context ctx,final String domain) throws StorageException;
     
     public abstract String getUsernameByUserID(final Context ctx,final int user_id) throws StorageException;
     
