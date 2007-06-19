@@ -53,6 +53,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 
@@ -62,6 +63,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Group;
+import com.openexchange.admin.rmi.dataobjects.Resource;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.PoolException;
@@ -1916,5 +1918,203 @@ public int getDefaultGroupForContext(final Context ctx, final Connection con) th
 
         }
     }
+
+    @Override
+    public boolean domainInUse(Context ctx, String domain) throws StorageException {        
+        Connection con = null;
+        try {
+            con = cache.getREADConnectionForContext(ctx.getIdAsInt().intValue());
+            Resource[] res =  getDomainUsedbyResource(ctx, domain, con);
+            Group[] grp =  getDomainUsedbyGroup(ctx, domain, con);
+            User[] usr =  getDomainUsedbyUser(ctx, domain, con);
+            return (res!=null && grp!=null && usr!=null);             
+        } catch (SQLException e) {
+            log.error("SQL Error",e);
+            throw new StorageException(e);
+        } catch (PoolException e) {
+            log.error("Pool Error",e);
+            throw new StorageException(e);
+        }finally{
+            try {
+                cache.pushOXDBRead(ctx.getIdAsInt(), con);
+            } catch (final PoolException e) {
+                log.error("Error pushing ox db read connection to pool!", e);
+            }
+        }
+    }
+
+    @Override
+    public Group[] domainInUseByGroup(Context ctx, String domain) throws StorageException {
+        // currently mailaddresse not used  in core for groups
+        return null;
+    }
+
+    @Override
+    public Resource[] domainInUseByResource(Context ctx, String domain) throws StorageException {
+        Connection con = null;
+        try {
+            con = cache.getREADConnectionForContext(ctx.getIdAsInt().intValue());
+            return getDomainUsedbyResource(ctx, domain, con);
+        } catch (SQLException e) {
+            log.error("SQL Error",e);
+            throw new StorageException(e);
+        } catch (PoolException e) {
+            log.error("Pool Error",e);
+            throw new StorageException(e);
+        }finally{
+            try {
+                cache.pushOXDBRead(ctx.getIdAsInt(), con);
+            } catch (final PoolException e) {
+                log.error("Error pushing ox db read connection to pool!", e);
+            }
+        }
+    }
+
+    @Override
+    public User[] domainInUseByUser(Context ctx, String domain) throws StorageException {
+        Connection con = null;
+        try {
+            con = cache.getREADConnectionForContext(ctx.getIdAsInt().intValue());
+            return getDomainUsedbyUser(ctx, domain, con);
+        } catch (SQLException e) {
+            log.error("SQL Error",e);
+            throw new StorageException(e);
+        } catch (PoolException e) {
+            log.error("Pool Error",e);
+            throw new StorageException(e);
+        }finally{
+            try {
+                cache.pushOXDBRead(ctx.getIdAsInt(), con);
+            } catch (final PoolException e) {
+                log.error("Error pushing ox db read connection to pool!", e);
+            }
+        }
+    }
+
+    
+    private User[] getDomainUsedbyUser(Context ctx,String domain,Connection oxcon) throws SQLException{
+        ArrayList<User> data = new ArrayList<User>();
+        
+        
+        PreparedStatement prep_check = null;
+        ResultSet rs = null;
+        
+        try{
+            HashSet<Integer> usr_ids = new HashSet<Integer>();
+            // fetch from alias table
+            prep_check = oxcon.prepareStatement("SELECT id FROM user_attribute WHERE cid = ? AND name = 'alias' AND VALUE like ?");
+            prep_check.setInt(1, ctx.getIdAsInt());
+            prep_check.setString(2, "%@"+domain);
+            rs = prep_check.executeQuery();
+            while(rs.next()){
+                usr_ids.add(rs.getInt("id"));
+            }
+            rs.close();
+            prep_check.close();
+            // fetch from user table
+            prep_check = oxcon.prepareStatement("SELECT id FROM user WHERE cid = ? AND mail like ?");
+            prep_check.setInt(1, ctx.getIdAsInt());
+            prep_check.setString(2, "%@"+domain);
+            rs = prep_check.executeQuery();
+            while(rs.next()){
+                usr_ids.add(rs.getInt("id"));
+            }
+            rs.close();
+            prep_check.close();
+            
+            // if we had time we could resolv the complete user object in db but at the moment we only need the ids of the user            
+           Iterator ids_itr =  usr_ids.iterator();
+           while (ids_itr.hasNext()) {
+               Integer id  = (Integer) ids_itr.next();
+               data.add(new User(id.intValue()));
+           }            
+        }finally{
+            if (null != rs) {
+                try {
+                    rs.close();
+                } catch (final SQLException e) {
+                    log.error("Error closing resultset", e);
+                }
+            }
+
+            try {
+                if (null != prep_check) {
+                    prep_check.close();
+                }
+            } catch (final SQLException e) {
+                log.error("Error closing prepared statement!", e);
+            }
+        }
+        
+        if(data.size()==0){
+            return null;
+        }else{
+            return data.toArray(new User[data.size()]);
+        }        
+    }
+    
+    private Group[] getDomainUsedbyGroup(Context ctx,String domain,Connection oxcon) throws SQLException{
+        // groups are currently not used with mail addresses in the core
+        return null;
+//        ArrayList<Group> data = new ArrayList<Group>();
+//        
+//        if(data.size()==0){
+//            return null;
+//        }else{
+//            return data.toArray(new Group[data.size()]);
+//        }        
+    }
+    
+    private Resource[] getDomainUsedbyResource(Context ctx,String domain,Connection oxcon) throws SQLException{
+        ArrayList<Resource> data = new ArrayList<Resource>();
+        
+        
+        PreparedStatement prep_check = null;
+        ResultSet rs = null;
+        
+        try{
+            HashSet<Integer> _ids = new HashSet<Integer>();
+            // fetch from alias table
+            prep_check = oxcon.prepareStatement("SELECT id FROM resource where cid = ? and mail like ?");
+            prep_check.setInt(1, ctx.getIdAsInt());
+            prep_check.setString(2, "%@"+domain);
+            rs = prep_check.executeQuery();
+            while(rs.next()){
+                _ids.add(rs.getInt("id"));
+            }
+            rs.close();
+            prep_check.close();            
+            
+            // if we had time we could resolv the complete resource object in db but at the moment we only need the ids of the resource            
+           Iterator ids_itr =  _ids.iterator();
+           while (ids_itr.hasNext()) {
+               Integer id  = (Integer) ids_itr.next();
+               data.add(new Resource(id.intValue()));
+           }            
+        }finally{
+            if (null != rs) {
+                try {
+                    rs.close();
+                } catch (final SQLException e) {
+                    log.error("Error closing resultset", e);
+                }
+            }
+
+            try {
+                if (null != prep_check) {
+                    prep_check.close();
+                }
+            } catch (final SQLException e) {
+                log.error("Error closing prepared statement!", e);
+            }
+        }
+        
+        if(data.size()==0){
+            return null;
+        }else{
+            return data.toArray(new Resource[data.size()]);
+        }        
+    }
+    
 
 }
