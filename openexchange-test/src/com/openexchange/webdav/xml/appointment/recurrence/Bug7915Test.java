@@ -49,7 +49,7 @@ public class Bug7915Test extends AbstractRecurrenceTest {
 		exceptionAppointmentObject.setTitle("testBug7915 - change exception (2007-06-06)");
 		exceptionAppointmentObject.setStartDate(exceptionStartDate);
 		exceptionAppointmentObject.setEndDate(exceptionEndDate);
-		appointmentObj.setFullTime(true);
+		exceptionAppointmentObject.setFullTime(true);
 		exceptionAppointmentObject.setRecurrenceDatePosition(recurrenceDatePosition);
 		exceptionAppointmentObject.setShownAs(AppointmentObject.ABSENT);
 		exceptionAppointmentObject.setParentFolderID(appointmentFolderId);
