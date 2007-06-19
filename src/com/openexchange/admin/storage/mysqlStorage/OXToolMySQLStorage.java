@@ -1927,7 +1927,7 @@ public int getDefaultGroupForContext(final Context ctx, final Connection con) th
             Resource[] res =  getDomainUsedbyResource(ctx, domain, con);
             Group[] grp =  getDomainUsedbyGroup(ctx, domain, con);
             User[] usr =  getDomainUsedbyUser(ctx, domain, con);
-            return (res!=null && grp!=null && usr!=null);             
+            return (res!=null || grp!=null || usr!=null);             
         } catch (SQLException e) {
             log.error("SQL Error",e);
             throw new StorageException(e);
