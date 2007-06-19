@@ -265,6 +265,12 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
             checkContext(ctx);
             checkExistsContextAndSchemaBeingLocked(ctx, tools);
             
+            if (!tools.existsUser(ctx, usrdata.getId())) {
+                final NoSuchUserException noSuchUserException = new NoSuchUserException("No such user " + usrdata.getId() + " in context " + ctx.getIdAsInt());
+                log.error(noSuchUserException);
+                throw noSuchUserException;
+            }
+
             final int auth_user_id = tools.getUserIDByUsername(ctx, auth.getLogin());
             // check if given user is admin
             if (tools.isContextAdmin(ctx, auth_user_id)) {
@@ -292,12 +298,6 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
             throw e1;
         }
         
-        if (!tools.existsUser(ctx, usrdata.getId())) {
-            final NoSuchUserException noSuchUserException = new NoSuchUserException("No such user " + usrdata.getId() + " in context " + ctx.getIdAsInt());
-            log.error(noSuchUserException);
-            throw noSuchUserException;
-        }
-
         boolean isContextAdmin = tools.isContextAdmin(ctx, usrdata.getId());
 
         final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
