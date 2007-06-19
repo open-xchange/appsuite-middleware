@@ -2073,24 +2073,17 @@ public int getDefaultGroupForContext(final Context ctx, final Connection con) th
         ResultSet rs = null;
         
         try{
-            HashSet<Integer> _ids = new HashSet<Integer>();
-            // fetch from alias table
+           
+            // fetch
             prep_check = oxcon.prepareStatement("SELECT id FROM resource where cid = ? and mail like ?");
             prep_check.setInt(1, ctx.getIdAsInt());
             prep_check.setString(2, "%@"+domain);
             rs = prep_check.executeQuery();
-            while(rs.next()){
-                _ids.add(rs.getInt("id"));
+            while(rs.next()){                
+                data.add(new Resource(rs.getInt("id")));
             }
             rs.close();
-            prep_check.close();            
-            
-            // if we had time we could resolv the complete resource object in db but at the moment we only need the ids of the resource            
-           Iterator ids_itr =  _ids.iterator();
-           while (ids_itr.hasNext()) {
-               Integer id  = (Integer) ids_itr.next();
-               data.add(new Resource(id.intValue()));
-           }            
+            prep_check.close();       
         }finally{
             if (null != rs) {
                 try {
