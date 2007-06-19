@@ -164,6 +164,7 @@
 		<manifest mode="update" file="META-INF/MANIFEST.MF.package">
 				<attribute name="Bundle-ClassPath" value=".,
 					 external:$libdir$/ox_server.jar,
+					 external:$libdir$/ox_languages.jar,
 					 external:$libdir$/commons-fileupload.jar,
 					 external:$libdir$/commons-httpclient-2.0.2.jar,
 					 external:$libdir$/commons-io.jar,
