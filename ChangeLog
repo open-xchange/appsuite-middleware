@@ -1,3 +1,9 @@
+* 2007-06-20 - marcus.klein@open-xchange.com
+
+ - Added option for showing external participants without email address.
+   CONFIG CHANGE: new file participant.properties and new path to this file in
+   system.properties.
+
 * 2007-06-12 - francisco.laguna@open-xchange.com
 
  - Bugfix #7683 OXEE: Use fully qualified hostname in direct link generation.
