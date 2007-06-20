@@ -290,10 +290,9 @@ public abstract class BasicCommandlineOptions {
         return setShortLongOpt(admp, shortopt, longopt, desc.toString(), hasarg, required);
     }
 
-    protected final Option getContextOption(final AdminParser admp) {
+    protected final void setContextOption(final AdminParser admp) {
         this.contextOption = setShortLongOpt(admp,OPT_NAME_CONTEXT_SHORT, OPT_NAME_CONTEXT_LONG, OPT_NAME_CONTEXT_DESCRIPTION, true, false);        
 //        retval.setArgName("Context ID");
-        return this.contextOption;
     }
     
     protected final Option getContextNameOption(final AdminParser admp) {
@@ -353,17 +352,12 @@ public abstract class BasicCommandlineOptions {
 
     /**
      * 
-     * @return Options containing context,adminuser,adminpass Option objects.
      */
     protected void setDefaultCommandLineOptions(final AdminParser admp){
-        
-        final Option[] options = new Option[3];
-        this.contextOption = getContextOption(admp);
-        this.adminUserOption = getAdminUserOption(admp); 
-        this.adminPassOption = getAdminPassOption(admp);
-        
-        options[0] = this.contextOption;
-        options[1] = this.adminUserOption;
-        options[2] = this.adminPassOption;
+        setContextOption(admp);
+        // TODO: Make setters of this two methods, in all situation this method is called there is now
+        // real need to get the Option
+        getAdminUserOption(admp); 
+        getAdminPassOption(admp);
     }
 }
