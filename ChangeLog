@@ -21,6 +21,7 @@
     hostname.
     CONFIG CHANGE: 2 additional options in ajp.properties and server.properties.
     Both have a fallback of "localhost".
+  - Bugfix #7289 Forwarding cookies from existing session to umin login.
 
 * 2007-06-12 - francisco.laguna@open-xchange.com
 

@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.ajax;
 
 import java.io.IOException;
@@ -68,7 +66,7 @@ import com.openexchange.groupware.integration.SetupLinkException;
 import com.openexchange.sessiond.SessionObject;
 
 /**
- * This class implements the servlet for authenticating the user at the 
+ * This class implements the servlet for authenticating the user at the
  * user admin interface an returns the URL for jumping to the user admin
  * interface to the GUI.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
@@ -79,11 +77,18 @@ public class ConfigJump extends SessionServlet {
      * Logger.
      */
     private static final Log LOG = LogFactory.getLog(ConfigJump.class);
-    
+
     /**
      * For serialization.
      */
     private static final long serialVersionUID = -6938253595032363499L;
+
+    /**
+     * Default constructor.
+     */
+    public ConfigJump() {
+        super();
+    }
 
     /**
      * {@inheritDoc}
@@ -97,16 +102,13 @@ public class ConfigJump extends SessionServlet {
             final SetupLink setupLink = SetupLink.getInstance();
             //protocol, host, port, userId, password
             String protocol = "http";
-            if( req.isSecure() ) {
+            if (req.isSecure()) {
                 protocol = "https";
             }
-            final URL url = setupLink.getLink(
-                    sessionObj.getContext().getContextId(),
-                    sessionObj.getUserlogin(),
-                    sessionObj.getPassword(),
-                    protocol,
-                    req.getServerName(),
-                    req.getServerPort());
+            final URL url = setupLink.getLink(sessionObj.getContext()
+                .getContextId(), sessionObj.getUserlogin(), sessionObj
+                .getPassword(), protocol, req.getServerName(), req
+                .getServerPort(), req.getCookies());
             response.setData(url);
         } catch (SetupLinkException e) {
             LOG.error(e.getMessage(), e);

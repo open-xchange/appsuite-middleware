@@ -60,7 +60,9 @@ import java.util.Properties;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.apache.commons.httpclient.Cookie;
 import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpState;
 import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.httpclient.methods.PostMethod;
 
@@ -102,26 +104,34 @@ public class ExpressImpl extends SetupLink {
             throw new SetupLinkException(new ConfigurationException(
                 ConfigurationException.Code.PROPERTY_MISSING, "URL"));
         }
-
-        final String userId = (String) values[1];
-        final String password = (String) values[2];
-        final String protocol = (String) values[3];
-        final String host = (String) values[4];
-        final int port = (Integer) values[5];
-        URL newUrlInst;
+        int pos = 1;
+        final String userId = (String) values[pos++];
+        final String password = (String) values[pos++];
+        final String protocol = (String) values[pos++];
+        final String host = (String) values[pos++];
+        final int port = (Integer) values[pos++];
+        final javax.servlet.http.Cookie[] cookies = (javax.servlet.http
+            .Cookie[]) values[pos++];
+        final URL urlInst;
+        final URL newUrlInst;
         try {
-            final URL urlInst = new URL(url);
+            urlInst = new URL(url);
             newUrlInst = new URL(protocol, host, port, urlInst.getPath());
         } catch (MalformedURLException e1) {
             throw new SetupLinkException(SetupLinkException.Code.MALFORMED_URL,
                     e1);
         }
         final HttpClient httpClient = new HttpClient();
+        final HttpState state = httpClient.getState();
+        for (javax.servlet.http.Cookie cookie : cookies) {
+            state.addCookie(new Cookie(urlInst.getHost(), cookie.getName(),
+                cookie.getValue(), urlInst.getPath(), -1, false));
+        }
         final PostMethod post = new PostMethod(url);
         post.addParameter(new NameValuePair("loginUsername", userId));
         post.addParameter(new NameValuePair("loginPassword", password));
         try {
-            httpClient.executeMethod(post);
+            httpClient.executeMethod(post.getHostConfiguration(), post, state);
             final String session = post.getResponseBodyAsString();
             return new URL(newUrlInst.toExternalForm() + AJPv13RequestHandler
                 .JSESSIONID_URI + session);
