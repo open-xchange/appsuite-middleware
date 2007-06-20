@@ -1063,7 +1063,7 @@ public class CalendarTest extends TestCase {
         oclp1.setFolderAdmin(true);
         OCLPermission oclp2 = new OCLPermission();
         oclp2.setEntity(uid2);
-        oclp2.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+        oclp2.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
         fo.setFolderName("testSharedFolder");
         fo.setParentFolderID(fid);
         fo.setModule(FolderObject.CALENDAR);
