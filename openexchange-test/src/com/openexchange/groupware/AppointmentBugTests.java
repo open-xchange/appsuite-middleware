@@ -504,7 +504,7 @@ public class AppointmentBugTests extends TestCase {
         oclp1.setFolderAdmin(true);
         OCLPermission oclp2 = new OCLPermission();
         oclp2.setEntity(uid2);
-        oclp2.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+        oclp2.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
         fo.setFolderName("testSharedFolder4717");
         fo.setParentFolderID(fid);
         fo.setModule(FolderObject.CALENDAR);
@@ -1694,5 +1694,76 @@ public class AppointmentBugTests extends TestCase {
         
  
      }
+
+     
+     
+    /*
+    1) User A creates a group appointment with User B & User C and a reminder 15 min
+    2) User B click on the calendar (outlook) and receives the appointment and a
+    reminder
+    3) User B clicks on the reminder (close)
+    */
+    public void testBug7883() throws Throwable {
+        String user2 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant3", "");        
+        int userid2 = resolveUser(user2);        
+        int fid = getPrivateFolder(userid);
+        int fid2 = getPrivateFolder(userid2);
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestIdentifier");
+        SessionObject so2 = SessionObjectWrapper.createSessionObject(userid2, getContext().getContextId(), "myTestIdentifier");
+        
+        CalendarDataObject cdao = new CalendarDataObject();
+        cdao.setContext(so.getContext());
+        cdao.setParentFolderID(fid);
+        cdao.setTitle("testBug7883");
+        cdao.setIgnoreConflicts(true);
+        CalendarTest.fillDatesInDao(cdao);
+        
+        UserParticipant userA = new UserParticipant();
+        userA.setIdentifier(userid);
+        userA.setAlarmMinutes(15);
+       
+        UserParticipant userB = new UserParticipant();
+        userB.setIdentifier(userid2);        
+        
+        cdao.setUsers(new UserParticipant[] { userA, userB });        
+        
+        CalendarSql csql = new CalendarSql(so);
+        CalendarSql csql2 = new CalendarSql(so2);
+        
+        csql.insertAppointmentObject(cdao);        
+        int object_id = cdao.getObjectID();       
+                
+        CalendarDataObject testobject = csql.getObjectById(object_id, fid);
+        
+        assertTrue("Check that userA has an alarm set in the cdao", testobject.containsAlarm());
+        assertEquals("Check that we got a 15", 15, testobject.getAlarm());          
+                
+        CalendarDataObject testobject2 = csql2.getObjectById(object_id, fid2);
+        assertTrue("Check that userB has no alarm set in the cdao", !testobject2.containsAlarm());
+        
+        SearchIterator si = csql.getModifiedAppointmentsInFolder(fid, cols, cdao.getLastModified());
+        boolean found = false;
+        while (si.hasNext()) {
+            CalendarDataObject tdao = (CalendarDataObject)si.next();
+            if (tdao.getTitle().equals("testBug7883")) {
+                found = true;
+                assertTrue("Check that userA has an alarm set in the cdao", tdao.containsAlarm());
+                assertEquals("Check that we got a 15", 15, tdao.getAlarm());                 
+            }
+        }
+        assertTrue("Found our object (userA)", found);
+        
+        SearchIterator si2 = csql2.getModifiedAppointmentsInFolder(fid2, cols, cdao.getLastModified());
+        found = false;
+        while (si2.hasNext()) {
+            CalendarDataObject tdao = (CalendarDataObject)si2.next();
+            if (tdao.getTitle().equals("testBug7883")) {
+                found = true;
+                assertTrue("Check that userB has an alarm set in the cdao", !tdao.containsAlarm());             
+            }
+        }
+        assertTrue("Found our object (userB)", found);        
+        
+    }
      
 }
