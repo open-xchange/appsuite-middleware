@@ -1,3 +1,10 @@
+* 2007-06-20 - marcus.klein@open-xchange.com
+
+  - Bugfix #7679: Added possibility to bind groupware ports to a configurable
+    hostname.
+    CONFIG CHANGE: 2 additional options in ajp.properties and server.properties.
+    Both have a fallback of "localhost".
+
 * 2007-06-12 - francisco.laguna@open-xchange.com
 
  - Bugfix #7683 OXEE: Use fully qualified hostname in direct link generation.

@@ -89,6 +89,8 @@ public final class ServerConfig extends AbstractConfig {
     private String defaultEncoding;
     
     private int jmxPort;
+    
+    private String jmxBindAddress;
 
     /**
      * Prevent instanciation.
@@ -161,6 +163,10 @@ public final class ServerConfig extends AbstractConfig {
 		 * JMX port
 		 */
 		jmxPort = Integer.parseInt(getPropertyInternal(Property.JMX_PORT.propertyName, "9999"));
+		/*
+		 * JMX bind address
+		 */
+		jmxBindAddress = getPropertyInternal(Property.JMX_BIND_ADDRESS.propertyName, "localhost");
     }
 
     /**
@@ -195,6 +201,9 @@ public final class ServerConfig extends AbstractConfig {
         	break;
         case JMX_PORT:
         	value = String.valueOf(SINGLETON.jmxPort);
+        	break;
+        case JMX_BIND_ADDRESS:
+        	value = SINGLETON.jmxBindAddress;
         	break;
         default:
             value = getProperty(property.propertyName);
@@ -283,7 +292,11 @@ public final class ServerConfig extends AbstractConfig {
         /**
          * MonitorJMXPort
          */
-        JMX_PORT("MonitorJMXPort");
+        JMX_PORT("MonitorJMXPort"),
+        /**
+         * MonitorJMXBindAddress
+         */
+        JMX_BIND_ADDRESS("MonitorJMXBindAddress");
 
         /**
          * Name of the property in the server.properties file.

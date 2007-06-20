@@ -52,9 +52,15 @@
 package com.openexchange.monitoring;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.lang.management.ManagementFactory;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.UnknownHostException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.rmi.server.RMISocketFactory;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -77,6 +83,34 @@ import com.sun.jmx.snmp.daemon.SnmpAdaptorServer;
 public abstract class AbstractAgent {
 	
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AbstractAgent.class);
+	
+	private static final class AbstractAgentSocketFactory extends RMISocketFactory implements Serializable {
+
+		/**
+		 * serialVersionUID
+		 */
+		private static final long serialVersionUID = 8324426326551371658L;
+
+		private final int backlog;
+
+		private final InetAddress bindAddress;
+
+		public AbstractAgentSocketFactory(final int backlog, final String bindAddr) throws UnknownHostException {
+			this.backlog = backlog < 1 ? 50 : backlog;
+			bindAddress = InetAddress.getByName(bindAddr);
+		}
+
+		@Override
+		public ServerSocket createServerSocket(final int port) throws IOException {
+			return new ServerSocket(port, backlog, bindAddress);
+		}
+
+		@Override
+		public Socket createSocket(final String host, final int port) throws IOException {
+			return new Socket(bindAddress, port);
+		}
+
+	}
 
 	protected MBeanServer mbs;
 
@@ -161,17 +195,21 @@ public abstract class AbstractAgent {
 	 * add a RMI registry
 	 * 
 	 * @param port
+	 * @param bindAddr
 	 */
-	protected void addRMIRegistry(final int port) {
+	protected void addRMIRegistry(final int port, final String bindAddr) {
 		Registry registry = null;
 		try {
-			registry = LocateRegistry.createRegistry(port);
+			final AbstractAgentSocketFactory socketFactory = new AbstractAgentSocketFactory(0, bindAddr);
+			registry = LocateRegistry.createRegistry(port, socketFactory, socketFactory);
 		} catch (Exception e) {
-			printTrace("Can not create a RMI registry on port " + port);
+			printTrace(new StringBuilder(200).append("Can not create a RMI registry on port ").append(port).append(
+					" and bind address ").append(bindAddr).append(": ").append(e.getMessage()).toString());
 			return;
 		}
 		registries.put(Integer.valueOf(port), registry);
-		printTrace("RMI registry created on port " + port);
+		printTrace(new StringBuilder(200).append("RMI registry created on port ").append(port).append(
+				" and bind address ").append(bindAddr).toString());
 	}
 
 	/**

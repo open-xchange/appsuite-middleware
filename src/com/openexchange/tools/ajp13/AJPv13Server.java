@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.tools.ajp13;
 
 import java.io.File;
@@ -79,6 +77,18 @@ public class AJPv13Server implements Runnable {
 
 	private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(AJPv13Server.class);
+
+	/**
+	 * <p>
+	 * The value 0 used in constructor
+	 * <code>ServerSocket(int port, int backlog, InetAddress bindAddr)</code>
+	 * causes to fall back to default value for backlog
+	 * <p>
+	 * The <code>backlog</code> argument must be a positive value greater than
+	 * 0. If the value passed if equal or less than 0, then the default value
+	 * will be assumed
+	 */
+	private static final int DEFAULT_BACKLOG = 0;
 
 	public static final int AJP13_PORT = AJPv13Config.getAJPPort();
 
@@ -113,9 +123,9 @@ public class AJPv13Server implements Runnable {
 			 */
 			sa = MonitorAgent.getDomainAndName(ajpv13ListenerMonitor.getClass().getName(), true);
 			MonitorAgent.registerMBeanGlobal(new ObjectName(sa[0], "name", sa[1]), ajpv13ListenerMonitor);
-		} catch (MalformedObjectNameException e) {
+		} catch (final MalformedObjectNameException e) {
 			LOG.error(e.getMessage(), e);
-		} catch (NullPointerException e) {
+		} catch (final NullPointerException e) {
 			LOG.error(e.getMessage(), e);
 		}
 	}
@@ -153,8 +163,8 @@ public class AJPv13Server implements Runnable {
 	private AJPv13Server() throws AJPv13Exception {
 		super();
 		try {
-			serverSocket = new ServerSocket(AJP13_PORT);
-		} catch (IOException ex) {
+			serverSocket = new ServerSocket(AJP13_PORT, DEFAULT_BACKLOG, AJPv13Config.getAJPBindAddress());
+		} catch (final IOException ex) {
 			throw new AJPv13Exception(AJPCode.STARTUP_ERROR, ex, Integer.valueOf(AJP13_PORT));
 		}
 	}
@@ -195,9 +205,8 @@ public class AJPv13Server implements Runnable {
 		for (int i = 0; i < threadArr.length; i++) {
 			try {
 				threadArr[i].interrupt();
-			} catch (Exception e) {
-				LOG.error(sb.append(threadArr[i].getName()).append(" could NOT be interrupted")
-						.toString(), e);
+			} catch (final Exception e) {
+				LOG.error(sb.append(threadArr[i].getName()).append(" could NOT be interrupted").toString(), e);
 				sb.setLength(0);
 			} finally {
 				threadArr[i] = null;
@@ -242,7 +251,7 @@ public class AJPv13Server implements Runnable {
 			}
 		}
 	}
-	
+
 	public final boolean isRunning() {
 		return running;
 	}
@@ -274,7 +283,7 @@ public class AJPv13Server implements Runnable {
 				}
 				final long useTime = System.currentTimeMillis() - start;
 				ajpv13ServerThreadsMonitor.addUseTime(useTime);
-			} catch (IOException ex) {
+			} catch (final IOException ex) {
 				LOG.error(ex.getMessage(), ex);
 			}
 		}
@@ -283,7 +292,7 @@ public class AJPv13Server implements Runnable {
 	public static void main(final String args[]) {
 		try {
 			new AJPv13Server().startServer();
-		} catch (AJPv13Exception e) {
+		} catch (final AJPv13Exception e) {
 			LOG.error(e.getMessage(), e);
 		}
 	}

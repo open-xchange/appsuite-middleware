@@ -75,6 +75,8 @@ public class MonitorAgent extends AbstractAgent {
 	
 	private static final int JMX_PORT = ServerConfig.getInteger(Property.JMX_PORT);
 	
+	private static final String JMX_BIND_ADDR = ServerConfig.getProperty(Property.JMX_BIND_ADDRESS);
+	
 	private static MonitorAgent instance;
 	
 	//private static MBeanServer alternativeMBeanServer;
@@ -179,21 +181,21 @@ public class MonitorAgent extends AbstractAgent {
 		}
 		try {
 			/*
-			 * Creates and exports a registry instance on the local host
-			 * that accepts requests on the specified port.
+			 * Creates and exports a registry instance on the local host that
+			 * accepts requests on the specified port.
 			 */
-			addRMIRegistry(JMX_PORT);
+			addRMIRegistry(JMX_PORT, JMX_BIND_ADDR);
 			/*
 			 * Create a JMX connector and start it
 			 */
-			final String ownIP = getOwnIP();
+			final String ip = getIPAddress(JMX_BIND_ADDR);
 			jmxURL = new StringBuilder(100).append("service:jmx:rmi:///jndi/rmi://").append(
-					ownIP == null ? "localhost" : ownIP).append(':').append(JMX_PORT).append("/server").toString();
+					ip == null ? "localhost" : ip).append(':').append(JMX_PORT).append("/server").toString();
 			addConnector(jmxURL);
 			if (LOG.isInfoEnabled()) {
 				LOG.info(new StringBuilder(100).append(
-						"\n\n\tUse the JConsole or the MC4J to connect the MBeanServer with this url: ")
-						.append(jmxURL).append("\n").toString());
+						"\n\n\tUse the JConsole or the MC4J to connect the MBeanServer with this url: ").append(jmxURL)
+						.append("\n").toString());
 			}
 			/*
 			 * Create Beans and register them
@@ -241,15 +243,16 @@ public class MonitorAgent extends AbstractAgent {
 		running = false;
 	}
 	
-	private String getOwnIP() {
-		String ip = null;
-		try {
-			final InetAddress myAddr = InetAddress.getLocalHost();
-			ip = myAddr.getHostAddress();
-		} catch (UnknownHostException ex) {
-			LOG.error(ex.getMessage(), ex);
+	private static final String getIPAddress(final String host) {
+		if (host == null) {
+			return null;
 		}
-		return ip;
+		try {
+			return InetAddress.getByName(host).getHostAddress();
+		} catch (UnknownHostException e) {
+			LOG.error(e.getMessage(), e);
+			return null;
+		}
 	}
 	
 	private static final String ERR_REGISTRATION = "MBean registration denied: MonitorAgent is not running";

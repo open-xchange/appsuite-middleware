@@ -53,6 +53,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.util.Properties;
 
 import com.openexchange.configuration.SystemConfig;
@@ -106,6 +107,8 @@ public class AJPv13Config {
 	private static boolean checkMagicBytesStrict;
 
 	private static String servletConfigs;
+	
+	private static InetAddress ajpBindAddr;
 
 	static {
 		final Properties ajpProperties = new Properties();
@@ -238,6 +241,10 @@ public class AJPv13Config {
 					LOG.warn(servletConfigsFile + " does not exist or is not a directory");
 				}
 				/*
+				 * AJP_BIND_ADDR
+				 */
+				ajpBindAddr = InetAddress.getByName(ajpProperties.getProperty("AJP_BIND_ADDR", "localhost"));
+				/*
 				 * Log info
 				 */
 				logInfo();
@@ -270,7 +277,8 @@ public class AJPv13Config {
 			logBuilder.append("\tSERVLET_POOL_SIZE=").append(servletPoolSize).append('\n');
 			logBuilder.append("\tAJP_JVM_ROUTE=").append(jvmRoute).append('\n');
 			logBuilder.append("\tAJP_CHECK_MAGIC_BYTES_STRICT=").append(checkMagicBytesStrict).append('\n');
-			logBuilder.append("\tAJP_SERVLET_CONFIG_DIR=").append(servletConfigs);
+			logBuilder.append("\tAJP_SERVLET_CONFIG_DIR=").append(servletConfigs).append('\n');
+			logBuilder.append("\tAJP_BIND_ADDR=").append(ajpBindAddr.toString());
 			LOG.info(logBuilder.toString());
 		}
 	}
@@ -349,6 +357,10 @@ public class AJPv13Config {
 
 	public static final String getServletConfigs() {
 		return servletConfigs;
+	}
+	
+	public static final InetAddress getAJPBindAddress() {
+		return ajpBindAddr;
 	}
 
 }
