@@ -110,7 +110,7 @@ public class Search extends ContextAbtraction {
     }
 
     private void setOptions(final AdminParser parser) {
-        setDefaultCommandLineOptions(parser);
+        setDefaultCommandLineOptionsWithoutContextID(parser);
         setSearchOption(parser, false);
     }
 

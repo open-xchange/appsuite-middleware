@@ -21,7 +21,6 @@ public abstract class ContextAbtraction extends UserAbstraction {
     
     protected Option searchOption = null;
     protected Option commonIDOption = null;
-    protected Option contextIDOption = null;
     protected Option maintenanceReasonIDOption = null;
     protected Option filestoreContextQuotaOption = null;
 
@@ -33,12 +32,7 @@ public abstract class ContextAbtraction extends UserAbstraction {
         this.commonIDOption = setShortLongOpt(parser, OPT_NAME_COMMON_ID_SHORT,OPT_NAME_COMMON_ID_LONG,"Object Id",true, required);
     }
     
-    protected void setContextIDOption(final AdminParser parser,final boolean required ){
-        this.contextIDOption = setShortLongOpt(parser, OPT_NAME_CONTEXT_SHORT,OPT_NAME_CONTEXT_LONG,OPT_NAME_CONTEXT_DESCRIPTION,true, required);
-    }
-    
-    @Override
-    protected void setDefaultCommandLineOptions(final AdminParser parser){          
+    protected void setDefaultCommandLineOptionsWithoutContextID(final AdminParser parser){          
         
         getAdminUserOption(parser);
         getAdminPassOption(parser);        

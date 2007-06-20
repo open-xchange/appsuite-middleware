@@ -81,9 +81,7 @@ public class DisableAll extends ContextAbtraction {
     }
 
     private void setOptions(final AdminParser parser) {
-
-        setDefaultCommandLineOptions(parser);
-
+        setDefaultCommandLineOptionsWithoutContextID(parser);
         setMaintenanceReasodIDOption(parser, true);
     }
 

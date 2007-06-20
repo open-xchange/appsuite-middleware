@@ -30,7 +30,7 @@ public class Delete extends ContextAbtraction {
             parser.ownparse(args2);
             final Context ctx = new Context();
 
-            ctx.setID(Integer.parseInt((String) parser.getOptionValue(contextIDOption)));
+            ctx.setID(Integer.parseInt((String) parser.getOptionValue(this.contextOption)));
 
             final Credentials auth = new Credentials((String) parser.getOptionValue(adminUserOption), (String) parser.getOptionValue(adminPassOption));
 
@@ -88,11 +88,7 @@ public class Delete extends ContextAbtraction {
     }
 
     private void setOptions(AdminParser parser) {
-
         setDefaultCommandLineOptions(parser);
-
-        setContextIDOption(parser, true);
-
     }
 
     protected void sysexit(final int exitcode) {

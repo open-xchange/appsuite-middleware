@@ -20,7 +20,7 @@ public class EnableAll extends ContextAbtraction {
 
         final AdminParser parser = new AdminParser("enableall");
 
-        setDefaultCommandLineOptions(parser);
+        setDefaultCommandLineOptionsWithoutContextID(parser);
         try {
 
             parser.ownparse(args2);
