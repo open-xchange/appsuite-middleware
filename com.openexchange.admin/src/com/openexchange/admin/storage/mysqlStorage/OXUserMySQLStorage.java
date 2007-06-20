@@ -218,6 +218,24 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.close();
             }
 
+            if (usrdata.getImapLogin() == null && usrdata.isImapLoginset() ) {
+                stmt = write_ox_con
+                .prepareStatement("UPDATE user SET  imapLogin = ? WHERE cid = ? AND id = ?");
+                stmt.setNull(1, java.sql.Types.VARCHAR);
+                stmt.setInt(2, context_id);
+                stmt.setInt(3, user_id);
+                stmt.executeUpdate();
+                stmt.close();
+            } else {
+                stmt = write_ox_con
+                        .prepareStatement("UPDATE user SET  imapLogin = ? WHERE cid = ? AND id = ?");
+                stmt.setString(1, usrdata.getImapLogin());
+                stmt.setInt(2, context_id);
+                stmt.setInt(3, user_id);
+                stmt.executeUpdate();
+                stmt.close();
+            }
+
             if (usrdata.getSmtpServer() != null) {
                 stmt = write_ox_con
                         .prepareStatement("UPDATE user SET  smtpserver = ? WHERE cid = ? AND id = ?");
@@ -674,7 +692,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             try {
 
                 stmt = write_ox_con
-                        .prepareStatement("INSERT INTO user (cid,id,userPassword,passwordMech,shadowLastChange,mail,timeZone,preferredLanguage,mailEnabled,imapserver,smtpserver,contactId,homeDirectory,uidNumber,gidNumber,loginShell) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+                        .prepareStatement("INSERT INTO user (cid,id,userPassword,passwordMech,shadowLastChange,mail,timeZone,preferredLanguage,mailEnabled,imapserver,smtpserver,contactId,homeDirectory,uidNumber,gidNumber,loginShell,imapLogin) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
                 stmt.setInt(1, ctx.getIdAsInt().intValue());
                 stmt.setInt(2, internal_user_id);
                 stmt.setString(3, passwd);
@@ -756,6 +774,12 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
                 stmt.setString(16,LOGINSHELL);
 
+                if(usrdata.getImapLogin() != null ) {
+                    stmt.setString(17,usrdata.getImapLogin());
+                } else {
+                    stmt.setNull(17, java.sql.Types.VARCHAR);
+                }
+                
                 stmt.executeUpdate();
                 stmt.close();
 
