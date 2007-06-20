@@ -243,7 +243,9 @@ public class AJPv13Config {
 				/*
 				 * AJP_BIND_ADDR
 				 */
-				ajpBindAddr = InetAddress.getByName(ajpProperties.getProperty("AJP_BIND_ADDR", "localhost"));
+				final String bindAddr = ajpProperties.getProperty("AJP_BIND_ADDR", "localhost");
+				ajpBindAddr = bindAddr.charAt(0) == '*' ? null : InetAddress.getByName(ajpProperties.getProperty(
+						"AJP_BIND_ADDR", "localhost"));
 				/*
 				 * Log info
 				 */
@@ -278,7 +280,7 @@ public class AJPv13Config {
 			logBuilder.append("\tAJP_JVM_ROUTE=").append(jvmRoute).append('\n');
 			logBuilder.append("\tAJP_CHECK_MAGIC_BYTES_STRICT=").append(checkMagicBytesStrict).append('\n');
 			logBuilder.append("\tAJP_SERVLET_CONFIG_DIR=").append(servletConfigs).append('\n');
-			logBuilder.append("\tAJP_BIND_ADDR=").append(ajpBindAddr.toString());
+			logBuilder.append("\tAJP_BIND_ADDR=").append(ajpBindAddr == null ? "* (all interfaces)" : ajpBindAddr.toString());
 			LOG.info(logBuilder.toString());
 		}
 	}
@@ -359,6 +361,10 @@ public class AJPv13Config {
 		return servletConfigs;
 	}
 	
+	/**
+	 * @return an instance if <code>java.net.InetAddress</code> if property
+	 *         AJP_BIND_ADDR is different to "*"; <code>null</code> otherwise
+	 */
 	public static final InetAddress getAJPBindAddress() {
 		return ajpBindAddr;
 	}

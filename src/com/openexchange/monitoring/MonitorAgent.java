@@ -188,7 +188,7 @@ public class MonitorAgent extends AbstractAgent {
 			/*
 			 * Create a JMX connector and start it
 			 */
-			final String ip = getIPAddress(JMX_BIND_ADDR);
+			final String ip = getIPAddress(JMX_BIND_ADDR.charAt(0) == '*' ? "localhost" : JMX_BIND_ADDR);
 			jmxURL = new StringBuilder(100).append("service:jmx:rmi:///jndi/rmi://").append(
 					ip == null ? "localhost" : ip).append(':').append(JMX_PORT).append("/server").toString();
 			addConnector(jmxURL);

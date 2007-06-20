@@ -1,3 +1,9 @@
+* 2007-06-20 - thorben.betten@open-xchange.com
+
+ - Bugfix #7679: Extended to allow special value "*" that will initialize
+   the affected server sockets (AJP & JMX) with bind address left to null,
+   thus it binds to all interfaces.
+
 * 2007-06-20 - marcus.klein@open-xchange.com
 
   - Bugfix #7679: Added possibility to bind groupware ports to a configurable

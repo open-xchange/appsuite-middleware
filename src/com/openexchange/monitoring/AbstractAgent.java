@@ -97,7 +97,7 @@ public abstract class AbstractAgent {
 
 		public AbstractAgentSocketFactory(final int backlog, final String bindAddr) throws UnknownHostException {
 			this.backlog = backlog < 1 ? 50 : backlog;
-			bindAddress = InetAddress.getByName(bindAddr);
+			bindAddress = bindAddr.charAt(0) == '*' ? null : InetAddress.getByName(bindAddr);
 		}
 
 		@Override
@@ -107,7 +107,7 @@ public abstract class AbstractAgent {
 
 		@Override
 		public Socket createSocket(final String host, final int port) throws IOException {
-			return new Socket(bindAddress, port);
+			return new Socket(bindAddress == null ? InetAddress.getByName(host) : bindAddress, port);
 		}
 
 	}
