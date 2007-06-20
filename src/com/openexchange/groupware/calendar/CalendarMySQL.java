@@ -1367,7 +1367,9 @@ class CalendarMySQL implements CalendarSqlImp {
                 final int alarm = rs.getInt(6);
                 if (!rs.wasNull()) {
                     up.setAlarmMinutes(alarm);
-                    cdao.setAlarm(up.getAlarmMinutes());
+                    if (up.getIdentifier() == uid && up.getAlarmMinutes() >= 0) {
+                        cdao.setAlarm(up.getAlarmMinutes());
+                    }
                 }
                 if (participants != null) {
                     participants.add(up);
@@ -1537,6 +1539,7 @@ class CalendarMySQL implements CalendarSqlImp {
             // from cdao and edao and then we force an insert!
             clone = CalendarRecurringCollection.cloneObjectForRecurringException(cdao, edao);
             try {
+                cdao.setRecurrenceCalculator(edao.getRecurrenceCalculator());
                 insertAppointment(clone, writecon, so);
                 CalendarCommonCollection.removeFieldsFromObject(cdao);
                 cdao.setRecurrence(edao.getRecurrence());
@@ -2091,7 +2094,7 @@ class CalendarMySQL implements CalendarSqlImp {
                     pd.setInt(1, cdao.getObjectID());
                     pd.setInt(2, cid);
                     pd.setInt(3, deleted_userparticipants[a].getIdentifier());
-                    pd.addBatch();          
+                    pd.addBatch();
                     java.util.Date calc_date = null;
                     java.util.Date end_date = null;
                     if (cdao.containsStartDate()) {
@@ -2103,7 +2106,7 @@ class CalendarMySQL implements CalendarSqlImp {
                         end_date = cdao.getEndDate();
                     } else {
                         end_date = edao.getEndDate();
-                    }                    
+                    }
                     changeReminder(cdao.getObjectID(), uid, -1, cdao.getContext(), cdao.isSequence(true), end_date, new Date(calc_date.getTime()+deleted_userparticipants[a].getAlarmMinutes()), CalendarOperation.DELETE);
                     new_deleted.add(deleted_userparticipants[a]);
                 }
