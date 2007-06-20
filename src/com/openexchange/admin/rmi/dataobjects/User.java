@@ -185,6 +185,9 @@ public class User implements Serializable, Cloneable {
     private String smtpServer;
     private boolean smtpServerset = false;
     
+    private String imapLogin;
+    private boolean imapLoginset = false;
+
     private String instant_messenger1;
     private boolean instant_messenger1set = false;
 
@@ -599,6 +602,10 @@ public class User implements Serializable, Cloneable {
 
     public boolean isImapServerset() {
         return imapServerset;
+    }
+
+    public boolean isImapLoginset() {
+        return imapLoginset;
     }
 
     public boolean isInfoset() {
@@ -1277,6 +1284,17 @@ public class User implements Serializable, Cloneable {
         this.imapServer = imapServer;
     }
 
+    public void setImapLogin(final String imapLogin) {
+        if(null == imapServer) {
+            this.imapLoginset = true;
+        }
+        this.imapLogin = imapLogin;
+    }
+    
+    public String getImapLogin() {
+        return this.imapLogin;
+    }
+    
     public String getSmtpServer() {
         return smtpServer;
     }
