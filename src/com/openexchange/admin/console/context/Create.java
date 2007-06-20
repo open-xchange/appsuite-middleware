@@ -96,7 +96,6 @@ public class Create extends ContextAbtraction {
     private void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptions(parser);
 
-        setContextIDOption(parser, true);
         setContextQuotaOption(parser, true);
 
         setMandatoryOptions(parser);

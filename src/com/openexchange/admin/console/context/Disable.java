@@ -31,7 +31,7 @@ public class Disable extends ContextAbtraction {
             parser.ownparse(args2);
             final Context ctx = new Context();
 
-            ctx.setID(Integer.parseInt((String) parser.getOptionValue(this.contextIDOption)));
+            ctx.setID(Integer.parseInt((String) parser.getOptionValue(this.contextOption)));
 
             final Credentials auth = new Credentials((String) parser.getOptionValue(this.adminUserOption), (String) parser.getOptionValue(this.adminPassOption));
 
@@ -91,9 +91,6 @@ public class Disable extends ContextAbtraction {
 
     private void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptions(parser);
-
-        setContextIDOption(parser, true);
-
         setMaintenanceReasodIDOption(parser, true);
 
     }

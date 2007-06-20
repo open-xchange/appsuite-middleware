@@ -39,7 +39,7 @@ public class MoveContextDatabase extends ContextAbtraction {
             parser.ownparse(args2);
             final Context ctx = new Context();
 
-            ctx.setID(Integer.parseInt((String) parser.getOptionValue(this.contextIDOption)));
+            ctx.setID(Integer.parseInt((String) parser.getOptionValue(this.contextOption)));
 
             final Credentials auth = new Credentials((String) parser.getOptionValue(this.adminUserOption), (String) parser.getOptionValue(this.adminPassOption));
 
@@ -103,13 +103,10 @@ public class MoveContextDatabase extends ContextAbtraction {
     }
 
     private void setOptions(final AdminParser parser) {
-
         setDefaultCommandLineOptions(parser);
-        setContextIDOption(parser, true);
         setMaintenanceReasodIDOption(parser, true);
 
         this.targetDatabaseIDOption = setShortLongOpt(parser, OPT_DATABASE_SHORT, OPT_DATABASE_LONG, "Target database id", true, true);
-
     }
 
     protected void sysexit(final int exitcode) {

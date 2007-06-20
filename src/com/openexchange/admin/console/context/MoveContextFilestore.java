@@ -38,7 +38,7 @@ public class MoveContextFilestore extends ContextAbtraction {
             parser.ownparse(args2);
             final Context ctx = new Context();
 
-            ctx.setID(Integer.parseInt((String) parser.getOptionValue(this.contextIDOption)));
+            ctx.setID(Integer.parseInt((String) parser.getOptionValue(this.contextOption)));
 
             final Credentials auth = new Credentials((String) parser.getOptionValue(this.adminUserOption), (String) parser.getOptionValue(this.adminPassOption));
 
@@ -101,9 +101,6 @@ public class MoveContextFilestore extends ContextAbtraction {
 
     private void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptions(parser);
-
-        // mandatory context id
-        setContextIDOption(parser, true);
         setMaintenanceReasodIDOption(parser, true);
         this.targetFilestoreIDOption = setShortLongOpt(parser, OPT_FILESTORE_SHORT, OPT_FILESTORE_LONG, "Target filestore id", true, true);
 
