@@ -1285,7 +1285,7 @@ public class User implements Serializable, Cloneable {
     }
 
     public void setImapLogin(final String imapLogin) {
-        if(null == imapServer) {
+        if(null == imapLogin) {
             this.imapLoginset = true;
         }
         this.imapLogin = imapLogin;
