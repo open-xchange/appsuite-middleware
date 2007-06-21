@@ -1,4 +1,4 @@
-* 2007-06-20 - marcus.klein@open-xchange.com
+* 2007-06-21 - marcus.klein@open-xchange.com
 
   - Bugfix #7670: Check in session check if the user is still enabled.
   - Bugfix #7901: Bad exception is catched when underlying user object is
@@ -28,6 +28,9 @@
     CONFIG CHANGE: 2 additional options in ajp.properties and server.properties.
     Both have a fallback of "localhost".
   - Bugfix #7289 Forwarding cookies from existing session to umin login.
+  - Added option for showing external participants without email address.
+    CONFIG CHANGE: new file participant.properties and new path to this file in
+    system.properties.
 
 * 2007-06-12 - francisco.laguna@open-xchange.com
 

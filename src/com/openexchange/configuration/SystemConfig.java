@@ -205,7 +205,11 @@ public final class SystemConfig extends AbstractConfig {
         /**
          * configjump.properties.
          */
-        ConfigJumpConf("ConfigJumpConf");
+        ConfigJumpConf("ConfigJumpConf"),
+        /**
+         * participant.properties.
+         */
+        PARTICIPANT("Participant");
 
         /**
          * Name of the property in the server.properties file.

@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.tools.conf;
 
 import java.io.File;
@@ -102,7 +100,7 @@ public abstract class AbstractConfig {
     protected String getPropertyInternal(final String key, final String def) {
         return props.getProperty(key, def);
     }
-    
+
     /**
      * Returns <code>true</code> if and only if the property named by the
      * argument exists and is equal to the string <code>"true"</code>. The test
@@ -124,13 +122,25 @@ public abstract class AbstractConfig {
      * @param def default value to return if the property isn't set.
      * @return the boolean value of the property.
      */
-    protected boolean getBooleanInternal(final String key, final boolean def) {
-        boolean retval = def;
-        final String value = getPropertyInternal(key);
-        if (null != value) {
-            retval = Boolean.parseBoolean(value);
+    protected final boolean getBooleanInternal(final String key,
+        final boolean def) {
+        return getBooleanInternal(key, Boolean.valueOf(def).toString());
+    }
+
+    /**
+     * Returns the boolean value of the property. If the propery isn't set the
+     * def arguments is returned.
+     * @param key the property name.
+     * @param def default value to return if the property isn't set.
+     * @return the boolean value of the property.
+     */
+    protected final boolean getBooleanInternal(final String key,
+        final String def) {
+        String value = getPropertyInternal(key);
+        if (null == value) {
+            value = def;
         }
-        return retval;
+        return Boolean.parseBoolean(value);
     }
 
     /**
