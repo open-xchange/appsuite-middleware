@@ -56,6 +56,7 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.TimeZone;
 
@@ -67,6 +68,7 @@ import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.dataobjects.User.PASSWORDMECH;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
@@ -114,10 +116,20 @@ public class List extends UserAbstraction {
             
             final User[] newusers = oxu.getData(ctx, users.toArray(new User[users.size()]), auth);
             
+            
+//          map user data to corresponding module access
+            HashMap<Integer, UserModuleAccess> usr2axs = new HashMap<Integer, UserModuleAccess>();
+            
+            for (User user : newusers) {      
+                // fetch module access for every user
+                usr2axs.put(user.getId(), oxu.getModuleAccess(ctx, user.getId(), auth));
+            }           
+            
+            
             if (null != parser.getOptionValue(this.csvOutputOption)) {
-                precsvinfos(newusers);
+                precsvinfos(newusers,usr2axs);
             } else {
-                sysoutOutput(newusers);
+                sysoutOutput(newusers,usr2axs);
             }
             sysexit(0);
         } catch (final java.rmi.ConnectException neti) {
@@ -185,7 +197,7 @@ public class List extends UserAbstraction {
      * @throws IllegalArgumentException 
      * 
      */
-    private void precsvinfos(final User[] users) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+    private void precsvinfos(final User[] users,final HashMap<Integer, UserModuleAccess> access_map) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
         final Method[] methods = User.class.getMethods();
         final ArrayList<MethodAndNames> methArrayList = getGetters(methods, new HashSet<String>());
         
@@ -193,6 +205,26 @@ public class List extends UserAbstraction {
         for (final MethodAndNames methodandnames : methArrayList) {
             columnnames.add(methodandnames.getName());
         }
+        
+        //      module access columns
+        columnnames.add(UserAbstraction.OPT_ACCESS_CALENDAR);
+        columnnames.add(UserAbstraction.OPT_ACCESS_CONTACTS);
+        columnnames.add(UserAbstraction.OPT_ACCESS_DELEGATE_TASKS);
+        columnnames.add(UserAbstraction.OPT_ACCESS_EDIT_PUBLIC_FOLDERS);
+        columnnames.add(UserAbstraction.OPT_ACCESS_FORUM);
+        columnnames.add(UserAbstraction.OPT_ACCESS_ICAL);
+        columnnames.add(UserAbstraction.OPT_ACCESS_INFOSTORE);
+        columnnames.add(UserAbstraction.OPT_ACCESS_PINBOARD_WRITE);
+        columnnames.add(UserAbstraction.OPT_ACCESS_PROJECTS);
+        columnnames.add(UserAbstraction.OPT_ACCESS_READCREATE_SHARED_FOLDERS);
+        columnnames.add(UserAbstraction.OPT_ACCESS_RSS_BOOKMARKS);
+        columnnames.add(UserAbstraction.OPT_ACCESS_RSS_PORTAL);
+        columnnames.add(UserAbstraction.OPT_ACCESS_SYNCML);
+        columnnames.add(UserAbstraction.OPT_ACCESS_TASKS);
+        columnnames.add(UserAbstraction.OPT_ACCESS_VCARD);
+        columnnames.add(UserAbstraction.OPT_ACCESS_WEBDAV);
+        columnnames.add(UserAbstraction.OPT_ACCESS_WEBDAV_XML);
+        columnnames.add(UserAbstraction.OPT_ACCESS_WEBMAIL);
         
         final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
         for (final User user : users) {
@@ -215,15 +247,38 @@ public class List extends UserAbstraction {
                     datarow.add(timezonetostring((TimeZone)methodandnames.getMethod().invoke(user, (Object[]) null)));
                 }
             }
+            
+//          add module access 
+            UserModuleAccess access = access_map.get(user.getId());
+            datarow.add(String.valueOf(access.getCalendar()));
+            datarow.add(String.valueOf(access.getContacts()));
+            datarow.add(String.valueOf(access.getDelegateTask()));
+            datarow.add(String.valueOf(access.getEditPublicFolders()));
+            datarow.add(String.valueOf(access.getForum()));
+            datarow.add(String.valueOf(access.getIcal()));
+            datarow.add(String.valueOf(access.getInfostore()));
+            datarow.add(String.valueOf(access.getPinboardWrite()));
+            datarow.add(String.valueOf(access.getProjects()));
+            datarow.add(String.valueOf(access.getReadCreateSharedFolders()));
+            datarow.add(String.valueOf(access.getRssBookmarks()));
+            datarow.add(String.valueOf(access.getRssPortal()));
+            datarow.add(String.valueOf(access.getSyncml()));
+            datarow.add(String.valueOf(access.getTasks()));
+            datarow.add(String.valueOf(access.getVcard()));
+            datarow.add(String.valueOf(access.getWebdav()));
+            datarow.add(String.valueOf(access.getWebdavXml()));
+            datarow.add(String.valueOf(access.getWebmail()));
+            
             data.add(datarow);
             printExtensionsError(user);
         }
         doCSVOutput(columnnames, data);
     }
 
-    private final void sysoutOutput(final User[] users) {
+    private final void sysoutOutput(final User[] users,final HashMap<Integer, UserModuleAccess> user_access) {
         for (final User user : users) {
             System.out.println(user.toString());
+            System.out.println(user_access.get(user.getId()).toString());
             printExtensionsError(user);
         }
     }
