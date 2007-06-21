@@ -46,17 +46,31 @@ public class Search extends ContextAbtraction {
             final ArrayList<String> columns = new ArrayList<String>();
             columns.add("id");
             columns.add("name");
-            columns.add("enabeld");
+            columns.add("enabled");
             columns.add("filestore_id");
             columns.add("filestore_name");
+            columns.add("used_quota");
+            columns.add("max_quota");
 
             final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
 
+            final String HEADER_FORMAT = "%-7s %-5s %-20s %-10s %-7s %-7s %s\n";
+            final String VALUE_FORMAT  = "%-7s %-5s %-20s %-10s %-7s %-7s %s\n";
+            if(parser.getOptionValue(this.csvOutputOption) == null) {
+                System.out.format(HEADER_FORMAT, "cid", "fid", "fname", "enabled", "qmax", "qused", "name");
+            }
             for (final Context ctx_tmp : ctxs) {
                 if (parser.getOptionValue(this.csvOutputOption) != null) {
                     data.add(makeCSVData(ctx_tmp));
                 } else {
-                    System.out.println(ctx_tmp.toString());
+                    System.out.format(VALUE_FORMAT,
+                            ctx_tmp.getIdAsInt(),
+                            ctx_tmp.getFilestore().getId(),
+                            ctx_tmp.getFilestore().getName(),
+                            ctx_tmp.isEnabled(),
+                            ctx_tmp.getMaxQuota(),
+                            ctx_tmp.getUsedQuota(),
+                            ctx_tmp.getName());
                 }
             }
 
@@ -144,6 +158,17 @@ public class Search extends ContextAbtraction {
             srv_data.add(null);
         }
 
+        if(ctx.getUsedQuota() != null ) {
+            srv_data.add(String.valueOf(ctx.getUsedQuota()));
+        } else {
+            srv_data.add(null);
+        }
+
+        if(ctx.getMaxQuota() != null ) {
+            srv_data.add(String.valueOf(ctx.getMaxQuota()));
+        } else {
+            srv_data.add(null);
+        }
         return srv_data;
     }
 
