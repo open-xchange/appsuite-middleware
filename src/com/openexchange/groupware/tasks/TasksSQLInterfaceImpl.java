@@ -365,6 +365,7 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
         if (task.containsAlarm()) {
             updateAlarm(task, userId);
         }
+        // TODO optimize multiple task load.
         try {
             final Task reload = storage.selectTask(ctx, taskId,
                 StorageType.ACTIVE);
