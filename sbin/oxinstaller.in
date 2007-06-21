@@ -93,10 +93,13 @@ CONFIGDB_WRITE_PORT=$CONFIGDB_READ_PORT
 CONFIGDB_WRITE_PORT_LONG=configdb-writeport
 CONFIGDB_DBNAME=configdb
 CONFIGDB_DBNAME_LONG=configdb-dbname
+MASTER_PASS=
+MASTER_PASS_LONG=master-pass
+MASTER_USER=oxadminmaster
+MASTER_USER_LONG=master-user
 
-
-MUSTOPTS="SERVER_NAME CONFIGDB_PASS"
-LONGOPTS='$SERVER_NAME_LONG:,$IMAP_SERVER_LONG:,$IMAP_LOGIN_TYPE_LONG:,$CONFIGDB_USER_LONG:,$CONFIGDB_PASS_LONG:,$CONFIGDB_POOL_LONG:,$CONFIGDB_READ_LONG:,$CONFIGDB_WRITE_LONG:,$CONFIGDB_DBNAME_LONG:,$LOGIN_IMPL_TYPE_LONG:,$SERVER_MEMORY_LONG:,$CONFIGDB_READ_PORT_LONG:,$CONFIGDB_WRITE_PORT_LONG:,$TMPDIR_PATH_LONG:'
+MUSTOPTS="SERVER_NAME CONFIGDB_PASS MASTER_PASS"
+LONGOPTS='$SERVER_NAME_LONG:,$IMAP_SERVER_LONG:,$IMAP_LOGIN_TYPE_LONG:,$CONFIGDB_USER_LONG:,$CONFIGDB_PASS_LONG:,$CONFIGDB_POOL_LONG:,$CONFIGDB_READ_LONG:,$CONFIGDB_WRITE_LONG:,$CONFIGDB_DBNAME_LONG:,$LOGIN_IMPL_TYPE_LONG:,$SERVER_MEMORY_LONG:,$CONFIGDB_READ_PORT_LONG:,$CONFIGDB_WRITE_PORT_LONG:,$TMPDIR_PATH_LONG:,$MASTER_PASS_LONG:,$MASTER_USER_LONG:'
 
 usage() {
     echo
@@ -118,7 +121,7 @@ usage() {
 cat<<EOF
 Example:
 
-  $0 --servername=ox6 --configdb-pass=secret --configdb-poolsize=10
+  $0 --servername=ox6 --configdb-pass=secret --master-pass=secret --configdb-poolsize=10
 EOF
     echo
 }
@@ -190,6 +193,14 @@ while true; do
 	    ;;
 	--$TMPDIR_PATH_LONG)
 	    TMPDIR_PATH=$2
+	    shift 2
+	    ;;
+	--$MASTER_PASS_LONG)
+	    MASTER_PASS=$2
+	    shift 2
+	    ;;
+	--$MASTER_USER_LONG)
+	    MASTER_USER=$2
 	    shift 2
 	    ;;
 	-h|--help)
@@ -310,4 +321,8 @@ v_setprop readProperty.2 "password=$CONFIGDB_PASS" ${ADMINCONF}/configdb.propert
 v_setprop writeProperty.1 "user=$CONFIGDB_USER" ${ADMINCONF}/configdb.properties
 v_setprop writeProperty.2 "password=$CONFIGDB_PASS" ${ADMINCONF}/configdb.properties
 
-# where to set pool size?
+echo "using $MASTER_USER as master account"
+/opt/open-xchange/sbin/generatempasswd $MASTER_USER \
+	/opt/open-xchange/etc/admindaemon/mpasswd "$MASTER_PASS" >/dev/null
+
+echo "admin daemon must now be restarted if already running"
