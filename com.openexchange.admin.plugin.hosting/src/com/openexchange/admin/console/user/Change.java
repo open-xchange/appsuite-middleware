@@ -63,6 +63,7 @@ import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
@@ -121,6 +122,19 @@ public class Change extends UserAbstraction {
              */
 
             oxres.change(ctx, usr, auth);
+            
+            
+            //  now change module access
+            // first load current module access rights from server
+            UserModuleAccess access = oxres.getModuleAccess(ctx, usr.getId(), auth);                    
+            
+            // apply rights from commandline
+            setModuleAccessOptionsinUserChange(parser, access);
+            
+            // apply changes in module access on server
+            oxres.changeModuleAccess(ctx, usr.getId(), access, auth);
+            
+            
             sysexit(0);
         } catch (final ConnectException neti) {
             printError(neti.getMessage());
@@ -192,6 +206,8 @@ public class Change extends UserAbstraction {
 
         // add optional opts
         setOptionalOptions(parser);
+        
+        setModuleAccessOptions(parser);
     }
     
     protected void sysexit(final int exitcode) {
