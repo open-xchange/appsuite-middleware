@@ -181,6 +181,27 @@ public abstract class UserAbstraction extends BasicCommandlineOptions {
     
     protected static final String OPT_EXTENDED_LONG = "extendedoptions";
     
+    protected static final String OPT_ACCESS_CALENDAR = "access-calendar";
+    protected static final String OPT_ACCESS_CONTACTS = "access-contacts";
+    protected static final String OPT_ACCESS_DELEGATE_TASKS = "access-delegate-tasks";
+    protected static final String OPT_ACCESS_EDIT_PUBLIC_FOLDERS = "access-edit-public-folder";
+    protected static final String OPT_ACCESS_FORUM = "access-forum";
+    protected static final String OPT_ACCESS_ICAL = "access-ical";
+    protected static final String OPT_ACCESS_INFOSTORE = "access-infostore";
+    protected static final String OPT_ACCESS_PINBOARD_WRITE = "access-pinboard-write";
+    protected static final String OPT_ACCESS_PROJECTS = "access-projects";
+    protected static final String OPT_ACCESS_READCREATE_SHARED_FOLDERS = "access-read-create-shared-Folders";
+    protected static final String OPT_ACCESS_RSS_BOOKMARKS = "access-rss-bookmarks";
+    protected static final String OPT_ACCESS_RSS_PORTAL = "access-rss-portal";
+    protected static final String OPT_ACCESS_SYNCML = "access-syncml";
+    protected static final String OPT_ACCESS_TASKS = "access-tasks";
+    protected static final String OPT_ACCESS_VCARD = "access-vcard";
+    protected static final String OPT_ACCESS_WEBDAV = "access-webdav";
+    protected static final String OPT_ACCESS_WEBDAV_XML = "access-webdav-xml";
+    protected static final String OPT_ACCESS_WEBMAIL = "access-webmail";
+    
+    
+    
     protected static final String JAVA_UTIL_TIME_ZONE = "java.util.TimeZone";
     protected static final String PASSWORDMECH_CLASS = "com.openexchange.admin.rmi.dataobjects.User$PASSWORDMECH";
     protected static final String JAVA_UTIL_HASH_SET = "java.util.HashSet";
@@ -199,6 +220,7 @@ public abstract class UserAbstraction extends BasicCommandlineOptions {
     protected static final char OPT_NO_INET_MAIL_ACCESS_SHORT = 'M';
     protected static final char OPT_SPAM_FILTER_ENABLE_SHORT = 'S';
     protected static final String OPT_SPAM_FILTER_ENABLE_LONG = "spamfilter";
+    
     public static final ArrayList<OptionAndMethod> optionsandmethods = new ArrayList<OptionAndMethod>();
 
     protected Option userNameOption = null;
@@ -219,6 +241,27 @@ public abstract class UserAbstraction extends BasicCommandlineOptions {
     protected Option imapQuotaOption = null;
     protected Option inetMailAccessOption = null;
     protected Option spamFilterOption = null;
+    
+    // access to modules
+    protected Option accessCalendarOption = null;
+    protected Option accessContactOption = null;
+    protected Option accessDelegateTasksOption = null;
+    protected Option accessEditPublicFolderOption = null;
+    protected Option accessForumOption = null;
+    protected Option accessIcalOption = null;
+    protected Option accessInfostoreOption = null;
+    protected Option accessPinboardWriteOption = null;
+    protected Option accessProjectsOption = null;
+    protected Option accessReadCreateSharedFolderOption = null;
+    protected Option accessRssBookmarkOption = null;
+    protected Option accessRssPortalOption = null;
+    protected Option accessSyncmlOption = null;
+    protected Option accessTasksOption = null;
+    protected Option accessVcardOption = null;
+    protected Option accessWebdavOption = null;
+    protected Option accessWebdavXmlOption = null;
+    protected Option accessWebmailOption = null;
+    
     
     /**
      * This field holds all the options which are displayed by default. So this options can be
@@ -524,6 +567,28 @@ public abstract class UserAbstraction extends BasicCommandlineOptions {
             usr.setAliases(aliases);
         }
     }
+    
+    
+    protected final void setModuleAccessOptions(final AdminParser admp){
+        this.accessCalendarOption = setLongOpt(admp, OPT_ACCESS_CALENDAR,"on/off","Calendar module (Default is on)", true, false,false);
+        this.accessContactOption = setLongOpt(admp, OPT_ACCESS_CONTACTS,"on/off","Contact module access (Default is on)", true, false,false);
+        this.accessDelegateTasksOption = setLongOpt(admp, OPT_ACCESS_DELEGATE_TASKS,"on/off","Delegate tasks access (Default is on)", true, false,false);
+        this.accessEditPublicFolderOption = setLongOpt(admp, OPT_ACCESS_EDIT_PUBLIC_FOLDERS,"on/off","Edit public folder access (Default is on)", true, false,false);
+        this.accessForumOption = setLongOpt(admp, OPT_ACCESS_FORUM,"on/off","Forum module access (Default is on)", true, false,false);
+        this.accessIcalOption = setLongOpt(admp, OPT_ACCESS_ICAL,"on/off","Ical module access (Default is on)", true, false,false);
+        this.accessInfostoreOption = setLongOpt(admp, OPT_ACCESS_INFOSTORE,"on/off","Infostore module access (Default is on)", true, false,false);
+        this.accessPinboardWriteOption = setLongOpt(admp, OPT_ACCESS_PINBOARD_WRITE,"on/off","Pinboard write access (Default is on)", true, false,false);
+        this.accessProjectsOption = setLongOpt(admp, OPT_ACCESS_PROJECTS,"on/off","Project module access (Default is on)", true, false,false);
+        this.accessReadCreateSharedFolderOption = setLongOpt(admp, OPT_ACCESS_READCREATE_SHARED_FOLDERS,"on/off","Read create shared folder access (Default is on)", true, false,false);
+        this.accessRssBookmarkOption= setLongOpt(admp, OPT_ACCESS_RSS_BOOKMARKS,"on/off","RSS bookmarks access (Default is on)", true, false,false);
+        this.accessRssPortalOption = setLongOpt(admp, OPT_ACCESS_RSS_PORTAL,"on/off","RSS portal access (Default is on)", true, false,false);
+        this.accessSyncmlOption = setLongOpt(admp, OPT_ACCESS_SYNCML,"on/off","Syncml access (Default is on)", true, false,false);
+        this.accessTasksOption = setLongOpt(admp, OPT_ACCESS_TASKS,"on/off","Tasks access (Default is on)", true, false,false);
+        this.accessVcardOption = setLongOpt(admp, OPT_ACCESS_VCARD,"on/off","Vcard access (Default is on)", true, false,false);
+        this.accessWebdavOption = setLongOpt(admp, OPT_ACCESS_WEBDAV,"on/off","Webdav access (Default is on)", true, false,false);
+        this.accessWebdavXmlOption = setLongOpt(admp, OPT_ACCESS_WEBDAV_XML,"on/off","Webdav-Xml access (Default is on)", true, false,false);
+        this.accessWebmailOption = setLongOpt(admp, OPT_ACCESS_WEBMAIL,"on/off","Webmail access (Default is on)", true, false,false);
+    }
 
     protected final void setMandatoryOptions(final AdminParser parser) {
         setUsernameOption(parser);
@@ -540,6 +605,8 @@ public abstract class UserAbstraction extends BasicCommandlineOptions {
         setDepartmentOption(parser);
         setCompanyOption(parser);
         setAliasesOption(parser);
+        
+       
     }
 
     protected void setExtendedOptions(final AdminParser parser) {
