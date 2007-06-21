@@ -2791,31 +2791,24 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         }
     }
 
-    private void createStandardGroupForContext(final int context_id, final Connection ox_write_con, final String display_name, final int group_id,final int gid_number) throws SQLException {
-        PreparedStatement group_stmt = ox_write_con.prepareStatement("INSERT INTO groups (cid, id, identifier, displayname,lastModified) VALUES (?,?,'users',?,?);");
+    private void createStandardGroupForContext(final int context_id,
+            final Connection ox_write_con, final String display_name,
+            final int group_id, final int gid_number) throws SQLException {
+        // TODO: this must be defined somewhere else
+        final int NOGROUP = 65534;
+        PreparedStatement group_stmt = ox_write_con
+                .prepareStatement("INSERT INTO groups (cid, id, identifier, displayname,lastModified,gidNumber) VALUES (?,?,'users',?,?,?);");
         group_stmt.setInt(1, context_id);
         group_stmt.setInt(2, group_id);
         group_stmt.setString(3, display_name);
         group_stmt.setLong(4, System.currentTimeMillis());
+        if (Integer.parseInt(prop.getGroupProp(AdminProperties.Group.GID_NUMBER_START, "-1")) > 0) {
+            group_stmt.setInt(5, gid_number);
+        } else {
+            group_stmt.setInt(5, NOGROUP);
+        }
         group_stmt.executeUpdate();
         group_stmt.close();
-        
-//      ok, group needs a correct gid number
-        if(Integer.parseInt(prop.getGroupProp(AdminProperties.Group.GID_NUMBER_START,"-1"))>0){
-            group_stmt = ox_write_con.prepareStatement("UPDATE " +
-                        "groups " +
-                        "set " +
-                        "gidNumber = ? " +
-                        "WHERE " +
-                        "cid = ? " +
-                        "AND " +
-                        "id = ?");
-            group_stmt.setInt(1, gid_number);
-            group_stmt.setInt(2, context_id);
-            group_stmt.setInt(3, group_id);
-            group_stmt.executeUpdate();
-            group_stmt.close();
-        }
     }
 
     private void createAdminForContext(final Context ctx, final User admin_user, final Connection ox_write_con, final int internal_user_id, final int contact_id,final int uid_number) throws StorageException,InvalidDataException {
