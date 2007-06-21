@@ -61,11 +61,23 @@ public class ListFilestore extends UtilAbstraction {
             // Needed for csv output
             final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
 
+            final String HEADER_FORMAT = "%-7s %-30s %-7s %-7s %-7s %-7s %s\n";
+            final String VALUE_FORMAT  = "%-7s %-30s %-7s %-7s %-7s %-7s %s\n";
+            if(parser.getOptionValue(this.csvOutputOption) == null) {
+                System.out.format(HEADER_FORMAT, "id", "uri", "size", "qmax", "qused", "maxctx", "curctx");
+            }
             for (final Filestore filestore : filestores) {
                 if (parser.getOptionValue(this.csvOutputOption) != null) {
                     data.add(makeCSVData(filestore));
                 } else {
-                    System.out.println(filestore);
+                    System.out.format(VALUE_FORMAT,
+                            filestore.getId(),
+                            filestore.getUrl(),
+                            filestore.getSize(),
+                            filestore.getQuota_max(),
+                            filestore.getQuota_used(),
+                            filestore.getMaxContexts(),
+                            filestore.getCurrentContexts());
                 }
             }
 
