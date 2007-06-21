@@ -250,9 +250,9 @@ ox_add_hosts_hostip() {
     local addr=$2
     
     test -z "$fqhn" && die \
-	"ox_addhostip: missing fqhn argument (arg 1)"
+	"ox_add_hosts_hostip: missing fqhn argument (arg 1)"
     test -z "$addr" && die \
-	"ox_addhostip: missing addr argument (arg 2)"
+	"ox_add_hosts_hostip: missing addr argument (arg 2)"
 
     local hostarr=( $(echo $fqhn | sed -e 's/\./ /g') )
     local hn=${hostarr[0]}
@@ -269,9 +269,18 @@ ox_remove_hosts_hostip() {
     local addr=$1
     
     test -z "$addr" && die \
-	"ox_addhostip: missing addr argument (arg 1)"
+	"ox_remove_hosts_hostip: missing addr argument (arg 1)"
 
     local hosttmp=/etc/hosts.$$
     grep -v "$addr" /etc/hosts > $hosttmp
     mv $hosttmp /etc/hosts
+}
+
+ox_remove_hosts_hostname() {
+    local name=$1
+    
+    test -z "$name" && die \
+	"ox_remove_hosts_hostname: missing name argument (arg 1)"
+
+    ox_remove_hosts_hostip $name
 }
