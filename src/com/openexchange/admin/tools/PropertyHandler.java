@@ -69,8 +69,9 @@ public class PropertyHandler {
     protected Hashtable       groupPropValues     = null;
     private Hashtable       resPropValues       = null;
     private Hashtable       rmiPropValues       = null;
+    protected Hashtable sqlPropValues = null;
     private final static Log log = LogFactory.getLog(PropertyHandler.class);
-    
+
     private String configdirname;
     private Properties sysprops = null;
     
@@ -78,7 +79,9 @@ public class PropertyHandler {
     protected static final String PROPERTIES_GROUP            = "GROUP_PROP_CONFIG";
     private static final String PROPERTIES_RESOURCE         = "RESOURCE_PROP_CONFIG";
     private static final String PROPERTIES_RMI              = "RMI_PROP_CONFIG";
-    
+    protected final static String PROPERTIES_SQL = "SQL_PROP_CONFIG";
+
+
     // The following lines define the property values for the database implementations
     public static final String GROUP_STORAGE = "GROUP_STORAGE";
     public static final String RESOURCE_STORAGE = "RESOURCE_STORAGE";
@@ -425,5 +428,31 @@ public class PropertyHandler {
         return retval;
     }
     
+    /**
+     * 
+     * @param key
+     * @param fallBack
+     * @return
+     */
+    public String getSqlProp(final String key, final String fallBack) {
+        String retString = fallBack;
+
+        if (this.sqlPropValues == null) {
+            if (this.allPropValues.containsKey(PROPERTIES_SQL)) {
+                this.sqlPropValues = (Hashtable) this.allPropValues.get(PROPERTIES_SQL);
+            } else {
+                log.error(OXGenericException.GENERAL_ERROR, new Exception("Property '" + PROPERTIES_SQL + "' not found."));
+            }
+        }
+
+        if (this.sqlPropValues != null && this.sqlPropValues.containsKey(key)) {
+            retString = this.sqlPropValues.get(key).toString();
+        } else {
+            log.error("Property '" + key + "' not found in file " + this.allPropValues.get(AdminProperties.Prop.PROPERTIES_SQL_FILE) + "! Using fallback :" + fallBack);
+        }
+
+        return retString;
+    }
+
 
 }
