@@ -61,7 +61,7 @@ import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.BasicCommandlineOptions;
 import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.rmi.dataobjects.User;
-//import com.openexchange.admin.rmi.dataobjects.User.PASSWORDMECH;
+import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.extensions.OXUserExtensionInterface;
 
 public abstract class UserAbstraction extends BasicCommandlineOptions {
@@ -527,6 +527,125 @@ public abstract class UserAbstraction extends BasicCommandlineOptions {
         }        
         }
     }
+    
+    /**
+     * Apply module access rights given from command line to the given module access object. 
+     * 
+     * @param parser The parser object
+     * @param usr User object which will be changed
+     */
+    protected final void setModuleAccessOptionsinUserCreate(final AdminParser parser, final UserModuleAccess access) {
+                
+        access.setCalendar(accessOption2BooleanCreate(parser,this.accessCalendarOption));
+        access.setContacts(accessOption2BooleanCreate(parser,this.accessContactOption));
+        access.setDelegateTask(accessOption2BooleanCreate(parser,this.accessDelegateTasksOption));
+        access.setEditPublicFolders(accessOption2BooleanCreate(parser,this.accessEditPublicFolderOption));
+        access.setForum(accessOption2BooleanCreate(parser,this.accessForumOption));
+        access.setIcal(accessOption2BooleanCreate(parser,this.accessIcalOption));
+        access.setInfostore(accessOption2BooleanCreate(parser,this.accessInfostoreOption));
+        access.setPinboardWrite(accessOption2BooleanCreate(parser,this.accessPinboardWriteOption));
+        access.setProjects(accessOption2BooleanCreate(parser,this.accessProjectsOption));
+        access.setReadCreateSharedFolders(accessOption2BooleanCreate(parser,this.accessReadCreateSharedFolderOption));
+        access.setRssBookmarks(accessOption2BooleanCreate(parser,this.accessRssBookmarkOption));
+        access.setRssPortal(accessOption2BooleanCreate(parser,this.accessRssPortalOption));
+        access.setSyncml(accessOption2BooleanCreate(parser,this.accessSyncmlOption));
+        access.setTasks(accessOption2BooleanCreate(parser,this.accessTasksOption));
+        access.setVcard(accessOption2BooleanCreate(parser,this.accessVcardOption));
+        access.setWebdav(accessOption2BooleanCreate(parser,this.accessWebdavOption));
+        access.setWebdavXml(accessOption2BooleanCreate(parser,this.accessWebdavXmlOption));
+        access.setWebmail(accessOption2BooleanCreate(parser,this.accessWebmailOption));
+        
+    }
+    
+    protected final boolean accessOption2BooleanCreate(final AdminParser parser,final Option accessOption){
+       
+            // option was set, check what text was sent
+            final String optionValue = (String) parser.getOptionValue(accessOption);
+            if(optionValue==null){
+                // option was not set in create. we return true, because default is on
+                return true;
+            }else{
+                if(optionValue.trim().length()>0 && optionValue.trim().equalsIgnoreCase("on")){
+                    return true;
+                }else{
+                    return false;
+                }
+            }
+        
+    }
+    
+    protected final void setModuleAccessOptionsinUserChange(final AdminParser parser, final UserModuleAccess access) {
+        
+        
+        if((String) parser.getOptionValue(this.accessCalendarOption)!=null){
+            access.setCalendar(accessOption2BooleanCreate(parser,this.accessCalendarOption));
+        }
+        if((String) parser.getOptionValue(this.accessContactOption)!=null){
+            access.setContacts(accessOption2BooleanCreate(parser,this.accessContactOption));
+        }
+        if((String) parser.getOptionValue(this.accessDelegateTasksOption)!=null){
+            access.setDelegateTask(accessOption2BooleanCreate(parser,this.accessDelegateTasksOption));
+        }
+        if((String) parser.getOptionValue(this.accessEditPublicFolderOption)!=null){
+            access.setEditPublicFolders(accessOption2BooleanCreate(parser,this.accessEditPublicFolderOption));
+        }
+        if((String) parser.getOptionValue(this.accessForumOption)!=null){
+            access.setForum(accessOption2BooleanCreate(parser,this.accessForumOption));
+        }
+        if((String) parser.getOptionValue(this.accessIcalOption)!=null){
+            access.setIcal(accessOption2BooleanCreate(parser,this.accessIcalOption));
+        }
+        if((String) parser.getOptionValue(this.accessInfostoreOption)!=null){
+            access.setInfostore(accessOption2BooleanCreate(parser,this.accessInfostoreOption));
+        }
+        if((String) parser.getOptionValue(this.accessPinboardWriteOption)!=null){
+            access.setPinboardWrite(accessOption2BooleanCreate(parser,this.accessPinboardWriteOption));
+        }
+        if((String) parser.getOptionValue(this.accessProjectsOption)!=null){
+            access.setProjects(accessOption2BooleanCreate(parser,this.accessProjectsOption));
+        }
+        if((String) parser.getOptionValue(this.accessReadCreateSharedFolderOption)!=null){
+            access.setReadCreateSharedFolders(accessOption2BooleanCreate(parser,this.accessReadCreateSharedFolderOption));
+        }
+        if((String) parser.getOptionValue(this.accessRssBookmarkOption)!=null){
+            access.setRssBookmarks(accessOption2BooleanCreate(parser,this.accessRssBookmarkOption));
+        }
+        if((String) parser.getOptionValue(this.accessRssPortalOption)!=null){
+            access.setRssPortal(accessOption2BooleanCreate(parser,this.accessRssPortalOption));
+        }
+        if((String) parser.getOptionValue(this.accessSyncmlOption)!=null){
+            access.setSyncml(accessOption2BooleanCreate(parser,this.accessSyncmlOption));
+        }
+        if((String) parser.getOptionValue(this.accessTasksOption)!=null){
+            access.setTasks(accessOption2BooleanCreate(parser,this.accessTasksOption));
+        }
+        if((String) parser.getOptionValue(this.accessVcardOption)!=null){
+            access.setVcard(accessOption2BooleanCreate(parser,this.accessVcardOption));
+        }
+        if((String) parser.getOptionValue(this.accessWebdavOption)!=null){
+            access.setWebdav(accessOption2BooleanCreate(parser,this.accessWebdavOption));
+        }
+        if((String) parser.getOptionValue(this.accessWebdavXmlOption)!=null){
+            access.setWebdavXml(accessOption2BooleanCreate(parser,this.accessWebdavXmlOption));
+        }
+        if((String) parser.getOptionValue(this.accessWebmailOption)!=null){
+            access.setWebmail(accessOption2BooleanCreate(parser,this.accessWebmailOption));
+        }
+        
+    }
+    
+    protected final boolean accessOption2BooleanChange(final AdminParser parser,final Option accessOption){
+        
+        // option was set, check what text was sent
+        final String optionValue = (String) parser.getOptionValue(accessOption);        
+        if(optionValue.trim().length()>0 && optionValue.trim().equalsIgnoreCase("on")){
+                return true;
+        }else{
+                return false;
+        }
+        
+    
+}
 
     /**
      * Get the optional options from the command line and set's them in the user object
