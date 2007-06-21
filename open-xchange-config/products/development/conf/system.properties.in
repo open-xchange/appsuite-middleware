@@ -44,6 +44,10 @@ Attachment=@oxgroupwaresysconfdir@/attachment.properties
 # configures certain assumptions about sending notifications
 Notification=@oxgroupwaresysconfdir@/notification.properties
 
+# Location of the participant.properties configuration file. This file
+# configures certain options about participants.
+Participant=@oxgroupwaresysconfdir@/participant.properties
+
 CONFIGPATH:@oxgroupwaresysconfdir@
 AJPPROPERTIES:@oxgroupwaresysconfdir@/ajp.properties
 CACHECCF:@oxgroupwaresysconfdir@/cache.ccf
