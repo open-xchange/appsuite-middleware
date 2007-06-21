@@ -116,6 +116,9 @@ public class Create extends UserAbstraction {
             // default set all access rights
             final UserModuleAccess access = new UserModuleAccess();
             access.enableAll();
+            
+//          set module access rights
+            setModuleAccessOptionsinUserCreate(parser, access);
 
             /*
              * ********************* The extensions
@@ -188,6 +191,9 @@ public class Create extends UserAbstraction {
 
         // add optional opts
         setOptionalOptions(parser);
+        
+        // module access params
+        setModuleAccessOptions(parser);
     }
     
     protected void sysexit(final int exitcode) {

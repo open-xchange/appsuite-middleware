@@ -1,3 +1,7 @@
+* 2007-06-21 - manuel.kraft@open-xchange.com
+
+  -  Bugfix ID#7675 LTs to manage users can not deal with modules
+
 * 2007-06-12 - dennis.sieben@open-xchange.com
 
   -  Bugfix ID#7657 console clients check extension errors in the wrong place
