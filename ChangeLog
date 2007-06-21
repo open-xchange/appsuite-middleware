@@ -1,3 +1,9 @@
+* 2007-06-20 - marcus.klein@open-xchange.com
+
+  - Bugfix #7670: Check in session check if the user is still enabled.
+  - Bugfix #7901: Bad exception is catched when underlying user object is
+    deleted.
+
 * 2007-06-20 - martin.kauss@open-xchange.com
 
  - Fixed bug #7883. The reminder was set for all participants even if only
