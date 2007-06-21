@@ -464,11 +464,10 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
         }
 
         try {
-            if (tool.getDefaultGroupForContextWithOutConnection(ctx) != grp_id) {
                 if (tool.existsGroupMember(ctx, grp_id, member_ids)) {
                     throw new InvalidDataException("Member already exists in group");
                 }
-            }
+            
         } catch (final InvalidDataException e) {
             log.error(e);
             throw e;
