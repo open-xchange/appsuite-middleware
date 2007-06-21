@@ -789,6 +789,7 @@
 # Antje Faber, 2007.
 # Antje Faber, 2007.
 # Antje Faber, 2007.
+# Antje Faber, 2007.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER.
 # Antje Faber, 2007.
 #
@@ -796,7 +797,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2007-06-04 16:38+0200\n"
+"PO-Revision-Date: 2007-06-21 17:08+0200\n"
 "Last-Translator: Antje Faber\n"
 "Language-Team:  <de@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -1333,10 +1334,8 @@ msgstr ""
 "Anlage mit der file_id %s konnte nicht gefunden werden. Entweder die Datei "
 "ist verwaist oder gehört zu einem anderen Modul."
 
-msgid "Could not find equivalent fields for the following fields in the CSV file: %s"
-msgstr ""
-"Für folgende Felder der CSV-Datei konnten keine equivalenten Felder gefunden "
-"werden: %s"
+msgid "Could not find the following fields %s"
+msgstr "Folgendes Feld konnte nicht gefunden werden: %s"
 
 msgid "Could not generate new ID."
 msgstr "Neue ID konnte nicht generiert werden"
@@ -2186,9 +2185,6 @@ msgstr "Aktion nicht erlaubt für einen geschlossenen SearchIterator"
 msgid "Operation not executeable on folder %s in context %s"
 msgstr "Aktion für Ordner %s im Kontext %s nicht ausführbar"
 
-msgid "Owner %s of default folder %s must keep the folder admin permission"
-msgstr "Der Eigentümer %s des Standardordners %s muss die Administrationsrechte für den Ordner behalten."
-
 msgid "Parameter %s does not match JSON key %s"
 msgstr "Der Parameter %s stimmt nicht mit dem JSON-Key %s überein"
 
@@ -2817,9 +2813,6 @@ msgstr "Unbekannte Aktion: %s"
 
 msgid "Unknown color label: %s"
 msgstr "Unbekanntes Farb-Label: %s"
-
-msgid "Unknown element %s was not imported."
-msgstr "Unbekanntes Element %s wurde nicht importiert."
 
 msgid "Unknown field: %d"
 msgstr "Unbekanntes Feld: %d"
