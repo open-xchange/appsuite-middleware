@@ -548,134 +548,12 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         // returns webdav infos, database infos(mapping), context status
         // (disabled,enabled,text)
         Connection config_db_read = null;
-        Connection ox_db_read = null;
         PreparedStatement prep = null;
-        final int context_id = ctx.getIdAsInt();
         try {
             config_db_read = cache.getREADConnectionForCONFIGDB();
-            ox_db_read = cache.getREADConnectionForContext(context_id);
-
-            Boolean enabled = Boolean.TRUE;
-
-            prep = config_db_read.prepareStatement("SELECT context.cid,context.name,context.enabled,context.reason_id,context.filestore_id,context.filestore_name,context.filestore_login,context.filestore_passwd,context.quota_max,context_server2db_pool.server_id,context_server2db_pool.write_db_pool_id,context_server2db_pool.read_db_pool_id,context_server2db_pool.db_schema FROM context LEFT JOIN context_server2db_pool ON context.cid = context_server2db_pool.cid WHERE context.cid =? AND context_server2db_pool.server_id = (select server_id from server where name = ?)");
-            prep.setInt(1, context_id);
-            prep.setString(2, prop.getProp(AdminProperties.Prop.SERVER_NAME, "local"));
-            ResultSet rs = prep.executeQuery();
-
-            final Context cs = new Context();
-            int reason_id = -1;
-            int filestore_id = -1;
-            long quota_used = -1;
-            long quota_max = -1;
-
-            String name = null;
-            String filestore_name = null;
-            String filestore_user = null;
-            String filestore_passwd = null;
-            // DATBASE HANDLE
-            while (rs.next()) {
-                // filestore_id | filestore_name | filestore_login |
-                // filestore_passwd | quota_max
-                int read_pool = -1;
-                int write_pool = -1;
-
-                Database readdb = null;
-                Database writedb = null;
-
-                name = rs.getString("name");
-                enabled = rs.getBoolean("enabled");
-                reason_id = rs.getInt("reason_id");
-                filestore_id = rs.getInt("filestore_id");
-                filestore_name = rs.getString("filestore_name");
-                filestore_user = rs.getString("filestore_login");
-                filestore_passwd = rs.getString("filestore_passwd");
-                quota_max = rs.getLong("quota_max");
-                if (quota_max != 0 && quota_max != -1) {
-                    quota_max /= Math.pow(2, 20);
-                }
-                read_pool = rs.getInt("read_db_pool_id");
-                write_pool = rs.getInt("write_db_pool_id");
-                final String db_schema = rs.getString("db_schema");
-                if (null != db_schema) {
-                    if (-1 != read_pool) {
-                        readdb = new Database(read_pool, db_schema);
-                    }
-                    if (-1 != write_pool) {
-                        writedb = new Database(write_pool, db_schema);
-                    }
-                }
-
-                cs.setReadDatabase(readdb);
-                cs.setWriteDatabase(writedb);
-            }
-
-            // CONTEXT STATE INFOS #
-            if (-1 != reason_id) {
-                cs.setMaintenanceReason(new MaintenanceReason(reason_id));
-            }
-            cs.setEnabled(enabled);
-            // ######################
-
-            // FILESTORE HANDLE INFOS ##
-            final Filestore fs = new Filestore();
-            if (-1 != filestore_id) {
-                fs.setId(filestore_id);
-            }
-            if (null != filestore_user) {
-                fs.setLogin(filestore_user);
-            }
-            if (null != filestore_name) {
-                fs.setName(filestore_name);
-            }
-            if (null != filestore_passwd) {
-                fs.setPassword(filestore_passwd);
-            }
-
-            // GENERAL CONTEXT INFOS AND QUOTA
-
-            rs.close();
-            prep.close();
-
-            prep = ox_db_read.prepareStatement("SELECT filestore_usage.used FROM filestore_usage WHERE filestore_usage.cid = ?");
-            prep.setInt(1, context_id);
-            rs = prep.executeQuery();
-
-            while (rs.next()) {
-                quota_used = rs.getLong(1);
-            }
-            rs.close();
-            prep.close();
-            if (quota_used != 0 && quota_used != -1) {
-                quota_used /= Math.pow(2, 20);
-            }
-            if (quota_used != -1) {
-                fs.setQuota_used(quota_used);
-
-                // set used quota in context setup
-                cs.setUsedQuota(quota_used);
-            }
-
-            // maximum quota of this context
-            if (quota_max != -1) {
-                fs.setQuota_max(quota_max);
-
-                // set quota max also in context setup object
-                cs.setMaxQuota(quota_max);
-            }
-
-            cs.setFilestore(fs);
-
-            final long average_size = Long.parseLong(prop.getProp("AVERAGE_CONTEXT_SIZE", "100"));
-            cs.setAverage_size(average_size);
-
-            // name of the context, currently same with contextid
-            if (name != null) {
-                cs.setName(name);
-            }
-
-            // context id
-            cs.setID(context_id);
-            return cs;
+            
+            return this.oxcontextcommon.getData(ctx, config_db_read);
+            
         } catch (final PoolException e) {
             log.error("Pool Error", e);
             throw new StorageException(e);
@@ -697,14 +575,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 }
             } catch (final PoolException exp) {
                 log.error("Error pushing configdb connection to pool!", exp);
-            }
-            try {
-                if (null != ox_db_read) {
-                    cache.pushOXDBRead(context_id, ox_db_read);
-                    // ox_db_read.close();
-                }
-            } catch (final PoolException exp) {
-                log.error("Error pushing ox connection to pool!", exp);
             }
         }
     }
@@ -992,8 +862,9 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         PreparedStatement stmt = null;
         try {
             configdb_read = cache.getREADConnectionForCONFIGDB();
+
             final String search_patterntmp = search_pattern.replace('*', '%');
-            stmt = configdb_read.prepareStatement("SELECT name,cid,enabled,reason_id,filestore_id,filestore_name,filestore_login,filestore_passwd,quota_max FROM context WHERE name LIKE ? OR cid LIKE ?");
+            stmt = configdb_read.prepareStatement("SELECT cid FROM context WHERE name LIKE ? OR cid LIKE ?");
             stmt.setString(1, search_patterntmp);
             stmt.setString(2, search_patterntmp);
 
@@ -1002,33 +873,11 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             final ArrayList<Context> list = new ArrayList<Context>();
 
             while (rs.next()) {
-                // filestore_id | filestore_name | filestore_login |
-                // filestore_passwd | quota_max
-                final Context cs = new Context();
+                Context cs = new Context();
                 final int cid = rs.getInt("cid");
-                final String name = rs.getString("name");
-                final int reason_id = rs.getInt("reason_id");
-                final int store_id = rs.getInt("filestore_id");
-                final String store_name = rs.getString("filestore_name");
-                final String store_login = rs.getString("filestore_login");
-                final String store_passwd = rs.getString("filestore_passwd");
-                final boolean enabled = rs.getBoolean("enabled");
-                cs.setName(name);
                 cs.setID(cid);
-                cs.setEnabled(enabled);
-
-                cs.setMaintenanceReason(new MaintenanceReason(reason_id));
-                final Filestore fs = new Filestore(store_id);
-                if (store_login != null) {
-                    fs.setLogin(store_login);
-                }
-                if (store_passwd != null) {
-                    fs.setPassword(store_passwd);
-                }
-                if (store_name != null) {
-                    fs.setName(store_name);
-                }
-                cs.setFilestore(fs);
+                cs = this.oxcontextcommon.getData(cs, configdb_read);
+                
                 list.add(cs);
             }
             rs.close();
