@@ -15,6 +15,7 @@ import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public class Search extends ContextAbtraction {
@@ -33,14 +34,14 @@ public class Search extends ContextAbtraction {
             final Credentials auth = new Credentials((String) parser.getOptionValue(this.adminUserOption), (String) parser.getOptionValue(this.adminPassOption));
 
             // get rmi ref
-            final OXContextInterface oxres = (OXContextInterface) Naming.lookup(RMI_HOSTNAME +OXContextInterface.RMI_NAME);
+            final OXContextInterface oxctx = (OXContextInterface) Naming.lookup(RMI_HOSTNAME +OXContextInterface.RMI_NAME);
 
             String pattern = "*";
             if (parser.getOptionValue(this.searchOption) != null) {
                 pattern = (String) parser.getOptionValue(this.searchOption);
             }
 
-            final Context[] ctxs = oxres.search(pattern, auth);
+            final Context[] ctxs = oxctx.search(pattern, auth);
 
             // needed for csv output, KEEP AN EYE ON ORDER!!!
             final ArrayList<String> columns = new ArrayList<String>();
@@ -54,12 +55,12 @@ public class Search extends ContextAbtraction {
 
             final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
 
-            final String HEADER_FORMAT = "%-7s %-5s %-20s %-10s %-7s %-7s %s\n";
-            final String VALUE_FORMAT  = "%-7s %-5s %-20s %-10s %-7s %-7s %s\n";
+            final String HEADER_FORMAT = "%-7s %-5s %-20s %-10s %-10s %-10s %s\n";
+            final String VALUE_FORMAT  = "%-7s %-5s %-20s %-10s %-10s %-10s %s\n";
             if(parser.getOptionValue(this.csvOutputOption) == null) {
                 System.out.format(HEADER_FORMAT, "cid", "fid", "fname", "enabled", "qmax", "qused", "name");
             }
-            for (final Context ctx_tmp : ctxs) {
+            for (Context ctx_tmp : ctxs) {
                 if (parser.getOptionValue(this.csvOutputOption) != null) {
                     data.add(makeCSVData(ctx_tmp));
                 } else {
