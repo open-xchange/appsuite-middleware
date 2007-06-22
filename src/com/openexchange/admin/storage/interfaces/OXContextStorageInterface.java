@@ -138,7 +138,14 @@ public abstract class OXContextStorageInterface {
         }
     }
 
-    public abstract void changeDatabase(Context ctx, Database db_handle) throws StorageException;
+    /**
+     * Changes a context
+     * 
+     * @param ctx
+     * @param db_handle
+     * @throws StorageException
+     */
+    public abstract void changeDatabase(final Context ctx, final Database db_handle) throws StorageException;
 
     /**
      * Move data of context to target database

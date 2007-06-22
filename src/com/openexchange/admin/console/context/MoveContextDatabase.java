@@ -10,6 +10,7 @@ import com.openexchange.admin.console.AdminParser.MissingOptionException;
 import com.openexchange.admin.console.CmdLineParser.IllegalOptionValueException;
 import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.console.CmdLineParser.UnknownOptionException;
+import com.openexchange.admin.exceptions.OXContextException;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -94,6 +95,9 @@ public class MoveContextDatabase extends ContextAbtraction {
             printError(e.getMessage());
             parser.printUsage();
             sysexit(SYSEXIT_MISSING_OPTION);
+        } catch (final OXContextException e) {
+            printServerResponse(e.getMessage());
+            sysexit(1);
         }
 
     }

@@ -13,6 +13,7 @@ import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
+import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
@@ -75,6 +76,9 @@ public class Enable extends ContextAbtraction {
             printError(e.getMessage());
             parser.printUsage();
             sysexit(SYSEXIT_MISSING_OPTION);
+        } catch (final InvalidDataException e) {
+            printServerResponse(e.getMessage());
+            sysexit(1);
         }
 
     }

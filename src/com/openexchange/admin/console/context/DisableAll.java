@@ -14,6 +14,7 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.NoSuchReasonException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public class DisableAll extends ContextAbtraction {
@@ -73,6 +74,9 @@ public class DisableAll extends ContextAbtraction {
             printError(e.getMessage());
             parser.printUsage();
             sysexit(SYSEXIT_MISSING_OPTION);
+        } catch (final NoSuchReasonException e) {
+            printServerResponse(e.getMessage());
+            sysexit(1);
         }
     }
 
