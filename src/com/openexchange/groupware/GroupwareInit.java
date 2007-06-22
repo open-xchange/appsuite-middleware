@@ -47,11 +47,12 @@
  *
  */
 
+
+
 package com.openexchange.groupware;
 
 import com.openexchange.event.EventInit;
 import com.openexchange.groupware.calendar.CalendarConfig;
-import com.openexchange.groupware.configuration.ParticipantConfig;
 import com.openexchange.groupware.contact.ContactConfig;
 import com.openexchange.groupware.contexts.ContextInit;
 import com.openexchange.groupware.integration.SetupLink;
@@ -62,7 +63,7 @@ import com.openexchange.sessiond.SessiondInit;
  * This class contains the initialization for the groupware server.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class GroupwareInit {
+public class GroupwareInit {
 
     /**
      * Prevent instanciation.
@@ -80,9 +81,8 @@ public final class GroupwareInit {
         SetupLink.init();
         CalendarConfig.init();
         ContactConfig.init();
-        SessiondInit.init();
-        EventInit.init();
-        PushInit.init();
-        ParticipantConfig.init();
+		SessiondInit.init();
+		EventInit.init();
+		PushInit.init();
     }
 }

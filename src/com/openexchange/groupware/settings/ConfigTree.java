@@ -60,9 +60,10 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.MailInterface;
 import com.openexchange.api2.MailInterfaceImpl;
 import com.openexchange.api2.OXException;
+import com.openexchange.configuration.ServerConfig;
 import com.openexchange.groupware.UserConfiguration;
-import com.openexchange.groupware.configuration.ParticipantConfig;
 import com.openexchange.groupware.imap.IMAPException;
+import com.openexchange.groupware.imap.IMAPProperties;
 import com.openexchange.groupware.imap.UserSettingMail;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
@@ -451,14 +452,6 @@ public final class ConfigTree {
         final Setting spamButton = new Setting("spambutton", true);
         spamButton.setId(-1);
         mail.addElement(spamButton);
-
-        final Setting participants = new Setting("participants", true);
-        participants.setId(-1);
-        TREE.addElement(participants);
-
-        final Setting showWithoutEmail = new Setting("showWithoutEmail", true);
-        showWithoutEmail.setId(-1);
-        participants.addElement(showWithoutEmail);
 
         final Setting gui = new Setting("gui", false);
         gui.setId(1);
@@ -897,14 +890,6 @@ public final class ConfigTree {
                 } catch (IMAPException e) {
                     throw new SettingException(e);
                 }
-            }
-        });
-        tmp.put(showWithoutEmail.getName(), new ReadOnlyValue() {
-            public void getValue(final SessionObject session,
-                final Setting setting) throws SettingException {
-                setting.setSingleValue(Boolean.valueOf(ParticipantConfig
-                    .getProperty(ParticipantConfig.Property
-                    .SHOW_WITHOUT_EMAIL)));
             }
         });
         READERS = Collections.unmodifiableMap(tmp);
