@@ -70,6 +70,10 @@ public abstract class DataParser {
 			dataobject.setCreatedBy(getValueAsInt(eProp.getChild(DataFields.CREATED_BY, XmlServlet.NS)));
 		} 
 		
+		if (hasElement(eProp.getChild(DataFields.CREATION_TIME, XmlServlet.NS))) {
+			dataobject.setCreationDate(getValueAsDate(eProp.getChild(DataFields.CREATION_TIME, XmlServlet.NS)));
+		} 
+
 		if (hasElement(eProp.getChild(DataFields.LAST_MODIFIED, XmlServlet.NS))) {
 			dataobject.setLastModified(getValueAsDate(eProp.getChild(DataFields.LAST_MODIFIED, XmlServlet.NS)));
 		} 
