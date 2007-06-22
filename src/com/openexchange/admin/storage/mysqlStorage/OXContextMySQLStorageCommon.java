@@ -15,6 +15,9 @@ import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Database;
+import com.openexchange.admin.rmi.dataobjects.Filestore;
+import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
+import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
@@ -40,7 +43,155 @@ public abstract class OXContextMySQLStorageCommon {
     public OXContextMySQLStorageCommon() {
         oxutilcommon = new OXUtilMySQLStorageCommon();
     }
-    
+
+    public Context getData(final Context ctx, final Connection configdb_con) throws SQLException, PoolException  {
+        Connection oxdb_read = null;
+        PreparedStatement prep = null;
+        final int context_id = ctx.getIdAsInt();
+
+        try {
+            oxdb_read = cache.getREADConnectionForContext(context_id);
+
+            Boolean enabled = Boolean.TRUE;
+
+            prep = configdb_con.prepareStatement("SELECT context.cid,context.name,context.enabled,context.reason_id,context.filestore_id,context.filestore_name,context.filestore_login,context.filestore_passwd,context.quota_max,context_server2db_pool.server_id,context_server2db_pool.write_db_pool_id,context_server2db_pool.read_db_pool_id,context_server2db_pool.db_schema FROM context LEFT JOIN context_server2db_pool ON context.cid = context_server2db_pool.cid WHERE context.cid =? AND context_server2db_pool.server_id = (select server_id from server where name = ?)");
+            prep.setInt(1, context_id);
+            prep.setString(2, prop.getProp(AdminProperties.Prop.SERVER_NAME, "local"));
+            ResultSet rs = prep.executeQuery();
+
+            final Context cs = new Context();
+            int reason_id = -1;
+            int filestore_id = -1;
+            long quota_used = -1;
+            long quota_max = -1;
+
+            String name = null;
+            String filestore_name = null;
+            String filestore_user = null;
+            String filestore_passwd = null;
+            // DATBASE HANDLE
+            while (rs.next()) {
+                // filestore_id | filestore_name | filestore_login |
+                // filestore_passwd | quota_max
+                int read_pool = -1;
+                int write_pool = -1;
+
+                Database readdb = null;
+                Database writedb = null;
+
+                name = rs.getString("name");
+                enabled = rs.getBoolean("enabled");
+                reason_id = rs.getInt("reason_id");
+                filestore_id = rs.getInt("filestore_id");
+                filestore_name = rs.getString("filestore_name");
+                filestore_user = rs.getString("filestore_login");
+                filestore_passwd = rs.getString("filestore_passwd");
+                quota_max = rs.getLong("quota_max");
+                if (quota_max != 0 && quota_max != -1) {
+                    quota_max /= Math.pow(2, 20);
+                }
+                read_pool = rs.getInt("read_db_pool_id");
+                write_pool = rs.getInt("write_db_pool_id");
+                final String db_schema = rs.getString("db_schema");
+                if (null != db_schema) {
+                    if (-1 != read_pool) {
+                        readdb = new Database(read_pool, db_schema);
+                    }
+                    if (-1 != write_pool) {
+                        writedb = new Database(write_pool, db_schema);
+                    }
+                }
+
+                cs.setReadDatabase(readdb);
+                cs.setWriteDatabase(writedb);
+            }
+
+            // CONTEXT STATE INFOS #
+            if (-1 != reason_id) {
+                cs.setMaintenanceReason(new MaintenanceReason(reason_id));
+            }
+            cs.setEnabled(enabled);
+            // ######################
+
+            // FILESTORE HANDLE INFOS ##
+            final Filestore fs = new Filestore();
+            if (-1 != filestore_id) {
+                fs.setId(filestore_id);
+            }
+            if (null != filestore_user) {
+                fs.setLogin(filestore_user);
+            }
+            if (null != filestore_name) {
+                fs.setName(filestore_name);
+            }
+            if (null != filestore_passwd) {
+                fs.setPassword(filestore_passwd);
+            }
+
+            // GENERAL CONTEXT INFOS AND QUOTA
+
+            rs.close();
+            prep.close();
+
+            prep = oxdb_read.prepareStatement("SELECT filestore_usage.used FROM filestore_usage WHERE filestore_usage.cid = ?");
+            prep.setInt(1, context_id);
+            rs = prep.executeQuery();
+
+            while (rs.next()) {
+                quota_used = rs.getLong(1);
+            }
+            rs.close();
+            prep.close();
+            if (quota_used != 0 && quota_used != -1) {
+                quota_used /= Math.pow(2, 20);
+            }
+            if (quota_used != -1) {
+                fs.setQuota_used(quota_used);
+
+                // set used quota in context setup
+                cs.setUsedQuota(quota_used);
+            }
+
+            // maximum quota of this context
+            if (quota_max != -1) {
+                fs.setQuota_max(quota_max);
+
+                // set quota max also in context setup object
+                cs.setMaxQuota(quota_max);
+            }
+
+            cs.setFilestore(fs);
+
+            final long average_size = Long.parseLong(prop.getProp("AVERAGE_CONTEXT_SIZE", "100"));
+            cs.setAverage_size(average_size);
+
+            // name of the context, currently same with contextid
+            if (name != null) {
+                cs.setName(name);
+            }
+
+            // context id
+            cs.setID(context_id);
+            return cs;
+        } finally {
+            try {
+                if (prep != null) {
+                    prep.close();
+                }
+            } catch (final SQLException e) {
+                log.error("SQL Error closing statement!", e);
+            }
+            try {
+                if (oxdb_read != null) {
+                    cache.pushOXDBRead(context_id, oxdb_read);
+                }
+            } catch (final PoolException exp) {
+                log.error("Pool Error pushing ox read connection to pool!",exp);
+            }
+        }
+
+    }
+
     public final void createStandardGroupForContext(final int context_id, final Connection ox_write_con, final String display_name, final int group_id, final int gid_number) throws SQLException {
         // TODO: this must be defined somewhere else
         final int NOGROUP = 65534;
