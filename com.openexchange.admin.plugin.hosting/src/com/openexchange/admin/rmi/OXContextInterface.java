@@ -48,6 +48,7 @@
  */
 package com.openexchange.admin.rmi;
 
+import com.openexchange.admin.exceptions.OXContextException;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
@@ -57,6 +58,8 @@ import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.ContextExistsException;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
+import com.openexchange.admin.rmi.exceptions.NoSuchFilestoreException;
+import com.openexchange.admin.rmi.exceptions.NoSuchReasonException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 
@@ -110,9 +113,10 @@ public interface OXContextInterface extends Remote {
      * @throws RemoteException General RMI Exception
      * @throws StorageException When an error in the subsystems occured.
      * @throws DatabaseUpdateException 
+     * @throws InvalidDataException 
      */
     public void delete(Context ctx,Credentials auth) 
-    throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException, DatabaseUpdateException;
+    throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException, DatabaseUpdateException, InvalidDataException;
     
    
     /**
@@ -150,9 +154,12 @@ public interface OXContextInterface extends Remote {
      * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException If the data sent within the method contained invalid data.
      * @throws RemoteException General RMI Exception
      * @throws StorageException When an error in the subsystems occured.
+     * @throws NoSuchFilestoreException 
+     * @throws NoSuchReasonException 
+     * @throws OXContextException 
      */
     public String moveContextFilestore(Context ctx,Filestore dst_filestore_id, MaintenanceReason reason,Credentials auth) 
-    throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException;
+    throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException, NoSuchFilestoreException, NoSuchReasonException, OXContextException;
     
 
     /**
@@ -175,9 +182,10 @@ public interface OXContextInterface extends Remote {
      * 
      * @throws StorageException When an error in the subsystems occured.
      * @throws DatabaseUpdateException 
+     * @throws OXContextException 
      */
-    public String moveContextDatabase(Context ctx,Database dst_database_id,MaintenanceReason reason,Credentials auth) 
-    throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException, DatabaseUpdateException;
+    public int moveContextDatabase(Context ctx,Database dst_database_id,MaintenanceReason reason,Credentials auth) 
+    throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException, DatabaseUpdateException, OXContextException;
     
     
     /**
@@ -191,9 +199,11 @@ public interface OXContextInterface extends Remote {
      * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException If the data sent within the method contained invalid data.
      * @throws RemoteException General RMI Exception
      * @throws StorageException When an error in the subsystems occured.
+     * @throws NoSuchReasonException 
+     * @throws OXContextException 
      */
     public void disable(Context ctx, MaintenanceReason reason,Credentials auth) 
-    throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException;
+    throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException, NoSuchReasonException, OXContextException;
     
     
     
@@ -205,9 +215,10 @@ public interface OXContextInterface extends Remote {
      * @throws com.openexchange.admin.rmi.exceptions.NoSuchContextException If the context does not exist in the system.
      * @throws RemoteException General RMI Exception
      * @throws StorageException When an error in the subsystems occured.
+     * @throws InvalidDataException 
      */
     public void enable(Context ctx,Credentials auth) 
-    throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException;
+    throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException, InvalidDataException;
     
     
     /**
@@ -236,9 +247,10 @@ public interface OXContextInterface extends Remote {
      * @throws RemoteException General RMI Exception
      * 
      * @throws StorageException When an error in the subsystems occured.
+     * @throws NoSuchReasonException 
      */
     public void disableAll(MaintenanceReason reason,Credentials auth ) 
-    throws RemoteException, StorageException, InvalidCredentialsException,InvalidDataException;
+    throws RemoteException, StorageException, InvalidCredentialsException,InvalidDataException, NoSuchReasonException;
     
     
     
@@ -255,7 +267,6 @@ public interface OXContextInterface extends Remote {
     
     
     
-    // TODO: here muss noch ein "Context" Object zur?ckgeworfen werden!
     /**
      * Retrieves the context setup of given context.
      * @param auth Credentials for authenticating against server.
@@ -266,9 +277,10 @@ public interface OXContextInterface extends Remote {
      * @throws RemoteException General RMI Exception
      * 
      * @throws StorageException When an error in the subsystems occured.
+     * @throws InvalidDataException 
      */
     public Context getSetup(Context ctx,Credentials auth) 
-    throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException;
+    throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException, InvalidDataException;
     
     /**
      * Change the database handle of the given context.

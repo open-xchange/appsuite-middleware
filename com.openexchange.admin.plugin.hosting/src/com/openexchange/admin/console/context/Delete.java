@@ -14,6 +14,7 @@ import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
+import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
@@ -64,19 +65,22 @@ public class Delete extends ContextAbtraction {
         } catch (final NoSuchContextException e) {
             printServerResponse(e.getMessage());
             sysexit(SYSEXIT_NO_SUCH_CONTEXT);
-        } catch (IllegalOptionValueException e) {
+        } catch (final IllegalOptionValueException e) {
             printError("Illegal option value : " + e.getMessage());
             parser.printUsage();
             sysexit(SYSEXIT_ILLEGAL_OPTION_VALUE);
-        } catch (UnknownOptionException e) {
+        } catch (final UnknownOptionException e) {
             printError("Unrecognized options on the command line: " + e.getMessage());
             parser.printUsage();
             sysexit(SYSEXIT_UNKNOWN_OPTION);
-        } catch (MissingOptionException e) {
+        } catch (final MissingOptionException e) {
             printError(e.getMessage());
             parser.printUsage();
             sysexit(SYSEXIT_MISSING_OPTION);
-        } catch (DatabaseUpdateException e) {
+        } catch (final DatabaseUpdateException e) {
+            printServerResponse(e.getMessage());
+            sysexit(1);
+        } catch (final InvalidDataException e) {
             printServerResponse(e.getMessage());
             sysexit(1);
         }

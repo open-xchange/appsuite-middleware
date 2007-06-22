@@ -48,8 +48,6 @@
  */
 package com.openexchange.admin.rmi.impl;
 
-import com.openexchange.admin.daemons.ClientAdminThreadExtended;
-import com.openexchange.admin.exceptions.ContextException;
 import com.openexchange.admin.rmi.BasicAuthenticator;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -60,9 +58,11 @@ import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.ContextExistsException;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
+import com.openexchange.admin.rmi.exceptions.NoSuchFilestoreException;
+import com.openexchange.admin.rmi.exceptions.NoSuchReasonException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.groupware.OXThrowsMultiple;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.rmi.RemoteException;
@@ -75,14 +75,14 @@ import com.openexchange.admin.exceptions.Classes;
 import com.openexchange.admin.exceptions.ContextExceptionFactory;
 import com.openexchange.admin.exceptions.OXContextException;
 import com.openexchange.admin.exceptions.OXUtilException;
-import com.openexchange.admin.jobs.AdminJob;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.storage.interfaces.OXContextStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
+import com.openexchange.admin.taskmanagement.TaskManager;
 import com.openexchange.admin.tools.DatabaseDataMover;
 import com.openexchange.admin.tools.FilestoreDataMover;
-import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.admin.tools.monitoring.MonitoringInfos;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.OXExceptionSource;
 
@@ -116,387 +116,271 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
 
     public OXContext() {
         super();
-        log.info("Class loaded: " + this.getClass().getName());
+        if (log.isDebugEnabled()) {
+            log.debug("Class loaded: " + this.getClass().getName());
+        }        
     }
 
-    @OXThrowsMultiple(category = { Category.CODE_ERROR, Category.USER_INPUT }, desc = { MSG_SQL_QUERY_FAILED, "Invalid data sent by client" }, exceptionId = { 0, 1 }, msg = { MSG_SQL_OPERATION_ERROR, "Invalid data sent-%s" })
-    public Context[] searchByDatabase(final Database db, final Credentials auth) 
-    throws RemoteException, StorageException, InvalidCredentialsException,InvalidDataException {
-        
-        doNullCheck(db,auth);
-        
+    public Context[] searchByDatabase(final Database db, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+        try {
+            doNullCheck(db);
+        } catch (final InvalidDataException e) {
+            final InvalidDataException invalidDataException = new InvalidDataException("Database is null");
+            log.error(invalidDataException);
+            throw invalidDataException;
+        }        
         doAuthentication(auth);
         
         final String db_host_url = db.getUrl();
         log.debug("" + db_host_url);
-        if (db_host_url != null) {
-
-            final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
-            return oxcox.searchContextByDatabase(db);
-            // }catch(PoolException ecp){
-            // log.error (LOG_ERROR,ecp);
-            // retValue.add (RESPONSE_ERROR);
-            // retValue.add (""+ecp.getMessage ());
-            // }catch(SQLException sql){
-            // log.error (MSG_SQL_OPERATION_ERROR,sql);
-            // retValue.add (RESPONSE_ERROR);
-            // retValue.add (""+CONTEXT_EXCEPTIONS.create (0).getMessage ());
-            // }
-        } else {
-            throw new InvalidDataException("Invalid db url");
-            // retValue.add (RESPONSE_ERROR);
-            // retValue.add (""+CONTEXT_EXCEPTIONS.create
-            // (1,db_host_url).getMessage ());
+        try {
+            if (db_host_url != null) {
+                final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
+                return oxcox.searchContextByDatabase(db);
+            } else {
+                throw new InvalidDataException("Invalid db url");
+            }
+        } catch (final StorageException e) {
+            log.error(e);
+            throw e;
+        } catch (final InvalidDataException e) {
+            log.error(e);
+            throw e;
         }
-        // log.debug (LOG_RESPONSE+retValue);
-
     }
 
-    @OXThrowsMultiple(category = { Category.CODE_ERROR, Category.USER_INPUT }, desc = { MSG_SQL_QUERY_FAILED, "Invalid data sent by client" }, exceptionId = { 2, 3 }, msg = { MSG_SQL_OPERATION_ERROR, "Invalid data sent-%s" })
-    public Context[] searchByFilestore(final Filestore filestore, final Credentials auth) 
-    throws RemoteException, StorageException, InvalidCredentialsException,InvalidDataException {
-                
-        doNullCheck(filestore,auth);
-        
+    public Context[] searchByFilestore(final Filestore filestore, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+        try {
+            doNullCheck(filestore);
+        } catch (final InvalidDataException e) {
+            new InvalidDataException("Filestore is null");
+            log.error(e);
+            throw e;
+        }        
         doAuthentication(auth);
         
         final String filestore_url = filestore.getUrl();
         log.debug("" + filestore_url);
-        if (null != filestore_url) {
-            final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
-            return oxcox.searchContextByFilestore(filestore);
-
-            // } catch (PoolException ecp) {
-            // log.error (LOG_ERROR,ecp);
-            // retValue.add (RESPONSE_ERROR);
-            // retValue.add (""+ecp.getMessage ());
-            // } catch (SQLException sql) {
-            // log.error (MSG_SQL_OPERATION_ERROR,sql);
-            // retValue.add (RESPONSE_ERROR);
-            // retValue.add (""+CONTEXT_EXCEPTIONS.create (2).getMessage ());
-            // }
-        } else {
-            throw new InvalidDataException("Invalid store url");
-            // retValue.add (RESPONSE_ERROR);
-            // retValue.add (""+CONTEXT_EXCEPTIONS.create
-            // (3,filestore_url).getMessage ());
+        try {
+            if (null != filestore_url) {
+                final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
+                return oxcox.searchContextByFilestore(filestore);
+            } else {
+                throw new InvalidDataException("Invalid store url");
+            }
+        } catch (final StorageException e) {
+            log.error(e);
+            throw e;
+        } catch (final InvalidDataException e) {
+            log.error(e);
+            throw e;
         }
-        // log.debug (LOG_RESPONSE+retValue);
-
     }
 
-    @OXThrowsMultiple(category = { Category.CODE_ERROR, Category.USER_INPUT }, desc = { MSG_SQL_QUERY_FAILED, " " }, exceptionId = { 4, 5 }, msg = { MSG_SQL_OPERATION_ERROR, OXContextException.NO_SUCH_CONTEXT + " %s" })
-    public void changeDatabase(final Context ctx, final Database db_handle, final Credentials auth) 
-    throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException,InvalidDataException {
-        
-        doNullCheck(ctx,db_handle,auth);
-        
+    public void changeDatabase(final Context ctx, final Database db_handle, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
+        try {
+            doNullCheck(ctx, db_handle);
+        } catch (final InvalidDataException e) {
+            new InvalidDataException("Context or database is null");
+            log.error(e);
+            throw e;
+        }        
         doAuthentication(auth);
         
-        final int context_id = ctx.getIdAsInt();
-
-        log.debug("" + context_id + " - " + db_handle);
-        // try {
-        final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
-        if (!tool.existsContext(ctx)) {
-            throw new NoSuchContextException();
-            // throw CONTEXT_EXCEPTIONS.create(5, context_id);
+        log.debug("" + ctx + " - " + db_handle);
+        try {
+            final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
+            if (!tool.existsContext(ctx)) {
+                throw new NoSuchContextException();
+            }
+            final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
+            oxcox.changeDatabase(ctx, db_handle);
+        } catch (final StorageException e) {
+            log.error(e);
+            throw e;
         }
-        final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
-        oxcox.changeDatabase(ctx, db_handle);
-        // TODO: d7
-        // }catch(PoolException ecp){
-        // log.error (LOG_ERROR,ecp);
-        // retValue.add (RESPONSE_ERROR);
-        // retValue.add (""+ecp.getMessage ());
-        // }catch(SQLException sql){
-        // log.error (MSG_SQL_OPERATION_ERROR,sql);
-        // retValue.add (RESPONSE_ERROR);
-        // retValue.add (""+CONTEXT_EXCEPTIONS.create (4).getMessage ());
-        // } catch (final ContextException ctxe) {
-        // throw new StorageException(ctxe);
-        // // log.debug (LOG_CLIENT_ERROR,ctxe);
-        // // retValue.add (RESPONSE_ERROR);
-        // // retValue.add (""+ctxe.getMessage ());
-        // // }catch(RemoteException remi){
-        // // log.error (LOG_ERROR,remi);
-        // // retValue.add (RESPONSE_ERROR);
-        // // retValue.add (""+remi.getMessage ());
-        // }
-
-        // log.debug (LOG_RESPONSE+retValue);
-
     }
 
-    @OXThrowsMultiple(category = { Category.CODE_ERROR, Category.USER_INPUT, Category.USER_INPUT }, desc = { MSG_SQL_QUERY_FAILED, " ", "invalid quota size" }, exceptionId = { 6, 7, 8 }, msg = { MSG_SQL_OPERATION_ERROR, OXContextException.NO_SUCH_CONTEXT + " %s", "Invalid quota size" })
-    public void changeStorageData(final Context ctx, final Filestore filestore, final Credentials auth) 
-    throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException,InvalidDataException {
-        
-        doNullCheck(ctx,filestore,auth);
-        
+    public void changeStorageData(final Context ctx, final Filestore filestore, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
+        try {
+            doNullCheck(ctx, filestore);
+        } catch (final InvalidDataException e) {
+            new InvalidDataException("Context or filestore is null");
+            log.error(e);
+            throw e;
+        }        
         doAuthentication(auth);
         
         final int context_id = ctx.getIdAsInt();
 
         log.debug("" + context_id + " - " + filestore);
-        // try {
-        final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
-        if (!tool.existsContext(ctx)) {
-            throw new NoSuchContextException();
-            // throw CONTEXT_EXCEPTIONS.create(7, context_id);
-        }
-        final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
-        oxcox.changeStorageData(ctx, filestore);
-        // TODO: d7
-        // }catch(PoolException ecp){
-        // log.error (LOG_ERROR,ecp);
-        // retValue.add (RESPONSE_ERROR);
-        // retValue.add (""+ecp.getMessage ());
-        // } catch (final ContextException ctxe) {
-        // throw new StorageException(ctxe);
-        // log.debug (LOG_CLIENT_ERROR,ctxe);
-        // retValue.add (RESPONSE_ERROR);
-        // retValue.add (""+ctxe.getMessage ());
-        // }catch(SQLException sql){
-        // log.error (MSG_SQL_OPERATION_ERROR,sql);
-        // retValue.add (RESPONSE_ERROR);
-        // retValue.add (""+CONTEXT_EXCEPTIONS.create (6).getMessage ());
-        // }catch(QuotaException genxo){
-        // log.debug (LOG_CLIENT_ERROR,genxo);
-        // retValue.add (RESPONSE_ERROR);
-        // retValue.add (""+CONTEXT_EXCEPTIONS.create (8).getMessage ());
-        // }
-        // log.debug (LOG_RESPONSE+retValue);
-    }
-
-    @OXThrowsMultiple(category = { Category.CODE_ERROR, Category.USER_INPUT, Category.CODE_ERROR, Category.USER_INPUT, Category.USER_INPUT, Category.USER_INPUT, Category.CODE_ERROR, Category.CODE_ERROR, Category.CODE_ERROR, Category.CODE_ERROR, Category.CODE_ERROR, Category.USER_INPUT }, desc = { MSG_SQL_QUERY_FAILED, " ", "not implemented", " ", " ", " ", " ", " ", " ", " ", " ", " " }, exceptionId = { 9, 10, 11, 40, 41, 42, 43, 44, 45, 46, 47, 49 }, msg = { MSG_SQL_OPERATION_ERROR, OXContextException.NO_SUCH_CONTEXT + " %s", "Not implemented", OXUtilException.NO_SUCH_STORE + " %s", OXUtilException.NO_SUCH_REASON + " %s", OXContextException.CONTEXT_DISABLED + " %s", "Unable to disable Context %s", "Unable to get Context data %s", "Unable to get filestore directory %s", "Unable to list filestores", "Unable to move filestore", "Src and dst store id is the same: %s" })
-    public String moveContextFilestore(final Context ctx, final Filestore dst_filestore_id, final MaintenanceReason reason, final Credentials auth)
-    throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException,InvalidDataException {
-        
-        doNullCheck(ctx,dst_filestore_id,reason,auth);
-        
-        doAuthentication(auth);
-        
-        Context retval = null;
-        final int context_id = ctx.getIdAsInt();
-        log.debug("" + ctx.getIdAsInt() + " - " + dst_filestore_id);
         try {
             final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
             if (!tool.existsContext(ctx)) {
                 throw new NoSuchContextException();
-                // throw CONTEXT_EXCEPTIONS.create(10, ctx.getIdAsInt());
             }
-            if (!tool.existsStore(dst_filestore_id.getId())) {
-                throw CONTEXT_EXCEPTIONS.create(40, dst_filestore_id);
-            }
-            if (!tool.existsReason(reason.getId())) {
-                throw CONTEXT_EXCEPTIONS.create(41, reason.getId());
-            }
-            if (!tool.isContextEnabled(ctx)) {
-                throw CONTEXT_EXCEPTIONS.create(42, ctx.getIdAsInt());
+            final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
+            oxcox.changeStorageData(ctx, filestore);
+        } catch (final StorageException e) {
+            log.error(e);
+            throw e;
+        }        
+    }
+
+    public String moveContextFilestore(final Context ctx, final Filestore dst_filestore, final MaintenanceReason reason, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, NoSuchFilestoreException, NoSuchReasonException, OXContextException {
+        try {
+            doNullCheck(ctx, dst_filestore, reason);
+        } catch (final InvalidDataException e) {
+            new InvalidDataException("Context or filestore or reason is null");
+            log.error(e);
+            throw e;
+        }        
+        doAuthentication(auth);
+        
+        Context retval = null;
+        log.debug("" + ctx.getIdAsInt() + " - " + dst_filestore);
+        try {
+            final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
+            if (!tool.existsContext(ctx)) {
+                throw new NoSuchContextException();
+            } else if (!tool.existsStore(dst_filestore.getId())) {
+                throw new NoSuchFilestoreException();
+            } else if (!tool.existsReason(reason.getId())) {
+                throw new NoSuchReasonException();
+            } else if (!tool.isContextEnabled(ctx)) {
+                throw new OXContextException("Unable to disable Context " + ctx.getIdAsString());
             }
 
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
 
-            // disable context
-            try {
-                oxcox.disable(ctx, reason);
-            } catch (final StorageException e) {
-                throw CONTEXT_EXCEPTIONS.create(43, context_id);
-            }
-
-            // find old context store data
-            try {
-                retval = oxcox.getSetup(ctx);
-            } catch (final StorageException e) {
-                reEnableContext(ctx, oxcox);
-                throw CONTEXT_EXCEPTIONS.create(44, context_id);
-            }
+            oxcox.disable(ctx, reason);
+            retval = oxcox.getSetup(ctx);
 
             final Filestore fs = retval.getFilestore();
             final int srcStore_id = fs.getId();
 
-            if (srcStore_id == dst_filestore_id.getId()) {
+            if (srcStore_id == dst_filestore.getId()) {
                 reEnableContext(ctx, oxcox);
-                throw CONTEXT_EXCEPTIONS.create(49, dst_filestore_id);
+                throw new OXContextException("Src and dst store id is the same: " + dst_filestore);
             }
 
             final String ctxdir = fs.getName();
             if (ctxdir == null) {
                 reEnableContext(ctx, oxcox);
-                throw CONTEXT_EXCEPTIONS.create(45, context_id);
+                throw new OXContextException("Unable to get filestore directory " + ctx.getIdAsString());
             }
 
             // get src and dst path from filestores
             final OXUtilStorageInterface oxu = OXUtilStorageInterface.getInstance();
-            Filestore[] fstores = null;
             try {
-                fstores = oxu.listFilestores("*");
+                final Filestore[] fstores = oxu.listFilestores("*");
 
-                String src = null;
-                String dst = null;
+                final StringBuilder src = new StringBuilder();
+                final StringBuilder dst = new StringBuilder();
 
                 for (final Filestore elem : fstores) {
                     final String s_url = elem.getUrl();
                     final int id = elem.getId();
+                    final URI uri = new URI(s_url);
                     if (id == srcStore_id) {
-                        final URI uri = new URI(s_url);
-                        src = uri.getPath();
-                        if (!dst.endsWith("/")) {
-                            dst += "/";
-                        }
-                        dst += ctxdir;
-                        if (dst.endsWith("/")) {
-                            dst = dst.substring(0, dst.length() - 1);
-                        }
-                    } else if (id == dst_filestore_id.getId()) {
-                        final URI uri = new URI(s_url);
-                        dst = uri.getPath();
-                        if (!dst.endsWith("/")) {
-                            dst += "/";
-                        }
-                        dst += ctxdir;
-                        if (dst.endsWith("/")) {
-                            dst = dst.substring(0, dst.length() - 1);
-                        }
+                        builduppath(ctxdir, src, uri);
+                    } else if (id == dst_filestore.getId()) {
+                        builduppath(ctxdir, dst, uri);
                     }
                 }
 
-                if (src == null || dst == null) {
-                    if (src == null) {
-                        log.error("src is null");
-                    }
-                    if (dst == null) {
-                        log.error("dst is null");
-                    }
+                if (src == null) {
+                    log.error("src is null");
                     reEnableContext(ctx, oxcox);
-                    throw CONTEXT_EXCEPTIONS.create(47);
+                    throw new OXContextException("Unable to move filestore");
+                } else if (dst == null) {
+                    log.error("dst is null");
+                    reEnableContext(ctx, oxcox);
+                    throw new OXContextException("Unable to move filestore");
                 }
 
-                final FilestoreDataMover fsdm = new FilestoreDataMover(src, dst, context_id, dst_filestore_id.getId());
-                // TODO: d7 set return value of jobid in addJob, so we can
-                // return the id here
-                ClientAdminThreadExtended.ajx.addJob(fsdm, context_id, dst_filestore_id.getId(), reason.getId(), AdminJob.Mode.MOVE_FILESTORE);
+                final FilestoreDataMover fsdm = new FilestoreDataMover(src.toString(), dst.toString(), ctx, dst_filestore);
+                TaskManager.getInstance().addJob(fsdm, "movefilestore", "move context " + ctx.getIdAsString() + " to filestore " + dst_filestore.getId());
 
             } catch (final StorageException e) {
                 reEnableContext(ctx, oxcox);
-                throw CONTEXT_EXCEPTIONS.create(46);
+                throw new OXContextException("Unable to list filestores");
+            } catch (final IOException e) {
+                reEnableContext(ctx, oxcox);
+                throw new OXContextException("Unable to list filestores");
             }
-            // } catch (PoolException ecp) {
-            // log.error(LOG_ERROR, ecp);
-            // retValue.add(RESPONSE_ERROR);
-            // retValue.add("" + ecp.getMessage());
-            // } catch (SQLException sql) {
-            // log.error(MSG_SQL_OPERATION_ERROR, sql);
-            // retValue.add(RESPONSE_ERROR);
-            // retValue.add("" + CONTEXT_EXCEPTIONS.create(9).getMessage());
-        } catch (final ContextException ctxe) {
-            throw new StorageException(ctxe);
-            // log.debug(LOG_CLIENT_ERROR, ctxe);
-            // retValue.add(RESPONSE_ERROR);
-            // retValue.add("" + ctxe.getMessage());
-            // } catch (RemoteException e) {
-            // log.debug(LOG_ERROR, e);
-            // retValue.add(RESPONSE_ERROR);
-            // retValue.add("" + e.getMessage());
         } catch (final URISyntaxException e) {
             throw new StorageException(e);
-            // log.debug(LOG_ERROR, e);
-            // retValue.add(RESPONSE_ERROR);
-            // retValue.add("" + e.getMessage());
+        } catch (final NoSuchFilestoreException e) {
+            log.error(e);
+            throw e;
+        } catch (final NoSuchReasonException e) {
+            log.error(e);
+            throw e;
+        } catch (final OXContextException e) {
+            log.error(e);
+            throw e;
         }
-        // log.debug(LOG_RESPONSE + retValue);
-        // return retValue;
         return null;
     }
 
-    @OXThrowsMultiple(category = { Category.CODE_ERROR, Category.USER_INPUT, Category.CODE_ERROR, Category.USER_INPUT, Category.USER_INPUT, Category.USER_INPUT }, desc = { MSG_SQL_QUERY_FAILED, " ", "not implemented", "", "", "" }, exceptionId = { 12, 13, 14, 37, 38, 39 }, msg = { MSG_SQL_OPERATION_ERROR, OXContextException.NO_SUCH_CONTEXT + " %s", "Not implemented", OXUtilException.NO_SUCH_REASON + " %s", "Context %s is already disabled.Move already in progress?", "Database with id %s is NOT a master!" })
-    public String moveContextDatabase(final Context ctx, final Database database_id, final MaintenanceReason reason, final Credentials auth) 
-    throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException,InvalidDataException, DatabaseUpdateException {
-        
-        doNullCheck(ctx,database_id,reason,auth);
+    public int moveContextDatabase(final Context ctx, final Database db, final MaintenanceReason reason, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException, OXContextException {
+        doNullCheck(ctx,db,reason);
         
         doAuthentication(auth);
         
-        final String retval = null;
         final int context_id = ctx.getIdAsInt();
         final int reason_id = reason.getId();
-        log.debug("" + context_id + " - " + database_id + " - " + reason_id);
+        if (log.isDebugEnabled()) {
+            log.debug("" + context_id + " - " + db + " - " + reason_id);
+        }
         try {
             final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
             if (!tool.existsReason(reason_id)) {
-                throw CONTEXT_EXCEPTIONS.create(37, reason_id);
+                // FIXME: Util in context???
+                throw new OXContextException(OXUtilException.NO_SUCH_REASON);
             }
-
             if (!tool.existsContext(ctx)) {
                 throw new NoSuchContextException();
-                // throw CONTEXT_EXCEPTIONS.create(13, context_id);
             }
-
             if( tool.schemaBeingLockedOrNeedsUpdate(ctx) ) {
-                throw new DatabaseUpdateException("Database must be updated or currently is beeing updated");
+                throw new DatabaseUpdateException("Database must be updated or is currently beeing updated");
             }
-
             if (!tool.isContextEnabled(ctx)) {
-                throw CONTEXT_EXCEPTIONS.create(38, context_id);
+                throw new OXContextException(OXContextException.CONTEXT_DISABLED);
             }
-
-            if (!tool.isMasterDatabase(database_id.getId())) {
-                throw CONTEXT_EXCEPTIONS.create(39, database_id);
+            if (!tool.isMasterDatabase(db.getId())) {
+                throw new OXContextException("Database with id " + db.getId() + " is NOT a master!");
             }
+            final DatabaseDataMover ddm = new DatabaseDataMover(ctx, db, reason);
 
-            final DatabaseDataMover ddm = new DatabaseDataMover(context_id, database_id.getId(), reason_id);
-
-            // add to job queue
-            // retValue.clear();
-            // retValue.add("OK");
-            ClientAdminThreadExtended.ajx.addJob(ddm, context_id, database_id.getId(), reason_id, AdminJob.Mode.MOVE_DATABASE);
-            // TODO: d7
-            // } catch (PoolException ecp) {
-            // log.error(LOG_ERROR, ecp);
-            // retValue.add(RESPONSE_ERROR);
-            // retValue.add("" + ecp.getMessage());
-            // } catch (SQLException sql) {
-            // log.error(MSG_SQL_OPERATION_ERROR, sql);
-            // retValue.add(RESPONSE_ERROR);
-            // retValue.add("" + CONTEXT_EXCEPTIONS.create(12).getMessage());
-        } catch (final ContextException ctxe) {
-            throw new StorageException(ctxe);
-            // log.debug(LOG_CLIENT_ERROR, ctxe);
-            // retValue.add(RESPONSE_ERROR);
-            // retValue.add("" + ctxe.getMessage());
+            return TaskManager.getInstance().addJob(ddm, "movedatabase", "move context " + context_id + "to database " + db.getId());
+//            ClientAdminThreadExtended.ajx.addJob(ddm, context_id, db.getId(), reason_id, AdminJob.Mode.MOVE_DATABASE);
+        } catch (final OXContextException e) {
+            log.error(e);
+            throw e;
+        } catch (final DatabaseUpdateException e) {
+            log.error(e);
+            throw e;
+        } catch (final NoSuchContextException e) {
+            log.error(e);
+            throw e;
         }
-
-        // log.debug(LOG_RESPONSE + retValue);
-        return retval;
     }
 
-    @OXThrowsMultiple(category = { Category.CODE_ERROR }, desc = { MSG_SQL_QUERY_FAILED }, exceptionId = { 15 }, msg = { MSG_SQL_OPERATION_ERROR })
     public void enableAll(final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException {
-        
-        
-        
         doAuthentication(auth);
         
-        log.debug("");
-        final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
-        oxcox.enableAll();
-        // TODO: d7
-        // }catch(PoolException popx){
-        // log.error (LOG_ERROR,popx);
-        // retValue.add (RESPONSE_ERROR);
-        // retValue.add (""+popx.getMessage ());
-        // }catch(SQLException sql){
-        // log.error (MSG_SQL_OPERATION_ERROR,sql);
-        // retValue.add (RESPONSE_ERROR);
-        // retValue.add (""+CONTEXT_EXCEPTIONS.create (15).getMessage ());
-        // }
-        // log.debug (LOG_RESPONSE+retValue);
+        try {
+            final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
+            oxcox.enableAll();
+        } catch (final StorageException e) {
+            log.error(e);
+            throw e;
+        }        
     }
 
-    @OXThrowsMultiple(category = { Category.CODE_ERROR, Category.USER_INPUT }, desc = { MSG_SQL_QUERY_FAILED, "Invalid data" }, exceptionId = { 16, 17 }, msg = { MSG_SQL_OPERATION_ERROR, OXUtilException.NO_SUCH_REASON + " %s" })
-    public void disableAll(final MaintenanceReason reason, final Credentials auth)
-    throws RemoteException, StorageException, InvalidCredentialsException,InvalidDataException {
+    public void disableAll(final MaintenanceReason reason, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchReasonException {
         
         doNullCheck(reason,auth);
         
@@ -507,355 +391,246 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
         try {
             final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
             if (!tool.existsReason(reason_id)) {
-                throw CONTEXT_EXCEPTIONS.create(17);
+                throw new NoSuchReasonException();
             }
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
             oxcox.disableAll(reason);
-            // TODO: d7
-            // }catch(PoolException popx){
-            // log.error (LOG_ERROR,popx);
-            // retValue.add (RESPONSE_ERROR);
-            // retValue.add (""+popx.getMessage ());
-            // }catch(SQLException sql){
-            // log.error (MSG_SQL_OPERATION_ERROR,sql);
-            // retValue.add (RESPONSE_ERROR);
-            // retValue.add (""+CONTEXT_EXCEPTIONS.create (16).getMessage ());
-        } catch (final ContextException ctxe) {
-            throw new StorageException(ctxe);
-            // log.debug (LOG_CLIENT_ERROR,ctxe);
-            // retValue.add (RESPONSE_ERROR);
-            // retValue.add (""+ctxe.getMessage ());
+        } catch (final StorageException e) {
+            log.error(e);
+            throw e;
+        } catch (final NoSuchReasonException e) {
+            log.error(e);
+            throw e;
         }
-        // log.debug (LOG_RESPONSE+retValue);
+        
     }
 
-    @OXThrowsMultiple(category = { Category.USER_INPUT, Category.CODE_ERROR, Category.SETUP_ERROR }, desc = { " ", MSG_SQL_QUERY_FAILED, MSG_INTERNAL_ERROR }, exceptionId = { 21, 22, 23 }, msg = { OXContextException.NO_SUCH_CONTEXT + " %s", MSG_SQL_OPERATION_ERROR, MSG_INTERNAL_ERROR + "-%s" })
-    public void delete(final Context ctx, final Credentials auth) 
-    throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, DatabaseUpdateException {
+    public void delete(final Context ctx, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, DatabaseUpdateException, InvalidDataException {
+        try {
+            doNullCheck(ctx);
+        } catch (InvalidDataException e) {
+            final InvalidDataException invalidDataException = new InvalidDataException("Context is null");
+            log.error(invalidDataException);
+            throw invalidDataException;
+        }
         
-       
         doAuthentication(auth);
         
         final int context_id = ctx.getIdAsInt();
         log.debug("" + context_id);
-        // try {
-        final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
-        if (!tool.existsContext(ctx)) {
-            throw new NoSuchContextException();
-            // throw CONTEXT_EXCEPTIONS.create(21, context_id);
-        }
-        
-        if( tool.schemaBeingLockedOrNeedsUpdate(ctx) ) {
-            throw new DatabaseUpdateException("Database must be updated or currently is beeing updated");
-        }
+        try {
+            final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
+            if (!tool.existsContext(ctx)) {
+                throw new NoSuchContextException();
+            }
 
-        final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
-        oxcox.delete(ctx);
-        // }catch(SQLException sql){
-        // log.error (MSG_SQL_OPERATION_ERROR,sql);
-        // retValue.add (RESPONSE_ERROR);
-        // retValue.add (""+CONTEXT_EXCEPTIONS.create (22).getMessage ());
-        // }catch(PoolException popx){
-        // log.error (LOG_ERROR,popx);
-        // retValue.add (RESPONSE_ERROR);
-        // retValue.add (""+popx.getMessage ());
-        // }catch(DBPoolingException pexp){
-        // log.error ("Problem with database connection pool",pexp);
-        // retValue.add (RESPONSE_ERROR);
-        // retValue.add (""+pexp.getMessage ());
-        // } catch (final ContextException ctxe) {
-        // throw new StorageException(ctxe);
-        // log.debug (LOG_CLIENT_ERROR,ctxe);
-        // retValue.add (RESPONSE_ERROR);
-        // retValue.add (""+ctxe.getMessage ());
-        // }catch(OXContextException popx){
-        // log.error (LOG_ERROR,popx);
-        // retValue.add (RESPONSE_ERROR);
-        // retValue.add (""+CONTEXT_EXCEPTIONS.create (23,popx.getMessage
-        // ()).getMessage ());
-        // }catch(RemoteException popx){
-        // log.error (LOG_ERROR,popx);
-        // retValue.add (RESPONSE_ERROR);
-        // retValue.add (""+CONTEXT_EXCEPTIONS.create (23,popx.getMessage
-        // ()).getMessage ());
-        // }catch(com.openexchange.groupware.contexts.ContextException
-        // pexp3){
-        // log.error ("Context error in OX delete API ",pexp3);
-        // retValue.add (RESPONSE_ERROR);
-        // retValue.add (""+pexp3.getMessage ());
-        // }catch(DeleteFailedException pexp4){
-        // log.error ("Delete error in OX delete API ",pexp4);
-        // retValue.add (RESPONSE_ERROR);
-        // retValue.add (""+pexp4.getMessage ());
-        // }catch(LdapException pexp5){
-        // log.error ("Delete error in OX delete API ",pexp5);
-        // retValue.add (RESPONSE_ERROR);
-        // retValue.add (""+pexp5.getMessage ());
-        // }
-        // log.debug (LOG_RESPONSE+retValue);
+            if( tool.schemaBeingLockedOrNeedsUpdate(ctx) ) {
+                throw new DatabaseUpdateException("Database must be updated or currently is beeing updated");
+            }
+
+            final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
+            oxcox.delete(ctx);
+        } catch (final StorageException e) {
+            log.error(e);
+            throw e;
+        } catch (final NoSuchContextException e) {
+            log.error(e);
+            throw e;
+        } catch (final DatabaseUpdateException e) {
+            log.error(e);
+            throw e;
+        }
     }
 
-    public Context[] search(final String search_pattern, final Credentials auth) 
-    throws RemoteException, StorageException, InvalidCredentialsException,InvalidDataException {
-    
-        doNullCheck(search_pattern,auth);
-        
+    public Context[] search(final String search_pattern, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+        try {
+            doNullCheck(search_pattern);
+        } catch (final InvalidDataException e) {
+            final InvalidDataException invalidDataException = new InvalidDataException("Search pattern is null");
+            log.error(invalidDataException);
+            throw invalidDataException;
+        }        
         doAuthentication(auth);
         
         log.debug("" + search_pattern);
         
-            // try{
+        try {
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
             return oxcox.searchContext(search_pattern);
-            // TODO: d7
-            // }catch(SQLException sql){
-            // log.error (MSG_SQL_OPERATION_ERROR,sql);
-            // retValue.add (RESPONSE_ERROR);
-            // retValue.add (""+CONTEXT_EXCEPTIONS.create (25).getMessage ());
-            // }catch(PoolException popx){
-            // log.error (LOG_ERROR,popx);
-            // retValue.add (RESPONSE_ERROR);
-            // retValue.add (""+popx.getMessage ());
-            // }
-        
-            // retValue.add (RESPONSE_ERROR);
-            // retValue.add (""+CONTEXT_EXCEPTIONS.create
-            // (24,search_pattern).getMessage ());
-        
-        // log.debug(LOG_RESPONSE + retval);
-
+        } catch (final StorageException e) {
+            log.error(e);
+            throw e;
+        }        
     }
 
-    @OXThrowsMultiple(category = { Category.USER_INPUT, Category.CODE_ERROR, Category.USER_INPUT, Category.USER_INPUT }, desc = { " ", MSG_SQL_QUERY_FAILED, "Invalid data", "context is disabled" }, exceptionId = { 26, 27, 28, 29 }, msg = { OXContextException.NO_SUCH_CONTEXT + " %s", MSG_SQL_OPERATION_ERROR, OXUtilException.NO_SUCH_REASON + " %s", "Context %s is already disabled" })
-    public void disable(final Context ctx, final MaintenanceReason reason, final Credentials auth) 
-    throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException,InvalidDataException {
-        
-        doNullCheck(ctx,reason,auth);
-        
+    public void disable(final Context ctx, final MaintenanceReason reason, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, NoSuchReasonException, OXContextException {
+        try {
+            doNullCheck(ctx, reason);
+        } catch (final InvalidDataException e) {
+            new InvalidDataException("Context or reason is null");
+        }        
         doAuthentication(auth);
         
         final int context_id = ctx.getIdAsInt();
         final int reason_id = reason.getId();
         log.debug("" + context_id + " - " + reason_id);
-        // try {
-        final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
-        if (!tool.existsContext(ctx)) {
-            throw new NoSuchContextException();
-            // throw CONTEXT_EXCEPTIONS.create(26, context_id);
+        try {
+            // try {
+            final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
+            if (!tool.existsContext(ctx)) {
+                throw new NoSuchContextException();
+            }
+            if (!tool.existsReason(reason_id)) {
+                throw new NoSuchReasonException();
+            }
+            if (!tool.isContextEnabled(ctx)) {
+                throw new OXContextException(OXContextException.CONTEXT_DISABLED);
+            }
+            final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
+            oxcox.disable(ctx, reason);
+        } catch (final NoSuchContextException e) {
+            log.error(e);
+            throw e;
+        } catch (final NoSuchReasonException e) {
+            log.error(e);
+            throw e;
+        } catch (final StorageException e) {
+            log.error(e);
+            throw e;
+        } catch (final OXContextException e) {
+            log.error(e);
+            throw e;
         }
-        if (!tool.existsReason(reason_id)) {
-            throw new InvalidDataException("No such reason");
-            // throw CONTEXT_EXCEPTIONS.create(28, reason_id);
-        }
-        if (!tool.isContextEnabled(ctx)) {
-            throw new InvalidDataException("This context is already disabled");
-            // throw CONTEXT_EXCEPTIONS.create(29, context_id);
-        }
-        final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
-        oxcox.disable(ctx, reason);
-        // } catch (final StorageException e) {
-        // throw new RemoteException("Error in underlying Storage", e);
-        // TODO: d7: Add messages to the underlying
-        // log.error (MSG_SQL_OPERATION_ERROR,sql);
-        // retValue.add (RESPONSE_ERROR);
-        // retValue.add (""+CONTEXT_EXCEPTIONS.create (27).getMessage ());
-        // }catch(PoolException popx){
-        // log.error (LOG_ERROR,popx);
-        // retValue.add (RESPONSE_ERROR);
-        // retValue.add (""+popx.getMessage ());
-        // } catch (final ContextException ctxe) {
-        // log.debug(LOG_CLIENT_ERROR, ctxe);
-        // // retValue.add (RESPONSE_ERROR);
-        // // retValue.add (""+ctxe.getMessage ());
-        // throw new RemoteException("Context exception occured", ctxe);
-        // }
-
     }
 
-    @OXThrowsMultiple(category = { Category.USER_INPUT, Category.CODE_ERROR }, desc = { " ", MSG_SQL_QUERY_FAILED }, exceptionId = { 30, 31 }, msg = { OXContextException.NO_SUCH_CONTEXT + " %s", MSG_SQL_OPERATION_ERROR })
-    public void enable(final Context ctx, final Credentials auth) 
-    throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException {
-        
-        
+    public void enable(final Context ctx, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
+        try {
+            doNullCheck(ctx);
+        } catch (InvalidDataException e1) {
+            final InvalidDataException invalidDataException = new InvalidDataException("Context is null");
+            log.error(invalidDataException);
+            throw invalidDataException;
+        }
         
         doAuthentication(auth);
         
         final int context_id = ctx.getIdAsInt();
         log.debug("" + context_id);
-        // try {
-        final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
-        if (!tool.existsContext(ctx)) {
-            throw new NoSuchContextException();
-            // throw CONTEXT_EXCEPTIONS.create(30, context_id);
+        try {
+            final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
+            if (!tool.existsContext(ctx)) {
+                throw new NoSuchContextException();
+            }
+            final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
+            oxcox.enable(ctx);
+        } catch (final StorageException e) {
+            log.error(e);
+            throw e;
+        } catch (final NoSuchContextException e) {
+            log.error(e);
+            throw e;
         }
-        final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
-        oxcox.enable(ctx);
-        // TODO: d7
-        // } catch (SQLException sql) {
-        // log.error (MSG_SQL_OPERATION_ERROR,sql);
-        // retValue.add (RESPONSE_ERROR);
-        // retValue.add (""+CONTEXT_EXCEPTIONS.create (31).getMessage ());
-        // } catch (PoolException popx) {
-        // log.error (LOG_ERROR,popx);
-        // retValue.add (RESPONSE_ERROR);
-        // retValue.add (""+popx.getMessage ());
-        // } catch (final ContextException ctxe) {
-        // throw new StorageException(ctxe);
-        // // log.debug (LOG_CLIENT_ERROR,ctxe);
-        // // retValue.add (RESPONSE_ERROR);
-        // // retValue.add (""+ctxe.getMessage ());
-        // }
-        // log.debug (LOG_RESPONSE+retValue);
     }
 
-    @OXThrowsMultiple(category = { Category.USER_INPUT, Category.CODE_ERROR }, desc = { " ", MSG_SQL_QUERY_FAILED }, exceptionId = { 32, 33 }, msg = { OXContextException.NO_SUCH_CONTEXT + " %s", MSG_SQL_OPERATION_ERROR })
-    public Context getSetup(final Context ctx, final Credentials auth) 
-    throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException {
+    public Context getSetup(final Context ctx, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
+        try {
+            doNullCheck(ctx);
+        } catch (InvalidDataException e1) {
+            final InvalidDataException invalidDataException = new InvalidDataException("Context is null");
+            log.error(invalidDataException);
+            throw invalidDataException;
+        }
         
         doAuthentication(auth);
         
         final int context_id = ctx.getIdAsInt();
         log.debug("" + context_id);
-        // try {
-        final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
-        if (!tool.existsContext(ctx)) {
-            throw new NoSuchContextException();
-            // throw CONTEXT_EXCEPTIONS.create(32, context_id);
+        try {
+            final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
+            if (!tool.existsContext(ctx)) {
+                throw new NoSuchContextException();
+            }
+            final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
+            return oxcox.getSetup(ctx);
+        } catch (final StorageException e) {
+            log.error(e);
+            throw e;
+        } catch (final NoSuchContextException e) {
+            log.error(e);
+            throw e;
         }
-        final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
-        return oxcox.getSetup(ctx);
-        // TODO: d7
-        // }catch(SQLException sql){
-        // log.error (MSG_SQL_OPERATION_ERROR,sql);
-        // retValue.add (RESPONSE_ERROR);
-        // retValue.add (""+CONTEXT_EXCEPTIONS.create (33).getMessage ());
-        // }catch(PoolException popx){
-        // log.error (LOG_ERROR,popx);
-        // retValue.add (RESPONSE_ERROR);
-        // retValue.add (""+popx.getMessage ());
-        // } catch (final ContextException ctxe) {
-        // throw new StorageException(ctxe);
-        // // log.debug (LOG_CLIENT_ERROR,ctxe);
-        // // retValue.add (RESPONSE_ERROR);
-        // // retValue.add (""+ctxe.getMessage ());
-        // }
-        // log.debug (LOG_RESPONSE+retValue);
     }
 
-    @OXThrowsMultiple(category = { Category.USER_INPUT, Category.CODE_ERROR }, desc = { " ", MSG_SQL_QUERY_FAILED }, exceptionId = { 34, 35 }, msg = { OXContextException.NO_SUCH_CONTEXT + " %s", MSG_SQL_OPERATION_ERROR })
-    public void changeQuota(final Context ctx, final long quota_max, final Credentials auth) 
-    throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException,InvalidDataException {
-        
-        doNullCheck(ctx,auth);
-        
+    public void changeQuota(final Context ctx, final long quota_max, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
+        try {
+            doNullCheck(ctx);
+        } catch (final InvalidDataException e) {
+            final InvalidDataException invalidDataException = new InvalidDataException("Context is null");
+            log.error(invalidDataException);
+            throw e;
+        }        
         doAuthentication(auth);
         
         final int context_id = ctx.getIdAsInt();
         log.debug("" + context_id + " - " + quota_max);
-        // try {
-        final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
-        if (!tool.existsContext(ctx)) {
-            throw new NoSuchContextException();
-            // throw CONTEXT_EXCEPTIONS.create(34, context_id);
+        try {
+            final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
+            if (!tool.existsContext(ctx)) {
+                throw new NoSuchContextException();
+            }
+            final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
+            oxcox.changeQuota(ctx, quota_max);
+        } catch (final StorageException e) {
+            log.error(e);
+            throw e;
+        } catch (final NoSuchContextException e) {
+            log.error(e);
+            throw e;
         }
-        final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
-        oxcox.changeQuota(ctx, quota_max);
-        // TODO: d7
-        // } catch (SQLException sql) {
-        // log.error(MSG_SQL_OPERATION_ERROR, sql);
-        // retValue.add(RESPONSE_ERROR);
-        // retValue.add("" + CONTEXT_EXCEPTIONS.create(35).getMessage());
-        // } catch (PoolException popx) {
-        // log.error(LOG_ERROR, popx);
-        // retValue.add(RESPONSE_ERROR);
-        // retValue.add("" + popx.getMessage());
-        // } catch (final ContextException ctxe) {
-        // throw new StorageException(ctxe);
-        // // log.debug(LOG_CLIENT_ERROR, ctxe);
-        // // retValue.add(RESPONSE_ERROR);
-        // // retValue.add("" + ctxe.getMessage());
-        // }
-        // log.debug(LOG_RESPONSE + retValue);
     }
 
-    @OXThrowsMultiple(category = { Category.USER_INPUT, Category.CODE_ERROR }, desc = { "invalid data", MSG_SQL_QUERY_FAILED }, exceptionId = { 24, 25 }, msg = { "Invalid data sent-%s", MSG_SQL_OPERATION_ERROR })
-    public Context create(final Context ctx, final User admin_user, final long quota_max, final Credentials auth) 
-    throws RemoteException, StorageException, InvalidCredentialsException,InvalidDataException, ContextExistsException {
-        
+    public Context create(final Context ctx, final User admin_user, final long quota_max, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException {
         doNullCheck(ctx,admin_user,auth);
         
         doAuthentication(auth);
         
-        final int context_id = ctx.getIdAsInt();
-        log.debug("" + context_id + " - " + quota_max + " - " + admin_user);
-        //try {
-        final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
-        if (tool.existsContext(ctx)) {
-            throw new ContextExistsException();
-        }
-
-        if (!admin_user.attributesforcreateset()) {
-            throw new InvalidDataException("Mandatory fields not set");               
-        } 
-
-        final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
-        // MonitoringInfos.incrementNumberOfCreateContextCalled();
-        return oxcox.create(ctx, admin_user, quota_max);
-        // TODO: cutmasta
-        // } catch (SQLException sql) {
-        // log.error(MSG_SQL_OPERATION_ERROR, sql);
-        // retValue.add(RESPONSE_ERROR);
-        // retValue.add("" + CONTEXT_EXCEPTIONS.create(18).getMessage());
-        //} catch (final ContextException ctxe) {
-        //    throw new StorageException(ctxe);
-        // log.debug(LOG_CLIENT_ERROR, ctxe);
-        // retValue.add(RESPONSE_ERROR);
-        // retValue.add("" + ctxe.getMessage());
-        // } catch (NoSuchAlgorithmException ctxe) {
-        // log.debug(LOG_ERROR, ctxe);
-        // retValue.add(RESPONSE_ERROR);
-        // retValue.add(""
-        // + CONTEXT_EXCEPTIONS.create(20, ctxe.getMessage())
-        // .getMessage());
-        // } catch (UserException ctxe) {
-        // log.debug(LOG_CLIENT_ERROR, ctxe);
-        // retValue.add(RESPONSE_ERROR);
-        // retValue.add("" + ctxe.getMessage());
-        // } catch (PoolException popx) {
-        // log.error(LOG_ERROR, popx);
-        // retValue.add(RESPONSE_ERROR);
-        // retValue.add("" + popx.getMessage());
-        // } catch (DBPoolingException popx) {
-        // log.error(LOG_ERROR, popx);
-        // retValue.add(RESPONSE_ERROR);
-        // retValue.add("" + popx.getMessage());
-        // } catch (OXContextException popx) {
-        // log.error(LOG_ERROR, popx);
-        // retValue.add(RESPONSE_ERROR);
-        // retValue.add(""
-        // + CONTEXT_EXCEPTIONS.create(20, popx.getMessage())
-        // .getMessage());
-        // } catch (OXException popx) {
-        // log.error(LOG_ERROR, popx);
-        // retValue.add(RESPONSE_ERROR);
-        // retValue.add("" + CONTEXT_EXCEPTIONS.create(36).getMessage());
-        // } catch (RemoteException popx) {
-        // log.error(LOG_ERROR, popx);
-        // retValue.add(RESPONSE_ERROR);
-        // retValue.add(""
-        // + CONTEXT_EXCEPTIONS.create(20, popx.getMessage())
-        // .getMessage());
-        //}
-        // log.debug(LOG_RESPONSE + retValue);
-    }
-
-    @OXThrowsMultiple(category = { Category.CODE_ERROR }, desc = { " " }, exceptionId = { 48 }, msg = { "Unable to disable Context %s" })
-    private void reEnableContext(final Context ctx, final OXContextStorageInterface oxcox) throws ContextException {
+        log.debug("" + ctx + " - " + quota_max + " - " + admin_user);
         try {
-            oxcox.enable(ctx);
+            final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
+            if (tool.existsContext(ctx)) {
+                throw new ContextExistsException();
+            }
+            if (!admin_user.attributesforcreateset()) {
+                throw new InvalidDataException("Mandatory fields not set");
+            }
+            final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
+            MonitoringInfos.incrementNumberOfCreateContextCalled();
+            return oxcox.create(ctx, admin_user, quota_max);
+        } catch (final ContextExistsException e) {
+            log.error(e);
+            throw e;
+        } catch (final InvalidDataException e) {
+            log.error(e);
+            throw e;
         } catch (final StorageException e) {
-            throw CONTEXT_EXCEPTIONS.create(43, ctx.getIdAsInt());
+            log.error(e);
+            throw e;
         }
     }
 
+    private StringBuilder builduppath(final String ctxdir, final StringBuilder src, final URI uri) {
+        src.append(uri.getPath());
+        if (src.charAt(src.length()) != '/') {
+            src.append('/');
+        }
+        src.append(ctxdir);
+        if (src.charAt(src.length()) == '/') {
+            src.deleteCharAt(src.length() - 1);
+        }
+        return src;
+    }
+
+    private void reEnableContext(final Context ctx, final OXContextStorageInterface oxcox) throws StorageException {
+        oxcox.enable(ctx);
+    }
 }

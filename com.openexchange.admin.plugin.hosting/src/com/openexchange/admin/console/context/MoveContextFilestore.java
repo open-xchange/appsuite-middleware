@@ -10,6 +10,7 @@ import com.openexchange.admin.console.AdminParser.MissingOptionException;
 import com.openexchange.admin.console.CmdLineParser.IllegalOptionValueException;
 import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.console.CmdLineParser.UnknownOptionException;
+import com.openexchange.admin.exceptions.OXContextException;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -18,6 +19,8 @@ import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
+import com.openexchange.admin.rmi.exceptions.NoSuchFilestoreException;
+import com.openexchange.admin.rmi.exceptions.NoSuchReasonException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public class MoveContextFilestore extends ContextAbtraction {
@@ -91,6 +94,15 @@ public class MoveContextFilestore extends ContextAbtraction {
             printError(e.getMessage());
             parser.printUsage();
             sysexit(SYSEXIT_MISSING_OPTION);
+        } catch (final NoSuchFilestoreException e) {
+            printServerResponse(e.getMessage());
+            sysexit(1);
+        } catch (final NoSuchReasonException e) {
+            printServerResponse(e.getMessage());
+            sysexit(1);
+        } catch (final OXContextException e) {
+            printServerResponse(e.getMessage());
+            sysexit(1);
         }
 
     }
