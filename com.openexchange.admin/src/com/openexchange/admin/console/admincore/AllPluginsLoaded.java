@@ -108,8 +108,4 @@ public class AllPluginsLoaded extends BasicCommandlineOptions {
             sysexit(SYSEXIT_MISSING_OPTION);
         }
     }
-
-    protected void sysexit(final int exitcode) {
-        System.exit(exitcode);
-    }
 }
