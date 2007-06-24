@@ -360,4 +360,13 @@ public abstract class BasicCommandlineOptions {
         getAdminUserOption(admp); 
         getAdminPassOption(admp);
     }
+
+    
+    protected void sysexit(final int exitcode) {
+        // see http://java.sun.com/j2se/1.5.0/docs/guide/rmi/faq.html#leases
+        System.gc();
+        System.runFinalization();
+        // 
+        System.exit(exitcode);
+    }
 }
