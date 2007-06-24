@@ -239,6 +239,7 @@
 				<include name="${plugdocpath}/*Interface*"/>
 				<include name="${plugdocpath}/dataobjects/*"/>
 				<include name="${plugdocpath}/extensions/*"/>
+				<include name="${plugdocpath}/exceptions/*"/>
             	<exclude name="${plugdocpath}/*ResourceGroup*"/>
             </fileset>
             <classpath>
