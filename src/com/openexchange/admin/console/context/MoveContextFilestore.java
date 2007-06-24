@@ -118,8 +118,4 @@ public class MoveContextFilestore extends ContextAbtraction {
 
     }
 
-    protected void sysexit(final int exitcode) {
-        System.exit(exitcode);
-    }
-
 }

@@ -102,8 +102,4 @@ public class AddReason extends UtilAbstraction {
         this.reasonTextOption = setShortLongOpt(parser, OPT_NAME_REASON_TEXT_SHORT,OPT_NAME_REASON_TEXT_LONG,"the text for the added reason",true, true);
                 
     }
-
-    protected void sysexit(final int exitcode) {
-        System.exit(exitcode);
-    }
 }

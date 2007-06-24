@@ -101,8 +101,4 @@ public class RegisterServer extends UtilAbstraction {
         this.serverNameOption = setShortLongOpt(parser, OPT_NAME_HOSTNAME_SHORT, OPT_NAME_HOSTNAME_LONG, "The hostname of the server", true, true);
 
     }
-
-    protected void sysexit(final int exitcode) {
-        System.exit(exitcode);
-    }
 }

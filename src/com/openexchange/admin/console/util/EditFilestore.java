@@ -133,8 +133,4 @@ public class EditFilestore extends UtilAbstraction {
         this.filestoreMaxContextsOption = setShortLongOpt(parser, OPT_NAME_STORE_MAX_CTX_SHORT, OPT_NAME_STORE_MAX_CTX_LONG, "the maximum number of contexts", true, false);
 
     }
-
-    protected void sysexit(final int exitcode) {
-        System.exit(exitcode);
-    }
 }

@@ -93,8 +93,4 @@ public class UnregisterFilestore extends UtilAbstraction {
         this.filestoreIdOption = setShortLongOpt(parser, OPT_NAME_STORE_FILESTORE_ID_SHORT, OPT_NAME_STORE_FILESTORE_ID_LONG, "The id of the filestore which should be deleted", true, true);
 
     }
-
-    protected void sysexit(final int exitcode) {
-        System.exit(exitcode);
-    }
 }

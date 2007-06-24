@@ -109,8 +109,4 @@ public class Create extends GroupAbstraction {
         setGroupNameOption(parser, true);
         setGroupDisplayNameOption(parser, true);
     }
-    
-    protected void sysexit(final int exitcode) {
-        System.exit(exitcode);
-    }
 }

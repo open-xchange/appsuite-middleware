@@ -90,8 +90,4 @@ public class Enable extends ContextAbtraction {
     private void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptions(parser);
     }
-
-    protected void sysexit(final int exitcode) {
-        System.exit(exitcode);
-    }
 }

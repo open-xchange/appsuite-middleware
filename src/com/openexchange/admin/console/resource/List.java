@@ -173,8 +173,4 @@ public class List extends ResourceAbstraction {
 
         return res_data;
     }
-
-    protected void sysexit(final int exitcode) {
-        System.exit(exitcode);
-    }
 }

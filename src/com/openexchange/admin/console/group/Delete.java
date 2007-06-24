@@ -106,8 +106,4 @@ public class Delete extends GroupAbstraction {
             sysexit(SYSEXIT_NO_SUCH_GROUP);
         }
     }
-
-    protected void sysexit(final int exitcode) {
-        System.exit(exitcode);
-    }
 }

@@ -148,8 +148,4 @@ public class Create extends UserAbstraction {
         // module access params
         setModuleAccessOptions(parser);
     }
-    
-    protected void sysexit(final int exitcode) {
-        System.exit(exitcode);
-    }
 }

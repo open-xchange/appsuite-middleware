@@ -95,8 +95,4 @@ public class RemoveReason extends UtilAbstraction {
 
         this.reasonIDOption = setShortLongOpt(parser, OPT_NAME_REASON_ID_SHORT, OPT_NAME_REASON_ID_LONG, "the id for the reason to be deleted", true, true);
     }
-
-    protected void sysexit(final int exitcode) {
-        System.exit(exitcode);
-    }
 }

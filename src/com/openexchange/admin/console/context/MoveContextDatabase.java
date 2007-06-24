@@ -112,8 +112,4 @@ public class MoveContextDatabase extends ContextAbtraction {
 
         this.targetDatabaseIDOption = setShortLongOpt(parser, OPT_DATABASE_SHORT, OPT_DATABASE_LONG, "Target database id", true, true);
     }
-
-    protected void sysexit(final int exitcode) {
-        System.exit(exitcode);
-    }
 }

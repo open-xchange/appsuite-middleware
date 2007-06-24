@@ -125,8 +125,4 @@ public class Create extends ResourceAbstraction {
         setRecipientsOption(parser, false);
 
     }
-
-    protected void sysexit(final int exitcode) {
-        System.exit(exitcode);
-    }
 }

@@ -156,8 +156,4 @@ public class Change extends GroupAbstraction {
         setRemoveMembersOption(parser, false);
 
     }
-    
-    protected void sysexit(final int exitcode) {
-        System.exit(exitcode);
-    }
 }

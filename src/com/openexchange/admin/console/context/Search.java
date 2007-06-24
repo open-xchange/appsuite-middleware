@@ -172,8 +172,4 @@ public class Search extends ContextAbtraction {
         }
         return srv_data;
     }
-
-    protected void sysexit(final int exitcode) {
-        System.exit(exitcode);
-    }
 }

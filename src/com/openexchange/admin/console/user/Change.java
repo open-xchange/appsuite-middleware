@@ -162,8 +162,4 @@ public class Change extends UserAbstraction {
         
         setModuleAccessOptions(parser);
     }
-    
-    protected void sysexit(final int exitcode) {
-        System.exit(exitcode);
-    }
 }

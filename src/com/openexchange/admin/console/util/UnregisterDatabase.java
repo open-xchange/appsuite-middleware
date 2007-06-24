@@ -94,8 +94,4 @@ public class UnregisterDatabase extends UtilAbstraction {
 
         this.databaseIdOption = setShortLongOpt(parser, OPT_NAME_DATABASE_ID_SHORT,OPT_NAME_DATABASE_ID_LONG,"The id of the database which should be unregistered",true, true);
     }
-    
-    protected void sysexit(final int exitcode) {
-        System.exit(exitcode);
-    }
 }
