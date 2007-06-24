@@ -101,8 +101,4 @@ public class Delete extends UserAbstraction {
             sysexit(SYSEXIT_NO_SUCH_USER);
         }
     }
-
-    protected void sysexit(final int exitcode) {
-        System.exit(exitcode);
-    }
 }

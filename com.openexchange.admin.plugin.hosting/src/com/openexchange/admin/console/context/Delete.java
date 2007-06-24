@@ -94,8 +94,4 @@ public class Delete extends ContextAbtraction {
     private void setOptions(AdminParser parser) {
         setDefaultCommandLineOptions(parser);
     }
-
-    protected void sysexit(final int exitcode) {
-        System.exit(exitcode);
-    }
 }

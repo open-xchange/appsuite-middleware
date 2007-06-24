@@ -93,8 +93,4 @@ public class ChangeQuota extends ContextAbtraction {
 
         setContextQuotaOption(parser, true);
     }
-
-    protected void sysexit(final int exitcode) {
-        System.exit(exitcode);
-    }
 }

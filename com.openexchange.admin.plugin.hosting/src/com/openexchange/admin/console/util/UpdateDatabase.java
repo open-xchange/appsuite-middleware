@@ -198,8 +198,4 @@ public class UpdateDatabase extends UtilAbstraction {
 
         this.databaseIdOption = setShortLongOpt(parser, OPT_NAME_DATABASE_ID_SHORT, OPT_NAME_DATABASE_ID_LONG, "The id of the database which should be changed", true, true);
     }
-    
-    protected void sysexit(final int exitcode) {
-        System.exit(exitcode);
-    }
 }

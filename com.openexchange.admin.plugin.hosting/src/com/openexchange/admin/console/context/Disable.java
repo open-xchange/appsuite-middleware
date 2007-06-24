@@ -102,8 +102,4 @@ public class Disable extends ContextAbtraction {
         setMaintenanceReasodIDOption(parser, true);
 
     }
-
-    protected void sysexit(final int exitcode) {
-        System.exit(exitcode);
-    }
 }

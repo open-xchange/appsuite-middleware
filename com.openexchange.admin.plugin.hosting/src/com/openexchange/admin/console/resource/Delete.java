@@ -100,8 +100,4 @@ public class Delete extends ResourceAbstraction {
             sysexit(SYSEXIT_NO_SUCH_RESOURCE);
         }
     }
-
-    protected void sysexit(final int exitcode) {
-        System.exit(exitcode);
-    }
 }

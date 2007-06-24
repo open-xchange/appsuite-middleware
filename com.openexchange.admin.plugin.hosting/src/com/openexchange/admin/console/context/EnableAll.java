@@ -73,8 +73,4 @@ public class EnableAll extends ContextAbtraction {
     public static void main(final String args[]) {
         new EnableAll(args);
     }
-
-    protected void sysexit(final int exitcode) {
-        System.exit(exitcode);
-    }
 }

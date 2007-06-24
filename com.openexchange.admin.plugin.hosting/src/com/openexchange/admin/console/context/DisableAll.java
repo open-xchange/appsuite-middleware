@@ -88,8 +88,4 @@ public class DisableAll extends ContextAbtraction {
         setDefaultCommandLineOptionsWithoutContextID(parser);
         setMaintenanceReasodIDOption(parser, true);
     }
-
-    protected void sysexit(final int exitcode) {
-        System.exit(exitcode);
-    }
 }

@@ -200,8 +200,4 @@ public class ListFilestore extends UtilAbstraction {
 
         return rea_data;
     }
-
-    protected void sysexit(final int exitcode) {
-        System.exit(exitcode);
-    }
 }

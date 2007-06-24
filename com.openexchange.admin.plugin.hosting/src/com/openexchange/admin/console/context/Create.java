@@ -100,8 +100,4 @@ public class Create extends ContextAbtraction {
 
         setMandatoryOptions(parser);
     }
-
-    protected void sysexit(final int exitcode) {
-        System.exit(exitcode);
-    }
 }

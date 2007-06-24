@@ -106,8 +106,4 @@ public class ListReason extends UtilAbstraction {
         setDefaultCommandLineOptions(parser);
 
     }
-
-    protected void sysexit(final int exitcode) {
-        System.exit(exitcode);
-    }
 }

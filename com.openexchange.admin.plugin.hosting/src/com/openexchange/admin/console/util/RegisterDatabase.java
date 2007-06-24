@@ -183,8 +183,4 @@ public class RegisterDatabase extends UtilAbstraction {
         setDatabasePoolMaxOption(parser, false);
 
     }
-
-    protected void sysexit(final int exitcode) {
-        System.exit(exitcode);
-    }
 }

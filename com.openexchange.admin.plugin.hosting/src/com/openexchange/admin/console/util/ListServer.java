@@ -120,8 +120,4 @@ public class ListServer extends UtilAbstraction {
         setDefaultCommandLineOptions(parser);
         setSearchOption(parser);
     }
-
-    protected void sysexit(final int exitcode) {
-        System.exit(exitcode);
-    }
 }

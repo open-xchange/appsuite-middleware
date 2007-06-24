@@ -295,8 +295,4 @@ public class List extends UserAbstraction {
     private final String timezonetostring(final TimeZone zone) {
         return zone.getDisplayName();
     }
-
-    protected void sysexit(final int exitcode) {
-        System.exit(exitcode);
-    }
 }

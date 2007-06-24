@@ -203,8 +203,4 @@ public class List extends GroupAbstraction {
 
         return grp_data;
     }
-
-    protected void sysexit(final int exitcode) {
-        System.exit(exitcode);
-    }
 }
