@@ -53,11 +53,7 @@ import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 
-import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.BasicCommandlineOptions;
-import com.openexchange.admin.console.AdminParser.MissingOptionException;
-import com.openexchange.admin.console.CmdLineParser.IllegalOptionValueException;
-import com.openexchange.admin.console.CmdLineParser.UnknownOptionException;
 import com.openexchange.admin.rmi.OXAdminCoreInterface;
 
 public class AllPluginsLoaded extends BasicCommandlineOptions {
@@ -67,11 +63,7 @@ public class AllPluginsLoaded extends BasicCommandlineOptions {
 
     public AllPluginsLoaded(final String[] args2) {
 
-        final AdminParser parser = new AdminParser("list");
-
         try {
-            parser.ownparse(args2);
-
             final OXAdminCoreInterface oxadmincore = (OXAdminCoreInterface) Naming.lookup(RMI_HOSTNAME+OXAdminCoreInterface.RMI_NAME);
 
             if (oxadmincore.allPluginsLoaded()) {
@@ -94,18 +86,6 @@ public class AllPluginsLoaded extends BasicCommandlineOptions {
         } catch (final NotBoundException e) {
             printServerResponse(e.getMessage());
             sysexit(1);
-        } catch (final IllegalOptionValueException e) {
-            printError("Illegal option value : " + e.getMessage());
-            parser.printUsage();
-            sysexit(SYSEXIT_ILLEGAL_OPTION_VALUE);
-        } catch (final UnknownOptionException e) {
-            printError("Unrecognized options on the command line: " + e.getMessage());
-            parser.printUsage();
-            sysexit(SYSEXIT_UNKNOWN_OPTION);
-        } catch (final MissingOptionException e) {
-            printError(e.getMessage());
-            parser.printUsage();
-            sysexit(SYSEXIT_MISSING_OPTION);
         }
     }
 }
