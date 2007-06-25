@@ -39,8 +39,10 @@ public class DatabaseDataMover implements Callable<Void> {
         } catch (final StorageException e) {
             log.error(e);
             throw e;
+        } catch (final RuntimeException e) {
+            log.error(e);
+            throw e;
         }
-
         return null;
     }
 
