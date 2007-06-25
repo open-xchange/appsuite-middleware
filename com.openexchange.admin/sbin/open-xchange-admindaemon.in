@@ -84,5 +84,5 @@ exec $JAVA_BIN $JAVA_XTRAOPTS -Dopenexchange.propfile=$SYSTEMPROPERTIES \
 		   -Djava.util.logging.config.file=$LOGGINGPROPERTIES \
 		   -Duser.timezone=GMT \
 		   -Dlibdir=$LIBPATH \
-		   -jar $LIBPATH/org.eclipse.osgi_3.2.1.R32x_v20060919.jar \
+		   -jar $LIBPATH/org.eclipse.osgi_3.2.2.ox.jar \
 		   -configuration file:$OSGIPATH/ > $CONSOLELOG 2>&1
