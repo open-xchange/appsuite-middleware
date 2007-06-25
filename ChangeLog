@@ -1,3 +1,14 @@
+* 2007-06-25 - martin.kauss@open-xchange.com
+
+  - Fixed bug #7883. The reminder was set for all participants even if only
+    one participant has set the reminder. This has been fixed.
+
+  - Fixed an issue that while creating an recurring exception for whole
+    day events the master recurring appointment has the same start/end time
+    after calculation.
+
+  - Fixed an whole day calculation issue for recurring events.
+
 * 2007-06-07 - thorben.betten@open-xchange.com
 
  - Bugfix #7503: Context's admin is assigned to public folders if a user is
