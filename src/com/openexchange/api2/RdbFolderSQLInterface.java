@@ -74,7 +74,6 @@ import com.openexchange.server.EffectivePermission;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.iterator.FolderObjectIterator;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderException;
@@ -217,7 +216,8 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 	public FolderObject saveFolderObject(final FolderObject folderobjectArg, final Date clientLastModified)
 			throws OXException {
 		if (folderobjectArg.getType() == FolderObject.PUBLIC
-				&& !sessionObj.getUserConfiguration().hasFullPublicFolderAccess()) {
+				&& !sessionObj.getUserConfiguration().hasFullPublicFolderAccess()
+				&& (!folderobjectArg.containsModule() || folderobjectArg.getModule() != FolderObject.INFOSTORE)) {
 			throw new OXFolderException(
 					FolderCode.NO_PUBLIC_FOLDER_WRITE_ACCESS,
 					STR_EMPTY,
@@ -231,13 +231,20 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 		try {
 			if (insert) {
 				if (folderobject.containsParentFolderID()) {
+					if (folderobject.getParentFolderID() == FolderObject.SYSTEM_PUBLIC_FOLDER_ID
+							&& !sessionObj.getUserConfiguration().hasFullPublicFolderAccess()) {
+						throw new OXFolderException(FolderCode.NO_PUBLIC_FOLDER_WRITE_ACCESS, STR_EMPTY,
+								getUserName(sessionObj), (folderobjectArg.containsObjectID()
+										&& folderobjectArg.getObjectID() > 0 ? getFolderName(folderobjectArg)
+										: STR_EMPTY), Integer.valueOf(ctx.getContextId()));
+					}
 					final int[] virtualIDs = new int[] { FolderObject.VIRTUAL_USER_INFOSTORE_FOLDER_ID,
 							FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID, FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID,
 							FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID, FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID };
 					if (Arrays.binarySearch(virtualIDs, folderobject.getParentFolderID()) > -1) {
 						throw new OXFolderPermissionException(FolderCode.NO_CREATE_SUBFOLDER_PERMISSION, STR_EMPTY,
-								getUserName(sessionObj), getFolderName(folderobject.getParentFolderID(), ctx), Integer.valueOf(ctx
-										.getContextId()));
+								getUserName(sessionObj), getFolderName(folderobject.getParentFolderID(), ctx), Integer
+										.valueOf(ctx.getContextId()));
 					}
 				} else {
 					throw new OXFolderException(FolderCode.MISSING_FOLDER_ATTRIBUTE, STR_EMPTY, FolderFields.FOLDER_ID,
@@ -556,7 +563,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 						getUserName(sessionObj), FolderObject.getFolderString(FolderObject.SYSTEM_SHARED_FOLDER_ID,
 								sessionObj.getLocale()), Integer.valueOf(ctx.getContextId()));
 			} else if (oxfolderAccess.isFolderShared(parentId, userId)) {
-				return SearchIteratorAdapter.EMPTY_ITERATOR;
+				return FolderObjectIterator.EMPTY_FOLDER_ITERATOR;
 			}
 			return OXFolderIteratorSQL.getVisibleSubfoldersIterator(parentId, userId, groups, ctx, sessionObj
 					.getUserConfiguration(), since);

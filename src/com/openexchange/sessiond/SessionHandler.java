@@ -63,6 +63,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.UserConfiguration;
+import com.openexchange.groupware.UserConfigurationStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.ContextException;
 import com.openexchange.groupware.contexts.ContextNotFoundException;
@@ -264,13 +265,13 @@ public class SessionHandler extends TimerTask {
             //}
         }
 
-        // Load user's configuration from db!
-        try {
-            sessionobject.setUserConfiguration(UserConfiguration.loadUserConfiguration(u.getId(), u.getGroups(),
-                    context));
-        } catch (Exception exc) {
-            throw new SessiondException(exc);
-        }
+        // Load user's configuration
+		try {
+			sessionobject.setUserConfiguration(UserConfigurationStorage.getInstance().getUserConfiguration(u.getId(),
+					u.getGroups(), context));
+		} catch (Exception exc) {
+			throw new SessiondException(exc);
+		}
 
         sessions.put(sessionId, sessionobject);
         randomMap.put(randomId, sessionId);

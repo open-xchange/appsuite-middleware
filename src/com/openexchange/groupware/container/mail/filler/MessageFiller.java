@@ -784,7 +784,7 @@ public class MessageFiller {
 			msgFlags.add(Flags.Flag.USER);
 		}
 		if (IMAPProperties.isUserFlagsEnabled()
-				&& (destinationFolder == null || IMAPUtils.supportsUserDefinedFlags(destinationFolder))) {
+				&& (destinationFolder == null || session.getCachedUserFlags(destinationFolder, true))) {
 			/*
 			 * Set user header: Color Label
 			 */

@@ -59,6 +59,7 @@ import com.openexchange.groupware.imap.OXMailException;
 import com.openexchange.groupware.imap.OXMailException.MailCode;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.server.IMAPPermission;
+import com.openexchange.sessiond.SessionObject;
 import com.sun.mail.imap.ACL;
 import com.sun.mail.imap.DefaultFolder;
 import com.sun.mail.imap.IMAPFolder;
@@ -127,7 +128,7 @@ public final class MailFolderObject {
 		this.fullName = fullName;
 	}
 	
-	public MailFolderObject(final IMAPFolder folder) throws MessagingException, OXException {
+	public MailFolderObject(final IMAPFolder folder, final SessionObject session) throws MessagingException, OXException {
 		super();
 		this.exists = folder.exists();
 		final String[] attrs = folder.getAttributes();
@@ -156,7 +157,7 @@ public final class MailFolderObject {
 			}
 		}
 		this.holdsMessages = this.exists ? ((folder.getType() & IMAPFolder.HOLDS_MESSAGES) > 0) : false;
-		this.ownRights = this.exists && holdsMessages ? getOwnRightsInternal(folder) : (Rights) RIGHTS_EMPTY.clone();
+		this.ownRights = this.exists && holdsMessages ? getOwnRightsInternal(folder, session) : (Rights) RIGHTS_EMPTY.clone();
 		this.rootFolder = (folder instanceof DefaultFolder);
 		if (holdsMessages && ownRights.contains(Rights.Right.READ)) {
 			this.summary = new StringBuilder().append('(').append(folder.getMessageCount()).append('/').append(
@@ -189,14 +190,14 @@ public final class MailFolderObject {
 	
 	private static final String STR_FULL_RIGHTS = "acdilprsw";
 	
-	private static Rights getOwnRightsInternal(final IMAPFolder folder) throws MessagingException, OXException {
+	private static Rights getOwnRightsInternal(final IMAPFolder folder, final SessionObject session) throws MessagingException, OXException {
 		if (folder instanceof DefaultFolder) {
 			return null;
 		}
 		final Rights retval;
 		if (IMAPProperties.isSupportsACLs()) {
 			try {
-				retval = folder.myRights();
+				retval = session.getCachedRights(folder, true);
 			} catch (MessagingException e) {
 				if (e.getNextException() instanceof com.sun.mail.iap.CommandFailedException
 						&& e.getNextException().getMessage().indexOf(STR_MAILBOX_NOT_EXISTS) != -1) {

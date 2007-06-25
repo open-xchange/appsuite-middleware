@@ -66,17 +66,20 @@ import com.openexchange.api2.MailInterfaceImpl;
 import com.openexchange.api2.OXException;
 import com.openexchange.cache.FolderCacheManager;
 import com.openexchange.groupware.UserConfiguration;
+import com.openexchange.groupware.UserConfigurationException;
+import com.openexchange.groupware.UserConfigurationStorage;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.MailFolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.imap.IMAPException;
 import com.openexchange.groupware.imap.IMAPProperties;
-import com.openexchange.groupware.imap.IMAPUtils;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.DBPoolingException;
+import com.openexchange.server.EffectivePermission;
 import com.openexchange.server.IMAPPermission;
 import com.openexchange.server.OCLPermission;
+import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
@@ -91,23 +94,28 @@ import com.sun.mail.imap.Rights;
  */
 public final class FolderWriter extends DataWriter {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(FolderWriter.class);
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(FolderWriter.class);
 
 	private static final int[] mapping = { 0, -1, 1, -1, 2, -1, -1, -1, 4 };
-	
+
 	private static final String STR_EMPTY = "";
-	
+
 	private static final String STR_UNKNOWN_COLUMN = "Unknown column";
-	
+
 	private static final String FULLNAME_INBOX = "INBOX";
-	
+
 	private static final int BIT_USER_FLAG = (1 << 29);
+
+	private final SessionObject session;
 
 	private final User userObj;
 
 	private final UserConfiguration userConfig;
 
 	private final Context ctx;
+
+	private UserConfigurationStorage userConfStorage;
 
 	public static abstract class IMAPFolderFieldWriter {
 		public void writeField(final JSONWriter jsonwriter, final MailFolderObject folder, final boolean withKey)
@@ -135,20 +143,29 @@ public final class FolderWriter extends DataWriter {
 				SQLException;
 	}
 
-	public FolderWriter(PrintWriter w, User userObj, UserConfiguration userConfig, Context ctx) {
+	public FolderWriter(final PrintWriter w, final SessionObject session) {
 		super();
+		this.session = session;
 		this.jsonwriter = new JSONWriter(w);
-		this.userObj = userObj;
-		this.userConfig = userConfig;
-		this.ctx = ctx;
+		this.userObj = session.getUserObject();
+		this.userConfig = session.getUserConfiguration();
+		this.ctx = session.getContext();
 	}
 
-	public FolderWriter(JSONWriter jw, User userObj, UserConfiguration userConfig, Context ctx) {
+	public FolderWriter(final JSONWriter jw, final SessionObject session) {
 		super();
+		this.session = session;
 		this.jsonwriter = jw;
-		this.userObj = userObj;
-		this.userConfig = userConfig;
-		this.ctx = ctx;
+		this.userObj = session.getUserObject();
+		this.userConfig = session.getUserConfiguration();
+		this.ctx = session.getContext();
+	}
+
+	private final UserConfigurationStorage getUserConfigurationStorage() throws UserConfigurationException {
+		if (userConfStorage == null) {
+			userConfStorage = UserConfigurationStorage.getInstance();
+		}
+		return userConfStorage;
 	}
 
 	public void writeIMAPFolderAsObject(final int[] fields, final MailFolderObject folder) throws JSONException,
@@ -199,7 +216,7 @@ public final class FolderWriter extends DataWriter {
 	}
 
 	public IMAPFolderFieldWriter[] getIMAPFolderFieldWriter(final int[] fields) {
-		IMAPFolderFieldWriter[] retval = new IMAPFolderFieldWriter[fields.length];
+		final IMAPFolderFieldWriter[] retval = new IMAPFolderFieldWriter[fields.length];
 		for (int i = 0; i < retval.length; i++) {
 			Fields: switch (fields[i]) {
 			case FolderObject.OBJECT_ID:
@@ -355,13 +372,9 @@ public final class FolderWriter extends DataWriter {
 							imapPerm.setEntity(userObj.getId());
 							imapPerm.parseRights(folder.getOwnRights());
 							permissionBits = createPermissionBits(imapPerm);
-							if (IMAPProperties.isUserFlagsEnabled()
-									&& folder.exists()
-									&& folder.isHoldsMessages()
+							if (IMAPProperties.isUserFlagsEnabled() && folder.exists() && folder.isHoldsMessages()
 									&& folder.getOwnRights().contains(Rights.Right.READ)
-									&& (IMAPUtils
-											.supportsUserDefinedFlags(folder
-													.getImapFolder()))) {
+									&& session.getCachedUserFlags(folder.getImapFolder(), true)) {
 								permissionBits |= BIT_USER_FLAG;
 							}
 						}
@@ -389,10 +402,10 @@ public final class FolderWriter extends DataWriter {
 							boolean error = false;
 							try {
 								imapPerm.parseACL(acls[j]);
-							} catch (IMAPException e) {
+							} catch (final IMAPException e) {
 								LOG.error(e.getMessage(), e);
 								error = true;
-							} catch (LdapException e) {
+							} catch (final LdapException e) {
 								LOG.error(e.getMessage(), e);
 								error = true;
 							}
@@ -524,7 +537,8 @@ public final class FolderWriter extends DataWriter {
 						if (FULLNAME_INBOX.equals(fn)) {
 							jsonwriter.value(true);
 						} else {
-							jsonwriter.value(folder.containsSubscribe() ? Boolean.valueOf(folder.isSubscribed()) : JSONObject.NULL);
+							jsonwriter.value(folder.containsSubscribe() ? Boolean.valueOf(folder.isSubscribed())
+									: JSONObject.NULL);
 						}
 					}
 				};
@@ -550,8 +564,9 @@ public final class FolderWriter extends DataWriter {
 			final String name, final int hasSubfolders, final String fullName, final int module) throws OXException,
 			JSONException {
 		try {
-			getIMAPFolderFieldWriter(new int[] { field })[0].writeField(jsonwriter, folder, withKey, name, hasSubfolders, fullName, module);
-		} catch (MessagingException e1) {
+			getIMAPFolderFieldWriter(new int[] { field })[0].writeField(jsonwriter, folder, withKey, name,
+					hasSubfolders, fullName, module);
+		} catch (final MessagingException e1) {
 			throw MailInterfaceImpl.handleMessagingException(e1);
 		}
 	}
@@ -590,7 +605,7 @@ public final class FolderWriter extends DataWriter {
 			jsonwriter.endArray();
 		}
 	}
-	
+
 	private static final int[] ALL_FLD_FIELDS = { FolderObject.OBJECT_ID, FolderObject.CREATED_BY,
 			FolderObject.MODIFIED_BY, FolderObject.CREATION_DATE, FolderObject.LAST_MODIFIED, FolderObject.FOLDER_ID,
 			FolderObject.FOLDER_NAME, FolderObject.MODULE, FolderObject.TYPE, FolderObject.SUBFOLDERS,
@@ -647,7 +662,8 @@ public final class FolderWriter extends DataWriter {
 						if (withKey) {
 							jsonwriter.key(FolderFields.MODIFIED_BY);
 						}
-						jsonwriter.value(fo.containsModifiedBy() ? Integer.valueOf(fo.getModifiedBy()) : JSONObject.NULL);
+						jsonwriter.value(fo.containsModifiedBy() ? Integer.valueOf(fo.getModifiedBy())
+								: JSONObject.NULL);
 					}
 				};
 				break Fields;
@@ -659,8 +675,8 @@ public final class FolderWriter extends DataWriter {
 						if (withKey) {
 							jsonwriter.key(FolderFields.CREATION_DATE);
 						}
-						jsonwriter.value(fo.containsCreationDate() ? Long.valueOf(addTimeZoneOffset(fo.getCreationDate().getTime()))
-								: JSONObject.NULL);
+						jsonwriter.value(fo.containsCreationDate() ? Long.valueOf(addTimeZoneOffset(fo
+								.getCreationDate().getTime())) : JSONObject.NULL);
 					}
 				};
 				break Fields;
@@ -672,8 +688,8 @@ public final class FolderWriter extends DataWriter {
 						if (withKey) {
 							jsonwriter.key(FolderFields.LAST_MODIFIED);
 						}
-						jsonwriter.value(fo.containsLastModified() ? Long.valueOf(addTimeZoneOffset(fo.getLastModified().getTime()))
-								: JSONObject.NULL);
+						jsonwriter.value(fo.containsLastModified() ? Long.valueOf(addTimeZoneOffset(fo
+								.getLastModified().getTime())) : JSONObject.NULL);
 					}
 				};
 				break Fields;
@@ -685,7 +701,8 @@ public final class FolderWriter extends DataWriter {
 						if (withKey) {
 							jsonwriter.key(FolderFields.FOLDER_ID);
 						}
-						jsonwriter.value(fo.containsParentFolderID() ? Integer.valueOf(fo.getParentFolderID()) : JSONObject.NULL);
+						jsonwriter.value(fo.containsParentFolderID() ? Integer.valueOf(fo.getParentFolderID())
+								: JSONObject.NULL);
 					}
 				};
 				break Fields;
@@ -724,7 +741,8 @@ public final class FolderWriter extends DataWriter {
 						if (withKey) {
 							jsonwriter.key(FolderFields.TYPE);
 						}
-						jsonwriter.value(fo.containsType() ? Integer.valueOf(fo.getType(userObj.getId())) : JSONObject.NULL);
+						jsonwriter.value(fo.containsType() ? Integer.valueOf(fo.getType(userObj.getId()))
+								: JSONObject.NULL);
 					}
 				};
 				break Fields;
@@ -737,7 +755,8 @@ public final class FolderWriter extends DataWriter {
 						if (withKey) {
 							jsonwriter.key(FolderFields.SUBFOLDERS);
 						}
-						final boolean shared = fo.containsCreatedBy() && fo.containsType() && fo.isShared(userObj.getId());
+						final boolean shared = fo.containsCreatedBy() && fo.containsType()
+								&& fo.isShared(userObj.getId());
 						jsonwriter.value(hasSubfolders == -1 ? (shared ? Boolean.FALSE
 								: (fo.containsSubfolderFlag() ? Boolean.valueOf(fo.hasVisibleSubfolders(userObj,
 										userConfig, ctx)) : JSONObject.NULL)) : Boolean.valueOf(hasSubfolders > 0));
@@ -758,12 +777,14 @@ public final class FolderWriter extends DataWriter {
 								if (FolderCacheManager.isEnabled()) {
 									FolderCacheManager.getInstance().putFolderObject(fo, ctx);
 								}
-							} catch (SQLException e) {
+							} catch (final SQLException e) {
 								throw new OXFolderException(FolderCode.MISSING_FOLDER_ATTRIBUTE, STR_EMPTY,
-										FolderFields.OWN_RIGHTS, Integer.valueOf(fo.getObjectID()), Integer.valueOf(ctx.getContextId()));
-							} catch (DBPoolingException e) {
+										FolderFields.OWN_RIGHTS, Integer.valueOf(fo.getObjectID()), Integer.valueOf(ctx
+												.getContextId()));
+							} catch (final DBPoolingException e) {
 								throw new OXFolderException(FolderCode.MISSING_FOLDER_ATTRIBUTE, STR_EMPTY,
-										FolderFields.OWN_RIGHTS, Integer.valueOf(fo.getObjectID()), Integer.valueOf(ctx.getContextId()));
+										FolderFields.OWN_RIGHTS, Integer.valueOf(fo.getObjectID()), Integer.valueOf(ctx
+												.getContextId()));
 							}
 						}
 						if (withKey) {
@@ -789,10 +810,10 @@ public final class FolderWriter extends DataWriter {
 								if (FolderCacheManager.isEnabled()) {
 									FolderCacheManager.getInstance().putFolderObject(fo, ctx);
 								}
-							} catch (SQLException e) {
+							} catch (final SQLException e) {
 								throw new OXFolderException(FolderCode.MISSING_PARAMETER, STR_EMPTY,
 										FolderFields.PERMISSIONS);
-							} catch (DBPoolingException e) {
+							} catch (final DBPoolingException e) {
 								throw new OXFolderException(FolderCode.MISSING_PARAMETER, STR_EMPTY,
 										FolderFields.PERMISSIONS);
 							}
@@ -802,12 +823,26 @@ public final class FolderWriter extends DataWriter {
 						}
 						final JSONArray ja = new JSONArray();
 						final OCLPermission[] perms = fo.getPermissionsAsArray();
-						for (int k = 0; k < perms.length; k++) {
-							final JSONObject jo = new JSONObject();
-							jo.put(FolderFields.BITS, createPermissionBits(perms[k]));
-							jo.put(FolderFields.ENTITY, perms[k].getEntity());
-							jo.put(FolderFields.GROUP, perms[k].isGroupPermission());
-							ja.put(jo);
+						final UserConfigurationStorage userConfStorage = getUserConfigurationStorage();
+						try {
+							for (int k = 0; k < perms.length; k++) {
+								final OCLPermission perm;
+								if (perms[k].isGroupPermission()) {
+									perm = perms[k];
+								} else {
+									perm = fo.getEffectiveUserPermission(perms[k].getEntity(), userConfStorage
+											.getUserConfiguration(perms[k].getEntity(), ctx));
+								}
+								final JSONObject jo = new JSONObject();
+								jo.put(FolderFields.BITS, createPermissionBits(perm));
+								jo.put(FolderFields.ENTITY, perm.getEntity());
+								jo.put(FolderFields.GROUP, perm.isGroupPermission());
+								ja.put(jo);
+							}
+						} catch (DBPoolingException e) {
+							throw new OXException(e);
+						} catch (SQLException e) {
+							throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(ctx.getContextId()));
 						}
 						jsonwriter.value(ja);
 					}
@@ -899,16 +934,16 @@ public final class FolderWriter extends DataWriter {
 				break Fields;
 			case FolderObject.SUBSCRIBED:
 				retval[i] = new FolderFieldWriter() {
-				@Override
-				public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey,
-						final String name, final int hasSubfolders) throws JSONException {
-					if (withKey) {
-						jsonwriter.key(FolderFields.SUBSCRIBED);
+					@Override
+					public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey,
+							final String name, final int hasSubfolders) throws JSONException {
+						if (withKey) {
+							jsonwriter.key(FolderFields.SUBSCRIBED);
+						}
+						jsonwriter.value(JSONObject.NULL);
 					}
-					jsonwriter.value(JSONObject.NULL);
-				}
-			};
-			break Fields;
+				};
+				break Fields;
 			default:
 				retval[i] = new FolderFieldWriter() {
 					@Override
@@ -929,7 +964,7 @@ public final class FolderWriter extends DataWriter {
 			final int hasSubfolders) throws Exception {
 		getFolderFieldWriter(new int[] { field })[0].writeField(jsonwriter, fo, withKey, name, hasSubfolders);
 	}
-	
+
 	private static int createPermissionBits(final OCLPermission perm) throws OXException {
 		return createPermissionBits(perm.getFolderPermission(), perm.getReadPermission(), perm.getWritePermission(),
 				perm.getDeletePermission(), perm.isFolderAdmin());
@@ -937,7 +972,7 @@ public final class FolderWriter extends DataWriter {
 
 	private static int createPermissionBits(final int fp, final int orp, final int owp, final int odp,
 			final boolean adminFlag) throws OXException {
-		int[] perms = new int[5];
+		final int[] perms = new int[5];
 		perms[0] = fp == Folder.MAX_PERMISSION ? OCLPermission.ADMIN_PERMISSION : fp;
 		perms[1] = orp == Folder.MAX_PERMISSION ? OCLPermission.ADMIN_PERMISSION : orp;
 		perms[2] = owp == Folder.MAX_PERMISSION ? OCLPermission.ADMIN_PERMISSION : owp;
@@ -960,7 +995,7 @@ public final class FolderWriter extends DataWriter {
 				} else {
 					try {
 						retval += mapping[permission[i]] << shiftVal;
-					} catch (Exception e) {
+					} catch (final Exception e) {
 						throw new OXFolderException(FolderCode.MAP_PERMISSION_FAILED, e, Integer.valueOf(permission[i]));
 					}
 				}
@@ -972,7 +1007,7 @@ public final class FolderWriter extends DataWriter {
 	private long addTimeZoneOffset(final long date) {
 		return (date + TimeZone.getTimeZone(userObj.getTimeZone()).getOffset(date));
 	}
-	
+
 	public static String getModuleString(final int module, final int objectId) {
 		String moduleStr = null;
 		switch (module) {

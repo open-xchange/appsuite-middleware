@@ -738,6 +738,10 @@ public class IMAPUtils {
 		return val;
 	}
 
+	private static final Pattern PATTERN_PERMANENTFLAGS = Pattern.compile("(\\[PERMANENTFLAGS\\s\\()(.*)(\\)\\]\\s*)");
+	
+	private static final Pattern PATTERN_USER_FLAG = Pattern.compile("(?:\\\\\\*|(?:(^|\\s)([^\\\\]\\S+)($|\\s)))");
+
 	/**
 	 * Applies the IMAPv4 SELECT command on given mailbox and returns whether
 	 * its permanent flags supports user-defined flags or not
@@ -765,31 +769,10 @@ public class IMAPUtils {
 							if (!(r[i] instanceof IMAPResponse)) {
 								continue;
 							}
-							final IMAPResponse ir = (IMAPResponse) r[i];
-							// String key = ir.getKey();
-							final String rest = ir.getRest();
-							if (rest.indexOf("PERMANENTFLAGS") != -1) {
-								/*
-								 * [PERMANENTFLAGS (\Answered \Flagged \Draft
-								 * \Deleted \Seen NonJunk attach \*)]
-								 */
-								final int pos01 = rest.indexOf('(');
-								final int pos02 = rest.lastIndexOf(')');
-								if (pos02 == (pos01 + 1)) {
-									/*
-									 * Empty. Assume all is supported.
-									 */
-									retval = Boolean.TRUE;
-									break NextResp;
-								}
-								final String[] flags = rest.substring(pos01 + 1, pos02).split(" +");
-								for (int j = 0; j < flags.length; j++) {
-									final String flag = flags[j];
-									if ("\\*".equals(flag) || flag.charAt(0) != '\\') {
-										retval = Boolean.TRUE;
-										break NextResp;
-									}
-								}
+							final Matcher matcher = PATTERN_PERMANENTFLAGS.matcher(((IMAPResponse) r[i]).getRest());
+							if (matcher.matches() && PATTERN_USER_FLAG.matcher(matcher.group(2)).find()) {
+								retval = Boolean.TRUE;
+								break NextResp;
 							}
 							r[i] = null;
 						}

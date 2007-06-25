@@ -1,3 +1,17 @@
+* 2007-06-25 - marcus.klein@open-xchange.com
+
+ - Modularity: Added UserConfigurationStorage to allow global access to
+   every user's configuration settings
+ - Modularity: Fixed some wrong permission checks in folder module
+#################### ATTENTION ! #####################
+ - CONFIG change: New property in 'system.properties' to define the
+   name/alias of the implementing class of UserConfigurationStorage:
+   UserConfigurationStorage
+ - CONFIG change: New JCS region defined in 'cache.ccf' for
+   UserConfigurationStorage which got its settings equal to existing
+   user cache.
+######################################################
+
 * 2007-06-21 - marcus.klein@open-xchange.com
 
   - Bugfix #7670: Check in session check if the user is still enabled.

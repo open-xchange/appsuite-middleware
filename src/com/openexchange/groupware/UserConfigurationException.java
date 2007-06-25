@@ -56,11 +56,11 @@ public class UserConfigurationException extends OXException {
 	private static final long serialVersionUID = 5579597483110227098L;
 
 	public static enum UserConfigurationCode {
-		
+
 		/**
-		 * An SQL error occurred
+		 * An SQL error occurred: %1$s
 		 */
-		SQL_ERROR("An SQL error occurred", Category.CODE_ERROR, 1),
+		SQL_ERROR("An SQL error occurred: %1$s", Category.CODE_ERROR, 1),
 		/**
 		 * A DBPooling error occurred
 		 */
@@ -68,15 +68,35 @@ public class UserConfigurationException extends OXException {
 		/**
 		 * Configuration for user %s could not found in context %d
 		 */
-		NOT_FOUND("Configuration for user %s could not found in context %d", Category.CODE_ERROR, 3);
-		
+		NOT_FOUND("Configuration for user %s could not found in context %d", Category.CODE_ERROR, 3),
+		/**
+		 * Missing property %1$s in system.properties.
+		 */
+		MISSING_SETTING("Missing property %1$s in system.properties.", Category.SETUP_ERROR, 4),
+		/**
+		 * Class %1$s can not be found.
+		 */
+		CLASS_NOT_FOUND("Class %1$s can not be found.", Category.SETUP_ERROR, 5),
+		/**
+		 * Instanciating the class failed.
+		 */
+		INSTANCIATION_FAILED("Instanciating the class failed.", Category.CODE_ERROR, 6),
+		/**
+		 * Cache initialization failed. Region: %1$s
+		 */
+		CACHE_INITIALIZATION_FAILED("Cache initialization failed. Region: %1$s", Category.CODE_ERROR, 7),
+		/**
+		 * User configuration could not be put into cache: %1$s
+		 */
+		CACHE_PUT_ERROR("User configuration could not be put into cache: %1$s", Category.CODE_ERROR, 8);
+
 		private final String message;
-		
+
 		private final int detailNumber;
-		
+
 		private final Category category;
 
-		private UserConfigurationCode(String message, Category category, int detailNumber) {
+		private UserConfigurationCode(final String message, final Category category, final int detailNumber) {
 			this.message = message;
 			this.detailNumber = detailNumber;
 			this.category = category;
@@ -93,15 +113,20 @@ public class UserConfigurationException extends OXException {
 		public String getMessage() {
 			return message;
 		}
-		
+
 	}
-	
-	public UserConfigurationException(UserConfigurationCode code, Throwable cause, Object... messageArgs) {
+
+	public UserConfigurationException(final AbstractOXException exc) {
+		super(exc);
+	}
+
+	public UserConfigurationException(final UserConfigurationCode code, final Throwable cause,
+			final Object... messageArgs) {
 		super(Component.USER_SETTING, code.category, code.detailNumber, code.message, cause);
 		super.setMessageArgs(messageArgs);
 	}
-	
-	public UserConfigurationException(UserConfigurationCode code, Object... messageArgs) {
+
+	public UserConfigurationException(final UserConfigurationCode code, final Object... messageArgs) {
 		super(Component.USER_SETTING, code.category, code.detailNumber, code.message, null);
 		super.setMessageArgs(messageArgs);
 	}

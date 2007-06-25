@@ -86,6 +86,34 @@ public class FolderObjectIterator implements SearchIterator {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(FolderObjectIterator.class);
+	
+	public static final FolderObjectIterator EMPTY_FOLDER_ITERATOR = new FolderObjectIterator() {
+
+        @Override
+		public boolean hasNext() {
+            return false;
+        }
+
+        @Override
+		public Object next() throws SearchIteratorException {
+            return null;
+        }
+
+        @Override
+		public void close() throws SearchIteratorException {
+        }
+
+        @Override
+		public int size() {
+        	return 0;
+        }
+
+        @Override
+		public boolean hasSize() {
+            return true;
+        }
+
+    };
 
 	private static final boolean prefetchEnabled = ServerConfig.getBoolean(Property.PrefetchEnabled);
 
@@ -137,6 +165,17 @@ public class FolderObjectIterator implements SearchIterator {
 			fields.append(selectFields[i]);
 		}
 		return fields.toString();
+	}
+	
+	/**
+	 * Default constructor
+	 */
+	private FolderObjectIterator() {
+		this.closeCon = false;
+		this.remainInCache = false;
+		this.ctx = null;
+		this.prefetchQueue = null;
+		this.folderIds = null;
 	}
 
 	public FolderObjectIterator(final Collection<FolderObject> col, final boolean remainInCache)

@@ -47,43 +47,65 @@
  *
  */
 
-
-
 package com.openexchange.groupware;
 
-import com.openexchange.event.EventInit;
-import com.openexchange.groupware.calendar.CalendarConfig;
-import com.openexchange.groupware.contact.ContactConfig;
-import com.openexchange.groupware.contexts.ContextInit;
-import com.openexchange.groupware.integration.SetupLink;
-import com.openexchange.push.udp.PushInit;
-import com.openexchange.sessiond.SessiondInit;
+import java.sql.SQLException;
+
+import com.openexchange.api2.OXException;
+import com.openexchange.groupware.UserConfigurationException.UserConfigurationCode;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.server.DBPoolingException;
 
 /**
- * This class contains the initialization for the groupware server.
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * RdbUserConfigurationStorage
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * 
  */
-public class GroupwareInit {
+public class RdbUserConfigurationStorage extends UserConfigurationStorage {
 
-    /**
-     * Prevent instanciation.
-     */
-    private GroupwareInit() {
-        super();
-    }
+	/**
+	 * Constructor
+	 * 
+	 * @param context -
+	 *            the context
+	 */
+	public RdbUserConfigurationStorage() {
+		super();
+	}
 
-    /**
-     * Method for initializing the groupware server.
-     * @throws AbstractOXException if initialization fails.
-     */
-    public static void init() throws AbstractOXException {
-        ContextInit.init();
-        UserConfigurationStorage.init();
-        SetupLink.init();
-        CalendarConfig.init();
-        ContactConfig.init();
-		SessiondInit.init();
-		EventInit.init();
-		PushInit.init();
-    }
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.groupware.UserConfigurationStorage#getUserConfiguration(int)
+	 */
+	@Override
+	public UserConfiguration getUserConfiguration(final int userId, final Context ctx)
+			throws UserConfigurationException {
+		return getUserConfiguration(userId, null, ctx);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.groupware.UserConfigurationStorage#getUserConfiguration(int,
+	 *      int[])
+	 */
+	@Override
+	public UserConfiguration getUserConfiguration(final int userId, final int[] groups, final Context ctx)
+			throws UserConfigurationException {
+		try {
+			return UserConfiguration.loadUserConfiguration(userId, groups, ctx);
+		} catch (final LdapException e) {
+			throw new UserConfigurationException(e);
+		} catch (final DBPoolingException e) {
+			throw new UserConfigurationException(e);
+		} catch (final OXException e) {
+			throw new UserConfigurationException(e);
+		} catch (final SQLException e) {
+			throw new UserConfigurationException(UserConfigurationCode.SQL_ERROR, e, e.getMessage());
+		}
+	}
+
 }

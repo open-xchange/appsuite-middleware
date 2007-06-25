@@ -160,7 +160,7 @@ public class EffectivePermission extends OCLPermission {
 		if (validateUserConfig()) {
 			if (!hasModuleAccess(folderModule)) {
 				return NO_PERMISSIONS;
-			} else if (folderType == FolderObject.PUBLIC) {
+			} else if (folderType == FolderObject.PUBLIC || getFuid() == FolderObject.SYSTEM_PUBLIC_FOLDER_ID) {
 				if (folderModule != FolderObject.INFOSTORE && !userConfig.hasFullPublicFolderAccess()) {
 					return super.getFolderPermission() > READ_FOLDER ? READ_FOLDER : super.getFolderPermission();
 				}
@@ -176,7 +176,7 @@ public class EffectivePermission extends OCLPermission {
 		if (validateUserConfig()) {
 			if (!hasModuleAccess(folderModule)) {
 				return NO_PERMISSIONS;
-			} else if (folderType == FolderObject.PUBLIC) {
+			} else if (folderType == FolderObject.PUBLIC || getFuid() == FolderObject.SYSTEM_PUBLIC_FOLDER_ID) {
 				if (folderModule != FolderObject.INFOSTORE && !userConfig.hasFullPublicFolderAccess()) {
 					return super.getReadPermission() > READ_ALL_OBJECTS ? READ_ALL_OBJECTS : super.getReadPermission();
 				}
@@ -192,7 +192,7 @@ public class EffectivePermission extends OCLPermission {
 		if (validateUserConfig()) {
 			if (!hasModuleAccess(folderModule)) {
 				return NO_PERMISSIONS;
-			} else if (folderType == FolderObject.PUBLIC) {
+			} else if (folderType == FolderObject.PUBLIC || getFuid() == FolderObject.SYSTEM_PUBLIC_FOLDER_ID) {
 				if (folderModule != FolderObject.INFOSTORE && !userConfig.hasFullPublicFolderAccess()) {
 					return NO_PERMISSIONS;
 				}
@@ -208,10 +208,11 @@ public class EffectivePermission extends OCLPermission {
 		if (validateUserConfig()) {
 			if (!hasModuleAccess(folderModule)) {
 				return NO_PERMISSIONS;
-			} else if (folderType == FolderObject.PUBLIC) {
+			} else if (folderType == FolderObject.PUBLIC || getFuid() == FolderObject.SYSTEM_PUBLIC_FOLDER_ID) {
 				if (folderModule != FolderObject.INFOSTORE && !userConfig.hasFullPublicFolderAccess()) {
-					return super.getDeletePermission() > DELETE_ALL_OBJECTS ? DELETE_ALL_OBJECTS : super
-							.getDeletePermission();
+					return NO_PERMISSIONS;
+					/*return super.getDeletePermission() > DELETE_ALL_OBJECTS ? DELETE_ALL_OBJECTS : super
+							.getDeletePermission();*/
 				}
 			} else if (!userConfig.hasFullSharedFolderAccess() && folderType == FolderObject.SHARED) {
 				return NO_PERMISSIONS;

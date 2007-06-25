@@ -6,6 +6,10 @@
 #   by the @ sign and resolve context and user in database.
 LoginInfo=com.openexchange.groupware.contexts.RdbLoginInfo
 
+# Name of the class implementing the UserConfigurationStorage.
+# Currenlty known aliases: Caching, DB
+UserConfigurationStorage=Caching
+
 # Name of the class that implements how to get the link for the configuration
 # setup.
 SetupLink=com.openexchange.groupware.integration.EmptyImpl

@@ -286,8 +286,7 @@ public class Folder extends SessionServlet {
 			 */
 			final int[] columns = paramContainer.checkIntArrayParam(PARAMETER_COLUMNS);
 			final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(sessionObj);
-			final FolderWriter folderWriter = new FolderWriter(jsonWriter, sessionObj.getUserObject(), sessionObj
-					.getUserConfiguration(), sessionObj.getContext());
+			final FolderWriter folderWriter = new FolderWriter(jsonWriter, sessionObj);
 			final FolderFieldWriter[] writers = folderWriter.getFolderFieldWriter(columns);
 
 			final Queue<FolderObject> q = ((FolderObjectIterator) foldersqlinterface.getRootFolderForUser()).asQueue();
@@ -296,6 +295,7 @@ public class Folder extends SessionServlet {
 			final OCLPermission perm = new OCLPermission();
 			NextRootFolder: for (int i = 0; i < size; i++) {
 				final FolderObject rootFolder = iter.next();
+				int hasSubfolder = -1;
 				if (rootFolder.getObjectID() == FolderObject.SYSTEM_FOLDER_ID
 						|| rootFolder.getObjectID() == FolderObject.SYSTEM_OX_FOLDER_ID) {
 					/*
@@ -314,6 +314,14 @@ public class Folder extends SessionServlet {
 					perm.setAllPermission(OCLPermission.READ_FOLDER, OCLPermission.NO_PERMISSIONS,
 							OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
 					rootFolder.setPermissionsAsArray(new OCLPermission[] { (OCLPermission) perm.clone() });
+				} else if (rootFolder.getObjectID() == FolderObject.SYSTEM_SHARED_FOLDER_ID
+						&& !sessionObj.getUserConfiguration().hasFullSharedFolderAccess()) {
+					/*
+					 * User does not hold READ_CREATE_SHARED_FOLDERS in user
+					 * configuration; mark system shared folder to have no
+					 * subfolders
+					 */
+					hasSubfolder = 0;
 				}
 				lastModified = rootFolder.getLastModified() == null ? lastModified : Math.max(lastModified, rootFolder
 						.getLastModified().getTime());
@@ -321,7 +329,7 @@ public class Folder extends SessionServlet {
 				try {
 					for (final FolderFieldWriter ffw : writers) {
 						ffw.writeField(jsonWriter, rootFolder, false, FolderObject.getFolderString(rootFolder
-								.getObjectID(), sessionObj.getLocale()), -1);
+								.getObjectID(), sessionObj.getLocale()), hasSubfolder);
 					}
 				} finally {
 					jsonWriter.endArray();
@@ -329,9 +337,9 @@ public class Folder extends SessionServlet {
 			}
 		} catch (final OXFolderException e) {
 			LOG.error(e.getMessage(), e);
-			if (!e.getCategory().equals(Category.USER_CONFIGURATION)) {
+			//if (!e.getCategory().equals(Category.USER_CONFIGURATION)) {
 				response.setException(e);
-			}
+			//}
 		} catch (final AbstractOXException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
@@ -397,8 +405,7 @@ public class Folder extends SessionServlet {
 			if (ignore != null && "mailfolder".equalsIgnoreCase(ignore)) {
 				ignoreMailfolder = true;
 			}
-			final FolderWriter folderWriter = new FolderWriter(jsonWriter, sessionObj.getUserObject(), sessionObj
-					.getUserConfiguration(), sessionObj.getContext());
+			final FolderWriter folderWriter = new FolderWriter(jsonWriter, sessionObj);
 			int parentId = -1;
 			if ((parentId = getUnsignedInteger(parentIdentifier)) != -1) {
 				long lastModified = 0;
@@ -830,9 +837,9 @@ public class Folder extends SessionServlet {
 			}
 		} catch (final OXFolderException e) {
 			LOG.error(e.getMessage(), e);
-			if (!e.getCategory().equals(Category.USER_CONFIGURATION)) {
+			//if (!e.getCategory().equals(Category.USER_CONFIGURATION)) {
 				response.setException(e);
-			}
+			//}
 		} catch (final AbstractOXException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
@@ -890,8 +897,7 @@ public class Folder extends SessionServlet {
 			 */
 			final String folderIdentifier = paramContainer.checkStringParam(PARAMETER_ID);
 			final int[] columns = paramContainer.checkIntArrayParam(PARAMETER_COLUMNS);
-			final FolderWriter folderWriter = new FolderWriter(jsonWriter, sessionObj.getUserObject(), sessionObj
-					.getUserConfiguration(), sessionObj.getContext());
+			final FolderWriter folderWriter = new FolderWriter(jsonWriter, sessionObj);
 			int folderId = -1;
 			if ((folderId = getUnsignedInteger(folderIdentifier)) != -1) {
 				folderId = FolderObject.mapVirtualID2SystemID(folderId);
@@ -983,9 +989,9 @@ public class Folder extends SessionServlet {
 			}
 		} catch (final OXFolderException e) {
 			LOG.error(e.getMessage(), e);
-			if (!e.getCategory().equals(Category.USER_CONFIGURATION)) {
+			//if (!e.getCategory().equals(Category.USER_CONFIGURATION)) {
 				response.setException(e);
-			}
+			//}
 		} catch (final AbstractOXException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
@@ -1046,8 +1052,7 @@ public class Folder extends SessionServlet {
 			 * Read in parameters
 			 */
 			final int[] columns = paramContainer.checkIntArrayParam(PARAMETER_COLUMNS);
-			final FolderWriter folderWriter = new FolderWriter(jsonWriter, sessionObj.getUserObject(), sessionObj
-					.getUserConfiguration(), sessionObj.getContext());
+			final FolderWriter folderWriter = new FolderWriter(jsonWriter, sessionObj);
 			final Date timestamp = paramContainer.checkDateParam(PARAMETER_TIMESTAMP);
 			final boolean includeMailFolders = STRING_1.equals(paramContainer.getStringParam(PARAMETER_MAIL));
 			lastModified = Math.max(timestamp.getTime(), lastModified);
@@ -1124,6 +1129,10 @@ public class Folder extends SessionServlet {
 			}
 			if (includeMailFolders) {
 				/*
+				 * Clean session caches
+				 */
+				sessionObj.cleanIMAPCaches();
+				/*
 				 * Append mail folders
 				 */
 				MailInterface mailInterface = null;
@@ -1161,9 +1170,9 @@ public class Folder extends SessionServlet {
 			lastModifiedDate = lastModified == 0 ? null : new Date(lastModified);
 		} catch (final OXFolderException e) {
 			LOG.error(e.getMessage(), e);
-			if (!e.getCategory().equals(Category.USER_CONFIGURATION)) {
+			//if (!e.getCategory().equals(Category.USER_CONFIGURATION)) {
 				response.setException(e);
-			}
+			//}
 		} catch (final AbstractOXException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
@@ -1211,8 +1220,7 @@ public class Folder extends SessionServlet {
 		try {
 			final String folderIdentifier = paramContainer.checkStringParam(PARAMETER_ID);
 			final int[] columns = paramContainer.checkIntArrayParam(PARAMETER_COLUMNS);
-			final FolderWriter folderWriter = new FolderWriter(jsonWriter, sessionObj.getUserObject(), sessionObj
-					.getUserConfiguration(), sessionObj.getContext());
+			final FolderWriter folderWriter = new FolderWriter(jsonWriter, sessionObj);
 			int folderId = -1;
 			if ((folderId = getUnsignedInteger(folderIdentifier)) != -1) {
 				folderId = FolderObject.mapVirtualID2SystemID(folderId);
@@ -1242,9 +1250,9 @@ public class Folder extends SessionServlet {
 			}
 		} catch (final OXFolderException e) {
 			LOG.error(e.getMessage(), e);
-			if (!e.getCategory().equals(Category.USER_CONFIGURATION)) {
+			//if (!e.getCategory().equals(Category.USER_CONFIGURATION)) {
 				response.setException(e);
-			}
+			//}
 		} catch (final AbstractOXException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
@@ -1330,9 +1338,9 @@ public class Folder extends SessionServlet {
 			}
 		} catch (final OXFolderException e) {
 			LOG.error(e.getMessage(), e);
-			if (!e.getCategory().equals(Category.USER_CONFIGURATION)) {
+			//if (!e.getCategory().equals(Category.USER_CONFIGURATION)) {
 				response.setException(e);
-			}
+			//}
 		} catch (final AbstractOXException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
@@ -1405,9 +1413,9 @@ public class Folder extends SessionServlet {
 			}
 		} catch (final OXFolderException e) {
 			LOG.error(e.getMessage(), e);
-			if (!e.getCategory().equals(Category.USER_CONFIGURATION)) {
+			//if (!e.getCategory().equals(Category.USER_CONFIGURATION)) {
 				response.setException(e);
-			}
+			//}
 		} catch (final AbstractOXException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
@@ -1510,9 +1518,9 @@ public class Folder extends SessionServlet {
 			}
 		} catch (final OXFolderException e) {
 			LOG.error(e.getMessage(), e);
-			if (!e.getCategory().equals(Category.USER_CONFIGURATION)) {
+			//if (!e.getCategory().equals(Category.USER_CONFIGURATION)) {
 				response.setException(e);
-			}
+			//}
 		} catch (final AbstractOXException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);

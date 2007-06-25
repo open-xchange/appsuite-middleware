@@ -47,17 +47,12 @@
  *
  */
 
-
-
 package com.openexchange.sessiond;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import javax.mail.MessagingException;
 import javax.mail.Session;
@@ -66,6 +61,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.imap.IMAPProperties;
+import com.openexchange.groupware.imap.IMAPUtils;
 import com.openexchange.groupware.ldap.Credentials;
 import com.openexchange.groupware.ldap.User;
 import com.sun.mail.imap.IMAPFolder;
@@ -77,72 +73,111 @@ import com.sun.mail.imap.Rights;
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
 public class SessionObject {
-	
+
 	private final String sessionid;
+
 	private String username;
+
 	private String userlogin;
+
 	private String loginName;
+
 	private String password;
+
 	private String language;
+
 	private Locale locale;
+
 	private String localip;
+
 	private String host;
-	
+
 	private long lifetime;
+
 	private Date timestamp;
+
 	private Date creationtime;
-	
+
 	private String secret;
-	
+
 	private String randomToken;
-	
+
 	private Context context;
-	
+
 	private Credentials cred;
-	
+
 	private Map hm;
-	
+
 	private User u;
-	
+
 	private IMAPProperties imapProperties;
-	
+
 	private UserConfiguration userConfig;
-	
+
 	private Session mailSession;
-	
-	private final transient Map<String, Rights> cachedRights;
-	
+
+	private final transient Map<String, Rights> imapCachedMyRights;
+
+	private final transient Map<String, Boolean> imapCachedUserFlags;
+
 	public SessionObject(final String sessionid) {
 		this.sessionid = sessionid;
-		cachedRights = new ConcurrentHashMap<String, Rights>();
+		imapCachedMyRights = new ConcurrentHashMap<String, Rights>();
+		imapCachedUserFlags = new ConcurrentHashMap<String, Boolean>();
 	}
-	
+
 	public final Rights getCachedRights(final IMAPFolder f, final boolean load) throws MessagingException {
-		Rights r = cachedRights.get(f.getFullName());
+		Rights r = imapCachedMyRights.get(f.getFullName());
 		if (load && r == null) {
 			r = f.myRights();
-			cachedRights.put(f.getFullName(), r);
+			imapCachedMyRights.put(f.getFullName(), r);
 		}
 		return r;
-		
+
 	}
-	
+
 	public final void removeCachedRights(final IMAPFolder f) {
-		cachedRights.remove(f.getFullName());
+		imapCachedMyRights.remove(f.getFullName());
 	}
 
 	public final void setCachedRights(final IMAPFolder f) throws MessagingException {
-		cachedRights.put(f.getFullName(), f.myRights());
+		imapCachedMyRights.put(f.getFullName(), f.myRights());
 	}
 
 	public final boolean containsCachedRights(final IMAPFolder f) {
-		return cachedRights.containsKey(f.getFullName());
+		return imapCachedMyRights.containsKey(f.getFullName());
 	}
-	
+
+	public final boolean getCachedUserFlags(final IMAPFolder f, final boolean load) throws MessagingException {
+		Boolean b = imapCachedUserFlags.get(f.getFullName());
+		if (load && b == null) {
+			b = Boolean.valueOf(IMAPUtils.supportsUserDefinedFlags(f));
+			imapCachedUserFlags.put(f.getFullName(), b);
+		}
+		return b.booleanValue();
+	}
+
+	public final void removeCachedUserFlags(final IMAPFolder f) {
+		imapCachedUserFlags.remove(f.getFullName());
+	}
+
+	public final void setCachedUserFlags(final IMAPFolder f) throws MessagingException {
+		imapCachedUserFlags.put(f.getFullName(), Boolean.valueOf(IMAPUtils.supportsUserDefinedFlags(f)));
+	}
+
+	public final boolean containsCachedUserFlags(final IMAPFolder f) {
+		return imapCachedUserFlags.containsKey(f.getFullName());
+	}
+
+	public final void cleanIMAPCaches() {
+		imapCachedMyRights.clear();
+		imapCachedUserFlags.clear();
+	}
+
 	public void setUsername(final String username) {
 		this.username = username;
 	}
-	
+
 	public void setUserlogin(final String userlogin) {
 		this.userlogin = userlogin;
 	}
@@ -150,60 +185,60 @@ public class SessionObject {
 	public void setPassword(final String password) {
 		this.password = password;
 	}
-	
+
 	public void setLanguage(final String language) {
 		this.language = language;
 		this.locale = createLocale(language);
 	}
-	
+
 	public void setLocalIp(final String localip) {
 		this.localip = localip;
 	}
-	
+
 	public void setHost(final String host) {
 		this.host = host;
 	}
-	
+
 	public void setLifetime(final long lifetime) {
 		this.lifetime = lifetime;
 	}
-	
+
 	public void setTimestamp(final Date timestamp) {
 		this.timestamp = (Date) timestamp.clone();
 	}
-	
+
 	public void setCreationtime(final Date creationtime) {
 		this.creationtime = (Date) creationtime.clone();
 	}
-	
+
 	public void setContext(final Context context) {
 		this.context = context;
 	}
-	
+
 	public void setDynamicMap(final Map hm) {
 		this.hm = hm;
 	}
-	
+
 	public void setUserObject(final User u) {
 		this.u = u;
 	}
-	
+
 	public void setIMAPProperties(final IMAPProperties imapProperties) {
 		this.imapProperties = imapProperties;
 	}
-	
+
 	public void setUserConfiguration(final UserConfiguration userConfig) {
 		this.userConfig = userConfig;
 	}
-	
+
 	public String getSessionID() {
 		return sessionid;
 	}
-	
+
 	public String getUsername() {
 		return username;
 	}
-	
+
 	public String getUserlogin() {
 		return userlogin;
 	}
@@ -211,59 +246,59 @@ public class SessionObject {
 	public String getPassword() {
 		return password;
 	}
-	
+
 	public String getLanguage() {
 		return language;
 	}
-	
+
 	public Locale getLocale() {
 		return locale;
 	}
-	
+
 	public String getLocalIp() {
 		return localip;
 	}
-	
+
 	public String getHost() {
 		return host;
 	}
-	
+
 	public long getLifetime() {
 		return lifetime;
 	}
-	
+
 	public Date getTimestamp() {
 		return timestamp;
 	}
-	
+
 	public Date getCreationtime() {
 		return creationtime;
 	}
-	
+
 	public Context getContext() {
 		return context;
 	}
-	
+
 	public void setCredentials(final Credentials cred) {
 		this.cred = cred;
 	}
-	
+
 	public Credentials getCredentials() {
 		return cred;
 	}
-	
+
 	public Map getDynamicMap() {
 		return hm;
 	}
-	
+
 	public User getUserObject() {
 		return u;
 	}
-	
+
 	public IMAPProperties getIMAPProperties() {
 		return imapProperties;
 	}
-	
+
 	public UserConfiguration getUserConfiguration() {
 		return this.userConfig;
 	}
@@ -283,7 +318,7 @@ public class SessionObject {
 	public String getRandomToken() {
 		return randomToken;
 	}
-	
+
 	public Session getMailSession() {
 		return mailSession;
 	}
@@ -308,23 +343,18 @@ public class SessionObject {
 	public void setSecret(final String secret) {
 		this.secret = secret;
 	}
-	
+
 	public static Locale createLocale(final String localeStr) {
 		final String[] sa = localeStr.split("_");
 		switch (sa.length) {
 		case 1:
 			return new Locale(sa[0]);
 		case 2:
-			return new Locale(sa[0],sa[1]);
+			return new Locale(sa[0], sa[1]);
 		case 3:
-			return new Locale(sa[0],sa[1],sa[2]);
+			return new Locale(sa[0], sa[1], sa[2]);
 		default:
 			return null;
 		}
 	}
 }
-
-
-
-
-
