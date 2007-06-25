@@ -1,6 +1,0 @@
-osgi.noShutdown=true
-osgi.bundles=reference\:file\:@oxlibpath@/ox_admindaemon.jar@1\:start,reference\:file\:@oxlibpath@/ox_admin_plugin_hosting.jar@2\:start
-osgi.bundles.defaultStartLevel=4
-osgi.framework=file\:@nonoxlibpath@/org.eclipse.osgi_3.2.2.ox.jar
-osgi.configuration.cascaded=false
-eclipse.ignoreApp=true
