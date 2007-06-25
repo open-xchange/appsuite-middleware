@@ -31,7 +31,7 @@
         <pathelement location="${lib.dir}/junit-4.1.jar"/>
         <pathelement location="${lib.dir}/mysql-connector-java-3.1.13-bin.jar"/>
         <pathelement location="${lib.dir}/jdom.jar"/>
-		<pathelement location="${lib.dir}/org.eclipse.osgi_3.2.1.R32x_v20060919.jar"/>
+		<pathelement location="${lib.dir}/org.eclipse.osgi_3.2.2.ox.jar"/>
     </path>
 
     <filterset id="pathsubst">
