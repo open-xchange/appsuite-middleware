@@ -4,3 +4,4 @@ osgi.bundles.defaultStartLevel=4
 osgi.framework=file\:@libpath@/org.eclipse.osgi_3.2.2.ox.jar
 osgi.configuration.cascaded=false
 eclipse.ignoreApp=true
+osgi.classloader.singleThreadLoads=true
