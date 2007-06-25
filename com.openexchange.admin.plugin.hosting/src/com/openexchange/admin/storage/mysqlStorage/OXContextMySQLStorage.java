@@ -1090,7 +1090,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 } else {
                     // check if there's a db schema which is not yet full
                     synchronized (ClientAdminThread.create_mutex) {
-                        String schema_name = getNextUnfilledSchemaFromDB(dbid.intValue(), configdb_write_con);
+                        String schema_name = getNextUnfilledSchemaFromDB(dbid, configdb_write_con);
                         // there's none? create one
                         if (schema_name == null) {
                             configdb_write_con.setAutoCommit(false);
@@ -1539,41 +1539,46 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         }
     }
 
-    private String getNextUnfilledSchemaFromDB(final int pool_id, final Connection con) throws SQLException, StorageException {
-        PreparedStatement pstm = null;
-        try {
-            pstm = con.prepareStatement("SELECT db_schema,COUNT(db_schema) FROM context_server2db_pool WHERE write_db_pool_id = ? GROUP BY db_schema");
-            pstm.setInt(1, pool_id);
-            final ResultSet rs = pstm.executeQuery();
-            String ret = null;
-            final OXToolStorageInterface oxt = OXToolStorageInterface.getInstance();
-
-            while (rs.next()) {
-                final String schema = rs.getString("db_schema");
-                final int count = rs.getInt("COUNT(db_schema)");
-                if (count < this.CONTEXTS_PER_SCHEMA) {
-                    if (oxt.schemaBeingLockedOrNeedsUpdate(pool_id, schema)) {
-                        log.debug("schema " + schema + "is locked or updated, trying next one");
-                        continue;
-                    }
-                    log.debug("count =" + count + " of schema " + schema + ", using it for next context");
-                    ret = schema;
-                    break;
-                }
-            }
-
-            return ret;
-        } catch (final SQLException e) {
-            log.error("SQL Error", e);
-            throw e;
-        } finally {
+    private String getNextUnfilledSchemaFromDB(final Integer pool_id, final Connection con) throws SQLException, StorageException {
+        if (null != pool_id) {
+            PreparedStatement pstm = null;
+            
             try {
-                if (pstm != null) {
-                    pstm.close();
+                pstm = con.prepareStatement("SELECT db_schema,COUNT(db_schema) FROM context_server2db_pool WHERE write_db_pool_id = ? GROUP BY db_schema");
+                pstm.setInt(1, pool_id);
+                final ResultSet rs = pstm.executeQuery();
+                String ret = null;
+                final OXToolStorageInterface oxt = OXToolStorageInterface.getInstance();
+                
+                while (rs.next()) {
+                    final String schema = rs.getString("db_schema");
+                    final int count = rs.getInt("COUNT(db_schema)");
+                    if (count < this.CONTEXTS_PER_SCHEMA) {
+                        if (oxt.schemaBeingLockedOrNeedsUpdate(pool_id, schema)) {
+                            log.debug("schema " + schema + "is locked or updated, trying next one");
+                            continue;
+                        }
+                        log.debug("count =" + count + " of schema " + schema + ", using it for next context");
+                        ret = schema;
+                        break;
+                    }
                 }
-            } catch (final Exception e) {
-                log.error(OXContextMySQLStorageCommon.LOG_ERROR_CLOSING_STATEMENT);
+                
+                return ret;
+            } catch (final SQLException e) {
+                log.error("SQL Error", e);
+                throw e;
+            } finally {
+                try {
+                    if (pstm != null) {
+                        pstm.close();
+                    }
+                } catch (final Exception e) {
+                    log.error(OXContextMySQLStorageCommon.LOG_ERROR_CLOSING_STATEMENT);
+                }
             }
+        } else {
+            throw new StorageException("pool_id in getNextUnfilledSchemaFromDB must be != null");
         }
     }
 
