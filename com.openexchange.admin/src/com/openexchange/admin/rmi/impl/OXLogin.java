@@ -98,8 +98,7 @@ public class OXLogin extends BasicAuthenticator implements OXLoginInterface {
         }
     }
 
-    public void login(final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException,DatabaseUpdateException {
-        doNullCheck(ctx,auth);
+    public void login(final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException,DatabaseUpdateException {        
         doUserAuthentication(auth, ctx);
         triggerUpdateProcess(ctx);
     }
@@ -110,9 +109,7 @@ public class OXLogin extends BasicAuthenticator implements OXLoginInterface {
     }
 
     public User login2User(final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
-        
-        doNullCheck(ctx,auth);
-        
+                
         doUserAuthentication(auth, ctx);
         
         triggerUpdateProcess(ctx);
