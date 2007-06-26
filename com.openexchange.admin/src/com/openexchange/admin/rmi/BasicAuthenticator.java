@@ -59,6 +59,7 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 
 /**
  *
@@ -103,6 +104,13 @@ public class BasicAuthenticator {
      */
     public void doAuthentication(Credentials authdata,Context ctx) throws InvalidCredentialsException, StorageException, InvalidDataException{
         contextcheck(ctx);
+        
+        if(!OXToolStorageInterface.getInstance().existsContext(ctx)){
+            final InvalidCredentialsException invalidCredentialsException = new InvalidCredentialsException("Authentication failed for user " + authdata.getLogin());
+            log.error("Requested context "+ctx.getIdAsInt()+" does not exist!",invalidCredentialsException);
+            throw invalidCredentialsException;
+        }        
+        
         if(!sqlAuth.authenticate(authdata,ctx)){
             final InvalidCredentialsException invalidCredentialsException = new InvalidCredentialsException("Authentication failed for user " + authdata.getLogin());
             log.error("Admin authentication: ", invalidCredentialsException);
@@ -121,6 +129,13 @@ public class BasicAuthenticator {
      */
     public void doUserAuthentication(Credentials authdata,Context ctx) throws InvalidCredentialsException, StorageException, InvalidDataException{
         contextcheck(ctx);
+        
+        if(!OXToolStorageInterface.getInstance().existsContext(ctx)){
+            final InvalidCredentialsException invalidCredentialsException = new InvalidCredentialsException("Authentication failed for user " + authdata.getLogin());
+            log.error("Requested context "+ctx.getIdAsInt()+" does not exist!",invalidCredentialsException);
+            throw invalidCredentialsException;
+        }        
+        
         if(!sqlAuth.authenticateUser(authdata,ctx)){
             final InvalidCredentialsException invalidCredentialsException = new InvalidCredentialsException("Authentication failed for user " + authdata.getLogin());
             log.error("User authentication: ", invalidCredentialsException);
@@ -128,9 +143,10 @@ public class BasicAuthenticator {
         }
     }
 
-    protected final void contextcheck(final Context ctx) throws InvalidDataException {
+    protected final void contextcheck(final Context ctx) throws InvalidCredentialsException {
         if (null == ctx || null == ctx.getIdAsInt()) {
-            throw new InvalidDataException("The context object has invalid data");
+            log.error("Client sent invalid context data object");
+            throw new InvalidCredentialsException();
         }
     }
     
