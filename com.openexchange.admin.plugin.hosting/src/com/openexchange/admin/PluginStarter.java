@@ -16,7 +16,6 @@ import org.osgi.framework.BundleContext;
 import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.properties.AdminProperties;
-import com.openexchange.admin.rmi.AdminJobExecutorInterface;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.tools.AdminCacheExtended;
@@ -30,7 +29,6 @@ public class PluginStarter {
 
     private static com.openexchange.admin.rmi.impl.OXContext oxctx_v2 = null;
     private static com.openexchange.admin.rmi.impl.OXUtil oxutil_v2 = null;
-    private static com.openexchange.admin.rmi.impl.AdminJobExecutor ajx_v2 = null;
 
     private static PropertyHandlerExtended prop = null;
     private static MonitorAgent moni = null;
@@ -62,14 +60,9 @@ public class PluginStarter {
             oxutil_v2 = new com.openexchange.admin.rmi.impl.OXUtil();
             OXUtilInterface oxutil_stub_v2 = (OXUtilInterface) UnicastRemoteObject.exportObject(oxutil_v2, 0);
 
-            ajx_v2 = new com.openexchange.admin.rmi.impl.AdminJobExecutor();
-            ClientAdminThreadExtended.ajx = ajx_v2;
-            AdminJobExecutorInterface ajx_stub_v2 = (AdminJobExecutorInterface) UnicastRemoteObject.exportObject(ajx_v2, 0);
-
             // bind all NEW Objects to registry
             registry.bind(OXContextInterface.RMI_NAME, oxctx_stub_v2);
             registry.bind(OXUtilInterface.RMI_NAME, oxutil_stub_v2);
-            registry.bind(AdminJobExecutorInterface.RMI_NAME, ajx_stub_v2);
 
             startJMX();
             
@@ -92,7 +85,6 @@ public class PluginStarter {
             if (null != registry) {
                 registry.unbind(OXContextInterface.RMI_NAME);
                 registry.unbind(OXUtilInterface.RMI_NAME);
-                registry.unbind(AdminJobExecutorInterface.RMI_NAME);
             }
         } catch (AccessException e) {
             log.error(e);
