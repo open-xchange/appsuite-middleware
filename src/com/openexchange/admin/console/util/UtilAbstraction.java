@@ -16,7 +16,7 @@ public class UtilAbstraction extends BasicCommandlineOptions {
     protected final static String USER_DEFAULT = "openexchange";
     protected final static int MAXUNITS_DEFAULT = 1000;
     protected final static int CLUSTER_WEIGHT_DEFAULT = 100;
-    protected final static int POOL_HARD_LIMIT_DEFAULT = 20;
+    protected final static int POOL_HARD_LIMIT_DEFAULT = 0;
     protected final static int POOL_INITIAL_DEFAULT = 2;
     protected final static int POOL_MAX_DEFAULT = 100;
     protected final static String DRIVER_DEFAULT = "com.mysql.jdbc.Driver";

@@ -16,6 +16,8 @@ import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.sun.org.apache.xerces.internal.util.URI;
+import com.sun.org.apache.xerces.internal.util.URI.MalformedURIException;
 
 /**
  * 
@@ -65,11 +67,27 @@ public class ListDatabase extends UtilAbstraction {
             
             final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
             
+            final String HEADER_FORMAT = "%-7s %-15s %-15s %-7s %-7s %-7s %-7s %-7s %-6s %-4s %-4s\n";
+            final String VALUE_FORMAT  = "%-7s %-15s %-15s %-7s %-7s %-7s %-7s %-7s %-6s %-4s %-4s\n";
+            if(parser.getOptionValue(this.csvOutputOption) == null) {
+                System.out.format(HEADER_FORMAT, "id", "name", "hostname", "master", "mid", "weight", "maxctx", "curctx", "hlimit", "max", "inital");
+            }
             for (final Database database : databases) {
                 if (parser.getOptionValue(this.csvOutputOption) != null) {                   
                     data.add(makeCSVData(database));
                 }else{
-                    System.out.println(database);
+                    System.out.format(VALUE_FORMAT,
+                            database.getId(),
+                            database.getDisplayname(),
+                            new URI(database.getUrl().substring("jdbc:".length())).getHost(),
+                            database.isMaster(),
+                            database.getMasterId(),
+                            database.getClusterWeight(),
+                            database.getMaxUnits(),
+                            database.getCurrentUnits(),
+                            database.getPoolHardLimit() > 0 ? "true" : "false",
+                            database.getPoolMax(),
+                            database.getPoolInitial());
                 }
             }
             
@@ -113,6 +131,9 @@ public class ListDatabase extends UtilAbstraction {
             printError(e.getMessage());
             parser.printUsage();
             sysexit(SYSEXIT_MISSING_OPTION);
+        } catch (MalformedURIException e) {
+            printServerResponse(e.getMessage());
+            sysexit(1);
         }
 
     }

@@ -53,6 +53,11 @@ public class ListServer extends UtilAbstraction {
 
             final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
 
+            final String HEADER_FORMAT = "%-7s %-35s\n";
+            final String VALUE_FORMAT  = "%-7s %-35s\n";
+            if(parser.getOptionValue(this.csvOutputOption) == null) {
+                System.out.format(HEADER_FORMAT, "id", "name");
+            }
             for (final Server server : servers) {
                 if (parser.getOptionValue(this.csvOutputOption) != null) {
                     final ArrayList<String> srv_data = new ArrayList<String>();
@@ -64,7 +69,7 @@ public class ListServer extends UtilAbstraction {
                     }
                     data.add(srv_data);
                 } else {
-                    System.out.println(server);
+                    System.out.format(VALUE_FORMAT,server.getId(),server.getName());
                 }
             }
 
