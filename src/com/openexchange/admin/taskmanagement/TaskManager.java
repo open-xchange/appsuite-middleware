@@ -48,6 +48,7 @@
  */
 package com.openexchange.admin.taskmanagement;
 
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.concurrent.Callable;
@@ -77,6 +78,8 @@ public class TaskManager {
     private int lastID = 0;
     
     private int runningjobs = 0;
+    
+    private ArrayList<Integer> finishedJobs = new ArrayList<Integer>();
 
     private static class JobManagerSingletonHolder {
         private static final TaskManager instance = new TaskManager();
@@ -85,9 +88,13 @@ public class TaskManager {
     // TODO: Find out how to invoke super with generic types
     private class Extended extends ExtendedFutureTask {
         @SuppressWarnings("unchecked")
-        public Extended(final Callable callable, final String typeofjob, final String furtherinformation) { super(callable, typeofjob, furtherinformation); }
+        public Extended(final Callable callable, final String typeofjob, final String furtherinformation, final int id) { super(callable, typeofjob, furtherinformation, id); }
         @Override
-        protected void done() { TaskManager.this.runningjobs--; }
+        protected void done() {
+            TaskManager.this.runningjobs--;
+            log.debug("Removing job number " + this.id);
+            finishedJobs.add(this.id);
+        }
     }
 
     /**
@@ -108,35 +115,18 @@ public class TaskManager {
     }
 
     public int addJob(final Callable jobcall, final String typeofjob, final String furtherinformation) {
-        final Extended job = new Extended(jobcall, typeofjob, furtherinformation);
-        this.jobs.put(++this.lastID, job);
+        final Extended job = new Extended(jobcall, typeofjob, furtherinformation, ++this.lastID);
+        this.jobs.put(this.lastID, job);
         if (log.isDebugEnabled()) {
-        log.debug("Adding job number " + lastID);
+        log.debug("Adding job number " + this.lastID);
         }
         runningjobs++;
         this.executor.execute(job);
         return lastID;
     }
     
-//    public void addJob(final ExtendedFutureTask job) {
-//        jobs.put(lastID++, job);
-//        executor.execute(job);
-//    }
-    
     public boolean jobsRunning() {
         return (runningjobs > 0);
-//        boolean haveJobs = false;
-//
-//        final Enumeration<Integer> jids = this.jobs.keys();
-//
-//        while (jids.hasMoreElements()) {
-//            final Integer id = jids.nextElement();
-//            final ExtendedFutureTask job = this.jobs.get(id);
-//            if (job.isRunning()) {
-//                haveJobs = true;
-//            }
-//        }
-//        return haveJobs;
     }
     
     public void shutdown() {
@@ -146,23 +136,6 @@ public class TaskManager {
     public ExtendedFutureTask<?> getTask(final int jid) {
         synchronized (this.jobs) {
             return this.jobs.get(jid);
-        }
-    }
-
-    /**
-     * flushing all jobs in DONE or FAILED state
-     */
-    public void flush() {
-        synchronized (this.jobs) {
-            final Enumeration<Integer> jids = this.jobs.keys();
-
-            while (jids.hasMoreElements()) {
-                final Integer id = jids.nextElement();
-                final ExtendedFutureTask job = this.jobs.get(id);
-                if (job.isDone() || job.isFailed()) {
-                    this.jobs.remove(id);
-                }
-            }
         }
     }
 
@@ -191,6 +164,14 @@ public class TaskManager {
             this.jobs.remove(id);
         } else {
             throw new TaskManagerException("The job with the id " + id + " is currently running and cannot be deleted");
+        }
+    }
+    
+    public void flush() throws TaskManagerException {
+        while(!finishedJobs.isEmpty()) {
+            final Integer jobid = finishedJobs.get(0);
+            deleteJob(jobid);
+            finishedJobs.remove(0);
         }
     }
 
