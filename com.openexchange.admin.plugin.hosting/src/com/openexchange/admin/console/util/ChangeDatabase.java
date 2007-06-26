@@ -22,7 +22,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
  * @author d7,cutmasta
  * 
  */
-public class UpdateDatabase extends UtilAbstraction {
+public class ChangeDatabase extends UtilAbstraction {
 
     // Setting names for options
     private final static char OPT_NAME_DATABASE_ID_SHORT = 'i';
@@ -31,7 +31,7 @@ public class UpdateDatabase extends UtilAbstraction {
 
     private Option databaseIdOption = null;
 
-    public UpdateDatabase(final String[] args2) {
+    public ChangeDatabase(final String[] args2) {
 
         final AdminParser parser = new AdminParser("updatedatabase");
 
@@ -175,7 +175,7 @@ public class UpdateDatabase extends UtilAbstraction {
     }
 
     public static void main(final String args[]) {
-        new UpdateDatabase(args);
+        new ChangeDatabase(args);
     }
 
     private void setOptions(final AdminParser parser) {

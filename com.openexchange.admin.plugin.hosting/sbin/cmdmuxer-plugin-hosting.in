@@ -102,8 +102,8 @@ case "${BNAME}" in
     "addreason")
     ACTION="util.AddReason"
     ;;
-    "editfilestore")
-    ACTION="util.EditFilestore"
+    "changefilestore")
+    ACTION="util.ChangeFilestore"
     ;;
     "listdatabase")
     ACTION="util.ListDatabase"
@@ -138,8 +138,8 @@ case "${BNAME}" in
     "unregisterserver")
     ACTION="util.UnregisterServer"
     ;;
-    "updatedatabase")
-    ACTION="util.UpdateDatabase"
+    "changedatabase")
+    ACTION="util.ChangeDatabase"
     ;;
 esac
 
