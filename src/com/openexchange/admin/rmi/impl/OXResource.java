@@ -47,7 +47,7 @@
  *
  */
 /*
- * $Id: OXResource.java,v 1.24 2007/06/18 10:06:51 cutmasta Exp $
+ * $Id: OXResource.java,v 1.25 2007/06/26 15:15:30 cutmasta Exp $
  */
 package com.openexchange.admin.rmi.impl;
 
@@ -116,16 +116,13 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {        
        
        try {
-           doNullCheck(ctx,res,auth);
+           doNullCheck(res);
        } catch (final InvalidDataException e3) {
            log.error("One of the given arguments for create is null", e3);
            throw e3;
        }        
        
        try {
-
-           checkContext(ctx);
-           
            doAuthentication(auth,ctx);
        } catch( final InvalidDataException e) {
            log.error(e);
@@ -139,10 +136,7 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
 
        final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
 
-
-       if( tool.schemaBeingLockedOrNeedsUpdate(ctx) ) {
-           throw new DatabaseUpdateException("Database must be updated or currently is beeing updated");
-       }
+       checkSchemaBeingLocked(ctx, tool);
 
        try {
            if (tool.existsResource(ctx, res.getName())) {
@@ -232,19 +226,14 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchResourceException {
         
         try {
-            doNullCheck(ctx,res,auth);
+            doNullCheck(res,res.getId());
         } catch (final InvalidDataException e3) {
             log.error("One of the given arguments for change is null", e3);
             throw e3;
         }        
         
-        try {
-            if(res.getId()==null){
-                throw new InvalidDataException();
-            }
+        try {           
             
-            checkContext(ctx);
-
             doAuthentication(auth,ctx);
         } catch (InvalidDataException e1) {
             log.error(e1);
@@ -259,9 +248,7 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
         
         final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();        
 
-        if( tool.schemaBeingLockedOrNeedsUpdate(ctx) ) {
-            throw new DatabaseUpdateException("Database must be updated or currently is beeing updated");
-        }
+        checkSchemaBeingLocked(ctx, tool);
         
         if (!tool.existsResource(ctx, resource_ID)) {
             throw new NoSuchResourceException("Resource with this id does not exists");
@@ -328,19 +315,14 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
         throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchResourceException {
         
         try {
-            doNullCheck(ctx,res,auth);
+            doNullCheck(res,res.getId());
         } catch (final InvalidDataException e3) {
             log.error("One of the given arguments for delete is null", e3);
             throw e3;
         }        
         
         try {
-            if(res.getId()==null){
-                throw new InvalidDataException();
-            }
-
-            checkContext(ctx);
-
+            
             doAuthentication(auth,ctx);
         } catch (InvalidDataException e1) {
             log.error(e1);
@@ -354,9 +336,7 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
         
         final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
         
-        if( tool.schemaBeingLockedOrNeedsUpdate(ctx) ) {
-            throw new DatabaseUpdateException("Database must be updated or currently is beeing updated");
-        }
+        checkSchemaBeingLocked(ctx, tool);
 
         if (!tool.existsResource(ctx, resource_id)) {
             throw new NoSuchResourceException("Resource with this id does not exist");
@@ -405,18 +385,13 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchResourceException {
         
         try {
-            doNullCheck(ctx,res,auth);
+            doNullCheck(res,res.getId());
         } catch (final InvalidDataException e3) {
             log.error("One of the given arguments for get is null", e3);
             throw e3;
         }        
         
         try {
-            if(res.getId()==null){
-                throw new InvalidDataException();
-            }
-
-            checkContext(ctx);
             
             doAuthentication(auth,ctx);
         } catch (InvalidDataException e) {
@@ -432,10 +407,8 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
         
         final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
         
-        if( tool.schemaBeingLockedOrNeedsUpdate(ctx) ) {
-            throw new DatabaseUpdateException("Database must be updated or currently is beeing updated");
-        }
-
+        checkSchemaBeingLocked(ctx, tool);
+        
         if (!tool.existsResource(ctx, resource_id)) {
             throw new NoSuchResourceException("resource with with this id does not exist");           
         }
@@ -476,7 +449,7 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {
         
         try {
-            doNullCheck(ctx,pattern,auth);
+            doNullCheck(pattern);
         } catch (final InvalidDataException e3) {
             log.error("One of the given arguments for list is null", e3);
             throw e3;
@@ -486,8 +459,6 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
             if(pattern.length()==0){
                 throw new InvalidDataException("Invalid pattern!");
             }        
-
-            checkContext(ctx);
             
             doAuthentication(auth,ctx);
         } catch (InvalidDataException e) {
@@ -501,9 +472,7 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
         
         final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
         
-        if( tool.schemaBeingLockedOrNeedsUpdate(ctx) ) {
-            throw new DatabaseUpdateException("Database must be updated or currently is beeing updated");
-        }
+        checkSchemaBeingLocked(ctx, tool);
 
         final OXResourceStorageInterface oxRes = OXResourceStorageInterface.getInstance();
         return oxRes.list(ctx,pattern);
@@ -526,15 +495,14 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
     public Resource[] getData(Context ctx, Resource[] resources, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchResourceException, DatabaseUpdateException {
         
         try {
-            doNullCheck(ctx,resources,auth);
+            doNullCheck(resources);
         } catch (final InvalidDataException e3) {
             log.error("One of the given arguments for getData is null", e3);
             throw e3;
         }        
         
         try {
-            checkContext(ctx);
-            
+                        
             doAuthentication(auth,ctx);
         
             if (log.isDebugEnabled()) {
@@ -543,9 +511,7 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
 
             final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
 
-            if( tool.schemaBeingLockedOrNeedsUpdate(ctx) ) {
-                throw new DatabaseUpdateException("Database must be updated or currently is beeing updated");
-            }
+            checkSchemaBeingLocked(ctx, tool);
 
             // check if all resources exists
             for (Resource resource : resources) {
@@ -609,5 +575,24 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
         }
         return (Resource[])retval.toArray(new Resource[retval.size()]);
        
+    }
+    
+    /**
+     * @param ctx
+     * @param tools
+     * @throws StorageException
+     * @throws DatabaseUpdateException
+     * @throws NoSuchContextException
+     */
+    private void checkSchemaBeingLocked(final Context ctx,
+            final OXToolStorageInterface tools) throws StorageException,
+            DatabaseUpdateException, NoSuchContextException {
+
+        if (tools.schemaBeingLockedOrNeedsUpdate(ctx)) {
+            final DatabaseUpdateException databaseUpdateException = new DatabaseUpdateException(
+                    "Database must be updated or currently is beeing updated");
+            log.error(databaseUpdateException);
+            throw databaseUpdateException;
+        }
     }
 }
