@@ -577,8 +577,8 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             this.dbConnection = ox_db_write_con;
             this.catalogname = ox_db_write_con.getCatalog();
             this.selectionCriteria = "cid";
-            this.criteriaType = ctx.getIdAsInt();
-            this.criteriaMatch = Types.INTEGER;
+            this.criteriaType = Types.INTEGER;
+            this.criteriaMatch = ctx.getIdAsInt();
 
             /*
              * 2. Fetch tables with cid column which could perhaps store data
@@ -717,7 +717,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             if (ox_db_write_con != null) {
                 try {
                     ox_db_write_con.rollback();
-                } catch (final Exception ecp) {
+                } catch (final SQLException ecp) {
                     log.error("Error rollback connection", ecp);
                 }
             }
@@ -1391,6 +1391,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
      */
     private Database getDatabaseHandleById(final Database database_id, final Connection configdb_write) throws SQLException {
         final Database retval = new Database();
+        retval.setId(database_id.getId());
         PreparedStatement pstm = null;
         try {
             pstm = configdb_write.prepareStatement("SELECT url,driver,login,password,name FROM db_pool WHERE db_pool_id = ?");
