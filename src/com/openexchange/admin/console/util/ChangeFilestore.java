@@ -23,7 +23,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
  * @author d7,cutmasta
  * 
  */
-public class EditFilestore extends UtilAbstraction {
+public class ChangeFilestore extends UtilAbstraction {
 
     private Option filestoreIdOption = null;
 
@@ -33,7 +33,7 @@ public class EditFilestore extends UtilAbstraction {
 
     private Option filestoreMaxContextsOption = null;
 
-    public EditFilestore(final String[] args2) {
+    public ChangeFilestore(final String[] args2) {
     
         final AdminParser parser = new AdminParser("editFileStore");
     
@@ -118,7 +118,7 @@ public class EditFilestore extends UtilAbstraction {
     }
 
     public static void main(final String args[]) {
-        new EditFilestore(args);
+        new ChangeFilestore(args);
     }
 
     private void setOptions(final AdminParser parser) {

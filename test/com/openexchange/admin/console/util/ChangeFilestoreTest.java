@@ -12,7 +12,7 @@ import com.openexchange.admin.console.BasicCommandlineOptions;
  * @author cutmasta
  *
  */
-public class EditFilestoreTest extends AbstractTest {
+public class ChangeFilestoreTest extends AbstractTest {
     
     @Test
     public void testEditFilestore() {
@@ -21,7 +21,7 @@ public class EditFilestoreTest extends AbstractTest {
         String store = "file:////tmp/"+System.currentTimeMillis();
         new RegisterFilestore(RegisterFilestoreTest.getAllOptionData(store)){
             protected void sysexit(int exitCode) {
-                EditFilestoreTest.this.returnCode = exitCode;
+                ChangeFilestoreTest.this.returnCode = exitCode;
             }
         };
         
@@ -30,9 +30,9 @@ public class EditFilestoreTest extends AbstractTest {
         
         //edit fstore via store id        
         int store_id = Integer.parseInt(outBytes.toString().trim());
-        new EditFilestore(getAllChangeOptionData(store,store_id)){
+        new ChangeFilestore(getAllChangeOptionData(store,store_id)){
             protected void sysexit(int exitCode) {
-                EditFilestoreTest.this.returnCode = exitCode;
+                ChangeFilestoreTest.this.returnCode = exitCode;
             }
         };
         
@@ -47,7 +47,7 @@ public class EditFilestoreTest extends AbstractTest {
         String store = "file:////tmp/"+System.currentTimeMillis();
         new RegisterFilestore(RegisterFilestoreTest.getAllOptionData(store)){
             protected void sysexit(int exitCode) {
-                EditFilestoreTest.this.returnCode = exitCode;
+                ChangeFilestoreTest.this.returnCode = exitCode;
             }
         };
         
@@ -56,9 +56,9 @@ public class EditFilestoreTest extends AbstractTest {
         
         //edit fstore via store id        
         int store_id = Integer.parseInt(outBytes.toString().trim());
-        new EditFilestore(getAllChangeOptionDataWithInvalidCredentials(store,store_id)){
+        new ChangeFilestore(getAllChangeOptionDataWithInvalidCredentials(store,store_id)){
             protected void sysexit(int exitCode) {
-                EditFilestoreTest.this.returnCode = exitCode;
+                ChangeFilestoreTest.this.returnCode = exitCode;
             }
         };
         
@@ -72,9 +72,9 @@ public class EditFilestoreTest extends AbstractTest {
         resetBuffers();
       
         
-        new EditFilestore(getUnknownOptionData()){
+        new ChangeFilestore(getUnknownOptionData()){
             protected void sysexit(int exitCode) {
-                EditFilestoreTest.this.returnCode = exitCode;
+                ChangeFilestoreTest.this.returnCode = exitCode;
             }
         };
         
@@ -88,9 +88,9 @@ public class EditFilestoreTest extends AbstractTest {
         resetBuffers();
       
         
-        new EditFilestore(getMissingOptionData()){
+        new ChangeFilestore(getMissingOptionData()){
             protected void sysexit(int exitCode) {
-                EditFilestoreTest.this.returnCode = exitCode;
+                ChangeFilestoreTest.this.returnCode = exitCode;
             }
         };
         
