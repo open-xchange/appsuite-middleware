@@ -57,6 +57,7 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.rmi.exceptions.TaskManagerException;
 
 /**
  * This interface defines the methods of the task management which are accessibly through RMI
@@ -97,4 +98,18 @@ public interface OXTaskMgmtInterface extends Remote {
      * @throws InvalidCredentialsException 
      */
     public String getJobList(final Context ctx, final Credentials cred) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException;
+
+    /**
+     * This method is used to delete finished jobs (jobs != running) from the list
+     * 
+     * @param ctx
+     * @param auth
+     * @param i
+     * @throws RemoteException
+     * @throws InvalidDataException
+     * @throws InvalidCredentialsException
+     * @throws StorageException 
+     * @throws TaskManagerException 
+     */
+    public void deleteJob(Context ctx, Credentials auth, int i) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, TaskManagerException;
 }

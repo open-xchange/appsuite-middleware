@@ -58,13 +58,14 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.rmi.exceptions.TaskManagerException;
 import com.openexchange.admin.taskmanagement.ExtendedFutureTask;
 import com.openexchange.admin.taskmanagement.TaskManager;
 
 public class OXTaskMgmtImpl extends BasicAuthenticator implements OXTaskMgmtInterface {
     
     public Object getTaskResults(final Context ctx, final Credentials cred, final int id) throws RemoteException, InvalidCredentialsException, StorageException, InterruptedException, ExecutionException, InvalidDataException {
-        doNullCheck(ctx,cred);
+        doNullCheck(ctx);
         contextcheck(ctx);
         doAuthentication(cred, ctx);
         return getTaskResults(id);
@@ -99,10 +100,20 @@ public class OXTaskMgmtImpl extends BasicAuthenticator implements OXTaskMgmtInte
     }
     
     public String getJobList(final Context ctx, final Credentials cred) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException {
-        doNullCheck(ctx,cred);
+        doNullCheck(ctx);
         contextcheck(ctx);
         doAuthentication(cred, ctx);
         return TaskManager.getInstance().getJobList();
+    }
+
+    public void deleteJob(final Context ctx, final Credentials cred, final int id) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, TaskManagerException {
+        doNullCheck(ctx);
+        contextcheck(ctx);
+        doAuthentication(cred, ctx);
+        if (id < 0) {
+            throw new InvalidDataException("Job ID must be > 0.");
+        }
+        TaskManager.getInstance().deleteJob(id);
     }
 
 }
