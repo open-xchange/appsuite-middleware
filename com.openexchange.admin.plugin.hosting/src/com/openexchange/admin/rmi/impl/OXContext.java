@@ -307,7 +307,7 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
             }
             final DatabaseDataMover ddm = new DatabaseDataMover(ctx, db, reason);
 
-            return TaskManager.getInstance().addJob(ddm, "movedatabase", "move context " + context_id + "to database " + db.getId());
+            return TaskManager.getInstance().addJob(ddm, "movedatabase", "move context " + context_id + " to database " + db.getId());
 //            ClientAdminThreadExtended.ajx.addJob(ddm, context_id, db.getId(), reason_id, AdminJob.Mode.MOVE_DATABASE);
         } catch (final OXContextException e) {
             log.error(e);
