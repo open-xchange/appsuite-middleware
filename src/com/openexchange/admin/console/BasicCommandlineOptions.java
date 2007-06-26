@@ -290,8 +290,8 @@ public abstract class BasicCommandlineOptions {
         return setShortLongOpt(admp, shortopt, longopt, desc.toString(), hasarg, required);
     }
 
-    protected final void setContextOption(final AdminParser admp) {
-        this.contextOption = setShortLongOpt(admp,OPT_NAME_CONTEXT_SHORT, OPT_NAME_CONTEXT_LONG, OPT_NAME_CONTEXT_DESCRIPTION, true, false);        
+    private final void setContextOption(final AdminParser admp) {
+        this.contextOption = setShortLongOpt(admp,OPT_NAME_CONTEXT_SHORT, OPT_NAME_CONTEXT_LONG, OPT_NAME_CONTEXT_DESCRIPTION, true, true);        
 //        retval.setArgName("Context ID");
     }
     
