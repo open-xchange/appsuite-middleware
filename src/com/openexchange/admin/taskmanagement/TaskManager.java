@@ -58,6 +58,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.admin.daemons.ClientAdminThread;
+import com.openexchange.admin.rmi.exceptions.TaskManagerException;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
 
@@ -182,6 +183,15 @@ public class TaskManager {
             buf.append(String.format(VFORMAT, id, job.getTypeofjob(), formatStatus(job), job.getFurtherinformation()));
         }
         return buf.toString();
+    }
+    
+    public void deleteJob(int id) throws TaskManagerException {
+        final ExtendedFutureTask<?> job = this.jobs.get(id);
+        if (!job.isRunning()) {
+            this.jobs.remove(id);
+        } else {
+            throw new TaskManagerException("The job with the id " + id + " is currently running and cannot be deleted");
+        }
     }
 
     private String formatStatus(final ExtendedFutureTask<?> job) {
