@@ -111,5 +111,18 @@ public interface OXTaskMgmtInterface extends Remote {
      * @throws StorageException 
      * @throws TaskManagerException 
      */
-    public void deleteJob(Context ctx, Credentials auth, int i) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, TaskManagerException;
+    public void deleteJob(final Context ctx, final Credentials auth, final int i) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, TaskManagerException;
+
+    /**
+     * Flushes all jobs from the queue which are finished ( != running)
+     * 
+     * @param ctx
+     * @param auth
+     * @throws RemoteException
+     * @throws InvalidDataException
+     * @throws InvalidCredentialsException
+     * @throws StorageException
+     * @throws TaskManagerException 
+     */
+    public void flush(final Context ctx, final Credentials auth) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, TaskManagerException;
 }
