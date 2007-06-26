@@ -108,4 +108,33 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
 		}
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.groupware.UserConfigurationStorage#clearStorage()
+	 */
+	@Override
+	public void clearStorage() throws UserConfigurationException {
+		/*
+		 * Since this storage implementation directly fetches data from database
+		 * this method has no effect
+		 */
+		return;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.groupware.UserConfigurationStorage#removeUserConfiguration(int,
+	 *      com.openexchange.groupware.contexts.Context)
+	 */
+	@Override
+	public void removeUserConfiguration(final int userId, final Context ctx) throws UserConfigurationException {
+		/*
+		 * Since this storage implementation directly fetches data from database
+		 * this method has no effect
+		 */
+		return;
+	}
+
 }

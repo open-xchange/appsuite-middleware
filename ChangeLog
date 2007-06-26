@@ -1,4 +1,17 @@
-* 2007-06-25 - marcus.klein@open-xchange.com
+* 2007-06-26 - thorben.betten@open-xchange.com
+
+ - Modularity: Added invalidation routines to UserConfigurationStorage interface
+ - Modularity: Added Cloneable interface to UserConfiguration thus cached
+   implementation stores/returns cloned versions. Therefore altered
+   instances fetched from cache do not change cached instance
+ - Modularity: Added additional folder permission checks on folder creation/update:
+   -> Sharing of a private folder is forbidden if user's config denies
+      full shared folder access.
+   -> Permissions defined for a folder are checked against entity's
+      user config to ensure its applicability. Currently an exception
+      is thrown but can be changed to any other handling.
+
+* 2007-06-25 - thorben.betten@open-xchange.com
 
  - Modularity: Added UserConfigurationStorage to allow global access to
    every user's configuration settings

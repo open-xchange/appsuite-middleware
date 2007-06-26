@@ -47,7 +47,6 @@
  *
  */
 
-
 package com.openexchange.groupware.imap;
 
 import static com.openexchange.tools.sql.DBUtils.closeResources;
@@ -78,151 +77,182 @@ import com.openexchange.server.DBPoolingException;
  * UserSettingMail
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- *
+ * 
  */
-public class UserSettingMail implements DeleteListener {
-	
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(UserSettingMail.class);
-	
+public class UserSettingMail implements DeleteListener, Cloneable {
+
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(UserSettingMail.class);
+
 	private static final String STR_EMPTY = "";
-	
+
 	public static final int INT_DISPLAY_HTML_INLINE_CONTENT = 1;
-	
+
 	public static final int INT_USE_COLOR_QUOTE = 2;
-	
+
 	public static final int INT_SHOW_GRAPHIC_EMOTICONS = 4;
-	
+
 	public static final int INT_HARD_DELETE_MSGS = 8;
-	
+
 	public static final int INT_FORWARD_AS_ATTACHMENT = 16;
-	
+
 	public static final int INT_APPEND_VCARD = 32;
-	
+
 	public static final int INT_NOTIFY_ON_READ_ACK = 64;
-	
+
 	public static final int INT_MSG_PREVIEW = 128;
-	
+
 	public static final int INT_NOTIFY_APPOINTMENTS = 256;
-	
+
 	public static final int INT_NOTIFY_TASKS = 512;
-	
+
 	public static final int INT_IGNORE_ORIGINAL_TEXT_ON_REPLY = 1024;
-	
-	public static final int INT_NO_COPY_INTO_SENT_FOLDER = 2048; // All bits: 4095
-	
+
+	public static final int INT_NO_COPY_INTO_SENT_FOLDER = 2048; // All bits:
+																	// 4095
+
 	public static final int INT_SPAM_ENABLED = 4096;
-	
-	
+
 	public static final int MSG_FORMAT_TEXT_ONLY = 1;
-	
+
 	public static final int MSG_FORMAT_HTML_ONLY = 2;
-	
+
 	public static final int MSG_FORMAT_BOTH = 3;
-	
+
 	public static final String STD_TRASH = "Trash";
-	
+
 	public static final String STD_DRAFTS = "Drafts";
-	
+
 	public static final String STD_SENT = "Sent";
-	
+
 	public static final String STD_SPAM = "Spam";
-	
+
 	public static final String STD_CONFIRMED_SPAM = "Confirmed Spam";
-	
+
 	public static final String STD_CONFIRMED_HAM = "Confirmed Ham";
-	
-	
+
 	private boolean modifiedDuringSession;
-	
+
 	private boolean displayHtmlInlineContent;
-	
+
 	private boolean useColorQuote;
-	
+
 	private boolean showGraphicEmoticons;
-	
+
 	private boolean hardDeleteMsgs;
-	
+
 	private boolean forwardAsAttachment;
-	
+
 	private boolean appendVCard;
-	
+
 	private boolean notifyOnReadAck;
-	
+
 	private boolean notifyAppointments;
-	
+
 	private boolean notifyTasks;
-	
+
 	private boolean msgPreview;
-	
+
 	private boolean stdFoldersSet;
-	
+
 	private boolean ignoreOriginalMailTextOnReply;
-	
+
 	private boolean noCopyIntoStandardSentFolder;
-	
-	private boolean spamEnabled; 
-	
+
+	private boolean spamEnabled;
+
 	private Signature[] signatures;
-	
+
 	private String sendAddr;
-	
+
 	private String replyToAddr;
-	
+
 	private int msgFormat = MSG_FORMAT_TEXT_ONLY;
-	
+
 	private String[] displayMsgHeaders;
-	
+
 	private int autoLinebreak = 80;
-	
+
 	private String stdTrashName;
-	
+
 	private String stdDraftsName;
-	
+
 	private String stdSentName;
-	
+
 	private String stdSpamName;
-	
+
 	private String confirmedSpam;
-	
+
 	private String confirmedHam;
-	
+
 	private long uploadQuota;
-	
+
 	private long uploadQuotaPerFile;
-	
-	private final String[] stdFolderFullnames; 
-	
-	private final Lock stdFolderCreationLock;
-	
-	private final Lock accessLock;
-	
+
+	private String[] stdFolderFullnames;
+
+	private Lock stdFolderCreationLock;
+
+	private Lock accessLock;
+
 	public UserSettingMail() {
 		super();
 		stdFolderFullnames = new String[6];
 		stdFolderCreationLock = new ReentrantLock();
 		accessLock = new ReentrantLock();
 	}
-	
-	private static final String SQL_LOAD = "SELECT bits, send_addr, reply_to_addr, msg_format, display_msg_headers, auto_linebreak, std_trash, std_sent, std_drafts, std_spam, " +
-			"upload_quota, upload_quota_per_file, confirmed_spam, confirmed_ham FROM user_setting_mail WHERE cid = ? AND user = ?";
-	
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#clone()
+	 */
+	@Override
+	public Object clone() {
+		try {
+			final UserSettingMail clone = (UserSettingMail) super.clone();
+			clone.stdFolderFullnames = new String[stdFolderFullnames.length];
+			System.arraycopy(stdFolderFullnames, 0, clone.stdFolderFullnames, 0, stdFolderFullnames.length);
+			clone.stdFolderCreationLock = new ReentrantLock();
+			clone.accessLock = new ReentrantLock();
+			if (displayMsgHeaders != null) {
+				clone.displayMsgHeaders = new String[displayMsgHeaders.length];
+				System.arraycopy(displayMsgHeaders, 0, clone.displayMsgHeaders, 0, displayMsgHeaders.length);
+			}
+			if (signatures != null) {
+				clone.signatures = new Signature[signatures.length];
+				for (int i = 0; i < signatures.length; i++) {
+					clone.signatures[i] = (Signature) signatures[i].clone();
+				}
+			}
+			return clone;
+		} catch (final CloneNotSupportedException e) {
+			LOG.error(e.getMessage(), e);
+			throw new InternalError(e.getMessage());
+		}
+	}
+
+	private static final String SQL_LOAD = "SELECT bits, send_addr, reply_to_addr, msg_format, display_msg_headers, auto_linebreak, std_trash, std_sent, std_drafts, std_spam, "
+			+ "upload_quota, upload_quota_per_file, confirmed_spam, confirmed_ham FROM user_setting_mail WHERE cid = ? AND user = ?";
+
 	private static final String SQL_INSERT = "INSERT INTO user_setting_mail (cid, user, bits, send_addr, reply_to_addr, msg_format, display_msg_headers, auto_linebreak, std_trash, std_sent, std_drafts, std_spam, upload_quota, upload_quota_per_file, confirmed_spam, confirmed_ham) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-	
+
 	private static final String SQL_UPDATE = "UPDATE user_setting_mail SET bits = ?, send_addr = ?, reply_to_addr = ?, msg_format = ?, display_msg_headers = ?, auto_linebreak = ?, std_trash = ?, std_sent = ?, std_drafts = ?, std_spam = ?, upload_quota = ?, upload_quota_per_file = ?, confirmed_spam = ?, confirmed_ham = ? WHERE cid = ? AND user = ?";
-	
+
 	private static final String SQL_DELETE = "DELETE FROM user_setting_mail WHERE cid = ? AND user = ?";
-	
+
 	private static final String SQL_LOAD_SIGNATURES = "SELECT id, signature FROM user_setting_mail_signature WHERE cid = ? AND user = ?";
-	
+
 	private static final String SQL_INSERT_SIGNATURE = "INSERT INTO user_setting_mail_signature (cid, user, id, signature) VALUES (?, ?, ?, ?)";
-	
+
 	private static final String SQL_DELETE_SIGNATURES = "DELETE FROM user_setting_mail_signature WHERE cid = ? AND user = ?";
-	
+
 	public final void saveUserSettingMail(final int user, final Context ctx) throws OXException {
 		saveUserSettingMail(user, ctx, null);
 	}
-	
-	public final void saveUserSettingMail(final int user, final Context ctx, final Connection writeConArg) throws OXException {
+
+	public final void saveUserSettingMail(final int user, final Context ctx, final Connection writeConArg)
+			throws OXException {
 		accessLock.lock();
 		try {
 			Connection writeCon = writeConArg;
@@ -254,7 +284,7 @@ public class UserSettingMail implements DeleteListener {
 					stmt.setInt(1, ctx.getContextId());
 					stmt.setInt(2, user);
 					stmt.setInt(3, getBitsValue());
-					//stmt.setString(4, signature);
+					// stmt.setString(4, signature);
 					stmt.setString(4, sendAddr);
 					stmt.setString(5, replyToAddr);
 					stmt.setInt(6, msgFormat);
@@ -277,7 +307,7 @@ public class UserSettingMail implements DeleteListener {
 				} else {
 					stmt = writeCon.prepareStatement(SQL_UPDATE);
 					stmt.setInt(1, getBitsValue());
-					//stmt.setString(2, signature);
+					// stmt.setString(2, signature);
 					stmt.setString(2, sendAddr);
 					stmt.setString(3, replyToAddr);
 					stmt.setInt(4, msgFormat);
@@ -306,22 +336,23 @@ public class UserSettingMail implements DeleteListener {
 				closeResources(rs, stmt, closeCon ? writeCon : null, false, ctx);
 			}
 			modifiedDuringSession = false;
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			LOG.error(e.getMessage(), e);
 			throw new UserConfigurationException(UserConfigurationCode.SQL_ERROR, e, new Object[0]);
-		} catch (DBPoolingException e) {
+		} catch (final DBPoolingException e) {
 			LOG.error(e.getMessage(), e);
 			throw new UserConfigurationException(UserConfigurationCode.DBPOOL_ERROR, e, new Object[0]);
 		} finally {
 			accessLock.unlock();
 		}
 	}
-	
+
 	public final void deleteUserSettingMail(final int user, final Context ctx) throws OXException {
 		deleteUserSettingMail(user, ctx, null);
 	}
-	
-	public final void deleteUserSettingMail(final int user, final Context ctx, final Connection writeConArg) throws OXException {
+
+	public final void deleteUserSettingMail(final int user, final Context ctx, final Connection writeConArg)
+			throws OXException {
 		accessLock.lock();
 		try {
 			Connection writeCon = writeConArg;
@@ -353,23 +384,23 @@ public class UserSettingMail implements DeleteListener {
 				closeResources(null, stmt, closeWriteCon ? writeCon : null, false, ctx);
 				stmt = null;
 			}
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			LOG.error(e.getMessage(), e);
 			throw new UserConfigurationException(UserConfigurationCode.SQL_ERROR, e, new Object[0]);
-		} catch (DBPoolingException e) {
+		} catch (final DBPoolingException e) {
 			LOG.error(e.getMessage(), e);
 			throw new UserConfigurationException(UserConfigurationCode.DBPOOL_ERROR, e, new Object[0]);
 		} finally {
 			accessLock.unlock();
 		}
 	}
-	
-	
+
 	public final void loadUserSettingMail(final int user, final Context ctx) throws OXException {
 		loadUserSettingMail(user, ctx, null);
 	}
-	
-	public final void loadUserSettingMail(final int user, final Context ctx, final Connection readConArg) throws OXException {
+
+	public final void loadUserSettingMail(final int user, final Context ctx, final Connection readConArg)
+			throws OXException {
 		accessLock.lock();
 		try {
 			Connection readCon = readConArg;
@@ -395,7 +426,7 @@ public class UserSettingMail implements DeleteListener {
 						stmt.setInt(1, ctx.getContextId());
 						stmt.setInt(2, user);
 						stmt.setInt(3, 0);
-						//stmt.setString(4, signature);
+						// stmt.setString(4, signature);
 						stmt.setString(4, sendAddr == null ? STR_EMPTY : sendAddr);
 						stmt.setString(5, replyToAddr == null ? STR_EMPTY : replyToAddr);
 						stmt.setInt(6, msgFormat);
@@ -436,18 +467,19 @@ public class UserSettingMail implements DeleteListener {
 			} finally {
 				closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
 			}
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			LOG.error(e.getMessage(), e);
 			throw new UserConfigurationException(UserConfigurationCode.SQL_ERROR, e, new Object[0]);
-		} catch (DBPoolingException e) {
+		} catch (final DBPoolingException e) {
 			LOG.error(e.getMessage(), e);
 			throw new UserConfigurationException(UserConfigurationCode.DBPOOL_ERROR, e, new Object[0]);
 		} finally {
 			accessLock.unlock();
 		}
 	}
-	
-	private final void loadSignatures(final int user, final Context ctx, final Connection readConArg) throws OXException {
+
+	private final void loadSignatures(final int user, final Context ctx, final Connection readConArg)
+			throws OXException {
 		try {
 			Connection readCon = readConArg;
 			boolean closeCon = false;
@@ -469,8 +501,8 @@ public class UserSettingMail implements DeleteListener {
 					} while (rs.next());
 					final int size = sigMap.size();
 					signatures = new Signature[size];
-					final Iterator<Map.Entry<String,String>> iter = sigMap.entrySet().iterator();
-					for (int i = 0; i< size; i++) {
+					final Iterator<Map.Entry<String, String>> iter = sigMap.entrySet().iterator();
+					for (int i = 0; i < size; i++) {
 						final Map.Entry<String, String> e = iter.next();
 						signatures[i] = new Signature(e.getKey(), e.getValue());
 					}
@@ -480,16 +512,17 @@ public class UserSettingMail implements DeleteListener {
 			} finally {
 				closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
 			}
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			LOG.error(e.getMessage(), e);
 			throw new UserConfigurationException(UserConfigurationCode.SQL_ERROR, e, new Object[0]);
-		} catch (DBPoolingException e) {
+		} catch (final DBPoolingException e) {
 			LOG.error(e.getMessage(), e);
 			throw new UserConfigurationException(UserConfigurationCode.DBPOOL_ERROR, e, new Object[0]);
 		}
 	}
-	
-	private final boolean saveSignatures(final int user, final Context ctx, final Connection writeConArg) throws OXException {
+
+	private final boolean saveSignatures(final int user, final Context ctx, final Connection writeConArg)
+			throws OXException {
 		try {
 			Connection writeCon = writeConArg;
 			boolean closeCon = false;
@@ -526,15 +559,15 @@ public class UserSettingMail implements DeleteListener {
 			} finally {
 				closeResources(null, stmt, closeCon ? writeCon : null, false, ctx);
 			}
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			LOG.error(e.getMessage(), e);
 			throw new UserConfigurationException(UserConfigurationCode.SQL_ERROR, e, new Object[0]);
-		} catch (DBPoolingException e) {
+		} catch (final DBPoolingException e) {
 			LOG.error(e.getMessage(), e);
 			throw new UserConfigurationException(UserConfigurationCode.DBPOOL_ERROR, e, new Object[0]);
 		}
 	}
-	
+
 	private final void parseBits(final int onOffOptions) {
 		displayHtmlInlineContent = ((onOffOptions & INT_DISPLAY_HTML_INLINE_CONTENT) == INT_DISPLAY_HTML_INLINE_CONTENT);
 		useColorQuote = ((onOffOptions & INT_USE_COLOR_QUOTE) == INT_USE_COLOR_QUOTE);
@@ -550,7 +583,7 @@ public class UserSettingMail implements DeleteListener {
 		noCopyIntoStandardSentFolder = ((onOffOptions & INT_NO_COPY_INTO_SENT_FOLDER) == INT_NO_COPY_INTO_SENT_FOLDER);
 		spamEnabled = ((onOffOptions & INT_SPAM_ENABLED) == INT_SPAM_ENABLED);
 	}
-	
+
 	private final int getBitsValue() {
 		int retval = 0;
 		retval = displayHtmlInlineContent ? (retval | INT_DISPLAY_HTML_INLINE_CONTENT) : retval;
@@ -568,7 +601,7 @@ public class UserSettingMail implements DeleteListener {
 		retval = spamEnabled ? (retval | INT_SPAM_ENABLED) : retval;
 		return retval;
 	}
-	
+
 	public final boolean isDisplayHtmlInlineContent() {
 		return displayHtmlInlineContent;
 	}
@@ -595,7 +628,7 @@ public class UserSettingMail implements DeleteListener {
 		this.useColorQuote = useColorQuote;
 		modifiedDuringSession = true;
 	}
-	
+
 	public final boolean isHardDeleteMsgs() {
 		return hardDeleteMsgs;
 	}
@@ -613,7 +646,7 @@ public class UserSettingMail implements DeleteListener {
 		this.forwardAsAttachment = forwardAsAttachment;
 		modifiedDuringSession = true;
 	}
-	
+
 	public final boolean isAppendVCard() {
 		return appendVCard;
 	}
@@ -679,7 +712,7 @@ public class UserSettingMail implements DeleteListener {
 		this.displayMsgHeaders = new String[displayMsgHeaders.length];
 		System.arraycopy(displayMsgHeaders, 0, this.displayMsgHeaders, 0, displayMsgHeaders.length);
 	}
-	
+
 	private final String getDisplayMsgHeadersString() {
 		if (displayMsgHeaders == null || displayMsgHeaders.length == 0) {
 			return null;
@@ -688,7 +721,7 @@ public class UserSettingMail implements DeleteListener {
 		tmp = tmp.substring(1, tmp.length() - 1);
 		return tmp;
 	}
-	
+
 	private final void setDisplayMsgHeadersString(final String displayMsgHeadersStr) {
 		if (displayMsgHeadersStr == null) {
 			this.displayMsgHeaders = null;
@@ -716,7 +749,7 @@ public class UserSettingMail implements DeleteListener {
 		this.msgPreview = msgPreview;
 		modifiedDuringSession = true;
 	}
-	
+
 	public final boolean isStdFoldersSetDuringSession() {
 		return stdFoldersSet;
 	}
@@ -863,19 +896,19 @@ public class UserSettingMail implements DeleteListener {
 		this.uploadQuotaPerFile = uploadQuotaPerFile;
 		modifiedDuringSession = true;
 	}
-	
+
 	public final boolean isModifiedDuringSession() {
 		return modifiedDuringSession;
 	}
-	
+
 	public final void setStandardFolder(final int index, final String fullname) {
 		this.stdFolderFullnames[index] = fullname;
 	}
-	
+
 	public final String getStandardFolder(final int index) {
 		return this.stdFolderFullnames[index];
 	}
-	
+
 	public final Lock getStdFolderCreationLock() {
 		return stdFolderCreationLock;
 	}
@@ -891,12 +924,12 @@ public class UserSettingMail implements DeleteListener {
 		if (delEvent.getType() == DeleteEvent.TYPE_USER) {
 			try {
 				this.deleteUserSettingMail(delEvent.getId(), delEvent.getContext(), writeCon);
-			} catch (OXException e) {
+			} catch (final OXException e) {
 				throw new DeleteFailedException(e.getMessage(), e);
 			}
 		}
 	}
-	
+
 	public static class Signature implements Cloneable {
 		private String id;
 
@@ -927,7 +960,7 @@ public class UserSettingMail implements DeleteListener {
 				clone.id = this.id;
 				clone.signature = this.signature;
 				return clone;
-			} catch (CloneNotSupportedException e) {
+			} catch (final CloneNotSupportedException e) {
 				/*
 				 * Cannot occur since we are cloneable
 				 */

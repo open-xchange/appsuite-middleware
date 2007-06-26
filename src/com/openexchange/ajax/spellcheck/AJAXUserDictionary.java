@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.ajax.spellcheck;
 
 import static com.openexchange.tools.sql.DBUtils.closeResources;
@@ -75,52 +73,76 @@ import com.openexchange.server.DBPoolingException;
  * AJAXUserDictionary
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- *
+ * 
  */
-public class AJAXUserDictionary implements DeleteListener {
-	
+public class AJAXUserDictionary implements DeleteListener, Cloneable {
+
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(AJAXUserDictionary.class);
+
 	private static final String SQL_INSERT = "INSERT INTO user_setting_spellcheck (cid, user, user_dic) VALUES (?, ?, ?)";
-	
+
 	private static final String SQL_LOAD = "SELECT user_dic FROM user_setting_spellcheck WHERE cid = ? AND user = ?";
-	
+
 	private static final String SQL_UPDATE = "UPDATE user_setting_spellcheck SET user_dic = ? WHERE cid = ? AND user = ?";
-	
+
 	private static final String SQL_DELETE = "DELETE FROM user_setting_spellcheck WHERE cid = ? AND user = ?";
-	
+
 	private Context ctx;
-	
+
 	private int user;
-	
+
 	private Set<IgnoreCaseString> words;
-	
+
 	public AJAXUserDictionary() {
 		super();
 	}
 
-	public AJAXUserDictionary(int user, Context ctx) {
+	public AJAXUserDictionary(final int user, final Context ctx) {
 		super();
 		this.ctx = ctx;
 		this.user = user;
 		words = new HashSet<IgnoreCaseString>();
 	}
-	
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#clone()
+	 */
+	@Override
+	public Object clone() {
+		try {
+			final AJAXUserDictionary clone = (AJAXUserDictionary) super.clone();
+			clone.words = new HashSet<IgnoreCaseString>();
+			final Iterator<IgnoreCaseString> iter = words.iterator();
+			for (int i = 0, n = words.size(); i < n; i++) {
+				clone.words.add((IgnoreCaseString) iter.next().clone());
+			}
+			return clone;
+		} catch (final CloneNotSupportedException e) {
+			LOG.error(e.getMessage(), e);
+			throw new InternalError(e.getMessage());
+		}
+	}
+
 	public void addWord(final String word) throws OXException {
 		if (!validateWord(word)) {
 			throw new AJAXUserDictionaryException(DictionaryCode.INVALID_WORD, word);
 		}
 		words.add(new IgnoreCaseString(word));
 	}
-	
+
 	public void removeWord(final String word) {
 		words.remove(new IgnoreCaseString(word));
 	}
-	
+
 	public boolean containsWord(final String word) {
 		return words.contains(new IgnoreCaseString(word));
 	}
-	
+
 	public String[] getAllWords() {
-		String[] retval = new String[words.size()];
+		final String[] retval = new String[words.size()];
 		int index = 0;
 		final int size = words.size();
 		final Iterator<IgnoreCaseString> iter = words.iterator();
@@ -130,11 +152,11 @@ public class AJAXUserDictionary implements DeleteListener {
 		}
 		return retval;
 	}
-	
+
 	private boolean validateWord(final String word) {
 		return (word.indexOf(',') == -1);
 	}
-	
+
 	private void parseCommaSeperatedWords(final String csw) {
 		if (csw == null) {
 			return;
@@ -143,10 +165,10 @@ public class AJAXUserDictionary implements DeleteListener {
 		final String[] sa = csw.split(" *, *");
 		for (int i = 0; i < sa.length; i++) {
 			ics.setString(sa[i]);
-			words.add((IgnoreCaseString)ics.clone());
+			words.add((IgnoreCaseString) ics.clone());
 		}
 	}
-	
+
 	private String getCommaSeperatedWords() {
 		final StringBuilder sb = new StringBuilder();
 		final int size = words.size();
@@ -160,7 +182,7 @@ public class AJAXUserDictionary implements DeleteListener {
 		}
 		return sb.toString();
 	}
-	
+
 	public boolean saveUserDictionary() throws SQLException, DBPoolingException {
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
@@ -201,12 +223,12 @@ public class AJAXUserDictionary implements DeleteListener {
 				stmt.setInt(2, ctx.getContextId());
 				stmt.setInt(3, user);
 			}
-			return (stmt.executeUpdate() == 1); 
+			return (stmt.executeUpdate() == 1);
 		} finally {
 			closeResources(null, stmt, writeCon, false, ctx);
 		}
 	}
-	
+
 	public boolean loadUserDictionary() throws SQLException, DBPoolingException, OXException {
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
@@ -218,7 +240,8 @@ public class AJAXUserDictionary implements DeleteListener {
 			stmt.setInt(2, user);
 			rs = stmt.executeQuery();
 			if (!rs.next()) {
-				throw new AJAXUserDictionaryException(DictionaryCode.NOT_LOADED, Integer.valueOf(user), Integer.valueOf(ctx.getContextId()));
+				throw new AJAXUserDictionaryException(DictionaryCode.NOT_LOADED, Integer.valueOf(user), Integer
+						.valueOf(ctx.getContextId()));
 			}
 			parseCommaSeperatedWords(rs.getString(1));
 			return true;
@@ -226,12 +249,13 @@ public class AJAXUserDictionary implements DeleteListener {
 			closeResources(rs, stmt, readCon, true, ctx);
 		}
 	}
-	
+
 	public boolean deleteUserDictionary() throws SQLException, DBPoolingException {
 		return deleteUserDictionary(user, ctx, null);
 	}
-	
-	private static boolean deleteUserDictionary(final int user, final Context ctx, final Connection writeConArg) throws SQLException, DBPoolingException {
+
+	private static boolean deleteUserDictionary(final int user, final Context ctx, final Connection writeConArg)
+			throws SQLException, DBPoolingException {
 		PreparedStatement stmt = null;
 		Connection writeCon = writeConArg;
 		boolean closeCon = false;
@@ -248,8 +272,9 @@ public class AJAXUserDictionary implements DeleteListener {
 			closeResources(null, stmt, closeCon ? writeCon : null, false, ctx);
 		}
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
 	 * 
 	 * @see java.lang.Object#toString()
 	 */
@@ -257,20 +282,21 @@ public class AJAXUserDictionary implements DeleteListener {
 	public String toString() {
 		return words.toString();
 	}
-	
+
 	private static class IgnoreCaseString implements Cloneable {
-		
+
 		public String str;
-		
+
 		public IgnoreCaseString() {
 			super();
 		}
 
-		public IgnoreCaseString(String str) {
+		public IgnoreCaseString(final String str) {
 			this.str = str;
 		}
-		
-		/* (non-Javadoc)
+
+		/*
+		 * (non-Javadoc)
 		 * 
 		 * @see java.lang.Object#hashCode()
 		 */
@@ -278,12 +304,13 @@ public class AJAXUserDictionary implements DeleteListener {
 		public int hashCode() {
 			return str.toLowerCase().hashCode();
 		}
-		
+
 		public void setString(final String str) {
 			this.str = str;
 		}
-		
-		/* (non-Javadoc)
+
+		/*
+		 * (non-Javadoc)
 		 * 
 		 * @see java.lang.Object#equals(java.lang.Object)
 		 */
@@ -296,7 +323,8 @@ public class AJAXUserDictionary implements DeleteListener {
 			return false;
 		}
 
-		/* (non-Javadoc)
+		/*
+		 * (non-Javadoc)
 		 * 
 		 * @see java.lang.Object#toString()
 		 */
@@ -305,7 +333,8 @@ public class AJAXUserDictionary implements DeleteListener {
 			return str;
 		}
 
-		/* (non-Javadoc)
+		/*
+		 * (non-Javadoc)
 		 * 
 		 * @see java.lang.Object#clone()
 		 */
@@ -315,14 +344,14 @@ public class AJAXUserDictionary implements DeleteListener {
 			IgnoreCaseString copy;
 			try {
 				copy = (IgnoreCaseString) super.clone();
-			} catch (CloneNotSupportedException e) {
+			} catch (final CloneNotSupportedException e) {
 				return null;
 			}
 			return copy;
 		}
 
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -339,10 +368,10 @@ public class AJAXUserDictionary implements DeleteListener {
 				 * Delete user dictionary
 				 */
 				deleteUserDictionary(userId, ctx, writeConArg);
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				throw new DeleteFailedException(e);
 			}
 		}
 	}
-	
+
 }

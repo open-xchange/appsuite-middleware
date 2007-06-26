@@ -98,7 +98,7 @@ import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
  * 
  * @author Thorben Betten
  */
-public class UserConfiguration implements Serializable, DeleteListener {
+public class UserConfiguration implements Serializable, DeleteListener, Cloneable {
 
 	private static final long serialVersionUID = -8277899698366715803L;
 
@@ -112,64 +112,64 @@ public class UserConfiguration implements Serializable, DeleteListener {
 
 	private static final String DELETE_USER_CONFIGURATION = "DELETE FROM user_configuration WHERE cid = ? AND user = ?";
 
-	private static String SELECT_MYINFOSTORE_PERMISSION = "SELECT ot.fuid, op.admin_flag FROM oxfolder_permissions AS op "
+	private static final String SELECT_MYINFOSTORE_PERMISSION = "SELECT ot.fuid, op.admin_flag FROM oxfolder_permissions AS op "
 			+ "JOIN oxfolder_tree AS ot ON op.fuid = ot.fuid AND op.cid = ? AND ot.cid = ? "
 			+ "WHERE ot.created_from = ? AND ot.module = ? AND ot.default_flag = ?";
 
-	private static String UPDATE_MYINFOSTORE_PERMISSION = "UPDATE oxfolder_permissions SET admin_flag = 1 "
+	private static final String UPDATE_MYINFOSTORE_PERMISSION = "UPDATE oxfolder_permissions SET admin_flag = 1 "
 			+ "WHERE cid = ? AND permission_id = ? AND fuid = ?";
 
-	private static int WEBMAIL = 1;
+	private static final int WEBMAIL = 1;
 
-	private static int CALENDAR = 2;
+	private static final int CALENDAR = 2;
 
-	private static int CONTACTS = 4;
+	private static final int CONTACTS = 4;
 
-	private static int TASKS = 8;
+	private static final int TASKS = 8;
 
-	private static int INFOSTORE = 16;
+	private static final int INFOSTORE = 16;
 
-	private static int PROJECTS = 32;
+	private static final int PROJECTS = 32;
 
-	private static int FORUM = 64;
+	private static final int FORUM = 64;
 
-	private static int PINBOARD_WRITE_ACCESS = 128;
+	private static final int PINBOARD_WRITE_ACCESS = 128;
 
-	private static int WEBDAV_XML = 256;
+	private static final int WEBDAV_XML = 256;
 
-	private static int WEBDAV = 512;
+	private static final int WEBDAV = 512;
 
-	private static int ICAL = 1024;
+	private static final int ICAL = 1024;
 
-	private static int VCARD = 2048;
+	private static final int VCARD = 2048;
 
-	private static int RSS_BOOKMARKS = 4096;
+	private static final int RSS_BOOKMARKS = 4096;
 
-	private static int RSS_PORTAL = 8192;
+	private static final int RSS_PORTAL = 8192;
 
-	private static int SYNCML = 16384;
+	private static final int SYNCML = 16384;
 
-	private static int EDIT_PUBLIC_FOLDERS = 32768;
+	private static final int EDIT_PUBLIC_FOLDERS = 32768;
 
-	private static int READ_CREATE_SHARED_FOLDERS = 65536;
+	private static final int READ_CREATE_SHARED_FOLDERS = 65536;
 
-	private static int DELEGATE_TASKS = 131072;
+	private static final int DELEGATE_TASKS = 131072;
 
 	/**
 	 * Permission bits for standard users
 	 */
-	private static int STANDARD_VERSION = 31;
+	private static final int STANDARD_VERSION = 31;
 
 	/**
 	 * Permission bits for premium users
 	 */
-	private static int PREMIUM_VERSION = Integer.MAX_VALUE;
+	private static final int PREMIUM_VERSION = Integer.MAX_VALUE;
 
 	private int permissionBits;
 
 	private final int userId;
 
-	private final int[] groups;
+	private int[] groups;
 
 	private final transient Context ctx;
 
@@ -188,13 +188,43 @@ public class UserConfiguration implements Serializable, DeleteListener {
 		groups = null;
 	}
 
-	public UserConfiguration(int permissionBits, int userId, int[] groups, Context ctx) {
+	public UserConfiguration(final int permissionBits, final int userId, final int[] groups, final Context ctx) {
 		super();
 		this.permissionBits = permissionBits;
 		this.userId = userId;
 		this.groups = new int[groups.length];
 		System.arraycopy(groups, 0, this.groups, 0, groups.length);
 		this.ctx = ctx;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#clone()
+	 */
+	@Override
+	public Object clone() {
+		try {
+			final UserConfiguration clone = (UserConfiguration) super.clone();
+			if (groups != null) {
+				clone.groups = new int[groups.length];
+				System.arraycopy(groups, 0, clone.groups, 0, groups.length);
+			}
+			if (accessibleModules != null) {
+				clone.accessibleModules = new int[accessibleModules.length];
+				System.arraycopy(accessibleModules, 0, clone.accessibleModules, 0, accessibleModules.length);
+			}
+			if (userSettingMail != null) {
+				clone.userSettingMail = (UserSettingMail) userSettingMail.clone();
+			}
+			if (userDictionary != null) {
+				clone.userDictionary = (AJAXUserDictionary) userDictionary.clone();
+			}
+			return clone;
+		} catch (final CloneNotSupportedException e) {
+			LOG.error(e.getMessage(), e);
+			throw new InternalError(e.getMessage());
+		}
 	}
 
 	public boolean isStandardVersion() {
@@ -447,7 +477,7 @@ public class UserConfiguration implements Serializable, DeleteListener {
 		return ctx;
 	}
 
-	private static transient Lock LOCK = new ReentrantLock();
+	private static final transient Lock LOCK = new ReentrantLock();
 
 	public UserSettingMail getUserSettingMail() {
 		if (userSettingMail == null) {
@@ -457,7 +487,7 @@ public class UserConfiguration implements Serializable, DeleteListener {
 					final UserSettingMail tmp = new UserSettingMail();
 					try {
 						tmp.loadUserSettingMail(userId, ctx);
-					} catch (OXException e) {
+					} catch (final OXException e) {
 						LOG.error(e.getMessage(), e);
 					}
 					userSettingMail = tmp;
@@ -478,7 +508,7 @@ public class UserConfiguration implements Serializable, DeleteListener {
 		if (save && this.userSettingMail != null) {
 			try {
 				this.userSettingMail.saveUserSettingMail(userId, ctx);
-			} catch (OXException e) {
+			} catch (final OXException e) {
 				LOG.error(e.getMessage(), e);
 			}
 		}
@@ -493,9 +523,9 @@ public class UserConfiguration implements Serializable, DeleteListener {
 				}
 			}
 			return userDictionary;
-		} catch (DBPoolingException e) {
+		} catch (final DBPoolingException e) {
 			throw new UserConfigurationException(UserConfigurationCode.DBPOOL_ERROR, e, new Object[0]);
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			throw new UserConfigurationException(UserConfigurationCode.SQL_ERROR, e, new Object[0]);
 		}
 	}
@@ -503,7 +533,7 @@ public class UserConfiguration implements Serializable, DeleteListener {
 	public void setUserDictionary(final AJAXUserDictionary userDictionary) {
 		try {
 			setUserDictionary(userDictionary, false);
-		} catch (OXException e) {
+		} catch (final OXException e) {
 			/*
 			 * Cannot occur since we call with save set to false
 			 */
@@ -516,9 +546,9 @@ public class UserConfiguration implements Serializable, DeleteListener {
 		if (save && this.userDictionary != null) {
 			try {
 				this.userDictionary.saveUserDictionary();
-			} catch (SQLException e) {
+			} catch (final SQLException e) {
 				throw new UserConfigurationException(UserConfigurationCode.SQL_ERROR, e, new Object[0]);
-			} catch (DBPoolingException e) {
+			} catch (final DBPoolingException e) {
 				throw new UserConfigurationException(UserConfigurationCode.DBPOOL_ERROR, e, new Object[0]);
 			}
 		}
@@ -592,9 +622,9 @@ public class UserConfiguration implements Serializable, DeleteListener {
 					writeCon = null;
 				}
 			}
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			throw new UserConfigurationException(UserConfigurationCode.SQL_ERROR, e, new Object[0]);
-		} catch (DBPoolingException e) {
+		} catch (final DBPoolingException e) {
 			throw new UserConfigurationException(UserConfigurationCode.DBPOOL_ERROR, e, new Object[0]);
 		}
 	}
@@ -618,9 +648,9 @@ public class UserConfiguration implements Serializable, DeleteListener {
 				closeResources(rs, stmt, readCon, true, userConfig.getContext());
 			}
 			saveUserConfiguration(userConfig, insert, userConfig.getContext(), null);
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			throw new UserConfigurationException(UserConfigurationCode.SQL_ERROR, e, new Object[0]);
-		} catch (DBPoolingException e) {
+		} catch (final DBPoolingException e) {
 			throw new UserConfigurationException(UserConfigurationCode.DBPOOL_ERROR, e, new Object[0]);
 		}
 	}
@@ -805,7 +835,7 @@ public class UserConfiguration implements Serializable, DeleteListener {
 				 * Delete user configuration
 				 */
 				deleteUserConfiguration(userId, writeConArg, ctx);
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				LOG.error(e.getMessage(), e);
 				throw new DeleteFailedException(e);
 			}

@@ -88,7 +88,15 @@ public class UserConfigurationException extends OXException {
 		/**
 		 * User configuration could not be put into cache: %1$s
 		 */
-		CACHE_PUT_ERROR("User configuration could not be put into cache: %1$s", Category.CODE_ERROR, 8);
+		CACHE_PUT_ERROR("User configuration could not be put into cache: %1$s", Category.CODE_ERROR, 8),
+		/**
+		 * User configuration cache could not be cleared: %1$s
+		 */
+		CACHE_CLEAR_ERROR("User configuration cache could not be cleared: %1$s", Category.CODE_ERROR, 9),
+		/**
+		 * User configuration could not be removed from cache: %1$s
+		 */
+		CACHE_REMOVE_ERROR("User configuration could not be removed from cache: %1$s", Category.CODE_ERROR, 9);
 
 		private final String message;
 

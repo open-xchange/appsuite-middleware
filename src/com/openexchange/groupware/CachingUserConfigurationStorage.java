@@ -149,7 +149,46 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
 				WRITE_LOCK.unlock();
 			}
 		}
-		return userConfig;
+		return (UserConfiguration) userConfig.clone();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.groupware.UserConfigurationStorage#clearStorage()
+	 */
+	@Override
+	public void clearStorage() throws UserConfigurationException {
+		WRITE_LOCK.lock();
+		try {
+			cache.clear();
+		} catch (final CacheException e) {
+			throw new UserConfigurationException(UserConfigurationCode.CACHE_CLEAR_ERROR, e, e.getLocalizedMessage());
+		} finally {
+			WRITE_LOCK.unlock();
+		}
+
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.groupware.UserConfigurationStorage#removeUserConfiguration(int,
+	 *      com.openexchange.groupware.contexts.Context)
+	 */
+	@Override
+	public void removeUserConfiguration(final int userId, final Context ctx) throws UserConfigurationException {
+		WRITE_LOCK.lock();
+		try {
+			final CacheKey key = getKey(userId, ctx);
+			if (null != cache.get(key)) {
+				cache.remove(key);
+			}
+		} catch (final CacheException e) {
+			throw new UserConfigurationException(UserConfigurationCode.CACHE_REMOVE_ERROR, e, e.getLocalizedMessage());
+		} finally {
+			WRITE_LOCK.unlock();
+		}
 	}
 
 }

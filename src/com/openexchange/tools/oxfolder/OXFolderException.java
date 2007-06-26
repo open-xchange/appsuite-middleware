@@ -504,7 +504,15 @@ public class OXFolderException extends OXException {
 		/**		
 		 * Owner %s of default folder %s must keep the folder admin permission
 		 */
-		CREATOR_IS_NOT_ADMIN("Owner %s of default folder %s must keep the folder admin permission", Category.USER_INPUT, 71);
+		CREATOR_IS_NOT_ADMIN("Owner %s of default folder %s must keep the folder admin permission", Category.USER_INPUT, 71),
+		/**
+		 * User %s is not allowed to share folder %s in context %s due to user configuration
+		 */
+		SHARE_FORBIDDEN("User %s is not allowed to share folder %s in context %s due to user configuration", Category.USER_CONFIGURATION, 72),
+		/**
+		 * Defined permissions for folder %s in context %s are not applicable to user %s due to user configuration
+		 */
+		UNAPPLICABLE_FOLDER_PERM("Defined permissions for folder %s in context %s are not applicable to user %s due to user configuration", Category.USER_CONFIGURATION, 73);
 
 		/**
 		 * Message of the exception.

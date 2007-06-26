@@ -65,6 +65,8 @@ import com.openexchange.api2.OXException;
 import com.openexchange.cache.FolderCacheManager;
 import com.openexchange.cache.FolderQueryCacheManager;
 import com.openexchange.groupware.UserConfiguration;
+import com.openexchange.groupware.UserConfigurationException;
+import com.openexchange.groupware.UserConfigurationStorage;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.calendar.CalendarCache;
 import com.openexchange.groupware.calendar.CalendarSql;
@@ -242,10 +244,12 @@ public class OXFolderManagerImpl implements OXFolderManager {
 			throw new OXFolderLogicException(FolderCode.INVALID_MODULE, PREFIX_CREATE, getFolderName(parentFolder),
 					folderModule2String(folderObj.getModule()), Integer.valueOf(ctx.getContextId()));
 		}
+		checkPermissionsAgainstSessionUserConfig(folderObj, userConfig, PREFIX_CREATE, ctx);
 		/*
 		 * Check if admin exists and permission structure
 		 */
 		checkFolderPermissions(folderObj, user.getId(), PREFIX_CREATE, ctx);
+		checkPermissionsAgainstUserConfigs(folderObj, PREFIX_CREATE, ctx);
 		/*
 		 * Check if duplicate folder exists
 		 */
@@ -489,7 +493,9 @@ public class OXFolderManagerImpl implements OXFolderManager {
 		folderObj.setModule(storageObj.getModule());
 		folderObj.setCreatedBy(storageObj.getCreatedBy());
 		folderObj.setDefaultFolder(storageObj.isDefaultFolder());
+		checkPermissionsAgainstSessionUserConfig(folderObj, userConfig, PREFIX_UPDATE, ctx);
 		checkFolderPermissions(folderObj, user.getId(), PREFIX_UPDATE, ctx);
+		checkPermissionsAgainstUserConfigs(folderObj, PREFIX_CREATE, ctx);
 		/*
 		 * Call SQL update
 		 */
@@ -1241,6 +1247,66 @@ public class OXFolderManagerImpl implements OXFolderManager {
 			throw new OXFolderException(FolderCode.UNKNOWN_MODULE, PREFIX_CREATE, Integer.valueOf(parentFolder.getModule()), "");
 		}
 		return true;
+	}
+	
+	private static final void checkPermissionsAgainstUserConfigs(final FolderObject folderObj, final String excPrefix,
+			final Context ctx) throws OXException {
+		final int size = folderObj.getPermissions().size();
+		final Iterator<OCLPermission> iter = folderObj.getPermissions().iterator();
+		final UserConfigurationStorage userConfigStorage = UserConfigurationStorage.getInstance();
+		for (int i = 0; i < size; i++) {
+			final OCLPermission assignedPerm = iter.next();
+			if (!assignedPerm.isGroupPermission()) {
+				final OCLPermission maxApplicablePerm = getMaxApplicablePermission(folderObj, userConfigStorage
+						.getUserConfiguration(assignedPerm.getEntity(), ctx));
+				if (!isApplicable(maxApplicablePerm, assignedPerm)) {
+					throw new OXFolderException(FolderCode.UNAPPLICABLE_FOLDER_PERM, excPrefix,
+							getFolderName(folderObj), Integer.valueOf(ctx.getContextId()), getUserName(assignedPerm
+									.getEntity(), ctx));
+				}
+			}
+		}
+	}
+	
+	private static final OCLPermission getMaxApplicablePermission(final FolderObject folderObj, final UserConfiguration userConfig) {
+		final EffectivePermission retval = new EffectivePermission(userConfig.getUserId(), folderObj.getObjectID(), folderObj.getType(userConfig.getUserId()), folderObj.getModule(), userConfig);
+		retval.setFolderAdmin(true);
+		retval.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+		return retval;
+	}
+	
+	private static final boolean isApplicable(final OCLPermission maxApplicablePerm, final OCLPermission assignedPerm) {
+		if (!maxApplicablePerm.isFolderAdmin() && assignedPerm.isFolderAdmin()) {
+			return false;
+		}
+		return (maxApplicablePerm.getFolderPermission() >= assignedPerm.getFolderPermission()
+				&& maxApplicablePerm.getReadPermission() >= assignedPerm.getReadPermission()
+				&& maxApplicablePerm.getWritePermission() >= assignedPerm.getWritePermission() && maxApplicablePerm
+				.getDeletePermission() >= assignedPerm.getDeletePermission());
+	}
+	
+	private static final void checkPermissionsAgainstSessionUserConfig(final FolderObject folderObj,
+			final UserConfiguration sessionUserConfig, final String excPrefix, final Context ctx) throws OXException {
+		final int size = folderObj.getPermissions().size();
+		final boolean isPrivate = (folderObj.getType() == FolderObject.PRIVATE);
+		final Iterator<OCLPermission> iter = folderObj.getPermissions().iterator();
+		for (int i = 0; i < size; i++) {
+			final OCLPermission oclPerm = iter.next();
+			if (!sessionUserConfig.hasFullSharedFolderAccess() && isPrivate && i > 0 && !isEmptyPermission(oclPerm)) {
+				/*
+				 * Prevent user from sharing a private folder cause he does not
+				 * hold full shared folder access due to its user configuration
+				 */
+				throw new OXFolderException(FolderCode.SHARE_FORBIDDEN, excPrefix, getUserName(sessionUserConfig
+						.getUserId(), ctx), getFolderName(folderObj), Integer.valueOf(ctx.getContextId()));
+			}
+		}
+	}
+
+	private static final boolean isEmptyPermission(final OCLPermission oclPerm) {
+		return (!oclPerm.isFolderAdmin() && oclPerm.getFolderPermission() == OCLPermission.NO_PERMISSIONS
+				&& oclPerm.getReadPermission() == OCLPermission.NO_PERMISSIONS
+				&& oclPerm.getWritePermission() == OCLPermission.NO_PERMISSIONS && oclPerm.getDeletePermission() == OCLPermission.NO_PERMISSIONS);
 	}
 
 	private static final void checkFolderPermissions(final FolderObject folderObj, final int userId,

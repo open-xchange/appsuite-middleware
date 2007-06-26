@@ -189,8 +189,8 @@ public abstract class UserConfigurationStorage {
 	 * 
 	 * @param userId -
 	 *            the user ID
-	 * @param ctx
-	 *            TODO
+	 * @param ctx -
+	 *            the context
 	 * @return the instance of <code>UserConfiguration</code>
 	 * @throws UserConfigurationException -
 	 *             if user's configuration could not be determined
@@ -206,13 +206,42 @@ public abstract class UserConfigurationStorage {
 	 *            the user ID
 	 * @param groups -
 	 *            user's groups
-	 * @param ctx
-	 *            TODO
+	 * @param ctx -
+	 *            the context
 	 * @return the instance of <code>UserConfiguration</code>
 	 * @throws UserConfigurationException -
 	 *             if user's configuration could not be determined
 	 */
 	public abstract UserConfiguration getUserConfiguration(int userId, int[] groups, Context ctx)
 			throws UserConfigurationException;
+
+	/**
+	 * <p>
+	 * Clears the whole storage. All kept instances of
+	 * <code>UserConfiguration</code> are going to be removed from storage.
+	 * <p>
+	 * <b>NOTE:</b> Only the instances are going to be removed from storage;
+	 * underlying database is not affected
+	 * 
+	 * @throws UserConfigurationException
+	 */
+	public abstract void clearStorage() throws UserConfigurationException;
+
+	/**
+	 * <p>
+	 * Removes the instance of <code>UserConfiguration</code> that corresponds
+	 * to given user ID from storage.
+	 * <p>
+	 * <b>NOTE:</b> Only the instance is going to be removed from storage;
+	 * underlying database is not affected
+	 * 
+	 * @param userId -
+	 *            the user ID
+	 * @param ctx -
+	 *            the context
+	 * @throws UserConfigurationException -
+	 *             if removal fails
+	 */
+	public abstract void removeUserConfiguration(int userId, Context ctx) throws UserConfigurationException;
 
 }
