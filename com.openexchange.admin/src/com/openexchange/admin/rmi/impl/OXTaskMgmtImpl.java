@@ -51,6 +51,9 @@ package com.openexchange.admin.rmi.impl;
 import java.rmi.RemoteException;
 import java.util.concurrent.ExecutionException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.admin.rmi.BasicAuthenticator;
 import com.openexchange.admin.rmi.OXTaskMgmtInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -64,11 +67,27 @@ import com.openexchange.admin.taskmanagement.TaskManager;
 
 public class OXTaskMgmtImpl extends BasicAuthenticator implements OXTaskMgmtInterface {
     
+    private static final Log log = LogFactory.getLog(OXTaskMgmtImpl.class);
+    
     public Object getTaskResults(final Context ctx, final Credentials cred, final int id) throws RemoteException, InvalidCredentialsException, StorageException, InterruptedException, ExecutionException, InvalidDataException {
-        doNullCheck(ctx);
-        contextcheck(ctx);
-        doAuthentication(cred, ctx);
-        return getTaskResults(id);
+        try {
+            doNullCheck(ctx);
+            contextcheck(ctx);
+            doAuthentication(cred, ctx);
+            return getTaskResults(id);
+        } catch (final InvalidCredentialsException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (final StorageException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (final InvalidDataException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (final InterruptedException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } // We needn't catch the ExecutionException because this is logged before
     }
 
     public Object getTaskResults(final int id) throws InterruptedException, ExecutionException, InvalidDataException {
@@ -100,20 +119,66 @@ public class OXTaskMgmtImpl extends BasicAuthenticator implements OXTaskMgmtInte
     }
     
     public String getJobList(final Context ctx, final Credentials cred) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException {
-        doNullCheck(ctx);
-        contextcheck(ctx);
-        doAuthentication(cred, ctx);
-        return TaskManager.getInstance().getJobList();
+        try {
+            doNullCheck(ctx);
+            contextcheck(ctx);
+            doAuthentication(cred, ctx);
+            return TaskManager.getInstance().getJobList();
+        } catch (final InvalidCredentialsException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (final StorageException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (final InvalidDataException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        }
     }
 
     public void deleteJob(final Context ctx, final Credentials cred, final int id) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, TaskManagerException {
-        doNullCheck(ctx);
-        contextcheck(ctx);
-        doAuthentication(cred, ctx);
-        if (id < 0) {
-            throw new InvalidDataException("Job ID must be > 0.");
+        try {
+            doNullCheck(ctx);
+            contextcheck(ctx);
+            doAuthentication(cred, ctx);
+            if (id < 0) {
+                throw new InvalidDataException("Job ID must be > 0.");
+            }
+            TaskManager.getInstance().deleteJob(id);
+        } catch (final InvalidCredentialsException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (final StorageException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (final InvalidDataException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (final TaskManagerException e) {
+            log.error(e.getMessage(), e);
+            throw e;
         }
-        TaskManager.getInstance().deleteJob(id);
+    }
+
+    public void flush(final Context ctx, final Credentials cred) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, TaskManagerException {
+        try {
+            doNullCheck(ctx);
+            contextcheck(ctx);
+            doAuthentication(cred, ctx);
+            TaskManager.getInstance().flush();
+        } catch (final InvalidCredentialsException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (final StorageException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (final InvalidDataException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (final TaskManagerException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        }
     }
 
 }
