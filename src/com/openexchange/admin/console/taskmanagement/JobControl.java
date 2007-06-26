@@ -33,12 +33,18 @@ public class JobControl extends BasicCommandlineOptions {
     private static final char OPT_DETAILS_SHORT = 't';
 
     private static final String OPT_DETAILS_LONG = "details";
+
+    private static final String OPT_FLUSH_LONG = "flush";
+
+    private static final char OPT_FLUSH_SHORT = 'f';
     
     private Option list = null;
 
     private Option delete = null;
 
     private Option details = null;
+
+    private Option flush = null;
     
     public static void main(final String[] args) {
         new JobControl(args);
@@ -70,6 +76,7 @@ public class JobControl extends BasicCommandlineOptions {
                 System.out.println(oxtask.getJobList(ctx, auth));
             } else  if (null != deleteValue) {
                 oxtask.deleteJob(ctx, auth, Integer.parseInt(deleteValue));
+                System.out.println("Deleted job with ID" + deleteValue);
             } else if (null != detailValue) {
                 try {
                     oxtask.getTaskResults(ctx, auth, Integer.parseInt(detailValue));
@@ -80,6 +87,9 @@ public class JobControl extends BasicCommandlineOptions {
                     System.err.println("The execution of this job was aborted by the following exception: ");
                     e.getCause().printStackTrace();
                 }
+            } else if (null != parser.getOptionValue(this.flush)) {
+                oxtask.flush(ctx, auth);
+                System.out.println("All finished jobs flushed.");
             } else {
                 System.err.println("No option selected (list, delete, details).");
                 parser.printUsage();
@@ -133,5 +143,6 @@ public class JobControl extends BasicCommandlineOptions {
         this.list = setShortLongOpt(parser, OPT_LIST_SHORT, OPT_LIST_LONG, "list the jobs of this open-xchange server", false, false);
         this.delete = setShortLongOpt(parser, OPT_DELETE_SHORT, OPT_DELETE_LONG, "id", "delete the the given job id", false);
         this.details = setShortLongOpt(parser, OPT_DETAILS_SHORT, OPT_DETAILS_LONG, "id", "show details for the given job", false);
+        this.flush = setShortLongOpt(parser, OPT_FLUSH_SHORT, OPT_FLUSH_LONG, "flush all finished jobs from the queue", false, false);
     }
 }
