@@ -16,6 +16,8 @@ import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.sun.org.apache.xerces.internal.util.URI;
+import com.sun.org.apache.xerces.internal.util.URI.MalformedURIException;
 
 /**
  * 
@@ -61,10 +63,10 @@ public class ListFilestore extends UtilAbstraction {
             // Needed for csv output
             final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
 
-            final String HEADER_FORMAT = "%-7s %-30s %-7s %-7s %-7s %-7s %s\n";
-            final String VALUE_FORMAT  = "%-7s %-30s %-7s %-7s %-7s %-7s %s\n";
+            final String HEADER_FORMAT = "%-7s %-35s %-7s %-7s %-7s %-7s %s\n";
+            final String VALUE_FORMAT  = "%-7s %-35s %-7s %-7s %-7s %-7s %s\n";
             if(parser.getOptionValue(this.csvOutputOption) == null) {
-                System.out.format(HEADER_FORMAT, "id", "uri", "size", "qmax", "qused", "maxctx", "curctx");
+                System.out.format(HEADER_FORMAT, "id", "path", "size", "qmax", "qused", "maxctx", "curctx");
             }
             for (final Filestore filestore : filestores) {
                 if (parser.getOptionValue(this.csvOutputOption) != null) {
@@ -72,7 +74,7 @@ public class ListFilestore extends UtilAbstraction {
                 } else {
                     System.out.format(VALUE_FORMAT,
                             filestore.getId(),
-                            filestore.getUrl(),
+                            new URI(filestore.getUrl()).getPath(),
                             filestore.getSize(),
                             filestore.getQuota_max(),
                             filestore.getQuota_used(),
@@ -122,6 +124,9 @@ public class ListFilestore extends UtilAbstraction {
             printError(e.getMessage());
             parser.printUsage();
             sysexit(SYSEXIT_MISSING_OPTION);
+        } catch (MalformedURIException e) {
+            printServerResponse(e.getMessage());
+            sysexit(1);
         }
     }
 

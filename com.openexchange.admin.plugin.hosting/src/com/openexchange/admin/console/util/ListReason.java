@@ -46,6 +46,11 @@ public class ListReason extends UtilAbstraction {
             // Needed for csv output
             final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
 
+            final String HEADER_FORMAT = "%-7s %-55s\n";
+            final String VALUE_FORMAT  = "%-7s %-55s\n";
+            if(parser.getOptionValue(this.csvOutputOption) == null) {
+                System.out.format(HEADER_FORMAT, "id", "test");
+            }
             for (final MaintenanceReason mr : mrs) {
                 if (parser.getOptionValue(this.csvOutputOption) != null) {
                     final ArrayList<String> rea_data = new ArrayList<String>();
@@ -53,7 +58,7 @@ public class ListReason extends UtilAbstraction {
                     rea_data.add(mr.getText());
                     data.add(rea_data);
                 } else {
-                    System.out.println(mr);
+                    System.out.format(VALUE_FORMAT,mr.getId(),mr.getText());
                 }
             }
 
