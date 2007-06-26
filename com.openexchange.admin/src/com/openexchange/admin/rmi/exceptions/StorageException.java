@@ -49,13 +49,11 @@
 
 package com.openexchange.admin.rmi.exceptions;
 
-import java.io.Serializable;
-
 /**
  * @author d7
  *
  */
-public class StorageException extends Exception implements  Serializable {
+public class StorageException extends Exception {
 
 	/**
 	 * For serialization
