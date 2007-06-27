@@ -118,6 +118,9 @@ public class Folder extends SessionServlet {
 
 	private static final String JSON_KEY_DATA = "data";
 
+	/**
+	 * The constant for Inbox mail folder. TODO: Should be read from StringHelper utility class!
+	 */
 	private static final String DEF_NAME_INBOX = "Inbox";
 
 	private static final String STR_INBOX = "INBOX";
@@ -804,7 +807,7 @@ public class Folder extends SessionServlet {
 							try {
 								// TODO: Translation for INBOX?!
 								for (int j = 0; j < writers.length; j++) {
-									writers[j].writeField(jsonWriter, f, false, DEF_NAME_INBOX, -1);
+									writers[j].writeField(jsonWriter, f, false, DEF_NAME_INBOX, -1, null, -1, all);
 								}
 							} finally {
 								jsonWriter.endArray();
@@ -813,7 +816,7 @@ public class Folder extends SessionServlet {
 							jsonWriter.array();
 							try {
 								for (int j = 0; j < writers.length; j++) {
-									writers[j].writeField(jsonWriter, f, false);
+									writers[j].writeField(jsonWriter, f, false, null, -1, null, -1, all);
 								}
 							} finally {
 								jsonWriter.endArray();

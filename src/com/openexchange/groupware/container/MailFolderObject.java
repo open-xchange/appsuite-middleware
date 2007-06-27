@@ -60,10 +60,13 @@ import com.openexchange.groupware.imap.OXMailException.MailCode;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.server.IMAPPermission;
 import com.openexchange.sessiond.SessionObject;
+import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.imap.ACL;
 import com.sun.mail.imap.DefaultFolder;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.Rights;
+import com.sun.mail.imap.protocol.IMAPProtocol;
+import com.sun.mail.imap.protocol.ListInfo;
 
 public final class MailFolderObject {
 	
@@ -85,6 +88,8 @@ public final class MailFolderObject {
 	private String name;
 	
 	private boolean hasSubfolders;
+	
+	private boolean hasSubscribedSubfolders;
 	
 	private Rights ownRights;
 	
@@ -147,12 +152,28 @@ public final class MailFolderObject {
 		 */
 		if (this.exists && (folder.getType() & javax.mail.Folder.HOLDS_FOLDERS) == 0) {
 			this.hasSubfolders = false;
+			this.hasSubscribedSubfolders = false;
 		} else {
 			this.hasSubfolders = false;
+			this.hasSubscribedSubfolders = false;
 			Attribs: for (String attribute : attrs) {
 				if (ATTRIBUTE_HAS_CHILDREN.equalsIgnoreCase(attribute)) {
 					this.hasSubfolders = true;
 					break Attribs;
+				}
+			}
+			ListInfo[] li = (ListInfo[]) folder.doCommand(new IMAPFolder.ProtocolCommand() {
+				public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+					return protocol.lsub("", folder.getFullName());
+				}
+			});
+			if (null != li) {
+				final String[] lsubAttrs = li[findName(li, folder.getFullName())].attrs;
+				Attribs: for (String attribute : lsubAttrs) {
+					if (ATTRIBUTE_HAS_CHILDREN.equalsIgnoreCase(attribute)) {
+						this.hasSubscribedSubfolders = true;
+						break Attribs;
+					}
 				}
 			}
 		}
@@ -184,6 +205,28 @@ public final class MailFolderObject {
 			}
 		}
 		this.imapFolder = folder;
+	}
+	
+	/**
+	 * Which entry in <code>li</code> matches <code>lname</code>? If the
+	 * name contains wildcards, more than one entry may be returned.
+	 */
+	private static final int findName(final ListInfo[] li, final String lname) {
+		int i;
+		/*
+		 * If the name contains a wildcard, there might be more than one
+		 */
+		for (i = 0; i < li.length; i++) {
+			if (li[i].name.equals(lname))
+				break;
+		}
+		if (i >= li.length) {
+			/*
+			 * Nothing matched exactly. Use first one.
+			 */
+			i = 0;
+		}
+		return i;
 	}
 	
 	private static final String STR_MAILBOX_NOT_EXISTS = "NO Mailbox does not exist";
@@ -376,6 +419,10 @@ public final class MailFolderObject {
 
 	public boolean hasSubfolders() {
 		return hasSubfolders;
+	}
+	
+	public boolean hasSubscribedSubfolders() {
+		return hasSubscribedSubfolders;
 	}
 
 	public int getNew() {

@@ -235,7 +235,7 @@ public class MessageCacheManager {
 	 * Removes <code>MessageCacheObject</code> instance from cache which
 	 * matches given folder and UID
 	 */
-	protected final void removeMessage(final SessionObject session, final long msgUID, final String folder) {
+	public final void removeMessage(final SessionObject session, final long msgUID, final String folder) {
 		removeMessage(session.getUserObject().getId(), msgUID, folder, session.getContext());
 	}
 
@@ -244,7 +244,7 @@ public class MessageCacheManager {
 	 * matches given folder and UID
 	 */
 	@SuppressWarnings(STR_UNCHECKED)
-	protected final void removeMessage(final int user, final long msgUID, final String folder, final Context ctx) {
+	public final void removeMessage(final int user, final long msgUID, final String folder, final Context ctx) {
 		final Map<String, MessageCacheObject> msgMap = (HashMap<String, MessageCacheObject>) msgCache.get(getUserKey(
 				user, ctx));
 		if (msgMap == null) {

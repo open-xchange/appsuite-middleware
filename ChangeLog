@@ -1,3 +1,10 @@
+* 2007-06-27 - thorben.betten@open-xchange.com
+
+ - Collecting multiple requests to store message flags which delivers a
+   huge performance gain
+ - Checking only subscribed subfolders when requesting subfolders flag
+   in non-config folder tree
+
 * 2007-06-27 - martin.kauss@open-xchange.com
 
  - Refactored Recurring API. The API is now in a seperate package.

@@ -1773,14 +1773,20 @@ public class Mail extends PermissionServlet implements UploadListener {
 					 * Update system flags which are allowed to be altered by
 					 * client
 					 */
-					final Message msg = mailInterface.updateMessageFlags(sourceFolder, mailIdentifier.msgUID, flagBits
+					final Message[] msgs = mailInterface.updateMessageFlags(sourceFolder, new long[] { mailIdentifier.msgUID }, flagBits
 							.intValue(), flagVal);
-					if (msg != null && MessageCacheManager.getInstance().containsUserMessages(sessionObj)) {
+					if (msgs != null && MessageCacheManager.getInstance().containsUserMessages(sessionObj)) {
 						/*
 						 * Update cache entry
 						 */
-						MessageCacheManager.getInstance().putMessage(sessionObj, mailIdentifier.msgUID,
-								new MessageCacheObject(msg, mailIdentifier.msgUID));
+						for (int i = 0; i < msgs.length; i++) {
+							final MessageCacheObject mco = (MessageCacheObject) msgs[i];
+							if (mco.isExpunged()) {
+								MessageCacheManager.getInstance().removeMessage(sessionObj, mco.getUid(), mailIdentifier.folder);
+							} else {
+								MessageCacheManager.getInstance().putMessage(sessionObj, mco.getUid(), mco);
+							}
+						}
 					}
 				}
 			} finally {
@@ -1938,6 +1944,65 @@ public class Mail extends PermissionServlet implements UploadListener {
 					response.setTimestamp(null);
 					Response.write(response, writer);
 				}
+			} finally {
+				if (closeMailInterface && mailInterface != null) {
+					mailInterface.close(true);
+					mailInterface = null;
+				}
+			}
+		} catch (OXMailException e) {
+			LOG.error(e.getMessage(), e);
+			final Response response = new Response();
+			if (!e.getCategory().equals(Category.USER_CONFIGURATION)) {
+				response.setException(e);
+			}
+			response.setData(JSONObject.NULL);
+			response.setTimestamp(null);
+			Response.write(response, writer);
+		} catch (AbstractOXException e) {
+			LOG.error(e.getMessage(), e);
+			final Response response = new Response();
+			response.setException(e);
+			response.setData(JSONObject.NULL);
+			response.setTimestamp(null);
+			Response.write(response, writer);
+		} catch (Exception e) {
+			LOG.error("actionPutCopyMail", e);
+			final Response response = new Response();
+			response.setException(getWrappingOXException(e));
+			response.setData(JSONObject.NULL);
+			response.setTimestamp(null);
+			Response.write(response, writer);
+		}
+	}
+	
+	public void actionPutStoreFlagsMultiple(final SessionObject sessionObj, final Writer writer,
+			final String[] mailIDs, final String folder, final int flagsBits, final boolean flagValue,
+			final MailInterface mailInterfaceArg) throws JSONException {
+		try {
+			MailInterface mailInterface = mailInterfaceArg;
+			boolean closeMailInterface = false;
+			try {
+				if (mailInterface == null) {
+					mailInterface = MailInterfaceImpl.getInstance(sessionObj);
+					closeMailInterface = true;
+				}
+				final Message[] msgs = mailInterface.updateMessageFlags(folder, MailIdentifier.getUIDs(mailIDs),
+						flagsBits, flagValue);
+				if (msgs != null && MessageCacheManager.getInstance().containsUserMessages(sessionObj)) {
+					/*
+					 * Update cache entry
+					 */
+					for (int i = 0; i < msgs.length; i++) {
+						final MessageCacheObject mco = (MessageCacheObject) msgs[i];
+						if (mco.isExpunged()) {
+							MessageCacheManager.getInstance().removeMessage(sessionObj, mco.getUid(), folder);
+						} else {
+							MessageCacheManager.getInstance().putMessage(sessionObj, mco.getUid(), mco);
+						}
+					}
+				}
+
 			} finally {
 				if (closeMailInterface && mailInterface != null) {
 					mailInterface.close(true);

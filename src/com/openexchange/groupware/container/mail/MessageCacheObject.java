@@ -156,6 +156,8 @@ public class MessageCacheObject extends Message implements Serializable {
 	private int threadLevel;
 
 	private final Map<String, String> headers;
+	
+	private boolean expunged;
 
 	public MessageCacheObject(final String folderFullname, final char separator, final int msgnum) {
 		super();
@@ -176,20 +178,24 @@ public class MessageCacheObject extends Message implements Serializable {
 		this.uid = msgUID;
 		this.folderFullname = msg.getFolder().getFullName();
 		this.separator = msg.getFolder().getSeparator();
-		this.from = (InternetAddress[]) msg.getFrom();
-		this.to = (InternetAddress[]) msg.getRecipients(RecipientType.TO);
-		this.cc = (InternetAddress[]) msg.getRecipients(RecipientType.CC);
-		this.bcc = (InternetAddress[]) msg.getRecipients(RecipientType.BCC);
-		this.replyTo = msg.getReplyTo() == null ? null : (InternetAddress[]) msg.getReplyTo();
-		this.subject = msg.getSubject();
-		this.date = msg.getSentDate();
-		this.receivedDate = msg.getReceivedDate();
-		this.flags = msg.getFlags();
-		this.contentType = new ContentType(msg.getContentType());
-		this.size = msg.getSize();
-		final String[] tmp;
-		this.priority = (tmp = msg.getHeader(HDR_X_PRIORITY)) == null || tmp[0] == null || tmp[0].length() == 0 ? JSONMessageObject.PRIORITY_NORMAL
-				: parsePriorityStr(tmp[0]);
+		if (msg.isExpunged()) {
+			expunged = true;
+		} else {
+			this.from = (InternetAddress[]) msg.getFrom();
+			this.to = (InternetAddress[]) msg.getRecipients(RecipientType.TO);
+			this.cc = (InternetAddress[]) msg.getRecipients(RecipientType.CC);
+			this.bcc = (InternetAddress[]) msg.getRecipients(RecipientType.BCC);
+			this.replyTo = msg.getReplyTo() == null ? null : (InternetAddress[]) msg.getReplyTo();
+			this.subject = msg.getSubject();
+			this.date = msg.getSentDate();
+			this.receivedDate = msg.getReceivedDate();
+			this.flags = msg.getFlags();
+			this.contentType = new ContentType(msg.getContentType());
+			this.size = msg.getSize();
+			final String[] tmp;
+			this.priority = (tmp = msg.getHeader(HDR_X_PRIORITY)) == null || tmp[0] == null || tmp[0].length() == 0 ? JSONMessageObject.PRIORITY_NORMAL
+					: parsePriorityStr(tmp[0]);
+		}
 	}
 
 	private static final int parsePriorityStr(final String priorityHdrArg) {
@@ -342,6 +348,16 @@ public class MessageCacheObject extends Message implements Serializable {
 	public void setSubject(final String subject) {
 		this.subject = subject;
 	}
+	
+	@Override
+	public boolean isExpunged() {
+		return expunged;
+	}
+	
+	@Override
+	public void setExpunged(final boolean expunged) {
+		this.expunged = expunged;
+	}
 
 	private static final String HDR_DATE = "Date";
 
@@ -400,6 +416,7 @@ public class MessageCacheObject extends Message implements Serializable {
 	 * 
 	 * @see javax.mail.Message#getMessageNumber()
 	 */
+	@Override
 	public int getMessageNumber() {
 		return seqNum;
 	}

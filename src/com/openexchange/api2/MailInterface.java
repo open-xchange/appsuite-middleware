@@ -290,7 +290,7 @@ public interface MailInterface {
 	 * //ANSWERED). <code>flagVal</code> determines whether the affected flags are
 	 * set (<code>true</code>) or unset (<code>false</code>).
 	 */
-	public Message updateMessageFlags(String folder, long msgUID, int flagBits, boolean flagVal) throws OXException;
+	public Message[] updateMessageFlags(String folder, long[] msgUID, int flagBits, boolean flagVal) throws OXException;
 
 	/**
 	 * Checks if user-defines default folder exist

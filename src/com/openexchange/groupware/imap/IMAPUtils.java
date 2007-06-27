@@ -1689,7 +1689,7 @@ public class IMAPUtils {
 			array = new long[initialSize];
 		}
 
-		public SmartLongArray append(final int i) {
+		public SmartLongArray append(final long i) {
 			if (pointer >= array.length) {
 				/*
 				 * time to grow!
@@ -2493,6 +2493,65 @@ public class IMAPUtils {
 		default:
 			return;
 		}
+	}
+	
+	/**
+	 * Gets the corresponding message UIDs to given array of
+	 * <code>Message</code> as an array of <code>long</code>
+	 * 
+	 * @param imapFolder -
+	 *            the imap folder
+	 * @param msgs -
+	 *            the array of <code>Message</code>
+	 * @return the UIDs as an array of <code>long</code>
+	 * @throws OXException -
+	 *             if FETCH command is not supported
+	 * @throws ProtocolException -
+	 *             if an error occurs in underlying protocol
+	 */
+	public static final long[] getMessageUIDs(final IMAPFolder imapFolder, final Message[] msgs) throws OXException,
+			ProtocolException {
+		final String[] args = getMessageSeqNums(msgs);
+		final IMAPProtocol p = imapFolder.getProtocol();
+		final SmartLongArray slo = new SmartLongArray(msgs.length);
+		Response[] r = null;
+		Response response = null;
+		for (int i = 0; i < args.length; i++) {
+			r = p.command(String.format(TEMPL_FETCH, args[i], STR_UID), null);
+			response = r[r.length - 1];
+			try {
+				if (!response.isOK()) {
+					throw new OXMailException(MailCode.PROTOCOL_ERROR, "FETCH not supported");
+				}
+				NextResponse: for (int index = 0; index < r.length - 1; index++) {
+					final Response currentReponse = r[index];
+					/*
+					 * Response is null or not a FetchResponse
+					 */
+					if (currentReponse == null) {
+						continue NextResponse;
+					} else if (!(currentReponse instanceof FetchResponse)) {
+						continue NextResponse;
+					}
+					slo.append(((UID) (((FetchResponse) currentReponse).getItem(0))).uid);
+				}
+
+			} finally {
+				p.notifyResponseHandlers(r);
+				try {
+					p.handleResult(response);
+				} catch (final CommandFailedException cfe) {
+					if (cfe.getMessage().indexOf(ERR_01) != -1) {
+						/*
+						 * Obviously this folder is empty
+						 */
+						return new long[0];
+					}
+					throw cfe;
+				}
+			}
+		}
+		return slo.toArray();
 	}
 
 	/**
