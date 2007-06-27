@@ -1,3 +1,7 @@
+* 2007-06-27 - martin.kauss@open-xchange.com
+
+ - Refactored Recurring API. The API is now in a seperate package.
+
 * 2007-06-26 - thorben.betten@open-xchange.com
 
  - Modularity: Added invalidation routines to UserConfigurationStorage interface
