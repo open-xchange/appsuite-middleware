@@ -74,19 +74,19 @@ public class ListReason extends UtilAbstraction {
             printInvalidInputMsg("Ids must be numbers!");
             sysexit(1);
         } catch (final MalformedURLException e) {
-            printServerResponse(e);
+            printServerException(e);
             sysexit(1);
         } catch (final RemoteException e) {
-            printServerResponse(e);
+            printServerException(e);
             sysexit(SYSEXIT_REMOTE_ERROR);
         } catch (final NotBoundException e) {
             printNotBoundResponse(e);
             sysexit(1);
         } catch (final StorageException e) {
-            printServerResponse(e);
+            printServerException(e);
             sysexit(SYSEXIT_SERVERSTORAGE_ERROR);
         } catch (final InvalidCredentialsException e) {
-            printServerResponse(e);
+            printServerException(e);
             sysexit(SYSEXIT_INVALID_CREDENTIALS);
         } catch (final IllegalOptionValueException e) {
             printError("Illegal option value : " + e.getMessage());
