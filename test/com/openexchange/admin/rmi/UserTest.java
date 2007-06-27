@@ -350,13 +350,14 @@ public class UserTest extends AbstractTest {
     
     // This test is used to check how the change method deals with changing values which are null before changing
     @Test
-    public void testChangeNullFields() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+    public void testChangeNullFields() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException, Exception {
         final Credentials cred = DummyCredentials();
+        final Context ctx = getTestContextObject(cred);
         final OXLoginInterface oxl = (OXLoginInterface) Naming.lookup(getRMIHostUrl() + OXLoginInterface.RMI_NAME);
         // Here we get the user object of the admin from the database
         // The admin has no company set by default, so we can test here, how a change work on field's which
         // aren't set by default
-        final User usr = oxl.login2User(new Context(1), cred);
+        final User usr = oxl.login2User(ctx, cred);
         
         final OXUserInterface user = (OXUserInterface) Naming.lookup(getRMIHostUrl() + OXUserInterface.RMI_NAME);
         usr.setNickname("test");
@@ -365,8 +366,8 @@ public class UserTest extends AbstractTest {
         usr.setSur_name("test");
         usr.setEmail1(usr.getPrimaryEmail());
         System.out.println(usr.isCompanyset());
-        user.change(new Context(1), usr, cred);
-        final User usr2 = oxl.login2User(new Context(1), cred);
+        user.change(ctx, usr, cred);
+        final User usr2 = oxl.login2User(ctx, cred);
         compareUser(usr, usr2);
     }
     
@@ -691,7 +692,11 @@ public class UserTest extends AbstractTest {
         return oxu.create(ctx,usr,access,DummyCredentials());
     }
     
-
+    //Uncomment this to use another context that 1
+//    public static Context getTestContextObject(final Credentials cred) {
+//        return getTestContextObject(1, 50);
+//    }
+    
     private User createChangeUserData(final User usr) throws CloneNotSupportedException{
         // change all fields of the user
         final User retval = (User) usr.clone();
