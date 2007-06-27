@@ -82,25 +82,25 @@ public class ChangeFilestore extends UtilAbstraction {
         } catch (final java.lang.NumberFormatException num) {
             printInvalidInputMsg("Ids must be numbers!");
         } catch (final MalformedURLException e) {
-            printServerResponse(e.getMessage());
+            printServerResponse(e);
             sysexit(1);
         } catch (final RemoteException e) {
-            printServerResponse(e.getMessage());
+            printServerResponse(e);
             sysexit(SYSEXIT_REMOTE_ERROR);
         } catch (final NotBoundException e) {
             printNotBoundResponse(e);
             sysexit(1);
         } catch (final StorageException e) {
-            printServerResponse(e.getMessage());
+            printServerResponse(e);
             sysexit(SYSEXIT_SERVERSTORAGE_ERROR);
         } catch (final InvalidCredentialsException e) {
-            printServerResponse(e.getMessage());
+            printServerResponse(e);
             sysexit(SYSEXIT_INVALID_CREDENTIALS);
         } catch (final InvalidDataException e) {
-            printServerResponse(e.getMessage());
+            printServerResponse(e);
             sysexit(SYSEXIT_INVALID_DATA);
         } catch (final URISyntaxException e) {
-            printServerResponse(e.getMessage());
+            printServerResponse(e);
             sysexit(1);
         } catch (final IllegalOptionValueException e) {
             printError("Illegal option value : " + e.getMessage());
