@@ -357,7 +357,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
 
     public void delete(final Context ctx, final User[] users, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         try {
-            doNullCheck(users);
+            doNullCheck((Object[])users);
         } catch (final InvalidDataException e1) {
             log.error("One of the given arguments for delete is null", e1);
             throw e1;
@@ -546,7 +546,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
 
     public User[] getData(final Context ctx, final User[] users, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException, DatabaseUpdateException {        
         try {
-            doNullCheck(users);
+            doNullCheck((Object[])users);
         } catch (final InvalidDataException e1) {
             log.error("One of the given arguments for getAll is null", e1);
             throw e1;
