@@ -1,9 +1,6 @@
 
 package com.openexchange.admin.tools;
 
-import com.openexchange.admin.daemons.ClientAdminThread;
-import com.openexchange.admin.exceptions.Classes;
-import java.io.File;
 import java.net.URI;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -11,25 +8,18 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Hashtable;
 import java.util.Vector;
-import com.openexchange.admin.exceptions.OXGenericException;
-import com.openexchange.admin.exceptions.UserException;
-import com.openexchange.admin.exceptions.UserExceptionFactory;
-import com.openexchange.admin.rmi.exceptions.PoolException;
-import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.Component;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrows;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-@OXExceptionSource(
-        classId=Classes.COM_OPENEXCHANGE_ADMIN_TOOLS_ADMINDAEMONTOOLS,
-        component=Component.ADMIN_USER
-        )
+import com.openexchange.admin.daemons.ClientAdminThread;
+import com.openexchange.admin.exceptions.OXGenericException;
+import com.openexchange.admin.rmi.exceptions.PoolException;
+
+
 public class AdminDaemonTools {
     
     private static Log log = LogFactory.getLog( AdminDaemonTools.class );
-    static UserExceptionFactory USER_EXCEPTIONS = new UserExceptionFactory(AdminDaemonTools.class);
     
     public static boolean checkValidStoreURI( String uriToCheck ) {
         boolean isOK = true;
@@ -112,49 +102,6 @@ public class AdminDaemonTools {
         }
     }
     
-    //FIXME: d7 remove this function when old rmi interface is removed
-    @OXThrows(
-            category=Category.USER_INPUT,
-            desc="Email address already exists in this context.Email addresses must be unique within their context!",
-            exceptionId=0,
-            msg="Email address %s already exists in context %s"
-            )
-    public static void checkPrimaryMail(int context_id,String primary_mail) throws PoolException, SQLException, UserException {
-        AdminCache      cache   = ClientAdminThread.cache;
-        Connection      con     = null;
-        PreparedStatement prep_check = null;
-        ResultSet rs = null;
-        try{
-            con = cache.getWRITEConnectionForContext(context_id);
-            prep_check = con.prepareStatement("SELECT mail FROM user WHERE cid = ? AND mail = ?");
-            prep_check.setInt(1,context_id);
-            prep_check.setString(2,primary_mail);
-            rs = prep_check.executeQuery();
-            if(rs.next()){
-                throw USER_EXCEPTIONS.create(0,primary_mail,context_id);
-            }
-            if(rs!=null){
-                rs.close();
-            }
-            
-        } finally{
-            try {
-                if(prep_check!=null){
-                    prep_check.close();
-                }
-            } catch ( Exception e ) {
-                log.error("Error closing prepared statement!",e);
-            }
-            
-            try {
-                cache.pushOXDBWrite(context_id,con);
-            } catch ( Exception e ) {
-                log.error("Error pushing ox db write connection to pool!",e);
-            }
-            
-            
-        }
-    }
     
     //FIXME: d7 remove this function when old rmi interface is removed
     public static boolean existsResource( int context_ID, String identifier,int resource_id ) throws SQLException, PoolException {

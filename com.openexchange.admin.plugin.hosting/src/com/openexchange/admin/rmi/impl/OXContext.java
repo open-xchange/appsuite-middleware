@@ -1,7 +1,18 @@
 
 package com.openexchange.admin.rmi.impl;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.rmi.RemoteException;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.openexchange.admin.exceptions.OXContextException;
+import com.openexchange.admin.exceptions.OXUtilException;
 import com.openexchange.admin.rmi.BasicAuthenticator;
+import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
@@ -11,24 +22,11 @@ import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.ContextExistsException;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
+import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchFilestoreException;
 import com.openexchange.admin.rmi.exceptions.NoSuchReasonException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
-
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.rmi.RemoteException;
-import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
-import com.openexchange.admin.rmi.exceptions.InvalidDataException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import com.openexchange.admin.exceptions.Classes;
-import com.openexchange.admin.exceptions.ContextExceptionFactory;
-import com.openexchange.admin.exceptions.OXContextException;
-import com.openexchange.admin.exceptions.OXUtilException;
-import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.storage.interfaces.OXContextStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
@@ -36,14 +34,10 @@ import com.openexchange.admin.taskmanagement.TaskManager;
 import com.openexchange.admin.tools.DatabaseDataMover;
 import com.openexchange.admin.tools.FilestoreDataMover;
 import com.openexchange.admin.tools.monitoring.MonitoringInfos;
-import com.openexchange.groupware.Component;
-import com.openexchange.groupware.OXExceptionSource;
 
-@OXExceptionSource(classId = Classes.COM_OPENEXCHANGE_ADMIN_DATASOURCE_OXCONTEXT, component = Component.ADMIN_CONTEXT)
 public class OXContext extends BasicAuthenticator implements OXContextInterface {
 
-    static ContextExceptionFactory CONTEXT_EXCEPTIONS = new ContextExceptionFactory(OXContext.class);
-
+    
     private final Log log = LogFactory.getLog(this.getClass());
 
     // error messages and so on
