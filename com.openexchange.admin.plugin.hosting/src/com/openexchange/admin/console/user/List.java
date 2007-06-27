@@ -40,7 +40,7 @@ public class List extends UserAbstraction {
 
     public List(final String[] args2) {
 
-        final AdminParser parser = new AdminParser("list");
+        final AdminParser parser = new AdminParser("listUser");
 
         setDefaultCommandLineOptions(parser);
         

@@ -34,7 +34,7 @@ public class List extends GroupAbstraction {
 
     public List(final String[] args2) {
 
-        final AdminParser parser = new AdminParser("list");
+        final AdminParser parser = new AdminParser("listGroup");
 
         setDefaultCommandLineOptions(parser);
 

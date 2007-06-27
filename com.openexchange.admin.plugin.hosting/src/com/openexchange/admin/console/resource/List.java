@@ -30,7 +30,7 @@ public class List extends ResourceAbstraction {
 
     public List(final String[] args2) {
 
-        final AdminParser parser = new AdminParser("list");
+        final AdminParser parser = new AdminParser("listResource");
         setDefaultCommandLineOptions(parser);
         // we need csv output , so we add this option
         setCSVOutputOption(parser);
