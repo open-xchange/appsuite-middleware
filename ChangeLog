@@ -1,3 +1,7 @@
+* 2007-06-27 - francisco.laguna@open-xchange.com
+
+  - Add french messages to ox_languages.jar
+
 * 2007-06-25 - martin.kauss@open-xchange.com
 
   - Fixed bug #7883. The reminder was set for all participants even if only
