@@ -117,13 +117,13 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
 
         try {
             doAuthentication(auth, ctx);
-        } catch (InvalidDataException e2) {
+        } catch (final InvalidDataException e2) {
             log.error(e2);
             throw e2;
         }
 
         if (log.isDebugEnabled()) {
-            log.debug("" + ctx.toString() + " - " + grp.toString() + " - " + auth.toString());
+            log.debug(ctx.toString() + " - " + grp.toString() + " - " + auth.toString());
         }
 
         final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
@@ -150,8 +150,8 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
 
             // if members sent, check exist
             if (grp.getMembers() != null && grp.getMembers().length > 0) {
-                Integer[] mems = grp.getMembers();
-                int[] tmp_mems = new int[mems.length];
+                final Integer[] mems = grp.getMembers();
+                final int[] tmp_mems = new int[mems.length];
                 for (int i = 0; i < mems.length; i++) {
                     tmp_mems[i] = mems[i];
                 }
@@ -159,16 +159,15 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
                     throw new NoSuchUserException("No such user");
                 }
             }
-        } catch (InvalidDataException e2) {
+        } catch (final InvalidDataException e2) {
             log.error(e2);
             throw e2;
-        } catch (NoSuchUserException e) {
+        } catch (final NoSuchUserException e) {
             log.error(e);
             throw e;
         }
 
-        final OXGroupStorageInterface oxGroup = OXGroupStorageInterface
-                .getInstance();
+        final OXGroupStorageInterface oxGroup = OXGroupStorageInterface.getInstance();
         final int retval = oxGroup.create(ctx, grp);
         grp.setId(retval);
         final ArrayList<OXGroupPluginInterface> interfacelist = new ArrayList<OXGroupPluginInterface>();
@@ -177,47 +176,32 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
         for (final Bundle bundle : bundles) {
             final String bundlename = bundle.getSymbolicName();
             if (Bundle.ACTIVE == bundle.getState()) {
-                final ServiceReference[] servicereferences = bundle
-                        .getRegisteredServices();
+                final ServiceReference[] servicereferences = bundle.getRegisteredServices();
                 if (null != servicereferences) {
                     for (final ServiceReference servicereference : servicereferences) {
-                        final Object property = servicereference
-                                .getProperty("name");
-                        if (null != property
-                                && property.toString().equalsIgnoreCase(
-                                        "oxgroup")) {
-                            final OXGroupPluginInterface oxgroup = (OXGroupPluginInterface) this.context
-                                    .getService(servicereference);
+                        final Object property = servicereference.getProperty("name");
+                        if (null != property && property.toString().equalsIgnoreCase("oxgroup")) {
+                            final OXGroupPluginInterface oxgroup = (OXGroupPluginInterface) this.context.getService(servicereference);
                             try {
                                 if (log.isDebugEnabled()) {
-                                    log.debug("Calling create for plugin: "
-                                            + bundlename);
+                                    log.debug("Calling create for plugin: " + bundlename);
                                 }
                                 oxgroup.create(ctx, grp, auth);
                                 interfacelist.add(oxgroup);
                             } catch (final PluginException e) {
-                                log.error(
-                                        "Error while calling create for plugin: "
-                                                + bundlename, e);
-                                log
-                                        .error("Now doing rollback for everything until now...");
+                                log.error("Error while calling create for plugin: " + bundlename, e);
+                                log.error("Now doing rollback for everything until now...");
                                 for (final OXGroupPluginInterface oxgroupinterface : interfacelist) {
                                     try {
-                                        oxgroupinterface.delete(ctx,
-                                                new Group[] { grp }, auth);
+                                        oxgroupinterface.delete(ctx, new Group[] { grp }, auth);
                                     } catch (final PluginException e1) {
-                                        log.error(
-                                                "Error doing rollback for plugin: "
-                                                        + bundlename, e1);
+                                        log.error("Error doing rollback for plugin: " + bundlename, e1);
                                     }
                                 }
                                 try {
                                     oxGroup.delete(ctx, new Group[] { grp });
                                 } catch (final StorageException e1) {
-                                    log
-                                            .error(
-                                                    "Error doing rollback for creating resource in database",
-                                                    e1);
+                                    log.error("Error doing rollback for creating resource in database", e1);
                                 }
                                 throw new StorageException(e);
                             }
@@ -246,13 +230,13 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
 
         try {            
             doAuthentication(auth, ctx);
-        } catch (InvalidDataException e) {
+        } catch (final InvalidDataException e) {
             log.error(e);
             throw e;
         }
 
         if (log.isDebugEnabled()) {
-            log.debug("" + ctx.toString() + " - " + pattern + " - "+ auth.toString());
+            log.debug(ctx.toString() + " - " + pattern + " - "+ auth.toString());
         }
 
         final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
@@ -278,7 +262,7 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
 
         try {                        
             doAuthentication(auth, ctx);
-        } catch (InvalidDataException e) {
+        } catch (final InvalidDataException e) {
             log.error(e);
             throw e;
         }
@@ -286,7 +270,7 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
         final int grp_id = grp.getId();
 
         if (log.isDebugEnabled()) {
-            log.debug("" + ctx.toString() + " - " + grp_id + " - "+ auth.toString());
+            log.debug(ctx.toString() + " - " + grp_id + " - "+ auth.toString());
         }
         final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
 
@@ -304,20 +288,14 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
         for (final Bundle bundle : bundles) {
             final String bundlename = bundle.getSymbolicName();
             if (Bundle.ACTIVE == bundle.getState()) {
-                final ServiceReference[] servicereferences = bundle
-                        .getRegisteredServices();
+                final ServiceReference[] servicereferences = bundle.getRegisteredServices();
                 if (null != servicereferences) {
                     for (final ServiceReference servicereference : servicereferences) {
-                        final Object property = servicereference
-                                .getProperty("name");
-                        if (null != property
-                                && property.toString().equalsIgnoreCase(
-                                        "oxgroup")) {
-                            final OXGroupPluginInterface oxgroupplugin = (OXGroupPluginInterface) this.context
-                                    .getService(servicereference);
+                        final Object property = servicereference.getProperty("name");
+                        if (null != property && property.toString().equalsIgnoreCase("oxgroup")) {
+                            final OXGroupPluginInterface oxgroupplugin = (OXGroupPluginInterface) this.context.getService(servicereference);
                             if (log.isDebugEnabled()) {
-                                log.debug("Calling getData for plugin: "
-                                        + bundlename);
+                                log.debug("Calling getData for plugin: " + bundlename);
                             }
                             retgrp = oxgroupplugin.get(ctx, retgrp, auth);
                         }
@@ -344,13 +322,13 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
 
         try {
             doAuthentication(auth, ctx);
-        } catch (InvalidDataException e1) {
+        } catch (final InvalidDataException e1) {
             log.error(e1);
             throw e1;
         }
 
         if (log.isDebugEnabled()) {
-            log.debug("" + ctx.toString() + " - " + grp.toString() + " - "+ auth.toString());
+            log.debug(ctx.toString() + " - " + grp.toString() + " - "+ auth.toString());
         }
         
         final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
@@ -373,8 +351,8 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
 
             // if members sent, check exist
             if (grp.getMembers() != null && grp.getMembers().length > 0) {
-                Integer[] mems = grp.getMembers();
-                int[] tmp_mems = new int[mems.length];
+                final Integer[] mems = grp.getMembers();
+                final int[] tmp_mems = new int[mems.length];
                 for (int i = 0; i < mems.length; i++) {
                     tmp_mems[i] = mems[i];
                 }
@@ -383,10 +361,10 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
                 }
             }
 
-        } catch (InvalidDataException e1) {
+        } catch (final InvalidDataException e1) {
             log.error(e1);
             throw e1;
-        } catch (NoSuchUserException e) {
+        } catch (final NoSuchUserException e) {
             log.error(e);
             throw e;
         }
@@ -403,27 +381,19 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
         for (final Bundle bundle : bundles) {
             final String bundlename = bundle.getSymbolicName();
             if (Bundle.ACTIVE == bundle.getState()) {
-                final ServiceReference[] servicereferences = bundle
-                        .getRegisteredServices();
+                final ServiceReference[] servicereferences = bundle.getRegisteredServices();
                 if (null != servicereferences) {
                     for (final ServiceReference servicereference : servicereferences) {
-                        final Object property = servicereference
-                                .getProperty("name");
-                        if (null != property
-                                && property.toString().equalsIgnoreCase(
-                                        "oxgroup")) {
-                            final OXGroupPluginInterface oxgroup = (OXGroupPluginInterface) this.context
-                                    .getService(servicereference);
+                        final Object property = servicereference.getProperty("name");
+                        if (null != property && property.toString().equalsIgnoreCase("oxgroup")) {
+                            final OXGroupPluginInterface oxgroup = (OXGroupPluginInterface) this.context.getService(servicereference);
                             try {
                                 if (log.isDebugEnabled()) {
-                                    log.debug("Calling change for plugin: "
-                                            + bundlename);
+                                    log.debug("Calling change for plugin: " + bundlename);
                                 }
                                 oxgroup.change(ctx, grp, auth);
                             } catch (final PluginException e) {
-                                log.error(
-                                        "Error while calling change for plugin: "
-                                                + bundlename, e);
+                                log.error("Error while calling change for plugin: " + bundlename, e);
                                 throw new StorageException(e);
                             }
                         }
@@ -451,15 +421,15 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
 
         try {
             doAuthentication(auth, ctx);
-        } catch (InvalidDataException e) {
+        } catch (final InvalidDataException e) {
             log.error(e);
             throw e;
         }
 
-        int grp_id = grp.getId();
+        final int grp_id = grp.getId();
 
         if (log.isDebugEnabled()) {
-            log.debug("" + ctx.toString() + " - " + grp_id + " - "+ Arrays.toString(member_ids) + " - " + auth.toString());
+            log.debug(ctx.toString() + " - " + grp_id + " - "+ Arrays.toString(member_ids) + " - " + auth.toString());
         }
 
         final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
@@ -505,15 +475,14 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
         try {
             doAuthentication(auth, ctx);
 
-        } catch (InvalidDataException e) {
+        } catch (final InvalidDataException e) {
             log.error(e);
             throw e;
         }
 
         final int grp_id = grp.getId();
         if (log.isDebugEnabled()) {
-            log.debug("" + ctx.toString() + " - " + grp_id + " - "
-                    + Arrays.toString(member_ids) + " - " + auth.toString());
+            log.debug(ctx.toString() + " - " + grp_id + " - " + Arrays.toString(member_ids) + " - " + auth.toString());
         }
 
         final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
@@ -555,7 +524,7 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
             InvalidDataException, DatabaseUpdateException, NoSuchGroupException {
 
         try {
-            doNullCheck(grp);
+            doNullCheck((Object[])grp);
         } catch (final InvalidDataException e3) {
             log.error("One of the given arguments for delete is null", e3);
             throw e3;
@@ -575,19 +544,17 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
                 }
                 final int grp_id = elem.getId();
                 if (1 == grp_id) {
-                    throw new InvalidDataException("Group with id " + grp_id
-                            + " cannot be deleted");
+                    throw new InvalidDataException("Group with id " + grp_id + " cannot be deleted");
                 }
                 grp_ids[i++] = grp_id;
             }
-        } catch (InvalidDataException e1) {
+        } catch (final InvalidDataException e1) {
             log.error(e1);
             throw e1;
         }
 
         if (log.isDebugEnabled()) {
-            log.debug(ctx.toString() + " - " + Arrays.toString(grp) + " - "
-                    + auth.toString());
+            log.debug(ctx.toString() + " - " + Arrays.toString(grp) + " - " + auth.toString());
         }
         final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
         
@@ -597,8 +564,7 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
             throw new NoSuchGroupException("No such group");
         }
 
-        final OXGroupStorageInterface oxGroup = OXGroupStorageInterface
-                .getInstance();
+        final OXGroupStorageInterface oxGroup = OXGroupStorageInterface.getInstance();
 
         final ArrayList<OXGroupPluginInterface> interfacelist = new ArrayList<OXGroupPluginInterface>();
 
@@ -610,28 +576,20 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
         for (final Bundle bundle : revbundles) {
             final String bundlename = bundle.getSymbolicName();
             if (Bundle.ACTIVE == bundle.getState()) {
-                final ServiceReference[] servicereferences = bundle
-                        .getRegisteredServices();
+                final ServiceReference[] servicereferences = bundle.getRegisteredServices();
                 if (null != servicereferences) {
                     for (final ServiceReference servicereference : servicereferences) {
-                        final Object property = servicereference
-                                .getProperty("name");
-                        if (null != property
-                                && property.toString().equalsIgnoreCase(
-                                        "oxgroup")) {
-                            final OXGroupPluginInterface oxgroup = (OXGroupPluginInterface) this.context
-                                    .getService(servicereference);
+                        final Object property = servicereference.getProperty("name");
+                        if (null != property && property.toString().equalsIgnoreCase("oxgroup")) {
+                            final OXGroupPluginInterface oxgroup = (OXGroupPluginInterface) this.context.getService(servicereference);
                             try {
                                 if (log.isDebugEnabled()) {
-                                    log.debug("Calling delete for plugin: "
-                                            + bundlename);
+                                    log.debug("Calling delete for plugin: " + bundlename);
                                 }
                                 oxgroup.delete(ctx, grp, auth);
                                 interfacelist.add(oxgroup);
                             } catch (final PluginException e) {
-                                log.error(
-                                        "Error while calling delete for plugin: "
-                                                + bundlename, e);
+                                log.error("Error while calling delete for plugin: " + bundlename, e);
                                 throw new StorageException(e);
                             }
                         }
@@ -660,7 +618,7 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
                        
             doAuthentication(auth, ctx);
 
-        } catch (InvalidDataException e) {
+        } catch (final InvalidDataException e) {
             log.error(e);
             throw e;
         }
@@ -693,15 +651,14 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
         if (groupName == null || groupName.trim().length() == 0) {
             throw new InvalidDataException("Invalid group name");
         }
-        String group_check_regexp = prop.getGroupProp("CHECK_GROUP_UID_REGEXP",
-                "[ $@%\\.+a-zA-Z0-9_-]");
+        final String group_check_regexp = prop.getGroupProp("CHECK_GROUP_UID_REGEXP", "[ $@%\\.+a-zA-Z0-9_-]");
         final String illegal = groupName.replaceAll(group_check_regexp, "");
         if (illegal.length() > 0) {
             throw new InvalidDataException("Illegal chars: \"" + illegal + "\"");
         }
     }
 
-    public Group[] getGroupsForUser(Context ctx, User usr, Credentials auth)
+    public Group[] getGroupsForUser(final Context ctx, final User usr, final Credentials auth)
             throws RemoteException, InvalidCredentialsException,
             NoSuchContextException, StorageException, InvalidDataException,
             DatabaseUpdateException, NoSuchUserException {
@@ -714,10 +671,8 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
         }
 
         try {
-           
             doAuthentication(auth, ctx);
-
-        } catch (InvalidDataException e) {
+        } catch (final InvalidDataException e) {
             log.error(e);
             throw e;
         }
@@ -739,13 +694,13 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
 
     }
 
-    public Group[] getData(Context ctx, Group[] groups, Credentials auth)
+    public Group[] getData(final Context ctx, final Group[] groups, final Credentials auth)
             throws RemoteException, StorageException,
             InvalidCredentialsException, NoSuchContextException,
             InvalidDataException, NoSuchGroupException, DatabaseUpdateException {
 
         try {
-            doNullCheck(groups);
+            doNullCheck((Object[])groups);
         } catch (final InvalidDataException e3) {
             log.error("One of the given arguments for getData is null", e3);
             throw e3;
@@ -755,50 +710,41 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
 
             doAuthentication(auth, ctx);
             if (log.isDebugEnabled()) {
-                log.debug("" + ctx.toString() + " - " + groups + " - "+ auth.toString());
+                log.debug(ctx.toString() + " - " + groups + " - " + auth.toString());
             }
             final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
 
             checkSchemaBeingLocked(ctx, tool);
 
             // resolv group id/username
-            for (Group group : groups) {
-                if (group.getId() != null
-                        && !tool.existsGroup(ctx, group.getId().intValue())) {
-                    throw new NoSuchGroupException("No such group "
-                            + group.getId().intValue());
+            for (final Group group : groups) {
+                if (group.getId() != null && !tool.existsGroup(ctx, group.getId().intValue())) {
+                    throw new NoSuchGroupException("No such group " + group.getId().intValue());
                 }
-                if (group.getName() != null
-                        && !tool.existsGroup(ctx, group.getName())) {
-                    throw new NoSuchGroupException("No such group "
-                            + group.getName());
+                if (group.getName() != null && !tool.existsGroup(ctx, group.getName())) {
+                    throw new NoSuchGroupException("No such group " + group.getName());
                 }
                 if (group.getName() == null && group.getId() == null) {
-                    throw new InvalidDataException(
-                            "Groupname and groupid missing!Cannot resolve group data");
+                    throw new InvalidDataException("Groupname and groupid missing! Cannot resolve group data");
                 } else {
                     if (group.getName() == null) {
                         // resolv name by id
-                        group.setName(tool.getGroupnameByGroupID(ctx, group
-                                .getId().intValue()));
+                        group.setName(tool.getGroupnameByGroupID(ctx, group.getId().intValue()));
                     }
                     if (group.getId() == null) {
-                        group.setId(tool.getGroupIDByGroupname(ctx, group
-                                .getName()));
+                        group.setId(tool.getGroupIDByGroupname(ctx, group.getName()));
                     }
                 }
             }
-
-        } catch (InvalidDataException e) {
+        } catch (final InvalidDataException e) {
             log.error(e);
             throw e;
         }
 
-        ArrayList<Group> retval = new ArrayList<Group>();
+        final ArrayList<Group> retval = new ArrayList<Group>();
 
-        final OXGroupStorageInterface oxGroup = OXGroupStorageInterface
-                .getInstance();
-        for (Group group : groups) {
+        final OXGroupStorageInterface oxGroup = OXGroupStorageInterface.getInstance();
+        for (final Group group : groups) {
             retval.add(oxGroup.get(ctx, group));
         }
 
@@ -806,20 +752,14 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
         for (final Bundle bundle : bundles) {
             final String bundlename = bundle.getSymbolicName();
             if (Bundle.ACTIVE == bundle.getState()) {
-                final ServiceReference[] servicereferences = bundle
-                        .getRegisteredServices();
+                final ServiceReference[] servicereferences = bundle.getRegisteredServices();
                 if (null != servicereferences) {
                     for (final ServiceReference servicereference : servicereferences) {
-                        final Object property = servicereference
-                                .getProperty("name");
-                        if (null != property
-                                && property.toString().equalsIgnoreCase(
-                                        "oxgroup")) {
-                            final OXGroupPluginInterface oxgroupplugin = (OXGroupPluginInterface) this.context
-                                    .getService(servicereference);
+                        final Object property = servicereference.getProperty("name");
+                        if (null != property && property.toString().equalsIgnoreCase("oxgroup")) {
+                            final OXGroupPluginInterface oxgroupplugin = (OXGroupPluginInterface) this.context.getService(servicereference);
                             if (log.isDebugEnabled()) {
-                                log.debug("Calling get for plugin: "
-                                        + bundlename);
+                                log.debug("Calling get for plugin: " + bundlename);
                             }
                             for (Group group : retval) {
                                 group = oxgroupplugin.get(ctx, group, auth);
@@ -829,18 +769,18 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
                 }
             }
         }
-        return (Group[]) retval.toArray(new Group[retval.size()]);
+        return retval.toArray(new Group[retval.size()]);
 
     }
 
-    public int getDefaultGroup(Context ctx, Credentials auth)
+    public int getDefaultGroup(final Context ctx, final Credentials auth)
             throws RemoteException, StorageException,
             InvalidCredentialsException, NoSuchContextException,
             InvalidDataException, DatabaseUpdateException {
         
         doAuthentication(auth, ctx);
         if (log.isDebugEnabled()) {
-            log.debug("" + ctx.toString() + " -  " + auth.toString());
+            log.debug(ctx.toString() + " - " + auth.toString());
         }
         final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
         
@@ -848,7 +788,7 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
         
         try {
             return tool.getDefaultGroupForContextWithOutConnection(ctx);
-        } catch (StorageException e) {
+        } catch (final StorageException e) {
             log.error("Error resolving default group for context", e);
             throw e;
         }
@@ -867,8 +807,7 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
             DatabaseUpdateException, NoSuchContextException {
 
         if (tools.schemaBeingLockedOrNeedsUpdate(ctx)) {
-            final DatabaseUpdateException databaseUpdateException = new DatabaseUpdateException(
-                    "Database must be updated or currently is beeing updated");
+            final DatabaseUpdateException databaseUpdateException = new DatabaseUpdateException("Database must be updated or currently is beeing updated");
             log.error(databaseUpdateException);
             throw databaseUpdateException;
         }
