@@ -87,6 +87,16 @@ public class AdminCache {
 
     private ArrayList<String> ox_queries_initial = null;
     
+    /**
+     * toggle auth for hosting features like create context etc. where master auth is needed
+     */
+    private boolean masterAuthenticationDisabled = false;
+    
+    /**
+     * togle auth when a context based method authentication is need like create user in a context
+     */
+    private  boolean contextAuthenticationDisabled = false;
+    
     public static DeleteRegistry delreg = null;
 
     // sql filenames order and directory
@@ -124,7 +134,8 @@ public class AdminCache {
         readSequenceTables();
         cacheSqlScripts();
         readMasterCredentials();
-        initOXProccess();
+        configureAuthentication(); // disabling authentication mechs
+        initOXProccess();        
         this.log.info("Init Cache");
         initPool();
         this.adminCredentialsCache = new Hashtable<Integer, Credentials>();
@@ -201,6 +212,14 @@ public class AdminCache {
 
     public final synchronized boolean isLockdb() {
         return lockdb;
+    }
+    
+    public boolean masterAuthenticationDisabled() {
+        return masterAuthenticationDisabled;
+    }
+    
+    public boolean contextAuthenticationDisabled() {
+        return contextAuthenticationDisabled;
     }
 
     public final synchronized void setLockdb(boolean lockdb) {
@@ -330,6 +349,21 @@ public class AdminCache {
     private String[] getInitialOXDBOrder() {
         return getOrdered(prop.getSqlProp("INITIAL_OX_SQL_ORDER", "sequences.sql,ldap2sql.sql,oxfolder.sql,settings.sql" + ",calendar.sql,contacts.sql,tasks.sql,projects.sql,infostore.sql,attachment.sql,forum.sql,pinboard.sql," + "misc.sql,ical_vcard.sql"));
     }
+    
+    private void configureAuthentication(){
+        
+        log.debug("Configuring authentication mechanisms ...");
+        
+        final String master_auth_disabled = this.prop.getProp("MASTER_AUTHENTICATION_DISABLED", "false"); // fallback is auth
+        final String context_auth_disabled = this.prop.getProp("CONTEXT_AUTHENTICATION_DISABLED", "false"); // fallback is auth
+        
+        masterAuthenticationDisabled = Boolean.parseBoolean(master_auth_disabled);
+        log.debug("MasterAuthentication mechanism disabled: "+masterAuthenticationDisabled);
+        
+        contextAuthenticationDisabled = Boolean.parseBoolean(context_auth_disabled);
+        log.debug("ContextAuthentication mechanism disabled: "+contextAuthenticationDisabled);
+    }
+    
 
     private void readMasterCredentials() {
         final String masterfile = this.prop.getProp("MASTER_AUTH_FILE", "/opt/open-xchange/admindaemon/etc/mpasswd");
