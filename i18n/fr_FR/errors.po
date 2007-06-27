@@ -8,13 +8,14 @@
 # Antje Faber, 2007.
 # Antje Faber, 2007.
 # Antje Faber, 2007.
+# Antje Faber, 2007.
 # Éric Bischoff <eric@bureau-cornavin.com>, 2007.
 # Antje Faber, 2007.
 msgid ""
 msgstr ""
-"Project-Id-Version: errors.fr\n"
+"Project-Id-Version: errors\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2007-06-27 11:45+0200\n"
+"PO-Revision-Date: 2007-06-27 12:05+0200\n"
 "Last-Translator: Antje Faber\n"
 "Language-Team:  <de@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -1636,9 +1637,8 @@ msgstr "La date de début %1$s doit être avant la date de fin %2$s."
 msgid "Store already closed: %s"
 msgstr "Le dépôt est déjà fermé : %s"
 
-#, fuzzy
 msgid "String Parse Exception: No ending 0x00 found"
-msgstr "Exception d'analyse de chaîne de caractères : caractère nul final non trouvé"
+msgstr "Exception d'analyse de chaîne de caractères : caractère 0x00 final non trouvé"
 
 msgid "Subsystem down"
 msgstr "Sous-système arrêté"
