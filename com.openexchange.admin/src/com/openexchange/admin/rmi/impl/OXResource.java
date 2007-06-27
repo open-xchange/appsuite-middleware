@@ -47,7 +47,7 @@
  *
  */
 /*
- * $Id: OXResource.java,v 1.25 2007/06/26 15:15:30 cutmasta Exp $
+ * $Id: OXResource.java,v 1.26 2007/06/27 10:19:33 dennis Exp $
  */
 package com.openexchange.admin.rmi.impl;
 
@@ -164,11 +164,11 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
                validateResourceName(res.getName());
            }
 
-           String resmail = res.getEmail();
+           final String resmail = res.getEmail();
            if( resmail != null && ! GenericChecks.isValidMailAddress(resmail)) {  
                throw new InvalidDataException("Invalid email address");
            }
-       } catch (InvalidDataException e2) {
+       } catch (final InvalidDataException e2) {
            log.error(e2);
            throw e2;
        }
@@ -235,7 +235,7 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
         try {           
             
             doAuthentication(auth,ctx);
-        } catch (InvalidDataException e1) {
+        } catch (final InvalidDataException e1) {
             log.error(e1);
             throw e1;
         }
@@ -271,11 +271,11 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
                 validateResourceName(res.getName());
             }
 
-            String resmail = res.getEmail();
+            final String resmail = res.getEmail();
             if( resmail != null && resmail.trim().length()>0 &&  ! GenericChecks.isValidMailAddress(resmail)) {  
                 throw new InvalidDataException("Invalid email address");
             }
-        } catch (InvalidDataException e1) {
+        } catch (final InvalidDataException e1) {
             log.error(e1);
             throw e1;
         }
@@ -324,7 +324,7 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
         try {
             
             doAuthentication(auth,ctx);
-        } catch (InvalidDataException e1) {
+        } catch (final InvalidDataException e1) {
             log.error(e1);
             throw e1;
         }        
@@ -394,7 +394,7 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
         try {
             
             doAuthentication(auth,ctx);
-        } catch (InvalidDataException e) {
+        } catch (final InvalidDataException e) {
             log.error(e);
             throw e;
         }        
@@ -417,7 +417,7 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
         Resource retres = oxRes.get(ctx, resource_id);
 
         // TODO: this code is superflous as soon as get takes resource as arg:
-        for(OXResourceExtensionInterface or : res.getExtensions() ) {
+        for(final OXResourceExtensionInterface or : res.getExtensions() ) {
             retres.addExtension(or);
         }
             
@@ -461,7 +461,7 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
             }        
             
             doAuthentication(auth,ctx);
-        } catch (InvalidDataException e) {
+        } catch (final InvalidDataException e) {
             log.error(e);
             throw e;
         }
@@ -479,23 +479,23 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
         
     }
     
-    private void validateResourceName( String resName ) throws InvalidDataException {
+    private void validateResourceName(final String resName) throws InvalidDataException {
         if(resName==null || resName.trim().length()==0){
             throw new InvalidDataException("Invalid resource name");
         }
         // Check for allowed chars:
         // abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 _-+.%$@
-        String resource_check_regexp = prop.getResourceProp("CHECK_RES_UID_REGEXP", "[ $@%\\.+a-zA-Z0-9_-]");        
-        String illegal = resName.replaceAll(resource_check_regexp, "");
+        final String resource_check_regexp = prop.getResourceProp("CHECK_RES_UID_REGEXP", "[ $@%\\.+a-zA-Z0-9_-]");        
+        final String illegal = resName.replaceAll(resource_check_regexp, "");
         if( illegal.length() > 0 ) {
             throw new InvalidDataException( "Illegal chars: \""+illegal+"\"");
         }
     }
 
-    public Resource[] getData(Context ctx, Resource[] resources, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchResourceException, DatabaseUpdateException {
+    public Resource[] getData(final Context ctx, final Resource[] resources, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchResourceException, DatabaseUpdateException {
         
         try {
-            doNullCheck(resources);
+            doNullCheck((Object[])resources);
         } catch (final InvalidDataException e3) {
             log.error("One of the given arguments for getData is null", e3);
             throw e3;
@@ -514,7 +514,7 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
             checkSchemaBeingLocked(ctx, tool);
 
             // check if all resources exists
-            for (Resource resource : resources) {
+            for (final Resource resource : resources) {
                 if(resource.getId()!=null && !tool.existsResource(ctx, resource.getId().intValue())){
                     throw new NoSuchResourceException("No such resource "+resource.getId().intValue());
                 }
@@ -533,20 +533,20 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
                     }
                 }
             }
-        } catch (InvalidDataException e) {
+        } catch (final InvalidDataException e) {
             log.error(e);
             throw e;
         }
         
         
-        ArrayList<Resource> retval = new ArrayList<Resource>();
+        final ArrayList<Resource> retval = new ArrayList<Resource>();
         
         final OXResourceStorageInterface oxRes = OXResourceStorageInterface.getInstance();
         
-        for (Resource resource : resources) {
+        for (final Resource resource : resources) {
             // not nice, but works ;)
-            Resource tmp = oxRes.get(ctx, resource.getId().intValue());
-            for(OXResourceExtensionInterface or : resource.getExtensions() ) {
+            final Resource tmp = oxRes.get(ctx, resource.getId().intValue());
+            for(final OXResourceExtensionInterface or : resource.getExtensions() ) {
                 tmp.addExtension(or);
             }
             retval.add(tmp);
@@ -573,7 +573,7 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
                 }
             }
         }
-        return (Resource[])retval.toArray(new Resource[retval.size()]);
+        return retval.toArray(new Resource[retval.size()]);
        
     }
     
