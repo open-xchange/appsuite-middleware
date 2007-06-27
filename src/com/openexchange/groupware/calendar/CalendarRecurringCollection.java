@@ -51,8 +51,8 @@
 package com.openexchange.groupware.calendar;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.calendar.recurring.RecurringCalculation;
-import com.openexchange.groupware.calendar.recurring.RecurringException;
+import com.openexchange.groupware.calendar.recurrence.RecurringCalculation;
+import com.openexchange.groupware.calendar.recurrence.RecurringException;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.CalendarObject;
 

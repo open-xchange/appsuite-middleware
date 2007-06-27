@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.groupware.calendar.recurring;
+package com.openexchange.groupware.calendar.recurrence;
 
 
 /**

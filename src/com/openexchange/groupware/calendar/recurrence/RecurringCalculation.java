@@ -49,7 +49,7 @@
  */
 
 
-package com.openexchange.groupware.calendar.recurring;
+package com.openexchange.groupware.calendar.recurrence;
 
 import com.openexchange.groupware.calendar.CalendarRecurringCollection;
 import com.openexchange.groupware.calendar.RecurringResults;
