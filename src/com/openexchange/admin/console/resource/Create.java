@@ -76,25 +76,25 @@ public class Create extends ResourceAbstraction {
             printInvalidInputMsg("Ids must be numbers!");
             sysexit(1);
         } catch (final MalformedURLException e) {
-            printServerResponse(e);
+            printServerException(e);
             sysexit(1);
         } catch (final RemoteException e) {
-            printServerResponse(e);
+            printServerException(e);
             sysexit(SYSEXIT_REMOTE_ERROR);
         } catch (final NotBoundException e) {
-            printServerResponse(e);
+            printServerException(e);
             sysexit(1);
         } catch (final StorageException e) {
-            printServerResponse(e);
+            printServerException(e);
             sysexit(SYSEXIT_SERVERSTORAGE_ERROR);
         } catch (final InvalidCredentialsException e) {
-            printServerResponse(e);
+            printServerException(e);
             sysexit(SYSEXIT_INVALID_CREDENTIALS);
         } catch (final NoSuchContextException e) {
-            printServerResponse(e);
+            printServerException(e);
             sysexit(SYSEXIT_NO_SUCH_CONTEXT);
         } catch (final InvalidDataException e) {
-            printServerResponse(e);
+            printServerException(e);
             sysexit(SYSEXIT_INVALID_DATA);
         } catch (final IllegalOptionValueException e) {
             printError("Illegal option value : " + e.getMessage());
@@ -109,7 +109,7 @@ public class Create extends ResourceAbstraction {
             parser.printUsage();
             sysexit(SYSEXIT_MISSING_OPTION);
         } catch (final DatabaseUpdateException e) {
-            printServerResponse(e);
+            printServerException(e);
             sysexit(1);
         }
     }

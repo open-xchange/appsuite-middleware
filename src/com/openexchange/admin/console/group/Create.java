@@ -60,25 +60,25 @@ public class Create extends GroupAbstraction {
             printError(neti.getMessage());
             sysexit(SYSEXIT_COMMUNICATION_ERROR);
         } catch (final MalformedURLException e) {
-            printServerResponse(e);
+            printServerException(e);
             sysexit(1);
         } catch (final RemoteException e) {
-            printServerResponse(e);
+            printServerException(e);
             sysexit(SYSEXIT_REMOTE_ERROR);
         } catch (final NotBoundException e) {
-            printServerResponse(e);
+            printServerException(e);
             sysexit(1);
         } catch (final InvalidCredentialsException e) {
-            printServerResponse(e);
+            printServerException(e);
             sysexit(SYSEXIT_INVALID_CREDENTIALS);
         } catch (final NoSuchContextException e) {
-            printServerResponse(e);
+            printServerException(e);
             sysexit(SYSEXIT_NO_SUCH_CONTEXT);
         } catch (final StorageException e) {
-            printServerResponse(e);
+            printServerException(e);
             sysexit(SYSEXIT_SERVERSTORAGE_ERROR);
         } catch (final InvalidDataException e) {
-            printServerResponse(e);
+            printServerException(e);
             sysexit(SYSEXIT_INVALID_DATA);
         } catch (final IllegalOptionValueException e) {
             printError("Illegal option value : " + e.getMessage());
@@ -93,10 +93,10 @@ public class Create extends GroupAbstraction {
             parser.printUsage();
             sysexit(SYSEXIT_MISSING_OPTION);
         } catch (final DatabaseUpdateException e) {
-            printServerResponse(e);
+            printServerException(e);
             sysexit(1);
         } catch (final NoSuchUserException e) {
-           printServerResponse(e);
+           printServerException(e);
            sysexit(SYSEXIT_NO_SUCH_USER);
         }
 
