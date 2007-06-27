@@ -163,6 +163,7 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
         log.debug("" + context_id + " - " + filestore);
         try {
             final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
+                        
             if (!tool.existsContext(ctx)) {
                 throw new NoSuchContextException();
             }
@@ -579,5 +580,13 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
 
     private void reEnableContext(final Context ctx, final OXContextStorageInterface oxcox) throws StorageException {
         oxcox.enable(ctx);
+    }
+    
+    private void checkSchemaBeingLocked(final Context ctx, final OXToolStorageInterface tools) throws StorageException, DatabaseUpdateException, NoSuchContextException {
+        if (tools.schemaBeingLockedOrNeedsUpdate(ctx)) {
+            final DatabaseUpdateException databaseUpdateException = new DatabaseUpdateException("Database must be updated or currently is beeing updated");
+            log.error(databaseUpdateException);
+            throw databaseUpdateException;
+        }
     }
 }
