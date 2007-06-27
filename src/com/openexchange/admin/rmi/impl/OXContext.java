@@ -40,27 +40,6 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
     
     private final Log log = LogFactory.getLog(this.getClass());
 
-    // error messages and so on
-    public static final String MSG_SQL_QUERY_FAILED = " ";
-
-    public static final String MSG_NO_SUCH_USER_IN_CONTEXT = "No such user %s in context %s";
-
-    public static final String MSG_SQL_OPERATION_ERROR = "SQL operation error";
-
-    public static final String MSG_INTERNAL_ERROR = "Internal error";
-
-    public static final String MSG_INVALID_DATA_SENT = "Invalid data sent";
-
-    public static final String RESPONSE_ERROR = "ERROR";
-
-    public static final String LOG_ERROR = "Error";
-
-    public static final String LOG_RESPONSE = "Response - ";
-
-    public static final String LOG_CLIENT_ERROR = "Client error";
-
-    public static final String LOG_PROBLEM_WITH_DB_POOL = "Problem with database connection pool";
-
     public OXContext() {
         super();
         if (log.isDebugEnabled()) {
