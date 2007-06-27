@@ -15,14 +15,13 @@ import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
-import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public class Search extends ContextAbtraction {
 
     public Search(final String[] args2) {
 
-        final AdminParser parser = new AdminParser("listcontexts");
+        final AdminParser parser = new AdminParser("searchcontexts");
 
         setOptions(parser);
         setCSVOutputOption(parser);
