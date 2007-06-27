@@ -29,7 +29,7 @@ public class UtilAbstraction extends BasicCommandlineOptions {
     protected final static String OPT_NAME_SEARCH_PATTERN_LONG = "searchpattern";
     protected final static char OPT_NAME_DBNAME_SHORT='n';
     protected final static String OPT_NAME_DBNAME_LONG="name";
-    protected final static char OPT_NAME_HOSTNAME_SHORT='h';
+    protected final static char OPT_NAME_HOSTNAME_SHORT='H';
     protected final static String OPT_NAME_HOSTNAME_LONG="hostname";
     protected final static char OPT_NAME_DB_USERNAME_SHORT='u';
     protected final static String OPT_NAME_DB_USERNAME_LONG="dbuser";
