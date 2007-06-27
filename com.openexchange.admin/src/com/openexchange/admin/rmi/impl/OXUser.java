@@ -572,41 +572,61 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         
         
         try {
-            // ok here its possible that a user wants to get his own data
-            //  SPECIAL USER AUTH CHECK FOR THIS METHOD!
-            // check if credentials are from oxadmin or from an user
-            final int auth_user_id = tools.getUserIDByUsername(ctx, auth.getLogin());
-            // check if given user is not admin, if he is admin, the
-            if (!tools.isContextAdmin(ctx, auth_user_id)) {
-                if (users.length > 1) {
-                    log.error("User sent more than 1 users to get data for. Only context admin is allowed to do that");
-                    throw new InvalidCredentialsException("Permission denied");
-                    // one user cannot edit more than his own data
-                } else {
-                    doUserAuthentication(auth, ctx);
-                    // its possible that he wants his own data
-                    if (users[0].getId() != null) {
-                        if (users[0].getId().intValue() != auth_user_id) {
-                            throw new InvalidCredentialsException("Permission denied");
-                        }
+            
+            
+            // enable check who wants to get data if authentcaition is enabled 
+            if (!cache.contextAuthenticationDisabled()) {
+
+                // ok here its possible that a user wants to get his own data
+                // SPECIAL USER AUTH CHECK FOR THIS METHOD!
+                // check if credentials are from oxadmin or from an user
+                final int auth_user_id = tools.getUserIDByUsername(ctx, auth
+                        .getLogin());
+                // check if given user is not admin, if he is admin, the
+                if (!tools.isContextAdmin(ctx, auth_user_id)) {
+                    if (users.length > 1) {
+                        log.error("User sent more than 1 users to get data for. Only context admin is allowed to do that");
+                        throw new InvalidCredentialsException(
+                                "Permission denied");
+                        // one user cannot edit more than his own data
                     } else {
-                        // id not set, try to resolv id by username and then check
-                        // again
-                        if (users[0].getUsername() != null) {
-                            final int check_user_id = tools.getUserIDByUsername(ctx, users[0].getUsername());
-                            if (check_user_id != auth_user_id) {
-                                log.debug("user[0].getId() does not match id from Credentials.getLogin()");
-                                throw new InvalidCredentialsException("Permission denied");
+                        doUserAuthentication(auth, ctx);
+                        // its possible that he wants his own data
+                        if (users[0].getId() != null) {
+                            if (users[0].getId().intValue() != auth_user_id) {
+                                throw new InvalidCredentialsException(
+                                        "Permission denied");
                             }
                         } else {
-                            log.debug("Cannot resolv user[0]`s internal id because the username is not set!");
-                            throw new InvalidDataException("Username and userid missing.");
+                            // id not set, try to resolv id by username and then
+                            // check
+                            // again
+                            if (users[0].getUsername() != null) {
+                                final int check_user_id = tools
+                                        .getUserIDByUsername(ctx, users[0]
+                                                .getUsername());
+                                if (check_user_id != auth_user_id) {
+                                    log
+                                            .debug("user[0].getId() does not match id from Credentials.getLogin()");
+                                    throw new InvalidCredentialsException(
+                                            "Permission denied");
+                                }
+                            } else {
+                                log
+                                        .debug("Cannot resolv user[0]`s internal id because the username is not set!");
+                                throw new InvalidDataException(
+                                        "Username and userid missing.");
+                            }
                         }
                     }
+                } else {
+                    doAuthentication(auth, ctx);
                 }
+
             } else {
                 doAuthentication(auth, ctx);
             }
+        
             
             
             checkSchemaBeingLocked(ctx, tools);
