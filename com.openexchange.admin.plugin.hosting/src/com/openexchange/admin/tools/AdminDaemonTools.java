@@ -14,7 +14,10 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.exceptions.OXGenericException;
+import com.openexchange.admin.exceptions.UserException;
 import com.openexchange.admin.rmi.exceptions.PoolException;
+import com.openexchange.groupware.OXThrows;
+import com.openexchange.groupware.AbstractOXException.Category;
 
 
 public class AdminDaemonTools {
