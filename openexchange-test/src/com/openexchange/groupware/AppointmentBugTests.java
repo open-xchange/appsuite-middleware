@@ -36,7 +36,6 @@ import com.openexchange.sessiond.SessionObjectWrapper;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
-import com.openexchange.tools.oxfolder.OXFolderTools;
 
 
 public class AppointmentBugTests extends TestCase {
@@ -128,7 +127,7 @@ public class AppointmentBugTests extends TestCase {
         int privatefolder = 0;
         Context context = getContext();
         Connection readcon = DBPool.pickup(context);
-        privatefolder = new Integer(OXFolderTools.getCalendarDefaultFolder(userid, context, readcon)).intValue();
+        privatefolder = CalendarTest.getCalendarDefaultFolderForUser(userid, context);
         DBPool.push(context, readcon);
         return privatefolder;        
     }
@@ -1572,7 +1571,7 @@ public class AppointmentBugTests extends TestCase {
      public void testBug6535() throws Throwable {
         Context context = new ContextImpl(contextid);
         SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
-        int fid = OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context);
+        int fid = CalendarTest.getCalendarDefaultFolderForUser(userid, context);
         
         CalendarDataObject cdao = new CalendarDataObject();
         cdao.setContext(so.getContext());
@@ -1636,7 +1635,7 @@ public class AppointmentBugTests extends TestCase {
      public void testBug6960() throws Throwable {
         Context context = new ContextImpl(contextid);
         SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
-        int folder_id = OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context);
+        int folder_id = CalendarTest.getCalendarDefaultFolderForUser(userid, context);
         
         CalendarDataObject cdao = new CalendarDataObject();
         cdao.setContext(so.getContext());

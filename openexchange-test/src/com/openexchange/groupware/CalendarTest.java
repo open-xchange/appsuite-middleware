@@ -2,6 +2,7 @@
 package com.openexchange.groupware;
 
 
+import com.openexchange.tools.oxfolder.OXFolderAccess;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -47,7 +48,6 @@ import com.openexchange.sessiond.SessionObjectWrapper;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
-import com.openexchange.tools.oxfolder.OXFolderTools;
 
 public class CalendarTest extends TestCase {
     
@@ -133,11 +133,16 @@ public class CalendarTest extends TestCase {
         int privatefolder = 0;
         Context context = getContext();
         Connection readcon = DBPool.pickup(context);
-        privatefolder = new Integer(OXFolderTools.getCalendarDefaultFolder(userid, context, readcon)).intValue();
+        privatefolder = getCalendarDefaultFolderForUser(userid, context);
         DBPool.push(context, readcon);
         return privatefolder;
     }
     
+    public static int getCalendarDefaultFolderForUser(int userid, Context context) throws OXException {
+        OXFolderAccess access = new OXFolderAccess(context);
+        FolderObject fo = access.getDefaultFolder(userid, FolderObject.CALENDAR);
+        return fo.getObjectID();
+    }
     
     private void testDelete(CalendarDataObject cdao) throws Exception {        
         Connection writecon = DBPool.pickupWriteable(getContext());
@@ -198,7 +203,7 @@ public class CalendarTest extends TestCase {
         
         readcon = DBPool.pickup(context);
         
-        int privatefolder = OXFolderTools.getCalendarDefaultFolder(userid, cdao.getContext(), readcon);
+        int privatefolder = getCalendarDefaultFolderForUser(userid, context);
         
         assertFalse("Checking for update", co.prepareUpdateAction(cdao, 1, privatefolder, "Europe/Berlin"));
         long realstart = 1149724800000L;
@@ -211,7 +216,7 @@ public class CalendarTest extends TestCase {
     
     public void testWholeDayWithDB() throws Throwable {
         Context context = new ContextImpl(contextid);
-        int fid = OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context);
+        int fid = getCalendarDefaultFolderForUser(userid, context);
         CalendarDataObject cdao = new CalendarDataObject();
         cdao.setTitle("testWholeDayWithDB - Step 1 - Insert");
         cdao.setParentFolderID(fid);
@@ -246,7 +251,7 @@ public class CalendarTest extends TestCase {
     public void testMultiSpanWholeDay() throws Throwable {
         int wanted_length = 3;
         Context context = new ContextImpl(contextid);
-        int fid = OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context);
+        int fid = getCalendarDefaultFolderForUser(userid, context);
         CalendarDataObject cdao = new CalendarDataObject();
         cdao.setTitle("testMultiSpanWholeDay - Step 1 - Insert");
         cdao.setParentFolderID(fid);
@@ -319,7 +324,7 @@ public class CalendarTest extends TestCase {
     
     public void testInsertAndLabel() throws Throwable {
         Context context = new ContextImpl(contextid);
-        int fid = OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context);
+        int fid = getCalendarDefaultFolderForUser(userid, context);
         CalendarDataObject cdao = new CalendarDataObject();
         cdao.setTitle("testInsertAndLabel - Step 1 - Insert");
         cdao.setParentFolderID(fid);
@@ -345,7 +350,7 @@ public class CalendarTest extends TestCase {
     
     public void testNoAlarm() throws Throwable {
         Context context = new ContextImpl(contextid);
-        int fid = OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context);
+        int fid = getCalendarDefaultFolderForUser(userid, context);
         CalendarDataObject cdao = new CalendarDataObject();
         cdao.setTitle("testNoAlarm - Step 1 - Insert");
         cdao.setParentFolderID(fid);
@@ -385,7 +390,7 @@ public class CalendarTest extends TestCase {
 
     public void testInsertAndAlarm() throws Throwable {
         Context context = new ContextImpl(contextid);
-        int fid = OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context);        
+        int fid = getCalendarDefaultFolderForUser(userid, context);
         
         CalendarDataObject cdao = new CalendarDataObject();
         cdao.setTitle("testInsertAndAlarm - Step 1 - Insert");
@@ -532,7 +537,7 @@ public class CalendarTest extends TestCase {
         CalendarDataObject cdao = new CalendarDataObject();
 
         cdao.setTitle("testInsertMoveAndDeleteAppointments - Step 1 - Insert");
-        cdao.setParentFolderID(OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context));
+        cdao.setParentFolderID(getCalendarDefaultFolderForUser(userid, context));
         
         SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
         cdao.setContext(so.getContext());
@@ -642,7 +647,7 @@ public class CalendarTest extends TestCase {
         CalendarDataObject cdao = new CalendarDataObject();
 
         cdao.setTitle("testInsertMoveAllDelete - Step 1 - Insert");
-        cdao.setParentFolderID(OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context));
+        cdao.setParentFolderID(getCalendarDefaultFolderForUser(userid, context));
         
         SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
         cdao.setContext(so.getContext());
@@ -770,7 +775,7 @@ public class CalendarTest extends TestCase {
         CalendarDataObject cdao = new CalendarDataObject();
 
         cdao.setTitle("testConflict Step 1 - Insert - ignore conflicts");
-        cdao.setParentFolderID(OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context));
+        cdao.setParentFolderID(getCalendarDefaultFolderForUser(userid, context));
         
         SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
         cdao.setContext(so.getContext());
@@ -784,7 +789,7 @@ public class CalendarTest extends TestCase {
         CalendarDataObject conflict_cdao = new CalendarDataObject();
 
         conflict_cdao.setTitle("testConflict Step 2 - Insert - Must conflict");
-        conflict_cdao.setParentFolderID(OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context));
+        conflict_cdao.setParentFolderID(getCalendarDefaultFolderForUser(userid, context));
         
         conflict_cdao.setContext(so.getContext());
         
@@ -841,7 +846,7 @@ public class CalendarTest extends TestCase {
     public void testResourceConflictHandling() throws Exception {
         Context context = new ContextImpl(contextid);
         SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
-        int folder_id = OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context);
+        int folder_id = getCalendarDefaultFolderForUser(userid, context);
         
         CalendarDataObject cdao = new CalendarDataObject();
         cdao.setTimezone("Europe/Berlin");
@@ -923,7 +928,7 @@ public class CalendarTest extends TestCase {
 
         Context context = new ContextImpl(contextid);
         SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
-        int fid = OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context);                
+        int fid = getCalendarDefaultFolderForUser(userid, context);    
         CalendarSql csql = new CalendarSql(so);                
         
         SearchIterator si = csql.getAppointmentsBetween(userid, new Date(0), new Date(SUPER_END), cols, 0,  null);
@@ -975,7 +980,7 @@ public class CalendarTest extends TestCase {
 
     public void testConfirmation() throws Throwable {
         Context context = new ContextImpl(contextid);
-        int fid = OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context);        
+        int fid = getCalendarDefaultFolderForUser(userid, context);
         String user2 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant3", "");        
         
         CalendarDataObject cdao = new CalendarDataObject();
@@ -1226,7 +1231,7 @@ public class CalendarTest extends TestCase {
     
    public void testInsertUpdateAlarm() throws Throwable {
         Context context = new ContextImpl(contextid);
-        int fid = OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context);
+        int fid = getCalendarDefaultFolderForUser(userid, context);
         CalendarDataObject cdao = new CalendarDataObject();
         cdao.setTitle("testInsertUpdateAlarm - Step 1 - Insert");
         cdao.setParentFolderID(fid);
@@ -1278,7 +1283,7 @@ public class CalendarTest extends TestCase {
         CalendarDataObject cdao = new CalendarDataObject();
 
         cdao.setTitle("testInsertMoveAndDeleteAppointmentsWithPrivateFlag - Step 1 - Insert");
-        cdao.setParentFolderID(OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context));
+        cdao.setParentFolderID(getCalendarDefaultFolderForUser(userid, context));
         
         SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
         cdao.setContext(so.getContext());
@@ -1349,7 +1354,7 @@ public class CalendarTest extends TestCase {
     
     public void testAlarmAndUpdate() throws Throwable {
         Context context = new ContextImpl(contextid);
-        int fid = OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context);
+        int fid = getCalendarDefaultFolderForUser(userid, context);
         CalendarDataObject cdao = new CalendarDataObject();
         cdao.setTitle("testAlarmAndUpdate - Step 1 - Insert");
         cdao.setParentFolderID(fid);
@@ -1419,7 +1424,7 @@ public class CalendarTest extends TestCase {
 
     public void testDataTuncationException() throws Throwable {
         Context context = new ContextImpl(contextid);
-        int fid = OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context);
+        int fid = getCalendarDefaultFolderForUser(userid, context);
         SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
         CalendarDataObject cdao = new CalendarDataObject();
         StringBuilder sb = new StringBuilder("testDataTuncationException ");
@@ -1463,7 +1468,7 @@ public class CalendarTest extends TestCase {
     
     public void testExternalParticipants() throws Throwable {
         Context context = new ContextImpl(contextid);
-        int fid = OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context);        
+        int fid = getCalendarDefaultFolderForUser(userid, context);
         
         CalendarDataObject cdao = new CalendarDataObject();
         cdao.setTitle("testExternalParticipants - Step 1 - Insert");
@@ -1671,7 +1676,7 @@ public class CalendarTest extends TestCase {
         cdao.setContext(so.getContext());
         cdao.setIgnoreConflicts(true);        
         
-        int fid = OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, getContext());
+        int fid = getCalendarDefaultFolderForUser(userid, getContext());
         cdao.setGlobalFolderID(fid);
         
         CalendarSql csql = new CalendarSql(so);        

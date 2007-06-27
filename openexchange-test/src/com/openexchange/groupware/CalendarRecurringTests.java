@@ -1,6 +1,7 @@
 
 package com.openexchange.groupware;
 
+import com.openexchange.tools.oxfolder.OXFolderAccess;
 import java.sql.Connection;
 import java.util.Calendar;
 import java.util.Date;
@@ -29,7 +30,6 @@ import com.openexchange.server.DBPool;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.sessiond.SessionObjectWrapper;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.oxfolder.OXFolderTools;
 
 
 public class CalendarRecurringTests extends TestCase {
@@ -82,10 +82,8 @@ public class CalendarRecurringTests extends TestCase {
     
     public static int getPrivateFolder() throws Exception {
         int privatefolder = 0;
-        Context context = getContext();
-        Connection readcon = DBPool.pickup(context);
-        privatefolder = new Integer(OXFolderTools.getCalendarDefaultFolder(userid, context, readcon)).intValue();
-        DBPool.push(context, readcon);
+        Context context = getContext();      
+        privatefolder = CalendarTest.getCalendarDefaultFolderForUser(userid, context);
         return privatefolder;
     }
     
@@ -111,7 +109,7 @@ public class CalendarRecurringTests extends TestCase {
         
         Context context = new ContextImpl(contextid);
         SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
-        int fid = OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context);
+        int fid = CalendarTest.getCalendarDefaultFolderForUser(userid, context);
         
         CalendarDataObject cdao = new CalendarDataObject();
         cdao.setContext(context);
@@ -156,7 +154,7 @@ public class CalendarRecurringTests extends TestCase {
         
         Context context = new ContextImpl(contextid);
         SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
-        int fid = OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context);
+        int fid = CalendarTest.getCalendarDefaultFolderForUser(userid, context);
         
         CalendarDataObject cdao = new CalendarDataObject();
         cdao.setContext(context);
@@ -514,8 +512,8 @@ public class CalendarRecurringTests extends TestCase {
         cdao.setRecurrenceCalculator(1);
         cdao.setInterval(1);
         cdao.setDays(1);
-        
-        cdao.setParentFolderID(OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context));
+
+        cdao.setParentFolderID(CalendarTest.getCalendarDefaultFolderForUser(userid, context));
         
         SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
         cdao.setContext(so.getContext());
@@ -562,8 +560,8 @@ public class CalendarRecurringTests extends TestCase {
         String user2 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant3", "");
         int uid2 = resolveUser(user2);
         
-        int folder_id = OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context);
-        int folder_id2 = OXFolderTools.getDefaultFolder(uid2, FolderObject.CALENDAR, context);
+        int folder_id = CalendarTest.getCalendarDefaultFolderForUser(userid, context);
+        int folder_id2 = CalendarTest.getCalendarDefaultFolderForUser(uid2, context);
         
         cdao.setStartDate(new Date(s));
         cdao.setEndDate(new Date(e));
@@ -684,7 +682,8 @@ public class CalendarRecurringTests extends TestCase {
     public void testRecurringSimpleUpdate() throws Throwable {
         Context context = new ContextImpl(contextid);
         SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
-        int folder_id = OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context);
+       
+        int folder_id = CalendarTest.getCalendarDefaultFolderForUser(userid, context);
         
         CalendarDataObject cdao = new CalendarDataObject();
         cdao.setContext(so.getContext());
@@ -767,7 +766,8 @@ public class CalendarRecurringTests extends TestCase {
     public void testUpdateSimpleAppointmentToRecurring() throws Throwable {
         Context context = new ContextImpl(contextid);
         SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
-        int folder_id = OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context);
+
+        int folder_id = CalendarTest.getCalendarDefaultFolderForUser(userid, context);
         
         CalendarDataObject cdao = new CalendarDataObject();
         cdao.setContext(so.getContext());
@@ -828,7 +828,8 @@ public class CalendarRecurringTests extends TestCase {
     public void testCreateExceptionFromRecurring() throws Throwable {
         Context context = new ContextImpl(contextid);
         SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
-        int folder_id = OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context);
+        
+        int folder_id = CalendarTest.getCalendarDefaultFolderForUser(userid, context);
         
         CalendarDataObject cdao = new CalendarDataObject();
         cdao.setContext(so.getContext());
@@ -945,7 +946,8 @@ public class CalendarRecurringTests extends TestCase {
     public void testCreateExceptionFromRecurringWithDatePosition() throws Throwable {
         Context context = new ContextImpl(contextid);
         SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
-        int folder_id = OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context);
+        
+        int folder_id = CalendarTest.getCalendarDefaultFolderForUser(userid, context);
         
         CalendarDataObject cdao = new CalendarDataObject();
         cdao.setContext(so.getContext());
@@ -1105,7 +1107,8 @@ public class CalendarRecurringTests extends TestCase {
     public void testFlagSingleException() throws Throwable {
         Context context = new ContextImpl(contextid);
         SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
-        int folder_id = OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context);
+        
+        int folder_id = CalendarTest.getCalendarDefaultFolderForUser(userid, context);
         
         RecurringResults m = null;
         CalendarDataObject cdao = new CalendarDataObject();
@@ -1149,7 +1152,8 @@ public class CalendarRecurringTests extends TestCase {
     public void testWholeDayRecurringWithOccurrence() throws Throwable {
         Context context = new ContextImpl(contextid);
         SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
-        int folder_id = OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context);
+        
+        int folder_id = CalendarTest.getCalendarDefaultFolderForUser(userid, context);
         
         CalendarDataObject cdao = new CalendarDataObject();
         cdao.setTimezone(TIMEZONE);
@@ -1189,7 +1193,8 @@ public class CalendarRecurringTests extends TestCase {
     public void testComplexOccurrence() throws Throwable {
         Context context = new ContextImpl(contextid);
         SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
-        int folder_id = OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context);
+        
+        int folder_id = CalendarTest.getCalendarDefaultFolderForUser(userid, context);
         CalendarDataObject cdao = new CalendarDataObject();
         cdao.setTimezone(TIMEZONE);
         cdao.setContext(context);
@@ -1229,7 +1234,8 @@ public class CalendarRecurringTests extends TestCase {
     public void testRecurringConflictHandling() throws Throwable {
         Context context = new ContextImpl(contextid);
         SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
-        int fid = OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context);
+       
+        int fid = CalendarTest.getCalendarDefaultFolderForUser(userid, context);
         CalendarDataObject cdao = new CalendarDataObject();
         cdao.setTimezone(TIMEZONE);
         cdao.setContext(context);
@@ -1272,7 +1278,8 @@ public class CalendarRecurringTests extends TestCase {
     public void testMonthlyRecurringWithDayLightSavingTimeShift() throws Throwable {
         Context context = new ContextImpl(contextid);
         SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
-        int fid = OXFolderTools.getDefaultFolder(userid, FolderObject.CALENDAR, context);
+        
+        int fid = CalendarTest.getCalendarDefaultFolderForUser(userid, context);
         
         CalendarDataObject cdao = new CalendarDataObject();
         cdao.setContext(context);
@@ -1331,5 +1338,53 @@ public class CalendarRecurringTests extends TestCase {
 
     }
     
+    
+    public void testYearly() throws Throwable {        
+        Context context = new ContextImpl(contextid);
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
+       
+        int fid = CalendarTest.getCalendarDefaultFolderForUser(userid, context);
+        
+        CalendarDataObject cdao = new CalendarDataObject();
+        cdao.setContext(context);
+        cdao.setTimezone(TIMEZONE);
+        CalendarTest.fillDatesInDao(cdao);
+        cdao.removeUntil();
+        cdao.setTitle("testYearly");
+        cdao.setRecurrenceType(CalendarObject.YEARLY);
+        cdao.setInterval(1);
+        cdao.setMonth(Calendar.FEBRUARY);
+        cdao.setDayInMonth(19);
+
+        cdao.setParentFolderID(fid);
+        cdao.setIgnoreConflicts(true);
+                
+        CalendarSql csql = new CalendarSql(so);
+        csql.insertAppointmentObject(cdao);
+        int object_id = cdao.getObjectID();
+        
+        CalendarDataObject test_dao = csql.getObjectById(object_id, fid);
+        
+        CalendarRecurringCollection.fillDAO(test_dao);
+        
+        RecurringResults m = CalendarRecurringCollection.calculateRecurring(test_dao, 0, 0, 0);
+        assertTrue("Result != null", m != null);
+        assertTrue("Got results", m.size() > 0);
+        
+        for (int a = 0; a < m.size(); a++) {
+            RecurringResult rs = m.getRecurringResult(a);
+
+            Calendar test_start = Calendar.getInstance();
+            test_start.setTimeZone(TimeZone.getTimeZone(TIMEZONE));
+            test_start.setTimeInMillis(rs.getStart());
+            int test_month = test_start.get(Calendar.MONTH);
+            int test_day_of_month = test_start.get(Calendar.DAY_OF_MONTH);
+            
+            assertEquals("Test month (of occurence "+rs.getPosition()+")", Calendar.FEBRUARY, test_month);
+            assertEquals("Test day_of_month (of occurence "+rs.getPosition()+")", 19, test_day_of_month);
+            
+        }        
+        
+    }
     
 }
