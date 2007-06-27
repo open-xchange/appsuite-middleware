@@ -26,9 +26,9 @@ public class StatisticTools {
 
     private String JMX_HOST = "localhost";
 
-    private static String JMX_SERVER_PORT = "9999";
+    private static final String JMX_SERVER_PORT = "9999";
 
-    private static String JMX_ADMIN_PORT = "9998";
+    private static final String JMX_ADMIN_PORT = "9998";
 
     private boolean showOXStats = false;
 
@@ -44,7 +44,7 @@ public class StatisticTools {
 
     private boolean showThreadStats = false;
 
-    private boolean args_ok = true;
+    private final boolean args_ok = true;
 
     private String ox_jmx_url = null;
 
@@ -57,12 +57,12 @@ public class StatisticTools {
      * the url depends on both steps
      */
     private void updatejmxurl() {
-        String jmxPort = showAdminStats ? JMX_ADMIN_PORT : JMX_SERVER_PORT;
+        final String jmxPort = showAdminStats ? JMX_ADMIN_PORT : JMX_SERVER_PORT;
         this.ox_jmx_url = "service:jmx:rmi:///jndi/rmi://" + JMX_HOST + ':' + jmxPort + "/server";
     }
 
-    public static void main(String args[]) {
-        StatisticTools st = new StatisticTools();
+    public static void main(final String args[]) {
+        final StatisticTools st = new StatisticTools();
         st.start(args);
     }
 
@@ -75,10 +75,10 @@ public class StatisticTools {
             try {
                 initConnection();
                 fetchData();
-            } catch (java.io.IOException sve) {
+            } catch (final java.io.IOException sve) {
                 p2c("Can't connect to \"" + ox_jmx_url + "\"");
                 System.exit(1);
-            } catch (Exception ex) {
+            } catch (final Exception ex) {
                 ex.printStackTrace();
                 System.exit(1);
             }
@@ -89,7 +89,11 @@ public class StatisticTools {
         }
     }
 
-    private void initConnection() throws Exception {
+    public void p2c(final Object obj) {
+        System.out.println("" + obj);
+    }
+
+    private void initConnection() throws InterruptedException, IOException {
         // Set timeout here, it is given in ms
         final long timeout = 1000;
         final JMXServiceURL serviceurl = new JMXServiceURL(ox_jmx_url);
@@ -99,7 +103,8 @@ public class StatisticTools {
         // h.put("jmx.remote.credentials", credentials);
         // c = JMXConnectorFactory.connect(u,h);
         final IOException[] exc = new IOException[1];
-        Thread t = new Thread() {
+        final Thread t = new Thread() {
+            @Override
             public void run() {
                 try {
                     c = JMXConnectorFactory.connect(serviceurl);
@@ -125,18 +130,14 @@ public class StatisticTools {
         if (c != null) {
             try {
                 c.close();
-            } catch (IOException ex) {
+            } catch (final IOException ex) {
                 ex.printStackTrace();
             }
         }
 
     }
 
-    public static void p2c(Object obj) {
-        System.out.println("" + obj);
-    }
-
-    private void parseInput(String args[]) {
+    private void parseInput(final String args[]) {
         String param = null;
 
         for (int a = 0; a < args.length; a++) {
@@ -149,11 +150,11 @@ public class StatisticTools {
                         break;
                     }
                 }
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 // nothing
             }
             if (param.startsWith("-host=")) {
-                StringTokenizer st = new StringTokenizer(param, "=");
+                final StringTokenizer st = new StringTokenizer(param, "=");
                 if (st.countTokens() == 2) {
                     st.nextToken();
                     JMX_HOST = st.nextToken().toLowerCase();
@@ -187,8 +188,8 @@ public class StatisticTools {
         }
     }
 
-    private static void showUsage() {
-        StringBuffer sb = new StringBuffer();
+    private void showUsage() {
+        final StringBuffer sb = new StringBuffer();
         sb.append("\n");
         sb.append("Options: \n");
         sb.append("\t -host=localhost\n");
@@ -202,39 +203,39 @@ public class StatisticTools {
         p2c(sb.toString());
     }
 
-    private void showStats(Set data_set, String class_name) throws IOException, InstanceNotFoundException, MBeanException, AttributeNotFoundException, ReflectionException, IntrospectionException {
-        Iterator itr = data_set.iterator();
+    private void showStats(final Set data_set, final String class_name) throws IOException, InstanceNotFoundException, MBeanException, AttributeNotFoundException, ReflectionException, IntrospectionException {
+        final Iterator itr = data_set.iterator();
         while (itr.hasNext()) {
-            ObjectInstance oin = (ObjectInstance) itr.next();
+            final ObjectInstance oin = (ObjectInstance) itr.next();
 
-            ObjectName obj = oin.getObjectName();
-            MBeanInfo info = mbc.getMBeanInfo(obj);
+            final ObjectName obj = oin.getObjectName();
+            final MBeanInfo info = mbc.getMBeanInfo(obj);
             // p2c("# "+obj.getCanonicalName() +" ->"+info.getClassName());
             if (info.getClassName().equals(class_name)) {
                 // p2c("# "+obj.getCanonicalName());
-                String ocname = obj.getCanonicalName();
-                MBeanAttributeInfo[] attrs = info.getAttributes();
+                final String ocname = obj.getCanonicalName();
+                final MBeanAttributeInfo[] attrs = info.getAttributes();
                 if (attrs.length > 0) {
-                    for (int i = 0; i < attrs.length; i++) {
+                    for (final MBeanAttributeInfo element : attrs) {
                         try {
-                            Object o = mbc.getAttribute(obj, attrs[i].getName());
+                            final Object o = mbc.getAttribute(obj, element.getName());
                             if (o != null) {
                                 if (o instanceof CompositeDataSupport) {
-                                    CompositeDataSupport c = (CompositeDataSupport) o;
-                                    p2c(ocname + "," + attrs[i].getName() + " = [init=" + c.get("init") + ",max=" + c.get("max") + ",committed=" + c.get("committed") + ",used=" + c.get("used") + "]");
+                                    final CompositeDataSupport c = (CompositeDataSupport) o;
+                                    p2c(ocname + "," + element.getName() + " = [init=" + c.get("init") + ",max=" + c.get("max") + ",committed=" + c.get("committed") + ",used=" + c.get("used") + "]");
                                 } else {
                                     if (o instanceof String[]) {
-                                        String[] c = (String[]) o;
-                                        p2c(ocname + "," + attrs[i].getName() + " = " + Arrays.toString(c));
+                                        final String[] c = (String[]) o;
+                                        p2c(ocname + "," + element.getName() + " = " + Arrays.toString(c));
                                     } else if (o instanceof long[]) {
-                                        long[] l = (long[]) o;
-                                        p2c(ocname + "," + attrs[i].getName() + " = " + Arrays.toString(l));
+                                        final long[] l = (long[]) o;
+                                        p2c(ocname + "," + element.getName() + " = " + Arrays.toString(l));
                                     } else {
-                                        p2c(ocname + "," + "" + attrs[i].getName() + " = " + o.toString());
+                                        p2c(ocname + "," + "" + element.getName() + " = " + o.toString());
                                     }
                                 }
                             }
-                        } catch (javax.management.RuntimeMBeanException rexp) {
+                        } catch (final javax.management.RuntimeMBeanException rexp) {
 
                         }
                     }
@@ -243,15 +244,15 @@ public class StatisticTools {
         }
     }
 
-    private void showMemoryPoolData(Set data_set) throws Exception {
+    private void showMemoryPoolData(final Set data_set) throws InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, IOException {
         showStats(data_set, "sun.management.MemoryPoolImpl");
     }
 
-    private void showSysThreadingData(Set data_set) throws Exception {
+    private void showSysThreadingData(final Set data_set) throws InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, IOException {
         showStats(data_set, "sun.management.ThreadImpl");
     }
 
-    private void showOXData(Set data_set) throws Exception {
+    private void showOXData(final Set data_set) throws InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, IOException {
         showStats(data_set, "com.openexchange.tools.ajp13.monitoring.AJPv13ServerThreadsMonitor");
         showStats(data_set, "com.openexchange.tools.ajp13.monitoring.AJPv13ListenerMonitor");
         showStats(data_set, "com.openexchange.monitoring.GeneralMonitor");
@@ -259,13 +260,13 @@ public class StatisticTools {
         showStats(data_set, "com.openexchange.database.ConnectionPool");
     }
 
-    private void showAdminData(Set data_set) throws Exception {
+    private void showAdminData(final Set data_set) throws InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, IOException {
         showStats(data_set, "com.openexchange.admin.tools.monitoring.Monitor");
     }
 
-    private void fetchData() throws Exception {
+    private void fetchData() throws IOException, InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException {
 
-        Set data_set = mbc.queryMBeans(null, null);
+        final Set data_set = mbc.queryMBeans(null, null);
         if (showOXStats) {
             if (showAdminStats) {
                 showAdminData(data_set);
