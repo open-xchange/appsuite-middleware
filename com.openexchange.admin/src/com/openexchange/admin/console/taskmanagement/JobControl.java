@@ -101,13 +101,13 @@ public class JobControl extends BasicCommandlineOptions {
             printInvalidInputMsg("Ids must be numbers!");
             sysexit(1);
         } catch (final MalformedURLException e) {
-            printServerResponse(e);
+            printServerException(e);
             sysexit(1);
         } catch (final RemoteException e) {
-            printServerResponse(e);
+            printServerException(e);
             sysexit(SYSEXIT_REMOTE_ERROR);
         } catch (final NotBoundException e) {
-            printServerResponse(e);
+            printServerException(e);
             sysexit(1);
         } catch (final IllegalOptionValueException e) {
             printError("Illegal option value : " + e.getMessage());
@@ -122,16 +122,16 @@ public class JobControl extends BasicCommandlineOptions {
             parser.printUsage();
             sysexit(SYSEXIT_MISSING_OPTION);
         } catch (final InvalidDataException e) {
-            printServerResponse(e);
+            printServerException(e);
             sysexit(SYSEXIT_INVALID_DATA);
         } catch (final InvalidCredentialsException e) {
-            printServerResponse(e);
+            printServerException(e);
             sysexit(SYSEXIT_INVALID_CREDENTIALS);
         } catch (final StorageException e) {
-            printServerResponse(e);
+            printServerException(e);
             sysexit(SYSEXIT_SERVERSTORAGE_ERROR);
         } catch (TaskManagerException e) {
-            printServerResponse(e);
+            printServerException(e);
             sysexit(1);
         }
     }
