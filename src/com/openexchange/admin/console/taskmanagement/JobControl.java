@@ -128,10 +128,10 @@ public class JobControl extends BasicCommandlineOptions {
             } else if (null != detailValue) {
                 try {
                     oxtask.getTaskResults(ctx, auth, Integer.parseInt(detailValue));
-                } catch (InterruptedException e) {
+                } catch (final InterruptedException e) {
                     System.err.println("This job was interrupted with the following exception: ");
                     e.printStackTrace();
-                } catch (ExecutionException e) {
+                } catch (final ExecutionException e) {
                     System.err.println("The execution of this job was aborted by the following exception: ");
                     e.getCause().printStackTrace();
                 }
@@ -139,7 +139,9 @@ public class JobControl extends BasicCommandlineOptions {
                 oxtask.flush(ctx, auth);
                 System.out.println("All finished jobs flushed.");
             } else {
-                System.err.println("No option selected (list, delete, details).");
+                System.err.println(new StringBuilder("No option selected (").append(OPT_LIST_LONG).append(", ")
+                        .append(OPT_DELETE_LONG).append(", ").append(OPT_DETAILS_LONG).append(", ").append(OPT_FLUSH_LONG)
+                        .append(")"));
                 parser.printUsage();
             }
         } catch (final java.rmi.ConnectException neti) {
@@ -178,7 +180,7 @@ public class JobControl extends BasicCommandlineOptions {
         } catch (final StorageException e) {
             printServerException(e);
             sysexit(SYSEXIT_SERVERSTORAGE_ERROR);
-        } catch (TaskManagerException e) {
+        } catch (final TaskManagerException e) {
             printServerException(e);
             sysexit(1);
         }
