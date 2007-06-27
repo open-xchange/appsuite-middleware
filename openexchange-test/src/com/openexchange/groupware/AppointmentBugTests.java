@@ -1701,6 +1701,10 @@ public class AppointmentBugTests extends TestCase {
     2) User B click on the calendar (outlook) and receives the appointment and a
     reminder
     3) User B clicks on the reminder (close)
+     
+     
+    This bug also test bug #8196
+     
     */
     public void testBug7883() throws Throwable {
         String user2 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant3", "");        
@@ -1758,10 +1762,52 @@ public class AppointmentBugTests extends TestCase {
             CalendarDataObject tdao = (CalendarDataObject)si2.next();
             if (tdao.getTitle().equals("testBug7883")) {
                 found = true;
-                assertTrue("Check that userB has an alarm set in the cdao", !tdao.containsAlarm());             
+                assertTrue("Check that userB has no alarm set in the cdao", !tdao.containsAlarm());             
             }
         }
         assertTrue("Found our object (userB)", found);        
+        
+        CalendarDataObject cdao_update = new CalendarDataObject();
+        cdao_update.setContext(so.getContext());
+        cdao_update.setObjectID(object_id);
+        userA = new UserParticipant();
+        userA.setIdentifier(userid);
+        userA.setAlarmMinutes(-1);
+        cdao_update.setUsers(new UserParticipant[] { userA, userB });        
+        cdao_update.setIgnoreConflicts(true);
+        
+        csql.updateAppointmentObject(cdao_update, fid, cdao.getLastModified());
+        
+        testobject = csql.getObjectById(object_id, fid);
+        
+        assertTrue("Check that userA has no alarm set in the cdao", !testobject.containsAlarm());           
+                
+        testobject2 = csql2.getObjectById(object_id, fid2);
+        assertTrue("Check that userB has no alarm set in the cdao", !testobject2.containsAlarm()); 
+        
+        si = csql.getModifiedAppointmentsInFolder(fid, cols, cdao.getLastModified());
+        found = false;
+        while (si.hasNext()) {
+            CalendarDataObject tdao = (CalendarDataObject)si.next();
+            if (tdao.getTitle().equals("testBug7883")) {
+                found = true;
+                assertTrue("Check that userA has no alarm set in the cdao", !tdao.containsAlarm());
+                 
+            }
+        }
+        assertTrue("Found our object (userA)", found);         
+        
+        si2 = csql2.getModifiedAppointmentsInFolder(fid2, cols, cdao.getLastModified());
+        found = false;
+        while (si2.hasNext()) {
+            CalendarDataObject tdao = (CalendarDataObject)si2.next();
+            if (tdao.getTitle().equals("testBug7883")) {
+                found = true;
+                assertTrue("Check that userB has no alarm set in the cdao", !tdao.containsAlarm());             
+            }
+        }
+        assertTrue("Found our object (userB)", found);               
+        
         
     }
      
