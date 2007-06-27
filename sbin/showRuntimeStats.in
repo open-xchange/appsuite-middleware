@@ -69,4 +69,4 @@ test -z "$LIBPATH"          && LIBPATH=${PREFIX}jar
 
 
 $JAVA_BIN -classpath $LIBPATH/ox_admindaemon.jar: \
-	com.openexchange.admin.adminConsole.StatisticTools $*
+	com.openexchange.admin.console.StatisticTools $*
