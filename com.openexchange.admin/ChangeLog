@@ -1,3 +1,7 @@
+* 2007-06-27 - manuel.kraft@open-xchange.com
+
+  - Bugfix ID#8122 	RMI Authentication must be able to be switched off! See AdminDaemon.properties for details!
+
 * 2007-06-20 - choeger@open-xchange.com
 
   - Bugfix ID#7310 createuser is not able to set imapLogin in user table
