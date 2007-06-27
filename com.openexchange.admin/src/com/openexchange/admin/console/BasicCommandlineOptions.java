@@ -165,18 +165,27 @@ public abstract class BasicCommandlineOptions {
         }
     }
 
-    protected final static void printServerResponse(final String msg){
-        System.err.println("Server response:\n "+msg);    
+    protected final static void printServerException(final Exception e){
+        String msg = e.getMessage();
+        if( msg != null) {
+            System.err.println("Server response:\n "+msg);
+        } else {
+            e.printStackTrace(System.err);
+        }
     }
     
     protected final static void printNotBoundResponse(final NotBoundException nbe){
-        printServerResponse("RMI module "+nbe.getMessage()+" not available on server");
+        System.err.println("RMI module "+nbe.getMessage()+" not available on server");
     }
     
     protected final static void printError(final String msg){
         System.err.println("Error:\n "+msg+"\n");    
     }
     
+    protected final static void printServerResponse(final String msg){
+        System.err.println("Server response:\n "+msg+"\n");    
+    }
+
     protected final static void printInvalidInputMsg(final String msg){
         System.err.println("Invalid input detected: "+msg);    
     }    

@@ -78,13 +78,13 @@ public class AllPluginsLoaded extends BasicCommandlineOptions {
             printInvalidInputMsg("Ids must be numbers!");
             sysexit(1);
         } catch (final MalformedURLException e) {
-            printServerResponse(e);
+            printServerException(e);
             sysexit(1);
         } catch (final RemoteException e) {
-            printServerResponse(e);
+            printServerException(e);
             sysexit(SYSEXIT_REMOTE_ERROR);
         } catch (final NotBoundException e) {
-            printServerResponse(e);
+            printServerException(e);
             sysexit(1);
         }
     }
