@@ -92,7 +92,7 @@ public class ListTest extends AppointmentTest {
 		
 		OCLPermission[] permission = new OCLPermission[] { 
 			FolderTest.createPermission( userId, false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION),
-			FolderTest.createPermission( usersGroupId, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, false),
+			FolderTest.createPermission( usersGroupId, true, OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, false),
 		};
 		
 		folderObj.setPermissionsAsArray( permission );
