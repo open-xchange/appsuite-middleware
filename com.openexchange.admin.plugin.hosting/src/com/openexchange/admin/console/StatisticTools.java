@@ -155,7 +155,9 @@ public class StatisticTools extends BasicCommandlineOptions {
 
             }
             if (0 == count) {
-                System.err.println(new StringBuilder("No option selected (").append(OPT_STATS_LONG).append(", ").append(OPT_RUNTIME_STATS_LONG).append(", ").append(OPT_OS_STATS_LONG).append(", ").append(OPT_THREADING_STATS_LONG).append(", ").append(OPT_ALL_STATS_LONG).append(", ").append(OPT_ADMINDAEMON_STATS_LONG).append(")"));
+                System.err.println(new StringBuilder("No option selected (").append(OPT_STATS_LONG).append(", ")
+                        .append(OPT_RUNTIME_STATS_LONG).append(", ").append(OPT_OS_STATS_LONG).append(", ")
+                        .append(OPT_THREADING_STATS_LONG).append(", ").append(OPT_ALL_STATS_LONG).append(")"));
                 parser.printUsage();
             } else if (count > 1) {
                 System.err.println("More than one of the stat options given. Using the first one only");
