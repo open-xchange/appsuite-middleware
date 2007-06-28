@@ -49,6 +49,10 @@ public class Bug8196Test extends AppointmentTest {
 		appointmentObj.setObjectID(objectId);
 		
 		appointmentObj.removeAlarm();
+		
+		updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, getHostName(), getLogin(), getPassword());
+		
+		appointmentObj.removeAlarm();
 		appointmentObj.setAlarmFlag(false);
 		appointmentObj.setParentFolderID(secondAppointmentFolderId);
 
