@@ -77,6 +77,10 @@ public class AppointmentParser extends CalendarParser {
 		if (hasElement(eProp.getChild(AppointmentFields.ALARM, XmlServlet.NS))) {
 			appointmentObj.setAlarm(getValueAsInt(eProp.getChild(AppointmentFields.ALARM, XmlServlet.NS)));
 		}
+
+		if (hasElement(eProp.getChild(AppointmentFields.ALARM_FLAG, XmlServlet.NS))) {
+			appointmentObj.setAlarmFlag(getValueAsBoolean(eProp.getChild(AppointmentFields.ALARM_FLAG, XmlServlet.NS)));
+		}
 		
 		if (hasElement(eProp.getChild(AppointmentFields.IGNORE_CONFLICTS, XmlServlet.NS))) {
 			appointmentObj.setIgnoreConflicts(getValueAsBoolean(eProp.getChild(AppointmentFields.IGNORE_CONFLICTS, XmlServlet.NS)));
