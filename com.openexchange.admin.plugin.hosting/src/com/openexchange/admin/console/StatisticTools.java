@@ -11,7 +11,9 @@ import javax.management.IntrospectionException;
 import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanException;
 import javax.management.MBeanInfo;
+import javax.management.MBeanOperationInfo;
 import javax.management.MBeanServerConnection;
+import javax.management.MalformedObjectNameException;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
@@ -25,6 +27,7 @@ import com.openexchange.admin.console.AdminParser.MissingOptionException;
 import com.openexchange.admin.console.CmdLineParser.IllegalOptionValueException;
 import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.console.CmdLineParser.UnknownOptionException;
+import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 
 public class StatisticTools extends BasicCommandlineOptions {
 
@@ -60,6 +63,14 @@ public class StatisticTools extends BasicCommandlineOptions {
 
     private static final String OPT_ADMINDAEMON_STATS_LONG = "admindaemonstats";
 
+    private static final char OPT_SHOWOPERATIONS_STATS_SHORT = 's';
+
+    private static final String OPT_SHOWOPERATIONS_STATS_LONG = "showoperations";
+
+    private static final char OPT_DOOPERATIONS_STATS_SHORT = 'd';
+
+    private static final String OPT_DOOPERATIONS_STATS_LONG = "dooperations";
+
     private String JMX_HOST = "localhost";
 
     private String ox_jmx_url = null;
@@ -81,6 +92,10 @@ public class StatisticTools extends BasicCommandlineOptions {
     private Option allstats = null;
 
     private Option admindaemonstats;
+
+    private Option showoperation;
+
+    private Option dooperation;
 
     /**
      * This method is called after a hostname change and input parsing, because
@@ -154,6 +169,26 @@ public class StatisticTools extends BasicCommandlineOptions {
                 count++;
 
             }
+            if (null != parser.getOptionValue(this.showoperation)) {
+                if (0 == count) {
+                    final MBeanServerConnection initConnection = initConnection(admin);
+                    showOperations(initConnection);
+                }
+                count++;
+
+            }
+            final String operation = (String) parser.getOptionValue(this.dooperation);
+            if (null != operation) {
+                if (0 == count) {
+                    final MBeanServerConnection initConnection = initConnection(admin);
+                    final Object result = doOperation(initConnection, operation);
+                    if (null != result) {
+                        System.out.println(result);
+                    }
+                }
+                count++;
+                
+            }
             if (0 == count) {
                 System.err.println(new StringBuilder("No option selected (").append(OPT_STATS_LONG).append(", ")
                         .append(OPT_RUNTIME_STATS_LONG).append(", ").append(OPT_OS_STATS_LONG).append(", ")
@@ -195,6 +230,15 @@ public class StatisticTools extends BasicCommandlineOptions {
         } catch (final InterruptedException e) {
             printServerException(e);
             sysexit(1);
+        } catch (final MalformedObjectNameException e) {
+            printServerException(e);
+            sysexit(1);
+        } catch (final NullPointerException e) {
+            printServerException(e);
+            sysexit(1);
+        } catch (final InvalidDataException e) {
+            printServerException(e);
+            sysexit(1);
         } finally {
             closeConnection();
         }
@@ -208,6 +252,8 @@ public class StatisticTools extends BasicCommandlineOptions {
         this.threadingstats = setShortLongOpt(parser, OPT_THREADING_STATS_SHORT, OPT_THREADING_STATS_LONG, "shows threading stats", false, false);
         this.allstats = setShortLongOpt(parser, OPT_ALL_STATS_SHORT, OPT_ALL_STATS_LONG, "shows all stats", false, false);
         this.admindaemonstats = setShortLongOpt(parser, OPT_ADMINDAEMON_STATS_SHORT, OPT_ADMINDAEMON_STATS_LONG, "shows stats for the admin instead of the groupware", false, false);
+        this.showoperation = setShortLongOpt(parser, OPT_SHOWOPERATIONS_STATS_SHORT, OPT_SHOWOPERATIONS_STATS_LONG, "shows the operations for the registered beans", false, false);
+        this.dooperation = setShortLongOpt(parser, OPT_DOOPERATIONS_STATS_SHORT, OPT_DOOPERATIONS_STATS_LONG, "operation", "shows the operations for the registered beans", false);
     }
 
     private MBeanServerConnection initConnection(final boolean adminstats) throws InterruptedException, IOException {
@@ -215,11 +261,6 @@ public class StatisticTools extends BasicCommandlineOptions {
         // Set timeout here, it is given in ms
         final long timeout = 1000;
         final JMXServiceURL serviceurl = new JMXServiceURL(ox_jmx_url);
-        // If server needs auth
-        // Hashtable h = new Hashtable();
-        // String[] credentials = new String[] {"username" ,"password" };
-        // h.put("jmx.remote.credentials", credentials);
-        // c = JMXConnectorFactory.connect(u,h);
         final IOException[] exc = new IOException[1];
         final Thread t = new Thread() {
             @Override
@@ -289,7 +330,7 @@ public class StatisticTools extends BasicCommandlineOptions {
                                 }
                             }
                         } catch (final RuntimeMBeanException e) {
-                            // eat it
+                            // If there was an error getting the attribute we just omit that attribute
                         }                        
                     }
                 }
@@ -314,6 +355,29 @@ public class StatisticTools extends BasicCommandlineOptions {
             showStats(mbc, "com.openexchange.monitoring.GeneralMonitor");
             showStats(mbc, "com.openexchange.api2.MailInterfaceMonitor");
             showStats(mbc, "com.openexchange.database.ConnectionPool");
+        }
+    }
+    
+    private void showOperations(final MBeanServerConnection mbc) throws IOException, InstanceNotFoundException, IntrospectionException, ReflectionException {
+        final Set<ObjectName> queryNames = mbc.queryNames(null, null);
+        for (final ObjectName objname : queryNames) {
+            final MBeanInfo beanInfo = mbc.getMBeanInfo(objname);
+            final MBeanOperationInfo[] operations = beanInfo.getOperations();
+            for (final MBeanOperationInfo operation : operations) {
+                System.out.println("Objectname: " + objname.getCanonicalName() +  " ,operationname: " + operation.getName() + ", desciption: " + operation.getDescription());
+            }
+        }
+    }
+    
+    private Object doOperation(final MBeanServerConnection mbc, final String fullqualifiedoperationname) throws MalformedObjectNameException, NullPointerException, IOException, InvalidDataException, InstanceNotFoundException, MBeanException, ReflectionException {
+        final String[] split = fullqualifiedoperationname.split(";");
+        if (2 == split.length) {
+            final ObjectName objectName = new ObjectName(split[0]);
+            final Object result = mbc.invoke(objectName, split[1], null, null);
+//            final Set<ObjectName> queryNames = mbc.queryNames(new ObjectName(split[1]), null);
+            return result;
+        } else {
+            throw new InvalidDataException("The given operationname is not valid. It couldn't be split at \";\"");
         }
     }
 }
