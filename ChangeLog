@@ -1,47 +1,12 @@
-* 2007-06-28 - martin.kauss@open-xchange.com
+* 2007-06-28 - marcus.klein@open-xchange.com
 
- - Removed enum from recurring API. The API can now be used with Java 1.4.
+  - Bugfix #8007: Partly fix. Disabled possibility to create unbound folders
+    through WebDAV XML interface. Replacing existing unbound folders in database
+    with contact folders to prevent AJAX GUI errors.
 
- - Fixed bug #8196. If the owner deleted his reminder in Outlook, a participant
-   got a reminder at start time. This has been fixed.
+* 2007-06-27 - francisco.laguna@open-xchange.com
 
-* 2007-06-27 - thorben.betten@open-xchange.com
-
- - Collecting multiple requests to store message flags which delivers a
-   huge performance gain
- - Checking only subscribed subfolders when requesting subfolders flag
-   in non-config folder tree
-
-* 2007-06-27 - martin.kauss@open-xchange.com
-
- - Refactored Recurring API. The API is now in a seperate package.
-
-* 2007-06-26 - thorben.betten@open-xchange.com
-
- - Modularity: Added invalidation routines to UserConfigurationStorage interface
- - Modularity: Added Cloneable interface to UserConfiguration thus cached
-   implementation stores/returns cloned versions. Therefore altered
-   instances fetched from cache do not change cached instance
- - Modularity: Added additional folder permission checks on folder creation/update:
-   -> Sharing of a private folder is forbidden if user's config denies
-      full shared folder access.
-   -> Permissions defined for a folder are checked against entity's
-      user config to ensure its applicability. Currently an exception
-      is thrown but can be changed to any other handling.
-
-* 2007-06-25 - thorben.betten@open-xchange.com
-
- - Modularity: Added UserConfigurationStorage to allow global access to
-   every user's configuration settings
- - Modularity: Fixed some wrong permission checks in folder module
-#################### ATTENTION ! #####################
- - CONFIG change: New property in 'system.properties' to define the
-   name/alias of the implementing class of UserConfigurationStorage:
-   UserConfigurationStorage
- - CONFIG change: New JCS region defined in 'cache.ccf' for
-   UserConfigurationStorage which got its settings equal to existing
-   user cache.
-######################################################
+  - Add french messages to ox_languages.jar
 
 * 2007-06-21 - marcus.klein@open-xchange.com
 
@@ -86,6 +51,11 @@
 
  - IMAP folder rights are now cached in user's session to decrease
    execution of IMAP command MYRIGHTS
+
+* 2007-06-07 - thorben.betten@open-xchange.com
+
+ - Bugfix #7503: Context's admin is assigned to public folders if a user is
+   deleted
 
 * 2007-06-06 - thorben.betten@open-xchange.com
 
@@ -143,7 +113,7 @@
  - Bugfix #7720: Tabs are removed from address header field on reply
  - Bugfix #7593: Removed check for INBOX folder on update
  - Bugfix #7480: Again optimized regex pattern for href parsing to ignore
-   non-ascii character
+   non-ascii characters
 
 * 2007-05-30 - thorben.betten@open-xchange.com
 
@@ -165,14 +135,36 @@
    column "fname" of table "del_oxfolder_tree" to the one located in table
    "oxfolder_tree"
 
+* 2007-05-29 - tobias.prinz@open-xchange.com
+
+ - Partial fix #6825: Now handling all messages where data given is too
+   long for our database. This makes part (3) of the bug report a lot better,
+   yet it still needs translation (and possibly i18n).
+ 
 * 2007-05-29 - francisco.laguna@open-xchange.com
 
  - Partial Fix 7557: Annotation Processor also checks class declarations
  
+* 2007-05-25 - tobias.prinz@open-xchange.com
+
+ - Bugfix #6825 (part): OxContainerConverter did not discern between external
+   and internal users, which lead to the rather unhelpful UNEXPECTED_EXCEPTION.
+   This fixes the main problem with this bug report.
+
+* 2007-05-24 - tobias.prinz@open-xchange.com
+
+ - Bugfix #7538 : AJAXServlet.substitute used String.replaceAll which 
+   removed some backslashes. This lead to unescaped quotation marks in
+   error messages, which broke the JSON response. Fixed this for all
+   response callbacks upon a HTTP-POST.
+ - Bugfix #7552 : Outlook imports now handle dd.MM.yyyy format, too.
+
 * 2007-05-24 - thorben.betten@open-xchange.com
 
  - Bugfix #7588: Avoiding NPE if content type is missing in infostore
    document that ought to be sent as attachment
+ - Bugfix #7548 : Use objects parentFolderId if the user participant
+   doesn't contain a user specific folderId.
 
 * 2007-05-24 - thorben.betten@open-xchange.com
 
@@ -183,6 +175,19 @@
    'imap.properties' to specifiy the domain name that is going to be
    transmitted on SMTP's HELO/EHLO command
 
+* 2007-05-23 - francisco.laguna@open-xchange.com
+
+ - Bugfix #7507: Resolve [hostname] to the hostname of the system in direct links
+
+* 2007-05-23 - tobias.prinz@open-xchange.com
+
+ - Bugfix #7472: Added handling of CONFIDENTIAL flag: Entry flagged as such
+   is not imported. Bug fixed.
+
+* 2007-05-23 - marcus.klein@open-xchange.com
+
+  - Bugfix #7275: Changed error message once again.
+   
 * 2007-05-23 - thorben.betten@open-xchange.com
 
  - Bugfix #7280: Changes to apply to new tnef.jar v.1.3.1
@@ -202,6 +207,17 @@
    too large
  - Bugfix #7362: Added parameter 'limit' to 'action=newmsgs' request from
    GUI as defined in HTTP spec
+
+* 2007-05-22 - tobias.prinz@open-xchange.com
+
+ - Added new error category "WARNING".
+ - Bugfix #7109: Added server side solution using WARNING for partial inserts.
+ - Bugfix #7472: Added handling of PRIVATE flag. Treating CONFIDENTIAL flag 
+   as PRIVATE flag.
+
+* 2007-05-22 - francisco.laguna@open-xchange.com
+
+ - Bugfix #7459: Add content-disposition headers for ordinary downloads also.
 
 * 2007-05-21 - thorben.betten@open-xchange.com
 

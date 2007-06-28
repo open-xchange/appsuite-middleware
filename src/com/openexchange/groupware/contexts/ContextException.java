@@ -123,9 +123,9 @@ public class ContextException extends AbstractOXException {
          */
         SQL_ERROR("SQL problem: %1$s.", Category.CODE_ERROR, 6),
         /**
-         * Your database is currently updated.
+         * Updating database ... Try again later.
          */
-        UPDATE("Your database is currently updated. Try again later.", Category
+        UPDATE("Updating database ... Try again later.", Category
             .TRY_AGAIN, 7),
         /**
          * Problem initializing the cache.

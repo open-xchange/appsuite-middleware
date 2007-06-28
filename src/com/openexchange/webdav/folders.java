@@ -132,6 +132,11 @@ public final class folders extends XmlServlet {
 							folderobject.setParentFolderID(inFolder);
 						}
 						
+						if (folderobject.getModule() == folderobject.UNBOUND) {
+							writeResponse(folderobject, HttpServletResponse.SC_CONFLICT, USER_INPUT_EXCEPTION, client_id, os, xo);
+							return;
+						}
+						
 						folderobject = foldersql.saveFolderObject(folderobject, lastModified);
 						break;
 					case DataParser.DELETE:
