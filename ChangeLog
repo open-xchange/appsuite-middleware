@@ -1,3 +1,9 @@
+* 2007-06-28 - marcus.klein@open-xchange.com
+
+  - Bugfix #8007: Partly fix. Disabled possibility to create unbound folders
+    through WebDAV XML interface. Replacing existing unbound folders in database
+    with contact folders to prevent AJAX GUI errors.
+
 * 2007-06-27 - francisco.laguna@open-xchange.com
 
   - Add french messages to ox_languages.jar
