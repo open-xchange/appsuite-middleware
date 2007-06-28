@@ -70,8 +70,8 @@ public abstract class ResourceAbstraction extends BasicCommandlineOptions {
     protected static final String _OPT_EMAIL_LONG = "email";
     protected static final char _OPT_RESOURCEID_SHORT = 'i';
     protected static final String _OPT_RESOURCEID_LONG = "resourceid";
-    protected static final String OPT_RECIPIENTS_LONG = "mailrecipients";
-    protected static final char OPT_RECIPIENTS_SHORT = 'm';
+    protected static final String OPT_RECIPIENT_LONG = "mailrecipients";
+    protected static final char OPT_RECIPIENT_SHORT = 'm';
     
     protected Option resourceDisplayNameOption = null;
     protected Option resourceNameOption = null;
@@ -80,7 +80,7 @@ public abstract class ResourceAbstraction extends BasicCommandlineOptions {
     protected Option resourceEmailOption = null;
     protected Option resourceIdOption = null;
 
-    protected Option resourceRecipientsOption = null;
+    protected Option resourceRecipientOption = null;
     
     protected void printExtensionsError(Resource res){
         //+ loop through extensions and check for errors       
@@ -98,8 +98,8 @@ public abstract class ResourceAbstraction extends BasicCommandlineOptions {
         resourceDisplayNameOption = setShortLongOpt(admp, _OPT_DISPNAME_SHORT,_OPT_DISPNAME_LONG,"The resource display name",true, required);        
     }
     
-    protected void setRecipientsOption(final AdminParser admp,final boolean required){
-        resourceRecipientsOption = setShortLongOpt(admp, OPT_RECIPIENTS_SHORT,OPT_RECIPIENTS_LONG,"Recipients who should receive mail addressed to the resource",true, required);        
+    protected void setRecipientOption(final AdminParser admp,final boolean required){
+        resourceRecipientOption = setShortLongOpt(admp, OPT_RECIPIENT_SHORT,OPT_RECIPIENT_LONG,"Recipient who should receive mail addressed to the resource",true, required);        
     }
     
     protected void setNameOption(final AdminParser admp,final boolean required){
