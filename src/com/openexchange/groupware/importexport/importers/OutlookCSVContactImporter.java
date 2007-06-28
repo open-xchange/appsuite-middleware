@@ -54,8 +54,11 @@ import java.util.List;
 import java.util.TimeZone;
 
 import com.openexchange.api2.ContactSQLInterface;
+import com.openexchange.api2.OXException;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.OXExceptionSource;
+import com.openexchange.groupware.OXThrowsMultiple;
+import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.ContactSetter;
 import com.openexchange.groupware.contact.helpers.ContactSwitcher;
@@ -69,10 +72,18 @@ import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.groupware.importexport.Importer;
 import com.openexchange.groupware.importexport.csv.CSVParser;
 import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionClasses;
+import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionFactory;
 
 @OXExceptionSource(
-		classId=ImportExportExceptionClasses.OUTLOOKCSVCONTACTIMPORTER, 
-		component=Component.IMPORT_EXPORT)
+	classId=ImportExportExceptionClasses.OUTLOOKCSVCONTACTIMPORTER, 
+	component=Component.IMPORT_EXPORT)
+@OXThrowsMultiple(
+	category={
+		Category.TRUNCATED}, 
+	desc={""}, 
+	exceptionId={0}, 
+	msg={
+		"The following field(s) are too long to be imported: %s"})
 /**
  * Imports the CSV format of Outlook, regardless of the file being written with an English, 
  * French or German version of Outlook.
@@ -81,6 +92,9 @@ import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionC
  *
  */
 public class OutlookCSVContactImporter extends CSVContactImporter implements Importer {
+	
+	private static final ImportExportExceptionFactory EXCEPTIONS = new ImportExportExceptionFactory(OutlookCSVContactImporter.class);
+	
 	protected ContactFieldMapper fieldMapper;
 	
 	@Override
@@ -135,14 +149,41 @@ public class OutlookCSVContactImporter extends CSVContactImporter implements Imp
 	@Override
 	protected ContactSwitcher getContactSwitcher() {
 		final ContactSwitcherForSimpleDateFormat switcher = new ContactSwitcherForSimpleDateFormat();
-		final SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
-		sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-		switcher.setDateFormat(sdf);
+		switcher.addDateFormat( getGermanDateNotation());
+		switcher.addDateFormat( getAmericanDateNotation());
 		switcher.setDelegate(new ContactSetter());
 		return switcher;
 	}
 	
+	public static final SimpleDateFormat getGermanDateNotation(){
+		final SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+		sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+		return sdf; 
+	}
 	
-	
-	
+	public static final SimpleDateFormat getAmericanDateNotation(){
+		final SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
+		sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+		return sdf; 
+	}
+
+	@Override
+	protected OXException handleDataTruncation(OXException oxEx) {
+		if(oxEx.getCategory() == Category.TRUNCATED 
+		&& oxEx.getComponent() == Component.CONTACT){
+			final String separator = ", ";
+			final StringBuilder bob = new StringBuilder();
+			final int[] ids = oxEx.getTruncatedIds();			
+			for(int id : ids){
+				final ContactField field = ContactField.getByValue(id);
+				bob.append(	fieldMapper.getNameOfField(field) );
+				bob.append(separator);
+			}
+			bob.setLength(bob.length() - separator.length());
+			oxEx = EXCEPTIONS.create(0, bob.toString());
+		} else {
+			return super.handleDataTruncation(oxEx);
+		}
+		return oxEx;
+	}
 }

@@ -70,6 +70,7 @@ import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.importexport.AbstractImporter;
 import com.openexchange.groupware.importexport.Format;
 import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.groupware.importexport.Importer;
@@ -85,7 +86,7 @@ import com.openexchange.tools.versit.ICalendar;
 import com.openexchange.tools.versit.VersitDefinition;
 import com.openexchange.tools.versit.VersitException;
 import com.openexchange.tools.versit.VersitObject;
-import com.openexchange.tools.versit.converter.ConverterException;
+import com.openexchange.tools.versit.converter.ConverterPrivacyException;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
 
 @OXExceptionSource(
@@ -98,26 +99,28 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
 		Category.USER_INPUT,
 		Category.CODE_ERROR,
 		Category.CODE_ERROR,
+		Category.USER_INPUT,
 		Category.USER_INPUT}, 
-	desc={"","","","","",""}, 
-	exceptionId={0,1,2,3,4,5}, 
+	desc={"","","","","","",""}, 
+	exceptionId={0,1,2,3,4,5,6}, 
 	msg={
 		"Could not import into the folder %s.",
 		"Subsystem down",
 		"User input Error %s",
 		"Programming Error",
 		"Could not load folder %s",
-		"Broken file uploaded: %s"})
+		"Broken file uploaded: %s",
+		"Cowardly refusing to import an entry flagged as confidential."})
 
 /**
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a> (minor: changes to new interface)
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a> (minor: changes to new interface, bugfixes)
  */
-public class ICalImporter implements Importer {
+public class ICalImporter extends AbstractImporter implements Importer {
 	
 	private static final Log LOG = LogFactory.getLog(ICalImporter.class);
 	
-	private static ImportExportExceptionFactory importExportExceptionFactory = new ImportExportExceptionFactory(ICalImporter.class);
+	private static final ImportExportExceptionFactory EXCEPTIONS = new ImportExportExceptionFactory(ICalImporter.class);
 	
 	public boolean canImport(final SessionObject sessObj, final Format format, final List<String> folders, final Map<String, String[]> optionalParams) throws ImportExportException{
 		if(!format.equals(Format.ICAL)){
@@ -145,9 +148,9 @@ public class ICalImporter implements Importer {
 			try {
 				perm = fo.getEffectiveUserPermission(sessObj.getUserObject().getId(), sessObj.getUserConfiguration());
 			} catch (DBPoolingException e) {
-				throw importExportExceptionFactory.create(1, folder);
+				throw EXCEPTIONS.create(1, folder);
 			} catch (SQLException e) {
-				throw importExportExceptionFactory.create(1, folder);
+				throw EXCEPTIONS.create(1, folder);
 			}
 			
 			if (perm.canCreateObjects()) {
@@ -172,7 +175,7 @@ public class ICalImporter implements Importer {
 			try {
 				fo = FolderObject.loadFolderObjectFromDB(folderId, sessObj.getContext());
 			} catch (OXException e) {
-				throw importExportExceptionFactory.create(4,folderId);
+				throw EXCEPTIONS.create(4,folderId);
 			}
 			if (fo.getModule() == FolderObject.CALENDAR) {
 				appointmentFolderId = folderId;
@@ -181,7 +184,7 @@ public class ICalImporter implements Importer {
 				taskFolderId = folderId;
 				importTask = true;
 			} else {
-				throw importExportExceptionFactory.create(0, fo.getModule()); 
+				throw EXCEPTIONS.create(0, fo.getModule()); 
 			}
 		}
 		
@@ -216,7 +219,7 @@ public class ICalImporter implements Importer {
 						versitObject=  def.parseChild(versitReader, rootVersitObject);
 					} catch (VersitException ve){
 						LOG.info("Trying to import ICAL file, but:\n" + ve);
-						importResult.setException(importExportExceptionFactory.create(5, ve.getLocalizedMessage()));
+						importResult.setException(EXCEPTIONS.create(5, ve.getLocalizedMessage()));
 						importResult.setDate(new Date(System.currentTimeMillis()));
 						list.add(importResult);
 						hasMoreObjects = false;
@@ -232,33 +235,52 @@ public class ICalImporter implements Importer {
 					
 					if ("VEVENT".equals(versitObject.name) && importAppointment) {
 						importResult.setFolder(String.valueOf(appointmentFolderId));
-								
-						final CalendarDataObject appointmentObj = oxContainerConverter.convertAppointment(versitObject);
-						appointmentObj.setContext(sessObj.getContext());
-						appointmentObj.setParentFolderID(appointmentFolderId);
-						appointmentObj.setIgnoreConflicts(true);
-						appointmentInterface.insertAppointmentObject(appointmentObj);
+						boolean storeData = true;
+						CalendarDataObject appointmentObj = null;
+						try {
+							appointmentObj = oxContainerConverter.convertAppointment(versitObject);
+						} catch (ConverterPrivacyException e){
+							storeData = false;
+						}
+						if(storeData){
+							appointmentObj.setContext(sessObj.getContext());
+							appointmentObj.setParentFolderID(appointmentFolderId);
+							appointmentObj.setIgnoreConflicts(true);
+							appointmentInterface.insertAppointmentObject(appointmentObj);
+							importResult.setObjectId(String.valueOf(appointmentObj.getObjectID()));
+							importResult.setDate(appointmentObj.getLastModified());
+						} else {
+							importResult.setException(EXCEPTIONS.create(6));
+							importResult.setDate(new Date());
+						}
 						
-						importResult.setObjectId(String.valueOf(appointmentObj.getObjectID()));
-						importResult.setDate(appointmentObj.getLastModified());
 					} else if ("VTODO".equals(versitObject.name) && importTask) {
 						importResult.setFolder(String.valueOf(taskFolderId));
+						boolean storeData = true;
 						
-						final Task taskObj = oxContainerConverter.convertTask(versitObject);
-						taskObj.setParentFolderID(taskFolderId);
-						taskInterface.insertTaskObject(taskObj);
+						Task taskObj = null;
+						try {
+							taskObj = oxContainerConverter.convertTask(versitObject);
+						} catch (ConverterPrivacyException e){
+							storeData = false;
+						}
+						if(storeData){
+							taskObj.setParentFolderID(taskFolderId);
+							taskInterface.insertTaskObject(taskObj);
+							importResult.setObjectId(String.valueOf(taskObj.getObjectID()));
+							importResult.setDate(taskObj.getLastModified());
+						} else {
+							importResult.setException(EXCEPTIONS.create(6));
+							importResult.setDate(new Date());
+						}
 						
-						importResult.setObjectId(String.valueOf(taskObj.getObjectID()));
-						importResult.setDate(taskObj.getLastModified());
 					} else {
 						LOG.warn("invalid versit object: " + versitObject.name);
 					}
 				} catch (OXException exc) {
 					LOG.error("cannot import calendar object", exc);
+					exc = handleDataTruncation(exc); 
 					importResult.setException(exc);
-				} catch (ConverterException exc) {
-					LOG.error("cannot convert calendar object", exc);
-					importResult.setException(new OXException("cannot parse ical object", exc));
 				} catch (VersitException exc) {
 					LOG.error("cannot parse calendar object", exc);
 					importResult.setException(new OXException("cannot parse ical object", exc));
@@ -267,11 +289,12 @@ public class ICalImporter implements Importer {
 				list.add(importResult);
 			}
 		} catch (Exception exc) {
-			throw importExportExceptionFactory.create(3, exc);
+			throw EXCEPTIONS.create(3, exc);
 		} finally {
 			oxContainerConverter.close();
 		}
 		
 		return list;
 	}
+
 }

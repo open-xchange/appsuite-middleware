@@ -156,7 +156,12 @@ public class AbstractOXException extends Exception {
          * attribute contains a too long value.
          * @value 12
          */
-        TRUNCATED(12);
+        TRUNCATED(12),
+        /**
+         * This is not an error but a partial success with an attached warning.
+         * @value 13
+         */
+        WARNING(13);
 
         private final int code;
 

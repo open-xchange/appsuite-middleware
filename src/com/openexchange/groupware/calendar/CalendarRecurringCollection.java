@@ -6,6 +6,7 @@
  *    international copyright laws.
  *
  *
+ *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
  *    trademarks of the Open-Xchange, Inc. group of companies.
@@ -623,10 +624,14 @@ public final class CalendarRecurringCollection {
         String change_exceptions = null;
         String delete_exceptions = null;
         String calc_timezone = "UTC";
-        if (!ignore_exceptions && cdao instanceof CalendarDataObject) {
-            change_exceptions = ((CalendarDataObject)cdao).getExceptions();
-            delete_exceptions = ((CalendarDataObject)cdao).getDelExceptions();
-            calc_timezone = ((CalendarDataObject)cdao).getTimezone();
+        if (cdao instanceof CalendarDataObject) {
+            if (!ignore_exceptions) {
+                change_exceptions = ((CalendarDataObject)cdao).getExceptions();
+                delete_exceptions = ((CalendarDataObject)cdao).getDelExceptions();
+            }
+            if (((CalendarDataObject)cdao).getFullTime() != true) {
+                calc_timezone = ((CalendarDataObject)cdao).getTimezone();
+            } 
         }
         
         final Calendar calc = Calendar.getInstance(TimeZone.getTimeZone(calc_timezone));

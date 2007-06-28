@@ -510,7 +510,7 @@ public class CalendarOperation implements SearchIterator {
         }
     }
     
-    private final void handleFullTime(final CalendarDataObject cdao) {
+    public static final void handleFullTime(final CalendarDataObject cdao) {
         if (cdao.getFullTime() && cdao.containsStartDate() && cdao.containsEndDate()) {
             final long mod = cdao.getStartDate().getTime()%CalendarRecurringCollection.MILLI_DAY;
             if (mod != 0) {

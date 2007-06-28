@@ -51,6 +51,8 @@ package com.openexchange.groupware.contact.helpers;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.LinkedList;
+import java.util.List;
 
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.OXExceptionSource;
@@ -80,21 +82,25 @@ import com.openexchange.groupware.contact.ContactExceptionFactory;
 public class ContactSwitcherForSimpleDateFormat implements ContactSwitcher {
 
 	private static final ContactExceptionFactory EXCEPTIONS = new ContactExceptionFactory(ContactSwitcherForSimpleDateFormat.class);
-	private SimpleDateFormat dateFormat;
+	private List<SimpleDateFormat> dateFormats = new LinkedList<SimpleDateFormat>() ;
 	private ContactSwitcher delegate;
 	
-	private Object[] makeDate(final Object... objects) throws ParseException{
-		objects[1] = dateFormat.parse( (String) objects[1] );
-		return objects;
+	private Object[] makeDate(final Object... objects) throws ContactException{
+		for(SimpleDateFormat dateFormat: dateFormats){
+			try {
+				objects[1] = dateFormat.parse( (String) objects[1] );
+				return objects;
+			} catch (ParseException e){
+				//try next parser
+			}
+		}
+		throw EXCEPTIONS.create(0, (String) objects[1] );
 	}
 	
 	/* GETTERS & SETTERS */
-	public SimpleDateFormat getDateFormat() {
-		return dateFormat;
-	}
 
-	public void setDateFormat(final SimpleDateFormat dateFormat) {
-		this.dateFormat = dateFormat;
+	public void addDateFormat(final SimpleDateFormat dateFormat) {
+		dateFormats.add( dateFormat );
 	}
 
 	public ContactSwitcher getDelegate() {
@@ -109,8 +115,6 @@ public class ContactSwitcherForSimpleDateFormat implements ContactSwitcher {
 	public Object creationdate(final Object... objects) throws ContactException {
 		try {
 			return delegate.creationdate( makeDate(objects) );
-		} catch (final ParseException e) {
-			throw EXCEPTIONS.create(0, objects[1] ,  "CreationDate", e);
 		} catch (final ClassCastException e){
 			throw EXCEPTIONS.create(0, objects[1] ,  "CreationDate", e);
 		}
@@ -119,8 +123,6 @@ public class ContactSwitcherForSimpleDateFormat implements ContactSwitcher {
 	public Object anniversary(final Object... objects) throws ContactException {
 		try {
 			return delegate.anniversary( makeDate(objects) );
-		} catch (final ParseException e) {
-			throw EXCEPTIONS.create(0, objects[1] ,  "Anniversary", e);
 		} catch (final ClassCastException e){
 			throw EXCEPTIONS.create(0, objects[1] ,  "Anniversary", e);
 		}
@@ -129,8 +131,6 @@ public class ContactSwitcherForSimpleDateFormat implements ContactSwitcher {
 	public Object birthday(final Object... objects) throws ContactException {
 		try {
 			return delegate.birthday( makeDate(objects) );
-		} catch (final ParseException e) {
-			throw EXCEPTIONS.create(0, objects[1] ,  "Birthday", e);
 		} catch (final ClassCastException e){
 			throw EXCEPTIONS.create(0, objects[1] ,  "Birthday", e);
 		}
@@ -139,8 +139,6 @@ public class ContactSwitcherForSimpleDateFormat implements ContactSwitcher {
 	public Object imagelastmodified(final Object... objects) throws ContactException {
 		try {
 			return delegate.imagelastmodified( makeDate(objects) );
-		} catch (final ParseException e) {
-			throw EXCEPTIONS.create(0, objects[1] ,  "ImageLastModified", e);
 		} catch (final ClassCastException e){
 			throw EXCEPTIONS.create(0, objects[1] ,  "ImageLastModified", e);
 		}
@@ -149,8 +147,6 @@ public class ContactSwitcherForSimpleDateFormat implements ContactSwitcher {
 	public Object lastmodified(final Object... objects) throws ContactException {
 		try {
 			return delegate.lastmodified( makeDate(objects) );
-		} catch (final ParseException e) {
-			throw EXCEPTIONS.create(0, objects[1] ,  "LastModified", e);
 		} catch (final ClassCastException e){
 			throw EXCEPTIONS.create(0, objects[1] ,  "LastModified", e);
 		}

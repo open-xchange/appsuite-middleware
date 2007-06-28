@@ -47,33 +47,59 @@
  *
  */
 
-package com.openexchange.groupware.importexport.exceptions;
+package com.openexchange.groupware.importexport;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
+import com.openexchange.groupware.OXExceptionSource;
+import com.openexchange.groupware.OXThrowsMultiple;
+import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.groupware.contact.helpers.ContactField;
+import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionClasses;
+import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionFactory;
 
 /**
- * An exception thrown by classes associated with the import or export of
- * OX data.
- * 
+ * This class contains basic helper methods needed by all importers.
+ *  
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  *
  */
-public class ImportExportException extends OXException {
-
-	private static final long serialVersionUID = 8368543799201210727L;
-
-	public ImportExportException(final Category category, final int id, final String message, final Throwable cause, final Object...msgParams){
-		super(Component.IMPORT_EXPORT, category, id, message, cause);
-		setMessageArgs(msgParams);
+@OXExceptionSource(
+		classId=ImportExportExceptionClasses.ABSTRACTIMPORTER, 
+		component=Component.IMPORT_EXPORT)
+	@OXThrowsMultiple(
+		category={
+			Category.TRUNCATED}, 
+		desc={""}, 
+		exceptionId={0}, 
+		msg={
+			"The following field(s) are too long to be imported: %s"})
+public abstract class AbstractImporter implements Importer {
+	private static final ImportExportExceptionFactory EXCEPTIONS = new ImportExportExceptionFactory(AbstractImporter.class);
+	
+	protected OXException handleDataTruncation(OXException oxEx){
+		if(oxEx.getCategory() == Category.TRUNCATED){
+			final String separator = ", ";
+			final String unidentifiedField = "unknown field";
+			final StringBuilder bob = new StringBuilder();
+			final int[] ids = oxEx.getTruncatedIds();			
+			if(oxEx.getComponent() == Component.CONTACT){
+				for(int id : ids){
+					final ContactField field = ContactField.getByValue(id);
+					bob.append( field == null ? unidentifiedField : field.getReadableName() );
+					bob.append(separator);
+				}
+			} else {
+				for(int id : ids){
+					bob.append(id);
+					bob.append(separator);
+				}
+			}
+			bob.setLength(bob.length() - separator.length());
+			oxEx = EXCEPTIONS.create(0, bob.toString());
+		}
+		return oxEx;
 	}
 
-	public ImportExportException(final Category category, final String message, final int id, final Object...msgParams){
-		this(category,id,message, null,msgParams);
-	}
 
-	public ImportExportException(final AbstractOXException e1) {
-		super(e1);
-	}
 }

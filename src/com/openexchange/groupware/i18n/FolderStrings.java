@@ -89,7 +89,10 @@ public class FolderStrings {
 	
 	public static final String MY_INFOSTORE_FOLDER_NAME = "My Infostore Folder";
 	
-	public static final String ALL_GROUPS_AND_USERS = "All Groups and Users";
+	/**
+     * @deprecated Use {@link Groups#ZERO_DISPLAYNAME}.
+	 */
+    public static final String ALL_GROUPS_AND_USERS = "All Groups and Users";
 	
 	public static final String DEFAULT_TASK_FOLDER_NAME = "Tasks";
 	

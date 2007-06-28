@@ -308,6 +308,8 @@ public class Attachment extends PermissionServlet {
 			
 			if(contentType != null && contentType.equals(SAVE_AS_TYPE)) {
 				res.setHeader("Content-Disposition", "attachment; filename=\""+Helper.encodeFilename(attachment.getFilename(),"UTF-8",ie)+"\"");
+			} else {
+				res.setHeader("Content-Disposition", "filename=\""+Helper.encodeFilename(attachment.getFilename(),"UTF-8",ie)+"\"");	
 			}
 
             // Browsers doesn't like the Pragma header the way we usually set
