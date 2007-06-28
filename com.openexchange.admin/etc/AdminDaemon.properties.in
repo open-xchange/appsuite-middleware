@@ -11,13 +11,13 @@ RMI_PROP=$PWD/@oxconfdir@/RMI.properties
 
 # Disabling authentication for system calls like context/server etc. creation!
 # ONLY USE THIS SWITCH IF YOU EXACTLY KNOW WHAT YOU DO!!!
-#MASTER_AUTHENTICATION_DISABLED=false
+MASTER_AUTHENTICATION_DISABLED=false
 
 # Disabling authentication for context calls like user/group etc. creation!
 # This also disables authentication for calls which a "normal" user can make
 # like change his own data or get his own data!
 # ONLY USE THIS SWITCH IF YOU EXACTLY KNOW WHAT YOU DO!!!
-#CONTEXT_AUTHENTICATION_DISABLED=false
+CONTEXT_AUTHENTICATION_DISABLED=false
 
 MASTER_AUTH_FILE=$PWD/@oxconfdir@/mpasswd
 
