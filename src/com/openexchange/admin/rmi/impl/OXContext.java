@@ -357,6 +357,8 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
 
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
             oxcox.delete(ctx);
+            removeFromAuthCache(ctx);
+            
         } catch (final StorageException e) {
             log.error(e);
             throw e;
