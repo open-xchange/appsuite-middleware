@@ -1529,7 +1529,6 @@ public class AppointmentBugTests extends TestCase {
 
             assertTrue("Got a participant", up_insert != null);
         
-            assertEquals("Check alarm after inserting", up_insert[0].getAlarmMinutes(), 0);
             assertEquals("Check that no alarm is set (insert)", false, up_insert[0].containsAlarm());
             
             update.setTitle("testBug6214 - Step 2");
@@ -1544,8 +1543,6 @@ public class AppointmentBugTests extends TestCase {
             
             assertTrue("Got a participant", up_update != null);
             
-            
-            assertEquals("Check alarm after updating", up_update[0].getAlarmMinutes(), 0);
             assertEquals("Check that no alarm is set (update)", false, up_update[0].containsAlarm());
                         
         } finally {
@@ -1769,10 +1766,11 @@ public class AppointmentBugTests extends TestCase {
         
         CalendarDataObject cdao_update = new CalendarDataObject();
         cdao_update.setContext(so.getContext());
+        cdao_update.setTitle("testBug7883-update");
         cdao_update.setObjectID(object_id);
         userA = new UserParticipant();
         userA.setIdentifier(userid);
-        userA.setAlarmMinutes(-1);
+        cdao_update.setAlarm(-1);
         cdao_update.setUsers(new UserParticipant[] { userA, userB });        
         cdao_update.setIgnoreConflicts(true);
         
@@ -1789,7 +1787,7 @@ public class AppointmentBugTests extends TestCase {
         found = false;
         while (si.hasNext()) {
             CalendarDataObject tdao = (CalendarDataObject)si.next();
-            if (tdao.getTitle().equals("testBug7883")) {
+            if (tdao.getTitle().equals("testBug7883-update")) {
                 found = true;
                 assertTrue("Check that userA has no alarm set in the cdao", !tdao.containsAlarm());
                  
@@ -1801,7 +1799,7 @@ public class AppointmentBugTests extends TestCase {
         found = false;
         while (si2.hasNext()) {
             CalendarDataObject tdao = (CalendarDataObject)si2.next();
-            if (tdao.getTitle().equals("testBug7883")) {
+            if (tdao.getTitle().equals("testBug7883-update")) {
                 found = true;
                 assertTrue("Check that userB has no alarm set in the cdao", !tdao.containsAlarm());             
             }
