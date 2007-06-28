@@ -5,7 +5,6 @@ import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-import java.util.ArrayList;
 
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.MissingOptionException;
@@ -51,17 +50,6 @@ public class Create extends ResourceAbstraction {
 
             if (parser.getOptionValue(this.resourceDescriptionOption) != null) {
                 res.setDescription((String) parser.getOptionValue(this.resourceDescriptionOption));
-            }
-            if (parser.getOptionValue(this.resourceRecipientsOption) != null) {
-                final String vals = (String) parser.getOptionValue(this.resourceRecipientsOption);
-                final ArrayList<String> recs = new ArrayList<String>();
-                if (vals.contains(",")) {
-                    for (final String s : vals.split(",")) {
-                        recs.add(s.trim());
-                    }
-                } else {
-                    recs.add(vals.trim());
-                }
             }
             res.setDisplayname((String) parser.getOptionValue(this.resourceDisplayNameOption));
             res.setEmail((String) parser.getOptionValue(this.resourceEmailOption));
@@ -122,7 +110,6 @@ public class Create extends ResourceAbstraction {
         setAvailableOption(parser, false);
         setDescriptionOption(parser, false);
         setEmailOption(parser, true);
-        setRecipientsOption(parser, false);
 
     }
 }
