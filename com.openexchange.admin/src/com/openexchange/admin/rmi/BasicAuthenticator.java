@@ -68,14 +68,14 @@ import com.openexchange.admin.tools.AdminCache;
  * @author cutmasta
  */
 public class BasicAuthenticator {
-    
+
     private final static Log log = LogFactory.getLog (BasicAuthenticator.class);
-    
+
     private AuthenticationInterface sqlAuth = null;
     private AuthenticationInterface fileAuth = null;
     private AdminCache cache = null;
-    
-    
+
+
     /** */
     public BasicAuthenticator() {
         super();
@@ -83,7 +83,7 @@ public class BasicAuthenticator {
         fileAuth = AuthenticationFactory.getInstanceFile();
         cache = ClientAdminThread.cache;
     }
-    
+
     /**
      * Authenticates the master admin!
      * @param authdata
@@ -99,7 +99,7 @@ public class BasicAuthenticator {
             }
         }
     }
-    
+
     /**
      * 
      * Authenticates ONLY the context admin!
@@ -112,8 +112,10 @@ public class BasicAuthenticator {
      */
     public void doAuthentication(Credentials authdata,Context ctx) throws InvalidCredentialsException, StorageException, InvalidDataException{
         contextcheck(ctx);
-        
-       
+
+
+        // only do context check, if we have not already admin creds in our cache for given context
+        if( ClientAdminThread.cache.getAdminCredentials(ctx) == null ) {
             if (!OXToolStorageInterface.getInstance().existsContext(ctx)) {
                 final InvalidCredentialsException invalidCredentialsException = new InvalidCredentialsException(
                         "Authentication failed for user " + authdata.getLogin());
@@ -121,18 +123,19 @@ public class BasicAuthenticator {
                         + " does not exist!", invalidCredentialsException);
                 throw invalidCredentialsException;
             }
-            
-            // first check if whole authentication mech is disabled
-            if (!cache.contextAuthenticationDisabled()) {
-                if (!sqlAuth.authenticate(authdata, ctx)) {
-                    final InvalidCredentialsException invalidCredentialsException = new InvalidCredentialsException(
+        }
+        
+        // first check if whole authentication mech is disabled
+        if (!cache.contextAuthenticationDisabled()) {
+            if (!sqlAuth.authenticate(authdata, ctx)) {
+                final InvalidCredentialsException invalidCredentialsException = new InvalidCredentialsException(
                         "Authentication failed for user " + authdata.getLogin());
-                        log.error("Admin authentication: ",invalidCredentialsException);
-                    throw invalidCredentialsException;
-                }
+                log.error("Admin authentication: ",invalidCredentialsException);
+                throw invalidCredentialsException;
             }
+        }
     }
-    
+
     /**
      * Authenticates all users within a context!
      * This method also validates the Context object data!
@@ -145,23 +148,23 @@ public class BasicAuthenticator {
     public void doUserAuthentication(Credentials authdata,Context ctx) throws InvalidCredentialsException, StorageException, InvalidDataException{
         contextcheck(ctx);
 
-            if (!OXToolStorageInterface.getInstance().existsContext(ctx)) {
+        if (!OXToolStorageInterface.getInstance().existsContext(ctx)) {
+            final InvalidCredentialsException invalidCredentialsException = new InvalidCredentialsException(
+                    "Authentication failed for user " + authdata.getLogin());
+            log.error("Requested context " + ctx.getIdAsInt()
+                    + " does not exist!", invalidCredentialsException);
+            throw invalidCredentialsException;
+        }
+
+        // first check if whole authentication mech is disabled
+        if (!cache.contextAuthenticationDisabled()) {
+            if (!sqlAuth.authenticateUser(authdata, ctx)) {
                 final InvalidCredentialsException invalidCredentialsException = new InvalidCredentialsException(
                         "Authentication failed for user " + authdata.getLogin());
-                log.error("Requested context " + ctx.getIdAsInt()
-                        + " does not exist!", invalidCredentialsException);
+                log.error("User authentication: ", invalidCredentialsException);
                 throw invalidCredentialsException;
             }
-            
-            // first check if whole authentication mech is disabled
-            if (!cache.contextAuthenticationDisabled()) {
-                if (!sqlAuth.authenticateUser(authdata, ctx)) {
-                    final InvalidCredentialsException invalidCredentialsException = new InvalidCredentialsException(
-                        "Authentication failed for user " + authdata.getLogin());
-                    log.error("User authentication: ", invalidCredentialsException);
-                    throw invalidCredentialsException;
-                }
-            }
+        }
     }
 
     protected final void contextcheck(final Context ctx) throws InvalidCredentialsException {
@@ -170,7 +173,7 @@ public class BasicAuthenticator {
             throw new InvalidCredentialsException();
         }
     }
-    
+
     /**
      * @param objects
      * @throws InvalidDataException
@@ -183,5 +186,5 @@ public class BasicAuthenticator {
             }
         }
     }
-    
+
 }
