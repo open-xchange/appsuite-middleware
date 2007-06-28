@@ -58,29 +58,30 @@ package com.openexchange.groupware.calendar.recurrence;
 public class RecurringException extends Exception {
     
     private int value;
-    private Code code;
+    private Code code;    
     
-   public enum Code {
-       
-        UNKOWN_DAYS_VALUE("Unknown days", 1),
-        RECURRING_MISSING_INTERVAL("Interval missing", 2),
-        RECURRING_MISSING_MONTLY_INTERVAL("Missing day in month", 3),
-        RECURRING_MISSING_MONTLY_INTERVAL_2("Missing month", 4),
-        RECURRING_MISSING_MONTLY_DAY("Got no day for montly calculation", 5),
-        RECURRING_MISSING_MONTLY_DAY_2("Missing day in month", 6),
-        RECURRING_MISSING_YEARLY_INTERVAL("Missing day in month", 7),
-        RECURRING_MISSING_YEARLY_DAY("Got no day for yearly calculation", 8),
-        RECURRING_MISSING_YEARLY_TYPE("Missing day in month", 9),
-        ;
-   
+    public static final Code UNKOWN_DAYS_VALUE = new Code("Unknown days", 1);
+    public static final Code RECURRING_MISSING_INTERVAL = new Code("Interval missing", 2);
+    public static final Code RECURRING_MISSING_MONTLY_INTERVAL = new Code("Missing day in month", 3);
+    public static final Code RECURRING_MISSING_MONTLY_INTERVAL_2 = new Code("Missing month", 4);
+    public static final Code RECURRING_MISSING_MONTLY_DAY = new Code("Got no day for montly calculation", 5);
+    public static final Code RECURRING_MISSING_MONTLY_DAY_2 = new Code("Missing day in month", 6);
+    public static final Code RECURRING_MISSING_YEARLY_INTERVAL = new Code("Missing day in month", 7);
+    public static final Code RECURRING_MISSING_YEARLY_DAY = new Code("Got no day for yearly calculation", 8);
+    public static final Code RECURRING_MISSING_YEARLY_TYPE = new Code("Missing day in month", 9);
+    
+    static class Code {
         private String message;
         
         private int id;
         
         private Code(String message, int id) {
-            
+            this.message = message;
+            this.id = id;
         }
-   }
+    }
+   
+   
    
     
     public RecurringException(final Code code, int value) {

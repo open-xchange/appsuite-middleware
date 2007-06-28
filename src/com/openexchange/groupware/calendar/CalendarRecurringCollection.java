@@ -650,23 +650,23 @@ static int MAXTC = 999;
         try {
             return rc.calculateRecurrence();
         } catch (RecurringException re) {
-            if (re.getCode() == RecurringException.Code.RECURRING_MISSING_INTERVAL) {
+            if (re.getCode() == RecurringException.RECURRING_MISSING_INTERVAL) {
                 throw new OXCalendarException(OXCalendarException.Code.RECURRING_MISSING_DAILY_INTERVAL, re.getValue());
-            } else if (re.getCode() == RecurringException.Code.RECURRING_MISSING_INTERVAL) {
+            } else if (re.getCode() == RecurringException.RECURRING_MISSING_INTERVAL) {
                 throw new OXCalendarException(OXCalendarException.Code.RECURRING_MISSING_WEEKLY_INTERVAL, re.getValue());
-            } else if (re.getCode() == RecurringException.Code.RECURRING_MISSING_MONTLY_INTERVAL) {
+            } else if (re.getCode() == RecurringException.RECURRING_MISSING_MONTLY_INTERVAL) {
                 throw new OXCalendarException(OXCalendarException.Code.RECURRING_MISSING_MONTLY_INTERVAL, re.getValue());
-            } else if (re.getCode() == RecurringException.Code.RECURRING_MISSING_MONTLY_INTERVAL_2) {
+            } else if (re.getCode() == RecurringException.RECURRING_MISSING_MONTLY_INTERVAL_2) {
                 throw new OXCalendarException(OXCalendarException.Code.RECURRING_MISSING_MONTLY_INTERVAL_2, re.getValue());
-            } else if (re.getCode() == RecurringException.Code.RECURRING_MISSING_MONTLY_DAY) {
+            } else if (re.getCode() == RecurringException.RECURRING_MISSING_MONTLY_DAY) {
                 throw new OXCalendarException(OXCalendarException.Code.RECURRING_MISSING_MONTLY_DAY, re.getValue());
-            } else if (re.getCode() == RecurringException.Code.RECURRING_MISSING_MONTLY_DAY_2) {
+            } else if (re.getCode() == RecurringException.RECURRING_MISSING_MONTLY_DAY_2) {
                 throw new OXCalendarException(OXCalendarException.Code.RECURRING_MISSING_MONTLY_DAY_2, re.getValue());
-            } else if (re.getCode() == RecurringException.Code.RECURRING_MISSING_YEARLY_INTERVAL) {
+            } else if (re.getCode() == RecurringException.RECURRING_MISSING_YEARLY_INTERVAL) {
                 throw new OXCalendarException(OXCalendarException.Code.RECURRING_MISSING_YEARLY_INTERVAL, re.getValue());
-            } else if (re.getCode() == RecurringException.Code.RECURRING_MISSING_YEARLY_DAY) {
+            } else if (re.getCode() == RecurringException.RECURRING_MISSING_YEARLY_DAY) {
                 throw new OXCalendarException(OXCalendarException.Code.RECURRING_MISSING_YEARLY_DAY, re.getValue());
-            } else if (re.getCode() == RecurringException.Code.RECURRING_MISSING_YEARLY_TYPE) {
+            } else if (re.getCode() == RecurringException.RECURRING_MISSING_YEARLY_TYPE) {
                 throw new OXCalendarException(OXCalendarException.Code.RECURRING_MISSING_YEARLY_TYPE, re.getValue());
             }
             

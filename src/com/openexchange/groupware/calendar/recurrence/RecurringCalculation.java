@@ -298,7 +298,7 @@ public class RecurringCalculation {
     private final RecurringResults calculateDaily() throws RecurringException {
         RecurringResults rs = null;
         if (recurring_interval < 1) {
-            throw new RecurringException(RecurringException.Code.RECURRING_MISSING_INTERVAL, recurring_interval);
+            throw new RecurringException(RecurringException.RECURRING_MISSING_INTERVAL, recurring_interval);
         }
         final Calendar calc = Calendar.getInstance(TimeZone.getTimeZone(calc_timezone));
         calc.setFirstDayOfWeek(first_day_of_week);
@@ -330,7 +330,7 @@ public class RecurringCalculation {
     private final RecurringResults calculateWeekly() throws RecurringException {
         RecurringResults rs = null;
         if (recurring_interval < 1) {
-            throw new RecurringException(RecurringException.Code.RECURRING_MISSING_INTERVAL, recurring_interval);
+            throw new RecurringException(RecurringException.RECURRING_MISSING_INTERVAL, recurring_interval);
         }
         final Calendar calc = Calendar.getInstance(TimeZone.getTimeZone(calc_timezone));
         calc.setFirstDayOfWeek(first_day_of_week);
@@ -372,7 +372,7 @@ public class RecurringCalculation {
                         days[c++] = 6;
                         break;
                     default:
-                        throw new RecurringException(RecurringException.Code.UNKOWN_DAYS_VALUE, days_int[x]);
+                        throw new RecurringException(RecurringException.UNKOWN_DAYS_VALUE, days_int[x]);
                 }
                 u-=days_int[x];
             }
@@ -414,7 +414,7 @@ public class RecurringCalculation {
     private final RecurringResults calculateMonthly() throws RecurringException {
         RecurringResults rs = null;
         if (recurring_interval < 1) {
-            throw new RecurringException(RecurringException.Code.RECURRING_MISSING_INTERVAL, recurring_interval);
+            throw new RecurringException(RecurringException.RECURRING_MISSING_INTERVAL, recurring_interval);
         }
         final Calendar calc = Calendar.getInstance(TimeZone.getTimeZone(calc_timezone));
         calc.setFirstDayOfWeek(first_day_of_week);
@@ -428,10 +428,10 @@ public class RecurringCalculation {
         rs = new RecurringResults();
         
         if (day_or_type == 0) {
-            throw new RecurringException(RecurringException.Code.RECURRING_MISSING_MONTLY_INTERVAL, day_or_type);
+            throw new RecurringException(RecurringException.RECURRING_MISSING_MONTLY_INTERVAL, day_or_type);
         }
         if (monthly <= 0) {
-            throw new RecurringException(RecurringException.Code.RECURRING_MISSING_MONTLY_INTERVAL_2, monthly);
+            throw new RecurringException(RecurringException.RECURRING_MISSING_MONTLY_INTERVAL_2, monthly);
         }
         if (!contains_days) {
             if (contains_occurrence) {
@@ -486,10 +486,10 @@ public class RecurringCalculation {
                  */
             
             if (a == -1) {
-                throw new RecurringException(RecurringException.Code.RECURRING_MISSING_MONTLY_DAY, a);
+                throw new RecurringException(RecurringException.RECURRING_MISSING_MONTLY_DAY, a);
             }
             if (day_or_type < 1 || day_or_type > 5) {
-                throw new RecurringException(RecurringException.Code.RECURRING_MISSING_MONTLY_DAY_2, day_or_type);
+                throw new RecurringException(RecurringException.RECURRING_MISSING_MONTLY_DAY_2, day_or_type);
             }
             
             final Calendar helper = (Calendar) calc.clone();
@@ -613,7 +613,7 @@ public class RecurringCalculation {
     private final RecurringResults calculateYearly() throws RecurringException {
         RecurringResults rs = null;
         if (recurring_interval < 1) {
-            throw new RecurringException(RecurringException.Code.RECURRING_MISSING_INTERVAL, recurring_interval);
+            throw new RecurringException(RecurringException.RECURRING_MISSING_INTERVAL, recurring_interval);
         }
         final Calendar calc = Calendar.getInstance(TimeZone.getTimeZone(calc_timezone));
         calc.setFirstDayOfWeek(first_day_of_week);
@@ -627,7 +627,7 @@ public class RecurringCalculation {
             final int month = recurring_month;
             
             if (day_or_type == 0) {
-                throw new RecurringException(RecurringException.Code.RECURRING_MISSING_YEARLY_INTERVAL, day_or_type);
+                throw new RecurringException(RecurringException.RECURRING_MISSING_YEARLY_INTERVAL, day_or_type);
             }
             
             if (!contains_days) {
@@ -678,10 +678,10 @@ public class RecurringCalculation {
                  */
                 
                 if (a == -1) {
-                    throw new RecurringException(RecurringException.Code.RECURRING_MISSING_YEARLY_DAY, a);
+                    throw new RecurringException(RecurringException.RECURRING_MISSING_YEARLY_DAY, a);
                 }
                 if (day_or_type < 1 || day_or_type > 5) {
-                    throw new RecurringException(RecurringException.Code.RECURRING_MISSING_YEARLY_TYPE, day_or_type);
+                    throw new RecurringException(RecurringException.RECURRING_MISSING_YEARLY_TYPE, day_or_type);
                 }
                 
                 final Calendar helper = (Calendar) calc.clone();
@@ -833,7 +833,7 @@ public class RecurringCalculation {
                 ret = CalendarObject.WEEKENDDAY;
                 break;
             default:
-                throw new RecurringException(RecurringException.Code.UNKOWN_DAYS_VALUE, cd);
+                throw new RecurringException(RecurringException.UNKOWN_DAYS_VALUE, cd);
         }
         return ret;
     }
