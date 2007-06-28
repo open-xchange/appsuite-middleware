@@ -15,6 +15,7 @@ public class AppointmentWebdavSuite extends TestSuite{
 		tests.addTestSuite( NewTest.class );
 		tests.addTestSuite( UpdateTest.class );
 		tests.addTest( RecurrenceTestSuite.suite() );
+		tests.addTest( AppointmentBugTestSuite.suite() );
 		
 		return tests;
 	}
