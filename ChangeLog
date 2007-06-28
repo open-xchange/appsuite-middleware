@@ -1,3 +1,10 @@
+* 2007-06-28 - martin.kauss@open-xchange.com
+
+ - Removed enum from recurring API. The API can now be used with Java 1.4.
+
+ - Fixed bug #8196. If the owner deleted his reminder in Outlook, a participant
+   got a reminder at start time. This has been fixed.
+
 * 2007-06-27 - thorben.betten@open-xchange.com
 
  - Collecting multiple requests to store message flags which delivers a
