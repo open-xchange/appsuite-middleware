@@ -5,6 +5,12 @@
  - Fixed bug #8196. If the owner deleted his reminder in Outlook, a participant
    got a reminder at start time. This has been fixed.
 
+ - Fixed bug #7734. If an appointment was moved to another time, the reminder
+   was not re-calculated. This has been fixed.
+
+ - Fixed bug #7273. The confirm state was not changed if an appointment was 
+   moved to a different time. Now the confirm state is set to NONE.
+
 * 2007-06-27 - thorben.betten@open-xchange.com
 
  - Collecting multiple requests to store message flags which delivers a

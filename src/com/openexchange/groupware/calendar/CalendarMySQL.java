@@ -1747,10 +1747,11 @@ class CalendarMySQL implements CalendarSqlImp {
             deleted_participants = CalendarOperation.getDeletedParticipants(old_participants, participants);
         }
         
+        final boolean time_change = CalendarCommonCollection.detectTimeChange(cdao, edao);
+        
         if (users != null) {
             Arrays.sort(users);
             Arrays.sort(old_users);
-            final boolean time_change = CalendarCommonCollection.detectTimeChange(cdao, edao);
             final Participants p[] = CalendarOperation.getModifiedUserParticipants(users, old_users, edao.getCreatedBy(), uid, time_change, cdao);
             if (p[0] != null) {
                 new_userparticipants = p[0].getUsers();
@@ -1938,7 +1939,7 @@ class CalendarMySQL implements CalendarSqlImp {
                         } else {
                             throw new OXCalendarException(OXCalendarException.Code.FOLDER_TYPE_UNRESOLVEABLE);
                         }
-
+                        
                         if (new_userparticipants[a].getAlarmMinutes() >= 0 && new_userparticipants[a].containsAlarm()) {
                             pi.setInt(6, new_userparticipants[a].getAlarmMinutes());
                         } else {
@@ -2067,10 +2068,6 @@ class CalendarMySQL implements CalendarSqlImp {
                     }
                     if (modified_userparticipants[a].getAlarmMinutes() >= 0 && modified_userparticipants[a].containsAlarm()) {
                         pu.setInt(4, modified_userparticipants[a].getAlarmMinutes());
-                    } else {
-                        pu.setNull(4, java.sql.Types.INTEGER);
-                    }
-                    if (modified_userparticipants[a].isModified() && modified_userparticipants[a].getIdentifier() == uid && modified_userparticipants[a].containsAlarm() && modified_userparticipants[a].getAlarmMinutes() >= 0) {
                         java.util.Date calc_date = null;
                         java.util.Date end_date = null;
                         if (cdao.containsStartDate()) {
@@ -2083,10 +2080,16 @@ class CalendarMySQL implements CalendarSqlImp {
                         } else {
                             end_date = edao.getEndDate();
                         }
-                        changeReminder(cdao.getObjectID(), uid, cdao.getEffectiveFolderId(), cdao.getContext(), cdao.isSequence(true), end_date, new Date(calc_date.getTime()-(modified_userparticipants[a].getAlarmMinutes() * 60000 )), CalendarOperation.UPDATE);
+                        int folder_id = modified_userparticipants[a].getPersonalFolderId();
+                        if (folder_id <= 0) {
+                            folder_id = cdao.getEffectiveFolderId();
+                        }
+                        changeReminder(cdao.getObjectID(), modified_userparticipants[a].getIdentifier(), folder_id, cdao.getContext(), cdao.isSequence(true), end_date, new Date(calc_date.getTime()-(modified_userparticipants[a].getAlarmMinutes() * 60000 )), CalendarOperation.UPDATE);
                     } else {
-                        changeReminder(cdao.getObjectID(), uid, -1, cdao.getContext(), cdao.isSequence(true), null, null, CalendarOperation.DELETE);
+                        pu.setNull(4, java.sql.Types.INTEGER);
+                        changeReminder(cdao.getObjectID(), modified_userparticipants[a].getIdentifier(), -1, cdao.getContext(), cdao.isSequence(true), null, null, CalendarOperation.DELETE);
                     }
+                    
                     pu.setInt(5, cdao.getObjectID());
                     pu.setInt(6, cid);
                     pu.setInt(7, modified_userparticipants[a].getIdentifier());
@@ -2585,7 +2588,7 @@ class CalendarMySQL implements CalendarSqlImp {
             }
         } else {
             if (rsql.existsReminder(oid, uid, Types.APPOINTMENT)) {
-                rsql.deleteReminder(oid, Types.APPOINTMENT);
+                rsql.deleteReminder(oid, uid, Types.APPOINTMENT);
             }
         }
     }

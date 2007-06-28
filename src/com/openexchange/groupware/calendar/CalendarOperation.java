@@ -1022,12 +1022,30 @@ public class CalendarOperation implements SearchIterator {
                             } else {
                                 np[a].setAlarmMinutes(-1);
                             }
-                            np[a].setConfirm(op[bs].getConfirm());
-                            np[a].setConfirmMessage(op[bs].getConfirmMessage());
+                            if (!time_change) {
+                                np[a].setConfirm(op[bs].getConfirm());
+                                np[a].setConfirmMessage(null);
+                            } else {
+                                np[a].setConfirm(CalendarDataObject.NONE);
+                                np[a].setConfirmMessage(op[bs].getConfirmMessage());                                
+                            }
                             np[a].setPersonalFolderId(op[bs].getPersonalFolderId());
                             if (p[1] == null) {
                                 p[1] = new Participants(); // modified
                             }
+                            p[1].add(np[a]);
+                        } else if (time_change) {
+                            if (p[1] == null) {
+                                p[1] = new Participants(); // modified
+                            }
+                            if (op[bs].containsAlarm()) {
+                                np[a].setAlarmMinutes(op[bs].getAlarmMinutes());
+                            } else {
+                                np[a].setAlarmMinutes(-1);
+                            }                            
+                            np[a].setConfirm(CalendarDataObject.NONE);
+                            np[a].setConfirmMessage(op[bs].getConfirmMessage());                              
+                            np[a].setPersonalFolderId(op[bs].getPersonalFolderId());
                             p[1].add(np[a]);
                         }
                     }
