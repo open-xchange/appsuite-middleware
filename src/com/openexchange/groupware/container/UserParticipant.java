@@ -66,7 +66,7 @@ public class UserParticipant implements Participant, Comparable {
 	
 	private int pfid = NO_PFID;
 	
-	private int alarmMinutes = 0;
+	private int alarmMinutes = -1;
 	
 	private Date alarmDate = null;
 	

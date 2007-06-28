@@ -1751,7 +1751,7 @@ class CalendarMySQL implements CalendarSqlImp {
             Arrays.sort(users);
             Arrays.sort(old_users);
             final boolean time_change = CalendarCommonCollection.detectTimeChange(cdao, edao);
-            final Participants p[] = CalendarOperation.getModifiedUserParticipants(users, old_users, edao.getCreatedBy(), uid, cdao.getFolderMoveAction(), time_change, cdao.getContext(), cdao.getObjectID());
+            final Participants p[] = CalendarOperation.getModifiedUserParticipants(users, old_users, edao.getCreatedBy(), uid, time_change, cdao);
             if (p[0] != null) {
                 new_userparticipants = p[0].getUsers();
                 if (new_userparticipants != null) {
@@ -1938,8 +1938,13 @@ class CalendarMySQL implements CalendarSqlImp {
                         } else {
                             throw new OXCalendarException(OXCalendarException.Code.FOLDER_TYPE_UNRESOLVEABLE);
                         }
+
+                        if (new_userparticipants[a].getAlarmMinutes() >= 0 && new_userparticipants[a].containsAlarm()) {
+                            pi.setInt(6, new_userparticipants[a].getAlarmMinutes());
+                        } else {
+                            pi.setNull(6, java.sql.Types.INTEGER);
+                        }
                         
-                        pi.setInt(6, new_userparticipants[a].getAlarmMinutes());
                         pi.setInt(7, cid);
                         CalendarCommonCollection.checkUserParticipantObject(new_userparticipants[a], cdao.getFolderType());
                         pi.addBatch();

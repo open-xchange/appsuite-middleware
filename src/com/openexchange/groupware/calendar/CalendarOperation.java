@@ -947,7 +947,7 @@ public class CalendarOperation implements SearchIterator {
         return p.getList();
     }
     
-    static final Participants[] getModifiedUserParticipants(final UserParticipant np[], final UserParticipant op[], final int owner, final int uid, final int move_action, final boolean time_change, Context c, final int oid) throws OXPermissionException {
+    static final Participants[] getModifiedUserParticipants(final UserParticipant np[], final UserParticipant op[], final int owner, final int uid, final boolean time_change, final CalendarDataObject cdao) throws OXPermissionException {
         Participants p[] = new Participants[2];
         for (int a = 0; a < np.length; a++ ) {
             int bs = Arrays.binarySearch(op, np[a]);
@@ -957,17 +957,20 @@ public class CalendarOperation implements SearchIterator {
                 }
                 p[0].add(np[a]);
             } else {
-                if (move_action == NO_MOVE_ACTION || move_action == PRIVATE_CURRENT_PARTICIPANT_ONLY) {
-                    if (owner == uid || uid == np[a].getIdentifier()) { // only the owner or the current user can change this object(s)
+                if (cdao.getFolderMoveAction() == NO_MOVE_ACTION || cdao.getFolderMoveAction() == PRIVATE_CURRENT_PARTICIPANT_ONLY) {
+                    if (uid == np[a].getIdentifier()) { // only the owner or the current user can change this object(s)
                         if (np[a].getIdentifier() == op[bs].getIdentifier() ||
-                                (move_action == PRIVATE_CURRENT_PARTICIPANT_ONLY &&
+                                (cdao.getFolderMoveAction() == PRIVATE_CURRENT_PARTICIPANT_ONLY &&
                                 uid == np[a].getIdentifier())) {
-                            if (np[a].containsAlarm() || np[a].containsConfirm() || np[a].containsConfirmMessage()) {
+                            if (np[a].containsAlarm() || np[a].containsConfirm() || np[a].containsConfirmMessage() || cdao.containsAlarm()) {
                                 if (p[1] == null) {
                                     p[1] = new Participants(); // modified
                                 }
                                 np[a].setIsModified(false);
-                                if (!np[a].containsAlarm() && CalendarCommonCollection.existsReminder(c, oid, uid)) {
+                                if (cdao.containsAlarm() && CalendarCommonCollection.existsReminder(cdao.getContext(), cdao.getObjectID(), uid)) {
+                                    np[a].setIsModified(true);
+                                    np[a].setAlarmMinutes(cdao.getAlarm());
+                                } else if (!np[a].containsAlarm() && CalendarCommonCollection.existsReminder(cdao.getContext(), cdao.getObjectID(), uid)) {
                                     np[a].setIsModified(true);
                                     np[a].setAlarmMinutes(op[bs].getAlarmMinutes());
                                 }
@@ -982,12 +985,12 @@ public class CalendarOperation implements SearchIterator {
                                 if (np[a].getPersonalFolderId() <= 0 && op[bs].getPersonalFolderId() > 0) {
                                     np[a].setPersonalFolderId(op[bs].getPersonalFolderId());
                                 }
-                                if (move_action != NO_MOVE_ACTION) {
+                                if (cdao.getFolderMoveAction() != NO_MOVE_ACTION) {
                                     p[1].add(np[a]);
                                 } else if (np[a].isModified()) {
                                     p[1].add(np[a]);
                                 }
-                            } else if (move_action == PRIVATE_CURRENT_PARTICIPANT_ONLY) {
+                            } else if (cdao.getFolderMoveAction() == PRIVATE_CURRENT_PARTICIPANT_ONLY) {
                                 if (p[1] == null) {
                                     p[1] = new Participants(); // modified
                                 }
@@ -1014,8 +1017,11 @@ public class CalendarOperation implements SearchIterator {
                             
                             //LOG.error("The current user ("+uid+") does not have the appropriate permissions to modify other participant ("+np[a].getIdentifier()+") properties");
                             //throw new OXPermissionException("The current user does not have the appropriate permissions to modify other participant properties");
-                            
-                            np[a].setAlarmMinutes(op[bs].getAlarmMinutes());
+                            if (op[bs].containsAlarm()) {
+                                np[a].setAlarmMinutes(op[bs].getAlarmMinutes());
+                            } else {
+                                np[a].setAlarmMinutes(-1);
+                            }
                             np[a].setConfirm(op[bs].getConfirm());
                             np[a].setConfirmMessage(op[bs].getConfirmMessage());
                             np[a].setPersonalFolderId(op[bs].getPersonalFolderId());
@@ -1025,12 +1031,12 @@ public class CalendarOperation implements SearchIterator {
                             p[1].add(np[a]);
                         }
                     }
-                } else if (move_action == PRIVATE_ALL_PARTICIPANTS) {
+                } else if (cdao.getFolderMoveAction() == PRIVATE_ALL_PARTICIPANTS) {
                     if (p[1] == null) {
                         p[1] = new Participants(); // modified
                     }
                     p[1].add(np[a]);
-                } else if (move_action == PUBLIC_ALL_PARTICIPANTS) {
+                } else if (cdao.getFolderMoveAction() == PUBLIC_ALL_PARTICIPANTS) {
                     if (p[1] == null) {
                         p[1] = new Participants(); // modified
                     }
