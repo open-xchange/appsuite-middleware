@@ -50,6 +50,8 @@ public class NewTest extends AppointmentTest {
 		appointmentObj.setAlarm(45);
 		int objectId = insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
 		appointmentObj.setObjectID(objectId);
+		appointmentObj.setAlarmFlag(true);
+		
 		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
 		compareObject(appointmentObj, loadAppointment);
 		
