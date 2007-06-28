@@ -63,7 +63,7 @@ public class CalendarTest extends TestCase {
     
     private static boolean do_not_delete = false;
     
-    static int cols[] = new int[] { AppointmentObject.TITLE, AppointmentObject.RECURRENCE_ID, AppointmentObject.RECURRENCE_POSITION, AppointmentObject.OBJECT_ID, AppointmentObject.FOLDER_ID, AppointmentObject.USERS };
+    static int cols[] = new int[] { AppointmentObject.START_DATE, AppointmentObject.END_DATE, AppointmentObject.TITLE, AppointmentObject.RECURRENCE_ID, AppointmentObject.RECURRENCE_POSITION, AppointmentObject.OBJECT_ID, AppointmentObject.FOLDER_ID, AppointmentObject.USERS, AppointmentObject.FULL_TIME };
     
     protected void setUp() throws Exception {        
         super.setUp();
@@ -1685,5 +1685,134 @@ public class CalendarTest extends TestCase {
    
         
     }
+    
+    public void testSetAlarmAndConfirmStateWithParticipantsAndChangeTime() throws Exception {
+        String user2 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant3", "");        
+        int userid2 = resolveUser(user2);        
+        int fid = getCalendarDefaultFolderForUser(userid, getContext());
+        int fid2 = getCalendarDefaultFolderForUser(userid2, getContext());
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestIdentifier");
+        SessionObject so2 = SessionObjectWrapper.createSessionObject(userid2, getContext().getContextId(), "myTestIdentifier");
+        
+        CalendarDataObject cdao = new CalendarDataObject();
+        cdao.setContext(so.getContext());
+        cdao.setParentFolderID(fid);
+        cdao.setTitle("testSetAlarmAndConfirmStateWithParticipantsAndChangeTime");
+        cdao.setIgnoreConflicts(true);
+        CalendarTest.fillDatesInDao(cdao);
+        
+        UserParticipant userA = new UserParticipant();
+        userA.setIdentifier(userid);
+        userA.setAlarmMinutes(15);
+       
+        UserParticipant userB = new UserParticipant();
+        userB.setIdentifier(userid2);        
+        
+        cdao.setUsers(new UserParticipant[] { userA, userB });        
+        
+        CalendarSql csql = new CalendarSql(so);
+        CalendarSql csql2 = new CalendarSql(so2);
+        
+        csql.insertAppointmentObject(cdao);        
+        int object_id = cdao.getObjectID();                
+        
+        CalendarDataObject update_user2 = csql2.getObjectById(object_id, fid2);
+        
+        update_user2.setContext(getContext());
+        update_user2.setIgnoreConflicts(true);
+        update_user2.setAlarm(30);
+        
+        csql2.updateAppointmentObject(update_user2, fid2, cdao.getLastModified());
+        
+        
+        CalendarDataObject testobject = csql.getObjectById(object_id, fid);
+        
+        SearchIterator si = csql.getModifiedAppointmentsInFolder(fid, cols, cdao.getLastModified());
+        boolean found = false;
+        while (si.hasNext()) {
+            CalendarDataObject tdao = (CalendarDataObject)si.next();
+            if (tdao.getObjectID() == object_id) {
+                found = true;
+                assertTrue("Check that userA has an alarm set in the cdao", tdao.containsAlarm());
+                assertEquals("Check that we got the correct reminder", 15, tdao.getAlarm());                 
+            }
+        }
+        assertTrue("Found our object (userA)", found);        
+        
+        SearchIterator si2 = csql2.getModifiedAppointmentsInFolder(fid2, cols, cdao.getLastModified());
+        found = false;
+        while (si2.hasNext()) {
+            CalendarDataObject tdao = (CalendarDataObject)si2.next();
+            if (tdao.getObjectID() == object_id) {
+                found = true;
+                assertTrue("Check that userB has an alarm set in the cdao", tdao.containsAlarm());  
+                assertEquals("Check that we got the correct reminder", 30, tdao.getAlarm());
+            }
+        }
+        assertTrue("Found our object (userB)", found); 
+        
+        
+        CalendarDataObject update_with_time_change = (CalendarDataObject) testobject.clone();
+        update_with_time_change.setContext(getContext());
+        update_with_time_change.setIgnoreConflicts(true);
+        update_with_time_change.setObjectID(object_id);
+        
+        Date test_date = new Date(testobject.getStartDate().getTime()+3600000);
+        
+        update_with_time_change.setStartDate(test_date);
+        update_with_time_change.setEndDate(new Date(testobject.getEndDate().getTime()+3600000));
+        
+        csql.updateAppointmentObject(update_with_time_change, fid, testobject.getLastModified());        
+        
+        
+        si = csql.getModifiedAppointmentsInFolder(fid, cols, cdao.getLastModified());
+        found = false;
+        while (si.hasNext()) {
+            CalendarDataObject tdao = (CalendarDataObject)si.next();
+            if (tdao.getObjectID() == object_id) {
+                found = true;
+                assertTrue("Check that userA has an alarm set in the cdao", tdao.containsAlarm());
+                assertEquals("Check that we got the correct reminder", 15, tdao.getAlarm());                 
+            }
+        }
+        assertTrue("Found our object (userA)", found);        
+        
+        si2 = csql2.getModifiedAppointmentsInFolder(fid2, cols, cdao.getLastModified());
+        found = false;
+        while (si2.hasNext()) {
+            CalendarDataObject tdao = (CalendarDataObject)si2.next();
+            if (tdao.getObjectID() == object_id) {
+                found = true;
+                assertTrue("Check that userB has an alarm set in the cdao", tdao.containsAlarm());  
+                assertEquals("Check that we got the correct reminder", 30, tdao.getAlarm());
+                UserParticipant up_test[] = tdao.getUsers();
+                for (int a = 0; a < up_test.length; a++) {
+                    if (up_test[a].getIdentifier() == userid2) {
+                        assertEquals("Check Confirm State", CalendarDataObject.NONE, up_test[a].getConfirm());
+                        ReminderHandler rh = new ReminderHandler(getContext());
+                        ReminderObject ro = rh.loadReminder(object_id, userid2, Types.APPOINTMENT);
+                        Date check_date = ro.getDate();
+                        assertEquals("Check correct Alarm", new Date(test_date.getTime()-(30*60000)), check_date);                        
+                    } else if (up_test[a].getIdentifier() == userid) {
+                        assertEquals("Check Confirm State", CalendarDataObject.NONE, up_test[a].getConfirm());
+                        ReminderHandler rh = new ReminderHandler(getContext());
+                        ReminderObject ro = rh.loadReminder(object_id, userid, Types.APPOINTMENT);
+                        Date check_date = ro.getDate();
+                        assertEquals("Check correct Alarm", new Date(test_date.getTime()-(15*60000)), check_date);                       
+                    }
+                }
+                
+            }
+        }
+        assertTrue("Found our object (userB)", found);         
+        
+        CalendarDataObject test_fid = csql.getObjectById(object_id, fid);
+        assertEquals("Check folder for userA", fid, test_fid.getParentFolderID());
+        
+        CalendarDataObject test_fid2 = csql2.getObjectById(object_id, fid2);
+        assertEquals("Check folder for userB", fid2, test_fid2.getParentFolderID());
+        
+    }
+    
     
 }
