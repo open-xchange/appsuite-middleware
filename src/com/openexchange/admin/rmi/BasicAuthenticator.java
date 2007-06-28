@@ -101,6 +101,15 @@ public class BasicAuthenticator {
     }
 
     /**
+     * Remove cached admin authdata from auth cache
+     * 
+     * @param ctx
+     */
+    public void removeFromAuthCache(Context ctx) {
+       ClientAdminThread.cache.removeAdminCredentials(ctx); 
+    }
+    
+    /**
      * 
      * Authenticates ONLY the context admin!
      * This method also validates the Context object data!

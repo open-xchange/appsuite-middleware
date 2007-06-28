@@ -210,6 +210,15 @@ public class AdminCache {
 //       }
     }
 
+    /**
+     * @param ctx
+     */
+    public final void removeAdminCredentials(final Context ctx) {
+        if( this.adminCredentialsCache.contains(ctx) ) {
+            this.adminCredentialsCache.remove(ctx);
+        }
+    }
+    
     public final synchronized boolean isLockdb() {
         return lockdb;
     }
