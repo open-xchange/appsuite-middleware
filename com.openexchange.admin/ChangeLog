@@ -1,6 +1,6 @@
 * 2007-06-27 - manuel.kraft@open-xchange.com
 
-  - Bugfix ID#8122 	RMI Authentication must be able to be switched off! See AdminDaemon.properties for details!
+  - Bugfix ID#8122 	RMI Authentication must be able to be switched off!
 
 * 2007-06-20 - choeger@open-xchange.com
 
