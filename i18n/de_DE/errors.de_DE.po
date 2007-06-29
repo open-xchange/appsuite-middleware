@@ -729,14 +729,77 @@
 # Antje Faber, 2007.
 # Antje Faber, 2007.
 # Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER.
 # Antje Faber, 2007.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: errors.de_DE\n"
+"Project-Id-Version: errors\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2007-05-21 12:44+0200\n"
+"PO-Revision-Date: 2007-06-29 15:12+0200\n"
 "Last-Translator: Antje Faber\n"
 "Language-Team:  <de@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -926,6 +989,11 @@ msgstr "SQL-Fehler beim Erstellen der Tabelle 'version': %1$s."
 msgid "An SQL error occurred while performing task CreateTableVersion: %1$s."
 msgstr "SQL-Fehler beim Ausführen der Aufgabe CreateTableVersion: %1$s."
 
+msgid ""
+"An SQL error occurred while performing task DelFolderTreeTableUpdateTask: %1"
+"$s."
+msgstr "SQL-Fehler beim Ausführen der Aufgabe DelFolderTreeTableUpdateTask: %1$s."
+
 msgid "An SQL error occurred while performing task PasswordMechUpdateTask: %1$s."
 msgstr "SQL-Fehler beim Ausführen der Aufgabe PasswordMechUpdateTask: %1$s."
 
@@ -960,11 +1028,21 @@ msgstr ""
 "Attribut \"%s\" ist nicht in der FolderObject-Instanz %s im Kontext %s "
 "enthalten"
 
-msgid "Bad JSON value %s in key %s"
-msgstr "Fehlerhafter JSON-Wert %s in Key %s"
+msgid "Bad value %s in parameter %s"
+msgstr "Fehlerhafter Wert %s in Parameter %s"
 
 msgid "Both %s and %s must not be present in message's JSON representation"
 msgstr "Weder %s noch %s dürfen in der JSON-Darstellung der Nachricht enthalten sein"
+
+msgid ""
+"Broken CSV file: Lines have different number of cells, line #1 has %d, line #"
+"%d has %d. Is this really a CSV file?"
+msgstr ""
+"Ungültige CSV-Datei: Zeilen haben unterschiedliche Zellenanzahl, Zeile #1 "
+"hat %d, Zeile #%d hat %d. Ist dies wirklich eine CSV-Datei?"
+
+msgid "Broken file uploaded: %s"
+msgstr "Kaputte Datei hochgeladen: %s"
 
 msgid "Cache %s could not be initialized due to following error: %s"
 msgstr "Cache %s konnte aufgrund folgenden Fehlers nicht initialisiert werden: %s"
@@ -976,6 +1054,12 @@ msgid "Caller does not allow to fetch a connection from pool in context %s"
 msgstr ""
 "Aufrufprogramm verbietet das Auschecken einer Verbindung vom Pool im Kontext "
 "%s"
+
+msgid "Can only handle one file, not %s"
+msgstr "Es kann nur eine Datei verarbeitet werden, nicht %s"
+
+msgid "Can only import into one folder at a time."
+msgstr "Import immer nur für einen Ordner möglich."
 
 msgid "Cannot add external participant without email address."
 msgstr "Externer Teilnehmer ohne E-Mail-Adresse kann nicht hinzugefügt werden"
@@ -1011,6 +1095,12 @@ msgstr ""
 
 msgid "Cannot decrease number of attachments below zero."
 msgstr "Anzahl der Anlagen kann nicht weniger Null sein"
+
+msgid "Cannot find an exporter for folder %s to format %s"
+msgstr "Kein Exporter für Ordner %s nach Format %s gefunden"
+
+msgid "Cannot find an importer for format %s into folders %s"
+msgstr "Kein Importer für Format %s in Ordner %s gefunden"
 
 msgid "Cannot find context %d."
 msgstr "Kontext %d konnte nicht gefunden werden"
@@ -1063,6 +1153,11 @@ msgstr "Verbindung zur Datenbank kann nicht hergestellt werden"
 msgid "Cannot get information for pool %d."
 msgstr "Information für Pool %d kann nicht abgerufen werden"
 
+msgid "Cannot import this kind of data. Use method canImport() first."
+msgstr ""
+"Dieser Datentyp kann nicht importiert werden. Bitte zuerst Methode canImport"
+"() verwenden."
+
 msgid "Cannot instanciate class %1$s."
 msgstr "Anlegen von Instanzen für Klasse %1$s nicht möglich"
 
@@ -1075,6 +1170,9 @@ msgstr "Anlegen von Instanzen für die Updater-Implementation %1$s nicht möglic
 msgid "Cannot load class \"%s\"."
 msgstr "Klasse \"%s\" kann nicht geladen werden"
 
+msgid "Cannot load property file %s due to following exception: %s"
+msgstr "Property-Datei %s konnte aufgrund folgenden Fehlers nicht geladen werden: %s"
+
 msgid "Cannot pre-fetch results."
 msgstr "Ergebnisse können nicht vorab geholt werden"
 
@@ -1086,6 +1184,9 @@ msgstr "Kein Zugriff auf Dateispeicher. Dokumente konnten nicht entfernt werden.
 
 msgid "Cannot read file \"%s\"."
 msgstr "Datei \"%s\" kann nicht gelesen werden"
+
+msgid "Cannot read given InputStream."
+msgstr "Angegebener InputStream kann nicht gelesen werden."
 
 msgid ""
 "Cannot remove file. Database and file store are probably inconsistent. "
@@ -1112,6 +1213,12 @@ msgstr "Event kann nicht an das Event-System geschickt werden"
 
 msgid "Cannot set schema in database connection."
 msgstr "Setzen des Schemas in Datenbankverbindung fehlgeschlagen"
+
+msgid "Cannot translate id=%d to a constant from FolderObject."
+msgstr "Übersetzen der id=%d in eine Konstante aus FolderObject fehlgeschlagen"
+
+msgid "Cannot translate id=%d to a constant from Types."
+msgstr "Übersetzen der id=%d in eine Konstante aus Types fehlgeschlagen"
 
 msgid ""
 "Changes done to the object this attachment was added to could not be undone. "
@@ -1184,8 +1291,19 @@ msgstr "Zugriff auf Dateispeicher fehlgeschlagen"
 msgid "Could not bind connection to local port %s"
 msgstr "Verbindung konnte nicht an lokalen Port %s angebunden werden"
 
+msgid "Could not convert given String %s to a date."
+msgstr "Angegebener String %s kann nicht in ein Datum konvertiert werden."
+
+msgid "Could not convert given object %s to a date when setting %s."
+msgstr ""
+"Beim Setzen von %s konnte das angegebene Objekt %s nicht in ein Datum "
+"konvertiert werden."
+
 msgid "Could not create a PartModifier instance from name %s"
 msgstr "PartModifier-Instanz konnte nicht aus dem Namen %s erstellt werden"
+
+msgid "Could not create folderId from String %s"
+msgstr "Erstellen der folderId aus String %s fehlgeschlagen"
 
 msgid "Could not delete DocumentMetadata %d. Please try again."
 msgstr "DocumentMetadata %d konnte nicht gelöscht werden. Bitte erneut versuchen."
@@ -1201,6 +1319,12 @@ msgstr ""
 "Datei konnte nicht aus Dateispeicher gelöscht werden. Dateispeicher: %s "
 "Kontext: %s"
 
+msgid "Could not encode as UTF-8"
+msgstr "Kodierung als UTF-8 fehlgeschlagen"
+
+msgid "Could not export the folder %s in the format %s."
+msgstr "Exportieren des Ordners %s in das Format %s fehlgeschlagen"
+
 msgid ""
 "Could not fetch result from result set. Probably the database may be busy or "
 "not running. Please try again."
@@ -1215,17 +1339,35 @@ msgstr ""
 "Anlage mit der file_id %s konnte nicht gefunden werden. Entweder die Datei "
 "ist verwaist oder gehört zu einem anderen Modul."
 
+msgid "Could not find the following fields %s"
+msgstr "Folgende Felder sind nicht vorhanden: %s"
+
 msgid "Could not generate new ID."
 msgstr "Neue ID konnte nicht generiert werden"
 
 msgid "Could not get file store location."
 msgstr "Dateispeicher kann nicht gefunden werden"
 
+msgid "Could not import into the folder %s."
+msgstr "Import in den Ordner %s fehlgeschlagen"
+
 msgid "Could not iterate result"
 msgstr "Ergebnis kann nicht iteriert werden"
 
+msgid "Could not load contacts"
+msgstr "Laden der Kontakte fehlgeschlagen"
+
 msgid "Could not load documents to check the permissions"
 msgstr "Dokumente konnten nicht zum Prüfen der Berechtigungen geladen werden"
+
+msgid "Could not load folder %s"
+msgstr "Laden des Ordners %s fehlgeschlagen"
+
+msgid "Could not read InputStream as String"
+msgstr "Lesen des InputStream als String fehlgeschlagen"
+
+msgid "Could not recognize format of the following data: %s"
+msgstr "Unbekanntes Format für folgende Daten: %s"
 
 msgid "Could not remove file from file store."
 msgstr "Datei konnte nicht aus Dateispeicher entfernt werden"
@@ -1239,11 +1381,28 @@ msgstr "Datei konnte nicht geholt werden: %s"
 msgid "Could not save file to the file store."
 msgstr "Datei konnte nicht in Dateispeicher gespeichert werden"
 
+msgid "Could not send results of importing process."
+msgstr "Ergebnis des Import-Prozesses konnte nicht gesendet werden."
+
+msgid "Could not translate a single column title. Is this a valid CSV file?"
+msgstr "Spaltentitel konnten nicht übersetzt werden. Ist dies eine gültige CSV-Datei?"
+
+msgid "Could not translate a single field of information, did not insert entry %s."
+msgstr ""
+"Informationsfelder konnten nicht übersetzt werden. Eintrag %s konnte nicht "
+"vorgenommen werden."
+
+msgid "Could not use UTF-8 encoding."
+msgstr "Verwenden der UTF-8-Kodierung fehlgeschlagen"
+
 msgid "Couldn't reach the filestore: %s"
 msgstr "Kein Zugriff auf Dateispeicher: %s"
 
 msgid "Counting tasks did not return a result."
 msgstr "Zählen der Aufgaben gab kein Ergebnis zurück"
+
+msgid "Cowardly refusing to import an entry flagged as confidential."
+msgstr "Importieren eines als vertraulich gekennzeichneten Eintrags verweigert"
 
 msgid "Creator cannot be participant."
 msgstr "Der Ersteller kann kein Teilnehmer sein"
@@ -1328,6 +1487,9 @@ msgstr "Entweder Key %s oder Key %s fehlt in der JSON-Darstellung der Nachricht"
 
 msgid "Empty SEND_BODY_CHUNK package MUST NOT be sent"
 msgstr "Leeres SEND_BODY_CHUNK-Paket DARF NICHT geschickt werden"
+
+msgid "Empty file uploaded."
+msgstr "Leere Datei hochgeladen"
 
 msgid "Encoding %s cannot be used."
 msgstr "Die Kodierung %s kann nicht verwendet werden"
@@ -1423,7 +1585,9 @@ msgid "Fatal error. (YEARLY2) Missing or wrong value day : %d"
 msgstr "Fataler Fehler. (JÄHRLICH2) Fehlender oder falscher Wert für Tag : %d"
 
 msgid "Fatal error. An database update exception occurred."
-msgstr "Fataler Fehler. Es trat ein Ausnahmefehler beim Aktualisieren der Datenbank auf."
+msgstr ""
+"Fataler Fehler. Es trat ein Ausnahmefehler beim Aktualisieren der Datenbank "
+"auf."
 
 msgid "Fatal error. You are trying to create a new recurring from an exception!"
 msgstr ""
@@ -1534,6 +1698,11 @@ msgstr "Der Ordner ist nicht vom Typ Kalender"
 msgid "Folder not found: %s"
 msgstr "Ordner nicht gefunden: %s"
 
+msgid "Folder owner's administer permission must not be removed from folder %s"
+msgstr ""
+"Die Admin-Rechte für den Besitzer des Ordners dürfen nicht aus dem Ordner %s "
+"entfernt werden."
+
 msgid "Folder read-only check failed"
 msgstr "Nur-Leseprüfung für Ordner fehlgeschlagen"
 
@@ -1626,6 +1795,9 @@ msgstr ""
 
 msgid "Illegal Argument: Document %d contains no file"
 msgstr "Unzulässiges Argument: Dokument %d enthält keine Datei"
+
+msgid "Illegal state: Found data after presumed last line."
+msgstr "Ungültiger Zustand: Daten nach letzter Zeile gefunden"
 
 msgid "Illegal write attempt: %s"
 msgstr "Unzulässiger Schreibversuch: %s"
@@ -1766,6 +1938,9 @@ msgstr "Nachricht konnte nicht in den Mülleimer verschoben werden. Quota übers
 msgid "Message could not be sent"
 msgstr "Nachricht konnte nicht gesendet werden"
 
+msgid "Message could not be sent because it is too large"
+msgstr "Nachricht ist zu groß. Sie konnte nicht gesendet werden."
+
 msgid "Message could not be sent to the following recipients: %s"
 msgstr "Senden der Nachricht an folgende Empfänger fehlgeschlagen: %s"
 
@@ -1792,6 +1967,11 @@ msgstr "Fehlender %s-Ordner für Mail-Verschiebeaktion"
 
 msgid "Missing SpellCheckConfig object."
 msgstr "Fehlendes SpellCheckConfig-Objekt."
+
+msgid "Missing ability to encode or decode UTF-8 on server, cannot read file."
+msgstr ""
+"UTF-8-Kodierenung bzw. -Dekodierung auf Server nicht möglich. Datei kann "
+"nicht gelesen werden. "
 
 msgid "Missing affiliation id"
 msgstr "Zugehörigkeits-ID fehlt"
@@ -1875,8 +2055,8 @@ msgstr ""
 
 msgid "Moving appointment to a public folder flaged as private is not allowed!"
 msgstr ""
-"Ein Termin mit Privatmarkierung (private flag) darf nicht in einen öffentlichen Ordner "
-"verschoben werden."
+"Ein Termin mit Privatmarkierung (private flag) darf nicht in einen "
+"öffentlichen Ordner verschoben werden."
 
 msgid "Moving items from or into shared folder %1$s (%2$d) is not allowed."
 msgstr ""
@@ -1885,6 +2065,12 @@ msgstr ""
 
 msgid "Multiple rows found."
 msgstr "Mehrere Zeilen gefunden."
+
+msgid "Need at least a ContactObject and a value to set %s"
+msgstr "Zum Setzen von %s wird mindestens ein ContactObject und ein Wert benötigt"
+
+msgid "Need at least a ContactObject to get the value of %s"
+msgstr "Zum Erhalten des Werts von %s wird mindestens ein ContactObject benötigt"
 
 msgid "No Changes found. No Update requiered. Context %1$d Object %2$d"
 msgstr ""
@@ -1902,6 +2088,9 @@ msgstr "Kein Adminrecht gefunden"
 
 msgid "No admin user found in context %s"
 msgstr "Kein Adminbenutzer im Kontext %s gefunden"
+
+msgid "No administer permission specified by user %s for folder %s"
+msgstr "Für den Benutzer %s wurden keine Admin-Rechte für den Ordner %s festgelegt."
 
 msgid "No attachment was found with id %s in message %s"
 msgstr "Keine Anlage mit der ID %s in Nachricht %s gefunden"
@@ -1930,6 +2119,11 @@ msgstr "Keine Zeile im Tabellen-Update gefunden"
 
 msgid "No send address could be found for user %s in user configuration"
 msgstr "Keine Sende-Adresse in der Benutzerkonfiguration für Benutzer %s gefunden"
+
+msgid "No subfolder creation underneath shared folder %s in context %s"
+msgstr ""
+"Kein Erstellen eines Unterordners unterhalb des freigegebenen Ordners %s im "
+"Kontext %s"
 
 msgid ""
 "Not allowed to change parent id of folder %s through an update call. Use "
@@ -1996,6 +2190,11 @@ msgstr "Aktion nicht erlaubt für einen geschlossenen SearchIterator"
 msgid "Operation not executeable on folder %s in context %s"
 msgstr "Aktion für Ordner %s im Kontext %s nicht ausführbar"
 
+msgid "Owner %s of default folder %s must keep the folder admin permission"
+msgstr ""
+"Der Eigentümer %s des Standardordners %s muss die Administrationsrechte für "
+"den Ordner behalten."
+
 msgid "Parameter %s does not match JSON key %s"
 msgstr "Der Parameter %s stimmt nicht mit dem JSON-Key %s überein"
 
@@ -2057,8 +2256,20 @@ msgstr ""
 "Prozess wurde beim Warten auf eine freie IMAP-Verbindung unterbrochen. Bitte "
 "erneut versuchen."
 
+msgid "Programming Error"
+msgstr "Programmierfehler"
+
+msgid "Programming Error - Could not import into folder %s"
+msgstr "Programmierfehler - Import in Ordner %s fehlgeschlagen"
+
+msgid "Programming Error - Folder %s"
+msgstr "Programmierfehler - Ordner %s"
+
 msgid "Property \"%s\" is not defined."
 msgstr "Eigenschaft \"%s\" nicht festgelegt"
+
+msgid "Property file %s could not be found"
+msgstr "Property-Datei %s konnte nicht gefunden werden."
 
 msgid "Public folder %s can only be moved to a public folder in context %s"
 msgstr ""
@@ -2164,6 +2375,12 @@ msgstr "Speicher bereits geschlossen: %s"
 msgid "String Parse Exception: No ending 0x00 found"
 msgstr "String Parse-Ausnahme: Keine Endung 0x00 gefunden"
 
+msgid "Subsystem down"
+msgstr "Subsystem läuft nicht"
+
+msgid "Subsystem down - Could not import into folder %s"
+msgstr "Subsystem läuft nicht - Import in Ordner %s fehlgeschlagen"
+
 msgid "System folder %s cannot be moved in context %s"
 msgstr "Der Systemordner %s kann im Kontext %s nicht verschoben werden"
 
@@ -2264,6 +2481,9 @@ msgstr "Zugriff auf Dateispeicher fehlgeschlagen"
 msgid "The folder %d is not an Infostore Folder"
 msgstr "Der Ordner %d ist kein InfoStore-Ordner"
 
+msgid "The following field(s) are too long to be imported: %s"
+msgstr "Folgende(s) Feld(er) sind zu lang für den Import: %s"
+
 msgid ""
 "The image you tried to attach is not a valid picture. It may be broken or is "
 "not a valid file."
@@ -2299,6 +2519,15 @@ msgstr "Erforderlicher Wert \"Tage\" fehlt oder ist ungültig"
 
 msgid "The required value \"interval\" is missing or wrong"
 msgstr "Erforderlicher Wert \"Intervall\" fehlt oder ist ungültig"
+
+msgid ""
+"The rights composed by user %s could not be applied to new folder %s due to "
+"missing administer right in its initial rights specified by IMAP server. The "
+"folder has been created anyway."
+msgstr ""
+"Aufgrund fehlender Administratorrechte in den vom IMAP-Server initial "
+"festgelegten Rechten konnten die vom Benutzer %s erstellten Rechte nicht auf "
+"den neuen Ordner %s angewendet werden. Der Ordner wurde dennoch erstellt."
 
 msgid "The session parameter is missing."
 msgstr "Fehlender Session-Parameter"
@@ -2527,8 +2756,8 @@ msgid ""
 msgstr ""
 "Das Kontaktfoto kann nicht skaliert werden. Es handelt sich entweder um "
 "einen nicht unterstützten Dateityp oder das Bild ist zu groß. Der MIME-Typ "
-"ist %1$s und die Bildgröße ist %2$d KB. Die maximal erlaubte Bildgröße ist %3$d "
-"KB."
+"ist %1$s und die Bildgröße ist %2$d KB. Die maximal erlaubte Bildgröße ist %3"
+"$d KB."
 
 msgid ""
 "Unable to syncronice the old contact with the new changes: Context %1$d "
@@ -2601,6 +2830,9 @@ msgstr "Unbekanntes Farb-Label: %s"
 msgid "Unknown field: %d"
 msgstr "Unbekanntes Feld: %d"
 
+msgid "Unknown format: %s"
+msgstr "Unbekanntes Format: %s"
+
 msgid "Unknown or unsupported action: %s"
 msgstr "Unbekannte oder nicht unterstützte Aktion: %s"
 
@@ -2651,8 +2883,14 @@ msgstr "Aktualisieren des Ordners %s fehlgeschlagen"
 msgid "Update process initialization failed: %1$s."
 msgstr "Initialisierung des Update-Prozesses fehlgeschlagen: %1$s."
 
+msgid "Updating database ... Try again later."
+msgstr "Ihre Datenbank wird aktualisiert ... Bitte später erneut versuchen."
+
 msgid "Upload Quota (%d) exceeded"
 msgstr "Upload-Quota (%d) überstiegen"
+
+msgid "Uploaded file is of type %s, cannot handle that"
+msgstr "Hochgeladene Datei ist vom Typ %s. Dieser kann nicht verarbeitet werden."
 
 msgid ""
 "User %s has no access on shared folder %s in context %s due to user "
@@ -2738,8 +2976,18 @@ msgstr ""
 "Der Benutzer %s darf nicht alle Unterordner des Ordners %s im Kontext %s "
 "verschieben"
 
+msgid ""
+"User %s must not grant \"create subfolder\" permission for another user on "
+"shared folder %s in context %s"
+msgstr ""
+"Benutzer %s kann anderen Benutzern im Kontext %s im freigegebenen Ordner %s "
+"keine Berechtigung zum Anlegen von Unterordner erteilen."
+
 msgid "User dictionary could not be found."
 msgstr "Das Wörterbuch des Benutzers konnte nicht gefunden werden."
+
+msgid "User input Error %s"
+msgstr "Benutzer-Eingabefehler %s"
 
 msgid "User's %s dictionary could not be loaded in context %d"
 msgstr "Das Wörterbuch %s des Benutzers konnte im Kontext %d nicht geladen werden."
@@ -2755,6 +3003,9 @@ msgstr "Wort enthält ungültige(s) Komma-Zeichen: %s"
 
 msgid "Writing the setting %1$s is not permitted."
 msgstr "Schreiben der Einstellung %1$s nicht erlaubt"
+
+msgid "Wrong client IP address."
+msgstr "Ungültige Client-IP-Adresse"
 
 msgid "Wrong filestore %1$d for context %2$d needing filestore %3$d."
 msgstr "Falscher Dateispeicher %1$d für Kontext %2$d. Benötigter Dateispeicher: %3$d"
@@ -2869,9 +3120,6 @@ msgstr "Zum Sperren eines Dokuments benötigen Sie Schreibrechte."
 
 msgid "You need write permissions to unlock a document."
 msgstr "Zum Entsperren eines Dokuments benötigen Sie Schreibrechte."
-
-msgid "Your database is currently updated. Try again later."
-msgstr "Ihre Datenbank ist derzeit aktualisiert. Bitte später erneut versuchen."
 
 msgid "Your session %s expired. Please start a new browser session."
 msgstr "Ihre Sitzung %s ist abgelaufen. Starten Sie eine neue Browser-Sitzung."
