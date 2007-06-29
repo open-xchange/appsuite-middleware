@@ -66,6 +66,7 @@ import com.openexchange.server.DBPoolingException;
 import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
 
 import java.sql.Connection;
+import java.sql.DataTruncation;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -136,6 +137,9 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             OXFolderAdminHelper.propagateGroupModification(grp_id, con, con, context_id); 
             
             con.commit();
+        }catch (final DataTruncation dt){
+            log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
+            throw AdminCache.parseDataTruncation(dt);
         } catch (final SQLException sql) {
             log.error("SQL Error", sql);
             try {
@@ -285,6 +289,9 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             changeLastModifiedOnGroup(context_id, group_id, con);
 
             con.commit();
+        }catch (final DataTruncation dt){
+            log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
+            throw AdminCache.parseDataTruncation(dt);
         } catch (final SQLException e) {
            log.error("SQL Error", e);
             try {
@@ -379,6 +386,9 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             if (log.isInfoEnabled()) {
                 log.info("Group " + groupID + " created!");
             }
+        }catch (final DataTruncation dt){
+            log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
+            throw AdminCache.parseDataTruncation(dt);
         } catch (final SQLException sql) {
             log.error("SQL Error", sql);
             try {
