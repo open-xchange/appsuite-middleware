@@ -183,7 +183,7 @@ public class OXUtilMySQLStorageCommon {
 
             con.commit();
         } catch (final ClassNotFoundException cnf) {
-            log.error("Driver not found to create database ");
+            log.error("Driver not found to create database.", cnf);
             throw new StorageException(cnf);
         } catch (final SQLException cp) {
             log.error("SQL Error", cp);

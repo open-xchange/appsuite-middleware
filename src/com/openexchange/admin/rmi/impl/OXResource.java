@@ -47,7 +47,7 @@
  *
  */
 /*
- * $Id: OXResource.java,v 1.26 2007/06/27 10:19:33 dennis Exp $
+ * $Id: OXResource.java,v 1.27 2007/06/29 17:07:42 dennis Exp $
  */
 package com.openexchange.admin.rmi.impl;
 
@@ -125,7 +125,7 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
        try {
            doAuthentication(auth,ctx);
        } catch( final InvalidDataException e) {
-           log.error(e);
+           log.error(e.getMessage(), e);
            throw e;
        }
       
@@ -169,7 +169,7 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
                throw new InvalidDataException("Invalid email address");
            }
        } catch (final InvalidDataException e2) {
-           log.error(e2);
+           log.error(e2.getMessage(), e2);
            throw e2;
        }
        
@@ -196,7 +196,7 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
                                interfacelist.add(oxresource);
                            } catch (final PluginException e) {
                                log.error("Error while calling create for plugin: " + bundlename, e);
-                               log.error("Now doing rollback for everything until now...");
+                               log.info("Now doing rollback for everything until now...");
                                for (final OXResourcePluginInterface oxresourceinterface : interfacelist) {
                                    try {
                                        oxresourceinterface.delete(ctx, res, auth);
@@ -236,7 +236,7 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
             
             doAuthentication(auth,ctx);
         } catch (final InvalidDataException e1) {
-            log.error(e1);
+            log.error(e1.getMessage(), e1);
             throw e1;
         }
         
@@ -276,7 +276,7 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
                 throw new InvalidDataException("Invalid email address");
             }
         } catch (final InvalidDataException e1) {
-            log.error(e1);
+            log.error(e1.getMessage(), e1);
             throw e1;
         }
 
@@ -325,7 +325,7 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
             
             doAuthentication(auth,ctx);
         } catch (final InvalidDataException e1) {
-            log.error(e1);
+            log.error(e1.getMessage(), e1);
             throw e1;
         }        
         
@@ -395,7 +395,7 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
             
             doAuthentication(auth,ctx);
         } catch (final InvalidDataException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw e;
         }        
         
@@ -462,7 +462,7 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
             
             doAuthentication(auth,ctx);
         } catch (final InvalidDataException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw e;
         }
         
@@ -534,7 +534,7 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
                 }
             }
         } catch (final InvalidDataException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw e;
         }
         
@@ -591,7 +591,7 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
         if (tools.schemaBeingLockedOrNeedsUpdate(ctx)) {
             final DatabaseUpdateException databaseUpdateException = new DatabaseUpdateException(
                     "Database must be updated or currently is beeing updated");
-            log.error(databaseUpdateException);
+            log.error(databaseUpdateException.getMessage(), databaseUpdateException);
             throw databaseUpdateException;
         }
     }
