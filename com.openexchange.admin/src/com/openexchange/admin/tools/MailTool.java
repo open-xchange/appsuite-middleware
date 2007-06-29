@@ -102,11 +102,11 @@ public class MailTool {
             
             msg.saveChanges();      // don't forget this
             Transport.send(msg);
-        } catch (AddressException e) {
-            log.error(e);
+        } catch (final AddressException e) {
+            log.error(e.getMessage(), e);
             throw new OXMailToolException(e.toString());
-        } catch (MessagingException e) {
-            log.error(e);
+        } catch (final MessagingException e) {
+            log.error(e.getMessage(), e);
             throw new OXMailToolException(e.toString());
         }
     }

@@ -49,12 +49,15 @@
 
 package com.openexchange.admin.rmi.dataobjects;
 
+import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+
 /**
  * @author choeger
  *
  */
 public interface AdminDataObject {
     
-    public DataObjectResponse checkMembers();
+    public void checkMembers() throws InvalidDataException;
     
+    public String getobjectName();
 }

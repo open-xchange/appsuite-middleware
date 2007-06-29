@@ -178,8 +178,9 @@ public class BasicAuthenticator {
 
     protected final void contextcheck(final Context ctx) throws InvalidCredentialsException {
         if (null == ctx || null == ctx.getIdAsInt()) {
-            log.error("Client sent invalid context data object");
-            throw new InvalidCredentialsException();
+            final InvalidCredentialsException e = new InvalidCredentialsException("Client sent invalid context data object");
+            log.error(e.getMessage(), e);
+            throw e;
         }
     }
 

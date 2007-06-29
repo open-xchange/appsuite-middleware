@@ -50,6 +50,7 @@
 package com.openexchange.admin.rmi.exceptions;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 
 /**
  * @author cutmasta Is thrown when user sends invalid data to the server. *
@@ -62,6 +63,15 @@ public class InvalidDataException extends Exception implements Serializable {
      * username for example, the new Exception must extend this exception.
      */
 
+    /**
+     * Contains the name of the object which is affected by this exception
+     */
+    private String objectname = null;
+    
+    /**
+     * Contains the fieldnames in the object (if available) which are not correct
+     */
+    private ArrayList<String> fieldnames = null;
     /**
      * For serialization
      */
@@ -96,6 +106,52 @@ public class InvalidDataException extends Exception implements Serializable {
      */
     public InvalidDataException(String message, Throwable cause) {
         super(message, cause);
+    }
+
+    /**
+     * Set the fieldname which are not correct in the object
+     * 
+     * @return
+     */
+    public final ArrayList<String> getFieldnames() {
+        return fieldnames;
+    }
+
+    /**
+     * Get the fieldnames of the object which aren't correct (maybe null if no fieldnames can be specified)
+     * 
+     * @param fieldnames
+     */
+    public final void setFieldnames(ArrayList<String> fieldnames) {
+        this.fieldnames = fieldnames;
+    }
+
+    /**
+     * Get the Name of the object which is affected by this exception
+     * 
+     * @return
+     */
+    public final String getObjectname() {
+        return objectname;
+    }
+
+    /**
+     * 
+     * 
+     * @param objectname
+     */
+    public final void setObjectname(String objectname) {
+        this.objectname = objectname;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder(super.toString());
+        if (null != fieldnames) {
+            sb.append("The following field are invalid:\n");
+            sb.append(fieldnames);
+        }        
+        return super.toString();
     }
 
 }
