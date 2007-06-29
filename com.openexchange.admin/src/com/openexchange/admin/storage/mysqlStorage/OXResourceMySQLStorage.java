@@ -49,11 +49,14 @@
 package com.openexchange.admin.storage.mysqlStorage;
 
 import java.sql.Connection;
+import java.sql.DataTruncation;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Arrays;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -69,6 +72,7 @@ import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.server.DBPoolingException;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * @author d7
@@ -171,6 +175,9 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
                 changeLastModified(resource_id, ctx, con);
             }
             con.commit();
+        }catch (final DataTruncation dt){
+            log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
+            throw AdminCache.parseDataTruncation(dt);
         } catch (final SQLException e) {
             log.error("SQL Error", e);
             try {
@@ -266,6 +273,9 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
 
             con.commit();
             return resID;
+        }catch (final DataTruncation dt){
+            log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
+            throw AdminCache.parseDataTruncation(dt);
         } catch (final SQLException e) {
             log.error("SQL Error", e);
             try {
@@ -619,6 +629,9 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             del_st.setString(7, disp);
             del_st.setInt(8, available);
             del_st.executeUpdate();
+        }catch (final DataTruncation dt){
+            log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
+            throw AdminCache.parseDataTruncation(dt);
         } catch (final SQLException e) {
             log.error("SQL Error", e);
             try {
