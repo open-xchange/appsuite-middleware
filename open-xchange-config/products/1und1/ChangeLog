@@ -1,3 +1,9 @@
+* 2007-06-28 - marcus.klein@open-xchange.com
+
+  - Bugfix #8007: Partly fix. Disabled possibility to create unbound folders
+    through WebDAV XML interface. Replacing existing unbound folders in database
+    with contact folders to prevent AJAX GUI errors.
+
 * 2007-06-20 - marcus.klein@open-xchange.com
 
   - Added bind for AJP and JMX port.
