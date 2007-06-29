@@ -61,7 +61,9 @@ import java.util.List;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
+import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.OXException;
+import com.openexchange.api2.RdbContactSQLInterface;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.contact.ContactConfig;
@@ -72,7 +74,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.ContextImpl;
 import com.openexchange.groupware.contexts.ContextStorage;
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
-import com.openexchange.groupware.importexport.importers.CSVContactImporter;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.DBPoolingException;
@@ -89,7 +90,6 @@ import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
  *
  */
 public class AbstractCSVContactTest {
-
 	protected static final int[] POSSIBLE_FIELDS = {
 			DataObject.OBJECT_ID,
 			DataObject.CREATED_BY,
@@ -279,7 +279,7 @@ public class AbstractCSVContactTest {
 		userId = sessObj.getUserObject().getId();
 		folderId = createTestFolder(FolderObject.CONTACT, sessObj, "csvContactTestFolder");
 	}
-
+	
 	@AfterClass
 	public static void debrief() throws OXException {
 		deleteTestFolder(folderId);
@@ -293,6 +293,16 @@ public class AbstractCSVContactTest {
 		List <String> folders = Arrays.asList( Integer.toString(folderId) );
 		InputStream is = new ByteArrayInputStream( csv.getBytes("UTF-8") );
 		return imp.importData(sessObj, defaultFormat, is, folders, null);
+	}
+	
+	protected boolean existsEntry(int entryNumber){
+		final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj);
+		try {
+			ContactObject co = contactSql.getObjectById(entryNumber, folderId);
+			return co != null;
+		} catch (OXException e) {
+			return false;
+		}
 	}
 
 }

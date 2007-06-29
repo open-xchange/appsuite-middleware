@@ -52,6 +52,7 @@ package com.openexchange.groupware.importexport;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -66,8 +67,10 @@ import org.junit.Test;
 import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbContactSQLInterface;
+import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.groupware.importexport.importers.OutlookCSVContactImporter;
 
 public class OutlookCSVContactImportTest extends AbstractCSVContactTest{
@@ -127,7 +130,7 @@ public class OutlookCSVContactImportTest extends AbstractCSVContactTest{
 	@Test
 	public void bug7105() throws NumberFormatException, Exception {
 		List<ImportResult> results = importStuff(IMPORT_ONE+"\n"+NAME2); 
-		assertEquals("Two results?" , results.size(), 2);
+		assertEquals("Two results?" , 2 , results.size());
 		ImportResult res = results.get(1);
 		if(res.hasError()){
 			res.getException().printStackTrace();
@@ -140,6 +143,40 @@ public class OutlookCSVContactImportTest extends AbstractCSVContactTest{
 
 		//cleaning up
 		contactSql.deleteContactObject(Integer.parseInt(res.getObjectId()), Integer.parseInt(res.getFolder()), res.getDate());
+	}
+	
+	@Test
+	public void bug7552() throws NumberFormatException, Exception {
+		List<ImportResult> results = importStuff(IMPORT_HEADERS + NAME1+", "+EMAIL1+", 1.4.1981"); 
+		assertEquals("One result?" , 1, results.size());
+		ImportResult res = results.get(0);
+		if(res.hasError()){
+			res.getException().printStackTrace();
+		}
+
+		//check date set correctly though German style
+		final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj);
+		Date birthday = contactSql.getObjectById( Integer.parseInt(res.getObjectId()) , Integer.parseInt(res.getFolder()) ).getBirthday();
+		assertDateEquals( new SimpleDateFormat("dd.MM.yyyy").parse("1.4.1981") , birthday);
+
+		//cleaning up
+		contactSql.deleteContactObject(Integer.parseInt(res.getObjectId()), Integer.parseInt(res.getFolder()), res.getDate());
+	}
+	
+	@Test
+	public void bug6825_tooMuchInformation() throws ImportExportException, UnsupportedEncodingException {
+		List<ImportResult> results = importStuff(
+				IMPORT_HEADERS + 
+				"my name is definately too long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long"+
+				", "
+				+EMAIL1+
+				", 1.4.1981"); 
+		assertEquals("One result?" , 1, results.size());
+		ImportResult res = results.get(0);
+		assertTrue("Has error" , res.hasError());
+		final OXException dirk = res.getException();
+		assertEquals("Is truncation error?" , Category.TRUNCATED , dirk.getCategory());
+		assertEquals("GIVEN_NAME is too long?" , ContactField.GIVEN_NAME.getEnglishOutlookName() , dirk.getMessageArgs()[0]);
 	}
 
 	public void assertDateEquals(Date date1 , Date date2){

@@ -127,7 +127,7 @@ public class AbstractVCardTest extends AbstractAJAXTest {
 			
 			if (jsonObj.has("error")) {
 				importResult[a] = new ImportResult();
-				importResult[a].setException(new OXException("server error"));
+				importResult[a].setException(new OXException(jsonObj.getString("error")));
 			} else {
 				String objectId = jsonObj.getString("id");
 				String folder = jsonObj.getString("folder_id");

@@ -55,6 +55,7 @@ import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -66,6 +67,7 @@ import org.junit.Test;
 import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbContactSQLInterface;
+import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
@@ -85,6 +87,7 @@ public class CSVContactImportTest extends AbstractCSVContactTest {
 	
 	public String notASingleImport = "I_E-0804";
 	public String malformedCSV = "I_E-1000";
+	public String malformedDate = "CON-0600";
 	
 	//workaround for JUnit 3 runner
 	public static junit.framework.Test suite() {
@@ -218,7 +221,57 @@ public class CSVContactImportTest extends AbstractCSVContactTest {
 		ImportResult res = results.get(0);
 		assertTrue("Got bug?" , res.hasError() );
 
-		assertEquals("Caught class cast exception", "CON-0600" , res.getException().getErrorCode() );
+		assertEquals("Caught class cast exception", malformedDate , res.getException().getErrorCode() );
+	}
+	
+	@Test public void bug7109() throws ImportExportException, UnsupportedEncodingException{
+		List<ImportResult> results1 = importStuff(ContactField.GIVEN_NAME.getReadableName() + " , " + ContactField.BIRTHDAY.getReadableName() + "\n" + "Tobias Prinz , "+System.currentTimeMillis());
+		List<ImportResult> results2 = importStuff(ContactField.GIVEN_NAME.getReadableName() + " , " + ContactField.BIRTHDAY.getReadableName() + "\n" + "Tobias Prinz , 1981/04/01");
+		List<ImportResult> results3 = importStuff(ContactField.GIVEN_NAME.getReadableName() + " , " + "stupidColumnName\n" + "Tobias Prinz , 1981/04/01");
+		List<ImportResult> results4 = importStuff(ContactField.BIRTHDAY.getReadableName() + "\n1981/04/01");
+		assertEquals("One result for first attempt?" , results1.size(), 1);
+		assertEquals("One result for second attempt?" , results2.size(), 1);
+		assertEquals("One result for third attempt?" , results3.size(), 1);
+		assertEquals("One result for fourth attempt?" , results4.size(), 1);
+		
+		ImportResult tempRes = results1.get(0);
+		assertTrue("Attempt 1 has no error", tempRes.isCorrect());
+		assertTrue("Entry after attempt 1 exists?", existsEntry(Integer.parseInt(tempRes.getObjectId())));
+		
+		tempRes = results2.get(0);
+		assertTrue("Attempt 2 has error", tempRes.hasError());
+		OXException exc = tempRes.getException();
+		assertEquals("Malformed date?" , malformedDate, exc.getErrorCode());
+		
+		tempRes = results3.get(0);
+		assertTrue("Attempt 3 has error", tempRes.hasError());
+		exc = tempRes.getException();
+		assertEquals("Only a warning" , Category.WARNING , exc.getCategory());
+		assertTrue("Entry after attempt 3 exists?", existsEntry(Integer.parseInt(tempRes.getObjectId())));
+		
+		tempRes = results4.get(0);
+		assertTrue("Attempt 4 has error", tempRes.hasError());
+		exc = tempRes.getException();
+		assertEquals("Malformed date?" , malformedDate, exc.getErrorCode());
+		
+		try	{
+			importStuff("stupidColumnName, yet another stupid column name\n" + "Tobias Prinz , 1981/04/01");
+			fail("Importing without any useful column titles should fail.");
+		} catch (ImportExportException exc1){
+			assertEquals("Could not translate any column title", notASingleImport, exc1.getErrorCode());
+		}
+	}
+	
+	/*
+	 * This was listed as 6825, 7107 or 7386
+	 */
+	@Test public void bugTooMuchInformation() throws ImportExportException, UnsupportedEncodingException{
+		final List<ImportResult> results = importStuff(ContactField.GIVEN_NAME.getReadableName() + "," + ContactField.SUFFIX.getReadableName() + "\nHadschi Halef Omar, Ben Hadschi Abul Abbas Ibn Hadschi Dawuhd Ben Hadschi Abul Abbas Ibn Hadschi Dawuhd Ben Hadschi Abul Abbas Ibn Hadschi Dawuhd Ben Hadschi Abul Abbas Ibn Hadschi Dawuhd al Gossarah");
+		assertEquals("One result?" , 1, results.size());
+		ImportResult res = results.get(0);
+		OXException exc = res.getException();
+		assertEquals("Category correct?" , exc.getCategory(), Category.TRUNCATED);
+		assertEquals("Fields correct?" ,  ContactField.SUFFIX.getReadableName() , exc.getMessageArgs()[0]);
 	}
 	
 

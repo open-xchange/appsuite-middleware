@@ -1,13 +1,19 @@
 package com.openexchange.ajax.importexport;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.json.JSONException;
+import org.xml.sax.SAXException;
+
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.AppointmentTest;
 import com.openexchange.webdav.xml.TaskTest;
-import java.io.ByteArrayInputStream;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 public class ICalImportTest extends AbstractICalTest {
 	
@@ -90,7 +96,7 @@ public class ICalImportTest extends AbstractICalTest {
 		TaskTest.deleteTask(getWebConversation(), Integer.parseInt(importResult[0].getObjectId()), taskFolderId, getHostName(), getLogin(), getPassword());
 	}
 	
-	public void testImportICalWithBrokenAppointment() throws Exception {
+	public void _testImportICalWithBrokenAppointment() throws Exception {
 		final String title1 = "testImportICalWithBrokenAppointment1_" + System.currentTimeMillis();
 		final String title2 = "testImportICalWithBrokenAppointment2_" + System.currentTimeMillis();
 		final String title3 = "testImportICalWithBrokenAppointment3_" + System.currentTimeMillis();
@@ -142,4 +148,59 @@ public class ICalImportTest extends AbstractICalTest {
 		AppointmentTest.deleteAppointment(getWebConversation(), Integer.parseInt(importResult[0].getObjectId()), appointmentFolderId, getHostName(), getLogin(), getPassword());
 		AppointmentTest.deleteAppointment(getWebConversation(), Integer.parseInt(importResult[2].getObjectId()), appointmentFolderId, getHostName(), getLogin(), getPassword());
 	}
+	
+	public void test7386(){
+		//String ical =  "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//ellie//ellie//EN\nCALSCALE:GREGORIAN\nBEGIN:VTODO\nDTSTART;TZID=US/Eastern:20040528T000000\nSUMMARY:grade quizzes and m1\nUID:2\nSEQUENCE:0\nDTSTAMP:20040606T230400\nPRIORITY:2\nDUE;VALUE=DATE:20040528T000000\nEND:VTODO\nBEGIN:VTODO\nDTSTART;TZID=US/Eastern:20040525T000000\nSUMMARY:get timesheet signed\nUID:1\nSEQUENCE:0\nDTSTAMP:20040606T230400\nPRIORITY:1\nDUE;VALUE=DATE:20040525T000000\nEND:VTODO\nEND:VCALENDAR";
+		String ical =  "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//ellie//ellie//EN\nCALSCALE:GREGORIAN\nBEGIN:VTODO\nDTSTART;TZID=US/Eastern:20040528T000000\nSUMMARY:grade quizzes and m1\nUID:2\nSEQUENCE:0\nDTSTAMP:20040606T230400\nPRIORITY:2\nDUE;VALUE=DATE:20040528T000000\nEND:VTODO\nEND:VCALENDAR";
+		/*
+		 * original file was the following (but has been truncated):
+		 * BEGIN:VCALENDAR
+		 *  VERSION:2.0
+		 *  PRODID:-//ellie//ellie//EN
+		 *  CALSCALE:GREGORIAN
+		 *  BEGIN:VTODO
+		 *   DTSTART;TZID=US/Eastern:20040528T000000
+		 * 	 SUMMARY:grade quizzes and m1
+		 * 	 UID:2
+		 * 	 SEQUENCE:0
+		 * 	 DTSTAMP:20040606T230400
+		 * 	 PRIORITY:2
+		 *   DUE;VALUE=DATE:20040528T000000
+		 *  END:VTODO
+		 *  BEGIN:VTODO
+		 *   DTSTART;TZID=US/Eastern:20040525T000000
+		 *   SUMMARY:get timesheet signed
+		 *   UID:1
+		 *   SEQUENCE:0
+		 *   DTSTAMP:20040606T230400
+		 *   PRIORITY:1
+		 *   DUE;VALUE=DATE:20040525T000000
+		 *  END:VTODO
+		 * END:VCALENDAR";
+		 */
+		ImportResult[] importResult;
+		try {
+			importResult = importICal(getWebConversation(), new ByteArrayInputStream(ical.getBytes()), appointmentFolderId, -1, timeZone, emailaddress, getHostName(), getSessionId());
+			assertEquals("Number of responses" , 1, importResult.length);
+			for(ImportResult res: importResult){
+				assertTrue("Could import" , res.isCorrect());
+			}
+		} catch (TestException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SAXException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 }

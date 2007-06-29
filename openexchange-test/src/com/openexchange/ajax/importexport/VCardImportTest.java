@@ -2,6 +2,7 @@ package com.openexchange.ajax.importexport;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.TimeZone;
 
@@ -56,7 +57,7 @@ public class VCardImportTest extends AbstractVCardTest {
 		
 		for (int a = 0; a < contactArray.length; a++) {
 			//System.out.println("surname: " + contactArray[a].getSurName() + " == " + contactObj.getSurName());
-			if (contactArray[a].getSurName().equals(contactObj.getSurName())) {
+			if (contactObj.getSurName().equals(contactArray[a].getSurName()) ) {
 				contactObj.setParentFolderID(contactFolderId);
 				ContactTest.compareObject(contactObj, contactArray[a]);
 				

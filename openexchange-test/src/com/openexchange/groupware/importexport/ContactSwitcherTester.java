@@ -64,6 +64,7 @@ import com.openexchange.groupware.contact.helpers.ContactSwitcher;
 import com.openexchange.groupware.contact.helpers.ContactSwitcherForSimpleDateFormat;
 import com.openexchange.groupware.contact.helpers.ContactSwitcherForTimestamp;
 import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.importexport.importers.OutlookCSVContactImporter;
 
 /**
  * This tests setting and getting options of the Switchers used in ...contact.helpers.
@@ -120,7 +121,13 @@ public class ContactSwitcherTester extends TestCase {
 		switcher.setDelegate(new ContactSetter());
 		conObj = (ContactObject) field.doSwitch(switcher, conObj, value);
 		
-		assertEquals("Setting of date via timestamp does work" , conObj.getBirthday(), new Date(value));
+		assertEquals("Setting of date via timestamp (as long) does work" , conObj.getBirthday(), new Date(value));
+		
+		String value2 = new Long(value).toString();
+		switcher.setDelegate(new ContactSetter());
+		conObj = (ContactObject) field.doSwitch(switcher, conObj, value2);
+		
+		assertEquals("Setting of date via timestamp (as String) does work" , conObj.getBirthday(), new Date(value));
 	}
 	
 	public void testSetDateValueViaSimpleDate() throws ContactException, ParseException{
@@ -134,7 +141,7 @@ public class ContactSwitcherTester extends TestCase {
 		sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
 		final ContactSwitcherForSimpleDateFormat switcher = new ContactSwitcherForSimpleDateFormat();
 		switcher.setDelegate(new ContactSetter());
-		switcher.setDateFormat(sdf);
+		switcher.addDateFormat(sdf);
 
 		//setting
 		conObj = (ContactObject) field.doSwitch(switcher, conObj, value);
@@ -159,5 +166,26 @@ public class ContactSwitcherTester extends TestCase {
 		
 		assertEquals("Checking date", date, compareDate);
 		assertEquals("Checking nickname", nickname, compareNickname);
+	}
+	
+	public void testDateSwitchingForBug7552() throws ParseException, ContactException{
+		//preparations
+		ContactObject conObj = new ContactObject();
+		ContactField field = ContactField.BIRTHDAY;
+
+		//setting up a proper setter for SimpleDateFormat
+		final ContactSwitcherForSimpleDateFormat switcher = new ContactSwitcherForSimpleDateFormat();
+		switcher.setDelegate(new ContactSetter());
+		switcher.addDateFormat( OutlookCSVContactImporter.getAmericanDateNotation());
+		switcher.addDateFormat( OutlookCSVContactImporter.getGermanDateNotation());
+
+		//setting
+		String value = "1981/03/05";
+		conObj = (ContactObject) field.doSwitch(switcher, conObj, value);
+		assertEquals("Setting of date via Outlook-simple-date value does work" , conObj.getBirthday(), OutlookCSVContactImporter.getAmericanDateNotation().parse(value));
+		
+		value = "05.03.1981";
+		conObj = (ContactObject) field.doSwitch(switcher, conObj, value);
+		assertEquals("Setting of date via Outlook-simple-date value does work" , conObj.getBirthday(), OutlookCSVContactImporter.getGermanDateNotation().parse(value));
 	}
 }
