@@ -28,15 +28,12 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
  *
  */
 public interface OXContextInterface extends Remote {
-    
-    
-    
+
     /**
      * RMI name to be used in RMI URL
      */
     public static final String RMI_NAME = "OXContext_V2";
-    
-    
+
     /**
      * Create a new context.
      * @param auth Credentials for authenticating against server.
@@ -52,9 +49,7 @@ public interface OXContextInterface extends Remote {
      */
     public Context create(Context ctx,User admin_user,long quota_max,Credentials auth) 
     throws RemoteException, StorageException, InvalidCredentialsException,InvalidDataException, ContextExistsException;
-    
-    
-    
+
     /**
      * Delete a context.<br>
      * Note: Deleting a context will delete all data whitch the context include (all users, groups, appointments, ... )
@@ -70,8 +65,7 @@ public interface OXContextInterface extends Remote {
      */
     public void delete(Context ctx,Credentials auth) 
     throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException, DatabaseUpdateException, InvalidDataException;
-    
-   
+
     /**
      * Change storage data of a context.
      * @param ctx Context object
@@ -88,8 +82,7 @@ public interface OXContextInterface extends Remote {
      */
     public void changeStorageData(Context ctx,Filestore filestore,Credentials auth) 
     throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException;
-    
-    
+
     /**
      * Move all data of a context contained on the filestore to another filestore using
      * specified reason to disable context.
@@ -113,7 +106,6 @@ public interface OXContextInterface extends Remote {
      */
     public String moveContextFilestore(Context ctx,Filestore dst_filestore_id, MaintenanceReason reason,Credentials auth) 
     throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException, NoSuchFilestoreException, NoSuchReasonException, OXContextException;
-    
 
     /**
      * Move all data of a context contained in a database to another database using
@@ -139,8 +131,7 @@ public interface OXContextInterface extends Remote {
      */
     public int moveContextDatabase(Context ctx,Database dst_database_id,MaintenanceReason reason,Credentials auth) 
     throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException, DatabaseUpdateException, OXContextException;
-    
-    
+
     /**
      * Disable given context.<br>
      * Note: To disable a context you need a reason
@@ -157,9 +148,7 @@ public interface OXContextInterface extends Remote {
      */
     public void disable(Context ctx, MaintenanceReason reason,Credentials auth) 
     throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException, NoSuchReasonException, OXContextException;
-    
-    
-    
+
     /**
      * Enable given context.
      * @param auth Credentials for authenticating against server.
@@ -172,8 +161,7 @@ public interface OXContextInterface extends Remote {
      */
     public void enable(Context ctx,Credentials auth) 
     throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException, InvalidDataException;
-    
-    
+
     /**
      * Search for contexts<br>
      * Use this for search a context or list all contexts.
@@ -187,9 +175,7 @@ public interface OXContextInterface extends Remote {
      */
     public Context[] search( String search_pattern,Credentials auth ) 
     throws RemoteException, StorageException, InvalidCredentialsException,InvalidDataException;
-    
-    
-    
+
     /**
      * Disable all contexts.<br>
      * Note: To disable all contexts, you need a reason.
@@ -204,9 +190,7 @@ public interface OXContextInterface extends Remote {
      */
     public void disableAll(MaintenanceReason reason,Credentials auth ) 
     throws RemoteException, StorageException, InvalidCredentialsException,InvalidDataException, NoSuchReasonException;
-    
-    
-    
+
     /**
      * Enable all contexts.
      * @param auth Credentials for authenticating against server.
@@ -217,9 +201,7 @@ public interface OXContextInterface extends Remote {
      */
     public void enableAll(Credentials auth) 
     throws RemoteException, StorageException, InvalidCredentialsException;
-    
-    
-    
+
     /**
      * Retrieves the context setup of given context.
      * @param auth Credentials for authenticating against server.
@@ -234,7 +216,7 @@ public interface OXContextInterface extends Remote {
      */
     public Context getSetup(Context ctx,Credentials auth) 
     throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException, InvalidDataException;
-    
+
     /**
      * Change the database handle of the given context.
      * @param ctx Context object
@@ -249,9 +231,7 @@ public interface OXContextInterface extends Remote {
      * @throws StorageException When an error in the subsystems occured.
      */
     public void changeDatabase(Context ctx,Database db_handle,Credentials auth) throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException;
-    
-    
-    
+
     /**
      * Change the quota size of the given context.
      * @param ctx Context object.
@@ -265,7 +245,7 @@ public interface OXContextInterface extends Remote {
      */
     public void changeQuota(Context ctx, long quota_max,Credentials auth) 
     throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException;
-    
+
     /**
      * Search for context on specified db.
      * @param db_host_url Database on which to search for contexts.
@@ -278,9 +258,7 @@ public interface OXContextInterface extends Remote {
      * @throws StorageException When an error in the subsystems occured.
      */
     public Context[] searchByDatabase(Database db_host_url,Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException,InvalidDataException;
-    
-    
-    
+
     /**
      * Search for context which store data on specified filestore
      * @param filestore_url Filestore
