@@ -33,7 +33,7 @@ import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
 import com.openexchange.admin.taskmanagement.TaskManager;
 import com.openexchange.admin.tools.DatabaseDataMover;
 import com.openexchange.admin.tools.FilestoreDataMover;
-import com.openexchange.admin.tools.monitoring.MonitoringInfos;
+import com.openexchange.admin.tools.monitoring.Monitor;
 
 public class OXContext extends BasicAuthenticator implements OXContextInterface {
 
@@ -533,8 +533,9 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
                 throw new InvalidDataException("Mandatory fields not set");
             }
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
-            MonitoringInfos.incrementNumberOfCreateContextCalled();
-            return oxcox.create(ctx, admin_user, quota_max);
+            final Context retval = oxcox.create(ctx, admin_user, quota_max);
+            Monitor.incrementNumberOfCreateContextCalled();
+            return retval;
         } catch (final ContextExistsException e) {
             log.error(e);
             throw e;
