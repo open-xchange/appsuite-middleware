@@ -47,33 +47,13 @@
  *
  */
 
-package com.openexchange.groupware.importexport.exceptions;
+package com.openexchange.tools.versit.converter;
 
-import com.openexchange.api2.OXException;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+public class ConverterPrivacyException extends ConverterException {
 
-/**
- * An exception thrown by classes associated with the import or export of
- * OX data.
- * 
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
- *
- */
-public class ImportExportException extends OXException {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 3425762662302945002L;
 
-	private static final long serialVersionUID = 8368543799201210727L;
-
-	public ImportExportException(final Category category, final int id, final String message, final Throwable cause, final Object...msgParams){
-		super(Component.IMPORT_EXPORT, category, id, message, cause);
-		setMessageArgs(msgParams);
-	}
-
-	public ImportExportException(final Category category, final String message, final int id, final Object...msgParams){
-		this(category,id,message, null,msgParams);
-	}
-
-	public ImportExportException(final AbstractOXException e1) {
-		super(e1);
-	}
 }

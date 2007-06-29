@@ -54,6 +54,7 @@ import static com.openexchange.groupware.importexport.csv.CSVLibrary.transformIn
 
 import java.io.InputStream;
 import java.sql.SQLException;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -66,13 +67,13 @@ import com.openexchange.groupware.Component;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.ContactSetter;
 import com.openexchange.groupware.contact.helpers.ContactSwitcher;
 import com.openexchange.groupware.contact.helpers.ContactSwitcherForTimestamp;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.importexport.AbstractImporter;
 import com.openexchange.groupware.importexport.Format;
 import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.groupware.importexport.Importer;
@@ -92,7 +93,7 @@ import com.openexchange.sessiond.SessionObject;
 		Category.USER_INPUT,
 		Category.CODE_ERROR,
 		Category.CODE_ERROR,
-		Category.USER_INPUT,
+		Category.WARNING,
 		Category.USER_INPUT,
 		Category.USER_INPUT},
 	desc={"","","", "", "", ""}, 
@@ -105,12 +106,12 @@ import com.openexchange.sessiond.SessionObject;
 		"Could not translate a single column title. Is this a valid CSV file?",
 		"Could not translate a single field of information, did not insert entry %s."})
 		
-public class CSVContactImporter implements Importer {
+public class CSVContactImporter extends AbstractImporter implements Importer {
 	
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(CSVContactImporter.class);
 
-	protected static ImportExportExceptionFactory EXCEPTIONS = new ImportExportExceptionFactory(CSVContactImporter.class);
+	private static ImportExportExceptionFactory EXCEPTIONS = new ImportExportExceptionFactory(CSVContactImporter.class);
 	
 	public boolean canImport(final SessionObject sessObj, final Format format, final List<String> folders,
 			final Map<String, String[]> optionalParams) throws ImportExportException {
@@ -241,16 +242,15 @@ public class CSVContactImporter implements Importer {
 			contactObj.setParentFolderID(Integer.parseInt( folder.trim() ));
 			if(atLeastOneFieldInserted){
 				contactsql.insertContactObject(contactObj);
+				result.setObjectId( Integer.toString( contactObj.getObjectID() ) );
+				result.setDate( contactObj.getLastModified() );
 			} else {
 				result.setException(EXCEPTIONS.create(5, Integer.valueOf(lineNumber)));
-				
+				result.setDate(new Date());
 			}
-			result.setDate( contactObj.getLastModified() );
-			result.setObjectId( Integer.toString( contactObj.getObjectID() ) );
-		} catch (final ContactException e) {
-			result.setException(e);
-			addErrorInformation(result, lineNumber , fields);
-		} catch (final OXException e) {
+			
+		} catch (OXException e) {
+			e =	handleDataTruncation(e);
 			result.setException(e);
 			addErrorInformation(result, lineNumber , fields);
 		}
@@ -281,4 +281,6 @@ public class CSVContactImporter implements Importer {
 		conSwitch.setDelegate(new ContactSetter());
 		return conSwitch;
 	}
+	
+	
 }

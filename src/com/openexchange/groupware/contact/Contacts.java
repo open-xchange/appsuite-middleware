@@ -116,6 +116,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 public class Contacts implements DeleteListener {
 	
+	public static final int DATA_TRUNCATION = 54;
 	private static final ContactExceptionFactory EXCEPTIONS = new ContactExceptionFactory(Contacts.class);
 	private static final Log LOG = LogFactory.getLog(Contacts.class);
 	
@@ -2549,7 +2550,7 @@ public class Contacts implements DeleteListener {
 	@OXThrows(
 			category=Category.TRUNCATED,
 			desc="54",
-			exceptionId=54,
+			exceptionId=DATA_TRUNCATION,
 			msg="One or more fields contain too much information. Fields: %1$s Character Limit: %2$d Sent %3$d"
 	)
 	
@@ -2563,10 +2564,15 @@ public class Contacts implements DeleteListener {
 	            sFields.append(field);
 	            sFields.append(", ");
 	        }
-	        sFields.setLength(sFields.length() - 1);
+	        sFields.setLength(sFields.length() - 2);
 	        
 	        
-			final OXException oxx = EXCEPTIONS.create(54,se,sFields,Integer.valueOf(se.getDataSize()), Integer.valueOf(se.getTransferSize()));
+			final OXException oxx = EXCEPTIONS.create(
+					DATA_TRUNCATION,
+					se,
+					sFields.toString(),
+					se.getDataSize(), 
+					se.getTransferSize());
 			
 
 	        if (fields.length > 0){

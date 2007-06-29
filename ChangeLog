@@ -11,6 +11,16 @@
  - Fixed bug #7273. The confirm state was not changed if an appointment was 
    moved to a different time. Now the confirm state is set to NONE.
 
+* 2007-06-28 - marcus.klein@open-xchange.com
+
+  - Bugfix #8007: Partly fix. Disabled possibility to create unbound folders
+    through WebDAV XML interface. Replacing existing unbound folders in database
+    with contact folders to prevent AJAX GUI errors.
+
+* 2007-06-27 - francisco.laguna@open-xchange.com
+
+  - Add french messages to ox_languages.jar
+
 * 2007-06-27 - thorben.betten@open-xchange.com
 
  - Collecting multiple requests to store message flags which delivers a
@@ -149,7 +159,7 @@
  - Bugfix #7720: Tabs are removed from address header field on reply
  - Bugfix #7593: Removed check for INBOX folder on update
  - Bugfix #7480: Again optimized regex pattern for href parsing to ignore
-   non-ascii character
+   non-ascii characters
 
 * 2007-05-30 - thorben.betten@open-xchange.com
 
@@ -171,14 +181,36 @@
    column "fname" of table "del_oxfolder_tree" to the one located in table
    "oxfolder_tree"
 
+* 2007-05-29 - tobias.prinz@open-xchange.com
+
+ - Partial fix #6825: Now handling all messages where data given is too
+   long for our database. This makes part (3) of the bug report a lot better,
+   yet it still needs translation (and possibly i18n).
+ 
 * 2007-05-29 - francisco.laguna@open-xchange.com
 
  - Partial Fix 7557: Annotation Processor also checks class declarations
  
+* 2007-05-25 - tobias.prinz@open-xchange.com
+
+ - Bugfix #6825 (part): OxContainerConverter did not discern between external
+   and internal users, which lead to the rather unhelpful UNEXPECTED_EXCEPTION.
+   This fixes the main problem with this bug report.
+
+* 2007-05-24 - tobias.prinz@open-xchange.com
+
+ - Bugfix #7538 : AJAXServlet.substitute used String.replaceAll which 
+   removed some backslashes. This lead to unescaped quotation marks in
+   error messages, which broke the JSON response. Fixed this for all
+   response callbacks upon a HTTP-POST.
+ - Bugfix #7552 : Outlook imports now handle dd.MM.yyyy format, too.
+
 * 2007-05-24 - thorben.betten@open-xchange.com
 
  - Bugfix #7588: Avoiding NPE if content type is missing in infostore
    document that ought to be sent as attachment
+ - Bugfix #7548 : Use objects parentFolderId if the user participant
+   doesn't contain a user specific folderId.
 
 * 2007-05-24 - thorben.betten@open-xchange.com
 
@@ -188,6 +220,10 @@
  - Bugfix #7526: Added property 'smtLocalhost' to property file
    'imap.properties' to specifiy the domain name that is going to be
    transmitted on SMTP's HELO/EHLO command
+
+* 2007-05-23 - francisco.laguna@open-xchange.com
+
+ - Bugfix #7507: Resolve [hostname] to the hostname of the system in direct links
 
 * 2007-05-23 - thorben.betten@open-xchange.com
 
@@ -208,6 +244,26 @@
    too large
  - Bugfix #7362: Added parameter 'limit' to 'action=newmsgs' request from
    GUI as defined in HTTP spec
+
+* 2007-05-23 - tobias.prinz@open-xchange.com
+
+ - Bugfix #7472: Added handling of CONFIDENTIAL flag: Entry flagged as such
+   is not imported. Bug fixed.
+
+* 2007-05-23 - marcus.klein@open-xchange.com
+
+  - Bugfix #7275: Changed error message once again.
+   
+* 2007-05-22 - tobias.prinz@open-xchange.com
+
+ - Added new error category "WARNING".
+ - Bugfix #7109: Added server side solution using WARNING for partial inserts.
+ - Bugfix #7472: Added handling of PRIVATE flag. Treating CONFIDENTIAL flag 
+   as PRIVATE flag.
+
+* 2007-05-22 - francisco.laguna@open-xchange.com
+
+ - Bugfix #7459: Add content-disposition headers for ordinary downloads also.
 
 * 2007-05-21 - thorben.betten@open-xchange.com
 

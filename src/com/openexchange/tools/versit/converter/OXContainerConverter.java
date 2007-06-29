@@ -76,10 +76,12 @@ import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.DataObject;
+import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Task;
@@ -95,7 +97,7 @@ import com.openexchange.tools.versit.values.RecurrenceValue;
 
 /**
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> (adapted Victor's parser for OX6)
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> (bugfix: 7248, 7249)
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> (bugfixes: 7248, 7249, 7472)
  * 
  */
 public class OXContainerConverter {
@@ -495,7 +497,8 @@ public class OXContainerConverter {
 	public Task convertTask(final VersitObject object) throws ConverterException {
 		try {
 			final Task taskContainer = new Task();
-			// TODO CLASS
+			// CLASS
+			PrivacyProperty(taskContainer, object, "CLASS", SET_BOOLEAN_METHODS.get(Task.PRIVATE_FLAG));
 			// COMPLETED
 			DateTimeProperty(taskContainer, object, "COMPLETED", SET_DATE_METHODS.get(Integer
 					.valueOf(Task.DATE_COMPLETED)));
@@ -598,7 +601,8 @@ public class OXContainerConverter {
 
 	public CalendarDataObject convertAppointment(final VersitObject object) throws ConverterException {
 		final CalendarDataObject appContainer = new CalendarDataObject();
-		// TODO CLASS
+		//CLASS
+		PrivacyProperty(appContainer, object, "CLASS", SET_BOOLEAN_METHODS.get(Task.PRIVATE_FLAG));
 		// CREATED is ignored
 		// DESCRIPTION
 		StringProperty(appContainer, object, "DESCRIPTION", SET_STRING_METHODS.get(AppointmentObject.NOTE));
@@ -1007,6 +1011,32 @@ public class OXContainerConverter {
 		}
 	}
 
+	private boolean PrivacyProperty(final Object containerObj, final VersitObject object, final String VersitName,
+			final Method setPrivacyMethod) throws ConverterException {
+		try {
+			final Property property = object.getProperty(VersitName);
+			if (property == null) {
+				return false;
+			}
+			String privacy = (String) property.getValue();
+			
+			boolean isPrivate = false;
+			if("PRIVATE".equals(privacy)){
+				isPrivate = true;
+			} 
+			if("CONFIDENTIAL".equals(privacy)){
+				throw new ConverterPrivacyException();
+			}
+			final Object[] args = { isPrivate };
+			setPrivacyMethod.invoke(containerObj, args);
+			return false;
+		} catch (ConverterPrivacyException e){
+			throw e;
+		} catch (Exception e){
+			throw new ConverterException(e);
+		}
+	}
+	
 	private boolean DateTimeProperty(final Object containerObj, final VersitObject object, final String VersitName,
 			final Method setDateMethod) throws ConverterException {
 		try {
@@ -1058,13 +1088,27 @@ public class OXContainerConverter {
 			throws ConverterException {
 		try {
 			final String mail = ((URI) property.getValue()).getSchemeSpecificPart();
-			final UserParticipant userParticipant = new UserParticipant();
-			userParticipant.setEmailAddress(mail);
-			calContainerObj.addParticipant(userParticipant);
-			// TODO: Look up users which matches found email address. If found
-			// USER participant else EXTERNAL participant
+			final Participant participant;
+			if(isInternalUser(mail)){
+				participant = new UserParticipant();
+			} else {
+				participant = new ExternalUserParticipant();
+				participant.setDisplayName(mail);
+			}
+			participant.setEmailAddress(mail);
+			calContainerObj.addParticipant(participant);
 		} catch (Exception e) {
 			throw new ConverterException(e);
+		}
+	}
+
+	public boolean isInternalUser(String mail) {
+		try {
+			final UserStorage us = UserStorage.getInstance(session.getContext());
+			final User uo = us.searchUser(mail);
+			return uo != null;
+		} catch (LdapException e){
+			return false;
 		}
 	}
 
@@ -1151,7 +1195,8 @@ public class OXContainerConverter {
 		for (int i = 0; i < count; i++) {
 			final VersitObject alarm = object.getChild(i);
 			Property property = alarm.getProperty("ACTION");
-			if (property != null && property.getValue().toString().equalsIgnoreCase("EMAIL")) {
+			//if (property != null && property.getValue().toString().equalsIgnoreCase("EMAIL")) {
+			if (property != null && property.getValue().toString().equalsIgnoreCase("DISPLAY")) { //bugfix: 7473
 				property = alarm.getProperty("TRIGGER");
 				if (property != null) {
 					int time;
@@ -1176,9 +1221,11 @@ public class OXContainerConverter {
 					if (calContainerObj instanceof AppointmentObject) {
 						final AppointmentObject appObj = (AppointmentObject) calContainerObj;
 						appObj.setAlarm(time);
+						appObj.setAlarmFlag(true); //bugfix: 7473
 					} else if (calContainerObj instanceof Task) {
 						final Task taskObj = (Task) calContainerObj;
 						taskObj.setAlarm(new Date(taskObj.getStartDate().getTime() - (time * 60 * 1000)));
+						taskObj.setAlarmFlag(true); //bugfix: 7473
 					}
 				}
 			}

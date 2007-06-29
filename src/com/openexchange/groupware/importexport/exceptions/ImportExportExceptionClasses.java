@@ -75,4 +75,6 @@ public class ImportExportExceptionClasses {
 	public static final int IMPORTSERVLET = 13;
 	public static final int EXPORTSERVLET = 14;
 	public static final int OUTLOOKCSVCONTACTIMPORTER = 15;
+	
+	public static final int ABSTRACTIMPORTER = 16;
 }

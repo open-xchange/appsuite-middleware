@@ -255,6 +255,13 @@
         <exec executable="${msgfmt}" dir="${basedir}">
             <arg line="--java2 -d ${build.dir} -r com.openexchange.groupware.i18n.ServerMessages -l de ${i18n.dir}/de_DE/server.de_DE.po" />
         </exec>
+    	<!-- french -->
+    	<exec executable="${msgfmt}" dir="${basedir}">
+            <arg line="--java2 -d ${build.dir} -r com.openexchange.groupware.i18n.ServerMessages -l fr_FR ${i18n.dir}/fr_FR/server.po" />
+        </exec>
+        <exec executable="${msgfmt}" dir="${basedir}">
+            <arg line="--java2 -d ${build.dir} -r com.openexchange.groupware.i18n.ServerMessages -l fr ${i18n.dir}/fr_FR/server.po" />
+        </exec>
         <jar jarfile="${lib.dir}/ox_languages.jar" basedir="${build.dir}"
             includes="com/openexchange/groupware/i18n/ServerMessages*" />
     </target>
