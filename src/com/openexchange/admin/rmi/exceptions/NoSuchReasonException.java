@@ -21,7 +21,7 @@ public class NoSuchReasonException extends Exception implements Serializable {
      * 
      */
     public NoSuchReasonException() {
-        super("User does not exist");
+        super("Reason does not exist");
     }
 
     /**
