@@ -21,7 +21,7 @@ public class NoSuchFilestoreException extends Exception implements Serializable 
      * 
      */
     public NoSuchFilestoreException() {
-        super("User does not exist");
+        super("Filestore does not exist");
     }
 
     /**
