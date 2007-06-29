@@ -1,3 +1,7 @@
+* 2007-06-29 - dennis.sieben@open-xchange.com
+
+  -  Bugfix ID#8171 need for a tool that does reset the jmx max values
+
 * 2007-06-21 - manuel.kraft@open-xchange.com
 
   -  Bugfix ID#7675 LTs to manage users can not deal with modules
