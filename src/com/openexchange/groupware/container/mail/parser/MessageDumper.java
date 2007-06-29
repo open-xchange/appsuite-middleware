@@ -155,13 +155,15 @@ public class MessageDumper {
 	private boolean stop;
 
 	private boolean multipartDetected;
+	
+	private final boolean nestedMsgsOnly;
 
 	/**
 	 * Creates a new <code>MessageDumper</code> instance with given session
 	 * object. <code>invokePartModifier</code> is set to <code>true</code>.
 	 */
 	public MessageDumper(final SessionObject session) {
-		this(session, true);
+		this(session, true, false);
 	}
 
 	/**
@@ -170,10 +172,11 @@ public class MessageDumper {
 	 * <code>com.openexchange.groupware.imap.PartModifier</code>
 	 * implementation is going to be called or not.
 	 */
-	public MessageDumper(final SessionObject session, final boolean invokePartModifier) {
+	public MessageDumper(final SessionObject session, final boolean invokePartModifier, final boolean nestedMsgsOnly) {
 		super();
 		this.session = session;
 		this.invokePartModifier = invokePartModifier;
+		this.nestedMsgsOnly = nestedMsgsOnly;
 	}
 
 	/**
@@ -238,7 +241,7 @@ public class MessageDumper {
 		 */
 		final boolean isInline = ((disposition == null || disposition.equalsIgnoreCase(Part.INLINE)) && part
 				.getFileName() == null);
-		if (contentType.isMimeType(MIME_TEXT_PLAIN) || contentType.isMimeType(MIME_TEXT_ENRICHED)) {
+		if (!nestedMsgsOnly && (contentType.isMimeType(MIME_TEXT_PLAIN) || contentType.isMimeType(MIME_TEXT_ENRICHED))) {
 			if (isInline) {
 				final String content = MessageUtils.getStringObject(part);
 				final UUEncodedMultiPart uuencodedMP = new UUEncodedMultiPart(content);
@@ -284,7 +287,7 @@ public class MessageDumper {
 					return;
 				}
 			}
-		} else if (contentType.isMimeType(MIME_TEXT_HTML)) {
+		} else if (!nestedMsgsOnly && contentType.isMimeType(MIME_TEXT_HTML)) {
 			if (isInline) {
 				if (!msgHandler.handleInlineHtml(MessageUtils.getStringObject(part), contentType.getBaseType(), size,
 						filename, MessageUtils.getIdentifier(prefix, partCount))) {
@@ -298,7 +301,7 @@ public class MessageDumper {
 					return;
 				}
 			}
-		} else if (contentType.isMimeType(MIME_MULTIPART_ALL)) {
+		} else if (!nestedMsgsOnly && contentType.isMimeType(MIME_MULTIPART_ALL)) {
 			final Multipart mp = (Multipart) part.getContent();
 			final int count = mp.getCount();
 			final String mpId = MessageUtils.getIdentifier(prefix, partCount);
@@ -317,7 +320,7 @@ public class MessageDumper {
 				final Part multiPartBodyPart = mp.getBodyPart(i);
 				dumpPart(multiPartBodyPart, msgHandler, mpPrefix, i + 1);
 			}
-		} else if (contentType.isMimeType(MIME_IMAGE_ALL)) {
+		} else if (!nestedMsgsOnly && contentType.isMimeType(MIME_IMAGE_ALL)) {
 			if (!msgHandler.handleImagePart(part, ((MimePart) part).getContentID(), contentType.getBaseType(),
 					MessageUtils.getIdentifier(prefix, partCount))) {
 				stop = true;
@@ -329,7 +332,7 @@ public class MessageDumper {
 				stop = true;
 				return;
 			}
-		} else if (TNEFUtils.isTNEFMimeType(part.getContentType())) {
+		} else if (!nestedMsgsOnly && TNEFUtils.isTNEFMimeType(part.getContentType())) {
 			/*
 			 * Here go with TNEF encoded messages. First, grab TNEF input
 			 * stream.
@@ -449,16 +452,16 @@ public class MessageDumper {
 					dumpPart(bodyPart, msgHandler, prefix, partCount++);
 				}
 			}
-		} else if (contentType.isMimeType(MIME_MESSAGE_DELIVERY_STATUS)
+		} else if (!nestedMsgsOnly && (contentType.isMimeType(MIME_MESSAGE_DELIVERY_STATUS)
 				|| contentType.isMimeType(MIME_MESSAGE_DISP_NOTIFICATION)
 				|| contentType.isMimeType(MIME_TEXT_RFC822_HDRS) || contentType.isMimeType(MIME_TEXT_ALL_CARD)
-				|| contentType.isMimeType(MIME_TEXT_ALL_CALENDAR)) {
+				|| contentType.isMimeType(MIME_TEXT_ALL_CALENDAR))) {
 			if (!msgHandler.handleSpecialPart(part, contentType.getBaseType(), MessageUtils.getIdentifier(prefix,
 					partCount))) {
 				stop = true;
 				return;
 			}
-		} else {
+		} else if (!nestedMsgsOnly) {
 			if (!msgHandler.handleAttachment(part, isInline, contentType.getBaseType(), filename, MessageUtils
 					.getIdentifier(prefix, partCount))) {
 				stop = true;

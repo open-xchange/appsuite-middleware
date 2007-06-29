@@ -256,6 +256,10 @@ public final class AJPv13Connection {
     public void markListenerProcessing() {
     	listener.markProcessing();
     }
+    
+    public void markListenerNonProcessing() {
+    	listener.markNonProcessing();
+    }
 
 	public void setListener(final AJPv13Listener listener) {
 		setAndApplyListener(listener);

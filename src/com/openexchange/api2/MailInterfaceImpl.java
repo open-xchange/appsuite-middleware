@@ -159,6 +159,7 @@ import com.openexchange.groupware.upload.UploadEvent;
 import com.openexchange.i18n.StringHelper;
 import com.openexchange.monitoring.MonitorAgent;
 import com.openexchange.sessiond.SessionObject;
+import com.openexchange.tools.Collections.SmartLongArray;
 import com.openexchange.tools.ajp13.AJPv13Config;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
@@ -177,6 +178,7 @@ import com.sun.mail.imap.DefaultFolder;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.imap.Rights;
+import com.sun.mail.imap.protocol.BODYSTRUCTURE;
 import com.sun.mail.smtp.SMTPMessage;
 
 /**
@@ -225,6 +227,8 @@ public class MailInterfaceImpl implements MailInterface {
 	private static final String HDR_X_MAILER = "X-Mailer";
 
 	private static final String HDR_ADDR_DELIM = ",";
+	
+	private static final String HDR_X_SPAM_FLAG = "X-Spam-Flag";
 
 	/*
 	 * MIME type constants
@@ -324,6 +328,8 @@ public class MailInterfaceImpl implements MailInterface {
 	private static final String STR_FALSE = "false";
 
 	private static final String STR_EMPTY = "";
+	
+	private static final String STR_YES = "YES";
 
 	private static final String SWITCH_DEFAULT_FOLDER = "Switching to default value %s";
 
@@ -533,16 +539,14 @@ public class MailInterfaceImpl implements MailInterface {
 	 * @throws OXException
 	 */
 	public final static Properties getDefaultIMAPProperties() throws OXException {
-		if (!imapPropsInitialized) {
-			LOCK_INIT.lock();
-			try {
-				if (!imapPropsInitialized) {
-					initializeIMAPProperties();
-					imapPropsInitialized = true;
-				}
-			} finally {
-				LOCK_INIT.unlock();
+		LOCK_INIT.lock();
+		try {
+			if (!imapPropsInitialized) {
+				initializeIMAPProperties();
+				imapPropsInitialized = true;
 			}
+		} finally {
+			LOCK_INIT.unlock();
 		}
 		return (Properties) IMAP_PROPS.clone();
 	}
@@ -1047,11 +1051,13 @@ public class MailInterfaceImpl implements MailInterface {
 				try {
 					keepSeen();
 					sessionObj.setMailSession(null);
-					if (tmpFolder != null && tmpFolder.isOpen()) {
+					if (tmpFolder != null) {
 						try {
 							tmpFolder.close(true); // expunge
 						} catch (final MessagingException e) {
-							LOG.error(e.getMessage(), e);
+							LOG.error("Temporary folder could not be closed", e);
+						} catch (final IllegalStateException e) {
+							LOG.warn("Invoked close() on a closed folder", e);
 						} finally {
 							mailInterfaceMonitor.changeNumActive(false);
 							tmpFolder = null;
@@ -3451,9 +3457,13 @@ public class MailInterfaceImpl implements MailInterface {
 				return new StringBuilder(sentFolder.getFullName()).append(Mail.SEPERATOR).append(uidNext).toString();
 
 			} finally {
-				if (originalMsgFolder != null && originalMsgFolder.isOpen()) {
-					originalMsgFolder.close(false);
-					mailInterfaceMonitor.changeNumActive(false);
+				if (originalMsgFolder != null) {
+					try {
+						originalMsgFolder.close(false);
+						mailInterfaceMonitor.changeNumActive(false);
+					} catch (final IllegalStateException e) {
+						LOG.warn("Invoked close() on a closed folder", e);
+					}
 					originalMsgFolder = null;
 				}
 				if (msgFiller != null) {
@@ -3737,18 +3747,15 @@ public class MailInterfaceImpl implements MailInterface {
 						final int spamAction = spamFullName.equals(imapCon.getImapFolder().getFullName()) ? SPAM_HAM
 								: (spamFullName.equals(tmpFolder.getFullName()) ? SPAM_SPAM : SPAM_NOOP);
 						if (spamAction != SPAM_NOOP) {
-							for (int i = 0; i < msgUIDs.length; i++) {
-								try {
-									handleSpam(imapCon.getImapFolder().getMessageByUID(msgUIDs[i]),
-											spamAction == SPAM_SPAM, false);
-								} catch (final OXException e) {
-									if (LOG.isWarnEnabled()) {
-										LOG.warn(e.getMessage(), e);
-									}
-								} catch (final MessagingException e) {
-									if (LOG.isWarnEnabled()) {
-										LOG.warn(e.getMessage(), e);
-									}
+							try {
+								handleSpamUID(msgUIDs, spamAction == SPAM_SPAM, false);
+							} catch (final OXException e) {
+								if (LOG.isWarnEnabled()) {
+									LOG.warn(e.getMessage(), e);
+								}
+							} catch (final MessagingException e) {
+								if (LOG.isWarnEnabled()) {
+									LOG.warn(e.getMessage(), e);
 								}
 							}
 						}
@@ -3863,8 +3870,12 @@ public class MailInterfaceImpl implements MailInterface {
 			throw handleMessagingException(e, sessionObj.getIMAPProperties());
 		}
 	}
-
-	public Message updateMessageColorLabel(final String folderArg, final long msgUID, final int newColorLabel)
+	
+	/* (non-Javadoc)
+	 * 
+	 * @see com.openexchange.api2.MailInterface#updateMessageColorLabel(java.lang.String, long[], int)
+	 */
+	public Message[] updateMessageColorLabel(final String folderArg, final long[] msgUIDs, final int newColorLabel)
 			throws OXException {
 		if (!IMAPProperties.isUserFlagsEnabled()) {
 			/*
@@ -3895,33 +3906,46 @@ public class MailInterfaceImpl implements MailInterface {
 						"\" does not support user-defined flags. Update of color flag ignored."));
 				return null;
 			}
-			final String colorLabel = JSONMessageObject.getColorLabelStringValue(newColorLabel);
-			final Message msg;
-			final long start = System.currentTimeMillis();
 			try {
-				msg = imapCon.getImapFolder().getMessageByUID(msgUID);
-			} finally {
+				/*
+				 * Remove all old color label flag(s) and set new color label
+				 * flag
+				 */
+				long start = System.currentTimeMillis();
+				IMAPUtils.clearAllColorLabels(imapCon.getImapFolder(), msgUIDs);
 				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-			}
-			/*
-			 * Remove old color label flag
-			 */
-			Flags newMsgFlags = new Flags();
-			final String[] userFlags = msg.getFlags().getUserFlags();
-			NextFlag: for (int i = 0; i < userFlags.length; i++) {
-				if (userFlags[i].startsWith(JSONMessageObject.COLOR_LABEL_PREFIX)) {
-					newMsgFlags.add(userFlags[i]);
-					break NextFlag;
+				if (LOG.isInfoEnabled()) {
+					LOG.info(new StringBuilder(100).append("All color flags cleared from ").append(msgUIDs.length)
+							.append(" messages in ").append((System.currentTimeMillis() - start)).append("msec")
+							.toString());
 				}
+				start = System.currentTimeMillis();
+				IMAPUtils.setColorLabel(imapCon.getImapFolder(), msgUIDs, JSONMessageObject
+						.getColorLabelStringValue(newColorLabel));
+				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+				if (LOG.isInfoEnabled()) {
+					LOG.info(new StringBuilder(100).append("All color flags set in ").append(msgUIDs.length).append(
+							" messages in ").append((System.currentTimeMillis() - start)).append("msec").toString());
+				}
+				if (msgUIDs.length <= IMAPProperties.getMessageFetchLimit()) {
+					/*
+					 * Fetch modified messages
+					 */
+					start = System.currentTimeMillis();
+					final Message[] msgs = IMAPUtils.fetchMessages(imapCon.getImapFolder(), msgUIDs, IMAPUtils
+							.getDefaultFetchProfile(), false);
+					mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+					return msgs;
+				}
+				
+				start = System.currentTimeMillis();
+				final Message[] msgs = IMAPUtils.fetchMessages(imapCon.getImapFolder(), msgUIDs, IMAPUtils
+						.getUIDFetchProfile(), false);
+				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+				return msgs;
+			} catch (ProtocolException e) {
+				throw new MessagingException(e.getMessage(), e);
 			}
-			msg.setFlags(newMsgFlags, false);
-			/*
-			 * Add new color label flag
-			 */
-			newMsgFlags = new Flags();
-			newMsgFlags.add(colorLabel);
-			msg.setFlags(newMsgFlags, true);
-			return msg;
 		} catch (final MessagingException e) {
 			throw handleMessagingException(e, sessionObj.getIMAPProperties());
 		}
@@ -3949,12 +3973,14 @@ public class MailInterfaceImpl implements MailInterface {
 				if (!imapCon.isHoldsMessages()) {
 					throw new OXMailException(MailCode.FOLDER_DOES_NOT_HOLD_MESSAGES, imapCon.getImapFolder()
 							.getFullName());
-				} else if (IMAPProperties.isSupportsACLs() && !sessionObj.getCachedRights(imapCon.getImapFolder(), true).contains(Rights.Right.READ)) {
+				} else if (IMAPProperties.isSupportsACLs()
+						&& !sessionObj.getCachedRights(imapCon.getImapFolder(), true).contains(Rights.Right.READ)) {
 					throw new OXMailException(MailCode.NO_READ_ACCESS, getUserName(sessionObj), imapCon.getImapFolder()
 							.getFullName());
 				}
 			} catch (final MessagingException e) {
-				throw new OXMailException(MailCode.NO_ACCESS, getUserName(sessionObj), imapCon.getImapFolder().getFullName());
+				throw new OXMailException(MailCode.NO_ACCESS, getUserName(sessionObj), imapCon.getImapFolder()
+						.getFullName());
 			}
 			/*
 			 * Remove non user-alterable system flags
@@ -3971,61 +3997,80 @@ public class MailInterfaceImpl implements MailInterface {
 			 */
 			final Flags affectedFlags = new Flags();
 			if (((flagBits & JSONMessageObject.BIT_ANSWERED) > 0)) {
-				if (IMAPProperties.isSupportsACLs() && !sessionObj.getCachedRights(imapCon.getImapFolder(), true).contains(Rights.Right.WRITE)) {
-					throw new OXMailException(MailCode.NO_WRITE_ACCESS, getUserName(sessionObj), imapCon.getImapFolder()
-							.getFullName());
+				if (IMAPProperties.isSupportsACLs()
+						&& !sessionObj.getCachedRights(imapCon.getImapFolder(), true).contains(Rights.Right.WRITE)) {
+					throw new OXMailException(MailCode.NO_WRITE_ACCESS, getUserName(sessionObj), imapCon
+							.getImapFolder().getFullName());
 				}
 				affectedFlags.add(Flags.Flag.ANSWERED);
 			}
 			if (((flagBits & JSONMessageObject.BIT_DELETED) > 0)) {
-				if (IMAPProperties.isSupportsACLs() && !sessionObj.getCachedRights(imapCon.getImapFolder(), true).contains(Rights.Right.DELETE)) {
-					throw new OXMailException(MailCode.NO_DELETE_ACCESS, getUserName(sessionObj), imapCon.getImapFolder()
-							.getFullName());
+				if (IMAPProperties.isSupportsACLs()
+						&& !sessionObj.getCachedRights(imapCon.getImapFolder(), true).contains(Rights.Right.DELETE)) {
+					throw new OXMailException(MailCode.NO_DELETE_ACCESS, getUserName(sessionObj), imapCon
+							.getImapFolder().getFullName());
 				}
 				affectedFlags.add(Flags.Flag.DELETED);
 			}
 			if (((flagBits & JSONMessageObject.BIT_DRAFT) > 0)) {
-				if (IMAPProperties.isSupportsACLs() && !sessionObj.getCachedRights(imapCon.getImapFolder(), true).contains(Rights.Right.WRITE)) {
-					throw new OXMailException(MailCode.NO_WRITE_ACCESS, getUserName(sessionObj), imapCon.getImapFolder()
-							.getFullName());
+				if (IMAPProperties.isSupportsACLs()
+						&& !sessionObj.getCachedRights(imapCon.getImapFolder(), true).contains(Rights.Right.WRITE)) {
+					throw new OXMailException(MailCode.NO_WRITE_ACCESS, getUserName(sessionObj), imapCon
+							.getImapFolder().getFullName());
 				}
 				affectedFlags.add(Flags.Flag.DRAFT);
 			}
 			if (((flagBits & JSONMessageObject.BIT_FLAGGED) > 0)) {
-				if (IMAPProperties.isSupportsACLs() && !sessionObj.getCachedRights(imapCon.getImapFolder(), true).contains(Rights.Right.WRITE)) {
-					throw new OXMailException(MailCode.NO_WRITE_ACCESS, getUserName(sessionObj), imapCon.getImapFolder()
-							.getFullName());
+				if (IMAPProperties.isSupportsACLs()
+						&& !sessionObj.getCachedRights(imapCon.getImapFolder(), true).contains(Rights.Right.WRITE)) {
+					throw new OXMailException(MailCode.NO_WRITE_ACCESS, getUserName(sessionObj), imapCon
+							.getImapFolder().getFullName());
 				}
 				affectedFlags.add(Flags.Flag.FLAGGED);
 			}
 			if (((flagBits & JSONMessageObject.BIT_SEEN) > 0)) {
-				if (IMAPProperties.isSupportsACLs() && !sessionObj.getCachedRights(imapCon.getImapFolder(), true).contains(Rights.Right.KEEP_SEEN)) {
-					throw new OXMailException(MailCode.NO_KEEP_SEEN_ACCESS, getUserName(sessionObj), imapCon.getImapFolder()
-							.getFullName());
+				if (IMAPProperties.isSupportsACLs()
+						&& !sessionObj.getCachedRights(imapCon.getImapFolder(), true).contains(Rights.Right.KEEP_SEEN)) {
+					throw new OXMailException(MailCode.NO_KEEP_SEEN_ACCESS, getUserName(sessionObj), imapCon
+							.getImapFolder().getFullName());
 				}
 				affectedFlags.add(Flags.Flag.SEEN);
 			}
 			if (affectedFlags.getSystemFlags().length > 0) {
+				final long start = System.currentTimeMillis();
 				IMAPUtils.setSystemFlags(imapCon.getImapFolder(), msgUIDs, false, affectedFlags, flagsVal);
-			}
-			final Message[] msgs;
-			final long start = System.currentTimeMillis();
-			try {
-				msgs = imapCon.getImapFolder().getMessagesByUID(msgUIDs);
-			} finally {
 				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+				if (LOG.isInfoEnabled()) {
+					LOG.info(new StringBuilder(100).append("System Flags applied to ").append(msgUIDs.length).append(
+							" messages in ").append((System.currentTimeMillis() - start)).append("msec").toString());
+				}
 			}
 			/*
 			 * Check for spam action
 			 */
 			if (IMAPProperties.isSpamEnabled() && ((flagBits & JSONMessageObject.BIT_SPAM) > 0)) {
-				handleSpam(msgs, flagsVal, true);
+				handleSpamUID(msgUIDs, flagsVal, true);
+				return MessageCacheObject.getExpungedMessageArr(msgUIDs);
 			}
-			MessageCacheObject[] retval = new MessageCacheObject[msgs.length];
-			for (int i = 0; i < msgs.length; i++) {
-				retval[i] = new MessageCacheObject(msgs[i], msgUIDs[i]);
+			try {
+				if (msgUIDs.length <= IMAPProperties.getMessageFetchLimit()) {
+					/*
+					 * Fetch modified messages in a fast manner
+					 */
+					final long start = System.currentTimeMillis();
+					final Message[] msgs = IMAPUtils.fetchMessages(imapCon.getImapFolder(), msgUIDs, IMAPUtils
+							.getDefaultFetchProfile(), false);
+					mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+					return msgs;
+				}
+				final long start = System.currentTimeMillis();
+				final Message[] msgs = IMAPUtils.fetchMessages(imapCon.getImapFolder(), msgUIDs, IMAPUtils
+						.getUIDFetchProfile(), false);
+				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+				return msgs;
+			} catch (final ProtocolException e) {
+				throw new MessagingException(e.getMessage(), e);
 			}
-			return retval;
 		} catch (final MessagingException e) {
 			throw handleMessagingException(e, sessionObj.getIMAPProperties());
 		}
@@ -4075,9 +4120,14 @@ public class MailInterfaceImpl implements MailInterface {
 					 */
 					destFullname = prepareMailFolderParam(getSpamFolder());
 				} finally {
-					if (confirmedSpamFld != null && confirmedSpamFld.isOpen()) {
-						confirmedSpamFld.close(false);
-						mailInterfaceMonitor.changeNumActive(false);
+					if (confirmedSpamFld != null) {
+						try {
+							confirmedSpamFld.close(false);
+							mailInterfaceMonitor.changeNumActive(false);
+						} catch (final IllegalStateException e) {
+							LOG.warn("Invoked close() on a closed folder", e);
+						}
+						confirmedSpamFld = null;
 					}
 				}
 			} else {
@@ -4108,9 +4158,14 @@ public class MailInterfaceImpl implements MailInterface {
 					 */
 					destFullname = STR_INBOX;
 				} finally {
-					if (confirmedHamFld != null && confirmedHamFld.isOpen()) {
-						confirmedHamFld.close(false);
-						mailInterfaceMonitor.changeNumActive(false);
+					if (confirmedHamFld != null) {
+						try {
+							confirmedHamFld.close(false);
+							mailInterfaceMonitor.changeNumActive(false);
+						} catch (final IllegalStateException e) {
+							LOG.warn("Invoked close() on a closed folder", e);
+						}
+						confirmedHamFld = null;
 					}
 				}
 			}
@@ -4128,9 +4183,14 @@ public class MailInterfaceImpl implements MailInterface {
 					mailInterfaceMonitor.changeNumActive(true);
 					destFld.appendMessages(msgArr);
 				} finally {
-					if (destFld != null && destFld.isOpen()) {
-						destFld.close(false);
-						mailInterfaceMonitor.changeNumActive(false);
+					if (destFld != null) {
+						try {
+							destFld.close(false);
+							mailInterfaceMonitor.changeNumActive(false);
+						} catch (final IllegalStateException e) {
+							LOG.warn("Invoked close() on a closed folder", e);
+						}
+						destFld = null;
 					}
 				}
 				/*
@@ -4151,13 +4211,205 @@ public class MailInterfaceImpl implements MailInterface {
 		}
 		return true;
 	}
+	
+	private final boolean handleSpamUID(final long[] msgUIDs, final boolean isSpam, final boolean move)
+			throws OXException, MessagingException {
+		/*
+		 * Check for spam handling
+		 */
+		if (usm.isSpamEnabled()) {
+			init();
+			final boolean locatedInSpamFolder = prepareMailFolderParam(getSpamFolder()).equals(
+					imapCon.getImapFolder().getFullName());
+			if (isSpam) {
+				if (locatedInSpamFolder) {
+					/*
+					 * A message that already has been detected as spam should
+					 * again be learned as spam: Abort.
+					 */
+					return true;
+				}
+				/*
+				 * Copy to confirmed spam
+				 */
+				IMAPUtils.copyUID(imapCon.getImapFolder(), msgUIDs, prepareMailFolderParam(getConfirmedSpamFolder()),
+						false);
+				if (move) {
+					/*
+					 * Copy messages to spam folder
+					 */
+					IMAPUtils.copyUID(imapCon.getImapFolder(), msgUIDs, prepareMailFolderParam(getSpamFolder()), false);
+					/*
+					 * Delete messages
+					 */
+					IMAPUtils.setSystemFlags(imapCon.getImapFolder(), msgUIDs, false, FLAGS_DELETED, true);
+					/*
+					 * Expunge messages immediately
+					 */
+					try {
+						imapCon.getImapFolder().getProtocol().uidexpunge(IMAPUtils.toUIDSet(msgUIDs));
+						/*
+						 * Force folder cache update through a close
+						 */
+						imapCon.getImapFolder().close(false);
+					} catch (final ProtocolException e) {
+						throw new OXMailException(MailCode.MOVE_PARTIALLY_COMPLETED, e,
+								com.openexchange.tools.oxfolder.OXFolderManagerImpl.getUserName(sessionObj), Arrays
+										.toString(msgUIDs), imapCon.getImapFolder().getFullName(), e.getMessage());
+					}
+				}
+				return true;
+			}
+			if (!locatedInSpamFolder) {
+				/*
+				 * A message that already has been detected as ham should again
+				 * be learned as ham: Abort.
+				 */
+				return true;
+			}
+			/*
+			 * Mark as ham. In contrast to mark as spam this is a very time
+			 * sucking operation. In order to deal with the original messages
+			 * that are wrapped inside a SpamAssassin-created message it must be
+			 * extracted. Therefore we need to access message's content and
+			 * cannot deal only with UIDs
+			 */
+			long start = System.currentTimeMillis();
+			MessageCacheObject[] msgs = null;
+			try {
+				final FetchProfile fp = new FetchProfile();
+				fp.add(HDR_X_SPAM_FLAG);
+				fp.add(FetchProfile.Item.CONTENT_INFO);
+				msgs = (MessageCacheObject[]) IMAPUtils.fetchMessages(imapCon.getImapFolder(), msgUIDs, fp, false);
+				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+			} catch (final ProtocolException e1) {
+				throw new MessagingException(e1.getMessage(), e1);
+			}
+			/*
+			 * Seperate the plain from the nested messages inside spam folder
+			 */
+			SmartLongArray plainUIDs = new SmartLongArray(msgUIDs.length);
+			SmartLongArray extractUIDs = new SmartLongArray(msgUIDs.length);
+			for (int i = 0; i < msgs.length; i++) {
+				final String[] spamHdr = msgs[i].getHeader(HDR_X_SPAM_FLAG);
+				final BODYSTRUCTURE bodystructure = msgs[i].getBodystructure();
+				if (spamHdr != null && STR_YES.regionMatches(true, 0, spamHdr[0], 0, 3) && bodystructure.isMulti()
+						&& bodystructure.bodies[1].isNested()) {
+					extractUIDs.append(msgUIDs[i]);
+				} else {
+					plainUIDs.append(msgUIDs[i]);
+				}
+			}
+			final String confirmedHamFullname = prepareMailFolderParam(getConfirmedHamFolder());
+			/*
+			 * Copy plain messages to confirmed ham and INBOX
+			 */
+			long[] plainUIDsArr = plainUIDs.toArray();
+			plainUIDs = null;
+			start = System.currentTimeMillis();
+			IMAPUtils.copyUID(imapCon.getImapFolder(), plainUIDsArr, confirmedHamFullname, false);
+			mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+			if (move) {
+				start = System.currentTimeMillis();
+				IMAPUtils.copyUID(imapCon.getImapFolder(), plainUIDsArr, STR_INBOX, false);
+				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+			}
+			plainUIDsArr = null;
+			/*
+			 * Handle spam messages
+			 */
+			long[] spamArr = extractUIDs.toArray();
+			extractUIDs = null;
+			IMAPFolder confirmedHamFld = null;
+			try {
+				confirmedHamFld = (IMAPFolder) imapCon.getIMAPStore().getFolder(confirmedHamFullname);
+				confirmedHamFld.open(Folder.READ_WRITE);
+				mailInterfaceMonitor.changeNumActive(true);
+				/*
+				 * Get nested spam messages
+				 */
+				start = System.currentTimeMillis();
+				Message[] nestedMsgs = IMAPUtils.getNestedSpamMessages(imapCon.getImapFolder(), spamArr);
+				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+				if (LOG.isInfoEnabled()) {
+					LOG.info(new StringBuilder(100).append("Nested SPAM messages fetched in ").append(
+							(System.currentTimeMillis() - start)).append("msec").toString());
+				}
+				spamArr = null;
+				/*
+				 * ... and append them to confirmed ham folder and - if move
+				 * enabled - copy them to INBOX.
+				 */
+				start = System.currentTimeMillis();
+				AppendUID[] appendUIDs = confirmedHamFld.appendUIDMessages(nestedMsgs);
+				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+				if (LOG.isInfoEnabled()) {
+					LOG.info(new StringBuilder(100).append("Nested SPAM messages appended to ").append(
+							confirmedHamFullname).append(" in ").append((System.currentTimeMillis() - start))
+							.append("msec").toString());
+				}
+				nestedMsgs = null;
+				if (move) { // Cannot be null
+					start = System.currentTimeMillis();
+					IMAPUtils.copyUID(confirmedHamFld, appendUID2Long(appendUIDs), STR_INBOX, false);
+					mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+					if (LOG.isInfoEnabled()) {
+						LOG.info(new StringBuilder(100).append("Nested SPAM messages copied to ").append(STR_INBOX)
+								.append(" in ").append((System.currentTimeMillis() - start)).append("msec").toString());
+					}
+				}
+				appendUIDs = null;
+				if (move) {
+					/*
+					 * Expunge messages
+					 */
+					start = System.currentTimeMillis();
+					IMAPUtils.setSystemFlags(imapCon.getImapFolder(), msgUIDs, false, FLAGS_DELETED, true);
+					mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+					start = System.currentTimeMillis();
+					imapCon.getImapFolder().getProtocol().uidexpunge(IMAPUtils.toUIDSet(msgUIDs));
+					mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+					if (LOG.isInfoEnabled()) {
+						LOG.info(new StringBuilder(100).append("Original spam messages expunged in ").append(
+								(System.currentTimeMillis() - start)).append("msec").toString());
+					}
+					/*
+					 * Close folder to force JavaMail-internal message cache
+					 * update
+					 */
+					imapCon.getImapFolder().close(false);
+				}
+			} catch (final ProtocolException e1) {
+				throw new MessagingException(e1.getMessage(), e1);
+			} finally {
+				if (confirmedHamFld != null) {
+					try {
+						confirmedHamFld.close(false);
+						mailInterfaceMonitor.changeNumActive(false);
+					} catch (final IllegalStateException e) {
+						LOG.warn(e.getMessage(), e);
+					}
+				}
+			}
+
+		}
+		return true;
+	}
+	
+	private static final long[] appendUID2Long(final AppendUID[] appendUIDs) {
+		final long[] retval = new long[appendUIDs.length];
+		for (int i = 0; i < retval.length; i++) {
+			retval[i] = appendUIDs[i].uid;
+		}
+		return retval;
+	}
 
 	private final Message getInlinedSpamMessage(final Message wrappingMsg) throws OXException, MessagingException {
 		/*
 		 * Get original message out of wrapping message from SpamAssassin
 		 */
 		final SpamMessageHandler msgHandler = new SpamMessageHandler();
-		new MessageDumper(sessionObj).dumpMessage(wrappingMsg, msgHandler);
+		new MessageDumper(sessionObj, false, true).dumpMessage(wrappingMsg, msgHandler);
 		return msgHandler.isSpam() && msgHandler.getInlineMessage() != null ? msgHandler.getInlineMessage()
 				: wrappingMsg;
 	}

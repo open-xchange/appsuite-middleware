@@ -1758,14 +1758,13 @@ public class Mail extends PermissionServlet implements UploadListener {
 					/*
 					 * Update color label
 					 */
-					final Message msg = mailInterface.updateMessageColorLabel(sourceFolder, mailIdentifier.msgUID,
-							colorLabel.intValue());
+					final MessageCacheObject msg = (MessageCacheObject) mailInterface.updateMessageColorLabel(
+							sourceFolder, new long[] { mailIdentifier.msgUID }, colorLabel.intValue())[0];
 					if (msg != null && MessageCacheManager.getInstance().containsUserMessages(sessionObj)) {
 						/*
 						 * Update cache entry
 						 */
-						MessageCacheManager.getInstance().putMessage(sessionObj, mailIdentifier.msgUID,
-								new MessageCacheObject(msg, mailIdentifier.msgUID));
+						MessageCacheManager.getInstance().putMessage(sessionObj, mailIdentifier.msgUID, msg);
 					}
 				}
 				if (flagBits != null) {
@@ -1989,6 +1988,65 @@ public class Mail extends PermissionServlet implements UploadListener {
 				}
 				final Message[] msgs = mailInterface.updateMessageFlags(folder, MailIdentifier.getUIDs(mailIDs),
 						flagsBits, flagValue);
+				if (msgs != null && MessageCacheManager.getInstance().containsUserMessages(sessionObj)) {
+					/*
+					 * Update cache entry
+					 */
+					for (int i = 0; i < msgs.length; i++) {
+						final MessageCacheObject mco = (MessageCacheObject) msgs[i];
+						if (mco.isExpunged()) {
+							MessageCacheManager.getInstance().removeMessage(sessionObj, mco.getUid(), folder);
+						} else {
+							MessageCacheManager.getInstance().putMessage(sessionObj, mco.getUid(), mco);
+						}
+					}
+				}
+
+			} finally {
+				if (closeMailInterface && mailInterface != null) {
+					mailInterface.close(true);
+					mailInterface = null;
+				}
+			}
+		} catch (OXMailException e) {
+			LOG.error(e.getMessage(), e);
+			final Response response = new Response();
+			if (!e.getCategory().equals(Category.USER_CONFIGURATION)) {
+				response.setException(e);
+			}
+			response.setData(JSONObject.NULL);
+			response.setTimestamp(null);
+			Response.write(response, writer);
+		} catch (AbstractOXException e) {
+			LOG.error(e.getMessage(), e);
+			final Response response = new Response();
+			response.setException(e);
+			response.setData(JSONObject.NULL);
+			response.setTimestamp(null);
+			Response.write(response, writer);
+		} catch (Exception e) {
+			LOG.error("actionPutCopyMail", e);
+			final Response response = new Response();
+			response.setException(getWrappingOXException(e));
+			response.setData(JSONObject.NULL);
+			response.setTimestamp(null);
+			Response.write(response, writer);
+		}
+	}
+	
+	public void actionPutColorLabelMultiple(final SessionObject sessionObj, final Writer writer,
+			final String[] mailIDs, final String folder, final int colorLabel, final MailInterface mailInterfaceArg)
+			throws JSONException {
+		try {
+			MailInterface mailInterface = mailInterfaceArg;
+			boolean closeMailInterface = false;
+			try {
+				if (mailInterface == null) {
+					mailInterface = MailInterfaceImpl.getInstance(sessionObj);
+					closeMailInterface = true;
+				}
+				final Message[] msgs = mailInterface.updateMessageColorLabel(folder, MailIdentifier.getUIDs(mailIDs),
+						colorLabel);
 				if (msgs != null && MessageCacheManager.getInstance().containsUserMessages(sessionObj)) {
 					/*
 					 * Update cache entry

@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.tools.ajp13;
 
 import java.util.HashMap;
@@ -79,7 +77,7 @@ public class AJPv13Watcher {
 
 	private static final int WATCHER_FREQUENCY = AJPv13Config.getAJPWatcherFrequency();
 
-	private static Map<Integer, AJPv13Listener> listeners = new HashMap<Integer, AJPv13Listener>();
+	private static final Map<Integer, AJPv13Listener> listeners = new HashMap<Integer, AJPv13Listener>();
 
 	private static final Lock LOCK = new ReentrantLock();
 
@@ -149,23 +147,31 @@ public class AJPv13Watcher {
 		public void run() {
 			LOCK.lock();
 			try {
-				int countListeningThreads = 0;
-				int countProcessingThreads = 0;
-				int countExceededThreads = 0;
+				int countWaiting = 0;
+				int countProcessing = 0;
+				int countExceeded = 0;
 				final Iterator<AJPv13Listener> iter = listeners.values().iterator();
 				final int size = listeners.size();
 				for (int i = 0; i < size; i++) {
 					final AJPv13Listener l = iter.next();
-					if (l.isListening()) {
-						countListeningThreads++;
+					if (l.isWaitingOnAJPSocket()) {
+						countWaiting++;
 					}
 					if (l.isProcessing()) {
 						/*
 						 * At least one listener is currently processing
 						 */
-						countProcessingThreads++;
-						if ((System.currentTimeMillis() - l.getLastAccessTime()) > MAX_LISTENER_RUNNING_TIME) {
-							countExceededThreads++;
+						countProcessing++;
+						final long currentProcTime = (System.currentTimeMillis() - l.getProcessingStartTime());
+						if (currentProcTime > MAX_LISTENER_RUNNING_TIME) {
+							if (LOG.isInfoEnabled()) {
+								final Throwable t = new Throwable();
+								t.setStackTrace(l.getStackTrace());
+								LOG.info(new StringBuilder("AJP Listener exceeds max. running time of ").append(
+										MAX_LISTENER_RUNNING_TIME).append("msec -> Processing time: ").append(
+										currentProcTime).append("msec").toString(), t);
+							}
+							countExceeded++;
 						}
 					}
 				}
@@ -173,7 +179,7 @@ public class AJPv13Watcher {
 				 * All threads are listening longer than specified max listener
 				 * running time
 				 */
-				if (PERMISSION_ENABLED && countProcessingThreads > 0 && countExceededThreads == countProcessingThreads) {
+				if (PERMISSION_ENABLED && countProcessing > 0 && countExceeded == countProcessing) {
 					final String delimStr = "\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
 					LOG.error(new StringBuilder(300).append(delimStr).append(
 							"AJP-Watcher's run done: SYSTEM DEADLOCK DETECTED!").append(
@@ -183,15 +189,15 @@ public class AJPv13Watcher {
 					 */
 					try {
 						AJPv13Server.restartAJPServer();
-					} catch (AJPv13Exception e) {
+					} catch (final AJPv13Exception e) {
 						LOG.error(e.getMessage(), e);
 					}
 				} else {
-					if (LOG.isInfoEnabled()) {
+					if (LOG.isTraceEnabled()) {
 						final String delimStr = "\n+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
-						LOG.info(new StringBuilder(300).append(delimStr).append("AJP-Watcher's run done: ").append(
-								"    Listening=").append(countListeningThreads).append("    Running=").append(
-								countProcessingThreads).append("    Exceeded=").append(countExceededThreads).append(
+						LOG.trace(new StringBuilder(300).append(delimStr).append("AJP-Watcher's run done: ").append(
+								"    Waiting=").append(countWaiting).append("    Running=").append(
+								countProcessing).append("    Exceeded=").append(countExceeded).append(
 								"    Total=").append(size).append(delimStr).toString());
 					}
 				}

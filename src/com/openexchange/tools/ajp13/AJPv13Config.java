@@ -153,7 +153,7 @@ public class AJPv13Config {
 				/*
 				 * AJP_MOD_JK
 				 */
-				modJK = trueStr.equalsIgnoreCase(ajpProperties.getProperty("AJP_MOD_JK", falseStr));
+				modJK = trueStr.regionMatches(true, 0, ajpProperties.getProperty("AJP_MOD_JK", falseStr), 0, 4);
 				/*
 				 * AJP_LISTENER_POOL_SIZE
 				 */
@@ -171,7 +171,7 @@ public class AJPv13Config {
 				/*
 				 * AJP_CONNECTION_POOL / AJP_CONNECTION_POOL_SIZE
 				 */
-				connectionPool = trueStr.equalsIgnoreCase(ajpProperties.getProperty("AJP_CONNECTION_POOL", trueStr));
+				connectionPool = trueStr.regionMatches(true, 0, ajpProperties.getProperty("AJP_CONNECTION_POOL", trueStr), 0, 4);
 				connectionPoolSize = Integer.parseInt(ajpProperties.getProperty("AJP_CONNECTION_POOL_SIZE", "5"));
 				if (connectionPoolSize < 0) {
 					connectionPoolSize = 0;
@@ -179,8 +179,8 @@ public class AJPv13Config {
 				/*
 				 * AJP_REQUEST_HANDLER_POOL / AJP_REQUEST_HANDLER_POOL_SIZE
 				 */
-				requestHandlerPool = trueStr.equalsIgnoreCase(ajpProperties.getProperty("AJP_REQUEST_HANDLER_POOL",
-						trueStr));
+				requestHandlerPool = trueStr.regionMatches(true, 0, ajpProperties.getProperty(
+						"AJP_REQUEST_HANDLER_POOL", trueStr), 0, 4);
 				requestHandlerPoolSize = Integer.parseInt(ajpProperties.getProperty("AJP_REQUEST_HANDLER_POOL_SIZE",
 						"5"));
 				if (requestHandlerPoolSize < 0) {
@@ -189,12 +189,13 @@ public class AJPv13Config {
 				/*
 				 * AJP_WATCHER_ENABLED
 				 */
-				watcherEnabled = trueStr.equalsIgnoreCase(ajpProperties.getProperty("AJP_WATCHER_ENABLED", falseStr));
+				watcherEnabled = trueStr.regionMatches(true, 0, ajpProperties.getProperty("AJP_WATCHER_ENABLED",
+						falseStr), 0, 4);
 				/*
 				 * AJP_WATCHER_PERMISSION
 				 */
-				watcherPermission = trueStr.equalsIgnoreCase(ajpProperties.getProperty("AJP_WATCHER_PERMISSION",
-						falseStr));
+				watcherPermission = trueStr.regionMatches(true, 0, ajpProperties.getProperty("AJP_WATCHER_PERMISSION",
+						falseStr), 0, 4);
 				/*
 				 * AJP_WATCHER_MAX_RUNNING_TIME
 				 */
@@ -227,8 +228,8 @@ public class AJPv13Config {
 				/*
 				 * AJP_CHECK_MAGIC_BYTES_STRICT
 				 */
-				checkMagicBytesStrict = trueStr.equalsIgnoreCase(ajpProperties.getProperty(
-						"AJP_CHECK_MAGIC_BYTES_STRICT", trueStr));
+				checkMagicBytesStrict = trueStr.regionMatches(true, 0, ajpProperties.getProperty(
+						"AJP_CHECK_MAGIC_BYTES_STRICT", trueStr), 0, 4);
 				/*
 				 * AJP_SERVLET_CONFIG_DIR
 				 */

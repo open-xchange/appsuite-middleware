@@ -68,7 +68,7 @@ import com.openexchange.tools.servlet.http.HttpServletResponseWrapper;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  *
  */
-public class AJPv13Listener implements Runnable {
+public final class AJPv13Listener implements Runnable {
 	
 	//private final String excPrefix;
 	
@@ -82,13 +82,11 @@ public class AJPv13Listener implements Runnable {
 
 	private AJPv13Connection ajpCon;
 
-	private long lastAccesTime = Long.MAX_VALUE;
-	
 	private boolean processing;
 	
 	private long processingStart;
 	
-	private boolean listening;
+	private boolean waitingOnAJPSocket;
 	
 	private boolean pooled;
 	
@@ -96,9 +94,9 @@ public class AJPv13Listener implements Runnable {
 	
 	private final Lock listenerLock = new ReentrantLock();
 	
-	private final Condition resumeRunning = listenerLock.newCondition();
+	private final transient Condition resumeRunning = listenerLock.newCondition();
 	
-	private static int numberOfRunningAJPListeners;
+	private static int numRunning;
 	
 	private static final Lock COUNT_LOCK = new ReentrantLock();
 	
@@ -122,7 +120,7 @@ public class AJPv13Listener implements Runnable {
 	public AJPv13Listener(final int num, final boolean pooled) {
 		this.num = num;
 		processing = false;
-		listening = false;
+		waitingOnAJPSocket = false;
 		this.pooled = pooled;
 		listenerThread = new AJPv13ListenerThread(this);
 		listenerThread.setName(new StringBuilder("AJPListener-").append(DF.format(this.num)).toString());
@@ -185,7 +183,7 @@ public class AJPv13Listener implements Runnable {
 		try {
 			listenerThread.interrupt();
 			return true;
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			if (LOG.isWarnEnabled()) {
 				LOG.warn(e.getMessage(), e);
 			}
@@ -197,7 +195,19 @@ public class AJPv13Listener implements Runnable {
 			listenerStarted = false;
 		}
 	}
+	
+	private static final StackTraceElement[] EMPTY_STACK_TRACE = new StackTraceElement[0];
 
+	/**
+	 * @return the stack trace of this listener's running thread
+	 */
+	public StackTraceElement[] getStackTrace() {
+		if (listenerThread == null || !listenerThread.isAlive() || listenerThread.isDead()) {
+			return EMPTY_STACK_TRACE;
+		}
+		return listenerThread.getStackTrace();
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -224,7 +234,7 @@ public class AJPv13Listener implements Runnable {
 			}
 			try {
 				client.setKeepAlive(true);
-				listening = true;
+				waitingOnAJPSocket = true;
 				/*
 				 * Keep on processing underlying stream's data as long as
 				 * accepted client socket is alive and its input is not shut
@@ -232,7 +242,6 @@ public class AJPv13Listener implements Runnable {
 				 */
 				while (client != null && !client.isInputShutdown()) {
 					try {
-						lastAccesTime = System.currentTimeMillis();
 						ajpCon.processRequest();
 						ajpCon.createResponse();
 						if (!ajpCon.getAjpRequestHandler().isEndResponseSent()) {
@@ -242,7 +251,7 @@ public class AJPv13Listener implements Runnable {
 							 */
 							writeEndResponse(client, false);
 						}
-					} catch (UploadServletException e) {
+					} catch (final UploadServletException e) {
 						LOG.error(e.getMessage(), e);
 						try {
 							/*
@@ -252,9 +261,9 @@ public class AJPv13Listener implements Runnable {
 							writeSendBody(client, e.getData().getBytes("UTF-8"));
 							writeEndResponse(client, false);
 							ajpCon.getAjpRequestHandler().setEndResponseSent(true);
-						} catch (AJPv13Exception e1) {
+						} catch (final AJPv13Exception e1) {
 							LOG.error(e1.getMessage(), e1);
-						} catch (IOException e1) {
+						} catch (final IOException e1) {
 							LOG.error(e1.getMessage(), e1);
 						}
 					}
@@ -264,11 +273,11 @@ public class AJPv13Listener implements Runnable {
 					processing = false;
 					client.getOutputStream().flush();
 				}
-			} catch (ServletException e) {
+			} catch (final ServletException e) {
 				final AJPv13Exception wrapper = new AJPv13Exception(e);
 				e.initCause(e.getRootCause());
 				LOG.error(wrapper.getMessage(), wrapper);
-			} catch (AJPv13SocketClosedException e) {
+			} catch (final AJPv13SocketClosedException e) {
 				if (e.isError()) {
 					LOG.error(e.getMessage(), e);
 				} else {
@@ -276,15 +285,15 @@ public class AJPv13Listener implements Runnable {
 						LOG.warn(e.getMessage(), e);
 					}
 				}
-			} catch (AJPv13InvalidByteSequenceException e) {
+			} catch (final AJPv13InvalidByteSequenceException e) {
 				/*
 				 * TODO: We received invalid starting bytes. Maybe we should add
 				 * special treatment (kind of retry mechanism) for this error
 				 */
 				LOG.error(e.getMessage(), e);
-			} catch (AbstractOXException e) {
+			} catch (final AbstractOXException e) {
 				LOG.error(e.getMessage(), e);
-			} catch (Throwable e) {
+			} catch (final Throwable e) {
 				/*
 				 * Catch Throwable to catch every Exception, even
 				 * RuntimeExceptions
@@ -293,7 +302,7 @@ public class AJPv13Listener implements Runnable {
 				LOG.error(wrapper.getMessage(), wrapper);
 			} finally {
 				terminateAndClose();
-				listening = false;
+				waitingOnAJPSocket = false;
 				if (processing) {
 					AJPv13Server.ajpv13ListenerMonitor.decrementNumProcessing();
 					AJPv13Server.ajpv13ListenerMonitor.addProcessingTime(System.currentTimeMillis() - processingStart);
@@ -302,7 +311,6 @@ public class AJPv13Listener implements Runnable {
 				AJPv13Server.decrementNumberOfOpenAJPSockets();
 				AJPv13Server.ajpv13ListenerMonitor.decrementNumActive();
 			}
-			lastAccesTime = Long.MAX_VALUE;
 			/*
 			 * Put back listener into pool. Use an enforced put if mod_jk is enabled.
 			 */
@@ -322,7 +330,7 @@ public class AJPv13Listener implements Runnable {
 						keepOnRunning = false;
 					}
 					pooled = false;
-				} catch (InterruptedException e) {
+				} catch (final InterruptedException e) {
 					LOG.error(e.getMessage(), e);
 					keepOnRunning = false;
 				} finally {
@@ -359,7 +367,7 @@ public class AJPv13Listener implements Runnable {
 				}
 				ajpCon = null;
 			}
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			if (LOG.isWarnEnabled()) {
 				LOG.warn(e.getMessage(), e);
 			}
@@ -375,26 +383,26 @@ public class AJPv13Listener implements Runnable {
 				}
 				client = null;
 			}
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			if (LOG.isWarnEnabled()) {
 				LOG.warn(e.getMessage(), e);
 			}
 		}
 	}
 	
-	private final static void writeEndResponse(final Socket client, final boolean closeConnection)
+	private static void writeEndResponse(final Socket client, final boolean closeConnection)
 			throws AJPv13Exception, IOException {
 		client.getOutputStream().write(AJPv13Response.getEndResponseBytes(closeConnection));
 		client.getOutputStream().flush();
 	}
 
-	private final static void writeSendHeaders(final Socket client, final HttpServletResponseWrapper resp)
+	private static void writeSendHeaders(final Socket client, final HttpServletResponseWrapper resp)
 			throws AJPv13Exception, IOException {
 		client.getOutputStream().write(AJPv13Response.getSendHeadersBytes(resp));
 		client.getOutputStream().flush();
 	}
 
-	private final static void writeSendBody(final Socket client, final byte[] data) throws AJPv13Exception, IOException {
+	private static void writeSendBody(final Socket client, final byte[] data) throws AJPv13Exception, IOException {
 		client.getOutputStream().write(AJPv13Response.getSendBodyChunkBytes(data));
 		client.getOutputStream().flush();
 	}
@@ -407,10 +415,10 @@ public class AJPv13Listener implements Runnable {
 	}
 
 	/**
-	 * @return listener's last access timestamp
+	 * @return listener's last timestamp when processing started
 	 */
-	public long getLastAccessTime() {
-		return lastAccesTime;
+	public long getProcessingStartTime() {
+		return processingStart;
 	}
 
 	/**
@@ -432,16 +440,28 @@ public class AJPv13Listener implements Runnable {
 	 */
 	public void markProcessing() {
 		processing = true;
+		waitingOnAJPSocket = false;
 		processingStart = System.currentTimeMillis();
 		AJPv13Server.ajpv13ListenerMonitor.incrementNumProcessing();
+	}
+	
+	/**
+	 * Mark this listener as non-processing
+	 */
+	public void markNonProcessing() {
+		if (processing) {
+			processing = false;
+			waitingOnAJPSocket = true;
+			AJPv13Server.ajpv13ListenerMonitor.decrementNumProcessing();
+		}
 	}
 
 	/**
 	 * @return <code>true</code> if listener is currently listening to client
 	 *         socket's input stream, otherwise <code>false</code>
 	 */
-	public boolean isListening() {
-		return listening;
+	public boolean isWaitingOnAJPSocket() {
+		return waitingOnAJPSocket;
 	}
 	
 	/**
@@ -459,17 +479,17 @@ public class AJPv13Listener implements Runnable {
 		return pooled;
 	}
 	
-	public static final void changeNumberOfRunningAJPListeners(final boolean increment) {
+	public static void changeNumberOfRunningAJPListeners(final boolean increment) {
 		COUNT_LOCK.lock();
 		try {
-			numberOfRunningAJPListeners += increment ? 1 : -1;
+			numRunning += increment ? 1 : -1;
 		} finally {
 			COUNT_LOCK.unlock();
 		}
 	}
 
-	public static final int getNumberOfRunningAJPListeners() {
-		return numberOfRunningAJPListeners;
+	public static int getNumberOfRunningAJPListeners() {
+		return numRunning;
 	}
 	
 }

@@ -283,7 +283,7 @@ public interface MailInterface {
 	/**
 	 * Updates the color label stored in message's user flags
 	 */
-	public Message updateMessageColorLabel(String folder, long msgUID, int newColorLabel) throws OXException;
+	public Message[] updateMessageColorLabel(String folder, long[] msgUID, int newColorLabel) throws OXException;
 	
 	/**
 	 * Updates message's client-alterable system flags (e.g. //SEEN or

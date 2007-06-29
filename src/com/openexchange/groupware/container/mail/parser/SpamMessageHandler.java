@@ -114,7 +114,7 @@ public class SpamMessageHandler implements MessageHandler {
 	 */
 	public boolean handleHeaders(final Map<String, String> headerMap) throws OXException {
 		final String val = headerMap.get(HEADER_X_SPAM_FLAG);
-		return (spam = (val != null && STR_YES.equals(val.toUpperCase(Locale.ENGLISH))));
+		return (spam = (val != null && STR_YES.regionMatches(true, 0, val, 0, 3)));
 	}
 
 	/*

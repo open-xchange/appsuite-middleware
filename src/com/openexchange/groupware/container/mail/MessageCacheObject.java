@@ -75,6 +75,7 @@ import javax.mail.internet.MimeUtility;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.mail.parser.MessageUtils;
 import com.openexchange.tools.mail.ContentType;
+import com.sun.mail.imap.protocol.BODYSTRUCTURE;
 
 /**
  * <p>
@@ -91,20 +92,21 @@ import com.openexchange.tools.mail.ContentType;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MessageCacheObject extends Message implements Serializable {
+public final class MessageCacheObject extends Message implements Serializable {
 
 	private static final long serialVersionUID = -5236672658788027516L;
 	
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MessageCacheObject.class);
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(MessageCacheObject.class);
 
 	private static final String HDR_X_PRIORITY = "X-Priority";
 
 	/**
 	 * Folder's full name
 	 */
-	private final String folderFullname;
-	
-	private final char separator;
+	private String folderFullname;
+
+	private char separator;
 
 	/**
 	 * Message's UID
@@ -151,20 +153,36 @@ public class MessageCacheObject extends Message implements Serializable {
 	 */
 	private int priority;
 
-	private final int seqNum;
+	private int seqNum;
 
 	private int threadLevel;
 
 	private final Map<String, String> headers;
-	
+
 	private boolean expunged;
 
-	public MessageCacheObject(final String folderFullname, final char separator, final int msgnum) {
+	private BODYSTRUCTURE bodystructure;
+
+	public static MessageCacheObject[] getExpungedMessageArr(final long[] uids) {
+		final MessageCacheObject[] retval = new MessageCacheObject[uids.length];
+		for (int i = 0; i < retval.length; i++) {
+			retval[i] = new MessageCacheObject();
+			retval[i].setUid(uids[i]);
+			retval[i].setExpunged(true);
+		}
+		return retval;
+	}
+
+	private MessageCacheObject() {
 		super();
+		this.headers = new HashMap<String, String>();
+	}
+
+	public MessageCacheObject(final String folderFullname, final char separator, final int msgnum) {
+		this();
 		this.seqNum = msgnum;
 		this.folderFullname = folderFullname;
 		this.separator = separator;
-		this.headers = new HashMap<String, String>();
 	}
 
 	/**
@@ -198,7 +216,7 @@ public class MessageCacheObject extends Message implements Serializable {
 		}
 	}
 
-	private static final int parsePriorityStr(final String priorityHdrArg) {
+	private static int parsePriorityStr(final String priorityHdrArg) {
 		final String priorityHdr = priorityHdrArg.trim();
 		final int pos = priorityHdr.indexOf(' ');
 		try {
@@ -206,7 +224,7 @@ public class MessageCacheObject extends Message implements Serializable {
 				return Integer.parseInt(priorityHdr);
 			}
 			return Integer.parseInt(priorityHdr.substring(0, pos));
-		} catch (NumberFormatException e) {
+		} catch (final NumberFormatException e) {
 			return JSONMessageObject.PRIORITY_NORMAL;
 		}
 	}
@@ -218,7 +236,8 @@ public class MessageCacheObject extends Message implements Serializable {
 		if (from != null) {
 			return from;
 		}
-		return headers.containsKey(HDR_FROM) ? (from = new InternetAddress[] { new DummyAddress(headers.get(HDR_FROM)) }) : null;
+		return headers.containsKey(HDR_FROM) ? (from = new InternetAddress[] { new DummyAddress(headers.get(HDR_FROM)) })
+				: null;
 	}
 
 	@Override
@@ -258,7 +277,7 @@ public class MessageCacheObject extends Message implements Serializable {
 		}
 	}
 
-	private final InternetAddress[] getRecipientsInternal(final RecipientType type) throws MessagingException {
+	private InternetAddress[] getRecipientsInternal(final RecipientType type) throws MessagingException {
 		if (type.equals(RecipientType.TO)) {
 			return to;
 		} else if (type.equals(RecipientType.CC)) {
@@ -280,11 +299,14 @@ public class MessageCacheObject extends Message implements Serializable {
 		Address[] retval = getRecipientsInternal(type);
 		if (retval == null) {
 			if (type.equals(RecipientType.TO)) {
-				retval = headers.containsKey(HDR_TO) ? new InternetAddress[] { new DummyAddress(headers.get(HDR_TO)) } : null;
+				retval = headers.containsKey(HDR_TO) ? new InternetAddress[] { new DummyAddress(headers.get(HDR_TO)) }
+						: null;
 			} else if (type.equals(RecipientType.CC)) {
-				retval = headers.containsKey(HDR_CC) ? new InternetAddress[] { new DummyAddress(headers.get(HDR_CC)) } : null;
+				retval = headers.containsKey(HDR_CC) ? new InternetAddress[] { new DummyAddress(headers.get(HDR_CC)) }
+						: null;
 			} else if (type.equals(RecipientType.BCC)) {
-				retval = headers.containsKey(HDR_BCC) ? new InternetAddress[] { new DummyAddress(headers.get(HDR_BCC)) } : null;
+				retval = headers.containsKey(HDR_BCC) ? new InternetAddress[] { new DummyAddress(headers.get(HDR_BCC)) }
+						: null;
 			} else {
 				throw new MessagingException("Unknown recipient type!");
 			}
@@ -337,7 +359,7 @@ public class MessageCacheObject extends Message implements Serializable {
 		try {
 			return subject != null ? subject : headers.containsKey(HDR_SUBJECT) ? MimeUtility.decodeText(headers
 					.get(HDR_SUBJECT)) : null;
-		} catch (UnsupportedEncodingException e) {
+		} catch (final UnsupportedEncodingException e) {
 			LOG.error(e.getMessage(), e);
 			return headers.containsKey(HDR_SUBJECT) ? MessageUtils.decodeMultiEncodedHeader(headers.get(HDR_SUBJECT))
 					: null;
@@ -348,15 +370,23 @@ public class MessageCacheObject extends Message implements Serializable {
 	public void setSubject(final String subject) {
 		this.subject = subject;
 	}
-	
+
 	@Override
 	public boolean isExpunged() {
 		return expunged;
 	}
-	
+
 	@Override
 	public void setExpunged(final boolean expunged) {
 		this.expunged = expunged;
+	}
+
+	public BODYSTRUCTURE getBodystructure() {
+		return bodystructure;
+	}
+
+	public void setBodystructure(final BODYSTRUCTURE bodystructure) {
+		this.bodystructure = bodystructure;
 	}
 
 	private static final String HDR_DATE = "Date";
@@ -367,7 +397,7 @@ public class MessageCacheObject extends Message implements Serializable {
 	public Date getSentDate() throws MessagingException {
 		try {
 			return date != null ? date : headers.containsKey(HDR_DATE) ? MDF.parse(headers.get(HDR_SUBJECT)) : null;
-		} catch (ParseException e) {
+		} catch (final ParseException e) {
 			throw new MessagingException(e.getMessage(), e);
 		}
 	}
@@ -387,7 +417,7 @@ public class MessageCacheObject extends Message implements Serializable {
 	}
 
 	@Override
-	public Flags getFlags()  {
+	public Flags getFlags() {
 		return (Flags) flags.clone();
 	}
 
@@ -446,7 +476,7 @@ public class MessageCacheObject extends Message implements Serializable {
 		} else if (headers.containsKey(HDR_CONTENT_TYPE)) {
 			try {
 				return (contentType = new ContentType(headers.get(HDR_CONTENT_TYPE))).isMimeType(mimeType);
-			} catch (OXException e) {
+			} catch (final OXException e) {
 				throw new MessagingException(e.getMessage(), e);
 			}
 		}
@@ -527,7 +557,7 @@ public class MessageCacheObject extends Message implements Serializable {
 		if (header_name.equalsIgnoreCase(HDR_X_PRIORITY)) {
 			try {
 				priority = parsePriorityStr(header_value);
-			} catch (NumberFormatException e) {
+			} catch (final NumberFormatException e) {
 				throw new MessagingException(String.format("Unsupported header value: %s", header_value), e);
 			}
 			return;
@@ -580,8 +610,9 @@ public class MessageCacheObject extends Message implements Serializable {
 
 	@Override
 	public Address[] getReplyTo() {
-		return replyTo != null ? replyTo : headers.containsKey(HDR_REPLY_TO) ? (replyTo = new InternetAddress[] { new DummyAddress(headers
-				.get(HDR_REPLY_TO)) }) : null;
+		return replyTo != null ? replyTo
+				: headers.containsKey(HDR_REPLY_TO) ? (replyTo = new InternetAddress[] { new DummyAddress(headers
+						.get(HDR_REPLY_TO)) }) : null;
 	}
 
 	@Override
@@ -604,7 +635,7 @@ public class MessageCacheObject extends Message implements Serializable {
 	public void setUid(final long uid) {
 		this.uid = uid;
 	}
-	
+
 	public final char getSeparator() {
 		return separator;
 	}
@@ -657,7 +688,7 @@ public class MessageCacheObject extends Message implements Serializable {
 		public String getAddress() {
 			return address;
 		}
-		
+
 		@Override
 		public String getPersonal() {
 			return null;
@@ -673,5 +704,4 @@ public class MessageCacheObject extends Message implements Serializable {
 		}
 
 	}
-
 }

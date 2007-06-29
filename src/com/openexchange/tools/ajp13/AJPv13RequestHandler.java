@@ -135,7 +135,7 @@ public final class AJPv13RequestHandler {
 
 	private int contentLength;
 
-	private boolean b_contentLength;
+	private boolean bContentLength;
 
 	private int totalRequestedContentLength;
 
@@ -183,6 +183,7 @@ public final class AJPv13RequestHandler {
 				/*
 				 * Read first two bytes
 				 */
+				ajpCon.markListenerNonProcessing();
 				magic = new int[] { ajpCon.getInputStream().read(), ajpCon.getInputStream().read() };
 			} catch (final SocketException e) {
 				throw new AJPv13SocketClosedException(AJPCode.SOCKET_CLOSED_BY_WEB_SERVER, false, e, Integer.valueOf(ajpCon.getPackageNumber()));
@@ -202,6 +203,10 @@ public final class AJPv13RequestHandler {
 				 */
 				ajpCon.setSoTimeout(0);
 			}
+			/*
+			 * Initial bytes have been read, so processing (re-)starts now
+			 */
+			ajpCon.markListenerProcessing();
 		} finally {
 			AJPv13Server.ajpv13ListenerMonitor.decrementNumWaiting();
 		}
@@ -254,10 +259,6 @@ public final class AJPv13RequestHandler {
 			int dataLength = -1;
 			final boolean firstPackage = (ajpCon.getPackageNumber() == 1);
 			dataLength = readInitialBytes(firstPackage && AJPv13Config.getAJPListenerReadTimeout() > 0);
-			/*
-			 * Initial bytes have been read, so processing starts now
-			 */
-			ajpCon.markListenerProcessing();
 			/*
 			 * We received the first package which must contain a prefix code
 			 */
@@ -450,7 +451,7 @@ public final class AJPv13RequestHandler {
 		servletResponseObj = null;
 		ajpRequest = null;
 		contentLength = 0;
-		b_contentLength = false;
+		bContentLength = false;
 		totalRequestedContentLength = 0;
 		headersSent = false;
 		serviceMethodCalled = false;
@@ -479,7 +480,7 @@ public final class AJPv13RequestHandler {
 		sb.append("Servlet: ").append(servletInstance == null ? "null" : servletInstance.getClass().getName()).append(
 				delim);
 		sb.append("Current Request: ").append(ajpRequest.getClass().getName()).append(delim);
-		sb.append("Content Length: ").append(b_contentLength ? String.valueOf(contentLength) : "Not available").append(delim);
+		sb.append("Content Length: ").append(bContentLength ? String.valueOf(contentLength) : "Not available").append(delim);
 		sb.append("Sevlet triggered: ").append(serviceMethodCalled).append(delim);
 		sb.append("Headers sent: ").append(headersSent).append(delim);
 		sb.append("End Response sent: ").append(endResponseSent).append(delim);
@@ -564,12 +565,12 @@ public final class AJPv13RequestHandler {
 	}
 
 	public boolean containsContentLength() {
-		return this.b_contentLength;
+		return this.bContentLength;
 	}
 
 	public void setContentLength(final int contentLength) {
 		this.contentLength = contentLength;
-		this.b_contentLength = true;
+		this.bContentLength = true;
 	}
 
 	public int getTotalRequestedContentLength() {

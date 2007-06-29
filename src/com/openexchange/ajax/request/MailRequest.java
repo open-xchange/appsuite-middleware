@@ -58,6 +58,7 @@ import org.json.JSONObject;
 
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
+import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.api2.MailInterface;
 import com.openexchange.groupware.container.mail.JSONMessageObject;
@@ -68,8 +69,11 @@ import com.openexchange.tools.iterator.SearchIteratorException;
 
 public final class MailRequest {
 	
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(MailRequest.class);
+	
 	private static enum CollectableOperation {
-		MOVE("Move"), COPY("Copy"), STORE_FLAG("Store Flag");
+		MOVE("Move"), COPY("Copy"), STORE_FLAG("Store Flag"), COLOR_LABEL("Color Label");
 		
 		private final String str;
 		
@@ -132,6 +136,8 @@ public final class MailRequest {
 				handleMultiple(jsonObject, mailInterface, CollectableOperation.MOVE);
 			} else if (isStoreFlags(jsonObject)) {
 				handleMultiple(jsonObject, mailInterface, CollectableOperation.STORE_FLAG);
+			} else if (isColorLabel(jsonObject)) {
+				handleMultiple(jsonObject, mailInterface, CollectableOperation.COLOR_LABEL);
 			} else {
 				MAIL_SERVLET.actionPutUpdateMail(session, writer, jsonObject, mailInterface);
 			}
@@ -177,7 +183,8 @@ public final class MailRequest {
 		}
 	}
 	
-	private final void performMultipleInternal(final MailInterface mailInterface) throws JSONException {
+	private void performMultipleInternal(final MailInterface mailInterface) throws JSONException {
+		final long start = System.currentTimeMillis();
 		switch (collectObj.getOperation()) {
 		case MOVE:
 			MAIL_SERVLET.actionPutMailMultiple(session, writer, collectObj.getMailIDs(), collectObj.getSrcFld(),
@@ -189,7 +196,11 @@ public final class MailRequest {
 			break;
 		case STORE_FLAG:
 			MAIL_SERVLET.actionPutStoreFlagsMultiple(session, writer, collectObj.getMailIDs(), collectObj.getSrcFld(),
-					collectObj.getFlagBits(), collectObj.getFlagValue(), mailInterface);
+					collectObj.getFlagInt(), collectObj.getFlagValue(), mailInterface);
+			break;
+		case COLOR_LABEL:
+			MAIL_SERVLET.actionPutColorLabelMultiple(session, writer, collectObj.getMailIDs(), collectObj.getSrcFld(),
+					collectObj.getFlagInt(), mailInterface);
 			break;
 		default:
 			/*
@@ -197,6 +208,11 @@ public final class MailRequest {
 			 * switch-case-statement
 			 */
 			throw new InternalError("Unknown collectable operation: " + collectObj.getOperation());
+		}
+		if (LOG.isInfoEnabled()) {
+			LOG.info(new StringBuilder(100).append("Multiple '").append(collectObj.getOperation().toString()).append(
+					"' mail request successfully performed: ").append(System.currentTimeMillis() - start).append("msec")
+					.toString());
 		}
 	}
 
@@ -211,6 +227,10 @@ public final class MailRequest {
 	private static boolean isStoreFlags(final JSONObject jsonObject) throws JSONException {
 		return jsonObject.has(STR_DATA) && jsonObject.getJSONObject(STR_DATA).has(JSONMessageObject.JSON_FLAGS);
 	}
+	
+	private static boolean isColorLabel(final JSONObject jsonObject) throws JSONException {
+		return jsonObject.has(STR_DATA) && jsonObject.getJSONObject(STR_DATA).has(CommonFields.COLORLABEL);
+	}
 
 	private static final class CollectObject {
 
@@ -222,7 +242,7 @@ public final class MailRequest {
 
 		private final CollectableOperation op;
 		
-		private final int flagBits;
+		private final int flagInt;
 		
 		private final boolean flagValue;
 
@@ -230,13 +250,17 @@ public final class MailRequest {
 			this.srcFld = jsonObject.getString(AJAXServlet.PARAMETER_FOLDERID);
 			if (CollectableOperation.MOVE.equals(op) || CollectableOperation.COPY.equals(op)) {
 				this.destFld = jsonObject.getJSONObject(STR_DATA).getString(FolderFields.FOLDER_ID);
-				flagBits = -1;
+				flagInt = -1;
 				flagValue = false;
 			} else if (CollectableOperation.STORE_FLAG.equals(op)) {
 				this.destFld = null;
 				final JSONObject bodyObj = jsonObject.getJSONObject(STR_DATA);
-				flagBits = bodyObj.getInt(JSONMessageObject.JSON_FLAGS);
+				flagInt = bodyObj.getInt(JSONMessageObject.JSON_FLAGS);
 				flagValue = bodyObj.getBoolean(JSONMessageObject.JSON_VALUE);
+			} else if (CollectableOperation.COLOR_LABEL.equals(op)) {
+				this.destFld = null;
+				flagInt = jsonObject.getJSONObject(STR_DATA).getInt(CommonFields.COLORLABEL);
+				flagValue = false;
 			} else {
 				throw new InternalError("Unknown collectable operation: " + op);
 			}
@@ -249,7 +273,7 @@ public final class MailRequest {
 			this.destFld = destFld;
 			this.mailIDs = new ArrayList<String>();
 			this.op = op;
-			flagBits = -1;
+			flagInt = -1;
 			flagValue = false;
 		}
 
@@ -260,8 +284,11 @@ public final class MailRequest {
 			} else if (CollectableOperation.STORE_FLAG.equals(op)) {
 				final JSONObject bodyObj = jsonObject.getJSONObject(STR_DATA);
 				return (this.op.equals(op) && this.srcFld.equals(jsonObject.getString(AJAXServlet.PARAMETER_FOLDERID))
-						&& flagBits == bodyObj.getInt(JSONMessageObject.JSON_FLAGS) && flagValue == bodyObj
+						&& flagInt == bodyObj.getInt(JSONMessageObject.JSON_FLAGS) && flagValue == bodyObj
 						.getBoolean(JSONMessageObject.JSON_VALUE));
+			} else if (CollectableOperation.COLOR_LABEL.equals(op)) {
+				return (this.op.equals(op) && this.srcFld.equals(jsonObject.getString(AJAXServlet.PARAMETER_FOLDERID))
+						&& flagInt == jsonObject.getJSONObject(STR_DATA).getInt(CommonFields.COLORLABEL));
 			}
 			throw new InternalError("Unknown collectable operation: " + op);
 		}
@@ -286,8 +313,8 @@ public final class MailRequest {
 			return srcFld;
 		}
 		
-		public int getFlagBits() {
-			return flagBits;
+		public int getFlagInt() {
+			return flagInt;
 		}
 		
 		public boolean getFlagValue() {

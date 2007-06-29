@@ -1,3 +1,15 @@
+* 2007-06-29 - thorben.betten@open-xchange.com
+
+ - Added AJP watcher in accordance to database's watcher mechanism:
+   If an AJP listener is in process for longer than x seconds its
+   stack trace is going to logged.
+   Affected Properties in ajp.properties:
+   - AJP_WATCHER_ENABLED must be set to TRUE
+   - AJP_WATCHER_MAX_RUNNING_TIME defines the amount of milliseconds
+   	after which a stack trace is logged
+ - Fastened message update (system flags, color label, spam/ham handling).
+   Those operations are increased to max performance now.
+
 * 2007-06-28 - martin.kauss@open-xchange.com
 
  - Removed enum from recurring API. The API can now be used with Java 1.4.

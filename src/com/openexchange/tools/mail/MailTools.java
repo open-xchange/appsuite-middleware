@@ -84,9 +84,10 @@ public class MailTools {
 		return htmlFormat(originalTag, false);
 	}
 
-	public static final Pattern PATTERN_HREF = Pattern.compile(
-			"<a\\s+href[^>]+>.*?</a>|((?:http|https|ftp|mailto|news|www)(?::|://)[\\p{ASCII}&&[^<\\s]]+)", Pattern.CASE_INSENSITIVE
-					| Pattern.DOTALL);
+	public static final Pattern PATTERN_HREF = Pattern
+			.compile(
+					"<a\\s+href[^>]+>.*?</a>|((?:https?://|ftp://|mailto:|news.|www.)(?:[-A-Z0-9+@#/%?=~_|!:,.;]|&amp;|&(?!\\w+;))*(?:[-A-Z0-9+@#/%=~_|]|&amp;|&(?!\\w+;)))",
+					Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
 
 	/**
 	 * Searching for links using a regexp pattern and convert them to valid href
@@ -100,13 +101,14 @@ public class MailTools {
 			final StringBuffer sb = new StringBuffer(line.length());
 			final StringBuilder tmp = new StringBuilder(200);
 			while (m.find()) {
-				if (m.group(1) != null && !isImgSrc(line, m.start(1))) {
+				final String nonHtmlLink = m.group(1);
+				if (nonHtmlLink == null || (isImgSrc(line, m.start(1)))) {
+					m.appendReplacement(sb, Matcher.quoteReplacement(m.group()));
+				} else {
 					tmp.setLength(0);
 					m.appendReplacement(sb, tmp.append("<a href=\"").append(
-							(m.group(1).startsWith("www") ? "http://" : "")).append(
+							(nonHtmlLink.startsWith("www") || nonHtmlLink.startsWith("news") ? "http://" : "")).append(
 							"$1\" target=\"_blank\" class=\"a-external\">$1</a>").toString());
-				} else {
-					m.appendReplacement(sb, Matcher.quoteReplacement(m.group()));
 				}
 			}
 			m.appendTail(sb);
