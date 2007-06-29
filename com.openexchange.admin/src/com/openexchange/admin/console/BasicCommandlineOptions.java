@@ -169,6 +169,7 @@ public abstract class BasicCommandlineOptions {
         String msg = e.getMessage();
         if( msg != null) {
             System.err.println("Server response:\n "+msg);
+            e.printStackTrace(System.err);
         } else {
             e.printStackTrace(System.err);
         }

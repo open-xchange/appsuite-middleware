@@ -96,9 +96,9 @@ public class PropertyHandler {
         try {
             loadProps(sysprops);
         } catch (final FileNotFoundException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
         } catch (final IOException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
         }
     }
     
@@ -330,8 +330,8 @@ public class PropertyHandler {
             this.configdirname = sysprops.getProperty("configdir");
             addpropsfromfile(this.configdirname + File.separatorChar + "AdminDaemon.properties");
         } else {
-            log.error( "Parameter '-Dconfigdir' not given in system properties!" );
-            log.error( "Now, using default parameter!" );
+            log.error("Parameter '-Dconfigdir' not given in system properties!");
+            log.error("Now, using default parameter!");
         }
     }
     

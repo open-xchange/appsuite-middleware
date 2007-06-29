@@ -141,7 +141,7 @@ public class MySQLAuthenticationImpl implements AuthenticationInterface {
                             rs.close();
                         }
                     } catch (final SQLException ecp) {
-                        log.error("Error closing resultset");
+                        log.error("Error closing resultset", ecp);
                     }
 
                     try {
@@ -149,7 +149,7 @@ public class MySQLAuthenticationImpl implements AuthenticationInterface {
                             prep.close();
                         }
                     } catch (final SQLException ecp) {
-                        log.error("Error closing statement");
+                        log.error("Error closing statement", ecp);
                     }
 
                     try {
@@ -218,7 +218,7 @@ public class MySQLAuthenticationImpl implements AuthenticationInterface {
                         rs.close();
                     }
                 } catch (final SQLException ecp) {
-                    log.error("Error closing resultset");
+                    log.error("Error closing resultset", ecp);
                 }
 
                 try {
@@ -226,7 +226,7 @@ public class MySQLAuthenticationImpl implements AuthenticationInterface {
                         prep.close();
                     }
                 } catch (final SQLException ecp) {
-                    log.error("Error closing statement");
+                    log.error("Error closing statement", ecp);
                 }
 
                 try {

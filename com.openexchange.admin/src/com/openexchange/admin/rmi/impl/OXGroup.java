@@ -118,7 +118,7 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
         try {
             doAuthentication(auth, ctx);
         } catch (final InvalidDataException e2) {
-            log.error(e2);
+            log.error(e2.getMessage(), e2);
             throw e2;
         }
 
@@ -160,10 +160,10 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
                 }
             }
         } catch (final InvalidDataException e2) {
-            log.error(e2);
+            log.error(e2.getMessage(), e2);
             throw e2;
         } catch (final NoSuchUserException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw e;
         }
 
@@ -190,7 +190,7 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
                                 interfacelist.add(oxgroup);
                             } catch (final PluginException e) {
                                 log.error("Error while calling create for plugin: " + bundlename, e);
-                                log.error("Now doing rollback for everything until now...");
+                                log.info("Now doing rollback for everything until now...");
                                 for (final OXGroupPluginInterface oxgroupinterface : interfacelist) {
                                     try {
                                         oxgroupinterface.delete(ctx, new Group[] { grp }, auth);
@@ -231,7 +231,7 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
         try {            
             doAuthentication(auth, ctx);
         } catch (final InvalidDataException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw e;
         }
 
@@ -263,7 +263,7 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
         try {                        
             doAuthentication(auth, ctx);
         } catch (final InvalidDataException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw e;
         }
 
@@ -323,7 +323,7 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
         try {
             doAuthentication(auth, ctx);
         } catch (final InvalidDataException e1) {
-            log.error(e1);
+            log.error(e1.getMessage(), e1);
             throw e1;
         }
 
@@ -362,10 +362,10 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
             }
 
         } catch (final InvalidDataException e1) {
-            log.error(e1);
+            log.error(e1.getMessage(), e1);
             throw e1;
         } catch (final NoSuchUserException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw e;
         }
 
@@ -422,7 +422,7 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
         try {
             doAuthentication(auth, ctx);
         } catch (final InvalidDataException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw e;
         }
 
@@ -449,7 +449,7 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
                 throw new InvalidDataException("Member already exists in group");
             }
         } catch (final InvalidDataException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw e;
         }
 
@@ -476,7 +476,7 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
             doAuthentication(auth, ctx);
 
         } catch (final InvalidDataException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw e;
         }
 
@@ -549,7 +549,7 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
                 grp_ids[i++] = grp_id;
             }
         } catch (final InvalidDataException e1) {
-            log.error(e1);
+            log.error(e1.getMessage(), e1);
             throw e1;
         }
 
@@ -619,7 +619,7 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
             doAuthentication(auth, ctx);
 
         } catch (final InvalidDataException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw e;
         }
 
@@ -673,7 +673,7 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
         try {
             doAuthentication(auth, ctx);
         } catch (final InvalidDataException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw e;
         }
 
@@ -737,7 +737,7 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
                 }
             }
         } catch (final InvalidDataException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw e;
         }
 
@@ -808,7 +808,7 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
 
         if (tools.schemaBeingLockedOrNeedsUpdate(ctx)) {
             final DatabaseUpdateException databaseUpdateException = new DatabaseUpdateException("Database must be updated or currently is beeing updated");
-            log.error(databaseUpdateException);
+            log.error(databaseUpdateException.getMessage(), databaseUpdateException);
             throw databaseUpdateException;
         }
     }

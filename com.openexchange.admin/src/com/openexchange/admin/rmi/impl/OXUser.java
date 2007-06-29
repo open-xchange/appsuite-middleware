@@ -163,7 +163,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
             // validate email adresss
             tools.checkPrimaryMail(ctx, usr.getPrimaryEmail());
         } catch (final InvalidDataException e2) {
-            log.error(e2);
+            log.error(e2.getMessage(), e2);
             throw e2;
         }
 
@@ -219,7 +219,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
                                     interfacelist.add(oxuser);
                                 } catch (final PluginException e) {
                                     log.error("Error while calling create for plugin: " + bundlename, e);
-                                    log.error("Now doing rollback for everything until now...");
+                                    log.info("Now doing rollback for everything until now...");
                                     for (final OXUserPluginInterface oxuserinterface : interfacelist) {
                                         try {
                                             oxuserinterface.delete(ctx, new User[] { usr }, auth);
@@ -268,7 +268,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
            
             if (!tools.existsUser(ctx, usrdata.getId())) {
                 final NoSuchUserException noSuchUserException = new NoSuchUserException("No such user " + usrdata.getId() + " in context " + ctx.getIdAsInt());
-                log.error(noSuchUserException);
+                log.error(noSuchUserException.getMessage(), noSuchUserException);
                 throw noSuchUserException;
             }
 
@@ -288,7 +288,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
             
             if (tools.schemaBeingLockedOrNeedsUpdate(ctx)) {
                 final DatabaseUpdateException databaseUpdateException = new DatabaseUpdateException("Database must be updated or currently is beeing updated");
-                log.error(databaseUpdateException);
+                log.error(databaseUpdateException.getMessage(), databaseUpdateException);
                 throw databaseUpdateException;
             }
             
@@ -301,7 +301,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
             
             checkChangeUserData(ctx, usrdata, dbuser[0], this.prop);
         } catch (final InvalidDataException e1) {
-            log.error(e1);
+            log.error(e1.getMessage(), e1);
             throw e1;
         }
         
@@ -347,7 +347,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
             JCS cache = JCS.getInstance("User");
             cache.remove(new CacheKey(ctx.getIdAsInt(), usrdata.getId()));
         } catch (final CacheException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
         }
     }
 
@@ -365,7 +365,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         
         if (users.length == 0) {
             final InvalidDataException e = new InvalidDataException("User array is empty");
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw e;
         }
         
@@ -384,7 +384,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
             // FIXME: Change function form int to user object
             if (!tools.existsUser(ctx, user_ids)) {
                 final NoSuchUserException noSuchUserException = new NoSuchUserException("No such user " + Arrays.toString(users) + " in context " + ctx.getIdAsInt());
-                log.error(noSuchUserException);
+                log.error(noSuchUserException.getMessage(), noSuchUserException);
                 throw noSuchUserException;
             }
             for (final User user : users) {
@@ -393,7 +393,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
                 }
             }
         } catch (final InvalidDataException e1) {
-            log.error(e1);
+            log.error(e1.getMessage(), e1);
             throw e1;
         }
 
@@ -469,7 +469,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
 
         if (!tools.existsUser(ctx, user_id)) {
             final NoSuchUserException noSuchUserException = new NoSuchUserException("No such user " + user_id + " in context " + ctx.getIdAsInt());
-            log.error(noSuchUserException);
+            log.error(noSuchUserException.getMessage(), noSuchUserException);
             throw noSuchUserException;
         }
 
@@ -497,7 +497,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
 
         if (!tools.existsUser(ctx, user_id)) {
             final NoSuchUserException noSuchUserException = new NoSuchUserException("No such user " + user_id + " in context " + ctx.getIdAsInt());
-            log.error(noSuchUserException);
+            log.error(noSuchUserException.getMessage(), noSuchUserException);
             throw noSuchUserException;
         }
 
@@ -528,7 +528,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
     public User[] getData(final Context ctx, final int[] user_ids, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException, DatabaseUpdateException {
         if (null == user_ids) {
             final InvalidDataException invalidDataException = new InvalidDataException("Array of user ids is empty");
-            log.error(invalidDataException);
+            log.error(invalidDataException.getMessage(), invalidDataException);
             throw invalidDataException;
         }
         
@@ -560,7 +560,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
                 throw new InvalidDataException();
             }
         } catch (final InvalidDataException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw e;
         }
         
@@ -584,18 +584,17 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
                         .getLogin());
                 // check if given user is not admin, if he is admin, the
                 if (!tools.isContextAdmin(ctx, auth_user_id)) {
+                    final InvalidCredentialsException invalidCredentialsException = new InvalidCredentialsException("Permission denied");
                     if (users.length > 1) {
                         log.error("User sent more than 1 users to get data for. Only context admin is allowed to do that");
-                        throw new InvalidCredentialsException(
-                                "Permission denied");
+                        throw invalidCredentialsException;
                         // one user cannot edit more than his own data
                     } else {
                         doUserAuthentication(auth, ctx);
                         // its possible that he wants his own data
                         if (users[0].getId() != null) {
                             if (users[0].getId().intValue() != auth_user_id) {
-                                throw new InvalidCredentialsException(
-                                        "Permission denied");
+                                throw invalidCredentialsException;
                             }
                         } else {
                             // id not set, try to resolv id by username and then
@@ -606,16 +605,12 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
                                         .getUserIDByUsername(ctx, users[0]
                                                 .getUsername());
                                 if (check_user_id != auth_user_id) {
-                                    log
-                                            .debug("user[0].getId() does not match id from Credentials.getLogin()");
-                                    throw new InvalidCredentialsException(
-                                            "Permission denied");
+                                    log.debug("user[0].getId() does not match id from Credentials.getLogin()");
+                                    throw invalidCredentialsException;
                                 }
                             } else {
-                                log
-                                        .debug("Cannot resolv user[0]`s internal id because the username is not set!");
-                                throw new InvalidDataException(
-                                        "Username and userid missing.");
+                                log.debug("Cannot resolv user[0]`s internal id because the username is not set!");
+                                throw new InvalidDataException("Username and userid missing.");
                             }
                         }
                     }
@@ -627,11 +622,8 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
                 doAuthentication(auth, ctx);
             }
         
-            
-            
             checkSchemaBeingLocked(ctx, tools);
             
-
             for (final User usr : users) {
                 if (usr.getId()!=null && !tools.existsUser(ctx, usr.getId())) {
                     throw new NoSuchUserException("No such user "+usr);
@@ -655,10 +647,10 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
             }
 
         } catch (final InvalidDataException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw(e);
         } catch (final InvalidCredentialsException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw(e);
         }
          
@@ -829,7 +821,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
     private void checkSchemaBeingLocked(final Context ctx, final OXToolStorageInterface tools) throws StorageException, DatabaseUpdateException, NoSuchContextException {
         if (tools.schemaBeingLockedOrNeedsUpdate(ctx)) {
             final DatabaseUpdateException databaseUpdateException = new DatabaseUpdateException("Database must be updated or currently is beeing updated");
-            log.error(databaseUpdateException);
+            log.error(databaseUpdateException.getMessage(), databaseUpdateException);
             throw databaseUpdateException;
         }
     }
@@ -900,7 +892,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         
         if (user.getId()!=null && !tools.existsUser(ctx, user.getId().intValue())) {
             final NoSuchUserException noSuchUserException = new NoSuchUserException("No such user " + user.getId().intValue() + " in context " + ctx.getIdAsInt());
-            log.error(noSuchUserException);
+            log.error(noSuchUserException.getMessage(), noSuchUserException);
             throw noSuchUserException;           
         }
         
