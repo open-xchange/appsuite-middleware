@@ -124,13 +124,25 @@ public abstract class AbstractConfig {
      * @param def default value to return if the property isn't set.
      * @return the boolean value of the property.
      */
-    protected boolean getBooleanInternal(final String key, final boolean def) {
-        boolean retval = def;
-        final String value = getPropertyInternal(key);
-        if (null != value) {
-            retval = Boolean.parseBoolean(value);
+    protected final boolean getBooleanInternal(final String key,
+        final boolean def) {
+        return getBooleanInternal(key, Boolean.valueOf(def).toString());
         }
-        return retval;
+
+    /**
+     * Returns the boolean value of the property. If the propery isn't set the
+     * def arguments is returned.
+     * @param key the property name.
+     * @param def default value to return if the property isn't set.
+     * @return the boolean value of the property.
+     */
+    protected final boolean getBooleanInternal(final String key,
+        final String def) {
+        String value = getPropertyInternal(key);
+        if (null == value) {
+            value = def;
+    }
+        return Boolean.parseBoolean(value);
     }
 
     /**

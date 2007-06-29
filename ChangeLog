@@ -89,6 +89,9 @@
     CONFIG CHANGE: 2 additional options in ajp.properties and server.properties.
     Both have a fallback of "localhost".
   - Bugfix #7289 Forwarding cookies from existing session to umin login.
+  - Added option for showing external participants without email address.
+    CONFIG CHANGE: new file participant.properties and new path to this file in
+    system.properties.
 
 * 2007-06-12 - francisco.laguna@open-xchange.com
 

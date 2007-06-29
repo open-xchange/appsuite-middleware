@@ -207,9 +207,14 @@ public final class SystemConfig extends AbstractConfig {
          */
         ConfigJumpConf("ConfigJumpConf"),
         /**
+         * participant.properties.
+         */
+        PARTICIPANT("Participant"),
+        /**
          * UserConfigurationStorage
          */
         USER_CONF_STORAGE("UserConfigurationStorage");
+
         /**
          * Name of the property in the server.properties file.
          */
