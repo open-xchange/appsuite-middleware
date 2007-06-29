@@ -1,4 +1,5 @@
-cmdmuxer*
+createcontext
+createuser
 initconfigdb
 jobControl
 oxinstaller
