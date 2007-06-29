@@ -8,8 +8,10 @@ import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
 import com.openexchange.admin.rmi.dataobjects.Server;
 import com.openexchange.admin.storage.sqlStorage.OXUtilSQLStorage;
+import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.groupware.IDGenerator;
 import java.sql.Connection;
+import java.sql.DataTruncation;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -53,6 +55,16 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             con.commit();
 
             return res_id;
+        }catch (final DataTruncation dt){
+            log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);   
+            try {
+                if (con != null) {
+                    con.rollback();
+                }
+            } catch (final SQLException exp) {
+                log.error("Error processing rollback of configdb connection!", exp);
+            }        
+            throw AdminCache.parseDataTruncation(dt);
         } catch (final PoolException pexp) {
             log.error("Pool error", pexp);
             throw new StorageException(pexp);
@@ -198,7 +210,9 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             
             con.commit();
             prep.close();
-
+        }catch (final DataTruncation dt){
+            log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);  
+            throw AdminCache.parseDataTruncation(dt);
         } catch (final PoolException pe) {
             log.error("Pool Error", pe);
             throw new StorageException(pe);
@@ -262,6 +276,16 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             prep.close();
 
             configdb_write_con.commit();
+        }catch (final DataTruncation dt){
+            log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);         
+            try {
+                if (configdb_write_con != null && !configdb_write_con.getAutoCommit()) {
+                    configdb_write_con.rollback();
+                }
+            } catch (final SQLException expd) {
+                log.error("Error processing rollback of configdb connection!", expd);
+            }
+            throw AdminCache.parseDataTruncation(dt);
         } catch (final PoolException pe) {
             log.error("Pool Error", pe);
             throw new StorageException(pe);
@@ -272,7 +296,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                     configdb_write_con.rollback();
                 }
             } catch (final SQLException expd) {
-                log.error("Error processing rollback of configdb connection!", exp);
+                log.error("Error processing rollback of configdb connection!", expd);
             }
             throw new StorageException(exp);
         } finally {
@@ -629,6 +653,16 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             }
 
             return db_id;
+        }catch (DataTruncation dt){
+            log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG,dt);
+            try {
+                if (con != null) {
+                    con.rollback();
+                }
+            } catch (final SQLException exp) {
+                log.error("Error processing rollback of configdb connection!", exp);
+            }
+            throw AdminCache.parseDataTruncation(dt);
         } catch (final PoolException pe) {
             log.error("Pool Error", pe);
             throw new StorageException(pe);
@@ -686,6 +720,16 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             con.commit();
 
             return fstore_id;
+        }catch (DataTruncation dt){
+            log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG,dt);
+            try {
+                if (con != null) {
+                    con.rollback();
+                }
+            } catch (final SQLException exp) {
+                log.error("Error processing rollback of configdb connection!", exp);
+            }
+            throw AdminCache.parseDataTruncation(dt);
         } catch (final PoolException pe) {
             log.error("Pool Error", pe);
             throw new StorageException(pe);
@@ -696,7 +740,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                     con.rollback();
                 }
             } catch (final SQLException exp) {
-                log.error("Error processing rollback of ox connection!", exp);
+                log.error("Error processing rollback of configdb connection!", exp);
             }
             throw new StorageException(ecp);
         } finally {
@@ -741,7 +785,9 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             prep.close();
 
             return srv_id;
-
+        }catch (DataTruncation dt){
+            log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG,dt);            
+            throw AdminCache.parseDataTruncation(dt);
         } catch (final PoolException pe) {
             log.error("Pool Error", pe);
             throw new StorageException(pe);

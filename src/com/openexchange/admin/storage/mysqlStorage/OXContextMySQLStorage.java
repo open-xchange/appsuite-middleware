@@ -4,6 +4,7 @@ package com.openexchange.admin.storage.mysqlStorage;
 import com.openexchange.api2.OXException;
 import java.rmi.RemoteException;
 import java.sql.Connection;
+import java.sql.DataTruncation;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -38,6 +39,7 @@ import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
 import com.openexchange.admin.storage.sqlStorage.OXContextSQLStorage;
+import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.database.TableColumnObject;
 import com.openexchange.admin.tools.database.TableObject;
 import com.openexchange.admin.tools.database.TableRowObject;
@@ -1015,6 +1017,9 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             }
 
             configdb_write_con.commit();
+        }catch (final DataTruncation dt){
+            log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
+            throw AdminCache.parseDataTruncation(dt);
         } catch (final SQLException exp) {
             log.error("SQL Error", exp);
             try {
@@ -1191,6 +1196,10 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             // TODO: cutmasta call setters and fill all required fields
             ctx.setEnabled(true);
             return ctx;
+        }catch (final DataTruncation dt){
+            log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
+            this.oxcontextcommon.handleCreateContextRollback(configdb_write_con, ox_write_con, context_id);
+            throw AdminCache.parseDataTruncation(dt);
         } catch (final OXException oxae) {
             log.error("Error", oxae);
             this.oxcontextcommon.handleCreateContextRollback(configdb_write_con, ox_write_con, context_id);
