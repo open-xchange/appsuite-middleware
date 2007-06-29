@@ -70,11 +70,11 @@ public class PluginStarter {
                 log.debug("Loading context implementation: " + prop.getProp(PropertyHandlerExtended.CONTEXT_STORAGE, null));
                 log.debug("Loading util implementation: " + prop.getProp(PropertyHandlerExtended.UTIL_STORAGE, null));
             }            
-        } catch (RemoteException e) {
-            log.error(e);
+        } catch (final RemoteException e) {
+            log.error(e.getMessage(), e);
             throw e;
-        } catch (AlreadyBoundException e) {
-            log.error(e);
+        } catch (final AlreadyBoundException e) {
+            log.error(e.getMessage(), e);
             throw e;
         }
     }
@@ -86,14 +86,14 @@ public class PluginStarter {
                 registry.unbind(OXContextInterface.RMI_NAME);
                 registry.unbind(OXUtilInterface.RMI_NAME);
             }
-        } catch (AccessException e) {
-            log.error(e);
+        } catch (final AccessException e) {
+            log.error(e.getMessage(), e);
             throw e;
-        } catch (RemoteException e) {
-            log.error(e);
+        } catch (final RemoteException e) {
+            log.error(e.getMessage(), e);
             throw e;
-        } catch (NotBoundException e) {
-            log.error(e);
+        } catch (final NotBoundException e) {
+            log.error(e.getMessage(), e);
             throw e;
         }
 
