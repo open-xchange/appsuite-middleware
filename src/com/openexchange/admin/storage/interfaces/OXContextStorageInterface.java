@@ -57,12 +57,13 @@ public abstract class OXContextStorageInterface {
                     try {
                         implementingClass = Class.forName(className).asSubclass(OXContextStorageInterface.class);
                     } catch (final ClassNotFoundException e) {
-                        log.error(e);
+                        log.error(e.getMessage(), e);
                         throw new StorageException(e);
                     }
                 } else {
-                    log.error("Property for context_storage not defined");
-                    throw new StorageException("Property for context_storage not defined");
+                    final StorageException storageException = new StorageException("Property for context_storage not defined");
+                    log.error(storageException.getMessage(), storageException);
+                    throw storageException;
                 }
             }
         }
@@ -71,22 +72,22 @@ public abstract class OXContextStorageInterface {
             cons = implementingClass.getConstructor(new Class[] {});
             return cons.newInstance(new Object[] {});
         } catch (final SecurityException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw new StorageException(e);
         } catch (final NoSuchMethodException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw new StorageException(e);
         } catch (final IllegalArgumentException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw new StorageException(e);
         } catch (final InstantiationException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw new StorageException(e);
         } catch (final IllegalAccessException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw new StorageException(e);
         } catch (final InvocationTargetException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw new StorageException(e);
         }
     }

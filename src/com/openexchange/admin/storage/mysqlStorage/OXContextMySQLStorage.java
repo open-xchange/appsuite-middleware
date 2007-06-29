@@ -692,7 +692,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 try {
                     target_ox_db_con.rollback();
                     log.error("Target database rollback finished for context " + ctx.getIdAsInt());
-                } catch (final Exception ecp) {
+                } catch (final SQLException ecp) {
                     log.error("Error rollback on target database", ecp);
                 }
             }
@@ -702,7 +702,9 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 log.error("Now revoking entries in configdb (cs2dbpool) for context " + ctx.getIdAsInt());
                 revokeConfigdbMapping(contextserver2dbpool_backup, configdb_write_con, ctx.getIdAsInt());
                 cache.resetPoolMappingForContext(ctx.getIdAsInt());
-            } catch (final Exception ecp) {
+            } catch (final SQLException ecp) {
+                log.fatal("!!!!!!WARNING!!!!! Could not revoke configdb entries for " + ctx.getIdAsInt() + "!!!!!!WARNING!!! INFORM ADMINISTRATOR!!!!!!", ecp);
+            } catch (final PoolException ecp) {
                 log.fatal("!!!!!!WARNING!!!!! Could not revoke configdb entries for " + ctx.getIdAsInt() + "!!!!!!WARNING!!! INFORM ADMINISTRATOR!!!!!!", ecp);
             }
 

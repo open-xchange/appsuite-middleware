@@ -52,7 +52,7 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
             doNullCheck(db);
         } catch (final InvalidDataException e) {
             final InvalidDataException invalidDataException = new InvalidDataException("Database is null");
-            log.error(invalidDataException);
+            log.error(invalidDataException.getMessage(), invalidDataException);
             throw invalidDataException;
         }        
         doAuthentication(auth);
@@ -67,10 +67,10 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
                 throw new InvalidDataException("Invalid db url");
             }
         } catch (final StorageException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw e;
         } catch (final InvalidDataException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw e;
         }
     }
@@ -79,9 +79,9 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
         try {
             doNullCheck(filestore);
         } catch (final InvalidDataException e) {
-            new InvalidDataException("Filestore is null");
-            log.error(e);
-            throw e;
+            final InvalidDataException invalidDataException = new InvalidDataException("Filestore is null");
+            log.error(invalidDataException.getMessage(), invalidDataException);
+            throw invalidDataException;
         }        
         doAuthentication(auth);
         
@@ -95,10 +95,10 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
                 throw new InvalidDataException("Invalid store url");
             }
         } catch (final StorageException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw e;
         } catch (final InvalidDataException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw e;
         }
     }
@@ -107,9 +107,9 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
         try {
             doNullCheck(ctx, db_handle);
         } catch (final InvalidDataException e) {
-            new InvalidDataException("Context or database is null");
-            log.error(e);
-            throw e;
+            final InvalidDataException invalidDataException = new InvalidDataException("Context or database is null");
+            log.error(invalidDataException.getMessage(), invalidDataException);
+            throw invalidDataException;
         }        
         doAuthentication(auth);
         
@@ -122,7 +122,7 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
             oxcox.changeDatabase(ctx, db_handle);
         } catch (final StorageException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw e;
         }
     }
@@ -132,7 +132,7 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
             doNullCheck(ctx, filestore);
         } catch (final InvalidDataException e) {
             new InvalidDataException("Context or filestore is null");
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw e;
         }        
         doAuthentication(auth);
@@ -149,7 +149,7 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
             oxcox.changeStorageData(ctx, filestore);
         } catch (final StorageException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw e;
         }        
     }
@@ -158,9 +158,9 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
         try {
             doNullCheck(ctx, dst_filestore, reason);
         } catch (final InvalidDataException e) {
-            new InvalidDataException("Context or filestore or reason is null");
-            log.error(e);
-            throw e;
+            final InvalidDataException invalidDataException = new InvalidDataException("Context or filestore or reason is null");
+            log.error(invalidDataException.getMessage(), invalidDataException);
+            throw invalidDataException;
         }        
         doAuthentication(auth);
         
@@ -216,14 +216,15 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
                     }
                 }
 
+                final OXContextException contextException = new OXContextException("Unable to move filestore");
                 if (src == null) {
                     log.error("src is null");
                     reEnableContext(ctx, oxcox);
-                    throw new OXContextException("Unable to move filestore");
+                    throw contextException;
                 } else if (dst == null) {
                     log.error("dst is null");
                     reEnableContext(ctx, oxcox);
-                    throw new OXContextException("Unable to move filestore");
+                    throw contextException;
                 }
 
                 final FilestoreDataMover fsdm = new FilestoreDataMover(src.toString(), dst.toString(), ctx, dst_filestore);
@@ -239,13 +240,13 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
         } catch (final URISyntaxException e) {
             throw new StorageException(e);
         } catch (final NoSuchFilestoreException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw e;
         } catch (final NoSuchReasonException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw e;
         } catch (final OXContextException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw e;
         }
         return null;
@@ -284,13 +285,13 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
             return TaskManager.getInstance().addJob(ddm, "movedatabase", "move context " + context_id + " to database " + db.getId());
 //            ClientAdminThreadExtended.ajx.addJob(ddm, context_id, db.getId(), reason_id, AdminJob.Mode.MOVE_DATABASE);
         } catch (final OXContextException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw e;
         } catch (final DatabaseUpdateException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw e;
         } catch (final NoSuchContextException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw e;
         }
     }
@@ -302,7 +303,7 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
             oxcox.enableAll();
         } catch (final StorageException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw e;
         }        
     }
@@ -323,10 +324,10 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
             oxcox.disableAll(reason);
         } catch (final StorageException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw e;
         } catch (final NoSuchReasonException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw e;
         }
         
@@ -337,7 +338,7 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
             doNullCheck(ctx);
         } catch (InvalidDataException e) {
             final InvalidDataException invalidDataException = new InvalidDataException("Context is null");
-            log.error(invalidDataException);
+            log.error(invalidDataException.getMessage(), invalidDataException);
             throw invalidDataException;
         }
         
@@ -360,13 +361,13 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
             removeFromAuthCache(ctx);
             
         } catch (final StorageException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw e;
         } catch (final NoSuchContextException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw e;
         } catch (final DatabaseUpdateException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw e;
         }
     }
@@ -376,7 +377,7 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
             doNullCheck(search_pattern);
         } catch (final InvalidDataException e) {
             final InvalidDataException invalidDataException = new InvalidDataException("Search pattern is null");
-            log.error(invalidDataException);
+            log.error(invalidDataException.getMessage(), invalidDataException);
             throw invalidDataException;
         }        
         doAuthentication(auth);
@@ -387,7 +388,7 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
             return oxcox.searchContext(search_pattern);
         } catch (final StorageException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw e;
         }        
     }
@@ -418,16 +419,16 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
             oxcox.disable(ctx, reason);
         } catch (final NoSuchContextException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw e;
         } catch (final NoSuchReasonException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw e;
         } catch (final StorageException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw e;
         } catch (final OXContextException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw e;
         }
     }
@@ -437,7 +438,7 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
             doNullCheck(ctx);
         } catch (InvalidDataException e1) {
             final InvalidDataException invalidDataException = new InvalidDataException("Context is null");
-            log.error(invalidDataException);
+            log.error(invalidDataException.getMessage(), invalidDataException);
             throw invalidDataException;
         }
         
@@ -453,10 +454,10 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
             oxcox.enable(ctx);
         } catch (final StorageException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw e;
         } catch (final NoSuchContextException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw e;
         }
     }
@@ -466,7 +467,7 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
             doNullCheck(ctx);
         } catch (InvalidDataException e1) {
             final InvalidDataException invalidDataException = new InvalidDataException("Context is null");
-            log.error(invalidDataException);
+            log.error(invalidDataException.getMessage(), invalidDataException);
             throw invalidDataException;
         }
         
@@ -482,10 +483,10 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
             return oxcox.getSetup(ctx);
         } catch (final StorageException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw e;
         } catch (final NoSuchContextException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw e;
         }
     }
@@ -495,8 +496,8 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
             doNullCheck(ctx);
         } catch (final InvalidDataException e) {
             final InvalidDataException invalidDataException = new InvalidDataException("Context is null");
-            log.error(invalidDataException);
-            throw e;
+            log.error(invalidDataException.getMessage(), invalidDataException);
+            throw invalidDataException;
         }        
         doAuthentication(auth);
         
@@ -510,10 +511,10 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
             oxcox.changeQuota(ctx, quota_max);
         } catch (final StorageException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw e;
         } catch (final NoSuchContextException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw e;
         }
     }
@@ -537,13 +538,13 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
             Monitor.incrementNumberOfCreateContextCalled();
             return retval;
         } catch (final ContextExistsException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw e;
         } catch (final InvalidDataException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw e;
         } catch (final StorageException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw e;
         }
     }
@@ -567,7 +568,7 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
     private void checkSchemaBeingLocked(final Context ctx, final OXToolStorageInterface tools) throws StorageException, DatabaseUpdateException, NoSuchContextException {
         if (tools.schemaBeingLockedOrNeedsUpdate(ctx)) {
             final DatabaseUpdateException databaseUpdateException = new DatabaseUpdateException("Database must be updated or currently is beeing updated");
-            log.error(databaseUpdateException);
+            log.error(databaseUpdateException.getMessage(), databaseUpdateException);
             throw databaseUpdateException;
         }
     }
