@@ -54,6 +54,7 @@ import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.DataTruncation;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -70,13 +71,17 @@ import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.exceptions.DatabaseLockedException;
 import com.openexchange.admin.rmi.exceptions.PoolException;
+import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.sqlStorage.OXAdminPoolDBPool;
 import com.openexchange.admin.storage.sqlStorage.OXAdminPoolInterface;
 import com.openexchange.groupware.delete.DeleteRegistry;
+import com.openexchange.tools.sql.DBUtils;
 
 public class AdminCache {
     private static final String DATABASE_INIT_SCRIPTS_ERROR_MESSAGE = "An error occured while reading the database initialization scripts.";
 
+    public final static String DATA_TRUNCATION_ERROR_MSG = "Data too long for column(s)";
+    
     private PropertyHandler prop = null;
 
     private final Log log = LogFactory.getLog(this.getClass());
@@ -353,6 +358,25 @@ public class AdminCache {
             }
         }
         return ret;
+    }
+    
+    /**
+     * Parses the truncated fields out of the DataTruncation exception and
+     * transforms this to a StorageException.
+     * */
+    public final static StorageException parseDataTruncation(DataTruncation dt){
+        final String[] fields = DBUtils.parseTruncatedFields(dt);
+        final StringBuilder sFields = new StringBuilder();
+        sFields.append("Data too long for underlying storage!Error field(s): ");
+        for (String field : fields) {
+            sFields.append(field);
+            sFields.append(",");
+        }
+        sFields.deleteCharAt(sFields.length()-1);
+        
+        final StorageException st = new StorageException(sFields.toString());
+        st.setStackTrace(dt.getStackTrace());
+        return st;
     }
 
     private String[] getInitialOXDBOrder() {
