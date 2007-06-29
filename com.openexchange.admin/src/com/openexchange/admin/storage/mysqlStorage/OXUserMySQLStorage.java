@@ -87,6 +87,7 @@ import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
 
+import java.sql.DataTruncation;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Types;
@@ -538,6 +539,14 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
             // fire up
             write_ox_con.commit();
+        }catch (final DataTruncation dt){
+            log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
+            try {
+                write_ox_con.rollback();
+            } catch (final SQLException e2) {
+                log.error("Error doing rollback", e2);
+            }
+            throw AdminCache.parseDataTruncation(dt);
         } catch (final SQLException e) {
             log.error("SQL Error", e);
             try {
@@ -1072,6 +1081,18 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             write_ox_con.commit();
             return id_for_client;
 
+            
+        }catch (final DataTruncation dt){
+            log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
+            try {
+                write_ox_con.rollback();
+                if (log.isDebugEnabled()) {
+                    log.debug("Rollback successfull for ox db write connection");
+                }
+            } catch (final SQLException ecp) {
+                log.error("Error rollback ox db write connection", ecp);
+            }
+            throw AdminCache.parseDataTruncation(dt);
         } catch (final SQLException e) {
             log.error("SQL Error", e);
             try {
@@ -1174,6 +1195,15 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
             return create(ctx, usrdata, moduleAccess, write_ox_con,
                     internal_user_id, contact_id, uid_number);
+        }catch (final DataTruncation dt){
+            log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
+            try {
+                write_ox_con.rollback();
+                log.debug("Rollback successfull for ox db write connection");
+            } catch (final SQLException ecp) {
+                log.error("Error rollback ox db write connection", ecp);
+            }
+            throw AdminCache.parseDataTruncation(dt);
         } catch (final SQLException sql) {
             log.error("SQL Error", sql);
             // rollback operations on ox db connection
@@ -1722,6 +1752,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             prep_edit_user.setInt(2, ctx.getIdAsInt());
             prep_edit_user.setInt(3, user_id);
             prep_edit_user.executeUpdate();
+            
         } catch (final SQLException sqle) {
             log.error("SQL Error ", sqle);
             throw new StorageException(sqle);
@@ -1874,6 +1905,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
 
             del_st.executeUpdate();
+        }catch (final DataTruncation dt){
+            log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
+            throw AdminCache.parseDataTruncation(dt);
         } catch (final SQLException sqle) {
             log.error("SQL Error ", sqle);
             throw new StorageException(sqle);

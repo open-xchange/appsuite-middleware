@@ -49,6 +49,7 @@
 package com.openexchange.admin.storage.mysqlStorage;
 
 import java.sql.Connection;
+import java.sql.DataTruncation;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -102,7 +103,9 @@ public class OXUtilMySQLStorageCommon {
             st.executeBatch();
 
             pumpData2Database(cache.getOXDBInitialQueries(), "ox initial", con, db.getScheme());
-
+        }catch (final DataTruncation dt){
+            log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
+            throw AdminCache.parseDataTruncation(dt);
         } catch (final OXGenericException oxgen) {
             log.error("Error reading DB init Queries!", oxgen);
             throw new StorageException(oxgen);
