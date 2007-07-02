@@ -67,6 +67,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.configuration.SystemConfig;
+import com.openexchange.groupware.imap.IMAPProperties.BoolCapVal;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.sessiond.SessionObject;
 
@@ -477,10 +478,10 @@ public class IMAPPropertiesFactory {
 				IMAPProperties.setSmtpsPort(Integer.parseInt(props.getProperty(PROP_SMTPS_PORT, "465")));
 				logBuilder.append("\tSMTP/S port: ").append(IMAPProperties.getSmtpsPortInternal()).append('\n');
 
-				IMAPProperties.setSupportsACLs(STR_TRUE.equalsIgnoreCase(props.getProperty(PROP_IMAP_SUPPORTS_ACL,
+				IMAPProperties.setSupportsACLs(BoolCapVal.parseBoolCapVal(props.getProperty(PROP_IMAP_SUPPORTS_ACL,
 						STR_FALSE)));
 				logBuilder.append("\tSupport ACLs: ").append(IMAPProperties.isSupportsACLsInternal()).append('\n');
-				
+
 				IMAPProperties.setImapTimeout(Integer.parseInt(props.getProperty(PROP_IMAP_TIMEOUT, "0")));
 				logBuilder.append("\tIMAP Timeout: ").append(IMAPProperties.getImapTimeoutInternal()).append('\n');
 

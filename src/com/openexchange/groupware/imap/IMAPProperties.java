@@ -61,9 +61,9 @@ import com.openexchange.groupware.contexts.Context;
  * 
  */
 public class IMAPProperties {
-	
+
 	private final int user;
-	
+
 	private final Context ctx;
 
 	private String imapLogin;
@@ -89,7 +89,7 @@ public class IMAPProperties {
 	private static boolean imapSort;
 
 	private static boolean imapSearch;
-	
+
 	private static String smtpLocalhost;
 
 	private static int messageFetchLimit = 1000;
@@ -98,12 +98,12 @@ public class IMAPProperties {
 
 	private static String[] quoteLineColors = new String[] { "#666666" };
 
-	private static boolean supportsACLs;
+	private static BoolCapVal supportsACLs;
 
 	private static PartModifier partModifierImpl;
 
 	private static boolean smtpAuth;
-	
+
 	private static int imapTimeout;
 
 	private static int imapConnectionTimeout;
@@ -113,32 +113,80 @@ public class IMAPProperties {
 	private static long maxIMAPConnectionIdleTime = Long.MIN_VALUE;
 
 	private static boolean allowNestedDefaultFolderOnAltNamespace;
-	
+
 	private static boolean imapsEnabled;
-	
+
 	private static int imapsPort;
-	
+
 	private static boolean smtpsEnabled;
-	
+
 	private static int smtpsPort;
-	
+
 	private static int maxNumOfIMAPConnections;
-	
+
 	private static String defaultMimeCharset;
-	
+
 	private static String imapAuthEnc;
-	
+
 	private static boolean ignoreSubscription;
-	
+
 	private static boolean smtpEnvelopeFrom;
-	
+
 	private static Properties javaMailProperties;
-	
+
 	private static boolean spamEnabled;
-	
+
 	private static IMAPPropertiesFactory.IMAPCredSrc imapCredSrc;
-	
+
 	private static IMAPPropertiesFactory.IMAPLoginType imapLoginType;
+
+	public static enum BoolCapVal {
+
+		/**
+		 * TRUE
+		 */
+		TRUE("true"),
+		/**
+		 * FALSE
+		 */
+		FALSE("false"),
+		/**
+		 * AUTO
+		 */
+		AUTO("auto");
+
+		private final String str;
+
+		private BoolCapVal(final String str) {
+			this.str = str;
+		}
+
+		@Override
+		public String toString() {
+			return str;
+		}
+
+		/**
+		 * Parses given capability value. If given value equals ignore-case to
+		 * string <code>true</code>, constant {@link #TRUE} will be returned.
+		 * Else if given value equals ignore-case to string <code>auto</code>,
+		 * constant {@link #AUTO} will be returned. Otherwise {@link #FALSE}
+		 * will be returned.
+		 * 
+		 * @param capVal -
+		 *            the string value to parse
+		 * @return an instance of <code>BoolCapVal</code>: either
+		 *         {@link #TRUE}, {@link #FALSE}, or {@link #AUTO}
+		 */
+		public final static BoolCapVal parseBoolCapVal(final String capVal) {
+			if (TRUE.str.equalsIgnoreCase(capVal)) {
+				return TRUE;
+			} else if (AUTO.str.equalsIgnoreCase(capVal)) {
+				return AUTO;
+			}
+			return FALSE;
+		}
+	}
 
 	public IMAPProperties(final int user, final Context ctx) {
 		super();
@@ -190,7 +238,7 @@ public class IMAPProperties {
 		checkGlobalImapProperties();
 		return smtpLocalhost;
 	}
-	
+
 	static String getSmtpLocalhostInternal() {
 		return smtpLocalhost;
 	}
@@ -206,7 +254,7 @@ public class IMAPProperties {
 	public void setSmtpPort(final int smtpPort) {
 		this.smtpPort = smtpPort;
 	}
-	
+
 	public Context getContext() {
 		return ctx;
 	}
@@ -238,7 +286,7 @@ public class IMAPProperties {
 		}
 		return imapSort;
 	}
-	
+
 	static boolean isImapSortInternal() {
 		return imapSort;
 	}
@@ -254,7 +302,7 @@ public class IMAPProperties {
 		}
 		return imapSearch;
 	}
-	
+
 	static boolean isImapSearchInternal() {
 		return imapSearch;
 	}
@@ -267,7 +315,7 @@ public class IMAPProperties {
 		checkGlobalImapProperties();
 		return messageFetchLimit;
 	}
-	
+
 	static int getMessageFetchLimitInternal() {
 		return messageFetchLimit;
 	}
@@ -280,7 +328,7 @@ public class IMAPProperties {
 		checkGlobalImapProperties();
 		return attachmentDisplaySizeLimit;
 	}
-	
+
 	static int getAttachmentDisplaySizeLimitInternal() {
 		return attachmentDisplaySizeLimit;
 	}
@@ -303,17 +351,17 @@ public class IMAPProperties {
 
 	public static boolean isSupportsACLs() throws IMAPException {
 		checkGlobalImapProperties();
-		if (capabilitiesLoaded) {
+		if (capabilitiesLoaded && BoolCapVal.AUTO.equals(supportsACLs)) {
 			return imapCapabilities.hasACL();
 		}
-		return supportsACLs;
+		return BoolCapVal.TRUE.equals(supportsACLs) ? true : false;
 	}
-	
-	static boolean isSupportsACLsInternal() {
+
+	static BoolCapVal isSupportsACLsInternal() {
 		return supportsACLs;
 	}
 
-	public static void setSupportsACLs(final boolean supportsACLs) {
+	static void setSupportsACLs(final BoolCapVal supportsACLs) {
 		IMAPProperties.supportsACLs = supportsACLs;
 	}
 
@@ -338,7 +386,7 @@ public class IMAPProperties {
 		checkGlobalImapProperties();
 		return partModifierImpl;
 	}
-	
+
 	static PartModifier getPartModifierImplInternal() {
 		return partModifierImpl;
 	}
@@ -351,7 +399,7 @@ public class IMAPProperties {
 		checkGlobalImapProperties();
 		return smtpAuth;
 	}
-	
+
 	static boolean isSmtpAuthInternal() {
 		return smtpAuth;
 	}
@@ -364,7 +412,7 @@ public class IMAPProperties {
 		checkGlobalImapProperties();
 		return imapConnectionTimeout;
 	}
-	
+
 	static int getImapConnectionTimeoutInternal() {
 		return imapConnectionTimeout;
 	}
@@ -372,12 +420,12 @@ public class IMAPProperties {
 	public static void setImapConnectionTimeout(final int imapConnectionTimeout) {
 		IMAPProperties.imapConnectionTimeout = imapConnectionTimeout;
 	}
-	
+
 	public static int getImapTimeout() throws IMAPException {
 		checkGlobalImapProperties();
 		return imapTimeout;
 	}
-	
+
 	static int getImapTimeoutInternal() {
 		return imapTimeout;
 	}
@@ -390,7 +438,7 @@ public class IMAPProperties {
 		checkGlobalImapProperties();
 		return userFlagsEnabled;
 	}
-	
+
 	static boolean isUserFlagsEnabledInternal() {
 		return userFlagsEnabled;
 	}
@@ -403,7 +451,7 @@ public class IMAPProperties {
 		checkGlobalImapProperties();
 		return maxIMAPConnectionIdleTime;
 	}
-	
+
 	static long getMaxIMAPConnectionIdleTimeInternal() {
 		return maxIMAPConnectionIdleTime;
 	}
@@ -416,7 +464,7 @@ public class IMAPProperties {
 		checkGlobalImapProperties();
 		return maxNumOfIMAPConnections;
 	}
-	
+
 	static int getMaxNumOfIMAPConnectionsInternal() {
 		return maxNumOfIMAPConnections;
 	}
@@ -429,7 +477,7 @@ public class IMAPProperties {
 		checkGlobalImapProperties();
 		return imapAuthEnc;
 	}
-	
+
 	static String getImapAuthEncInternal() {
 		return imapAuthEnc;
 	}
@@ -442,11 +490,11 @@ public class IMAPProperties {
 		checkGlobalImapProperties();
 		return defaultMimeCharset;
 	}
-	
+
 	static String getDefaultMimeCharsetInternal() {
 		return defaultMimeCharset;
 	}
-	
+
 	private static final String PROP_MIME_CS = "mail.mime.charset";
 
 	public static void setDefaultMimeCharset(final String defaultMimeCharset) {
@@ -462,7 +510,7 @@ public class IMAPProperties {
 		checkGlobalImapProperties();
 		return imapsEnabled;
 	}
-	
+
 	static boolean isImapsEnabledInternal() {
 		return imapsEnabled;
 	}
@@ -475,7 +523,7 @@ public class IMAPProperties {
 		checkGlobalImapProperties();
 		return imapsPort;
 	}
-	
+
 	static int getImapsPortInternal() {
 		return imapsPort;
 	}
@@ -488,7 +536,7 @@ public class IMAPProperties {
 		checkGlobalImapProperties();
 		return smtpsEnabled;
 	}
-	
+
 	static boolean isSmtpsEnabledInternal() {
 		return smtpsEnabled;
 	}
@@ -501,7 +549,7 @@ public class IMAPProperties {
 		checkGlobalImapProperties();
 		return smtpsPort;
 	}
-	
+
 	static int getSmtpsPortInternal() {
 		return smtpsPort;
 	}
@@ -514,7 +562,7 @@ public class IMAPProperties {
 		checkGlobalImapProperties();
 		return allowNestedDefaultFolderOnAltNamespace;
 	}
-	
+
 	static boolean isAllowNestedDefaultFolderOnAltNamespaceInternal() {
 		return allowNestedDefaultFolderOnAltNamespace;
 	}
@@ -527,7 +575,7 @@ public class IMAPProperties {
 		checkGlobalImapProperties();
 		return ignoreSubscription;
 	}
-	
+
 	static boolean isIgnoreSubscriptionInternal() {
 		return ignoreSubscription;
 	}
@@ -540,7 +588,7 @@ public class IMAPProperties {
 		checkGlobalImapProperties();
 		return smtpEnvelopeFrom;
 	}
-	
+
 	static boolean isSMTPEnvelopeFromInternal() {
 		return smtpEnvelopeFrom;
 	}
@@ -553,7 +601,7 @@ public class IMAPProperties {
 		checkGlobalImapProperties();
 		return spamEnabled;
 	}
-	
+
 	static boolean isSpamEnabledInternal() {
 		return spamEnabled;
 	}
@@ -566,7 +614,7 @@ public class IMAPProperties {
 		checkGlobalImapProperties();
 		return imapCredSrc;
 	}
-	
+
 	static IMAPPropertiesFactory.IMAPCredSrc getImapCredSrcInternal() {
 		return imapCredSrc;
 	}
@@ -579,7 +627,7 @@ public class IMAPProperties {
 		checkGlobalImapProperties();
 		return imapLoginType;
 	}
-	
+
 	static IMAPPropertiesFactory.IMAPLoginType getImapLoginTypeInternal() {
 		return imapLoginType;
 	}
@@ -592,7 +640,7 @@ public class IMAPProperties {
 		checkGlobalImapProperties();
 		return javaMailProperties;
 	}
-	
+
 	static Properties getJavaMailPropertiesInternal() {
 		return javaMailProperties;
 	}
