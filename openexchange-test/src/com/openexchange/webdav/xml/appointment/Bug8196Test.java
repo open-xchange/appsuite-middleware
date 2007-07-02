@@ -34,6 +34,7 @@ public class Bug8196Test extends AppointmentTest {
 		appointmentObj.setShownAs(AppointmentObject.ABSENT);
 		appointmentObj.setParentFolderID(appointmentFolderId);
 		appointmentObj.setIgnoreConflicts(true);
+		appointmentObj.setAlarmFlag(true);
 		appointmentObj.setAlarm(15);
 		
 		final Participant[] userParticipant = new UserParticipant[2];
