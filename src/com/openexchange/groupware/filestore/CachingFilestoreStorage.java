@@ -85,12 +85,15 @@ public class CachingFilestoreStorage extends FilestoreStorage {
 	}
 	
 	@Override
-	public Filestore getFilestore(int id) {
+	public Filestore getFilestore(int id) throws FilestoreException {
+        final FilestoreFactory factory = new FilestoreFactory(id,delegate);
 		if(cache == null) {
 			throw new IllegalStateException("Cache not initialised! Not caching");
 		}
-		return CacheProxy.getCacheProxy(new FilestoreFactory(id,delegate),
-            cache, Filestore.class);
+        if (null == cache.get(factory.getKey())) {
+            factory.load();
+        }
+		return CacheProxy.getCacheProxy(factory, cache, Filestore.class);
 	}
 	
 	private static final class FilestoreFactory implements
@@ -108,12 +111,8 @@ public class CachingFilestoreStorage extends FilestoreStorage {
 			return id;
 		}
 
-		public Filestore load() throws OXCachingException {
-			try {
-				return delegate.getFilestore(id);
-			} catch (Exception x) {
-				throw new OXCachingException(x.toString());
-			}
+		public Filestore load() throws FilestoreException {
+		    return delegate.getFilestore(id);
 		}
 
         public Lock getCacheLock() {

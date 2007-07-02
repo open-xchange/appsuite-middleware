@@ -1,6 +1,11 @@
+* 2007-07-02 - marcus.klein@open-xchange.com
+
+  - Bugfix #7574: Now checking if objects exist before returning a cache proxy
+    object.
+
 * 2007-07-02 - thorben.betten@open-xchange.com
 
- - Moduarity: Added additional methods to UserConfiguration to check
+ - Modularity: Added additional methods to UserConfiguration to check
    allowance for team view, free-busy, and conflict handling
  - Fastened expunging messages
  - Fixed exception message if user has no infostore access
