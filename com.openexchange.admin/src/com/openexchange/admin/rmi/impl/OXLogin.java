@@ -154,10 +154,10 @@ public class OXLogin extends BasicAuthenticator implements OXLoginInterface {
             final Updater updater = Updater.getInstance();
             if (updater.toUpdate(ctxas)){
                 updater.startUpdate(ctxas);
-                throw new DatabaseUpdateException(ContextException.Code.UPDATE.toString());
+                throw new DatabaseUpdateException("Database is just beeing updated. Try again.");
             }
             if (updater.isLocked(ctxas)) {
-                throw new DatabaseUpdateException(ContextException.Code.UPDATE.toString());
+                throw new DatabaseUpdateException("Database is just beeing updated. Try again.");
             }
         } catch (UpdateException e) {
             throw new DatabaseUpdateException(e);
