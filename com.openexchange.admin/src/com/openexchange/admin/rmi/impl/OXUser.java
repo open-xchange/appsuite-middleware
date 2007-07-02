@@ -586,7 +586,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
                 if (!tools.isContextAdmin(ctx, auth_user_id)) {
                     final InvalidCredentialsException invalidCredentialsException = new InvalidCredentialsException("Permission denied");
                     if (users.length > 1) {
-                        log.error("User sent more than 1 users to get data for. Only context admin is allowed to do that");
+                        log.error("User sent more than 1 users to get data for. Only context admin is allowed to do that", invalidCredentialsException);
                         throw invalidCredentialsException;
                         // one user cannot edit more than his own data
                     } else {
