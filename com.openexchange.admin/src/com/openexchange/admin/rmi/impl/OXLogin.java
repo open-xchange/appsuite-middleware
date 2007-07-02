@@ -47,7 +47,7 @@
  *
  */
 /*
- * $Id: OXLogin.java,v 1.9 2007/06/26 15:10:48 cutmasta Exp $
+ * $Id: OXLogin.java,v 1.10 2007/07/02 13:52:38 choeger Exp $
  */
 package com.openexchange.admin.rmi.impl;
 
@@ -154,10 +154,10 @@ public class OXLogin extends BasicAuthenticator implements OXLoginInterface {
             final Updater updater = Updater.getInstance();
             if (updater.toUpdate(ctxas)){
                 updater.startUpdate(ctxas);
-                throw new DatabaseUpdateException(ContextException.Code.UPDATE.toString());
+                throw new DatabaseUpdateException("Database is just beeing updated. Try again.");
             }
             if (updater.isLocked(ctxas)) {
-                throw new DatabaseUpdateException(ContextException.Code.UPDATE.toString());
+                throw new DatabaseUpdateException("Database is just beeing updated. Try again.");
             }
         } catch (UpdateException e) {
             throw new DatabaseUpdateException(e);
