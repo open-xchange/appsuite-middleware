@@ -62,25 +62,19 @@ import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 public class OXFolderPermissionException extends OXPermissionException {
 
 	private static final long serialVersionUID = -5108199975949161729L;
+	
+	private static final transient Object EMPTY_ARGS = new Object[0];
 
 	public OXFolderPermissionException(final FolderCode code) {
-		this(code, new Object[0]);
+		this(code, EMPTY_ARGS);
 	}
 
 	public OXFolderPermissionException(final FolderCode code, final Object... messageArgs) {
-		super(Component.FOLDER, Category.PERMISSION, code.getNumber(), code.getMessage(), null, messageArgs);
+		this(code, null, messageArgs);
 	}
 
-	public OXFolderPermissionException(final FolderCode code, String messagePrefix, final Object... messageArgs) {
-		super(Component.FOLDER, Category.PERMISSION, code.getNumber(), new StringBuilder().append(messagePrefix)
-				.append(code.getMessage()).toString(), null, messageArgs);
-	}
-
-	public OXFolderPermissionException(final FolderCode code, final Exception cause, final boolean insertCauseMsg,
-			final Object... messageArgs) {
-		super(Component.FOLDER, Category.PERMISSION, code.getNumber(), insertCauseMsg ? new StringBuilder().append(
-				code.getMessage()).append(':').append(cause.getMessage()).toString() : code.getMessage(), cause,
-				messageArgs);
+	public OXFolderPermissionException(final FolderCode code, final Exception cause, final Object... messageArgs) {
+		super(Component.FOLDER, Category.PERMISSION, code.getNumber(), code.getMessage(), cause, messageArgs);
 	}
 
 }

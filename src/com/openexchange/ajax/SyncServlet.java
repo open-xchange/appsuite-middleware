@@ -95,9 +95,7 @@ public class SyncServlet extends PermissionServlet {
 
 	private static final long serialVersionUID = 8749478304854849616L;
 
-	private static final String STR_EMPTY = "";
-
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+	private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(SyncServlet.class);
 
 	public static final String ACTION_REFRESH_SERVER = "refresh_server";
@@ -318,7 +316,7 @@ public class SyncServlet extends PermissionServlet {
 			throws OXException {
 		final String paramVal = req.getParameter(paramName);
 		if (paramVal == null) {
-			throw new OXFolderException(FolderCode.MISSING_PARAMETER, STR_EMPTY, paramName);
+			throw new OXFolderException(FolderCode.MISSING_PARAMETER, paramName);
 		}
 		return paramVal;
 	}

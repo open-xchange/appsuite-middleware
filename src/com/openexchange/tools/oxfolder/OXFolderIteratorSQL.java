@@ -74,6 +74,7 @@ import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.FolderStrings;
+import com.openexchange.groupware.i18n.Groups;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.StringHelper;
@@ -651,7 +652,7 @@ public class OXFolderIteratorSQL {
 					/*
 					 * Starting folder is not visible to user
 					 */
-					throw new OXFolderException(FolderCode.NOT_VISIBLE, STR_EMPTY, OXFolderManagerImpl.getFolderName(
+					throw new OXFolderException(FolderCode.NOT_VISIBLE, OXFolderManagerImpl.getFolderName(
 							folderId, ctx), getUserName(userId, ctx), Integer.valueOf(ctx.getContextId()));
 				}
 				return;
@@ -672,7 +673,7 @@ public class OXFolderIteratorSQL {
 						throw e;
 					}
 					final StringHelper strHelper = new StringHelper(locale);
-					creatorDisplayName = strHelper.getString(FolderStrings.ALL_GROUPS_AND_USERS);
+					creatorDisplayName = strHelper.getString(Groups.ZERO_DISPLAYNAME);
 				}
 				final FolderObject virtualOwnerFolder = FolderObject.createVirtualFolderObject(
 						"u:" + fo.getCreatedBy(), creatorDisplayName, FolderObject.SYSTEM_MODULE, true,

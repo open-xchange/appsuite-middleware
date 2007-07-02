@@ -816,7 +816,7 @@ public final class UserConfiguration implements Serializable, DeleteListener, Cl
 						stmt.executeUpdate();
 					}
 				} else {
-					throw new OXFolderException(FolderCode.NO_DEFAULT_FOLDER_FOUND, "",
+					throw new OXFolderException(FolderCode.NO_DEFAULT_FOLDER_FOUND,
 							folderModule2String(FolderObject.INFOSTORE), getUserName(userId, ctx), Integer.valueOf(ctx
 									.getContextId()));
 				}

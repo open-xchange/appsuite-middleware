@@ -60,9 +60,5 @@ public class OXFolderNotFoundException extends OXFolderException {
 	public OXFolderNotFoundException (final int fuid, final int cid) {
 		super(FolderCode.NOT_EXISTS, Integer.valueOf(fuid), Integer.valueOf(cid));
 	}
-	
-	public OXFolderNotFoundException (final String prefix, final int fuid, final int cid) {
-		super(FolderCode.NOT_EXISTS, prefix, Integer.valueOf(fuid), Integer.valueOf(cid));
-	}
 
 }

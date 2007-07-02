@@ -322,7 +322,7 @@ public class FolderCacheManager {
 			final IElementAttributes elemAttribs) throws OXException {
 		try {
 			if (!folderObj.containsObjectID()) {
-				throw new OXFolderException(FolderCode.MISSING_FOLDER_ATTRIBUTE, "", FolderFields.ID, Integer
+				throw new OXFolderException(FolderCode.MISSING_FOLDER_ATTRIBUTE, FolderFields.ID, Integer
 						.valueOf(-1), Integer.valueOf(ctx.getContextId()));
 			}
 			final CacheKey ck = new CacheKey(ctx, folderObj.getObjectID());

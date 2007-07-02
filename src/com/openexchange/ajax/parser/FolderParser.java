@@ -118,7 +118,7 @@ public class FolderParser {
 				return FolderObject.SYSTEM_MODULE;
 			}
 		} else {
-			throw new OXFolderException(FolderCode.UNKNOWN_MODULE, STR_EMPTY, moduleStr, STR_EMPTY);
+			throw new OXFolderException(FolderCode.UNKNOWN_MODULE, moduleStr, STR_EMPTY);
 		}
 	}
 
@@ -126,7 +126,7 @@ public class FolderParser {
 			JSONException {
 		if (jsonObj.has(FolderFields.ID)) {
 			if (fo.containsObjectID() && fo.getObjectID() != jsonObj.getInt(FolderFields.ID)) {
-				throw new OXFolderException(FolderCode.PARAMETER_MISMATCH, STR_EMPTY, FolderFields.ID, FolderFields.ID);
+				throw new OXFolderException(FolderCode.PARAMETER_MISMATCH, FolderFields.ID, FolderFields.ID);
 			}
 			if (!fo.containsObjectID()) {
 				fo.setObjectID(jsonObj.getInt(FolderFields.ID));
@@ -158,7 +158,7 @@ public class FolderParser {
 			for (int i = 0; i < arrayLength; i++) {
 				final JSONObject elem = jsonArr.getJSONObject(i);
 				if (!elem.has(FolderFields.ENTITY)) {
-					throw new OXFolderException(FolderCode.MISSING_PARAMETER, STR_EMPTY, FolderFields.ENTITY);
+					throw new OXFolderException(FolderCode.MISSING_PARAMETER, FolderFields.ENTITY);
 				}
 				int entity;
 				try {
@@ -179,7 +179,7 @@ public class FolderParser {
 					oclPerm.setFuid(fo.getObjectID());
 				}
 				if (!elem.has(FolderFields.BITS)) {
-					throw new OXFolderException(FolderCode.MISSING_PARAMETER, STR_EMPTY, FolderFields.BITS);
+					throw new OXFolderException(FolderCode.MISSING_PARAMETER, FolderFields.BITS);
 				}
 				final int[] permissionBits = parsePermissionBits(elem.getInt(FolderFields.BITS));
 				if (!oclPerm.setAllPermission(permissionBits[0], permissionBits[1], permissionBits[2],
@@ -189,7 +189,7 @@ public class FolderParser {
 				}
 				oclPerm.setFolderAdmin(permissionBits[4] > 0 ? true : false);
 				if (!elem.has(FolderFields.GROUP)) {
-					throw new OXFolderException(FolderCode.MISSING_PARAMETER, STR_EMPTY, FolderFields.GROUP);
+					throw new OXFolderException(FolderCode.MISSING_PARAMETER, FolderFields.GROUP);
 				}
 				oclPerm.setGroupPermission(elem.getBoolean(FolderFields.GROUP));
 				perms[i] = oclPerm;

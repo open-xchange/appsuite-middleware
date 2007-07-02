@@ -2158,11 +2158,11 @@ public class Mail extends PermissionServlet implements UploadListener {
 				final EffectivePermission p = folderObj.getEffectiveUserPermission(sessionObj.getUserObject().getId(),
 						sessionObj.getUserConfiguration());
 				if (!p.isFolderVisible()) {
-					throw new OXFolderException(FolderCode.NOT_VISIBLE, STR_EMPTY, getFolderName(folderObj),
+					throw new OXFolderException(FolderCode.NOT_VISIBLE, getFolderName(folderObj),
 							getUserName(sessionObj), Integer.valueOf(sessionObj.getContext().getContextId()));
 				}
 				if (!p.canWriteOwnObjects()) {
-					throw new OXFolderException(FolderCode.NO_WRITE_PERMISSION, STR_EMPTY, getUserName(sessionObj),
+					throw new OXFolderException(FolderCode.NO_WRITE_PERMISSION, getUserName(sessionObj),
 							getFolderName(folderObj), Integer.valueOf(sessionObj.getContext().getContextId()));
 				}
 				/*

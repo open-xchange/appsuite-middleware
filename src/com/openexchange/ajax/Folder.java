@@ -49,9 +49,8 @@
 
 package com.openexchange.ajax;
 
-import static com.openexchange.tools.oxfolder.OXFolderManagerImpl.getFolderName;
-import static com.openexchange.tools.oxfolder.OXFolderManagerImpl.getUserName;
 import static com.openexchange.tools.oxfolder.OXFolderManagerImpl.folderModule2String;
+import static com.openexchange.tools.oxfolder.OXFolderManagerImpl.getUserName;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -156,8 +155,6 @@ public class Folder extends SessionServlet {
 	public static final int MAX_PERMISSION = 64;
 
 	private static final String STRING_1 = "1";
-
-	private static final String STRING_EMPTY = "";
 
 	/*
 	 * (non-Javadoc)
@@ -525,7 +522,7 @@ public class Folder extends SessionServlet {
 					}
 				} else if (parentId == FolderObject.SYSTEM_INFOSTORE_FOLDER_ID) {
 					if (!sessionObj.getUserConfiguration().hasInfostore()) {
-						throw new OXFolderException(FolderCode.NO_MODULE_ACCESS, STRING_EMPTY, getUserName(sessionObj),
+						throw new OXFolderException(FolderCode.NO_MODULE_ACCESS, getUserName(sessionObj),
 								folderModule2String(FolderObject.INFOSTORE), Integer
 										.valueOf(sessionObj.getContext().getContextId()));
 					}
@@ -1576,7 +1573,7 @@ public class Folder extends SessionServlet {
 			throws OXException {
 		final String paramVal = req.getParameter(paramName);
 		if (paramVal == null) {
-			throw new OXFolderException(FolderCode.MISSING_PARAMETER, STRING_EMPTY, paramName);
+			throw new OXFolderException(FolderCode.MISSING_PARAMETER, paramName);
 		}
 		return paramVal;
 	}
@@ -1585,7 +1582,7 @@ public class Folder extends SessionServlet {
 			throws OXException {
 		String tmp = req.getParameter(paramName);
 		if (tmp == null) {
-			throw new OXFolderException(FolderCode.MISSING_PARAMETER, STRING_EMPTY, paramName);
+			throw new OXFolderException(FolderCode.MISSING_PARAMETER, paramName);
 		}
 		final String[] sa = tmp.split(SPLIT_PAT);
 		tmp = null;
@@ -1594,7 +1591,7 @@ public class Folder extends SessionServlet {
 			try {
 				intArray[a] = Integer.parseInt(sa[a]);
 			} catch (final NumberFormatException e) {
-				throw new OXFolderException(FolderCode.BAD_PARAM_VALUE, STRING_EMPTY, sa[a], paramName);
+				throw new OXFolderException(FolderCode.BAD_PARAM_VALUE, sa[a], paramName);
 			}
 		}
 		return intArray;

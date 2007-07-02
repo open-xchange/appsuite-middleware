@@ -116,7 +116,7 @@ public class RdbFolderSyncInterface implements FolderSyncInterface {
 		try {
 			if (folderobject.getType() == FolderObject.PUBLIC
 					&& !sessionObj.getUserConfiguration().hasFullPublicFolderAccess()) {
-				throw new OXFolderException(FolderCode.NO_PUBLIC_FOLDER_WRITE_ACCESS, STR_EMPTY,
+				throw new OXFolderException(FolderCode.NO_PUBLIC_FOLDER_WRITE_ACCESS,
 						getUserName(sessionObj), getFolderName(folderobject), Integer.valueOf(ctx.getContextId()));
 			}
 			if (!folderobject.exists(ctx)) {
@@ -130,12 +130,12 @@ public class RdbFolderSyncInterface implements FolderSyncInterface {
 			final EffectivePermission effectivePerm = folderobject.getEffectiveUserPermission(userId, sessionObj
 					.getUserConfiguration());
 			if (!effectivePerm.hasModuleAccess(folderobject.getModule())) {
-				throw new OXFolderException(FolderCode.NO_MODULE_ACCESS, STR_EMPTY, getUserName(sessionObj),
+				throw new OXFolderException(FolderCode.NO_MODULE_ACCESS, getUserName(sessionObj),
 						folderModule2String(folderobject.getModule()), Integer.valueOf(ctx.getContextId()));
 			}
 			if (!effectivePerm.isFolderVisible()) {
 				if (!effectivePerm.getUnderlyingPermission().isFolderVisible()) {
-					throw new OXFolderPermissionException(FolderCode.NOT_VISIBLE, STR_EMPTY,
+					throw new OXFolderPermissionException(FolderCode.NOT_VISIBLE,
 							getFolderName(folderobject), getUserName(sessionObj), Integer.valueOf(ctx.getContextId()));
 				}
 				throw new OXFolderException(FolderCode.NOT_VISIBLE, Category.USER_CONFIGURATION,

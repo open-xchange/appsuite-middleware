@@ -90,7 +90,7 @@ public class FolderRequest {
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_DELETE)) {
 			new Folder().actionPutDeleteFolder(sessionObj, pw, jsonObject);
 		} else {
-			throw new OXFolderException(FolderCode.UNKNOWN_ACTION, "", action);
+			throw new OXFolderException(FolderCode.UNKNOWN_ACTION, action);
 		}
 	}
 

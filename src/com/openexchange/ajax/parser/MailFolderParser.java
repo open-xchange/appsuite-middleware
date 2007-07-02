@@ -79,8 +79,6 @@ public class MailFolderParser {
 	
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MailFolderParser.class);
 
-	private static final String STR_EMPTY = "";
-	
 	private static final int[] mapping = { 0, 2, 4, -1, 8 };
 
 	private final SessionObject sessionObj;
@@ -108,7 +106,7 @@ public class MailFolderParser {
 		}
 		if (jsonObj.has(FolderFields.MODULE)
 				&& !jsonObj.getString(FolderFields.MODULE).equalsIgnoreCase(Folder.MODULE_MAIL)) {
-			throw new OXFolderException(FolderCode.MISSING_PARAMETER, STR_EMPTY, FolderFields.MODULE);
+			throw new OXFolderException(FolderCode.MISSING_PARAMETER, FolderFields.MODULE);
 		}
 		if (jsonObj.has(FolderFields.SUBSCRIBED) && !jsonObj.isNull(FolderFields.SUBSCRIBED)) {
 			mfo.setSubscribed(jsonObj.getInt(FolderFields.SUBSCRIBED) > 0);
@@ -122,7 +120,7 @@ public class MailFolderParser {
 			NextPerm: for (int i = 0; i < arrayLength; i++) {
 				final JSONObject elem = jsonArr.getJSONObject(i);
 				if (!elem.has(FolderFields.ENTITY)) {
-					throw new OXFolderException(FolderCode.MISSING_PARAMETER, STR_EMPTY, FolderFields.ENTITY);
+					throw new OXFolderException(FolderCode.MISSING_PARAMETER, FolderFields.ENTITY);
 				}
 				int entity;
 				try {
@@ -142,7 +140,7 @@ public class MailFolderParser {
 					imapPerm.setFolderFullname(jsonObj.getString(FolderFields.ID));
 				}
 				if (!elem.has(FolderFields.BITS)) {
-					throw new OXFolderException(FolderCode.MISSING_PARAMETER, STR_EMPTY, FolderFields.BITS);
+					throw new OXFolderException(FolderCode.MISSING_PARAMETER, FolderFields.BITS);
 				}
 				final int[] permissionBits = parsePermissionBits(elem.getInt(FolderFields.BITS));
 				if (!imapPerm.setAllPermission(permissionBits[0], permissionBits[1], permissionBits[2],
@@ -152,7 +150,7 @@ public class MailFolderParser {
 				}
 				imapPerm.setFolderAdmin(permissionBits[4] > 0 ? true : false);
 				if (!elem.has(FolderFields.GROUP)) {
-					throw new OXFolderException(FolderCode.MISSING_PARAMETER, STR_EMPTY, FolderFields.GROUP);
+					throw new OXFolderException(FolderCode.MISSING_PARAMETER, FolderFields.GROUP);
 				}
 				imapPerm.setGroupPermission(elem.getBoolean(FolderFields.GROUP));
 				try {

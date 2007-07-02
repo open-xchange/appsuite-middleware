@@ -68,6 +68,321 @@ import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
  * 
  */
 public abstract class ParamContainer {
+	
+	private static class HttpParamContainer extends ParamContainer {
+
+		private final HttpServletRequest req;
+
+		private final Component component;
+
+		private final HttpServletResponse resp;
+
+		/**
+		 * @param req
+		 * @param component
+		 * @param resp
+		 */
+		public HttpParamContainer(final HttpServletRequest req, final Component component,
+				final HttpServletResponse resp) {
+			this.req = req;
+			this.component = component;
+			this.resp = resp;
+		}
+
+		@Override
+		public Date checkDateParam(final String paramName) throws AbstractOXException {
+			final String tmp = req.getParameter(paramName);
+			if (tmp == null) {
+				throw new ParamContainerException(component, FolderCode.MISSING_PARAMETER.getCategory(),
+						FolderCode.MISSING_PARAMETER.getNumber(), FolderCode.MISSING_PARAMETER.getMessage(), null,
+						paramName);
+			}
+			try {
+				return new Date(Long.parseLong(tmp));
+			} catch (final NumberFormatException e) {
+				throw new ParamContainerException(component, FolderCode.BAD_PARAM_VALUE.getCategory(),
+						FolderCode.BAD_PARAM_VALUE.getNumber(), FolderCode.BAD_PARAM_VALUE.getMessage(), null, tmp,
+						paramName);
+			}
+		}
+
+		@Override
+		public int[] checkIntArrayParam(final String paramName) throws AbstractOXException {
+			String tmp = req.getParameter(paramName);
+			if (tmp == null) {
+				throw new ParamContainerException(component, FolderCode.MISSING_PARAMETER.getCategory(),
+						FolderCode.MISSING_PARAMETER.getNumber(), FolderCode.MISSING_PARAMETER.getMessage(), null,
+						paramName);
+			}
+			final String[] sa = tmp.split(SPLIT_PAT);
+			tmp = null;
+			final int intArray[] = new int[sa.length];
+			for (int a = 0; a < sa.length; a++) {
+				try {
+					intArray[a] = Integer.parseInt(sa[a]);
+				} catch (final NumberFormatException e) {
+					throw new ParamContainerException(component, FolderCode.BAD_PARAM_VALUE.getCategory(),
+							FolderCode.BAD_PARAM_VALUE.getNumber(), FolderCode.BAD_PARAM_VALUE.getMessage(), null,
+							tmp, paramName);
+				}
+			}
+			return intArray;
+		}
+
+		@Override
+		public int checkIntParam(final String paramName) throws AbstractOXException {
+			final String tmp = req.getParameter(paramName);
+			if (tmp == null) {
+				throw new ParamContainerException(component, FolderCode.MISSING_PARAMETER.getCategory(),
+						FolderCode.MISSING_PARAMETER.getNumber(), FolderCode.MISSING_PARAMETER.getMessage(), null);
+			}
+			try {
+				return Integer.parseInt(tmp);
+			} catch (final NumberFormatException e) {
+				throw new ParamContainerException(component, FolderCode.BAD_PARAM_VALUE.getCategory(),
+						FolderCode.BAD_PARAM_VALUE.getNumber(), FolderCode.BAD_PARAM_VALUE.getMessage(), null);
+			}
+		}
+
+		@Override
+		public String checkStringParam(final String paramName) throws AbstractOXException {
+			final String tmp = req.getParameter(paramName);
+			if (tmp == null) {
+				throw new ParamContainerException(component, FolderCode.MISSING_PARAMETER.getCategory(),
+						FolderCode.MISSING_PARAMETER.getNumber(), FolderCode.MISSING_PARAMETER.getMessage(), null);
+			}
+			return tmp;
+		}
+
+		@Override
+		public Date getDateParam(final String paramName) throws AbstractOXException {
+			final String tmp = req.getParameter(paramName);
+			if (tmp == null) {
+				return null;
+			}
+			try {
+				return new Date(Long.parseLong(tmp));
+			} catch (final NumberFormatException e) {
+				throw new ParamContainerException(component, FolderCode.BAD_PARAM_VALUE.getCategory(),
+						FolderCode.BAD_PARAM_VALUE.getNumber(), FolderCode.BAD_PARAM_VALUE.getMessage(), null);
+			}
+		}
+
+		@Override
+		public String getHeader(final String hdrName) {
+			return req.getHeader(hdrName);
+		}
+
+		@Override
+		public int[] getIntArrayParam(final String paramName) throws AbstractOXException {
+			final String tmp = req.getParameter(paramName);
+			if (tmp == null) {
+				return null;
+			}
+			final String[] sa = tmp.split(SPLIT_PAT);
+			final int intArray[] = new int[sa.length];
+			for (int a = 0; a < sa.length; a++) {
+				try {
+					intArray[a] = Integer.parseInt(sa[a]);
+				} catch (final NumberFormatException e) {
+					throw new ParamContainerException(component, FolderCode.BAD_PARAM_VALUE.getCategory(),
+							FolderCode.BAD_PARAM_VALUE.getNumber(), FolderCode.BAD_PARAM_VALUE.getMessage(), null,
+							tmp, paramName);
+				}
+			}
+			return intArray;
+		}
+
+		@Override
+		public int getIntParam(final String paramName) throws AbstractOXException {
+			final String tmp = req.getParameter(paramName);
+			if (tmp == null) {
+				return NOT_FOUND;
+			}
+			try {
+				return Integer.parseInt(tmp);
+			} catch (final NumberFormatException e) {
+				throw new ParamContainerException(component, FolderCode.BAD_PARAM_VALUE.getCategory(),
+						FolderCode.BAD_PARAM_VALUE.getNumber(), FolderCode.BAD_PARAM_VALUE.getMessage(), null);
+			}
+		}
+
+		@Override
+		public String getStringParam(final String paramName) {
+			return req.getParameter(paramName);
+		}
+
+		@Override
+		public HttpServletResponse getHttpServletResponse() {
+			return resp;
+		}
+	}
+	
+	private static class JSONParamContainer extends ParamContainer {
+
+		private final JSONObject jo;
+
+		private final Component component;
+
+		/**
+		 * @param jo
+		 * @param component
+		 */
+		public JSONParamContainer(final JSONObject jo, final Component component) {
+			this.jo = jo;
+			this.component = component;
+		}
+
+		@Override
+		public Date checkDateParam(final String paramName) throws AbstractOXException {
+			if (!jo.has(paramName) || jo.isNull(paramName)) {
+				throw new ParamContainerException(component, FolderCode.MISSING_PARAMETER.getCategory(),
+						FolderCode.MISSING_PARAMETER.getNumber(), FolderCode.MISSING_PARAMETER.getMessage(), null);
+			}
+			try {
+				return new Date(jo.getLong(paramName));
+			} catch (final JSONException e) {
+				throw new ParamContainerException(component, FolderCode.BAD_PARAM_VALUE.getCategory(),
+						FolderCode.BAD_PARAM_VALUE.getNumber(), FolderCode.BAD_PARAM_VALUE.getMessage(), null, jo
+								.opt(paramName), paramName);
+			}
+		}
+
+		@Override
+		public int[] checkIntArrayParam(final String paramName) throws AbstractOXException {
+			if (!jo.has(paramName) || jo.isNull(paramName)) {
+				throw new ParamContainerException(component, FolderCode.MISSING_PARAMETER.getCategory(),
+						FolderCode.MISSING_PARAMETER.getNumber(), FolderCode.MISSING_PARAMETER.getMessage(), null);
+			}
+			String[] tmp;
+			try {
+				tmp = jo.getString(paramName).split(SPLIT_PAT);
+			} catch (final JSONException e1) {
+				throw new ParamContainerException(component, FolderCode.BAD_PARAM_VALUE.getCategory(),
+						FolderCode.BAD_PARAM_VALUE.getNumber(), FolderCode.BAD_PARAM_VALUE.getMessage(), null, jo
+								.opt(paramName), paramName);
+			}
+			final int[] intArray = new int[tmp.length];
+			for (int i = 0; i < tmp.length; i++) {
+				try {
+					intArray[i] = Integer.parseInt(tmp[i]);
+				} catch (final NumberFormatException e) {
+					throw new ParamContainerException(component, FolderCode.BAD_PARAM_VALUE.getCategory(),
+							FolderCode.BAD_PARAM_VALUE.getNumber(), FolderCode.BAD_PARAM_VALUE.getMessage(), null,
+							jo.opt(paramName), paramName);
+				}
+			}
+			return intArray;
+		}
+
+		@Override
+		public int checkIntParam(final String paramName) throws AbstractOXException {
+			if (!jo.has(paramName) || jo.isNull(paramName)) {
+				throw new ParamContainerException(component, FolderCode.MISSING_PARAMETER.getCategory(),
+						FolderCode.MISSING_PARAMETER.getNumber(), FolderCode.MISSING_PARAMETER.getMessage(), null);
+			}
+			try {
+				return jo.getInt(paramName);
+			} catch (final JSONException e) {
+				throw new ParamContainerException(component, FolderCode.BAD_PARAM_VALUE.getCategory(),
+						FolderCode.BAD_PARAM_VALUE.getNumber(), FolderCode.BAD_PARAM_VALUE.getMessage(), null, jo
+								.opt(paramName), paramName);
+			}
+		}
+
+		@Override
+		public String checkStringParam(final String paramName) throws AbstractOXException {
+			if (!jo.has(paramName) || jo.isNull(paramName)) {
+				throw new ParamContainerException(component, FolderCode.MISSING_PARAMETER.getCategory(),
+						FolderCode.MISSING_PARAMETER.getNumber(), FolderCode.MISSING_PARAMETER.getMessage(), null);
+			}
+			try {
+				return jo.getString(paramName);
+			} catch (final JSONException e) {
+				throw new ParamContainerException(component, FolderCode.BAD_PARAM_VALUE.getCategory(),
+						FolderCode.BAD_PARAM_VALUE.getNumber(), FolderCode.BAD_PARAM_VALUE.getMessage(), null, jo
+								.opt(paramName), paramName);
+			}
+		}
+
+		@Override
+		public Date getDateParam(final String paramName) throws AbstractOXException {
+			if (!jo.has(paramName) || jo.isNull(paramName)) {
+				return null;
+			}
+			try {
+				return new Date(jo.getLong(paramName));
+			} catch (final JSONException e) {
+				throw new ParamContainerException(component, FolderCode.BAD_PARAM_VALUE.getCategory(),
+						FolderCode.BAD_PARAM_VALUE.getNumber(), FolderCode.BAD_PARAM_VALUE.getMessage(), null, jo
+								.opt(paramName), paramName);
+			}
+		}
+
+		@Override
+		public String getHeader(final String hdrName) {
+			return null;
+		}
+
+		@Override
+		public int[] getIntArrayParam(final String paramName) throws AbstractOXException {
+			if (!jo.has(paramName) || jo.isNull(paramName)) {
+				return null;
+			}
+			String[] tmp;
+			try {
+				tmp = jo.getString(paramName).split(SPLIT_PAT);
+			} catch (final JSONException e1) {
+				throw new ParamContainerException(component, FolderCode.BAD_PARAM_VALUE.getCategory(),
+						FolderCode.BAD_PARAM_VALUE.getNumber(), FolderCode.BAD_PARAM_VALUE.getMessage(), null, jo
+								.opt(paramName), paramName);
+			}
+			final int[] intArray = new int[tmp.length];
+			for (int i = 0; i < tmp.length; i++) {
+				try {
+					intArray[i] = Integer.parseInt(tmp[i]);
+				} catch (final NumberFormatException e) {
+					throw new ParamContainerException(component, FolderCode.BAD_PARAM_VALUE.getCategory(),
+							FolderCode.BAD_PARAM_VALUE.getNumber(), FolderCode.BAD_PARAM_VALUE.getMessage(), null,
+							jo.opt(paramName), paramName);
+				}
+			}
+			return intArray;
+		}
+
+		@Override
+		public int getIntParam(final String paramName) throws AbstractOXException {
+			if (!jo.has(paramName) || jo.isNull(paramName)) {
+				return NOT_FOUND;
+			}
+			try {
+				return jo.getInt(paramName);
+			} catch (final JSONException e) {
+				throw new ParamContainerException(component, FolderCode.BAD_PARAM_VALUE.getCategory(),
+						FolderCode.BAD_PARAM_VALUE.getNumber(), FolderCode.BAD_PARAM_VALUE.getMessage(), null, jo
+								.opt(paramName), paramName);
+			}
+		}
+
+		@Override
+		public String getStringParam(final String paramName) throws AbstractOXException {
+			if (!jo.has(paramName) || jo.isNull(paramName)) {
+				return null;
+			}
+			try {
+				return jo.getString(paramName);
+			} catch (final JSONException e) {
+				throw new ParamContainerException(component, FolderCode.BAD_PARAM_VALUE.getCategory(),
+						FolderCode.BAD_PARAM_VALUE.getNumber(), FolderCode.BAD_PARAM_VALUE.getMessage(), null, jo
+								.opt(paramName), paramName);
+			}
+		}
+
+		@Override
+		public HttpServletResponse getHttpServletResponse() {
+			return null;
+		}
+	}
 
 	private static final String SPLIT_PAT = " *, *";
 
@@ -75,325 +390,10 @@ public abstract class ParamContainer {
 
 	public static ParamContainer getInstance(final HttpServletRequest req, final Component component,
 			final HttpServletResponse resp) {
-
-		class HttpParamContainer extends ParamContainer {
-
-			private final HttpServletRequest req;
-
-			private final Component component;
-
-			private final HttpServletResponse resp;
-
-			/**
-			 * @param req
-			 * @param component
-			 * @param resp
-			 */
-			public HttpParamContainer(final HttpServletRequest req, final Component component,
-					final HttpServletResponse resp) {
-				this.req = req;
-				this.component = component;
-				this.resp = resp;
-			}
-
-			@Override
-			public Date checkDateParam(final String paramName) throws AbstractOXException {
-				final String tmp = req.getParameter(paramName);
-				if (tmp == null) {
-					throw new ParamContainerException(component, FolderCode.MISSING_PARAMETER.getCategory(),
-							FolderCode.MISSING_PARAMETER.getNumber(), FolderCode.MISSING_PARAMETER.getMessage(), null,
-							paramName);
-				}
-				try {
-					return new Date(Long.parseLong(tmp));
-				} catch (final NumberFormatException e) {
-					throw new ParamContainerException(component, FolderCode.BAD_PARAM_VALUE.getCategory(),
-							FolderCode.BAD_PARAM_VALUE.getNumber(), FolderCode.BAD_PARAM_VALUE.getMessage(), null, tmp,
-							paramName);
-				}
-			}
-
-			@Override
-			public int[] checkIntArrayParam(final String paramName) throws AbstractOXException {
-				String tmp = req.getParameter(paramName);
-				if (tmp == null) {
-					throw new ParamContainerException(component, FolderCode.MISSING_PARAMETER.getCategory(),
-							FolderCode.MISSING_PARAMETER.getNumber(), FolderCode.MISSING_PARAMETER.getMessage(), null,
-							paramName);
-				}
-				final String[] sa = tmp.split(SPLIT_PAT);
-				tmp = null;
-				final int intArray[] = new int[sa.length];
-				for (int a = 0; a < sa.length; a++) {
-					try {
-						intArray[a] = Integer.parseInt(sa[a]);
-					} catch (final NumberFormatException e) {
-						throw new ParamContainerException(component, FolderCode.BAD_PARAM_VALUE.getCategory(),
-								FolderCode.BAD_PARAM_VALUE.getNumber(), FolderCode.BAD_PARAM_VALUE.getMessage(), null,
-								tmp, paramName);
-					}
-				}
-				return intArray;
-			}
-
-			@Override
-			public int checkIntParam(final String paramName) throws AbstractOXException {
-				final String tmp = req.getParameter(paramName);
-				if (tmp == null) {
-					throw new ParamContainerException(component, FolderCode.MISSING_PARAMETER.getCategory(),
-							FolderCode.MISSING_PARAMETER.getNumber(), FolderCode.MISSING_PARAMETER.getMessage(), null);
-				}
-				try {
-					return Integer.parseInt(tmp);
-				} catch (final NumberFormatException e) {
-					throw new ParamContainerException(component, FolderCode.BAD_PARAM_VALUE.getCategory(),
-							FolderCode.BAD_PARAM_VALUE.getNumber(), FolderCode.BAD_PARAM_VALUE.getMessage(), null);
-				}
-			}
-
-			@Override
-			public String checkStringParam(final String paramName) throws AbstractOXException {
-				final String tmp = req.getParameter(paramName);
-				if (tmp == null) {
-					throw new ParamContainerException(component, FolderCode.MISSING_PARAMETER.getCategory(),
-							FolderCode.MISSING_PARAMETER.getNumber(), FolderCode.MISSING_PARAMETER.getMessage(), null);
-				}
-				return tmp;
-			}
-
-			@Override
-			public Date getDateParam(final String paramName) throws AbstractOXException {
-				final String tmp = req.getParameter(paramName);
-				if (tmp == null) {
-					return null;
-				}
-				try {
-					return new Date(Long.parseLong(tmp));
-				} catch (final NumberFormatException e) {
-					throw new ParamContainerException(component, FolderCode.BAD_PARAM_VALUE.getCategory(),
-							FolderCode.BAD_PARAM_VALUE.getNumber(), FolderCode.BAD_PARAM_VALUE.getMessage(), null);
-				}
-			}
-
-			@Override
-			public String getHeader(final String hdrName) {
-				return req.getHeader(hdrName);
-			}
-
-			@Override
-			public int[] getIntArrayParam(final String paramName) throws AbstractOXException {
-				final String tmp = req.getParameter(paramName);
-				if (tmp == null) {
-					return null;
-				}
-				final String[] sa = tmp.split(SPLIT_PAT);
-				final int intArray[] = new int[sa.length];
-				for (int a = 0; a < sa.length; a++) {
-					try {
-						intArray[a] = Integer.parseInt(sa[a]);
-					} catch (final NumberFormatException e) {
-						throw new ParamContainerException(component, FolderCode.BAD_PARAM_VALUE.getCategory(),
-								FolderCode.BAD_PARAM_VALUE.getNumber(), FolderCode.BAD_PARAM_VALUE.getMessage(), null,
-								tmp, paramName);
-					}
-				}
-				return intArray;
-			}
-
-			@Override
-			public int getIntParam(final String paramName) throws AbstractOXException {
-				final String tmp = req.getParameter(paramName);
-				if (tmp == null) {
-					return NOT_FOUND;
-				}
-				try {
-					return Integer.parseInt(tmp);
-				} catch (final NumberFormatException e) {
-					throw new ParamContainerException(component, FolderCode.BAD_PARAM_VALUE.getCategory(),
-							FolderCode.BAD_PARAM_VALUE.getNumber(), FolderCode.BAD_PARAM_VALUE.getMessage(), null);
-				}
-			}
-
-			@Override
-			public String getStringParam(final String paramName) {
-				return req.getParameter(paramName);
-			}
-
-			@Override
-			public HttpServletResponse getHttpServletResponse() {
-				return resp;
-			}
-		}
 		return new HttpParamContainer(req, component, resp);
 	}
 
 	public static ParamContainer getInstance(final JSONObject jo, final Component component) {
-
-		class JSONParamContainer extends ParamContainer {
-
-			private final JSONObject jo;
-
-			private final Component component;
-
-			/**
-			 * @param jo
-			 * @param component
-			 */
-			public JSONParamContainer(final JSONObject jo, final Component component) {
-				this.jo = jo;
-				this.component = component;
-			}
-
-			@Override
-			public Date checkDateParam(final String paramName) throws AbstractOXException {
-				if (!jo.has(paramName) || jo.isNull(paramName)) {
-					throw new ParamContainerException(component, FolderCode.MISSING_PARAMETER.getCategory(),
-							FolderCode.MISSING_PARAMETER.getNumber(), FolderCode.MISSING_PARAMETER.getMessage(), null);
-				}
-				try {
-					return new Date(jo.getLong(paramName));
-				} catch (final JSONException e) {
-					throw new ParamContainerException(component, FolderCode.BAD_PARAM_VALUE.getCategory(),
-							FolderCode.BAD_PARAM_VALUE.getNumber(), FolderCode.BAD_PARAM_VALUE.getMessage(), null, jo
-									.opt(paramName), paramName);
-				}
-			}
-
-			@Override
-			public int[] checkIntArrayParam(final String paramName) throws AbstractOXException {
-				if (!jo.has(paramName) || jo.isNull(paramName)) {
-					throw new ParamContainerException(component, FolderCode.MISSING_PARAMETER.getCategory(),
-							FolderCode.MISSING_PARAMETER.getNumber(), FolderCode.MISSING_PARAMETER.getMessage(), null);
-				}
-				String[] tmp;
-				try {
-					tmp = jo.getString(paramName).split(SPLIT_PAT);
-				} catch (final JSONException e1) {
-					throw new ParamContainerException(component, FolderCode.BAD_PARAM_VALUE.getCategory(),
-							FolderCode.BAD_PARAM_VALUE.getNumber(), FolderCode.BAD_PARAM_VALUE.getMessage(), null, jo
-									.opt(paramName), paramName);
-				}
-				final int[] intArray = new int[tmp.length];
-				for (int i = 0; i < tmp.length; i++) {
-					try {
-						intArray[i] = Integer.parseInt(tmp[i]);
-					} catch (final NumberFormatException e) {
-						throw new ParamContainerException(component, FolderCode.BAD_PARAM_VALUE.getCategory(),
-								FolderCode.BAD_PARAM_VALUE.getNumber(), FolderCode.BAD_PARAM_VALUE.getMessage(), null,
-								jo.opt(paramName), paramName);
-					}
-				}
-				return intArray;
-			}
-
-			@Override
-			public int checkIntParam(final String paramName) throws AbstractOXException {
-				if (!jo.has(paramName) || jo.isNull(paramName)) {
-					throw new ParamContainerException(component, FolderCode.MISSING_PARAMETER.getCategory(),
-							FolderCode.MISSING_PARAMETER.getNumber(), FolderCode.MISSING_PARAMETER.getMessage(), null);
-				}
-				try {
-					return jo.getInt(paramName);
-				} catch (final JSONException e) {
-					throw new ParamContainerException(component, FolderCode.BAD_PARAM_VALUE.getCategory(),
-							FolderCode.BAD_PARAM_VALUE.getNumber(), FolderCode.BAD_PARAM_VALUE.getMessage(), null, jo
-									.opt(paramName), paramName);
-				}
-			}
-
-			@Override
-			public String checkStringParam(final String paramName) throws AbstractOXException {
-				if (!jo.has(paramName) || jo.isNull(paramName)) {
-					throw new ParamContainerException(component, FolderCode.MISSING_PARAMETER.getCategory(),
-							FolderCode.MISSING_PARAMETER.getNumber(), FolderCode.MISSING_PARAMETER.getMessage(), null);
-				}
-				try {
-					return jo.getString(paramName);
-				} catch (final JSONException e) {
-					throw new ParamContainerException(component, FolderCode.BAD_PARAM_VALUE.getCategory(),
-							FolderCode.BAD_PARAM_VALUE.getNumber(), FolderCode.BAD_PARAM_VALUE.getMessage(), null, jo
-									.opt(paramName), paramName);
-				}
-			}
-
-			@Override
-			public Date getDateParam(final String paramName) throws AbstractOXException {
-				if (!jo.has(paramName) || jo.isNull(paramName)) {
-					return null;
-				}
-				try {
-					return new Date(jo.getLong(paramName));
-				} catch (final JSONException e) {
-					throw new ParamContainerException(component, FolderCode.BAD_PARAM_VALUE.getCategory(),
-							FolderCode.BAD_PARAM_VALUE.getNumber(), FolderCode.BAD_PARAM_VALUE.getMessage(), null, jo
-									.opt(paramName), paramName);
-				}
-			}
-
-			@Override
-			public String getHeader(final String hdrName) {
-				return null;
-			}
-
-			@Override
-			public int[] getIntArrayParam(final String paramName) throws AbstractOXException {
-				if (!jo.has(paramName) || jo.isNull(paramName)) {
-					return null;
-				}
-				String[] tmp;
-				try {
-					tmp = jo.getString(paramName).split(SPLIT_PAT);
-				} catch (final JSONException e1) {
-					throw new ParamContainerException(component, FolderCode.BAD_PARAM_VALUE.getCategory(),
-							FolderCode.BAD_PARAM_VALUE.getNumber(), FolderCode.BAD_PARAM_VALUE.getMessage(), null, jo
-									.opt(paramName), paramName);
-				}
-				final int[] intArray = new int[tmp.length];
-				for (int i = 0; i < tmp.length; i++) {
-					try {
-						intArray[i] = Integer.parseInt(tmp[i]);
-					} catch (final NumberFormatException e) {
-						throw new ParamContainerException(component, FolderCode.BAD_PARAM_VALUE.getCategory(),
-								FolderCode.BAD_PARAM_VALUE.getNumber(), FolderCode.BAD_PARAM_VALUE.getMessage(), null,
-								jo.opt(paramName), paramName);
-					}
-				}
-				return intArray;
-			}
-
-			@Override
-			public int getIntParam(final String paramName) throws AbstractOXException {
-				if (!jo.has(paramName) || jo.isNull(paramName)) {
-					return NOT_FOUND;
-				}
-				try {
-					return jo.getInt(paramName);
-				} catch (final JSONException e) {
-					throw new ParamContainerException(component, FolderCode.BAD_PARAM_VALUE.getCategory(),
-							FolderCode.BAD_PARAM_VALUE.getNumber(), FolderCode.BAD_PARAM_VALUE.getMessage(), null, jo
-									.opt(paramName), paramName);
-				}
-			}
-
-			@Override
-			public String getStringParam(final String paramName) throws AbstractOXException {
-				if (!jo.has(paramName) || jo.isNull(paramName)) {
-					return null;
-				}
-				try {
-					return jo.getString(paramName);
-				} catch (final JSONException e) {
-					throw new ParamContainerException(component, FolderCode.BAD_PARAM_VALUE.getCategory(),
-							FolderCode.BAD_PARAM_VALUE.getNumber(), FolderCode.BAD_PARAM_VALUE.getMessage(), null, jo
-									.opt(paramName), paramName);
-				}
-			}
-
-			@Override
-			public HttpServletResponse getHttpServletResponse() {
-				return null;
-			}
-		}
 		return new JSONParamContainer(jo, component);
 	}
 

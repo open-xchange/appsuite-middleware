@@ -84,8 +84,6 @@ import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
  */
 public class OXFolderAccess {
 
-	private static final String STR_EMPTY = "";
-
 	/**
 	 * Readable connection
 	 */
@@ -335,7 +333,7 @@ public class OXFolderAccess {
 		try {
 			final int folderId = OXFolderSQL.getUserDefaultFolder(userId, module, readCon, ctx);
 			if (folderId == -1) {
-				throw new OXFolderException(FolderCode.NO_DEFAULT_FOLDER_FOUND, STR_EMPTY, folderModule2String(module),
+				throw new OXFolderException(FolderCode.NO_DEFAULT_FOLDER_FOUND, folderModule2String(module),
 						getUserName(userId, ctx), Integer.valueOf(ctx.getContextId()));
 			}
 			return getFolderObject(folderId);
@@ -398,7 +396,7 @@ public class OXFolderAccess {
 					final InfostoreFacade db = new InfostoreFacadeImpl(new DBPoolProvider());
 					return !db.hasFolderForeignObjects(fo.getObjectID(), ctx, session.getUserObject(), userConfig);
 				default:
-					throw new OXFolderException(FolderCode.UNKNOWN_MODULE, STR_EMPTY, folderModule2String(fo
+					throw new OXFolderException(FolderCode.UNKNOWN_MODULE, folderModule2String(fo
 							.getModule()), Integer.valueOf(ctx.getContextId()));
 				}
 			} else {
@@ -420,7 +418,7 @@ public class OXFolderAccess {
 					final InfostoreFacade db = new InfostoreFacadeImpl(new DBPoolProvider());
 					return db.isFolderEmpty(fo.getObjectID(), session.getContext());
 				default:
-					throw new OXFolderException(FolderCode.UNKNOWN_MODULE, STR_EMPTY, folderModule2String(fo
+					throw new OXFolderException(FolderCode.UNKNOWN_MODULE, folderModule2String(fo
 							.getModule()), Integer.valueOf(ctx.getContextId()));
 				}
 			}

@@ -9,6 +9,7 @@
    allowance for team view, free-busy, and conflict handling
  - Fastened expunging messages
  - Fixed exception message if user has no infostore access
+ - Bugfix #7591: Removed exception message prefixed from folder exceptions
 
 * 2007-06-29 - thorben.betten@open-xchange.com
 

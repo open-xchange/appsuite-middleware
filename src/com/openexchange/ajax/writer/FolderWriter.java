@@ -98,8 +98,6 @@ public final class FolderWriter extends DataWriter {
 
 	private static final int[] mapping = { 0, -1, 1, -1, 2, -1, -1, -1, 4 };
 
-	private static final String STR_EMPTY = "";
-
 	private static final String STR_UNKNOWN_COLUMN = "Unknown column";
 
 	private static final String FULLNAME_INBOX = "INBOX";
@@ -777,11 +775,11 @@ public final class FolderWriter extends DataWriter {
 									FolderCacheManager.getInstance().putFolderObject(fo, ctx);
 								}
 							} catch (final SQLException e) {
-								throw new OXFolderException(FolderCode.MISSING_FOLDER_ATTRIBUTE, STR_EMPTY,
+								throw new OXFolderException(FolderCode.MISSING_FOLDER_ATTRIBUTE,
 										FolderFields.OWN_RIGHTS, Integer.valueOf(fo.getObjectID()), Integer.valueOf(ctx
 												.getContextId()));
 							} catch (final DBPoolingException e) {
-								throw new OXFolderException(FolderCode.MISSING_FOLDER_ATTRIBUTE, STR_EMPTY,
+								throw new OXFolderException(FolderCode.MISSING_FOLDER_ATTRIBUTE,
 										FolderFields.OWN_RIGHTS, Integer.valueOf(fo.getObjectID()), Integer.valueOf(ctx
 												.getContextId()));
 							}
@@ -810,10 +808,10 @@ public final class FolderWriter extends DataWriter {
 									FolderCacheManager.getInstance().putFolderObject(fo, ctx);
 								}
 							} catch (final SQLException e) {
-								throw new OXFolderException(FolderCode.MISSING_PARAMETER, STR_EMPTY,
+								throw new OXFolderException(FolderCode.MISSING_PARAMETER,
 										FolderFields.PERMISSIONS);
 							} catch (final DBPoolingException e) {
-								throw new OXFolderException(FolderCode.MISSING_PARAMETER, STR_EMPTY,
+								throw new OXFolderException(FolderCode.MISSING_PARAMETER,
 										FolderFields.PERMISSIONS);
 							}
 						}

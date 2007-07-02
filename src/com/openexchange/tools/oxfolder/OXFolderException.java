@@ -155,10 +155,10 @@ public class OXFolderException extends OXException {
 		 * Folder's type setting is invalid
 		 * </p>
 		 */
-		INVALID_TYPE("Parent folder %s does not allow folder's type setting %s in context %s",
-				Category.CODE_ERROR, 13),
+		INVALID_TYPE("Parent folder %s does not allow folder's type setting %s in context %s", Category.CODE_ERROR, 13),
 		/**
-		 * Parent folder %s does not allow folder's module setting (%s) in context %s
+		 * Parent folder %s does not allow folder's module setting (%s) in
+		 * context %s
 		 * <p>
 		 * Folder's module setting is invalid
 		 * </p>
@@ -171,8 +171,8 @@ public class OXFolderException extends OXException {
 		 * Only one admin is allowed on a private folder
 		 * </p>
 		 */
-		ONLY_ONE_PRIVATE_FOLDER_ADMIN("Only one admin permission is allowed on a private folder",
-				Category.CODE_ERROR, 15),
+		ONLY_ONE_PRIVATE_FOLDER_ADMIN("Only one admin permission is allowed on a private folder", Category.CODE_ERROR,
+				15),
 		/**
 		 * A group must not hold admin permission on a private folder
 		 * <p>
@@ -360,8 +360,8 @@ public class OXFolderException extends OXException {
 		/**
 		 * Caller does not allow to fetch a connection from pool in context %s
 		 */
-		NO_CONNECTION_FETCH("Caller does not allow to fetch a connection from pool in context %s",
-				Category.CODE_ERROR, 40),
+		NO_CONNECTION_FETCH("Caller does not allow to fetch a connection from pool in context %s", Category.CODE_ERROR,
+				40),
 		/**
 		 * Delivered sequence id %s from database is less than allowed min
 		 * folder id of %s in context %s
@@ -384,13 +384,12 @@ public class OXFolderException extends OXException {
 		 * Invalid entity id %s detected in permissions of folder %s in context
 		 * %s
 		 */
-		INVALID_ENTITY("Invalid entity id %s detected in permissions of folder %s in context %s",
-				Category.CODE_ERROR, 44),
+		INVALID_ENTITY("Invalid entity id %s detected in permissions of folder %s in context %s", Category.CODE_ERROR,
+				44),
 		/**
 		 * Folder %s must not be moved to one of its subfolders in context %s
 		 */
-		NO_SUBFOLDER_MOVE("Folder %s must not be moved to one of its subfolders in context %s",
-				Category.CODE_ERROR, 45),
+		NO_SUBFOLDER_MOVE("Folder %s must not be moved to one of its subfolders in context %s", Category.CODE_ERROR, 45),
 		/**
 		 * Inserted for those exception that will turn to an
 		 * <code>OXException</code> in future
@@ -403,8 +402,8 @@ public class OXFolderException extends OXException {
 		/**
 		 * Attribute \"%s\" is not set in FolderObject instance %s in context %s
 		 */
-		ATTRIBUTE_NOT_SET("Attribute \"%s\" is not set in FolderObject instance %s in context %s",
-				Category.CODE_ERROR, 48),
+		ATTRIBUTE_NOT_SET("Attribute \"%s\" is not set in FolderObject instance %s in context %s", Category.CODE_ERROR,
+				48),
 		/**
 		 * A source folder of module %s must not be moved to a target folder of
 		 * module %s
@@ -477,11 +476,14 @@ public class OXFolderException extends OXException {
 		/**
 		 * Unable to map OCL permission value %s to a JSON permission value
 		 */
-		MAP_PERMISSION_FAILED("Unable to map OCL permission value %s to a JSON permission value", Category.CODE_ERROR, 65),
+		MAP_PERMISSION_FAILED("Unable to map OCL permission value %s to a JSON permission value", Category.CODE_ERROR,
+				65),
 		/**
-		 * Folder existence cannot be checked due to unsufficient folder information
+		 * Folder existence cannot be checked due to unsufficient folder
+		 * information
 		 */
-		UNSUFFICIENT_FOLDER_INFORMATION("Folder existence cannot be checked due to unsufficient folder information)", Category.CODE_ERROR, 66),
+		UNSUFFICIENT_FOLDER_INFORMATION("Folder existence cannot be checked due to unsufficient folder information)",
+				Category.CODE_ERROR, 66),
 		/**
 		 * A runtime error occurred in context %s
 		 */
@@ -496,23 +498,30 @@ public class OXFolderException extends OXException {
 		NO_SUBFOLDER_BELOW_SHARED_FOLDER("No subfolder creation underneath shared folder %s in context %s",
 				Category.PERMISSION, 69),
 		/**
-		 * User %s must not grant \"create subfolder\" permission for another user on shared folder %s in context %s
+		 * User %s must not grant \"create subfolder\" permission for another
+		 * user on shared folder %s in context %s
 		 */
 		NO_SHARED_FOLDER_SUBFOLDER_PERMISSION(
 				"User %s must not grant \"create subfolder\" permission for another user on shared folder %s in context %s",
 				Category.PERMISSION, 70),
-		/**		
+		/**
 		 * Owner %s of default folder %s must keep the folder admin permission
 		 */
-		CREATOR_IS_NOT_ADMIN("Owner %s of default folder %s must keep the folder admin permission", Category.USER_INPUT, 71),
+		CREATOR_IS_NOT_ADMIN("Owner %s of default folder %s must keep the folder admin permission",
+				Category.USER_INPUT, 71),
 		/**
-		 * User %s is not allowed to share folder %s in context %s due to user configuration
+		 * User %s is not allowed to share folder %s in context %s due to user
+		 * configuration
 		 */
-		SHARE_FORBIDDEN("User %s is not allowed to share folder %s in context %s due to user configuration", Category.USER_CONFIGURATION, 72),
+		SHARE_FORBIDDEN("User %s is not allowed to share folder %s in context %s due to user configuration",
+				Category.USER_CONFIGURATION, 72),
 		/**
-		 * Defined permissions for folder %s in context %s are not applicable to user %s due to user configuration
+		 * Defined permissions for folder %s in context %s are not applicable to
+		 * user %s due to user configuration
 		 */
-		UNAPPLICABLE_FOLDER_PERM("Defined permissions for folder %s in context %s are not applicable to user %s due to user configuration", Category.USER_CONFIGURATION, 73);
+		UNAPPLICABLE_FOLDER_PERM(
+				"Defined permissions for folder %s in context %s are not applicable to user %s due to user configuration",
+				Category.USER_CONFIGURATION, 73);
 
 		/**
 		 * Message of the exception.
@@ -558,51 +567,21 @@ public class OXFolderException extends OXException {
 		}
 	}
 
+	private static final transient Object[] EMPTY_ARGS = new Object[0];
+
 	public OXFolderException(final FolderCode folderCode) {
-		this(folderCode, (Exception) null, new Object[0]);
+		this(folderCode, (Throwable) null, EMPTY_ARGS);
 	}
 
 	public OXFolderException(final FolderCode folderCode, final Object... messageArgs) {
-		this(folderCode, (Exception) null, messageArgs);
+		this(folderCode, (Throwable) null, messageArgs);
 	}
 
 	public OXFolderException(final FolderCode folderCode, final Throwable cause, final Object... messageArgs) {
-		super(Component.FOLDER, folderCode.category, folderCode.detailNumber, folderCode.message, cause);
-		setMessageArgs(messageArgs);
-	}
-
-	public OXFolderException(final FolderCode folderCode, final String messagePrefix, final Object... messageArgs) {
-		super(Component.FOLDER, folderCode.category, folderCode.detailNumber,
-				messagePrefix == null ? folderCode.message : new StringBuilder().append(messagePrefix).append(
-						folderCode.message).toString(), null);
-		setMessageArgs(messageArgs);
-	}
-
-	public OXFolderException(final FolderCode folderCode, final String messagePrefix, final Category category,
-			final Object... messageArgs) {
-		super(Component.FOLDER, category, folderCode.detailNumber, new StringBuilder().append(messagePrefix)
-				.append(folderCode.message).toString(), null);
-		setMessageArgs(messageArgs);
+		super(Component.FOLDER, folderCode.category, folderCode.detailNumber, folderCode.message, cause, messageArgs);
 	}
 
 	public OXFolderException(final FolderCode folderCode, final Category category, final Object... messageArgs) {
-		super(Component.FOLDER, category, folderCode.detailNumber, folderCode.message, null);
-		setMessageArgs(messageArgs);
-	}
-
-	public OXFolderException(final FolderCode folderCode, final Throwable cause, final boolean insertCauseMsg,
-			final Object... messageArgs) {
-		super(Component.FOLDER, folderCode.category, folderCode.detailNumber, insertCauseMsg ? new StringBuilder()
-				.append(folderCode.message).append(':').append(cause.getMessage()).toString() : folderCode.message,
-				cause);
-		setMessageArgs(messageArgs);
-	}
-
-	public OXFolderException(final FolderCode folderCode, final String msgPrefix, final Throwable cause,
-			final boolean insertCauseMsg, final Object... messageArgs) {
-		super(Component.FOLDER, folderCode.category, folderCode.detailNumber, insertCauseMsg ? new StringBuilder(
-				msgPrefix).append(folderCode.message).append(':').append(cause.getMessage()).toString()
-				: new StringBuilder(msgPrefix).append(folderCode.message).toString(), cause);
-		setMessageArgs(messageArgs);
+		super(Component.FOLDER, category, folderCode.detailNumber, folderCode.message, null, messageArgs);
 	}
 }
