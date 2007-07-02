@@ -2,6 +2,8 @@
 
   - Bugfix #7574: Now checking if objects exist before returning a cache proxy
     object.
+  - Bugfix #8147: Autologin from wrong IP now returns an error and cookies are
+    deleted.
 
 * 2007-07-02 - thorben.betten@open-xchange.com
 

@@ -141,6 +141,7 @@ public abstract class SessionServlet extends AJAXServlet {
             final Response response = new Response();
             response.setException(e);
             resp.setContentType(CONTENTTYPE_JAVASCRIPT);
+            Tools.deleteCookies(req, resp);
             try {
                 Response.write(response, resp.getWriter());
             } catch (JSONException e1) {
@@ -164,7 +165,7 @@ public abstract class SessionServlet extends AJAXServlet {
         exceptionId = 5,
         msg = "Wrong client IP address."
     )
-    private static void checkIP(final String remembered, final String actual)
+    public static void checkIP(final String remembered, final String actual)
         throws SessionException {
         if (null == actual || !actual.equals(remembered)) {
             throw EXCEPTION.create(5);

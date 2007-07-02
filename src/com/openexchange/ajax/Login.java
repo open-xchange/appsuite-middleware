@@ -76,6 +76,7 @@ import com.openexchange.sessiond.SessiondException;
 import com.openexchange.sessiond.UserNotActivatedException;
 import com.openexchange.sessiond.UserNotFoundException;
 import com.openexchange.sessiond.LoginException.Code;
+import com.openexchange.sessiond.exception.SessionException;
 import com.openexchange.tools.ajp13.AJPv13RequestHandler;
 import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.servlet.http.Tools;
@@ -268,41 +269,49 @@ public class Login extends AJAXServlet {
 				resp.sendRedirect(_redirectUrl + sessionObj.getSecret());
             }
 		} else if (action.equals(ACTION_AUTOLOGIN)) {
-			final Cookie[] cookie = req.getCookies();
+			final Cookie[] cookies = req.getCookies();
             final Response response = new Response();
-            JSONObject login = null;
-			if (cookie != null) {
-				final SessiondConnector sessiondConnector = SessiondConnector.getInstance();
-				for (int a = 0; a < cookie.length; a++) {
-					final String cookieName = cookie[a].getName();
+            try {
+    			if (cookies == null) {
+                    throw new OXJSONException(OXJSONException.Code
+                        .INVALID_COOKIE);
+                }
+				final SessiondConnector sessiondConnector = SessiondConnector
+				    .getInstance();
+				for (Cookie cookie : cookies) {
+					final String cookieName = cookie.getName();
 					if (cookieName.startsWith(cookiePrefix)) {
-						final String session = cookie[a].getValue();
+						final String session = cookie.getValue();
 						if (sessiondConnector.refreshSession(session)) {
-							final SessionObject sessionObj = sessiondConnector.getSession(session);
-                            try {
-                                login = writeLogin(sessionObj);
-                            } catch (JSONException e) {
-                                final OXJSONException oje = new OXJSONException(
-                                    OXJSONException.Code.JSON_WRITE_ERROR, e);
-                                LOG.error(oje.getMessage(), oje);
-                                response.setException(oje);
-                            }
+							final SessionObject sessionObj = sessiondConnector
+                                .getSession(session);
+                            SessionServlet.checkIP(sessionObj.getLocalIp(), req
+                                .getRemoteAddr());
+                            response.setData(writeLogin(sessionObj));
 							break;
 						}
-                        final Cookie respCookie = new Cookie(cookie[a]
-                            .getName(), cookie[a].getValue());
+                        final Cookie respCookie = new Cookie(cookie.getName(),
+                            cookie.getValue());
                         respCookie.setPath("/");
                         respCookie.setMaxAge(0); // delete
                         resp.addCookie(respCookie);
 					}
 				}
-                if (null == login) {
-                    response.setException(new OXJSONException(
-                        OXJSONException.Code.INVALID_COOKIE, null));
+                if (null == response.getData()) {
+                    throw new OXJSONException(OXJSONException.Code
+                        .INVALID_COOKIE);
                 }
-			} else {
-                response.setException(new OXJSONException(
-                    OXJSONException.Code.INVALID_COOKIE, null));
+            } catch (SessionException e) {
+                LOG.debug(e.getMessage(), e);
+                response.setException(e);
+            } catch (OXJSONException e) {
+                LOG.debug(e.getMessage(), e);
+                response.setException(e);
+            } catch (JSONException e) {
+                final OXJSONException oje = new OXJSONException(OXJSONException
+                    .Code.JSON_WRITE_ERROR, e);
+                LOG.error(oje.getMessage(), oje);
+                response.setException(oje);
             }
 			/*
              * The magic spell to disable caching
@@ -311,10 +320,10 @@ public class Login extends AJAXServlet {
             resp.setStatus(HttpServletResponse.SC_OK);
             resp.setContentType(CONTENTTYPE_JAVASCRIPT);
             try {
-                if (null == login) {
+                if (response.hasError()) {
                     Response.write(response, resp.getWriter());
                 } else {
-                    login.write(resp.getWriter());
+                    ((JSONObject) response.getData()).write(resp.getWriter());
                 }
             } catch (JSONException e) {
                 log(RESPONSE_ERROR, e);

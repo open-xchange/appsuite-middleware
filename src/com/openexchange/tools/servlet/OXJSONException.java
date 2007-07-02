@@ -68,6 +68,15 @@ public class OXJSONException extends AbstractOXException {
     /**
      * Initializes a new exception using the information provided by the code.
      * @param code code for the exception.
+     * @param messageArgs arguments that will be formatted into the message.
+     */
+    public OXJSONException(final Code code, final Object... messageArgs) {
+        this(code, null, messageArgs);
+    }
+    
+    /**
+     * Initializes a new exception using the information provided by the code.
+     * @param code code for the exception.
      * @param cause the cause of the exception.
      * @param messageArgs arguments that will be formatted into the message.
      */

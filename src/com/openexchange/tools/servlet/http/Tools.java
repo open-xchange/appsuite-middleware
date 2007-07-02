@@ -58,8 +58,12 @@ import java.util.TimeZone;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import com.openexchange.ajax.Login;
+import com.openexchange.tools.ajp13.AJPv13RequestHandler;
 
 /**
  * Convenience methods for servlets.
@@ -237,7 +241,30 @@ public final class Tools {
 		return message.toString();
 	}
 
-	static {
+    /**
+     * Deletes all OX specific cookies.
+     * @param req http servlet request.
+     * @param resp http servlet response.
+     */
+    public static void deleteCookies(final HttpServletRequest req,
+        final HttpServletResponse resp) {
+        final Cookie[] cookies = req.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                final String cookieName = cookie.getName();
+                if (cookieName.startsWith(Login.cookiePrefix) ||
+                    cookieName.equals(AJPv13RequestHandler.JSESSIONID_COOKIE)) {
+                    final Cookie respCookie = new Cookie(cookie.getName(),
+                        cookie.getValue());
+                    respCookie.setPath("/");
+                    respCookie.setMaxAge(0);
+                    resp.addCookie(respCookie);
+                }
+            }
+        }
+    }
+
+    static {
 		HEADER_DATEFORMAT = new SimpleDateFormat(DATE_PATTERN, Locale.ENGLISH);
 		HEADER_DATEFORMAT.setTimeZone(TimeZone.getTimeZone("GMT"));
 		EXPIRES_DATE = HEADER_DATEFORMAT.format(new Date(799761600000L));
