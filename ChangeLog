@@ -3,6 +3,7 @@
  - Moduarity: Added additional methods to UserConfiguration to check
    allowance for team view, free-busy, and conflict handling
  - Fastened expunging messages
+ - Fixed exception message if user has no infostore access
 
 * 2007-06-29 - thorben.betten@open-xchange.com
 

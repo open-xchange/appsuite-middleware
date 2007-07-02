@@ -51,6 +51,7 @@ package com.openexchange.ajax;
 
 import static com.openexchange.tools.oxfolder.OXFolderManagerImpl.getFolderName;
 import static com.openexchange.tools.oxfolder.OXFolderManagerImpl.getUserName;
+import static com.openexchange.tools.oxfolder.OXFolderManagerImpl.folderModule2String;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -525,7 +526,7 @@ public class Folder extends SessionServlet {
 				} else if (parentId == FolderObject.SYSTEM_INFOSTORE_FOLDER_ID) {
 					if (!sessionObj.getUserConfiguration().hasInfostore()) {
 						throw new OXFolderException(FolderCode.NO_MODULE_ACCESS, STRING_EMPTY, getUserName(sessionObj),
-								getFolderName(FolderObject.INFOSTORE, sessionObj.getContext()), Integer
+								folderModule2String(FolderObject.INFOSTORE), Integer
 										.valueOf(sessionObj.getContext().getContextId()));
 					}
 					/*
