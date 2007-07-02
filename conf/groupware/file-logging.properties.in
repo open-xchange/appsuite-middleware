@@ -1,4 +1,4 @@
-.level=ALL
+.level=INFO
 
 handlers=java.util.logging.FileHandler
 java.util.logging.FileHandler.pattern=@serverlogfile@
