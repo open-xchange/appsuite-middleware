@@ -519,7 +519,9 @@ public class JSONMessageObject {
 	}
 
 	public void addBccAddresses(final InternetAddress[] addrs) {
-		bcc.addAll(Arrays.asList(addrs));
+		if (addrs != null) {
+			bcc.addAll(Arrays.asList(addrs));
+		}
 	}
 
 	public void setBcc(final Collection<InternetAddress> bcc) {
@@ -540,7 +542,9 @@ public class JSONMessageObject {
 	}
 
 	public void addCCAddresses(final InternetAddress[] addrs) {
-		cc.addAll(Arrays.asList(addrs));
+		if (addrs != null) {
+			cc.addAll(Arrays.asList(addrs));
+		}
 	}
 
 	public void setCc(final Collection<InternetAddress> cc) {
@@ -561,7 +565,9 @@ public class JSONMessageObject {
 	}
 
 	public void addFromAddresses(final InternetAddress[] addrs) {
-		from.addAll(Arrays.asList(addrs));
+		if (addrs != null) {
+			from.addAll(Arrays.asList(addrs));
+		}
 	}
 
 	public void setFrom(final Collection<InternetAddress> from) {
@@ -630,7 +636,9 @@ public class JSONMessageObject {
 	}
 
 	public void addToAddresses(final InternetAddress[] addrs) {
-		to.addAll(Arrays.asList(addrs));
+		if (addrs != null) {
+			to.addAll(Arrays.asList(addrs));
+		}
 	}
 
 	public void setTo(final Collection<InternetAddress> to) {
