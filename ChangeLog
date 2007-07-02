@@ -1,3 +1,7 @@
+* 2007-07-02 - choeger@open-xchange.com
+
+ - Bugfix ID#8254 Cryptic error message when updatetask is started
+
 * 2007-06-27 - manuel.kraft@open-xchange.com
 
   - Bugfix ID#8122 	RMI Authentication must be able to be switched off!
