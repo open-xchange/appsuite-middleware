@@ -98,7 +98,7 @@ import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
  * 
  * @author Thorben Betten
  */
-public class UserConfiguration implements Serializable, DeleteListener, Cloneable {
+public final class UserConfiguration implements Serializable, DeleteListener, Cloneable {
 
 	private static final long serialVersionUID = -8277899698366715803L;
 
@@ -147,7 +147,7 @@ public class UserConfiguration implements Serializable, DeleteListener, Cloneabl
 
 	private static final int RSS_PORTAL = 8192;
 
-	private static final int SYNCML = 16384;
+	private static final int MOBILITY = 16384;
 
 	private static final int EDIT_PUBLIC_FOLDERS = 32768;
 
@@ -241,139 +241,341 @@ public class UserConfiguration implements Serializable, DeleteListener, Cloneabl
 		upgradeUser();
 	}
 
+	/**
+	 * Gets this user configuration's bit pattern
+	 * 
+	 * @return the bit pattern as an <code>int</code>
+	 */
 	public int getPermissionBits() {
 		return permissionBits;
 	}
 
+	/**
+	 * Sets this user configuration's bit pattern
+	 * 
+	 * @param permissionBits -
+	 *            the bit pattern
+	 */
 	public void setPermissionBits(final int permissionBits) {
 		this.permissionBits = permissionBits;
 		accessibleModulesComputed = false;
 	}
 
+	/**
+	 * Detects if user configuration allows web mail access
+	 * 
+	 * @return <code>true</code> if enabled; otherwise <code>false</code>
+	 */
 	public boolean hasWebMail() {
 		return hasPermission(WEBMAIL);
 	}
 
+	/**
+	 * Enables/Disables web mail access in user configuration
+	 * 
+	 * @param enableWebMail
+	 */
 	public void setWebMail(final boolean enableWebMail) {
 		setPermission(enableWebMail, WEBMAIL);
 		accessibleModulesComputed = false;
 	}
 
+	/**
+	 * Detects if user configuration allows calendar access
+	 * 
+	 * @return <code>true</code> if enabled; otherwise <code>false</code>
+	 */
 	public boolean hasCalendar() {
 		return hasPermission(CALENDAR);
 	}
 
+	/**
+	 * Enables/Disables calendar access in user configuration
+	 * 
+	 * @param enableCalender
+	 */
 	public void setCalendar(final boolean enableCalender) {
 		setPermission(enableCalender, CALENDAR);
 		accessibleModulesComputed = false;
 	}
 
+	/**
+	 * Detects if user configuration allows contact access
+	 * 
+	 * @return <code>true</code> if enabled; otherwise <code>false</code>
+	 */
 	public boolean hasContact() {
 		return hasPermission(CONTACTS);
 	}
 
+	/**
+	 * Enables/Disables contact access in user configuration
+	 * 
+	 * @param enableContact
+	 */
 	public void setContact(final boolean enableContact) {
 		setPermission(enableContact, CONTACTS);
 		accessibleModulesComputed = false;
 	}
 
+	/**
+	 * Detects if user configuration allows task access
+	 * 
+	 * @return <code>true</code> if enabled; otherwise <code>false</code>
+	 */
 	public boolean hasTask() {
 		return hasPermission(TASKS);
 	}
 
+	/**
+	 * Enables/Disables task access in user configuration
+	 * 
+	 * @param enableTask
+	 */
 	public void setTask(final boolean enableTask) {
 		setPermission(enableTask, TASKS);
 		accessibleModulesComputed = false;
 	}
 
+	/**
+	 * Detects if user configuration allows infostore access
+	 * 
+	 * @return <code>true</code> if enabled; otherwise <code>false</code>
+	 */
 	public boolean hasInfostore() {
 		return hasPermission(INFOSTORE);
 	}
 
+	/**
+	 * Enables/Disables infostore access in user configuration
+	 * 
+	 * @param enableInfostore
+	 */
 	public void setInfostore(final boolean enableInfostore) {
 		setPermission(enableInfostore, INFOSTORE);
 		accessibleModulesComputed = false;
 	}
 
+	/**
+	 * Detects if user configuration allows project access
+	 * 
+	 * @return <code>true</code> if enabled; otherwise <code>false</code>
+	 */
 	public boolean hasProject() {
 		return hasPermission(PROJECTS);
 	}
 
+	/**
+	 * Enables/Disables project access in user configuration
+	 * 
+	 * @param enableProject
+	 */
 	public void setProject(final boolean enableProject) {
 		setPermission(enableProject, PROJECTS);
 		accessibleModulesComputed = false;
 	}
 
+	/**
+	 * Detects if user configuration allows forum access
+	 * 
+	 * @return <code>true</code> if enabled; otherwise <code>false</code>
+	 */
 	public boolean hasForum() {
 		return hasPermission(FORUM);
 	}
 
+	/**
+	 * Enables/Disables forum access in user configuration
+	 * 
+	 * @param enableForum
+	 */
 	public void setForum(final boolean enableForum) {
 		setPermission(enableForum, FORUM);
 	}
 
+	/**
+	 * Detects if user configuration allows pinboard write access
+	 * 
+	 * @return <code>true</code> if enabled; otherwise <code>false</code>
+	 */
 	public boolean hasPinboardWriteAccess() {
 		return hasPermission(PINBOARD_WRITE_ACCESS);
 	}
 
+	/**
+	 * Enables/Disables pinboard write access in user configuration
+	 * 
+	 * @param enablePinboardWriteAccess
+	 */
 	public void setPinboardWriteAccess(final boolean enablePinboardWriteAccess) {
 		setPermission(enablePinboardWriteAccess, PINBOARD_WRITE_ACCESS);
 	}
 
+	/**
+	 * Detects if user configuration allows WebDAV XML
+	 * 
+	 * @return <code>true</code> if enabled; otherwise <code>false</code>
+	 */
 	public boolean hasWebDAVXML() {
 		return hasPermission(WEBDAV_XML);
 	}
 
+	/**
+	 * Enables/Disables WebDAV XML access in user configuration
+	 * 
+	 * @param enableWebDAVXML
+	 */
 	public void setWebDAVXML(final boolean enableWebDAVXML) {
 		setPermission(enableWebDAVXML, WEBDAV_XML);
 	}
 
+	/**
+	 * Detects if user configuration allows WebDAV
+	 * 
+	 * @return <code>true</code> if enabled; otherwise <code>false</code>
+	 */
 	public boolean hasWebDAV() {
 		return hasPermission(WEBDAV);
 	}
 
+	/**
+	 * Enables/Disables WebDAV access in user configuration
+	 * 
+	 * @param enableWebDAV
+	 */
 	public void setWebDAV(final boolean enableWebDAV) {
 		setPermission(enableWebDAV, WEBDAV);
 	}
 
+	/**
+	 * Detects if user configuration allows ICalendar
+	 * 
+	 * @return <code>true</code> if enabled; otherwise <code>false</code>
+	 */
 	public boolean hasICal() {
 		return hasPermission(ICAL);
 	}
 
+	/**
+	 * Enables/Disables ICalendar access in user configuration
+	 * 
+	 * @param enableICal
+	 */
 	public void setICal(final boolean enableICal) {
 		setPermission(enableICal, ICAL);
 	}
 
+	/**
+	 * Detects if user configuration allows VCard
+	 * 
+	 * @return <code>true</code> if enabled; otherwise <code>false</code>
+	 */
 	public boolean hasVCard() {
 		return hasPermission(VCARD);
 	}
 
+	/**
+	 * Enables/Disables VCard access in user configuration
+	 * 
+	 * @param enableVCard
+	 */
 	public void setVCard(final boolean enableVCard) {
 		setPermission(enableVCard, VCARD);
 	}
 
+	/**
+	 * Detects if user configuration allows RSS bookmarks
+	 * 
+	 * @return <code>true</code> if enabled; otherwise <code>false</code>
+	 */
 	public boolean hasRSSBookmarks() {
 		return hasPermission(RSS_BOOKMARKS);
 	}
 
+	/**
+	 * Enables/Disables RSS bookmarks access in user configuration
+	 * 
+	 * @param enableRSSBookmarks
+	 */
 	public void setRSSBookmarks(final boolean enableRSSBookmarks) {
 		setPermission(enableRSSBookmarks, RSS_BOOKMARKS);
 	}
 
+	/**
+	 * Detects if user configuration allows RSS portal
+	 * 
+	 * @return <code>true</code> if enabled; otherwise <code>false</code>
+	 */
 	public boolean hasRSSPortal() {
 		return hasPermission(RSS_PORTAL);
 	}
 
+	/**
+	 * Enables/Disables RSS portal access in user configuration
+	 * 
+	 * @param enableRSSPortal
+	 */
 	public void setRSSPortal(final boolean enableRSSPortal) {
 		setPermission(enableRSSPortal, RSS_PORTAL);
 	}
 
+	/**
+	 * Detects if user configuration allows mobility functionality
+	 * 
+	 * @return <code>true</code> if enabled; otherwise <code>false</code>
+	 */
 	public boolean hasSyncML() {
-		return hasPermission(SYNCML);
+		return hasPermission(MOBILITY);
 	}
 
+	/**
+	 * Enables/Disables mobility access in user configuration
+	 * 
+	 * @param enableSyncML
+	 */
 	public void setSyncML(final boolean enableSyncML) {
-		setPermission(enableSyncML, SYNCML);
+		setPermission(enableSyncML, MOBILITY);
+	}
+
+	/**
+	 * Detects if user configuration allows PIM functionality (Calendar,
+	 * Contact, and Task)
+	 * 
+	 * @return <code>true</code> if PIM functionality (Calendar, Contact, and
+	 *         Task) is allowed; otherwise <code>false</code>
+	 */
+	public boolean hasPIM() {
+		return hasCalendar() && hasContact() && hasTask();
+	}
+
+	/**
+	 * Detects if user configuration allows team view
+	 * 
+	 * @return <code>true</code> if team view is allowed;otherwise
+	 *         <code>false</code>
+	 */
+	public boolean hasTeamView() {
+		return hasCalendar() && hasInfostore() && hasFullSharedFolderAccess() && hasFullPublicFolderAccess();
+	}
+
+	/**
+	 * Detects if user configuration allows free busy
+	 * 
+	 * @return <code>true</code> if free busy is allowed;otherwise
+	 *         <code>false</code>
+	 */
+	public boolean hasFreeBusy() {
+		return hasCalendar() && hasInfostore() && hasFullSharedFolderAccess() && hasFullPublicFolderAccess();
+	}
+
+	/**
+	 * Detects if user configuration allows conflict handling
+	 * 
+	 * @return <code>true</code> if conflict handling is allowed;otherwise
+	 *         <code>false</code>
+	 */
+	public boolean hasConflictHandling() {
+		return hasCalendar() && hasInfostore() && hasFullSharedFolderAccess() && hasFullPublicFolderAccess();
 	}
 
 	/**
@@ -468,6 +670,9 @@ public class UserConfiguration implements Serializable, DeleteListener, Cloneabl
 	}
 
 	public int[] getGroups() {
+		if (null == groups) {
+			return null;
+		}
 		final int[] clone = new int[groups.length];
 		System.arraycopy(groups, 0, clone, 0, clone.length);
 		return clone;

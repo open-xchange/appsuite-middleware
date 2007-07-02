@@ -1,3 +1,9 @@
+* 2007-07-02 - thorben.betten@open-xchange.com
+
+ - Moduarity: Added additional methods to UserConfiguration to check
+   allowance for team view, free-busy, and conflict handling
+ - Fastened expunging messages
+
 * 2007-06-29 - thorben.betten@open-xchange.com
 
  - Added AJP watcher in accordance to database's watcher mechanism:

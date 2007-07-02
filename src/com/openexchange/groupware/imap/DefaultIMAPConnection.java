@@ -251,10 +251,14 @@ public class DefaultIMAPConnection implements IMAPConnection, Serializable {
 
 	public void setImapFolder(final IMAPFolder imapFolder) {
 		this.imapFolder = imapFolder;
+		if (null == imapFolder) {
+			this.holdsMessages = -1;
+		}
 	}
 
 	public void resetImapFolder() {
 		this.imapFolder = null;
+		this.holdsMessages = -1;
 	}
 
 	public boolean isHoldsMessages() throws MessagingException {

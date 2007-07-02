@@ -1533,6 +1533,54 @@ public class IMAPUtils {
 	private static final String TEMPL_UID_FETCH = "UID FETCH %s (%s)";
 
 	private static final String TEMPL_UID_COPY = "UID COPY %s %s";
+	
+	/**
+	 * Copies all Messages identified through given <code>uids</code> from
+	 * <code>imapFolder</code> to <code>destFolderName</code>.
+	 */
+	public static final void copyUIDFast(final IMAPFolder imapFolder, final long[] uids, final String destFolderName,
+			final boolean isSequential) throws MessagingException {
+		if (uids == null || uids.length == 0) {
+			return;
+		}
+		final String nameArg = prepareStringArgument(destFolderName);
+		final String[] uidsArr;
+		if (isSequential) {
+			final StringBuilder tmp = new StringBuilder(100);
+			tmp.append(uids[0]).append(':').append(uids[uids.length - 1]);
+			uidsArr = new String[] { tmp.toString() };
+		} else {
+			uidsArr = getUIDs(uids);
+		}
+		/*
+		 * Perform copy
+		 */
+		imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+			/*
+			 * (non-Javadoc)
+			 * 
+			 * @see com.sun.mail.imap.IMAPFolder$ProtocolCommand#doCommand(com.sun.mail.imap.protocol.IMAPProtocol)
+			 */
+			public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+				Response[] r = null;
+				Response response = null;
+				for (int k = 0; k < uidsArr.length; k++) {
+					r = p.command(String.format(TEMPL_UID_COPY, uidsArr[k], nameArg), null);
+					response = r[r.length - 1];
+					try {
+						if (!response.isOK()) {
+							throw new ProtocolException(OXMailException.getFormattedMessage(MailCode.PROTOCOL_ERROR,
+									"UID COPY not supported"));
+						}
+					} finally {
+						p.notifyResponseHandlers(r);
+						p.handleResult(response);
+					}
+				}
+				return Boolean.TRUE;
+			}
+		});
+	}
 
 	/**
 	 * Copies all Messages identified through given <code>uids</code> from
@@ -1578,7 +1626,7 @@ public class IMAPUtils {
 					try {
 						if (!response.isOK()) {
 							throw new ProtocolException(OXMailException.getFormattedMessage(MailCode.PROTOCOL_ERROR,
-									"COPY not supported"));
+									"UID COPY not supported"));
 						}
 						NextResponse: for (int index = 0; index < r.length && index < uids.length; index++) {
 							if (!(r[index] instanceof IMAPResponse)) {
@@ -2142,7 +2190,14 @@ public class IMAPUtils {
 					messageIndex++;
 				}
 			} finally {
-				p.notifyResponseHandlers(r);
+				/*
+				 * If FETCH command contains fetch item FLAGS all folder's
+				 * messages kept in folder's message cache are sequentially
+				 * iterated to update their flags attribute. Since we deal with
+				 * our own Message instances after calling this method, the
+				 * folder cache needs not to be updated
+				 */
+				/* p.notifyResponseHandlers(r); */
 				p.handleResult(response);
 			}
 			r = null;
@@ -2780,6 +2835,121 @@ public class IMAPUtils {
 				}
 			} finally {
 				p.notifyResponseHandlers(r);
+				try {
+					p.handleResult(response);
+				} catch (final CommandFailedException cfe) {
+					if (cfe.getMessage().indexOf(ERR_01) != -1) {
+						/*
+						 * Obviously this folder is empty
+						 */
+						return true;
+					}
+					throw cfe;
+				}
+			}
+		}
+		return true;
+	}
+
+	private static final String COMMAND_EXPUNGE = "EXPUNGE";
+
+	/**
+	 * <p>
+	 * Performs the <code>EXPUNGE</code> command on whole folder referenced by
+	 * <code>imapFolder</code>.
+	 * <p>
+	 * <b>NOTE</b> folder's message cache is left in an inconsistent state
+	 * cause its kept message references are not marked as expunged. Therefore
+	 * the folder should be closed afterwards to force message cache update.
+	 * 
+	 * 
+	 * @param imapFolder -
+	 *            the imap folder
+	 * @return <code>true</code> if everything went fine; otherwise
+	 *         <code>false</code>
+	 * @throws ProtocolException -
+	 *             if an error occurs in underlying protocol
+	 */
+	public static final boolean fastExpunge(final IMAPFolder imapFolder) throws ProtocolException {
+		final IMAPProtocol p = imapFolder.getProtocol();
+		Response[] r = p.command(COMMAND_EXPUNGE, null);
+		Response response = r[r.length - 1];
+		try {
+			if (response.isOK()) {
+				return true;
+			} else if (response.isBAD() && response.getRest() != null
+					&& response.getRest().indexOf("Invalid system flag") != -1) {
+				throw new ProtocolException(OXMailException.getFormattedMessage(MailCode.PROTOCOL_ERROR,
+						"Invalid System Flag detected"));
+			} else {
+				throw new ProtocolException(OXMailException.getFormattedMessage(MailCode.PROTOCOL_ERROR,
+						"UID STORE not supported"));
+			}
+		} finally {
+			/*
+			 * No invocation of notifyResponseHandlers() to avoid sequential (by
+			 * message) folder cache update
+			 */
+			/* p.notifyResponseHandlers(r); */
+			try {
+				p.handleResult(response);
+			} catch (final CommandFailedException cfe) {
+				if (cfe.getMessage().indexOf(ERR_01) != -1) {
+					/*
+					 * Obviously this folder is empty
+					 */
+					return true;
+				}
+				throw cfe;
+			}
+		}
+	}
+
+	private static final String TEMPL_UID_EXPUNGE = "UID EXPUNGE %s";
+
+	/**
+	 * <p>
+	 * Performs the <code>EXPUNGE</code> command on messages identified
+	 * through given <code>uids</code>
+	 * <p>
+	 * <b>NOTE</b> folder's message cache is left in an inconsistent state
+	 * cause its kept message references are not marked as expunged. Therefore
+	 * the folder should be closed afterwards to force message cache update.
+	 * 
+	 * @param imapFolder -
+	 *            the imap folder
+	 * @param uids -
+	 *            the message UIDs
+	 * @return <code>true</code> if everything went fine; otherwise
+	 *         <code>false</code>
+	 * @throws ProtocolException -
+	 *             if an error occurs in underlying protocol
+	 */
+	public static final boolean uidExpunge(final IMAPFolder imapFolder, final long[] uids) throws ProtocolException {
+		final String[] args = getUIDs(uids);
+		final IMAPProtocol p = imapFolder.getProtocol();
+		Response[] r = null;
+		Response response = null;
+		Next: for (int i = 0; i < args.length; i++) {
+			r = p.command(String.format(TEMPL_UID_EXPUNGE, args[i]), null);
+			response = r[r.length - 1];
+			try {
+				if (response.isOK()) {
+					continue Next;
+				} else if (response.isBAD() && response.getRest() != null
+						&& response.getRest().indexOf("Invalid system flag") != -1) {
+					throw new ProtocolException(OXMailException.getFormattedMessage(MailCode.PROTOCOL_ERROR,
+							"Invalid System Flag detected"));
+				} else {
+					throw new ProtocolException(OXMailException.getFormattedMessage(MailCode.PROTOCOL_ERROR,
+							"UID STORE not supported"));
+				}
+			} finally {
+				/*
+				 * No invocation of notifyResponseHandlers() to avoid sequential
+				 * (by message) folder cache update
+				 */
+				/* p.notifyResponseHandlers(r); */
 				try {
 					p.handleResult(response);
 				} catch (final CommandFailedException cfe) {

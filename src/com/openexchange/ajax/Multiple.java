@@ -184,8 +184,10 @@ public class Multiple extends SessionServlet {
 			log(RESPONSE_ERROR, e);
 			sendError(resp);
 		} finally {
-			if (req.getAttribute(ATTRIBUTE_MAIL_INTERFACE) != null) {
-				final MailInterface mi = (MailInterface) req.getAttribute(ATTRIBUTE_MAIL_INTERFACE);
+			Object tmp = req.getAttribute(ATTRIBUTE_MAIL_INTERFACE);
+			if (tmp != null) {
+				final MailInterface mi = (MailInterface) tmp;
+				tmp = null;
 				try {
 					mi.close(true);
 				} catch (OXException e) {
