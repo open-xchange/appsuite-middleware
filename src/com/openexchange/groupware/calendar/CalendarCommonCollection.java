@@ -1227,9 +1227,9 @@ public class CalendarCommonCollection {
         }
         if (!cdao.containsCreatedBy()) {
             cdao.setCreatedBy(edao.getCreatedBy());
-        }        
+        }
     }
-
+    
     public static final CalendarDataObject getDAOFromList(ArrayList al, int oid) {
         CalendarDataObject cdao = null;
         for (int a = 0; a < al.size(); a++) {
@@ -1239,6 +1239,29 @@ public class CalendarCommonCollection {
             }
         }
         return null;
-    }   
+    }
+    
+    static boolean checkForSoloReminderUpdate(CalendarDataObject cdao, int uc) {
+        if (uc > 2) {
+            return false;
+        } else if (CalendarConfig.getSoloReminderTriggerEvent() && cdao.containsAlarm()) {
+            return true;
+        }
+        return false;
+    }
+    
+    static void checkAndRemovePastReminders(CalendarDataObject cdao, CalendarDataObject edao) {
+        if (CalendarConfig.getCheckAndRemovePastReminders() && cdao.containsAlarm() && cdao.getAlarm() >= 0) {
+            long reminder = 0;
+            if (cdao.containsStartDate()) {
+                reminder = cdao.getStartDate().getTime();
+            } else {
+                reminder = edao.getStartDate().getTime();
+            }
+            if (checkMillisInThePast(reminder-(cdao.getAlarm()*60000))) {
+                cdao.removeAlarm();
+            }
+        }
+    }
     
 }

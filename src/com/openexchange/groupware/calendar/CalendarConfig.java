@@ -70,6 +70,9 @@ public class CalendarConfig extends AbstractConfig {
     
     private static final Log LOG = LogFactory.getLog(CalendarConfig.class);
     
+    private static boolean solo_reminder_trigger_event = true;
+    private static boolean check_and_remove_past_reminders = true;
+    
     /**
      * {@inheritDoc}
      */
@@ -115,6 +118,28 @@ public class CalendarConfig extends AbstractConfig {
                 LOG.error("Unable to parse config parameter MAX_PRE_FETCH: "+check_max_pre_fetch_size);
             }
         }
-        
+        String check_and_remove_past_reminders_string = CalendarConfig.getProperty("CHECK_AND_REMOVE_PAST_REMINDERS");
+        if (check_and_remove_past_reminders_string != null){
+            check_and_remove_past_reminders_string = check_and_remove_past_reminders_string.trim();
+            if (check_and_remove_past_reminders_string.equalsIgnoreCase("FALSE")) {
+                check_and_remove_past_reminders = false;
+            }
+        }     
+        String solo_reminder_trigger_event_string = CalendarConfig.getProperty("CHECK_AND_AVOID_SOLO_REMINDER_TRIGGER_EVENTS");
+        if (solo_reminder_trigger_event_string != null){
+            solo_reminder_trigger_event_string = solo_reminder_trigger_event_string.trim();
+            if (solo_reminder_trigger_event_string.equalsIgnoreCase("FALSE")) {
+                solo_reminder_trigger_event = false;
+            }
+        }           
     }
+    
+    public static boolean getCheckAndRemovePastReminders() {
+        return check_and_remove_past_reminders;
+    }
+    
+    public static boolean getSoloReminderTriggerEvent() {
+        return solo_reminder_trigger_event;
+    }
+    
 }

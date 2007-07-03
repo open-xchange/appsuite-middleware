@@ -1699,16 +1699,13 @@ class CalendarMySQL implements CalendarSqlImp {
             }
             
         }
-        cdao.setParentFolderID(cdao.getActionFolder());
-        
-        /*
-         *
-         * TODO: Check if only the reminder has been updated.
-         * In such a case no event trigger must be executed.
-         *
-         */
-        
-        CalendarCommonCollection.triggerEvent(so, CalendarOperation.UPDATE, cdao);
+        cdao.setParentFolderID(cdao.getActionFolder());        
+
+        boolean solo_reminder = CalendarCommonCollection.checkForSoloReminderUpdate(cdao, uc);
+        CalendarCommonCollection.checkAndRemovePastReminders(cdao, edao);
+        if (!solo_reminder) {
+            CalendarCommonCollection.triggerEvent(so, CalendarOperation.UPDATE, cdao);
+        }
         if (clone != null) {
             cdao.setObjectID(clone.getObjectID());
             cdao.setLastModified(clone.getLastModified());
