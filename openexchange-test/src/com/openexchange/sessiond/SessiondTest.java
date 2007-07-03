@@ -178,8 +178,8 @@ public class SessiondTest extends TestCase {
 		SessiondConnector sc = SessiondConnector.getInstance();
 		try {
 			sc.addSession(userWithoutContext, password, "localhost");
-		} catch (ContextException ex) {
-			if (ex.getDetailNumber() == ContextException.Code.NOT_FOUND.getNumber()) {
+		} catch (LoginException ex) {
+			if (ex.getDetailNumber() == LoginException.Code.INVALID_CREDENTIALS.getNumber()) {
 				return;
 			}
 		}
@@ -187,4 +187,3 @@ public class SessiondTest extends TestCase {
 		fail("Context Not Found Error expected!");
 	}
 }
-
