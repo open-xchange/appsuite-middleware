@@ -1,3 +1,8 @@
+* 2007-07-03 - tobias.prinz@open-xchange.com
+
+ - Fixed bug 7718. Now the DESCRIPTION property of VTODO is mapped to our 
+   Task.NOTE property.
+
 * 2007-07-03 - martin.kauss@open-xchange.com
 
  - Fixed bug #6910. Moving a personal appointment into

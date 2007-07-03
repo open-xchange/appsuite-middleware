@@ -590,6 +590,8 @@ public class OXContainerConverter {
 				cats.deleteCharAt(cats.length() - 1);
 				taskContainer.setCategories(cats.toString());
 			}
+			// DESCRIPTION (fix: 7718)
+			StringProperty(taskContainer, object, "DESCRIPTION", SET_STRING_METHODS.get(Task.NOTE));
 			// VALARM
 			AddAlarms(taskContainer, object);
 			return taskContainer;
