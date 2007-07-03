@@ -1,5 +1,9 @@
 * 2007-07-03 - martin.kauss@open-xchange.com
 
+ - Fixed bug #6910. Moving a personal appointment into
+   a shared sub folder did not moved the appointment.
+   This has been fixed.
+
  - Fixed bug 7738. New config options exists in the filecalendar.properties,
    both are true by default.
 
