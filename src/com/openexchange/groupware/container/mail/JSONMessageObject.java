@@ -67,6 +67,7 @@ import java.util.regex.Pattern;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeUtility;
+import javax.mail.internet.ParseException;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -863,7 +864,7 @@ public class JSONMessageObject {
 	 * JSON-Array comforming to: [["The Personal", "someone@somewhere.com"],
 	 * ...]
 	 */
-	private static final JSONArray getAddressesAsArray(final Collection<InternetAddress> addrs) {
+	public static final JSONArray getAddressesAsArray(final Collection<InternetAddress> addrs) {
 		final JSONArray jsonArr = new JSONArray();
 		if (addrs != null) {
 			final int size = addrs.size();
@@ -883,7 +884,8 @@ public class JSONMessageObject {
 		final JSONArray retval = new JSONArray();
 		retval.put(addr.getPersonal() == null || addr.getPersonal().length() == 0 ? JSONObject.NULL
 				: preparePersonal(addr.getPersonal()));
-		retval.put(addr.getAddress() == null || addr.getAddress().length() == 0 ? JSONObject.NULL : addr.getAddress());
+		retval.put(addr.getAddress() == null || addr.getAddress().length() == 0 ? JSONObject.NULL : prepareAddress(addr
+				.getAddress()));
 		return retval;
 	}
 
@@ -905,6 +907,22 @@ public class JSONMessageObject {
 			return new StringBuilder().append('"').append(pp.replaceAll("\"", "\\\\\\\"")).append('"').toString();
 		}
 		return personal;
+	}
+	
+	private static final String DUMMY_DOMAIN = "@unspecified-domain";
+	
+	private static final String prepareAddress(final String address) {
+		try {
+			final String decoded = MimeUtility.decodeText(address);
+			if (decoded.endsWith(DUMMY_DOMAIN)) {
+				return decoded.substring(0, decoded.indexOf('@'));
+			}
+			return decoded;
+		} catch (final UnsupportedEncodingException e) {
+			LOG.error("Unsupported encoding in a message detected and monitored.", e);
+			MailInterfaceImpl.mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
+			return MessageUtils.decodeMultiEncodedHeader(address);
+		}
 	}
 
 	private static final JSONArray getUserFieldsAsObject(final List<String> user) {

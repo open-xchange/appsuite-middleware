@@ -49,7 +49,9 @@
 
 package com.openexchange.ajax.writer;
 
-import java.io.UnsupportedEncodingException;
+import static com.openexchange.groupware.container.mail.JSONMessageObject.getAddressesAsArray;
+
+import java.util.Arrays;
 import java.util.Locale;
 import java.util.TimeZone;
 
@@ -59,7 +61,6 @@ import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeUtility;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -518,58 +519,24 @@ public class MailWriter extends DataWriter {
 		}
 		return values[0];
 	}
+	
+	private static final JSONArray EMPTY_JSON_ARR = new JSONArray();
 
-	private final JSONArray getFromAddr(final Message msg) throws MessagingException, JSONException {
-		final JSONArray retval = new JSONArray();
-		if (msg.getFrom() != null) {
-			for (int i = 0; i < msg.getFrom().length; i++) {
-				final InternetAddress addr = (InternetAddress) msg.getFrom()[i];
-				final JSONArray arr = new JSONArray();
-				arr.put(addr.getPersonal() == null || addr.getPersonal().length() == 0 ? JSONObject.NULL
-						: preparePersonal(addr.getPersonal()));
-				arr.put(addr.getAddress() == null || addr.getAddress().length() == 0 ? JSONObject.NULL : addr
-						.getAddress());
-				retval.put(i, arr);
-			}
+	private final JSONArray getFromAddr(final Message msg) throws MessagingException {
+		final Address[] adrs = msg.getFrom();
+		if (null == adrs) {
+			return EMPTY_JSON_ARR;
 		}
-		return retval;
+		return getAddressesAsArray(Arrays.asList((InternetAddress[]) adrs));
 	}
 
 	private final JSONArray getRecipientAddresses(final Message msg, final javax.mail.Message.RecipientType type)
-			throws JSONException, MessagingException {
-		final JSONArray retval = new JSONArray();
-		final Address[] recipients = msg.getRecipients(type);
-		if (recipients != null) {
-			for (int i = 0; i < recipients.length; i++) {
-				final InternetAddress addr = (InternetAddress) recipients[i];
-				final JSONArray arr = new JSONArray();
-				arr.put(addr.getPersonal() == null || addr.getPersonal().length() == 0 ? JSONObject.NULL
-						: preparePersonal(addr.getPersonal()));
-				arr.put(addr.getAddress() == null || addr.getAddress().length() == 0 ? JSONObject.NULL : addr
-						.getAddress());
-				retval.put(i, arr);
-			}
+			throws MessagingException {
+		final Address[] adrs = msg.getRecipients(type);
+		if (null == adrs) {
+			return EMPTY_JSON_ARR;
 		}
-		return retval;
-	}
-
-	private static final String preparePersonal(final String personal) {
-		if (personal.charAt(0) == '"') {
-			/*
-			 * Assume personal is already surrounded with quotes
-			 */
-			return personal;
-		} else if (personal.indexOf(',') != -1) {
-			try {
-				return new StringBuilder().append('"').append(MimeUtility.decodeText(personal)).append(
-						'"').toString();
-			} catch (UnsupportedEncodingException e) {
-				LOG.error("Unsupported encoding in a message detected and monitored.", e);
-				MailInterfaceImpl.mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
-				return new StringBuilder().append('"').append(personal).append('"').toString();
-			}
-		}
-		return personal;
+		return getAddressesAsArray(Arrays.asList((InternetAddress[]) adrs));
 	}
 
 	private final int getFlags(final Message msg) throws MessagingException {

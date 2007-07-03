@@ -49,6 +49,8 @@
  - Bugfix #8133: Force folder unsubsription prior to its deletion
  - Avoiding OXFolderException being thrown when checking for for non-tree-
    visible public folders
+ - Bugfix #8221: Proper decoding of address headers that do not contain a
+   domain part.
 
 * 2007-07-02 - marcus.klein@open-xchange.com
 
