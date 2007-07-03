@@ -1592,6 +1592,12 @@ public int getDefaultGroupForContext(final Context ctx, final Connection con) th
             updater = Updater.getInstance();
             return updater.isLocked(schema, writePoolId) || updater.toUpdate(schema, writePoolId);
         } catch (final UpdateException e) {
+            if (e.getDetailNumber() == 102) {
+                // no entry found in table, nobody has ever logged into this context
+                // this situation is mostly caused when we move contexts between dbms
+                log.debug("NO row was found in version table!\nThis is mostly caused when a context is moved between dbms!\nIf this is here not the case, report the error to the admin!",e);
+                return false;
+            }
             log.error("UpdateCheck Error",e);
             throw new StorageException(e);
         }
