@@ -1241,8 +1241,8 @@ public class CalendarCommonCollection {
         return null;
     }
     
-    static boolean checkForSoloReminderUpdate(CalendarDataObject cdao, int uc) {
-        if (uc > 2) {
+    static boolean checkForSoloReminderUpdate(final CalendarDataObject cdao, final int uc, final boolean cup) {
+        if (uc > 2 || cup) {
             return false;
         } else if (CalendarConfig.getSoloReminderTriggerEvent() && cdao.containsAlarm()) {
             return true;
