@@ -55,6 +55,7 @@ import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import junit.framework.JUnit4TestAdapter;
@@ -70,7 +71,9 @@ import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarSql;
+import com.openexchange.groupware.calendar.CalendarSqlImp;
 import com.openexchange.groupware.contact.ContactConfig;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.FolderObject;
@@ -88,6 +91,7 @@ import com.openexchange.server.DBPoolingException;
 import com.openexchange.sessiond.SessionObjectWrapper;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
+import com.openexchange.tools.versit.values.RecurrenceValue;
 
 
 public class ICalImportTest extends AbstractCSVContactTest {
@@ -222,6 +226,24 @@ public class ICalImportTest extends AbstractCSVContactTest {
 		assertEquals("Summary" , summary, task.getTitle());
 		assertEquals("Description:" , description , task.getNote());
 	}
+	
+	/*
+	 * Problem with DAILY recurrences
+	 */
+	@Test public void test7703() throws DBPoolingException, SQLException, UnsupportedEncodingException, NumberFormatException, OXException{
+		folderId = createTestFolder(FolderObject.CALENDAR, sessObj, "ical7703Folder");
+		int interval = 3;
+		final String ical = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//The Horde Project//Horde_iCalendar Library//EN\nMETHOD:PUBLISH\nBEGIN:VEVENT\nDTSTART;VALUE=DATE:20070616\nDTEND;VALUE=DATE:20070617\nDTSTAMP:20070530T200206Z\nUID:20070530220126.23mszu01hoo0@www.klein-intern.de\nSUMMARY:Marc beim Umzug helfen\nTRANSP:OPAQUE\nORGANIZER;CN=Marcus Klein:MAILTO:m.klein@sendung-mit-der-maus.com\nLOCATION:Olpe\nRRULE:FREQ=DAILY;INTERVAL="+interval+";UNTIL=20070627\nEND:VEVENT\nEND:VCALENDAR\n";
+		final List <String> folders = Arrays.asList( Integer.toString(folderId) );
+		
+		final List<ImportResult> results = imp.importData(sessObj, format, new ByteArrayInputStream(ical.getBytes("UTF-8")), folders, null);
+		assertEquals("One import?" , 1 , results.size());
+		ImportResult res = results.get(0);
+		assertEquals("Should have no error" , null, results.get(0).getException() );
+		final AppointmentSQLInterface appointments = new CalendarSql(sessObj);
+		CalendarDataObject app = appointments.getObjectById( Integer.valueOf(res.getObjectId()), Integer.valueOf(res.getFolder()) );
+		assertEquals("Comparing interval: ", interval , app.getInterval() );
+	}
 
 //	/*
 //	 * Unexpected exception 25!
@@ -266,7 +288,7 @@ public class ICalImportTest extends AbstractCSVContactTest {
 //		final AppointmentObject appointmentObj = appointmentSql.getObjectById(Integer.parseInt( res.getObjectId() ), folderId);
 //		assertTrue("Exists" , appointmentObj != null);
 //	}
-//	
+//
 //	/*
 //	 * Imported appointment loses reminder
 //	 */
