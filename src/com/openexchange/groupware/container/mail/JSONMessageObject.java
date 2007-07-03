@@ -887,21 +887,22 @@ public class JSONMessageObject {
 		return retval;
 	}
 
+	private static final Pattern PATTERN_QUOTE = Pattern.compile("[.,:;<>\"]");
+
 	private static final String preparePersonal(final String personal) {
-		if (personal.charAt(0) == '"' || personal.charAt(0) == '\'') {
+		if (PATTERN_QUOTE.matcher(personal).find()) {
 			/*
-			 * Assume personal is already surrounded with quotes
+			 * Surround with double-quotes
 			 */
-			return personal;
-		} else if (personal.indexOf(',') != -1) {
+			String pp;
 			try {
-				return new StringBuilder().append('"').append(MimeUtility.decodeText(personal)).append(
-						'"').toString();
+				pp = MimeUtility.decodeText(personal);
 			} catch (UnsupportedEncodingException e) {
 				LOG.error("Unsupported encoding in a message detected and monitored.", e);
 				MailInterfaceImpl.mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
-				return new StringBuilder().append('"').append(personal).append('"').toString();
+				pp = personal;
 			}
+			return new StringBuilder().append('"').append(pp.replaceAll("\"", "\\\\\\\"")).append('"').toString();
 		}
 		return personal;
 	}

@@ -25,6 +25,8 @@
    GUI's permission composer dialog.
  - Bugfix #7862: Added occurences of UnsupportedEncodingExceptions to JMX
    monitoring interface as suggested by PM.
+ - Bugfix #7950: Fixed broken reply if personal part of an email address
+   contains quotable characters
 
 * 2007-07-02 - marcus.klein@open-xchange.com
 
