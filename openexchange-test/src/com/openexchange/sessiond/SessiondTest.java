@@ -158,7 +158,7 @@ public class SessiondTest extends TestCase {
 		SessiondConnector sc = SessiondConnector.getInstance();
 		try {
 			sc.addSession(notActiveUser, password, "localhost");
-		} catch (LoginException ex) {
+		} catch (UserNotActivatedException ex) {
 			return;
 		}
 		fail("UserNotActivatedException expected!");
