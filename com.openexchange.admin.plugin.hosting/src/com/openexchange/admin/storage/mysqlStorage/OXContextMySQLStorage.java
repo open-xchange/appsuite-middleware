@@ -1515,6 +1515,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
                     final int srv_id = IDGenerator.getId(configdb_write_con);
                     configdb_write_con.commit();
+                    configdb_write_con.setAutoCommit(true);
                     schema_name = db.getDisplayname() + "_" + srv_id;
 
                     db.setScheme(schema_name);
@@ -1738,6 +1739,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                             prep_ins.setObject(ins_pos, tco.getData(), tco.getType());
                             ins_pos++;
                         }
+                        
                         prep_ins.executeUpdate();
                         prep_ins.close();
                     } finally {
@@ -1889,7 +1891,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         sb.append("SELECT ");
         for (int a = 0; a < column_objects.size(); a++) {
             final TableColumnObject tco = (TableColumnObject) column_objects.get(a);
-            sb.append("" + tco.getName() + ",");
+            sb.append("`" + tco.getName() + "`,");
         }
         sb.delete(sb.length() - 1, sb.length());
         sb.append(" FROM " + to.getName() + " WHERE " + this.selectionCriteria + " = ?");
