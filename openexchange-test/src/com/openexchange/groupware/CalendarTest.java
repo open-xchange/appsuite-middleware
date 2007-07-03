@@ -205,7 +205,7 @@ public class CalendarTest extends TestCase {
         
         int privatefolder = getCalendarDefaultFolderForUser(userid, context);
         
-        assertFalse("Checking for update", co.prepareUpdateAction(cdao, 1, privatefolder, "Europe/Berlin"));
+        assertFalse("Checking for update", co.prepareUpdateAction(cdao, cdao, 1, privatefolder, "Europe/Berlin"));
         long realstart = 1149724800000L;
         assertEquals("Testing start time", cdao.getStartDate().getTime(), realstart);
         assertEquals("Testing end time", cdao.getEndDate().getTime(), realstart+CalendarRecurringCollection.MILLI_DAY);
