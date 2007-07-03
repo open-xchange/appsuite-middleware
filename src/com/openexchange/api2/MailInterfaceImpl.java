@@ -5011,6 +5011,7 @@ public class MailInterfaceImpl implements MailInterface {
 		/*
 		 * Delete old folder
 		 */
+		IMAPUtils.forceSetSubscribed(imapCon.getIMAPStore(), toMove.getFullName(), false);
 		if (!toMove.delete(true) && LOG.isWarnEnabled()) {
 			final OXMailException e = new OXMailException(MailCode.DELETE_FAILED, toMove.getFullName());
 			LOG.warn(e.getMessage(), e);
@@ -5045,6 +5046,10 @@ public class MailInterfaceImpl implements MailInterface {
 			deleteMe.close(false);
 			mailInterfaceMonitor.changeNumActive(false);
 		}
+		/*
+		 * Unsubscribe prio to deletion
+		 */
+		IMAPUtils.forceSetSubscribed(imapCon.getIMAPStore(), deleteMe.getFullName(), false);
 		final long start = System.currentTimeMillis();
 		try {
 			if (!deleteMe.delete(true)) {

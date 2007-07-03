@@ -33,6 +33,7 @@
    default folder check. INBOX is subscribed if not yet done.
  - Bugfix #8107: Additional catch-clause when requesting folder's quota to
    handle the ParseException as unlimited quota
+ - Bugfix #8133: Force folder unsubsription prior to its deletion
 
 * 2007-07-02 - marcus.klein@open-xchange.com
 
