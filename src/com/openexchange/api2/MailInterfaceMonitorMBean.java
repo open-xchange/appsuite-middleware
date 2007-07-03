@@ -142,5 +142,12 @@ public interface MailInterfaceMonitorMBean {
 	 * @return a textual representation of given message
 	 */
 	String getMessage(String imapServer, int imapPort, String login, String password, String msgUID);
+	
+	/**
+	 * @return the occurrences of unsupported encoding exceptions as a
+	 *         comma-separated string of the form:
+	 *         <code>[encoding1]: [num1] times, [encoding2]: [num2] times, ...</code>
+	 */
+	String getUnsupportedEncodingExceptions();
 
 }

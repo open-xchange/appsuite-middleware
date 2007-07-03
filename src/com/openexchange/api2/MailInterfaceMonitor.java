@@ -53,7 +53,12 @@ package com.openexchange.api2;
 
 import java.io.InputStream;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Properties;
+import java.util.Map.Entry;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -100,6 +105,8 @@ public class MailInterfaceMonitor implements MailInterfaceMonitorMBean {
 	private int numActive;
 
 	private final Lock useTimeLock = new ReentrantLock();
+	
+	private final Map<String, Integer> unsupportedEnc;
 
 	/**
 	 * Constructor
@@ -107,6 +114,7 @@ public class MailInterfaceMonitor implements MailInterfaceMonitorMBean {
 	public MailInterfaceMonitor() {
 		super();
 		avgUseTimeArr = new long[USE_TIME_COUNT];
+		unsupportedEnc = new HashMap<String, Integer>();
 	}
 	
 	/*
@@ -303,7 +311,52 @@ public class MailInterfaceMonitor implements MailInterfaceMonitorMBean {
 		numFailedLogins = 0;
 	}
 
-	public String getMessage(final String imapServer, final int imapPort, final String login, final String password, final String msgUID) {
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.api2.MailInterfaceMonitorMBean#getUnsupportedEncodingExceptions()
+	 */
+	public String getUnsupportedEncodingExceptions() {
+		final int size = unsupportedEnc.size();
+		if (size == 0) {
+			return "";
+		}
+		final StringBuilder sb = new StringBuilder(100);
+		final Iterator<Entry<String, Integer>> iter = unsupportedEnc.entrySet().iterator();
+		for (int i = 0; i < size; i++) {
+			if (i > 0) {
+				sb.append(", ");
+			}
+			final Entry<String, Integer> entry = iter.next();
+			sb.append(entry.getKey()).append(": ").append(entry.getValue()).append(" times");
+		}
+		return sb.toString();
+	}
+
+	/**
+	 * Adds an occurence of an unsupported encoding
+	 * 
+	 * @param encoding -
+	 *            the unsupported encoding
+	 */
+	public void addUnsupportedEncodingExceptions(final String encoding) {
+		final String key = encoding.toLowerCase(Locale.ENGLISH);
+		final Integer num = unsupportedEnc.get(key);
+		if (null == num) {
+			unsupportedEnc.put(key, Integer.valueOf(1));
+		} else {
+			unsupportedEnc.put(key, Integer.valueOf(num.intValue() + 1));
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.api2.MailInterfaceMonitorMBean#getMessage(java.lang.String,
+	 *      int, java.lang.String, java.lang.String, java.lang.String)
+	 */
+	public String getMessage(final String imapServer, final int imapPort, final String login, final String password,
+			final String msgUID) {
 		Mail.MailIdentifier mailIdentifier = null;
 		try {
 			mailIdentifier = new Mail.MailIdentifier(msgUID);

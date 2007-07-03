@@ -898,7 +898,8 @@ public class JSONMessageObject {
 				return new StringBuilder().append('"').append(MimeUtility.decodeText(personal)).append(
 						'"').toString();
 			} catch (UnsupportedEncodingException e) {
-				LOG.error(e.getMessage(), e);
+				LOG.error("Unsupported encoding in a message detected and monitored.", e);
+				MailInterfaceImpl.mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
 				return new StringBuilder().append('"').append(personal).append('"').toString();
 			}
 		}
@@ -1140,7 +1141,8 @@ public class JSONMessageObject {
 			try {
 				addrs[i].setPersonal(addrs[i].getPersonal(), IMAPProperties.getDefaultMimeCharset());
 			} catch (UnsupportedEncodingException e) {
-				LOG.error(e.getMessage(), e);
+				LOG.error("Unsupported encoding in a message detected and monitored.", e);
+				MailInterfaceImpl.mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
 			} catch (IMAPException e) {
 				LOG.error(e.getMessage(), e);
 			}

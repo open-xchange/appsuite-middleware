@@ -95,7 +95,6 @@ import com.openexchange.groupware.container.mail.parser.PartMessageHandler;
 import com.openexchange.groupware.imap.ByteArrayDataSource;
 import com.openexchange.groupware.imap.IMAPException;
 import com.openexchange.groupware.imap.IMAPProperties;
-import com.openexchange.groupware.imap.IMAPUtils;
 import com.openexchange.groupware.imap.MessageDataSource;
 import com.openexchange.groupware.imap.OXMailException;
 import com.openexchange.groupware.imap.UserSettingMail;
@@ -633,6 +632,8 @@ public class MessageFiller {
 						msgBodyPart.setFileName(MimeUtility.encodeText(mao.getFileName(), IMAPProperties
 								.getDefaultMimeCharset(), ENC_Q));
 					} catch (final UnsupportedEncodingException e) {
+						LOG.error("Unsupported encoding in a message detected and monitored.", e);
+						MailInterfaceImpl.mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
 						msgBodyPart.setFileName(mao.getFileName());
 					} catch (final IMAPException e) {
 						msgBodyPart.setFileName(mao.getFileName());
@@ -720,7 +721,7 @@ public class MessageFiller {
 	}
 
 	private final void setMessageHeaders(final MimeMessage msg, final JSONMessageObject msgObj)
-			throws MessagingException, UnsupportedEncodingException, OXException {
+			throws MessagingException, OXException {
 		/*
 		 * Set from
 		 */
@@ -749,8 +750,14 @@ public class MessageFiller {
 		 * Set subject
 		 */
 		if (msgObj.getSubject() != null) {
-			msg.setSubject(MimeUtility.encodeText(removeHdrLineBreak(msgObj.getSubject()), IMAPProperties
-					.getDefaultMimeCharset(), ENC_Q));
+			try {
+				msg.setSubject(MimeUtility.encodeText(removeHdrLineBreak(msgObj.getSubject()), IMAPProperties
+						.getDefaultMimeCharset(), ENC_Q));
+			} catch (final UnsupportedEncodingException e) {
+				LOG.error("Unsupported encoding in a message detected and monitored.", e);
+				MailInterfaceImpl.mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
+				msg.setSubject(removeHdrLineBreak(msgObj.getSubject()));
+			}
 		}
 		/*
 		 * Set sent date

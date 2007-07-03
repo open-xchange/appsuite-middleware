@@ -2523,6 +2523,8 @@ public class MailInterfaceImpl implements MailInterface {
 						: new StringBuilder().append(subjectPrefix).append(decodedSubject).toString();
 				retval.setSubject(newSubject);
 			} catch (final UnsupportedEncodingException e) {
+				LOG.error("Unsupported encoding in a message detected and monitored.", e);
+				mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
 				/*
 				 * Handle raw value: setting prefix to raw subject value still
 				 * leaves a valid and correct encoded header
@@ -5295,7 +5297,8 @@ public class MailInterfaceImpl implements MailInterface {
 			try {
 				tmpPass = new String(password.getBytes(IMAPProperties.getImapAuthEnc()), CHARENC_ISO_8859_1);
 			} catch (final UnsupportedEncodingException e) {
-				LOG.error(e.getMessage(), e);
+				LOG.error("Unsupported encoding in a message detected and monitored.", e);
+				mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
 			} catch (final IMAPException e) {
 				LOG.error(e.getMessage(), e);
 			}

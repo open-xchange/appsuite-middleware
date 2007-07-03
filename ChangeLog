@@ -23,6 +23,8 @@
    folder initially has full access (incl. folder admin) to subfolder. The
    creating user gets the permissions (excl. folder admin) as composed by
    GUI's permission composer dialog.
+ - Bugfix #7862: Added occurences of UnsupportedEncodingExceptions to JMX
+   monitoring interface as suggested by PM.
 
 * 2007-07-02 - marcus.klein@open-xchange.com
 

@@ -263,7 +263,8 @@ public class IMAPUtils {
 						try {
 							msg.setSubject(MimeUtility.decodeText(hdrValue));
 						} catch (final UnsupportedEncodingException e) {
-							LOG.error(e.getMessage(), e);
+							LOG.error("Unsupported encoding in a message detected and monitored.", e);
+							MailInterfaceImpl.mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
 							msg.setSubject(MessageUtils.decodeMultiEncodedHeader(hdrValue));
 						}
 					}
@@ -704,7 +705,7 @@ public class IMAPUtils {
 			public Object doCommand(IMAPProtocol p) throws ProtocolException {
 				Response[] r = p.command("SEARCH UNSEEN", null);
 				Response response = r[r.length - 1];
-				List<Integer> retvalList = new ArrayList<Integer>();
+				final List<Integer> retvalList = new ArrayList<Integer>();
 				try {
 					if (response.isOK()) {
 						for (int i = 0, len = r.length - 1; i < len; i++) {
@@ -743,7 +744,7 @@ public class IMAPUtils {
 				if (sort) {
 					Collections.sort(retvalList);
 				}
-				int[] retval = new int[size];
+				final int[] retval = new int[size];
 				for (int i = 0; i < size; i++) {
 					retval[i] = retvalList.get(i).intValue();
 				}
@@ -2242,7 +2243,8 @@ public class IMAPUtils {
 						try {
 							msg.setSubject(env.subject == null ? STR_EMPTY : MimeUtility.decodeText(env.subject));
 						} catch (final UnsupportedEncodingException e) {
-							LOG.error(e.getMessage(), e);
+							LOG.error("Unsupported encoding in a message detected and monitored.", e);
+							MailInterfaceImpl.mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
 							msg.setSubject(MessageUtils.decodeMultiEncodedHeader(env.subject));
 						}
 						msg.setSentDate(env.date);

@@ -72,6 +72,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MailDateFormat;
 import javax.mail.internet.MimeUtility;
 
+import com.openexchange.api2.MailInterfaceImpl;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.mail.parser.MessageUtils;
 import com.openexchange.tools.mail.ContentType;
@@ -360,7 +361,8 @@ public final class MessageCacheObject extends Message implements Serializable {
 			return subject != null ? subject : headers.containsKey(HDR_SUBJECT) ? MimeUtility.decodeText(headers
 					.get(HDR_SUBJECT)) : null;
 		} catch (final UnsupportedEncodingException e) {
-			LOG.error(e.getMessage(), e);
+			LOG.error("Unsupported encoding in a message detected and monitored.", e);
+			MailInterfaceImpl.mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
 			return headers.containsKey(HDR_SUBJECT) ? MessageUtils.decodeMultiEncodedHeader(headers.get(HDR_SUBJECT))
 					: null;
 		}

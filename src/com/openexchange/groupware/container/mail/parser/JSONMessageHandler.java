@@ -71,6 +71,7 @@ import javax.mail.Message.RecipientType;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeUtility;
 
+import com.openexchange.api2.MailInterfaceImpl;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.mail.JSONMessageAttachmentObject;
 import com.openexchange.groupware.container.mail.JSONMessageObject;
@@ -537,6 +538,8 @@ public class JSONMessageHandler implements MessageHandler {
 			try {
 				mao.setFileName(part.getFileName() == null ? fileName : MimeUtility.decodeText(part.getFileName()));
 			} catch (UnsupportedEncodingException e) {
+				LOG.error("Unsupported encoding in a message detected and monitored.", e);
+				MailInterfaceImpl.mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
 				mao.setFileName(part.getFileName() == null ? fileName : MessageUtils.decodeMultiEncodedHeader(part
 						.getFileName()));
 			}
