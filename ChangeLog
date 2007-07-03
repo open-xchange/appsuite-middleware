@@ -1,3 +1,20 @@
+* 2007-07-03 - martin.kauss@open-xchange.com
+
+ - Fixed bug 7738. New config options exists in the filecalendar.properties,
+   both are true by default.
+
+   The first one (CHECK_AND_REMOVE_PAST_REMINDERS)
+   checks if a reminder is in the past and removes the reminder from the object.
+   To disable this option please use
+   CHECK_AND_REMOVE_PAST_REMINDERS=FALSE
+
+   The second one (CHECK_AND_AVOID_SOLO_REMINDER_TRIGGER_EVENTS)
+   checks if only the reminder was changed. If this is true we avoid to trigger
+   the event because this is a private field and no mail must be send and no
+   client must be informed.
+   To disable this option please use
+   CHECK_AND_AVOID_SOLO_REMINDER_TRIGGER_EVENTS=FALSE
+
 * 2007-07-03 - thorben.betten@open-xchange.com
 
  - Bugfix #7848: Changed handling when creating a subfolder underneath a
