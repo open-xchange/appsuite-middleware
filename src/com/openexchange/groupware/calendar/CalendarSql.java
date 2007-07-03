@@ -424,7 +424,7 @@ public class CalendarSql implements AppointmentSQLInterface {
             Connection writecon = null;
             try {
                 CalendarOperation co = new CalendarOperation();
-                if (co.prepareUpdateAction(cdao, sessionobject.getUserObject().getId(), cdao.getParentFolderID(), sessionobject.getUserObject().getTimeZone())) {
+                if (co.prepareUpdateAction(cdao, null, sessionobject.getUserObject().getId(), cdao.getParentFolderID(), sessionobject.getUserObject().getTimeZone())) {
                     try {
                         OXFolderAccess ofa = new OXFolderAccess(sessionobject.getContext());
                         EffectivePermission oclp = ofa.getFolderPermission(cdao.getEffectiveFolderId(), sessionobject.getUserObject().getId(), sessionobject.getUserConfiguration());
@@ -513,8 +513,8 @@ public class CalendarSql implements AppointmentSQLInterface {
             Connection writecon = null;
             try {
                 CalendarOperation co = new CalendarOperation();
-                if (!co.prepareUpdateAction(cdao, sessionobject.getUserObject().getId(), inFolder, sessionobject.getUserObject().getTimeZone())) {
-                    CalendarDataObject edao = cimp.loadObjectForUpdate(cdao, sessionobject, inFolder);
+                CalendarDataObject edao = cimp.loadObjectForUpdate(cdao, sessionobject, inFolder);
+                if (!co.prepareUpdateAction(cdao, edao, sessionobject.getUserObject().getId(), inFolder, sessionobject.getUserObject().getTimeZone())) {
                     CalendarDataObject conflict_dao = CalendarCommonCollection.fillFieldsForConflictQuery(cdao, edao, false);
                     ConflictHandler ch = new ConflictHandler(conflict_dao, sessionobject, false);
                     CalendarDataObject conflicts[] = ch.getConflicts();

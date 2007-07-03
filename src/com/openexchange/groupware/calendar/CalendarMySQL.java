@@ -1892,7 +1892,10 @@ class CalendarMySQL implements CalendarSqlImp {
                                 }
                             } else {
                                 try {
-                                    final int pfid = access.getDefaultFolder(new_userparticipants[a].getIdentifier(), FolderObject.CALENDAR).getObjectID();
+                                    int pfid = cdao.getGlobalFolderID();
+                                    if (pfid == 0) {
+                                        pfid = access.getDefaultFolder(new_userparticipants[a].getIdentifier(), FolderObject.CALENDAR).getObjectID();
+                                    }
                                     //final int pfid = Integer.valueOf(OXFolderTools.getCalendarDefaultFolder(new_userparticipants[a].getIdentifier(), cdao.getContext()));
                                     pi.setInt(5, pfid);
                                     new_userparticipants[a].setPersonalFolderId(pfid);

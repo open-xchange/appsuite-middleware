@@ -384,7 +384,7 @@ public class CalendarOperation implements SearchIterator {
         return uc;
     }
     
-    public boolean prepareUpdateAction(final CalendarDataObject cdao, final int uid, final int inFolder, final String timezone) throws OXException, SQLException, Exception {
+    public boolean prepareUpdateAction(final CalendarDataObject cdao, final CalendarDataObject edao, final int uid, final int inFolder, final String timezone) throws OXException, SQLException, Exception {
         boolean action = true;
         if (cdao.getContext() != null) {
             
@@ -428,7 +428,7 @@ public class CalendarOperation implements SearchIterator {
                     } else {
                         cdao.setFolderType(ofa.getFolderType(inFolder, uid));
                     }
-                }                
+                }
                 
                 if (cdao.getFolderType() == FolderObject.PRIVATE) {
                     if (action || cdao.containsParticipants()) {
@@ -438,17 +438,22 @@ public class CalendarOperation implements SearchIterator {
                         CalendarCommonCollection.checkAndFillIfUserIsParticipant(cdao, up);
                     }
                 } else if (cdao.getFolderType() == FolderObject.SHARED) {
-                        if (cdao.containsParentFolderID()) {
-                            cdao.setSharedFolderOwner(ofa.getFolderOwner(cdao.getParentFolderID()));
-                        } else {
-                            cdao.setSharedFolderOwner(ofa.getFolderOwner(inFolder));
-                        }
-                    if (action || cdao.containsParticipants()) {
-                        UserParticipant up = new UserParticipant();
-                        up.setIdentifier(cdao.getSharedFolderOwner());
-                        up.setConfirm(CalendarDataObject.ACCEPT);
-                        CalendarCommonCollection.checkAndFillIfUserIsParticipant(cdao, up);
+                    if (cdao.containsParentFolderID()) {
+                        cdao.setSharedFolderOwner(ofa.getFolderOwner(cdao.getParentFolderID()));
+                    } else {
+                        cdao.setSharedFolderOwner(ofa.getFolderOwner(inFolder));
                     }
+                    if (!action && !cdao.containsUserParticipants()) {
+                        cdao.setUsers(edao.getUsers());
+                    }
+                    
+                    UserParticipant up = new UserParticipant();
+                    up.setIdentifier(cdao.getSharedFolderOwner());
+                    if (action) {
+                        up.setConfirm(CalendarDataObject.ACCEPT);
+                    }
+                    CalendarCommonCollection.checkAndFillIfUserIsParticipant(cdao, up);
+                    
                 } else if (cdao.getFolderType() == FolderObject.PUBLIC) {
                     UserParticipant up = new UserParticipant();
                     up.setIdentifier(uid);
@@ -458,7 +463,7 @@ public class CalendarOperation implements SearchIterator {
                 
                 Participant p = new UserParticipant();
                 if (cdao.getFolderType() == FolderObject.SHARED) {
-                        p.setIdentifier(cdao.getSharedFolderOwner());
+                    p.setIdentifier(cdao.getSharedFolderOwner());
                 } else {
                     p.setIdentifier(uid);
                 }
@@ -610,7 +615,7 @@ public class CalendarOperation implements SearchIterator {
                                     cdao.setTitle(setString(g++, co_rs));
                                 }
                                 break;
-                            case AppointmentObject.USERS:                                
+                            case AppointmentObject.USERS:
                                 if (!cdao.containsUserParticipants() && !CachedCalendarIterator.CACHED_ITERATOR_FAST_FETCH) {
                                     final Participants users = cimp.getUserParticipants(cdao, readcon, uid);
                                     cdao.setUsers(users.getUsers());
@@ -1027,7 +1032,7 @@ public class CalendarOperation implements SearchIterator {
                                 np[a].setConfirmMessage(null);
                             } else {
                                 np[a].setConfirm(CalendarDataObject.NONE);
-                                np[a].setConfirmMessage(op[bs].getConfirmMessage());                                
+                                np[a].setConfirmMessage(op[bs].getConfirmMessage());
                             }
                             np[a].setPersonalFolderId(op[bs].getPersonalFolderId());
                             if (p[1] == null) {
@@ -1042,9 +1047,9 @@ public class CalendarOperation implements SearchIterator {
                                 np[a].setAlarmMinutes(op[bs].getAlarmMinutes());
                             } else {
                                 np[a].setAlarmMinutes(-1);
-                            }                            
+                            }
                             np[a].setConfirm(CalendarDataObject.NONE);
-                            np[a].setConfirmMessage(op[bs].getConfirmMessage());                              
+                            np[a].setConfirmMessage(op[bs].getConfirmMessage());
                             np[a].setPersonalFolderId(op[bs].getPersonalFolderId());
                             p[1].add(np[a]);
                         }
