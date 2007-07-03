@@ -467,6 +467,16 @@ public class OXFolderIteratorSQL {
 			 */
 			final Queue<FolderObject> q = new FolderObjectIterator(rs, stmt, false, ctx, readCon, true).asQueue();
 			final int size = q.size();
+			if (size == 0) {
+				/*
+				 * Set resources to null since they were already closed by
+				 * asQueue() method
+				 */
+				rs = null;
+				stmt = null;
+				readCon = null;
+				return FolderObjectIterator.EMPTY_FOLDER_ITERATOR;
+			}
 			/*
 			 * 2.) All non-user-visible public folders
 			 */
@@ -494,58 +504,18 @@ public class OXFolderIteratorSQL {
 				}
 			}
 			return new FolderObjectIterator(q, false);
-			
-			
-//			/*
-//			 * Following statement is not very performant, but at least it works
-//			 * as it should. I didn't found a working one using joins.
-//			 */
-//			final StringBuilder sql = new StringBuilder(1000);
-//			sql.append(STR_SELECT).append(FolderObjectIterator.getFieldsForSQL(STR_OT));
-//			sql.append(" FROM oxfolder_tree AS ot JOIN oxfolder_permissions AS op ON ot.fuid = op.fuid AND ot.cid = ? AND op.cid = ?");
-//			sql.append(" WHERE ((ot.permission_flag = ").append(FolderObject.PUBLIC_PERMISSION);
-//			sql.append(") OR (ot.permission_flag = ").append(FolderObject.PRIVATE_PERMISSION).append(" AND ot.created_from = ?)");
-//			sql.append(" OR (op.admin_flag = 1 AND op.permission_id = ?) OR (op.fp > 0 AND op.permission_id IN ");
-//			sql.append(StringCollection.getSqlInString(userId, groups)).append(")) AND ot.parent IN (");
-//			sql.append("SELECT res.fuid FROM oxfolder_tree AS res WHERE res.cid = ? AND res.fuid NOT IN (");
-//			sql.append("SELECT ot2.fuid FROM oxfolder_tree AS ot2 JOIN oxfolder_permissions AS op2 ON ot2.fuid = op2.fuid AND ot2.cid = ? AND op2.cid = ?");
-//			sql.append(" WHERE (ot2.permission_flag = ").append(FolderObject.PUBLIC_PERMISSION);
-//			sql.append(") OR (ot2.permission_flag = ").append(FolderObject.PRIVATE_PERMISSION).append(" AND ot2.created_from = ?)");
-//			sql.append(" OR (op2.admin_flag = 1 AND op2.permission_id = ?) OR (op2.fp > 0 AND op2.permission_id IN ");
-//			sql.append(StringCollection.getSqlInString(userId, groups)).append("))) AND ot.type = ");
-//			sql.append(FolderObject.PUBLIC).append(" AND ot.module IN ");
-//			sql.append(StringCollection.getSqlInString(userConfig.getAccessibleModules()));
-//			sql.append(" GROUP BY ot.fuid ORDER BY ot.module, ot.fuid");
-//			stmt = readCon.prepareStatement(sql.toString());
-//			stmt.setInt(1, ctx.getContextId());
-//			stmt.setInt(2, ctx.getContextId());
-//			stmt.setInt(3, userId);
-//			stmt.setInt(4, userId);
-//			stmt.setInt(5, ctx.getContextId());
-//			stmt.setInt(6, ctx.getContextId());
-//			stmt.setInt(7, ctx.getContextId());
-//			stmt.setInt(8, userId);
-//			stmt.setInt(9, userId);
-//			rs = stmt.executeQuery();
 		} catch (SQLException e) {
-//			closeResources(rs, stmt, readCon, true, ctx);
 			throw new OXFolderException(FolderCode.SQL_ERROR, e, true, Integer.valueOf(ctx.getContextId()));
 		} catch (DBPoolingException e) {
-//			closeResources(rs, stmt, readCon, true, ctx);
 			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, true, Integer.valueOf(ctx.getContextId()));
 		} catch (Throwable t) {
-//			closeResources(rs, stmt, readCon, true, ctx);
 			throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, true, Integer.valueOf(ctx.getContextId()));
 		} finally {
 			closeResources(rs, stmt, readCon, true, ctx);
 		}
-		//return new FolderObjectIterator(rs, stmt, false, ctx, readCon);
 	}
 	
 	private static final String queue2SQLString(final Queue<FolderObject> q, final int size) {
-		if (q == null || size == 0) {
-			return null;
-		}
 		final Iterator<FolderObject> iter = q.iterator();
 		final StringBuilder sb = new StringBuilder(1024);
 		sb.append('(');

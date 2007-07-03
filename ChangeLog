@@ -43,6 +43,8 @@
  - Bugfix #8107: Additional catch-clause when requesting folder's quota to
    handle the ParseException as unlimited quota
  - Bugfix #8133: Force folder unsubsription prior to its deletion
+ - Avoiding OXFolderException being thrown when checking for for non-tree-
+   visible public folders
 
 * 2007-07-02 - marcus.klein@open-xchange.com
 

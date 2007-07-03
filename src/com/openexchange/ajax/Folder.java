@@ -705,6 +705,19 @@ public class Folder extends SessionServlet {
 								}
 								folderWriter.writeOXFolderFieldsAsArray(columns, virtualListFolder);
 							}
+						} catch (final OXFolderException e) {
+							if (e.getDetailNumber() == FolderCode.NO_MODULE_ACCESS.getNumber()
+									&& Category.USER_CONFIGURATION.equals(e.getCategory())) {
+								/*
+								 * No non-tree-visible public calendar folders
+								 * due to user configuration
+								 */
+								if (LOG.isTraceEnabled()) {
+									LOG.trace(e.getMessage(), e);
+								}
+							} else {
+								throw e;
+							}
 						} finally {
 							if (it != null) {
 								it.close();
@@ -723,6 +736,19 @@ public class Folder extends SessionServlet {
 								}
 								folderWriter.writeOXFolderFieldsAsArray(columns, virtualListFolder);
 							}
+						} catch (final OXFolderException e) {
+							if (e.getDetailNumber() == FolderCode.NO_MODULE_ACCESS.getNumber()
+									&& Category.USER_CONFIGURATION.equals(e.getCategory())) {
+								/*
+								 * No non-tree-visible public contact folders
+								 * due to user configuration
+								 */
+								if (LOG.isTraceEnabled()) {
+									LOG.trace(e.getMessage(), e);
+								}
+							} else {
+								throw e;
+							}
 						} finally {
 							if (it != null) {
 								it.close();
@@ -740,6 +766,19 @@ public class Folder extends SessionServlet {
 											sessionObj.getContext());
 								}
 								folderWriter.writeOXFolderFieldsAsArray(columns, virtualListFolder);
+							}
+						} catch (final OXFolderException e) {
+							if (e.getDetailNumber() == FolderCode.NO_MODULE_ACCESS.getNumber()
+									&& Category.USER_CONFIGURATION.equals(e.getCategory())) {
+								/*
+								 * No non-tree-visible public task folders due
+								 * to user configuration
+								 */
+								if (LOG.isTraceEnabled()) {
+									LOG.trace(e.getMessage(), e);
+								}
+							} else {
+								throw e;
 							}
 						} finally {
 							if (it != null) {

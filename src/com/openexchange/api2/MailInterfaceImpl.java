@@ -4804,7 +4804,7 @@ public class MailInterfaceImpl implements MailInterface {
 				} else if (parent instanceof DefaultFolder) {
 					if ((parent.getType() & Folder.HOLDS_FOLDERS) == 0) {
 						throw new OXMailException(MailCode.FOLDER_DOES_NOT_HOLD_FOLDERS,
-								MailCode.NO_DEFAULT_FOLDER_UPDATE);
+								parent.getFullName());
 					}
 				} else if (IMAPProperties.isSupportsACLs()) {
 					try {
