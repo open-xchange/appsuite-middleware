@@ -1823,5 +1823,82 @@ public class AppointmentBugTests extends TestCase {
         
         
     }
+    
+    /*
+     1) Create an appointment from 2-4pm
+     2) Add a resource and save
+     3) Create an appointment from 1-2pm and save
+     4) Edit the appointment and add resource
+
+     --> Conflict is reported although the appointments do not overlap.
+     */    
+    public void testBug7646() throws Throwable {
+        
+        deleteAllAppointments();
+        
+        Context context = new ContextImpl(contextid);
+        
+        int fid = getPrivateFolder(userid);
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
+        CalendarSql csql = new CalendarSql(so);
+        
+        CalendarDataObject cdao = new CalendarDataObject();
+        cdao.setContext(so.getContext());
+        cdao.setTitle("testBug7646 - #1");
+        cdao.setParentFolderID(fid);
+        CalendarTest.fillDatesInDao(cdao);
+        Participants p = new Participants();
+        Participant resource = new ResourceParticipant();
+        resource.setIdentifier(100);
+        p.add(resource);
+        cdao.setParticipants(p.getList());        
+        cdao.setIgnoreConflicts(true);
+        cdao.setRecurrenceType(CalendarDataObject.DAILY);
+        cdao.setInterval(1);
+        csql.insertAppointmentObject(cdao);
+        int object_id = cdao.getObjectID();                       
+        
+        CalendarDataObject cdao_conflict_test = new CalendarDataObject();
+        cdao_conflict_test.setContext(so.getContext());
+        cdao_conflict_test.setTitle("testBug7646 - #1");
+        cdao_conflict_test.setParentFolderID(fid);        
+        cdao_conflict_test.setStartDate(new Date(cdao.getEndDate().getTime()));
+        cdao_conflict_test.setEndDate(new Date(cdao.getEndDate().getTime() + 3600000));
+        cdao_conflict_test.setIgnoreConflicts(false);
+        
+        CalendarDataObject conflicts[] = csql.insertAppointmentObject(cdao_conflict_test);
+        int object_id2 = cdao_conflict_test.getObjectID();        
+
+        boolean found_object_1 = false;
+        if (conflicts != null) {
+            for (int a = 0; a < conflicts.length; a++) {
+                if (conflicts[a].getObjectID() == object_id) {
+                    found_object_1 = true;
+                }
+            }
+        }
+        assertTrue("Conflicted with object #1!", !found_object_1);
+        
+        CalendarDataObject testobject = csql.getObjectById(object_id2, fid);
+        testobject.removeStartDate();
+        testobject.removeEndDate();
+        testobject.setParticipants(p.getList());   
+        testobject.setIgnoreConflicts(false);
+        conflicts = csql.updateAppointmentObject(testobject, fid, cdao_conflict_test.getLastModified());
+        
+        
+        found_object_1 = false;
+        if (conflicts != null) {
+            for (int a = 0; a < conflicts.length; a++) {
+                if (conflicts[a].getObjectID() == object_id) {
+                    found_object_1 = true;
+                }
+            }
+        }
+        assertTrue("Conflicted with object #1!", !found_object_1);
      
+        csql.deleteAppointmentObject(cdao, fid, cdao.getLastModified());
+        csql.deleteAppointmentObject(testobject, fid, testobject.getLastModified());
+    }
+    
 }
