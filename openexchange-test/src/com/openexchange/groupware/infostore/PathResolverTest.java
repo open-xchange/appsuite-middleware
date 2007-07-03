@@ -170,6 +170,7 @@ public class PathResolverTest extends TestCase {
 		
 		OCLPermission perm2 = new OCLPermission();
 		perm2.setEntity(OCLPermission.ALL_GROUPS_AND_USERS);
+		perm2.setGroupPermission(true);
 		perm2.setFolderPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER);
 		perm2.setReadObjectPermission(OCLPermission.READ_ALL_OBJECTS);
 		perm2.setWriteObjectPermission(OCLPermission.WRITE_ALL_OBJECTS);
