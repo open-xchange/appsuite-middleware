@@ -29,6 +29,8 @@
    contains quotable characters
  - Bugfix #7992: Added EventQueue to folder modification operations (create,
    modify & delete)
+ - Bugfix #8018: INBOX folder is subscription status is checked along with
+   default folder check. INBOX is subscribed if not yet done.
 
 * 2007-07-02 - marcus.klein@open-xchange.com
 

@@ -831,6 +831,12 @@ public class MailInterfaceImpl implements MailInterface {
 				if (!inboxFolder.exists()) {
 					throw new OXMailException(MailCode.FOLDER_NOT_FOUND, STR_INBOX);
 				}
+				if (!inboxFolder.isSubscribed()) {
+					/*
+					 * Subscribe INBOX folder
+					 */
+					inboxFolder.setSubscribed(true);
+				}
 				final boolean noInferiors = ((inboxFolder.getType() & Folder.HOLDS_FOLDERS) == 0);
 				final StringBuilder tmp = new StringBuilder(100);
 				/*
