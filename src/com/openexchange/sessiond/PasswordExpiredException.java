@@ -55,6 +55,7 @@ package com.openexchange.sessiond;
  *   PasswordExpiredException
  * TODO Integrate into LoginException
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * @deprecated use LoginException.
  */
 public class PasswordExpiredException extends Exception
 {

@@ -55,6 +55,7 @@ package com.openexchange.groupware.contexts;
  * ContextNotFoundException
  * TODO Integrate into LoginException
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * @deprecated use ContextException or LoginException.
  */
 public class ContextNotFoundException extends Exception
 {

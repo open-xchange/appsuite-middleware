@@ -55,6 +55,7 @@ package com.openexchange.sessiond;
  *   UserNotFoundException
  * TODO Integrate into LoginException
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * @deprecated use LoginExcepion.
  */
 public class UserNotFoundException extends Exception
 {
