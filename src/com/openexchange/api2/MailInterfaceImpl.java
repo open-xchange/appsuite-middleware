@@ -171,6 +171,7 @@ import com.openexchange.tools.versit.VersitObject;
 import com.openexchange.tools.versit.converter.ConverterException;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
 import com.sun.mail.iap.CommandFailedException;
+import com.sun.mail.iap.ParsingException;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.imap.ACL;
 import com.sun.mail.imap.AppendUID;
@@ -1314,6 +1315,11 @@ public class MailInterfaceImpl implements MailInterface {
 			final long start = System.currentTimeMillis();
 			try {
 				folderQuota = inboxFolder.getQuota();
+			} catch (MessagingException mexc) {
+				if (mexc.getNextException() instanceof ParsingException) {
+					return new long[] { MailInterface.UNLIMITED_QUOTA, MailInterface.UNLIMITED_QUOTA };
+				}
+				throw mexc;
 			} finally {
 				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 			}
@@ -1346,6 +1352,11 @@ public class MailInterfaceImpl implements MailInterface {
 			final Quota[] folderQuota;
 			try {
 				folderQuota = inboxFolder.getQuota();
+			} catch (MessagingException mexc) {
+				if (mexc.getNextException() instanceof ParsingException) {
+					return MailInterface.UNLIMITED_QUOTA;
+				}
+				throw mexc;
 			} finally {
 				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 			}
@@ -1378,6 +1389,11 @@ public class MailInterfaceImpl implements MailInterface {
 			final Quota[] folderQuota;
 			try {
 				folderQuota = inboxFolder.getQuota();
+			} catch (MessagingException mexc) {
+				if (mexc.getNextException() instanceof ParsingException) {
+					return MailInterface.UNLIMITED_QUOTA;
+				}
+				throw mexc;
 			} finally {
 				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 			}
