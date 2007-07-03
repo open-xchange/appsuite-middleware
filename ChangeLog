@@ -1,7 +1,11 @@
 * 2007-07-03 - tobias.prinz@open-xchange.com
 
- - Fixed bug 7718. Now the DESCRIPTION property of VTODO is mapped to our 
-   Task.NOTE property.
+ - Fixed bug #7718 (importer). Now the DESCRIPTION property of 
+   VTODO is mapped to our Task.NOTE property.
+ - Fixed bug #7719 (importer). Added special handling for TELEX 
+   element which VCARD considers a mail object, but of course
+   it does not pass the check for a proper mail adress (VCard is
+   more tolerant than us).
 
 * 2007-07-03 - martin.kauss@open-xchange.com
 

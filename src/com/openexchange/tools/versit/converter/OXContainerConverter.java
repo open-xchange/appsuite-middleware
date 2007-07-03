@@ -97,7 +97,7 @@ import com.openexchange.tools.versit.values.RecurrenceValue;
 
 /**
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> (adapted Victor's parser for OX6)
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> (bugfixes: 7248, 7249, 7472)
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> (bugfixes: 7248, 7249, 7472, 7718, 7719)
  * 
  */
 public class OXContainerConverter {
@@ -963,10 +963,19 @@ public class OXContainerConverter {
 					} catch (AddressException e) {
 						isProperEmailAddress = false;
 					}
-				}
+				} 
 				//fix: end
 				if (isProperEmailAddress) {
 					ComplexProperty(contactContainer, emails, emailIndex, value);
+				}else {
+					//fix for: 7719
+					final Parameter type = property.getParameter("TYPE");
+					if(type != null && type.getValue(0) != null && type.getValue(0).getText() != null){
+						if( "TLX".equals( type.getValue(0).getText() ) ){
+							contactContainer.setTelephoneTelex( property.getValue().toString() );
+						}
+					}
+					//fix:end
 				}
 			}
 			// CATEGORIES
