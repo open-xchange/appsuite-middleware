@@ -194,7 +194,7 @@ public class AppointmentBugTests extends TestCase {
         cdao.setInterval(2);        
         RecurringResults rss = null;
         CalendarOperation co = new CalendarOperation();
-        co.prepareUpdateAction(cdao, userid, getPrivateFolder(userid), TIMEZONE);
+        co.prepareUpdateAction(cdao, null, userid, getPrivateFolder(userid), TIMEZONE);
         assertEquals("Check that the recurring calculator is 1", 1, cdao.getRecurrenceCalculator());
         rss = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 0);
         for (int a = 0; a < rss.size(); a++) {
@@ -1253,7 +1253,7 @@ public class AppointmentBugTests extends TestCase {
         
     }
     
-    /*
+     /*
      As User A:
      1. Create a new appointment in your default private calendar
      2. Edit the appointment, and change the folder to the shared folder of user B
@@ -1275,18 +1275,20 @@ public class AppointmentBugTests extends TestCase {
         Connection writecon = DBPool.pickupWriteable(context);        
         
         int fid = getPrivateFolder(userid);
-        final OXFolderManager oxma = new OXFolderManagerImpl(so, readcon, writecon);
+        int fid2 = getPrivateFolder(uid2);
+        
+        final OXFolderManager oxma = new OXFolderManagerImpl(so2, readcon, writecon);
         FolderObject fo = new FolderObject();
         
         OCLPermission oclp1 = new OCLPermission();
-        oclp1.setEntity(userid);
+        oclp1.setEntity(uid2);
         oclp1.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
         oclp1.setFolderAdmin(true);
         OCLPermission oclp2 = new OCLPermission();
-        oclp2.setEntity(uid2);
-        oclp2.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.NO_PERMISSIONS);
+        oclp2.setEntity(userid);
+        oclp2.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
         fo.setFolderName("testSharedFolder6910");
-        fo.setParentFolderID(fid);
+        fo.setParentFolderID(fid2);
         fo.setModule(FolderObject.CALENDAR);
         fo.setType(FolderObject.PRIVATE);
         fo.setPermissionsAsArray(new OCLPermission[] { oclp1, oclp2 });       
@@ -1301,14 +1303,14 @@ public class AppointmentBugTests extends TestCase {
             
             CalendarDataObject cdao = new CalendarDataObject();
             cdao.setContext(so.getContext());
-            cdao.setParentFolderID(shared_folder_id);
+            cdao.setParentFolderID(fid);
             CalendarTest.fillDatesInDao(cdao);
             cdao.setTitle("testBug6910 - Step 1");
             cdao.setIgnoreConflicts(true);
             csql.insertAppointmentObject(cdao);        
             int object_id = cdao.getObjectID();
             
-            CalendarDataObject testobject = csql.getObjectById(object_id, shared_folder_id);
+            CalendarDataObject testobject = csql.getObjectById(object_id, fid);
             
             UserParticipant up[] = testobject.getUsers();
             assertTrue("up > 0", up.length > 0);
@@ -1318,17 +1320,30 @@ public class AppointmentBugTests extends TestCase {
             update.setObjectID(object_id);
             update.setParentFolderID(shared_folder_id);
             update.setIgnoreConflicts(true);
+            //update.setUsers(up); // THE GUI DOES NOT SEND THE USERS !!!
             update.setTitle("testBug6910 - Step 2");
             
             csql.updateAppointmentObject(update, fid, cdao.getLastModified());
+ 
+            testobject = csql2.getObjectById(object_id, shared_folder_id);
+            UserParticipant user_test[] = testobject.getUsers();
             
-            CalendarDataObject testobject2 = csql.getObjectById(object_id, shared_folder_id);
+            boolean found_user1 = false;
+            boolean found_user2 = false;
             
-            UserParticipant up2[] = testobject2.getUsers();
-            assertTrue("up2 > 0", up2.length > 0);
+            for (int a = 0; a < user_test.length; a++) {
+                if (user_test[a].getIdentifier() == userid) {
+                    found_user1 = true;
+                }
+                if (user_test[a].getIdentifier() == uid2) {
+                    found_user2 = true;
+                }
+            }
             
-            assertEquals("Check if user is still the same", up[0].getIdentifier(), up2[0].getIdentifier());
-            assertEquals("Check that the fid is still the same", testobject.getParentFolderID(), testobject2.getParentFolderID());
+            assertTrue("User A is not in the participants", found_user1);
+            assertTrue("User B is not in the participants", found_user2);
+            
+            
             
         } finally {
             try {
