@@ -1,5 +1,6 @@
 package com.openexchange.sessiond;
 
+import com.openexchange.groupware.contexts.ContextException;
 import java.io.FileInputStream;
 import java.util.Iterator;
 import java.util.Properties;
@@ -126,20 +127,26 @@ public class SessiondTest extends TestCase {
 		SessiondConnector sc = SessiondConnector.getInstance();
 		try {
 			sc.addSession(testUser1, invalidPassword, "localhost");
-		} catch (InvalidCredentialsException ex) {
-			boolean ok = true;
+		} catch (LoginException ex) {
+			if (ex.getDetailNumber() == LoginException.Code.INVALID_CREDENTIALS.getNumber()) {
+				return ;
+			}
 		}
+		
+		fail("Invalid Credentials Error expected!");
 	}
 
 	public void testUserNotFound() throws Exception {
 		SessiondConnector sc = SessiondConnector.getInstance();
 		try {
 			sc.addSession(notExistingUser, password, "localhost");
-		} catch (UserNotFoundException ex) {
-			return ;
+		} catch (LoginException ex) {
+			if (ex.getDetailNumber() == LoginException.Code.INVALID_CREDENTIALS.getNumber()) {
+				return ;
+			}
 		}
 		
-		fail("UserNotFoundException doesn't work!");
+		fail("User Not Found Error expected!");
 	}
 	
 	public void testSessionNotFound() throws Exception {
@@ -151,10 +158,10 @@ public class SessiondTest extends TestCase {
 		SessiondConnector sc = SessiondConnector.getInstance();
 		try {
 			sc.addSession(notActiveUser, password, "localhost");
-		} catch (UserNotActivatedException ex) {
+		} catch (LoginException ex) {
 			return;
 		}
-		fail("UserNotActivatedException doesn't work!");
+		fail("UserNotActivatedException expected!");
 	}
 	
 	public void testPasswordExpired() throws Exception {
@@ -164,17 +171,20 @@ public class SessiondTest extends TestCase {
 		} catch (PasswordExpiredException ex) {
 			return;
 		}
-		fail("PasswordExpiredException doesn't work!");
+		fail("PasswordExpiredException expected!!");
 	}
 	
 	public void testContextNotFound() throws Exception {
 		SessiondConnector sc = SessiondConnector.getInstance();
 		try {
 			sc.addSession(userWithoutContext, password, "localhost");
-		} catch (ContextNotFoundException ex) {
-			return;
+		} catch (ContextException ex) {
+			if (ex.getDetailNumber() == ContextException.Code.NOT_FOUND.getNumber()) {
+				return;
+			}
 		}
-		fail("ContextNotFoundException doesn't work!");
+		
+		fail("Context Not Found Error expected!");
 	}
 }
 
