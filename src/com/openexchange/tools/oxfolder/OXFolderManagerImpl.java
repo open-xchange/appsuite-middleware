@@ -231,8 +231,14 @@ public class OXFolderManagerImpl implements OXFolderManager {
 		 * Check if parent folder is a shared folder
 		 */
 		if (parentFolder.isShared(user.getId())) {
-			throw new OXFolderLogicException(FolderCode.NO_SUBFOLDER_BELOW_SHARED_FOLDER,
-					getFolderName(parentFolder), Integer.valueOf(ctx.getContextId()));
+			/*
+			 * Current user wants to create a subfolder underneath a shared folder
+			 */
+			checkSharedSubfolderOwnerPermission(parentFolder, folderObj, user.getId(), ctx);
+			/*
+			 * Set folder creator for next permission check and for proper insert value
+			 */
+			folderObj.setCreatedBy(parentFolder.getCreatedBy());
 		}
 		/*
 		 * Check folder module
@@ -295,7 +301,9 @@ public class OXFolderManagerImpl implements OXFolderManager {
 		final Date creatingDate = new Date(createTime);
 		folderObj.setObjectID(fuid);
 		folderObj.setCreationDate(creatingDate);
-		folderObj.setCreatedBy(user.getId());
+		if (!folderObj.containsCreatedBy()) {
+			folderObj.setCreatedBy(user.getId());
+		}
 		folderObj.setLastModified(creatingDate);
 		folderObj.setModifiedBy(user.getId());
 		folderObj.setSubfolderFlag(false);
@@ -1237,8 +1245,67 @@ public class OXFolderManagerImpl implements OXFolderManager {
 		return true;
 	}
 	
-	private static final void checkPermissionsAgainstUserConfigs(final FolderObject folderObj,
-			final Context ctx) throws OXException {
+	/**
+	 * This routine ensures that owner of parental shared folder gets full
+	 * access (incl. folder admin) to shared subfolder
+	 * 
+	 * @param parentOwner -
+	 *            the user ID of parent folder owner
+	 * @param folderObj -
+	 *            the sharde subfolder
+	 * @throws OXException -
+	 *             if permission check fails
+	 */
+	private static final void checkSharedSubfolderOwnerPermission(final FolderObject parent, final FolderObject folderObj,
+			final int userId, final Context ctx) throws OXException {
+		final List<OCLPermission> ocls = folderObj.getPermissions();
+		final int size = ocls.size();
+		/*
+		 * Look for existing permissions for parent owner
+		 */
+		boolean pownerFound = false;
+		for (int i = 0; i < size; i++) {
+			final OCLPermission cur = ocls.get(i);
+			if (cur.getEntity() == parent.getCreatedBy()) {
+				/*
+				 * In any case grant full access
+				 */
+				cur.setFolderAdmin(true);
+				cur.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
+						OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+				pownerFound = true;
+			} else if (cur.isFolderAdmin()) {
+				throw new OXFolderException(FolderCode.INVALID_SHARED_FOLDER_SUBFOLDER_PERMISSION, getUserName(
+						userId, ctx), getFolderName(folderObj), Integer.valueOf(ctx.getContextId()),
+						getFolderName(folderObj), Integer.valueOf(ctx.getContextId()), getFolderName(parent));
+			}
+		}
+		if (!pownerFound) {
+			/*
+			 * Add full permission for parent folder owner
+			 */
+			final OCLPermission pownerPerm = new OCLPermission();
+			pownerPerm.setEntity(parent.getCreatedBy());
+			pownerPerm.setFolderAdmin(true);
+			pownerPerm.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
+					OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+			ocls.add(pownerPerm);
+		}
+		folderObj.setPermissions((ArrayList) ocls);
+	}
+	
+	/**
+	 * Checks every <b>user permission</b> against user configuration settings
+	 * 
+	 * @param folderObj -
+	 *            the folder object
+	 * @param ctx -
+	 *            the context
+	 * @throws OXException -
+	 *             if a composed permission does not obey user's configuration
+	 */
+	private static final void checkPermissionsAgainstUserConfigs(final FolderObject folderObj, final Context ctx)
+			throws OXException {
 		final int size = folderObj.getPermissions().size();
 		final Iterator<OCLPermission> iter = folderObj.getPermissions().iterator();
 		final UserConfigurationStorage userConfigStorage = UserConfigurationStorage.getInstance();
@@ -1248,9 +1315,8 @@ public class OXFolderManagerImpl implements OXFolderManager {
 				final OCLPermission maxApplicablePerm = getMaxApplicablePermission(folderObj, userConfigStorage
 						.getUserConfiguration(assignedPerm.getEntity(), ctx));
 				if (!isApplicable(maxApplicablePerm, assignedPerm)) {
-					throw new OXFolderException(FolderCode.UNAPPLICABLE_FOLDER_PERM,
-							getFolderName(folderObj), Integer.valueOf(ctx.getContextId()), getUserName(assignedPerm
-									.getEntity(), ctx));
+					throw new OXFolderException(FolderCode.UNAPPLICABLE_FOLDER_PERM, getFolderName(folderObj), Integer
+							.valueOf(ctx.getContextId()), getUserName(assignedPerm.getEntity(), ctx));
 				}
 			}
 		}
@@ -1273,6 +1339,20 @@ public class OXFolderManagerImpl implements OXFolderManager {
 				.getDeletePermission() >= assignedPerm.getDeletePermission());
 	}
 	
+	/**
+	 * Ensures that an user who does not hold full shared folder access cannot
+	 * share on of his private folders
+	 * 
+	 * @param folderObj -
+	 *            the folder object
+	 * @param sessionUserConfig -
+	 *            the session user's configuration
+	 * @param ctx -
+	 *            the context
+	 * @throws OXException -
+	 *             if an user tries to share a folder eventhough he is not
+	 *             allowed to
+	 */
 	private static final void checkPermissionsAgainstSessionUserConfig(final FolderObject folderObj,
 			final UserConfiguration sessionUserConfig, final Context ctx) throws OXException {
 		final int size = folderObj.getPermissions().size();
@@ -1285,8 +1365,9 @@ public class OXFolderManagerImpl implements OXFolderManager {
 				 * Prevent user from sharing a private folder cause he does not
 				 * hold full shared folder access due to its user configuration
 				 */
-				throw new OXFolderException(FolderCode.SHARE_FORBIDDEN, getUserName(sessionUserConfig
-						.getUserId(), ctx), getFolderName(folderObj), Integer.valueOf(ctx.getContextId()));
+				throw new OXFolderException(FolderCode.SHARE_FORBIDDEN,
+						getUserName(sessionUserConfig.getUserId(), ctx), getFolderName(folderObj), Integer.valueOf(ctx
+								.getContextId()));
 			}
 		}
 	}
@@ -1310,11 +1391,6 @@ public class OXFolderManagerImpl implements OXFolderManager {
 			final OCLPermission oclPerm = iter.next();
 			if (oclPerm.getEntity() < 0) {
 				throw new OXFolderException(FolderCode.INVALID_ENTITY, Integer.valueOf(oclPerm.getEntity()),
-						getFolderName(folderObj), Integer.valueOf(ctx.getContextId()));
-			} else if (isPrivate && oclPerm.getEntity() != creator
-					&& oclPerm.getFolderPermission() >= OCLPermission.CREATE_SUB_FOLDERS) {
-				throw new OXFolderException(FolderCode.NO_SHARED_FOLDER_SUBFOLDER_PERMISSION, getUserName(
-						userId, ctx), getFolderName(folderObj), Integer.valueOf(ctx.getContextId()),
 						getFolderName(folderObj), Integer.valueOf(ctx.getContextId()));
 			}
 			if (oclPerm.isFolderAdmin()) {

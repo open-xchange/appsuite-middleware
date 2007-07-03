@@ -498,11 +498,10 @@ public class OXFolderException extends OXException {
 		NO_SUBFOLDER_BELOW_SHARED_FOLDER("No subfolder creation underneath shared folder %s in context %s",
 				Category.PERMISSION, 69),
 		/**
-		 * User %s must not grant \"create subfolder\" permission for another
-		 * user on shared folder %s in context %s
+		 * User %s grants invalid permissions on shared folder %s in context %s. Only owner of parental shared folder %s may be folder admin
 		 */
-		NO_SHARED_FOLDER_SUBFOLDER_PERMISSION(
-				"User %s must not grant \"create subfolder\" permission for another user on shared folder %s in context %s",
+		INVALID_SHARED_FOLDER_SUBFOLDER_PERMISSION(
+				"User %s grants invalid permissions on shared folder %s in context %s. Only owner of parental shared folder %s may be folder admin",
 				Category.PERMISSION, 70),
 		/**
 		 * Owner %s of default folder %s must keep the folder admin permission

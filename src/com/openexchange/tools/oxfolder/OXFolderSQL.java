@@ -340,7 +340,7 @@ public class OXFolderSQL {
 					stmt.setInt(5, folderObj.getModule());
 					stmt.setInt(6, folderObj.getType());
 					stmt.setLong(7, creatingTime);
-					stmt.setInt(8, userId);
+					stmt.setInt(8, folderObj.containsCreatedBy() ? folderObj.getCreatedBy() : userId);
 					stmt.setLong(9, creatingTime);
 					stmt.setInt(10, userId);
 					stmt.setInt(11, permissionFlag);

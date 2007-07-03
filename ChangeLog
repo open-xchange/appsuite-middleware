@@ -1,3 +1,12 @@
+* 2007-07-03 - thorben.betten@open-xchange.com
+
+ - Bugfix #7848: Changed handling when creating a subfolder underneath a
+   shared folder according to the suggestions posted in comment #11:
+   Subfolder creation is no longer forbidden but owner of parental shared
+   folder initially has full access (incl. folder admin) to subfolder. The
+   creating user gets the permissions (excl. folder admin) as composed by
+   GUI's permission composer dialog.
+
 * 2007-07-02 - marcus.klein@open-xchange.com
 
   - Bugfix #7574: Now checking if objects exist before returning a cache proxy
