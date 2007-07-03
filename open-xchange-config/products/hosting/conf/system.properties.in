@@ -13,10 +13,6 @@ LoginInfo=com.openexchange.groupware.contexts.RdbLoginInfo
 # setup.
 SetupLink=com.openexchange.groupware.integration.EmptyImpl
 
-# Properties file that configures the LDAP context for authenticating against
-# LDAP.
-LDAP=@oxgroupwaresysconfdir@/ldaplogin.properties
-
 # Switch for enabling caching in the groupware. Normally this should be set to
 # true or the database will get a lot more load.
 Cache=true
