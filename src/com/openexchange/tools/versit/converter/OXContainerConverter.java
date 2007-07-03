@@ -97,7 +97,7 @@ import com.openexchange.tools.versit.values.RecurrenceValue;
 
 /**
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> (adapted Victor's parser for OX6)
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> (bugfixes: 7248, 7249, 7472, 7718, 7719)
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> (bugfixes: 7248, 7249, 7472, 7703, 7718, 7719)
  * 
  */
 public class OXContainerConverter {
@@ -1184,6 +1184,7 @@ public class OXContainerConverter {
 			}
 			break;
 		case RecurrenceValue.WEEKLY:
+		case RecurrenceValue.DAILY: //fix: 7703
 			int days = 0;
 			final int size = recur.ByDay.size();
 			final Iterator j = recur.ByDay.iterator();

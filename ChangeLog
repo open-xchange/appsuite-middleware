@@ -6,6 +6,8 @@
    element which VCARD considers a mail object, but of course
    it does not pass the check for a proper mail adress (VCard is
    more tolerant than us).
+ - Fixed bug #7703 (importer). Surprisingly, I could use the logic
+   of WEEKLY occurrences for DAILY ones, too. A one line fix...
 
 * 2007-07-03 - martin.kauss@open-xchange.com
 
