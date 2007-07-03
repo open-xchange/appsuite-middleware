@@ -27,6 +27,8 @@
    monitoring interface as suggested by PM.
  - Bugfix #7950: Fixed broken reply if personal part of an email address
    contains quotable characters
+ - Bugfix #7992: Added EventQueue to folder modification operations (create,
+   modify & delete)
 
 * 2007-07-02 - marcus.klein@open-xchange.com
 
