@@ -428,8 +428,6 @@ public class MessageUtils {
 		return sb.toString();
 	}
 
-	private static final Html2TextConverter CONVERTER = new Html2TextConverter();
-
 	private static final Pattern PATTERN_BLOCKQUOTE = Pattern.compile("(?:(<blockquote.*?>)|(</blockquote>))",
 			Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
@@ -441,16 +439,18 @@ public class MessageUtils {
 	 * @return partially converted plain text version of given html content as
 	 *         html content
 	 */
-	public final static String convertAndKeepQuotes(final String htmlContent) throws IOException {
+	public final static String convertAndKeepQuotes(final String htmlContent, final Html2TextConverter converter)
+			throws IOException {
+
 		final StringBuilder sb = new StringBuilder(htmlContent.length() + INT_100);
 		final Matcher m = PATTERN_BLOCKQUOTE.matcher(htmlContent);
 		int lastMatch = 0;
 		while (m.find()) {
-			sb.append(MailTools.htmlFormat(CONVERTER.convert(htmlContent.substring(lastMatch, m.start()))));
+			sb.append(MailTools.htmlFormat(converter.convert(htmlContent.substring(lastMatch, m.start()))));
 			sb.append(m.group());
 			lastMatch = m.end();
 		}
-		sb.append(MailTools.htmlFormat(CONVERTER.convert(htmlContent.substring(lastMatch))));
+		sb.append(MailTools.htmlFormat(converter.convert(htmlContent.substring(lastMatch))));
 		return sb.toString();
 	}
 

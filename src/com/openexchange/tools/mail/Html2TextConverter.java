@@ -62,7 +62,9 @@ import java.util.regex.Pattern;
  * 
  */
 public class Html2TextConverter {
-	
+
+	private static final String STR_EMPTY = "";
+
 	private static final String LINEBREAK = "\n";
 
 	private boolean body_found;
@@ -71,13 +73,23 @@ public class Html2TextConverter {
 
 	private boolean pre;
 
-	private String href = "";
+	private String href = STR_EMPTY;
+
+	private boolean gatherAnchor;
+
+	private final StringBuilder anchorBuilder;
+
+	public Html2TextConverter() {
+		super();
+		anchorBuilder = new StringBuilder(100);
+	}
 
 	private final void reset() {
 		body_found = false;
 		in_body = false;
 		pre = false;
-		href = "";
+		href = STR_EMPTY;
+		gatherAnchor = false;
 	}
 
 	private static final String HTML_BREAK = "<br>";
@@ -168,8 +180,8 @@ public class Html2TextConverter {
 	 */
 	public final String convert(final String htmlContent) throws IOException {
 		reset();
-		final StringBuilder result = new StringBuilder();
-		final StringBuilder result2 = new StringBuilder();
+		final StringBuilder result = new StringBuilder(1024);
+		final StringBuilder result2 = new StringBuilder(1024);
 		final StringReader input = new StringReader(htmlContent);
 		try {
 			String text = null;
@@ -208,24 +220,27 @@ public class Html2TextConverter {
 				} else if (!pre && Character.isWhitespace((char) c)) {
 					final StringBuilder s = in_body ? result : result2;
 					if (s.length() > 0 && Character.isWhitespace(s.charAt(s.length() - 1))) {
-						text = "";
+						text = STR_EMPTY;
 					} else {
 						text = " ";
 					}
 				} else {
-					text = "" + (char) c;
+					text = String.valueOf((char) c);
 				}
 				final StringBuilder s = in_body ? result : result2;
-				s.append(text == null ? "" : text);
+				s.append(text);
+				if (gatherAnchor) {
+					anchorBuilder.append(text);
+				}
 				c = input.read();
 			}
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			input.close();
 			throw e;
 		}
 		return body_found ? result.toString() : result2.toString();
 	}
-	
+
 	private static final char getLastChar(final StringBuilder sb) {
 		if (sb.length() == 0) {
 			return ' ';
@@ -277,8 +292,17 @@ public class Html2TextConverter {
 				|| tag.regionMatches(true, 0, '<' + pattern + ' ', 0, pattern.length() + 2);
 	}
 
+	private static final Pattern PATTERN_HREF_CONTENT = Pattern.compile("href=\"?([^\\s\">]+)\"?",
+			Pattern.CASE_INSENSITIVE);
+
+	private static final Pattern PATTERN_ALT_CONTENT = Pattern.compile("alt=\"?([^\">]+)\"?",
+			Pattern.CASE_INSENSITIVE);
+	
+	private static final Pattern PATTERN_SRC_CONTENT = Pattern.compile("src=\"?([^\\s\">]+)\"?",
+			Pattern.CASE_INSENSITIVE);
+
 	private final String convertTag(final String t, final char prevChar) {
-		String result = "";
+		String result = STR_EMPTY;
 		if (isTag(t, "body")) {
 			in_body = true;
 			body_found = true;
@@ -342,24 +366,32 @@ public class Html2TextConverter {
 		} else if (isTag(t, "/i")) {
 			result = "\"";
 		} else if (isTag(t, "img")) {
-			int idx = t.indexOf("alt=\"");
-			if (idx != -1) {
-				idx += 5;
-				final int idx2 = t.indexOf("\"", idx);
-				result = t.substring(idx, idx2);
+			final StringBuilder sb = new StringBuilder(100);
+			Matcher matcher = PATTERN_ALT_CONTENT.matcher(t);
+			if (matcher.find()) {
+				sb.append(matcher.group(1));
 			}
+			matcher = PATTERN_SRC_CONTENT.matcher(t);
+			if (matcher.find() && MailTools.PATTERN_HREF.matcher(matcher.group(1)).matches()) {
+				sb.append(' ').append('[').append(matcher.group(1)).append(']');
+			}
+			result = sb.toString();
 		} else if (isTag(t, "a")) {
-			int idx = t.indexOf("href=\"");
-			if (idx == -1) {
-				href = "";
+			final Matcher matcher = PATTERN_HREF_CONTENT.matcher(t);
+			if (matcher.find()) {
+				href = matcher.group(1);
+				anchorBuilder.setLength(0);
+				gatherAnchor = true;
 			} else {
-				idx += 6;
-				final int idx2 = t.indexOf("\"", idx);
-				href = t.substring(idx, idx2);
+				href = STR_EMPTY;
 			}
 		} else if (isTag(t, "/a") && href.length() > 0) {
-			result = new StringBuilder(100).append(" [ ").append(href).append(" ]").toString();
-			href = "";
+			final String anchorTitle = anchorBuilder.toString();
+			if (!MailTools.PATTERN_HREF.matcher(anchorTitle).matches() && !href.equalsIgnoreCase(anchorTitle)) {
+				result = new StringBuilder(100).append(' ').append('[').append(href).append(']').toString();
+			}
+			href = STR_EMPTY;
+			gatherAnchor = false;
 		}
 		return result;
 	}

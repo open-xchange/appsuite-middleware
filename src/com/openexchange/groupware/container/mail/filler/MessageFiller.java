@@ -187,10 +187,10 @@ public class MessageFiller {
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(MessageFiller.class);
 
-	private static final Html2TextConverter CONVERTER = new Html2TextConverter();
-
 	private static final Pattern PATTERN_EMBD_IMG = Pattern.compile("(<img *src=\"cid:)(.+?)(\" */?>)",
 			Pattern.CASE_INSENSITIVE);
+	
+	private final Html2TextConverter converter;
 
 	private final SessionObject session;
 
@@ -225,6 +225,7 @@ public class MessageFiller {
 		this.mailSession = mailSession;
 		this.destinationFolder = destinationFolder;
 		this.linewrap = session.getUserConfiguration().getUserSettingMail().getAutoLinebreak();
+		converter = new Html2TextConverter();
 	}
 
 	public void close() {
@@ -319,7 +320,7 @@ public class MessageFiller {
 					/*
 					 * Define text content
 					 */
-					text.setText(performLineWrap(CONVERTER.convertWithQuotes(mailText), false, linewrap),
+					text.setText(performLineWrap(converter.convertWithQuotes(mailText), false, linewrap),
 							IMAPProperties.getDefaultMimeCharset());
 					text.setHeader(HDR_MIME_VERSION, VERSION);
 					text.setHeader(HDR_CONTENT_TYPE, PAT_TEXT_CT.replaceFirst(REPLACE_CS, IMAPProperties
@@ -423,7 +424,7 @@ public class MessageFiller {
 						/*
 						 * Convert html content to reguar text
 						 */
-						mailText = performLineWrap(CONVERTER.convertWithQuotes((String) mailTextMao.getContent()),
+						mailText = performLineWrap(converter.convertWithQuotes((String) mailTextMao.getContent()),
 								false, linewrap);
 					} else {
 						mailText = performLineWrap(insertColorQuotes(MailTools.formatHrefLinks((String) mailTextMao
@@ -523,7 +524,7 @@ public class MessageFiller {
 		 * Define & add text content
 		 */
 		try {
-			text.setText(performLineWrap(CONVERTER.convertWithQuotes(mailText), false, linewrap), IMAPProperties
+			text.setText(performLineWrap(converter.convertWithQuotes(mailText), false, linewrap), IMAPProperties
 					.getDefaultMimeCharset());
 		} catch (final IOException e) {
 			throw new OXMailException(MailCode.HTML2TEXT_CONVERTER_ERROR, e, e.getMessage());

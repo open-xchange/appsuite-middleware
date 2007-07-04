@@ -72,6 +72,7 @@ import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.FolderStrings;
+import com.openexchange.groupware.i18n.Groups;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.ldap.LdapException;
@@ -1094,7 +1095,7 @@ public class OXFolderTools {
 						throw e;
 					}
 					final StringHelper strHelper = new StringHelper(locale);
-					creatorDisplayName = strHelper.getString(FolderStrings.ALL_GROUPS_AND_USERS);
+					creatorDisplayName = strHelper.getString(Groups.ZERO_DISPLAYNAME);
 				}
 				final FolderObject virtualOwnerFolder = FolderObject.createVirtualFolderObject(
 						"u:" + fo.getCreatedBy(), creatorDisplayName, FolderObject.SYSTEM_MODULE, true,

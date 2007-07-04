@@ -110,6 +110,8 @@ public class JSONMessageHandler implements MessageHandler {
 	private boolean textFound;
 
 	private final boolean createVersionForDisplay;
+	
+	private final Html2TextConverter converter;
 
 	public JSONMessageHandler(final SessionObject session, final String msgUID, final boolean createVersionForDisplay) {
 		super();
@@ -118,6 +120,7 @@ public class JSONMessageHandler implements MessageHandler {
 		this.msgObj = new JSONMessageObject(usm, TimeZone.getTimeZone(session.getUserObject().getTimeZone()));
 		this.msgUID = msgUID;
 		this.createVersionForDisplay = createVersionForDisplay;
+		converter = new Html2TextConverter();
 	}
 
 	/*
@@ -391,8 +394,6 @@ public class JSONMessageHandler implements MessageHandler {
 	
 	private static final String MIME_TEXT_PLAIN = "TEXT/PLAIN";
 
-	private static final Html2TextConverter CONVERTER = new Html2TextConverter();
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -437,9 +438,9 @@ public class JSONMessageHandler implements MessageHandler {
 					 */
 					final String content;
 					if (createVersionForDisplay && usm.isUseColorQuote()) {
-						content = MailTools.formatHrefLinks(MessageUtils.convertAndKeepQuotes(htmlContent));
+						content = MailTools.formatHrefLinks(MessageUtils.convertAndKeepQuotes(htmlContent, converter));
 					} else {
-						final String convertedHtml = CONVERTER.convertWithQuotes(htmlContent);
+						final String convertedHtml = converter.convertWithQuotes(htmlContent);
 						content = MessageUtils.formatContentForDisplay(convertedHtml, false, session, msgUID);
 					}
 					mao.setDisposition(Part.INLINE);

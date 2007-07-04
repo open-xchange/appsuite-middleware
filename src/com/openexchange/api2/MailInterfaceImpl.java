@@ -3190,7 +3190,6 @@ public class MailInterfaceImpl implements MailInterface {
 			MimeMessage originalMsg = null;
 			boolean isReadWrite = true;
 			Mail.MailIdentifier mailId = null;
-			MessageFiller msgFiller = null;
 			try {
 				if (msgObj.getMsgref() != null) {
 					/*
@@ -3287,7 +3286,8 @@ public class MailInterfaceImpl implements MailInterface {
 					/*
 					 * Fill message
 					 */
-					msgFiller = new MessageFiller(sessionObj, originalMsg, imapCon.getSession(), draftFolder);
+					final MessageFiller msgFiller = new MessageFiller(sessionObj, originalMsg, imapCon.getSession(),
+							draftFolder);
 					msgFiller.fillMessage(msgObj, newSMTPMsg, uploadEvent, sendType);
 					checkAndCreateFolder(draftFolder, inboxFolder);
 					if (!draftFolder.isOpen()) {
@@ -3366,7 +3366,7 @@ public class MailInterfaceImpl implements MailInterface {
 				/*
 				 * Fill message
 				 */
-				msgFiller = new MessageFiller(sessionObj, originalMsg, imapCon.getSession(), usm
+				final MessageFiller msgFiller = new MessageFiller(sessionObj, originalMsg, imapCon.getSession(), usm
 						.isNoCopyIntoStandardSentFolder() ? null : sentFolder);
 				msgFiller.fillMessage(msgObj, newSMTPMsg, uploadEvent, sendType);
 				/*
@@ -3496,10 +3496,6 @@ public class MailInterfaceImpl implements MailInterface {
 						LOG.warn("Invoked close() on a closed folder", e);
 					}
 					originalMsgFolder = null;
-				}
-				if (msgFiller != null) {
-					msgFiller.close();
-					msgFiller = null;
 				}
 			}
 		} catch (final MessagingException e) {

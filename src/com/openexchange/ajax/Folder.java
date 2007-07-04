@@ -93,6 +93,7 @@ import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.MailFolderObject;
 import com.openexchange.groupware.i18n.FolderStrings;
+import com.openexchange.groupware.i18n.Groups;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.StringHelper;
@@ -586,7 +587,7 @@ public class Folder extends SessionServlet {
 							if (sharedFolder.getCreatedBy() != OCLPermission.ALL_GROUPS_AND_USERS) {
 								throw new AbstractOXException(e);
 							}
-							creatorDisplayName = strHelper.getString(FolderStrings.ALL_GROUPS_AND_USERS);
+							creatorDisplayName = strHelper.getString(Groups.ZERO_DISPLAYNAME);
 						}
 						if (displayNames.contains(creatorDisplayName)) {
 							continue;

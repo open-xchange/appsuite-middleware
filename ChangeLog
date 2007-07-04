@@ -9,6 +9,8 @@
  - Invoking InternetAddress.toUnicodeString() when composing prefix line on
    message reply to get the decoded representation.
  - Bugfix #8280: Linebreak is performed after the whitespace character
+ - Improved html2text conversion
+ - Replaced usages of FolderString.ALL_GROUPS_AND_USERS with Groups.ZERO_DISPLAYNAME
 
 * 2007-07-04 - francisco.laguna@open-xchange.com
 
