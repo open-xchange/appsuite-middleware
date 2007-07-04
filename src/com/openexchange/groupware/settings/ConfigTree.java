@@ -49,8 +49,14 @@
 
 package com.openexchange.groupware.settings;
 
+import java.io.File;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
@@ -69,6 +75,21 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.settings.SettingException.Code;
+import com.openexchange.groupware.settings.shared.Modules;
+import com.openexchange.groupware.settings.shared.ModulesCalendar;
+import com.openexchange.groupware.settings.shared.ModulesCalendarConflict;
+import com.openexchange.groupware.settings.shared.ModulesCalendarFreeBusy;
+import com.openexchange.groupware.settings.shared.ModulesCalendarTeamView;
+import com.openexchange.groupware.settings.shared.ModulesContacts;
+import com.openexchange.groupware.settings.shared.ModulesDelegateTasks;
+import com.openexchange.groupware.settings.shared.ModulesICal;
+import com.openexchange.groupware.settings.shared.ModulesInfostore;
+import com.openexchange.groupware.settings.shared.ModulesPublicFolders;
+import com.openexchange.groupware.settings.shared.ModulesSharedFolders;
+import com.openexchange.groupware.settings.shared.ModulesSyncML;
+import com.openexchange.groupware.settings.shared.ModulesTasks;
+import com.openexchange.groupware.settings.shared.ModulesVCard;
+import com.openexchange.groupware.settings.shared.ModulesWebmail;
 import com.openexchange.server.Version;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.oxfolder.OXFolderTools;
@@ -97,12 +118,12 @@ public final class ConfigTree {
     /**
      * Reference to the settings tree.
      */
-    private static final Setting TREE;
+    private static Setting tree;
 
     /**
      * A map for the readers for shared settings.
      */
-    private static final Map<String, SharedValue> READERS;
+    private static Map<String, SharedValue> readers;
 
     /**
      * Prevent instanciation.
@@ -120,7 +141,7 @@ public final class ConfigTree {
      */
     public static Setting getSettingByPath(final String path)
         throws SettingException {
-        Setting retval = TREE;
+        Setting retval = tree;
         retval = getSettingByPath(retval, path);
         try {
             retval = (Setting) retval.clone();
@@ -170,59 +191,9 @@ public final class ConfigTree {
     static SharedValue getSharedValue(final Setting setting) {
         SharedValue retval = null;
         if (setting.isLeaf()) {
-            retval = READERS.get(setting.getName());
+            retval = readers.get(setting.getPath());
         }
         return retval;
-    }
-
-    /**
-     * Interface for settings that are shared between GUI and server.
-     */
-    interface SharedValue {
-
-        /**
-         * @param session Session.
-         * @param setting the value should be set in this setting object.
-         * @throws SettingException if an error occurs.
-         */
-        void getValue(SessionObject session, Setting setting)
-            throws SettingException;
-
-        /**
-         * @return <code>true</code> if the setting can be written by the GUI.
-         */
-        boolean isWritable();
-
-        /**
-         * Write a new value to the setting.
-         * @param session Session.
-         * @param setting contains the value for the setting.
-         * @throws SettingException if the setting can't be written or an error
-         * occurs while writing the value.
-         */
-        void writeValue(SessionObject session, Setting setting)
-            throws SettingException;
-    }
-
-    /**
-     * This class contains shared functions for all setting that are read only.
-     */
-    private abstract static class ReadOnlyValue implements SharedValue {
-
-        /**
-         * {@inheritDoc}
-         */
-        public boolean isWritable() {
-            return false;
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        public void writeValue(final SessionObject session,
-            final Setting setting) throws SettingException {
-            throw new SettingException(Code.NO_WRITE, setting.getName());
-        }
     }
 
     /**
@@ -307,57 +278,76 @@ public final class ConfigTree {
          */
         protected abstract void setValue(UserSettingMail settings,
             String value);
-
-        /**
-         * @return the name of the mail bit setting.
-         */
-        protected abstract String getName();
     }
 
-    static {
-        TREE = new Setting("", true);
-        TREE.setId(-1);
+    private static Class< ? extends SettingSetup>[] getClasses() {
+        return (Class< ? extends SettingSetup>[]) new Class[] {
+            Modules.class,
+            ModulesCalendar.class,
+            ModulesCalendarConflict.class,
+            ModulesCalendarFreeBusy.class,
+            ModulesCalendarTeamView.class,
+            ModulesContacts.class,
+            ModulesDelegateTasks.class,
+            ModulesICal.class,
+            ModulesInfostore.class,
+            ModulesPublicFolders.class,
+            ModulesSharedFolders.class,
+            ModulesSyncML.class,
+            ModulesTasks.class,
+            ModulesVCard.class,
+            ModulesWebmail.class
+        };
+    }
+
+    /**
+     * Initializes the configuration tree.
+     * @throws SettingException if initializing doesn't work.
+     */
+    public static void init() throws SettingException {
+        tree = new Setting("", true);
+        tree.setId(-1);
 
         final Setting identifier = new Setting(IDENTIFIER, true);
         identifier.setId(-1);
-        TREE.addElement(identifier);
+        tree.addElement(identifier);
 
         final Setting contactId = new Setting("contact_id", true);
         contactId.setId(-1);
-        TREE.addElement(contactId);
+        tree.addElement(contactId);
 
         final Setting language = new Setting("language", true);
         language.setId(-1);
-        TREE.addElement(language);
+        tree.addElement(language);
 
         final Setting timezone = new Setting(TIMEZONE, true);
         timezone.setId(-1);
-        TREE.addElement(timezone);
+        tree.addElement(timezone);
 
         final Setting calNotification = new Setting("calendarnotification",
             true);
         calNotification.setId(-1);
-        TREE.addElement(calNotification);
+        tree.addElement(calNotification);
 
         final Setting taskNotification = new Setting("tasknotification", true);
         taskNotification.setId(-1);
-        TREE.addElement(taskNotification);
+        tree.addElement(taskNotification);
 
         final Setting reloadTimes = new Setting("reloadtimes", true);
         reloadTimes.setId(-1);
-        TREE.addElement(reloadTimes);
+        tree.addElement(reloadTimes);
 
         final Setting serverVersion = new Setting("serverVersion", true);
         serverVersion.setId(-1);
-        TREE.addElement(serverVersion);
+        tree.addElement(serverVersion);
 
         final Setting currentTime = new Setting("currentTime", true);
         currentTime.setId(-1);
-        TREE.addElement(currentTime);
+        tree.addElement(currentTime);
 
         final Setting folder = new Setting("folder", true);
         folder.setId(-1);
-        TREE.addElement(folder);
+        tree.addElement(folder);
 
         final Setting tasks = new Setting("tasks", true);
         tasks.setId(-1);
@@ -377,7 +367,7 @@ public final class ConfigTree {
 
         final Setting mail = new Setting("mail", true);
         mail.setId(-1);
-        TREE.addElement(mail);
+        tree.addElement(mail);
 
         final Setting defaultaddress = new Setting("defaultaddress", true);
         defaultaddress.setId(-1);
@@ -454,7 +444,7 @@ public final class ConfigTree {
 
         final Setting participants = new Setting("participants", true);
         participants.setId(-1);
-        TREE.addElement(participants);
+        tree.addElement(participants);
 
         final Setting showWithoutEmail = new Setting("showWithoutEmail", true);
         showWithoutEmail.setId(-1);
@@ -462,25 +452,24 @@ public final class ConfigTree {
 
         final Setting gui = new Setting("gui", false);
         gui.setId(1);
-        TREE.addElement(gui);
+        tree.addElement(gui);
 
-        final Map<String, SharedValue> tmp =
-            new HashMap<String, SharedValue>();
-        tmp.put(identifier.getName(), new ReadOnlyValue() {
+        final Map<String, SharedValue> tmp = new HashMap<String, SharedValue>();
+        tmp.put(identifier.getPath(), new ReadOnlyValue() {
             public void getValue(final SessionObject session,
                 final Setting setting) {
                 setting.setSingleValue(String.valueOf(session.getUserObject()
                     .getId()));
             }
         });
-        tmp.put(contactId.getName(), new ReadOnlyValue() {
+        tmp.put(contactId.getPath(), new ReadOnlyValue() {
             public void getValue(final SessionObject session,
                 final Setting setting) {
                 setting.setSingleValue(String.valueOf(session.getUserObject()
                     .getContactId()));
             }
         });
-        tmp.put(language.getName(), new AbstractUserFuncs() {
+        tmp.put(language.getPath(), new AbstractUserFuncs() {
             public void getValue(final SessionObject session,
                 final Setting setting) {
                 setting.setSingleValue(session.getUserObject()
@@ -494,7 +483,7 @@ public final class ConfigTree {
                 user.setPreferredLanguage(value);
             }
         });
-        tmp.put(timezone.getName(), new AbstractUserFuncs() {
+        tmp.put(timezone.getPath(), new AbstractUserFuncs() {
             public void getValue(final SessionObject session,
                 final Setting setting) {
                 setting.setSingleValue(session.getUserObject().getTimeZone());
@@ -507,11 +496,7 @@ public final class ConfigTree {
                 user.setTimeZone(value);
             }
         });
-        tmp.put(calNotification.getName(), new AbstractMailFuncs() {
-            @Override
-            protected String getName() {
-                return calNotification.getName();
-            }
+        tmp.put(calNotification.getPath(), new AbstractMailFuncs() {
             @Override
             protected Object isSet(final UserSettingMail settings) {
                 return settings.isNotifyAppointments();
@@ -522,11 +507,7 @@ public final class ConfigTree {
                 settings.setNotifyAppointments(Boolean.parseBoolean(value));
             }
         });
-        tmp.put(taskNotification.getName(), new AbstractMailFuncs() {
-            @Override
-            protected String getName() {
-                return taskNotification.getName();
-            }
+        tmp.put(taskNotification.getPath(), new AbstractMailFuncs() {
             @Override
             protected Object isSet(final UserSettingMail settings) {
                 return settings.isNotifyTasks();
@@ -537,7 +518,7 @@ public final class ConfigTree {
                 settings.setNotifyTasks(Boolean.parseBoolean(value));
             }
         });
-        tmp.put(reloadTimes.getName(), new ReadOnlyValue() {
+        tmp.put(reloadTimes.getPath(), new ReadOnlyValue() {
             private static final int MINUTE = 60 * 1000;
             public void getValue(final SessionObject session,
                 final Setting setting) {
@@ -548,13 +529,13 @@ public final class ConfigTree {
                 setting.addMultiValue(30 * MINUTE); // 30 Minutes
             }
         });
-        tmp.put(serverVersion.getName(), new ReadOnlyValue() {
+        tmp.put(serverVersion.getPath(), new ReadOnlyValue() {
             public void getValue(final SessionObject session,
                 final Setting setting) {
                 setting.setSingleValue(Version.VERSION_STRING);
             }
         });
-        tmp.put(currentTime.getName(), new ReadOnlyValue() {
+        tmp.put(currentTime.getPath(), new ReadOnlyValue() {
             public void getValue(final SessionObject session,
                 final Setting setting) {
                 long time = System.currentTimeMillis();
@@ -564,7 +545,7 @@ public final class ConfigTree {
                 setting.setSingleValue(time);
             }
         });
-        tmp.put(tasks.getName(), new ReadOnlyValue() {
+        tmp.put(tasks.getPath(), new ReadOnlyValue() {
             public void getValue(final SessionObject session,
                 final Setting setting) throws SettingException {
                 try {
@@ -576,7 +557,7 @@ public final class ConfigTree {
                 }
             }
         });
-        tmp.put(calendar.getName(), new ReadOnlyValue() {
+        tmp.put(calendar.getPath(), new ReadOnlyValue() {
             public void getValue(final SessionObject session,
                 final Setting setting) throws SettingException {
                 try {
@@ -588,7 +569,7 @@ public final class ConfigTree {
                 }
             }
         });
-        tmp.put(contacts.getName(), new ReadOnlyValue() {
+        tmp.put(contacts.getPath(), new ReadOnlyValue() {
             public void getValue(final SessionObject session,
                 final Setting setting) throws SettingException {
                 try {
@@ -600,7 +581,7 @@ public final class ConfigTree {
                 }
             }
         });
-        tmp.put(infostore.getName(), new ReadOnlyValue() {
+        tmp.put(infostore.getPath(), new ReadOnlyValue() {
             public void getValue(final SessionObject session,
                 final Setting setting) throws SettingException {
                 try {
@@ -612,7 +593,7 @@ public final class ConfigTree {
                 }
             }
         });
-        tmp.put(defaultaddress.getName(), new AbstractUserFuncs() {
+        tmp.put(defaultaddress.getPath(), new AbstractUserFuncs() {
             public void getValue(final SessionObject session,
                 final Setting setting) {
                 setting.addMultiValue(session.getUserObject().getMail());
@@ -623,10 +604,10 @@ public final class ConfigTree {
             protected void setValue(final UserImpl user, final String value)
                 throws SettingException {
                 throw new SettingException(Code.NO_WRITE,
-                    defaultaddress.getName());
+                    defaultaddress.getPath());
             }
         });
-        tmp.put(addresses.getName(), new AbstractUserFuncs() {
+        tmp.put(addresses.getPath(), new AbstractUserFuncs() {
             public void getValue(final SessionObject session,
                 final Setting setting) {
                 final String[] aliases = session.getUserObject().getAliases();
@@ -641,10 +622,10 @@ public final class ConfigTree {
             }
             protected void setValue(final UserImpl user, final String value)
                 throws SettingException {
-                throw new SettingException(Code.NO_WRITE, addresses.getName());
+                throw new SettingException(Code.NO_WRITE, addresses.getPath());
             }
         });
-        tmp.put(sendaddress.getName(), new SharedValue() {
+        tmp.put(sendaddress.getPath(), new SharedValue() {
             public void getValue(final SessionObject session,
                 final Setting setting) throws SettingException {
                 final UserSettingMail settings = session.getUserConfiguration()
@@ -667,7 +648,7 @@ public final class ConfigTree {
                 }
             }
         });
-        tmp.put(inbox.getName(), new ReadOnlyValue() {
+        tmp.put(inbox.getPath(), new ReadOnlyValue() {
             public void getValue(final SessionObject session,
                 final Setting setting) throws SettingException {
                 MailInterface mail = null;
@@ -687,7 +668,7 @@ public final class ConfigTree {
                 }
             }
         });
-        tmp.put(drafts.getName(), new ReadOnlyValue() {
+        tmp.put(drafts.getPath(), new ReadOnlyValue() {
             public void getValue(final SessionObject session,
                 final Setting setting) throws SettingException {
                 MailInterface mail = null;
@@ -707,7 +688,7 @@ public final class ConfigTree {
                 }
             }
         });
-        tmp.put(sent.getName(), new ReadOnlyValue() {
+        tmp.put(sent.getPath(), new ReadOnlyValue() {
             public void getValue(final SessionObject session,
                 final Setting setting) throws SettingException {
                 MailInterface mail = null;
@@ -727,7 +708,7 @@ public final class ConfigTree {
                 }
             }
         });
-        tmp.put(spam.getName(), new ReadOnlyValue() {
+        tmp.put(spam.getPath(), new ReadOnlyValue() {
             public void getValue(final SessionObject session,
                 final Setting setting) throws SettingException {
                 MailInterface mail = null;
@@ -747,7 +728,7 @@ public final class ConfigTree {
                 }
             }
         });
-        tmp.put(trash.getName(), new ReadOnlyValue() {
+        tmp.put(trash.getPath(), new ReadOnlyValue() {
             public void getValue(final SessionObject session,
                 final Setting setting) throws SettingException {
                 MailInterface mail = null;
@@ -767,10 +748,7 @@ public final class ConfigTree {
                 }
             }
         });
-        tmp.put(colorquoted.getName(), new AbstractMailFuncs() {
-            protected String getName() {
-                return colorquoted.getName();
-            }
+        tmp.put(colorquoted.getPath(), new AbstractMailFuncs() {
             protected Object isSet(final UserSettingMail settings) {
                 return settings.isUseColorQuote();
             }
@@ -779,10 +757,7 @@ public final class ConfigTree {
                 settings.setUseColorQuote(Boolean.parseBoolean(value));
             }
         });
-        tmp.put(emoticons.getName(), new AbstractMailFuncs() {
-            protected String getName() {
-                return emoticons.getName();
-            }
+        tmp.put(emoticons.getPath(), new AbstractMailFuncs() {
             protected Object isSet(final UserSettingMail settings) {
                 return settings.isShowGraphicEmoticons();
             }
@@ -791,10 +766,7 @@ public final class ConfigTree {
                 settings.setShowGraphicEmoticons(Boolean.parseBoolean(value));
             }
         });
-        tmp.put(deletemail.getName(), new AbstractMailFuncs() {
-            protected String getName() {
-                return deletemail.getName();
-            }
+        tmp.put(deletemail.getPath(), new AbstractMailFuncs() {
             protected Object isSet(final UserSettingMail settings) {
                 return settings.isHardDeleteMsgs();
             }
@@ -803,10 +775,7 @@ public final class ConfigTree {
                 settings.setHardDeleteMsgs(Boolean.parseBoolean(value));
             }
         });
-        tmp.put(inlineattachments.getName(), new AbstractMailFuncs() {
-            protected String getName() {
-                return inlineattachments.getName();
-            }
+        tmp.put(inlineattachments.getPath(), new AbstractMailFuncs() {
             protected Object isSet(final UserSettingMail settings) {
                 return settings.isDisplayHtmlInlineContent();
             }
@@ -816,10 +785,7 @@ public final class ConfigTree {
                     Boolean.parseBoolean(value));
             }
         });
-        tmp.put(appendmailtext.getName(), new AbstractMailFuncs() {
-            protected String getName() {
-                return appendmailtext.getName();
-            }
+        tmp.put(appendmailtext.getPath(), new AbstractMailFuncs() {
             protected Object isSet(final UserSettingMail settings) {
                 return !settings.isIgnoreOriginalMailTextOnReply();
             }
@@ -829,12 +795,9 @@ public final class ConfigTree {
                     !Boolean.parseBoolean(value));
             }
         });
-        tmp.put(forwardmessage.getName(), new AbstractMailFuncs() {
+        tmp.put(forwardmessage.getPath(), new AbstractMailFuncs() {
             private static final String INLINE = "Inline";
             private static final String ATTACHMENT = "Attachment";
-            protected String getName() {
-                return forwardmessage.getName();
-            }
             protected Object isSet(final UserSettingMail settings) {
                 final String retval;
                 if (settings.isForwardAsAttachment()) {
@@ -849,7 +812,7 @@ public final class ConfigTree {
                 settings.setForwardAsAttachment(ATTACHMENT.equals(value));
             }
         });
-        tmp.put(linewrap.getName(), new SharedValue() {
+        tmp.put(linewrap.getPath(), new SharedValue() {
             public void getValue(final SessionObject session,
                 final Setting setting) throws SettingException {
                 final UserSettingMail settings = session.getUserConfiguration()
@@ -875,10 +838,7 @@ public final class ConfigTree {
                 }
             }
         });
-        tmp.put(vcard.getName(), new AbstractMailFuncs() {
-            protected String getName() {
-                return vcard.getName();
-            }
+        tmp.put(vcard.getPath(), new AbstractMailFuncs() {
             protected Object isSet(final UserSettingMail settings) {
                 return settings.isAppendVCard();
             }
@@ -887,7 +847,7 @@ public final class ConfigTree {
                 settings.setAppendVCard(Boolean.parseBoolean(value));
             }
         });
-        tmp.put(spamButton.getName(), new ReadOnlyValue() {
+        tmp.put(spamButton.getPath(), new ReadOnlyValue() {
             public void getValue(final SessionObject session,
                 final Setting setting) throws SettingException {
                 final UserSettingMail settings = session.getUserConfiguration()
@@ -899,7 +859,7 @@ public final class ConfigTree {
                 }
             }
         });
-        tmp.put(showWithoutEmail.getName(), new ReadOnlyValue() {
+        tmp.put(showWithoutEmail.getPath(), new ReadOnlyValue() {
             public void getValue(final SessionObject session,
                 final Setting setting) throws SettingException {
                 setting.setSingleValue(Boolean.valueOf(ParticipantConfig
@@ -907,6 +867,36 @@ public final class ConfigTree {
                     .SHOW_WITHOUT_EMAIL)));
             }
         });
-        READERS = Collections.unmodifiableMap(tmp);
+        
+        try {
+            final Class< ? extends SettingSetup>[] clazzes = getClasses();
+            final SettingSetup[] setups = new SettingSetup[clazzes.length];
+            for (int i = 0; i < clazzes.length; i++) {
+                setups[i] = clazzes[i].newInstance();
+            }
+            Arrays.sort(setups, new Comparator<SettingSetup>() {
+                public int compare(final SettingSetup o1,
+                    final SettingSetup o2) {
+                    return o1.getPath().compareTo(o2.getPath());
+                }
+            });
+            for (SettingSetup setup : setups) {
+                // Define parent.
+                final Setting setting = getSettingByPath(tree, setup.getPath());
+                final Setting subSetting = setup.getSetting();
+                // Connect tree.
+                setting.addElement(subSetting);
+                // Map shared value.
+                tmp.put(subSetting.getPath(), setup.getSharedValue());
+            }
+        } catch (InstantiationException e) {
+            throw new SettingException(Code.INIT, e);
+        } catch (IllegalAccessException e) {
+            throw new SettingException(Code.INIT, e);
+        } catch (SettingException e) {
+            throw new SettingException(Code.INIT, e);
+        }
+        
+        readers = Collections.unmodifiableMap(tmp);
     }
 }

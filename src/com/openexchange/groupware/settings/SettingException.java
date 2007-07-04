@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.groupware.settings;
 
 import com.openexchange.groupware.AbstractOXException;
@@ -134,7 +132,12 @@ public class SettingException extends AbstractOXException {
         /**
          * Cannot clone tree.
          */
-        CLONE("Cannot clone tree.", Category.CODE_ERROR, 7);
+        CLONE("Cannot clone tree.", Category.CODE_ERROR, 7),
+        /**
+         * Problem while initialising configuration tree.
+         */
+        INIT("Problem while initialising configuration tree.", Category
+            .CODE_ERROR, 8);
 
         /**
          * Message of the exception.

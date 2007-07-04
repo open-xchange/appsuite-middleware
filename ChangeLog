@@ -1,3 +1,7 @@
+* 2007-07-04 - marcus.klein@open-xchange.com
+
+  - Added module configuration to the GUI configuration interface.
+
 * 2007-07-04 - tobias.prinz@open-xchange.com
 
  - Fixed bug #7632 (importer): OutlookCSVImporter uses cp1252 as

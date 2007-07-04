@@ -61,7 +61,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.settings.ConfigTree.SharedValue;
 import com.openexchange.groupware.settings.SettingException.Code;
 import com.openexchange.server.DBPool;
 import com.openexchange.server.DBPoolingException;

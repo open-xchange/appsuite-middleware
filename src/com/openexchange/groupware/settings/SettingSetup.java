@@ -47,47 +47,26 @@
  *
  */
 
-
-
-package com.openexchange.groupware;
-
-import com.openexchange.event.EventInit;
-import com.openexchange.groupware.calendar.CalendarConfig;
-import com.openexchange.groupware.configuration.ParticipantConfig;
-import com.openexchange.groupware.contact.ContactConfig;
-import com.openexchange.groupware.contexts.ContextInit;
-import com.openexchange.groupware.integration.SetupLink;
-import com.openexchange.groupware.settings.ConfigTree;
-import com.openexchange.push.udp.PushInit;
-import com.openexchange.sessiond.SessiondInit;
+package com.openexchange.groupware.settings;
 
 /**
- * This class contains the initialization for the groupware server.
+ * Interface for dynamically adding settings into the configuration tree.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class GroupwareInit {
+public interface SettingSetup {
 
     /**
-     * Prevent instanciation.
+     * @return the path to the configuration option.
      */
-    private GroupwareInit() {
-        super();
-    }
+    String getPath();
 
     /**
-     * Method for initializing the groupware server.
-     * @throws AbstractOXException if initialization fails.
+     * @return the setting object.
      */
-    public static void init() throws AbstractOXException {
-        ContextInit.init();
-        UserConfigurationStorage.init();
-        SetupLink.init();
-        ConfigTree.init();
-        CalendarConfig.init();
-        ContactConfig.init();
-		SessiondInit.init();
-		EventInit.init();
-		PushInit.init();
-        ParticipantConfig.init();
-    }
+    Setting getSetting();
+
+    /**
+     * @return the sharedvalue object.
+     */
+    SharedValue getSharedValue();
 }

@@ -47,47 +47,58 @@
  *
  */
 
+package com.openexchange.groupware.settings.shared;
 
-
-package com.openexchange.groupware;
-
-import com.openexchange.event.EventInit;
-import com.openexchange.groupware.calendar.CalendarConfig;
-import com.openexchange.groupware.configuration.ParticipantConfig;
-import com.openexchange.groupware.contact.ContactConfig;
-import com.openexchange.groupware.contexts.ContextInit;
-import com.openexchange.groupware.integration.SetupLink;
-import com.openexchange.groupware.settings.ConfigTree;
-import com.openexchange.push.udp.PushInit;
-import com.openexchange.sessiond.SessiondInit;
+import com.openexchange.groupware.settings.ReadOnlyValue;
+import com.openexchange.groupware.settings.SettingException;
+import com.openexchange.groupware.settings.SettingSetup;
+import com.openexchange.groupware.settings.Setting;
+import com.openexchange.groupware.settings.SharedValue;
+import com.openexchange.sessiond.SessionObject;
 
 /**
- * This class contains the initialization for the groupware server.
+ * Contains initialization for the modules configuration tree setting webmail.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class GroupwareInit {
+public abstract class AbstractModules {
 
     /**
-     * Prevent instanciation.
+     * Default constructor.
      */
-    private GroupwareInit() {
+    public AbstractModules() {
         super();
     }
 
     /**
-     * Method for initializing the groupware server.
-     * @throws AbstractOXException if initialization fails.
+     * {@inheritDoc}
      */
-    public static void init() throws AbstractOXException {
-        ContextInit.init();
-        UserConfigurationStorage.init();
-        SetupLink.init();
-        ConfigTree.init();
-        CalendarConfig.init();
-        ContactConfig.init();
-		SessiondInit.init();
-		EventInit.init();
-		PushInit.init();
-        ParticipantConfig.init();
+    public String getPath() {
+        return "modules";
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Setting getSetting() {
+        return new Setting(getName(), -1, true);
+    }
+
+    protected abstract String getName();
+    
+    /**
+     * {@inheritDoc}
+     */
+    public SharedValue getSharedValue() {
+        return new ReadOnlyValue() {
+            /**
+             * {@inheritDoc}
+             */
+            public void getValue(final SessionObject session,
+                final Setting setting) throws SettingException {
+                setting.setSingleValue(getModule(session));
+            }
+        };
+    }
+
+    protected abstract boolean getModule(final SessionObject session);
 }

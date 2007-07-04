@@ -47,47 +47,37 @@
  *
  */
 
+package com.openexchange.groupware.settings.shared;
 
-
-package com.openexchange.groupware;
-
-import com.openexchange.event.EventInit;
-import com.openexchange.groupware.calendar.CalendarConfig;
-import com.openexchange.groupware.configuration.ParticipantConfig;
-import com.openexchange.groupware.contact.ContactConfig;
-import com.openexchange.groupware.contexts.ContextInit;
-import com.openexchange.groupware.integration.SetupLink;
-import com.openexchange.groupware.settings.ConfigTree;
-import com.openexchange.push.udp.PushInit;
-import com.openexchange.sessiond.SessiondInit;
+import com.openexchange.groupware.settings.SettingSetup;
+import com.openexchange.sessiond.SessionObject;
 
 /**
- * This class contains the initialization for the groupware server.
+ * Contains initialization for the modules configuration tree setting ical.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class GroupwareInit {
+public class ModulesICal extends AbstractModules implements SettingSetup {
 
     /**
-     * Prevent instanciation.
+     * Default constructor.
      */
-    private GroupwareInit() {
+    public ModulesICal() {
         super();
     }
 
     /**
-     * Method for initializing the groupware server.
-     * @throws AbstractOXException if initialization fails.
+     * {@inheritDoc}
      */
-    public static void init() throws AbstractOXException {
-        ContextInit.init();
-        UserConfigurationStorage.init();
-        SetupLink.init();
-        ConfigTree.init();
-        CalendarConfig.init();
-        ContactConfig.init();
-		SessiondInit.init();
-		EventInit.init();
-		PushInit.init();
-        ParticipantConfig.init();
+    @Override
+    protected String getName() {
+        return "ical";
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected boolean getModule(final SessionObject session) {
+        return session.getUserConfiguration().hasICal();
     }
 }

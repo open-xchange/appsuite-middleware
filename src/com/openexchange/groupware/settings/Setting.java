@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.groupware.settings;
 
 import java.util.ArrayList;
@@ -63,9 +61,19 @@ import java.util.Map;
 public class Setting implements Cloneable {
 
     /**
+     * Separator for pathes.
+     */
+    public static final char SEPARATOR = '/';
+
+    /**
      * Unique identifier of this setting.
      */
     private int id;
+
+    /**
+     * Reference to the parent Setting.
+     */
+    private Setting parent;
 
     /**
      * States if this setting is a gui only setting or a setting that is shared
@@ -105,6 +113,18 @@ public class Setting implements Cloneable {
         this.shared = shared;
     }
 
+    /**
+     * Constructor for initializing especially shared values.
+     * @param name Name.
+     * @param shared <code>true</code> if this setting is used in server and gui
+     * and <code>false</code> if the setting is only used in gui.
+     * @param id for shared values normally <code>-1</code>.
+     */
+    public Setting(final String name, final int id, final boolean shared) {
+        this(name, shared);
+        this.id = id;
+    }
+    
     /**
      * @return the multi value.
      */
@@ -160,6 +180,7 @@ public class Setting implements Cloneable {
      */
     public Object clone() throws CloneNotSupportedException {
         final Setting setting = (Setting) super.clone();
+        
         setting.singleValue = singleValue;
         if (null != multiValue) {
             setting.multiValue = new ArrayList<Object>(multiValue.size());
@@ -218,6 +239,7 @@ public class Setting implements Cloneable {
             elements = new HashMap<String, Setting>();
         }
         elements.put(child.getName(), child);
+        child.setParent(this);
     }
 
     /**
@@ -267,6 +289,7 @@ public class Setting implements Cloneable {
     public boolean isShared() {
         return shared;
     }
+
     /**
      * {@inheritDoc}
      */
@@ -277,6 +300,9 @@ public class Setting implements Cloneable {
         }
         final Setting other = (Setting) obj;
         if (id != other.id || !name.equals(other.name)) {
+            return false;
+        }
+        if (parent != null && !parent.equals(other.parent)) {
             return false;
         }
         if (singleValue != null && !singleValue.equals(other.singleValue)) {
@@ -302,6 +328,26 @@ public class Setting implements Cloneable {
         }
         if (shared) {
             retval ^= Boolean.valueOf(shared).hashCode();
+        }
+        return retval;
+    }
+
+    /**
+     * @param parent the parent to set
+     */
+    private void setParent(final Setting parent) {
+        this.parent = parent;
+    }
+
+    /**
+     * @return the path for this setting.
+     */
+    public String getPath() {
+        final String retval;
+        if (null == parent) {
+            retval = name;
+        } else {
+            retval = parent.getPath() + SEPARATOR + name;
         }
         return retval;
     }
