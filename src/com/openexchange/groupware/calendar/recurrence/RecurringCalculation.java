@@ -82,6 +82,7 @@ public class RecurringCalculation {
     private boolean contains_days = false;
     private boolean contains_day_in_month = false;
     private boolean contains_month = false;
+    private boolean contains_until = false;
     
     private int recurrence_calculator;
     
@@ -140,7 +141,7 @@ public class RecurringCalculation {
     public void setDayInMonth(int recurring_day_in_month) {
         this.recurring_day_in_month = recurring_day_in_month;
         contains_day_in_month = true;
-    }    
+    }
     
     /**
      * <code>setMonth</code>
@@ -151,7 +152,7 @@ public class RecurringCalculation {
     public void setMonth(int recurring_month) {
         this.recurring_month = recurring_month;
         contains_month = true;
-    }        
+    }
     
     /**
      * <code>setFirstDayOfWeek</code>
@@ -279,9 +280,31 @@ public class RecurringCalculation {
     public void setUntil(long until) {
         this.e = until;
         this.until = until;
+        contains_until = true;
+    }
+    
+    private void checkValues() throws RecurringException {
+        if (!contains_until && !contains_occurrence)  {
+            if (e > 0) {
+                e = (e + (CalendarRecurringCollection.MILLI_YEAR * 99));
+                this.until = e;
+            } else {
+                // TODO: throw error
+            }            
+        } else if (!contains_until && contains_occurrence) {
+            if (e > 0) {
+                e = (e + (CalendarRecurringCollection.MILLI_YEAR * 99));
+                this.until = e;
+            } else {
+                // TODO: throw error
+            }
+        }
     }
     
     public RecurringResults calculateRecurrence() throws RecurringException {
+        
+        checkValues();
+        
         if (recurring_type == CalendarObject.DAILY) {
             return calculateDaily();
         } else if (recurring_type == CalendarObject.WEEKLY) {
@@ -291,7 +314,7 @@ public class RecurringCalculation {
         } else if (recurring_type == CalendarObject.YEARLY) {
             return calculateYearly();
         }
-        return null;
+        return null; // TODO: throw error
     }
     
     
@@ -507,20 +530,13 @@ public class RecurringCalculation {
                         calc.set(Calendar.YEAR, helper.get(Calendar.YEAR));
                         calc.set(Calendar.MONTH, helper.get(Calendar.MONTH));
                         calc.set(Calendar.DAY_OF_MONTH, 1);
-                        for (int x = 0; x < 7; x++) {
+                        for (int x = 0; x < 13; x++) {
                             if (calc.get(Calendar.DAY_OF_WEEK) == a) {
                                 break;
                             }
                             calc.add(Calendar.DAY_OF_MONTH, 1);
                         }
-                        int counter = 1;
-                        for (int y = 0; y < 5; y++) {
-                            if (counter >= day_or_type) {
-                                break;
-                            }
-                            calc.add(Calendar.WEEK_OF_MONTH, 1);
-                            counter++;
-                        }
+                        calc.add(Calendar.WEEK_OF_MONTH, day_or_type-1);
                     } else {
                         // DAY, WEEKDAY OR WEEKENDDAY
                         if (a == CalendarObject.DAY) {
@@ -622,45 +638,45 @@ public class RecurringCalculation {
         
         rs = new RecurringResults();
         
-            int a = recurring_days;
-            final int day_or_type = recurring_day_in_month;
-            final int month = recurring_month;
-            
-            if (day_or_type == 0) {
-                throw new RecurringException(RecurringException.RECURRING_MISSING_YEARLY_INTERVAL, day_or_type);
-            }
-            
-            if (!contains_days) {
-                while (s <= e) {
-                    calc.setTimeInMillis(s);
-                    calc.set(Calendar.YEAR, calc.get(Calendar.YEAR));
-                    calc.set(Calendar.MONTH, month);
-                    if (calc.getActualMaximum(Calendar.DAY_OF_MONTH) >= day_or_type) {
-                        calc.set(Calendar.DAY_OF_MONTH, day_or_type);
-                        s = calc.getTimeInMillis();
-                        calc.setFirstDayOfWeek(2); // TODO: Make this configurable
-                        final long range = calc.getTimeInMillis();
-                        if (range >= sst && range <= e) {
-                            if (((range_start == 0 && range_end == 0 && pos == 0) || (range >= range_start && range <= range_end) || pos == ds_count)
-                            && (!CalendarRecurringCollection.isException(s, change_exceptions, delete_exceptions))) {
-                                //if (!isException(s, change_exceptions, delete_exceptions)) {
-                                if (!contains_occurrence || calc_until ||(contains_occurrence && ds_count <= occurrence_value)) {
-                                    CalendarRecurringCollection.fillMap(rs, s, diff, recurrence_calculator, ds_count);
-                                }
-                                if (ds_count > PMAXTC || pos == ds_count || (contains_occurrence && ds_count == occurrence_value)) {
-                                    break;
-                                }
-                                //}
-                            }
-                            ds_count++;
-                        }
-                    }
-                    calc.add(Calendar.YEAR, recurring_interval);
+        int a = recurring_days;
+        final int day_or_type = recurring_day_in_month;
+        final int month = recurring_month;
+        
+        if (day_or_type == 0) {
+            throw new RecurringException(RecurringException.RECURRING_MISSING_YEARLY_INTERVAL, day_or_type);
+        }
+        
+        if (!contains_days) {
+            while (s <= e) {
+                calc.setTimeInMillis(s);
+                calc.set(Calendar.YEAR, calc.get(Calendar.YEAR));
+                calc.set(Calendar.MONTH, month);
+                if (calc.getActualMaximum(Calendar.DAY_OF_MONTH) >= day_or_type) {
+                    calc.set(Calendar.DAY_OF_MONTH, day_or_type);
                     s = calc.getTimeInMillis();
+                    calc.setFirstDayOfWeek(2); // TODO: Make this configurable
+                    final long range = calc.getTimeInMillis();
+                    if (range >= sst && range <= e) {
+                        if (((range_start == 0 && range_end == 0 && pos == 0) || (range >= range_start && range <= range_end) || pos == ds_count)
+                        && (!CalendarRecurringCollection.isException(s, change_exceptions, delete_exceptions))) {
+                            //if (!isException(s, change_exceptions, delete_exceptions)) {
+                            if (!contains_occurrence || calc_until ||(contains_occurrence && ds_count <= occurrence_value)) {
+                                CalendarRecurringCollection.fillMap(rs, s, diff, recurrence_calculator, ds_count);
+                            }
+                            if (ds_count > PMAXTC || pos == ds_count || (contains_occurrence && ds_count == occurrence_value)) {
+                                break;
+                            }
+                            //}
+                        }
+                        ds_count++;
+                    }
                 }
-            } else {
-                a = getDay(a);
-                
+                calc.add(Calendar.YEAR, recurring_interval);
+                s = calc.getTimeInMillis();
+            }
+        } else {
+            a = getDay(a);
+            
                 /*
                  * MONDAY - SUNDAY
                  * WEEKDAY
@@ -676,124 +692,120 @@ public class RecurringCalculation {
                  * 5 = last
                  *
                  */
-                
-                if (a == -1) {
-                    throw new RecurringException(RecurringException.RECURRING_MISSING_YEARLY_DAY, a);
-                }
-                if (day_or_type < 1 || day_or_type > 5) {
-                    throw new RecurringException(RecurringException.RECURRING_MISSING_YEARLY_TYPE, day_or_type);
-                }
-                
-                final Calendar helper = (Calendar) calc.clone();
-                helper.setTimeInMillis(s);
-                helper.set(Calendar.MONTH, month);
-                helper.set(Calendar.WEEK_OF_MONTH, 1);
-                helper.set(Calendar.DAY_OF_MONTH, 1);
-                while (s <= e) {
-                    calc.setTimeInMillis(s);
-                    if (day_or_type < 5) {
-                        // first until forth
-                        if (a <= Calendar.SATURDAY) {
-                            // normal operation
+            
+            if (a == -1) {
+                throw new RecurringException(RecurringException.RECURRING_MISSING_YEARLY_DAY, a);
+            }
+            if (day_or_type < 1 || day_or_type > 5) {
+                throw new RecurringException(RecurringException.RECURRING_MISSING_YEARLY_TYPE, day_or_type);
+            }
+            
+            final Calendar helper = (Calendar) calc.clone();
+            helper.setTimeInMillis(s);
+            helper.set(Calendar.MONTH, month);
+            helper.set(Calendar.WEEK_OF_MONTH, 1);
+            helper.set(Calendar.DAY_OF_MONTH, 1);
+            while (s <= e) {
+                calc.setTimeInMillis(s);
+                if (day_or_type < 5) {
+                    // first until forth
+                    if (a <= Calendar.SATURDAY) {
+                        // normal operation
+                        calc.set(Calendar.YEAR, helper.get(Calendar.YEAR));
+                        calc.set(Calendar.MONTH, helper.get(Calendar.MONTH));
+                        calc.set(Calendar.DAY_OF_MONTH, 1);           
+                        for (int x = 0; x < 13; x++) {
+                            if (calc.get(Calendar.DAY_OF_WEEK) == a) {
+                                break;
+                            }
+                            calc.add(Calendar.DAY_OF_MONTH, 1);
+                        }
+                        calc.add(Calendar.WEEK_OF_MONTH, day_or_type-1);    
+                    } else {
+                        // DAY, WEEKDAY OR WEEKENDDAY
+                        if (a == CalendarObject.DAY) {
+                            calc.set(Calendar.YEAR, helper.get(Calendar.YEAR));
+                            calc.set(Calendar.MONTH, helper.get(Calendar.MONTH));
+                            calc.add(Calendar.DAY_OF_MONTH, 0-day_or_type);
+                        } else if (a == CalendarObject.WEEKDAY) {
                             calc.set(Calendar.YEAR, helper.get(Calendar.YEAR));
                             calc.set(Calendar.MONTH, helper.get(Calendar.MONTH));
                             calc.set(Calendar.DAY_OF_MONTH, 1);
-                            for (int x = 0; x < 7; x++) {
-                                if (calc.get(Calendar.DAY_OF_WEEK) == a) {
-                                    break;
-                                }
-                                calc.add(Calendar.DAY_OF_MONTH, 1);
+                            if (calc.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
+                                calc.add(Calendar.DAY_OF_MONTH, 2 + (day_or_type-1));
+                            } else if (calc.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
+                                calc.add(Calendar.DAY_OF_MONTH, 1 + (day_or_type-1));
                             }
-                            for (int y = 0; y < 5; y++) {
-                                if (calc.get(Calendar.WEEK_OF_MONTH) >= day_or_type) {
-                                    break;
-                                }
-                                calc.add(Calendar.WEEK_OF_MONTH, 1);
-                            }
-                        } else {
-                            // DAY, WEEKDAY OR WEEKENDDAY
-                            if (a == CalendarObject.DAY) {
-                                calc.set(Calendar.YEAR, helper.get(Calendar.YEAR));
-                                calc.set(Calendar.MONTH, helper.get(Calendar.MONTH));
-                                calc.add(Calendar.DAY_OF_MONTH, 0-day_or_type);
-                            } else if (a == CalendarObject.WEEKDAY) {
-                                calc.set(Calendar.YEAR, helper.get(Calendar.YEAR));
-                                calc.set(Calendar.MONTH, helper.get(Calendar.MONTH));
-                                calc.set(Calendar.DAY_OF_MONTH, 1);
-                                if (calc.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
-                                    calc.add(Calendar.DAY_OF_MONTH, 2 + (day_or_type-1));
-                                } else if (calc.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
-                                    calc.add(Calendar.DAY_OF_MONTH, 1 + (day_or_type-1));
-                                }
-                            } else if (a == CalendarObject.WEEKENDDAY) {
-                                calc.set(Calendar.YEAR, helper.get(Calendar.YEAR));
-                                calc.set(Calendar.MONTH, helper.get(Calendar.MONTH));
-                                calc.set(Calendar.DAY_OF_MONTH, 1);
-                                final int x  = Calendar.DAY_OF_WEEK;
-                                if (x != Calendar.SATURDAY || x == Calendar.SUNDAY) {
-                                    calc.set(Calendar.DAY_OF_WEEK, Calendar.SATURDAY); // TODO: Check if we need to calculate this by outself
-                                    calc.add(Calendar.DAY_OF_MONTH, + (((day_or_type-1) * day_or_type) * 7));
-                                }
+                        } else if (a == CalendarObject.WEEKENDDAY) {
+                            calc.set(Calendar.YEAR, helper.get(Calendar.YEAR));
+                            calc.set(Calendar.MONTH, helper.get(Calendar.MONTH));
+                            calc.set(Calendar.DAY_OF_MONTH, 1);
+                            final int x  = Calendar.DAY_OF_WEEK;
+                            if (x != Calendar.SATURDAY || x == Calendar.SUNDAY) {
+                                calc.set(Calendar.DAY_OF_WEEK, Calendar.SATURDAY); // TODO: Check if we need to calculate this by outself
+                                calc.add(Calendar.DAY_OF_MONTH, + (((day_or_type-1) * day_or_type) * 7));
                             }
                         }
-                    } else {
-                        // everything with LAST
-                        if (a <= Calendar.SATURDAY) {
-                            // normal operation
-                            calc.set(Calendar.YEAR, helper.get(Calendar.YEAR));
-                            calc.set(Calendar.MONTH, helper.get(Calendar.MONTH));
-                            calc.set(Calendar.DAY_OF_MONTH, 1);
-                            calc.add(Calendar.MONTH, 1);
+                    }
+                } else {
+                    // everything with LAST
+                    if (a <= Calendar.SATURDAY) {
+                        // normal operation
+                        calc.set(Calendar.YEAR, helper.get(Calendar.YEAR));
+                        calc.set(Calendar.MONTH, helper.get(Calendar.MONTH));
+                        calc.set(Calendar.DAY_OF_MONTH, 1);
+                        calc.add(Calendar.MONTH, 1);
+                        calc.add(Calendar.DAY_OF_MONTH, -1);
+                        for (int x = 0; x < 7; x++) {
+                            if (calc.get(Calendar.DAY_OF_WEEK) == a) {
+                                break;
+                            }
                             calc.add(Calendar.DAY_OF_MONTH, -1);
+                        }
+                    } else {
+                        // DAY, WEEKDAY OR WEEKENDDAY
+                        calc.set(Calendar.YEAR, helper.get(Calendar.YEAR));
+                        calc.set(Calendar.MONTH, helper.get(Calendar.MONTH));
+                        calc.set(Calendar.DAY_OF_MONTH, 1);
+                        calc.add(Calendar.MONTH, 1);
+                        calc.add(Calendar.DAY_OF_MONTH, -1); // coverage of DAY
+                        if (a == CalendarObject.WEEKDAY) {
+                            if (calc.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
+                                calc.add(Calendar.DAY_OF_MONTH, -2);
+                            } else if (calc.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
+                                calc.add(Calendar.DAY_OF_MONTH, -1);
+                            }
+                        } else if (a == CalendarObject.WEEKENDDAY) {
                             for (int x = 0; x < 7; x++) {
-                                if (calc.get(Calendar.DAY_OF_WEEK) == a) {
+                                if (calc.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY || calc.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
                                     break;
                                 }
                                 calc.add(Calendar.DAY_OF_MONTH, -1);
                             }
-                        } else {
-                            // DAY, WEEKDAY OR WEEKENDDAY
-                            calc.set(Calendar.YEAR, helper.get(Calendar.YEAR));
-                            calc.set(Calendar.MONTH, helper.get(Calendar.MONTH));
-                            calc.set(Calendar.DAY_OF_MONTH, 1);
-                            calc.add(Calendar.MONTH, 1);
-                            calc.add(Calendar.DAY_OF_MONTH, -1); // coverage of DAY
-                            if (a == CalendarObject.WEEKDAY) {
-                                if (calc.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
-                                    calc.add(Calendar.DAY_OF_MONTH, -2);
-                                } else if (calc.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
-                                    calc.add(Calendar.DAY_OF_MONTH, -1);
-                                }
-                            } else if (a == CalendarObject.WEEKENDDAY) {
-                                for (int x = 0; x < 7; x++) {
-                                    if (calc.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY || calc.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
-                                        break;
-                                    }
-                                    calc.add(Calendar.DAY_OF_MONTH, -1);
-                                }
-                            }
                         }
                     }
-                    final long range = calc.getTimeInMillis();
-                    s = calc.getTimeInMillis();
-                    if (range >= sst && range <= e) {
-                        if (((range_start == 0 && range_end == 0 && pos == 0) || (range >= range_start && range <= range_end) || pos == ds_count)
-                        && (!CalendarRecurringCollection.isException(s, change_exceptions, delete_exceptions))) {
-                            //if (!isException(s, change_exceptions, delete_exceptions)) {
-                            if (!contains_occurrence || calc_until ||(contains_occurrence && ds_count <= occurrence_value)) {
-                                CalendarRecurringCollection.fillMap(rs, s, diff, recurrence_calculator, ds_count);
-                            }
-                            if (ds_count > PMAXTC || pos == ds_count || (contains_occurrence && ds_count == occurrence_value)) {
-                                break;
-                            }
-                            //}
-                        }
-                        ds_count++;
-                    }
-                    helper.add(Calendar.YEAR, recurring_interval);
-                    s = helper.getTimeInMillis();
                 }
-            }        
+                final long range = calc.getTimeInMillis();
+                s = calc.getTimeInMillis();
+                
+                if (range >= sst && range <= e) {
+                    if (((range_start == 0 && range_end == 0 && pos == 0) || (range >= range_start && range <= range_end) || pos == ds_count)
+                    && (!CalendarRecurringCollection.isException(s, change_exceptions, delete_exceptions))) {
+                        //if (!isException(s, change_exceptions, delete_exceptions)) {
+                        if (!contains_occurrence || calc_until ||(contains_occurrence && ds_count <= occurrence_value)) {
+                            CalendarRecurringCollection.fillMap(rs, s, diff, recurrence_calculator, ds_count);
+                        }
+                        if (ds_count > PMAXTC || pos == ds_count || (contains_occurrence && ds_count == occurrence_value)) {
+                            break;
+                        }
+                        //}
+                    }
+                    ds_count++;
+                }
+                helper.add(Calendar.YEAR, recurring_interval);
+                s = helper.getTimeInMillis();
+            }
+        }
         
         
         return rs;

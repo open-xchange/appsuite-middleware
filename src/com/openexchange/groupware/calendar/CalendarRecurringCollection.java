@@ -633,7 +633,9 @@ static int MAXTC = 999;
             rc.setRecurringStart(((cdao.getStartDate().getTime()/MILLI_DAY)*MILLI_DAY));
         }
 
-        rc.setUntil(cdao.getUntil().getTime());
+        if (cdao.containsUntil()) {
+            rc.setUntil(cdao.getUntil().getTime()); 
+        }
         
         if (cdao.containsOccurrence()) {
             rc.setOccurrence(cdao.getOccurrence());
