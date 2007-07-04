@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.importexport;
 
+import com.openexchange.ajax.importexport.CSVImportExportServletTest;
 import com.openexchange.ajax.importexport.ICalExportTest;
 import com.openexchange.ajax.importexport.ICalImportTest;
 import com.openexchange.ajax.importexport.VCardExportTest;
@@ -74,8 +75,11 @@ public class ImportExportServerSuite extends TestSuite {
 		//VCARD
 		tests.addTestSuite(VCardImportTest.class);
 		tests.addTestSuite(VCardExportTest.class);
+		
+		//CSV
+		tests.addTestSuite(CSVImportExportServletTest.class);
+		
 		return tests;
 		
-		//Roundtrip tests
 	}
 }

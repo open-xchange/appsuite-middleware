@@ -75,6 +75,8 @@ public class CCTests
 		tests.addTestSuite(com.openexchange.ajax.LinkTest.class);
 		tests.addTestSuite(com.openexchange.ajax.MultipleTest.class);
 
+		tests.addTest(com.openexchange.groupware.importexport.ImportExportServerSuite.suite());
+		
 		tests.addTestSuite(com.openexchange.ajax.attach.SimpleAttachmentTest.class);
 		tests.addTestSuite(com.openexchange.ajax.attach.TaskAttachmentTest.class);
         tests.addTest(com.openexchange.ajax.task.TaskTestSuite.suite());
