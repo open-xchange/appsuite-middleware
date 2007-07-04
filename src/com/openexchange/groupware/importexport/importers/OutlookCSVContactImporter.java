@@ -114,6 +114,13 @@ public class OutlookCSVContactImporter extends CSVContactImporter implements Imp
 		return Format.OUTLOOK_CSV;
 	}
 
+	
+	
+	@Override
+	public String getEncoding() {
+		return "cp1252";
+	}
+
 	@Override
 	/**
 	 * Opposed to the basic CSV importer, this method probes different

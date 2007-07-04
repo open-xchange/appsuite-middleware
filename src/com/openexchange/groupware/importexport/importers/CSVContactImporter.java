@@ -156,6 +156,10 @@ public class CSVContactImporter extends AbstractImporter implements Importer {
 	protected Format getResponsibleFor() {
 		return Format.CSV;
 	}
+	
+	public String getEncoding(){
+		return "UTF-8";
+	}
 
 
 	public List<ImportResult> importData(final SessionObject sessObj, final Format format,
@@ -165,7 +169,7 @@ public class CSVContactImporter extends AbstractImporter implements Importer {
 			throw EXCEPTIONS.create(1);
 		}
 		final String folder = folders.get(0);
-		final String csvStr = transformInputStreamToString(is);
+		final String csvStr = transformInputStreamToString(is, getEncoding());
 		final CSVParser csvParser = getCSVParser();
 		final List <List <String> >csv = csvParser.parse(csvStr);
 		
