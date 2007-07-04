@@ -58,6 +58,24 @@ public abstract class StructureTest extends ActionTestCase {
 		}	
 	}
 	
+	public void testSuccessfulOverwrite() throws Exception {
+		final String INDEX_HTML_URL = testCollection+"/index.html";
+		final String SITEMAP_HTML_URL = testCollection+"/sitemap.html";
+		
+		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
+		MockWebdavResponse res = new MockWebdavResponse();
+		
+		req.setUrl(INDEX_HTML_URL);
+		req.setHeader("Destination", SITEMAP_HTML_URL);
+		req.setHeader("Overwrite", "T");
+		
+		WebdavAction action = getAction(factory);
+		action.perform(req, res);
+		
+		assertEquals(HttpServletResponse.SC_NO_CONTENT, res.getStatus());
+		
+	}
+	
 	public void testOverwriteCollection() throws Exception {
 		final String DEVELOPMENT_URL = testCollection+"/development";
 		final String PM_URL = testCollection+"/pm";

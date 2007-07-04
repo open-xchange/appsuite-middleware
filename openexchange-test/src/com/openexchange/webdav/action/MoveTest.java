@@ -24,7 +24,7 @@ public class MoveTest extends StructureTest {
 		WebdavAction action = new WebdavMoveAction(factory);
 		action.perform(req, res);
 		
-		assertEquals(HttpServletResponse.SC_NO_CONTENT, res.getStatus());
+		assertEquals(HttpServletResponse.SC_CREATED, res.getStatus());
 		
 		WebdavResource resource = factory.resolveResource(INDEX_HTML_URL);
 		assertFalse(resource.exists());
