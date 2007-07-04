@@ -1,3 +1,9 @@
+* 2007-07-04 - tobias.prinz@open-xchange.com
+
+ - Fixed bug #7632 (importer): OutlookCSVImporter uses cp1252 as
+   standard encoding now, since this is the default charset on
+   most Windows platforms and the default encoding for Outlook.
+
 * 2007-07-04 - martin.kauss@open-xchange.com
 
  - Fixed bug #7646. An conflict occured while updating n appointment
