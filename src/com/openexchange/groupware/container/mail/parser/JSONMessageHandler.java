@@ -81,6 +81,7 @@ import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.mail.ContentType;
 import com.openexchange.tools.mail.Enriched2HtmlConverter;
 import com.openexchange.tools.mail.Html2TextConverter;
+import com.openexchange.tools.mail.MailTools;
 import com.openexchange.tools.mail.UUEncodedPart;
 
 /**
@@ -436,7 +437,7 @@ public class JSONMessageHandler implements MessageHandler {
 					 */
 					final String content;
 					if (createVersionForDisplay && usm.isUseColorQuote()) {
-						content = MessageUtils.convertAndKeepQuotes(htmlContent);
+						content = MailTools.formatHrefLinks(MessageUtils.convertAndKeepQuotes(htmlContent));
 					} else {
 						final String convertedHtml = CONVERTER.convertWithQuotes(htmlContent);
 						content = MessageUtils.formatContentForDisplay(convertedHtml, false, session, msgUID);
