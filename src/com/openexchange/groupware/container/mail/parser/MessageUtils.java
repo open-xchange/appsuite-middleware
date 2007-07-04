@@ -752,7 +752,7 @@ public class MessageUtils {
 			return STR_EMPTY;
 		}
 		final StringBuilder sb = new StringBuilder(200);
-		sb.append(addrs[0].toString());
+		sb.append(addrs[0].toUnicodeString());
 		for (int i = 1; i < addrs.length; i++) {
 			sb.append(", ");
 			sb.append(addrs[i].toUnicodeString());
