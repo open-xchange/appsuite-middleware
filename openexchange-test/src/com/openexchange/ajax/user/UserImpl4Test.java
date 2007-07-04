@@ -9,6 +9,8 @@
 
 package com.openexchange.ajax.user;
 
+import java.util.Locale;
+
 import com.openexchange.groupware.ldap.User;
 
 /**
@@ -48,6 +50,8 @@ public class UserImpl4Test implements User {
 	private String preferedLanguage = null;
 	
 	private String loginInfo = null;
+	
+	private Locale locale;
 	
 	public UserImpl4Test() {
 		
@@ -139,5 +143,13 @@ public class UserImpl4Test implements User {
 	
 	public void setLoginInfo(String loginInfo) {
 		this.loginInfo = loginInfo;
+	}
+
+	public Locale getLocale() {
+		return locale;
+	}
+
+	public void setLocale(Locale locale) {
+		this.locale = locale;
 	}
 }

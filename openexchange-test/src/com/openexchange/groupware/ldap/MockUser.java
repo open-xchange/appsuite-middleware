@@ -1,5 +1,7 @@
 package com.openexchange.groupware.ldap;
 
+import java.util.Locale;
+
 public class MockUser implements User {
 	private static final int GROUP_ALL = 0;
 
@@ -109,6 +111,9 @@ public class MockUser implements User {
 
 	private String loginInfo;
     
+	
+	private Locale locale;
+	
     /**
      * Getter for userPassword.
      * @return Password.
@@ -430,5 +435,13 @@ public class MockUser implements User {
 
 	public String getLoginInfo() {
 		return loginInfo;
+	}
+
+	public Locale getLocale() {
+		return locale;
+	}
+
+	public void setLocale(Locale locale) {
+		this.locale = locale;
 	}
 }
