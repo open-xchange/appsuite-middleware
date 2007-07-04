@@ -871,7 +871,7 @@ public class AppointmentBugTests extends TestCase {
         delete.setContext(so2.getContext());
         delete.setObjectID(object_id);
           
-        csql2.deleteAppointmentObject(delete, fid2, cdao.getLastModified());
+        csql2.deleteAppointmentObject(delete, fid2, new Date(CalendarTest.SUPER_END));
         
         try {
             CalendarDataObject testobject = csql2.getObjectById(object_id, fid2);
@@ -1906,4 +1906,58 @@ public class AppointmentBugTests extends TestCase {
         csql.deleteAppointmentObject(testobject, fid, testobject.getLastModified());
     }
     
+    /*
+     Steps to reproduce (informal):
+     1. Create a recurring yearly appointment "on third tuesday in april"
+     2. Verify the appointment series
+
+     Expected results:
+     - Step 2: The appointment occurs every year on the third tuesday in april
+
+     Result was:
+     The appointment occurs:
+     - 2008-04-15 (correct)
+     - 2009-04-14 (wrong, should be 2009-04-21)
+     - 2010-04-13 (wrong, should be 2010-04-20)
+     - ...
+     */
+    public void testBug7064() throws Throwable {
+        Context context = new ContextImpl(contextid);
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
+        
+        int fid = CalendarTest.getCalendarDefaultFolderForUser(userid, context);
+        
+        CalendarDataObject cdao = new CalendarDataObject();
+        cdao.setContext(context);
+        cdao.setTimezone(TIMEZONE);
+        cdao.setParentFolderID(fid);
+        cdao.setTitle("testBug7064");
+        
+        long startdate = 1175421600000L; // 01.04.2007 12:00
+        long enddate = 1175425200000L; // 01.04.2007 13:00
+        long until = 1272664800000L; // 01.05.2010 00:00
+        
+        long testmatrix[] = { 1176804000000L, 1208253600000L, 1240308000000L, 1271757600000L };
+        
+        cdao.setStartDate(new Date(startdate));
+        cdao.setEndDate(new Date(enddate));
+        
+        cdao.setRecurrenceType(CalendarDataObject.YEARLY);
+        
+        cdao.setDays(CalendarDataObject.TUESDAY);
+        cdao.setDayInMonth(3);
+        cdao.setMonth(Calendar.APRIL);
+        cdao.setInterval(1);
+        
+        cdao.setOccurrence(testmatrix.length);
+        
+        CalendarRecurringCollection.fillDAO(cdao);
+        
+        RecurringResults rrs = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 0);
+        assertEquals("Check result size", testmatrix.length, rrs.size());
+        for (int a = 0; a < rrs.size(); a++) {
+            RecurringResult rs = rrs.getRecurringResult(a);            
+            assertEquals("Check start time ("+a+")", new Date(testmatrix[a]), new Date(rs.getStart()));
+        }    
+    }
 }
