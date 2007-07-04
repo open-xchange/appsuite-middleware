@@ -21,6 +21,7 @@
  - Bugfix #8250: Fetching user's locale from user object instead from
    session. Thus the proper translation is used when changing user's
    language
+ - Removing entry from UserConfigurationStorage on update/delete
 
 * 2007-07-04 - francisco.laguna@open-xchange.com
 

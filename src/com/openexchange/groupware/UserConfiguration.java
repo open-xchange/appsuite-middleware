@@ -887,6 +887,13 @@ public final class UserConfiguration implements Serializable, DeleteListener, Cl
 				stmt.setInt(3, userConfig.userId);
 			}
 			stmt.executeUpdate();
+			if (!insert) {
+				try {
+					UserConfigurationStorage.getInstance().removeUserConfiguration(userConfig.userId, userConfig.ctx);
+				} catch (UserConfigurationException e) {
+					LOG.warn("User Configuration could not be removed from cache", e);
+				}
+			}
 		} finally {
 			closeResources(null, stmt, closeConnection ? writeCon : null, false, ctx);
 		}
@@ -976,6 +983,11 @@ public final class UserConfiguration implements Serializable, DeleteListener, Cl
 			stmt.setInt(1, ctx.getContextId());
 			stmt.setInt(2, userId);
 			stmt.executeUpdate();
+			try {
+				UserConfigurationStorage.getInstance().removeUserConfiguration(userId, ctx);
+			} catch (UserConfigurationException e) {
+				LOG.warn("User Configuration could not be removed from cache", e);
+			}
 		} finally {
 			closeResources(null, stmt, closeWriteCon ? writeCon : null, false, ctx);
 		}
