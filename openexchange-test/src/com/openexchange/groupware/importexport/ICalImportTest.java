@@ -255,24 +255,6 @@ public class ICalImportTest extends AbstractCSVContactTest {
 //		assertTrue("One user is the user doing the import", participants[0].getIdentifier() == userId || participants[1].getIdentifier() == userId );
 //		
 //	}
-
-//	/*
-//	 * Imported appointment loses participants
-//	 */
-//	@Test public void test7470() throws DBPoolingException, SQLException, UnsupportedEncodingException, OXObjectNotFoundException, NumberFormatException, OXException{
-//		folderId = createTestFolder(FolderObject.CALENDAR, sessObj, "ical7470Folder");
-//		String ical = "BEGIN:VCALENDAR\nPRODID:-//Microsoft Corporation//Outlook 12.0 MIMEDIR//EN\nVERSION:2.0\nMETHOD:REQUEST\nX-MS-OLK-FORCEINSPECTOROPEN:TRUE\nBEGIN:VEVENT\nATTENDEE;CN=\"Camil Bartkowiak (cbartkowiak@oxhemail.open-xchange.com)\";RSVP\n\n	=TRUE:mailto:cbartkowiak@oxhemail.open-xchange.com\nCLASS:PUBLIC\nCREATED:20070521T150327Z\nDESCRIPTION:Hallo Hallo\n\n\nDTEND:20070523T090000Z\nDTSTAMP:20070521T150327Z\nDTSTART:20070523T083000Z\nLAST-MODIFIED:20070521T150327Z\nLOCATION:Location here\nORGANIZER;CN=Tobias:mailto:tfriedrich@oxhemail.open-xchange.com\nPRIORITY:5\nSEQUENCE:0\nSUMMARY;LANGUAGE=de:Simple Appointment with participant\nTRANSP:OPAQUE\nUID:040000008200E00074C5B7101A82E0080000000060565ABBC99BC701000000000000000\n	010000000E4B2BA931D32B84DAFB227C9E0CA348C\nX-MICROSOFT-CDO-BUSYSTATUS:BUSY\nX-MICROSOFT-CDO-IMPORTANCE:1\nX-MICROSOFT-DISALLOW-COUNTER:FALSE\nX-MS-OLK-ALLOWEXTERNCHECK:TRUE\nX-MS-OLK-AUTOFILLLOCATION:FALSE\nX-MS-OLK-CONFTYPE:0\nBEGIN:VALARM\nTRIGGER:PT0M\nACTION:DISPLAY\nDESCRIPTION:Reminder\nEND:VALARM\nEND:VEVENT\nEND:VCALENDAR";
-//		assertTrue("Can import?" ,  imp.canImport(sessObj, format, folders, null));
-//		List<ImportResult> results = imp.importData(sessObj, format, new ByteArrayInputStream(ical.getBytes("UTF-8")), folders, null);
-//		assertEquals("One import?" , 1 , results.size());
-//		ImportResult res = results.get(0);
-//		assertEquals("Shouldn't have error" , null, res.getException());
-//		
-//		final AppointmentSQLInterface appointmentSql = new CalendarSql(sessObj);
-//		final AppointmentObject appointmentObj = appointmentSql.getObjectById(Integer.parseInt( res.getObjectId() ), folderId);
-//		assertTrue("Exists" , appointmentObj != null);
-//	}
-//
 //	/*
 //	 * Imported appointment loses reminder
 //	 */
