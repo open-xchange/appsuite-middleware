@@ -551,6 +551,9 @@ msgstr ""
 msgid "Counting tasks did not return a result."
 msgstr ""
 
+msgid "Cowardly refusing to import an entry flagged as confidential."
+msgstr ""
+
 msgid "Creator cannot be participant."
 msgstr ""
 
@@ -1505,6 +1508,9 @@ msgstr ""
 msgid "The folder %d is not an Infostore Folder"
 msgstr ""
 
+msgid "The following field(s) are too long to be imported: %s"
+msgstr ""
+
 msgid ""
 "The image you tried to attach is not a valid picture. It may be broken or is "
 "not a valid file."
@@ -1837,6 +1843,9 @@ msgstr ""
 msgid "Update process initialization failed: %1$s."
 msgstr ""
 
+msgid "Updating database ... Try again later."
+msgstr ""
+
 msgid "Upload Quota (%d) exceeded"
 msgstr ""
 
@@ -2032,9 +2041,6 @@ msgid "You need write permissions to lock a document."
 msgstr ""
 
 msgid "You need write permissions to unlock a document."
-msgstr ""
-
-msgid "Your database is currently updated. Try again later."
 msgstr ""
 
 msgid "Your session %s expired. Please start a new browser session."
