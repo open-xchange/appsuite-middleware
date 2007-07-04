@@ -1,3 +1,8 @@
+* 2007-07-04 - francisco.laguna@open-xchange.com
+
+ - Fixed Bug #7870: Applied patch that corrects the HTTP status 
+   codes for webdav MOVE and COPY requests.
+   
 * 2007-07-03 - tobias.prinz@open-xchange.com
 
  - Fixed bug #7718 (importer). Now the DESCRIPTION property of 

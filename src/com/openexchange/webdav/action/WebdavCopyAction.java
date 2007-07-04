@@ -49,8 +49,6 @@
 
 package com.openexchange.webdav.action;
 
-import javax.servlet.http.HttpServletResponse;
-
 import com.openexchange.webdav.protocol.WebdavException;
 import com.openexchange.webdav.protocol.WebdavFactory;
 
@@ -65,8 +63,9 @@ public class WebdavCopyAction extends WebdavStructureAction {
 			throws WebdavException {
 		checkOverwrite(req);
 		checkSame(req);
+		int rc = chooseReturnCode(req);
 		req.getResource().copy(req.getDestinationUrl());
-		res.setStatus(HttpServletResponse.SC_CREATED);
+		res.setStatus(rc);
 	}
 
 	

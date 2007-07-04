@@ -65,6 +65,7 @@ public abstract class WebdavStructureAction extends AbstractAction {
 		this.factory = factory;
 	}
 
+	// Returns the status for a successful move/copy
 	protected void checkOverwrite(WebdavRequest req) throws WebdavException{
 		if(req.getHeader("Overwrite") != null && "F".equals(req.getHeader("Overwrite"))){
 			LoadingHints loadingHints = new LoadingHints();
@@ -97,6 +98,11 @@ public abstract class WebdavStructureAction extends AbstractAction {
 			}
 			
 		}
+		return;
+	}
+	
+	protected int chooseReturnCode(WebdavRequest req) throws WebdavException {
+		return (req.getDestination().exists()) ? HttpServletResponse.SC_NO_CONTENT : HttpServletResponse.SC_CREATED;
 	}
 	
 	protected void checkSame(WebdavRequest req) throws WebdavException {
