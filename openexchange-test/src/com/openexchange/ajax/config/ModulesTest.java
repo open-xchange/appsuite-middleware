@@ -49,35 +49,40 @@
 
 package com.openexchange.ajax.config;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import com.openexchange.ajax.AbstractAJAXTest;
 
-/**
- * Suite for all config tests.
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
- */
-public class ConfigTestSuite {
+public class ModulesTest extends AbstractAJAXTest {
 
     /**
-     * Prevent instanciation.
+     * Logger.
      */
-    private ConfigTestSuite() {
-        super();
+    private static final Log LOG = LogFactory.getLog(ModulesTest.class);
+
+    /**
+     * Path to the configuration parameter.
+     */
+    private static final String PATH = "modules";
+
+    /**
+     * Default constructor.
+     * @param name Name of the test.
+     */
+    public ModulesTest(final String name) {
+        super(name);
     }
-    
+
     /**
-     * Generates the task test suite.
-     * @return the task tests suite.
+     * Tests if the spam button option is sent to the GUI.
+     * @throws Throwable if an exception occurs.
      */
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(ConfigMenuTest.class);
-        tests.addTestSuite(ForwardInlineOrAttachmentTest.class);
-        tests.addTestSuite(CurrentTimeTest.class);
-        tests.addTestSuite(SpamButtonTest.class);
-        tests.addTestSuite(ModulesTest.class);
-        tests.addTestSuite(BugTests.class);
-        return tests;
+    public void testModules() throws Throwable {
+        final String value = ConfigTools.readSetting(getWebConversation(),
+            getHostName(), getSessionId(), PATH);
+        LOG.info("Modules: " + value);
+        assertNotNull("Got no value for the modules configuration parameter.",
+            value);
     }
 }

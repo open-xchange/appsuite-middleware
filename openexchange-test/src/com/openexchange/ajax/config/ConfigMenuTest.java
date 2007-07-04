@@ -35,13 +35,14 @@
  * Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-package com.openexchange.ajax;
+package com.openexchange.ajax.config;
 
 import static com.openexchange.ajax.config.ConfigTools.*;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.openexchange.ajax.AbstractAJAXTest;
 import com.openexchange.groupware.settings.ConfigTree;
 
 /**
