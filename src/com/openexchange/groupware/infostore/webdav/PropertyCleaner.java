@@ -57,14 +57,9 @@ public class PropertyCleaner implements FolderEvent, InfostoreEvent {
 
 	public void infoitemDeleted(final DocumentMetadata metadata,
 			final SessionObject sessionObject) {
-
-	}
-
-	public void infoitemModified(final DocumentMetadata metadata,
-			final SessionObject sessionObj) {
 		try {
 			infoProperties.startTransaction();
-			infoProperties.removeAll(metadata.getId(), sessionObj.getContext(), sessionObj.getUserObject(), sessionObj.getUserConfiguration());
+			infoProperties.removeAll(metadata.getId(), sessionObject.getContext(), sessionObject.getUserObject(), sessionObject.getUserConfiguration());
 			infoProperties.commit();
 		} catch (final TransactionException e) {
 			LOG.fatal(e); // What shall we do with the drunken Exception? what shall we do with the drunken Exception? What shall we do with the drunken Exception early in the morning?
@@ -77,6 +72,11 @@ public class PropertyCleaner implements FolderEvent, InfostoreEvent {
 				LOG.error(e);
 			}
 		}
+	}
+
+	public void infoitemModified(final DocumentMetadata metadata,
+			final SessionObject sessionObj) {
+		
 	}
 
 }

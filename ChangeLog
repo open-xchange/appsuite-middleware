@@ -8,6 +8,9 @@
 
  - Fixed Bug #7870: Applied patch that corrects the HTTP status 
    codes for webdav MOVE and COPY requests.
+  
+ - Fixed Bug #8127: Applied patch that moves the property cleaning
+   to the delete event handler for infoitems.
    
 * 2007-07-03 - tobias.prinz@open-xchange.com
 
