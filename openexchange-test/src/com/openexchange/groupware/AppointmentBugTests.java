@@ -1847,28 +1847,31 @@ public class AppointmentBugTests extends TestCase {
         cdao.setTitle("testBug7646 - #1");
         cdao.setParentFolderID(fid);
         CalendarTest.fillDatesInDao(cdao);
+        cdao.setStartDate(new Date(cdao.getStartDate().getTime()+ 3600000));
+        cdao.setEndDate(new Date(cdao.getEndDate().getTime()+ 7200000));        
         Participants p = new Participants();
         Participant resource = new ResourceParticipant();
         resource.setIdentifier(100);
         p.add(resource);
         cdao.setParticipants(p.getList());        
         cdao.setIgnoreConflicts(true);
-        cdao.setRecurrenceType(CalendarDataObject.DAILY);
-        cdao.setInterval(1);
         csql.insertAppointmentObject(cdao);
         int object_id = cdao.getObjectID();                       
         
+        assertTrue("Got an object id", object_id > 0);
+        
         CalendarDataObject cdao_conflict_test = new CalendarDataObject();
         cdao_conflict_test.setContext(so.getContext());
-        cdao_conflict_test.setTitle("testBug7646 - #1");
+        cdao_conflict_test.setTitle("testBug7646 - #2");
         cdao_conflict_test.setParentFolderID(fid);        
-        cdao_conflict_test.setStartDate(new Date(cdao.getEndDate().getTime()));
-        cdao_conflict_test.setEndDate(new Date(cdao.getEndDate().getTime() + 3600000));
-        cdao_conflict_test.setIgnoreConflicts(false);
+        CalendarTest.fillDatesInDao(cdao_conflict_test);
+        cdao_conflict_test.setIgnoreConflicts(false);       
         
         CalendarDataObject conflicts[] = csql.insertAppointmentObject(cdao_conflict_test);
         int object_id2 = cdao_conflict_test.getObjectID();        
 
+        assertTrue("Got an object id", object_id2 > 0);
+        
         boolean found_object_1 = false;
         if (conflicts != null) {
             for (int a = 0; a < conflicts.length; a++) {
@@ -1880,6 +1883,8 @@ public class AppointmentBugTests extends TestCase {
         assertTrue("Conflicted with object #1!", !found_object_1);
         
         CalendarDataObject testobject = csql.getObjectById(object_id2, fid);
+        System.out.println(">>> "+testobject.getStartDate());
+        System.out.println(">>> "+testobject.getEndDate());         
         testobject.removeStartDate();
         testobject.removeEndDate();
         testobject.setParticipants(p.getList());   
