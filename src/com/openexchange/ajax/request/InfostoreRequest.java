@@ -105,7 +105,6 @@ public class InfostoreRequest extends CommonRequest{
 	}
 		
 	public boolean action(final String action, final SimpleRequest req){
-		
 		try {
 			if (action.equals(AJAXServlet.ACTION_ALL)) {
 
@@ -114,7 +113,6 @@ public class InfostoreRequest extends CommonRequest{
 				}
 
 				doSortedSearch(req);
-
 				return true;
 			} else if (action.equals(AJAXServlet.ACTION_UPDATES)) {
 				if (!checkRequired(req, AJAXServlet.PARAMETER_FOLDERID, AJAXServlet.PARAMETER_COLUMNS, AJAXServlet.PARAMETER_TIMESTAMP)) {
@@ -155,6 +153,7 @@ public class InfostoreRequest extends CommonRequest{
 				final long ts = Long.parseLong(req.getParameter(AJAXServlet.PARAMETER_TIMESTAMP));
 				
 				revert(id,ts);
+				
 				return true;
 			} else if(action.equals(AJAXServlet.ACTION_LIST)) {
 				if(!checkRequired(req, AJAXServlet.PARAMETER_COLUMNS)){
@@ -883,12 +882,7 @@ public class InfostoreRequest extends CommonRequest{
 			}
 			
 			infostore.saveDocumentMetadata(updated,timestamp,presentFields,sessionObj);
-			
-			updated = infostore.getDocumentMetadata(id,InfostoreFacade.CURRENT_VERSION,sessionObj.getContext(), sessionObj.getUserObject(), sessionObj.getUserConfiguration());
-	
-			searchEngine.index(updated,sessionObj.getContext(), sessionObj.getUserObject(), sessionObj.getUserConfiguration());
-			
-			
+						
 			infostore.commit();
 			searchEngine.commit();
 		} catch (final Throwable t){

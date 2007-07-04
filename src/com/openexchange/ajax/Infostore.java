@@ -411,10 +411,6 @@ public class Infostore extends PermissionServlet {
 				initMetadata(updated,upload);
 				infostore.saveDocument(updated,new FileInputStream(upload.getTmpFile()),timestamp,presentFields,sessionObj);
 			}
-			updated = infostore.getDocumentMetadata(id,InfostoreFacade.CURRENT_VERSION,ctx, user, userConfig);
-	
-			searchEngine.index(updated,ctx, user, userConfig);
-			
 			infostore.commit();
 			searchEngine.commit();
 			

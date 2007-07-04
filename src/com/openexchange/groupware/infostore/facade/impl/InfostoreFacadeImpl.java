@@ -377,11 +377,12 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 		return new SearchIteratorAdapter(list.iterator());
 	}
 
-	private void checkWriteLock(final int id, final SessionObject sessionObj)
+	private DocumentMetadata checkWriteLock(final int id, final SessionObject sessionObj)
 			throws OXException {
 		final DocumentMetadata document = load(id, CURRENT_VERSION,
 				sessionObj.getContext());
 		checkWriteLock(document, sessionObj);
+		return document;
 	}
 
 	@OXThrows(category = Category.CONCURRENT_MODIFICATION, desc = "The infoitem was locked by some other user. Only the user that locked the item (the one that modified the entry) can modify a locked infoitem.", exceptionId = 15, msg = "This document is locked.")
@@ -666,7 +667,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 					throw EXCEPTIONS.create(4);
 				}
 			}
-			checkWriteLock(document.getId(), sessionObj);
+			final DocumentMetadata oldDocument = checkWriteLock(document.getId(), sessionObj);
 
 			document.setLastModified(new Date());
 			document.setModifiedBy(sessionObj.getUserObject().getId());
@@ -677,10 +678,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 
 			// db.createDocument(document, data, sessionObj.getContext(),
 			// sessionObj.getUserObject(), sessionObj.getUserConfiguration());
-
-			final DocumentMetadata oldDocument = load(document
-					.getId(), CURRENT_VERSION, sessionObj.getContext());
-
+			
 			final Set<Metadata> updatedCols = new HashSet<Metadata>(Arrays
 					.asList(modifiedColumns));
 			updatedCols.add(Metadata.LAST_MODIFIED_LITERAL);
@@ -745,13 +743,13 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 					} finally {
 						releaseReadConnection(sessionObj.getContext(), con);
 					}
-
+					
 					final CreateVersionAction createVersionAction = new CreateVersionAction();
 					createVersionAction.setContext(sessionObj.getContext());
 					createVersionAction.setDocuments(Arrays.asList(document));
 					createVersionAction.setProvider(this);
 					createVersionAction.setQueryCatalog(QUERIES);
-
+					
 					perform(createVersionAction, true);
 
 				} catch (final FileStorageException e) {

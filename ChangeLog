@@ -12,6 +12,8 @@
  - Fixed Bug #8127: Applied patch that moves the property cleaning
    to the delete event handler for infoitems.
    
+ - Fixed Bug #8111: Removed some unnecessary selects
+ 
 * 2007-07-03 - tobias.prinz@open-xchange.com
 
  - Fixed bug #7718 (importer). Now the DESCRIPTION property of 
