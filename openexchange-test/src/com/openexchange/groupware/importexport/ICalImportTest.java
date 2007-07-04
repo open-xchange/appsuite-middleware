@@ -49,13 +49,12 @@
 
 package com.openexchange.groupware.importexport;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 import junit.framework.JUnit4TestAdapter;
@@ -73,7 +72,6 @@ import com.openexchange.groupware.Init;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarSql;
-import com.openexchange.groupware.calendar.CalendarSqlImp;
 import com.openexchange.groupware.contact.ContactConfig;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.FolderObject;
@@ -82,21 +80,15 @@ import com.openexchange.groupware.contexts.ContextImpl;
 import com.openexchange.groupware.contexts.ContextStorage;
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.groupware.importexport.importers.ICalImporter;
-import com.openexchange.groupware.ldap.LdapException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.sessiond.SessionObjectWrapper;
-import com.openexchange.tools.oxfolder.OXFolderManager;
-import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
-import com.openexchange.tools.versit.values.RecurrenceValue;
 
 
 public class ICalImportTest extends AbstractCSVContactTest {
 	public final Format format = Format.ICAL;
-	public final Importer imp = new ICalImporter();
 	
 	//workaround for JUnit 3 runner
 	public static junit.framework.Test suite() {
@@ -114,6 +106,7 @@ public class ICalImportTest extends AbstractCSVContactTest {
 	    userId = uStorage.getUserId( Init.getAJAXProperty("login") );
 	    sessObj = SessionObjectWrapper.createSessionObject(userId, 1, "csv-tests");
 		userId = sessObj.getUserObject().getId();
+		imp = new ICalImporter();
 	}
 	
 	@After
@@ -125,12 +118,11 @@ public class ICalImportTest extends AbstractCSVContactTest {
 
 	@Test public void test7386() throws UnsupportedEncodingException, ImportExportException, DBPoolingException, SQLException{
 		folderId = createTestFolder(FolderObject.TASK, sessObj, "icalTaskTestFolder");
-		List <String> folders = Arrays.asList( Integer.toString(folderId) );
 		String ical =  "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//ellie//ellie//EN\nCALSCALE:GREGORIAN\nBEGIN:VTODO\nDTSTART;TZID=US/Eastern:20040528T000000\nSUMMARY:grade quizzes and m1\nUID:2\nSEQUENCE:0\nDTSTAMP:20040606T230400\nPRIORITY:2\nDUE;VALUE=DATE:20040528T000000\nEND:VTODO\nBEGIN:VTODO\nDTSTART;TZID=US/Eastern:20040525T000000\nSUMMARY:get timesheet signed\nUID:1\nSEQUENCE:0\nDTSTAMP:20040606T230400\nPRIORITY:1\nDUE;VALUE=DATE:20040525T000000\nEND:VTODO\nEND:VCALENDAR";
 
-		assertTrue("Can import?" ,  imp.canImport(sessObj, format, folders, null));
+		assertTrue("Can import?" ,  imp.canImport(sessObj, format, _folders(), null));
 
-		List<ImportResult> results = imp.importData(sessObj, format, new ByteArrayInputStream(ical.getBytes("UTF-8")), folders, null);
+		List<ImportResult> results = imp.importData(sessObj, format, new ByteArrayInputStream(ical.getBytes("UTF-8")), _folders(), null);
 		for(ImportResult res : results){
 			assertTrue("Should have error" , res.hasError());
 			assertEquals("I_E-0505",res.getException().getErrorCode());
@@ -140,12 +132,11 @@ public class ICalImportTest extends AbstractCSVContactTest {
 
 	@Test public void test7472_confidential() throws UnsupportedEncodingException, ImportExportException, DBPoolingException, SQLException{
 		folderId = createTestFolder(FolderObject.CALENDAR, sessObj, "icalAppointmentTestFolder");
-		List <String> folders = Arrays.asList( Integer.toString(folderId) );
 		String ical = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Apple Computer\\, Inc//iCal 2.0//EN\nBEGIN:VEVENT\nCLASS:CONFIDENTIAL\nDTSTART:20070514T150000Z\nDTEND:20070514T163000Z\nLOCATION:Olpe\nSUMMARY:Simple iCal Appointment\nDESCRIPTION:Notes here...\nEND:VEVENT\nEND:VCALENDAR\n";
 
-		assertTrue("Can import?" ,  imp.canImport(sessObj, format, folders, null));
+		assertTrue("Can import?" ,  imp.canImport(sessObj, format, _folders(), null));
 
-		List<ImportResult> results = imp.importData(sessObj, format, new ByteArrayInputStream(ical.getBytes("UTF-8")), folders, null);
+		List<ImportResult> results = imp.importData(sessObj, format, new ByteArrayInputStream(ical.getBytes("UTF-8")), _folders(), null);
 		for(ImportResult res : results){
 			assertTrue("Should have error" , res.hasError());
 			assertEquals("Should be privacy error" , "I_E-0506",res.getException().getErrorCode());
@@ -155,12 +146,11 @@ public class ICalImportTest extends AbstractCSVContactTest {
 	
 	@Test public void test7472_private() throws UnsupportedEncodingException, ImportExportException, DBPoolingException, SQLException{
 		folderId = createTestFolder(FolderObject.CALENDAR, sessObj, "icalAppointmentTestFolder");
-		List <String> folders = Arrays.asList( Integer.toString(folderId) );
 		String ical = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Apple Computer\\, Inc//iCal 2.0//EN\nBEGIN:VEVENT\nCLASS:PRIVATE\nDTSTART:20070514T150000Z\nDTEND:20070514T163000Z\nLOCATION:Olpe\nSUMMARY:Simple iCal Appointment\nDESCRIPTION:Notes here...\nEND:VEVENT\nEND:VCALENDAR\n";
 
-		assertTrue("Can import?" ,  imp.canImport(sessObj, format, folders, null));
+		assertTrue("Can import?" ,  imp.canImport(sessObj, format, _folders(), null));
 
-		List<ImportResult> results = imp.importData(sessObj, format, new ByteArrayInputStream(ical.getBytes("UTF-8")), folders, null);
+		List<ImportResult> results = imp.importData(sessObj, format, new ByteArrayInputStream(ical.getBytes("UTF-8")), _folders(), null);
 		for(ImportResult res : results){
 			assertTrue("Shouldn't have error" , res.isCorrect());
 		}
@@ -175,9 +165,8 @@ public class ICalImportTest extends AbstractCSVContactTest {
 		folderId = createTestFolder(FolderObject.CALENDAR, sessObj, "ical6825Folder");
 		final String testMailAddress = "stephan.martin@open-xchange.com";
 		final String ical = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:OPEN-XCHANGE\nBEGIN:VEVENT\nCLASS:PUBLIC\nCREATED:20060519T120300Z\nDTSTART:20060519T110000Z\nDTSTAMP:20070423T063205Z\nSUMMARY:External 1&1 Review call\nDTEND:20060519T120000Z\nATTENDEE:mailto:"+ testMailAddress + "\nEND:VEVENT\nEND:VCALENDAR";
-		List <String> folders = Arrays.asList( Integer.toString(folderId) );
 		//import and basic tests
-		List<ImportResult> results = imp.importData(sessObj, format, new ByteArrayInputStream(ical.getBytes("UTF-8")), folders, null);
+		List<ImportResult> results = imp.importData(sessObj, format, new ByteArrayInputStream(ical.getBytes("UTF-8")), _folders(), null);
 		assertEquals("One import?" , 1 , results.size());
 		ImportResult res = results.get(0);
 		assertEquals("Shouldn't have error" , null , res.getException() );
@@ -197,9 +186,8 @@ public class ICalImportTest extends AbstractCSVContactTest {
 		final String testMailAddress = "stephan.martin@open-xchange.com";
 		final String stringTooLong = "zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... ";
 		final String ical = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:OPEN-XCHANGE\nBEGIN:VEVENT\nCLASS:PUBLIC\nCREATED:20060519T120300Z\nDTSTART:20060519T110000Z\nDTSTAMP:20070423T063205Z\nSUMMARY:" + stringTooLong + "\nDTEND:20060519T120000Z\nATTENDEE:mailto:"+ testMailAddress + "\nEND:VEVENT\nEND:VCALENDAR";
-		final List <String> folders = Arrays.asList( Integer.toString(folderId) );
 		//import and tests
-		final List<ImportResult> results = imp.importData(sessObj, format, new ByteArrayInputStream(ical.getBytes("UTF-8")), folders, null);
+		final List<ImportResult> results = imp.importData(sessObj, format, new ByteArrayInputStream(ical.getBytes("UTF-8")), _folders(), null);
 		assertEquals("One import?" , 1 , results.size());
 		assertTrue("Should have an error" , results.get(0).hasError() );
 		final OXException e = results.get(0).getException();
@@ -215,9 +203,8 @@ public class ICalImportTest extends AbstractCSVContactTest {
 		final String description = "das ist ein ical test";
 		final String summary = "summariamuttergottes";
 		final String ical = "BEGIN:VCALENDAR\nPRODID:-//K Desktop Environment//NONSGML libkcal 3.2//EN\nVERSION:2.0\nBEGIN:VTODO\nDTSTAMP:20070531T093649Z\nORGANIZER;CN=Stephan Martin:MAILTO:stephan.martin@open-xchange.com\nCREATED:20070531T093612Z\nUID:libkcal-1172232934.1028\nSEQUENCE:0\nLAST-MODIFIED:20070531T093612Z\nDESCRIPTION:"+description+"\nSUMMARY:"+summary+"\nLOCATION:daheim\nCLASS:PUBLIC\nPRIORITY:5\nDUE;VALUE=DATE:20070731\nPERCENT-COMPLETE:30\nEND:VTODO\nEND:VCALENDAR";
-		final List <String> folders = Arrays.asList( Integer.toString(folderId) );
 		
-		final List<ImportResult> results = imp.importData(sessObj, format, new ByteArrayInputStream(ical.getBytes("UTF-8")), folders, null);
+		final List<ImportResult> results = imp.importData(sessObj, format, new ByteArrayInputStream(ical.getBytes("UTF-8")), _folders(), null);
 		assertEquals("One import?" , 1 , results.size());
 		ImportResult res = results.get(0);
 		assertEquals("Should have no error" , null, results.get(0).getException() );
@@ -232,11 +219,10 @@ public class ICalImportTest extends AbstractCSVContactTest {
 	 */
 	@Test public void test7703() throws DBPoolingException, SQLException, UnsupportedEncodingException, NumberFormatException, OXException{
 		folderId = createTestFolder(FolderObject.CALENDAR, sessObj, "ical7703Folder");
-		int interval = 3;
-		final String ical = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//The Horde Project//Horde_iCalendar Library//EN\nMETHOD:PUBLISH\nBEGIN:VEVENT\nDTSTART;VALUE=DATE:20070616\nDTEND;VALUE=DATE:20070617\nDTSTAMP:20070530T200206Z\nUID:20070530220126.23mszu01hoo0@www.klein-intern.de\nSUMMARY:Marc beim Umzug helfen\nTRANSP:OPAQUE\nORGANIZER;CN=Marcus Klein:MAILTO:m.klein@sendung-mit-der-maus.com\nLOCATION:Olpe\nRRULE:FREQ=DAILY;INTERVAL="+interval+";UNTIL=20070627\nEND:VEVENT\nEND:VCALENDAR\n";
-		final List <String> folders = Arrays.asList( Integer.toString(folderId) );
+		int interval = 3; 
+		String ical = generateRecurringICAL(interval, "DAILY");
 		
-		final List<ImportResult> results = imp.importData(sessObj, format, new ByteArrayInputStream(ical.getBytes("UTF-8")), folders, null);
+		final List<ImportResult> results = imp.importData(sessObj, format, new ByteArrayInputStream(ical.getBytes("UTF-8")), _folders(), null);
 		assertEquals("One import?" , 1 , results.size());
 		ImportResult res = results.get(0);
 		assertEquals("Should have no error" , null, results.get(0).getException() );
@@ -254,7 +240,6 @@ public class ICalImportTest extends AbstractCSVContactTest {
 //		folderId = createTestFolder(FolderObject.CALENDAR, sessObj, "ical6825Folder");
 //		final String testMailAddress = "stephan.martin@open-xchange.com";
 //		final String ical = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:OPEN-XCHANGE\nBEGIN:VEVENT\nCLASS:PUBLIC\nCREATED:20060519T120300Z\nDTSTART:20060519T110000Z\nDTSTAMP:20070423T063205Z\nSUMMARY:External 1&1 Review call\nDTEND:20060519T120000Z\nATTENDEE;MEMBER=\"MAILTO:DEV-GROUP@host2.com\":MAILTO:joecool@host2.com:mailto:"+ testMailAddress + "\nEND:VEVENT\nEND:VCALENDAR";
-//		List <String> folders = Arrays.asList( Integer.toString(folderId) );
 //		//import and basic tests
 //		List<ImportResult> results = imp.importData(sessObj, format, new ByteArrayInputStream(ical.getBytes("UTF-8")), folders, null);
 //		assertEquals("One import?" , 1 , results.size());
@@ -277,7 +262,6 @@ public class ICalImportTest extends AbstractCSVContactTest {
 //	@Test public void test7470() throws DBPoolingException, SQLException, UnsupportedEncodingException, OXObjectNotFoundException, NumberFormatException, OXException{
 //		folderId = createTestFolder(FolderObject.CALENDAR, sessObj, "ical7470Folder");
 //		String ical = "BEGIN:VCALENDAR\nPRODID:-//Microsoft Corporation//Outlook 12.0 MIMEDIR//EN\nVERSION:2.0\nMETHOD:REQUEST\nX-MS-OLK-FORCEINSPECTOROPEN:TRUE\nBEGIN:VEVENT\nATTENDEE;CN=\"Camil Bartkowiak (cbartkowiak@oxhemail.open-xchange.com)\";RSVP\n\n	=TRUE:mailto:cbartkowiak@oxhemail.open-xchange.com\nCLASS:PUBLIC\nCREATED:20070521T150327Z\nDESCRIPTION:Hallo Hallo\n\n\nDTEND:20070523T090000Z\nDTSTAMP:20070521T150327Z\nDTSTART:20070523T083000Z\nLAST-MODIFIED:20070521T150327Z\nLOCATION:Location here\nORGANIZER;CN=Tobias:mailto:tfriedrich@oxhemail.open-xchange.com\nPRIORITY:5\nSEQUENCE:0\nSUMMARY;LANGUAGE=de:Simple Appointment with participant\nTRANSP:OPAQUE\nUID:040000008200E00074C5B7101A82E0080000000060565ABBC99BC701000000000000000\n	010000000E4B2BA931D32B84DAFB227C9E0CA348C\nX-MICROSOFT-CDO-BUSYSTATUS:BUSY\nX-MICROSOFT-CDO-IMPORTANCE:1\nX-MICROSOFT-DISALLOW-COUNTER:FALSE\nX-MS-OLK-ALLOWEXTERNCHECK:TRUE\nX-MS-OLK-AUTOFILLLOCATION:FALSE\nX-MS-OLK-CONFTYPE:0\nBEGIN:VALARM\nTRIGGER:PT0M\nACTION:DISPLAY\nDESCRIPTION:Reminder\nEND:VALARM\nEND:VEVENT\nEND:VCALENDAR";
-//		List <String> folders = Arrays.asList( Integer.toString(folderId) );
 //		assertTrue("Can import?" ,  imp.canImport(sessObj, format, folders, null));
 //		List<ImportResult> results = imp.importData(sessObj, format, new ByteArrayInputStream(ical.getBytes("UTF-8")), folders, null);
 //		assertEquals("One import?" , 1 , results.size());
@@ -295,7 +279,6 @@ public class ICalImportTest extends AbstractCSVContactTest {
 //	@Test public void test7473() throws DBPoolingException, SQLException, UnsupportedEncodingException, OXObjectNotFoundException, OXException{
 //		folderId = createTestFolder(FolderObject.CALENDAR, sessObj, "ical7473Folder");
 //		String ical =  "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Apple Computer\\, Inc//iCal 2.0//EN\nBEGIN:VEVENT\nCLASS:PRIVATE\nDTSTART:20070614T150000Z\nDTEND:20070614T163000Z\nLOCATION:Olpe\nSUMMARY:Simple iCal Appointment\nDESCRIPTION:Notes here...\nBEGIN:VALARM\nTRIGGER:-PT180M\nACTION:DISPLAY\nDESCRIPTION:Reminder\nEND:VALARM\nEND:VEVENT\nEND:VCALENDAR";
-//		List <String> folders = Arrays.asList( Integer.toString(folderId) );
 //		assertTrue("Can import?" ,  imp.canImport(sessObj, format, folders, null));
 //		List<ImportResult> results = imp.importData(sessObj, format, new ByteArrayInputStream(ical.getBytes("UTF-8")), folders, null);
 //		assertEquals("One import?" , 1 , results.size());
@@ -311,4 +294,23 @@ public class ICalImportTest extends AbstractCSVContactTest {
 //		folderId = createTestFolder(FolderObject.CALENDAR, sessObj, "ical6825Folder");
 //		fail("TODO");
 //	}
+	
+	public String generateRecurringICAL(final int interval, final String frequency){
+		return 
+		"BEGIN:VCALENDAR\n" +
+		"VERSION:2.0\n" +
+		"PRODID:-//The Horde Project//Horde_iCalendar Library//EN\n" +
+		"METHOD:PUBLISH\n" +
+		"BEGIN:VEVENT\n" +
+		"DTSTART;VALUE=DATE:20070616\n" +
+		"DTEND;VALUE=DATE:20070617\n" +
+		"DTSTAMP:20070530T200206Z\n" +
+		"UID:20070530220126.23mszu01hoo0@www.klein-intern.de\n" +
+		"SUMMARY:Marc beim Umzug helfen\n" +
+		"TRANSP:OPAQUE\nORGANIZER;CN=Marcus Klein:MAILTO:m.klein@sendung-mit-der-maus.com\n" +
+		"LOCATION:Olpe\n" +
+		"RRULE:FREQ="+frequency+";INTERVAL="+interval+";UNTIL=20070627\n" +
+		"END:VEVENT\n" +
+		"END:VCALENDAR\n";
+	}
 }

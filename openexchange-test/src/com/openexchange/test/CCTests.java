@@ -142,6 +142,7 @@ public class CCTests
 		
 		tests.addTestSuite(com.openexchange.groupware.attach.AttachmentBaseTest.class);
 		
+		tests.addTestSuite(com.openexchange.groupware.importexport.ImportExportStandaloneSuite.class);
 		return tests;
 	}
 }

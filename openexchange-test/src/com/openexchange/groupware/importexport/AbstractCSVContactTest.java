@@ -208,7 +208,7 @@ public class AbstractCSVContactTest {
 	public String EMAIL1 = "tobias.prinz@open-xchange.com";
 	public String NAME2 = "Laguna";
 	public String EMAIL2 = "francisco.laguna@open-xchange.com";
-	public Importer imp;
+	public static Importer imp;
 	public Format defaultFormat;
 
 	public static int createTestFolder(int type, SessionObject sessObj, String folderTitle) throws DBPoolingException, SQLException  {
@@ -290,9 +290,8 @@ public class AbstractCSVContactTest {
 	}
 
 	protected List<ImportResult> importStuff(String csv) throws ImportExportException, UnsupportedEncodingException{
-		List <String> folders = Arrays.asList( Integer.toString(folderId) );
 		InputStream is = new ByteArrayInputStream( csv.getBytes("UTF-8") );
-		return imp.importData(sessObj, defaultFormat, is, folders, null);
+		return imp.importData(sessObj, defaultFormat, is, _folders(), null);
 	}
 	
 	protected boolean existsEntry(int entryNumber){
@@ -304,5 +303,8 @@ public class AbstractCSVContactTest {
 			return false;
 		}
 	}
-
+	
+	protected List<String> _folders(){
+		return Arrays.asList( Integer.toString(folderId) );
+	}
 }
