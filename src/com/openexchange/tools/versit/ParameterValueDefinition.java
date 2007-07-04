@@ -64,7 +64,8 @@ public class ParameterValueDefinition {
 	public ParameterValue parse(final Scanner s) throws IOException {
 		final StringBuilder sb = new StringBuilder();
 		if (s.peek == '"') {
-			while (!(s.peek < ' ' && s.peek != '\t' || s.peek == 0x7f)) {
+			s.read();
+			while (!(s.peek < ' ' && s.peek != '\t' || s.peek == 0x7f || s.peek == '"')) {
 				sb.append((char) s.read());
 			}
 			if (s.peek != '"') {
