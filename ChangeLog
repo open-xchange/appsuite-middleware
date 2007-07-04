@@ -15,6 +15,10 @@
    with a resource if the endtime adjoins to another appointment start time and
    the same resource. This has been fixed.
 
+ - Fixed bug #7064. Weekly and yearly recurring calculations, where
+   the day was not in the first week, were calulated wrong.
+   This has been fixed.
+
 * 2007-07-04 - thorben.betten@open-xchange.com
 
  - Invoking InternetAddress.toUnicodeString() when composing prefix line on
