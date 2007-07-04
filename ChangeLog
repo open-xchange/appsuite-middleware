@@ -16,7 +16,11 @@
    message reply to get the decoded representation.
  - Bugfix #8280: Linebreak is performed after the whitespace character
  - Improved html2text conversion
- - Replaced usages of FolderString.ALL_GROUPS_AND_USERS with Groups.ZERO_DISPLAYNAME
+ - Replaced usages of FolderString.ALL_GROUPS_AND_USERS with
+   Groups.ZERO_DISPLAYNAME
+ - Bugfix #8250: Fetching user's locale from user object instead from
+   session. Thus the proper translation is used when changing user's
+   language
 
 * 2007-07-04 - francisco.laguna@open-xchange.com
 

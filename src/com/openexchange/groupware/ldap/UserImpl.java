@@ -50,6 +50,10 @@
 package com.openexchange.groupware.ldap;
 
 import java.io.Serializable;
+import java.util.Locale;
+
+import com.openexchange.server.OCLPermission;
+import com.openexchange.tools.LocaleTools;
 
 /**
  * This class implements the data container for the attributes of a user. This
@@ -61,6 +65,8 @@ public class UserImpl implements Serializable, User, Cloneable {
 
     /**
      * The group identifier for all groups and users.
+     * 
+     * @deprecated use {@link OCLPermission#ALL_GROUPS_AND_USERS} instead
      */
     private static final int GROUP_ALL = 0;
 
@@ -126,9 +132,14 @@ public class UserImpl implements Serializable, User, Cloneable {
 
     /**
      * The preferred language of this user. According to RFC 2798 and 2068 it
-     * should be something like de-de, en-gb or en.
+     * should be something like de_DE, en_GB or en.
      */
     private String preferredLanguage;
+    
+    /**
+     * The locale bound to preferred language of this user
+     */
+    private Locale locale;
 
     /**
      * Display name of the user.
@@ -386,23 +397,34 @@ public class UserImpl implements Serializable, User, Cloneable {
     }
 
     /**
-     * Setter for preferredLanguage.
-     * @param preferredLanguage Preferred language.
-     */
-    public void setPreferredLanguage(final String preferredLanguage) {
-        this.preferredLanguage = preferredLanguage;
-    }
+	 * Setter for preferredLanguage. The user's locale is implicitely re-set,
+	 * too.
+	 * 
+	 * @param preferredLanguage
+	 *            Preferred language.
+	 */
+	public void setPreferredLanguage(final String preferredLanguage) {
+		this.preferredLanguage = preferredLanguage;
+		this.locale = LocaleTools.getLocale(preferredLanguage);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getPreferredLanguage() {
+		return preferredLanguage;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Locale getLocale() {
+		return locale;
+	}
 
     /**
-     * {@inheritDoc}
-     */
-    public String getPreferredLanguage() {
-        return preferredLanguage;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
+	 * {@inheritDoc}
+	 */
     public int[] getGroups() {
         return groups.clone();
     }

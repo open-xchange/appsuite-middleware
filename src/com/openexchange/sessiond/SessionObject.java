@@ -86,8 +86,6 @@ public class SessionObject {
 
 	private String language;
 
-	private Locale locale;
-
 	private String localip;
 
 	private String host;
@@ -188,7 +186,6 @@ public class SessionObject {
 
 	public void setLanguage(final String language) {
 		this.language = language;
-		this.locale = createLocale(language);
 	}
 
 	public void setLocalIp(final String localip) {
@@ -251,8 +248,16 @@ public class SessionObject {
 		return language;
 	}
 
+	/**
+	 * Convenience method that just invokes {@link User#getLocale()}
+	 * 
+	 * @see com.openexchange.groupware.ldap.User#getLocale()
+	 * 
+	 * @return an instance of <code>java.util.Locale</code> or
+	 *         <code>null</code> if none present
+	 */
 	public Locale getLocale() {
-		return locale;
+		return u == null ? null : u.getLocale();
 	}
 
 	public String getLocalIp() {
@@ -344,17 +349,4 @@ public class SessionObject {
 		this.secret = secret;
 	}
 
-	public static Locale createLocale(final String localeStr) {
-		final String[] sa = localeStr.split("_");
-		switch (sa.length) {
-		case 1:
-			return new Locale(sa[0]);
-		case 2:
-			return new Locale(sa[0], sa[1]);
-		case 3:
-			return new Locale(sa[0], sa[1], sa[2]);
-		default:
-			return null;
-		}
-	}
 }

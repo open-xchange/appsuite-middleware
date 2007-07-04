@@ -49,6 +49,8 @@
 
 package com.openexchange.groupware.ldap;
 
+import java.util.Locale;
+
 /**
  * Interface for the user object.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
@@ -145,17 +147,27 @@ public interface User {
     String getTimeZone();
 
     /**
-     * Getter for preferredLanguage. The preferred language of the user.
-     * According to RFC 2798 and 2068 it should be something like de-de, en-gb
-     * or en.
-     * @return Preferred Language.
-     */
-    String getPreferredLanguage();
+	 * Getter for preferredLanguage. The preferred language of the user.
+	 * According to RFC 2798 and 2068 it should be something like de-de, en-gb
+	 * or en.
+	 * 
+	 * @return Preferred Language.
+	 */
+	String getPreferredLanguage();
+
+	/**
+	 * Getter for locale constructed from set preferred language.
+	 * 
+	 * @see #getPreferredLanguage()
+	 * @return Locale
+	 */
+	Locale getLocale();
 
     /**
-     * Getter for groups.
-     * @return the groups this user is member of.
-     */
+	 * Getter for groups.
+	 * 
+	 * @return the groups this user is member of.
+	 */
     int[] getGroups();
 
     /**

@@ -55,35 +55,42 @@ import java.util.regex.Pattern;
 
 /**
  * Tool methods for handling locales.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class LocaleTools {
 
-    private static final Pattern identifierPattern = Pattern
-        .compile("(\\p{Lower}{2})_(\\p{Upper}{2})");
+	private static final String STR_EMPTY = "";
 
-    /**
-     * Prevent instanciation. 
-     */
-    private LocaleTools() {
-        super();
-    }
+	private static final Pattern identifierPattern = Pattern
+			.compile("(\\p{Lower}{2})(?:_(\\p{Upper}{2}))?(?:_([a-zA-Z]{2}))?");
 
-    /**
-     * Splits the full locale identifier into its parts and creates the
-     * corresponding locale. Currently the fullIdentifier must match the pattern
-     * <code>language_country</code>.
-     * @param fullIdentifier full locale identifier.
-     * @return the locale or <code>null</code> if the pattern doesn't match. 
-     */
-    public static Locale getLocale(final String fullIdentifier) {
-        final Matcher match = identifierPattern.matcher(fullIdentifier);
-        Locale retval = null;
-        if (match.find()) {
-            final String language = match.group(1);
-            final String country = match.group(2);
-            retval = new Locale(language, country);
-        }
-        return retval;
-    }
+	/**
+	 * Prevent instanciation.
+	 */
+	private LocaleTools() {
+		super();
+	}
+
+	/**
+	 * Splits the full locale identifier into its parts and creates the
+	 * corresponding locale. Currently the fullIdentifier must match the pattern
+	 * <code>language_country</code>.
+	 * 
+	 * @param fullIdentifier
+	 *            full locale identifier compliant to RFC 2798 and 2068.
+	 * @return the locale or <code>null</code> if the pattern doesn't match.
+	 */
+	public static Locale getLocale(final String fullIdentifier) {
+		final Matcher match = identifierPattern.matcher(fullIdentifier);
+		Locale retval = null;
+		if (match.matches()) {
+			final String country = match.group(2);
+			final String variant = match.group(3);
+			retval = new Locale(match.group(1), country == null ? STR_EMPTY : country, variant == null ? STR_EMPTY
+					: variant);
+		}
+		return retval;
+	}
 }

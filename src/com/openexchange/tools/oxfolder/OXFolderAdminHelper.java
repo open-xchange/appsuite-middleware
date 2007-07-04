@@ -74,7 +74,7 @@ import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.i18n.StringHelper;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.server.OCLPermission;
-import com.openexchange.sessiond.SessionObject;
+import com.openexchange.tools.LocaleTools;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 
 /**
@@ -527,7 +527,7 @@ public final class OXFolderAdminHelper {
 		try {
 			// final Context ctx = ContextStorage.getInstance().getContext(cid);
 			final Context ctx = new ContextImpl(cid);
-			final StringHelper strHelper = new StringHelper(SessionObject.createLocale(language));
+			final StringHelper strHelper = new StringHelper(LocaleTools.getLocale(language));
 			/*
 			 * Load the propfile manually if not done, yet
 			 */

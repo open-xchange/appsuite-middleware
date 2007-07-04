@@ -67,7 +67,6 @@ import java.util.regex.Pattern;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeUtility;
-import javax.mail.internet.ParseException;
 
 import org.json.JSONArray;
 import org.json.JSONException;
