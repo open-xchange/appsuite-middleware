@@ -59,8 +59,6 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.UnsupportedCharsetException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -73,7 +71,6 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeUtility;
-import javax.swing.text.html.HTMLEditorKit;
 
 import com.openexchange.ajax.Mail;
 import com.openexchange.api2.MailInterfaceImpl;
@@ -83,6 +80,7 @@ import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.groupware.imap.IMAPProperties;
 import com.openexchange.groupware.imap.UserSettingMail;
 import com.openexchange.sessiond.SessionObject;
+import com.openexchange.tools.Collections.SmartIntArray;
 import com.openexchange.tools.mail.ContentType;
 import com.openexchange.tools.mail.Html2TextConverter;
 import com.openexchange.tools.mail.MailTools;
@@ -98,9 +96,9 @@ public class MessageUtils {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(MessageUtils.class);
-	
+
 	private static final int INT_100 = 100;
-	
+
 	private static final int INT_1000 = 1000;
 
 	private static final String HTML_BREAK = "<br>";
@@ -109,55 +107,13 @@ public class MessageUtils {
 
 	private static final Pattern HTML_QUOTE_PATTERN = Pattern.compile("(\\G\\s?&gt;)", Pattern.CASE_INSENSITIVE);
 
-	private static final Pattern IMG_PATTERN = Pattern.compile("(<img[^>]*>)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+	private static final Pattern IMG_PATTERN = Pattern.compile("(<img[^>]*>)", Pattern.CASE_INSENSITIVE
+			| Pattern.DOTALL);
 
-	private static final Pattern CID_PATTERN = Pattern.compile("cid:([^\\s>]*)|\"cid:([^\"]*)\"", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+	private static final Pattern CID_PATTERN = Pattern.compile("cid:([^\\s>]*)|\"cid:([^\"]*)\"",
+			Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
 	private static final Pattern ENC_PATTERN = Pattern.compile("(=\\?\\S+?\\?\\S+?\\?)(\\S+?)(\\?=)");
-
-	private static class HTMLParse extends HTMLEditorKit {
-
-		/**
-		 * Call to obtain a HTMLEditorKit.Parser object.
-		 * 
-		 * @return A new HTMLEditorKit.Parser object.
-		 */
-		public HTMLEditorKit.Parser getParser() {
-			return super.getParser();
-		}
-	}
-
-	private static class HTMLCallback extends HTMLEditorKit.ParserCallback {
-
-		private final List<int[]> positionList;
-
-		private final int linewrap;
-
-		public HTMLCallback(final int linewrap) {
-			this.positionList = new ArrayList<int[]>();
-			this.linewrap = linewrap;
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see javax.swing.text.html.HTMLEditorKit$ParserCallback#handleText(char[],
-		 *      int)
-		 */
-		public void handleText(final char[] chars, final int pos) {
-			if (chars.length > linewrap) {
-				positionList.add(new int[] { pos, pos + chars.length });
-			}
-		}
-
-		/**
-		 * @return a <code>java.util.List</code> containing all starting and
-		 *         ending positions of html lines that have to be line-wraped
-		 */
-		public List<int[]> getPositionList() {
-			return positionList;
-		}
-	}
 
 	private MessageUtils() {
 		super();
@@ -176,7 +132,7 @@ public class MessageUtils {
 					sb.append(hdrVal.substring(lastMatch, m.start()));
 					sb.append(Matcher.quoteReplacement(MimeUtility.decodeText(m.group())));
 					lastMatch = m.end();
-				} catch (UnsupportedEncodingException e) {
+				} catch (final UnsupportedEncodingException e) {
 					sb.append(hdrVal.substring(lastMatch));
 				}
 			} while (m.find());
@@ -185,15 +141,15 @@ public class MessageUtils {
 		}
 		return removeHdrLineBreak(hdrVal);
 	}
-	
+
 	private static final Pattern PATTERN_RMV_HDR_BR = Pattern.compile("(\r)?\n(\\s{1})?");
-	
+
 	private static final String STR_EMPTY = "";
-	
+
+	private static final String SPLIT_LINES = "(\r)?\n";
+
 	private static final char CHAR_BREAK = '\n';
-	
-	private static final char CHAR_CONTROL = '\r';
-	
+
 	public static final String removeHdrLineBreak(final String hdrVal) {
 		return PATTERN_RMV_HDR_BR.matcher(hdrVal).replaceAll(STR_EMPTY);
 	}
@@ -205,46 +161,14 @@ public class MessageUtils {
 		final StringBuilder sb = new StringBuilder(content.length() + INT_100);
 		if (isHtml) {
 			return content;
-//			/*
-//			 * Use of javax.swing.text.html package to easily parse text content
-//			 * out of html content
-//			 */
-//			final StringReader r = new StringReader(content);
-//			final HTMLEditorKit.Parser parse = new HTMLParse().getParser();
-//			final HTMLCallback callback = new HTMLCallback(linewrap);
-//			try {
-//				parse.parse(r, callback, true);
-//			} catch (IOException e) {
-//				LOG.error(e.getMessage(), e);
-//			}
-//			/*
-//			 * Get list of start and end positions
-//			 */
-//			final List<int[]> pos = callback.getPositionList();
-//			int from = 0;
-//			final int size = pos.size();
-//			final Iterator<int[]> iter = pos.iterator();
-//			for (int i = 0; i < size; i++) {
-//				final int[] startEndPos = iter.next();
-//				sb.append(content.substring(from, startEndPos[0]));
-//				sb.append(wrapHtmlText(content.substring(startEndPos[0], startEndPos[1]), linewrap));
-//				from = startEndPos[1];
-//			}
-//			sb.append(content.substring(from));
-//			return sb.toString();
 		}
-		final BufferedReader reader = new BufferedReader(new StringReader(content));
-		String line = null;
-		try {
-			while ((line = reader.readLine()) != null) {
-				sb.append(wrapTextLine(line, linewrap)).append(CHAR_BREAK);
-			}
-		} catch (IOException e) {
-			LOG.error(e.getMessage(), e);
+		final String[] lines = content.split(SPLIT_LINES);
+		for (int i = 0; i < lines.length; i++) {
+			sb.append(wrapTextLine(lines[i], linewrap)).append(CHAR_BREAK);
 		}
 		return sb.toString();
 	}
-	
+
 	private static final String wrapTextLine(final String line, final int linewrap) {
 		return wrapTextLineRecursive(line, linewrap, null, true);
 	}
@@ -255,29 +179,29 @@ public class MessageUtils {
 		if (length <= linewrap) {
 			return line;
 		}
+		final int[] hrefIndices = getHrefIndices(line);
 		final String quote = lookUpQuote ? getQuotePrefix(line) : quoteArg;
 		final int startPos = quote == null ? 0 : quote.length();
-		final char[] chars = line.toCharArray();
-		final char c = chars[linewrap];
+		final char c = line.charAt(linewrap);
 		final StringBuilder sb = new StringBuilder(length + 5);
 		final StringBuilder sub = new StringBuilder();
-		if (Character.isWhitespace(c) && c != CHAR_BREAK && c != CHAR_CONTROL) {
+		if (Character.isWhitespace(c)) {
 			/*
 			 * Find last non-whitespace character before
 			 */
 			int i = linewrap - 1;
 			int[] sep = null;
 			while (i >= startPos) {
-				if (!Character.isWhitespace(chars[i])) {
-					if ((sep = isLineBreakInsideHref(line, i)) != null) {
+				if (!Character.isWhitespace(line.charAt(i))) {
+					if ((sep = isLineBreakInsideHref(hrefIndices, i)) != null) {
 						i = sep[0] - 1;
 						continue;
 					}
 					sb.setLength(0);
 					sub.setLength(0);
 					return sb.append(line.substring(0, i + 1)).append(CHAR_BREAK).append(
-							wrapTextLineRecursive(quote == null ? line.substring(i + 1) : sub.append(quote).append(
-									line.substring(i + 1)).toString(), linewrap, quote, false)).toString();
+							wrapTextLineRecursive(quote == null ? line.substring(linewrap + 1) : sub.append(quote)
+									.append(line.substring(i + 1)).toString(), linewrap, quote, false)).toString();
 				}
 				i--;
 			}
@@ -288,8 +212,8 @@ public class MessageUtils {
 			int i = linewrap - 1;
 			int[] sep = null;
 			while (i >= startPos) {
-				if (Character.isWhitespace(chars[i])) {
-					if ((sep = isLineBreakInsideHref(line, i)) != null) {
+				if (Character.isWhitespace(line.charAt(i))) {
+					if ((sep = isLineBreakInsideHref(hrefIndices, i)) != null) {
 						i = sep[0] - 1;
 						continue;
 					}
@@ -302,7 +226,7 @@ public class MessageUtils {
 				i--;
 			}
 		}
-		final int[] sep = isLineBreakInsideHref(line, linewrap);
+		final int[] sep = isLineBreakInsideHref(hrefIndices, linewrap);
 		if (sep == null) {
 			return new StringBuilder(line.length() + 1).append(line.substring(0, linewrap)).append(CHAR_BREAK).append(
 					wrapTextLineRecursive(quote == null ? line.substring(linewrap) : new StringBuilder().append(quote)
@@ -327,11 +251,20 @@ public class MessageUtils {
 		return m.matches() ? new StringBuilder(m.group(1)).append(m.group(2)).toString() : null;
 	}
 
-	private static final int[] isLineBreakInsideHref(final String line, final int linewrap) {
+	private static final int[] getHrefIndices(final String line) {
+		final SmartIntArray sia = new SmartIntArray(10);
 		final Matcher m = MailTools.PATTERN_HREF.matcher(line);
 		while (m.find()) {
-			if (m.start() <= linewrap && m.end() > linewrap) {
-				return new int[] { m.start(), m.end() };
+			sia.append(m.start());
+			sia.append(m.end());
+		}
+		return sia.toArray();
+	}
+
+	private static final int[] isLineBreakInsideHref(final int[] hrefIndices, final int linewrap) {
+		for (int i = 0; i < hrefIndices.length; i += 2) {
+			if (hrefIndices[i] <= linewrap && hrefIndices[i + 1] > linewrap) {
+				return new int[] { hrefIndices[i], hrefIndices[i + 1] };
 			}
 		}
 		/*
@@ -340,38 +273,6 @@ public class MessageUtils {
 		return null;
 	}
 
-	private static String wrapHtmlText(final String line, final int linewrap) {
-		final int length = line.length();
-		if (length <= linewrap) {
-			return line;
-		}
-		final char[] chars = line.toCharArray();
-		final char c = chars[linewrap];
-		if (Character.isWhitespace(c)) {
-			/*
-			 * Find last non-whitespace character before
-			 */
-			for (int i = linewrap - 1; i >= 0; i--) {
-				if (!Character.isWhitespace(chars[i])) {
-					return new StringBuilder(length + 5).append(line.substring(0, i + 1)).append(HTML_BREAK).append(
-							wrapHtmlText(line.substring(i + 2), linewrap)).toString();
-				}
-			}
-		} else {
-			/*
-			 * Find last whitespace before
-			 */
-			for (int i = linewrap - 1; i >= 0; i--) {
-				if (Character.isWhitespace(chars[i])) {
-					return new StringBuilder(length + 5).append(line.substring(0, i)).append(HTML_BREAK).append(
-							wrapHtmlText(line.substring(i + 1), linewrap)).toString();
-				}
-			}
-		}
-		return new StringBuilder(line.length() + 1).append(line.substring(0, linewrap)).append(HTML_BREAK).append(
-				wrapHtmlText(line.substring(linewrap), linewrap)).toString();
-	}
-	
 	private static final String STR_START_BLOCKQUOTE = "<blockquote";
 
 	/**
@@ -411,12 +312,12 @@ public class MessageUtils {
 	}
 
 	private static final String[] COLORS;
-	
+
 	static {
 		String[] tmp = null;
 		try {
 			tmp = IMAPProperties.getQuoteLineColors();
-		} catch (OXException e) {
+		} catch (final OXException e) {
 			tmp = new String[] { "#454545" };
 		}
 		COLORS = tmp;
@@ -425,7 +326,7 @@ public class MessageUtils {
 	private static final String DEFAULT_COLOR = "#0026ff";
 
 	private static final String BLOCKQUOTE_START_TEMPLATE = "<blockquote type=\"cite\" style=\"margin-left: 0px; padding-left: 10px; color:%s; border-left: solid 1px %s;\">";
-	
+
 	private static final String STR_BLOCKQUOTE = "blockquote";
 
 	/**
@@ -464,9 +365,9 @@ public class MessageUtils {
 	}
 
 	private static final String BLOCKQUOTE_END = "</blockquote>\n";
-	
+
 	private static final String STR_HTML_QUOTE = "&gt;";
-	
+
 	private static final String STR_SPLIT_BR = "<br/?>";
 
 	/**
@@ -501,8 +402,9 @@ public class MessageUtils {
 			}
 			if (offset > 0) {
 				try {
-					offset = offset < line.length() && Character.isWhitespace(line.charAt(offset)) ? offset + 1 : offset;
-				} catch (StringIndexOutOfBoundsException e) {
+					offset = offset < line.length() && Character.isWhitespace(line.charAt(offset)) ? offset + 1
+							: offset;
+				} catch (final StringIndexOutOfBoundsException e) {
 					if (LOG.isTraceEnabled()) {
 						LOG.trace(e.getMessage(), e);
 					}
@@ -525,12 +427,12 @@ public class MessageUtils {
 		}
 		return sb.toString();
 	}
-	
+
 	private static final Html2TextConverter CONVERTER = new Html2TextConverter();
-	
+
 	private static final Pattern PATTERN_BLOCKQUOTE = Pattern.compile("(?:(<blockquote.*?>)|(</blockquote>))",
 			Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-	
+
 	/**
 	 * Converts given HTML content into plain text, but keeps
 	 * <code>&lt;blockquote&gt;</code> tags if any present. <b>NOTE:</b>
@@ -626,7 +528,7 @@ public class MessageUtils {
 					formattedText.append(line).append(HTML_BREAK);
 				}
 			}
-		} catch (Exception ioe) {
+		} catch (final Exception ioe) {
 			LOG.error(ioe.getMessage(), ioe);
 			return text;
 		} finally {
@@ -635,13 +537,13 @@ public class MessageUtils {
 					reader.close();
 					reader = null;
 				}
-			} catch (IOException ioe) {
+			} catch (final IOException ioe) {
 				LOG.error(ioe.getMessage(), ioe);
 			}
 		}
 		return formattedText.toString();
 	}
-	
+
 	private static final String STR_AJAX_MAIL = "\"/ajax/mail?";
 
 	/**
@@ -672,7 +574,7 @@ public class MessageUtils {
 			}
 			imgMatcher.appendTail(sb);
 			reval = sb.toString();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOG.warn("Unable to filter cid Images: " + e.getMessage());
 		}
 		return reval;
@@ -731,7 +633,7 @@ public class MessageUtils {
 				quotelevel_before = quotelevel;
 			}
 			return htmlBuffer.toString();
-		} catch (Exception ioe) {
+		} catch (final Exception ioe) {
 			LOG.error(ioe.getMessage(), ioe);
 			return htmlContent;
 		} finally {
@@ -740,14 +642,14 @@ public class MessageUtils {
 					reader.close();
 					reader = null;
 				}
-			} catch (IOException ioe) {
+			} catch (final IOException ioe) {
 				LOG.error(ioe.getMessage(), ioe);
 			}
 		}
 	}
 
 	private static final Charset DEFAULT_CHARSET = Charset.forName(ServerConfig.getProperty(Property.DefaultEncoding));
-	
+
 	private static final String STR_CHARSET = "charset";
 
 	/**
@@ -764,12 +666,12 @@ public class MessageUtils {
 		Charset charset = null;
 		try {
 			charset = charsetStr == null ? DEFAULT_CHARSET : Charset.forName(charsetStr);
-		} catch (UnsupportedCharsetException e) {
+		} catch (final UnsupportedCharsetException e) {
 			if (LOG.isDebugEnabled()) {
 				LOG.debug(e.getMessage(), e);
 			}
 			charset = DEFAULT_CHARSET;
-		} catch (IllegalCharsetNameException e) {
+		} catch (final IllegalCharsetNameException e) {
 			if (LOG.isDebugEnabled()) {
 				LOG.debug(e.getMessage(), e);
 			}
@@ -781,14 +683,14 @@ public class MessageUtils {
 			while ((contentLine = br.readLine()) != null) {
 				sb.append(contentLine).append(CHAR_BREAK);
 			}
-		} catch (Throwable t) {
+		} catch (final Throwable t) {
 			try {
 				br = getBufferedReaderFromPart(p, charset);
 				String contentLine = null;
 				while ((contentLine = br.readLine()) != null) {
 					sb.append(contentLine).append(CHAR_BREAK);
 				}
-			} catch (IOException innerExc) {
+			} catch (final IOException innerExc) {
 				/*
 				 * Common way does not work, try to read from raw stream
 				 */
@@ -800,7 +702,7 @@ public class MessageUtils {
 					br.close();
 					br = null;
 				}
-			} catch (IOException ioe) {
+			} catch (final IOException ioe) {
 				LOG.error(ioe.getMessage(), ioe);
 			}
 		}
@@ -815,7 +717,7 @@ public class MessageUtils {
 				partInputStream = new BufferedInputStream(partInputStream);
 			}
 			return new BufferedReader(new InputStreamReader(partInputStream, charset));
-		} catch (Exception ee) {
+		} catch (final Exception ee) {
 			/*
 			 * Common way does not work, try to read from raw stream
 			 */
@@ -853,7 +755,7 @@ public class MessageUtils {
 		sb.append(addrs[0].toString());
 		for (int i = 1; i < addrs.length; i++) {
 			sb.append(", ");
-			sb.append(addrs[i].toString());
+			sb.append(addrs[i].toUnicodeString());
 		}
 		return sb.toString();
 	}
@@ -900,7 +802,7 @@ public class MessageUtils {
 		} else {
 			try {
 				filename = MimeUtility.decodeText(filename.replaceAll("\\?==\\?", "?= =?"));
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				LOG.error(e.getMessage(), e);
 			}
 		}
@@ -914,7 +816,7 @@ public class MessageUtils {
 		} else {
 			try {
 				filename = MimeUtility.decodeText(filename.replaceAll("\\?==\\?", "?= =?"));
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				LOG.error(e.getMessage(), e);
 			}
 		}
