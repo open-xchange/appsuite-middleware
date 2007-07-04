@@ -206,7 +206,7 @@ class CalendarMySQL implements CalendarSqlImp {
         sb.append(" JOIN prg_dates_members pdm ON pd.intfield01 = pdm.object_id AND pdm.cid = ");
         sb.append(c.getContextId());
         sb.append(WHERE);
-        getRange(sb);
+        getConflictRange(sb);
         sb.append(" AND pdr.id IN ");
         sb.append(resource_sql_in);
         sb.append(" AND pdr.type = ");
@@ -229,7 +229,7 @@ class CalendarMySQL implements CalendarSqlImp {
         sb.append(" AND pdr.cid = ");
         sb.append(c.getContextId());
         sb.append(WHERE);
-        getRange(sb);
+        getConflictRange(sb);
         sb.append(" AND pdr.id IN ");
         sb.append(resource_sql_in);
         sb.append(" AND pdr.type = ");

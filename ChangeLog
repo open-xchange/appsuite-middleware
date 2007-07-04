@@ -1,3 +1,9 @@
+* 2007-07-04 - martin.kauss@open-xchange.com
+
+ - Fixed bug #7646. An conflict occured while updating n appointment
+   with a resource if the endtime adjoins to another appointment start time and
+   the same resource. This has been fixed.
+
 * 2007-07-04 - thorben.betten@open-xchange.com
 
  - Invoking InternetAddress.toUnicodeString() when composing prefix line on
