@@ -7,6 +7,7 @@
  - Fixed bug #7632 (importer): OutlookCSVImporter uses cp1252 as
    standard encoding now, since this is the default charset on
    most Windows platforms and the default encoding for Outlook.
+ - Bug #7470: Applied Viktor's patch. Now we are one bug further...
 
 * 2007-07-04 - martin.kauss@open-xchange.com
 
