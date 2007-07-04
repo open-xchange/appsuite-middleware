@@ -1,3 +1,9 @@
+* 2007-07-04 - thorben.betten@open-xchange.com
+
+ - Invoking InternetAddress.toUnicodeString() when composing prefix line on
+   message reply to get the decoded representation.
+ - Bugfix #8280: Linebreak is performed after the whitespace character
+
 * 2007-07-04 - francisco.laguna@open-xchange.com
 
  - Fixed Bug #7870: Applied patch that corrects the HTTP status 
