@@ -252,7 +252,10 @@ public class AbstractCSVContactTest {
 			return;
 		}
 		OXFolderManager oxfa = new OXFolderManagerImpl(sessObj);
-		oxfa.deleteFolder(new FolderObject(fuid), true, System.currentTimeMillis());
+		FolderObject fo = new FolderObject(fuid);
+		if(fo.exists(sessObj.getContext())){
+			oxfa.deleteFolder(fo, true, System.currentTimeMillis());
+		}
 	}
 
 	public static String readStreamAsString(InputStream is) throws IOException {
