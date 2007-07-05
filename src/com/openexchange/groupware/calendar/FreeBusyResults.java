@@ -83,7 +83,7 @@ public class FreeBusyResults implements SearchIterator {
     private final Connection con;
     private final Context c;
     private int uid;
-    private int seq;
+    private int seq = -1;
     private int sa;
     private int ft;
     private int oid;
@@ -165,7 +165,7 @@ public class FreeBusyResults implements SearchIterator {
     
     public final Object mynext() throws SearchIteratorException, OXException {
         CalendarDataObject cdao = null;
-        if (seq > 0) {
+        if (seq >= 0 && rrs != null) {
             final RecurringResult rr = rrs.getRecurringResult(seq);
             return recurringDAO(rr);
         }
@@ -261,7 +261,7 @@ public class FreeBusyResults implements SearchIterator {
     }
     
     public final boolean myhasNext() {
-        if (seq > 0) {
+        if (seq >= 0) {
             return true;
         }
         return has_next;
