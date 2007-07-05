@@ -14,6 +14,11 @@
    even if the requested user or resource has appointments in
    the given timeframe. This is not a bug but a feature.
 
+ - Fixed bug #8290. A multi span whole day account was 
+   sometimes shown wrong in the mini calendar. This 
+   could happen if the start of the appointment is before
+   the start of the mini calendar. This has been fixed.
+
 * 2007-07-04 - marcus.klein@open-xchange.com
 
   - Added module configuration to the GUI configuration interface.
