@@ -49,12 +49,14 @@
 
 package com.openexchange.groupware.importexport;
 
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.List;
 
 import junit.framework.JUnit4TestAdapter;
@@ -255,23 +257,41 @@ public class ICalImportTest extends AbstractContactTest {
 //		assertTrue("One user is the user doing the import", participants[0].getIdentifier() == userId || participants[1].getIdentifier() == userId );
 //		
 //	}
-//	/*
-//	 * Imported appointment loses reminder
-//	 */
-//	@Test public void test7473() throws DBPoolingException, SQLException, UnsupportedEncodingException, OXObjectNotFoundException, OXException{
-//		folderId = createTestFolder(FolderObject.CALENDAR, sessObj, "ical7473Folder");
-//		String ical =  "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Apple Computer\\, Inc//iCal 2.0//EN\nBEGIN:VEVENT\nCLASS:PRIVATE\nDTSTART:20070614T150000Z\nDTEND:20070614T163000Z\nLOCATION:Olpe\nSUMMARY:Simple iCal Appointment\nDESCRIPTION:Notes here...\nBEGIN:VALARM\nTRIGGER:-PT180M\nACTION:DISPLAY\nDESCRIPTION:Reminder\nEND:VALARM\nEND:VEVENT\nEND:VCALENDAR";
-//		assertTrue("Can import?" ,  imp.canImport(sessObj, format, folders, null));
-//		List<ImportResult> results = imp.importData(sessObj, format, new ByteArrayInputStream(ical.getBytes("UTF-8")), folders, null);
-//		assertEquals("One import?" , 1 , results.size());
-//		ImportResult res = results.get(0);
-//		assertEquals("Shouldn't have error" , null, res.getException());
-//		
-//		final AppointmentSQLInterface appointmentSql = new CalendarSql(sessObj);
-//		final AppointmentObject appointmentObj = appointmentSql.getObjectById(Integer.parseInt( res.getObjectId() ), folderId);
-//		assertTrue("Has alarm" , appointmentObj.containsAlarm());
-//	}
-//	
+	/*
+	 * Imported appointment loses reminder
+	 */
+	@Test public void test7473() throws DBPoolingException, SQLException, UnsupportedEncodingException, OXObjectNotFoundException, OXException{
+		folderId = createTestFolder(FolderObject.CALENDAR, sessObj, "ical7473Folder");
+		int alarm = 180;
+		String ical =  
+			"BEGIN:VCALENDAR\n" +
+			"VERSION:2.0\n" +
+			"PRODID:-//Apple Computer\\, Inc//iCal 2.0//EN\n" +
+			"BEGIN:VEVENT\n" +
+			"CLASS:PRIVATE\n" +
+			"DTSTART:20070614T150000Z\n" +
+			"DTEND:20070614T163000Z\n" +
+			"LOCATION:Olpe\n" +
+			"SUMMARY:Simple iCal Appointment\n" +
+			"DESCRIPTION:Notes here...\n" +
+			"BEGIN:VALARM\nTRIGGER:-PT"+alarm+"M\n" +
+			"ACTION:DISPLAY\n" +
+			"DESCRIPTION:Reminder\n" +
+			"END:VALARM\nEND:VEVENT\n" +
+			"END:VCALENDAR";
+		List <String> folders = Arrays.asList( Integer.toString(folderId) );
+		assertTrue("Can import?" ,  imp.canImport(sessObj, format, folders, null));
+		List<ImportResult> results = imp.importData(sessObj, format, new ByteArrayInputStream(ical.getBytes("UTF-8")), folders, null);
+		assertEquals("One import?" , 1 , results.size());
+		ImportResult res = results.get(0);
+		assertEquals("Shouldn't have error" , null, res.getException());
+		
+		final AppointmentSQLInterface appointmentSql = new CalendarSql(sessObj);
+		final AppointmentObject appointmentObj = appointmentSql.getObjectById(Integer.parseInt( res.getObjectId() ), folderId);
+		assertTrue("Has alarm" , appointmentObj.containsAlarm());
+		assertEquals("Alarm is "+alarm+" minutes earlier" , alarm , appointmentObj.getAlarm());
+	}
+	
 //	@Test public void test7474() throws DBPoolingException, SQLException{
 //		folderId = createTestFolder(FolderObject.CALENDAR, sessObj, "ical6825Folder");
 //		fail("TODO");
