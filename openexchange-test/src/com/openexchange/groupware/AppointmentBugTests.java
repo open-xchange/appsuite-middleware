@@ -2029,4 +2029,59 @@ public class AppointmentBugTests extends TestCase {
                 
     }
     
+    
+    /*
+     Steps to reproduce:
+     1. Go to the Calendar module
+     2. Click 'View' -> 'Calendar' in the panel
+     3. Click 'Time range' -> 'Month' in the panel
+     4. Navigate to the month 06-2007
+     5. Double LMB on the calendar cell for 2007-06-01
+     6. Enter a "3x mondays" as subject for the new appointment
+     7. LMB the 'Series' button
+     8. Click the 'Weekly' radio button
+     9. Check the checkbox next to 'Monday'
+     10. Click the 'after _ appointments' radio buttons and change the value to "3"
+     11. Save the appointment
+     12. Verify the appoinmtent in the calendar
+
+     Expected Results:
+     - Step 12: The appointment occurs on 2007-06-04, 2007-06-11 and 2007-06-18
+
+     Result was:
+     - Step 12: The appointment occurs on 2007-06-04 and 2007-06-11 (the last
+     occurence is missing)
+    */
+    public void testBug7134() throws Throwable {         
+        deleteAllAppointments();
+        
+        Context context = new ContextImpl(contextid);
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
+        
+        int fid = CalendarTest.getCalendarDefaultFolderForUser(userid, context);
+        
+        long starttime = 1180692000000L; // 01.06.2007 12:00
+        long endtime = 1180695600000L; //  01.06.2007 13:00 
+        
+        CalendarDataObject cdao = new CalendarDataObject();
+        cdao.setContext(context);
+        cdao.setTimezone(TIMEZONE);
+        cdao.setParentFolderID(fid);
+        cdao.setStartDate(new Date(starttime));
+        cdao.setEndDate(new Date(endtime));
+        cdao.setFullTime(true);
+        cdao.setTitle("testBug7134");
+        cdao.setIgnoreConflicts(true);
+        cdao.setRecurrenceType(CalendarDataObject.WEEKLY);
+        cdao.setInterval(1);
+        cdao.setDays(AppointmentObject.MONDAY);
+        cdao.setOccurrence(3);
+        
+        CalendarRecurringCollection.fillDAO(cdao);
+        RecurringResults rrs = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 0);
+        assertEquals("Check that we got 3 results", 3, rrs.size());
+
+                
+    }
+    
 }
