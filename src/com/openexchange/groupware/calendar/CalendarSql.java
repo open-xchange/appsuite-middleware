@@ -931,6 +931,9 @@ public class CalendarSql implements AppointmentSQLInterface {
             ResultSet rs = null;
             boolean close_connection = true;
             try {
+                if (!sessionobject.getUserConfiguration().hasFreeBusy()) {
+                    return new CalendarOperation();
+                }
                 readcon = DBPool.pickup(sessionobject.getContext());
                 switch(type) {
                     case Participant.USER:
