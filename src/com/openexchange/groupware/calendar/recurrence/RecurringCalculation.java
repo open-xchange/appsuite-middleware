@@ -405,6 +405,15 @@ public class RecurringCalculation {
         final int r[] = new int[c];
         System.arraycopy(days, 0, r, 0, c);
         Arrays.sort(r);
+        if (contains_occurrence) {
+            // find highes value and compare if sst.getDayOfWeek >= highest value. If not, we need to change e !!!
+            int hi = r[c-1];
+            calc.setTimeInMillis(sst);
+            int sd = calc.get(Calendar.DAY_OF_WEEK);
+            if (hi < sd) {
+                e = (e+(CalendarRecurringCollection.MILLI_DAY*(sd-hi)));
+            }
+        }        
         loop: while (sr <= e) {
             for (int a = 0; a < c; a++) {
                 calc.setTimeInMillis(s);
