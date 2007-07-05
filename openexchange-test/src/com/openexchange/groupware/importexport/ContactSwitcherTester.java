@@ -61,6 +61,7 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.ContactGetter;
 import com.openexchange.groupware.contact.helpers.ContactSetter;
 import com.openexchange.groupware.contact.helpers.ContactSwitcher;
+import com.openexchange.groupware.contact.helpers.ContactSwitcherForBooleans;
 import com.openexchange.groupware.contact.helpers.ContactSwitcherForSimpleDateFormat;
 import com.openexchange.groupware.contact.helpers.ContactSwitcherForTimestamp;
 import com.openexchange.groupware.container.ContactObject;
@@ -187,5 +188,56 @@ public class ContactSwitcherTester extends TestCase {
 		value = "05.03.1981";
 		conObj = (ContactObject) field.doSwitch(switcher, conObj, value);
 		assertEquals("Setting of date via Outlook-simple-date value does work" , conObj.getBirthday(), OutlookCSVContactImporter.getGermanDateNotation().parse(value));
+	}
+	
+	public void testBooleanSwitchingForBug7710() throws ContactException{
+		//preparations
+		ContactObject conObj = new ContactObject();
+		ContactField field = ContactField.PRIVATE_FLAG;
+
+		//setting up a proper setter for SimpleDateFormat
+		final ContactSwitcherForBooleans switcher = new ContactSwitcherForBooleans();
+		switcher.setDelegate(new ContactSetter());
+
+		//setting
+		String value = "true";
+		conObj = (ContactObject) field.doSwitch(switcher, conObj, value);
+		assertEquals("Setting private flag via "+value+" does work" , true, conObj.getPrivateFlag());
+		
+		value = "1";
+		conObj = (ContactObject) field.doSwitch(switcher, conObj, value);
+		assertEquals("Setting private flag via "+value+" does work" , true, conObj.getPrivateFlag());
+		
+		value = "yes";
+		conObj = (ContactObject) field.doSwitch(switcher, conObj, value);
+		assertEquals("Setting private flag via "+value+" does work" , true, conObj.getPrivateFlag());
+		
+		value = "y";
+		conObj = (ContactObject) field.doSwitch(switcher, conObj, value);
+		assertEquals("Setting private flag via "+value+" does work" , true, conObj.getPrivateFlag());
+		
+		value = "no";
+		conObj = (ContactObject) field.doSwitch(switcher, conObj, value);
+		assertEquals("Setting private flag via "+value+" does work" , false, conObj.getPrivateFlag());
+		
+		value = "false";
+		conObj = (ContactObject) field.doSwitch(switcher, conObj, value);
+		assertEquals("Setting private flag via "+value+" does work" , false, conObj.getPrivateFlag());
+		
+		value = "wrong";
+		conObj = (ContactObject) field.doSwitch(switcher, conObj, value);
+		assertEquals("Setting private flag via "+value+" does work" , false, conObj.getPrivateFlag());
+		
+		value = "0";
+		conObj = (ContactObject) field.doSwitch(switcher, conObj, value);
+		assertEquals("Setting private flag via "+value+" does work" , false, conObj.getPrivateFlag());
+		
+		Object value2 = 0;
+		conObj = (ContactObject) field.doSwitch(switcher, conObj, value2);
+		assertEquals("Setting private flag via "+value2+" does work" , false, conObj.getPrivateFlag());
+		
+		value2 = 1;
+		conObj = (ContactObject) field.doSwitch(switcher, conObj, value2);
+		assertEquals("Setting private flag via "+value2+" does work" , true, conObj.getPrivateFlag());
 	}
 }
