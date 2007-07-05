@@ -1,6 +1,6 @@
 
 CREATE TABLE prg_dates (
-	creating_date timestamp,
+	creating_date timestamp DEFAULT CURRENT_TIMESTAMP,
 	created_from text,
 	changing_date timestamp,
 	changed_from text,
@@ -59,7 +59,7 @@ CREATE TABLE del_date_rights (
 );
 
 CREATE TABLE del_dates (
-	creating_date timestamp,
+	creating_date timestamp DEFAULT CURRENT_TIMESTAMP,
 	created_from text,
 	changing_date timestamp,
 	changed_from text,
