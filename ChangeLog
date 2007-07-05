@@ -11,6 +11,7 @@
  
 * 2007-07-05 - thorben.betten@open-xchange.com
 
+ - Fixed folder handling on closure
  - Bugfix #8304: Displaying broken TNEF attachments at least as normal
    attachment
  - Fixed exception message formatting for folder exceptions

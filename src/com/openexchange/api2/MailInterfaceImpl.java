@@ -2175,6 +2175,7 @@ public class MailInterfaceImpl implements MailInterface {
 					}
 					imapCon.getImapFolder().close(false);
 					mailInterfaceMonitor.changeNumActive(false);
+					imapCon.resetImapFolder();
 				}
 				imapCon.setImapFolder((IMAPFolder) (folder == null ? imapCon.getIMAPStore().getFolder(STR_INBOX)
 						: imapCon.getIMAPStore().getFolder(folder)));
@@ -2263,6 +2264,7 @@ public class MailInterfaceImpl implements MailInterface {
 				if (imapCon.getImapFolder().isOpen()) {
 					imapCon.getImapFolder().close(false);
 					mailInterfaceMonitor.changeNumActive(false);
+					imapCon.resetImapFolder();
 				}
 				imapCon.setImapFolder((IMAPFolder) (folder == null ? imapCon.getIMAPStore().getFolder(STR_INBOX)
 						: imapCon.getIMAPStore().getFolder(folder)));
@@ -2785,7 +2787,7 @@ public class MailInterfaceImpl implements MailInterface {
 				}
 				imapCon.getImapFolder().close(false);
 				mailInterfaceMonitor.changeNumActive(false);
-				imapCon.resetHoldsMessages();
+				imapCon.resetImapFolder();
 			}
 			if (isIdenticalFolder) {
 				if (mode == Folder.READ_WRITE
@@ -2850,7 +2852,7 @@ public class MailInterfaceImpl implements MailInterface {
 			if (tmpFolder.isOpen()) {
 				tmpFolder.close(false);
 				mailInterfaceMonitor.changeNumActive(false);
-				// tmpRights = null;
+				tmpFolder = null;
 			}
 			if (isIdenticalFolder) {
 				if (mode == Folder.READ_WRITE
@@ -3817,6 +3819,7 @@ public class MailInterfaceImpl implements MailInterface {
 							 * Force folder cache update through a close
 							 */
 							imapCon.getImapFolder().close(false);
+							imapCon.resetImapFolder();
 						} catch (final ProtocolException e) {
 							throw new OXMailException(MailCode.MOVE_PARTIALLY_COMPLETED, e,
 									com.openexchange.tools.oxfolder.OXFolderManagerImpl.getUserName(sessionObj), Arrays
@@ -4257,6 +4260,7 @@ public class MailInterfaceImpl implements MailInterface {
 					 * Close folder to force internal message cache update
 					 */
 					imapCon.getImapFolder().close(false);
+					imapCon.resetImapFolder();
 				} catch (final ProtocolException e) {
 					throw new MessagingException(e.getMessage(), e);
 				}
@@ -4306,6 +4310,7 @@ public class MailInterfaceImpl implements MailInterface {
 						 * Force folder cache update through a close
 						 */
 						imapCon.getImapFolder().close(false);
+						imapCon.resetImapFolder();
 					} catch (final ProtocolException e) {
 						throw new OXMailException(MailCode.MOVE_PARTIALLY_COMPLETED, e,
 								com.openexchange.tools.oxfolder.OXFolderManagerImpl.getUserName(sessionObj), Arrays
@@ -4432,6 +4437,7 @@ public class MailInterfaceImpl implements MailInterface {
 					 * update
 					 */
 					imapCon.getImapFolder().close(false);
+					imapCon.resetImapFolder();
 				}
 			} catch (final ProtocolException e1) {
 				throw new MessagingException(e1.getMessage(), e1);
