@@ -89,7 +89,7 @@ import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  *
  */
-public class AbstractCSVContactTest {
+public class AbstractContactTest {
 	protected static final int[] POSSIBLE_FIELDS = {
 			DataObject.OBJECT_ID,
 			DataObject.CREATED_BY,
@@ -288,7 +288,7 @@ public class AbstractCSVContactTest {
 		deleteTestFolder(folderId);
 	}
 
-	public AbstractCSVContactTest() {
+	public AbstractContactTest() {
 		super();
 	}
 

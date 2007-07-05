@@ -74,7 +74,7 @@ import com.openexchange.groupware.importexport.exporters.CSVContactExporter;
 import com.openexchange.groupware.importexport.importers.CSVContactImporter;
 
 
-public class CSVContactExportTest extends AbstractCSVContactTest {
+public class CSVContactExportTest extends AbstractContactTest {
 
 	public static Exporter exp = new CSVContactExporter();
 	public static String TEST1_RESULT = 

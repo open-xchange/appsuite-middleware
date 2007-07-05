@@ -73,7 +73,7 @@ import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.groupware.importexport.importers.OutlookCSVContactImporter;
 
-public class OutlookCSVContactImportTest extends AbstractCSVContactTest{
+public class OutlookCSVContactImportTest extends AbstractContactTest{
 	public String IMPORT_HEADERS = ContactField.GIVEN_NAME.getEnglishOutlookName()+","+ContactField.EMAIL1.getEnglishOutlookName()+","+ContactField.BIRTHDAY.getEnglishOutlookName()+"\n";
 	public String IMPORT_ONE = IMPORT_HEADERS + NAME1+", "+EMAIL1+", "+DATE1;
 	public static String DATE1 = "4/1/1981";

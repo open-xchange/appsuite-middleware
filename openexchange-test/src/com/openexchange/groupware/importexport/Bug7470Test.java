@@ -80,7 +80,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.sessiond.SessionObjectWrapper;
 
-public class Bug7470Test extends AbstractCSVContactTest {
+public class Bug7470Test extends AbstractContactTest {
 	public final Format format = Format.ICAL;
 	
 	//workaround for JUnit 3 runner

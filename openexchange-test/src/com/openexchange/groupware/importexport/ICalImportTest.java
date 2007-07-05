@@ -87,7 +87,7 @@ import com.openexchange.server.DBPoolingException;
 import com.openexchange.sessiond.SessionObjectWrapper;
 
 
-public class ICalImportTest extends AbstractCSVContactTest {
+public class ICalImportTest extends AbstractContactTest {
 	public final Format format = Format.ICAL;
 	
 	//workaround for JUnit 3 runner

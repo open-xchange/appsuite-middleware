@@ -78,7 +78,7 @@ import com.openexchange.groupware.importexport.importers.CSVContactImporter;
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  *
  */
-public class CSVContactImportTest extends AbstractCSVContactTest {
+public class CSVContactImportTest extends AbstractContactTest {
 	public String IMPORT_HEADERS = ContactField.GIVEN_NAME.getReadableName()+","+ContactField.EMAIL1.getReadableName()+"\n";
 	public String IMPORT_ONE = IMPORT_HEADERS +NAME1+", "+EMAIL1;
 	public String IMPORT_MULTIPLE = IMPORT_ONE + "\n"+NAME2+", "+EMAIL2+"\n";

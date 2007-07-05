@@ -83,7 +83,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.sessiond.SessionObjectWrapper;
 
-public class VCardImportTest extends AbstractCSVContactTest {
+public class VCardImportTest extends AbstractContactTest {
 	public final Format format = Format.VCARD;
 
 	@SuppressWarnings("hiding")	public final Importer imp = new VCardImporter();
