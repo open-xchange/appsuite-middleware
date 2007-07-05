@@ -76,23 +76,19 @@ msgid "My Infostore Folder"
 msgstr ""
 
 #: com/openexchange/groupware/i18n/FolderStrings.java:92
-msgid "All Groups and Users"
-msgstr ""
-
-#: com/openexchange/groupware/i18n/FolderStrings.java:94
 msgid "Tasks"
 msgstr ""
 
-#: com/openexchange/groupware/i18n/FolderStrings.java:96
+#: com/openexchange/groupware/i18n/FolderStrings.java:94
 msgid "Calendar"
 msgstr ""
 
-#: com/openexchange/groupware/i18n/FolderStrings.java:98
+#: com/openexchange/groupware/i18n/FolderStrings.java:96
 msgid "Contacts"
 msgstr ""
 
 #: com/openexchange/groupware/i18n/Groups.java:68
-msgid "All groups and users"
+msgid "All internal users"
 msgstr ""
 
 #: com/openexchange/groupware/i18n/MailStrings.java:62
