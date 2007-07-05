@@ -136,6 +136,14 @@ public class IMAPProperties {
 
 	private static boolean spamEnabled;
 
+	private static boolean watcherEnabled;
+	
+	private static boolean watcherShallClose;
+
+	private static int watcherFrequency;
+
+	private static int watcherTime;
+
 	private static IMAPPropertiesFactory.IMAPCredSrc imapCredSrc;
 
 	private static IMAPPropertiesFactory.IMAPLoginType imapLoginType;
@@ -608,6 +616,58 @@ public class IMAPProperties {
 
 	public static void setSpamEnabled(final boolean spamEnabled) {
 		IMAPProperties.spamEnabled = spamEnabled;
+	}
+
+	public static boolean isWatcherEnabled() throws IMAPException {
+		checkGlobalImapProperties();
+		return watcherEnabled;
+	}
+
+	static boolean isWatcherEnabledInternal() {
+		return watcherEnabled;
+	}
+
+	public static void setWatcherEnabled(final boolean watcherEnabled) {
+		IMAPProperties.watcherEnabled = watcherEnabled;
+	}
+
+	public static boolean isWatcherShallClose() throws IMAPException {
+		checkGlobalImapProperties();
+		return watcherShallClose;
+	}
+
+	static boolean isWatcherShallCloseInternal() {
+		return watcherShallClose;
+	}
+
+	public static void setWatcherShallClose(final boolean watcherShallClose) {
+		IMAPProperties.watcherShallClose = watcherShallClose;
+	}
+
+	public static int getWatcherTime() throws IMAPException {
+		checkGlobalImapProperties();
+		return watcherTime;
+	}
+
+	static int getWatcherTimeInternal() {
+		return watcherTime;
+	}
+
+	public static void setWatcherTime(final int watcherTime) {
+		IMAPProperties.watcherTime = watcherTime;
+	}
+
+	public static int getWatcherFrequency() throws IMAPException {
+		checkGlobalImapProperties();
+		return watcherFrequency;
+	}
+
+	static int getWatcherFrequencyInternal() {
+		return watcherFrequency;
+	}
+
+	public static void setWatcherFrequency(final int watcherFrequency) {
+		IMAPProperties.watcherFrequency = watcherFrequency;
 	}
 
 	public static IMAPPropertiesFactory.IMAPCredSrc getImapCredSrc() throws IMAPException {

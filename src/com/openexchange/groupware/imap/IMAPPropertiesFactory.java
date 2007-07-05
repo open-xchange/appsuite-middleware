@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.groupware.imap;
 
 import java.io.File;
@@ -78,31 +76,31 @@ import com.openexchange.sessiond.SessionObject;
  * 
  */
 public class IMAPPropertiesFactory {
-	
+
 	public static enum IMAPCredSrc {
 		SESSION("session"), USER_IMAPLOGIN("user.imapLogin"), OTHER("other");
-		
+
 		private final String str;
-		
+
 		private IMAPCredSrc(final String str) {
 			this.str = str;
 		}
-		
+
 		@Override
 		public String toString() {
 			return str;
 		}
 	}
-	
+
 	public static enum IMAPLoginType {
 		GLOBAL("global"), USER("user"), ANONYMOUS("anonymous");
-		
+
 		private final String str;
-		
+
 		private IMAPLoginType(final String str) {
 			this.str = str;
 		}
-		
+
 		@Override
 		public String toString() {
 			return str;
@@ -110,13 +108,13 @@ public class IMAPPropertiesFactory {
 	}
 
 	private static Properties props;
-	
+
 	private static Properties javaMailProps;
 
 	private static final Lock PROP_LOCK = new ReentrantLock();
 
 	private static final String PROPERTYNAME_IMAP = "IMAPPROPERTIES";
-	
+
 	private static final String PROPERTYNAME_JAVAMAIL = "JAVAMAILPROPERTIES";
 
 	private static String PROP_FILE;
@@ -130,15 +128,15 @@ public class IMAPPropertiesFactory {
 	private static final String PROP_IMAPSERVER = "imapServer";
 
 	private static final String PROP_SMTPSERVER = "smtpServer";
-	
+
 	private static final String PROP_SMTPLOCALHOST = "smtpLocalhost";
-	
+
 	private static final String PROP_IMAPS_ENABLED = "imaps";
-	
+
 	private static final String PROP_IMAPS_PORT = "imapsPort";
-	
+
 	private static final String PROP_SMTPS_ENABLED = "smtps";
-	
+
 	private static final String PROP_SMTPS_PORT = "smtpsPort";
 
 	private static final String PROP_IMAPSORT = "imapSort";
@@ -152,32 +150,40 @@ public class IMAPPropertiesFactory {
 	private static final String PROP_IMAP_QUOTE_LINE_COLORS = "imapQuoteLineColors";
 
 	private static final String PROP_IMAP_SUPPORTS_ACL = "imapSupportsACL";
-	
+
 	private static final String PROP_IMAP_AUTH_ENC = "imapAuthEnc";
 
 	private static final String PROP_IMAP_PART_MODIFIER = "partModifierImpl";
 
 	private static final String PROP_IMAP_SMTP_AUTH = "smtpAuthentication";
-	
+
 	private static final String PROP_IMAP_TIMEOUT = "imapTimeout";
 
 	private static final String PROP_IMAP_CONNECTION_TIMEOUT = "imapConnectionTimeout";
 
 	private static final String PROP_IMAP_USER_FLAGS_ENABLED = "userFlagsEnabled";
-	
+
 	private static final String PROP_MAX_IMAP_CON_IDLE_TIME = "maxIMAPConnectionIdleTime";
-	
+
 	private static final String PROP_MAX_NUM_OF_IMAP_CONS = "imapMaxNumOfConnections";
-	
+
 	private static final String PROP_ALLOW_NESTED_DEFAULT_FOLDERS = "allowNestedDefaultFolderOnAltNamespace";
-	
+
 	private static final String PROP_MIME_CHARSET = "mail.mime.charset";
-	
+
 	private static final String PROP_IGNORE_SUBSCRIPTION = "ignoreSubscription";
-	
+
 	private static final String PROP_SET_SMTP_ENVELOPE_FROM = "setSMTPEnvelopeFrom";
-	
+
 	private static final String PROP_SPAM_ENABLED = "spamEnabled";
+
+	private static final String PROP_WATCHER_ENABLED = "watcherEnabled";
+
+	private static final String PROP_WATCHER_TIME = "watcherTime";
+	
+	private static final String PROP_WATCHER_FREQUENCY = "watcherFrequency";
+	
+	private static final String PROP_WATCHER_SHALL_CLOSE = "watcherShallClose";
 
 	private static final String SPELL_CHECK_CONFIG_FILE = SystemConfig.getProperty("SPELLCHECKCFG");
 
@@ -244,11 +250,11 @@ public class IMAPPropertiesFactory {
 					javaMailProps = null;
 				}
 			}
-		} catch (FileNotFoundException e) {
+		} catch (final FileNotFoundException e) {
 			props = null;
 			throw new IMAPException(new StringBuilder(300).append("IMAP properties not found at location: ").append(
 					PROP_FILE).toString(), e);
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			props = null;
 			throw new IMAPException(new StringBuilder(300).append(
 					"I/O error while reading IMAP properties from file \"").append(PROP_FILE).append("\": ").append(
@@ -260,7 +266,7 @@ public class IMAPPropertiesFactory {
 			if (fis != null) {
 				try {
 					fis.close();
-				} catch (IOException e) {
+				} catch (final IOException e) {
 					LOG.error(e.getMessage(), e);
 				}
 				fis = null;
@@ -272,8 +278,7 @@ public class IMAPPropertiesFactory {
 
 	private static final String STR_NOTSETIN = " NOT set in ";
 
-	public static IMAPProperties getImapProperties(final SessionObject sessionObj)
-			throws IMAPException {
+	public static IMAPProperties getImapProperties(final SessionObject sessionObj) throws IMAPException {
 		checkImapPropFile();
 		/*
 		 * Load global IMAP properties if not done, yet
@@ -382,13 +387,13 @@ public class IMAPPropertiesFactory {
 	public static void loadGlobalImapProperties() throws IMAPException {
 		loadGlobalImapProperties(true);
 	}
-	
+
 	private static final String STR_TRUE = "true";
-	
+
 	private static final String STR_FALSE = "false";
-	
+
 	private static final String STR_IMAP = "IMAP";
-	
+
 	private static final Lock GLOBAL_PROP_LOCK = new ReentrantLock();
 
 	/**
@@ -412,16 +417,16 @@ public class IMAPPropertiesFactory {
 
 				IMAPProperties.setImapSearch(STR_IMAP.equalsIgnoreCase(props.getProperty(PROP_IMAPSEARCH)));
 				logBuilder.append("\tIMAP-Search: ").append(IMAPProperties.isImapSearchInternal()).append('\n');
-				
+
 				final String propSmtpLocalhost = props.getProperty(PROP_SMTPLOCALHOST);
 				IMAPProperties.setSmtpLocalhost(propSmtpLocalhost == null || propSmtpLocalhost.length() == 0
 						|| "null".equalsIgnoreCase(propSmtpLocalhost) ? null : propSmtpLocalhost);
 				logBuilder.append("\tSMTP Localhost: ").append(IMAPProperties.getSmtpLocalhostInternal()).append('\n');
-				
+
 				final String loginType = props.getProperty(PROP_LOGINTYPE);
 				if (loginType == null) {
-					throw new IMAPException(new StringBuilder().append(STR_PROPERTY).append(PROP_LOGINTYPE)
-							.append(STR_NOTSETIN).append(PROP_FILE).toString());
+					throw new IMAPException(new StringBuilder().append(STR_PROPERTY).append(PROP_LOGINTYPE).append(
+							STR_NOTSETIN).append(PROP_FILE).toString());
 				}
 				if (IMAPLoginType.GLOBAL.toString().equalsIgnoreCase(loginType)) {
 					IMAPProperties.setImapLoginType(IMAPLoginType.GLOBAL);
@@ -523,16 +528,31 @@ public class IMAPPropertiesFactory {
 						STR_FALSE)));
 				logBuilder.append("\tSet SMTP ENVELOPE-FROM: ").append(IMAPProperties.isSMTPEnvelopeFromInternal())
 						.append('\n');
-				
-				IMAPProperties.setSpamEnabled(Boolean.parseBoolean(props.getProperty(PROP_SPAM_ENABLED,
-						STR_FALSE)));
-				logBuilder.append("\tSpam Enabled: ").append(IMAPProperties.isSpamEnabledInternal())
-						.append('\n');
-				
+
+				IMAPProperties.setSpamEnabled(Boolean.parseBoolean(props.getProperty(PROP_SPAM_ENABLED, STR_FALSE)));
+				logBuilder.append("\tSpam Enabled: ").append(IMAPProperties.isSpamEnabledInternal()).append('\n');
+
 				IMAPProperties.setImapAuthEnc(props.getProperty(PROP_IMAP_AUTH_ENC, "UTF-8"));
 				logBuilder.append("\tAuthentication Encoding: ").append(IMAPProperties.getImapAuthEncInternal())
 						.append('\n');
-				
+
+				IMAPProperties.setWatcherEnabled(STR_TRUE.equalsIgnoreCase(props.getProperty(PROP_WATCHER_ENABLED,
+						STR_FALSE).trim()));
+				logBuilder.append("\tWatcher Enabled: ").append(IMAPProperties.isWatcherEnabledInternal()).append('\n');
+
+				IMAPProperties.setWatcherTime(Integer.parseInt(props.getProperty(PROP_WATCHER_TIME, "60000").trim()));
+				logBuilder.append("\tWatcher Time: ").append(IMAPProperties.getWatcherTimeInternal()).append('\n');
+
+				IMAPProperties.setWatcherFrequency(Integer.parseInt(props.getProperty(PROP_WATCHER_FREQUENCY, "10000")
+						.trim()));
+				logBuilder.append("\tWatcher Frequency: ").append(IMAPProperties.getWatcherFrequencyInternal()).append(
+						'\n');
+
+				IMAPProperties.setWatcherShallClose(STR_TRUE.equalsIgnoreCase(props.getProperty(
+						PROP_WATCHER_SHALL_CLOSE, STR_FALSE).trim()));
+				logBuilder.append("\tWatcher Shall Close: ").append(IMAPProperties.isWatcherShallCloseInternal())
+						.append('\n');
+
 				IMAPProperties.setJavaMailProperties(javaMailProps);
 				logBuilder.append("\tJavaMail Properties loaded: ").append(
 						IMAPProperties.getJavaMailPropertiesInternal() != null).append('\n');
@@ -540,7 +560,7 @@ public class IMAPPropertiesFactory {
 				try {
 					IMAPProperties.setPartModifierImpl(PartModifier.getImpl(props.getProperty(PROP_IMAP_PART_MODIFIER,
 							"com.openexchange.groupware.imap.DummyPartModifier")));
-				} catch (OXException e) {
+				} catch (final OXException e) {
 					LOG.error(e.getMessage(), e);
 					IMAPProperties.setPartModifierImpl(new DummyPartModifier());
 				}
@@ -561,7 +581,7 @@ public class IMAPPropertiesFactory {
 					IMAPProperties.setSpellCheckConfig(new SpellCheckConfigParser()
 							.parseSpellCheckConfig(SPELL_CHECK_CONFIG_FILE));
 					logBuilder.append("\tSpellCheck Config File: ").append(SPELL_CHECK_CONFIG_FILE).append('\n');
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					LOG.error("SpellCheck config file \"" + SPELL_CHECK_CONFIG_FILE
 							+ "\" could not be properly loaded & parsed:\n" + e.getMessage(), e);
 				}

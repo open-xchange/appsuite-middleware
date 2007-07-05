@@ -115,6 +115,8 @@ public abstract class UserConfigurationStorage {
 	private static Class<? extends UserConfigurationStorage> implementingClass;
 
 	private static UserConfigurationStorage singleton;
+	
+	private static boolean initialized;
 
 	/**
 	 * Default constructor
@@ -165,20 +167,23 @@ public abstract class UserConfigurationStorage {
 	 *             if instanciation fails.
 	 */
 	public static UserConfigurationStorage getInstance() throws UserConfigurationException {
-		INIT_LOCK.lock();
-		try {
-			if (singleton == null) {
-				try {
-					init();
-					singleton = implementingClass.newInstance();
-				} catch (final InstantiationException e) {
-					throw new UserConfigurationException(UserConfigurationCode.INSTANCIATION_FAILED, e);
-				} catch (final IllegalAccessException e) {
-					throw new UserConfigurationException(UserConfigurationCode.INSTANCIATION_FAILED, e);
+		if (!initialized) {
+			INIT_LOCK.lock();
+			try {
+				if (singleton == null) {
+					try {
+						init();
+						singleton = implementingClass.newInstance();
+						initialized = true;
+					} catch (final InstantiationException e) {
+						throw new UserConfigurationException(UserConfigurationCode.INSTANCIATION_FAILED, e);
+					} catch (final IllegalAccessException e) {
+						throw new UserConfigurationException(UserConfigurationCode.INSTANCIATION_FAILED, e);
+					}
 				}
+			} finally {
+				INIT_LOCK.unlock();
 			}
-		} finally {
-			INIT_LOCK.unlock();
 		}
 		return singleton;
 	}

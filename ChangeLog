@@ -1,3 +1,20 @@
+* 2007-07-05 - thorben.betten@open-xchange.com
+
+ - Added a watcher for established IMAP connections which keeps track of
+   usage times and logs current state and using thread's stack trace.
+   Moreover the watcher can be configured to close those IMAP connections
+   which exceed the max. usage time.
+   The watch is configured via property file 'imap.properties'
+#################### ATTENTION ! #####################
+ - CONFIG change: New properties in 'imap.properties' to configure
+   watcher for IMAP connections:
+   "watcherEnabled" to enable/disable watcher
+   "watcherFrequency" to define watcher's frequency in milliseconds
+   "watcherTime" to define the exceeding time
+   "watcherShallClose" if watch is allowed to force closure of exceeded
+   IMAP connections
+#####################################################
+
 * 2007-07-05 - marcus.klein@open-xchange.com
 
   - Bugfix #7317: IMAPS now works with JavaMail 1.4.

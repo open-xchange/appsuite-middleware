@@ -71,9 +71,10 @@ import com.sun.mail.imap.IMAPStore;
  * the current APIs.
  * 
  * @author <a href="mailto:stefan.preuss@open-xchange.com">Stefan Preuss</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * 
  */
-
-public class DefaultIMAPConnection implements IMAPConnection, Serializable {
+public final class DefaultIMAPConnection implements IMAPConnection, Serializable {
 
 	private static final long serialVersionUID = 6925486716045103344L;
 
@@ -88,15 +89,15 @@ public class DefaultIMAPConnection implements IMAPConnection, Serializable {
 
 	private final transient static Lock COUNTER_LOCK = new ReentrantLock();
 
-	private String imapServer = "localhost";
+	private String imapServer;
 
-	private int imapPort = 143;
+	private int imapPort;
 
 	private String imapUsername;
 
 	private String imapPassword;
 
-	private Properties imapProperties = (Properties) System.getProperties().clone();
+	private Properties imapProperties;
 
 	private transient Session imapSession;
 
@@ -110,10 +111,42 @@ public class DefaultIMAPConnection implements IMAPConnection, Serializable {
 
 	private boolean connected;
 
+	private boolean decrement;
+
+	private StackTraceElement[] trace;
+
+	private Thread usingThread;
+
 	public DefaultIMAPConnection() {
 		super();
+		imapServer = "localhost";
+		imapPort = 143;
+		imapProperties = (Properties) System.getProperties().clone();
 	}
 
+	private void reset() {
+		imapServer = null;
+		imapPort = 0;
+		imapUsername = null;
+		imapPassword = null;
+		imapProperties = null;
+		imapSession = null;
+		imapStore = null;
+		expunge = false;
+		imapFolder = null;
+		holdsMessages = -1;
+		connected = false;
+		decrement = false;
+		trace = null;
+		usingThread = null;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.groupware.imap.IMAPConnection#setImapServer(java.lang.String,
+	 *      int)
+	 */
 	public void setImapServer(final String imapServer, final int imapPort) {
 		this.imapServer = imapServer;
 		this.imapPort = imapPort;
@@ -123,14 +156,29 @@ public class DefaultIMAPConnection implements IMAPConnection, Serializable {
 		 */
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.groupware.imap.IMAPConnection#setUsername(java.lang.String)
+	 */
 	public void setUsername(final String imapUsername) {
 		this.imapUsername = imapUsername;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.groupware.imap.IMAPConnection#setPassword(java.lang.String)
+	 */
 	public void setPassword(final String imapPassword) {
 		this.imapPassword = imapPassword;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.groupware.imap.IMAPConnection#setProperties(java.util.Properties)
+	 */
 	public void setProperties(final Properties imapProperties) {
 		this.imapProperties = imapProperties;
 	}
@@ -150,6 +198,8 @@ public class DefaultIMAPConnection implements IMAPConnection, Serializable {
 	public void connect() throws javax.mail.NoSuchProviderException, javax.mail.MessagingException {
 		if (imapStore != null && imapStore.isConnected()) {
 			connected = true;
+			usingThread = Thread.currentThread();
+			trace = usingThread.getStackTrace();
 			return;
 		}
 		try {
@@ -159,7 +209,7 @@ public class DefaultIMAPConnection implements IMAPConnection, Serializable {
 				 */
 				Security.setProperty(STR_SECURITY_PROVIDER, STR_SECURITY_FACTORY);
 			}
-		} catch (IMAPException e1) {
+		} catch (final IMAPException e1) {
 			throw new MessagingException(e1.getMessage(), e1);
 		}
 		if (imapSession == null) {
@@ -180,22 +230,32 @@ public class DefaultIMAPConnection implements IMAPConnection, Serializable {
 		if (imapPassword != null) {
 			try {
 				tmpPass = new String(imapPassword.getBytes(IMAPProperties.getImapAuthEnc()), CHARENC_ISO8859);
-			} catch (UnsupportedEncodingException e) {
+			} catch (final UnsupportedEncodingException e) {
 				LOG.error(e.getMessage(), e);
-			} catch (IMAPException e) {
+			} catch (final IMAPException e) {
 				LOG.error(e.getMessage(), e);
 			}
 		}
 		imapStore.connect(imapServer, imapPort, imapUsername, tmpPass);
+		connected = true;
+		/*
+		 * Increase counter
+		 */
 		MailInterfaceImpl.mailInterfaceMonitor.changeNumActive(true);
 		MonitoringInfo.incrementNumberOfConnections(MonitoringInfo.IMAP);
-		connected = true;
 		COUNTER_LOCK.lock();
 		try {
 			counter++;
 		} finally {
 			COUNTER_LOCK.unlock();
 		}
+		/*
+		 * Remember to decrement
+		 */
+		decrement = true;
+		usingThread = Thread.currentThread();
+		trace = usingThread.getStackTrace();
+		IMAPConnectionWatcher.addIMAPConnection(this);
 	}
 
 	/*
@@ -216,12 +276,29 @@ public class DefaultIMAPConnection implements IMAPConnection, Serializable {
 	 * @see com.openexchange.groupware.imap.IMAPConnection#close()
 	 */
 	public void close() throws javax.mail.MessagingException {
-		if (imapStore != null) {
-			imapStore.close();
-			if (connected) {
+		try {
+			if (imapFolder != null) {
+				try {
+					imapFolder.close(false);
+					MailInterfaceImpl.mailInterfaceMonitor.changeNumActive(false);
+				} catch (final IllegalStateException e) {
+					LOG.warn("Invoked close() on a closed folder", e);
+				}
+			}
+			if (imapStore != null) {
+				try {
+					imapStore.close();
+				} catch (final MessagingException e) {
+					LOG.error("Error while closing IMAPStore", e);
+				}
+			}
+		} finally {
+			if (decrement) {
+				/*
+				 * Decrease counters
+				 */
 				MailInterfaceImpl.mailInterfaceMonitor.changeNumActive(false);
 				MonitoringInfo.decrementNumberOfConnections(MonitoringInfo.IMAP);
-				connected = false;
 				COUNTER_LOCK.lock();
 				try {
 					counter--;
@@ -229,7 +306,11 @@ public class DefaultIMAPConnection implements IMAPConnection, Serializable {
 					COUNTER_LOCK.unlock();
 				}
 			}
-			imapStore = null;
+			/*
+			 * Reset
+			 */
+			reset();
+			IMAPConnectionWatcher.removeIMAPConnection(this);
 		}
 	}
 
@@ -253,12 +334,14 @@ public class DefaultIMAPConnection implements IMAPConnection, Serializable {
 		this.imapFolder = imapFolder;
 		if (null == imapFolder) {
 			this.holdsMessages = -1;
+			this.expunge = false;
 		}
 	}
 
 	public void resetImapFolder() {
 		this.imapFolder = null;
 		this.holdsMessages = -1;
+		this.expunge = false;
 	}
 
 	public boolean isHoldsMessages() throws MessagingException {
@@ -300,6 +383,45 @@ public class DefaultIMAPConnection implements IMAPConnection, Serializable {
 		} finally {
 			COUNTER_LOCK.unlock();
 		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		final StringBuilder sBuilder = new StringBuilder(512);
+		if (!isConnected()) {
+			sBuilder.append("IMAPConnection NOT CONNECTED!\n");
+		} else {
+			sBuilder.append("IMAPConnection connected | IMAP Server=").append(imapServer).append(':').append(imapPort);
+			sBuilder.append(" | User=").append(imapUsername);
+			if (null != imapFolder) {
+				sBuilder.append(" | IMAP Folder=").append(imapFolder.getFullName());
+			}
+		}
+		if (IMAPProperties.isWatcherEnabledInternal()) {
+			sBuilder.append("\nEstablished (or fetched from cache) at: ").append('\n');
+			/*
+			 * Start at index 2
+			 */
+			for (int i = 2; i < trace.length; i++) {
+				sBuilder.append("\tat ").append(trace[i]).append('\n');
+			}
+			if (null != usingThread && usingThread.isAlive()) {
+				sBuilder.append("Current Using Thread: ").append(usingThread.getName()).append('\n');
+				final StackTraceElement[] trace = usingThread.getStackTrace();
+				for (int i = 0; i < trace.length; i++) {
+					if (i > 0) {
+						sBuilder.append('\n');
+					}
+					sBuilder.append("\tat ").append(trace[i]);
+				}
+			}
+		}
+		return sBuilder.toString();
 	}
 
 }
