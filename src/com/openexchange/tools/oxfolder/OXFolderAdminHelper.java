@@ -163,7 +163,7 @@ public final class OXFolderAdminHelper {
 			}
 			addContextSystemFolders(cid, contextMalAdmin, mailAdminDisplayName, language, con);
 		} catch (final SQLException e) {
-			throw new OXFolderException(FolderCode.SQL_ERROR, e, true, Integer.valueOf(cid));
+			throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(cid));
 		}
 	}
 
@@ -641,9 +641,9 @@ public final class OXFolderAdminHelper {
 						" in context ").append(cid).toString());
 			}
 		} catch (final DBPoolingException e) {
-			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, true, Integer.valueOf(cid));
+			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(cid));
 		} catch (final SQLException e) {
-			throw new OXFolderException(FolderCode.SQL_ERROR, e, true, Integer.valueOf(cid));
+			throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(cid));
 		}
 	}
 

@@ -772,9 +772,9 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 			try {
 				return OXFolderSQL.exists(getObjectID(), null, ctx);
 			} catch (final DBPoolingException e) {
-				throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, true, e.getMessage());
+				throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
 			} catch (final SQLException e) {
-				throw new OXFolderException(FolderCode.SQL_ERROR, e, true, e.getMessage());
+				throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(ctx.getContextId()));
 			}
 		} else if (containsParentFolderID() && containsFolderName() && containsModule()) {
 			try {
@@ -785,9 +785,9 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 				this.setObjectID(fuid);
 				return true;
 			} catch (final DBPoolingException e) {
-				throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, true, e.getMessage());
+				throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
 			} catch (final SQLException e) {
-				throw new OXFolderException(FolderCode.SQL_ERROR, e, true, e.getMessage());
+				throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(ctx.getContextId()));
 			}
 		}
 		throw new OXFolderException(FolderCode.UNSUFFICIENT_FOLDER_INFORMATION);
