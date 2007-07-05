@@ -4,6 +4,8 @@
    server's buildfile will cause it to compare the German and the
    English .po/.pot files to check whether all texts have been 
    translated.
+ - Refactored the ContactSwitchers, added ContactSwitcherForBooleans
+   as preparation for bugfix #7710.
  
 * 2007-07-05 - thorben.betten@open-xchange.com
 
