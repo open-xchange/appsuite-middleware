@@ -97,6 +97,7 @@
         <include name="**/*.po"/>
     </fileset>
     <property name="java_apt" value="apt"/>
+	<property name="msgcmp" value="msgcmp"/>
 
     <!-- Compile -->
 
@@ -197,7 +198,7 @@
 
     <!-- I18N Stuff -->
 
-    <target name="all-i18n" depends="create-pot,create-codes-csv,create-lang-jar" />
+    <target name="all-i18n" depends="create-pot,check-pot,create-codes-csv,create-lang-jar" />
 
     <target name="check-msgfmt-executable" unless="exists_msgfmt">
         <exec executable="${msgfmt}" dir="${basedir}" failonerror="false" failifexecutionfails="false" outputproperty="garbage" resultproperty="result_msgmft">
@@ -359,6 +360,46 @@
         <replaceregexp file="${i18n.dir}/errors.pot" match="#:(.*)\n" replace="" flags="g"/>
         <delete file="${i18n.dir}/GUIMessages.java" />
     </target>
+	
+	<!-- comparing source .pot files to translated .po files-->
+	<target name="check-pot" depends="create-pot">
+        <exec executable="${msgcmp}" dir="${i18n.dir}" failonerror="false" failifexecutionfails="false" resultproperty="translation-return-1" outputproperty="translation-result-1">
+            <arg value="de_DE/server.de_DE.po"/>
+            <arg value="server.pot"/>
+        </exec>
+		<antcall target="check-pot-warning" inheritAll="false">
+			<param name="translation-success" value="${translation-return-1}" />
+			<param name="translation-step" value="German (de_DE) server texts" />
+			<param name="translation-message" value="${translation-result-1}"/>
+		</antcall>
+		
+        <exec executable="${msgcmp}" dir="${i18n.dir}" failonerror="false" failifexecutionfails="false" resultproperty="translation-return-2" outputproperty="translation-result-2">
+            <arg value="de_DE/errors.de_DE.po"/>
+        	<arg value="errors.pot"/>
+        </exec>
+		<antcall target="check-pot-warning" inheritAll="false">
+			<param name="translation-success" value="${translation-return-2}" />
+			<param name="translation-step" value="German (de_DE) error texts" />
+			<param name="translation-message" value="${translation-result-2}"/>
+		</antcall>
+	</target>
+	
+	<target name="check-pot-warning">
+		<condition property="translation-warning-needed">
+            <not>
+            	<equals arg1="0" arg2="${translation-success}" />
+            </not>
+        </condition>
+		<antcall target="show-pot-warning">
+			<param name="translation-step" value="${translation-step}" />
+			<param name="translation-message" value="${translation-message}"/>
+		</antcall>
+	</target>
+	
+	<target name="show-pot-warning" if="translation-warning-needed" >
+		<echo message="Warnings for ${translation-step}:" />
+		<echo message="${translation-message}" />
+	</target>		
 
     <target name="create-codes-csv" depends="create-ser">
         <echo message="Creating ${i18n.dir}/codes.csv" />

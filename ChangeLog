@@ -1,3 +1,10 @@
+* 2007-07-05 - tobias.prinz@open-xchange.com
+
+ - Fixed bug #8050: Now calling "ant -f build.xml all-i18n" on the
+   server's buildfile will cause it to compare the German and the
+   English .po/.pot files to check whether all texts have been 
+   translated.
+ 
 * 2007-07-05 - thorben.betten@open-xchange.com
 
  - Added a watcher for established IMAP connections which keeps track of
