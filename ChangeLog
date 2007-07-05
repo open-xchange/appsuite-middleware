@@ -13,6 +13,8 @@
  
 * 2007-07-05 - thorben.betten@open-xchange.com
 
+ - Fixed message headers 'X-Mailer' & 'Organization' settings when sending
+   a message
  - Fixed folder handling on closure
  - Bugfix #8304: Displaying broken TNEF attachments at least as normal
    attachment

@@ -86,8 +86,10 @@ import org.json.JSONException;
 
 import com.openexchange.api2.MailInterfaceImpl;
 import com.openexchange.api2.OXException;
+import com.openexchange.api2.RdbContactSQLInterface;
 import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.mail.JSONMessageAttachmentObject;
 import com.openexchange.groupware.container.mail.JSONMessageObject;
 import com.openexchange.groupware.container.mail.parser.MessageDumper;
@@ -99,10 +101,13 @@ import com.openexchange.groupware.imap.MessageDataSource;
 import com.openexchange.groupware.imap.OXMailException;
 import com.openexchange.groupware.imap.UserSettingMail;
 import com.openexchange.groupware.imap.OXMailException.MailCode;
+import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.upload.UploadEvent;
 import com.openexchange.server.DBPool;
 import com.openexchange.server.DBPoolingException;
+import com.openexchange.server.Version;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.mail.ContentType;
 import com.openexchange.tools.mail.Html2TextConverter;
@@ -813,13 +818,25 @@ public class MessageFiller {
 		 */
 		msg.setHeader(HDR_X_PRIORITY, String.valueOf(msgObj.getPriority()));
 		/*
-		 * Set mailer TODO: Read in mailer from file
+		 * Set mailer
 		 */
-		msgObj.addHeader(HDR_X_MAILER, "Open-Xchange v6.0 Mailer");
+		msgObj.addHeader(HDR_X_MAILER, "Open-Xchange Mailer v" + Version.VERSION_STRING);
 		/*
-		 * Set organization TODO: Read in organization from file
+		 * Set organization to context-admin's company field setting
 		 */
-		msg.setHeader(HDR_ORGANIZATION, "Open-Xchange, Inc.");
+		try {
+			/*
+			 * Get context's admin contact object
+			 */
+			final ContactObject c = new RdbContactSQLInterface(session).getObjectById(UserStorage.getInstance(
+					session.getContext()).getUser(session.getContext().getMailadmin()).getContactId(),
+					FolderObject.SYSTEM_LDAP_FOLDER_ID);
+			if (null != c && c.getCompany() != null && c.getCompany().length() > 0) {
+				msg.setHeader(HDR_ORGANIZATION, c.getCompany());
+			}
+		} catch (final LdapException e) {
+			LOG.warn("Header \"Organization\" could not be set", e);
+		}
 		/*
 		 * Headers
 		 */
