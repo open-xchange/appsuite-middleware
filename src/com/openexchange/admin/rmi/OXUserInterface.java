@@ -206,76 +206,10 @@ public interface OXUserInterface extends Remote {
      */
     public void changeModuleAccess(Context ctx, int user_id, UserModuleAccess moduleAccess, Credentials auth) 
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchUserException;
-
+    
+     
     /**
-     * Retrieve all user ids for a given context.
-     * 
-     * @param ctx
-     *            numerical context identifier
-     * @param auth
-     *            Credentials for authenticating against server.
-     * @return int[] containing user ids.
-     * 
-     * @throws RemoteException General RMI Exception
-     * @throws StorageException When an error in the subsystems occured.
-     * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
-     * @throws NoSuchContextException If the context does not exist in the system.
-     * @throws InvalidDataException If the data sent within the method contained invalid data.
-     * @throws DatabaseUpdateException 
-     */
-    public int[] getAll(Context ctx, Credentials auth) 
-    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException;
-
-    /**
-     * Retrieve user objects for a range of users by id
-     * 
-     * @deprecated  Use {@link #getData(Context,User[],Credential)} instead
-     * @param ctx
-     *            numerical context identifier
-     * @param user_id
-     *            int[] array containing user id(s)
-     * @param auth
-     *            Credentials for authenticating against server.
-     * @return User[] containing result objects.
-     * 
-     * @throws RemoteException General RMI Exception
-     * @throws StorageException When an error in the subsystems occured.
-     * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
-     * @throws NoSuchContextException If the context does not exist in the system.
-     * @throws InvalidDataException If the data sent within the method contained invalid data.
-     * @throws NoSuchUserException
-     * @throws DatabaseUpdateException 
-     */
-    @Deprecated
-    public User[] getData(Context ctx, int[] user_ids, Credentials auth) 
-    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, NoSuchUserException, DatabaseUpdateException;
-
-    /**
-     * Retrieve user objects for a range of users by id
-     * 
-     * @deprecated  Use {@link #getData(Context,User,Credential)} instead
-     * @param ctx
-     *            numerical context identifier
-     * @param user_id
-     *            int of the user id
-     * @param auth
-     *            Credentials for authenticating against server.
-     * @return User containing result object.
-     * 
-     * @throws RemoteException General RMI Exception
-     * @throws StorageException When an error in the subsystems occured.
-     * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
-     * @throws NoSuchContextException If the context does not exist in the system.
-     * @throws InvalidDataException If the data sent within the method contained invalid data.
-     * @throws NoSuchUserException 
-     * @throws DatabaseUpdateException 
-     */
-    @Deprecated
-    public User getData(Context ctx, int user_id, Credentials auth) 
-    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, NoSuchUserException, DatabaseUpdateException;
-
-    /**
-     * Retrieve user objects for a range of users by name
+     * Retrieve user objects for a range of users by username or id.
      * @see User.getUsername().
      * 
      * @param context
@@ -298,7 +232,7 @@ public interface OXUserInterface extends Remote {
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException, DatabaseUpdateException;
 
     /**
-     * Retrieve user objects for a range of users by name
+     * Retrieve user objects for a range of users by username or id.
      * @see User.getUsername().
      * 
      * @param context
@@ -340,5 +274,25 @@ public interface OXUserInterface extends Remote {
      */
     public boolean isContextAdmin(Context ctx, User user, Credentials auth) 
         throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException, DatabaseUpdateException;
+    
+    /**
+     * Retrieve all users for a given context.
+     * 
+     * @param ctx
+     *          Context object.
+     * @param auth
+     *          Credentials for authenticating against server.
+     * @return User[] with currently ONYL id set in each User.
+     * 
+     * @throws RemoteException
+     * @throws StorageException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws InvalidDataException
+     * @throws DatabaseUpdateException
+     */
+    public User[] getAll(Context ctx,Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException;
+
+    
     
 }

@@ -56,6 +56,7 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Locale;
 
 import org.apache.commons.io.FileUtils;
@@ -505,7 +506,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         oxu.changeModuleAccess(ctx, user_id, moduleAccess);
     }
 
-    public int[] getAll(final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
+    public User[] getAll(final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
                
         if (log.isDebugEnabled()) {
             log.debug(ctx.toString() + " - " + auth.toString());
@@ -518,7 +519,13 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         checkSchemaBeingLocked(ctx, tools);
 
         final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
-        return oxu.getAll(ctx);
+        int[] ids =  oxu.getAll(ctx);
+        User[] retval = new User[ids.length];
+        for (int i = 0; i < ids.length; i++) {
+            retval[i] = new User(ids[i]);
+        }
+        
+        return retval;
     }
 
     public User getData(final Context ctx, final int user_id, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException, DatabaseUpdateException {
