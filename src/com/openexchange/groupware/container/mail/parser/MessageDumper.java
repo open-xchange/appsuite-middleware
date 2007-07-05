@@ -106,47 +106,47 @@ public class MessageDumper {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(MessageDumper.class);
+
 	/*
 	 * +++++++++++++++++++ MIME TYPES +++++++++++++++++++
 	 */
 	private static final String MIME_TEXT_PLAIN = "text/plain";
-		
+
 	private static final String MIME_TEXT_ENRICHED = "text/enriched";
-	
+
 	private static final String MIME_TEXT_RTF = "text/rtf";
-	
+
 	private static final String MIME_TEXT_HTML = "text/html";
-	
+
 	private static final String MIME_TEXT_RFC822_HDRS = "text/rfc822-headers";
-	
+
 	private static final String MIME_TEXT_ALL_CARD = "text/*card";
-	
+
 	private static final String MIME_TEXT_ALL_CALENDAR = "text/*calendar";
-	
+
 	private static final String MIME_MULTIPART_ALL = "multipart/*";
-	
+
 	private static final String MIME_IMAGE_ALL = "image/*";
 
 	private static final String MIME_MESSAGE_RFC822 = "message/rfc822";
-	
+
 	private static final String MIME_APPL_OCTET = "application/octet-stream";
-	
+
 	private static final String MIME_MESSAGE_DELIVERY_STATUS = "message/delivery-status";
-	
+
 	private static final String MIME_MESSAGE_DISP_NOTIFICATION = "message/disposition-notification";
-	
+
 	/*
 	 * +++++++++++++++++++ HEADERS +++++++++++++++++++
 	 */
 	private static final String HEADER_CONTENT_TYPE = "Content-Type";
-	
+
 	/*
 	 * +++++++++++++++++++ TNEF CONSTANTS +++++++++++++++++++
 	 */
 	private static final String TNEF_IPM_CONTACT = "IPM.Contact";
-	
+
 	private static final String TNEF_IPM_MS_READ_RECEIPT = "IPM.Microsoft Mail.Read Receipt";
-	
 
 	private final SessionObject session;
 
@@ -155,7 +155,7 @@ public class MessageDumper {
 	private boolean stop;
 
 	private boolean multipartDetected;
-	
+
 	private final boolean nestedMsgsOnly;
 
 	/**
@@ -196,9 +196,9 @@ public class MessageDumper {
 			throws OXException, MessagingException {
 		try {
 			dumpPart(msg, msgHandler, prefix, 1);
-		} catch (IOException e) {
-			throw new OXMailException(MailCode.UNREADBALE_PART_CONTENT, e, Integer.valueOf(msg.getMessageNumber()), msg.getFolder()
-					.getFullName(), OXFolderManagerImpl.getUserName(session));
+		} catch (final IOException e) {
+			throw new OXMailException(MailCode.UNREADBALE_PART_CONTENT, e, Integer.valueOf(msg.getMessageNumber()), msg
+					.getFolder().getFullName(), OXFolderManagerImpl.getUserName(session));
 		}
 		msgHandler.handleMessageEnd(msg);
 	}
@@ -224,9 +224,8 @@ public class MessageDumper {
 		final String filename = MessageUtils.getFileName(part, MessageUtils.getIdentifier(prefix, partCount));
 		final ContentType contentType = new ContentType();
 		try {
-			contentType.setContentType(part.getContentType() == null ? MIME_APPL_OCTET : part
-					.getContentType());
-		} catch (Exception e) {
+			contentType.setContentType(part.getContentType() == null ? MIME_APPL_OCTET : part.getContentType());
+		} catch (final Exception e) {
 			LOG.error(e.getMessage(), e);
 			/*
 			 * Try to determine MIME type from file name
@@ -333,129 +332,145 @@ public class MessageDumper {
 				return;
 			}
 		} else if (!nestedMsgsOnly && TNEFUtils.isTNEFMimeType(part.getContentType())) {
-			/*
-			 * Here go with TNEF encoded messages. First, grab TNEF input
-			 * stream.
-			 */
-			final TNEFInputStream tnefInputStream = new TNEFInputStream(part.getInputStream());
-			/*
-			 * Wrapping TNEF message
-			 */
-			final net.freeutils.tnef.Message message = new net.freeutils.tnef.Message(tnefInputStream);
-			/*
-			 * Handle special conversion
-			 */
-			final Attr messageClass = message.getAttribute(Attr.attMessageClass);
-			final String messageClassName = messageClass == null ? "" : ((String) messageClass.getValue());
-			if (messageClass != null && TNEF_IPM_CONTACT.equalsIgnoreCase(messageClassName)) {
+			try {
 				/*
-				 * Convert contact to standard vCard. Resulting Multipart object
-				 * consists of only ONE BodyPart object which encapsulates
-				 * converted VCard. But for consistency reasons keep the code
-				 * structure to iterate over Multipart's child objects.
+				 * Here go with TNEF encoded messages. First, grab TNEF input
+				 * stream.
 				 */
-				final Multipart mp = ContactHandler.convert(message);
-				final int mpsize = mp.getCount();
-				for (int i = 0; i < mpsize; i++) {
-					final BodyPart bodyPart = mp.getBodyPart(i);
-					dumpPart(bodyPart, msgHandler, prefix, partCount++);
-				}
+				final TNEFInputStream tnefInputStream = new TNEFInputStream(part.getInputStream());
 				/*
-				 * Stop to further process tnef attachment
+				 * Wrapping TNEF message
 				 */
-				return;
-			} else if (messageClassName.equalsIgnoreCase(TNEF_IPM_MS_READ_RECEIPT)) {
+				final net.freeutils.tnef.Message message = new net.freeutils.tnef.Message(tnefInputStream);
 				/*
-				 * Convert read receipt to standard notification. Resulting
-				 * Multipart object consists both the human readable text part
-				 * and machine readable part.
+				 * Handle special conversion
 				 */
-				final Multipart mp = ReadReceiptHandler.convert(message);
-				final int mpsize = mp.getCount();
-				for (int i = 0; i < mpsize; i++) {
-					final BodyPart bodyPart = mp.getBodyPart(i);
+				final Attr messageClass = message.getAttribute(Attr.attMessageClass);
+				final String messageClassName = messageClass == null ? "" : ((String) messageClass.getValue());
+				if (messageClass != null && TNEF_IPM_CONTACT.equalsIgnoreCase(messageClassName)) {
 					/*
-					 * Do not increase part count for one vcard
+					 * Convert contact to standard vCard. Resulting Multipart
+					 * object consists of only ONE BodyPart object which
+					 * encapsulates converted VCard. But for consistency reasons
+					 * keep the code structure to iterate over Multipart's child
+					 * objects.
 					 */
-					dumpPart(bodyPart, msgHandler, prefix, partCount++);
+					final Multipart mp = ContactHandler.convert(message);
+					final int mpsize = mp.getCount();
+					for (int i = 0; i < mpsize; i++) {
+						final BodyPart bodyPart = mp.getBodyPart(i);
+						dumpPart(bodyPart, msgHandler, prefix, partCount++);
+					}
+					/*
+					 * Stop to further process tnef attachment
+					 */
+					return;
+				} else if (messageClassName.equalsIgnoreCase(TNEF_IPM_MS_READ_RECEIPT)) {
+					/*
+					 * Convert read receipt to standard notification. Resulting
+					 * Multipart object consists both the human readable text
+					 * part and machine readable part.
+					 */
+					final Multipart mp = ReadReceiptHandler.convert(message);
+					final int mpsize = mp.getCount();
+					for (int i = 0; i < mpsize; i++) {
+						final BodyPart bodyPart = mp.getBodyPart(i);
+						/*
+						 * Do not increase part count for one vcard
+						 */
+						dumpPart(bodyPart, msgHandler, prefix, partCount++);
+					}
+					/*
+					 * Stop to further process tnef attachment
+					 */
+					return;
 				}
 				/*
-				 * Stop to further process tnef attachment
+				 * Look for body. Usually the body is the rtf text.
 				 */
-				return;
-			}
-			/*
-			 * Look for body. Usually the body is the rtf text.
-			 */
-			final Attr attrBody = Attr.findAttr(message.getAttributes(), Attr.attBody);
-			if (attrBody != null) {
-				final TNEFBodyPart bodyPart = new TNEFBodyPart();
-				bodyPart.setText((String) attrBody.getValue());
-				bodyPart.setSize(((String) attrBody.getValue()).length());
-				dumpPart(bodyPart, msgHandler, prefix, partCount++);
-			}
-			if (message.getMAPIProps() != null) {
-				final RawInputStream ris = (RawInputStream) message.getMAPIProps().getPropValue(
-						MAPIProp.PR_RTF_COMPRESSED);
-				if (ris != null) {
-					final byte[] rtfBody = ris.toByteArray();
+				final Attr attrBody = Attr.findAttr(message.getAttributes(), Attr.attBody);
+				if (attrBody != null) {
 					final TNEFBodyPart bodyPart = new TNEFBodyPart();
-					final String content = new String(TNEFUtils.decompressRTF(rtfBody), ServerConfig
-							.getProperty(Property.DefaultEncoding));
-					bodyPart.setText(content);
-					bodyPart.setHeader(HEADER_CONTENT_TYPE, MIME_TEXT_RTF);
-					bodyPart.setSize(content.length());
+					bodyPart.setText((String) attrBody.getValue());
+					bodyPart.setSize(((String) attrBody.getValue()).length());
 					dumpPart(bodyPart, msgHandler, prefix, partCount++);
 				}
-			}
-			/*
-			 * Iterate TNEF attachments and nested messages
-			 */
-			final int s = message.getAttachments().size();
-			final Iterator iter = message.getAttachments().iterator();
-			for (int i = 0; i < s; i++) {
-				final Attachment attachment = (Attachment) iter.next();
-				final TNEFBodyPart bodyPart = new TNEFBodyPart();
-				if (attachment.getNestedMessage() == null) {
-					// add TNEF attributes
-					bodyPart.setTNEFAttributes(attachment.getAttributes());
-					// translate TNEF attributes to Mime
-					final String attachFilename = attachment.getFilename();
-					if (attachFilename != null) {
-						bodyPart.setFileName(attachFilename);
+				if (message.getMAPIProps() != null) {
+					final RawInputStream ris = (RawInputStream) message.getMAPIProps().getPropValue(
+							MAPIProp.PR_RTF_COMPRESSED);
+					if (ris != null) {
+						final byte[] rtfBody = ris.toByteArray();
+						final TNEFBodyPart bodyPart = new TNEFBodyPart();
+						final String content = new String(TNEFUtils.decompressRTF(rtfBody), ServerConfig
+								.getProperty(Property.DefaultEncoding));
+						bodyPart.setText(content);
+						bodyPart.setHeader(HEADER_CONTENT_TYPE, MIME_TEXT_RTF);
+						bodyPart.setSize(content.length());
+						dumpPart(bodyPart, msgHandler, prefix, partCount++);
 					}
-					String contentTypeStr = null;
-					if (attachment.getMAPIProps() != null) {
-						contentTypeStr = (String) attachment.getMAPIProps().getPropValue(MAPIProp.PR_ATTACH_MIME_TAG);
+				}
+				/*
+				 * Iterate TNEF attachments and nested messages
+				 */
+				final int s = message.getAttachments().size();
+				final Iterator iter = message.getAttachments().iterator();
+				final ByteArrayOutputStream os = new ByteArrayOutputStream(1024);
+				for (int i = 0; i < s; i++) {
+					final Attachment attachment = (Attachment) iter.next();
+					final TNEFBodyPart bodyPart = new TNEFBodyPart();
+					if (attachment.getNestedMessage() == null) {
+						// add TNEF attributes
+						bodyPart.setTNEFAttributes(attachment.getAttributes());
+						// translate TNEF attributes to Mime
+						final String attachFilename = attachment.getFilename();
+						if (attachFilename != null) {
+							bodyPart.setFileName(attachFilename);
+						}
+						String contentTypeStr = null;
+						if (attachment.getMAPIProps() != null) {
+							contentTypeStr = (String) attachment.getMAPIProps().getPropValue(
+									MAPIProp.PR_ATTACH_MIME_TAG);
+						}
+						if (contentTypeStr == null && attachFilename != null) {
+							contentTypeStr = MimetypesFileTypeMap.getDefaultFileTypeMap()
+									.getContentType(attachFilename);
+						}
+						if (contentTypeStr == null) {
+							contentTypeStr = MIME_APPL_OCTET;
+						}
+						final DataSource ds = new RawDataSource(attachment.getRawData(), contentTypeStr);
+						bodyPart.setDataHandler(new DataHandler(ds));
+						bodyPart.setHeader(HEADER_CONTENT_TYPE, contentTypeStr);
+						os.reset();
+						attachment.writeTo(os);
+						bodyPart.setSize(os.size());
+						dumpPart(bodyPart, msgHandler, prefix, partCount++);
+					} else {
+						/*
+						 * Nested message
+						 */
+						final MimeMessage nestedMessage = TNEFMime.convert(session.getMailSession(), attachment
+								.getNestedMessage());
+						bodyPart.setDataHandler(new DataHandler(nestedMessage, MIME_MESSAGE_RFC822));
+						bodyPart.setHeader(HEADER_CONTENT_TYPE, MIME_MESSAGE_RFC822);
+						dumpPart(bodyPart, msgHandler, prefix, partCount++);
 					}
-					if (contentTypeStr == null && attachFilename != null) {
-						contentTypeStr = MimetypesFileTypeMap.getDefaultFileTypeMap().getContentType(attachFilename);
-					}
-					if (contentTypeStr == null) {
-						contentTypeStr = MIME_APPL_OCTET;
-					}
-					final DataSource ds = new RawDataSource(attachment.getRawData(), contentTypeStr);
-					bodyPart.setDataHandler(new DataHandler(ds));
-					bodyPart.setHeader(HEADER_CONTENT_TYPE, contentTypeStr);
-					final ByteArrayOutputStream os = new ByteArrayOutputStream();
-					attachment.writeTo(os);
-					bodyPart.setSize(os.size());
-					dumpPart(bodyPart, msgHandler, prefix, partCount++);
-				} else {
-					/*
-					 * Nested message
-					 */
-					final MimeMessage nestedMessage = TNEFMime.convert(session.getMailSession(), attachment
-							.getNestedMessage());
-					bodyPart.setDataHandler(new DataHandler(nestedMessage, MIME_MESSAGE_RFC822));
-					bodyPart.setHeader(HEADER_CONTENT_TYPE, MIME_MESSAGE_RFC822);
-					dumpPart(bodyPart, msgHandler, prefix, partCount++);
+				}
+			} catch (final IOException tnefExc) {
+				if (LOG.isWarnEnabled()) {
+					LOG.warn(tnefExc.getLocalizedMessage(), tnefExc);
+				}
+				if (!msgHandler.handleAttachment(part, isInline, contentType.getBaseType(), filename, MessageUtils
+						.getIdentifier(prefix, partCount))) {
+					stop = true;
+					return;
 				}
 			}
-		} else if (!nestedMsgsOnly && (contentType.isMimeType(MIME_MESSAGE_DELIVERY_STATUS)
-				|| contentType.isMimeType(MIME_MESSAGE_DISP_NOTIFICATION)
-				|| contentType.isMimeType(MIME_TEXT_RFC822_HDRS) || contentType.isMimeType(MIME_TEXT_ALL_CARD)
-				|| contentType.isMimeType(MIME_TEXT_ALL_CALENDAR))) {
+		} else if (!nestedMsgsOnly
+				&& (contentType.isMimeType(MIME_MESSAGE_DELIVERY_STATUS)
+						|| contentType.isMimeType(MIME_MESSAGE_DISP_NOTIFICATION)
+						|| contentType.isMimeType(MIME_TEXT_RFC822_HDRS) || contentType.isMimeType(MIME_TEXT_ALL_CARD) || contentType
+						.isMimeType(MIME_TEXT_ALL_CALENDAR))) {
 			if (!msgHandler.handleSpecialPart(part, contentType.getBaseType(), MessageUtils.getIdentifier(prefix,
 					partCount))) {
 				stop = true;
@@ -525,14 +540,14 @@ public class MessageDumper {
 				final Header h = (Header) e.nextElement();
 				headerMap.put(h.getName(), h.getValue());
 			}
-		} catch (MessagingException e) {
+		} catch (final MessagingException e) {
 			if (e.getMessage().indexOf(STR_CANNOT_LOAD_HEADER) != -1) {
 				/*
 				 * Headers could not be loaded
 				 */
 				try {
 					headerMap = IMAPUtils.loadBrokenHeaders(msg, false);
-				} catch (ProtocolException e1) {
+				} catch (final ProtocolException e1) {
 					LOG.error(e.getMessage(), e);
 					headerMap = new HashMap<String, String>();
 				}

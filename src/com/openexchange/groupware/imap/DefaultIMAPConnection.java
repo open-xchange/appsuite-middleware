@@ -189,11 +189,9 @@ public final class DefaultIMAPConnection implements IMAPConnection, Serializable
 
 	private static final String PROP_MAIL_DEBUG = "mail.debug";
 
-	/**
-	 * Establishes a new IMAP connection (if not done yet) and returns its
-	 * connected IMAP store
+	/* (non-Javadoc)
 	 * 
-	 * @return connected <code>com.sun.mail.imap.IMAPStore</code> instance
+	 * @see com.openexchange.groupware.imap.IMAPConnection#connect()
 	 */
 	public void connect() throws javax.mail.NoSuchProviderException, javax.mail.MessagingException {
 		if (imapStore != null && imapStore.isConnected()) {
@@ -385,6 +383,33 @@ public final class DefaultIMAPConnection implements IMAPConnection, Serializable
 		}
 	}
 
+	/* (non-Javadoc)
+	 * 
+	 * @see com.openexchange.groupware.imap.IMAPConnection#getTrace()
+	 */
+	public String getTrace() {
+		final StringBuilder sBuilder = new StringBuilder(512);
+		sBuilder.append(toString());
+		sBuilder.append("\nEstablished (or fetched from cache) at: ").append('\n');
+		/*
+		 * Start at index 2
+		 */
+		for (int i = 2; i < trace.length; i++) {
+			sBuilder.append("\tat ").append(trace[i]).append('\n');
+		}
+		if (null != usingThread && usingThread.isAlive()) {
+			sBuilder.append("Current Using Thread: ").append(usingThread.getName()).append('\n');
+			final StackTraceElement[] trace = usingThread.getStackTrace();
+			for (int i = 0; i < trace.length; i++) {
+				if (i > 0) {
+					sBuilder.append('\n');
+				}
+				sBuilder.append("\tat ").append(trace[i]);
+			}
+		}
+		return sBuilder.toString();
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -394,32 +419,14 @@ public final class DefaultIMAPConnection implements IMAPConnection, Serializable
 	public String toString() {
 		final StringBuilder sBuilder = new StringBuilder(512);
 		if (!isConnected()) {
-			sBuilder.append("IMAPConnection NOT CONNECTED!\n");
+			sBuilder.append("IMAPConnection NOT connected");
 		} else {
-			sBuilder.append("IMAPConnection connected | IMAP Server=").append(imapServer).append(':').append(imapPort);
-			sBuilder.append(" | User=").append(imapUsername);
-			if (null != imapFolder) {
-				sBuilder.append(" | IMAP Folder=").append(imapFolder.getFullName());
-			}
+			sBuilder.append("IMAPConnection connected");
 		}
-		if (IMAPProperties.isWatcherEnabledInternal()) {
-			sBuilder.append("\nEstablished (or fetched from cache) at: ").append('\n');
-			/*
-			 * Start at index 2
-			 */
-			for (int i = 2; i < trace.length; i++) {
-				sBuilder.append("\tat ").append(trace[i]).append('\n');
-			}
-			if (null != usingThread && usingThread.isAlive()) {
-				sBuilder.append("Current Using Thread: ").append(usingThread.getName()).append('\n');
-				final StackTraceElement[] trace = usingThread.getStackTrace();
-				for (int i = 0; i < trace.length; i++) {
-					if (i > 0) {
-						sBuilder.append('\n');
-					}
-					sBuilder.append("\tat ").append(trace[i]);
-				}
-			}
+		sBuilder.append(" | IMAP Server=").append(imapServer).append(':').append(imapPort);
+		sBuilder.append(" | User=").append(imapUsername);
+		if (null != imapFolder) {
+			sBuilder.append(" | IMAP Folder=").append(imapFolder.getFullName());
 		}
 		return sBuilder.toString();
 	}

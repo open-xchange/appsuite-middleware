@@ -49,8 +49,10 @@
 
 package com.openexchange.groupware.imap;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.TimerTask;
 import java.util.Map.Entry;
@@ -64,17 +66,17 @@ import com.openexchange.server.ServerTimer;
 
 /**
  * IMAPConnectionWatcher
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- *
+ * 
  */
 public final class IMAPConnectionWatcher {
-	
+
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(IMAPConnectionWatcher.class);
-	
+
 	private static final Map<IMAPConnection, Long> imapCons = new HashMap<IMAPConnection, Long>();
-	
+
 	private static final Lock LOCK = new ReentrantLock();
 
 	/**
@@ -83,7 +85,7 @@ public final class IMAPConnectionWatcher {
 	private IMAPConnectionWatcher() {
 		super();
 	}
-	
+
 	public static void addIMAPConnection(final IMAPConnection imapCon) {
 		LOCK.lock();
 		try {
@@ -92,7 +94,7 @@ public final class IMAPConnectionWatcher {
 			LOCK.unlock();
 		}
 	}
-	
+
 	public static void removeIMAPConnection(final IMAPConnection imapCon) {
 		LOCK.lock();
 		try {
@@ -101,9 +103,13 @@ public final class IMAPConnectionWatcher {
 			LOCK.unlock();
 		}
 	}
-	
+
 	private static final String INFO_PREFIX = "UNCLOSED IMAP CONNECTION AFTER #N#msec:\n";
+
+	private static final String INFO_PREFIX2 = "CLOSING IMAP CONNECTION BY WATCHER:\n";
 	
+	private static final String INFO_PREFIX3 = "\n\tDONE";
+
 	private static class IMAPConnectionWatcherTask extends TimerTask {
 		/*
 		 * (non-Javadoc)
@@ -122,6 +128,7 @@ public final class IMAPConnectionWatcher {
 			try {
 				final StringBuilder sb = new StringBuilder(512);
 				final Iterator<Entry<IMAPConnection, Long>> iter = imapCons.entrySet().iterator();
+				final List<IMAPConnection> exceededCons = new ArrayList<IMAPConnection>();
 				for (int i = 0, n = imapCons.size(); i < n; i++) {
 					final Entry<IMAPConnection, Long> e = iter.next();
 					if ((System.currentTimeMillis() - e.getValue().longValue()) > IMAPProperties
@@ -130,13 +137,36 @@ public final class IMAPConnectionWatcher {
 						LOG.info(sb.append(
 								INFO_PREFIX
 										.replaceFirst("#N#", String.valueOf(IMAPProperties.getWatcherTimeInternal())))
-								.append(e.getKey().toString()).toString());
-						if (IMAPProperties.isWatcherShallCloseInternal() && e.getKey() instanceof DefaultIMAPConnection) {
-							try {
-								MailInterfaceImpl.closeIMAPConnection((DefaultIMAPConnection) e.getKey());
-								LOG.info("FORCED IMAP CONNECTION CLOSED BY WATCHER");
-							} catch (MessagingException e1) {
-								LOG.error(e1.getLocalizedMessage(), e1);
+								.append(e.getKey().getTrace()).toString());
+						exceededCons.add(e.getKey());
+					}
+				}
+				if (!exceededCons.isEmpty()) {
+					/*
+					 * Remove/Close exceeded connections
+					 */
+					final boolean closeAllowed = IMAPProperties.isWatcherShallCloseInternal();
+					for (int i = 0, n = exceededCons.size(); i < n; i++) {
+						final IMAPConnection imapCon = exceededCons.get(i);
+						boolean remove = true;
+						try {
+							if (closeAllowed) {
+								sb.setLength(0);
+								sb.append(INFO_PREFIX2).append(imapCon.toString());
+								if (imapCon instanceof DefaultIMAPConnection) {
+									MailInterfaceImpl.closeIMAPConnection((DefaultIMAPConnection) imapCon);
+									remove = false;
+								} else {
+									imapCon.close();
+								}
+								sb.append(INFO_PREFIX3);
+								LOG.info(sb.toString());
+							}
+						} catch (final MessagingException e1) {
+							LOG.error(e1.getLocalizedMessage(), e1);
+						} finally {
+							if (remove) {
+								imapCons.remove(imapCon);
 							}
 						}
 					}
@@ -153,9 +183,10 @@ public final class IMAPConnectionWatcher {
 				/*
 				 * Start task
 				 */
-				ServerTimer.getTimer().schedule(new IMAPConnectionWatcherTask(), 1000, IMAPProperties.getWatcherFrequency());
+				ServerTimer.getTimer().schedule(new IMAPConnectionWatcherTask(), 1000,
+						IMAPProperties.getWatcherFrequency());
 			}
-		} catch (IMAPException e) {
+		} catch (final IMAPException e) {
 			LOG.error(e.getMessage(), e);
 		}
 	}

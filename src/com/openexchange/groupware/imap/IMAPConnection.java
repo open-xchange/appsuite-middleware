@@ -141,5 +141,10 @@ public interface IMAPConnection {
 	 * @return <code>true</code> if connected; otherwise <code>false</code>
 	 */
 	public boolean isConnectedUnsafe();
+	
+	/**
+	 * @return the trace of this IMAP connection
+	 */
+	public String getTrace();
 
 }
