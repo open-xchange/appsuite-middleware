@@ -1,3 +1,15 @@
+* 2007-07-05 - martin.kauss@open-xchange.com
+
+ - Added new feature that the conflict handling can be disabled.
+   If the conflict flag is false, no conflict resolution or detection 
+   is done, even if a resource is booked. This can lead into 
+   overbooking of resources and this is not a bug but a feature.
+
+ - Added new  feature that the free/busy handling can be disabled.
+   If the free/busy flag is false, no free/busy results are returned, 
+   even if the requested user or resource has appointments in
+   the given timeframe. This is not a bug but a feature.
+
 * 2007-07-04 - marcus.klein@open-xchange.com
 
   - Added module configuration to the GUI configuration interface.
