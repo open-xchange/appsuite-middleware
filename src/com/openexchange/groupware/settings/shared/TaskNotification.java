@@ -47,48 +47,61 @@
  *
  */
 
-package com.openexchange.groupware.settings;
+package com.openexchange.groupware.settings.shared;
 
+import com.openexchange.groupware.UserConfiguration;
+import com.openexchange.groupware.imap.UserSettingMail;
+import com.openexchange.groupware.settings.AbstractMailFuncs;
+import com.openexchange.groupware.settings.Setting;
+import com.openexchange.groupware.settings.SettingSetup;
+import com.openexchange.groupware.settings.SharedValue;
 import com.openexchange.sessiond.SessionObject;
 
 /**
- * This class defines the interface to the storage for user specific settings.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public abstract class SettingStorage {
+public class TaskNotification implements SettingSetup {
 
     /**
      * Default constructor.
      */
-    protected SettingStorage() {
+    public TaskNotification() {
         super();
     }
 
     /**
-     * This method stores a specific setting.
-     * @param setting the setting to store.
-     * @throws SettingException if an error occurs while saving the setting.
+     * {@inheritDoc}
      */
-    public abstract void save(Setting setting)
-        throws SettingException;
+    public String getPath() {
+        return "";
+    }
 
     /**
-     * This method reads the setting and its subsettings from the database.
-     * @param setting setting to read.
-     * @throws SettingException if an error occurs while reading the setting.
+     * {@inheritDoc}
      */
-    public abstract void readValues(Setting setting)
-        throws SettingException;
+    public Setting getSetting() {
+        return new Setting("tasknotification", -1, true);
+    }
 
     /**
-     * @param session Session.
-     * @return an instance implementing this storage interface.
+     * {@inheritDoc}
      */
-    public static SettingStorage getInstance(final SessionObject session) {
-        try {
-            return new RdbSettingStorage(session);
-        } catch (SettingException e) {
-            throw new RuntimeException(e);
-        }
+    public SharedValue getSharedValue() {
+        return new AbstractMailFuncs() {
+            public boolean isAvailable(final SessionObject session) {
+                final UserConfiguration config = session.getUserConfiguration();
+                return config.hasWebMail() && config.hasTask();
+            }
+            @Override
+            protected Object isSet(final UserSettingMail settings) {
+                return settings.isNotifyTasks();
+            }
+            @Override
+            protected void setValue(final UserSettingMail settings,
+                final String value) {
+                settings.setNotifyTasks(Boolean.parseBoolean(value));
+            }
+        };
     }
 }

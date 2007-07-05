@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.groupware.settings;
 
 import java.sql.Connection;
@@ -126,8 +124,7 @@ public class RdbSettingStorage extends SettingStorage {
      * {@inheritDoc}
      */
     @Override
-    public void save(final int userId, final Setting setting)
-        throws SettingException {
+    public void save(final Setting setting) throws SettingException {
         if (!setting.isLeaf()) {
             throw new SettingException(Code.NOT_LEAF, setting.getName());
         }
@@ -139,6 +136,7 @@ public class RdbSettingStorage extends SettingStorage {
                 throw new SettingException(Code.NO_WRITE, setting.getName());
             }
         } else {
+            final int userId = session.getUserObject().getId();
             final boolean update = settingExists(userId, setting);
             Connection con;
             try {
@@ -171,23 +169,13 @@ public class RdbSettingStorage extends SettingStorage {
     /**
      * {@inheritDoc}
      */
-    public void readValues(final int userId, final Setting setting)
-        throws SettingException {
+    public void readValues(final Setting setting) throws SettingException {
         if (!setting.isLeaf()) {
-            for (Setting subSetting : setting.getElements()) {
-                readValues(userId, subSetting);
-            }
+            readSubValues(setting);
             return;
         }
         if (setting.isShared()) {
-            final SharedValue reader = ConfigTree.getSharedValue(setting);
-            if (null != reader) {
-                try {
-                    reader.getValue(session, setting);
-                } catch (SettingException e) {
-                    LOG.error("Problem while reading setting value.", e);
-                }
-            }
+            readSharedValue(setting);
         } else {
             Connection con;
             try {
@@ -202,7 +190,7 @@ public class RdbSettingStorage extends SettingStorage {
                     SELECT_VALUE);
                 int pos = 1;
                 stmt.setInt(pos++, ctx.getContextId());
-                stmt.setInt(pos++, userId);
+                stmt.setInt(pos++, session.getUserObject().getId());
                 stmt.setInt(pos++, setting.getId());
                 result = stmt.executeQuery();
                 if (result.next()) {
@@ -215,6 +203,25 @@ public class RdbSettingStorage extends SettingStorage {
             } finally {
                 closeSQLStuff(result, stmt);
                 DBPool.closeReaderSilent(ctx, con);
+            }
+        }
+    }
+
+    /**
+     * Reads a shared value.
+     * @param setting setting Setting.
+     */
+    private void readSharedValue(final Setting setting) {
+        final SharedValue reader = ConfigTree.getSharedValue(setting);
+        if (null != reader) {
+            if (reader.isAvailable(session)) {
+                try {
+                    reader.getValue(session, setting);
+                } catch (SettingException e) {
+                    LOG.error("Problem while reading setting value.", e);
+                }
+            } else {
+                setting.getParent().removeElement(setting);
             }
         }
     }
@@ -255,6 +262,22 @@ public class RdbSettingStorage extends SettingStorage {
             DBPool.closeReaderSilent(ctx, con);
         }
         return exists;
+    }
+
+    /**
+     * Reads all sub values of a setting.
+     * @param setting setting to read.
+     * @throws SettingException if an error occurs while reading the setting.
+     */
+    private void readSubValues(final Setting setting)
+        throws SettingException {
+        for (Setting subSetting : setting.getElements()) {
+            readValues(subSetting);
+        }
+        // During reading values all childs may be removed.
+        if (setting.isLeaf()) {
+            setting.getParent().removeElement(setting);
+        }
     }
 
     /**

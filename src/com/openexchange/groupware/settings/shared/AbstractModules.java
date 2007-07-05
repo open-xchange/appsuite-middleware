@@ -97,6 +97,12 @@ public abstract class AbstractModules {
                 final Setting setting) throws SettingException {
                 setting.setSingleValue(getModule(session));
             }
+            /**
+             * {@inheritDoc}
+             */
+            public boolean isAvailable(final SessionObject session) {
+                return true;
+            }
         };
     }
 

@@ -65,6 +65,13 @@ public interface SharedValue {
         throws SettingException;
 
     /**
+     * @param session Session.
+     * @return <code>true</code> if this setting is available due to
+     * {@link UserConfiguration}.
+     */
+    boolean isAvailable(SessionObject session);
+
+    /**
      * @return <code>true</code> if the setting can be written by the GUI.
      */
     boolean isWritable();

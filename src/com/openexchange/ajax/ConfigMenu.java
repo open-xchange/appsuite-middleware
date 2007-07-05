@@ -118,7 +118,7 @@ public class ConfigMenu extends SessionServlet {
         final Response response = new Response();
         try {
             setting = ConfigTree.getSettingByPath(path);
-            stor.readValues(sessionObj.getUserObject().getId(), setting);
+            stor.readValues(setting);
             response.setData(convert2JS(setting));
         } catch (AbstractOXException e) {
             response.setException(e);
@@ -216,7 +216,7 @@ public class ConfigMenu extends SessionServlet {
         try {
             final Setting setting = ConfigTree.getSettingByPath(path);
             setting.setSingleValue(value);
-            saveSettingWithSubs(stor, setting, session.getUserObject().getId());
+            saveSettingWithSubs(stor, setting);
         } catch (AbstractOXException e) {
             log(e.getMessage(), e);
             response.setException(e);
@@ -243,12 +243,11 @@ public class ConfigMenu extends SessionServlet {
      * them.
      * @param storage setting storage.
      * @param setting actual setting.
-     * @param userId unique identifier of the user.
      * @throws SettingException if an error occurs.
      * @throws JSONException if the json object can't be parsed.
      */
     private void saveSettingWithSubs(final SettingStorage storage,
-        final Setting setting, final int userId) throws SettingException,
+        final Setting setting) throws SettingException,
         JSONException {
         if (setting.isLeaf()) {
             final String value = (String) setting.getSingleValue();
@@ -267,10 +266,10 @@ public class ConfigMenu extends SessionServlet {
                 	}
                 }
             }
-            storage.save(userId, setting);
+            storage.save(setting);
         } else {
-            final JSONObject json = new JSONObject(
-                (String) setting.getSingleValue());
+            final JSONObject json = new JSONObject((String) setting
+                .getSingleValue());
             final int numOfKeys = json.length();
             final Iterator iter = json.keys();
             SettingException exc = null;
@@ -281,7 +280,7 @@ public class ConfigMenu extends SessionServlet {
                 try {
                     // FIXME catch single exceptions if GUI writes not writable
                     // fields.
-                    saveSettingWithSubs(storage, sub, userId);
+                    saveSettingWithSubs(storage, sub);
                 } catch (SettingException e) {
                     exc = e;
                 }

@@ -49,14 +49,10 @@
 
 package com.openexchange.groupware.settings;
 
-import java.io.File;
-import java.net.URL;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
@@ -68,6 +64,7 @@ import com.openexchange.api2.MailInterfaceImpl;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.configuration.ParticipantConfig;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.imap.IMAPException;
 import com.openexchange.groupware.imap.UserSettingMail;
 import com.openexchange.groupware.ldap.LdapException;
@@ -75,24 +72,10 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.settings.SettingException.Code;
-import com.openexchange.groupware.settings.shared.Modules;
-import com.openexchange.groupware.settings.shared.ModulesCalendar;
-import com.openexchange.groupware.settings.shared.ModulesCalendarConflict;
-import com.openexchange.groupware.settings.shared.ModulesCalendarFreeBusy;
-import com.openexchange.groupware.settings.shared.ModulesCalendarTeamView;
-import com.openexchange.groupware.settings.shared.ModulesContacts;
-import com.openexchange.groupware.settings.shared.ModulesDelegateTasks;
-import com.openexchange.groupware.settings.shared.ModulesICal;
-import com.openexchange.groupware.settings.shared.ModulesInfostore;
-import com.openexchange.groupware.settings.shared.ModulesPublicFolders;
-import com.openexchange.groupware.settings.shared.ModulesSharedFolders;
-import com.openexchange.groupware.settings.shared.ModulesSyncML;
-import com.openexchange.groupware.settings.shared.ModulesTasks;
-import com.openexchange.groupware.settings.shared.ModulesVCard;
-import com.openexchange.groupware.settings.shared.ModulesWebmail;
+import com.openexchange.groupware.settings.shared.*;
 import com.openexchange.server.Version;
 import com.openexchange.sessiond.SessionObject;
-import com.openexchange.tools.oxfolder.OXFolderTools;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 /**
  * This class is a container for the settings tree.
@@ -227,61 +210,9 @@ public final class ConfigTree {
             throws SettingException;
     }
 
-    /**
-     * This class contains the shared, same functions for all mail bit settings.
-     */
-    private abstract static class AbstractMailFuncs implements SharedValue {
-
-        /**
-         * {@inheritDoc}
-         */
-        public void getValue(final SessionObject session,
-            final Setting setting) {
-            final UserConfiguration userConf = session.getUserConfiguration();
-            if (userConf.hasWebMail()) {
-                setting.setSingleValue(isSet(userConf.getUserSettingMail()));
-            }
-        }
-
-        /**
-         * @param settings in this mail settings the bit will be requested.
-         * @return the value of the bit.
-         */
-        protected abstract Object isSet(UserSettingMail settings);
-
-        /**
-         * {@inheritDoc}
-         */
-        public boolean isWritable() {
-            return true;
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        public void writeValue(final SessionObject session,
-            final Setting setting) throws SettingException {
-            final UserSettingMail settings = session.getUserConfiguration()
-                .getUserSettingMail();
-            setValue(settings, (String) setting.getSingleValue());
-            try {
-                settings.saveUserSettingMail(session.getUserObject().getId(),
-                    session.getContext());
-            } catch (OXException e) {
-                throw new SettingException(e);
-            }
-        }
-
-        /**
-         * @param settings in this mail settings the bit will be set.
-         * @param value value of the bit that should be set.
-         */
-        protected abstract void setValue(UserSettingMail settings,
-            String value);
-    }
-
     private static Class< ? extends SettingSetup>[] getClasses() {
         return (Class< ? extends SettingSetup>[]) new Class[] {
+            TaskNotification.class,
             Modules.class,
             ModulesCalendar.class,
             ModulesCalendarConflict.class,
@@ -328,10 +259,6 @@ public final class ConfigTree {
             true);
         calNotification.setId(-1);
         tree.addElement(calNotification);
-
-        final Setting taskNotification = new Setting("tasknotification", true);
-        taskNotification.setId(-1);
-        tree.addElement(taskNotification);
 
         final Setting reloadTimes = new Setting("reloadtimes", true);
         reloadTimes.setId(-1);
@@ -456,6 +383,9 @@ public final class ConfigTree {
 
         final Map<String, SharedValue> tmp = new HashMap<String, SharedValue>();
         tmp.put(identifier.getPath(), new ReadOnlyValue() {
+            public boolean isAvailable(final SessionObject session) {
+                return true;
+            }
             public void getValue(final SessionObject session,
                 final Setting setting) {
                 setting.setSingleValue(String.valueOf(session.getUserObject()
@@ -463,6 +393,9 @@ public final class ConfigTree {
             }
         });
         tmp.put(contactId.getPath(), new ReadOnlyValue() {
+            public boolean isAvailable(final SessionObject session) {
+                return true;
+            }
             public void getValue(final SessionObject session,
                 final Setting setting) {
                 setting.setSingleValue(String.valueOf(session.getUserObject()
@@ -475,8 +408,10 @@ public final class ConfigTree {
                 setting.setSingleValue(session.getUserObject()
                     .getPreferredLanguage());
             }
+            public boolean isAvailable(final SessionObject session) {
+                return true;
+            }
             public boolean isWritable() {
-                // TODO Make switch.
                 return true;
             }
             protected void setValue(final UserImpl user, final String value) {
@@ -488,8 +423,10 @@ public final class ConfigTree {
                 final Setting setting) {
                 setting.setSingleValue(session.getUserObject().getTimeZone());
             }
+            public boolean isAvailable(final SessionObject session) {
+                return true;
+            }
             public boolean isWritable() {
-                // TODO Make switch.
                 return true;
             }
             protected void setValue(final UserImpl user, final String value) {
@@ -497,6 +434,10 @@ public final class ConfigTree {
             }
         });
         tmp.put(calNotification.getPath(), new AbstractMailFuncs() {
+            public boolean isAvailable(final SessionObject session) {
+                final UserConfiguration config = session.getUserConfiguration();
+                return config.hasWebMail() && config.hasCalendar();
+            }
             @Override
             protected Object isSet(final UserSettingMail settings) {
                 return settings.isNotifyAppointments();
@@ -507,19 +448,11 @@ public final class ConfigTree {
                 settings.setNotifyAppointments(Boolean.parseBoolean(value));
             }
         });
-        tmp.put(taskNotification.getPath(), new AbstractMailFuncs() {
-            @Override
-            protected Object isSet(final UserSettingMail settings) {
-                return settings.isNotifyTasks();
-            }
-            @Override
-            protected void setValue(final UserSettingMail settings,
-                final String value) {
-                settings.setNotifyTasks(Boolean.parseBoolean(value));
-            }
-        });
         tmp.put(reloadTimes.getPath(), new ReadOnlyValue() {
             private static final int MINUTE = 60 * 1000;
+            public boolean isAvailable(final SessionObject session) {
+                return true;
+            }
             public void getValue(final SessionObject session,
                 final Setting setting) {
                 setting.addMultiValue(0); // Never
@@ -530,12 +463,18 @@ public final class ConfigTree {
             }
         });
         tmp.put(serverVersion.getPath(), new ReadOnlyValue() {
+            public boolean isAvailable(final SessionObject session) {
+                return true;
+            }
             public void getValue(final SessionObject session,
                 final Setting setting) {
                 setting.setSingleValue(Version.VERSION_STRING);
             }
         });
         tmp.put(currentTime.getPath(), new ReadOnlyValue() {
+            public boolean isAvailable(final SessionObject session) {
+                return true;
+            }
             public void getValue(final SessionObject session,
                 final Setting setting) {
                 long time = System.currentTimeMillis();
@@ -546,48 +485,68 @@ public final class ConfigTree {
             }
         });
         tmp.put(tasks.getPath(), new ReadOnlyValue() {
+            public boolean isAvailable(final SessionObject session) {
+                return session.getUserConfiguration().hasTask();
+            }
             public void getValue(final SessionObject session,
                 final Setting setting) throws SettingException {
+                final OXFolderAccess acc = new OXFolderAccess(session
+                    .getContext());
                 try {
-                    setting.setSingleValue(String.valueOf(OXFolderTools
-                        .getTaskDefaultFolder(session.getUserObject().getId(),
-                        session.getContext())));
+                    setting.setSingleValue(acc.getDefaultFolder(session
+                        .getUserObject().getId(), FolderObject.TASK)
+                        .getObjectID());
                 } catch (OXException e) {
                     throw new SettingException(e);
                 }
             }
         });
         tmp.put(calendar.getPath(), new ReadOnlyValue() {
+            public boolean isAvailable(final SessionObject session) {
+                return session.getUserConfiguration().hasCalendar();
+            }
             public void getValue(final SessionObject session,
                 final Setting setting) throws SettingException {
+                final OXFolderAccess acc = new OXFolderAccess(session
+                    .getContext());
                 try {
-                    setting.setSingleValue(String.valueOf(OXFolderTools
-                        .getCalendarDefaultFolder(session.getUserObject()
-                        .getId(), session.getContext())));
+                    setting.setSingleValue(acc.getDefaultFolder(session
+                        .getUserObject().getId(), FolderObject.CALENDAR)
+                        .getObjectID());
                 } catch (OXException e) {
                     throw new SettingException(e);
                 }
             }
         });
         tmp.put(contacts.getPath(), new ReadOnlyValue() {
+            public boolean isAvailable(final SessionObject session) {
+                return session.getUserConfiguration().hasContact();
+            }
             public void getValue(final SessionObject session,
                 final Setting setting) throws SettingException {
+                final OXFolderAccess acc = new OXFolderAccess(session
+                    .getContext());
                 try {
-                    setting.setSingleValue(String.valueOf(OXFolderTools
-                        .getContactDefaultFolder(session.getUserObject()
-                        .getId(), session.getContext())));
+                    setting.setSingleValue(acc.getDefaultFolder(session
+                        .getUserObject().getId(), FolderObject.CONTACT)
+                        .getObjectID());
                 } catch (OXException e) {
                     throw new SettingException(e);
                 }
             }
         });
         tmp.put(infostore.getPath(), new ReadOnlyValue() {
+            public boolean isAvailable(final SessionObject session) {
+                return session.getUserConfiguration().hasInfostore();
+            }
             public void getValue(final SessionObject session,
                 final Setting setting) throws SettingException {
+                final OXFolderAccess acc = new OXFolderAccess(session
+                    .getContext());
                 try {
-                    setting.setSingleValue(String.valueOf(OXFolderTools
-                        .getInfostoreDefaultFolder(session.getUserObject()
-                        .getId(), session.getContext())));
+                    setting.setSingleValue(acc.getDefaultFolder(session
+                        .getUserObject().getId(), FolderObject.INFOSTORE)
+                        .getObjectID());
                 } catch (OXException e) {
                     throw new SettingException(e);
                 }
@@ -597,6 +556,9 @@ public final class ConfigTree {
             public void getValue(final SessionObject session,
                 final Setting setting) {
                 setting.addMultiValue(session.getUserObject().getMail());
+            }
+            public boolean isAvailable(final SessionObject session) {
+                return session.getUserConfiguration().hasWebMail();
             }
             public boolean isWritable() {
                 return false;
@@ -617,6 +579,9 @@ public final class ConfigTree {
                     }
                 }
             }
+            public boolean isAvailable(final SessionObject session) {
+                return session.getUserConfiguration().hasWebMail();
+            }
             public boolean isWritable() {
                 return false;
             }
@@ -631,6 +596,9 @@ public final class ConfigTree {
                 final UserSettingMail settings = session.getUserConfiguration()
                     .getUserSettingMail();
                 setting.setSingleValue(settings.getSendAddr());
+            }
+            public boolean isAvailable(final SessionObject session) {
+                return session.getUserConfiguration().hasWebMail();
             }
             public boolean isWritable() {
                 return true;
@@ -649,6 +617,9 @@ public final class ConfigTree {
             }
         });
         tmp.put(inbox.getPath(), new ReadOnlyValue() {
+            public boolean isAvailable(final SessionObject session) {
+                return session.getUserConfiguration().hasWebMail();
+            }
             public void getValue(final SessionObject session,
                 final Setting setting) throws SettingException {
                 MailInterface mail = null;
@@ -669,6 +640,9 @@ public final class ConfigTree {
             }
         });
         tmp.put(drafts.getPath(), new ReadOnlyValue() {
+            public boolean isAvailable(final SessionObject session) {
+                return session.getUserConfiguration().hasWebMail();
+            }
             public void getValue(final SessionObject session,
                 final Setting setting) throws SettingException {
                 MailInterface mail = null;
@@ -689,6 +663,9 @@ public final class ConfigTree {
             }
         });
         tmp.put(sent.getPath(), new ReadOnlyValue() {
+            public boolean isAvailable(final SessionObject session) {
+                return session.getUserConfiguration().hasWebMail();
+            }
             public void getValue(final SessionObject session,
                 final Setting setting) throws SettingException {
                 MailInterface mail = null;
@@ -709,6 +686,9 @@ public final class ConfigTree {
             }
         });
         tmp.put(spam.getPath(), new ReadOnlyValue() {
+            public boolean isAvailable(final SessionObject session) {
+                return session.getUserConfiguration().hasWebMail();
+            }
             public void getValue(final SessionObject session,
                 final Setting setting) throws SettingException {
                 MailInterface mail = null;
@@ -729,6 +709,9 @@ public final class ConfigTree {
             }
         });
         tmp.put(trash.getPath(), new ReadOnlyValue() {
+            public boolean isAvailable(final SessionObject session) {
+                return session.getUserConfiguration().hasWebMail();
+            }
             public void getValue(final SessionObject session,
                 final Setting setting) throws SettingException {
                 MailInterface mail = null;
@@ -749,6 +732,9 @@ public final class ConfigTree {
             }
         });
         tmp.put(colorquoted.getPath(), new AbstractMailFuncs() {
+            public boolean isAvailable(final SessionObject session) {
+                return session.getUserConfiguration().hasWebMail();
+            }
             protected Object isSet(final UserSettingMail settings) {
                 return settings.isUseColorQuote();
             }
@@ -758,6 +744,9 @@ public final class ConfigTree {
             }
         });
         tmp.put(emoticons.getPath(), new AbstractMailFuncs() {
+            public boolean isAvailable(final SessionObject session) {
+                return session.getUserConfiguration().hasWebMail();
+            }
             protected Object isSet(final UserSettingMail settings) {
                 return settings.isShowGraphicEmoticons();
             }
@@ -767,6 +756,9 @@ public final class ConfigTree {
             }
         });
         tmp.put(deletemail.getPath(), new AbstractMailFuncs() {
+            public boolean isAvailable(final SessionObject session) {
+                return session.getUserConfiguration().hasWebMail();
+            }
             protected Object isSet(final UserSettingMail settings) {
                 return settings.isHardDeleteMsgs();
             }
@@ -776,6 +768,9 @@ public final class ConfigTree {
             }
         });
         tmp.put(inlineattachments.getPath(), new AbstractMailFuncs() {
+            public boolean isAvailable(final SessionObject session) {
+                return session.getUserConfiguration().hasWebMail();
+            }
             protected Object isSet(final UserSettingMail settings) {
                 return settings.isDisplayHtmlInlineContent();
             }
@@ -786,6 +781,9 @@ public final class ConfigTree {
             }
         });
         tmp.put(appendmailtext.getPath(), new AbstractMailFuncs() {
+            public boolean isAvailable(final SessionObject session) {
+                return session.getUserConfiguration().hasWebMail();
+            }
             protected Object isSet(final UserSettingMail settings) {
                 return !settings.isIgnoreOriginalMailTextOnReply();
             }
@@ -798,6 +796,9 @@ public final class ConfigTree {
         tmp.put(forwardmessage.getPath(), new AbstractMailFuncs() {
             private static final String INLINE = "Inline";
             private static final String ATTACHMENT = "Attachment";
+            public boolean isAvailable(final SessionObject session) {
+                return session.getUserConfiguration().hasWebMail();
+            }
             protected Object isSet(final UserSettingMail settings) {
                 final String retval;
                 if (settings.isForwardAsAttachment()) {
@@ -819,6 +820,9 @@ public final class ConfigTree {
                     .getUserSettingMail();
                 setting.setSingleValue(settings.getAutoLinebreak());
             }
+            public boolean isAvailable(final SessionObject session) {
+                return session.getUserConfiguration().hasWebMail();
+            }
             public boolean isWritable() {
                 return true;
             }
@@ -839,6 +843,9 @@ public final class ConfigTree {
             }
         });
         tmp.put(vcard.getPath(), new AbstractMailFuncs() {
+            public boolean isAvailable(final SessionObject session) {
+                return session.getUserConfiguration().hasWebMail();
+            }
             protected Object isSet(final UserSettingMail settings) {
                 return settings.isAppendVCard();
             }
@@ -848,6 +855,9 @@ public final class ConfigTree {
             }
         });
         tmp.put(spamButton.getPath(), new ReadOnlyValue() {
+            public boolean isAvailable(final SessionObject session) {
+                return session.getUserConfiguration().hasWebMail();
+            }
             public void getValue(final SessionObject session,
                 final Setting setting) throws SettingException {
                 final UserSettingMail settings = session.getUserConfiguration()
@@ -860,6 +870,10 @@ public final class ConfigTree {
             }
         });
         tmp.put(showWithoutEmail.getPath(), new ReadOnlyValue() {
+            public boolean isAvailable(final SessionObject session) {
+                final UserConfiguration config = session.getUserConfiguration();
+                return config.hasCalendar() || config.hasTask();
+            }
             public void getValue(final SessionObject session,
                 final Setting setting) throws SettingException {
                 setting.setSingleValue(Boolean.valueOf(ParticipantConfig

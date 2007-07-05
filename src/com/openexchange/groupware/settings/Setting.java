@@ -189,8 +189,7 @@ public class Setting implements Cloneable {
         if (null != elements) {
             setting.elements = new HashMap<String, Setting>(elements.size());
             for (Setting element : elements.values()) {
-                setting.elements.put(element.getName(),
-                    (Setting) element.clone());
+                setting.addElement((Setting) element.clone());
             }
         }
         return setting;
@@ -227,7 +226,7 @@ public class Setting implements Cloneable {
      * @return Returns the leaf.
      */
     public boolean isLeaf() {
-        return null == elements;
+        return null == elements || 0 == elements.size();
     }
 
     /**
@@ -240,6 +239,16 @@ public class Setting implements Cloneable {
         }
         elements.put(child.getName(), child);
         child.setParent(this);
+    }
+
+    /**
+     * Removes the sub element from this element.
+     * @param child sub element to remove.
+     */
+    public void removeElement(final Setting child) {
+        if (null != elements) {
+            elements.remove(child.getName());
+        }
     }
 
     /**
@@ -350,5 +359,12 @@ public class Setting implements Cloneable {
             retval = parent.getPath() + SEPARATOR + name;
         }
         return retval;
+    }
+
+    /**
+     * @return the parent
+     */
+    Setting getParent() {
+        return parent;
     }
 }

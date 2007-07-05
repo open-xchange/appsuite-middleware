@@ -25,6 +25,7 @@
 * 2007-07-05 - marcus.klein@open-xchange.com
 
   - Bugfix #7317: IMAPS now works with JavaMail 1.4.
+  - Now the configuration setting tree adapts to user configuration of modules.
 
 * 2007-07-05 - martin.kauss@open-xchange.com
 

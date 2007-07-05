@@ -49,46 +49,67 @@
 
 package com.openexchange.groupware.settings;
 
+import com.openexchange.api2.OXException;
+import com.openexchange.groupware.UserConfiguration;
+import com.openexchange.groupware.imap.UserSettingMail;
 import com.openexchange.sessiond.SessionObject;
 
 /**
- * This class defines the interface to the storage for user specific settings.
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * This class contains the shared, same functions for all mail bit settings.
  */
-public abstract class SettingStorage {
+public abstract class AbstractMailFuncs implements SharedValue {
 
     /**
      * Default constructor.
      */
-    protected SettingStorage() {
+    protected AbstractMailFuncs() {
         super();
     }
 
     /**
-     * This method stores a specific setting.
-     * @param setting the setting to store.
-     * @throws SettingException if an error occurs while saving the setting.
+     * {@inheritDoc}
      */
-    public abstract void save(Setting setting)
-        throws SettingException;
-
-    /**
-     * This method reads the setting and its subsettings from the database.
-     * @param setting setting to read.
-     * @throws SettingException if an error occurs while reading the setting.
-     */
-    public abstract void readValues(Setting setting)
-        throws SettingException;
-
-    /**
-     * @param session Session.
-     * @return an instance implementing this storage interface.
-     */
-    public static SettingStorage getInstance(final SessionObject session) {
-        try {
-            return new RdbSettingStorage(session);
-        } catch (SettingException e) {
-            throw new RuntimeException(e);
+    public void getValue(final SessionObject session,
+        final Setting setting) {
+        final UserConfiguration userConf = session.getUserConfiguration();
+        if (userConf.hasWebMail()) {
+            setting.setSingleValue(isSet(userConf.getUserSettingMail()));
         }
     }
+
+    /**
+     * @param settings in this mail settings the bit will be requested.
+     * @return the value of the bit.
+     */
+    protected abstract Object isSet(UserSettingMail settings);
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean isWritable() {
+        return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void writeValue(final SessionObject session,
+        final Setting setting) throws SettingException {
+        final UserSettingMail settings = session.getUserConfiguration()
+            .getUserSettingMail();
+        setValue(settings, (String) setting.getSingleValue());
+        try {
+            settings.saveUserSettingMail(session.getUserObject().getId(),
+                session.getContext());
+        } catch (OXException e) {
+            throw new SettingException(e);
+        }
+    }
+
+    /**
+     * @param settings in this mail settings the bit will be set.
+     * @param value value of the bit that should be set.
+     */
+    protected abstract void setValue(UserSettingMail settings,
+        String value);
 }
