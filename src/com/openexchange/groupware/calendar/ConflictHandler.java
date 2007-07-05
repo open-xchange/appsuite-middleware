@@ -91,8 +91,8 @@ public class ConflictHandler {
     }
     
     public CalendarDataObject[] getConflicts() throws OXException {
-        if (cdao.getShownAs() == CalendarDataObject.FREE) {
-            return NO_CONFLICTS; // According to bug #5267
+        if (cdao.getShownAs() == CalendarDataObject.FREE || !so.getUserConfiguration().hasConflictHandling()) {
+            return NO_CONFLICTS; // According to bug #5267 and modularisation concept
         } else if (!action && !cdao.containsStartDate() && !cdao.containsEndDate() && !cdao.containsParticipants() && !cdao.containsRecurrenceType()) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Ignoring conflict checks because we detected an update and no start/end time, recurrence type or participants are changed!");
