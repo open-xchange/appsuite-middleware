@@ -44,6 +44,10 @@
    could happen if the start of the appointment is before
    the start of the mini calendar. This has been fixed.
 
+ - Fixed bug #7134. Weekly recurrence, occurrence and if the first occurrence
+   is not in the first week after the start one occurrence is not calculated.
+   This has been fixed.
+
 * 2007-07-04 - marcus.klein@open-xchange.com
 
   - Added module configuration to the GUI configuration interface.
