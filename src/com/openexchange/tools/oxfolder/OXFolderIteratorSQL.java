@@ -73,7 +73,6 @@ import com.openexchange.cache.FolderCacheProperties;
 import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.i18n.Groups;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -703,6 +702,8 @@ public class OXFolderIteratorSQL {
 			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, true, Integer.valueOf(ctx.getContextId()));
 		} catch (LdapException e) {
 			throw new OXFolderException(FolderCode.LDAP_ERROR, e, true, Integer.valueOf(ctx.getContextId()));
+		} catch (OXException e) {
+			throw e;
 		} catch (Throwable t) {
 			throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, true, Integer.valueOf(ctx.getContextId()));
 		}
