@@ -38,6 +38,8 @@
 
   - Bugfix #7317: IMAPS now works with JavaMail 1.4.
   - Now the configuration setting tree adapts to user configuration of modules.
+  - Bugfix #6692: Changed name of group containing all users to
+    "All internal users".
 
 * 2007-07-05 - martin.kauss@open-xchange.com
 

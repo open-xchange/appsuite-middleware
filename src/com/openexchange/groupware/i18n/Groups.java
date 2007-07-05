@@ -65,5 +65,5 @@ public final class Groups {
     /**
      * Display name of group with identifier 0.
      */
-    public static final String ZERO_DISPLAYNAME = "All groups and users";
+    public static final String ZERO_DISPLAYNAME = "All internal users";
 }
