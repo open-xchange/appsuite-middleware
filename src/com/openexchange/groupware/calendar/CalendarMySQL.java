@@ -329,6 +329,7 @@ class CalendarMySQL implements CalendarSqlImp {
         final PreparedStatement pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
         pst.setTimestamp(1, new Timestamp(d2.getTime()));
         pst.setTimestamp(2, new Timestamp(d1.getTime()));
+        
         final ResultSet rs = getResultSet(pst);
         try {
             CalendarDataObject cdao = null;
@@ -369,13 +370,18 @@ class CalendarMySQL implements CalendarSqlImp {
         return activeDates;
     }
     
-    private final void fillActiveDates(final long start, final long s, final long e, final boolean activeDates[]) {
+    private final void fillActiveDates(final long start, long s, final long e, final boolean activeDates[]) {   
+        if (start > s) {
+            s = start;
+        }       
+        
         int start_pos = 0;
         final int ll = (int)(e-s);
         int len = (int)(ll/CalendarRecurringCollection.MILLI_DAY);
         if (ll != 0 && ll % CalendarRecurringCollection.MILLI_DAY == 0) {
             len--;
         }
+        
         if (s >= start) {
             start_pos = (int)((s-start)/CalendarRecurringCollection.MILLI_DAY);
             if (start_pos > activeDates.length) {
