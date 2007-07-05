@@ -1218,9 +1218,18 @@ public class OXContainerConverter {
 							throw new ConverterException("Irregular durations not supported");
 						}
 						time = trigger.Minutes + (trigger.Hours + (trigger.Days + 7 * trigger.Weeks) * 24) * 60;
-						if (trigger.Negative) {
+						if (trigger.Negative) { //note: This does not make sense currently, because "NEGATIVE" is never set
 							time = -time;
 						}
+						/*fix for 7473: 
+						 * TRIGGERs in ICAL are always negative 
+						 * (because they are _before_ the event), 
+						 * alarms in OX are always positive 
+						 * (because there is no reason for them to 
+						 * be _after_ the event).
+						 */
+						time = -time;
+						//fix:end
 					} else {
 						final DateTimeValue trigger = (DateTimeValue) property.getValue();
 						property = object.getProperty("DTSTART");
