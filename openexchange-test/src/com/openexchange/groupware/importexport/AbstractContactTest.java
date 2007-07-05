@@ -307,6 +307,11 @@ public class AbstractContactTest {
 		}
 	}
 	
+	protected ContactObject getEntry(int entryNumber) throws OXException{
+		final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj);
+		return contactSql.getObjectById(entryNumber, folderId);
+	}
+	
 	protected List<String> _folders(){
 		return Arrays.asList( Integer.toString(folderId) );
 	}

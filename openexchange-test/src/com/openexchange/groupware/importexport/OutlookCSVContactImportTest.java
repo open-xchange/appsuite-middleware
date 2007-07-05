@@ -123,26 +123,18 @@ public class OutlookCSVContactImportTest extends AbstractContactTest{
 			Integer.parseInt(
 				res.getObjectId()));
 		
-		//cleaning up
-		contactSql.deleteContactObject(Integer.parseInt(res.getObjectId()), Integer.parseInt(res.getFolder()), res.getDate());
 	}
 	
 	@Test
 	public void bug7105() throws NumberFormatException, Exception {
 		List<ImportResult> results = importStuff(IMPORT_ONE+"\n"+NAME2); 
 		assertEquals("Two results?" , 2 , results.size());
-		ImportResult res = results.get(1);
-		if(res.hasError()){
-			res.getException().printStackTrace();
+
+		int i = 0;
+		for(ImportResult res : results){
+			assertEquals("Entry " + (i++) + " is correct?" , null, res.getException());
 		}
-		assertTrue("Second import correct?" ,  res.isCorrect() );
-
-		//basic check: 2 entries in folder
-		final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj);
-		assertEquals("One contact in folder?", 2, contactSql.getNumberOfContacts(folderId));
-
-		//cleaning up
-		contactSql.deleteContactObject(Integer.parseInt(res.getObjectId()), Integer.parseInt(res.getFolder()), res.getDate());
+		
 	}
 	
 	@Test
@@ -179,6 +171,25 @@ public class OutlookCSVContactImportTest extends AbstractContactTest{
 		assertEquals("GIVEN_NAME is too long?" , ContactField.GIVEN_NAME.getEnglishOutlookName() , dirk.getMessageArgs()[0]);
 	}
 
+	/*
+	 * "private" flag is being set
+	 */
+	@Test public void bug7710() throws UnsupportedEncodingException, NumberFormatException, OXException{
+		String file = ContactField.SUR_NAME.getGermanOutlookName() + ", " + ContactField.PRIVATE_FLAG.getGermanOutlookName() + "\nTobias Prinz,PRIVAT";
+		List<ImportResult> results = importStuff(file);
+		assertEquals("Only one result", 1, results.size());
+		ImportResult res = results.get(0);
+		ContactObject conObj = getEntry( Integer.parseInt( res.getObjectId() ) );
+		assertTrue("Is private?", conObj.getPrivateFlag());
+		
+		file = ContactField.SUR_NAME.getGermanOutlookName() + ", " + ContactField.PRIVATE_FLAG.getGermanOutlookName() + "\nTobias Prinz,ÖFFENTLICH";
+		results = importStuff(file);
+		assertEquals("Only one result", 1, results.size());
+		res = results.get(0);
+		conObj = getEntry( Integer.parseInt( res.getObjectId() ) );
+		assertTrue("Is private?", !conObj.getPrivateFlag());
+	}
+	
 	public void assertDateEquals(Date date1 , Date date2){
 		Calendar c1 = new GregorianCalendar(), c2 = new GregorianCalendar();
 		c1.setTime(date1);

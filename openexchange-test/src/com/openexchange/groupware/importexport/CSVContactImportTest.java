@@ -224,6 +224,9 @@ public class CSVContactImportTest extends AbstractContactTest {
 		assertEquals("Caught class cast exception", malformedDate , res.getException().getErrorCode() );
 	}
 	
+	/*
+	 * Counting the TIMEZONE element? 
+	 */
 	@Test public void bug7109() throws ImportExportException, UnsupportedEncodingException{
 		List<ImportResult> results1 = importStuff(ContactField.GIVEN_NAME.getReadableName() + " , " + ContactField.BIRTHDAY.getReadableName() + "\n" + "Tobias Prinz , "+System.currentTimeMillis());
 		List<ImportResult> results2 = importStuff(ContactField.GIVEN_NAME.getReadableName() + " , " + ContactField.BIRTHDAY.getReadableName() + "\n" + "Tobias Prinz , 1981/04/01");
@@ -274,6 +277,17 @@ public class CSVContactImportTest extends AbstractContactTest {
 		assertEquals("Fields correct?" ,  ContactField.SUFFIX.getReadableName() , exc.getMessageArgs()[0]);
 	}
 	
+	/*
+	 * "private" flag is being set
+	 */
+	@Test public void bug7710() throws UnsupportedEncodingException, NumberFormatException, OXException{
+		final String file = ContactField.GIVEN_NAME.getReadableName() + " , " + ContactField.PRIVATE_FLAG.getReadableName() + "\nTobias Prinz,true";
+		final List<ImportResult> results = importStuff(file);
+		assertEquals("Only one result", 1, results.size());
+		ImportResult res = results.get(0);
+		ContactObject conObj = getEntry( Integer.parseInt( res.getObjectId() ) );
+		assertTrue("Is private?", conObj.getPrivateFlag());
+	}
 
 	protected void checkFirstResult(int objectID ) throws OXException{
 		final ContactObject co = new RdbContactSQLInterface(sessObj).getObjectById(objectID, folderId);
