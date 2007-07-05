@@ -453,6 +453,15 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         
         // FIXME: Change function from int to user object
         oxu.delete(ctx, user_ids);
+
+        for(int id : user_ids) {
+            try {
+                JCS cache = JCS.getInstance("User");
+                cache.remove(new CacheKey(ctx.getIdAsInt(), id));
+            } catch (final CacheException e) {
+                log.error(e.getMessage(), e);
+            }
+        }
     }
 
     public UserModuleAccess getModuleAccess(final Context ctx, final int user_id, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchUserException {
