@@ -51,9 +51,19 @@ package com.openexchange.groupware.contact.helpers;
 
 import com.openexchange.groupware.contact.ContactException;
 
+/**
+ * This switcher can translate all kinds of objects given to a boolean.
+ * 
+ * This is necessary for CSV files - mostly for the PRIVATE flag, which 
+ * may be -depending on the Outlook version- either "true", "yes", 
+ * "private" or whatever...
+ * 
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
+ *
+ */
 public class ContactSwitcherForBooleans extends	AbstractContactSwitcherWithDelegate {
 
-	public String[] trueValues = {"y", "yes", "true" , "1"};
+	public String[] trueValues = {"y", "yes", "true" , "1", "privat", "private"};
 	
 	public Object[] determineBooleanValue(Object[] objects){
 		Object obj = objects[1];

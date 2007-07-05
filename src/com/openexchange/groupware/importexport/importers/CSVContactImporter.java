@@ -70,6 +70,7 @@ import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.ContactSetter;
 import com.openexchange.groupware.contact.helpers.ContactSwitcher;
+import com.openexchange.groupware.contact.helpers.ContactSwitcherForBooleans;
 import com.openexchange.groupware.contact.helpers.ContactSwitcherForTimestamp;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
@@ -281,9 +282,11 @@ public class CSVContactImporter extends AbstractImporter implements Importer {
 	}
 	
 	protected ContactSwitcher getContactSwitcher(){
-		final ContactSwitcherForTimestamp conSwitch  = new ContactSwitcherForTimestamp();
-		conSwitch.setDelegate(new ContactSetter());
-		return conSwitch;
+		final ContactSwitcherForTimestamp dateSwitch  = new ContactSwitcherForTimestamp();
+		final ContactSwitcherForBooleans boolSwitch  = new ContactSwitcherForBooleans();
+		boolSwitch.setDelegate(dateSwitch);
+		dateSwitch.setDelegate(new ContactSetter());
+		return boolSwitch;
 	}
 	
 	

@@ -268,8 +268,8 @@ public class FrenchOutlookMapper implements ContactFieldMapper {
         french2field.put("Conjoint(e)" , ContactField.SPOUSE_NAME);
         field2french.put(ContactField.SPOUSE_NAME , "Conjoint(e)");
 
-        //french2field.put("Crit\u00e8re de diffusion" , ContactField.); //=sensitivity
-        //field2french.put(ContactField. , "Crit\u00e8re de diffusion"); //=sensitivity
+        french2field.put("Crit\u00e8re de diffusion" , ContactField.PRIVATE_FLAG); //=sensitivity
+        field2french.put(ContactField.PRIVATE_FLAG , "Crit\u00e8re de diffusion"); //=sensitivity
 
         //french2field.put("Disponibilit\u00e9 Internet" , ContactField.); //=internet free/busy
         //field2french.put(ContactField. , "Disponibilit\u00e9 Internet"); //=internet free/busy

@@ -267,8 +267,8 @@ public class GermanOutlookMapper implements ContactFieldMapper {
         german2field.put("Partner" , ContactField.SPOUSE_NAME);
         field2german.put(ContactField.SPOUSE_NAME , "Partner");
 
-        //french2field.put("Vertraulichkeit" , ContactField.); //=sensitivity
-        //field2french.put(ContactField. , "Vertraulichkeit"); //=sensitivity
+        german2field.put("Vertraulichkeit" , ContactField.PRIVATE_FLAG);
+        field2german.put(ContactField.PRIVATE_FLAG , "Vertraulichkeit");
 
         //french2field.put("Internet-Frei/Gebucht" , ContactField.); //=internet free/busy
         //field2french.put(ContactField. , "Internet-Frei/Gebucht"); //=internet free/busy

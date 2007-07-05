@@ -268,8 +268,8 @@ public class EnglishOutlookMapper implements ContactFieldMapper {
     english2field.put("Spouse " , ContactField.SPOUSE_NAME);
     field2english.put(ContactField.SPOUSE_NAME , "Spouse ");
 
-    //french2field.put("Sensitivity" , ContactField.); //=sensitivity
-    //field2french.put(ContactField. , "Sensitivity"); //=sensitivity
+    english2field.put("Sensitivity" , ContactField.PRIVATE_FLAG); //=sensitivity
+    field2english.put(ContactField.PRIVATE_FLAG , "Sensitivity"); //=sensitivity
 
     //french2field.put("Internet Free Busy" , ContactField.); //=internet free/busy
     //field2french.put(ContactField. , "Internet Free Busy"); //=internet free/busy

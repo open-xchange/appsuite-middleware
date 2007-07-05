@@ -62,6 +62,7 @@ import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.ContactSetter;
 import com.openexchange.groupware.contact.helpers.ContactSwitcher;
+import com.openexchange.groupware.contact.helpers.ContactSwitcherForBooleans;
 import com.openexchange.groupware.contact.helpers.ContactSwitcherForSimpleDateFormat;
 import com.openexchange.groupware.contact.mappers.ContactFieldMapper;
 import com.openexchange.groupware.contact.mappers.EnglishOutlookMapper;
@@ -155,11 +156,13 @@ public class OutlookCSVContactImporter extends CSVContactImporter implements Imp
 
 	@Override
 	protected ContactSwitcher getContactSwitcher() {
-		final ContactSwitcherForSimpleDateFormat switcher = new ContactSwitcherForSimpleDateFormat();
-		switcher.addDateFormat( getGermanDateNotation());
-		switcher.addDateFormat( getAmericanDateNotation());
-		switcher.setDelegate(new ContactSetter());
-		return switcher;
+		final ContactSwitcherForSimpleDateFormat dateSwitcher = new ContactSwitcherForSimpleDateFormat();
+		dateSwitcher.addDateFormat( getGermanDateNotation());
+		dateSwitcher.addDateFormat( getAmericanDateNotation());
+		dateSwitcher.setDelegate(new ContactSetter());
+		final ContactSwitcherForBooleans boolSwitcher = new ContactSwitcherForBooleans();
+		boolSwitcher.setDelegate(dateSwitcher);
+		return boolSwitcher;
 	}
 	
 	public static final SimpleDateFormat getGermanDateNotation(){

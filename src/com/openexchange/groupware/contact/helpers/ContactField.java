@@ -172,7 +172,7 @@ public enum ContactField{
 	LINKS (591 , "intfield03" , "LINKS" , ""  , "links"),
 	FOLDER_ID (20 , "fid" , "FOLDER_ID" , "Folder id"  , ""),
 	CONTEXTID (593 , "cid" , "CONTEXTID" , "Context id"  , ""),
-	PRIVATE_FLAG (101 , "pflag" , "PRIVATE_FLAG" , ""  , ""),
+	PRIVATE_FLAG (101 , "pflag" , "PRIVATE_FLAG" , "private"  , "private"),
 	CREATED_BY (2 , "created_from" , "CREATED_BY" , "Created by"  , ""),
 	MODIFIED_BY (3 , "changed_from" , "MODIFIED_BY" , "Modified by"  , ""),
 	CREATION_DATE (4 , "creating_date" , "CREATION_DATE" , "Creation date"  , ""),

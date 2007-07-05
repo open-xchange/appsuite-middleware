@@ -4,10 +4,12 @@
    server's buildfile will cause it to compare the German and the
    English .po/.pot files to check whether all texts have been 
    translated.
- - Refactored the ContactSwitchers, added ContactSwitcherForBooleans
-   as preparation for bugfix #7710.
- - Fixed bug #7473: Trigger times in ICal are always negative, alarm
-   times in OX always positive. Just switching that.
+ - Fixed bug #7473 (importer): Trigger times in ICal are always 
+   negative, alarmtimes in OX always positive. Just switching that now.
+ - Fixed bug #7710 (importer): Now private flag is correctly read.
+   This needed a ContactSwitcher able to translate several strings
+   to a boolean value. Hopefully, the French translation is correct 
+   also...
  
 * 2007-07-05 - thorben.betten@open-xchange.com
 
