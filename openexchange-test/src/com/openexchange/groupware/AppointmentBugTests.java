@@ -1960,4 +1960,73 @@ public class AppointmentBugTests extends TestCase {
             assertEquals("Check start time ("+a+")", new Date(testmatrix[a]), new Date(rs.getStart()));
         }    
     }
+    
+    
+    /*
+    Create the following appointment in your private calendar.
+    From 20.08.2007 Till 31.08.2007 
+    Wholeday
+
+
+
+    Steps to Reproduce:
+    1. Login
+    2. On start page move to August on mini calendar
+    3. Verify that the days 20,21,22...31 are marked bold (correct)
+    4. Go to 'September' on minicalendar
+    5. Verify bold days
+
+    Actual Results:
+    The 1,23,4,5,6,7 are also marked bold.!! But there are no appointments
+     */
+    public void testBug8290() throws Throwable {         
+        deleteAllAppointments();
+        
+        Context context = new ContextImpl(contextid);
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
+        
+        int fid = CalendarTest.getCalendarDefaultFolderForUser(userid, context);
+        
+        long teststarttime = 1188165600000L; // 27.08.2007 00:00
+        long testendtime = 1191103200000L; // 30.09.2007 00:00
+        
+        Date teststartdate = new Date(teststarttime);
+        Date testenddate = new Date(testendtime);
+        
+        CalendarSql csql = new CalendarSql(so);
+        boolean testarray[] = csql.hasAppointmentsBetween(teststartdate, testenddate);
+        
+        boolean check_all_false = true;
+        for (int a = 0; a < testarray.length; a++) {
+            if (testarray[a]) {
+                check_all_false = false;
+            }
+        }
+        
+        assertTrue("Got results, but this test works only if no results are given at start time!", check_all_false);
+        
+        long starttime = 1187560800000L; //  20.08.2007 00:00
+        long endtime = 1188511200000L; // 31.08.2007 00:00
+        
+        CalendarDataObject cdao = new CalendarDataObject();
+        cdao.setContext(context);
+        cdao.setTimezone(TIMEZONE);
+        cdao.setParentFolderID(fid);
+        cdao.setStartDate(new Date(starttime));
+        cdao.setEndDate(new Date(endtime));
+        cdao.setFullTime(true);
+        cdao.setTitle("testBug8290");
+        cdao.setIgnoreConflicts(true);
+        
+        csql.insertAppointmentObject(cdao);
+        
+        testarray = csql.hasAppointmentsBetween(teststartdate, testenddate);
+        boolean checkarray[] = { true, true, true, true, false, false, false, false, false, false } ;
+        
+        for (int a = 0; a < checkarray.length; a++) {
+            assertEquals("Check array position "+a+" failed!", checkarray[a], testarray[a]);
+        }
+                
+    }
+    
 }
