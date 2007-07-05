@@ -62,6 +62,9 @@
    is not in the first week after the start one occurrence is not calculated.
    This has been fixed.
 
+ - Fixed bug #7878. The first recurring calculation result was never 
+   provided by the free/busy interface. This has been fixed.
+
 * 2007-07-04 - marcus.klein@open-xchange.com
 
   - Added module configuration to the GUI configuration interface.
