@@ -59,30 +59,24 @@ public class List extends UserAbstraction {
 
             final OXUserInterface oxu = (OXUserInterface) Naming.lookup(RMI_HOSTNAME + OXUserInterface.RMI_NAME);
 
-            final int[] allusers = oxu.getAll(ctx, auth);
+            User[] allusers = oxu.getAll(ctx, auth);            
             
-            final ArrayList<User> users = new ArrayList<User>();
-            for (final int id : allusers) {
-                final User user = new User(id);
-                users.add(user);
-            }
-            
-            final User[] newusers = oxu.getData(ctx, users.toArray(new User[users.size()]), auth);
+            allusers = oxu.getData(ctx, allusers, auth);
             
             
 //          map user data to corresponding module access
             HashMap<Integer, UserModuleAccess> usr2axs = new HashMap<Integer, UserModuleAccess>();
             
-            for (User user : newusers) {      
+            for (User user : allusers) {      
                 // fetch module access for every user
                 usr2axs.put(user.getId(), oxu.getModuleAccess(ctx, user.getId(), auth));
             }           
             
             
             if (null != parser.getOptionValue(this.csvOutputOption)) {
-                precsvinfos(newusers,usr2axs);
+                precsvinfos(allusers,usr2axs);
             } else {
-                sysoutOutput(newusers,usr2axs);
+                sysoutOutput(allusers,usr2axs);
             }
             sysexit(0);
         } catch (final java.rmi.ConnectException neti) {
