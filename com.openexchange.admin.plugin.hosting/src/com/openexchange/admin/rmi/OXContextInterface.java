@@ -233,7 +233,17 @@ public interface OXContextInterface extends Remote {
     throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException, InvalidDataException;
     
     /**
-     * Change specified context details
+     * Change specified context!
+     * 
+     * This method currently ONLY modifies following data:
+     * 
+     * Login mappings - You can then login via usernam@loginmapping instead of username@contextID          
+     *      
+     * Context name in configdb - This is for better organization of contexts in your whole system.
+     *  
+     * Change filestore quota size - Change how much quota the context is allowed to use!
+     * This will result that the changeQuota method is deprecated!
+     *       
      * @param ctx Change context data.
      * @param auth Credentials for authenticating against server.
      * @throws RemoteException
@@ -262,6 +272,7 @@ public interface OXContextInterface extends Remote {
     public void changeDatabase(Context ctx,Database db_handle,Credentials auth) throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException;
 
     /**
+     * 
      * Change the quota size of the given context.
      * @param ctx Context object.
      * @param quota_max Maximum quota for the context.
@@ -271,6 +282,8 @@ public interface OXContextInterface extends Remote {
      * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException If the data sent within the method contained invalid data.
      * @throws RemoteException General RMI Exception
      * @throws StorageException When an error in the subsystems occured.
+     * @deprecated  Method should replaced by changeContextSetup(Context,Credentials) in the future!
+     * 
      */
     public void changeQuota(Context ctx, long quota_max,Credentials auth) 
     throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException;
