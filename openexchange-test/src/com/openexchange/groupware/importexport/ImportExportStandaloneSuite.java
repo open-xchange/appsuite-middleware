@@ -49,6 +49,8 @@
 
 package com.openexchange.groupware.importexport;
 
+import com.openexchange.tools.versit.filetokenizer.VCardTokenizerTest;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -63,6 +65,7 @@ public class ImportExportStandaloneSuite extends TestSuite {
 	public static Test suite(){
 		TestSuite tests = new TestSuite();
 		//basics
+		tests.addTestSuite( VCardTokenizerTest.class );
 		tests.addTestSuite( ContactFieldTester.class );
 		tests.addTestSuite( ContactSwitcherTester.class );
 		tests.addTest( SizedInputStreamTest.suite() );
