@@ -49,10 +49,14 @@
 
 package com.openexchange.tools.versit.filetokenizer;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.LinkedList;
 import java.util.List;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.tools.versit.ICalendar;
 import com.openexchange.tools.versit.VCard;
@@ -71,6 +75,8 @@ import com.openexchange.tools.versit.old.VCard21;
  *
  */
 public class VCardTokenizer {
+	private static final Log LOG = LogFactory.getLog(VCardTokenizer.class);
+	
 	public static final String VCARD_V3  = "3.0";
 	public static final String VCARD_V21 = "2.1";
 	public static final String VCALENDAR = "1.0";
@@ -92,52 +98,63 @@ public class VCardTokenizer {
 	 */
 	public VCardTokenizer(InputStream is) throws IOException{
 		streamAsBytes = new LinkedList<Byte>();
-		vcard = is;
+		vcard = new BufferedInputStream(is);
 	}
 	
 
-	public List<VCardFileToken> split() throws IOException{
+	public List<VCardFileToken> split(){
 		final List<VCardFileToken> chunks = new LinkedList<VCardFileToken>();
 		
 		VCardFileToken currentChunk = new VCardFileToken();
 		boolean potentialCalendar = false;
 		boolean potentialCard = false;
 		String currLine;
-		while( (currLine = _readLine()) != null){
-			String compLine = currLine.trim().toUpperCase();
-			
-			if( compLine.startsWith("VERSION") ){
-				if(potentialCard && currLine.trim().endsWith(VCARD_V3)){
-					currentChunk.setVersitDefinition(VCard.definition);
+		try {
+			while( (currLine = _readLine()) != null){
+				String compLine = currLine.trim().toUpperCase();
+				
+				if( compLine.startsWith("VERSION") ){
+					if(potentialCard && currLine.trim().endsWith(VCARD_V3)){
+						currentChunk.setVersitDefinition(VCard.definition);
+					} else
+					if(potentialCard && compLine.endsWith(VCARD_V21)){
+						currentChunk.setVersitDefinition(VCard21.definition);
+					} else 
+					if(potentialCalendar && compLine.endsWith(VCALENDAR)){
+						currentChunk.setVersitDefinition(VCalendar10.definition);
+					} else 
+					if(potentialCalendar && compLine.endsWith(ICALENDAR)){
+						currentChunk.setVersitDefinition(ICalendar.definition);
+					}
 				} else
-				if(potentialCard && compLine.endsWith(VCARD_V21)){
-					currentChunk.setVersitDefinition(VCard21.definition);
-				} else 
-				if(potentialCalendar && compLine.endsWith(VCALENDAR)){
-					currentChunk.setVersitDefinition(VCalendar10.definition);
-				} else 
-				if(potentialCalendar && compLine.endsWith(ICALENDAR)){
-					currentChunk.setVersitDefinition(ICalendar.definition);
+				if( compLine.startsWith("BEGIN") && compLine.endsWith("VCALENDAR")){
+						potentialCalendar = true;
+				} else
+				if( compLine.startsWith("BEGIN") && compLine.endsWith("VCARD") ){
+						potentialCard = true;
+				} else
+				if( compLine.startsWith("END") &&
+					(compLine.endsWith("VCARD") || compLine.endsWith("VCALENDAR"))){
+					currentChunk.setContent(_toByteArray(streamAsBytes));
+					streamAsBytes = new LinkedList<Byte>();
+					chunks.add(currentChunk);
+					entriesFound++;
+					potentialCalendar = false;
+					potentialCard = false;
+					if(currentChunk.getVersitDefinition() != null){
+						entriesRecognized++;
+					}
+					currentChunk = new VCardFileToken();
 				}
-			} else
-			if( compLine.startsWith("BEGIN") && compLine.endsWith("VCALENDAR")){
-					potentialCalendar = true;
-			} else
-			if( compLine.startsWith("BEGIN") && compLine.endsWith("VCARD") ){
-					potentialCard = true;
-			} else
-			if( compLine.startsWith("END") &&
-				(compLine.endsWith("VCARD") || compLine.endsWith("VCALENDAR"))){
-				currentChunk.setContent(_toByteArray(streamAsBytes));
-				streamAsBytes = new LinkedList<Byte>();
-				chunks.add(currentChunk);
-				entriesFound++;
-				potentialCalendar = false;
-				potentialCard = false;
-				if(currentChunk.getVersitDefinition() != null){
-					entriesRecognized++;
+			}
+		} catch(IOException e) {
+			LOG.error("IOException while trying to tokenize stream that was a VCARD (supposedly)", e);
+			if(vcard != null){
+				try {
+					vcard.close();
+				} catch (IOException e1) {
+					LOG.error("Tried to close stream of VCARD that was closed already" , e);
 				}
-				currentChunk = new VCardFileToken();
 			}
 		}
 		return chunks;

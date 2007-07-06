@@ -1,3 +1,7 @@
+* 2007-07-06 - tobias.prinz@open-xchange.com
+
+ - Improved performance of VCardTokenizer. A lot.
+
 * 2007-07-06 - thorben.betten@open-xchange.com
 
  - Fastened input stream reading from message parts
