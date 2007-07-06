@@ -600,6 +600,14 @@ public class OXFolderManagerImpl implements OXFolderManager {
 		}
 	}
 
+	private final int[] SYSTEM_PUBLIC_FOLDERS = { FolderObject.SYSTEM_PUBLIC_FOLDER_ID,
+			FolderObject.SYSTEM_INFOSTORE_FOLDER_ID };
+
+	private static final boolean isInArray(final int key, final int[] a) {
+		Arrays.sort(a);
+		return Arrays.binarySearch(a, key) >= 0;
+	}
+
 	private final void move(final int folderId, final int targetFolderId, final long lastModified) throws OXException {
 		/*
 		 * Load source folder
@@ -672,7 +680,7 @@ public class OXFolderManagerImpl implements OXFolderManager {
 				throw new OXFolderException(FolderCode.ONLY_PRIVATE_TO_PRIVATE_MOVE, getFolderName(storageSrc), Integer
 						.valueOf(ctx.getContextId()));
 			} else if (storageSrc.getType() == FolderObject.PUBLIC
-					&& ((storageDest.getType() == FolderObject.PRIVATE || (storageDest.getType() == FolderObject.SYSTEM_TYPE && targetFolderId != FolderObject.SYSTEM_PUBLIC_FOLDER_ID)))) {
+					&& ((storageDest.getType() == FolderObject.PRIVATE || (storageDest.getType() == FolderObject.SYSTEM_TYPE && !isInArray(targetFolderId, SYSTEM_PUBLIC_FOLDERS))))) {
 				throw new OXFolderException(FolderCode.ONLY_PUBLIC_TO_PUBLIC_MOVE, getFolderName(storageSrc), Integer
 						.valueOf(ctx.getContextId()));
 			} else if (storageSrc.getModule() == FolderObject.INFOSTORE
