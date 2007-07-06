@@ -2248,7 +2248,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         
         Connection config_db_write = null;
         Connection ox_db_write = null;
-        PreparedStatement prep = null;
         try {
             config_db_write = cache.getWRITEConnectionForCONFIGDB();
             config_db_write.setAutoCommit(false);
@@ -2287,14 +2286,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             log.error("SQL Error", e);
             throw new StorageException(e);
         } finally {
-            try {
-                if (null != prep) {
-                    prep.close();
-                }
-            } catch (final SQLException ecp) {
-                log.error(OXContextMySQLStorageCommon.LOG_ERROR_CLOSING_STATEMENT);
-            }
-
+           
             try {
                 if (null != config_db_write) {
                     cache.pushConfigDBWrite(config_db_write);
@@ -2302,8 +2294,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             } catch (final PoolException exp) {
                 log.error("Error pushing configdb connection to pool!", exp);
             }
-            
-            
+                        
             try {
                 if (ox_db_write != null) {
                     cache.pushOXDBWrite(ctx.getIdAsInt().intValue(), ox_db_write);
