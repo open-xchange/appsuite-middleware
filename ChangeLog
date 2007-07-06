@@ -1,3 +1,7 @@
+* 2007-07-06 - marcus.klein@open-xchange.com
+
+ - Bugfix #7046: Changed the error message.
+
 * 2007-07-06 - tobias.prinz@open-xchange.com
 
  - Improved performance of VCardTokenizer. A lot.

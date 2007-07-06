@@ -153,11 +153,10 @@ public class LoginException extends AbstractOXException {
         MISSING_ATTRIBUTES("Too few (%d) login attributes.",
             Category.USER_INPUT, Source.USER, 4),
         /**
-         * Problem while communicating with external authorization.
+         * Login not possible at the moment. Please try again later.
          */
-        COMMUNICATION("Problem while communicating with external "
-            + "authorization.", Category.SUBSYSTEM_OR_SERVICE_DOWN,
-            Source.SYSTEM, 5),
+        COMMUNICATION("Login not possible at the moment. Please try again "
+            + "later.", Category.SUBSYSTEM_OR_SERVICE_DOWN, Source.SYSTEM, 5),
         /**
          * Invalid credentials.
          */

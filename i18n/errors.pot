@@ -161,9 +161,6 @@ msgstr ""
 msgid "An IOError occurred: %s"
 msgstr ""
 
-msgid "An SQL error occurred"
-msgstr ""
-
 msgid "An SQL error occurred in context %s"
 msgstr ""
 
@@ -186,6 +183,9 @@ msgid "An SQL error occurred while performing task SpamUpdateTask: %1$s."
 msgstr ""
 
 msgid "An SQL error occurred while reading schema version information: %1$s."
+msgstr ""
+
+msgid "An SQL error occurred: %1$s"
 msgstr ""
 
 msgid "An SQL error occurred: %s"
@@ -225,6 +225,9 @@ msgid "Broken file uploaded: %s"
 msgstr ""
 
 msgid "Cache %s could not be initialized due to following error: %s"
+msgstr ""
+
+msgid "Cache initialization failed. Region: %1$s"
 msgstr ""
 
 msgid "CalendarOperation: Context not set."
@@ -551,6 +554,9 @@ msgstr ""
 msgid "Counting tasks did not return a result."
 msgstr ""
 
+msgid "Cowardly refusing to import an entry flagged as confidential."
+msgstr ""
+
 msgid "Creator cannot be participant."
 msgstr ""
 
@@ -575,6 +581,11 @@ msgid "Default folder %s cannot be renamed in context %s"
 msgstr ""
 
 msgid "Default folder %s cannot be updated"
+msgstr ""
+
+msgid ""
+"Defined permissions for folder %s in context %s are not applicable to user %"
+"s due to user configuration"
 msgstr ""
 
 msgid "Deletion of folder %s failed"
@@ -993,6 +1004,9 @@ msgstr ""
 msgid "Link is not implemented."
 msgstr ""
 
+msgid "Login not possible at the moment. Please try again later."
+msgstr ""
+
 msgid ""
 "Login to imap server %s failed for user %s in context %s. Please try again "
 "later"
@@ -1289,6 +1303,9 @@ msgstr ""
 msgid "Problem while communicating with external authorization."
 msgstr ""
 
+msgid "Problem while initialising configuration tree."
+msgstr ""
+
 msgid "Problem with URI when creating context specific filestore location."
 msgstr ""
 
@@ -1503,6 +1520,9 @@ msgid "The file store could not be reched"
 msgstr ""
 
 msgid "The folder %d is not an Infostore Folder"
+msgstr ""
+
+msgid "The following field(s) are too long to be imported: %s"
 msgstr ""
 
 msgid ""
@@ -1837,10 +1857,18 @@ msgstr ""
 msgid "Update process initialization failed: %1$s."
 msgstr ""
 
+msgid "Updating database ... Try again later."
+msgstr ""
+
 msgid "Upload Quota (%d) exceeded"
 msgstr ""
 
 msgid "Uploaded file is of type %s, cannot handle that"
+msgstr ""
+
+msgid ""
+"User %s grants invalid permissions on shared folder %s in context %s. Only "
+"owner of parental shared folder %s may be folder admin"
 msgstr ""
 
 msgid ""
@@ -1912,8 +1940,17 @@ msgid ""
 msgstr ""
 
 msgid ""
-"User %s must not grant \"create subfolder\" permission for another user on "
-"shared folder %s in context %s"
+"User %s is not allowed to share folder %s in context %s due to user "
+"configuration"
+msgstr ""
+
+msgid "User configuration cache could not be cleared: %1$s"
+msgstr ""
+
+msgid "User configuration could not be put into cache: %1$s"
+msgstr ""
+
+msgid "User configuration could not be removed from cache: %1$s"
 msgstr ""
 
 msgid "User dictionary could not be found."
@@ -2032,9 +2069,6 @@ msgid "You need write permissions to lock a document."
 msgstr ""
 
 msgid "You need write permissions to unlock a document."
-msgstr ""
-
-msgid "Your database is currently updated. Try again later."
 msgstr ""
 
 msgid "Your session %s expired. Please start a new browser session."
