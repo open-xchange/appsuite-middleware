@@ -498,7 +498,7 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
             final InvalidDataException invalidDataException = new InvalidDataException("Context is null");
             log.error(invalidDataException.getMessage(), invalidDataException);
             throw invalidDataException;
-        }        
+        }
         doAuthentication(auth);
         
         final int context_id = ctx.getIdAsInt();
@@ -571,5 +571,69 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
             log.error(databaseUpdateException.getMessage(), databaseUpdateException);
             throw databaseUpdateException;
         }
+    }
+    
+    
+    // this method will remove 
+    public void changeContextSetup(Context ctx, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
+        
+        try {
+            doNullCheck(ctx,ctx.getIdAsInt());
+        } catch (InvalidDataException e1) {
+            final InvalidDataException invalidDataException = new InvalidDataException("Context is invalid");
+            log.error(invalidDataException.getMessage(), invalidDataException);
+            throw invalidDataException;
+        }
+        
+        doAuthentication(auth);
+        
+        final int context_id = ctx.getIdAsInt();
+        log.debug("" + context_id);
+        try {
+            final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
+            if (!tool.existsContext(ctx)) {
+                throw new NoSuchContextException();
+            }
+            final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
+            oxcox.changeSetup(ctx);
+        } catch (final StorageException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (final NoSuchContextException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        }        
+    
+    }
+    
+    
+    // this method will remove getSetup
+    public Context getContextSetup(Context ctx, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
+        try {
+            doNullCheck(ctx,ctx.getIdAsInt());
+        } catch (InvalidDataException e1) {
+            final InvalidDataException invalidDataException = new InvalidDataException("Context is invalid");
+            log.error(invalidDataException.getMessage(), invalidDataException);
+            throw invalidDataException;
+        }
+        
+        doAuthentication(auth);
+        
+        final int context_id = ctx.getIdAsInt();
+        log.debug("" + context_id);
+        try {
+            final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
+            if (!tool.existsContext(ctx)) {
+                throw new NoSuchContextException();
+            }
+            final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
+            return oxcox.getSetup(ctx);
+        } catch (final StorageException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (final NoSuchContextException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        }        
     }
 }

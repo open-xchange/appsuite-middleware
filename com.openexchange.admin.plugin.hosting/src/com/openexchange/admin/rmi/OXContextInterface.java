@@ -217,6 +217,35 @@ public interface OXContextInterface extends Remote {
     public Context getSetup(Context ctx,Credentials auth) 
     throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException, InvalidDataException;
 
+    
+    /**
+     * Get specified context details
+     * @param ctx With context ID set.
+     * @param auth Credentials for authenticating against server.
+     * @return Data for the requested context.
+     * @throws RemoteException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws StorageException
+     * @throws InvalidDataException
+     */
+    public Context getContextSetup(Context ctx,Credentials auth) 
+    throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException, InvalidDataException;
+    
+    /**
+     * Change specified context details
+     * @param ctx Change context data.
+     * @param auth Credentials for authenticating against server.
+     * @throws RemoteException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws StorageException
+     * @throws InvalidDataException
+     */
+    public void changeContextSetup(Context ctx,Credentials auth) 
+    throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException, InvalidDataException;
+    
+    
     /**
      * Change the database handle of the given context.
      * @param ctx Context object
