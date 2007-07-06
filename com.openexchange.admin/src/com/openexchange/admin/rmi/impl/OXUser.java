@@ -722,6 +722,10 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
             throw new InvalidDataException("Empty password is not allowed");
         }
         
+        if( newuser.getUsername() != null ) {
+            throw new InvalidDataException("Username cannot be changed");
+        }
+        
         final OXToolStorageInterface oxtool = OXToolStorageInterface.getInstance();
         
         if (!oxtool.isContextAdmin(ctx, newuser.getId())) {
