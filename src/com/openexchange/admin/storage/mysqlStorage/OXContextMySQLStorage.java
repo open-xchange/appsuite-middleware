@@ -2242,4 +2242,78 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         tool.checkPrimaryMail(ctx, admin_user.getPrimaryEmail());
         oxs.create(ctx, admin_user, access, ox_write_con, internal_user_id, contact_id, uid_number);
     }
+
+    @Override
+    public void changeSetup(Context ctx) throws StorageException {
+        
+        Connection config_db_write = null;
+        Connection ox_db_write = null;
+        PreparedStatement prep = null;
+        try {
+            config_db_write = cache.getWRITEConnectionForCONFIGDB();
+            config_db_write.setAutoCommit(false);
+            
+            ox_db_write = cache.getWRITEConnectionForContext(ctx.getIdAsInt());            
+            ox_db_write.setAutoCommit(false);
+            
+            // do operations on db
+            this.oxcontextcommon.changeContextSetup(ctx, config_db_write,ox_db_write);
+            
+            // commit changes to db
+            ox_db_write.commit();
+            config_db_write.commit();
+        } catch (final PoolException e) {
+            log.error("Pool Error", e);
+            throw new StorageException(e);
+        } catch (final SQLException e) {
+            if(config_db_write!=null){
+                try {
+                    config_db_write.rollback();
+                } catch (SQLException e1) {
+                    log.error("Error in rollback of configdb connection",e1);
+                    throw new StorageException(e1);                   
+                }
+            }
+            
+            if(ox_db_write!=null){
+                try {
+                    ox_db_write.rollback();
+                } catch (SQLException e1) {
+                    log.error("Error in rollback of oxdb connection",e1);
+                    throw new StorageException(e1);                   
+                }
+            } 
+            
+            log.error("SQL Error", e);
+            throw new StorageException(e);
+        } finally {
+            try {
+                if (null != prep) {
+                    prep.close();
+                }
+            } catch (final SQLException ecp) {
+                log.error(OXContextMySQLStorageCommon.LOG_ERROR_CLOSING_STATEMENT);
+            }
+
+            try {
+                if (null != config_db_write) {
+                    cache.pushConfigDBWrite(config_db_write);
+                }
+            } catch (final PoolException exp) {
+                log.error("Error pushing configdb connection to pool!", exp);
+            }
+            
+            
+            try {
+                if (ox_db_write != null) {
+                    cache.pushOXDBWrite(ctx.getIdAsInt().intValue(), ox_db_write);
+                }
+            } catch (final PoolException exp) {
+                log.error("Pool Error pushing ox write connection to pool!",exp);
+            }
+            
+            
+        }
+        
+    }
 }

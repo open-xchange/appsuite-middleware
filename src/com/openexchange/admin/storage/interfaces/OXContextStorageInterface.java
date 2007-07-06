@@ -134,6 +134,13 @@ public abstract class OXContextStorageInterface {
      */
     public abstract Context getSetup(final Context ctx) throws StorageException;
 
+    
+    /**
+     * @param ctx
+     * @throws StorageException
+     */
+    public abstract void changeSetup(final Context ctx) throws StorageException;
+    
     /**
      * @param ctx
      * @param admin_user
