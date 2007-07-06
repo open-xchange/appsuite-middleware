@@ -1,0 +1,126 @@
+package com.openexchange.admin.console.user;
+
+import java.lang.reflect.InvocationTargetException;
+import java.net.MalformedURLException;
+import java.rmi.ConnectException;
+import java.rmi.Naming;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+
+import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.console.AdminParser.MissingOptionException;
+import com.openexchange.admin.console.CmdLineParser.IllegalOptionValueException;
+import com.openexchange.admin.console.CmdLineParser.UnknownOptionException;
+import com.openexchange.admin.rmi.OXUserInterface;
+import com.openexchange.admin.rmi.dataobjects.Context;
+import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
+
+public abstract class CreateCore extends UserAbstraction {
+
+    protected final void setOptions(final AdminParser parser) {
+    
+        setExtendedOption(parser);
+        setDefaultCommandLineOptions(parser);
+    
+        // add mandatory options
+        setMandatoryOptions(parser);
+    
+        // add optional opts
+        setOptionalOptions(parser);
+        
+        // module access params
+        setModuleAccessOptions(parser);
+        
+        setFurtherOptions(parser);
+    }
+
+    protected abstract void setFurtherOptions(final AdminParser parser);
+
+    protected final void commonfunctions(final AdminParser parser, final String[] args) {
+        // set all needed options in our parser
+        setOptions(parser);
+
+        setExtendedOptions(parser);
+
+        // parse the command line
+        try {
+            parser.ownparse(args);
+
+            printExtendedOutputIfSet(parser);
+            
+            final Context ctx = new Context(DEFAULT_CONTEXT);
+
+            if (parser.getOptionValue(this.contextOption) != null) {
+                ctx.setID(Integer.parseInt((String) parser.getOptionValue(this.contextOption)));
+            }
+
+            final Credentials auth = new Credentials((String) parser.getOptionValue(this.adminUserOption), (String) parser.getOptionValue(this.adminPassOption));
+
+            // get rmi ref
+            final OXUserInterface oxusr = (OXUserInterface) Naming.lookup(RMI_HOSTNAME + OXUserInterface.RMI_NAME);
+
+            // create user obj
+            final User usr = new User();
+
+            // fill user obj with mandatory values from console
+            setMandatoryOptionsinUser(parser, usr);
+
+            // add optional values if set
+            setOptionalOptionsinUser(parser, usr);
+
+            applyExtendedOptionsToUser(parser, usr);
+
+            // default set all access rights
+            final UserModuleAccess access = new UserModuleAccess();
+            access.enableAll();
+
+            // set module access rights
+            setModuleAccessOptionsinUserCreate(parser, access);
+            
+            maincall(parser, oxusr, ctx, usr, access, auth);
+            
+            sysexit(0);
+        } catch (final ConnectException neti) {
+            printError(neti.getMessage());
+            sysexit(SYSEXIT_COMMUNICATION_ERROR);
+        } catch (final NumberFormatException num) {
+            printInvalidInputMsg("Ids must be numbers!");
+            sysexit(1);
+        } catch (final IllegalOptionValueException e) {
+            printError("Illegal option value : " + e.getMessage());
+            printrightoptions(parser);
+            sysexit(SYSEXIT_ILLEGAL_OPTION_VALUE);
+        } catch (final UnknownOptionException e) {
+            printError("Unrecognized options on the command line: " + e.getMessage());
+            printrightoptions(parser);
+            sysexit(SYSEXIT_UNKNOWN_OPTION);
+        } catch (final MissingOptionException e) {
+            printError(e.getMessage());
+            printrightoptions(parser);
+            sysexit(SYSEXIT_MISSING_OPTION);
+        } catch (final MalformedURLException e) {
+            printServerException(e);
+            sysexit(1);
+        } catch (final RemoteException e) {
+            printServerException(e);
+            sysexit(SYSEXIT_REMOTE_ERROR);
+        } catch (final NotBoundException e) {
+            printServerException(e);
+            sysexit(1);
+        } catch (final IllegalArgumentException e) {
+            printError(e.getMessage());
+            sysexit(1);
+        } catch (final IllegalAccessException e) {
+            printError(e.getMessage());
+            sysexit(1);
+        } catch (final InvocationTargetException e) {
+            printError(e.getMessage());
+            sysexit(1);
+        }
+
+    }
+    
+    protected abstract void maincall(final AdminParser parser, final OXUserInterface oxusr, final Context ctx, final User usr, final UserModuleAccess access, final Credentials auth) throws RemoteException;
+}
