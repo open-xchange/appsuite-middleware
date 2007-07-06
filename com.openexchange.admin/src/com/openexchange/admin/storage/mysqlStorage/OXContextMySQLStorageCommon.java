@@ -53,6 +53,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 
 import org.apache.commons.logging.Log;
@@ -90,6 +91,31 @@ public abstract class OXContextMySQLStorageCommon {
 
     public OXContextMySQLStorageCommon() {
         oxutilcommon = new OXUtilMySQLStorageCommon();
+    }
+    
+    public void changeContextSetup(final Context ctx, final Connection configdb_con,final Connection oxdb_con) throws SQLException, PoolException {
+                
+        PreparedStatement prep = null;
+        
+        try {
+                        
+            // now change values from the context as defined in the admin api
+            
+            // 1st. change login mappings in configdb,
+            
+            ctx.getLoginMappings().remove(String.valueOf(ctx.getIdAsInt())); // Deny change of mapping cid<->cid
+            
+            
+            
+        }finally{
+            try {
+                if (prep != null) {
+                    prep.close();
+                }
+            } catch (final SQLException e) {
+                log.error("SQL Error closing statement!", e);
+            }            
+        }
     }
 
     public Context getData(final Context ctx, final Connection configdb_con) throws SQLException, PoolException  {
@@ -217,7 +243,18 @@ public abstract class OXContextMySQLStorageCommon {
             if (name != null) {
                 cs.setName(name);
             }
-
+            
+            // add context login mappings
+            prep = configdb_con.prepareStatement("SELECT login_info FROM login2context WHERE cid = ?");
+            prep.setInt(1, context_id);
+            rs = prep.executeQuery();
+            while (rs.next()) {
+                cs.addLoginMapping(rs.getString(1));                
+            }
+            rs.close();
+            prep.close();
+            
+            
             // context id
             cs.setID(context_id);
             return cs;
