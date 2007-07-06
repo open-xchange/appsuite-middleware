@@ -303,7 +303,7 @@ public class UserTest extends AbstractTest {
         
         boolean founduser = false;
         for(final User element: srv_response){
-            if(element.getId()==urs.getId()){
+            if(element.getId().intValue()==urs.getId().intValue()){
                 founduser = true;
             }
         }
