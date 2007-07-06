@@ -680,11 +680,13 @@ public class OXFolderManagerImpl implements OXFolderManager {
 				throw new OXFolderException(FolderCode.ONLY_PRIVATE_TO_PRIVATE_MOVE, getFolderName(storageSrc), Integer
 						.valueOf(ctx.getContextId()));
 			} else if (storageSrc.getType() == FolderObject.PUBLIC
-					&& ((storageDest.getType() == FolderObject.PRIVATE || (storageDest.getType() == FolderObject.SYSTEM_TYPE && !isInArray(targetFolderId, SYSTEM_PUBLIC_FOLDERS))))) {
+					&& ((storageDest.getType() == FolderObject.PRIVATE || (storageDest.getType() == FolderObject.SYSTEM_TYPE && !isInArray(
+							targetFolderId, SYSTEM_PUBLIC_FOLDERS))))) {
 				throw new OXFolderException(FolderCode.ONLY_PUBLIC_TO_PUBLIC_MOVE, getFolderName(storageSrc), Integer
 						.valueOf(ctx.getContextId()));
 			} else if (storageSrc.getModule() == FolderObject.INFOSTORE
-					&& storageDest.getModule() != FolderObject.INFOSTORE && targetFolderId != FolderObject.SYSTEM_INFOSTORE_FOLDER_ID) {
+					&& storageDest.getModule() != FolderObject.INFOSTORE
+					&& targetFolderId != FolderObject.SYSTEM_INFOSTORE_FOLDER_ID) {
 				throw new OXFolderException(FolderCode.INCOMPATIBLE_MODULES,
 						folderModule2String(storageSrc.getModule()), folderModule2String(storageDest.getModule()));
 			} else if (storageSrc.getModule() != FolderObject.INFOSTORE
