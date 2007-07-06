@@ -1,3 +1,8 @@
+* 2007-07-06 - marcus.klein@open-xchange.com
+
+ - Bugfix #8300: Displaying properly formatted address (RFC 822 syntax) in
+   reply/forward prefix text
+
 * 2007-07-02 - marcus.klein@open-xchange.com
 
   - Bugfix #8234: Set default log level to INFO.
