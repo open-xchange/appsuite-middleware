@@ -12,6 +12,8 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
@@ -2249,14 +2251,26 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         Connection config_db_write = null;
         Connection ox_db_write = null;
         try {
+            
             config_db_write = cache.getWRITEConnectionForCONFIGDB();
             config_db_write.setAutoCommit(false);
             
             ox_db_write = cache.getWRITEConnectionForContext(ctx.getIdAsInt());            
             ox_db_write.setAutoCommit(false);
             
-            // do operations on db
-            this.oxcontextcommon.changeContextSetup(ctx, config_db_write,ox_db_write);
+            
+            
+//          Change values from the context as defined in the admin spec for this call!
+            // it should be possible that we can change the settings we got with getData method
+            
+            // Change login mappings in configdb          
+            changeLoginMappingsForContext(ctx,config_db_write);
+            
+            // Change context name in configdb
+            changeNameForContext(ctx,config_db_write);
+            
+            // Change quota size in config db
+            changeQuotaForContext(ctx,config_db_write);
             
             // commit changes to db
             ox_db_write.commit();
@@ -2307,4 +2321,151 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         }
         
     }
+    
+    private void changeQuotaForContext(final Context ctx, final Connection configdb_con) throws SQLException{
+        
+        
+        // check if max quota is set in context 
+       if(ctx.getMaxQuota()!=null){
+           
+           long quota_max_temp = ctx.getMaxQuota().longValue();
+           
+           if (ctx.getMaxQuota().longValue() != -1) {
+               quota_max_temp *= Math.pow(2, 20);
+           }  
+           
+           PreparedStatement prep = null;
+           try {
+               
+               prep = configdb_con.prepareStatement("UPDATE context SET quota_max=? WHERE cid=?");
+               prep.setLong(1, quota_max_temp);
+               prep.setInt(2, ctx.getIdAsInt());
+               prep.executeUpdate();
+               prep.close();
+           
+           }finally{
+                try {
+                   if (prep != null) {
+                        prep.close();
+                   }
+                } catch (final SQLException e) {
+                       log.error("SQL Error closing statement!", e);
+                }            
+           } 
+           
+       }
+              
+    }
+    
+   
+   
+    
+    private void changeLoginMappingsForContext(final Context ctx, final Connection configdb_con) throws SQLException{
+        
+        PreparedStatement prep = null;
+        
+        try {
+           
+            if(ctx.getLoginMappings()!=null && ctx.getLoginMappings().size()>0){
+                
+                HashSet<String> login_map = ctx.getLoginMappings();
+                login_map.remove(String.valueOf(ctx.getIdAsInt())); // Deny change of mapping cid<->cid
+               
+                    
+                    // first delete all mappings excluding default mapping from cid <-> cid
+                    prep = configdb_con.prepareStatement("DELETE FROM login2context WHERE cid = ? AND login_info!=?");
+                    prep.setInt(1, ctx.getIdAsInt().intValue());
+                    prep.setInt(2, ctx.getIdAsInt().intValue());
+                    prep.executeUpdate();
+                    prep.close();
+                    
+                    // now insert all mappings from the hashset if size >0 
+                    if(login_map.size()>0){
+                        Iterator itr = login_map.iterator();
+                        while(itr.hasNext()){
+                            String mapping_entry = ((String)itr.next()).trim();
+                            if(mapping_entry.length()>0){
+                                
+                                // check if no mapping which the client wants to add already exists for another context
+                                prep = configdb_con.prepareStatement("SELECT cid FROM login2context WHERE login_info = ?");
+                                prep.setString(1, mapping_entry);
+                                ResultSet rs = prep.executeQuery();
+                                if(rs.next()){
+                                    // throw exception back to client 
+                                    String err_msg ="A mapping with login info \""+mapping_entry+"\" already exists in the system!";
+                                    log.error(err_msg);
+                                    throw new SQLException(err_msg);
+                                }
+                                rs.close();
+                                prep.close();
+                                
+                                prep = configdb_con.prepareStatement("INSERT INTO login2context (cid,login_info) values (?,?)");
+                                prep.setInt(1, ctx.getIdAsInt().intValue());
+                                prep.setString(2, mapping_entry);
+                                prep.executeUpdate();
+                                prep.close();
+                            }                               
+                        }
+                    }
+                
+            } // end of updating login mappings ###
+        }finally{
+            try {
+                if (prep != null) {
+                    prep.close();
+                }
+            } catch (final SQLException e) {
+                log.error("SQL Error closing statement!", e);
+            }            
+        }       
+    }
+    
+    private void changeNameForContext(final Context ctx, final Connection configdb_con) throws SQLException{
+        
+        PreparedStatement prep = null;
+        
+        try {
+            
+            
+            // first check if name is set and has a valid name
+            if(ctx.getName()!=null && ctx.getName().trim().length()>0){
+                // ok , now check if a context with this name the client wants to change already exists
+                // BUT exclude the name of the current context, because this context can of course be renamed to the same
+                // name as it had before the update :)
+                
+                prep = configdb_con.prepareStatement("SELECT cid FROM context WHERE name = ? AND cid !=?");
+                prep.setString(1, ctx.getName().trim());
+                prep.setInt(2, ctx.getIdAsInt().intValue());
+                ResultSet rs = prep.executeQuery();
+                if(rs.next()){
+                    // context with the name already exists in the system,
+                    String err_msg ="A context with context name \""+ctx.getName().trim()+"\" already exists in the system!";
+                    log.error(err_msg);
+                    // throw error
+                    throw new SQLException(err_msg);
+                }
+                rs.close();
+                prep.close();
+                
+                // if we reach here, update the table
+                prep = configdb_con.prepareStatement("UPDATE context SET name = ? where cid = ?");
+                prep.setString(1, ctx.getName().trim());
+                prep.setInt(2, ctx.getIdAsInt().intValue());
+                prep.executeUpdate();
+                prep.close();
+                
+            }
+        }finally{
+            try {
+                if (prep != null) {
+                    prep.close();
+                }
+            } catch (final SQLException e) {
+                log.error("SQL Error closing statement!", e);
+            }
+        }
+        
+    }
+    
+    
 }
