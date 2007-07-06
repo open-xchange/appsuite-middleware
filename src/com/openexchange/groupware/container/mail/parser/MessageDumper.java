@@ -242,7 +242,7 @@ public class MessageDumper {
 				.getFileName() == null);
 		if (!nestedMsgsOnly && (contentType.isMimeType(MIME_TEXT_PLAIN) || contentType.isMimeType(MIME_TEXT_ENRICHED))) {
 			if (isInline) {
-				final String content = MessageUtils.getStringObject(part);
+				final String content = MessageUtils.readPart(part, contentType);
 				final UUEncodedMultiPart uuencodedMP = new UUEncodedMultiPart(content);
 				if (uuencodedMP.isUUEncoded()) {
 					/*
@@ -288,8 +288,8 @@ public class MessageDumper {
 			}
 		} else if (!nestedMsgsOnly && contentType.isMimeType(MIME_TEXT_HTML)) {
 			if (isInline) {
-				if (!msgHandler.handleInlineHtml(MessageUtils.getStringObject(part), contentType.getBaseType(), size,
-						filename, MessageUtils.getIdentifier(prefix, partCount))) {
+				if (!msgHandler.handleInlineHtml(MessageUtils.readPart(part, contentType), contentType.getBaseType(),
+						size, filename, MessageUtils.getIdentifier(prefix, partCount))) {
 					stop = true;
 					return;
 				}

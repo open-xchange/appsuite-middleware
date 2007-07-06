@@ -110,7 +110,7 @@ public class JSONMessageHandler implements MessageHandler {
 	private boolean textFound;
 
 	private final boolean createVersionForDisplay;
-	
+
 	private final Html2TextConverter converter;
 
 	public JSONMessageHandler(final SessionObject session, final String msgUID, final boolean createVersionForDisplay) {
@@ -180,13 +180,13 @@ public class JSONMessageHandler implements MessageHandler {
 		msgObj.setReceivedDate(receivedDate);
 		return true;
 	}
-	
+
 	private static final String HEADER_X_PRIORITY = "X-Priority";
-	
+
 	private static final String HEADER_X_MSGREF = "X-Msgref";
-	
+
 	private static final String HEADER_X_MAILER = "X-Mailer";
-	
+
 	private static final String HEADER_DISP_NOTIFICATION_TO = "Disposition-Notification-To";
 
 	/*
@@ -219,7 +219,7 @@ public class JSONMessageHandler implements MessageHandler {
 				int priority = JSONMessageObject.PRIORITY_NORMAL;
 				try {
 					priority = Integer.parseInt(tmp[0]);
-				} catch (NumberFormatException nfe) {
+				} catch (final NumberFormatException nfe) {
 					LOG.warn("Strange X-Priority header: " + tmp[0], nfe);
 					priority = JSONMessageObject.PRIORITY_NORMAL;
 				}
@@ -298,9 +298,9 @@ public class JSONMessageHandler implements MessageHandler {
 		}
 		return true;
 	}
-	
+
 	private static final String MIME_TEXT_ENRICHED = "text/enriched";
-	
+
 	private static final Enriched2HtmlConverter ENRCONV = new Enriched2HtmlConverter();
 
 	/*
@@ -309,8 +309,8 @@ public class JSONMessageHandler implements MessageHandler {
 	 * @see com.openexchange.groupware.container.mail.parser.MessageHandler#handleInlinePlainText(java.lang.String,
 	 *      java.lang.String, int, java.lang.String, java.lang.String)
 	 */
-	public boolean handleInlinePlainText(final String plainTextContentArg, final String baseContentType, final int size,
-			final String fileName, final String id) throws OXException {
+	public boolean handleInlinePlainText(final String plainTextContentArg, final String baseContentType,
+			final int size, final String fileName, final String id) throws OXException {
 		if (isAlternative && usm.isDisplayHtmlInlineContent() && !textFound) {
 			/*
 			 * User wants to see message's alternative content
@@ -325,7 +325,8 @@ public class JSONMessageHandler implements MessageHandler {
 		} else {
 			plainTextContent = plainTextContentArg;
 		}
-		final String formattedText = MessageUtils.formatContentForDisplay(plainTextContent, isEnriched, session, msgUID);
+		final String formattedText = MessageUtils
+				.formatContentForDisplay(plainTextContent, isEnriched, session, msgUID);
 		final JSONMessageAttachmentObject mao = new JSONMessageAttachmentObject(id);
 		mao.setDisposition(Part.INLINE);
 		mao.setContentType(baseContentType);
@@ -333,7 +334,7 @@ public class JSONMessageHandler implements MessageHandler {
 		mao.setContentID(JSONMessageAttachmentObject.CONTENT_STRING);
 		mao.setSize(formattedText.length());
 		msgObj.addMessageAttachment(mao);
-        textFound = true;
+		textFound = true;
 		return true;
 	}
 
@@ -347,7 +348,7 @@ public class JSONMessageHandler implements MessageHandler {
 			final int size, final String fileName, final String id) throws OXException {
 		return handleInlinePlainText(decodedTextContent, baseContentType, size, fileName, id);
 	}
-	
+
 	private static final String MIME_APPL_OCTET_STREAM = "application/octet-stream";
 
 	/*
@@ -363,7 +364,7 @@ public class JSONMessageHandler implements MessageHandler {
 		try {
 			contentType = new MimetypesFileTypeMap().getContentType(
 					new File(filename.toLowerCase(session.getLocale())).getName()).toLowerCase(session.getLocale());
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			final Throwable t = new Throwable(new StringBuilder("Unable to fetch content/type for '").append(filename)
 					.append("': ").append(e).toString());
 			LOG.warn(t.getMessage(), t);
@@ -391,7 +392,7 @@ public class JSONMessageHandler implements MessageHandler {
 		msgObj.addMessageAttachment(mao);
 		return true;
 	}
-	
+
 	private static final String MIME_TEXT_PLAIN = "TEXT/PLAIN";
 
 	/*
@@ -461,7 +462,7 @@ public class JSONMessageHandler implements MessageHandler {
 						htmlAttach.setContentID(JSONMessageAttachmentObject.CONTENT_NONE);
 						htmlAttach.setFileName(fileName);
 					}
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					final Throwable t = new Throwable("Unable to parse html2text for message view: " + e.getMessage());
 					LOG.error(t.getMessage(), e);
 				}
@@ -524,7 +525,7 @@ public class JSONMessageHandler implements MessageHandler {
 			 */
 			try {
 				contentType = new ContentType(part.getContentType());
-			} catch (OXMailException e) {
+			} catch (final OXMailException e) {
 				/*
 				 * Invalid content type: Ignore this attachment
 				 */
@@ -539,7 +540,7 @@ public class JSONMessageHandler implements MessageHandler {
 			mao.setSize(part.getSize());
 			try {
 				mao.setFileName(part.getFileName() == null ? fileName : MimeUtility.decodeText(part.getFileName()));
-			} catch (UnsupportedEncodingException e) {
+			} catch (final UnsupportedEncodingException e) {
 				LOG.error("Unsupported encoding in a message detected and monitored.", e);
 				MailInterfaceImpl.mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
 				mao.setFileName(part.getFileName() == null ? fileName : MessageUtils.decodeMultiEncodedHeader(part
@@ -553,8 +554,8 @@ public class JSONMessageHandler implements MessageHandler {
 					mao.setContent(null);
 					mao.setContentID(JSONMessageAttachmentObject.CONTENT_NONE);
 				} else {
-					mao.setContent(MessageUtils.formatContentForDisplay(MessageUtils.getStringObject(part), contentType
-							.isMimeType(MIME_TEXT_HTM), session, msgUID));
+					mao.setContent(MessageUtils.formatContentForDisplay(MessageUtils.readPart(part, contentType),
+							contentType.isMimeType(MIME_TEXT_HTM), session, msgUID));
 					mao.setContentID(JSONMessageAttachmentObject.CONTENT_STRING);
 				}
 			} else {
@@ -563,7 +564,7 @@ public class JSONMessageHandler implements MessageHandler {
 			}
 			msgObj.addMessageAttachment(mao);
 			return true;
-		} catch (MessagingException e) {
+		} catch (final MessagingException e) {
 			throw handleMessagingException(e, session.getIMAPProperties());
 		}
 	}
@@ -626,7 +627,7 @@ public class JSONMessageHandler implements MessageHandler {
 		final JSONMessageHandler msgHandler = new JSONMessageHandler(session, msgUID, createVersionForDisplay);
 		try {
 			new MessageDumper(session).dumpMessage(nestedMsg, msgHandler, id);
-		} catch (MessagingException e) {
+		} catch (final MessagingException e) {
 			throw handleMessagingException(e, session.getIMAPProperties());
 		}
 		msgObj.addNestedMessage(msgHandler.getMessageObject());
@@ -674,7 +675,7 @@ public class JSONMessageHandler implements MessageHandler {
 				msgObj.setNew(fld.getNewMessageCount());
 				msgObj.setUnread(fld.getUnreadMessageCount());
 				msgObj.setDeleted(fld.getDeletedMessageCount());
-			} catch (MessagingException e) {
+			} catch (final MessagingException e) {
 				LOG.error(e.getMessage(), e);
 			}
 		}

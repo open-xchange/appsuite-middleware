@@ -305,7 +305,7 @@ public class ForwardTextMessageHandler implements MessageHandler {
 		try {
 			if (isInline && part.isMimeType("text/*")) {
 				this.isHtml = part.isMimeType("text/html");
-				this.firstText = isHtml ? MessageUtils.getStringObject(part) : MailTools.htmlFormat(MessageUtils.getStringObject(part));
+				this.firstText = isHtml ? MessageUtils.readPart(part) : MailTools.htmlFormat(MessageUtils.readPart(part));
 				return false;
 			}
 			return true;

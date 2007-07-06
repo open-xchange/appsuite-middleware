@@ -1,3 +1,7 @@
+* 2007-07-06 - thorben.betten@open-xchange.com
+
+ - Fastened input stream reading from message parts
+
 * 2007-07-05 - tobias.prinz@open-xchange.com
 
  - Fixed bug #8050: Now calling "ant -f build.xml all-i18n" on the

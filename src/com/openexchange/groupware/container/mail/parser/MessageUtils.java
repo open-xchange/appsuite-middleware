@@ -49,16 +49,12 @@
 
 package com.openexchange.groupware.container.mail.parser;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
-import java.nio.charset.IllegalCharsetNameException;
-import java.nio.charset.UnsupportedCharsetException;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -98,8 +94,6 @@ public class MessageUtils {
 			.getLog(MessageUtils.class);
 
 	private static final int INT_100 = 100;
-
-	private static final int INT_1000 = 1000;
 
 	private static final String HTML_BREAK = "<br>";
 
@@ -648,105 +642,138 @@ public class MessageUtils {
 		}
 	}
 
-	private static final Charset DEFAULT_CHARSET = Charset.forName(ServerConfig.getProperty(Property.DefaultEncoding));
+	private static final int BUFSIZE = 8192; // 8K
+
+	private static final int STRBLD_SIZE = 32768; // 32K
 
 	private static final String STR_CHARSET = "charset";
+	
+	/**
+	 * Reads the string out of part's input stream. On first try the input
+	 * stream retrieved by <code>javax.mail.Part.getInputStream()</code> is
+	 * used. If an I/O error occurs (<code>java.io.IOException</code>) then
+	 * the next try is with part's raw input stream. If everything fails an
+	 * empty string is returned.
+	 * 
+	 * @param p -
+	 *            the <code>javax.mail.Part</code> object
+	 * @return the string read from part's input stream or the empty string ""
+	 *         if everything failed
+	 * @throws OXException -
+	 *             if part's content type could not be parsed
+	 * @throws MessagingException -
+	 *             if an error occurs in part's getter methods
+	 */
+	public static final String readPart(final Part p) throws OXException, MessagingException {
+		return readPart(p, new ContentType(p.getContentType()));
+	}
 
 	/**
-	 * Delivers the <code>java.lang.String</code> object created from given
-	 * <code>javax.mail.Part</code> instance by calling either its
-	 * <code>getContent()</code> or <code>getInputStream()</code> (in
-	 * sub-routine) method. This means the //SEEN flag is going to be set
-	 * implicitely.
+	 * Reads the string out of part's input stream. On first try the input
+	 * stream retrieved by <code>javax.mail.Part.getInputStream()</code> is
+	 * used. If an I/O error occurs (<code>java.io.IOException</code>) then
+	 * the next try is with part's raw input stream. If everything fails an
+	 * empty string is returned.
+	 * 
+	 * @param p -
+	 *            the <code>javax.mail.Part</code> object
+	 * @param ct -
+	 *            the part's content type
+	 * @return the string read from part's input stream or the empty string ""
+	 *         if everything failed
+	 * @throws MessagingException -
+	 *             if an error occurs in part's getter methods
 	 */
-	public static final String getStringObject(final Part p) throws MessagingException, OXException {
-		final StringBuilder sb = new StringBuilder(INT_1000);
-		BufferedReader br = null;
-		final String charsetStr = new ContentType(p.getContentType()).getParameter(STR_CHARSET);
-		Charset charset = null;
-		try {
-			charset = charsetStr == null ? DEFAULT_CHARSET : Charset.forName(charsetStr);
-		} catch (final UnsupportedCharsetException e) {
-			if (LOG.isDebugEnabled()) {
-				LOG.debug(e.getMessage(), e);
-			}
-			charset = DEFAULT_CHARSET;
-		} catch (final IllegalCharsetNameException e) {
-			if (LOG.isDebugEnabled()) {
-				LOG.debug(e.getMessage(), e);
-			}
-			charset = DEFAULT_CHARSET;
+	public static final String readPart(final Part p, final ContentType ct) throws MessagingException {
+		/*
+		 * Use specified charset if available else use default one
+		 */
+		String charset = ct.getParameter(STR_CHARSET);
+		if (null == charset) {
+			charset = ServerConfig.getProperty(Property.DefaultEncoding);
 		}
 		try {
-			br = new BufferedReader(new InputStreamReader(p.getInputStream(), charset));
-			String contentLine = null;
-			while ((contentLine = br.readLine()) != null) {
-				sb.append(contentLine).append(CHAR_BREAK);
+			return readStream(p.getInputStream(), charset);
+		} catch (final IOException e) {
+			/*
+			 * Try to get data from raw input stream
+			 */
+			InputStream inStream = null;
+			if (p instanceof MimeBodyPart) {
+				final MimeBodyPart mpb = (MimeBodyPart) p;
+				inStream = mpb.getRawInputStream();
+			} else if (p instanceof MimeMessage) {
+				final MimeMessage mm = (MimeMessage) p;
+				inStream = mm.getRawInputStream();
 			}
-		} catch (final Throwable t) {
-			try {
-				br = getBufferedReaderFromPart(p, charset);
-				String contentLine = null;
-				while ((contentLine = br.readLine()) != null) {
-					sb.append(contentLine).append(CHAR_BREAK);
-				}
-			} catch (final IOException innerExc) {
+			if (inStream == null) {
 				/*
-				 * Common way does not work, try to read from raw stream
+				 * Neither a MimeBodyPart nor a MimeMessage
 				 */
-				LOG.warn(innerExc, innerExc);
+				return STR_EMPTY;
 			}
-		} finally {
 			try {
-				if (br != null) {
-					br.close();
-					br = null;
+				return readStream(inStream, charset);
+			} catch (IOException e1) {
+				LOG.error(e.getLocalizedMessage(), e);
+				return STR_EMPTY;
+			} finally {
+				try {
+					inStream.close();
+				} catch (IOException e1) {
+					LOG.error(e1.getLocalizedMessage(), e1);
 				}
-			} catch (final IOException ioe) {
-				LOG.error(ioe.getMessage(), ioe);
 			}
 		}
-		return sb.toString();
 	}
 
-	private static final BufferedReader getBufferedReaderFromPart(final Part p, final Charset charset)
-			throws MessagingException {
+	/**
+	 * Reads a string from given input stream using direct buffering
+	 * 
+	 * @param inStream -
+	 *            the input stream
+	 * @param charset -
+	 *            the charset
+	 * @return the <code>String</code> read from input stream
+	 * @throws IOException -
+	 *             if an I/O error occurs
+	 */
+	public static final String readStream(final InputStream inStream, final String charset) throws IOException {
+		InputStreamReader isr = null;
 		try {
-			InputStream partInputStream = p.getInputStream();
-			if (!(partInputStream instanceof BufferedInputStream)) {
-				partInputStream = new BufferedInputStream(partInputStream);
+			int count = 0;
+			final char[] c = new char[BUFSIZE];
+			isr = new InputStreamReader(inStream, charset);
+			final StringBuilder sb = new StringBuilder(STRBLD_SIZE);
+			while ((count = isr.read(c)) > 0) {
+				sb.append(c, 0, count);
 			}
-			return new BufferedReader(new InputStreamReader(partInputStream, charset));
-		} catch (final Exception ee) {
-			/*
-			 * Common way does not work, try to read from raw stream
-			 */
-			return getBufferedReaderFromRawPart(p, charset);
+			return sb.toString();
+		} catch (final UnsupportedEncodingException e) {
+			LOG.error("Unsupported encoding in a message detected and monitored.", e);
+			MailInterfaceImpl.mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
+			return STR_EMPTY;
+		} finally {
+			if (null != isr) {
+				try {
+					isr.close();
+				} catch (IOException e) {
+					LOG.error(e.getLocalizedMessage(), e);
+				}
+			}
 		}
 	}
 
-	private static final BufferedReader getBufferedReaderFromRawPart(final Part p, final Charset charset)
-			throws MessagingException {
-		InputStream in = null;
-		if (p instanceof MimeBodyPart) {
-			final MimeBodyPart mpb = (MimeBodyPart) p;
-			in = mpb.getRawInputStream();
-		} else if (p instanceof MimeMessage) {
-			final MimeMessage mm = (MimeMessage) p;
-			in = mm.getRawInputStream();
-		}
-		if (in == null) {
-			/*
-			 * Neither a MimeBodyPart nor a MimeMessage
-			 */
-			return null;
-		}
-		if (!(in instanceof BufferedInputStream)) {
-			in = new BufferedInputStream(in);
-		}
-		return new BufferedReader(new InputStreamReader(in, charset));
-	}
-
+	/**
+	 * Turns given array of <code>javax.mail.internet.InternetAddress</code>
+	 * into a comma-separated string using the
+	 * <code>javax.mail.internet.InternetAddress.toUnicodeString()</code>
+	 * method to get properly formatted address (RFC 822 syntax)
+	 * 
+	 * @param addrs -
+	 *            the array of <code>javax.mail.internet.InternetAddress</code>
+	 * @return - the comma-separated string
+	 */
 	public static final String addr2String(final InternetAddress[] addrs) {
 		if (addrs == null || addrs.length == 0) {
 			return STR_EMPTY;
