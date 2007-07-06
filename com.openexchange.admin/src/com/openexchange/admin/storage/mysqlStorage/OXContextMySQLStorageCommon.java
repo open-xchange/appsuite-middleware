@@ -93,30 +93,8 @@ public abstract class OXContextMySQLStorageCommon {
         oxutilcommon = new OXUtilMySQLStorageCommon();
     }
     
-    public void changeContextSetup(final Context ctx, final Connection configdb_con,final Connection oxdb_con) throws SQLException, PoolException {
-                
-        PreparedStatement prep = null;
-        
-        try {
-                        
-            // now change values from the context as defined in the admin api
-            
-            // 1st. change login mappings in configdb,
-            
-            ctx.getLoginMappings().remove(String.valueOf(ctx.getIdAsInt())); // Deny change of mapping cid<->cid
-            
-            
-            
-        }finally{
-            try {
-                if (prep != null) {
-                    prep.close();
-                }
-            } catch (final SQLException e) {
-                log.error("SQL Error closing statement!", e);
-            }            
-        }
-    }
+    
+    
 
     public Context getData(final Context ctx, final Connection configdb_con) throws SQLException, PoolException  {
         Connection oxdb_read = null;
