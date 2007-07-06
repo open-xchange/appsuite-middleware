@@ -956,7 +956,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             if (rs.next()) {
                 admin_id = rs.getInt("user");
             } else {
-                throw new SQLException("UNABLE TO GET MAILADMIN ID FOR CONTEXT " + ctx.getIdAsInt());
+                throw new SQLException("Unable to determine admin for context " + ctx.getIdAsInt());
             }
         } catch (final SQLException e) {
             log.error("SQL Error",e);
