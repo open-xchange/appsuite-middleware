@@ -214,12 +214,6 @@ public abstract class UserAbstraction extends BasicCommandlineOptions {
     protected static final String SIMPLE_INT = "int";
     protected static final String OPT_IMAPONLY_LONG = "imaponly";
     protected static final String OPT_DBONLY_LONG = "dbonly";
-    protected static final String OPT_IMAP_QUOTA_LONG = "imapquota";
-    protected static final char OPT_IMAP_QUOTA_SHORT = 'I';
-    protected static final String OPT_NO_INET_MAIL_ACCESS_LONG = "inetmailaccess";
-    protected static final char OPT_NO_INET_MAIL_ACCESS_SHORT = 'M';
-    protected static final char OPT_SPAM_FILTER_ENABLE_SHORT = 'S';
-    protected static final String OPT_SPAM_FILTER_ENABLE_LONG = "spamfilter";
     
     public static final ArrayList<OptionAndMethod> optionsandmethods = new ArrayList<OptionAndMethod>();
 
@@ -270,9 +264,6 @@ public abstract class UserAbstraction extends BasicCommandlineOptions {
     public static final HashSet<String> standardoptions = new HashSet<String>(15);
     
     static {
-        standardoptions.add(OPT_IMAP_QUOTA_LONG);
-        standardoptions.add(OPT_NO_INET_MAIL_ACCESS_LONG);
-        standardoptions.add("spam_filter_enabled");
         standardoptions.add("id");
         standardoptions.add(OPT_USERNAME_LONG);
         standardoptions.add("display_name");
@@ -520,11 +511,11 @@ public abstract class UserAbstraction extends BasicCommandlineOptions {
             }   
         }
         if(parser.getOptionValue(this.primaryMailOption)!=null){
-        final String optionValue6 = (String) parser.getOptionValue(this.primaryMailOption);
-        if (null != optionValue6) {
-            usr.setPrimaryEmail(optionValue6);
-            usr.setEmail1(optionValue6);
-        }        
+            final String optionValue6 = (String) parser.getOptionValue(this.primaryMailOption);
+            if (null != optionValue6) {
+                usr.setPrimaryEmail(optionValue6);
+                usr.setEmail1(optionValue6);
+            }        
         }
     }
     
