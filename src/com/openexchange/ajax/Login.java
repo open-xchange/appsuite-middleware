@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.ajax;
 
 import java.io.IOException;
@@ -65,7 +63,6 @@ import org.json.JSONObject;
 
 import com.openexchange.ajax.container.Response;
 import com.openexchange.groupware.contexts.ContextException;
-import com.openexchange.groupware.contexts.ContextNotFoundException;
 import com.openexchange.sessiond.InvalidCredentialsException;
 import com.openexchange.sessiond.LoginException;
 import com.openexchange.sessiond.MaxSessionLimitException;
@@ -164,10 +161,6 @@ public class Login extends AJAXServlet {
                     Code.INVALID_CREDENTIALS, e));
 			} catch (PasswordExpiredException e) {
 				LOG.debug(ERROR_PASSWORD_EXPIRED, e);
-                response.setException(new LoginException(
-                    Code.INVALID_CREDENTIALS, e));
-			} catch (ContextNotFoundException e) {
-				LOG.debug(ERROR_CONTEXT_NOT_FOUND, e);
                 response.setException(new LoginException(
                     Code.INVALID_CREDENTIALS, e));
 			} catch (MaxSessionLimitException e) {

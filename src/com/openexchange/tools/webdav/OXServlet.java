@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.tools.webdav;
 
 import java.io.IOException;
@@ -64,7 +62,6 @@ import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
 
 import com.openexchange.groupware.contexts.ContextException;
-import com.openexchange.groupware.contexts.ContextNotFoundException;
 import com.openexchange.sessiond.InvalidCredentialsException;
 import com.openexchange.sessiond.LoginException;
 import com.openexchange.sessiond.MaxSessionLimitException;
@@ -331,8 +328,6 @@ public abstract class OXServlet extends WebDavServlet {
         } catch (UserNotActivatedException e) {
             log(e.getMessage(), e);
         } catch (PasswordExpiredException e) {
-            log(e.getMessage(), e);
-        } catch (ContextNotFoundException e) {
             log(e.getMessage(), e);
         } catch (LoginException e) {
             if (LoginException.Source.SYSTEM == e.getSource()) {

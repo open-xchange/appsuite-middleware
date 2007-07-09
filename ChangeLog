@@ -20,6 +20,7 @@
  - Bugfix #7047: Not working authentication is now logged as error.
  - Bugfix #7048: Exceptions in authentication mechanisms are not logged as
    "Invalid credentials" anymore.
+ - Bugfix #7119: A not found context is not logged as error.
 
 * 2007-07-06 - marcus.klein@open-xchange.com
 

@@ -105,7 +105,7 @@ public class ContextException extends AbstractOXException {
         NO_MAILADMIN("Cannot resolve mailadmin for context %d.",
             Category.SETUP_ERROR, 1),
         /**
-         * A context could not be found.
+         * Cannot find context %d.
          */
         NOT_FOUND("Cannot find context %d.", Category.SETUP_ERROR, 2),
         /**
@@ -135,7 +135,11 @@ public class ContextException extends AbstractOXException {
          * Cannot remove object %s from cache.
          */
         CACHE_REMOVE("Cannot remove object %s from cache.", Category
-            .INTERNAL_ERROR, 9);
+            .INTERNAL_ERROR, 9),
+        /**
+         * Cannot find context "%s".
+         */
+        NO_MAPPING("Cannot find context \"%s\".", Category.USER_INPUT, 10);
 
         /**
          * Message of the exception.

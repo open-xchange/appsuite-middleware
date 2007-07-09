@@ -62,11 +62,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.UserConfigurationStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.ContextException;
-import com.openexchange.groupware.contexts.ContextNotFoundException;
 import com.openexchange.groupware.contexts.ContextStorage;
 import com.openexchange.groupware.contexts.LoginInfo;
 import com.openexchange.groupware.imap.IMAPException;
@@ -158,7 +156,7 @@ public class SessionHandler extends TimerTask {
 
     protected static SessionObject addSession(final String loginName, final String password, final String client_ip,
             final String host) throws LoginException, InvalidCredentialsException, UserNotFoundException, UserNotActivatedException,
-            PasswordExpiredException, ContextNotFoundException, MaxSessionLimitException, SessiondException, ContextException {
+            PasswordExpiredException, MaxSessionLimitException, SessiondException, ContextException {
         final String sessionId = sessionIdGenerator.createSessionId(loginName, client_ip);
 
         if (LOG.isDebugEnabled()) {
@@ -171,20 +169,16 @@ public class SessionHandler extends TimerTask {
         final String contextname = login_infos[0];
         final String username = login_infos[1];
 
-        final ContextStorage cs = ContextStorage.getInstance();
-        Context context = null;
-        //try {
-            final int contextId = cs.getContextId(contextname);
-            if (ContextStorage.NOT_FOUND == contextId) {
-                throw new ContextNotFoundException("Cannot find context.");
-            }
-            context = cs.getContext(contextId);
-        //} catch (ContextException e) {
-        //    throw new SessiondException("", e);
-        //}
-
-        if (context == null) {
-            throw new ContextNotFoundException("Cannot find context with the given name (" + contextname + ')');
+        final ContextStorage contextStor = ContextStorage.getInstance();
+        final int contextId = contextStor.getContextId(contextname);
+        if (ContextStorage.NOT_FOUND == contextId) {
+            throw new ContextException(ContextException.Code.NO_MAPPING,
+                contextname);
+        }
+        final Context context = contextStor.getContext(contextId);
+        if (null == context) {
+            throw new ContextException(ContextException.Code.NOT_FOUND,
+                contextId);
         }
 
         int userId = -1;
