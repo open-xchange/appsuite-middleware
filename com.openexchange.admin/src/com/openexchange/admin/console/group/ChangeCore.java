@@ -1,7 +1,6 @@
 package com.openexchange.admin.console.group;
 
 import java.net.MalformedURLException;
-import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 
@@ -44,15 +43,11 @@ public abstract class ChangeCore extends GroupAbstraction {
 
         try {
             parser.ownparse(args);
-            final Context ctx = new Context(DEFAULT_CONTEXT);
+            final Context ctx = contextparsing(parser);
 
-            if (parser.getOptionValue(this.contextOption) != null) {
-                ctx.setID(Integer.parseInt((String) parser.getOptionValue(this.contextOption)));
-            }
+            final Credentials auth = credentialsparsing(parser);
 
-            final Credentials auth = new Credentials((String) parser.getOptionValue(this.adminUserOption), (String) parser.getOptionValue(this.adminPassOption));
-
-            final OXGroupInterface oxgrp = (OXGroupInterface) Naming.lookup(RMI_HOSTNAME +  OXGroupInterface.RMI_NAME);
+            final OXGroupInterface oxgrp = getGroupInterface();
             final Group grp = new Group();
 
             grp.setId(Integer.valueOf((String) parser.getOptionValue(this.IdOption)));

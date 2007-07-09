@@ -51,6 +51,10 @@ package com.openexchange.admin.console.user;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.MalformedURLException;
+import java.rmi.Naming;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -60,6 +64,7 @@ import java.util.TimeZone;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.BasicCommandlineOptions;
 import com.openexchange.admin.console.CmdLineParser.Option;
+import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.extensions.OXUserExtensionInterface;
@@ -815,6 +820,10 @@ public abstract class UserAbstraction extends BasicCommandlineOptions {
         } else {
             parser.printUsage();
         }
+    }
+
+    protected final OXUserInterface getUserInterface() throws NotBoundException, MalformedURLException, RemoteException {
+        return (OXUserInterface) Naming.lookup(RMI_HOSTNAME + OXUserInterface.RMI_NAME);
     }
 }
 

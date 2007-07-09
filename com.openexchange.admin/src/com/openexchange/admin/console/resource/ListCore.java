@@ -1,7 +1,6 @@
 package com.openexchange.admin.console.resource;
 
 import java.net.MalformedURLException;
-import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
@@ -36,13 +35,9 @@ public abstract class ListCore extends ResourceAbstraction {
         try {
             parser.ownparse(args);
 
-            final Context ctx = new Context(DEFAULT_CONTEXT);
+            final Context ctx = contextparsing(parser);
 
-            if (parser.getOptionValue(this.contextOption) != null) {
-                ctx.setID(Integer.parseInt((String) parser.getOptionValue(this.contextOption)));
-            }
-
-            final Credentials auth = new Credentials((String) parser.getOptionValue(this.adminUserOption), (String) parser.getOptionValue(this.adminPassOption));
+            final Credentials auth = credentialsparsing(parser);
 
             String pattern = (String) parser.getOptionValue(this.searchOption);
             
@@ -50,7 +45,7 @@ public abstract class ListCore extends ResourceAbstraction {
                 pattern = "*";
             }
 
-            final OXResourceInterface oxres = (OXResourceInterface) Naming.lookup(RMI_HOSTNAME + OXResourceInterface.RMI_NAME);
+            final OXResourceInterface oxres = getResourceInterface();
 
             final Resource[] allres = oxres.list(ctx, pattern, auth);
 
@@ -112,7 +107,7 @@ public abstract class ListCore extends ResourceAbstraction {
             sysexit(SYSEXIT_NO_SUCH_RESOURCE);
         }
     }
-    
+
     protected final void sysoutOutput(final ArrayList<Resource> resources) {
         for (final Resource resource : resources) {
             System.out.println(resource.toString());
