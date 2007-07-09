@@ -27,7 +27,7 @@ public abstract class OXUtilSQLStorage extends OXUtilStorageInterface {
 	
 	abstract public void unregisterFilestore( final int store_id ) throws StorageException;
 	
-	abstract public int addMaintenanceReason( final MaintenanceReason reason )  throws StorageException;
+	abstract public int createMaintenanceReason( final MaintenanceReason reason )  throws StorageException;
 	
 	abstract public void deleteMaintenanceReason(final int[] reason_ids) throws StorageException;
 	

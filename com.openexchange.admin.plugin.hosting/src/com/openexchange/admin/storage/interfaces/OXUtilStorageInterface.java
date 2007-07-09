@@ -139,7 +139,7 @@ public abstract class OXUtilStorageInterface {
      * @return the id as a long of the new created reason
      * @throws StorageException
      */
-    public abstract int addMaintenanceReason(final MaintenanceReason reason) throws StorageException;
+    public abstract int createMaintenanceReason(final MaintenanceReason reason) throws StorageException;
 
     /**
      * Delete reason from configdb

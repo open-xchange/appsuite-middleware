@@ -81,7 +81,7 @@ public class UtilTest extends AbstractTest {
         mr1.setText("testcase-reason-"+System.currentTimeMillis());
         
         // add reason to system
-        int[] srv_id = {oxu.addMaintenanceReason(mr1,ContextTest.DummyMasterCredentials())};
+        int[] srv_id = {oxu.createMaintenanceReason(mr1,ContextTest.DummyMasterCredentials())};
         mr1.setId(srv_id[0]);
         // load from system and verify
         MaintenanceReason[] getmrs = oxu.getMaintenanceReasons(srv_id,ContextTest.DummyMasterCredentials());
@@ -107,7 +107,7 @@ public class UtilTest extends AbstractTest {
         mr1.setText("testcase-delete-reason-"+System.currentTimeMillis());
         
         // add reason to system
-        int[] srv_id = {oxu.addMaintenanceReason(mr1,ContextTest.DummyMasterCredentials())};
+        int[] srv_id = {oxu.createMaintenanceReason(mr1,ContextTest.DummyMasterCredentials())};
         mr1.setId(srv_id[0]);
         
         // now delete it and check if it is deleted also sucessfully.
@@ -131,7 +131,7 @@ public class UtilTest extends AbstractTest {
         mr1.setText("testcase-get-reason-"+System.currentTimeMillis());
         
         // add reason to system
-        int[] srv_id = {oxu.addMaintenanceReason(mr1,ContextTest.DummyMasterCredentials())};
+        int[] srv_id = {oxu.createMaintenanceReason(mr1,ContextTest.DummyMasterCredentials())};
         mr1.setId(srv_id[0]);
         // load from system and verify
         MaintenanceReason[] getmrs = oxu.getMaintenanceReasons(srv_id,ContextTest.DummyMasterCredentials());
@@ -159,7 +159,7 @@ public class UtilTest extends AbstractTest {
             MaintenanceReason mr = new MaintenanceReason();
             mr.setText("testcase-get-all-reasons-"+a+"-"+System.currentTimeMillis());
             // add reason to system
-            int[] srv_id = {oxu.addMaintenanceReason(mr,ContextTest.DummyMasterCredentials())};
+            int[] srv_id = {oxu.createMaintenanceReason(mr,ContextTest.DummyMasterCredentials())};
             mr.setId(srv_id[0]);
             c_reasons.add(mr);
         }
@@ -194,7 +194,7 @@ public class UtilTest extends AbstractTest {
             MaintenanceReason mr = new MaintenanceReason();
             mr.setText("testcase-get-all-reason-ids-"+a+"-"+System.currentTimeMillis());
             // add reason to system
-            c_reasons[a] = oxu.addMaintenanceReason(mr,ContextTest.DummyMasterCredentials());           
+            c_reasons[a] = oxu.createMaintenanceReason(mr,ContextTest.DummyMasterCredentials());           
         }
         Arrays.sort(c_reasons);
         
