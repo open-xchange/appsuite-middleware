@@ -199,8 +199,8 @@ public class ContactSwitcherTester extends TestCase {
 		final ContactSwitcherForBooleans switcher = new ContactSwitcherForBooleans();
 		switcher.setDelegate(new ContactSetter());
 
-		//setting
-		String value = "true";
+		//positive string tests
+		String value = "true"; //english outlook
 		conObj = (ContactObject) field.doSwitch(switcher, conObj, value);
 		assertEquals("Setting private flag via "+value+" does work" , true, conObj.getPrivateFlag());
 		
@@ -215,29 +215,58 @@ public class ContactSwitcherTester extends TestCase {
 		value = "y";
 		conObj = (ContactObject) field.doSwitch(switcher, conObj, value);
 		assertEquals("Setting private flag via "+value+" does work" , true, conObj.getPrivateFlag());
-		
+
+		value = "Priv\u00e9"; //french outlook
+		conObj = (ContactObject) field.doSwitch(switcher, conObj, value);
+		assertEquals("Setting private flag via "+value+" does work" , true, conObj.getPrivateFlag());
+
+		//negative string tests
 		value = "no";
 		conObj = (ContactObject) field.doSwitch(switcher, conObj, value);
-		assertEquals("Setting private flag via "+value+" does work" , false, conObj.getPrivateFlag());
+		assertEquals("Setting private flag via "+value+" does no work" , false, conObj.getPrivateFlag());
 		
-		value = "false";
+		value = "false"; //english outlook
 		conObj = (ContactObject) field.doSwitch(switcher, conObj, value);
-		assertEquals("Setting private flag via "+value+" does work" , false, conObj.getPrivateFlag());
+		assertEquals("Setting private flag via "+value+" does not work" , false, conObj.getPrivateFlag());
 		
 		value = "wrong";
 		conObj = (ContactObject) field.doSwitch(switcher, conObj, value);
-		assertEquals("Setting private flag via "+value+" does work" , false, conObj.getPrivateFlag());
+		assertEquals("Setting private flag via "+value+" does not work" , false, conObj.getPrivateFlag());
 		
 		value = "0";
 		conObj = (ContactObject) field.doSwitch(switcher, conObj, value);
-		assertEquals("Setting private flag via "+value+" does work" , false, conObj.getPrivateFlag());
+		assertEquals("Setting private flag via "+value+" does not work" , false, conObj.getPrivateFlag());
 		
-		Object value2 = 0;
-		conObj = (ContactObject) field.doSwitch(switcher, conObj, value2);
-		assertEquals("Setting private flag via "+value2+" does work" , false, conObj.getPrivateFlag());
-		
-		value2 = 1;
+		value = "normal"; //french outlook
+		conObj = (ContactObject) field.doSwitch(switcher, conObj, value);
+		assertEquals("Setting private flag via "+value+" does not work" , false, conObj.getPrivateFlag());
+
+		//positive object tests
+		Object value2 = 1;
 		conObj = (ContactObject) field.doSwitch(switcher, conObj, value2);
 		assertEquals("Setting private flag via "+value2+" does work" , true, conObj.getPrivateFlag());
+		
+		value2 = true;
+		conObj = (ContactObject) field.doSwitch(switcher, conObj, value2);
+		assertEquals("Setting private flag via "+value2+" does work" , true, conObj.getPrivateFlag());
+		
+		value2 = new Boolean(true);
+		conObj = (ContactObject) field.doSwitch(switcher, conObj, value2);
+		assertEquals("Setting private flag via "+value2+" does work" , true, conObj.getPrivateFlag());
+		
+		//negative object tests
+		value2 = 0;
+		conObj = (ContactObject) field.doSwitch(switcher, conObj, value2);
+		assertEquals("Setting private flag via "+value2+" does not work" , false, conObj.getPrivateFlag());
+		
+		value2 = false;
+		conObj = (ContactObject) field.doSwitch(switcher, conObj, value2);
+		assertEquals("Setting private flag via "+value2+" does not work" , false, conObj.getPrivateFlag());
+		
+		value2 = new Boolean(false);
+		conObj = (ContactObject) field.doSwitch(switcher, conObj, value2);
+		assertEquals("Setting private flag via "+value2+" does not work" , false, conObj.getPrivateFlag());
+		
+		
 	}
 }
