@@ -113,7 +113,7 @@ public class ContextTest extends AbstractTest {
         final String hosturl = getRMIHostUrl();
         addContext(ctx, hosturl, cred);
         OXUtilInterface oxu = (OXUtilInterface) Naming.lookup(hosturl + OXUtilInterface.RMI_NAME);
-        MaintenanceReason[] mrs = oxu.getAllMaintenanceReasons(cred);
+        MaintenanceReason[] mrs = oxu.listMaintenanceReasons(cred);
         MaintenanceReason mr = new MaintenanceReason();
         if (mrs.length == 0) {
             // add reason , and then use this reason to disable the context
@@ -144,7 +144,7 @@ public class ContextTest extends AbstractTest {
         
         addContext(ctx, hosturl, cred);
         OXUtilInterface oxu = (OXUtilInterface) Naming.lookup(hosturl + OXUtilInterface.RMI_NAME);
-        MaintenanceReason[] mrs = oxu.getAllMaintenanceReasons(cred);
+        MaintenanceReason[] mrs = oxu.listMaintenanceReasons(cred);
         MaintenanceReason mr = new MaintenanceReason();
         if (mrs.length == 0) {
             // add reason , and then use this reason to disable the context

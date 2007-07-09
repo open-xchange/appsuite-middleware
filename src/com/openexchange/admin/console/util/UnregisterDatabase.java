@@ -12,6 +12,7 @@ import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.console.CmdLineParser.UnknownOptionException;
 import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
@@ -42,8 +43,8 @@ public class UnregisterDatabase extends UtilAbstraction {
             
             // get rmi ref
             final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME +OXUtilInterface.RMI_NAME);
-
-            oxutil.unregisterDatabase(Integer.parseInt((String)parser.getOptionValue(this.databaseIdOption)), auth);
+            Database db = new Database(Integer.parseInt((String)parser.getOptionValue(this.databaseIdOption)));
+            oxutil.unregisterDatabase(db, auth);
             sysexit(0);
         } catch (final java.rmi.ConnectException neti) {
             printError(neti.getMessage());

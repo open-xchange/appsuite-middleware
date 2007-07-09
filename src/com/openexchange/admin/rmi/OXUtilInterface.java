@@ -47,8 +47,8 @@ public interface OXUtilInterface extends Remote {
     /**
      * Deletes maintenance reason text.
      * 
-     * @param reason_id
-     *            numerical identifier containing the reason id
+     * @param reasons
+     *            Reasons which should be deleted!Currently ID must be set in each object! 
      * @param auth
      *            Credentials for authenticating against server.
      * @throws com.openexchange.admin.rmi.exceptions.StorageException
@@ -60,28 +60,7 @@ public interface OXUtilInterface extends Remote {
      * @throws RemoteException
      *             General RMI Exception
      */
-    public void deleteMaintenanceReason(final int reason_id[], final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException;
-
-    /**
-     * Get maintenance reasons.
-     * 
-     * @return MaintenanceReason
-     * @param reason_ids
-     *            Ids of the maintenance reasons you want to receive from
-     *            server.
-     * @param auth
-     *            Credentials for authenticating against server.
-     * @throws com.openexchange.admin.rmi.exceptions.StorageException
-     *             When an error in the subsystems occured.
-     * 
-     * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException
-     *             When the supplied credentials were not correct or invalid.
-     * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException
-     *             If the data sent within the method contained invalid data.
-     * @throws RemoteException
-     *             General RMI Exception
-     */
-    public MaintenanceReason[] getMaintenanceReasons(final int reason_ids[], final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException;
+    public void deleteMaintenanceReason(final MaintenanceReason[] reasons, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException;
 
     /**
      * Get all maintenance reasons.
@@ -96,22 +75,7 @@ public interface OXUtilInterface extends Remote {
      * @throws RemoteException
      *             General RMI Exception
      */
-    public MaintenanceReason[] getAllMaintenanceReasons(final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException;
-
-    /**
-     * Get all maintenance reason ids.
-     * 
-     * @return Contains the reason ids to retrieve from server.
-     * @param auth
-     *            Credentials for authenticating against server.
-     * @throws com.openexchange.admin.rmi.exceptions.StorageException
-     *             When an error in the subsystems occured.
-     * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException
-     *             When the supplied credentials were not correct or invalid.
-     * @throws RemoteException
-     *             General RMI Exception
-     */
-    public int[] getAllMaintenanceReasonIds(final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException;
+    public MaintenanceReason[] listMaintenanceReasons(final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException;
 
     /**
      * Register an OX Server in the system.
@@ -138,8 +102,8 @@ public interface OXUtilInterface extends Remote {
      * 
      * @param auth
      *            Credentials for authenticating against server.
-     * @param server_id
-     *            numerical server identifier
+     * @param serv
+     *            Server with id set.
      * @throws com.openexchange.admin.rmi.exceptions.StorageException
      *             When an error in the subsystems occured.
      * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException
@@ -149,7 +113,7 @@ public interface OXUtilInterface extends Remote {
      * @throws RemoteException
      *             General RMI Exception
      */
-    public void unregisterServer(final int server_id, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException;
+    public void unregisterServer(final Server serv, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException;
 
     /**
      * Register a new database to the system.
@@ -311,8 +275,8 @@ public interface OXUtilInterface extends Remote {
     /**
      * Unregister database identified by its ID from configdb.
      * 
-     * @param database_id
-     *            Database id.
+     * @param database
+     *            Database with id set.
      * @param auth
      *            Credentials for authenticating against server.
      * @throws com.openexchange.admin.rmi.exceptions.StorageException
@@ -325,7 +289,7 @@ public interface OXUtilInterface extends Remote {
      * @throws RemoteException
      *             General RMI Exception
      */
-    public void unregisterDatabase(final int database_id, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException;
+    public void unregisterDatabase(final Database dbhandle, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException;
 
     /**
      * Search for databases registered in the system.
@@ -425,8 +389,8 @@ public interface OXUtilInterface extends Remote {
     /**
      * Unregister filestore from system identified by its ID
      * 
-     * @param store_id
-     *            ID of the Filestore to unregister.
+     * @param store
+     *            Filestore to unregister with id set.
      * @param auth
      *            Credentials for authenticating against server.
      * @throws com.openexchange.admin.rmi.exceptions.StorageException
@@ -438,6 +402,6 @@ public interface OXUtilInterface extends Remote {
      * @throws RemoteException
      *             General RMI Exception
      */
-    public void unregisterFilestore(final int store_id, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException;
+    public void unregisterFilestore(final Filestore store, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException;
 
 }

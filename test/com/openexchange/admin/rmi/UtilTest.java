@@ -73,80 +73,6 @@ public class UtilTest extends AbstractTest {
         return client_db;
     }
     
-    @Test
-    public void testAddMaintenanceReason() throws Exception {
-        OXUtilInterface oxu = getUtilClient();
-        
-        MaintenanceReason mr1 = new MaintenanceReason();
-        mr1.setText("testcase-reason-"+System.currentTimeMillis());
-        
-        // add reason to system
-        int[] srv_id = {oxu.createMaintenanceReason(mr1,ContextTest.DummyMasterCredentials())};
-        mr1.setId(srv_id[0]);
-        // load from system and verify
-        MaintenanceReason[] getmrs = oxu.getMaintenanceReasons(srv_id,ContextTest.DummyMasterCredentials());
-        
-        // server MUST return only 1 reason
-        if(getmrs.length!=1){
-            fail("Added 1 MaintenanceReason but server returned "+getmrs.length+" MaintenanceReasons");
-        }
-        
-        // check id
-        assertEquals(mr1.getId(),getmrs[0].getId());
-        
-        // check text
-        assertEquals(mr1.getText(),getmrs[0].getText());
-        
-    }
-    
-    @Test
-    public void testDeleteMaintenanceReason() throws Exception {
-        OXUtilInterface oxu = getUtilClient();
-        
-        MaintenanceReason mr1 = new MaintenanceReason();
-        mr1.setText("testcase-delete-reason-"+System.currentTimeMillis());
-        
-        // add reason to system
-        int[] srv_id = {oxu.createMaintenanceReason(mr1,ContextTest.DummyMasterCredentials())};
-        mr1.setId(srv_id[0]);
-        
-        // now delete it and check if it is deleted also sucessfully.
-        oxu.deleteMaintenanceReason(srv_id,ContextTest.DummyMasterCredentials());
-        
-        // now we must get an error that reason does not exist in system
-        try{
-            oxu.getMaintenanceReasons(srv_id,ContextTest.DummyMasterCredentials());
-            fail("Exception expected while loading an already deleted reason!");
-        }catch(InvalidDataException st){
-            // all ok, we MUST get an exception, cause reason is already deleted
-            assertTrue(true);
-        }
-    }
-    
-    @Test
-    public void testGetMaintenanceReasons() throws Exception {
-        OXUtilInterface oxu = getUtilClient();
-        
-        MaintenanceReason mr1 = new MaintenanceReason();
-        mr1.setText("testcase-get-reason-"+System.currentTimeMillis());
-        
-        // add reason to system
-        int[] srv_id = {oxu.createMaintenanceReason(mr1,ContextTest.DummyMasterCredentials())};
-        mr1.setId(srv_id[0]);
-        // load from system and verify
-        MaintenanceReason[] getmrs = oxu.getMaintenanceReasons(srv_id,ContextTest.DummyMasterCredentials());
-        
-        // server MUST return only 1 reason
-        if(getmrs.length!=1){
-            fail("Added 1 MaintenanceReason but server returned "+getmrs.length+" MaintenanceReasons");
-        }
-        
-        // check id
-        assertEquals(mr1.getId(),getmrs[0].getId());
-        
-        // check text
-        assertEquals(mr1.getText(),getmrs[0].getText());
-    }
     
     @Test
     public void testGetAllMaintenanceReasons() throws Exception {
@@ -166,7 +92,7 @@ public class UtilTest extends AbstractTest {
         
         // now fetch all reasons, and look if my added reasons are within this data set        
         int resp = 0;
-        MaintenanceReason[] srv_reasons = oxu.getAllMaintenanceReasons(ContextTest.DummyMasterCredentials());
+        MaintenanceReason[] srv_reasons = oxu.listMaintenanceReasons(ContextTest.DummyMasterCredentials());
         for(int c = 0;c<c_reasons.size();c++){
             
             MaintenanceReason tmp = c_reasons.get(c);
@@ -184,30 +110,7 @@ public class UtilTest extends AbstractTest {
         
     }
     
-    @Test
-    public void testGetAllMaintenanceReasonIds() throws Exception {
-        OXUtilInterface oxu = getUtilClient();
-        
-        int[] c_reasons = new int[10];
-        // add some reasons
-        for(int a = 0;a<10;a++){
-            MaintenanceReason mr = new MaintenanceReason();
-            mr.setText("testcase-get-all-reason-ids-"+a+"-"+System.currentTimeMillis());
-            // add reason to system
-            c_reasons[a] = oxu.createMaintenanceReason(mr,ContextTest.DummyMasterCredentials());           
-        }
-        Arrays.sort(c_reasons);
-        
-        int[] srv_reasons = oxu.getAllMaintenanceReasonIds(ContextTest.DummyMasterCredentials());
-        Arrays.sort(srv_reasons);
-        
-        assertTrue("Expected "+c_reasons.length+" ids",srv_reasons.length>=c_reasons.length);        
-        
-        for(int c = 0;c<c_reasons.length;c++){
-            assertTrue("reason id not found in server response",Arrays.binarySearch(srv_reasons,c_reasons[c])>-1);
-        }
-        
-    }
+    
     
     @Test
     public void testRegisterServer() throws Exception {
@@ -250,8 +153,12 @@ public class UtilTest extends AbstractTest {
         // resp muss 1 sein , ansonsten gibts 2 server mit selber id und name
         assertTrue("Expected 1 server",resp==1);
         
+        
+        Server sv = new Server();
+        sv.setId(reg_srv.getId());
+        
         // here the server was added correctly to the server, now delete it
-        oxu.unregisterServer(reg_srv.getId(),ContextTest.DummyMasterCredentials());
+        oxu.unregisterServer(sv,ContextTest.DummyMasterCredentials());
         
         srv_resp = oxu.searchForServer("testcase-register-server-*",ContextTest.DummyMasterCredentials());
         resp = 0;
@@ -344,7 +251,7 @@ public class UtilTest extends AbstractTest {
         
         srv_dbs = oxu.searchForDatabase("db_*",ContextTest.DummyMasterCredentials());        
         // remove the broken _changed entries from configdb because later tests might fail
-        oxu.unregisterDatabase(client_db.getId(), ContextTest.DummyMasterCredentials());
+        oxu.unregisterDatabase(new Database(client_db.getId()), ContextTest.DummyMasterCredentials());
         for(int a = 0;a<srv_dbs.length;a++){
             Database tmp = srv_dbs[a];
             // we found our added db, check now the data 
@@ -396,7 +303,7 @@ public class UtilTest extends AbstractTest {
         
         
         // now unregister database
-        oxu.unregisterDatabase(client_db.getId(),ContextTest.DummyMasterCredentials());
+        oxu.unregisterDatabase(new Database(client_db.getId()),ContextTest.DummyMasterCredentials());
         
         srv_dbs = oxu.searchForDatabase("db_*",ContextTest.DummyMasterCredentials());
         found_db = false;
@@ -600,7 +507,7 @@ public class UtilTest extends AbstractTest {
         
         
         // now unregister and search again
-        oxu.unregisterFilestore(client_st.getId(),ContextTest.DummyMasterCredentials());
+        oxu.unregisterFilestore(new Filestore(client_st.getId()),ContextTest.DummyMasterCredentials());
         
         srv_stores = oxu.listFilestores("file:///tmp/disc_*",ContextTest.DummyMasterCredentials());
         
