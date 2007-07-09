@@ -1,0 +1,179 @@
+package com.openexchange.admin.console.resource;
+
+import java.net.MalformedURLException;
+import java.rmi.Naming;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+import java.util.ArrayList;
+
+import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.console.AdminParser.MissingOptionException;
+import com.openexchange.admin.console.CmdLineParser.IllegalOptionValueException;
+import com.openexchange.admin.console.CmdLineParser.UnknownOptionException;
+import com.openexchange.admin.rmi.OXResourceInterface;
+import com.openexchange.admin.rmi.dataobjects.Context;
+import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.dataobjects.Resource;
+import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
+import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
+import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
+import com.openexchange.admin.rmi.exceptions.NoSuchResourceException;
+import com.openexchange.admin.rmi.exceptions.StorageException;
+
+public abstract class ListCore extends ResourceAbstraction {
+    
+    protected final void setOptions(final AdminParser parser) {
+        setDefaultCommandLineOptions(parser);
+        // we need csv output , so we add this option
+        setCSVOutputOption(parser);
+        setSearchPatternOption(parser);
+    }
+
+    protected final void commonfunctions(final AdminParser parser, final String[] args) {
+        setOptions(parser);
+
+        try {
+            parser.ownparse(args);
+
+            final Context ctx = new Context(DEFAULT_CONTEXT);
+
+            if (parser.getOptionValue(this.contextOption) != null) {
+                ctx.setID(Integer.parseInt((String) parser.getOptionValue(this.contextOption)));
+            }
+
+            final Credentials auth = new Credentials((String) parser.getOptionValue(this.adminUserOption), (String) parser.getOptionValue(this.adminPassOption));
+
+            String pattern = (String) parser.getOptionValue(this.searchOption);
+            
+            if (null == pattern) {
+                pattern = "*";
+            }
+
+            final OXResourceInterface oxres = (OXResourceInterface) Naming.lookup(RMI_HOSTNAME + OXResourceInterface.RMI_NAME);
+
+            final Resource[] allres = oxres.list(ctx, pattern, auth);
+
+            // TODO FIX THE NORMAL OUTPUT OF THIS COMMANDLINE TOOL
+            final ArrayList<Resource> resourceList = new ArrayList<Resource>();
+            maincall(parser, oxres, ctx, resourceList, allres, auth);
+            if (parser.getOptionValue(this.csvOutputOption) != null) {
+                // do CSV output
+                precsvinfos(resourceList);
+            } else {
+                sysoutOutput(resourceList);
+            }
+            sysexit(0);
+
+        } catch (final java.rmi.ConnectException neti) {
+            printError(neti.getMessage());
+            sysexit(SYSEXIT_COMMUNICATION_ERROR);
+        } catch (final java.lang.NumberFormatException num) {
+            printInvalidInputMsg("Ids must be numbers!");
+            sysexit(1);
+        } catch (final MalformedURLException e) {
+            printServerException(e);
+            sysexit(1);
+        } catch (final RemoteException e) {
+            printServerException(e);
+            sysexit(SYSEXIT_REMOTE_ERROR);
+        } catch (final NotBoundException e) {
+            printServerException(e);
+            sysexit(1);
+        } catch (final StorageException e) {
+            printServerException(e);
+            sysexit(SYSEXIT_SERVERSTORAGE_ERROR);
+        } catch (final InvalidCredentialsException e) {
+            printServerException(e);
+            sysexit(SYSEXIT_INVALID_CREDENTIALS);
+        } catch (final NoSuchContextException e) {
+            printServerException(e);
+            sysexit(SYSEXIT_NO_SUCH_CONTEXT);
+        } catch (final InvalidDataException e) {
+            printServerException(e);
+            sysexit(SYSEXIT_INVALID_DATA);
+        } catch (final IllegalOptionValueException e) {
+            printError("Illegal option value : " + e.getMessage());
+            parser.printUsage();
+            sysexit(SYSEXIT_ILLEGAL_OPTION_VALUE);
+        } catch (final UnknownOptionException e) {
+            printError("Unrecognized options on the command line: " + e.getMessage());
+            parser.printUsage();
+            sysexit(SYSEXIT_UNKNOWN_OPTION);
+        } catch (final MissingOptionException e) {
+            printError(e.getMessage());
+            parser.printUsage();
+            sysexit(SYSEXIT_MISSING_OPTION);
+        } catch (final DatabaseUpdateException e) {
+            printServerException(e);
+            sysexit(1);
+        } catch (final NoSuchResourceException e) {
+            printServerException(e);
+            sysexit(SYSEXIT_NO_SUCH_RESOURCE);
+        }
+    }
+    
+    protected final void sysoutOutput(final ArrayList<Resource> resources) {
+        for (final Resource resource : resources) {
+            System.out.println(resource.toString());
+            printExtensionsError(resource);
+        }
+    }
+
+
+    protected abstract void maincall(final AdminParser parser, final OXResourceInterface oxres, final Context ctx, final ArrayList<Resource> reslist, final Resource[] allres, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchResourceException;
+
+    private void precsvinfos(final ArrayList<Resource> resourceList) {
+        // needed for csv output, KEEP AN EYE ON ORDER!!!
+        final ArrayList<String> columns = new ArrayList<String>();
+        columns.add("id");
+        columns.add("name");
+        columns.add("displayname");
+        columns.add("email");
+        extendscvscolumns(columns);
+    
+        // Needed for csv output
+        final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
+    
+        for (final Resource my_res : resourceList) {
+            data.add(makeCsvData(my_res));
+            printExtensionsError(my_res);
+        }
+        doCSVOutput(columns, data);
+    }
+    
+    protected abstract void extendscvscolumns(final ArrayList<String> columns);
+
+    private ArrayList<String> makeCsvData(final Resource my_res) {
+    
+        final ArrayList<String> res_data = new ArrayList<String>();
+    
+        res_data.add(String.valueOf(my_res.getId())); // id
+    
+        final String name = my_res.getName();
+        if (name != null && name.trim().length() > 0) {
+            res_data.add(name); // name
+        } else {
+            res_data.add(null); // name
+        }
+    
+        final String displayname = my_res.getDisplayname();
+        if (displayname != null && displayname.trim().length() > 0) {
+            res_data.add(displayname); // displayname
+        } else {
+            res_data.add(null); // displayname
+        }
+    
+        final String email = my_res.getEmail();
+        if (email != null && email.trim().length() > 0) {
+            res_data.add(email); // email
+        } else {
+            res_data.add(null); // email
+        }
+    
+        extendmakeCSVData(my_res, res_data);
+        return res_data;
+    }
+    
+    protected abstract void extendmakeCSVData(final Resource my_res, final ArrayList<String> res_data);
+}
