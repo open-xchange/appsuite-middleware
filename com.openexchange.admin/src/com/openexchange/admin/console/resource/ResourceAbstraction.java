@@ -107,7 +107,7 @@ public abstract class ResourceAbstraction extends BasicCommandlineOptions {
     }
     
     protected void setAvailableOption(final AdminParser admp,final boolean required){
-        resourceAvailableOption = setShortLongOpt(admp, _OPT_AVAILABLE_SHORT,_OPT_AVAILABLE_LONG,"Toggle resource availability",true, required);                
+        resourceAvailableOption = setShortLongOpt(admp, _OPT_AVAILABLE_SHORT, _OPT_AVAILABLE_LONG, "true/false", "Toggle resource availability", required);
     }
     
     protected void setDescriptionOption(final AdminParser admp,final boolean required){
