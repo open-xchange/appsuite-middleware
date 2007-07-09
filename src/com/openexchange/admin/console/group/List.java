@@ -42,7 +42,7 @@ public class List extends ListCore {
     @Override
     protected void maincall(AdminParser parser, OXGroupInterface oxgrp, Context ctx, ArrayList<Group> grplist, Group[] allgrps, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException, NoSuchGroupException {
         for (final Group group : allgrps) {
-            grplist.add(oxgrp.get(ctx, group, auth));
+            grplist.add(oxgrp.getData(ctx, group, auth));
         }
     }
 }
