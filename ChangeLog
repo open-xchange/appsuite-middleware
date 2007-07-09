@@ -1,3 +1,7 @@
+* 2007-07-09 - thorben.betten@open-xchange.com
+
+ - Bugfix #7950: Proper handling of quotes in message address headers
+
 * 2007-07-06 - marcus.klein@open-xchange.com
 
  - Bugfix #8300: Displaying properly formatted address (RFC 822 syntax) in
