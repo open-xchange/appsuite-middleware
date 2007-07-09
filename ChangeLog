@@ -9,6 +9,7 @@
 
  - Bugfix #8335: Remembering subscription status on folder rename for
    affected folder and its subfolders
+ - Bugfix #8348: Proper exception handling on actionGetAttachment
 
 * 2007-07-09 - marcus.klein@open-xchange.com
 

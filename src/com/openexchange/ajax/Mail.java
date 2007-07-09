@@ -63,14 +63,10 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -146,7 +142,6 @@ import com.openexchange.tools.mail.ContentType;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 import com.openexchange.tools.servlet.UploadServletException;
-import com.openexchange.tools.servlet.http.HttpServletResponseWrapper;
 import com.openexchange.tools.servlet.http.Tools;
 
 /**
@@ -213,15 +208,6 @@ public class Mail extends PermissionServlet implements UploadListener {
 	private static final String UPLOAD_PARAM_WRITER = "w";
 
 	private static final String UPLOAD_PARAM_SESSION = "s";
-
-	private static final String ERROR_PAGE_TEMPLATE = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\""
-			+ "\"http://www.w3.org/TR/html4/strict.dtd\">\n" + "<html>\n" + "<head>\n"
-			+ "\t<title>#STATUS_MSG#</title>\n" + "\t<style type=\"text/css\"><!--/*--><![CDATA[/*><!--*/ " + "\n"
-			+ "\t\tbody { color: #000000; background-color: #FFFFFF; }\n" + "\t\ta:link { color: #0000CC; }\n"
-			+ "\t\tp, address {margin-left: 3em;}" + "\t\tspan {font-size: smaller;}" + "\t/*]]>*/--></style>\n"
-			+ "</head>\n\n" + "<body>\n" + "<h1>#STATUS_MSG#</h1>\n" + "<p>\n#STATUS_DESC#\n</p>\n\n"
-			+ "<h2>Error #STATUS_CODE#</h2>\n" + "<address>\n" + "<a href=\"/\">#IP_ADR#</a><br />\n\n"
-			+ "<span>#DATE#<br />\n" + "\tOpen-Xchange</span>\n" + "</address>\n" + "</body>\n" + "</html>";
 
 	private static final String STR_CHARSET = "charset";
 
@@ -1093,6 +1079,8 @@ public class Mail extends PermissionServlet implements UploadListener {
 		 * Some variables
 		 */
 		final SessionObject sessionObj = getSessionObject(req);
+		boolean outSelected = false;
+		boolean saveToDisk = false;
 		/*
 		 * Start response
 		 */
@@ -1132,14 +1120,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 				if (saveIdentifier == null || saveIdentifier.length() == 0) {
 					saveIdentifier = "0";
 				}
-				final boolean saveToDisk = ((Integer.parseInt(saveIdentifier)) > 0);
-				/*
-				 * Reset response header values since we are going to directly
-				 * write into servlet's output stream and then some browsers do
-				 * not allow header "Pragma"
-				 */
-				Tools.removeCachingHeader(resp);
-				final OutputStream out = resp.getOutputStream();
+				saveToDisk = ((Integer.parseInt(saveIdentifier)) > 0);
 				/*
 				 * Write to response
 				 */
@@ -1177,6 +1158,14 @@ public class Mail extends PermissionServlet implements UploadListener {
 					 * stream
 					 */
 					InputStream contentInputStream = null;
+					/*
+					 * Reset response header values since we are going to directly
+					 * write into servlet's output stream and then some browsers do
+					 * not allow header "Pragma"
+					 */
+					Tools.removeCachingHeader(resp);
+					final OutputStream out = resp.getOutputStream();
+					outSelected = true;
 					try {
 						contentInputStream = (InputStream) content;
 						final byte[] buffer = new byte[0xFFFF];
@@ -1197,6 +1186,14 @@ public class Mail extends PermissionServlet implements UploadListener {
 					final String contentTypeStr = contentType.toString();
 					resp.setContentType(contentTypeStr);
 					final byte[] contentBytes = (byte[]) content;
+					/*
+					 * Reset response header values since we are going to directly
+					 * write into servlet's output stream and then some browsers do
+					 * not allow header "Pragma"
+					 */
+					Tools.removeCachingHeader(resp);
+					final OutputStream out = resp.getOutputStream();
+					outSelected = true;
 					out.write(contentBytes);
 				}
 			} finally {
@@ -1205,27 +1202,36 @@ public class Mail extends PermissionServlet implements UploadListener {
 					mailInterface = null;
 				}
 			}
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOG.error("actionGetAttachment", e);
-			/*
-			 * Assume output stream has NOT been selected, yet
-			 */
 			try {
 				resp.setContentType(MIME_TEXT_HTML_CHARSET_UTF_8);
-				final PrintWriter p = getResponseWriter(resp);
-				final String errorPage = ERROR_PAGE_TEMPLATE.replaceAll("#STATUS_MSG#", "Internal Server Error")
-						.replaceAll("#STATUS_CODE#", "500").replaceAll("#STATUS_DESC#", e.getMessage()).replaceAll(
-								"#IP_ADR#", getOwnIP()).replaceAll("#DATE#", getCurrentDate(sessionObj));
-				p.write(errorPage);
-				p.flush();
-			} catch (UnsupportedEncodingException uee) {
-				if (LOG.isWarnEnabled()) {
-					LOG.warn("actionGetAttachment", uee);
+				final Writer writer;
+				if (outSelected) {
+					/*
+					 * Output stream has already been selected
+					 */
+					Tools.disableCaching(resp);
+					writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(resp.getOutputStream(), resp
+							.getCharacterEncoding())), true);
+				} else {
+					writer = resp.getWriter();
 				}
-			} catch (IOException ioe) {
-				if (LOG.isWarnEnabled()) {
-					LOG.warn("actionGetAttachment", ioe);
-				}
+				final Response response = new Response();
+				response.setException(e instanceof AbstractOXException ? (AbstractOXException) e
+						: getWrappingOXException(e));
+				final String callback = saveToDisk ? JS_FRAGMENT : JS_FRAGMENT_POPUP;
+				writer.write(callback.replaceFirst(JS_FRAGMENT_JSON, response.getJSON().toString()).replaceFirst(
+						JS_FRAGMENT_ACTION, ACTION_MATTACH));
+				writer.flush();
+			} catch (final UnsupportedEncodingException uee) {
+				LOG.error(uee.getLocalizedMessage(), uee);
+			} catch (final IOException ioe) {
+				LOG.error(ioe.getLocalizedMessage(), ioe);
+			} catch (final IllegalStateException ise) {
+				LOG.error(ise.getLocalizedMessage(), ise);
+			} catch (final JSONException je) {
+				LOG.error(je.getLocalizedMessage(), je);
 			}
 			return;
 		}
@@ -1233,36 +1239,6 @@ public class Mail extends PermissionServlet implements UploadListener {
 		 * flush output stream
 		 */
 		resp.getOutputStream().flush();
-	}
-	
-	private static final PrintWriter getResponseWriter(final HttpServletResponse resp) throws UnsupportedEncodingException, IOException {
-		final PrintWriter writer;
-		if (((HttpServletResponseWrapper) resp).getOutputSelection() != HttpServletResponseWrapper.USE_OUTPUT_STREAM) {
-			writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(resp.getOutputStream(), resp
-					.getCharacterEncoding())), true);
-		} else {
-			writer = resp.getWriter();
-		}
-		return writer;
-	}
-
-	private static final String getOwnIP() {
-		String ip = null;
-		try {
-			final InetAddress myAddr = InetAddress.getLocalHost();
-			ip = myAddr.getHostAddress();
-		} catch (UnknownHostException ex) {
-			LOG.error(ex.getMessage(), ex);
-		}
-		return ip;
-	}
-
-	private static final String getCurrentDate(final SessionObject session) {
-		if (session.getLocale() == null) {
-			return null;
-		}
-		final Date currentDate = new Date();
-		return DateFormat.getDateInstance(DateFormat.LONG, session.getLocale()).format(currentDate);
 	}
 
 	private static final Pattern PART_FILENAME_PATTERN = Pattern.compile("(part )([0-9]+)(\\.)([0-9]+)",
@@ -1968,7 +1944,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 			response.setTimestamp(null);
 			Response.write(response, writer);
 		} catch (Exception e) {
-			LOG.error("actionPutCopyMail", e);
+			LOG.error("actionPutMailMultiple", e);
 			final Response response = new Response();
 			response.setException(getWrappingOXException(e));
 			response.setData(JSONObject.NULL);
@@ -2027,7 +2003,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 			response.setTimestamp(null);
 			Response.write(response, writer);
 		} catch (Exception e) {
-			LOG.error("actionPutCopyMail", e);
+			LOG.error("actionPutStoreFlagsMultiple", e);
 			final Response response = new Response();
 			response.setException(getWrappingOXException(e));
 			response.setData(JSONObject.NULL);
@@ -2086,7 +2062,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 			response.setTimestamp(null);
 			Response.write(response, writer);
 		} catch (Exception e) {
-			LOG.error("actionPutCopyMail", e);
+			LOG.error("actionPutColorLabelMultiple", e);
 			final Response response = new Response();
 			response.setException(getWrappingOXException(e));
 			response.setData(JSONObject.NULL);
