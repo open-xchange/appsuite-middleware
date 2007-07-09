@@ -1217,6 +1217,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 				} else {
 					writer = resp.getWriter();
 				}
+				resp.setHeader(STR_CONTENT_DISPOSITION, null);
 				final Response response = new Response();
 				response.setException(e instanceof AbstractOXException ? (AbstractOXException) e
 						: getWrappingOXException(e));
