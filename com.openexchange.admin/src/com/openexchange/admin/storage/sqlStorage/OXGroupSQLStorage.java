@@ -51,6 +51,7 @@ package com.openexchange.admin.storage.sqlStorage;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Group;
+import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.storage.interfaces.OXGroupStorageInterface;
 import java.sql.Connection;
 
@@ -70,9 +71,9 @@ public abstract class OXGroupSQLStorage extends OXGroupStorageInterface {
 
     /**
      * @see com.openexchange.admin.storage.interfaces.OXGroupStorageInterface#addMember(com.openexchange.admin.rmi.dataobjects.Context,
-     *      int, int[])
+     *      int, User[])
      */
-    abstract public void addMember(final Context ctx, final int grp_id, final int[] member_ids) throws StorageException;
+    abstract public void addMember(final Context ctx, final int grp_id, final User[] members) throws StorageException;
 
     /**
      * @see com.openexchange.admin.storage.interfaces.OXGroupStorageInterface#change(com.openexchange.admin.rmi.dataobjects.Context,
@@ -90,7 +91,7 @@ public abstract class OXGroupSQLStorage extends OXGroupStorageInterface {
      * @see com.openexchange.admin.storage.interfaces.OXGroupStorageInterface#getMembers(com.openexchange.admin.rmi.dataobjects.Context,
      *      int)
      */
-    abstract public int[] getMembers(final Context ctx, final int grp_id) throws StorageException;
+    abstract public User[] getMembers(final Context ctx, final int grp_id) throws StorageException;
 
     /**
      * @see com.openexchange.admin.storage.interfaces.OXGroupStorageInterface#list(com.openexchange.admin.rmi.dataobjects.Context,
@@ -100,9 +101,9 @@ public abstract class OXGroupSQLStorage extends OXGroupStorageInterface {
 
     /**
      * @see com.openexchange.admin.storage.interfaces.OXGroupStorageInterface#removeMember(com.openexchange.admin.rmi.dataobjects.Context,
-     *      int, int[])
+     *      int, User[])
      */
-    abstract public void removeMember(final Context ctx, final int grp_id, final int[] member_ids) throws StorageException;
+    abstract public void removeMember(final Context ctx, final int grp_id, final User[] members) throws StorageException;
 
     /**
      * @see com.openexchange.admin.storage.interfaces.OXGroupStorageInterface#deleteRecoveryData(com.openexchange.admin.rmi.dataobjects.Context,

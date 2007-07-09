@@ -13,6 +13,7 @@ import com.openexchange.admin.rmi.OXGroupInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Group;
+import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
@@ -54,13 +55,13 @@ public abstract class ChangeCore extends GroupAbstraction {
 
             
             if (parser.getOptionValue(this.addMemberOption) != null) {
-                final int[] newMemberList = getMembers(parser, this.addMemberOption);
+                final User[] newMemberList = getMembers(parser, this.addMemberOption);
                 if (newMemberList != null) {
                     oxgrp.addMember(ctx, grp, newMemberList, auth);
                 }
             }
             if (parser.getOptionValue(this.removeMemberOption) != null) {
-                final int[] removeMemberList = getMembers(parser, this.removeMemberOption);
+                final User[] removeMemberList = getMembers(parser, this.removeMemberOption);
                 if (removeMemberList != null) {
                     oxgrp.removeMember(ctx, grp, removeMemberList, auth);
                 }
@@ -126,12 +127,12 @@ public abstract class ChangeCore extends GroupAbstraction {
         }
     }
 
-    private int[] getMembers(final AdminParser parser, final Option memberOption) {
+    private User[] getMembers(final AdminParser parser, final Option memberOption) {
         final String tmpmembers = (String) parser.getOptionValue(memberOption);
         final String[] split = tmpmembers.split(",");
-        final int[] memberList = new int[split.length];
+        final User[] memberList = new User[split.length];
         for (int i = 0; i < split.length; i++) {
-            memberList[i] = Integer.parseInt(split[i]);
+            memberList[i].setId(Integer.parseInt(split[i]));
         }
         return memberList;
     }
