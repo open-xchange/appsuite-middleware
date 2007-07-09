@@ -21,6 +21,7 @@ public abstract class ContextAbtraction extends UserAbstraction {
     
     protected Option searchOption = null;
     protected Option commonIDOption = null;
+    protected Option contextNameOption = null;
     protected Option maintenanceReasonIDOption = null;
     protected Option filestoreContextQuotaOption = null;
 
@@ -45,5 +46,9 @@ public abstract class ContextAbtraction extends UserAbstraction {
     
     protected void setContextQuotaOption(final AdminParser parser,final boolean required ){
         this.filestoreContextQuotaOption = setShortLongOpt(parser, OPT_QUOTA_SHORT,OPT_QUOTA_LONG,"How much quota the context can use for filestore",true, required);
+    }
+    
+    protected void setContextNameOption(final AdminParser parser,final boolean required ){
+        this.contextNameOption = setShortLongOpt(parser, OPT_NAME_CONTEXT_NAME_SHORT,OPT_NAME_CONTEXT_NAME_LONG,OPT_NAME_CONTEXT_NAME_DESCRIPTION,true, required);
     }
 }
