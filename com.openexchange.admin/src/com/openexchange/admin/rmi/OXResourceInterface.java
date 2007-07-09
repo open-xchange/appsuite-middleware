@@ -110,25 +110,6 @@ public interface OXResourceInterface extends Remote {
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchResourceException;
 
     /**
-     * Get Resource from given context.
-     * 
-     * @return Resource object containing data.
-     * @param ctx Context object.
-     * @param res Resource containing the resource id.
-     * @param auth Credentials for authenticating against server.
-     * @throws StorageException When an error in the subsystems occured.
-     * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
-     * @throws NoSuchContextException If the context does not exist in the system.
-     * 
-     * @throws InvalidDataException If the data sent within the method contained invalid data.
-     * @throws RemoteException General RMI Exception
-     * @throws DatabaseUpdateException 
-     * @throws NoSuchResourceException 
-     */
-    public Resource get(Context ctx, Resource res, Credentials auth)
-    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchResourceException;
-
-    /**
      * Delete resource from given context.
      * 
      * @param ctx Context object.
@@ -147,22 +128,24 @@ public interface OXResourceInterface extends Remote {
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchResourceException;
 
     /**
-     * List resources matching <code>pattern</code> in given context.
+     * Get Resource from given context.
      * 
-     * @return Resource[] containing result objects.
+     * @return Resource object containing data.
      * @param ctx Context object.
-     * @param pattern Search pattern like * or mon* (e.g. for monitor)
+     * @param res Resource containing the resource id.
      * @param auth Credentials for authenticating against server.
      * @throws StorageException When an error in the subsystems occured.
      * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
      * @throws NoSuchContextException If the context does not exist in the system.
+     * 
      * @throws InvalidDataException If the data sent within the method contained invalid data.
      * @throws RemoteException General RMI Exception
      * @throws DatabaseUpdateException 
+     * @throws NoSuchResourceException 
      */
-    public Resource[] list(Context ctx, String pattern, Credentials auth)
-    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException;
-    
+    public Resource getData(Context ctx, Resource res, Credentials auth)
+    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchResourceException;
+
     /**
      * Fetch specified resources from server. Can be used to fetch resource data including extensions.
      * Resources will be identified by id or by name.
@@ -180,6 +163,23 @@ public interface OXResourceInterface extends Remote {
      */
     public Resource[] getData(Context ctx, Resource[] resources, Credentials auth)
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchResourceException, DatabaseUpdateException;
+
+    /**
+     * List resources matching <code>pattern</code> in given context.
+     * 
+     * @return Resource[] containing result objects.
+     * @param ctx Context object.
+     * @param pattern Search pattern like * or mon* (e.g. for monitor)
+     * @param auth Credentials for authenticating against server.
+     * @throws StorageException When an error in the subsystems occured.
+     * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException If the context does not exist in the system.
+     * @throws InvalidDataException If the data sent within the method contained invalid data.
+     * @throws RemoteException General RMI Exception
+     * @throws DatabaseUpdateException 
+     */
+    public Resource[] list(Context ctx, String pattern, Credentials auth)
+    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException;
 
 
 }
