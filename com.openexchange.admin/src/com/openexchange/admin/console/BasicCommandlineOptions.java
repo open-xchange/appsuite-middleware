@@ -52,6 +52,8 @@ import java.rmi.NotBoundException;
 import java.util.ArrayList;
 
 import com.openexchange.admin.console.CmdLineParser.Option;
+import com.openexchange.admin.rmi.dataobjects.Context;
+import com.openexchange.admin.rmi.dataobjects.Credentials;
 
 
 /**
@@ -378,5 +380,19 @@ public abstract class BasicCommandlineOptions {
         System.runFinalization();
         // 
         System.exit(exitcode);
+    }
+
+    protected Context contextparsing(final AdminParser parser) {
+        final Context ctx = new Context(DEFAULT_CONTEXT);
+    
+        if (parser.getOptionValue(this.contextOption) != null) {
+            ctx.setID(Integer.parseInt((String) parser.getOptionValue(this.contextOption)));
+        }
+        return ctx;
+    }
+
+    protected Credentials credentialsparsing(final AdminParser parser) {
+        final Credentials auth = new Credentials((String) parser.getOptionValue(this.adminUserOption), (String) parser.getOptionValue(this.adminPassOption));
+        return auth;
     }
 }

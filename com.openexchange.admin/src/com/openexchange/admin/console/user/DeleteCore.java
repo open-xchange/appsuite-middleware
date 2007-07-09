@@ -2,7 +2,6 @@ package com.openexchange.admin.console.user;
 
 import java.net.MalformedURLException;
 import java.rmi.ConnectException;
-import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 
@@ -40,16 +39,12 @@ public abstract class DeleteCore extends UserAbstraction {
         try {
             parser.ownparse(args);
 
-            final Context ctx = new Context(DEFAULT_CONTEXT);
+            final Context ctx = contextparsing(parser);
 
-            if (parser.getOptionValue(this.contextOption) != null) {
-                ctx.setID(Integer.parseInt((String) parser.getOptionValue(this.contextOption)));
-            }
-
-            final Credentials auth = new Credentials((String) parser.getOptionValue(this.adminUserOption), (String) parser.getOptionValue(this.adminPassOption));
+            final Credentials auth = credentialsparsing(parser);
 
             // get rmi ref
-            final OXUserInterface oxusr = (OXUserInterface) Naming.lookup(RMI_HOSTNAME + OXUserInterface.RMI_NAME);
+            final OXUserInterface oxusr = getUserInterface();
 
             final int id = Integer.valueOf((String) parser.getOptionValue(this.idOption));
 
@@ -107,7 +102,7 @@ public abstract class DeleteCore extends UserAbstraction {
         }
 
     }
-    
+
     protected abstract void maincall(final AdminParser parser, final OXUserInterface oxusr, final Context ctx, final User usr, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
 
 }

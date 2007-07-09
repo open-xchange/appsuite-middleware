@@ -1,7 +1,6 @@
 package com.openexchange.admin.console.resource;
 
 import java.net.MalformedURLException;
-import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 
@@ -41,15 +40,11 @@ public abstract class CreateCore extends ResourceAbstraction {
         try {
             parser.ownparse(args);
 
-            final Context ctx = new Context(DEFAULT_CONTEXT);
+            final Context ctx = contextparsing(parser);
 
-            if (parser.getOptionValue(this.contextOption) != null) {
-                ctx.setID(Integer.parseInt((String) parser.getOptionValue(this.contextOption)));
-            }
-
-            final Credentials auth = new Credentials((String) parser.getOptionValue(this.adminUserOption), (String) parser.getOptionValue(this.adminPassOption));
+            final Credentials auth = credentialsparsing(parser);
             
-            final OXResourceInterface oxres = (OXResourceInterface) Naming.lookup(RMI_HOSTNAME + OXResourceInterface.RMI_NAME);
+            final OXResourceInterface oxres = getResourceInterface();
             final Resource res = new Resource();
 
             res.setAvailable(Boolean.parseBoolean((String) parser.getOptionValue(this.resourceAvailableOption)));
@@ -110,6 +105,6 @@ public abstract class CreateCore extends ResourceAbstraction {
         }
 
     }
-    
+
     protected abstract void maincall(final AdminParser parser, final OXResourceInterface oxres, final Context ctx, final Resource res, final Credentials auth) throws RemoteException;
 }

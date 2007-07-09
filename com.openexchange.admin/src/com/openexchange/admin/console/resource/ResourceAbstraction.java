@@ -48,11 +48,16 @@
  */
 package com.openexchange.admin.console.resource;
 
+import java.net.MalformedURLException;
+import java.rmi.Naming;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.BasicCommandlineOptions;
 import com.openexchange.admin.console.CmdLineParser.Option;
+import com.openexchange.admin.rmi.OXResourceInterface;
 import com.openexchange.admin.rmi.dataobjects.Resource;
 import com.openexchange.admin.rmi.extensions.OXResourceExtensionInterface;
 
@@ -120,8 +125,9 @@ public abstract class ResourceAbstraction extends BasicCommandlineOptions {
     
     protected void setIdOption(final AdminParser admp,final boolean required){
         resourceIdOption = setShortLongOpt(admp,_OPT_RESOURCEID_SHORT,_OPT_RESOURCEID_LONG,"Id of this resource", true, required); 
+    }
+
+    protected final OXResourceInterface getResourceInterface() throws NotBoundException, MalformedURLException, RemoteException {
+        return (OXResourceInterface) Naming.lookup(RMI_HOSTNAME + OXResourceInterface.RMI_NAME);
     }    
-    
-   
-    
 }
