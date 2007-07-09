@@ -47,7 +47,7 @@
  *
  */
 /*
- * $Id: OXResource.java,v 1.27 2007/06/29 17:07:42 dennis Exp $
+ * $Id: OXResource.java,v 1.28 2007/07/09 11:45:36 dennis Exp $
  */
 package com.openexchange.admin.rmi.impl;
 
@@ -103,7 +103,6 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
         if (log.isInfoEnabled()) {
             log.info("Class loaded: " + this.getClass().getName());
         }
-        
     }
 
     private void checkContext(final Context ctx) throws InvalidDataException {
@@ -141,18 +140,15 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
        try {
            if (tool.existsResource(ctx, res.getName())) {
                throw new InvalidDataException("Resource with this name already exists");
-
            }
 
            if( res.getEmail() != null && tool.existsResourceAddress(ctx, res.getEmail())) {
                throw new InvalidDataException("Resource with this email address already exists");
-
            }
 
            if (!res.attributesforcreateset()) {
                throw new InvalidDataException("Mandatory fields not set");
                // TODO: cutmasta look here
-
            }
 
            if (prop.getResourceProp(AdminProperties.Resource.AUTO_LOWERCASE, true)) {
@@ -233,7 +229,6 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
         }        
         
         try {           
-            
             doAuthentication(auth,ctx);
         } catch (final InvalidDataException e1) {
             log.error(e1.getMessage(), e1);
@@ -252,14 +247,12 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
         
         if (!tool.existsResource(ctx, resource_ID)) {
             throw new NoSuchResourceException("Resource with this id does not exists");
-            
         }
 
         try {
 
-            if( res.getEmail() != null && tool.existsResourceAddress(ctx, res.getEmail(),res.getId())) {
+            if (res.getEmail() != null && tool.existsResourceAddress(ctx, res.getEmail(), res.getId())) {
                 throw new InvalidDataException("Resource with this email address already exists");
-
             }
 
             if ((null != res.getName()) && prop.getResourceProp(AdminProperties.Resource.AUTO_LOWERCASE, true)) {
