@@ -42,7 +42,7 @@ public class List extends ListCore {
     @Override
     protected void maincall(final AdminParser parser, final OXResourceInterface oxres, final Context ctx, final ArrayList<Resource> reslist, final Resource[] allres, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchResourceException {
         for (final Resource da_res : allres) {
-            reslist.add(oxres.get(ctx, da_res, auth));
+            reslist.add(oxres.getData(ctx, da_res, auth));
         }
     }
 }
