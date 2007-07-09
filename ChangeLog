@@ -1,3 +1,8 @@
+* 2007-07-09 - thorben.betten@open-xchange.com
+
+ - Bugfix #7950: Proper handling of quotes in email address headers
+ - Bugfix #8300: Proper display of email addresses in reply/forward prefix
+
 * 2007-06-28 - marcus.klein@open-xchange.com
 
   - Bugfix #8007: Partly fix. Disabled possibility to create unbound folders
