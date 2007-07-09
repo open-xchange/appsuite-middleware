@@ -55,7 +55,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -72,7 +71,6 @@ import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.server.DBPoolingException;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * @author d7
@@ -102,15 +100,12 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             // update status of resource availability
             editres = con.prepareStatement("UPDATE resource SET available = ? WHERE cid = ? AND id = ?");
             try {
-                if (null != res && null != res.isAvailable()) {
-                    if (res.isAvailable()) {
+                if (null != res.getAvailable()) {
+                    if (res.getAvailable().booleanValue()) {
                         editres.setInt(1, 1);
                     } else {
                         editres.setInt(1, 0);
                     }
-                } else {
-                    // Here we set the default value to true
-                    editres.setInt(1, 1);
                 }
                 editres.setInt(2, context_id);
                 editres.setInt(3, resource_id);
@@ -226,8 +221,8 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             final String displayName = res.getDisplayname();
 
             int available;
-            if (null != res && null != res.isAvailable()) {
-                if (res.isAvailable()) {
+            if (null != res && null != res.getAvailable()) {
+                if (res.getAvailable()) {
                     available = 1;
                 } else {
                     available = 0;
