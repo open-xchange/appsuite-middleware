@@ -5,6 +5,7 @@ import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.MissingOptionException;
@@ -54,23 +55,37 @@ public class Search extends ContextAbtraction {
 
             final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
 
-            final String HEADER_FORMAT = "%-7s %-5s %-20s %-10s %-10s %-10s %s\n";
-            final String VALUE_FORMAT  = "%-7s %-5s %-20s %-10s %-10s %-10s %s\n";
+            final String HEADER_FORMAT = "%-7s %-5s %-20s %-10s %-10s %-10s %-20s %s\n";
+            final String VALUE_FORMAT  = "%-7s %-5s %-20s %-10s %-10s %-10s %-20s %s\n";
             if(parser.getOptionValue(this.csvOutputOption) == null) {
-                System.out.format(HEADER_FORMAT, "cid", "fid", "fname", "enabled", "qmax", "qused", "name");
+                System.out.format(HEADER_FORMAT, "cid", "fid", "fname", "enabled", "qmax", "qused", "name","lmappings");
             }
             for (Context ctx_tmp : ctxs) {
                 if (parser.getOptionValue(this.csvOutputOption) != null) {
                     data.add(makeCSVData(ctx_tmp));
                 } else {
+                    // loginl mappings
+                    StringBuilder sb = new StringBuilder();
+                    if(ctx_tmp.getLoginMappings()!=null &&ctx_tmp.getLoginMappings().size()>0 ){
+                        Iterator itr = ctx_tmp.getLoginMappings().iterator();
+                        while(itr.hasNext()){
+                            sb.append("\"");
+                            sb.append((String)itr.next());
+                            sb.append("\"");
+                            sb.append(",");
+                        }
+                        sb.deleteCharAt(sb.length()-1);
+                    }
+                    
                     System.out.format(VALUE_FORMAT,
                             ctx_tmp.getIdAsInt(),
                             ctx_tmp.getFilestore().getId(),
                             ctx_tmp.getFilestore().getName(),
                             ctx_tmp.isEnabled(),
                             ctx_tmp.getMaxQuota(),
-                            ctx_tmp.getUsedQuota(),
-                            ctx_tmp.getName());
+                            ctx_tmp.getUsedQuota(),                            
+                            ctx_tmp.getName(),
+                            sb.toString());
                 }
             }
 
