@@ -108,7 +108,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
     }
 
     @Override
-    public void addMember(final Context ctx, final int grp_id, final int[] member_ids) throws StorageException {
+    public void addMember(final Context ctx, final int grp_id, final User[] members) throws StorageException {
         Connection con = null;
         PreparedStatement prep_add_member = null;
         final int context_id = ctx.getIdAsInt().intValue();
@@ -117,11 +117,11 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             con = cache.getWRITEConnectionForContext(context_id);
             con.setAutoCommit(false);
 
-            for (final int member_id : member_ids) {
+            for (final User member : members) {
                 prep_add_member = con.prepareStatement("INSERT INTO groups_member VALUES (?,?,?);");
                 prep_add_member.setInt(1, context_id);
                 prep_add_member.setInt(2, grp_id);
-                prep_add_member.setInt(3, member_id);
+                prep_add_member.setInt(3, member.getId());
                 prep_add_member.executeUpdate();
                 prep_add_member.close();
             }
@@ -129,8 +129,8 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             // set last modified on group
             changeLastModifiedOnGroup(context_id, grp_id, con);
             OXUserMySQLStorage oxu = new OXUserMySQLStorage();
-            for (final int element : member_ids) {
-                oxu.changeLastModified(element, ctx, con);
+            for (final User member : members) {
+                oxu.changeLastModified(member.getId(), ctx, con);
             }
             
             // let the groupware api know that the group has changed
@@ -171,7 +171,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
     }
 
     @Override
-    public void removeMember(final Context ctx, final int grp_id, final int[] member_ids) throws StorageException {
+    public void removeMember(final Context ctx, final int grp_id, final User[] members) throws StorageException {
         Connection con = null;
         PreparedStatement prep_del_member = null;
         final int context_id = ctx.getIdAsInt().intValue();
@@ -179,11 +179,11 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             con = cache.getWRITEConnectionForContext(context_id);
             con.setAutoCommit(false);
 
-            for (final int element : member_ids) {
+            for (final User member : members) {
                 prep_del_member = con.prepareStatement("DELETE FROM groups_member WHERE cid=? AND id=? AND member=?;");
                 prep_del_member.setInt(1, context_id);
                 prep_del_member.setInt(2, grp_id);
-                prep_del_member.setInt(3, element);
+                prep_del_member.setInt(3, member.getId());
                 prep_del_member.executeUpdate();
                 prep_del_member.close();
             }
@@ -192,10 +192,10 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             changeLastModifiedOnGroup(context_id, grp_id, con);
             final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
             OXUserMySQLStorage oxu = new OXUserMySQLStorage();
-            for (final int element : member_ids) {
-                if (tool.existsUser(ctx, element)) {
+            for (final User member : members) {
+                if (tool.existsUser(ctx, member.getId())) {
                     // update last modified on user
-                    oxu.changeLastModified(element, ctx, con);
+                    oxu.changeLastModified(member.getId(), ctx, con);
                 }
             }
             
@@ -540,7 +540,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
     }
 
     @Override
-    public int[] getMembers(final Context ctx, final int grp_id) throws StorageException {
+    public User[] getMembers(final Context ctx, final int grp_id) throws StorageException {
         Connection con = null;
         final int context_id = ctx.getIdAsInt();
         try {
@@ -548,9 +548,10 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             con = cache.getREADConnectionForContext(context_id);
             
             Integer[] as =  getMembers(ctx, grp_id,con);
-            int[] ret = new int[as.length];
+            User[] ret = new User[as.length];
             for(int i = 0;i<as.length;i++){
-                ret[i] = as[i];
+                User u = new User(as[i]);
+                ret[i] = u;
             }
             return ret;
         } catch (final PoolException e) {

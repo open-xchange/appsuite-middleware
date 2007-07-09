@@ -165,15 +165,14 @@ public class GroupTest extends AbstractTest {
         usr.setId(usr_id);
 
         // add user as groupmember
-        final int[] members = new int[1];
-        members[0] = (int) usr_id;
-        addMemberToGroup(ctx, addgroup, members, hosturl, cred);
+        User u = new User(usr_id);
+        addMemberToGroup(ctx, addgroup, new User[]{u}, hosturl, cred);
 
         // now get all members of group, and check if user is member
-        final int[] remote_members = getMembers(ctx, addgroup, hosturl, cred);
+        final User[] remote_members = getMembers(ctx, addgroup, hosturl, cred);
         boolean foundmember = false;
-        for (int element : remote_members) {
-            if (element == (int) usr_id) {
+        for (User element : remote_members) {
+            if (element.getId() == (int) usr_id) {
                 foundmember = true;
             }
         }
@@ -199,27 +198,26 @@ public class GroupTest extends AbstractTest {
         usr.setId(usr_id);
 
         // add user as groupmember
-        final int[] members = new int[1];
-        members[0] = (int) usr_id;
-        addMemberToGroup(ctx, addgroup, members, hosturl, cred);
+        User u = new User(usr_id);
+        addMemberToGroup(ctx, addgroup, new User[]{u}, hosturl, cred);
 
         // now get all members of group, and check if user is member
-        int[] remote_members = getMembers(ctx, addgroup, hosturl, cred);
+        User[] remote_members = getMembers(ctx, addgroup, hosturl, cred);
         boolean foundmember = false;
-        for (int element : remote_members) {
-            if (element == (int) usr_id) {
+        for (User element : remote_members) {
+            if (element.getId() == (int) usr_id) {
                 foundmember = true;
             }
         }
         assertTrue("member not added to group", foundmember);
 
         // now remove user from group;
-        removeMemberFromGroup(ctx, addgroup, members, hosturl, cred);
+        removeMemberFromGroup(ctx, addgroup, new User[]{u}, hosturl, cred);
         // now get all members of group, and check if user is member
         remote_members = getMembers(ctx, addgroup, hosturl, cred);
         foundmember = false;
-        for (int element : remote_members) {
-            if (element == (int) usr_id) {
+        for (User element : remote_members) {
+            if (element.getId() == (int) usr_id) {
                 foundmember = true;
             }
         }
@@ -279,12 +277,11 @@ public class GroupTest extends AbstractTest {
         usr.setId(usr_id);
 
         // add user as groupmember
-        final int[] members = new int[1];
-        members[0] = (int) usr_id;
-        addMemberToGroup(ctx, addgroup, members, hosturl, cred);
+        final User u = new User(usr_id);
+        addMemberToGroup(ctx, addgroup, new User[]{u}, hosturl, cred);
 
         // now get all members of group, and check if user is member
-        final int[] remote_members = getMembers(ctx, addgroup, hosturl, cred);
+        final User[] remote_members = getMembers(ctx, addgroup, hosturl, cred);
         assertTrue("members could not be loaded", remote_members.length > 0);
     }
 
@@ -293,24 +290,24 @@ public class GroupTest extends AbstractTest {
         xres.change(ctx, grp, cred);
     }
 
-    public static int[] getMembers(final Context ctx, final Group group, final String host, final Credentials cred) throws Exception {
+    public static User[] getMembers(final Context ctx, final Group group, final String host, final Credentials cred) throws Exception {
         final OXGroupInterface xres = (OXGroupInterface) Naming.lookup(host + OXGroupInterface.RMI_NAME);
         return xres.getMembers(ctx, group, cred);
     }
 
-    public static void addMemberToGroup(final Context ctx, final Group grp, final int[] member_ids, final String host, final Credentials cred) throws Exception {
+    public static void addMemberToGroup(final Context ctx, final Group grp, final User[] members, final String host, final Credentials cred) throws Exception {
         final OXGroupInterface xres = (OXGroupInterface) Naming.lookup(host + OXGroupInterface.RMI_NAME);
-        xres.addMember(ctx, grp, member_ids, cred);
+        xres.addMember(ctx, grp, members, cred);
     }
 
-    public static void removeMemberFromGroup(final Context ctx, final Group grp, final int[] member_ids, final String host, final Credentials cred) throws Exception {
+    public static void removeMemberFromGroup(final Context ctx, final Group grp, final User[] members, final String host, final Credentials cred) throws Exception {
         final OXGroupInterface xres = (OXGroupInterface) Naming.lookup(host + OXGroupInterface.RMI_NAME);
-        xres.removeMember(ctx, grp, member_ids, cred);
+        xres.removeMember(ctx, grp, members, cred);
     }
 
     public static Group loadGroup(final Context ctx, final Group grp, final String host, final Credentials cred) throws Exception {
         final OXGroupInterface xres = (OXGroupInterface) Naming.lookup(host + OXGroupInterface.RMI_NAME);
-        return xres.get(ctx, grp, cred);
+        return xres.getData(ctx, grp, cred);
     }
 
     public static int addGroup(final Context ctx, final Group grp, final String host, final Credentials cred) throws Exception {

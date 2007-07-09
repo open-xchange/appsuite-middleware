@@ -2114,6 +2114,24 @@ public int getDefaultGroupForContext(final Context ctx, final Connection con) th
             return data.toArray(new Resource[data.size()]);
         }        
     }
+
+    @Override
+    public boolean existsUser(Context ctx, User[] users) throws StorageException {
+        int []ids = new int[users.length];
+        for(int i=0; i<ids.length; i++) {
+            ids[i] = users[i].getId();
+        }
+        return existsUser(ctx, ids);
+    }
+
+    @Override
+    public boolean existsGroupMember(Context ctx, int group_ID, User[] users) throws StorageException {
+        int []ids = new int[users.length];
+        for(int i=0; i<ids.length; i++) {
+            ids[i] = users[i].getId();
+        }
+        return existsGroupMember(ctx, group_ID, ids);
+    }
     
 
 }
