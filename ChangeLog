@@ -1,3 +1,8 @@
+* 2007-07-09 - tobias.prinz@open-xchange.com
+
+ - Bugfix #7710: Now the French Outlook value for the private field is
+   recognized, too.
+ 
 * 2007-07-09 - thorben.betten@open-xchange.com
 
  - Bugfix #8335: Remembering subscription status on folder rename for
@@ -16,7 +21,7 @@
 
 * 2007-07-06 - tobias.prinz@open-xchange.com
 
- - Improved performance of VCardTokenizer. A lot.
+ - Bugfix #8325: Improved performance of VCardTokenizer. A lot.
 
 * 2007-07-06 - thorben.betten@open-xchange.com
 
