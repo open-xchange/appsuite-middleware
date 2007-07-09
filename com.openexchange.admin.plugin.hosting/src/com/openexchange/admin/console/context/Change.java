@@ -71,7 +71,7 @@ public class Change extends ContextAbtraction {
                 
                 // check if wants to change login mappings, then first load current mappings from server
                 if(add_mappings!=null || remove_mappings!=null){
-                    Context server_ctx = oxres.getContextSetup(ctx, auth);
+                    Context server_ctx = oxres.getData(ctx, auth);
                     ctx.setLoginMappings(server_ctx.getLoginMappings());
                     
                     
@@ -91,7 +91,7 @@ public class Change extends ContextAbtraction {
                 }
                 
                 // do the change
-                oxres.changeContextSetup(ctx, auth);
+                oxres.change(ctx, auth);
             
                 sysexit(0);
             }

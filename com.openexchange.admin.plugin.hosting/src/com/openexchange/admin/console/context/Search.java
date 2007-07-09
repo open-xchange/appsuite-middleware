@@ -41,7 +41,7 @@ public class Search extends ContextAbtraction {
                 pattern = (String) parser.getOptionValue(this.searchOption);
             }
 
-            final Context[] ctxs = oxctx.search(pattern, auth);
+            final Context[] ctxs = oxctx.list(pattern, auth);
 
             // needed for csv output, KEEP AN EYE ON ORDER!!!
             final ArrayList<String> columns = new ArrayList<String>();
