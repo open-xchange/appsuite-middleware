@@ -12,15 +12,15 @@ import com.openexchange.admin.console.BasicCommandlineOptions;
  * @author cutmasta
  *
  */
-public class AddReasonTest extends AbstractTest {
+public class CreateReasonTest extends AbstractTest {
 
     @Test
     public void testAddReason() {
         
         resetBuffers();
-        new AddReason(getAllOptionData()){
+        new CreateReason(getAllOptionData()){
             protected void sysexit(int exitCode) {
-                AddReasonTest.this.returnCode = exitCode;
+                CreateReasonTest.this.returnCode = exitCode;
             }
         };
         
@@ -31,9 +31,9 @@ public class AddReasonTest extends AbstractTest {
     public void testAddReasonWithInvalidCredentials() {
         
         resetBuffers();
-        new AddReason(getAllOptionDataWithInvalidCredentials()){
+        new CreateReason(getAllOptionDataWithInvalidCredentials()){
             protected void sysexit(int exitCode) {
-                AddReasonTest.this.returnCode = exitCode;
+                CreateReasonTest.this.returnCode = exitCode;
             }
         };
         
@@ -44,9 +44,9 @@ public class AddReasonTest extends AbstractTest {
     public void testAddReasonWithMissingOption() {
         
         resetBuffers();
-        new AddReason(getMissingOptionData()){
+        new CreateReason(getMissingOptionData()){
             protected void sysexit(int exitCode) {
-                AddReasonTest.this.returnCode = exitCode;
+                CreateReasonTest.this.returnCode = exitCode;
             }
         };
         
@@ -57,9 +57,9 @@ public class AddReasonTest extends AbstractTest {
     public void testAddReasonWithUnknownOption() {
         
         resetBuffers();
-        new AddReason(getUnknownOptionData()){
+        new CreateReason(getUnknownOptionData()){
             protected void sysexit(int exitCode) {
-                AddReasonTest.this.returnCode = exitCode;
+                CreateReasonTest.this.returnCode = exitCode;
             }
         };
         
