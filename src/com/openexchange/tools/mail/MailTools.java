@@ -103,12 +103,12 @@ public class MailTools {
 			while (m.find()) {
 				final String nonHtmlLink = m.group(1);
 				if (nonHtmlLink == null || (isImgSrc(line, m.start(1)))) {
-					m.appendReplacement(sb, Matcher.quoteReplacement(m.group()));
+					m.appendReplacement(sb, Matcher.quoteReplacement(checkTarget(m.group())));
 				} else {
 					tmp.setLength(0);
 					m.appendReplacement(sb, tmp.append("<a href=\"").append(
 							(nonHtmlLink.startsWith("www") || nonHtmlLink.startsWith("news") ? "http://" : "")).append(
-							"$1\" target=\"_blank\" class=\"a-external\">$1</a>").toString());
+							"$1\" target=\"_blank\">$1</a>").toString());
 				}
 			}
 			m.appendTail(sb);
@@ -118,9 +118,32 @@ public class MailTools {
 		}
 		return line;
 	}
-	
+
+	private static final Pattern PATTERN_TARGET = Pattern.compile("(<a.*target=\"?)([^\\s\">]+)(\"?.*</a>)",
+			Pattern.CASE_INSENSITIVE);
+
+	private static final String STR_BLANK = "_blank";
+
+	private static final String checkTarget(final String anchorTag) {
+		final Matcher m = PATTERN_TARGET.matcher(anchorTag);
+		if (m.matches()) {
+			if (!STR_BLANK.equalsIgnoreCase(m.group(2))) {
+				final StringBuilder sb = new StringBuilder(128);
+				return sb.append(m.group(1)).append(STR_BLANK).append(m.group(3)).toString();
+			}
+			return anchorTag;
+		}
+		/*
+		 * No target specified
+		 */
+		final int pos = anchorTag.indexOf('>');
+		final StringBuilder sb = new StringBuilder(128);
+		return sb.append(anchorTag.substring(0, pos)).append(" target=\"").append(STR_BLANK).append('"').append(
+				anchorTag.substring(pos)).toString();
+	}
+
 	private static final String STR_IMG_SRC = "src=\"";
-	
+
 	private static final boolean isImgSrc(final String line, final int start) {
 		return start >= 5 && STR_IMG_SRC.equalsIgnoreCase(line.substring(start - 5, start));
 	}

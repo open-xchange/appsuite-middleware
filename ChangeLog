@@ -4,6 +4,9 @@
    recognized, too.
  - Bugfix #7949: Now using LOG.warn() instead of LOG.error() in case 
    of USER_ERROR.
+ - Bugfix #8342: Searching for "target" attribute when parsing links
+   inside html content of an email. If not present or its value is not
+   equal to "_blank" it's going to be replaced.
  
 * 2007-07-09 - thorben.betten@open-xchange.com
 
