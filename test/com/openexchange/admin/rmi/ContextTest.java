@@ -40,20 +40,7 @@ public class ContextTest extends AbstractTest {
 		return new JUnit4TestAdapter(ContextTest.class);
 	}
     
-    @Test
-    public void testChangeStorageData() throws Exception {
-        final Credentials cred = DummyMasterCredentials();        
-        final int ctsid = createNewContextID(cred);
-        final Context ctxset = getTestContextObject(ctsid, 50);
-        final String hosturl = getRMIHostUrl();
-        final int id = addContext(ctxset, hosturl, cred);
-        ctxset.setID(id);
-        final Filestore filestore = ctxset.getFilestore();        
-        filestore.setQuota_max(1337L);
-        filestore.setId(111111337);
-        changeStorageData(ctxset, hosturl, cred);
-    }
-
+    
     @Test
     public void testGetContext() throws Exception {
         fail("NOT IMPLEMENTED");
@@ -225,29 +212,25 @@ public class ContextTest extends AbstractTest {
         assertTrue("context not found", foundctx);
     }
 
-    public static void changeStorageData(Context ctx, String host, Credentials cred) throws Exception {
-        OXContextInterface xres = (OXContextInterface) Naming.lookup(host + OXContextInterface.RMI_NAME);
-        xres.changeStorageData(ctx, ctx.getFilestore(), cred);
-    }
-
+   
     public static Context[] searchContextByDatabase(Database db, String host, Credentials cred) throws Exception {
         OXContextInterface xres = (OXContextInterface) Naming.lookup(host + OXContextInterface.RMI_NAME);
-        return xres.searchByDatabase(db, cred);
+        return xres.listByDatabase(db, cred);
     }
 
     public static Context[] searchContextByFilestore(Filestore fis, String host, Credentials cred) throws Exception {
         OXContextInterface xres = (OXContextInterface) Naming.lookup(host + OXContextInterface.RMI_NAME);
-        return xres.searchByFilestore(fis, cred);
+        return xres.listByFilestore(fis, cred);
     }
 
     public static Context getContext(Context ctx, String host, Credentials cred) throws Exception {
         OXContextInterface xres = (OXContextInterface) Naming.lookup(host + OXContextInterface.RMI_NAME);
-        return xres.getSetup(ctx, cred);
+        return xres.getData(ctx, cred);
     }
 
     public static Context[] searchContext(String pattern, String host, Credentials cred) throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException {
         OXContextInterface xres = (OXContextInterface) Naming.lookup(host + OXContextInterface.RMI_NAME);        
-        return xres.search(pattern, cred);
+        return xres.list(pattern, cred);
     }
 
     public static void deleteContext(Context ctx, String host, Credentials cred) throws Exception {
