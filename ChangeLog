@@ -1,6 +1,7 @@
 * 2007-07-09 - marcus.klein@open-xchange.com
 
  - Bugfix #8337: Added proper content-type header to multiple response.
+ - Bugfix #7047: Not working authentication is now logged as error.
 
 * 2007-07-06 - marcus.klein@open-xchange.com
 
