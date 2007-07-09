@@ -31,6 +31,10 @@ public class Create extends ContextAbtraction {
             final Context ctx = new Context();
             ctx.setID(Integer.parseInt((String) parser.getOptionValue(this.contextOption)));
 
+            if (parser.getOptionValue(this.contextNameOption) != null) {
+                ctx.setName((String) parser.getOptionValue(this.contextNameOption));
+            }
+            
             final Credentials auth = new Credentials((String) parser.getOptionValue(this.adminUserOption), (String) parser.getOptionValue(this.adminPassOption));
 
             // get rmi ref
@@ -97,7 +101,9 @@ public class Create extends ContextAbtraction {
         setDefaultCommandLineOptions(parser);
 
         setContextQuotaOption(parser, true);
-
+        
+        setContextNameOption(parser,false);
+        
         setMandatoryOptions(parser);
     }
 }
