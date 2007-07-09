@@ -2,7 +2,7 @@
 
 DDIR=$1 || DDIR="/opt/open-xchange/sbin"
 
-COMMANDS="changequotacontext \
+COMMANDS="changecontext \
 deletecontext \
 disablecontext \
 disableallcontexts \
@@ -11,7 +11,7 @@ enableallcontexts \
 movedatabasecontext \
 movefilestorecontext \
 searchcontext \
-addreason \
+createreason \
 changefilestore \
 listdatabase \
 listfilestore \
