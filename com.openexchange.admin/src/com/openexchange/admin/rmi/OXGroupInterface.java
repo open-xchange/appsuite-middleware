@@ -72,29 +72,45 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
  */
 public interface OXGroupInterface extends Remote {
     
-    
     /**
      * RMI name to be used in RMI URL
      */
     public static final String RMI_NAME  = "OXGroup_V2";
     
     /**
+     * Adds a new member to the group within given context.
      * 
-     * @param ctx Context object.
-     * @param usr User object
-     * @param auth redentials for authenticating against server.
-     * @return
+     * @param ctx Context object
+     * @param grp_id The ID of the group in which the new members should be added.
+     * @param members User objects with the user_id field set.
+     * @param auth Credentials for authenticating against server.
      * @throws RemoteException General RMI Exception
      * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
      * @throws NoSuchContextException If the context does not exist in the system.
      * @throws StorageException When an error in the subsystems occured.
-     * @throws InvalidDataException if the data sent within the method contained invalid data.
+     * @throws InvalidDataException If the data sent within the method contained invalid data.
      * @throws DatabaseUpdateException 
      * @throws NoSuchUserException 
+     * @throws NoSuchGroupException 
      */
-    public Group[] listGroupsForUser(final Context ctx, final User usr, final Credentials auth) 
-    throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException, DatabaseUpdateException, NoSuchUserException;
-    
+    public void addMember(final Context ctx, final Group grp, final User[] members, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException, NoSuchUserException, NoSuchGroupException;
+
+    /**
+     * Method for changing group data in given context
+     * 
+     * @param ctx Context object
+     * @param grp Group to change.
+     * @param auth Credentials for authenticating against server.
+     * @throws RemoteException General RMI Exception
+     * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException If the context does not exist in the system.
+     * @throws StorageException When an error in the subsystems occured.
+     * @throws InvalidDataException If the data sent within the method contained invalid data.
+     * @throws DatabaseUpdateException 
+     * @throws NoSuchGroupException 
+     */
+    public void change(final Context ctx, final Group grp, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, NoSuchUserException, StorageException, InvalidDataException, DatabaseUpdateException, NoSuchGroupException;
+
     /**
      * Create new group in given context.
      * 
@@ -109,10 +125,40 @@ public interface OXGroupInterface extends Remote {
      * @throws InvalidDataException If the data sent within the method contained invalid data.
      * @throws DatabaseUpdateException 
      */
-    public int create(final Context ctx, final Group grp, final Credentials auth) 
-    throws RemoteException,InvalidCredentialsException,NoSuchContextException,NoSuchUserException,StorageException,InvalidDataException, DatabaseUpdateException;
-    
-    
+    public int create(final Context ctx, final Group grp, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, NoSuchUserException, StorageException, InvalidDataException, DatabaseUpdateException;
+
+    /**
+     * Method for deleting group within given context.
+     * 
+     * @param ctx Context object
+     * @param grp Group which should be deleted from the server.
+     * @param auth Credentials for authenticating against server.
+     * @throws RemoteException General RMI Exception
+     * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException If the context does not exist in the system.
+     * @throws StorageException When an error in the subsystems occured.
+     * @throws InvalidDataException If the data sent within the method contained invalid data.
+     * @throws DatabaseUpdateException 
+     * @throws NoSuchGroupException 
+     */
+    public void delete(final Context ctx, final Group grp, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException, NoSuchGroupException;
+
+    /**
+     * Delete group within given context.
+     * 
+     * @param ctx Context object
+     * @param grps Contains all groups which should be deleted from the server.
+     * @param auth Credentials for authenticating against server.
+     * @throws RemoteException General RMI Exception
+     * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException If the context does not exist in the system.
+     * @throws StorageException When an error in the subsystems occured.
+     * @throws InvalidDataException If the data sent within the method contained invalid data.
+     * @throws DatabaseUpdateException 
+     * @throws NoSuchGroupException 
+     */
+    public void delete(final Context ctx, final Group[] grps, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException, NoSuchGroupException;
+
     /**
      * Fetch a group from server.
      * 
@@ -128,16 +174,46 @@ public interface OXGroupInterface extends Remote {
      * @throws DatabaseUpdateException 
      * @throws NoSuchGroupException 
      */
-    public Group getData(final Context ctx, final Group grp, final Credentials auth) 
-    throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException, DatabaseUpdateException, NoSuchGroupException;
-    
-  
+    public Group getData(final Context ctx, final Group grp, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException, NoSuchGroupException;
+
     /**
-     * Convenience method for changing group data in given context
+     * Fetch specified groups from server. Can be used to fetch group data including extensions.
+     * Groups will be identified by id or by name.
+     * @param ctx
+     * @param grps
+     * @param auth
+     * @return Groups including extension data if requested!
+     * @throws RemoteException
+     * @throws StorageException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws InvalidDataException
+     * @throws NoSuchGroupException
+     * @throws DatabaseUpdateException
+     */
+    public Group[] getData(final Context ctx, final Group[] grps, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchGroupException, DatabaseUpdateException;
+
+    /**
+     * 
+     * @param ctx
+     * @param auth
+     * @return The id of the default group of the context
+     * @throws RemoteException
+     * @throws StorageException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws InvalidDataException
+     * @throws DatabaseUpdateException
+     */
+    public int getDefaultGroup(final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException;
+
+    /**
+     * Get User IDs of the members of this group.
      * 
      * @param ctx Context object
-     * @param grp Group to change.
+     * @param grp group from which to retrieve the members.
      * @param auth Credentials for authenticating against server.
+     * @return User IDs.
      * @throws RemoteException General RMI Exception
      * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
      * @throws NoSuchContextException If the context does not exist in the system.
@@ -146,63 +222,39 @@ public interface OXGroupInterface extends Remote {
      * @throws DatabaseUpdateException 
      * @throws NoSuchGroupException 
      */
-    public void change(final Context ctx, final Group grp, final Credentials auth) 
-    throws RemoteException,InvalidCredentialsException,NoSuchContextException,NoSuchUserException,StorageException,InvalidDataException, DatabaseUpdateException, NoSuchGroupException;    
-    
-    
+    public User[] getMembers(final Context ctx, final Group grp, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException, NoSuchGroupException;
+
     /**
-     * Delete group within given context.
+     * List groups whithin context.
      * 
-     * @param ctx Context object
-     * @param grps Contains all groups which should be deleted from the server.
+     * @param ctx Context object.
+     * @param pattern Search pattern to search for e.g. "*mygroup*"
      * @param auth Credentials for authenticating against server.
+     * @return Groups which matched the supplied search pattern.
      * @throws RemoteException General RMI Exception
      * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
      * @throws NoSuchContextException If the context does not exist in the system.
      * @throws StorageException When an error in the subsystems occured.
      * @throws InvalidDataException If the data sent within the method contained invalid data.
      * @throws DatabaseUpdateException 
-     * @throws NoSuchGroupException 
      */
-    public void delete(final Context ctx, final Group[] grps, final Credentials auth) 
-    throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException, DatabaseUpdateException, NoSuchGroupException;
-    
+    public Group[] list(final Context ctx, final String pattern, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException;
+
     /**
-     * Convenience method for deleting group within given context.
      * 
-     * @param ctx Context object
-     * @param grp Group which should be deleted from the server.
-     * @param auth Credentials for authenticating against server.
+     * @param ctx Context object.
+     * @param usr User object
+     * @param auth redentials for authenticating against server.
+     * @return
      * @throws RemoteException General RMI Exception
      * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
      * @throws NoSuchContextException If the context does not exist in the system.
      * @throws StorageException When an error in the subsystems occured.
-     * @throws InvalidDataException If the data sent within the method contained invalid data.
-     * @throws DatabaseUpdateException 
-     * @throws NoSuchGroupException 
-     */
-    public void delete(final Context ctx, final Group grp, final Credentials auth) 
-    throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException, DatabaseUpdateException, NoSuchGroupException;
-    
-    /**
-     * Adds a new member to the group within given context.
-     * 
-     * @param ctx Context object
-     * @param grp_id The ID of the group in which the new members should be added.
-     * @param members User IDs.
-     * @param auth Credentials for authenticating against server.
-     * @throws RemoteException General RMI Exception
-     * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
-     * @throws NoSuchContextException If the context does not exist in the system.
-     * @throws StorageException When an error in the subsystems occured.
-     * @throws InvalidDataException If the data sent within the method contained invalid data.
+     * @throws InvalidDataException if the data sent within the method contained invalid data.
      * @throws DatabaseUpdateException 
      * @throws NoSuchUserException 
-     * @throws NoSuchGroupException 
      */
-    public void addMember(final Context ctx, final Group grp, User[] members, final Credentials auth) 
-    throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException, DatabaseUpdateException, NoSuchUserException, NoSuchGroupException;
-    
+    public Group[] listGroupsForUser(final Context ctx, final User usr, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
     
     /**
      * Remove member(s) from group.
@@ -220,76 +272,5 @@ public interface OXGroupInterface extends Remote {
      * @throws NoSuchGroupException 
      * @throws NoSuchUserException 
      */
-    public void removeMember(final Context ctx, final Group grp, User[] members, final Credentials auth) 
-    throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException, DatabaseUpdateException, NoSuchGroupException, NoSuchUserException;
-    
-   
-    /**
-     * Get User IDs of the members of this group.
-     * 
-     * @param ctx Context object
-     * @param grp group from which to retrieve the members.
-     * @param auth Credentials for authenticating against server.
-     * @return User IDs.
-     * @throws RemoteException General RMI Exception
-     * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
-     * @throws NoSuchContextException If the context does not exist in the system.
-     * @throws StorageException When an error in the subsystems occured.
-     * @throws InvalidDataException If the data sent within the method contained invalid data.
-     * @throws DatabaseUpdateException 
-     * @throws NoSuchGroupException 
-     */
-    public User[] getMembers(final Context ctx,final Group grp, final Credentials auth) 
-    throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException, DatabaseUpdateException, NoSuchGroupException;
-    
-    
-    /**
-     * List groups whithin context.
-     * 
-     * @param ctx Context object.
-     * @param pattern Search pattern to search for e.g. "*mygroup*"
-     * @param auth Credentials for authenticating against server.
-     * @return Groups which matched the supplied search pattern.
-     * @throws RemoteException General RMI Exception
-     * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
-     * @throws NoSuchContextException If the context does not exist in the system.
-     * @throws StorageException When an error in the subsystems occured.
-     * @throws InvalidDataException If the data sent within the method contained invalid data.
-     * @throws DatabaseUpdateException 
-     */
-    public Group[] list(final Context ctx, final String pattern, final Credentials auth) 
-    throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException, DatabaseUpdateException;
-    
-    /**
-     * Fetch specified groups from server. Can be used to fetch group data including extensions.
-     * Groups will be identified by id or by name.
-     * @param ctx
-     * @param grps
-     * @param auth
-     * @return Groups including extension data if requested!
-     * @throws RemoteException
-     * @throws StorageException
-     * @throws InvalidCredentialsException
-     * @throws NoSuchContextException
-     * @throws InvalidDataException
-     * @throws NoSuchGroupException
-     * @throws DatabaseUpdateException
-     */
-    public Group[] getData(final Context ctx, final Group[] grps, final Credentials auth) 
-    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchGroupException, DatabaseUpdateException;
-
-    /**
-     * 
-     * @param ctx
-     * @param auth
-     * @return The id of the default group of the context
-     * @throws RemoteException
-     * @throws StorageException
-     * @throws InvalidCredentialsException
-     * @throws NoSuchContextException
-     * @throws InvalidDataException
-     * @throws DatabaseUpdateException
-     */
-    public int getDefaultGroup(Context ctx,Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException;
-    
+    public void removeMember(final Context ctx, final Group grp, final User[] members, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException, NoSuchGroupException, NoSuchUserException;
 }
