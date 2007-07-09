@@ -319,7 +319,7 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
     }
 
     
-    public Database[] searchForDatabase(final String search_pattern, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+    public Database[] listDatabases(final String search_pattern, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
 
         doNullCheck(search_pattern, auth);
 
@@ -337,7 +337,7 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
     }
 
    
-    public Server[] searchForServer(final String search_pattern, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+    public Server[] listServer(final String search_pattern, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
 
         doNullCheck(search_pattern, auth);
 

@@ -44,7 +44,7 @@ public class ListDatabase extends UtilAbstraction {
             if(parser.getOptionValue(this.searchOption)!=null){
                 searchpattern = (String)parser.getOptionValue(this.searchOption);
             }
-            final Database[] databases = oxutil.searchForDatabase(searchpattern, auth);
+            final Database[] databases = oxutil.listDatabases(searchpattern, auth);
             
             // needed for csv output, KEEP AN EYE ON ORDER!!!
             final ArrayList<String> columns = new ArrayList<String>();

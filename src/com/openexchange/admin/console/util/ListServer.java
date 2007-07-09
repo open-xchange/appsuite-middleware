@@ -44,7 +44,7 @@ public class ListServer extends UtilAbstraction {
                 searchpattern = (String) parser.getOptionValue(this.searchOption);
             }
             // Setting the options in the dataobject
-            final Server[] servers = oxutil.searchForServer(searchpattern, auth);
+            final Server[] servers = oxutil.listServer(searchpattern, auth);
 
             // needed for csv output, KEEP AN EYE ON ORDER!!!
             final ArrayList<String> columns = new ArrayList<String>();

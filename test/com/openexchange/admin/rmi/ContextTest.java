@@ -75,7 +75,7 @@ public class ContextTest extends AbstractTest {
         final String hosturl = getRMIHostUrl();
         addContext(ctx, hosturl, cred);
         OXUtilInterface oxu = (OXUtilInterface) Naming.lookup(hosturl + OXUtilInterface.RMI_NAME);
-        Database[] dbs = oxu.searchForDatabase("*", cred);
+        Database[] dbs = oxu.listDatabases("*", cred);
         if (dbs.length > 0) {
             Context[] ids = searchContextByDatabase(dbs[0], hosturl, cred);
             assertTrue("no contexts found on database " + dbs[0].getUrl(), ids.length > 0);
@@ -242,7 +242,7 @@ public class ContextTest extends AbstractTest {
         OXUtilInterface oxu = (OXUtilInterface) Naming.lookup(host + OXUtilInterface.RMI_NAME);
         // first check if the needed server entry is in db, if not, add server
         // first,
-        if (oxu.searchForServer("local", cred).length != 1) {
+        if (oxu.listServer("local", cred).length != 1) {
             Server srv = new Server();
             srv.setName("local");
             oxu.registerServer(srv, cred);
@@ -261,7 +261,7 @@ public class ContextTest extends AbstractTest {
         // then check if a database is in db for the new ctx, if not register
         // database first,
         // THEN we can add the contex with its data
-        if (oxu.searchForDatabase("test-ox-db", cred).length == 0) {
+        if (oxu.listDatabases("test-ox-db", cred).length == 0) {
             Database db = UtilTest.getTestDatabaseObject("localhost", "test-ox-db");
             oxu.registerDatabase(db, cred);
         }
