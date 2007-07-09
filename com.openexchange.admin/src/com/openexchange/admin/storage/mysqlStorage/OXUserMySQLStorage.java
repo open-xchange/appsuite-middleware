@@ -49,6 +49,7 @@
 package com.openexchange.admin.storage.mysqlStorage;
 
 import com.openexchange.admin.rmi.exceptions.PoolException;
+import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.impl.OXUser;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
@@ -73,7 +74,6 @@ import java.util.TimeZone;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
@@ -1259,6 +1259,51 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
 
             return retval;
+        } catch (final SQLException e) {
+            log.error("SQL Error", e);
+            throw new StorageException(e);
+        } catch (final PoolException e) {
+            log.error("Pool Error", e);
+            throw new StorageException(e);
+        } finally {
+            try {
+                if (stmt != null) {
+                    stmt.close();
+                }
+            } catch (final SQLException e) {
+                log.error("SQL Error closing statement!", e);
+            }
+            try {
+                if (read_ox_con != null) {
+                    cache.pushOXDBRead(context_id, read_ox_con);
+                }
+            } catch (final PoolException exp) {
+                log.error("Pool Error pushing ox read connection to pool!",exp);
+            }
+        }
+    }
+
+    @Override
+    public User[] list(final Context ctx, final String search_pattern) throws StorageException {
+        Connection read_ox_con = null;
+        PreparedStatement stmt = null;
+        final int context_id = ctx.getIdAsInt();
+        try {
+            final ArrayList<User> retval = new ArrayList<User>();
+            read_ox_con = cache.getREADConnectionForContext(context_id);
+            stmt = read_ox_con.prepareStatement("SELECT con.userid,con.field01,con.field02,con.field03,lu.uid FROM prg_contacts con JOIN login2user lu  ON con.userid = lu.id WHERE con.cid = ? AND con.cid = lu.cid AND (lu.uid LIKE '?' OR con.field01 LIKE '?');");
+
+            stmt.setInt(1, context_id);
+            stmt.setString(2, search_pattern);
+            stmt.setString(3, search_pattern);
+            final ResultSet rs3 = stmt.executeQuery();
+            while (rs3.next()) {
+                final int user_id = rs3.getInt("userid");
+                retval.add(new User(user_id));
+            }
+            rs3.close();
+
+            return retval.toArray(new User[retval.size()]);
         } catch (final SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e);
