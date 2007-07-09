@@ -67,10 +67,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Queue;
 import java.util.Set;
@@ -4746,8 +4748,25 @@ public class MailInterfaceImpl implements MailInterface {
 					if (renameFolder.exists()) {
 						throw new OXMailException(MailCode.DUPLICATE_FOLDER, renameFolder.getFullName());
 					}
+					/*
+					 * Remember subscription status
+					 */
 					final String newFullName = renameFolder.getFullName();
 					final String oldFullName = updateMe.getFullName();
+					Map<String, Boolean> subscriptionStatus;
+					try {
+						subscriptionStatus = getSubscriptionStatus(updateMe, oldFullName, newFullName);
+					} catch (final MessagingException e) {
+						if (LOG.isWarnEnabled()) {
+							LOG.warn(new StringBuilder(128).append("Subscription status of folder \"").append(
+									updateMe.getFullName()).append(
+									"\" and its subfolders could not be stored prior to rename operation"));
+						}
+						subscriptionStatus = null;
+					}
+					/*
+					 * Rename
+					 */
 					boolean success = false;
 					final long start = System.currentTimeMillis();
 					try {
@@ -4766,7 +4785,17 @@ public class MailInterfaceImpl implements MailInterface {
 						deleteFolder(updateMe);
 					}
 					updateMe = (IMAPFolder) imapCon.getIMAPStore().getFolder(newFullName);
-					updateMe.setSubscribed(true);
+					/*
+					 * Apply remembered subscription status
+					 */
+					if (subscriptionStatus == null) {
+						/*
+						 * At least subscribe to renamed folder
+						 */
+						updateMe.setSubscribed(true);
+					} else {
+						applySubscriptionStatus(updateMe, subscriptionStatus);
+					}
 				}
 				ACLS: if (folderObj.containsACLs() && IMAPProperties.isSupportsACLs()) {
 					/*
@@ -4911,6 +4940,43 @@ public class MailInterfaceImpl implements MailInterface {
 		} catch (final MessagingException e) {
 			throw handleMessagingException(e, sessionObj.getIMAPProperties());
 		}
+	}
+
+	private static final Map<String, Boolean> getSubscriptionStatus(final IMAPFolder f, final String oldFullName,
+			final String newFullName) throws MessagingException {
+		final Map<String, Boolean> retval = new HashMap<String, Boolean>();
+		getSubscriptionStatus(retval, f, oldFullName, newFullName);
+		return retval;
+	}
+
+	private static final void getSubscriptionStatus(final Map<String, Boolean> m, final IMAPFolder f,
+			final String oldFullName, final String newFullName) throws MessagingException {
+		if ((f.getType() & IMAPFolder.HOLDS_FOLDERS) > 0) {
+			final Folder[] folders = f.list();
+			for (int i = 0; i < folders.length; i++) {
+				getSubscriptionStatus(m, (IMAPFolder) folders[i], oldFullName, newFullName);
+			}
+		}
+		m.put(f.getFullName().replaceFirst(oldFullName, newFullName), Boolean.valueOf(f.isSubscribed()));
+	}
+
+	private static final void applySubscriptionStatus(final IMAPFolder f, final Map<String, Boolean> m)
+			throws MessagingException {
+		if ((f.getType() & IMAPFolder.HOLDS_FOLDERS) > 0) {
+			final Folder[] folders = f.list();
+			for (int i = 0; i < folders.length; i++) {
+				applySubscriptionStatus((IMAPFolder) folders[i], m);
+			}
+		}
+		Boolean b = m.get(f.getFullName());
+		if (b == null) {
+			if (LOG.isWarnEnabled()) {
+				LOG.warn(new StringBuilder(128).append("No stored subscription status found for \"").append(
+						f.getFullName()).append('"').toString());
+			}
+			b = Boolean.TRUE;
+		}
+		f.setSubscribed(b.booleanValue());
 	}
 
 	private static final ACL[] getRemovedACLs(final ACL[] newACLs, final ACL[] oldACLs) {

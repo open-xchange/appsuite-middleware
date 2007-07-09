@@ -1,3 +1,8 @@
+* 2007-07-09 - thorben.betten@open-xchange.com
+
+ - Bugfix #8335: Remembering subscription status on folder rename for
+   affected folder and its subfolders
+
 * 2007-07-09 - marcus.klein@open-xchange.com
 
  - Bugfix #8337: Added proper content-type header to multiple response.
