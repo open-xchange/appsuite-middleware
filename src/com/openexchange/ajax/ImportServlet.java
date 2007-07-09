@@ -182,7 +182,11 @@ public class ImportServlet extends ImportExport {
 				throw EXCEPTIONS.create(4);
 			}
 		} catch (AbstractOXException e){
-			LOG.error("unknown exception: " , e);
+			if(Category.USER_INPUT.equals( e.getCategory() ) ){
+				LOG.warn("user error: ", e);
+			} else {
+				LOG.error("import exception: " , e);
+			}
 			sendResponse(e, resp);
 		}
 	}
