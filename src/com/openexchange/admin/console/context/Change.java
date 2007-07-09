@@ -21,7 +21,7 @@ public class Change extends ContextAbtraction {
 
     
     public Change(final String[] args2) {
-        final AdminParser parser = new AdminParser("change");
+        final AdminParser parser = new AdminParser("changecontext");
 
         setOptions(parser);
         

@@ -1,3 +1,7 @@
+* 2007-07-09 - manuel.kraft@open-xchange.com
+
+  -  Bugfix ID#7302 changecontext is missing
+
 * 2007-06-29 - dennis.sieben@open-xchange.com
 
   -  Bugfix ID#8171 need for a tool that does reset the jmx max values
