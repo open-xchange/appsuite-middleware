@@ -92,7 +92,7 @@ public interface OXGroupInterface extends Remote {
      * @throws DatabaseUpdateException 
      * @throws NoSuchUserException 
      */
-    public Group[] getGroupsForUser(final Context ctx, final User usr, final Credentials auth) 
+    public Group[] listGroupsForUser(final Context ctx, final User usr, final Credentials auth) 
     throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException, DatabaseUpdateException, NoSuchUserException;
     
     /**
@@ -128,7 +128,7 @@ public interface OXGroupInterface extends Remote {
      * @throws DatabaseUpdateException 
      * @throws NoSuchGroupException 
      */
-    public Group get(final Context ctx, final Group grp, final Credentials auth) 
+    public Group getData(final Context ctx, final Group grp, final Credentials auth) 
     throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException, DatabaseUpdateException, NoSuchGroupException;
     
   
@@ -189,7 +189,7 @@ public interface OXGroupInterface extends Remote {
      * 
      * @param ctx Context object
      * @param grp_id The ID of the group in which the new members should be added.
-     * @param member_ids User IDs.
+     * @param members User IDs.
      * @param auth Credentials for authenticating against server.
      * @throws RemoteException General RMI Exception
      * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
@@ -200,7 +200,7 @@ public interface OXGroupInterface extends Remote {
      * @throws NoSuchUserException 
      * @throws NoSuchGroupException 
      */
-    public void addMember(final Context ctx, final Group grp, final int [] member_ids, final Credentials auth) 
+    public void addMember(final Context ctx, final Group grp, User[] members, final Credentials auth) 
     throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException, DatabaseUpdateException, NoSuchUserException, NoSuchGroupException;
     
     
@@ -209,7 +209,7 @@ public interface OXGroupInterface extends Remote {
      * 
      * @param ctx Context object
      * @param grp the group from which the members should be removed.
-     * @param member_ids User IDs.
+     * @param members User IDs.
      * @param auth Credentials for authenticating against server.
      * @throws RemoteException General RMI Exception
      * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
@@ -220,7 +220,7 @@ public interface OXGroupInterface extends Remote {
      * @throws NoSuchGroupException 
      * @throws NoSuchUserException 
      */
-    public void removeMember(final Context ctx, final Group grp, final int[] member_ids, final Credentials auth) 
+    public void removeMember(final Context ctx, final Group grp, User[] members, final Credentials auth) 
     throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException, DatabaseUpdateException, NoSuchGroupException, NoSuchUserException;
     
    
@@ -239,7 +239,7 @@ public interface OXGroupInterface extends Remote {
      * @throws DatabaseUpdateException 
      * @throws NoSuchGroupException 
      */
-    public int[] getMembers(final Context ctx,final Group grp, final Credentials auth) 
+    public User[] getMembers(final Context ctx,final Group grp, final Credentials auth) 
     throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException, DatabaseUpdateException, NoSuchGroupException;
     
     

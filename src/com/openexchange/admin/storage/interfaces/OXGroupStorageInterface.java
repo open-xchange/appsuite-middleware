@@ -170,12 +170,12 @@ public abstract class OXGroupStorageInterface {
     /**
      * Adds a new member to the group.
      */
-    public abstract void addMember(final Context ctx, final int grp_id, final int[] member_ids) throws StorageException;
+    public abstract void addMember(final Context ctx, final int grp_id, final User[] members) throws StorageException;
 
     /**
      * Removes member from group
      */
-    public abstract void removeMember(final Context ctx, final int grp_id, final int[] member_ids) throws StorageException;
+    public abstract void removeMember(final Context ctx, final int grp_id, final User[] members) throws StorageException;
 
     /**
      * Delete group from context
@@ -189,7 +189,7 @@ public abstract class OXGroupStorageInterface {
     /**
      * Get all members of group grp_id in context ctx
      */
-    public abstract int[] getMembers(final Context ctx, final int grp_id) throws StorageException;
+    public abstract User[] getMembers(final Context ctx, final int grp_id) throws StorageException;
 
     /**
      * Removes entry in del_groups for group group_id and context ctx

@@ -152,6 +152,8 @@ public abstract class OXToolStorageInterface {
 
     public abstract boolean existsGroupMember(final Context ctx, final int group_ID, final int[] user_ids) throws StorageException;
 
+    public abstract boolean existsGroupMember(final Context ctx, final int group_ID, final User[] users) throws StorageException;
+
     public abstract boolean existsGroupMember(final Context ctx, final int group_ID, final int member_ID) throws StorageException;
 
     public abstract boolean existsUser(final Context ctx, final String username) throws StorageException;
@@ -165,6 +167,8 @@ public abstract class OXToolStorageInterface {
     public abstract boolean existsReason(final String reason) throws StorageException;
 
     public abstract boolean existsUser(final Context ctx, final int[] user_ids) throws StorageException;
+
+    public abstract boolean existsUser(final Context ctx, final User[] users) throws StorageException;
 
     public abstract boolean existsContext(final Context ctx) throws StorageException;
 
