@@ -135,7 +135,7 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
     }
 
     
-    public int addMaintenanceReason(final MaintenanceReason reason, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+    public int createMaintenanceReason(final MaintenanceReason reason, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
 
         doNullCheck(reason, auth);
 
@@ -152,7 +152,7 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
         }
 
         final OXUtilStorageInterface oxutil = OXUtilStorageInterface.getInstance();
-        return oxutil.addMaintenanceReason(reason);
+        return oxutil.createMaintenanceReason(reason);
 
     }
 

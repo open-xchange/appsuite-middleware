@@ -36,7 +36,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
     }
 
     @Override
-    public int addMaintenanceReason(final MaintenanceReason reason)
+    public int createMaintenanceReason(final MaintenanceReason reason)
             throws StorageException {
 
         Connection con = null;
