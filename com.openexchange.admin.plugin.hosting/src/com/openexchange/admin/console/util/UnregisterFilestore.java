@@ -12,6 +12,7 @@ import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.console.CmdLineParser.UnknownOptionException;
 import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
@@ -39,8 +40,8 @@ public class UnregisterFilestore extends UtilAbstraction {
     
             // get rmi ref
             final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME +OXUtilInterface.RMI_NAME);
-    
-            oxutil.unregisterFilestore(Integer.parseInt((String) parser.getOptionValue(this.filestoreIdOption)), auth);
+            Filestore fs= new Filestore(Integer.parseInt((String) parser.getOptionValue(this.filestoreIdOption)));
+            oxutil.unregisterFilestore(fs, auth);
             sysexit(0);
         } catch (final java.rmi.ConnectException neti) {
             printError(neti.getMessage());

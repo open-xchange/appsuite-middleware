@@ -113,24 +113,24 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
         return oxutil.listFilestores(search_pattern);
     }
 
-    public void unregisterFilestore(final int store_id, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+    public void unregisterFilestore(final Filestore store, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
 
-        doNullCheck(auth);
+        doNullCheck(auth,store.getId());
 
         doAuthentication(auth);
 
-        log.debug(store_id);
+        log.debug(store);
 
         final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
-        if (!tools.existsStore(store_id)) {
+        if (!tools.existsStore(store.getId())) {
             throw new InvalidDataException("No such store");
         }
 
-        if (tools.storeInUse(store_id)) {
-            throw new InvalidDataException("Store " + store_id + " in use");
+        if (tools.storeInUse(store.getId())) {
+            throw new InvalidDataException("Store " + store + " in use");
         }
         final OXUtilStorageInterface oxutil = OXUtilStorageInterface.getInstance();
-        oxutil.unregisterFilestore(store_id);
+        oxutil.unregisterFilestore(store.getId());
 
     }
 
@@ -156,26 +156,6 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
 
     }
 
-    public void deleteMaintenanceReason(final MaintenanceReason reason, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
-
-        doNullCheck(reason, auth);
-
-        doAuthentication(auth);
-
-        log.debug(reason);
-
-        final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
-
-        if (!tools.existsReason(reason.getId())) {
-            throw new InvalidDataException("No such reason");
-        }
-
-        final OXUtilStorageInterface oxutil = OXUtilStorageInterface.getInstance();
-        final int[] tmp = { reason.getId() };
-        oxutil.deleteMaintenanceReason(tmp);
-
-    }
-
     
     public MaintenanceReason[] getMaintenanceReasons(final int reason_ids[], final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
 
@@ -198,7 +178,7 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
     }
 
    
-    public MaintenanceReason[] getAllMaintenanceReasons(final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException {
+    public MaintenanceReason[] listMaintenanceReasons(final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException {
 
         doAuthentication(auth);
 
@@ -293,48 +273,48 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
     }
 
     
-    public void unregisterDatabase(final int database_id, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+    public void unregisterDatabase(final Database database, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
 
-        doNullCheck(auth);
+        doNullCheck(auth,database.getId());
 
         doAuthentication(auth);
 
-        log.debug(database_id);
+        log.debug(database);
 
         final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
 
-        if (!tools.existsDatabase(database_id)) {
-            throw new InvalidDataException("No such database " + database_id);
+        if (!tools.existsDatabase(database.getId())) {
+            throw new InvalidDataException("No such database " + database);
         }
-        if (tools.poolInUse(database_id)) {
-            throw new StorageException("Pool is in use " + database_id);
+        if (tools.poolInUse(database.getId())) {
+            throw new StorageException("Pool is in use " + database);
         }
 
         final OXUtilStorageInterface oxcox = OXUtilStorageInterface.getInstance();
-        oxcox.unregisterDatabase(database_id);
+        oxcox.unregisterDatabase(database.getId());
 
     }
 
   
-    public void unregisterServer(final int server_id, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+    public void unregisterServer(final Server server, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
 
-        doNullCheck(auth);
+        doNullCheck(auth,server.getId());
 
         doAuthentication(auth);
 
-        log.debug(server_id);
+        log.debug(server);
 
         final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
 
-        if (!tools.existsServer(server_id)) {
-            throw new InvalidDataException("No such server " + server_id);
+        if (!tools.existsServer(server.getId())) {
+            throw new InvalidDataException("No such server " + server);
         }
-        if (tools.serverInUse(server_id)) {
-            throw new StorageException("Server " + server_id + " is in use");
+        if (tools.serverInUse(server.getId())) {
+            throw new StorageException("Server " + server+ " is in use");
         }
 
         final OXUtilStorageInterface oxcox = OXUtilStorageInterface.getInstance();
-        oxcox.unregisterServer(server_id);
+        oxcox.unregisterServer(server.getId());
 
     }
 
@@ -408,23 +388,29 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
 
     }
 
-    public void deleteMaintenanceReason(final int[] reason_ids, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+    public void deleteMaintenanceReason(final MaintenanceReason[] reasons, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
 
         doNullCheck(auth);
 
         doAuthentication(auth);
 
-        log.debug(Arrays.toString(reason_ids));
+        log.debug(Arrays.toString(reasons));
 
         final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
-        for (int element : reason_ids) {
-            if (!tools.existsReason(element)) {
+        for (MaintenanceReason element : reasons) {
+            if (!tools.existsReason(element.getId())) {
                 throw new InvalidDataException("Reason with id " + element + " does not exists");
             }
         }
 
         final OXUtilStorageInterface oxcox = OXUtilStorageInterface.getInstance();
-        oxcox.deleteMaintenanceReason(reason_ids);
+        int[] del_ids = new int[reasons.length];
+        for (int i = 0; i < reasons.length; i++) {
+            del_ids[i] = reasons[i].getId().intValue();
+        }
+        
+        
+        oxcox.deleteMaintenanceReason(del_ids);
 
     }
 

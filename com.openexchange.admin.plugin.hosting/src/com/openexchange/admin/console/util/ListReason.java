@@ -36,7 +36,7 @@ public class ListReason extends UtilAbstraction {
             // get rmi ref
             final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME +OXUtilInterface.RMI_NAME);
 
-            final MaintenanceReason[] mrs = oxutil.getAllMaintenanceReasons(auth);
+            final MaintenanceReason[] mrs = oxutil.listMaintenanceReasons(auth);
 
             // needed for csv output, KEEP AN EYE ON ORDER!!!
             final ArrayList<String> columns = new ArrayList<String>();

@@ -12,6 +12,7 @@ import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.console.CmdLineParser.UnknownOptionException;
 import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
@@ -44,8 +45,10 @@ public class RemoveReason extends UtilAbstraction {
             final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME +OXUtilInterface.RMI_NAME);
     
             final int reason_id = Integer.parseInt((String) parser.getOptionValue(this.reasonIDOption));
-    
-            oxutil.deleteMaintenanceReason(new int[] { reason_id }, auth);
+            MaintenanceReason[] mrs = new MaintenanceReason[1];
+            mrs[0] = new MaintenanceReason();
+            mrs[0].setId(reason_id);
+            oxutil.deleteMaintenanceReason(mrs, auth);
             sysexit(0);
         } catch (final java.rmi.ConnectException neti) {
             printError(neti.getMessage());
