@@ -204,6 +204,16 @@ public abstract class OXUserStorageInterface {
      *
      */
     public abstract int[] getAll(final Context ctx) throws StorageException;
+
+    /**
+     * Retrieve all user objects for a given context. Which match the given search_pattern
+     *
+     * @param ctx numerical context identifier     
+     * @return long[] containing user ids. 
+     * @throws StorageException
+     *
+     */
+    public abstract User[] list(final Context ctx, final String search_pattern) throws StorageException;
     
     /**
      * Delete an user or multiple from given context in given connection
