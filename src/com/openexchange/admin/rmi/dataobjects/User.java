@@ -77,6 +77,8 @@ public class User implements Serializable, Cloneable {
     private ArrayList<OXUserExtensionInterface> extensions = null;
     private final boolean extensionsset = false;
 
+    private boolean contextadmin = false;
+    
     /**
      * This field is used to show if all extension have run fine and inserted their
      * data correctly
@@ -2566,5 +2568,13 @@ public class User implements Serializable, Cloneable {
             this.spam_filter_enabledset = true;
         }
         this.spam_filter_enabled = spam_filter_enabled;
+    }
+
+    public final boolean isContextadmin() {
+        return contextadmin;
+    }
+
+    public final void setContextadmin(boolean contextadmin) {
+        this.contextadmin = contextadmin;
     }
 }

@@ -1329,6 +1329,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         final ArrayList<User> userlist = new ArrayList<User>();
         try {
             read_ox_con = cache.getREADConnectionForContext(context_id);
+            final OXToolStorageInterface oxtool = OXToolMySQLStorage.getInstance();
+            final int adminForContext = oxtool.getAdminForContext(ctx, read_ox_con);
+
             for (final User user : users) {
                 int user_id = user.getId();
                 final User newuser = (User) user.clone();
@@ -1446,6 +1449,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 rs3.close();
                 stmt.close();
 
+                newuser.setContextadmin(newuser.getId().equals(adminForContext));
                 userlist.add(newuser);
             }
 
