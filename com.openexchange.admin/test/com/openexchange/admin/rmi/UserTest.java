@@ -311,9 +311,8 @@ public class UserTest extends AbstractTest {
         assertTrue("Expected to find added user in user list",founduser);
     }
 
-    //choeger: FIXME
     @Test
-    public void notestChange() throws Exception {
+    public void testChange() throws Exception {
         
         // get context to create an user
         final Credentials cred = DummyCredentials();
@@ -341,6 +340,8 @@ public class UserTest extends AbstractTest {
         
         // load again
         final User user_changed_loaded = oxu.getData(ctx, srv_loaded, cred);
+        // set Username to old value for verification
+        srv_loaded.setUsername(usr.getUsername());
         if(srv_loaded.getId().equals(user_changed_loaded.getId())){
             //verify data
             compareUser(srv_loaded,user_changed_loaded);
@@ -350,9 +351,8 @@ public class UserTest extends AbstractTest {
     }
     
     // This test is used to check how the change method deals with changing values which are null before changing
-    //choeger: FIXME
     @Test
-    public void notestChangeNullFields() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException, Exception {
+    public void testChangeNullFields() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException, Exception {
         final Credentials cred = DummyCredentials();
         final Context ctx = getTestContextObject(cred);
         final OXLoginInterface oxl = (OXLoginInterface) Naming.lookup(getRMIHostUrl() + OXLoginInterface.RMI_NAME);
@@ -367,15 +367,18 @@ public class UserTest extends AbstractTest {
         usr.setCompany("test");
         usr.setSur_name("test");
         usr.setEmail1(usr.getPrimaryEmail());
+        // Store username to be able to restore it after change
+        final String username = usr.getUsername();
+        usr.setUsername(null);
         System.out.println(usr.isCompanyset());
         user.change(ctx, usr, cred);
+        usr.setUsername(username);
         final User usr2 = oxl.login2User(ctx, cred);
         compareUser(usr, usr2);
     }
     
-    //choeger: FIXME
     @Test(expected=AssertionError.class)
-    public void notestChangefailing() throws Exception {
+    public void testChangefailing() throws Exception {
         
         // get context to create an user
         final Credentials cred = DummyCredentials();
@@ -703,6 +706,7 @@ public class UserTest extends AbstractTest {
     private User createChangeUserData(final User usr) throws CloneNotSupportedException{
         // change all fields of the user
         final User retval = (User) usr.clone();
+        retval.setUsername(null);
         retval.setEnabled(!usr.getEnabled());        
         retval.setPrimaryEmail(usr.getPrimaryEmail()+change_suffix);
         retval.setEmail1(usr.getEmail1()+change_suffix);
