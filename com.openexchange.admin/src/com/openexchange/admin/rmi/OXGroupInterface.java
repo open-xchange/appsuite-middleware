@@ -200,7 +200,7 @@ public interface OXGroupInterface extends Remote {
      * @throws NoSuchUserException 
      * @throws NoSuchGroupException 
      */
-    public void addMember(final Context ctx, final Group grp, int [] member_ids, final Credentials auth) 
+    public void addMember(final Context ctx, final Group grp, final int [] member_ids, final Credentials auth) 
     throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException, DatabaseUpdateException, NoSuchUserException, NoSuchGroupException;
     
     
@@ -220,7 +220,7 @@ public interface OXGroupInterface extends Remote {
      * @throws NoSuchGroupException 
      * @throws NoSuchUserException 
      */
-    public void removeMember(final Context ctx, final Group grp, int[] member_ids, final Credentials auth) 
+    public void removeMember(final Context ctx, final Group grp, final int[] member_ids, final Credentials auth) 
     throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException, DatabaseUpdateException, NoSuchGroupException, NoSuchUserException;
     
    
@@ -275,8 +275,9 @@ public interface OXGroupInterface extends Remote {
      * @throws NoSuchGroupException
      * @throws DatabaseUpdateException
      */
-    public Group[] getData(Context ctx, Group[] grps, Credentials auth) 
+    public Group[] getData(final Context ctx, final Group[] grps, final Credentials auth) 
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchGroupException, DatabaseUpdateException;
+
     /**
      * 
      * @param ctx
