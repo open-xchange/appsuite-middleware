@@ -1222,7 +1222,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 						: getWrappingOXException(e));
 				final String callback = saveToDisk ? JS_FRAGMENT : JS_FRAGMENT_POPUP;
 				writer.write(callback.replaceFirst(JS_FRAGMENT_JSON, response.getJSON().toString()).replaceFirst(
-						JS_FRAGMENT_ACTION, ACTION_MATTACH));
+						JS_FRAGMENT_ACTION, "error"));
 				writer.flush();
 			} catch (final UnsupportedEncodingException uee) {
 				LOG.error(uee.getLocalizedMessage(), uee);
