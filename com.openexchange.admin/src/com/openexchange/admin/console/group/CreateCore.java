@@ -8,6 +8,7 @@ import java.rmi.RemoteException;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.MissingOptionException;
 import com.openexchange.admin.console.CmdLineParser.IllegalOptionValueException;
+import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.console.CmdLineParser.UnknownOptionException;
 import com.openexchange.admin.rmi.OXGroupInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -28,7 +29,8 @@ public abstract class CreateCore extends GroupAbstraction {
         // create options for this command line tool
         setGroupNameOption(parser, true);
         setGroupDisplayNameOption(parser, true);
-
+        setAddMembersOption(parser, false);
+        
         setFurtherOptions(parser);
     }
 
@@ -49,6 +51,13 @@ public abstract class CreateCore extends GroupAbstraction {
 
             final OXGroupInterface oxgrp = (OXGroupInterface) Naming.lookup(RMI_HOSTNAME + OXGroupInterface.RMI_NAME);
             final Group grp = new Group();
+
+            if (parser.getOptionValue(this.addMemberOption) != null) {
+                final Integer[] newMemberList = getMembers(parser, this.addMemberOption);
+                if (newMemberList != null) {
+                    grp.setMembers(newMemberList);
+                }
+            }
 
             grp.setName((String) parser.getOptionValue(this.nameOption));
             grp.setDisplayname((String) parser.getOptionValue(this.displayNameOption));
@@ -103,5 +112,15 @@ public abstract class CreateCore extends GroupAbstraction {
         }
     }
     
+    private Integer[] getMembers(final AdminParser parser, final Option memberOption) {
+        final String tmpmembers = (String) parser.getOptionValue(memberOption);
+        final String[] split = tmpmembers.split(",");
+        final Integer[] memberList = new Integer[split.length];
+        for (int i = 0; i < split.length; i++) {
+            memberList[i] = Integer.parseInt(split[i]);
+        }
+        return memberList;
+    }
+
     protected abstract void maincall(final AdminParser parser, final OXGroupInterface oxgrp, final Context ctx, final Group grp, final Credentials auth) throws RemoteException;
 }
