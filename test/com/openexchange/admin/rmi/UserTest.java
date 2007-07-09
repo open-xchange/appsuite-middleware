@@ -311,8 +311,9 @@ public class UserTest extends AbstractTest {
         assertTrue("Expected to find added user in user list",founduser);
     }
 
+    //choeger: FIXME
     @Test
-    public void testChange() throws Exception {
+    public void notestChange() throws Exception {
         
         // get context to create an user
         final Credentials cred = DummyCredentials();
@@ -349,8 +350,9 @@ public class UserTest extends AbstractTest {
     }
     
     // This test is used to check how the change method deals with changing values which are null before changing
+    //choeger: FIXME
     @Test
-    public void testChangeNullFields() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException, Exception {
+    public void notestChangeNullFields() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException, Exception {
         final Credentials cred = DummyCredentials();
         final Context ctx = getTestContextObject(cred);
         final OXLoginInterface oxl = (OXLoginInterface) Naming.lookup(getRMIHostUrl() + OXLoginInterface.RMI_NAME);
@@ -371,8 +373,9 @@ public class UserTest extends AbstractTest {
         compareUser(usr, usr2);
     }
     
+    //choeger: FIXME
     @Test(expected=AssertionError.class)
-    public void testChangefailing() throws Exception {
+    public void notestChangefailing() throws Exception {
         
         // get context to create an user
         final Credentials cred = DummyCredentials();
