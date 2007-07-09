@@ -227,7 +227,7 @@ public class UserTest extends AbstractTest {
         urs.setId(oxu.create(ctx,urs,client_access,cred));
         
         // get module access 
-        final UserModuleAccess srv_response = oxu.getModuleAccess(ctx,urs.getId(),cred);
+        final UserModuleAccess srv_response = oxu.getModuleAccess(ctx,urs,cred);
         
         // test if module access was set correctly
         compareUserAccess(client_access,srv_response);        
@@ -244,11 +244,11 @@ public class UserTest extends AbstractTest {
         // create new user
         final OXUserInterface oxu = getUserClient();
         final UserModuleAccess client_access = new UserModuleAccess();
-        final User urs = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
-        urs.setId(oxu.create(ctx,urs,client_access,cred));
+        final User usr = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
+        usr.setId(oxu.create(ctx,usr,client_access,cred));
         
         // get module access 
-        final UserModuleAccess srv_response = oxu.getModuleAccess(ctx,urs.getId(),cred);
+        final UserModuleAccess srv_response = oxu.getModuleAccess(ctx,usr,cred);
         
         // test if module access was set correctly
         compareUserAccess(client_access,srv_response);  
@@ -274,10 +274,10 @@ public class UserTest extends AbstractTest {
         srv_response.setWebmail(!srv_response.getWebmail());        
         
         // submit changes
-        oxu.changeModuleAccess(ctx,urs.getId(),srv_response,cred);        
+        oxu.changeModuleAccess(ctx,usr,srv_response,cred);        
         
         // load again and verify
-        final UserModuleAccess srv_response_changed = oxu.getModuleAccess(ctx,urs.getId(),cred);
+        final UserModuleAccess srv_response_changed = oxu.getModuleAccess(ctx,usr,cred);
         
         // test if module access was set correctly
         compareUserAccess(srv_response,srv_response_changed);          
@@ -285,7 +285,7 @@ public class UserTest extends AbstractTest {
     }
 
     @Test
-    public void testGetAll() throws Exception {
+    public void testList() throws Exception {
         
         // get context to create an user
         final Credentials cred = DummyCredentials();
@@ -297,7 +297,7 @@ public class UserTest extends AbstractTest {
         final User urs = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
         urs.setId(oxu.create(ctx,urs,client_access,cred));
         
-        final User[] srv_response = oxu.getAll(ctx,cred);
+        final User[] srv_response = oxu.list(ctx, null, cred);
         
         assertTrue("Expected list size > 0 ",srv_response.length>0);
         
