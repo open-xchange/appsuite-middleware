@@ -117,6 +117,9 @@ public interface OXUtilInterface extends Remote {
 
     /**
      * Register a new database to the system.
+     * HINT: Use unregisterDatabase to remove/unregitser.
+     * 
+     * DONT use deleteDatabase, cause this method performs a real "drop" for its specified Database!
      * 
      * <p>
      * <blockquote>
