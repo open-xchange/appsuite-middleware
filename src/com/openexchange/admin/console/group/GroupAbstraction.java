@@ -48,16 +48,28 @@
  */
 package com.openexchange.admin.console.group;
 
+import java.net.MalformedURLException;
+import java.rmi.Naming;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.BasicCommandlineOptions;
 import com.openexchange.admin.console.CmdLineParser.Option;
+import com.openexchange.admin.rmi.OXGroupInterface;
 import com.openexchange.admin.rmi.dataobjects.Group;
 import com.openexchange.admin.rmi.extensions.OXGroupExtensionInterface;
 
 public abstract class GroupAbstraction extends BasicCommandlineOptions {
 
+    protected Option addMemberOption = null;
+    protected Option removeMemberOption = null;
+    protected Option IdOption = null;
+    protected Option nameOption = null;
+    protected Option displayNameOption = null;
+    protected Option mailOption = null;
+    
     protected static final String OPT_NAME_GROUPNAME_LONG = "name";
     protected static final char OPT_NAME_GROUPNAME = 'n';
 
@@ -124,11 +136,8 @@ public abstract class GroupAbstraction extends BasicCommandlineOptions {
         
     }
     
-    protected Option addMemberOption = null;
-    protected Option removeMemberOption = null;
-    protected Option IdOption = null;
-    protected Option nameOption = null;
-    protected Option displayNameOption = null;
-    protected Option mailOption = null;
+    protected final OXGroupInterface getGroupInterface() throws NotBoundException, MalformedURLException, RemoteException {
+        return (OXGroupInterface) Naming.lookup(RMI_HOSTNAME + OXGroupInterface.RMI_NAME);
+    }
    
 }
