@@ -134,12 +134,12 @@ public abstract class ChangeCore extends GroupAbstraction {
     private int[] getMembers(final AdminParser parser, final Option memberOption) {
         final String tmpmembers = (String) parser.getOptionValue(memberOption);
         final String[] split = tmpmembers.split(",");
-        int[] memberList = new int[split.length];
+        final int[] memberList = new int[split.length];
         for (int i = 0; i < split.length; i++) {
             memberList[i] = Integer.parseInt(split[i]);
         }
         return memberList;
     }
-    
+
     protected abstract void maincall(final AdminParser parser, final OXGroupInterface oxgrp, final Context ctx, final Group grp, final Credentials auth) throws RemoteException;
 }
