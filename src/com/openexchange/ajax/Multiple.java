@@ -195,9 +195,16 @@ public class Multiple extends SessionServlet {
 				}
 			}
 		}
-
-		resp.getWriter().write(response.getData().toString());
-		resp.getWriter().flush();
+        resp.setStatus(HttpServletResponse.SC_OK);
+        resp.setContentType(CONTENTTYPE_JAVASCRIPT);
+        final Writer writer = resp.getWriter();
+        try {
+            Response.write(response, writer);
+        } catch (JSONException e) {
+            LOG.error(e.getMessage(), e);
+            sendError(resp);
+        }
+        writer.flush();
 	}
 
 	protected static final boolean parseActionElement(final Writer w, final JSONArray jsonArray, final int pos,
