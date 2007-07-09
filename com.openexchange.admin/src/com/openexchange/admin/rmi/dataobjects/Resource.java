@@ -134,7 +134,7 @@ public class Resource implements Serializable {
         this.email = val;
     }
 
-    public Boolean isAvailable() {
+    public Boolean getAvailable() {
         return available;
     }
 

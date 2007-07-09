@@ -136,8 +136,8 @@ public class ResourceTest extends AbstractTest{
         
         
         // set change data
-        if (null != res.isAvailable()) {
-            res.setAvailable(!res.isAvailable());
+        if (null != res.getAvailable()) {
+            res.setAvailable(!res.getAvailable());
         } else {
             res.setAvailable(true);
         }
