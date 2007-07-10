@@ -392,6 +392,93 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
     }
 
     @Override
+    public void delete(final Context ctx, final Resource resource) throws StorageException {
+        Connection con = null;
+        PreparedStatement prep_del = null;
+        final int resource_id = resource.getId().intValue();
+        final int context_id = ctx.getIdAsInt();
+        try {
+            con = cache.getWRITEConnectionForContext(context_id);
+            con.setAutoCommit(false);
+            
+            final DeleteEvent delev = new DeleteEvent(this, resource_id, DeleteEvent.TYPE_RESOURCE, context_id);
+            AdminCache.delreg.fireDeleteEvent(delev, con, con);
+            
+            createRecoveryData(resource_id, ctx, con);
+            
+            prep_del = con.prepareStatement("DELETE FROM resource WHERE cid=? AND id=?;");
+            prep_del.setInt(1, context_id);
+            prep_del.setInt(2, resource_id);
+            prep_del.executeUpdate();
+            
+            con.commit();
+        } catch (final SQLException e) {
+            log.error("SQL Error", e);
+            try {
+                con.rollback();
+            } catch (final SQLException e2) {
+                log.error("Error rollback ox db write connection", e2);
+            }
+            throw new StorageException(e);
+        } catch (final PoolException e) {
+            log.error("Pool Error", e);
+            try {
+                con.rollback();
+            } catch (final SQLException e2) {
+                log.error("Error rollback ox db write connection", e2);
+            }
+            throw new StorageException(e);
+        } catch (final ContextException e) {
+            log.error("Context Error", e);
+            try {
+                con.rollback();
+            } catch (final SQLException e2) {
+                log.error("Error rollback ox db write connection", e2);
+            }
+            throw new StorageException(e);
+        } catch (final LdapException e) {
+            log.error("LDAP Error", e);
+            try {
+                con.rollback();
+            } catch (final SQLException e2) {
+                log.error("Error rollback ox db write connection", e2);
+            }
+            throw new StorageException(e);
+        } catch (final DBPoolingException e) {
+            log.error("DBPooling Error", e);
+            try {
+                con.rollback();
+            } catch (final SQLException e2) {
+                log.error("Error rollback ox db write connection", e2);
+            }
+            throw new StorageException(e);
+        } catch (final DeleteFailedException e) {
+            log.error("Delete Error", e);
+            try {
+                con.rollback();
+            } catch (final SQLException e2) {
+                log.error("Error rollback ox db write connection", e2);
+            }
+            throw new StorageException(e);
+        } finally {
+            try {
+                if (prep_del != null) {
+                    prep_del.close();
+                }
+            } catch (final SQLException ex) {
+                log.error("Error closing  PreparedStatement", ex);
+            }
+            try {
+                
+                cache.pushOXDBWrite(context_id, con);
+            } catch (final PoolException e) {
+                log.error("Error pushing ox write connection to pool!", e);
+            }
+            
+        }
+    }
+
+    @Override
     public Resource get(final Context ctx, final int resource_id)
             throws StorageException {
         Connection con = null;

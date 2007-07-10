@@ -146,6 +146,8 @@ public abstract class OXResourceStorageInterface {
 
     @Deprecated
     public abstract void delete(final Context ctx, final int resource_id) throws StorageException;
+    
+    public abstract void delete(final Context ctx, final Resource resource) throws StorageException;
 
     /**
      * get resource data
