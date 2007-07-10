@@ -108,6 +108,8 @@ public class IMAPPropertiesFactory {
 	}
 
 	private static Properties props;
+	
+	private static boolean propsLoaded;
 
 	private static Properties javaMailProps;
 
@@ -215,18 +217,19 @@ public class IMAPPropertiesFactory {
 	}
 
 	private static void checkImapPropFile() throws IMAPException {
-		if ((PROP_FILE = SystemConfig.getProperty(PROPERTYNAME_IMAP)) == null) {
-			throw new IMAPException(new StringBuilder(50).append("Property \"").append(PROPERTYNAME_IMAP).append(
-					"\" not defined in system.properties").toString());
-		}
 		/*
 		 * Load properties in a thread-safe manner
 		 */
-		if (props == null) {
+		if (!propsLoaded) {
 			PROP_LOCK.lock();
 			try {
+				if (PROP_FILE == null && (PROP_FILE = SystemConfig.getProperty(PROPERTYNAME_IMAP)) == null) {
+					throw new IMAPException(new StringBuilder(50).append("Property \"").append(PROPERTYNAME_IMAP)
+							.append("\" not defined in system.properties").toString());
+				}
 				if (props == null) {
 					loadProps();
+					propsLoaded = true;
 				}
 			} finally {
 				PROP_LOCK.unlock();
