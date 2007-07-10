@@ -77,8 +77,6 @@ public class GroupTest extends AbstractTest {
     // list of chars that must be valid
     private static final String VALID_CHAR_TESTGROUP = " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-+.%$@";
 
-    private static final String VALID_CHAR_TESTUSER = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-+.%$@";
-
     public static junit.framework.Test suite() {
 		return new JUnit4TestAdapter(GroupTest.class);
 	}
