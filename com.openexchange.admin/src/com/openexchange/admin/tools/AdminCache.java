@@ -110,11 +110,8 @@ public class AdminCache {
     // master credentials for authenticating master admin
     private Credentials masterCredentials = null;
     
-    // OLD NOT CONTEXT BASED CACHED CREDENTIALS
-    //private Credentials adminCredentials = null;    
-    
-    // bugfix for context wide credentials caching
     private Hashtable<Integer, Credentials> adminCredentialsCache = null;
+    private Hashtable<Integer, String>      adminAuthMechCache = null;
     
     // A flag to lock the database if an update is made
     private boolean lockdb = false;
@@ -144,6 +141,7 @@ public class AdminCache {
         this.log.info("Init Cache");
         initPool();
         this.adminCredentialsCache = new Hashtable<Integer, Credentials>();
+        this.adminAuthMechCache    = new Hashtable<Integer, String>();
     }
 
     protected void initPool() {
@@ -200,19 +198,21 @@ public class AdminCache {
      */
     public final Credentials getAdminCredentials(Context ctx) {        
         return this.adminCredentialsCache.get(ctx.getIdAsInt());
-//        synchronized (this.adminCredentials) {
-//            return this.adminCredentials;
-//        }
+    }
+
+    /**
+     * @return authMech
+     */
+    public final String getAdminAuthMech(Context ctx) {        
+        return this.adminAuthMechCache.get(ctx.getIdAsInt());
     }
 
     /**
      * @param adminCredentials the adminCredentials to set
      */
-    public final void setAdminCredentials(Context ctx,Credentials adminCredentials) {
+    public final void setAdminCredentials(Context ctx, String authMech, Credentials adminCredentials) {
         this.adminCredentialsCache.put(ctx.getIdAsInt(),adminCredentials);
-//        synchronized (this.adminCredentials) {
-//            this.adminCredentials = adminCredentials;
-//       }
+        this.adminAuthMechCache.put(ctx.getIdAsInt(),authMech);
     }
 
     /**
@@ -221,6 +221,9 @@ public class AdminCache {
     public final void removeAdminCredentials(final Context ctx) {
         if( this.adminCredentialsCache.contains(ctx) ) {
             this.adminCredentialsCache.remove(ctx);
+        }
+        if( this.adminAuthMechCache.contains(ctx) ) {
+            this.adminAuthMechCache.remove(ctx);
         }
     }
     

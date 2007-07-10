@@ -85,6 +85,23 @@ public class MySQLAuthenticationImpl implements AuthenticationInterface {
     }
 
     /**
+     * @param crypted
+     * @param clear
+     * @param mech
+     * @return
+     * @throws NoSuchAlgorithmException
+     * @throws UnsupportedEncodingException
+     */
+    private boolean authByMech(final String crypted, final String clear, final String mech) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+        if("{CRYPT}".equals(mech)) {
+            return UnixCrypt.matches(crypted, clear);
+        } else if("{SHA}".equals(mech)) {
+            return SHACrypt.makeSHAPasswd(clear).equals(crypted);
+        } else {
+            return false;
+        }
+    }
+    /**
      * 
      * Authenticates the admin user of the system within context.
      * 
@@ -113,27 +130,26 @@ public class MySQLAuthenticationImpl implements AuthenticationInterface {
                         }
                         return false;
                     } else {
-                        Boolean retval = false;
                         String pwcrypt = rs.getString("userPassword");
                         String pwmech  = rs.getString("passwordMech");
-                        if("{CRYPT}".equals(pwmech)) {
-                            retval = UnixCrypt.matches(pwcrypt, authdata.getPassword());
-                        } else if("{SHA}".equals(pwmech)) {
-                            retval = SHACrypt.makeSHAPasswd(authdata.getPassword()).equals(pwcrypt);
-                        }
-                        if( retval ) {
+                        if( authByMech(pwcrypt, authdata.getPassword(), pwmech) ) {
                             Credentials cauth = new Credentials(authdata.getLogin(),pwcrypt);
-                            ClientAdminThread.cache.setAdminCredentials(ctx,cauth);
+                            ClientAdminThread.cache.setAdminCredentials(ctx, pwmech, cauth);
+                            return true;
                         }
-                        return retval;
+                        return false;
                     }
                 } catch (final SQLException sql) {
+                    log.error(sql.getMessage(), sql);
                     throw new StorageException(sql);
                 } catch (final PoolException ex) {
+                    log.error(ex.getMessage(), ex);
                     throw new StorageException(ex);
                 } catch (NoSuchAlgorithmException e) {
+                    log.error(e.getMessage(), e);
                     throw new StorageException(e);
                 } catch (UnsupportedEncodingException e) {
+                    log.error(e.getMessage(), e);
                     throw new StorageException(e);
                 } finally {
                     try {
@@ -159,13 +175,22 @@ public class MySQLAuthenticationImpl implements AuthenticationInterface {
                     }
                 }
             } else {
-                if (UnixCrypt.matches(ClientAdminThread.cache.getAdminCredentials(ctx).getPassword(), authdata.getPassword())) {
-                    return true;
-                } else {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Password for admin user \"" + authdata.getLogin() + "\" did not match!");
+                try {
+                    if ( authByMech(ClientAdminThread.cache.getAdminCredentials(ctx).getPassword(),
+                            authdata.getPassword(), ClientAdminThread.cache.getAdminAuthMech(ctx) ) ) {
+                        return true;
+                    } else {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Password for admin user \"" + authdata.getLogin() + "\" did not match!");
+                        }
+                        return false;
                     }
-                    return false;
+                } catch (NoSuchAlgorithmException e) {
+                    log.error(e.getMessage(), e);
+                    throw new StorageException(e);
+                } catch (UnsupportedEncodingException e) {
+                    log.error(e.getMessage(), e);
+                    throw new StorageException(e);
                 }
                 
             }
@@ -196,9 +221,10 @@ public class MySQLAuthenticationImpl implements AuthenticationInterface {
                     }
                     return false;
                 } else {
+                    String pwcrypt = rs.getString("userPassword");
+                    String pwmech  = rs.getString("passwordMech");
                     // now check via our crypt mech the password
-                    if (UnixCrypt.matches(rs.getString("userPassword"), authdata.getPassword())) {
-                        // here add the isUser flag to the credentials
+                    if ( authByMech(pwcrypt, authdata.getPassword(), pwmech) ) {
                         return true;
                     } else {
                         if (log.isDebugEnabled()) {
@@ -208,9 +234,17 @@ public class MySQLAuthenticationImpl implements AuthenticationInterface {
                     }
                 }
             } catch (final SQLException sql) {
+                log.error(sql.getMessage(), sql);
                 throw new StorageException(sql);
             } catch (final PoolException ex) {
+                log.error(ex.getMessage(), ex);
                 throw new StorageException(ex);
+            } catch (NoSuchAlgorithmException e) {
+                log.error(e.getMessage(), e);
+                throw new StorageException(e);
+            } catch (UnsupportedEncodingException e) {
+                log.error(e.getMessage(), e);
+                throw new StorageException(e);
             } finally {
 
                 try {

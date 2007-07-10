@@ -52,7 +52,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.rmi.RemoteException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -89,6 +91,7 @@ import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.GenericChecks;
 import com.openexchange.admin.tools.PropertyHandler;
+import com.openexchange.admin.tools.SHACrypt;
 import com.openexchange.admin.tools.UnixCrypt;
 import com.openexchange.cache.CacheKey;
 /**
@@ -343,9 +346,22 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         }
         // change cached admin credentials if neccessary
         if( isContextAdmin && usrdata.getPassword() != null ) {
-            Credentials cauth = ClientAdminThread.cache.getAdminCredentials(ctx);
-            cauth.setPassword(UnixCrypt.crypt(usrdata.getPassword()));
-            ClientAdminThread.cache.setAdminCredentials(ctx,cauth);
+            final Credentials cauth = ClientAdminThread.cache.getAdminCredentials(ctx);
+            final String mech = ClientAdminThread.cache.getAdminAuthMech(ctx);
+            if("{CRYPT}".equals(mech)) {
+                cauth.setPassword(UnixCrypt.crypt(usrdata.getPassword()));
+            } else if("{SHA}".equals(mech)) {
+                try {
+                    cauth.setPassword(SHACrypt.makeSHAPasswd(usrdata.getPassword()));
+                } catch (NoSuchAlgorithmException e) {
+                    log.error("Error encrypting password for credential cache ", e);
+                    throw new StorageException(e);
+                } catch (UnsupportedEncodingException e) {
+                    log.error("Error encrypting password for credential cache ", e);
+                    throw new StorageException(e);
+                }
+            }
+            ClientAdminThread.cache.setAdminCredentials(ctx,mech,cauth);
         }
         try {
             JCS cache = JCS.getInstance("User");
