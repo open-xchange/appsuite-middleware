@@ -193,4 +193,19 @@ public interface OXResourceInterface extends Remote {
      * @throws DatabaseUpdateException 
      */
     public Resource[] list(final Context ctx, final String pattern, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException;
+    
+    /**
+     * Lists all resources in given context.
+     * 
+     * @return Resource[] containing result objects.
+     * @param ctx Context object.
+     * @param auth Credentials for authenticating against server.
+     * @throws StorageException When an error in the subsystems occured.
+     * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException If the context does not exist in the system.
+     * @throws InvalidDataException If the data sent within the method contained invalid data.
+     * @throws RemoteException General RMI Exception
+     * @throws DatabaseUpdateException 
+     */
+    public Resource[] listAll(final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException;;
 }

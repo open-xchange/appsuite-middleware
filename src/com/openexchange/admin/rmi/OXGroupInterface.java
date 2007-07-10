@@ -281,7 +281,7 @@ public interface OXGroupInterface extends Remote {
     public Group[] getGroupsForUser(final Context ctx, final User usr, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
 
     /**
-     * List groups whithin context.
+     * List groups whithin context matching the pattern.
      * 
      * @param ctx Context object.
      * @param pattern Search pattern to search for e.g. "*mygroup*"
@@ -295,6 +295,21 @@ public interface OXGroupInterface extends Remote {
      * @throws DatabaseUpdateException 
      */
     public Group[] list(final Context ctx, final String pattern, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException;
+
+    /**
+     * List all groups whithin context.
+     * 
+     * @param ctx Context object.
+     * @param auth Credentials for authenticating against server.
+     * @return Groups which matched the supplied search pattern.
+     * @throws RemoteException General RMI Exception
+     * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException If the context does not exist in the system.
+     * @throws StorageException When an error in the subsystems occured.
+     * @throws InvalidDataException If the data sent within the method contained invalid data.
+     * @throws DatabaseUpdateException 
+     */
+    public Group[] listAll(final Context ctx, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException;
 
     /**
      * 
