@@ -153,6 +153,8 @@ public abstract class OXResourceStorageInterface {
     @Deprecated
     public abstract Resource get(final Context ctx, final int resource_id) throws StorageException;
 
+    public abstract Resource getData(final Context ctx, final Resource resource) throws StorageException;
+    
     /**
      * fetch data from resource and insert in del_resource
      */
