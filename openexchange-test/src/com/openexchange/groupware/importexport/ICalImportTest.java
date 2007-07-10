@@ -49,9 +49,9 @@
 
 package com.openexchange.groupware.importexport;
 
-import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
@@ -290,6 +290,30 @@ public class ICalImportTest extends AbstractContactTest {
 		final AppointmentObject appointmentObj = appointmentSql.getObjectById(Integer.parseInt( res.getObjectId() ), folderId);
 		assertTrue("Has alarm" , appointmentObj.containsAlarm());
 		assertEquals("Alarm is "+alarm+" minutes earlier" , alarm , appointmentObj.getAlarm());
+	}
+	
+	@Test public void test7735() throws DBPoolingException, SQLException, ImportExportException, UnsupportedEncodingException{
+		folderId = createTestFolder(FolderObject.CALENDAR, sessObj, "ical7735Folder");
+		String ical = 
+			"BEGIN:VCALENDAR\n" +
+			"VERSION:2.0\n" +
+			"PRODID:-//Microsoft Corporation//Outlook 12.0 MIMEDIR//EN\n" +
+			"BEGIN:VEVENT\n" +
+			"DTSTART:20070814T150000Z\n" +
+			"DTEND:20070814T163000Z\n" +
+			"LOCATION:Olpe\nSUMMARY:Komplizierte Intervalle\n" +
+			"DESCRIPTION:Jeden ersten Sonntag im April\n" +
+			"RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=4\n" +
+			"END:VEVENT\n" +
+			"END:VCALENDAR";
+
+		List <String> folders = Arrays.asList( Integer.toString(folderId) );
+		assertTrue("Can import?" ,  imp.canImport(sessObj, format, folders, null));
+		List<ImportResult> results = imp.importData(sessObj, format, new ByteArrayInputStream(ical.getBytes("UTF-8")), folders, null);
+		assertEquals("One import?" , 1 , results.size());
+		ImportResult res = results.get(0);
+		assertEquals("Shouldn't have error" , null, res.getException());
+
 	}
 	
 //	@Test public void test7474() throws DBPoolingException, SQLException{
