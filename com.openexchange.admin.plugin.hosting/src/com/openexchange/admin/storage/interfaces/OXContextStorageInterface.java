@@ -112,11 +112,10 @@ public abstract class OXContextStorageInterface {
     public abstract String moveContextFilestore(final Context ctx, final Filestore dst_filestore_id, final MaintenanceReason reason) throws StorageException;
 
     /**
-     * @param ctx
-     * @param filestore
+     * @param ctx Context with Filestore data set!
      * @throws StorageException
      */
-    public abstract void changeStorageData(final Context ctx, final Filestore filestore) throws StorageException;
+    public abstract void changeStorageData(final Context ctx) throws StorageException;
 
     /**
      * @param ctx

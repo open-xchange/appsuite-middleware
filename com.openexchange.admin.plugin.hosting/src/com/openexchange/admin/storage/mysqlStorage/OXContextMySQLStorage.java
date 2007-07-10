@@ -959,24 +959,18 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             }
         }
     }
-
-    public void changeDatabase(final Context ctx, final Database db_handle) throws StorageException {
-        throw new StorageException("Not implemented");
-
-    }
-
-    public void changeStorageData(final Context ctx, final Filestore filestore) throws StorageException {
-        Connection configdb_write_con = null;
+    
+    private void changeStorageDataImpl(Context ctx,Connection configdb_write_con) throws SQLException{
+        
+        if(ctx.getFilestore()!=null){
+        Filestore filestore = ctx.getFilestore();
         PreparedStatement prep = null;
         final int context_id = ctx.getIdAsInt();
         try {
-            configdb_write_con = cache.getWRITEConnectionForCONFIGDB();
-            configdb_write_con.setAutoCommit(false);
-
-            final int filestoreid = filestore.getId();
-            if (-1 != filestoreid) {
+                        
+            if (filestore.getId()!=null && -1 != filestore.getId().intValue()) {
                 prep = configdb_write_con.prepareStatement("UPDATE context SET filestore_id = ? WHERE cid = ?");
-                prep.setInt(1, filestoreid);
+                prep.setInt(1, filestore.getId().intValue());
                 prep.setInt(2, context_id);
                 prep.executeUpdate();
                 prep.close();
@@ -1009,8 +1003,9 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 prep.close();
             }
 
-            final long filestore_quota_max = filestore.getQuota_max();
-            if (-1 != filestore_quota_max) {
+           
+            if (ctx.getMaxQuota()!=null && ctx.getMaxQuota()!=-1) {
+                final long filestore_quota_max = ctx.getMaxQuota();
                 // convert to byte for db
                 final long quota_max_in_byte = (long) (filestore_quota_max * Math.pow(2, 20));
                 prep = configdb_write_con.prepareStatement("UPDATE context SET quota_max = ? WHERE cid = ?");
@@ -1019,6 +1014,28 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 prep.executeUpdate();
                 prep.close();
             }
+            
+            
+        }finally{
+            try {
+                if (prep != null) {
+                    prep.close();
+                }
+            } catch (final SQLException exp) {
+                log.error(OXContextMySQLStorageCommon.LOG_ERROR_CLOSING_STATEMENT);
+            }
+        }
+        }
+    }
+
+    public void changeStorageData(final Context ctx) throws StorageException {
+        Connection configdb_write_con = null;
+        PreparedStatement prep = null;      
+        try {
+            configdb_write_con = cache.getWRITEConnectionForCONFIGDB();
+            configdb_write_con.setAutoCommit(false);
+            
+            changeStorageDataImpl(ctx, configdb_write_con);
 
             configdb_write_con.commit();
         }catch (final DataTruncation dt){
@@ -2271,6 +2288,9 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             
             // Change quota size in config db
             changeQuotaForContext(ctx,config_db_write);
+                        
+            // Change storage data
+            changeStorageDataImpl(ctx, config_db_write);
             
             // commit changes to db
             ox_db_write.commit();
