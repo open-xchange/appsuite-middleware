@@ -501,7 +501,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
      * @see com.openexchange.admin.storage.sqlStorage.OXContextSQLStorage#getContext(int)
      */
     @Override
-    public Context getSetup(final Context ctx) throws StorageException {
+    public Context getData(final Context ctx) throws StorageException {
         // returns webdav infos, database infos(mapping), context status
         // (disabled,enabled,text)
         Connection config_db_read = null;
@@ -2246,7 +2246,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     }
 
     @Override
-    public void changeSetup(Context ctx) throws StorageException {
+    public void change(Context ctx) throws StorageException {
         
         Connection config_db_write = null;
         Connection ox_db_write = null;

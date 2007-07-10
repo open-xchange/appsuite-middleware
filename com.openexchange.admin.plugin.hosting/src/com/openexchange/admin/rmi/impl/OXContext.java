@@ -159,7 +159,7 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
 
             oxcox.disable(ctx, reason);
-            retval = oxcox.getSetup(ctx);
+            retval = oxcox.getData(ctx);
 
             final Filestore fs = retval.getFilestore();
             final int srcStore_id = fs.getId();
@@ -459,7 +459,7 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
                 throw new NoSuchContextException();
             }
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
-            return oxcox.getSetup(ctx);
+            return oxcox.getData(ctx);
         } catch (final StorageException e) {
             log.error(e.getMessage(), e);
             throw e;
@@ -545,7 +545,7 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
                 throw new NoSuchContextException();
             }
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
-            oxcox.changeSetup(ctx);
+            oxcox.change(ctx);
         } catch (final StorageException e) {
             log.error(e.getMessage(), e);
             throw e;
@@ -577,7 +577,7 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
                 throw new NoSuchContextException();
             }
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
-            return oxcox.getSetup(ctx);
+            return oxcox.getData(ctx);
         } catch (final StorageException e) {
             log.error(e.getMessage(), e);
             throw e;
