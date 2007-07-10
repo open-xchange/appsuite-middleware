@@ -198,12 +198,7 @@ public class Multiple extends SessionServlet {
         resp.setStatus(HttpServletResponse.SC_OK);
         resp.setContentType(CONTENTTYPE_JAVASCRIPT);
         final Writer writer = resp.getWriter();
-        try {
-            response.getJSON().write(writer);
-        } catch (JSONException e) {
-            LOG.error(e.getMessage(), e);
-            sendError(resp);
-        }
+        writer.write(response.getData().toString());
         writer.flush();
 	}
 
