@@ -22,7 +22,7 @@ public class List extends ContextAbtraction {
 
     public List(final String[] args2) {
 
-        final AdminParser parser = new AdminParser("searchcontexts");
+        final AdminParser parser = new AdminParser("listcontext");
 
         setOptions(parser);
         setCSVOutputOption(parser);
