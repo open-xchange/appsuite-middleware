@@ -49,6 +49,9 @@
 
 package com.openexchange.groupware.importexport;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -314,5 +317,18 @@ public class AbstractContactTest {
 	
 	protected List<String> _folders(){
 		return Arrays.asList( Integer.toString(folderId) );
+	}
+	
+	protected ImportResult performOneEntryCheck(String file, Format format, int folderObjectType, String foldername, boolean errorExpected) throws DBPoolingException, SQLException, ImportExportException, UnsupportedEncodingException{
+		folderId = createTestFolder(folderObjectType, sessObj, foldername);
+
+		assertTrue("Can import?" ,  imp.canImport(sessObj, format, _folders(), null));
+
+		List<ImportResult> results = imp.importData(sessObj, format, new ByteArrayInputStream(file.getBytes("UTF-8")), _folders(), null);
+		assertEquals("One import?" , 1 , results.size());
+		ImportResult res = results.get(0);
+		assertEquals("Shoudl have error?" , errorExpected, res.hasError());
+		
+		return res;
 	}
 }
