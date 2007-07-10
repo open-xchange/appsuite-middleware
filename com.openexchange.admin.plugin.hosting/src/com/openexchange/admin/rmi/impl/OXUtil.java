@@ -32,7 +32,7 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
         super();
     }
 
-    public int registerFilestore(final Filestore fstore, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+    public Filestore registerFilestore(final Filestore fstore, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
 
         doNullCheck(fstore, auth);
 
@@ -70,7 +70,7 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
         final OXUtilStorageInterface oxutil = OXUtilStorageInterface.getInstance();
         final int response = oxutil.registerFilestore(fstore);
         log.debug("RESPONSE " + response);
-        return response;
+        return new Filestore(response);
 
     }
 
@@ -135,7 +135,7 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
     }
 
     
-    public int createMaintenanceReason(final MaintenanceReason reason, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+    public MaintenanceReason createMaintenanceReason(final MaintenanceReason reason, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
 
         doNullCheck(reason, auth);
 
@@ -152,7 +152,7 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
         }
 
         final OXUtilStorageInterface oxutil = OXUtilStorageInterface.getInstance();
-        return oxutil.createMaintenanceReason(reason);
+        return  new MaintenanceReason(oxutil.createMaintenanceReason(reason));
 
     }
 
@@ -223,7 +223,7 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
     }
 
     
-    public int registerDatabase(final Database db, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+    public Database registerDatabase(final Database db, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
 
         doNullCheck(db, auth);
 
@@ -244,12 +244,12 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
         }
 
         final OXUtilStorageInterface oxcox = OXUtilStorageInterface.getInstance();
-        return oxcox.registerDatabase(db);
+        return new Database(oxcox.registerDatabase(db));
 
     }
 
    
-    public int registerServer(final Server srv, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+    public Server registerServer(final Server srv, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
 
         doNullCheck(srv, auth);
 
@@ -268,7 +268,10 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
         }
 
         final OXUtilStorageInterface oxcox = OXUtilStorageInterface.getInstance();
-        return oxcox.registerServer(srv.getName());
+        Server sr = new Server ();
+        sr.setName(srv.getName());
+        sr.setId(oxcox.registerServer(srv.getName()));
+        return sr;
 
     }
 

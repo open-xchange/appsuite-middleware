@@ -118,7 +118,7 @@ public class ContextTest extends AbstractTest {
         if (mrs.length == 0) {
             // add reason , and then use this reason to disable the context
             mr.setText("Context disabled " + System.currentTimeMillis());
-            int mr_id = oxu.createMaintenanceReason(mr, cred);
+            int mr_id = oxu.createMaintenanceReason(mr, cred).getId().intValue();
             mr.setId(mr_id);
         } else {
             mr.setId(mrs[0].getId());
@@ -149,7 +149,7 @@ public class ContextTest extends AbstractTest {
         if (mrs.length == 0) {
             // add reason , and then use this reason to disable the context
             mr.setText("Context disabled " + System.currentTimeMillis());
-            int mr_id = oxu.createMaintenanceReason(mr, cred);
+            int mr_id = oxu.createMaintenanceReason(mr, cred).getId().intValue();
             mr.setId(mr_id);
         } else {
             mr.setId(mrs[0].getId());

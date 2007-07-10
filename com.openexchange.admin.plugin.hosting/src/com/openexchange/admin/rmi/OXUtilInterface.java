@@ -42,7 +42,7 @@ public interface OXUtilInterface extends Remote {
      * @throws RemoteException
      *             General RMI Exception
      */
-    public int createMaintenanceReason(final MaintenanceReason reason, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException;
+    public MaintenanceReason createMaintenanceReason(final MaintenanceReason reason, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException;
 
     /**
      * Deletes maintenance reason text.
@@ -95,7 +95,7 @@ public interface OXUtilInterface extends Remote {
      * @throws RemoteException
      *             General RMI Exception
      */
-    public int registerServer(final Server srv, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException;
+    public Server registerServer(final Server srv, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException;
 
     /**
      * Delete an OX server from the system.
@@ -155,7 +155,7 @@ public interface OXUtilInterface extends Remote {
      * @throws RemoteException
      *             General RMI Exception
      */
-    public int registerDatabase(final Database db, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException;
+    public Database registerDatabase(final Database db, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException;
 
     /**
      * Change parameters of a database registered in system
@@ -350,7 +350,7 @@ public interface OXUtilInterface extends Remote {
      * @throws RemoteException
      *             General RMI Exception
      */
-    public int registerFilestore(final Filestore fstore, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException;
+    public Filestore registerFilestore(final Filestore fstore, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException;
 
     /**
      * Change filestore.
