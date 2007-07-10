@@ -22,7 +22,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
  * @author d7,cutmasta
  * 
  */
-public class RemoveReason extends UtilAbstraction {
+public class DeleteReason extends UtilAbstraction {
 
     private final static char OPT_NAME_REASON_ID_SHORT = 'r';
 
@@ -30,7 +30,7 @@ public class RemoveReason extends UtilAbstraction {
 
     private Option reasonIDOption = null;
 
-    public RemoveReason(final String[] args2) {
+    public DeleteReason(final String[] args2) {
     
         final AdminParser parser = new AdminParser("removereason");
     
@@ -90,7 +90,7 @@ public class RemoveReason extends UtilAbstraction {
     }
 
     public static void main(final String args[]) {
-        new RemoveReason(args);
+        new DeleteReason(args);
     }
 
     private void setOptions(final AdminParser parser) {
