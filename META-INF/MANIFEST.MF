@@ -54,6 +54,7 @@ Export-Package: com.openexchange.admin.console,
  com.sun.mail.iap,
  javax.activation,
  javax.mail,
+ javax.mail.internet,
  org.apache.commons.io,
  org.apache.commons.logging,
  org.apache.commons.logging.impl
