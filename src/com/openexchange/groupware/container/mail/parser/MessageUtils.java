@@ -341,9 +341,7 @@ public class MessageUtils {
 			if (htmlText.charAt(pos - 1) == '<') {
 				quotelevel++;
 				sb.append(htmlText.subSequence(offset, pos - 1));
-				final String color = COLORS != null && COLORS.length > 0 ? (quotelevel >= COLORS.length ? COLORS[COLORS.length - 1]
-						: COLORS[quotelevel])
-						: DEFAULT_COLOR;
+				final String color = getLevelColor(quotelevel);
 				sb.append(String.format(BLOCKQUOTE_START_TEMPLATE, color, color));
 			} else if (htmlText.charAt(pos - 1) == '/') {
 				quotelevel--;
@@ -356,6 +354,18 @@ public class MessageUtils {
 		}
 		sb.append(htmlText.substring(offset));
 		return sb.toString();
+	}
+
+	/**
+	 * Determines the quote color for given <code>quotelevel</code>
+	 * 
+	 * @param quotelevel -
+	 *            tho quote level
+	 * @return the color for given <code>quotelevel</code>
+	 */
+	private static String getLevelColor(final int quotelevel) {
+		return COLORS != null && COLORS.length > 0 ? (quotelevel >= COLORS.length ? COLORS[COLORS.length - 1]
+				: COLORS[quotelevel]) : DEFAULT_COLOR;
 	}
 
 	private static final String BLOCKQUOTE_END = "</blockquote>\n";
@@ -407,9 +417,7 @@ public class MessageUtils {
 			}
 			if (levelBefore < currentLevel) {
 				for (; levelBefore < currentLevel; levelBefore++) {
-					final String color = COLORS != null && COLORS.length > 0 ? (levelBefore >= COLORS.length ? COLORS[COLORS.length - 1]
-							: COLORS[levelBefore])
-							: DEFAULT_COLOR;
+					final String color = getLevelColor(levelBefore);
 					sb.append(String.format(BLOCKQUOTE_START_TEMPLATE, color, color));
 				}
 			} else if (levelBefore > currentLevel) {

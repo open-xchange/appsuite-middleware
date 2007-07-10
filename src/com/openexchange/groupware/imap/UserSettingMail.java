@@ -343,55 +343,9 @@ public class UserSettingMail implements DeleteListener, Cloneable {
 					closeCon = true;
 				}
 				if (insert) {
-					stmt = writeCon.prepareStatement(SQL_INSERT);
-					stmt.setInt(1, ctx.getContextId());
-					stmt.setInt(2, user);
-					stmt.setInt(3, getBitsValue());
-					// stmt.setString(4, signature);
-					stmt.setString(4, sendAddr);
-					stmt.setString(5, replyToAddr);
-					stmt.setInt(6, msgFormat);
-					String s = getDisplayMsgHeadersString();
-					if (s == null) {
-						stmt.setNull(7, Types.VARCHAR);
-					} else {
-						stmt.setString(7, s);
-					}
-					s = null;
-					stmt.setInt(8, autoLinebreak);
-					stmt.setString(9, stdTrashName == null ? STD_TRASH : stdTrashName);
-					stmt.setString(10, stdSentName == null ? STD_SENT : stdSentName);
-					stmt.setString(11, stdDraftsName == null ? STD_DRAFTS : stdDraftsName);
-					stmt.setString(12, stdSpamName == null ? STD_SPAM : stdSpamName);
-					stmt.setLong(13, uploadQuota);
-					stmt.setLong(14, uploadQuotaPerFile);
-					stmt.setString(15, confirmedSpam == null ? STD_CONFIRMED_SPAM : confirmedSpam);
-					stmt.setString(16, confirmedHam == null ? STD_CONFIRMED_HAM : confirmedHam);
+					stmt = getInsertStmt(user, ctx, writeCon);
 				} else {
-					stmt = writeCon.prepareStatement(SQL_UPDATE);
-					stmt.setInt(1, getBitsValue());
-					// stmt.setString(2, signature);
-					stmt.setString(2, sendAddr);
-					stmt.setString(3, replyToAddr);
-					stmt.setInt(4, msgFormat);
-					String s = getDisplayMsgHeadersString();
-					if (s == null) {
-						stmt.setNull(5, Types.VARCHAR);
-					} else {
-						stmt.setString(5, s);
-					}
-					s = null;
-					stmt.setInt(6, autoLinebreak);
-					stmt.setString(7, stdTrashName == null ? STD_TRASH : stdTrashName);
-					stmt.setString(8, stdSentName == null ? STD_SENT : stdSentName);
-					stmt.setString(9, stdDraftsName == null ? STD_DRAFTS : stdDraftsName);
-					stmt.setString(10, stdSpamName == null ? STD_SPAM : stdSpamName);
-					stmt.setLong(11, uploadQuota);
-					stmt.setLong(12, uploadQuotaPerFile);
-					stmt.setString(13, confirmedSpam == null ? STD_CONFIRMED_SPAM : confirmedSpam);
-					stmt.setString(14, confirmedHam == null ? STD_CONFIRMED_HAM : confirmedHam);
-					stmt.setInt(15, ctx.getContextId());
-					stmt.setInt(16, user);
+					stmt = getUpdateStmt(user, ctx, writeCon);
 				}
 				stmt.executeUpdate();
 				saveSignatures(user, ctx, writeCon);
@@ -408,6 +362,66 @@ public class UserSettingMail implements DeleteListener, Cloneable {
 		} finally {
 			accessLock.unlock();
 		}
+	}
+
+	private PreparedStatement getUpdateStmt(final int user, final Context ctx, final Connection writeCon)
+			throws SQLException {
+		PreparedStatement stmt;
+		stmt = writeCon.prepareStatement(SQL_UPDATE);
+		stmt.setInt(1, getBitsValue());
+		// stmt.setString(2, signature);
+		stmt.setString(2, sendAddr == null ? STR_EMPTY : sendAddr);
+		stmt.setString(3, replyToAddr == null ? STR_EMPTY : replyToAddr);
+		stmt.setInt(4, msgFormat);
+		String s = getDisplayMsgHeadersString();
+		if (s == null) {
+			stmt.setNull(5, Types.VARCHAR);
+		} else {
+			stmt.setString(5, s);
+		}
+		s = null;
+		stmt.setInt(6, autoLinebreak);
+		stmt.setString(7, stdTrashName == null ? STD_TRASH : stdTrashName);
+		stmt.setString(8, stdSentName == null ? STD_SENT : stdSentName);
+		stmt.setString(9, stdDraftsName == null ? STD_DRAFTS : stdDraftsName);
+		stmt.setString(10, stdSpamName == null ? STD_SPAM : stdSpamName);
+		stmt.setLong(11, uploadQuota);
+		stmt.setLong(12, uploadQuotaPerFile);
+		stmt.setString(13, confirmedSpam == null ? STD_CONFIRMED_SPAM : confirmedSpam);
+		stmt.setString(14, confirmedHam == null ? STD_CONFIRMED_HAM : confirmedHam);
+		stmt.setInt(15, ctx.getContextId());
+		stmt.setInt(16, user);
+		return stmt;
+	}
+
+	private PreparedStatement getInsertStmt(final int user, final Context ctx, final Connection writeCon)
+			throws SQLException {
+		PreparedStatement stmt;
+		stmt = writeCon.prepareStatement(SQL_INSERT);
+		stmt.setInt(1, ctx.getContextId());
+		stmt.setInt(2, user);
+		stmt.setInt(3, getBitsValue());
+		// stmt.setString(4, signature);
+		stmt.setString(4, sendAddr == null ? STR_EMPTY : sendAddr);
+		stmt.setString(5, replyToAddr == null ? STR_EMPTY : replyToAddr);
+		stmt.setInt(6, msgFormat);
+		String s = getDisplayMsgHeadersString();
+		if (s == null) {
+			stmt.setNull(7, Types.VARCHAR);
+		} else {
+			stmt.setString(7, s);
+		}
+		s = null;
+		stmt.setInt(8, autoLinebreak);
+		stmt.setString(9, stdTrashName == null ? STD_TRASH : stdTrashName);
+		stmt.setString(10, stdSentName == null ? STD_SENT : stdSentName);
+		stmt.setString(11, stdDraftsName == null ? STD_DRAFTS : stdDraftsName);
+		stmt.setString(12, stdSpamName == null ? STD_SPAM : stdSpamName);
+		stmt.setLong(13, uploadQuota);
+		stmt.setLong(14, uploadQuotaPerFile);
+		stmt.setString(15, confirmedSpam == null ? STD_CONFIRMED_SPAM : confirmedSpam);
+		stmt.setString(16, confirmedHam == null ? STD_CONFIRMED_HAM : confirmedHam);
+		return stmt;
 	}
 
 	public final void deleteUserSettingMail(final int user, final Context ctx) throws OXException {
@@ -485,24 +499,7 @@ public class UserSettingMail implements DeleteListener, Cloneable {
 					Connection writeCon = null;
 					try {
 						writeCon = DBPool.pickupWriteable(ctx);
-						stmt = writeCon.prepareStatement(SQL_INSERT);
-						stmt.setInt(1, ctx.getContextId());
-						stmt.setInt(2, user);
-						stmt.setInt(3, 0);
-						// stmt.setString(4, signature);
-						stmt.setString(4, sendAddr == null ? STR_EMPTY : sendAddr);
-						stmt.setString(5, replyToAddr == null ? STR_EMPTY : replyToAddr);
-						stmt.setInt(6, msgFormat);
-						stmt.setString(7, getDisplayMsgHeadersString());
-						stmt.setInt(8, autoLinebreak);
-						stmt.setString(9, stdTrashName == null ? STD_TRASH : stdTrashName);
-						stmt.setString(10, stdSentName == null ? STD_SENT : stdSentName);
-						stmt.setString(11, stdDraftsName == null ? STD_DRAFTS : stdDraftsName);
-						stmt.setString(12, stdSpamName == null ? STD_SPAM : stdSpamName);
-						stmt.setLong(13, uploadQuota);
-						stmt.setLong(14, uploadQuotaPerFile);
-						stmt.setString(15, confirmedSpam == null ? STD_CONFIRMED_SPAM : confirmedSpam);
-						stmt.setString(16, confirmedHam == null ? STD_CONFIRMED_HAM : confirmedHam);
+						stmt = getInsertStmt(user, ctx, writeCon);
 						stmt.executeUpdate();
 						return;
 					} finally {

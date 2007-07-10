@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.groupware.imap;
 
 import java.util.ArrayList;
@@ -58,9 +56,9 @@ import java.util.List;
  * ThreadParser
  * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-
-public class ThreadParser {
+public final class ThreadParser {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(ThreadParser.class);
@@ -140,27 +138,6 @@ public class ThreadParser {
 			if (LOG.isDebugEnabled()) {
 				LOG.debug(new StringBuilder("List: ").append(recthreads).toString());
 			}
-
-			/*
-			 * TreeNode emptyParent = null; List childThreads = new ArrayList();
-			 * if (threadList.charAt(1) == '(') { if (debug)
-			 * System.out.println("Found thread with no parent."); emptyParent =
-			 * new TreeNode(null); } // Parse list of threads. int pos = 0; do {
-			 * if (debug) System.out.println("Position: "+pos); int
-			 * closingBracket = findAccordingBracket(threadList.substring(pos));
-			 * System.out.println("Closing bracket: "+(pos+closingBracket)); if
-			 * (debug) System.out.println("Threadlist:
-			 * "+threadList.substring(pos+1, pos+closingBracket));
-			 * parse(threadList.substring(pos+1, pos+closingBracket),
-			 * childThreads); pos += closingBracket+1; } while (pos <
-			 * threadList.length()); if (debug) System.out.println("List:
-			 * "+childThreads); //Did we found an empty parent? if (emptyParent ==
-			 * null) { if (debug) System.out.println("No empty parent.");
-			 * recthreads.addAll(childThreads); } else { //No parent message! if
-			 * (debug) System.out.println("Parsing childs of thread with no
-			 * parent."); recthreads.add(emptyParent);
-			 * emptyParent.addChilds(childThreads); }
-			 */
 		} else {
 			throw new Exception("Found not expected character: " + threadList.charAt(0));
 		}
@@ -185,11 +162,11 @@ public class ThreadParser {
 		if (pos == 0) {
 			return -1;
 		}
+		final int id = Integer.parseInt(threadList.substring(0, pos));
 		if (LOG.isDebugEnabled()) {
-			LOG.debug(new StringBuilder("Parsed number: ").append(Integer.parseInt(threadList.substring(0, pos)))
-					.toString());
+			LOG.debug(new StringBuilder("Parsed number: ").append(id).toString());
 		}
-		return Integer.parseInt(threadList.substring(0, pos));
+		return id;
 	}
 
 	/**
@@ -220,7 +197,7 @@ public class ThreadParser {
 		}
 		return pos;
 	}
-	
+
 	/**
 	 * 
 	 */

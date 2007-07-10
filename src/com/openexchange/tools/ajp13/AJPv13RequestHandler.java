@@ -300,35 +300,40 @@ public final class AJPv13RequestHandler {
 			}
 			ajpRequest.processRequest(this);
 			if (prefixCode == FORWARD_REQUEST_PREFIX_CODE) {
-				if (contentLength == NOT_SET) {
-					/*
-					 * This condition is reached when no content-length
-					 * header was present in forward request package
-					 * (transfer-encoding: chunked)
-					 */
-					servletRequestObj.getOXInputStream().setData(new byte[0]);
-				} else if (contentLength == 0) {
-					/*
-					 * This condition is reached when content-length
-					 * header's value is set to '0'
-					 */
-					servletRequestObj.getOXInputStream().setData(null);
-				} else {
-					/*
-					 * Forward request is immediately followed by a data package
-					 */
-					ajpCon.increasePackageNumber();
-					/*
-					 * Processed package is an AJP forward request which
-					 * indicates presence of a following request body package.
-					 */
-					dataLength = readInitialBytes(false);
-					ajpRequest = new AJPv13RequestBody(getPayloadData(dataLength, ajpCon.getInputStream(), true));
-					ajpRequest.processRequest(this);
-				}
+				handleContentLength();
 			}
 		} catch (final IOException e) {
 			throw new AJPv13Exception(AJPCode.IO_ERROR, e, e.getMessage());
+		}
+	}
+
+	private void handleContentLength() throws IOException, AJPv13Exception {
+		int dataLength;
+		if (contentLength == NOT_SET) {
+			/*
+			 * This condition is reached when no content-length
+			 * header was present in forward request package
+			 * (transfer-encoding: chunked)
+			 */
+			servletRequestObj.getOXInputStream().setData(new byte[0]);
+		} else if (contentLength == 0) {
+			/*
+			 * This condition is reached when content-length
+			 * header's value is set to '0'
+			 */
+			servletRequestObj.getOXInputStream().setData(null);
+		} else {
+			/*
+			 * Forward request is immediately followed by a data package
+			 */
+			ajpCon.increasePackageNumber();
+			/*
+			 * Processed package is an AJP forward request which
+			 * indicates presence of a following request body package.
+			 */
+			dataLength = readInitialBytes(false);
+			ajpRequest = new AJPv13RequestBody(getPayloadData(dataLength, ajpCon.getInputStream(), true));
+			ajpRequest.processRequest(this);
 		}
 	}
 

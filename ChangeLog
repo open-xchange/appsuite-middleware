@@ -8,6 +8,7 @@
    bug
  - Additional bit in UserSettingMail to set the displayed content on message
    compose
+ - Fastened parsing of query string inside AJP's forward request
 
 * 2007-07-09 - tobias.prinz@open-xchange.com
 

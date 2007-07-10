@@ -272,22 +272,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 				servletRequest.setMethod((String) servletRequest.getAttribute(ATTR_STORED_METHOD));
 			}
 			if (servletRequest.containsAttribute(ATTR_QUERY_STRING)) {
-				final String queryStr = (String) servletRequest.getAttribute(ATTR_QUERY_STRING);
-				servletRequest.setQueryString(queryStr);
-				final String[] paramsNVPs = queryStr.split("&");
-				for (int i = 0; i < paramsNVPs.length; i++) {
-					paramsNVPs[i] = paramsNVPs[i].trim();
-				}
-				for (int i = 0; i < paramsNVPs.length; i++) {
-					if (paramsNVPs[i].indexOf('=') > -1) {
-						final String[] paramNVP = new String[] {
-								paramsNVPs[i].substring(0, paramsNVPs[i].indexOf('=')),
-								paramsNVPs[i].substring(paramsNVPs[i].indexOf('=') + 1) };
-						servletRequest.setParameter(paramNVP[0], decodeQueryStringValue(servletRequest, paramNVP[1]));
-					} else {
-						servletRequest.setParameter(paramsNVPs[i], "");
-					}
-				}
+				parseQueryString(servletRequest, (String) servletRequest.getAttribute(ATTR_QUERY_STRING));
 			}
 		}
 		/*
@@ -324,6 +309,24 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 		 */
 		servletRequest.setServletPath(new StringBuilder().append('/').append(ajpRequestHandler.getServletPath())
 				.toString());
+	}
+
+	private static void parseQueryString(final HttpServletRequestWrapper servletRequest, final String queryStr)
+			throws UnsupportedEncodingException {
+		servletRequest.setQueryString(queryStr);
+		final String[] paramsNVPs = queryStr.split("&");
+		for (int i = 0; i < paramsNVPs.length; i++) {
+			paramsNVPs[i] = paramsNVPs[i].trim();
+		}
+		for (int i = 0; i < paramsNVPs.length; i++) {
+			final int pos = paramsNVPs[i].indexOf('=');
+			if (pos > -1) {
+				servletRequest.setParameter(paramsNVPs[i].substring(0, pos), decodeQueryStringValue(servletRequest
+						.getCharacterEncoding(), paramsNVPs[i].substring(pos + 1)));
+			} else {
+				servletRequest.setParameter(paramsNVPs[i], "");
+			}
+		}
 	}
 
 	private void parseRequestHeaders(final HttpServletRequestWrapper servletRequest, final int numHeaders)
@@ -536,9 +539,9 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 		return (nextByte() > 0);
 	}
 
-	private static String decodeQueryStringValue(final HttpServletRequestWrapper servletRequest,
-			final String queryStringValue) throws UnsupportedEncodingException {
-		return URLDecoder.decode(queryStringValue, servletRequest.getCharacterEncoding() == null ? ServerConfig
-				.getProperty(Property.DefaultEncoding) : servletRequest.getCharacterEncoding());
+	private static String decodeQueryStringValue(final String charEnc, final String queryStringValue)
+			throws UnsupportedEncodingException {
+		return URLDecoder.decode(queryStringValue, charEnc == null ? ServerConfig.getProperty(Property.DefaultEncoding)
+				: charEnc);
 	}
 }
