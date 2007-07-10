@@ -105,13 +105,7 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
         }
     }
 
-    private void checkContext(final Context ctx) throws InvalidDataException {
-        if (null == ctx.getIdAsInt()) {
-            throw new InvalidDataException("Context invalid");
-        }
-    }
-    
-   public int create(final Context ctx, final Resource res, final Credentials auth)
+    public int create(final Context ctx, final Resource res, final Credentials auth)
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {        
        
        try {
@@ -201,7 +195,7 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
                                    }
                                }
                                try {
-                                   oxRes.delete(ctx, retval);
+                                   oxRes.delete(ctx, res);
                                } catch (final StorageException e1) {
                                    log.error("Error doing rollback for creating resource in database", e1);
                                }
@@ -370,7 +364,7 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
             }
         }
 
-        oxRes.delete(ctx, resource_id);
+        oxRes.delete(ctx, res);
         
     }
     

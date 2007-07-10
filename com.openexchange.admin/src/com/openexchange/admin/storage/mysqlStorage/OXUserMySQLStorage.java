@@ -1652,6 +1652,118 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     }
 
     @Override
+    public void delete(final Context ctx, final User[] users, final Connection write_ox_con) throws StorageException {
+        PreparedStatement stmt = null;
+        try {
+            // delete all users
+            for (final User user : users) {
+                final int user_id = user.getId();
+                if (log.isDebugEnabled()) {
+                    log.debug("Start delete user " + user_id + " in context "+ ctx.getIdAsInt());
+                    log.debug("Delete user " + user_id + "(" + ctx.getIdAsInt()+ ") via OX API...");
+                }
+                final DeleteEvent delev = new DeleteEvent(this, user_id,
+                        DeleteEvent.TYPE_USER, ctx.getIdAsInt());
+                AdminCache.delreg.fireDeleteEvent(delev, write_ox_con,
+                        write_ox_con);
+                if (log.isDebugEnabled()) {
+                    log.debug("Delete user " + user_id + "(" + ctx.getIdAsInt()+ ") from login2user...");
+                }
+                stmt = write_ox_con
+                .prepareStatement("DELETE FROM login2user WHERE cid = ? AND id = ?");
+                stmt.setInt(1, ctx.getIdAsInt());
+                stmt.setInt(2, user_id);
+                stmt.executeUpdate();
+                stmt.close();
+                if (log.isDebugEnabled()) {
+                    log.debug("Delete user " + user_id + "(" + ctx.getIdAsInt()+ ") from groups member...");
+                }
+                stmt = write_ox_con
+                .prepareStatement("DELETE FROM groups_member WHERE cid = ? AND member = ?");
+                stmt.setInt(1, ctx.getIdAsInt());
+                stmt.setInt(2, user_id);
+                stmt.executeUpdate();
+                stmt.close();
+                if (log.isDebugEnabled()) {
+                    log.debug("Delete user " + user_id + "(" + ctx.getIdAsInt()+ ") from user attribute ...");
+                }
+                stmt = write_ox_con
+                .prepareStatement("DELETE FROM user_attribute WHERE cid = ? AND id = ?");
+                stmt.setInt(1, ctx.getIdAsInt());
+                stmt.setInt(2, user_id);
+                stmt.executeUpdate();
+                stmt.close();
+                if (log.isDebugEnabled()) {
+                    log.debug("Delete user " + user_id + "(" + ctx.getIdAsInt() + ") from user mail setting...");
+                }
+                stmt = write_ox_con
+                .prepareStatement("DELETE FROM user_setting_mail WHERE cid = ? AND user = ?");
+                stmt.setInt(1, ctx.getIdAsInt());
+                stmt.setInt(2, user_id);
+                stmt.executeUpdate();
+                stmt.close();
+                
+                // delete from user_setting_admin if user is mailadmin
+                final OXToolStorageInterface tools = OXToolStorageInterface
+                .getInstance();
+                if (user_id == tools.getAdminForContext(ctx, write_ox_con)) {
+                    stmt = write_ox_con
+                    .prepareStatement("DELETE FROM user_setting_admin WHERE cid = ? AND user = ?");
+                    stmt.setInt(1, ctx.getIdAsInt());
+                    stmt.setInt(2, user_id);
+                    stmt.executeUpdate();
+                    stmt.close();
+                }
+                
+                // when table ready, enable this
+                createRecoveryData(ctx, user_id, write_ox_con);
+                if (log.isDebugEnabled()) {
+                    log.debug("Delete user " + user_id + "(" + ctx.getIdAsInt() + ") from user ...");
+                }
+                stmt = write_ox_con
+                .prepareStatement("DELETE FROM user WHERE cid = ? AND id = ?");
+                stmt.setInt(1, ctx.getIdAsInt());
+                stmt.setInt(2, user_id);
+                stmt.executeUpdate();
+                stmt.close();
+                if (log.isDebugEnabled()) {
+                    log.debug("Delete user " + user_id + "(" + ctx.getIdAsInt() + ") from contacts ...");
+                }
+                stmt = write_ox_con
+                .prepareStatement("DELETE FROM prg_contacts WHERE cid = ? AND userid = ?");
+                stmt.setInt(1, ctx.getIdAsInt());
+                stmt.setInt(2, user_id);
+                stmt.executeUpdate();
+                stmt.close();
+                
+            }
+        } catch (final DBPoolingException dbex) {
+            log.error("DBPooling Error", dbex);
+            throw new StorageException(dbex);
+        } catch (final LdapException ldex) {
+            log.error("LDAP Error", ldex);
+            throw new StorageException(ldex);
+        } catch (final DeleteFailedException dex) {
+            log.error("Delete Error", dex);
+            throw new StorageException(dex);
+        } catch (final ContextException cte) {
+            log.error("Context Error", cte);
+            throw new StorageException(cte);
+        } catch (final SQLException sqle) {
+            log.error("SQL Error", sqle);
+            throw new StorageException(sqle);
+        } finally {
+            try {
+                if (stmt != null) {
+                    stmt.close();
+                }
+            } catch (final SQLException e) {
+                log.error("SQL Error closing statement on ox write connection!", e);
+            }
+        }
+    }
+
+    @Override
     public void delete(final Context ctx, final int[] user_ids)
             throws StorageException {
         Connection write_ox_con = null;
@@ -1698,6 +1810,58 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
         }
 
+    }
+
+    @Override
+    public void delete(final Context ctx, final User[] users) throws StorageException {
+        Connection write_ox_con = null;
+        
+        try {
+            write_ox_con = cache.getWRITEConnectionForContext(ctx.getIdAsInt());
+            write_ox_con.setAutoCommit(false);
+            
+            delete(ctx, users, write_ox_con);
+            
+            write_ox_con.commit();
+        } catch (final StorageException st) {
+            log.error("Storage Error", st);
+            try {
+                write_ox_con.rollback();
+            } catch (final SQLException ex) {
+                log.error("Error rollback ox db write connection", ex);
+            }
+            throw st;
+        } catch (final PoolException pep) {
+            log.error("Pool Error", pep);
+            try {
+                write_ox_con.rollback();
+            } catch (final SQLException ex) {
+                log.error("Error rollback ox db write connection", ex);
+            }
+            throw new StorageException(pep);
+        } catch (final SQLException sql) {
+            log.error("SQL Error", sql);
+            try {
+                write_ox_con.rollback();
+            } catch (final SQLException ex) {
+                log.error("Error rollback ox db write connection", ex);
+            }
+            throw new StorageException(sql);
+        } finally {
+            try {
+                if (write_ox_con != null) {
+                    cache.pushOXDBWrite(ctx.getIdAsInt(), write_ox_con);
+                }
+            } catch (final PoolException aexp) {
+                log.error("Pool Error pushing ox write connection to pool!", aexp);
+            }
+        }
+        
+    }
+
+    @Override
+    public void delete(final Context ctx, final User user) throws StorageException {
+        delete(ctx, new User[] {user});
     }
 
     @Override

@@ -231,7 +231,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
                                         }
                                     }
                                     try {
-                                        oxu.delete(ctx, new int[] { usr.getId() });
+                                        oxu.delete(ctx, usr);
                                     } catch (final StorageException e1) {
                                         log.error("Error doing rollback for creating user in database", e1);
                                     }
@@ -471,8 +471,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
             }
         }
         
-        // FIXME: Change function from int to user object
-        oxu.delete(ctx, user_ids);
+        oxu.delete(ctx, users);
 
         for(int id : user_ids) {
             try {
