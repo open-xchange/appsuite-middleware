@@ -89,8 +89,7 @@ public interface OXResourceInterface extends Remote {
      * @throws RemoteException General RMI Exception
      * @throws DatabaseUpdateException 
      */
-    public int create(Context ctx, Resource res, Credentials auth)
-    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException;
+    public int create(Context ctx, Resource res, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException;
 
     /**
      * Change resource within the given context.
@@ -106,8 +105,7 @@ public interface OXResourceInterface extends Remote {
      * @throws DatabaseUpdateException 
      * @throws NoSuchResourceException 
      */
-    public void change(Context ctx, Resource res, Credentials auth)
-    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchResourceException;
+    public void change(Context ctx, Resource res, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchResourceException;
 
     /**
      * Delete resource from given context.
@@ -124,8 +122,7 @@ public interface OXResourceInterface extends Remote {
      * @throws DatabaseUpdateException 
      * @throws NoSuchResourceException 
      */
-    public void delete(Context ctx, final Resource res, Credentials auth)
-    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchResourceException;
+    public void delete(Context ctx, final Resource res, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchResourceException;
 
     /**
      * Get Resource from given context.
@@ -144,8 +141,7 @@ public interface OXResourceInterface extends Remote {
      * @throws NoSuchResourceException
      * @deprecated Will be removed with next service pack 
      */
-    public Resource get(Context ctx, Resource res, Credentials auth) 
-    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchResourceException;
+    public Resource get(Context ctx, Resource res, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchResourceException;
 
     /**
      * Get Resource from given context.
@@ -163,8 +159,7 @@ public interface OXResourceInterface extends Remote {
      * @throws DatabaseUpdateException 
      * @throws NoSuchResourceException 
      */
-    public Resource getData(Context ctx, Resource res, Credentials auth)
-    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchResourceException;
+    public Resource getData(Context ctx, Resource res, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchResourceException;
 
     /**
      * Fetch specified resources from server. Can be used to fetch resource data including extensions.
@@ -181,8 +176,7 @@ public interface OXResourceInterface extends Remote {
      * @throws NoSuchResourceException
      * @throws DatabaseUpdateException
      */
-    public Resource[] getData(Context ctx, Resource[] resources, Credentials auth)
-    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchResourceException, DatabaseUpdateException;
+    public Resource[] getData(Context ctx, Resource[] resources, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchResourceException, DatabaseUpdateException;
 
     /**
      * List resources matching <code>pattern</code> in given context.
@@ -198,8 +192,5 @@ public interface OXResourceInterface extends Remote {
      * @throws RemoteException General RMI Exception
      * @throws DatabaseUpdateException 
      */
-    public Resource[] list(Context ctx, String pattern, Credentials auth)
-    throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException;
-
-
+    public Resource[] list(Context ctx, String pattern, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException;
 }
