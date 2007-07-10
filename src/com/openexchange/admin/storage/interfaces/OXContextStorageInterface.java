@@ -93,15 +93,6 @@ public abstract class OXContextStorageInterface {
     }
 
     /**
-     * Changes a context
-     * 
-     * @param ctx
-     * @param db_handle
-     * @throws StorageException
-     */
-    public abstract void changeDatabase(final Context ctx, final Database db_handle) throws StorageException;
-
-    /**
      * Move data of context to target database
      * 
      * @param ctx
@@ -132,14 +123,14 @@ public abstract class OXContextStorageInterface {
      * @return a context object
      * @throws StorageException
      */
-    public abstract Context getSetup(final Context ctx) throws StorageException;
+    public abstract Context getData(final Context ctx) throws StorageException;
 
     
     /**
      * @param ctx
      * @throws StorageException
      */
-    public abstract void changeSetup(final Context ctx) throws StorageException;
+    public abstract void change(final Context ctx) throws StorageException;
     
     /**
      * @param ctx
@@ -200,10 +191,5 @@ public abstract class OXContextStorageInterface {
      */
     public abstract Context[] searchContextByFilestore(final Filestore filestore) throws StorageException;
 
-    /**
-     * @param ctx
-     * @param quota_max
-     * @throws StorageException
-     */
-    public abstract void changeQuota(final Context ctx, final long quota_max) throws StorageException;
+    
 }
