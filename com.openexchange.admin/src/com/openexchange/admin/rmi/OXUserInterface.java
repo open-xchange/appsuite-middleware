@@ -292,6 +292,8 @@ public interface OXUserInterface extends Remote {
      * 
      * @param ctx
      *            Context object.
+     * @param search_pattern
+     *            A pattern to search for
      * @param auth
      *            Credentials for authenticating against server.
      * @return User[] with currently ONYL id set in each User.
@@ -305,4 +307,23 @@ public interface OXUserInterface extends Remote {
      */
     public User[] list(final Context ctx, final String search_pattern, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException;
 
+    /**
+     * Retrieve all users for a given context. The same as calling list with a search_pattern of "*"
+     * 
+     * @param ctx
+     *            Context object.
+     * @param auth
+     *            Credentials for authenticating against server.
+     * @return User[] with currently ONYL id set in each User.
+     * 
+     * @throws RemoteException
+     * @throws StorageException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws InvalidDataException
+     * @throws DatabaseUpdateException
+     */
+    public User[] listAll(final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException;
+
+    
 }
