@@ -86,33 +86,94 @@ public class UserSettingMail implements DeleteListener, Cloneable {
 
 	private static final String STR_EMPTY = "";
 
+	/*
+	 * Integer constants for on/off options
+	 */
+	/**
+	 * If this bit is set, html content is displayed on message display
+	 */
 	public static final int INT_DISPLAY_HTML_INLINE_CONTENT = 1;
 
+	/**
+	 * If this bit is set, the quote levels of a plain text message are
+	 * colorized
+	 */
 	public static final int INT_USE_COLOR_QUOTE = 2;
 
+	/**
+	 * If this bit is set, emoticons like <tt>:-)</tt> are replaced with a
+	 * little graphic
+	 */
 	public static final int INT_SHOW_GRAPHIC_EMOTICONS = 4;
 
+	/**
+	 * If this bit is set, no copy of a deleted message is created in default
+	 * "trash" folder. The message is hard deleted and no more present at all.
+	 */
 	public static final int INT_HARD_DELETE_MSGS = 8;
 
+	/**
+	 * If this bit is set, a forwarded message is appended as an
+	 * <tt>message/rfc822</tt> attachment instead of an inline forward
+	 */
 	public static final int INT_FORWARD_AS_ATTACHMENT = 16;
 
+	/**
+	 * If this bit is set, a VCard created from user's contact data is appended
+	 * to a sent message
+	 */
 	public static final int INT_APPEND_VCARD = 32;
 
+	/**
+	 * If this bit is set, the user is notified if a message contains a read
+	 * acknowledgement
+	 */
 	public static final int INT_NOTIFY_ON_READ_ACK = 64;
 
+	/**
+	 * This constant is currently not in use
+	 */
 	public static final int INT_MSG_PREVIEW = 128;
 
+	/**
+	 * If this bit is set, the user will receive notification messages on
+	 * appointment events (creation, deletion & change)
+	 */
 	public static final int INT_NOTIFY_APPOINTMENTS = 256;
 
+	/**
+	 * If this bit is set, the user will receive notification messages on task
+	 * events (creation, deletion & change)
+	 */
 	public static final int INT_NOTIFY_TASKS = 512;
 
+	/**
+	 * If this bit is set, no message body text is extracted (and dispalyed)
+	 * from the message to which the user replies
+	 */
 	public static final int INT_IGNORE_ORIGINAL_TEXT_ON_REPLY = 1024;
 
-	public static final int INT_NO_COPY_INTO_SENT_FOLDER = 2048; // All bits:
-																	// 4095
+	/**
+	 * If this bit is set, no copy of a sent mail is created in default "sent"
+	 * folder
+	 */
+	public static final int INT_NO_COPY_INTO_SENT_FOLDER = 2048;
 
+	/**
+	 * If this bit is set, the spam feature is enabled
+	 */
 	public static final int INT_SPAM_ENABLED = 4096;
 
+	/**
+	 * If this bit is set, only plain text is allowed when composing
+	 * reply/forward messages. The user will see the html2text converted content
+	 * when replying to/inline-forwarding a html message.
+	 */
+	public static final int INT_TEXT_ONLY_COMPOSE = 8192;
+
+	/*
+	 * Other constants
+	 */
 	public static final int MSG_FORMAT_TEXT_ONLY = 1;
 
 	public static final int MSG_FORMAT_HTML_ONLY = 2;
@@ -160,6 +221,8 @@ public class UserSettingMail implements DeleteListener, Cloneable {
 	private boolean noCopyIntoStandardSentFolder;
 
 	private boolean spamEnabled;
+	
+	private boolean textOnlyCompose;
 
 	private Signature[] signatures;
 
@@ -582,6 +645,7 @@ public class UserSettingMail implements DeleteListener, Cloneable {
 		ignoreOriginalMailTextOnReply = ((onOffOptions & INT_IGNORE_ORIGINAL_TEXT_ON_REPLY) == INT_IGNORE_ORIGINAL_TEXT_ON_REPLY);
 		noCopyIntoStandardSentFolder = ((onOffOptions & INT_NO_COPY_INTO_SENT_FOLDER) == INT_NO_COPY_INTO_SENT_FOLDER);
 		spamEnabled = ((onOffOptions & INT_SPAM_ENABLED) == INT_SPAM_ENABLED);
+		textOnlyCompose = ((onOffOptions & INT_TEXT_ONLY_COMPOSE) == INT_TEXT_ONLY_COMPOSE);
 	}
 
 	private final int getBitsValue() {
@@ -599,6 +663,7 @@ public class UserSettingMail implements DeleteListener, Cloneable {
 		retval = ignoreOriginalMailTextOnReply ? (retval | INT_IGNORE_ORIGINAL_TEXT_ON_REPLY) : retval;
 		retval = noCopyIntoStandardSentFolder ? (retval | INT_NO_COPY_INTO_SENT_FOLDER) : retval;
 		retval = spamEnabled ? (retval | INT_SPAM_ENABLED) : retval;
+		retval = textOnlyCompose ? (retval | INT_TEXT_ONLY_COMPOSE) : retval;
 		return retval;
 	}
 
@@ -877,6 +942,16 @@ public class UserSettingMail implements DeleteListener, Cloneable {
 
 	public final void setSpamEnabled(final boolean spamEnabled) {
 		this.spamEnabled = spamEnabled;
+		modifiedDuringSession = true;
+	}
+
+	public boolean isTextOnlyCompose() {
+		return textOnlyCompose;
+	}
+
+	public void setTextOnlyCompose(final boolean textOnlyCompose) {
+		this.textOnlyCompose = textOnlyCompose;
+		modifiedDuringSession = true;
 	}
 
 	public final long getUploadQuota() {
