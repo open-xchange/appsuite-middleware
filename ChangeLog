@@ -1,3 +1,7 @@
+* 2007-07-10 - marcus.klein@open-xchange.com
+
+ - Bugfix #8351: Assigned 512MB maximum memory to groupware server.
+
 * 2007-07-09 - thorben.betten@open-xchange.com
 
  - Bugfix #7950: Proper handling of quotes in email address headers

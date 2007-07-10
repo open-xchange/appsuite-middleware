@@ -2,6 +2,6 @@
 SYSTEMPROPERTIES=@systemproperties@
 LOGGINGPROPERTIES=@loggingproperties@
 
-JAVA_XTRAOPTS="-Xms50M -Xmx50M"
+JAVA_XTRAOPTS="-Xms50M -Xmx512M"
 
 NRFILES="8192"
