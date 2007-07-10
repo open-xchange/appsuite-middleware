@@ -44,7 +44,7 @@
     </filterset>
 
     <!-- JAR names for classpath -->
-    <property name="jsdkjar" value="jsdk.jar" />
+    <property name="servletjar" value="servlet-api-2.4.jar" />
     <property name="jdbcjar" value="mysql-connector-java-3.1.13-bin.jar" />
     <property name="mailjar" value="mail.jar" />
     <property name="activationjar" value="activation.jar" />
@@ -63,7 +63,7 @@
 
     <!-- Classpath -->
     <path id="project.classpath">
-        <pathelement location="${3rdlib}/${jsdkjar}"/>
+        <pathelement location="${3rdlib}/${servletjar}"/>
         <pathelement location="${3rdlib}/${jdbcjar}"/>
         <pathelement location="${3rdlib}/${mailjar}"/>
         <pathelement location="${3rdlib}/${activationjar}"/>
@@ -496,7 +496,7 @@
             <replacefilter token="@mailjar@" value="${lib.subst.patch}/${mailjar}"/>
             <replacefilter token="@activationjar@" value="${lib.subst.patch}/${activationjar}"/>
             <replacefilter token="@jdomjar@" value="${lib.subst.patch}/${jdomjar}"/>
-            <replacefilter token="@jsdkjar@" value="${lib.subst.patch}/${jsdkjar}"/>
+            <replacefilter token="@servletjar@" value="${lib.subst.patch}/${servletjar}"/>
             <replacefilter token="@jcsjar@" value="${lib.subst.patch}/${jcsjar}"/>
             <replacefilter token="@concurrentjar@" value="${lib.subst.patch}/${concurrentjar}"/>
             <replacefilter token="@loggingjar@" value="${lib.subst.patch}/${loggingjar}"/>
@@ -524,7 +524,7 @@
             <replacefilter token="@mailjar@"    value="${lib.subst.patch}/${mailjar}"/>
             <replacefilter token="@activationjar@" value="${lib.subst.patch}/${activationjar}"/>
             <replacefilter token="@jdomjar@"    value="${lib.subst.patch}/${jdomjar}"/>
-            <replacefilter token="@jsdkjar@"    value="${lib.subst.patch}/${jsdkjar}"/>
+            <replacefilter token="@servletjar@"    value="${lib.subst.patch}/${servletjar}"/>
             <replacefilter token="@jcsjar@"    value="${lib.subst.patch}/${jcsjar}"/>
             <replacefilter token="@concurrentjar@"    value="${lib.subst.patch}/${concurrentjar}"/>
             <replacefilter token="@loggingjar@"    value="${lib.subst.patch}/${loggingjar}"/>
