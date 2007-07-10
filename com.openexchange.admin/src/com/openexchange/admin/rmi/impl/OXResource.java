@@ -47,7 +47,7 @@
  *
  */
 /*
- * $Id: OXResource.java,v 1.33 2007/07/10 13:12:30 dennis Exp $
+ * $Id: OXResource.java,v 1.34 2007/07/10 13:25:12 dennis Exp $
  */
 package com.openexchange.admin.rmi.impl;
 
@@ -447,6 +447,10 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
 
         final OXResourceStorageInterface oxRes = OXResourceStorageInterface.getInstance();
         return oxRes.list(ctx,pattern);
+    }
+    
+    public Resource[] listAll(final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {
+        return list(ctx, "*", auth);
     }
     
     private void validateResourceName(final String resName) throws InvalidDataException {
