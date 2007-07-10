@@ -335,6 +335,7 @@ public class PropertyHandler {
         }
     }
     
+    @SuppressWarnings("unchecked")
     protected void addpropsfromfile(final String file) throws FileNotFoundException, IOException {
         final Properties configprops  = new Properties();
         configprops.load( new FileInputStream(file) );
