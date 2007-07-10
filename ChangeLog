@@ -11,6 +11,7 @@
    compose
  - Fastened parsing of query string inside AJP's forward request
  - New class IMAPServerInfo to read an IMAP server's greeting
+ - Bugfix #7132: Fixed counting for open IMAP connections
 
 * 2007-07-09 - tobias.prinz@open-xchange.com
 

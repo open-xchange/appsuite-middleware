@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.tools.servlet.http;
 
 import java.io.File;
@@ -84,7 +82,7 @@ public class HttpServletManager {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(HttpServletManager.class);
-	
+
 	private static final String SERVLET_MAPPING_FILE = "servletmapping.properties";
 
 	private static final Map<String, FIFOQueue<HttpServlet>> SERVLET_POOL = new HashMap<String, FIFOQueue<HttpServlet>>();
@@ -92,7 +90,7 @@ public class HttpServletManager {
 	private static Map<String, Constructor> servletConstructorMap;
 
 	private static int numberOfWorkingServlets;
-	
+
 	private static final Lock INIT_LOCK = new ReentrantLock();
 
 	private static final ReadWriteLock RW_LOCK = new ReentrantReadWriteLock();
@@ -100,7 +98,7 @@ public class HttpServletManager {
 	private static final Lock READ_LOCK = RW_LOCK.readLock();
 
 	private static final Lock WRITE_LOCK = RW_LOCK.writeLock();
-	
+
 	private HttpServletManager() {
 		super();
 	}
@@ -158,9 +156,10 @@ public class HttpServletManager {
 		}
 		try {
 			final HttpServlet servletInstance = (HttpServlet) servletConstructor.newInstance(new Object[] {});
-			servletInstance.init(AJPv13Server.SERVLET_CONFIGS.getConfig(servletInstance.getClass().getCanonicalName(), servletKey));
+			servletInstance.init(AJPv13Server.SERVLET_CONFIGS.getConfig(servletInstance.getClass().getCanonicalName(),
+					servletKey));
 			return servletInstance;
-		} catch (Throwable t) {
+		} catch (final Throwable t) {
 			LOG.error(t.getMessage(), t);
 		}
 		return null;
@@ -171,8 +170,7 @@ public class HttpServletManager {
 		try {
 			if (SERVLET_POOL.containsKey(id)) {
 				if (servletObj instanceof SingleThreadModel) {
-					final FIFOQueue<HttpServlet> servlets = SERVLET_POOL.get(id);
-					servlets.enqueue(servletObj);
+					SERVLET_POOL.get(id).enqueue(servletObj);
 				}
 			} else {
 				final FIFOQueue<HttpServlet> servlets = new FIFOQueue<HttpServlet>(HttpServlet.class, 1);
@@ -184,7 +182,7 @@ public class HttpServletManager {
 			WRITE_LOCK.unlock();
 		}
 	}
-	
+
 	public static final void destroyServlet(final String id, final HttpServlet servletObj) {
 		WRITE_LOCK.lock();
 		try {
@@ -204,10 +202,6 @@ public class HttpServletManager {
 		}
 	}
 
-//	public static void setServletConstructorMap(final Map<String, Constructor> servletConstructorMap) {
-//		HttpServletManager.servletConstructorMap = servletConstructorMap;
-//	}
-
 	public static Iterator<String> getServletKeysIterator() {
 		return servletConstructorMap.keySet().iterator();
 	}
@@ -224,14 +218,14 @@ public class HttpServletManager {
 			WRITE_LOCK.unlock();
 		}
 	}
-	
+
 	public final static void loadServletMapping() throws AbstractOXException {
 		loadServletMapping(new StringBuilder(SystemConfig.getProperty("CONFIGPATH")).append('/').append(
 				SERVLET_MAPPING_FILE).toString());
 	}
-	
+
 	private final static Class[] CLASS_ARR = new Class[] {};
-	
+
 	public final static void loadServletMapping(final String file) throws AbstractOXException {
 		if (servletConstructorMap == null) {
 			INIT_LOCK.lock();
@@ -279,7 +273,7 @@ public class HttpServletManager {
 							if (LOG.isWarnEnabled()) {
 								LOG.warn("Couldn't find class " + value, e);
 							}
-						} catch (NoSuchMethodException e) {
+						} catch (final NoSuchMethodException e) {
 							if (LOG.isWarnEnabled()) {
 								LOG.warn("No default constructor specified in class " + value, e);
 							}
@@ -296,7 +290,9 @@ public class HttpServletManager {
 			}
 		}
 	}
-
+	
+	private static final Object[] INIT_ARGS = new Object[] {};
+	
 	public static void createServlets() {
 		WRITE_LOCK.lock();
 		try {
@@ -327,14 +323,14 @@ public class HttpServletManager {
 							 * Enqueue more than one instance if it implements
 							 * SingleThreadModel
 							 */
-							final int servlet_pool_size = AJPv13Config.getServletPoolSize();
-							for (int i = 0; i < (servlet_pool_size - 1); i++) {
-								servletInstance = (HttpServlet) servletConstructor.newInstance(new Object[] {});
+							final int remainingSize = AJPv13Config.getServletPoolSize() - 1;
+							for (int i = 0; i < remainingSize; i++) {
+								servletInstance = (HttpServlet) servletConstructor.newInstance(INIT_ARGS);
 								servletInstance.init(conf);
 								servletQueue.enqueue(servletInstance);
 							}
 						}
-					} catch (Throwable t) {
+					} catch (final Throwable t) {
 						LOG.error(t.getMessage(), t);
 					}
 				}

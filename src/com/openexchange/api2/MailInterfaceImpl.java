@@ -3371,8 +3371,7 @@ public class MailInterfaceImpl implements MailInterface {
 							originalMsgFolder.getProtocol().uidexpunge(
 									IMAPUtils.toUIDSet(new long[] { mailId.getMsgUID() }));
 						} catch (final ProtocolException e) {
-							originalMsgFolder.close(true);
-							mailInterfaceMonitor.changeNumActive(false);
+							LOG.error(e.getLocalizedMessage(), e);
 						} finally {
 							if (originalMsgFolderOpened) {
 								originalMsgFolder.close(false);
@@ -5082,7 +5081,7 @@ public class MailInterfaceImpl implements MailInterface {
 				newFolder.addACL(acls[i]);
 			}
 			newFolder.close(false);
-			MailInterfaceImpl.mailInterfaceMonitor.changeNumActive(false);
+			mailInterfaceMonitor.changeNumActive(false);
 		} catch (final ReadOnlyFolderException e) {
 			throw new OXMailException(MailCode.NO_WRITE_ACCESS, getUserName(sessionObj), newFolder.getFullName());
 		}

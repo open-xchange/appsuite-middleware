@@ -128,6 +128,9 @@ public class MailInterfaceMonitor implements MailInterfaceMonitorMBean {
 	
 	public void changeNumActive(final boolean increment) {
 		numActive += increment ? 1 : -1;
+		if (numActive < 0) {
+			numActive = 0;
+		}
 	}
 
 	/*
