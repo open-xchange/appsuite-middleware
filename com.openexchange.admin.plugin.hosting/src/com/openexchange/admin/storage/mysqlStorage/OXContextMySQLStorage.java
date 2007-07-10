@@ -2266,20 +2266,12 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     public void change(Context ctx) throws StorageException {
         
         Connection config_db_write = null;
-        Connection ox_db_write = null;
-        try {
+        
+        try{
             
             config_db_write = cache.getWRITEConnectionForCONFIGDB();
             config_db_write.setAutoCommit(false);
-            
-            ox_db_write = cache.getWRITEConnectionForContext(ctx.getIdAsInt());            
-            ox_db_write.setAutoCommit(false);
-            
-            
-            
-//          Change values from the context as defined in the admin spec for this call!
-            // it should be possible that we can change the settings we got with getData method
-            
+                        
             // Change login mappings in configdb          
             changeLoginMappingsForContext(ctx,config_db_write);
             
@@ -2293,7 +2285,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             changeStorageDataImpl(ctx, config_db_write);
             
             // commit changes to db
-            ox_db_write.commit();
             config_db_write.commit();
         } catch (final PoolException e) {
             log.error("Pool Error", e);
@@ -2308,15 +2299,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 }
             }
             
-            if(ox_db_write!=null){
-                try {
-                    ox_db_write.rollback();
-                } catch (SQLException e1) {
-                    log.error("Error in rollback of oxdb connection",e1);
-                    throw new StorageException(e1);                   
-                }
-            } 
-            
             log.error("SQL Error", e);
             throw new StorageException(e);
         } finally {
@@ -2328,16 +2310,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             } catch (final PoolException exp) {
                 log.error("Error pushing configdb connection to pool!", exp);
             }
-                        
-            try {
-                if (ox_db_write != null) {
-                    cache.pushOXDBWrite(ctx.getIdAsInt().intValue(), ox_db_write);
-                }
-            } catch (final PoolException exp) {
-                log.error("Pool Error pushing ox write connection to pool!",exp);
-            }
-            
-            
         }
         
     }

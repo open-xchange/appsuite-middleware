@@ -202,17 +202,18 @@ public interface OXContextInterface extends Remote {
     /**
      * Change specified context!
      * 
-     * This method currently ONLY modifies following data:
+     * This method currently modifies following data:
      * 
      * Login mappings - You can then login via usernam@loginmapping instead of username@contextID          
      *      
      * Context name in configdb - This is for better organization of contexts in your whole system.
      *  
      * Change filestore quota size - Change how much quota the context is allowed to use!
-     * This will result that the changeQuota method is deprecated!
-     *       
-     * @param ctx Change context data.
-     * @param auth Credentials for authenticating against server.
+     * 
+     * Change storage data informations - Change filestore infos for context. Normally NO need to change!
+     * 
+     * @param ctx
+     * @param auth
      * @throws RemoteException
      * @throws InvalidCredentialsException
      * @throws NoSuchContextException
