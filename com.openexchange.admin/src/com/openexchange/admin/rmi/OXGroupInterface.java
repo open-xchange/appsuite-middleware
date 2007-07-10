@@ -205,7 +205,7 @@ public interface OXGroupInterface extends Remote {
      * @throws InvalidDataException
      * @throws DatabaseUpdateException
      */
-    public int getDefaultGroup(final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException;
+    public Group getDefaultGroup(final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException;
 
     /**
      * Get User IDs of the members of this group.
