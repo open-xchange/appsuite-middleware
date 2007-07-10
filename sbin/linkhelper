@@ -10,7 +10,7 @@ enablecontext \
 enableallcontexts \
 movedatabasecontext \
 movefilestorecontext \
-searchcontext \
+listcontext \
 createreason \
 changefilestore \
 listdatabase \

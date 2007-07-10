@@ -18,9 +18,9 @@ import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
-public class Search extends ContextAbtraction {
+public class List extends ContextAbtraction {
 
-    public Search(final String[] args2) {
+    public List(final String[] args2) {
 
         final AdminParser parser = new AdminParser("searchcontexts");
 
@@ -135,7 +135,7 @@ public class Search extends ContextAbtraction {
     }
 
     public static void main(final String args[]) {
-        new Search(args);
+        new List(args);
     }
 
     private void setOptions(final AdminParser parser) {
