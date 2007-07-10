@@ -374,6 +374,10 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
         
     }
     
+    public Resource get(final Context ctx, final Resource res, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchResourceException {
+        return getData(ctx, res, auth);
+    }
+
     public Resource getData(final Context ctx, final Resource res, final Credentials auth)
     throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchResourceException {
         
