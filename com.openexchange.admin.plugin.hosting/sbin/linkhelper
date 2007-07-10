@@ -20,7 +20,7 @@ listserver \
 registerdatabase \
 registerfilestore \
 registerserver \
-removereason \
+deletereason \
 unregisterdatabase \
 unregisterfilestore \
 unregisterserver \
