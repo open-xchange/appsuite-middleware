@@ -297,7 +297,7 @@ public class UserTest extends AbstractTest {
         final User urs = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
         urs.setId(oxu.create(ctx,urs,client_access,cred));
         
-        final User[] srv_response = oxu.list(ctx, null, cred);
+        final User[] srv_response = oxu.list(ctx, "*", cred);
         
         assertTrue("Expected list size > 0 ",srv_response.length>0);
         
@@ -308,6 +308,33 @@ public class UserTest extends AbstractTest {
             }
         }
        
+        assertTrue("Expected to find added user in user list",founduser);
+    }
+
+    @Test
+    public void testListAll() throws Exception {
+        
+        // get context to create an user
+        final Credentials cred = DummyCredentials();
+        final Context ctx = getTestContextObject(cred);
+        
+        // create new user
+        final OXUserInterface oxu = getUserClient();
+        final UserModuleAccess client_access = new UserModuleAccess();
+        final User urs = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
+        urs.setId(oxu.create(ctx,urs,client_access,cred));
+        
+        final User[] srv_response = oxu.listAll(ctx, cred);
+        
+        assertTrue("Expected list size > 0 ",srv_response.length>0);
+        
+        boolean founduser = false;
+        for(final User element: srv_response){
+            if(element.getId().intValue()==urs.getId().intValue()){
+                founduser = true;
+            }
+        }
+        
         assertTrue("Expected to find added user in user list",founduser);
     }
 

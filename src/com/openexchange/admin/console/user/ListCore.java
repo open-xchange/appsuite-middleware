@@ -38,7 +38,7 @@ public abstract class ListCore extends UserAbstraction {
         setDefaultCommandLineOptions(parser);
         
         setCSVOutputOption(parser);
-
+        this.searchOption = setShortLongOpt(parser, OPT_NAME_SEARCHPATTERN, OPT_NAME_SEARCHPATTERN_LONG, "The search pattern which is used for listing. This applies to name.", true, false);
         setFurtherOptions(parser);
     }
 
@@ -59,7 +59,13 @@ public abstract class ListCore extends UserAbstraction {
             // get rmi ref
             final OXUserInterface oxusr = getUserInterface();
 
-            final User[] allusers = maincall(parser, oxusr, ctx, auth);
+            String pattern = (String) parser.getOptionValue(this.searchOption);
+
+            if (null == pattern) {
+                pattern = "*";
+            }
+
+            final User[] allusers = maincall(parser, oxusr, pattern, ctx, auth);
 
             // map user data to corresponding module access
             final HashMap<Integer, UserModuleAccess> usr2axs = new HashMap<Integer, UserModuleAccess>();
@@ -134,7 +140,7 @@ public abstract class ListCore extends UserAbstraction {
 
     }
 
-    protected abstract User[] maincall(final AdminParser parser, final OXUserInterface oxusr, final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
+    protected abstract User[] maincall(final AdminParser parser, final OXUserInterface oxusr, final String search_pattern, final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
 
     /**
      * This method is used to define how a date value is transferred to string

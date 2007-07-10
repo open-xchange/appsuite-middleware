@@ -1287,15 +1287,19 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     public User[] list(final Context ctx, final String search_pattern) throws StorageException {
         Connection read_ox_con = null;
         PreparedStatement stmt = null;
+        String new_search_pattern = null;
+        if (null != search_pattern) {
+            new_search_pattern = search_pattern.replace('*', '%');
+        }
         final int context_id = ctx.getIdAsInt();
         try {
             final ArrayList<User> retval = new ArrayList<User>();
             read_ox_con = cache.getREADConnectionForContext(context_id);
-            stmt = read_ox_con.prepareStatement("SELECT con.userid,con.field01,con.field02,con.field03,lu.uid FROM prg_contacts con JOIN login2user lu  ON con.userid = lu.id WHERE con.cid = ? AND con.cid = lu.cid AND (lu.uid LIKE '?' OR con.field01 LIKE '?');");
+            stmt = read_ox_con.prepareStatement("SELECT con.userid,con.field01,con.field02,con.field03,lu.uid FROM prg_contacts con JOIN login2user lu  ON con.userid = lu.id WHERE con.cid = ? AND con.cid = lu.cid AND (lu.uid LIKE ? OR con.field01 LIKE ?);");
 
             stmt.setInt(1, context_id);
-            stmt.setString(2, search_pattern);
-            stmt.setString(3, search_pattern);
+            stmt.setString(2, new_search_pattern);
+            stmt.setString(3, new_search_pattern);
             final ResultSet rs3 = stmt.executeQuery();
             while (rs3.next()) {
                 final int user_id = rs3.getInt("userid");
