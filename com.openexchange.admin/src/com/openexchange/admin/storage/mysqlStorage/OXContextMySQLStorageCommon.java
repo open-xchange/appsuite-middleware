@@ -206,8 +206,10 @@ public abstract class OXContextMySQLStorageCommon {
 
             // maximum quota of this context
             if (quota_max != -1) {
-                fs.setQuota_max(quota_max);
-
+                //#### already set in context object
+                //fs.setQuota_max(quota_max);
+                // ######################
+                
                 // set quota max also in context setup object
                 cs.setMaxQuota(quota_max);
             }
