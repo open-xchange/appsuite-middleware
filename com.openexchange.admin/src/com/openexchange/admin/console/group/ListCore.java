@@ -29,7 +29,6 @@ public abstract class ListCore extends GroupAbstraction {
         setCSVOutputOption(parser);
         // create options for this command line tool
         this.searchOption = setShortLongOpt(parser, OPT_NAME_SEARCHPATTERN, OPT_NAME_SEARCHPATTERN_LONG, "The search pattern which is used for listing. This applies to name.", true, false);
-
     }
 
     protected final void commonfunctions(final AdminParser parser, final String[] args) {
