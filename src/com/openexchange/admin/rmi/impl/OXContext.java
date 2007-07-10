@@ -544,6 +544,15 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
             if (!tool.existsContext(ctx)) {
                 throw new NoSuchContextException();
             }
+            
+            // check if he wants to change the filestore id, if yes, make sure filestore with this id exists in the system
+            if(ctx.getFilestore()!=null && ctx.getFilestore().getId()!=null)
+            if(!tool.existsStore(ctx.getFilestore().getId().intValue())){
+                final InvalidDataException inde = new InvalidDataException("No such filestore with id "+ctx.getFilestore().getId());
+                log.error(inde.getMessage(),inde);
+                throw inde;
+            }
+            
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
             oxcox.change(ctx);
         } catch (final StorageException e) {
