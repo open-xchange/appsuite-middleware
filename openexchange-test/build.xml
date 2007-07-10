@@ -14,7 +14,7 @@
 		<pathelement location="${lib}/junit-4.1.jar"/>
 		<pathelement location="${lib}/commons-httpclient-2.0.2.jar"/>
 		<pathelement location="${lib}/logging.jar"/>
-		<pathelement location="${lib}/jsdk.jar"/>
+		<pathelement location="${lib}/servlet-api-2.4.jar"/>
 		<pathelement location="${lib}/activation.jar"/>
 		<pathelement location="${lib}/mail.jar"/>
 		<pathelement location="${lib}/jdom.jar"/>
