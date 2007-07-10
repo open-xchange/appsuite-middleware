@@ -484,6 +484,28 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         }
     }
 
+    public UserModuleAccess getModuleAccess(final Context ctx, final int user_id, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+        
+        if (log.isDebugEnabled()) {
+            log.debug(ctx.toString() + " - " + user_id + " - " + auth.toString());
+        }        
+        
+        doAuthentication(auth,ctx);
+        
+        final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
+        
+        checkSchemaBeingLocked(ctx, tools);
+
+        if (!tools.existsUser(ctx, user_id)) {
+            final NoSuchUserException noSuchUserException = new NoSuchUserException("No such user " + user_id + " in context " + ctx.getIdAsInt());
+            log.error(noSuchUserException.getMessage(), noSuchUserException);
+            throw noSuchUserException;
+        }
+
+        final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
+        return oxu.getModuleAccess(ctx, user_id);
+    }
+
     public UserModuleAccess getModuleAccess(final Context ctx, final User user, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         try {
             doNullCheck(user);
@@ -511,6 +533,34 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
 
         final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
         return oxu.getModuleAccess(ctx, user_id);
+    }
+
+    public void changeModuleAccess(final Context ctx, final int user_id, final UserModuleAccess moduleAccess, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+        try {
+            doNullCheck(moduleAccess);
+        } catch (final InvalidDataException e1) {
+            log.error("One of the given arguments for changeModuleAccess is null", e1);
+            throw e1;
+        }
+        
+        if (log.isDebugEnabled()) {
+            log.debug(ctx.toString() + " - " + user_id + " - "+ moduleAccess.toString() + " - " + auth.toString());
+        }
+
+        doAuthentication(auth,ctx);
+        
+        final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();       
+        
+        checkSchemaBeingLocked(ctx, tools);
+
+        if (!tools.existsUser(ctx, user_id)) {
+            final NoSuchUserException noSuchUserException = new NoSuchUserException("No such user " + user_id + " in context " + ctx.getIdAsInt());
+            log.error(noSuchUserException.getMessage(), noSuchUserException);
+            throw noSuchUserException;
+        }
+
+        final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
+        oxu.changeModuleAccess(ctx, user_id, moduleAccess);
     }
 
     public void changeModuleAccess(final Context ctx, final User user, final UserModuleAccess moduleAccess, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchUserException {
@@ -541,6 +591,22 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
 
         final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
         oxu.changeModuleAccess(ctx, user_id, moduleAccess);
+    }
+
+    public int[] getAll(final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
+        
+        if (log.isDebugEnabled()) {
+            log.debug(ctx.toString() + " - " + auth.toString());
+        }
+        
+        doAuthentication(auth,ctx);
+        
+        final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();      
+        
+        checkSchemaBeingLocked(ctx, tools);
+
+        final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
+        return oxu.getAll(ctx);
     }
 
     public User[] list(final Context ctx, final String search_pattern, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
@@ -912,4 +978,28 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         GenericChecks.checkValidMailAddress(usr.getEmail3());
     }
 
+    public boolean isContextAdmin(Context ctx, User user, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException, DatabaseUpdateException {
+        
+        try {
+            doNullCheck(user);
+        } catch (final InvalidDataException e1) {
+            log.error("One of the given arguments is null", e1);
+            throw e1;
+        }
+                
+        doUserAuthentication(auth,ctx);
+        
+        final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
+        
+        checkSchemaBeingLocked(ctx, tools);
+        
+        if (user.getId()!=null && !tools.existsUser(ctx, user.getId().intValue())) {
+            final NoSuchUserException noSuchUserException = new NoSuchUserException("No such user " + user.getId().intValue() + " in context " + ctx.getIdAsInt());
+            log.error(noSuchUserException.getMessage(), noSuchUserException);
+            throw noSuchUserException;           
+        }
+        
+        return tools.isContextAdmin(ctx, user.getId().intValue());
+                
+    }
 }
