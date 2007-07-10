@@ -59,6 +59,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.StringTokenizer;
+import java.util.TimeZone;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -1262,6 +1263,16 @@ public class CalendarCommonCollection {
                 cdao.removeAlarm();
             }
         }
+    }
+
+    static long getUserTimeUTCDate(Date date, String timezone) {
+        TimeZone tz = TimeZone.getTimeZone(timezone);
+        int offset = tz.getOffset(date.getTime());
+        long ndl = date.getTime()+offset;
+        long off = ndl%CalendarRecurringCollection.MILLI_DAY;
+        ndl -= off;
+        System.out.println(" GOT "+date+" and return "+new Date(ndl));
+        return ndl;
     }
     
 }

@@ -109,6 +109,7 @@ class CalendarMySQL implements CalendarSqlImp {
     private static final String FREE_BUSY_SELECT = "SELECT intfield01, timestampfield01, timestampfield02, intfield07, intfield06, field01, fid, pflag, created_from, intfield02, intfield04, field06, field07, field08, timezone FROM prg_dates ";
     private static final String RANGE_SELECT = "SELECT intfield01, timestampfield01, timestampfield02, intfield02, intfield04, field06, field07, field08, timezone FROM prg_dates ";
     private static final String ORDER_BY = " ORDER BY pd.timestampfield01";
+    private static final String ORDER_BY_TS1 = " ORDER BY timestampfield01";
     private static final String JOIN_DATES = " pd JOIN prg_dates_members pdm ON pd.intfield01 = pdm.object_id AND pd.cid = ";
     private static final String JOIN_PARTICIPANTS = " pd JOIN prg_date_rights pdr ON pd.intfield01 = pdr.object_id AND pd.cid = ";
     private static final String WHERE = " WHERE";
@@ -119,11 +120,13 @@ class CalendarMySQL implements CalendarSqlImp {
     private static final String PDM_AND = " AND ";
     private static final String PDM_ORDER_BY = " ORDER BY ";
     private static final String PDM_GROUP_BY_PD_INTFIELD01 = " GROUP BY pd.intfield01 ";
+    private static final String PDM_GROUP_BY_INTFIELD01 = " GROUP BY intfield01";
     private static final String PD_FID_IS_NULL = " AND pd.fid = 0 ";
     private static final String PD_CREATED_FROM_IS = " AND pd.created_from = ";
     private static final String DATES_IDENTIFIER_IS = " AND intfield01 = ";
     private static final String PARTICIPANTS_IDENTIFIER_IS = " AND object_id = ";
     private static final String PARTICIPANTS_IDENTIFIER_IN = " AND object_id IN ";
+    private static final String UNION = " UNION ";
     
     private static final Log LOG = LogFactory.getLog(CalendarMySQL.class);
     
@@ -169,7 +172,7 @@ class CalendarMySQL implements CalendarSqlImp {
         return pst;
     }
     
-    public final PreparedStatement getConflicts(final Context c, final java.util.Date d1, final java.util.Date d2, final Connection readcon, final String member_sql_in, final boolean free_busy_select) throws SQLException {
+    public final PreparedStatement getConflicts(final Context c, final java.util.Date d1, final java.util.Date d2, final java.util.Date d3, final java.util.Date d4, final Connection readcon, final String member_sql_in, final boolean free_busy_select) throws SQLException {
         final StringBuilder sb = new StringBuilder(64);
         if (free_busy_select) {
             sb.append(FREE_BUSY_SELECT);
@@ -188,16 +191,38 @@ class CalendarMySQL implements CalendarSqlImp {
         sb.append(AppointmentObject.FREE);
         sb.append(" AND pdm.confirm != ");
         sb.append(com.openexchange.groupware.container.CalendarObject.DECLINE);
-        sb.append(PDM_GROUP_BY_PD_INTFIELD01);
-        sb.append(ORDER_BY);
+        
+        if (free_busy_select) {
+            sb.append(UNION);
+            sb.append(FREE_BUSY_SELECT);
+            sb.append(JOIN_DATES);
+            sb.append(c.getContextId());
+            sb.append(PDM_CID_IS);
+            sb.append(c.getContextId());
+            sb.append(WHERE);
+            getConflictRangeFullTime(sb);
+            sb.append(PDM_MEMBER_UID_IN);
+            sb.append(member_sql_in);
+            sb.append(" AND pd.intfield06 != ");
+            sb.append(AppointmentObject.FREE);
+            sb.append(" AND pdm.confirm != ");
+            sb.append(com.openexchange.groupware.container.CalendarObject.DECLINE);
+        } else {
+            sb.append(PDM_GROUP_BY_PD_INTFIELD01);
+            sb.append(ORDER_BY);
+        }
         final PreparedStatement pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
         pst.setTimestamp(1, new Timestamp(d2.getTime()));
         pst.setTimestamp(2, new Timestamp(d1.getTime()));
+        if (free_busy_select && d3 != null && d4 != null) {
+            pst.setTimestamp(3, new Timestamp(d4.getTime()));
+            pst.setTimestamp(4, new Timestamp(d3.getTime()));
+        }
         return pst;
     }
     
-    public final PreparedStatement getResourceConflictsPrivateFolderInformation(final Context c, final java.util.Date d1, final java.util.Date d2, final Connection readcon, final String resource_sql_in) throws SQLException {
-        final StringBuilder sb = new StringBuilder(64);
+    public final PreparedStatement getResourceConflictsPrivateFolderInformation(final Context c, final java.util.Date d1, final java.util.Date d2, final java.util.Date d3, final java.util.Date d4, final Connection readcon, final String resource_sql_in) throws SQLException {
+        final StringBuilder sb = new StringBuilder(184);
         sb.append("SELECT pdm.object_id, pdm.pfid, pdm.member_uid FROM prg_dates ");
         sb.append(JOIN_PARTICIPANTS);
         sb.append(c.getContextId());
@@ -206,23 +231,44 @@ class CalendarMySQL implements CalendarSqlImp {
         sb.append(" JOIN prg_dates_members pdm ON pd.intfield01 = pdm.object_id AND pdm.cid = ");
         sb.append(c.getContextId());
         sb.append(WHERE);
-        getConflictRange(sb);
+        getConflictRangeFullTime(sb);
         sb.append(" AND pdr.id IN ");
         sb.append(resource_sql_in);
         sb.append(" AND pdr.type = ");
         sb.append(Participant.RESOURCE);
         sb.append(" AND pd.intfield06 != ");
         sb.append(AppointmentObject.FREE);
-        sb.append(PDM_GROUP_BY_PD_INTFIELD01);
-        sb.append(ORDER_BY);
+        
+        sb.append(UNION);
+        
+        sb.append("SELECT pdm.object_id, pdm.pfid, pdm.member_uid FROM prg_dates ");
+        sb.append(JOIN_PARTICIPANTS);
+        sb.append(c.getContextId());
+        sb.append(" AND pdr.cid = ");
+        sb.append(c.getContextId());
+        sb.append(" JOIN prg_dates_members pdm ON pd.intfield01 = pdm.object_id AND pdm.cid = ");
+        sb.append(c.getContextId());
+        sb.append(WHERE);
+        getConflictRangeFullTime(sb);
+        sb.append(" AND pdr.id IN ");
+        sb.append(resource_sql_in);
+        sb.append(" AND pdr.type = ");
+        sb.append(Participant.RESOURCE);
+        sb.append(" AND pd.intfield06 != ");
+        sb.append(AppointmentObject.FREE);
+        
+        sb.append(PDM_GROUP_BY_INTFIELD01);
+        sb.append(ORDER_BY_TS1);
         final PreparedStatement pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
         pst.setTimestamp(1, new Timestamp(d2.getTime()));
         pst.setTimestamp(2, new Timestamp(d1.getTime()));
+        pst.setTimestamp(3, new Timestamp(d4.getTime()));
+        pst.setTimestamp(4, new Timestamp(d3.getTime()));         
         return pst;
     }
     
-    public final PreparedStatement getResourceConflicts(final Context c, final java.util.Date d1, final java.util.Date d2, final Connection readcon, final String resource_sql_in) throws SQLException {
-        final StringBuilder sb = new StringBuilder(64);
+    public final PreparedStatement getResourceConflicts(final Context c, final java.util.Date d1, final java.util.Date d2, final java.util.Date d3, final java.util.Date d4, final Connection readcon, final String resource_sql_in) throws SQLException {
+        final StringBuilder sb = new StringBuilder(184);
         sb.append(FREE_BUSY_SELECT);
         sb.append(JOIN_PARTICIPANTS);
         sb.append(c.getContextId());
@@ -236,11 +282,31 @@ class CalendarMySQL implements CalendarSqlImp {
         sb.append(Participant.RESOURCE);
         sb.append(" AND pd.intfield06 != ");
         sb.append(AppointmentObject.FREE);
-        sb.append(PDM_GROUP_BY_PD_INTFIELD01);
-        sb.append(ORDER_BY);
+        
+        sb.append(UNION);
+        
+        sb.append(FREE_BUSY_SELECT);
+        sb.append(JOIN_PARTICIPANTS);
+        sb.append(c.getContextId());
+        sb.append(" AND pdr.cid = ");
+        sb.append(c.getContextId());
+        sb.append(WHERE);
+        getConflictRangeFullTime(sb);
+        sb.append(" AND pdr.id IN ");
+        sb.append(resource_sql_in);
+        sb.append(" AND pdr.type = ");
+        sb.append(Participant.RESOURCE);
+        sb.append(" AND pd.intfield06 != ");
+        sb.append(AppointmentObject.FREE);        
+        
+        
+        sb.append(PDM_GROUP_BY_INTFIELD01);
+        sb.append(ORDER_BY_TS1);
         final PreparedStatement pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
         pst.setTimestamp(1, new Timestamp(d2.getTime()));
         pst.setTimestamp(2, new Timestamp(d1.getTime()));
+        pst.setTimestamp(3, new Timestamp(d4.getTime()));
+        pst.setTimestamp(4, new Timestamp(d3.getTime()));        
         return pst;
     }
     
@@ -370,10 +436,10 @@ class CalendarMySQL implements CalendarSqlImp {
         return activeDates;
     }
     
-    private final void fillActiveDates(final long start, long s, final long e, final boolean activeDates[]) {   
+    private final void fillActiveDates(final long start, long s, final long e, final boolean activeDates[]) {
         if (start > s) {
             s = start;
-        }       
+        }
         
         int start_pos = 0;
         final int ll = (int)(e-s);
@@ -749,6 +815,10 @@ class CalendarMySQL implements CalendarSqlImp {
     
     private final void getConflictRange(final StringBuilder sb) {
         sb.append(" pd.timestampfield01 < ? AND pd.timestampfield02 > ?");
+    }
+    
+    private final void getConflictRangeFullTime(final StringBuilder sb) {
+        sb.append(" intfield07 = 1 AND pd.timestampfield01 < ? AND pd.timestampfield02 > ?");
     }
     
     private final void getSince(final StringBuilder sb) {
@@ -1705,8 +1775,8 @@ class CalendarMySQL implements CalendarSqlImp {
             }
             
         }
-        cdao.setParentFolderID(cdao.getActionFolder());        
-
+        cdao.setParentFolderID(cdao.getActionFolder());
+        
         boolean solo_reminder = CalendarCommonCollection.checkForSoloReminderUpdate(cdao, uc, cup);
         CalendarCommonCollection.checkAndRemovePastReminders(cdao, edao);
         if (!solo_reminder) {

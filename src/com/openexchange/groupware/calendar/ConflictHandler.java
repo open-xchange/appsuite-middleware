@@ -172,9 +172,14 @@ public class ConflictHandler {
         PreparedStatement private_folder_information = null;
         boolean close_connection = true;
         try {
-            readcon = DBPool.pickup(so.getContext());
-            prep = calendarsqlimp.getConflicts(so.getContext(), start, end, readcon, sql_in, true);
-            private_folder_information = calendarsqlimp.getConflicts(so.getContext(), start, end, readcon, sql_in, false);
+            readcon = DBPool.pickup(so.getContext());            
+            long whole_day_start = CalendarCommonCollection.getUserTimeUTCDate(start, so.getUserObject().getTimeZone());
+            long whole_day_end = CalendarCommonCollection.getUserTimeUTCDate(end, so.getUserObject().getTimeZone());
+            if (whole_day_end <= whole_day_start) {
+                whole_day_end = whole_day_start+CalendarRecurringCollection.MILLI_DAY;
+            }
+            prep = calendarsqlimp.getConflicts(so.getContext(), start, end, new Date(whole_day_start), new Date(whole_day_end), readcon, sql_in, true);
+            private_folder_information = calendarsqlimp.getConflicts(so.getContext(), start, end, null, null, readcon, sql_in, false);
             rs = calendarsqlimp.getResultSet(prep);
             si = new FreeBusyResults(rs, prep, so.getContext(), so.getUserObject().getId(), so.getUserObject().getGroups(), so.getUserConfiguration(), readcon, true, cdao.getUsers(), private_folder_information);
             ArrayList<CalendarDataObject> li = null;
@@ -252,8 +257,13 @@ public class ConflictHandler {
         boolean close_connection = true;
         try {
             readcon = DBPool.pickup(so.getContext());
-            prep = calendarsqlimp.getResourceConflicts(so.getContext(), start, end, readcon, sql_in);
-            private_folder_information = calendarsqlimp.getResourceConflictsPrivateFolderInformation(so.getContext(), start, end, readcon, sql_in);
+            long whole_day_start = CalendarCommonCollection.getUserTimeUTCDate(start, so.getUserObject().getTimeZone());
+            long whole_day_end = CalendarCommonCollection.getUserTimeUTCDate(end, so.getUserObject().getTimeZone());
+            if (whole_day_end <= whole_day_start) {
+                whole_day_end = whole_day_start+CalendarRecurringCollection.MILLI_DAY;
+            }
+            prep = calendarsqlimp.getResourceConflicts(so.getContext(), start, end, new Date(whole_day_start), new Date(whole_day_end), readcon, sql_in);
+            private_folder_information = calendarsqlimp.getResourceConflictsPrivateFolderInformation(so.getContext(), start, end, new Date(whole_day_start), new Date(whole_day_end), readcon, sql_in);
             rs = calendarsqlimp.getResultSet(prep);
             si = new FreeBusyResults(rs, prep, so.getContext(), so.getUserObject().getId(), so.getUserObject().getGroups(), so.getUserConfiguration(), readcon, true, cdao.getParticipants(), private_folder_information);
             ArrayList<CalendarDataObject> li = null;
