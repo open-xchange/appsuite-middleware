@@ -1245,7 +1245,12 @@ public class Mail extends PermissionServlet implements UploadListener {
 	private static final Pattern PART_FILENAME_PATTERN = Pattern.compile("(part )([0-9]+)(\\.)([0-9]+)",
 			Pattern.CASE_INSENSITIVE);
 
+	private static final String DEFAULT_FILENAME = "file.dat";
+	
 	public static final String getSaveAsFileName(final String fileName, final boolean internetExplorer) {
+		if (null == fileName) {
+			return DEFAULT_FILENAME;
+		}
 		final Matcher m = PART_FILENAME_PATTERN.matcher(fileName);
 		if (m.matches()) {
 			return fileName.replaceAll(" ", "_");
