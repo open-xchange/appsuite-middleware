@@ -1,6 +1,5 @@
 package com.openexchange.sessiond;
 
-import com.openexchange.groupware.contexts.ContextException;
 import java.io.FileInputStream;
 import java.util.Iterator;
 import java.util.Properties;
@@ -9,7 +8,6 @@ import junit.framework.TestCase;
 
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
-import com.openexchange.groupware.contexts.ContextNotFoundException;
 
 public class SessiondTest extends TestCase {
 	
