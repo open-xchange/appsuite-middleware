@@ -1,3 +1,8 @@
+* 2007-07-10 - tobias.prinz@open-xchange.com
+
+ - Bugfix #7949: Changed log-level for USER_INPUT exceptions 
+   from warn() to debug().
+
 * 2007-07-10 - martin.kauss@open-xchange.com
 
  - Fixed bug #8317. If a whole day appointment exist and a user
@@ -25,7 +30,7 @@
  - Bugfix #7710: Now the French Outlook value for the private field is
    recognized, too.
  - Bugfix #7949: Now using LOG.warn() instead of LOG.error() in case 
-   of USER_ERROR.
+   of USER_INPUT exception.
  - Bugfix #8342: Searching for "target" attribute when parsing links
    inside html content of an email. If not present or its value is not
    equal to "_blank" it's going to be replaced.

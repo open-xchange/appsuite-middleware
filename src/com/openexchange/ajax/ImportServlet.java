@@ -183,7 +183,7 @@ public class ImportServlet extends ImportExport {
 			}
 		} catch (AbstractOXException e){
 			if(Category.USER_INPUT.equals( e.getCategory() ) ){
-				LOG.warn("user error: ", e);
+				LOG.debug("user error: ", e);
 			} else {
 				LOG.error("import exception: " , e);
 			}
