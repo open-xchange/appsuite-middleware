@@ -55,7 +55,6 @@ import static org.junit.Assert.fail;
 
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Resource;
-import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchResourceException;
 
 import java.net.MalformedURLException;
@@ -78,8 +77,8 @@ public class ResourceTest extends AbstractTest{
     }
     
     public static junit.framework.Test suite() {
-		return new JUnit4TestAdapter(ResourceTest.class);
-	}
+        return new JUnit4TestAdapter(ResourceTest.class);
+    }
     
     @Test
     public void testCreate() throws Exception {
