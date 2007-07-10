@@ -75,7 +75,7 @@ public class FIFOQueue<T> {
 	private final Lock r = rwLock.readLock(), w = rwLock.writeLock();
 
 	@SuppressWarnings("unchecked")
-	public FIFOQueue(Class<T> clazz, int maxsize) {
+	public FIFOQueue(final Class<T> clazz, final int maxsize) {
 		array = (T[]) Array.newInstance(clazz, maxsize);
 		start = end = 0;
 		full = false;
@@ -164,25 +164,5 @@ public class FIFOQueue<T> {
 			r.unlock();
 		}
 	}
-
-//	/*
-//	 * (non-Javadoc)
-//	 * 
-//	 * @see java.lang.Object#toString()
-//	 */
-//	public String toString() {
-//		final StringBuilder sb = new StringBuilder().append('{');
-//		if (isEmpty()) {
-//			return sb.append('}').toString();
-//		}
-//		final int startIndex = full ? end : end + 1;
-//		sb.append(array[startIndex].toString());
-//		int count = (startIndex + 1) % array.length;
-//		while (array[count] != null) {
-//			sb.append(',').append(array[count].toString());
-//			count = ++count % array.length;
-//		}
-//		return sb.append('}').toString();
-//	}
 
 }
