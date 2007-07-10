@@ -1,3 +1,10 @@
+* 2007-07-10 - martin.kauss@open-xchange.com
+
+ - Fixed bug #8317. If a whole day appointment exist and a user
+   creates an appointment around midnight which should conflict,
+   depending of the timezone of the user, no conflict is resolved
+   because of a wrong handling. This has been fixed.
+
 * 2007-07-10 - marcus.klein@open-xchange.com
 
  - Bugfix #7140: Updated servlet API to newest version.
