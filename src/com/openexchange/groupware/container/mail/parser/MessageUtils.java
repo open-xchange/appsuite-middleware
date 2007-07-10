@@ -647,7 +647,7 @@ public class MessageUtils {
 	private static final int STRBLD_SIZE = 32768; // 32K
 
 	private static final String STR_CHARSET = "charset";
-	
+
 	/**
 	 * Reads the string out of part's input stream. On first try the input
 	 * stream retrieved by <code>javax.mail.Part.getInputStream()</code> is
@@ -698,13 +698,15 @@ public class MessageUtils {
 			/*
 			 * Try to get data from raw input stream
 			 */
-			InputStream inStream = null;
+			final InputStream inStream;
 			if (p instanceof MimeBodyPart) {
 				final MimeBodyPart mpb = (MimeBodyPart) p;
 				inStream = mpb.getRawInputStream();
 			} else if (p instanceof MimeMessage) {
 				final MimeMessage mm = (MimeMessage) p;
 				inStream = mm.getRawInputStream();
+			} else {
+				inStream = null;
 			}
 			if (inStream == null) {
 				/*
@@ -714,13 +716,14 @@ public class MessageUtils {
 			}
 			try {
 				return readStream(inStream, charset);
-			} catch (IOException e1) {
-				LOG.error(e.getLocalizedMessage(), e);
-				return STR_EMPTY;
+			} catch (final IOException e1) {
+				LOG.error(e1.getLocalizedMessage(), e1);
+				return e1.getLocalizedMessage();
+				// return STR_EMPTY;
 			} finally {
 				try {
 					inStream.close();
-				} catch (IOException e1) {
+				} catch (final IOException e1) {
 					LOG.error(e1.getLocalizedMessage(), e1);
 				}
 			}
@@ -744,11 +747,14 @@ public class MessageUtils {
 			int count = 0;
 			final char[] c = new char[BUFSIZE];
 			isr = new InputStreamReader(inStream, charset);
-			final StringBuilder sb = new StringBuilder(STRBLD_SIZE);
-			while ((count = isr.read(c)) > 0) {
-				sb.append(c, 0, count);
+			if ((count = isr.read(c)) > 0) {
+				final StringBuilder sb = new StringBuilder(STRBLD_SIZE);
+				do {
+					sb.append(c, 0, count);
+				} while ((count = isr.read(c)) > 0);
+				return sb.toString();
 			}
-			return sb.toString();
+			return STR_EMPTY;
 		} catch (final UnsupportedEncodingException e) {
 			LOG.error("Unsupported encoding in a message detected and monitored.", e);
 			MailInterfaceImpl.mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
@@ -757,7 +763,7 @@ public class MessageUtils {
 			if (null != isr) {
 				try {
 					isr.close();
-				} catch (IOException e) {
+				} catch (final IOException e) {
 					LOG.error(e.getLocalizedMessage(), e);
 				}
 			}
