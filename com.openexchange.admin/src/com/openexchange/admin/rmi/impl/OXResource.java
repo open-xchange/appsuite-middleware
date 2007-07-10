@@ -411,7 +411,7 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
         }
         
         final OXResourceStorageInterface oxRes = OXResourceStorageInterface.getInstance();
-        Resource retres = oxRes.get(ctx, resource_id);
+        Resource retres = oxRes.getData(ctx, res);
 
         // TODO: this code is superflous as soon as get takes resource as arg:
         for(final OXResourceExtensionInterface or : res.getExtensions() ) {
@@ -542,7 +542,7 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
         
         for (final Resource resource : resources) {
             // not nice, but works ;)
-            final Resource tmp = oxRes.get(ctx, resource.getId().intValue());
+            final Resource tmp = oxRes.getData(ctx, resource);
             for(final OXResourceExtensionInterface or : resource.getExtensions() ) {
                 tmp.addExtension(or);
             }

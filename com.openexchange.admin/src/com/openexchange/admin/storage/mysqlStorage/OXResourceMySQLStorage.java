@@ -475,6 +475,88 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
     }
 
     @Override
+    public Resource getData(final Context ctx, final Resource resource) throws StorageException {
+        Connection con = null;
+        PreparedStatement prep_list = null;
+        final int context_id = ctx.getIdAsInt();
+        try {
+            
+            con = cache.getREADConnectionForContext(context_id);
+
+            prep_list = con.prepareStatement("SELECT cid,id,identifier,displayName,available,description,mail FROM resource WHERE resource.cid = ? AND resource.id = ?");
+            prep_list.setInt(1, context_id);
+            prep_list.setInt(2, resource.getId());
+            final ResultSet rs = prep_list.executeQuery();
+
+            if (rs.next()) {
+                final int id = rs.getInt("id");
+                final String ident = rs.getString("identifier");
+                final String mail = rs.getString("mail");
+                final String disp = rs.getString("displayName");
+                final Boolean aval = rs.getBoolean("available");
+                final String desc = rs.getString("description");
+                
+                Resource retval = new Resource();
+                
+                retval.setId(id);
+                if (null != mail) {
+                    retval.setEmail(mail);
+                }
+                if (null != disp) {
+                    retval.setDisplayname(disp);
+                }
+
+                if (null != ident) {
+                    retval.setName(ident);
+                }
+
+                if (null != desc) {
+                    retval.setDescription(desc);
+                }
+
+                if (null != aval) {
+                    retval.setAvailable(aval);
+                }
+                return retval;
+               
+            }else{
+               throw new StorageException("No such resource"); 
+            }
+            
+        } catch (final SQLException e) {
+            log.error("SQL Error", e);
+            try {
+                con.rollback();
+            } catch (final SQLException e2) {
+                log.error("Error rollback ox db write connection", e2);
+            }
+            throw new StorageException(e);
+        } catch (final PoolException e) {
+            log.error("Pool Error", e);
+            try {
+                con.rollback();
+            } catch (final SQLException e2) {
+                log.error("Error rollback ox db write connection", e2);
+            }
+            throw new StorageException(e);
+        } finally {
+            try {
+                if (prep_list != null) {
+                    prep_list.close();
+                }
+            } catch (final SQLException e) {
+                log.error("Error closing prepared statement!", e);
+            }
+
+            try {
+                cache.pushOXDBRead(context_id, con);
+            } catch (final PoolException e) {
+                log.error("Error pushing ox read connection to pool!", e);
+            }
+        }
+    }
+
+    @Override
     public Resource[] list(final Context ctx, final String pattern)
             throws StorageException {
         Connection con = null;
