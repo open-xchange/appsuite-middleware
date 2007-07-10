@@ -96,8 +96,8 @@ case "${BNAME}" in
     "movefilestorecontext")
     ACTION="context.MoveContextFilestore"
     ;;
-    "searchcontext")
-    ACTION="context.Search"
+    "listcontext")
+    ACTION="context.List"
     ;;
     "createreason")
     ACTION="util.CreateReason"
