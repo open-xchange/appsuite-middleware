@@ -9,6 +9,7 @@
  - Additional bit in UserSettingMail to set the displayed content on message
    compose
  - Fastened parsing of query string inside AJP's forward request
+ - New class IMAPServerInfo to read an IMAP server's greeting
 
 * 2007-07-09 - tobias.prinz@open-xchange.com
 
