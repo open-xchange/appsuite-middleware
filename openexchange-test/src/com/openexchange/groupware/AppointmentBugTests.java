@@ -1882,9 +1882,7 @@ public class AppointmentBugTests extends TestCase {
         }
         assertTrue("Conflicted with object #1!", !found_object_1);
         
-        CalendarDataObject testobject = csql.getObjectById(object_id2, fid);
-        System.out.println(">>> "+testobject.getStartDate());
-        System.out.println(">>> "+testobject.getEndDate());         
+        CalendarDataObject testobject = csql.getObjectById(object_id2, fid);      
         testobject.removeStartDate();
         testobject.removeEndDate();
         testobject.setParticipants(p.getList());   
@@ -2082,6 +2080,74 @@ public class AppointmentBugTests extends TestCase {
         assertEquals("Check that we got 3 results", 3, rrs.size());
 
                 
+    }
+ 
+    /*
+     Steps to Reproduce:
+     1. Login
+     2. Select 'Calendar' from OX-Module
+     3. From panel press 'New'
+     4. Create a whole-day appointment for current day 
+     5. Press 'New' from panel again to create a second appointment
+     6. Select '00:30' for start and '01:00' for end time and save for current day
+     */
+    public void testBug8317() throws Throwable {
+        deleteAllAppointments();
+        
+        Context context = new ContextImpl(contextid);
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
+        
+        int fid = CalendarTest.getCalendarDefaultFolderForUser(userid, context);
+        
+        CalendarSql csql = new CalendarSql(so);
+        
+        CalendarDataObject cdao = new CalendarDataObject();
+        cdao.setContext(context);
+        cdao.setParentFolderID(fid);
+        cdao.setTimezone(TIMEZONE);
+        CalendarTest.fillDatesInDao(cdao);
+        cdao.setStartDate(new Date(cdao.getStartDate().getTime()+CalendarRecurringCollection.MILLI_DAY));
+        cdao.setEndDate(new Date(cdao.getEndDate().getTime()+CalendarRecurringCollection.MILLI_DAY));
+        cdao.setFullTime(true);
+        cdao.setTitle("testBug8317");
+        cdao.setIgnoreConflicts(true);
+        csql.insertAppointmentObject(cdao);
+        
+        int object_id = cdao.getObjectID();
+        assertTrue("Got an object id", object_id > 0);        
+        
+        CalendarDataObject cdao2 = new CalendarDataObject();
+        cdao2.setContext(context);
+        cdao2.setParentFolderID(fid);
+        cdao2.setTimezone(TIMEZONE);
+        CalendarTest.fillDatesInDao(cdao2);
+        long starttime = cdao2.getStartDate().getTime();
+        long mod = starttime%CalendarRecurringCollection.MILLI_DAY;
+        starttime -= mod;
+        starttime -= 3600000*2; // UTC shift !?
+        starttime = starttime + 1800000;
+        long endtime = starttime + 1800000;
+        starttime +=CalendarRecurringCollection.MILLI_DAY;
+        endtime +=CalendarRecurringCollection.MILLI_DAY;
+        Date startdate = new Date(starttime);
+        Date enddate = new Date(endtime);
+        cdao2.setStartDate(startdate);
+        cdao2.setEndDate(enddate);
+        cdao2.setTitle("testBug8317 - 2");
+        CalendarDataObject conflicts[] = csql.insertAppointmentObject(cdao2);
+        
+        assertTrue("Got no conflicts", conflicts != null && conflicts.length > 0);
+        
+        boolean found_object_1 = false;
+        if (conflicts != null) {
+            for (int a = 0; a < conflicts.length; a++) {
+                if (conflicts[a].getObjectID() == object_id) {
+                    found_object_1 = true;
+                }
+            }
+        }
+        assertTrue("No conflict with object #1!", found_object_1);
+        
     }
     
 }
