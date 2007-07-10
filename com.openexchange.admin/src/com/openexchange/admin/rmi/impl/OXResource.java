@@ -449,6 +449,10 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
         return oxRes.list(ctx,pattern);
     }
     
+    public Resource[] listAll(final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {
+        return list(ctx, "*", auth);
+    }
+    
     private void validateResourceName(final String resName) throws InvalidDataException {
         if(resName==null || resName.trim().length()==0){
             throw new InvalidDataException("Invalid resource name");

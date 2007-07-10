@@ -248,6 +248,10 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
 
     }
 
+    public Group[] listAll(final Context ctx, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException {
+        return list(ctx, "*", auth);
+    }
+    
     public Group getData(final Context ctx, final Group grp, final Credentials auth)
             throws RemoteException, StorageException,
             InvalidCredentialsException, NoSuchContextException,
