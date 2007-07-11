@@ -135,26 +135,26 @@ public class ResourceTest extends AbstractTest{
         
         
         // set change data
-        if (null != res.getAvailable()) {
-            res.setAvailable(!res.getAvailable());
+        if (null != createdresource.getAvailable()) {
+            createdresource.setAvailable(!createdresource.getAvailable());
         } else {
-            res.setAvailable(true);
+            createdresource.setAvailable(true);
         }
-        res.setDescription(res.getDescription()+change_suffix);
-        res.setDisplayname(res.getDisplayname()+change_suffix);
-        res.setEmail(res.getEmail()+change_suffix);
-        res.setName(res.getName()+change_suffix);
+        createdresource.setDescription(createdresource.getDescription()+change_suffix);
+        createdresource.setDisplayname(createdresource.getDisplayname()+change_suffix);
+        createdresource.setEmail(createdresource.getEmail()+change_suffix);
+        createdresource.setName(createdresource.getName()+change_suffix);
         
         // change on server
-        oxres.change(ctx,res,DummyCredentials());
+        oxres.change(ctx,createdresource,DummyCredentials());
         
         // get resource from server and verify changed data
-        Resource srv_res = oxres.getData(ctx,res,DummyCredentials());        
+        Resource srv_res = oxres.getData(ctx,createdresource,DummyCredentials());        
         
-        assertEquals(res.getDescription(),srv_res.getDescription());
-        assertEquals(res.getDisplayname(),srv_res.getDisplayname());
-        assertEquals(res.getEmail(),srv_res.getEmail());
-        assertEquals(res.getName(),srv_res.getName());
+        assertEquals(createdresource.getDescription(),srv_res.getDescription());
+        assertEquals(createdresource.getDisplayname(),srv_res.getDisplayname());
+        assertEquals(createdresource.getEmail(),srv_res.getEmail());
+        assertEquals(createdresource.getName(),srv_res.getName());
         
     }
     
