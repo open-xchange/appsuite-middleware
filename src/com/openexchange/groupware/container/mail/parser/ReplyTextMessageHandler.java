@@ -375,7 +375,7 @@ public class ReplyTextMessageHandler implements MessageHandler {
 			}
 			return true;
 		} catch (final MessagingException e) {
-			throw MailInterfaceImpl.handleMessagingException(e, session.getIMAPProperties());
+			throw MailInterfaceImpl.handleMessagingException(e, session.getIMAPProperties(), session.getContext());
 		} catch (final IOException e) {
 			throw new OXMailException(MailCode.INTERNAL_ERROR, e, e.getMessage());
 		}
@@ -395,7 +395,7 @@ public class ReplyTextMessageHandler implements MessageHandler {
 			this.isHtml |= msgHandler.isHtml;
 			return true;
 		} catch (final MessagingException e) {
-			throw MailInterfaceImpl.handleMessagingException(e, session.getIMAPProperties());
+			throw MailInterfaceImpl.handleMessagingException(e, session.getIMAPProperties(), session.getContext());
 		}
 	}
 

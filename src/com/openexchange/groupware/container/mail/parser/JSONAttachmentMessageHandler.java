@@ -311,7 +311,7 @@ public class JSONAttachmentMessageHandler implements MessageHandler {
 				}
 				return false;
 			} catch (MessagingException e) {
-				throw MailInterfaceImpl.handleMessagingException(e, session.getIMAPProperties());
+				throw MailInterfaceImpl.handleMessagingException(e, session.getIMAPProperties(), session.getContext());
 			} catch (IOException e) {
 				throw new OXMailException(MailCode.INTERNAL_ERROR, e, e.getMessage());
 			}
@@ -337,7 +337,7 @@ public class JSONAttachmentMessageHandler implements MessageHandler {
 				attachment.setContentID(JSONMessageAttachmentObject.CONTENT_INPUT_STREAM);
 				return false;
 			} catch (MessagingException e) {
-				throw MailInterfaceImpl.handleMessagingException(e, session.getIMAPProperties());
+				throw MailInterfaceImpl.handleMessagingException(e, session.getIMAPProperties(), session.getContext());
 			} catch (IOException e) {
 				throw new OXMailException(MailCode.INTERNAL_ERROR, e, e.getMessage());
 			}
@@ -364,7 +364,7 @@ public class JSONAttachmentMessageHandler implements MessageHandler {
 				attachment.setContentID(JSONMessageAttachmentObject.CONTENT_INPUT_STREAM);
 				return false;
 			} catch (MessagingException e) {
-				throw MailInterfaceImpl.handleMessagingException(e, session.getIMAPProperties());
+				throw MailInterfaceImpl.handleMessagingException(e, session.getIMAPProperties(), session.getContext());
 			} catch (IOException e) {
 				throw new OXMailException(MailCode.INTERNAL_ERROR, e, e.getMessage());
 			}
@@ -411,7 +411,7 @@ public class JSONAttachmentMessageHandler implements MessageHandler {
 			}
 			return true;
 		} catch (MessagingException e) {
-			throw MailInterfaceImpl.handleMessagingException(e, session.getIMAPProperties());
+			throw MailInterfaceImpl.handleMessagingException(e, session.getIMAPProperties(), session.getContext());
 		}
 	}
 

@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.groupware.ldap;
 
 import java.io.IOException;
@@ -65,7 +63,6 @@ import com.openexchange.cache.CacheKey;
 import com.openexchange.cache.Configuration;
 import com.openexchange.cache.dynamic.CacheProxy;
 import com.openexchange.cache.dynamic.OXObjectFactory;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapException.Code;
@@ -199,6 +196,31 @@ public class CachingUserStorage extends UserStorage {
         } catch (LdapException e) {
             throw new UserException(e);
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int resolveIMAPLogin(final String imapLogin) throws UserException {
+        final CacheKey key = new CacheKey(context, imapLogin);
+        final int identifier;
+        final Integer tmp = (Integer) CACHE.get(key);
+        if (null == tmp) {
+            try {
+                identifier = getUserStorage().resolveIMAPLogin(imapLogin);
+            } catch (LdapException e) {
+                throw new UserException(e);
+            }
+            try {
+                CACHE.put(key, identifier);
+            } catch (CacheException e) {
+                throw new UserException(UserException.Code.CACHE_PROBLEM, e);
+            }
+        } else {
+            identifier = tmp;
+        }
+        return identifier;
     }
 
     /**

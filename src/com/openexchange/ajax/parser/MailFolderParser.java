@@ -67,7 +67,6 @@ import com.openexchange.server.OCLPermission;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
-import com.sun.mail.imap.ACL;
 
 /**
  * MailFolderParser
@@ -76,14 +75,14 @@ import com.sun.mail.imap.ACL;
  * 
  */
 public class MailFolderParser {
-	
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MailFolderParser.class);
+
+	private static final String STR_EMPTY = "";
 
 	private static final int[] mapping = { 0, 2, 4, -1, 8 };
 
 	private final SessionObject sessionObj;
 
-	public MailFolderParser(SessionObject sessionObj) {
+	public MailFolderParser(final SessionObject sessionObj) {
 		super();
 		this.sessionObj = sessionObj;
 	}
@@ -91,7 +90,7 @@ public class MailFolderParser {
 	public void parse(final MailFolderObject mfo, final JSONObject jsonObj) throws OXException {
 		try {
 			parseMailFolder(mfo, jsonObj);
-		} catch (JSONException exc) {
+		} catch (final JSONException exc) {
 			throw new OXFolderException(FolderCode.JSON_ERROR, exc, exc.getMessage());
 		}
 	}
@@ -111,62 +110,63 @@ public class MailFolderParser {
 		if (jsonObj.has(FolderFields.SUBSCRIBED) && !jsonObj.isNull(FolderFields.SUBSCRIBED)) {
 			mfo.setSubscribed(jsonObj.getInt(FolderFields.SUBSCRIBED) > 0);
 		}
-		
+
 		if (jsonObj.has(FolderFields.PERMISSIONS) && !jsonObj.isNull(FolderFields.PERMISSIONS)
 				&& jsonObj.getJSONArray(FolderFields.PERMISSIONS).length() > 0) {
 			final JSONArray jsonArr = jsonObj.getJSONArray(FolderFields.PERMISSIONS);
 			final int arrayLength = jsonArr.length();
-			final List<ACL> acls = new ArrayList<ACL>(arrayLength);
-			NextPerm: for (int i = 0; i < arrayLength; i++) {
+			final List<IMAPPermission> iPerms = new ArrayList<IMAPPermission>(arrayLength);
+			final UserStorage us;
+			try {
+				us = UserStorage.getInstance(sessionObj.getContext());
+			} catch (final LdapException e1) {
+				throw new OXException(e1);
+			}
+			for (int i = 0; i < arrayLength; i++) {
 				final JSONObject elem = jsonArr.getJSONObject(i);
 				if (!elem.has(FolderFields.ENTITY)) {
-					throw new OXFolderException(FolderCode.MISSING_PARAMETER, FolderFields.ENTITY);
+					throw new OXFolderException(FolderCode.MISSING_PARAMETER, STR_EMPTY, FolderFields.ENTITY);
 				}
 				int entity;
 				try {
 					entity = elem.getInt(FolderFields.ENTITY);
-				} catch (JSONException e) {
+				} catch (final JSONException e) {
 					try {
 						final String entityStr = elem.getString(FolderFields.ENTITY);
-						final UserStorage us = UserStorage.getInstance(sessionObj.getContext());
 						entity = us.getUserId(entityStr);
-					} catch (LdapException e1) {
+					} catch (final LdapException e1) {
 						throw new OXException(e1);
 					}
 				}
-				final IMAPPermission imapPerm = new IMAPPermission(sessionObj.getContext());
+				final IMAPPermission imapPerm = new IMAPPermission(sessionObj.getUserObject().getId(), us);
 				imapPerm.setEntity(entity);
 				if (jsonObj.has(FolderFields.ID) && !jsonObj.isNull(FolderFields.ID)) {
 					imapPerm.setFolderFullname(jsonObj.getString(FolderFields.ID));
 				}
 				if (!elem.has(FolderFields.BITS)) {
-					throw new OXFolderException(FolderCode.MISSING_PARAMETER, FolderFields.BITS);
+					throw new OXFolderException(FolderCode.MISSING_PARAMETER, STR_EMPTY, FolderFields.BITS);
 				}
 				final int[] permissionBits = parsePermissionBits(elem.getInt(FolderFields.BITS));
 				if (!imapPerm.setAllPermission(permissionBits[0], permissionBits[1], permissionBits[2],
 						permissionBits[3])) {
-					throw new OXFolderException(FolderCode.INVALID_PERMISSION, Integer.valueOf(permissionBits[0]), Integer.valueOf(permissionBits[1]),
-							Integer.valueOf(permissionBits[2]), Integer.valueOf(permissionBits[3]));
+					throw new OXFolderException(FolderCode.INVALID_PERMISSION, Integer.valueOf(permissionBits[0]),
+							Integer.valueOf(permissionBits[1]), Integer.valueOf(permissionBits[2]), Integer
+									.valueOf(permissionBits[3]));
 				}
 				imapPerm.setFolderAdmin(permissionBits[4] > 0 ? true : false);
 				if (!elem.has(FolderFields.GROUP)) {
-					throw new OXFolderException(FolderCode.MISSING_PARAMETER, FolderFields.GROUP);
+					throw new OXFolderException(FolderCode.MISSING_PARAMETER, STR_EMPTY, FolderFields.GROUP);
 				}
 				imapPerm.setGroupPermission(elem.getBoolean(FolderFields.GROUP));
-				try {
-					acls.add(imapPerm.getPermissionACL());
-				} catch (LdapException e) {
-					LOG.error(e.getMessage(), e);
-					continue NextPerm;
-				}
+				iPerms.add(imapPerm);
 			}
-			mfo.setACL(acls.toArray(new ACL[acls.size()]));
+			mfo.setIMAPPermission(iPerms.toArray(new IMAPPermission[iPerms.size()]));
 		}
 	}
-	
+
 	private static final int[] parsePermissionBits(final int bitsArg) {
 		int bits = bitsArg;
-		int[] retval = new int[5];
+		final int[] retval = new int[5];
 		for (int i = retval.length - 1; i >= 0; i--) {
 			final int shiftVal = (i * 7); // Number of bits to be shifted
 			retval[i] = bits >> shiftVal;
@@ -181,5 +181,5 @@ public class MailFolderParser {
 		}
 		return retval;
 	}
-	
+
 }

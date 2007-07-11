@@ -66,6 +66,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.OXException;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.groupware.imap.IMAPProperties.BoolCapVal;
+import com.openexchange.groupware.imap.User2IMAP.User2IMAPException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.sessiond.SessionObject;
 
@@ -108,7 +109,7 @@ public class IMAPPropertiesFactory {
 	}
 
 	private static Properties props;
-	
+
 	private static boolean propsLoaded;
 
 	private static Properties javaMailProps;
@@ -127,7 +128,7 @@ public class IMAPPropertiesFactory {
 
 	private static final String PROP_CREDSRC = "imapCredSrc";
 
-	private static final String PROP_IMAPSERVER = "imapServer";
+	public static final String PROP_IMAPSERVER = "imapServer";
 
 	private static final String PROP_SMTPSERVER = "smtpServer";
 
@@ -182,9 +183,9 @@ public class IMAPPropertiesFactory {
 	private static final String PROP_WATCHER_ENABLED = "watcherEnabled";
 
 	private static final String PROP_WATCHER_TIME = "watcherTime";
-	
+
 	private static final String PROP_WATCHER_FREQUENCY = "watcherFrequency";
-	
+
 	private static final String PROP_WATCHER_SHALL_CLOSE = "watcherShallClose";
 
 	private static final String SPELL_CHECK_CONFIG_FILE = SystemConfig.getProperty("SPELLCHECKCFG");
@@ -276,12 +277,17 @@ public class IMAPPropertiesFactory {
 			}
 		}
 	}
+	
+	public static final Properties getProperties() throws IMAPException {
+		checkImapPropFile();
+		return (Properties) props.clone();
+	}
 
 	private static final String STR_PROPERTY = "Property ";
 
 	private static final String STR_NOTSETIN = " NOT set in ";
 
-	public static IMAPProperties getImapProperties(final SessionObject sessionObj) throws IMAPException {
+	public static final IMAPProperties getImapProperties(final SessionObject sessionObj) throws IMAPException {
 		checkImapPropFile();
 		/*
 		 * Load global IMAP properties if not done, yet
@@ -291,7 +297,7 @@ public class IMAPPropertiesFactory {
 		 * Fetch user object and create its IMAP properties
 		 */
 		final User userObj = sessionObj.getUserObject();
-		final IMAPProperties imapProps = new IMAPProperties(sessionObj.getUserObject().getId(), sessionObj.getContext());
+		final IMAPProperties imapProps = new IMAPProperties(sessionObj.getUserObject().getId());
 		if (IMAPLoginType.GLOBAL.equals(IMAPProperties.getImapLoginTypeInternal())) {
 			String imapServer = props.getProperty(PROP_IMAPSERVER);
 			if (imapServer == null) {
@@ -348,16 +354,20 @@ public class IMAPPropertiesFactory {
 			imapProps.setImapPort(imapPort);
 			imapProps.setSmtpServer(smtpServer);
 			imapProps.setSmtpPort(smtpPort);
-			if (IMAPProperties.getImapCredSrcInternal() == null
-					|| IMAPCredSrc.SESSION.equals(IMAPProperties.getImapCredSrcInternal())) {
-				imapProps.setImapPassword(sessionObj.getPassword());
-				imapProps.setImapLogin(OXUser2IMAPLogin.getLocalIMAPLogin(sessionObj, false));
-			} else if (IMAPCredSrc.OTHER.equals(IMAPProperties.getImapCredSrcInternal())) {
-				imapProps.setImapPassword(TEST_PW);
-				imapProps.setImapLogin(getRandomTestLogin());
-			} else if (IMAPCredSrc.USER_IMAPLOGIN.equals(IMAPProperties.getImapCredSrcInternal())) {
-				imapProps.setImapPassword(sessionObj.getPassword());
-				imapProps.setImapLogin(OXUser2IMAPLogin.getLocalIMAPLogin(sessionObj, true));
+			try {
+				if (IMAPProperties.getImapCredSrcInternal() == null
+						|| IMAPCredSrc.SESSION.equals(IMAPProperties.getImapCredSrcInternal())) {
+					imapProps.setImapPassword(sessionObj.getPassword());
+					imapProps.setImapLogin(User2IMAP.getInstance(userObj).getLocalIMAPLogin(sessionObj, false));
+				} else if (IMAPCredSrc.OTHER.equals(IMAPProperties.getImapCredSrcInternal())) {
+					imapProps.setImapPassword(TEST_PW);
+					imapProps.setImapLogin(getRandomTestLogin());
+				} else if (IMAPCredSrc.USER_IMAPLOGIN.equals(IMAPProperties.getImapCredSrcInternal())) {
+					imapProps.setImapPassword(sessionObj.getPassword());
+					imapProps.setImapLogin(User2IMAP.getInstance(userObj).getLocalIMAPLogin(sessionObj, true));
+				}
+			} catch (final User2IMAPException e) {
+				throw new IMAPException(e);
 			}
 		} else if (IMAPLoginType.ANONYMOUS.equals(IMAPProperties.getImapLoginTypeInternal())) {
 			String imapServer = userObj.getImapServer();

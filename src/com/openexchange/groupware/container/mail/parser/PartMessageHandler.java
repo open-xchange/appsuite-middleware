@@ -277,7 +277,7 @@ public class PartMessageHandler implements MessageHandler {
 			}
 			return true;
 		} catch (MessagingException e) {
-			throw handleMessagingException(e, session.getIMAPProperties());
+			throw handleMessagingException(e, session.getIMAPProperties(), session.getContext());
 		}
 	}
 

@@ -64,8 +64,6 @@ public class IMAPProperties {
 
 	private final int user;
 
-	private final Context ctx;
-
 	private String imapLogin;
 
 	private String imapPassword;
@@ -196,10 +194,9 @@ public class IMAPProperties {
 		}
 	}
 
-	public IMAPProperties(final int user, final Context ctx) {
+	public IMAPProperties(final int user) {
 		super();
 		this.user = user;
-		this.ctx = ctx;
 	}
 
 	public String getImapLogin() {
@@ -261,10 +258,6 @@ public class IMAPProperties {
 
 	public void setSmtpPort(final int smtpPort) {
 		this.smtpPort = smtpPort;
-	}
-
-	public Context getContext() {
-		return ctx;
 	}
 
 	public int getUser() {

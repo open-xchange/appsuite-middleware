@@ -148,7 +148,13 @@ public class EffectivePermission extends OCLPermission {
 			if (folderType == FolderObject.PUBLIC && folderModule != FolderObject.INFOSTORE
 					&& !userConfig.hasFullPublicFolderAccess()) {
 				return false;
-			} else if (!hasModuleAccess(folderModule)) {
+			}
+			
+			else if (folderType == FolderObject.PRIVATE && !userConfig.hasFullSharedFolderAccess()) {
+				return false;
+			}
+			
+			else if (!hasModuleAccess(folderModule)) {
 				return false;
 			}
 		}

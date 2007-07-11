@@ -107,6 +107,12 @@ public class RdbUserStorage extends UserStorage {
         + " FROM login2user where cid=? AND " + IDENTIFIER + "=?";
 
     /**
+     * SQL statement for resolving an imap login to a user.
+     */
+    private static final String SELECT_IMAPLOGIN = "SELECT " + IDENTIFIER
+        + " FROM user WHERE cid=? AND imapLogin=?";
+    
+    /**
      * Reference to the context.
      */
     private final transient Context context;
@@ -521,5 +527,45 @@ public class RdbUserStorage extends UserStorage {
             DBPool.closeReaderSilent(context, con);
         }
         return users;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int resolveIMAPLogin(final String imapLogin) throws UserException {
+        Connection con = null;
+        try {
+            con = DBPool.pickup(context);
+        } catch (Exception e) {
+            throw new UserException(UserException.Code.NO_CONNECTION, e);
+        }
+        final int user;
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            stmt = con.prepareStatement(SELECT_IMAPLOGIN);
+            final int cid = context.getContextId();
+            stmt.setInt(1, cid);
+            stmt.setString(2, imapLogin);
+            result = stmt.executeQuery();
+            if (result.next()) {
+                user = result.getInt(1);
+            } else {
+                throw new UserException(UserException.Code.USER_NOT_FOUND,
+                    imapLogin, cid);
+            }
+            if (result.next()) {
+                throw new UserException(UserException.Code.USER_CONFLICT,
+                    imapLogin, cid);
+            }
+        } catch (SQLException e) {
+            throw new UserException(UserException.Code.SQL_ERROR, e, e
+                .getMessage());
+        } finally {
+            closeSQLStuff(result, stmt);
+            DBPool.closeReaderSilent(context, con);
+        }
+        return user;
     }
 }

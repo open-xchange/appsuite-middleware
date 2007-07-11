@@ -14,6 +14,10 @@ UserConfigurationStorage=Caching
 # setup.
 SetupLink=com.openexchange.groupware.integration.EmptyImpl
 
+# Name of the class that implements User2IMAP, their alias or "auto" to use auto-detection.
+# Currently known aliases: Cyrus, Courier
+User2IMAPImpl=auto
+
 # Location of the configuration file for the user specific configuration jump.
 # The content of this file depends on the implementation of the SetupLink.
 ConfigJumpConf=@oxgroupwaresysconfdir@/configjump.properties

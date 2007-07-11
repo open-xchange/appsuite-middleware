@@ -1,3 +1,8 @@
+* 2007-07-11 - thorben.betten@open-xchange.com
+
+ - Added support for differing IMAP server's ACL handling plus
+   auto-detection of IMAP server
+
 * 2007-07-10 - tobias.prinz@open-xchange.com
 
  - Bugfix #7949: Changed log-level for USER_INPUT exceptions 

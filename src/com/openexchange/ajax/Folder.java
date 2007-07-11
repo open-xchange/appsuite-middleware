@@ -1362,7 +1362,7 @@ public class Folder extends SessionServlet {
 				try {
 					final MailFolderObject updateFolder = mailInterface.getFolder(folderIdentifier, true);
 					if (updateFolder != null) {
-						final MailFolderObject mfo = new MailFolderObject(updateFolder.getFullName(), updateFolder
+						final MailFolderObject mfo = new MailFolderObject(sessionObj.getUserObject().getId(), updateFolder.getFullName(), updateFolder
 								.exists());
 						mfo.setImapFolder(updateFolder.getImapFolder());
 						mfo.setSeparator(updateFolder.getSeparator());
@@ -1440,7 +1440,7 @@ public class Folder extends SessionServlet {
 			} else {
 				final MailInterface mailInterface = MailInterfaceImpl.getInstance(sessionObj);
 				try {
-					final MailFolderObject mfo = new MailFolderObject();
+					final MailFolderObject mfo = new MailFolderObject(sessionObj.getUserObject().getId());
 					mfo.setParentFullName(parentFolder);
 					new MailFolderParser(sessionObj).parse(mfo, jsonObj);
 					retval = mailInterface.saveFolder(mfo);

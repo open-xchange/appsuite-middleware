@@ -174,7 +174,22 @@ public class UserException extends AbstractOXException {
          * Encoding %s cannot be used.
          */
         UNSUPPORTED_ENCODING("Encoding %s cannot be used.", Category.CODE_ERROR,
-            Detail.ERROR, 9);
+            Detail.ERROR, 9),
+        /**
+         * Cannot find user with identifier %1$s in context %2$d.
+         */
+        USER_NOT_FOUND("Cannot find user with identifier %1$s in context %2$d.",
+            Category.CODE_ERROR, Detail.NOT_FOUND, 10),
+        /**
+         * Found two user with same identifier %1$s in context %2$d.
+         */
+        USER_CONFLICT("Found two user with same identifier %1$s in context "
+            + "%2$d.", Category.CODE_ERROR, Detail.ERROR, 11),
+        /**
+         * Problem putting an object into the cache.
+         */
+        CACHE_PROBLEM("Problem putting/removing an object into/from the cache.",
+            Category.CODE_ERROR, Detail.ERROR, 12);
 
         /**
          * Message of the exception.

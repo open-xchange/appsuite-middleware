@@ -217,7 +217,11 @@ public final class SystemConfig extends AbstractConfig {
         /**
          * Config file for the login implementation.
          */
-        LoginInfoConfig("LoginInfoConfig");
+        LoginInfoConfig("LoginInfoConfig"),
+        /**
+		 * Class implementing User2IMAP
+		 */
+		User2IMAPImpl("User2IMAPImpl");
 
         /**
          * Name of the property in the server.properties file.

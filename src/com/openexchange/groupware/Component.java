@@ -238,7 +238,11 @@ public enum Component {
     /**
      * Spell Check
      */
-    SPELLCHECK("SPC");
+    SPELLCHECK("SPC"),
+    /**
+     * ACL related error
+     */
+    ACL_ERROR("ACL");
 
     /**
      * The abbrevation for components.

@@ -47,49 +47,19 @@
  *
  */
 
+package com.openexchange.groupware.imap;
 
-
-package com.openexchange.groupware;
-
-import com.openexchange.event.EventInit;
-import com.openexchange.groupware.calendar.CalendarConfig;
-import com.openexchange.groupware.configuration.ParticipantConfig;
-import com.openexchange.groupware.contact.ContactConfig;
-import com.openexchange.groupware.contexts.ContextInit;
-import com.openexchange.groupware.imap.User2IMAP;
-import com.openexchange.groupware.integration.SetupLink;
-import com.openexchange.groupware.settings.ConfigTree;
-import com.openexchange.push.udp.PushInit;
-import com.openexchange.sessiond.SessiondInit;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.imap.User2IMAP.IMAPServer;
 
 /**
- * This class contains the initialization for the groupware server.
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * User2IMAPInfo
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ *
  */
-public final class GroupwareInit {
+public interface User2IMAPInfo {
+	
+	public Object[] getArguments(IMAPServer imapServer) throws AbstractOXException;
 
-    /**
-     * Prevent instanciation.
-     */
-    private GroupwareInit() {
-        super();
-    }
-
-    /**
-     * Method for initializing the groupware server.
-     * @throws AbstractOXException if initialization fails.
-     */
-    public static void init() throws AbstractOXException {
-        ContextInit.init();
-        UserConfigurationStorage.init();
-        User2IMAP.init();
-        SetupLink.init();
-        ConfigTree.init();
-        CalendarConfig.init();
-        ContactConfig.init();
-		SessiondInit.init();
-		EventInit.init();
-		PushInit.init();
-        ParticipantConfig.init();
-    }
 }

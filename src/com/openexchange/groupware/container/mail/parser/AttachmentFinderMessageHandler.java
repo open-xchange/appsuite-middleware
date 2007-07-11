@@ -245,7 +245,7 @@ public class AttachmentFinderMessageHandler implements MessageHandler {
 			hasAttachment = (isMultipart && (isAttachment(part) || !part.isMimeType("text/*")));
 			return !hasAttachment;
 		} catch (MessagingException e) {
-			throw MailInterfaceImpl.handleMessagingException(e, session.getIMAPProperties());
+			throw MailInterfaceImpl.handleMessagingException(e, session.getIMAPProperties(), session.getContext());
 		}
 	}
 
@@ -260,7 +260,7 @@ public class AttachmentFinderMessageHandler implements MessageHandler {
 			hasAttachment = (isMultipart && isAttachment(part));
 			return !hasAttachment;
 		} catch (MessagingException e) {
-			throw MailInterfaceImpl.handleMessagingException(e, session.getIMAPProperties());
+			throw MailInterfaceImpl.handleMessagingException(e, session.getIMAPProperties(), session.getContext());
 		}
 	}
 
@@ -276,7 +276,7 @@ public class AttachmentFinderMessageHandler implements MessageHandler {
 			hasAttachment = (isMultipart && isAttachment(part));
 			return !hasAttachment;
 		} catch (MessagingException e) {
-			throw MailInterfaceImpl.handleMessagingException(e, session.getIMAPProperties());
+			throw MailInterfaceImpl.handleMessagingException(e, session.getIMAPProperties(), session.getContext());
 		}
 	}
 

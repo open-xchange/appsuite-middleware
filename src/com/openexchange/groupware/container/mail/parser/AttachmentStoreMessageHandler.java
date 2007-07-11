@@ -260,7 +260,7 @@ public class AttachmentStoreMessageHandler implements MessageHandler {
 		try {
 			new MessageDumper(session).dumpMessage(nestedMsg, msgHandler, id);
 		} catch (MessagingException e) {
-			throw MailInterfaceImpl.handleMessagingException(e, session.getIMAPProperties());
+			throw MailInterfaceImpl.handleMessagingException(e, session.getIMAPProperties(), session.getContext());
 		}
 		return true;
 	}

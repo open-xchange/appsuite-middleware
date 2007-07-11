@@ -565,7 +565,7 @@ public class JSONMessageHandler implements MessageHandler {
 			msgObj.addMessageAttachment(mao);
 			return true;
 		} catch (final MessagingException e) {
-			throw handleMessagingException(e, session.getIMAPProperties());
+			throw handleMessagingException(e, session.getIMAPProperties(), session.getContext());
 		}
 	}
 
@@ -628,7 +628,7 @@ public class JSONMessageHandler implements MessageHandler {
 		try {
 			new MessageDumper(session).dumpMessage(nestedMsg, msgHandler, id);
 		} catch (final MessagingException e) {
-			throw handleMessagingException(e, session.getIMAPProperties());
+			throw handleMessagingException(e, session.getIMAPProperties(),session.getContext() );
 		}
 		msgObj.addNestedMessage(msgHandler.getMessageObject());
 		return true;

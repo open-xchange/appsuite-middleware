@@ -134,7 +134,7 @@ public class MailWriter extends DataWriter {
 			if (e.getMessage().toLowerCase(Locale.ENGLISH).indexOf(ERR_BROKEN_BODYSTRUCTURE) != -1 && LOG.isWarnEnabled()) {
 				LOG.warn(e.getMessage(), e);
 			} else {
-				throw MailInterfaceImpl.handleMessagingException(e, session.getIMAPProperties());
+				throw MailInterfaceImpl.handleMessagingException(e, session.getIMAPProperties(), session.getContext());
 			}
 		} catch (JSONException e) {
 			throw new OXMailException(MailCode.JSON_ERROR, e, e.getMessage());
@@ -495,7 +495,7 @@ public class MailWriter extends DataWriter {
 		} catch (JSONException e) {
 			throw new OXMailException(MailCode.JSON_ERROR, e, e.getMessage());
 		} catch (MessagingException e) {
-			throw MailInterfaceImpl.handleMessagingException(e, session.getIMAPProperties());
+			throw MailInterfaceImpl.handleMessagingException(e, session.getIMAPProperties(), session.getContext());
 		}
 	}
 

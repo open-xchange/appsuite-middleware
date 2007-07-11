@@ -124,6 +124,7 @@ import sun.net.ConnectionResetException;
 
 import com.openexchange.ajax.Mail;
 import com.openexchange.cache.IMAPConnectionCacheManager;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.AccountExistenceException;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.calendar.CalendarDataObject;
@@ -144,6 +145,7 @@ import com.openexchange.groupware.container.mail.parser.MessageDumper;
 import com.openexchange.groupware.container.mail.parser.PartMessageHandler;
 import com.openexchange.groupware.container.mail.parser.ReplyTextMessageHandler;
 import com.openexchange.groupware.container.mail.parser.SpamMessageHandler;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.imap.DefaultIMAPConnection;
 import com.openexchange.groupware.imap.IMAPCapabilities;
@@ -669,9 +671,9 @@ public class MailInterfaceImpl implements MailInterface {
 			imapCon.connect();
 			return retval;
 		} catch (final NoSuchProviderException e) {
-			throw handleMessagingException(e, sessionObj.getIMAPProperties());
+			throw handleMessagingException(e, sessionObj.getIMAPProperties(), sessionObj.getContext());
 		} catch (final MessagingException e) {
-			throw handleMessagingException(e, sessionObj.getIMAPProperties());
+			throw handleMessagingException(e, sessionObj.getIMAPProperties(), sessionObj.getContext());
 		}
 	}
 
@@ -1023,7 +1025,7 @@ public class MailInterfaceImpl implements MailInterface {
 				}
 			}
 		} catch (final MessagingException e) {
-			throw handleMessagingException(e, sessionObj.getIMAPProperties());
+			throw handleMessagingException(e, sessionObj.getIMAPProperties(), sessionObj.getContext());
 		}
 	}
 
@@ -1046,7 +1048,7 @@ public class MailInterfaceImpl implements MailInterface {
 			init();
 			return imapCon.getIMAPStore();
 		} catch (final MessagingException e) {
-			throw handleMessagingException(e, sessionObj.getIMAPProperties());
+			throw handleMessagingException(e, sessionObj.getIMAPProperties(), sessionObj.getContext());
 		}
 	}
 
@@ -1077,7 +1079,7 @@ public class MailInterfaceImpl implements MailInterface {
 					closeIMAPConnection(putIntoCache, sessionObj, imapCon);
 					close = false;
 				} catch (final MessagingException e) {
-					throw handleMessagingException(e, sessionObj.getIMAPProperties());
+					throw handleMessagingException(e, sessionObj.getIMAPProperties(), sessionObj.getContext());
 				}
 			}
 		} finally {
@@ -1244,7 +1246,7 @@ public class MailInterfaceImpl implements MailInterface {
 				return;
 			}
 		} catch (final MessagingException e2) {
-			throw handleMessagingException(e2, sessionObj.getIMAPProperties());
+			throw handleMessagingException(e2, sessionObj.getIMAPProperties(), sessionObj.getContext());
 		}
 		try {
 			try {
@@ -1337,7 +1339,7 @@ public class MailInterfaceImpl implements MailInterface {
 			}
 			return new long[] { resources[0].limit, resources[0].usage };
 		} catch (final MessagingException e) {
-			throw handleMessagingException(e, sessionObj.getIMAPProperties());
+			throw handleMessagingException(e, sessionObj.getIMAPProperties(), sessionObj.getContext());
 		}
 	}
 
@@ -1374,7 +1376,7 @@ public class MailInterfaceImpl implements MailInterface {
 			}
 			return resources[0].limit;
 		} catch (final MessagingException e) {
-			throw handleMessagingException(e, sessionObj.getIMAPProperties());
+			throw handleMessagingException(e, sessionObj.getIMAPProperties(), sessionObj.getContext());
 		}
 	}
 
@@ -1411,7 +1413,7 @@ public class MailInterfaceImpl implements MailInterface {
 			}
 			return resources[0].usage;
 		} catch (final MessagingException e) {
-			throw handleMessagingException(e, sessionObj.getIMAPProperties());
+			throw handleMessagingException(e, sessionObj.getIMAPProperties(), sessionObj.getContext());
 		}
 	}
 
@@ -1450,7 +1452,7 @@ public class MailInterfaceImpl implements MailInterface {
 			}
 			return retval;
 		} catch (final MessagingException e) {
-			throw handleMessagingException(e, sessionObj.getIMAPProperties());
+			throw handleMessagingException(e, sessionObj.getIMAPProperties(), sessionObj.getContext());
 		}
 	}
 
@@ -1466,7 +1468,7 @@ public class MailInterfaceImpl implements MailInterface {
 			setAndOpenFolder(folder == null ? STR_INBOX : folder, Folder.READ_ONLY);
 			return imapCon.getImapFolder().getMessageCount();
 		} catch (final MessagingException e) {
-			throw handleMessagingException(e, sessionObj.getIMAPProperties());
+			throw handleMessagingException(e, sessionObj.getIMAPProperties(), sessionObj.getContext());
 		}
 	}
 
@@ -1482,7 +1484,7 @@ public class MailInterfaceImpl implements MailInterface {
 			setAndOpenFolder(folder == null ? STR_INBOX : folder, Folder.READ_ONLY);
 			return imapCon.getImapFolder().getNewMessageCount();
 		} catch (final MessagingException e) {
-			throw handleMessagingException(e, sessionObj.getIMAPProperties());
+			throw handleMessagingException(e, sessionObj.getIMAPProperties(), sessionObj.getContext());
 		}
 	}
 
@@ -1498,7 +1500,7 @@ public class MailInterfaceImpl implements MailInterface {
 			setAndOpenFolder(folder == null ? STR_INBOX : folder, Folder.READ_ONLY);
 			return imapCon.getImapFolder().getUnreadMessageCount();
 		} catch (final MessagingException e) {
-			throw handleMessagingException(e, sessionObj.getIMAPProperties());
+			throw handleMessagingException(e, sessionObj.getIMAPProperties(), sessionObj.getContext());
 		}
 	}
 
@@ -1514,7 +1516,7 @@ public class MailInterfaceImpl implements MailInterface {
 			setAndOpenFolder(folder == null ? STR_INBOX : folder, Folder.READ_ONLY);
 			return imapCon.getImapFolder().getDeletedMessageCount();
 		} catch (final MessagingException e) {
-			throw handleMessagingException(e, sessionObj.getIMAPProperties());
+			throw handleMessagingException(e, sessionObj.getIMAPProperties(), sessionObj.getContext());
 		}
 	}
 
@@ -1534,7 +1536,7 @@ public class MailInterfaceImpl implements MailInterface {
 			}
 			return retval;
 		} catch (final MessagingException e) {
-			throw handleMessagingException(e, sessionObj.getIMAPProperties());
+			throw handleMessagingException(e, sessionObj.getIMAPProperties(), sessionObj.getContext());
 		}
 	}
 
@@ -1663,7 +1665,7 @@ public class MailInterfaceImpl implements MailInterface {
 			}
 			return SearchIteratorAdapter.createArrayIterator(newMsgs);
 		} catch (final MessagingException e) {
-			throw handleMessagingException(e, sessionObj.getIMAPProperties());
+			throw handleMessagingException(e, sessionObj.getIMAPProperties(), sessionObj.getContext());
 		}
 	}
 
@@ -1836,7 +1838,7 @@ public class MailInterfaceImpl implements MailInterface {
 			}
 			return SearchIteratorAdapter.createArrayIterator(retval);
 		} catch (final MessagingException e) {
-			throw handleMessagingException(e, sessionObj.getIMAPProperties());
+			throw handleMessagingException(e, sessionObj.getIMAPProperties(), sessionObj.getContext());
 		} catch (final IMAPException e) {
 			throw new OXMailException(MailCode.IMAP_ERROR, e, e.getMessage());
 		}
@@ -1857,7 +1859,7 @@ public class MailInterfaceImpl implements MailInterface {
 			return SearchIteratorAdapter.createArrayIterator(searchMessages(imapCon.getImapFolder(), searchCols,
 					searchPatterns, linkWithOR, fields, -1));
 		} catch (final MessagingException e) {
-			throw handleMessagingException(e, sessionObj.getIMAPProperties());
+			throw handleMessagingException(e, sessionObj.getIMAPProperties(), sessionObj.getContext());
 		} catch (final IMAPException e) {
 			throw new OXMailException(MailCode.IMAP_ERROR, e, e.getMessage());
 		}
@@ -2072,7 +2074,7 @@ public class MailInterfaceImpl implements MailInterface {
 			}
 			return SearchIteratorAdapter.createArrayIterator(msgs);
 		} catch (final MessagingException e) {
-			throw handleMessagingException(e, sessionObj.getIMAPProperties());
+			throw handleMessagingException(e, sessionObj.getIMAPProperties(), sessionObj.getContext());
 		} catch (final IMAPException e) {
 			throw new OXMailException(MailCode.IMAP_ERROR, e, e.getMessage());
 		}
@@ -2140,7 +2142,7 @@ public class MailInterfaceImpl implements MailInterface {
 			}
 			return msgs;
 		} catch (final MessagingException e) {
-			throw handleMessagingException(e, sessionObj.getIMAPProperties());
+			throw handleMessagingException(e, sessionObj.getIMAPProperties(), sessionObj.getContext());
 		}
 	}
 
@@ -2238,7 +2240,7 @@ public class MailInterfaceImpl implements MailInterface {
 			markAsSeen = msg;
 			return msg;
 		} catch (final MessagingException e) {
-			throw handleMessagingException(e, sessionObj.getIMAPProperties());
+			throw handleMessagingException(e, sessionObj.getIMAPProperties(), sessionObj.getContext());
 		}
 	}
 
@@ -2290,7 +2292,7 @@ public class MailInterfaceImpl implements MailInterface {
 			new MessageDumper(sessionObj).dumpMessage(msg, msgHandler);
 			return msgHandler.getAttachmentObject();
 		} catch (final MessagingException e) {
-			throw handleMessagingException(e, sessionObj.getIMAPProperties());
+			throw handleMessagingException(e, sessionObj.getIMAPProperties(), sessionObj.getContext());
 		}
 	}
 
@@ -2467,7 +2469,7 @@ public class MailInterfaceImpl implements MailInterface {
 			}
 			return retvalList.toArray(new CommonObject[retvalList.size()]);
 		} catch (final MessagingException e) {
-			throw handleMessagingException(e, sessionObj.getIMAPProperties());
+			throw handleMessagingException(e, sessionObj.getIMAPProperties(), sessionObj.getContext());
 		} catch (final IOException e) {
 			throw new OXMailException(MailCode.FAILED_VERSIT_SAVE);
 		}
@@ -2509,7 +2511,7 @@ public class MailInterfaceImpl implements MailInterface {
 			new MessageDumper(sessionObj).dumpMessage(msg, msgHandler);
 			return msgHandler.getImageAttachment();
 		} catch (final MessagingException e) {
-			throw handleMessagingException(e, sessionObj.getIMAPProperties());
+			throw handleMessagingException(e, sessionObj.getIMAPProperties(), sessionObj.getContext());
 		}
 	}
 
@@ -2727,7 +2729,7 @@ public class MailInterfaceImpl implements MailInterface {
 			retval.setMsgref(msgUID);
 			return retval;
 		} catch (final MessagingException e) {
-			throw handleMessagingException(e, sessionObj.getIMAPProperties());
+			throw handleMessagingException(e, sessionObj.getIMAPProperties(), sessionObj.getContext());
 		}
 	}
 
@@ -2990,7 +2992,7 @@ public class MailInterfaceImpl implements MailInterface {
 			retval.setMsgref(msgUID);
 			return retval;
 		} catch (final MessagingException e) {
-			throw handleMessagingException(e, sessionObj.getIMAPProperties());
+			throw handleMessagingException(e, sessionObj.getIMAPProperties(), sessionObj.getContext());
 		}
 	}
 
@@ -3074,7 +3076,7 @@ public class MailInterfaceImpl implements MailInterface {
 			sendReceiptAck(to, fromAddr, (msgId == null ? "[not available]" : msgId), msg.getSubject(), msg
 					.getSentDate());
 		} catch (final MessagingException e) {
-			throw handleMessagingException(e, sessionObj.getIMAPProperties());
+			throw handleMessagingException(e, sessionObj.getIMAPProperties(), sessionObj.getContext());
 		}
 	}
 
@@ -3460,7 +3462,7 @@ public class MailInterfaceImpl implements MailInterface {
 						mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 					}
 				} catch (final MessagingException e) {
-					throw handleMessagingException(e, sessionObj.getIMAPProperties());
+					throw handleMessagingException(e, sessionObj.getIMAPProperties(), sessionObj.getContext());
 				}
 				if (usm.isNoCopyIntoStandardSentFolder()) {
 					/*
@@ -3525,7 +3527,7 @@ public class MailInterfaceImpl implements MailInterface {
 				}
 			}
 		} catch (final MessagingException e) {
-			throw handleMessagingException(e, sessionObj.getIMAPProperties());
+			throw handleMessagingException(e, sessionObj.getIMAPProperties(), sessionObj.getContext());
 		} catch (final IOException e) {
 			throw new OXMailException(MailCode.INTERNAL_ERROR, e, e.getMessage());
 		} catch (final JSONException e) {
@@ -3604,7 +3606,7 @@ public class MailInterfaceImpl implements MailInterface {
 			imapCon.setExpunge(true);
 			return true;
 		} catch (final MessagingException e) {
-			throw handleMessagingException(e, sessionObj.getIMAPProperties());
+			throw handleMessagingException(e, sessionObj.getIMAPProperties(), sessionObj.getContext());
 		}
 	}
 
@@ -3684,7 +3686,7 @@ public class MailInterfaceImpl implements MailInterface {
 			imapCon.setExpunge(true);
 			return true;
 		} catch (final MessagingException e) {
-			throw handleMessagingException(e, sessionObj.getIMAPProperties());
+			throw handleMessagingException(e, sessionObj.getIMAPProperties(), sessionObj.getContext());
 		}
 	}
 
@@ -3849,7 +3851,7 @@ public class MailInterfaceImpl implements MailInterface {
 						throw new OXMailException(MailCode.INTERNAL_ERROR, e1, e1.getMessage());
 					}
 				}
-				throw handleMessagingException(e, sessionObj.getIMAPProperties());
+				throw handleMessagingException(e, sessionObj.getIMAPProperties(), sessionObj.getContext());
 			}
 			msgs = cleanMessageArray(msgs);
 			if (msgs == null || msgs.length == 0) {
@@ -3915,7 +3917,7 @@ public class MailInterfaceImpl implements MailInterface {
 			 */
 			return retval;
 		} catch (final MessagingException e) {
-			throw handleMessagingException(e, sessionObj.getIMAPProperties());
+			throw handleMessagingException(e, sessionObj.getIMAPProperties(), sessionObj.getContext());
 		}
 	}
 
@@ -4001,7 +4003,7 @@ public class MailInterfaceImpl implements MailInterface {
 				throw new MessagingException(e.getMessage(), e);
 			}
 		} catch (final MessagingException e) {
-			throw handleMessagingException(e, sessionObj.getIMAPProperties());
+			throw handleMessagingException(e, sessionObj.getIMAPProperties(), sessionObj.getContext());
 		}
 	}
 
@@ -4129,7 +4131,7 @@ public class MailInterfaceImpl implements MailInterface {
 				throw new MessagingException(e.getMessage(), e);
 			}
 		} catch (final MessagingException e) {
-			throw handleMessagingException(e, sessionObj.getIMAPProperties());
+			throw handleMessagingException(e, sessionObj.getIMAPProperties(), sessionObj.getContext());
 		}
 	}
 
@@ -4488,7 +4490,7 @@ public class MailInterfaceImpl implements MailInterface {
 			list.add(new MailFolderObject(defaultFolder, sessionObj));
 			return new SearchIteratorAdapter(list.iterator(), 1);
 		} catch (final MessagingException e) {
-			throw handleMessagingException(e, sessionObj.getIMAPProperties());
+			throw handleMessagingException(e, sessionObj.getIMAPProperties(), sessionObj.getContext());
 		}
 	}
 
@@ -4536,7 +4538,7 @@ public class MailInterfaceImpl implements MailInterface {
 			}
 			return new SearchIteratorAdapter(list.iterator(), list.size());
 		} catch (final MessagingException e) {
-			throw handleMessagingException(e, sessionObj.getIMAPProperties());
+			throw handleMessagingException(e, sessionObj.getIMAPProperties(), sessionObj.getContext());
 		}
 	}
 
@@ -4562,7 +4564,7 @@ public class MailInterfaceImpl implements MailInterface {
 			}
 			return new SearchIteratorAdapter(list.iterator(), allFolders.length);
 		} catch (final MessagingException e) {
-			throw handleMessagingException(e, sessionObj.getIMAPProperties());
+			throw handleMessagingException(e, sessionObj.getIMAPProperties(), sessionObj.getContext());
 		}
 	}
 
@@ -4596,7 +4598,7 @@ public class MailInterfaceImpl implements MailInterface {
 			}
 			return new MailFolderObject(retval, sessionObj);
 		} catch (final MessagingException e) {
-			throw handleMessagingException(e, sessionObj.getIMAPProperties());
+			throw handleMessagingException(e, sessionObj.getIMAPProperties(), sessionObj.getContext());
 		}
 	}
 
@@ -4632,7 +4634,7 @@ public class MailInterfaceImpl implements MailInterface {
 			}
 			return new SearchIteratorAdapter(retval.iterator(), retval.size());
 		} catch (final MessagingException e) {
-			throw handleMessagingException(e, sessionObj.getIMAPProperties());
+			throw handleMessagingException(e, sessionObj.getIMAPProperties(), sessionObj.getContext());
 		}
 	}
 
@@ -4656,7 +4658,7 @@ public class MailInterfaceImpl implements MailInterface {
 				}
 			}
 		} catch (final MessagingException e) {
-			throw handleMessagingException(e, sessionObj.getIMAPProperties());
+			throw handleMessagingException(e, sessionObj.getIMAPProperties(), sessionObj.getContext());
 		}
 	}
 
@@ -4796,13 +4798,19 @@ public class MailInterfaceImpl implements MailInterface {
 						applySubscriptionStatus(updateMe, subscriptionStatus);
 					}
 				}
-				ACLS: if (folderObj.containsACLs() && IMAPProperties.isSupportsACLs()) {
+				ACLS: if (IMAPProperties.isSupportsACLs()
+						&& (folderObj.containsIMAPPermissions() || folderObj.containsACLs())) {
 					/*
 					 * Wrapper object contains rights. No simple rename but a
 					 * whole ACL re-set
 					 */
 					final ACL[] oldACLs = updateMe.getACL();
-					final ACL[] newACLs = folderObj.getACL();
+					ACL[] newACLs;
+					try {
+						newACLs = folderObj.getACL();
+					} catch (AbstractOXException e) {
+						throw new OXMailException(e);
+					}
 					if (equals(oldACLs, newACLs)) {
 						break ACLS;
 					}
@@ -4900,7 +4908,12 @@ public class MailInterfaceImpl implements MailInterface {
 				}
 				ACLS: if (folderObj.containsACLs() && IMAPProperties.isSupportsACLs()) {
 					final ACL[] initialACLs = createMe.getACL();
-					final ACL[] newACLs = folderObj.getACL();
+					ACL[] newACLs;
+					try {
+						newACLs = folderObj.getACL();
+					} catch (AbstractOXException e1) {
+						throw new OXMailException(e1);
+					}
 					if (equals(initialACLs, newACLs)) {
 						break ACLS;
 					}
@@ -4929,15 +4942,19 @@ public class MailInterfaceImpl implements MailInterface {
 					 * Wrapper object contains rights. Add new ACLs from
 					 * folderObj
 					 */
-					for (int i = 0; i < folderObj.getACL().length; i++) {
-						createMe.addACL(folderObj.getACL()[i]);
+					try {
+						for (int i = 0; i < folderObj.getACL().length; i++) {
+							createMe.addACL(folderObj.getACL()[i]);
+						}
+					} catch (AbstractOXException e) {
+						throw new OXMailException(e);
 					}
 				}
 				retval = createMe.getFullName();
 			}
 			return retval;
 		} catch (final MessagingException e) {
-			throw handleMessagingException(e, sessionObj.getIMAPProperties());
+			throw handleMessagingException(e, sessionObj.getIMAPProperties(), sessionObj.getContext());
 		}
 	}
 
@@ -5186,7 +5203,7 @@ public class MailInterfaceImpl implements MailInterface {
 			deleteFolder(deleteMe);
 			return retval;
 		} catch (final MessagingException e) {
-			throw handleMessagingException(e, sessionObj.getIMAPProperties());
+			throw handleMessagingException(e, sessionObj.getIMAPProperties(), sessionObj.getContext());
 		}
 	}
 
@@ -5270,7 +5287,7 @@ public class MailInterfaceImpl implements MailInterface {
 	}
 
 	public static OXMailException handleMessagingException(final MessagingException e) {
-		return handleMessagingException(e, null);
+		return handleMessagingException(e, null, null);
 	}
 
 	private static final String ERR_AUTH_FAILED = "bad authentication failed";
@@ -5279,26 +5296,27 @@ public class MailInterfaceImpl implements MailInterface {
 
 	private static final String ERR_MSG_TOO_LARGE = "message too large";
 
-	public static OXMailException handleMessagingException(final MessagingException e, final IMAPProperties imapProps) {
+	public static OXMailException handleMessagingException(final MessagingException e, final IMAPProperties imapProps,
+			final Context ctx) {
 		final OXMailException oxme;
 		if (e instanceof AuthenticationFailedException) {
 			final boolean temporary = e.getMessage() != null
 					&& ERR_TMP.equals(e.getMessage().toLowerCase(Locale.ENGLISH));
-			if (imapProps == null) {
+			if (imapProps != null && ctx != null) {
+				if (temporary) {
+					oxme = new OXMailException(MailCode.LOGIN_FAILED, e, imapProps.getImapServer(),
+							com.openexchange.tools.oxfolder.OXFolderManagerImpl.getUserName(imapProps.getUser(), ctx),
+							Integer.valueOf(ctx.getContextId()));
+				} else {
+					oxme = new OXMailException(MailCode.INVALID_CREDENTIALS, e, imapProps.getImapServer(),
+							com.openexchange.tools.oxfolder.OXFolderManagerImpl.getUserName(imapProps.getUser(), ctx),
+							Integer.valueOf(ctx.getContextId()));
+				}
+			} else {
 				if (temporary) {
 					oxme = new OXMailException(MailCode.LOGIN_FAILED, e, STR_EMPTY, STR_EMPTY, STR_EMPTY);
 				} else {
 					oxme = new OXMailException(MailCode.INVALID_CREDENTIALS, e, STR_EMPTY, STR_EMPTY, STR_EMPTY);
-				}
-			} else {
-				if (temporary) {
-					oxme = new OXMailException(MailCode.LOGIN_FAILED, e, imapProps.getImapServer(),
-							com.openexchange.tools.oxfolder.OXFolderManagerImpl.getUserName(imapProps.getUser(),
-									imapProps.getContext()), Integer.valueOf(imapProps.getContext().getContextId()));
-				} else {
-					oxme = new OXMailException(MailCode.INVALID_CREDENTIALS, e, imapProps.getImapServer(),
-							com.openexchange.tools.oxfolder.OXFolderManagerImpl.getUserName(imapProps.getUser(),
-									imapProps.getContext()), Integer.valueOf(imapProps.getContext().getContextId()));
 				}
 			}
 		} else if (e instanceof FolderClosedException) {
@@ -5388,12 +5406,12 @@ public class MailInterfaceImpl implements MailInterface {
 			} else if (e.getNextException() instanceof UnknownHostException) {
 				oxme = new OXMailException(MailCode.UNKNOWN_HOST, e, e.getMessage());
 			} else if (e.getMessage().toLowerCase(Locale.ENGLISH).indexOf(ERR_AUTH_FAILED) != -1) {
-				if (imapProps == null) {
-					oxme = new OXMailException(MailCode.LOGIN_FAILED, e, STR_EMPTY, STR_EMPTY, STR_EMPTY);
-				} else {
+				if (imapProps != null && ctx != null) {
 					oxme = new OXMailException(MailCode.LOGIN_FAILED, e, imapProps.getImapServer(),
-							com.openexchange.tools.oxfolder.OXFolderManagerImpl.getUserName(imapProps.getUser(),
-									imapProps.getContext()), Integer.valueOf(imapProps.getContext().getContextId()));
+							com.openexchange.tools.oxfolder.OXFolderManagerImpl.getUserName(imapProps.getUser(), ctx),
+							Integer.valueOf(ctx.getContextId()));
+				} else {
+					oxme = new OXMailException(MailCode.LOGIN_FAILED, e, STR_EMPTY, STR_EMPTY, STR_EMPTY);
 				}
 			} else {
 				/*

@@ -211,6 +211,14 @@ public abstract class UserStorage {
     public abstract int[] listAllUser() throws UserException;
 
     /**
+     * Searches for a user whose IMAP login name matches the given login name.
+     * @param imapLogin the IMAP login name to search for
+     * @return The unique identifier of the user.
+     * @throws UserException if an error occurs during the search. 
+     */
+    public abstract int resolveIMAPLogin(String imapLogin) throws UserException;
+
+    /**
      * Searches users who where modified later than the given date.
      * @param modifiedSince Date after that the returned users are modified.
      * @return a string array with the uids of the matching user.

@@ -52,10 +52,10 @@ package com.openexchange.server;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.imap.IMAPException;
-import com.openexchange.groupware.imap.OXUser2IMAPLogin;
-import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.groupware.imap.User2IMAP;
+import com.openexchange.groupware.imap.User2IMAPInfo;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 import com.sun.mail.imap.ACL;
@@ -76,11 +76,11 @@ public class IMAPPermission extends OCLPermission {
 
 	private String folderFullname;
 
-	private final transient Context ctx;
-
 	private transient ACL acl;
 
-	private transient UserStorage userStorage;
+	private final transient UserStorage userStorage;
+
+	private final int sessionUser;
 
 	/**
 	 * Constructor
@@ -88,22 +88,10 @@ public class IMAPPermission extends OCLPermission {
 	 * @param ctx -
 	 *            the context
 	 */
-	public IMAPPermission(final Context ctx) {
+	public IMAPPermission(final int sessionUser, final UserStorage userStorage) {
 		super();
-		this.ctx = ctx;
-	}
-
-	/**
-	 * Constructor
-	 * 
-	 * @param entity -
-	 *            the entity ID
-	 * @param ctx -
-	 *            the context
-	 */
-	public IMAPPermission(final int entity, final Context ctx) {
-		this(ctx);
-		super.setEntity(entity);
+		this.sessionUser = sessionUser;
+		this.userStorage = userStorage;
 	}
 
 	/**
@@ -316,19 +304,19 @@ public class IMAPPermission extends OCLPermission {
 		this.acl = null;
 	}
 
-	/**
-	 * @return <code>UserStorage</code> implementation
-	 * @throws LdapException
-	 */
-	private final UserStorage getUserStorage() throws LdapException {
-		if (userStorage != null) {
-			/*
-			 * Return cached value
-			 */
-			return userStorage;
-		}
-		return (userStorage = UserStorage.getInstance(ctx));
-	}
+	// /**
+	// * @return <code>UserStorage</code> implementation
+	// * @throws LdapException
+	// */
+	// private final UserStorage getUserStorage() throws LdapException {
+	// if (userStorage != null) {
+	// /*
+	// * Return cached value
+	// */
+	// return userStorage;
+	// }
+	// return (userStorage = UserStorage.getInstance(ctx));
+	// }
 
 	/*
 	 * Full rights: "acdilprsw"
@@ -371,9 +359,9 @@ public class IMAPPermission extends OCLPermission {
 	 * <code>ACL</code> instance
 	 * 
 	 * @return mapped <code>ACL</code> instance
-	 * @throws LdapException
+	 * @throws AbstractOXException
 	 */
-	public ACL getPermissionACL() throws LdapException {
+	public ACL getPermissionACL(final User2IMAPInfo user2IMAPInfo) throws AbstractOXException {
 		if (this.acl != null) {
 			/*
 			 * Return caches ACL
@@ -411,7 +399,8 @@ public class IMAPPermission extends OCLPermission {
 		if (hasAnyRights) {
 			rights.add(RIGHTS_UNMAPPABLE);
 		}
-		return (acl = new ACL(OXUser2IMAPLogin.getIMAPLogin(getEntity(), getUserStorage()), rights));
+		return (acl = new ACL(User2IMAP.getInstance(userStorage.getUser(sessionUser)).getACLName(getEntity(),
+				userStorage, user2IMAPInfo), rights));
 	}
 
 	/**
@@ -420,12 +409,12 @@ public class IMAPPermission extends OCLPermission {
 	 * 
 	 * @param acl -
 	 *            the <code>ACL</code> instance
-	 * @throws IMAPException
-	 * @throws LdapException
+	 * @throws AbstractOXException
 	 */
-	public final void parseACL(final ACL acl) throws IMAPException, LdapException {
+	public final void parseACL(final ACL acl, final User2IMAPInfo user2IMAPInfo) throws AbstractOXException {
 		this.acl = acl;
-		setEntity(OXUser2IMAPLogin.getUserIDByName(acl.getName(), getUserStorage()));
+		setEntity(User2IMAP.getInstance(userStorage.getUser(sessionUser)).getUserID(acl.getName(), userStorage,
+				user2IMAPInfo));
 		parseRights(acl.getRights());
 	}
 
@@ -489,7 +478,7 @@ public class IMAPPermission extends OCLPermission {
 			final IMAPPermission clone = (IMAPPermission) super.clone();
 			clone.acl = new ACL(acl.getName(), (Rights) acl.getRights().clone());
 			return clone;
-		} catch (CloneNotSupportedException e) {
+		} catch (final CloneNotSupportedException e) {
 			LOG.error(e.getMessage(), e);
 		}
 		return null;

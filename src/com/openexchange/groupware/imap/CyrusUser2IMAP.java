@@ -49,55 +49,87 @@
 
 package com.openexchange.groupware.imap;
 
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
-import com.openexchange.groupware.imap.OXMailException.MailCode;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.imap.IMAPPropertiesFactory.IMAPCredSrc;
+import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.server.OCLPermission;
 
 /**
- * IMAPException
+ * <p>
+ * CyrusUser2IMAP - Handles the ACL entities used by Cyrus IMAP server. The
+ * current supported identifers are: <i>anyone</i>. Missing handling for
+ * identifiers: <i>anonymous</i>
+ * <p>
+ * The identifier <i>anonymous</i> refers to the anonymous, or unauthenticated
+ * user. The identifier <i>anyone</i> refers to all users, including the
+ * anonymous user.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class IMAPException extends OXException {
+public final class CyrusUser2IMAP extends User2IMAP {
+
+	private static final String AUTH_ID_ANYONE = "anyone";
 
 	/**
-	 * 
+	 * Default constructor
 	 */
-	private static final long serialVersionUID = 7467142354806667384L;
-	
-	IMAPException(final AbstractOXException cause) {
-		super(cause);
+	public CyrusUser2IMAP() {
+		super();
 	}
 
-	/**
-	 * Constructs a new exception with the given detail message and cause.
+	/*
+	 * (non-Javadoc)
 	 * 
+	 * @see com.openexchange.groupware.imap.User2IMAP#getIMAPLogin(int,
+	 *      com.openexchange.groupware.contexts.Context)
 	 */
-	IMAPException(final String message, final Throwable cause) {
-		super(Component.EMAIL, MailCode.IMAP_PROPERTY_ERROR.getCategory(), MailCode.IMAP_PROPERTY_ERROR.getNumber(),
-				MailCode.IMAP_PROPERTY_ERROR.getMessage(), cause);
-		super.setMessageArgs(message);
+	@Override
+	public String getACLName(final int userId, final Context ctx, final User2IMAPInfo user2IMAPInfo)
+			throws AbstractOXException {
+		return getACLName(userId, UserStorage.getInstance(ctx), user2IMAPInfo);
 	}
 
-	/**
-	 * Constructs a new exception with the given detail message.
+	/*
+	 * (non-Javadoc)
 	 * 
+	 * @see com.openexchange.groupware.imap.User2IMAP#getIMAPLogin(int,
+	 *      com.openexchange.groupware.ldap.UserStorage)
 	 */
-	public IMAPException(final String message) {
-		super(Component.EMAIL, MailCode.IMAP_PROPERTY_ERROR.getCategory(), MailCode.IMAP_PROPERTY_ERROR.getNumber(),
-				MailCode.IMAP_PROPERTY_ERROR.getMessage(), null);
-		super.setMessageArgs(message);
+	@Override
+	public String getACLName(final int userId, final UserStorage userStorage, final User2IMAPInfo user2IMAPInfo)
+			throws AbstractOXException {
+		if (userId == OCLPermission.ALL_GROUPS_AND_USERS) {
+			return AUTH_ID_ANYONE;
+		} else if (IMAPCredSrc.USER_IMAPLOGIN.equals(IMAPProperties.getImapCredSrc())) {
+			return userStorage.getUser(userId).getImapLogin();
+		}
+		return userStorage.getUser(userId).getLoginInfo();
 	}
 
-	/**
-	 * Constructs a new exception from the given <code>Exception</code>
-	 * instance.
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.groupware.imap.User2IMAP#getUserID(java.lang.String,
+	 *      com.openexchange.groupware.ldap.UserStorage)
 	 */
-	public IMAPException(final Exception e) {
-		super(Component.EMAIL, MailCode.IMAP_PROPERTY_ERROR.getCategory(), MailCode.IMAP_PROPERTY_ERROR.getNumber(),
-				MailCode.IMAP_PROPERTY_ERROR.getMessage(), e);
-		super.setMessageArgs(e.getMessage());
+	@Override
+	public int getUserID(final String pattern, final UserStorage userStorage, final User2IMAPInfo user2IMAPInfo)
+			throws AbstractOXException {
+		if (!IMAPProperties.isSupportsACLs()) {
+			return -1;
+		} else if (AUTH_ID_ANYONE.equalsIgnoreCase(pattern)) {
+			return OCLPermission.ALL_GROUPS_AND_USERS;
+		} else if (IMAPCredSrc.USER_IMAPLOGIN.equals(IMAPProperties.getImapCredSrc())) {
+			/*
+			 * Find user name by user's imap login
+			 */
+			return userStorage.resolveIMAPLogin(pattern);
+		}
+		/*
+		 * Find by name
+		 */
+		return userStorage.getUserId(pattern);
 	}
 
 }

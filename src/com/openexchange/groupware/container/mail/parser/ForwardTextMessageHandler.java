@@ -310,7 +310,7 @@ public class ForwardTextMessageHandler implements MessageHandler {
 			}
 			return true;
 		} catch (final MessagingException e) {
-			throw MailInterfaceImpl.handleMessagingException(e, session.getIMAPProperties());
+			throw MailInterfaceImpl.handleMessagingException(e, session.getIMAPProperties(), session.getContext());
 		}
 	}
 
@@ -366,7 +366,7 @@ public class ForwardTextMessageHandler implements MessageHandler {
 			}
 			return true;
 		} catch (final MessagingException e) {
-			throw MailInterfaceImpl.handleMessagingException(e, session.getIMAPProperties());
+			throw MailInterfaceImpl.handleMessagingException(e, session.getIMAPProperties(), session.getContext());
 		}
 	}
 

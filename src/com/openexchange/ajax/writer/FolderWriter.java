@@ -65,16 +65,17 @@ import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.api2.MailInterfaceImpl;
 import com.openexchange.api2.OXException;
 import com.openexchange.cache.FolderCacheManager;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.UserConfigurationException;
 import com.openexchange.groupware.UserConfigurationStorage;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.MailFolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.imap.IMAPException;
 import com.openexchange.groupware.imap.IMAPProperties;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.server.IMAPPermission;
 import com.openexchange.server.OCLPermission;
@@ -112,6 +113,8 @@ public final class FolderWriter extends DataWriter {
 
 	private final Context ctx;
 
+	private UserStorage userStorage;
+
 	private UserConfigurationStorage userConfStorage;
 
 	public static abstract class IMAPFolderFieldWriter {
@@ -126,7 +129,8 @@ public final class FolderWriter extends DataWriter {
 		}
 
 		public abstract void writeField(JSONWriter jsonwriter, MailFolderObject folder, boolean withKey, String name,
-				int hasSubfolders, String fullName, int module, boolean all) throws JSONException, OXException, MessagingException;
+				int hasSubfolders, String fullName, int module, boolean all) throws JSONException, OXException,
+				MessagingException;
 	}
 
 	public static abstract class FolderFieldWriter {
@@ -158,11 +162,18 @@ public final class FolderWriter extends DataWriter {
 		this.ctx = session.getContext();
 	}
 
-	private final UserConfigurationStorage getUserConfigurationStorage() throws UserConfigurationException {
+	private UserConfigurationStorage getUserConfigurationStorage() throws UserConfigurationException {
 		if (userConfStorage == null) {
 			userConfStorage = UserConfigurationStorage.getInstance();
 		}
 		return userConfStorage;
+	}
+
+	private UserStorage getUserStorage() throws LdapException {
+		if (userStorage == null) {
+			userStorage = UserStorage.getInstance(ctx);
+		}
+		return userStorage;
 	}
 
 	public void writeIMAPFolderAsObject(final int[] fields, final MailFolderObject folder) throws JSONException,
@@ -365,7 +376,12 @@ public final class FolderWriter extends DataWriter {
 									OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS,
 									OCLPermission.NO_PERMISSIONS, false);
 						} else {
-							final IMAPPermission imapPerm = new IMAPPermission(ctx);
+							IMAPPermission imapPerm;
+							try {
+								imapPerm = new IMAPPermission(session.getUserObject().getId(), getUserStorage());
+							} catch (final LdapException e) {
+								throw new OXException(e);
+							}
 							imapPerm.setEntity(userObj.getId());
 							imapPerm.parseRights(folder.getOwnRights());
 							permissionBits = createPermissionBits(imapPerm);
@@ -393,16 +409,24 @@ public final class FolderWriter extends DataWriter {
 							return;
 						}
 						final JSONArray ja = new JSONArray();
-						final ACL[] acls = folder.getACL();
+						ACL[] acls;
+						try {
+							acls = folder.getACL();
+						} catch (final AbstractOXException e1) {
+							throw new OXException(e1);
+						}
+						UserStorage us;
+						try {
+							us = getUserStorage();
+						} catch (final LdapException e1) {
+							throw new OXException(e1);
+						}
 						for (int j = 0; j < acls.length; j++) {
-							final IMAPPermission imapPerm = new IMAPPermission(ctx);
+							final IMAPPermission imapPerm = new IMAPPermission(session.getUserObject().getId(), us);
 							boolean error = false;
 							try {
-								imapPerm.parseACL(acls[j]);
-							} catch (final IMAPException e) {
-								LOG.error(e.getMessage(), e);
-								error = true;
-							} catch (final LdapException e) {
+								imapPerm.parseACL(acls[j], folder);
+							} catch (final AbstractOXException e) {
 								LOG.error(e.getMessage(), e);
 								error = true;
 							}
@@ -808,11 +832,9 @@ public final class FolderWriter extends DataWriter {
 									FolderCacheManager.getInstance().putFolderObject(fo, ctx);
 								}
 							} catch (final SQLException e) {
-								throw new OXFolderException(FolderCode.MISSING_PARAMETER,
-										FolderFields.PERMISSIONS);
+								throw new OXFolderException(FolderCode.MISSING_PARAMETER, FolderFields.PERMISSIONS);
 							} catch (final DBPoolingException e) {
-								throw new OXFolderException(FolderCode.MISSING_PARAMETER,
-										FolderFields.PERMISSIONS);
+								throw new OXFolderException(FolderCode.MISSING_PARAMETER, FolderFields.PERMISSIONS);
 							}
 						}
 						if (withKey) {
@@ -836,9 +858,9 @@ public final class FolderWriter extends DataWriter {
 								jo.put(FolderFields.GROUP, perm.isGroupPermission());
 								ja.put(jo);
 							}
-						} catch (DBPoolingException e) {
+						} catch (final DBPoolingException e) {
 							throw new OXException(e);
-						} catch (SQLException e) {
+						} catch (final SQLException e) {
 							throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(ctx.getContextId()));
 						}
 						jsonwriter.value(ja);

@@ -50,6 +50,7 @@
 package com.openexchange.groupware.imap;
 
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
 
 /**
@@ -601,6 +602,10 @@ public class OXMailException extends OXException {
 
 	public static final String getFormattedMessage(final MailCode mailCode, final Object... msgArgs) {
 		return String.format(mailCode.getMessage(), msgArgs);
+	}
+	
+	public OXMailException(final AbstractOXException e) {
+		super(e);
 	}
 
 	public OXMailException(final MailCode mailCode) {
