@@ -83,7 +83,7 @@ public class ResourceTest extends AbstractTest{
     @Test
     public void testCreate() throws Exception {
         OXResourceInterface oxres = getResourceClient();
-        final int context_id = GroupTest.getContextID();
+        final int context_id = getContextID();
         final Context ctx = new Context(context_id);
         Resource res = getTestResourceObject("tescase-create-resource-"+System.currentTimeMillis());
         final Resource createdresource = oxres.create(ctx,res,DummyCredentials());
@@ -110,7 +110,7 @@ public class ResourceTest extends AbstractTest{
     public void testChange() throws Exception {
         
         OXResourceInterface oxres = getResourceClient();
-        final int context_id = GroupTest.getContextID();
+        final int context_id = getContextID();
         final Context ctx = new Context(context_id);
         Resource res = getTestResourceObject("tescase-create-resource-"+System.currentTimeMillis());
         final Resource createdresource = oxres.create(ctx,res,DummyCredentials());
@@ -161,7 +161,7 @@ public class ResourceTest extends AbstractTest{
     @Test
     public void testGet() throws Exception {
         OXResourceInterface oxres = getResourceClient();
-        final int context_id = GroupTest.getContextID();
+        final int context_id = getContextID();
         final Context ctx = new Context(context_id);
         Resource res = getTestResourceObject("tescase-create-resource-"+System.currentTimeMillis());
         final Resource createdresource = oxres.create(ctx,res,DummyCredentials());
@@ -178,7 +178,7 @@ public class ResourceTest extends AbstractTest{
     @Test
     public void testDelete() throws Exception {
         OXResourceInterface oxres = getResourceClient();
-        final int context_id = GroupTest.getContextID();
+        final int context_id = getContextID();
         final Context ctx = new Context(context_id);
         Resource res = getTestResourceObject("tescase-create-resource-"+System.currentTimeMillis());
         final Resource createdresource = oxres.create(ctx,res,DummyCredentials());
@@ -206,7 +206,7 @@ public class ResourceTest extends AbstractTest{
     @Test
     public void testList() throws Exception {
        OXResourceInterface oxres = getResourceClient();
-        final int context_id = GroupTest.getContextID();
+        final int context_id = getContextID();
         final Context ctx = new Context(context_id);
         Resource res = getTestResourceObject("tescase-create-resource-"+System.currentTimeMillis());
         oxres.create(ctx,res,DummyCredentials());
@@ -228,5 +228,8 @@ public class ResourceTest extends AbstractTest{
         return res;
     }
     
-    
+    private int getContextID() throws Exception {
+        return 1;
+    }
+
 }
