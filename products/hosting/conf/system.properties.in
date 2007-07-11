@@ -17,6 +17,10 @@ UserConfigurationStorage=Caching
 # setup.
 SetupLink=com.openexchange.groupware.integration.EmptyImpl
 
+# Name of the class that implements User2IMAP, their alias or "auto" to use auto-detection.
+# Currently known aliases: Cyrus, Courier
+User2IMAPImpl=auto
+
 # Switch for enabling caching in the groupware. Normally this should be set to
 # true or the database will get a lot more load.
 Cache=true
