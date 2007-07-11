@@ -144,7 +144,7 @@ public interface OXGroupInterface extends Remote {
      * @throws InvalidDataException If the data sent within the method contained invalid data.
      * @throws DatabaseUpdateException 
      */
-    public int create(final Context ctx, final Group grp, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, NoSuchUserException, StorageException, InvalidDataException, DatabaseUpdateException;
+    public Group create(final Context ctx, final Group grp, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, NoSuchUserException, StorageException, InvalidDataException, DatabaseUpdateException;
 
     /**
      * Method for deleting group within given context.
