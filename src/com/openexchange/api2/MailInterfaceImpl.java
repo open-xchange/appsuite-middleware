@@ -572,6 +572,8 @@ public class MailInterfaceImpl implements MailInterface {
 	private final void applySessionObject(final SessionObject sessionObj) throws OXException {
 		if (!sessionObj.getUserConfiguration().hasWebMail()) {
 			throw new OXMailException(MailCode.NO_MAIL_MODULE_ACCESS, getUserName(sessionObj));
+		} else if (sessionObj.getIMAPProperties().hasError()) {
+			throw new OXMailException(sessionObj.getIMAPProperties().getError());
 		}
 		this.sessionObj = sessionObj;
 		this.usm = sessionObj.getUserConfiguration().getUserSettingMail();

@@ -58,18 +58,23 @@ import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import com.openexchange.groupware.imap.User2IMAP.IMAPServer;
+import com.openexchange.groupware.imap.User2IMAP.User2IMAPException;
+
 /**
  * IMAPServerInfo
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class IMAPServerInfo {
+public final class IMAPServerImpl {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(IMAPServerInfo.class);
+			.getLog(IMAPServerImpl.class);
 
-	private static final Map<InetAddress, String> map = new HashMap<InetAddress, String>();
+	private static final Object[] EMPTY_ARGS = new Object[0];
+
+	private static final Map<InetAddress, User2IMAP> map = new HashMap<InetAddress, User2IMAP>();
 
 	private static final Lock CONTACT_LOCK = new ReentrantLock();
 
@@ -82,12 +87,13 @@ public final class IMAPServerInfo {
 	/**
 	 * Prevent instanciation
 	 */
-	private IMAPServerInfo() {
+	private IMAPServerImpl() {
 		super();
 	}
 
 	/**
-	 * Determines the IMAP server's greeting, given the IMAP server's name
+	 * Determines the <code>User2IMAP</code> impl dependent on MAP server's
+	 * greeting, given the IMAP server's name
 	 * 
 	 * <p>
 	 * The IMAP server name can either be a machine name, such as "<code>java.sun.com</code>",
@@ -97,25 +103,49 @@ public final class IMAPServerInfo {
 	 *            the IMAP server's name
 	 * @param imapPort -
 	 *            the IMAP server's port
-	 * @return the IMAP server's greeting
+	 * @return the IMAP server's depending <code>User2IMAP</code>
+	 *         implementation
 	 * @throws IOException -
 	 *             if an I/O error occurs
+	 * @throws User2IMAPException -
+	 *             if a server greeting could not be mapped to a supported IMAP
+	 *             server
 	 */
-	public static String getIMAPServerInfo(final String imapServer, final int imapPort) throws IOException {
+	public static User2IMAP getUser2IMAPImpl(final String imapServer, final int imapPort) throws IOException,
+			User2IMAPException {
 		final InetAddress key = InetAddress.getByName(imapServer);
-		String info = map.get(key);
-		if (info == null) {
-			info = loadIMAPServerInfo(key, imapPort);
+		User2IMAP impl = map.get(key);
+		if (impl == null) {
+			impl = loadIMAPServerInfo(key, imapPort);
 		}
-		return info;
+		return impl;
 	}
 
-	private static String loadIMAPServerInfo(final InetAddress inetAddress, final int imapPort) throws IOException {
+	private static IMAPServer mapInfo2IMAPServer(final String info) throws User2IMAPException {
+		final IMAPServer[] iServers = IMAPServer.values();
+		for (int i = 0; i < iServers.length; i++) {
+			if (toLowerCase(info).indexOf(toLowerCase(iServers[i].getName())) > -1) {
+				return iServers[i];
+			}
+		}
+		throw new User2IMAPException(User2IMAPException.Code.UNKNOWN_IMAP_SERVER, info);
+	}
+
+	private static String toLowerCase(final String str) {
+		final char[] buf = new char[str.length()];
+		for (int i = 0; i < buf.length; i++) {
+			buf[i] = Character.toLowerCase(str.charAt(i));
+		}
+		return new String(buf);
+	}
+
+	private static User2IMAP loadIMAPServerInfo(final InetAddress inetAddress, final int imapPort) throws IOException,
+			User2IMAPException {
 		CONTACT_LOCK.lock();
 		try {
-			String info;
-			if ((info = map.get(inetAddress)) != null) {
-				return info;
+			User2IMAP user2IMAP;
+			if ((user2IMAP = map.get(inetAddress)) != null) {
+				return user2IMAP;
 			}
 			Socket s = null;
 			InputStreamReader isr = null;
@@ -128,18 +158,27 @@ public final class IMAPServerInfo {
 				if ((bytesRead = isr.read(buf, 0, buf.length)) != -1) {
 					sb.append(buf, 0, bytesRead);
 				}
-				info = sb.toString();
+				final IMAPServer imapServer = mapInfo2IMAPServer(sb.toString());
+				try {
+					user2IMAP = Class.forName(imapServer.getImpl()).asSubclass(User2IMAP.class).newInstance();
+				} catch (final InstantiationException e) {
+					throw new User2IMAPException(User2IMAPException.Code.INSTANCIATION_FAILED, e, EMPTY_ARGS);
+				} catch (final IllegalAccessException e) {
+					throw new User2IMAPException(User2IMAPException.Code.INSTANCIATION_FAILED, e, EMPTY_ARGS);
+				} catch (final ClassNotFoundException e) {
+					throw new User2IMAPException(User2IMAPException.Code.INSTANCIATION_FAILED, e, EMPTY_ARGS);
+				}
 				s.getOutputStream().write(IMAPCMD_LOGOUT.getBytes(CHARSET_US_ASCII));
 				s.getOutputStream().flush();
 				while ((bytesRead = isr.read(buf, 0, buf.length)) != -1) {
 					sb.append(buf, 0, bytesRead);
 				}
-				map.put(inetAddress, info);
+				map.put(inetAddress, user2IMAP);
 				if (LOG.isInfoEnabled()) {
 					LOG.info(new StringBuilder(256).append("\n\tIMAP server [").append(inetAddress.toString()).append(
-							"] greeting successfully fetched:\n\t").append(info));
+							"] greeting successfully mapped to: ").append(imapServer.getName()));
 				}
-				return info;
+				return user2IMAP;
 			} finally {
 				if (isr != null) {
 					try {

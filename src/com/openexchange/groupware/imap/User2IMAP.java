@@ -272,32 +272,19 @@ public abstract class User2IMAP {
 					init();
 					try {
 						if (implementingClass == null) {
+							/*
+							 * Auto-Detection turned on
+							 */
 							try {
 								final Object[] args = getIMAPServer(sessionUser);
-								final String greeting = toLowerCase(IMAPServerInfo.getIMAPServerInfo((String) args[0],
-										((Integer) args[1]).intValue()));
-								final IMAPServer[] imapServers = IMAPServer.values();
-								for (int i = 0; i < imapServers.length && implementingClass == null; i++) {
-									if (greeting.indexOf(toLowerCase(imapServers[i].getName())) != -1) {
-										implementingClass = Class.forName(imapServers[i].getImpl()).asSubclass(
-												User2IMAP.class);
-									}
-								}
-								if (implementingClass == null) {
-									throw new User2IMAPException(User2IMAPException.Code.UNKNOWN_IMAP_SERVER, greeting);
-								}
-							} catch (final IMAPException e) {
-								throw new User2IMAPException(User2IMAPException.Code.INSTANCIATION_FAILED, e,
-										EMPTY_ARGS);
+								return IMAPServerImpl.getUser2IMAPImpl((String) args[0], ((Integer) args[1])
+										.intValue());
 							} catch (final IOException e) {
 								throw new User2IMAPException(User2IMAPException.Code.INSTANCIATION_FAILED, e,
 										EMPTY_ARGS);
-							} catch (final ClassNotFoundException e) {
+							} catch (final IMAPException e) {
 								throw new User2IMAPException(User2IMAPException.Code.INSTANCIATION_FAILED, e,
 										EMPTY_ARGS);
-							}
-							if (LOG.isInfoEnabled()) {
-								LOG.info("\n\tAuto-Detected IMAP server: " + implementingClass.getCanonicalName());
 							}
 						}
 						singleton = implementingClass.newInstance();
@@ -333,14 +320,6 @@ public abstract class User2IMAP {
 			return new Object[] { imapServer.substring(0, pos), Integer.valueOf(imapServer.substring(pos + 1)) };
 		}
 		return new Object[] { imapServer, Integer.valueOf(143) };
-	}
-
-	private static final String toLowerCase(final String str) {
-		final char[] buf = new char[str.length()];
-		for (int i = 0; i < buf.length; i++) {
-			buf[i] = Character.toLowerCase(str.charAt(i));
-		}
-		return new String(buf);
 	}
 
 	/**

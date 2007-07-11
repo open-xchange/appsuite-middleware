@@ -52,6 +52,7 @@ package com.openexchange.groupware.imap;
 import java.util.Arrays;
 import java.util.Properties;
 
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 
 /**
@@ -75,6 +76,8 @@ public class IMAPProperties {
 	private int imapPort = -1;
 
 	private int smtpPort = -1;
+	
+	private AbstractOXException error;
 
 	private static boolean globalPropertiesLoaded;
 
@@ -262,6 +265,18 @@ public class IMAPProperties {
 
 	public int getUser() {
 		return user;
+	}
+
+	public AbstractOXException getError() {
+		return error;
+	}
+	
+	public boolean hasError() {
+		return (null != error);
+	}
+
+	public void setError(final AbstractOXException error) {
+		this.error = error;
 	}
 
 	public static boolean isCapabilitiesLoaded() {

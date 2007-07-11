@@ -367,7 +367,7 @@ public class IMAPPropertiesFactory {
 					imapProps.setImapLogin(User2IMAP.getInstance(userObj).getLocalIMAPLogin(sessionObj, true));
 				}
 			} catch (final User2IMAPException e) {
-				throw new IMAPException(e);
+				imapProps.setError(e);
 			}
 		} else if (IMAPLoginType.ANONYMOUS.equals(IMAPProperties.getImapLoginTypeInternal())) {
 			String imapServer = userObj.getImapServer();

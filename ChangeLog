@@ -2,6 +2,10 @@
 
  - Added support for differing IMAP server's ACL handling plus
    auto-detection of IMAP server
+ - Added possibility to map more machines to one host name when detecting
+   User2IMAP impl
+ - Fixed problem if IMAPProperties could not be properly initialized during
+   session creation
 
 * 2007-07-10 - tobias.prinz@open-xchange.com
 
