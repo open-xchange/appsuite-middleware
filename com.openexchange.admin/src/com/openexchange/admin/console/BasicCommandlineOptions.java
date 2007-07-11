@@ -406,7 +406,7 @@ public abstract class BasicCommandlineOptions {
      * @return
      */
     protected String stripString(final String text, final int length, final String lastmark) {
-        if (text.length() > length) {
+        if (null != text && text.length() > length) {
             final int stringlength = length - lastmark.length();
             return new StringBuffer(text.substring(0, stringlength)).append(lastmark).toString();
         } else {
