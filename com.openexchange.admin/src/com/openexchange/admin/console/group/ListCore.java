@@ -133,7 +133,6 @@ public abstract class ListCore extends GroupAbstraction {
         columns.add("id");
         columns.add("name");
         columns.add("displayname");
-        columns.add("email");
         columns.add("members");
         extendscvscolumns(columns);
         
