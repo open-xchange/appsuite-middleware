@@ -82,7 +82,7 @@ public class GroupTest extends AbstractTest {
 	}
     
     @Test
-    public void testAddGroup() throws Exception {
+    public void testCreateGroup() throws Exception {
         final int context_id = getContextID();
         final Context ctx = new Context(context_id);
         final Credentials cred = DummyCredentials();
@@ -270,59 +270,59 @@ public class GroupTest extends AbstractTest {
         assertTrue("members could not be loaded", remote_members.length > 0);
     }
 
-    public static void changeGroup(final Context ctx, final Group grp, final String host, final Credentials cred) throws Exception {
+    private void changeGroup(final Context ctx, final Group grp, final String host, final Credentials cred) throws Exception {
         final OXGroupInterface xres = (OXGroupInterface) Naming.lookup(host + OXGroupInterface.RMI_NAME);
         xres.change(ctx, grp, cred);
     }
 
-    public static User[] getMembers(final Context ctx, final Group group, final String host, final Credentials cred) throws Exception {
+    private User[] getMembers(final Context ctx, final Group group, final String host, final Credentials cred) throws Exception {
         final OXGroupInterface xres = (OXGroupInterface) Naming.lookup(host + OXGroupInterface.RMI_NAME);
         return xres.getMembers(ctx, group, cred);
     }
 
-    public static void addMemberToGroup(final Context ctx, final Group grp, final User[] members, final String host, final Credentials cred) throws Exception {
+    private void addMemberToGroup(final Context ctx, final Group grp, final User[] members, final String host, final Credentials cred) throws Exception {
         final OXGroupInterface xres = (OXGroupInterface) Naming.lookup(host + OXGroupInterface.RMI_NAME);
         xres.addMember(ctx, grp, members, cred);
     }
 
-    public static void removeMemberFromGroup(final Context ctx, final Group grp, final User[] members, final String host, final Credentials cred) throws Exception {
+    private void removeMemberFromGroup(final Context ctx, final Group grp, final User[] members, final String host, final Credentials cred) throws Exception {
         final OXGroupInterface xres = (OXGroupInterface) Naming.lookup(host + OXGroupInterface.RMI_NAME);
         xres.removeMember(ctx, grp, members, cred);
     }
 
-    public static Group loadGroup(final Context ctx, final Group grp, final String host, final Credentials cred) throws Exception {
+    private Group loadGroup(final Context ctx, final Group grp, final String host, final Credentials cred) throws Exception {
         final OXGroupInterface xres = (OXGroupInterface) Naming.lookup(host + OXGroupInterface.RMI_NAME);
         return xres.getData(ctx, grp, cred);
     }
 
-    public static Group createGroup(final Context ctx, final Group grp, final String host, final Credentials cred) throws Exception {
+    private Group createGroup(final Context ctx, final Group grp, final String host, final Credentials cred) throws Exception {
         final OXGroupInterface xres = (OXGroupInterface) Naming.lookup(host + OXGroupInterface.RMI_NAME);
         return xres.create(ctx, grp, cred);
     }
 
-    public static void deleteGroup(final Context ctx, final Group grp, final String host, final Credentials cred) throws Exception {
+    private void deleteGroup(final Context ctx, final Group grp, final String host, final Credentials cred) throws Exception {
         final OXGroupInterface xres = (OXGroupInterface) Naming.lookup(host + OXGroupInterface.RMI_NAME);
         xres.delete(ctx, new Group[] { grp }, cred);
     }
 
-    public static Group[] searchGroup(final Context ctx, final String pattern, final String host, final Credentials cred) throws Exception {
+    private Group[] searchGroup(final Context ctx, final String pattern, final String host, final Credentials cred) throws Exception {
         final OXGroupInterface xres = (OXGroupInterface) Naming.lookup(host + OXGroupInterface.RMI_NAME);
         return xres.list(ctx, pattern, cred);
     }
 
-    private static Group getTestGroupObject(final Credentials cred) throws Exception {
+    private Group getTestGroupObject(final Credentials cred) throws Exception {
         final Context ctx = new Context(getContextID());
         return getTestGroupObject(VALID_CHAR_TESTGROUP+System.currentTimeMillis(), ctx, cred);
     }
 
-    private static Group getTestGroupObject(final String ident, final Context ctx, final Credentials cred) throws Exception {
+    private Group getTestGroupObject(final String ident, final Context ctx, final Credentials cred) throws Exception {
         final Group grp = new Group();
         grp.setDisplayname("display name " + ident);
         grp.setName(ident);
         return grp;
     }
 
-    public static int getContextID() throws Exception {
+    private int getContextID() throws Exception {
         return 1;
     }
 
