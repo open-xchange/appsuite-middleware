@@ -86,7 +86,7 @@ public class ResourceTest extends AbstractTest{
         final int context_id = GroupTest.getContextID();
         final Context ctx = new Context(context_id);
         Resource res = getTestResourceObject("tescase-create-resource-"+System.currentTimeMillis());
-        res.setId(oxres.create(ctx,res,DummyCredentials()));
+        final Resource createdresource = oxres.create(ctx,res,DummyCredentials());
         
         Resource[] srv_response = oxres.list(ctx,"*",DummyCredentials());
         if(srv_response==null){
@@ -95,11 +95,11 @@ public class ResourceTest extends AbstractTest{
         boolean found_resource = false;
         for(int a = 0;a<srv_response.length;a++){
             Resource tmp = srv_response[a];
-            if(tmp.getId().equals(res.getId())){
-                assertEquals(res.getDescription(),tmp.getDescription());
-                assertEquals(res.getDisplayname(),tmp.getDisplayname());
-                assertEquals(res.getEmail(),tmp.getEmail());
-                assertEquals(res.getName(),tmp.getName());
+            if(tmp.getId().equals(createdresource.getId())){
+                assertEquals(createdresource.getDescription(),tmp.getDescription());
+                assertEquals(createdresource.getDisplayname(),tmp.getDisplayname());
+                assertEquals(createdresource.getEmail(),tmp.getEmail());
+                assertEquals(createdresource.getName(),tmp.getName());
                 found_resource = true;
             }
         }
@@ -113,7 +113,7 @@ public class ResourceTest extends AbstractTest{
         final int context_id = GroupTest.getContextID();
         final Context ctx = new Context(context_id);
         Resource res = getTestResourceObject("tescase-create-resource-"+System.currentTimeMillis());
-        res.setId(oxres.create(ctx,res,DummyCredentials()));
+        final Resource createdresource = oxres.create(ctx,res,DummyCredentials());
         
         Resource[] srv_response = oxres.list(ctx,"*",DummyCredentials());
         if(srv_response==null){
@@ -122,11 +122,11 @@ public class ResourceTest extends AbstractTest{
         boolean found_resource = false;
         for(int a = 0;a<srv_response.length;a++){
             Resource tmp = srv_response[a];
-            if(tmp.getId().equals(res.getId())){
-                assertEquals(res.getDescription(),tmp.getDescription());
-                assertEquals(res.getDisplayname(),tmp.getDisplayname());
-                assertEquals(res.getEmail(),tmp.getEmail());
-                assertEquals(res.getName(),tmp.getName());
+            if(tmp.getId().equals(createdresource.getId())){
+                assertEquals(createdresource.getDescription(),tmp.getDescription());
+                assertEquals(createdresource.getDisplayname(),tmp.getDisplayname());
+                assertEquals(createdresource.getEmail(),tmp.getEmail());
+                assertEquals(createdresource.getName(),tmp.getName());
                 found_resource = true;
             }
         }
@@ -164,15 +164,15 @@ public class ResourceTest extends AbstractTest{
         final int context_id = GroupTest.getContextID();
         final Context ctx = new Context(context_id);
         Resource res = getTestResourceObject("tescase-create-resource-"+System.currentTimeMillis());
-        res.setId(oxres.create(ctx,res,DummyCredentials()));
+        final Resource createdresource = oxres.create(ctx,res,DummyCredentials());
         
         // get resource from server
-        Resource srv_res = oxres.getData(ctx,res,DummyCredentials());        
+        Resource srv_res = oxres.getData(ctx,createdresource,DummyCredentials());        
         
-        assertEquals(res.getDescription(),srv_res.getDescription());
-        assertEquals(res.getDisplayname(),srv_res.getDisplayname());
-        assertEquals(res.getEmail(),srv_res.getEmail());
-        assertEquals(res.getName(),srv_res.getName());
+        assertEquals(createdresource.getDescription(),srv_res.getDescription());
+        assertEquals(createdresource.getDisplayname(),srv_res.getDisplayname());
+        assertEquals(createdresource.getEmail(),srv_res.getEmail());
+        assertEquals(createdresource.getName(),srv_res.getName());
     }
     
     @Test
@@ -181,23 +181,23 @@ public class ResourceTest extends AbstractTest{
         final int context_id = GroupTest.getContextID();
         final Context ctx = new Context(context_id);
         Resource res = getTestResourceObject("tescase-create-resource-"+System.currentTimeMillis());
-        res.setId(oxres.create(ctx,res,DummyCredentials()));
+        final Resource createdresource = oxres.create(ctx,res,DummyCredentials());
         
         // get resource from server
-        Resource srv_res = oxres.getData(ctx,res,DummyCredentials());        
+        Resource srv_res = oxres.getData(ctx,createdresource,DummyCredentials());        
         
-        assertEquals(res.getDescription(),srv_res.getDescription());
-        assertEquals(res.getDisplayname(),srv_res.getDisplayname());
-        assertEquals(res.getEmail(),srv_res.getEmail());
-        assertEquals(res.getName(),srv_res.getName());
+        assertEquals(createdresource.getDescription(),srv_res.getDescription());
+        assertEquals(createdresource.getDisplayname(),srv_res.getDisplayname());
+        assertEquals(createdresource.getEmail(),srv_res.getEmail());
+        assertEquals(createdresource.getName(),srv_res.getName());
         
         
         // delete resource
-        oxres.delete(ctx,res,DummyCredentials());
+        oxres.delete(ctx,createdresource,DummyCredentials());
         
         // try to get resource again, this MUST fail
         try{
-            srv_res = oxres.getData(ctx,res,DummyCredentials());   
+            srv_res = oxres.getData(ctx,createdresource,DummyCredentials());   
             fail("Expected that the resource was deleted!");
         }catch(NoSuchResourceException nsr){  }
         
@@ -209,7 +209,7 @@ public class ResourceTest extends AbstractTest{
         final int context_id = GroupTest.getContextID();
         final Context ctx = new Context(context_id);
         Resource res = getTestResourceObject("tescase-create-resource-"+System.currentTimeMillis());
-        res.setId(oxres.create(ctx,res,DummyCredentials()));
+        oxres.create(ctx,res,DummyCredentials());
         
         Resource[] srv_response = oxres.list(ctx,"*",DummyCredentials());
         if(srv_response==null){

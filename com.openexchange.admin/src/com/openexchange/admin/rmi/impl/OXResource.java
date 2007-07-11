@@ -105,7 +105,7 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
         }
     }
 
-    public int create(final Context ctx, final Resource res, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {        
+    public Resource create(final Context ctx, final Resource res, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {        
        try {
            doNullCheck(res);
        } catch (final InvalidDataException e3) {
@@ -204,7 +204,7 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
            }
        }
 
-       return retval;
+       return res;
     }
     
     public void change(final Context ctx, final Resource res, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchResourceException {
