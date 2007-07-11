@@ -2,6 +2,6 @@
 SYSTEMPROPERTIES=@systemproperties@
 LOGGINGPROPERTIES=@loggingproperties@
 
-JAVA_XTRAOPTS="-Xms1000M -Xmx2000M -XX:NewSize=500m -XX:MaxNewSize=500m -XX:SurvivorRatio=6"
+JAVA_XTRAOPTS="-XX:+AggressiveHeap"
 
 NRFILES="8192"

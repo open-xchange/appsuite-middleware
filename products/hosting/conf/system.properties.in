@@ -9,6 +9,10 @@
 #   RHEL ldap.
 LoginInfo=com.openexchange.groupware.contexts.RdbLoginInfo
 
+# Name of the class implementing the UserConfigurationStorage.
+# Currenlty known aliases: Caching, DB
+UserConfigurationStorage=Caching
+
 # Name of the class that implements how to get the link for the configuration
 # setup.
 SetupLink=com.openexchange.groupware.integration.EmptyImpl
@@ -39,9 +43,13 @@ Infostore=@oxgroupwaresysconfdir@/infostore.properties
 # the attachment subsystem.
 Attachment=@oxgroupwaresysconfdir@/attachment.properties
 
-# Location of the ntofication.properties configuration file. This file 
+# Location of the notfication.properties configuration file. This file 
 # configures certain assumptions about sending notifications
 Notification=@oxgroupwaresysconfdir@/notification.properties
+
+# Location of the participant.properties configuration file. This file
+# configures certain options about participants.
+Participant=@oxgroupwaresysconfdir@/participant.properties
 
 CONFIGPATH:@oxgroupwaresysconfdir@
 AJPPROPERTIES:@oxgroupwaresysconfdir@/ajp.properties
