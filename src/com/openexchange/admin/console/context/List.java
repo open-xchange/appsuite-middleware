@@ -52,6 +52,7 @@ public class List extends ContextAbtraction {
             columns.add("filestore_name");
             columns.add("used_quota");
             columns.add("max_quota");
+            columns.add("lmappings");
 
             final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
 
@@ -184,6 +185,25 @@ public class List extends ContextAbtraction {
         } else {
             srv_data.add(null);
         }
+        
+        
+//      loginl mappings
+        
+        if(ctx.getLoginMappings()!=null &&ctx.getLoginMappings().size()>0 ){
+            StringBuilder sb = new StringBuilder();
+            Iterator itr = ctx.getLoginMappings().iterator();
+            while(itr.hasNext()){               
+                sb.append((String)itr.next());
+                sb.append(",");
+            }
+            sb.deleteCharAt(sb.length()-1);
+            srv_data.add(sb.toString());
+        }else{
+            srv_data.add(null);
+        }
+        
+        
+        
         return srv_data;
     }
 }
