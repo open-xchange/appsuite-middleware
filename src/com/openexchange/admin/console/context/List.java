@@ -43,55 +43,10 @@ public class List extends ContextAbtraction {
 
             final Context[] ctxs = oxctx.list(pattern, auth);
 
-            // needed for csv output, KEEP AN EYE ON ORDER!!!
-            final ArrayList<String> columns = new ArrayList<String>();
-            columns.add("id");
-            columns.add("name");
-            columns.add("enabled");
-            columns.add("filestore_id");
-            columns.add("filestore_name");
-            columns.add("used_quota");
-            columns.add("max_quota");
-            columns.add("lmappings");
-
-            final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
-
-            final String HEADER_FORMAT = "%-7s %-5s %-20s %-10s %-10s %-10s %-20s %s\n";
-            final String VALUE_FORMAT  = "%-7s %-5s %-20s %-10s %-10s %-10s %-20s %s\n";
-            if(parser.getOptionValue(this.csvOutputOption) == null) {
-                System.out.format(HEADER_FORMAT, "cid", "fid", "fname", "enabled", "qmax", "qused", "name","lmappings");
-            }
-            for (final Context ctx_tmp : ctxs) {
-                if (parser.getOptionValue(this.csvOutputOption) != null) {
-                    data.add(makeCSVData(ctx_tmp));
-                } else {
-                    // loginl mappings
-                    StringBuilder sb = new StringBuilder();
-                    if(ctx_tmp.getLoginMappings()!=null &&ctx_tmp.getLoginMappings().size()>0 ){
-                        Iterator itr = ctx_tmp.getLoginMappings().iterator();
-                        while(itr.hasNext()){
-                            sb.append("\"");
-                            sb.append((String)itr.next());
-                            sb.append("\"");
-                            sb.append(",");
-                        }
-                        sb.deleteCharAt(sb.length()-1);
-                    }
-                    
-                    System.out.format(VALUE_FORMAT,
-                            ctx_tmp.getIdAsInt(),
-                            ctx_tmp.getFilestore().getId(),
-                            ctx_tmp.getFilestore().getName(),
-                            ctx_tmp.isEnabled(),
-                            ctx_tmp.getMaxQuota(),
-                            ctx_tmp.getUsedQuota(),                            
-                            ctx_tmp.getName(),
-                            sb.toString());
-                }
-            }
-
-            if (parser.getOptionValue(this.csvOutputOption) != null) {
-                doCSVOutput(columns, data);
+            if (null != parser.getOptionValue(this.csvOutputOption)) {
+                precsvinfos(ctxs);
+            } else {
+                sysoutOutput(ctxs);
             }
 
             sysexit(0);
@@ -133,6 +88,36 @@ public class List extends ContextAbtraction {
             sysexit(SYSEXIT_MISSING_OPTION);
         }
 
+    }
+
+    private void sysoutOutput(final Context[] ctxs) throws InvalidDataException {
+        final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
+        for (final Context ctx : ctxs) {
+            data.add(makeCSVData(ctx));
+        }
+        
+        doOutput(new int[] { 3, 8, 8, 4, 20, 10, 9, 10 }, new String[] { "Id", "Name", "Enabled", "Fid", "Fname", "used_quota", "max_quota", "lmappings" }, data);
+    }
+
+    private void precsvinfos(final Context[] ctxs) {
+        // needed for csv output, KEEP AN EYE ON ORDER!!!
+        final ArrayList<String> columns = new ArrayList<String>();
+        columns.add("id");
+        columns.add("name");
+        columns.add("enabled");
+        columns.add("filestore_id");
+        columns.add("filestore_name");
+        columns.add("used_quota");
+        columns.add("max_quota");
+        columns.add("lmappings");
+
+        final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
+
+        for (final Context ctx_tmp : ctxs) {
+            data.add(makeCSVData(ctx_tmp));
+        }
+        
+        doCSVOutput(columns, data);
     }
 
     public static void main(final String args[]) {
@@ -190,8 +175,8 @@ public class List extends ContextAbtraction {
 //      loginl mappings
         
         if(ctx.getLoginMappings()!=null &&ctx.getLoginMappings().size()>0 ){
-            StringBuilder sb = new StringBuilder();
-            Iterator itr = ctx.getLoginMappings().iterator();
+            final StringBuilder sb = new StringBuilder();
+            final Iterator itr = ctx.getLoginMappings().iterator();
             while(itr.hasNext()){               
                 sb.append((String)itr.next());
                 sb.append(",");
