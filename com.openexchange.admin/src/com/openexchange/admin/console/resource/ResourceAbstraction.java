@@ -87,11 +87,11 @@ public abstract class ResourceAbstraction extends BasicCommandlineOptions {
 
     protected Option resourceRecipientOption = null;
     
-    protected void printExtensionsError(Resource res){
+    protected void printExtensionsError(final Resource res){
         //+ loop through extensions and check for errors       
         if(res!=null && res.getExtensions()!=null){
-            ArrayList<OXResourceExtensionInterface> _exts = res.getExtensions();
-            for (OXResourceExtensionInterface _extension :_exts) {
+            final ArrayList<OXResourceExtensionInterface> _exts = res.getExtensions();
+            for (final OXResourceExtensionInterface _extension :_exts) {
                 if(_extension.getExtensionError()!=null){
                     printServerResponse(_extension.getExtensionError());
                 }
