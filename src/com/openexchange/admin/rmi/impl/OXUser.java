@@ -137,7 +137,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         return usr.getLanguage();
     }
 
-    public int create(final Context ctx, final User usr, final UserModuleAccess access, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
+    public User create(final Context ctx, final User usr, final UserModuleAccess access, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
         try {
             doNullCheck(usr,access);
         } catch (final InvalidDataException e3) {
@@ -244,7 +244,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
                 }
             }
         }
-        return retval;
+        return usr;
     }
 
     public void change(final Context ctx, final User usrdata, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchUserException {

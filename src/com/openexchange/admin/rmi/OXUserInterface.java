@@ -101,7 +101,7 @@ public interface OXUserInterface extends Remote {
      *             If the data sent within the method contained invalid data.
      * @throws DatabaseUpdateException
      */
-    public int create(final Context ctx, final User usrdata, final UserModuleAccess access, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException;
+    public User create(final Context ctx, final User usrdata, final UserModuleAccess access, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException;
 
     /**
      * Manipulate user data within the given context.

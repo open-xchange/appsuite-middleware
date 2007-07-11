@@ -110,13 +110,13 @@ public class UserTest extends AbstractTest {
         final OXUserInterface oxu = getUserClient();
         final UserModuleAccess access = new UserModuleAccess();    
         final User urs = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
-        urs.setId(oxu.create(ctx,urs,access,cred));        
+        final User createduser = oxu.create(ctx,urs,access,cred);        
         
         // now load user from server and check if data is correct, else fail
-        final User srv_loaded = oxu.getData(ctx,urs,cred);
-        if(urs.getId().equals(srv_loaded.getId())){
+        final User srv_loaded = oxu.getData(ctx,createduser,cred);
+        if(createduser.getId().equals(srv_loaded.getId())){
             //verify data
-            compareUser(urs,srv_loaded);
+            compareUser(createduser,srv_loaded);
         }else{
             fail("Expected to get user data for added user");
         }
@@ -134,13 +134,13 @@ public class UserTest extends AbstractTest {
         final UserModuleAccess access = new UserModuleAccess();
         
         final User urs = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
-        urs.setId(oxu.create(ctx,urs,access,cred));             
+        final User createduser = oxu.create(ctx,urs,access,cred);             
         
         // delete user
-        oxu.delete(ctx, urs ,cred);
+        oxu.delete(ctx, createduser, cred);
         
         // try to load user, this MUST fail       
-        oxu.getData(ctx,urs,cred);
+        oxu.getData(ctx, createduser, cred);
         fail("user not exists expected");
     }
 
@@ -156,13 +156,13 @@ public class UserTest extends AbstractTest {
         final UserModuleAccess access = new UserModuleAccess();
         
         final User urs = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
-        urs.setId(oxu.create(ctx,urs,access,cred));             
+        final User createduser = oxu.create(ctx,urs,access,cred);             
         
         // delete user
         oxu.delete(ctx, new User[0] ,cred);
         
         // try to load user, this MUST fail       
-        oxu.getData(ctx,urs,cred);
+        oxu.getData(ctx, createduser, cred);
         fail("user not exists expected");
     }
 
@@ -178,12 +178,12 @@ public class UserTest extends AbstractTest {
         final UserModuleAccess access = new UserModuleAccess();   
         
         final User urs = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
-        urs.setId(oxu.create(ctx,urs,access,cred));     
+        final User createduser = oxu.create(ctx,urs,access,cred);     
         // now load user from server and check if data is correct, else fail
-        final User srv_loaded = oxu.getData(ctx, urs, cred);
-        if(urs.getId().equals(srv_loaded.getId())){
+        final User srv_loaded = oxu.getData(ctx, createduser, cred);
+        if(createduser.getId().equals(srv_loaded.getId())){
             //verify data
-            compareUser(urs,srv_loaded);
+            compareUser(createduser, srv_loaded);
         }else{
             fail("Expected to get user data");
         }       
@@ -200,14 +200,13 @@ public class UserTest extends AbstractTest {
         final UserModuleAccess access = new UserModuleAccess();
         
         final User urs = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
-        urs.setId(oxu.create(ctx,urs,access,cred));     
+        final User createduser = oxu.create(ctx, urs, access, cred);     
         
         // now load user from server and check if data is correct, else fail
-        final User[] srv_response = oxu.getData(ctx,new User[]{urs},cred);
-        final User srv_loaded = srv_response[0];
-        if(urs.getId().equals(srv_loaded.getId())){
+        final User srv_loaded = oxu.getData(ctx,createduser,cred);
+        if(createduser.getId().equals(srv_loaded.getId())){
             //verify data
-            compareUser(urs,srv_loaded);
+            compareUser(createduser,srv_loaded);
         }else{
             fail("Expected to get user data");
         }    
@@ -224,10 +223,10 @@ public class UserTest extends AbstractTest {
         final OXUserInterface oxu = getUserClient();
         final UserModuleAccess client_access = new UserModuleAccess(); 
         final User urs = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
-        urs.setId(oxu.create(ctx,urs,client_access,cred));
+        final User createduser = oxu.create(ctx,urs,client_access,cred);
         
         // get module access 
-        final UserModuleAccess srv_response = oxu.getModuleAccess(ctx,urs,cred);
+        final UserModuleAccess srv_response = oxu.getModuleAccess(ctx, createduser, cred);
         
         // test if module access was set correctly
         compareUserAccess(client_access,srv_response);        
@@ -245,10 +244,10 @@ public class UserTest extends AbstractTest {
         final OXUserInterface oxu = getUserClient();
         final UserModuleAccess client_access = new UserModuleAccess();
         final User usr = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
-        usr.setId(oxu.create(ctx,usr,client_access,cred));
+        final User createduser = oxu.create(ctx,usr,client_access,cred);
         
         // get module access 
-        final UserModuleAccess srv_response = oxu.getModuleAccess(ctx,usr,cred);
+        final UserModuleAccess srv_response = oxu.getModuleAccess(ctx, createduser, cred);
         
         // test if module access was set correctly
         compareUserAccess(client_access,srv_response);  
@@ -274,13 +273,13 @@ public class UserTest extends AbstractTest {
         srv_response.setWebmail(!srv_response.getWebmail());        
         
         // submit changes
-        oxu.changeModuleAccess(ctx,usr,srv_response,cred);        
+        oxu.changeModuleAccess(ctx, createduser, srv_response, cred);        
         
         // load again and verify
-        final UserModuleAccess srv_response_changed = oxu.getModuleAccess(ctx,usr,cred);
+        final UserModuleAccess srv_response_changed = oxu.getModuleAccess(ctx, createduser, cred);
         
         // test if module access was set correctly
-        compareUserAccess(srv_response,srv_response_changed);          
+        compareUserAccess(srv_response, srv_response_changed);          
         
     }
 
@@ -295,15 +294,15 @@ public class UserTest extends AbstractTest {
         final OXUserInterface oxu = getUserClient();
         final UserModuleAccess client_access = new UserModuleAccess();
         final User urs = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
-        urs.setId(oxu.create(ctx,urs,client_access,cred));
+        final User createduser = oxu.create(ctx,urs,client_access,cred);
         
         final User[] srv_response = oxu.list(ctx, "*", cred);
         
-        assertTrue("Expected list size > 0 ",srv_response.length>0);
+        assertTrue("Expected list size > 0 ", srv_response.length > 0);
         
         boolean founduser = false;
         for(final User element: srv_response){
-            if(element.getId().intValue()==urs.getId().intValue()){
+            if (element.getId().intValue() == createduser.getId().intValue()) {
                 founduser = true;
             }
         }
@@ -322,15 +321,15 @@ public class UserTest extends AbstractTest {
         final OXUserInterface oxu = getUserClient();
         final UserModuleAccess client_access = new UserModuleAccess();
         final User urs = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
-        urs.setId(oxu.create(ctx,urs,client_access,cred));
+        final User createduser = oxu.create(ctx,urs,client_access,cred);
         
         final User[] srv_response = oxu.listAll(ctx, cred);
         
-        assertTrue("Expected list size > 0 ",srv_response.length>0);
+        assertTrue("Expected list size > 0 ", srv_response.length > 0);
         
         boolean founduser = false;
         for(final User element: srv_response){
-            if(element.getId().intValue()==urs.getId().intValue()){
+            if (element.getId().intValue() == createduser.getId().intValue()) {
                 founduser = true;
             }
         }
@@ -349,13 +348,13 @@ public class UserTest extends AbstractTest {
         final OXUserInterface oxu = getUserClient();
         final UserModuleAccess access = new UserModuleAccess();    
         final User usr = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
-        usr.setId(oxu.create(ctx,usr,access,cred));     
+        final User createduser = oxu.create(ctx,usr,access,cred);     
         // now load user from server and check if data is correct, else fail
-        User srv_loaded = oxu.getData(ctx,usr,cred);
-        if(usr.getId().equals(srv_loaded.getId())){
+        User srv_loaded = oxu.getData(ctx, createduser, cred);
+        if (createduser.getId().equals(srv_loaded.getId())) {
             //verify data
-            compareUser(usr,srv_loaded);
-        }else{
+            compareUser(createduser, srv_loaded);
+        } else {
             fail("Expected to get user data");
         } 
         
@@ -368,10 +367,10 @@ public class UserTest extends AbstractTest {
         // load again
         final User user_changed_loaded = oxu.getData(ctx, srv_loaded, cred);
         // set Username to old value for verification
-        srv_loaded.setUsername(usr.getUsername());
-        if(srv_loaded.getId().equals(user_changed_loaded.getId())){
+        srv_loaded.setUsername(createduser.getUsername());
+        if (srv_loaded.getId().equals(user_changed_loaded.getId())) {
             //verify data
-            compareUser(srv_loaded,user_changed_loaded);
+            compareUser(srv_loaded, user_changed_loaded);
         }else{
             fail("Expected to get correct changed user data");
         } 
@@ -415,12 +414,12 @@ public class UserTest extends AbstractTest {
         final OXUserInterface oxu = getUserClient();
         final UserModuleAccess access = new UserModuleAccess();    
         final User usr = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
-        usr.setId(oxu.create(ctx,usr,access,cred));     
+        final User createduser = oxu.create(ctx,usr,access,cred);     
         // now load user from server and check if data is correct, else fail
-        User srv_loaded = oxu.getData(ctx,usr,cred);
-        if(usr.getId().equals(srv_loaded.getId())){
+        User srv_loaded = oxu.getData(ctx, createduser, cred);
+        if (createduser.getId().equals(srv_loaded.getId())) {
             //verify data
-            compareUser(usr,srv_loaded);
+            compareUser(createduser, srv_loaded);
         }else{
             fail("Expected to get user data");
         } 
@@ -719,7 +718,7 @@ public class UserTest extends AbstractTest {
         assertEquals("access webmail not equal", a.getWebmail(), b.getWebmail());
     }
     
-    public static int addUser(final Context ctx,final User usr,final UserModuleAccess access) throws Exception{
+    public static User addUser(final Context ctx,final User usr,final UserModuleAccess access) throws Exception{
         // create new user
         final OXUserInterface oxu = getUserClient();        
         return oxu.create(ctx,usr,access,DummyCredentials());

@@ -159,18 +159,16 @@ public class GroupTest extends AbstractTest {
         // create user to add
         final User usr = UserTest.getTestUserObject("groupmemberadduser" + System.currentTimeMillis(), "netline");
         final UserModuleAccess access = new UserModuleAccess();
-        final int usr_id = UserTest.addUser(ctx, usr, access);
-        usr.setId(usr_id);
+        final User createduser = UserTest.addUser(ctx, usr, access);
 
         // add user as groupmember
-        User u = new User(usr_id);
-        addMemberToGroup(ctx, addgroup, new User[]{u}, hosturl, cred);
+        addMemberToGroup(ctx, addgroup, new User[]{createduser}, hosturl, cred);
 
         // now get all members of group, and check if user is member
         final User[] remote_members = getMembers(ctx, addgroup, hosturl, cred);
         boolean foundmember = false;
         for (User element : remote_members) {
-            if (element.getId() == (int) usr_id) {
+            if (element.getId() == createduser.getId().intValue()) {
                 foundmember = true;
             }
         }
@@ -192,30 +190,28 @@ public class GroupTest extends AbstractTest {
         
         final User usr = UserTest.getTestUserObject("groupmemberadduser" + System.currentTimeMillis(), "netline");
         final UserModuleAccess access = new UserModuleAccess();
-        final int usr_id = UserTest.addUser(ctx, usr, access);
-        usr.setId(usr_id);
+        final User createduser = UserTest.addUser(ctx, usr, access);
 
         // add user as groupmember
-        User u = new User(usr_id);
-        addMemberToGroup(ctx, addgroup, new User[]{u}, hosturl, cred);
+        addMemberToGroup(ctx, addgroup, new User[]{createduser}, hosturl, cred);
 
         // now get all members of group, and check if user is member
         User[] remote_members = getMembers(ctx, addgroup, hosturl, cred);
         boolean foundmember = false;
         for (User element : remote_members) {
-            if (element.getId() == (int) usr_id) {
+            if (element.getId() == createduser.getId().intValue()) {
                 foundmember = true;
             }
         }
         assertTrue("member not added to group", foundmember);
 
         // now remove user from group;
-        removeMemberFromGroup(ctx, addgroup, new User[]{u}, hosturl, cred);
+        removeMemberFromGroup(ctx, addgroup, new User[]{createduser}, hosturl, cred);
         // now get all members of group, and check if user is member
         remote_members = getMembers(ctx, addgroup, hosturl, cred);
         foundmember = false;
         for (User element : remote_members) {
-            if (element.getId() == (int) usr_id) {
+            if (element.getId() == createduser.getId().intValue()) {
                 foundmember = true;
             }
         }
@@ -271,12 +267,10 @@ public class GroupTest extends AbstractTest {
         // create user to add
         final User usr = UserTest.getTestUserObject("groupmemberadduser" + System.currentTimeMillis(), "netline");
         final UserModuleAccess access = new UserModuleAccess();
-        final int usr_id = UserTest.addUser(ctx, usr, access);
-        usr.setId(usr_id);
+        final User createduser = UserTest.addUser(ctx, usr, access);
 
         // add user as groupmember
-        final User u = new User(usr_id);
-        addMemberToGroup(ctx, addgroup, new User[]{u}, hosturl, cred);
+        addMemberToGroup(ctx, addgroup, new User[]{createduser}, hosturl, cred);
 
         // now get all members of group, and check if user is member
         final User[] remote_members = getMembers(ctx, addgroup, hosturl, cred);
