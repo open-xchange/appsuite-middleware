@@ -54,6 +54,7 @@ import java.util.ArrayList;
 import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 
 
 /**
@@ -394,5 +395,74 @@ public abstract class BasicCommandlineOptions {
     protected Credentials credentialsparsing(final AdminParser parser) {
         final Credentials auth = new Credentials((String) parser.getOptionValue(this.adminUserOption), (String) parser.getOptionValue(this.adminPassOption));
         return auth;
+    }
+
+    /**
+     * Strips a string to the given size and adds the given lastmark to it to signal that the string is longer
+     * than specified
+     * 
+     * @param test
+     * @param length
+     * @return
+     */
+    protected String stripString(final String text, final int length, final String lastmark) {
+        if (text.length() > length) {
+            final int stringlength = length - lastmark.length();
+            return new StringBuffer(text.substring(0, stringlength)).append(lastmark).toString();
+        } else {
+            return text;
+        }
+    }
+
+    /**
+     * This method takes an array of objects and format them in one comma-separated string
+     * 
+     * @param objects
+     * @return
+     */
+    protected String getObjectsAsString(final Object[] objects) {
+        final StringBuilder sb = new StringBuilder();
+        if (objects != null && objects.length > 0) {
+            for (final Object id : objects) {
+                sb.append(id);
+                sb.append(",");
+            }
+            sb.deleteCharAt(sb.length() - 1);
+            
+            return sb.toString();
+        } else {
+            return "";
+        }
+        
+    }
+
+    protected void doOutput(final int[] columnsizes, final String[] columnnames, final ArrayList<ArrayList<String>> data) throws InvalidDataException {
+        if (columnsizes.length != columnnames.length) {
+            throw new InvalidDataException("The sizes of columnsizes and columnnames aren't equals");
+        }
+        final StringBuilder formatsb = new StringBuilder();
+        for (final int size : columnsizes) {
+            formatsb.append("%-");
+            formatsb.append(size);
+            formatsb.append("s ");
+        }
+        formatsb.deleteCharAt(formatsb.length() - 1);
+        formatsb.append('\n');
+        for (int i = 0; i < columnsizes.length; i++) {
+            if (columnnames[i].length() > columnsizes[i]) {
+                throw new InvalidDataException("Columnsize for column " + columnnames[i] + " is too small for columnname");
+            }
+        }
+        System.out.format(formatsb.toString(), (Object[]) columnnames);
+        for (final ArrayList<String> row : data) {
+            if (row.size() != columnsizes.length) {
+                throw new InvalidDataException("The size of one of the rows isn't correct");
+            }
+            final Object[] outputrow = new Object[columnsizes.length];
+            for (int i = 0; i < columnsizes.length; i++) {
+                outputrow[i] = stripString(row.get(i), columnsizes[i], "~");
+            }
+            System.out.format(formatsb.toString(), outputrow);
+        }
     }
 }

@@ -198,12 +198,43 @@ public abstract class ListCore extends UserAbstraction {
         }
     }
 
-    protected final void sysoutOutput(final User[] users, final HashMap<Integer, UserModuleAccess> user_access) {
+    protected final void sysoutOutput(final User[] users, final HashMap<Integer, UserModuleAccess> user_access) throws InvalidDataException {
+
+        final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
         for (final User user : users) {
-            System.out.println(user.toString());
-            System.out.println(user_access.get(user.getId()).toString());
             printExtensionsError(user);
+            data.add(makeStandardData(user));
         }
+        
+        doOutput(new int[] { 3, 30, 30, 14 }, new String[] { "Id", "Name", "Displayname", "Email" }, data);
+    }
+
+    private ArrayList<String> makeStandardData(final User user) {
+        final ArrayList<String> res_data = new ArrayList<String>();
+        
+        res_data.add(String.valueOf(user.getId())); // id
+    
+        final String name = user.getUsername();
+        if (name != null && name.trim().length() > 0) {
+            res_data.add(name); // name
+        } else {
+            res_data.add(null); // name
+        }
+    
+        final String displayname = user.getDisplay_name();
+        if (displayname != null && displayname.trim().length() > 0) {
+            res_data.add(displayname); // displayname
+        } else {
+            res_data.add(null); // displayname
+        }
+    
+        final String email = user.getPrimaryEmail();
+        if (email != null && email.trim().length() > 0) {
+            res_data.add(email); // email
+        } else {
+            res_data.add(null); // email
+        }
+        return res_data;
     }
 
     protected final String timezonetostring(final TimeZone zone) {
