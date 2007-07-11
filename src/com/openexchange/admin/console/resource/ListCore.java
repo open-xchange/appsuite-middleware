@@ -108,11 +108,14 @@ public abstract class ListCore extends ResourceAbstraction {
         }
     }
 
-    protected final void sysoutOutput(final ArrayList<Resource> resources) {
+    protected final void sysoutOutput(final ArrayList<Resource> resources) throws InvalidDataException {
+        final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
         for (final Resource resource : resources) {
-            System.out.println(resource.toString());
             printExtensionsError(resource);
+            data.add(makeStandardData(resource));
         }
+        
+        doOutput(new int[] { 3, 30, 20, 14, 9 }, new String[] { "Id", "Name", "Displayname", "Email", "Available" }, data);
     }
 
 
@@ -141,7 +144,13 @@ public abstract class ListCore extends ResourceAbstraction {
     protected abstract void extendscvscolumns(final ArrayList<String> columns);
 
     private ArrayList<String> makeCsvData(final Resource my_res) {
+        final ArrayList<String> res_data = makeStandardData(my_res);
     
+        extendmakeCSVData(my_res, res_data);
+        return res_data;
+    }
+
+    private ArrayList<String> makeStandardData(final Resource my_res) {
         final ArrayList<String> res_data = new ArrayList<String>();
     
         res_data.add(String.valueOf(my_res.getId())); // id
@@ -167,13 +176,13 @@ public abstract class ListCore extends ResourceAbstraction {
             res_data.add(null); // email
         }
         
-        if(my_res.getAvailable()!=null){
-            res_data.add(my_res.getAvailable().toString()); // vailable
-        }else{
+        final Boolean available = my_res.getAvailable();
+        if (available != null) {
+            res_data.add(available.toString()); // available
+        } else {
             res_data.add(null);
         }
     
-        extendmakeCSVData(my_res, res_data);
         return res_data;
     }
     
