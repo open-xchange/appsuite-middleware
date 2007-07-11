@@ -1,3 +1,7 @@
+* 2007-07-11 - choeger@open-xchange.com
+
+ - Bugfix ID#8397 listgroup: "email" in csv output
+
 * 2007-07-09 - choeger@open-xchange.com
 
  - Bugfix ID#8336 Unable to change user using the changeuser script
