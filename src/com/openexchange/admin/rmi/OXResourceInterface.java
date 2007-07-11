@@ -89,7 +89,7 @@ public interface OXResourceInterface extends Remote {
      * @throws RemoteException General RMI Exception
      * @throws DatabaseUpdateException 
      */
-    public int create(final Context ctx, final Resource res, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException;
+    public Resource create(final Context ctx, final Resource res, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException;
 
     /**
      * Change resource within the given context.
