@@ -213,7 +213,11 @@ public final class SystemConfig extends AbstractConfig {
         /**
          * UserConfigurationStorage
          */
-        USER_CONF_STORAGE("UserConfigurationStorage");
+        USER_CONF_STORAGE("UserConfigurationStorage"),
+        /**
+         * Config file for the login implementation.
+         */
+        LoginInfoConfig("LoginInfoConfig");
 
         /**
          * Name of the property in the server.properties file.

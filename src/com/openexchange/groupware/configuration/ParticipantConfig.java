@@ -120,7 +120,7 @@ public final class ParticipantConfig extends AbstractConfig {
         SHOW_WITHOUT_EMAIL("ShowWithoutEmail", Boolean.TRUE.toString());
 
         /**
-         * Name of the property in the server.properties file.
+         * Name of the property in the participant.properties file.
          */
         private String propertyName;
 
@@ -131,7 +131,7 @@ public final class ParticipantConfig extends AbstractConfig {
 
         /**
          * Default constructor.
-         * @param keyName Name of the property in the server.properties
+         * @param keyName Name of the property in the participant.properties
          * file.
          * @param value Default value of the property.
          */
