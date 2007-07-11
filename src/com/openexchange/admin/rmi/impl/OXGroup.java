@@ -103,7 +103,7 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
         }
     }
 
-    public int create(final Context ctx, final Group grp, final Credentials auth)
+    public Group create(final Context ctx, final Group grp, final Credentials auth)
             throws RemoteException, StorageException,
             InvalidCredentialsException, NoSuchContextException,
             InvalidDataException, DatabaseUpdateException, NoSuchUserException {
@@ -212,7 +212,7 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
             }
         }
 
-        return retval;
+        return grp;
         // MonitoringInfos.incrementNumberOfCreateGroupCalled();
     }
 
