@@ -125,6 +125,7 @@ public abstract class ListCore extends ResourceAbstraction {
         columns.add("name");
         columns.add("displayname");
         columns.add("email");
+        columns.add("available");
         extendscvscolumns(columns);
     
         // Needed for csv output
@@ -164,6 +165,12 @@ public abstract class ListCore extends ResourceAbstraction {
             res_data.add(email); // email
         } else {
             res_data.add(null); // email
+        }
+        
+        if(my_res.getAvailable()!=null){
+            res_data.add(my_res.getAvailable().toString()); // vailable
+        }else{
+            res_data.add(null);
         }
     
         extendmakeCSVData(my_res, res_data);
