@@ -354,11 +354,13 @@ public abstract class User2IMAP {
 			INIT_LOCK.lock();
 			try {
 				if (null == implementingClass) {
-					final String classNameProp = SystemConfig.getProperty(SystemConfig.Property.User2IMAPImpl).trim();
+					String classNameProp = SystemConfig.getProperty(SystemConfig.Property.User2IMAPImpl);
 					if (null == classNameProp) {
 						throw new User2IMAPException(User2IMAPException.Code.MISSING_SETTING,
 								SystemConfig.Property.User2IMAPImpl.getPropertyName());
-					} else if ("auto".equalsIgnoreCase(classNameProp)) {
+					}
+					classNameProp = classNameProp.trim();
+					if ("auto".equalsIgnoreCase(classNameProp)) {
 						/*
 						 * Try to detect dependent on IMAP server greeting
 						 */
