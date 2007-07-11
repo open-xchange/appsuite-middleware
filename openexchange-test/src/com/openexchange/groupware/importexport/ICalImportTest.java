@@ -51,47 +51,33 @@ package com.openexchange.groupware.importexport;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.List;
 
 import junit.framework.JUnit4TestAdapter;
 
-import org.junit.After;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.TasksSQLInterface;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Init;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarSql;
-import com.openexchange.groupware.contact.ContactConfig;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
-import com.openexchange.groupware.contexts.ContextImpl;
-import com.openexchange.groupware.contexts.ContextStorage;
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
-import com.openexchange.groupware.importexport.importers.ICalImporter;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
 import com.openexchange.server.DBPoolingException;
-import com.openexchange.sessiond.SessionObjectWrapper;
 
 
-public class ICalImportTest extends AbstractContactTest {
-	public final Format format = Format.ICAL;
-	
+public class ICalImportTest extends AbstractICalImportTest {
 	//workaround for JUnit 3 runner
 	public static junit.framework.Test suite() {
 		return new JUnit4TestAdapter(ICalImportTest.class);
@@ -99,25 +85,6 @@ public class ICalImportTest extends AbstractContactTest {
 	
 	
 	
-	@BeforeClass
-	public static void initialize() throws SQLException, AbstractOXException {
-		Init.initDB();
-		ContactConfig.init();
-		ContextStorage.init();
-		final UserStorage uStorage = UserStorage.getInstance(new ContextImpl(1));
-	    userId = uStorage.getUserId( Init.getAJAXProperty("login") );
-	    sessObj = SessionObjectWrapper.createSessionObject(userId, 1, "csv-tests");
-		userId = sessObj.getUserObject().getId();
-		imp = new ICalImporter();
-	}
-	
-	@After
-	public void cleanUpAfterTest() throws OXException{
-		deleteTestFolder(folderId);
-	}
-
-
-
 	@Test public void test7386() throws UnsupportedEncodingException, ImportExportException, DBPoolingException, SQLException{
 		folderId = createTestFolder(FolderObject.TASK, sessObj, "icalTaskTestFolder");
 		String ical =  "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//ellie//ellie//EN\nCALSCALE:GREGORIAN\nBEGIN:VTODO\nDTSTART;TZID=US/Eastern:20040528T000000\nSUMMARY:grade quizzes and m1\nUID:2\nSEQUENCE:0\nDTSTAMP:20040606T230400\nPRIORITY:2\nDUE;VALUE=DATE:20040528T000000\nEND:VTODO\nBEGIN:VTODO\nDTSTART;TZID=US/Eastern:20040525T000000\nSUMMARY:get timesheet signed\nUID:1\nSEQUENCE:0\nDTSTAMP:20040606T230400\nPRIORITY:1\nDUE;VALUE=DATE:20040525T000000\nEND:VTODO\nEND:VCALENDAR";
@@ -279,46 +246,45 @@ public class ICalImportTest extends AbstractContactTest {
 		assertEquals("Alarm is "+alarm+" minutes earlier" , alarm , appointmentObj.getAlarm());
 	}
 	
-//	@Test public void test7735() throws DBPoolingException, SQLException, ImportExportException, UnsupportedEncodingException{
-//		folderId = createTestFolder(FolderObject.CALENDAR, sessObj, "ical7735Folder");
-//		String ical = 
-//			"BEGIN:VCALENDAR\n" +
-//			"VERSION:2.0\n" +
-//			"PRODID:-//Microsoft Corporation//Outlook 12.0 MIMEDIR//EN\n" +
-//			"BEGIN:VEVENT\n" +
-//			"DTSTART:20070814T150000Z\n" +
-//			"DTEND:20070814T163000Z\n" +
-//			"LOCATION:Olpe\nSUMMARY:Komplizierte Intervalle\n" +
-//			"DESCRIPTION:Jeden ersten Sonntag im April\n" +
-//			"RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=4\n" +
-//			"END:VEVENT\n" +
-//			"END:VCALENDAR";
-//
-//		ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.CALENDAR, "7735", false);
-//
-//	}
-	
-//	@Test public void test7474() throws DBPoolingException, SQLException{
-//		folderId = createTestFolder(FolderObject.CALENDAR, sessObj, "ical6825Folder");
-//		fail("TODO");
-//	}
-	
-	public String generateRecurringICAL(final int interval, final String frequency){
-		return 
-		"BEGIN:VCALENDAR\n" +
-		"VERSION:2.0\n" +
-		"PRODID:-//The Horde Project//Horde_iCalendar Library//EN\n" +
-		"METHOD:PUBLISH\n" +
-		"BEGIN:VEVENT\n" +
-		"DTSTART;VALUE=DATE:20070616\n" +
-		"DTEND;VALUE=DATE:20070617\n" +
-		"DTSTAMP:20070530T200206Z\n" +
-		"UID:20070530220126.23mszu01hoo0@www.klein-intern.de\n" +
-		"SUMMARY:Marc beim Umzug helfen\n" +
-		"TRANSP:OPAQUE\nORGANIZER;CN=Marcus Klein:MAILTO:m.klein@sendung-mit-der-maus.com\n" +
-		"LOCATION:Olpe\n" +
-		"RRULE:FREQ="+frequency+";INTERVAL="+interval+";UNTIL=20070627\n" +
-		"END:VEVENT\n" +
-		"END:VCALENDAR\n";
+	/*
+	 * "Every sunday in a month" - this is supposed to work
+	 */
+	@Test public void test7735_positive() throws DBPoolingException, SQLException, ImportExportException, UnsupportedEncodingException{
+		//positive prefix for RRULE
+		String ical = 
+			"BEGIN:VCALENDAR\n" +
+			"VERSION:2.0\n" +
+			"PRODID:-//Microsoft Corporation//Outlook 12.0 MIMEDIR//EN\n" +
+			"BEGIN:VEVENT\n" +
+			"DTSTART:20070814T150000Z\n" +
+			"DTEND:20070814T163000Z\n" +
+			"LOCATION:Olpe\nSUMMARY:Komplizierte Intervalle\n" +
+			"DESCRIPTION:Jeden ersten Sonntag im April\n" +
+			"RRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=4\n" +
+			"END:VEVENT\n" +
+			"END:VCALENDAR";
+
+		performOneEntryCheck(ical, Format.ICAL, FolderObject.CALENDAR, "7735_positive", false);
+	}
+
+	/*
+	 * "Every last sunday in a month" - this is supposed to fail, 
+	 * because this kind of setup is not supported. 
+	 */
+	@Test public void test7735_negative () throws DBPoolingException, SQLException, ImportExportException, UnsupportedEncodingException{
+		//positive prefix for RRULE
+		String ical = 
+			"BEGIN:VCALENDAR\n" +
+			"VERSION:2.0\n" +
+			"PRODID:-//Microsoft Corporation//Outlook 12.0 MIMEDIR//EN\n" +
+			"BEGIN:VEVENT\n" +
+			"DTSTART:20070814T150000Z\n" +
+			"DTEND:20070814T163000Z\n" +
+			"LOCATION:Olpe\nSUMMARY:Komplizierte Intervalle\n" +
+			"DESCRIPTION:Jeden ersten Sonntag im April\n" +
+			"RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=4\n" +
+			"END:VEVENT\n" +
+			"END:VCALENDAR";
+		performOneEntryCheck(ical, Format.ICAL, FolderObject.CALENDAR, "7735_negative", true);
 	}
 }
