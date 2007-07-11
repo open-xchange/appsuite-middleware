@@ -61,7 +61,7 @@ public class List extends ContextAbtraction {
             if(parser.getOptionValue(this.csvOutputOption) == null) {
                 System.out.format(HEADER_FORMAT, "cid", "fid", "fname", "enabled", "qmax", "qused", "name","lmappings");
             }
-            for (Context ctx_tmp : ctxs) {
+            for (final Context ctx_tmp : ctxs) {
                 if (parser.getOptionValue(this.csvOutputOption) != null) {
                     data.add(makeCSVData(ctx_tmp));
                 } else {
