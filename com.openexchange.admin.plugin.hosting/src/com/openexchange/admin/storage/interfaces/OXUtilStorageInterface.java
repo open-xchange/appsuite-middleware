@@ -165,6 +165,12 @@ public abstract class OXUtilStorageInterface {
     public abstract MaintenanceReason[] getAllMaintenanceReasons() throws StorageException;
 
     /**
+     * @return an array of all available MaintenanceReasons in configdb match the specified pattern
+     * @throws StorageException
+     */
+    public abstract MaintenanceReason[] listMaintenanceReasons(final String search_pattern) throws StorageException;
+
+    /**
      * Register a new Database in configdb
      * 
      * @param db

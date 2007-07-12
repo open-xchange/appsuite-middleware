@@ -14,6 +14,7 @@ import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
+import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
 /**
@@ -36,34 +37,17 @@ public class ListReason extends UtilAbstraction {
             // get rmi ref
             final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME +OXUtilInterface.RMI_NAME);
 
-            final MaintenanceReason[] mrs = oxutil.listMaintenanceReasons(auth);
-
-            // needed for csv output, KEEP AN EYE ON ORDER!!!
-            final ArrayList<String> columns = new ArrayList<String>();
-            columns.add("id");
-            columns.add("text");
-
-            // Needed for csv output
-            final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
-
-            final String HEADER_FORMAT = "%-7s %-55s\n";
-            final String VALUE_FORMAT  = "%-7s %-55s\n";
-            if(parser.getOptionValue(this.csvOutputOption) == null) {
-                System.out.format(HEADER_FORMAT, "id", "test");
-            }
-            for (final MaintenanceReason mr : mrs) {
-                if (parser.getOptionValue(this.csvOutputOption) != null) {
-                    final ArrayList<String> rea_data = new ArrayList<String>();
-                    rea_data.add(mr.getId().toString());
-                    rea_data.add(mr.getText());
-                    data.add(rea_data);
-                } else {
-                    System.out.format(VALUE_FORMAT,mr.getId(),mr.getText());
-                }
+            String pattern = "*";
+            if (parser.getOptionValue(this.searchOption) != null) {
+                pattern = (String) parser.getOptionValue(this.searchOption);
             }
 
-            if (parser.getOptionValue(this.csvOutputOption) != null) {
-                doCSVOutput(columns, data);
+            final MaintenanceReason[] mrs = oxutil.listMaintenanceReasons(pattern, auth);
+
+            if (null != parser.getOptionValue(this.csvOutputOption)) {
+                precsvinfos(mrs);
+            } else {
+                sysoutOutput(mrs);
             }
 
             sysexit(0);
@@ -100,6 +84,9 @@ public class ListReason extends UtilAbstraction {
             printError(e.getMessage());
             parser.printUsage();
             sysexit(SYSEXIT_MISSING_OPTION);
+        } catch (final InvalidDataException e) {
+            printServerException(e);
+            sysexit(SYSEXIT_INVALID_DATA);
         }
     }
 
@@ -109,6 +96,39 @@ public class ListReason extends UtilAbstraction {
 
     private void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptions(parser);
+        setSearchOption(parser);
+    }
 
+    private void sysoutOutput(final MaintenanceReason[] mrs) throws InvalidDataException {
+        final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
+        for (final MaintenanceReason mr : mrs) {
+            data.add(makeCSVData(mr));
+        }
+        
+        doOutput(new int[] { 3, 72 }, new String[] { "Id", "Text" }, data);
+    }
+
+    private void precsvinfos(final MaintenanceReason[] mrs) {
+        // needed for csv output, KEEP AN EYE ON ORDER!!!
+        final ArrayList<String> columns = new ArrayList<String>();
+        columns.add("id");
+        columns.add("text");
+    
+        // Needed for csv output
+        final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
+    
+        for (final MaintenanceReason mr : mrs) {
+            data.add(makeCSVData(mr));
+        }
+    
+        doCSVOutput(columns, data);
+    }
+
+    private ArrayList<String> makeCSVData(final MaintenanceReason mr) {
+        final ArrayList<String> rea_data = new ArrayList<String>();
+        rea_data.add(mr.getId().toString());
+        rea_data.add(mr.getText());
+    
+        return rea_data;
     }
 }
