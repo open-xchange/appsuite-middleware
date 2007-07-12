@@ -47,21 +47,24 @@
  *
  */
 
-package com.openexchange.groupware.settings.shared;
+package com.openexchange.groupware.settings.shared.modules.infostore;
 
 import com.openexchange.groupware.settings.SettingSetup;
+import com.openexchange.groupware.settings.shared.AbstractModules;
+import com.openexchange.groupware.settings.shared.Modules;
+import com.openexchange.groupware.settings.shared.modules.Infostore;
 import com.openexchange.sessiond.SessionObject;
 
 /**
- * Contains initialization for the modules configuration tree setting calendar.
+ * Contains initialization for the modules configuration tree setting infostore.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class ModulesCalendar extends AbstractModules implements SettingSetup {
+public class Module extends AbstractModules {
 
     /**
      * Default constructor.
      */
-    public ModulesCalendar() {
+    public Module() {
         super();
     }
 
@@ -69,8 +72,16 @@ public class ModulesCalendar extends AbstractModules implements SettingSetup {
      * {@inheritDoc}
      */
     @Override
+    protected SettingSetup[] getParents() {
+        return new SettingSetup[] { new Modules(), new Infostore() };
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     protected String getName() {
-        return "calendar";
+        return "module";
     }
 
     /**
@@ -78,6 +89,6 @@ public class ModulesCalendar extends AbstractModules implements SettingSetup {
      */
     @Override
     protected boolean getModule(final SessionObject session) {
-        return session.getUserConfiguration().hasCalendar();
+        return session.getUserConfiguration().hasInfostore();
     }
 }

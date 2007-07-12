@@ -47,21 +47,24 @@
  *
  */
 
-package com.openexchange.groupware.settings.shared;
+package com.openexchange.groupware.settings.shared.modules;
 
 import com.openexchange.groupware.settings.SettingSetup;
-import com.openexchange.sessiond.SessionObject;
+import com.openexchange.groupware.settings.shared.AbstractNode;
+import com.openexchange.groupware.settings.shared.Modules;
 
 /**
- * Contains initialization for the modules configuration tree setting contacts.
+ * Contains initialization for the modules contacts configuration setting tree.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class ModulesContacts extends AbstractModules implements SettingSetup {
+public class Contacts extends AbstractNode {
 
+    public static final String NAME = "contacts";
+    
     /**
      * Default constructor.
      */
-    public ModulesContacts() {
+    public Contacts() {
         super();
     }
 
@@ -69,15 +72,16 @@ public class ModulesContacts extends AbstractModules implements SettingSetup {
      * {@inheritDoc}
      */
     @Override
-    protected String getName() {
-        return "contacts";
+    protected SettingSetup[] getParents() {
+        return new SettingSetup[] { new Modules() };
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected boolean getModule(final SessionObject session) {
-        return session.getUserConfiguration().hasContact();
+    protected String getName() {
+        return NAME;
     }
+
 }

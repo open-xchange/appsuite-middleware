@@ -47,47 +47,49 @@
  *
  */
 
-package com.openexchange.groupware.settings.shared;
+package com.openexchange.groupware.settings.shared.modules.calendar;
 
-import com.openexchange.groupware.settings.ReadOnlyValue;
-import com.openexchange.groupware.settings.SettingException;
-import com.openexchange.groupware.settings.Setting;
-import com.openexchange.groupware.settings.SharedValue;
+import com.openexchange.groupware.settings.SettingSetup;
+import com.openexchange.groupware.settings.shared.AbstractModules;
+import com.openexchange.groupware.settings.shared.Modules;
+import com.openexchange.groupware.settings.shared.modules.Calendar;
 import com.openexchange.sessiond.SessionObject;
 
 /**
- * Contains initialization for the modules configuration tree setting webmail.
+ * Contains initialization for the modules configuration tree setting
+ * calendar_conflict.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public abstract class AbstractModules extends AbstractNode {
+public class CalendarConflict extends AbstractModules {
 
     /**
      * Default constructor.
      */
-    public AbstractModules() {
+    public CalendarConflict() {
         super();
     }
 
     /**
      * {@inheritDoc}
      */
-    public SharedValue getSharedValue() {
-        return new ReadOnlyValue() {
-            /**
-             * {@inheritDoc}
-             */
-            public void getValue(final SessionObject session,
-                final Setting setting) throws SettingException {
-                setting.setSingleValue(getModule(session));
-            }
-            /**
-             * {@inheritDoc}
-             */
-            public boolean isAvailable(final SessionObject session) {
-                return true;
-            }
-        };
+    @Override
+    protected SettingSetup[] getParents() {
+        return new SettingSetup[] { new Modules(), new Calendar() };
     }
 
-    protected abstract boolean getModule(final SessionObject session);
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected String getName() {
+        return "calendar_conflict";
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected boolean getModule(final SessionObject session) {
+        return session.getUserConfiguration().hasConflictHandling();
+    }
 }

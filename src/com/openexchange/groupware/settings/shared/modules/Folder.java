@@ -47,47 +47,40 @@
  *
  */
 
-package com.openexchange.groupware.settings.shared;
+package com.openexchange.groupware.settings.shared.modules;
 
-import com.openexchange.groupware.settings.ReadOnlyValue;
-import com.openexchange.groupware.settings.SettingException;
-import com.openexchange.groupware.settings.Setting;
-import com.openexchange.groupware.settings.SharedValue;
-import com.openexchange.sessiond.SessionObject;
+import com.openexchange.groupware.settings.SettingSetup;
+import com.openexchange.groupware.settings.shared.AbstractNode;
+import com.openexchange.groupware.settings.shared.Modules;
 
 /**
- * Contains initialization for the modules configuration tree setting webmail.
+ * Contains initialization for the modules folder configuration setting tree.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public abstract class AbstractModules extends AbstractNode {
+public class Folder extends AbstractNode {
 
+    public static final String NAME = "folder";
+    
     /**
      * Default constructor.
      */
-    public AbstractModules() {
+    public Folder() {
         super();
     }
 
     /**
      * {@inheritDoc}
      */
-    public SharedValue getSharedValue() {
-        return new ReadOnlyValue() {
-            /**
-             * {@inheritDoc}
-             */
-            public void getValue(final SessionObject session,
-                final Setting setting) throws SettingException {
-                setting.setSingleValue(getModule(session));
-            }
-            /**
-             * {@inheritDoc}
-             */
-            public boolean isAvailable(final SessionObject session) {
-                return true;
-            }
-        };
+    @Override
+    protected SettingSetup[] getParents() {
+        return new SettingSetup[] { new Modules() };
     }
 
-    protected abstract boolean getModule(final SessionObject session);
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected String getName() {
+        return NAME;
+    }
 }

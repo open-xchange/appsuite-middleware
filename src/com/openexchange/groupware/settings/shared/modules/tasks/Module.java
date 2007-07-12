@@ -47,21 +47,24 @@
  *
  */
 
-package com.openexchange.groupware.settings.shared;
+package com.openexchange.groupware.settings.shared.modules.tasks;
 
 import com.openexchange.groupware.settings.SettingSetup;
+import com.openexchange.groupware.settings.shared.AbstractModules;
+import com.openexchange.groupware.settings.shared.Modules;
+import com.openexchange.groupware.settings.shared.modules.Tasks;
 import com.openexchange.sessiond.SessionObject;
 
 /**
  * Contains initialization for the modules configuration tree setting tasks.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class ModulesTasks extends AbstractModules implements SettingSetup {
+public class Module extends AbstractModules {
 
     /**
      * Default constructor.
      */
-    public ModulesTasks() {
+    public Module() {
         super();
     }
 
@@ -69,8 +72,16 @@ public class ModulesTasks extends AbstractModules implements SettingSetup {
      * {@inheritDoc}
      */
     @Override
+    protected SettingSetup[] getParents() {
+        return new SettingSetup[] { new Modules(), new Tasks() };
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     protected String getName() {
-        return "tasks";
+        return "module";
     }
 
     /**

@@ -49,37 +49,55 @@
 
 package com.openexchange.groupware.settings.shared;
 
+import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.SettingSetup;
-import com.openexchange.sessiond.SessionObject;
+import com.openexchange.groupware.settings.SharedValue;
 
 /**
- * Contains initialization for the modules configuration tree setting
- * calendar_teamview.
+ * Abstract class with setup methods for inner config tree nodes.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class ModulesCalendarTeamView extends AbstractModules implements
-    SettingSetup {
+public abstract class AbstractNode implements SettingSetup {
 
     /**
      * Default constructor.
      */
-    public ModulesCalendarTeamView() {
+    protected AbstractNode() {
         super();
     }
 
     /**
      * {@inheritDoc}
      */
-    @Override
-    protected String getName() {
-        return "calendar_teamview";
+    public String getPath() {
+        final StringBuilder path = new StringBuilder();
+        boolean removeLastSlash = false;
+        for (SettingSetup setup : getParents()) {
+            path.append(setup.getSetting().getName());
+            path.append('/');
+            removeLastSlash = true;
+        }
+        if (removeLastSlash) {
+            path.setLength(path.length() - 1);
+        }
+        return path.toString();
     }
+
+    protected abstract SettingSetup[] getParents();
 
     /**
      * {@inheritDoc}
      */
-    @Override
-    protected boolean getModule(final SessionObject session) {
-        return session.getUserConfiguration().hasTeamView();
+    public Setting getSetting() {
+        return new Setting(getName(), -1, true);
+    }
+
+    protected abstract String getName();
+    
+    /**
+     * {@inheritDoc}
+     */
+    public SharedValue getSharedValue() {
+        return null;
     }
 }

@@ -47,23 +47,24 @@
  *
  */
 
-package com.openexchange.groupware.settings.shared;
+package com.openexchange.groupware.settings.shared.modules;
 
 import com.openexchange.groupware.settings.SettingSetup;
-import com.openexchange.sessiond.SessionObject;
+import com.openexchange.groupware.settings.shared.AbstractNode;
+import com.openexchange.groupware.settings.shared.Modules;
 
 /**
- * Contains initialization for the modules configuration tree setting
- * calendar_conflict.
+ * Contains initialization for the modules portal configuration setting tree.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class ModulesCalendarConflict extends AbstractModules implements
-    SettingSetup {
+public class Portal extends AbstractNode {
+
+    public static final String NAME = "portal";
 
     /**
      * Default constructor.
      */
-    public ModulesCalendarConflict() {
+    public Portal() {
         super();
     }
 
@@ -71,15 +72,15 @@ public class ModulesCalendarConflict extends AbstractModules implements
      * {@inheritDoc}
      */
     @Override
-    protected String getName() {
-        return "calendar_conflict";
+    protected SettingSetup[] getParents() {
+        return new SettingSetup[] { new Modules() };
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected boolean getModule(final SessionObject session) {
-        return session.getUserConfiguration().hasConflictHandling();
+    protected String getName() {
+        return NAME;
     }
 }

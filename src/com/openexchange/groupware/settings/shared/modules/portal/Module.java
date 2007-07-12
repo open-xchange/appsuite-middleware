@@ -47,21 +47,24 @@
  *
  */
 
-package com.openexchange.groupware.settings.shared;
+package com.openexchange.groupware.settings.shared.modules.portal;
 
 import com.openexchange.groupware.settings.SettingSetup;
+import com.openexchange.groupware.settings.shared.AbstractModules;
+import com.openexchange.groupware.settings.shared.Modules;
+import com.openexchange.groupware.settings.shared.modules.Portal;
 import com.openexchange.sessiond.SessionObject;
 
 /**
- * Contains initialization for the modules configuration tree setting infostore.
+ * Contains initialization for the modules configuration tree setting portal.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class ModulesInfostore extends AbstractModules implements SettingSetup {
+public class Module extends AbstractModules {
 
     /**
      * Default constructor.
      */
-    public ModulesInfostore() {
+    public Module() {
         super();
     }
 
@@ -69,8 +72,16 @@ public class ModulesInfostore extends AbstractModules implements SettingSetup {
      * {@inheritDoc}
      */
     @Override
+    protected SettingSetup[] getParents() {
+        return new SettingSetup[] { new Modules(), new Portal() };
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     protected String getName() {
-        return "infostore";
+        return "module";
     }
 
     /**
@@ -78,6 +89,6 @@ public class ModulesInfostore extends AbstractModules implements SettingSetup {
      */
     @Override
     protected boolean getModule(final SessionObject session) {
-        return session.getUserConfiguration().hasInfostore();
+        return session.getUserConfiguration().hasPortal();
     }
 }

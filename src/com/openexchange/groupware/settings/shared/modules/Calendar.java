@@ -47,21 +47,24 @@
  *
  */
 
-package com.openexchange.groupware.settings.shared;
+package com.openexchange.groupware.settings.shared.modules;
 
 import com.openexchange.groupware.settings.SettingSetup;
-import com.openexchange.sessiond.SessionObject;
+import com.openexchange.groupware.settings.shared.AbstractNode;
+import com.openexchange.groupware.settings.shared.Modules;
 
 /**
- * Contains initialization for the modules configuration tree setting webmail.
+ * Contains initialization for the modules calendar configuration setting tree.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class ModulesWebmail extends AbstractModules implements SettingSetup {
+public class Calendar extends AbstractNode {
 
+    public static final String NAME = "calendar";
+    
     /**
      * Default constructor.
      */
-    public ModulesWebmail() {
+    public Calendar() {
         super();
     }
 
@@ -69,15 +72,15 @@ public class ModulesWebmail extends AbstractModules implements SettingSetup {
      * {@inheritDoc}
      */
     @Override
-    protected String getName() {
-        return "webmail";
+    protected SettingSetup[] getParents() {
+        return new SettingSetup[] { new Modules() };
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected boolean getModule(final SessionObject session) {
-        return session.getUserConfiguration().hasWebMail();
+    protected String getName() {
+        return NAME;
     }
 }

@@ -72,7 +72,6 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.settings.SettingException.Code;
-import com.openexchange.groupware.settings.shared.*;
 import com.openexchange.server.Version;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
@@ -212,22 +211,31 @@ public final class ConfigTree {
 
     private static Class< ? extends SettingSetup>[] getClasses() {
         return (Class< ? extends SettingSetup>[]) new Class[] {
-            TaskNotification.class,
-            Modules.class,
-            ModulesCalendar.class,
-            ModulesCalendarConflict.class,
-            ModulesCalendarFreeBusy.class,
-            ModulesCalendarTeamView.class,
-            ModulesContacts.class,
-            ModulesDelegateTasks.class,
-            ModulesICal.class,
-            ModulesInfostore.class,
-            ModulesPublicFolders.class,
-            ModulesSharedFolders.class,
-            ModulesSyncML.class,
-            ModulesTasks.class,
-            ModulesVCard.class,
-            ModulesWebmail.class
+            com.openexchange.groupware.settings.shared.Modules.class,
+            com.openexchange.groupware.settings.shared.modules.Calendar.class,
+            com.openexchange.groupware.settings.shared.modules.calendar.Module.class,
+            com.openexchange.groupware.settings.shared.modules.calendar.CalendarConflict.class,
+            com.openexchange.groupware.settings.shared.modules.calendar.CalendarFreeBusy.class,
+            com.openexchange.groupware.settings.shared.modules.calendar.CalendarTeamView.class,
+            com.openexchange.groupware.settings.shared.modules.Contacts.class,
+            com.openexchange.groupware.settings.shared.modules.contacts.Module.class,
+            com.openexchange.groupware.settings.shared.modules.Folder.class,
+            com.openexchange.groupware.settings.shared.modules.folder.PublicFolders.class,
+            com.openexchange.groupware.settings.shared.modules.folder.SharedFolders.class,
+            com.openexchange.groupware.settings.shared.modules.Infostore.class,
+            com.openexchange.groupware.settings.shared.modules.infostore.Module.class,
+            com.openexchange.groupware.settings.shared.modules.Interfaces.class,
+            com.openexchange.groupware.settings.shared.modules.interfaces.ICal.class,
+            com.openexchange.groupware.settings.shared.modules.interfaces.SyncML.class,
+            com.openexchange.groupware.settings.shared.modules.interfaces.VCard.class,
+            com.openexchange.groupware.settings.shared.modules.Mail.class,
+            com.openexchange.groupware.settings.shared.modules.mail.Module.class,
+            com.openexchange.groupware.settings.shared.modules.Portal.class,
+            com.openexchange.groupware.settings.shared.modules.portal.Module.class,
+            com.openexchange.groupware.settings.shared.modules.Tasks.class,
+            com.openexchange.groupware.settings.shared.modules.tasks.Module.class,
+            com.openexchange.groupware.settings.shared.modules.tasks.DelegateTasks.class,
+            com.openexchange.groupware.settings.shared.TaskNotification.class
         };
     }
 

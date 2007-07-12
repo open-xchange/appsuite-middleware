@@ -47,23 +47,24 @@
  *
  */
 
-package com.openexchange.groupware.settings.shared;
+package com.openexchange.groupware.settings.shared.modules.contacts;
 
 import com.openexchange.groupware.settings.SettingSetup;
+import com.openexchange.groupware.settings.shared.AbstractModules;
+import com.openexchange.groupware.settings.shared.Modules;
+import com.openexchange.groupware.settings.shared.modules.Contacts;
 import com.openexchange.sessiond.SessionObject;
 
 /**
- * Contains initialization for the modules configuration tree setting
- * delegate_tasks.
+ * Contains initialization for the modules configuration tree setting contacts.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class ModulesDelegateTasks extends AbstractModules implements
-    SettingSetup {
+public class Module extends AbstractModules {
 
     /**
      * Default constructor.
      */
-    public ModulesDelegateTasks() {
+    public Module() {
         super();
     }
 
@@ -71,8 +72,16 @@ public class ModulesDelegateTasks extends AbstractModules implements
      * {@inheritDoc}
      */
     @Override
+    protected SettingSetup[] getParents() {
+        return new SettingSetup[] { new Modules(), new Contacts() };
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     protected String getName() {
-        return "delegate_tasks";
+        return "module";
     }
 
     /**
@@ -80,6 +89,6 @@ public class ModulesDelegateTasks extends AbstractModules implements
      */
     @Override
     protected boolean getModule(final SessionObject session) {
-        return session.getUserConfiguration().canDelegateTasks();
+        return session.getUserConfiguration().hasContact();
     }
 }

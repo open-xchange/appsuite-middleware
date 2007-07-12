@@ -47,23 +47,24 @@
  *
  */
 
-package com.openexchange.groupware.settings.shared;
+package com.openexchange.groupware.settings.shared.modules;
 
 import com.openexchange.groupware.settings.SettingSetup;
-import com.openexchange.sessiond.SessionObject;
+import com.openexchange.groupware.settings.shared.AbstractNode;
+import com.openexchange.groupware.settings.shared.Modules;
 
 /**
- * Contains initialization for the modules configuration tree setting
- * calendar_freebusy.
+ * Contains initialization for the modules interfaces configuration setting tree.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class ModulesCalendarFreeBusy extends AbstractModules implements
-    SettingSetup {
+public class Interfaces extends AbstractNode {
+
+    public static final String NAME = "interfaces";
 
     /**
      * Default constructor.
      */
-    public ModulesCalendarFreeBusy() {
+    public Interfaces() {
         super();
     }
 
@@ -71,15 +72,15 @@ public class ModulesCalendarFreeBusy extends AbstractModules implements
      * {@inheritDoc}
      */
     @Override
-    protected String getName() {
-        return "calendar_freebusy";
+    protected SettingSetup[] getParents() {
+        return new SettingSetup[] { new Modules() };
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected boolean getModule(final SessionObject session) {
-        return session.getUserConfiguration().hasFreeBusy();
+    protected String getName() {
+        return NAME;
     }
 }

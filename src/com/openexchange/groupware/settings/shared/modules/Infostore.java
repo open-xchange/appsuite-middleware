@@ -47,21 +47,24 @@
  *
  */
 
-package com.openexchange.groupware.settings.shared;
+package com.openexchange.groupware.settings.shared.modules;
 
 import com.openexchange.groupware.settings.SettingSetup;
-import com.openexchange.sessiond.SessionObject;
+import com.openexchange.groupware.settings.shared.AbstractNode;
+import com.openexchange.groupware.settings.shared.Modules;
 
 /**
- * Contains initialization for the modules configuration tree setting ical.
+ * Contains initialization for the modules infostore configuration setting tree.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class ModulesICal extends AbstractModules implements SettingSetup {
+public class Infostore extends AbstractNode {
 
+    public static final String NAME = "infostore";
+    
     /**
      * Default constructor.
      */
-    public ModulesICal() {
+    public Infostore() {
         super();
     }
 
@@ -69,15 +72,15 @@ public class ModulesICal extends AbstractModules implements SettingSetup {
      * {@inheritDoc}
      */
     @Override
-    protected String getName() {
-        return "ical";
+    protected SettingSetup[] getParents() {
+        return new SettingSetup[] { new Modules() };
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected boolean getModule(final SessionObject session) {
-        return session.getUserConfiguration().hasICal();
+    protected String getName() {
+        return NAME;
     }
 }

@@ -50,15 +50,15 @@
 package com.openexchange.groupware.settings.shared;
 
 import com.openexchange.groupware.settings.SettingSetup;
-import com.openexchange.groupware.settings.Setting;
-import com.openexchange.groupware.settings.SharedValue;
 
 /**
  * Contains initialization for the modules configuration setting tree.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class Modules implements SettingSetup {
+public class Modules extends AbstractNode {
 
+    public static final String NAME = "modules";
+    
     /**
      * Default constructor.
      */
@@ -69,21 +69,16 @@ public class Modules implements SettingSetup {
     /**
      * {@inheritDoc}
      */
-    public String getPath() {
-        return "";
+    @Override
+    protected SettingSetup[] getParents() {
+        return new SettingSetup[0];
     }
 
     /**
      * {@inheritDoc}
      */
-    public Setting getSetting() {
-        return new Setting("modules", -1, true);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public SharedValue getSharedValue() {
-        return null;
+    @Override
+    protected String getName() {
+        return NAME;
     }
 }

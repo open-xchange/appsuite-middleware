@@ -47,21 +47,24 @@
  *
  */
 
-package com.openexchange.groupware.settings.shared;
+package com.openexchange.groupware.settings.shared.modules;
 
 import com.openexchange.groupware.settings.SettingSetup;
-import com.openexchange.sessiond.SessionObject;
+import com.openexchange.groupware.settings.shared.AbstractNode;
+import com.openexchange.groupware.settings.shared.Modules;
 
 /**
- * Contains initialization for the modules configuration tree setting syncml.
+ * Contains initialization for the modules mail configuration setting tree.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class ModulesSyncML extends AbstractModules implements SettingSetup {
+public class Mail extends AbstractNode {
+
+    public static final String NAME = "mail";
 
     /**
      * Default constructor.
      */
-    public ModulesSyncML() {
+    public Mail() {
         super();
     }
 
@@ -69,15 +72,15 @@ public class ModulesSyncML extends AbstractModules implements SettingSetup {
      * {@inheritDoc}
      */
     @Override
-    protected String getName() {
-        return "syncml";
+    protected SettingSetup[] getParents() {
+        return new SettingSetup[] { new Modules() };
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected boolean getModule(final SessionObject session) {
-        return session.getUserConfiguration().hasSyncML();
+    protected String getName() {
+        return NAME;
     }
 }

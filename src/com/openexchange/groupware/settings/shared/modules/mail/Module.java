@@ -47,23 +47,24 @@
  *
  */
 
-package com.openexchange.groupware.settings.shared;
+package com.openexchange.groupware.settings.shared.modules.mail;
 
 import com.openexchange.groupware.settings.SettingSetup;
+import com.openexchange.groupware.settings.shared.AbstractModules;
+import com.openexchange.groupware.settings.shared.Modules;
+import com.openexchange.groupware.settings.shared.modules.Mail;
 import com.openexchange.sessiond.SessionObject;
 
 /**
- * Contains initialization for the modules configuration tree setting
- * read_create_shared_folders.
+ * Contains initialization for the modules configuration tree setting webmail.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class ModulesSharedFolders extends AbstractModules implements
-    SettingSetup {
+public class Module extends AbstractModules {
 
     /**
      * Default constructor.
      */
-    public ModulesSharedFolders() {
+    public Module() {
         super();
     }
 
@@ -71,8 +72,16 @@ public class ModulesSharedFolders extends AbstractModules implements
      * {@inheritDoc}
      */
     @Override
+    protected SettingSetup[] getParents() {
+        return new SettingSetup[] { new Modules(), new Mail() };
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     protected String getName() {
-        return "read_create_shared_folders";
+        return "module";
     }
 
     /**
@@ -80,6 +89,6 @@ public class ModulesSharedFolders extends AbstractModules implements
      */
     @Override
     protected boolean getModule(final SessionObject session) {
-        return session.getUserConfiguration().hasFullSharedFolderAccess();
+        return session.getUserConfiguration().hasWebMail();
     }
 }

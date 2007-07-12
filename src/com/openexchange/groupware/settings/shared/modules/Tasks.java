@@ -47,21 +47,24 @@
  *
  */
 
-package com.openexchange.groupware.settings.shared;
+package com.openexchange.groupware.settings.shared.modules;
 
 import com.openexchange.groupware.settings.SettingSetup;
-import com.openexchange.sessiond.SessionObject;
+import com.openexchange.groupware.settings.shared.AbstractNode;
+import com.openexchange.groupware.settings.shared.Modules;
 
 /**
- * Contains initialization for the modules configuration tree setting vcard.
+ * Contains initialization for the modules tasks configuration setting tree.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class ModulesVCard extends AbstractModules implements SettingSetup {
+public class Tasks extends AbstractNode {
+
+    public static final String NAME = "tasks";
 
     /**
      * Default constructor.
      */
-    public ModulesVCard() {
+    public Tasks() {
         super();
     }
 
@@ -69,15 +72,15 @@ public class ModulesVCard extends AbstractModules implements SettingSetup {
      * {@inheritDoc}
      */
     @Override
-    protected String getName() {
-        return "vcard";
+    protected SettingSetup[] getParents() {
+        return new SettingSetup[] { new Modules() };
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected boolean getModule(final SessionObject session) {
-        return session.getUserConfiguration().hasVCard();
+    protected String getName() {
+        return NAME;
     }
 }

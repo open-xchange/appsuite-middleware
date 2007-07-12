@@ -47,47 +47,49 @@
  *
  */
 
-package com.openexchange.groupware.settings.shared;
+package com.openexchange.groupware.settings.shared.modules.folder;
 
-import com.openexchange.groupware.settings.ReadOnlyValue;
-import com.openexchange.groupware.settings.SettingException;
-import com.openexchange.groupware.settings.Setting;
-import com.openexchange.groupware.settings.SharedValue;
+import com.openexchange.groupware.settings.SettingSetup;
+import com.openexchange.groupware.settings.shared.AbstractModules;
+import com.openexchange.groupware.settings.shared.Modules;
+import com.openexchange.groupware.settings.shared.modules.Folder;
 import com.openexchange.sessiond.SessionObject;
 
 /**
- * Contains initialization for the modules configuration tree setting webmail.
+ * Contains initialization for the modules configuration tree setting
+ * public_folders.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public abstract class AbstractModules extends AbstractNode {
+public class PublicFolders extends AbstractModules {
 
     /**
      * Default constructor.
      */
-    public AbstractModules() {
+    public PublicFolders() {
         super();
     }
 
     /**
      * {@inheritDoc}
      */
-    public SharedValue getSharedValue() {
-        return new ReadOnlyValue() {
-            /**
-             * {@inheritDoc}
-             */
-            public void getValue(final SessionObject session,
-                final Setting setting) throws SettingException {
-                setting.setSingleValue(getModule(session));
-            }
-            /**
-             * {@inheritDoc}
-             */
-            public boolean isAvailable(final SessionObject session) {
-                return true;
-            }
-        };
+    @Override
+    protected SettingSetup[] getParents() {
+        return new SettingSetup[] { new Modules(), new Folder() };
     }
 
-    protected abstract boolean getModule(final SessionObject session);
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected String getName() {
+        return "public_folders";
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected boolean getModule(final SessionObject session) {
+        return session.getUserConfiguration().hasFullPublicFolderAccess();
+    }
 }

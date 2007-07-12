@@ -47,23 +47,25 @@
  *
  */
 
-package com.openexchange.groupware.settings.shared;
+package com.openexchange.groupware.settings.shared.modules.tasks;
 
 import com.openexchange.groupware.settings.SettingSetup;
+import com.openexchange.groupware.settings.shared.AbstractModules;
+import com.openexchange.groupware.settings.shared.Modules;
+import com.openexchange.groupware.settings.shared.modules.Tasks;
 import com.openexchange.sessiond.SessionObject;
 
 /**
  * Contains initialization for the modules configuration tree setting
- * public_folders.
+ * delegate_tasks.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class ModulesPublicFolders extends AbstractModules implements
-    SettingSetup {
+public class DelegateTasks extends AbstractModules {
 
     /**
      * Default constructor.
      */
-    public ModulesPublicFolders() {
+    public DelegateTasks() {
         super();
     }
 
@@ -71,8 +73,16 @@ public class ModulesPublicFolders extends AbstractModules implements
      * {@inheritDoc}
      */
     @Override
+    protected SettingSetup[] getParents() {
+        return new SettingSetup[] { new Modules(), new Tasks() };
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     protected String getName() {
-        return "public_folders";
+        return "delegate_tasks";
     }
 
     /**
@@ -80,6 +90,6 @@ public class ModulesPublicFolders extends AbstractModules implements
      */
     @Override
     protected boolean getModule(final SessionObject session) {
-        return session.getUserConfiguration().hasFullPublicFolderAccess();
+        return session.getUserConfiguration().canDelegateTasks();
     }
 }
