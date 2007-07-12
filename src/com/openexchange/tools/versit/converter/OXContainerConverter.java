@@ -1136,7 +1136,8 @@ public class OXContainerConverter {
 			calContainerObj.setUntil(recur.Until.calendar.getTime());
 		}
 		if (recur.Count != -1) {
-			throw new ConverterException("COUNT is not supported.");
+			calContainerObj.setOccurrence(recur.Count);
+			//throw new ConverterException("COUNT is not supported.");
 		}
 		calContainerObj.setInterval(recur.Interval);
 		switch (recur.Freq) {

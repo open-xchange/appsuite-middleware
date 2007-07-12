@@ -1,3 +1,7 @@
+* 2007-07-12 - tobias.prinz@open-xchange.com
+ - Bugfix #7732: An RRULE's COUNT property is now set as occurrence value
+   for a CalendarObject.
+
 * 2007-07-12 - thorben.betten@open-xchange.com
 
  - Setting message's 'Organization' header surrounded by a try-catch clause
