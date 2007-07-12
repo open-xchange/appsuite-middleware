@@ -103,49 +103,25 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
         }
     }
 
-    
-
-//    public void changeStorageData(final Context ctx, final Filestore filestore, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
-//        try {
-//            doNullCheck(ctx, filestore);
-//        } catch (final InvalidDataException e) {
-//            new InvalidDataException("Context or filestore is null");
-//            log.error(e.getMessage(), e);
-//            throw e;
-//        }        
-//        doAuthentication(auth);
-//        
-//        final int context_id = ctx.getIdAsInt();
-//
-//        log.debug("" + context_id + " - " + filestore);
-//        try {
-//            final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
-//                        
-//            if (!tool.existsContext(ctx)) {
-//                throw new NoSuchContextException();
-//            }
-//            final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
-//            oxcox.changeStorageData(ctx, filestore);
-//        } catch (final StorageException e) {
-//            log.error(e.getMessage(), e);
-//            throw e;
-//        }        
-//    }
-
     public String moveContextFilestore(final Context ctx, final Filestore dst_filestore, final MaintenanceReason reason, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, NoSuchFilestoreException, NoSuchReasonException, OXContextException {
+        
         try {
-            doNullCheck(ctx, dst_filestore, reason);
-        } catch (final InvalidDataException e) {
-            final InvalidDataException invalidDataException = new InvalidDataException("Context or filestore or reason is null");
-            log.error(invalidDataException.getMessage(), invalidDataException);
-            throw invalidDataException;
-        }        
+            doNullCheck(ctx, ctx.getIdAsInt(),dst_filestore,dst_filestore.getId(), reason,reason.getId());
+        } catch (InvalidDataException e1) {            
+            log.error("Invalid data sent by client!", e1);
+            throw e1;
+        }
+        
         doAuthentication(auth);
         
         Context retval = null;
+        
         log.debug("" + ctx.getIdAsInt() + " - " + dst_filestore);
+        
         try {
+            
             final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
+            
             if (!tool.existsContext(ctx)) {
                 throw new NoSuchContextException();
             } else if (!tool.existsStore(dst_filestore.getId())) {
@@ -231,7 +207,13 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
     }
 
     public int moveContextDatabase(final Context ctx, final Database db, final MaintenanceReason reason, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException, OXContextException {
-        doNullCheck(ctx,db,reason);
+        
+        try{
+            doNullCheck(ctx,ctx.getIdAsInt(),db,db.getId(),reason,reason.getId());
+        } catch (InvalidDataException e1) {            
+            log.error("Invalid data sent by client!", e1);
+            throw e1;
+        }
         
         doAuthentication(auth);
         
@@ -287,9 +269,12 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
     }
 
     public void disableAll(final MaintenanceReason reason, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchReasonException {
-        
-        doNullCheck(reason,auth);
-        
+        try{
+            doNullCheck(reason,reason.getId());
+        } catch (InvalidDataException e1) {            
+            log.error("Invalid data sent by client!", e1);
+            throw e1;
+        }
         doAuthentication(auth);
         
         final int reason_id = reason.getId();
@@ -313,7 +298,7 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
 
     public void delete(final Context ctx, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, DatabaseUpdateException, InvalidDataException {
         try {
-            doNullCheck(ctx);
+            doNullCheck(ctx,ctx.getIdAsInt());
         } catch (InvalidDataException e) {
             final InvalidDataException invalidDataException = new InvalidDataException("Context is null");
             log.error(invalidDataException.getMessage(), invalidDataException);
@@ -372,11 +357,15 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
     }
 
     public void disable(final Context ctx, final MaintenanceReason reason, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, NoSuchReasonException, OXContextException {
+        
+        
         try {
-            doNullCheck(ctx, reason);
-        } catch (final InvalidDataException e) {
-            new InvalidDataException("Context or reason is null");
+            doNullCheck(ctx, ctx.getIdAsInt(),reason,reason.getId());        
+        } catch (InvalidDataException e1) {            
+            log.error("Invalid data sent by client!", e1);
+            throw e1;
         }        
+        
         doAuthentication(auth);
         
         final int context_id = ctx.getIdAsInt();
@@ -413,7 +402,7 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
 
     public void enable(final Context ctx, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
         try {
-            doNullCheck(ctx);
+            doNullCheck(ctx,ctx.getIdAsInt());
         } catch (InvalidDataException e1) {
             final InvalidDataException invalidDataException = new InvalidDataException("Context is null");
             log.error(invalidDataException.getMessage(), invalidDataException);
@@ -442,7 +431,7 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
 
     public Context getSetup(final Context ctx, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
         try {
-            doNullCheck(ctx);
+            doNullCheck(ctx,ctx.getIdAsInt());
         } catch (InvalidDataException e1) {
             final InvalidDataException invalidDataException = new InvalidDataException("Context is null");
             log.error(invalidDataException.getMessage(), invalidDataException);
@@ -470,7 +459,13 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
     }
 
     public Context create(final Context ctx, final User admin_user, final long quota_max, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException {
-        doNullCheck(ctx,admin_user,auth);
+        
+        try{
+            doNullCheck(ctx,ctx.getIdAsInt(),admin_user);
+        } catch (InvalidDataException e1) {            
+            log.error("Invalid data sent by client!", e1);
+            throw e1;
+        }
         
         doAuthentication(auth);
         
@@ -524,7 +519,7 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
     }
     
     
-    // this method will remove 
+    
     public void change(Context ctx, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
         
         try {
