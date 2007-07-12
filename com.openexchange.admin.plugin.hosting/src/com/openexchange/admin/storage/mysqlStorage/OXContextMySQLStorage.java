@@ -186,64 +186,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     /**
      * 
      * @throws StorageException
-     * @see com.openexchange.admin.storage.sqlStorage.OXContextSQLStorage#changeQuota(int,
-     *      long)
-     */
-    @Override
-    public void changeQuota(final Context ctx, final long quota_max) throws StorageException {
-        long quota_max_temp = quota_max;
-        if (quota_max != -1) {
-            quota_max_temp *= Math.pow(2, 20);
-        }
-        Connection con_write = null;
-        PreparedStatement stmt = null;
-        try {
-            con_write = cache.getWRITEConnectionForCONFIGDB();
-            con_write.setAutoCommit(false);
-            stmt = con_write.prepareStatement("UPDATE context SET quota_max=? WHERE cid=?");
-            stmt.setLong(1, quota_max_temp);
-            stmt.setInt(2, ctx.getIdAsInt());
-            stmt.executeUpdate();
-            stmt.close();
-            con_write.commit();
-        } catch (final SQLException sql) {
-            log.error("SQL Error", sql);
-            try {
-                con_write.rollback();
-            } catch (final SQLException ec) {
-                log.error("Error rollback configdb connection", ec);
-            }
-            throw new StorageException(sql);
-        } catch (final PoolException e) {
-            log.error("Pool Error", e);
-            try {
-                con_write.rollback();
-            } catch (final SQLException ec) {
-                log.error("Error rollback configdb connection", ec);
-            }
-            throw new StorageException(e);
-        } finally {
-            try {
-                if (stmt != null) {
-                    stmt.close();
-                }
-            } catch (final SQLException e) {
-                log.error(OXContextMySQLStorageCommon.LOG_ERROR_CLOSING_STATEMENT, e);
-            }
-
-            if (con_write != null) {
-                try {
-                    cache.pushConfigDBWrite(con_write);
-                } catch (final PoolException exp) {
-                    log.error("Error pushing configdb connection to pool!", exp);
-                }
-            }
-        }
-    }
-
-    /**
-     * 
-     * @throws StorageException
      * @see com.openexchange.admin.storage.sqlStorage.OXContextSQLStorage#deleteContext(int)
      */
     @Override

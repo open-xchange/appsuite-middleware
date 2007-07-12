@@ -21,8 +21,6 @@ import com.openexchange.admin.storage.interfaces.OXContextStorageInterface;
  */
 public abstract class OXContextSQLStorage extends OXContextStorageInterface {
 
-    abstract public void changeQuota(final Context ctx, final long quota_max) throws StorageException;
-
     abstract public void delete(final Context ctx) throws StorageException;
 
     abstract public void disableAll(final MaintenanceReason reason) throws StorageException;
