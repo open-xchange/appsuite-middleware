@@ -9,6 +9,10 @@
 * 2007-07-09 - choeger@open-xchange.com
 
  - Bugfix ID#8336 Unable to change user using the changeuser script
+
+* 2007-07-05 - choeger@open-xchange.com
+
+ - Bugfix ID#7682 (user setup) deleted user is not automatically logged off (syntax error message is displayed)
  
 * 2007-07-02 - choeger@open-xchange.com
 
