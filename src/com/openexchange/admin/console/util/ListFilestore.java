@@ -16,8 +16,6 @@ import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.sun.org.apache.xerces.internal.util.URI;
-import com.sun.org.apache.xerces.internal.util.URI.MalformedURIException;
 
 /**
  * 
@@ -48,44 +46,12 @@ public class ListFilestore extends UtilAbstraction {
 
             final Filestore[] filestores = oxutil.listFilestores(searchpattern, auth);
 
-            // needed for csv output, KEEP AN EYE ON ORDER!!!
-            final ArrayList<String> columns = new ArrayList<String>();
-            columns.add("id");
-            columns.add("uri");
-            columns.add("size");
-            columns.add("currentcontexts");
-            columns.add("maxcontexts");
-            columns.add("login");
-            columns.add("password");
-            columns.add("name");
-            columns.add("quota_max");
-            columns.add("quota_used");
-            // Needed for csv output
-            final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
-
-            final String HEADER_FORMAT = "%-7s %-35s %-7s %-7s %-7s %-7s %s\n";
-            final String VALUE_FORMAT  = "%-7s %-35s %-7s %-7s %-7s %-7s %s\n";
-            if(parser.getOptionValue(this.csvOutputOption) == null) {
-                System.out.format(HEADER_FORMAT, "id", "path", "size", "qmax", "qused", "maxctx", "curctx");
-            }
-            for (final Filestore filestore : filestores) {
-                if (parser.getOptionValue(this.csvOutputOption) != null) {
-                    data.add(makeCSVData(filestore));
-                } else {
-                    System.out.format(VALUE_FORMAT,
-                            filestore.getId(),
-                            new URI(filestore.getUrl()).getPath(),
-                            filestore.getSize(),
-                            filestore.getQuota_max(),
-                            filestore.getQuota_used(),
-                            filestore.getMaxContexts(),
-                            filestore.getCurrentContexts());
-                }
+            if (null != parser.getOptionValue(this.csvOutputOption)) {
+                precsvinfos(filestores);
+            } else {
+                sysoutOutput(filestores);
             }
 
-            if (parser.getOptionValue(this.csvOutputOption) != null) {
-                doCSVOutput(columns, data);
-            }
 
             sysexit(0);
         } catch (final java.rmi.ConnectException neti) {
@@ -124,10 +90,41 @@ public class ListFilestore extends UtilAbstraction {
             printError(e.getMessage());
             parser.printUsage();
             sysexit(SYSEXIT_MISSING_OPTION);
-        } catch (MalformedURIException e) {
-            printServerException(e);
-            sysexit(1);
         }
+    }
+
+    private void sysoutOutput(Filestore[] filestores) throws InvalidDataException {
+        final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
+        for (final Filestore filestore : filestores) {
+            data.add(makeStandardData(filestore));
+        }
+        
+//        final String HEADER_FORMAT = "%-7s %-35s %-7s %-7s %-7s %-7s %s\n";
+//            System.out.format(HEADER_FORMAT, "id", "path", "size", "qmax", "qused", "maxctx", "curctx");
+        doOutput(new int[] { 3, 35, 7, 7, 7, 7, 7 }, new String[] { "id", "path", "size", "qmax", "qused", "maxctx", "curctx" }, data);
+    }
+
+    private void precsvinfos(Filestore[] filestores) {
+        // needed for csv output, KEEP AN EYE ON ORDER!!!
+        final ArrayList<String> columns = new ArrayList<String>();
+        columns.add("id");
+        columns.add("uri");
+        columns.add("size");
+        columns.add("quota_max");
+        columns.add("quota_used");
+        columns.add("maxcontexts");
+        columns.add("currentcontexts");
+        columns.add("login");
+        columns.add("password");
+        columns.add("name");
+        // Needed for csv output
+        final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
+
+        for (final Filestore filestore : filestores) {
+            data.add(makeCSVData(filestore));
+        }
+
+        doCSVOutput(columns, data);
     }
 
     public static void main(final String args[]) {
@@ -145,33 +142,7 @@ public class ListFilestore extends UtilAbstraction {
      * @return
      */
     private ArrayList<String> makeCSVData(final Filestore fstore) {
-        final ArrayList<String> rea_data = new ArrayList<String>();
-
-        rea_data.add(fstore.getId().toString());
-
-        if (fstore.getUrl() != null) {
-            rea_data.add(fstore.getUrl());
-        } else {
-            rea_data.add(null);
-        }
-
-        if (fstore.getSize() != null) {
-            rea_data.add(fstore.getSize().toString());
-        } else {
-            rea_data.add(null);
-        }
-
-        if (fstore.getCurrentContexts() != null) {
-            rea_data.add(fstore.getCurrentContexts().toString());
-        } else {
-            rea_data.add(null);
-        }
-
-        if (fstore.getMaxContexts() != null) {
-            rea_data.add(fstore.getMaxContexts().toString());
-        } else {
-            rea_data.add(null);
-        }
+        final ArrayList<String> rea_data = makeStandardData(fstore);
 
         if (fstore.getLogin() != null) {
             rea_data.add(fstore.getLogin());
@@ -191,18 +162,49 @@ public class ListFilestore extends UtilAbstraction {
             rea_data.add(null);
         }
 
+        return rea_data;
+    }
+
+    private ArrayList<String> makeStandardData(final Filestore fstore) {
+        final ArrayList<String> rea_data = new ArrayList<String>();
+
+        rea_data.add(fstore.getId().toString());
+
+        if (fstore.getUrl() != null) {
+            rea_data.add(fstore.getUrl());
+        } else {
+            rea_data.add(null);
+        }
+
+        if (fstore.getSize() != null) {
+            rea_data.add(fstore.getSize().toString());
+        } else {
+            rea_data.add(null);
+        }
+
         if (fstore.getQuota_max() != null) {
             rea_data.add(fstore.getQuota_max().toString());
         } else {
             rea_data.add(null);
         }
-
+        
         if (fstore.getQuota_used() != null) {
             rea_data.add(fstore.getQuota_used().toString());
         } else {
             rea_data.add(null);
         }
+        
+        if (fstore.getMaxContexts() != null) {
+            rea_data.add(fstore.getMaxContexts().toString());
+        } else {
+            rea_data.add(null);
+        }
 
+        if (fstore.getCurrentContexts() != null) {
+            rea_data.add(fstore.getCurrentContexts().toString());
+        } else {
+            rea_data.add(null);
+        }
         return rea_data;
     }
 }
