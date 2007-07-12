@@ -172,7 +172,7 @@
             <fileset dir="${patch.bin.dir}"/>
         </copy>
         <chmod perm="755" file="${bin.install.copy.dir}/open-xchange-groupware"/>
-        <chmod perm="755" file="${bin.install.copy.dir}/checkConsistency"/>
+        <chmod perm="755" file="${bin.install.copy.dir}/checkconsistency"/>
 
         <copy todir="${destdir}" overwrite="true">
             <fileset dir="system"/>
@@ -486,8 +486,8 @@
     </target>
 
     <target name="patchConsistencyStart">
-        <move tofile="${patch.bin.dir}/checkConsistency" file="${patch.bin.dir}/checkConsistency.in" overwrite="true"/>
-        <replace file="${patch.bin.dir}/checkConsistency">
+        <move tofile="${patch.bin.dir}/checkconsistency" file="${patch.bin.dir}/checkconsistency.in" overwrite="true"/>
+        <replace file="${patch.bin.dir}/checkconsistency">
             <replacefilter token="@oxfunctions@" value="${conf.subst.patch}/oxfunctions.sh"/>
             <replacefilter token="@oxscriptconf@" value="${conf.subst.patch}/ox-scriptconf.sh"/>
             <replacefilter token="@prefix@" value="${prefix}"/>
