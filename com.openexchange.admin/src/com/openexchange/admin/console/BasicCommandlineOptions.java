@@ -63,6 +63,7 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
  *
  */
 public abstract class BasicCommandlineOptions {
+    private static final char dividechar = ' ';
     /**
      * Used when username/password credentials were not correct!
      */
@@ -436,33 +437,50 @@ public abstract class BasicCommandlineOptions {
         
     }
 
-    protected void doOutput(final int[] columnsizes, final String[] columnnames, final ArrayList<ArrayList<String>> data) throws InvalidDataException {
-        if (columnsizes.length != columnnames.length) {
-            throw new InvalidDataException("The sizes of columnsizes and columnnames aren't equals");
+    protected void doOutput(final String[] columnsizesandalignments, final String[] columnnames, final ArrayList<ArrayList<String>> data) throws InvalidDataException {
+        if (columnsizesandalignments.length != columnnames.length) {
+            throw new InvalidDataException("The sizes of columnsizes and columnnames aren't equal");
         }
+        final int[] columnsizes = new int[columnsizesandalignments.length];
+        final char[] alignments = new char[columnsizesandalignments.length];
         final StringBuilder formatsb = new StringBuilder();
-        for (final int size : columnsizes) {
-            formatsb.append("%-");
-            formatsb.append(size);
-            formatsb.append("s ");
-        }
-        formatsb.deleteCharAt(formatsb.length() - 1);
-        formatsb.append('\n');
-        for (int i = 0; i < columnsizes.length; i++) {
+        for (int i = 0; i < columnsizesandalignments.length; i++) {
+            // fill up part
+            try {
+                columnsizes[i] = Integer.parseInt(columnsizesandalignments[i].substring(0, columnsizesandalignments[i].length() - 1));
+            } catch (final NumberFormatException e) {
+                throw new InvalidDataException("Error while parsing integer from columnsizesandalignments");
+            }            
+            alignments[i] = columnsizesandalignments[i].charAt(columnsizesandalignments[i].length() - 1);
+
+            // check part
             if (columnnames[i].length() > columnsizes[i]) {
                 throw new InvalidDataException("Columnsize for column " + columnnames[i] + " is too small for columnname");
             }
+
+            // formatting part
+            formatsb.append("%");
+            if (alignments[i] == 'l') {
+                formatsb.append('-');
+            }
+            formatsb.append(columnsizes[i]);
+            formatsb.append('s');
+            formatsb.append(dividechar);
         }
+        formatsb.deleteCharAt(formatsb.length() - 1);
+        formatsb.append('\n');
         System.out.format(formatsb.toString(), (Object[]) columnnames);
         for (final ArrayList<String> row : data) {
-            if (row.size() != columnsizes.length) {
+            if (row.size() != columnsizesandalignments.length) {
                 throw new InvalidDataException("The size of one of the rows isn't correct");
             }
-            final Object[] outputrow = new Object[columnsizes.length];
-            for (int i = 0; i < columnsizes.length; i++) {
-                outputrow[i] = stripString(row.get(i), columnsizes[i], "~");
+            final Object[] outputrow = new Object[columnsizesandalignments.length];
+            for (int i = 0; i < columnsizesandalignments.length; i++) {
+                final String value = row.get(i);
+                outputrow[i] = stripString(value, columnsizes[i], "~");
             }
             System.out.format(formatsb.toString(), outputrow);
         }
     }
+
 }

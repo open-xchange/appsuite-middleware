@@ -119,7 +119,8 @@ public abstract class ListCore extends GroupAbstraction {
             data.add(makeStandardData(group));
         }
         
-        doOutput(new int[] { 3, 30, 30, 14 }, new String[] { "Id", "Name", "Displayname", "Members" }, data);
+        doOutput(new String[] { "3r", "30l", "30l", "14l" },
+                 new String[] { "Id", "Name", "Displayname", "Members" }, data);
     }
     
     private void precsvinfos(final ArrayList<Group> grplist) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
