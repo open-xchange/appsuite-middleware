@@ -1086,12 +1086,6 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         PreparedStatement stmt = null;
         try {
             con = cache.getWRITEConnectionForCONFIGDB();
-
-            stmt = con.prepareStatement("DELETE FROM server2db_pool WHERE server_id = ?");
-            stmt.setInt(1, server_id);
-            stmt.executeUpdate();
-            stmt.close();
-
             stmt = con.prepareStatement("DELETE FROM server WHERE server_id = ?");
             stmt.setInt(1, server_id);
             stmt.executeUpdate();
@@ -1100,14 +1094,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             log.error("Pool Error", pe);
             throw new StorageException(pe);
         } catch (final SQLException ecp) {
-            log.error("SQL Error", ecp);
-            try {
-                if (con != null) {
-                    con.rollback();
-                }
-            } catch (final SQLException exp) {
-                log.error("Error processing rollback of ox connection!", exp);
-            }
+            log.error("SQL Error", ecp);           
             throw new StorageException(ecp);
         } finally {
             try {
