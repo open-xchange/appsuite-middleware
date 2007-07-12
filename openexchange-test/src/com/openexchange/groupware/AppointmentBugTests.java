@@ -1,6 +1,7 @@
 package com.openexchange.groupware;
 
 import com.openexchange.groupware.calendar.OXCalendarException;
+import com.openexchange.groupware.contexts.ContextStorage;
 import java.sql.Connection;
 import java.util.Calendar;
 import java.util.Date;
@@ -53,6 +54,7 @@ public class AppointmentBugTests extends TestCase {
         EventConfigImpl event = new EventConfigImpl();
         event.setEventQueueEnabled(false);
         this.userid = getUserId();
+        ContextStorage.init();
     }
     
     protected void tearDown() throws Exception {
