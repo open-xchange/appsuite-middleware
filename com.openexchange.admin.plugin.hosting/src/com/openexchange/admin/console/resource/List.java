@@ -24,7 +24,7 @@ public class List extends ListCore {
 
     public List(final String[] args2) {
 
-        final AdminParser parser = new AdminParser("listResource");
+        final AdminParser parser = new AdminParser("listresource");
 
         commonfunctions(parser, args2);
     }

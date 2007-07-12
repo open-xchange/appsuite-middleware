@@ -26,7 +26,7 @@ public class ListServer extends UtilAbstraction {
 
     public ListServer(final String[] args2) {
 
-        final AdminParser parser = new AdminParser("listServers");
+        final AdminParser parser = new AdminParser("listservers");
 
         setOptions(parser);
         setCSVOutputOption(parser);

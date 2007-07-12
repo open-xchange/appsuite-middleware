@@ -28,7 +28,7 @@ public class ListDatabase extends UtilAbstraction {
 
     public ListDatabase(final String[] args2) {
 
-        final AdminParser parser = new AdminParser("listDatabases");
+        final AdminParser parser = new AdminParser("listdatabases");
 
         setOptions(parser);
         setCSVOutputOption(parser);

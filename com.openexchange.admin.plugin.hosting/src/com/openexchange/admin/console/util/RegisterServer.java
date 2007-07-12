@@ -33,7 +33,7 @@ public class RegisterServer extends UtilAbstraction {
 
     public RegisterServer(final String[] args2) {
 
-        final AdminParser parser = new AdminParser("registerServer");
+        final AdminParser parser = new AdminParser("registerserver");
 
         setOptions(parser);
 

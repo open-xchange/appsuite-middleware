@@ -33,7 +33,7 @@ public class CreateReason extends UtilAbstraction {
 
     public CreateReason(final String[] args2) {
     
-        final AdminParser parser = new AdminParser("addreason");
+        final AdminParser parser = new AdminParser("createreason");
     
         setOptions(parser);
     

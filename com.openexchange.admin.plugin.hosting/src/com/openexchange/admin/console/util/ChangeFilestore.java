@@ -35,7 +35,7 @@ public class ChangeFilestore extends UtilAbstraction {
 
     public ChangeFilestore(final String[] args2) {
     
-        final AdminParser parser = new AdminParser("editFileStore");
+        final AdminParser parser = new AdminParser("changefilestore");
     
         setOptions(parser);
     

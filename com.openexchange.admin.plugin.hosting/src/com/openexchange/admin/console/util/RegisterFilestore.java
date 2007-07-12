@@ -33,7 +33,7 @@ public class RegisterFilestore extends UtilAbstraction {
 
     public RegisterFilestore(final String[] args2) {
     
-        final AdminParser parser = new AdminParser("registerFilestore");
+        final AdminParser parser = new AdminParser("registerfilestore");
     
         setOptions(parser);
     

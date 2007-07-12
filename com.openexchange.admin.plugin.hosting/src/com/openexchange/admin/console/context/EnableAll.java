@@ -18,7 +18,7 @@ public class EnableAll extends ContextAbtraction {
 
     public EnableAll(final String[] args2) {
 
-        final AdminParser parser = new AdminParser("enableall");
+        final AdminParser parser = new AdminParser("enableallcontexts");
 
         setDefaultCommandLineOptionsWithoutContextID(parser);
         try {

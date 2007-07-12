@@ -23,7 +23,7 @@ public class Change extends ChangeCore {
 
     public Change(final String[] args2) {
 
-        final AdminParser parser = new AdminParser("change");
+        final AdminParser parser = new AdminParser("changeuser");
 
         commonfunctions(parser, args2);
     }
