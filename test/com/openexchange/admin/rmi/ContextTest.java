@@ -42,34 +42,42 @@ public class ContextTest extends AbstractTest {
     
     
     @Test
-    public void testGetContext() throws Exception {
-        fail("NOT IMPLEMENTED");
+    public void testGetAndChangeContext() throws Exception {
+        
         final Credentials cred = DummyMasterCredentials();
-        Context ctx = getTestContextObject(cred);
-        addContext(ctx, getRMIHostUrl(), cred);
-
-        // Context loaded_ctx = ctx_setup.getContext();
-        //                
-        //               
-        // // now change some context values like enabled/disabled, quota max,
-        // filestore username,filestore passwd
-        // long changed_quota_max = loaded_ctx.getFilestoreQuotaMax()+10;
-        // loaded_ctx.setFilestoreQuotaMax(changed_quota_max);
-        // loaded_ctx.setFilestoreUsername(""+loaded_ctx.getFilestoreUsername()+"_changed");
-        //                
-        // changeStorageData(loaded_ctx,getRMIHost());
-        // Context ctx_setup_loaded =
-        // getContext(loaded_ctx,getRMIHost());
-        //                
-        // // compareContext();
-        // log(ctx_setup_loaded.getContext().getFilestoreUsername()+""+ctx_setup.getContext().getFilestoreUsername());
-        // //
-        // log("->"+loaded_ctx.getFilestoreQuotaMax()+"->"+ctx.getFilestoreQuotaMax());
-        // fail("not completely implemented in testsuite");
+        final String hosturl = getRMIHostUrl();
+        Context ctx = addContext(getTestContextObject(cred), getRMIHostUrl(), cred);
+        
+        OXContextInterface xctx = (OXContextInterface) Naming.lookup(hosturl + OXContextInterface.RMI_NAME);
+        
+       Context srv_loaded =  xctx.getData(ctx, cred);
+       
+       assertTrue("Expected same context ids", ctx.getIdAsInt().intValue()==srv_loaded.getIdAsInt().intValue());
+              
+       String add_mapping = srv_loaded.getIdAsInt().intValue()+"_"+System.currentTimeMillis();
+       srv_loaded.addLoginMapping(add_mapping);
+       
+       String changed_context_name = srv_loaded.getName()+"_"+System.currentTimeMillis();
+       srv_loaded.setName(changed_context_name);
+       
+       // change context and load again
+       xctx.change(srv_loaded, cred);
+       
+       Context edited_ctx = xctx.getData(ctx, cred);
+       
+       // ids must be correct again and the mapping should now exist
+       assertTrue("Expected same context ids", edited_ctx.getIdAsInt().intValue()==srv_loaded.getIdAsInt().intValue());
+       
+       // new mapping must exists
+       assertTrue("Expected changed login mapping in loaded context", edited_ctx.getLoginMappings().contains(add_mapping));
+       
+       // changed conmtext name must exists
+       assertTrue("Expected changed context name to be same as loaded ctx", edited_ctx.getName().equals(changed_context_name));
+       
     }
 
     @Test
-    public void testSearchContextByDatabase() throws Exception {
+    public void testListContextByDatabase() throws Exception {
         final Credentials cred = DummyMasterCredentials();
         final Context ctx = getTestContextObject(cred);
         final String hosturl = getRMIHostUrl();
@@ -85,7 +93,7 @@ public class ContextTest extends AbstractTest {
     }
 
     @Test
-    public void testSearchContextByFilestore() throws Exception {
+    public void testListContextByFilestore() throws Exception {
         final Credentials cred = DummyMasterCredentials();
         final Context ctx = getTestContextObject(cred);
         final String hosturl = getRMIHostUrl();
@@ -178,7 +186,7 @@ public class ContextTest extends AbstractTest {
     }
 
     @Test
-    public void testAddContext() throws Exception {
+    public void testCreateontext() throws Exception {
         final Credentials cred = DummyMasterCredentials();
         Context ctxset = getTestContextObject(cred);
         addContext(ctxset, getRMIHostUrl(), cred);
@@ -190,12 +198,12 @@ public class ContextTest extends AbstractTest {
         int ctxid = createNewContextID(cred);
         final String hosturl = getRMIHostUrl();
         final Context ctx = getTestContextObject(ctxid, 50);
-        ctxid = addContext(ctx, hosturl, cred);
+        ctxid = addContext(ctx, hosturl, cred).getIdAsInt().intValue();
         deleteContext(ctx, hosturl, cred);
     }
 
     @Test
-    public void testSearchContext() throws Exception {
+    public void testListContext() throws Exception {
         final Credentials cred = DummyMasterCredentials();
         int ctxid = createNewContextID(cred);
         final String hosturl = getRMIHostUrl();
@@ -238,7 +246,7 @@ public class ContextTest extends AbstractTest {
         xres.delete(ctx, cred);
     }
 
-    public static int addContext(Context ctx, String host, Credentials cred) throws Exception {
+    public static Context addContext(Context ctx, String host, Credentials cred) throws Exception {
         OXUtilInterface oxu = (OXUtilInterface) Naming.lookup(host + OXUtilInterface.RMI_NAME);
         // first check if the needed server entry is in db, if not, add server
         // first,
@@ -269,8 +277,9 @@ public class ContextTest extends AbstractTest {
         OXContextInterface xres = (OXContextInterface) Naming.lookup(host + OXContextInterface.RMI_NAME);
         
         xres.create(ctx,UserTest.getTestUserObject("admin","secret"), ctx.getFilestore().getQuota_max(), cred);
-        return ctx.getIdAsInt();
+        return ctx;
     }
+     
 
     public static void disableContext(Context ctx, MaintenanceReason mr, String host, Credentials cred) throws Exception {
         OXContextInterface xres = (OXContextInterface) Naming.lookup(host + OXContextInterface.RMI_NAME);
