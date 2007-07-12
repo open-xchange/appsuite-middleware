@@ -75,7 +75,7 @@ public class UtilTest extends AbstractTest {
     
     
     @Test
-    public void testGetAllMaintenanceReasons() throws Exception {
+    public void testListMaintenanceReasons() throws Exception {
         
         OXUtilInterface oxu = getUtilClient();
         
@@ -321,7 +321,7 @@ public class UtilTest extends AbstractTest {
     }
     
     @Test
-    public void testSearchForDatabase() throws Exception {
+    public void testListDatabase() throws Exception {
         OXUtilInterface oxu = getUtilClient();
         
         String db_name = "db_"+System.currentTimeMillis();
@@ -357,7 +357,7 @@ public class UtilTest extends AbstractTest {
     }
     
     @Test
-    public void testSearchForServer() throws Exception {
+    public void testListServer() throws Exception {
         OXUtilInterface oxu = getUtilClient();
         
         Server client_srv = new Server();
