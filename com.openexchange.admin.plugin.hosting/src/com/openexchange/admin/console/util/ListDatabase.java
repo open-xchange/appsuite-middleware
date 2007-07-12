@@ -1,6 +1,8 @@
 package com.openexchange.admin.console.util;
 
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -16,8 +18,6 @@ import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.sun.org.apache.xerces.internal.util.URI;
-import com.sun.org.apache.xerces.internal.util.URI.MalformedURIException;
 
 /**
  * 
@@ -46,55 +46,14 @@ public class ListDatabase extends UtilAbstraction {
             }
             final Database[] databases = oxutil.listDatabases(searchpattern, auth);
             
-            // needed for csv output, KEEP AN EYE ON ORDER!!!
-            final ArrayList<String> columns = new ArrayList<String>();
-            columns.add("id");
-            columns.add("url");
-            columns.add("display_name");
-            columns.add("login");
-            columns.add("password");
-            columns.add("driver");
-            columns.add("clusterweight");
-            columns.add("maxUnits");
-            columns.add("poolHardLimit");
-            columns.add("poolInitial");
-            columns.add("poolMax");
-            columns.add("masterid");
-            columns.add("currentunits");
-            columns.add("master");
-            columns.add("read_id");
-            columns.add("scheme");
-            
-            final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
-            
-            final String HEADER_FORMAT = "%-7s %-15s %-15s %-7s %-7s %-7s %-7s %-7s %-6s %-4s %-4s\n";
-            final String VALUE_FORMAT  = "%-7s %-15s %-15s %-7s %-7s %-7s %-7s %-7s %-6s %-4s %-4s\n";
-            if(parser.getOptionValue(this.csvOutputOption) == null) {
-                System.out.format(HEADER_FORMAT, "id", "name", "hostname", "master", "mid", "weight", "maxctx", "curctx", "hlimit", "max", "inital");
+            if (null != parser.getOptionValue(this.csvOutputOption)) {
+                precsvinfos(databases);
+            } else {
+                sysoutOutput(databases);
             }
-            for (final Database database : databases) {
-                if (parser.getOptionValue(this.csvOutputOption) != null) {                   
-                    data.add(makeCSVData(database));
-                }else{
-                    System.out.format(VALUE_FORMAT,
-                            database.getId(),
-                            database.getDisplayname(),
-                            new URI(database.getUrl().substring("jdbc:".length())).getHost(),
-                            database.isMaster(),
-                            database.getMasterId(),
-                            database.getClusterWeight(),
-                            database.getMaxUnits(),
-                            database.getCurrentUnits(),
-                            database.getPoolHardLimit() > 0 ? "true" : "false",
-                            database.getPoolMax(),
-                            database.getPoolInitial());
-                }
-            }
-            
-            if (parser.getOptionValue(this.csvOutputOption) != null) {
-                doCSVOutput(columns, data);
-            }
-            
+
+
+            sysexit(0);
         } catch (final java.rmi.ConnectException neti) {
             printError(neti.getMessage());
             sysexit(SYSEXIT_COMMUNICATION_ERROR);
@@ -131,11 +90,49 @@ public class ListDatabase extends UtilAbstraction {
             printError(e.getMessage());
             parser.printUsage();
             sysexit(SYSEXIT_MISSING_OPTION);
-        } catch (MalformedURIException e) {
+        } catch (final URISyntaxException e) {
             printServerException(e);
             sysexit(1);
         }
 
+    }
+
+    private void sysoutOutput(Database[] databases) throws InvalidDataException, URISyntaxException {
+        final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
+        for (final Database database : databases) {
+            data.add(makeStandardData(database, false));
+        }
+        
+        doOutput(new int[] { 3, 10, 20, 7, 7, 7, 7, 7, 6, 4, 7 }, new String[] { "id", "name", "hostname", "master", "mid", "weight", "maxctx", "curctx", "hlimit", "max", "inital" }, data);
+    }
+
+    private void precsvinfos(Database[] databases) throws URISyntaxException {
+        // needed for csv output, KEEP AN EYE ON ORDER!!!
+        final ArrayList<String> columns = new ArrayList<String>();
+        columns.add("id");
+        columns.add("display_name");
+        columns.add("url");
+        columns.add("master");
+        columns.add("masterid");
+        columns.add("clusterweight");
+        columns.add("maxUnits");
+        columns.add("currentunits");
+        columns.add("poolHardLimit");
+        columns.add("poolMax");
+        columns.add("poolInitial");
+        columns.add("login");
+        columns.add("password");
+        columns.add("driver");
+        columns.add("read_id");
+        columns.add("scheme");
+        
+        final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
+        
+        for (final Database database : databases) {
+            data.add(makeCSVData(database));
+        }
+        
+        doCSVOutput(columns, data);
     }
 
     public static void main(final String args[]) {
@@ -146,106 +143,121 @@ public class ListDatabase extends UtilAbstraction {
         setDefaultCommandLineOptions(parser);
         setSearchOption(parser);       
     }
+    
     /**     
      * @param db
      * @return
+     * @throws URISyntaxException 
      */
-    private ArrayList<String> makeCSVData(final Database db){
+    private ArrayList<String> makeCSVData(final Database db) throws URISyntaxException{
+        final ArrayList<String> rea_data = makeStandardData(db, true);
+        
+        if (null != db.getLogin()) {
+            rea_data.add(db.getLogin());
+        } else {
+            rea_data.add(null);
+        }
+
+        if (null != db.getPassword()) {
+            rea_data.add(db.getPassword());
+        } else {
+            rea_data.add(null);
+        }
+
+        if (null != db.getDriver()) {
+            rea_data.add(db.getDriver());
+        } else {
+            rea_data.add(null);
+        }
+
+        if (null != db.getRead_id()) {
+            rea_data.add(db.getRead_id().toString());
+        } else {
+            rea_data.add(null);
+        }
+
+        if (null != db.getScheme()) {
+            rea_data.add(db.getScheme().toString());
+        } else {
+            rea_data.add(null);
+        }
+        
+        
+        return rea_data;
+    }
+
+    private ArrayList<String> makeStandardData(final Database db, boolean csv) throws URISyntaxException {
         final ArrayList<String> rea_data = new ArrayList<String>();
         
         rea_data.add(db.getId().toString());
         
-        if(db.getUrl()!=null){
-            rea_data.add(db.getUrl());
-        }else{
+        if (null != db.getDisplayname()) {
+            rea_data.add(db.getDisplayname());
+        } else {
             rea_data.add(null);
         }
         
-        if(db.getDisplayname()!=null){
-            rea_data.add(db.getDisplayname());
-        }else{
-            rea_data.add(null);            
+        if (null != db.getUrl()) {
+            if (csv) {
+                rea_data.add(db.getUrl());
+            } else {
+                rea_data.add(new URI(db.getUrl().substring("jdbc:".length())).getHost());
+            }
+        } else {
+            rea_data.add(null);
         }
         
-        if(db.getLogin()!=null){
-            rea_data.add(db.getLogin());
-        }else{
-            rea_data.add(null);            
-        }
-        
-        if(db.getPassword()!=null){
-            rea_data.add(db.getPassword());
-        }else{
-            rea_data.add(null);            
-        }
-        
-        if(db.getDriver()!=null){
-            rea_data.add(db.getDriver());
-        }else{
-            rea_data.add(null);            
-        }
-        
-        if(db.getClusterWeight()!=null){
-            rea_data.add(db.getClusterWeight().toString());
-        }else{
-            rea_data.add(null);            
-        }
-        
-        if(db.getMaxUnits()!=null){
-            rea_data.add(db.getMaxUnits().toString());
-        }else{
-            rea_data.add(null);            
-        }
-        
-        if(db.getPoolHardLimit()!=null){
-            rea_data.add(db.getPoolHardLimit().toString());
-        }else{
-            rea_data.add(null);            
-        }
-        
-        if(db.getPoolInitial()!=null){
-            rea_data.add(db.getPoolInitial().toString());
-        }else{
-            rea_data.add(null);            
-        }
-        
-        if(db.getPoolMax()!=null){
-            rea_data.add(db.getPoolMax().toString());
-        }else{
-            rea_data.add(null);            
-        }
-        
-        if(db.getMasterId()!=null){
-            rea_data.add(db.getMasterId().toString());
-        }else{
-            rea_data.add(null);            
-        }
-        
-        if(db.getCurrentUnits()!=null){
-            rea_data.add(db.getCurrentUnits().toString());
-        }else{
-            rea_data.add(null); 
-        }
-        
-        if(db.isMaster()!=null){
+        if (null != db.isMaster()) {
             rea_data.add(db.isMaster().toString());
-        }else{
-            rea_data.add(null); 
+        } else {
+            rea_data.add(null);
         }
         
-        if(db.getRead_id()!=null){
-            rea_data.add(db.getRead_id().toString());
-        }else{
-            rea_data.add(null); 
+        if (null != db.getMasterId()) {
+            rea_data.add(db.getMasterId().toString());
+        } else {
+            rea_data.add(null);
         }
         
-        if(db.getScheme()!=null){
-            rea_data.add(db.getScheme().toString());
-        }else{
-            rea_data.add(null); 
+        if (null != db.getClusterWeight()) {
+            rea_data.add(db.getClusterWeight().toString());
+        } else {
+            rea_data.add(null);
         }
         
+        if (null != db.getMaxUnits()) {
+            rea_data.add(db.getMaxUnits().toString());
+        } else {
+            rea_data.add(null);
+        }
         
+        if (null != db.getCurrentUnits()) {
+            rea_data.add(db.getCurrentUnits().toString());
+        } else {
+            rea_data.add(null);
+        }
+        
+        if (null != db.getPoolHardLimit()) {
+            if (csv) {
+                rea_data.add(db.getPoolHardLimit().toString());
+            } else {
+                rea_data.add(db.getPoolHardLimit() > 0 ? "true" : "false");
+            }
+        } else {
+            rea_data.add(null);
+        }
+        
+        if (null != db.getPoolMax()) {
+            rea_data.add(db.getPoolMax().toString());
+        } else {
+            rea_data.add(null);
+        }
+        
+        if (null != db.getPoolInitial()) {
+            rea_data.add(db.getPoolInitial().toString());
+        } else {
+            rea_data.add(null);
+        }
         return rea_data;
     }
 }
