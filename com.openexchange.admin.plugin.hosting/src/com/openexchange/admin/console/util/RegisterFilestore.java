@@ -71,7 +71,7 @@ public class RegisterFilestore extends UtilAbstraction {
             }
             fstore.setMaxContexts(testStringAndGetIntOrDefault(store_max_ctx, STORE_MAX_CTX_DEFAULT));
     
-            System.out.println(oxutil.registerFilestore(fstore, auth));
+            System.out.println(oxutil.registerFilestore(fstore, auth).getId());
             sysexit(0);
         } catch (final java.rmi.ConnectException neti) {
             printError(neti.getMessage());
