@@ -303,7 +303,7 @@ public abstract class User2IMAP {
 	private static final User2IMAP getUser2IMAPImpl(final User sessionUser) throws User2IMAPException {
 		try {
 			final Object[] args = getIMAPServer(sessionUser);
-			return IMAPServerImpl.getUser2IMAPImpl((String) args[0], ((Integer) args[1]).intValue());
+			return User2IMAPAutoDetector.getUser2IMAPImpl((String) args[0], ((Integer) args[1]).intValue());
 		} catch (final IOException e) {
 			throw new User2IMAPException(User2IMAPException.Code.INSTANCIATION_FAILED, e, EMPTY_ARGS);
 		} catch (final IMAPException e) {

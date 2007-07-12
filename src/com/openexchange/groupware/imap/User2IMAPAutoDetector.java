@@ -62,15 +62,15 @@ import com.openexchange.groupware.imap.User2IMAP.IMAPServer;
 import com.openexchange.groupware.imap.User2IMAP.User2IMAPException;
 
 /**
- * IMAPServerInfo
+ * User2IMAPAutoDetector
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class IMAPServerImpl {
+public final class User2IMAPAutoDetector {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(IMAPServerImpl.class);
+			.getLog(User2IMAPAutoDetector.class);
 
 	private static final Object[] EMPTY_ARGS = new Object[0];
 
@@ -87,7 +87,7 @@ public final class IMAPServerImpl {
 	/**
 	 * Prevent instanciation
 	 */
-	private IMAPServerImpl() {
+	private User2IMAPAutoDetector() {
 		super();
 	}
 
