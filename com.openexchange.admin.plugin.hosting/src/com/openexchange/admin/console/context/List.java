@@ -5,7 +5,6 @@ import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.MissingOptionException;
@@ -96,19 +95,19 @@ public class List extends ContextAbtraction {
             data.add(makeCSVData(ctx));
         }
         
-        doOutput(new int[] { 3, 8, 8, 4, 20, 10, 9, 10 }, new String[] { "Id", "Name", "Enabled", "Fid", "Fname", "used_quota", "max_quota", "lmappings" }, data);
+        doOutput(new int[] { 3, 3, 20, 10, 10, 10, 10, 40 }, new String[] { "cid", "fid", "fname", "enabled", "qmax", "qused", "name", "lmappings" }, data);
     }
 
     private void precsvinfos(final Context[] ctxs) {
         // needed for csv output, KEEP AN EYE ON ORDER!!!
         final ArrayList<String> columns = new ArrayList<String>();
         columns.add("id");
-        columns.add("name");
-        columns.add("enabled");
         columns.add("filestore_id");
         columns.add("filestore_name");
-        columns.add("used_quota");
+        columns.add("enabled");
         columns.add("max_quota");
+        columns.add("used_quota");
+        columns.add("name");
         columns.add("lmappings");
 
         final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
@@ -132,16 +131,6 @@ public class List extends ContextAbtraction {
     private ArrayList<String> makeCSVData(final Context ctx) {
         final ArrayList<String> srv_data = new ArrayList<String>();
         srv_data.add(String.valueOf(ctx.getIdAsInt()));
-        if (ctx.getName() != null) {
-            srv_data.add(ctx.getName());
-        } else {
-            srv_data.add(null);
-        }
-        if (ctx.isEnabled() != null) {
-            srv_data.add(String.valueOf(ctx.isEnabled()));
-        } else {
-            srv_data.add(null);
-        }
 
         if (ctx.getFilestore() != null) {
             if (ctx.getFilestore().getId() != null) {
@@ -159,35 +148,37 @@ public class List extends ContextAbtraction {
             srv_data.add(null);
         }
 
-        if(ctx.getUsedQuota() != null ) {
+        if (ctx.isEnabled() != null) {
+            srv_data.add(String.valueOf(ctx.isEnabled()));
+        } else {
+            srv_data.add(null);
+        }
+
+        if (ctx.getMaxQuota() != null) {
+            srv_data.add(String.valueOf(ctx.getMaxQuota()));
+        } else {
+            srv_data.add(null);
+        }
+
+        if (ctx.getUsedQuota() != null) {
             srv_data.add(String.valueOf(ctx.getUsedQuota()));
         } else {
             srv_data.add(null);
         }
 
-        if(ctx.getMaxQuota() != null ) {
-            srv_data.add(String.valueOf(ctx.getMaxQuota()));
+        if (ctx.getName() != null) {
+            srv_data.add(ctx.getName());
         } else {
             srv_data.add(null);
         }
         
-        
 //      loginl mappings
         
-        if(ctx.getLoginMappings()!=null &&ctx.getLoginMappings().size()>0 ){
-            final StringBuilder sb = new StringBuilder();
-            final Iterator itr = ctx.getLoginMappings().iterator();
-            while(itr.hasNext()){               
-                sb.append((String)itr.next());
-                sb.append(",");
-            }
-            sb.deleteCharAt(sb.length()-1);
-            srv_data.add(sb.toString());
-        }else{
+        if (ctx.getLoginMappings() != null && ctx.getLoginMappings().size() > 0) {
+            srv_data.add(getObjectsAsString(ctx.getLoginMappings().toArray()));
+        } else {
             srv_data.add(null);
         }
-        
-        
         
         return srv_data;
     }
