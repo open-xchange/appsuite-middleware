@@ -48,7 +48,7 @@ public class Create extends ContextAbtraction {
 
             final long quota = Long.parseLong((String) parser.getOptionValue(this.filestoreContextQuotaOption));
 
-            System.out.println(oxctx.create(ctx, usr, quota, auth));
+            System.out.println(oxctx.create(ctx, usr, quota, auth).getIdAsInt());
 
             sysexit(0);
         } catch (final java.rmi.ConnectException neti) {

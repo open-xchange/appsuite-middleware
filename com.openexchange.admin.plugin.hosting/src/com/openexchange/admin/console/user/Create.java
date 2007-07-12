@@ -30,7 +30,7 @@ public class Create extends CreateCore {
     @Override
     protected void maincall(final AdminParser parser, final OXUserInterface oxusr, final Context ctx, final User usr, final UserModuleAccess access, final Credentials auth) throws RemoteException {
         try {
-            System.out.println(oxusr.create(ctx, usr, access, auth));
+            System.out.println(oxusr.create(ctx, usr, access, auth).getId());
         } catch (final StorageException e) {
             printServerException(e);
             sysexit(SYSEXIT_SERVERSTORAGE_ERROR);
