@@ -116,7 +116,7 @@ public final class IMAPServerImpl {
 		final InetAddress key = InetAddress.getByName(imapServer);
 		User2IMAP impl = map.get(key);
 		if (impl == null) {
-			impl = loadIMAPServerInfo(key, imapPort);
+			impl = loadUser2IMAPImpl(key, imapPort);
 		}
 		return impl;
 	}
@@ -139,7 +139,7 @@ public final class IMAPServerImpl {
 		return new String(buf);
 	}
 
-	private static User2IMAP loadIMAPServerInfo(final InetAddress inetAddress, final int imapPort) throws IOException,
+	private static User2IMAP loadUser2IMAPImpl(final InetAddress inetAddress, final int imapPort) throws IOException,
 			User2IMAPException {
 		CONTACT_LOCK.lock();
 		try {
