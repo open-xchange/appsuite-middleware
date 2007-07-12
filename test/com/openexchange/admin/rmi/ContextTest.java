@@ -314,6 +314,7 @@ public class ContextTest extends AbstractTest {
         final Filestore filestore = new Filestore();
         filestore.setQuota_max(quota_max_in_mb);
         ctx.setFilestore(filestore);
+        ctx.setName("Name-"+ctx.getIdAsInt());
         return ctx;
     }
 
