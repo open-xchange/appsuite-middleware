@@ -68,6 +68,7 @@ public class ImportExportStandaloneSuite extends TestSuite {
 		tests.addTestSuite( VCardTokenizerTest.class );
 		tests.addTestSuite( ContactFieldTester.class );
 		tests.addTestSuite( ContactSwitcherTester.class );
+		tests.addTestSuite( VersitParserTest.class );
 		tests.addTest( SizedInputStreamTest.suite() );
 
 		//CSV
@@ -80,6 +81,11 @@ public class ImportExportStandaloneSuite extends TestSuite {
 
 		//VCARD
 		tests.addTest( VCardImportTest.suite() );
+		
+		//separate tests
+		//tests.addTest( Bug7470Test.suite() ); //FIXME
+		tests.addTest( Bug7732Test.suite() );
+		
 		return tests;
 	}
 }
