@@ -441,6 +441,48 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
     }
 
     @Override
+    public MaintenanceReason[] listMaintenanceReasons(final String search_pattern) throws StorageException {
+        Connection con = null;
+        PreparedStatement stmt = null;
+        final String new_search_pattern = search_pattern.replace('*', '%');
+        try {
+            con = cache.getREADConnectionForCONFIGDB();
+            
+            stmt = con.prepareStatement("SELECT id,text FROM reason_text WHERE text like ?");
+            stmt.setString(1, new_search_pattern);
+            final ResultSet rs = stmt.executeQuery();
+            final ArrayList<MaintenanceReason> list = new ArrayList<MaintenanceReason>();
+            while (rs.next()) {
+                list.add(new MaintenanceReason(rs.getInt("id"), rs.getString("text")));
+            }
+            rs.close();
+            
+            return list.toArray(new MaintenanceReason[list.size()]);
+        } catch (final PoolException pe) {
+            log.error("Pool Error", pe);
+            throw new StorageException(pe);
+        } catch (final SQLException ecp) {
+            log.error("SQL Error", ecp);
+            throw new StorageException(ecp);
+        } finally {
+            try {
+                if (stmt != null) {
+                    stmt.close();
+                }
+            } catch (final SQLException e) {
+                log.error("Error closing statement", e);
+            }
+            try {
+                if (con != null) {
+                    cache.pushConfigDBRead(con);
+                }
+            } catch (final PoolException exp) {
+                log.error("Error pushing configdb connection to pool!", exp);
+            }
+        }
+    }
+
+    @Override
     public MaintenanceReason[] getMaintenanceReasons(final int[] reason_id)
             throws StorageException {
         Connection con = null;

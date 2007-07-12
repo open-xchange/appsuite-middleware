@@ -177,16 +177,32 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
 
     }
 
-   
     public MaintenanceReason[] listMaintenanceReasons(final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException {
-
         doAuthentication(auth);
 
         final OXUtilStorageInterface oxutil = OXUtilStorageInterface.getInstance();
         return oxutil.getAllMaintenanceReasons();
-
     }
 
+    public MaintenanceReason[] listMaintenanceReasons(final String search_pattern, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+        try {
+            doNullCheck(search_pattern);
+        } catch (final InvalidDataException e) {
+            final InvalidDataException invalidDataException = new InvalidDataException("The search_pattern is null");
+            log.error(invalidDataException.getMessage(), invalidDataException);
+            throw invalidDataException;
+        }
+        
+        doAuthentication(auth);
+        
+        final OXUtilStorageInterface oxutil = OXUtilStorageInterface.getInstance();
+        return oxutil.listMaintenanceReasons(search_pattern);
+        
+    }
+    
+    public MaintenanceReason[] listAllMaintenanceReasons(final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+        return listMaintenanceReasons("*", auth);
+    }
     
     public void createDatabase(final Database db, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         
@@ -436,7 +452,7 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
 
     public void deleteMaintenanceReason(final MaintenanceReason[] reasons, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         try{
-            doNullCheck(reasons);
+            doNullCheck((Object[])reasons);
         } catch (InvalidDataException e1) {            
             log.error("Invalid data sent by client!", e1);
             throw e1;

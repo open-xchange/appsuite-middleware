@@ -74,8 +74,43 @@ public interface OXUtilInterface extends Remote {
      *             When the supplied credentials were not correct or invalid.
      * @throws RemoteException
      *             General RMI Exception
+     * @deprecated
      */
     public MaintenanceReason[] listMaintenanceReasons(final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException;
+
+    /**
+     * Get all maintenance reasons which match the specified search_pattern
+     * 
+     * @return MaintenanceReason[] containing MaintenanceReason objects.
+     * @param search_pattern
+     *             A search pattern to list only those reason which match that pattern
+     * @param auth
+     *             Credentials for authenticating against server.
+     * @throws com.openexchange.admin.rmi.exceptions.StorageException
+     *             When an error in the subsystems occured.
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException
+     *             When the supplied credentials were not correct or invalid.
+     * @throws RemoteException
+     *             General RMI Exception
+     * @throws InvalidDataException 
+     */
+    public MaintenanceReason[] listMaintenanceReasons(final String search_pattern, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException;
+
+    /**
+     * Get all maintenance reasons. Same as calling listMaintenanceReasons with a search_pattern "*"
+     * 
+     * @return MaintenanceReason[] containing MaintenanceReason objects.
+     * @param auth
+     *             Credentials for authenticating against server.
+     * @throws com.openexchange.admin.rmi.exceptions.StorageException
+     *             When an error in the subsystems occured.
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException
+     *             When the supplied credentials were not correct or invalid.
+     * @throws RemoteException
+     *             General RMI Exception
+     * @throws InvalidDataException 
+     */
+    public MaintenanceReason[] listAllMaintenanceReasons(final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException;
 
     /**
      * Register an OX Server in the system.
