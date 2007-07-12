@@ -46,7 +46,7 @@ public class ContextTest extends AbstractTest {
         
         final Credentials cred = DummyMasterCredentials();
         final String hosturl = getRMIHostUrl();
-        Context ctx = addContext(getTestContextObject(cred), getRMIHostUrl(), cred);
+        Context ctx = addSystemContext(getTestContextObject(cred), getRMIHostUrl(), cred);
         
         OXContextInterface xctx = (OXContextInterface) Naming.lookup(hosturl + OXContextInterface.RMI_NAME);
         
@@ -198,7 +198,7 @@ public class ContextTest extends AbstractTest {
         int ctxid = createNewContextID(cred);
         final String hosturl = getRMIHostUrl();
         final Context ctx = getTestContextObject(ctxid, 50);
-        ctxid = addContext(ctx, hosturl, cred).getIdAsInt().intValue();
+        ctxid = addSystemContext(ctx, hosturl, cred).getIdAsInt().intValue();
         deleteContext(ctx, hosturl, cred);
     }
 
@@ -245,8 +245,9 @@ public class ContextTest extends AbstractTest {
         OXContextInterface xres = (OXContextInterface) Naming.lookup(host + OXContextInterface.RMI_NAME);
         xres.delete(ctx, cred);
     }
-
-    public static Context addContext(Context ctx, String host, Credentials cred) throws Exception {
+    
+    
+    private static Context addSystemContext(Context ctx, String host, Credentials cred) throws Exception {
         OXUtilInterface oxu = (OXUtilInterface) Naming.lookup(host + OXUtilInterface.RMI_NAME);
         // first check if the needed server entry is in db, if not, add server
         // first,
@@ -278,6 +279,10 @@ public class ContextTest extends AbstractTest {
         
         xres.create(ctx,UserTest.getTestUserObject("admin","secret"), ctx.getFilestore().getQuota_max(), cred);
         return ctx;
+    }
+
+    public static int addContext(Context ctx, String host, Credentials cred) throws Exception {
+        return addSystemContext(ctx,host,cred).getIdAsInt().intValue();
     }
      
 
