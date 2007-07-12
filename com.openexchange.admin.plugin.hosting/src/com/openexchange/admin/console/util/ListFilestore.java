@@ -1,6 +1,8 @@
 package com.openexchange.admin.console.util;
 
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -52,7 +54,6 @@ public class ListFilestore extends UtilAbstraction {
                 sysoutOutput(filestores);
             }
 
-
             sysexit(0);
         } catch (final java.rmi.ConnectException neti) {
             printError(neti.getMessage());
@@ -90,21 +91,23 @@ public class ListFilestore extends UtilAbstraction {
             printError(e.getMessage());
             parser.printUsage();
             sysexit(SYSEXIT_MISSING_OPTION);
+        } catch (URISyntaxException e) {
+            printServerException(e);
+            sysexit(1);
         }
     }
 
-    private void sysoutOutput(Filestore[] filestores) throws InvalidDataException {
+    private void sysoutOutput(final Filestore[] filestores) throws InvalidDataException, URISyntaxException {
         final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
         for (final Filestore filestore : filestores) {
-            data.add(makeStandardData(filestore));
+            data.add(makeStandardData(filestore, false));
         }
         
-//        final String HEADER_FORMAT = "%-7s %-35s %-7s %-7s %-7s %-7s %s\n";
-//            System.out.format(HEADER_FORMAT, "id", "path", "size", "qmax", "qused", "maxctx", "curctx");
-        doOutput(new int[] { 3, 35, 7, 7, 7, 7, 7 }, new String[] { "id", "path", "size", "qmax", "qused", "maxctx", "curctx" }, data);
+        doOutput(new String[] { "3r", "35l", "7r", "7r", "7r", "7r", "7r" },
+                 new String[] { "id", "path", "size", "qmax", "qused", "maxctx", "curctx" }, data);
     }
 
-    private void precsvinfos(Filestore[] filestores) {
+    private void precsvinfos(final Filestore[] filestores) throws URISyntaxException {
         // needed for csv output, KEEP AN EYE ON ORDER!!!
         final ArrayList<String> columns = new ArrayList<String>();
         columns.add("id");
@@ -140,9 +143,10 @@ public class ListFilestore extends UtilAbstraction {
      * 
      * @param fstore
      * @return
+     * @throws URISyntaxException 
      */
-    private ArrayList<String> makeCSVData(final Filestore fstore) {
-        final ArrayList<String> rea_data = makeStandardData(fstore);
+    private ArrayList<String> makeCSVData(final Filestore fstore) throws URISyntaxException {
+        final ArrayList<String> rea_data = makeStandardData(fstore, true);
 
         if (fstore.getLogin() != null) {
             rea_data.add(fstore.getLogin());
@@ -165,13 +169,17 @@ public class ListFilestore extends UtilAbstraction {
         return rea_data;
     }
 
-    private ArrayList<String> makeStandardData(final Filestore fstore) {
+    private ArrayList<String> makeStandardData(final Filestore fstore, final boolean csv) throws URISyntaxException {
         final ArrayList<String> rea_data = new ArrayList<String>();
 
         rea_data.add(fstore.getId().toString());
 
         if (fstore.getUrl() != null) {
-            rea_data.add(fstore.getUrl());
+            if (csv) {
+                rea_data.add(fstore.getUrl());
+            } else {
+                rea_data.add(new URI(fstore.getUrl()).getPath());
+            }
         } else {
             rea_data.add(null);
         }
@@ -205,6 +213,7 @@ public class ListFilestore extends UtilAbstraction {
         } else {
             rea_data.add(null);
         }
+        
         return rea_data;
     }
 }

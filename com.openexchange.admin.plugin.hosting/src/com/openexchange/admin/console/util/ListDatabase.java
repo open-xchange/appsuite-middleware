@@ -103,7 +103,8 @@ public class ListDatabase extends UtilAbstraction {
             data.add(makeStandardData(database, false));
         }
         
-        doOutput(new int[] { 3, 10, 20, 7, 7, 7, 7, 7, 6, 4, 7 }, new String[] { "id", "name", "hostname", "master", "mid", "weight", "maxctx", "curctx", "hlimit", "max", "inital" }, data);
+        doOutput(new String[] { "3r", "10l", "20l", "7l", "7r", "7r", "7r", "7r", "6l", "4r", "7r" },
+                 new String[] { "id", "name", "hostname", "master", "mid", "weight", "maxctx", "curctx", "hlimit", "max", "inital" }, data);
     }
 
     private void precsvinfos(Database[] databases) throws URISyntaxException {

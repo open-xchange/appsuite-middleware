@@ -95,7 +95,8 @@ public class List extends ContextAbtraction {
             data.add(makeCSVData(ctx));
         }
         
-        doOutput(new int[] { 3, 3, 20, 10, 10, 10, 10, 40 }, new String[] { "cid", "fid", "fname", "enabled", "qmax", "qused", "name", "lmappings" }, data);
+        doOutput(new String[] { "3r", "3r", "20l", "10l", "10r", "10r", "10l", "10l" },
+                 new String[] { "cid", "fid", "fname", "enabled", "qmax", "qused", "name", "lmappings" }, data);
     }
 
     private void precsvinfos(final Context[] ctxs) {

@@ -107,7 +107,7 @@ public class ListServer extends UtilAbstraction {
             data.add(makeCSVData(server));
         }
         
-        doOutput(new int[] { 3, 35 }, new String[] { "Id", "Name" }, data);
+        doOutput(new String[] { "3r", "35l" }, new String[] { "Id", "Name" }, data);
     }
 
     private void precsvinfos(Server[] servers) {

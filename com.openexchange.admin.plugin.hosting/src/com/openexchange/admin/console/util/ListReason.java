@@ -105,7 +105,7 @@ public class ListReason extends UtilAbstraction {
             data.add(makeCSVData(mr));
         }
         
-        doOutput(new int[] { 3, 72 }, new String[] { "Id", "Text" }, data);
+        doOutput(new String[] { "3r", "72l" }, new String[] { "Id", "Text" }, data);
     }
 
     private void precsvinfos(final MaintenanceReason[] mrs) {
