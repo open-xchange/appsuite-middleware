@@ -144,10 +144,10 @@ public class ListDatabase extends UtilAbstraction {
         setSearchOption(parser);       
     }
     
-    /**     
+    /**
      * @param db
      * @return
-     * @throws URISyntaxException 
+     * @throws URISyntaxException
      */
     private ArrayList<String> makeCSVData(final Database db) throws URISyntaxException{
         final ArrayList<String> rea_data = makeStandardData(db, true);
