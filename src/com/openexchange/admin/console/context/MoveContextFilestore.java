@@ -33,7 +33,7 @@ public class MoveContextFilestore extends ContextAbtraction {
 
     public MoveContextFilestore(final String[] args2) {
 
-        final AdminParser parser = new AdminParser("movecontext");
+        final AdminParser parser = new AdminParser("movecontextfilestore");
         setOptions(parser);
 
         try {

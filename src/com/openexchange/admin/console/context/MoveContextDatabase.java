@@ -32,7 +32,7 @@ public class MoveContextDatabase extends ContextAbtraction {
 
     public MoveContextDatabase(final String[] args2) {
 
-        final AdminParser parser = new AdminParser("movecontext");
+        final AdminParser parser = new AdminParser("movecontextdatabase");
         setOptions(parser);
 
         try {

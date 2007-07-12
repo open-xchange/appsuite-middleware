@@ -33,7 +33,7 @@ public class ChangeDatabase extends UtilAbstraction {
 
     public ChangeDatabase(final String[] args2) {
 
-        final AdminParser parser = new AdminParser("updatedatabase");
+        final AdminParser parser = new AdminParser("changedatabase");
 
         setOptions(parser);
 

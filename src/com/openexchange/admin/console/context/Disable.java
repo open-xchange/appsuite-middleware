@@ -24,7 +24,7 @@ public class Disable extends ContextAbtraction {
 
     public Disable(final String[] args2) {
 
-        final AdminParser parser = new AdminParser("disableall");
+        final AdminParser parser = new AdminParser("disablecontext");
 
         setOptions(parser);
 

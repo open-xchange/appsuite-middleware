@@ -28,7 +28,7 @@ public class ListFilestore extends UtilAbstraction {
 
     public ListFilestore(final String[] args2) {
 
-        final AdminParser parser = new AdminParser("listFilestores");
+        final AdminParser parser = new AdminParser("listfilestores");
 
         setOptions(parser);
         setCSVOutputOption(parser);

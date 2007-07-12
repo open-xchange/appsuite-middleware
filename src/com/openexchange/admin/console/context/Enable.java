@@ -21,7 +21,7 @@ public class Enable extends ContextAbtraction {
 
     public Enable(final String[] args2) {
 
-        final AdminParser parser = new AdminParser("enable");
+        final AdminParser parser = new AdminParser("enablecontext");
 
         setOptions(parser);
 

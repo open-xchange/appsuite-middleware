@@ -17,7 +17,7 @@ public class Create extends CreateCore {
 
     public Create(final String[] args2) {
 
-        final AdminParser parser = new AdminParser("create");
+        final AdminParser parser = new AdminParser("createresource");
         
         commonfunctions(parser, args2);
     }

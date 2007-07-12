@@ -29,7 +29,7 @@ public class UnregisterFilestore extends UtilAbstraction {
     // Setting names for options
     public UnregisterFilestore(final String[] args2) {
     
-        final AdminParser parser = new AdminParser("unregisterFilestore");
+        final AdminParser parser = new AdminParser("unregisterfilestore");
     
         setOptions(parser);
     

@@ -22,7 +22,7 @@ public class Delete extends ContextAbtraction {
 
     public Delete(final String[] args2) {
 
-        AdminParser parser = new AdminParser("disableall");
+        AdminParser parser = new AdminParser("deletecontext");
 
         setOptions(parser);
 

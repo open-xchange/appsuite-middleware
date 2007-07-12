@@ -33,7 +33,7 @@ public class UnregisterServer extends UtilAbstraction {
 
     public UnregisterServer(final String[] args2) {
 
-        AdminParser parser = new AdminParser("unregisterFilestore");
+        AdminParser parser = new AdminParser("unregisterserver");
 
         setOptions(parser);
 

@@ -25,7 +25,7 @@ public class ListReason extends UtilAbstraction {
 
     public ListReason(final String[] args2) {
 
-        final AdminParser parser = new AdminParser("listReasons");
+        final AdminParser parser = new AdminParser("listreasons");
         setOptions(parser);
         setCSVOutputOption(parser);
         try {

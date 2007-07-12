@@ -32,7 +32,7 @@ public class DeleteReason extends UtilAbstraction {
 
     public DeleteReason(final String[] args2) {
     
-        final AdminParser parser = new AdminParser("removereason");
+        final AdminParser parser = new AdminParser("deletereason");
     
         setOptions(parser);
     

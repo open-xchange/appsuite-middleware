@@ -32,7 +32,7 @@ public class UnregisterDatabase extends UtilAbstraction {
 
     public UnregisterDatabase(final String[] args2) {
 
-        final AdminParser parser = new AdminParser("unregisterFilestore");
+        final AdminParser parser = new AdminParser("unregisterdatabase");
 
         setOptions(parser);
 
