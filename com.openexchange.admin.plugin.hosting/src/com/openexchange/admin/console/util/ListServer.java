@@ -46,35 +46,10 @@ public class ListServer extends UtilAbstraction {
             // Setting the options in the dataobject
             final Server[] servers = oxutil.listServer(searchpattern, auth);
 
-            // needed for csv output, KEEP AN EYE ON ORDER!!!
-            final ArrayList<String> columns = new ArrayList<String>();
-            columns.add("id");
-            columns.add("name");
-
-            final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
-
-            final String HEADER_FORMAT = "%-7s %-35s\n";
-            final String VALUE_FORMAT  = "%-7s %-35s\n";
-            if(parser.getOptionValue(this.csvOutputOption) == null) {
-                System.out.format(HEADER_FORMAT, "id", "name");
-            }
-            for (final Server server : servers) {
-                if (parser.getOptionValue(this.csvOutputOption) != null) {
-                    final ArrayList<String> srv_data = new ArrayList<String>();
-                    srv_data.add(String.valueOf(server.getId()));
-                    if (server.getName() != null) {
-                        srv_data.add(server.getName());
-                    } else {
-                        srv_data.add(null);
-                    }
-                    data.add(srv_data);
-                } else {
-                    System.out.format(VALUE_FORMAT,server.getId(),server.getName());
-                }
-            }
-
-            if (parser.getOptionValue(this.csvOutputOption) != null) {
-                doCSVOutput(columns, data);
+            if (null != parser.getOptionValue(this.csvOutputOption)) {
+                precsvinfos(servers);
+            } else {
+                sysoutOutput(servers);
             }
 
             sysexit(0);
@@ -124,5 +99,41 @@ public class ListServer extends UtilAbstraction {
     private void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptions(parser);
         setSearchOption(parser);
+    }
+
+    private void sysoutOutput(Server[] servers) throws InvalidDataException {
+        final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
+        for (final Server server : servers) {
+            data.add(makeCSVData(server));
+        }
+        
+        doOutput(new int[] { 3, 35 }, new String[] { "Id", "Name" }, data);
+    }
+
+    private void precsvinfos(Server[] servers) {
+        // needed for csv output, KEEP AN EYE ON ORDER!!!
+        final ArrayList<String> columns = new ArrayList<String>();
+        columns.add("id");
+        columns.add("name");
+    
+        final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
+    
+        for (final Server server : servers) {
+            data.add(makeCSVData(server));
+        }
+    
+        doCSVOutput(columns, data);
+    }
+
+    private ArrayList<String> makeCSVData(Server server) {
+        final ArrayList<String> srv_data = new ArrayList<String>();
+        srv_data.add(String.valueOf(server.getId()));
+        final String servername = server.getName();
+        if (servername != null) {
+            srv_data.add(servername);
+        } else {
+            srv_data.add(null);
+        }
+        return srv_data;
     }
 }
