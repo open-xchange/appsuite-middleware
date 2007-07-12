@@ -579,6 +579,16 @@ public final class UserConfiguration implements Serializable, DeleteListener, Cl
 	}
 
 	/**
+	 * Detects if user configuration allows portal page in GUI
+	 * 
+	 * @return <code>true</code> if portal page is allowed;otherwise
+	 *         <code>false</code>
+	 */
+	public boolean hasPortal() {
+		return hasCalendar() && hasContact() && hasTask();
+	}
+
+	/**
 	 * @return a sorted array of <tt>int</tt> representing user's accessible
 	 *         modules
 	 */
