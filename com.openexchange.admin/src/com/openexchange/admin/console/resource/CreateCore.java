@@ -57,7 +57,7 @@ public abstract class CreateCore extends ResourceAbstraction {
             res.setDisplayname((String) parser.getOptionValue(this.resourceDisplayNameOption));
             res.setEmail((String) parser.getOptionValue(this.resourceEmailOption));
             res.setName((String) parser.getOptionValue(this.resourceNameOption));
-            System.out.println(oxres.create(ctx, res, auth));
+            System.out.println(oxres.create(ctx, res, auth).getId());
 
             sysexit(0);
         } catch (final java.rmi.ConnectException neti) {
