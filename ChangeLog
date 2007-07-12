@@ -1,3 +1,9 @@
+* 2007-07-12 - thorben.betten@open-xchange.com
+
+ - Setting message's 'Organization' header surrounded by a try-catch clause
+   in which a Throwable is caught thus sending a message is not aborted
+   through a possible error while reading context admin's organization field
+
 * 2007-07-11 - thorben.betten@open-xchange.com
 
  - Added support for differing IMAP server's ACL handling plus

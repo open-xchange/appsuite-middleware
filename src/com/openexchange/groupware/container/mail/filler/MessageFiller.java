@@ -834,8 +834,8 @@ public class MessageFiller {
 			if (null != c && c.getCompany() != null && c.getCompany().length() > 0) {
 				msg.setHeader(HDR_ORGANIZATION, c.getCompany());
 			}
-		} catch (final LdapException e) {
-			LOG.warn("Header \"Organization\" could not be set", e);
+		} catch (final Throwable t) {
+			LOG.warn("Header \"Organization\" could not be set", t);
 		}
 		/*
 		 * Headers

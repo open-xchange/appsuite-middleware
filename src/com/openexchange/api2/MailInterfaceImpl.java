@@ -343,7 +343,7 @@ public class MailInterfaceImpl implements MailInterface {
 	/*
 	 * Other constants
 	 */
-	private static final Properties IMAP_PROPS;
+	private static Properties IMAP_PROPS;
 
 	private static boolean imapPropsInitialized;
 
@@ -402,34 +402,6 @@ public class MailInterfaceImpl implements MailInterface {
 		} catch (final NullPointerException e) {
 			LOG.error(e.getMessage(), e);
 		}
-		/*
-		 * Define imap properties
-		 */
-		IMAP_PROPS = ((Properties) (System.getProperties().clone()));
-		/*
-		 * Set some global JavaMail properties
-		 */
-		IMAP_PROPS.put(PROP_MAIL_MIME_BASE64_IGNOREERRORS, STR_TRUE);
-		IMAP_PROPS.put(PROP_ALLOWREADONLYSELECT, STR_TRUE);
-		IMAP_PROPS.put(PROP_MAIL_MIME_ENCODEEOL_STRICT, STR_TRUE);
-		IMAP_PROPS.put(PROP_MAIL_MIME_DECODETEXT_STRICT, STR_FALSE);
-		/*
-		 * A connected IMAPStore maintains a pool of IMAP protocol objects for
-		 * use in communicating with the IMAP server. The IMAPStore will create
-		 * the initial AUTHENTICATED connection and seed the pool with this
-		 * connection. As folders are opened and new IMAP protocol objects are
-		 * needed, the IMAPStore will provide them from the connection pool, or
-		 * create them if none are available. When a folder is closed, its IMAP
-		 * protocol object is returned to the connection pool if the pool is not
-		 * over capacity.
-		 */
-		IMAP_PROPS.put(PROP_MAIL_IMAP_CONNECTIONPOOLSIZE, "1");
-		/*
-		 * A mechanism is provided for timing out idle connection pool IMAP
-		 * protocol objects. Timed out connections are closed and removed
-		 * (pruned) from the connection pool.
-		 */
-		IMAP_PROPS.put(PROP_MAIL_IMAP_CONNECTIONPOOLTIMEOUT, "1000"); // 1 sec
 	}
 
 	private static final MailInterfaceImpl getQueuedMailInterface(final SessionObject sessionObj) throws OXException {
@@ -477,11 +449,60 @@ public class MailInterfaceImpl implements MailInterface {
 			}
 		}
 	}
+	
+	/**
+	 * Creates a <b>cloned</b> version of default IMAP properties
+	 * 
+	 * @return a cloned version of default IMAP properties
+	 * @throws OXException
+	 */
+	public final static Properties getDefaultIMAPProperties() throws OXException {
+		if (!imapPropsInitialized) {
+			LOCK_INIT.lock();
+			try {
+				if (null == IMAP_PROPS) {
+					initializeIMAPProperties();
+					imapPropsInitialized = true;
+				}
+			} finally {
+				LOCK_INIT.unlock();
+			}
+		}
+		return (Properties) IMAP_PROPS.clone();
+	}
 
 	/**
 	 * This method can only be exclusively accessed
 	 */
 	private final static void initializeIMAPProperties() throws OXException {
+		/*
+		 * Define imap properties
+		 */
+		IMAP_PROPS = ((Properties) (System.getProperties().clone()));
+		/*
+		 * Set some global JavaMail properties
+		 */
+		IMAP_PROPS.put(PROP_MAIL_MIME_BASE64_IGNOREERRORS, STR_TRUE);
+		IMAP_PROPS.put(PROP_ALLOWREADONLYSELECT, STR_TRUE);
+		IMAP_PROPS.put(PROP_MAIL_MIME_ENCODEEOL_STRICT, STR_TRUE);
+		IMAP_PROPS.put(PROP_MAIL_MIME_DECODETEXT_STRICT, STR_FALSE);
+		/*
+		 * A connected IMAPStore maintains a pool of IMAP protocol objects for
+		 * use in communicating with the IMAP server. The IMAPStore will create
+		 * the initial AUTHENTICATED connection and seed the pool with this
+		 * connection. As folders are opened and new IMAP protocol objects are
+		 * needed, the IMAPStore will provide them from the connection pool, or
+		 * create them if none are available. When a folder is closed, its IMAP
+		 * protocol object is returned to the connection pool if the pool is not
+		 * over capacity.
+		 */
+		IMAP_PROPS.put(PROP_MAIL_IMAP_CONNECTIONPOOLSIZE, "1");
+		/*
+		 * A mechanism is provided for timing out idle connection pool IMAP
+		 * protocol objects. Timed out connections are closed and removed
+		 * (pruned) from the connection pool.
+		 */
+		IMAP_PROPS.put(PROP_MAIL_IMAP_CONNECTIONPOOLTIMEOUT, "1000"); // 1 sec
 		/*
 		 * Fill global IMAP Properties only once and switch flag
 		 */
@@ -524,6 +545,10 @@ public class MailInterfaceImpl implements MailInterface {
 		}
 		try {
 			if (IMAPProperties.getJavaMailProperties() != null) {
+				/*
+				 * Overwrite current JavaMail-Specific properties with the ones
+				 * defined in javamail.properties
+				 */
 				IMAP_PROPS.putAll(IMAPProperties.getJavaMailProperties());
 			}
 		} catch (final IMAPException e) {
@@ -537,25 +562,6 @@ public class MailInterfaceImpl implements MailInterface {
 					.put(PROP_MAIL_IMAP_CONNECTIONTIMEOUT, Integer.valueOf(IMAPProperties.getImapConnectionTimeout()));
 		}
 		IMAP_PROPS.put(PROP_MAIL_SMTP_AUTH, IMAPProperties.isSmtpAuth() ? STR_TRUE : STR_FALSE);
-	}
-
-	/**
-	 * Creates a <b>cloned</b> version of default IMAP properties
-	 * 
-	 * @return a cloned version of default IMAP properties
-	 * @throws OXException
-	 */
-	public final static Properties getDefaultIMAPProperties() throws OXException {
-		LOCK_INIT.lock();
-		try {
-			if (!imapPropsInitialized) {
-				initializeIMAPProperties();
-				imapPropsInitialized = true;
-			}
-		} finally {
-			LOCK_INIT.unlock();
-		}
-		return (Properties) IMAP_PROPS.clone();
 	}
 
 	private MailInterfaceImpl() {

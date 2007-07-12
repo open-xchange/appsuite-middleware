@@ -266,6 +266,12 @@ public abstract class User2IMAP {
 	 */
 	public static final User2IMAP getInstance(final User sessionUser) throws User2IMAPException {
 		if (!instancialized) {
+			if (initialized && null == implementingClass) {
+				/*
+				 * Already initialized and auto-detection turned on
+				 */
+				return getUser2IMAPImpl(sessionUser);
+			}
 			INSTANCE_LOCK.lock();
 			try {
 				if (null == singleton) {
@@ -273,19 +279,9 @@ public abstract class User2IMAP {
 					try {
 						if (implementingClass == null) {
 							/*
-							 * Auto-Detection turned on
+							 * Auto-detection turned on
 							 */
-							try {
-								final Object[] args = getIMAPServer(sessionUser);
-								return IMAPServerImpl.getUser2IMAPImpl((String) args[0], ((Integer) args[1])
-										.intValue());
-							} catch (final IOException e) {
-								throw new User2IMAPException(User2IMAPException.Code.INSTANCIATION_FAILED, e,
-										EMPTY_ARGS);
-							} catch (final IMAPException e) {
-								throw new User2IMAPException(User2IMAPException.Code.INSTANCIATION_FAILED, e,
-										EMPTY_ARGS);
-							}
+							return getUser2IMAPImpl(sessionUser);
 						}
 						singleton = implementingClass.newInstance();
 						instancialized = true;
@@ -302,6 +298,17 @@ public abstract class User2IMAP {
 			}
 		}
 		return singleton;
+	}
+
+	private static final User2IMAP getUser2IMAPImpl(final User sessionUser) throws User2IMAPException {
+		try {
+			final Object[] args = getIMAPServer(sessionUser);
+			return IMAPServerImpl.getUser2IMAPImpl((String) args[0], ((Integer) args[1]).intValue());
+		} catch (final IOException e) {
+			throw new User2IMAPException(User2IMAPException.Code.INSTANCIATION_FAILED, e, EMPTY_ARGS);
+		} catch (final IMAPException e) {
+			throw new User2IMAPException(User2IMAPException.Code.INSTANCIATION_FAILED, e, EMPTY_ARGS);
+		}
 	}
 
 	private static final Object[] getIMAPServer(final User sessionUser) throws IMAPException {
