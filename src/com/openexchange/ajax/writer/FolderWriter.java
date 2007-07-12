@@ -75,6 +75,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.imap.IMAPProperties;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.server.IMAPPermission;
@@ -423,19 +424,24 @@ public final class FolderWriter extends DataWriter {
 						}
 						for (int j = 0; j < acls.length; j++) {
 							final IMAPPermission imapPerm = new IMAPPermission(session.getUserObject().getId(), us);
-							boolean error = false;
 							try {
 								imapPerm.parseACL(acls[j], folder);
-							} catch (final AbstractOXException e) {
-								LOG.error(e.getMessage(), e);
-								error = true;
-							}
-							if (!error) {
 								final JSONObject jo = new JSONObject();
 								jo.put(FolderFields.BITS, createPermissionBits(imapPerm));
 								jo.put(FolderFields.ENTITY, imapPerm.getEntity());
 								jo.put(FolderFields.GROUP, imapPerm.isGroupPermission());
 								ja.put(jo);
+							} catch (final UserException e) {
+								LOG.error(new StringBuilder(128).append("Unmappable entity ").append(acls[j].getName())
+										.append(" in folder ").append(folder.getFullName()), e);
+								/*imapPerm.parseRights(acls[j].getRights());
+								final JSONObject jo = new JSONObject();
+								jo.put(FolderFields.BITS, createPermissionBits(imapPerm));
+								jo.put(FolderFields.ENTITY, acls[j].getName());
+								jo.put(FolderFields.GROUP, imapPerm.isGroupPermission());
+								ja.put(jo);*/
+							} catch (final AbstractOXException e) {
+								LOG.error(e.getMessage(), e);
 							}
 						}
 						jsonwriter.value(ja);

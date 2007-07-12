@@ -853,7 +853,7 @@ public class MailInterfaceImpl implements MailInterface {
 					inboxFolder.setSubscribed(true);
 				}
 				final boolean noInferiors = ((inboxFolder.getType() & Folder.HOLDS_FOLDERS) == 0);
-				final StringBuilder tmp = new StringBuilder(100);
+				final StringBuilder tmp = new StringBuilder(128);
 				/*
 				 * Determine where to create default folders and store as a
 				 * prefix for folder fullname
@@ -872,169 +872,51 @@ public class MailInterfaceImpl implements MailInterface {
 				tmp.setLength(0);
 				final int type = (Folder.HOLDS_MESSAGES | Folder.HOLDS_FOLDERS);
 				/*
-				 * Check draft folder
+				 * Check default folders
 				 */
-				boolean checkSubscribed = true;
-				Folder f = imapCon.getIMAPStore().getFolder(
-						tmp.append(prefix).append(prepareMailFolderParam(defaultFolderNames[INDEX_DRAFTS])).toString());
-				tmp.setLength(0);
-				long start = System.currentTimeMillis();
-				if (!f.exists() && !f.create(type)) {
-					final OXMailException oxme = new OXMailException(MailCode.NO_DEFAULT_FOLDER_CREATION,
-							new StringBuilder().append(prefix).append(defaultFolderNames[INDEX_DRAFTS]).toString());
-					LOG.error(oxme.getMessage(), oxme);
-					checkSubscribed = false;
-				}
-				if (checkSubscribed && !f.isSubscribed()) {
-					try {
-						f.setSubscribed(true);
-					} catch (final MethodNotSupportedException e) {
-						LOG.error(e.getMessage(), e);
-					} catch (final MessagingException e) {
-						LOG.error(e.getMessage(), e);
-					}
-				}
-				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-				usm
-						.setStandardFolder(INDEX_DRAFTS, MailFolderObject.prepareFullname(f.getFullName(), f
-								.getSeparator()));
-				/*
-				 * Check sent folder
-				 */
-				checkSubscribed = true;
-				f = imapCon.getIMAPStore().getFolder(
-						tmp.append(prefix).append(prepareMailFolderParam(defaultFolderNames[INDEX_SENT])).toString());
-				tmp.setLength(0);
-				start = System.currentTimeMillis();
-				if (!f.exists() && !f.create(type)) {
-					final OXMailException oxme = new OXMailException(MailCode.NO_DEFAULT_FOLDER_CREATION,
-							new StringBuilder().append(prefix).append(defaultFolderNames[INDEX_SENT]).toString());
-					LOG.error(oxme.getMessage(), oxme);
-					checkSubscribed = false;
-				}
-				if (checkSubscribed && !f.isSubscribed()) {
-					try {
-						f.setSubscribed(true);
-					} catch (final MethodNotSupportedException e) {
-						LOG.error(e.getMessage(), e);
-					} catch (final MessagingException e) {
-						LOG.error(e.getMessage(), e);
-					}
-				}
-				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-				usm.setStandardFolder(INDEX_SENT, MailFolderObject.prepareFullname(f.getFullName(), f.getSeparator()));
-				/*
-				 * Check spam folder
-				 */
-				checkSubscribed = true;
-				f = imapCon.getIMAPStore().getFolder(
-						tmp.append(prefix).append(prepareMailFolderParam(defaultFolderNames[INDEX_SPAM])).toString());
-				tmp.setLength(0);
-				start = System.currentTimeMillis();
-				if (!f.exists() && !f.create(type)) {
-					final OXMailException oxme = new OXMailException(MailCode.NO_DEFAULT_FOLDER_CREATION,
-							new StringBuilder().append(prefix).append(defaultFolderNames[INDEX_SPAM]).toString());
-					LOG.error(oxme.getMessage(), oxme);
-					checkSubscribed = false;
-				}
-				if (checkSubscribed && !f.isSubscribed()) {
-					try {
-						f.setSubscribed(true);
-					} catch (final MethodNotSupportedException e) {
-						LOG.error(e.getMessage(), e);
-					} catch (final MessagingException e) {
-						LOG.error(e.getMessage(), e);
-					}
-				}
-				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-				usm.setStandardFolder(INDEX_SPAM, MailFolderObject.prepareFullname(f.getFullName(), f.getSeparator()));
-				/*
-				 * Check trash folder
-				 */
-				checkSubscribed = true;
-				f = imapCon.getIMAPStore().getFolder(
-						tmp.append(prefix).append(prepareMailFolderParam(defaultFolderNames[INDEX_TRASH])).toString());
-				tmp.setLength(0);
-				start = System.currentTimeMillis();
-				if (!f.exists() && !f.create(type)) {
-					final OXMailException oxme = new OXMailException(MailCode.NO_DEFAULT_FOLDER_CREATION,
-							new StringBuilder().append(prefix).append(defaultFolderNames[INDEX_TRASH]).toString());
-					LOG.error(oxme.getMessage(), oxme);
-					checkSubscribed = false;
-				}
-				if (checkSubscribed && !f.isSubscribed()) {
-					try {
-						f.setSubscribed(true);
-					} catch (final MethodNotSupportedException e) {
-						LOG.error(e.getMessage(), e);
-					} catch (final MessagingException e) {
-						LOG.error(e.getMessage(), e);
-					}
-				}
-				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-				usm.setStandardFolder(INDEX_TRASH, MailFolderObject.prepareFullname(f.getFullName(), f.getSeparator()));
-				if (usm.isSpamEnabled()) {
-					/*
-					 * Check confirmed spam folder
-					 */
-					checkSubscribed = true;
-					f = imapCon.getIMAPStore().getFolder(
-							tmp.append(prefix).append(prepareMailFolderParam(defaultFolderNames[INDEX_CONFIRMED_SPAM]))
-									.toString());
-					tmp.setLength(0);
-					start = System.currentTimeMillis();
-					if (!f.exists() && !f.create(type)) {
-						final OXMailException oxme = new OXMailException(MailCode.NO_DEFAULT_FOLDER_CREATION,
-								new StringBuilder().append(prefix).append(defaultFolderNames[INDEX_CONFIRMED_SPAM])
-										.toString());
-						LOG.error(oxme.getMessage(), oxme);
-						checkSubscribed = false;
-					}
-					if (checkSubscribed && !f.isSubscribed()) {
-						try {
-							f.setSubscribed(true);
-						} catch (final MethodNotSupportedException e) {
-							LOG.error(e.getMessage(), e);
-						} catch (final MessagingException e) {
-							LOG.error(e.getMessage(), e);
-						}
-					}
-					mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-					usm.setStandardFolder(INDEX_CONFIRMED_SPAM, MailFolderObject.prepareFullname(f.getFullName(), f
-							.getSeparator()));
-					/*
-					 * Check confirmed ham folder
-					 */
-					checkSubscribed = true;
-					f = imapCon.getIMAPStore().getFolder(
-							tmp.append(prefix).append(prepareMailFolderParam(defaultFolderNames[INDEX_CONFIRMED_HAM]))
-									.toString());
-					tmp.setLength(0);
-					start = System.currentTimeMillis();
-					if (!f.exists() && !f.create(type)) {
-						final OXMailException oxme = new OXMailException(MailCode.NO_DEFAULT_FOLDER_CREATION,
-								new StringBuilder().append(prefix).append(defaultFolderNames[INDEX_CONFIRMED_HAM])
-										.toString());
-						LOG.error(oxme.getMessage(), oxme);
-						checkSubscribed = false;
-					}
-					if (checkSubscribed && !f.isSubscribed()) {
-						try {
-							f.setSubscribed(true);
-						} catch (final MethodNotSupportedException e) {
-							LOG.error(e.getMessage(), e);
-						} catch (final MessagingException e) {
-							LOG.error(e.getMessage(), e);
-						}
-					}
-					mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-					usm.setStandardFolder(INDEX_CONFIRMED_HAM, MailFolderObject.prepareFullname(f.getFullName(), f
-							.getSeparator()));
+				final int l = usm.isSpamEnabled() ? defaultFolderNames.length : defaultFolderNames.length - 2;
+				for (int i = 0; i < l; i++) {
+					usm.setStandardFolder(i, checkDefaultFolder(imapCon.getIMAPStore(), prefix, defaultFolderNames[i],
+							type, tmp));
 				}
 			}
 		} catch (final MessagingException e) {
 			throw handleMessagingException(e, sessionObj.getIMAPProperties(), sessionObj.getContext());
 		}
+	}
+	
+	private static final String checkDefaultFolder(final IMAPStore store, final String prefix, final String name,
+			final int type, final StringBuilder tmp) throws MessagingException {
+		/*
+		 * Check default folder
+		 */
+		boolean checkSubscribed = true;
+		final Folder f = store.getFolder(tmp.append(prefix).append(prepareMailFolderParam(name)).toString());
+		tmp.setLength(0);
+		final long start = System.currentTimeMillis();
+		if (!f.exists() && !f.create(type)) {
+			final OXMailException oxme = new OXMailException(MailCode.NO_DEFAULT_FOLDER_CREATION, tmp.append(prefix)
+					.append(name).toString());
+			tmp.setLength(0);
+			LOG.error(oxme.getMessage(), oxme);
+			checkSubscribed = false;
+		}
+		if (checkSubscribed && !f.isSubscribed()) {
+			try {
+				f.setSubscribed(true);
+			} catch (final MethodNotSupportedException e) {
+				LOG.error(e.getMessage(), e);
+			} catch (final MessagingException e) {
+				LOG.error(e.getMessage(), e);
+			}
+		}
+		mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+		if (LOG.isDebugEnabled()) {
+			LOG.debug(tmp.append("Default folder \"").append(f.getFullName()).append("\" successfully checked")
+					.toString());
+			tmp.setLength(0);
+		}
+		return MailFolderObject.prepareFullname(f.getFullName(), f.getSeparator());
 	}
 
 	private static final boolean isAltNamespaceEnabled(final IMAPStore imapStore) throws MessagingException {
