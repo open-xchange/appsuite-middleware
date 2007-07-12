@@ -349,6 +349,44 @@ public interface OXUtilInterface extends Remote {
     public Database[] listDatabases(final String search_pattern, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException;
 
     /**
+     * Convenience method for listing all databases registered in the system.
+     * 
+     * @return Containing the databases found by the search.
+     * @param auth
+     *            Credentials for authenticating against server.
+     * @throws com.openexchange.admin.rmi.exceptions.StorageException
+     *             When an error in the subsystems occured.
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException
+     *             When the supplied credentials were not correct or invalid.
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException
+     *             If the data sent within the method contained invalid data.
+     * @throws RemoteException
+     *             General RMI Exception
+     */
+    public Database[] listAllDatabases(final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException;
+
+    /**
+     * Search for server
+     * 
+     * @return Containing Server Object found by the search.
+     * @param search_pattern
+     *            Search pattern e.g "*" "*my*".
+     * @param auth
+     *            Credentials for authenticating against server.
+     * @throws com.openexchange.admin.rmi.exceptions.StorageException
+     *             When an error in the subsystems occured.
+     * 
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException
+     *             When the supplied credentials were not correct or invalid.
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException
+     *             If the data sent within the method contained invalid data.
+     * @throws RemoteException
+     *             General RMI Exception
+     * @deprecated
+     */
+    public Server[] listServer(final String search_pattern, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException;
+
+    /**
      * Search for server
      * 
      * @return Containing Server Object found by the search.
@@ -366,7 +404,25 @@ public interface OXUtilInterface extends Remote {
      * @throws RemoteException
      *             General RMI Exception
      */
-    public Server[] listServer(final String search_pattern, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException;
+    public Server[] listServers(final String search_pattern, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException;
+
+    /**
+     * Convenience method for listing all servers
+     * 
+     * @return Containing Server Object found by the search.
+     * @param auth
+     *            Credentials for authenticating against server.
+     * @throws com.openexchange.admin.rmi.exceptions.StorageException
+     *             When an error in the subsystems occured.
+     * 
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException
+     *             When the supplied credentials were not correct or invalid.
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException
+     *             If the data sent within the method contained invalid data.
+     * @throws RemoteException
+     *             General RMI Exception
+     */
+    public Server[] listAllServers(final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException;
 
     /**
      * Register new filestore to the system.
@@ -423,6 +479,23 @@ public interface OXUtilInterface extends Remote {
      *             General RMI Exception
      */
     public Filestore[] listFilestores(final String search_pattern, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException;
+
+    /**
+     * Convenience method for listing all filestores.
+     * 
+     * @return Containing result objects.
+     * @param auth
+     *            Credentials for authenticating against server.
+     * @throws com.openexchange.admin.rmi.exceptions.StorageException
+     *             When an error in the subsystems occured.
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException
+     *             When the supplied credentials were not correct or invalid.
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException
+     *             If the data sent within the method contained invalid data.
+     * @throws RemoteException
+     *             General RMI Exception
+     */
+    public Filestore[] listAllFilestores(final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException;
 
     /**
      * Unregister filestore from system identified by its ID
