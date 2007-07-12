@@ -91,6 +91,27 @@ public class VersitParserTest extends TestCase {
 	}
 	
 	/*
+	 * Parsing of ATTENDEE property
+	 */
+	public void test7470() throws IOException{
+		String ical = 
+			"BEGIN:VCALENDAR\n" +
+			"VERSION:2.0\n" +
+			"METHOD:REQUEST\n" +
+			"BEGIN:VEVENT\n" +
+			"ATTENDEE;CN=\"Camil Bartkowiak (cbartkowiak@oxhemail.open-xchange.com)\";RSVP=TRUE:mailto:cbartkowiak@oxhemail.open-xchange.com\n" +
+			"CLASS:PUBLIC\n" +
+			"CREATED:20070521T150327Z\n" +
+			"DTEND:20070523T090000Z\n" +
+			"DTSTAMP:20070521T150327Z\n" +
+			"DTSTART:20070523T083000Z\n" +
+			"SUMMARY;LANGUAGE=de:Simple Appointment with participant\n" +
+			"END:VEVENT\n" +
+			"END:VCALENDAR\n";
+		parse(ical);
+	}
+	
+	/*
 	 * Parsing of RRULE with COUNT ("only ten times") 
 	 */
 	public void test7732() throws IOException{
