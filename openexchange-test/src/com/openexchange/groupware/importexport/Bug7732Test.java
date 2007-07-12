@@ -49,6 +49,9 @@
 
 package com.openexchange.groupware.importexport;
 
+import static org.junit.Assert.*;
+import static org.junit.Assert.fail;
+
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 
@@ -56,6 +59,11 @@ import junit.framework.JUnit4TestAdapter;
 
 import org.junit.Test;
 
+import com.openexchange.api.OXObjectNotFoundException;
+import com.openexchange.api2.AppointmentSQLInterface;
+import com.openexchange.api2.OXException;
+import com.openexchange.groupware.calendar.CalendarSql;
+import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.server.DBPoolingException;
@@ -67,8 +75,8 @@ public class Bug7732Test extends AbstractICalImportTest {
 	}
 	
 	
-	@Test public void test7732() throws DBPoolingException, SQLException, ImportExportException, UnsupportedEncodingException{
-		folderId = createTestFolder(FolderObject.CALENDAR, sessObj, "ical7735Folder");
+	@Test public void test7732() throws DBPoolingException, SQLException, UnsupportedEncodingException, OXObjectNotFoundException, NumberFormatException, OXException{
+		int count = 10;
 		String ical = 
 			"BEGIN:VCALENDAR\n" +
 			"PRODID:-//Microsoft Corporation//Outlook 12.0 MIMEDIR//EN\n" +
@@ -77,14 +85,14 @@ public class Bug7732Test extends AbstractICalImportTest {
 				"BEGIN:VEVENT\n" +
 				"CLASS:PUBLIC\n" +
 				"CREATED:20070531T130514Z\n" +
-				"DESCRIPTION:\n" +
+				"DESCRIPTION:\\n\n" +
 				"DTEND:20070912T083000Z\n" +
 				"DTSTAMP:20070531T130514Z\n" +
 				"DTSTART:20070912T080000Z\n" +
 				"LAST-MODIFIED:20070531T130514Z\n" +
 				"LOCATION:loc\n" +
 				"PRIORITY:5\n" +
-				"RRULE:FREQ=DAILY;COUNT=10\n" +
+				"RRULE:FREQ=DAILY;COUNT="+count+"\n" +
 				"SEQUENCE:0\n" +
 				"SUMMARY;LANGUAGE=de:Daily iCal\n" +
 				"TRANSP:OPAQUE\n" +
@@ -93,10 +101,9 @@ public class Bug7732Test extends AbstractICalImportTest {
 			"END:VCALENDAR";
 
 		ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.CALENDAR, "7735", false);
-		
-		System.out.println("--- dies ist nicht der bug, den ihr sucht ---");
-		res.getException().printStackTrace();
-		System.out.println("--- ihr wollt nach hause gehen und euer leben überdenken---");
+		final AppointmentSQLInterface appointmentSql = new CalendarSql(sessObj);
+		final AppointmentObject appointmentObj = appointmentSql.getObjectById(Integer.parseInt( res.getObjectId() ), folderId);
+		assertEquals(count + " occurences found?" , count , appointmentObj.getOccurrence());
 	}
 
 }

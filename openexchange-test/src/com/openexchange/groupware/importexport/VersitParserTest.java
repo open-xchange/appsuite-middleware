@@ -102,7 +102,7 @@ public class VersitParserTest extends TestCase {
 				"BEGIN:VEVENT\n" +
 				"CLASS:PUBLIC\n" +
 				"CREATED:20070531T130514Z\n" +
-				"DESCRIPTION:\n" +
+				"DESCRIPTION:\\n\n" +
 				"DTEND:20070912T083000Z\n" +
 				"DTSTAMP:20070531T130514Z\n" +
 				"DTSTART:20070912T080000Z\n" +
@@ -116,7 +116,7 @@ public class VersitParserTest extends TestCase {
 				"UID:040000008200E00074C5B7101A82E008000000005059CADA94A3C701000000000000000010000000A1B56CAC71BB0948833B0C11C333ADB0\n" +
 				"END:VEVENT\n" +
 			"END:VCALENDAR";
-		List<VersitObject> list = parse(ical);
+		parse(ical);
 	}
 	
 	/*
