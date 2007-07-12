@@ -101,7 +101,6 @@ import com.openexchange.groupware.imap.MessageDataSource;
 import com.openexchange.groupware.imap.OXMailException;
 import com.openexchange.groupware.imap.UserSettingMail;
 import com.openexchange.groupware.imap.OXMailException.MailCode;
-import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.upload.UploadEvent;
