@@ -49,44 +49,37 @@
 
 package com.openexchange.groupware.importexport;
 
-import com.openexchange.tools.versit.filetokenizer.VCardTokenizerTest;
+import java.sql.SQLException;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.Init;
+import com.openexchange.groupware.contact.ContactConfig;
+import com.openexchange.groupware.contexts.ContextImpl;
+import com.openexchange.groupware.contexts.ContextStorage;
+import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.sessiond.SessionObject;
+import com.openexchange.sessiond.SessionObjectWrapper;
 
 /**
- * This suite is meant for tests without a running OX instance
+ * This class gets you a SessionObject, since nearly everything within
+ * the OX needs one and it is hard to get one.
+ * 
+ * What you need is a proper property file containing the login data.
+ * 
+ * FIXME: If released, this class might be in need of renaming. 
  * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  *
  */
-public class ImportExportStandaloneSuite extends TestSuite {
-	
-	public static Test suite(){
-		TestSuite tests = new TestSuite();
-		//basics
-		tests.addTestSuite( VCardTokenizerTest.class );
-		tests.addTestSuite( ContactFieldTester.class );
-		tests.addTestSuite( ContactSwitcherTester.class );
-		tests.addTestSuite( VersitParserTest.class );
-		tests.addTestSuite( OXContainerConverterTest.class );
-		tests.addTest( SizedInputStreamTest.suite() );
+public class SessionHelper {
 
-		//CSV
-		tests.addTest( CSVContactImportTest.suite() );
-		tests.addTest( CSVContactExportTest.suite() );
-		tests.addTest( OutlookCSVContactImportTest.suite() );
-		
-		//ICAL
-		tests.addTest( ICalImportTest.suite() );
-
-		//VCARD
-		tests.addTest( VCardImportTest.suite() );
-		
-		//separate tests
-		//tests.addTest( Bug7470Test.suite() ); //FIXME
-		tests.addTest( Bug7732Test.suite() );
-		
-		return tests;
+	public static SessionObject getSession() throws SQLException, AbstractOXException{
+		Init.initDB();
+		ContactConfig.init();
+		ContextStorage.init();
+		final UserStorage uStorage = UserStorage.getInstance(new ContextImpl(1));
+	    final int userId = uStorage.getUserId( Init.getAJAXProperty("login") );
+	    return SessionObjectWrapper.createSessionObject(userId, 1, "sessionhelper");
 	}
+	
 }
