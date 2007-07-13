@@ -288,22 +288,6 @@ public final class OXServletInputStream extends ServletInputStream {
 			}
 			final byte[] tmp = new byte[(int) n];
 			return (read(tmp, 0, tmp.length));
-
-			// final int numOfAvailableBytes = data.length - pos;
-			// if (numOfAvailableBytes >= n) {
-			// pos += n;
-			// return n;
-			// }
-			// long remainingSkippedBytes = n - numOfAvailableBytes;
-			// pos = data.length;
-			// final byte[] tmpData = new byte[8192];
-			// int numOfReadBytes = 0;
-			// do {
-			// // remainingSkippedBytes -= numOfReadBytes;
-			// numOfReadBytes = read(tmpData, 0, tmpData.length);
-			// } while ((remainingSkippedBytes -= numOfReadBytes) > 0 &&
-			// numOfReadBytes > 0);
-			// return (n - remainingSkippedBytes);
 		} finally {
 			MUTEX.unlock();
 		}
@@ -346,7 +330,7 @@ public final class OXServletInputStream extends ServletInputStream {
 	 *         <code>false</code> if no more data is expected or an empty data
 	 *         package has been sent from web server
 	 */
-	private final boolean requestMoreDataFromWebServer() throws IOException {
+	private boolean requestMoreDataFromWebServer() throws IOException {
 		try {
 			if (ajpCon.getAjpRequestHandler().isAllDataRead()) {
 				/*

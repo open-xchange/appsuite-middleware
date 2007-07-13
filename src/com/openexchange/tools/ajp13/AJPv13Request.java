@@ -116,13 +116,15 @@ public abstract class AJPv13Request {
 			/*
 			 * Send rest of data cut into MAX_BODY_CHUNK_SIZE pieces
 			 */
-			while (remainingData.length > AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE) {
+			if (remainingData.length > AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE) {
 				final byte[] currentData = new byte[AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE];
-				final byte[] tmp = new byte[remainingData.length - currentData.length];
-				System.arraycopy(remainingData, 0, currentData, 0, currentData.length);
-				System.arraycopy(remainingData, currentData.length, tmp, 0, tmp.length);
-				writeResponse(AJPv13Response.getSendBodyChunkBytes(currentData), out, true);
-				remainingData = tmp;
+				do {
+					final byte[] tmp = new byte[remainingData.length - currentData.length];
+					System.arraycopy(remainingData, 0, currentData, 0, currentData.length);
+					System.arraycopy(remainingData, currentData.length, tmp, 0, tmp.length);
+					writeResponse(AJPv13Response.getSendBodyChunkBytes(currentData), out, true);
+					remainingData = tmp;
+				} while (remainingData.length > AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE);
 			}
 			if (remainingData.length > 0) {
 				/*
@@ -136,7 +138,6 @@ public abstract class AJPv13Request {
 		 */
 		writeResponse(AJPv13Response.getEndResponseBytes(), out, true);
 		ajpRequestHandler.setEndResponseSent(true);
-		return;
 	}
 
 	/**
@@ -170,10 +171,11 @@ public abstract class AJPv13Request {
 	}
 
 	protected final byte nextByte() {
-		if (payloadDataIndex < payloadData.length) {
-			return payloadData[payloadDataIndex++];
-		}
-		return -1;
+		return payloadData[payloadDataIndex++];
+//		if (payloadDataIndex < payloadData.length) {
+//			return payloadData[payloadDataIndex++];
+//		}
+//		return -1;
 	}
 
 	protected final boolean compareNextByte(final int compareTo) {
@@ -187,7 +189,7 @@ public abstract class AJPv13Request {
 		return (payloadDataIndex < payloadData.length);
 	}
 
-	protected final int unsignedByte2Int(final byte b) {
+	protected static final int unsignedByte2Int(final byte b) {
 		return (b & 0xff);
 	}
 

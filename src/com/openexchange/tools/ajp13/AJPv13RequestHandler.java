@@ -244,7 +244,11 @@ public final class AJPv13RequestHandler {
 			} else {
 				sb.append(' ');
 			}
-			sb.append(Integer.toHexString(b).toUpperCase());
+			final String s = Integer.toHexString(b).toUpperCase();
+			if (s.length() == 1) {
+				sb.append('0');
+			}
+			sb.append(s);
 			c++;
 		}
 		return sb.toString();
@@ -341,7 +345,7 @@ public final class AJPv13RequestHandler {
 		try {
 			if (ajpRequest == null) {
 				/*
-				 * We received an unsupported prefix code before thus ajpRequest
+				 * We received an unsupported prefix code before, thus ajpRequest
 				 * is null. Terminate ajp cycle
 				 */
 				ajpCon.getOutputStream().write(AJPv13Response.getEndResponseBytes());

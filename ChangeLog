@@ -1,3 +1,7 @@
+* 2007-07-13 - thorben.betten@open-xchange.com
+
+ - Slightly fastened AJP processing
+
 * 2007-07-12 - tobias.prinz@open-xchange.com
 
  - Bugfix #7732: An RRULE's COUNT property is now set as occurrence value
