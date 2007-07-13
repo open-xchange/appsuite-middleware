@@ -219,9 +219,6 @@ public class ICalImporter extends AbstractImporter implements Importer {
 						versitObject=  def.parseChild(versitReader, rootVersitObject);
 					} catch (VersitException ve){
 						LOG.info("Trying to import ICAL file, but:\n" + ve);
-						System.out.println("\n---BEG ---");
-						ve.printStackTrace();
-						System.out.println("---END ---");
 						importResult.setException(EXCEPTIONS.create(5, ve.getLocalizedMessage()));
 						importResult.setDate(new Date(System.currentTimeMillis()));
 						list.add(importResult);
