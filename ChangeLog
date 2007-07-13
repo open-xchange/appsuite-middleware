@@ -2,6 +2,7 @@
 
  - Slightly fastened AJP processing
  - Added file name extraction method to UploadEvent
+ - Avoiding duplicate VCard attachment when saving draft message
 
 * 2007-07-12 - tobias.prinz@open-xchange.com
 
