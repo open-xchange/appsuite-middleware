@@ -50,19 +50,22 @@
 package com.openexchange.groupware.importexport;
 
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.List;
+import java.util.TimeZone;
 
 import junit.framework.TestCase;
 
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.Participant;
-import com.openexchange.groupware.container.Participants;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.sessiond.SessionObject;
+import com.openexchange.tools.versit.Property;
 import com.openexchange.tools.versit.VersitObject;
 import com.openexchange.tools.versit.converter.ConverterException;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
+import com.openexchange.tools.versit.values.RecurrenceValue;
 
 /**
  * Since the OXContainerConverter has been ported from OX5 to OX Hyperion,
@@ -96,8 +99,34 @@ public class OXContainerConverterTest extends TestCase {
 		return converter.convertContact(obj);
 	}
 	
-	public void test8411(){
-		//fail("Please implement me!");
+	public void test8411() throws ConverterException{
+		AppointmentObject app = new AppointmentObject();
+		app.setTitle("Tierlieb's birthday");
+		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+
+		cal.set(1981, 3, 1, 0, 0);
+		app.setStartDate(cal.getTime());
+
+		cal.set(1981, 3, 2, 0, 0);
+		app.setEndDate(cal.getTime()); //+24 std
+		
+		app.setShownAs(AppointmentObject.FREE);
+		app.setFullTime(true);
+		app.setRecurrenceType(AppointmentObject.YEARLY);
+		app.setDayInMonth(1);
+		app.setMonth(3);
+		app.setInterval(1);
+		app.setCreatedBy(session.getUserObject().getId());
+		
+		VersitObject  ical = converter.convertAppointment(app);
+		
+		Property prop = ical.getProperty("SUMMARY");
+		assertEquals("Summary is correct" , "Tierlieb's birthday" , prop.getValue());
+		
+		prop = ical.getProperty("RRULE");
+		RecurrenceValue rv = (RecurrenceValue) prop.getValue();
+		assertEquals("Interval is correct" , rv.Freq, RecurrenceValue.YEARLY);
+	
 	}
 	
 	public void test7470() throws IOException, ConverterException{
