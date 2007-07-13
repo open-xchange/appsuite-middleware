@@ -1,3 +1,15 @@
+* 2007-07-13 - francisco.laguna@open-xchange.com
+
+ - Fix for bug #8392: Changed webdav servlet to expect ENCODED URIs. To ensure
+   that they remain encoded the following option has to be set in the Apache configuration:
+   JkOptions +ForwardURICompatUnparsed
+   
+############## PAY ATTENTION TO ME ! ################
+ - CONFIG change: Option in apache configuration must be set:
+JkOptions +ForwardURICompatUnparsed
+#####################################################
+   
+
 * 2007-07-13 - thorben.betten@open-xchange.com
 
  - Slightly fastened AJP processing
