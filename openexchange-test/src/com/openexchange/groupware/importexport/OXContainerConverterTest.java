@@ -103,7 +103,7 @@ public class OXContainerConverterTest extends TestCase {
 		AppointmentObject app = new AppointmentObject();
 		app.setTitle("Tierlieb's birthday");
 		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-
+		app.setTimezone("UTC");
 		cal.set(1981, 3, 1, 0, 0);
 		app.setStartDate(cal.getTime());
 
