@@ -84,14 +84,15 @@ public class MessageDataSource implements DataSource {
 	/**
 	 * Create a datasource from an input stream
 	 */
-	public MessageDataSource(InputStream inputStream, String contentType) throws IOException {
+	public MessageDataSource(final InputStream inputStream, final String contentType) throws IOException {
 		this(inputStream, contentType, null);
 	}
 
 	/**
 	 * Create a datasource from an input stream
 	 */
-	public MessageDataSource(InputStream inputStream, String contentType, String name) throws IOException {
+	public MessageDataSource(final InputStream inputStream, final String contentType, final String name)
+			throws IOException {
 		this.contentType = contentType;
 		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		copyStream(inputStream, baos);
@@ -102,7 +103,7 @@ public class MessageDataSource implements DataSource {
 	/**
 	 * Create a datasource from a byte array
 	 */
-	public MessageDataSource(byte[] data, String contentType) {
+	public MessageDataSource(final byte[] data, final String contentType) {
 		this.contentType = contentType;
 		this.data = new byte[data.length];
 		System.arraycopy(data, 0, this.data, 0, data.length);
@@ -111,7 +112,8 @@ public class MessageDataSource implements DataSource {
 	/**
 	 * Create a datasource from a String
 	 */
-	public MessageDataSource(String data, String contentType) throws UnsupportedEncodingException, OXException {
+	public MessageDataSource(final String data, final String contentType) throws UnsupportedEncodingException,
+			OXException {
 		this.contentType = contentType;
 		final ContentType ct = new ContentType(contentType);
 		this.data = data.getBytes(ct.getParameter("charset") == null ? DEFAULT_ENCODING : ct.getParameter("charset"));

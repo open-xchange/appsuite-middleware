@@ -63,11 +63,11 @@ import java.util.List;
 
 public class TreeNode {
 	
-	public int msgNum;
+	public final int msgNum;
 
 	private List<TreeNode> childs;
 
-	public TreeNode(int msgNum) {
+	public TreeNode(final int msgNum) {
 		this.msgNum = msgNum;
 		childs = new ArrayList<TreeNode>();
 	}
