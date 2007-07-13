@@ -132,7 +132,7 @@ public abstract class ChangeCore extends GroupAbstraction {
         final String[] split = tmpmembers.split(",");
         final User[] memberList = new User[split.length];
         for (int i = 0; i < split.length; i++) {
-            memberList[i].setId(Integer.parseInt(split[i]));
+            memberList[i] = new User(Integer.parseInt(split[i]));
         }
         return memberList;
     }
