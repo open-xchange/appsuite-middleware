@@ -1,3 +1,8 @@
+* 2007-07-13 - tobias.prinz@open-xchange.com
+
+ - Bugfix #7470: Fixed and tested after all.
+ - Bugfix #8411: Applied Thorben's patch and wrote test for it.
+
 * 2007-07-13 - francisco.laguna@open-xchange.com
 
  - Fix for bug #8392: Changed webdav servlet to expect ENCODED URIs. To ensure

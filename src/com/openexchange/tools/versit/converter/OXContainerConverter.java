@@ -1381,7 +1381,7 @@ public class OXContainerConverter {
 		// RESOURCES is ignored
 		// RDATE is ignored
 		// RRULE
-		addRecurrence(task);
+		addRecurrence(object, "RRULE", task);
 		// TODO VALARM
 		return object;
 	}
@@ -1490,7 +1490,7 @@ public class OXContainerConverter {
 		}
 		// RDATE is ignored
 		// RRULE
-		addRecurrence(app);
+		addRecurrence(object, "RRULE", app);
 		// TODO VALARM
 		return object;
 	}
@@ -1869,7 +1869,7 @@ public class OXContainerConverter {
 		}
 	}
 
-	private static void addRecurrence(final CalendarObject oxobject) {
+	private static void addRecurrence(final VersitObject object, final String name, final CalendarObject oxobject) {
 		if (oxobject.getRecurrenceType() != CalendarObject.NONE) {
 			final RecurrenceValue recur = new RecurrenceValue();
 			final Date until = oxobject.getUntil();
@@ -1881,7 +1881,7 @@ public class OXContainerConverter {
 			if (interval != 1) {
 				recur.Interval = interval;
 			}
-			/*final int type = */oxobject.getRecurrenceType();
+			final int type = oxobject.getRecurrenceType();
 			switch (oxobject.getRecurrenceType()) {
 			case CalendarObject.YEARLY:
 				final int[] byMonth = { oxobject.getMonth() - Calendar.JANUARY + 1 };
@@ -1908,17 +1908,12 @@ public class OXContainerConverter {
 						recur.ByDay.add(recur.new Weekday(0, Calendar.SUNDAY + i));
 					}
 				}
-			default:
-				return;
 			}
-			final int[] freqs = { RecurrenceValue.DAILY, RecurrenceValue.WEEKLY, RecurrenceValue.MONTHLY,
+			final int[] freqs = { RecurrenceValue.DAILY,
+					RecurrenceValue.WEEKLY, RecurrenceValue.MONTHLY,
 					RecurrenceValue.YEARLY };
-			/*
-			 * TODO REMOVED DUE REMOVAL OF com.openexchange.groupware.tasks
-			 * 
-			 * recur.Freq = freqs[type - OXTask.DAILY]; addProperty(object,
-			 * name, recur);
-			 */
+			recur.Freq = freqs[type - CalendarObject.DAILY];
+			addProperty(object, name, recur);
 		}
 	}
 
