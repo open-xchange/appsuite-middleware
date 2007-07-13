@@ -56,6 +56,7 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.net.URLDecoder;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -90,6 +91,7 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api2.OXException;
 import com.openexchange.configuration.ServerConfig;
+import com.openexchange.configuration.SystemConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.upload.UploadEvent;
@@ -549,7 +551,14 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 	 * @return the URI part after the path to your servlet.
 	 */
 	protected static String getServletSpecificURI(final HttpServletRequest req) {
-		String uri = req.getRequestURI();
+		String uri;
+		try {
+			uri = URLDecoder.decode(req.getRequestURI(), req.getCharacterEncoding() == null ? ServerConfig
+					.getProperty(ServerConfig.Property.DefaultEncoding) : req.getCharacterEncoding());
+		} catch (final UnsupportedEncodingException e) {
+			LOG.error("Unsupported encoding", e);
+			uri = req.getRequestURI();
+		}
 		final String path = req.getContextPath() + req.getServletPath();
 		final int pos = uri.indexOf(path);
 		if (pos != -1) {

@@ -15,6 +15,7 @@ JkOptions +ForwardURICompatUnparsed
  - Slightly fastened AJP processing
  - Added file name extraction method to UploadEvent
  - Avoiding duplicate VCard attachment when saving draft message
+ - Changed AJAXServlet according to bugfix #8392
 
 * 2007-07-12 - tobias.prinz@open-xchange.com
 
