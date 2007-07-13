@@ -8,6 +8,7 @@
 	<property name="oxconfdir" value="etc/admindaemon"/>
 	<property name="serverconfdir" value="etc/groupware"/>
     <property name="admin.classpath" value="../open-xchange-admin/classes"/>
+	<property name="client.jar" value="ox_admin_hosting_rmiclient.jar"/>
     <path id="project.classpath">
 	  <pathelement location="${lib.dir}/ox_server.jar"/>
 	  <pathelement location="${lib.dir}/commons-logging.jar"/>
@@ -51,7 +52,14 @@
         manifest="META-INF/MANIFEST.MF"/>
     </target>
 
-    <target name="clean">
+    <target name="client" depends="compile">
+        <mkdir dir="jar"/>
+        <jar jarfile="jar/${client.jar}"
+         includes="com/openexchange/admin/rmi/"
+         basedir="classes"/>
+    </target>
+
+         	<target name="clean">
         <delete dir="classes"/>
         <delete dir="jar"/>
     </target>
@@ -93,6 +101,11 @@
         includes="${project.name}-${version}/"
         compression="bzip2"/>
     	<delete dir="${dist-package}"/>
+    </target>
+
+	<target name="install-client" depends="client">
+        <mkdir dir="${destdir}/${prefix}/lib"/>
+        <copy file="jar/${client.jar}" todir="${destdir}/${prefix}/lib"/>
     </target>
 
     <target name="install" depends="jar,doc,replacer">
