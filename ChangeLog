@@ -1,6 +1,7 @@
 * 2007-07-13 - thorben.betten@open-xchange.com
 
  - Slightly fastened AJP processing
+ - Added file name extraction method to UploadEvent
 
 * 2007-07-12 - tobias.prinz@open-xchange.com
 

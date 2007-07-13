@@ -274,5 +274,16 @@ public class UploadEvent {
 		}
 		uploadFiles.clear();
 	}
-	
+
+	public static final String getFileName(final String filePath) {
+		String retval = filePath;
+		int pos;
+		if ((pos = retval.lastIndexOf('\\')) > -1) {
+			retval = retval.substring(pos + 1);
+		} else if ((pos = retval.lastIndexOf('/')) > -1) {
+			retval = retval.substring(pos + 1);
+		}
+		return retval;
+	}
+
 }

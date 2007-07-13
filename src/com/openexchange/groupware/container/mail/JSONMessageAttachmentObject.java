@@ -62,6 +62,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.mail.parser.MessageUtils;
 import com.openexchange.groupware.imap.OXMailException;
 import com.openexchange.groupware.imap.OXMailException.MailCode;
+import com.openexchange.groupware.upload.UploadEvent;
 
 /**
  * JSONMessageAttachmentObject
@@ -156,7 +157,7 @@ public class JSONMessageAttachmentObject implements Cloneable {
 	}
 
 	public void setFileName(final String fileName) {
-		this.fileName = fileName == null ? null : getFileName(fileName);
+		this.fileName = fileName == null ? null : UploadEvent.getFileName(fileName);
 	}
 
 	public String getPositionInMail() {
@@ -325,14 +326,4 @@ public class JSONMessageAttachmentObject implements Cloneable {
 		return copy;
 	}
 
-	private String getFileName(final String filePath) {
-		String retval = filePath;
-		int pos;
-		if ((pos = retval.lastIndexOf('\\')) > -1) {
-			retval = retval.substring(pos + 1);
-		} else if ((pos = retval.lastIndexOf('/')) > -1) {
-			retval = retval.substring(pos + 1);
-		}
-		return retval;
-	}
 }

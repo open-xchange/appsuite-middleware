@@ -756,17 +756,18 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 			String action;
 			try {
 				action = getAction(req);
-			} catch (OXConflictException e) {
+			} catch (final OXConflictException e) {
 				throw new UploadException(UploadCode.UPLOAD_FAILED, null, e);
 			}
 			try {
 				items = upload.parseRequest(req);
-			} catch (FileUploadException e) {
+			} catch (final FileUploadException e) {
 				throw new UploadException(UploadCode.UPLOAD_FAILED, action, e);
 			}
 			if (action != null
-					&& (action.equals(ACTION_NEW) || action.equals(ACTION_UPLOAD) || action.equals(ACTION_APPEND) || action.equals(ACTION_UPDATE)
-							|| action.equals(ACTION_ATTACH) || action.equals(ACTION_COPY) || com.openexchange.groupware.importexport.Format
+					&& (action.equals(ACTION_NEW) || action.equals(ACTION_UPLOAD) || action.equals(ACTION_APPEND)
+							|| action.equals(ACTION_UPDATE) || action.equals(ACTION_ATTACH)
+							|| action.equals(ACTION_COPY) || com.openexchange.groupware.importexport.Format
 							.containsConstantName(action))) {
 				uploadEvent.setAction(action);
 				/*
@@ -785,7 +786,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 						final String fieldName = fileItem.getFieldName();
 						try {
 							uploadEvent.addFormField(fieldName, fileItem.getString(charEnc));
-						} catch (UnsupportedEncodingException e) {
+						} catch (final UnsupportedEncodingException e) {
 							throw new UploadException(UploadCode.UPLOAD_FAILED, action, e);
 						}
 					} else {
@@ -795,7 +796,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 						try {
 							uploadEvent.addUploadFile(processUploadedFile(fileItem, ServerConfig
 									.getProperty(Property.UploadDirectory)));
-						} catch (Exception e) {
+						} catch (final Exception e) {
 							throw new UploadException(UploadCode.UPLOAD_FAILED, action, e);
 						}
 					}

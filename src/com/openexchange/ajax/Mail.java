@@ -2391,7 +2391,9 @@ public class Mail extends PermissionServlet implements UploadListener {
 			}
 			final JSONObject jsonMailObj = new JSONObject(mailStr);
 			mailStr = null;
-			final int sendType = jsonMailObj.has(PARAMETER_SEND_TYPE) && !jsonMailObj.isNull(PARAMETER_SEND_TYPE) ? jsonMailObj.getInt(PARAMETER_SEND_TYPE) : MailInterfaceImpl.SENDTYPE_NEW;
+			final int sendType = jsonMailObj.has(PARAMETER_SEND_TYPE) && !jsonMailObj.isNull(PARAMETER_SEND_TYPE) ? jsonMailObj
+					.getInt(PARAMETER_SEND_TYPE)
+					: MailInterfaceImpl.SENDTYPE_NEW;
 			int[] infostoreDocIDs = null;
 			if (jsonMailObj.has(JSONMessageObject.JSON_INFOSTORE_IDS)) {
 				final JSONArray ja = jsonMailObj.getJSONArray(JSONMessageObject.JSON_INFOSTORE_IDS);
@@ -2434,7 +2436,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 					// TODO: Editing mail
 					throw new UnsupportedOperationException("APPEND NOT SUPPORTED, YET!");
 				}
-			} catch (OXException e) {
+			} catch (final OXException e) {
 				/*
 				 * Message could not be sent
 				 */
@@ -2449,7 +2451,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 				return true;
 			}
 			return false;
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
 			throw new OXMailException(MailCode.JSON_ERROR, e, e.getMessage());
 		}
 	}
