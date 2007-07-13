@@ -1,3 +1,7 @@
+* 2007-07-13 - thorben.betten@open-xchange.com
+
+ - Added file name extraction method to UploadEvent
+
 * 2007-07-10 - marcus.klein@open-xchange.com
 
  - Bugfix #8351: Assigned 512MB maximum memory to groupware server.
