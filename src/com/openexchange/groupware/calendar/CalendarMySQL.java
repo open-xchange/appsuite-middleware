@@ -1414,7 +1414,7 @@ class CalendarMySQL implements CalendarSqlImp {
                 
                 if (!rs.wasNull()) {
                     if (pfid < 1) {
-                        LOG.error("Write me!"); // TODO
+                        LOG.error(StringCollection.convertArraytoString(new Object[] { "ERROR: getUserParticipantsSQLIn oid:uid ", Integer.valueOf(uid), Character.valueOf(CalendarOperation.COLON), Integer.valueOf(cdao.getObjectID()) }));
                     }
                     if (cdao.getFolderType() == FolderObject.PRIVATE) {
                         if  (uid == tuid) {
