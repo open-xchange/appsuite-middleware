@@ -1,6 +1,7 @@
 package com.openexchange.ajax.appointment;
 
 import com.openexchange.ajax.AppointmentTest;
+import com.openexchange.api.OXConflictException;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.test.TestException;
 import com.openexchange.webdav.calendar;
@@ -26,7 +27,16 @@ public class Bug8317Test extends AppointmentTest {
 		
 	}
 	
-	public void _notestBug8317() throws Exception {
+        
+        /*
+         INFO: This testcase must be done at least today + 1 days because otherwise
+         no cconflict resolution is made because past appointments do not conflict!
+         *
+         Therefor i changed this to a future date and i fixed the test case.
+         
+         TODO: Create a dynamic date/time in the future for testing.
+         */
+	public void testBug8317() throws Exception {
 		TimeZone timeZoneUTC = TimeZone.getTimeZone("UTC");
 		SimpleDateFormat simpleDateFormatUTC = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 		simpleDateFormatUTC.setTimeZone(timeZoneUTC);
@@ -34,8 +44,8 @@ public class Bug8317Test extends AppointmentTest {
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 		simpleDateFormat.setTimeZone(timeZone);
 		
-		Date startDate = simpleDateFormatUTC.parse("2007-06-10 00:00:00");
-		Date endDate = simpleDateFormatUTC.parse("2007-07-10 00:00:00");
+		Date startDate = simpleDateFormatUTC.parse("2009-06-10 00:00:00");
+		Date endDate = simpleDateFormatUTC.parse("2009-07-10 00:00:00");
 		
 		AppointmentObject appointmentObj = new AppointmentObject();
 		appointmentObj.setTitle("testBug8317");
@@ -47,8 +57,8 @@ public class Bug8317Test extends AppointmentTest {
 		appointmentObj.setIgnoreConflicts(true);
 		int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
 		
-		startDate = simpleDateFormat.parse("2007-06-10 00:30:00");
-		endDate = simpleDateFormat.parse("2007-06-10 01:00:00");
+		startDate = simpleDateFormat.parse("2009-06-10 00:30:00");
+		endDate = simpleDateFormat.parse("2009-06-10 01:00:00");
 		
 		appointmentObj = new AppointmentObject();
 		appointmentObj.setTitle("testBug8317 II");
@@ -56,12 +66,14 @@ public class Bug8317Test extends AppointmentTest {
 		appointmentObj.setEndDate(endDate);
 		appointmentObj.setParentFolderID(appointmentFolderId);
 		appointmentObj.setShownAs(AppointmentObject.ABSENT);
-		
+		appointmentObj.setIgnoreConflicts(false);
+                
 		try {
 			int objectId2 = insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
 			fail("conflict exception expected!");
-		} catch (TestException exc) {
-			fail("exception: " + exc.toString());
+		} catch (OXConflictException exc) {
+			// Perfect. The insertAppointment throws a OXConflictException
+                        // And this is what we expect here !!!
 		}
 		
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId());
