@@ -138,8 +138,8 @@ ALTER TABLE user_setting_mail
     MODIFY std_spam VARCHAR(128) character set utf8 collate utf8_unicode_ci NOT NULL,
     MODIFY confirmed_spam VARCHAR(128) character set utf8 collate utf8_unicode_ci NOT NULL,
     MODIFY confirmed_ham VARCHAR(128) character set utf8 collate utf8_unicode_ci NOT NULL,
-    MODIFY upload_quota INT4 UNSIGNED DEFAULT 0,
-    MODIFY upload_quota_per_file INT4 UNSIGNED DEFAULT 0,
+    MODIFY upload_quota INT4 UNSIGNED DEFAULT -1,
+    MODIFY upload_quota_per_file INT4 UNSIGNED DEFAULT -1,
     ADD FOREIGN KEY (cid, user) REFERENCES user (cid, id),
     ENGINE = InnoDB;
     
