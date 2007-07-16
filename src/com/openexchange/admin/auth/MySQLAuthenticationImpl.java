@@ -64,6 +64,7 @@ import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.tools.SHACrypt;
 import com.openexchange.admin.tools.UnixCrypt;
 
@@ -110,79 +111,90 @@ public class MySQLAuthenticationImpl implements AuthenticationInterface {
 
         if (authdata != null && authdata.getLogin() != null && authdata.getPassword() != null) {
 
-            if(ClientAdminThread.cache.getAdminCredentials(ctx) == null ) {
-                Connection sql_con = null;
-                PreparedStatement prep = null;
-                ResultSet rs = null;
-                try {
-
-                    sql_con = ClientAdminThread.cache.getREADConnectionForContext(ctx.getIdAsInt());
-                    prep = sql_con.prepareStatement("select u.userPassword,u.passwordMech from user u JOIN login2user l JOIN user_setting_admin usa ON u.id = l.id AND u.cid = l.cid AND u.cid = usa.cid AND u.id = usa.user WHERE u.cid = ? AND l.uid = ?");
-
-                    prep.setInt(1, ctx.getIdAsInt());
-                    prep.setString(2, authdata.getLogin());
-
-                    rs = prep.executeQuery();
-                    if (!rs.next()) {
-                        // auth failed , admin user not found in context
-                        if (log.isDebugEnabled()) {
-                            log.debug("Admin user \"" + authdata.getLogin() + "\" not found in context \"" + ctx.getIdAsInt() + "\"!");
-                        }
-                        return false;
-                    } else {
-                        String pwcrypt = rs.getString("userPassword");
-                        String pwmech  = rs.getString("passwordMech");
-                        if( authByMech(pwcrypt, authdata.getPassword(), pwmech) ) {
-                            Credentials cauth = new Credentials(authdata.getLogin(),pwcrypt);
-                            ClientAdminThread.cache.setAdminCredentials(ctx, pwmech, cauth);
-                            return true;
-                        }
-                        return false;
-                    }
-                } catch (final SQLException sql) {
-                    log.error(sql.getMessage(), sql);
-                    throw new StorageException(sql);
-                } catch (final PoolException ex) {
-                    log.error(ex.getMessage(), ex);
-                    throw new StorageException(ex);
-                } catch (NoSuchAlgorithmException e) {
-                    log.error(e.getMessage(), e);
-                    throw new StorageException(e);
-                } catch (UnsupportedEncodingException e) {
-                    log.error(e.getMessage(), e);
-                    throw new StorageException(e);
-                } finally {
+            final Credentials cachedAdminCredentials = ClientAdminThread.cache.getAdminCredentials(ctx);
+            if(cachedAdminCredentials == null ) {
+                final OXToolStorageInterface instance = OXToolStorageInterface.getInstance();
+                final int uid = instance.getUserIDByUsername(ctx, authdata.getLogin());
+                if (instance.isContextAdmin(ctx, uid)) {
+                    Connection sql_con = null;
+                    PreparedStatement prep = null;
+                    ResultSet rs = null;
                     try {
-                        if (rs != null) {
-                            rs.close();
-                        }
-                    } catch (final SQLException ecp) {
-                        log.error("Error closing resultset", ecp);
-                    }
 
-                    try {
-                        if (prep != null) {
-                            prep.close();
-                        }
-                    } catch (final SQLException ecp) {
-                        log.error("Error closing statement", ecp);
-                    }
+                        sql_con = ClientAdminThread.cache.getREADConnectionForContext(ctx.getIdAsInt());
+                        prep = sql_con.prepareStatement("select u.userPassword,u.passwordMech from user u JOIN login2user l JOIN user_setting_admin usa ON u.id = l.id AND u.cid = l.cid AND u.cid = usa.cid AND u.id = usa.user WHERE u.cid = ? AND l.uid = ?");
 
-                    try {
-                        ClientAdminThread.cache.pushOXDBRead(ctx.getIdAsInt(), sql_con);
-                    } catch (final PoolException ecp) {
-                        log.error("Pool Error", ecp);
+                        prep.setInt(1, ctx.getIdAsInt());
+                        prep.setString(2, authdata.getLogin());
+
+                        rs = prep.executeQuery();
+                        if (!rs.next()) {
+                            // auth failed , admin user not found in context
+                            if (log.isDebugEnabled()) {
+                                log.debug("Admin user \"" + authdata.getLogin() + "\" not found in context \"" + ctx.getIdAsInt() + "\"!");
+                            }
+                            return false;
+                        } else {
+                            String pwcrypt = rs.getString("userPassword");
+                            String pwmech = rs.getString("passwordMech");
+                            if (authByMech(pwcrypt, authdata.getPassword(), pwmech)) {
+                                Credentials cauth = new Credentials(authdata.getLogin(), pwcrypt);
+                                ClientAdminThread.cache.setAdminCredentials(ctx, pwmech, cauth);
+                                return true;
+                            }
+                            return false;
+                        }
+                    } catch (final SQLException sql) {
+                        log.error(sql.getMessage(), sql);
+                        throw new StorageException(sql);
+                    } catch (final PoolException ex) {
+                        log.error(ex.getMessage(), ex);
+                        throw new StorageException(ex);
+                    } catch (NoSuchAlgorithmException e) {
+                        log.error(e.getMessage(), e);
+                        throw new StorageException(e);
+                    } catch (UnsupportedEncodingException e) {
+                        log.error(e.getMessage(), e);
+                        throw new StorageException(e);
+                    } finally {
+                        try {
+                            if (rs != null) {
+                                rs.close();
+                            }
+                        } catch (final SQLException ecp) {
+                            log.error("Error closing resultset", ecp);
+                        }
+
+                        try {
+                            if (prep != null) {
+                                prep.close();
+                            }
+                        } catch (final SQLException ecp) {
+                            log.error("Error closing statement", ecp);
+                        }
+
+                        try {
+                            ClientAdminThread.cache.pushOXDBRead(ctx.getIdAsInt(), sql_con);
+                        } catch (final PoolException ecp) {
+                            log.error("Pool Error", ecp);
+                        }
                     }
+                } else {
+                    return false;
                 }
             } else {
                 try {
-                    if ( authByMech(ClientAdminThread.cache.getAdminCredentials(ctx).getPassword(),
-                            authdata.getPassword(), ClientAdminThread.cache.getAdminAuthMech(ctx) ) ) {
-                        return true;
-                    } else {
-                        if (log.isDebugEnabled()) {
-                            log.debug("Password for admin user \"" + authdata.getLogin() + "\" did not match!");
+                    if ( authdata.getLogin().equals(cachedAdminCredentials.getLogin())) {
+                        if ( authByMech(cachedAdminCredentials.getPassword(),
+                                authdata.getPassword(), ClientAdminThread.cache.getAdminAuthMech(ctx) ) ) {
+                            return true;
+                        } else {
+                            if (log.isDebugEnabled()) {
+                                log.debug("Password for admin user \"" + authdata.getLogin() + "\" did not match!");
+                            }
+                            return false;
                         }
+                    } else {
                         return false;
                     }
                 } catch (NoSuchAlgorithmException e) {
