@@ -54,7 +54,9 @@ import java.util.ArrayList;
 import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.dataobjects.ExtendableDataObject;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.extensions.OXCommonExtensionInterface;
 
 
 /**
@@ -480,6 +482,19 @@ public abstract class BasicCommandlineOptions {
                 outputrow[i] = stripString(value, columnsizes[i], "~");
             }
             System.out.format(formatsb.toString(), outputrow);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    protected final void printExtensionsError(final ExtendableDataObject obj) {
+        //+ loop through extensions and check for errors       
+        if (obj != null && obj.getAllExtensions() != null) {
+            final ArrayList<OXCommonExtensionInterface> obj_exts = (ArrayList<OXCommonExtensionInterface>) obj.getAllExtensions();
+            for (final OXCommonExtensionInterface obj_extension : obj_exts) {
+                if (obj_extension.getExtensionError() != null) {
+                    printServerResponse(obj_extension.getExtensionError());
+                }
+            }
         }
     }
 

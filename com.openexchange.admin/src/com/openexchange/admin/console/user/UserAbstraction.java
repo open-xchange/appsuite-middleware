@@ -67,7 +67,6 @@ import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
-import com.openexchange.admin.rmi.extensions.OXUserExtensionInterface;
 
 public abstract class UserAbstraction extends BasicCommandlineOptions {
     
@@ -282,23 +281,6 @@ public abstract class UserAbstraction extends BasicCommandlineOptions {
         standardoptions.add(OPT_ALIASES_LONG);
     }
 
-    
-    protected final void printExtensionsError(final User usr){
-        //+ loop through extensions and check for errors       
-        if(usr!=null && usr.getExtensions()!=null){
-            final ArrayList<OXUserExtensionInterface> usr_exts = usr.getExtensions();
-//            boolean has_error = false;
-            for (final OXUserExtensionInterface usr_extension : usr_exts) {
-                if(usr_extension.getExtensionError()!=null){
-                    printServerResponse(usr_extension.getExtensionError());
-//                    has_error = true;
-                }
-            }
-//            if(has_error){
-//                System.exit(SYSEXIT_SERVERSTORAGE_ERROR);
-//            }
-        }
-    }
     
     protected final void setIdOption(final AdminParser admp){
         this.idOption =  setShortLongOpt(admp,OPT_ID_SHORT,OPT_ID_LONG,"Id of the user", true, true);

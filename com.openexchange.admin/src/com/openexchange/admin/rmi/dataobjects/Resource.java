@@ -49,13 +49,13 @@
 
 package com.openexchange.admin.rmi.dataobjects;
 
-import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 
+import com.openexchange.admin.rmi.extensions.OXCommonExtensionInterface;
 import com.openexchange.admin.rmi.extensions.OXResourceExtensionInterface;
 
-public class Resource implements Serializable {
+public class Resource extends ExtendableDataObject {
     /**
      * For serialization
      */
@@ -73,14 +73,6 @@ public class Resource implements Serializable {
 
     private Boolean available;
 
-    private ArrayList<OXResourceExtensionInterface> extensions = null;
-
-    /**
-     * This field is used to show if all extension have run fine and inserted their
-     * data correctly
-     */
-    private boolean extensionsok = true;
-
     public Resource() {
         super();
         init();
@@ -93,7 +85,7 @@ public class Resource implements Serializable {
     }
 
     private void init() {
-        this.extensions = new ArrayList<OXResourceExtensionInterface>();
+        initExtendeable();
         this.id = null;
         this.name = null;
         this.displayname = null;
@@ -184,14 +176,34 @@ public class Resource implements Serializable {
         return ret.toString();
     }
 
+    /**
+     * @param extension
+     * @deprecated Please remove the usage of this method as fast as you can because it used a dangerous downcast.
+     * This method will go away with the next update
+     */
     public void addExtension(final OXResourceExtensionInterface extension) {
         this.extensions.add(extension);
     }
 
+    /**
+     * @return
+     * @deprecated Please remove the usage of this method as fast as you can because it used a dangerous downcast.
+     * This method will go away with the next update
+     */
     public ArrayList<OXResourceExtensionInterface> getExtensions() {
-        return this.extensions;
+        final ArrayList<OXResourceExtensionInterface> retval = new ArrayList<OXResourceExtensionInterface>();
+        for (final OXCommonExtensionInterface commoninterface : this.extensions) {
+            retval.add((OXResourceExtensionInterface) commoninterface);
+        }
+        return retval;
     }
     
+    /**
+     * @param o
+     * @return
+     * @deprecated Please remove the usage of this method as fast as you can because it used a dangerous downcast.
+     * This method will go away with the next update
+     */
     public boolean removeExtension(final OXResourceExtensionInterface o) {
         return extensions.remove(o);
     }
@@ -203,11 +215,13 @@ public class Resource implements Serializable {
      * 
      * @param extname a String for the extension
      * @return the {@link OXResourceExtensionInterface} with extname
+     * @deprecated Please remove the usage of this method as fast as you can because it used a dangerous downcast.
+     * This method will go away with the next update
      */
     public OXResourceExtensionInterface getExtensionbyName(final String extname) {
-        for (final OXResourceExtensionInterface ext : this.extensions) {
+        for (final OXCommonExtensionInterface ext : this.extensions) {
             if (ext.getExtensionName().equals(extname)) {
-                return ext;
+                return (OXResourceExtensionInterface) ext;
             }
         }
         return null;

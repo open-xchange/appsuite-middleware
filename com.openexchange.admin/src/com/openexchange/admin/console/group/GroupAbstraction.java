@@ -88,18 +88,6 @@ public abstract class GroupAbstraction extends BasicCommandlineOptions {
     protected static final String OPT_MAILADDRESS_LONG = "mailaddress";
     protected static final char OPT_MAILADDRESS_SHORT = 'm';
     
-    protected void printExtensionsError(Group grp){
-        //+ loop through extensions and check for errors       
-        if(grp!=null && grp.getExtensions()!=null){
-            ArrayList<OXGroupExtensionInterface> _exts = grp.getExtensions();
-            for (OXGroupExtensionInterface _extension :_exts) {
-                if(_extension.getExtensionError()!=null){
-                    printServerResponse(_extension.getExtensionError());
-                }
-            }
-        }
-    }
-    
     protected void setAddMembersOption(final AdminParser admp,boolean required) {
         addMemberOption = setShortLongOpt(admp,OPT_NAME_ADDMEMBERS, OPT_NAME_ADDMEMBERS_LONG, "List of members to add to group", true, required);
 //        retval.setArgName(OPT_NAME_ADDMEMBERS_LONG);
