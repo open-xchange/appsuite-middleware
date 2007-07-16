@@ -48,7 +48,6 @@
  */
 package com.openexchange.admin.rmi.dataobjects;
 
-import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -60,6 +59,7 @@ import java.util.Hashtable;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import com.openexchange.admin.rmi.extensions.OXCommonExtensionInterface;
 import com.openexchange.admin.rmi.extensions.OXUserExtensionInterface;
 
 /**
@@ -68,22 +68,13 @@ import com.openexchange.admin.rmi.extensions.OXUserExtensionInterface;
  * @author cutmasta
  * @author d7
  */
-public class User implements Serializable, Cloneable {
+public class User extends ExtendableDataObject implements Cloneable {
     /**
      * For serialization
      */
     private static final long serialVersionUID = -4492376747507390066L;
 
-    private ArrayList<OXUserExtensionInterface> extensions = null;
-    private final boolean extensionsset = false;
-
     private boolean contextadmin = false;
-    
-    /**
-     * This field is used to show if all extension have run fine and inserted their
-     * data correctly
-     */
-    private boolean extensionsok = true;
     
     private Integer id;
     private boolean idset = false;
@@ -2259,7 +2250,7 @@ public class User implements Serializable, Cloneable {
     public String toString() {
         final StringBuilder ret = new StringBuilder();
         ret.append("[ \n");
-        for (final OXUserExtensionInterface usrext : extensions) {
+        for (final OXCommonExtensionInterface usrext : extensions) {
             ret.append("  ");
             ret.append("Extension ");
             ret.append(usrext.getExtensionName());
@@ -2294,7 +2285,7 @@ public class User implements Serializable, Cloneable {
     public Object clone() throws CloneNotSupportedException {
         final User object = (User) super.clone();
         if( this.extensions != null ) {
-            object.extensions = new ArrayList<OXUserExtensionInterface>(this.extensions);
+            object.extensions = new ArrayList<OXCommonExtensionInterface>(this.extensions);
         }
         if( this.aliases != null ) {
             object.aliases = new HashSet<String>(this.aliases);
@@ -2316,7 +2307,7 @@ public class User implements Serializable, Cloneable {
     }
     
     private void init() {
-        this.extensions = new ArrayList<OXUserExtensionInterface>();
+        initExtendeable();
         this.id = null;
         this.username = null;
         this.password = null;
@@ -2431,16 +2422,32 @@ public class User implements Serializable, Cloneable {
         this.extensions.add(extension);
     }
 
+    /**
+     * @return
+     * @deprecated Please remove the usage of this method as fast as you can because it used a dangerous downcast.
+     * This method will go away with the next update
+     */
+    @Deprecated
     public ArrayList<OXUserExtensionInterface> getExtensions() {
-        return this.extensions;
+        final ArrayList<OXUserExtensionInterface> retval = new ArrayList<OXUserExtensionInterface>();
+        for (final OXCommonExtensionInterface commoninterface : this.extensions) {
+            retval.add((OXUserExtensionInterface) commoninterface);
+        }
+        return retval;
     }
     
     public boolean removeExtension(final OXUserExtensionInterface o) {
         return extensions.remove(o);
     }
 
+    /**
+     * @param index
+     * @return
+     * @deprecated Please remove the usage of this method as fast as you can because it used a dangerous downcast.
+     * This method will go away with the next update
+     */
     public OXUserExtensionInterface removeExtensionByIndex(final int index) {
-        return extensions.remove(index);
+        return (OXUserExtensionInterface) extensions.remove(index);
     }
 
     /**
@@ -2450,12 +2457,14 @@ public class User implements Serializable, Cloneable {
      * 
      * @param extname a String for the extension
      * @return the ArrayList of {@link OXUserExtensionInterface} with extname
+     * @deprecated Please remove the usage of this method as fast as you can because it used a dangerous downcast.
+     * This method will go away with the next update
      */
     public ArrayList<OXUserExtensionInterface> getExtensionbyName(final String extname) {
         final ArrayList<OXUserExtensionInterface> retval = new ArrayList<OXUserExtensionInterface>();
-        for (final OXUserExtensionInterface ext : this.extensions) {
+        for (final OXCommonExtensionInterface ext : this.extensions) {
             if (ext.getExtensionName().equals(extname)) {
-                retval.add(ext);
+                retval.add((OXUserExtensionInterface) ext);
             }
         }
         return retval;
@@ -2468,6 +2477,8 @@ public class User implements Serializable, Cloneable {
      * 
      * @param extname
      * @return
+     * @deprecated Please remove the usage of this method as fast as you can because it used a dangerous downcast.
+     * This method will go away with the next update
      */
     public OXUserExtensionInterface getFirstExtensionbyName(final String extname) {
         final ArrayList<OXUserExtensionInterface> list = getExtensionbyName(extname);

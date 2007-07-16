@@ -58,7 +58,7 @@ import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Group;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
-import com.openexchange.admin.rmi.extensions.OXGroupExtensionInterface;
+import com.openexchange.admin.rmi.extensions.OXCommonExtensionInterface;
 
 import java.rmi.Naming;
 import java.util.ArrayList;
@@ -344,12 +344,12 @@ public class GroupTest extends AbstractTest {
         assertEquals("members not equal", a.getMembers(), b.getMembers());
         assertEquals("id not equal", a.getId(), b.getId());
         
-        final ArrayList<OXGroupExtensionInterface> aexts = a.getExtensions();
-        final ArrayList<OXGroupExtensionInterface> bexts = b.getExtensions();
+        final ArrayList<OXCommonExtensionInterface> aexts = a.getAllExtensions();
+        final ArrayList<OXCommonExtensionInterface> bexts = b.getAllExtensions();
         if (aexts.size() == bexts.size()) {
             for (int i = 0; i < aexts.size(); i++) {
-                final OXGroupExtensionInterface aext = aexts.get(i);
-                final OXGroupExtensionInterface bext = bexts.get(i);
+                final OXCommonExtensionInterface aext = aexts.get(i);
+                final OXCommonExtensionInterface bext = bexts.get(i);
                 assertTrue("Extensions not equal: " + aext.toString() + ",\n" + bext.toString(), aext.equals(bext));
             }
         }

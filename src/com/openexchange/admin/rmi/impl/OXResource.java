@@ -47,7 +47,7 @@
  *
  */
 /*
- * $Id: OXResource.java,v 1.35 2007/07/11 12:56:30 dennis Exp $
+ * $Id: OXResource.java,v 1.36 2007/07/16 13:56:16 dennis Exp $
  */
 package com.openexchange.admin.rmi.impl;
 
@@ -77,7 +77,7 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchResourceException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.admin.rmi.extensions.OXResourceExtensionInterface;
+import com.openexchange.admin.rmi.extensions.OXCommonExtensionInterface;
 import com.openexchange.admin.storage.interfaces.OXResourceStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.tools.AdminCache;
@@ -391,7 +391,7 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
         Resource retres = oxRes.getData(ctx, res);
 
         // TODO: this code is superflous as soon as get takes resource as arg:
-        for(final OXResourceExtensionInterface or : res.getExtensions() ) {
+        for(final OXCommonExtensionInterface or : res.getAllExtensions() ) {
             retres.addExtension(or);
         }
             
@@ -518,7 +518,7 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
         for (final Resource resource : resources) {
             // not nice, but works ;)
             final Resource tmp = oxRes.getData(ctx, resource);
-            for(final OXResourceExtensionInterface or : resource.getExtensions() ) {
+            for(final OXCommonExtensionInterface or : resource.getAllExtensions() ) {
                 tmp.addExtension(or);
             }
             retval.add(tmp);
