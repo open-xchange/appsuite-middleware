@@ -54,34 +54,6 @@ import java.io.Serializable;
  * @author choeger
  * 
  */
-public interface OXGroupExtensionInterface extends Serializable {
-    /**
-     * @return the extensionName
-     */
-    public String getExtensionName();
+public interface OXGroupExtensionInterface extends OXCommonExtensionInterface, Serializable {
     
-    /**
-     * If an error has occured you get the error text of the extension
-     * here
-     * @return a string containing the error text
-     */
-    public String getExtensionError();
-    
-    /**
-     * If an error has occured you set the error text of the extension
-     * here
-     */
-    public void setExtensionError(final String errortext);
-
-    /**
-     * Used to return a string representation of the underlying object
-     * @return
-     */
-    public String toString();
-    
-    /**
-     * @param ext
-     * @return
-     */
-    public boolean equals(final OXGroupExtensionInterface ext);
 }

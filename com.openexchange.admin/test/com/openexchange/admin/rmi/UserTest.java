@@ -60,7 +60,7 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.admin.rmi.extensions.OXUserExtensionInterface;
+import com.openexchange.admin.rmi.extensions.OXCommonExtensionInterface;
 
 import java.net.MalformedURLException;
 import java.rmi.Naming;
@@ -686,12 +686,12 @@ public class UserTest extends AbstractTest {
         assertEquals("Userfield18 not equal", a.getUserfield18(), b.getUserfield18());
         assertEquals("Userfield19 not equal", a.getUserfield19(), b.getUserfield19());
         assertEquals("Userfield20 not equal", a.getUserfield20(), b.getUserfield20());
-        final ArrayList<OXUserExtensionInterface> aexts = a.getExtensions();
-        final ArrayList<OXUserExtensionInterface> bexts = b.getExtensions();
+        final ArrayList<OXCommonExtensionInterface> aexts = a.getAllExtensions();
+        final ArrayList<OXCommonExtensionInterface> bexts = b.getAllExtensions();
         if (aexts.size() == bexts.size()) {
             for (int i = 0; i < aexts.size(); i++) {
-                final OXUserExtensionInterface aext = aexts.get(i);
-                final OXUserExtensionInterface bext = bexts.get(i);
+                final OXCommonExtensionInterface aext = aexts.get(i);
+                final OXCommonExtensionInterface bext = bexts.get(i);
                 assertTrue("Extensions not equal: " + aext.toString() + ",\n" + bext.toString(), aext.equals(bext));
             }
         }

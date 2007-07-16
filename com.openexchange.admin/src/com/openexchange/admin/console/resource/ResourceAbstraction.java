@@ -52,14 +52,11 @@ import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-import java.util.ArrayList;
 
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.BasicCommandlineOptions;
 import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.rmi.OXResourceInterface;
-import com.openexchange.admin.rmi.dataobjects.Resource;
-import com.openexchange.admin.rmi.extensions.OXResourceExtensionInterface;
 
 public abstract class ResourceAbstraction extends BasicCommandlineOptions {
     
@@ -86,18 +83,6 @@ public abstract class ResourceAbstraction extends BasicCommandlineOptions {
     protected Option resourceIdOption = null;
 
     protected Option resourceRecipientOption = null;
-    
-    protected void printExtensionsError(final Resource res){
-        //+ loop through extensions and check for errors       
-        if(res!=null && res.getExtensions()!=null){
-            final ArrayList<OXResourceExtensionInterface> _exts = res.getExtensions();
-            for (final OXResourceExtensionInterface _extension :_exts) {
-                if(_extension.getExtensionError()!=null){
-                    printServerResponse(_extension.getExtensionError());
-                }
-            }
-        }
-    }
     
     protected void setDisplayNameOption(final AdminParser admp,final boolean required){
         resourceDisplayNameOption = setShortLongOpt(admp, _OPT_DISPNAME_SHORT,_OPT_DISPNAME_LONG,"The resource display name",true, required);        

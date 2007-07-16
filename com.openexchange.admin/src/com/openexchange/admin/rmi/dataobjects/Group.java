@@ -49,13 +49,13 @@
 
 package com.openexchange.admin.rmi.dataobjects;
 
-import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 
+import com.openexchange.admin.rmi.extensions.OXCommonExtensionInterface;
 import com.openexchange.admin.rmi.extensions.OXGroupExtensionInterface;
 
-public class Group implements Serializable {
+public class Group extends ExtendableDataObject {
     /**
      * For serialization
      */
@@ -68,14 +68,6 @@ public class Group implements Serializable {
     private String displayname;
 
     private Integer[] members;
-
-    private ArrayList<OXGroupExtensionInterface> extensions = null;
-
-    /**
-     * This field is used to show if all extension have run fine and inserted their
-     * data correctly
-     */
-    private boolean extensionsok = true;
 
     public Group() {
         super();
@@ -103,7 +95,7 @@ public class Group implements Serializable {
     }
 
     private void init(){
-        this.extensions = new ArrayList<OXGroupExtensionInterface>();
+        initExtendeable();
         this.id = null;
         this.name = null;
         this.displayname = null;
@@ -183,14 +175,34 @@ public class Group implements Serializable {
         return ret.toString();
     }
 
+    /**
+     * @param extension
+     * @deprecated Please remove the usage of this method as fast as you can because it used a dangerous downcast.
+     * This method will go away with the next update
+     */
     public void addExtension(final OXGroupExtensionInterface extension) {
         this.extensions.add(extension);
     }
 
+    /**
+     * @return
+     * @deprecated Please remove the usage of this method as fast as you can because it used a dangerous downcast.
+     * This method will go away with the next update
+     */
     public ArrayList<OXGroupExtensionInterface> getExtensions() {
-        return this.extensions;
+        final ArrayList<OXGroupExtensionInterface> retval = new ArrayList<OXGroupExtensionInterface>();
+        for (final OXCommonExtensionInterface commoninterface : this.extensions) {
+            retval.add((OXGroupExtensionInterface) commoninterface);
+        }
+        return retval;
     }
     
+    /**
+     * @param o
+     * @return
+     * @deprecated Please remove the usage of this method as fast as you can because it used a dangerous downcast.
+     * This method will go away with the next update
+     */
     public boolean removeExtension(final OXGroupExtensionInterface o) {
         return extensions.remove(o);
     }
@@ -202,11 +214,13 @@ public class Group implements Serializable {
      * 
      * @param extname a String for the extension
      * @return the {@link OXGroupExtensionInterface} with extname
+     * @deprecated Please remove the usage of this method as fast as you can because it used a dangerous downcast.
+     * This method will go away with the next update
      */
     public OXGroupExtensionInterface getExtensionbyName(final String extname) {
-        for (final OXGroupExtensionInterface ext : this.extensions) {
+        for (final OXCommonExtensionInterface ext : this.extensions) {
             if (ext.getExtensionName().equals(extname)) {
-                return ext;
+                return (OXGroupExtensionInterface) ext;
             }
         }
         return null;
