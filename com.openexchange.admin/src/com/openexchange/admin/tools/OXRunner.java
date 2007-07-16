@@ -58,6 +58,7 @@ import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.ConfigurationInit;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.database.DatabaseInit;
+import com.openexchange.event.EventInit;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.ContextException;
 import com.openexchange.groupware.contexts.ContextStorage;
@@ -99,6 +100,7 @@ public class OXRunner {
              * Force cache initialization
              */
             FolderCacheManager.getInstance();
+            EventInit.init();
         } catch (DBPoolingException e) {
             throw new RuntimeException(e);
         } catch (ContextException e) {
