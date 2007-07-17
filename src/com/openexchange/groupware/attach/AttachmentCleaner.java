@@ -55,6 +55,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.openexchange.api2.OXException;
 import com.openexchange.event.AppointmentEvent;
 import com.openexchange.event.ContactEvent;
 import com.openexchange.event.TaskEvent;
@@ -149,29 +150,38 @@ public class AttachmentCleaner implements AppointmentEvent, TaskEvent,
 			
 			ATTACHMENT_BASE.detachFromObject(parentFolderID, objectID, type, idA,sessionObj.getContext(), sessionObj.getUserObject(), sessionObj.getUserConfiguration());
 			ATTACHMENT_BASE.commit();
-		} catch (Exception x) {
-			try {
-				ATTACHMENT_BASE.rollback();
-			} catch (TransactionException e) {
-				LOG.debug("",e);
-			}
-			if (LOG.isDebugEnabled()) {
-				LOG.debug(x);
-			}
+		
+		} catch (TransactionException e) {
+			rollback(e);
+		} catch (OXException e) {
+			rollback(e);
+		} catch (SearchIteratorException e) {
+			rollback(e);
 		} finally {
 			if(iter != null) {
 				try {
 					iter.close();
 				} catch (SearchIteratorException e) {
-					LOG.debug("",e);
+					LOG.error("",e);
 				}
 			}
 			try {
 				ATTACHMENT_BASE.finish();
 			} catch (TransactionException e) {
-				LOG.debug("",e);
+				LOG.error("",e);
 			}
 		}
+	}
+
+	private void rollback(Exception x) {
+		try {
+			ATTACHMENT_BASE.rollback();
+		} catch (TransactionException e) {
+			LOG.error("",e);
+		}
+		if (LOG.isErrorEnabled()) {
+			LOG.error(x);
+		}	
 	}
 
 }
