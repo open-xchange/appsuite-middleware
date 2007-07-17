@@ -12,14 +12,6 @@ import com.openexchange.admin.console.CmdLineParser.Option;
 public class UtilAbstraction extends BasicCommandlineOptions {
     
     //  Setting default values for some options
-    protected final static String HOSTNAME_DEFAULT = "localhost";
-    protected final static String USER_DEFAULT = "openexchange";
-    protected final static int MAXUNITS_DEFAULT = 1000;
-    protected final static int CLUSTER_WEIGHT_DEFAULT = 100;
-    protected final static int POOL_HARD_LIMIT_DEFAULT = 0;
-    protected final static int POOL_INITIAL_DEFAULT = 2;
-    protected final static int POOL_MAX_DEFAULT = 100;
-    protected final static String DRIVER_DEFAULT = "com.mysql.jdbc.Driver";
 //    protected final static String STORE_PATH_DEFAULT = "file:///tmp/filestore";
     protected final static long STORE_SIZE_DEFAULT = 1000;
     protected final static int STORE_MAX_CTX_DEFAULT = 5000;
@@ -37,7 +29,7 @@ public class UtilAbstraction extends BasicCommandlineOptions {
     protected final static String OPT_NAME_DB_PASSWD_LONG="dbpasswd";
     protected final static char OPT_NAME_IS_MASTER_SHORT='m';
     protected final static String OPT_NAME_IS_MASTER_LONG="master";
-    protected final static char OPT_NAME_MASTER_ID_SHORT='i';
+    protected final static char OPT_NAME_MASTER_ID_SHORT='M';
     protected final static String OPT_NAME_MASTER_ID_LONG="masterid";
     protected final static char OPT_NAME_WEIGHT_SHORT='w';
     protected final static String OPT_NAME_WEIGHT_LONG="dbweight";
@@ -90,8 +82,12 @@ public class UtilAbstraction extends BasicCommandlineOptions {
         this.databaseUsernameOption = setShortLongOpt(parser, OPT_NAME_DB_USERNAME_SHORT,OPT_NAME_DB_USERNAME_LONG,"Name of the user for the database",true, required);
     }
     
-    protected void setDatabaseDriverOption(final AdminParser parser,final boolean required){
-        this.databaseDriverOption = setShortLongOpt(parser, OPT_NAME_DB_DRIVER_SHORT,OPT_NAME_DB_DRIVER_LONG,"The driver to be used for the database",true, required);
+    protected void setDatabaseDriverOption(final AdminParser parser, final String defaultvalue, final boolean required) {
+        if (null != defaultvalue) {
+            this.databaseDriverOption = setShortLongOptWithDefault(parser, OPT_NAME_DB_DRIVER_SHORT, OPT_NAME_DB_DRIVER_LONG, "The driver to be used for the database", defaultvalue, true, required);
+        } else {
+            this.databaseDriverOption = setShortLongOpt(parser, OPT_NAME_DB_DRIVER_SHORT,OPT_NAME_DB_DRIVER_LONG,"The driver to be used for the database",true, required);
+        }
     }
     
     protected void setDatabasePasswdOption(final AdminParser parser,final boolean required){
@@ -99,26 +95,46 @@ public class UtilAbstraction extends BasicCommandlineOptions {
     }
     
     protected void setDatabaseIsMasterOption(final AdminParser parser,final boolean required){
-        this.databaseIsMasterOption = setShortLongOpt(parser, OPT_NAME_IS_MASTER_SHORT,OPT_NAME_IS_MASTER_LONG,"Set this if the registered database is the master",false,required);
+        this.databaseIsMasterOption = setShortLongOpt(parser, OPT_NAME_IS_MASTER_SHORT, OPT_NAME_IS_MASTER_LONG, "true/false", "Set this if the registered database is the master", required);
     }
     protected void setDatabaseMasterIDOption(final AdminParser parser,final boolean required){
-        this.databaseMasterIDOption = setShortLongOpt(parser, OPT_NAME_MASTER_ID_SHORT,OPT_NAME_MASTER_ID_LONG,"If this database isn't the master give the id of the master here",true,required);
+        this.databaseMasterIDOption = setShortLongOpt(parser, OPT_NAME_MASTER_ID_SHORT, OPT_NAME_MASTER_ID_LONG, "If this database isn't the master give the id of the master here", true, required);
     }
-    protected void setDatabaseWeightOption(final AdminParser parser,final boolean required){
-        this.databaseWeightOption = setShortLongOpt(parser, OPT_NAME_WEIGHT_SHORT,OPT_NAME_WEIGHT_LONG,"The db weight for this database",true,required);
+    protected void setDatabaseWeightOption(final AdminParser parser, final String defaultvalue, final boolean required) {
+        if (null != defaultvalue) {
+            this.databaseWeightOption = setShortLongOptWithDefault(parser, OPT_NAME_WEIGHT_SHORT, OPT_NAME_WEIGHT_LONG, "The db weight for this database", defaultvalue, true, required);
+        } else {
+            this.databaseWeightOption = setShortLongOpt(parser, OPT_NAME_WEIGHT_SHORT, OPT_NAME_WEIGHT_LONG, "The db weight for this database", true, required);
+        }
     }
-    protected void setDatabaseMaxUnitsOption(final AdminParser parser,final boolean required){
-        this.maxUnitsOption = setShortLongOpt(parser, OPT_NAME_MAX_UNITS_SHORT,OPT_NAME_MAX_UNITS_LONG,"The maximum number of units in this database",true,required);
+    protected void setDatabaseMaxUnitsOption(final AdminParser parser, final String defaultvalue, final boolean required) {
+        if (null != defaultvalue) {
+            this.maxUnitsOption = setShortLongOptWithDefault(parser, OPT_NAME_MAX_UNITS_SHORT, OPT_NAME_MAX_UNITS_LONG, "The maximum number of units in this database", defaultvalue, true, required);
+        } else {
+            this.maxUnitsOption = setShortLongOpt(parser, OPT_NAME_MAX_UNITS_SHORT, OPT_NAME_MAX_UNITS_LONG, "The maximum number of units in this database", true, required);
+        }
     }
-    protected void setDatabasePoolHardlimitOption(final AdminParser parser,final boolean required){
-//      FIXME: choeger Enter right description here        
-        this.poolHardlimitOption = setShortLongOpt(parser, OPT_NAME_POOL_HARDLIMIT_SHORT,OPT_NAME_POOL_HARDLIMIT_LONG,"Db pool hardlimit",true,required);
+    protected void setDatabasePoolHardlimitOption(final AdminParser parser, final String defaultvalue, final boolean required) {
+        if (null != defaultvalue) {
+            // FIXME: choeger Enter right description here
+            this.poolHardlimitOption = setShortLongOptWithDefault(parser, OPT_NAME_POOL_HARDLIMIT_SHORT, OPT_NAME_POOL_HARDLIMIT_LONG, "true/false", "Db pool hardlimit", defaultvalue, required);
+        } else {
+            this.poolHardlimitOption = setShortLongOpt(parser, OPT_NAME_POOL_HARDLIMIT_SHORT, OPT_NAME_POOL_HARDLIMIT_LONG, "true/false", "Db pool hardlimit", required);
+        }
     }
-    protected void setDatabasePoolInitialOption(final AdminParser parser,final boolean required){
-        this.poolInitialOption = setShortLongOpt(parser, OPT_NAME_POOL_INITIAL_SHORT,OPT_NAME_POOL_INITIAL_LONG,"Db pool initial",true,required);
+    protected void setDatabasePoolInitialOption(final AdminParser parser, final String defaultvalue, final boolean required) {
+        if (null != defaultvalue) {
+            this.poolInitialOption = setShortLongOptWithDefault(parser, OPT_NAME_POOL_INITIAL_SHORT, OPT_NAME_POOL_INITIAL_LONG, "Db pool initial", defaultvalue, true, required);
+        } else {
+            this.poolInitialOption = setShortLongOpt(parser, OPT_NAME_POOL_INITIAL_SHORT, OPT_NAME_POOL_INITIAL_LONG, "Db pool initial", true, required);
+        }
     }
-    protected void setDatabasePoolMaxOption(final AdminParser parser,final boolean required){
-        this.poolMaxOption = setShortLongOpt(parser, OPT_NAME_POOL_MAX_SHORT,OPT_NAME_POOL_MAX_LONG,"Db pool max",true,required);
+    protected void setDatabasePoolMaxOption(final AdminParser parser, final String defaultvalue, final boolean required) {
+        if (null != defaultvalue) {
+            this.poolMaxOption = setShortLongOptWithDefault(parser, OPT_NAME_POOL_MAX_SHORT, OPT_NAME_POOL_MAX_LONG, "Db pool max", defaultvalue, true, required);
+        } else {
+            this.poolMaxOption = setShortLongOpt(parser, OPT_NAME_POOL_MAX_SHORT, OPT_NAME_POOL_MAX_LONG, "Db pool max", true, required);
+        }
     }
     
     protected void setDatabaseParatmeterOption(final AdminParser parser,final boolean required){

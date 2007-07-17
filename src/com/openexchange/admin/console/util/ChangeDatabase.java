@@ -22,7 +22,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
  * @author d7,cutmasta
  * 
  */
-public class ChangeDatabase extends UtilAbstraction {
+public class ChangeDatabase extends DatabaseAbstraction {
 
     // Setting names for options
     private final static char OPT_NAME_DATABASE_ID_SHORT = 'i';
@@ -43,96 +43,36 @@ public class ChangeDatabase extends UtilAbstraction {
             final Credentials auth = new Credentials((String) parser.getOptionValue(this.adminUserOption), (String) parser.getOptionValue(this.adminPassOption));
 
             // get rmi ref
-            final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME +OXUtilInterface.RMI_NAME);
+            final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME + OXUtilInterface.RMI_NAME);
 
             final Database db = new Database();
 
-            String hostname = HOSTNAME_DEFAULT;
-            if (parser.getOptionValue(this.hostnameOption) != null) {
-                hostname = (String) parser.getOptionValue(this.hostnameOption);
-            }
+            parseAndSetHostname(parser, db);
+            
+            parseAndSetDatabasename(parser, db);
 
-            if (parser.getOptionValue(this.databaseNameOption) != null) {
-                db.setDisplayname((String) parser.getOptionValue(this.databaseNameOption));
-            }
+            parseAndSetDriver(parser, db);
 
-            String driver = DRIVER_DEFAULT;
-            if (parser.getOptionValue(this.databaseDriverOption) != null) {
-                driver = (String) parser.getOptionValue(this.databaseDriverOption);
-            }
+            parseAndSetDBUsername(parser, db);
+            
+            parseAndSetPasswd(parser, db);
 
-            String username = USER_DEFAULT;
-            if (parser.getOptionValue(this.databaseUsernameOption) != null) {
-                username = (String) parser.getOptionValue(this.databaseUsernameOption);
-            }
+            parseAndSetMaxUnits(parser, db);
 
-            if (parser.getOptionValue(this.databasePasswdOption) != null) {
-                db.setPassword((String) parser.getOptionValue(this.databasePasswdOption));
-            }
+            parseAndSetPoolHardLimit(parser, db);
 
-            String maxunits = String.valueOf(MAXUNITS_DEFAULT);
-            if (parser.getOptionValue(this.maxUnitsOption) != null) {
-                maxunits = (String) parser.getOptionValue(this.maxUnitsOption);
-            }
+            parseAndSetPoolInitial(parser, db);
 
-            String pool_hard_limit = String.valueOf(POOL_HARD_LIMIT_DEFAULT);
-            if (parser.getOptionValue(this.poolHardlimitOption) != null) {
-                pool_hard_limit = (String) parser.getOptionValue(this.poolHardlimitOption);
-            }
+            parseAndSetPoolmax(parser, db);
 
-            String pool_initial = String.valueOf(POOL_INITIAL_DEFAULT);
-            if (parser.getOptionValue(this.poolInitialOption) != null) {
-                pool_initial = (String) parser.getOptionValue(this.poolInitialOption);
-            }
+            parseAndSetDatabaseWeight(parser, db);
 
-            boolean ismaster = false;
-            String masterid = null;
+//            parseAndSetMasterAndID(parser, db);
 
-            String pool_max = String.valueOf(POOL_MAX_DEFAULT);
-            if (parser.getOptionValue(this.poolMaxOption) != null) {
-                pool_max = (String) parser.getOptionValue(this.poolMaxOption);
-            }
-
-            String cluster_weight = String.valueOf(CLUSTER_WEIGHT_DEFAULT);
-            if (parser.getOptionValue(this.databaseWeightOption) != null) {
-                cluster_weight = (String) parser.getOptionValue(this.databaseWeightOption);
-            }
-
-            if (parser.getOptionValue(this.databaseIsMasterOption) != null) {
-                ismaster = true;
-            }
-            if (false == ismaster) {
-                if (parser.getOptionValue(this.databaseMasterIDOption) != null) {
-                    masterid = (String) parser.getOptionValue(this.databaseMasterIDOption);
-                } else {
-                    printError(" master id must be set if this database isn't the master");
-                    parser.printUsage();
-                    System.exit(1);
-                }
-            }
-
-            // Setting the options in the dataobject
-
-            db.setDriver(testStringAndGetStringOrDefault(driver, DRIVER_DEFAULT));
-            if (null != hostname) {
-                db.setUrl("jdbc:mysql://" + hostname + "/?useUnicode=true&characterEncoding=UTF-8&" + "autoReconnect=true&useUnicode=true&useServerPrepStmts=false&useTimezone=true&" + "serverTimezone=UTC&connectTimeout=15000&socketTimeout=15000");
-            } else {
-                db.setUrl("jdbc:mysql://" + HOSTNAME_DEFAULT + "/?useUnicode=true&characterEncoding=UTF-8&" + "autoReconnect=true&useUnicode=true&useServerPrepStmts=false&useTimezone=true&" + "serverTimezone=UTC&connectTimeout=15000&socketTimeout=15000");
-            }
-            db.setLogin(testStringAndGetStringOrDefault(username, USER_DEFAULT));
-
-            db.setMaster(ismaster);
-            if (null != masterid) {
-                db.setMasterId(Integer.parseInt(masterid));
-            }
-            db.setClusterWeight(testStringAndGetIntOrDefault(cluster_weight, CLUSTER_WEIGHT_DEFAULT));
-            db.setMaxUnits(testStringAndGetIntOrDefault(maxunits, MAXUNITS_DEFAULT));
-            db.setPoolHardLimit(testStringAndGetIntOrDefault(pool_hard_limit, POOL_HARD_LIMIT_DEFAULT));
-            db.setPoolInitial(testStringAndGetIntOrDefault(pool_initial, POOL_INITIAL_DEFAULT));
-            db.setPoolMax(testStringAndGetIntOrDefault(pool_max, POOL_MAX_DEFAULT));
             // NEEDED ID
             db.setId(Integer.parseInt((String) parser.getOptionValue(this.databaseIdOption)));
             oxutil.changeDatabase(db, auth);
+            System.out.println("Database successfully changed.");
             sysexit(0);
         } catch (final java.rmi.ConnectException neti) {
             printError(neti.getMessage());
@@ -185,16 +125,16 @@ public class ChangeDatabase extends UtilAbstraction {
         setDatabaseNameOption(parser, false);
         setDatabaseHostnameOption(parser, false);
         setDatabaseUsernameOption(parser, false);
-        setDatabaseDriverOption(parser, false);
+        setDatabaseDriverOption(parser, null, false);
         setDatabasePasswdOption(parser, false);
-        setDatabaseIsMasterOption(parser, false);
-        setDatabaseMasterIDOption(parser, false);
+//        setDatabaseIsMasterOption(parser, false);
+//        setDatabaseMasterIDOption(parser, false);
 
-        setDatabaseWeightOption(parser, false);
-        setDatabaseMaxUnitsOption(parser, false);
-        setDatabasePoolHardlimitOption(parser, false);
-        setDatabasePoolInitialOption(parser, false);
-        setDatabasePoolMaxOption(parser, false);
+        setDatabaseWeightOption(parser, null, false);
+        setDatabaseMaxUnitsOption(parser, null, false);
+        setDatabasePoolHardlimitOption(parser, null, false);
+        setDatabasePoolInitialOption(parser, null, false);
+        setDatabasePoolMaxOption(parser, null, false);
 
         this.databaseIdOption = setShortLongOpt(parser, OPT_NAME_DATABASE_ID_SHORT, OPT_NAME_DATABASE_ID_LONG, "The id of the database which should be changed", true, true);
     }

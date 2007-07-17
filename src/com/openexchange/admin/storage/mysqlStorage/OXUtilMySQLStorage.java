@@ -108,7 +108,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             con = cache.getWRITEConnectionForCONFIGDB();
             con.setAutoCommit(false);
             
-            if(db.getDisplayname()!=null && db.getDisplayname().length()>0){
+            if (db.getDisplayname() != null && db.getDisplayname().length() > 0) {
                 prep = con.prepareStatement("UPDATE db_pool,db_cluster SET db_pool.name = ? WHERE db_pool.db_pool_id = ? AND (db_cluster.write_db_pool_id = ? OR db_cluster.read_db_pool_id = ?)");
                 prep.setString(1, db.getDisplayname());
                 prep.setInt(2, db.getId());
@@ -118,7 +118,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 prep.close();
             }
             
-            if(db.getLogin()!=null && db.getLogin().length()>0){
+            if (db.getLogin() != null && db.getLogin().length() > 0) {
                 prep = con.prepareStatement("UPDATE db_pool,db_cluster SET db_pool.login = ? WHERE db_pool.db_pool_id = ? AND (db_cluster.write_db_pool_id = ? OR db_cluster.read_db_pool_id = ?)");
                 prep.setString(1, db.getLogin());
                 prep.setInt(2, db.getId());
@@ -128,7 +128,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 prep.close();
             }
             
-            if(db.getPassword()!=null && db.getPassword().length()>0){
+            if (db.getPassword() != null && db.getPassword().length() > 0) {
                 prep = con.prepareStatement("UPDATE db_pool,db_cluster SET db_pool.password = ? WHERE db_pool.db_pool_id = ? AND (db_cluster.write_db_pool_id = ? OR db_cluster.read_db_pool_id = ?)");
                 prep.setString(1, db.getPassword());
                 prep.setInt(2, db.getId());
@@ -138,7 +138,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 prep.close();
             }
             
-            if(db.getDriver()!=null && db.getDriver().length()>0){
+            if (db.getDriver() != null && db.getDriver().length() > 0) {
                 prep = con.prepareStatement("UPDATE db_pool,db_cluster SET db_pool.driver = ? WHERE db_pool.db_pool_id = ? AND (db_cluster.write_db_pool_id = ? OR db_cluster.read_db_pool_id = ?)");
                 prep.setString(1, db.getDriver());
                 prep.setInt(2, db.getId());
@@ -148,7 +148,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 prep.close();
             }
             
-            if(db.getPoolInitial()!=null){
+            if (db.getPoolInitial() != null) {
                 prep = con.prepareStatement("UPDATE db_pool,db_cluster SET db_pool.initial = ? WHERE db_pool.db_pool_id = ? AND (db_cluster.write_db_pool_id = ? OR db_cluster.read_db_pool_id = ?)");
                 prep.setInt(1, db.getPoolInitial());
                 prep.setInt(2, db.getId());
@@ -158,7 +158,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 prep.close();
             }
             
-            if(db.getPoolMax()!=null){
+            if (db.getPoolMax() != null) {
                 prep = con.prepareStatement("UPDATE db_pool,db_cluster SET db_pool.max = ? WHERE db_pool.db_pool_id = ? AND (db_cluster.write_db_pool_id = ? OR db_cluster.read_db_pool_id = ?)");
                 prep.setInt(1, db.getPoolMax());
                 prep.setInt(2, db.getId());
@@ -168,7 +168,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 prep.close();
             }
             
-            if(db.getPoolHardLimit()!=null){
+            if (db.getPoolHardLimit() != null) {
                 prep = con.prepareStatement("UPDATE db_pool,db_cluster SET db_pool.hardlimit = ? WHERE db_pool.db_pool_id = ? AND (db_cluster.write_db_pool_id = ? OR db_cluster.read_db_pool_id = ?)");
                 prep.setInt(1, db.getPoolHardLimit());
                 prep.setInt(2, db.getId());
@@ -178,7 +178,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 prep.close();
             }
             
-            if(db.getUrl()!=null && db.getUrl().length()>0){
+            if (db.getUrl() != null && db.getUrl().length() > 0) {
                 prep = con.prepareStatement("UPDATE db_pool,db_cluster SET db_pool.url = ? WHERE db_pool.db_pool_id = ? AND (db_cluster.write_db_pool_id = ? OR db_cluster.read_db_pool_id = ?)");
                 prep.setString(1, db.getUrl());
                 prep.setInt(2, db.getId());
@@ -188,7 +188,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 prep.close();
             }
             
-            if(db.getClusterWeight()!=null){
+            if (db.getClusterWeight() != null) {
                 prep = con.prepareStatement("UPDATE db_pool,db_cluster SET db_cluster.weight = ? WHERE db_pool.db_pool_id = ? AND (db_cluster.write_db_pool_id = ? OR db_cluster.read_db_pool_id = ?)");
                 prep.setInt(1, db.getClusterWeight());
                 prep.setInt(2, db.getId());
@@ -198,7 +198,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 prep.close();
             }
             
-            if(db.getMaxUnits()!=null){
+            if (db.getMaxUnits() != null) {
                 prep = con.prepareStatement("UPDATE db_pool,db_cluster SET db_cluster.max_units = ? WHERE db_pool.db_pool_id = ? AND (db_cluster.write_db_pool_id = ? OR db_cluster.read_db_pool_id = ?)");
                 prep.setInt(1, db.getMaxUnits());
                 prep.setInt(2, db.getId());
@@ -209,35 +209,34 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             }
             
             con.commit();
-            prep.close();
-        }catch (final DataTruncation dt){
-            log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);  
-            try{
-                if(con!=null && !con.getAutoCommit()){
+        } catch (final DataTruncation dt) {
+            log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
+            try {
+                if (con != null && !con.getAutoCommit()) {
                     con.rollback();
                 }
-            }catch(SQLException sql){
-                log.error("Rollback failed for configdb connection",sql);
+            } catch (SQLException sql) {
+                log.error("Rollback failed for configdb connection", sql);
             }
             throw AdminCache.parseDataTruncation(dt);
         } catch (final PoolException pe) {
             log.error("Pool Error", pe);
-            try{
-                if(con!=null && !con.getAutoCommit()){
+            try {
+                if (con != null && !con.getAutoCommit()) {
                     con.rollback();
                 }
-            }catch(SQLException sql){
-                log.error("Rollback failed for configdb connection",sql);
+            } catch (SQLException sql) {
+                log.error("Rollback failed for configdb connection", sql);
             }
             throw new StorageException(pe);
         } catch (final SQLException sqle) {
             log.error("SQL Error", sqle);
-            try{
-                if(con!=null && !con.getAutoCommit()){
+            try {
+                if (con != null && !con.getAutoCommit()) {
                     con.rollback();
                 }
-            }catch(SQLException sql){
-                log.error("Rollback failed for configdb connection",sql);
+            } catch (SQLException sql) {
+                log.error("Rollback failed for configdb connection", sql);
             }
             throw new StorageException(sqle);
         } finally {
