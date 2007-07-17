@@ -306,6 +306,15 @@ public abstract class BasicCommandlineOptions {
         return setShortLongOpt(admp, shortopt, longopt, desc.toString(), hasarg, required);
     }
 
+    protected final Option setShortLongOptWithDefault(final AdminParser admp,final char shortopt, final String longopt, final String argdescription, final String description, final String defaultvalue, final boolean required) {
+        final StringBuilder desc = new StringBuilder();
+        desc.append(description);
+        desc.append(". Default: ");
+        desc.append(defaultvalue);
+        
+        return setShortLongOpt(admp, shortopt, longopt, argdescription, desc.toString(), required);
+    }
+
     private final void setContextOption(final AdminParser admp) {
         this.contextOption = setShortLongOpt(admp,OPT_NAME_CONTEXT_SHORT, OPT_NAME_CONTEXT_LONG, OPT_NAME_CONTEXT_DESCRIPTION, true, true);        
 //        retval.setArgName("Context ID");
@@ -361,6 +370,14 @@ public abstract class BasicCommandlineOptions {
     protected final String testStringAndGetStringOrDefault(final String test, final String defaultvalue) {
         if (null != test) {
             return test;
+        } else {
+            return defaultvalue;
+        }
+    }
+
+    protected final boolean testStringAndGetBooleanOrDefault(final String test, final boolean defaultvalue) {
+        if (null != test) {
+            return Boolean.parseBoolean(test);
         } else {
             return defaultvalue;
         }
