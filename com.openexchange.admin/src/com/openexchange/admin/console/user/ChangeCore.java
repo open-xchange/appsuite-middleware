@@ -76,39 +76,29 @@ public abstract class ChangeCore extends UserAbstraction {
             usr.setId(Integer.parseInt((String) parser.getOptionValue(this.idOption)));
 
             // fill user obj with mandatory values from console
-            if(parser.getOptionValue(this.displayNameOption)!=null){
-                final String optionValue2 = (String) parser.getOptionValue(this.displayNameOption);
-                if (null != optionValue2) {
-                    usr.setDisplay_name(optionValue2);
-                }        
+            final String optionValue2 = (String) parser.getOptionValue(this.displayNameOption);
+            if (null != optionValue2) {
+                usr.setDisplay_name(optionValue2);
+            }        
+            
+            final String optionValue3 = (String) parser.getOptionValue(this.givenNameOption);
+            if (null != optionValue3) {
+                usr.setGiven_name(optionValue3);
             }
             
-            if(parser.getOptionValue(this.givenNameOption)!=null){
-                final String optionValue3 = (String) parser.getOptionValue(this.givenNameOption);
-                if (null != optionValue3) {
-                    usr.setGiven_name(optionValue3);
-                }
+            final String optionValue4 = (String) parser.getOptionValue(this.surNameOption);
+            if (null != optionValue4) {
+                usr.setSur_name(optionValue4);
             }
-            
-            if(parser.getOptionValue(this.surNameOption)!=null){
-                final String optionValue4 = (String) parser.getOptionValue(this.surNameOption);
-                if (null != optionValue4) {
-                    usr.setSur_name(optionValue4);
-                }        
-            }
-            if(parser.getOptionValue(this.passwordOption)!=null){
-                final String optionValue5 = (String) parser.getOptionValue(this.passwordOption);
-                if (null != optionValue5) {
-                    usr.setPassword(optionValue5);
-                }   
-            }
-            if(parser.getOptionValue(this.primaryMailOption)!=null){
-                final String optionValue6 = (String) parser.getOptionValue(this.primaryMailOption);
-                if (null != optionValue6) {
-                    usr.setPrimaryEmail(optionValue6);
-                    usr.setEmail1(optionValue6);
-                }        
-            }
+            final String optionValue5 = (String) parser.getOptionValue(this.passwordOption);
+            if (null != optionValue5) {
+                usr.setPassword(optionValue5);
+            }   
+            final String optionValue6 = (String) parser.getOptionValue(this.primaryMailOption);
+            if (null != optionValue6) {
+                usr.setPrimaryEmail(optionValue6);
+                usr.setEmail1(optionValue6);
+            }        
 
             // add optional values if set
             setOptionalOptionsinUser(parser, usr);
