@@ -319,6 +319,7 @@ public class AdminParser extends CmdLineParser {
                 basicOutput(optInfo);
             }
         }
+        System.err.println("\nEntries marked with an asterisk (*) are mandatory\n");
     }
 
     public final void printUsageExtended() {
@@ -327,11 +328,12 @@ public class AdminParser extends CmdLineParser {
         for (final OptionInfo optInfo : this.optinfolist) {
             basicOutput(optInfo);
         }
+        System.err.println("\nEntries marked with an asterisk (*) are mandatory\n");
     }
 
     private final void basicOutput(final OptionInfo optInfo) {
         if (optInfo.shortForm == null) {
-            final String format_this = " %s %-46s %-28s\n";
+            final String format_this = " %s %-45s%-2s%-28s\n";
             if (null != optInfo.longFormParameterDescription) {
                 final StringBuilder sb = new StringBuilder();
                 sb.append("--");
@@ -339,14 +341,14 @@ public class AdminParser extends CmdLineParser {
                 sb.append(" <");
                 sb.append(optInfo.longFormParameterDescription);
                 sb.append(">");
-                final Object[] format_with_ = { "  ", sb.toString(), optInfo.description };
+                final Object[] format_with_ = { "  ", sb.toString(), optInfo.needed ? "*" : " ", optInfo.description };
                 System.err.format(format_this, format_with_);
             } else {
-                final Object[] format_with_ = { "  ", "--" + optInfo.longForm, optInfo.description };
+                final Object[] format_with_ = { "  ", "--" + optInfo.longForm, optInfo.needed ? "*" : " ", optInfo.description };
                 System.err.format(format_this, format_with_);
             }
         } else {
-            final String format_this = " %s,%-46s %-28s\n";
+            final String format_this = " %s,%-45s%-2s%-28s\n";
             if (null != optInfo.longFormParameterDescription) {
                 // example result :
                 // -c,--contextid The id of the context
@@ -357,10 +359,10 @@ public class AdminParser extends CmdLineParser {
                 sb.append(optInfo.longFormParameterDescription);
                 sb.append(">");
 
-                final Object[] format_with = { "-" + optInfo.shortForm, sb.toString(), optInfo.description };
+                final Object[] format_with = { "-" + optInfo.shortForm, sb.toString(), optInfo.needed ? "*" : " ", optInfo.description };
                 System.err.format(format_this, format_with);
             } else {
-                final Object[] format_with = { "-" + optInfo.shortForm, "--" + optInfo.longForm, optInfo.description };
+                final Object[] format_with = { "-" + optInfo.shortForm, "--" + optInfo.longForm, optInfo.needed ? "*" : " ", optInfo.description };
                 System.err.format(format_this, format_with);
             }
         }
