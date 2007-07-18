@@ -8,6 +8,7 @@ import java.rmi.RemoteException;
 
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.MissingOptionException;
+import com.openexchange.admin.console.AdminParser.NeededTriState;
 import com.openexchange.admin.console.CmdLineParser.IllegalOptionValueException;
 import com.openexchange.admin.console.CmdLineParser.UnknownOptionException;
 import com.openexchange.admin.rmi.OXUserInterface;
@@ -32,11 +33,11 @@ public abstract class ChangeCore extends UserAbstraction {
         // required
         setIdOption(parser);
 
-        displayNameOption = setShortLongOpt(parser,OPT_DISPLAYNAME_SHORT,OPT_DISPLAYNAME_LONG,"Display name of the user", true, false); 
-        givenNameOption =  setShortLongOpt(parser,OPT_GIVENNAME_SHORT,OPT_GIVENNAME_LONG,"Given name for the user", true, false); 
-        surNameOption =  setShortLongOpt(parser,OPT_SURNAME_SHORT,OPT_SURNAME_LONG,"Sur name for the user", true, false); 
-        passwordOption = setShortLongOpt(parser,OPT_PASSWORD_SHORT,OPT_PASSWORD_LONG,"Password for the user", true, false); 
-        primaryMailOption = setShortLongOpt(parser,OPT_PRIMARY_EMAIL_SHORT,OPT_PRIMARY_EMAIL_LONG,"Primary mail address", true, false); 
+        displayNameOption = setShortLongOpt(parser,OPT_DISPLAYNAME_SHORT,OPT_DISPLAYNAME_LONG,"Display name of the user", true, NeededTriState.notneeded); 
+        givenNameOption =  setShortLongOpt(parser,OPT_GIVENNAME_SHORT,OPT_GIVENNAME_LONG,"Given name for the user", true, NeededTriState.notneeded); 
+        surNameOption =  setShortLongOpt(parser,OPT_SURNAME_SHORT,OPT_SURNAME_LONG,"Sur name for the user", true, NeededTriState.notneeded); 
+        passwordOption = setShortLongOpt(parser,OPT_PASSWORD_SHORT,OPT_PASSWORD_LONG,"Password for the user", true, NeededTriState.notneeded); 
+        primaryMailOption = setShortLongOpt(parser,OPT_PRIMARY_EMAIL_SHORT,OPT_PRIMARY_EMAIL_LONG,"Primary mail address", true, NeededTriState.notneeded); 
 
         
         // add optional opts
