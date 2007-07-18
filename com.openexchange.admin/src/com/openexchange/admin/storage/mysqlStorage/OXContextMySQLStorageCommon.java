@@ -413,7 +413,7 @@ public abstract class OXContextMySQLStorageCommon {
         }
     }
 
-    public void fillContextAndServer2DBPool(final Context ctx, final long quota_max, final Connection con, final Database db) throws SQLException, StorageException {
+    public void fillContextAndServer2DBPool(final Context ctx, final Connection con, final Database db) throws SQLException, StorageException {
         // dbid is the id in db_pool of database engine to use for next context
     
         // if read id -1 (not set by client ) or 0 (there is no read db for this
@@ -425,11 +425,12 @@ public abstract class OXContextMySQLStorageCommon {
     
         // create context entry in configdb
         // quota is in MB, but we store in Byte
-        long quota_max_temp = quota_max;
-        if (quota_max != -1) {
+        long quota_max_temp = ctx.getMaxQuota();
+        if (quota_max_temp != -1) {
             quota_max_temp *= Math.pow(2, 20);
+            ctx.setMaxQuota(quota_max_temp);
         }
-        fillContextTable(ctx, quota_max_temp, con);
+        fillContextTable(ctx, con);
     
         // insert in the context_server2dbpool table
         fillContextServer2DBPool(ctx, db, con);
@@ -631,7 +632,7 @@ public abstract class OXContextMySQLStorageCommon {
         }
     }
 
-    private final void fillContextTable(final Context ctx, final long quota_max, final Connection configdb_write_con) throws SQLException, StorageException {
+    private final void fillContextTable(final Context ctx, final Connection configdb_write_con) throws SQLException, StorageException {
         PreparedStatement stmt = null;
         try {
 
@@ -649,7 +650,7 @@ public abstract class OXContextMySQLStorageCommon {
             stmt.setBoolean(3, true);
             stmt.setInt(4, store_id);
             stmt.setString(5, ctx.getIdAsString() + "_ctx_store");
-            stmt.setLong(6, quota_max);
+            stmt.setLong(6, ctx.getMaxQuota());
             stmt.executeUpdate();
             stmt.close();
         } finally {
