@@ -327,20 +327,16 @@ public abstract class BasicCommandlineOptions {
         return retval;
     }
     
-    protected final Option getAdminPassOption(final AdminParser admp) {
+    protected final void setAdminPassOption(final AdminParser admp) {
         this.adminPassOption = setShortLongOpt(admp,OPT_NAME_ADMINPASS_SHORT, OPT_NAME_ADMINPASS_LONG, OPT_NAME_ADMINPASS_DESCRIPTION, true, NeededTriState.possibly);
-//        retval.setArgName("Admin password");
-        return this.adminPassOption;
     }
     
     protected final void setCSVOutputOption(final AdminParser admp) {
         this.csvOutputOption = setLongOpt(admp, OPT_NAME_CSVOUTPUT_LONG, OPT_NAME_CSVOUTPUT_DESCRIPTION, false, false);
     }
     
-    protected final Option getAdminUserOption(final AdminParser admp) {
+    protected final void setAdminUserOption(final AdminParser admp) {
         this.adminUserOption= setShortLongOpt(admp,OPT_NAME_ADMINUSER_SHORT, OPT_NAME_ADMINUSER_LONG, OPT_NAME_ADMINUSER_DESCRIPTION, true, NeededTriState.possibly);
-//        retval.setArgName("Admin username");
-        return this.adminUserOption;
     }
     
     protected final void setSearchPatternOption(final AdminParser admp){
@@ -389,13 +385,16 @@ public abstract class BasicCommandlineOptions {
      */
     protected void setDefaultCommandLineOptions(final AdminParser admp){
         setContextOption(admp);
-        // TODO: Make setters of this two methods, in all situation this method is called there is now
-        // real need to get the Option
-        getAdminUserOption(admp); 
-        getAdminPassOption(admp);
+        setAdminUserOption(admp); 
+        setAdminPassOption(admp);
     }
 
     
+    protected final void setDefaultCommandLineOptionsWithoutContextID(final AdminParser parser) {          
+        setAdminUserOption(parser);
+        setAdminPassOption(parser);        
+    }
+
     protected void sysexit(final int exitcode) {
         // see http://java.sun.com/j2se/1.5.0/docs/guide/rmi/faq.html#leases
         System.gc();
@@ -404,7 +403,7 @@ public abstract class BasicCommandlineOptions {
         System.exit(exitcode);
     }
 
-    protected Context contextparsing(final AdminParser parser) {
+    protected final Context contextparsing(final AdminParser parser) {
         final Context ctx = new Context(DEFAULT_CONTEXT);
     
         if (parser.getOptionValue(this.contextOption) != null) {
@@ -413,7 +412,7 @@ public abstract class BasicCommandlineOptions {
         return ctx;
     }
 
-    protected Credentials credentialsparsing(final AdminParser parser) {
+    protected final Credentials credentialsparsing(final AdminParser parser) {
         final Credentials auth = new Credentials((String) parser.getOptionValue(this.adminUserOption), (String) parser.getOptionValue(this.adminPassOption));
         return auth;
     }
@@ -426,7 +425,7 @@ public abstract class BasicCommandlineOptions {
      * @param length
      * @return
      */
-    protected String stripString(final String text, final int length, final String lastmark) {
+    private String stripString(final String text, final int length, final String lastmark) {
         if (null != text && text.length() > length) {
             final int stringlength = length - lastmark.length();
             return new StringBuffer(text.substring(0, stringlength)).append(lastmark).toString();
