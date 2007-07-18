@@ -134,10 +134,9 @@ public abstract class OXContextStorageInterface {
     /**
      * @param ctx
      * @param admin_user
-     * @param quota_max
      * @throws StorageException
      */
-    public abstract Context create(final Context ctx, final User admin_user, final long quota_max) throws StorageException, InvalidDataException;
+    public abstract Context create(final Context ctx, final User admin_user) throws StorageException, InvalidDataException;
 
     /**
      * @param ctx
