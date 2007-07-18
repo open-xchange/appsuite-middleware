@@ -1021,7 +1021,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         }
     }
 
-    public Context create(final Context ctx, final User admin_user, final long quota_max) throws StorageException, InvalidDataException {
+    public Context create(final Context ctx, final User admin_user) throws StorageException, InvalidDataException {
         Connection configdb_write_con = null;
         Connection ox_write_con = null;
         final int context_id = ctx.getIdAsInt();
@@ -1038,6 +1038,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 final Integer dbid = db.getId();
 
                 boolean newSchemaCreated = false;
+                long quota_max = ctx.getMaxQuota();
                 if (this.CONTEXTS_PER_SCHEMA == 1) {
                     // synchronized (ClientAdminThread.create_mutex) {
                     // FIXME: generate unique schema name
@@ -1053,7 +1054,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     oxu.createDatabase(db);
                     newSchemaCreated = true;
 
-                    this.oxcontextcommon.fillContextAndServer2DBPool(ctx, quota_max, configdb_write_con, db);
+                    this.oxcontextcommon.fillContextAndServer2DBPool(ctx, configdb_write_con , db);
                     // }
                 } else {
                     // check if there's a db schema which is not yet full
@@ -1068,10 +1069,10 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                             db.setScheme(schema_name);
                             oxu.createDatabase(db);
                             newSchemaCreated = true;
-                            this.oxcontextcommon.fillContextAndServer2DBPool(ctx, quota_max, configdb_write_con, db);
+                            this.oxcontextcommon.fillContextAndServer2DBPool(ctx, configdb_write_con, db);
                         } else {
                             db.setScheme(schema_name);
-                            this.oxcontextcommon.fillContextAndServer2DBPool(ctx, quota_max, configdb_write_con, db);
+                            this.oxcontextcommon.fillContextAndServer2DBPool(ctx, configdb_write_con, db);
                         }
                     }
                 }

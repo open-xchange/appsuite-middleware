@@ -46,9 +46,9 @@ public class Create extends ContextAbtraction {
             // fill user obj with mandatory values from console
             setMandatoryOptionsinUser(parser, usr);
 
-            final long quota = Long.parseLong((String) parser.getOptionValue(this.filestoreContextQuotaOption));
+            ctx.setMaxQuota(Long.parseLong((String) parser.getOptionValue(this.filestoreContextQuotaOption)));
 
-            System.out.println(oxctx.create(ctx, usr, quota, auth).getIdAsInt());
+            System.out.println(oxctx.create(ctx, usr, auth).getIdAsInt());
 
             sysexit(0);
         } catch (final java.rmi.ConnectException neti) {

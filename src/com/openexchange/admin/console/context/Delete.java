@@ -40,6 +40,7 @@ public class Delete extends ContextAbtraction {
 
             oxres.delete(ctx, auth);
 
+            System.out.println("Successfully deleted");
             sysexit(0);
         } catch (final java.rmi.ConnectException neti) {
             printError(neti.getMessage());

@@ -31,7 +31,7 @@ public abstract class OXContextSQLStorage extends OXContextStorageInterface {
 
     abstract public void enable(final Context ctx) throws StorageException;
 
-    abstract public Context create( final Context ctx, final User admin_user, final long quota_max) throws StorageException,InvalidDataException;
+    abstract public Context create( final Context ctx, final User admin_user) throws StorageException,InvalidDataException;
     
     abstract public Context getData(final Context ctx) throws StorageException;
 

@@ -36,11 +36,10 @@ public interface OXContextInterface extends Remote {
 
     /**
      * Create a new context.
-     * 
-     * @param auth Credentials for authenticating against server.
      * @param ctx Context object
      * @param admin_user User data of administrative user account for this context
-     * @param quota_max maximum quota value, this context can use in the filestore (in MB)
+     * @param auth Credentials for authenticating against server.
+     * 
      * @return Context object.
      * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException When the supplied credentials were not correct or invalid.
      * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException If the data sent within the method contained invalid data.
@@ -48,7 +47,7 @@ public interface OXContextInterface extends Remote {
      * @throws StorageException When an error in the subsystems occured.
      * @throws ContextExistsException 
      */
-    public Context create(Context ctx, User admin_user, long quota_max, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException,InvalidDataException, ContextExistsException;
+    public Context create(Context ctx, User admin_user, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException,InvalidDataException, ContextExistsException;
 
     /**
      * Delete a context.<br>

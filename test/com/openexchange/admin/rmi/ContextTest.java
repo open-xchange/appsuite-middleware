@@ -269,15 +269,15 @@ public class ContextTest extends AbstractTest {
         }
         // then check if a database is in db for the new ctx, if not register
         // database first,
-        // THEN we can add the contex with its data
+        // THEN we can add the context with its data
         if (oxu.listDatabases("test-ox-db", cred).length == 0) {
             Database db = UtilTest.getTestDatabaseObject("localhost", "test-ox-db");
             oxu.registerDatabase(db, cred);
         }
         
-        OXContextInterface xres = (OXContextInterface) Naming.lookup(host + OXContextInterface.RMI_NAME);
+        OXContextInterface oxcontext = (OXContextInterface) Naming.lookup(host + OXContextInterface.RMI_NAME);
         
-        xres.create(ctx,UserTest.getTestUserObject("admin","secret"), ctx.getFilestore().getQuota_max(), cred);
+        oxcontext.create(ctx,UserTest.getTestUserObject("admin","secret"), cred);
         return ctx;
     }
 

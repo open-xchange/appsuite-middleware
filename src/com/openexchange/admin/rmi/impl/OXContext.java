@@ -462,7 +462,7 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
         }
     }
 
-    public Context create(final Context ctx, final User admin_user, final long quota_max, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException {
+    public Context create(final Context ctx, final User admin_user, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException {
         
         try{
             doNullCheck(ctx,ctx.getIdAsInt(),admin_user);
@@ -473,7 +473,7 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
         
         doAuthentication(auth);
         
-        log.debug("" + ctx + " - " + quota_max + " - " + admin_user);
+        log.debug("" + ctx + " - " + admin_user);
         try {
             final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
             if (tool.existsContext(ctx)) {
@@ -483,7 +483,7 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
                 throw new InvalidDataException("Mandatory fields not set");
             }
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
-            final Context retval = oxcox.create(ctx, admin_user, quota_max);
+            final Context retval = oxcox.create(ctx, admin_user);
             Monitor.incrementNumberOfCreateContextCalled();
             return retval;
         } catch (final ContextExistsException e) {
@@ -513,16 +513,6 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
     private void reEnableContext(final Context ctx, final OXContextStorageInterface oxcox) throws StorageException {
         oxcox.enable(ctx);
     }
-    
-    private void checkSchemaBeingLocked(final Context ctx, final OXToolStorageInterface tools) throws StorageException, DatabaseUpdateException, NoSuchContextException {
-        if (tools.schemaBeingLockedOrNeedsUpdate(ctx)) {
-            final DatabaseUpdateException databaseUpdateException = new DatabaseUpdateException("Database must be updated or currently is beeing updated");
-            log.error(databaseUpdateException.getMessage(), databaseUpdateException);
-            throw databaseUpdateException;
-        }
-    }
-    
-    
     
     public void change(final Context ctx, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
         
