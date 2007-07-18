@@ -80,8 +80,8 @@ import com.openexchange.groupware.container.mail.parser.MessageDumper;
 import com.openexchange.groupware.container.mail.parser.MessageUtils;
 import com.openexchange.imap.IMAPProperties;
 import com.openexchange.imap.OXMailException;
-import com.openexchange.imap.ThreadSortMessage;
 import com.openexchange.imap.OXMailException.MailCode;
+import com.openexchange.imap.threadsort.ThreadSortMessage;
 import com.openexchange.sessiond.SessionObject;
 import com.sun.mail.imap.IMAPFolder;
 

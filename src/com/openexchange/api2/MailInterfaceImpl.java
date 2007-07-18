@@ -159,7 +159,6 @@ import com.openexchange.imap.IMAPPropertiesFactory;
 import com.openexchange.imap.IMAPUtils;
 import com.openexchange.imap.MessageHeaders;
 import com.openexchange.imap.OXMailException;
-import com.openexchange.imap.TreeNode;
 import com.openexchange.imap.UserSettingMail;
 import com.openexchange.imap.OXMailException.MailCode;
 import com.openexchange.imap.command.CopyUIDIMAPCommand;
@@ -169,6 +168,8 @@ import com.openexchange.imap.command.FlagsIMAPCommand;
 import com.openexchange.imap.command.MessageUIDsIMAPCommand;
 import com.openexchange.imap.command.SeqNumIMAPCommand;
 import com.openexchange.imap.connection.DefaultIMAPConnection;
+import com.openexchange.imap.threadsort.ThreadSortUtil;
+import com.openexchange.imap.threadsort.TreeNode;
 import com.openexchange.monitoring.MonitorAgent;
 import com.openexchange.server.Version;
 import com.openexchange.sessiond.SessionObject;
@@ -1853,9 +1854,9 @@ public class MailInterfaceImpl implements MailInterface {
 					for (int i = 1; i < msgArr.length; i++) {
 						sortRange.append(msgArr[i].getMessageNumber()).append(',');
 					}
-					threadResp = IMAPUtils.getThreadResponse(imapCon.getImapFolder(), sortRange);
+					threadResp = ThreadSortUtil.getThreadResponse(imapCon.getImapFolder(), sortRange);
 				} else {
-					threadResp = IMAPUtils.getThreadResponse(imapCon.getImapFolder(), new StringBuilder(STR_ALL));
+					threadResp = ThreadSortUtil.getThreadResponse(imapCon.getImapFolder(), new StringBuilder(STR_ALL));
 				}
 			} finally {
 				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
@@ -1863,8 +1864,8 @@ public class MailInterfaceImpl implements MailInterface {
 			/*
 			 * Parse THREAD response
 			 */
-			final List<TreeNode> threadList = IMAPUtils.parseThreadResponse(threadResp);
-			MessageCacheObject[] msgs = IMAPUtils.getMessagesFromThreadResponse(imapCon.getImapFolder().getFullName(),
+			final List<TreeNode> threadList = ThreadSortUtil.parseThreadResponse(threadResp);
+			MessageCacheObject[] msgs = ThreadSortUtil.getMessagesFromThreadResponse(imapCon.getImapFolder().getFullName(),
 					imapCon.getImapFolder().getSeparator(), threadResp);
 			/*
 			 * Fetch messages

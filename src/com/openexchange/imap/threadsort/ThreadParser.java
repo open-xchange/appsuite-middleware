@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.imap;
+package com.openexchange.imap.threadsort;
 
 import java.util.ArrayList;
 import java.util.List;
