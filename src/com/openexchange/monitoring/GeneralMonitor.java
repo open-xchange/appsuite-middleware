@@ -111,10 +111,6 @@ public class GeneralMonitor implements GeneralMonitorMBean, MBeanRegistration {
 	public int getNumberOfRunningAJPListeners() {
 		return MonitoringInfo.getNumberOfRunningAJPListeners();
 	}
-	
-	public int getNumberOfWorkingServlets() {
-		return MonitoringInfo.getNumberOfWorkingServlets();
-	}
 
 	public ObjectName preRegister(final MBeanServer server, final ObjectName nameArg) throws Exception {
 		ObjectName name = nameArg;

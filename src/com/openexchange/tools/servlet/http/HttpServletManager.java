@@ -89,8 +89,6 @@ public class HttpServletManager {
 
 	private static Map<String, Constructor> servletConstructorMap;
 
-	private static int numberOfWorkingServlets;
-
 	private static final Lock INIT_LOCK = new ReentrantLock();
 
 	private static final ReadWriteLock RW_LOCK = new ReentrantReadWriteLock();
@@ -101,10 +99,6 @@ public class HttpServletManager {
 
 	private HttpServletManager() {
 		super();
-	}
-
-	public static int getNumberOfWorkingServlets() {
-		return numberOfWorkingServlets;
 	}
 
 	public static HttpServlet getServlet(final String id) {
@@ -121,7 +115,6 @@ public class HttpServletManager {
 						return new HttpErrorServlet(new StringBuilder(100).append("Servlet ").append(id).append(
 								" could NOT be created").toString());
 					}
-					numberOfWorkingServlets++;
 					return servletInst;
 				}
 				final HttpServlet servletInstance = servletQueue.get();
@@ -133,7 +126,6 @@ public class HttpServletManager {
 					 */
 					servletQueue.dequeue();
 				}
-				numberOfWorkingServlets++;
 				return servletInstance;
 			}
 			return null;
@@ -177,7 +169,6 @@ public class HttpServletManager {
 				servlets.enqueue(servletObj);
 				SERVLET_POOL.put(id, servlets);
 			}
-			numberOfWorkingServlets--;
 		} finally {
 			WRITE_LOCK.unlock();
 		}

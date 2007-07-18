@@ -6,6 +6,8 @@
    underneath a folder that should be deleted
  - Bugfix #8498: Additional check when reading an infostore document's MIME
    type setting
+ - Bugfix #8360: Removed senseless counter for working servlets in JMX's
+   GeneralMonitor interface
 
 * 2007-07-17 - francisco.laguna@open-xchange.com
 

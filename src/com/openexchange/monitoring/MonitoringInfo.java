@@ -54,7 +54,6 @@ package com.openexchange.monitoring;
 import com.openexchange.database.Database;
 import com.openexchange.tools.ajp13.AJPv13Listener;
 import com.openexchange.tools.ajp13.AJPv13Server;
-import com.openexchange.tools.servlet.http.HttpServletManager;
 
 /**
  * 
@@ -122,10 +121,6 @@ public class MonitoringInfo {
 	
 	public static int getNumberOfRunningAJPListeners() {
 		return AJPv13Listener.getNumberOfRunningAJPListeners();
-	}
-	
-	public static int getNumberOfWorkingServlets() {
-		return HttpServletManager.getNumberOfWorkingServlets();
 	}
 	
 	public static int getNumberOfDBConnections() {
