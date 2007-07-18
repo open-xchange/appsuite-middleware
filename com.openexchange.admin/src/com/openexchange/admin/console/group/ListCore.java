@@ -7,6 +7,7 @@ import java.util.ArrayList;
 
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.MissingOptionException;
+import com.openexchange.admin.console.AdminParser.NeededTriState;
 import com.openexchange.admin.console.CmdLineParser.IllegalOptionValueException;
 import com.openexchange.admin.console.CmdLineParser.UnknownOptionException;
 import com.openexchange.admin.rmi.OXGroupInterface;
@@ -28,7 +29,7 @@ public abstract class ListCore extends GroupAbstraction {
         // we need csv output , so we add this option
         setCSVOutputOption(parser);
         // create options for this command line tool
-        this.searchOption = setShortLongOpt(parser, OPT_NAME_SEARCHPATTERN, OPT_NAME_SEARCHPATTERN_LONG, "The search pattern which is used for listing. This applies to name.", true, false);
+        this.searchOption = setShortLongOpt(parser, OPT_NAME_SEARCHPATTERN, OPT_NAME_SEARCHPATTERN_LONG, "The search pattern which is used for listing. This applies to name.", true, NeededTriState.notneeded);
     }
 
     protected final void commonfunctions(final AdminParser parser, final String[] args) {

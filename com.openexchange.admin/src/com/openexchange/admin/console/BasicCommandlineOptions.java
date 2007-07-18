@@ -51,6 +51,7 @@ package com.openexchange.admin.console;
 import java.rmi.NotBoundException;
 import java.util.ArrayList;
 
+import com.openexchange.admin.console.AdminParser.NeededTriState;
 import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -292,12 +293,12 @@ public abstract class BasicCommandlineOptions {
         return retval;
     }
 
-    protected final Option setShortLongOpt(final AdminParser admp,final char shortopt, final String longopt, final String description, final boolean hasarg, final boolean required) {
-        final Option retval = admp.addOption(shortopt,longopt, longopt, description, required,hasarg);       
+    protected final Option setShortLongOpt(final AdminParser admp,final char shortopt, final String longopt, final String description, final boolean hasarg, final NeededTriState required) {
+        final Option retval = admp.addOption(shortopt,longopt, longopt, description, required, hasarg);       
         return retval;
     }
     
-    protected final Option setShortLongOptWithDefault(final AdminParser admp,final char shortopt, final String longopt, final String description, final String defaultvalue, final boolean hasarg, final boolean required) {
+    protected final Option setShortLongOptWithDefault(final AdminParser admp,final char shortopt, final String longopt, final String description, final String defaultvalue, final boolean hasarg, final NeededTriState required) {
         final StringBuilder desc = new StringBuilder();
         desc.append(description);
         desc.append(". Default: ");
@@ -316,18 +317,18 @@ public abstract class BasicCommandlineOptions {
     }
 
     private final void setContextOption(final AdminParser admp) {
-        this.contextOption = setShortLongOpt(admp,OPT_NAME_CONTEXT_SHORT, OPT_NAME_CONTEXT_LONG, OPT_NAME_CONTEXT_DESCRIPTION, true, true);        
+        this.contextOption = setShortLongOpt(admp,OPT_NAME_CONTEXT_SHORT, OPT_NAME_CONTEXT_LONG, OPT_NAME_CONTEXT_DESCRIPTION, true, NeededTriState.needed);        
 //        retval.setArgName("Context ID");
     }
     
     protected final Option getContextNameOption(final AdminParser admp) {
-        final Option retval = setShortLongOpt(admp,OPT_NAME_CONTEXT_NAME_SHORT, OPT_NAME_CONTEXT_NAME_LONG, OPT_NAME_CONTEXT_NAME_DESCRIPTION, true, false);
+        final Option retval = setShortLongOpt(admp,OPT_NAME_CONTEXT_NAME_SHORT, OPT_NAME_CONTEXT_NAME_LONG, OPT_NAME_CONTEXT_NAME_DESCRIPTION, true, NeededTriState.notneeded);
 //        retval.setArgName("Context Name");
         return retval;
     }
     
     protected final Option getAdminPassOption(final AdminParser admp) {
-        this.adminPassOption = setShortLongOpt(admp,OPT_NAME_ADMINPASS_SHORT, OPT_NAME_ADMINPASS_LONG, OPT_NAME_ADMINPASS_DESCRIPTION, true, true);
+        this.adminPassOption = setShortLongOpt(admp,OPT_NAME_ADMINPASS_SHORT, OPT_NAME_ADMINPASS_LONG, OPT_NAME_ADMINPASS_DESCRIPTION, true, NeededTriState.possibly);
 //        retval.setArgName("Admin password");
         return this.adminPassOption;
     }
@@ -337,13 +338,13 @@ public abstract class BasicCommandlineOptions {
     }
     
     protected final Option getAdminUserOption(final AdminParser admp) {
-        this.adminUserOption= setShortLongOpt(admp,OPT_NAME_ADMINUSER_SHORT, OPT_NAME_ADMINUSER_LONG, OPT_NAME_ADMINUSER_DESCRIPTION, true, true);
+        this.adminUserOption= setShortLongOpt(admp,OPT_NAME_ADMINUSER_SHORT, OPT_NAME_ADMINUSER_LONG, OPT_NAME_ADMINUSER_DESCRIPTION, true, NeededTriState.possibly);
 //        retval.setArgName("Admin username");
         return this.adminUserOption;
     }
     
     protected final void setSearchPatternOption(final AdminParser admp){
-        this.searchOption = setShortLongOpt(admp,OPT_NAME_SEARCHPATTERN, OPT_NAME_SEARCHPATTERN_LONG, "The search pattern which is used for listing", true, false);
+        this.searchOption = setShortLongOpt(admp,OPT_NAME_SEARCHPATTERN, OPT_NAME_SEARCHPATTERN_LONG, "The search pattern which is used for listing", true, NeededTriState.notneeded);
     }
 
 //    protected final Option addArgName(final Option option, final String argname) {
@@ -515,4 +516,11 @@ public abstract class BasicCommandlineOptions {
         }
     }
 
+    protected final NeededTriState convertBooleantoTriState(boolean needed) {
+        if (needed) {
+            return NeededTriState.needed;
+        } else {
+            return NeededTriState.notneeded;
+        }
+    }
 }

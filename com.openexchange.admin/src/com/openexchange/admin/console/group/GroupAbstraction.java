@@ -52,14 +52,11 @@ import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-import java.util.ArrayList;
 
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.BasicCommandlineOptions;
 import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.rmi.OXGroupInterface;
-import com.openexchange.admin.rmi.dataobjects.Group;
-import com.openexchange.admin.rmi.extensions.OXGroupExtensionInterface;
 
 public abstract class GroupAbstraction extends BasicCommandlineOptions {
 
@@ -89,37 +86,37 @@ public abstract class GroupAbstraction extends BasicCommandlineOptions {
     protected static final char OPT_MAILADDRESS_SHORT = 'm';
     
     protected void setAddMembersOption(final AdminParser admp,boolean required) {
-        addMemberOption = setShortLongOpt(admp,OPT_NAME_ADDMEMBERS, OPT_NAME_ADDMEMBERS_LONG, "List of members to add to group", true, required);
+        addMemberOption = setShortLongOpt(admp,OPT_NAME_ADDMEMBERS, OPT_NAME_ADDMEMBERS_LONG, "List of members to add to group", true, convertBooleantoTriState(required));
 //        retval.setArgName(OPT_NAME_ADDMEMBERS_LONG);
         
     }
 
     protected void setRemoveMembersOption(final AdminParser admp,boolean required) {
-        removeMemberOption = setShortLongOpt(admp,OPT_NAME_REMOVEMEMBERS, OPT_NAME_REMOVEMEMBERS_LONG, "List of members to be removed from group", true, required);
+        removeMemberOption = setShortLongOpt(admp,OPT_NAME_REMOVEMEMBERS, OPT_NAME_REMOVEMEMBERS_LONG, "List of members to be removed from group", true, convertBooleantoTriState(required));
 //        retval.setArgName(OPT_NAME_REMOVEMEMBERS_LONG);
        
     }
 
     protected void setGroupIdOption(final AdminParser admp,boolean required) {
-        IdOption = setShortLongOpt(admp,OPT_NAME_GROUPID, OPT_NAME_GROUPID_LONG, "The id of the group", true, required);
+        IdOption = setShortLongOpt(admp,OPT_NAME_GROUPID, OPT_NAME_GROUPID_LONG, "The id of the group", true, convertBooleantoTriState(required));
 //        retval.setArgName("id");
         
     }
     
     protected void setGroupNameOption(final AdminParser admp,boolean required) {
-        nameOption= setShortLongOpt(admp,OPT_NAME_GROUPNAME, OPT_NAME_GROUPNAME_LONG, "The group name", true, required);
+        nameOption= setShortLongOpt(admp,OPT_NAME_GROUPNAME, OPT_NAME_GROUPNAME_LONG, "The group name", true, convertBooleantoTriState(required));
 //        retval.setArgName(OPT_NAME_GROUPDISPLAYNAME_LONG);
         
     }
     
     protected void setGroupDisplayNameOption(final AdminParser admp,boolean required) {
-        displayNameOption = setShortLongOpt(admp,OPT_NAME_GROUPDISPLAYNAME, OPT_NAME_GROUPDISPLAYNAME_LONG, "The displayname for the Group", true, required);
+        displayNameOption = setShortLongOpt(admp,OPT_NAME_GROUPDISPLAYNAME, OPT_NAME_GROUPDISPLAYNAME_LONG, "The displayname for the Group", true, convertBooleantoTriState(required));
 //        retval.setArgName(OPT_NAME_GROUPNAME_LONG);
         
     }
     
     protected void setMailOption(final AdminParser admp,boolean required) {
-        mailOption = setShortLongOpt(admp,OPT_MAILADDRESS_SHORT, OPT_MAILADDRESS_LONG, "email address if the group should receive mail", true, required);
+        mailOption = setShortLongOpt(admp,OPT_MAILADDRESS_SHORT, OPT_MAILADDRESS_LONG, "email address if the group should receive mail", true, convertBooleantoTriState(required));
 //        retval.setArgName(OPT_NAME_GROUPNAME_LONG);
         
     }
