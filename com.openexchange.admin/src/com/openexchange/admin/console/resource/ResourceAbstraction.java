@@ -85,15 +85,15 @@ public abstract class ResourceAbstraction extends BasicCommandlineOptions {
     protected Option resourceRecipientOption = null;
     
     protected void setDisplayNameOption(final AdminParser admp,final boolean required){
-        resourceDisplayNameOption = setShortLongOpt(admp, _OPT_DISPNAME_SHORT,_OPT_DISPNAME_LONG,"The resource display name",true, required);        
+        resourceDisplayNameOption = setShortLongOpt(admp, _OPT_DISPNAME_SHORT,_OPT_DISPNAME_LONG,"The resource display name",true, convertBooleantoTriState(required));        
     }
     
     protected void setRecipientOption(final AdminParser admp,final boolean required){
-        resourceRecipientOption = setShortLongOpt(admp, OPT_RECIPIENT_SHORT,OPT_RECIPIENT_LONG,"Recipient who should receive mail addressed to the resource",true, required);        
+        resourceRecipientOption = setShortLongOpt(admp, OPT_RECIPIENT_SHORT,OPT_RECIPIENT_LONG,"Recipient who should receive mail addressed to the resource",true, convertBooleantoTriState(required));        
     }
     
     protected void setNameOption(final AdminParser admp,final boolean required){
-        resourceNameOption =  setShortLongOpt(admp, _OPT_NAME_SHORT,_OPT_NAME_LONG,"The resource name",true, required); 
+        resourceNameOption =  setShortLongOpt(admp, _OPT_NAME_SHORT,_OPT_NAME_LONG,"The resource name",true, convertBooleantoTriState(required)); 
     }
     
     protected void setAvailableOption(final AdminParser admp,final boolean required){
@@ -101,15 +101,15 @@ public abstract class ResourceAbstraction extends BasicCommandlineOptions {
     }
     
     protected void setDescriptionOption(final AdminParser admp,final boolean required){
-        resourceDescriptionOption =   setShortLongOpt(admp,_OPT_DESCRIPTION_SHORT,_OPT_DESCRIPTION_LONG,"Description of this resource", true, required);        
+        resourceDescriptionOption =   setShortLongOpt(admp,_OPT_DESCRIPTION_SHORT,_OPT_DESCRIPTION_LONG,"Description of this resource", true, convertBooleantoTriState(required));        
     }
     
     protected void setEmailOption(final AdminParser admp,final boolean required){
-        resourceEmailOption =  setShortLongOpt(admp,_OPT_EMAIL_SHORT,_OPT_EMAIL_LONG,"Email of this resource", true, required); 
+        resourceEmailOption =  setShortLongOpt(admp,_OPT_EMAIL_SHORT,_OPT_EMAIL_LONG,"Email of this resource", true, convertBooleantoTriState(required)); 
     }
     
     protected void setIdOption(final AdminParser admp,final boolean required){
-        resourceIdOption = setShortLongOpt(admp,_OPT_RESOURCEID_SHORT,_OPT_RESOURCEID_LONG,"Id of this resource", true, required); 
+        resourceIdOption = setShortLongOpt(admp,_OPT_RESOURCEID_SHORT,_OPT_RESOURCEID_LONG,"Id of this resource", true, convertBooleantoTriState(required)); 
     }
 
     protected final OXResourceInterface getResourceInterface() throws NotBoundException, MalformedURLException, RemoteException {
