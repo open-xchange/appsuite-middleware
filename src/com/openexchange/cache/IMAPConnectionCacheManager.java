@@ -62,7 +62,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.configuration.ConfigurationInit;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.imap.IMAPConnection;
+import com.openexchange.imap.connection.IMAPConnection;
 import com.openexchange.sessiond.SessionObject;
 
 /**

@@ -61,11 +61,11 @@ import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.ContextException;
 import com.openexchange.groupware.contexts.ContextStorage;
-import com.openexchange.groupware.imap.IMAPException;
-import com.openexchange.groupware.imap.IMAPPropertiesFactory;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.imap.IMAPException;
+import com.openexchange.imap.IMAPPropertiesFactory;
 import com.openexchange.server.DBPoolingException;
 
 /**

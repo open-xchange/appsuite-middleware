@@ -56,8 +56,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.imap.OXMailException;
-import com.openexchange.groupware.imap.OXMailException.MailCode;
+import com.openexchange.imap.OXMailException;
+import com.openexchange.imap.OXMailException.MailCode;
 
 /**
  * CommandExecutor - executes given command in a separate process and supports

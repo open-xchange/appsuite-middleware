@@ -78,7 +78,7 @@ import com.openexchange.sessiond.SessionObject;
  * "imap.properties".
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @see com.openexchange.groupware.imap.IMAPProperties
+ * @see com.openexchange.imap.IMAPProperties
  */
 public class MessageCacheManager {
 

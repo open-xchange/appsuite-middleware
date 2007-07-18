@@ -54,9 +54,9 @@ import java.sql.SQLException;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.imap.User2IMAP;
-import com.openexchange.groupware.imap.User2IMAPInfo;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.imap.user2imap.User2IMAP;
+import com.openexchange.imap.user2imap.User2IMAPInfo;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 import com.sun.mail.imap.ACL;
 import com.sun.mail.imap.Rights;

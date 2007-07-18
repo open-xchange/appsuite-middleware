@@ -60,10 +60,10 @@ import javax.mail.Session;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.imap.IMAPProperties;
-import com.openexchange.groupware.imap.IMAPUtils;
 import com.openexchange.groupware.ldap.Credentials;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.imap.IMAPProperties;
+import com.openexchange.imap.IMAPUtils;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.Rights;
 

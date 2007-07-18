@@ -50,11 +50,11 @@
 package com.openexchange.groupware.settings.shared;
 
 import com.openexchange.groupware.UserConfiguration;
-import com.openexchange.groupware.imap.UserSettingMail;
 import com.openexchange.groupware.settings.AbstractMailFuncs;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.SettingSetup;
 import com.openexchange.groupware.settings.SharedValue;
+import com.openexchange.imap.UserSettingMail;
 import com.openexchange.sessiond.SessionObject;
 
 /**

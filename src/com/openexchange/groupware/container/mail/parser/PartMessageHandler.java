@@ -64,8 +64,8 @@ import javax.mail.Message.RecipientType;
 import javax.mail.internet.InternetAddress;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.imap.OXMailException;
-import com.openexchange.groupware.imap.OXMailException.MailCode;
+import com.openexchange.imap.OXMailException;
+import com.openexchange.imap.OXMailException.MailCode;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.mail.UUEncodedPart;
 

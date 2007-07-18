@@ -55,7 +55,7 @@ import org.apache.jcs.engine.CacheElement;
 import org.apache.jcs.engine.control.event.ElementEvent;
 
 import com.openexchange.api2.MailInterfaceImpl;
-import com.openexchange.groupware.imap.DefaultIMAPConnection;
+import com.openexchange.imap.connection.DefaultIMAPConnection;
 
 /**
  * IMAPConnectionEventHandler - an element event handler that ensures cached

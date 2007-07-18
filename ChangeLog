@@ -1,3 +1,8 @@
+* 2007-07-18 - thorben.betten@open-xchange.com
+
+ - New design for custom IMAP commands
+ - Moved imap-related packages to new package(s)
+
 * 2007-07-17 - francisco.laguna@open-xchange.com
 
  - Fix for bug #8478: Changed LogLevel.

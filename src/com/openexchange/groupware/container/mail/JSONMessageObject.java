@@ -79,11 +79,11 @@ import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.mail.parser.MessageUtils;
-import com.openexchange.groupware.imap.IMAPException;
-import com.openexchange.groupware.imap.IMAPProperties;
-import com.openexchange.groupware.imap.OXMailException;
-import com.openexchange.groupware.imap.UserSettingMail;
-import com.openexchange.groupware.imap.OXMailException.MailCode;
+import com.openexchange.imap.IMAPException;
+import com.openexchange.imap.IMAPProperties;
+import com.openexchange.imap.OXMailException;
+import com.openexchange.imap.UserSettingMail;
+import com.openexchange.imap.OXMailException.MailCode;
 
 /**
  * JSONMessageObject

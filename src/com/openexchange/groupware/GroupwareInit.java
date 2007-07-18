@@ -56,9 +56,9 @@ import com.openexchange.groupware.calendar.CalendarConfig;
 import com.openexchange.groupware.configuration.ParticipantConfig;
 import com.openexchange.groupware.contact.ContactConfig;
 import com.openexchange.groupware.contexts.ContextInit;
-import com.openexchange.groupware.imap.User2IMAP;
 import com.openexchange.groupware.integration.SetupLink;
 import com.openexchange.groupware.settings.ConfigTree;
+import com.openexchange.imap.user2imap.User2IMAP;
 import com.openexchange.push.udp.PushInit;
 import com.openexchange.sessiond.SessiondInit;
 

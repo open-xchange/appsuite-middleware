@@ -94,16 +94,17 @@ import com.openexchange.groupware.container.mail.JSONMessageAttachmentObject;
 import com.openexchange.groupware.container.mail.JSONMessageObject;
 import com.openexchange.groupware.container.mail.parser.MessageDumper;
 import com.openexchange.groupware.container.mail.parser.PartMessageHandler;
-import com.openexchange.groupware.imap.ByteArrayDataSource;
-import com.openexchange.groupware.imap.IMAPException;
-import com.openexchange.groupware.imap.IMAPProperties;
-import com.openexchange.groupware.imap.MessageDataSource;
-import com.openexchange.groupware.imap.OXMailException;
-import com.openexchange.groupware.imap.UserSettingMail;
-import com.openexchange.groupware.imap.OXMailException.MailCode;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.upload.UploadEvent;
+import com.openexchange.imap.IMAPException;
+import com.openexchange.imap.IMAPProperties;
+import com.openexchange.imap.MessageHeaders;
+import com.openexchange.imap.OXMailException;
+import com.openexchange.imap.UserSettingMail;
+import com.openexchange.imap.OXMailException.MailCode;
+import com.openexchange.imap.datasource.ByteArrayDataSource;
+import com.openexchange.imap.datasource.MessageDataSource;
 import com.openexchange.server.DBPool;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.server.Version;
@@ -125,23 +126,6 @@ import com.sun.mail.imap.IMAPFolder;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MessageFiller {
-
-	/*
-	 * Constants for rfc822 message headers
-	 */
-	private static final String HDR_X_MAILER = "X-Mailer";
-
-	private static final String HDR_X_PRIORITY = "X-Priority";
-
-	private static final String HDR_CONTENT_TYPE = "Content-Type";
-
-	private static final String HDR_CONTENT_ID = "Content-ID";
-
-	private static final String HDR_DISP_TO = "Disposition-Notification-To";
-
-	private static final String HDR_MIME_VERSION = "MIME-Version";
-	
-	private static final String HDR_ORGANIZATION = "Organization";
 
 	/*
 	 * Constants for MIME types
@@ -326,8 +310,8 @@ public class MessageFiller {
 					 */
 					text.setText(performLineWrap(converter.convertWithQuotes(mailText), false, linewrap),
 							IMAPProperties.getDefaultMimeCharset());
-					text.setHeader(HDR_MIME_VERSION, VERSION);
-					text.setHeader(HDR_CONTENT_TYPE, PAT_TEXT_CT.replaceFirst(REPLACE_CS, IMAPProperties
+					text.setHeader(MessageHeaders.HDR_MIME_VERSION, VERSION);
+					text.setHeader(MessageHeaders.HDR_CONTENT_TYPE, PAT_TEXT_CT.replaceFirst(REPLACE_CS, IMAPProperties
 							.getDefaultMimeCharset()));
 					/*
 					 * Add body part
@@ -344,8 +328,8 @@ public class MessageFiller {
 					final String ct = PAT_HTML_CT.replaceFirst(REPLACE_CS, IMAPProperties.getDefaultMimeCharset());
 					html.setContent(performLineWrap(insertColorQuotes(MailTools.formatHrefLinks(mailText)), true,
 							linewrap), ct);
-					html.setHeader(HDR_MIME_VERSION, VERSION);
-					html.setHeader(HDR_CONTENT_TYPE, ct);
+					html.setHeader(MessageHeaders.HDR_MIME_VERSION, VERSION);
+					html.setHeader(MessageHeaders.HDR_CONTENT_TYPE, ct);
 					/*
 					 * Add body part
 					 */
@@ -388,7 +372,7 @@ public class MessageFiller {
 					 * Define content
 					 */
 					vcardPart.setDataHandler(new DataHandler(new MessageDataSource(userVCard, MIME_TEXT_VCARD)));
-					vcardPart.setHeader(HDR_MIME_VERSION, VERSION);
+					vcardPart.setHeader(MessageHeaders.HDR_MIME_VERSION, VERSION);
 					vcardPart.setFileName(fileName);
 					/*
 					 * Append body part
@@ -448,13 +432,13 @@ public class MessageFiller {
 								.getContent())), true, linewrap);
 					}
 					newMimeMessage.setContent(mailText, ct.toString());
-					newMimeMessage.setHeader(HDR_MIME_VERSION, VERSION);
-					newMimeMessage.setHeader(HDR_CONTENT_TYPE, ct.toString());
+					newMimeMessage.setHeader(MessageHeaders.HDR_MIME_VERSION, VERSION);
+					newMimeMessage.setHeader(MessageHeaders.HDR_CONTENT_TYPE, ct.toString());
 				} else {
 					final MimeBodyPart msgBodyPart = new MimeBodyPart();
 					msgBodyPart.setContent(mailTextMao.getContent(), ct.toString());
-					msgBodyPart.setHeader(HDR_MIME_VERSION, VERSION);
-					msgBodyPart.setHeader(HDR_CONTENT_TYPE, ct.toString());
+					msgBodyPart.setHeader(MessageHeaders.HDR_MIME_VERSION, VERSION);
+					msgBodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, ct.toString());
 					primaryMultipart.addBodyPart(msgBodyPart);
 				}
 			} else {
@@ -546,8 +530,8 @@ public class MessageFiller {
 		} catch (final IOException e) {
 			throw new OXMailException(MailCode.HTML2TEXT_CONVERTER_ERROR, e, e.getMessage());
 		}
-		text.setHeader(HDR_MIME_VERSION, VERSION);
-		text.setHeader(HDR_CONTENT_TYPE, PAT_TEXT_CT.replaceFirst(REPLACE_CS, IMAPProperties.getDefaultMimeCharset()));
+		text.setHeader(MessageHeaders.HDR_MIME_VERSION, VERSION);
+		text.setHeader(MessageHeaders.HDR_CONTENT_TYPE, PAT_TEXT_CT.replaceFirst(REPLACE_CS, IMAPProperties.getDefaultMimeCharset()));
 		alternativeMultipart.addBodyPart(text);
 		/*
 		 * Define html content
@@ -557,8 +541,8 @@ public class MessageFiller {
 		html
 				.setContent(performLineWrap(insertColorQuotes(MailTools.formatHrefLinks(mailText)), true, linewrap),
 						htmlCT);
-		html.setHeader(HDR_MIME_VERSION, VERSION);
-		html.setHeader(HDR_CONTENT_TYPE, htmlCT);
+		html.setHeader(MessageHeaders.HDR_MIME_VERSION, VERSION);
+		html.setHeader(MessageHeaders.HDR_CONTENT_TYPE, htmlCT);
 		htmlCT = null;
 		/*
 		 * Add to newly created "related" or existing superior multipart
@@ -595,7 +579,7 @@ public class MessageFiller {
 				relatedImageBodyPart.setFileName(ifds.getName());
 				relatedImageBodyPart.setText(ifds.getName());
 				relatedImageBodyPart.setDataHandler(new DataHandler(ifds));
-				relatedImageBodyPart.setHeader(HDR_CONTENT_ID, cidBuilder.append('<').append(cid).append('>')
+				relatedImageBodyPart.setHeader(MessageHeaders.HDR_CONTENT_ID, cidBuilder.append('<').append(cid).append('>')
 						.toString());
 				cidBuilder.setLength(0);
 				relatedImageBodyPart.setDisposition(Part.INLINE);
@@ -686,7 +670,7 @@ public class MessageFiller {
 					messageBodyPart.setFileName(mao.getFileName());
 				}
 				messageBodyPart.setDisposition(mao.getDisposition() == null ? Part.ATTACHMENT : mao.getDisposition());
-				messageBodyPart.setHeader(HDR_CONTENT_TYPE, mao.getContentType());
+				messageBodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, mao.getContentType());
 				mp.addBodyPart(messageBodyPart);
 			} else if (mao.getInfostoreDocumentInputStream() != null) {
 				/*
@@ -710,7 +694,7 @@ public class MessageFiller {
 					messageBodyPart.setFileName(mao.getFileName());
 				}
 				messageBodyPart.setDisposition(mao.getDisposition() == null ? Part.ATTACHMENT : mao.getDisposition());
-				messageBodyPart.setHeader(HDR_CONTENT_TYPE, mao.getContentType());
+				messageBodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, mao.getContentType());
 				mp.addBodyPart(messageBodyPart);
 			} else if (msgObj.getMsgref() != null && mao.getFileName() != null && mao.getPositionInMail() != null) {
 				/*
@@ -823,16 +807,16 @@ public class MessageFiller {
 		 * Set disposition notification
 		 */
 		if (msgObj.getDispositionNotification() != null && msgObj.getDispositionNotification().length() > 0) {
-			msg.setHeader(HDR_DISP_TO, msgObj.getDispositionNotification());
+			msg.setHeader(MessageHeaders.HDR_DISP_TO, msgObj.getDispositionNotification());
 		}
 		/*
 		 * Set priority
 		 */
-		msg.setHeader(HDR_X_PRIORITY, String.valueOf(msgObj.getPriority()));
+		msg.setHeader(MessageHeaders.HDR_X_PRIORITY, String.valueOf(msgObj.getPriority()));
 		/*
 		 * Set mailer
 		 */
-		msgObj.addHeader(HDR_X_MAILER, "Open-Xchange Mailer v" + Version.VERSION_STRING);
+		msgObj.addHeader(MessageHeaders.HDR_X_MAILER, "Open-Xchange Mailer v" + Version.VERSION_STRING);
 		/*
 		 * Set organization to context-admin's company field setting
 		 */
@@ -844,7 +828,7 @@ public class MessageFiller {
 					session.getContext()).getUser(session.getContext().getMailadmin()).getContactId(),
 					FolderObject.SYSTEM_LDAP_FOLDER_ID);
 			if (null != c && c.getCompany() != null && c.getCompany().length() > 0) {
-				msg.setHeader(HDR_ORGANIZATION, c.getCompany());
+				msg.setHeader(MessageHeaders.HDR_ORGANIZATION, c.getCompany());
 			}
 		} catch (final Throwable t) {
 			LOG.warn("Header \"Organization\" could not be set", t);

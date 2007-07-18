@@ -66,7 +66,7 @@ import javax.mail.internet.InternetAddress;
 import com.openexchange.api2.MailInterfaceImpl;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.mail.JSONMessageObject;
-import com.openexchange.groupware.imap.IMAPUtils;
+import com.openexchange.imap.IMAPUtils;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.mail.UUEncodedPart;
 

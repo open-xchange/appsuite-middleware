@@ -49,7 +49,7 @@
 
 package com.openexchange.groupware;
 
-import com.openexchange.groupware.imap.OXMailException;
+import com.openexchange.imap.OXMailException;
 
 /**
  * AccountExistenceException

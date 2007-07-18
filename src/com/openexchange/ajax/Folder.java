@@ -1211,9 +1211,7 @@ public class Folder extends SessionServlet {
 			lastModifiedDate = lastModified == 0 ? null : new Date(lastModified);
 		} catch (final OXFolderException e) {
 			LOG.error(e.getMessage(), e);
-			//if (!e.getCategory().equals(Category.USER_CONFIGURATION)) {
-				response.setException(e);
-			//}
+			response.setException(e);
 		} catch (final AbstractOXException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
@@ -1291,9 +1289,7 @@ public class Folder extends SessionServlet {
 			}
 		} catch (final OXFolderException e) {
 			LOG.error(e.getMessage(), e);
-			//if (!e.getCategory().equals(Category.USER_CONFIGURATION)) {
-				response.setException(e);
-			//}
+			response.setException(e);
 		} catch (final AbstractOXException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);

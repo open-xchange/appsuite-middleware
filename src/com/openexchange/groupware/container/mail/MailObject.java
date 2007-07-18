@@ -65,9 +65,9 @@ import javax.mail.internet.MimeMessage;
 
 import com.openexchange.api2.MailInterfaceImpl;
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.imap.IMAPProperties;
-import com.openexchange.groupware.imap.OXMailException;
-import com.openexchange.groupware.imap.OXMailException.MailCode;
+import com.openexchange.imap.IMAPProperties;
+import com.openexchange.imap.OXMailException;
+import com.openexchange.imap.OXMailException.MailCode;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.mail.ContentType;
 

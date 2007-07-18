@@ -58,8 +58,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.imap.OXMailException;
-import com.openexchange.groupware.imap.OXMailException.MailCode;
+import com.openexchange.imap.OXMailException;
+import com.openexchange.imap.OXMailException.MailCode;
 
 /**
  * ContentType

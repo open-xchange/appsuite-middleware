@@ -62,8 +62,8 @@ import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.api2.MailInterface;
 import com.openexchange.groupware.container.mail.JSONMessageObject;
-import com.openexchange.groupware.imap.OXMailException;
-import com.openexchange.groupware.imap.OXMailException.MailCode;
+import com.openexchange.imap.OXMailException;
+import com.openexchange.imap.OXMailException.MailCode;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.iterator.SearchIteratorException;
 

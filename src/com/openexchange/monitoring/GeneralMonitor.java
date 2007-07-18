@@ -55,7 +55,7 @@ import javax.management.MBeanRegistration;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
-import com.openexchange.groupware.imap.DefaultIMAPConnection;
+import com.openexchange.imap.connection.DefaultIMAPConnection;
 
 /**
  * 

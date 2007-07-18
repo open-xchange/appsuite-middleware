@@ -74,7 +74,7 @@ import javax.mail.Store;
 import javax.mail.internet.InternetAddress;
 
 import com.openexchange.ajax.Mail;
-import com.openexchange.groupware.imap.DefaultIMAPConnection;
+import com.openexchange.imap.connection.DefaultIMAPConnection;
 import com.openexchange.tools.mail.ContentType;
 import com.sun.mail.imap.IMAPFolder;
 

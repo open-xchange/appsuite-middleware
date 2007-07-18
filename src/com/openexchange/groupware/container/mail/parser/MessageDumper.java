@@ -85,11 +85,11 @@ import net.freeutils.tnef.mime.TNEFMime;
 import com.openexchange.api2.OXException;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
-import com.openexchange.groupware.imap.IMAPProperties;
-import com.openexchange.groupware.imap.IMAPUtils;
-import com.openexchange.groupware.imap.OXMailException;
-import com.openexchange.groupware.imap.TNEFBodyPart;
-import com.openexchange.groupware.imap.OXMailException.MailCode;
+import com.openexchange.imap.IMAPProperties;
+import com.openexchange.imap.IMAPUtils;
+import com.openexchange.imap.OXMailException;
+import com.openexchange.imap.TNEFBodyPart;
+import com.openexchange.imap.OXMailException.MailCode;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.mail.ContentType;
 import com.openexchange.tools.mail.UUEncodedMultiPart;
@@ -169,7 +169,7 @@ public class MessageDumper {
 	/**
 	 * Creates a new <code>MessageDumper</code> instance with given session
 	 * object. <code>invokePartModifier</code> determines whether underlying
-	 * <code>com.openexchange.groupware.imap.PartModifier</code>
+	 * <code>com.openexchange.imap.PartModifier</code>
 	 * implementation is going to be called or not.
 	 */
 	public MessageDumper(final SessionObject session, final boolean invokePartModifier, final boolean nestedMsgsOnly) {

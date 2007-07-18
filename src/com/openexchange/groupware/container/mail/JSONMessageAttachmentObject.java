@@ -60,9 +60,9 @@ import org.json.JSONObject;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.mail.parser.MessageUtils;
-import com.openexchange.groupware.imap.OXMailException;
-import com.openexchange.groupware.imap.OXMailException.MailCode;
 import com.openexchange.groupware.upload.UploadEvent;
+import com.openexchange.imap.OXMailException;
+import com.openexchange.imap.OXMailException.MailCode;
 
 /**
  * JSONMessageAttachmentObject
