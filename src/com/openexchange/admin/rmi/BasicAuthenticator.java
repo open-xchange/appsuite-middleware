@@ -89,7 +89,7 @@ public class BasicAuthenticator {
      * @param authdata
      * @throws InvalidCredentialsException
      */
-    public void doAuthentication(Credentials authdata) throws InvalidCredentialsException{        
+    public void doAuthentication(final Credentials authdata) throws InvalidCredentialsException{        
         // first check if whole authentication mech is disabled
         if(!cache.masterAuthenticationDisabled()){
             if(!fileAuth.authenticate(authdata)){
@@ -105,7 +105,7 @@ public class BasicAuthenticator {
      * 
      * @param ctx
      */
-    public void removeFromAuthCache(Context ctx) {
+    public void removeFromAuthCache(final Context ctx) {
        ClientAdminThread.cache.removeAdminCredentials(ctx); 
     }
     
@@ -119,27 +119,29 @@ public class BasicAuthenticator {
      * @throws StorageException
      * @throws InvalidDataException 
      */
-    public void doAuthentication(Credentials authdata,Context ctx) throws InvalidCredentialsException, StorageException, InvalidDataException{
+    public void doAuthentication(final Credentials authdata,final Context ctx) throws InvalidCredentialsException, StorageException, InvalidDataException{
         contextcheck(ctx);
 
 
         // only do context check, if we have not already admin creds in our cache for given context
+        // ATTENTION: It is correct that we don't throw a now such context exception here because we won't
+        // give an opportunity to indirectly check for contexts here
         if( ClientAdminThread.cache.getAdminCredentials(ctx) == null ) {
             if (!OXToolStorageInterface.getInstance().existsContext(ctx)) {
                 final InvalidCredentialsException invalidCredentialsException = new InvalidCredentialsException(
-                        "Authentication failed for user " + authdata.getLogin());
+                        "Authentication failed");
                 log.error("Requested context " + ctx.getIdAsInt()
                         + " does not exist!", invalidCredentialsException);
                 throw invalidCredentialsException;
             }
         }
         
-        // first check if whole authentication mech is disabled
+        // first check if whole authentication mechanism is disabled
         if (!cache.contextAuthenticationDisabled()) {
             if (!sqlAuth.authenticate(authdata, ctx)) {
                 final InvalidCredentialsException invalidCredentialsException = new InvalidCredentialsException(
-                        "Authentication failed for user " + authdata.getLogin());
-                log.error("Admin authentication: ",invalidCredentialsException);
+                        "Authentication failed");
+                log.error("Admin authentication for user " + authdata.getLogin(),invalidCredentialsException);
                 throw invalidCredentialsException;
             }
         }
@@ -154,7 +156,7 @@ public class BasicAuthenticator {
      * @throws StorageException
      * @throws InvalidDataException 
      */
-    public void doUserAuthentication(Credentials authdata,Context ctx) throws InvalidCredentialsException, StorageException, InvalidDataException{
+    public void doUserAuthentication(final Credentials authdata,final Context ctx) throws InvalidCredentialsException, StorageException, InvalidDataException{
         contextcheck(ctx);
 
         if (!OXToolStorageInterface.getInstance().existsContext(ctx)) {
@@ -188,9 +190,9 @@ public class BasicAuthenticator {
      * @param objects
      * @throws InvalidDataException
      */
-    protected final static void doNullCheck(Object...objects ) throws InvalidDataException
+    protected final static void doNullCheck(final Object...objects ) throws InvalidDataException
     {
-        for (Object object : objects) {
+        for (final Object object : objects) {
             if(object==null){
                 throw new InvalidDataException();
             }
