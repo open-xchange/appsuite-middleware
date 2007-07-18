@@ -41,13 +41,6 @@ public abstract class ContextAbtraction extends UserAbstraction {
         this.commonIDOption = setShortLongOpt(parser, OPT_NAME_COMMON_ID_SHORT,OPT_NAME_COMMON_ID_LONG,"Object Id",true, convertBooleantoTriState(required));
     }
     
-    protected void setDefaultCommandLineOptionsWithoutContextID(final AdminParser parser){          
-        
-        getAdminUserOption(parser);
-        getAdminPassOption(parser);        
-        
-    }
-    
     protected void setMaintenanceReasodIDOption(final AdminParser parser,final boolean required){
         this.maintenanceReasonIDOption = setShortLongOpt(parser, OPT_REASON_SHORT,OPT_REASON_LONG,"Maintenance reason id",true, convertBooleantoTriState(required));
     }
