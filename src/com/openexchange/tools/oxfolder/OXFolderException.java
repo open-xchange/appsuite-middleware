@@ -520,7 +520,15 @@ public class OXFolderException extends OXException {
 		 */
 		UNAPPLICABLE_FOLDER_PERM(
 				"Defined permissions for folder %s in context %s are not applicable to user %s due to user configuration",
-				Category.USER_CONFIGURATION, 73);
+				Category.USER_CONFIGURATION, 73),
+		/**
+		 * Folder %s in context %s contains a hidden subfolder. User %s has no
+		 * delete rights for this subfolder and consequently cannot delete its
+		 * parent folder.
+		 */
+		HIDDEN_FOLDER_ON_DELETION(
+				"Folder %s in context %s contains a hidden subfolder. User %s has no delete rights for this subfolder and consequently cannot delete its parent folder.",
+				Category.PERMISSION, 74);
 
 		/**
 		 * Message of the exception.

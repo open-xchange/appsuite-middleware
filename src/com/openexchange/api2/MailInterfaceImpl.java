@@ -3485,8 +3485,6 @@ public class MailInterfaceImpl implements MailInterface {
 				try {
 					final long start = System.currentTimeMillis();
 					new CopyUIDIMAPCommand(imapCon.getImapFolder(), msgUIDs, trashFolder.getFullName(), false, true).doCommand();
-					/*IMAPUtils.copyUIDFast(imapCon.getImapFolder(), msgUIDs, trashFolder.getFullName(), false);
-					mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);*/
 					if (LOG.isInfoEnabled()) {
 						LOG.info(new StringBuilder(100).append("\"Soft Delete\": ").append(msgUIDs.length).append(
 								" messages copied to default trash folder \"").append(trashFolder.getFullName())
@@ -3510,8 +3508,6 @@ public class MailInterfaceImpl implements MailInterface {
 			 * Mark messages as \DELETED
 			 */
 			final long start = System.currentTimeMillis();
-			//IMAPUtils.setSystemFlags(imapCon.getImapFolder(), msgUIDs, false, FLAGS_DELETED, true);
-			//mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 			new FlagsIMAPCommand(imapCon.getImapFolder(), msgUIDs, FLAGS_DELETED, true, false).doCommand();
 			if (LOG.isInfoEnabled()) {
 				LOG.info(new StringBuilder(100).append(msgUIDs.length).append(

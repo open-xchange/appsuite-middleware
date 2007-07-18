@@ -1133,7 +1133,7 @@ public class OXFolderManagerImpl implements OXFolderManager {
 			final UserConfiguration userConfig, final String permissionIDs) throws OXException, DBPoolingException,
 			SQLException {
 		final HashMap<Integer, HashMap> deleteableIDs = new HashMap<Integer, HashMap>();
-		gatherDeleteableSubfoldersRecursively(folderID, userId, userConfig, permissionIDs, deleteableIDs);
+		gatherDeleteableSubfoldersRecursively(folderID, userId, userConfig, permissionIDs, deleteableIDs, folderID);
 		return deleteableIDs;
 	}
 
@@ -1142,7 +1142,7 @@ public class OXFolderManagerImpl implements OXFolderManager {
 	 */
 	private final void gatherDeleteableSubfoldersRecursively(final int folderID, final int userId,
 			final UserConfiguration userConfig, final String permissionIDs,
-			final HashMap<Integer, HashMap> deleteableIDs) throws OXException, DBPoolingException, SQLException {
+			final HashMap<Integer, HashMap> deleteableIDs, final int initParent) throws OXException, DBPoolingException, SQLException {
 		final FolderObject delFolder = getOXFolderAccess().getFolderObject(folderID);
 		/*
 		 * Check if shared
@@ -1164,11 +1164,19 @@ public class OXFolderManagerImpl implements OXFolderManager {
 		final EffectivePermission effectivePerm = getOXFolderAccess().getFolderPermission(folderID, userId, userConfig);
 		if (!effectivePerm.isFolderVisible()) {
 			if (!effectivePerm.getUnderlyingPermission().isFolderVisible()) {
-				throw new OXFolderPermissionException(FolderCode.NOT_VISIBLE, getFolderName(folderID, ctx),
-						getUserName(userId, ctx), Integer.valueOf(ctx.getContextId()));
+				if (initParent == folderID) {
+					throw new OXFolderPermissionException(FolderCode.NOT_VISIBLE, getFolderName(folderID, ctx),
+							getUserName(userId, ctx), Integer.valueOf(ctx.getContextId()));
+				}
+				throw new OXFolderPermissionException(FolderCode.HIDDEN_FOLDER_ON_DELETION, getFolderName(initParent,
+						ctx), Integer.valueOf(ctx.getContextId()), getUserName(userId, ctx));
 			}
-			throw new OXFolderException(FolderCode.NOT_VISIBLE, Category.USER_CONFIGURATION, getFolderName(folderID,
-					ctx), getUserName(userId, ctx), Integer.valueOf(ctx.getContextId()));
+			if (initParent == folderID) {
+				throw new OXFolderException(FolderCode.NOT_VISIBLE, Category.USER_CONFIGURATION, getFolderName(
+						folderID, ctx), getUserName(userId, ctx), Integer.valueOf(ctx.getContextId()));
+			}
+			throw new OXFolderException(FolderCode.HIDDEN_FOLDER_ON_DELETION, Category.USER_CONFIGURATION,
+					getFolderName(initParent, ctx), Integer.valueOf(ctx.getContextId()), getUserName(userId, ctx));
 		} else if (!effectivePerm.isFolderAdmin()) {
 			if (!effectivePerm.getUnderlyingPermission().isFolderAdmin()) {
 				throw new OXFolderPermissionException(FolderCode.NO_ADMIN_ACCESS, getUserName(userId, ctx),
@@ -1204,7 +1212,7 @@ public class OXFolderManagerImpl implements OXFolderManager {
 		final Iterator<Integer> it = subfolders.iterator();
 		for (int i = 0; i < size; i++) {
 			final int fuid = it.next().intValue();
-			gatherDeleteableSubfoldersRecursively(fuid, userId, userConfig, permissionIDs, subMap);
+			gatherDeleteableSubfoldersRecursively(fuid, userId, userConfig, permissionIDs, subMap, initParent);
 		}
 		deleteableIDs.put(Integer.valueOf(folderID), subMap);
 	}

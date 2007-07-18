@@ -2,6 +2,8 @@
 
  - New design for custom IMAP commands
  - Moved imap-related packages to new package(s)
+ - Bugfix #8472: Improved error message if a hidden subfolder is located
+   underneath a folder that should be deleted
 
 * 2007-07-17 - francisco.laguna@open-xchange.com
 
