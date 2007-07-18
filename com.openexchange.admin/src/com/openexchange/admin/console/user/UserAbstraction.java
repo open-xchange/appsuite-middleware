@@ -432,7 +432,7 @@ public abstract class UserAbstraction extends BasicCommandlineOptions {
             if (methodname.startsWith("set")) {
                 final String methodnamewithoutprefix = methodname.substring(3);
                 if (!notallowed.contains(methodnamewithoutprefix)) {
-                    final Class[] parametertypes = method.getParameterTypes();
+                    final Class<?>[] parametertypes = method.getParameterTypes();
                     if (parametertypes.length == 1) {
                         final String parametertype = parametertypes[0].getName();
                         if (allowedparametertypes.contains(parametertype)) {
@@ -769,7 +769,7 @@ public abstract class UserAbstraction extends BasicCommandlineOptions {
                     optionAndMethod.getMethod().invoke(usr, value);
                 }
             } else if (optionAndMethod.getReturntype().equals(JAVA_UTIL_HASH_SET)) {
-                final HashSet value = (HashSet)parser.getOptionValue(optionAndMethod.getOption());
+                final HashSet<?> value = (HashSet<?>)parser.getOptionValue(optionAndMethod.getOption());
                 if (null != value) {
                     optionAndMethod.getMethod().invoke(usr, value);
                 }
