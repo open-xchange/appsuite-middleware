@@ -14,6 +14,7 @@ import java.util.TimeZone;
 
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.MissingOptionException;
+import com.openexchange.admin.console.AdminParser.NeededTriState;
 import com.openexchange.admin.console.CmdLineParser.IllegalOptionValueException;
 import com.openexchange.admin.console.CmdLineParser.UnknownOptionException;
 import com.openexchange.admin.rmi.OXUserInterface;
@@ -38,7 +39,7 @@ public abstract class ListCore extends UserAbstraction {
         setDefaultCommandLineOptions(parser);
         
         setCSVOutputOption(parser);
-        this.searchOption = setShortLongOpt(parser, OPT_NAME_SEARCHPATTERN, OPT_NAME_SEARCHPATTERN_LONG, "The search pattern which is used for listing. This applies to name.", true, false);
+        this.searchOption = setShortLongOpt(parser, OPT_NAME_SEARCHPATTERN, OPT_NAME_SEARCHPATTERN_LONG, "The search pattern which is used for listing. This applies to name.", true, NeededTriState.notneeded);
         setFurtherOptions(parser);
     }
 
@@ -298,7 +299,7 @@ public abstract class ListCore extends UserAbstraction {
                 } else if (returntype.equals(JAVA_UTIL_DATE)) {
                     datarow.add(datetostring((Date)methodandnames.getMethod().invoke(user, (Object[]) null)));
                 } else if (returntype.equals(JAVA_UTIL_HASH_SET)) {
-                    datarow.add(hashtostring((HashSet)methodandnames.getMethod().invoke(user, (Object[]) null)));
+                    datarow.add(hashtostring((HashSet<?>)methodandnames.getMethod().invoke(user, (Object[]) null)));
                 } else if (returntype.equals(PASSWORDMECH_CLASS)) {
                     datarow.add(passwordtostring((PASSWORDMECH)methodandnames.getMethod().invoke(user, (Object[]) null)));
                 } else if (returntype.equals(JAVA_UTIL_TIME_ZONE)) {
