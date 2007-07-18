@@ -55,7 +55,6 @@ import com.openexchange.admin.rmi.impl.OXUser;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.groupware.contexts.ContextException;
 import com.openexchange.groupware.delete.DeleteFailedException;
-import com.openexchange.groupware.imap.UserSettingMail;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.server.DBPoolingException;
 
@@ -85,6 +84,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.groupware.IDGenerator;
 import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.delete.DeleteEvent;
+import com.openexchange.imap.UserSettingMail;
 import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
 
 import java.sql.DataTruncation;
