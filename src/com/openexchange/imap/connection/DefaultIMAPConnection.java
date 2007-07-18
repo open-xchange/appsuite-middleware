@@ -277,19 +277,24 @@ public final class DefaultIMAPConnection implements IMAPConnection, Serializable
 	 */
 	public void close() throws javax.mail.MessagingException {
 		try {
-			if (imapFolder != null) {
-				try {
-					imapFolder.close(false);
-					MailInterfaceImpl.mailInterfaceMonitor.changeNumActive(false);
-				} catch (final IllegalStateException e) {
-					LOG.warn("Invoked close() on a closed folder", e);
+			try {
+				if (imapFolder != null) {
+					try {
+						imapFolder.close(false);
+						MailInterfaceImpl.mailInterfaceMonitor.changeNumActive(false);
+					} catch (final IllegalStateException e) {
+						LOG.warn("Invoked close() on a closed folder", e);
+					}
 				}
-			}
-			if (imapStore != null) {
-				try {
-					imapStore.close();
-				} catch (final MessagingException e) {
-					LOG.error("Error while closing IMAPStore", e);
+			} catch (final Throwable t) {
+				LOG.warn("IMAP folder could not be closed", t);
+			} finally {
+				if (imapStore != null) {
+					try {
+						imapStore.close();
+					} catch (final MessagingException e) {
+						LOG.error("Error while closing IMAPStore", e);
+					}
 				}
 			}
 		} finally {
