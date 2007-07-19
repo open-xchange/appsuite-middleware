@@ -5,6 +5,7 @@ import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.MissingOptionException;
@@ -95,8 +96,8 @@ public class List extends ContextAbtraction {
             data.add(makeCSVData(ctx));
         }
         
-        doOutput(new String[] { "3r", "3r", "10l", "10r", "10r", "10l", "10l" },
-                 new String[] { "cid", "fid", "enabled", "qmax", "qused", "name", "lmappings" }, data);
+        doOutput(new String[] { "3r", "3r", "21l", "10l", "10r", "10r", "10l", "10l" },
+                 new String[] { "cid", "fid", "fname", "enabled", "qmax", "qused", "name", "lmappings" }, data);
     }
 
     private void precsvinfos(final Context[] ctxs) throws StorageException {
@@ -132,40 +133,53 @@ public class List extends ContextAbtraction {
         final ArrayList<String> srv_data = new ArrayList<String>();
         srv_data.add(String.valueOf(ctx.getIdAsInt()));
 
-        if (ctx.getFilestoreId() != null) {
-            srv_data.add(String.valueOf(ctx.getFilestoreId()));
+        final Integer filestoreId = ctx.getFilestoreId();
+        if (filestoreId != null) {
+            srv_data.add(String.valueOf(filestoreId));
         } else {
             srv_data.add(null);
         }
 
-        if (ctx.isEnabled() != null) {
-            srv_data.add(String.valueOf(ctx.isEnabled()));
+        final String filestore_name = ctx.getFilestore_name();
+        if (filestore_name != null) {
+            srv_data.add(filestore_name);
         } else {
             srv_data.add(null);
         }
 
-        if (ctx.getMaxQuota() != null) {
-            srv_data.add(String.valueOf(ctx.getMaxQuota()));
+        final Boolean enabled = ctx.isEnabled();
+        if (enabled != null) {
+            srv_data.add(String.valueOf(enabled));
         } else {
             srv_data.add(null);
         }
 
-        if (ctx.getUsedQuota() != null) {
-            srv_data.add(String.valueOf(ctx.getUsedQuota()));
+        final Long maxQuota = ctx.getMaxQuota();
+        if (maxQuota != null) {
+            srv_data.add(String.valueOf(maxQuota));
         } else {
             srv_data.add(null);
         }
 
-        if (ctx.getName() != null) {
-            srv_data.add(ctx.getName());
+        final Long usedQuota = ctx.getUsedQuota();
+        if (usedQuota != null) {
+            srv_data.add(String.valueOf(usedQuota));
+        } else {
+            srv_data.add(null);
+        }
+
+        final String name = ctx.getName();
+        if (name != null) {
+            srv_data.add(name);
         } else {
             srv_data.add(null);
         }
         
 //      loginl mappings
         
-        if (ctx.getLoginMappings() != null && ctx.getLoginMappings().size() > 0) {
-            srv_data.add(getObjectsAsString(ctx.getLoginMappings().toArray()));
+        final HashSet<String> loginMappings = ctx.getLoginMappings();
+        if (loginMappings != null && loginMappings.size() > 0) {
+            srv_data.add(getObjectsAsString(loginMappings.toArray()));
         } else {
             srv_data.add(null);
         }
