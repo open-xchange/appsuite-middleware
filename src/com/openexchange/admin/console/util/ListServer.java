@@ -44,7 +44,7 @@ public class ListServer extends UtilAbstraction {
                 searchpattern = (String) parser.getOptionValue(this.searchOption);
             }
             // Setting the options in the dataobject
-            final Server[] servers = oxutil.listServer(searchpattern, auth);
+            final Server[] servers = oxutil.listServers(searchpattern, auth);
 
             if (null != parser.getOptionValue(this.csvOutputOption)) {
                 precsvinfos(servers);
