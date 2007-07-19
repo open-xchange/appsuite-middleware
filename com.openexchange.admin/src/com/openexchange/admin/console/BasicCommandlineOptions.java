@@ -149,6 +149,7 @@ public abstract class BasicCommandlineOptions {
     
     protected static final String OPT_NAME_CSVOUTPUT_LONG = "csv";
     protected static final String OPT_NAME_CSVOUTPUT_DESCRIPTION = "Format output to csv";
+    protected static final String SUCCESSFULLY_CHANGED = "Successfully changed";
     
     protected static String RMI_HOSTNAME ="rmi://localhost/";
     
