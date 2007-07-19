@@ -7,9 +7,7 @@ import java.rmi.RemoteException;
 
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.MissingOptionException;
-import com.openexchange.admin.console.AdminParser.NeededTriState;
 import com.openexchange.admin.console.CmdLineParser.IllegalOptionValueException;
-import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.console.CmdLineParser.UnknownOptionException;
 import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -23,14 +21,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
  * @author d7,cutmasta
  *
  */
-public class UnregisterDatabase extends UtilAbstraction {
-   
-    // Setting names for options
-    private final static char OPT_NAME_DATABASE_ID_SHORT = 'i';
-    private final static String OPT_NAME_DATABASE_ID_LONG = "id";
-
-    private Option databaseIdOption = null;
-
+public class UnregisterDatabase extends DatabaseAbstraction {
     public UnregisterDatabase(final String[] args2) {
 
         final AdminParser parser = new AdminParser("unregisterdatabase");
@@ -46,7 +37,7 @@ public class UnregisterDatabase extends UtilAbstraction {
             final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME +OXUtilInterface.RMI_NAME);
             Database db = new Database(Integer.parseInt((String)parser.getOptionValue(this.databaseIdOption)));
             oxutil.unregisterDatabase(db, auth);
-            System.out.println("Successfully unregistered.");
+            System.out.println(SUCCESSFULLY_UNREGISTERED);
             sysexit(0);
         } catch (final java.rmi.ConnectException neti) {
             printError(neti.getMessage());
@@ -95,6 +86,6 @@ public class UnregisterDatabase extends UtilAbstraction {
     private void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptionsWithoutContextID(parser);
 
-        this.databaseIdOption = setShortLongOpt(parser, OPT_NAME_DATABASE_ID_SHORT,OPT_NAME_DATABASE_ID_LONG,"The id of the database which should be unregistered",true, NeededTriState.needed);
+        setDatabaseIDOption(parser);
     }
 }

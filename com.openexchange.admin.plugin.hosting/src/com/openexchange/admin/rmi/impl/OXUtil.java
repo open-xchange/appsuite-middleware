@@ -25,16 +25,6 @@ import com.openexchange.admin.tools.AdminDaemonTools;
 
 public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
 
-    
-    public static final int DB_WEIGHT_DEFAULT = 100;
-    public static final String DRIVER_DEFAULT = "com.mysql.jdbc.Driver";
-    public static final int MAXUNITS_DEFAULT = 1000;
-    public static final boolean POOL_HARD_LIMIT_DEFAULT = false;
-    public static final int POOL_INITIAL_DEFAULT = 2;
-    public static final int POOL_MAX_DEFAULT = 100;
-    public static final String USER_DEFAULT = "openexchange";
-    public static final String HOSTNAME_DEFAULT = "localhost";
-    
     private final static Log log = LogFactory.getLog(OXUtil.class);
 
     public OXUtil() throws RemoteException {
@@ -58,10 +48,16 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
             throw new InvalidDataException("Invalid url sent");           
         }
 
-        if (fstore.getSize() == -1) {
+        if (null == fstore.getSize()) {
+            fstore.setSize(DEFAULT_STORE_SIZE);
+        } else if (fstore.getSize() == -1) {
             throw new InvalidDataException("Invalid store size -1");
         }
 
+        if (null == fstore.getMaxContexts()) {
+            fstore.setMaxContexts(DEFAULT_STORE_MAX_CTX);
+        }
+        
         final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
         if (tools.existsStore(fstore.getUrl())) {
             throw new InvalidDataException("Store already exists");           
@@ -101,10 +97,10 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
 
         log.debug(fstore.getUrl() + " " + fstore.getMaxContexts() + " " + fstore.getSize() + " " + fstore.getId());
 
-        if (!AdminDaemonTools.checkValidStoreURI(fstore.getUrl())) {
+        if (null != fstore.getUrl() && !AdminDaemonTools.checkValidStoreURI(fstore.getUrl())) {
             throw new InvalidDataException("Invalid store url " + fstore.getUrl());           
-
         }
+        
         final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
         if (!tools.existsStore(fstore.getId())) {
             throw new InvalidDataException("No such store " + fstore.getUrl());
@@ -281,37 +277,37 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
         }
 
         if (null == db.getDriver()) {
-            db.setDriver(DRIVER_DEFAULT);
+            db.setDriver(DEFAULT_DRIVER);
         }
         
         if (null == db.getMaxUnits()) {
-            db.setMaxUnits(MAXUNITS_DEFAULT);
+            db.setMaxUnits(DEFAULT_MAXUNITS);
         }
         
         if (null == db.getPoolInitial()) {
-            db.setPoolInitial(POOL_INITIAL_DEFAULT);
+            db.setPoolInitial(DEFAULT_POOL_INITIAL);
         }
         
         if (null == db.getPoolMax()) {
-            db.setPoolMax(POOL_MAX_DEFAULT);
+            db.setPoolMax(DEFAULT_POOL_MAX);
         }
         
         if (null == db.getLogin()) {
-            db.setLogin(USER_DEFAULT);
+            db.setLogin(DEFAULT_USER);
         }
         
         if (null == db.getPoolHardLimit()) {
-            db.setPoolHardLimit(POOL_HARD_LIMIT_DEFAULT ? 1 : 0);
+            db.setPoolHardLimit(DEFAULT_POOL_HARD_LIMIT ? 1 : 0);
         }
         
         if (null == db.getClusterWeight()) {
-            db.setClusterWeight(DB_WEIGHT_DEFAULT);
+            db.setClusterWeight(DEFAULT_DB_WEIGHT);
         } else if (db.getClusterWeight() < 0 || db.getClusterWeight() > 100) {
             throw new InvalidDataException("Clusterweight not within range (0-100)");
         }
 
         if (null == db.getUrl()) {
-            db.setUrl("jdbc:mysql://" + HOSTNAME_DEFAULT + "/?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&useUnicode=true&useServerPrepStmts=false&useTimezone=true&serverTimezone=UTC&connectTimeout=15000&socketTimeout=15000");
+            db.setUrl("jdbc:mysql://" + DEFAULT_HOSTNAME + "/?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&useUnicode=true&useServerPrepStmts=false&useTimezone=true&serverTimezone=UTC&connectTimeout=15000&socketTimeout=15000");
         }
         
         final OXUtilStorageInterface oxcox = OXUtilStorageInterface.getInstance();

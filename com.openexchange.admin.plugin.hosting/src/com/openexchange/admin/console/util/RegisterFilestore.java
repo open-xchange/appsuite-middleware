@@ -10,7 +10,6 @@ import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.MissingOptionException;
 import com.openexchange.admin.console.AdminParser.NeededTriState;
 import com.openexchange.admin.console.CmdLineParser.IllegalOptionValueException;
-import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.console.CmdLineParser.UnknownOptionException;
 import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -24,16 +23,9 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
  * @author d7,cutmasta
  * 
  */
-public class RegisterFilestore extends UtilAbstraction {
-
-    private Option filestorePathOption = null;
-
-    private Option filestoreSizeOption = null;
-
-    private Option filestoreMaxContextsOption = null;
+public class RegisterFilestore extends FileStoreAbstraction {
 
     public RegisterFilestore(final String[] args2) {
-    
         final AdminParser parser = new AdminParser("registerfilestore");
     
         setOptions(parser);
@@ -41,36 +33,18 @@ public class RegisterFilestore extends UtilAbstraction {
         try {
             parser.ownparse(args2);
     
-            final Credentials auth = new Credentials((String) parser.getOptionValue(this.adminUserOption), (String) parser.getOptionValue(this.adminPassOption));
+            final Credentials auth = credentialsparsing(parser);
     
             // get rmi ref
             final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME +OXUtilInterface.RMI_NAME);
     
             final Filestore fstore = new Filestore();
     
-            final String store_path = (String) parser.getOptionValue(this.filestorePathOption);
-    
-            String store_size = String.valueOf(STORE_SIZE_DEFAULT);
-            if (parser.getOptionValue(this.filestoreSizeOption) != null) {
-                store_size = (String) parser.getOptionValue(this.filestoreSizeOption);
-            }
-            String store_max_ctx = String.valueOf(STORE_MAX_CTX_DEFAULT);
-            if (parser.getOptionValue(this.filestoreMaxContextsOption) != null) {
-                store_max_ctx = (String) parser.getOptionValue(this.filestoreMaxContextsOption);
-            }
-            // add optional values if set
-    
-            // Setting the options in the dataobject
-            final java.net.URI uri = new java.net.URI(store_path);
-            fstore.setUrl(uri.toString());
-            new java.io.File(uri.getPath()).mkdir();
-    
-            if (null != store_size) {
-                fstore.setSize(Long.parseLong(store_size));
-            } else {
-                fstore.setSize(STORE_SIZE_DEFAULT);
-            }
-            fstore.setMaxContexts(testStringAndGetIntOrDefault(store_max_ctx, STORE_MAX_CTX_DEFAULT));
+            parseAndSetFilestorePath(parser, fstore);
+            
+            parseAndSetFilestoreSize(parser, fstore);
+            
+            parseAndSetFilestoreMaxCtxs(parser, fstore);
     
             System.out.println(oxutil.registerFilestore(fstore, auth).getId());
             sysexit(0);
@@ -124,11 +98,10 @@ public class RegisterFilestore extends UtilAbstraction {
     private void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptionsWithoutContextID(parser);
 
-        this.filestorePathOption = setShortLongOpt(parser, OPT_NAME_STORE_PATH_SHORT, OPT_NAME_STORE_PATH_LONG, "Path to store filestore contents", true, NeededTriState.needed);
+        setPathOption(parser, NeededTriState.needed);
 
-        this.filestoreSizeOption = setShortLongOpt(parser, OPT_NAME_STORE_SIZE_SHORT, OPT_NAME_STORE_SIZE_LONG, "The maximum size of the filestore", true, NeededTriState.notneeded);
+        setSizeOption(parser, String.valueOf(OXUtilInterface.DEFAULT_STORE_SIZE));
 
-        this.filestoreMaxContextsOption = setShortLongOpt(parser, OPT_NAME_STORE_MAX_CTX_SHORT, OPT_NAME_STORE_MAX_CTX_LONG, "the maximum number of contexts", true, NeededTriState.notneeded);
-
+        setMaxCtxOption(parser, String.valueOf(OXUtilInterface.DEFAULT_STORE_MAX_CTX));
     }
 }
