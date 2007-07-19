@@ -68,6 +68,7 @@ public class Context implements Serializable {
     private Database readDatabase;
     private Database writeDatabase;
     private Integer filestore_id;
+    private String filestore_name;
     private Long average_size;
     private Long maxQuota;
     private Long usedQuota;
@@ -86,7 +87,7 @@ public class Context implements Serializable {
     /**
      * @param id
      */
-    public Context(Integer id) {
+    public Context(final Integer id) {
         super();
         init();
         this.id = id;
@@ -96,46 +97,32 @@ public class Context implements Serializable {
      * @param id
      * @param name
      */
-    public Context(int id, String name) {
+    public Context(final int id, final String name) {
         super();
         this.id = id;
         this.name = name;
     }
 
-    public Integer getIdAsInt() {
+    public final Integer getIdAsInt() {
         return this.id;
     }
 
-    public String getIdAsString() {
+    public final String getIdAsString() {
         return String.valueOf(this.id);
     }
 
-    public void setID(Integer id) {
+    public final void setID(final Integer id) {
         this.id = id;
     }
     
-    public String getName() {
+    public final String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public final void setName(final String name) {
         this.name = name;
     }
 
-    private void init() {
-        this.id = -1;
-        this.name = null;
-        this.enabled = false;
-        this.filestore_id = null;
-        this.average_size = null;
-        this.maintenanceReason = null;
-        this.maxQuota = null;
-        this.usedQuota = null;
-        this.readDatabase = null;
-        this.writeDatabase = null;
-        this.login_mappings = null;
-    }
-    
     /*
      * Add login mappings.
      * Example:
@@ -143,14 +130,14 @@ public class Context implements Serializable {
      * login with <username>@ mydomain.org OR   <username>@<context_id>
      *  
      */    
-    public void setLoginMappings(HashSet<String> mappings) {
+    public final void setLoginMappings(final HashSet<String> mappings) {
         this.login_mappings = mappings;
     }
     
     /*
      * Add a single login mapping entry. 
      */
-    public void addLoginMapping(String mapping) {
+    public final void addLoginMapping(final String mapping) {
         if (this.login_mappings == null) {
             this.login_mappings = new HashSet<String>();
         }
@@ -160,7 +147,7 @@ public class Context implements Serializable {
     /*
      * Remove a login mapping.
      */
-    public boolean removeLoginMapping(String mapping) {
+    public final boolean removeLoginMapping(final String mapping) {
         if (null != this.login_mappings) {
             return this.login_mappings.remove(mapping);
         } else {
@@ -168,75 +155,83 @@ public class Context implements Serializable {
         }
     }
 
-    public HashSet<String> getLoginMappings() {
+    public final HashSet<String> getLoginMappings() {
         return this.login_mappings;
     }
 
-    public Integer getFilestoreId() {
+    public final Integer getFilestoreId() {
         return filestore_id;
     }
 
-    public void setFilestoreId(Integer filestore_id) {
+    public final void setFilestoreId(final Integer filestore_id) {
         this.filestore_id = filestore_id;
     }
 
-    public Long getMaxQuota() {
+    public final Long getMaxQuota() {
         return maxQuota;
     }
 
-    public void setMaxQuota(Long maxQuota) {
+    public final void setMaxQuota(final Long maxQuota) {
         this.maxQuota = maxQuota;
     }
 
-    public Long getUsedQuota() {
+    public final Long getUsedQuota() {
         return usedQuota;
     }
 
-    public void setUsedQuota(Long usedQuota) {
+    public final void setUsedQuota(final Long usedQuota) {
         this.usedQuota = usedQuota;
     }
 
-    public MaintenanceReason getMaintenanceReason() {
+    public final MaintenanceReason getMaintenanceReason() {
         return maintenanceReason;
     }
 
-    public void setMaintenanceReason(MaintenanceReason maintenanceReason) {
+    public final void setMaintenanceReason(final MaintenanceReason maintenanceReason) {
         this.maintenanceReason = maintenanceReason;
     }
 
-    public Boolean isEnabled() {
+    public final Boolean isEnabled() {
         return enabled;
     }
 
-    public void setEnabled(Boolean enabled) {
+    public final void setEnabled(final Boolean enabled) {
         this.enabled = enabled;
     }
 
-    public Database getReadDatabase() {
+    public final Database getReadDatabase() {
         return readDatabase;
     }
 
-    public void setReadDatabase(Database readDatabase) {
+    public final void setReadDatabase(final Database readDatabase) {
         this.readDatabase = readDatabase;
     }
 
-    public Database getWriteDatabase() {
+    public final Database getWriteDatabase() {
         return writeDatabase;
     }
 
-    public void setWriteDatabase(Database writeDatabase) {
+    public final void setWriteDatabase(final Database writeDatabase) {
         this.writeDatabase = writeDatabase;
     }
 
-    public Long getAverage_size() {
+    public final Long getAverage_size() {
         return average_size;
     }
 
-    public void setAverage_size(Long average_size) {
+    public final void setAverage_size(final Long average_size) {
         this.average_size = average_size;
     }
     
-    public String toString() {
+    public final String getFilestore_name() {
+        return filestore_name;
+    }
+
+    public final void setFilestore_name(final String filestore_name) {
+        this.filestore_name = filestore_name;
+    }
+
+    public final String toString() {
         StringBuilder ret = new StringBuilder();
         ret.append("[ \n");
         for (final Field f : this.getClass().getDeclaredFields()) {
@@ -258,6 +253,20 @@ public class Context implements Serializable {
         }
         ret.append("]");
         return ret.toString();
+    }
+
+    private void init() {
+        this.id = -1;
+        this.name = null;
+        this.enabled = false;
+        this.filestore_id = null;
+        this.average_size = null;
+        this.maintenanceReason = null;
+        this.maxQuota = null;
+        this.usedQuota = null;
+        this.readDatabase = null;
+        this.writeDatabase = null;
+        this.login_mappings = null;
     }
 
 }
