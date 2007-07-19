@@ -266,12 +266,11 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         try {
             configdb_write_con = cache.getWRITEConnectionForCONFIGDB();
             configdb_write_con.setAutoCommit(false);
-            final StringBuilder sb = new StringBuilder("UPDATE filestore SET ");
             
             final Integer id = fstore.getId();
             final String url = fstore.getUrl();
             if (null != url) {
-                prep = configdb_write_con.prepareStatement("uri = ?");
+                prep = configdb_write_con.prepareStatement("UPDATE filestore SET uri = ? WHERE id = ?");
                 prep.setString(1, url);
                 prep.setInt(2, id);
                 prep.executeUpdate();
@@ -286,7 +285,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 }
                 double store_size_double = store_size;
                 store_size_double *= Math.pow(2, 20);
-                prep = configdb_write_con.prepareStatement("size = ?");
+                prep = configdb_write_con.prepareStatement("UPDATE filestore SET size = ? WHERE id = ?");
                 prep.setLong(1,  Math.round(store_size_double));
                 prep.setInt(2, id);
                 prep.executeUpdate();
@@ -295,14 +294,13 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
             final Integer maxContexts = fstore.getMaxContexts();
             if (null != maxContexts) {
-                prep = configdb_write_con.prepareStatement("max_context = ?");
+                prep = configdb_write_con.prepareStatement("UPDATE filestore SET max_context = ? WHERE id = ?");
                 prep.setInt(1, maxContexts);
                 prep.setInt(2, id);
                 prep.executeUpdate();
                 prep.close();
             }
             
-            sb.append(" WHERE id = ?");
             configdb_write_con.commit();
         } catch (final DataTruncation dt) {
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);         
