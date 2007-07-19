@@ -144,6 +144,7 @@
         <mkdir dir="${conf.install.copy.dir}"/>
         <copy todir="${conf.install.copy.dir}" overwrite="true">
             <fileset dir="${patch.conf.dir}">
+            	<include name="**" />
                 <exclude name="oxfunctions.sh"/>
                 <exclude name="*.in"/>
             </fileset>

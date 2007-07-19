@@ -1,3 +1,7 @@
+* 2007-07-19 - francisco.laguna@open-xchange.com
+
+ - Fixed build.xml to also copy subdirectories of the configuration.
+
 * 2007-07-19 - thorben.betten@open-xchange.com
 
  - Added mail folder clearing to mail servlet
