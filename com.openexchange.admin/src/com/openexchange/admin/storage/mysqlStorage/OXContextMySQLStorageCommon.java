@@ -197,7 +197,7 @@ public abstract class OXContextMySQLStorageCommon {
                 quota_used /= Math.pow(2, 20);
             }
             if (quota_used != -1) {
-                fs.setQuota_used(quota_used);
+                fs.setUsed(quota_used);
 
                 // set used quota in context setup
                 cs.setUsedQuota(quota_used);
