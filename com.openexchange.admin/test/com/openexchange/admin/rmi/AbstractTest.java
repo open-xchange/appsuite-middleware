@@ -95,7 +95,7 @@ public abstract class AbstractTest {
         final Context ctx = new Context(context_id);        
         final Filestore filestore = new Filestore();
         filestore.setSize(quota_max_in_mb);
-        ctx.setFilestore(filestore);
+        ctx.setFilestoreId(filestore.getId());
         return ctx;
     }
 
