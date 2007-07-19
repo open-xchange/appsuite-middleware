@@ -93,8 +93,8 @@ public class BasicAuthenticator {
         // first check if whole authentication mech is disabled
         if(!cache.masterAuthenticationDisabled()){
             if(!fileAuth.authenticate(authdata)){
-                final InvalidCredentialsException invalidCredentialsException = new InvalidCredentialsException("Authentication failed for user " + authdata.getLogin());
-                log.error("Master authentication: ", invalidCredentialsException);
+                final InvalidCredentialsException invalidCredentialsException = new InvalidCredentialsException("Authentication failed");
+                log.error("Master authentication for user: " + authdata.getLogin(), invalidCredentialsException);
                 throw invalidCredentialsException;
             }
         }
