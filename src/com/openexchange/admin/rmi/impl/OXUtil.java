@@ -428,27 +428,6 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
         return listDatabases("*", auth);
     }
     
-    @Deprecated
-    public Server[] listServer(final String search_pattern, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
-        try{
-            doNullCheck(search_pattern);
-        } catch (final InvalidDataException e1) {            
-            log.error("Invalid data sent by client!", e1);
-            throw e1;
-        }
-        doAuthentication(auth);
-
-        log.debug(search_pattern);
-
-        if (search_pattern.length() == 0) {
-            throw new InvalidDataException("Invalid search pattern");
-        }
-
-        final OXUtilStorageInterface oxcox = OXUtilStorageInterface.getInstance();
-        return oxcox.searchForServer(search_pattern);
-
-    }
-
     public Server[] listServers(final String search_pattern, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         try{
             doNullCheck(search_pattern);
