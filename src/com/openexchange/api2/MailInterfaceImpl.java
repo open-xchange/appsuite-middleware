@@ -161,7 +161,7 @@ import com.openexchange.imap.MessageHeaders;
 import com.openexchange.imap.OXMailException;
 import com.openexchange.imap.UserSettingMail;
 import com.openexchange.imap.OXMailException.MailCode;
-import com.openexchange.imap.command.CopyUIDIMAPCommand;
+import com.openexchange.imap.command.CopyIMAPCommand;
 import com.openexchange.imap.command.ExtractSpamMsgIMAPCommand;
 import com.openexchange.imap.command.FetchIMAPCommand;
 import com.openexchange.imap.command.FlagsIMAPCommand;
@@ -312,6 +312,8 @@ public class MailInterfaceImpl implements MailInterface {
 	private static final String SWITCH_DEFAULT_FOLDER = "Switching to default value %s";
 
 	private static final String WARN_FLD_ALREADY_CLOSED = "Invoked close() on a closed folder";
+	
+	private static final String STR_MSEC = "msec";
 
 	/*
 	 * Other constants
@@ -3413,8 +3415,11 @@ public class MailInterfaceImpl implements MailInterface {
 	 */
 	public boolean clearFolder(final String folderArg) throws OXException {
 		try {
+			if (folderArg == null) {
+				return false;
+			}
 			init();
-			final String folder = folderArg == null ? STR_INBOX : prepareMailFolderParam(folderArg);
+			final String folder = prepareMailFolderParam(folderArg);
 			setAndOpenFolder(folder, Folder.READ_WRITE);
 			try {
 				if (!imapCon.isHoldsMessages()) {
@@ -3429,14 +3434,56 @@ public class MailInterfaceImpl implements MailInterface {
 				throw new OXMailException(MailCode.NO_ACCESS, getUserName(sessionObj), imapCon.getImapFolder()
 						.getFullName());
 			}
+			final String trashFullname = prepareMailFolderParam(getTrashFolder());
+			if (!usm.isHardDeleteMsgs() && !(folder.equals(trashFullname))) {
+				final IMAPFolder trashFolder = (IMAPFolder) imapCon.getIMAPStore().getFolder(trashFullname);
+				checkAndCreateFolder(trashFolder, (IMAPFolder) imapCon.getIMAPStore().getFolder(STR_INBOX));
+				try {
+					final long start = System.currentTimeMillis();
+					new CopyIMAPCommand(imapCon.getImapFolder(), trashFolder.getFullName()).doCommand();
+					if (LOG.isInfoEnabled()) {
+						LOG.info(new StringBuilder(100).append("\"Soft Clear\": All").append(
+								" messages copied to default trash folder \"").append(trashFolder.getFullName())
+								.append("\" in ").append((System.currentTimeMillis() - start)).append(STR_MSEC)
+								.toString());
+					}
+				} catch (final MessagingException e) {
+					if (e.getNextException() instanceof CommandFailedException) {
+						final CommandFailedException exc = (CommandFailedException) e.getNextException();
+						if (exc.getMessage().indexOf("Over quota") > -1) {
+							/*
+							 * We face an Over-Quota-Exception
+							 */
+							throw new OXMailException(MailCode.DELETE_FAILED_OVER_QUOTA);
+						}
+					}
+					throw new OXMailException(MailCode.MOVE_ON_DELETE_FAILED);
+				}
+			}
 			/*
 			 * Mark all messages as /DELETED
 			 */
 			new FlagsIMAPCommand(imapCon.getImapFolder(), FLAGS_DELETED, true).doCommand();
 			/*
-			 * Force expunge on close()
+			 * ... and perform EXPUNGE
 			 */
-			imapCon.setExpunge(true);
+			try {
+				final long start = System.currentTimeMillis();
+				IMAPUtils.fastExpunge(imapCon.getImapFolder());
+				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+				if (LOG.isInfoEnabled()) {
+					LOG.info(new StringBuilder(100).append("Folder ").append(imapCon.getImapFolder().getFullName())
+							.append(" cleared in ").append((System.currentTimeMillis() - start)).append(STR_MSEC)
+							.toString());
+				}
+			} catch (final ProtocolException pex) {
+				throw new MessagingException(pex.getMessage(), pex);
+			}
+			/*
+			 * Close folder to force JavaMail-internal message cache update
+			 */
+			imapCon.getImapFolder().close(false);
+			imapCon.resetImapFolder();
 			return true;
 		} catch (final MessagingException e) {
 			throw handleMessagingException(e, sessionObj.getIMAPProperties(), sessionObj.getContext());
@@ -3474,21 +3521,20 @@ public class MailInterfaceImpl implements MailInterface {
 			 * Perform "soft delete", means to copy message to default trash
 			 * folder
 			 */
-			final boolean isTrashFolder = (folder.endsWith(usm.getStdTrashName()));
-			if (!usm.isHardDeleteMsgs() && !hardDelete && !isTrashFolder) {
+			final String trashFullname = prepareMailFolderParam(getTrashFolder());
+			if (!usm.isHardDeleteMsgs() && !hardDelete && !(folder.equals(trashFullname))) {
 				/*
 				 * Copy messages to folder "TRASH"
 				 */
-				final IMAPFolder trashFolder = (IMAPFolder) imapCon.getIMAPStore().getFolder(
-						prepareMailFolderParam(getTrashFolder()));
+				final IMAPFolder trashFolder = (IMAPFolder) imapCon.getIMAPStore().getFolder(trashFullname);
 				checkAndCreateFolder(trashFolder, (IMAPFolder) imapCon.getIMAPStore().getFolder(STR_INBOX));
 				try {
 					final long start = System.currentTimeMillis();
-					new CopyUIDIMAPCommand(imapCon.getImapFolder(), msgUIDs, trashFolder.getFullName(), false, true).doCommand();
+					new CopyIMAPCommand(imapCon.getImapFolder(), msgUIDs, trashFolder.getFullName(), false, true).doCommand();
 					if (LOG.isInfoEnabled()) {
 						LOG.info(new StringBuilder(100).append("\"Soft Delete\": ").append(msgUIDs.length).append(
 								" messages copied to default trash folder \"").append(trashFolder.getFullName())
-								.append("\" in ").append((System.currentTimeMillis() - start)).append("msec")
+								.append("\" in ").append((System.currentTimeMillis() - start)).append(STR_MSEC)
 								.toString());
 					}
 				} catch (final MessagingException e) {
@@ -3512,7 +3558,7 @@ public class MailInterfaceImpl implements MailInterface {
 			if (LOG.isInfoEnabled()) {
 				LOG.info(new StringBuilder(100).append(msgUIDs.length).append(
 						" messages marked as deleted (through system flag \\DELETED) in ").append(
-						(System.currentTimeMillis() - start)).append("msec").toString());
+						(System.currentTimeMillis() - start)).append(STR_MSEC).toString());
 			}
 			imapCon.setExpunge(true);
 			return true;
@@ -3602,10 +3648,10 @@ public class MailInterfaceImpl implements MailInterface {
 			if (IMAPProperties.getImapCapabilities().hasUIDPlus()) {
 				long start = System.currentTimeMillis();
 				try {
-					final long[] res = new CopyUIDIMAPCommand(imapCon.getImapFolder(), msgUIDs, destFolder, false, false).doCommand();
+					final long[] res = new CopyIMAPCommand(imapCon.getImapFolder(), msgUIDs, destFolder, false, false).doCommand();
 					if (LOG.isInfoEnabled()) {
 						LOG.info(new StringBuilder(100).append(msgUIDs.length).append(" messages copied in ").append(
-								(System.currentTimeMillis() - start)).append("msec").toString());
+								(System.currentTimeMillis() - start)).append(STR_MSEC).toString());
 					}
 					if (usm.isSpamEnabled()) {
 						/*
@@ -3636,7 +3682,7 @@ public class MailInterfaceImpl implements MailInterface {
 						if (LOG.isInfoEnabled()) {
 							LOG.info(new StringBuilder(100).append(msgUIDs.length).append(
 									" messages marked as expunged (through system flag \\DELETED) in ").append(
-									(System.currentTimeMillis() - start)).append("msec").toString());
+									(System.currentTimeMillis() - start)).append(STR_MSEC).toString());
 						}
 						/*
 						 * Expunge "moved" messages immediately
@@ -3647,7 +3693,7 @@ public class MailInterfaceImpl implements MailInterface {
 							mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 							if (LOG.isInfoEnabled()) {
 								LOG.info(new StringBuilder(100).append(msgUIDs.length).append(" messages expunged in ")
-										.append((System.currentTimeMillis() - start)).append("msec").toString());
+										.append((System.currentTimeMillis() - start)).append(STR_MSEC).toString());
 							}
 							/*
 							 * Force folder cache update through a close
@@ -3795,7 +3841,7 @@ public class MailInterfaceImpl implements MailInterface {
 				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 				if (LOG.isInfoEnabled()) {
 					LOG.info(new StringBuilder(100).append("All color flags cleared from ").append(msgUIDs.length)
-							.append(" messages in ").append((System.currentTimeMillis() - start)).append("msec")
+							.append(" messages in ").append((System.currentTimeMillis() - start)).append(STR_MSEC)
 							.toString());
 				}
 				start = System.currentTimeMillis();
@@ -3804,7 +3850,7 @@ public class MailInterfaceImpl implements MailInterface {
 				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 				if (LOG.isInfoEnabled()) {
 					LOG.info(new StringBuilder(100).append("All color flags set in ").append(msgUIDs.length).append(
-							" messages in ").append((System.currentTimeMillis() - start)).append("msec").toString());
+							" messages in ").append((System.currentTimeMillis() - start)).append(STR_MSEC).toString());
 				}
 				final Message[] msgs;
 				if (msgUIDs.length <= IMAPProperties.getMessageFetchLimit()) {
@@ -3924,7 +3970,7 @@ public class MailInterfaceImpl implements MailInterface {
 				new FlagsIMAPCommand(imapCon.getImapFolder(), msgUIDs, affectedFlags, flagsVal, false).doCommand();
 				if (LOG.isInfoEnabled()) {
 					LOG.info(new StringBuilder(100).append("System Flags applied to ").append(msgUIDs.length).append(
-							" messages in ").append((System.currentTimeMillis() - start)).append("msec").toString());
+							" messages in ").append((System.currentTimeMillis() - start)).append(STR_MSEC).toString());
 				}
 			}
 			/*
@@ -4075,9 +4121,7 @@ public class MailInterfaceImpl implements MailInterface {
 				 */
 				try {
 					final long[] uids = new MessageUIDsIMAPCommand(imapCon.getImapFolder(), msgArr).doCommand();
-					//IMAPUtils.setSystemFlags(imapCon.getImapFolder(), uids, false, FLAGS_DELETED, true);
-					//imapCon.getImapFolder().getProtocol().uidexpunge(IMAPUtils.toUIDSet(uids));
-					new FlagsIMAPCommand(imapCon.getImapFolder(), uids, FLAGS_DELETED, true, false);
+					new FlagsIMAPCommand(imapCon.getImapFolder(), uids, FLAGS_DELETED, true, false).doCommand();
 					imapCon.getImapFolder().getProtocol().uidexpunge(IMAPUtils.toUIDSet(uids));
 					/*
 					 * Close folder to force internal message cache update
@@ -4112,19 +4156,18 @@ public class MailInterfaceImpl implements MailInterface {
 				/*
 				 * Copy to confirmed spam
 				 */
-				new CopyUIDIMAPCommand(imapCon.getImapFolder(), msgUIDs,
+				new CopyIMAPCommand(imapCon.getImapFolder(), msgUIDs,
 						prepareMailFolderParam(getConfirmedSpamFolder()), false, true).doCommand();
 				if (move) {
 					/*
 					 * Copy messages to spam folder
 					 */
-					new CopyUIDIMAPCommand(imapCon.getImapFolder(), msgUIDs,
+					new CopyIMAPCommand(imapCon.getImapFolder(), msgUIDs,
 							prepareMailFolderParam(getSpamFolder()), false, true).doCommand();
 					/*
 					 * Delete messages
 					 */
 					new FlagsIMAPCommand(imapCon.getImapFolder(), msgUIDs, FLAGS_DELETED, true, false).doCommand();
-					//IMAPUtils.setSystemFlags(imapCon.getImapFolder(), msgUIDs, false, FLAGS_DELETED, true);
 					/*
 					 * Expunge messages immediately
 					 */
@@ -4183,9 +4226,9 @@ public class MailInterfaceImpl implements MailInterface {
 			 */
 			long[] plainUIDsArr = plainUIDs.toArray();
 			plainUIDs = null;
-			new CopyUIDIMAPCommand(imapCon.getImapFolder(), plainUIDsArr, confirmedHamFullname, false, true).doCommand();
+			new CopyIMAPCommand(imapCon.getImapFolder(), plainUIDsArr, confirmedHamFullname, false, true).doCommand();
 			if (move) {
-				new CopyUIDIMAPCommand(imapCon.getImapFolder(), plainUIDsArr, STR_INBOX, false, true).doCommand();
+				new CopyIMAPCommand(imapCon.getImapFolder(), plainUIDsArr, STR_INBOX, false, true).doCommand();
 			}
 			plainUIDsArr = null;
 			/*
@@ -4205,7 +4248,7 @@ public class MailInterfaceImpl implements MailInterface {
 				Message[] nestedMsgs = new ExtractSpamMsgIMAPCommand(imapCon.getImapFolder(), spamArr).doCommand();
 				if (LOG.isInfoEnabled()) {
 					LOG.info(new StringBuilder(100).append("Nested SPAM messages fetched in ").append(
-							(System.currentTimeMillis() - start)).append("msec").toString());
+							(System.currentTimeMillis() - start)).append(STR_MSEC).toString());
 				}
 				spamArr = null;
 				/*
@@ -4218,15 +4261,15 @@ public class MailInterfaceImpl implements MailInterface {
 				if (LOG.isInfoEnabled()) {
 					LOG.info(new StringBuilder(100).append("Nested SPAM messages appended to ").append(
 							confirmedHamFullname).append(" in ").append((System.currentTimeMillis() - start)).append(
-							"msec").toString());
+							STR_MSEC).toString());
 				}
 				nestedMsgs = null;
 				if (move) { // Cannot be null
 					start = System.currentTimeMillis();
-					new CopyUIDIMAPCommand(confirmedHamFld, appendUID2Long(appendUIDs), STR_INBOX, false, true).doCommand();
+					new CopyIMAPCommand(confirmedHamFld, appendUID2Long(appendUIDs), STR_INBOX, false, true).doCommand();
 					if (LOG.isInfoEnabled()) {
 						LOG.info(new StringBuilder(100).append("Nested SPAM messages copied to ").append(STR_INBOX)
-								.append(" in ").append((System.currentTimeMillis() - start)).append("msec").toString());
+								.append(" in ").append((System.currentTimeMillis() - start)).append(STR_MSEC).toString());
 					}
 				}
 				appendUIDs = null;
@@ -4240,7 +4283,7 @@ public class MailInterfaceImpl implements MailInterface {
 					mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 					if (LOG.isInfoEnabled()) {
 						LOG.info(new StringBuilder(100).append("Original spam messages expunged in ").append(
-								(System.currentTimeMillis() - start)).append("msec").toString());
+								(System.currentTimeMillis() - start)).append(STR_MSEC).toString());
 					}
 					/*
 					 * Close folder to force JavaMail-internal message cache

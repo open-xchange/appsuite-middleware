@@ -137,7 +137,7 @@ public final class SeqNumIMAPCommand extends AbstractIMAPCommand<int[]> {
 	 * @see com.openexchange.imap.command.AbstractIMAPCommand#getDefaultValueOnEmptyFolder()
 	 */
 	@Override
-	protected int[] getDefaultValueOnEmptyFolder() {
+	protected int[] getDefaultValue() {
 		return EMPTY_ARR;
 	}
 

@@ -63,15 +63,17 @@ import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.protocol.IMAPResponse;
 
 /**
- * CopyUIDIMAPCommand - Copies messages from given folder to given destination
- * folder just using their UIDs
+ * CopyIMAPCommand - Copies messages from given folder to given destination
+ * folder just using their sequence numbers/UIDs
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class CopyUIDIMAPCommand extends AbstractIMAPCommand<long[]> {
+public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
 
 	private static final long[] DEFAULT_RETVAL = new long[0];
+
+	private final boolean uid;
 
 	private final boolean fast;
 
@@ -88,7 +90,8 @@ public final class CopyUIDIMAPCommand extends AbstractIMAPCommand<long[]> {
 	private int fetchRespIndex;
 
 	/**
-	 * Constructor
+	 * Constructor using UIDs ans consequently performs a <code>UID COPY</code>
+	 * command
 	 * 
 	 * @param imapFolder -
 	 *            the imap folder
@@ -102,22 +105,44 @@ public final class CopyUIDIMAPCommand extends AbstractIMAPCommand<long[]> {
 	 *            <code>true</code> to ignore corresponding UIDs of copied
 	 *            messages and {@link #getReturnVal()} returns <code>null</code>
 	 */
-	public CopyUIDIMAPCommand(final IMAPFolder imapFolder, final long[] uids, final String destFolderName,
+	public CopyIMAPCommand(final IMAPFolder imapFolder, final long[] uids, final String destFolderName,
 			final boolean isSequential, final boolean fast) {
 		super(imapFolder);
 		this.uids = uids == null ? DEFAULT_RETVAL : uids;
+		uid = true;
 		returnDefaultValue = (this.uids.length == 0);
 		this.fast = fast;
 		this.destFolderName = prepareStringArgument(destFolderName);
 		length = this.uids.length;
 		args = length == 0 ? ARGS_EMPTY : (isSequential ? new String[] { new StringBuilder(64).append(this.uids[0])
-				.append(':').append(this.uids[this.uids.length - 1]).toString() } : IMAPNumArgSplitter.splitUIDArg(this.uids));
+				.append(':').append(this.uids[this.uids.length - 1]).toString() } : IMAPNumArgSplitter
+				.splitUIDArg(this.uids));
 		if (fast) {
-			retval = null;
+			retval = DEFAULT_RETVAL;
 		} else {
 			retval = new long[length];
 			Arrays.fill(retval, -1);
 		}
+	}
+
+	/**
+	 * Constructor to copy all messages of given folder to given destination
+	 * folder by performing a <code>COPY 1:*</code> command
+	 * 
+	 * @param imapFolder -
+	 *            the ima folder
+	 * @param destFolderName -
+	 *            the destination folder
+	 */
+	public CopyIMAPCommand(final IMAPFolder imapFolder, final String destFolderName) {
+		super(imapFolder);
+		fast = true;
+		uid = false;
+		this.uids = DEFAULT_RETVAL;
+		this.destFolderName = prepareStringArgument(destFolderName);
+		retval = DEFAULT_RETVAL;
+		args = ARGS_ALL;
+		length = -1;
 	}
 
 	/*
@@ -127,7 +152,7 @@ public final class CopyUIDIMAPCommand extends AbstractIMAPCommand<long[]> {
 	 */
 	@Override
 	protected boolean addLoopCondition() {
-		return (fetchRespIndex < length);
+		return (fast ? true : fetchRespIndex < length);
 	}
 
 	/*
@@ -148,7 +173,10 @@ public final class CopyUIDIMAPCommand extends AbstractIMAPCommand<long[]> {
 	@Override
 	protected String getCommand(final int argsIndex) {
 		final StringBuilder sb = new StringBuilder(args[argsIndex].length() + 64);
-		sb.append("UID COPY ");
+		if (uid) {
+			sb.append("UID ");
+		}
+		sb.append("COPY ");
 		sb.append(args[argsIndex]);
 		sb.append(' ').append(destFolderName);
 		return sb.toString();
@@ -160,7 +188,7 @@ public final class CopyUIDIMAPCommand extends AbstractIMAPCommand<long[]> {
 	 * @see com.openexchange.imap.command.AbstractIMAPCommand#getDefaultValueOnEmptyFolder()
 	 */
 	@Override
-	protected long[] getDefaultValueOnEmptyFolder() {
+	protected long[] getDefaultValue() {
 		return DEFAULT_RETVAL;
 	}
 

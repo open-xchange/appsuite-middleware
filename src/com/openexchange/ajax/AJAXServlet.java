@@ -53,6 +53,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
@@ -91,7 +92,6 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api2.OXException;
 import com.openexchange.configuration.ServerConfig;
-import com.openexchange.configuration.SystemConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.upload.UploadEvent;
@@ -211,6 +211,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 	public static final String ACTION_AUTOLOGIN = "autologin";
 
 	public static final String ACTION_SAVE_VERSIT = "saveVersit";
+	
+	public static final String ACTION_CLEAR = "clear";
 
 	/**
 	 * The parameter 'from' specifies index of starting entry in list of objects
@@ -334,6 +336,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 	 */
 	protected static final String ERROR_SESSION_NOT_FOUND = "No valid session found.";
 
+	private static final String STR_EMPTY = "";
+	
 	private static final String STR_ERROR = "error";
 
 	private static final String STR_ERROR_PARAMS = "error_params";
@@ -374,7 +378,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 			w.write("null");
 			return;
 		}
-		w.write("\"");
+		w.write('"');
+		//w.write("\"");
 		final int len = s.length();
 		for (int i = 0; i < len; i++) {
 			final char c = s.charAt(i);
@@ -387,7 +392,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 				w.write(c);
 			}
 		}
-		w.write("\"");
+		w.write('"');
+		//w.write("\"");
 	}
 
 	public static boolean containsParameter(final HttpServletRequest req, final String name) {
@@ -492,7 +498,37 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 	 *             if an error occurs while reading the body.
 	 */
 	public static String getBody(final HttpServletRequest req) throws IOException {
-		final InputStream input = req.getInputStream();
+		InputStreamReader isr = null;
+		try {
+			int count = 0;
+			final char[] c = new char[8192];
+			final String charset = null == req.getCharacterEncoding() ? ServerConfig
+					.getProperty(Property.DefaultEncoding) : req.getCharacterEncoding();
+			isr = new InputStreamReader(req.getInputStream(), charset);
+			if ((count = isr.read(c)) > 0) {
+				final StringBuilder sb = new StringBuilder(16384);
+				do {
+					sb.append(c, 0, count);
+				} while ((count = isr.read(c)) > 0);
+				return sb.toString();
+			}
+			return STR_EMPTY;
+		} catch (final UnsupportedEncodingException e) {
+			/*
+			 * Should never occur
+			 */
+			LOG.error("Unsupported encoding in request", e);
+			return STR_EMPTY;
+		} finally {
+			if (null != isr) {
+				try {
+					isr.close();
+				} catch (final IOException e) {
+					LOG.error(e.getLocalizedMessage(), e);
+				}
+			}
+		}
+		/*final InputStream input = req.getInputStream();
 		final ByteArrayOutputStream baos = new ByteArrayOutputStream(input.available());
 		final byte[] buf = new byte[8192];
 		int length = -1;
@@ -503,7 +539,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 		if (null == characterEncoding) {
 			characterEncoding = ServerConfig.getProperty(Property.DefaultEncoding);//"UTF-8";
 		}
-		return new String(baos.toByteArray(), characterEncoding);
+		return new String(baos.toByteArray(), characterEncoding);*/
 	}
 
 	/**
@@ -821,16 +857,20 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 	}
 
 	private static final UploadFile processUploadedFile(final FileItem item, final String uploadDir) throws Exception {
-		final UploadFile retval = new UploadFile();
-		retval.setFieldName(item.getFieldName());
-		retval.setFileName(item.getName());
-		retval.setContentType(item.getContentType());
-		retval.setSize(item.getSize());
-		final File tmpFile = File.createTempFile("openexchange", null, new File(uploadDir));
-		tmpFile.deleteOnExit();
-		item.write(tmpFile);
-		retval.setTmpFile(tmpFile);
-		return retval;
+		try {
+			final UploadFile retval = new UploadFile();
+			retval.setFieldName(item.getFieldName());
+			retval.setFileName(item.getName());
+			retval.setContentType(item.getContentType());
+			retval.setSize(item.getSize());
+			final File tmpFile = File.createTempFile("openexchange", null, new File(uploadDir));
+			tmpFile.deleteOnExit();
+			item.write(tmpFile);
+			retval.setTmpFile(tmpFile);
+			return retval;
+		} finally {
+			item.delete();
+		}
 	}
 
 	/* (non-Javadoc)

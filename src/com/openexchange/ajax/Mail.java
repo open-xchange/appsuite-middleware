@@ -324,6 +324,8 @@ public class Mail extends PermissionServlet implements UploadListener {
 			actionPutReceiptAck(req, resp);
 		} else if (actionStr.equalsIgnoreCase(ACTION_SEARCH)) {
 			actionPutMailSearch(req, resp);
+		} else if (actionStr.equalsIgnoreCase(ACTION_CLEAR)) {
+			actionPutClear(req, resp);
 		} else {
 			throw new Exception("Unknown value in parameter " + PARAMETER_ACTION + " through PUT command");
 		}
@@ -1262,6 +1264,83 @@ public class Mail extends PermissionServlet implements UploadListener {
 			MailInterfaceImpl.mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
 			return fileName;
 		}
+	}
+	
+	public void actionPutClear(final SessionObject session, final Writer writer, final JSONObject jsonObj,
+			final MailInterface mi) throws JSONException {
+		actionPutClear(session, writer, jsonObj.getString(JSON_KEY_DATA), ParamContainer.getInstance(jsonObj,
+				Component.EMAIL), mi);
+	}
+
+	private final void actionPutClear(final HttpServletRequest req, final HttpServletResponse resp) throws IOException,
+			ServletException {
+		try {
+			actionPutClear(getSessionObject(req), resp.getWriter(), getBody(req), ParamContainer.getInstance(req,
+					Component.EMAIL, resp), null);
+		} catch (JSONException e) {
+			sendErrorAsJS(resp, RESPONSE_ERROR);
+		}
+	}
+
+	private final void actionPutClear(final SessionObject sessionObj, final Writer writer, final String body,
+			final ParamContainer paramContainer, final MailInterface mailInterfaceArg) throws JSONException {
+		/*
+		 * Some variables
+		 */
+		final Response response = new Response();
+		final StringWriter strWriter = new StringWriter();
+		final JSONWriter jsonWriter = new JSONWriter(strWriter);
+		/*
+		 * Start response
+		 */
+		jsonWriter.array();
+		try {
+			/*
+			 * Parse body
+			 */
+			final JSONArray ja = new JSONArray(body);
+			final int length = ja.length();
+			if (length > 0) {
+				MailInterface mailInterface = mailInterfaceArg;
+				boolean closeMailInterface = false;
+				try {
+					if (mailInterface == null) {
+						mailInterface = MailInterfaceImpl.getInstance(sessionObj);
+						closeMailInterface = true;
+					}
+					/*
+					 * Clear folder sequentially
+					 */
+					for (int i = 0; i < length; i++) {
+						final String folderId = ja.getString(i);
+						if (!mailInterface.clearFolder(folderId)) {
+							/*
+							 * Something went wrong
+							 */
+							jsonWriter.value(folderId);
+						}
+					}
+				} finally {
+					if (closeMailInterface && mailInterface != null) {
+						mailInterface.close(true);
+					}
+					mailInterface = null;
+				}
+			}
+		} catch (final AbstractOXException e) {
+			LOG.error(e.getMessage(), e);
+			response.setException(e);
+		} catch (final Exception e) {
+			LOG.error("actionPutClear", e);
+			response.setException(getWrappingOXException(e));
+		}
+		/*
+		 * Close response and flush print writer
+		 */
+		jsonWriter.endArray();
+		response.setData(new JSONArray(strWriter.toString()));
+		response.setTimestamp(null);
+		Response.write(response, writer);
 	}
 
 	public void actionPutMailSearch(final SessionObject session, final Writer writer, final JSONObject jsonObj,

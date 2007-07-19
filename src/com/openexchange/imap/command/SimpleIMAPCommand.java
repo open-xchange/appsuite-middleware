@@ -49,49 +49,52 @@
 
 package com.openexchange.imap.command;
 
-import javax.mail.Message;
 import javax.mail.MessagingException;
 
 import com.openexchange.imap.OXMailException;
 import com.openexchange.imap.OXMailException.MailCode;
-import com.openexchange.tools.Collections.SmartLongArray;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
-import com.sun.mail.imap.protocol.FetchResponse;
-import com.sun.mail.imap.protocol.UID;
 
 /**
- * MessageUIDsIMAPCommand - gets the corresponding message UIDs to given array
- * of <code>Message</code> as an array of <code>long</code>
+ * SimpleIMAPCommand
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class MessageUIDsIMAPCommand extends AbstractIMAPCommand<long[]> {
+public final class SimpleIMAPCommand extends AbstractIMAPCommand<Boolean> {
+
+	private final String command;
 
 	private final String[] args;
-
-	private final int length;
-
-	private final SmartLongArray sla;
-
-	private int index;
+	
+	private final boolean performNotifyResponseHandlers;
 
 	/**
+	 * Constructor to apply command as it is
+	 * 
 	 * @param imapFolder
 	 */
-	public MessageUIDsIMAPCommand(final IMAPFolder imapFolder, final Message[] msgs) {
+	public SimpleIMAPCommand(final IMAPFolder imapFolder, final String command, final boolean performNotifyResponseHandlers) {
 		super(imapFolder);
-		if (msgs == null) {
+		this.command = command;
+		args = ARGS_EMPTY;
+		this.performNotifyResponseHandlers = performNotifyResponseHandlers;
+	}
+
+	/**
+	 * Constructor to apply command to specified messages in folder
+	 * 
+	 * @param imapFolder
+	 */
+	public SimpleIMAPCommand(final IMAPFolder imapFolder, final String command, final long[] uids, final boolean performNotifyResponseHandlers) {
+		super(imapFolder);
+		if (uids == null) {
 			returnDefaultValue = true;
-			args = ARGS_EMPTY;
-			length = -1;
-			sla = null;
-		} else {
-			args = IMAPNumArgSplitter.splitMessageArg(msgs);
-			length = msgs.length;
-			sla = new SmartLongArray(length);
 		}
+		this.command = command;
+		args = IMAPNumArgSplitter.splitUIDArg(uids);
+		this.performNotifyResponseHandlers = performNotifyResponseHandlers;
 	}
 
 	/*
@@ -101,7 +104,7 @@ public final class MessageUIDsIMAPCommand extends AbstractIMAPCommand<long[]> {
 	 */
 	@Override
 	protected boolean addLoopCondition() {
-		return (index < length);
+		return true;
 	}
 
 	/*
@@ -122,13 +125,12 @@ public final class MessageUIDsIMAPCommand extends AbstractIMAPCommand<long[]> {
 	@Override
 	protected String getCommand(final int argsIndex) {
 		final StringBuilder sb = new StringBuilder(args[argsIndex].length() + 64);
-		sb.append("FETCH ");
-		sb.append(args[argsIndex]);
-		sb.append(" (UID)");
+		sb.append(command);
+		if (java.util.Arrays.equals(ARGS_EMPTY, args)) {
+			sb.append(args[argsIndex]);
+		}
 		return sb.toString();
 	}
-
-	private static final long[] EMPTY_ARR = new long[0];
 
 	/*
 	 * (non-Javadoc)
@@ -136,8 +138,8 @@ public final class MessageUIDsIMAPCommand extends AbstractIMAPCommand<long[]> {
 	 * @see com.openexchange.imap.command.AbstractIMAPCommand#getDefaultValueOnEmptyFolder()
 	 */
 	@Override
-	protected long[] getDefaultValue() {
-		return EMPTY_ARR;
+	protected Boolean getDefaultValue() {
+		return Boolean.TRUE;
 	}
 
 	/*
@@ -146,8 +148,8 @@ public final class MessageUIDsIMAPCommand extends AbstractIMAPCommand<long[]> {
 	 * @see com.openexchange.imap.command.AbstractIMAPCommand#getReturnVal()
 	 */
 	@Override
-	protected long[] getReturnVal() {
-		return sla.toArray();
+	protected Boolean getReturnVal() {
+		return Boolean.TRUE;
 	}
 
 	/*
@@ -158,8 +160,8 @@ public final class MessageUIDsIMAPCommand extends AbstractIMAPCommand<long[]> {
 	@Override
 	protected void handleLastResponse(final Response lastResponse) throws MessagingException {
 		if (!lastResponse.isOK()) {
-			throw new MessagingException(OXMailException.getFormattedMessage(MailCode.PROTOCOL_ERROR, "FETCH failed: "
-					+ lastResponse.getRest()));
+			throw new MessagingException(OXMailException.getFormattedMessage(MailCode.PROTOCOL_ERROR, "Command \""
+					+ command + "\" failed: " + lastResponse.getRest()));
 		}
 	}
 
@@ -170,16 +172,6 @@ public final class MessageUIDsIMAPCommand extends AbstractIMAPCommand<long[]> {
 	 */
 	@Override
 	protected void handleResponse(final Response response) throws MessagingException {
-		/*
-		 * Response is null or not a FetchResponse
-		 */
-		if (response == null) {
-			return;
-		} else if (!(response instanceof FetchResponse)) {
-			return;
-		}
-		sla.append(((UID) (((FetchResponse) response).getItem(0))).uid);
-		index++;
 	}
 
 	/*
@@ -199,7 +191,7 @@ public final class MessageUIDsIMAPCommand extends AbstractIMAPCommand<long[]> {
 	 */
 	@Override
 	protected boolean performNotifyResponseHandlers() {
-		return false;
+		return performNotifyResponseHandlers;
 	}
 
 }

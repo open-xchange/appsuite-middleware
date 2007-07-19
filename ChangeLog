@@ -1,3 +1,10 @@
+* 2007-07-19 - thorben.betten@open-xchange.com
+
+ - Added mail folder clearing to mail servlet
+ - Added invocation of FileItem.delete() on file upload to avoid double
+   temporary files
+ - Fastened reading of body content on PUT request in AJAXServlet.getBody()
+
 * 2007-07-18 - thorben.betten@open-xchange.com
 
  - New design for custom IMAP commands

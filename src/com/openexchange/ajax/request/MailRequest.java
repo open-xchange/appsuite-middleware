@@ -149,6 +149,8 @@ public final class MailRequest {
 			MAIL_SERVLET.actionPutReceiptAck(session, writer, jsonObject, mailInterface);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_SEARCH)) {
 			MAIL_SERVLET.actionPutMailSearch(session, writer, jsonObject, mailInterface);
+		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_CLEAR)) {
+			MAIL_SERVLET.actionPutClear(session, writer, jsonObject, mailInterface);
 		} else {
 			throw new OXMailException(MailCode.UNKNOWN_ACTION, action);
 		}

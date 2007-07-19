@@ -106,7 +106,7 @@ public abstract class AbstractIMAPCommand<T> {
 				/*
 				 * Abort processing
 				 */
-				return abstractIMAPCommand.getDefaultValueOnEmptyFolder();
+				return abstractIMAPCommand.getDefaultValue();
 			}
 			final boolean notifyResponseHandlers = abstractIMAPCommand.performNotifyResponseHandlers();
 			final String[] args = abstractIMAPCommand.getArgs();
@@ -119,7 +119,7 @@ public abstract class AbstractIMAPCommand<T> {
 					abstractIMAPCommand.handleLastResponse(response);
 				} catch (final MessagingException e) {
 					if (e.getMessage().indexOf(ERR_01) > -1) {
-						return abstractIMAPCommand.getDefaultValueOnEmptyFolder();
+						return abstractIMAPCommand.getDefaultValue();
 					}
 					final ProtocolException pe = new ProtocolException(e.getMessage());
 					pe.initCause(e);
@@ -155,7 +155,7 @@ public abstract class AbstractIMAPCommand<T> {
 								 * Obviously this folder is empty or no matching
 								 * messages were found
 								 */
-								return abstractIMAPCommand.getDefaultValueOnEmptyFolder();
+								return abstractIMAPCommand.getDefaultValue();
 							}
 							throw cfe;
 						}
@@ -225,7 +225,7 @@ public abstract class AbstractIMAPCommand<T> {
 	 * 
 	 * @return the default value
 	 */
-	protected abstract T getDefaultValueOnEmptyFolder();
+	protected abstract T getDefaultValue();
 
 	/**
 	 * Indicates if processing should be stopped right at the beginning and the

@@ -230,7 +230,7 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
 	 * @see com.openexchange.imap.command.AbstractIMAPCommand#getDefaultValueOnEmptyFolder()
 	 */
 	@Override
-	protected Boolean getDefaultValueOnEmptyFolder() {
+	protected Boolean getDefaultValue() {
 		return Boolean.TRUE;
 	}
 

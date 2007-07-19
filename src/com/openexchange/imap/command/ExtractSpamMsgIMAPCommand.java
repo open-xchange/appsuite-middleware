@@ -151,7 +151,7 @@ public final class ExtractSpamMsgIMAPCommand extends AbstractIMAPCommand<Message
 	 * @see com.openexchange.imap.command.AbstractIMAPCommand#getDefaultValueOnEmptyFolder()
 	 */
 	@Override
-	protected Message[] getDefaultValueOnEmptyFolder() {
+	protected Message[] getDefaultValue() {
 		return EMPTY_ARR;
 	}
 
