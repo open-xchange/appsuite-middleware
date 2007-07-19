@@ -118,7 +118,6 @@ public class ListFilestores extends UtilAbstraction {
         columns.add("currentcontexts");
         columns.add("login");
         columns.add("password");
-        columns.add("name");
         // Needed for csv output
         final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
 
@@ -155,12 +154,6 @@ public class ListFilestores extends UtilAbstraction {
 
         if (fstore.getPassword() != null) {
             rea_data.add(fstore.getPassword());
-        } else {
-            rea_data.add(null);
-        }
-
-        if (fstore.getName() != null) {
-            rea_data.add(fstore.getName());
         } else {
             rea_data.add(null);
         }
