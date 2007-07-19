@@ -63,7 +63,6 @@ import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Database;
-import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
@@ -113,13 +112,10 @@ public abstract class OXContextMySQLStorageCommon {
             final Context cs = new Context();
             int reason_id = -1;
             int filestore_id = -1;
-            long quota_used = -1;
             long quota_max = -1;
 
             String name = null;
             String filestore_name = null;
-            String filestore_user = null;
-            String filestore_passwd = null;
             // DATBASE HANDLE
             while (rs.next()) {
                 // filestore_id | filestore_name | filestore_login |
@@ -135,8 +131,6 @@ public abstract class OXContextMySQLStorageCommon {
                 reason_id = rs.getInt("reason_id");
                 filestore_id = rs.getInt("filestore_id");
                 filestore_name = rs.getString("filestore_name");
-                filestore_user = rs.getString("filestore_login");
-                filestore_passwd = rs.getString("filestore_passwd");
                 quota_max = rs.getLong("quota_max");
                 if (quota_max != 0 && quota_max != -1) {
                     quota_max /= Math.pow(2, 20);
@@ -194,6 +188,7 @@ public abstract class OXContextMySQLStorageCommon {
                 cs.setMaxQuota(quota_max);
             }
             cs.setFilestoreId(filestore_id);
+            cs.setFilestore_name(filestore_name);
 
             final long average_size = Long.parseLong(prop.getProp("AVERAGE_CONTEXT_SIZE", "100"));
             cs.setAverage_size(average_size);
