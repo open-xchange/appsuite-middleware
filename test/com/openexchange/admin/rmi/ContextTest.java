@@ -121,7 +121,7 @@ public class ContextTest extends AbstractTest {
         final String hosturl = getRMIHostUrl();
         addContext(ctx, hosturl, cred);
         OXUtilInterface oxu = (OXUtilInterface) Naming.lookup(hosturl + OXUtilInterface.RMI_NAME);
-        MaintenanceReason[] mrs = oxu.listMaintenanceReasons(cred);
+        MaintenanceReason[] mrs = oxu.listMaintenanceReasons("*",cred);
         MaintenanceReason mr = new MaintenanceReason();
         if (mrs.length == 0) {
             // add reason , and then use this reason to disable the context
@@ -152,7 +152,7 @@ public class ContextTest extends AbstractTest {
         
         addContext(ctx, hosturl, cred);
         OXUtilInterface oxu = (OXUtilInterface) Naming.lookup(hosturl + OXUtilInterface.RMI_NAME);
-        MaintenanceReason[] mrs = oxu.listMaintenanceReasons(cred);
+        MaintenanceReason[] mrs = oxu.listMaintenanceReasons("*",cred);
         MaintenanceReason mr = new MaintenanceReason();
         if (mrs.length == 0) {
             // add reason , and then use this reason to disable the context
@@ -251,7 +251,7 @@ public class ContextTest extends AbstractTest {
         OXUtilInterface oxu = (OXUtilInterface) Naming.lookup(host + OXUtilInterface.RMI_NAME);
         // first check if the needed server entry is in db, if not, add server
         // first,
-        if (oxu.listServer("local", cred).length != 1) {
+        if (oxu.listServers("local", cred).length != 1) {
             Server srv = new Server();
             srv.setName("local");
             oxu.registerServer(srv, cred);
@@ -312,7 +312,7 @@ public class ContextTest extends AbstractTest {
     public static Context getTestContextObject(int context_id, long quota_max_in_mb) {
         Context ctx = new Context(context_id);        
         final Filestore filestore = new Filestore();
-        filestore.setQuota_max(quota_max_in_mb);
+        filestore.setSize(quota_max_in_mb);
         ctx.setFilestore(filestore);
         ctx.setName("Name-"+ctx.getIdAsInt());
         return ctx;

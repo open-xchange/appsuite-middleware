@@ -92,7 +92,7 @@ public class UtilTest extends AbstractTest {
         
         // now fetch all reasons, and look if my added reasons are within this data set        
         int resp = 0;
-        MaintenanceReason[] srv_reasons = oxu.listMaintenanceReasons(ContextTest.DummyMasterCredentials());
+        MaintenanceReason[] srv_reasons = oxu.listMaintenanceReasons("*",ContextTest.DummyMasterCredentials());
         for(int c = 0;c<c_reasons.size();c++){
             
             MaintenanceReason tmp = c_reasons.get(c);
@@ -121,7 +121,7 @@ public class UtilTest extends AbstractTest {
         
         reg_srv.setId(oxu.registerServer(reg_srv,ContextTest.DummyMasterCredentials()).getId());
         
-        Server[] srv_resp = oxu.listServer("testcase-register-server-*",ContextTest.DummyMasterCredentials());
+        Server[] srv_resp = oxu.listServers("testcase-register-server-*",ContextTest.DummyMasterCredentials());
         int resp = 0;
         for(int a = 0;a<srv_resp.length;a++){
             if(srv_resp[a].getName().equals(reg_srv.getName()) &&
@@ -142,7 +142,7 @@ public class UtilTest extends AbstractTest {
         
         reg_srv.setId(oxu.registerServer(reg_srv,ContextTest.DummyMasterCredentials()).getId());
         
-        Server[] srv_resp = oxu.listServer("testcase-register-server-*",ContextTest.DummyMasterCredentials());
+        Server[] srv_resp = oxu.listServers("testcase-register-server-*",ContextTest.DummyMasterCredentials());
         int resp = 0;
         for(int a = 0;a<srv_resp.length;a++){
             if(srv_resp[a].getName().equals(reg_srv.getName()) &&
@@ -160,7 +160,7 @@ public class UtilTest extends AbstractTest {
         // here the server was added correctly to the server, now delete it
         oxu.unregisterServer(sv,ContextTest.DummyMasterCredentials());
         
-        srv_resp = oxu.listServer("testcase-register-server-*",ContextTest.DummyMasterCredentials());
+        srv_resp = oxu.listServers("testcase-register-server-*",ContextTest.DummyMasterCredentials());
         resp = 0;
         for(int a = 0;a<srv_resp.length;a++){
             if(srv_resp[a].getName().equals(reg_srv.getName()) &&
@@ -364,7 +364,7 @@ public class UtilTest extends AbstractTest {
         client_srv.setName("testcase-search-server-"+System.currentTimeMillis());
         client_srv.setId(oxu.registerServer(client_srv,ContextTest.DummyMasterCredentials()).getId());
         
-        Server[] srv_response = oxu.listServer("testcase-search-server-*",ContextTest.DummyMasterCredentials());
+        Server[] srv_response = oxu.listServers("testcase-search-server-*",ContextTest.DummyMasterCredentials());
         boolean found_srv = false;
         for(int a = 0;a<srv_response.length;a++){
             Server tmp = srv_response[a];

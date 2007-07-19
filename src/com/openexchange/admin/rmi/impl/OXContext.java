@@ -436,7 +436,7 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
     public Context create(final Context ctx, final User admin_user, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException {
         
         try{
-            doNullCheck(ctx,ctx.getIdAsInt(),admin_user);
+            doNullCheck(ctx,ctx.getIdAsInt(),ctx.getMaxQuota(),admin_user);
         } catch (final InvalidDataException e1) {            
             log.error("Invalid data sent by client!", e1);
             throw e1;
