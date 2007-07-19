@@ -67,7 +67,7 @@ public class Context implements Serializable {
     private Integer id;
     private Database readDatabase;
     private Database writeDatabase;
-    private Filestore filestore;
+    private Integer filestore_id;
     private Long average_size;
     private Long maxQuota;
     private Long usedQuota;
@@ -126,7 +126,7 @@ public class Context implements Serializable {
         this.id = -1;
         this.name = null;
         this.enabled = false;
-        this.filestore = null;
+        this.filestore_id = null;
         this.average_size = null;
         this.maintenanceReason = null;
         this.maxQuota = null;
@@ -172,12 +172,12 @@ public class Context implements Serializable {
         return this.login_mappings;
     }
 
-    public Filestore getFilestore() {
-        return filestore;
+    public Integer getFilestoreId() {
+        return filestore_id;
     }
 
-    public void setFilestore(Filestore filestore) {
-        this.filestore = filestore;
+    public void setFilestoreId(Integer filestore_id) {
+        this.filestore_id = filestore_id;
     }
 
     public Long getMaxQuota() {

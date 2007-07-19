@@ -164,27 +164,12 @@ public abstract class OXContextMySQLStorageCommon {
             cs.setEnabled(enabled);
             // ######################
 
-            // FILESTORE HANDLE INFOS ##
-            final Filestore fs = new Filestore();
-            if (-1 != filestore_id) {
-                fs.setId(filestore_id);
-            }
-            if (null != filestore_user) {
-                fs.setLogin(filestore_user);
-            }
-            if (null != filestore_name) {
-                fs.setName(filestore_name);
-            }
-            if (null != filestore_passwd) {
-                fs.setPassword(filestore_passwd);
-            }
-
             // GENERAL CONTEXT INFOS AND QUOTA
 
             rs.close();
             prep.close();
 
-            prep = oxdb_read.prepareStatement("SELECT filestore_usage.used FROM filestore_usage WHERE filestore_usage.cid = ?");
+/*            prep = oxdb_read.prepareStatement("SELECT filestore_usage.used FROM filestore_usage WHERE filestore_usage.cid = ?");
             prep.setInt(1, context_id);
             rs = prep.executeQuery();
 
@@ -202,18 +187,13 @@ public abstract class OXContextMySQLStorageCommon {
                 // set used quota in context setup
                 cs.setUsedQuota(quota_used);
             }
-
+*/
             // maximum quota of this context
             if (quota_max != -1) {
-                //#### already set in context object
-                //fs.setQuota_max(quota_max);
-                // ######################
-                
                 // set quota max also in context setup object
                 cs.setMaxQuota(quota_max);
             }
-
-            cs.setFilestore(fs);
+            cs.setFilestoreId(filestore_id);
 
             final long average_size = Long.parseLong(prop.getProp("AVERAGE_CONTEXT_SIZE", "100"));
             cs.setAverage_size(average_size);
