@@ -19,7 +19,7 @@ public class ListFilestoreTest extends AbstractTest {
         
         resetBuffers();
         
-        new ListFilestore(getMasterCredentialsOptionData()){
+        new ListFilestores(getMasterCredentialsOptionData()){
             protected void sysexit(int exitCode) {
                 ListFilestoreTest.this.returnCode = exitCode;
             }
@@ -33,7 +33,7 @@ public class ListFilestoreTest extends AbstractTest {
         
         resetBuffers();
         
-        new ListFilestore(getCSVMasterOptionData()){
+        new ListFilestores(getCSVMasterOptionData()){
             protected void sysexit(int exitCode) {
                 ListFilestoreTest.this.returnCode = exitCode;
             }
@@ -47,7 +47,7 @@ public class ListFilestoreTest extends AbstractTest {
         
         resetBuffers();
         
-        new ListFilestore(getWrongMasterCredentialsOptionData()){
+        new ListFilestores(getWrongMasterCredentialsOptionData()){
             protected void sysexit(int exitCode) {
                 ListFilestoreTest.this.returnCode = exitCode;
             }
@@ -61,7 +61,7 @@ public class ListFilestoreTest extends AbstractTest {
         
         resetBuffers();
         
-        new ListFilestore(getUnknownOptionData()){
+        new ListFilestores(getUnknownOptionData()){
             protected void sysexit(int exitCode) {
                 ListFilestoreTest.this.returnCode = exitCode;
             }
