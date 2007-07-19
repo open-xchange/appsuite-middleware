@@ -3526,14 +3526,12 @@ public class MailInterfaceImpl implements MailInterface {
 				/*
 				 * Copy messages to folder "TRASH"
 				 */
-				final IMAPFolder trashFolder = (IMAPFolder) imapCon.getIMAPStore().getFolder(trashFullname);
-				checkAndCreateFolder(trashFolder, (IMAPFolder) imapCon.getIMAPStore().getFolder(STR_INBOX));
 				try {
 					final long start = System.currentTimeMillis();
-					new CopyIMAPCommand(imapCon.getImapFolder(), msgUIDs, trashFolder.getFullName(), false, true).doCommand();
+					new CopyIMAPCommand(imapCon.getImapFolder(), msgUIDs, trashFullname, false, true).doCommand();
 					if (LOG.isInfoEnabled()) {
 						LOG.info(new StringBuilder(100).append("\"Soft Delete\": ").append(msgUIDs.length).append(
-								" messages copied to default trash folder \"").append(trashFolder.getFullName())
+								" messages copied to default trash folder \"").append(trashFullname)
 								.append("\" in ").append((System.currentTimeMillis() - start)).append(STR_MSEC)
 								.toString());
 					}
