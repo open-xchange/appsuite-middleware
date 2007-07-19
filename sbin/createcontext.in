@@ -96,7 +96,7 @@ case "${BNAME}" in
     "movefilestorecontext")
     ACTION="context.MoveContextFilestore"
     ;;
-    "listcontext")
+    "listcontexts")
     ACTION="context.List"
     ;;
     "createreason")
@@ -105,17 +105,17 @@ case "${BNAME}" in
     "changefilestore")
     ACTION="util.ChangeFilestore"
     ;;
-    "listdatabase")
-    ACTION="util.ListDatabase"
+    "listdatabases")
+    ACTION="util.ListDatabases"
     ;;
-    "listfilestore")
-    ACTION="util.ListFilestore"
+    "listfilestores")
+    ACTION="util.ListFilestores"
     ;;
-    "listreason")
-    ACTION="util.ListReason"
+    "listreasons")
+    ACTION="util.ListReasons"
     ;;
-    "listserver")
-    ACTION="util.ListServer"
+    "listservers")
+    ACTION="util.ListServers"
     ;;
     "registerdatabase")
     ACTION="util.RegisterDatabase"

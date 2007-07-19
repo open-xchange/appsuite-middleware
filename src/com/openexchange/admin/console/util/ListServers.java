@@ -22,9 +22,9 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
  * @author d7
  * 
  */
-public class ListServer extends UtilAbstraction {
+public class ListServers extends UtilAbstraction {
 
-    public ListServer(final String[] args2) {
+    public ListServers(final String[] args2) {
 
         final AdminParser parser = new AdminParser("listservers");
 
@@ -93,7 +93,7 @@ public class ListServer extends UtilAbstraction {
     }
 
     public static void main(final String args[]) {
-        new ListServer(args);
+        new ListServers(args);
     }
 
     private void setOptions(final AdminParser parser) {

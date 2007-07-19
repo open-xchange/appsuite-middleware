@@ -24,9 +24,9 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
  * @author d7,cutmasta
  * 
  */
-public class ListFilestore extends UtilAbstraction {
+public class ListFilestores extends UtilAbstraction {
 
-    public ListFilestore(final String[] args2) {
+    public ListFilestores(final String[] args2) {
 
         final AdminParser parser = new AdminParser("listfilestores");
 
@@ -131,7 +131,7 @@ public class ListFilestore extends UtilAbstraction {
     }
 
     public static void main(final String args[]) {
-        new ListFilestore(args);
+        new ListFilestores(args);
     }
 
     private void setOptions(final AdminParser parser) {

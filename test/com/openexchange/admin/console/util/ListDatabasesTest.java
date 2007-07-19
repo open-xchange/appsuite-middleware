@@ -20,7 +20,7 @@ public class ListDatabasesTest extends AbstractTest {
         
         resetBuffers();
         
-        new ListDatabase(getMasterCredentialsOptionData()){
+        new ListDatabases(getMasterCredentialsOptionData()){
             protected void sysexit(int exitCode) {
                 ListDatabasesTest.this.returnCode = exitCode;
             }
@@ -34,7 +34,7 @@ public class ListDatabasesTest extends AbstractTest {
         
         resetBuffers();
         
-        new ListDatabase(getCSVMasterOptionData()){
+        new ListDatabases(getCSVMasterOptionData()){
             protected void sysexit(int exitCode) {
                 ListDatabasesTest.this.returnCode = exitCode;
             }
@@ -48,7 +48,7 @@ public class ListDatabasesTest extends AbstractTest {
         
         resetBuffers();
         
-        new ListDatabase(getWrongMasterCredentialsOptionData()){
+        new ListDatabases(getWrongMasterCredentialsOptionData()){
             protected void sysexit(int exitCode) {
                 ListDatabasesTest.this.returnCode = exitCode;
             }
@@ -62,7 +62,7 @@ public class ListDatabasesTest extends AbstractTest {
         
         resetBuffers();
         
-        new ListDatabase(getUnknownOptionData()){
+        new ListDatabases(getUnknownOptionData()){
             protected void sysexit(int exitCode) {
                 ListDatabasesTest.this.returnCode = exitCode;
             }
