@@ -96,7 +96,7 @@ public class FilestoreDataMover implements Callable<Void> {
         FileUtils.deleteDirectory(new File(this.src));
 
         final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
-        ctx.setFilestore(dstStore);
+        ctx.setFilestoreId(dstStore.getId());
         oxcox.changeStorageData(ctx);
         oxcox.enable(ctx);
     }

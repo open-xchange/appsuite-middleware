@@ -121,6 +121,15 @@ public abstract class OXUtilStorageInterface {
      */
     public abstract Filestore[] listFilestores(final String search_pattern) throws StorageException;
 
+
+    /**
+     * get filestore by ID
+     * @param id
+     * @return Filestore
+     * @throws StorageException
+     */
+    public abstract Filestore getFilestore(final int id) throws StorageException;
+
     /**
      * Unregister filestore from configbdb
      * 
