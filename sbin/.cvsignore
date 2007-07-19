@@ -1,7 +1,5 @@
 createcontext
 createuser
 initconfigdb
-jobControl
 oxinstaller
-showRuntimeStats
-
+showruntimestats
