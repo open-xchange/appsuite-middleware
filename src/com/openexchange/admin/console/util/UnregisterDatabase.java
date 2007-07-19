@@ -93,7 +93,7 @@ public class UnregisterDatabase extends UtilAbstraction {
     }
 
     private void setOptions(final AdminParser parser) {
-        setDefaultCommandLineOptions(parser);
+        setDefaultCommandLineOptionsWithoutContextID(parser);
 
         this.databaseIdOption = setShortLongOpt(parser, OPT_NAME_DATABASE_ID_SHORT,OPT_NAME_DATABASE_ID_LONG,"The id of the database which should be unregistered",true, NeededTriState.needed);
     }

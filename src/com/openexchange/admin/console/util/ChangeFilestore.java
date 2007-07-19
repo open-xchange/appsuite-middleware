@@ -123,7 +123,7 @@ public class ChangeFilestore extends UtilAbstraction {
     }
 
     private void setOptions(final AdminParser parser) {
-        setDefaultCommandLineOptions(parser);
+        setDefaultCommandLineOptionsWithoutContextID(parser);
 
         this.filestoreIdOption = setShortLongOpt(parser, OPT_NAME_STORE_FILESTORE_ID_SHORT, OPT_NAME_STORE_FILESTORE_ID_LONG, "The id of the filestore which should be changed", true, NeededTriState.needed);
 

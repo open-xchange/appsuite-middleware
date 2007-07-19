@@ -109,7 +109,7 @@ public class RegisterDatabase extends DatabaseAbstraction {
     }
 
     private void setOptions(final AdminParser parser) {
-        setDefaultCommandLineOptions(parser);
+        setDefaultCommandLineOptionsWithoutContextID(parser);
 
         setDatabaseNameOption(parser, true);
         setDatabaseHostnameOption(parser, false);

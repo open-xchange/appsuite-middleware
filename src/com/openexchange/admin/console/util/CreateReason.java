@@ -98,7 +98,7 @@ public class CreateReason extends UtilAbstraction {
 
     private void setOptions(final AdminParser parser) {
         
-        setDefaultCommandLineOptions(parser);
+        setDefaultCommandLineOptionsWithoutContextID(parser);
 
         this.reasonTextOption = setShortLongOpt(parser, OPT_NAME_REASON_TEXT_SHORT,OPT_NAME_REASON_TEXT_LONG,"the text for the added reason",true, NeededTriState.needed);
                 

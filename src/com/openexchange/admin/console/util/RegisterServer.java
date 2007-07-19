@@ -97,7 +97,7 @@ public class RegisterServer extends UtilAbstraction {
     }
 
     private void setOptions(final AdminParser parser) {
-        setDefaultCommandLineOptions(parser);
+        setDefaultCommandLineOptionsWithoutContextID(parser);
 
         this.serverNameOption = setShortLongOpt(parser, OPT_NAME_HOSTNAME_SHORT, OPT_NAME_HOSTNAME_LONG, "The hostname of the server", true, NeededTriState.needed);
 
