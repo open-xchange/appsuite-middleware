@@ -43,9 +43,6 @@ public abstract class ChangeCore extends UserAbstraction {
         // add optional opts
         setOptionalOptions(parser);
         
-        // module access params
-        setModuleAccessOptions(parser);
-        
         setFurtherOptions(parser);
     }
 
