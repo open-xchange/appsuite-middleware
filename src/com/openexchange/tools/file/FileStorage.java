@@ -281,7 +281,12 @@ public abstract class FileStorage {
         State state = null;
         lock(LOCK_TIMEOUT);
         try {
-            state = new State(load(STATEFILENAME));
+            try {
+                state = new State(load(STATEFILENAME));
+            } catch (FileStorageException e) {
+                delete(STATEFILENAME);
+                throw e;
+            }
             // Look for an empty slot
             while (nextentry == null && state.hasUnused()) {
                 nextentry = state.getUnused();
@@ -317,7 +322,12 @@ public abstract class FileStorage {
                     state.setNextEntry(savenextentry);
                 }
             }
-            save(STATEFILENAME, state.saveState());
+            try {
+                save(STATEFILENAME, state.saveState());
+            } catch (FileStorageException e) {
+                delete(STATEFILENAME);
+                throw e;
+            }
         } finally {
             unlock();
         }
