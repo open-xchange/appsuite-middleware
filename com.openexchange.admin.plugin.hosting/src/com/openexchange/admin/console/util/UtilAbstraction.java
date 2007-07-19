@@ -55,17 +55,6 @@ public class UtilAbstraction extends BasicCommandlineOptions {
     protected final static char OPT_NAME_STORE_MAX_CTX_SHORT = 'x';
     protected final static String OPT_NAME_STORE_MAX_CTX_LONG = "maxcontexts";
     
-    /**
-     * 
-     * @return Options containing adminuser,adminpass Option objects.
-     */
-    protected void setDefaultCommandLineOptions(final AdminParser parser){          
-        
-        setAdminUserOption(parser);
-        setAdminPassOption(parser);        
-        
-    }
-    
     protected void setDatabaseNameOption(final AdminParser parser,final boolean required){
         this.databaseNameOption = setShortLongOpt(parser, OPT_NAME_DBNAME_SHORT,OPT_NAME_DBNAME_LONG,"Name of the database",true, convertBooleantoTriState(required)); 
     }

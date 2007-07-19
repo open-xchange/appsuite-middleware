@@ -121,7 +121,7 @@ public class ChangeDatabase extends DatabaseAbstraction {
 
     private void setOptions(final AdminParser parser) {
         // oxadmin,oxadmin passwd
-        setDefaultCommandLineOptions(parser);
+        setDefaultCommandLineOptionsWithoutContextID(parser);
 
         setDatabaseNameOption(parser, false);
         setDatabaseHostnameOption(parser, false);

@@ -95,7 +95,7 @@ public class ListReason extends UtilAbstraction {
     }
 
     private void setOptions(final AdminParser parser) {
-        setDefaultCommandLineOptions(parser);
+        setDefaultCommandLineOptionsWithoutContextID(parser);
         setSearchOption(parser);
     }
 

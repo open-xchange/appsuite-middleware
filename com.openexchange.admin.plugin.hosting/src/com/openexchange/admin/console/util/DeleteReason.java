@@ -95,7 +95,7 @@ public class DeleteReason extends UtilAbstraction {
     }
 
     private void setOptions(final AdminParser parser) {
-        setDefaultCommandLineOptions(parser);
+        setDefaultCommandLineOptionsWithoutContextID(parser);
 
         this.reasonIDOption = setShortLongOpt(parser, OPT_NAME_REASON_ID_SHORT, OPT_NAME_REASON_ID_LONG, "the id for the reason to be deleted", true, NeededTriState.needed);
     }

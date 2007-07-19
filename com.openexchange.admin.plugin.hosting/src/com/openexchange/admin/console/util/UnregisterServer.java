@@ -95,7 +95,7 @@ public class UnregisterServer extends UtilAbstraction {
     }
 
     private void setOptions(AdminParser parser) {
-        setDefaultCommandLineOptions(parser);
+        setDefaultCommandLineOptionsWithoutContextID(parser);
 
         serverIdOption = setShortLongOpt(parser, OPT_NAME_SERVER_ID_SHORT, OPT_NAME_SERVER_ID_LONG, "The id of the server which should be deleted", true, NeededTriState.needed);
     }
