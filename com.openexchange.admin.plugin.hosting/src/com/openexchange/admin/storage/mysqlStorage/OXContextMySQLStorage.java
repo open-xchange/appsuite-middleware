@@ -902,71 +902,72 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         }
     }
     
-    private void changeStorageDataImpl(Context ctx,Connection configdb_write_con) throws SQLException{
+    private void changeStorageDataImpl(Context ctx,Connection configdb_write_con) throws SQLException, StorageException{
         
-        if(ctx.getFilestore()!=null){
-        Filestore filestore = ctx.getFilestore();
-        PreparedStatement prep = null;
-        final int context_id = ctx.getIdAsInt();
-        try {
-                        
-            if (filestore.getId()!=null && -1 != filestore.getId().intValue()) {
-                prep = configdb_write_con.prepareStatement("UPDATE context SET filestore_id = ? WHERE cid = ?");
-                prep.setInt(1, filestore.getId().intValue());
-                prep.setInt(2, context_id);
-                prep.executeUpdate();
-                prep.close();
-            }
-
-            final String filestore_login = filestore.getLogin();
-            if (null != filestore_login) {
-                prep = configdb_write_con.prepareStatement("UPDATE context SET filestore_login = ? WHERE cid = ?");
-                prep.setString(1, filestore_login);
-                prep.setInt(2, context_id);
-                prep.executeUpdate();
-                prep.close();
-            }
-
-            final String filestore_pw = filestore.getPassword();
-            if (null != filestore_pw) {
-                prep = configdb_write_con.prepareStatement("UPDATE context SET filestore_passwd = ? WHERE cid = ?");
-                prep.setString(1, filestore_pw);
-                prep.setInt(2, context_id);
-                prep.executeUpdate();
-                prep.close();
-            }
-
-            final String filestore_name = filestore.getName();
-            if (null != filestore_name) {
-                prep = configdb_write_con.prepareStatement("UPDATE context SET filestore_name = ? WHERE cid = ?");
-                prep.setString(1, filestore_name);
-                prep.setInt(2, context_id);
-                prep.executeUpdate();
-                prep.close();
-            }
-
-           
-            if (ctx.getMaxQuota()!=null && ctx.getMaxQuota()!=-1) {
-                final long filestore_quota_max = ctx.getMaxQuota();
-                // convert to byte for db
-                final long quota_max_in_byte = (long) (filestore_quota_max * Math.pow(2, 20));
-                prep = configdb_write_con.prepareStatement("UPDATE context SET quota_max = ? WHERE cid = ?");
-                prep.setLong(1, quota_max_in_byte);
-                prep.setInt(2, context_id);
-                prep.executeUpdate();
-                prep.close();
-            }
-            
-            
-        }finally{
+        if(ctx.getFilestoreId()!=null){
+            final OXUtilStorageInterface oxutil = OXUtilStorageInterface.getInstance();
+            Filestore filestore = oxutil.getFilestore(ctx.getFilestoreId());
+            PreparedStatement prep = null;
+            final int context_id = ctx.getIdAsInt();
             try {
-                if (prep != null) {
+
+                if (filestore.getId()!=null && -1 != filestore.getId().intValue()) {
+                    prep = configdb_write_con.prepareStatement("UPDATE context SET filestore_id = ? WHERE cid = ?");
+                    prep.setInt(1, filestore.getId().intValue());
+                    prep.setInt(2, context_id);
+                    prep.executeUpdate();
                     prep.close();
                 }
-            } catch (final SQLException exp) {
-                log.error(OXContextMySQLStorageCommon.LOG_ERROR_CLOSING_STATEMENT);
+
+                final String filestore_login = filestore.getLogin();
+                if (null != filestore_login) {
+                    prep = configdb_write_con.prepareStatement("UPDATE context SET filestore_login = ? WHERE cid = ?");
+                    prep.setString(1, filestore_login);
+                    prep.setInt(2, context_id);
+                    prep.executeUpdate();
+                    prep.close();
+                }
+
+                final String filestore_pw = filestore.getPassword();
+                if (null != filestore_pw) {
+                    prep = configdb_write_con.prepareStatement("UPDATE context SET filestore_passwd = ? WHERE cid = ?");
+                    prep.setString(1, filestore_pw);
+                    prep.setInt(2, context_id);
+                    prep.executeUpdate();
+                    prep.close();
+                }
+
+                final String filestore_name = filestore.getName();
+                if (null != filestore_name) {
+                    prep = configdb_write_con.prepareStatement("UPDATE context SET filestore_name = ? WHERE cid = ?");
+                    prep.setString(1, filestore_name);
+                    prep.setInt(2, context_id);
+                    prep.executeUpdate();
+                    prep.close();
+                }
+
+
+                if (ctx.getMaxQuota()!=null && ctx.getMaxQuota()!=-1) {
+                    final long filestore_quota_max = ctx.getMaxQuota();
+                    // convert to byte for db
+                    final long quota_max_in_byte = (long) (filestore_quota_max * Math.pow(2, 20));
+                    prep = configdb_write_con.prepareStatement("UPDATE context SET quota_max = ? WHERE cid = ?");
+                    prep.setLong(1, quota_max_in_byte);
+                    prep.setInt(2, context_id);
+                    prep.executeUpdate();
+                    prep.close();
+                }
+
+
+            }finally{
+                try {
+                    if (prep != null) {
+                        prep.close();
+                    }
+                } catch (final SQLException exp) {
+                    log.error(OXContextMySQLStorageCommon.LOG_ERROR_CLOSING_STATEMENT);
+                }
             }
-        }
         }
     }
 

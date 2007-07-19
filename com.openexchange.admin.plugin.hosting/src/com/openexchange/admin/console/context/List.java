@@ -89,22 +89,21 @@ public class List extends ContextAbtraction {
 
     }
 
-    private void sysoutOutput(final Context[] ctxs) throws InvalidDataException {
+    private void sysoutOutput(final Context[] ctxs) throws InvalidDataException, StorageException {
         final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
         for (final Context ctx : ctxs) {
             data.add(makeCSVData(ctx));
         }
         
-        doOutput(new String[] { "3r", "3r", "20l", "10l", "10r", "10r", "10l", "10l" },
-                 new String[] { "cid", "fid", "fname", "enabled", "qmax", "qused", "name", "lmappings" }, data);
+        doOutput(new String[] { "3r", "3r", "10l", "10r", "10r", "10l", "10l" },
+                 new String[] { "cid", "fid", "enabled", "qmax", "qused", "name", "lmappings" }, data);
     }
 
-    private void precsvinfos(final Context[] ctxs) {
+    private void precsvinfos(final Context[] ctxs) throws StorageException {
         // needed for csv output, KEEP AN EYE ON ORDER!!!
         final ArrayList<String> columns = new ArrayList<String>();
         columns.add("id");
         columns.add("filestore_id");
-        columns.add("filestore_name");
         columns.add("enabled");
         columns.add("max_quota");
         columns.add("used_quota");
@@ -129,23 +128,13 @@ public class List extends ContextAbtraction {
         setSearchOption(parser, false);
     }
 
-    private ArrayList<String> makeCSVData(final Context ctx) {
+    private ArrayList<String> makeCSVData(final Context ctx) throws StorageException {
         final ArrayList<String> srv_data = new ArrayList<String>();
         srv_data.add(String.valueOf(ctx.getIdAsInt()));
 
-        if (ctx.getFilestore() != null) {
-            if (ctx.getFilestore().getId() != null) {
-                srv_data.add(String.valueOf(ctx.getFilestore().getId()));
-            } else {
-                srv_data.add(null);
-            }
-            if (ctx.getFilestore().getName() != null) {
-                srv_data.add(ctx.getFilestore().getName());
-            } else {
-                srv_data.add(null);
-            }
+        if (ctx.getFilestoreId() != null) {
+            srv_data.add(String.valueOf(ctx.getFilestoreId()));
         } else {
-            srv_data.add(null);
             srv_data.add(null);
         }
 

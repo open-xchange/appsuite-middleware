@@ -137,13 +137,15 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
             oxcox.disable(ctx, reason);
             retval = oxcox.getData(ctx);
 
-            final Filestore fs = retval.getFilestore();
-            final int srcStore_id = fs.getId();
+            final int srcStore_id = retval.getFilestoreId();
 
             if (srcStore_id == dst_filestore.getId()) {
                 reEnableContext(ctx, oxcox);
                 throw new OXContextException("Src and dst store id is the same: " + dst_filestore);
             }
+
+            final OXUtilStorageInterface oxutil = OXUtilStorageInterface.getInstance();
+            Filestore fs = oxutil.getFilestore(srcStore_id);
 
             final String ctxdir = fs.getName();
             if (ctxdir == null) {
@@ -506,9 +508,9 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
             }
             
             // check if he wants to change the filestore id, if yes, make sure filestore with this id exists in the system
-            if(ctx.getFilestore()!=null && ctx.getFilestore().getId()!=null) {
-                if(!tool.existsStore(ctx.getFilestore().getId().intValue())){
-                    final InvalidDataException inde = new InvalidDataException("No such filestore with id "+ctx.getFilestore().getId());
+            if(ctx.getFilestoreId()!=null) {
+                if(!tool.existsStore(ctx.getFilestoreId().intValue())){
+                    final InvalidDataException inde = new InvalidDataException("No such filestore with id "+ctx.getFilestoreId());
                     log.error(inde.getMessage(),inde);
                     throw inde;
                 }

@@ -562,21 +562,15 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         try {
             con = cache.getREADConnectionForCONFIGDB();
 
-            stmt = con.prepareStatement("SELECT id,uri,size,max_context,COUNT(cid) FROM filestore LEFT JOIN context ON filestore.id = context.filestore_id WHERE uri LIKE ? GROUP BY filestore.id");
+            stmt = con.prepareStatement("SELECT id FROM filestore WHERE uri LIKE ?");
 
             stmt.setString(1, my_search_pattern);
             final ResultSet rs = stmt.executeQuery();
             final ArrayList<Filestore> tmp = new ArrayList<Filestore>();
 
             while (rs.next()) {
-                final Filestore fs = new Filestore();
-                fs.setId(rs.getInt("id"));
-                fs.setUrl(rs.getString("uri"));
-                long size = rs.getLong("size");
-                size /= Math.pow(2, 20);
-                fs.setSize(size);
-                fs.setMaxContexts(rs.getInt("max_context"));
-                fs.setCurrentContexts(rs.getInt("COUNT(cid)"));
+                int id = rs.getInt("id");
+                final Filestore fs = getFilestore(id);
                 tmp.add(fs);
             }
 
@@ -1138,6 +1132,59 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 } catch (final PoolException exp) {
                     log.error("Error pushing configdb connection to pool!", exp);
                 }
+            }
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.admin.storage.interfaces.OXUtilStorageInterface#getFilestore(int)
+     */
+    @Override
+    public Filestore getFilestore(final int id) throws StorageException {
+        Connection con = null;
+        PreparedStatement stmt = null;
+
+        try {
+            con = cache.getREADConnectionForCONFIGDB();
+
+            stmt = con.prepareStatement("SELECT id,uri,size,max_context,COUNT(cid) FROM filestore LEFT JOIN context ON filestore.id = context.filestore_id WHERE filestore.id=? GROUP BY filestore.id");
+
+            stmt.setInt(1, id);
+            final ResultSet rs = stmt.executeQuery();
+            Filestore fs = new Filestore();
+
+            if( ! rs.next() ) {
+                throw new StorageException("unable to get filestore data");
+            }
+            fs.setId(rs.getInt("id"));
+            fs.setUrl(rs.getString("uri"));
+            long size = rs.getLong("size");
+            size /= Math.pow(2, 20);
+            fs.setSize(size);
+            fs.setMaxContexts(rs.getInt("max_context"));
+            fs.setCurrentContexts(rs.getInt("COUNT(cid)"));
+
+            return fs;
+        } catch (final PoolException pe) {
+            log.error("Pool Error", pe);
+            throw new StorageException(pe);
+        } catch (final SQLException ecp) {
+            log.error("SQL Error", ecp);            
+            throw new StorageException(ecp);
+        } finally {
+            try {
+                if (stmt != null) {
+                    stmt.close();
+                }
+            } catch (final SQLException e) {
+                log.error("Error closing statement", e);
+            }
+            try {
+                if (con != null) {
+                    cache.pushConfigDBRead(con);
+                }
+            } catch (final PoolException exp) {
+                log.error("Error pushing configdb connection to pool!", exp);
             }
         }
     }
