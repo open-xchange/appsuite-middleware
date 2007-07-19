@@ -16,7 +16,6 @@ import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-import java.util.Arrays;
 import java.util.Vector;
 
 import junit.framework.JUnit4TestAdapter;
@@ -46,7 +45,6 @@ public class UtilTest extends AbstractTest {
         new java.io.File(uri.getPath()).mkdir();
         
         client_st.setSize(100L);        
-        client_st.setName(name);
         client_st.setMaxContexts(100);
         
         
