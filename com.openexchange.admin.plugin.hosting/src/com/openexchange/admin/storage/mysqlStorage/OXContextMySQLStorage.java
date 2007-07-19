@@ -1038,7 +1038,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 final Integer dbid = db.getId();
 
                 boolean newSchemaCreated = false;
-                long quota_max = ctx.getMaxQuota();
                 if (this.CONTEXTS_PER_SCHEMA == 1) {
                     // synchronized (ClientAdminThread.create_mutex) {
                     // FIXME: generate unique schema name

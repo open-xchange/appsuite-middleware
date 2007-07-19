@@ -103,8 +103,8 @@ public class ListFilestores extends UtilAbstraction {
             data.add(makeStandardData(filestore, false));
         }
         
-        doOutput(new String[] { "3r", "35l", "7r", "7r", "7r", "7r", "7r" },
-                 new String[] { "id", "path", "size", "qmax", "qused", "maxctx", "curctx" }, data);
+        doOutput(new String[] { "3r", "35l", "7r", "7r", "7r", "7r" },
+                 new String[] { "id", "path", "size", "used", "maxctx", "curctx" }, data);
     }
 
     private void precsvinfos(final Filestore[] filestores) throws URISyntaxException {
@@ -113,8 +113,7 @@ public class ListFilestores extends UtilAbstraction {
         columns.add("id");
         columns.add("uri");
         columns.add("size");
-        columns.add("quota_max");
-        columns.add("quota_used");
+        columns.add("used");
         columns.add("maxcontexts");
         columns.add("currentcontexts");
         columns.add("login");
@@ -190,14 +189,8 @@ public class ListFilestores extends UtilAbstraction {
             rea_data.add(null);
         }
 
-        if (fstore.getQuota_max() != null) {
-            rea_data.add(fstore.getQuota_max().toString());
-        } else {
-            rea_data.add(null);
-        }
-        
-        if (fstore.getQuota_used() != null) {
-            rea_data.add(fstore.getQuota_used().toString());
+        if (fstore.getUsed() != null) {
+            rea_data.add(fstore.getUsed().toString());
         } else {
             rea_data.add(null);
         }
