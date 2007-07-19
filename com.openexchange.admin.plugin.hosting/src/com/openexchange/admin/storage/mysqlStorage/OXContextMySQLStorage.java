@@ -937,7 +937,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     prep.close();
                 }
 
-                final String filestore_name = filestore.getName();
+                final String filestore_name = ctx.getFilestore_name();
                 if (null != filestore_name) {
                     prep = configdb_write_con.prepareStatement("UPDATE context SET filestore_name = ? WHERE cid = ?");
                     prep.setString(1, filestore_name);
