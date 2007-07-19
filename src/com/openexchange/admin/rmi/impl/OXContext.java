@@ -144,10 +144,7 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
                 throw new OXContextException("Src and dst store id is the same: " + dst_filestore);
             }
 
-            final OXUtilStorageInterface oxutil = OXUtilStorageInterface.getInstance();
-            Filestore fs = oxutil.getFilestore(srcStore_id);
-
-            final String ctxdir = fs.getName();
+            final String ctxdir = retval.getFilestore_name();
             if (ctxdir == null) {
                 reEnableContext(ctx, oxcox);
                 throw new OXContextException("Unable to get filestore directory " + ctx.getIdAsString());
