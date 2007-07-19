@@ -919,6 +919,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     prep.close();
                 }
 
+                //FIXME: d7 remove here when discussed
                 final String filestore_login = filestore.getLogin();
                 if (null != filestore_login) {
                     prep = configdb_write_con.prepareStatement("UPDATE context SET filestore_login = ? WHERE cid = ?");
@@ -928,6 +929,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     prep.close();
                 }
 
+                //FIXME: d7 remove here when discussed
                 final String filestore_pw = filestore.getPassword();
                 if (null != filestore_pw) {
                     prep = configdb_write_con.prepareStatement("UPDATE context SET filestore_passwd = ? WHERE cid = ?");
