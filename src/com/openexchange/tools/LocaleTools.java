@@ -93,4 +93,18 @@ public final class LocaleTools {
 		}
 		return retval;
 	}
+	
+	/**
+	 * an own implementation of toLowerCase() to
+	 * avoid circularity problems between Locale and String.
+	 * The most straightforward algorithm is used. Look at optimizations later.
+	 */
+	public static String toLowerCase(final String str) {
+		char[] buf = new char[str.length()];
+		for (int i = 0; i < buf.length; i++) {
+			buf[i] = Character.toLowerCase(str.charAt(i));
+		}
+		return new String(buf);
+	}
+	
 }

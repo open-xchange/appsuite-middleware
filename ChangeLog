@@ -4,6 +4,7 @@
  - Added invocation of FileItem.delete() on file upload to avoid double
    temporary files
  - Fastened reading of body content on PUT request in AJAXServlet.getBody()
+ - Servlet mapping read from directory
 
 * 2007-07-18 - thorben.betten@open-xchange.com
 

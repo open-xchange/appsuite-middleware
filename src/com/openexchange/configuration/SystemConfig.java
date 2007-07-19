@@ -221,7 +221,11 @@ public final class SystemConfig extends AbstractConfig {
         /**
 		 * Class implementing User2IMAP
 		 */
-		User2IMAPImpl("User2IMAPImpl");
+		User2IMAPImpl("User2IMAPImpl"),
+		/**
+		 * Directory in which all property files for servlet mapping are kept
+		 */
+		ServletMappingDir("ServletMappingDir");
 
         /**
          * Name of the property in the server.properties file.

@@ -74,13 +74,21 @@ public class OXServletException extends AbstractOXException {
 	public static enum Code {
 
 		/**
-		 * Property file %s could not be found
+		 * Missing property %s in 'system.properties'
 		 */
-		SERVLET_MAPPINGS_NOT_FOUND("Property file %s could not be found", Category.SETUP_ERROR, 1),
+		MISSING_SERVLET_DIR("Missing property %s in 'system.properties'", Category.SETUP_ERROR, 1),
 		/**
-		 * Cannot load property file %s due to following exception: %s
+		 * Servlet mapping directory does not exist: %s
 		 */
-		SERVLET_MAPPINGS_NOT_LOADED("Cannot load property file %s due to following exception: %s", Category.INTERNAL_ERROR, 2);
+		DIR_NOT_EXISTS("Servlet mapping directory does not exist: %s", Category.SETUP_ERROR, 2),
+		/**
+		 * File is not a directory: %s
+		 */
+		NO_DIRECTORY("File is not a directory: %s", Category.SETUP_ERROR, 3),
+		/**
+		 * Servlet mappings could not be loaded due to following error: %s
+		 */
+		SERVLET_MAPPINGS_NOT_LOADED("Servlet mappings could not be loaded due to following error: %s", Category.CODE_ERROR, 4);
 
 		/**
 		 * Message of the exception.
@@ -125,10 +133,17 @@ public class OXServletException extends AbstractOXException {
 			return number;
 		}
 	}
+	
+	public OXServletException(final AbstractOXException cause) {
+		super(cause);
+	}
+	
+	public OXServletException(final Code code, final Object... messageArgs) {
+		this(code, null, messageArgs);
+	}
 
 	public OXServletException(final Code code, final Throwable cause, final Object... messageArgs) {
-		super(Component.SERVLET, code.category, code.number, null == code.message ? cause.getMessage() : code.message,
-				cause);
+		super(Component.SERVLET, code.category, code.number, code.message, cause);
 		setMessageArgs(messageArgs);
 	}
 

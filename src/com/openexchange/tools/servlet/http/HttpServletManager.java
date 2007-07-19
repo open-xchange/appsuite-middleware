@@ -49,8 +49,11 @@
 
 package com.openexchange.tools.servlet.http;
 
+import static com.openexchange.tools.LocaleTools.toLowerCase;
+
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
@@ -83,11 +86,11 @@ public class HttpServletManager {
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(HttpServletManager.class);
 
-	private static final String SERVLET_MAPPING_FILE = "servletmapping.properties";
-
 	private static final Map<String, FIFOQueue<HttpServlet>> SERVLET_POOL = new HashMap<String, FIFOQueue<HttpServlet>>();
 
 	private static Map<String, Constructor> servletConstructorMap;
+
+	private static boolean initialized;
 
 	private static final Lock INIT_LOCK = new ReentrantLock();
 
@@ -211,14 +214,20 @@ public class HttpServletManager {
 	}
 
 	public final static void loadServletMapping() throws AbstractOXException {
-		loadServletMapping(new StringBuilder(SystemConfig.getProperty("CONFIGPATH")).append('/').append(
-				SERVLET_MAPPING_FILE).toString());
+		final String servletMappingDir = SystemConfig.getProperty(SystemConfig.Property.ServletMappingDir);
+		if (servletMappingDir == null) {
+			throw new OXServletException(OXServletException.Code.MISSING_SERVLET_DIR,
+					SystemConfig.Property.ServletMappingDir.getPropertyName());
+		}
+		loadServletMapping(servletMappingDir.trim());
 	}
+
+	private final static String STR_PROPERTIES = ".properties";
 
 	private final static Class[] CLASS_ARR = new Class[] {};
 
-	public final static void loadServletMapping(final String file) throws AbstractOXException {
-		if (servletConstructorMap == null) {
+	public final static void loadServletMapping(final String servletMappingDir) throws AbstractOXException {
+		if (!initialized) {
 			INIT_LOCK.lock();
 			try {
 				if (servletConstructorMap != null) {
@@ -227,8 +236,28 @@ public class HttpServletManager {
 					 */
 					return;
 				}
-				final File f = new File(file);
-				if (f.exists()) {
+				final File dir = new File(servletMappingDir);
+				if (!dir.exists()) {
+					throw new OXServletException(OXServletException.Code.DIR_NOT_EXISTS, servletMappingDir);
+				} else if (!dir.isDirectory()) {
+					throw new OXServletException(OXServletException.Code.NO_DIRECTORY, servletMappingDir);
+				}
+				final File[] propFiles = dir.listFiles(new FilenameFilter() {
+					/*
+					 * (non-Javadoc)
+					 * 
+					 * @see java.io.FilenameFilter#accept(java.io.File,
+					 *      java.lang.String)
+					 */
+					public boolean accept(final File dir, final String name) {
+						return toLowerCase(name).endsWith(STR_PROPERTIES);
+
+					}
+				});
+				servletConstructorMap = new HashMap<String, Constructor>();
+				for (int i = 0; i < propFiles.length; i++) {
+					final File f = propFiles[i];
+
 					/*
 					 * Read properties from file
 					 */
@@ -247,7 +276,6 @@ public class HttpServletManager {
 					/*
 					 * Initialize servlets' default constructor
 					 */
-					servletConstructorMap = new HashMap<String, Constructor>();
 					final int size = properties.keySet().size();
 					final Iterator<Object> iter = properties.keySet().iterator();
 					for (int k = 0; k < size; k++) {
@@ -255,7 +283,14 @@ public class HttpServletManager {
 						try {
 							final String name = iter.next().toString();
 							value = properties.get(name).toString();
-							servletConstructorMap.put(name, Class.forName(value).getConstructor(CLASS_ARR));
+							if (servletConstructorMap.containsKey(name)) {
+								if (LOG.isWarnEnabled()) {
+									LOG.warn(new StringBuilder(256).append("Name \"").append(name).append(
+											"\" already contained in servlet mapping: Ignoring ").append(value));
+								}
+							} else {
+								servletConstructorMap.put(name, Class.forName(value).getConstructor(CLASS_ARR));
+							}
 						} catch (final SecurityException e) {
 							if (LOG.isWarnEnabled()) {
 								LOG.warn("SecurityException while loading class " + value, e);
@@ -270,20 +305,19 @@ public class HttpServletManager {
 							}
 						}
 					}
-				} else {
-					throw new OXServletException(OXServletException.Code.SERVLET_MAPPINGS_NOT_FOUND, null, file);
 				}
+				initialized = true;
 			} catch (final IOException exc) {
-				throw new OXServletException(OXServletException.Code.SERVLET_MAPPINGS_NOT_LOADED, exc, file, exc
-						.getMessage());
+				throw new OXServletException(OXServletException.Code.SERVLET_MAPPINGS_NOT_LOADED, exc, exc
+						.getLocalizedMessage());
 			} finally {
 				INIT_LOCK.unlock();
 			}
 		}
 	}
-	
+
 	private static final Object[] INIT_ARGS = new Object[] {};
-	
+
 	public static void createServlets() {
 		WRITE_LOCK.lock();
 		try {
