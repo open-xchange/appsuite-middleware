@@ -63,9 +63,7 @@ public class Filestore implements Serializable {
 
     private Long size;
 
-    private Long quota_used;
-
-    private Long quota_max;
+    private Long used;
 
     private Integer maxContexts;
 
@@ -152,28 +150,19 @@ public class Filestore implements Serializable {
         this.name = name;
     }
 
-    public Long getQuota_max() {
-        return this.quota_max;
+    public Long getUsed() {
+        return this.used;
     }
 
-    public void setQuota_max(final Long quota_max) {
-        this.quota_max = quota_max;
-    }
-
-    public Long getQuota_used() {
-        return this.quota_used;
-    }
-
-    public void setQuota_used(final Long quota_used) {
-        this.quota_used = quota_used;
+    public void setUsed(final Long quota_used) {
+        this.used = quota_used;
     }
 
     private void init() {
         this.maxContexts = null;
         this.id = null;
         this.size = null;
-        this.quota_used = null;
-        this.quota_max = null;
+        this.used = null;
         this.currentContexts = null;
         this.url = null;
         this.name = null;
@@ -204,11 +193,8 @@ public class Filestore implements Serializable {
         if (null != this.size) {
             retValue.append("size = ").append(this.size).append(TAB);
         }        
-        if (null != this.quota_used) {
-            retValue.append("quota_used = ").append(this.quota_used).append(TAB);
-        }        
-        if (null != this.quota_max) {
-            retValue.append("quota_max = ").append(this.quota_max).append(TAB);
+        if (null != this.used) {
+            retValue.append("used = ").append(this.used).append(TAB);
         }        
         if (null != this.maxContexts) {
             retValue.append("maxContexts = ").append(this.maxContexts).append(TAB);
