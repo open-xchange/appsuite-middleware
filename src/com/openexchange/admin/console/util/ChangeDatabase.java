@@ -7,9 +7,7 @@ import java.rmi.RemoteException;
 
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.MissingOptionException;
-import com.openexchange.admin.console.AdminParser.NeededTriState;
 import com.openexchange.admin.console.CmdLineParser.IllegalOptionValueException;
-import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.console.CmdLineParser.UnknownOptionException;
 import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -24,13 +22,6 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
  * 
  */
 public class ChangeDatabase extends DatabaseAbstraction {
-
-    // Setting names for options
-    private final static char OPT_NAME_DATABASE_ID_SHORT = 'i';
-
-    private final static String OPT_NAME_DATABASE_ID_LONG = "id";
-
-    private Option databaseIdOption = null;
 
     public ChangeDatabase(final String[] args2) {
 
@@ -73,7 +64,7 @@ public class ChangeDatabase extends DatabaseAbstraction {
             // NEEDED ID
             db.setId(Integer.parseInt((String) parser.getOptionValue(this.databaseIdOption)));
             oxutil.changeDatabase(db, auth);
-            System.out.println("Database successfully changed.");
+            System.out.println(SUCCESSFULLY_CHANGED);
             sysexit(0);
         } catch (final java.rmi.ConnectException neti) {
             printError(neti.getMessage());
@@ -137,6 +128,6 @@ public class ChangeDatabase extends DatabaseAbstraction {
         setDatabasePoolInitialOption(parser, null, false);
         setDatabasePoolMaxOption(parser, null, false);
 
-        this.databaseIdOption = setShortLongOpt(parser, OPT_NAME_DATABASE_ID_SHORT, OPT_NAME_DATABASE_ID_LONG, "The id of the database which should be changed", true, NeededTriState.needed);
+        setDatabaseIDOption(parser);
     }
 }

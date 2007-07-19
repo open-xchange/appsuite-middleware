@@ -114,14 +114,14 @@ public class RegisterDatabase extends DatabaseAbstraction {
         setDatabaseNameOption(parser, true);
         setDatabaseHostnameOption(parser, false);
         setDatabaseUsernameOption(parser, false);
-        setDatabaseDriverOption(parser, OXUtil.DRIVER_DEFAULT, false);
+        setDatabaseDriverOption(parser, OXUtil.DEFAULT_DRIVER, false);
         setDatabasePasswdOption(parser, true);
         setDatabaseIsMasterOption(parser, true);
         setDatabaseMasterIDOption(parser, false);
-        setDatabaseWeightOption(parser, String.valueOf(OXUtil.DB_WEIGHT_DEFAULT), false);
-        setDatabaseMaxUnitsOption(parser, String.valueOf(OXUtil.MAXUNITS_DEFAULT), false);
-        setDatabasePoolHardlimitOption(parser, String.valueOf(OXUtil.POOL_HARD_LIMIT_DEFAULT), false);
-        setDatabasePoolInitialOption(parser, String.valueOf(OXUtil.POOL_INITIAL_DEFAULT), false);
-        setDatabasePoolMaxOption(parser, String.valueOf(OXUtil.POOL_MAX_DEFAULT), false);
+        setDatabaseWeightOption(parser, String.valueOf(OXUtil.DEFAULT_DB_WEIGHT), false);
+        setDatabaseMaxUnitsOption(parser, String.valueOf(OXUtil.DEFAULT_MAXUNITS), false);
+        setDatabasePoolHardlimitOption(parser, String.valueOf(OXUtil.DEFAULT_POOL_HARD_LIMIT), false);
+        setDatabasePoolInitialOption(parser, String.valueOf(OXUtil.DEFAULT_POOL_INITIAL), false);
+        setDatabasePoolMaxOption(parser, String.valueOf(OXUtil.DEFAULT_POOL_MAX), false);
     }
 }
