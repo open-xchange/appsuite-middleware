@@ -73,8 +73,6 @@ public class Filestore implements Serializable {
 
     private String password;
 
-    private String name;
-
     public Filestore() {
         super();
         init();
@@ -142,14 +140,6 @@ public class Filestore implements Serializable {
         this.password = password;
     }
 
-    public String getName() {
-        return this.name;
-    }
-
-    public void setName(final String name) {
-        this.name = name;
-    }
-
     public Long getUsed() {
         return this.used;
     }
@@ -165,7 +155,6 @@ public class Filestore implements Serializable {
         this.used = null;
         this.currentContexts = null;
         this.url = null;
-        this.name = null;
         this.login = null;
         this.password = null;
     }
@@ -204,9 +193,6 @@ public class Filestore implements Serializable {
         }        
         if (null != this.login) {
             retValue.append("login = ").append(this.login).append(TAB);
-        }        
-        if (null != this.name) {
-            retValue.append("name = ").append(this.name).append(TAB);
         }        
         retValue.append(" )");
 
