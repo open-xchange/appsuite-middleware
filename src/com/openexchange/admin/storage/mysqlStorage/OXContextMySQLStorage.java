@@ -1,7 +1,6 @@
 
 package com.openexchange.admin.storage.mysqlStorage;
 
-import com.openexchange.api2.OXException;
 import java.rmi.RemoteException;
 import java.sql.Connection;
 import java.sql.DataTruncation;
@@ -15,6 +14,7 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Vector;
 
 import org.apache.commons.logging.Log;
@@ -23,10 +23,8 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.exceptions.DatabaseContextMappingException;
 import com.openexchange.admin.exceptions.OXContextException;
-import com.openexchange.admin.properties.AdminProperties;
-import com.openexchange.admin.rmi.exceptions.PoolException;
-import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.exceptions.TargetDatabaseException;
+import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
@@ -34,6 +32,8 @@ import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.PoolException;
+import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.impl.OXUser;
 import com.openexchange.admin.storage.interfaces.OXGroupStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXResourceStorageInterface;
@@ -45,10 +45,9 @@ import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.database.TableColumnObject;
 import com.openexchange.admin.tools.database.TableObject;
 import com.openexchange.admin.tools.database.TableRowObject;
+import com.openexchange.api2.OXException;
 import com.openexchange.groupware.IDGenerator;
 import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
-
-import java.util.Locale;
 
 /**
  * This class provides the implementation for the storage into a MySQL database
@@ -451,7 +450,8 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         try {
             config_db_read = cache.getREADConnectionForCONFIGDB();
             
-            return this.oxcontextcommon.getData(ctx, config_db_read);
+            return this.oxcontextcommon.getData(ctx, config_db_read,
+                    Long.parseLong(prop.getProp("AVERAGE_CONTEXT_SIZE", "100")));
             
         } catch (final PoolException e) {
             log.error("Pool Error", e);
@@ -777,7 +777,8 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 Context cs = new Context();
                 final int cid = rs.getInt("cid");
                 cs.setID(cid);
-                cs = this.oxcontextcommon.getData(cs, configdb_read);
+                cs = this.oxcontextcommon.getData(cs, configdb_read,
+                        Long.parseLong(prop.getProp("AVERAGE_CONTEXT_SIZE", "100")));
                 
                 list.add(cs);
             }
@@ -914,26 +915,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 if (filestore.getId()!=null && -1 != filestore.getId().intValue()) {
                     prep = configdb_write_con.prepareStatement("UPDATE context SET filestore_id = ? WHERE cid = ?");
                     prep.setInt(1, filestore.getId().intValue());
-                    prep.setInt(2, context_id);
-                    prep.executeUpdate();
-                    prep.close();
-                }
-
-                //FIXME: d7 remove here when discussed
-                final String filestore_login = filestore.getLogin();
-                if (null != filestore_login) {
-                    prep = configdb_write_con.prepareStatement("UPDATE context SET filestore_login = ? WHERE cid = ?");
-                    prep.setString(1, filestore_login);
-                    prep.setInt(2, context_id);
-                    prep.executeUpdate();
-                    prep.close();
-                }
-
-                //FIXME: d7 remove here when discussed
-                final String filestore_pw = filestore.getPassword();
-                if (null != filestore_pw) {
-                    prep = configdb_write_con.prepareStatement("UPDATE context SET filestore_passwd = ? WHERE cid = ?");
-                    prep.setString(1, filestore_pw);
                     prep.setInt(2, context_id);
                     prep.executeUpdate();
                     prep.close();
