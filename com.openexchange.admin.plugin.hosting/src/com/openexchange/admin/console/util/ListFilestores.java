@@ -100,7 +100,7 @@ public class ListFilestores extends UtilAbstraction {
     private void sysoutOutput(final Filestore[] filestores) throws InvalidDataException, URISyntaxException {
         final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
         for (final Filestore filestore : filestores) {
-            data.add(makeStandardData(filestore, false));
+            data.add(makeCSVData(filestore, false));
         }
         
         doOutput(new String[] { "3r", "35l", "7r", "7r", "7r", "7r" },
@@ -116,13 +116,11 @@ public class ListFilestores extends UtilAbstraction {
         columns.add("used");
         columns.add("maxcontexts");
         columns.add("currentcontexts");
-        columns.add("login");
-        columns.add("password");
         // Needed for csv output
         final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
 
         for (final Filestore filestore : filestores) {
-            data.add(makeCSVData(filestore));
+            data.add(makeCSVData(filestore, true));
         }
 
         doCSVOutput(columns, data);
@@ -137,31 +135,7 @@ public class ListFilestores extends UtilAbstraction {
         setSearchOption(parser);
     }
 
-    /**
-     * 
-     * @param fstore
-     * @return
-     * @throws URISyntaxException 
-     */
-    private ArrayList<String> makeCSVData(final Filestore fstore) throws URISyntaxException {
-        final ArrayList<String> rea_data = makeStandardData(fstore, true);
-
-        if (fstore.getLogin() != null) {
-            rea_data.add(fstore.getLogin());
-        } else {
-            rea_data.add(null);
-        }
-
-        if (fstore.getPassword() != null) {
-            rea_data.add(fstore.getPassword());
-        } else {
-            rea_data.add(null);
-        }
-
-        return rea_data;
-    }
-
-    private ArrayList<String> makeStandardData(final Filestore fstore, final boolean csv) throws URISyntaxException {
+    private ArrayList<String> makeCSVData(final Filestore fstore, final boolean csv) throws URISyntaxException {
         final ArrayList<String> rea_data = new ArrayList<String>();
 
         rea_data.add(fstore.getId().toString());
