@@ -84,7 +84,7 @@ import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.GenericChecks;
 import com.openexchange.admin.tools.PropertyHandler;
 
-public class OXResource extends BasicAuthenticator implements OXResourceInterface{
+public class OXResource extends OXCommonImpl implements OXResourceInterface{
     
     private static final long serialVersionUID = -7012370962672596682L;
     
@@ -114,7 +114,7 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
        }        
        
        try {
-           doAuthentication(auth,ctx);
+           new BasicAuthenticator().doAuthentication(auth,ctx);
        } catch( final InvalidDataException e) {
            log.error(e.getMessage(), e);
            throw e;
@@ -216,7 +216,7 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
         }        
         
         try {           
-            doAuthentication(auth,ctx);
+            new BasicAuthenticator().doAuthentication(auth,ctx);
         } catch (final InvalidDataException e1) {
             log.error(e1.getMessage(), e1);
             throw e1;
@@ -297,8 +297,7 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
         }        
         
         try {
-            
-            doAuthentication(auth,ctx);
+            new BasicAuthenticator().doAuthentication(auth,ctx);
         } catch (final InvalidDataException e1) {
             log.error(e1.getMessage(), e1);
             throw e1;
@@ -367,7 +366,7 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
         }        
         
         try {
-            doAuthentication(auth,ctx);
+            new BasicAuthenticator().doAuthentication(auth,ctx);
         } catch (final InvalidDataException e) {
             log.error(e.getMessage(), e);
             throw e;
@@ -431,7 +430,7 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
                 throw new InvalidDataException("Invalid pattern!");
             }        
             
-            doAuthentication(auth,ctx);
+            new BasicAuthenticator().doAuthentication(auth,ctx);
         } catch (final InvalidDataException e) {
             log.error(e.getMessage(), e);
             throw e;
@@ -475,8 +474,7 @@ public class OXResource extends BasicAuthenticator implements OXResourceInterfac
         }        
         
         try {
-                        
-            doAuthentication(auth,ctx);
+            new BasicAuthenticator().doAuthentication(auth,ctx);
         
             if (log.isDebugEnabled()) {
                 log.debug(ctx.toString() + " - " + Arrays.toString(resources) + " - " + auth.toString());
