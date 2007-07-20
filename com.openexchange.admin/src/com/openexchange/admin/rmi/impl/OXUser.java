@@ -114,6 +114,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
      * Prevent calling the default constructor
      *
      */
+    @SuppressWarnings("unused")
     private OXUser() {
         super();
         this.cache = ClientAdminThread.cache;
@@ -150,9 +151,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
         final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
 
-
         try {
-
             new BasicAuthenticator().doAuthentication(auth,ctx);        
             
             checkSchemaBeingLocked(ctx, tools);
@@ -240,7 +239,6 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                             }                            
                         }
                     }
-                    
                 }
             }
         }
@@ -260,7 +258,6 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
         
         try {   
-            
             contextcheck(ctx);
                 
             if(!tools.existsContext(ctx)){           
@@ -341,17 +338,16 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                             }                            
                         }
                     }
-                    
                 }
             }
         }
         // change cached admin credentials if neccessary
-        if( isContextAdmin && usrdata.getPassword() != null ) {
+        if (isContextAdmin && usrdata.getPassword() != null) {
             final Credentials cauth = ClientAdminThread.cache.getAdminCredentials(ctx);
             final String mech = ClientAdminThread.cache.getAdminAuthMech(ctx);
-            if("{CRYPT}".equals(mech)) {
+            if ("{CRYPT}".equals(mech)) {
                 cauth.setPassword(UnixCrypt.crypt(usrdata.getPassword()));
-            } else if("{SHA}".equals(mech)) {
+            } else if ("{SHA}".equals(mech)) {
                 try {
                     cauth.setPassword(SHACrypt.makeSHAPasswd(usrdata.getPassword()));
                 } catch (NoSuchAlgorithmException e) {
@@ -453,7 +449,6 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                             }
                         }
                     }
-                    
                 }
             }
         }
@@ -485,7 +480,6 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     }
 
     public UserModuleAccess getModuleAccess(final Context ctx, final int user_id, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchUserException {
-        
         if (log.isDebugEnabled()) {
             log.debug(ctx.toString() + " - " + user_id + " - " + auth.toString());
         }        
@@ -518,7 +512,6 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             log.debug(ctx.toString() + " - " + user + " - " + auth.toString());
         }        
         new BasicAuthenticator().doAuthentication(auth,ctx);
-        
         
         final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
         
@@ -594,7 +587,6 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     }
 
     public int[] getAll(final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
-        
         if (log.isDebugEnabled()) {
             log.debug(ctx.toString() + " - " + auth.toString());
         }
@@ -610,7 +602,6 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     }
 
     public User[] list(final Context ctx, final String search_pattern, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
-               
         if (log.isDebugEnabled()) {
             log.debug(ctx.toString() + " - " + auth.toString());
         }
@@ -664,7 +655,6 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
         
         try {
-            
             checkContext(ctx);
             
             if (users.length <= 0) {
@@ -688,8 +678,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 // ok here its possible that a user wants to get his own data
                 // SPECIAL USER AUTH CHECK FOR THIS METHOD!
                 // check if credentials are from oxadmin or from an user
-                final int auth_user_id = tools.getUserIDByUsername(ctx, auth
-                        .getLogin());
+                final int auth_user_id = tools.getUserIDByUsername(ctx, auth.getLogin());
                 // check if given user is not admin, if he is admin, the
                 if (!tools.isContextAdmin(ctx, auth_user_id)) {
                     final InvalidCredentialsException invalidCredentialsException = new InvalidCredentialsException("Permission denied");
@@ -807,7 +796,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         // cause he must set which adress is primarymail and email2 from the new
         // aliases
         
-        if(newuser.getPassword()!=null && newuser.getPassword().trim().length()==0){
+        if (newuser.getPassword() != null && newuser.getPassword().trim().length() == 0) {
             throw new InvalidDataException("Empty password is not allowed");
         }
         
@@ -891,8 +880,8 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         // checks below throw InvalidDataException
         checkValidEmailsInUserObject(usr);
         final HashSet<String> aliases = usr.getAliases();
-        if( aliases != null ) {
-            for(final String addr : aliases ) {
+        if (aliases != null) {
+            for (final String addr : aliases) {
                 GenericChecks.checkValidMailAddress(addr);
             }
         }
@@ -980,7 +969,6 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     }
 
     public boolean isContextAdmin(Context ctx, User user, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException, DatabaseUpdateException {
-        
         try {
             doNullCheck(user);
         } catch (final InvalidDataException e1) {
@@ -1001,6 +989,5 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
         
         return tools.isContextAdmin(ctx, user.getId().intValue());
-                
     }
 }
