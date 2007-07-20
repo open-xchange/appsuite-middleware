@@ -47,7 +47,7 @@
  *
  */
 /*
- * $Id: OXLogin.java,v 1.11 2007/07/10 13:28:37 dennis Exp $
+ * $Id: OXLogin.java,v 1.12 2007/07/20 15:36:06 dennis Exp $
  */
 package com.openexchange.admin.rmi.impl;
 
@@ -83,7 +83,7 @@ import com.openexchange.groupware.update.exception.UpdateException;
  * @author d7
  * @author cutmasta
  */
-public class OXLogin extends BasicAuthenticator implements OXLoginInterface {
+public class OXLogin extends OXCommonImpl implements OXLoginInterface {
 
     private BundleContext context = null;
 
@@ -98,18 +98,17 @@ public class OXLogin extends BasicAuthenticator implements OXLoginInterface {
     }
 
     public void login(final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException,DatabaseUpdateException {        
-        doUserAuthentication(auth, ctx);
+        new BasicAuthenticator().doUserAuthentication(auth, ctx);
         triggerUpdateProcess(ctx);
     }
 
     public void login(final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         doNullCheck(auth);
-        doAuthentication(auth);
+        new BasicAuthenticator().doAuthentication(auth);
     }
 
     public User login2User(final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
-                
-        doUserAuthentication(auth, ctx);
+        new BasicAuthenticator().doUserAuthentication(auth, ctx);
         
         triggerUpdateProcess(ctx);
 
