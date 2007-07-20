@@ -6,9 +6,6 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 
 import com.openexchange.admin.console.AdminParser;
-import com.openexchange.admin.console.AdminParser.MissingOptionException;
-import com.openexchange.admin.console.CmdLineParser.IllegalOptionValueException;
-import com.openexchange.admin.console.CmdLineParser.UnknownOptionException;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -18,81 +15,20 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
-public class Delete extends ContextAbstraction {
-
+public class Delete extends DeleteCore {
     public Delete(final String[] args2) {
+        final AdminParser parser = new AdminParser("deletecontext");
 
-        AdminParser parser = new AdminParser("deletecontext");
-
-        setOptions(parser);
-
-        try {
-
-            parser.ownparse(args2);
-            final Context ctx = new Context();
-
-            ctx.setID(Integer.parseInt((String) parser.getOptionValue(this.contextOption)));
-
-            final Credentials auth = new Credentials((String) parser.getOptionValue(adminUserOption), (String) parser.getOptionValue(adminPassOption));
-
-            // get rmi ref
-            final OXContextInterface oxres = (OXContextInterface) Naming.lookup(RMI_HOSTNAME +OXContextInterface.RMI_NAME);
-
-            oxres.delete(ctx, auth);
-
-            System.out.println("Successfully deleted");
-            sysexit(0);
-        } catch (final java.rmi.ConnectException neti) {
-            printError(neti.getMessage());
-            sysexit(SYSEXIT_COMMUNICATION_ERROR);
-        } catch (final java.lang.NumberFormatException num) {
-            printInvalidInputMsg("Ids must be numbers!");
-            sysexit(1);
-        } catch (final MalformedURLException e) {
-            printServerException(e);
-            sysexit(1);
-        } catch (final RemoteException e) {
-            printServerException(e);
-            sysexit(SYSEXIT_REMOTE_ERROR);
-        } catch (final NotBoundException e) {
-            printNotBoundResponse(e);
-            sysexit(1);
-        } catch (final StorageException e) {
-            printServerException(e);
-            sysexit(SYSEXIT_SERVERSTORAGE_ERROR);
-        } catch (final InvalidCredentialsException e) {
-            printServerException(e);
-            sysexit(SYSEXIT_INVALID_CREDENTIALS);
-        } catch (final NoSuchContextException e) {
-            printServerException(e);
-            sysexit(SYSEXIT_NO_SUCH_CONTEXT);
-        } catch (final IllegalOptionValueException e) {
-            printError("Illegal option value : " + e.getMessage());
-            parser.printUsage();
-            sysexit(SYSEXIT_ILLEGAL_OPTION_VALUE);
-        } catch (final UnknownOptionException e) {
-            printError("Unrecognized options on the command line: " + e.getMessage());
-            parser.printUsage();
-            sysexit(SYSEXIT_UNKNOWN_OPTION);
-        } catch (final MissingOptionException e) {
-            printError(e.getMessage());
-            parser.printUsage();
-            sysexit(SYSEXIT_MISSING_OPTION);
-        } catch (final DatabaseUpdateException e) {
-            printServerException(e);
-            sysexit(1);
-        } catch (final InvalidDataException e) {
-            printServerException(e);
-            sysexit(1);
-        }
-
+        commonfunctions(parser, args2);
     }
 
     public static void main(final String args[]) {
         new Delete(args);
     }
 
-    private void setOptions(AdminParser parser) {
-        setDefaultCommandLineOptions(parser);
+    @Override
+    protected void maincall(final Context ctx, final Credentials auth) throws NotBoundException, MalformedURLException, RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, DatabaseUpdateException, InvalidDataException {
+        final OXContextInterface oxres = (OXContextInterface) Naming.lookup(RMI_HOSTNAME + OXContextInterface.RMI_NAME);
+        oxres.delete(ctx, auth);
     }
 }
