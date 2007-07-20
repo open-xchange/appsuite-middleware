@@ -61,7 +61,7 @@ Notification=@oxgroupwaresysconfdir@/notification.properties
 Participant=@oxgroupwaresysconfdir@/participant.properties
 
 # Directory in which all property files for servlet mapping are kept
-ServletMappingDir=@oxgroupwaresysconfdir@/servletmapping
+ServletMappingDir=@oxgroupwaresysconfdir@/servletmappings
 
 CONFIGPATH:@oxgroupwaresysconfdir@
 AJPPROPERTIES:@oxgroupwaresysconfdir@/ajp.properties
