@@ -60,7 +60,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -133,6 +132,7 @@ import com.openexchange.imap.OXMailException;
 import com.openexchange.imap.UserSettingMail;
 import com.openexchange.imap.OXMailException.MailCode;
 import com.openexchange.imap.threadsort.ThreadSortMessage;
+import com.openexchange.json.OXJSONWriter;
 import com.openexchange.server.EffectivePermission;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.encoding.Helper;
@@ -451,8 +451,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 		 * Some variables
 		 */
 		final Response response = new Response();
-		final StringWriter strWriter = new StringWriter();
-		final JSONWriter jsonWriter = new JSONWriter(strWriter);
+		final OXJSONWriter jsonWriter = new OXJSONWriter();
 		/*
 		 * Start response
 		 */
@@ -592,7 +591,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 		 * Close response and flush print writer
 		 */
 		jsonWriter.endArray();
-		response.setData(new JSONArray(strWriter.toString()));
+		response.setData(jsonWriter.getObject());
 		response.setTimestamp(null);
 		Response.write(response, writer);
 	}
@@ -618,8 +617,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 		 * final Some variables
 		 */
 		final Response response = new Response();
-		final StringWriter strWriter = new StringWriter();
-		final JSONWriter jsonWriter = new JSONWriter(strWriter);
+		final OXJSONWriter jsonWriter = new OXJSONWriter();
 		/*
 		 * Start response
 		 */
@@ -666,7 +664,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 		/*
 		 * Close response and flush print writer
 		 */
-		response.setData(valueWritten ? new JSONObject(strWriter.toString()) : JSONObject.NULL);
+		response.setData(valueWritten ? jsonWriter.getObject() : JSONObject.NULL);
 		response.setTimestamp(null);
 		Response.write(response, writer);
 	}
@@ -692,8 +690,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 		 * Some variables
 		 */
 		final Response response = new Response();
-		final StringWriter strWriter = new StringWriter();
-		final JSONWriter jsonWriter = new JSONWriter(strWriter);
+		final OXJSONWriter jsonWriter = new OXJSONWriter();
 		/*
 		 * Start response
 		 */
@@ -740,7 +737,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 		/*
 		 * Close response and flush print writer
 		 */
-		response.setData(valueWritten ? new JSONObject(strWriter.toString()) : JSONObject.NULL);
+		response.setData(valueWritten ? jsonWriter.getObject() : JSONObject.NULL);
 		response.setTimestamp(null);
 		Response.write(response, writer);
 	}
@@ -767,8 +764,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 		 * Some variables
 		 */
 		final Response response = new Response();
-		final StringWriter strWriter = new StringWriter();
-		final JSONWriter jsonWriter = new JSONWriter(strWriter);
+		final OXJSONWriter jsonWriter = new OXJSONWriter();
 		Object data = null;
 		/*
 		 * Start response
@@ -833,7 +829,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 					data = formatMessageHeaders(msg.getAllHeaders());
 				} else {
 					new MailWriter(jsonWriter, sessionObj).writeMessageAsJSONObject(msg, !editDraft);
-					data = new JSONObject(strWriter.toString());
+					data = jsonWriter.getObject();
 				}
 				writer.flush();
 				valueWritten = true;
@@ -894,8 +890,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 		 * Some variables
 		 */
 		final Response response = new Response();
-		final StringWriter strWriter = new StringWriter();
-		final JSONWriter jsonWriter = new JSONWriter(strWriter);
+		final OXJSONWriter jsonWriter = new OXJSONWriter();
 		/*
 		 * Start response
 		 */
@@ -980,7 +975,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 		 * Close response and flush print writer
 		 */
 		jsonWriter.endArray();
-		response.setData(new JSONArray(strWriter.toString()));
+		response.setData(jsonWriter.getObject());
 		response.setTimestamp(null);
 		Response.write(response, writer);
 	}
@@ -1006,8 +1001,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 		 * Some variables
 		 */
 		final Response response = new Response();
-		final StringWriter strWriter = new StringWriter();
-		final JSONWriter jsonWriter = new JSONWriter(strWriter);
+		final OXJSONWriter jsonWriter = new OXJSONWriter();
 		/*
 		 * Start response
 		 */
@@ -1061,7 +1055,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 		 * Close response and flush print writer
 		 */
 		jsonWriter.endArray();
-		response.setData(new JSONArray(strWriter.toString()));
+		response.setData(jsonWriter.getObject());
 		response.setTimestamp(null);
 		Response.write(response, writer);
 	}
@@ -1288,8 +1282,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 		 * Some variables
 		 */
 		final Response response = new Response();
-		final StringWriter strWriter = new StringWriter();
-		final JSONWriter jsonWriter = new JSONWriter(strWriter);
+		final OXJSONWriter jsonWriter = new OXJSONWriter();
 		/*
 		 * Start response
 		 */
@@ -1338,7 +1331,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 		 * Close response and flush print writer
 		 */
 		jsonWriter.endArray();
-		response.setData(new JSONArray(strWriter.toString()));
+		response.setData(jsonWriter.getObject());
 		response.setTimestamp(null);
 		Response.write(response, writer);
 	}
@@ -1366,8 +1359,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 		 * Some variables
 		 */
 		final Response response = new Response();
-		final StringWriter strWriter = new StringWriter();
-		final JSONWriter jsonWriter = new JSONWriter(strWriter);
+		final OXJSONWriter jsonWriter = new OXJSONWriter();
 		/*
 		 * Start response
 		 */
@@ -1488,7 +1480,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 		 * Close response and flush print writer
 		 */
 		jsonWriter.endArray();
-		response.setData(new JSONArray(strWriter.toString()));
+		response.setData(jsonWriter.getObject());
 		response.setTimestamp(null);
 		Response.write(response, writer);
 	}
@@ -1514,8 +1506,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 		 * Some variables
 		 */
 		final Response response = new Response();
-		final StringWriter strWriter = new StringWriter();
-		final JSONWriter jsonWriter = new JSONWriter(strWriter);
+		final OXJSONWriter jsonWriter = new OXJSONWriter();
 		/*
 		 * Start response
 		 */
@@ -1621,7 +1612,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 		 * Close response and flush print writer
 		 */
 		jsonWriter.endArray();
-		response.setData(new JSONArray(strWriter.toString()));
+		response.setData(jsonWriter.getObject());
 		response.setTimestamp(null);
 		Response.write(response, writer);
 	}
@@ -1674,8 +1665,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 		 * Some variables
 		 */
 		final Response response = new Response();
-		final StringWriter strWriter = new StringWriter();
-		final JSONWriter jsonWriter = new JSONWriter(strWriter);
+		final OXJSONWriter jsonWriter = new OXJSONWriter();
 		/*
 		 * Start response
 		 */
@@ -1750,7 +1740,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 		 * Close response and flush print writer
 		 */
 		jsonWriter.endArray();
-		response.setData(new JSONArray(strWriter.toString()));
+		response.setData(jsonWriter.getObject());
 		response.setTimestamp(null);
 		Response.write(response, writer);
 	}
@@ -1776,8 +1766,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 		 * Some variables
 		 */
 		final Response response = new Response();
-		final StringWriter strWriter = new StringWriter();
-		final JSONWriter jsonWriter = new JSONWriter(strWriter);
+		final OXJSONWriter jsonWriter = new OXJSONWriter();
 		/*
 		 * Start response
 		 */
@@ -1873,7 +1862,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 		 * Close response and flush print writer
 		 */
 		jsonWriter.endArray();
-		response.setData(new JSONArray(strWriter.toString()));
+		response.setData(jsonWriter.getObject());
 		response.setTimestamp(null);
 		Response.write(response, writer);
 	}
@@ -1899,8 +1888,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 		 * Some variables
 		 */
 		final Response response = new Response();
-		final StringWriter strWriter = new StringWriter();
-		final JSONWriter jsonWriter = new JSONWriter(strWriter);
+		final OXJSONWriter jsonWriter = new OXJSONWriter();
 		/*
 		 * Start response
 		 */
@@ -1954,7 +1942,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 		 * Close response and flush print writer
 		 */
 		jsonWriter.endArray();
-		response.setData(new JSONArray(strWriter.toString()));
+		response.setData(jsonWriter.getObject());
 		response.setTimestamp(null);
 		Response.write(response, writer);
 	}
@@ -2177,8 +2165,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 		 * Some variables
 		 */
 		final Response response = new Response();
-		final StringWriter strWriter = new StringWriter();
-		final JSONWriter jsonWriter = new JSONWriter(strWriter);
+		final OXJSONWriter jsonWriter = new OXJSONWriter();
 		/*
 		 * Start response
 		 */
@@ -2289,7 +2276,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 		 * Close response and flush print writer
 		 */
 		jsonWriter.endArray();
-		response.setData(new JSONArray(strWriter.toString()));
+		response.setData(jsonWriter.getObject());
 		response.setTimestamp(null);
 		Response.write(response, writer);
 	}

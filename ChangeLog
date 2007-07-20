@@ -6,6 +6,8 @@
    previously shared and subscribed but now does no more grant rights for
    affected user still occurs in user's subscription list (LSUB command).
    This is fixed now.
+ - Added an own implementation of org.json.JSONWriter that uses real objects
+   instead of a java.io.Writer
 
 * 2007-07-19 - francisco.laguna@open-xchange.com
 

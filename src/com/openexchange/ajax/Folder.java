@@ -53,7 +53,6 @@ import static com.openexchange.tools.oxfolder.OXFolderManagerImpl.folderModule2S
 import static com.openexchange.tools.oxfolder.OXFolderManagerImpl.getUserName;
 
 import java.io.IOException;
-import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Date;
 import java.util.HashSet;
@@ -97,6 +96,7 @@ import com.openexchange.groupware.i18n.Groups;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.StringHelper;
+import com.openexchange.json.OXJSONWriter;
 import com.openexchange.server.OCLPermission;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.iterator.FolderObjectIterator;
@@ -275,8 +275,7 @@ public class Folder extends SessionServlet {
 		 * Some variables
 		 */
 		final Response response = new Response();
-		final StringWriter strWriter = new StringWriter();
-		final JSONWriter jsonWriter = new JSONWriter(strWriter);
+		final OXJSONWriter jsonWriter = new OXJSONWriter();
 		long lastModified = 0;
 		/*
 		 * Start response
@@ -339,9 +338,7 @@ public class Folder extends SessionServlet {
 			}
 		} catch (final OXFolderException e) {
 			LOG.error(e.getMessage(), e);
-			//if (!e.getCategory().equals(Category.USER_CONFIGURATION)) {
-				response.setException(e);
-			//}
+			response.setException(e);
 		} catch (final AbstractOXException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
@@ -353,7 +350,7 @@ public class Folder extends SessionServlet {
 		 * Close response and flush print writer
 		 */
 		jsonWriter.endArray();
-		response.setData(new JSONArray(strWriter.toString()));
+		response.setData(jsonWriter.getObject());
 		response.setTimestamp(lastModified == 0 ? null : new Date(lastModified));
 		Response.write(response, pw);
 	}
@@ -389,8 +386,7 @@ public class Folder extends SessionServlet {
 		 */
 		final Response response = new Response();
 		final StringHelper strHelper = new StringHelper(sessionObj.getLocale());
-		final StringWriter strWriter = new StringWriter();
-		final JSONWriter jsonWriter = new JSONWriter(strWriter);
+		final OXJSONWriter jsonWriter = new OXJSONWriter();
 		Date lastModifiedDate = null;
 		/*
 		 * Start response
@@ -878,9 +874,7 @@ public class Folder extends SessionServlet {
 			}
 		} catch (final OXFolderException e) {
 			LOG.error(e.getMessage(), e);
-			//if (!e.getCategory().equals(Category.USER_CONFIGURATION)) {
-				response.setException(e);
-			//}
+			response.setException(e);
 		} catch (final AbstractOXException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
@@ -892,7 +886,7 @@ public class Folder extends SessionServlet {
 		 * Close response and flush print writer
 		 */
 		jsonWriter.endArray();
-		response.setData(new JSONArray(strWriter.toString()));
+		response.setData(jsonWriter.getObject());
 		response.setTimestamp(lastModifiedDate);
 		Response.write(response, pw);
 	}
@@ -925,8 +919,7 @@ public class Folder extends SessionServlet {
 		 * Some variables
 		 */
 		final Response response = new Response();
-		final StringWriter strWriter = new StringWriter();
-		final JSONWriter jsonWriter = new JSONWriter(strWriter);
+		final OXJSONWriter jsonWriter = new OXJSONWriter();
 		long lastModified = 0;
 		/*
 		 * Start response
@@ -1030,9 +1023,7 @@ public class Folder extends SessionServlet {
 			}
 		} catch (final OXFolderException e) {
 			LOG.error(e.getMessage(), e);
-			//if (!e.getCategory().equals(Category.USER_CONFIGURATION)) {
-				response.setException(e);
-			//}
+			response.setException(e);
 		} catch (final AbstractOXException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
@@ -1044,7 +1035,7 @@ public class Folder extends SessionServlet {
 		 * Close response and flush print writer
 		 */
 		jsonWriter.endArray();
-		response.setData(new JSONArray(strWriter.toString()));
+		response.setData(jsonWriter.getObject());
 		response.setTimestamp(lastModified == 0 ? null : new Date(lastModified));
 		Response.write(response, pw);
 	}
@@ -1080,8 +1071,7 @@ public class Folder extends SessionServlet {
 		 * Some variables
 		 */
 		final Response response = new Response();
-		final StringWriter strWriter = new StringWriter();
-		final JSONWriter jsonWriter = new JSONWriter(strWriter);
+		final OXJSONWriter jsonWriter = new OXJSONWriter();
 		Date lastModifiedDate = null;
 		/*
 		 * Start response
@@ -1223,7 +1213,7 @@ public class Folder extends SessionServlet {
 		 * Close response and flush print writer
 		 */
 		jsonWriter.endArray();
-		response.setData(new JSONArray(strWriter.toString()));
+		response.setData(jsonWriter.getObject());
 		response.setTimestamp(lastModifiedDate);
 		Response.write(response, pw);
 	}
@@ -1249,8 +1239,7 @@ public class Folder extends SessionServlet {
 		 * Some variables
 		 */
 		final Response response = new Response();
-		final StringWriter strWriter = new StringWriter();
-		final JSONWriter jsonWriter = new JSONWriter(strWriter);
+		final OXJSONWriter jsonWriter = new OXJSONWriter();
 		Date lastModifiedDate = null;
 		/*
 		 * Start response
@@ -1304,10 +1293,7 @@ public class Folder extends SessionServlet {
 		/*
 		 * Close response and flush print writer
 		 */
-		final String data = strWriter.toString();
-		if (data.length() > 0) {
-			response.setData(new JSONObject(data));
-		}
+		response.setData(jsonWriter.getObject());
 		response.setTimestamp(lastModifiedDate);
 		Response.write(response, pw);
 	}
@@ -1375,9 +1361,7 @@ public class Folder extends SessionServlet {
 			}
 		} catch (final OXFolderException e) {
 			LOG.error(e.getMessage(), e);
-			//if (!e.getCategory().equals(Category.USER_CONFIGURATION)) {
-				response.setException(e);
-			//}
+			response.setException(e);
 		} catch (final AbstractOXException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
@@ -1450,9 +1434,7 @@ public class Folder extends SessionServlet {
 			}
 		} catch (final OXFolderException e) {
 			LOG.error(e.getMessage(), e);
-			//if (!e.getCategory().equals(Category.USER_CONFIGURATION)) {
-				response.setException(e);
-			//}
+			response.setException(e);
 		} catch (final AbstractOXException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
@@ -1490,8 +1472,7 @@ public class Folder extends SessionServlet {
 		 * Some variables
 		 */
 		final Response response = new Response();
-		final StringWriter strWriter = new StringWriter();
-		final JSONWriter jsonWriter = new JSONWriter(strWriter);
+		final OXJSONWriter jsonWriter = new OXJSONWriter();
 		Date lastModifiedDate = null;
 		/*
 		 * Start response
@@ -1555,9 +1536,7 @@ public class Folder extends SessionServlet {
 			}
 		} catch (final OXFolderException e) {
 			LOG.error(e.getMessage(), e);
-			//if (!e.getCategory().equals(Category.USER_CONFIGURATION)) {
-				response.setException(e);
-			//}
+			response.setException(e);
 		} catch (final AbstractOXException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
@@ -1569,7 +1548,7 @@ public class Folder extends SessionServlet {
 		 * Close response and flush print writer
 		 */
 		jsonWriter.endArray();
-		response.setData(new JSONArray(strWriter.toString()));
+		response.setData(jsonWriter.getObject());
 		response.setTimestamp(lastModifiedDate);
 		Response.write(response, pw);
 	}
@@ -1579,7 +1558,7 @@ public class Folder extends SessionServlet {
 		/*
 		 * Some variables
 		 */
-		final JSONWriter jsonWriter = new JSONWriter(resp.getWriter());
+		final OXJSONWriter jsonWriter = new OXJSONWriter();
 		final SessionObject sessionObj = getSessionObject(req);
 		final long lastModified = 0;
 		String error = null;

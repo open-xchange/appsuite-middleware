@@ -1,0 +1,354 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.json;
+
+import java.io.Writer;
+import java.util.Stack;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONWriter;
+
+/**
+ * OXJSONWriter - extends <code>{@link JSONWriter}</code> but does not use an
+ * underlying instance of <code>{@link Writer}</code> rather that creating
+ * JSON objects thus this JSONWriter will never get into an incomplete state.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * 
+ */
+public final class OXJSONWriter extends JSONWriter {
+
+	private static final int MODE_INIT = 0;
+
+	private static final int MODE_ARR = 1;
+
+	private static final int MODE_OBJ = 2;
+
+	private static final int MODE_KEY = 3;
+
+	private static final int MODE_DONE = 4;
+
+	private static final Integer STACK_ARR = Integer.valueOf(MODE_ARR);
+
+	private static final Integer STACK_OBJ = Integer.valueOf(MODE_OBJ);
+
+	private int mode = MODE_INIT;
+
+	private Object jsonObject;
+
+	private int jsonObjectType;
+
+	private final Stack<Object> stackObjs = new Stack<Object>();
+
+	private final Stack<Integer> stackModes = new Stack<Integer>();
+
+	private String key;
+
+	public OXJSONWriter() {
+		super(null);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.json.JSONWriter#array()
+	 */
+	@Override
+	public JSONWriter array() throws JSONException {
+		if (mode == MODE_INIT || mode == MODE_OBJ || mode == MODE_ARR) {
+			final JSONArray ja = new JSONArray();
+			if (mode == MODE_INIT) {
+				jsonObject = ja;
+				jsonObjectType = MODE_ARR;
+			}
+			pushArray(ja);
+			return this;
+		}
+		throw new JSONException("Misplaced array.");
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.json.JSONWriter#endArray()
+	 */
+	@Override
+	public JSONWriter endArray() throws JSONException {
+		if (mode != MODE_ARR) {
+			throw new JSONException("Misplaced endArray.");
+		}
+		popArray();
+		return this;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.json.JSONWriter#object()
+	 */
+	@Override
+	public JSONWriter object() throws JSONException {
+		if (mode == MODE_INIT || mode == MODE_OBJ || mode == MODE_ARR) {
+			final JSONObject jo = new JSONObject();
+			if (mode == MODE_INIT) {
+				jsonObject = jo;
+				jsonObjectType = MODE_OBJ;
+				mode = MODE_OBJ;
+			}
+			pushObject(jo);
+			return this;
+		}
+		throw new JSONException("Misplaced object.");
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.json.JSONWriter#endObject()
+	 */
+	@Override
+	public JSONWriter endObject() throws JSONException {
+		if (mode != MODE_KEY) {
+			throw new JSONException("Misplaced endObject.");
+		}
+		popObject();
+		return this;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.json.JSONWriter#key(java.lang.String)
+	 */
+	@Override
+	public JSONWriter key(final String key) throws JSONException {
+		if (key == null) {
+			throw new JSONException("Null key.");
+		}
+		if (this.mode == MODE_KEY) {
+			this.key = key;
+			mode = MODE_OBJ;
+			return this;
+		}
+		throw new JSONException("Misplaced key.");
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.json.JSONWriter#value(boolean)
+	 */
+	@Override
+	public JSONWriter value(final boolean b) throws JSONException {
+		return this.append(Boolean.valueOf(b));
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.json.JSONWriter#value(double)
+	 */
+	@Override
+	public JSONWriter value(final double d) throws JSONException {
+		return this.value(Double.valueOf(d));
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.json.JSONWriter#value(long)
+	 */
+	@Override
+	public JSONWriter value(final long l) throws JSONException {
+		return this.append(Long.valueOf(l));
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.json.JSONWriter#value(java.lang.Object)
+	 */
+	@Override
+	public JSONWriter value(final Object o) throws JSONException {
+		return this.append(o);
+	}
+
+	/**
+	 * Checks if this writer is left in an complete state; meaning all opened
+	 * objects - either JSONArrays or JSONObjects - were properly closed through
+	 * corresponding <code>{@link #endArray()}</code> or
+	 * <code>{@link #endObject()}</code> routine.
+	 * 
+	 * @return <code>true</code> if JSON object is complete; otherwise
+	 *         <code>false</code>
+	 */
+	public boolean isComplete() {
+		return (mode == MODE_DONE);
+	}
+
+	/**
+	 * Checks if initial JSON object is an instance of <code>JSONArray</code>
+	 * 
+	 * @return <code>true</code> if initial JSON object is an instance of
+	 *         <code>JSONArray</code>; otherwise <code>false</code>
+	 */
+	public boolean isJSONArray() {
+		return (jsonObjectType == MODE_ARR);
+	}
+
+	/**
+	 * Checks if initial JSON object is an instance of <code>JSONObject</code>
+	 * 
+	 * @return <code>true</code> if initial JSON object is an instance of
+	 *         <code>JSONObject</code>; otherwise <code>false</code>
+	 */
+	public boolean isJSONObject() {
+		return (jsonObjectType == MODE_OBJ);
+	}
+
+	/**
+	 * Getter for initial JSON object created through this writer
+	 * 
+	 * @return the JSON object; either <code>JSONArray</code> or
+	 *         <code>JSONObject</code>
+	 */
+	public Object getObject() {
+		return jsonObject;
+	}
+
+	/**
+	 * Append a value.
+	 * 
+	 * @param value
+	 *            A value.
+	 * @return this
+	 * @throws JSONException
+	 *             If the value is out of sequence.
+	 */
+	private JSONWriter append(final Object value) throws JSONException {
+		if (this.mode == MODE_OBJ || this.mode == MODE_ARR) {
+			if (STACK_ARR.equals(stackModes.peek())) {
+				((JSONArray) stackObjs.peek()).put(value);
+			} else if (STACK_OBJ.equals(stackModes.peek())) {
+				((JSONObject) stackObjs.peek()).put(key, value);
+				key = null;
+			}
+			if (this.mode == MODE_OBJ) {
+				this.mode = MODE_KEY;
+			}
+			return this;
+		}
+		throw new JSONException("Value out of sequence.");
+	}
+
+	private void pushArray(final JSONArray ja) {
+		stackObjs.push(ja);
+		stackModes.push(STACK_ARR);
+		this.mode = MODE_ARR;
+	}
+
+	private void popArray() throws JSONException {
+		if (null == stackModes.pop() || stackModes.isEmpty()) {
+			/*
+			 * Done
+			 */
+			mode = MODE_DONE;
+			return;
+		}
+		final JSONArray ja = (JSONArray) stackObjs.pop();
+		if (STACK_ARR.equals(stackModes.peek())) {
+			((JSONArray) stackObjs.peek()).put(ja);
+			/*
+			 * Set mode to arary
+			 */
+			mode = MODE_ARR;
+		} else if (STACK_OBJ.equals(stackModes.peek())) {
+			((JSONObject) stackObjs.peek()).put(key, ja);
+			key = null;
+			/*
+			 * Set mode to object
+			 */
+			mode = MODE_OBJ;
+		}
+	}
+
+	private void pushObject(final JSONObject jo) {
+		stackObjs.push(jo);
+		stackModes.push(STACK_OBJ);
+		this.mode = MODE_KEY;
+	}
+
+	private void popObject() throws JSONException {
+		if (null == stackModes.pop() || stackModes.isEmpty()) {
+			/*
+			 * Done
+			 */
+			mode = MODE_DONE;
+			return;
+		}
+		final JSONObject jo = (JSONObject) stackObjs.pop();
+		if (STACK_ARR.equals(stackModes.peek())) {
+			((JSONArray) stackObjs.peek()).put(jo);
+			/*
+			 * Set mode to arary
+			 */
+			mode = MODE_ARR;
+		} else if (STACK_OBJ.equals(stackModes.peek())) {
+			((JSONObject) stackObjs.peek()).put(key, jo);
+			key = null;
+			/*
+			 * Set mode to object
+			 */
+			mode = MODE_OBJ;
+		}
+	}
+}
