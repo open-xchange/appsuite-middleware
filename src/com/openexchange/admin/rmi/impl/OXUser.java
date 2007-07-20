@@ -95,31 +95,28 @@ import com.openexchange.admin.tools.SHACrypt;
 import com.openexchange.admin.tools.UnixCrypt;
 import com.openexchange.cache.CacheKey;
 /**
+ * @author d7
  * @author cutmasta
  */
 
 public class OXUser extends OXCommonImpl implements OXUserInterface {
 
-    private final AdminCache cache;
-
     private final static Log log = LogFactory.getLog(OXUser.class);
 
-    private final PropertyHandler prop;
-    private BundleContext context = null;
-    
-    private static final String FALLBACK_LANGUAGE_CREATE = "en";   
+    private static final String FALLBACK_LANGUAGE_CREATE = "en";
+
     private static final String FALLBACK_COUNTRY_CREATE = "US";
-    
-    /**
-     * Prevent calling the default constructor
-     *
-     */
-    @SuppressWarnings("unused")
-    private OXUser() {
-        super();
-        this.cache = ClientAdminThread.cache;
-        this.prop = this.cache.getProperties();
+    public static Locale getLanguage(final User usr){
+        if (usr.getLanguage() == null) {
+            usr.setLanguage(new Locale(FALLBACK_LANGUAGE_CREATE, FALLBACK_COUNTRY_CREATE));
+        }
+        return usr.getLanguage();
     }
+    
+    private final AdminCache cache;   
+    private final PropertyHandler prop;
+    
+    private BundleContext context = null;
 
     public OXUser(final BundleContext context) throws RemoteException {
         super();
@@ -131,118 +128,15 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
     }
     
-    public static Locale getLanguage(final User usr){
-        if (usr.getLanguage() == null) {
-            usr.setLanguage(new Locale(FALLBACK_LANGUAGE_CREATE, FALLBACK_COUNTRY_CREATE));
-        }
-        return usr.getLanguage();
-    }
-
-    public User create(final Context ctx, final User usr, final UserModuleAccess access, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
-        try {
-            doNullCheck(usr,access);
-        } catch (final InvalidDataException e3) {
-            log.error("One of the given arguments for create is null", e3);
-            throw e3;
-        }        
-        
-        if (log.isDebugEnabled()) {
-            log.debug(ctx.toString() + " - " + usr.toString() + " - " + access.toString() + " - " + auth.toString());
-        }
-        final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
-
-        try {
-            new BasicAuthenticator().doAuthentication(auth,ctx);        
-            
-            checkSchemaBeingLocked(ctx, tools);
-            
-            checkCreateUserData(ctx, usr, this.prop);
-
-            if (tools.existsUser(ctx, usr.getUsername())) {
-                throw new InvalidDataException("User " + usr.getUsername() + " already exists in this context");
-            }
-
-            // validate email adresss
-            tools.checkPrimaryMail(ctx, usr.getPrimaryEmail());
-        } catch (final InvalidDataException e2) {
-            log.error(e2.getMessage(), e2);
-            throw e2;
-        }
-
-        final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
-        final int retval = oxu.create(ctx, usr, access);
-        usr.setId(retval);
-        final ArrayList<OXUserPluginInterface> interfacelist = new ArrayList<OXUserPluginInterface>();
-
-        // homedirectory
-        final String homedir = this.prop.getUserProp(AdminProperties.User.HOME_DIR_ROOT, "/home") + "/" + usr.getUsername();
-        if (this.prop.getUserProp(AdminProperties.User.CREATE_HOMEDIRECTORY, false) && !tools.isContextAdmin(ctx, usr.getId())) {
-            if (!new File(homedir).mkdir()) {
-                log.error("unable to create directory: " + homedir);
-            }
-            final String CHOWN = "/bin/chown";
-            final Process p;
-            try {
-                p = Runtime.getRuntime().exec(new String[] { CHOWN, usr.getUsername() + ":", homedir });
-                p.waitFor();
-                if (p.exitValue() != 0) {
-                    log.error(CHOWN + " exited abnormally");
-                    final BufferedReader prerr = new BufferedReader(new InputStreamReader(p.getErrorStream()));
-                    String line = null;
-                    while ((line = prerr.readLine()) != null) {
-                        log.error(line);
-                    }
-                    log.error("Unable to chown homedirectory: " + homedir);
-                }
-            } catch (final IOException e) {
-                log.error("Unable to chown homedirectory: " + homedir, e);
-            } catch (final InterruptedException e) {
-                log.error("Unable to chown homedirectory: " + homedir, e);
-            }
-        }
-
-        final ArrayList<Bundle> bundles = AdminDaemon.getBundlelist();
-        for (final Bundle bundle : bundles) {
-            final String bundlename = bundle.getSymbolicName();
-            if (Bundle.ACTIVE==bundle.getState()) {
-                final ServiceReference[] servicereferences = bundle.getRegisteredServices();
-                if (null != servicereferences) {
-                    for (final ServiceReference servicereference : servicereferences) {
-                        final Object property = servicereference.getProperty("name");
-                        if (null != property && property.toString().equalsIgnoreCase("oxuser")) {
-                            final OXUserPluginInterface oxuser = (OXUserPluginInterface) this.context.getService(servicereference);
-                            
-                            if (oxuser.canHandleContextAdmin() || (!oxuser.canHandleContextAdmin() && !tools.isContextAdmin(ctx, usr.getId()))) {
-                                try {
-                                    if (log.isDebugEnabled()) {
-                                        log.debug("Calling create for plugin: " + bundlename);
-                                    }
-                                    oxuser.create(ctx, usr, access, auth);
-                                    interfacelist.add(oxuser);
-                                } catch (final PluginException e) {
-                                    log.error("Error while calling create for plugin: " + bundlename, e);
-                                    log.info("Now doing rollback for everything until now...");
-                                    for (final OXUserPluginInterface oxuserinterface : interfacelist) {
-                                        try {
-                                            oxuserinterface.delete(ctx, new User[] { usr }, auth);
-                                        } catch (final PluginException e1) {
-                                            log.error("Error doing rollback for plugin: " + bundlename, e1);
-                                        }
-                                    }
-                                    try {
-                                        oxu.delete(ctx, usr);
-                                    } catch (final StorageException e1) {
-                                        log.error("Error doing rollback for creating user in database", e1);
-                                    }
-                                    throw new StorageException(e);
-                                }
-                            }                            
-                        }
-                    }
-                }
-            }
-        }
-        return usr;
+    /**
+     * Prevent calling the default constructor
+     *
+     */
+    @SuppressWarnings("unused")
+    private OXUser() {
+        super();
+        this.cache = ClientAdminThread.cache;
+        this.prop = this.cache.getProperties();
     }
 
     public void change(final Context ctx, final User usrdata, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchUserException {
@@ -368,6 +262,171 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
     }
 
+    public void changeModuleAccess(final Context ctx, final int user_id, final UserModuleAccess moduleAccess, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+        try {
+            doNullCheck(moduleAccess);
+        } catch (final InvalidDataException e1) {
+            log.error("One of the given arguments for changeModuleAccess is null", e1);
+            throw e1;
+        }
+        
+        if (log.isDebugEnabled()) {
+            log.debug(ctx.toString() + " - " + user_id + " - "+ moduleAccess.toString() + " - " + auth.toString());
+        }
+
+        new BasicAuthenticator().doAuthentication(auth,ctx);
+        
+        final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();       
+        
+        checkSchemaBeingLocked(ctx, tools);
+
+        if (!tools.existsUser(ctx, user_id)) {
+            final NoSuchUserException noSuchUserException = new NoSuchUserException("No such user " + user_id + " in context " + ctx.getIdAsInt());
+            log.error(noSuchUserException.getMessage(), noSuchUserException);
+            throw noSuchUserException;
+        }
+
+        final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
+        oxu.changeModuleAccess(ctx, user_id, moduleAccess);
+    }
+
+    public void changeModuleAccess(final Context ctx, final User user, final UserModuleAccess moduleAccess, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+        try {
+            doNullCheck(user,moduleAccess);
+        } catch (final InvalidDataException e1) {
+            final InvalidDataException invalidDataException = new InvalidDataException("User or UserModuleAccess is null");
+            log.error(invalidDataException.getMessage(), invalidDataException);
+            throw invalidDataException;
+        }
+        
+        if (log.isDebugEnabled()) {
+            log.debug(ctx.toString() + " - " + user + " - "+ moduleAccess.toString() + " - " + auth.toString());
+        }
+
+        new BasicAuthenticator().doAuthentication(auth,ctx);
+        
+        final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();       
+        
+        checkSchemaBeingLocked(ctx, tools);
+
+        final int user_id = user.getId();
+        if (!tools.existsUser(ctx, user_id)) {
+            final NoSuchUserException noSuchUserException = new NoSuchUserException("No such user " + user_id + " in context " + ctx.getIdAsInt());
+            log.error(noSuchUserException.getMessage(), noSuchUserException);
+            throw noSuchUserException;
+        }
+
+        final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
+        oxu.changeModuleAccess(ctx, user_id, moduleAccess);
+    }
+
+    public User create(final Context ctx, final User usr, final UserModuleAccess access, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
+        try {
+            doNullCheck(usr,access);
+        } catch (final InvalidDataException e3) {
+            log.error("One of the given arguments for create is null", e3);
+            throw e3;
+        }        
+        
+        if (log.isDebugEnabled()) {
+            log.debug(ctx.toString() + " - " + usr.toString() + " - " + access.toString() + " - " + auth.toString());
+        }
+        final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
+
+        try {
+            new BasicAuthenticator().doAuthentication(auth,ctx);        
+            
+            checkSchemaBeingLocked(ctx, tools);
+            
+            checkCreateUserData(ctx, usr, this.prop);
+
+            if (tools.existsUser(ctx, usr.getUsername())) {
+                throw new InvalidDataException("User " + usr.getUsername() + " already exists in this context");
+            }
+
+            // validate email adresss
+            tools.checkPrimaryMail(ctx, usr.getPrimaryEmail());
+        } catch (final InvalidDataException e2) {
+            log.error(e2.getMessage(), e2);
+            throw e2;
+        }
+
+        final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
+        final int retval = oxu.create(ctx, usr, access);
+        usr.setId(retval);
+        final ArrayList<OXUserPluginInterface> interfacelist = new ArrayList<OXUserPluginInterface>();
+
+        // homedirectory
+        final String homedir = this.prop.getUserProp(AdminProperties.User.HOME_DIR_ROOT, "/home") + "/" + usr.getUsername();
+        if (this.prop.getUserProp(AdminProperties.User.CREATE_HOMEDIRECTORY, false) && !tools.isContextAdmin(ctx, usr.getId())) {
+            if (!new File(homedir).mkdir()) {
+                log.error("unable to create directory: " + homedir);
+            }
+            final String CHOWN = "/bin/chown";
+            final Process p;
+            try {
+                p = Runtime.getRuntime().exec(new String[] { CHOWN, usr.getUsername() + ":", homedir });
+                p.waitFor();
+                if (p.exitValue() != 0) {
+                    log.error(CHOWN + " exited abnormally");
+                    final BufferedReader prerr = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+                    String line = null;
+                    while ((line = prerr.readLine()) != null) {
+                        log.error(line);
+                    }
+                    log.error("Unable to chown homedirectory: " + homedir);
+                }
+            } catch (final IOException e) {
+                log.error("Unable to chown homedirectory: " + homedir, e);
+            } catch (final InterruptedException e) {
+                log.error("Unable to chown homedirectory: " + homedir, e);
+            }
+        }
+
+        final ArrayList<Bundle> bundles = AdminDaemon.getBundlelist();
+        for (final Bundle bundle : bundles) {
+            final String bundlename = bundle.getSymbolicName();
+            if (Bundle.ACTIVE==bundle.getState()) {
+                final ServiceReference[] servicereferences = bundle.getRegisteredServices();
+                if (null != servicereferences) {
+                    for (final ServiceReference servicereference : servicereferences) {
+                        final Object property = servicereference.getProperty("name");
+                        if (null != property && property.toString().equalsIgnoreCase("oxuser")) {
+                            final OXUserPluginInterface oxuser = (OXUserPluginInterface) this.context.getService(servicereference);
+                            
+                            if (oxuser.canHandleContextAdmin() || (!oxuser.canHandleContextAdmin() && !tools.isContextAdmin(ctx, usr.getId()))) {
+                                try {
+                                    if (log.isDebugEnabled()) {
+                                        log.debug("Calling create for plugin: " + bundlename);
+                                    }
+                                    oxuser.create(ctx, usr, access, auth);
+                                    interfacelist.add(oxuser);
+                                } catch (final PluginException e) {
+                                    log.error("Error while calling create for plugin: " + bundlename, e);
+                                    log.info("Now doing rollback for everything until now...");
+                                    for (final OXUserPluginInterface oxuserinterface : interfacelist) {
+                                        try {
+                                            oxuserinterface.delete(ctx, new User[] { usr }, auth);
+                                        } catch (final PluginException e1) {
+                                            log.error("Error doing rollback for plugin: " + bundlename, e1);
+                                        }
+                                    }
+                                    try {
+                                        oxu.delete(ctx, usr);
+                                    } catch (final StorageException e1) {
+                                        log.error("Error doing rollback for creating user in database", e1);
+                                    }
+                                    throw new StorageException(e);
+                                }
+                            }                            
+                        }
+                    }
+                }
+            }
+        }
+        return usr;
+    }
+
     public void delete(final Context ctx, final User user, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         delete(ctx, new User[]{user}, auth);
     }
@@ -479,113 +538,6 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
     }
 
-    public UserModuleAccess getModuleAccess(final Context ctx, final int user_id, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchUserException {
-        if (log.isDebugEnabled()) {
-            log.debug(ctx.toString() + " - " + user_id + " - " + auth.toString());
-        }        
-        
-        new BasicAuthenticator().doAuthentication(auth,ctx);
-        
-        final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
-        
-        checkSchemaBeingLocked(ctx, tools);
-
-        if (!tools.existsUser(ctx, user_id)) {
-            final NoSuchUserException noSuchUserException = new NoSuchUserException("No such user " + user_id + " in context " + ctx.getIdAsInt());
-            log.error(noSuchUserException.getMessage(), noSuchUserException);
-            throw noSuchUserException;
-        }
-
-        final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
-        return oxu.getModuleAccess(ctx, user_id);
-    }
-
-    public UserModuleAccess getModuleAccess(final Context ctx, final User user, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchUserException {
-        try {
-            doNullCheck(user);
-        } catch (final InvalidDataException e) {
-            final InvalidDataException invalidDataException = new InvalidDataException("User object is null");
-            log.error(invalidDataException.getMessage(), invalidDataException);
-            throw invalidDataException;
-        }        
-        if (log.isDebugEnabled()) {
-            log.debug(ctx.toString() + " - " + user + " - " + auth.toString());
-        }        
-        new BasicAuthenticator().doAuthentication(auth,ctx);
-        
-        final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
-        
-        checkSchemaBeingLocked(ctx, tools);
-
-        final int user_id = user.getId();
-        if (!tools.existsUser(ctx, user_id)) {
-            final NoSuchUserException noSuchUserException = new NoSuchUserException("No such user " + user + " in context " + ctx.getIdAsInt());
-            log.error(noSuchUserException.getMessage(), noSuchUserException);
-            throw noSuchUserException;
-        }
-
-        final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
-        return oxu.getModuleAccess(ctx, user_id);
-    }
-
-    public void changeModuleAccess(final Context ctx, final int user_id, final UserModuleAccess moduleAccess, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchUserException {
-        try {
-            doNullCheck(moduleAccess);
-        } catch (final InvalidDataException e1) {
-            log.error("One of the given arguments for changeModuleAccess is null", e1);
-            throw e1;
-        }
-        
-        if (log.isDebugEnabled()) {
-            log.debug(ctx.toString() + " - " + user_id + " - "+ moduleAccess.toString() + " - " + auth.toString());
-        }
-
-        new BasicAuthenticator().doAuthentication(auth,ctx);
-        
-        final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();       
-        
-        checkSchemaBeingLocked(ctx, tools);
-
-        if (!tools.existsUser(ctx, user_id)) {
-            final NoSuchUserException noSuchUserException = new NoSuchUserException("No such user " + user_id + " in context " + ctx.getIdAsInt());
-            log.error(noSuchUserException.getMessage(), noSuchUserException);
-            throw noSuchUserException;
-        }
-
-        final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
-        oxu.changeModuleAccess(ctx, user_id, moduleAccess);
-    }
-
-    public void changeModuleAccess(final Context ctx, final User user, final UserModuleAccess moduleAccess, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchUserException {
-        try {
-            doNullCheck(user,moduleAccess);
-        } catch (final InvalidDataException e1) {
-            final InvalidDataException invalidDataException = new InvalidDataException("User or UserModuleAccess is null");
-            log.error(invalidDataException.getMessage(), invalidDataException);
-            throw invalidDataException;
-        }
-        
-        if (log.isDebugEnabled()) {
-            log.debug(ctx.toString() + " - " + user + " - "+ moduleAccess.toString() + " - " + auth.toString());
-        }
-
-        new BasicAuthenticator().doAuthentication(auth,ctx);
-        
-        final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();       
-        
-        checkSchemaBeingLocked(ctx, tools);
-
-        final int user_id = user.getId();
-        if (!tools.existsUser(ctx, user_id)) {
-            final NoSuchUserException noSuchUserException = new NoSuchUserException("No such user " + user_id + " in context " + ctx.getIdAsInt());
-            log.error(noSuchUserException.getMessage(), noSuchUserException);
-            throw noSuchUserException;
-        }
-
-        final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
-        oxu.changeModuleAccess(ctx, user_id, moduleAccess);
-    }
-
     public int[] getAll(final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
         if (log.isDebugEnabled()) {
             log.debug(ctx.toString() + " - " + auth.toString());
@@ -601,28 +553,6 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         return oxu.getAll(ctx);
     }
 
-    public User[] list(final Context ctx, final String search_pattern, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
-        if (log.isDebugEnabled()) {
-            log.debug(ctx.toString() + " - " + auth.toString());
-        }
-        
-        new BasicAuthenticator().doAuthentication(auth,ctx);
-        
-        final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();      
-        
-        checkSchemaBeingLocked(ctx, tools);
-
-        final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
-        
-        final User[] retval =  oxu.list(ctx, search_pattern);
-        
-        return retval;
-    }
-
-    public User[] listAll(final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
-        return list(ctx, "*", auth);
-    }
-    
     public User getData(final Context ctx, final int user_id, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException, DatabaseUpdateException {
         return getData(ctx, new int[]{user_id}, auth)[0];
     }
@@ -775,14 +705,110 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         log.debug(Arrays.toString(retusers));
         return retusers;
     }
+    
+    public UserModuleAccess getModuleAccess(final Context ctx, final int user_id, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+        if (log.isDebugEnabled()) {
+            log.debug(ctx.toString() + " - " + user_id + " - " + auth.toString());
+        }        
+        
+        new BasicAuthenticator().doAuthentication(auth,ctx);
+        
+        final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
+        
+        checkSchemaBeingLocked(ctx, tools);
 
-    private void validateUserName(final String userName) throws InvalidDataException {
-        // Check for allowed chars:
-        // abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-+.%$@
-        final String usr_uid_regexp = this.prop.getUserProp("CHECK_USER_UID_REGEXP", "[$@%\\.+a-zA-Z0-9_-]");        
-        final String illegal = userName.replaceAll(usr_uid_regexp,"");
-        if( illegal.length() > 0 ) {
-            throw new InvalidDataException("Illegal chars: \""+illegal+"\"");
+        if (!tools.existsUser(ctx, user_id)) {
+            final NoSuchUserException noSuchUserException = new NoSuchUserException("No such user " + user_id + " in context " + ctx.getIdAsInt());
+            log.error(noSuchUserException.getMessage(), noSuchUserException);
+            throw noSuchUserException;
+        }
+
+        final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
+        return oxu.getModuleAccess(ctx, user_id);
+    }
+
+    public UserModuleAccess getModuleAccess(final Context ctx, final User user, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+        try {
+            doNullCheck(user);
+        } catch (final InvalidDataException e) {
+            final InvalidDataException invalidDataException = new InvalidDataException("User object is null");
+            log.error(invalidDataException.getMessage(), invalidDataException);
+            throw invalidDataException;
+        }        
+        if (log.isDebugEnabled()) {
+            log.debug(ctx.toString() + " - " + user + " - " + auth.toString());
+        }        
+        new BasicAuthenticator().doAuthentication(auth,ctx);
+        
+        final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
+        
+        checkSchemaBeingLocked(ctx, tools);
+
+        final int user_id = user.getId();
+        if (!tools.existsUser(ctx, user_id)) {
+            final NoSuchUserException noSuchUserException = new NoSuchUserException("No such user " + user + " in context " + ctx.getIdAsInt());
+            log.error(noSuchUserException.getMessage(), noSuchUserException);
+            throw noSuchUserException;
+        }
+
+        final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
+        return oxu.getModuleAccess(ctx, user_id);
+    }
+
+    public boolean isContextAdmin(Context ctx, User user, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException, DatabaseUpdateException {
+        try {
+            doNullCheck(user);
+        } catch (final InvalidDataException e1) {
+            log.error("One of the given arguments is null", e1);
+            throw e1;
+        }
+                
+        new BasicAuthenticator().doUserAuthentication(auth,ctx);
+        
+        final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
+        
+        checkSchemaBeingLocked(ctx, tools);
+        
+        if (user.getId()!=null && !tools.existsUser(ctx, user.getId().intValue())) {
+            final NoSuchUserException noSuchUserException = new NoSuchUserException("No such user " + user.getId().intValue() + " in context " + ctx.getIdAsInt());
+            log.error(noSuchUserException.getMessage(), noSuchUserException);
+            throw noSuchUserException;           
+        }
+        
+        return tools.isContextAdmin(ctx, user.getId().intValue());
+    }
+
+    public User[] list(final Context ctx, final String search_pattern, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
+        if (log.isDebugEnabled()) {
+            log.debug(ctx.toString() + " - " + auth.toString());
+        }
+        
+        new BasicAuthenticator().doAuthentication(auth,ctx);
+        
+        final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();      
+        
+        checkSchemaBeingLocked(ctx, tools);
+
+        final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
+        
+        final User[] retval =  oxu.list(ctx, search_pattern);
+        
+        return retval;
+    }
+
+    public User[] listAll(final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
+        return list(ctx, "*", auth);
+    }
+
+    private void callDeleteForPlugin(final Context ctx, final Credentials auth, User[] retusers, final ArrayList<OXUserPluginInterface> interfacelist, final String bundlename, final OXUserPluginInterface oxuser) {
+        try {
+            if (log.isDebugEnabled()) {
+                log.debug("Calling delete for plugin: " + bundlename);
+            }
+            oxuser.delete(ctx, retusers, auth);
+            interfacelist.add(oxuser);
+        } catch (final PluginException e) {
+            log.error("Error while calling delete for plugin: " + bundlename, e);
         }
     }
 
@@ -855,6 +881,12 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     
     }
 
+    private void checkContext(final Context ctx) throws InvalidDataException {
+        if (null == ctx.getIdAsInt()) {
+            throw new InvalidDataException("Context invalid");
+        }
+    }
+
     private void checkCreateUserData(final Context ctx, final User usr, final PropertyHandler prop) throws InvalidDataException {
         final Locale langus = OXUser.getLanguage(usr);
         if (langus.getLanguage().indexOf('_') != -1 || langus.getCountry().indexOf('_') != -1) {
@@ -919,15 +951,11 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
     }
 
-    private User[] removeContextAdmin(final Context ctx, final User[] retusers) throws StorageException {
-        final OXToolStorageInterface oxtool = OXToolStorageInterface.getInstance();
-        final ArrayList<User> list = new ArrayList<User>();
-        for (final User user : retusers) {
-            if (!oxtool.isContextAdmin(ctx, user.getId())) {
-                list.add(user);
-            }
-        }
-        return list.toArray(new User[list.size()]);
+    private void checkValidEmailsInUserObject(final User usr) throws InvalidDataException {
+        GenericChecks.checkValidMailAddress(usr.getPrimaryEmail());
+        GenericChecks.checkValidMailAddress(usr.getEmail1());
+        GenericChecks.checkValidMailAddress(usr.getEmail2());
+        GenericChecks.checkValidMailAddress(usr.getEmail3());
     }
 
     private int[] getUserIdArrayFromUsers(final User[] users) throws InvalidDataException {
@@ -942,52 +970,25 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
         return retval;
     }
-
-    private void callDeleteForPlugin(final Context ctx, final Credentials auth, User[] retusers, final ArrayList<OXUserPluginInterface> interfacelist, final String bundlename, final OXUserPluginInterface oxuser) {
-        try {
-            if (log.isDebugEnabled()) {
-                log.debug("Calling delete for plugin: " + bundlename);
-            }
-            oxuser.delete(ctx, retusers, auth);
-            interfacelist.add(oxuser);
-        } catch (final PluginException e) {
-            log.error("Error while calling delete for plugin: " + bundlename, e);
-        }
-    }
-
-    private void checkContext(final Context ctx) throws InvalidDataException {
-        if (null == ctx.getIdAsInt()) {
-            throw new InvalidDataException("Context invalid");
-        }
-    }
     
-    private void checkValidEmailsInUserObject(final User usr) throws InvalidDataException {
-        GenericChecks.checkValidMailAddress(usr.getPrimaryEmail());
-        GenericChecks.checkValidMailAddress(usr.getEmail1());
-        GenericChecks.checkValidMailAddress(usr.getEmail2());
-        GenericChecks.checkValidMailAddress(usr.getEmail3());
+    private User[] removeContextAdmin(final Context ctx, final User[] retusers) throws StorageException {
+        final OXToolStorageInterface oxtool = OXToolStorageInterface.getInstance();
+        final ArrayList<User> list = new ArrayList<User>();
+        for (final User user : retusers) {
+            if (!oxtool.isContextAdmin(ctx, user.getId())) {
+                list.add(user);
+            }
+        }
+        return list.toArray(new User[list.size()]);
     }
 
-    public boolean isContextAdmin(Context ctx, User user, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException, DatabaseUpdateException {
-        try {
-            doNullCheck(user);
-        } catch (final InvalidDataException e1) {
-            log.error("One of the given arguments is null", e1);
-            throw e1;
+    private void validateUserName(final String userName) throws InvalidDataException {
+        // Check for allowed chars:
+        // abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-+.%$@
+        final String usr_uid_regexp = this.prop.getUserProp("CHECK_USER_UID_REGEXP", "[$@%\\.+a-zA-Z0-9_-]");        
+        final String illegal = userName.replaceAll(usr_uid_regexp,"");
+        if( illegal.length() > 0 ) {
+            throw new InvalidDataException("Illegal chars: \""+illegal+"\"");
         }
-                
-        new BasicAuthenticator().doUserAuthentication(auth,ctx);
-        
-        final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
-        
-        checkSchemaBeingLocked(ctx, tools);
-        
-        if (user.getId()!=null && !tools.existsUser(ctx, user.getId().intValue())) {
-            final NoSuchUserException noSuchUserException = new NoSuchUserException("No such user " + user.getId().intValue() + " in context " + ctx.getIdAsInt());
-            log.error(noSuchUserException.getMessage(), noSuchUserException);
-            throw noSuchUserException;           
-        }
-        
-        return tools.isContextAdmin(ctx, user.getId().intValue());
     }
 }
