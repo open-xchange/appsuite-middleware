@@ -65,15 +65,78 @@ import com.openexchange.admin.rmi.exceptions.TaskManagerException;
 import com.openexchange.admin.taskmanagement.ExtendedFutureTask;
 import com.openexchange.admin.taskmanagement.TaskManager;
 
-public class OXTaskMgmtImpl extends BasicAuthenticator implements OXTaskMgmtInterface {
+public class OXTaskMgmtImpl extends OXCommonImpl implements OXTaskMgmtInterface {
     
     private static final Log log = LogFactory.getLog(OXTaskMgmtImpl.class);
+    
+    public void deleteJob(final Context ctx, final Credentials cred, final int id) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, TaskManagerException {
+        try {
+            doNullCheck(ctx);
+            contextcheck(ctx);
+            new BasicAuthenticator().doAuthentication(cred, ctx);
+            if (id < 0) {
+                throw new InvalidDataException("Job ID must be > 0.");
+            }
+            TaskManager.getInstance().deleteJob(id);
+        } catch (final InvalidCredentialsException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (final StorageException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (final InvalidDataException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (final TaskManagerException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    public void flush(final Context ctx, final Credentials cred) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, TaskManagerException {
+        try {
+            doNullCheck(ctx);
+            contextcheck(ctx);
+            new BasicAuthenticator().doAuthentication(cred, ctx);
+            TaskManager.getInstance().flush();
+        } catch (final InvalidCredentialsException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (final StorageException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (final InvalidDataException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (final TaskManagerException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        }
+    }
+    
+    public String getJobList(final Context ctx, final Credentials cred) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException {
+        try {
+            doNullCheck(ctx);
+            contextcheck(ctx);
+            new BasicAuthenticator().doAuthentication(cred, ctx);
+            return TaskManager.getInstance().getJobList();
+        } catch (final InvalidCredentialsException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (final StorageException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (final InvalidDataException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        }
+    }
     
     public Object getTaskResults(final Context ctx, final Credentials cred, final int id) throws RemoteException, InvalidCredentialsException, StorageException, InterruptedException, ExecutionException, InvalidDataException {
         try {
             doNullCheck(ctx);
             contextcheck(ctx);
-            doAuthentication(cred, ctx);
+            new BasicAuthenticator().doAuthentication(cred, ctx);
             return getTaskResults(id);
         } catch (final InvalidCredentialsException e) {
             log.error(e.getMessage(), e);
@@ -105,7 +168,7 @@ public class OXTaskMgmtImpl extends BasicAuthenticator implements OXTaskMgmtInte
             throw new InvalidDataException("No such Task ID");
         }
     }
-    
+
     public boolean isTaskDone(final int id) throws InvalidDataException {
         if (id < 0) {
             throw new InvalidDataException("Task must be a value >= 0");
@@ -117,68 +180,4 @@ public class OXTaskMgmtImpl extends BasicAuthenticator implements OXTaskMgmtInte
             throw new InvalidDataException("No such Task ID");
         }
     }
-    
-    public String getJobList(final Context ctx, final Credentials cred) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException {
-        try {
-            doNullCheck(ctx);
-            contextcheck(ctx);
-            doAuthentication(cred, ctx);
-            return TaskManager.getInstance().getJobList();
-        } catch (final InvalidCredentialsException e) {
-            log.error(e.getMessage(), e);
-            throw e;
-        } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
-            throw e;
-        } catch (final InvalidDataException e) {
-            log.error(e.getMessage(), e);
-            throw e;
-        }
-    }
-
-    public void deleteJob(final Context ctx, final Credentials cred, final int id) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, TaskManagerException {
-        try {
-            doNullCheck(ctx);
-            contextcheck(ctx);
-            doAuthentication(cred, ctx);
-            if (id < 0) {
-                throw new InvalidDataException("Job ID must be > 0.");
-            }
-            TaskManager.getInstance().deleteJob(id);
-        } catch (final InvalidCredentialsException e) {
-            log.error(e.getMessage(), e);
-            throw e;
-        } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
-            throw e;
-        } catch (final InvalidDataException e) {
-            log.error(e.getMessage(), e);
-            throw e;
-        } catch (final TaskManagerException e) {
-            log.error(e.getMessage(), e);
-            throw e;
-        }
-    }
-
-    public void flush(final Context ctx, final Credentials cred) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, TaskManagerException {
-        try {
-            doNullCheck(ctx);
-            contextcheck(ctx);
-            doAuthentication(cred, ctx);
-            TaskManager.getInstance().flush();
-        } catch (final InvalidCredentialsException e) {
-            log.error(e.getMessage(), e);
-            throw e;
-        } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
-            throw e;
-        } catch (final InvalidDataException e) {
-            log.error(e.getMessage(), e);
-            throw e;
-        } catch (final TaskManagerException e) {
-            log.error(e.getMessage(), e);
-            throw e;
-        }
-    }
-
 }
