@@ -81,7 +81,7 @@ import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
 
-public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
+public class OXGroup extends OXCommonImpl implements OXGroupInterface {
 
     private static final long serialVersionUID = -8949889293005549513L;
 
@@ -103,11 +103,7 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
         }
     }
 
-    public Group create(final Context ctx, final Group grp, final Credentials auth)
-            throws RemoteException, StorageException,
-            InvalidCredentialsException, NoSuchContextException,
-            InvalidDataException, DatabaseUpdateException, NoSuchUserException {
-
+    public Group create(final Context ctx, final Group grp, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         try {
             doNullCheck(grp);
         } catch (final InvalidDataException e3) {
@@ -116,7 +112,7 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
         }
 
         try {
-            doAuthentication(auth, ctx);
+            new BasicAuthenticator().doAuthentication(auth, ctx);
         } catch (final InvalidDataException e2) {
             log.error(e2.getMessage(), e2);
             throw e2;
@@ -207,7 +203,6 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
                             }
                         }
                     }
-
                 }
             }
         }
@@ -216,11 +211,7 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
         // MonitoringInfos.incrementNumberOfCreateGroupCalled();
     }
 
-    public Group[] list(final Context ctx, final String pattern,
-            final Credentials auth) throws RemoteException, StorageException,
-            InvalidCredentialsException, NoSuchContextException,
-            InvalidDataException, DatabaseUpdateException {
-
+    public Group[] list(final Context ctx, final String pattern, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
         try {
             doNullCheck( pattern);
         } catch (final InvalidDataException e3) {
@@ -229,7 +220,7 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
         }
 
         try {            
-            doAuthentication(auth, ctx);
+            new BasicAuthenticator().doAuthentication(auth, ctx);
         } catch (final InvalidDataException e) {
             log.error(e.getMessage(), e);
             throw e;
@@ -245,18 +236,13 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
 
         final OXGroupStorageInterface oxGroup = OXGroupStorageInterface.getInstance();
         return oxGroup.list(ctx, pattern);
-
     }
 
     public Group[] listAll(final Context ctx, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException {
         return list(ctx, "*", auth);
     }
     
-    public Group getData(final Context ctx, final Group grp, final Credentials auth)
-            throws RemoteException, StorageException,
-            InvalidCredentialsException, NoSuchContextException,
-            InvalidDataException, DatabaseUpdateException, NoSuchGroupException {
-
+    public Group getData(final Context ctx, final Group grp, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchGroupException {
         try {
             doNullCheck(grp,grp.getId());
         } catch (final InvalidDataException e3) {
@@ -265,7 +251,7 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
         }
 
         try {                        
-            doAuthentication(auth, ctx);
+            new BasicAuthenticator().doAuthentication(auth, ctx);
         } catch (final InvalidDataException e) {
             log.error(e.getMessage(), e);
             throw e;
@@ -311,12 +297,7 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
         return retgrp;
     }
 
-    public void change(final Context ctx, final Group grp,
-            final Credentials auth) throws RemoteException, StorageException,
-            InvalidCredentialsException, NoSuchContextException,
-            InvalidDataException, DatabaseUpdateException,
-            NoSuchGroupException, NoSuchUserException {
-
+    public void change(final Context ctx, final Group grp, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchGroupException, NoSuchUserException {
         try {
             doNullCheck(grp,grp.getId());
         } catch (final InvalidDataException e3) {
@@ -325,7 +306,7 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
         }
 
         try {
-            doAuthentication(auth, ctx);
+            new BasicAuthenticator().doAuthentication(auth, ctx);
         } catch (final InvalidDataException e1) {
             log.error(e1.getMessage(), e1);
             throw e1;
@@ -348,7 +329,6 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
         }
 
         try {
-            
             if (grp.getName() != null && prop.getGroupProp(AdminProperties.Group.CHECK_NOT_ALLOWED_CHARS,true)) {
                 validateGroupName(grp.getName());
             }
@@ -402,15 +382,12 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
                             }
                         }
                     }
-
                 }
             }
         }
-
     }
 
     public void addMember(final Context ctx, final Group grp, final int[] member_ids, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException, NoSuchGroupException {
-
         try {
             doNullCheck(grp, member_ids, grp.getId());
         } catch (final InvalidDataException e3) {
@@ -419,7 +396,7 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
         }
 
         try {
-            doAuthentication(auth, ctx);
+            new BasicAuthenticator().doAuthentication(auth, ctx);
         } catch (final InvalidDataException e) {
             log.error(e.getMessage(), e);
             throw e;
@@ -455,7 +432,6 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
         final User[] user_objs = getUsersFromIds(member_ids);
         final OXGroupStorageInterface oxGroup = OXGroupStorageInterface.getInstance();
         oxGroup.addMember(ctx, grp_id, user_objs);
-
     }
 
     private User[] getUsersFromIds(final int[] member_ids) {
@@ -467,7 +443,6 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
     }
 
     public void addMember(final Context ctx, final Group grp, final User[] members, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException, NoSuchGroupException {
-
         try {
             doNullCheck(grp, members, grp.getId());
         } catch (final InvalidDataException e3) {
@@ -476,7 +451,7 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
         }
 
         try {
-            doAuthentication(auth, ctx);
+            new BasicAuthenticator().doAuthentication(auth, ctx);
         } catch (final InvalidDataException e) {
             log.error(e.getMessage(), e);
             throw e;
@@ -511,11 +486,9 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
 
         final OXGroupStorageInterface oxGroup = OXGroupStorageInterface.getInstance();
         oxGroup.addMember(ctx, grp_id, members);
-
     }
 
     public void removeMember(final Context ctx, final Group grp, final int[] member_ids, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchGroupException, NoSuchUserException {
-
         try {
             doNullCheck(grp, member_ids, grp.getId());
         } catch (final InvalidDataException e3) {
@@ -524,7 +497,7 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
         }
 
         try {
-            doAuthentication(auth, ctx);
+            new BasicAuthenticator().doAuthentication(auth, ctx);
 
         } catch (final InvalidDataException e) {
             log.error(e.getMessage(), e);
@@ -554,7 +527,6 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
     }
 
     public void removeMember(final Context ctx, final Group grp, final User[] members, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchGroupException, NoSuchUserException {
-
         try {
             doNullCheck(grp, members, grp.getId());
         } catch (final InvalidDataException e3) {
@@ -563,7 +535,7 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
         }
 
         try {
-            doAuthentication(auth, ctx);
+            new BasicAuthenticator().doAuthentication(auth, ctx);
 
         } catch (final InvalidDataException e) {
             log.error(e.getMessage(), e);
@@ -592,7 +564,6 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
     }
 
     public void delete(final Context ctx, final Group grp, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException, NoSuchGroupException {
-
         try {
             doNullCheck(grp);
         } catch (final InvalidDataException e3) {
@@ -604,7 +575,6 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
     }
 
     public void delete(final Context ctx, final Group[] grp, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchGroupException {
-
         try {
             doNullCheck((Object[])grp);
         } catch (final InvalidDataException e3) {
@@ -615,7 +585,7 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
         int[] grp_ids;
         try {
 
-            doAuthentication(auth, ctx);
+            new BasicAuthenticator().doAuthentication(auth, ctx);
 
             grp_ids = new int[grp.length];
             int i = 0;
@@ -687,49 +657,8 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
     public Group get(final Context ctx, final Group grp, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchGroupException {
         return getData(ctx, grp, auth);
     }
-//    public int[] getMembers(final Context ctx, final Group grp, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchGroupException {
-//
-//        try {
-//            doNullCheck(grp, grp.getId());
-//        } catch (final InvalidDataException e3) {
-//            log.error("One of the given arguments for getMembers is null", e3);
-//            throw e3;
-//        }
-//
-//        try {
-//                       
-//            doAuthentication(auth, ctx);
-//
-//        } catch (final InvalidDataException e) {
-//            log.error(e.getMessage(), e);
-//            throw e;
-//        }
-//
-//        final int grp_id = grp.getId();
-//
-//        if (log.isDebugEnabled()) {
-//            log.debug(ctx.toString() + " - " + grp_id + " - "+ auth.toString());
-//        }
-//
-//        final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
-//
-//        checkSchemaBeingLocked(ctx, tool);
-//
-//        if (!tool.existsGroup(ctx, grp_id)) {
-//            throw new NoSuchGroupException("No such group");
-//
-//        }
-//
-//        final OXGroupStorageInterface oxGroup = OXGroupStorageInterface.getInstance();
-//        return oxGroup.getMembers(ctx, grp_id);
-//
-//    }
 
-    public User[] getMembers(final Context ctx, final Group grp,
-            final Credentials auth) throws RemoteException, StorageException,
-            InvalidCredentialsException, NoSuchContextException,
-            InvalidDataException, DatabaseUpdateException, NoSuchGroupException {
-
+    public User[] getMembers(final Context ctx, final Group grp, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchGroupException {
         try {
             doNullCheck(grp, grp.getId());
         } catch (final InvalidDataException e3) {
@@ -739,7 +668,7 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
 
         try {
                        
-            doAuthentication(auth, ctx);
+            new BasicAuthenticator().doAuthentication(auth, ctx);
 
         } catch (final InvalidDataException e) {
             log.error(e.getMessage(), e);
@@ -763,7 +692,6 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
 
         final OXGroupStorageInterface oxGroup = OXGroupStorageInterface.getInstance();
         return oxGroup.getMembers(ctx, grp_id);
-
     }
 
     private void validateGroupName(final String groupName) throws InvalidDataException {
@@ -781,7 +709,6 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
     }
 
     public Group[] getGroupsForUser(final Context ctx, final User usr, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
-
         try {
             doNullCheck(usr, usr.getId());
         } catch (final InvalidDataException e3) {
@@ -790,7 +717,7 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
         }
 
         try {
-            doAuthentication(auth, ctx);
+            new BasicAuthenticator().doAuthentication(auth, ctx);
         } catch (final InvalidDataException e) {
             log.error(e.getMessage(), e);
             throw e;
@@ -813,7 +740,6 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
     }
 
     public Group[] listGroupsForUser(final Context ctx, final User usr, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
-
         try {
             doNullCheck(usr,usr.getId());
         } catch (final InvalidDataException e3) {
@@ -822,7 +748,7 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
         }
 
         try {
-            doAuthentication(auth, ctx);
+            new BasicAuthenticator().doAuthentication(auth, ctx);
         } catch (final InvalidDataException e) {
             log.error(e.getMessage(), e);
             throw e;
@@ -844,11 +770,7 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
         return oxGroup.getGroupsForUser(ctx, usr);
     }
 
-    public Group[] getData(final Context ctx, final Group[] groups, final Credentials auth)
-            throws RemoteException, StorageException,
-            InvalidCredentialsException, NoSuchContextException,
-            InvalidDataException, NoSuchGroupException, DatabaseUpdateException {
-
+    public Group[] getData(final Context ctx, final Group[] groups, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchGroupException, DatabaseUpdateException {
         try {
             doNullCheck((Object[])groups);
         } catch (final InvalidDataException e3) {
@@ -857,8 +779,7 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
         }
 
         try {
-
-            doAuthentication(auth, ctx);
+            new BasicAuthenticator().doAuthentication(auth, ctx);
             if (log.isDebugEnabled()) {
                 log.debug(ctx.toString() + " - " + groups + " - " + auth.toString());
             }
@@ -920,12 +841,10 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
             }
         }
         return retval.toArray(new Group[retval.size()]);
-
     }
 
     public Group getDefaultGroup(final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
-        
-        doAuthentication(auth, ctx);
+        new BasicAuthenticator().doAuthentication(auth, ctx);
         if (log.isDebugEnabled()) {
             log.debug(ctx.toString() + " - " + auth.toString());
         }
@@ -939,7 +858,6 @@ public class OXGroup extends BasicAuthenticator implements OXGroupInterface {
             log.error("Error resolving default group for context", e);
             throw e;
         }
-
     }
 
     /**
