@@ -65,6 +65,8 @@ public class Filestore implements Serializable {
 
     private Long used;
 
+    private Long reserved;
+    
     private Integer maxContexts;
 
     private Integer currentContexts;
@@ -135,6 +137,7 @@ public class Filestore implements Serializable {
         this.used = null;
         this.currentContexts = null;
         this.url = null;
+        this.reserved = null;
     }
 
     /**
@@ -163,6 +166,9 @@ public class Filestore implements Serializable {
         if (null != this.used) {
             retValue.append("used = ").append(this.used).append(TAB);
         }        
+        if (null != this.reserved) {
+            retValue.append("reserved = ").append(this.reserved).append(TAB);
+        }        
         if (null != this.maxContexts) {
             retValue.append("maxContexts = ").append(this.maxContexts).append(TAB);
         }        
@@ -172,6 +178,20 @@ public class Filestore implements Serializable {
         retValue.append(" )");
 
         return retValue.toString();
+    }
+
+    /**
+     * @return the reserved
+     */
+    public final Long getReserved() {
+        return reserved;
+    }
+
+    /**
+     * @param reserved the reserved to set
+     */
+    public final void setReserved(Long reserved) {
+        this.reserved = reserved;
     }
 
 }
