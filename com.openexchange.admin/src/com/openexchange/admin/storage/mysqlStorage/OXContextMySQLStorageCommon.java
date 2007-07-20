@@ -94,7 +94,7 @@ public abstract class OXContextMySQLStorageCommon {
     
     
 
-    public Context getData(final Context ctx, final Connection configdb_con) throws SQLException, PoolException  {
+    public Context getData(final Context ctx, final Connection configdb_con, final long average_size) throws SQLException, PoolException  {
         Connection oxdb_read = null;
         PreparedStatement prep = null;
         final int context_id = ctx.getIdAsInt();
@@ -190,7 +190,6 @@ public abstract class OXContextMySQLStorageCommon {
             cs.setFilestoreId(filestore_id);
             cs.setFilestore_name(filestore_name);
 
-            final long average_size = Long.parseLong(prop.getProp("AVERAGE_CONTEXT_SIZE", "100"));
             cs.setAverage_size(average_size);
 
             // name of the context, currently same with contextid
