@@ -98,7 +98,7 @@ import com.openexchange.cache.CacheKey;
  * @author cutmasta
  */
 
-public class OXUser extends BasicAuthenticator implements OXUserInterface {
+public class OXUser extends OXCommonImpl implements OXUserInterface {
 
     private final AdminCache cache;
 
@@ -153,7 +153,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
 
         try {
 
-            doAuthentication(auth,ctx);        
+            new BasicAuthenticator().doAuthentication(auth,ctx);        
             
             checkSchemaBeingLocked(ctx, tools);
             
@@ -277,10 +277,11 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
 
             final int auth_user_id = tools.getUserIDByUsername(ctx, auth.getLogin());
             // check if given user is admin
+            final BasicAuthenticator basicAuthenticator = new BasicAuthenticator();
             if (tools.isContextAdmin(ctx, auth_user_id)) {
-                doAuthentication(auth, ctx);
+                basicAuthenticator.doAuthentication(auth, ctx);
             } else {
-                doUserAuthentication(auth, ctx);
+                basicAuthenticator.doUserAuthentication(auth, ctx);
                 // now check if user which authed has the same id as the user he
                 // wants to change,else fail,
                 // cause then he/she wants to change not his own data!
@@ -389,7 +390,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
             throw e;
         }
         
-        doAuthentication(auth,ctx);       
+        new BasicAuthenticator().doAuthentication(auth,ctx);       
         
         if (log.isDebugEnabled()) {
             log.debug(ctx.toString() + " - " + Arrays.toString(users) + " - " + auth.toString());
@@ -489,7 +490,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
             log.debug(ctx.toString() + " - " + user_id + " - " + auth.toString());
         }        
         
-        doAuthentication(auth,ctx);
+        new BasicAuthenticator().doAuthentication(auth,ctx);
         
         final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
         
@@ -516,7 +517,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         if (log.isDebugEnabled()) {
             log.debug(ctx.toString() + " - " + user + " - " + auth.toString());
         }        
-        doAuthentication(auth,ctx);
+        new BasicAuthenticator().doAuthentication(auth,ctx);
         
         
         final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
@@ -546,7 +547,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
             log.debug(ctx.toString() + " - " + user_id + " - "+ moduleAccess.toString() + " - " + auth.toString());
         }
 
-        doAuthentication(auth,ctx);
+        new BasicAuthenticator().doAuthentication(auth,ctx);
         
         final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();       
         
@@ -575,7 +576,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
             log.debug(ctx.toString() + " - " + user + " - "+ moduleAccess.toString() + " - " + auth.toString());
         }
 
-        doAuthentication(auth,ctx);
+        new BasicAuthenticator().doAuthentication(auth,ctx);
         
         final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();       
         
@@ -598,7 +599,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
             log.debug(ctx.toString() + " - " + auth.toString());
         }
         
-        doAuthentication(auth,ctx);
+        new BasicAuthenticator().doAuthentication(auth,ctx);
         
         final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();      
         
@@ -614,7 +615,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
             log.debug(ctx.toString() + " - " + auth.toString());
         }
         
-        doAuthentication(auth,ctx);
+        new BasicAuthenticator().doAuthentication(auth,ctx);
         
         final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();      
         
@@ -682,6 +683,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
         
         try {
             // enable check who wants to get data if authentcaition is enabled 
+            final BasicAuthenticator basicAuthenticator = new BasicAuthenticator();
             if (!cache.contextAuthenticationDisabled()) {
                 // ok here its possible that a user wants to get his own data
                 // SPECIAL USER AUTH CHECK FOR THIS METHOD!
@@ -696,7 +698,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
                         throw invalidCredentialsException;
                         // one user cannot edit more than his own data
                     } else {
-                        doUserAuthentication(auth, ctx);
+                        basicAuthenticator.doUserAuthentication(auth, ctx);
                         // its possible that he wants his own data
                         if (users[0].getId() != null) {
                             if (users[0].getId().intValue() != auth_user_id) {
@@ -719,11 +721,11 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
                         }
                     }
                 } else {
-                    doAuthentication(auth, ctx);
+                    basicAuthenticator.doAuthentication(auth, ctx);
                 }
 
             } else {
-                doAuthentication(auth, ctx);
+                basicAuthenticator.doAuthentication(auth, ctx);
             }
         
             checkSchemaBeingLocked(ctx, tools);
@@ -986,7 +988,7 @@ public class OXUser extends BasicAuthenticator implements OXUserInterface {
             throw e1;
         }
                 
-        doUserAuthentication(auth,ctx);
+        new BasicAuthenticator().doUserAuthentication(auth,ctx);
         
         final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
         
