@@ -35,9 +35,8 @@ import com.openexchange.admin.tools.DatabaseDataMover;
 import com.openexchange.admin.tools.FilestoreDataMover;
 import com.openexchange.admin.tools.monitoring.Monitor;
 
-public class OXContext extends BasicAuthenticator implements OXContextInterface {
+public class OXContext extends OXContextCommonImpl implements OXContextInterface {
 
-    
     private final Log log = LogFactory.getLog(this.getClass());
 
     public OXContext() {
@@ -55,7 +54,7 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
             log.error(invalidDataException.getMessage(), invalidDataException);
             throw invalidDataException;
         }        
-        doAuthentication(auth);
+        new BasicAuthenticator().doAuthentication(auth);
         
         final String db_host_url = db.getUrl();
         log.debug("" + db_host_url);
@@ -83,7 +82,7 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
             log.error(invalidDataException.getMessage(), invalidDataException);
             throw invalidDataException;
         }        
-        doAuthentication(auth);
+        new BasicAuthenticator().doAuthentication(auth);
         
         final String filestore_url = filestore.getUrl();
         log.debug("" + filestore_url);
@@ -112,7 +111,7 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
             throw e1;
         }
         
-        doAuthentication(auth);
+        new BasicAuthenticator().doAuthentication(auth);
         
         Context retval = null;
         
@@ -214,7 +213,7 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
             throw e1;
         }
         
-        doAuthentication(auth);
+        new BasicAuthenticator().doAuthentication(auth);
         
         final int context_id = ctx.getIdAsInt();
         final int reason_id = reason.getId();
@@ -256,7 +255,7 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
     }
 
     public void enableAll(final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException {
-        doAuthentication(auth);
+        new BasicAuthenticator().doAuthentication(auth);
         
         try {
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
@@ -274,7 +273,7 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
             log.error("Invalid data sent by client!", e1);
             throw e1;
         }
-        doAuthentication(auth);
+        new BasicAuthenticator().doAuthentication(auth);
         
         final int reason_id = reason.getId();
         log.debug("" + reason_id);
@@ -304,7 +303,8 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
             throw invalidDataException;
         }
         
-        doAuthentication(auth);
+        final BasicAuthenticator basicAuthenticator = new BasicAuthenticator();
+        basicAuthenticator.doAuthentication(auth);
         
         final int context_id = ctx.getIdAsInt();
         log.debug("" + context_id);
@@ -320,7 +320,7 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
 
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
             oxcox.delete(ctx);
-            removeFromAuthCache(ctx);
+            basicAuthenticator.removeFromAuthCache(ctx);
             
         } catch (final StorageException e) {
             log.error(e.getMessage(), e);
@@ -342,7 +342,7 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
             log.error(invalidDataException.getMessage(), invalidDataException);
             throw invalidDataException;
         }        
-        doAuthentication(auth);
+        new BasicAuthenticator().doAuthentication(auth);
         
         log.debug("" + search_pattern);
         
@@ -369,7 +369,7 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
             throw e1;
         }        
         
-        doAuthentication(auth);
+        new BasicAuthenticator().doAuthentication(auth);
         
         final int context_id = ctx.getIdAsInt();
         final int reason_id = reason.getId();
@@ -412,7 +412,7 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
             throw invalidDataException;
         }
         
-        doAuthentication(auth);
+        new BasicAuthenticator().doAuthentication(auth);
         
         final int context_id = ctx.getIdAsInt();
         log.debug("" + context_id);
@@ -441,7 +441,7 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
             throw e1;
         }
         
-        doAuthentication(auth);
+        new BasicAuthenticator().doAuthentication(auth);
         
         log.debug("" + ctx + " - " + admin_user);
         try {
@@ -494,7 +494,7 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
             throw invalidDataException;
         }
         
-        doAuthentication(auth);
+        new BasicAuthenticator().doAuthentication(auth);
         
         final int context_id = ctx.getIdAsInt();
         log.debug("" + context_id);
@@ -536,7 +536,7 @@ public class OXContext extends BasicAuthenticator implements OXContextInterface 
             throw invalidDataException;
         }
         
-        doAuthentication(auth);
+        new BasicAuthenticator().doAuthentication(auth);
         
         final int context_id = ctx.getIdAsInt();
         log.debug("" + context_id);
