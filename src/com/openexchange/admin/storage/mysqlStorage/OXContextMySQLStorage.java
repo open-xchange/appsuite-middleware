@@ -2384,6 +2384,47 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         }
         
     }
+
+    @Override
+    public Context[] searchContextByFilestoreId(Filestore filestore) throws StorageException {
+        Connection con = null;
+        PreparedStatement stmt = null;
+        try {
+            con = cache.getREADConnectionForCONFIGDB();
+            stmt = con.prepareStatement("SELECT context.cid FROM context,filestore WHERE filestore.id=? AND filestore.id = context.filestore_id");
+            stmt.setInt(1, filestore.getId());
+            final ResultSet rs = stmt.executeQuery();
+            final ArrayList<Context> list = new ArrayList<Context>();
+            while (rs.next()) {
+                list.add(new Context(rs.getInt("cid")));
+            }
+            rs.close();
+            stmt.close();
+
+            return list.toArray(new Context[list.size()]);
+        } catch (final PoolException e) {
+            log.error("Pool Error", e);
+            throw new StorageException(e);
+        } catch (final SQLException e) {
+            log.error("SQL Error", e);
+            throw new StorageException(e);
+        } finally {
+            try {
+                if (stmt != null) {
+                    stmt.close();
+                }
+            } catch (final SQLException e) {
+                log.error(OXContextMySQLStorageCommon.LOG_ERROR_CLOSING_STATEMENT, e);
+            }
+            if (con != null) {
+                try {
+                    cache.pushConfigDBRead(con);
+                } catch (final PoolException exp) {
+                    log.error("Error pushing configdb connection to pool!", exp);
+                }
+            }
+        }
+    }
     
     
 }

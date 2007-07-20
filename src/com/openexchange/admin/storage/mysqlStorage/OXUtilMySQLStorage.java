@@ -3,10 +3,12 @@ package com.openexchange.admin.storage.mysqlStorage;
 
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
 import com.openexchange.admin.rmi.dataobjects.Server;
+import com.openexchange.admin.storage.interfaces.OXContextStorageInterface;
 import com.openexchange.admin.storage.sqlStorage.OXUtilSQLStorage;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.groupware.IDGenerator;
@@ -1144,6 +1146,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
         try {
             con = cache.getREADConnectionForCONFIGDB();
+            //oxdb_read = cache.getREADConnectionForContext(context_id);
 
             stmt = con.prepareStatement("SELECT id,uri,size,max_context,COUNT(cid) FROM filestore LEFT JOIN context ON filestore.id = context.filestore_id WHERE filestore.id=? GROUP BY filestore.id");
 
@@ -1162,6 +1165,25 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             fs.setMaxContexts(rs.getInt("max_context"));
             fs.setCurrentContexts(rs.getInt("COUNT(cid)"));
 
+            OXContextStorageInterface oxcox = (OXContextStorageInterface)OXContextMySQLStorage.getInstance();
+            final Context[] all_ctx = oxcox.searchContextByFilestoreId(fs);
+            if( all_ctx == null ) {
+                throw new StorageException("Unable to determine filestore data");
+            }
+            long usage = 0;
+            long reserved = 0;
+            for(Context ctx : all_ctx) {
+                ctx = oxcox.getData(ctx);
+                if( ctx.getUsedQuota() != null ) {
+                    usage += ctx.getUsedQuota();
+                }
+                if( ctx.getAverage_size() != null ) {
+                    reserved += ctx.getAverage_size();
+                }
+            }
+            fs.setUsed(usage);
+            fs.setReserved(reserved);
+            
             return fs;
         } catch (final PoolException pe) {
             log.error("Pool Error", pe);
