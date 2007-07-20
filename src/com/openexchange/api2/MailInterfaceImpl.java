@@ -170,6 +170,7 @@ import com.openexchange.imap.command.SeqNumIMAPCommand;
 import com.openexchange.imap.connection.DefaultIMAPConnection;
 import com.openexchange.imap.threadsort.ThreadSortUtil;
 import com.openexchange.imap.threadsort.TreeNode;
+import com.openexchange.imap.user2imap.User2IMAP;
 import com.openexchange.monitoring.MonitorAgent;
 import com.openexchange.server.Version;
 import com.openexchange.sessiond.SessionObject;
@@ -4662,8 +4663,16 @@ public class MailInterfaceImpl implements MailInterface {
 					if (equals(oldACLs, newACLs)) {
 						break ACLS;
 					}
-					if (isDefaultFolder(updateMe.getFullName())) {
-						throw new OXMailException(MailCode.NO_DEFAULT_FOLDER_UPDATE, updateMe.getFullName());
+					try {
+						/*
+						 * Default folder is affected, check if owner still holds full rights
+						 */
+						if (isDefaultFolder(updateMe.getFullName())
+								&& !stillHoldsFullRights(updateMe, newACLs, sessionObj)) {
+							throw new OXMailException(MailCode.NO_DEFAULT_FOLDER_UPDATE, updateMe.getFullName());
+						}
+					} catch (final AbstractOXException e) {
+						throw new OXMailException(e);
 					}
 					if (!sessionObj.getCachedRights(updateMe, true).contains(Rights.Right.ADMINISTER)) {
 						throw new OXMailException(MailCode.NO_ADMINISTER_ACCESS, getUserName(sessionObj), updateMe
@@ -4804,6 +4813,24 @@ public class MailInterfaceImpl implements MailInterface {
 		} catch (final MessagingException e) {
 			throw handleMessagingException(e, sessionObj.getIMAPProperties(), sessionObj.getContext());
 		}
+	}
+	
+	private static final Rights FULL_RIGHTS = new Rights("lrswipcda");
+
+	private static final boolean stillHoldsFullRights(final IMAPFolder defaultFolder, final ACL[] newACLs,
+			final SessionObject sessionObj) throws AbstractOXException, MessagingException {
+		/*
+		 * Ensure that owner still holds full rights
+		 */
+		final String ownerACLName = User2IMAP.getInstance(sessionObj.getUserObject()).getACLName(
+				sessionObj.getUserObject().getId(), sessionObj.getContext(),
+				new MailFolderObject(defaultFolder, sessionObj));
+		for (int i = 0; i < newACLs.length; i++) {
+			if (newACLs[i].getName().equals(ownerACLName) && newACLs[i].getRights().contains(FULL_RIGHTS)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private static final Map<String, Boolean> getSubscriptionStatus(final IMAPFolder f, final String oldFullName,

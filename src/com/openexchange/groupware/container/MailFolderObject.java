@@ -165,24 +165,26 @@ public final class MailFolderObject implements User2IMAPInfo {
 			this.hasSubscribedSubfolders = false;
 		} else {
 			this.hasSubfolders = false;
-			this.hasSubscribedSubfolders = false;
 			Attribs: for (final String attribute : attrs) {
 				if (ATTRIBUTE_HAS_CHILDREN.equalsIgnoreCase(attribute)) {
 					this.hasSubfolders = true;
 					break Attribs;
 				}
 			}
-			final ListInfo[] li = (ListInfo[]) folder.doCommand(new IMAPFolder.ProtocolCommand() {
-				public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
-					return protocol.lsub("", folder.getFullName());
-				}
-			});
-			if (null != li) {
-				final String[] lsubAttrs = li[findName(li, folder.getFullName())].attrs;
-				Attribs: for (final String attribute : lsubAttrs) {
-					if (ATTRIBUTE_HAS_CHILDREN.equalsIgnoreCase(attribute)) {
-						this.hasSubscribedSubfolders = true;
-						break Attribs;
+			this.hasSubscribedSubfolders = false;
+			if (this.hasSubfolders) {
+				final ListInfo[] li = (ListInfo[]) folder.doCommand(new IMAPFolder.ProtocolCommand() {
+					public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+						return protocol.lsub("", folder.getFullName());
+					}
+				});
+				if (null != li) {
+					final String[] lsubAttrs = li[findName(li, folder.getFullName())].attrs;
+					Attribs: for (final String attribute : lsubAttrs) {
+						if (ATTRIBUTE_HAS_CHILDREN.equalsIgnoreCase(attribute)) {
+							this.hasSubscribedSubfolders = true;
+							break Attribs;
+						}
 					}
 				}
 			}

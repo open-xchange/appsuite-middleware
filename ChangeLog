@@ -1,3 +1,12 @@
+* 2007-07-20 - thorben.betten@open-xchange.com
+
+ - Bugfix #8491: Allowing sharing of default folders (if owner still holds
+   full rights on modified ACL list)
+ - Fixed subfolder display on shared IMAP folders: A folder that was
+   previously shared and subscribed but now does no more grant rights for
+   affected user still occurs in user's subscription list (LSUB command).
+   This is fixed now.
+
 * 2007-07-19 - francisco.laguna@open-xchange.com
 
  - Fixed build.xml to also copy subdirectories of the configuration.
