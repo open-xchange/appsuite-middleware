@@ -189,5 +189,11 @@ public abstract class OXContextStorageInterface {
      */
     public abstract Context[] searchContextByFilestore(final Filestore filestore) throws StorageException;
 
+    /**
+     * @param filestore
+     * @return
+     * @throws StorageException
+     */
+    public abstract Context[] searchContextByFilestoreId(final Filestore filestore) throws StorageException;
     
 }
