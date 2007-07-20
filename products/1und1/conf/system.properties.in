@@ -4,23 +4,16 @@
 # processed.
 # * com.openexchange.groupware.contexts.RdbLoginInfo split only the login info
 #   by the @ sign and resolve context and user in database.
-# * com.openexchange.groupware.contexts.LoginOneAndOneImpl authenticates the
-#   user against the OxAdapter at 1and1. Returned context and user must not be
-#   checked anymore. Only resolving to OX internal identifier is necessary.
-#   Look at ldap.properties and set AuthenticationImpl appropriate.
-# * com.openexchange.groupware.contexts.LoginLDAPAuth authenticates the user
-#   against an LDAP server. This is a special implementation for using an OX5
-#   RHEL ldap.
 LoginInfo=com.openexchange.groupware.contexts.LoginOneAndOneImpl
+
+# Properties file that configures the implementation for the login info.
+LoginInfoConfig=@oxgroupwaresysconfdir@/oxadapter.properties
 
 # Name of the class that implements how to get the link for the configuration
 # setup.
 # com.openexchange.groupware.integration.OneAndOneConfig creates a session
 # through OxAdapter and returns a link to OneAndOne Control Center.
 SetupLink=com.openexchange.groupware.integration.OneAndOneConfig
-
-# Properties file that configures the Context for OxAdapter.
-OxAdapter=@oxgroupwaresysconfdir@/oxadapter.properties
 
 # Properties file that configures the LDAP context for authenticating against
 # LDAP.
