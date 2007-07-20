@@ -60,6 +60,7 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.rmi.impl.OXCommonImpl;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.tools.AdminCache;
 
@@ -67,14 +68,13 @@ import com.openexchange.admin.tools.AdminCache;
  *
  * @author cutmasta
  */
-public class BasicAuthenticator {
+public class BasicAuthenticator extends OXCommonImpl {
 
     private final static Log log = LogFactory.getLog (BasicAuthenticator.class);
 
     private AuthenticationInterface sqlAuth = null;
     private AuthenticationInterface fileAuth = null;
     private AdminCache cache = null;
-
 
     /** */
     public BasicAuthenticator() {
@@ -178,25 +178,5 @@ public class BasicAuthenticator {
         }
     }
 
-    protected final void contextcheck(final Context ctx) throws InvalidCredentialsException {
-        if (null == ctx || null == ctx.getIdAsInt()) {
-            final InvalidCredentialsException e = new InvalidCredentialsException("Client sent invalid context data object");
-            log.error(e.getMessage(), e);
-            throw e;
-        }
-    }
-
-    /**
-     * @param objects
-     * @throws InvalidDataException
-     */
-    protected final static void doNullCheck(final Object...objects ) throws InvalidDataException
-    {
-        for (final Object object : objects) {
-            if(object==null){
-                throw new InvalidDataException();
-            }
-        }
-    }
 
 }
