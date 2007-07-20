@@ -293,7 +293,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
             // update prg_contacts ONLY if needed ( see
             // "prg_contacts_update_needed")
-            final Class c = usrdata.getClass();
+            final Class<? extends User> c = usrdata.getClass();
             final Method[] theMethods = c.getMethods();
             final HashSet<String> notallowed = new HashSet<String>(9);
             // Define all those fields which are contained in the user table
@@ -797,7 +797,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 
                 // fill up statement for prg_contacts update
 
-                final Class c = usrdata.getClass();
+                final Class<? extends User> c = usrdata.getClass();
                 final Method[] theMethods = c.getMethods();
                 // final ArrayList<Method> methodlist = new ArrayList<Method>();
                 // final ArrayList<String> methodnamelist = new
@@ -972,7 +972,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 // here we fill the alias attribute in it
                 if (usrdata.getAliases() != null
                         && usrdata.getAliases().size() > 0) {
-                    final Iterator itr = usrdata.getAliases().iterator();
+                    final Iterator<String> itr = usrdata.getAliases().iterator();
                     while (itr.hasNext()) {
                        final String tmp_mail = itr.next().toString().trim();
                        if(tmp_mail.length()>0){
@@ -1336,7 +1336,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     public User[] getData(final Context ctx, final User[] users)
             throws StorageException {
         final int context_id = ctx.getIdAsInt();
-        final Class c = User.class;
+        final Class<User> c = User.class;
         final Method[] theMethods = c.getMethods();
         final ArrayList<Method> list = new ArrayList<Method>();
         final HashSet<String> notallowed = new HashSet<String>(9);
