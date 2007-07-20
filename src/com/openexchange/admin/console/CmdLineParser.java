@@ -62,7 +62,7 @@ import java.util.Vector;
  * can be explicitly terminated by the argument '--'.
  *
  * @author Steve Purcell
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @see jargs.examples.gnu.OptionTest
  */
 public class CmdLineParser {
@@ -460,7 +460,7 @@ public class CmdLineParser {
      * option was not set
      */
     public final Object getOptionValue( Option o, Object def ) {
-        Vector v = (Vector)values.get(o.longForm());
+        Vector<?> v = (Vector<?>)values.get(o.longForm());
 
         if (v == null) {
             return def;
@@ -483,7 +483,7 @@ public class CmdLineParser {
      * @return A Vector giving the parsed values of all the occurrences of the
      * given Option, or an empty Vector if the option was not set.
      */
-    public final Vector getOptionValues( Option option ) {
+    public final Vector<Object> getOptionValues( Option option ) {
         Vector<Object> result = new Vector<Object>();
 
         while (true) {
@@ -535,7 +535,7 @@ public class CmdLineParser {
 
         Vector<String> otherArgs = new Vector<String>();
         int position = 0;
-        this.values = new Hashtable<String, Vector>(10);
+        this.values = new Hashtable<String, Vector<Object>>(10);
         while ( position < argv.length ) {
             String curArg = argv[position];
             if ( curArg.startsWith("-") ) {
@@ -604,7 +604,7 @@ public class CmdLineParser {
     private void addValue(Option opt, Object value) {
         String lf = opt.longForm();
 
-        Vector<Object> v = (Vector)values.get(lf);
+        Vector<Object> v = (Vector<Object>)values.get(lf);
 
         if (v == null) {
             v = new Vector<Object>();
@@ -617,5 +617,5 @@ public class CmdLineParser {
 
     private String[] remainingArgs = null;
     private Hashtable<String, Option> options = new Hashtable<String, Option>(10);
-    private Hashtable<String, Vector> values = new Hashtable<String, Vector>(10);
+    private Hashtable<String, Vector<Object>> values = new Hashtable<String, Vector<Object>>(10);
 }
