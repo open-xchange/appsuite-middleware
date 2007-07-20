@@ -135,7 +135,7 @@ public class OXUtilMySQLStorageCommon {
 
     }
 
-    private void pumpData2Database(final ArrayList db_queries, final String ident, final Connection con, final String database) throws SQLException {
+    private void pumpData2Database(final ArrayList<String> db_queries, final String ident, final Connection con, final String database) throws SQLException {
         Statement st = null;
         try {
             con.setCatalog(database);
