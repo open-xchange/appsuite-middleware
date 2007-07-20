@@ -690,7 +690,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                                 
                 
                 final HashSet<String> logmaps = ctx.getLoginMappings();
-                final Iterator itr = logmaps.iterator();
+                final Iterator<String> itr = logmaps.iterator();
                 
                 while(itr.hasNext()){
                     final String mpi = (String)itr.next();
@@ -2029,7 +2029,7 @@ public int getDefaultGroupForContext(final Context ctx, final Connection con) th
             prep_check.close();
             
             // if we had time we could resolv the complete user object in db but at the moment we only need the ids of the user            
-           Iterator ids_itr =  usr_ids.iterator();
+           Iterator<Integer> ids_itr =  usr_ids.iterator();
            while (ids_itr.hasNext()) {
                Integer id  = (Integer) ids_itr.next();
                data.add(new User(id.intValue()));
