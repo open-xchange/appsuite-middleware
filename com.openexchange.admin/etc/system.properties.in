@@ -37,9 +37,11 @@ Attachment=@oxconfdir@/attachment.properties
 Notification=@oxconfdir@/notification.properties
 
 
+
 CalendarSQL=com.openexchange.groupware.calendar.CalendarMySQL
 
 LDAPPROPERTIES:@oxconfdir@/ldap.properties
+EVENTPROPERTIES:@oxconfdir@/event.properties
 FOLDERCACHEPROPERTIES=@oxconfdir@/foldercache.properties
 CACHECCF:@oxconfdir@/cache.ccf
 IMAPPROPERTIES=@oxconfdir@/imap.properties
