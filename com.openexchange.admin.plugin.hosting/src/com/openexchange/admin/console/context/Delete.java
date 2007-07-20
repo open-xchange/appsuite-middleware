@@ -18,7 +18,7 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
-public class Delete extends ContextAbtraction {
+public class Delete extends ContextAbstraction {
 
     public Delete(final String[] args2) {
 

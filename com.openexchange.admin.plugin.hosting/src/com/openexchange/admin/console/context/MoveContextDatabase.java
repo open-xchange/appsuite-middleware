@@ -23,7 +23,7 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
-public class MoveContextDatabase extends ContextAbtraction {
+public class MoveContextDatabase extends ContextHostingAbstraction {
 
     private final static char OPT_DATABASE_SHORT = 'd';
 

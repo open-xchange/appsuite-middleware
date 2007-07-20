@@ -14,7 +14,7 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
-public class EnableAll extends ContextAbtraction {
+public class EnableAll extends ContextAbstraction {
 
     public EnableAll(final String[] args2) {
 

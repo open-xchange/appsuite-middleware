@@ -17,7 +17,7 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
-public class Change extends ContextAbtraction {
+public class Change extends ContextHostingAbstraction {
 
     
     public Change(final String[] args2) {
@@ -38,8 +38,8 @@ public class Change extends ContextAbtraction {
             ctx.setID(Integer.parseInt((String) parser.getOptionValue(this.contextOption)));
             
             // context filestore quota
-            if(parser.getOptionValue(this.filestoreContextQuotaOption)!=null){                
-                ctx.setMaxQuota(Long.parseLong((String) parser.getOptionValue(this.filestoreContextQuotaOption)));
+            if(parser.getOptionValue(this.contextQuotaOption)!=null){                
+                ctx.setMaxQuota(Long.parseLong((String) parser.getOptionValue(this.contextQuotaOption)));
                 doChange++;
             }
             
