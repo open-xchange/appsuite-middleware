@@ -154,6 +154,7 @@ public abstract class BasicCommandlineOptions {
     protected static String RMI_HOSTNAME ="rmi://localhost/";
     
     protected Option contextOption = null;
+    protected Option contextNameOption = null;
     protected Option adminUserOption = null;
     protected Option adminPassOption = null;
     protected Option searchOption = null;
@@ -319,13 +320,10 @@ public abstract class BasicCommandlineOptions {
 
     private final void setContextOption(final AdminParser admp) {
         this.contextOption = setShortLongOpt(admp,OPT_NAME_CONTEXT_SHORT, OPT_NAME_CONTEXT_LONG, OPT_NAME_CONTEXT_DESCRIPTION, true, NeededTriState.needed);        
-//        retval.setArgName("Context ID");
     }
     
-    protected final Option getContextNameOption(final AdminParser admp) {
-        final Option retval = setShortLongOpt(admp,OPT_NAME_CONTEXT_NAME_SHORT, OPT_NAME_CONTEXT_NAME_LONG, OPT_NAME_CONTEXT_NAME_DESCRIPTION, true, NeededTriState.notneeded);
-//        retval.setArgName("Context Name");
-        return retval;
+    protected final void setContextNameOption(final AdminParser admp) {
+        this.contextNameOption = setShortLongOpt(admp,OPT_NAME_CONTEXT_NAME_SHORT, OPT_NAME_CONTEXT_NAME_LONG, OPT_NAME_CONTEXT_NAME_DESCRIPTION, true, NeededTriState.notneeded);
     }
     
     protected final void setAdminPassOption(final AdminParser admp) {
