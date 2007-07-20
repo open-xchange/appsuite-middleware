@@ -266,6 +266,16 @@ public final class OXJSONWriter extends JSONWriter {
 	}
 
 	/**
+	 * Checks if nothing has been written to this writer, yet
+	 * 
+	 * @return <code>true</code> if nothing has been written to this writer;
+	 *         otherwise <code>false</code>
+	 */
+	public boolean isEmpty() {
+		return (mode == MODE_INIT);
+	}
+
+	/**
 	 * Append a value.
 	 * 
 	 * @param value
