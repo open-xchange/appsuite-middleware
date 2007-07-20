@@ -65,11 +65,11 @@ import org.apache.commons.logging.LogFactory;
 public class PropertyHandler {
     
     protected Hashtable<String, Object>       allPropValues       = null;
-    private Hashtable       userPropValues      = null;
-    protected Hashtable       groupPropValues     = null;
-    private Hashtable       resPropValues       = null;
-    private Hashtable       rmiPropValues       = null;
-    protected Hashtable sqlPropValues = null;
+    private Hashtable<String, String>       userPropValues      = null;
+    protected Hashtable<String, String>       groupPropValues     = null;
+    private Hashtable<String, String>       resPropValues       = null;
+    private Hashtable<String, String>       rmiPropValues       = null;
+    protected Hashtable<String, String> sqlPropValues = null;
     private final static Log log = LogFactory.getLog(PropertyHandler.class);
 
     private String configdirname;
@@ -144,12 +144,13 @@ public class PropertyHandler {
         return retString; 
     }
     
+    @SuppressWarnings("unchecked")
     public String getGroupProp( final String key, final String fallBack ) {
         String retBool = fallBack;
         
         if ( this.groupPropValues == null ) {
             if ( this.allPropValues.containsKey( PROPERTIES_GROUP ) ) {
-                this.groupPropValues = (Hashtable)this.allPropValues.get( PROPERTIES_GROUP );
+                this.groupPropValues = (Hashtable<String, String>)this.allPropValues.get( PROPERTIES_GROUP );
             } else {
                 if(log.isDebugEnabled()){
                     log.debug( OXGenericException.GENERAL_ERROR, new Exception( "Property '" + PROPERTIES_GROUP + "' not found in file: " + this.configdirname ) );
@@ -174,12 +175,13 @@ public class PropertyHandler {
      * @param fallBack
      * @return
      */
+    @SuppressWarnings("unchecked")
     public boolean getGroupProp( final String key, final boolean fallBack ) {
         boolean retBool = fallBack;
         
         if ( this.groupPropValues == null ) {
             if ( this.allPropValues.containsKey( PROPERTIES_GROUP ) ) {
-                this.groupPropValues = (Hashtable)this.allPropValues.get( PROPERTIES_GROUP );
+                this.groupPropValues = (Hashtable<String, String>)this.allPropValues.get( PROPERTIES_GROUP );
             } else {
                 if(log.isDebugEnabled()){
                     log.debug( OXGenericException.GENERAL_ERROR, new Exception( "Property '" + PROPERTIES_GROUP + "' not found in file: " + this.configdirname ) );
@@ -204,12 +206,13 @@ public class PropertyHandler {
      * @param fallBack
      * @return
      */
+    @SuppressWarnings("unchecked")
     public boolean getUserProp( final String key, final boolean fallBack ) {
         boolean retBool = fallBack;
         
         if ( this.userPropValues == null ) {
             if ( this.allPropValues.containsKey( PROPERTIES_USER ) ) {
-                this.userPropValues = (Hashtable)this.allPropValues.get( PROPERTIES_USER );
+                this.userPropValues = (Hashtable<String, String>)this.allPropValues.get( PROPERTIES_USER );
             } else {
                 if(log.isDebugEnabled()){
                     log.debug( OXGenericException.GENERAL_ERROR, new Exception( "Property '" + PROPERTIES_USER + "' not found in file: " + this.configdirname ) );
@@ -235,12 +238,13 @@ public class PropertyHandler {
      * @param fallBack
      * @return
      */
+    @SuppressWarnings("unchecked")
     public String getUserProp( final String key, final String fallBack ) {
         String retBool = fallBack;
         
         if ( this.userPropValues == null ) {
             if ( this.allPropValues.containsKey( PROPERTIES_USER ) ) {
-                this.userPropValues = (Hashtable)this.allPropValues.get( PROPERTIES_USER );
+                this.userPropValues = (Hashtable<String, String>)this.allPropValues.get( PROPERTIES_USER );
             } else {
                 if(log.isDebugEnabled()){
                     log.debug( OXGenericException.GENERAL_ERROR, new Exception( "Property '" + PROPERTIES_USER + "' not found in file: " + this.configdirname ) );
@@ -268,12 +272,13 @@ public class PropertyHandler {
      * @param fallBack
      * @return
      */
+    @SuppressWarnings("unchecked")
     public boolean getResourceProp( final String key, final boolean fallBack ) {
         boolean retBool = fallBack;
         
         if ( this.resPropValues == null ) {
             if ( this.allPropValues.containsKey( PROPERTIES_RESOURCE ) ) {
-                this.resPropValues = (Hashtable)this.allPropValues.get( PROPERTIES_RESOURCE );
+                this.resPropValues = (Hashtable<String, String>)this.allPropValues.get( PROPERTIES_RESOURCE );
             } else {
                 if(log.isDebugEnabled()){
                     log.debug( OXGenericException.GENERAL_ERROR, new Exception( "Property '" + PROPERTIES_RESOURCE + "' not found in file: " + this.configdirname ) );
@@ -299,12 +304,13 @@ public class PropertyHandler {
      * @param fallBack
      * @return
      */
+    @SuppressWarnings("unchecked")
     public int getRmiProp( final String key, final int fallBack ) {
         int retInt = fallBack;
         
         if ( this.rmiPropValues == null ) {
             if ( this.allPropValues.containsKey( PROPERTIES_RMI ) ) {
-                this.rmiPropValues = (Hashtable)this.allPropValues.get( PROPERTIES_RMI );
+                this.rmiPropValues = (Hashtable<String, String>)this.allPropValues.get( PROPERTIES_RMI );
             } else {
                 if(log.isDebugEnabled()){
                     log.debug( OXGenericException.GENERAL_ERROR, new Exception( "Property '" + PROPERTIES_RMI + "' not found in file: " + this.configdirname ) );
@@ -407,11 +413,12 @@ public class PropertyHandler {
         return source;
     }
 
+    @SuppressWarnings("unchecked")
     public String getResourceProp(final String key, final String fallback) {
         String retval = fallback;
         if ( this.resPropValues == null ) {
             if ( this.allPropValues.containsKey( PROPERTIES_RESOURCE ) ) {
-                this.resPropValues = (Hashtable)this.allPropValues.get( PROPERTIES_RESOURCE );
+                this.resPropValues = (Hashtable<String, String>)this.allPropValues.get( PROPERTIES_RESOURCE );
             } else {
                 if(log.isDebugEnabled()){
                     log.debug( OXGenericException.GENERAL_ERROR, new Exception( "Property '" + PROPERTIES_RESOURCE + "' not found in file: " + this.configdirname ) );
@@ -435,12 +442,13 @@ public class PropertyHandler {
      * @param fallBack
      * @return
      */
+    @SuppressWarnings("unchecked")
     public String getSqlProp(final String key, final String fallBack) {
         String retString = fallBack;
 
         if (this.sqlPropValues == null) {
             if (this.allPropValues.containsKey(PROPERTIES_SQL)) {
-                this.sqlPropValues = (Hashtable) this.allPropValues.get(PROPERTIES_SQL);
+                this.sqlPropValues = (Hashtable<String, String>) this.allPropValues.get(PROPERTIES_SQL);
             } else {
                 log.error(OXGenericException.GENERAL_ERROR, new Exception("Property '" + PROPERTIES_SQL + "' not found."));
             }
