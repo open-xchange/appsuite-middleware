@@ -113,6 +113,7 @@ public abstract class OXContextMySQLStorageCommon {
             int reason_id = -1;
             int filestore_id = -1;
             long quota_max = -1;
+            long quota_used = 0;
 
             String name = null;
             String filestore_name = null;
@@ -163,7 +164,7 @@ public abstract class OXContextMySQLStorageCommon {
             rs.close();
             prep.close();
 
-/*            prep = oxdb_read.prepareStatement("SELECT filestore_usage.used FROM filestore_usage WHERE filestore_usage.cid = ?");
+            prep = oxdb_read.prepareStatement("SELECT filestore_usage.used FROM filestore_usage WHERE filestore_usage.cid = ?");
             prep.setInt(1, context_id);
             rs = prep.executeQuery();
 
@@ -176,12 +177,10 @@ public abstract class OXContextMySQLStorageCommon {
                 quota_used /= Math.pow(2, 20);
             }
             if (quota_used != -1) {
-                fs.setUsed(quota_used);
-
                 // set used quota in context setup
                 cs.setUsedQuota(quota_used);
             }
-*/
+
             // maximum quota of this context
             if (quota_max != -1) {
                 // set quota max also in context setup object
