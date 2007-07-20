@@ -57,7 +57,7 @@ import java.util.concurrent.Callable;
  * @author d7
  *
  */
-public interface ProgressCallable<V> extends Callable {
+public interface ProgressCallable<V> extends Callable<V> {
 
     public int getProgressPercentage();
 }
