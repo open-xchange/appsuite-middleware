@@ -22,8 +22,7 @@ import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
 import com.openexchange.admin.tools.AdminDaemonTools;
 
-
-public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
+public class OXUtil extends OXCommonImpl implements OXUtilInterface {
 
     private final static Log log = LogFactory.getLog(OXUtil.class);
 
@@ -32,15 +31,14 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
     }
 
     public Filestore registerFilestore(final Filestore fstore, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
-        
-        try{
+        try {
             doNullCheck(fstore);
         } catch (final InvalidDataException e1) {            
             log.error("Invalid data sent by client!", e1);
             throw e1;
         }
         
-        doAuthentication(auth);
+        new BasicAuthenticator().doAuthentication(auth);
 
         log.debug(fstore.getUrl() + " - " + fstore.getSize());
 
@@ -84,16 +82,14 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
 
     }
 
-   
     public void changeFilestore(final Filestore fstore, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
-        
-        try{
+        try {
             doNullCheck(fstore);
         } catch (final InvalidDataException e1) {            
             log.error("Invalid data sent by client!", e1);
             throw e1;
         }
-        doAuthentication(auth);
+        new BasicAuthenticator().doAuthentication(auth);
 
         log.debug(fstore.getUrl() + " " + fstore.getMaxContexts() + " " + fstore.getSize() + " " + fstore.getId());
 
@@ -110,16 +106,14 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
         oxutil.changeFilestore(fstore);
     }
 
-   
     public Filestore[] listFilestores(final String search_pattern, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
-
-        try{
+        try {
             doNullCheck(search_pattern);
         } catch (final InvalidDataException e1) {            
             log.error("Invalid data sent by client!", e1);
             throw e1;
         }
-        doAuthentication(auth);
+        new BasicAuthenticator().doAuthentication(auth);
 
         log.debug(search_pattern);
 
@@ -136,15 +130,14 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
     }
     
     public void unregisterFilestore(final Filestore store, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
-        
-        try{
+        try {
             doNullCheck(store,store.getId());
         } catch (final InvalidDataException e1) {            
             log.error("Invalid data sent by client!", e1);
             throw e1;
         }
         
-        doAuthentication(auth);
+        new BasicAuthenticator().doAuthentication(auth);
 
         log.debug(store);
 
@@ -158,18 +151,17 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
         }
         final OXUtilStorageInterface oxutil = OXUtilStorageInterface.getInstance();
         oxutil.unregisterFilestore(store.getId());
-
     }
 
     
     public MaintenanceReason createMaintenanceReason(final MaintenanceReason reason, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
-        try{
+        try {
             doNullCheck(reason);
         } catch (final InvalidDataException e1) {            
             log.error("Invalid data sent by client!", e1);
             throw e1;
         }
-        doAuthentication(auth);
+        new BasicAuthenticator().doAuthentication(auth);
 
         log.debug(reason);
 
@@ -187,7 +179,7 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
     }
 
     public MaintenanceReason[] listMaintenanceReasons(final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException {
-        doAuthentication(auth);
+        new BasicAuthenticator().doAuthentication(auth);
 
         final OXUtilStorageInterface oxutil = OXUtilStorageInterface.getInstance();
         return oxutil.getAllMaintenanceReasons();
@@ -202,11 +194,10 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
             throw invalidDataException;
         }
         
-        doAuthentication(auth);
+        new BasicAuthenticator().doAuthentication(auth);
         
         final OXUtilStorageInterface oxutil = OXUtilStorageInterface.getInstance();
         return oxutil.listMaintenanceReasons(search_pattern);
-        
     }
     
     public MaintenanceReason[] listAllMaintenanceReasons(final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
@@ -214,7 +205,6 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
     }
     
     public void createDatabase(final Database db, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
-        
         try{
             doNullCheck(db);
         } catch (final InvalidDataException e1) {            
@@ -222,7 +212,7 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
             throw e1;
         }
         
-        doAuthentication(auth);
+        new BasicAuthenticator().doAuthentication(auth);
 
         log.debug(db.toString());
 
@@ -232,13 +222,9 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
 
         final OXUtilStorageInterface oxcox = OXUtilStorageInterface.getInstance();
         oxcox.createDatabase(db);
-
     }
 
-   
     public void deleteDatabase(final Database db, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
-        
-        
         try{
             doNullCheck(db);
         } catch (final InvalidDataException e1) {            
@@ -246,7 +232,7 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
             throw e1;
         }
         
-        doAuthentication(auth);
+        new BasicAuthenticator().doAuthentication(auth);
 
         log.debug(db.toString());
 
@@ -258,9 +244,7 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
         }
     }
 
-    
     public Database registerDatabase(final Database db, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
-        
         try{
             doNullCheck(db);
         } catch (final InvalidDataException e1) {            
@@ -268,7 +252,7 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
             throw e1;
         }
         
-        doAuthentication(auth);
+        new BasicAuthenticator().doAuthentication(auth);
 
         log.debug(db.toString());
 
@@ -323,7 +307,7 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
             throw e1;
         }
         
-        doAuthentication(auth);
+        new BasicAuthenticator().doAuthentication(auth);
 
         log.debug(srv.getName());
 
@@ -342,13 +326,9 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
         sr.setName(srv.getName());
         sr.setId(oxcox.registerServer(srv.getName()));
         return sr;
-
     }
 
-    
     public void unregisterDatabase(final Database database, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
-        
-        
         try{
             doNullCheck(database,database.getId());
         } catch (final InvalidDataException e1) {            
@@ -356,7 +336,7 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
             throw e1;
         }
         
-        doAuthentication(auth);
+        new BasicAuthenticator().doAuthentication(auth);
 
         log.debug(database);
 
@@ -371,13 +351,10 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
 
         final OXUtilStorageInterface oxcox = OXUtilStorageInterface.getInstance();
         oxcox.unregisterDatabase(database.getId());
-
     }
 
   
     public void unregisterServer(final Server server, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
-
-        
         try{
             doNullCheck(server,server.getId());
         } catch (final InvalidDataException e1) {            
@@ -385,7 +362,7 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
             throw e1;
         }
         
-        doAuthentication(auth);
+        new BasicAuthenticator().doAuthentication(auth);
 
         log.debug(server);
 
@@ -400,7 +377,6 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
 
         final OXUtilStorageInterface oxcox = OXUtilStorageInterface.getInstance();
         oxcox.unregisterServer(server.getId());
-
     }
 
     
@@ -411,7 +387,7 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
             log.error("Invalid data sent by client!", e1);
             throw e1;
         }
-        doAuthentication(auth);
+        new BasicAuthenticator().doAuthentication(auth);
 
         log.debug(search_pattern);
 
@@ -421,7 +397,6 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
 
         final OXUtilStorageInterface oxcox = OXUtilStorageInterface.getInstance();
         return oxcox.searchForDatabase(search_pattern);
-
     }
 
     public Database[] listAllDatabases(final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
@@ -435,7 +410,7 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
             log.error("Invalid data sent by client!", e1);
             throw e1;
         }
-        doAuthentication(auth);
+        new BasicAuthenticator().doAuthentication(auth);
         
         log.debug(search_pattern);
         
@@ -445,7 +420,6 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
         
         final OXUtilStorageInterface oxcox = OXUtilStorageInterface.getInstance();
         return oxcox.searchForServer(search_pattern);
-        
     }
 
     public Server[] listAllServers(final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
@@ -453,15 +427,14 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
     }
     
     public void changeDatabase(final Database db, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
-        
-        try{
+        try {
             doNullCheck(db);
         } catch (final InvalidDataException e1) {            
             log.error("Invalid data sent by client!", e1);
             throw e1;
         }
         
-        doAuthentication(auth);
+        new BasicAuthenticator().doAuthentication(auth);
 
         log.debug(db.toString());
 
@@ -488,13 +461,13 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
     }
 
     public void deleteMaintenanceReason(final MaintenanceReason[] reasons, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
-        try{
+        try {
             doNullCheck((Object[])reasons);
         } catch (final InvalidDataException e1) {            
             log.error("Invalid data sent by client!", e1);
             throw e1;
         }
-        doAuthentication(auth);
+        new BasicAuthenticator().doAuthentication(auth);
 
         log.debug(Arrays.toString(reasons));
 
@@ -511,9 +484,6 @@ public class OXUtil extends BasicAuthenticator implements OXUtilInterface {
             del_ids[i] = reasons[i].getId().intValue();
         }
         
-        
         oxcox.deleteMaintenanceReason(del_ids);
-
     }
-    
 }
