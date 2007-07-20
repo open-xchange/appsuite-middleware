@@ -17,7 +17,7 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchReasonException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
-public class DisableAll extends ContextAbtraction {
+public class DisableAll extends ContextHostingAbstraction {
 
     public DisableAll(final String[] args2) {
 

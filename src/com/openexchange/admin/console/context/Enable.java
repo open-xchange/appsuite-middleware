@@ -17,7 +17,7 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
-public class Enable extends ContextAbtraction {
+public class Enable extends ContextAbstraction {
 
     public Enable(final String[] args2) {
 

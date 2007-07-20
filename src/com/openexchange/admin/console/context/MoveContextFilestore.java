@@ -24,7 +24,7 @@ import com.openexchange.admin.rmi.exceptions.NoSuchFilestoreException;
 import com.openexchange.admin.rmi.exceptions.NoSuchReasonException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
-public class MoveContextFilestore extends ContextAbtraction {
+public class MoveContextFilestore extends ContextHostingAbstraction {
 
     private final static char OPT_FILESTORE_SHORT = 'f';
 

@@ -20,7 +20,7 @@ import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchReasonException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
-public class Disable extends ContextAbtraction {
+public class Disable extends ContextHostingAbstraction {
 
     public Disable(final String[] args2) {
 
