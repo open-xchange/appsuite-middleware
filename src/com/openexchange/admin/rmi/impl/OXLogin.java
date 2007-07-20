@@ -47,7 +47,7 @@
  *
  */
 /*
- * $Id: OXLogin.java,v 1.12 2007/07/20 15:36:06 dennis Exp $
+ * $Id: OXLogin.java,v 1.13 2007/07/20 15:56:52 dennis Exp $
  */
 package com.openexchange.admin.rmi.impl;
 
@@ -85,9 +85,9 @@ import com.openexchange.groupware.update.exception.UpdateException;
  */
 public class OXLogin extends OXCommonImpl implements OXLoginInterface {
 
-    private BundleContext context = null;
-
     private final static Log log = LogFactory.getLog(OXLogin.class);
+
+    private BundleContext context = null;
 
     public OXLogin(final BundleContext context) throws RemoteException {
         super();
