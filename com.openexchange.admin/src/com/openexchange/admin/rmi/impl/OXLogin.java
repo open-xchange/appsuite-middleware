@@ -85,9 +85,9 @@ import com.openexchange.groupware.update.exception.UpdateException;
  */
 public class OXLogin extends OXCommonImpl implements OXLoginInterface {
 
-    private BundleContext context = null;
-
     private final static Log log = LogFactory.getLog(OXLogin.class);
+
+    private BundleContext context = null;
 
     public OXLogin(final BundleContext context) throws RemoteException {
         super();
