@@ -59,7 +59,7 @@ import org.json.JSONWriter;
 
 /**
  * OXJSONWriter - extends <code>{@link JSONWriter}</code> but does not use an
- * underlying instance of <code>{@link Writer}</code> rather that creating
+ * underlying instance of <code>{@link Writer}</code> rather than creating
  * JSON objects thus this JSONWriter will never get into an incomplete state.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
