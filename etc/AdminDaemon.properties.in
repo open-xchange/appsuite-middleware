@@ -25,3 +25,6 @@ USER_STORAGE=com.openexchange.admin.storage.mysqlStorage.OXUserMySQLStorage
 GROUP_STORAGE=com.openexchange.admin.storage.mysqlStorage.OXGroupMySQLStorage
 TOOL_STORAGE=com.openexchange.admin.storage.mysqlStorage.OXToolMySQLStorage
 RESOURCE_STORAGE=com.openexchange.admin.storage.mysqlStorage.OXResourceMySQLStorage
+
+# how many jobs should be executed concurrently
+CONCURRENT_JOBS=2
