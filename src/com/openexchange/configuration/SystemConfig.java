@@ -159,10 +159,6 @@ public final class SystemConfig extends AbstractConfig {
          */
         CONFIGDB("configDB"),
         /**
-         * Properties file for OxAdapter.
-         */
-        OXADAPTER("OxAdapter"),
-        /**
          * Class implementing the LoginInfo.
          */
         LOGIN_INFO("LoginInfo"),
