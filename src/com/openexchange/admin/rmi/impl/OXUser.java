@@ -811,16 +811,36 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
     }
 
+    /**
+     * @param aliases
+     * @param address
+     * @return
+     */
+    private boolean aliasesContain(final HashSet<String> aliases, final String address) {
+        if (null != aliases) {
+            for (final String addr : aliases) {
+                if (address.equals(addr)) {
+                    return true;
+                }
+            }
+            return false;
+        } else {
+            return false;
+        }
+    }
+    
+    /**
+     * checking for some requirements when changing exisiting user data
+     * 
+     * @param ctx
+     * @param newuser
+     * @param dbuser
+     * @param prop
+     * @throws StorageException
+     * @throws InvalidDataException
+     */
     private void checkChangeUserData(final Context ctx, final User newuser, final User dbuser, final PropertyHandler prop) throws StorageException, InvalidDataException {
     
-        // Do some mail attribute checks cause of bug
-        // http://www.open-xchange.org/bugzilla/show_bug.cgi?id=5444
-    
-        // 1. If user sends only Aliases but not primarymail and email2 field.
-        // show error.
-        // cause he must set which adress is primarymail and email2 from the new
-        // aliases
-        
         if (newuser.getPassword() != null && newuser.getPassword().trim().length() == 0) {
             throw new InvalidDataException("Empty password is not allowed");
         }
@@ -831,6 +851,11 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             // checks below throw InvalidDataException
             checkValidEmailsInUserObject(newuser);
             HashSet<String> useraliases = newuser.getAliases();
+            if (useraliases == null) {
+                useraliases = dbuser.getAliases();
+            }
+
+            final String defaultSenderAddress = newuser.getDefaultSenderAddress();
             final String primaryEmail = newuser.getPrimaryEmail();
             final String email1 = newuser.getEmail1();
             if (primaryEmail != null && email1 != null) {
@@ -839,11 +864,10 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     throw new InvalidDataException("email1 not equal with primarymail!");
                 }
             }
-            if (useraliases == null) {
-                useraliases = dbuser.getAliases();
-            }
+
             String check_primary_mail;
             String check_email1;
+            String check_default_sender_address;
             if (primaryEmail != null) {
                 check_primary_mail = primaryEmail;
             } else {
@@ -852,23 +876,20 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             if (email1 != null) {
                 check_email1 = email1;
             } else {
-                check_email1 = dbuser.getPrimaryEmail();
+                check_email1 = dbuser.getEmail1();
             }
-            boolean found_primary_mail = false;
-            boolean found_email1 = false;
-            if (null != useraliases) {
-                for (final String addr : useraliases) {
-                    GenericChecks.checkValidMailAddress(addr);
-                    if (check_primary_mail.equals(addr)) {
-                        found_primary_mail = true;
-                    }
-                    if (check_email1.equals(addr)) {
-                        found_email1 = true;
-                    }
-                }
+            if (defaultSenderAddress != null) {
+                check_default_sender_address = defaultSenderAddress;
+            } else {
+                check_default_sender_address = dbuser.getDefaultSenderAddress();
             }
-            if (!found_primary_mail || !found_email1) {
-                throw new InvalidDataException("primarymail and mail1 must be present in set of aliases.");
+            
+            boolean found_primary_mail = aliasesContain(useraliases, check_primary_mail);
+            boolean found_email1 = aliasesContain(useraliases, check_email1);
+            boolean found_default_sender_address = aliasesContain(useraliases, check_default_sender_address);
+
+            if (!found_primary_mail || !found_email1 || !found_default_sender_address) {
+                throw new InvalidDataException("primaryMail, Email1 and defaultSenderAddress must be present in set of aliases.");
             }
             // added "usrdata.getPrimaryEmail() != null" for this check, else we cannot update user data without mail data
             // which is not very good when just changing the displayname for example
@@ -910,29 +931,23 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     
         // checks below throw InvalidDataException
         checkValidEmailsInUserObject(usr);
-        final HashSet<String> aliases = usr.getAliases();
-        if (aliases != null) {
-            for (final String addr : aliases) {
-                GenericChecks.checkValidMailAddress(addr);
-            }
-        }
             
         // ### Do some mail attribute checks cause of bug 5444
-        // check if primaryemail address is also set in I_OXUser.EMAIL1,
+        // check if primary email address is also set in Email1,
         if (!usr.getPrimaryEmail().equals(usr.getEmail1())) {
         	 throw new InvalidDataException("primarymail must have the same value as email1");
         }
     
+        // if default sender address is != primary mail, add it to list of aliases
+        if(usr.getDefaultSenderAddress() != null ) {
+            usr.addAlias(usr.getDefaultSenderAddress());
+        } else {
+            // if default sender address is not set, set it to primary mail address
+            usr.setDefaultSenderAddress(usr.getPrimaryEmail());
+        }
+        
         // put primary mail in the aliases,
         usr.addAlias(usr.getPrimaryEmail());
-    
-        // check if privateemail1(before refacotring EMAIL1) set in aliases
-        if (aliases != null) {
-            if (!aliases.contains(usr.getEmail1())) {
-                throw new InvalidDataException("email1 must also be set in the aliases");
-            }
-        }
-        // ############################################
     }
 
     /**
@@ -955,6 +970,13 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         GenericChecks.checkValidMailAddress(usr.getEmail1());
         GenericChecks.checkValidMailAddress(usr.getEmail2());
         GenericChecks.checkValidMailAddress(usr.getEmail3());
+        GenericChecks.checkValidMailAddress(usr.getDefaultSenderAddress());
+        final HashSet<String> aliases = usr.getAliases();
+        if (aliases != null) {
+            for (final String addr : aliases) {
+                GenericChecks.checkValidMailAddress(addr);
+            }
+        }
     }
 
     private int[] getUserIdArrayFromUsers(final User[] users) throws InvalidDataException {

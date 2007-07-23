@@ -360,7 +360,9 @@ public class UserTest extends AbstractTest {
         
         
         // now change data
+        System.out.println(srv_loaded);
         srv_loaded = createChangeUserData(srv_loaded);
+        System.out.println(srv_loaded);
         // submit changes
         oxu.change(ctx,srv_loaded,cred);
         
@@ -735,6 +737,7 @@ public class UserTest extends AbstractTest {
         retval.setUsername(null);
         retval.setEnabled(!usr.getEnabled());        
         retval.setPrimaryEmail(usr.getPrimaryEmail()+change_suffix);
+        retval.setDefaultSenderAddress(usr.getPrimaryEmail()+change_suffix);
         retval.setEmail1(usr.getEmail1()+change_suffix);
         retval.setEmail2(usr.getEmail2()+change_suffix);
         retval.setEmail3(usr.getEmail3()+change_suffix);
@@ -751,7 +754,7 @@ public class UserTest extends AbstractTest {
             lAliases.add(element + "_" + change_suffix);            
         }
         lAliases.add(usr.getPrimaryEmail()+change_suffix);
-        lAliases.add(usr.getEmail2()+change_suffix);
+        lAliases.add(usr.getEmail1()+change_suffix);
         
         retval.setAliases(lAliases);        
         

@@ -1030,7 +1030,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.setString(4, std_mail_folder_sent);
                 stmt.setString(5, std_mail_folder_drafts);
                 stmt.setString(6, std_mail_folder_spam);
-                stmt.setString(7, usrdata.getPrimaryEmail());
+                stmt.setString(7, usrdata.getDefaultSenderAddress());
                 // set the flag for "receiving notifications" in the ox, was bug
                 // #5336
                 // TODO: choeger: Extend API to allow setting of these flags
@@ -1477,7 +1477,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.close();
 
                 stmt = read_ox_con
-                        .prepareStatement("SELECT std_trash,std_sent,std_drafts,std_spam,confirmed_spam,confirmed_ham,bits FROM user_setting_mail WHERE cid = ? and user = ?");
+                        .prepareStatement("SELECT std_trash,std_sent,std_drafts,std_spam,confirmed_spam,confirmed_ham,bits,send_addr FROM user_setting_mail WHERE cid = ? and user = ?");
                 stmt.setInt(1, context_id);
                 stmt.setInt(2, user_id);
                 rs3 = stmt.executeQuery();
@@ -1494,6 +1494,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     } else {
                         newuser.setGUI_Spam_filter_capabilities_enabled(false);
                     }
+                    newuser.setDefaultSenderAddress(rs3.getString("send_addr"));
                 }
                 rs3.close();
                 stmt.close();
