@@ -11,7 +11,6 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.admin.exceptions.OXContextException;
 import com.openexchange.admin.exceptions.OXUtilException;
-import com.openexchange.admin.rmi.BasicAuthenticator;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
