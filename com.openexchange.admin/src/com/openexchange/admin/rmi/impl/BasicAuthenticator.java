@@ -52,14 +52,13 @@ package com.openexchange.admin.rmi.impl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.admin.auth.AuthenticationFactory;
-import com.openexchange.admin.auth.AuthenticationInterface;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.storage.interfaces.OXAuthStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.tools.AdminCache;
 
@@ -71,15 +70,15 @@ public class BasicAuthenticator extends OXCommonImpl {
 
     private final static Log log = LogFactory.getLog (BasicAuthenticator.class);
 
-    private AuthenticationInterface sqlAuth = null;
-    private AuthenticationInterface fileAuth = null;
+    private OXAuthStorageInterface sqlAuth = null;
+    private OXAuthStorageInterface fileAuth = null;
     private AdminCache cache = null;
 
     /** */
     public BasicAuthenticator() {
         super();
-        sqlAuth  = AuthenticationFactory.getInstanceSQL();
-        fileAuth = AuthenticationFactory.getInstanceFile();
+        sqlAuth  = OXAuthStorageInterface.getInstanceSQL();
+        fileAuth = OXAuthStorageInterface.getInstanceFile();
         cache = ClientAdminThread.cache;
     }
 
