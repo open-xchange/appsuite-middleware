@@ -28,25 +28,8 @@ public class Create extends CreateCore {
     }
 
     @Override
-    protected void maincall(final AdminParser parser, final OXUserInterface oxusr, final Context ctx, final User usr, final UserModuleAccess access, final Credentials auth) throws RemoteException {
-        try {
-            System.out.println(oxusr.create(ctx, usr, access, auth).getId());
-        } catch (final StorageException e) {
-            printServerException(e);
-            sysexit(SYSEXIT_SERVERSTORAGE_ERROR);
-        } catch (final InvalidCredentialsException e) {
-            printServerException(e);
-            sysexit(SYSEXIT_INVALID_CREDENTIALS);
-        } catch (final NoSuchContextException e) {
-            printServerException(e);
-            sysexit(SYSEXIT_NO_SUCH_CONTEXT);
-        } catch (final InvalidDataException e) {
-            printServerException(e);
-            sysexit(SYSEXIT_INVALID_DATA);
-        } catch (final DatabaseUpdateException e) {
-            printServerException(e);
-            sysexit(1);
-        }
+    protected void maincall(final AdminParser parser, final OXUserInterface oxusr, final Context ctx, final User usr, final UserModuleAccess access, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
+        System.out.println(oxusr.create(ctx, usr, access, auth).getId());
     }
 
     @Override
