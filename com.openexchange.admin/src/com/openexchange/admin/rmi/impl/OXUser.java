@@ -345,7 +345,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             }
 
             // validate email adresss
-            tools.checkPrimaryMail(ctx, usr.getPrimaryEmail());
+            tools.primaryMailExists(ctx, usr.getPrimaryEmail());
         } catch (final InvalidDataException e2) {
             log.error(e2.getMessage(), e2);
             throw e2;
