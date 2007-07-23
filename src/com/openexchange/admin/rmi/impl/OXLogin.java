@@ -47,7 +47,7 @@
  *
  */
 /*
- * $Id: OXLogin.java,v 1.13 2007/07/20 15:56:52 dennis Exp $
+ * $Id: OXLogin.java,v 1.14 2007/07/23 11:55:50 dennis Exp $
  */
 package com.openexchange.admin.rmi.impl;
 
@@ -62,7 +62,6 @@ import org.osgi.framework.ServiceReference;
 
 import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.plugins.OXUserPluginInterface;
-import com.openexchange.admin.rmi.BasicAuthenticator;
 import com.openexchange.admin.rmi.OXLoginInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;

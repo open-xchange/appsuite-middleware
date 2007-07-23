@@ -63,7 +63,6 @@ import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.plugins.OXGroupPluginInterface;
 import com.openexchange.admin.plugins.PluginException;
 import com.openexchange.admin.properties.AdminProperties;
-import com.openexchange.admin.rmi.BasicAuthenticator;
 import com.openexchange.admin.rmi.OXGroupInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
