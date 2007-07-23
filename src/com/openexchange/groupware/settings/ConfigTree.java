@@ -88,11 +88,6 @@ public final class ConfigTree {
     private static final Log LOG = LogFactory.getLog(ConfigTree.class);
 
     /**
-     * Path name containing the identifier of the user.
-     */
-    private static final String IDENTIFIER = "identifier";
-
-    /**
      * Path name containing the timezone of the user.
      */
     public static final String TIMEZONE = "timezone";
@@ -211,31 +206,34 @@ public final class ConfigTree {
 
     private static Class< ? extends SettingSetup>[] getClasses() {
         return (Class< ? extends SettingSetup>[]) new Class[] {
-            com.openexchange.groupware.settings.shared.Modules.class,
-            com.openexchange.groupware.settings.shared.modules.Calendar.class,
-            com.openexchange.groupware.settings.shared.modules.calendar.Module.class,
-            com.openexchange.groupware.settings.shared.modules.calendar.CalendarConflict.class,
-            com.openexchange.groupware.settings.shared.modules.calendar.CalendarFreeBusy.class,
-            com.openexchange.groupware.settings.shared.modules.calendar.CalendarTeamView.class,
-            com.openexchange.groupware.settings.shared.modules.Contacts.class,
-            com.openexchange.groupware.settings.shared.modules.contacts.Module.class,
-            com.openexchange.groupware.settings.shared.modules.Folder.class,
-            com.openexchange.groupware.settings.shared.modules.folder.PublicFolders.class,
-            com.openexchange.groupware.settings.shared.modules.folder.SharedFolders.class,
-            com.openexchange.groupware.settings.shared.modules.Infostore.class,
-            com.openexchange.groupware.settings.shared.modules.infostore.Module.class,
-            com.openexchange.groupware.settings.shared.modules.Interfaces.class,
-            com.openexchange.groupware.settings.shared.modules.interfaces.ICal.class,
-            com.openexchange.groupware.settings.shared.modules.interfaces.SyncML.class,
-            com.openexchange.groupware.settings.shared.modules.interfaces.VCard.class,
-            com.openexchange.groupware.settings.shared.modules.Mail.class,
-            com.openexchange.groupware.settings.shared.modules.mail.Module.class,
-            com.openexchange.groupware.settings.shared.modules.Portal.class,
-            com.openexchange.groupware.settings.shared.modules.portal.Module.class,
-            com.openexchange.groupware.settings.shared.modules.Tasks.class,
-            com.openexchange.groupware.settings.shared.modules.tasks.Module.class,
-            com.openexchange.groupware.settings.shared.modules.tasks.DelegateTasks.class,
-            com.openexchange.groupware.settings.shared.TaskNotification.class
+            com.openexchange.groupware.settings.tree.Identifier.class,
+            com.openexchange.groupware.settings.tree.FastGUI.class,
+            com.openexchange.groupware.settings.tree.GUI.class,
+            com.openexchange.groupware.settings.tree.Modules.class,
+            com.openexchange.groupware.settings.tree.modules.Calendar.class,
+            com.openexchange.groupware.settings.tree.modules.calendar.Module.class,
+            com.openexchange.groupware.settings.tree.modules.calendar.CalendarConflict.class,
+            com.openexchange.groupware.settings.tree.modules.calendar.CalendarFreeBusy.class,
+            com.openexchange.groupware.settings.tree.modules.calendar.CalendarTeamView.class,
+            com.openexchange.groupware.settings.tree.modules.Contacts.class,
+            com.openexchange.groupware.settings.tree.modules.contacts.Module.class,
+            com.openexchange.groupware.settings.tree.modules.Folder.class,
+            com.openexchange.groupware.settings.tree.modules.folder.PublicFolders.class,
+            com.openexchange.groupware.settings.tree.modules.folder.SharedFolders.class,
+            com.openexchange.groupware.settings.tree.modules.Infostore.class,
+            com.openexchange.groupware.settings.tree.modules.infostore.Module.class,
+            com.openexchange.groupware.settings.tree.modules.Interfaces.class,
+            com.openexchange.groupware.settings.tree.modules.interfaces.ICal.class,
+            com.openexchange.groupware.settings.tree.modules.interfaces.SyncML.class,
+            com.openexchange.groupware.settings.tree.modules.interfaces.VCard.class,
+            com.openexchange.groupware.settings.tree.modules.Mail.class,
+            com.openexchange.groupware.settings.tree.modules.mail.Module.class,
+            com.openexchange.groupware.settings.tree.modules.Portal.class,
+            com.openexchange.groupware.settings.tree.modules.portal.Module.class,
+            com.openexchange.groupware.settings.tree.modules.Tasks.class,
+            com.openexchange.groupware.settings.tree.modules.tasks.Module.class,
+            com.openexchange.groupware.settings.tree.modules.tasks.DelegateTasks.class,
+            com.openexchange.groupware.settings.tree.TaskNotification.class
         };
     }
 
@@ -246,10 +244,6 @@ public final class ConfigTree {
     public static void init() throws SettingException {
         tree = new Setting("", true);
         tree.setId(-1);
-
-        final Setting identifier = new Setting(IDENTIFIER, true);
-        identifier.setId(-1);
-        tree.addElement(identifier);
 
         final Setting contactId = new Setting("contact_id", true);
         contactId.setId(-1);
@@ -385,21 +379,7 @@ public final class ConfigTree {
         showWithoutEmail.setId(-1);
         participants.addElement(showWithoutEmail);
 
-        final Setting gui = new Setting("gui", false);
-        gui.setId(1);
-        tree.addElement(gui);
-
         final Map<String, SharedValue> tmp = new HashMap<String, SharedValue>();
-        tmp.put(identifier.getPath(), new ReadOnlyValue() {
-            public boolean isAvailable(final SessionObject session) {
-                return true;
-            }
-            public void getValue(final SessionObject session,
-                final Setting setting) {
-                setting.setSingleValue(String.valueOf(session.getUserObject()
-                    .getId()));
-            }
-        });
         tmp.put(contactId.getPath(), new ReadOnlyValue() {
             public boolean isAvailable(final SessionObject session) {
                 return true;
@@ -909,7 +889,10 @@ public final class ConfigTree {
                 // Connect tree.
                 setting.addElement(subSetting);
                 // Map shared value.
-                tmp.put(subSetting.getPath(), setup.getSharedValue());
+                final SharedValue shared = setup.getSharedValue();
+                if (null != shared) {
+                    tmp.put(subSetting.getPath(), shared);
+                }
             }
         } catch (InstantiationException e) {
             throw new SettingException(Code.INIT, e);

@@ -1,3 +1,7 @@
+* 2007-07-23 - marcus.klein@open-xchange.com
+
+ - Added config tree setting fastgui.
+
 * 2007-07-20 - thorben.betten@open-xchange.com
 
  - Bugfix #8491: Allowing sharing of default folders (if owner still holds
