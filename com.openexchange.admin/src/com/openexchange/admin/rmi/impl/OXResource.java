@@ -47,7 +47,7 @@
  *
  */
 /*
- * $Id: OXResource.java,v 1.38 2007/07/20 15:23:43 dennis Exp $
+ * $Id: OXResource.java,v 1.39 2007/07/23 11:55:50 dennis Exp $
  */
 package com.openexchange.admin.rmi.impl;
 
@@ -66,7 +66,6 @@ import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.plugins.OXResourcePluginInterface;
 import com.openexchange.admin.plugins.PluginException;
 import com.openexchange.admin.properties.AdminProperties;
-import com.openexchange.admin.rmi.BasicAuthenticator;
 import com.openexchange.admin.rmi.OXResourceInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
