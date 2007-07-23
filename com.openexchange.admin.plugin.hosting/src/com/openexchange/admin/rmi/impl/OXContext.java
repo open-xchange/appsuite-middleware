@@ -33,7 +33,6 @@ import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
 import com.openexchange.admin.taskmanagement.TaskManager;
 import com.openexchange.admin.tools.DatabaseDataMover;
 import com.openexchange.admin.tools.FilestoreDataMover;
-import com.openexchange.admin.tools.monitoring.Monitor;
 
 public class OXContext extends OXContextCommonImpl implements OXContextInterface {
 
@@ -433,39 +432,13 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
     }
 
     public Context create(final Context ctx, final User admin_user, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException {
-        
-        try{
-            doNullCheck(ctx,ctx.getIdAsInt(),ctx.getMaxQuota(),admin_user);
-        } catch (final InvalidDataException e1) {            
-            log.error("Invalid data sent by client!", e1);
-            throw e1;
-        }
-        
-        new BasicAuthenticator().doAuthentication(auth);
-        
-        log.debug("" + ctx + " - " + admin_user);
-        try {
-            final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
-            if (tool.existsContext(ctx)) {
-                throw new ContextExistsException();
-            }
-            if (!admin_user.attributesforcreateset()) {
-                throw new InvalidDataException("Mandatory fields not set");
-            }
-            final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
-            final Context retval = oxcox.create(ctx, admin_user);
-            Monitor.incrementNumberOfCreateContextCalled();
-            return retval;
-        } catch (final ContextExistsException e) {
-            log.error(e.getMessage(), e);
-            throw e;
-        } catch (final InvalidDataException e) {
-            log.error(e.getMessage(), e);
-            throw e;
-        } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
-            throw e;
-        }
+        return createcommon(ctx, admin_user, null, auth);
+    }
+
+    protected Context createmaincall(final Context ctx, final User admin_user, Database db) throws StorageException, InvalidDataException {
+        final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
+        final Context retval = oxcox.create(ctx, admin_user);
+        return retval;
     }
 
     private StringBuilder builduppath(final String ctxdir, final StringBuilder src, final URI uri) {
