@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.admin.auth;
+package com.openexchange.admin.storage.mysqlStorage;
 
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
@@ -64,6 +64,7 @@ import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.storage.interfaces.OXAuthStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.tools.SHACrypt;
 import com.openexchange.admin.tools.UnixCrypt;
@@ -73,12 +74,12 @@ import com.openexchange.admin.tools.UnixCrypt;
  * 
  * @author cutmasta
  */
-public class MySQLAuthenticationImpl implements AuthenticationInterface {
+public class OXAuthMySQLStorage extends OXAuthStorageInterface {
 
-    private final static Log log = LogFactory.getLog(MySQLAuthenticationImpl.class);
+    private final static Log log = LogFactory.getLog(OXAuthMySQLStorage.class);
 
     /** */
-    public MySQLAuthenticationImpl() {
+    public OXAuthMySQLStorage() {
     }
 
     public boolean authenticate(final Credentials authdata) {

@@ -47,50 +47,34 @@
  *
  */
 
-package com.openexchange.admin.auth;
+package com.openexchange.admin.storage.interfaces;
 
-
-import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.admin.tools.UnixCrypt;
+import com.openexchange.admin.storage.fileStorage.OXAuthFileStorage;
+import com.openexchange.admin.storage.mysqlStorage.OXAuthMySQLStorage;
 
 /**
- * Default file implementation for admin auth.
- * 
- * @author choeger
+ *
+ * @author cutmasta
  */
-public class FileAuthenticationImpl implements AuthenticationInterface {
+public abstract class OXAuthStorageInterface {
+    public abstract boolean authenticate(final Credentials authdata);
+    
+    public abstract boolean authenticate(final Credentials authdata, final Context ctx) throws StorageException;
+    
+    public abstract boolean authenticateUser(final Credentials authdata, final Context ctx) throws StorageException;
 
-    /** */
-    public FileAuthenticationImpl() {
-    }
-
-    /**
-     * 
-     * Authenticates against a textfile
-     * 
-     */
-    public boolean authenticate(final Credentials authdata) {
-        final Credentials master = ClientAdminThread.cache.getMasterCredentials();
-        if(master != null && authdata != null &&
-           master.getLogin() != null && authdata.getLogin() != null &&
-           master.getPassword() != null && authdata.getPassword() != null &&
-           master.getLogin().equals(authdata.getLogin())) {
-                return UnixCrypt.matches(master.getPassword(), authdata.getPassword());
-        }else{
-            return false;
+    public static OXAuthStorageInterface getInstanceSQL() {
+        synchronized (OXAuthStorageInterface.class) {
+            return new OXAuthMySQLStorage();
         }
     }
 
-    public boolean authenticate(final Credentials authdata, final Context ctx)
-            throws StorageException {
-        return false;
+    public static OXAuthStorageInterface getInstanceFile() {
+        synchronized (OXAuthStorageInterface.class) {
+            return new OXAuthFileStorage();
+        }
     }
-
-    public boolean authenticateUser(final Credentials authdata, final Context ctx) throws StorageException {        
-        return false;
-    }
-
 }
