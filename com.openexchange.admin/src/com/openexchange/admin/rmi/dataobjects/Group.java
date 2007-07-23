@@ -95,7 +95,7 @@ public class Group extends ExtendableDataObject {
     }
 
     private void init(){
-        initExtendeable();
+        initExtendable();
         this.id = null;
         this.name = null;
         this.displayname = null;
@@ -181,7 +181,7 @@ public class Group extends ExtendableDataObject {
      * This method will go away with the next update
      */
     public void addExtension(final OXGroupExtensionInterface extension) {
-        this.extensions.add(extension);
+        getAllExtensionsAsHash().put(extension.getExtensionName(), extension);
     }
 
     /**
@@ -191,7 +191,7 @@ public class Group extends ExtendableDataObject {
      */
     public ArrayList<OXGroupExtensionInterface> getExtensions() {
         final ArrayList<OXGroupExtensionInterface> retval = new ArrayList<OXGroupExtensionInterface>();
-        for (final OXCommonExtensionInterface commoninterface : this.extensions) {
+        for (final OXCommonExtensionInterface commoninterface : getAllExtensionsAsHash().values()) {
             retval.add((OXGroupExtensionInterface) commoninterface);
         }
         return retval;
@@ -204,7 +204,11 @@ public class Group extends ExtendableDataObject {
      * This method will go away with the next update
      */
     public boolean removeExtension(final OXGroupExtensionInterface o) {
-        return extensions.remove(o);
+        if (null == getAllExtensionsAsHash().remove(o)) {
+            return false;
+        } else {
+            return true;
+        }
     }
 
     /**
@@ -218,19 +222,11 @@ public class Group extends ExtendableDataObject {
      * This method will go away with the next update
      */
     public OXGroupExtensionInterface getExtensionbyName(final String extname) {
-        for (final OXCommonExtensionInterface ext : this.extensions) {
+        for (final OXCommonExtensionInterface ext : getAllExtensionsAsHash().values()) {
             if (ext.getExtensionName().equals(extname)) {
                 return (OXGroupExtensionInterface) ext;
             }
         }
         return null;
-    }
-
-    public final boolean isExtensionsok() {
-        return extensionsok;
-    }
-
-    public final void setExtensionsok(boolean extensionsok) {
-        this.extensionsok = extensionsok;
     }
 }
