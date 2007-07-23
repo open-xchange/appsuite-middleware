@@ -75,342 +75,458 @@ public class User extends ExtendableDataObject implements Cloneable {
     private static final long serialVersionUID = -4492376747507390066L;
 
     private boolean contextadmin = false;
-    
+
     private Integer id;
+
     private boolean idset = false;
 
     private String username;
+
     private boolean usernameset = false;
 
     private String password;
+
     private boolean passwordset = false;
 
     private PASSWORDMECH passwordMech;
+
     private boolean passwordMechset = false;
 
     private String primaryEmail;
+
     private boolean primaryEmailset = false;
 
     private String email1;
+
     private boolean email1set = false;
 
     private String email2;
+
     private boolean email2set = false;
 
     private String email3;
+
     private boolean email3set = false;
 
     private HashSet<String> aliases;
+
     private boolean aliasesset = false;
 
     private String sur_name;
+
     private boolean sur_nameset = false;
 
     private String given_name;
+
     private boolean given_nameset = false;
 
     private Boolean enabled;
+
     private boolean enabledset = false;
 
     private Date birthday;
+
     private boolean birthdayset = false;
 
     private Date anniversary;
+
     private boolean anniversaryset = false;
 
     private String branches;
+
     private boolean branchesset = false;
 
     private String business_category;
+
     private boolean business_categoryset = false;
 
     private String categories;
+
     private boolean categoriesset = false;
 
     private String postal_code_business;
+
     private boolean postal_code_businessset = false;
 
     private String state_business;
+
     private boolean state_businessset = false;
 
     private String street_business;
+
     private boolean street_businessset = false;
 
     private String telephone_callback;
+
     private boolean telephone_callbackset = false;
 
     private String city_home;
+
     private boolean city_homeset = false;
 
     private String commercial_register;
+
     private boolean commercial_registerset = false;
 
     private String country_home;
+
     private boolean country_homeset = false;
 
     private String company;
+
     private boolean companyset = false;
 
     private Group default_group;
+
     private boolean default_groupset = false;
 
     private String department;
+
     private boolean departmentset = false;
 
     private String display_name;
+
     private boolean display_nameset = false;
 
     private String employeeType;
+
     private boolean employeeTypeset = false;
 
     private String fax_business;
+
     private boolean fax_businessset = false;
 
     private String fax_home;
+
     private boolean fax_homeset = false;
 
     private String fax_other;
+
     private boolean fax_otherset = false;
 
     private String imapServer;
+
     private boolean imapServerset = false;
 
     private String smtpServer;
+
     private boolean smtpServerset = false;
-    
+
     private String imapLogin;
+
     private boolean imapLoginset = false;
 
     private String instant_messenger1;
+
     private boolean instant_messenger1set = false;
 
     private String instant_messenger2;
+
     private boolean instant_messenger2set = false;
 
     private String telephone_ip;
+
     private boolean telephone_ipset = false;
 
     private String telephone_isdn;
+
     private boolean telephone_isdnset = false;
 
     private Locale language;
+
     private boolean languageset = false;
 
     private String mail_folder_drafts_name;
+
     private boolean mail_folder_drafts_nameset = false;
 
     private String mail_folder_sent_name;
+
     private boolean mail_folder_sent_nameset = false;
 
     private String mail_folder_spam_name;
+
     private boolean mail_folder_spam_nameset = false;
 
     private String mail_folder_trash_name;
+
     private boolean mail_folder_trash_nameset = false;
 
     private String mail_folder_confirmed_spam_name;
+
     private boolean mail_folder_confirmed_spam_nameset = false;
 
     private String mail_folder_confirmed_ham_name;
+
     private boolean mail_folder_confirmed_ham_nameset = false;
 
     private Boolean spam_filter_enabled;
+
     private boolean spam_filter_enabledset = false;
-    
+
     private String manager_name;
+
     private boolean manager_nameset = false;
 
     private String marital_status;
+
     private boolean marital_statusset = false;
 
     private String cellular_telephone1;
+
     private boolean cellular_telephone1set = false;
 
     private String cellular_telephone2;
+
     private boolean cellular_telephone2set = false;
 
     private String info;
+
     private boolean infoset = false;
 
     private String nickname;
+
     private boolean nicknameset = false;
 
     private String number_of_children;
+
     private boolean number_of_childrenset = false;
 
     private String note;
+
     private boolean noteset = false;
 
     private String number_of_employee;
+
     private boolean number_of_employeeset = false;
 
     private String telephone_pager;
+
     private boolean telephone_pagerset = false;
 
     private Boolean password_expired;
+
     private boolean password_expiredset = false;
 
     private String telephone_assistant;
+
     private boolean telephone_assistantset = false;
 
     private String assistant_name;
+
     private boolean assistant_nameset = false;
 
     private String telephone_business1;
+
     private boolean telephone_business1set = false;
 
     private String telephone_business2;
+
     private boolean telephone_business2set = false;
 
     private String telephone_car;
+
     private boolean telephone_carset = false;
 
     private String telephone_company;
+
     private boolean telephone_companyset = false;
 
     private String telephone_home1;
+
     private boolean telephone_home1set = false;
 
     private String telephone_home2;
+
     private boolean telephone_home2set = false;
 
     private String telephone_other;
+
     private boolean telephone_otherset = false;
 
     private String telephone_primary;
+
     private boolean telephone_primaryset = false;
 
     private String position;
+
     private boolean positionset = false;
 
     private String postal_code_home;
+
     private boolean postal_code_homeset = false;
 
     private String profession;
+
     private boolean professionset = false;
 
     private String telephone_radio;
+
     private boolean telephone_radioset = false;
 
     private String room_number;
+
     private boolean room_numberset = false;
 
     private String sales_volume;
+
     private boolean sales_volumeset = false;
 
     private String city_other;
+
     private boolean city_otherset = false;
 
     private String city_business;
+
     private boolean city_businessset = false;
 
     private String country_other;
+
     private boolean country_otherset = false;
 
     private String country_business;
+
     private boolean country_businessset = false;
 
     private String middle_name;
+
     private boolean middle_nameset = false;
 
     private String postal_code_other;
+
     private boolean postal_code_otherset = false;
 
     private String state_other;
+
     private boolean state_otherset = false;
 
     private String street_other;
+
     private boolean street_otherset = false;
 
     private String spouse_name;
+
     private boolean spouse_nameset = false;
 
     private String state_home;
+
     private boolean state_homeset = false;
 
     private String street_home;
+
     private boolean street_homeset = false;
 
     private String suffix;
+
     private boolean suffixset = false;
 
     private String tax_id;
+
     private boolean tax_idset = false;
 
     private String telephone_telex;
+
     private boolean telephone_telexset = false;
 
     private TimeZone timezone;
+
     private boolean timezoneset = false;
 
     private String title;
+
     private boolean titleset = false;
 
     private String telephone_ttytdd;
+
     private boolean telephone_ttytddset = false;
 
     private String url;
+
     private boolean urlset = false;
 
     private String userfield01;
+
     private boolean userfield01set = false;
 
     private String userfield02;
+
     private boolean userfield02set = false;
 
     private String userfield03;
+
     private boolean userfield03set = false;
 
     private String userfield04;
+
     private boolean userfield04set = false;
 
     private String userfield05;
+
     private boolean userfield05set = false;
 
     private String userfield06;
+
     private boolean userfield06set = false;
 
     private String userfield07;
+
     private boolean userfield07set = false;
 
     private String userfield08;
+
     private boolean userfield08set = false;
 
     private String userfield09;
+
     private boolean userfield09set = false;
 
     private String userfield10;
+
     private boolean userfield10set = false;
 
     private String userfield11;
+
     private boolean userfield11set = false;
 
     private String userfield12;
+
     private boolean userfield12set = false;
 
     private String userfield13;
+
     private boolean userfield13set = false;
 
     private String userfield14;
+
     private boolean userfield14set = false;
 
     private String userfield15;
+
     private boolean userfield15set = false;
 
     private String userfield16;
+
     private boolean userfield16set = false;
 
     private String userfield17;
+
     private boolean userfield17set = false;
 
     private String userfield18;
+
     private boolean userfield18set = false;
 
     private String userfield19;
+
     private boolean userfield19set = false;
 
     private String userfield20;
+
     private boolean userfield20set = false;
+
+    private String defaultSenderAddress;
+
+    private boolean defaultSenderAddressset = false;
 
     /**
      * Creates a new instance of user
@@ -430,32 +546,31 @@ public class User extends ExtendableDataObject implements Cloneable {
     }
 
     public enum PASSWORDMECH {
-        CRYPT,
-        SHA
+        CRYPT, SHA
     }
-    
+
     /**
-     * Returns the String representation of password mechanism as used in the data store
-     * as SQL or LDAP
+     * Returns the String representation of password mechanism as used in the
+     * data store as SQL or LDAP
      * 
      * @return String representation of PASSWORDMECH
      */
     public String getPasswordMech2String() {
         if (null != this.passwordMech) {
             switch (this.passwordMech) {
-                case CRYPT:
-                    return "{CRYPT}";
-                case SHA:
-                    return "{SHA}";
+            case CRYPT:
+                return "{CRYPT}";
+            case SHA:
+                return "{SHA}";
 
-                default:
-                    return null;
+            default:
+                return null;
             }
         } else {
             return null;
         }
     }
-    
+
     /**
      * Returns the id of the user
      * 
@@ -940,8 +1055,8 @@ public class User extends ExtendableDataObject implements Cloneable {
     }
 
     /**
-     * The users password
-     * must be plaintext
+     * The users password must be plaintext
+     * 
      * @param passwd
      * @see setPasswordMech
      */
@@ -1138,8 +1253,8 @@ public class User extends ExtendableDataObject implements Cloneable {
     }
 
     /**
-     * The default group when creating an user.
-     * If not supplied, a default group is used.
+     * The default group when creating an user. If not supplied, a default group
+     * is used.
      */
     public void setDefault_group(final Group default_group) {
         if (null == default_group) {
@@ -1278,16 +1393,16 @@ public class User extends ExtendableDataObject implements Cloneable {
     }
 
     public void setImapLogin(final String imapLogin) {
-        if(null == imapLogin) {
+        if (null == imapLogin) {
             this.imapLoginset = true;
         }
         this.imapLogin = imapLogin;
     }
-    
+
     public String getImapLogin() {
         return this.imapLogin;
     }
-    
+
     public String getSmtpServer() {
         return smtpServer;
     }
@@ -2123,12 +2238,7 @@ public class User extends ExtendableDataObject implements Cloneable {
     }
 
     public boolean attributesforcreateset() {
-        if (null != this.username && !this.username.equals("")
-                && null != this.display_name && !this.display_name.equals("")
-                && null != this.password && !this.password.equals("")
-                && null != this.given_name && !this.given_name.equals("")
-                && null != this.sur_name && !this.sur_name.equals("")
-                && null != this.primaryEmail && !this.primaryEmail.equals("")) {
+        if (null != this.username && !this.username.equals("") && null != this.display_name && !this.display_name.equals("") && null != this.password && !this.password.equals("") && null != this.given_name && !this.given_name.equals("") && null != this.sur_name && !this.sur_name.equals("") && null != this.primaryEmail && !this.primaryEmail.equals("")) {
             return true;
         } else {
             return false;
@@ -2211,13 +2321,13 @@ public class User extends ExtendableDataObject implements Cloneable {
      * @throws IllegalAccessException
      * @throws InvocationTargetException
      */
-    public static User hashmapToUser(HashMap<String, Object> hm) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException  {
+    public static User hashmapToUser(HashMap<String, Object> hm) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
         User u = new User();
-        for(Method m : u.getClass().getMethods()) {
+        for (Method m : u.getClass().getMethods()) {
             String mname = m.getName();
-            if(mname.startsWith("set")) {
+            if (mname.startsWith("set")) {
                 String keyName = mname.substring(3).toLowerCase();
-                if( hm.containsKey(keyName)) {
+                if (hm.containsKey(keyName)) {
                     m.invoke(u, hm.get(keyName));
                 }
             }
@@ -2225,13 +2335,13 @@ public class User extends ExtendableDataObject implements Cloneable {
 
         return u;
     }
-    
+
     /**
      * @return this user Objects members as key/value pairs in a hashtable
      */
     public Hashtable<String, Object> toHashtable() {
         final Hashtable<String, Object> ht = new Hashtable<String, Object>();
-        
+
         for (final Field f : this.getClass().getDeclaredFields()) {
             try {
                 final Object ob = f.get(this);
@@ -2284,28 +2394,28 @@ public class User extends ExtendableDataObject implements Cloneable {
     @Override
     public Object clone() throws CloneNotSupportedException {
         final User object = (User) super.clone();
-        if( this.extensions != null ) {
+        if (this.extensions != null) {
             object.extensions = new ArrayList<OXCommonExtensionInterface>(this.extensions);
         }
-        if( this.aliases != null ) {
+        if (this.aliases != null) {
             object.aliases = new HashSet<String>(this.aliases);
         }
         if (null != this.birthday) {
             object.birthday = (Date) this.birthday.clone();
-        }        
+        }
         if (null != this.anniversary) {
             object.anniversary = (Date) this.anniversary.clone();
-        }        
+        }
         if (null != this.language) {
             object.language = (Locale) this.language.clone();
-        }        
+        }
         if (null != this.timezone) {
-            //object.default_group
+            // object.default_group
             object.timezone = (TimeZone) this.timezone.clone();
-        }        
+        }
         return object;
     }
-    
+
     private void init() {
         initExtendeable();
         this.id = null;
@@ -2416,6 +2526,7 @@ public class User extends ExtendableDataObject implements Cloneable {
         this.userfield18 = null;
         this.userfield19 = null;
         this.userfield20 = null;
+        this.defaultSenderAddress = null;
     }
 
     public void addExtension(final OXUserExtensionInterface extension) {
@@ -2424,8 +2535,9 @@ public class User extends ExtendableDataObject implements Cloneable {
 
     /**
      * @return
-     * @deprecated Please remove the usage of this method as fast as you can because it used a dangerous downcast.
-     * This method will go away with the next update
+     * @deprecated Please remove the usage of this method as fast as you can
+     *             because it used a dangerous downcast. This method will go
+     *             away with the next update
      */
     @Deprecated
     public ArrayList<OXUserExtensionInterface> getExtensions() {
@@ -2435,7 +2547,7 @@ public class User extends ExtendableDataObject implements Cloneable {
         }
         return retval;
     }
-    
+
     public boolean removeExtension(final OXUserExtensionInterface o) {
         return extensions.remove(o);
     }
@@ -2443,8 +2555,9 @@ public class User extends ExtendableDataObject implements Cloneable {
     /**
      * @param index
      * @return
-     * @deprecated Please remove the usage of this method as fast as you can because it used a dangerous downcast.
-     * This method will go away with the next update
+     * @deprecated Please remove the usage of this method as fast as you can
+     *             because it used a dangerous downcast. This method will go
+     *             away with the next update
      */
     public OXUserExtensionInterface removeExtensionByIndex(final int index) {
         return (OXUserExtensionInterface) extensions.remove(index);
@@ -2452,13 +2565,15 @@ public class User extends ExtendableDataObject implements Cloneable {
 
     /**
      * This method is used to get the extensions through the name of the
-     * extension. An Array with all extensions where the name fits will be returned, 
-     * or an empty array if no fitting extension was found.
+     * extension. An Array with all extensions where the name fits will be
+     * returned, or an empty array if no fitting extension was found.
      * 
-     * @param extname a String for the extension
+     * @param extname
+     *                a String for the extension
      * @return the ArrayList of {@link OXUserExtensionInterface} with extname
-     * @deprecated Please remove the usage of this method as fast as you can because it used a dangerous downcast.
-     * This method will go away with the next update
+     * @deprecated Please remove the usage of this method as fast as you can
+     *             because it used a dangerous downcast. This method will go
+     *             away with the next update
      */
     public ArrayList<OXUserExtensionInterface> getExtensionbyName(final String extname) {
         final ArrayList<OXUserExtensionInterface> retval = new ArrayList<OXUserExtensionInterface>();
@@ -2471,14 +2586,15 @@ public class User extends ExtendableDataObject implements Cloneable {
     }
 
     /**
-     * A convenience method for getting the first extension in a list of equal extension names. The
-     * use of this method is not recommended because you won't get notifications how many extensions
-     * of the same name exist.
+     * A convenience method for getting the first extension in a list of equal
+     * extension names. The use of this method is not recommended because you
+     * won't get notifications how many extensions of the same name exist.
      * 
      * @param extname
      * @return
-     * @deprecated Please remove the usage of this method as fast as you can because it used a dangerous downcast.
-     * This method will go away with the next update
+     * @deprecated Please remove the usage of this method as fast as you can
+     *             because it used a dangerous downcast. This method will go
+     *             away with the next update
      */
     public OXUserExtensionInterface getFirstExtensionbyName(final String extname) {
         final ArrayList<OXUserExtensionInterface> list = getExtensionbyName(extname);
@@ -2488,7 +2604,7 @@ public class User extends ExtendableDataObject implements Cloneable {
             return null;
         }
     }
-    
+
     /**
      * @return the passwordMech
      */
@@ -2497,9 +2613,11 @@ public class User extends ExtendableDataObject implements Cloneable {
     }
 
     /**
-     * Represents the password encryption mechanism, value is a password mechanism
+     * Represents the password encryption mechanism, value is a password
+     * mechanism
+     * 
      * @param passwordMech
-     *            the passwordMech to set
+     *                the passwordMech to set
      */
     public void setPasswordMech(final PASSWORDMECH passwordMech) {
         if (null == passwordMech) {
@@ -2524,13 +2642,11 @@ public class User extends ExtendableDataObject implements Cloneable {
     }
 
     /**
-     * @param mail_folder_confirmed_ham_name the mail_folder_confirmed_ham_name to set
+     * @param mail_folder_confirmed_ham_name
+     *                the mail_folder_confirmed_ham_name to set
      */
-    public final void setMail_folder_confirmed_ham_name(
-            String mail_folder_confirmed_ham_name) {
-        if( mail_folder_confirmed_ham_name != null ) {
-            this.mail_folder_confirmed_ham_nameset = true;
-        }
+    public final void setMail_folder_confirmed_ham_name(String mail_folder_confirmed_ham_name) {
+        this.mail_folder_confirmed_ham_nameset = true;
         this.mail_folder_confirmed_ham_name = mail_folder_confirmed_ham_name;
     }
 
@@ -2542,16 +2658,14 @@ public class User extends ExtendableDataObject implements Cloneable {
     }
 
     /**
-     * @param mail_folder_confirmed_spam_name the mail_folder_confirmed_spam_name to set
+     * @param mail_folder_confirmed_spam_name
+     *                the mail_folder_confirmed_spam_name to set
      */
-    public final void setMail_folder_confirmed_spam_name(
-            String mail_folder_confirmed_spam_name) {
-        if( mail_folder_confirmed_spam_name != null ) {
-            this.mail_folder_confirmed_ham_nameset = true;
-        }
+    public final void setMail_folder_confirmed_spam_name(String mail_folder_confirmed_spam_name) {
+        this.mail_folder_confirmed_ham_nameset = true;
         this.mail_folder_confirmed_spam_name = mail_folder_confirmed_spam_name;
     }
-    
+
     public boolean isMail_folder_confirmed_spamset() {
         return mail_folder_confirmed_spam_nameset;
     }
@@ -2572,12 +2686,11 @@ public class User extends ExtendableDataObject implements Cloneable {
     }
 
     /**
-     * @param spam_filter_enabled the spam_filter_enabled to set
+     * @param spam_filter_enabled
+     *                the spam_filter_enabled to set
      */
     public final void setGUI_Spam_filter_capabilities_enabled(Boolean spam_filter_enabled) {
-        if( spam_filter_enabled != null ) {
-            this.spam_filter_enabledset = true;
-        }
+        this.spam_filter_enabledset = true;
         this.spam_filter_enabled = spam_filter_enabled;
     }
 
@@ -2588,4 +2701,25 @@ public class User extends ExtendableDataObject implements Cloneable {
     public final void setContextadmin(boolean contextadmin) {
         this.contextadmin = contextadmin;
     }
+
+    /**
+     * @return the defaultSenderAddress
+     */
+    public final String getDefaultSenderAddress() {
+        return defaultSenderAddress;
+    }
+
+    /**
+     * @param defaultSenderAddress
+     *                the defaultSenderAddress to set
+     */
+    public final void setDefaultSenderAddress(String defaultSenderAddress) {
+        this.defaultSenderAddressset = true;
+        this.defaultSenderAddress = defaultSenderAddress;
+    }
+
+    public boolean isDefaultSenderAddressset() {
+        return defaultSenderAddressset;
+    }
+
 }
