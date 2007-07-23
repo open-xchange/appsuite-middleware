@@ -165,7 +165,7 @@ public class WebdavFileStorage extends FileStorage {
     		return del;
         } catch (final IOException e) {
             throw new FileStorageException(FileStorageException.Code.IOERROR,
-                e);
+                e, e.getMessage());
         }
     }
 
@@ -223,7 +223,7 @@ public class WebdavFileStorage extends FileStorage {
     		return Long.parseLong((String)e.nextElement());
         } catch (final IOException e) {
             throw new FileStorageException(FileStorageException.Code.IOERROR,
-                e);
+                e, e.getMessage());
         }
 	}
 
@@ -254,7 +254,7 @@ public class WebdavFileStorage extends FileStorage {
     		return res.exists();
         } catch (final IOException e) {
             throw new FileStorageException(FileStorageException.Code.IOERROR,
-                e);
+                e, e.getMessage());
         }
 	}
 

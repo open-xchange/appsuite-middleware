@@ -281,12 +281,7 @@ public abstract class FileStorage {
         State state = null;
         lock(LOCK_TIMEOUT);
         try {
-            try {
-                state = new State(load(STATEFILENAME));
-            } catch (FileStorageException e) {
-                delete(STATEFILENAME);
-                throw e;
-            }
+            state = loadState();
             // Look for an empty slot
             while (nextentry == null && state.hasUnused()) {
                 nextentry = state.getUnused();
@@ -322,23 +317,19 @@ public abstract class FileStorage {
                     state.setNextEntry(savenextentry);
                 }
             }
-            try {
-                save(STATEFILENAME, state.saveState());
-            } catch (FileStorageException e) {
-                delete(STATEFILENAME);
-                throw e;
-            }
+            saveState(state);
         } finally {
             unlock();
         }
         try {
             save(nextentry, input);
         } catch (FileStorageException ie) {
+            delete(nextentry);
             lock(LOCK_TIMEOUT);
             try {
-                state = new State(load(STATEFILENAME));
+                state = loadState();
                 state.addUnused(nextentry);
-                save(STATEFILENAME, state.saveState());
+                saveState(state);
             } finally {
                 unlock();
             }
@@ -358,9 +349,9 @@ public abstract class FileStorage {
         if (retval) {
             lock(LOCK_TIMEOUT);
             try {
-                final State state = new State(load(STATEFILENAME));
+                final State state = loadState();
                 state.addUnused(identifier);
-                save(STATEFILENAME, state.saveState());
+                saveState(state);
             } finally {
                 unlock();
             }
@@ -394,12 +385,40 @@ public abstract class FileStorage {
 				LOG.info("Repairing.");
 			}
             final State state = repairState();
-            save(STATEFILENAME, state.saveState());
+            saveState(state);
         } finally {
             unlock();
         }
     }
-    
+
+    /**
+     * Loads the state file.
+     * @return a successfully loaded state file.
+     * @throws FileStorageException if the state file cannot be loaded.
+     */
+    private State loadState() throws FileStorageException {
+        try {
+            return new State(load(STATEFILENAME));
+        } catch (FileStorageException e) {
+            delete(STATEFILENAME);
+            throw e;
+        }
+    }
+
+    /**
+     * Saves the state file.
+     * @param state state file to save.
+     * @throws FileStorageException if the saving fails.
+     */
+    private void saveState(final State state) throws FileStorageException {
+        try {
+            save(STATEFILENAME, state.saveState());
+        } catch (FileStorageException e) {
+            delete(STATEFILENAME);
+            throw e;
+        }
+    }
+
     /**
      * Checks the storage.
      * @throws IOException if an error occurs.
@@ -412,7 +431,7 @@ public abstract class FileStorage {
 					LOG.info("Repairing.");
 				}
                 final State state = repairState();
-                save(STATEFILENAME, state.saveState());
+                saveState(state);
             }
         } finally {
             unlock();
@@ -553,7 +572,7 @@ public abstract class FileStorage {
 
     /**
      * Save the data for the input stream into the file storage under the given
-     * name.
+     * name. This method may leave file cadaver files.
      * @param name name the data should get in the file storage.
      * @param input the data that should be stored.
      * @throws FileStorageException if an error occurs.

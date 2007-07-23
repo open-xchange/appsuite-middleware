@@ -146,7 +146,7 @@ class State {
                 e);
         } catch (IOException e) {
             throw new FileStorageException(FileStorageException.Code.IOERROR,
-                e);
+                e, e.getMessage());
         } finally {
             if (null != reader) {
                 try {
@@ -191,7 +191,7 @@ class State {
                 e);
         } catch (IOException e) {
             throw new FileStorageException(FileStorageException.Code.IOERROR,
-                e);
+                e, e.getMessage());
         }
     }
 

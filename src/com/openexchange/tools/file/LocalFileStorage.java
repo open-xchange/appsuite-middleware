@@ -129,7 +129,7 @@ public class LocalFileStorage extends FileStorage {
             return new FileInputStream(new File(storage, name));
         } catch (final FileNotFoundException e) {
             throw new FileStorageException(FileStorageException.Code.IOERROR,
-                e);
+                e, e.getMessage());
         }
     }
 
@@ -190,17 +190,17 @@ public class LocalFileStorage extends FileStorage {
             }
         } catch (final FileNotFoundException e) {
             throw new FileStorageException(FileStorageException.Code.IOERROR,
-                e);
+                e, e.getMessage());
         } catch (final IOException e) {
             throw new FileStorageException(FileStorageException.Code.IOERROR,
-                e);
+                e, e.getMessage());
         } finally {
             if (null != fos) {
                 try {
                     fos.close();
                 } catch (final IOException e) {
                     throw new FileStorageException(FileStorageException.Code
-                        .IOERROR, e.getMessage(), e);
+                        .IOERROR, e, e.getMessage());
                 }
             }
         }
