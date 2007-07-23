@@ -85,7 +85,7 @@ public class Resource extends ExtendableDataObject {
     }
 
     private void init() {
-        initExtendeable();
+        initExtendable();
         this.id = null;
         this.name = null;
         this.displayname = null;
@@ -182,7 +182,7 @@ public class Resource extends ExtendableDataObject {
      * This method will go away with the next update
      */
     public void addExtension(final OXResourceExtensionInterface extension) {
-        this.extensions.add(extension);
+        getAllExtensionsAsHash().put(extension.getExtensionName(), extension);
     }
 
     /**
@@ -192,7 +192,7 @@ public class Resource extends ExtendableDataObject {
      */
     public ArrayList<OXResourceExtensionInterface> getExtensions() {
         final ArrayList<OXResourceExtensionInterface> retval = new ArrayList<OXResourceExtensionInterface>();
-        for (final OXCommonExtensionInterface commoninterface : this.extensions) {
+        for (final OXCommonExtensionInterface commoninterface : getAllExtensionsAsHash().values()) {
             retval.add((OXResourceExtensionInterface) commoninterface);
         }
         return retval;
@@ -205,7 +205,11 @@ public class Resource extends ExtendableDataObject {
      * This method will go away with the next update
      */
     public boolean removeExtension(final OXResourceExtensionInterface o) {
-        return extensions.remove(o);
+        if (null == getAllExtensionsAsHash().remove(o)) {
+            return false;
+        } else {
+            return true;
+        }
     }
 
     /**
@@ -219,7 +223,7 @@ public class Resource extends ExtendableDataObject {
      * This method will go away with the next update
      */
     public OXResourceExtensionInterface getExtensionbyName(final String extname) {
-        for (final OXCommonExtensionInterface ext : this.extensions) {
+        for (final OXCommonExtensionInterface ext : getAllExtensionsAsHash().values()) {
             if (ext.getExtensionName().equals(extname)) {
                 return (OXResourceExtensionInterface) ext;
             }
@@ -227,12 +231,8 @@ public class Resource extends ExtendableDataObject {
         return null;
     }
 
-    public final boolean isExtensionsok() {
-        return extensionsok;
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
     }
-
-    public final void setExtensionsok(boolean extensionsok) {
-        this.extensionsok = extensionsok;
-    }
-
 }

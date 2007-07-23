@@ -24,6 +24,7 @@ import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.dataobjects.User.PASSWORDMECH;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
+import com.openexchange.admin.rmi.exceptions.DuplicateExtensionException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
@@ -137,11 +138,14 @@ public abstract class ListCore extends UserAbstraction {
         } catch (final InvocationTargetException e) {
             printServerException(e);
             sysexit(1);
+        } catch (final DuplicateExtensionException e) {
+            printServerException(e);
+            sysexit(1);
         }
 
     }
 
-    protected abstract User[] maincall(final AdminParser parser, final OXUserInterface oxusr, final String search_pattern, final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
+    protected abstract User[] maincall(final AdminParser parser, final OXUserInterface oxusr, final String search_pattern, final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException, DuplicateExtensionException;
 
     /**
      * This method is used to define how a date value is transferred to string

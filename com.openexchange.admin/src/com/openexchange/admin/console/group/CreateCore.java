@@ -14,6 +14,7 @@ import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Group;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
+import com.openexchange.admin.rmi.exceptions.DuplicateExtensionException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
@@ -104,6 +105,9 @@ public abstract class CreateCore extends GroupAbstraction {
         } catch (final NoSuchUserException e) {
            printServerException(e);
            sysexit(SYSEXIT_NO_SUCH_USER);
+        } catch (final DuplicateExtensionException e) {
+            printServerException(e);
+            sysexit(1);
         }
     }
 
@@ -117,5 +121,5 @@ public abstract class CreateCore extends GroupAbstraction {
         return memberList;
     }
 
-    protected abstract void maincall(final AdminParser parser, final OXGroupInterface oxgrp, final Context ctx, final Group grp, final Credentials auth) throws RemoteException;
+    protected abstract void maincall(final AdminParser parser, final OXGroupInterface oxgrp, final Context ctx, final Group grp, final Credentials auth) throws RemoteException, DuplicateExtensionException;
 }
