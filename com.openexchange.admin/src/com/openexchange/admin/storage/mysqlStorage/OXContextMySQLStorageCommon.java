@@ -64,8 +64,13 @@ import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
+import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
+import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
+import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
 import com.openexchange.groupware.update.UpdateTaskCollection;
@@ -245,6 +250,16 @@ public abstract class OXContextMySQLStorageCommon {
         group_stmt.executeUpdate();
         group_stmt.close();
 
+    }
+
+    public final void createAdminForContext(final Context ctx, final User admin_user, final Connection ox_write_con, final int internal_user_id, final int contact_id, final int uid_number) throws StorageException, InvalidDataException {
+        final OXUserStorageInterface oxs = OXUserStorageInterface.getInstance();
+        final UserModuleAccess access = new UserModuleAccess(true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true);
+
+        final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
+        tool.primaryMailExists(ctx, admin_user.getPrimaryEmail());
+        admin_user.setDefaultSenderAddress(admin_user.getPrimaryEmail());
+        oxs.create(ctx, admin_user, access, ox_write_con, internal_user_id, contact_id, uid_number);
     }
 
     public final void deleteContextFromConfigDB(final Connection configdb_write_con, final int context_id) throws SQLException {
