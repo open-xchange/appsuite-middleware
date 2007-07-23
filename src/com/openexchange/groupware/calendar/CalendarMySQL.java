@@ -1433,7 +1433,9 @@ class CalendarMySQL implements CalendarSqlImp {
                             throw new OXCalendarException(OXCalendarException.Code.NO_SHARED_FOLDER_OWNER);
                         }
                     } else if (uid == tuid) {
-                        cdao.setGlobalFolderID(pfid);
+                        if (!cdao.containsParentFolderID()) {
+                            cdao.setGlobalFolderID(pfid);
+                        }
                         cdao.setPrivateFolderID(pfid);
                     } else {
                         cdao.setActionFolder(pfid);
