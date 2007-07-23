@@ -47,7 +47,7 @@
  *
  */
 /*
- * $Id: OXResource.java,v 1.39 2007/07/23 11:55:50 dennis Exp $
+ * $Id: OXResource.java,v 1.40 2007/07/23 19:16:32 dennis Exp $
  */
 package com.openexchange.admin.rmi.impl;
 
@@ -76,7 +76,6 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchResourceException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.admin.rmi.extensions.OXCommonExtensionInterface;
 import com.openexchange.admin.storage.interfaces.OXResourceStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.tools.AdminCache;
@@ -388,11 +387,6 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
         final OXResourceStorageInterface oxRes = OXResourceStorageInterface.getInstance();
         Resource retres = oxRes.getData(ctx, res);
 
-        // TODO: this code is superflous as soon as get takes resource as arg:
-        for(final OXCommonExtensionInterface or : res.getAllExtensions() ) {
-            retres.addExtension(or);
-        }
-            
         final ArrayList<Bundle> bundles = AdminDaemon.getBundlelist();
         for (final Bundle bundle : bundles) {
             final String bundlename = bundle.getSymbolicName();
@@ -467,9 +461,6 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
         for (final Resource resource : resources) {
             // not nice, but works ;)
             final Resource tmp = oxRes.getData(ctx, resource);
-            for (final OXCommonExtensionInterface or : resource.getAllExtensions()) {
-                tmp.addExtension(or);
-            }
             retval.add(tmp);
         }        
             

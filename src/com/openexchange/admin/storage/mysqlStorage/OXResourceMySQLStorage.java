@@ -59,10 +59,10 @@ import java.util.ArrayList;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.admin.rmi.exceptions.PoolException;
-import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Resource;
+import com.openexchange.admin.rmi.exceptions.PoolException;
+import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.sqlStorage.OXResourceSQLStorage;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.groupware.IDGenerator;
@@ -175,19 +175,11 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             throw AdminCache.parseDataTruncation(dt);
         } catch (final SQLException e) {
             log.error("SQL Error", e);
-            try {
-                con.rollback();
-            } catch (final SQLException e2) {
-                log.error("Error rollback", e2);
-            }
+            dorollback(con);
             throw new StorageException(e);
         } catch (final PoolException e) {
             log.error("Pool Error", e);
-            try {
-                con.rollback();
-            } catch (final SQLException e2) {
-                log.error("Error rollback", e2);
-            }
+            dorollback(con);
             throw new StorageException(e);
         } finally {
             try {
@@ -273,19 +265,11 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             throw AdminCache.parseDataTruncation(dt);
         } catch (final SQLException e) {
             log.error("SQL Error", e);
-            try {
-                con.rollback();
-            } catch (final SQLException exp) {
-                log.error("Error processing rollback of ox connection!", exp);
-            }
+            dorollback(con);
             throw new StorageException(e);
         } catch (final PoolException e) {
             log.error("Pool Error", e);
-            try {
-                con.rollback();
-            } catch (final SQLException exp) {
-                log.error("Error processing rollback of ox connection!", exp);
-            }
+            dorollback(con);
             throw new StorageException(e);
         } finally {
             try {
@@ -327,51 +311,27 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             con.commit();
         } catch (final SQLException e) {
             log.error("SQL Error", e);
-            try {
-                con.rollback();
-            } catch (final SQLException e2) {
-                log.error("Error rollback ox db write connection", e2);
-            }
+            dorollback(con);
             throw new StorageException(e);
         } catch (final PoolException e) {
             log.error("Pool Error", e);
-            try {
-                con.rollback();
-            } catch (final SQLException e2) {
-                log.error("Error rollback ox db write connection", e2);
-            }
+            dorollback(con);
             throw new StorageException(e);
         } catch (final ContextException e) {
             log.error("Context Error", e);
-            try {
-                con.rollback();
-            } catch (final SQLException e2) {
-                log.error("Error rollback ox db write connection", e2);
-            }
+            dorollback(con);
             throw new StorageException(e);
         } catch (final LdapException e) {
             log.error("LDAP Error", e);
-            try {
-                con.rollback();
-            } catch (final SQLException e2) {
-                log.error("Error rollback ox db write connection", e2);
-            }
+            dorollback(con);
             throw new StorageException(e);
         } catch (final DBPoolingException e) {
             log.error("DBPooling Error", e);
-            try {
-                con.rollback();
-            } catch (final SQLException e2) {
-                log.error("Error rollback ox db write connection", e2);
-            }
+            dorollback(con);
             throw new StorageException(e);
         } catch (final DeleteFailedException e) {
             log.error("Delete Error", e);
-            try {
-                con.rollback();
-            } catch (final SQLException e2) {
-                log.error("Error rollback ox db write connection", e2);
-            }
+            dorollback(con);
             throw new StorageException(e);
         } finally {
             try {
@@ -414,51 +374,27 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             con.commit();
         } catch (final SQLException e) {
             log.error("SQL Error", e);
-            try {
-                con.rollback();
-            } catch (final SQLException e2) {
-                log.error("Error rollback ox db write connection", e2);
-            }
+            dorollback(con);
             throw new StorageException(e);
         } catch (final PoolException e) {
             log.error("Pool Error", e);
-            try {
-                con.rollback();
-            } catch (final SQLException e2) {
-                log.error("Error rollback ox db write connection", e2);
-            }
+            dorollback(con);
             throw new StorageException(e);
         } catch (final ContextException e) {
             log.error("Context Error", e);
-            try {
-                con.rollback();
-            } catch (final SQLException e2) {
-                log.error("Error rollback ox db write connection", e2);
-            }
+            dorollback(con);
             throw new StorageException(e);
         } catch (final LdapException e) {
             log.error("LDAP Error", e);
-            try {
-                con.rollback();
-            } catch (final SQLException e2) {
-                log.error("Error rollback ox db write connection", e2);
-            }
+            dorollback(con);
             throw new StorageException(e);
         } catch (final DBPoolingException e) {
             log.error("DBPooling Error", e);
-            try {
-                con.rollback();
-            } catch (final SQLException e2) {
-                log.error("Error rollback ox db write connection", e2);
-            }
+            dorollback(con);
             throw new StorageException(e);
         } catch (final DeleteFailedException e) {
             log.error("Delete Error", e);
-            try {
-                con.rollback();
-            } catch (final SQLException e2) {
-                log.error("Error rollback ox db write connection", e2);
-            }
+            dorollback(con);
             throw new StorageException(e);
         } finally {
             try {
@@ -530,19 +466,11 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             
         } catch (final SQLException e) {
             log.error("SQL Error", e);
-            try {
-                con.rollback();
-            } catch (final SQLException e2) {
-                log.error("Error rollback ox db write connection", e2);
-            }
+            dorollback(con);
             throw new StorageException(e);
         } catch (final PoolException e) {
             log.error("Pool Error", e);
-            try {
-                con.rollback();
-            } catch (final SQLException e2) {
-                log.error("Error rollback ox db write connection", e2);
-            }
+            dorollback(con);
             throw new StorageException(e);
         } finally {
             try {
@@ -583,7 +511,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
                 final Boolean aval = rs.getBoolean("available");
                 final String desc = rs.getString("description");
                 
-                Resource retval = new Resource();
+                final Resource retval = (Resource) resource.clone();
                 
                 retval.setId(id);
                 if (null != mail) {
@@ -612,19 +540,15 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             
         } catch (final SQLException e) {
             log.error("SQL Error", e);
-            try {
-                con.rollback();
-            } catch (final SQLException e2) {
-                log.error("Error rollback ox db write connection", e2);
-            }
+            dorollback(con);
             throw new StorageException(e);
         } catch (final PoolException e) {
             log.error("Pool Error", e);
-            try {
-                con.rollback();
-            } catch (final SQLException e2) {
-                log.error("Error rollback ox db write connection", e2);
-            }
+            dorollback(con);
+            throw new StorageException(e);
+        } catch (final CloneNotSupportedException e) {
+            log.error(e.getMessage(), e);
+            dorollback(con);
             throw new StorageException(e);
         } finally {
             try {
@@ -740,11 +664,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             prep_edit_user.close();
         } catch (final SQLException e) {
             log.error("SQL Error", e);
-            try {
-                write_ox_con.rollback();
-            } catch (final SQLException e2) {
-                log.error("Error rollback", e2);
-            }
+            dorollback(write_ox_con);
             throw new StorageException(e);
         } finally {
             try {
@@ -798,11 +718,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             throw AdminCache.parseDataTruncation(dt);
         } catch (final SQLException e) {
             log.error("SQL Error", e);
-            try {
-                con.rollback();
-            } catch (final SQLException e2) {
-                log.error("Error rollback", e2);
-            }
+            dorollback(con);
             throw new StorageException(e);
         } finally {
             try {
@@ -828,11 +744,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             del_st.executeUpdate();
         } catch (final SQLException e) {
             log.error("SQL Error", e);
-            try {
-                con.rollback();
-            } catch (final SQLException e2) {
-                log.error("Error rollback", e2);
-            }
+            dorollback(con);
             throw new StorageException(e);
         } finally {
             try {
@@ -858,11 +770,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             del_st.executeUpdate();
         } catch (final SQLException e) {
             log.error("SQL Error", e);
-            try {
-                con.rollback();
-            } catch (final SQLException e2) {
-                log.error("Error rollback", e2);
-            }
+            dorollback(con);
             throw new StorageException(e);
         } finally {
             try {
@@ -872,6 +780,14 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             } catch (final SQLException e) {
                 log.error("Error closing prepared statement!", e);
             }
+        }
+    }
+
+    private void dorollback(Connection con) {
+        try {
+            con.rollback();
+        } catch (final SQLException e) {
+            log.error("Error processing rollback of ox db connection", e);
         }
     }
 }

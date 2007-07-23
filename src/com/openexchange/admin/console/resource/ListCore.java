@@ -15,6 +15,7 @@ import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Resource;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
+import com.openexchange.admin.rmi.exceptions.DuplicateExtensionException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
@@ -50,7 +51,6 @@ public abstract class ListCore extends ResourceAbstraction {
 
             final Resource[] allres = oxres.list(ctx, pattern, auth);
 
-            // TODO FIX THE NORMAL OUTPUT OF THIS COMMANDLINE TOOL
             final ArrayList<Resource> resourceList = new ArrayList<Resource>();
             maincall(parser, oxres, ctx, resourceList, allres, auth);
             if (parser.getOptionValue(this.csvOutputOption) != null) {
@@ -106,6 +106,9 @@ public abstract class ListCore extends ResourceAbstraction {
         } catch (final NoSuchResourceException e) {
             printServerException(e);
             sysexit(SYSEXIT_NO_SUCH_RESOURCE);
+        } catch (final DuplicateExtensionException e) {
+            printServerException(e);
+            sysexit(1);
         }
     }
 
@@ -121,7 +124,7 @@ public abstract class ListCore extends ResourceAbstraction {
     }
 
 
-    protected abstract void maincall(final AdminParser parser, final OXResourceInterface oxres, final Context ctx, final ArrayList<Resource> reslist, final Resource[] allres, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchResourceException;
+    protected abstract void maincall(final AdminParser parser, final OXResourceInterface oxres, final Context ctx, final ArrayList<Resource> reslist, final Resource[] allres, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchResourceException, DuplicateExtensionException;
 
     private void precsvinfos(final ArrayList<Resource> resourceList) {
         // needed for csv output, KEEP AN EYE ON ORDER!!!

@@ -15,6 +15,12 @@ import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
+import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
+import com.openexchange.admin.rmi.exceptions.DuplicateExtensionException;
+import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
+import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
+import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public abstract class CreateCore extends UserAbstraction {
 
@@ -110,9 +116,26 @@ public abstract class CreateCore extends UserAbstraction {
         } catch (final InvocationTargetException e) {
             printError(e.getMessage());
             sysexit(1);
+        } catch (final InvalidDataException e) {
+            printServerException(e);
+            sysexit(SYSEXIT_INVALID_DATA);
+        } catch (final StorageException e) {
+            printServerException(e);
+            sysexit(1);
+        } catch (final InvalidCredentialsException e) {
+            printServerException(e);
+            sysexit(SYSEXIT_INVALID_CREDENTIALS);
+        } catch (final NoSuchContextException e) {
+            printServerException(e);
+            sysexit(SYSEXIT_NO_SUCH_CONTEXT);
+        } catch (final DatabaseUpdateException e) {
+            printServerException(e);
+            sysexit(1);
+        } catch (final DuplicateExtensionException e) {
+            printServerException(e);
+            sysexit(1);
         }
-
     }
 
-    protected abstract void maincall(final AdminParser parser, final OXUserInterface oxusr, final Context ctx, final User usr, final UserModuleAccess access, final Credentials auth) throws RemoteException;
+    protected abstract void maincall(final AdminParser parser, final OXUserInterface oxusr, final Context ctx, final User usr, final UserModuleAccess access, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, DuplicateExtensionException, MalformedURLException, NotBoundException;
 }

@@ -68,7 +68,7 @@ import com.openexchange.admin.rmi.extensions.OXUserExtensionInterface;
  * @author cutmasta
  * @author d7
  */
-public class User extends ExtendableDataObject implements Cloneable {
+public class User extends ExtendableDataObject {
     /**
      * For serialization
      */
@@ -682,10 +682,6 @@ public class User extends ExtendableDataObject implements Cloneable {
 
     public boolean isEnabledset() {
         return enabledset;
-    }
-
-    public boolean isExtensionsset() {
-        return extensionsset;
     }
 
     public boolean isFax_businessset() {
@@ -2360,16 +2356,8 @@ public class User extends ExtendableDataObject implements Cloneable {
     public String toString() {
         final StringBuilder ret = new StringBuilder();
         ret.append("[ \n");
-        for (final OXCommonExtensionInterface usrext : extensions) {
-            ret.append("  ");
-            ret.append("Extension ");
-            ret.append(usrext.getExtensionName());
-            ret.append(" contains: \n");
-            ret.append("  ");
-            ret.append(usrext.toString());
-            ret.append("\n");
-        }
-
+        ret.append(super.toString());
+        
         for (final Field f : this.getClass().getDeclaredFields()) {
             try {
                 final Object ob = f.get(this);
@@ -2394,10 +2382,7 @@ public class User extends ExtendableDataObject implements Cloneable {
     @Override
     public Object clone() throws CloneNotSupportedException {
         final User object = (User) super.clone();
-        if (this.extensions != null) {
-            object.extensions = new ArrayList<OXCommonExtensionInterface>(this.extensions);
-        }
-        if (this.aliases != null) {
+        if( this.aliases != null ) {
             object.aliases = new HashSet<String>(this.aliases);
         }
         if (null != this.birthday) {
@@ -2417,7 +2402,7 @@ public class User extends ExtendableDataObject implements Cloneable {
     }
 
     private void init() {
-        initExtendeable();
+        initExtendable();
         this.id = null;
         this.username = null;
         this.password = null;
@@ -2529,8 +2514,13 @@ public class User extends ExtendableDataObject implements Cloneable {
         this.defaultSenderAddress = null;
     }
 
+    /**
+     * @param extension
+     * @deprecated Please remove the usage of this method as fast as you can because it used a dangerous downcast.
+     * This method will go away with the next update
+     */
     public void addExtension(final OXUserExtensionInterface extension) {
-        this.extensions.add(extension);
+        getAllExtensionsAsHash().put(extension.getExtensionName(), extension);
     }
 
     /**
@@ -2542,14 +2532,23 @@ public class User extends ExtendableDataObject implements Cloneable {
     @Deprecated
     public ArrayList<OXUserExtensionInterface> getExtensions() {
         final ArrayList<OXUserExtensionInterface> retval = new ArrayList<OXUserExtensionInterface>();
-        for (final OXCommonExtensionInterface commoninterface : this.extensions) {
+        for (final OXCommonExtensionInterface commoninterface : getAllExtensionsAsHash().values()) {
             retval.add((OXUserExtensionInterface) commoninterface);
         }
         return retval;
     }
-
+    
+    /**
+     * @param o
+     * @return
+     * @deprecated Will be removed with next version. Use removeExtension(final OXCommonExtensionInterface o) instead
+     */
     public boolean removeExtension(final OXUserExtensionInterface o) {
-        return extensions.remove(o);
+        if (null == getAllExtensionsAsHash().remove(o.getExtensionName())) {
+            return false;
+        } else {
+            return true;
+        }
     }
 
     /**
@@ -2560,7 +2559,9 @@ public class User extends ExtendableDataObject implements Cloneable {
      *             away with the next update
      */
     public OXUserExtensionInterface removeExtensionByIndex(final int index) {
-        return (OXUserExtensionInterface) extensions.remove(index);
+        final ArrayList<OXCommonExtensionInterface> retval = new ArrayList<OXCommonExtensionInterface>(getAllExtensionsAsHash().values());
+        final OXCommonExtensionInterface commonExtensionInterface = retval.get(index);
+        return (OXUserExtensionInterface) getAllExtensionsAsHash().remove(commonExtensionInterface);
     }
 
     /**
@@ -2577,7 +2578,7 @@ public class User extends ExtendableDataObject implements Cloneable {
      */
     public ArrayList<OXUserExtensionInterface> getExtensionbyName(final String extname) {
         final ArrayList<OXUserExtensionInterface> retval = new ArrayList<OXUserExtensionInterface>();
-        for (final OXCommonExtensionInterface ext : this.extensions) {
+        for (final OXCommonExtensionInterface ext : getAllExtensionsAsHash().values()) {
             if (ext.getExtensionName().equals(extname)) {
                 retval.add((OXUserExtensionInterface) ext);
             }
@@ -2624,14 +2625,6 @@ public class User extends ExtendableDataObject implements Cloneable {
             this.passwordMechset = true;
         }
         this.passwordMech = passwordMech;
-    }
-
-    public final boolean isExtensionsok() {
-        return extensionsok;
-    }
-
-    public final void setExtensionsok(boolean extensionsok) {
-        this.extensionsok = extensionsok;
     }
 
     /**
