@@ -841,6 +841,12 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
      */
     private void checkChangeUserData(final Context ctx, final User newuser, final User dbuser, final PropertyHandler prop) throws StorageException, InvalidDataException {
     
+        if( !prop.getUserProp(AdminProperties.User.PRIMARY_MAIL_UNCHANGEABLE, true) ) {
+            if( newuser.getPrimaryEmail() != null && ! newuser.getPrimaryEmail().equals(dbuser.getPrimaryEmail()) ) {
+                throw new InvalidDataException("primary mail must not be changed");
+            }
+        }
+
         if (newuser.getPassword() != null && newuser.getPassword().trim().length() == 0) {
             throw new InvalidDataException("Empty password is not allowed");
         }
