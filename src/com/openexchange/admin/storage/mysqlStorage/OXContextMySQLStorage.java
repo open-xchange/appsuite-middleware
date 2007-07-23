@@ -2184,7 +2184,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         final UserModuleAccess access = new UserModuleAccess(true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true);
 
         final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
-        tool.checkPrimaryMail(ctx, admin_user.getPrimaryEmail());
+        tool.primaryMailExists(ctx, admin_user.getPrimaryEmail());
         oxs.create(ctx, admin_user, access, ox_write_con, internal_user_id, contact_id, uid_number);
     }
 
