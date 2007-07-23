@@ -1,3 +1,7 @@
+* 2007-07-23 - marcus.klein@open-xchange.com
+
+  - Bugfix #8083: Changed path to GUI for notification links.
+
 * 2007-06-28 - marcus.klein@open-xchange.com
 
   - Bugfix #8007: Partly fix. Disabled possibility to create unbound folders
