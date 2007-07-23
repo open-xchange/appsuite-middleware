@@ -63,10 +63,10 @@ import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 public abstract class OXToolSQLStorage extends OXToolStorageInterface {
 
     /**
-     * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#checkPrimaryMail(int,
+     * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#primaryMailExists(int,
      *      java.lang.String)
      */
-    public abstract void checkPrimaryMail(final Context ctx, final String primary_mail) throws StorageException, InvalidDataException;
+    public abstract void primaryMailExists(final Context ctx, final String primary_mail) throws StorageException, InvalidDataException;
 
     /**
      * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsContext(int)

@@ -83,10 +83,10 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
 
     
     /**
-     * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#checkPrimaryMail(int,
+     * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#primaryMailExists(int,
      *      java.lang.String)
      */
-    public void checkPrimaryMail(final Context ctx, final String primary_mail) throws StorageException, InvalidDataException {
+    public void primaryMailExists(final Context ctx, final String primary_mail) throws StorageException, InvalidDataException {
         Connection con = null;
         PreparedStatement prep_check = null;
         ResultSet rs = null;
@@ -97,8 +97,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             prep_check.setString(2, primary_mail);
             rs = prep_check.executeQuery();
             if (rs.next()) {
-                throw new InvalidDataException("Sent primary mail already exists in this context");
-                // throw USER_EXCEPTIONS.create(0,primary_mail,context_id);
+                throw new InvalidDataException("Primary mail address already exists in this context");
             }
         } catch (final PoolException e) {
             log.error("Pool Error",e);
