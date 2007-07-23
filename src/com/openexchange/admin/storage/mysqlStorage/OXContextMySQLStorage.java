@@ -1111,7 +1111,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 final String def_group_disp_name = prop.getGroupProp("DEFAULT_CONTEXT_GROUP_" + lang.toUpperCase(), "Users");
                 this.oxcontextcommon.createStandardGroupForContext(context_id, ox_write_con, def_group_disp_name, group_id, gid_number);
 
-                createAdminForContext(ctx, admin_user, ox_write_con, internal_user_id_for_admin, contact_id_for_admin, uid_number);
+                this.oxcontextcommon.createAdminForContext(ctx, admin_user, ox_write_con, internal_user_id_for_admin, contact_id_for_admin, uid_number);
                 // create system folder for context
                 // get lang and displayname of admin
                 String display = String.valueOf(admin_user.getId());
@@ -2178,16 +2178,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         }
     }
 
-    private void createAdminForContext(final Context ctx, final User admin_user, final Connection ox_write_con, final int internal_user_id, final int contact_id, final int uid_number) throws StorageException, InvalidDataException {
-        // here implemente the user creation for the context
-        final OXUserStorageInterface oxs = OXUserStorageInterface.getInstance();
-        final UserModuleAccess access = new UserModuleAccess(true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true);
-
-        final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
-        tool.primaryMailExists(ctx, admin_user.getPrimaryEmail());
-        oxs.create(ctx, admin_user, access, ox_write_con, internal_user_id, contact_id, uid_number);
-    }
-
     @Override
     public void change(Context ctx) throws StorageException {
         
@@ -2299,9 +2289,9 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     
                     // now insert all mappings from the hashset if size >0 
                     if(login_map.size()>0){
-                        Iterator itr = login_map.iterator();
+                        Iterator<String> itr = login_map.iterator();
                         while(itr.hasNext()){
-                            String mapping_entry = ((String)itr.next()).trim();
+                            String mapping_entry = (itr.next()).trim();
                             if(mapping_entry.length()>0){
                                 
                                 // check if no mapping which the client wants to add already exists for another context
