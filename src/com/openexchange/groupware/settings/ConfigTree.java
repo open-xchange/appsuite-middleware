@@ -386,7 +386,7 @@ public final class ConfigTree {
             }
             public void getValue(final SessionObject session,
                 final Setting setting) {
-                setting.setSingleValue(String.valueOf(session.getUserObject()
+                setting.setSingleValue(Integer.valueOf(session.getUserObject()
                     .getContactId()));
             }
         });
@@ -543,7 +543,7 @@ public final class ConfigTree {
         tmp.put(defaultaddress.getPath(), new AbstractUserFuncs() {
             public void getValue(final SessionObject session,
                 final Setting setting) {
-                setting.addMultiValue(session.getUserObject().getMail());
+                setting.setSingleValue(session.getUserObject().getMail());
             }
             public boolean isAvailable(final SessionObject session) {
                 return session.getUserConfiguration().hasWebMail();

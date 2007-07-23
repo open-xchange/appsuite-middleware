@@ -94,7 +94,7 @@ public final class Identifier extends AbstractNode {
             }
             public void getValue(final SessionObject session,
                 final Setting setting) {
-                setting.setSingleValue(String.valueOf(session.getUserObject()
+                setting.setSingleValue(Integer.valueOf(session.getUserObject()
                     .getId()));
             }
         };
