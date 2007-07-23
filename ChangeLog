@@ -1,3 +1,9 @@
+* 2007-07-23 - martin.kauss@open-xchange.com
+ 
+ - Fixed bug #8490. The wrong folder was send to the client if a shared folder
+   was requested but the current user was also a participant in an appointment.
+   This has been fixed.
+
 * 2007-07-23 - marcus.klein@open-xchange.com
 
  - Added config tree setting fastgui.
