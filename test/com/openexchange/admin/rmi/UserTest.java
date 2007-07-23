@@ -360,9 +360,7 @@ public class UserTest extends AbstractTest {
         
         
         // now change data
-        System.out.println(srv_loaded);
         srv_loaded = createChangeUserData(srv_loaded);
-        System.out.println(srv_loaded);
         // submit changes
         oxu.change(ctx,srv_loaded,cred);
         
@@ -736,9 +734,11 @@ public class UserTest extends AbstractTest {
         final User retval = (User) usr.clone();
         retval.setUsername(null);
         retval.setEnabled(!usr.getEnabled());        
-        retval.setPrimaryEmail(usr.getPrimaryEmail()+change_suffix);
-        retval.setDefaultSenderAddress(usr.getPrimaryEmail()+change_suffix);
-        retval.setEmail1(usr.getEmail1()+change_suffix);
+        // do not change primary mail, that's forbidden per default, see
+        //PRIMARY_MAIL_UNCHANGEABLE in User.properties
+        // retval.setPrimaryEmail(usr.getPrimaryEmail()+change_suffix);
+        //retval.setEmail1(usr.getEmail1()+change_suffix);
+        //retval.setDefaultSenderAddress(usr.getPrimaryEmail()+change_suffix);
         retval.setEmail2(usr.getEmail2()+change_suffix);
         retval.setEmail3(usr.getEmail3()+change_suffix);
         
@@ -753,8 +753,7 @@ public class UserTest extends AbstractTest {
         for (final String element : aliase) {
             lAliases.add(element + "_" + change_suffix);            
         }
-        lAliases.add(usr.getPrimaryEmail()+change_suffix);
-        lAliases.add(usr.getEmail1()+change_suffix);
+        lAliases.add(usr.getPrimaryEmail());
         
         retval.setAliases(lAliases);        
         
