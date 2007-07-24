@@ -2233,16 +2233,6 @@ public class User extends ExtendableDataObject {
         return this.aliases;
     }
 
-    @Override
-    protected final String[] getMandatoryMembersCreate() {
-        return new String[]{ "username", "display_name", "password", "given_name", "sur_name", "primaryEmail" };
-    }
-    
-    @Override
-    protected final String[] getMandatoryMembersChange() {
-        return null;
-    }
-
     public String getCity_business() {
         return city_business;
     }
@@ -2715,6 +2705,26 @@ public class User extends ExtendableDataObject {
 
     public boolean isDefaultSenderAddressset() {
         return defaultSenderAddressset;
+    }
+
+    @Override
+    protected final String[] getMandatoryMembersCreate() {
+        return new String[]{ "username", "display_name", "password", "given_name", "sur_name", "primaryEmail" };
+    }
+    
+    @Override
+    protected final String[] getMandatoryMembersChange() {
+        return null;
+    }
+
+    @Override
+    protected String[] getMandatoryMembersDelete() {
+        return null;
+    }
+
+    @Override
+    protected String[] getMandatoryMembersRegister() {
+        return null;
     }
 
 }

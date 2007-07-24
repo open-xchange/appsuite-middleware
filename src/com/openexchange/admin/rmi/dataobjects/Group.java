@@ -223,4 +223,16 @@ public class Group extends ExtendableDataObject {
     protected final String[] getMandatoryMembersChange() {
         return new String[]{ "id" };
     }
+
+
+    @Override
+    protected String[] getMandatoryMembersDelete() {
+        return null;
+    }
+
+
+    @Override
+    protected String[] getMandatoryMembersRegister() {
+        return null;
+    }
 }
