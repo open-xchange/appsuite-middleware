@@ -8,6 +8,7 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.ContextExistsException;
+import com.openexchange.admin.rmi.exceptions.EnforceableDataObjectException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
@@ -23,8 +24,12 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
             throw new ContextExistsException("Context already exists!");
         }        
         
-        if (!admin_user.attributesforcreateset()) {
-            throw new InvalidDataException("Mandatory fields in admin user not set");               
+        try {
+            if (!admin_user.mandatoryCreateMembersSet()) {
+                throw new InvalidDataException("Mandatory fields in admin user not set: " + admin_user.getUnsetMembers());               
+            }
+        } catch (EnforceableDataObjectException e) {
+            throw new InvalidDataException(e.getMessage());
         }
     }
 

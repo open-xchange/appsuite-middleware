@@ -142,16 +142,6 @@ public class Resource extends ExtendableDataObject {
         this.description = description;
     }
 
-    public boolean attributesforcreateset() {
-        if (null != this.name && !this.name.equals("") 
-                && null != this.displayname && !this.displayname.equals("")
-                && null != this.email && !this.email.equals("")) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
     public String toString() {
         StringBuilder ret = new StringBuilder();
         ret.append("[ \n");
@@ -234,5 +224,15 @@ public class Resource extends ExtendableDataObject {
     @Override
     public Object clone() throws CloneNotSupportedException {
         return super.clone();
+    }
+
+    @Override
+    protected String[] getMandatoryMembersChange() {
+        return null;
+    }
+
+    @Override
+    protected String[] getMandatoryMembersCreate() {
+        return new String[]{ "name", "displayname", "email"};
     }
 }
