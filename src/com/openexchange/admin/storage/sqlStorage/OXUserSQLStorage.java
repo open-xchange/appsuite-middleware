@@ -195,8 +195,8 @@ public abstract class OXUserSQLStorage extends OXUserStorageInterface {
             method2field.put("Userfield18", "field87");
             method2field.put("Userfield19", "field88");
             method2field.put("Userfield20", "field89");
-            method2field.put("Anniversary", "timestampfield01");
-            method2field.put("Birthday", "timestampfield02");
+            method2field.put("Birthday", "timestampfield01");
+            method2field.put("Anniversary", "timestampfield02");
 
             // For the user table
             final Enumeration<String> keys = method2field.keys();
