@@ -14,6 +14,7 @@ import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
 import com.openexchange.admin.rmi.dataobjects.Server;
+import com.openexchange.admin.rmi.exceptions.EnforceableDataObjectException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
@@ -215,8 +216,12 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
 
         log.debug(db.toString());
 
-        if (!db.attributesforcreateset()) {
-            throw new InvalidDataException("Mandatory fields not set!");
+        try {
+            if (!db.mandatoryCreateMembersSet()) {
+                throw new InvalidDataException("Mandatory fields not set: "+ db.getUnsetMembers());
+            }
+        } catch (EnforceableDataObjectException e) {
+            throw new InvalidDataException(e.getMessage());
         }
 
         final OXUtilStorageInterface oxcox = OXUtilStorageInterface.getInstance();
@@ -235,11 +240,15 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
 
         log.debug(db.toString());
 
-        if (!db.attributesfordeleteset()) {
-            throw new InvalidDataException("Mandatory fields not set!");
-        } else {
-            final OXUtilStorageInterface oxcox = OXUtilStorageInterface.getInstance();
-            oxcox.deleteDatabase(db);
+        try {
+            if (!db.mandatoryDeleteMembersSet()) {
+                throw new InvalidDataException("Mandatory fields not set: " + db.getUnsetMembers());
+            } else {
+                final OXUtilStorageInterface oxcox = OXUtilStorageInterface.getInstance();
+                oxcox.deleteDatabase(db);
+            }
+        } catch (EnforceableDataObjectException e) {
+            throw new InvalidDataException(e.getMessage());
         }
     }
 
@@ -255,8 +264,12 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
 
         log.debug(db.toString());
 
-        if (!db.attributesforregisterset()) {
-            throw new InvalidDataException("Mandatory fields not set!");
+        try {
+            if (!db.mandatoryRegisterMembersSet()) {
+                throw new InvalidDataException("Mandatory fields not set: " + db.getUnsetMembers());
+            }
+        } catch (EnforceableDataObjectException e) {
+            throw new InvalidDataException(e.getMessage());
         }
 
         if (null == db.getDriver()) {

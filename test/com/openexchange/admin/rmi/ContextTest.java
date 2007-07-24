@@ -186,7 +186,7 @@ public class ContextTest extends AbstractTest {
     }
 
     @Test
-    public void testCreateontext() throws Exception {
+    public void testCreateContext() throws Exception {
         final Credentials cred = DummyMasterCredentials();
         Context ctxset = getTestContextObject(cred);
         addContext(ctxset, getRMIHostUrl(), cred);
@@ -306,7 +306,7 @@ public class ContextTest extends AbstractTest {
     }
 
     public static Context getTestContextObject(Credentials cred) throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException {
-        return getTestContextObject(createNewContextID(cred), 50);
+        return getTestContextObject(createNewContextID(cred), 5000);
     }
 
     public static Context getTestContextObject(int context_id, long quota_max_in_mb) {
@@ -315,6 +315,7 @@ public class ContextTest extends AbstractTest {
         filestore.setSize(quota_max_in_mb);
         ctx.setFilestoreId(filestore.getId());
         ctx.setName("Name-"+ctx.getIdAsInt());
+        ctx.setMaxQuota(quota_max_in_mb);
         return ctx;
     }
 
