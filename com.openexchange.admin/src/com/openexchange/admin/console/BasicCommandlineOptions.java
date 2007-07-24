@@ -504,9 +504,8 @@ public abstract class BasicCommandlineOptions {
     @SuppressWarnings("unchecked")
     protected final void printExtensionsError(final ExtendableDataObject obj) {
         //+ loop through extensions and check for errors       
-        if (obj != null && obj.getAllExtensions() != null) {
-            final ArrayList<OXCommonExtension> obj_exts = (ArrayList<OXCommonExtension>) obj.getAllExtensions();
-            for (final OXCommonExtension obj_extension : obj_exts) {
+        if (obj != null && obj.getAllExtensionsAsHash() != null) {
+            for (final OXCommonExtension obj_extension : obj.getAllExtensionsAsHash().values()) {
                 if (obj_extension.getExtensionError() != null) {
                     printServerResponse(obj_extension.getExtensionError());
                 }
