@@ -87,6 +87,11 @@ public abstract class ExtendableDataObject implements Serializable, Cloneable {
         }
     }
 
+    /**
+     * @param index
+     * @return
+     * @deprecated
+     */
     public OXCommonExtensionInterface removeOneExtensionByIndex(final int index) {
         return extensions.remove(index);
     }
