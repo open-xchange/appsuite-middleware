@@ -2,12 +2,13 @@ package com.openexchange.admin.rmi.extensions;
 
 import java.io.Serializable;
 
+/**
+ * 
+ * 
+ * @author d7
+ * @deprecated This interface will be removed with next version use the abstract class OXCommonExtensionInterface instead
+ */
 public interface OXCommonExtensionInterface extends Serializable {
-    /**
-     * @return the extensionName
-     */
-    public String getExtensionName();
-
     /**
      * If an error has occured you get the error text of the extension
      * here

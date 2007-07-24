@@ -65,7 +65,7 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Group;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
-import com.openexchange.admin.rmi.extensions.OXCommonExtensionInterface;
+import com.openexchange.admin.rmi.extensions.OXCommonExtension;
 
 /**
  * 
@@ -344,8 +344,8 @@ public class GroupTest extends AbstractTest {
         assertEquals("members not equal", a.getMembers(), b.getMembers());
         assertEquals("id not equal", a.getId(), b.getId());
         
-        final Collection<OXCommonExtensionInterface> aexts = a.getAllExtensionsAsHash().values();
-        final Collection<OXCommonExtensionInterface> bexts = b.getAllExtensionsAsHash().values();
+        final Collection<OXCommonExtension> aexts = a.getAllExtensionsAsHash().values();
+        final Collection<OXCommonExtension> bexts = b.getAllExtensionsAsHash().values();
         if (aexts.size() == bexts.size()) {
             aexts.containsAll(bexts);
 //            for (int i = 0; i < aexts.size(); i++) {
