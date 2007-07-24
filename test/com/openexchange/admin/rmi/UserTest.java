@@ -66,10 +66,10 @@ import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Locale;
 import java.util.TimeZone;
 
@@ -686,14 +686,15 @@ public class UserTest extends AbstractTest {
         assertEquals("Userfield18 not equal", a.getUserfield18(), b.getUserfield18());
         assertEquals("Userfield19 not equal", a.getUserfield19(), b.getUserfield19());
         assertEquals("Userfield20 not equal", a.getUserfield20(), b.getUserfield20());
-        final ArrayList<OXCommonExtensionInterface> aexts = a.getAllExtensions();
-        final ArrayList<OXCommonExtensionInterface> bexts = b.getAllExtensions();
+        final Hashtable<String, OXCommonExtensionInterface> aexts = a.getAllExtensionsAsHash();
+        final Hashtable<String, OXCommonExtensionInterface> bexts = b.getAllExtensionsAsHash();
         if (aexts.size() == bexts.size()) {
-            for (int i = 0; i < aexts.size(); i++) {
-                final OXCommonExtensionInterface aext = aexts.get(i);
-                final OXCommonExtensionInterface bext = bexts.get(i);
-                assertTrue("Extensions not equal: " + aext.toString() + ",\n" + bext.toString(), aext.equals(bext));
-            }
+            assertTrue("Extensions not equal: " + aexts.toString() + ",\n" + bexts.toString(), aexts.values().containsAll(bexts.values()));
+//            for (int i = 0; i < aexts.size(); i++) {
+//                final OXCommonExtensionInterface aext = aexts.get(i);
+//                final OXCommonExtensionInterface bext = bexts.get(i);
+//                assertTrue("Extensions not equal: " + aext.toString() + ",\n" + bext.toString(), aext.equals(bext));
+//            }
         }
     }
 
