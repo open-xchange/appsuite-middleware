@@ -235,4 +235,14 @@ public class Resource extends ExtendableDataObject {
     protected String[] getMandatoryMembersCreate() {
         return new String[]{ "name", "displayname", "email"};
     }
+
+    @Override
+    protected String[] getMandatoryMembersDelete() {
+        return null;
+    }
+
+    @Override
+    protected String[] getMandatoryMembersRegister() {
+        return null;
+    }
 }
