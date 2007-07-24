@@ -47,30 +47,32 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit.encodings;
 
 import java.io.IOException;
 
-import sun.misc.BASE64Decoder;
-import sun.misc.BASE64Encoder;
-
+import com.openexchange.tools.encoding.Base64;
 import com.openexchange.tools.versit.Encoding;
 
 /**
  * @author Viktor Pracht
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class BASE64Encoding implements Encoding {
 
-	public String decode(final String text) throws IOException {
-		return new String((new BASE64Decoder()).decodeBuffer(text),
-				"ISO-8859-1");
-	}
+    /**
+     * Default constructor.
+     */
+    public BASE64Encoding() {
+        super();
+    }
 
-	public String encode(final String text) throws IOException {
-		return (new BASE64Encoder()).encode(text.getBytes("ISO-8859-1"))
-				.replaceAll("[\\r\\n]", "");
-	}
+    public String decode(final String text) throws IOException {
+        return new String(Base64.decode(text), "ISO-8859-1");
+    }
+
+    public String encode(final String text) throws IOException {
+        return Base64.encode(text.getBytes("ISO-8859-1"));
+    }
 
 }
