@@ -7,7 +7,7 @@ import java.util.Hashtable;
 import com.openexchange.admin.rmi.exceptions.DuplicateExtensionException;
 import com.openexchange.admin.rmi.extensions.OXCommonExtensionInterface;
 
-public abstract class ExtendableDataObject implements Serializable, Cloneable {
+public abstract class ExtendableDataObject extends EnforceableDataObject implements Serializable, Cloneable {
 
     private Hashtable<String, OXCommonExtensionInterface> extensions = null;
 

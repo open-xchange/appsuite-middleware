@@ -2233,12 +2233,14 @@ public class User extends ExtendableDataObject {
         return this.aliases;
     }
 
-    public boolean attributesforcreateset() {
-        if (null != this.username && !this.username.equals("") && null != this.display_name && !this.display_name.equals("") && null != this.password && !this.password.equals("") && null != this.given_name && !this.given_name.equals("") && null != this.sur_name && !this.sur_name.equals("") && null != this.primaryEmail && !this.primaryEmail.equals("")) {
-            return true;
-        } else {
-            return false;
-        }
+    @Override
+    protected final String[] getMandatoryMembersCreate() {
+        return new String[]{ "username", "display_name", "password", "given_name", "sur_name", "primaryEmail" };
+    }
+    
+    @Override
+    protected final String[] getMandatoryMembersChange() {
+        return null;
     }
 
     public String getCity_business() {

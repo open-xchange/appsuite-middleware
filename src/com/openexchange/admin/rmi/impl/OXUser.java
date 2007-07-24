@@ -80,6 +80,7 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
+import com.openexchange.admin.rmi.exceptions.EnforceableDataObjectException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
@@ -348,6 +349,9 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         } catch (final InvalidDataException e2) {
             log.error(e2.getMessage(), e2);
             throw e2;
+        } catch (EnforceableDataObjectException e) {
+            log.error(e.getMessage(), e);
+            throw new InvalidDataException(e.getMessage());
         }
 
         final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
@@ -913,7 +917,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
     }
 
-    private void checkCreateUserData(final Context ctx, final User usr, final PropertyHandler prop) throws InvalidDataException {
+    private void checkCreateUserData(final Context ctx, final User usr, final PropertyHandler prop) throws InvalidDataException, EnforceableDataObjectException {
         final Locale langus = OXUser.getLanguage(usr);
         if (langus.getLanguage().indexOf('_') != -1 || langus.getCountry().indexOf('_') != -1) {
             throw new InvalidDataException("The specified locale data (Language:" + langus.getLanguage() + " - Country:" + langus.getCountry() + ") for users language is invalid!");
@@ -923,8 +927,8 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             throw new InvalidDataException("Empty password is not allowed");
         }
     
-        if (!usr.attributesforcreateset()) {
-            throw new InvalidDataException("Mandatory fields not set");
+        if( ! usr.mandatoryCreateMembersSet() ) {
+            throw new InvalidDataException("Mandatory fields not set: " + usr.getUnsetMembers() );
         }
     
         if (prop.getUserProp(AdminProperties.User.CHECK_NOT_ALLOWED_CHARS, true)) {

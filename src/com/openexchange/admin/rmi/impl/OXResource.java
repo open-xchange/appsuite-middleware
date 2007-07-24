@@ -47,7 +47,7 @@
  *
  */
 /*
- * $Id: OXResource.java,v 1.40 2007/07/23 19:16:32 dennis Exp $
+ * $Id: OXResource.java,v 1.41 2007/07/24 13:05:37 choeger Exp $
  */
 package com.openexchange.admin.rmi.impl;
 
@@ -71,6 +71,7 @@ import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Resource;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
+import com.openexchange.admin.rmi.exceptions.EnforceableDataObjectException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
@@ -217,8 +218,8 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
                 throw new InvalidDataException("Resource with this email address already exists");
             }
 
-            if (!res.attributesforcreateset()) {
-                throw new InvalidDataException("Mandatory fields not set");
+            if (!res.mandatoryCreateMembersSet()) {
+                throw new InvalidDataException("Mandatory fields not set: " + res.getUnsetMembers());
                 // TODO: cutmasta look here
             }
 
@@ -238,6 +239,8 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
         } catch (final InvalidDataException e2) {
             log.error(e2.getMessage(), e2);
             throw e2;
+        } catch (EnforceableDataObjectException e) {
+            throw new InvalidDataException(e.getMessage());
         }
        
        final OXResourceStorageInterface oxRes = OXResourceStorageInterface.getInstance();

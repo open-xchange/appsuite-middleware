@@ -134,23 +134,7 @@ public class Group extends ExtendableDataObject {
         this.members = val;
     }
 
-    public boolean attributesforcreateset() {
-        if (this.displayname != null && !this.displayname.equals("")
-                && this.name != null && !this.name.equals("")) {
-            return true;
-        } else {
-            return false;
-        }
-    }
 
-    public boolean attributesforchangeset() {
-        if (this.id != -1) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-    
     public String toString() {
         StringBuilder ret = new StringBuilder();
         ret.append("[ \n");
@@ -228,5 +212,15 @@ public class Group extends ExtendableDataObject {
             }
         }
         return null;
+    }
+
+    @Override
+    protected String[] getMandatoryMembersCreate() {
+        return new String[]{ "displayname", "name" };
+    }
+    
+    @Override
+    protected final String[] getMandatoryMembersChange() {
+        return new String[]{ "id" };
     }
 }
