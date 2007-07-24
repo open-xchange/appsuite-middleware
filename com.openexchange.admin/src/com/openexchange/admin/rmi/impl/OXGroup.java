@@ -69,6 +69,7 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Group;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
+import com.openexchange.admin.rmi.exceptions.EnforceableDataObjectException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
@@ -218,8 +219,12 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         
         checkSchemaBeingLocked(ctx, tool);
      
-        if (!grp.attributesforchangeset()) {
-            throw new InvalidDataException("Mandatory fields not set");
+        try {
+            if (!grp.mandatoryChangeMembersSet()) {
+                throw new InvalidDataException("Mandatory fields not set: " + grp.getUnsetMembers());
+            }
+        } catch (EnforceableDataObjectException e2) {
+            throw new InvalidDataException(e2.getMessage());
         }
 
         if (grp.getName() != null  && prop.getGroupProp(AdminProperties.Group.AUTO_LOWERCASE,true)) {
@@ -309,8 +314,8 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         checkSchemaBeingLocked(ctx, tool);
         
         try {
-            if (!grp.attributesforcreateset()) {
-                throw new InvalidDataException("Mandatory fields not set");
+            if (!grp.mandatoryCreateMembersSet()) {
+                throw new InvalidDataException("Mandatory fields not set: " + grp.getUnsetMembers());
             }
 
             if (prop.getGroupProp(AdminProperties.Group.AUTO_LOWERCASE, true)) {
@@ -343,6 +348,8 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         } catch (final NoSuchUserException e) {
             log.error(e.getMessage(), e);
             throw e;
+        } catch (EnforceableDataObjectException e) {
+            throw new InvalidDataException(e.getMessage());
         }
 
         final OXGroupStorageInterface oxGroup = OXGroupStorageInterface.getInstance();
