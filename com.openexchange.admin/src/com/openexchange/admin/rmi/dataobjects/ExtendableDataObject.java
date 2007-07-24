@@ -5,11 +5,11 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 
 import com.openexchange.admin.rmi.exceptions.DuplicateExtensionException;
-import com.openexchange.admin.rmi.extensions.OXCommonExtensionInterface;
+import com.openexchange.admin.rmi.extensions.OXCommonExtension;
 
 public abstract class ExtendableDataObject extends EnforceableDataObject implements Serializable, Cloneable {
 
-    private Hashtable<String, OXCommonExtensionInterface> extensions = null;
+    private Hashtable<String, OXCommonExtension> extensions = null;
 
     private final boolean extensionsset = false;
     
@@ -19,8 +19,8 @@ public abstract class ExtendableDataObject extends EnforceableDataObject impleme
      */
     private boolean extensionsok = true;
     
-    public void addExtension(final OXCommonExtensionInterface extension) throws DuplicateExtensionException {
-        final String extensionName = extension.getExtensionName();
+    public void addExtension(final OXCommonExtension extension) throws DuplicateExtensionException {
+        final String extensionName = extension.getClass().getName();
         if (this.extensions.containsKey(extensionName)) {
             throw new DuplicateExtensionException(extensionName);
         }
@@ -32,11 +32,11 @@ public abstract class ExtendableDataObject extends EnforceableDataObject impleme
      * 
      * @deprecated Will be removed with next release. Please use getAllExtensionsAsHash instead
      */
-    public ArrayList<OXCommonExtensionInterface> getAllExtensions() {
-        return new ArrayList<OXCommonExtensionInterface>(this.extensions.values());
+    public ArrayList<OXCommonExtension> getAllExtensions() {
+        return new ArrayList<OXCommonExtension>(this.extensions.values());
     }
 
-    public Hashtable<String, OXCommonExtensionInterface> getAllExtensionsAsHash() {
+    public Hashtable<String, OXCommonExtension> getAllExtensionsAsHash() {
         return this.extensions;
     }
     
@@ -46,13 +46,13 @@ public abstract class ExtendableDataObject extends EnforceableDataObject impleme
      * or an empty array if no fitting extension was found.
      * 
      * @param extname a String for the extension
-     * @return the ArrayList of {@link OXCommonExtensionInterface} with extname
+     * @return the ArrayList of {@link OXCommonExtension} with extname
      * @deprecated Will be removed with next release
      */
-    public ArrayList<OXCommonExtensionInterface> getExtensionsbyName(final String extname) {
-        final ArrayList<OXCommonExtensionInterface> retval = new ArrayList<OXCommonExtensionInterface>();
-        for (final OXCommonExtensionInterface ext : this.extensions.values()) {
-            if (ext.getExtensionName().equals(extname)) {
+    public ArrayList<OXCommonExtension> getExtensionsbyName(final String extname) {
+        final ArrayList<OXCommonExtension> retval = new ArrayList<OXCommonExtension>();
+        for (final OXCommonExtension ext : this.extensions.values()) {
+            if (extname.equals(ext.getClass().getName())) {
                 retval.add(ext);
             }
         }
@@ -67,7 +67,7 @@ public abstract class ExtendableDataObject extends EnforceableDataObject impleme
      * @param extname
      * @return
      */
-    public OXCommonExtensionInterface getFirstExtensionByName(final String extname) {
+    public OXCommonExtension getFirstExtensionByName(final String extname) {
         return this.extensions.get(extname);
     }
     
@@ -79,8 +79,8 @@ public abstract class ExtendableDataObject extends EnforceableDataObject impleme
         return extensionsset;
     }
 
-    public boolean removeExtension(final OXCommonExtensionInterface o) {
-        if (null == extensions.remove(o.getExtensionName())) {
+    public boolean removeExtension(final OXCommonExtension o) {
+        if (null == extensions.remove(o.getClass().getName())) {
             return false;
         } else {
             return true;
@@ -92,7 +92,7 @@ public abstract class ExtendableDataObject extends EnforceableDataObject impleme
      * @return
      * @deprecated
      */
-    public OXCommonExtensionInterface removeOneExtensionByIndex(final int index) {
+    public OXCommonExtension removeOneExtensionByIndex(final int index) {
         return extensions.remove(index);
     }
     
@@ -101,14 +101,14 @@ public abstract class ExtendableDataObject extends EnforceableDataObject impleme
     }
     
     protected void initExtendable() {
-        this.extensions = new Hashtable<String, OXCommonExtensionInterface>(3);
+        this.extensions = new Hashtable<String, OXCommonExtension>(3);
     }
 
     @Override
     protected Object clone() throws CloneNotSupportedException {
         final ExtendableDataObject object = (ExtendableDataObject) super.clone();
         if( this.extensions != null ) {
-            object.extensions = new Hashtable<String, OXCommonExtensionInterface>(this.extensions);
+            object.extensions = new Hashtable<String, OXCommonExtension>(this.extensions);
         }
         return object;
     }
@@ -116,10 +116,10 @@ public abstract class ExtendableDataObject extends EnforceableDataObject impleme
     @Override
     public String toString() {
         final StringBuilder ret = new StringBuilder(super.toString());
-        for (final OXCommonExtensionInterface usrext : extensions.values()) {
+        for (final OXCommonExtension usrext : extensions.values()) {
             ret.append("  ");
             ret.append("Extension ");
-            ret.append(usrext.getExtensionName());
+            ret.append(usrext.getClass().getName());
             ret.append(" contains: \n");
             ret.append("  ");
             ret.append(usrext.toString());

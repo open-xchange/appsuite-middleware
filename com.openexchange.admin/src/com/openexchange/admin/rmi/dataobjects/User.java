@@ -59,7 +59,7 @@ import java.util.Hashtable;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import com.openexchange.admin.rmi.extensions.OXCommonExtensionInterface;
+import com.openexchange.admin.rmi.extensions.OXCommonExtension;
 import com.openexchange.admin.rmi.extensions.OXUserExtensionInterface;
 
 /**
@@ -2522,7 +2522,7 @@ public class User extends ExtendableDataObject {
      * This method will go away with the next update
      */
     public void addExtension(final OXUserExtensionInterface extension) {
-        getAllExtensionsAsHash().put(extension.getExtensionName(), extension);
+        getAllExtensionsAsHash().put(extension.getClass().getName(), (OXCommonExtension) extension);
     }
 
     /**
@@ -2534,7 +2534,7 @@ public class User extends ExtendableDataObject {
     @Deprecated
     public ArrayList<OXUserExtensionInterface> getExtensions() {
         final ArrayList<OXUserExtensionInterface> retval = new ArrayList<OXUserExtensionInterface>();
-        for (final OXCommonExtensionInterface commoninterface : getAllExtensionsAsHash().values()) {
+        for (final OXCommonExtension commoninterface : getAllExtensionsAsHash().values()) {
             retval.add((OXUserExtensionInterface) commoninterface);
         }
         return retval;
@@ -2546,7 +2546,7 @@ public class User extends ExtendableDataObject {
      * @deprecated Will be removed with next version. Use removeExtension(final OXCommonExtensionInterface o) instead
      */
     public boolean removeExtension(final OXUserExtensionInterface o) {
-        if (null == getAllExtensionsAsHash().remove(o.getExtensionName())) {
+        if (null == getAllExtensionsAsHash().remove(o.getClass().getName())) {
             return false;
         } else {
             return true;
@@ -2561,8 +2561,8 @@ public class User extends ExtendableDataObject {
      *             away with the next update
      */
     public OXUserExtensionInterface removeExtensionByIndex(final int index) {
-        final ArrayList<OXCommonExtensionInterface> retval = new ArrayList<OXCommonExtensionInterface>(getAllExtensionsAsHash().values());
-        final OXCommonExtensionInterface commonExtensionInterface = retval.get(index);
+        final ArrayList<OXCommonExtension> retval = new ArrayList<OXCommonExtension>(getAllExtensionsAsHash().values());
+        final OXCommonExtension commonExtensionInterface = retval.get(index);
         return (OXUserExtensionInterface) getAllExtensionsAsHash().remove(commonExtensionInterface);
     }
 
@@ -2580,8 +2580,8 @@ public class User extends ExtendableDataObject {
      */
     public ArrayList<OXUserExtensionInterface> getExtensionbyName(final String extname) {
         final ArrayList<OXUserExtensionInterface> retval = new ArrayList<OXUserExtensionInterface>();
-        for (final OXCommonExtensionInterface ext : getAllExtensionsAsHash().values()) {
-            if (ext.getExtensionName().equals(extname)) {
+        for (final OXCommonExtension ext : getAllExtensionsAsHash().values()) {
+            if (extname.equals(ext.getClass().getName())) {
                 retval.add((OXUserExtensionInterface) ext);
             }
         }
