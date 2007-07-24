@@ -50,6 +50,8 @@ public class DeleteReason extends UtilAbstraction {
             mrs[0] = new MaintenanceReason();
             mrs[0].setId(reason_id);
             oxutil.deleteMaintenanceReason(mrs, auth);
+            
+            displayDeletedMessage();
             sysexit(0);
         } catch (final java.rmi.ConnectException neti) {
             printError(neti.getMessage());
