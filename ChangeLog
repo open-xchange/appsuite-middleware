@@ -1,6 +1,7 @@
 * 2007-07-23 - marcus.klein@open-xchange.com
 
  - Improved SQL command when listing deleted tasks.
+ - Removed Suns BASE64 en/decoder.
 
 * 2007-07-23 - martin.kauss@open-xchange.com
  

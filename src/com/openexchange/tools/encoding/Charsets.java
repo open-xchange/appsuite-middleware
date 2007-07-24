@@ -49,49 +49,28 @@
 
 package com.openexchange.tools.encoding;
 
+import java.nio.charset.Charset;
+
 /**
- * Central entry point for a base64 en/decoder.
- * @author <a href="mailto:martin.kauss@netline-is.de">Martin Kauss</a>
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * Class for storing character sets.
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class Base64 {
-    
-	/**
+public final class Charsets {
+
+    /**
+     * US-ASCII character set.
+     */
+    public static final Charset US_ASCII = Charset.forName("US-ASCII");
+
+    /**
+     * UTF-8 character set.
+     */
+    public static final Charset UTF_8 = Charset.forName("UTF-8");
+
+    /**
      * Prevent instanciation.
-	 */
-    private Base64() {
-		super();
-	}
-
-	/**
-     * Encodes some binary data into base64.
-	 * @param bytes binary data to encode.
-	 * @return a string containing the encoded data.
-	 */
-	public static String encode(final byte[] bytes) {
-        return new String(org.apache.commons.codec.binary.Base64
-            .encodeBase64(bytes), Charsets.US_ASCII);
-	}
-
-	/**
-     * Converts the string using UTF-8 character set encoding and encodes then
-     * into base64.
-	 * @param source string the encode.
-	 * @return the base64 data for the string.
-	 */
-	public static String encode(final String source) {
-        return encode(source.getBytes(Charsets.UTF_8));
-	}
-
-	/**
-     * Decodes some base64 data.
-	 * @param source string to decode.
-	 * @return the decoded data.
-	 */
-	public static byte[] decode(final String source) {
-        return org.apache.commons.codec.binary.Base64.decodeBase64(source
-            .getBytes(Charsets.US_ASCII));
-	}
+     */
+    private Charsets() {
+        super();
+    }
 }
-
-

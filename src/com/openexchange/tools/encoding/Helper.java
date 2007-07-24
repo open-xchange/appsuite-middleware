@@ -51,6 +51,8 @@
 package com.openexchange.tools.encoding;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
+import java.nio.charset.UnsupportedCharsetException;
 
 import javax.mail.internet.MimeUtility;
 
@@ -93,7 +95,12 @@ public class Helper {
 		}
 		if (!isAscii) {
 			if (internetExplorer) {
-				encoded = URLCoder.encode(orig, encoding);
+                try {
+                    final Charset charset = Charset.forName(encoding);
+                    encoded = URLCoder.encode(orig, charset);
+                } catch (UnsupportedCharsetException uce) {
+                    throw new UnsupportedEncodingException(uce.getMessage());
+                }
 			} else {
 				encoded = MimeUtility.encodeText(orig, encoding, "B");
 			}

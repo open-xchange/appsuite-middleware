@@ -53,7 +53,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-import sun.misc.BASE64Encoder;
+import com.openexchange.tools.encoding.Base64;
 
 /**
  * Tool methods for users.
@@ -91,7 +91,7 @@ public final class UserTools {
             final MessageDigest sha = MessageDigest.getInstance(HASH_ALGO);
             sha.update(password.getBytes(UTF_8));
             final byte[] hash = sha.digest();
-            hashed = new BASE64Encoder().encode(hash);
+            hashed = Base64.encode(hash);
         } catch (final NoSuchAlgorithmException e) {
             throw new UserException(UserException.Code.HASHING, e, HASH_ALGO);
         } catch (final UnsupportedEncodingException e) {

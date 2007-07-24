@@ -52,6 +52,8 @@
 package com.openexchange.sessiond;
 
 import com.openexchange.ssl.SSLSocket;
+import com.openexchange.tools.encoding.Base64;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
@@ -184,7 +186,7 @@ public class SessionRequest implements Runnable {
 	
 	protected void actionAdd(final String[] data, final OutputStream os) {
 		try {
-			final String authData = new String(new sun.misc.BASE64Decoder().decodeBuffer(data[3]), "UTF-8");
+			final String authData = new String(Base64.decode(data[3]), "UTF-8");
 			
 			final String[] sAuthData = authData.split("\1");
 			
@@ -245,7 +247,7 @@ public class SessionRequest implements Runnable {
 	
 	protected void actionGetSessions(final String[] data, final OutputStream os) {
 		try {
-			final String authData = new String(new sun.misc.BASE64Decoder().decodeBuffer(data[1]), "UTF-8");
+			final String authData = new String(Base64.decode(data[1]), "UTF-8");
 			
 			long l_cr = 0;
 			long l_lt = 0;
@@ -265,8 +267,6 @@ public class SessionRequest implements Runnable {
 				final long current = System.currentTimeMillis();
 				final Iterator it = SessionHandler.getSessions();
 				
-				final sun.misc.BASE64Encoder encoder = new sun.misc.BASE64Encoder();
-				
 				while (it.hasNext()) {
 					sessionobject = (SessionObject)it.next();
 					tmp_sessionid = sessionobject.getSessionID();
@@ -278,7 +278,7 @@ public class SessionRequest implements Runnable {
 					if ((l_ts + l_lt) < current) {
 						it.remove();
 					} else {
-						final String response = encoder.encode((sessionobject.getUsername() + "\1" + sessionobject.getLanguage() + "\1" + sessionobject.getLocalIp() + "\1" + l_cr + "\1" + l_lt).getBytes("UTF-8"));
+						final String response = Base64.encode((sessionobject.getUsername() + "\1" + sessionobject.getLanguage() + "\1" + sessionobject.getLocalIp() + "\1" + l_cr + "\1" + l_lt).getBytes("UTF-8"));
 						
 						os.write((tmp_sessionid + ' ' + response + "\n\1\n").getBytes());
 						os.flush();

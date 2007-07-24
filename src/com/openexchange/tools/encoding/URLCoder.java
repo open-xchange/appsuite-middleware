@@ -47,30 +47,30 @@
  *
  */
 
-
-
 package com.openexchange.tools.encoding;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.util.BitSet;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * URL encoding and decoding. RFC 2396
- * 
- * @author <a href="mailto:m.klein@comfire.de">Marcus Klein </a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein </a>
  */
 public final class URLCoder {
 	
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(URLCoder.class);
+	private static final Log LOG = LogFactory.getLog(URLCoder.class);
 
 	private URLCoder() {
 		super();
 	}
 
-	public static String encode(final String s) throws UnsupportedEncodingException {
-		return encode(s, "UTF-8");
+	public static String encode(final String source) {
+		return encode(source, Charsets.UTF_8);
 	}
 
     /**
@@ -79,28 +79,22 @@ public final class URLCoder {
      * @return the decoded URL.
      */
     public static String decode(final String url) {
-        try {
-            return decode(url, "UTF-8");
-        } catch (UnsupportedEncodingException uee) {
-            // Normally an UnsupportedEncodingException should not be thrown if
-            // the charset UTF-8 is used.
-            throw new RuntimeException(uee);
-        }
+        return decode(url, Charsets.UTF_8);
     }
 
-	public static String decode(final String s, final String encoding) throws UnsupportedEncodingException {
+	public static String decode(final String source, final Charset charset) {
 		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		int pos = 0;
-		while (pos < s.length()) {
-			final char c = s.charAt(pos++);
-			if ('\u0025' == c) {
-				baos.write(Hex.toByte(s.substring(pos, pos + 2)));
+		while (pos < source.length()) {
+			final char chr = source.charAt(pos++);
+			if ('\u0025' == chr) {
+				baos.write(Hex.toByte(source.substring(pos, pos + 2)));
 				pos += 2;
 			} else {
-				baos.write((byte) c);
+				baos.write((byte) chr);
 			}
 		}
-		final String retval = new String(baos.toByteArray(), encoding);
+		final String retval = new String(baos.toByteArray(), charset);
 		try {
 			baos.close();
 		} catch (IOException e) {
@@ -109,18 +103,18 @@ public final class URLCoder {
 		return retval;
 	}
 
-	public static String encode(final String s, final String encoding) throws UnsupportedEncodingException {
-		final byte[] b = s.getBytes(encoding);
-		final StringBuilder sb = new StringBuilder(b.length);
-		for (int i = 0; i < b.length; i++) {
-			if (needToBeEncoded.get(b[i] < 0 ? 256 + b[i] : b[i])) {
-				sb.append('\u0025');
-				sb.append(Hex.toHex(b[i]));
+	public static String encode(final String source, final Charset charset) {
+		final byte[] bytes = source.getBytes(charset);
+		final StringBuilder builder = new StringBuilder(bytes.length);
+		for (int i = 0; i < bytes.length; i++) {
+			if (needToBeEncoded.get(bytes[i] < 0 ? 256 + bytes[i] : bytes[i])) {
+				builder.append('\u0025');
+				builder.append(Hex.toHex(bytes[i]));
 			} else {
-				sb.append((char) b[i]);
+				builder.append((char) bytes[i]);
 			}
 		}
-		return sb.toString();
+		return builder.toString();
 	}
 
 	private static BitSet needToBeEncoded = new BitSet(256);

@@ -72,6 +72,7 @@ import com.openexchange.sessiond.SessiondException;
 import com.openexchange.sessiond.UserNotActivatedException;
 import com.openexchange.sessiond.UserNotFoundException;
 import com.openexchange.tools.StringCollection;
+import com.openexchange.tools.encoding.Base64;
 
 /**
  * This servlet can be used as super class for all OX webdav servlets.
@@ -265,8 +266,7 @@ public abstract class OXServlet extends WebDavServlet {
             throw new IOException(
                 "Authorization header is missing the leading \"basic\"!");
         }
-        final byte[] decoded = new sun.misc.BASE64Decoder().decodeBuffer(auth
-            .substring(6));
+        final byte[] decoded = Base64.decode(auth.substring(6));
         final String userpass = new String(decoded, "UTF-8").trim();
         final int delimiter = userpass.indexOf(':');
         String user = "";
