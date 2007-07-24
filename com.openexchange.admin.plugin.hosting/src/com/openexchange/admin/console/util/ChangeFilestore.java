@@ -49,7 +49,7 @@ public class ChangeFilestore extends FileStoreAbstraction {
     
             oxutil.changeFilestore(fstore, auth);
             
-            System.out.println(SUCCESSFULLY_CHANGED);
+            displayChangedMessage();
             sysexit(0);
         } catch (final java.rmi.ConnectException neti) {
             printError(neti.getMessage());

@@ -42,7 +42,7 @@ public class UnregisterFilestore extends FileStoreAbstraction {
 
             oxutil.unregisterFilestore(fstore, auth);
             
-            System.out.println(SUCCESSFULLY_UNREGISTERED);
+            displayUnregisteredMessage();
             sysexit(0);
         } catch (final java.rmi.ConnectException neti) {
             printError(neti.getMessage());

@@ -49,6 +49,7 @@ public class UnregisterServer extends UtilAbstraction {
             sv.setId(Integer.parseInt((String) parser.getOptionValue(serverIdOption)));
             oxutil.unregisterServer(sv, auth);
             
+            displayUnregisteredMessage();
             sysexit(0);
         } catch (final java.rmi.ConnectException neti) {
             printError(neti.getMessage());

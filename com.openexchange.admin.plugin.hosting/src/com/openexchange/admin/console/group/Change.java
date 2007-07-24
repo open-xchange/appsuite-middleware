@@ -15,10 +15,6 @@ public class Change extends ChangeCore {
         new Change(args);
     }
 
-    private Change() {
-
-    }
-
     public Change(final String[] args2) {
 
         final AdminParser parser = new AdminParser("changegroup");
