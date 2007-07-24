@@ -66,13 +66,13 @@ class Folder {
     /**
      * Unique identifier of the folder.
      */
-    private final transient int identifier;
+    private final int identifier;
 
     /**
      * Unique identifier of the user or <code>MAIN_FOLDER</code> if the folder
      * is the main folder of the task.
      */
-    private final transient int user;
+    private final int user;
 
     /**
      * Default constructor.

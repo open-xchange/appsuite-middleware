@@ -52,6 +52,7 @@ package com.openexchange.groupware.tasks;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.server.OCLPermission;
@@ -96,5 +97,14 @@ public final class Access {
             || (noPrivate && task.getPrivateFlag())) {
             throw new TaskException(Code.NO_DELETE_PERMISSION);
         }
+    }
+
+    static boolean isTaskInFolder(final Task task, final int folderId) {
+        boolean found = task.getParentFolderID() == folderId;
+        final UserParticipant[] parts = task.getUsers();
+        for (int i = 0; !found && i < parts.length; i++) {
+            found = parts[i].getPersonalFolderId() == folderId;
+        }
+        return found;
     }
 }

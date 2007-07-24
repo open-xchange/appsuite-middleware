@@ -92,6 +92,10 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
     private static final Log LOG = LogFactory.getLog(
         TasksSQLInterfaceImpl.class);
 
+    private static final TaskStorage taskStor = TaskStorage.getInstance();
+
+    private static final FolderStorage folderStor = FolderStorage.getInstance();
+
     /**
      * Reference to the context.
      */
@@ -173,41 +177,38 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
      */
     public Task getTaskById(final int taskId, final int folderId)
         throws OXException {
-        Task retval;
         final Context ctx = session.getContext();
         final User user = session.getUserObject();
         final int userId = user.getId();
-        final TaskStorage storage = TaskStorage.getInstance();
-        try {
-            retval = storage.selectTask(ctx, taskId, StorageType.ACTIVE);
-            // Check if task appears in folder
-            retval.setParentFolderID(storage.selectFolderById(ctx, taskId,
-                folderId).getIdentifier());
-        } catch (TaskException e) {
-            throw Tools.convert(e);
-        }
         FolderObject folder;
         try {
             folder = Tools.getFolder(ctx, folderId);
         } catch (TaskException e) {
             throw Tools.convert(e);
         }
+        final Task retval;
         try {
-            TaskLogic.canReadInFolder(ctx, userId, user.getGroups(),
-                session.getUserConfiguration(), folder, retval.getCreatedBy());
-            if (Tools.isFolderShared(folder, userId)
-                && retval.getPrivateFlag()) {
-                throw new TaskException(Code.NO_PRIVATE_PERMISSION,
-                    folder.getFolderName(), Integer.valueOf(folderId));
-            }
+            retval = TaskLogic.loadTask(ctx, folderId, taskId, StorageType
+                .ACTIVE);
         } catch (TaskException e) {
             throw Tools.convert(e);
         }
         try {
-            final Set<TaskParticipant> participants = storage
-                .selectParticipants(ctx, taskId, StorageType.ACTIVE);
-            retval.setParticipants(TaskLogic.createParticipants(participants));
-            retval.setUsers(TaskLogic.createUserParticipants(participants));
+            TaskLogic.canReadInFolder(ctx, userId, user.getGroups(), session
+                .getUserConfiguration(), folder, retval.getCreatedBy());
+            if (Tools.isFolderShared(folder, userId) && retval
+                .getPrivateFlag()) {
+                throw new TaskException(Code.NO_PRIVATE_PERMISSION, folder
+                    .getFolderName(), Integer.valueOf(folderId));
+            }
+        } catch (TaskException e) {
+            throw Tools.convert(e);
+        }
+        if (!Access.isTaskInFolder(retval, folderId)) {
+            throw Tools.convert(new TaskException(Code.FOLDER_NOT_FOUND,
+                folderId, taskId));
+        }
+        try {
             Tools.loadReminder(ctx, userId, retval);
         } catch (TaskException e) {
             throw Tools.convert(e);
@@ -395,9 +396,10 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
             if (task.containsParentFolderID()) {
                 newFolderId = task.getParentFolderID();
             }
+            // TODO Use FolderObject
             if (!Tools.isFolderPublic(ctx, newFolderId)) {
                 final Set<Folder> folders = storage.selectFolders(ctx, taskId);
-                Tools.fillStandardFolders(parts, folders);
+                Tools.fillStandardFolders(parts, folders, true);
             }
             // Fill participants
             forEvent.setParticipants(TaskLogic.createParticipants(parts));
@@ -435,7 +437,7 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
             final Set<Folder> folders = storage.selectFolders(ctx, task
                 .getObjectID());
             if (folders.size() > 1) {
-                Tools.fillStandardFolders(parts, folders);
+                Tools.fillStandardFolders(parts, folders, true);
             }
             storage.insert(ctx, task, parts, folders);
             // Fill participants

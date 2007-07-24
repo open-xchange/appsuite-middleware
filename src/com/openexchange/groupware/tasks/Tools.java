@@ -272,7 +272,7 @@ public final class Tools {
     }
 
     static void fillStandardFolders(final Set<TaskParticipant> participants,
-        final Set<Folder> folders) throws TaskException {
+        final Set<Folder> folders, final boolean privat) throws TaskException {
         final Map<Integer, Folder> folderByUser = new HashMap<Integer, Folder>(
             folders.size(), 1);
         for (Folder folder : folders) {
@@ -284,11 +284,11 @@ public final class Tools {
                     (TaskInternalParticipant) participant;
                 final Folder folder = folderByUser.get(
                     internal.getIdentifier());
-                if (null == folder) {
-                    throw new TaskException(
-                        Code.PARTICIPANT_FOLDER_INCONSISTENCY);
+                if (null == folder && privat) {
+                    throw new TaskException(Code
+                        .PARTICIPANT_FOLDER_INCONSISTENCY);
                 }
-            internal.setFolderId(folder.getIdentifier());
+                internal.setFolderId(folder.getIdentifier());
             }
         }
     }

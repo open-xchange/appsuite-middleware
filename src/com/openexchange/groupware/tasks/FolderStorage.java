@@ -162,6 +162,20 @@ public abstract class FolderStorage {
         int userId, StorageType type) throws TaskException;
 
     /**
+     * Reads a task folder mapping.
+     * @param ctx Context.
+     * @param con readable database connection.
+     * @param taskId unique identifier of the task.
+     * @param folderId unique identifier of the folder.
+     * @param type storage type of the folder mapping.
+     * @return the folder object or <code>null</code> if no folder could be
+     * found.
+     * @throws TaskException if the folder isn't found or an error occurs.
+     */
+    abstract Folder selectFolderById(Context ctx, Connection con, int taskId,
+        int folderId, StorageType type) throws TaskException;
+
+    /**
      * Deletes task folder mappings.
      * @param ctx Context.
      * @param con writable database connection.

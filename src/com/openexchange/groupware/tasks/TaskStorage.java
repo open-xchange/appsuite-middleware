@@ -301,6 +301,7 @@ abstract class TaskStorage {
      * @param folderId unique identifier of the folder.
      * @return the folder object.
      * @throws TaskException if the folder isn't found or an error occurs.
+     * @deprecated use {@link FolderStorage#selectFolderById}
      */
     abstract Folder selectFolderById(Context ctx, int taskId,
         int folderId) throws TaskException;

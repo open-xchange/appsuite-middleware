@@ -261,9 +261,10 @@ class UpdateLogic {
             }
         }
         if (changed.containsParticipants()) {
+            // TODO Use FolderObject
             if (!Tools.isFolderPublic(folder)) {
                 Tools.fillStandardFolders(getOrigParticipants(),
-                    getOrigFolder());
+                    getOrigFolder(), true);
             }
             // Find added participants
             added.addAll(getChangedParticipants());

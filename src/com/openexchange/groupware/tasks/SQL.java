@@ -167,6 +167,13 @@ public final class SQL {
         new EnumMap<StorageType, String>(StorageType.class);
 
     /**
+     * SQL statements for selecting a task folder mapping by the folder
+     * identifier.
+     */
+    static final Map<StorageType, String> FOLDER_BY_ID =
+        new EnumMap<StorageType, String>(StorageType.class);
+
+    /**
      * SQL statements for searching all task folder mapping by the user.
      */
     static final Map<StorageType, String> SEARCH_FOLDER_BY_USER =
@@ -473,6 +480,12 @@ public final class SQL {
             + " WHERE cid=? AND id=? AND user=?";
         for (StorageType type : activeDelete) {
             FOLDER_BY_USER.put(type, sql.replace(tableName, FOLDER_TABLES
+                .get(type)));
+        }
+        sql = "SELECT user FROM " + tableName
+            + " WHERE cid=? AND id=? AND folder=?";
+        for (StorageType type : activeDelete) {
+            FOLDER_BY_ID.put(type, sql.replace(tableName, FOLDER_TABLES
                 .get(type)));
         }
         sql = "SELECT folder,id FROM " + tableName + " WHERE cid=? AND user=?";

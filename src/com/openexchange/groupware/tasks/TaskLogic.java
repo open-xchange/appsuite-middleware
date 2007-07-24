@@ -93,7 +93,6 @@ import com.openexchange.server.DBPoolingException;
 import com.openexchange.server.OCLPermission;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.oxfolder.OXFolderTools;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * This class contains logic methods for the tasks.
@@ -824,10 +823,11 @@ public final class TaskLogic {
         throws TaskException {
         final Set<TaskParticipant> parts = storage.selectParticipants(ctx,
             taskId, type);
+        // TODO Use FolderObject
         if (!Tools.isFolderPublic(ctx, folderId)) {
             final Set<Folder> folders = foldStor.selectFolder(ctx, taskId,
                 type);
-            Tools.fillStandardFolders(parts, folders);
+            Tools.fillStandardFolders(parts, folders, true);
         }
         return parts;
     }

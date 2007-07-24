@@ -170,6 +170,34 @@ public class RdbFolderStorage extends FolderStorage {
      * {@inheritDoc}
      */
     @Override
+    Folder selectFolderById(final Context ctx, final Connection con,
+        final int taskId, final int folderId, final StorageType type)
+        throws TaskException {
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        Folder retval = null;
+        try {
+            stmt = con.prepareStatement(SQL.FOLDER_BY_ID.get(type));
+            int pos = 1;
+            stmt.setInt(pos++, ctx.getContextId());
+            stmt.setInt(pos++, taskId);
+            stmt.setInt(pos++, folderId);
+            result = stmt.executeQuery();
+            if (result.next()) {
+                retval = new Folder(folderId, result.getInt(1));
+            }
+        } catch (SQLException e) {
+            throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
+        } finally {
+            closeSQLStuff(result, stmt);
+        }
+        return retval;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     void deleteFolder(final Context ctx, final Connection con, final int taskId,
         final int[] folderIds, final StorageType type) throws TaskException {
         PreparedStatement stmt = null;
