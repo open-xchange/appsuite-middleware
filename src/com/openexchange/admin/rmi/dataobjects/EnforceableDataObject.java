@@ -145,45 +145,45 @@ public abstract class EnforceableDataObject implements Serializable, Cloneable {
     @Override
     public String toString() {
         final StringBuilder ret = new StringBuilder(super.toString());
-        ret.append("  ");
+        ret.append("\n");
         ret.append(" Mandatory members:\n");
-        ret.append("  Create:");
+        ret.append("  Create: ");
         if (getMandatoryMembersCreate() != null && getMandatoryMembersCreate().length > 0) {
             for (final String m : getMandatoryMembersCreate()) {
-                ret.append(" ");
                 ret.append(m);
-                ret.append("\n");
+                ret.append(" ");
             }
+            ret.append("\n");
         } else {
             ret.append(" NONE\n");
         }
         ret.append("  Change:");
         if (getMandatoryMembersChange() != null && getMandatoryMembersChange().length > 0) {
             for (final String m : getMandatoryMembersChange()) {
-                ret.append(" ");
                 ret.append(m);
-                ret.append("\n");
+                ret.append(" ");
             }
+            ret.append("\n");
         } else {
             ret.append(" NONE\n");
         }
         ret.append("  Delete:");
         if (getMandatoryMembersDelete() != null && getMandatoryMembersDelete().length > 0) {
             for (final String m : getMandatoryMembersDelete()) {
-                ret.append(" ");
                 ret.append(m);
-                ret.append("\n");
+                ret.append(" ");
             }
+            ret.append("\n");
         } else {
             ret.append(" NONE\n");
         }
         ret.append("  Register:");
         if (getMandatoryMembersRegister() != null && getMandatoryMembersRegister().length > 0) {
             for (final String m : getMandatoryMembersRegister()) {
-                ret.append(" ");
                 ret.append(m);
-                ret.append("\n");
+                ret.append(" ");
             }
+            ret.append("\n");
         } else {
             ret.append(" NONE\n");
         }
