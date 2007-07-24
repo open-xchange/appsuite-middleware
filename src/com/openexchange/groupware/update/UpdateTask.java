@@ -57,7 +57,12 @@ import com.openexchange.groupware.AbstractOXException;
  */
 public interface UpdateTask {
 	
-	public static enum UpdateTaskPriority {
+	/**
+     * Priorities for update tasks.
+     * TODO remove the int value. this isn't used anywhere. enum itself have an
+     * internal order.
+	 */
+    public static enum UpdateTaskPriority {
 		HIGHEST(0),
 		HIGH(1),
 		NORMAL(3),
@@ -88,8 +93,12 @@ public interface UpdateTask {
 
     /**
      * This method is called to apply the changes to the schema of the database.
-     * @param schema TODO
-     * @param contextId TODO
+     * Write the schema changing code in this method that it doesn't destroy any
+     * information in the database if this changings already have been applied.
+     * This ensures that update tasks can be executed twice if a task failed.
+     * @param schema schema meta data
+     * @param contextId this context identifier is used to fetch database
+     * connections from the pool.
      * @throws AbstractOXException if applying the changes fails.
      */
     void perform(Schema schema, int contextId) throws AbstractOXException;
