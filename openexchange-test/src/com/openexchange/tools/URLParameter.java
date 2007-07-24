@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import com.openexchange.tools.encoding.Charsets;
 import com.openexchange.tools.encoding.URLCoder;
 import java.util.ArrayList;
 import java.util.Date;
@@ -100,9 +101,9 @@ public class URLParameter {
 				final List l = multivalueParameters.get(name);
 				
 				for (int a = 0; a < l.size(); a++) {
-					sb.append(URLCoder.encode(name, "UTF-8"));
+					sb.append(URLCoder.encode(name, Charsets.UTF_8));
 					sb.append('=');
-					sb.append(URLCoder.encode((String) l.get(a), "UTF-8"));
+					sb.append(URLCoder.encode((String) l.get(a), Charsets.UTF_8));
 					if (iter.hasNext()) {
 						sb.append('&');
 					}
@@ -116,9 +117,9 @@ public class URLParameter {
 			final Iterator iter = parameters.keySet().iterator();
 			while (iter.hasNext()) {
 				final String name = (String) iter.next();
-				sb.append(URLCoder.encode(name, "UTF-8"));
+				sb.append(URLCoder.encode(name, Charsets.UTF_8));
 				sb.append('=');
-				sb.append(URLCoder.encode((String) parameters.get(name), "UTF-8"));
+				sb.append(URLCoder.encode((String) parameters.get(name), Charsets.UTF_8));
 				if (iter.hasNext()) {
 					sb.append('&');
 				}
