@@ -84,7 +84,7 @@ import com.openexchange.tools.sql.DBUtils;
  * while reading from database.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class TaskIterator implements SearchIterator<Task>, Runnable {
+public final class TaskIterator implements SearchIterator<Task>, Runnable {
 
     /**
      * Logger.

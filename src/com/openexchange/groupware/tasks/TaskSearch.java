@@ -50,8 +50,10 @@
 package com.openexchange.groupware.tasks;
 
 import java.sql.Connection;
+import java.util.Date;
 
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.tools.iterator.SearchIterator;
 
 /**
  * Interface to different SQL implementations for searching for tasks and its
@@ -90,4 +92,23 @@ abstract class TaskSearch {
      */
     abstract int[] findDelegatedTasks(Context ctx, Connection con, int userId,
         StorageType type) throws TaskException;
+
+    /**
+     * List tasks in a folder that are modified since the specified date.
+     * @param ctx Context.
+     * @param folderId unique identifier of the folder.
+     * @param type ACTIVE or DELETED.
+     * @param columns Columns of the tasks that should be loaded.
+     * @param since timestamp since that the task are modified.
+     * @param onlyOwn <code>true</code> if only own tasks can be seen.
+     * @param userId unique identifier of the user (own tasks).
+     * @param noPrivate <code>true</code> if private tasks should not be listed
+     * (shared folder).
+     * @return a SearchIterator for iterating over all returned tasks.
+     * @throws TaskException if an error occurs while listing modified tasks.
+     */
+    public abstract SearchIterator listModifiedTasks(Context ctx, int folderId,
+        StorageType type, int[] columns, Date since, boolean onlyOwn,
+        int userId, boolean noPrivate) throws TaskException;
+
 }

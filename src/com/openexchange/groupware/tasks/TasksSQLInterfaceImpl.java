@@ -238,7 +238,7 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
         }
         final boolean noPrivate = Tools.isFolderShared(folder, userId);
         try {
-            return TaskStorage.getInstance().listModifiedTasks(ctx, folderId,
+            return TaskSearch.getInstance().listModifiedTasks(ctx, folderId,
                 StorageType.ACTIVE, columns, since, onlyOwn, userId, noPrivate);
         } catch (TaskException e) {
             throw Tools.convert(e);
@@ -268,7 +268,7 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
         }
         final boolean noPrivate = Tools.isFolderShared(folder, userId);
         try {
-            return TaskStorage.getInstance().listModifiedTasks(ctx, folderId,
+            return TaskSearch.getInstance().listModifiedTasks(ctx, folderId,
                 StorageType.DELETED, columns, since, onlyOwn, userId,
                 noPrivate);
         } catch (TaskException e) {

@@ -303,6 +303,20 @@ public final class SQL {
         return sql.toString();
     }
 
+    static String getOnlyOwn(final String table) {
+        final StringBuilder sql = new StringBuilder();
+        sql.append(table);
+        sql.append(".created_from=?");
+        return sql.toString();
+    }
+
+    static String getNoPrivate(final String table) {
+        final StringBuilder sql = new StringBuilder();
+        sql.append(table);
+        sql.append(".private=false");
+        return sql.toString();
+    }
+
     /**
      * @param orderBy attribute identifier that should be used for sorting.
      * @param orderDir string defining the order direction. <code>"ASC"</code>

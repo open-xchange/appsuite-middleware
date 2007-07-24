@@ -50,7 +50,6 @@
 package com.openexchange.groupware.tasks;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -215,24 +214,6 @@ abstract class TaskStorage {
     public abstract SearchIterator list(Context ctx, int folderId,
         int from, int until, int orderBy, String orderDir, int[] columns,
         boolean onlyOwn, int userId, boolean noPrivate) throws TaskException;
-
-    /**
-     * List tasks in a folder that are modified since the specified date.
-     * @param ctx Context.
-     * @param folderId unique identifier of the folder.
-     * @param type ACTIVE or DELETED.
-     * @param columns Columns of the tasks that should be loaded.
-     * @param since timestamp since that the task are modified.
-     * @param onlyOwn <code>true</code> if only own tasks can be seen.
-     * @param userId unique identifier of the user (own tasks).
-     * @param noPrivate <code>true</code> if private tasks should not be listed
-     * (shared folder).
-     * @return a SearchIterator for iterating over all returned tasks.
-     * @throws TaskException if an error occurs while listing modified tasks.
-     */
-    public abstract SearchIterator listModifiedTasks(Context ctx, int folderId,
-        StorageType type, int[] columns, Date since, boolean onlyOwn,
-        int userId, boolean noPrivate) throws TaskException;
 
     /**
      * Searches for tasks. Currently not all search options are available.

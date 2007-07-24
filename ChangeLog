@@ -1,3 +1,7 @@
+* 2007-07-23 - marcus.klein@open-xchange.com
+
+ - Improved SQL command when listing deleted tasks.
+
 * 2007-07-23 - martin.kauss@open-xchange.com
  
  - Fixed bug #8490. The wrong folder was send to the client if a shared folder
