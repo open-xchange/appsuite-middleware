@@ -79,6 +79,7 @@ public abstract class ChangeCore extends GroupAbstraction {
 
             oxgrp.change(ctx, grp, auth);
 
+            displayChangedMessage();
             sysexit(0);
         } catch (final java.rmi.ConnectException neti) {
             printError(neti.getMessage());

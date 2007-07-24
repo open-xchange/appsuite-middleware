@@ -149,7 +149,6 @@ public abstract class BasicCommandlineOptions {
     
     protected static final String OPT_NAME_CSVOUTPUT_LONG = "csv";
     protected static final String OPT_NAME_CSVOUTPUT_DESCRIPTION = "Format output to csv";
-    protected static final String SUCCESSFULLY_CHANGED = "Successfully changed";
     
     protected static String RMI_HOSTNAME ="rmi://localhost/";
     
@@ -519,5 +518,13 @@ public abstract class BasicCommandlineOptions {
         } else {
             return NeededTriState.notneeded;
         }
+    }
+
+    protected final void displayChangedMessage() {
+        System.out.println("Successfully changed");
+    }
+
+    protected final void displayDeletedMessage() {
+        System.out.println("Successfully deleted");
     }
 }
