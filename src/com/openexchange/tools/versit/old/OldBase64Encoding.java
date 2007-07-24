@@ -47,40 +47,40 @@
  *
  */
 
-
-
 package com.openexchange.tools.versit.old;
 
 import java.io.IOException;
 
-import sun.misc.BASE64Decoder;
-import sun.misc.BASE64Encoder;
+import com.openexchange.tools.encoding.Base64;
 
+/**
+ * @author Viktor Pracht
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ */
 public class OldBase64Encoding implements OldEncoding {
 
 	public static final OldEncoding Default = new OldBase64Encoding();
 
-	private final BASE64Decoder decoder = new BASE64Decoder();
+	/**
+     * Default constructor.
+     */
+    private OldBase64Encoding() {
+        super();
+    }
 
-	public byte[] decode(final OldScanner s) throws IOException {
+    public byte[] decode(final OldScanner s) throws IOException {
 		final StringBuilder sb = new StringBuilder();
 		boolean newline = false;
 		while (!newline || s.peek != -1 && s.peek != -2) {
 			newline = s.peek == -1 || s.peek == -2;
 			sb.append((char) s.read());
 		}
-		return decoder.decodeBuffer(sb.toString());
+		return Base64.decode(sb.toString());
 	}
 
-	private static final byte[] SoftBreak = { '\r', '\n', ' ' };
-
-	private final BASE64Encoder encoder = new BASE64Encoder();
-	
 	public void encode(final OldFoldingWriter fw, final byte[] b) throws IOException {
 		fw.rawStart();
-		fw.writeRaw(SoftBreak);
-		fw.writeRaw(encoder.encode(b).getBytes(fw.charset));
+        fw.write(Base64.encode(b));
 		fw.rawEnd();
 	}
-
 }
