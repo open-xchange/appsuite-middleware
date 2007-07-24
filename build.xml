@@ -60,6 +60,7 @@
     <property name="tnefjar" value="tnef.jar" />
     <property name="springbeanjar" value="spring-beans_1.2.7.jar" />
     <property name="springcorejar" value="spring-core_1.2.7.jar" />
+    <property name="commonscodecjar" value="commons-codec-1.3.jar" />
 
     <!-- Classpath -->
     <path id="project.classpath">
@@ -79,6 +80,7 @@
         <pathelement location="${3rdlib}/${tnefjar}" />
         <pathelement location="${3rdlib}/${springbeanjar}" />
         <pathelement location="${3rdlib}/${springcorejar}" />
+        <pathelement location="${3rdlib}/${commonscodecjar}" />
     </path>
 
     <!-- JARs for running server -->

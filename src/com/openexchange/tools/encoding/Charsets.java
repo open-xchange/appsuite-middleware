@@ -49,6 +49,8 @@
 
 package com.openexchange.tools.encoding;
 
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 
 /**
@@ -72,5 +74,18 @@ public final class Charsets {
      */
     private Charsets() {
         super();
+    }
+
+    public static String toString(final byte[] bytes,
+        final Charset charset) {
+        return charset.decode(ByteBuffer.wrap(bytes)).toString();
+    }
+
+    public static byte[] getBytes(final String source,
+        final Charset charset) {
+        final ByteBuffer buf = charset.encode(CharBuffer.wrap(source));
+        final byte[] retval = new byte[buf.limit()];
+        buf.get(retval);
+        return retval;
     }
 }

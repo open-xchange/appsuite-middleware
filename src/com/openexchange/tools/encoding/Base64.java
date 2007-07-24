@@ -69,7 +69,7 @@ public class Base64 {
 	 * @return a string containing the encoded data.
 	 */
 	public static String encode(final byte[] bytes) {
-        return new String(org.apache.commons.codec.binary.Base64
+        return Charsets.toString(org.apache.commons.codec.binary.Base64
             .encodeBase64(bytes), Charsets.US_ASCII);
 	}
 
@@ -80,7 +80,7 @@ public class Base64 {
 	 * @return the base64 data for the string.
 	 */
 	public static String encode(final String source) {
-        return encode(source.getBytes(Charsets.UTF_8));
+        return encode(Charsets.getBytes(source, Charsets.UTF_8));
 	}
 
 	/**
@@ -89,8 +89,8 @@ public class Base64 {
 	 * @return the decoded data.
 	 */
 	public static byte[] decode(final String source) {
-        return org.apache.commons.codec.binary.Base64.decodeBase64(source
-            .getBytes(Charsets.US_ASCII));
+        return org.apache.commons.codec.binary.Base64.decodeBase64(
+            Charsets.getBytes(source, Charsets.US_ASCII));
 	}
 }
 

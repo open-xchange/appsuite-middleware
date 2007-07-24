@@ -94,7 +94,7 @@ public final class URLCoder {
 				baos.write((byte) chr);
 			}
 		}
-		final String retval = new String(baos.toByteArray(), charset);
+		final String retval = Charsets.toString(baos.toByteArray(), charset);
 		try {
 			baos.close();
 		} catch (IOException e) {
@@ -104,7 +104,7 @@ public final class URLCoder {
 	}
 
 	public static String encode(final String source, final Charset charset) {
-		final byte[] bytes = source.getBytes(charset);
+		final byte[] bytes = Charsets.getBytes(source, charset);
 		final StringBuilder builder = new StringBuilder(bytes.length);
 		for (int i = 0; i < bytes.length; i++) {
 			if (needToBeEncoded.get(bytes[i] < 0 ? 256 + bytes[i] : bytes[i])) {
