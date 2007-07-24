@@ -45,6 +45,7 @@ public abstract class DeleteCore extends ResourceAbstraction {
             maincall(parser, oxres, ctx, res, auth);
             oxres.delete(ctx, res, auth);
 
+            displayDeletedMessage();
             sysexit(0);
         } catch (final java.rmi.ConnectException neti) {
             printError(neti.getMessage());

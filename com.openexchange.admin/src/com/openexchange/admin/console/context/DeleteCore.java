@@ -33,7 +33,7 @@ public abstract class DeleteCore extends ContextAbstraction {
     
             maincall(ctx, auth);
     
-            System.out.println("Successfully deleted");
+            displayDeletedMessage();
             sysexit(0);
         } catch (final java.rmi.ConnectException neti) {
             printError(neti.getMessage());

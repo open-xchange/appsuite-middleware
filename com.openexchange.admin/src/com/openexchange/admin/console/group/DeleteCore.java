@@ -48,6 +48,8 @@ public abstract class DeleteCore extends GroupAbstraction {
             maincall(parser, oxgrp, ctx, grp, auth);
 
             oxgrp.delete(ctx, new Group[] { grp }, auth);
+            
+            displayDeletedMessage();
             sysexit(0);
         } catch (final java.rmi.ConnectException neti) {
             printError(neti.getMessage());
