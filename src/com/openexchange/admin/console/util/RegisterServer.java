@@ -50,7 +50,7 @@ public class RegisterServer extends UtilAbstraction {
 
             srv.setName((String) parser.getOptionValue(this.serverNameOption));
 
-            System.out.println(oxutil.registerServer(srv, auth));
+            System.out.println(oxutil.registerServer(srv, auth).getId());
             sysexit(0);
         } catch (final java.rmi.ConnectException neti) {
             printError(neti.getMessage());

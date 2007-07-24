@@ -49,7 +49,7 @@ public class CreateReason extends UtilAbstraction {
     
             final MaintenanceReason reason = new MaintenanceReason((String)parser.getOptionValue(this.reasonTextOption));
     
-            System.out.println(oxutil.createMaintenanceReason(reason, auth));
+            System.out.println(oxutil.createMaintenanceReason(reason, auth).getId());
             
             sysexit(0);
         } catch (final java.rmi.ConnectException neti) {
