@@ -58,7 +58,7 @@ import java.util.HashSet;
  * 
  * @author cutmasta
  */
-public class Context implements Serializable {
+public class Context extends EnforceableDataObject implements Serializable {
     /**
      * 
      */
@@ -267,6 +267,26 @@ public class Context implements Serializable {
         this.readDatabase = null;
         this.writeDatabase = null;
         this.login_mappings = null;
+    }
+
+    @Override
+    protected String[] getMandatoryMembersChange() {
+        return null;
+    }
+
+    @Override
+    protected String[] getMandatoryMembersCreate() {
+        return new String[]{ "id", "maxQuota" };
+    }
+
+    @Override
+    protected String[] getMandatoryMembersDelete() {
+        return null;
+    }
+
+    @Override
+    protected String[] getMandatoryMembersRegister() {
+        return null;
     }
 
 }

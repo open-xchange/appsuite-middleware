@@ -52,14 +52,14 @@ package com.openexchange.admin.rmi.dataobjects;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 
-public class Database implements Serializable{
+public class Database extends EnforceableDataObject implements Serializable {
     /**
      * For serialization
      */
     private static final long serialVersionUID = -3068828009821317094L;
 
     private Integer id;
-    
+
     private Integer read_id;
 
     private String url;
@@ -71,23 +71,23 @@ public class Database implements Serializable{
     private String displayname;
 
     private String driver;
-    
+
     private String scheme;
-    
+
     private Integer clusterWeight;
-    
+
     private Integer maxUnits;
-    
+
     private Integer poolHardLimit;
-    
+
     private Integer poolInitial;
-    
+
     private Integer poolMax;
-    
+
     private Integer masterId;
-    
+
     private Integer currentUnits;
-    
+
     private Boolean master;
 
     /**
@@ -131,103 +131,104 @@ public class Database implements Serializable{
     /**
      * 
      */
-    public Database () {
+    public Database() {
         super();
         init();
     }
 
-    ////////////////////////////////////////////////
-	// Getter and Setter
-	//
-    public Integer getId () {
+    // //////////////////////////////////////////////
+    // Getter and Setter
+    //
+    public Integer getId() {
         return this.id;
     }
 
-    public void setId (final int val) {
+    public void setId(final int val) {
         this.id = val;
     }
 
-    public String getUrl () {
+    public String getUrl() {
         return this.url;
     }
 
-    public void setUrl (final String val) {
+    public void setUrl(final String val) {
         this.url = val;
     }
 
-    public String getLogin () {
+    public String getLogin() {
         return this.login;
     }
 
-    public void setLogin (final String val) {
+    public void setLogin(final String val) {
         this.login = val;
     }
 
-    public String getPassword () {
+    public String getPassword() {
         return this.password;
     }
 
-    public void setPassword (final String val) {
+    public void setPassword(final String val) {
         this.password = val;
     }
 
-    public String getDisplayname () {
+    public String getDisplayname() {
         return this.displayname;
     }
 
-    public void setDisplayname (final String val) {
+    public void setDisplayname(final String val) {
         this.displayname = val;
     }
 
-    public String getDriver () {
+    public String getDriver() {
         return this.driver;
     }
 
-    public void setDriver (final String val) {
+    public void setDriver(final String val) {
         this.driver = val;
     }
 
-    public String getScheme () {
+    public String getScheme() {
         return this.scheme;
     }
 
-    public void setScheme (final String scheme) {
+    public void setScheme(final String scheme) {
         this.scheme = scheme;
     }
-    
-    public Integer getClusterWeight () {
+
+    public Integer getClusterWeight() {
         return this.clusterWeight;
     }
 
     /**
      * The system weight factor of this database in percent, value is Integer
-     * This value defines how contexts will be distributed over multiple databases/db pools.
+     * This value defines how contexts will be distributed over multiple
+     * databases/db pools.
      */
-    public void setClusterWeight (final int clusterWeight) {
+    public void setClusterWeight(final int clusterWeight) {
         this.clusterWeight = clusterWeight;
     }
 
-    public Integer getMaxUnits () {
+    public Integer getMaxUnits() {
         return this.maxUnits;
     }
 
-    public void setMaxUnits (final int maxunits) {
+    public void setMaxUnits(final int maxunits) {
         this.maxUnits = maxunits;
     }
 
-    public Integer getPoolInitial () {
+    public Integer getPoolInitial() {
         return this.poolInitial;
     }
 
-    public void setPoolInitial (final int poolInitial) {
+    public void setPoolInitial(final int poolInitial) {
         this.poolInitial = poolInitial;
     }
 
-    public Integer getPoolMax () {
+    public Integer getPoolMax() {
         return this.poolMax;
     }
 
-    public void setPoolMax (final int poolMax) {
+    public void setPoolMax(final int poolMax) {
         this.poolMax = poolMax;
     }
 
@@ -263,74 +264,37 @@ public class Database implements Serializable{
         this.currentUnits = units;
     }
 
-    public Integer getPoolHardLimit () {
+    public Integer getPoolHardLimit() {
         return this.poolHardLimit;
     }
 
-    public void setPoolHardLimit (final int poolHardLimit) {
+    public void setPoolHardLimit(final int poolHardLimit) {
         this.poolHardLimit = poolHardLimit;
     }
 
-    
-        ////////////////////////////////////////////////
-        // Other methods
-        //
-    /**
-     * This methods checks if the required attributes are set, so that a database
-     * can be created with this object
-     */
-    public boolean attributesforcreateset() {
-    	if (-1 != this.id
-            && null != this.driver && !this.driver.equals("")
-            && null != this.url && !this.url.equals("")
-            && null != this.scheme && !this.scheme.equals("")) {
-    		return true;
-    	} else {
-    		return false;
-    	}
-    		
-    }
-    
-    public boolean attributesfordeleteset() {
-    	if (null != this.driver || null != this.url || null != this.scheme) {
-    		return true;
-    	} else {
-    		return false;
-    	}
-    		
-    }
-    public boolean attributesforregisterset() {
-    	if (null != this.driver || null != this.url || null != this.scheme || null != this.login || null!=this.password || -1!=this.clusterWeight || null!=this.displayname) {
-    		return true;
-    	} else {
-    		return false;
-    	}
-    		
-    }
-    
     @Override
     public String toString() {
-    	final StringBuilder ret = new StringBuilder();
-    	ret.append("[ \n");
-    	for( final Field f : this.getClass().getDeclaredFields() ) {
-    		try {
-				final Object ob = f.get(this);
-				final String tname = f.getName();
-				if( ob != null && ! tname.equals("serialVersionUID") ) {
-					ret.append("  ");
-					ret.append(tname);
-		    		ret.append(": ");
-					ret.append(ob);
-					ret.append("\n");
-				}
-    		} catch (final IllegalArgumentException e) {
-				ret.append("IllegalArgument\n");
-			} catch (final IllegalAccessException e) {
-				ret.append("IllegalAccessException\n");
-			}
-    	}
-    	ret.append(" ]");
-    	return ret.toString();
+        final StringBuilder ret = new StringBuilder();
+        ret.append("[ \n");
+        for (final Field f : this.getClass().getDeclaredFields()) {
+            try {
+                final Object ob = f.get(this);
+                final String tname = f.getName();
+                if (ob != null && !tname.equals("serialVersionUID")) {
+                    ret.append("  ");
+                    ret.append(tname);
+                    ret.append(": ");
+                    ret.append(ob);
+                    ret.append("\n");
+                }
+            } catch (final IllegalArgumentException e) {
+                ret.append("IllegalArgument\n");
+            } catch (final IllegalAccessException e) {
+                ret.append("IllegalAccessException\n");
+            }
+        }
+        ret.append(" ]");
+        return ret.toString();
     }
 
     /**
@@ -369,6 +333,26 @@ public class Database implements Serializable{
         this.masterId = null;
         this.master = null;
         this.currentUnits = null;
+    }
+
+    @Override
+    protected String[] getMandatoryMembersChange() {
+        return null;
+    }
+
+    @Override
+    protected String[] getMandatoryMembersCreate() {
+        return new String[] { "id", "driver", "url", "scheme" };
+    }
+
+    @Override
+    protected String[] getMandatoryMembersDelete() {
+        return new String[] { "driver", "url", "scheme", "password", "login" };
+    }
+
+    @Override
+    protected String[] getMandatoryMembersRegister() {
+        return new String[] { "password", "displayname", "master" };
     }
 
 }

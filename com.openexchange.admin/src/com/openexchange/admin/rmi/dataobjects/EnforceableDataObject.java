@@ -38,6 +38,26 @@ public abstract class EnforceableDataObject implements Serializable, Cloneable {
     protected abstract String[] getMandatoryMembersChange();
 
     /**
+     * This method must be implemented and it must return a String array
+     * containing all names of mandatory members of the corresponding class
+     * required to DELETE data.
+     * 
+     * @return String array containing names of mandatory members or null if
+     *         unwanted
+     */
+    protected abstract String[] getMandatoryMembersDelete();
+
+    /**
+     * This method must be implemented and it must return a String array
+     * containing all names of mandatory members of the corresponding class
+     * required to REGISTER data.
+     * 
+     * @return String array containing names of mandatory members or null if
+     *         unwanted
+     */
+    protected abstract String[] getMandatoryMembersRegister();
+
+    /**
      * @return
      * @throws EnforceableDataObjectException
      */
@@ -51,6 +71,22 @@ public abstract class EnforceableDataObject implements Serializable, Cloneable {
      */
     public boolean mandatoryChangeMembersSet() throws EnforceableDataObjectException {
         return mandatoryMembersSet(getMandatoryMembersChange());
+    }
+
+    /**
+     * @return
+     * @throws EnforceableDataObjectException
+     */
+    public boolean mandatoryDeleteMembersSet() throws EnforceableDataObjectException {
+        return mandatoryMembersSet(getMandatoryMembersDelete());
+    }
+
+    /**
+     * @return
+     * @throws EnforceableDataObjectException
+     */
+    public boolean mandatoryRegisterMembersSet() throws EnforceableDataObjectException {
+        return mandatoryMembersSet(getMandatoryMembersRegister());
     }
 
     private boolean mandatoryMembersSet(final String[] members) throws EnforceableDataObjectException {
@@ -124,6 +160,26 @@ public abstract class EnforceableDataObject implements Serializable, Cloneable {
         ret.append("  Change:");
         if (getMandatoryMembersChange() != null && getMandatoryMembersChange().length > 0) {
             for (final String m : getMandatoryMembersChange()) {
+                ret.append(" ");
+                ret.append(m);
+                ret.append("\n");
+            }
+        } else {
+            ret.append(" NONE\n");
+        }
+        ret.append("  Delete:");
+        if (getMandatoryMembersDelete() != null && getMandatoryMembersDelete().length > 0) {
+            for (final String m : getMandatoryMembersDelete()) {
+                ret.append(" ");
+                ret.append(m);
+                ret.append("\n");
+            }
+        } else {
+            ret.append(" NONE\n");
+        }
+        ret.append("  Register:");
+        if (getMandatoryMembersRegister() != null && getMandatoryMembersRegister().length > 0) {
+            for (final String m : getMandatoryMembersRegister()) {
                 ret.append(" ");
                 ret.append(m);
                 ret.append("\n");

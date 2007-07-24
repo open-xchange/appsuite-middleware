@@ -31,13 +31,20 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
         } catch (EnforceableDataObjectException e) {
             throw new InvalidDataException(e.getMessage());
         }
+        try {
+            if (!ctx.mandatoryCreateMembersSet()) {
+                throw new InvalidDataException("Mandatory fields in context not set: " + ctx.getUnsetMembers());               
+            }
+        } catch (EnforceableDataObjectException e) {
+            throw new InvalidDataException(e.getMessage());
+        }
     }
 
     protected abstract Context createmaincall(final Context ctx, final User admin_user, Database db) throws StorageException, InvalidDataException;
 
     protected Context createcommon(final Context ctx, final User admin_user, final Database db, final Credentials auth) throws InvalidCredentialsException, ContextExistsException, InvalidDataException, StorageException {
         try{
-            doNullCheck(ctx,ctx.getIdAsInt(),ctx.getMaxQuota(),admin_user);
+            doNullCheck(ctx,admin_user);
         } catch (final InvalidDataException e1) {
             final InvalidDataException invalidDataException = new InvalidDataException("Context or user not correct");
             log.error(invalidDataException.getMessage(), invalidDataException);
