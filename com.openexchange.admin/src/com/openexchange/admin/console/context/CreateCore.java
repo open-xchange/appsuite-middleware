@@ -117,8 +117,9 @@ public abstract class CreateCore extends ContextAbstraction {
 
             ctx.setMaxQuota(Long.parseLong((String) parser.getOptionValue(this.contextQuotaOption)));
 
-            System.out.println(maincall(parser, ctx, usr, auth).getIdAsString());
+            final Integer id = maincall(parser, ctx, usr, auth).getIdAsInt();
             
+            displayCreatedMessage(id, null);
             sysexit(0);
         } catch (final java.rmi.ConnectException neti) {
             printError(neti.getMessage());

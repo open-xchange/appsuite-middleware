@@ -108,8 +108,9 @@ public abstract class CreateCore extends GroupAbstraction {
 
             maincall(parser, oxgrp, ctx, grp, auth);
             
-            System.out.println(oxgrp.create(ctx, grp, auth).getId());
-
+            final Integer id = oxgrp.create(ctx, grp, auth).getId();
+            
+            displayCreatedMessage(id, ctx.getIdAsInt());
             sysexit(0);
         } catch (final java.rmi.ConnectException neti) {
             printError(neti.getMessage());

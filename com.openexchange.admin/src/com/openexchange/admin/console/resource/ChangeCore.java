@@ -101,7 +101,8 @@ public abstract class ChangeCore extends ResourceAbstraction {
             final OXResourceInterface oxres = getResourceInterface();
             final Resource res = new Resource();
 
-            res.setId(Integer.parseInt((String) parser.getOptionValue(this.resourceIdOption)));
+            final int resourceid = Integer.parseInt((String) parser.getOptionValue(this.resourceIdOption));
+            res.setId(resourceid);
 
             if (parser.getOptionValue(this.resourceAvailableOption) != null) {
                 res.setAvailable(Boolean.parseBoolean(parser.getOptionValue(this.resourceAvailableOption).toString()));
@@ -127,7 +128,7 @@ public abstract class ChangeCore extends ResourceAbstraction {
             
             oxres.change(ctx, res, auth);
 
-            displayChangedMessage();
+            displayChangedMessage(resourceid, ctx.getIdAsInt());
             sysexit(0);
         } catch (final java.rmi.ConnectException neti) {
             printError(neti.getMessage());
