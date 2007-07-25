@@ -137,6 +137,7 @@ public class OXCalendarException extends OXException {
         RECURRING_ALREADY_EXCEPTION("Fatal error. You are trying to create a new recurring from an exception!", 65, AbstractOXException.Category.USER_INPUT),
         RECURRING_EXCEPTION_MOVE_EXCEPTION("You can not move one element of a recurring appointment into another folder.", 66, AbstractOXException.Category.USER_INPUT),
         UPDATE_EXCEPTION("Fatal error. An database update exception occurred.", 67, AbstractOXException.Category.INTERNAL_ERROR),
+        MOVE_TO_SHARED_FOLDER_NOT_SUPPORTED("Move not allowed to a shared folders if the private flag is set", 68, AbstractOXException.Category.USER_INPUT),
         ;
         
         /**

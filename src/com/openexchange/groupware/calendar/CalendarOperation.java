@@ -484,7 +484,7 @@ public class CalendarOperation implements SearchIterator {
             throw new OXCalendarException(OXCalendarException.Code.CONTEXT_NOT_SET);
         }
         
-        simpleDataCheck(cdao);
+        simpleDataCheck(cdao, edao, uid);
         if (action && cdao.getParticipants() == null && cdao.getFolderType() == FolderObject.PUBLIC) {
             Participant np[] = new Participant[1];
             final Participant p = new UserParticipant();
@@ -1113,7 +1113,7 @@ public class CalendarOperation implements SearchIterator {
         }
     }
     
-    private final void simpleDataCheck(final CalendarDataObject cdao) throws OXException {
+    private final void simpleDataCheck(final CalendarDataObject cdao, final CalendarDataObject edao, int uid) throws OXException {
         if (cdao.containsStartDate() && cdao.containsEndDate() && cdao.getEndDate().getTime() < cdao.getStartDate().getTime()) {
             throw new OXCalendarException(OXCalendarException.Code.END_DATE_BEFORE_START_DATE);
         }
@@ -1123,6 +1123,9 @@ public class CalendarOperation implements SearchIterator {
         }
         if (cdao.containsPrivateFlag()) {
             if (cdao.getPrivateflag() == 1) {
+                if (cdao.containsObjectID() && cdao.getSharedFolderOwner() != uid) {
+                    throw new OXCalendarException(OXCalendarException.Code.MOVE_TO_SHARED_FOLDER_NOT_SUPPORTED);
+                }
                 if (cdao.getFolderType() != FolderObject.PRIVATE) {
                     throw new OXCalendarException(OXCalendarException.Code.PRIVATE_FLAG_IN_PRIVATE_FOLDER);
                 }
@@ -1131,6 +1134,10 @@ public class CalendarOperation implements SearchIterator {
                 }
             } else if (cdao.getPrivateflag() != 0) {
                 throw new OXCalendarException(OXCalendarException.Code.UNSUPPORTED_PRIVATE_FLAG, cdao.getPrivateflag());
+            }
+        } else if (edao != null && edao.containsPrivateFlag() && edao.getPrivateflag() == 1) {
+            if (cdao.getSharedFolderOwner() != uid) {
+                throw new OXCalendarException(OXCalendarException.Code.MOVE_TO_SHARED_FOLDER_NOT_SUPPORTED);
             }
         }
         if (cdao.containsShownAs() && (cdao.getShownAs() < 0 || cdao.getShownAs() > 4)) {
