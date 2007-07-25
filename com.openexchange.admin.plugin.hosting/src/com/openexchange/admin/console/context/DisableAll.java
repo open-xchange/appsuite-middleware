@@ -11,7 +11,6 @@ import com.openexchange.admin.console.CmdLineParser.IllegalOptionValueException;
 import com.openexchange.admin.console.CmdLineParser.UnknownOptionException;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchReasonException;
@@ -34,8 +33,9 @@ public class DisableAll extends ContextHostingAbstraction {
             // get rmi ref
             final OXContextInterface oxres = (OXContextInterface) Naming.lookup(RMI_HOSTNAME +OXContextInterface.RMI_NAME);
 
-            final MaintenanceReason mr = new MaintenanceReason(Integer.parseInt((String) parser.getOptionValue(this.maintenanceReasonIDOption)));
-            oxres.disableAll(mr, auth);
+            /* final MaintenanceReason mr = new MaintenanceReason(Integer.parseInt((String) parser.getOptionValue(this.maintenanceReasonIDOption)));
+            oxres.disableAll(mr, auth); */
+            oxres.disableAll(auth);
 
             sysexit(0);
         } catch (final java.rmi.ConnectException neti) {
@@ -86,6 +86,6 @@ public class DisableAll extends ContextHostingAbstraction {
 
     private void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptionsWithoutContextID(parser);
-        setMaintenanceReasodIDOption(parser, true);
+        //setMaintenanceReasodIDOption(parser, true);
     }
 }
