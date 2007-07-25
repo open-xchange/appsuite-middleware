@@ -9,9 +9,7 @@ import java.rmi.RemoteException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.admin.console.context.DisableAll;
 import com.openexchange.admin.exceptions.OXContextException;
-import com.openexchange.admin.exceptions.OXUtilException;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -129,8 +127,8 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 throw new NoSuchContextException();
             } else if (!tool.existsStore(dst_filestore.getId())) {
                 throw new NoSuchFilestoreException();
-            } else if (!tool.existsReason(reason.getId())) {
-                throw new NoSuchReasonException();
+            /*} else if (!tool.existsReason(reason.getId())) {
+                throw new NoSuchReasonException();*/
             } else if (!tool.isContextEnabled(ctx)) {
                 throw new OXContextException("Unable to disable Context " + ctx.getIdAsString());
             }
@@ -198,9 +196,9 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         } catch (final NoSuchFilestoreException e) {
             log.error(e.getMessage(), e);
             throw e;
-        } catch (final NoSuchReasonException e) {
+        /*} catch (final NoSuchReasonException e) {
             log.error(e.getMessage(), e);
-            throw e;
+            throw e;*/
         } catch (final OXContextException e) {
             log.error(e.getMessage(), e);
             throw e;
@@ -231,10 +229,10 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         }
         try {
             final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
-            if (!tool.existsReason(reason_id)) {
+            /*if (!tool.existsReason(reason_id)) {
                 // FIXME: Util in context???
                 throw new OXContextException(OXUtilException.NO_SUCH_REASON);
-            }
+            }*/
             if (!tool.existsContext(ctx)) {
                 throw new NoSuchContextException();
             }
@@ -292,18 +290,18 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         final int reason_id = reason.getId();
         log.debug("" + reason_id);
         try {
-            final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
+            /*final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
             if (!tool.existsReason(reason_id)) {
                 throw new NoSuchReasonException();
-            }
+            }*/
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
             oxcox.disableAll(reason);
         } catch (final StorageException e) {
             log.error(e.getMessage(), e);
             throw e;
-        } catch (final NoSuchReasonException e) {
+        /*} catch (final NoSuchReasonException e) {
             log.error(e.getMessage(), e);
-            throw e;
+            throw e;*/
         }
         
     }
@@ -399,9 +397,9 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             if (!tool.existsContext(ctx)) {
                 throw new NoSuchContextException();
             }
-            if (!tool.existsReason(reason_id)) {
+            /*if (!tool.existsReason(reason_id)) {
                 throw new NoSuchReasonException();
-            }
+            }*/
             if (!tool.isContextEnabled(ctx)) {
                 throw new OXContextException(OXContextException.CONTEXT_DISABLED);
             }
@@ -410,9 +408,9 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         } catch (final NoSuchContextException e) {
             log.error(e.getMessage(), e);
             throw e;
-        } catch (final NoSuchReasonException e) {
+        /*} catch (final NoSuchReasonException e) {
             log.error(e.getMessage(), e);
-            throw e;
+            throw e;*/
         } catch (final StorageException e) {
             log.error(e.getMessage(), e);
             throw e;
