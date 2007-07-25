@@ -99,9 +99,6 @@ case "${BNAME}" in
     "listcontexts")
     ACTION="context.List"
     ;;
-    "createreason")
-    ACTION="util.CreateReason"
-    ;;
     "changefilestore")
     ACTION="util.ChangeFilestore"
     ;;
@@ -110,9 +107,6 @@ case "${BNAME}" in
     ;;
     "listfilestores")
     ACTION="util.ListFilestores"
-    ;;
-    "listreasons")
-    ACTION="util.ListReasons"
     ;;
     "listservers")
     ACTION="util.ListServers"
@@ -125,9 +119,6 @@ case "${BNAME}" in
     ;;
     "registerserver")
     ACTION="util.RegisterServer"
-    ;;
-    "deletereason")
-    ACTION="util.DeleteReason"
     ;;
     "unregisterdatabase")
     ACTION="util.UnregisterDatabase"
