@@ -231,7 +231,7 @@ public abstract class BasicCommandlineOptions {
         }
     }
     
-    protected final static void printServerException(final Exception e){
+    protected final void printServerException(final Exception e){
         String msg = e.getMessage();
         if( msg != null) {
             System.err.println("Server response:\n "+msg);
@@ -241,19 +241,19 @@ public abstract class BasicCommandlineOptions {
         }
     }
     
-    protected final static void printNotBoundResponse(final NotBoundException nbe){
+    protected final void printNotBoundResponse(final NotBoundException nbe){
         System.err.println("RMI module "+nbe.getMessage()+" not available on server");
     }
     
-    protected final static void printError(final String msg){
+    protected void printError(final String msg){
         System.err.println("Error:\n "+msg+"\n");    
     }
     
-    protected final static void printServerResponse(final String msg){
+    protected void printServerResponse(final String msg){
         System.err.println("Server response:\n "+msg+"\n");    
     }
 
-    protected final static void printInvalidInputMsg(final String msg){
+    protected void printInvalidInputMsg(final String msg){
         System.err.println("Invalid input detected: "+msg);    
     }    
     
@@ -268,7 +268,7 @@ public abstract class BasicCommandlineOptions {
      * @param columns
      * @param data
      */
-    protected final static void doCSVOutput(final ArrayList<String> columns, final ArrayList<ArrayList<String>> data){
+    protected final void doCSVOutput(final ArrayList<String> columns, final ArrayList<ArrayList<String>> data){
         if(columns!=null && data!=null){
             
             // first prepare the columns line
@@ -306,7 +306,7 @@ public abstract class BasicCommandlineOptions {
         }
     }
     
-    protected final static void setRMI_HOSTNAME(final String rmi_hostname) {       
+    protected final void setRMI_HOSTNAME(final String rmi_hostname) {       
         String host = rmi_hostname;
         if(!host.startsWith("rmi://")){
             host = "rmi://"+host;

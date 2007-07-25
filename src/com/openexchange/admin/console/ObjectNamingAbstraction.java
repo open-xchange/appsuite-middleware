@@ -1,5 +1,7 @@
 package com.openexchange.admin.console;
 
+import java.io.PrintStream;
+
 /**
  * This abstract class declares an abstract method to get the object name with which the command line tool
  * deals. This is used for output
@@ -12,18 +14,22 @@ public abstract class ObjectNamingAbstraction extends BasicCommandlineOptions {
     protected abstract String getObjectName();
 
     protected final void displayCreatedMessage(final Integer id, final Integer ctxid) {
-        createMessage(id, ctxid, "created");
+        createMessageForStdout(id, ctxid, "created");
     }
 
     protected final void displayChangedMessage(final Integer id, final Integer ctxid) {
-        createMessage(id, ctxid, "changed");
+        createMessageForStdout(id, ctxid, "changed");
     }
 
     protected final void displayDeletedMessage(Integer id, Integer ctxid) {
-        createMessage(id, ctxid, "deleted");
+        createMessageForStdout(id, ctxid, "deleted");
     }
     
-    protected void createMessage(final Integer id, final Integer ctxid, final String type) {
+    protected void createMessageForStdout(final Integer id, final Integer ctxid, final String type) {
+        createMessage(id, ctxid, type, System.out);
+    }
+
+    private void createMessage(final Integer id, final Integer ctxid, final String type, final PrintStream ps) {
         final StringBuilder sb = new StringBuilder(getObjectName());
         if (null != id) {
             sb.append(" ");
@@ -35,7 +41,22 @@ public abstract class ObjectNamingAbstraction extends BasicCommandlineOptions {
         }
         sb.append(" ");
         sb.append(type);
-        System.out.println(sb.toString());
+        ps.println(sb.toString());
     }
+    
+    private void createMessageForStderr(final Integer id, final Integer ctxid, final String type) {
+        createMessage(id, ctxid, type, System.err);
+    }
+    
+    protected final void printError(final Integer id, final Integer ctxid, final String msg) {
+        if (getObjectName().getClass().getName().matches("create")) {
+            createMessageForStderr(id, ctxid, "create");
+        }
+        System.err.println("Error:\n "+msg+"\n");    
+    }
+
+    protected void printInvalidInputMsg(final Integer id, final Integer ctxid, final String msg) {
+        System.err.println("Invalid input detected: "+msg);    
+    }    
 
 }

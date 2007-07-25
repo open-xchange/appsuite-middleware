@@ -129,21 +129,21 @@ public abstract class CreateCore extends UserAbstraction {
             
             sysexit(0);
         } catch (final ConnectException neti) {
-            printError(neti.getMessage());
+            printError(null, null, neti.getMessage());
             sysexit(SYSEXIT_COMMUNICATION_ERROR);
         } catch (final NumberFormatException num) {
-            printInvalidInputMsg("Ids must be numbers!");
+            printInvalidInputMsg(null, null, "Ids must be numbers!");
             sysexit(1);
         } catch (final IllegalOptionValueException e) {
-            printError("Illegal option value : " + e.getMessage());
+            printError(null, null, "Illegal option value : " + e.getMessage());
             printrightoptions(parser);
             sysexit(SYSEXIT_ILLEGAL_OPTION_VALUE);
         } catch (final UnknownOptionException e) {
-            printError("Unrecognized options on the command line: " + e.getMessage());
+            printError(null, null, "Unrecognized options on the command line: " + e.getMessage());
             printrightoptions(parser);
             sysexit(SYSEXIT_UNKNOWN_OPTION);
         } catch (final MissingOptionException e) {
-            printError(e.getMessage());
+            printError(null, null, e.getMessage());
             printrightoptions(parser);
             sysexit(SYSEXIT_MISSING_OPTION);
         } catch (final MalformedURLException e) {
@@ -156,13 +156,13 @@ public abstract class CreateCore extends UserAbstraction {
             printServerException(e);
             sysexit(1);
         } catch (final IllegalArgumentException e) {
-            printError(e.getMessage());
+            printError(null, null, e.getMessage());
             sysexit(1);
         } catch (final IllegalAccessException e) {
-            printError(e.getMessage());
+            printError(null, null, e.getMessage());
             sysexit(1);
         } catch (final InvocationTargetException e) {
-            printError(e.getMessage());
+            printError(null, null, e.getMessage());
             sysexit(1);
         } catch (final InvalidDataException e) {
             printServerException(e);
