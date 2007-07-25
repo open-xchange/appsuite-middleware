@@ -496,6 +496,9 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 		try{
 			readcon = DBPool.pickup(sessionobject.getContext());
 		} catch (DBPoolingException e) {
+			if (readcon != null) {
+				DBPool.closeReaderSilent(sessionobject.getContext(), readcon);
+			}
 			throw EXCEPTIONS.create(20,e);
 			//throw new OXException("UNABLE TO GET READ CONNECTION", e);
 		}
@@ -560,10 +563,19 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 			rs = stmt.executeQuery(cs.getSqlCommand());
 			si = new ContactObjectIterator(rs, stmt, cols, false, readcon);
 		} catch (SearchIteratorException e){
+			if (readcon != null) {
+				DBPool.closeReaderSilent(sessionobject.getContext(), readcon);
+			}
 			throw EXCEPTIONS.create(24,e,Integer.valueOf(ctx.getContextId()), Integer.valueOf(folderId), Integer.valueOf(userId));
 		} catch (SQLException e) {
+			if (readcon != null) {
+				DBPool.closeReaderSilent(sessionobject.getContext(), readcon);
+			}
 			throw EXCEPTIONS.create(25,e,Integer.valueOf(ctx.getContextId()), Integer.valueOf(folderId), Integer.valueOf(userId));
 		} catch (OXException e) {
+			if (readcon != null) {
+				DBPool.closeReaderSilent(sessionobject.getContext(), readcon);
+			}
 			throw e;
 			//throw new OXException("Exception during getContactsInFolder() for User " + userId	+ " in folder " + folderId +  " cid="+sessionobject.getContext().getContextId()+"\n:" + e.getMessage(),	e);
 		}
