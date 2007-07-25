@@ -93,7 +93,7 @@ public class Change extends ContextHostingAbstraction {
                 // do the change
                 oxres.change(ctx, auth);
                 
-                displayChangedMessage();
+                displayChangedMessage(null, null);
                 sysexit(0);
             }
         } catch (final java.rmi.ConnectException neti) {

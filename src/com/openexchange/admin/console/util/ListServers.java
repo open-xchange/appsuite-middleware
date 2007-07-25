@@ -22,7 +22,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
  * @author d7
  * 
  */
-public class ListServers extends UtilAbstraction {
+public class ListServers extends ServerAbstraction {
 
     public ListServers(final String[] args2) {
 

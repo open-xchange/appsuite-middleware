@@ -22,7 +22,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
  * @author d7,cutmasta
  * 
  */
-public class ListReasons extends UtilAbstraction {
+public class ListReasons extends ReasonAbstraction {
 
     public ListReasons(final String[] args2) {
 

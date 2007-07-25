@@ -37,7 +37,8 @@ public class UnregisterDatabase extends DatabaseAbstraction {
             final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME +OXUtilInterface.RMI_NAME);
             Database db = new Database(Integer.parseInt((String)parser.getOptionValue(this.databaseIdOption)));
             oxutil.unregisterDatabase(db, auth);
-            displayUnregisteredMessage();
+            
+            displayUnregisteredMessage(db.getId());
             sysexit(0);
         } catch (final java.rmi.ConnectException neti) {
             printError(neti.getMessage());

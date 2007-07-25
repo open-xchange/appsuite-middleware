@@ -31,6 +31,7 @@ public class Change extends ChangeCore {
     @Override
     protected void maincall(final AdminParser parser, final OXUserInterface oxusr, final Context ctx, final User usr, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         oxusr.change(ctx, usr, auth);
+        displayChangedMessage(usr.getId(), ctx.getIdAsInt());
     }
 
     @Override

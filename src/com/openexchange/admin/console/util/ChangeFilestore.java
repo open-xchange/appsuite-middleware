@@ -23,7 +23,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
  * @author d7,cutmasta
  * 
  */
-public class ChangeFilestore extends FileStoreAbstraction {
+public class ChangeFilestore extends FilestoreAbstraction {
 
     public ChangeFilestore(final String[] args2) {
         final AdminParser parser = new AdminParser("changefilestore");
@@ -49,7 +49,7 @@ public class ChangeFilestore extends FileStoreAbstraction {
     
             oxutil.changeFilestore(fstore, auth);
             
-            displayChangedMessage();
+            displayChangedMessage(null, null);
             sysexit(0);
         } catch (final java.rmi.ConnectException neti) {
             printError(neti.getMessage());

@@ -24,7 +24,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
  * @author d7,cutmasta
  * 
  */
-public class ListFilestores extends UtilAbstraction {
+public class ListFilestores extends FilestoreAbstraction {
 
     public ListFilestores(final String[] args2) {
 

@@ -221,4 +221,8 @@ public abstract class DatabaseAbstraction extends UtilAbstraction{
         this.databaseNameOption = setShortLongOpt(parser, OPT_NAME_DBNAME_SHORT,OPT_NAME_DBNAME_LONG,"Name of the database",true, convertBooleantoTriState(required)); 
     }
 
+    @Override
+    protected final String getObjectName() {
+        return "database";
+    }
 }

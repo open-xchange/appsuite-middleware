@@ -24,7 +24,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
  * @author d7,cutmasta
  *
  */
-public class ListDatabases extends UtilAbstraction {
+public class ListDatabases extends DatabaseAbstraction {
 
     public ListDatabases(final String[] args2) {
 

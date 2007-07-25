@@ -65,7 +65,7 @@ public class ChangeDatabase extends DatabaseAbstraction {
             db.setId(Integer.parseInt((String) parser.getOptionValue(this.databaseIdOption)));
             oxutil.changeDatabase(db, auth);
             
-            displayChangedMessage();
+            displayChangedMessage(null, null);
             sysexit(0);
         } catch (final java.rmi.ConnectException neti) {
             printError(neti.getMessage());

@@ -23,7 +23,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
  * @author d7,cutmasta
  * 
  */
-public class UnregisterServer extends UtilAbstraction {
+public class UnregisterServer extends ServerAbstraction {
 
     // Setting names for options
     private final static char OPT_NAME_SERVER_ID_SHORT = 'i';
@@ -49,7 +49,7 @@ public class UnregisterServer extends UtilAbstraction {
             sv.setId(Integer.parseInt((String) parser.getOptionValue(serverIdOption)));
             oxutil.unregisterServer(sv, auth);
             
-            displayUnregisteredMessage();
+            displayUnregisteredMessage(sv.getId());
             sysexit(0);
         } catch (final java.rmi.ConnectException neti) {
             printError(neti.getMessage());
