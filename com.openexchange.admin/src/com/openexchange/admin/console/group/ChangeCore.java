@@ -130,7 +130,7 @@ public abstract class ChangeCore extends GroupAbstraction {
             displayChangedMessage(grpid, ctx.getIdAsInt());
             sysexit(0);
         } catch (final java.rmi.ConnectException neti) {
-            printError(neti.getMessage());
+            printError(null, null, neti.getMessage());
             sysexit(SYSEXIT_COMMUNICATION_ERROR);
         } catch (final MalformedURLException e) {
             printServerException(e);
@@ -154,15 +154,15 @@ public abstract class ChangeCore extends GroupAbstraction {
             printServerException(e);
             sysexit(SYSEXIT_INVALID_DATA);
         } catch (final IllegalOptionValueException e) {
-            printError("Illegal option value : " + e.getMessage());
+            printError(null, null, "Illegal option value : " + e.getMessage());
             parser.printUsage();
             sysexit(SYSEXIT_ILLEGAL_OPTION_VALUE);
         } catch (final UnknownOptionException e) {
-            printError("Unrecognized options on the command line: " + e.getMessage());
+            printError(null, null, "Unrecognized options on the command line: " + e.getMessage());
             parser.printUsage();
             sysexit(SYSEXIT_UNKNOWN_OPTION);
         } catch (final MissingOptionException e) {
-            printError(e.getMessage());
+            printError(null, null, e.getMessage());
             parser.printUsage();
             sysexit(SYSEXIT_MISSING_OPTION);
         } catch (final DatabaseUpdateException e) {
