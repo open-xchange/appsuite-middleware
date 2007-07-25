@@ -1,6 +1,7 @@
 package com.openexchange.admin.console.util;
 
 import java.net.MalformedURLException;
+import java.rmi.ConnectException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -38,57 +39,58 @@ public class UnregisterServer extends ServerAbstraction {
 
         setOptions(parser);
 
+        Integer serverid = null;
         try {
             parser.ownparse(args2);
 
-            final Credentials auth = new Credentials((String) parser.getOptionValue(adminUserOption), (String) parser.getOptionValue(adminPassOption));
+            final Credentials auth = credentialsparsing(parser);
 
             // get rmi ref
             final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME +OXUtilInterface.RMI_NAME);
             Server sv = new Server();
-            sv.setId(Integer.parseInt((String) parser.getOptionValue(serverIdOption)));
+            serverid = Integer.parseInt((String) parser.getOptionValue(serverIdOption));
+            sv.setId(serverid);
             oxutil.unregisterServer(sv, auth);
             
             displayUnregisteredMessage(sv.getId());
             sysexit(0);
-        } catch (final java.rmi.ConnectException neti) {
-            printError(null, null, neti.getMessage());
+        } catch (final ConnectException neti) {
+            printError(serverid, null, neti.getMessage());
             sysexit(SYSEXIT_COMMUNICATION_ERROR);
-        } catch (final java.lang.NumberFormatException num) {
-            printInvalidInputMsg(null, null, "Ids must be numbers!");
+        } catch (final NumberFormatException num) {
+            printInvalidInputMsg(serverid, null, "Ids must be numbers!");
             sysexit(1);
         } catch (final MalformedURLException e) {
-            printServerException(e);
+            printServerException(serverid, null, e);
             sysexit(1);
         } catch (final RemoteException e) {
-            printServerException(e);
+            printServerException(serverid, null, e);
             sysexit(SYSEXIT_REMOTE_ERROR);
         } catch (final NotBoundException e) {
-            printNotBoundResponse(e);
+            printNotBoundResponse(serverid, null, e);
             sysexit(1);
         } catch (final StorageException e) {
-            printServerException(e);
+            printServerException(serverid, null, e);
             sysexit(SYSEXIT_SERVERSTORAGE_ERROR);
         } catch (final InvalidCredentialsException e) {
-            printServerException(e);
+            printServerException(serverid, null, e);
             sysexit(SYSEXIT_INVALID_CREDENTIALS);
         } catch (final InvalidDataException e) {
-            printServerException(e);
+            printServerException(serverid, null, e);
             sysexit(SYSEXIT_INVALID_DATA);
         } catch (IllegalOptionValueException e) {
-            printError(null, null, "Illegal option value : " + e.getMessage());
+            printError(serverid, null, "Illegal option value : " + e.getMessage());
             parser.printUsage();
             sysexit(SYSEXIT_ILLEGAL_OPTION_VALUE);
         } catch (UnknownOptionException e) {
-            printError(null, null, "Unrecognized options on the command line: " + e.getMessage());
+            printError(serverid, null, "Unrecognized options on the command line: " + e.getMessage());
             parser.printUsage();
             sysexit(SYSEXIT_UNKNOWN_OPTION);
         } catch (MissingOptionException e) {
-            printError(null, null, e.getMessage());
+            printError(serverid, null, e.getMessage());
             parser.printUsage();
             sysexit(SYSEXIT_MISSING_OPTION);
         }
-
     }
 
     public static void main(final String args[]) {

@@ -55,25 +55,25 @@ public class RegisterFilestore extends FilestoreAbstraction {
             printInvalidInputMsg(null, null, "Ids must be numbers!");
             sysexit(1);
         } catch (final MalformedURLException e) {
-            printServerException(e);
+            printServerException(null, null, e);
             sysexit(1);
         } catch (final RemoteException e) {
-            printServerException(e);
+            printServerException(null, null, e);
             sysexit(SYSEXIT_REMOTE_ERROR);
         } catch (final NotBoundException e) {
-            printNotBoundResponse(e);
+            printNotBoundResponse(null, null, e);
             sysexit(1);
         } catch (final StorageException e) {
-            printServerException(e);
+            printServerException(null, null, e);
             sysexit(SYSEXIT_SERVERSTORAGE_ERROR);
         } catch (final InvalidCredentialsException e) {
-            printServerException(e);
+            printServerException(null, null, e);
             sysexit(SYSEXIT_INVALID_CREDENTIALS);
         } catch (final InvalidDataException e) {
-            printServerException(e);
+            printServerException(null, null, e);
             sysexit(SYSEXIT_INVALID_DATA);
         } catch (final URISyntaxException e) {
-            printServerException(e);
+            printServerException(null, null, e);
             sysexit(1);
         } catch (final IllegalOptionValueException e) {
             printError(null, null, "Illegal option value : " + e.getMessage());

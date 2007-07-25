@@ -37,6 +37,7 @@ public class DisableAll extends ContextHostingAbstraction {
             oxres.disableAll(mr, auth); */
             oxres.disableAll(auth);
 
+            displayDisabledMessage(null, null);
             sysexit(0);
         } catch (final java.rmi.ConnectException neti) {
             printError(null, null, neti.getMessage());
@@ -45,22 +46,22 @@ public class DisableAll extends ContextHostingAbstraction {
             printInvalidInputMsg(null, null, "Ids must be numbers!");
             sysexit(1);
         } catch (final MalformedURLException e) {
-            printServerException(e);
+            printServerException(null, null, e);
             sysexit(1);
         } catch (final RemoteException e) {
-            printServerException(e);
+            printServerException(null, null, e);
             sysexit(SYSEXIT_REMOTE_ERROR);
         } catch (final NotBoundException e) {
-            printNotBoundResponse(e);
+            printNotBoundResponse(null, null, e);
             sysexit(1);
         } catch (final StorageException e) {
-            printServerException(e);
+            printServerException(null, null, e);
             sysexit(SYSEXIT_SERVERSTORAGE_ERROR);
         } catch (final InvalidCredentialsException e) {
-            printServerException(e);
+            printServerException(null, null, e);
             sysexit(SYSEXIT_INVALID_CREDENTIALS);
         } catch (final InvalidDataException e) {
-            printServerException(e);
+            printServerException(null, null, e);
             sysexit(SYSEXIT_INVALID_DATA);
         } catch (final IllegalOptionValueException e) {
             printError(null, null, "Illegal option value : " + e.getMessage());
@@ -75,7 +76,7 @@ public class DisableAll extends ContextHostingAbstraction {
             parser.printUsage();
             sysexit(SYSEXIT_MISSING_OPTION);
         } catch (final NoSuchReasonException e) {
-            printServerException(e);
+            printServerException(null, null, e);
             sysexit(1);
         }
     }
@@ -87,5 +88,10 @@ public class DisableAll extends ContextHostingAbstraction {
     private void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptionsWithoutContextID(parser);
         //setMaintenanceReasodIDOption(parser, true);
+    }
+
+    @Override
+    protected String getObjectName() {
+        return "all contexts";
     }
 }

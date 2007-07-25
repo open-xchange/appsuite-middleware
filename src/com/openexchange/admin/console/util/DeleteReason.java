@@ -37,6 +37,7 @@ public class DeleteReason extends ReasonAbstraction {
     
         setOptions(parser);
     
+        Integer reason_id = null;
         try {
             parser.ownparse(args2);
     
@@ -45,7 +46,7 @@ public class DeleteReason extends ReasonAbstraction {
             // get rmi ref
             final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME +OXUtilInterface.RMI_NAME);
     
-            final int reason_id = Integer.parseInt((String) parser.getOptionValue(this.reasonIDOption));
+            reason_id = Integer.parseInt((String) parser.getOptionValue(this.reasonIDOption));
             MaintenanceReason[] mrs = new MaintenanceReason[1];
             mrs[0] = new MaintenanceReason();
             mrs[0].setId(reason_id);
@@ -54,39 +55,39 @@ public class DeleteReason extends ReasonAbstraction {
             displayDeletedMessage(reason_id, null);
             sysexit(0);
         } catch (final java.rmi.ConnectException neti) {
-            printError(null, null, neti.getMessage());
+            printError(reason_id, null, neti.getMessage());
             sysexit(SYSEXIT_COMMUNICATION_ERROR);
         } catch (final java.lang.NumberFormatException num) {
-            printInvalidInputMsg(null, null, "Ids must be numbers!");
+            printInvalidInputMsg(reason_id, null, "Ids must be numbers!");
             sysexit(1);
         } catch (final MalformedURLException e) {
-            printServerException(e);
+            printServerException(reason_id, null, e);
             sysexit(1);
         } catch (final RemoteException e) {
-            printServerException(e);
+            printServerException(reason_id, null, e);
             sysexit(SYSEXIT_REMOTE_ERROR);
         } catch (final NotBoundException e) {
-            printNotBoundResponse(e);
+            printNotBoundResponse(reason_id, null, e);
             sysexit(1);
         } catch (final StorageException e) {
-            printServerException(e);
+            printServerException(reason_id, null, e);
             sysexit(SYSEXIT_SERVERSTORAGE_ERROR);
         } catch (final InvalidCredentialsException e) {
-            printServerException(e);
+            printServerException(reason_id, null, e);
             sysexit(SYSEXIT_INVALID_CREDENTIALS);
         } catch (final InvalidDataException e) {
-            printServerException(e);
+            printServerException(reason_id, null, e);
             sysexit(SYSEXIT_INVALID_DATA);
         } catch (final IllegalOptionValueException e) {
-            printError(null, null, "Illegal option value : " + e.getMessage());
+            printError(reason_id, null, "Illegal option value : " + e.getMessage());
             parser.printUsage();
             sysexit(SYSEXIT_ILLEGAL_OPTION_VALUE);
         } catch (final UnknownOptionException e) {
-            printError(null, null, "Unrecognized options on the command line: " + e.getMessage());
+            printError(reason_id, null, "Unrecognized options on the command line: " + e.getMessage());
             parser.printUsage();
             sysexit(SYSEXIT_UNKNOWN_OPTION);
         } catch (final MissingOptionException e) {
-            printError(null, null, e.getMessage());
+            printError(reason_id, null, e.getMessage());
             parser.printUsage();
             sysexit(SYSEXIT_MISSING_OPTION);
         }

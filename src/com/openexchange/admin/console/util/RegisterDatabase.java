@@ -33,7 +33,7 @@ public class RegisterDatabase extends DatabaseAbstraction {
         try {
             parser.ownparse(args2);
 
-            final Credentials auth = new Credentials((String) parser.getOptionValue(this.adminUserOption), (String) parser.getOptionValue(this.adminPassOption));
+            final Credentials auth = credentialsparsing(parser);
 
             // get rmi ref
             final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME + OXUtilInterface.RMI_NAME);
@@ -71,22 +71,22 @@ public class RegisterDatabase extends DatabaseAbstraction {
             printInvalidInputMsg(null, null, "Ids must be numbers!");
             sysexit(1);
         } catch (final MalformedURLException e) {
-            printServerException(e);
+            printServerException(null, null, e);
             sysexit(1);
         } catch (final RemoteException e) {
-            printServerException(e);
+            printServerException(null, null, e);
             sysexit(SYSEXIT_REMOTE_ERROR);
         } catch (final NotBoundException e) {
-            printNotBoundResponse(e);
+            printNotBoundResponse(null, null, e);
             sysexit(1);
         } catch (final StorageException e) {
-            printServerException(e);
+            printServerException(null, null, e);
             sysexit(SYSEXIT_SERVERSTORAGE_ERROR);
         } catch (final InvalidCredentialsException e) {
-            printServerException(e);
+            printServerException(null, null, e);
             sysexit(SYSEXIT_INVALID_CREDENTIALS);
         } catch (final InvalidDataException e) {
-            printServerException(e);
+            printServerException(null, null, e);
             sysexit(SYSEXIT_INVALID_DATA);
         } catch (final IllegalOptionValueException e) {
             printError(null, null, "Illegal option value : " + e.getMessage());

@@ -25,6 +25,8 @@ public abstract class FilestoreAbstraction extends UtilAbstraction {
     
     protected Option filestoreMaxContextsOption = null;
     
+    protected Integer filestoreid = null;
+    
     protected void parseAndSetFilestorePath(final AdminParser parser, final Filestore fstore) throws URISyntaxException {
         final String store_path = (String) parser.getOptionValue(this.filestorePathOption);
         if (null != store_path) {
@@ -73,8 +75,8 @@ public abstract class FilestoreAbstraction extends UtilAbstraction {
     }
 
     protected void parseAndSetFilestoreID(final AdminParser parser, final Filestore fstore) {
-        final String filestore_id = (String) parser.getOptionValue(this.filestoreIdOption);
-        fstore.setId(Integer.parseInt(filestore_id));
+        filestoreid = Integer.parseInt((String) parser.getOptionValue(this.filestoreIdOption));
+        fstore.setId(filestoreid);
     }
 
     @Override
