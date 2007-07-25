@@ -11,16 +11,13 @@ enableallcontexts \
 movedatabasecontext \
 movefilestorecontext \
 listcontexts \
-createreason \
 changefilestore \
 listdatabases \
 listfilestores \
-listreasons \
 listservers \
 registerdatabase \
 registerfilestore \
 registerserver \
-deletereason \
 unregisterdatabase \
 unregisterfilestore \
 unregisterserver \
