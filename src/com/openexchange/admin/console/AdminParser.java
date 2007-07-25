@@ -49,6 +49,7 @@
 package com.openexchange.admin.console;
 
 import java.util.ArrayList;
+import java.util.Hashtable;
 
 /**
  * This class is used to extend the CmdLineParser which two main things:
@@ -66,6 +67,8 @@ public class AdminParser extends CmdLineParser {
 
     private static final char OPT_HELP_SHORT = 'h';
 
+    private static final String OPT_ENVOPTS_LONG = "environment";
+    
     public class MissingOptionException extends Exception {
         /**
          * 
@@ -154,6 +157,7 @@ public class AdminParser extends CmdLineParser {
         super();
         this.appname = appname;
         this.helpoption = this.addOption(OPT_HELP_SHORT, OPT_HELP_LONG, null, "Output this help text", NeededTriState.notneeded, false);
+        this.envoption = this.addOption(OPT_ENVOPTS_LONG, "Output this help text", "Show info about commandline environment", false, false);
     }
 
     ArrayList<OptionInfo> optinfolist = new ArrayList<OptionInfo>();
@@ -162,6 +166,8 @@ public class AdminParser extends CmdLineParser {
 
     private Option helpoption;
 
+    private Option envoption;
+    
     /**
      * This method is used to add an option with a mandatory field
      * 
@@ -300,6 +306,10 @@ public class AdminParser extends CmdLineParser {
             printUsage();
             System.exit(0);
         }
+        if (null != this.getOptionValue(this.envoption)) {
+            printEnvUsage();
+            System.exit(0);
+        }
         final StringBuilder sb = new StringBuilder();
         for (final OptionInfo optInfo : this.optinfolist) {
             if (optInfo.needed == NeededTriState.needed) {
@@ -318,6 +328,20 @@ public class AdminParser extends CmdLineParser {
 
     }
 
+    public final void printEnvUsage() {
+        System.out.println("\nThe following environment variables and their current value are known\n" +
+        		"and can be modified to change behaviour:\n");
+        Hashtable<String, String> env = BasicCommandlineOptions.getEnvOptions();
+        for( final String key : env.keySet()) {
+            System.out.println("\t" + key + "=" + env.get(key));
+        }
+        System.out.println("\n");
+        System.out.println("Date format is used to format all dates coming out of or going into the system.");
+        System.out.println("\n");
+        System.out.println("For possible date formats, see\n http://java.sun.com/j2se/1.5.0/docs/api/java/text/SimpleDateFormat.html");
+        System.out.println("For possible timezones, see\n http://java.sun.com/j2se/1.5.0/docs/api/java/util/TimeZone.html");
+    }
+    
     public final void printUsage() {
         System.err.println("Usage: " + this.appname);
 
