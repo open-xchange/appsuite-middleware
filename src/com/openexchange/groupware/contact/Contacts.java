@@ -149,7 +149,7 @@ public class Contacts implements DeleteListener {
 				}
 			}
 		}catch (final AddressException ae){
-			LOG.error("Email Validation Failed", ae);
+			LOG.info("Email Validation Failed", ae);
 			throw EXCEPTIONS.create(0,ae,email);
 		}
 	}
