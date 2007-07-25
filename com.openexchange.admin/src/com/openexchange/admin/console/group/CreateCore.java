@@ -49,6 +49,7 @@
 package com.openexchange.admin.console.group;
 
 import java.net.MalformedURLException;
+import java.rmi.ConnectException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 
@@ -89,22 +90,24 @@ public abstract class CreateCore extends GroupAbstraction {
 
         try {
             parser.ownparse(args);
+            
             final Context ctx = contextparsing(parser);
 
             final Credentials auth = credentialsparsing(parser);
 
             final OXGroupInterface oxgrp = getGroupInterface();
+            
             final Group grp = new Group();
 
-            if (parser.getOptionValue(this.addMemberOption) != null) {
-                final Integer[] newMemberList = getMembers(parser, this.addMemberOption);
+            final String members = (String) parser.getOptionValue(this.addMemberOption);
+            if (members != null) {
+                final Integer[] newMemberList = getMembers(parser, members);
                 if (newMemberList != null) {
                     grp.setMembers(newMemberList);
                 }
             }
 
-            grp.setName((String) parser.getOptionValue(this.nameOption));
-            grp.setDisplayname((String) parser.getOptionValue(this.displayNameOption));
+            parseAndSetGroupAndDisplayName(parser, grp);
 
             maincall(parser, oxgrp, ctx, grp, auth);
             
@@ -112,56 +115,55 @@ public abstract class CreateCore extends GroupAbstraction {
             
             displayCreatedMessage(id, ctx.getIdAsInt());
             sysexit(0);
-        } catch (final java.rmi.ConnectException neti) {
-            printError(null, null, neti.getMessage());
+        } catch (final ConnectException neti) {
+            printError(null, ctxid, neti.getMessage());
             sysexit(SYSEXIT_COMMUNICATION_ERROR);
         } catch (final MalformedURLException e) {
-            printServerException(e);
+            printServerException(null, ctxid, e);
             sysexit(1);
         } catch (final RemoteException e) {
-            printServerException(e);
+            printServerException(null, ctxid, e);
             sysexit(SYSEXIT_REMOTE_ERROR);
         } catch (final NotBoundException e) {
-            printServerException(e);
+            printServerException(null, ctxid, e);
             sysexit(1);
         } catch (final InvalidCredentialsException e) {
-            printServerException(e);
+            printServerException(null, ctxid, e);
             sysexit(SYSEXIT_INVALID_CREDENTIALS);
         } catch (final NoSuchContextException e) {
-            printServerException(e);
+            printServerException(null, ctxid, e);
             sysexit(SYSEXIT_NO_SUCH_CONTEXT);
         } catch (final StorageException e) {
-            printServerException(e);
+            printServerException(null, ctxid, e);
             sysexit(SYSEXIT_SERVERSTORAGE_ERROR);
         } catch (final InvalidDataException e) {
-            printServerException(e);
+            printServerException(null, ctxid, e);
             sysexit(SYSEXIT_INVALID_DATA);
         } catch (final IllegalOptionValueException e) {
-            printError(null, null, "Illegal option value : " + e.getMessage());
+            printError(null, ctxid, "Illegal option value : " + e.getMessage());
             parser.printUsage();
             sysexit(SYSEXIT_ILLEGAL_OPTION_VALUE);
         } catch (final UnknownOptionException e) {
-            printError(null, null, "Unrecognized options on the command line: " + e.getMessage());
+            printError(null, ctxid, "Unrecognized options on the command line: " + e.getMessage());
             parser.printUsage();
             sysexit(SYSEXIT_UNKNOWN_OPTION);
         } catch (final MissingOptionException e) {
-            printError(null, null, e.getMessage());
+            printError(null, ctxid, e.getMessage());
             parser.printUsage();
             sysexit(SYSEXIT_MISSING_OPTION);
         } catch (final DatabaseUpdateException e) {
-            printServerException(e);
+            printServerException(null, ctxid, e);
             sysexit(1);
         } catch (final NoSuchUserException e) {
-           printServerException(e);
+           printServerException(null, ctxid, e);
            sysexit(SYSEXIT_NO_SUCH_USER);
         } catch (final DuplicateExtensionException e) {
-            printServerException(e);
+            printServerException(null, ctxid, e);
             sysexit(1);
         }
     }
 
-    private Integer[] getMembers(final AdminParser parser, final Option memberOption) {
-        final String tmpmembers = (String) parser.getOptionValue(memberOption);
+    private Integer[] getMembers(final AdminParser parser, final String tmpmembers) {
         final String[] split = tmpmembers.split(",");
         final Integer[] memberList = new Integer[split.length];
         for (int i = 0; i < split.length; i++) {

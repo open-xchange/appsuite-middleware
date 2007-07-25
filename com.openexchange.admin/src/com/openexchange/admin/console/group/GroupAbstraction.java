@@ -57,6 +57,7 @@ import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.ObjectNamingAbstraction;
 import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.rmi.OXGroupInterface;
+import com.openexchange.admin.rmi.dataobjects.Group;
 
 public abstract class GroupAbstraction extends ObjectNamingAbstraction {
 
@@ -84,6 +85,9 @@ public abstract class GroupAbstraction extends ObjectNamingAbstraction {
     
     protected static final String OPT_MAILADDRESS_LONG = "mailaddress";
     protected static final char OPT_MAILADDRESS_SHORT = 'm';
+    
+    // For right error output
+    protected Integer groupid = null;
     
     protected void setAddMembersOption(final AdminParser admp,boolean required) {
         addMemberOption = setShortLongOpt(admp,OPT_NAME_ADDMEMBERS, OPT_NAME_ADDMEMBERS_LONG, "List of members to add to group", true, convertBooleantoTriState(required));
@@ -128,5 +132,28 @@ public abstract class GroupAbstraction extends ObjectNamingAbstraction {
     protected final String getObjectName() {
         return "group";
     }
-   
+
+    protected final void parseAndSetGroupId(final AdminParser parser, final Group grp) {
+        groupid = Integer.valueOf((String) parser.getOptionValue(this.IdOption));
+        grp.setId(groupid);
+    }
+
+    private void parseAndSetGroupName(final AdminParser parser, final Group grp) {
+        final String groupName = (String) parser.getOptionValue(this.nameOption);
+        if (groupName != null) {
+            grp.setName(groupName);
+        }
+    }
+
+    private void parseAndSetDisplayName(final AdminParser parser, final Group grp) {
+        final String displayName = (String) parser.getOptionValue(this.displayNameOption);
+        if (displayName != null) {
+            grp.setDisplayname(displayName);
+        }
+    }
+
+    protected final void parseAndSetGroupAndDisplayName(final AdminParser parser, final Group grp) {
+        parseAndSetGroupName(parser, grp);
+        parseAndSetDisplayName(parser, grp);
+    }
 }

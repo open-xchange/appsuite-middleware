@@ -1,6 +1,7 @@
 package com.openexchange.admin.console;
 
 import java.io.PrintStream;
+import java.rmi.NotBoundException;
 
 /**
  * This abstract class declares an abstract method to get the object name with which the command line tool
@@ -49,14 +50,37 @@ public abstract class ObjectNamingAbstraction extends BasicCommandlineOptions {
     }
     
     protected final void printError(final Integer id, final Integer ctxid, final String msg) {
-        if (getObjectName().getClass().getName().matches("create")) {
-            createMessageForStderr(id, ctxid, "create");
-        }
-        System.err.println("Error:\n "+msg+"\n");    
+        printFirstPartOfErrorText(id, ctxid);
+        printError(msg);    
     }
 
-    protected void printInvalidInputMsg(final Integer id, final Integer ctxid, final String msg) {
-        System.err.println("Invalid input detected: "+msg);    
+    protected final void printInvalidInputMsg(final Integer id, final Integer ctxid, final String msg) {
+        printFirstPartOfErrorText(id, ctxid);
+        printInvalidInputMsg(msg);    
     }    
 
+    protected void printServerException(final Integer id, final Integer ctxid, final Exception e) {
+        printFirstPartOfErrorText(id, ctxid);
+        printServerException(e);
+    }
+
+    protected final void printNotBoundResponse(final Integer id, final Integer ctxid, final NotBoundException nbe){
+        System.err.println("RMI module "+nbe.getMessage()+" not available on server");
+    }
+
+    private void printFirstPartOfErrorText(final Integer id, final Integer ctxid) {
+        if (getClass().getName().matches("^.*\\..*(?i)create.*$")) {
+            createMessageForStderr(id, ctxid, "could not be created: ");
+        } else if (getClass().getName().matches("^.*\\..*(?i)change.*$")) {
+            createMessageForStderr(id, ctxid, "could not be changed: ");
+        } else if (getClass().getName().matches("^.*\\..*(?i)delete.*$")) {
+            createMessageForStderr(id, ctxid, "could not be deleted: ");
+        } else if (getClass().getName().matches("^.*\\..*(?i)list.*$")) {
+            createMessageForStderr(id, ctxid, "could not be listed: ");
+        } else if (getClass().getName().matches("^.*\\..*(?i)disable.*$")) {
+            createMessageForStderr(id, ctxid, "could not be disabled: ");
+        } else if (getClass().getName().matches("^.*\\..*(?i)move.*$")) {
+            createMessageForStderr(id, ctxid, "could not be moved: ");
+        }
+    }
 }

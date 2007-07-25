@@ -49,6 +49,7 @@
 package com.openexchange.admin.console.resource;
 
 import java.net.MalformedURLException;
+import java.rmi.ConnectException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 
@@ -94,89 +95,71 @@ public abstract class ChangeCore extends ResourceAbstraction {
         try {
             parser.ownparse(args);
 
+            final Resource res = new Resource();
+            
+            parseAndSetResourceId(parser, res);
+
             final Context ctx = contextparsing(parser);
 
             final Credentials auth = credentialsparsing(parser);
             
             final OXResourceInterface oxres = getResourceInterface();
-            final Resource res = new Resource();
 
-            final int resourceid = Integer.parseInt((String) parser.getOptionValue(this.resourceIdOption));
-            res.setId(resourceid);
-
-            if (parser.getOptionValue(this.resourceAvailableOption) != null) {
-                res.setAvailable(Boolean.parseBoolean(parser.getOptionValue(this.resourceAvailableOption).toString()));
-            }
-
-            if (parser.getOptionValue(this.resourceDescriptionOption) != null) {
-                res.setDescription((String) parser.getOptionValue(this.resourceDescriptionOption));
-            }
-
-            if (parser.getOptionValue(this.resourceDisplayNameOption) != null) {
-                res.setDisplayname((String) parser.getOptionValue(this.resourceDisplayNameOption));
-            }
-
-            if (parser.getOptionValue(this.resourceEmailOption) != null) {
-                res.setEmail((String) parser.getOptionValue(this.resourceEmailOption));
-            }
-
-            if (parser.getOptionValue(this.resourceNameOption) != null) {
-                res.setName((String) parser.getOptionValue(this.resourceNameOption));
-            }
+            parseAndSetMandatoryFields(parser, res);
 
             maincall(parser, oxres, ctx, res, auth);
             
             oxres.change(ctx, res, auth);
 
-            displayChangedMessage(resourceid, ctx.getIdAsInt());
+            displayChangedMessage(resourceid, ctxid);
             sysexit(0);
-        } catch (final java.rmi.ConnectException neti) {
-            printError(null, null, neti.getMessage());
+        } catch (final ConnectException neti) {
+            printError(resourceid, ctxid, neti.getMessage());
             sysexit(SYSEXIT_COMMUNICATION_ERROR);
-        } catch (final java.lang.NumberFormatException num) {
-            printInvalidInputMsg(null, null, "Ids must be numbers!");
+        } catch (final NumberFormatException num) {
+            printInvalidInputMsg(resourceid, ctxid, "Ids must be numbers!");
             sysexit(1);
         } catch (final MalformedURLException e) {
-            printServerException(e);
+            printServerException(resourceid, ctxid, e);
             sysexit(1);
         } catch (final RemoteException e) {
-            printServerException(e);
+            printServerException(resourceid, ctxid, e);
             sysexit(SYSEXIT_REMOTE_ERROR);
         } catch (final NotBoundException e) {
-            printServerException(e);
+            printServerException(resourceid, ctxid, e);
             sysexit(1);
         } catch (final StorageException e) {
-            printServerException(e);
+            printServerException(resourceid, ctxid, e);
             sysexit(SYSEXIT_SERVERSTORAGE_ERROR);
         } catch (final InvalidCredentialsException e) {
-            printServerException(e);
+            printServerException(resourceid, ctxid, e);
             sysexit(SYSEXIT_INVALID_CREDENTIALS);
         } catch (final NoSuchContextException e) {
-            printServerException(e);
+            printServerException(resourceid, ctxid, e);
             sysexit(SYSEXIT_NO_SUCH_CONTEXT);
         } catch (final InvalidDataException e) {
-            printServerException(e);
+            printServerException(resourceid, ctxid, e);
             sysexit(SYSEXIT_INVALID_DATA);
         } catch (final IllegalOptionValueException e) {
-            printError(null, null, "Illegal option value : " + e.getMessage());
+            printError(resourceid, ctxid, "Illegal option value : " + e.getMessage());
             parser.printUsage();
             sysexit(SYSEXIT_ILLEGAL_OPTION_VALUE);
         } catch (final UnknownOptionException e) {
-            printError(null, null, "Unrecognized options on the command line: " + e.getMessage());
+            printError(resourceid, ctxid, "Unrecognized options on the command line: " + e.getMessage());
             parser.printUsage();
             sysexit(SYSEXIT_UNKNOWN_OPTION);
         } catch (final MissingOptionException e) {
-            printError(null, null, e.getMessage());
+            printError(resourceid, ctxid, e.getMessage());
             parser.printUsage();
             sysexit(SYSEXIT_MISSING_OPTION);
         } catch (final DatabaseUpdateException e) {
-            printServerException(e);
+            printServerException(resourceid, ctxid, e);
             sysexit(1);
         } catch (final NoSuchResourceException e) {
-            printServerException(e);
+            printServerException(resourceid, ctxid, e);
             sysexit(SYSEXIT_NO_SUCH_RESOURCE);
         } catch (final DuplicateExtensionException e) {
-            printServerException(e);
+            printServerException(resourceid, ctxid, e);
             sysexit(1);
         }
     }
