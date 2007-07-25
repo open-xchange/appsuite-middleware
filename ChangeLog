@@ -1,3 +1,7 @@
+* 2007-07-25 ben.pahne@open-xchange.com
+
+ - Bugfix 7368
+
 * 2007-07-23 - marcus.klein@open-xchange.com
 
  - Improved SQL command when listing deleted tasks.
