@@ -1,3 +1,8 @@
+* 2007-07-25 - martin.kauss@open-xchange.com
+
+ - Fixed bug #8482. If an appoinment with an enabled private flag was moved
+   to a shared folder, no error message was shown. This has been fixed.
+
 * 2007-07-25 ben.pahne@open-xchange.com
 
  - Bugfix 7368, changed a message status from error to info
