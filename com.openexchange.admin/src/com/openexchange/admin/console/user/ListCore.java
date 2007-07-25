@@ -134,61 +134,61 @@ public abstract class ListCore extends UserAbstraction {
 
             sysexit(0);
         } catch (final ConnectException neti) {
-            printError(null, null, neti.getMessage());
+            printError(null, ctxid, neti.getMessage());
             sysexit(SYSEXIT_COMMUNICATION_ERROR);
         } catch (final NumberFormatException num) {
-            printInvalidInputMsg(null, null, "Ids must be numbers!");
+            printInvalidInputMsg(null, ctxid, "Ids must be numbers!");
             sysexit(1);
         } catch (final IllegalOptionValueException e) {
-            printError(null, null, "Illegal option value : " + e.getMessage());
+            printError(null, ctxid, "Illegal option value : " + e.getMessage());
             parser.printUsage();
             sysexit(SYSEXIT_ILLEGAL_OPTION_VALUE);
         } catch (final UnknownOptionException e) {
-            printError(null, null, "Unrecognized options on the command line: " + e.getMessage());
+            printError(null, ctxid, "Unrecognized options on the command line: " + e.getMessage());
             parser.printUsage();
             sysexit(SYSEXIT_UNKNOWN_OPTION);
         } catch (final MissingOptionException e) {
-            printError(null, null, e.getMessage());
+            printError(null, ctxid, e.getMessage());
             parser.printUsage();
             sysexit(SYSEXIT_MISSING_OPTION);
         } catch (final MalformedURLException e) {
-            printServerException(e);
+            printServerException(null, ctxid, e);
             sysexit(1);
         } catch (final RemoteException e) {
-            printServerException(e);
+            printServerException(null, ctxid, e);
             sysexit(SYSEXIT_REMOTE_ERROR);
         } catch (final NotBoundException e) {
-            printServerException(e);
+            printServerException(null, ctxid, e);
             sysexit(1);
         } catch (final IllegalArgumentException e) {
-            printError(null, null, e.getMessage());
+            printError(null, ctxid, e.getMessage());
             sysexit(1);
         } catch (final StorageException e) {
-            printServerException(e);
+            printServerException(null, ctxid, e);
             sysexit(SYSEXIT_SERVERSTORAGE_ERROR);
         } catch (final InvalidCredentialsException e) {
-            printServerException(e);
+            printServerException(null, ctxid, e);
             sysexit(SYSEXIT_INVALID_CREDENTIALS);
         } catch (final NoSuchContextException e) {
-            printServerException(e);
+            printServerException(null, ctxid, e);
             sysexit(SYSEXIT_NO_SUCH_CONTEXT);
         } catch (final InvalidDataException e) {
-            printServerException(e);
+            printServerException(null, ctxid, e);
             sysexit(SYSEXIT_INVALID_DATA);
         } catch (final DatabaseUpdateException e) {
-            printServerException(e);
+            printServerException(null, ctxid, e);
             sysexit(1);
         } catch (final NoSuchUserException e) {
-            printServerException(e);
+            printServerException(null, ctxid, e);
             sysexit(SYSEXIT_NO_SUCH_USER);
         } catch (final IllegalAccessException e) {
-            printServerException(e);
+            printServerException(null, ctxid, e);
             sysexit(1);
         } catch (final InvocationTargetException e) {
-            printServerException(e);
+            printServerException(null, ctxid, e);
             sysexit(1);
         } catch (final DuplicateExtensionException e) {
-            printServerException(e);
+            printServerException(null, ctxid, e);
             sysexit(1);
         }
 

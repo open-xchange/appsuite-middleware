@@ -57,6 +57,7 @@ import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.ObjectNamingAbstraction;
 import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.rmi.OXResourceInterface;
+import com.openexchange.admin.rmi.dataobjects.Resource;
 
 public abstract class ResourceAbstraction extends ObjectNamingAbstraction {
     
@@ -83,6 +84,9 @@ public abstract class ResourceAbstraction extends ObjectNamingAbstraction {
     protected Option resourceIdOption = null;
 
     protected Option resourceRecipientOption = null;
+    
+    // For right error output
+    protected Integer resourceid = null;
     
     protected void setDisplayNameOption(final AdminParser admp,final boolean required){
         resourceDisplayNameOption = setShortLongOpt(admp, _OPT_DISPNAME_SHORT,_OPT_DISPNAME_LONG,"The resource display name",true, convertBooleantoTriState(required));        
@@ -119,6 +123,58 @@ public abstract class ResourceAbstraction extends ObjectNamingAbstraction {
     @Override
     protected final String getObjectName() {
         return "resource";
+    }
+
+    private void parseAndSetResourceAvailable(final AdminParser parser, final Resource res) {
+        final String resourceavailable = (String) parser.getOptionValue(this.resourceAvailableOption);
+        if (resourceavailable != null) {
+            res.setAvailable(Boolean.parseBoolean(resourceavailable));
+        }
+    }
+
+    private void parseAndSetResourceDescription(final AdminParser parser, final Resource res) {
+        final String resourceDescription = (String) parser.getOptionValue(this.resourceDescriptionOption);
+        if (resourceDescription != null) {
+            res.setDescription(resourceDescription);
+        }
+    }
+
+    private void parseAndSetResourceDisplayName(final AdminParser parser, final Resource res) {
+        final String resourceDisplayName = (String) parser.getOptionValue(this.resourceDisplayNameOption);
+        if (resourceDisplayName != null) {
+            res.setDisplayname(resourceDisplayName);
+        }
+    }
+
+    private void parseAndSetResourceEmail(final AdminParser parser, final Resource res) {
+        final String resourceEmail = (String) parser.getOptionValue(this.resourceEmailOption);
+        if (resourceEmail != null) {
+            res.setEmail(resourceEmail);
+        }
+    }
+
+    private void parseAndSetResourceName(final AdminParser parser, final Resource res) {
+        final String resourceName = (String) parser.getOptionValue(this.resourceNameOption);
+        if (resourceName != null) {
+            res.setName(resourceName);
+        }
+    }
+
+    protected void parseAndSetMandatoryFields(final AdminParser parser, final Resource res) {
+        parseAndSetResourceAvailable(parser, res);
+    
+        parseAndSetResourceDescription(parser, res);
+    
+        parseAndSetResourceDisplayName(parser, res);
+    
+        parseAndSetResourceEmail(parser, res);
+    
+        parseAndSetResourceName(parser, res);
+    }
+
+    protected void parseAndSetResourceId(final AdminParser parser, final Resource res) {
+        resourceid = Integer.parseInt((String) parser.getOptionValue(this.resourceIdOption));
+        res.setId(resourceid);
     }
     
     

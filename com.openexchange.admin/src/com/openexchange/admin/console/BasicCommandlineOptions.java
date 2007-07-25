@@ -49,7 +49,6 @@
 package com.openexchange.admin.console;
 
 import java.lang.reflect.Field;
-import java.rmi.NotBoundException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
@@ -165,6 +164,9 @@ public abstract class BasicCommandlineOptions {
     protected Option searchOption = null;
     protected Option csvOutputOption = null;
 
+    // Used for right error output
+    protected Integer ctxid = null;
+    
     /**
      * 
      */
@@ -241,19 +243,19 @@ public abstract class BasicCommandlineOptions {
         }
     }
     
-    protected final void printNotBoundResponse(final NotBoundException nbe){
-        System.err.println("RMI module "+nbe.getMessage()+" not available on server");
+//    protected final void printNotBoundResponse(final NotBoundException nbe){
+//        System.err.println("RMI module "+nbe.getMessage()+" not available on server");
+//    }
+    
+    protected final void printError(final String msg){
+        System.err.println("Error: "+msg+"\n");    
     }
     
-    protected void printError(final String msg){
-        System.err.println("Error:\n "+msg+"\n");    
-    }
-    
-    protected void printServerResponse(final String msg){
+    protected final void printServerResponse(final String msg){
         System.err.println("Server response:\n "+msg+"\n");    
     }
 
-    protected void printInvalidInputMsg(final String msg){
+    protected final void printInvalidInputMsg(final String msg){
         System.err.println("Invalid input detected: "+msg);    
     }    
     
@@ -463,7 +465,8 @@ public abstract class BasicCommandlineOptions {
         final Context ctx = new Context(DEFAULT_CONTEXT);
     
         if (parser.getOptionValue(this.contextOption) != null) {
-            ctx.setID(Integer.parseInt((String) parser.getOptionValue(this.contextOption)));
+            ctxid = Integer.parseInt((String) parser.getOptionValue(this.contextOption));
+            ctx.setID(ctxid);
         }
         return ctx;
     }

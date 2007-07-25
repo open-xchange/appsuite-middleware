@@ -94,6 +94,7 @@ public abstract class CreateCore extends UserAbstraction {
 
         setExtendedOptions(parser);
 
+        Integer ctxid = null;
         // parse the command line
         try {
             parser.ownparse(args);
@@ -101,7 +102,8 @@ public abstract class CreateCore extends UserAbstraction {
             printExtendedOutputIfSet(parser);
             
             final Context ctx = contextparsing(parser);
-
+            ctxid = ctx.getIdAsInt();
+            
             final Credentials auth = credentialsparsing(parser);
 
             // get rmi ref
@@ -111,10 +113,10 @@ public abstract class CreateCore extends UserAbstraction {
             final User usr = new User();
 
             // fill user obj with mandatory values from console
-            setMandatoryOptionsinUser(parser, usr);
+            parseAndSetMandatoryOptionsinUser(parser, usr);
 
             // add optional values if set
-            setOptionalOptionsinUser(parser, usr);
+            parseAndSetOptionalOptionsinUser(parser, usr);
 
             applyExtendedOptionsToUser(parser, usr);
 
@@ -129,61 +131,61 @@ public abstract class CreateCore extends UserAbstraction {
             
             sysexit(0);
         } catch (final ConnectException neti) {
-            printError(null, null, neti.getMessage());
+            printError(null, ctxid, neti.getMessage());
             sysexit(SYSEXIT_COMMUNICATION_ERROR);
         } catch (final NumberFormatException num) {
-            printInvalidInputMsg(null, null, "Ids must be numbers!");
+            printInvalidInputMsg(null, ctxid, "Ids must be numbers!");
             sysexit(1);
         } catch (final IllegalOptionValueException e) {
-            printError(null, null, "Illegal option value : " + e.getMessage());
+            printError(null, ctxid, "Illegal option value : " + e.getMessage());
             printrightoptions(parser);
             sysexit(SYSEXIT_ILLEGAL_OPTION_VALUE);
         } catch (final UnknownOptionException e) {
-            printError(null, null, "Unrecognized options on the command line: " + e.getMessage());
+            printError(null, ctxid, "Unrecognized options on the command line: " + e.getMessage());
             printrightoptions(parser);
             sysexit(SYSEXIT_UNKNOWN_OPTION);
         } catch (final MissingOptionException e) {
-            printError(null, null, e.getMessage());
+            printError(null, ctxid, e.getMessage());
             printrightoptions(parser);
             sysexit(SYSEXIT_MISSING_OPTION);
         } catch (final MalformedURLException e) {
-            printServerException(e);
+            printServerException(null, null, e);
             sysexit(1);
         } catch (final RemoteException e) {
-            printServerException(e);
+            printServerException(null, null, e);
             sysexit(SYSEXIT_REMOTE_ERROR);
         } catch (final NotBoundException e) {
-            printServerException(e);
+            printServerException(null, null, e);
             sysexit(1);
         } catch (final IllegalArgumentException e) {
-            printError(null, null, e.getMessage());
+            printError(null, ctxid, e.getMessage());
             sysexit(1);
         } catch (final IllegalAccessException e) {
-            printError(null, null, e.getMessage());
+            printError(null, ctxid, e.getMessage());
             sysexit(1);
         } catch (final InvocationTargetException e) {
-            printError(null, null, e.getMessage());
+            printError(null, ctxid, e.getMessage());
             sysexit(1);
         } catch (final InvalidDataException e) {
-            printServerException(e);
+            printServerException(null, null, e);
             sysexit(SYSEXIT_INVALID_DATA);
         } catch (final StorageException e) {
-            printServerException(e);
+            printServerException(null, null, e);
             sysexit(1);
         } catch (final InvalidCredentialsException e) {
-            printServerException(e);
+            printServerException(null, null, e);
             sysexit(SYSEXIT_INVALID_CREDENTIALS);
         } catch (final NoSuchContextException e) {
-            printServerException(e);
+            printServerException(null, null, e);
             sysexit(SYSEXIT_NO_SUCH_CONTEXT);
         } catch (final DatabaseUpdateException e) {
-            printServerException(e);
+            printServerException(null, null, e);
             sysexit(1);
         } catch (final DuplicateExtensionException e) {
-            printServerException(e);
+            printServerException(null, null, e);
             sysexit(1);
         }
     }
 
-    protected abstract void maincall(final AdminParser parser, final OXUserInterface oxusr, final Context ctx, final User usr, final UserModuleAccess access, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, DuplicateExtensionException, MalformedURLException, NotBoundException;
+    protected abstract void maincall(final AdminParser parser, final OXUserInterface oxusr, final Context ctx, final User usr, final UserModuleAccess access, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, DuplicateExtensionException, MalformedURLException, NotBoundException, ConnectException;
 }
