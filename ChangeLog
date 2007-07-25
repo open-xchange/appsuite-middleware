@@ -2,6 +2,8 @@
 
  - Bugfix 7368, changed a message status from error to info
  - Bugfix 7771, changed the SQL query for a linkage list
+ - Bugfix 8417, changed the error message of a exception
+ - Bugfix 8420, a connection handling problem
 
 * 2007-07-23 - marcus.klein@open-xchange.com
 
