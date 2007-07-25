@@ -1,3 +1,9 @@
+* 2007-07-25 - choeger@open-xchange.com
+
+ - Bugfix ID#8556 CLTs: <datevalue> not working in "createuser"
+   fixed parsing of dates and added dateformat format environment options,
+   see --environment commandline parameter for known options
+
 * 2007-07-11 - manuel.kraft@open-xchange.com
 
  - Bugfix ID#8400 listresource: attribute available not in csv output

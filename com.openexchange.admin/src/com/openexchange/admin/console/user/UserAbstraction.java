@@ -55,6 +55,8 @@ import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -68,6 +70,7 @@ import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
+import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 
 public abstract class UserAbstraction extends BasicCommandlineOptions {
     
@@ -746,8 +749,9 @@ public abstract class UserAbstraction extends BasicCommandlineOptions {
      * @throws InvocationTargetException 
      * @throws IllegalAccessException 
      * @throws IllegalArgumentException 
+     * @throws InvalidDataException 
      */
-    protected final void applyExtendedOptionsToUser(final AdminParser parser, final User usr) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+    protected final void applyExtendedOptionsToUser(final AdminParser parser, final User usr) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException, InvalidDataException {
         for (final OptionAndMethod optionAndMethod : optionsandmethods) {
             if (optionAndMethod.getReturntype().equals(JAVA_LANG_STRING)) {
                 final String value = (String)parser.getOptionValue(optionAndMethod.getOption());
@@ -765,9 +769,18 @@ public abstract class UserAbstraction extends BasicCommandlineOptions {
                     optionAndMethod.getMethod().invoke(usr, value);
                 }
             } else if (optionAndMethod.getReturntype().equals(JAVA_UTIL_DATE)) {
-                final Date value = (Date)parser.getOptionValue(optionAndMethod.getOption());
-                if (null != value) {
-                    optionAndMethod.getMethod().invoke(usr, value);
+                SimpleDateFormat sdf = new SimpleDateFormat(COMMANDLINE_DATEFORMAT);
+                sdf.setTimeZone(TimeZone.getTimeZone(COMMANDLINE_TIMEZONE));
+                try {
+                    String date = (String)parser.getOptionValue(optionAndMethod.getOption());
+                    if( date != null ) {
+                        Date value = sdf.parse(date);
+                        if (null != value) {
+                            optionAndMethod.getMethod().invoke(usr, value);
+                        }
+                    }
+                } catch (ParseException e) {
+                    throw new InvalidDataException("Wrong dateformat, use \"" + sdf.toPattern() + "\"");
                 }
             } else if (optionAndMethod.getReturntype().equals(JAVA_UTIL_HASH_SET)) {
                 final HashSet<?> value = (HashSet<?>)parser.getOptionValue(optionAndMethod.getOption());
