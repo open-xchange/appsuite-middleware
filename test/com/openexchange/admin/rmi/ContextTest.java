@@ -288,7 +288,8 @@ public class ContextTest extends AbstractTest {
 
     public static void disableContext(Context ctx, MaintenanceReason mr, String host, Credentials cred) throws Exception {
         OXContextInterface xres = (OXContextInterface) Naming.lookup(host + OXContextInterface.RMI_NAME);
-        xres.disable(ctx, mr, cred);
+        //xres.disable(ctx, mr, cred);
+        xres.disable(ctx, cred);
     }
 
     public static void enableContext(Context ctx, String host, Credentials cred) throws Exception {

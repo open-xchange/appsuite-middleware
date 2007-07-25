@@ -75,7 +75,6 @@ public interface OXContextInterface extends Remote {
      *         
      * @param ctx Context object
      * @param dst_filestore_id Id of the Filestore to move the context in.
-     * @param reason ID of the maintenance reason for disabling the context while the move is in progress.
      * @param auth Credentials for authenticating against server.
      * @return Job id which can be used for retrieving progress information.
      * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException Credentials for authenticating against server.
@@ -87,7 +86,9 @@ public interface OXContextInterface extends Remote {
      * @throws NoSuchReasonException 
      * @throws OXContextException 
      */
-    public String moveContextFilestore(Context ctx, Filestore dst_filestore_id, MaintenanceReason reason, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, NoSuchFilestoreException, NoSuchReasonException, OXContextException;
+    //public String moveContextFilestore(Context ctx, Filestore dst_filestore_id, MaintenanceReason reason, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, NoSuchFilestoreException, NoSuchReasonException, OXContextException;
+    //* @param reason ID of the maintenance reason for disabling the context while the move is in progress.
+    public String moveContextFilestore(Context ctx, Filestore dst_filestore_id, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, NoSuchFilestoreException, NoSuchReasonException, OXContextException;
 
     /**
      * Move all data of a context contained in a database to another database using
@@ -95,7 +96,6 @@ public interface OXContextInterface extends Remote {
      * 
      * @param ctx Context object
      * @param dst_database_id ID of a registered Database to move all data of this context in.
-     * @param reason ID of the maintenance reason for disabling the context while the move is in progress.
      * @param auth Credentials for authenticating against server.
      * @return String containing return queue id to query status of job.
      *         <p>
@@ -112,14 +112,15 @@ public interface OXContextInterface extends Remote {
      * @throws DatabaseUpdateException 
      * @throws OXContextException 
      */
-    public int moveContextDatabase(Context ctx, Database dst_database_id, MaintenanceReason reason, Credentials auth) throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException, DatabaseUpdateException, OXContextException;
+    //    public int moveContextDatabase(Context ctx, Database dst_database_id, MaintenanceReason reason, Credentials auth) throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException, DatabaseUpdateException, OXContextException;
+    //    * @param reason ID of the maintenance reason for disabling the context while the move is in progress.
+    public int moveContextDatabase(Context ctx, Database dst_database_id, Credentials auth) throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException, DatabaseUpdateException, OXContextException;
 
     /**
      * Disable given context.<br>
      * Note: To disable a context you need a reason
      * 
      * @param ctx Context object.
-     * @param reason MaintenanceReason
      * @param auth Credentials for authenticating against server.
      * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException Credentials for authenticating against server.
      * @throws com.openexchange.admin.rmi.exceptions.NoSuchContextException If the context does not exist in the system.
@@ -129,7 +130,9 @@ public interface OXContextInterface extends Remote {
      * @throws NoSuchReasonException 
      * @throws OXContextException 
      */
-    public void disable(Context ctx, MaintenanceReason reason, Credentials auth) throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException, NoSuchReasonException, OXContextException;
+    //public void disable(Context ctx, MaintenanceReason reason, Credentials auth) throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException, NoSuchReasonException, OXContextException;
+    //* @param reason MaintenanceReason
+    public void disable(Context ctx, Credentials auth) throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException,InvalidDataException, NoSuchReasonException, OXContextException;
 
     /**
      * Enable given context.
@@ -176,7 +179,6 @@ public interface OXContextInterface extends Remote {
      * Disable all contexts.<br>
      * Note: To disable all contexts, you need a reason.
      * 
-     * @param reason MaintenanceReason
      * @param auth Credentials for authenticating against server.
      * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException When the supplied credentials were not correct or invalid.
      * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException If the data sent within the method contained invalid data.
@@ -185,7 +187,9 @@ public interface OXContextInterface extends Remote {
      * @throws StorageException When an error in the subsystems occured.
      * @throws NoSuchReasonException 
      */
-    public void disableAll(MaintenanceReason reason, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException,InvalidDataException, NoSuchReasonException;
+    //public void disableAll(MaintenanceReason reason, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException,InvalidDataException, NoSuchReasonException;
+    //* @param reason MaintenanceReason
+    public void disableAll(Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException,InvalidDataException, NoSuchReasonException;
 
     /**
      * Enable all contexts.

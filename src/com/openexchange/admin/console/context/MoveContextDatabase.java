@@ -16,7 +16,6 @@ import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
-import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
@@ -49,9 +48,10 @@ public class MoveContextDatabase extends ContextHostingAbstraction {
             final OXContextInterface oxres = (OXContextInterface) Naming.lookup(RMI_HOSTNAME +OXContextInterface.RMI_NAME);
 
             final Database db = new Database(Integer.parseInt((String) parser.getOptionValue(this.targetDatabaseIDOption)));
-            final MaintenanceReason mr = new MaintenanceReason(Integer.parseInt((String) parser.getOptionValue(this.maintenanceReasonIDOption)));
+            /*final MaintenanceReason mr = new MaintenanceReason(Integer.parseInt((String) parser.getOptionValue(this.maintenanceReasonIDOption)));
 
-            oxres.moveContextDatabase(ctx, db, mr, auth);
+            oxres.moveContextDatabase(ctx, db, mr, auth);*/
+            oxres.moveContextDatabase(ctx, db, auth);
 
             sysexit(0);
         } catch (final java.rmi.ConnectException neti) {
@@ -109,7 +109,7 @@ public class MoveContextDatabase extends ContextHostingAbstraction {
 
     private void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptions(parser);
-        setMaintenanceReasodIDOption(parser, true);
+        //setMaintenanceReasodIDOption(parser, true);
 
         this.targetDatabaseIDOption = setShortLongOpt(parser, OPT_DATABASE_SHORT, OPT_DATABASE_LONG, "Target database id", true, NeededTriState.needed);
     }

@@ -13,7 +13,6 @@ import com.openexchange.admin.exceptions.OXContextException;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
@@ -40,8 +39,9 @@ public class Disable extends ContextHostingAbstraction {
             // get rmi ref
             final OXContextInterface oxres = (OXContextInterface) Naming.lookup(RMI_HOSTNAME +OXContextInterface.RMI_NAME);
 
-            final MaintenanceReason mr = new MaintenanceReason(Integer.parseInt((String) parser.getOptionValue(this.maintenanceReasonIDOption)));
-            oxres.disable(ctx, mr, auth);
+            /*final MaintenanceReason mr = new MaintenanceReason(Integer.parseInt((String) parser.getOptionValue(this.maintenanceReasonIDOption)));
+            oxres.disable(ctx, mr, auth); */
+            oxres.disable(ctx, auth);
 
             sysexit(0);
         } catch (final java.rmi.ConnectException neti) {
@@ -99,7 +99,7 @@ public class Disable extends ContextHostingAbstraction {
 
     private void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptions(parser);
-        setMaintenanceReasodIDOption(parser, true);
+        //setMaintenanceReasodIDOption(parser, true);
 
     }
 }

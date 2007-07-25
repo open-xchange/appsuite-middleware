@@ -16,7 +16,6 @@ import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
-import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
@@ -51,9 +50,10 @@ public class MoveContextFilestore extends ContextHostingAbstraction {
 
             final Filestore fs = new Filestore(Integer.parseInt((String) parser.getOptionValue(this.targetFilestoreIDOption)));
 
-            final MaintenanceReason mr = new MaintenanceReason(Integer.parseInt((String) parser.getOptionValue(this.maintenanceReasonIDOption)));
+            /*final MaintenanceReason mr = new MaintenanceReason(Integer.parseInt((String) parser.getOptionValue(this.maintenanceReasonIDOption)));
 
-            oxres.moveContextFilestore(ctx, fs, mr, auth);
+            oxres.moveContextFilestore(ctx, fs, mr, auth);*/
+            oxres.moveContextFilestore(ctx, fs, auth);
 
             sysexit(0);
         } catch (final java.rmi.ConnectException neti) {
@@ -114,7 +114,7 @@ public class MoveContextFilestore extends ContextHostingAbstraction {
 
     private void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptions(parser);
-        setMaintenanceReasodIDOption(parser, true);
+        //setMaintenanceReasodIDOption(parser, true);
         this.targetFilestoreIDOption = setShortLongOpt(parser, OPT_FILESTORE_SHORT, OPT_FILESTORE_LONG, "Target filestore id", true, NeededTriState.needed);
 
     }
