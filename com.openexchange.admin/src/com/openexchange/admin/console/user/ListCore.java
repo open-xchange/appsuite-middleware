@@ -6,6 +6,7 @@ import java.net.MalformedURLException;
 import java.rmi.ConnectException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -154,8 +155,10 @@ public abstract class ListCore extends UserAbstraction {
      * @return the string representation of this date
      */
     protected final String datetostring(final Date date) {
+        SimpleDateFormat sdf = new SimpleDateFormat(COMMANDLINE_DATEFORMAT);
+        sdf.setTimeZone(TimeZone.getTimeZone(COMMANDLINE_TIMEZONE));
         if (null != date) {
-            return date.toString();
+            return sdf.format(date);
         } else {
             return null;
         }

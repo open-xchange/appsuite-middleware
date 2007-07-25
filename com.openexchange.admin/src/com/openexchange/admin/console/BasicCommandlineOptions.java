@@ -48,8 +48,10 @@
  */
 package com.openexchange.admin.console;
 
+import java.lang.reflect.Field;
 import java.rmi.NotBoundException;
 import java.util.ArrayList;
+import java.util.Hashtable;
 
 import com.openexchange.admin.console.AdminParser.NeededTriState;
 import com.openexchange.admin.console.CmdLineParser.Option;
@@ -112,7 +114,7 @@ public abstract class BasicCommandlineOptions {
     public static final int SYSEXIT_ILLEGAL_OPTION_VALUE=109;
    
    /**
-    * Used when a context aklready exists
+    * Used when a context already exists
     */
     public static final int SYSEXIT_CONTEXT_ALREADY_EXISTS=110;
    
@@ -150,7 +152,11 @@ public abstract class BasicCommandlineOptions {
     protected static final String OPT_NAME_CSVOUTPUT_LONG = "csv";
     protected static final String OPT_NAME_CSVOUTPUT_DESCRIPTION = "Format output to csv";
     
+    private static final String []ENV_OPTIONS = 
+        new String[]{ "RMI_HOSTNAME", "COMMANDLINE_TIMEZONE", "COMMANDLINE_DATEFORMAT" };
     protected static String RMI_HOSTNAME ="rmi://localhost/";
+    protected static String COMMANDLINE_TIMEZONE ="GMT";
+    protected static String COMMANDLINE_DATEFORMAT ="yyyy-MM-dd";
     
     protected Option contextOption = null;
     protected Option contextNameOption = null;
@@ -164,15 +170,67 @@ public abstract class BasicCommandlineOptions {
      */
     public BasicCommandlineOptions() {
         super();
-        final String property = System.getProperties().getProperty("RMI_HOSTNAME");
-        final String env = System.getenv("RMI_HOSTNAME");
-        if (null != property && property.trim().length()>0) {
-            setRMI_HOSTNAME(property);
-        } else if (null != env && env.trim().length()>0) {
-            setRMI_HOSTNAME(env);
+        for( final String opt : ENV_OPTIONS ) {
+            setEnvConfigOption(opt);
         }
     }
 
+    public static final Hashtable<String,String> getEnvOptions() {
+        Hashtable<String, String> opts = new Hashtable<String, String>();
+        for( final String opt : ENV_OPTIONS ) {
+            try {
+                Field f = BasicCommandlineOptions.class.getDeclaredField(opt);
+                opts.put(opt, (String)f.get(null));
+            } catch (SecurityException e) {
+                System.err.println("unable to get commandline option \""+opt+"\"");
+                e.printStackTrace();
+            } catch (NoSuchFieldException e) {
+                System.err.println("unable to get commandline option \""+opt+"\"");
+                e.printStackTrace();
+            } catch (IllegalArgumentException e) {
+                System.err.println("unable to get commandline option \""+opt+"\"");
+                e.printStackTrace();
+            } catch (IllegalAccessException e) {
+                System.err.println("unable to get commandline option \""+opt+"\"");
+                e.printStackTrace();
+            }
+        }
+        return opts;
+    }
+    
+    private final void setEnvConfigOption(final String opt) {
+        final String property = System.getProperties().getProperty(opt);
+        final String env = System.getenv(opt);
+        String setOpt = null;
+        if (null != env && env.trim().length()>0) {
+            setOpt = env;
+        } else if (null != property && property.trim().length()>0) {
+            setOpt = property;
+        }
+        if( setOpt != null ) {
+            if( opt.equals("RMI_HOSTNAME") ) {
+                setRMI_HOSTNAME(setOpt);
+            } else {
+                try {
+                    Field f = BasicCommandlineOptions.class.getDeclaredField(opt);
+                    f.set(this, setOpt);
+                } catch (SecurityException e) {
+                    System.err.println("unable to set commandline option for \""+opt+"\" to \"" + setOpt+ "\"");
+                    e.printStackTrace();
+                } catch (NoSuchFieldException e) {
+                    System.err.println("unable to set commandline option for \""+opt+"\" to \"" + setOpt+ "\"");
+                    e.printStackTrace();
+                } catch (IllegalArgumentException e) {
+                    System.err.println("unable to set commandline option for \""+opt+"\" to \"" + setOpt+ "\"");
+                    e.printStackTrace();
+                } catch (IllegalAccessException e) {
+                    System.err.println("unable to set commandline option for \""+opt+"\" to \"" + setOpt+ "\"");
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+    
     protected final static void printServerException(final Exception e){
         String msg = e.getMessage();
         if( msg != null) {
