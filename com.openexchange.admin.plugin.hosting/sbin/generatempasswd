@@ -47,17 +47,65 @@
 #
 
 use strict;
+use Getopt::Long qw(:config no_ignore_case);
 
-my $MASTER = $ARGV[0] || "oxadminmaster";
-my $MPW    = $ARGV[1] || "/opt/open-xchange/etc/admindaemon/mpasswd";
-my $PASSWD = $ARGV[2];
+my $OXMASTER   = "oxadminmaster";
+my $OXMPWFILE  = "/opt/open-xchange/etc/admindaemon/mpasswd";
+my $OXPASSWORD = undef;
+my $USAGE      = undef;
 
-print "Using \"$MASTER\" as master user\n";
-print "Using \"$MPW\" as mpasswd file\n";
+GetOptions( "adminuser|A=s"   => \$OXMASTER,
+            "adminpass|P=s"   => \$OXPASSWORD,
+            "mpasswdfile|f=s" => \$OXMPWFILE,
+            "help|h|?"        => \$USAGE
+) || exit;
 
-if( ! defined $PASSWD ) {
+if( $< != 0 ) {
+	die "You must be root to run this command";
+}
+
+usage() if ! defined $OXMASTER || ! defined $OXMPWFILE || defined $USAGE;
+
+my $cryptedpw = undef;
+if( ! defined $OXPASSWORD ) {
+	$cryptedpw=encryptPassword(promptPassword());
+} else {
+	$cryptedpw=encryptPassword($OXPASSWORD);
+}
+
+if( defined $cryptedpw && length($cryptedpw)>0 ) {
+	print "saving password for user $OXMPWFILE in $OXMPWFILE";
+	open(OUT,">$OXMPWFILE") || die "unable to open $OXMPWFILE: $!";
+	print OUT "$OXMASTER:$cryptedpw\n";
+	close(OUT);
+}
+
+
+
+1;
+# ---------------------------------- functions -------
+
+sub usage {
+	print <<EoF;
+
+This program stores the username and password of the superadmin to the mpasswd file.
+
+Usage: $0
+ -h,--help       Prints this help text
+ -A,--adminuser <adminuser>\t\tAccount name of superadmin (Default: $OXMASTER)
+ -P,--adminpass <adminpass>\t\t* Password of superadmin
+ -f,--mpasswdfile <mpasswdfile>\t\tpath to mpasswd
+					(Default: $OXMPWFILE)
+
+Entries marked with an asterisk (*) are mandatory.
+
+EoF
+	exit 1;
+}
+
+sub promptPassword {
     system("stty -echo");
-    print "Enter $MASTER password: ";
+    print "Enter password for user $OXMASTER: ";
     while( <STDIN> ) {
         chomp;
         last if $_ ne "";
@@ -65,10 +113,10 @@ if( ! defined $PASSWD ) {
     print "\n";
     my $PW = $_;
     system("stty echo");
+	return $PW;
 }
 
-my $ENPW=crypt($PASSWD, pack("C2",(int(rand 26)+65),(int(rand 26)+65)));
-
-open(OUT,">$MPW") || die "unable to open $MPW: $!";
-print OUT "$MASTER:$ENPW\n";
-close(OUT);
+sub encryptPassword {
+	my $pw = shift;
+	return crypt($pw, pack("C2",(int(rand 26)+65),(int(rand 26)+65)));
+}

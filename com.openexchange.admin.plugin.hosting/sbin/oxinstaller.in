@@ -322,7 +322,7 @@ v_setprop writeProperty.1 "user=$CONFIGDB_USER" ${ADMINCONF}/configdb.properties
 v_setprop writeProperty.2 "password=$CONFIGDB_PASS" ${ADMINCONF}/configdb.properties
 
 echo "using $MASTER_USER as master account"
-/opt/open-xchange/sbin/generatempasswd $MASTER_USER \
-	/opt/open-xchange/etc/admindaemon/mpasswd "$MASTER_PASS" >/dev/null
+/opt/open-xchange/sbin/generatempasswd -A $MASTER_USER \
+	-f /opt/open-xchange/etc/admindaemon/mpasswd -P "$MASTER_PASS" >/dev/null
 
 echo "admin daemon must now be restarted if already running"

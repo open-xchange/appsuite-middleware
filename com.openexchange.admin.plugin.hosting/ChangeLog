@@ -1,3 +1,8 @@
+* 2007-07-25 - choeger@open-xchange.com
+
+  - Bugfix ID#8550 generatempasswd not developed to be used by humans
+  made generatempasswd usable by humans... :-)
+
 * 2007-07-11 - manuel.kraft@open-xchange.com
 
   -  Bugfix ID#8379 listcontext, lmapping not in csv output
