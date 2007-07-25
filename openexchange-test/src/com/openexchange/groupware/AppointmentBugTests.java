@@ -2276,4 +2276,105 @@ public class AppointmentBugTests extends TestCase {
         
     }    
     
+    
+    /*
+     Steps to Reproduce:
+     1. Login to groupware
+     2. Navigate to your calendar
+     3. Create a new private appointment via LMB-click on "Panel -> New", check the
+     private checkbox, and save
+     4. Edit the appointment via Double-LMB-click and change the folder-path to the
+     shared calendar-folder     
+     5. Save the appointment    
+     
+     Expected results:
+     Step 4: The folder cannot be chosen in the "Select Folder" dialogue, as long
+       as the appointment is a private one     
+    */
+    public void testBug8482() throws Throwable {
+        Context context = new ContextImpl(contextid);
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestSearch");
+        
+        String user2 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant3", "");        
+        int uid2 = resolveUser(user2);        
+        SessionObject so2 = SessionObjectWrapper.createSessionObject(uid2, context.getContextId(), "myTestIdentifier");
+        
+        Connection readcon = DBPool.pickup(context);
+        Connection writecon = DBPool.pickupWriteable(context);        
+        
+        int fid = AppointmentBugTests.getPrivateFolder(userid);
+        int fid2 = AppointmentBugTests.getPrivateFolder(uid2);
+        
+        final OXFolderManager oxma = new OXFolderManagerImpl(so2, readcon, writecon);
+        FolderObject fo = new FolderObject();
+        
+        CalendarSql csql = new CalendarSql(so);
+        CalendarSql csql2 = new CalendarSql(so2);
+        
+        
+        OCLPermission oclp1 = new OCLPermission();
+        oclp1.setEntity(uid2);
+        oclp1.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+        oclp1.setFolderAdmin(true);
+        OCLPermission oclp2 = new OCLPermission();
+        
+        oclp2.setEntity(userid);
+        oclp2.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+        fo.setFolderName("testSharedFolder8482");
+        fo.setParentFolderID(fid2);
+        fo.setModule(FolderObject.CALENDAR);
+        fo.setType(FolderObject.PRIVATE);
+        fo.setPermissionsAsArray(new OCLPermission[] { oclp1, oclp2 });       
+        
+        int shared_folder_id = 0;
+        try {
+            
+            fo = oxma.createFolder(fo, true, System.currentTimeMillis());
+            shared_folder_id = fo.getObjectID();       
+            
+            CalendarDataObject cdao = new CalendarDataObject();
+            cdao.setContext(so.getContext());
+            cdao.setTitle("testBug8482");
+            CalendarTest.fillDatesInDao(cdao);
+            cdao.setPrivateFlag(true);
+            cdao.setParentFolderID(fid);
+            cdao.setIgnoreConflicts(true);
+            
+            csql.insertAppointmentObject(cdao);
+            int object_id = cdao.getObjectID();
+            
+            CalendarDataObject move = new CalendarDataObject();
+            move.setContext(so.getContext());
+            move.setObjectID(object_id);
+            move.setParentFolderID(shared_folder_id);
+            
+            try {
+                csql.updateAppointmentObject(move, fid, new Date(SUPER_END));
+                fail("Move not allowed");
+            } catch(OXCalendarException oxce) {
+                // perfect
+                int x = 0;
+            } catch(Exception e) {
+                fail("Noooo "+e.getMessage());
+            }
+            
+        } finally {
+            try {
+                if (shared_folder_id > 0) {
+                    oxma.deleteFolder(new FolderObject(shared_folder_id), true, SUPER_END);
+                } 
+            } catch(Exception e) {
+                e.printStackTrace();
+                fail("Error deleting folder object.");
+            }
+        }
+        try {
+            DBPool.push(context, readcon);
+            DBPool.pushWrite(context, writecon);        
+        } catch(Exception ignore) { 
+            ignore.printStackTrace();
+        }                        
+        
+    }
+    
 }
