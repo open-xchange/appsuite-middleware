@@ -1,6 +1,7 @@
 package com.openexchange.admin.console.util;
 
 import java.net.MalformedURLException;
+import java.rmi.ConnectException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -29,8 +30,12 @@ public class ChangeDatabase extends DatabaseAbstraction {
 
         setOptions(parser);
 
+        Integer dbid = null;
         try {
             parser.ownparse(args2);
+
+            // We have to parse the id first to have the id for error output
+            dbid = Integer.parseInt((String) parser.getOptionValue(this.databaseIdOption));
 
             final Credentials auth = new Credentials((String) parser.getOptionValue(this.adminUserOption), (String) parser.getOptionValue(this.adminPassOption));
 
@@ -38,6 +43,9 @@ public class ChangeDatabase extends DatabaseAbstraction {
             final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME + OXUtilInterface.RMI_NAME);
 
             final Database db = new Database();
+
+            // NEEDED ID
+            db.setId(dbid);
 
             parseAndSetHostname(parser, db);
             
@@ -61,17 +69,15 @@ public class ChangeDatabase extends DatabaseAbstraction {
 
 //            parseAndSetMasterAndID(parser, db);
 
-            // NEEDED ID
-            db.setId(Integer.parseInt((String) parser.getOptionValue(this.databaseIdOption)));
             oxutil.changeDatabase(db, auth);
             
-            displayChangedMessage(null, null);
+            displayChangedMessage(dbid, null);
             sysexit(0);
-        } catch (final java.rmi.ConnectException neti) {
-            printError(neti.getMessage());
+        } catch (final ConnectException neti) {
+            printError(dbid, null, neti.getMessage());
             sysexit(SYSEXIT_COMMUNICATION_ERROR);
         } catch (final java.lang.NumberFormatException num) {
-            printInvalidInputMsg("Ids must be numbers!");
+            printInvalidInputMsg(null, null, "Ids must be numbers!");
             sysexit(1);
         } catch (final MalformedURLException e) {
             printServerException(e);
@@ -92,15 +98,15 @@ public class ChangeDatabase extends DatabaseAbstraction {
             printServerException(e);
             sysexit(SYSEXIT_INVALID_DATA);
         } catch (final IllegalOptionValueException e) {
-            printError("Illegal option value : " + e.getMessage());
+            printError(null, null, "Illegal option value : " + e.getMessage());
             parser.printUsage();
             sysexit(SYSEXIT_ILLEGAL_OPTION_VALUE);
         } catch (final UnknownOptionException e) {
-            printError("Unrecognized options on the command line: " + e.getMessage());
+            printError(null, null, "Unrecognized options on the command line: " + e.getMessage());
             parser.printUsage();
             sysexit(SYSEXIT_UNKNOWN_OPTION);
         } catch (final MissingOptionException e) {
-            printError(e.getMessage());
+            printError(null, null, e.getMessage());
             parser.printUsage();
             sysexit(SYSEXIT_MISSING_OPTION);
         }

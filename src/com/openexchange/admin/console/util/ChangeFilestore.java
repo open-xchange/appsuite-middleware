@@ -52,10 +52,10 @@ public class ChangeFilestore extends FilestoreAbstraction {
             displayChangedMessage(null, null);
             sysexit(0);
         } catch (final java.rmi.ConnectException neti) {
-            printError(neti.getMessage());
+            printError(null, null, neti.getMessage());
             sysexit(SYSEXIT_COMMUNICATION_ERROR);
         } catch (final java.lang.NumberFormatException num) {
-            printInvalidInputMsg("Ids must be numbers!");
+            printInvalidInputMsg(null, null, "Ids must be numbers!");
         } catch (final MalformedURLException e) {
             printServerException(e);
             sysexit(1);
@@ -78,15 +78,15 @@ public class ChangeFilestore extends FilestoreAbstraction {
             printServerException(e);
             sysexit(1);
         } catch (final IllegalOptionValueException e) {
-            printError("Illegal option value : " + e.getMessage());
+            printError(null, null, "Illegal option value : " + e.getMessage());
             parser.printUsage();
             sysexit(SYSEXIT_ILLEGAL_OPTION_VALUE);
         } catch (final UnknownOptionException e) {
-            printError("Unrecognized options on the command line: " + e.getMessage());
+            printError(null, null, "Unrecognized options on the command line: " + e.getMessage());
             parser.printUsage();
             sysexit(SYSEXIT_UNKNOWN_OPTION);
         } catch (final MissingOptionException e) {
-            printError(e.getMessage());
+            printError(null, null, e.getMessage());
             parser.printUsage();
             sysexit(SYSEXIT_MISSING_OPTION);
         }
