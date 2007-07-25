@@ -133,7 +133,7 @@ public abstract class DatabaseAbstraction extends UtilAbstraction{
             if (databasemasterid != null) {
                 db.setMasterId(Integer.parseInt(databasemasterid));
             } else {
-                printError("master id must be set if this database isn't the master");
+                printError(null, null, "master id must be set if this database isn't the master");
                 parser.printUsage();
                 sysexit(SYSEXIT_MISSING_OPTION);
             }

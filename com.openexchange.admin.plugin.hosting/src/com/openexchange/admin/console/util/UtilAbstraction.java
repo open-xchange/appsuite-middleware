@@ -21,11 +21,11 @@ public abstract class UtilAbstraction extends ObjectNamingAbstraction {
     }
     
     protected void displayRegisteredMessage(final Integer id) {
-        createMessage(id, null, "registered");
+        createMessageForStdout(id, null, "registered");
     }
 
     protected void displayUnregisteredMessage(final Integer id) {
-        createMessage(id, null, "unregistered");
+        createMessageForStdout(id, null, "unregistered");
     }
 
     // for all tools
