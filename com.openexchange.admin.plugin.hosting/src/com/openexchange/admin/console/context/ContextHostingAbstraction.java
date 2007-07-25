@@ -29,4 +29,17 @@ public class ContextHostingAbstraction extends ContextAbstraction {
     protected void setRemoveMappingOption(final AdminParser parser,final boolean required ){
         this.removeLoginMappingOption = setShortLongOpt(parser, OPT_CONTEXT_REMOVE_LOGIN_MAPPINGS_SHORT,OPT_CONTEXT_REMOVE_LOGIN_MAPPINGS_LONG,"Remove login mappings.Seperated by \",\"",true, convertBooleantoTriState(required));
     }
+    
+    protected final void displayDisabledMessage(final Integer id, final Integer ctxid) {
+        createMessageForStdout(id, ctxid, "disabled");
+    }
+
+    protected final void displayEnabledMessage(final Integer id, final Integer ctxid) {
+        createMessageForStdout(id, ctxid, "enabled");
+    }
+
+    protected final void displayMovedMessage(final Integer id, final Integer ctxid) {
+        createMessageForStdout(id, ctxid, "moved");
+    }
+
 }

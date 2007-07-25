@@ -39,7 +39,6 @@ public class CreateReason extends ReasonAbstraction {
         setOptions(parser);
     
         try {
-            
             parser.ownparse(args2);
     
             final Credentials auth = new Credentials((String)parser.getOptionValue(this.adminUserOption),(String)parser.getOptionValue(this.adminPassOption));
@@ -50,7 +49,6 @@ public class CreateReason extends ReasonAbstraction {
             final MaintenanceReason reason = new MaintenanceReason((String)parser.getOptionValue(this.reasonTextOption));
     
             displayCreatedMessage(oxutil.createMaintenanceReason(reason, auth).getId(), null);
-            
             sysexit(0);
         } catch (final java.rmi.ConnectException neti) {
             printError(null, null, neti.getMessage());
@@ -59,22 +57,22 @@ public class CreateReason extends ReasonAbstraction {
             printInvalidInputMsg(null, null, "Ids must be numbers!");
             sysexit(1);
         } catch (final MalformedURLException e) {
-            printServerException(e);
+            printServerException(null, null, e);
             sysexit(1);
         } catch (final RemoteException e) {
-            printServerException(e);
+            printServerException(null, null, e);
             sysexit(SYSEXIT_REMOTE_ERROR);
         } catch (final NotBoundException e) {
-            printNotBoundResponse(e);
+            printNotBoundResponse(null, null, e);
             sysexit(1);
         } catch (final StorageException e) {
-            printServerException(e);
+            printServerException(null, null, e);
             sysexit(SYSEXIT_SERVERSTORAGE_ERROR);
         } catch (final InvalidCredentialsException e) {
-            printServerException(e);
+            printServerException(null, null, e);
             sysexit(SYSEXIT_INVALID_CREDENTIALS);
         } catch (final InvalidDataException e) {
-            printServerException(e);
+            printServerException(null, null, e);
             sysexit(SYSEXIT_INVALID_DATA);
         } catch (final IllegalOptionValueException e) {            
             printError(null, null, "Illegal option value : " + e.getMessage());

@@ -1,6 +1,7 @@
 package com.openexchange.admin.console.util;
 
 import java.net.MalformedURLException;
+import java.rmi.ConnectException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -32,7 +33,7 @@ public class ListReasons extends ReasonAbstraction {
         try {
             parser.ownparse(args2);
 
-            final Credentials auth = new Credentials((String) parser.getOptionValue(this.adminUserOption), (String) parser.getOptionValue(this.adminPassOption));
+            final Credentials auth = credentialsparsing(parser);
 
             // get rmi ref
             final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME +OXUtilInterface.RMI_NAME);
@@ -51,26 +52,26 @@ public class ListReasons extends ReasonAbstraction {
             }
 
             sysexit(0);
-        } catch (final java.rmi.ConnectException neti) {
+        } catch (final ConnectException neti) {
             printError(null, null, neti.getMessage());
             sysexit(SYSEXIT_COMMUNICATION_ERROR);
         } catch (final java.lang.NumberFormatException num) {
             printInvalidInputMsg(null, null, "Ids must be numbers!");
             sysexit(1);
         } catch (final MalformedURLException e) {
-            printServerException(e);
+            printServerException(null, null, e);
             sysexit(1);
         } catch (final RemoteException e) {
-            printServerException(e);
+            printServerException(null, null, e);
             sysexit(SYSEXIT_REMOTE_ERROR);
         } catch (final NotBoundException e) {
-            printNotBoundResponse(e);
+            printNotBoundResponse(null, null, e);
             sysexit(1);
         } catch (final StorageException e) {
-            printServerException(e);
+            printServerException(null, null, e);
             sysexit(SYSEXIT_SERVERSTORAGE_ERROR);
         } catch (final InvalidCredentialsException e) {
-            printServerException(e);
+            printServerException(null, null, e);
             sysexit(SYSEXIT_INVALID_CREDENTIALS);
         } catch (final IllegalOptionValueException e) {
             printError(null, null, "Illegal option value : " + e.getMessage());
@@ -85,7 +86,7 @@ public class ListReasons extends ReasonAbstraction {
             parser.printUsage();
             sysexit(SYSEXIT_MISSING_OPTION);
         } catch (final InvalidDataException e) {
-            printServerException(e);
+            printServerException(null, null, e);
             sysexit(SYSEXIT_INVALID_DATA);
         }
     }

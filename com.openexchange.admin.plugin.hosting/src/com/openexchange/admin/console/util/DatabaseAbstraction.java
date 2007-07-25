@@ -6,6 +6,12 @@ import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 
+/**
+ * This is an abstract class for all common attributes and methods of database related command line tools
+ * 
+ * @author d7
+ *
+ */
 public abstract class DatabaseAbstraction extends UtilAbstraction{
     protected static final char OPT_NAME_DATABASE_ID_SHORT = 'i';
     protected static final String OPT_NAME_DATABASE_ID_LONG = "id";
@@ -47,6 +53,14 @@ public abstract class DatabaseAbstraction extends UtilAbstraction{
     protected Option poolHardlimitOption = null;
     protected Option poolInitialOption = null;
     protected Option poolMaxOption = null;
+    
+    // Needed for right error output
+    protected Integer dbid = null;
+    
+    protected void parseAndSetDatabaseID(final AdminParser parser, final Database db) {
+        dbid = Integer.parseInt((String) parser.getOptionValue(this.databaseIdOption));
+        db.setId(dbid);
+    }
     
     protected void parseAndSetHostname(final AdminParser parser, final Database db) {
         final String hostname = (String)parser.getOptionValue(this.hostnameOption);

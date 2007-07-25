@@ -52,41 +52,41 @@ public class ChangeFilestore extends FilestoreAbstraction {
             displayChangedMessage(null, null);
             sysexit(0);
         } catch (final java.rmi.ConnectException neti) {
-            printError(null, null, neti.getMessage());
+            printError(filestoreid, null, neti.getMessage());
             sysexit(SYSEXIT_COMMUNICATION_ERROR);
         } catch (final java.lang.NumberFormatException num) {
-            printInvalidInputMsg(null, null, "Ids must be numbers!");
+            printInvalidInputMsg(filestoreid, null, "Ids must be numbers!");
         } catch (final MalformedURLException e) {
-            printServerException(e);
+            printServerException(filestoreid, null, e);
             sysexit(1);
         } catch (final RemoteException e) {
-            printServerException(e);
+            printServerException(filestoreid, null, e);
             sysexit(SYSEXIT_REMOTE_ERROR);
         } catch (final NotBoundException e) {
-            printNotBoundResponse(e);
+            printNotBoundResponse(filestoreid, null, e);
             sysexit(1);
         } catch (final StorageException e) {
-            printServerException(e);
+            printServerException(filestoreid, null, e);
             sysexit(SYSEXIT_SERVERSTORAGE_ERROR);
         } catch (final InvalidCredentialsException e) {
-            printServerException(e);
+            printServerException(filestoreid, null, e);
             sysexit(SYSEXIT_INVALID_CREDENTIALS);
         } catch (final InvalidDataException e) {
-            printServerException(e);
+            printServerException(filestoreid, null, e);
             sysexit(SYSEXIT_INVALID_DATA);
         } catch (final URISyntaxException e) {
-            printServerException(e);
+            printServerException(filestoreid, null, e);
             sysexit(1);
         } catch (final IllegalOptionValueException e) {
-            printError(null, null, "Illegal option value : " + e.getMessage());
+            printError(filestoreid, null, "Illegal option value : " + e.getMessage());
             parser.printUsage();
             sysexit(SYSEXIT_ILLEGAL_OPTION_VALUE);
         } catch (final UnknownOptionException e) {
-            printError(null, null, "Unrecognized options on the command line: " + e.getMessage());
+            printError(filestoreid, null, "Unrecognized options on the command line: " + e.getMessage());
             parser.printUsage();
             sysexit(SYSEXIT_UNKNOWN_OPTION);
         } catch (final MissingOptionException e) {
-            printError(null, null, e.getMessage());
+            printError(filestoreid, null, e.getMessage());
             parser.printUsage();
             sysexit(SYSEXIT_MISSING_OPTION);
         }
