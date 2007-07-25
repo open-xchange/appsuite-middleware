@@ -2,6 +2,7 @@
 package com.openexchange.groupware;
 
 
+import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -1329,6 +1330,10 @@ public class CalendarTest extends TestCase {
                 fail("Move from a private folder with private flag should not be possibe!");
             } catch(OXPermissionException e) {
                 // Very good if we get an error
+            } catch(OXCalendarException oxce) {
+                // Very good if we get this kind of error
+            } catch(Exception e) {
+                fail ("Nooo "+e.getMessage());
             }
             
         } finally {
