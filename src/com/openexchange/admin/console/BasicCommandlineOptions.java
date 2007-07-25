@@ -63,7 +63,7 @@ import com.openexchange.admin.rmi.extensions.OXCommonExtension;
 
 
 /**
- * 
+ * This abstract class contains all the common options between all command line tools
  * @author cutmasta,d7
  *
  */
@@ -576,13 +576,5 @@ public abstract class BasicCommandlineOptions {
         } else {
             return NeededTriState.notneeded;
         }
-    }
-
-    protected final void displayChangedMessage() {
-        System.out.println("Successfully changed");
-    }
-
-    protected final void displayDeletedMessage() {
-        System.out.println("Successfully deleted");
     }
 }

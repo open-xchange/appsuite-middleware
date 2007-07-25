@@ -54,11 +54,11 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 
 import com.openexchange.admin.console.AdminParser;
-import com.openexchange.admin.console.BasicCommandlineOptions;
+import com.openexchange.admin.console.ObjectNamingAbstraction;
 import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.rmi.OXResourceInterface;
 
-public abstract class ResourceAbstraction extends BasicCommandlineOptions {
+public abstract class ResourceAbstraction extends ObjectNamingAbstraction {
     
     protected static final String _OPT_NAME_LONG = "name";
     protected static final char _OPT_NAME_SHORT = 'n';
@@ -114,5 +114,12 @@ public abstract class ResourceAbstraction extends BasicCommandlineOptions {
 
     protected final OXResourceInterface getResourceInterface() throws NotBoundException, MalformedURLException, RemoteException {
         return (OXResourceInterface) Naming.lookup(RMI_HOSTNAME + OXResourceInterface.RMI_NAME);
-    }    
+    }
+
+    @Override
+    protected final String getObjectName() {
+        return "resource";
+    }
+    
+    
 }
