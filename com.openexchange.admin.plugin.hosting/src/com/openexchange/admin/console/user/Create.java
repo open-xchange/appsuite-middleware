@@ -29,7 +29,8 @@ public class Create extends CreateCore {
 
     @Override
     protected void maincall(final AdminParser parser, final OXUserInterface oxusr, final Context ctx, final User usr, final UserModuleAccess access, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
-        System.out.println(oxusr.create(ctx, usr, access, auth).getId());
+        final Integer id = oxusr.create(ctx, usr, access, auth).getId();
+        displayCreatedMessage(id, ctx.getIdAsInt());
     }
 
     @Override

@@ -7,7 +7,7 @@ import com.openexchange.admin.console.AdminParser.NeededTriState;
 import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 
-public abstract class FileStoreAbstraction extends UtilAbstraction {
+public abstract class FilestoreAbstraction extends UtilAbstraction {
     protected final static char OPT_NAME_STORE_FILESTORE_ID_SHORT = 'i';
     protected final static String OPT_NAME_STORE_FILESTORE_ID_LONG = "id";
     protected final static char OPT_NAME_STORE_PATH_SHORT = 't';
@@ -75,5 +75,10 @@ public abstract class FileStoreAbstraction extends UtilAbstraction {
     protected void parseAndSetFilestoreID(final AdminParser parser, final Filestore fstore) {
         final String filestore_id = (String) parser.getOptionValue(this.filestoreIdOption);
         fstore.setId(Integer.parseInt(filestore_id));
+    }
+
+    @Override
+    protected final String getObjectName() {
+        return "filestore";
     }
 }

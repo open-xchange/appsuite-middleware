@@ -31,6 +31,7 @@ public class Delete extends DeleteCore {
     @Override
     protected void maincall(final AdminParser parser, final OXUserInterface oxusr, final Context ctx, final User usr, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         oxusr.delete(ctx, usr, auth);
+        displayDeletedMessage(usr.getId(), ctx.getIdAsInt());
     }
 
     @Override

@@ -62,7 +62,7 @@ public class RegisterDatabase extends DatabaseAbstraction {
             
             parseAndSetMasterAndID(parser, db);
             
-            System.out.println(oxutil.registerDatabase(db, auth).getId());
+            displayRegisteredMessage(oxutil.registerDatabase(db, auth).getId());
             sysexit(0);
         } catch (final java.rmi.ConnectException neti) {
             printError(neti.getMessage());

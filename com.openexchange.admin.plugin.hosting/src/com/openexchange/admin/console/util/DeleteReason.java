@@ -23,9 +23,9 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
  * @author d7,cutmasta
  * 
  */
-public class DeleteReason extends UtilAbstraction {
+public class DeleteReason extends ReasonAbstraction {
 
-    private final static char OPT_NAME_REASON_ID_SHORT = 'r';
+    private final static char OPT_NAME_REASON_ID_SHORT = 'i';
 
     private final static String OPT_NAME_REASON_ID_LONG = "reasonid";
 
@@ -51,7 +51,7 @@ public class DeleteReason extends UtilAbstraction {
             mrs[0].setId(reason_id);
             oxutil.deleteMaintenanceReason(mrs, auth);
             
-            displayDeletedMessage();
+            displayDeletedMessage(reason_id, null);
             sysexit(0);
         } catch (final java.rmi.ConnectException neti) {
             printError(neti.getMessage());

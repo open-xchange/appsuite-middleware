@@ -23,7 +23,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
  * @author d7,cutmasta
  * 
  */
-public class RegisterServer extends UtilAbstraction {
+public class RegisterServer extends ServerAbstraction {
 
     // Setting names for options
     private final static char OPT_NAME_HOSTNAME_SHORT = 'h';
@@ -50,7 +50,7 @@ public class RegisterServer extends UtilAbstraction {
 
             srv.setName((String) parser.getOptionValue(this.serverNameOption));
 
-            System.out.println(oxutil.registerServer(srv, auth).getId());
+            displayRegisteredMessage(oxutil.registerServer(srv, auth).getId());
             sysexit(0);
         } catch (final java.rmi.ConnectException neti) {
             printError(neti.getMessage());

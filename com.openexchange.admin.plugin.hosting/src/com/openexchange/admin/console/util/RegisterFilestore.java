@@ -23,7 +23,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
  * @author d7,cutmasta
  * 
  */
-public class RegisterFilestore extends FileStoreAbstraction {
+public class RegisterFilestore extends FilestoreAbstraction {
 
     public RegisterFilestore(final String[] args2) {
         final AdminParser parser = new AdminParser("registerfilestore");
@@ -46,7 +46,7 @@ public class RegisterFilestore extends FileStoreAbstraction {
             
             parseAndSetFilestoreMaxCtxs(parser, fstore);
     
-            System.out.println(oxutil.registerFilestore(fstore, auth).getId());
+            displayRegisteredMessage(oxutil.registerFilestore(fstore, auth).getId());
             sysexit(0);
         } catch (final java.rmi.ConnectException neti) {
             printError(neti.getMessage());

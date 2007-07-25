@@ -23,7 +23,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
  * @author d7,cutmasta
  *
  */
-public class CreateReason extends UtilAbstraction {
+public class CreateReason extends ReasonAbstraction {
     
 
     private final static char OPT_NAME_REASON_TEXT_SHORT = 'r';
@@ -49,7 +49,7 @@ public class CreateReason extends UtilAbstraction {
     
             final MaintenanceReason reason = new MaintenanceReason((String)parser.getOptionValue(this.reasonTextOption));
     
-            System.out.println(oxutil.createMaintenanceReason(reason, auth).getId());
+            displayCreatedMessage(oxutil.createMaintenanceReason(reason, auth).getId(), null);
             
             sysexit(0);
         } catch (final java.rmi.ConnectException neti) {

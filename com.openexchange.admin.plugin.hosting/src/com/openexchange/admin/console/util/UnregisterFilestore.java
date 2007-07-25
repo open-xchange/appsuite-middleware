@@ -21,7 +21,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
  * @author d7,cutmasta
  * 
  */
-public class UnregisterFilestore extends FileStoreAbstraction {
+public class UnregisterFilestore extends FilestoreAbstraction {
 
     // Setting names for options
     public UnregisterFilestore(final String[] args2) {
@@ -42,7 +42,7 @@ public class UnregisterFilestore extends FileStoreAbstraction {
 
             oxutil.unregisterFilestore(fstore, auth);
             
-            displayUnregisteredMessage();
+            displayUnregisteredMessage(fstore.getId());
             sysexit(0);
         } catch (final java.rmi.ConnectException neti) {
             printError(neti.getMessage());
