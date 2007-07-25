@@ -49,6 +49,7 @@
 package com.openexchange.admin.console.group;
 
 import java.net.MalformedURLException;
+import java.rmi.ConnectException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 
@@ -93,95 +94,93 @@ public abstract class ChangeCore extends GroupAbstraction {
 
         try {
             parser.ownparse(args);
+
+            final Group grp = new Group();
+            
+            parseAndSetGroupId(parser, grp);
+            
             final Context ctx = contextparsing(parser);
 
             final Credentials auth = credentialsparsing(parser);
 
             final OXGroupInterface oxgrp = getGroupInterface();
-            final Group grp = new Group();
-
-            final Integer grpid = Integer.valueOf((String) parser.getOptionValue(this.IdOption));
-            grp.setId(grpid);
             
-            if (parser.getOptionValue(this.addMemberOption) != null) {
-                final User[] newMemberList = getMembers(parser, this.addMemberOption);
+            final String addMembers = (String) parser.getOptionValue(this.addMemberOption);
+            if (addMembers != null) {
+                final User[] newMemberList = getMembers(parser, addMembers);
                 if (newMemberList != null) {
                     oxgrp.addMember(ctx, grp, newMemberList, auth);
                 }
             }
-            if (parser.getOptionValue(this.removeMemberOption) != null) {
-                final User[] removeMemberList = getMembers(parser, this.removeMemberOption);
+            
+            final String removeMembers = (String) parser.getOptionValue(this.removeMemberOption);
+            if (removeMembers != null) {
+                final User[] removeMemberList = getMembers(parser, removeMembers);
                 if (removeMemberList != null) {
                     oxgrp.removeMember(ctx, grp, removeMemberList, auth);
                 }
             }
 
-            if (parser.getOptionValue(this.nameOption) != null) {
-                grp.setName((String) parser.getOptionValue(this.nameOption));
-            }
-            if (parser.getOptionValue(this.displayNameOption) != null) {
-                grp.setDisplayname((String) parser.getOptionValue(this.displayNameOption));
-            }
+            parseAndSetGroupAndDisplayName(parser, grp);
 
             maincall(parser, oxgrp, ctx, grp, auth);
 
             oxgrp.change(ctx, grp, auth);
 
-            displayChangedMessage(grpid, ctx.getIdAsInt());
+            displayChangedMessage(groupid, ctxid);
             sysexit(0);
-        } catch (final java.rmi.ConnectException neti) {
-            printError(null, null, neti.getMessage());
+        } catch (final ConnectException neti) {
+            printError(groupid, ctxid, neti.getMessage());
             sysexit(SYSEXIT_COMMUNICATION_ERROR);
         } catch (final MalformedURLException e) {
-            printServerException(e);
+            printServerException(groupid, ctxid, e);
             sysexit(1);
         } catch (final RemoteException e) {
-            printServerException(e);
+            printServerException(groupid, ctxid, e);
             sysexit(SYSEXIT_REMOTE_ERROR);
         } catch (final NotBoundException e) {
-            printServerException(e);
+            printServerException(groupid, ctxid, e);
             sysexit(1);
         } catch (final InvalidCredentialsException e) {
-            printServerException(e);
+            printServerException(groupid, ctxid, e);
             sysexit(SYSEXIT_INVALID_CREDENTIALS);
         } catch (final NoSuchContextException e) {
-            printServerException(e);
+            printServerException(groupid, ctxid, e);
             sysexit(SYSEXIT_NO_SUCH_CONTEXT);
         } catch (final StorageException e) {
-            printServerException(e);
+            printServerException(groupid, ctxid, e);
             sysexit(SYSEXIT_SERVERSTORAGE_ERROR);
         } catch (final InvalidDataException e) {
-            printServerException(e);
+            printServerException(groupid, ctxid, e);
             sysexit(SYSEXIT_INVALID_DATA);
         } catch (final IllegalOptionValueException e) {
-            printError(null, null, "Illegal option value : " + e.getMessage());
+            printError(groupid, ctxid, "Illegal option value : " + e.getMessage());
             parser.printUsage();
             sysexit(SYSEXIT_ILLEGAL_OPTION_VALUE);
         } catch (final UnknownOptionException e) {
-            printError(null, null, "Unrecognized options on the command line: " + e.getMessage());
+            printError(groupid, ctxid, "Unrecognized options on the command line: " + e.getMessage());
             parser.printUsage();
             sysexit(SYSEXIT_UNKNOWN_OPTION);
         } catch (final MissingOptionException e) {
-            printError(null, null, e.getMessage());
+            printError(groupid, ctxid, e.getMessage());
             parser.printUsage();
             sysexit(SYSEXIT_MISSING_OPTION);
         } catch (final DatabaseUpdateException e) {
-            printServerException(e);
+            printServerException(groupid, ctxid, e);
             sysexit(1);
         } catch (final NoSuchUserException e) {
-            printServerException(e);
+            printServerException(groupid, ctxid, e);
             sysexit(SYSEXIT_NO_SUCH_USER);
         } catch (final NoSuchGroupException e) {
-            printServerException(e);
+            printServerException(groupid, ctxid, e);
             sysexit(SYSEXIT_NO_SUCH_GROUP);
         } catch (final DuplicateExtensionException e) {
-            printServerException(e);
+            printServerException(groupid, ctxid, e);
             sysexit(1);
         }
     }
 
-    private User[] getMembers(final AdminParser parser, final Option memberOption) {
-        final String tmpmembers = (String) parser.getOptionValue(memberOption);
+    private User[] getMembers(final AdminParser parser, final String tmpmembers) {
         final String[] split = tmpmembers.split(",");
         final User[] memberList = new User[split.length];
         for (int i = 0; i < split.length; i++) {

@@ -49,6 +49,7 @@
 package com.openexchange.admin.console.resource;
 
 import java.net.MalformedURLException;
+import java.rmi.ConnectException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 
@@ -89,71 +90,66 @@ public abstract class CreateCore extends ResourceAbstraction {
         try {
             parser.ownparse(args);
 
+            final Resource res = new Resource();
+            
+            parseAndSetMandatoryFields(parser, res);
+
             final Context ctx = contextparsing(parser);
 
             final Credentials auth = credentialsparsing(parser);
             
             final OXResourceInterface oxres = getResourceInterface();
-            final Resource res = new Resource();
-
-            res.setAvailable(Boolean.parseBoolean((String) parser.getOptionValue(this.resourceAvailableOption)));
-
-            if (parser.getOptionValue(this.resourceDescriptionOption) != null) {
-                res.setDescription((String) parser.getOptionValue(this.resourceDescriptionOption));
-            }
-
+            
             maincall(parser, oxres, ctx, res, auth);
-            res.setDisplayname((String) parser.getOptionValue(this.resourceDisplayNameOption));
-            res.setEmail((String) parser.getOptionValue(this.resourceEmailOption));
-            res.setName((String) parser.getOptionValue(this.resourceNameOption));
+            
             final Integer id = oxres.create(ctx, res, auth).getId();
 
-            displayCreatedMessage(id, ctx.getIdAsInt());
+            displayCreatedMessage(id, ctxid);
             sysexit(0);
-        } catch (final java.rmi.ConnectException neti) {
-            printError(null, null, neti.getMessage());
+        } catch (final ConnectException neti) {
+            printError(null, ctxid, neti.getMessage());
             sysexit(SYSEXIT_COMMUNICATION_ERROR);
-        } catch (final java.lang.NumberFormatException num) {
-            printInvalidInputMsg(null, null, "Ids must be numbers!");
+        } catch (final NumberFormatException num) {
+            printInvalidInputMsg(null, ctxid, "Ids must be numbers!");
             sysexit(1);
         } catch (final MalformedURLException e) {
-            printServerException(e);
+            printServerException(null, ctxid, e);
             sysexit(1);
         } catch (final RemoteException e) {
-            printServerException(e);
+            printServerException(null, ctxid, e);
             sysexit(SYSEXIT_REMOTE_ERROR);
         } catch (final NotBoundException e) {
-            printServerException(e);
+            printServerException(null, ctxid, e);
             sysexit(1);
         } catch (final StorageException e) {
-            printServerException(e);
+            printServerException(null, ctxid, e);
             sysexit(SYSEXIT_SERVERSTORAGE_ERROR);
         } catch (final InvalidCredentialsException e) {
-            printServerException(e);
+            printServerException(null, ctxid, e);
             sysexit(SYSEXIT_INVALID_CREDENTIALS);
         } catch (final NoSuchContextException e) {
-            printServerException(e);
+            printServerException(null, ctxid, e);
             sysexit(SYSEXIT_NO_SUCH_CONTEXT);
         } catch (final InvalidDataException e) {
-            printServerException(e);
+            printServerException(null, ctxid, e);
             sysexit(SYSEXIT_INVALID_DATA);
         } catch (final IllegalOptionValueException e) {
-            printError(null, null, "Illegal option value : " + e.getMessage());
+            printError(null, ctxid, "Illegal option value : " + e.getMessage());
             parser.printUsage();
             sysexit(SYSEXIT_ILLEGAL_OPTION_VALUE);
         } catch (final UnknownOptionException e) {
-            printError(null, null, "Unrecognized options on the command line: " + e.getMessage());
+            printError(null, ctxid, "Unrecognized options on the command line: " + e.getMessage());
             parser.printUsage();
             sysexit(SYSEXIT_UNKNOWN_OPTION);
         } catch (final MissingOptionException e) {
-            printError(null, null, e.getMessage());
+            printError(null, ctxid, e.getMessage());
             parser.printUsage();
             sysexit(SYSEXIT_MISSING_OPTION);
         } catch (final DatabaseUpdateException e) {
-            printServerException(e);
+            printServerException(null, ctxid, e);
             sysexit(1);
         } catch (final DuplicateExtensionException e) {
-            printServerException(e);
+            printServerException(null, ctxid, e);
             sysexit(1);
         }
 

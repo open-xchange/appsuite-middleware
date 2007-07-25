@@ -120,35 +120,13 @@ public abstract class ChangeCore extends UserAbstraction {
             final User usr = new User();
 
             // set mandatory id
-            usr.setId(Integer.parseInt((String) parser.getOptionValue(this.idOption)));
+            parseAndSetUserId(parser, usr);
 
             // fill user obj with mandatory values from console
-            final String optionValue2 = (String) parser.getOptionValue(this.displayNameOption);
-            if (null != optionValue2) {
-                usr.setDisplay_name(optionValue2);
-            }        
-            
-            final String optionValue3 = (String) parser.getOptionValue(this.givenNameOption);
-            if (null != optionValue3) {
-                usr.setGiven_name(optionValue3);
-            }
-            
-            final String optionValue4 = (String) parser.getOptionValue(this.surNameOption);
-            if (null != optionValue4) {
-                usr.setSur_name(optionValue4);
-            }
-            final String optionValue5 = (String) parser.getOptionValue(this.passwordOption);
-            if (null != optionValue5) {
-                usr.setPassword(optionValue5);
-            }   
-            final String optionValue6 = (String) parser.getOptionValue(this.primaryMailOption);
-            if (null != optionValue6) {
-                usr.setPrimaryEmail(optionValue6);
-                usr.setEmail1(optionValue6);
-            }        
+            parseAndSetMandatoryOptionsWithoutUsernameInUser(parser, usr);
 
             // add optional values if set
-            setOptionalOptionsinUser(parser, usr);
+            parseAndSetOptionalOptionsinUser(parser, usr);
 
             applyExtendedOptionsToUser(parser, usr);
             
@@ -164,63 +142,64 @@ public abstract class ChangeCore extends UserAbstraction {
             // apply changes in module access on server
             oxusr.changeModuleAccess(ctx, usr, access, auth);
 
+            displayChangedMessage(userid, ctx.getIdAsInt());
             sysexit(0);
         } catch (final ConnectException neti) {
-            printError(null, null, neti.getMessage());
+            printError(userid, ctxid, neti.getMessage());
             sysexit(SYSEXIT_COMMUNICATION_ERROR);
         } catch (final NumberFormatException num) {
-            printInvalidInputMsg(null, null, "Ids must be numbers!");
+            printInvalidInputMsg(userid, ctxid, "Ids must be numbers!");
             sysexit(1);
         } catch (final IllegalOptionValueException e) {
-            printError(null, null, "Illegal option value : " + e.getMessage());
+            printError(userid, ctxid, "Illegal option value : " + e.getMessage());
             printrightoptions(parser);
             sysexit(SYSEXIT_ILLEGAL_OPTION_VALUE);
         } catch (final UnknownOptionException e) {
-            printError(null, null, "Unrecognized options on the command line: " + e.getMessage());
+            printError(userid, ctxid, "Unrecognized options on the command line: " + e.getMessage());
             printrightoptions(parser);
             sysexit(SYSEXIT_UNKNOWN_OPTION);
         } catch (final MissingOptionException e) {
-            printError(null, null, e.getMessage());
+            printError(userid, ctxid, e.getMessage());
             printrightoptions(parser);
             sysexit(SYSEXIT_MISSING_OPTION);
         } catch (final MalformedURLException e) {
-            printServerException(e);
+            printServerException(userid, ctxid, e);
             sysexit(1);
         } catch (final RemoteException e) {
-            printServerException(e);
+            printServerException(userid, ctxid, e);
             sysexit(SYSEXIT_REMOTE_ERROR);
         } catch (final NotBoundException e) {
-            printServerException(e);
+            printServerException(userid, ctxid, e);
             sysexit(1);
         } catch (final IllegalArgumentException e) {
-            printError(null, null, e.getMessage());
+            printError(userid, ctxid, e.getMessage());
             sysexit(1);
         } catch (final IllegalAccessException e) {
-            printError(null, null, e.getMessage());
+            printError(userid, ctxid, e.getMessage());
             sysexit(1);
         } catch (final InvocationTargetException e) {
-            printError(null, null, e.getMessage());
+            printError(userid, ctxid, e.getMessage());
             sysexit(1);
         } catch (final StorageException e) {
-            printServerException(e);
+            printServerException(userid, ctxid, e);
             sysexit(SYSEXIT_SERVERSTORAGE_ERROR);
         } catch (final InvalidCredentialsException e) {
-            printServerException(e);
+            printServerException(userid, ctxid, e);
             sysexit(SYSEXIT_INVALID_CREDENTIALS);
         } catch (final NoSuchContextException e) {
-            printServerException(e);
+            printServerException(userid, ctxid, e);
             sysexit(SYSEXIT_NO_SUCH_CONTEXT);
         } catch (final InvalidDataException e) {
-            printServerException(e);
+            printServerException(userid, ctxid, e);
             sysexit(SYSEXIT_INVALID_DATA);
         } catch (final DatabaseUpdateException e) {
-            printServerException(e);
+            printServerException(userid, ctxid, e);
             sysexit(1);
         } catch (final NoSuchUserException e) {
-            printServerException(e);
+            printServerException(userid, ctxid, e);
             sysexit(SYSEXIT_NO_SUCH_USER);
         } catch (final DuplicateExtensionException e) {
-            printServerException(e);
+            printServerException(userid, ctxid, e);
             sysexit(1);
         }
 

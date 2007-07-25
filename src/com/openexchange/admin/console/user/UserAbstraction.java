@@ -64,7 +64,6 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import com.openexchange.admin.console.AdminParser;
-import com.openexchange.admin.console.BasicCommandlineOptions;
 import com.openexchange.admin.console.ObjectNamingAbstraction;
 import com.openexchange.admin.console.AdminParser.NeededTriState;
 import com.openexchange.admin.console.CmdLineParser.Option;
@@ -265,6 +264,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected Option accessWebdavXmlOption = null;
     protected Option accessWebmailOption = null;
     
+    // For right error output
+    protected Integer userid = null;
     
     /**
      * This field holds all the options which are displayed by default. So this options can be
@@ -469,13 +470,17 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
      * @param parser The parser object
      * @param usr User object which will be changed
      */
-    protected final void setMandatoryOptionsinUser(final AdminParser parser, final User usr) {
+    protected final void parseAndSetMandatoryOptionsinUser(final AdminParser parser, final User usr) {
         if(parser.getOptionValue(this.userNameOption)!=null){
             final String optionValue = (String) parser.getOptionValue(this.userNameOption);
             if (null != optionValue) {
                 usr.setUsername(optionValue);
             }        
         }
+        parseAndSetMandatoryOptionsWithoutUsernameInUser(parser, usr);
+    }
+
+    protected final void parseAndSetMandatoryOptionsWithoutUsernameInUser(final AdminParser parser, final User usr) {
         if(parser.getOptionValue(this.displayNameOption)!=null){
             final String optionValue2 = (String) parser.getOptionValue(this.displayNameOption);
             if (null != optionValue2) {
@@ -636,7 +641,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
      * @param parser The parser object
      * @param usr User object which will be changed
      */
-    protected final void setOptionalOptionsinUser(final AdminParser parser, final User usr) {
+    protected final void parseAndSetOptionalOptionsinUser(final AdminParser parser, final User usr) {
         final String optionValue = (String) parser.getOptionValue(this.companyOption);
         if (null != optionValue) {
             usr.setCompany(optionValue);
@@ -825,6 +830,11 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     
     protected String getObjectName() {
         return "user";
+    }
+
+    protected void parseAndSetUserId(final AdminParser parser, final User usr) {
+        userid = Integer.parseInt((String) parser.getOptionValue(this.idOption));
+        usr.setId(userid);
     }
 }
 
