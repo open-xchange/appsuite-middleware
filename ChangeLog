@@ -1,6 +1,7 @@
 * 2007-07-25 ben.pahne@open-xchange.com
 
- - Bugfix 7368
+ - Bugfix 7368, changed a message status from error to info
+ - Bugfix 7771, changed the SQL query for a linkage list
 
 * 2007-07-23 - marcus.klein@open-xchange.com
 
