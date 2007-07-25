@@ -55,7 +55,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 
 import com.openexchange.admin.console.AdminParser;
-import com.openexchange.admin.console.BasicCommandlineOptions;
 import com.openexchange.admin.console.AdminParser.MissingOptionException;
 import com.openexchange.admin.console.CmdLineParser.IllegalOptionValueException;
 import com.openexchange.admin.console.CmdLineParser.UnknownOptionException;
@@ -65,7 +64,7 @@ import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
-public abstract class ListCore extends BasicCommandlineOptions {
+public abstract class ListCore extends ContextAbstraction {
 
     protected final void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptionsWithoutContextID(parser);

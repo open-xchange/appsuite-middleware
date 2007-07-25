@@ -65,6 +65,7 @@ import java.util.TimeZone;
 
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.BasicCommandlineOptions;
+import com.openexchange.admin.console.ObjectNamingAbstraction;
 import com.openexchange.admin.console.AdminParser.NeededTriState;
 import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.rmi.OXUserInterface;
@@ -72,7 +73,7 @@ import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 
-public abstract class UserAbstraction extends BasicCommandlineOptions {
+public abstract class UserAbstraction extends ObjectNamingAbstraction {
     
     protected class MethodAndNames {
         private Method method = null;
@@ -820,6 +821,10 @@ public abstract class UserAbstraction extends BasicCommandlineOptions {
 
     protected final OXUserInterface getUserInterface() throws NotBoundException, MalformedURLException, RemoteException {
         return (OXUserInterface) Naming.lookup(RMI_HOSTNAME + OXUserInterface.RMI_NAME);
+    }
+    
+    protected String getObjectName() {
+        return "user";
     }
 }
 

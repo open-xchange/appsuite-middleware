@@ -462,8 +462,8 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             user_ids = getUserIdArrayFromUsers(users);
             // FIXME: Change function form int to user object
             if (!tools.existsUser(ctx, user_ids)) {
-                final NoSuchUserException noSuchUserException = new NoSuchUserException("No such user " + Arrays.toString(users) + " in context " + ctx.getIdAsInt());
-                log.error(noSuchUserException.getMessage(), noSuchUserException);
+                final NoSuchUserException noSuchUserException = new NoSuchUserException("No such user(s) " + getUserIdArrayFromUsersAsString(users) + " in context " + ctx.getIdAsInt());
+                log.error("No such user(s) " + Arrays.toString(users) + " in context " + ctx.getIdAsInt(), noSuchUserException);
                 throw noSuchUserException;
             }
             for (final User user : users) {
@@ -1000,6 +1000,20 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             }
         }
         return retval;
+    }
+
+    private String getUserIdArrayFromUsersAsString(final User[] users) throws InvalidDataException {
+        final StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < users.length; i++) {
+            final Integer id = users[i].getId();
+            if (null != id) {
+                sb.append(id);
+                sb.append(",");
+            } else {
+                throw new InvalidDataException("One user object has no id");
+            }
+        }
+        return sb.deleteCharAt(sb.length()-1).toString();
     }
     
     private User[] removeContextAdmin(final Context ctx, final User[] retusers) throws StorageException {

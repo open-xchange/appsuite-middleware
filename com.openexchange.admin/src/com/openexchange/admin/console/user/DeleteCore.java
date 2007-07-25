@@ -102,7 +102,6 @@ public abstract class DeleteCore extends UserAbstraction {
             
             maincall(parser, oxusr, ctx, usr, auth);
 
-            displayDeletedMessage();
             sysexit(0);
         } catch (final ConnectException neti) {
             printError(neti.getMessage());

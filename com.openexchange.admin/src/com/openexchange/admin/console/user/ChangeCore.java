@@ -164,7 +164,6 @@ public abstract class ChangeCore extends UserAbstraction {
             // apply changes in module access on server
             oxusr.changeModuleAccess(ctx, usr, access, auth);
 
-            displayChangedMessage();
             sysexit(0);
         } catch (final ConnectException neti) {
             printError(neti.getMessage());

@@ -54,11 +54,11 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 
 import com.openexchange.admin.console.AdminParser;
-import com.openexchange.admin.console.BasicCommandlineOptions;
+import com.openexchange.admin.console.ObjectNamingAbstraction;
 import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.rmi.OXGroupInterface;
 
-public abstract class GroupAbstraction extends BasicCommandlineOptions {
+public abstract class GroupAbstraction extends ObjectNamingAbstraction {
 
     protected Option addMemberOption = null;
     protected Option removeMemberOption = null;
@@ -123,6 +123,10 @@ public abstract class GroupAbstraction extends BasicCommandlineOptions {
     
     protected final OXGroupInterface getGroupInterface() throws NotBoundException, MalformedURLException, RemoteException {
         return (OXGroupInterface) Naming.lookup(RMI_HOSTNAME + OXGroupInterface.RMI_NAME);
+    }
+    
+    protected final String getObjectName() {
+        return "group";
     }
    
 }

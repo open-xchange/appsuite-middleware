@@ -100,8 +100,8 @@ public abstract class ChangeCore extends GroupAbstraction {
             final OXGroupInterface oxgrp = getGroupInterface();
             final Group grp = new Group();
 
-            grp.setId(Integer.valueOf((String) parser.getOptionValue(this.IdOption)));
-
+            final Integer grpid = Integer.valueOf((String) parser.getOptionValue(this.IdOption));
+            grp.setId(grpid);
             
             if (parser.getOptionValue(this.addMemberOption) != null) {
                 final User[] newMemberList = getMembers(parser, this.addMemberOption);
@@ -127,7 +127,7 @@ public abstract class ChangeCore extends GroupAbstraction {
 
             oxgrp.change(ctx, grp, auth);
 
-            displayChangedMessage();
+            displayChangedMessage(grpid, ctx.getIdAsInt());
             sysexit(0);
         } catch (final java.rmi.ConnectException neti) {
             printError(neti.getMessage());
