@@ -58,6 +58,7 @@ public class ContactException extends OXException {
 	
 	public static final String NON_CONTACT_FOLDER_MSG = "You are not allowed to store this contact in a non-contact folder:: Folder id %1$d in Context %2$d with User %3$d";
 	public static final String NO_PERMISSION_MSG = "You do not have permission to store objects in Folder %1$d in Context %2$d with User %3$d";
+	public static final String NO_READ_PERMISSION_MSG = "You do not have permission to read objects in Folder %1$d in Context %2$d with User %3$d";
 	public static final String OBJECT_HAS_CHANGED_MSG = "The object has changed on server side since it was last fetched.";
 	public static final String NO_DELETE_PERMISSION_MSG = "You do not have permission to delete objects from Folder %1$d in Context %2$d with User %3$d";
 	public static final String EVENT_QUEUE = "Unable to initialize Event queue";

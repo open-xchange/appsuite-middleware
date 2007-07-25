@@ -580,7 +580,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 			exceptionId={26,27,28,29},
 			msg={	"The Object you requested can not be found. Try again. Context %1$d Folder %2$d User %3$d Object %4$d",
 							ContactException.NON_CONTACT_FOLDER_MSG,
-							ContactException.NO_PERMISSION_MSG,
+							ContactException.NO_READ_PERMISSION_MSG,
 							ContactException.INIT_CONNECTION_FROM_DBPOOL
 						}
 	)
