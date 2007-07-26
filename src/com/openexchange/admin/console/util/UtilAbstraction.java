@@ -33,9 +33,9 @@ public abstract class UtilAbstraction extends ObjectNamingAbstraction {
 
     @Override
     protected void printFirstPartOfErrorText(Integer id, Integer ctxid) {
-        if (getClass().getName().matches("^.*\\..*(?i)register.*$")) {
+        if (getClass().getName().matches("^.*\\.\\w*(?i)register\\w*$")) {
             createMessageForStderr(id, ctxid, "could not be registered: ");
-        } else if (getClass().getName().matches("^.*\\..*(?i)unregister.*$")) {
+        } else if (getClass().getName().matches("^.*\\.\\w*(?i)unregister\\w*$")) {
             createMessageForStderr(id, ctxid, "could not be unregistered: ");
         } else {
             super.printFirstPartOfErrorText(id, ctxid);
