@@ -129,7 +129,7 @@ public abstract class GroupAbstraction extends ObjectNamingAbstraction {
         return (OXGroupInterface) Naming.lookup(RMI_HOSTNAME + OXGroupInterface.RMI_NAME);
     }
     
-    protected final String getObjectName() {
+    protected String getObjectName() {
         return "group";
     }
 
