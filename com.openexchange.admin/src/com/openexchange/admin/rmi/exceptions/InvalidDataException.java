@@ -49,14 +49,13 @@
 
 package com.openexchange.admin.rmi.exceptions;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
  * @author cutmasta Is thrown when user sends invalid data to the server. *
  * 
  */
-public class InvalidDataException extends Exception implements Serializable {
+public class InvalidDataException extends Exception {
 
     /**
      * IF we need more granular exceptions for invalid filestore url or invalid

@@ -49,14 +49,13 @@
 
 package com.openexchange.admin.rmi.exceptions;
 
-import java.io.Serializable;
 
 /**
  * @author cutmasta
  * Is thrown when user sends invalid credentials.
  *
  */
-public class InvalidCredentialsException extends Exception implements Serializable{
+public class InvalidCredentialsException extends Exception {
 
 	/**
          * For serialization

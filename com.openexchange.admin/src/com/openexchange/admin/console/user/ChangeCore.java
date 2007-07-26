@@ -48,17 +48,12 @@
  */
 package com.openexchange.admin.console.user;
 
-import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
-import java.rmi.ConnectException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 
 import com.openexchange.admin.console.AdminParser;
-import com.openexchange.admin.console.AdminParser.MissingOptionException;
 import com.openexchange.admin.console.AdminParser.NeededTriState;
-import com.openexchange.admin.console.CmdLineParser.IllegalOptionValueException;
-import com.openexchange.admin.console.CmdLineParser.UnknownOptionException;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -144,62 +139,8 @@ public abstract class ChangeCore extends UserAbstraction {
 
             displayChangedMessage(userid, ctx.getIdAsInt());
             sysexit(0);
-        } catch (final ConnectException neti) {
-            printError(userid, ctxid, neti.getMessage());
-            sysexit(SYSEXIT_COMMUNICATION_ERROR);
-        } catch (final NumberFormatException num) {
-            printInvalidInputMsg(userid, ctxid, "Ids must be numbers!");
-            sysexit(1);
-        } catch (final IllegalOptionValueException e) {
-            printError(userid, ctxid, "Illegal option value : " + e.getMessage());
-            printrightoptions(parser);
-            sysexit(SYSEXIT_ILLEGAL_OPTION_VALUE);
-        } catch (final UnknownOptionException e) {
-            printError(userid, ctxid, "Unrecognized options on the command line: " + e.getMessage());
-            printrightoptions(parser);
-            sysexit(SYSEXIT_UNKNOWN_OPTION);
-        } catch (final MissingOptionException e) {
-            printError(userid, ctxid, e.getMessage());
-            printrightoptions(parser);
-            sysexit(SYSEXIT_MISSING_OPTION);
-        } catch (final MalformedURLException e) {
-            printServerException(userid, ctxid, e);
-            sysexit(1);
-        } catch (final RemoteException e) {
-            printServerException(userid, ctxid, e);
-            sysexit(SYSEXIT_REMOTE_ERROR);
-        } catch (final NotBoundException e) {
-            printServerException(userid, ctxid, e);
-            sysexit(1);
-        } catch (final IllegalArgumentException e) {
-            printError(userid, ctxid, e.getMessage());
-            sysexit(1);
-        } catch (final IllegalAccessException e) {
-            printError(userid, ctxid, e.getMessage());
-            sysexit(1);
-        } catch (final InvocationTargetException e) {
-            printError(userid, ctxid, e.getMessage());
-            sysexit(1);
-        } catch (final StorageException e) {
-            printServerException(userid, ctxid, e);
-            sysexit(SYSEXIT_SERVERSTORAGE_ERROR);
-        } catch (final InvalidCredentialsException e) {
-            printServerException(userid, ctxid, e);
-            sysexit(SYSEXIT_INVALID_CREDENTIALS);
-        } catch (final NoSuchContextException e) {
-            printServerException(userid, ctxid, e);
-            sysexit(SYSEXIT_NO_SUCH_CONTEXT);
-        } catch (final InvalidDataException e) {
-            printServerException(userid, ctxid, e);
-            sysexit(SYSEXIT_INVALID_DATA);
-        } catch (final DatabaseUpdateException e) {
-            printServerException(userid, ctxid, e);
-            sysexit(1);
-        } catch (final NoSuchUserException e) {
-            printServerException(userid, ctxid, e);
-            sysexit(SYSEXIT_NO_SUCH_USER);
-        } catch (final DuplicateExtensionException e) {
-            printServerException(userid, ctxid, e);
+        } catch (final Exception e) {
+            printErrors(userid, ctxid, e, parser);
             sysexit(1);
         }
 

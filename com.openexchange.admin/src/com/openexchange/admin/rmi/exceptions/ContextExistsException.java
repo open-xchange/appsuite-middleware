@@ -50,13 +50,12 @@
 
 package com.openexchange.admin.rmi.exceptions;
 
-import java.io.Serializable;
 
 /**
  * @author choeger
  *
  */
-public class ContextExistsException extends Exception implements Serializable{
+public class ContextExistsException extends Exception {
 
 	/**
          * For serialization

@@ -53,9 +53,6 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 
 import com.openexchange.admin.console.AdminParser;
-import com.openexchange.admin.console.AdminParser.MissingOptionException;
-import com.openexchange.admin.console.CmdLineParser.IllegalOptionValueException;
-import com.openexchange.admin.console.CmdLineParser.UnknownOptionException;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
@@ -83,48 +80,8 @@ public abstract class DeleteCore extends ContextAbstraction {
     
             displayDeletedMessage(ctxid, null);
             sysexit(0);
-        } catch (final java.rmi.ConnectException neti) {
-            printError(ctxid, null, neti.getMessage());
-            sysexit(SYSEXIT_COMMUNICATION_ERROR);
-        } catch (final java.lang.NumberFormatException num) {
-            printInvalidInputMsg(ctxid, null, "Ids must be numbers!");
-            sysexit(1);
-        } catch (final MalformedURLException e) {
-            printServerException(ctxid, null, e);
-            sysexit(1);
-        } catch (final RemoteException e) {
-            printServerException(ctxid, null, e);
-            sysexit(SYSEXIT_REMOTE_ERROR);
-        } catch (final NotBoundException e) {
-            printNotBoundResponse(ctxid, null, e);
-            sysexit(1);
-        } catch (final StorageException e) {
-            printServerException(ctxid, null, e);
-            sysexit(SYSEXIT_SERVERSTORAGE_ERROR);
-        } catch (final InvalidCredentialsException e) {
-            printServerException(ctxid, null, e);
-            sysexit(SYSEXIT_INVALID_CREDENTIALS);
-        } catch (final NoSuchContextException e) {
-            printServerException(ctxid, null, e);
-            sysexit(SYSEXIT_NO_SUCH_CONTEXT);
-        } catch (final IllegalOptionValueException e) {
-            printError(ctxid, null, "Illegal option value : " + e.getMessage());
-            parser.printUsage();
-            sysexit(SYSEXIT_ILLEGAL_OPTION_VALUE);
-        } catch (final UnknownOptionException e) {
-            printError(ctxid, null, "Unrecognized options on the command line: " + e.getMessage());
-            parser.printUsage();
-            sysexit(SYSEXIT_UNKNOWN_OPTION);
-        } catch (final MissingOptionException e) {
-            printError(ctxid, null, e.getMessage());
-            parser.printUsage();
-            sysexit(SYSEXIT_MISSING_OPTION);
-        } catch (final DatabaseUpdateException e) {
-            printServerException(ctxid, null, e);
-            sysexit(1);
-        } catch (final InvalidDataException e) {
-            printServerException(ctxid, null, e);
-            sysexit(1);
+        } catch (final Exception e) {
+            printErrors(ctxid, null, e, parser);
         }
     }
     
