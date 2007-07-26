@@ -137,4 +137,10 @@ public class ListServers extends ServerAbstraction {
         }
         return srv_data;
     }
+
+    @Override
+    protected final String getObjectName() {
+        return "servers";
+    }
+
 }

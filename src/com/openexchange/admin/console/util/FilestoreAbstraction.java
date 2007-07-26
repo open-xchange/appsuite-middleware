@@ -80,7 +80,7 @@ public abstract class FilestoreAbstraction extends UtilAbstraction {
     }
 
     @Override
-    protected final String getObjectName() {
+    protected String getObjectName() {
         return "filestore";
     }
 }

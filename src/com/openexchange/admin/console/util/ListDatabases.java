@@ -261,4 +261,10 @@ public class ListDatabases extends DatabaseAbstraction {
         }
         return rea_data;
     }
+    
+    @Override
+    protected final String getObjectName() {
+        return "databases";
+    }
+
 }

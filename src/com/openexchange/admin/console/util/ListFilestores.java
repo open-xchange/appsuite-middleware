@@ -184,4 +184,9 @@ public class ListFilestores extends FilestoreAbstraction {
         
         return rea_data;
     }
+    
+    @Override
+    protected final String getObjectName() {
+        return "filestores";
+    }
 }

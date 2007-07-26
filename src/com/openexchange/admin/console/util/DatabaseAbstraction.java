@@ -236,7 +236,7 @@ public abstract class DatabaseAbstraction extends UtilAbstraction{
     }
 
     @Override
-    protected final String getObjectName() {
+    protected String getObjectName() {
         return "database";
     }
 }

@@ -12,6 +12,9 @@ import com.openexchange.admin.console.CmdLineParser.Option;
  */
 public abstract class UtilAbstraction extends ObjectNamingAbstraction {
     
+    // for all tools
+    protected Option searchOption = null;
+
     //  Setting names for options
     protected final static char OPT_NAME_SEARCH_PATTERN_SHORT = 's';
     protected final static String OPT_NAME_SEARCH_PATTERN_LONG = "searchpattern";
@@ -28,6 +31,14 @@ public abstract class UtilAbstraction extends ObjectNamingAbstraction {
         createMessageForStdout(id, null, "unregistered");
     }
 
-    // for all tools
-    protected Option searchOption = null;
+    @Override
+    protected void printFirstPartOfErrorText(Integer id, Integer ctxid) {
+        if (getClass().getName().matches("^.*\\..*(?i)register.*$")) {
+            createMessageForStderr(id, ctxid, "could not be registered: ");
+        } else if (getClass().getName().matches("^.*\\..*(?i)unregister.*$")) {
+            createMessageForStderr(id, ctxid, "could not be unregistered: ");
+        } else {
+            super.printFirstPartOfErrorText(id, ctxid);
+        }
+    }
 }
