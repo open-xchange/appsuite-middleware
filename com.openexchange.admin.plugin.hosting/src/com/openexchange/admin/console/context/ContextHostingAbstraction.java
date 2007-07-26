@@ -44,11 +44,11 @@ public class ContextHostingAbstraction extends ContextAbstraction {
 
     @Override
     protected void printFirstPartOfErrorText(final Integer id, final Integer ctxid) {
-        if (getClass().getName().matches("^.*\\..*(?i)enable.*$")) {
+        if (getClass().getName().matches("^.*\\.\\w*(?i)enable\\w*$")) {
             createMessageForStderr(id, ctxid, "could not be enabled: ");
-        } else if (getClass().getName().matches("^.*\\..*(?i)disable.*$")) {
+        } else if (getClass().getName().matches("^.*\\.\\w*(?i)disable\\w*$")) {
             createMessageForStderr(id, ctxid, "could not be disabled: ");
-        } else if (getClass().getName().matches("^.*\\..*(?i)move.*database$")) {
+        } else if (getClass().getName().matches("^.*\\.\\w*(?i)move\\wdatabase\\w*$")) {
             final StringBuilder sb = new StringBuilder(getObjectName());
             if (null != id) {
                 sb.append(" ");
@@ -60,7 +60,7 @@ public class ContextHostingAbstraction extends ContextAbstraction {
             }
             sb.append(" could not be scheduled: ");
             System.err.println(sb.toString());
-        } else if (getClass().getName().matches("^.*\\..*(?i)move.*filestore$")) {
+        } else if (getClass().getName().matches("^.*\\.\\w*(?i)move\\wfilestore\\w*$")) {
             final StringBuilder sb = new StringBuilder(getObjectName());
             if (null != id) {
                 sb.append(" ");
