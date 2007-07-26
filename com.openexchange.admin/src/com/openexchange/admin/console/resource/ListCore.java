@@ -241,4 +241,9 @@ public abstract class ListCore extends ResourceAbstraction {
     }
     
     protected abstract void extendmakeCSVData(final Resource my_res, final ArrayList<String> res_data);
+
+    @Override
+    protected final String getObjectName() {
+        return "resources";
+    }
 }

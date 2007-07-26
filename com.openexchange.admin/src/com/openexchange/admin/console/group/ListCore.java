@@ -239,4 +239,9 @@ public abstract class ListCore extends GroupAbstraction {
     }
 
     protected abstract void extendmakeCSVData(Group group, ArrayList<String> grp_data);
+
+    @Override
+    protected final String getObjectName() {
+        return "groups";
+    }
 }
