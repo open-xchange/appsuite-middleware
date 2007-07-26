@@ -49,7 +49,6 @@
 
 package com.openexchange.admin.rmi.exceptions;
 
-import java.io.Serializable;
 
 /**
  * Is thrown if a user doesn't exist in an operation
@@ -57,7 +56,7 @@ import java.io.Serializable;
  * @author d7
  *
  */
-public class NoSuchGroupException extends Exception implements Serializable {
+public class NoSuchGroupException extends Exception {
 
     /**
      * 

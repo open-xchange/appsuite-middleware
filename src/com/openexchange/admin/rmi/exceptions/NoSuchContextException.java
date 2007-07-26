@@ -48,7 +48,6 @@
  */
 package com.openexchange.admin.rmi.exceptions;
 
-import java.io.Serializable;
 
 /**
  * Is thrown when user want to do an action in a context which doesn't exists in the system.
@@ -56,7 +55,7 @@ import java.io.Serializable;
  * @author cutmasta 
  * 
  */
-public class NoSuchContextException extends Exception implements Serializable {
+public class NoSuchContextException extends Exception {
 
     /**
      * For serialization
