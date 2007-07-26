@@ -31,11 +31,14 @@ public class MoveContextDatabase extends ContextHostingAbstraction {
 
     protected Option targetDatabaseIDOption = null;
 
+    
     public MoveContextDatabase(final String[] args2) {
 
         final AdminParser parser = new AdminParser("movecontextdatabase");
         setOptions(parser);
 
+        Integer dbid = null;
+        
         try {
             parser.ownparse(args2);
             final Context ctx = contextparsing(parser);
@@ -45,58 +48,63 @@ public class MoveContextDatabase extends ContextHostingAbstraction {
             // get rmi ref
             final OXContextInterface oxres = (OXContextInterface) Naming.lookup(RMI_HOSTNAME +OXContextInterface.RMI_NAME);
 
-            final Database db = new Database(Integer.parseInt((String) parser.getOptionValue(this.targetDatabaseIDOption)));
+            dbid = Integer.parseInt((String) parser.getOptionValue(this.targetDatabaseIDOption));
+            final Database db = new Database(dbid);
+
             /*final MaintenanceReason mr = new MaintenanceReason(Integer.parseInt((String) parser.getOptionValue(this.maintenanceReasonIDOption)));
 
             oxres.moveContextDatabase(ctx, db, mr, auth);*/
-            oxres.moveContextDatabase(ctx, db, auth);
+            final int jobId = oxres.moveContextDatabase(ctx, db, auth);
 
-            displayMovedMessage(ctxid, null);
+            displayMovedMessage(ctxid, null, "to database " + dbid + " scheduled as job " + jobId);
             sysexit(0);
         } catch (final ConnectException neti) {
-            printError(ctxid, null, neti.getMessage());
+            // In this special case the second parameter is not the context id but the database id
+            // this also applies to all following error outputting methods
+            // see com.openexchange.admin.console.context.ContextHostingAbstraction.printFirstPartOfErrorText(Integer, Integer)
+            printError(ctxid, dbid, neti.getMessage());
             sysexit(SYSEXIT_COMMUNICATION_ERROR);
         } catch (final NumberFormatException num) {
-            printInvalidInputMsg(ctxid, null, "Ids must be numbers!");
+            printInvalidInputMsg(ctxid, dbid, "Ids must be numbers!");
             sysexit(1);
         } catch (final MalformedURLException e) {
-            printServerException(ctxid, null, e);
+            printServerException(ctxid, dbid, e);
             sysexit(1);
         } catch (final RemoteException e) {
-            printServerException(ctxid, null, e);
+            printServerException(ctxid, dbid, e);
             sysexit(SYSEXIT_REMOTE_ERROR);
         } catch (final NotBoundException e) {
-            printNotBoundResponse(ctxid, null, e);
+            printNotBoundResponse(ctxid, dbid, e);
             sysexit(1);
         } catch (final StorageException e) {
-            printServerException(ctxid, null, e);
+            printServerException(ctxid, dbid, e);
             sysexit(SYSEXIT_SERVERSTORAGE_ERROR);
         } catch (final InvalidCredentialsException e) {
-            printServerException(ctxid, null, e);
+            printServerException(ctxid, dbid, e);
             sysexit(SYSEXIT_INVALID_CREDENTIALS);
         } catch (final InvalidDataException e) {
-            printServerException(ctxid, null, e);
+            printServerException(ctxid, dbid, e);
             sysexit(SYSEXIT_INVALID_DATA);
         } catch (final NoSuchContextException e) {
-            printServerException(ctxid, null, e);
+            printServerException(ctxid, dbid, e);
             sysexit(SYSEXIT_NO_SUCH_CONTEXT);
         } catch (final DatabaseUpdateException e) {
-            printServerException(ctxid, null, e);
+            printServerException(ctxid, dbid, e);
             sysexit(1);
         } catch (final IllegalOptionValueException e) {
-            printError(ctxid, null, "Illegal option value : " + e.getMessage());
+            printError(ctxid, dbid, "Illegal option value : " + e.getMessage());
             parser.printUsage();
             sysexit(SYSEXIT_ILLEGAL_OPTION_VALUE);
         } catch (final UnknownOptionException e) {
-            printError(ctxid, null, "Unrecognized options on the command line: " + e.getMessage());
+            printError(ctxid, dbid, "Unrecognized options on the command line: " + e.getMessage());
             parser.printUsage();
             sysexit(SYSEXIT_UNKNOWN_OPTION);
         } catch (final MissingOptionException e) {
-            printError(ctxid, null, e.getMessage());
+            printError(ctxid, dbid, e.getMessage());
             parser.printUsage();
             sysexit(SYSEXIT_MISSING_OPTION);
         } catch (final OXContextException e) {
-            printServerException(ctxid, null, e);
+            printServerException(ctxid, dbid, e);
             sysexit(1);
         }
 
@@ -112,4 +120,11 @@ public class MoveContextDatabase extends ContextHostingAbstraction {
 
         this.targetDatabaseIDOption = setShortLongOpt(parser, OPT_DATABASE_SHORT, OPT_DATABASE_LONG, "Target database id", true, NeededTriState.needed);
     }
+
+    @Override
+    protected String getObjectName() {
+        return "move context";
+    }
+    
+    
 }
