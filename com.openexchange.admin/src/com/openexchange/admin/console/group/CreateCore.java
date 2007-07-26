@@ -48,27 +48,14 @@
  */
 package com.openexchange.admin.console.group;
 
-import java.net.MalformedURLException;
-import java.rmi.ConnectException;
-import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 
 import com.openexchange.admin.console.AdminParser;
-import com.openexchange.admin.console.AdminParser.MissingOptionException;
-import com.openexchange.admin.console.CmdLineParser.IllegalOptionValueException;
-import com.openexchange.admin.console.CmdLineParser.Option;
-import com.openexchange.admin.console.CmdLineParser.UnknownOptionException;
 import com.openexchange.admin.rmi.OXGroupInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Group;
-import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.DuplicateExtensionException;
-import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
-import com.openexchange.admin.rmi.exceptions.InvalidDataException;
-import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
-import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
-import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public abstract class CreateCore extends GroupAbstraction {
     
@@ -115,51 +102,8 @@ public abstract class CreateCore extends GroupAbstraction {
             
             displayCreatedMessage(id, ctx.getIdAsInt());
             sysexit(0);
-        } catch (final ConnectException neti) {
-            printError(null, ctxid, neti.getMessage());
-            sysexit(SYSEXIT_COMMUNICATION_ERROR);
-        } catch (final MalformedURLException e) {
-            printServerException(null, ctxid, e);
-            sysexit(1);
-        } catch (final RemoteException e) {
-            printServerException(null, ctxid, e);
-            sysexit(SYSEXIT_REMOTE_ERROR);
-        } catch (final NotBoundException e) {
-            printServerException(null, ctxid, e);
-            sysexit(1);
-        } catch (final InvalidCredentialsException e) {
-            printServerException(null, ctxid, e);
-            sysexit(SYSEXIT_INVALID_CREDENTIALS);
-        } catch (final NoSuchContextException e) {
-            printServerException(null, ctxid, e);
-            sysexit(SYSEXIT_NO_SUCH_CONTEXT);
-        } catch (final StorageException e) {
-            printServerException(null, ctxid, e);
-            sysexit(SYSEXIT_SERVERSTORAGE_ERROR);
-        } catch (final InvalidDataException e) {
-            printServerException(null, ctxid, e);
-            sysexit(SYSEXIT_INVALID_DATA);
-        } catch (final IllegalOptionValueException e) {
-            printError(null, ctxid, "Illegal option value : " + e.getMessage());
-            parser.printUsage();
-            sysexit(SYSEXIT_ILLEGAL_OPTION_VALUE);
-        } catch (final UnknownOptionException e) {
-            printError(null, ctxid, "Unrecognized options on the command line: " + e.getMessage());
-            parser.printUsage();
-            sysexit(SYSEXIT_UNKNOWN_OPTION);
-        } catch (final MissingOptionException e) {
-            printError(null, ctxid, e.getMessage());
-            parser.printUsage();
-            sysexit(SYSEXIT_MISSING_OPTION);
-        } catch (final DatabaseUpdateException e) {
-            printServerException(null, ctxid, e);
-            sysexit(1);
-        } catch (final NoSuchUserException e) {
-           printServerException(null, ctxid, e);
-           sysexit(SYSEXIT_NO_SUCH_USER);
-        } catch (final DuplicateExtensionException e) {
-            printServerException(null, ctxid, e);
-            sysexit(1);
+        } catch (final Exception e) {
+            printErrors(null, ctxid, e, parser);
         }
     }
 

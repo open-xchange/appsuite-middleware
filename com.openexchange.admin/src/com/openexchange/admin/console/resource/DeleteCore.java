@@ -48,26 +48,14 @@
  */
 package com.openexchange.admin.console.resource;
 
-import java.net.MalformedURLException;
-import java.rmi.ConnectException;
-import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 
 import com.openexchange.admin.console.AdminParser;
-import com.openexchange.admin.console.AdminParser.MissingOptionException;
-import com.openexchange.admin.console.CmdLineParser.IllegalOptionValueException;
-import com.openexchange.admin.console.CmdLineParser.UnknownOptionException;
 import com.openexchange.admin.rmi.OXResourceInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Resource;
-import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.DuplicateExtensionException;
-import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
-import com.openexchange.admin.rmi.exceptions.InvalidDataException;
-import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
-import com.openexchange.admin.rmi.exceptions.NoSuchResourceException;
-import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public abstract class DeleteCore extends ResourceAbstraction {
     
@@ -97,54 +85,8 @@ public abstract class DeleteCore extends ResourceAbstraction {
 
             displayDeletedMessage(resourceid, ctxid);
             sysexit(0);
-        } catch (final ConnectException neti) {
-            printError(resourceid, ctxid, neti.getMessage());
-            sysexit(SYSEXIT_COMMUNICATION_ERROR);
-        } catch (final NumberFormatException num) {
-            printInvalidInputMsg(resourceid, ctxid, "Ids must be numbers!");
-            sysexit(1);
-        } catch (final MalformedURLException e) {
-            printServerException(resourceid, ctxid, e);
-            sysexit(1);
-        } catch (final RemoteException e) {
-            printServerException(resourceid, ctxid, e);
-            sysexit(SYSEXIT_REMOTE_ERROR);
-        } catch (final NotBoundException e) {
-            printServerException(resourceid, ctxid, e);
-            sysexit(1);
-        } catch (final StorageException e) {
-            printServerException(resourceid, ctxid, e);
-            sysexit(SYSEXIT_SERVERSTORAGE_ERROR);
-        } catch (final InvalidCredentialsException e) {
-            printServerException(resourceid, ctxid, e);
-            sysexit(SYSEXIT_INVALID_CREDENTIALS);
-        } catch (final NoSuchContextException e) {
-            printServerException(resourceid, ctxid, e);
-            sysexit(SYSEXIT_NO_SUCH_CONTEXT);
-        } catch (final InvalidDataException e) {
-            printServerException(resourceid, ctxid, e);
-            sysexit(SYSEXIT_INVALID_DATA);
-        } catch (final IllegalOptionValueException e) {
-            printError(resourceid, ctxid, "Illegal option value : " + e.getMessage());
-            parser.printUsage();
-            sysexit(SYSEXIT_ILLEGAL_OPTION_VALUE);
-        } catch (final UnknownOptionException e) {
-            printError(resourceid, ctxid, "Unrecognized options on the command line: " + e.getMessage());
-            parser.printUsage();
-            sysexit(SYSEXIT_UNKNOWN_OPTION);
-        } catch (final MissingOptionException e) {
-            printError(resourceid, ctxid, e.getMessage());
-            parser.printUsage();
-            sysexit(SYSEXIT_MISSING_OPTION);
-        } catch (final DatabaseUpdateException e) {
-            printServerException(resourceid, ctxid, e);
-            sysexit(1);
-        } catch (final NoSuchResourceException e) {
-            printServerException(resourceid, ctxid, e);
-            sysexit(SYSEXIT_NO_SUCH_RESOURCE);
-        } catch (final DuplicateExtensionException e) {
-            printServerException(resourceid, ctxid, e);
-            sysexit(1);
+        } catch (final Exception e) {
+            printErrors(resourceid, ctxid, e, parser);
         }
     }
 
