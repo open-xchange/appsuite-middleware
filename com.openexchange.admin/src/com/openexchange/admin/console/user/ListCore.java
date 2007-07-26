@@ -393,4 +393,9 @@ public abstract class ListCore extends UserAbstraction {
     protected abstract ArrayList<String> getDataOfAllExtensions(final User user) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException;
 
     protected abstract ArrayList<String> getColumnsOfAllExtensions(final User user);
+
+    @Override
+    protected final String getObjectName() {
+        return "users";
+    }
 }

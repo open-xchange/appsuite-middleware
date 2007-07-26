@@ -169,60 +169,65 @@ public abstract class ListCore extends ContextAbstraction {
     }
 
     public ArrayList<String> makeCSVData(final Context ctx) throws StorageException {
-            final ArrayList<String> srv_data = new ArrayList<String>();
-            srv_data.add(String.valueOf(ctx.getIdAsInt()));
-    
-            final Integer filestoreId = ctx.getFilestoreId();
-            if (filestoreId != null) {
-                srv_data.add(String.valueOf(filestoreId));
-            } else {
-                srv_data.add(null);
-            }
-    
-            final String filestore_name = ctx.getFilestore_name();
-            if (filestore_name != null) {
-                srv_data.add(filestore_name);
-            } else {
-                srv_data.add(null);
-            }
-    
-            final Boolean enabled = ctx.isEnabled();
-            if (enabled != null) {
-                srv_data.add(String.valueOf(enabled));
-            } else {
-                srv_data.add(null);
-            }
-    
-            final Long maxQuota = ctx.getMaxQuota();
-            if (maxQuota != null) {
-                srv_data.add(String.valueOf(maxQuota));
-            } else {
-                srv_data.add(null);
-            }
-    
-            final Long usedQuota = ctx.getUsedQuota();
-            if (usedQuota != null) {
-                srv_data.add(String.valueOf(usedQuota));
-            } else {
-                srv_data.add(null);
-            }
-    
-            final String name = ctx.getName();
-            if (name != null) {
-                srv_data.add(name);
-            } else {
-                srv_data.add(null);
-            }
-            
-    //      loginl mappings
-            
-            final HashSet<String> loginMappings = ctx.getLoginMappings();
-            if (loginMappings != null && loginMappings.size() > 0) {
-                srv_data.add(getObjectsAsString(loginMappings.toArray()));
-            } else {
-                srv_data.add(null);
-            }
-            
-            return srv_data;
+        final ArrayList<String> srv_data = new ArrayList<String>();
+        srv_data.add(String.valueOf(ctx.getIdAsInt()));
+
+        final Integer filestoreId = ctx.getFilestoreId();
+        if (filestoreId != null) {
+            srv_data.add(String.valueOf(filestoreId));
+        } else {
+            srv_data.add(null);
         }
+
+        final String filestore_name = ctx.getFilestore_name();
+        if (filestore_name != null) {
+            srv_data.add(filestore_name);
+        } else {
+            srv_data.add(null);
+        }
+
+        final Boolean enabled = ctx.isEnabled();
+        if (enabled != null) {
+            srv_data.add(String.valueOf(enabled));
+        } else {
+            srv_data.add(null);
+        }
+
+        final Long maxQuota = ctx.getMaxQuota();
+        if (maxQuota != null) {
+            srv_data.add(String.valueOf(maxQuota));
+        } else {
+            srv_data.add(null);
+        }
+
+        final Long usedQuota = ctx.getUsedQuota();
+        if (usedQuota != null) {
+            srv_data.add(String.valueOf(usedQuota));
+        } else {
+            srv_data.add(null);
+        }
+
+        final String name = ctx.getName();
+        if (name != null) {
+            srv_data.add(name);
+        } else {
+            srv_data.add(null);
+        }
+
+        //      loginl mappings
+
+        final HashSet<String> loginMappings = ctx.getLoginMappings();
+        if (loginMappings != null && loginMappings.size() > 0) {
+            srv_data.add(getObjectsAsString(loginMappings.toArray()));
+        } else {
+            srv_data.add(null);
+        }
+
+        return srv_data;
+    }
+
+    @Override
+    protected final String getObjectName() {
+        return "contexts";
+    }
 }

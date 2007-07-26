@@ -45,7 +45,7 @@ public abstract class ObjectNamingAbstraction extends BasicCommandlineOptions {
         ps.println(sb.toString());
     }
     
-    private void createMessageForStderr(final Integer id, final Integer ctxid, final String type) {
+    protected void createMessageForStderr(final Integer id, final Integer ctxid, final String type) {
         createMessage(id, ctxid, type, System.err);
     }
     
@@ -68,7 +68,7 @@ public abstract class ObjectNamingAbstraction extends BasicCommandlineOptions {
         System.err.println("RMI module "+nbe.getMessage()+" not available on server");
     }
 
-    private void printFirstPartOfErrorText(final Integer id, final Integer ctxid) {
+    protected void printFirstPartOfErrorText(final Integer id, final Integer ctxid) {
         if (getClass().getName().matches("^.*\\..*(?i)create.*$")) {
             createMessageForStderr(id, ctxid, "could not be created: ");
         } else if (getClass().getName().matches("^.*\\..*(?i)change.*$")) {
@@ -77,10 +77,6 @@ public abstract class ObjectNamingAbstraction extends BasicCommandlineOptions {
             createMessageForStderr(id, ctxid, "could not be deleted: ");
         } else if (getClass().getName().matches("^.*\\..*(?i)list.*$")) {
             createMessageForStderr(id, ctxid, "could not be listed: ");
-        } else if (getClass().getName().matches("^.*\\..*(?i)disable.*$")) {
-            createMessageForStderr(id, ctxid, "could not be disabled: ");
-        } else if (getClass().getName().matches("^.*\\..*(?i)move.*$")) {
-            createMessageForStderr(id, ctxid, "could not be moved: ");
         }
     }
 }
