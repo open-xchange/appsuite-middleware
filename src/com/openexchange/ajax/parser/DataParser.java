@@ -65,11 +65,10 @@ import com.openexchange.sessiond.SessionObject;
 
 /**
  * DataParser
- *
+ * TODO make protected fields private.
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
-
-public class DataParser {
+public abstract class DataParser {
 	
 	private static final String STR_VALUE = "' value '";
 
@@ -84,8 +83,37 @@ public class DataParser {
 	private static final String _missingField = "missing field: ";
 	
 	protected SessionObject sessionObj;
-	
-	protected void parseElementDataObject(final DataObject dataobject, final JSONObject jsonobject) throws JSONException {
+
+    /**
+     * Default old constructor.
+     */
+    protected DataParser() {
+        this(false, null, null);
+    }
+
+	/**
+     * Constructor for setting timeZone only.
+     * @param timeZone TimeZone for converting Javascript specific timestamps.
+     */
+    protected DataParser(final TimeZone timeZone) {
+        this(false, timeZone, null);
+    }
+
+    /**
+     * Constructor with all fields.
+     * @param parseAll <code>true</code> to parse all fields.
+     * @param timeZone TimeZone for converting Javascript specific timestamps.
+     * @param sessionObj Session object.
+     */
+    protected DataParser(final boolean parseAll, final TimeZone timeZone,
+        final SessionObject sessionObj) {
+        super();
+        this.parseAll = parseAll;
+        this.timeZone = timeZone;
+        this.sessionObj = sessionObj;
+    }
+
+    protected void parseElementDataObject(final DataObject dataobject, final JSONObject jsonobject) throws JSONException {
 		if (jsonobject.has(DataFields.ID)) {
 			dataobject.setObjectID(parseInt(jsonobject, DataFields.ID));
 		}
@@ -357,6 +385,13 @@ public class DataParser {
 		
 		return i;
 	}
+
+    /**
+     * @return the timeZone
+     */
+    protected TimeZone getTimeZone() {
+        return timeZone;
+    }
 }
 
 
