@@ -132,4 +132,9 @@ public class ListReasons extends ReasonAbstraction {
     
         return rea_data;
     }
+    
+    @Override
+    protected final String getObjectName() {
+        return "reasons";
+    }
 }
