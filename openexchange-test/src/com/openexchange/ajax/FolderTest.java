@@ -431,33 +431,33 @@ public class FolderTest extends AbstractAJAXTest {
 		return retval;
 	}
 
-	public static boolean deleteTestFolders(final WebConversation conversation, final String hostname,
-			final String sessionId, final int[] folderIds, final boolean printOutput) throws JSONException,
-			IOException, SAXException {
-		String deleteIds = Arrays.toString(folderIds);
-		deleteIds = deleteIds.substring(1, deleteIds.length() - 1).replaceAll("\\s+", "");
-
-		byte[] bytes = "".getBytes("UTF-8");
-		ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-
-		URLParameter urlParam = new URLParameter();
-		urlParam.setParameter(AJAXServlet.PARAMETER_ACTION, "removetestfolders");
-		urlParam.setParameter("del_ids", deleteIds);
-		urlParam.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
-
-		final WebRequest req = new PutMethodWebRequest(PROTOCOL + hostname + FOLDER_URL + urlParam.getURLParameters(),
-				bais, "text/javascript; charset=UTF-8");
-
-		final WebResponse resp = conversation.getResponse(req);
-
-		JSONObject respObj = new JSONObject(resp.getText());
-		if (printOutput)
-			System.out.println(respObj.toString());
-		if (respObj.has("error"))
-			throw new JSONException("JSON Response object contains an error: " + respObj.getString("error"));
-		String retval = respObj.getString("data");
-		return retval.equalsIgnoreCase("ok");
-	}
+//	public static boolean deleteTestFolders(final WebConversation conversation, final String hostname,
+//			final String sessionId, final int[] folderIds, final boolean printOutput) throws JSONException,
+//			IOException, SAXException {
+//		String deleteIds = Arrays.toString(folderIds);
+//		deleteIds = deleteIds.substring(1, deleteIds.length() - 1).replaceAll("\\s+", "");
+//
+//		byte[] bytes = "".getBytes("UTF-8");
+//		ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+//
+//		URLParameter urlParam = new URLParameter();
+//		urlParam.setParameter(AJAXServlet.PARAMETER_ACTION, "removetestfolders");
+//		urlParam.setParameter("del_ids", deleteIds);
+//		urlParam.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
+//
+//		final WebRequest req = new PutMethodWebRequest(PROTOCOL + hostname + FOLDER_URL + urlParam.getURLParameters(),
+//				bais, "text/javascript; charset=UTF-8");
+//
+//		final WebResponse resp = conversation.getResponse(req);
+//
+//		JSONObject respObj = new JSONObject(resp.getText());
+//		if (printOutput)
+//			System.out.println(respObj.toString());
+//		if (respObj.has("error"))
+//			throw new JSONException("JSON Response object contains an error: " + respObj.getString("error"));
+//		String retval = respObj.getString("data");
+//		return retval.equalsIgnoreCase("ok");
+//	}
 
 	private static final int[] mapping = { 0, -1, 1, -1, 2, -1, -1, -1, 4 };
 
@@ -899,7 +899,8 @@ public class FolderTest extends AbstractAJAXTest {
 			assertTrue(found02);
 			String sesID = LoginTest.getSessionId(getWebConversation(), getHostName(), getLogin(), getPassword());
 
-			deleteTestFolders(getWebConversation(), getHostName(), sesID, new int[] { fuid01, fuid02 }, false);
+            deleteFolders(getWebConversation(), getHostName(), sesID, new int[] { fuid01, fuid02 }, System.currentTimeMillis(), false);
+//			deleteTestFolders(getWebConversation(), getHostName(), sesID, new int[] { fuid01, fuid02 }, false);
 
 			printTestEnd("testSharedFolder");
 		} catch (Exception e) {
