@@ -2,6 +2,9 @@ package com.openexchange.admin.console.context;
 
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.CmdLineParser.Option;
+import com.openexchange.admin.exceptions.OXContextException;
+import com.openexchange.admin.rmi.exceptions.NoSuchFilestoreException;
+import com.openexchange.admin.rmi.exceptions.NoSuchReasonException;
 
 public class ContextHostingAbstraction extends ContextAbstraction {
     private final static char OPT_REASON_SHORT = 'r';
@@ -76,4 +79,24 @@ public class ContextHostingAbstraction extends ContextAbstraction {
             super.printFirstPartOfErrorText(id, ctxid);
         }
     }
+
+    @Override
+    protected void printErrors(final Integer id, final Integer ctxid, final Exception e, final AdminParser parser) {
+        if (e instanceof NoSuchReasonException) {
+            final NoSuchReasonException exc = (NoSuchReasonException) e;
+            printServerException(id, ctxid, exc);
+            sysexit(1);
+        } else if (e instanceof OXContextException) {
+            final OXContextException exc = (OXContextException) e;
+            printServerException(id, ctxid, exc);
+            sysexit(1);
+        } else if (e instanceof NoSuchFilestoreException) {
+            final NoSuchFilestoreException exc = (NoSuchFilestoreException) e;
+            printServerException(id, ctxid, exc);
+            sysexit(1);
+        } else {
+            super.printErrors(id, ctxid, e, parser);
+        }
+    }
+    
 }
