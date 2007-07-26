@@ -1,7 +1,6 @@
-package com.openexchange.admin.console.util;
+package com.openexchange.admin.console.util.server;
 
 import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -10,10 +9,11 @@ import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.MissingOptionException;
 import com.openexchange.admin.console.AdminParser.NeededTriState;
 import com.openexchange.admin.console.CmdLineParser.IllegalOptionValueException;
+import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.console.CmdLineParser.UnknownOptionException;
 import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.admin.rmi.dataobjects.Filestore;
+import com.openexchange.admin.rmi.dataobjects.Server;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
@@ -23,88 +23,83 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
  * @author d7,cutmasta
  * 
  */
-public class ChangeFilestore extends FilestoreAbstraction {
+public class RegisterServer extends ServerAbstraction {
 
-    public ChangeFilestore(final String[] args2) {
-        final AdminParser parser = new AdminParser("changefilestore");
-    
+    // Setting names for options
+    private final static char OPT_NAME_HOSTNAME_SHORT = 'h';
+
+    private final static String OPT_NAME_HOSTNAME_LONG = "hostname";
+
+    private Option serverNameOption = null;
+
+    public RegisterServer(final String[] args2) {
+
+        final AdminParser parser = new AdminParser("registerserver");
+
         setOptions(parser);
-    
+
         try {
             parser.ownparse(args2);
-    
+
             final Credentials auth = credentialsparsing(parser);
-    
+
             // get rmi ref
             final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME +OXUtilInterface.RMI_NAME);
-    
-            final Filestore fstore = new Filestore();
-            parseAndSetFilestoreID(parser, fstore);
-            
-            parseAndSetFilestorePath(parser, fstore);
-    
-            parseAndSetFilestoreSize(parser, fstore);
-            
-            parseAndSetFilestoreMaxCtxs(parser, fstore);
-    
-            oxutil.changeFilestore(fstore, auth);
-            
-            displayChangedMessage(null, null);
+
+            final Server srv = new Server();
+
+            srv.setName((String) parser.getOptionValue(this.serverNameOption));
+
+            displayRegisteredMessage(oxutil.registerServer(srv, auth).getId());
             sysexit(0);
         } catch (final java.rmi.ConnectException neti) {
-            printError(filestoreid, null, neti.getMessage());
+            printError(null, null, neti.getMessage());
             sysexit(SYSEXIT_COMMUNICATION_ERROR);
         } catch (final java.lang.NumberFormatException num) {
-            printInvalidInputMsg(filestoreid, null, "Ids must be numbers!");
+            printInvalidInputMsg(null, null, "Ids must be numbers!");
+            sysexit(1);
         } catch (final MalformedURLException e) {
-            printServerException(filestoreid, null, e);
+            printServerException(null, null, e);
             sysexit(1);
         } catch (final RemoteException e) {
-            printServerException(filestoreid, null, e);
+            printServerException(null, null, e);
             sysexit(SYSEXIT_REMOTE_ERROR);
         } catch (final NotBoundException e) {
-            printNotBoundResponse(filestoreid, null, e);
+            printNotBoundResponse(null, null, e);
             sysexit(1);
         } catch (final StorageException e) {
-            printServerException(filestoreid, null, e);
+            printServerException(null, null, e);
             sysexit(SYSEXIT_SERVERSTORAGE_ERROR);
         } catch (final InvalidCredentialsException e) {
-            printServerException(filestoreid, null, e);
+            printServerException(null, null, e);
             sysexit(SYSEXIT_INVALID_CREDENTIALS);
         } catch (final InvalidDataException e) {
-            printServerException(filestoreid, null, e);
+            printServerException(null, null, e);
             sysexit(SYSEXIT_INVALID_DATA);
-        } catch (final URISyntaxException e) {
-            printServerException(filestoreid, null, e);
-            sysexit(1);
         } catch (final IllegalOptionValueException e) {
-            printError(filestoreid, null, "Illegal option value : " + e.getMessage());
+            printError(null, null, "Illegal option value : " + e.getMessage());
             parser.printUsage();
             sysexit(SYSEXIT_ILLEGAL_OPTION_VALUE);
         } catch (final UnknownOptionException e) {
-            printError(filestoreid, null, "Unrecognized options on the command line: " + e.getMessage());
+            printError(null, null, "Unrecognized options on the command line: " + e.getMessage());
             parser.printUsage();
             sysexit(SYSEXIT_UNKNOWN_OPTION);
         } catch (final MissingOptionException e) {
-            printError(filestoreid, null, e.getMessage());
+            printError(null, null, e.getMessage());
             parser.printUsage();
             sysexit(SYSEXIT_MISSING_OPTION);
         }
+
     }
 
     public static void main(final String args[]) {
-        new ChangeFilestore(args);
+        new RegisterServer(args);
     }
 
     private void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptionsWithoutContextID(parser);
 
-        setFilestoreIDOption(parser);
+        this.serverNameOption = setShortLongOpt(parser, OPT_NAME_HOSTNAME_SHORT, OPT_NAME_HOSTNAME_LONG, "The hostname of the server", true, NeededTriState.needed);
 
-        setPathOption(parser, NeededTriState.notneeded);
-
-        setSizeOption(parser, null);
-
-        setMaxCtxOption(parser, null);
     }
 }

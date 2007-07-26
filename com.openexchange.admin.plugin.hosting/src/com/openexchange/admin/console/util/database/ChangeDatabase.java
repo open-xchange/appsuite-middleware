@@ -1,6 +1,7 @@
-package com.openexchange.admin.console.util;
+package com.openexchange.admin.console.util.database;
 
 import java.net.MalformedURLException;
+import java.rmi.ConnectException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -15,113 +16,119 @@ import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.admin.rmi.impl.OXUtil;
 
 /**
  * 
  * @author d7,cutmasta
  * 
  */
-public class RegisterDatabase extends DatabaseAbstraction {
+public class ChangeDatabase extends DatabaseAbstraction {
 
-    public RegisterDatabase(final String[] args2) {
+    public ChangeDatabase(final String[] args2) {
 
-        final AdminParser parser = new AdminParser("registerdatabase");
+        final AdminParser parser = new AdminParser("changedatabase");
 
         setOptions(parser);
 
         try {
             parser.ownparse(args2);
 
-            final Credentials auth = credentialsparsing(parser);
+            final Database db = new Database();
+
+            parseAndSetDatabaseID(parser, db);
+            
+            final Credentials auth = new Credentials((String) parser.getOptionValue(this.adminUserOption), (String) parser.getOptionValue(this.adminPassOption));
 
             // get rmi ref
             final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME + OXUtilInterface.RMI_NAME);
 
-            final Database db = new Database();
-
             parseAndSetHostname(parser, db);
-
+            
             parseAndSetDatabasename(parser, db);
-            
-            parseAndSetPasswd(parser, db);
-            
+
             parseAndSetDriver(parser, db);
-            
+
             parseAndSetDBUsername(parser, db);
             
+            parseAndSetPasswd(parser, db);
+
             parseAndSetMaxUnits(parser, db);
-            
+
             parseAndSetPoolHardLimit(parser, db);
-            
+
             parseAndSetPoolInitial(parser, db);
-            
+
             parseAndSetPoolmax(parser, db);
-            
+
             parseAndSetDatabaseWeight(parser, db);
+
+//            parseAndSetMasterAndID(parser, db);
+
+            oxutil.changeDatabase(db, auth);
             
-            parseAndSetMasterAndID(parser, db);
-            
-            displayRegisteredMessage(oxutil.registerDatabase(db, auth).getId());
+            displayChangedMessage(dbid, null);
             sysexit(0);
-        } catch (final java.rmi.ConnectException neti) {
-            printError(null, null, neti.getMessage());
+        } catch (final ConnectException neti) {
+            printError(dbid, null, neti.getMessage());
             sysexit(SYSEXIT_COMMUNICATION_ERROR);
         } catch (final java.lang.NumberFormatException num) {
-            printInvalidInputMsg(null, null, "Ids must be numbers!");
+            printInvalidInputMsg(dbid, null, "Ids must be numbers!");
             sysexit(1);
         } catch (final MalformedURLException e) {
-            printServerException(null, null, e);
+            printServerException(dbid, null, e);
             sysexit(1);
         } catch (final RemoteException e) {
-            printServerException(null, null, e);
+            printServerException(dbid, null, e);
             sysexit(SYSEXIT_REMOTE_ERROR);
         } catch (final NotBoundException e) {
-            printNotBoundResponse(null, null, e);
+            printNotBoundResponse(dbid, null, e);
             sysexit(1);
         } catch (final StorageException e) {
-            printServerException(null, null, e);
+            printServerException(dbid, null, e);
             sysexit(SYSEXIT_SERVERSTORAGE_ERROR);
         } catch (final InvalidCredentialsException e) {
-            printServerException(null, null, e);
+            printServerException(dbid, null, e);
             sysexit(SYSEXIT_INVALID_CREDENTIALS);
         } catch (final InvalidDataException e) {
-            printServerException(null, null, e);
+            printServerException(dbid, null, e);
             sysexit(SYSEXIT_INVALID_DATA);
         } catch (final IllegalOptionValueException e) {
-            printError(null, null, "Illegal option value : " + e.getMessage());
+            printError(dbid, null, "Illegal option value : " + e.getMessage());
             parser.printUsage();
             sysexit(SYSEXIT_ILLEGAL_OPTION_VALUE);
         } catch (final UnknownOptionException e) {
-            printError(null, null, "Unrecognized options on the command line: " + e.getMessage());
+            printError(dbid, null, "Unrecognized options on the command line: " + e.getMessage());
             parser.printUsage();
             sysexit(SYSEXIT_UNKNOWN_OPTION);
         } catch (final MissingOptionException e) {
-            printError(null, null, e.getMessage());
+            printError(dbid, null, e.getMessage());
             parser.printUsage();
             sysexit(SYSEXIT_MISSING_OPTION);
         }
-
     }
 
     public static void main(final String args[]) {
-        new RegisterDatabase(args);
+        new ChangeDatabase(args);
     }
 
     private void setOptions(final AdminParser parser) {
+        // oxadmin,oxadmin passwd
         setDefaultCommandLineOptionsWithoutContextID(parser);
 
-        setDatabaseNameOption(parser, true);
+        setDatabaseNameOption(parser, false);
         setDatabaseHostnameOption(parser, false);
         setDatabaseUsernameOption(parser, false);
-        setDatabaseDriverOption(parser, OXUtil.DEFAULT_DRIVER, false);
-        setDatabasePasswdOption(parser, true);
-        setDatabaseIsMasterOption(parser, true);
-        setDatabaseMasterIDOption(parser, false);
-        setDatabaseWeightOption(parser, String.valueOf(OXUtil.DEFAULT_DB_WEIGHT), false);
-        setDatabaseMaxUnitsOption(parser, String.valueOf(OXUtil.DEFAULT_MAXUNITS), false);
-        setDatabasePoolHardlimitOption(parser, String.valueOf(OXUtil.DEFAULT_POOL_HARD_LIMIT), false);
-        setDatabasePoolInitialOption(parser, String.valueOf(OXUtil.DEFAULT_POOL_INITIAL), false);
-        setDatabasePoolMaxOption(parser, String.valueOf(OXUtil.DEFAULT_POOL_MAX), false);
+        setDatabaseDriverOption(parser, null, false);
+        setDatabasePasswdOption(parser, false);
+//        setDatabaseIsMasterOption(parser, false);
+//        setDatabaseMasterIDOption(parser, false);
+
+        setDatabaseWeightOption(parser, null, false);
+        setDatabaseMaxUnitsOption(parser, null, false);
+        setDatabasePoolHardlimitOption(parser, null, false);
+        setDatabasePoolInitialOption(parser, null, false);
+        setDatabasePoolMaxOption(parser, null, false);
+
+        setDatabaseIDOption(parser);
     }
 }

@@ -1,4 +1,4 @@
-package com.openexchange.admin.console.util;
+package com.openexchange.admin.console.util.reason;
 
 import java.net.MalformedURLException;
 import java.rmi.Naming;
