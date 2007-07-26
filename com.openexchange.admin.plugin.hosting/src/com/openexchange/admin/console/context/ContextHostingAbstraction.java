@@ -38,8 +38,42 @@ public class ContextHostingAbstraction extends ContextAbstraction {
         createMessageForStdout(id, ctxid, "enabled");
     }
 
-    protected final void displayMovedMessage(final Integer id, final Integer ctxid) {
-        createMessageForStdout(id, ctxid, "moved");
+    protected final void displayMovedMessage(final Integer id, final Integer ctxid, final String text) {
+        createMessageForStdout(id, ctxid, text);
     }
 
+    @Override
+    protected void printFirstPartOfErrorText(final Integer id, final Integer ctxid) {
+        if (getClass().getName().matches("^.*\\..*(?i)enable.*$")) {
+            createMessageForStderr(id, ctxid, "could not be enabled: ");
+        } else if (getClass().getName().matches("^.*\\..*(?i)disable.*$")) {
+            createMessageForStderr(id, ctxid, "could not be disabled: ");
+        } else if (getClass().getName().matches("^.*\\..*(?i)move.*database$")) {
+            final StringBuilder sb = new StringBuilder(getObjectName());
+            if (null != id) {
+                sb.append(" ");
+                sb.append(id);
+            }
+            if (null != ctxid) {
+                sb.append(" to database ");
+                sb.append(ctxid);
+            }
+            sb.append(" could not be scheduled: ");
+            System.err.println(sb.toString());
+        } else if (getClass().getName().matches("^.*\\..*(?i)move.*filestore$")) {
+            final StringBuilder sb = new StringBuilder(getObjectName());
+            if (null != id) {
+                sb.append(" ");
+                sb.append(id);
+            }
+            if (null != ctxid) {
+                sb.append(" to filestore ");
+                sb.append(ctxid);
+            }
+            sb.append(" could not be scheduled: ");
+            System.err.println(sb.toString());
+        } else {
+            super.printFirstPartOfErrorText(id, ctxid);
+        }
+    }
 }
