@@ -1,11 +1,9 @@
-package com.openexchange.admin.console.util;
+package com.openexchange.admin.console.util.database;
 
 import java.net.MalformedURLException;
-import java.rmi.ConnectException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-import java.util.ArrayList;
 
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.MissingOptionException;
@@ -13,24 +11,24 @@ import com.openexchange.admin.console.CmdLineParser.IllegalOptionValueException;
 import com.openexchange.admin.console.CmdLineParser.UnknownOptionException;
 import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.admin.rmi.dataobjects.Server;
+import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.rmi.impl.OXUtil;
 
 /**
  * 
- * @author d7
+ * @author d7,cutmasta
  * 
  */
-public class ListServers extends ServerAbstraction {
+public class RegisterDatabase extends DatabaseAbstraction {
 
-    public ListServers(final String[] args2) {
+    public RegisterDatabase(final String[] args2) {
 
-        final AdminParser parser = new AdminParser("listservers");
+        final AdminParser parser = new AdminParser("registerdatabase");
 
         setOptions(parser);
-        setCSVOutputOption(parser);
 
         try {
             parser.ownparse(args2);
@@ -38,26 +36,38 @@ public class ListServers extends ServerAbstraction {
             final Credentials auth = credentialsparsing(parser);
 
             // get rmi ref
-            final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME +OXUtilInterface.RMI_NAME);
+            final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME + OXUtilInterface.RMI_NAME);
 
-            String searchpattern = "*";
-            if (parser.getOptionValue(this.searchOption) != null) {
-                searchpattern = (String) parser.getOptionValue(this.searchOption);
-            }
-            // Setting the options in the dataobject
-            final Server[] servers = oxutil.listServers(searchpattern, auth);
+            final Database db = new Database();
 
-            if (null != parser.getOptionValue(this.csvOutputOption)) {
-                precsvinfos(servers);
-            } else {
-                sysoutOutput(servers);
-            }
+            parseAndSetHostname(parser, db);
 
+            parseAndSetDatabasename(parser, db);
+            
+            parseAndSetPasswd(parser, db);
+            
+            parseAndSetDriver(parser, db);
+            
+            parseAndSetDBUsername(parser, db);
+            
+            parseAndSetMaxUnits(parser, db);
+            
+            parseAndSetPoolHardLimit(parser, db);
+            
+            parseAndSetPoolInitial(parser, db);
+            
+            parseAndSetPoolmax(parser, db);
+            
+            parseAndSetDatabaseWeight(parser, db);
+            
+            parseAndSetMasterAndID(parser, db);
+            
+            displayRegisteredMessage(oxutil.registerDatabase(db, auth).getId());
             sysexit(0);
-        } catch (final ConnectException neti) {
+        } catch (final java.rmi.ConnectException neti) {
             printError(null, null, neti.getMessage());
             sysexit(SYSEXIT_COMMUNICATION_ERROR);
-        } catch (final NumberFormatException num) {
+        } catch (final java.lang.NumberFormatException num) {
             printInvalidInputMsg(null, null, "Ids must be numbers!");
             sysexit(1);
         } catch (final MalformedURLException e) {
@@ -91,56 +101,27 @@ public class ListServers extends ServerAbstraction {
             parser.printUsage();
             sysexit(SYSEXIT_MISSING_OPTION);
         }
+
     }
 
     public static void main(final String args[]) {
-        new ListServers(args);
+        new RegisterDatabase(args);
     }
 
     private void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptionsWithoutContextID(parser);
-        setSearchOption(parser);
-    }
 
-    private void sysoutOutput(Server[] servers) throws InvalidDataException {
-        final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
-        for (final Server server : servers) {
-            data.add(makeCSVData(server));
-        }
-        
-        doOutput(new String[] { "3r", "35l" }, new String[] { "Id", "Name" }, data);
+        setDatabaseNameOption(parser, true);
+        setDatabaseHostnameOption(parser, false);
+        setDatabaseUsernameOption(parser, false);
+        setDatabaseDriverOption(parser, OXUtil.DEFAULT_DRIVER, false);
+        setDatabasePasswdOption(parser, true);
+        setDatabaseIsMasterOption(parser, true);
+        setDatabaseMasterIDOption(parser, false);
+        setDatabaseWeightOption(parser, String.valueOf(OXUtil.DEFAULT_DB_WEIGHT), false);
+        setDatabaseMaxUnitsOption(parser, String.valueOf(OXUtil.DEFAULT_MAXUNITS), false);
+        setDatabasePoolHardlimitOption(parser, String.valueOf(OXUtil.DEFAULT_POOL_HARD_LIMIT), false);
+        setDatabasePoolInitialOption(parser, String.valueOf(OXUtil.DEFAULT_POOL_INITIAL), false);
+        setDatabasePoolMaxOption(parser, String.valueOf(OXUtil.DEFAULT_POOL_MAX), false);
     }
-
-    private void precsvinfos(Server[] servers) {
-        // needed for csv output, KEEP AN EYE ON ORDER!!!
-        final ArrayList<String> columns = new ArrayList<String>();
-        columns.add("id");
-        columns.add("name");
-    
-        final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
-    
-        for (final Server server : servers) {
-            data.add(makeCSVData(server));
-        }
-    
-        doCSVOutput(columns, data);
-    }
-
-    private ArrayList<String> makeCSVData(Server server) {
-        final ArrayList<String> srv_data = new ArrayList<String>();
-        srv_data.add(String.valueOf(server.getId()));
-        final String servername = server.getName();
-        if (servername != null) {
-            srv_data.add(servername);
-        } else {
-            srv_data.add(null);
-        }
-        return srv_data;
-    }
-
-    @Override
-    protected final String getObjectName() {
-        return "servers";
-    }
-
 }

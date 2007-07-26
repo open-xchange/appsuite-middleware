@@ -1,4 +1,4 @@
-package com.openexchange.admin.console.util;
+package com.openexchange.admin.console.util.database;
 
 import java.net.MalformedURLException;
 import java.rmi.ConnectException;
@@ -20,13 +20,12 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 /**
  * 
  * @author d7,cutmasta
- * 
+ *
  */
-public class ChangeDatabase extends DatabaseAbstraction {
+public class UnregisterDatabase extends DatabaseAbstraction {
+    public UnregisterDatabase(final String[] args2) {
 
-    public ChangeDatabase(final String[] args2) {
-
-        final AdminParser parser = new AdminParser("changedatabase");
+        final AdminParser parser = new AdminParser("unregisterdatabase");
 
         setOptions(parser);
 
@@ -34,44 +33,22 @@ public class ChangeDatabase extends DatabaseAbstraction {
             parser.ownparse(args2);
 
             final Database db = new Database();
-
+            
             parseAndSetDatabaseID(parser, db);
             
-            final Credentials auth = new Credentials((String) parser.getOptionValue(this.adminUserOption), (String) parser.getOptionValue(this.adminPassOption));
-
+            final Credentials auth = credentialsparsing(parser);
+            
             // get rmi ref
-            final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME + OXUtilInterface.RMI_NAME);
+            final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME +OXUtilInterface.RMI_NAME);
 
-            parseAndSetHostname(parser, db);
+            oxutil.unregisterDatabase(db, auth);
             
-            parseAndSetDatabasename(parser, db);
-
-            parseAndSetDriver(parser, db);
-
-            parseAndSetDBUsername(parser, db);
-            
-            parseAndSetPasswd(parser, db);
-
-            parseAndSetMaxUnits(parser, db);
-
-            parseAndSetPoolHardLimit(parser, db);
-
-            parseAndSetPoolInitial(parser, db);
-
-            parseAndSetPoolmax(parser, db);
-
-            parseAndSetDatabaseWeight(parser, db);
-
-//            parseAndSetMasterAndID(parser, db);
-
-            oxutil.changeDatabase(db, auth);
-            
-            displayChangedMessage(dbid, null);
+            displayUnregisteredMessage(dbid);
             sysexit(0);
         } catch (final ConnectException neti) {
             printError(dbid, null, neti.getMessage());
             sysexit(SYSEXIT_COMMUNICATION_ERROR);
-        } catch (final java.lang.NumberFormatException num) {
+        } catch (final NumberFormatException num) {
             printInvalidInputMsg(dbid, null, "Ids must be numbers!");
             sysexit(1);
         } catch (final MalformedURLException e) {
@@ -92,7 +69,7 @@ public class ChangeDatabase extends DatabaseAbstraction {
         } catch (final InvalidDataException e) {
             printServerException(dbid, null, e);
             sysexit(SYSEXIT_INVALID_DATA);
-        } catch (final IllegalOptionValueException e) {
+        } catch (final IllegalOptionValueException e) {            
             printError(dbid, null, "Illegal option value : " + e.getMessage());
             parser.printUsage();
             sysexit(SYSEXIT_ILLEGAL_OPTION_VALUE);
@@ -108,26 +85,11 @@ public class ChangeDatabase extends DatabaseAbstraction {
     }
 
     public static void main(final String args[]) {
-        new ChangeDatabase(args);
+        new UnregisterDatabase(args);
     }
 
     private void setOptions(final AdminParser parser) {
-        // oxadmin,oxadmin passwd
         setDefaultCommandLineOptionsWithoutContextID(parser);
-
-        setDatabaseNameOption(parser, false);
-        setDatabaseHostnameOption(parser, false);
-        setDatabaseUsernameOption(parser, false);
-        setDatabaseDriverOption(parser, null, false);
-        setDatabasePasswdOption(parser, false);
-//        setDatabaseIsMasterOption(parser, false);
-//        setDatabaseMasterIDOption(parser, false);
-
-        setDatabaseWeightOption(parser, null, false);
-        setDatabaseMaxUnitsOption(parser, null, false);
-        setDatabasePoolHardlimitOption(parser, null, false);
-        setDatabasePoolInitialOption(parser, null, false);
-        setDatabasePoolMaxOption(parser, null, false);
 
         setDatabaseIDOption(parser);
     }

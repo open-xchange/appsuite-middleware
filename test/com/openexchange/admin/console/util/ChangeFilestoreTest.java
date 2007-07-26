@@ -7,6 +7,8 @@ import org.junit.Test;
 
 import com.openexchange.admin.console.AbstractTest;
 import com.openexchange.admin.console.BasicCommandlineOptions;
+import com.openexchange.admin.console.util.filestore.ChangeFilestore;
+import com.openexchange.admin.console.util.filestore.RegisterFilestore;
 
 /**
  * @author cutmasta

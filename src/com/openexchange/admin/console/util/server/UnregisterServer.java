@@ -1,6 +1,7 @@
-package com.openexchange.admin.console.util;
+package com.openexchange.admin.console.util.server;
 
 import java.net.MalformedURLException;
+import java.rmi.ConnectException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -23,21 +24,22 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
  * @author d7,cutmasta
  * 
  */
-public class RegisterServer extends ServerAbstraction {
+public class UnregisterServer extends ServerAbstraction {
 
     // Setting names for options
-    private final static char OPT_NAME_HOSTNAME_SHORT = 'h';
+    private final static char OPT_NAME_SERVER_ID_SHORT = 'i';
 
-    private final static String OPT_NAME_HOSTNAME_LONG = "hostname";
+    private final static String OPT_NAME_SERVER_ID_LONG = "id";
 
-    private Option serverNameOption = null;
+    private Option serverIdOption = null;
 
-    public RegisterServer(final String[] args2) {
+    public UnregisterServer(final String[] args2) {
 
-        final AdminParser parser = new AdminParser("registerserver");
+        AdminParser parser = new AdminParser("unregisterserver");
 
         setOptions(parser);
 
+        Integer serverid = null;
         try {
             parser.ownparse(args2);
 
@@ -45,61 +47,59 @@ public class RegisterServer extends ServerAbstraction {
 
             // get rmi ref
             final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME +OXUtilInterface.RMI_NAME);
-
-            final Server srv = new Server();
-
-            srv.setName((String) parser.getOptionValue(this.serverNameOption));
-
-            displayRegisteredMessage(oxutil.registerServer(srv, auth).getId());
+            Server sv = new Server();
+            serverid = Integer.parseInt((String) parser.getOptionValue(serverIdOption));
+            sv.setId(serverid);
+            oxutil.unregisterServer(sv, auth);
+            
+            displayUnregisteredMessage(sv.getId());
             sysexit(0);
-        } catch (final java.rmi.ConnectException neti) {
-            printError(null, null, neti.getMessage());
+        } catch (final ConnectException neti) {
+            printError(serverid, null, neti.getMessage());
             sysexit(SYSEXIT_COMMUNICATION_ERROR);
-        } catch (final java.lang.NumberFormatException num) {
-            printInvalidInputMsg(null, null, "Ids must be numbers!");
+        } catch (final NumberFormatException num) {
+            printInvalidInputMsg(serverid, null, "Ids must be numbers!");
             sysexit(1);
         } catch (final MalformedURLException e) {
-            printServerException(null, null, e);
+            printServerException(serverid, null, e);
             sysexit(1);
         } catch (final RemoteException e) {
-            printServerException(null, null, e);
+            printServerException(serverid, null, e);
             sysexit(SYSEXIT_REMOTE_ERROR);
         } catch (final NotBoundException e) {
-            printNotBoundResponse(null, null, e);
+            printNotBoundResponse(serverid, null, e);
             sysexit(1);
         } catch (final StorageException e) {
-            printServerException(null, null, e);
+            printServerException(serverid, null, e);
             sysexit(SYSEXIT_SERVERSTORAGE_ERROR);
         } catch (final InvalidCredentialsException e) {
-            printServerException(null, null, e);
+            printServerException(serverid, null, e);
             sysexit(SYSEXIT_INVALID_CREDENTIALS);
         } catch (final InvalidDataException e) {
-            printServerException(null, null, e);
+            printServerException(serverid, null, e);
             sysexit(SYSEXIT_INVALID_DATA);
-        } catch (final IllegalOptionValueException e) {
-            printError(null, null, "Illegal option value : " + e.getMessage());
+        } catch (IllegalOptionValueException e) {
+            printError(serverid, null, "Illegal option value : " + e.getMessage());
             parser.printUsage();
             sysexit(SYSEXIT_ILLEGAL_OPTION_VALUE);
-        } catch (final UnknownOptionException e) {
-            printError(null, null, "Unrecognized options on the command line: " + e.getMessage());
+        } catch (UnknownOptionException e) {
+            printError(serverid, null, "Unrecognized options on the command line: " + e.getMessage());
             parser.printUsage();
             sysexit(SYSEXIT_UNKNOWN_OPTION);
-        } catch (final MissingOptionException e) {
-            printError(null, null, e.getMessage());
+        } catch (MissingOptionException e) {
+            printError(serverid, null, e.getMessage());
             parser.printUsage();
             sysexit(SYSEXIT_MISSING_OPTION);
         }
-
     }
 
     public static void main(final String args[]) {
-        new RegisterServer(args);
+        new UnregisterServer(args);
     }
 
-    private void setOptions(final AdminParser parser) {
+    private void setOptions(AdminParser parser) {
         setDefaultCommandLineOptionsWithoutContextID(parser);
 
-        this.serverNameOption = setShortLongOpt(parser, OPT_NAME_HOSTNAME_SHORT, OPT_NAME_HOSTNAME_LONG, "The hostname of the server", true, NeededTriState.needed);
-
+        serverIdOption = setShortLongOpt(parser, OPT_NAME_SERVER_ID_SHORT, OPT_NAME_SERVER_ID_LONG, "The id of the server which should be deleted", true, NeededTriState.needed);
     }
 }

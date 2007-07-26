@@ -1,13 +1,14 @@
-package com.openexchange.admin.console.util;
+package com.openexchange.admin.console.util.filestore;
 
 import java.net.MalformedURLException;
-import java.rmi.ConnectException;
+import java.net.URISyntaxException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.MissingOptionException;
+import com.openexchange.admin.console.AdminParser.NeededTriState;
 import com.openexchange.admin.console.CmdLineParser.IllegalOptionValueException;
 import com.openexchange.admin.console.CmdLineParser.UnknownOptionException;
 import com.openexchange.admin.rmi.OXUtilInterface;
@@ -22,12 +23,10 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
  * @author d7,cutmasta
  * 
  */
-public class UnregisterFilestore extends FilestoreAbstraction {
+public class ChangeFilestore extends FilestoreAbstraction {
 
-    // Setting names for options
-    public UnregisterFilestore(final String[] args2) {
-    
-        final AdminParser parser = new AdminParser("unregisterfilestore");
+    public ChangeFilestore(final String[] args2) {
+        final AdminParser parser = new AdminParser("changefilestore");
     
         setOptions(parser);
     
@@ -38,19 +37,25 @@ public class UnregisterFilestore extends FilestoreAbstraction {
     
             // get rmi ref
             final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME +OXUtilInterface.RMI_NAME);
+    
             final Filestore fstore = new Filestore();
             parseAndSetFilestoreID(parser, fstore);
-
-            oxutil.unregisterFilestore(fstore, auth);
             
-            displayUnregisteredMessage(filestoreid);
+            parseAndSetFilestorePath(parser, fstore);
+    
+            parseAndSetFilestoreSize(parser, fstore);
+            
+            parseAndSetFilestoreMaxCtxs(parser, fstore);
+    
+            oxutil.changeFilestore(fstore, auth);
+            
+            displayChangedMessage(null, null);
             sysexit(0);
-        } catch (final ConnectException neti) {
+        } catch (final java.rmi.ConnectException neti) {
             printError(filestoreid, null, neti.getMessage());
             sysexit(SYSEXIT_COMMUNICATION_ERROR);
         } catch (final java.lang.NumberFormatException num) {
             printInvalidInputMsg(filestoreid, null, "Ids must be numbers!");
-            sysexit(1);
         } catch (final MalformedURLException e) {
             printServerException(filestoreid, null, e);
             sysexit(1);
@@ -69,6 +74,9 @@ public class UnregisterFilestore extends FilestoreAbstraction {
         } catch (final InvalidDataException e) {
             printServerException(filestoreid, null, e);
             sysexit(SYSEXIT_INVALID_DATA);
+        } catch (final URISyntaxException e) {
+            printServerException(filestoreid, null, e);
+            sysexit(1);
         } catch (final IllegalOptionValueException e) {
             printError(filestoreid, null, "Illegal option value : " + e.getMessage());
             parser.printUsage();
@@ -82,18 +90,21 @@ public class UnregisterFilestore extends FilestoreAbstraction {
             parser.printUsage();
             sysexit(SYSEXIT_MISSING_OPTION);
         }
-    
     }
 
     public static void main(final String args[]) {
-        new UnregisterFilestore(args);
+        new ChangeFilestore(args);
     }
 
     private void setOptions(final AdminParser parser) {
-
         setDefaultCommandLineOptionsWithoutContextID(parser);
 
         setFilestoreIDOption(parser);
 
+        setPathOption(parser, NeededTriState.notneeded);
+
+        setSizeOption(parser, null);
+
+        setMaxCtxOption(parser, null);
     }
 }

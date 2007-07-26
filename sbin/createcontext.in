@@ -100,37 +100,37 @@ case "${BNAME}" in
     ACTION="context.List"
     ;;
     "changefilestore")
-    ACTION="util.ChangeFilestore"
+    ACTION="util.filestore.ChangeFilestore"
     ;;
     "listdatabases")
-    ACTION="util.ListDatabases"
+    ACTION="util.database.ListDatabases"
     ;;
     "listfilestores")
-    ACTION="util.ListFilestores"
+    ACTION="util.filestore.ListFilestores"
     ;;
     "listservers")
-    ACTION="util.ListServers"
+    ACTION="util.server.ListServers"
     ;;
     "registerdatabase")
-    ACTION="util.RegisterDatabase"
+    ACTION="util.database.RegisterDatabase"
     ;;
     "registerfilestore")
-    ACTION="util.RegisterFilestore"
+    ACTION="util.filestore.RegisterFilestore"
     ;;
     "registerserver")
-    ACTION="util.RegisterServer"
+    ACTION="util.server.RegisterServer"
     ;;
     "unregisterdatabase")
-    ACTION="util.UnregisterDatabase"
+    ACTION="util.database.UnregisterDatabase"
     ;;
     "unregisterfilestore")
-    ACTION="util.UnregisterFilestore"
+    ACTION="util.filestore.UnregisterFilestore"
     ;;
     "unregisterserver")
-    ACTION="util.UnregisterServer"
+    ACTION="util.server.UnregisterServer"
     ;;
     "changedatabase")
-    ACTION="util.ChangeDatabase"
+    ACTION="util.database.ChangeDatabase"
     ;;
 esac
 

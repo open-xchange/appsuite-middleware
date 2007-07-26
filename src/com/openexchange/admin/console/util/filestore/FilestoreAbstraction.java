@@ -1,10 +1,11 @@
-package com.openexchange.admin.console.util;
+package com.openexchange.admin.console.util.filestore;
 
 import java.net.URISyntaxException;
 
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.NeededTriState;
 import com.openexchange.admin.console.CmdLineParser.Option;
+import com.openexchange.admin.console.util.UtilAbstraction;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 
 public abstract class FilestoreAbstraction extends UtilAbstraction {
