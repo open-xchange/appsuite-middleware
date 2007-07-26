@@ -1,24 +1,15 @@
 package com.openexchange.admin.console.util.database;
 
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.rmi.ConnectException;
 import java.rmi.Naming;
-import java.rmi.NotBoundException;
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 
 import com.openexchange.admin.console.AdminParser;
-import com.openexchange.admin.console.AdminParser.MissingOptionException;
-import com.openexchange.admin.console.CmdLineParser.IllegalOptionValueException;
-import com.openexchange.admin.console.CmdLineParser.UnknownOptionException;
 import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
-import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
-import com.openexchange.admin.rmi.exceptions.StorageException;
 
 /**
  * 
@@ -54,45 +45,8 @@ public class ListDatabases extends DatabaseAbstraction {
             }
 
             sysexit(0);
-        } catch (final ConnectException neti) {
-            printError(null, ctxid, neti.getMessage());
-            sysexit(SYSEXIT_COMMUNICATION_ERROR);
-        } catch (final NumberFormatException num) {
-            printInvalidInputMsg(null, ctxid, "Ids must be numbers!");
-            sysexit(1);
-        } catch (final MalformedURLException e) {
-            printServerException(null, ctxid, e);
-            sysexit(1);
-        } catch (final RemoteException e) {
-            printServerException(null, ctxid, e);
-            sysexit(SYSEXIT_REMOTE_ERROR);
-        } catch (final NotBoundException e) {
-            printNotBoundResponse(null, ctxid, e);
-            sysexit(1);
-        } catch (final StorageException e) {
-            printServerException(null, ctxid, e);
-            sysexit(SYSEXIT_SERVERSTORAGE_ERROR);
-        } catch (final InvalidCredentialsException e) {
-            printServerException(null, ctxid, e);
-            sysexit(SYSEXIT_INVALID_CREDENTIALS);
-        } catch (final InvalidDataException e) {
-            printServerException(null, ctxid, e);
-            sysexit(SYSEXIT_INVALID_DATA);
-        } catch (final IllegalOptionValueException e) {            
-            printError(null, ctxid, "Illegal option value : " + e.getMessage());
-            parser.printUsage();
-            sysexit(SYSEXIT_ILLEGAL_OPTION_VALUE);
-        } catch (final UnknownOptionException e) {
-            printError(null, ctxid, "Unrecognized options on the command line: " + e.getMessage());
-            parser.printUsage();
-            sysexit(SYSEXIT_UNKNOWN_OPTION);
-        } catch (final MissingOptionException e) {
-            printError(null, ctxid, e.getMessage());
-            parser.printUsage();
-            sysexit(SYSEXIT_MISSING_OPTION);
-        } catch (final URISyntaxException e) {
-            printServerException(null, ctxid, e);
-            sysexit(1);
+        } catch (final Exception e) {
+            printErrors(null, ctxid, e, parser);
         }
 
     }
