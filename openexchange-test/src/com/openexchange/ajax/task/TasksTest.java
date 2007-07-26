@@ -47,10 +47,11 @@
  *
  */
 
-package com.openexchange.ajax;
+package com.openexchange.ajax.task;
 
 import static com.openexchange.ajax.task.TaskTools.*;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -60,15 +61,18 @@ import java.util.Random;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
+import org.xml.sax.SAXException;
 
 import com.meterware.httpunit.WebConversation;
+import com.openexchange.ajax.AbstractAJAXTest;
+import com.openexchange.ajax.ContactTest;
+import com.openexchange.ajax.FolderTest;
 import com.openexchange.ajax.config.ConfigTools;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.TaskFields;
-import com.openexchange.ajax.task.AbstractTaskTest;
-import com.openexchange.ajax.task.Create;
-import com.openexchange.ajax.task.TaskTools;
+import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.FolderObject;
@@ -81,12 +85,16 @@ import com.openexchange.groupware.tasks.Task;
  * This class tests the AJAX interface of the tasks.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class TasksTest extends AbstractTaskTest {
+public class TasksTest extends AbstractAJAXTest {
 
     /**
      * Logger.
      */
     private static final Log LOG = LogFactory.getLog(TasksTest.class);
+    /**
+     * Proxy attribute for the private task folder of the user.
+     */
+    private int privateTaskFolder;
 
     /**
      * Default constructor.
@@ -764,5 +772,21 @@ public class TasksTest extends AbstractTaskTest {
         task.setBillingInformation("billing information");
         task.setCompanies("companies");
         */
+    }
+
+    /**
+     * @return the identifier of the private task folder of the primary user.
+     * @throws IOException if the communication with the server fails.
+     * @throws SAXException if a SAX error occurs.
+     * @throws JSONException if parsing of serialized json fails.
+     * @throws OXException if reading the folders fails.
+     */
+    protected int getPrivateTaskFolder() throws IOException, SAXException,
+        JSONException, OXException {
+        if (0 == privateTaskFolder) {
+            privateTaskFolder = TaskTools.getPrivateTaskFolder(getWebConversation(),
+                getHostName(), getSessionId());
+        }
+        return privateTaskFolder;
     }
 }

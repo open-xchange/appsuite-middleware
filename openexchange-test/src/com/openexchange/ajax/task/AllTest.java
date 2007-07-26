@@ -70,7 +70,7 @@ import com.openexchange.groupware.tasks.Task;
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class AllTest extends AbstractTaskTest2 {
+public final class AllTest extends AbstractTaskTest {
 
     /**
      * Logger.

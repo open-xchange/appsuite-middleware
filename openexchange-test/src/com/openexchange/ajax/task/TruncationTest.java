@@ -66,7 +66,7 @@ import com.openexchange.tools.RandomString;
  * @author marcus
  *
  */
-public class TruncationTest extends AbstractTaskTest2 {
+public class TruncationTest extends AbstractTaskTest {
 
     /**
      * Logger.

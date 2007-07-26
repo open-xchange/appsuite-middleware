@@ -58,7 +58,9 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.groupware.tasks.Task;
 
 /**
- * 
+ * Implements creating the necessary values for a task update request. All
+ * necessary values are read from the task. The task must contain the folder and
+ * object identifier and the last modification timestamp.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class UpdateRequest extends AbstractTaskRequest {
@@ -68,7 +70,10 @@ public class UpdateRequest extends AbstractTaskRequest {
     private final TimeZone timeZone;
 
     /**
-     * 
+     * Default constructor.
+     * @param task Task object with updated attributes. This task must contain
+     * the attributes parent folder identifier, object identifier and last
+     * modification timestamp.
      */
     public UpdateRequest(final Task task, final TimeZone timeZone) {
         super();
@@ -111,5 +116,12 @@ public class UpdateRequest extends AbstractTaskRequest {
      */
     public AbstractAJAXParser getParser() {
         return new UpdateParser();
+    }
+
+    /**
+     * @return the task
+     */
+    protected Task getTask() {
+        return task;
     }
 }

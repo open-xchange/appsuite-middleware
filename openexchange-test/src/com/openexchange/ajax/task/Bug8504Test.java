@@ -49,9 +49,11 @@
 
 package com.openexchange.ajax.task;
 
-import java.util.List;
+import java.util.Date;
+import java.util.TimeZone;
 
-import com.openexchange.ajax.config.ConfigTools;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.reminder.ReminderTools;
 import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.GetRequest;
 import com.openexchange.ajax.task.actions.GetResponse;
@@ -59,20 +61,19 @@ import com.openexchange.ajax.task.actions.InsertRequest;
 import com.openexchange.ajax.task.actions.InsertResponse;
 import com.openexchange.ajax.task.actions.UpdateRequest;
 import com.openexchange.ajax.task.actions.UpdateResponse;
-import com.openexchange.configuration.AJAXConfig;
-import com.openexchange.groupware.container.Participant;
+import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.groupware.tasks.Task;
 
 /**
  * Tests problem described in bug #7380.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class Bug7380Test extends AbstractTaskTest {
+public class Bug8504Test extends AbstractTaskTest {
 
     /**
      * @param name
      */
-    public Bug7380Test(final String name) {
+    public Bug8504Test(final String name) {
         super(name);
     }
 
@@ -81,26 +82,72 @@ public class Bug7380Test extends AbstractTaskTest {
      * @throws Throwable if this test fails.
      */
     public void testBug() throws Throwable {
+        // Create a task.
         final Task task = new Task();
-        task.setTitle("Test bug #7380");
-        task.setParentFolderID(getPrivateTaskFolder());
+        task.setTitle("Test bug #8504");
+        final int folderId = getPrivateTaskFolder();
+        task.setParentFolderID(folderId);
         final AJAXSession session = getSession();
-        final List<Participant> participants = TasksTest.getParticipants(session
-            .getConversation(), AJAXConfig.getProperty(AJAXConfig.Property
-            .HOSTNAME), session.getId(), 1, true, ConfigTools.getUserId(session
-            .getConversation(), AJAXConfig.getProperty(AJAXConfig.Property
-            .HOSTNAME), session.getId()));
-        task.setParticipants(participants);
         final InsertResponse iResponse = TaskTools.insert(session,
             new InsertRequest(task, getTimeZone()));
         task.setObjectID(iResponse.getId());
-        final GetResponse gResponse = TaskTools.get(session,
-            new GetRequest(getPrivateTaskFolder(), task.getObjectID()));
-        task.setLastModified(gResponse.getTimestamp());
-        task.setParticipants((Participant[]) null);
-        final UpdateResponse uResponse = TaskTools.update(session,
-            new UpdateRequest(task, getTimeZone()));
-        task.setLastModified(uResponse.getTimestamp());
-        TaskTools.delete(session, new DeleteRequest(task));
+        try {
+            // Update timestamp
+            final GetResponse gResponse = TaskTools.get(session,
+                new GetRequest(getPrivateTaskFolder(), task.getObjectID()));
+            task.setLastModified(gResponse.getTimestamp());
+            // Update task and insert reminder and don't send folder in task.
+            task.setNote("Updated with reminder");
+            final Date remindDate = new Date();
+            task.setAlarm(remindDate);
+            task.getParentFolderID();
+            task.removeParentFolderID();
+            final UpdateResponse uResponse = TaskTools.update(session,
+                new SpecialUpdateRequest(folderId, task, getTimeZone()));
+            task.setLastModified(uResponse.getTimestamp());
+            // Check reminder
+            final com.openexchange.ajax.reminder.actions.GetResponse rResponse =
+                ReminderTools.get(session, new com.openexchange.ajax.reminder
+                .actions.GetRequest(remindDate));
+            final ReminderObject reminder = rResponse.getReminderByTarget(
+                getTimeZone(), task.getObjectID());
+    
+            assertNotNull("Can't find reminder for task.", reminder);
+            assertNotSame("Found folder 0 for task reminder.", 0, Integer
+                .parseInt(reminder.getFolder()));
+        } finally {
+            final Date lastModified = task.containsLastModified() ? task
+                .getLastModified() : new Date();
+            TaskTools.delete(session, new DeleteRequest(folderId, task
+                .getObjectID(), lastModified));
+        }
+    }
+
+    private static class SpecialUpdateRequest extends UpdateRequest {
+
+        private final int folderId;
+        
+        public SpecialUpdateRequest(final int folderId, final Task task,
+            final TimeZone timeZone) {
+            super(task, timeZone);
+            this.folderId = folderId;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public Parameter[] getParameters() {
+            return new Parameter[] {
+                new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet
+                    .ACTION_UPDATE),
+                new Parameter(AJAXServlet.PARAMETER_INFOLDER, String.valueOf(
+                    folderId)),
+                new Parameter(AJAXServlet.PARAMETER_ID, String.valueOf(getTask()
+                    .getObjectID())),
+                new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, String.valueOf(
+                    getTask().getLastModified().getTime()))
+            };
+        }
     }
 }

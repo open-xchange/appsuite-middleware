@@ -47,82 +47,61 @@
  *
  */
 
-package com.openexchange.ajax.task.actions;
+package com.openexchange.ajax.reminder.actions;
 
-import java.util.Date;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.TimeZone;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
-import com.openexchange.groupware.tasks.Task;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.parser.ReminderParser;
+import com.openexchange.ajax.reminder.ReminderTools;
+import com.openexchange.groupware.reminder.ReminderObject;
+import com.openexchange.tools.servlet.OXJSONException;
 
 /**
- * Stores parameters for the delete request.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class DeleteRequest extends AbstractTaskRequest {
+public class GetResponse extends AbstractAJAXResponse {
 
-    private final int folderId;
-
-    private final int taskId;
-
-    private final Date lastModified;
-
+    private List<ReminderObject> reminders;
+    
     /**
-     * Default constructor.
+     * @param response
      */
-    public DeleteRequest(final int folderId, final int taskId,
-        final Date lastModified) {
-        super();
-        this.folderId = folderId;
-        this.taskId = taskId;
-        this.lastModified = lastModified;
+    GetResponse(final Response response) {
+        super(response);
     }
 
-    /**
-     * @param task Task object to delete. This object must contain the folder
-     * identifier, the object identifier and the last modification timestamp.
-     */
-    public DeleteRequest(final Task task) {
-        this(task.getParentFolderID(), task.getObjectID(),
-            task.getLastModified());
+    public ReminderObject[] getReminder(final TimeZone timeZone)
+        throws OXJSONException {
+        if (null == reminders) {
+            final ReminderParser parser = new ReminderParser(timeZone);
+            final JSONArray array = (JSONArray) getResponse().getData();
+            reminders = new ArrayList<ReminderObject>(array.length());
+            for (int i = 0; i < array.length(); i++) {
+                try {
+                    final JSONObject jremind = array.getJSONObject(i);
+                    final ReminderObject reminder = new ReminderObject();
+                    parser.parse(reminder, jremind);
+                    reminders.add(reminder);
+                } catch (JSONException e) {
+                    throw new OXJSONException(OXJSONException.Code
+                        .JSON_READ_ERROR, e, array.toString());
+                }
+            }
+        }
+        return reminders.toArray(new ReminderObject[reminders.size()]);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public Object getBody() throws JSONException {
-        final JSONObject json = new JSONObject();
-        json.put(AJAXServlet.PARAMETER_ID, taskId);
-        json.put(AJAXServlet.PARAMETER_INFOLDER, folderId);
-        return json;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Method getMethod() {
-        return Method.PUT;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Parameter[] getParameters() {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet
-                .ACTION_DELETE),
-            new Parameter(AJAXServlet.PARAMETER_TIMESTAMP,
-                String.valueOf(lastModified.getTime()))
-        };
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public AbstractAJAXParser getParser() {
-        return new DeleteParser();
+    public ReminderObject getReminderByTarget(final TimeZone timeZone,
+        final int targetId) throws OXJSONException {
+        return ReminderTools.searchByTarget(getReminder(timeZone), targetId);
     }
 }

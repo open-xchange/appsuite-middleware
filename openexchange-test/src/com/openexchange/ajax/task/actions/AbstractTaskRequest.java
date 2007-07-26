@@ -72,7 +72,7 @@ public abstract class AbstractTaskRequest implements AJAXRequest {
     private static final String TASKS_URL = "/ajax/tasks";
 
     /**
-     * 
+     * Default constructor.
      */
     protected AbstractTaskRequest() {
         super();
