@@ -69,13 +69,13 @@ public abstract class ObjectNamingAbstraction extends BasicCommandlineOptions {
     }
 
     protected void printFirstPartOfErrorText(final Integer id, final Integer ctxid) {
-        if (getClass().getName().matches("^.*\\..*(?i)create.*$")) {
+        if (getClass().getName().matches("^.*\\.\\w*(?i)create\\w*$")) {
             createMessageForStderr(id, ctxid, "could not be created: ");
-        } else if (getClass().getName().matches("^.*\\..*(?i)change.*$")) {
+        } else if (getClass().getName().matches("^.*\\.\\w*(?i)change\\w*$")) {
             createMessageForStderr(id, ctxid, "could not be changed: ");
-        } else if (getClass().getName().matches("^.*\\..*(?i)delete.*$")) {
+        } else if (getClass().getName().matches("^.*\\.\\w*(?i)delete\\w*$")) {
             createMessageForStderr(id, ctxid, "could not be deleted: ");
-        } else if (getClass().getName().matches("^.*\\..*(?i)list.*$")) {
+        } else if (getClass().getName().matches("^.*\\.\\w*(?i)list\\w*$")) {
             createMessageForStderr(id, ctxid, "could not be listed: ");
         }
     }
