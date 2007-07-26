@@ -99,12 +99,12 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         }
     }
 
-    public String moveContextFilestore(final Context ctx, final Filestore dst_filestore, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, NoSuchFilestoreException, NoSuchReasonException, OXContextException {
+    public int moveContextFilestore(final Context ctx, final Filestore dst_filestore, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, NoSuchFilestoreException, NoSuchReasonException, OXContextException {
         MaintenanceReason reason = new MaintenanceReason(42);
         return moveContextFilestore(ctx, dst_filestore, reason, auth);
     }
 
-    public String moveContextFilestore(final Context ctx, final Filestore dst_filestore, final MaintenanceReason reason, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, NoSuchFilestoreException, NoSuchReasonException, OXContextException {
+    public int moveContextFilestore(final Context ctx, final Filestore dst_filestore, final MaintenanceReason reason, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, NoSuchFilestoreException, NoSuchReasonException, OXContextException {
         
         try {
             doNullCheck(ctx, ctx.getIdAsInt(),dst_filestore,dst_filestore.getId(), reason,reason.getId());
@@ -182,7 +182,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 }
 
                 final FilestoreDataMover fsdm = new FilestoreDataMover(src.toString(), dst.toString(), ctx, dst_filestore);
-                TaskManager.getInstance().addJob(fsdm, "movefilestore", "move context " + ctx.getIdAsString() + " to filestore " + dst_filestore.getId());
+                return TaskManager.getInstance().addJob(fsdm, "movefilestore", "move context " + ctx.getIdAsString() + " to filestore " + dst_filestore.getId());
 
             } catch (final StorageException e) {
                 reEnableContext(ctx, oxcox);
@@ -203,7 +203,6 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             log.error(e.getMessage(), e);
             throw e;
         }
-        return null;
     }
 
     public int moveContextDatabase(final Context ctx, final Database db, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException, OXContextException {
