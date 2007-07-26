@@ -87,7 +87,7 @@ public interface OXContextInterface extends Remote {
      */
     //public String moveContextFilestore(Context ctx, Filestore dst_filestore_id, MaintenanceReason reason, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, NoSuchFilestoreException, NoSuchReasonException, OXContextException;
     //* @param reason ID of the maintenance reason for disabling the context while the move is in progress.
-    public String moveContextFilestore(Context ctx, Filestore dst_filestore_id, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, NoSuchFilestoreException, NoSuchReasonException, OXContextException;
+    public int moveContextFilestore(Context ctx, Filestore dst_filestore_id, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, NoSuchFilestoreException, NoSuchReasonException, OXContextException;
 
     /**
      * Move all data of a context contained in a database to another database using
