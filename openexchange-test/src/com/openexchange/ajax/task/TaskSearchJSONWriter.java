@@ -35,13 +35,14 @@
  * Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-package com.openexchange.ajax;
+package com.openexchange.ajax.task;
 
 import java.util.Date;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.TaskFields;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.TaskException;

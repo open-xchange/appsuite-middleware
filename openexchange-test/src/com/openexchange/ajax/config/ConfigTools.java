@@ -69,8 +69,13 @@ import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.AbstractAJAXTest;
+import com.openexchange.ajax.config.actions.GetRequest;
+import com.openexchange.ajax.config.actions.GetResponse;
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AJAXSession;
+import com.openexchange.ajax.framework.Executor;
 import com.openexchange.tools.URLParameter;
+import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * Utility class that contains all methods for making config requests to the
@@ -187,4 +192,9 @@ public final class ConfigTools extends Assert {
         return TimeZone.getTimeZone(value);
     }
 
+    public static GetResponse get(final AJAXSession session,
+        final GetRequest request) throws AjaxException, IOException,
+        SAXException, JSONException {
+        return (GetResponse) Executor.execute(session, request);
+    }
 }

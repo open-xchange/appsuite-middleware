@@ -3,6 +3,7 @@
  */
 package com.openexchange.ajax.session;
 
+import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.configuration.AJAXConfig;
 

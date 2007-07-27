@@ -1,105 +1,143 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
 package com.openexchange.ajax.framework;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
+import java.util.TimeZone;
 
-import javax.servlet.http.HttpServletResponse;
-
-import junit.framework.Assert;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.xml.sax.SAXException;
 
-import com.meterware.httpunit.GetMethodWebRequest;
-import com.meterware.httpunit.PostMethodWebRequest;
-import com.meterware.httpunit.PutMethodWebRequest;
-import com.meterware.httpunit.WebRequest;
-import com.meterware.httpunit.WebResponse;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.framework.AJAXRequest.Parameter;
-import com.openexchange.ajax.framework.AbstractAJAXSession.AJAXSession;
-import com.openexchange.ajax.writer.TaskWriter;
+import com.openexchange.ajax.config.ConfigTools;
+import com.openexchange.ajax.config.actions.GetRequest;
+import com.openexchange.ajax.session.LoginRequest;
+import com.openexchange.ajax.session.LoginTools;
+import com.openexchange.ajax.session.LogoutRequest;
 import com.openexchange.configuration.AJAXConfig;
-import com.openexchange.sessiond.Sessiond;
-import com.openexchange.tools.URLParameter;
+import com.openexchange.configuration.ConfigurationException;
+import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.tools.servlet.AjaxException;
 
-public class AJAXClient extends Assert {
+/**
+ * This class implements the temporary memory of an AJAX client and provides
+ * some convenience methods to determine user specific values for running some
+ * tests more easily.
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ */
+public class AJAXClient {
+
+    private final AJAXSession session;
+
+    private int userId = -1;
+
+    private TimeZone timeZone;
 
     /**
-     * Logger.
+     * Default constructor.
      */
-    private static final Log LOG = LogFactory.getLog(AJAXClient.class);
-    
-    /**
-     * To use character encoding.
-     */
-    private static final String ENCODING = "UTF-8";
+    public AJAXClient(final AJAXSession session) {
+        this.session = session;
+    }
 
-    public static AbstractAJAXResponse execute(final AJAXSession session,
-        final AJAXRequest request) throws AjaxException, IOException,
+    public AJAXClient(final User user) throws ConfigurationException,
+        AjaxException, IOException, SAXException, JSONException {
+        AJAXConfig.init();
+        final String login = AJAXConfig.getProperty(user.login);
+        final String password = AJAXConfig.getProperty(user.password);
+        session = new AJAXSession();
+        session.setId(LoginTools.login(session, new LoginRequest(login,
+            password)).getSessionId());
+    }
+
+    public int getUserId() throws AjaxException, IOException, SAXException,
+        JSONException {
+        if (-1 == userId) {
+            userId = ConfigTools.get(session, new GetRequest(GetRequest.Tree
+                .Identifier)).getId();
+        }
+        return userId;
+    }
+
+    public TimeZone getTimeZone() throws AjaxException, IOException,
         SAXException, JSONException {
-        LOG.trace("Logging in.");
-        final String urlString = AJAXConfig.getProperty(AJAXConfig.Property
-            .PROTOCOL) + "://" + AJAXConfig.getProperty(AJAXConfig.Property
-                .HOSTNAME) + request.getServletPath();
-        final WebRequest req;
-        switch (request.getMethod()) {
-        case GET:
-            req = new GetMethodWebRequest(urlString);
-            addParameter(req, session, request);
-            break;
-        case POST:
-            req = new PostMethodWebRequest(urlString);
-            addParameter(req, session, request);
-            break;
-        case PUT:
-            req = new PutMethodWebRequest(urlString + getPUTParameter(session,
-                request), createBody(request.getBody()), AJAXServlet
-                .CONTENTTYPE_JAVASCRIPT);
-            break;
-        default:
-            throw new AjaxException(AjaxException.Code.InvalidParameter, request
-                .getMethod().name());
+        if (null == timeZone) {
+            final String tzId = ConfigTools.get(session, new GetRequest(
+                GetRequest.Tree.TimeZone)).getString();
+            timeZone = TimeZone.getTimeZone(tzId);
         }
-        final WebResponse resp = session.getConversation().getResponse(req);
-        final AbstractAJAXParser parser = request.getParser();
-        parser.checkResponse(resp);
-        return parser.parse(resp.getText());
+        return timeZone;
     }
 
-    private static void addParameter(final WebRequest req,
-        final AJAXSession session, final AJAXRequest request) {
+    public enum User {
+        User1(Property.LOGIN, Property.PASSWORD);
+        private Property login;
+        private Property password;
+        private User(final Property login, final Property password) {
+            this.login = login;
+            this.password = password;
+        }
+    }
+
+    /**
+     * @return the session
+     */
+    public AJAXSession getSession() {
+        return session;
+    }
+
+    public void logout() throws AjaxException, IOException, SAXException,
+        JSONException {
         if (null != session.getId()) {
-            req.setParameter(AJAXServlet.PARAMETER_SESSION, session.getId());
+            LoginTools.logout(session, new LogoutRequest(session.getId()));
+            session.setId(null);
         }
-        for (Parameter parameter : request.getParameters()) {
-            req.setParameter(parameter.getName(), parameter.getValue());
-        }
-    }
-
-    private static String getPUTParameter(final AJAXSession session,
-        final AJAXRequest request) throws UnsupportedEncodingException {
-        final URLParameter parameter = new URLParameter();
-        if (null != session.getId()) {
-            parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session
-                .getId());
-        }
-        for (Parameter param : request.getParameters()) {
-            parameter.setParameter(param.getName(), param.getValue());
-        }
-        return parameter.getURLParameters();
-    }
-
-    private static InputStream createBody(final Object body)
-        throws JSONException, UnsupportedEncodingException {
-        return new ByteArrayInputStream(body.toString().getBytes(ENCODING));
+        session.getConversation().clearContents();
     }
 }

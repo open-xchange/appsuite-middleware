@@ -47,36 +47,70 @@
  *
  */
 
-package com.openexchange.ajax.task;
+package com.openexchange.ajax.config.actions;
 
+import org.json.JSONException;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
- * Suite for all task tests.
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * 
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class TaskTestSuite {
+public class GetRequest extends AbstractConfigRequest {
+
+    private final Tree param;
 
     /**
-     * Prevent instanciation.
+     * Default constructor.
      */
-    private TaskTestSuite() {
+    public GetRequest(final Tree param) {
         super();
+        this.param = param;
     }
-    
+
     /**
-     * Generates the task test suite.
-     * @return the task tests suite.
+     * {@inheritDoc}
      */
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(AllTest.class);
-        tests.addTestSuite(Bug7380Test.class);
-        tests.addTestSuite(Bug7377Test.class);
-        tests.addTestSuite(TruncationTest.class);
-        tests.addTestSuite(TasksTest.class);
-        return tests;
+    @Override
+    public String getServletPath() {
+        return super.getServletPath() + param.path;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Object getBody() throws JSONException {
+        return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Method getMethod() {
+        return Method.GET;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Parameter[] getParameters() {
+        return new Parameter[0];
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public AbstractAJAXParser getParser() {
+        return new GetParser();
+    }
+
+    public enum Tree {
+        Identifier("/identifier"),
+        TimeZone("/timezone");
+        private String path;
+        private Tree(final String path) {
+            this.path=path;
+        }
     }
 }

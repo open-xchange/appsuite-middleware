@@ -47,36 +47,39 @@
  *
  */
 
-package com.openexchange.ajax.task;
+package com.openexchange.ajax.config.actions;
 
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
- * Suite for all task tests.
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * 
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class TaskTestSuite {
+public class GetResponse extends AbstractAJAXResponse {
+
+    private Object value;
 
     /**
-     * Prevent instanciation.
+     * @param response
      */
-    private TaskTestSuite() {
-        super();
+    GetResponse(final Response response) {
+        super(response);
     }
-    
-    /**
-     * Generates the task test suite.
-     * @return the task tests suite.
-     */
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(AllTest.class);
-        tests.addTestSuite(Bug7380Test.class);
-        tests.addTestSuite(Bug7377Test.class);
-        tests.addTestSuite(TruncationTest.class);
-        tests.addTestSuite(TasksTest.class);
-        return tests;
+
+    private void fetchValue() {
+        if (null == value) {
+            value = getResponse().getData();
+        }
+    }
+
+    public int getId() {
+        fetchValue();
+        return -1;
+    }
+
+    public String getString() {
+        fetchValue();
+        return (String) value;
     }
 }

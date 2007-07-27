@@ -63,7 +63,11 @@ public class AJAXConfig extends AbstractConfig {
         /**
          * http or https.
          */
-        PROTOCOL("protocol");
+        PROTOCOL("protocol"),
+        /**
+         * Second user login.
+         */
+        SECONDUSER("seconduser");
 
         /**
          * Name of the property in the ajax.properties file.

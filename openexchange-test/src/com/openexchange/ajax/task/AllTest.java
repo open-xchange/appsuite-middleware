@@ -56,7 +56,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.ajax.config.ConfigTools;
-import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AJAXSession;
+import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.MultipleRequest;
 import com.openexchange.ajax.framework.MultipleResponse;
 import com.openexchange.ajax.task.actions.AbstractTaskRequest;
@@ -115,7 +116,7 @@ public final class AllTest extends AbstractTaskTest {
             task.setParentFolderID(getPrivateTaskFolder());
             inserts[i] = new InsertRequest(task, timeZone);
         }
-        final MultipleResponse mInsert = (MultipleResponse) AJAXClient.execute(
+        final MultipleResponse mInsert = (MultipleResponse) Executor.execute(
             getSession(), new MultipleRequest(inserts));
         for (int i = 0; i < inserts.length; i++) {
             final InsertResponse ins = (InsertResponse) mInsert
@@ -131,7 +132,7 @@ public final class AllTest extends AbstractTaskTest {
                 ((InsertResponse) mInsert.getResponse(i)).getId(),
                 new Date());
         }
-        final MultipleResponse mDelete = (MultipleResponse) AJAXClient.execute(
+        final MultipleResponse mDelete = (MultipleResponse) Executor.execute(
             getSession(), new MultipleRequest(deletes)); 
     }
 }

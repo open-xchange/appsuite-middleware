@@ -51,12 +51,10 @@ package com.openexchange.ajax.task;
 
 import static com.openexchange.ajax.task.TaskTools.insertTask;
 
-import java.util.TimeZone;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.task.actions.InsertRequest;
 import com.openexchange.ajax.task.actions.InsertResponse;
 import com.openexchange.groupware.tasks.Task;
@@ -67,6 +65,8 @@ import com.openexchange.tools.RandomString;
  *
  */
 public class TruncationTest extends AbstractTaskTest {
+
+    private AJAXClient client;
 
     /**
      * Logger.
@@ -82,6 +82,15 @@ public class TruncationTest extends AbstractTaskTest {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        client = new AJAXClient(getSession());
+    }
+
+    /**
      * Creates a task with a to long title and checks if the data truncation
      * is detected.
      * @throws Throwable if an error occurs.
@@ -94,7 +103,7 @@ public class TruncationTest extends AbstractTaskTest {
         task.setTripMeter(RandomString.generateFixLetter(300));
         task.setParentFolderID(getPrivateTaskFolder());
         final InsertResponse response = TaskTools.insert(getSession(),
-            new InsertRequest(task, getTimeZone(), false));
+            new InsertRequest(task, client.getTimeZone(), false));
         assertTrue("Server did not detect truncated data.", response
             .hasError());
         assertTrue("Array of truncated attribute identifier is empty.", response

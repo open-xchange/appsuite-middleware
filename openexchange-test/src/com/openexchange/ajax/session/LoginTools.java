@@ -5,8 +5,8 @@ import java.io.IOException;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
 
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AbstractAJAXSession.AJAXSession;
+import com.openexchange.ajax.framework.AJAXSession;
+import com.openexchange.ajax.framework.Executor;
 import com.openexchange.tools.servlet.AjaxException;
 
 public class LoginTools {
@@ -18,18 +18,18 @@ public class LoginTools {
     public static LoginResponse login(final AJAXSession session,
         final LoginRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
-        return (LoginResponse) AJAXClient.execute(session, request);
+        return (LoginResponse) Executor.execute(session, request);
     }
 
     public static LogoutResponse logout(final AJAXSession session,
         final LogoutRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
-        return (LogoutResponse) AJAXClient.execute(session, request);
+        return (LogoutResponse) Executor.execute(session, request);
     }
 
     public static RedirectResponse redirect(final AJAXSession session,
         final RedirectRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
-        return (RedirectResponse) AJAXClient.execute(session, request);
+        return (RedirectResponse) Executor.execute(session, request);
     }
 }

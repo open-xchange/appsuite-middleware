@@ -52,6 +52,8 @@ package com.openexchange.ajax.task;
 import java.util.List;
 
 import com.openexchange.ajax.config.ConfigTools;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.GetRequest;
 import com.openexchange.ajax.task.actions.GetResponse;
@@ -81,6 +83,7 @@ public class Bug7380Test extends AbstractTaskTest {
      * @throws Throwable if this test fails.
      */
     public void testBug() throws Throwable {
+        final AJAXClient client = getClient();
         final Task task = new Task();
         task.setTitle("Test bug #7380");
         task.setParentFolderID(getPrivateTaskFolder());
@@ -92,14 +95,14 @@ public class Bug7380Test extends AbstractTaskTest {
             .HOSTNAME), session.getId()));
         task.setParticipants(participants);
         final InsertResponse iResponse = TaskTools.insert(session,
-            new InsertRequest(task, getTimeZone()));
+            new InsertRequest(task, client.getTimeZone()));
         task.setObjectID(iResponse.getId());
         final GetResponse gResponse = TaskTools.get(session,
             new GetRequest(getPrivateTaskFolder(), task.getObjectID()));
         task.setLastModified(gResponse.getTimestamp());
         task.setParticipants((Participant[]) null);
         final UpdateResponse uResponse = TaskTools.update(session,
-            new UpdateRequest(task, getTimeZone()));
+            new UpdateRequest(task, client.getTimeZone()));
         task.setLastModified(uResponse.getTimestamp());
         TaskTools.delete(session, new DeleteRequest(task));
     }

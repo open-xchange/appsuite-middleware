@@ -53,6 +53,8 @@ import java.util.Date;
 import java.util.TimeZone;
 
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.reminder.ReminderTools;
 import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.GetRequest;
@@ -61,27 +63,40 @@ import com.openexchange.ajax.task.actions.InsertRequest;
 import com.openexchange.ajax.task.actions.InsertResponse;
 import com.openexchange.ajax.task.actions.UpdateRequest;
 import com.openexchange.ajax.task.actions.UpdateResponse;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.server.OCLPermission;
 
 /**
- * Tests problem described in bug #7380.
+ * Tests problem described in bug #7377.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class Bug8504Test extends AbstractTaskTest {
+public class Bug7377Test extends AbstractTaskTest {
 
+    private AJAXClient client1;
+    
     /**
      * @param name
      */
-    public Bug8504Test(final String name) {
+    public Bug7377Test(final String name) {
         super(name);
     }
 
     /**
-     * Tests if bug #7380 appears again.
+     * {@inheritDoc}
+     */
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        client1 = new AJAXClient(getSession());
+    }
+
+    /**
+     * Tests if on updating tasks the folder for the reminder gets lost.
      * @throws Throwable if this test fails.
      */
-    public void testBug() throws Throwable {
+    public void testLostFolderInfo() throws Throwable {
         // Create a task.
         final Task task = new Task();
         task.setTitle("Test bug #8504");
@@ -89,7 +104,7 @@ public class Bug8504Test extends AbstractTaskTest {
         task.setParentFolderID(folderId);
         final AJAXSession session = getSession();
         final InsertResponse iResponse = TaskTools.insert(session,
-            new InsertRequest(task, getTimeZone()));
+            new InsertRequest(task, client1.getTimeZone()));
         task.setObjectID(iResponse.getId());
         try {
             // Update timestamp
@@ -103,14 +118,14 @@ public class Bug8504Test extends AbstractTaskTest {
             task.getParentFolderID();
             task.removeParentFolderID();
             final UpdateResponse uResponse = TaskTools.update(session,
-                new SpecialUpdateRequest(folderId, task, getTimeZone()));
+                new SpecialUpdateRequest(folderId, task, client1.getTimeZone()));
             task.setLastModified(uResponse.getTimestamp());
             // Check reminder
             final com.openexchange.ajax.reminder.actions.GetResponse rResponse =
                 ReminderTools.get(session, new com.openexchange.ajax.reminder
                 .actions.GetRequest(remindDate));
             final ReminderObject reminder = rResponse.getReminderByTarget(
-                getTimeZone(), task.getObjectID());
+                client1.getTimeZone(), task.getObjectID());
     
             assertNotNull("Can't find reminder for task.", reminder);
             assertNotSame("Found folder 0 for task reminder.", 0, Integer
@@ -123,6 +138,20 @@ public class Bug8504Test extends AbstractTaskTest {
         }
     }
 
+    public void testPublicFolderMove() throws Throwable {
+        
+//        final FolderObject public1 = new FolderObject();
+//        public1.setFolderName("Bug7377TaskFolder1");
+//        public1.setModule(FolderObject.TASK);
+//        public1.setType(FolderObject.PUBLIC);
+//        final OCLPermission perm1 = new OCLPermission();
+//        perm1.setEntity(entity);
+//        
+//        public1.setPermissionsAsArray(new OCLPermission[] {
+//            new OCLPermission()
+//        });
+    }
+    
     private static class SpecialUpdateRequest extends UpdateRequest {
 
         private final int folderId;

@@ -47,36 +47,34 @@
  *
  */
 
-package com.openexchange.ajax.task;
+package com.openexchange.ajax.config.actions;
 
+import org.json.JSONException;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
- * Suite for all task tests.
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * 
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class TaskTestSuite {
+class GetParser extends AbstractAJAXParser {
 
     /**
-     * Prevent instanciation.
+     * Default constructor.
      */
-    private TaskTestSuite() {
+    public GetParser() {
         super();
     }
-    
+
     /**
-     * Generates the task test suite.
-     * @return the task tests suite.
+     * {@inheritDoc}
      */
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(AllTest.class);
-        tests.addTestSuite(Bug7380Test.class);
-        tests.addTestSuite(Bug7377Test.class);
-        tests.addTestSuite(TruncationTest.class);
-        tests.addTestSuite(TasksTest.class);
-        return tests;
+    @Override
+    protected GetResponse createResponse(final Response response)
+        throws JSONException {
+        return new GetResponse(response);
     }
+
 }

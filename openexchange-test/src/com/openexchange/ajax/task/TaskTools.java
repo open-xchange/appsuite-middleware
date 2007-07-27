@@ -75,12 +75,11 @@ import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.AbstractAJAXTest;
 import com.openexchange.ajax.FolderTest;
-import com.openexchange.ajax.TaskSearchJSONWriter;
 import com.openexchange.ajax.config.ConfigTools;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.TaskFields;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AbstractAJAXSession.AJAXSession;
+import com.openexchange.ajax.framework.AJAXSession;
+import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.parser.TaskParser;
 import com.openexchange.ajax.task.actions.AbstractTaskRequest;
 import com.openexchange.ajax.task.actions.DeleteRequest;
@@ -191,7 +190,7 @@ public final class TaskTools extends Assert {
     public static InsertResponse insert(final AJAXSession session,
         final AbstractTaskRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
-        return (InsertResponse) AJAXClient.execute(session, request);
+        return (InsertResponse) Executor.execute(session, request);
     }
     
     /**
@@ -250,7 +249,7 @@ public final class TaskTools extends Assert {
     public static UpdateResponse update(final AJAXSession session,
         final UpdateRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
-        return (UpdateResponse) AJAXClient.execute(session, request);
+        return (UpdateResponse) Executor.execute(session, request);
     }
     
     public static TimeZone getUserTimeZone(final WebConversation conversation,
@@ -292,7 +291,7 @@ public final class TaskTools extends Assert {
     public static GetResponse get(final AJAXSession session,
         final GetRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
-        return (GetResponse) AJAXClient.execute(session, request);
+        return (GetResponse) Executor.execute(session, request);
     }
 
     /**
@@ -332,7 +331,7 @@ public final class TaskTools extends Assert {
     public static DeleteResponse delete(final AJAXSession session,
         final DeleteRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
-        return (DeleteResponse) AJAXClient.execute(session, request);
+        return (DeleteResponse) Executor.execute(session, request);
     }
     
     public static int countTasks(final WebConversation conversation,

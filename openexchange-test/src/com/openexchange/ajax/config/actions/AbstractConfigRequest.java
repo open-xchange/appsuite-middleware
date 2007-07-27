@@ -47,36 +47,33 @@
  *
  */
 
-package com.openexchange.ajax.task;
+package com.openexchange.ajax.config.actions;
 
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import com.openexchange.ajax.framework.AJAXRequest;
 
 /**
- * Suite for all task tests.
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * 
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class TaskTestSuite {
+abstract class AbstractConfigRequest implements AJAXRequest {
 
     /**
-     * Prevent instanciation.
+     * URL of the tasks AJAX interface.
      */
-    private TaskTestSuite() {
+    private static final String CONFIG_URL = "/ajax/config";
+
+    /**
+     * Default constructor.
+     */
+    protected AbstractConfigRequest() {
         super();
     }
-    
+
     /**
-     * Generates the task test suite.
-     * @return the task tests suite.
+     * {@inheritDoc}
      */
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(AllTest.class);
-        tests.addTestSuite(Bug7380Test.class);
-        tests.addTestSuite(Bug7377Test.class);
-        tests.addTestSuite(TruncationTest.class);
-        tests.addTestSuite(TasksTest.class);
-        return tests;
+    public String getServletPath() {
+        return CONFIG_URL;
     }
+
 }

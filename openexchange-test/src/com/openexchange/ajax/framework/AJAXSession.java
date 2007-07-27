@@ -47,36 +47,43 @@
  *
  */
 
-package com.openexchange.ajax.task;
+package com.openexchange.ajax.framework;
 
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import com.meterware.httpunit.WebConversation;
 
 /**
- * Suite for all task tests.
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * 
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class TaskTestSuite {
+public class AJAXSession {
+    
+    private final WebConversation conversation;
+
+    private String id;
+
+    public AJAXSession() {
+        super();
+        conversation = new WebConversation();
+    }
 
     /**
-     * Prevent instanciation.
+     * @return the conversation
      */
-    private TaskTestSuite() {
-        super();
+    public WebConversation getConversation() {
+        return conversation;
     }
-    
+
     /**
-     * Generates the task test suite.
-     * @return the task tests suite.
+     * @return the sessionId
      */
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(AllTest.class);
-        tests.addTestSuite(Bug7380Test.class);
-        tests.addTestSuite(Bug7377Test.class);
-        tests.addTestSuite(TruncationTest.class);
-        tests.addTestSuite(TasksTest.class);
-        return tests;
+    public String getId() {
+        return id;
+    }
+
+    /**
+     * @param sessionId the sessionId to set
+     */
+    public void setId(final String id) {
+        this.id = id;
     }
 }
