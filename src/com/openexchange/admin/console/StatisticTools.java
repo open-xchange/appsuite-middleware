@@ -294,8 +294,7 @@ public class StatisticTools extends BasicCommandlineOptions {
     }
 
     private void showStats(final MBeanServerConnection mbc, final String class_name) throws IOException, InstanceNotFoundException, MBeanException, AttributeNotFoundException, ReflectionException, IntrospectionException {
-        final Set data_set = mbc.queryMBeans(null, null);
-        final Iterator itr = data_set.iterator();
+        final Iterator<ObjectInstance> itr = mbc.queryMBeans(null, null).iterator();
         while (itr.hasNext()) {
             final ObjectInstance oin = (ObjectInstance) itr.next();
 
