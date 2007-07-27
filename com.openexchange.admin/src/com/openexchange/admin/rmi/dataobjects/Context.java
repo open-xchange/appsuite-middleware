@@ -51,6 +51,7 @@ package com.openexchange.admin.rmi.dataobjects;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
+import java.util.Collection;
 import java.util.HashSet;
 
 /**
@@ -143,6 +144,13 @@ public class Context extends EnforceableDataObject implements Serializable {
         }
         this.login_mappings.add(mapping);
     }
+
+    public final void addLoginMappings(final Collection<String> mapping) {
+        if (this.login_mappings == null) {
+            this.login_mappings = new HashSet<String>();
+        }
+        this.login_mappings.addAll(mapping);
+    }
     
     /*
      * Remove a login mapping.
@@ -150,6 +158,14 @@ public class Context extends EnforceableDataObject implements Serializable {
     public final boolean removeLoginMapping(final String mapping) {
         if (null != this.login_mappings) {
             return this.login_mappings.remove(mapping);
+        } else {
+            return false;
+        }
+    }
+
+    public final boolean removeLoginMappings(final Collection<String> mapping) {
+        if (null != this.login_mappings) {
+            return this.login_mappings.removeAll(mapping);
         } else {
             return false;
         }
