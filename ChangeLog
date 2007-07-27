@@ -1,3 +1,7 @@
+* 2007-07-27 ben.pahne@open-xchange.com
+
+ - Fixed bug #7936, a lot of typos and text corrections
+
 * 2007-07-25 - martin.kauss@open-xchange.com
 
  - Fixed bug #8482. If an appoinment with an enabled private flag was moved
