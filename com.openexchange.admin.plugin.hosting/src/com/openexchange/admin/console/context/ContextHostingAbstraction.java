@@ -97,10 +97,6 @@ public class ContextHostingAbstraction extends ContextAbstraction {
             if(remove_mappings!=null){
                 ctx.removeLoginMappings(Arrays.asList(remove_mappings));
             }
-//            // The HashSet always adds in front so we have to set the context number at last to get it in 
-//            // first position. Furthermore we should think about replacing the HashSet by an ArrayList
-//            if (!change) {
-//            }
         }
     }
 
