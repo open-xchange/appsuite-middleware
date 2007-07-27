@@ -61,6 +61,7 @@ import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.ContextExistsException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public abstract class CreateCore extends ContextAbstraction {
@@ -86,10 +87,7 @@ public abstract class CreateCore extends ContextAbstraction {
 
             final Context ctx = contextparsing(parser);
 
-            final String optionValue = (String) parser.getOptionValue(contextNameOption);
-            if (optionValue != null) {
-                ctx.setName(optionValue);
-            }
+            parseAndSetContextName(parser, ctx);
 
             final Credentials auth = credentialsparsing(parser);
 
@@ -112,8 +110,8 @@ public abstract class CreateCore extends ContextAbstraction {
                 }
             }
 
-            ctx.setMaxQuota(Long.parseLong((String) parser.getOptionValue(this.contextQuotaOption)));
-
+            parseAndSetContextQuota(parser, ctx);
+            
             final Integer id = maincall(parser, ctx, usr, auth).getIdAsInt();
             
             displayCreatedMessage(id, null);
@@ -122,8 +120,8 @@ public abstract class CreateCore extends ContextAbstraction {
             printErrors(ctxid, null, e, parser);
         }
     }
-    
-    protected abstract Context maincall(final AdminParser parser, Context ctx, User usr, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, MalformedURLException, NotBoundException, ContextExistsException;
+
+    protected abstract Context maincall(final AdminParser parser, Context ctx, User usr, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, MalformedURLException, NotBoundException, ContextExistsException, NoSuchContextException;
         
     protected abstract void setFurtherOptions(final AdminParser parser);
 }
