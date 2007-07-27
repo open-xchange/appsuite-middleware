@@ -52,6 +52,7 @@ package com.openexchange.admin.console.context;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.console.user.UserAbstraction;
+import com.openexchange.admin.rmi.dataobjects.Context;
 
 public abstract class ContextAbstraction extends UserAbstraction {   
 
@@ -79,6 +80,20 @@ public abstract class ContextAbstraction extends UserAbstraction {
     @Override
     protected String getObjectName() {
         return "context";
+    }
+
+    protected void parseAndSetContextQuota(final AdminParser parser, final Context ctx) {
+        final String contextQuota = (String) parser.getOptionValue(this.contextQuotaOption);
+        if (null != contextQuota) {
+            ctx.setMaxQuota(Long.parseLong(contextQuota));
+        }
+    }
+
+    protected void parseAndSetContextName(final AdminParser parser, final Context ctx) {
+        final String optionValue = (String) parser.getOptionValue(contextNameOption);
+        if (optionValue != null) {
+            ctx.setName(optionValue);
+        }
     }
 
 }
