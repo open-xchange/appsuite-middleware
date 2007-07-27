@@ -127,7 +127,7 @@ public class ContactsAttachment implements AttachmentListener, AttachmentAuthori
 			category=Category.PERMISSION,
 			desc="",
 			exceptionId=1,
-			msg= "Insufficient write rights for this folder. Unable to attach Document. Context %4$d Folder %1$d Object %2$d User %3$d"
+			msg= "Insufficient write rights for this folder. Unable to attach document. Context %4$d Folder %1$d Object %2$d User %3$d"
 	)
 	public void checkMayAttach(final int folderId, final int objectId, final User user, final UserConfiguration userConfig, final Context ctx) throws OXException {
 		try{
@@ -137,7 +137,7 @@ public class ContactsAttachment implements AttachmentListener, AttachmentAuthori
 	            //throw new OXException("Insufficient write rights for this folder! Unable to attach Document.");
 			}
 		} catch (final OXException e){
-			LOG.error("Insufficient write rights for this folder! Unable to attach Document.", e);
+			LOG.error("Insufficient write rights for this folder! Unable to attach document.", e);
 			throw e;
 		}
 	}
@@ -150,7 +150,7 @@ public class ContactsAttachment implements AttachmentListener, AttachmentAuthori
 			category=Category.PERMISSION,
 			desc="",
 			exceptionId=2,
-			msg= "Insufficient write rights for this folder. Unable to attach Document. Context %4$d Folder %1$d Object %2$d User %3$d"
+			msg= "Insufficient write rights for this folder. Unable to attach document. Context %4$d Folder %1$d Object %2$d User %3$d"
 	)
 	public void checkMayReadAttachments(final int folderId, final int objectId, final User user, final UserConfiguration userConfig, final Context ctx) throws OXException {
 		try{

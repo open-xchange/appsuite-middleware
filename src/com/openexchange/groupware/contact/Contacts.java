@@ -127,7 +127,7 @@ public class Contacts implements DeleteListener {
 			category=Category.USER_INPUT,
 			desc="0",
 			exceptionId=0,
-			msg="The Application was unable to validate a given email address from this contact: %s"
+			msg="The application was unable to validate a given email address from this contact: %s"
 	)
 	public static void validateEmailAddress(final ContactObject co) throws OXException {
 
@@ -159,8 +159,8 @@ public class Contacts implements DeleteListener {
 								Category.USER_INPUT},
 			desc={"1", "2"},
 			exceptionId={1,2 },
-			msg={"Unable to scale the contact image. This is a not supported file type or it is too large! Your mime type is %1$s and your image size is %2$d KB. The max. allowed image size is %3$d KB.",		
-					"This gif Image is to large. It can not be scaled and will not be accepted"}
+			msg={"Unable to scale this contact image.  Either the file type is not supported or the image is too large. Your mime type is %1$s and your image size is %2$d KB. The max. allowed image size is %3$d KB.",		
+					"This gif image is too large. It can not be scaled and will not be accepted"}
 	)
 	public static byte[] scaleContactImage(final byte[] img, String mime) throws OXConflictException, OXException, IOException {
 		
@@ -336,9 +336,9 @@ public class Contacts implements DeleteListener {
 			msg={	ContactException.NON_CONTACT_FOLDER_MSG, 
 							ContactException.NO_PERMISSION_MSG, 
 							ContactException.NO_PERMISSION_MSG, 
-							"Unable to Insert Contacts! Context: %d", 
+							"Unable to insert contacts! Context: %d", 
 							"Got a -1 ID from IDGenerator", 
-							"Unable to scale Image down.", 
+							"Unable to scale image down.", 
 							"Unable to insert Contact. Context: %d",
 							ContactException.INIT_CONNECTION_FROM_DBPOOL,
 							ContactException.INIT_CONNECTION_FROM_DBPOOL,
@@ -595,15 +595,15 @@ public class Contacts implements DeleteListener {
 							ContactException.NON_CONTACT_FOLDER_MSG, 
 							ContactException.NO_PERMISSION_MSG, 
 							ContactException.NO_PERMISSION_MSG,
-							"Unable to syncronice the old contact with the new changes: Context %1$d Object %2$d",
+							"Unable to syncronize the old contact with the new changes: Context %1$d Object %2$d",
 							ContactException.NO_PERMISSION_MSG,		
 							"You are not allowed to mark this contact as private contact: Context %1$d Object %2$d",
 							ContactException.OBJECT_HAS_CHANGED_MSG,
-							"Unable to update Contact. Context %1$d Object %2$d",
-							"An Error occurred: Object ID is -1",
-							"No Changes found. No Update requiered. Context %1$d Object %2$d",
-							"Unable to scale Image down.", 
-							"Unable to update Contact. Context %1$d Object %2$d",
+							"Unable to update contact. Context %1$d Object %2$d",
+							"An error occurred: Object id is -1",
+							"No changes found. No update requiered. Context %1$d Object %2$d",
+							"Unable to scale image down.", 
+							"Unable to update contact. Context %1$d Object %2$d",
 							ContactException.INIT_CONNECTION_FROM_DBPOOL,
 							"One or more fields contain too much information. Field: %1$d Character Limit: %2$d Sent %3$d",
 							"The image you tried to attach is not a valid picture. It may be broken or is not a valid file.",
@@ -1001,7 +1001,7 @@ public class Contacts implements DeleteListener {
 			desc={"25","26"},
 			exceptionId={25,26},
 			msg={	"Contact not found! Context %1$d",
-							"Unable to load Contact: Context %1$d"
+							"Unable to load contact: Context %1$d"
 						}
 	)
 	public static ContactObject fillContactObject(final String sql_string, final int user, final int[] group, final Context ctx, final UserConfiguration uc, final Connection readCon) throws OXException {
@@ -1082,7 +1082,7 @@ public class Contacts implements DeleteListener {
 			category=Category.CODE_ERROR,
 			desc="28",
 			exceptionId=28,
-			msg="Unable to load Dristributionlist : Context %1$d Contact %2$d"
+			msg="Unable to load dristributionlist: Context %1$d Contact %2$d"
 	)
 	public static DistributionListEntryObject[] fillDistributionListArray(final int id, final int user, final int[] group, final Context ctx, final UserConfiguration uc, final Connection readcon) throws OXException {		
 
@@ -1175,8 +1175,8 @@ public class Contacts implements DeleteListener {
 								},
 			desc={"29","60"},
 			exceptionId={29,60},
-			msg={	"Unable to save Dristributionlist : Context %1$d Contact %2$d",
-							"This Contact has no FolderID: Entry %1$d Context %2$d"
+			msg={	"Unable to save dristributionlist: Context %1$d Contact %2$d",
+							"This contact has no folder id: Entry %1$d Context %2$d"
 						}
 	)
 	public static void writeDistributionListArrayInsert(final DistributionListEntryObject[] dleos, final int id, final int cid, final Connection writecon) throws OXException {
@@ -1356,7 +1356,7 @@ public class Contacts implements DeleteListener {
 								},
 			desc={"30","61"},
 			exceptionId={30,61},
-			msg={	"Unable to update Dristributionlist : Context %1$d Contact %2$d",
+			msg={	"Unable to update dristributionlist : Context %1$d Contact %2$d",
 							"This Contact has no FolderID: Entry %1$d Context %2$d"
 						}
 	)
@@ -1446,8 +1446,8 @@ public class Contacts implements DeleteListener {
 								},
 			desc={"48","31"},
 			exceptionId={48,31},
-			msg={	"Unable to delete Dristributionlist by Id : Context %1$d Contact %2$d",
-							"Unable to delete Dristributionlist by Id : Context %1$d Contact %2$d"
+			msg={	"Unable to delete dristributionlist by id : Context %1$d Contact %2$d",
+							"Unable to delete dristributionlist by id : Context %1$d Contact %2$d"
 						}
 	)
 	public static void deleteDistributionListEntriesByIds(final int id, final DistributionListEntryObject[] dleos, final int cid, final Connection writecon) throws OXException {
@@ -1514,7 +1514,7 @@ public class Contacts implements DeleteListener {
 			category=Category.CODE_ERROR,
 			desc="32",
 			exceptionId=32,
-			msg="Unable to Load Linked Contacts : Context %1$d Contact %2$d"
+			msg="Unable to load linked contacts : Context %1$d Contact %2$d"
 	)
 	public static LinkEntryObject[] fillLinkArray(final ContactObject co, final int user, final int[] group, final Context ctx, final UserConfiguration uc, final Connection readcon) throws OXException {		
 		
@@ -1699,7 +1699,7 @@ public class Contacts implements DeleteListener {
 			category=Category.CODE_ERROR,
 			desc="34",
 			exceptionId=34,
-			msg="Unable to delete Linking between Contacts : Context %1$d Contact %2$d"
+			msg="Unable to delete linking between contacts : Context %1$d Contact %2$d"
 	)
 	public static void deleteLinkEntriesByIds(final int id, final LinkEntryObject[] leos, final int cid, final Connection writecon) throws OXException {
 		if (leos.length > 0) {
@@ -1768,7 +1768,7 @@ public class Contacts implements DeleteListener {
 			category=Category.CODE_ERROR,
 			desc="35",
 			exceptionId=35,
-			msg="Unable to load Contact Image : Context %1$d Contact %2$d"
+			msg="Unable to load contact image: Context %1$d Contact %2$d"
 	)
 	public static void getContactImage(final int contact_id, final ContactObject co, final int cid, final Connection readcon) throws OXException {
 		Date last_mod = null;
@@ -1812,7 +1812,7 @@ public class Contacts implements DeleteListener {
 			desc={"36","37"},
 			exceptionId={36,37},
 			msg={ "Unable to save contact image. The image appears to be broken.",
-						"Unable to save Contact Image: Context %1$d Contact %2$d"
+						"Unable to save contact Image: Context %1$d Contact %2$d"
 						}
 	)
 	public static void writeContactImage(final int contact_id, final byte[] img, final int cid, final String mime, final Connection writecon) throws OXException {
@@ -1855,7 +1855,7 @@ public class Contacts implements DeleteListener {
 			desc={"38","39"},
 			exceptionId={38,39},
 			msg={ "Unable to update contact image. The image appears to be broken."	,
-						"Unable to update Contact Image: Context %1$d Contact %2$d"
+						"Unable to update contact image: Context %1$d Contact %2$d"
 						}
 	)
 	public static void updateContactImage(final int contact_id, final byte[] img, final int cid, final String mime, final Connection writecon) throws OXException {
@@ -2158,7 +2158,7 @@ public class Contacts implements DeleteListener {
 			category=Category.CODE_ERROR,
 			desc="40",
 			exceptionId=40,
-			msg="Unable to perform Contact Folder check for readable content: Context %1$d Folder %2$d"
+			msg="Unable to perform contact folder check for readable content: Context %1$d Folder %2$d"
 	)
 	public static boolean containsForeignObjectInFolder(final int fid, final int uid, final SessionObject so) throws OXException, DBPoolingException {
 		Connection readCon = null;
@@ -2253,8 +2253,8 @@ public class Contacts implements DeleteListener {
 			exceptionId={42,44,45,46},
 			msg={	ContactException.NO_DELETE_PERMISSION_MSG,			
 							"Critical Error occurred. This folder contains a contact with no id. Context %1$d Folder %2$d",						
-							"Unable to delete Contacts from this folder. Context %1$d Folder %2$d",
-							"Unable to trigger Object Events: Context %1$d Folder %2$d"
+							"Unable to delete contacts from this folder. Context %1$d Folder %2$d",
+							"Unable to trigger object Events: Context %1$d Folder %2$d"
 						}
 	)
 	public static void trashContactsFromFolder(final int fid, final SessionObject so, final Connection readcon, final Connection writecon, boolean delit) throws OXException {
@@ -2449,9 +2449,9 @@ public class Contacts implements DeleteListener {
 								},
 			desc={"47","52","57"},
 			exceptionId={47,52,57},
-			msg={	"Unable to delete Contacts from User. Context %1$d User %2$d",
+			msg={	"Unable to delete Contacts from this user. Context %1$d User %2$d",
 							"Unable to delete contacts from user because this is a non-contact folder. Context %1$d Folder %2$d User %3$d",
-							"Unable to trigger Object Events: Context %1$d User %2$d"
+							"Unable to trigger object Events: Context %1$d User %2$d"
 						}
 	)
 	public static void trashAllUserContacts(final int uid, final SessionObject so, final Connection readcon, final Connection writecon) throws OXException {

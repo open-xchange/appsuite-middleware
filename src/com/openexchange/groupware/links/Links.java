@@ -256,11 +256,11 @@ public class Links {
 			desc={"", "","","",""},
 			exceptionId={0,1,2,3,4},
 			msg={	
-					"Unable to create a link between these two Objects. Insufficient Rights. 1. Object %1$d Folder %2$d 2. Object %3$d Folder %4$d Context %5$d",
+					"Unable to create a link between these two objects. Insufficient rights. 1. Object %1$d Folder %2$d 2. Object %3$d Folder %4$d Context %5$d",
 					"Unable to create a link between these two objects. This link already exists. 1. Object %1$d Folder %2$d 2. Object %3$d Folder %4$d Context %5$d",
 					ContactException.INIT_CONNECTION_FROM_DBPOOL,
-					"An Error occurred. Unable to save this linking between those two Objects.1. Object %1$d Folder %2$d 2. Object %3$d Folder %4$d Context %5$d",
-					"An Error occurred. Unable to save this linking between those two Objects.1. Object %1$d Folder %2$d 2. Object %3$d Folder %4$d Context %5$d"
+					"An error occurred. Unable to save this linking between those two objects. 1. Object %1$d Folder %2$d 2. Object %3$d Folder %4$d Context %5$d",
+					"An error occurred. Unable to save this linking between those two objects. 1. Object %1$d Folder %2$d 2. Object %3$d Folder %4$d Context %5$d"
 					}
 	)
 	public static void performLinkStorage(final LinkObject l, final int user, final int[] group, final SessionObject so, final Connection writecon) throws OXException{
@@ -340,9 +340,9 @@ public class Links {
 			desc={"", "",""},
 			exceptionId={5,6,7},
 			msg={	
-					"Unable to create a link between these two Objects. Insufficient Rights. 1. Object %1$d 2. Object %2$d Context %3$d",
-					"Unable to create a link between these two Objects. Insufficient Rights. 1. Object %1$d Folder %2$d 2. Object %3$d Folder %4$d Context %5$d",
-					"An Error occurred. Unable to load some links for this Objects. 1. Object %1$d 2. Object %2$d Context %3$d"
+					"Unable to create a link between these two objects. Insufficient rights. 1. Object %1$d 2. Object %2$d Context %3$d",
+					"Unable to create a link between these two objects. Insufficient rights. 1. Object %1$d Folder %2$d 2. Object %3$d Folder %4$d Context %5$d",
+					"An error occurred. Unable to load some links for this objects. 1. Object %1$d 2. Object %2$d Context %3$d"
 					}
 	)
 	public static LinkObject getLinkFromObject(final int first_id, final int first_type, final int second_id, final int second_type, final int user, final int[] group, final SessionObject so, final Connection readcon) throws OXException {
@@ -395,7 +395,7 @@ public class Links {
 			category=Category.CODE_ERROR,
 			desc="",
 			exceptionId=9,
-			msg="Unable to load all links from this Objects. Object %1$d Folder %2$d User %3$d Context %4$d"
+			msg="Unable to load all links from this objects. Object %1$d Folder %2$d User %3$d Context %4$d"
 	)
 	public static LinkObject[] getAllLinksFromObject(final int id, final int type, final int folder, final int user, final int[] group, final SessionObject so, final Connection readcon) throws OXException {
 		LinkObject[] los = null;
@@ -457,8 +457,8 @@ public class Links {
 			desc={"", ""},
 			exceptionId={10,11},
 			msg={	
-					"Unable to create a link between these two Objects. Insufficient Rights. Object %1$d Folder %2$d Context %3$d",
-					"An Error occurred. Unable to delete some links from this Objects. Object %1$d Folder %2$d Context %3$d"
+					"Unable to create a link between these two objects. Insufficient rights. Object %1$d Folder %2$d Context %3$d",
+					"An error occurred. Unable to delete some links from this objects. Object %1$d Folder %2$d Context %3$d"
 					}
 	)
 	public static int[][] deleteLinkFromObject(final int id, final int type, final int folder, final int[][] data, final int user, final int[] group, final SessionObject so, final Connection readcon, final Connection writecon) throws OXException {
@@ -548,7 +548,7 @@ public class Links {
 			category=Category.CODE_ERROR,
 			desc="",
 			exceptionId=12,
-			msg="Unable to delete all links from this Objects. Object %1$d Context %2$d"
+			msg="Unable to delete all links from this objects. Object %1$d Context %2$d"
 	)
 	public static void deleteAllObjectLinks(final int id, final int type, final int cid, final Connection writecon) throws OXException {
 		//TODO RIGHTS CHECK on onject id and fid!

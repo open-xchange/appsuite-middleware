@@ -432,6 +432,8 @@ public class ContactMySql implements ContactSql {
 			/*********************** * search in all folder or subfolder * ***********************/ 
 			
 			if (cso.isAllFolders()){
+				
+			} else if (cso.isAllFolders()){
 				folder = -1;
 				sb.append(' ').append(cso.getAllFolderSQLINString()).append(" AND ");
 

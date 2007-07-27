@@ -100,7 +100,7 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
 	
 public class RdbContactSQLInterface implements ContactSQLInterface {
 
-	private static final String ERR_UNABLE_TO_LOAD_OBJECTS_CONTEXT_1$D_USER_2$D = "Unable to load Objects. Context %1$d User %2$d";
+	private static final String ERR_UNABLE_TO_LOAD_OBJECTS_CONTEXT_1$D_USER_2$D = "Unable to load objects. Context %1$d User %2$d";
 	private final int userId;
 	private final int[] memberInGroups;
 	private final Context ctx;
@@ -137,7 +137,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 		}catch (InvalidStateException ise){
 			throw EXCEPTIONS.create(0,ise);
 		}catch (OXConflictException ce){
-            LOG.debug("Unable to Insert Contact", ce);
+            LOG.debug("Unable to insert contact", ce);
 			throw ce;
 		}catch (OXException e){
             LOG.debug("Problem while inserting contact.", e);
@@ -271,8 +271,8 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 							ContactException.NON_CONTACT_FOLDER_MSG,
 							ContactException.NO_PERMISSION_MSG,
 							ContactException.NO_PERMISSION_MSG,
-							"An Error occurred during the load of Folder Objects. Context %1$d Folder %2$d User %3$d",
-							"An Error occurred during the load of Folder Objects. Context %1$d Folder %2$d User %3$d"
+							"An error occurred during the load of folder objects. Context %1$d Folder %2$d User %3$d",
+							"An error occurred during the load of folder objects. Context %1$d Folder %2$d User %3$d"
 						}
 	)
 	public SearchIterator getContactsInFolder(final int folderId, final int from, final int to, final int order_field, final String orderMechanism, final int[] cols) throws OXException {
@@ -372,8 +372,8 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 							ContactException.NON_CONTACT_FOLDER_MSG,
 							ContactException.NO_PERMISSION_MSG,
 							ContactException.NO_PERMISSION_MSG,
-							"An Error occurred during the load of Folder Objects by a extended search. Context %1$d Folder %2$d User %3$d",
-							"An Error occurred during the load of Folder Objects by a extended search. Context %1$d Folder %2$d User %3$d",
+							"An error occurred during the load of folder objects by an extended search. Context %1$d Folder %2$d User %3$d",
+							"An error occurred during the load of folder objects by an extended search. Context %1$d Folder %2$d User %3$d",
 							ContactException.INIT_CONNECTION_FROM_DBPOOL
 						}
 	)
@@ -479,8 +479,8 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 							ContactException.NON_CONTACT_FOLDER_MSG,
 							ContactException.NO_PERMISSION_MSG,
 							ContactException.NO_PERMISSION_MSG,
-							"An Error occurred during the load of Folder Objects by a simple search. Context %1$d Folder %2$d User %3$d",
-							"An Error occurred during the load of Folder Objects by a simple search. Context %1$d Folder %2$d User %3$d"
+							"An error occurred during the load of folder objects by a simple search. Context %1$d Folder %2$d User %3$d",
+							"An error occurred during the load of folder objects by a simple search. Context %1$d Folder %2$d User %3$d"
 						}
 	)
 	public SearchIterator searchContacts(final String searchpattern, final boolean startletter, final int folderId, final int order_field, final String orderMechanism, final int[] cols) throws OXException {
@@ -590,7 +590,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 								},
 			desc={"26","27","28","29"},
 			exceptionId={26,27,28,29},
-			msg={	"The Object you requested can not be found. Try again. Context %1$d Folder %2$d User %3$d Object %4$d",
+			msg={	"The object you requested can not be found. Try again. Context %1$d Folder %2$d User %3$d Object %4$d",
 							ContactException.NON_CONTACT_FOLDER_MSG,
 							ContactException.NO_READ_PERMISSION_MSG,
 							ContactException.INIT_CONNECTION_FROM_DBPOOL
@@ -653,8 +653,8 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 							ContactException.NON_CONTACT_FOLDER_MSG,
 							ContactException.NO_PERMISSION_MSG,
 							ContactException.NO_PERMISSION_MSG,
-							"An Error occurred during the load of modified Objects from a Folder. Context %1$d Folder %2$d User %3$d",
-							"An Error occurred during the load of modified Objects from a Folder. Context %1$d Folder %2$d User %3$d"
+							"An error occurred during the load of modified objects from a folder. Context %1$d Folder %2$d User %3$d",
+							"An error occurred during the load of modified objects from a folder. Context %1$d Folder %2$d User %3$d"
 						}
 	)
 	public SearchIterator getModifiedContactsInFolder(final int folderId, final int[] cols, final Date since) throws OXException {
@@ -734,8 +734,8 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 			desc={"36","37","38"},
 			exceptionId={36,37,38},
 			msg={	ContactException.INIT_CONNECTION_FROM_DBPOOL,
-							"An Error occurred during the load of deleted Objects from a Folder. Context %1$d Folder %2$d User %3$d",
-							"An Error occurred during the load of deleted Objects from a Folder. Context %1$d Folder %2$d User %3$d"
+							"An error occurred during the load of deleted objects from a folder. Context %1$d Folder %2$d User %3$d",
+							"An error occurred during the load of deleted objects from a folder. Context %1$d Folder %2$d User %3$d"
 						}
 	)
 	public SearchIterator getDeletedContactsInFolder(final int folderId, final int[] cols, final Date since) throws OXException {
@@ -780,13 +780,13 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 								},
 			desc={"39","40","41","42","58","43","44","45","46","56"},
 			exceptionId={39,40,41,42,58,43,44,45,46,56},
-			msg={	"Unable to delete this Contact. Object not found. Context %1$d Folder %2$d User %3$d Object %4$d",
+			msg={	"Unable to delete this contact. Object not found. Context %1$d Folder %2$d User %3$d Object %4$d",
 							ContactException.OBJECT_HAS_CHANGED_MSG+" Context %1$d Folder %2$d User %3$d Object %4$d",
 							ContactException.NON_CONTACT_FOLDER_MSG,
 							ContactException.NO_DELETE_PERMISSION_MSG,
 							ContactException.NO_DELETE_PERMISSION_MSG,
 							ContactException.INIT_CONNECTION_FROM_DBPOOL,
-							"Unable to delete Contact Object. Context %1$d Folder %2$d User %3$d Object %4$d",
+							"Unable to delete contact object. Context %1$d Folder %2$d User %3$d Object %4$d",
 							ContactException.INIT_CONNECTION_FROM_DBPOOL,
 							ContactException.NO_DELETE_PERMISSION_MSG,
 							ContactException.EVENT_QUEUE
