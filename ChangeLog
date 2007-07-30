@@ -1,6 +1,7 @@
 * 2007-07-30 - marcus.klein@open-xchange.com
 
  - Bugfix #7377. Fixed update of tasks to prevent loss of folder mappings.
+ - Bugfix #8351. Server now runs with AggressiveHeap memory option.
 
 * 2007-07-27 ben.pahne@open-xchange.com
 
