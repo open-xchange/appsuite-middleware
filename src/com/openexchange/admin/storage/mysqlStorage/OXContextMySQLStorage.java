@@ -764,17 +764,17 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             configdb_read = cache.getREADConnectionForCONFIGDB();
 
             final String search_patterntmp = search_pattern.replace('*', '%');
-            stmt = configdb_read.prepareStatement("SELECT cid FROM context WHERE name LIKE ? OR cid LIKE ?");
-            stmt.setString(1, search_patterntmp);
+            stmt = configdb_read.prepareStatement("SELECT context_server2db_pool.cid FROM context_server2db_pool,server,context WHERE context_server2db_pool.server_id=server.server_id AND server.name=? AND context.cid=context_server2db_pool.cid AND ( context.name LIKE ? OR context.cid LIKE ? )");
+            stmt.setString(1, prop.getProp(AdminProperties.Prop.SERVER_NAME, "local"));
             stmt.setString(2, search_patterntmp);
-
+            stmt.setString(3, search_patterntmp);
             final ResultSet rs = stmt.executeQuery();
 
             final ArrayList<Context> list = new ArrayList<Context>();
 
             while (rs.next()) {
                 Context cs = new Context();
-                final int cid = rs.getInt("cid");
+                final int cid = rs.getInt("context_server2db_pool.cid");
                 cs.setID(cid);
                 cs = this.oxcontextcommon.getData(cs, configdb_read,
                         Long.parseLong(prop.getProp("AVERAGE_CONTEXT_SIZE", "100")));
