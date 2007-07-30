@@ -63,6 +63,7 @@ import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Part;
+import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
@@ -73,6 +74,7 @@ import com.openexchange.api2.MailInterfaceImpl;
 import com.openexchange.api2.OXException;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
+import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.IMAPProperties;
 import com.openexchange.imap.UserSettingMail;
 import com.openexchange.sessiond.SessionObject;
@@ -88,7 +90,7 @@ import com.sun.mail.imap.IMAPFolder;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public class MessageUtils {
+public final class MessageUtils {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(MessageUtils.class);
@@ -113,7 +115,65 @@ public class MessageUtils {
 		super();
 	}
 
-	public static final String decodeMultiEncodedHeader(final String hdrVal) {
+	/**
+	 * Parse the given sequence of addresses into InternetAddress objects by
+	 * invoking <code>{@link InternetAddress#parse(String, boolean)}</code>.
+	 * If <code>strict</code> is false, simple email addresses separated by
+	 * spaces are also allowed. If <code>strict</code> is true, many (but not
+	 * all) of the RFC822 syntax rules are enforced. In particular, even if
+	 * <code>strict</code> is true, addresses composed of simple names (with
+	 * no "@domain" part) are allowed. Such "illegal" addresses are not uncommon
+	 * in real messages.
+	 * <p>
+	 * Non-strict parsing is typically used when parsing a list of mail
+	 * addresses entered by a human. Strict parsing is typically used when
+	 * parsing address headers in mail messages.
+	 * <p>
+	 * Additionally the personal parts are MIME encoded using default charset
+	 * specified in 'imap.properties' file
+	 * 
+	 * @param addresslist -
+	 *            comma separated address strings
+	 * @param strict -
+	 *            <code>true</code> to enforce RFC822 syntax; otherwise
+	 *            <code>false</code>
+	 * @see IMAPProperties#getDefaultMimeCharset()
+	 * @return array of <code>InternetAddress</code> objects
+	 * @throws AddressException -
+	 *             if parsing fails
+	 */
+	public static InternetAddress[] parseAddressList(final String addresslist, final boolean strict)
+			throws AddressException {
+		final InternetAddress[] addrs = InternetAddress.parse(replaceWithComma(addresslist), strict);
+		for (int i = 0; i < addrs.length; i++) {
+			try {
+				addrs[i].setPersonal(addrs[i].getPersonal(), IMAPProperties.getDefaultMimeCharset());
+			} catch (final UnsupportedEncodingException e) {
+				LOG.error("Unsupported encoding in a message detected and monitored.", e);
+				MailInterfaceImpl.mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
+			} catch (final IMAPException e) {
+				LOG.error(e.getMessage(), e);
+			}
+		}
+		return addrs;
+	}
+
+	private static final Pattern PATTERN_REPLACE = Pattern.compile("([^\"]\\S+?)(\\s*)([;|])(\\s*)");
+
+	private static String replaceWithComma(final String addressList) {
+		final StringBuilder sb = new StringBuilder();
+		final Matcher m = PATTERN_REPLACE.matcher(addressList);
+		int lastMatch = 0;
+		while (m.find()) {
+			sb.append(addressList.substring(lastMatch, m.start()));
+			sb.append(m.group(1)).append(m.group(2)).append(',').append(m.group(4));
+			lastMatch = m.end();
+		}
+		sb.append(addressList.substring(lastMatch));
+		return sb.toString();
+	}
+
+	public static String decodeMultiEncodedHeader(final String hdrVal) {
 		if (hdrVal == null) {
 			return null;
 		}
@@ -144,11 +204,11 @@ public class MessageUtils {
 
 	private static final char CHAR_BREAK = '\n';
 
-	public static final String removeHdrLineBreak(final String hdrVal) {
+	public static String removeHdrLineBreak(final String hdrVal) {
 		return PATTERN_RMV_HDR_BR.matcher(hdrVal).replaceAll(STR_EMPTY);
 	}
 
-	public static final String performLineWrap(final String content, final boolean isHtml, final int linewrap) {
+	public static String performLineWrap(final String content, final boolean isHtml, final int linewrap) {
 		if (linewrap <= 0) {
 			return content;
 		}
@@ -163,11 +223,11 @@ public class MessageUtils {
 		return sb.toString();
 	}
 
-	private static final String wrapTextLine(final String line, final int linewrap) {
+	private static String wrapTextLine(final String line, final int linewrap) {
 		return wrapTextLineRecursive(line, linewrap, null, true);
 	}
 
-	private static final String wrapTextLineRecursive(final String line, final int linewrap, final String quoteArg,
+	private static String wrapTextLineRecursive(final String line, final int linewrap, final String quoteArg,
 			final boolean lookUpQuote) {
 		final int length = line.length();
 		if (length <= linewrap) {
@@ -240,12 +300,12 @@ public class MessageUtils {
 
 	private static final Pattern PATTERN_QP = Pattern.compile("((?:\\s?>)+)(\\s?)(.*)");
 
-	private static final String getQuotePrefix(final String line) {
+	private static String getQuotePrefix(final String line) {
 		final Matcher m = PATTERN_QP.matcher(line);
 		return m.matches() ? new StringBuilder(m.group(1)).append(m.group(2)).toString() : null;
 	}
 
-	private static final int[] getHrefIndices(final String line) {
+	private static int[] getHrefIndices(final String line) {
 		final SmartIntArray sia = new SmartIntArray(10);
 		final Matcher m = MailTools.PATTERN_HREF.matcher(line);
 		while (m.find()) {
@@ -255,7 +315,7 @@ public class MessageUtils {
 		return sia.toArray();
 	}
 
-	private static final int[] isLineBreakInsideHref(final int[] hrefIndices, final int linewrap) {
+	private static int[] isLineBreakInsideHref(final int[] hrefIndices, final int linewrap) {
 		for (int i = 0; i < hrefIndices.length; i += 2) {
 			if (hrefIndices[i] <= linewrap && hrefIndices[i + 1] > linewrap) {
 				return new int[] { hrefIndices[i], hrefIndices[i + 1] };
@@ -274,8 +334,8 @@ public class MessageUtils {
 	 * display according to user's configuration. The original content keeps
 	 * unaffected.
 	 */
-	public static final String formatContentForDisplay(final String s, final boolean isHtml,
-			final SessionObject session, final String msgUID) {
+	public static String formatContentForDisplay(final String s, final boolean isHtml, final SessionObject session,
+			final String msgUID) {
 		final UserSettingMail usm = session.getUserConfiguration().getUserSettingMail();
 		String retval = s;
 		if (isHtml) {
@@ -328,7 +388,7 @@ public class MessageUtils {
 	 * with colored "&lt;blockquote&gt;" tags according to configured quote
 	 * colors in file "imap.properties"
 	 */
-	private static final String replaceHTMLBlockQuotesForDisplay(final String htmlText) {
+	private static String replaceHTMLBlockQuotesForDisplay(final String htmlText) {
 		final StringBuilder sb = new StringBuilder(htmlText.length() + INT_100);
 		int offset = 0;
 		int pos = -1;
@@ -378,7 +438,7 @@ public class MessageUtils {
 	 * Turns all simple quotes "&amp;gt; " to colored "&lt;blockquote&gt;" tags
 	 * according to configured quote colors in file "imap.properties"
 	 */
-	private static final String replaceHTMLSimpleQuotesForDisplay(final String htmlText) {
+	private static String replaceHTMLSimpleQuotesForDisplay(final String htmlText) {
 		final StringBuilder sb = new StringBuilder();
 		final String[] lines = htmlText.split(STR_SPLIT_BR);
 		int levelBefore = 0;
@@ -441,7 +501,7 @@ public class MessageUtils {
 	 * @return partially converted plain text version of given html content as
 	 *         html content
 	 */
-	public final static String convertAndKeepQuotes(final String htmlContent, final Html2TextConverter converter)
+	public static String convertAndKeepQuotes(final String htmlContent, final Html2TextConverter converter)
 			throws IOException {
 
 		final StringBuilder sb = new StringBuilder(htmlContent.length() + INT_100);
@@ -460,8 +520,8 @@ public class MessageUtils {
 	 * *************************************************************
 	 */
 
-	public static final String getFormattedText(final String text, final boolean isHtmlContent,
-			final SessionObject session, final String msgUID) {
+	public static String getFormattedText(final String text, final boolean isHtmlContent, final SessionObject session,
+			final String msgUID) {
 		final UserSettingMail usm = session.getUserConfiguration().getUserSettingMail();
 		final StringBuilder formattedText = new StringBuilder();
 		if (isHtmlContent) {
@@ -552,8 +612,7 @@ public class MessageUtils {
 	 * Replaces all occurences of <code>&lt;img cid:&quot;[cid]&quot;...</code>
 	 * with links to the image content
 	 */
-	private static final String filterInlineImages(final String content, final SessionObject session,
-			final String msgUID) {
+	private static String filterInlineImages(final String content, final SessionObject session, final String msgUID) {
 		String reval = content;
 		try {
 			final Matcher imgMatcher = IMG_PATTERN.matcher(reval);
@@ -586,7 +645,7 @@ public class MessageUtils {
 	 * Replaces all occuring "<code> &amp;gt;</code>" patterns with a
 	 * surrounding <code>&lt;blockquote&gt;</code> tag
 	 */
-	private static final String doHtmlColorQuoting(final String htmlContent) {
+	private static String doHtmlColorQuoting(final String htmlContent) {
 		final StringBuffer htmlBuffer = new StringBuffer(htmlContent.length());
 		BufferedReader reader = null;
 		try {
@@ -672,7 +731,7 @@ public class MessageUtils {
 	 * @throws MessagingException -
 	 *             if an error occurs in part's getter methods
 	 */
-	public static final String readPart(final Part p) throws OXException, MessagingException {
+	public static String readPart(final Part p) throws OXException, MessagingException {
 		return readPart(p, new ContentType(p.getContentType()));
 	}
 
@@ -692,7 +751,7 @@ public class MessageUtils {
 	 * @throws MessagingException -
 	 *             if an error occurs in part's getter methods
 	 */
-	public static final String readPart(final Part p, final ContentType ct) throws MessagingException {
+	public static String readPart(final Part p, final ContentType ct) throws MessagingException {
 		/*
 		 * Use specified charset if available else use default one
 		 */
@@ -749,7 +808,7 @@ public class MessageUtils {
 	 * @throws IOException -
 	 *             if an I/O error occurs
 	 */
-	public static final String readStream(final InputStream inStream, final String charset) throws IOException {
+	public static String readStream(final InputStream inStream, final String charset) throws IOException {
 		InputStreamReader isr = null;
 		try {
 			int count = 0;
@@ -788,7 +847,7 @@ public class MessageUtils {
 	 *            the array of <code>javax.mail.internet.InternetAddress</code>
 	 * @return - the comma-separated string
 	 */
-	public static final String addr2String(final InternetAddress[] addrs) {
+	public static String addr2String(final InternetAddress[] addrs) {
 		if (addrs == null || addrs.length == 0) {
 			return STR_EMPTY;
 		}
@@ -801,7 +860,7 @@ public class MessageUtils {
 		return sb.toString();
 	}
 
-	public static final String getMessageUniqueIdentifier(final Message msg) throws MessagingException {
+	public static String getMessageUniqueIdentifier(final Message msg) throws MessagingException {
 		if (msg.getFolder() == null) {
 			return null;
 		}
@@ -823,11 +882,11 @@ public class MessageUtils {
 		}
 	}
 
-	public static final String getMessageUniqueIdentifier(final IMAPFolder folder, final long msgUID) {
+	public static String getMessageUniqueIdentifier(final IMAPFolder folder, final long msgUID) {
 		return new StringBuilder(folder.getFullName()).append(Mail.SEPERATOR).append(msgUID).toString();
 	}
 
-	public static final int[] parseIdentifier(final String id) {
+	public static int[] parseIdentifier(final String id) {
 		final String[] sa = id.split("\\.");
 		final int[] retval = new int[sa.length];
 		for (int i = 0; i < sa.length; i++) {
@@ -836,7 +895,7 @@ public class MessageUtils {
 		return retval;
 	}
 
-	public final static String getFileName(final Part p, final String identifier) throws MessagingException {
+	public static String getFileName(final Part p, final String identifier) throws MessagingException {
 		String filename = p.getFileName();
 		if (filename == null || isEmptyString(filename)) {
 			filename = new StringBuilder(20).append("Part_").append(identifier).toString();
@@ -850,7 +909,7 @@ public class MessageUtils {
 		return filename;
 	}
 
-	public final static String getFileName(final Part p, final int[] indices) throws MessagingException {
+	public static String getFileName(final Part p, final int[] indices) throws MessagingException {
 		String filename = p.getFileName();
 		if (filename == null || isEmptyString(filename)) {
 			filename = new StringBuilder(20).append("Part_").append(getIdentifier(indices)).toString();
@@ -864,7 +923,7 @@ public class MessageUtils {
 		return filename;
 	}
 
-	private final static boolean isEmptyString(final String str) {
+	private static boolean isEmptyString(final String str) {
 		final char[] chars = str.toCharArray();
 		for (int i = 0; i < chars.length; i++) {
 			if (!Character.isWhitespace(chars[i])) {
@@ -874,14 +933,14 @@ public class MessageUtils {
 		return true;
 	}
 
-	public static final String getIdentifier(final String prefix, final int partCount) {
+	public static String getIdentifier(final String prefix, final int partCount) {
 		if (prefix == null) {
 			return String.valueOf(partCount);
 		}
 		return new StringBuilder(prefix).append('.').append(partCount).toString();
 	}
 
-	public static final String getIdentifier(final int[] indices) {
+	public static String getIdentifier(final int[] indices) {
 		final StringBuilder sb = new StringBuilder((2 * indices.length) - 1);
 		sb.append(indices[0]);
 		for (int i = 1; i < indices.length; i++) {

@@ -53,6 +53,7 @@ import static com.openexchange.groupware.container.mail.parser.MessageUtils.deco
 import static com.openexchange.groupware.container.mail.parser.MessageUtils.getMessageUniqueIdentifier;
 import static com.openexchange.groupware.container.mail.parser.MessageUtils.performLineWrap;
 import static com.openexchange.groupware.container.mail.parser.MessageUtils.removeHdrLineBreak;
+import static com.openexchange.groupware.container.mail.parser.MessageUtils.parseAddressList;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -2441,7 +2442,7 @@ public class MailInterfaceImpl implements MailInterface {
 				 */
 				final String alternates = imapCon.getSession().getProperty(PROP_MAIL_ALTERNATES);
 				if (alternates != null) {
-					filter.addAll(Arrays.asList(InternetAddress.parse(alternates, false)));
+					filter.addAll(Arrays.asList(parseAddressList(alternates, false)));
 				}
 				/*
 				 * Add user's aliases to filter
@@ -2453,7 +2454,7 @@ public class MailInterfaceImpl implements MailInterface {
 					for (int i = 1; i < userAddrs.length; i++) {
 						addrBuilder.append(',').append(userAddrs[i]);
 					}
-					filter.addAll(Arrays.asList(InternetAddress.parse(addrBuilder.toString(), false)));
+					filter.addAll(Arrays.asList(parseAddressList(addrBuilder.toString(), false)));
 				}
 				/*
 				 * Determine if other original recipients should be added to Cc
@@ -2470,7 +2471,7 @@ public class MailInterfaceImpl implements MailInterface {
 				String hdrVal = originalMsg.getHeader(MessageHeaders.HDR_TO, MessageHeaders.HDR_ADDR_DELIM);
 				InternetAddress[] toAddrs = null;
 				if (hdrVal != null) {
-					filteredAddrs.addAll(filter(filter, (toAddrs = InternetAddress.parse(removeHdrLineBreak(hdrVal),
+					filteredAddrs.addAll(filter(filter, (toAddrs = parseAddressList(removeHdrLineBreak(hdrVal),
 							true))));
 				}
 				/*
@@ -2500,7 +2501,7 @@ public class MailInterfaceImpl implements MailInterface {
 				filteredAddrs.clear();
 				hdrVal = originalMsg.getHeader(MessageHeaders.HDR_CC, MessageHeaders.HDR_ADDR_DELIM);
 				if (hdrVal != null) {
-					filteredAddrs.addAll(filter(filter, InternetAddress.parse(removeHdrLineBreak(hdrVal), true)));
+					filteredAddrs.addAll(filter(filter, parseAddressList(removeHdrLineBreak(hdrVal), true)));
 				}
 				if (!filteredAddrs.isEmpty()) {
 					retval.addCCAddresses(filteredAddrs.toArray(new InternetAddress[filteredAddrs.size()]));
@@ -2511,7 +2512,7 @@ public class MailInterfaceImpl implements MailInterface {
 				filteredAddrs.clear();
 				hdrVal = originalMsg.getHeader(MessageHeaders.HDR_BCC, MessageHeaders.HDR_ADDR_DELIM);
 				if (hdrVal != null) {
-					filteredAddrs.addAll(filter(filter, InternetAddress.parse(removeHdrLineBreak(hdrVal), true)));
+					filteredAddrs.addAll(filter(filter, parseAddressList(removeHdrLineBreak(hdrVal), true)));
 				}
 				if (!filteredAddrs.isEmpty()) {
 					retval.addBccAddresses(filteredAddrs.toArray(new InternetAddress[filteredAddrs.size()]));
@@ -2882,7 +2883,7 @@ public class MailInterfaceImpl implements MailInterface {
 			}
 			InternetAddress[] to = null;
 			for (int i = 0; i < dispNotification.length; i++) {
-				final InternetAddress[] addrs = InternetAddress.parse(dispNotification[i], false); // TODO:
+				final InternetAddress[] addrs = parseAddressList(dispNotification[i], false); // TODO:
 				// Should
 				// be
 				// strict
@@ -2922,7 +2923,7 @@ public class MailInterfaceImpl implements MailInterface {
 		} else {
 			from = usm.getSendAddr() == null ? sessionObj.getUserObject().getMail() : usm.getSendAddr();
 		}
-		msg.addFrom(InternetAddress.parse(from, false));
+		msg.addFrom(parseAddressList(from, false));
 		/*
 		 * Set to
 		 */
@@ -3249,7 +3250,7 @@ public class MailInterfaceImpl implements MailInterface {
 					ia = new InternetAddress[msgObj.getFrom().size()];
 					msgObj.getFrom().toArray(ia);
 				} else {
-					ia = InternetAddress.parse(usm.getReplyToAddr(), false);
+					ia = parseAddressList(usm.getReplyToAddr(), false);
 				}
 				newSMTPMsg.setReplyTo(ia);
 				/*

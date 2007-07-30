@@ -1,3 +1,8 @@
+* 2007-07-30 - thorben.betten@open-xchange.com
+
+ - Bugfix #8525: Fixed missing personal encoding when sending a read
+   acknowledgement
+
 * 2007-07-30 - marcus.klein@open-xchange.com
 
  - Bugfix #7377. Fixed update of tasks to prevent loss of folder mappings.

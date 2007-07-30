@@ -50,6 +50,7 @@
 package com.openexchange.groupware.container.mail;
 
 import static com.openexchange.api2.MailInterfaceImpl.getDefaultIMAPProperties;
+import static com.openexchange.groupware.container.mail.parser.MessageUtils.parseAddressList;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -161,14 +162,14 @@ public class MailObject {
 			/*
 			 * Set from
 			 */
-			InternetAddress[] internetAddrs = InternetAddress.parse(fromAddr, false);
+			InternetAddress[] internetAddrs = parseAddressList(fromAddr, false);
 			msg.setFrom(internetAddrs[0]);
 			/*
 			 * Set to
 			 */
 			String tmp = Arrays.toString(toAddrs);
 			tmp = tmp.substring(1, tmp.length() - 1);
-			internetAddrs = InternetAddress.parse(tmp, false);
+			internetAddrs = parseAddressList(tmp, false);
 			msg.setRecipients(RecipientType.TO, internetAddrs);
 			/*
 			 * Set cc
@@ -176,7 +177,7 @@ public class MailObject {
 			if (ccAddrs != null && ccAddrs.length > 0) {
 				tmp = Arrays.toString(ccAddrs);
 				tmp = tmp.substring(1, tmp.length() - 1);
-				internetAddrs = InternetAddress.parse(tmp, false);
+				internetAddrs = parseAddressList(tmp, false);
 				msg.setRecipients(RecipientType.CC, internetAddrs);
 			}
 			/*
@@ -185,7 +186,7 @@ public class MailObject {
 			if (bccAddrs != null && bccAddrs.length > 0) {
 				tmp = Arrays.toString(bccAddrs);
 				tmp = tmp.substring(1, tmp.length() - 1);
-				internetAddrs = InternetAddress.parse(tmp, false);
+				internetAddrs = parseAddressList(tmp, false);
 				msg.setRecipients(RecipientType.BCC, internetAddrs);
 			}
 			final ContentType ct = new ContentType(contentType);

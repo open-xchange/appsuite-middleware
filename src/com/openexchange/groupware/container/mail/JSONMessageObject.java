@@ -49,6 +49,8 @@
 
 package com.openexchange.groupware.container.mail;
 
+import static com.openexchange.groupware.container.mail.parser.MessageUtils.parseAddressList;
+
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1154,18 +1156,7 @@ public class JSONMessageObject {
 		if (!jo.has(key) || jo.isNull(key) || (value = jo.getString(key)).length() == 0) {
 			return retList;
 		}
-		final InternetAddress[] addrs = InternetAddress.parse(replaceWithComma(value), false);
-		for (int i = 0; i < addrs.length; i++) {
-			try {
-				addrs[i].setPersonal(addrs[i].getPersonal(), IMAPProperties.getDefaultMimeCharset());
-			} catch (UnsupportedEncodingException e) {
-				LOG.error("Unsupported encoding in a message detected and monitored.", e);
-				MailInterfaceImpl.mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
-			} catch (IMAPException e) {
-				LOG.error(e.getMessage(), e);
-			}
-		}
-		retList.addAll(Arrays.asList(addrs));
+		retList.addAll(Arrays.asList(parseAddressList(value, false)));
 		return retList;
 	}
 
@@ -1179,21 +1170,6 @@ public class JSONMessageObject {
 		} catch (AddressException e) {
 			return false;
 		}
-	}
-
-	private static final Pattern PATTERN_REPLACE = Pattern.compile("([^\"]\\S+?)(\\s*)([;|])(\\s*)");
-
-	private static final String replaceWithComma(final String addressList) {
-		final StringBuilder sb = new StringBuilder();
-		final Matcher m = PATTERN_REPLACE.matcher(addressList);
-		int lastMatch = 0;
-		while (m.find()) {
-			sb.append(addressList.substring(lastMatch, m.start()));
-			sb.append(m.group(1)).append(m.group(2)).append(',').append(m.group(4));
-			lastMatch = m.end();
-		}
-		sb.append(addressList.substring(lastMatch));
-		return sb.toString();
 	}
 
 	public static final String getPriorityString(final int priority) {
