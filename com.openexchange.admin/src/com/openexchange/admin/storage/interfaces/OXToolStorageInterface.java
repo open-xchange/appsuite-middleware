@@ -132,98 +132,14 @@ public abstract class OXToolStorageInterface {
     }
 
     
-    public abstract void primaryMailExists(final Context ctx, final String primary_mail) throws StorageException, InvalidDataException;
-
-    public abstract boolean existsResourceAddress(final Context ctx, final String address) throws StorageException;
-    
-    public abstract boolean existsResourceAddress(Context ctx, String address,Integer resource_id) throws StorageException;
-
-    public abstract boolean existsResource(final Context ctx, final String identifier) throws StorageException;
-
-    public abstract boolean existsResource(final Context ctx, final int resource_id) throws StorageException;
-
-    public abstract boolean existsGroup(final Context ctx, final int gid) throws StorageException;
-
-    public abstract boolean existsGroup(final Context ctx, final int[] gid) throws StorageException;
-
-    public abstract boolean existsGroup(final Context ctx, final Group[] gid) throws StorageException;
-
-    public abstract boolean existsGroup(final Context ctx, final String identifier) throws StorageException;
-
-    public abstract boolean existsGroupMember(final Context ctx, final int group_ID, final int[] user_ids) throws StorageException;
-
-    public abstract boolean existsGroupMember(final Context ctx, final int group_ID, final User[] users) throws StorageException;
-
-    public abstract boolean existsGroupMember(final Context ctx, final int group_ID, final int member_ID) throws StorageException;
-
-    public abstract boolean existsUser(final Context ctx, final String username) throws StorageException;
-
-    public abstract boolean existsUser(final Context ctx, final int uid) throws StorageException;
-
-    public abstract boolean isMasterDatabase(final int database_id) throws StorageException;
-
-    public abstract boolean existsReason(final int rid) throws StorageException;
-
-    public abstract boolean existsReason(final String reason) throws StorageException;
-
-    public abstract boolean existsUser(final Context ctx, final int[] user_ids) throws StorageException;
-
-    public abstract boolean existsUser(final Context ctx, final User[] users) throws StorageException;
-
-    public abstract boolean existsContext(final Context ctx) throws StorageException;
-
-    public abstract boolean isContextAdmin(final Context ctx, final int user_id) throws StorageException;
-
-    public abstract int getAdminForContext(final Context ctx, final Connection con) throws StorageException;
-
-    public abstract int getDefaultGroupForContext(final Context ctx, final Connection con) throws StorageException;
-    
-    public abstract int getDefaultGroupForContextWithOutConnection(final Context ctx) throws StorageException;
-    
-    public abstract int getGidNumberOfGroup(final Context ctx,final int group_id, final Connection con) throws StorageException;
-
-    public abstract boolean existsServerID(final int check_ID, final String table, final String field) throws StorageException;
-
-    public abstract boolean existsServer(final int server_id) throws StorageException;
-
-    public abstract boolean existsServer(final String server_name) throws StorageException;
-
-    public abstract boolean existsDatabase(final int db_id) throws StorageException;
-
-    public abstract boolean existsStore(final int store_id) throws StorageException;
-
-    public abstract boolean existsStore(final String url) throws StorageException;
-
-    public abstract boolean existsDatabase(final String db_name) throws StorageException;
-    
-    public abstract boolean existsContextLoginMappings(Context ctx,Connection configdb_connection) throws StorageException;
-    
-    public abstract boolean existsContextLoginMappings(Context ctx) throws StorageException;
-
-    public abstract boolean isContextEnabled(final Context ctx) throws StorageException;
-
-    public abstract boolean storeInUse(final int store_id) throws StorageException;
-
-    public abstract boolean poolInUse(final int pool_id) throws StorageException;
-
-    public abstract boolean serverInUse(final int server_id) throws StorageException;
-    
     /**
-     * Checks if given domain is used as alias or primary mail address of any user in given context.
+     * Checks if given domain is used by any user,group or resource as mailaddress in given context.
      * @param domain
-     * @return Users which use this domain. null if no user uses this domain.
+     * @return
      * @throws StorageException
      */
-    public abstract User[] domainInUseByUser(final Context ctx,final String domain) throws StorageException;
-    
-    /**
-     * Checks if given domain is used as mail address of any resource in given context.
-     * @param domain
-     * @return Resources which use this domain. null if no resource uses this domain.
-     * @throws StorageException
-     */
-    public abstract Resource[] domainInUseByResource(final Context ctx,final String domain) throws StorageException;
-    
+    public abstract boolean domainInUse(final Context ctx,final String domain) throws StorageException;
+
     /**
      * Checks if given domain is used as mail address of any group in given context.
      * @param domain
@@ -233,32 +149,116 @@ public abstract class OXToolStorageInterface {
     public abstract Group[] domainInUseByGroup(final Context ctx,final String domain) throws StorageException;
     
     /**
-     * Checks if given domain is used by any user,group or resource as mailaddress in given context.
+     * Checks if given domain is used as mail address of any resource in given context.
      * @param domain
-     * @return
+     * @return Resources which use this domain. null if no resource uses this domain.
      * @throws StorageException
      */
-    public abstract boolean domainInUse(final Context ctx,final String domain) throws StorageException;
+    public abstract Resource[] domainInUseByResource(final Context ctx,final String domain) throws StorageException;
+
+    /**
+     * Checks if given domain is used as alias or primary mail address of any user in given context.
+     * @param domain
+     * @return Users which use this domain. null if no user uses this domain.
+     * @throws StorageException
+     */
+    public abstract User[] domainInUseByUser(final Context ctx,final String domain) throws StorageException;
+
+    public abstract boolean existsContext(final Context ctx) throws StorageException;
+
+    public abstract boolean existsContextLoginMappings(Context ctx) throws StorageException;
+
+    public abstract boolean existsContextLoginMappings(Context ctx,Connection configdb_connection) throws StorageException;
+
+    public abstract boolean existsDatabase(final int db_id) throws StorageException;
+
+    public abstract boolean existsDatabase(final String db_name) throws StorageException;
+
+    public abstract boolean existsGroup(final Context ctx, final Group[] gid) throws StorageException;
+
+    public abstract boolean existsGroup(final Context ctx, final int gid) throws StorageException;
+
+    public abstract boolean existsGroup(final Context ctx, final int[] gid) throws StorageException;
+
+    public abstract boolean existsGroup(final Context ctx, final String identifier) throws StorageException;
+
+    public abstract boolean existsGroupMember(final Context ctx, final int group_ID, final int member_ID) throws StorageException;
+
+    public abstract boolean existsGroupMember(final Context ctx, final int group_ID, final int[] user_ids) throws StorageException;
+
+    public abstract boolean existsGroupMember(final Context ctx, final int group_ID, final User[] users) throws StorageException;
+
+    public abstract boolean existsReason(final int rid) throws StorageException;
+
+    public abstract boolean existsReason(final String reason) throws StorageException;
+
+    public abstract boolean existsResource(final Context ctx, final int resource_id) throws StorageException;
+
+    public abstract boolean existsResource(final Context ctx, final String identifier) throws StorageException;
+
+    public abstract boolean existsResourceAddress(final Context ctx, final String address) throws StorageException;
+
+    public abstract boolean existsResourceAddress(Context ctx, String address,Integer resource_id) throws StorageException;
+
+    public abstract boolean existsServer(final int server_id) throws StorageException;
     
-    public abstract String getUsernameByUserID(final Context ctx,final int user_id) throws StorageException;
+    public abstract boolean existsServer(final String server_name) throws StorageException;
     
-    public abstract int getUserIDByUsername(final Context ctx,final String username) throws StorageException;
+    public abstract boolean existsServerID(final int check_ID, final String table, final String field) throws StorageException;
+
+    public abstract boolean existsStore(final int store_id) throws StorageException;
+
+    public abstract boolean existsStore(final String url) throws StorageException;
+
+    public abstract boolean existsUser(final Context ctx, final int uid) throws StorageException;
+
+    public abstract boolean existsUser(final Context ctx, final int[] user_ids) throws StorageException;
+
+    public abstract boolean existsUser(final Context ctx, final String username) throws StorageException;
+
+    public abstract boolean existsUser(final Context ctx, final User[] users) throws StorageException;
+
+    public abstract int getAdminForContext(final Context ctx, final Connection con) throws StorageException;
     
-    public abstract String getGroupnameByGroupID(final Context ctx,final int group_id) throws StorageException;
+    public abstract int getDefaultGroupForContext(final Context ctx, final Connection con) throws StorageException;
     
+    public abstract int getDefaultGroupForContextWithOutConnection(final Context ctx) throws StorageException;
+
+    public abstract int getGidNumberOfGroup(final Context ctx,final int group_id, final Connection con) throws StorageException;
+
     public abstract int getGroupIDByGroupname(final Context ctx,final String groupname) throws StorageException;
+
+    public abstract String getGroupnameByGroupID(final Context ctx,final int group_id) throws StorageException;
+
+    public abstract int getResourceIDByResourcename(final Context ctx,final String resourcename) throws StorageException;
     
     public abstract String getResourcenameByResourceID(final Context ctx,final int resource_id) throws StorageException;
     
-    public abstract int getResourceIDByResourcename(final Context ctx,final String resourcename) throws StorageException;
+    public abstract int getUserIDByUsername(final Context ctx,final String username) throws StorageException;
     
-    public abstract boolean schemaBeingLockedOrNeedsUpdate(final Context ctx) throws StorageException;
-
-    public abstract boolean schemaBeingLockedOrNeedsUpdate(final int writePoolId, final String schema) throws StorageException;
+    public abstract String getUsernameByUserID(final Context ctx,final int user_id) throws StorageException;
+    
+    public abstract boolean isContextAdmin(final Context ctx, final int user_id) throws StorageException;
+    
+    public abstract boolean isContextEnabled(final Context ctx) throws StorageException;
+    
+    public abstract boolean isMasterDatabase(final int database_id) throws StorageException;
     
     public abstract boolean isUserSettingMailBitSet(final Context ctx, final User user, final int bit, final Connection con) throws StorageException;
+    
+    public abstract boolean poolInUse(final int pool_id) throws StorageException;
+    
+    public abstract void primaryMailExists(final Context ctx, final String primary_mail) throws StorageException, InvalidDataException;
+    
+    public abstract boolean schemaBeingLockedOrNeedsUpdate(final Context ctx) throws StorageException;
+    
+    public abstract boolean schemaBeingLockedOrNeedsUpdate(final int writePoolId, final String schema) throws StorageException;
 
+    public abstract boolean serverInUse(final int server_id) throws StorageException;
+    
     public abstract void setUserSettingMailBit(final Context ctx, final User user, final int bit, final Connection con) throws StorageException;
+
+    public abstract boolean storeInUse(final int store_id) throws StorageException;
     
     public abstract void unsetUserSettingMailBit(final Context ctx, final User user, final int bit, final Connection con) throws StorageException;
 }
