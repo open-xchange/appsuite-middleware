@@ -50,36 +50,36 @@ package com.openexchange.admin.console.context;
 
 
 import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.console.AdminParser.NeededTriState;
 import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.console.user.UserAbstraction;
 import com.openexchange.admin.rmi.dataobjects.Context;
 
 public abstract class ContextAbstraction extends UserAbstraction {   
 
+    private static final String OPT_NAME_CONTEXT_QUOTA_DESCRIPTION = "Context wide filestore quota in MB.";
+    private final static char OPT_QUOTA_SHORT = 'q';
+
+    private final static String OPT_QUOTA_LONG = "quota";
+    protected static final String OPT_NAME_ADMINPASS_DESCRIPTION="master Admin password";
+    protected static final String OPT_NAME_ADMINUSER_DESCRIPTION="master Admin user name";
+    
     protected final static char OPT_NAME_COMMON_ID_SHORT = 'i';
     protected final static String OPT_NAME_COMMON_ID_LONG  = "id";
-    
-    private final static char OPT_QUOTA_SHORT = 'q';
-    private final static String OPT_QUOTA_LONG = "quota";
     
     protected Option commonIDOption = null;
     protected Option contextQuotaOption = null;
 
-    protected void setCommonIDOption(final AdminParser parser,final boolean required ){
-        this.commonIDOption = setShortLongOpt(parser, OPT_NAME_COMMON_ID_SHORT,OPT_NAME_COMMON_ID_LONG,"Object Id",true, convertBooleantoTriState(required));
-    }
-    
-    protected void setContextQuotaOption(final AdminParser parser,final boolean required ){
-        this.contextQuotaOption = setShortLongOpt(parser, OPT_QUOTA_SHORT,OPT_QUOTA_LONG,"How much quota the context.",true, convertBooleantoTriState(required));
-    }
-    
-    protected void setContextNameOption(final AdminParser parser,final boolean required ){
-        this.contextNameOption = setShortLongOpt(parser, OPT_NAME_CONTEXT_NAME_SHORT,OPT_NAME_CONTEXT_NAME_LONG,OPT_NAME_CONTEXT_NAME_DESCRIPTION,true, convertBooleantoTriState(required));
-    }
-    
     @Override
     protected String getObjectName() {
         return "context";
+    }
+
+    protected void parseAndSetContextName(final AdminParser parser, final Context ctx) {
+        final String optionValue = (String) parser.getOptionValue(contextNameOption);
+        if (optionValue != null) {
+            ctx.setName(optionValue);
+        }
     }
 
     protected void parseAndSetContextQuota(final AdminParser parser, final Context ctx) {
@@ -88,12 +88,25 @@ public abstract class ContextAbstraction extends UserAbstraction {
             ctx.setMaxQuota(Long.parseLong(contextQuota));
         }
     }
+    
+    protected void setAdminPassOption(final AdminParser admp) {
+        this.adminPassOption = setShortLongOpt(admp,OPT_NAME_ADMINPASS_SHORT, OPT_NAME_ADMINPASS_LONG, OPT_NAME_ADMINPASS_DESCRIPTION, true, NeededTriState.possibly);
+    }
+    
+    protected void setAdminUserOption(final AdminParser admp) {
+        this.adminUserOption= setShortLongOpt(admp,OPT_NAME_ADMINUSER_SHORT, OPT_NAME_ADMINUSER_LONG, OPT_NAME_ADMINUSER_DESCRIPTION, true, NeededTriState.possibly);
+    }
+    
+    protected void setCommonIDOption(final AdminParser parser,final boolean required ){
+        this.commonIDOption = setShortLongOpt(parser, OPT_NAME_COMMON_ID_SHORT,OPT_NAME_COMMON_ID_LONG,"Object Id",true, convertBooleantoTriState(required));
+    }
 
-    protected void parseAndSetContextName(final AdminParser parser, final Context ctx) {
-        final String optionValue = (String) parser.getOptionValue(contextNameOption);
-        if (optionValue != null) {
-            ctx.setName(optionValue);
-        }
+    protected void setContextNameOption(final AdminParser parser,final boolean required ){
+        this.contextNameOption = setShortLongOpt(parser, OPT_NAME_CONTEXT_NAME_SHORT,OPT_NAME_CONTEXT_NAME_LONG,OPT_NAME_CONTEXT_NAME_DESCRIPTION,true, convertBooleantoTriState(required));
+    }
+
+    protected void setContextQuotaOption(final AdminParser parser,final boolean required ){
+        this.contextQuotaOption = setShortLongOpt(parser, OPT_QUOTA_SHORT,OPT_QUOTA_LONG,OPT_NAME_CONTEXT_QUOTA_DESCRIPTION,true, convertBooleantoTriState(required));
     }
 
 }
