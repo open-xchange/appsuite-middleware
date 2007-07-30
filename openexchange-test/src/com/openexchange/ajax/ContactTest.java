@@ -23,6 +23,7 @@ import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.LinkEntryObject;
+import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.test.TestException;
 import com.openexchange.tools.URLParameter;
 import java.io.ByteArrayInputStream;
@@ -666,6 +667,46 @@ public class ContactTest extends AbstractAJAXTest {
 		jsonObj.put("pattern", searchpattern);
 		jsonObj.put(AJAXServlet.PARAMETER_INFOLDER, inFolder);
 		jsonObj.put("startletter", startletter);
+		
+		WebRequest req = new PutMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters(), new ByteArrayInputStream(jsonObj.toString().getBytes()), "text/javascript");
+		WebResponse resp = webCon.getResponse(req);
+		
+		assertEquals(200, resp.getResponseCode());
+		
+		final Response response = Response.parse(resp.getText());
+		
+		if (response.hasError()) {
+			throw new TestException(response.getErrorMessage());
+		}
+		
+		assertNotNull("timestamp", response.getTimestamp());
+		
+		assertEquals(200, resp.getResponseCode());
+		
+		return jsonArray2ContactArray((JSONArray)response.getData(), cols);
+	}
+	
+	public static ContactObject[] searchContactAdvanced(WebConversation webCon, ContactSearchObject cso,int folder, int[] cols, String host, String session) throws OXException, Exception {
+		host = appendPrefix(host);
+		
+		final URLParameter parameter = new URLParameter();
+		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
+		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_SEARCH);
+		parameter.setParameter(AJAXServlet.PARAMETER_COLUMNS, URLParameter.colsArray2String(cols));
+	
+		JSONObject jsonObj = new JSONObject();
+		jsonObj.put(AJAXServlet.PARAMETER_INFOLDER, folder);
+		jsonObj.put(ContactFields.LAST_NAME,cso.getSurname());
+		jsonObj.put(ContactFields.FIRST_NAME ,cso.getGivenName());
+		jsonObj.put(ContactFields.DISPLAY_NAME ,cso.getDisplayName());
+		jsonObj.put(ContactFields.EMAIL1 ,cso.getEmail1());
+		jsonObj.put(ContactFields.EMAIL2 ,cso.getEmail2());
+		jsonObj.put(ContactFields.EMAIL3 ,cso.getEmail3());
+		
+		if (cso.getEmailAutoComplete()){
+			jsonObj.put("emailAutoComplete","true");
+			//parameter.setParameter("emailAutoComplete","true");
+		}
 		
 		WebRequest req = new PutMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters(), new ByteArrayInputStream(jsonObj.toString().getBytes()), "text/javascript");
 		WebResponse resp = webCon.getResponse(req);
