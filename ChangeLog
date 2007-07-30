@@ -1,3 +1,7 @@
+* 2007-07-03 - sebastian.kauss@open-xchange.com
+
+ - Fixed Bug #4409 - Exception when opening a contact
+
 * 2007-07-30 - thorben.betten@open-xchange.com
 
  - Bugfix #8525: Fixed missing personal encoding when sending a read
