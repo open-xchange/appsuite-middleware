@@ -168,13 +168,13 @@ public class OXMailException extends OXException {
 		NO_SUCH_PROVIDER("Session attempts to instantiate a provider that doesn't exist: %s",
 				Category.CODE_ERROR, 14),
 		/**
-		 * Wrong message %sheader: %s
+		 * Wrong message %s header: %s
 		 * <p>
 		 * The exception thrown due to an error in parsing RFC822 or MIME
 		 * headers
 		 * </p>
 		 */
-		PARSE_ERROR("Wrong message %sheader: %s", Category.USER_INPUT, 15),
+		PARSE_ERROR("Wrong message %s header: %s", Category.USER_INPUT, 15),
 		/**
 		 * An attempt was made to open a read-only folder with read-write: %s
 		 */
@@ -289,9 +289,9 @@ public class OXMailException extends OXException {
 				"The message to send contains an invalid attachment %s: neither content nor attachment's filename is set",
 				Category.CODE_ERROR, 41),
 		/**
-		 * User %s has no write access on IMAP-Folder %s
+		 * User %s has no write access to IMAP folder %s
 		 */
-		NO_WRITE_ACCESS("User %s has no write access on IMAP-Folder %s", Category.PERMISSION, 42),
+		NO_WRITE_ACCESS("User %s has no write access to IMAP folder %s", Category.PERMISSION, 42),
 		/**
 		 * IMAP default folder %s could not be created
 		 */
@@ -387,14 +387,14 @@ public class OXMailException extends OXException {
 		 */
 		NO_ATTACHMENT_FOUND("No attachment was found with id %s in message %s", Category.USER_INPUT, 64),
 		/**
-		 * Per-File Upload Quota (%d) exceeded for file %s (size=%d)
+		 * Upload quota (%d) exceeded for file %s (size=%d)
 		 */
-		UPLOAD_QUOTA_EXCEEDED_FOR_FILE("Per-File Upload Quota (%d) exceeded for file %s (size=%d)",
+		UPLOAD_QUOTA_EXCEEDED_FOR_FILE("Upload quota (%d) exceeded for file %s (size=%d)",
 				Category.USER_INPUT, 65),
 		/**
-		 * Upload Quota (%d) exceeded
+		 * Upload quota (%d) exceeded
 		 */
-		UPLOAD_QUOTA_EXCEEDED("Upload Quota (%d) exceeded", Category.USER_INPUT, 66),
+		UPLOAD_QUOTA_EXCEEDED("Upload quota (%d) exceeded", Category.USER_INPUT, 66),
 		/**
 		 * Missing user default email address in mail settings
 		 */
@@ -441,9 +441,9 @@ public class OXMailException extends OXException {
 		 */
 		FAILED_READ_ONLY_CHECK("Folder read-only check failed", Category.CODE_ERROR, 76),
 		/**
-		 * IMAP Property error: %s
+		 * IMAP property error: %s
 		 */
-		IMAP_PROPERTY_ERROR("IMAP Property error: %s", Category.SETUP_ERROR, 77),
+		IMAP_PROPERTY_ERROR("IMAP property error: %s", Category.SETUP_ERROR, 77),
 		/**
 		 * Unknown action: %s
 		 */

@@ -90,9 +90,9 @@ public class AJPv13Exception extends AbstractOXException {
 				"No data provided from web server: input stream returned \"-1\" while reading AJP magic bytes in package #%d",
 				Category.SOCKET_CONNECTION, 4),
 		/**
-		 * AJP Connection is not set to status "ASSIGNED"
+		 * AJP connection is not set to status "ASSIGNED"
 		 */
-		INVALID_CONNECTION_STATE("AJP Connection is not set to status \"ASSIGNED\"", Category.CODE_ERROR, 5),
+		INVALID_CONNECTION_STATE("AJP connection is not set to status \"ASSIGNED\"", Category.CODE_ERROR, 5),
 		/**
 		 * Response package exceeds max package size value of 8192k: %s
 		 */
@@ -123,9 +123,9 @@ public class AJPv13Exception extends AbstractOXException {
 		 */
 		UNPARSEABLE_HEADER_FIELD("Unparseable header field %s in forward request package", Category.SOCKET_CONNECTION, 12),
 		/**
-		 * String Parse Exception: No ending 0x00 found
+		 * String parse exception: No ending 0x00 found
 		 */
-		UNPARSEABLE_STRING("String Parse Exception: No ending 0x00 found", Category.SOCKET_CONNECTION, 13),
+		UNPARSEABLE_STRING("String parse exception: No ending 0x00 found", Category.SOCKET_CONNECTION, 13),
 		/**
 		 * Unsupported encoding: %s
 		 */
@@ -159,11 +159,11 @@ public class AJPv13Exception extends AbstractOXException {
 				"Unexpected empty body package received from web server. Total-Received: %d | Content-Length: %d",
 				Category.SOCKET_CONNECTION, 20),
 		/**
-		 * AJP Server socket could not be bind to port %d. Probably another
+		 * AJP server socket could not be bind to port %d. Probably another
 		 * process is already listening on this port.
 		 */
 		STARTUP_ERROR(
-				"AJP Server socket could not be bind to port %d. Probably another process is already listening on this port.",
+				"AJP server socket could not be bind to port %d. Probably another process is already listening on this port.",
 				Category.SOCKET_CONNECTION, 21);
 
 		private final String message;

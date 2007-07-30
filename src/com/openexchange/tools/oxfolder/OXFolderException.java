@@ -52,6 +52,12 @@ package com.openexchange.tools.oxfolder;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.Component;
 
+/**
+ * OXFolderException
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ *
+ */
 public class OXFolderException extends OXException {
 
 	private static final long serialVersionUID = -9109199682724280886L;
@@ -341,13 +347,13 @@ public class OXFolderException extends OXException {
 		FOLDER_COULD_NOT_BE_PUT_INTO_CACHE("Folder %s could not be put into cache in context %s",
 				Category.INTERNAL_ERROR, 36),
 		/**
-		 * Effective permission of Folder %s could not determined for user %s in
+		 * Effective permission of folder %s could not determined for user %s in
 		 * context %s
 		 * <p>
 		 * User's effective permission on folder could not be determined
 		 * </p>
 		 */
-		NO_EFFECTIVE_PERMISSION("Effective permission of Folder %s could not determined for user %s in context %s",
+		NO_EFFECTIVE_PERMISSION("Effective permission of folder %s could not determined for user %s in context %s",
 				Category.CODE_ERROR, 37),
 		/**
 		 * A SQL error occurred in context %s
