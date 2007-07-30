@@ -74,7 +74,10 @@ public abstract class AbstractAJAXSession extends TestCase {
     @Override
     protected void tearDown() throws Exception {
         super.tearDown();
-        client.logout();
+        if(client != null) {
+        	// Client can be null if setUp() fails
+            client.logout();
+        }
     }
 
     /**
