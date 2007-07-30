@@ -76,7 +76,6 @@ import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.calendar.RecurringResult;
 import com.openexchange.groupware.calendar.RecurringResults;
 import com.openexchange.groupware.container.ExternalUserParticipant;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
@@ -90,9 +89,7 @@ import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.groupware.tasks.TaskParticipant.Type;
 import com.openexchange.server.DBPool;
 import com.openexchange.server.DBPoolingException;
-import com.openexchange.server.OCLPermission;
 import com.openexchange.sessiond.SessionObject;
-import com.openexchange.tools.oxfolder.OXFolderTools;
 
 /**
  * This class contains logic methods for the tasks.
@@ -113,176 +110,6 @@ public final class TaskLogic {
     }
 
     /**
-     * Checks if the folder is a tasks folder and if the user is allowed to
-     * create object in that folder.
-     * @param session Session.
-     * @param folderId unique identifier of the folder.
-     * @throws TaskException if an error occurs or the user is not allowed to
-     * create object in that folder.
-     */
-    static void checkCreateInFolder(final SessionObject session,
-        final int folderId) throws TaskException {
-        final UserConfiguration config = session.getUserConfiguration();
-        final User user = session.getUserObject();
-        if (!config.hasTask()) {
-            throw new TaskException(Code.NO_TASKS, user.getId());
-        }
-        final Context ctx = session.getContext();
-        if (!Tools.isFolderTask(ctx, folderId)) {
-            throw new TaskException(Code.NOT_TASK_FOLDER, "", folderId);
-        }
-        final OCLPermission permission;
-        try {
-            permission = OXFolderTools.getEffectiveFolderOCL(folderId,
-                user.getId(), user.getGroups(), ctx, config);
-        } catch (OXException e) {
-            throw new TaskException(e);
-        }
-        if (!permission.canCreateObjects()) {
-            throw new TaskException(Code.NO_CREATE_PERMISSION, "", folderId);
-        }
-    }
-
-    /**
-     * Checks if the folder is a tasks folder and if the user is allowed to read
-     * objects in that folder.
-     * @param ctx Context.
-     * @param userId unique identifier of the user.
-     * @param groups Groups the user belongs to.
-     * @param userConfig Groupware configuration of the user.
-     * @param folderId unique identifier of the folder.
-     * @return <code>true</code> if only private objects can be seen.
-     * @throws TaskException if the reading is not okay.
-     */
-    static boolean canReadInFolder(final Context ctx, final int userId,
-        final int[] groups, final UserConfiguration userConfig,
-        final int folderId) throws TaskException {
-        final FolderObject folder = Tools.getFolder(ctx, folderId);
-        return canReadInFolder(ctx, userId, groups, userConfig, folder);
-    }
-
-    /**
-     * Checks if the folder is a tasks folder and if the user is allowed to read
-     * objects in that folder.
-     * @param ctx Context.
-     * @param userId unique identifier of the user.
-     * @param groups Groups the user belongs to.
-     * @param userConfig groupware configuration of the user.
-     * @param folder folder object that should be tested for read access.
-     * @return <code>true</code> if only private objects can be seen.
-     * @throws TaskException if the reading is not okay.
-     */
-    static boolean canReadInFolder(final Context ctx, final int userId,
-        final int[] groups, final UserConfiguration userConfig,
-        final FolderObject folder) throws TaskException {
-        if (!Tools.isFolderTask(ctx, folder.getObjectID())) {
-            throw new TaskException(Code.NOT_TASK_FOLDER,
-                folder.getFolderName(), folder.getObjectID());
-        }
-        final OCLPermission permission;
-        try {
-            permission = OXFolderTools.getEffectiveFolderOCL(
-                folder.getObjectID(), userId, groups, ctx, userConfig);
-        } catch (OXException e) {
-            throw new TaskException(e);
-        }
-        if (!permission.canReadAllObjects() && !permission
-            .canReadOwnObjects()) {
-            throw new TaskException(Code.NO_READ_PERMISSION,
-                folder.getFolderName(), folder.getObjectID());
-        }
-        final boolean onlyOwn = !permission.canReadAllObjects() && permission
-            .canReadOwnObjects();
-        return onlyOwn;
-    }
-
-    /**
-     * Checks if the user is allowed to read the task.
-     * @param ctx Context.
-     * @param userId unique identifier of the user.
-     * @param groups Groups the user belongs to.
-     * @param userConfig groupware access rights of the user.
-     * @param folderId unique identifier of the folder.
-     * @param taskCreator unique identifier of the user who created the task.
-     * @throws TaskException if the reading is not okay.
-     */
-    static void canReadInFolder(final Context ctx, final int userId,
-        final int[] groups, final UserConfiguration userConfig,
-        final int folderId, final int taskCreator) throws TaskException {
-        final FolderObject folder = Tools.getFolder(ctx, folderId);
-        canReadInFolder(ctx, userId, groups, userConfig, folder, taskCreator);
-    }
-
-    /**
-     * Checks if the user is allowed to read the task.
-     * @param ctx Context.
-     * @param userId unique identifier of the user.
-     * @param groups Groups the user belongs to.
-     * @param userConfig groupware access rights of the user.
-     * @param folder folder object that should be tested for read access.
-     * @param taskCreator unique identifier of the user who created the task.
-     * @throws TaskException if the reading is not okay.
-     */
-    static void canReadInFolder(final Context ctx, final int userId,
-        final int[] groups, final UserConfiguration userConfig,
-        final FolderObject folder, final int taskCreator)
-        throws TaskException {
-        final boolean onlyOwn = canReadInFolder(ctx, userId, groups,
-            userConfig, folder);
-        if (onlyOwn && (userId != taskCreator)) {
-            throw new TaskException(Code.NO_READ_PERMISSION,
-                folder.getFolderName(), folder.getObjectID());
-        }
-    }
-
-    /**
-     * Checks if a user is allowed to update a task.
-     * @param ctx Context.
-     * @param user User.
-     * @param userConfiguration Groupware configuration of the user.
-     * @param task Task to update.
-     * @throws TaskException if the task can't be updated.
-     */
-    static void checkWriteInFolder(final Context ctx, final User user,
-        final UserConfiguration userConfiguration, final Task task)
-        throws TaskException {
-        final OCLPermission permission;
-        final int folderId = task.getParentFolderID();
-        try {
-            permission = OXFolderTools.getEffectiveFolderOCL(folderId,
-                user.getId(), user.getGroups(), ctx, userConfiguration);
-        } catch (OXException e) {
-            throw new TaskException(e);
-        }
-        if (!permission.canWriteAllObjects()
-            && !(permission.canWriteOwnObjects()
-                && (user.getId() == task.getCreatedBy()))) {
-            final FolderObject folder = Tools.getFolder(ctx, folderId);
-            throw new TaskException(Code.NO_WRITE_PERMISSION,
-                folder.getFolderName(), folderId);
-        }
-    }
-
-    static void checkWriteInFolder(final Context ctx, final int userId,
-        final int[] groups, final UserConfiguration userConfig,
-        final int folderId, final int taskCreator)
-        throws TaskException {
-        final OCLPermission permission;
-        try {
-            permission = OXFolderTools.getEffectiveFolderOCL(folderId, userId,
-                groups, ctx, userConfig);
-        } catch (OXException e) {
-            throw new TaskException(e);
-        }
-        if (!permission.canWriteAllObjects()
-            && !(permission.canWriteOwnObjects() && (userId == taskCreator))) {
-            final FolderObject folder = Tools.getFolder(ctx, folderId);
-            throw new TaskException(Code.NO_WRITE_PERMISSION,
-                folder.getFolderName(), folderId);
-        }
-    }
-
-    /**
      * Checks if a new task is not missing any data, does not contains any wrong
      * data and if the user is allowed to create a task in tasks folder.
      * @param task Task to create.
@@ -298,11 +125,11 @@ public final class TaskLogic {
         checkMissingAttributes(task, userId);
         checkDates(task);
         checkStateAndProgress(task);
-        checkDelegation(userConfig, task.getParticipants());
+        Permission.checkDelegation(userConfig, task.getParticipants());
         // TODO Check if creator is participant in private or shared folder
         // Maybe the owner of the shared folder is the delegator of the task.
-        checkParticipants(participants, task.getPrivateFlag(),
-            task.getCreatedBy());
+        checkPrivateFlag(task.getPrivateFlag(), false, participants, null);
+        checkParticipants(participants, task.getCreatedBy());
         checkRecurrence(task, null);
     }
 
@@ -310,29 +137,39 @@ public final class TaskLogic {
      * Checks if the data of an to update task is correct.
      * @param task Task object with the updated attributes.
      * @param oldTask Task object that should be updated.
-     * @param userId unique identifier of the user that wants to change the
-     * task.
+     * @param user user that wants to change the task.
      * @param userConfig groupware configuration of the user that wants to
      * change the task.
-     * @param participants 
+     * @param newParts changed participants.
+     * @param oldParts participants of the original task.
      * @throws TaskException if the check fails.
      */
     static void checkUpdateTask(final Task task, final Task oldTask,
-        final int userId, final UserConfiguration userConfig,
-        final Set<TaskParticipant> participants) throws TaskException {
+        final User user, final UserConfiguration userConfig,
+        final Set<TaskParticipant> newParts,
+        final Set<TaskParticipant> oldParts) throws TaskException {
         if (!task.containsLastModified()) {
             task.setLastModified(new Date());
         }
         if (!task.containsModifiedBy()) {
-            task.setModifiedBy(userId);
+            task.setModifiedBy(user.getId());
         }
         checkDates(task);
         checkStateAndProgress(task);
-        checkDelegation(userConfig, task.getParticipants());
-        // TODO Check if creator is participant in private or shared folder
-        final boolean privateFlag = task.containsPrivateFlag() ? task
+        Permission.checkDelegation(userConfig, task.getParticipants());
+        final boolean changedParts = task.containsParticipants();
+        // Only creator is allowed to set private flag.
+        if (task.containsPrivateFlag() && task.getPrivateFlag()
+            && oldTask.getCreatedBy() != user.getId()) {
+            throw new TaskException(Code.ONLY_CREATOR_PRIVATE);
+        }
+        final boolean privat = task.containsPrivateFlag() ? task
             .getPrivateFlag() : oldTask.getPrivateFlag();
-        checkParticipants(participants, privateFlag, oldTask.getCreatedBy());
+        checkPrivateFlag(privat, changedParts, oldParts, newParts);
+        // TODO Check if creator is participant in private or shared folder
+        final Set<TaskParticipant> destParts = changedParts ? newParts
+            : oldParts;
+        checkParticipants(destParts, oldTask.getCreatedBy());
         checkRecurrence(task, oldTask);
     }
 
@@ -422,55 +259,68 @@ public final class TaskLogic {
     }
 
     /**
-     * Checks if the user is allowed to delegate tasks.
-     * @param userConfig groupware configuration of the user.
-     * @param participants Participants of a task.
-     * @throws TaskException if delegation is not allowed.
+     * This method checks if the user tries to delegate a private flagged task.
+     * @param privat private flag of the old or new task.
+     * @param changed if updated task contains participants.
+     * @param oldParts original participants of the task.
+     * @param newParts changed participants of the task.
+     * @throws TaskException if the check fails.
      */
-    private static void checkDelegation(final UserConfiguration userConfig,
-        final Participant[] participants) throws TaskException {
-        if (!userConfig.canDelegateTasks()
-            && null != participants && participants.length > 0) {
-            throw new TaskException(Code.NO_DELEGATE_PERMISSION);
+    private static void checkPrivateFlag(final boolean privat,
+        final boolean changed, final Set<TaskParticipant> oldParts,
+        final Set<TaskParticipant> newParts) throws TaskException {
+        if (!privat) {
+            return;
+        }
+        if (changed) {
+            if (newParts.size() > 0) {
+                throw new TaskException(Code.NO_PRIVATE_DELEGATE);
+            }
+        } else {
+            if (oldParts.size() > 0) {
+                throw new TaskException(Code.NO_PRIVATE_DELEGATE);
+            }
         }
     }
-
+    
     /**
      * Checks that the creator can't be participant if the according global
-     * option isn't set. This method also checks if the user tries to delegate
-     * a private flagged task.
+     * option isn't set.
      * @param participants Participants of the task.
-     * @param privateFlag private flag of the task.
      * @param creator unique identifier of the user that created the task.
      * @throws TaskException if the check fails.
      */
     private static void checkParticipants(
-        final Set<TaskParticipant> participants, final boolean privateFlag,
-        final int creator) throws TaskException {
-        if (null != participants) {
-            if (participants.size() > 0 && privateFlag) {
-                throw new TaskException(Code.NO_PRIVATE_DELEGATE);
-            }
-            if (Configuration.isNoCreatorToParticipants()) {
-                for (TaskParticipant participant : participants) {
-                    switch (participant.getType()) {
-                    case INTERNAL:
-                        final TaskInternalParticipant internal =
-                            (TaskInternalParticipant) participant;
-                        if (internal.getIdentifier() == creator) {
-                            throw new TaskException(Code
-                                .NO_CREATOR_PARTICIPANT);
-                        }
-                        break;
-                    case EXTERNAL:
-                        final TaskExternalParticipant external =
-                            (TaskExternalParticipant) participant;
-                        final String mail = external.getMail();
-                        if (mail == null || mail.length() == 0) {
-                            throw new TaskException(Code.EXTERNAL_WITHOUT_MAIL);
-                        }
-                    }
+        final Set<TaskParticipant> participants, final int creator)
+        throws TaskException {
+        if (null == participants) {
+            return;
+        }
+        if (Configuration.isNoCreatorToParticipants()) {
+            for (TaskParticipant participant : participants) {
+                if (Type.INTERNAL == participant.getType() &&
+                    ((InternalParticipant) participant)
+                    .getIdentifier() == creator) {
+                    throw new TaskException(Code.NO_CREATOR_PARTICIPANT);
                 }
+            }
+        }
+        checkExternal(ParticipantStorage.extractExternal(participants));
+    }
+
+    /**
+     * Checks if external participants contain consistent data. Currently
+     * external participants are checked to contain an email address.
+     * @param participants external participants.
+     * @throws TaskException if an external participant does not contain an
+     * email address.
+     */
+    private static void checkExternal(
+        final Set<ExternalParticipant> participants) throws TaskException {
+        for (ExternalParticipant participant : participants) {
+            final String mail = participant.getMail();
+            if (null == mail || mail.length() == 0) {
+                throw new TaskException(Code.EXTERNAL_WITHOUT_MAIL);
             }
         }
     }
@@ -528,7 +378,7 @@ public final class TaskLogic {
         for (Participant participant : participants) {
             switch (participant.getType()) {
             case Participant.USER:
-                retval.add(new TaskInternalParticipant(
+                retval.add(new InternalParticipant(
                     (UserParticipant) participant, null));
                 break;
             case Participant.GROUP:
@@ -540,7 +390,7 @@ public final class TaskLogic {
                         final UserParticipant user = new UserParticipant();
                         user.setIdentifier(userId);
                         final TaskParticipant tParticipant =
-                            new TaskInternalParticipant(user,
+                            new InternalParticipant(user,
                             group.getIdentifier());
                         if (!retval.contains(tParticipant)) {
                             retval.add(tParticipant);
@@ -551,7 +401,7 @@ public final class TaskLogic {
                 }
                 break;
             case Participant.EXTERNAL_USER:
-                retval.add(new TaskExternalParticipant(
+                retval.add(new ExternalParticipant(
                     (ExternalUserParticipant) participant));
             default:
             }
@@ -565,8 +415,8 @@ public final class TaskLogic {
             participants.size());
         for (TaskParticipant participant : participants) {
             if (Type.INTERNAL == participant.getType()) {
-                final TaskInternalParticipant internal =
-                    (TaskInternalParticipant) participant;
+                final InternalParticipant internal =
+                    (InternalParticipant) participant;
                 retval.add(internal.getUser());
             }
         }
@@ -581,8 +431,8 @@ public final class TaskLogic {
         for (TaskParticipant participant : participants) {
             switch (participant.getType()) {
             case INTERNAL:
-                final TaskInternalParticipant internal =
-                    (TaskInternalParticipant) participant;
+                final InternalParticipant internal =
+                    (InternalParticipant) participant;
                 final Integer groupId = internal.getGroupId();
                 if (null == groupId) {
                     retval.add(internal.getUser());
@@ -595,8 +445,8 @@ public final class TaskLogic {
                 }
                 break;
             case EXTERNAL:
-                final TaskExternalParticipant external =
-                    (TaskExternalParticipant) participant;
+                final ExternalParticipant external =
+                    (ExternalParticipant) participant;
                 retval.add(external.getExternal());
                 break;
             default:
@@ -608,7 +458,7 @@ public final class TaskLogic {
     }
 
     static Set<Folder> createFolderMapping(
-        final Set<TaskInternalParticipant> participants) {
+        final Set<InternalParticipant> participants) {
         return createFolderMapping(-1, -1, participants);
     }
 
@@ -625,12 +475,12 @@ public final class TaskLogic {
      * @return the ready to insert folder mapping.
      */
     static Set<Folder> createFolderMapping(final int folderId, final int userId,
-        final Set<TaskInternalParticipant> participants) {
+        final Set<InternalParticipant> participants) {
         final Set<Folder> retval = new HashSet<Folder>();
         if (-1 != userId) {
             retval.add(new Folder(folderId, userId));
         }
-        for (TaskInternalParticipant participant : participants) {
+        for (InternalParticipant participant : participants) {
             final Folder folder = new Folder(participant.getFolderId(),
                 participant.getIdentifier());
             if (!retval.contains(folder)) {
@@ -712,17 +562,6 @@ public final class TaskLogic {
         return retval;
     }
 
-    static Folder getFolder(final Set<Folder> folders, final int folderId) {
-        Folder retval = null;
-        for (Folder folder : folders) {
-            if (folder.getIdentifier() == folderId) {
-                retval = folder;
-                break;
-            }
-        }
-        return retval;
-    }
-
     /**
      * @param folders Set of task folder mappings.
      * @param userId unique identifier of a user.
@@ -739,10 +578,10 @@ public final class TaskLogic {
         return retval;
     }
 
-    static TaskInternalParticipant getParticipant(
-        final Set<TaskInternalParticipant> participants, final int userId) {
-        TaskInternalParticipant retval = null;
-        for (TaskInternalParticipant participant : participants) {
+    static InternalParticipant getParticipant(
+        final Set<InternalParticipant> participants, final int userId) {
+        InternalParticipant retval = null;
+        for (InternalParticipant participant : participants) {
             if (participant.getIdentifier() == userId) {
                 retval = participant;
                 break;
@@ -757,11 +596,11 @@ public final class TaskLogic {
      * @param groupId the group identifier.
      * @return All participants that are added by the group.
      */
-    static Set<TaskInternalParticipant> extractWithGroup(
-        final Set<TaskInternalParticipant> participants, final int groupId) {
-        final Set<TaskInternalParticipant> retval =
-            new HashSet<TaskInternalParticipant>();
-        for (TaskInternalParticipant participant : participants) {
+    static Set<InternalParticipant> extractWithGroup(
+        final Set<InternalParticipant> participants, final int groupId) {
+        final Set<InternalParticipant> retval =
+            new HashSet<InternalParticipant>();
+        for (InternalParticipant participant : participants) {
             if (null != participant.getGroupId()
                 && groupId == participant.getGroupId()) {
                 retval.add(participant);
@@ -832,6 +671,59 @@ public final class TaskLogic {
         return parts;
     }
 
+    static void updateTask(final Context ctx, final Task task,
+        final Date lastRead, final int[] modified,
+        final Set<TaskParticipant> add, final Set<TaskParticipant> remove,
+        final Set<Folder> addFolder, final Set<Folder> removeFolder)
+        throws TaskException {
+        Connection con;
+        try {
+            con = DBPool.pickupWriteable(ctx);
+        } catch (DBPoolingException e) {
+            throw new TaskException(Code.NO_CONNECTION, e);
+        }
+        try {
+            con.setAutoCommit(false);
+            final int taskId = task.getObjectID();
+            storage.updateTask(ctx, con, task, lastRead, modified, StorageType
+                .ACTIVE);
+            if (null != add) {
+                partStor.insertParticipants(ctx, con, taskId, add, StorageType
+                    .ACTIVE);
+                partStor.deleteParticipants(ctx, con, taskId, add, StorageType
+                    .REMOVED, false);
+            }
+            if (null != remove) {
+                partStor.insertParticipants(ctx, con, taskId, remove,
+                    StorageType.REMOVED);
+                partStor.deleteParticipants(ctx, con, taskId, remove,
+                    StorageType.ACTIVE, true);
+            }
+            if (null != removeFolder) {
+                foldStor.deleteFolder(ctx, con, taskId, removeFolder,
+                    StorageType.ACTIVE);
+            }
+            if (null != addFolder) {
+                foldStor.insertFolder(ctx, con, taskId, addFolder, StorageType
+                    .ACTIVE);
+            }
+            con.commit();
+        } catch (SQLException e) {
+            rollback(con);
+            throw new TaskException(Code.UPDATE_FAILED, e, e.getMessage());
+        } catch (TaskException e) {
+            rollback(con);
+            throw e;
+        } finally {
+            try {
+                con.setAutoCommit(true);
+            } catch (SQLException e) {
+                LOG.error("Problem setting auto commit to true.", e);
+            }
+            DBPool.closeWriterSilent(ctx, con);
+        }
+    }
+
     /**
      * Deletes an ACTIVE task object. This stores the task as a DELETED task
      * object, deletes all reminders and sends the task delete event.
@@ -894,9 +786,9 @@ public final class TaskLogic {
         // Load the task.
         final Task task = storage.selectTask(ctx, taskId, type);
         task.setParentFolderID(folderId);
-        final Set<TaskInternalParticipant> internal = partStor.selectInternal(
+        final Set<InternalParticipant> internal = partStor.selectInternal(
             ctx, taskId, type);
-        final Set<TaskExternalParticipant> external = partStor.selectExternal(
+        final Set<ExternalParticipant> external = partStor.selectExternal(
             ctx, taskId, type);
         final Set<Folder> folders = foldStor.selectFolder(ctx, taskId, type);
         final Set<TaskParticipant> parts = new HashSet<TaskParticipant>();
@@ -914,7 +806,7 @@ public final class TaskLogic {
             con.setAutoCommit(false);
             partStor.deleteInternal(ctx, con, taskId, internal, type, true);
             if (StorageType.ACTIVE == type) {
-                final Set<TaskInternalParticipant> removed = partStor
+                final Set<InternalParticipant> removed = partStor
                     .selectInternal(ctx, con, taskId, StorageType.REMOVED);
                 partStor.deleteInternal(ctx, con, taskId, removed,
                     StorageType.REMOVED, true);

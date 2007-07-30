@@ -1,3 +1,7 @@
+* 2007-07-30 - marcus.klein@open-xchange.com
+
+ - Bugfix #7377. Fixed update of tasks to prevent loss of folder mappings.
+
 * 2007-07-27 ben.pahne@open-xchange.com
 
  - Fixed bug #7936, a lot of typos and text corrections

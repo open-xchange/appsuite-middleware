@@ -49,62 +49,62 @@
 
 package com.openexchange.groupware.tasks;
 
-import com.openexchange.api2.OXException;
-import com.openexchange.groupware.UserConfiguration;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.container.UserParticipant;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.tasks.TaskException.Code;
-import com.openexchange.server.OCLPermission;
-import com.openexchange.tools.oxfolder.OXFolderTools;
+import com.openexchange.groupware.container.ExternalUserParticipant;
 
 /**
- * Contains convenience methods for checking access rights.
+ * TaskExternalParticipant.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class Access {
+public class ExternalParticipant extends TaskParticipant {
+
+    private final ExternalUserParticipant external;
+
+    ExternalParticipant(final ExternalUserParticipant external) {
+        super();
+        this.external = external;
+    }
 
     /**
-     * Prevent instanciation.
+     * {@inheritDoc}
      */
-    private Access() {
-        super();
+    @Override
+    Type getType() {
+        return Type.EXTERNAL;
     }
 
-    public static void checkDelete(final Context ctx, final int userId,
-        final int[] groups, final UserConfiguration userConfig,
-        final FolderObject folder, final Task task) throws TaskException {
-        final int folderId = folder.getObjectID();
-        if (!Tools.isFolderTask(folder)) {
-            throw new TaskException(Code.NOT_TASK_FOLDER, folder
-                .getFolderName(), folderId);
-        }
-        final OCLPermission permission;
-        try {
-            permission = OXFolderTools.getEffectiveFolderOCL(folderId, userId,
-                groups, ctx, userConfig);
-        } catch (OXException e) {
-            throw new TaskException(e);
-        }
-        if (!permission.canDeleteAllObjects() && !permission
-            .canDeleteOwnObjects()) {
-            throw new TaskException(Code.NO_DELETE_PERMISSION);
-        }
-        final boolean onlyOwn = !permission.canDeleteAllObjects() && permission
-            .canDeleteOwnObjects();
-        final boolean noPrivate = Tools.isFolderShared(folder, userId);
-        if ((onlyOwn && task.getCreatedBy() != userId)
-            || (noPrivate && task.getPrivateFlag())) {
-            throw new TaskException(Code.NO_DELETE_PERMISSION);
-        }
+    /**
+     * @return the external
+     */
+    public ExternalUserParticipant getExternal() {
+        return external;
     }
 
-    static boolean isTaskInFolder(final Task task, final int folderId) {
-        boolean found = task.getParentFolderID() == folderId;
-        final UserParticipant[] parts = task.getUsers();
-        for (int i = 0; !found && i < parts.length; i++) {
-            found = parts[i].getPersonalFolderId() == folderId;
+    public String getMail() {
+        return external.getEmailAddress();
+    }
+
+    public String getDisplayName() {
+        return external.getDisplayName();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        if (!(obj instanceof ExternalParticipant)) {
+            return false;
         }
-        return found;
+        final ExternalParticipant other = (ExternalParticipant) obj;
+        return (null == getMail() && null == other.getMail())
+            || getMail().equals(other.getMail());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        return null == getMail() ? super.hashCode() : getMail().hashCode();
     }
 }

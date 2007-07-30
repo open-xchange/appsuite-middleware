@@ -49,6 +49,8 @@
 
 package com.openexchange.groupware.update.exception;
 
+import com.openexchange.groupware.update.tasks.TaskReminderFolderZero;
+
 /**
  * Class identifier for component update exceptions.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
@@ -89,7 +91,12 @@ public final class Classes {
      * {@link UpdateTask}.
      */
     public static final int UPDATE_TASK = 7;
-    
+
+    /**
+     * {@link TaskReminderFolderZero}
+     */
+    public static final int TASK_REMINDER_FOLDER_ZERO = 8;
+
     /**
      * Prevent instanciation.
      */

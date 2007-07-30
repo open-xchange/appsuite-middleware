@@ -96,7 +96,7 @@ public final class Task2Links {
         }
         try {
             final User user = session.getUserObject();
-            TaskLogic.canReadInFolder(ctx, user.getId(), user.getGroups(),
+            Permission.canReadInFolder(ctx, user.getId(), user.getGroups(),
                 session.getUserConfiguration(), folderId, task.getCreatedBy());
         } catch (TaskException e) {
             return false;

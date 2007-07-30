@@ -52,6 +52,7 @@ package com.openexchange.groupware.tasks;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.attach.AttachmentAuthorization;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 
@@ -79,7 +80,8 @@ public class TaskAuthorization implements AttachmentAuthorization {
             final Task task = storage.selectTask(ctx, taskId, StorageType
                 .ACTIVE);
             task.setParentFolderID(folderId);
-            TaskLogic.checkWriteInFolder(ctx, user, userConfig, task);
+            final FolderObject folder = Tools.getFolder(ctx, folderId);
+            Permission.checkWriteInFolder(ctx, user, userConfig, folder, task);
             // Check if task appears in folder.
             storage.selectFolderById(ctx, taskId, folderId);
         } catch (TaskException e) {
@@ -110,7 +112,7 @@ public class TaskAuthorization implements AttachmentAuthorization {
             throw Tools.convert(e);
         }
         try {
-            TaskLogic.canReadInFolder(ctx, user.getId(), user.getGroups(),
+            Permission.canReadInFolder(ctx, user.getId(), user.getGroups(),
                 userConfig, folderId, task.getCreatedBy());
         } catch (TaskException e) {
             throw Tools.convert(e);

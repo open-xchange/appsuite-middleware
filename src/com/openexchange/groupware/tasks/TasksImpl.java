@@ -56,18 +56,23 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.api2.OXException;
-import com.openexchange.event.EventClient;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.sessiond.SessionObject;
-import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 
 /**
- * @author marcus
- *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 final class TasksImpl extends Tasks {
+
+    /**
+     * Logger.
+     */
+    private static final Log LOG = LogFactory.getLog(TasksImpl.class);
 
     /**
      * Fields to update of a participant is removed from a task.
@@ -116,21 +121,29 @@ final class TasksImpl extends Tasks {
         final int userId = session.getUserObject().getId();
         final List<Integer> deleteTask = new ArrayList<Integer>();
         final List<UpdateData> removeParticipant = new ArrayList<UpdateData>();
+        TaskIterator iter = null;
         try {
-            final SearchIterator iter = storage.list(ctx, folderId, 0, -1, 0,
+            iter = storage.list(ctx, folderId, 0, -1, 0,
                 null, new int[] { Task.OBJECT_ID }, false, userId, false);
             while (iter.hasNext()) {
-                final Task task = (Task) iter.next();
+                final Task task = iter.next();
                 final UpdateData data = new UpdateData();
                 data.taskId = task.getObjectID();
                 data.lastRead = task.getLastModified();
                 removeParticipant.add(data);
             }
-            iter.close();
         } catch (TaskException e) {
             throw Tools.convert(e);
         } catch (SearchIteratorException e) {
             throw new OXException(e);
+        } finally {
+            if (null != iter) {
+                try {
+                    iter.close();
+                } catch (SearchIteratorException e) {
+                    LOG.error(e.getMessage(), e);
+                }
+            }
         }
         try {
             for (UpdateData data : removeParticipant) {
@@ -141,10 +154,10 @@ final class TasksImpl extends Tasks {
                     deleteTask.add(data.taskId);
                     continue;
                 }
-                final Set<TaskInternalParticipant> participants = Tools
+                final Set<InternalParticipant> participants = ParticipantStorage
                     .extractInternal(storage.selectParticipants(ctx,
                         data.taskId, StorageType.ACTIVE));
-                final Folder folder = TaskLogic.getFolder(folders, folderId);
+                final Folder folder = FolderStorage.getFolder(folders, folderId);
                 final TaskParticipant participant = TaskLogic.getParticipant(
                     participants, folder.getUser());
                 if (null == participant) {
@@ -178,8 +191,9 @@ final class TasksImpl extends Tasks {
                 if (deleteTask.contains(data.taskId)) {
                     continue;
                 }
-                storage.update(ctx, data.task, data.lastRead, data.modified,
-                    data.add, data.remove, data.addFolder, data.removeFolder);
+                TaskLogic.updateTask(ctx, data.task, data.lastRead,
+                    data.modified, data.add, data.remove, data.addFolder,
+                    data.removeFolder);
             }
         } catch (TaskException e) {
             throw Tools.convert(e);

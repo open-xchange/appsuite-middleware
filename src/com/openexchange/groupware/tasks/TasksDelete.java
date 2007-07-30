@@ -183,7 +183,7 @@ public class TasksDelete implements DeleteListener {
                     taskId, type);
                 if (folders.size() == 0) {
                     throw new TaskException(TaskException.Code.FOLDER_NOT_FOUND,
-                        folderId, taskId);
+                        folderId, taskId, userId, ctx.getContextId());
                 } else if (folders.size() > 1) {
                     foldStor.deleteFolder(ctx, writeCon, taskId, folderId,
                         type);
@@ -274,7 +274,7 @@ public class TasksDelete implements DeleteListener {
                 final int[] tasks = partStor.findTasksWithGroup(ctx, readCon,
                     groupId, type);
                 for (int task : tasks) {
-                    Set<TaskInternalParticipant> participants = partStor
+                    Set<InternalParticipant> participants = partStor
                         .selectInternal(ctx, readCon, task, type);
                     participants = TaskLogic.extractWithGroup(participants,
                         groupId);
@@ -293,8 +293,8 @@ public class TasksDelete implements DeleteListener {
      * Removes the group from the participants.
      * @param participants task internal participants.
      */
-    private void removeGroup(final Set<TaskInternalParticipant> participants) {
-        for (TaskInternalParticipant participant : participants) {
+    private void removeGroup(final Set<InternalParticipant> participants) {
+        for (InternalParticipant participant : participants) {
             participant.setGroupId(null);
         }
     }

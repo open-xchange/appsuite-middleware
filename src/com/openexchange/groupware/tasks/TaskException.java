@@ -232,10 +232,10 @@ public class TaskException extends AbstractOXException {
             + "%2$d were deleted.", Category.CODE_ERROR, Detail.OTHER,
             16),
         /**
-         * Folder %d for task %d cannot be found.
+         * Folder %d for task %d cannot be found. User %d, Context %d.
          */
-        FOLDER_NOT_FOUND("Folder %d for task %d cannot be found.",
-            Category.CODE_ERROR, Detail.NOT_FOUND, 17),
+        FOLDER_NOT_FOUND("Folder %d for task %d cannot be found. User %d, "
+            + "Context %d.", Category.CODE_ERROR, Detail.NOT_FOUND, 17),
         /**
          * Participant %d for task %d is not found.
          */

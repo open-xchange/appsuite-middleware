@@ -102,8 +102,8 @@ public class TaskAttachmentListener implements AttachmentListener {
                 StorageType.ACTIVE);
             final Date lastRead = oldTask.getLastModified();
             task.setNumberOfAttachments(oldTask.getNumberOfAttachments() + 1);
-            storage.update(ctx, task, lastRead, UPDATE_FIELDS, null, null, null,
-                null);
+            TaskLogic.updateTask(ctx, task, lastRead, UPDATE_FIELDS, null, null,
+                null, null);
         } catch (TaskException e) {
             throw Tools.convert(e);
         }
@@ -137,7 +137,7 @@ public class TaskAttachmentListener implements AttachmentListener {
             } else {
                 task.setNumberOfAttachments(numOfAttachments);
             }
-            storage.update(ctx, task, lastRead, UPDATE_FIELDS, null, null,
+            TaskLogic.updateTask(ctx, task, lastRead, UPDATE_FIELDS, null, null,
                 null, null);
         } catch (TaskException e) {
             throw Tools.convert(e);

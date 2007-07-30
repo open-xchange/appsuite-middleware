@@ -79,7 +79,7 @@ public final class Mapping {
      * This interface will be used to map object attributes to database columns.
      * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
      */
-    public interface Mapper {
+    public interface Mapper<T> {
 
         /**
          * @return the unique identifier of the field.
@@ -130,13 +130,27 @@ public final class Mapping {
          * both tasks and <code>false</code> otherwise.
          */
         boolean equals(Task task1, Task task2);
+
+        /**
+         * Reads the attribute from the task.
+         * @param task task object to read the attribute from.
+         * @return the attribute value.
+         */
+        T get(Task task);
+
+        /**
+         * Sets an attribute value in a task.
+         * @param task task object to set the attribute-
+         * @param value the value to set.
+         */
+        void set(Task task, T value);
     }
 
     /**
      * Mapping array for all object attributes.
      */
     static final Mapper[] MAPPERS = new Mapper[] {
-        new Mapper() {
+        new Mapper<Boolean>() {
             public int getId() {
                 return Task.PRIVATE_FLAG;
             }
@@ -148,7 +162,7 @@ public final class Mapping {
             }
             public void toDB(final PreparedStatement stmt, final int pos,
                 final Task task) throws SQLException {
-                stmt.setBoolean(pos, task.getPrivateFlag());
+                stmt.setBoolean(pos, get(task));
             }
             public void fromDB(final ResultSet result, final int pos,
                 final Task task) throws SQLException {
@@ -158,8 +172,14 @@ public final class Mapping {
             public boolean equals(final Task task1, final Task task2) {
                 return task1.getPrivateFlag() == task2.getPrivateFlag();
             }
+            public Boolean get(final Task task) {
+                return task.getPrivateFlag();
+            }
+            public void set(final Task task, final Boolean value) {
+                task.setPrivateFlag(value);
+            }
         },
-        new Mapper() {
+        new Mapper<Date>() {
             public int getId() {
                 return Task.CREATION_DATE;
             }
@@ -183,8 +203,14 @@ public final class Mapping {
                 return Mapping.equals(task1.getCreationDate(),
                     task2.getCreationDate());
             }
+            public Date get(final Task task) {
+                return task.getCreationDate();
+            }
+            public void set(final Task task, final Date value) {
+                task.setCreationDate(value);
+            }
         },
-        new Mapper() {
+        new Mapper<Date>() {
             public int getId() {
                 return Task.LAST_MODIFIED;
             }
@@ -207,8 +233,14 @@ public final class Mapping {
                 return Mapping.equals(task1.getLastModified(),
                     task2.getLastModified());
             }
+            public Date get(final Task task) {
+                return task.getLastModified();
+            }
+            public void set(final Task task, final Date value) {
+                task.setLastModified(value);
+            }
         },
-        new Mapper() {
+        new Mapper<Integer>() {
             public int getId() {
                 return Task.CREATED_BY;
             }
@@ -230,8 +262,14 @@ public final class Mapping {
             public boolean equals(final Task task1, final Task task2) {
                 return task1.getCreatedBy() == task2.getCreatedBy();
             }
+            public Integer get(final Task task) {
+                return task.getCreatedBy();
+            }
+            public void set(final Task task, final Integer value) {
+                task.setCreatedBy(value);
+            }
         },
-        new Mapper() {
+        new Mapper<Integer>() {
             public int getId() {
                 return Task.MODIFIED_BY;
             }
@@ -255,8 +293,14 @@ public final class Mapping {
             public boolean equals(final Task task1, final Task task2) {
                 return task1.getModifiedBy() == task2.getModifiedBy();
             }
+            public Integer get(final Task task) {
+                return task.getModifiedBy();
+            }
+            public void set(final Task task, final Integer value) {
+                task.setModifiedBy(value);
+            }
         },
-        new Mapper() {
+        new Mapper<Date>() {
             public int getId() {
                 return Task.START_DATE;
             }
@@ -286,8 +330,14 @@ public final class Mapping {
                 return Mapping.equals(task1.getStartDate(),
                     task2.getStartDate());
             }
+            public Date get(final Task task) {
+                return task.getStartDate();
+            }
+            public void set(final Task task, final Date value) {
+                task.setStartDate(value);
+            }
         },
-        new Mapper() {
+        new Mapper<Date>() {
             public int getId() {
                 return Task.END_DATE;
             }
@@ -316,8 +366,14 @@ public final class Mapping {
             public boolean equals(final Task task1, final Task task2) {
                 return Mapping.equals(task1.getEndDate(), task2.getEndDate());
             }
+            public Date get(final Task task) {
+                return task.getEndDate();
+            }
+            public void set(final Task task, final Date value) {
+                task.setEndDate(value);
+            }
         },
-        new Mapper() {
+        new Mapper<Date>() {
             public int getId() {
                 return Task.DATE_COMPLETED;
             }
@@ -347,8 +403,14 @@ public final class Mapping {
                 return Mapping.equals(task1.getDateCompleted(),
                     task2.getDateCompleted());
             }
+            public Date get(final Task task) {
+                return task.getDateCompleted();
+            }
+            public void set(final Task task, final Date value) {
+                task.setDateCompleted(value);
+            }
         },
-        new Mapper() {
+        new Mapper<String>() {
             public int getId() {
                 return Task.TITLE;
             }
@@ -376,8 +438,14 @@ public final class Mapping {
             public boolean equals(final Task task1, final Task task2) {
                 return Mapping.equals(task1.getTitle(), task2.getTitle());
             }
+            public String get(final Task task) {
+                return task.getTitle();
+            }
+            public void set(final Task task, final String value) {
+                task.setTitle(value);
+            }
         },
-        new Mapper() {
+        new Mapper<String>() {
             public int getId() {
                 return Task.NOTE;
             }
@@ -405,8 +473,14 @@ public final class Mapping {
             public boolean equals(final Task task1, final Task task2) {
                 return Mapping.equals(task1.getNote(), task2.getNote());
             }
+            public String get(final Task task) {
+                return task.getNote();
+            }
+            public void set(final Task task, final String value) {
+                task.setNote(value);
+            }
         },
-        new Mapper() {
+        new Mapper<Integer>() {
             public int getId() {
                 return Task.STATUS;
             }
@@ -430,8 +504,14 @@ public final class Mapping {
             public boolean equals(final Task task1, final Task task2) {
                 return task1.getStatus() == task2.getStatus();
             }
+            public Integer get(final Task task) {
+                return task.getStatus();
+            }
+            public void set(final Task task, final Integer value) {
+                task.setStatus(value);
+            }
         },
-        new Mapper() {
+        new Mapper<Integer>() {
             public int getId() {
                 return Task.PRIORITY;
             }
@@ -455,8 +535,14 @@ public final class Mapping {
             public boolean equals(final Task task1, final Task task2) {
                 return task1.getPriority() == task2.getPriority();
             }
+            public Integer get(final Task task) {
+                return task.getPriority();
+            }
+            public void set(final Task task, final Integer value) {
+                task.setPriority(value);
+            }
         },
-        new Mapper() {
+        new Mapper<Integer>() {
             public int getId() {
                 return Task.PERCENT_COMPLETED;
             }
@@ -480,8 +566,14 @@ public final class Mapping {
             public boolean equals(final Task task1, final Task task2) {
                 return task1.getPercentComplete() == task2.getPercentComplete();
             }
+            public Integer get(final Task task) {
+                return task.getPercentComplete();
+            }
+            public void set(final Task task, final Integer value) {
+                task.setPercentComplete(value);
+            }
         },
-        new Mapper() {
+        new Mapper<String>() {
             public int getId() {
                 return Task.CATEGORIES;
             }
@@ -510,8 +602,14 @@ public final class Mapping {
                 return Mapping.equals(task1.getCategories(),
                     task2.getCategories());
             }
+            public String get(final Task task) {
+                return task.getCategories();
+            }
+            public void set(final Task task, final String value) {
+                task.setCategories(value);
+            }
         },
-        new Mapper() {
+        new Mapper<Integer>() {
             public int getId() {
                 return Task.PROJECT_ID;
             }
@@ -535,8 +633,14 @@ public final class Mapping {
             public boolean equals(final Task task1, final Task task2) {
                 return task1.getProjectID() == task2.getProjectID();
             }
+            public Integer get(final Task task) {
+                return task.getProjectID();
+            }
+            public void set(final Task task, final Integer value) {
+                task.setProjectID(value);
+            }
         },
-        new Mapper() {
+        new Mapper<Long>() {
             public int getId() {
                 return Task.TARGET_DURATION;
             }
@@ -560,8 +664,14 @@ public final class Mapping {
             public boolean equals(final Task task1, final Task task2) {
                 return task1.getTargetDuration() == task2.getTargetDuration();
             }
+            public Long get(final Task task) {
+                return task.getTargetDuration();
+            }
+            public void set(final Task task, final Long value) {
+                task.setTargetDuration(value);
+            }
         },
-        new Mapper() {
+        new Mapper<Long>() {
             public int getId() {
                 return Task.ACTUAL_DURATION;
             }
@@ -585,8 +695,14 @@ public final class Mapping {
             public boolean equals(final Task task1, final Task task2) {
                 return task1.getActualDuration() == task2.getActualDuration();
             }
+            public Long get(final Task task) {
+                return task.getActualDuration();
+            }
+            public void set(final Task task, final Long value) {
+                task.setActualDuration(value);
+            }
         },
-        new Mapper() {
+        new Mapper<Float>() {
             public int getId() {
                 return Task.TARGET_COSTS;
             }
@@ -610,8 +726,14 @@ public final class Mapping {
             public boolean equals(final Task task1, final Task task2) {
                 return task1.getTargetCosts() == task2.getTargetCosts();
             }
+            public Float get(final Task task) {
+                return task.getTargetCosts();
+            }
+            public void set(final Task task, final Float value) {
+                task.setTargetCosts(value);
+            }
         },
-        new Mapper() {
+        new Mapper<Float>() {
             public int getId() {
                 return Task.ACTUAL_COSTS;
             }
@@ -635,8 +757,14 @@ public final class Mapping {
             public boolean equals(final Task task1, final Task task2) {
                 return task1.getActualCosts() == task2.getActualCosts();
             }
+            public Float get(final Task task) {
+                return task.getActualCosts();
+            }
+            public void set(final Task task, final Float value) {
+                task.setActualCosts(value);
+            }
         },
-        new Mapper() {
+        new Mapper<String>() {
             public int getId() {
                 return Task.CURRENCY;
             }
@@ -665,8 +793,14 @@ public final class Mapping {
                 return Mapping.equals(task1.getCurrency(),
                     task2.getCurrency());
             }
+            public String get(final Task task) {
+                return task.getCurrency();
+            }
+            public void set(final Task task, final String value) {
+                task.setCurrency(value);
+            }
         },
-        new Mapper() {
+        new Mapper<String>() {
             public int getId() {
                 return Task.TRIP_METER;
             }
@@ -695,8 +829,14 @@ public final class Mapping {
                 return Mapping.equals(task1.getTripMeter(),
                     task2.getTripMeter());
             }
+            public String get(final Task task) {
+                return task.getTripMeter();
+            }
+            public void set(final Task task, final String value) {
+                task.setTripMeter(value);
+            }
         },
-        new Mapper() {
+        new Mapper<String>() {
             public int getId() {
                 return Task.BILLING_INFORMATION;
             }
@@ -725,8 +865,14 @@ public final class Mapping {
                 return Mapping.equals(task1.getBillingInformation(),
                     task2.getBillingInformation());
             }
+            public String get(final Task task) {
+                return task.getBillingInformation();
+            }
+            public void set(final Task task, final String value) {
+                task.setBillingInformation(value);
+            }
         },
-        new Mapper() {
+        new Mapper<String>() {
             public int getId() {
                 return Task.COMPANIES;
             }
@@ -755,8 +901,14 @@ public final class Mapping {
                 return Mapping.equals(task1.getCompanies(),
                     task2.getCompanies());
             }
+            public String get(final Task task) {
+                return task.getCompanies();
+            }
+            public void set(final Task task, final String value) {
+                task.setCompanies(value);
+            }
         },
-        new Mapper() {
+        new Mapper<Integer>() {
             public int getId() {
                 return Task.COLOR_LABEL;
             }
@@ -780,8 +932,14 @@ public final class Mapping {
             public boolean equals(final Task task1, final Task task2) {
                 return task1.getLabel() == task2.getLabel();
             }
+            public Integer get(final Task task) {
+                return task.getLabel();
+            }
+            public void set(final Task task, final Integer value) {
+                task.setLabel(value);
+            }
         },
-        new Mapper() {
+        new Mapper<Integer>() {
             public int getId() {
                 return Task.RECURRENCE_TYPE;
             }
@@ -803,8 +961,14 @@ public final class Mapping {
             public boolean equals(final Task task1, final Task task2) {
                 return task1.getRecurrenceType() == task2.getRecurrenceType();
             }
+            public Integer get(final Task task) {
+                return task.getRecurrenceType();
+            }
+            public void set(final Task task, final Integer value) {
+                task.setRecurrenceType(value);
+            }
         },
-        new Mapper() {
+        new Mapper<Integer>() {
             public int getId() {
                 return Task.INTERVAL;
             }
@@ -828,8 +992,14 @@ public final class Mapping {
             public boolean equals(final Task task1, final Task task2) {
                 return task1.getInterval() == task2.getInterval();
             }
+            public Integer get(final Task task) {
+                return task.getInterval();
+            }
+            public void set(final Task task, final Integer value) {
+                task.setInterval(value);
+            }
         },
-        new Mapper() {
+        new Mapper<Integer>() {
             public int getId() {
                 return Task.DAYS;
             }
@@ -853,8 +1023,14 @@ public final class Mapping {
             public boolean equals(final Task task1, final Task task2) {
                 return task1.getDays() == task2.getDays();
             }
+            public Integer get(final Task task) {
+                return task.getDays();
+            }
+            public void set(final Task task, final Integer value) {
+                task.setDays(value);
+            }
         },
-        new Mapper() {
+        new Mapper<Integer>() {
             public int getId() {
                 return Task.DAY_IN_MONTH;
             }
@@ -878,8 +1054,14 @@ public final class Mapping {
             public boolean equals(final Task task1, final Task task2) {
                 return task1.getDayInMonth() == task2.getDayInMonth();
             }
+            public Integer get(final Task task) {
+                return task.getDayInMonth();
+            }
+            public void set(final Task task, final Integer value) {
+                task.setDayInMonth(value);
+            }
         },
-        new Mapper() {
+        new Mapper<Integer>() {
             public int getId() {
                 return Task.MONTH;
             }
@@ -903,8 +1085,14 @@ public final class Mapping {
             public boolean equals(final Task task1, final Task task2) {
                 return task1.getMonth() == task2.getMonth();
             }
+            public Integer get(final Task task) {
+                return task.getMonth();
+            }
+            public void set(final Task task, final Integer value) {
+                task.setMonth(value);
+            }
         },
-        new Mapper() {
+        new Mapper<Date>() {
             public int getId() {
                 return Task.UNTIL;
             }
@@ -933,8 +1121,14 @@ public final class Mapping {
             public boolean equals(final Task task1, final Task task2) {
                 return Mapping.equals(task1.getUntil(), task2.getUntil());
             }
+            public Date get(final Task task) {
+                return task.getUntil();
+            }
+            public void set(final Task task, final Date value) {
+                task.setUntil(value);
+            }
         },
-        new Mapper() {
+        new Mapper<Integer>() {
             public int getId() {
                 return Task.RECURRING_OCCURRENCE;
             }
@@ -958,8 +1152,14 @@ public final class Mapping {
             public boolean equals(final Task task1, final Task task2) {
                 return task1.getOccurrence() == task2.getOccurrence();
             }
+            public Integer get(final Task task) {
+                return task.getOccurrence();
+            }
+            public void set(final Task task, final Integer value) {
+                task.setOccurrence(value);
+            }
         },
-        new Mapper() {
+        new Mapper<Integer>() {
             public int getId() {
                 return Task.NUMBER_OF_ATTACHMENTS;
             }
@@ -983,6 +1183,12 @@ public final class Mapping {
             public boolean equals(final Task task1, final Task task2) {
                 return task1.getNumberOfAttachments() == task2
                     .getNumberOfAttachments();
+            }
+            public Integer get(final Task task) {
+                return task.getNumberOfAttachments();
+            }
+            public void set(final Task task, final Integer value) {
+                task.setNumberOfAttachments(value);
             }
         }
     };
@@ -1036,7 +1242,7 @@ public final class Mapping {
         for (Mapper mapper : MAPPERS) {
             tmp.put(mapper.getId(), mapper);
         }
-        Mapper identifier = new Mapper() {
+        Mapper identifier = new Mapper<Integer>() {
             public int getId() {
                 return Task.OBJECT_ID;
             }
@@ -1057,6 +1263,12 @@ public final class Mapping {
             }
             public boolean equals(final Task task1, final Task task2) {
                 return task1.getObjectID() == task2.getObjectID();
+            }
+            public Integer get(final Task task) {
+                return task.getObjectID();
+            }
+            public void set(final Task task, final Integer value) {
+                task.setObjectID(value);
             }
         };
         tmp.put(identifier.getId(), identifier);

@@ -92,10 +92,6 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
     private static final Log LOG = LogFactory.getLog(
         TasksSQLInterfaceImpl.class);
 
-    private static final TaskStorage taskStor = TaskStorage.getInstance();
-
-    private static final FolderStorage folderStor = FolderStorage.getInstance();
-
     /**
      * Reference to the context.
      */
@@ -125,12 +121,12 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
         }
         boolean onlyOwn;
         try {
-            onlyOwn = TaskLogic.canReadInFolder(ctx, userId, user.getGroups(),
+            onlyOwn = Permission.canReadInFolder(ctx, userId, user.getGroups(),
                 session.getUserConfiguration(), folder);
         } catch (TaskException e) {
             throw Tools.convert(e);
         }
-        final boolean noPrivate = Tools.isFolderShared(folder, userId);
+        final boolean noPrivate = Tools.isFolderShared(folder, user);
         final int count;
         try {
             count = TaskStorage.getInstance().countTasks(ctx, userId, folderId,
@@ -158,12 +154,12 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
             throw Tools.convert(e);
         }
         try {
-            onlyOwn = TaskLogic.canReadInFolder(ctx, userId, user.getGroups(),
+            onlyOwn = Permission.canReadInFolder(ctx, userId, user.getGroups(),
                 session.getUserConfiguration(), folder);
         } catch (TaskException e) {
             throw Tools.convert(e);
         }
-        final boolean noPrivate = Tools.isFolderShared(folder, userId);
+        final boolean noPrivate = Tools.isFolderShared(folder, user);
         try {
             return TaskStorage.getInstance().list(ctx, folderId, from, until,
                 orderBy, orderDir, columns, onlyOwn, userId, noPrivate);
@@ -194,9 +190,9 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
             throw Tools.convert(e);
         }
         try {
-            TaskLogic.canReadInFolder(ctx, userId, user.getGroups(), session
+            Permission.canReadInFolder(ctx, userId, user.getGroups(), session
                 .getUserConfiguration(), folder, retval.getCreatedBy());
-            if (Tools.isFolderShared(folder, userId) && retval
+            if (Tools.isFolderShared(folder, user) && retval
                 .getPrivateFlag()) {
                 throw new TaskException(Code.NO_PRIVATE_PERMISSION, folder
                     .getFolderName(), Integer.valueOf(folderId));
@@ -204,9 +200,9 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
         } catch (TaskException e) {
             throw Tools.convert(e);
         }
-        if (!Access.isTaskInFolder(retval, folderId)) {
+        if (!Permission.isTaskInFolder(retval, folderId)) {
             throw Tools.convert(new TaskException(Code.FOLDER_NOT_FOUND,
-                folderId, taskId));
+                folderId, taskId, userId, ctx.getContextId()));
         }
         try {
             Tools.loadReminder(ctx, userId, retval);
@@ -232,12 +228,12 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
         }
         boolean onlyOwn;
         try {
-            onlyOwn = TaskLogic.canReadInFolder(ctx, userId, user.getGroups(),
+            onlyOwn = Permission.canReadInFolder(ctx, userId, user.getGroups(),
                 session.getUserConfiguration(), folder);
         } catch (TaskException e) {
             throw Tools.convert(e);
         }
-        final boolean noPrivate = Tools.isFolderShared(folder, userId);
+        final boolean noPrivate = Tools.isFolderShared(folder, user);
         try {
             return TaskSearch.getInstance().listModifiedTasks(ctx, folderId,
                 StorageType.ACTIVE, columns, since, onlyOwn, userId, noPrivate);
@@ -262,12 +258,12 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
         }
         boolean onlyOwn;
         try {
-            onlyOwn = TaskLogic.canReadInFolder(ctx, userId, user.getGroups(),
+            onlyOwn = Permission.canReadInFolder(ctx, userId, user.getGroups(),
                 session.getUserConfiguration(), folderId);
         } catch (TaskException e) {
             throw Tools.convert(e);
         }
-        final boolean noPrivate = Tools.isFolderShared(folder, userId);
+        final boolean noPrivate = Tools.isFolderShared(folder, user);
         try {
             return TaskSearch.getInstance().listModifiedTasks(ctx, folderId,
                 StorageType.DELETED, columns, since, onlyOwn, userId,
@@ -285,31 +281,33 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
         final TaskStorage storage = TaskStorage.getInstance();
         final Set<TaskParticipant> parts;
         try {
-            final int userId = session.getUserObject().getId();
+            final User user = session.getUserObject();
+            final int userId = user.getId();
             parts = TaskLogic.createParticipants(ctx, task.getParticipants());
             TaskLogic.checkNewTask(task, userId, session.getUserConfiguration(),
                 parts);
             // Check access rights
             final int folderId = task.getParentFolderID();
-            TaskLogic.checkCreateInFolder(session, folderId);
+            Permission.checkCreateInFolder(session, folderId);
             final FolderObject folder = Tools.getFolder(ctx, folderId);
             if (task.getPrivateFlag() && (Tools.isFolderPublic(folder)
-                || Tools.isFolderShared(folder, userId))) {
+                || Tools.isFolderShared(folder, user))) {
                 throw new TaskException(Code.PRIVATE_FLAG, folderId);
             }
             // Create folder mappings
             Set<Folder> folders;
             if (Tools.isFolderPublic(folder)) {
                 folders = TaskLogic.createFolderMapping(folderId, task
-                    .getCreatedBy(), TaskInternalParticipant.EMPTY);
+                    .getCreatedBy(), InternalParticipant.EMPTY);
             } else {
-                Tools.fillStandardFolders(ctx, parts);
-                int user = userId;
-                if (Tools.isFolderShared(folder, userId)) {
-                    user = folder.getCreator();
-                }
-                folders = TaskLogic.createFolderMapping(folderId, user, Tools
+                Tools.fillStandardFolders(ctx, ParticipantStorage
                     .extractInternal(parts));
+                int creator = userId;
+                if (Tools.isFolderShared(folder, user)) {
+                    creator = folder.getCreator();
+                }
+                folders = TaskLogic.createFolderMapping(folderId, creator,
+                    ParticipantStorage.extractInternal(parts));
             }
             // Insert task
             storage.insert(ctx, task, parts, folders);
@@ -350,99 +348,74 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
     public void updateTaskObject(final Task task, final int folderId,
         final Date lastRead) throws OXException {
         final Context ctx = session.getContext();
-        final TaskStorage storage = TaskStorage.getInstance();
-        final int taskId = task.getObjectID();
-        final int userId = session.getUserObject().getId();
+        final User user = session.getUserObject();
+        final UserConfiguration userConfig = session.getUserConfiguration();
+        final FolderObject folder;
         try {
-            final UpdateLogic update = new UpdateLogic(session, task, folderId,
-                lastRead);
+            folder = Tools.getFolder(ctx, folderId);
+        } catch (TaskException e) {
+            throw Tools.convert(e);
+        }
+        final UpdateData update = new UpdateData(ctx, user, userConfig,
+            folder, task, lastRead);
+        final Task updated;
+        final Set<TaskParticipant> removedParts;
+        final Set<TaskParticipant> updatedParts;
+        final Set<Folder> updatedFolder;
+        final boolean move;
+        try {
             update.prepare();
-            storage.update(ctx, task, lastRead, update.getModifiedFields(),
-                update.getAdded(), update.getRemoved(), update.getAddedFolder(),
+            removedParts = update.getRemoved();
+            TaskLogic.updateTask(ctx, task, lastRead, update.getModifiedFields(),
+                update.getAdded(), removedParts, update.getAddedFolder(),
                 update.getRemovedFolder());
+            updated = update.getUpdated();
+            updatedParts = update.getUpdatedParticipants();
+            updatedFolder = update.getUpdatedFolder();
+            move = update.isMove();
         } catch (TaskException e) {
             throw Tools.convert(e);
         }
-        if (task.containsAlarm()) {
-            updateAlarm(task, userId);
-        }
-        // TODO optimize multiple task load.
         try {
-            final Task reload = storage.selectTask(ctx, taskId,
-                StorageType.ACTIVE);
-            // Reload folder
-            int newFolderId = folderId;
-            if (task.containsParentFolderID()) {
-                newFolderId = task.getParentFolderID();
-            }
-            reload.setParentFolderID(newFolderId);
-            if (Task.NO_RECURRENCE != reload.getRecurrenceType()
-                && Task.DONE == reload.getStatus()) {
-                insertNextRecurrence(reload);
-            }
-        } catch (TaskException e) {
-            throw Tools.convert(e);
-        }
-        final Task forEvent;
-        try {
-            // Reload task for event handling. Given task may not contain all
-            // values.
-            forEvent = storage.selectTask(ctx, taskId, StorageType.ACTIVE);
-            // Reload participants
-            final Set<TaskParticipant> parts = storage.selectParticipants(ctx,
-                taskId, StorageType.ACTIVE);
-            // Reload folder
-            int newFolderId = folderId;
-            if (task.containsParentFolderID()) {
-                newFolderId = task.getParentFolderID();
-            }
-            // TODO Use FolderObject
-            if (!Tools.isFolderPublic(ctx, newFolderId)) {
-                final Set<Folder> folders = storage.selectFolders(ctx, taskId);
-                Tools.fillStandardFolders(parts, folders, true);
-            }
-            // Fill participants
-            forEvent.setParticipants(TaskLogic.createParticipants(parts));
-            forEvent.setUsers(TaskLogic.createUserParticipants(parts));
-        } catch (TaskException e) {
-            throw Tools.convert(e);
-        }
-        forEvent.setParentFolderID(folderId);
-        if (task.containsNotification()) {
-            forEvent.setNotification(task.getNotification());
-        }
-        try {
-            new EventClient(session).modify(forEvent);
+            new EventClient(session).modify(updated);
         } catch (InvalidStateException e) {
             throw Tools.convert(new TaskException(Code.EVENT, e));
+        }
+        if (updated.containsAlarm()) {
+            updateAlarm(updated, user);
+        }
+        if (move) {
+            fixAlarm(updated, removedParts, updatedFolder);
+        }
+        try {
+            if (Task.NO_RECURRENCE != updated.getRecurrenceType()
+                && Task.DONE == updated.getStatus()) {
+                insertNextRecurrence(updated, updatedParts, updatedFolder);
+            }
+        } catch (TaskException e) {
+            throw Tools.convert(e);
         }
     }
 
     /**
      * Inserts a new task according to the recurrence.
      * @param task recurring task.
+     * @param parts participants of the updated task.
+     * @param folders folders of the updated task.
      * @throws TaskException if creating the new task fails.
      * @throws OXException if sending an event about new task fails.
      */
-    private void insertNextRecurrence(final Task task) throws TaskException,
+    private void insertNextRecurrence(final Task task,
+        final Set<TaskParticipant> parts, final Set<Folder> folders)
+        throws TaskException,
         OXException {
         final TaskStorage storage = TaskStorage.getInstance();
         final Context ctx = session.getContext();
         final boolean next = TaskLogic.makeRecurrence(task);
         if (next) {
-            final Set<TaskParticipant> parts = storage.selectParticipants(ctx,
-                task.getObjectID(), StorageType.ACTIVE);
             TaskLogic.checkNewTask(task, session.getUserObject().getId(),
                 session.getUserConfiguration(), parts);
-            final Set<Folder> folders = storage.selectFolders(ctx, task
-                .getObjectID());
-            if (folders.size() > 1) {
-                Tools.fillStandardFolders(parts, folders, true);
-            }
             storage.insert(ctx, task, parts, folders);
-            // Fill participants
-            task.setParticipants(TaskLogic.createParticipants(parts));
-            task.setUsers(TaskLogic.createUserParticipants(parts));
             try {
                 new EventClient(session).create(task);
             } catch (InvalidStateException e) {
@@ -454,30 +427,31 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
     /**
      * Updates the alarm for a task.
      * @param task Task.
-     * @param userId unique identifier of the user.
+     * @param user User.
      * @throws OXException if the update of the alarm makes problems.
      */
-    private void updateAlarm(final Task task, final int userId)
+    private void updateAlarm(final Task task, final User user)
         throws OXException {
         final ReminderSQLInterface reminder = new ReminderHandler(session);
+        final int taskId = task.getObjectID();
+        final int userId = user.getId();
         if (null == task.getAlarm()) {
             try {
-                reminder.deleteReminder(task.getObjectID(), userId, Types.TASK);
+                reminder.deleteReminder(taskId, userId, Types.TASK);
             } catch (OXObjectNotFoundException ce) {
-                LOG.debug("Cannot delete reminder for task "
-                    + task.getObjectID() + " in context "
-                    + session.getContext().getContextId());
+                LOG.debug("Cannot delete reminder for task " + taskId
+                    + " and user " + userId + " in context " + session
+                    .getContext().getContextId());
             }
         } else {
-			final int targetId = task.getObjectID();
 			final ReminderObject remind = new ReminderObject();
             remind.setDate(task.getAlarm());
             remind.setModule(Types.TASK);
-            remind.setTargetId(targetId);
+            remind.setTargetId(taskId);
             remind.setFolder(String.valueOf(task.getParentFolderID()));
             remind.setUser(userId);
 			
-			if (reminder.existsReminder(targetId, userId, Types.TASK)) {
+			if (reminder.existsReminder(taskId, userId, Types.TASK)) {
 	            reminder.updateReminder(remind);
 			} else {
 				reminder.insertReminder(remind);
@@ -485,6 +459,39 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
         }
     }
 
+    private void fixAlarm(final Task task, final Set<TaskParticipant> removed,
+        final Set<Folder> folders) throws OXException {
+        final ReminderSQLInterface reminder = new ReminderHandler(session);
+        final int taskId = task.getObjectID();
+        for (InternalParticipant participant : ParticipantStorage
+            .extractInternal(removed)) {
+            final int userId = participant.getIdentifier();
+            try {
+                reminder.deleteReminder(taskId, userId, Types.TASK);
+            } catch (OXObjectNotFoundException ce) {
+                LOG.debug("Cannot delete reminder for task " + taskId
+                    + " and user " + userId + " in context " + session
+                    .getContext().getContextId());
+            }
+        }
+        for (Folder folder : folders) {
+            try {
+                final ReminderObject remind = reminder.loadReminder(taskId,
+                    folder.getUser(), Types.TASK);
+                final int folderId = folder.getIdentifier();
+                if (Integer.parseInt(remind.getFolder()) != folderId) {
+                    remind.setFolder(String.valueOf(folderId));
+                    reminder.updateReminder(remind);
+                }
+            } catch (NumberFormatException nfe) {
+                LOG.error("Parsing reminder folder identifier failed.", nfe);
+            } catch (OXObjectNotFoundException nf) {
+                LOG.debug("No reminder to update. Task: " + taskId + ", User: "
+                    + folder.getUser() + '.');
+            }
+        }
+    }
+    
     /**
      * {@inheritDoc}
      */
@@ -494,7 +501,6 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
         final FolderObject folder;
         final Context ctx = session.getContext();
         final User user = session.getUserObject();
-        final int userId = user.getId();
         final Task task;
         try {
             // Check if folder exists
@@ -506,8 +512,8 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
                 .ACTIVE);
             // TODO Switch to only delete the participant from task
             // Check delete permission
-            Access.checkDelete(ctx, userId, user.getGroups(), session
-                .getUserConfiguration(), folder, task);
+            Permission.checkDelete(ctx, user, session.getUserConfiguration(),
+                folder, task);
         } catch (TaskException e) {
             throw Tools.convert(e);
         }
@@ -516,7 +522,7 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
         } catch (TaskException e) {
             throw Tools.convert(e);
         }
-        }
+    }
 
     /**
      * {@inheritDoc}
@@ -526,7 +532,7 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
         final TaskStorage storage = TaskStorage.getInstance();
         try {
             final Context ctx = session.getContext();
-            final TaskInternalParticipant participant = storage
+            final InternalParticipant participant = storage
                 .selectParticipant(ctx, taskId, userId);
             participant.setConfirm(confirm);
             participant.setConfirmMessage(message);
@@ -536,7 +542,7 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
             task.setLastModified(new Date());
             task.setModifiedBy(session.getUserObject().getId());
             // FIXME remove new Date()
-            storage.update(ctx, task, new Date(), new int[] {
+            TaskLogic.updateTask(ctx, task, new Date(), new int[] {
                 Task.LAST_MODIFIED, Task.MODIFIED_BY }, null, null, null, null);
         } catch (TaskException e) {
             throw Tools.convert(e);
@@ -580,7 +586,7 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
                     final FolderObject folder = (FolderObject) iter.next();
                     if (folder.isShared(userId)) {
                         shared.add(Integer.valueOf(folder.getObjectID()));
-                    } else if (TaskLogic.canReadInFolder(ctx, userId, groups,
+                    } else if (Permission.canReadInFolder(ctx, userId, groups,
                         config, folder)) {
                         own.add(Integer.valueOf(folder.getObjectID()));
                     } else {
@@ -592,7 +598,7 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
                     search.getFolder());
                 if (folder.isShared(userId)) {
                     shared.add(Integer.valueOf(folder.getObjectID()));
-                } else if (TaskLogic.canReadInFolder(ctx, userId, groups,
+                } else if (Permission.canReadInFolder(ctx, userId, groups,
                     config, folder)) {
                     own.add(Integer.valueOf(folder.getObjectID()));
                 } else {

@@ -53,6 +53,7 @@ import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.getIN;
 
 import java.sql.Connection;
+import java.sql.DataTruncation;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -96,11 +97,11 @@ public class RdbParticipantStorage extends ParticipantStorage {
      * {@inheritDoc}
      */
     @Override
-    protected Map<Integer, Set<TaskInternalParticipant>> selectInternal(
+    protected Map<Integer, Set<InternalParticipant>> selectInternal(
         final Context ctx, final Connection con, final int[] tasks,
         final StorageType type) throws TaskException {
-        final Map<Integer, HashSet<TaskInternalParticipant>> tmp =
-            new HashMap<Integer, HashSet<TaskInternalParticipant>>();
+        final Map<Integer, HashSet<InternalParticipant>> tmp =
+            new HashMap<Integer, HashSet<InternalParticipant>>();
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
@@ -121,8 +122,8 @@ public class RdbParticipantStorage extends ParticipantStorage {
                 if (result.wasNull()) {
                     groupId = null;
                 }
-                final TaskInternalParticipant taskParticipant =
-                    new TaskInternalParticipant(participant, groupId);
+                final InternalParticipant taskParticipant =
+                    new InternalParticipant(participant, groupId);
                 taskParticipant.setConfirm(result.getInt(pos++));
                 taskParticipant.setConfirmMessage(result.getString(pos++));
                 if (StorageType.REMOVED == type) {
@@ -133,9 +134,9 @@ public class RdbParticipantStorage extends ParticipantStorage {
                         taskParticipant.setFolderId(folderId);
                     }
                 }
-                HashSet<TaskInternalParticipant> participants = tmp.get(taskId);
+                HashSet<InternalParticipant> participants = tmp.get(taskId);
                 if (null == participants) {
-                    participants = new HashSet<TaskInternalParticipant>();
+                    participants = new HashSet<InternalParticipant>();
                     tmp.put(taskId, participants);
                 }
                 participants.add(taskParticipant);
@@ -145,8 +146,8 @@ public class RdbParticipantStorage extends ParticipantStorage {
         } finally {
             closeSQLStuff(result, stmt);
         }
-        final Map<Integer, Set<TaskInternalParticipant>> retval =
-            new HashMap<Integer, Set<TaskInternalParticipant>>();
+        final Map<Integer, Set<InternalParticipant>> retval =
+            new HashMap<Integer, Set<InternalParticipant>>();
         retval.putAll(tmp);
         return retval;
     }
@@ -156,12 +157,12 @@ public class RdbParticipantStorage extends ParticipantStorage {
      */
     @Override
     void updateInternal(final Context ctx, final Connection con,
-        final int taskId, final Set<TaskInternalParticipant> participants,
+        final int taskId, final Set<InternalParticipant> participants,
         final StorageType type) throws TaskException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement(SQL.UPDATE_PARTS.get(type));
-            for (TaskInternalParticipant participant : participants) {
+            for (InternalParticipant participant : participants) {
                 int pos = 1;
                 if (null == participant.getGroupId()) {
                     stmt.setNull(pos++, Types.INTEGER);
@@ -277,13 +278,16 @@ public class RdbParticipantStorage extends ParticipantStorage {
      * {@inheritDoc}
      */
     @Override
-    protected Map<Integer, Set<TaskExternalParticipant>> selectExternal(
+    protected Map<Integer, Set<ExternalParticipant>> selectExternal(
         final Context ctx, final Connection con, final int[] tasks,
         final StorageType type) throws TaskException {
+        final Map<Integer, Set<ExternalParticipant>> retval =
+            new HashMap<Integer, Set<ExternalParticipant>>();
+        if (StorageType.REMOVED == type) {
+            return retval;
+        }
         PreparedStatement stmt = null;
         ResultSet result = null;
-        final Map<Integer, Set<TaskExternalParticipant>> retval =
-            new HashMap<Integer, Set<TaskExternalParticipant>>();
         try {
             stmt = con.prepareStatement(getIN(SQL.SELECT_EXTERNAL.get(type),
                 tasks.length));
@@ -300,11 +304,11 @@ public class RdbParticipantStorage extends ParticipantStorage {
                     new ExternalUserParticipant();
                 external.setEmailAddress(result.getString(pos++));
                 external.setDisplayName(result.getString(pos++));
-                final TaskExternalParticipant participant =
-                    new TaskExternalParticipant(external);
-                Set<TaskExternalParticipant> participants = retval.get(taskId);
+                final ExternalParticipant participant =
+                    new ExternalParticipant(external);
+                Set<ExternalParticipant> participants = retval.get(taskId);
                 if (null == participants) {
-                    participants = new HashSet<TaskExternalParticipant>();
+                    participants = new HashSet<ExternalParticipant>();
                     retval.put(taskId, participants);
                 }
                 participants.add(participant);
@@ -345,9 +349,104 @@ public class RdbParticipantStorage extends ParticipantStorage {
             closeSQLStuff(null, stmt);
         }
         if (check && addresses.length != deleted) {
-            final TaskException e = new TaskException(Code
+            final TaskException exc = new TaskException(Code
                 .PARTICIPANT_DELETE_WRONG, addresses.length, deleted);
-            LOG.error(e.getMessage(), e);
+            LOG.error(exc.getMessage(), exc);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    void insertExternals(final Context ctx, final Connection con,
+        final int taskId, final Set<ExternalParticipant> participants,
+        final StorageType type) throws TaskException {
+        if (0 == participants.size() || StorageType.REMOVED == type) {
+            return;
+        }
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement(SQL.INSERT_EXTERNAL.get(type));
+            int pos = 1;
+            stmt.setInt(pos++, ctx.getContextId());
+            stmt.setInt(pos++, taskId);
+            for (ExternalParticipant participant : participants) {
+                pos = 3;
+                stmt.setString(pos++, participant.getMail());
+                final String displayName = participant.getDisplayName();
+                if (null == displayName) {
+                    stmt.setNull(pos++, java.sql.Types.VARCHAR);
+                } else {
+                    stmt.setString(pos++, displayName);
+                }
+                stmt.addBatch();
+            }
+            stmt.executeBatch();
+        } catch (DataTruncation e) {
+            final int truncated = -1; // No ID defined here
+            final TaskException tske = new TaskException(Code.TRUNCATED, e,
+                "mail");
+            tske.addTruncatedId(truncated);
+            throw tske;
+        } catch (SQLException e) {
+            throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
+        } finally {
+            closeSQLStuff(null, stmt);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    void insertInternals(final Context ctx, final Connection con,
+        final int taskId, final Set<InternalParticipant> participants,
+        final StorageType type) throws TaskException {
+        if (0 == participants.size()) {
+            return;
+        }
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement(SQL.INSERT_PARTS.get(type));
+            int pos = 1;
+            stmt.setInt(pos++, ctx.getContextId());
+            stmt.setInt(pos++, taskId);
+            for (InternalParticipant participant : participants) {
+                pos = 3;
+                stmt.setInt(pos++, participant.getIdentifier());
+                if (null == participant.getGroupId()) {
+                    stmt.setNull(pos++, java.sql.Types.INTEGER);
+                } else {
+                    stmt.setInt(pos++, participant.getGroupId());
+                }
+                stmt.setInt(pos++, participant.getConfirm());
+                if (null == participant.getConfirmMessage()) {
+                    stmt.setNull(pos++, java.sql.Types.VARCHAR);
+                } else {
+                    stmt.setString(pos++, participant.getConfirmMessage());
+                }
+                if (StorageType.REMOVED == type) {
+                    final int folderId = participant.getFolderId();
+                    if (UserParticipant.NO_PFID == folderId) {
+                        stmt.setInt(pos++, 0);
+                    } else {
+                        stmt.setInt(pos++, participant.getFolderId());
+                    }
+                }
+                stmt.addBatch();
+            }
+            stmt.executeBatch();
+        } catch (DataTruncation e) {
+            final int truncated = -1; // No ID defined here
+            final TaskException tske = new TaskException(Code.TRUNCATED, e,
+                "description");
+            tske.addTruncatedId(truncated);
+            throw tske;
+        } catch (SQLException e) {
+            throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
+        } finally {
+            closeSQLStuff(null, stmt);
         }
     }
 }

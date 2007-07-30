@@ -72,7 +72,7 @@ public final class Configuration {
      * If this global parameter is set to <code>true</code> the creator of a
      * task can't be put into the participants. This is for emulating Outlook
      * behaviour that can't add the creator/organisator into the participants.
-     * TODO the <code>false</code> case is not implemented.
+     * FIXME remove this crappy stuff.
      * @return <code>true</code>.
      */
     public static boolean isNoCreatorToParticipants() {

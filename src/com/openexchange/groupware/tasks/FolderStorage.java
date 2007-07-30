@@ -214,6 +214,9 @@ public abstract class FolderStorage {
     void deleteFolder(final Context ctx, final Connection con, final int taskId,
         final Set<Folder> folders, final StorageType type)
         throws TaskException {
+        if (0 == folders.size()) {
+            return;
+        }
         final int[] folderIds = new int[folders.size()];
         final Iterator<Folder> iter = folders.iterator();
         for (int i = 0; i < folderIds.length; i++) {
@@ -234,5 +237,16 @@ public abstract class FolderStorage {
      */
     abstract int[][] searchFolderByUser(Context ctx, Connection readCon,
         int userId, StorageType type) throws TaskException;
+
+    static Folder getFolder(final Set<Folder> folders, final int folderId) {
+        Folder retval = null;
+        for (Folder folder : folders) {
+            if (folder.getIdentifier() == folderId) {
+                retval = folder;
+                break;
+            }
+        }
+        return retval;
+    }
 
 }

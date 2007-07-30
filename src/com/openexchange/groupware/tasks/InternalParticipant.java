@@ -58,12 +58,12 @@ import com.openexchange.groupware.container.UserParticipant;
  * TaskInternalParticipant.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class TaskInternalParticipant extends TaskParticipant {
+public class InternalParticipant extends TaskParticipant {
 
     /**
      * An empty set of participants for tasks.
      */
-    static final Set<TaskInternalParticipant> EMPTY = Collections.emptySet();
+    static final Set<InternalParticipant> EMPTY = Collections.emptySet();
 
     /**
      * User.
@@ -80,7 +80,7 @@ public class TaskInternalParticipant extends TaskParticipant {
      * Creates an empty task participant. Insure using the set methods for
      * setting at least the user identifier.
      */
-    TaskInternalParticipant() {
+    InternalParticipant() {
         super();
         this.user = new UserParticipant();
     }
@@ -91,7 +91,7 @@ public class TaskInternalParticipant extends TaskParticipant {
      * @param groupId unique identifier of the group if this participant is
      * added through a group.
      */
-    TaskInternalParticipant(final UserParticipant user, final Integer groupId) {
+    InternalParticipant(final UserParticipant user, final Integer groupId) {
         super();
         this.user = user;
         this.groupId = groupId;
@@ -101,7 +101,7 @@ public class TaskInternalParticipant extends TaskParticipant {
      * Copy constructor.
      * @param copy participant to copy.
      */
-    TaskInternalParticipant(final TaskInternalParticipant copy) {
+    InternalParticipant(final InternalParticipant copy) {
         super();
         user = new UserParticipant();
         user.setIdentifier(copy.getIdentifier());
@@ -188,10 +188,10 @@ public class TaskInternalParticipant extends TaskParticipant {
      * {@inheritDoc}
      */
     public boolean equals(final Object obj) {
-        if (!(obj instanceof TaskInternalParticipant)) {
+        if (!(obj instanceof InternalParticipant)) {
             return false;
         }
-        return getIdentifier() == ((TaskInternalParticipant) obj)
+        return getIdentifier() == ((InternalParticipant) obj)
             .getIdentifier();
     }
 

@@ -94,6 +94,7 @@ abstract class TaskStorage {
      * @param participants Participants of the task.
      * @param folders Folders the task should appear in.
      * @throws TaskException if an error occurs while storing the task.
+     * TODO move to TaskLogic
      */
     abstract void insert(Context ctx, Task task,
         Set<TaskParticipant> participants, Set<Folder> folders)
@@ -111,23 +112,6 @@ abstract class TaskStorage {
      */
     abstract void updateTask(Context ctx, Connection con, Task task,
         Date lastRead, int[] modified, StorageType type) throws TaskException;
-
-    /**
-     * Updates a task and its folder and participants.
-     * @param ctx Context.
-     * @param task task values.
-     * @param lastRead timestamp when the client read the task last.
-     * @param modified modified attributes of the task.
-     * @param add added participants.
-     * @param remove removed participants.
-     * @param addFolder added folders.
-     * @param removeFolder removed folders.
-     * @throws TaskException if an error occurs.
-     */
-    abstract void update(Context ctx, Task task, Date lastRead,
-        int[] modified, Set<TaskParticipant> add, Set<TaskParticipant> remove,
-        Set<Folder> addFolder, Set<Folder> removeFolder)
-        throws TaskException;
 
     /**
      * Deletes a task.
@@ -163,7 +147,7 @@ abstract class TaskStorage {
      * @throws TaskException if an error occurs.
      */
     abstract void updateParticipant(Context ctx, int taskId,
-        TaskInternalParticipant participant) throws TaskException;
+        InternalParticipant participant) throws TaskException;
 
     /**
      * Counts tasks in a folder.
@@ -211,7 +195,7 @@ abstract class TaskStorage {
      * @return a SearchIterator for iterating over all returned tasks.
      * @throws TaskException if an error occurs while listing tasks.
      */
-    public abstract SearchIterator list(Context ctx, int folderId,
+    public abstract TaskIterator list(Context ctx, int folderId,
         int from, int until, int orderBy, String orderDir, int[] columns,
         boolean onlyOwn, int userId, boolean noPrivate) throws TaskException;
 
@@ -279,7 +263,7 @@ abstract class TaskStorage {
      * @throws TaskException if an error occurs.
      * @deprecated Use ParticipantStorage.
      */
-    abstract TaskInternalParticipant selectParticipant(Context ctx,
+    abstract InternalParticipant selectParticipant(Context ctx,
         int taskId, int userId) throws TaskException;
 
     /**
@@ -289,7 +273,7 @@ abstract class TaskStorage {
      * @param type type of participant that should be selected.
      * @return a set of participants.
      * @throws TaskException if an error occurs.
-     * @deprecated Use ParticipantStorage.
+     * @deprecated Use {@link ParticipantStorage}{@link #selectParticipants(Context, int, StorageType)}
      */
     abstract Set<TaskParticipant> selectParticipants(Context ctx,
         int taskId, StorageType type) throws TaskException;

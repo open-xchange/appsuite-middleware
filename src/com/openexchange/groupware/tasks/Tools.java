@@ -52,7 +52,6 @@ package com.openexchange.groupware.tasks;
 import java.sql.Connection;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
@@ -73,6 +72,7 @@ import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.groupware.tasks.TaskException.Code;
@@ -108,6 +108,7 @@ public final class Tools {
      *         <code>false</code> otherwise.
      * @throws TaskException if no database connection can be obtained or an
      * error occurs while reading the folder.
+     * @deprecated Use {@link #isFolderTask(FolderObject)}
      */
     static boolean isFolderTask(final Context ctx, final int folderId)
         throws TaskException {
@@ -132,6 +133,7 @@ public final class Tools {
      *         <code>false</code> otherwise.
      * @throws TaskException if no database connection can be obtained or an
      * error occurs while reading the folder.
+     * @deprecated Use {@link #isFolderPublic(FolderObject)}
      */
     static boolean isFolderPublic(final Context ctx, final int folderId)
         throws TaskException {
@@ -157,6 +159,7 @@ public final class Tools {
      *         <code>false</code> otherwise.
      * @throws TaskException if no database connection can be obtained or an
      * error occurs while reading the folder.
+     * @deprecated Use {@link #isFolderPrivate(FolderObject)}
      */
     static boolean isFolderPrivate(final Context ctx, final int folderId)
         throws TaskException {
@@ -183,6 +186,7 @@ public final class Tools {
      *         <code>false</code> otherwise.
      * @throws TaskException if no database connection can be obtained or an
      * error occurs while reading the folder.
+     * @deprecated Use {@link #isFolderShared(FolderObject, int)}
      */
     static boolean isFolderShared(final Context ctx, final int folderId,
         final int userId) throws TaskException {
@@ -196,10 +200,23 @@ public final class Tools {
      * @param folder folder object.
      * @return <code>true</code> if the folder is a shared folder,
      * <code>false</code> otherwise.
+     * @deprecated Use {@link #isFolderShared(FolderObject, User)}
      */
     static boolean isFolderShared(final FolderObject folder, final int userId) {
         return (FolderObject.PRIVATE == folder.getType()
             && folder.getCreatedBy() != userId);
+    }
+
+    /**
+     * Checks if the folder is a shared folder.
+     * @param folder folder object.
+     * @param user requesting user.
+     * @return <code>true</code> if the folder is a shared folder,
+     * <code>false</code> otherwise.
+     */
+    static boolean isFolderShared(final FolderObject folder, final User user) {
+        return (FolderObject.PRIVATE == folder.getType()
+            && folder.getCreatedBy() != user.getId());
     }
 
     /**
@@ -258,15 +275,11 @@ public final class Tools {
     }
 
     static void fillStandardFolders(final Context ctx,
-        final Set<TaskParticipant> participants) throws TaskException {
-        for (TaskParticipant participant : participants) {
-            if (Type.INTERNAL == participant.getType()) {
-                final TaskInternalParticipant internal =
-                    (TaskInternalParticipant) participant;
-                if (UserParticipant.NO_PFID == internal.getFolderId()) {
-                    internal.setFolderId(Tools.getUserTaskStandardFolder(ctx,
-                        internal.getIdentifier()));
-                }
+        final Set<InternalParticipant> participants) throws TaskException {
+        for (InternalParticipant participant : participants) {
+            if (UserParticipant.NO_PFID == participant.getFolderId()) {
+                participant.setFolderId(Tools.getUserTaskStandardFolder(ctx,
+                    participant.getIdentifier()));
             }
         }
     }
@@ -280,8 +293,8 @@ public final class Tools {
         }
         for (TaskParticipant participant : participants) {
             if (Type.INTERNAL == participant.getType()) {
-                final TaskInternalParticipant internal =
-                    (TaskInternalParticipant) participant;
+                final InternalParticipant internal =
+                    (InternalParticipant) participant;
                 final Folder folder = folderByUser.get(
                     internal.getIdentifier());
                 if (null == folder && privat) {
@@ -291,30 +304,6 @@ public final class Tools {
                 internal.setFolderId(folder.getIdentifier());
             }
         }
-    }
-
-    static Set<TaskInternalParticipant> extractInternal(
-        final Set<TaskParticipant> participants) {
-        final Set<TaskInternalParticipant> retval =
-            new HashSet<TaskInternalParticipant>();
-        for (TaskParticipant participant : participants) {
-            if (Type.INTERNAL == participant.getType()) {
-                retval.add((TaskInternalParticipant) participant);
-            }
-        }
-        return retval;
-    }
-
-    static Set<TaskExternalParticipant> extractExternal(
-        final Set<TaskParticipant> participants) {
-        final Set<TaskExternalParticipant> retval =
-            new HashSet<TaskExternalParticipant>();
-        for (TaskParticipant participant : participants) {
-            if (Type.EXTERNAL == participant.getType()) {
-                retval.add((TaskExternalParticipant) participant);
-            }
-        }
-        return retval;
     }
 
     /**

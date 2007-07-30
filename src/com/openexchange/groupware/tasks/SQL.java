@@ -101,6 +101,12 @@ public final class SQL {
         new EnumMap<StorageType, String>(StorageType.class);
 
     /**
+     * SQL statements for inserting participants.
+     */
+    static final Map<StorageType, String> INSERT_PARTS =
+        new EnumMap<StorageType, String>(StorageType.class);
+
+    /**
      * SQL statements for selecting participants.
      */
     static final Map<StorageType, String> SELECT_PARTS =
@@ -128,6 +134,12 @@ public final class SQL {
      * SQL statements for finding group participants.
      */
     static final Map<StorageType, String> FIND_GROUP =
+        new EnumMap<StorageType, String>(StorageType.class);
+
+    /**
+     * SQL statement for inserting external participants.
+     */
+    static final Map<StorageType, String> INSERT_EXTERNAL =
         new EnumMap<StorageType, String>(StorageType.class);
 
     /**
@@ -415,6 +427,14 @@ public final class SQL {
                 .get(type)));
         }
 
+        sql = "INSERT INTO " + tableName + " (cid,task,user,group_id,accepted,"
+            + "description) VALUES (?,?,?,?,?,?)";
+        for (StorageType type : activeDelete) {
+            INSERT_PARTS.put(type, sql.replace(tableName, PARTS_TABLES.get(type)));
+        }
+        INSERT_PARTS.put(StorageType.REMOVED,
+            "INSERT INTO task_removedparticipant (cid,task,user,group_id,"
+            + "accepted,description,folder) VALUES (?,?,?,?,?,?,?)");
         SELECT_PARTS.put(StorageType.ACTIVE,
             "SELECT task,user,group_id,accepted,description "
             + "FROM task_participant WHERE cid=? AND task IN (");
@@ -444,6 +464,12 @@ public final class SQL {
         sql = "SELECT task FROM " + tableName + " WHERE cid=? AND group_id=?";
         for (StorageType type : StorageType.values()) {
             FIND_GROUP.put(type, sql.replace(tableName, PARTS_TABLES
+                .get(type)));
+        }
+        sql = "INSERT INTO " + tableName
+            + " (cid,task,mail,display_name) VALUES (?,?,?,?)";
+        for (StorageType type : activeDelete) {
+            INSERT_EXTERNAL.put(type, sql.replace(tableName, EPARTS_TABLES
                 .get(type)));
         }
         sql = "DELETE FROM " + tableName
