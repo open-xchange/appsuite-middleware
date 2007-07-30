@@ -65,7 +65,13 @@ public abstract class AbstractAJAXSession extends TestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        client = new AJAXClient(AJAXClient.User.User1);
+        try {
+            client = new AJAXClient(AJAXClient.User.User1);
+        } catch (Exception x) {
+        	fail(x.getMessage());
+        	x.printStackTrace();
+        	throw x;
+        }
     }
 
     /**
