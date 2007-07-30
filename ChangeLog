@@ -1,4 +1,8 @@
-* 2007-07-03 - sebastian.kauss@open-xchange.com
+* 2007-07-30 - ben.pahne@open-xchange.com
+
+ - New Feature: Email Autocomplete
+
+* 2007-07-30 - sebastian.kauss@open-xchange.com
 
  - Fixed Bug #4409 - Exception when opening a contact
 
