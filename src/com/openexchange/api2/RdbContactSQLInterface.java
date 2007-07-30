@@ -396,7 +396,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 	
 		final int folderId = searchobject.getFolder();
 		
-		if (!searchobject.isAllFolders()){
+		if (!(searchobject.isAllFolders() || searchobject.getEmailAutoComplete())){
 			try {
 				FolderObject contactFolder;
 				if (FolderCacheManager.isEnabled()){
@@ -421,7 +421,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 		try {
 			final ContactSql cs = new ContactMySql(sessionobject);
 			
-			if (!searchobject.isAllFolders()){	
+			if (!searchobject.isAllFolders() && !searchobject.getEmailAutoComplete()){	
 				cs.setFolder(folderId);
 
 				final EffectivePermission oclPerm = new OXFolderAccess(readcon, ctx).getFolderPermission(folderId, userId, sessionobject.getUserConfiguration());
@@ -437,8 +437,12 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 						//throw new OXConflictException("NOT ALLOWED TO SEE FOLDER OBJECTS (cid="+sessionobject.getContext().getContextId()+" fid="+folderId+')');
 					}
 				}
-			}else{
+			}else if (searchobject.isAllFolders()){
 				searchobject.setAllFolderSQLINString(cs.buildAllFolderSearchString(userId,memberInGroups,sessionobject,readcon).toString());
+			} else if (searchobject.getEmailAutoComplete()){
+				final OXFolderAccess oxfs = new OXFolderAccess(readcon, sessionobject.getContext());
+				FolderObject user_private_folder = oxfs.getDefaultFolder(userId, FolderObject.CONTACT);
+				searchobject.setEmailAutoCompleteFolder(user_private_folder.getObjectID());
 			}
 			
 			final String order = " ORDER BY co." + Contacts.mapping[orderBy].getDBFieldName() + ' ' + orderDir +  ' ';
@@ -521,7 +525,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 			throw e;
 			//throw new OXException("getContactsInFolder() called with a non-Contact-Folder! (cid="+sessionobject.getContext().getContextId()+" fid="+folderId+')');
 		}	
-		
+
 		SearchIterator si = null;
 		try {
 			final ContactSql cs = new ContactMySql(sessionobject);

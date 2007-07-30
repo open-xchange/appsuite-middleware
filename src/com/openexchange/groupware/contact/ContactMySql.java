@@ -72,6 +72,7 @@ import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.date.FormatDate;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderTools;
 
 /**
@@ -214,6 +215,10 @@ public class ContactMySql implements ContactSql {
 
 
 		if (cso != null){
+			
+			if (cso.getEmailAutoComplete()){
+			//	String mumu = null;
+			}
 			
 			sb.append(" ( ");
 			
@@ -366,10 +371,66 @@ public class ContactMySql implements ContactSql {
 					sb.append('(').append("co.").append(field).append(" LIKE '%").append(value).append("%') ").append(search_habit).append(' ');
 				}
 			}
+			if(cso.getSurname() != null && cso.getSurname().length() > 0){	
+				final String field = Contacts.mapping[ContactObject.SUR_NAME].getDBFieldName();
+
+				String value = cso.getSurname();
+				value = value.replace('*', '%');
+				value = value.replace('?', '_');
+				value = value.replaceAll("'", "\\\\'");
+
+				if (value.indexOf('%') != -1) {
+					sb.append('(').append("co.").append(field).append(" LIKE '").append(value).append("') ").append(search_habit).append(' ');
+				} else {
+					sb.append('(').append("co.").append(field).append(" LIKE '%").append(value).append("%') ").append(search_habit).append(' ');
+				}
+			}
 			if(cso.getDisplayName() != null && cso.getDisplayName().length() > 0){			
 				final String field = Contacts.mapping[ContactObject.DISPLAY_NAME].getDBFieldName();
 
 				String value = cso.getDisplayName();
+				value = value.replace('*', '%');
+				value = value.replace('?', '_');
+				value = value.replaceAll("'", "\\\\'");
+
+				if (value.indexOf('%') != -1) {
+					sb.append('(').append("co.").append(field).append(" LIKE '").append(value).append("') ").append(search_habit).append(' ');
+				} else {
+					sb.append('(').append("co.").append(field).append(" LIKE '%").append(value).append("%') ").append(search_habit).append(' ');
+				}
+			}
+			if(cso.getEmail1() != null && cso.getEmail1().length() > 0){			
+				final String field = Contacts.mapping[ContactObject.EMAIL1].getDBFieldName();
+
+				String value = cso.getEmail1();
+				value = value.replace('*', '%');
+				value = value.replace('?', '_');
+				value = value.replaceAll("'", "\\\\'");
+
+				if (value.indexOf('%') != -1) {
+					sb.append('(').append("co.").append(field).append(" LIKE '").append(value).append("') ").append(search_habit).append(' ');
+				} else {
+					sb.append('(').append("co.").append(field).append(" LIKE '%").append(value).append("%') ").append(search_habit).append(' ');
+				}
+			}
+			if(cso.getEmail2() != null && cso.getEmail2().length() > 0){			
+				final String field = Contacts.mapping[ContactObject.EMAIL2].getDBFieldName();
+
+				String value = cso.getEmail2();
+				value = value.replace('*', '%');
+				value = value.replace('?', '_');
+				value = value.replaceAll("'", "\\\\'");
+
+				if (value.indexOf('%') != -1) {
+					sb.append('(').append("co.").append(field).append(" LIKE '").append(value).append("') ").append(search_habit).append(' ');
+				} else {
+					sb.append('(').append("co.").append(field).append(" LIKE '%").append(value).append("%') ").append(search_habit).append(' ');
+				}
+			}
+			if(cso.getEmail3() != null && cso.getEmail3().length() > 0){			
+				final String field = Contacts.mapping[ContactObject.EMAIL3].getDBFieldName();
+
+				String value = cso.getEmail3();
 				value = value.replace('*', '%');
 				value = value.replace('?', '_');
 				value = value.replaceAll("'", "\\\\'");
@@ -402,8 +463,7 @@ public class ContactMySql implements ContactSql {
 						sb.append(") ").append(search_habit).append(' ');						
 					}
 				}
-			}
-			
+			}	
 			if(cso.getCompany() != null && cso.getCompany().length() > 0){			
 				final String field = Contacts.mapping[ContactObject.COMPANY].getDBFieldName();
 
@@ -431,8 +491,9 @@ public class ContactMySql implements ContactSql {
 			
 			/*********************** * search in all folder or subfolder * ***********************/ 
 			
-			if (cso.isAllFolders()){
-				
+			if (cso.getEmailAutoComplete()){
+				folder = -1;
+				sb.append(' ').append("(fid = ").append(FolderObject.SYSTEM_LDAP_FOLDER_ID).append(" or fid =").append(cso.getEmailAutoCompleteFolder()).append(") AND ");
 			} else if (cso.isAllFolders()){
 				folder = -1;
 				sb.append(' ').append(cso.getAllFolderSQLINString()).append(" AND ");

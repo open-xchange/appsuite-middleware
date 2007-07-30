@@ -243,7 +243,7 @@ public class GroupUserWriter extends ContactWriter {
 		XMLOutputter xo = new XMLOutputter();
 		SearchIterator it = null;
 		try {
-			it = contactsql.searchContacts(searchpattern, false,FolderObject.SYSTEM_LDAP_FOLDER_ID, ContactObject.DISPLAY_NAME, "asc", changeFields);
+			it = contactsql.searchContacts(searchpattern, false, FolderObject.SYSTEM_LDAP_FOLDER_ID, ContactObject.DISPLAY_NAME, "asc", changeFields);
 			writeIterator(it, false, xo, os);
 		} finally {
 			if (it != null) {

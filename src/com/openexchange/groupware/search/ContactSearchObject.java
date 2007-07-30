@@ -61,6 +61,12 @@ public class ContactSearchObject extends SearchObject {
 	
 	private String company = null;
 	
+	private String email1 = null;
+	
+	private String email2 = null;
+	
+	private String email3 = null;
+	
 	private int[] dynamicSearchField = null;
 	
 	private String[] dynamicSearchFieldValue = null;
@@ -84,7 +90,11 @@ public class ContactSearchObject extends SearchObject {
 	private Date[] lastModifiedRange = null;
 	
 	private String allFolderSQLINString = null;
+	
+	private boolean emailAutoComplete = false;
 
+	private int emailAutoCompleteFolder = 0;
+	
 	public ContactSearchObject() {
 		super();
 	}
@@ -121,6 +131,30 @@ public class ContactSearchObject extends SearchObject {
 		this.company = company;
 	}
 
+	public String getEmail1() {
+		return email1;
+	}
+
+	public void setEmail1(String email1) {
+		this.email1 = email1;
+	}
+	
+	public String getEmail2() {
+		return email2;
+	}
+
+	public void setEmail2(String email2) {
+		this.email2 = email2;
+	}
+	
+	public String getEmail3() {
+		return email3;
+	}
+
+	public void setEmail3(String email3) {
+		this.email3 = email3;
+	}
+	
 	public Date[] getCreationDateRange() {
 		return creationDateRange;
 	}
@@ -215,5 +249,21 @@ public class ContactSearchObject extends SearchObject {
 
 	public void setSurname(String surname) {
 		this.surname = surname;
+	}
+	
+	public void setEmailAutoComplete(boolean status){
+		this.emailAutoComplete = status;
+	}
+	
+	public boolean getEmailAutoComplete(){
+		return emailAutoComplete;
+	}
+	
+	public void setEmailAutoCompleteFolder(int folder){
+		this.emailAutoCompleteFolder = folder;
+	}
+	
+	public int getEmailAutoCompleteFolder(){
+		return emailAutoCompleteFolder;
 	}
 }

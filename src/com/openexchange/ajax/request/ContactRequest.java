@@ -406,6 +406,10 @@ public class ContactRequest {
 			if (jData.has("startletter")){
 				startletter = DataParser.parseBoolean(jData, "startletter");
 			}
+			if (jData.has("emailAutoComplete")){
+				searchObj.setEmailAutoComplete(true);
+				searchObj.setAllFolders(false);
+			}
 			
 			final int orderBy = DataParser.parseInt(jsonObj, AJAXServlet.PARAMETER_SORT);
 			final String orderDir = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_ORDER);
@@ -414,6 +418,9 @@ public class ContactRequest {
 			searchObj.setDisplayName(DataParser.parseString(jData, ContactFields.DISPLAY_NAME));
 			searchObj.setGivenName(DataParser.parseString(jData, ContactFields.FIRST_NAME));
 			searchObj.setCompany(DataParser.parseString(jData, ContactFields.COMPANY));
+			searchObj.setCompany(DataParser.parseString(jData, ContactFields.EMAIL1));
+			searchObj.setCompany(DataParser.parseString(jData, ContactFields.EMAIL2));
+			searchObj.setCompany(DataParser.parseString(jData, ContactFields.EMAIL3));
 			searchObj.setDynamicSearchField(DataParser.parseJSONIntArray(jData, "dynamicsearchfield"));
 			searchObj.setDynamicSearchFieldValue(DataParser.parseJSONStringArray(jData, "dynamicsearchfieldvalue"));
 			searchObj.setPrivatePostalCodeRange(DataParser.parseJSONStringArray(jData, "privatepostalcoderange"));
