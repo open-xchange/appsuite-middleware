@@ -917,18 +917,25 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
     }
 
-    private void checkCreateUserData(final Context ctx, final User usr, final PropertyHandler prop) throws InvalidDataException, EnforceableDataObjectException {
+    private void checkCreateUserData(final Context ctx, final User usr, final PropertyHandler prop) throws InvalidDataException, EnforceableDataObjectException, StorageException {
         final Locale langus = OXUser.getLanguage(usr);
         if (langus.getLanguage().indexOf('_') != -1 || langus.getCountry().indexOf('_') != -1) {
             throw new InvalidDataException("The specified locale data (Language:" + langus.getLanguage() + " - Country:" + langus.getCountry() + ") for users language is invalid!");
         }
         
-        if(usr.getPassword()==null || usr.getPassword().trim().length()==0){
+        if (usr.getPassword() == null || usr.getPassword().trim().length() == 0) {
             throw new InvalidDataException("Empty password is not allowed");
         }
     
-        if( ! usr.mandatoryCreateMembersSet() ) {
+        if (!usr.mandatoryCreateMembersSet()) {
             throw new InvalidDataException("Mandatory fields not set: " + usr.getUnsetMembers() );
+        }
+        
+        if (prop.getUserProp(AdminProperties.User.DISPLAYNAME_UNIQUE, true)) {
+            final OXToolStorageInterface oxtool = OXToolStorageInterface.getInstance();
+            if (oxtool.existsDisplayName(ctx, usr)) {
+                throw new InvalidDataException("The displayname is already used");
+            }
         }
     
         if (prop.getUserProp(AdminProperties.User.CHECK_NOT_ALLOWED_CHARS, true)) {

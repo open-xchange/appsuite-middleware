@@ -71,7 +71,7 @@ public abstract class ChangeCore extends UserAbstraction {
 
     protected final void setOptions(final AdminParser parser) {
         
-        setExtendedOption(parser);
+        parser.setExtendedOptions();
         setDefaultCommandLineOptions(parser);
 
         // required
@@ -102,8 +102,6 @@ public abstract class ChangeCore extends UserAbstraction {
         try {
             parser.ownparse(args);
 
-            printExtendedOutputIfSet(parser);
-            
             final Context ctx = contextparsing(parser);
 
             final Credentials auth = credentialsparsing(parser);

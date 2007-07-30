@@ -69,6 +69,8 @@ public class AdminParser extends CmdLineParser {
 
     private static final String OPT_ENVOPTS_LONG = "environment";
     
+    private static final String OPT_EXTENDED_LONG = "extendedoptions";
+    
     public class MissingOptionException extends Exception {
         /**
          * 
@@ -167,6 +169,8 @@ public class AdminParser extends CmdLineParser {
     private Option helpoption;
 
     private Option envoption;
+    
+    private Option extendedoption;
     
     /**
      * This method is used to add an option with a mandatory field
@@ -310,6 +314,10 @@ public class AdminParser extends CmdLineParser {
             printEnvUsage();
             System.exit(0);
         }
+        if (null != this.extendedoption && null != this.getOptionValue(this.extendedoption)) {
+            printUsageExtended();
+            System.exit(0);
+        }
         final StringBuilder sb = new StringBuilder();
         for (final OptionInfo optInfo : this.optinfolist) {
             if (optInfo.needed == NeededTriState.needed) {
@@ -328,6 +336,10 @@ public class AdminParser extends CmdLineParser {
 
     }
 
+    public final void setExtendedOptions() {
+        this.extendedoption = addOption(OPT_EXTENDED_LONG, OPT_EXTENDED_LONG, "Set this if you want to see all options, use this instead of help option", false,false);
+    }
+    
     public final void printEnvUsage() {
         System.out.println("\nThe following environment variables and their current value are known\n" +
         		"and can be modified to change behaviour:\n");

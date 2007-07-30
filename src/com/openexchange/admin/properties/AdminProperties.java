@@ -121,5 +121,6 @@ public class AdminProperties {
             public static final String CREATE_HOMEDIRECTORY      = "CREATE_HOMEDIRECTORY";
             public static final String HOME_DIR_ROOT             = "HOME_DIR_ROOT";
             public static final String PRIMARY_MAIL_UNCHANGEABLE = "PRIMARY_MAIL_UNCHANGEABLE";
+            public static final String DISPLAYNAME_UNIQUE = "DISPLAYNAME_UNIQUE";
 	}
 }

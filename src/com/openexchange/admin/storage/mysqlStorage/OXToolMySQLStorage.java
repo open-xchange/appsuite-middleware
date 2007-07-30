@@ -81,9 +81,8 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
 
     private final static Log log = LogFactory.getLog(OXToolMySQLStorage.class);
 
-    
     @Override
-    public boolean domainInUse(Context ctx, String domain) throws StorageException {        
+    public boolean domainInUse(final Context ctx, final String domain) throws StorageException {        
         Connection con = null;
         try {
             con = cache.getREADConnectionForContext(ctx.getIdAsInt().intValue());
@@ -175,13 +174,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             log.error("Pool Error",e);
             throw new StorageException(e);
         }finally{
-            try {
-                if(con!=null){
-                    cache.pushOXDBWrite(ctx.getIdAsInt(), con);
-                }
-             } catch (final PoolException e) {
-                 log.error("Error pushing configdb write connection to pool!", e);
-             }
+            returnConnection(ctx.getIdAsInt(), con);
         }
         
         
@@ -232,13 +225,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                         log.error("Error closing resultset", e);
                     }
                 }
-                try {
-                    if (null != prep_check) {
-                        prep_check.close();
-                    }
-                } catch (final SQLException e) {
-                    log.error("Error closing prepared statement!", e);
-                }
+                closePreparedStatement(prep_check);
             }
             
         }else{
@@ -258,6 +245,36 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
      */
     public boolean existsDatabase(final String db_name) throws StorageException {
         return selectwithstring(-1, "SELECT db_pool_id FROM db_pool WHERE name = ?;", db_name);
+    }
+
+    @Override
+    public boolean existsDisplayName(final Context ctx, final User usr) throws StorageException {
+        Connection con = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            con = cache.getREADConnectionForContext(ctx.getIdAsInt());
+            ps = con.prepareStatement("SELECT field01 FROM prg_contacts WHERE field01 = ?;");
+            ps.setString(1, usr.getDisplay_name());
+            
+            rs = ps.executeQuery();
+            
+            if (rs.next()) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (final SQLException e) {
+            log.error("SQL Error",e);
+            throw new StorageException(e);
+        } catch (final PoolException e) {
+            log.error("SQL Error",e);
+            throw new StorageException(e);
+        } finally {
+            closeRecordSet(rs);
+            closePreparedStatement(ps);
+            returnConnection(ctx.getIdAsInt(), con);
+        }
     }
 
     @Override
@@ -291,29 +308,9 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             log.error("SQL Error",e);
             throw new StorageException(e);
         } finally {
-            if (null != rs) {
-                try {
-                    rs.close();
-                } catch (final SQLException e) {
-                    log.error("Error closing resultset", e);
-                }
-            }
-            try {
-                if (null != prep_check) {
-                    prep_check.close();
-                }
-            } catch (final SQLException e) {
-                log.error("Error closing prepared statement!", e);
-            }
-
-            try {
-                if (con != null) {
-                    cache.pushOXDBWrite(ctx.getIdAsInt(), con);
-                }
-            } catch (final PoolException e) {
-                log.error("Error pushing configdb write connection to pool!", e);
-            }
-
+            closeRecordSet(rs);
+            closePreparedStatement(prep_check);
+            returnConnection(ctx.getIdAsInt(), con);
         }
 
         return retBool;
@@ -361,33 +358,12 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             log.error("SQL Error",e);
             throw new StorageException(e);
         } finally {
-            if (null != rs) {
-                try {
-                    rs.close();
-                } catch (final SQLException e) {
-                    log.error("Error closing resultset", e);
-                }
-            }
-            try {
-                if (null != prep_check) {
-                    prep_check.close();
-                }
-            } catch (final SQLException e) {
-                log.error("Error closing prepared statement!", e);
-            }
-
-            try {
-                if (con != null) {
-                    cache.pushOXDBWrite(ctx.getIdAsInt(), con);
-                }
-            } catch (final PoolException e) {
-                log.error("Error pushing configdb write connection to pool!", e);
-            }
-
+            closeRecordSet(rs);
+            closePreparedStatement(prep_check);
+            returnConnection(ctx.getIdAsInt(), con);
         }
 
         return retBool;
-
     }
 
     /**
@@ -419,31 +395,14 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             log.error("SQL Error",e);
             throw new StorageException(e);
         } finally {
-            try {
-                rs.close();
-            } catch (final SQLException e) {
-                log.error("Error closing resultset", e);
-            }
-            try {
-                if (prep_check != null) {
-                    prep_check.close();
-                }
-            } catch (final SQLException e) {
-                log.error("Error closing prepared statement!", e);
-            }
-
-            try {
-                cache.pushOXDBWrite(ctx.getIdAsInt(), con);
-            } catch (final PoolException e) {
-                log.error("Error pushing ox db write connection to pool!", e);
-            }
-
+            closeRecordSet(rs);
+            closePreparedStatement(prep_check);
+            returnConnection(ctx.getIdAsInt(), con);
         }
 
         return retBool;
     }
-    
-    
+
     /**
      * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsGroupMember(int,
      *      int, int)
@@ -518,7 +477,8 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         }
         return existsGroupMember(ctx, group_ID, ids);
     }
-
+    
+    
     /**
      * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsReason(int)
      */
@@ -562,20 +522,8 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             log.error("SQL Error",e);
             throw new StorageException(e);
         } finally {
-            if (null != rs) {
-                try {
-                    rs.close();
-                } catch (final SQLException e) {
-                    log.error("Error closing resultset", e);
-                }
-            }
-            try {
-                if (null != prep_check) {
-                    prep_check.close();
-                }
-            } catch (final SQLException e) {
-                log.error("Error closing prepared statement!", e);
-            }
+            closeRecordSet(rs);
+            closePreparedStatement(prep_check);
 
             try {
                if(con!=null){
@@ -618,20 +566,8 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             log.error("SQL Error",e);
             throw new StorageException(e);
         } finally {
-            if (null != rs) {
-                try {
-                    rs.close();
-                } catch (final SQLException e) {
-                    log.error("Error closing resultset", e);
-                }
-            }
-            try {
-                if (null != prep_check) {
-                    prep_check.close();
-                }
-            } catch (final SQLException e) {
-                log.error("Error closing prepared statement!", e);
-            }
+            closeRecordSet(rs);
+            closePreparedStatement(prep_check);
 
             try {
                if(con!=null){
@@ -677,20 +613,8 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             log.error("SQL Error",e);
             throw new StorageException(e);
         } finally {
-            if (null != rs) {
-                try {
-                    rs.close();
-                } catch (final SQLException e) {
-                    log.error("Error closing resultset", e);
-                }
-            }
-            try {
-                if (null != prep_check) {
-                    prep_check.close();
-                }
-            } catch (final SQLException e) {
-                log.error("Error closing prepared statement!", e);
-            }
+            closeRecordSet(rs);
+            closePreparedStatement(prep_check);
 
             try {
                if(con!=null){
@@ -702,8 +626,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
 
         }
     }
-    
-    
+
     public boolean existsResourceAddress(Context ctx, String address,Integer resource_id) throws StorageException {
         
         final AdminCache cache = ClientAdminThread.cache;
@@ -731,20 +654,8 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             log.error("SQL Error",e);
             throw new StorageException(e);
         } finally {
-            if (null != rs) {
-                try {
-                    rs.close();
-                } catch (final SQLException e) {
-                    log.error("Error closing resultset", e);
-                }
-            }
-            try {
-                if (null != prep_check) {
-                    prep_check.close();
-                }
-            } catch (final SQLException e) {
-                log.error("Error closing prepared statement!", e);
-            }
+            closeRecordSet(rs);
+            closePreparedStatement(prep_check);
 
             try {
                if(con!=null){
@@ -756,7 +667,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
 
         }
     }
-    
+
     /**
      * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsServer(int)
      */
@@ -770,7 +681,8 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     public boolean existsServer(final String server_name) throws StorageException {
         return selectwithstring(-1, "SELECT server_id FROM server WHERE name = ?;", server_name);
     }
-
+    
+    
     /**
      * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsServerID(int,
      *      java.lang.String, java.lang.String)
@@ -778,7 +690,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     public boolean existsServerID(final int check_ID, final String table, final String field) throws StorageException {
         return selectwithint(-1, "SELECT server_id FROM " + table + " WHERE " + field + " = ?;", check_ID);
     }
-
+    
     /**
      * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsStore(int)
      */
@@ -792,7 +704,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     public boolean existsStore(final String url) throws StorageException {
         return selectwithstring(-1, "SELECT uri FROM filestore WHERE uri = ?", url);
     }
-    
+
     /**
      * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsUser(int,
      *      int)
@@ -823,20 +735,8 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             log.error("SQL Error",e);
             throw new StorageException(e);
         } finally {
-            if (null != rs) {
-                try {
-                    rs.close();
-                } catch (final SQLException e) {
-                    log.error("Error closing resultset", e);
-                }
-            }
-            try {
-                if (null != prep_check) {
-                    prep_check.close();
-                }
-            } catch (final SQLException e) {
-                log.error("Error closing prepared statement!", e);
-            }
+            closeRecordSet(rs);
+            closePreparedStatement(prep_check);
 
             try {
                if(con!=null){
@@ -944,20 +844,8 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             log.error("SQL Error",e);
             throw new StorageException(e);
         } finally {
-            if (null != rs) {
-                try {
-                    rs.close();
-                } catch (final SQLException e) {
-                    log.error("Error closing resultset", e);
-                }
-            }
-            try {
-                if (null != prep_check) {
-                    prep_check.close();
-                }
-            } catch (final SQLException e) {
-                log.error("Error closing prepared statement!", e);
-            }
+            closeRecordSet(rs);
+            closePreparedStatement(prep_check);
 
             try {
                if(con!=null){
@@ -969,7 +857,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
 
         }
     }
-
+    
     @Override
     public boolean existsUser(Context ctx, User[] users) throws StorageException {
         int []ids = new int[users.length];
@@ -1009,13 +897,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                     log.error("Error closing resultset", e);
                 }
             }
-            try {
-                if (null != stmt) {
-                    stmt.close();
-                }
-            } catch (final SQLException e) {
-                log.error("Error closing prepared statement!", e);
-            }
+            closePreparedStatement(stmt);
         }
 
         return admin_id;
@@ -1174,21 +1056,9 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
             log.error("SQL Error",e);
             throw new StorageException(e);
         } finally {
-            if (null != rs) {
-                try {
-                    rs.close();
-                } catch (final SQLException e) {
-                    log.error("Error closing resultset", e);
-                }
-            }
+            closeRecordSet(rs);
 
-            try {
-                if (null != prep_check) {
-                    prep_check.close();
-                }
-            } catch (final SQLException e) {
-                log.error("Error closing prepared statement!", e);
-            }
+            closePreparedStatement(prep_check);
 
             try {
                 cache.pushOXDBRead(ctx.getIdAsInt(), con);
@@ -1223,21 +1093,9 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
             log.error("SQL Error",e);
             throw new StorageException(e);
         } finally {
-            if (null != rs) {
-                try {
-                    rs.close();
-                } catch (final SQLException e) {
-                    log.error("Error closing resultset", e);
-                }
-            }
+            closeRecordSet(rs);
 
-            try {
-                if (null != prep_check) {
-                    prep_check.close();
-                }
-            } catch (final SQLException e) {
-                log.error("Error closing prepared statement!", e);
-            }
+            closePreparedStatement(prep_check);
 
             try {
                 cache.pushOXDBRead(ctx.getIdAsInt(), con);
@@ -1272,21 +1130,120 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
             log.error("SQL Error",e);
             throw new StorageException(e);
         } finally {
-            if (null != rs) {
-                try {
-                    rs.close();
-                } catch (final SQLException e) {
-                    log.error("Error closing resultset", e);
-                }
-            }
+            closeRecordSet(rs);
+
+            closePreparedStatement(prep_check);
 
             try {
-                if (null != prep_check) {
-                    prep_check.close();
-                }
-            } catch (final SQLException e) {
-                log.error("Error closing prepared statement!", e);
+                cache.pushOXDBRead(ctx.getIdAsInt(), con);
+            } catch (final PoolException e) {
+                log.error("Error pushing ox db read connection to pool!", e);
             }
+
+        }
+    }
+
+    @Override
+    public String getResourcenameByResourceID(Context ctx, int resource_id) throws StorageException {
+        Connection con = null;
+        PreparedStatement prep_check = null;
+        ResultSet rs = null;
+        try {
+            con = cache.getREADConnectionForContext(ctx.getIdAsInt().intValue());
+            prep_check = con.prepareStatement("SELECT identifier from resource where cid = ? and id = ?");
+            prep_check.setInt(1,ctx.getIdAsInt().intValue());
+            prep_check.setInt(2, resource_id);
+            rs = prep_check.executeQuery();
+            if (rs.next()) {
+                // grab username and return 
+                return rs.getString("identifier");
+            }else{
+                throw new StorageException("No such resource "+resource_id+" in context "+ctx.getIdAsInt().intValue()+"");
+            }
+        } catch (final PoolException e) {
+            log.error("Pool Error",e);
+            throw new StorageException(e);
+        } catch (final SQLException e) {
+            log.error("SQL Error",e);
+            throw new StorageException(e);
+        } finally {
+            closeRecordSet(rs);
+
+            closePreparedStatement(prep_check);
+
+            try {
+                cache.pushOXDBRead(ctx.getIdAsInt(), con);
+            } catch (final PoolException e) {
+                log.error("Error pushing ox db read connection to pool!", e);
+            }
+
+        }
+    }
+
+    @Override
+    public int getUserIDByUsername(final Context ctx, final String username) throws StorageException {
+        Connection con = null;
+        PreparedStatement prep_check = null;
+        ResultSet rs = null;
+        try {
+            con = cache.getREADConnectionForContext(ctx.getIdAsInt().intValue());
+            prep_check = con.prepareStatement("SELECT id from login2user where cid = ? and uid = ?");
+            prep_check.setInt(1,ctx.getIdAsInt().intValue());
+            prep_check.setString(2, username);
+            rs = prep_check.executeQuery();
+            if (rs.next()) {
+                // grab user id and return 
+                return rs.getInt("id");
+            }else{
+                throw new StorageException("No such user "+username+" in context "+ctx.getIdAsInt().intValue()+"");
+            }
+        } catch (final PoolException e) {
+            log.error("Pool Error",e);
+            throw new StorageException(e);
+        } catch (final SQLException e) {
+            log.error("SQL Error",e);
+            throw new StorageException(e);
+        } finally {
+            closeRecordSet(rs);
+
+            closePreparedStatement(prep_check);
+
+            try {
+                cache.pushOXDBRead(ctx.getIdAsInt(), con);
+            } catch (final PoolException e) {
+                log.error("Error pushing ox db read connection to pool!", e);
+            }
+
+        }
+    }
+
+    @Override
+    public String getUsernameByUserID(final Context ctx, final int user_id) throws StorageException {
+        Connection con = null;
+        PreparedStatement prep_check = null;
+        ResultSet rs = null;
+        try {
+            con = cache.getREADConnectionForContext(ctx.getIdAsInt().intValue());
+            prep_check = con.prepareStatement("SELECT uid from login2user where cid = ? and id = ?");
+            prep_check.setInt(1,ctx.getIdAsInt().intValue());
+            prep_check.setInt(2, user_id);
+            rs = prep_check.executeQuery();
+            if (rs.next()) {
+                // grab username and return 
+                return rs.getString("uid");
+            }else{
+                throw new StorageException("No such user "+user_id+" in context "+ctx.getIdAsInt().intValue()+"");
+            }
+        } catch (final PoolException e) {
+            log.error("Pool Error",e);
+            throw new StorageException(e);
+        } catch (final SQLException e) {
+            log.error("SQL Error",e);
+            throw new StorageException(e);
+        } finally {
+            closeRecordSet(rs);
+
+            closePreparedStatement(prep_check);
 
             try {
                 cache.pushOXDBRead(ctx.getIdAsInt(), con);
@@ -1373,153 +1330,6 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
 //
 //        return retBool;
 //    }
-
-    @Override
-    public String getResourcenameByResourceID(Context ctx, int resource_id) throws StorageException {
-        Connection con = null;
-        PreparedStatement prep_check = null;
-        ResultSet rs = null;
-        try {
-            con = cache.getREADConnectionForContext(ctx.getIdAsInt().intValue());
-            prep_check = con.prepareStatement("SELECT identifier from resource where cid = ? and id = ?");
-            prep_check.setInt(1,ctx.getIdAsInt().intValue());
-            prep_check.setInt(2, resource_id);
-            rs = prep_check.executeQuery();
-            if (rs.next()) {
-                // grab username and return 
-                return rs.getString("identifier");
-            }else{
-                throw new StorageException("No such resource "+resource_id+" in context "+ctx.getIdAsInt().intValue()+"");
-            }
-        } catch (final PoolException e) {
-            log.error("Pool Error",e);
-            throw new StorageException(e);
-        } catch (final SQLException e) {
-            log.error("SQL Error",e);
-            throw new StorageException(e);
-        } finally {
-            if (null != rs) {
-                try {
-                    rs.close();
-                } catch (final SQLException e) {
-                    log.error("Error closing resultset", e);
-                }
-            }
-
-            try {
-                if (null != prep_check) {
-                    prep_check.close();
-                }
-            } catch (final SQLException e) {
-                log.error("Error closing prepared statement!", e);
-            }
-
-            try {
-                cache.pushOXDBRead(ctx.getIdAsInt(), con);
-            } catch (final PoolException e) {
-                log.error("Error pushing ox db read connection to pool!", e);
-            }
-
-        }
-    }
-
-    @Override
-    public int getUserIDByUsername(final Context ctx, final String username) throws StorageException {
-        Connection con = null;
-        PreparedStatement prep_check = null;
-        ResultSet rs = null;
-        try {
-            con = cache.getREADConnectionForContext(ctx.getIdAsInt().intValue());
-            prep_check = con.prepareStatement("SELECT id from login2user where cid = ? and uid = ?");
-            prep_check.setInt(1,ctx.getIdAsInt().intValue());
-            prep_check.setString(2, username);
-            rs = prep_check.executeQuery();
-            if (rs.next()) {
-                // grab user id and return 
-                return rs.getInt("id");
-            }else{
-                throw new StorageException("No such user "+username+" in context "+ctx.getIdAsInt().intValue()+"");
-            }
-        } catch (final PoolException e) {
-            log.error("Pool Error",e);
-            throw new StorageException(e);
-        } catch (final SQLException e) {
-            log.error("SQL Error",e);
-            throw new StorageException(e);
-        } finally {
-            if (null != rs) {
-                try {
-                    rs.close();
-                } catch (final SQLException e) {
-                    log.error("Error closing resultset", e);
-                }
-            }
-
-            try {
-                if (null != prep_check) {
-                    prep_check.close();
-                }
-            } catch (final SQLException e) {
-                log.error("Error closing prepared statement!", e);
-            }
-
-            try {
-                cache.pushOXDBRead(ctx.getIdAsInt(), con);
-            } catch (final PoolException e) {
-                log.error("Error pushing ox db read connection to pool!", e);
-            }
-
-        }
-    }
-
-    @Override
-    public String getUsernameByUserID(final Context ctx, final int user_id) throws StorageException {
-        Connection con = null;
-        PreparedStatement prep_check = null;
-        ResultSet rs = null;
-        try {
-            con = cache.getREADConnectionForContext(ctx.getIdAsInt().intValue());
-            prep_check = con.prepareStatement("SELECT uid from login2user where cid = ? and id = ?");
-            prep_check.setInt(1,ctx.getIdAsInt().intValue());
-            prep_check.setInt(2, user_id);
-            rs = prep_check.executeQuery();
-            if (rs.next()) {
-                // grab username and return 
-                return rs.getString("uid");
-            }else{
-                throw new StorageException("No such user "+user_id+" in context "+ctx.getIdAsInt().intValue()+"");
-            }
-        } catch (final PoolException e) {
-            log.error("Pool Error",e);
-            throw new StorageException(e);
-        } catch (final SQLException e) {
-            log.error("SQL Error",e);
-            throw new StorageException(e);
-        } finally {
-            if (null != rs) {
-                try {
-                    rs.close();
-                } catch (final SQLException e) {
-                    log.error("Error closing resultset", e);
-                }
-            }
-
-            try {
-                if (null != prep_check) {
-                    prep_check.close();
-                }
-            } catch (final SQLException e) {
-                log.error("Error closing prepared statement!", e);
-            }
-
-            try {
-                cache.pushOXDBRead(ctx.getIdAsInt(), con);
-            } catch (final PoolException e) {
-                log.error("Error pushing ox db read connection to pool!", e);
-            }
-
-        }
-    }
 
     /**
      * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#isContextAdmin(int,
@@ -1640,13 +1450,7 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
                     log.error("Error closing resultset", e);
                 }
             }
-            try {
-                if (null != stmt) {
-                    stmt.close();
-                }
-            } catch (final SQLException e) {
-                log.error("Error closing prepared statement!", e);
-            }
+            closePreparedStatement(stmt);
         }
     }
 
@@ -1681,21 +1485,9 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
             log.error("SQL Error",e);
             throw new StorageException(e);
         } finally {
-            if (null != rs) {
-                try {
-                    rs.close();
-                } catch (final SQLException e) {
-                    log.error("Error closing resultset", e);
-                }
-            }
+            closeRecordSet(rs);
 
-            try {
-                if (null != prep_check) {
-                    prep_check.close();
-                }
-            } catch (final SQLException e) {
-                log.error("Error closing prepared statement!", e);
-            }
+            closePreparedStatement(prep_check);
 
             try {
                 cache.pushOXDBWrite(ctx.getIdAsInt(), con);
@@ -1732,21 +1524,9 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
             log.error("SQL Error",e);
             throw new StorageException(e);
         } finally {
-            if (null != rs) {
-                try {
-                    rs.close();
-                } catch (final SQLException e) {
-                    log.error("Error closing resultset", e);
-                }
-            }
+            closeRecordSet(rs);
 
-            try {
-                if (null != ps) {
-                    ps.close();
-                }
-            } catch (final SQLException e) {
-                log.error("Error closing prepared statement!", e);
-            }
+            closePreparedStatement(ps);
 
             try {
                 cache.pushConfigDBWrite(con);
@@ -1815,13 +1595,7 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
                     log.error("Error closing resultset", e);
                 }
             }
-            try {
-                if (null != stmt) {
-                    stmt.close();
-                }
-            } catch (final SQLException e) {
-                log.error("Error closing prepared statement!", e);
-            }
+            closePreparedStatement(stmt);
         }
     }
 
@@ -1865,17 +1639,30 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
                     log.error("Error closing resultset", e);
                 }
             }
+            closePreparedStatement(stmt);
+        }
+    }
+
+    private void closePreparedStatement(PreparedStatement ps) {
+        try {
+            if (null != ps) {
+                ps.close();
+            }
+        } catch (final SQLException e) {
+            log.error("Error closing prepared statement!", e);
+        }
+    }
+
+    private void closeRecordSet(ResultSet rs) {
+        if (null != rs) {
             try {
-                if (null != stmt) {
-                    stmt.close();
-                }
+                rs.close();
             } catch (final SQLException e) {
-                log.error("Error closing prepared statement!", e);
+                log.error("Error closing resultset", e);
             }
         }
     }
 
-    
     private Group[] getDomainUsedbyGroup(Context ctx,String domain,Connection oxcon) throws SQLException{
         // groups are currently not used with mail addresses in the core
         return null;
@@ -1887,6 +1674,7 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
 //            return data.toArray(new Group[data.size()]);
 //        }        
     }
+
     
     private Resource[] getDomainUsedbyResource(Context ctx,String domain,Connection oxcon) throws SQLException{
         ArrayList<Resource> data = new ArrayList<Resource>();
@@ -1908,21 +1696,9 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
             rs.close();
             prep_check.close();       
         }finally{
-            if (null != rs) {
-                try {
-                    rs.close();
-                } catch (final SQLException e) {
-                    log.error("Error closing resultset", e);
-                }
-            }
+            closeRecordSet(rs);
 
-            try {
-                if (null != prep_check) {
-                    prep_check.close();
-                }
-            } catch (final SQLException e) {
-                log.error("Error closing prepared statement!", e);
-            }
+            closePreparedStatement(prep_check);
         }
         
         if(data.size()==0){
@@ -1969,21 +1745,9 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
                data.add(new User(id.intValue()));
            }            
         }finally{
-            if (null != rs) {
-                try {
-                    rs.close();
-                } catch (final SQLException e) {
-                    log.error("Error closing resultset", e);
-                }
-            }
+            closeRecordSet(rs);
 
-            try {
-                if (null != prep_check) {
-                    prep_check.close();
-                }
-            } catch (final SQLException e) {
-                log.error("Error closing prepared statement!", e);
-            }
+            closePreparedStatement(prep_check);
         }
         
         if(data.size()==0){
@@ -1991,6 +1755,16 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
         }else{
             return data.toArray(new User[data.size()]);
         }        
+    }
+    
+    private void returnConnection(final int ctxid, Connection con) {
+        try {
+            if (con != null) {
+                cache.pushOXDBWrite(ctxid, con);
+            }
+        } catch (final PoolException e) {
+            log.error("Error pushing configdb write connection to pool!", e);
+        }
     }
 
     /**
@@ -2034,20 +1808,8 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
             log.error("SQL Error",e);
             throw new StorageException(e);
         } finally {
-            if (null != rs) {
-                try {
-                    rs.close();
-                } catch (final SQLException e) {
-                    log.error("Error closing resultset", e);
-                }
-            }
-            try {
-                if (null != prep_check) {
-                    prep_check.close();
-                }
-            } catch (final SQLException e) {
-                log.error("Error closing prepared statement!", e);
-            }
+            closeRecordSet(rs);
+            closePreparedStatement(prep_check);
 
             try {
                 if (context_id != -1) {
@@ -2102,20 +1864,8 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
             log.error("SQL Error",e);
             throw new StorageException(e);
         } finally {
-            if (null != rs) {
-                try {
-                    rs.close();
-                } catch (final SQLException e) {
-                    log.error("Error closing resultset", e);
-                }
-            }
-            try {
-                if (null != prep_check) {
-                    prep_check.close();
-                }
-            } catch (final SQLException e) {
-                log.error("Error closing prepared statement!", e);
-            }
+            closeRecordSet(rs);
+            closePreparedStatement(prep_check);
 
             try {
                 if (context_id != -1) {
