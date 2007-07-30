@@ -410,7 +410,7 @@ public class ContactRequest {
 			final int orderBy = DataParser.parseInt(jsonObj, AJAXServlet.PARAMETER_SORT);
 			final String orderDir = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_ORDER);
 			
-			searchObj.setSurname(DataParser.parseString(jsonObj, ContactFields.LAST_NAME));
+			searchObj.setSurname(DataParser.parseString(jData, ContactFields.LAST_NAME));
 			searchObj.setDisplayName(DataParser.parseString(jData, ContactFields.DISPLAY_NAME));
 			searchObj.setGivenName(DataParser.parseString(jData, ContactFields.FIRST_NAME));
 			searchObj.setCompany(DataParser.parseString(jData, ContactFields.COMPANY));
