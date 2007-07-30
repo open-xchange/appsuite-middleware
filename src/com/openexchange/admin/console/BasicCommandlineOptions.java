@@ -137,7 +137,7 @@ public abstract class BasicCommandlineOptions {
     protected static final String OPT_NAME_CONTEXT_LONG="contextid";
     protected static final char OPT_NAME_CONTEXT_NAME_SHORT='N';
     protected static final String OPT_NAME_CONTEXT_NAME_LONG="contextname";
-    protected static final String OPT_NAME_CONTEXT_NAME_DESCRIPTION="The name of the context";
+    protected static final String OPT_NAME_CONTEXT_NAME_DESCRIPTION="context name";
     protected static final String OPT_NAME_CONTEXT_DESCRIPTION="The id of the context";
     protected static final char OPT_NAME_ADMINUSER_SHORT='A';
     protected static final String OPT_NAME_ADMINUSER_LONG="adminuser";
@@ -385,7 +385,7 @@ public abstract class BasicCommandlineOptions {
         this.contextNameOption = setShortLongOpt(admp,OPT_NAME_CONTEXT_NAME_SHORT, OPT_NAME_CONTEXT_NAME_LONG, OPT_NAME_CONTEXT_NAME_DESCRIPTION, true, NeededTriState.notneeded);
     }
     
-    protected final void setAdminPassOption(final AdminParser admp) {
+    protected void setAdminPassOption(final AdminParser admp) {
         this.adminPassOption = setShortLongOpt(admp,OPT_NAME_ADMINPASS_SHORT, OPT_NAME_ADMINPASS_LONG, OPT_NAME_ADMINPASS_DESCRIPTION, true, NeededTriState.possibly);
     }
     
@@ -393,7 +393,7 @@ public abstract class BasicCommandlineOptions {
         this.csvOutputOption = setLongOpt(admp, OPT_NAME_CSVOUTPUT_LONG, OPT_NAME_CSVOUTPUT_DESCRIPTION, false, false);
     }
     
-    protected final void setAdminUserOption(final AdminParser admp) {
+    protected void setAdminUserOption(final AdminParser admp) {
         this.adminUserOption= setShortLongOpt(admp,OPT_NAME_ADMINUSER_SHORT, OPT_NAME_ADMINUSER_LONG, OPT_NAME_ADMINUSER_DESCRIPTION, true, NeededTriState.possibly);
     }
     
