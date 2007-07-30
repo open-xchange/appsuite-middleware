@@ -33,8 +33,12 @@ public class List extends ListCore {
     @Override
     protected User[] maincall(final AdminParser parser, final OXUserInterface oxusr, final String search_pattern, final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         final User[] allusers = oxusr.list(ctx, search_pattern, auth);            
-        
-        return  oxusr.getData(ctx, allusers, auth);
+        if( allusers.length == 0 ) {
+            User []users = new User[0];
+            return users;
+        } else {
+            return oxusr.getData(ctx, allusers, auth);
+        }
     }
 
     @Override
