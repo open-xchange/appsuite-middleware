@@ -1,3 +1,7 @@
+* 2007-07-30 - francisco.laguna@open-xchange.com
+
+ - Bug #7792 : Added Logging code. Error 500 is always logged with a level of ERROR. 
+
 * 2007-07-10 - marcus.klein@open-xchange.com
 
  - Bugfix #8351: Assigned 512MB maximum memory to groupware server.

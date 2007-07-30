@@ -53,6 +53,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -68,31 +70,30 @@ public class WebdavLogAction extends AbstractAction {
 	public void perform(WebdavRequest req, WebdavResponse res)
 			throws WebdavException {
 		StringBuilder b = new StringBuilder();
-		
-		b.append("URL: "); b.append(req.getUrl()); b.append('\n');
-		for(String header : req.getHeaderNames()) {
-			b.append(header); b.append(": "); b.append(req.getHeader(header)); b.append('\n');
-		}
-		final WebdavResource resource = req.getResource();
-		b.append("Resource: "); b.append(resource); b.append('\n');
-		b.append("exists: "); b.append(resource.exists()); b.append('\n');
-		b.append("isCollection: "); b.append(resource.isCollection()); b.append('\n');
-		
-		if (LOG.isDebugEnabled()) {
-			LOG.debug(b.toString());
-		}
-		
-		if(LOG.isTraceEnabled()) {
-			if(logBody) {
-				req = new ReplayWebdavRequest(req);
-				printRequestBody(req);
-			}
-			if(logResponse) {
-				res = new CapturingWebdavResponse(res);
-			}
-		}
-		
 		try {
+			b.append("URL: "); b.append(req.getUrl()); b.append('\n');
+			for(String header : req.getHeaderNames()) {
+				b.append(header); b.append(": "); b.append(req.getHeader(header)); b.append('\n');
+			}
+			final WebdavResource resource = req.getResource();
+			b.append("Resource: "); b.append(resource); b.append('\n');
+			b.append("exists: "); b.append(resource.exists()); b.append('\n');
+			b.append("isCollection: "); b.append(resource.isCollection()); b.append('\n');
+		
+			if (LOG.isDebugEnabled()) {
+				LOG.debug(b.toString());
+			}
+		
+			if(LOG.isTraceEnabled()) {
+				if(logBody) {
+					req = new ReplayWebdavRequest(req);
+					printRequestBody(req);
+				}
+				if(logResponse) {
+					res = new CapturingWebdavResponse(res);
+				}
+			}
+		
 			yield(req,res);
 			b = new StringBuilder();
 			b.append("DONE URL: "); b.append(req.getUrl()); b.append(' '); b.append(res.getStatus()); b.append('\n');
@@ -111,11 +112,13 @@ public class WebdavLogAction extends AbstractAction {
 			b.append("WebdavException: ");
 			if (LOG.isDebugEnabled()) {
 				LOG.debug(b.toString(),x);
+			} else if(LOG.isErrorEnabled() && x.getStatus() == HttpServletResponse.SC_INTERNAL_SERVER_ERROR) {
+				LOG.error("The request: "+b.toString()+" caused an internal server error: "+x.getMessage(),x);
 			}
 			throw x;
 		} catch (RuntimeException x) {
-			if (LOG.isDebugEnabled()) {
-				LOG.debug("RuntimeException: ",x);
+			if (LOG.isErrorEnabled()) {
+				LOG.error("RuntimeException In WebDAV for request: "+b.toString(),x);
 			}
 			throw x;
 		}
@@ -158,7 +161,7 @@ public class WebdavLogAction extends AbstractAction {
 	}
 
 	public boolean isEnabled() {
-		return LOG.isDebugEnabled();
+		return LOG.isErrorEnabled();
 	}
 
 }
