@@ -242,6 +242,8 @@ public abstract class OXToolStorageInterface {
     
     public abstract boolean isContextEnabled(final Context ctx) throws StorageException;
     
+    public abstract boolean existsDisplayName(final Context ctx, final User usr) throws StorageException;
+    
     public abstract boolean isMasterDatabase(final int database_id) throws StorageException;
     
     public abstract boolean isUserSettingMailBitSet(final Context ctx, final User user, final int bit, final Connection con) throws StorageException;

@@ -70,7 +70,7 @@ public abstract class CreateCore extends UserAbstraction {
 
     protected final void setOptions(final AdminParser parser) {
     
-        setExtendedOption(parser);
+        parser.setExtendedOptions();
         setDefaultCommandLineOptions(parser);
     
         // add mandatory options
@@ -95,8 +95,6 @@ public abstract class CreateCore extends UserAbstraction {
         try {
             parser.ownparse(args);
 
-            printExtendedOutputIfSet(parser);
-            
             final Context ctx = contextparsing(parser);
             ctxid = ctx.getIdAsInt();
             
