@@ -65,13 +65,7 @@ public abstract class AbstractAJAXSession extends TestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        try {
-            client = new AJAXClient(AJAXClient.User.User1);
-        } catch (Exception x) {
-        	fail(x.getMessage());
-        	x.printStackTrace();
-        	throw x;
-        }
+        client = new AJAXClient(AJAXClient.User.User1);
     }
 
     /**
@@ -79,11 +73,11 @@ public abstract class AbstractAJAXSession extends TestCase {
      */
     @Override
     protected void tearDown() throws Exception {
-        super.tearDown();
-        if(client != null) {
-        	// Client can be null if setUp() fails
+        if (client != null) {
+            // Client can be null if setUp() fails
             client.logout();
         }
+        super.tearDown();
     }
 
     /**

@@ -45,7 +45,7 @@ public class RedirectTest extends AbstractAJAXSession {
     }
 
     public void testRedirect() throws Throwable {
-        final AJAXSession session = getSession();
+        final AJAXSession session = new AJAXSession();
         // Create session.
         final LoginResponse lResponse = LoginTools.login(session,
             new LoginRequest(login, password));
