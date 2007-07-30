@@ -18,12 +18,13 @@ public class ListTest extends AppointmentTest {
 	}
 	
 	public void testPropFindWithModified() throws Exception {
-		Date modified = new Date();
-		
 		AppointmentObject appointmentObj = createAppointmentObject("testPropFindWithModified");
 		appointmentObj.setIgnoreConflicts(true);
 		int objectId1 = insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
 		int objectId2 = insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
+		
+		final AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId1, appointmentFolderId, getHostName(), getLogin(), getPassword());
+		final Date modified = loadAppointment.getCreationDate();
 		
 		AppointmentObject[] appointmentArray = listAppointment(webCon, appointmentFolderId, modified, true, false, PROTOCOL + hostName, login, password);
 		
@@ -35,8 +36,6 @@ public class ListTest extends AppointmentTest {
 	}
 	
 	public void testPropFindInPublicFolder() throws Exception {
-		Date modified = new Date();
-		
 		FolderObject folderObj = new FolderObject();
 		folderObj.setFolderName("testPropFindInPublicFolder" + System.currentTimeMillis());
 		folderObj.setModule(FolderObject.CALENDAR);
@@ -61,6 +60,9 @@ public class ListTest extends AppointmentTest {
 		
 		int objectId = insertAppointment(getWebConversation(), appointmentObj, getHostName(), getLogin(), getPassword());
 		
+		final AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, parentFolderId, getHostName(), getLogin(), getPassword());
+		final Date modified = loadAppointment.getCreationDate();
+		
 		AppointmentObject[] appointmentArray = listAppointment(webCon, appointmentFolderId, modified, true, false, PROTOCOL + hostName, login, password);
 		
 		boolean found = true;
@@ -79,8 +81,6 @@ public class ListTest extends AppointmentTest {
 	}
 	
 	public void testPropFindInPublicFolderWithGroupPermission() throws Exception {
-		Date modified = new Date();
-		
 		FolderObject folderObj = new FolderObject();
 		folderObj.setFolderName("testPropFindInPublicFolderWithGroupPermission" + System.currentTimeMillis());
 		folderObj.setModule(FolderObject.CALENDAR);
@@ -109,6 +109,9 @@ public class ListTest extends AppointmentTest {
 		
 		int objectId = insertAppointment(getWebConversation(), appointmentObj, getHostName(), getLogin(), getPassword());
 		
+		final AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, parentFolderId, getHostName(), getLogin(), getPassword());
+		final Date modified = loadAppointment.getCreationDate();
+
 		AppointmentObject[] appointmentArray = listAppointment(getSecondWebConversation(), appointmentFolderId, modified, true, false, PROTOCOL + hostName, getSecondLogin(), getPassword());
 		
 		boolean found = true;
@@ -127,12 +130,13 @@ public class ListTest extends AppointmentTest {
 	}
 	
 	public void testPropFindWithDelete() throws Exception {
-		Date modified = new Date();
-		
 		AppointmentObject appointmentObj = createAppointmentObject("testPropFindWithDelete");
 		appointmentObj.setIgnoreConflicts(true);
 		int objectId1 = insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
 		int objectId2 = insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
+		
+		final AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId1, appointmentFolderId, getHostName(), getLogin(), getPassword());
+		final Date modified = loadAppointment.getCreationDate();
 		
 		int[][] objectIdAndFolderId = { { objectId1, appointmentFolderId }, { objectId2, appointmentFolderId } };
 		deleteAppointment(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password);
@@ -170,8 +174,6 @@ public class ListTest extends AppointmentTest {
 	}
 	
 	public void testListWithAllFields() throws Exception {
-		Date modified = new Date();
-		
 		AppointmentObject appointmentObj = new AppointmentObject();
 		appointmentObj.setTitle("testListWithAllFields");
 		appointmentObj.setStartDate(startTime);
@@ -187,18 +189,21 @@ public class ListTest extends AppointmentTest {
 		
 		int objectId = insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
 		
-		AppointmentObject[] appointmentArray = listAppointment(webCon, appointmentFolderId, modified, true, false, PROTOCOL + hostName, login, password);
+		final AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getLogin(), getPassword());
+		final Date modified = loadAppointment.getCreationDate();
+	
+		final AppointmentObject[] appointmentArray = listAppointment(webCon, appointmentFolderId, modified, true, false, PROTOCOL + hostName, login, password);
 		
 		assertTrue("wrong response array length", appointmentArray.length >= 1);
 		
 		boolean found = false;
 		for (int a = 0; a < appointmentArray.length; a++) {
-			AppointmentObject loadAppointment = appointmentArray[a];
+			AppointmentObject checkAppointment = appointmentArray[a];
 			
-			if (loadAppointment.getObjectID() == objectId) {
+			if (checkAppointment.getObjectID() == objectId) {
 				found = true;
 				appointmentObj.setObjectID(objectId);
-				compareObject(appointmentObj, loadAppointment);
+				compareObject(appointmentObj, checkAppointment);
 			}
 		}
 		
