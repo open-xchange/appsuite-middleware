@@ -51,9 +51,9 @@ package com.openexchange.api2;
 
 import static com.openexchange.groupware.container.mail.parser.MessageUtils.decodeMultiEncodedHeader;
 import static com.openexchange.groupware.container.mail.parser.MessageUtils.getMessageUniqueIdentifier;
+import static com.openexchange.groupware.container.mail.parser.MessageUtils.parseAddressList;
 import static com.openexchange.groupware.container.mail.parser.MessageUtils.performLineWrap;
 import static com.openexchange.groupware.container.mail.parser.MessageUtils.removeHdrLineBreak;
-import static com.openexchange.groupware.container.mail.parser.MessageUtils.parseAddressList;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -5180,9 +5180,8 @@ public class MailInterfaceImpl implements MailInterface {
 					&& ERR_TMP.equals(e.getMessage().toLowerCase(Locale.ENGLISH));
 			if (imapProps != null && ctx != null) {
 				if (temporary) {
-					oxme = new OXMailException(MailCode.LOGIN_FAILED, e, imapProps.getImapServer(),
-							com.openexchange.tools.oxfolder.OXFolderManagerImpl.getUserName(imapProps.getUser(), ctx),
-							Integer.valueOf(ctx.getContextId()));
+					oxme = new OXMailException(MailCode.LOGIN_FAILED, e, imapProps.getImapServer(), Integer
+							.valueOf(imapProps.getUser()), Integer.valueOf(ctx.getContextId()));
 				} else {
 					oxme = new OXMailException(MailCode.INVALID_CREDENTIALS, e, imapProps.getImapServer(),
 							com.openexchange.tools.oxfolder.OXFolderManagerImpl.getUserName(imapProps.getUser(), ctx),
@@ -5283,9 +5282,8 @@ public class MailInterfaceImpl implements MailInterface {
 				oxme = new OXMailException(MailCode.UNKNOWN_HOST, e, e.getMessage());
 			} else if (e.getMessage().toLowerCase(Locale.ENGLISH).indexOf(ERR_AUTH_FAILED) != -1) {
 				if (imapProps != null && ctx != null) {
-					oxme = new OXMailException(MailCode.LOGIN_FAILED, e, imapProps.getImapServer(),
-							com.openexchange.tools.oxfolder.OXFolderManagerImpl.getUserName(imapProps.getUser(), ctx),
-							Integer.valueOf(ctx.getContextId()));
+					oxme = new OXMailException(MailCode.LOGIN_FAILED, e, imapProps.getImapServer(), Integer
+							.valueOf(imapProps.getUser()), Integer.valueOf(ctx.getContextId()));
 				} else {
 					oxme = new OXMailException(MailCode.LOGIN_FAILED, e, STR_EMPTY, STR_EMPTY, STR_EMPTY);
 				}

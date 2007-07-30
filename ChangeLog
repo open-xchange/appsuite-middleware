@@ -7,6 +7,7 @@
  - Bugfix #8525: Fixed missing personal encoding when sending a read
    acknowledgement
  - Bugfix #7936: Fixed typos in error messages
+ - Bugfix #6274: Changed error message according to PM's suggestion
 
 * 2007-07-30 - marcus.klein@open-xchange.com
 

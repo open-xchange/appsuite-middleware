@@ -520,9 +520,12 @@ public class OXMailException extends OXException {
 		 */
 		HTML2TEXT_CONVERTER_ERROR("Html-2-Text conversion failed: %s", Category.CODE_ERROR, 93),
 		/**
-		 * Login to imap server %s failed for user %s in context %s. Please try again later
+		 * There was an issue in authenticating your email password. This may be because of a recent password change.
+		 * To continue please logout now and then log back in with your most current password. (server=%s | user=%s | context=%s)
 		 */
-		LOGIN_FAILED("Login to imap server %s failed for user %s in context %s. Please try again later", Category.PERMISSION, 94),
+		LOGIN_FAILED("There was an issue in authenticating your email password. This may be because of a recent password change. " +
+				"To continue please logout now and then log back in with your most current password. (server=%s | user=%s | context=%s)",
+				Category.PERMISSION, 94),
 		/**
 		 * SpamAssassin executable not found
 		 */
