@@ -141,6 +141,7 @@ public class AppointmentWriter extends CalendarWriter {
 		} catch (OXObjectNotFoundException exc) {
 			writeResponseElement(eProp, 0, HttpServletResponse.SC_NOT_FOUND, XmlServlet.OBJECT_NOT_FOUND_EXCEPTION, xo, os);
 		} catch (Exception ex) {
+			LOG.error("startWriter", ex);
 			writeResponseElement(eProp, 0, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, XmlServlet.SERVER_ERROR_EXCEPTION, xo, os);
 		}
 	}
