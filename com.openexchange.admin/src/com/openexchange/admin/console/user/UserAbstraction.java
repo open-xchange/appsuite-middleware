@@ -344,9 +344,10 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         this.dbOnlyOption =  setLongOpt(admp,OPT_DBONLY_LONG,"Do this operation only in Database system (parameters which apply to extensions will be ignored)", false, false); 
     }
     
-    protected final void setExtendedOption(final AdminParser admp) {
-        this.extendedOption  = setLongOpt(admp, OPT_EXTENDED_LONG, "Set this if you want to see all options, use this instead of help option", false, false);
-    }
+//    protected final void setExtendedOption(final AdminParser admp) {
+//        final Option retval = admp.addOption(OPT_EXTENDED_LONG, OPT_EXTENDED_LONG, "Set this if you want to see all options, use this instead of help option", false,false);
+//        this.extendedOption  = retval;
+//    }
 
     /**
      * @param theMethods
@@ -449,19 +450,6 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             } 
         }
         return retlist;
-    }
-
-    /**
-     * This method is used to show the full help text, if the extended option is set.
-     * Be careful to check only for that option, if you have added this option before.
-     * 
-     * @param parser
-     */
-    protected final void printExtendedOutputIfSet(final AdminParser parser) {
-        if (null != parser.getOptionValue(this.extendedOption)) {
-            parser.printUsageExtended();
-            System.exit(0);
-        }
     }
 
     /**
@@ -808,19 +796,6 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
 //                }
             }
     
-        }
-    }
-
-    /**
-     * This method is used to find the right output
-     * 
-     * @param parser
-     */
-    protected void printrightoptions(final AdminParser parser) {
-        if (null != parser.getOptionValue(this.extendedOption)) {
-            parser.printUsageExtended();
-        } else {
-            parser.printUsage();
         }
     }
 
