@@ -700,8 +700,6 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         setDepartmentOption(parser);
         setCompanyOption(parser);
         setAliasesOption(parser);
-        
-       
     }
 
     protected void setExtendedOptions(final AdminParser parser) {
