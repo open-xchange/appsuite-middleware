@@ -72,6 +72,8 @@ public abstract class AbstractWebdavTest extends TestCase {
 
 		secondlogin = AbstractConfigWrapper.parseProperty(webdavProps, "secondlogin", "");
 		
+		hostName = AbstractConfigWrapper.parseProperty(webdavProps, "hostname", "localhost");
+		
 		userId = GroupUserTest.getUserId(getWebConversation(), PROTOCOL + getHostName(), getLogin(), getPassword());
 		assertTrue("user not found", userId != -1);
 		
