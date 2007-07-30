@@ -1,3 +1,7 @@
+* 2007-07-30 - choeger@open-xchange.com
+
+  - Bugfix ID#8592 Misleading server response if "listuser" doesn't find any match
+
 * 2007-07-30 - dennis.sieben@open-xchange.com
 
   - Bugfix ID#8575 CLT createcontext: It should be possible to create a mapping between contextID
