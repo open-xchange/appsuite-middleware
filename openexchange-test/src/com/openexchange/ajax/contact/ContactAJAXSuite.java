@@ -17,6 +17,7 @@ public class ContactAJAXSuite extends TestSuite {
 		tests.addTestSuite( SearchTest.class );
 		tests.addTestSuite( UpdateTest.class );
 		tests.addTestSuite( UpdatesTest.class );
+		tests.addTest(ContactBugTestSuite.suite());
 		
 		return tests;
 	}
