@@ -1215,114 +1215,19 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
     /**
      * Internally used object for getnextdbhandlebyweight method instead of
-     * returning hashtable
      */
-    private class DatabaseHandle {
+    private class DatabaseHandle extends Database {
 
-        private String server;
-
-        private String login;
-
-        private String driver;
-
-        private String password;
-
-        private String url;
-
-        private int id;
-
-        private int readId;
-
-        private int weight;
-
-        private int max_units;
+        /**
+         * 
+         */
+        private static final long serialVersionUID = -4816706296673058930L;
 
         private int count;
 
         public DatabaseHandle() {
             super();
-            this.server = null;
-            this.login = null;
-            this.password = null;
-            this.readId = -1;
-            this.url = null;
-            this.driver = null;
-            this.id = -1;
-            this.weight = -1;
-            this.max_units = -1;
             this.count = -1;
-        }
-
-        public String getServer() {
-            return this.server;
-        }
-
-        public void setServer(final String server) {
-            this.server = server;
-        }
-
-        public String getLogin() {
-            return this.login;
-        }
-
-        public void setLogin(final String login) {
-            this.login = login;
-        }
-
-        public String getDriver() {
-            return this.driver;
-        }
-
-        public void setDriver(final String driver) {
-            this.driver = driver;
-        }
-
-        public String getPassword() {
-            return this.password;
-        }
-
-        public void setPassword(final String password) {
-            this.password = password;
-        }
-
-        public String getUrl() {
-            return this.url;
-        }
-
-        public void setUrl(final String url) {
-            this.url = url;
-        }
-
-        public int getId() {
-            return this.id;
-        }
-
-        public void setId(final int id) {
-            this.id = id;
-        }
-
-        public int getReadId() {
-            return this.readId;
-        }
-
-        public void setReadId(final int readId) {
-            this.readId = readId;
-        }
-
-        public int getWeight() {
-            return this.weight;
-        }
-
-        public void setWeight(final int weight) {
-            this.weight = weight;
-        }
-
-        public int getMax_units() {
-            return this.max_units;
-        }
-
-        public void setMax_units(final int max_units) {
-            this.max_units = max_units;
         }
 
         public int getCount() {
@@ -1332,11 +1237,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         public void setCount(final int count) {
             this.count = count;
         }
-
-        public Database toDatabase() {
-            return new Database(this.login, this.password, this.driver, this.url, this.id, this.server);
-        }
-
     }
 
     /*
@@ -1989,12 +1889,18 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         }
     }
 
-    private Database getNextDBHandleByWeight(final Connection con) throws SQLException, OXContextException {
+    /**
+     * determine the next database to use depending on database weight factor
+     * 
+     * @param configdb_con
+     * @return Database handle containing information about database
+     * @throws SQLException
+     * @throws OXContextException
+     */
+    private Database getNextDBHandleByWeight(final Connection configdb_con) throws SQLException, OXContextException {
         PreparedStatement pstm = null;
         try {
-            // Hashtable<String, Hashtable> servers = new Hashtable<String,
-            // Hashtable>();
-            pstm = con.prepareStatement("SELECT db_pool_id,url,driver,login,password,name,weight,max_units FROM db_pool, db_cluster WHERE db_cluster.write_db_pool_id = db_pool_id");
+            pstm = configdb_con.prepareStatement("SELECT db_pool_id,url,driver,login,password,name,weight,max_units FROM db_pool, db_cluster WHERE db_cluster.write_db_pool_id = db_pool_id");
             ResultSet rs = pstm.executeQuery();
 
             int totalDatabases = 0;
@@ -2003,22 +1909,20 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
             while (rs.next()) {
                 final DatabaseHandle datahandle = new DatabaseHandle();
-                // Hashtable<String, Object> sdata = new Hashtable<String,
-                // Object>();
                 datahandle.setUrl(rs.getString("url"));
                 datahandle.setId(rs.getInt("db_pool_id"));
                 datahandle.setDriver(rs.getString("driver"));
                 datahandle.setLogin(rs.getString("login"));
                 datahandle.setPassword(rs.getString("password"));
-                datahandle.setWeight(rs.getInt("weight"));
-                datahandle.setMax_units(rs.getInt("max_units"));
+                datahandle.setClusterWeight(rs.getInt("weight"));
+                datahandle.setMaxUnits(rs.getInt("max_units"));
 
-                final int db_count = countUnits(datahandle, con);
+                final int db_count = countUnits(datahandle, configdb_con);
                 datahandle.setCount(db_count);
 
                 totalDatabases += db_count;
                 final String name = rs.getString("name");
-                datahandle.setServer(name);
+                datahandle.setDisplayname(name);
 
                 list.add(datahandle);
 
@@ -2033,10 +1937,10 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             // totalDatabase
             // after the first loop
             for (final DatabaseHandle handle : list) {
-                final int unit_max = handle.getMax_units();
-                final int weight = handle.getWeight();
+                final int unit_max = handle.getMaxUnits();
+                final int weight = handle.getClusterWeight();
                 final int db_count = handle.getCount();
-                final String name = handle.getServer();
+                final String name = handle.getDisplayname();
 
                 if (unit_max == -1 || (unit_max != 0 && db_count < unit_max)) {
                     double currweight = (double) totalDatabases / 100 * db_count;
@@ -2055,7 +1959,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 throw new OXContextException("Unable to find a suitable server");
             }
 
-            pstm = con.prepareStatement("SELECT read_db_pool_id FROM db_cluster WHERE write_db_pool_id = ?");
+            pstm = configdb_con.prepareStatement("SELECT read_db_pool_id FROM db_cluster WHERE write_db_pool_id = ?");
             pstm.setInt(1, selected_server.getId());
             rs = pstm.executeQuery();
             if (!rs.next()) {
@@ -2066,7 +1970,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             rs.close();
             pstm.close();
 
-            final Database retval = selected_server.toDatabase();
+            final Database retval = selected_server;
             if (slave_id > 0) {
                 retval.setRead_id(slave_id);
             }
@@ -2084,16 +1988,25 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
     }
 
-    private int countUnits(final DatabaseHandle server, final Connection con) throws SQLException, OXContextException {
+    /**
+     * count the number of contexts (or users) on the given database
+     * 
+     * @param db
+     * @param configdb_con
+     * @return number of units (contexts/user depending on settings)
+     * @throws SQLException
+     * @throws OXContextException
+     */
+    private int countUnits(final DatabaseHandle db, final Connection configdb_con) throws SQLException, OXContextException {
         PreparedStatement ps = null;
         PreparedStatement ppool = null;
         try {
             int count = 0;
 
-            final int pool_id = server.getId();
+            final int pool_id = db.getId();
 
             if (this.USE_UNIT == UNIT_CONTEXT) {
-                ps = con.prepareStatement("SELECT COUNT(server_id) FROM context_server2db_pool WHERE write_db_pool_id=?");
+                ps = configdb_con.prepareStatement("SELECT COUNT(server_id) FROM context_server2db_pool WHERE write_db_pool_id=?");
                 ps.setInt(1, pool_id);
                 final ResultSet rsi = ps.executeQuery();
 
@@ -2104,14 +2017,14 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 rsi.close();
                 ps.close();
             } else if (this.USE_UNIT == UNIT_USER) {
-                ppool = con.prepareStatement("SELECT db_schema FROM context_server2db_pool WHERE write_db_pool_id=?");
+                ppool = configdb_con.prepareStatement("SELECT db_schema FROM context_server2db_pool WHERE write_db_pool_id=?");
                 ppool.setInt(1, pool_id);
                 final ResultSet rpool = ppool.executeQuery();
                 while (rpool.next()) {
                     final String schema = rpool.getString("db_schema");
                     ResultSet rsi = null;
                     try {
-                        Connection rcon = cache.getSimpleSqlConnection(server.getUrl() + schema, server.getLogin(), server.getPassword(), server.getDriver());
+                        Connection rcon = cache.getSimpleSqlConnection(db.getUrl() + schema, db.getLogin(), db.getPassword(), db.getDriver());
                         ps = rcon.prepareStatement("SELECT COUNT(id) FROM user");
 
                         rsi = ps.executeQuery();
