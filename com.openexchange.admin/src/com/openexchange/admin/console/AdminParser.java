@@ -158,7 +158,7 @@ public class AdminParser extends CmdLineParser {
     public AdminParser(final String appname) {
         super();
         this.appname = appname;
-        this.helpoption = this.addOption(OPT_HELP_SHORT, OPT_HELP_LONG, null, "Output this help text", NeededTriState.notneeded, false);
+        this.helpoption = this.addOption(OPT_HELP_SHORT, OPT_HELP_LONG, null, "Prints a help text", NeededTriState.notneeded, false);
         this.envoption = this.addOption(OPT_ENVOPTS_LONG, "Output this help text", "Show info about commandline environment", false, false);
     }
 
