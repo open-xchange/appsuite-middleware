@@ -84,6 +84,8 @@ public final class OXJSONWriter extends JSONWriter {
 	private int jsonObjectType;
 
 	private final Stack<StackObject> stackObjs = new Stack<StackObject>();
+	
+	//private final Stack<String> stackKeys = new Stack<String>();
 
 	private String key;
 
@@ -295,12 +297,21 @@ public final class OXJSONWriter extends JSONWriter {
 		throw new JSONException("Value out of sequence.");
 	}
 
-	private void pushArray(final JSONArray ja) {
+	private void pushArray(final JSONArray ja) throws JSONException {
+		if (!stackObjs.isEmpty()) {
+			final StackObject stackObject = stackObjs.peek();
+			if (MODE_ARR == stackObject.type) {
+				((JSONArray) stackObject.jsonObject).put(ja);
+			} else if (MODE_OBJ == stackObject.type) {
+				((JSONObject) stackObject.jsonObject).put(key, ja);
+				key = null;
+			}
+		}
 		stackObjs.push(new StackObject(MODE_ARR, ja));
 		this.mode = MODE_ARR;
 	}
 
-	private void pop() throws JSONException {
+	private void pop() {
 		final StackObject stackObject = stackObjs.pop();
 		if (null == stackObject || stackObjs.isEmpty()) {
 			/*
@@ -309,16 +320,12 @@ public final class OXJSONWriter extends JSONWriter {
 			mode = MODE_DONE;
 			return;
 		}
-		final Object jsonObj = stackObject.jsonObject;
 		if (MODE_ARR == stackObjs.peek().type) {
-			((JSONArray) stackObjs.peek().jsonObject).put(jsonObj);
 			/*
 			 * Set mode to arary
 			 */
 			mode = MODE_ARR;
 		} else if (MODE_OBJ == stackObjs.peek().type) {
-			((JSONObject) stackObjs.peek().jsonObject).put(key, jsonObj);
-			key = null;
 			/*
 			 * Set mode to object
 			 */
@@ -326,7 +333,16 @@ public final class OXJSONWriter extends JSONWriter {
 		}
 	}
 
-	private void pushObject(final JSONObject jo) {
+	private void pushObject(final JSONObject jo) throws JSONException {
+		if (!stackObjs.isEmpty()) {
+			final StackObject stackObject = stackObjs.peek();
+			if (MODE_ARR == stackObject.type) {
+				((JSONArray) stackObject.jsonObject).put(jo);
+			} else if (MODE_OBJ == stackObject.type) {
+				((JSONObject) stackObject.jsonObject).put(key, jo);
+				key = null;
+			}
+		}
 		stackObjs.push(new StackObject(MODE_OBJ, jo));
 		this.mode = MODE_KEY;
 	}
