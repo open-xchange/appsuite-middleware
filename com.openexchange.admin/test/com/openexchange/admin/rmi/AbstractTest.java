@@ -99,7 +99,7 @@ public abstract class AbstractTest {
         return ctx;
     }
 
-    public static int addContext(final Context ctx, final String host, final Credentials cred) throws Exception {
+    private int addContext(final Context ctx, final String host, final Credentials cred) throws Exception {
         return 1;
     }
 }
