@@ -46,7 +46,7 @@ public class PropertiesWriterTest extends TestCase {
 		
 		Element response = marshaller.marshal(resource).get(0);
 		
-		assertHref(response, "/"+testCollection+"test.txt");
+		assertHref(response, testCollection+"/test.txt");
 		
 		int count = 0;
 		for(Element element : (List<Element>)response.getChildren()) {
@@ -71,7 +71,7 @@ public class PropertiesWriterTest extends TestCase {
 			.addProperty("DAV:", "displayname");
 		Element response = marshaller.marshal(resource).get(0);
 		
-		assertHref(response, "/"+testCollection+"test.txt");
+		assertHref(response, testCollection+"/test.txt");
 		
 		int count = 0;
 		for(Element element : (List<Element>)response.getChildren()) {
@@ -95,7 +95,7 @@ public class PropertiesWriterTest extends TestCase {
 		PropfindPropNamesMarshaller marshaller = new PropfindPropNamesMarshaller("","UTF-8");
 		Element response = marshaller.marshal(resource).get(0);
 		
-		assertHref(response, "/"+testCollection+"test.txt");
+		assertHref(response, testCollection+"/test.txt");
 		
 		Set<String> allProps = new HashSet<String>();
 		
@@ -121,7 +121,7 @@ public class PropertiesWriterTest extends TestCase {
 		PropfindAllPropsMarshaller marshaller = new PropfindAllPropsMarshaller("","UTF-8");
 		Element response = marshaller.marshal(resource).get(0);
 		
-		assertHref(response, "/"+testCollection+"test.txt");
+		assertHref(response, testCollection+"/test.txt");
 		
 		Set<String> allProps = new HashSet<String>();
 		
@@ -149,7 +149,7 @@ public class PropertiesWriterTest extends TestCase {
 		
 		Element response = marshaller.marshal(resource).get(0);
 		
-		assertHref(response, "/"+testCollection+"test.txt");
+		assertHref(response, testCollection+"/test.txt");
 		
 		int count = 0;
 		for(Element element : (List<Element>)response.getChildren()) {
@@ -172,7 +172,7 @@ public class PropertiesWriterTest extends TestCase {
 		
 		Element response = marshaller.marshal(resource).get(0);
 		
-		assertHref(response, "/"+testCollection+"test.txt");
+		assertHref(response, testCollection+"/test.txt");
 		
 		int count = 0;
 		for(Element element : (List<Element>)response.getChildren()) {
@@ -200,7 +200,7 @@ public class PropertiesWriterTest extends TestCase {
 		
 		Element response = marshaller.marshal(resource).get(0);
 		
-		assertHref(response, "/"+testCollection+"test.txt");
+		assertHref(response, testCollection+"/test.txt");
 		
 		for(Element element : (List<Element>)response.getChildren()) {
 			if(!element.getName().equals("propstat"))
@@ -218,7 +218,7 @@ public class PropertiesWriterTest extends TestCase {
 		
 		response = marshaller.marshal(resource).get(0);
 		
-		assertHref(response, "/"+testCollection+"test.txt");
+		assertHref(response, testCollection+"/test.txt");
 		
 		for(Element element : (List<Element>)response.getChildren()) {
 			if(!element.getName().equals("propstat"))
@@ -245,7 +245,7 @@ public class PropertiesWriterTest extends TestCase {
 			.addProperty("OX:", "notExist");
 		Element response = marshaller.marshal(resource).get(0);
 		
-		assertHref(response, "/"+testCollection+"test.txt");
+		assertHref(response, testCollection+"/test.txt");
 		
 		int count = 0;
 		int status = 0;

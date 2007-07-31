@@ -109,7 +109,7 @@ public class CollectionTest extends ResourceTest {
 		createStructure(coll, resourceManager);
 		
 		List<WebdavResource> children = coll.getChildren();
-		assertResources(children, "index.html", "sitemap.html", "development", "pm");
+		assertResources(children, "index.html", "sitemap.html", "development", "pm", "special characters?");
 		
 		WebdavCollection dev = coll.resolveCollection("development");
 		children = dev.getChildren();
@@ -135,8 +135,8 @@ public class CollectionTest extends ResourceTest {
 	public void testIterate() throws Exception {
 		WebdavCollection coll = createResource().toCollection();
 		createStructure(coll, resourceManager);
-		assertResources(coll,"index.html", "sitemap.html", "development", "pm","gui","index2.html", "index3.html"); // Note: Children ONLY
-		assertResources(coll.toIterable(1), "index.html", "sitemap.html", "development", "pm");
+		assertResources(coll,"index.html", "sitemap.html", "development", "pm","gui","index2.html", "index3.html", "special characters?"); // Note: Children ONLY
+		assertResources(coll.toIterable(1), "index.html", "sitemap.html", "development", "pm", "special characters?");
 		assertResources(coll.toIterable(0));
 		
 		try{
@@ -157,7 +157,7 @@ public class CollectionTest extends ResourceTest {
 		subList = OXCollections.inject(subList, dev, new Collector<WebdavResource>());
 		
 		dev.delete();
-		assertResources(coll,"index.html", "sitemap.html", "pm","index2.html");
+		assertResources(coll,"index.html", "sitemap.html", "pm","index2.html","special characters?");
 		
 		assertFalse(dev.exists());
 		for(WebdavResource res : subList) {
