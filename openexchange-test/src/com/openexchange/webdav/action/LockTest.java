@@ -178,7 +178,7 @@ public class LockTest extends ActionTestCase {
 		WebdavAction action = new WebdavLockAction();
 		action.perform(req, res);
 		
-		assertEquals(HttpServletResponse.SC_CREATED, res.getStatus());
+		assertEquals(HttpServletResponse.SC_OK, res.getStatus());
 		
 		WebdavResource resource = factory.resolveResource(LOCK_HTML_URL);
 		assertTrue(resource.isLockNull());
