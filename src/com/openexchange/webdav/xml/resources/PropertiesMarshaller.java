@@ -134,11 +134,9 @@ public class PropertiesMarshaller implements ResourceMarshaller {
 		try {
 			String[] components = string.split("/+");
 			StringBuilder builder = new StringBuilder();
-			boolean first = true;
 			for(String comp : components) {
 				if(comp != null && !"".equals(comp)) {
-					if(first) {
-						first = false;
+					if(comp.endsWith(":/") && comp.startsWith("http")) {
 						builder.append(comp);
 						builder.append("/");
 					} else {
