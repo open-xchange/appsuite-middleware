@@ -1,3 +1,8 @@
+* 2007-07-31 - dennis.sieben@open-xchange.com
+
+  - Bugfix ID#8597 [DEV] searchContextByFilestoreId,searchContextByFilestore and
+    searchContextByDatabase must only return contexts bound to specific SERVER_NAME
+    
 * 2007-07-30 - choeger@open-xchange.com
 
   - Bugfix ID#8592 Misleading server response if "listuser" doesn't find any match
