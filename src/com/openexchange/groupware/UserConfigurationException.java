@@ -66,9 +66,9 @@ public class UserConfigurationException extends OXException {
 		 */
 		DBPOOL_ERROR("A DBPooling error occurred", Category.CODE_ERROR, 2),
 		/**
-		 * Configuration for user %s could not found in context %d
+		 * Configuration for user %s could not be found in context %d
 		 */
-		NOT_FOUND("Configuration for user %s could not found in context %d", Category.CODE_ERROR, 3),
+		NOT_FOUND("Configuration for user %s could not be found in context %d", Category.CODE_ERROR, 3),
 		/**
 		 * Missing property %1$s in system.properties.
 		 */

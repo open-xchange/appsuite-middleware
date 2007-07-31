@@ -513,8 +513,8 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 	 */
 	public SearchIterator getRootFolderForUser() throws OXException {
 		try {
-			return OXFolderIteratorSQL.getUserRootFoldersIterator(userId, groups, sessionObj.getUserConfiguration()
-					.getAccessibleModules(), ctx);
+			return OXFolderIteratorSQL.getUserRootFoldersIterator(userId, groups, sessionObj.getUserConfiguration(),
+					ctx);
 		} catch (final SearchIteratorException e) {
 			throw new OXException(e);
 		}

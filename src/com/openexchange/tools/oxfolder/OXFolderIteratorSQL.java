@@ -184,11 +184,19 @@ public class OXFolderIteratorSQL {
 	 * instances, which represent all user-visible root folders
 	 */
 	public final static SearchIterator getUserRootFoldersIterator(final int userId, final int[] memberInGroups,
-			final int[] accessibleModules, final Context ctx) throws OXException, SearchIteratorException {
+			final UserConfiguration userConfig, final Context ctx) throws OXException, SearchIteratorException {
+		StringBuilder condBuilder = new StringBuilder("AND (ot.type = ?) AND (ot.parent = ?)");
+		if (!userConfig.hasFullSharedFolderAccess()) {
+			condBuilder.append(" AND (ot.fuid != ").append(FolderObject.SYSTEM_SHARED_FOLDER_ID).append(')');
+		}
+		if (!userConfig.hasInfostore()) {
+			condBuilder.append(" AND (ot.fuid != ").append(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID).append(')');
+		}
 		final String sqlSelectStr = getSQLUserVisibleFolders(FolderObjectIterator.getFieldsForSQL(STR_OT),
-				StringCollection.getSqlInString(userId, memberInGroups), StringCollection
-						.getSqlInString(accessibleModules), "AND (ot.type = ?) AND (ot.parent = ?)",
+				StringCollection.getSqlInString(userId, memberInGroups), StringCollection.getSqlInString(userConfig
+						.getAccessibleModules()), condBuilder.toString(),
 				FolderCacheProperties.isEnableDBGrouping() ? getGroupBy(STR_OT) : null, getRootOrderBy(STR_OT));
+		condBuilder = null;
 		Connection readCon = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
