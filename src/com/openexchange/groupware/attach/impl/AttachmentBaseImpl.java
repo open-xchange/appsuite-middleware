@@ -99,6 +99,7 @@ import com.openexchange.groupware.results.TimedResultImpl;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.tx.DBService;
 import com.openexchange.groupware.tx.TransactionException;
+import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.FileStorageException;
 import com.openexchange.tools.file.QuotaFileStorage;
@@ -123,6 +124,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 	private static final boolean USE_QUOTA = true;
 	
 	private static final Log LOG = LogFactory.getLog(AttachmentBaseImpl.class);
+	private static final LoggingLogic LL = LoggingLogic.getLoggingLogic(AttachmentBaseImpl.class, LOG);
 	private static final AttachmentExceptionFactory EXCEPTIONS = new AttachmentExceptionFactory(AttachmentBaseImpl.class);
 
 	private static final AttachmentQueryCatalog QUERIES = new AttachmentQueryCatalog();
@@ -501,7 +503,11 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 				files.add(rs.getString(1));
 			}
 		} catch(final SQLException x) {
-			rollbackDBTransaction();
+			try {
+				rollbackDBTransaction();
+			} catch (TransactionException x2) {
+				LL.log(x2);
+			}
 			throw EXCEPTIONS.create(3,x,DBUtils.getStatement(stmt));
 		} finally {
 			close(stmt,rs);
@@ -520,7 +526,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 			final FileStorage fs = getFileStorage(ctx);
 			return fs.getFile(fileId);
 		
-		} catch (final FileStorageException e) {
+		} catch (final AbstractOXException e) {
 			throw new AttachmentException(e);
 		}
 	}
@@ -856,11 +862,11 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 				for(final String fileId : fileIdRemoveList.get()) {
 					fs.deleteFile(fileId);
 				}
-			} catch (final FileStorageException x) {
+			} catch (final AbstractOXException x) {
 				try {
 					rollback();	
 				} catch (final TransactionException txe) {
-					LOG.fatal("Could not execute undo. The system propably contains inconsistent data. Run the recovery tool.", x);//FIXME
+					LL.log(x);
 				}
 				throw new TransactionException(EXCEPTIONS.create(15,x,Integer.valueOf(contextHolder.get().getFilestoreId()), Integer.valueOf(contextHolder.get().getContextId())));
 			}
@@ -882,18 +888,11 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 		super.startTransaction();
 	}
 	
-	protected FileStorage getFileStorage(final Context ctx) throws FileStorageException {
-		try {
-			if(USE_QUOTA) {
-				return FileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx,getProvider());
-			}
-			return FileStorage.getInstance(FilestoreStorage.createURI(ctx));
-		} catch (final FilestoreException e) {
-			if (LOG.isDebugEnabled()) {
-				LOG.debug(e);
-			}
-        }
-		return null;
+	protected FileStorage getFileStorage(final Context ctx) throws AbstractOXException {
+		if(USE_QUOTA) {
+			return FileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx,getProvider());
+		}
+		return FileStorage.getInstance(FilestoreStorage.createURI(ctx));
 	}
 	
 	public class AttachmentIterator implements SearchIterator {

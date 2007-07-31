@@ -52,18 +52,15 @@ package com.openexchange.groupware.attach.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.Component;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.OXThrowsMultiple;
+import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.attach.AttachmentExceptionFactory;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.Classes;
-import com.openexchange.groupware.Component;
-import com.openexchange.groupware.AbstractOXException.Category;
 
 @OXExceptionSource(
 		classId = Classes.COM_OPENEXCHANGE_GROUPWARE_ATTACH_IMPL_FIREDETACHEDEVENTACTION,
@@ -71,7 +68,6 @@ import com.openexchange.groupware.AbstractOXException.Category;
 )
 public class FireDetachedEventAction extends AttachmentEventAction {
 
-	private static final Log LOG = LogFactory.getLog(FireDetachedEventAction.class);
 	private static final AttachmentExceptionFactory EXCEPTIONS = new AttachmentExceptionFactory(FireDetachedEventAction.class);
 	
 	@OXThrowsMultiple(
@@ -89,7 +85,6 @@ public class FireDetachedEventAction extends AttachmentEventAction {
 			try {
 				fireDetached(processed, getUser(), getUserConfiguration(), getContext(), getProvider());
 			} catch (Exception e1) {
-				LOG.fatal(e1);
 				throw EXCEPTIONS.create(0);
 			}
 			throw e;

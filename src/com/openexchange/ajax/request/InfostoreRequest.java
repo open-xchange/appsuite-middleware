@@ -87,6 +87,7 @@ import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.sessiond.SessionObject;
+import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 
@@ -97,6 +98,7 @@ public class InfostoreRequest extends CommonRequest{
 	private SessionObject sessionObj;
 
 	private static final Log LOG = LogFactory.getLog(InfostoreRequest.class);
+	private static final LoggingLogic LL = LoggingLogic.getLoggingLogic(InfostoreRequest.class);
 	
 	public InfostoreRequest(final SessionObject sessionObj, final JSONWriter w) {
 		super(w);
@@ -452,7 +454,7 @@ public class InfostoreRequest extends CommonRequest{
 			iWriter.write(dm,TimeZone.getTimeZone(sessionObj.getUserObject().getTimeZone()));
 			iWriter.endTimedResult();
 		} catch (final JSONException e) {
-			LOG.debug("", e);
+			LOG.error("", e);
 		}
 	}
 	
@@ -503,13 +505,13 @@ public class InfostoreRequest extends CommonRequest{
 				try {
 					iter.close();
 				} catch (final SearchIteratorException e) {
-					LOG.debug("", e);
+					LOG.error("", e);
 				}
 			}
 			try {
 				infostore.finish();
 			} catch (final TransactionException e1) {
-				LOG.debug("", e1);
+				LOG.error("", e1);
 			}
 		}
 	}
@@ -646,13 +648,12 @@ public class InfostoreRequest extends CommonRequest{
 				searchEngine.commit();
 				
 			} catch (final Throwable t){
-				LOG.debug("",t);
 				try {
 					infostore.rollback();
 					searchEngine.rollback();
 					return;
 				} catch (final TransactionException e) {
-					LOG.debug("", e);
+					LOG.error("", e);
 				}
 				handle(t);
 				return;
@@ -661,7 +662,7 @@ public class InfostoreRequest extends CommonRequest{
 					infostore.finish();
 					searchEngine.finish();
 				} catch (final TransactionException e) {
-					LOG.debug("", e);
+					LOG.error("", e);
 				}
 				
 			}
@@ -703,14 +704,11 @@ public class InfostoreRequest extends CommonRequest{
 				infostore.commit();
 				searchEngine.commit();
 			} catch (final Throwable t){
-				if (LOG.isDebugEnabled()) {
-					LOG.debug(t);
-				}
 				try {
 					infostore.rollback();
 					searchEngine.rollback();
 				} catch (final TransactionException e) {
-					LOG.debug("",e);
+					LOG.error("",e);
 				}
 				handle(t);
 				return;
@@ -719,7 +717,7 @@ public class InfostoreRequest extends CommonRequest{
 					infostore.finish();
 					searchEngine.finish();
 				} catch (final TransactionException e) {
-					LOG.debug("", e);
+					LOG.error("", e);
 				}
 				
 			}
@@ -757,15 +755,12 @@ public class InfostoreRequest extends CommonRequest{
 			searchEngine.index(newDocument,sessionObj.getContext(), sessionObj.getUserObject(), sessionObj.getUserConfiguration());
 			searchEngine.commit();
 		} catch (final Throwable t){
-			if (LOG.isDebugEnabled()) {
-				LOG.debug(t);
-			}
 			try {
 				infostore.rollback();
 				searchEngine.rollback();
 				
 			} catch (final TransactionException e) {
-				LOG.debug("", e);
+				LOG.error("", e);
 			}
 			handle(t);
 			return;
@@ -774,7 +769,7 @@ public class InfostoreRequest extends CommonRequest{
 				infostore.finish();
 				searchEngine.finish();
 			} catch (final TransactionException e) {
-				LOG.debug("",e);
+				LOG.error("",e);
 			}	
 		}
 		final JSONObject obj = new JSONObject();
@@ -829,15 +824,12 @@ public class InfostoreRequest extends CommonRequest{
 			searchEngine.commit();
 			attachmentBase.commit();
 		} catch (final Throwable t){
-			if (LOG.isDebugEnabled()) {
-				LOG.debug(t);
-			}
 			try {
 				infostore.rollback();
 				searchEngine.rollback();
 				attachmentBase.rollback();
 			} catch (final TransactionException e) {
-				LOG.debug("", e);
+				LOG.error("", e);
 			}
 			handle(t);
 			return;
@@ -847,7 +839,7 @@ public class InfostoreRequest extends CommonRequest{
 				searchEngine.finish();
 				attachmentBase.finish();
 			} catch (final TransactionException e) {
-				LOG.debug("", e);
+				LOG.error("", e);
 			}
 			if(in != null) {
 				try {
@@ -888,14 +880,11 @@ public class InfostoreRequest extends CommonRequest{
 			infostore.commit();
 			searchEngine.commit();
 		} catch (final Throwable t){
-			if (LOG.isDebugEnabled()) {
-				LOG.debug(t);
-			}
 			try {
 				infostore.rollback();
 				searchEngine.rollback();
 			} catch (final TransactionException e) {
-				LOG.debug("", e);
+				LOG.error("", e);
 			}
 			handle(t);
 			return;
@@ -904,7 +893,7 @@ public class InfostoreRequest extends CommonRequest{
 				infostore.finish();
 				searchEngine.finish();
 			} catch (final TransactionException e) {
-				LOG.debug("", e);
+				LOG.error("", e);
 			}
 			
 		}
@@ -951,14 +940,11 @@ public class InfostoreRequest extends CommonRequest{
 			infostore.commit();
 			searchEngine.commit();
 		} catch (final Throwable t){
-			if (LOG.isDebugEnabled()) {
-				LOG.debug(t);
-			}
 			try {
 				infostore.rollback();
 				searchEngine.rollback();
 			} catch (final TransactionException e) {
-				LOG.debug("", e);
+				LOG.error("", e);
 			}
 			handle(t);
 			return;
@@ -1001,14 +987,14 @@ public class InfostoreRequest extends CommonRequest{
 			try {
 				infostore.rollback();
 			} catch (final TransactionException e) {
-				LOG.debug("", e);
+				LOG.error("", e);
 			}
 			handle(t);
 		} finally {
 			try {
 				infostore.finish();
 			} catch (final TransactionException e) {
-				LOG.debug("", e);
+				LOG.error("", e);
 			}
 		}
 	}
@@ -1034,7 +1020,7 @@ public class InfostoreRequest extends CommonRequest{
 			try {
 				infostore.rollback();
 			} catch (final TransactionException e) {
-				LOG.debug("", e);
+				LOG.error("", e);
 			}
 			handle(t);
 		} finally {
@@ -1073,7 +1059,7 @@ public class InfostoreRequest extends CommonRequest{
 			try {
 				searchEngine.finish();
 			} catch (final TransactionException x){
-				LOG.debug("", x);
+				LOG.error("", x);
 			}
 		}
 	}

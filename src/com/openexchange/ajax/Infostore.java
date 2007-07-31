@@ -99,6 +99,7 @@ import com.openexchange.groupware.upload.UploadException.UploadCode;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.encoding.Helper;
+import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.servlet.UploadServletException;
 import com.openexchange.tools.servlet.http.Tools;
 
@@ -131,8 +132,8 @@ public class Infostore extends PermissionServlet {
 	
 //	public static final Exception2Message OXEXCEPTION_HANDLER = new InfostoreException2Message();
 	
-	private static  final Log LOG = LogFactory.getLog(Infostore.class);
-
+	private static final Log LOG = LogFactory.getLog(Infostore.class);
+	private static final LoggingLogic LL = LoggingLogic.getLoggingLogic(Infostore.class, LOG);
 
 	private long maxUploadSize = -1;
 	
@@ -607,6 +608,9 @@ public class Infostore extends PermissionServlet {
 			} catch (IOException e) {
 				LOG.error("",e);
 			}
+			
+			LL.log((AbstractOXException) t);
+			
 			return true;
 		}
 		return false;
@@ -667,26 +671,24 @@ public class Infostore extends PermissionServlet {
 	}
 	
 	protected void rollback(final InfostoreFacade infostore, final SearchEngine searchEngine, final HttpServletResponse res, final Throwable t, final String action, final boolean post){
-		if (LOG.isDebugEnabled()) {
-			LOG.debug(t);
-		}
 		if(infostore != null) {
 			try {
 				infostore.rollback();
 			} catch (TransactionException e) {
-				LOG.debug("", e);
+				LOG.error("", e);
 			}
 		}
 		if(searchEngine != null) {
 			try {
 				searchEngine.rollback();
 			} catch (TransactionException e) {
-				LOG.debug("", e);
+				LOG.error("", e);
 			}
 		}
 		if(!handleOXException(res, t, action, post, null)){
 			try {
 				sendErrorAsJSHTML(res,t.toString(),action);
+				LOG.error("Got non OXException", t);
 			} catch (IOException e) {
 				LOG.error(e);
 			}

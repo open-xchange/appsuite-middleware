@@ -1,6 +1,7 @@
 * 2007-07-31 - francisco.laguna@open-xchange.com
 
  - Bugfix #8622: Properly URLEncode urls in response to propfind requests.
+ - Improving logging
 
 * 2007-07-31 - thorben.betten@open-xchange.com
 

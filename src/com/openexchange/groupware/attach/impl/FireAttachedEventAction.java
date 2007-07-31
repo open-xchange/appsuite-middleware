@@ -71,7 +71,6 @@ import com.openexchange.groupware.AbstractOXException.Category;
 )
 public class FireAttachedEventAction extends AttachmentEventAction {
 
-	private static final Log LOG = LogFactory.getLog(FireAttachedEventAction.class);
 	private static final AttachmentExceptionFactory EXCEPTIONS = new AttachmentExceptionFactory(FireAttachedEventAction.class);
 	
 	@OXThrows(
@@ -106,7 +105,6 @@ public class FireAttachedEventAction extends AttachmentEventAction {
 			try {
 				fireDetached(processed, getUser(), getUserConfiguration(), getContext(), getProvider());
 			} catch (Exception e1) {
-				LOG.fatal(e1);
 				throw EXCEPTIONS.create(0,e1);
 			}
 			if (e instanceof AbstractOXException) {

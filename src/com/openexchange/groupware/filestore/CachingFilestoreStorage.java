@@ -57,7 +57,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.jcs.JCS;
 import org.apache.jcs.access.exception.CacheException;
 
-import com.openexchange.cache.OXCachingException;
 import com.openexchange.cache.dynamic.CacheProxy;
 import com.openexchange.cache.dynamic.OXObjectFactory;
 

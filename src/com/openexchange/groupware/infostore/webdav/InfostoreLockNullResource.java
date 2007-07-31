@@ -407,10 +407,18 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 			setId(id);
 			writeCon.commit();
 		} catch (final SQLException x) {
-			writeCon.rollback();
+			try {
+				writeCon.rollback();
+			} catch (SQLException x2) {
+				LOG.error("Can't roll back",x2);
+			}
 			throw x;
 		} catch (final TransactionException e) {
-			writeCon.rollback();
+			try {
+				writeCon.rollback();
+			} catch (SQLException x2) {
+				LOG.error("Can't roll back",x2);
+			}
 			throw e;
 		} finally {
 			if (stmt != null) {

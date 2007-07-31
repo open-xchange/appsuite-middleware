@@ -59,15 +59,29 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.api2.OXException;
+import com.openexchange.groupware.Component;
+import com.openexchange.groupware.OXExceptionSource;
+import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.tx.Classes;
 import com.openexchange.tools.ajp13.AJPv13ListenerThread;
 
+import com.openexchange.groupware.AbstractOXException.Category;
+
+@OXExceptionSource(classId=Classes.COM_OPENEXCHANGE_GROUPWARE_TX_REQUESTDBPROVIDER, component=Component.TRANSACTION)
+
+@OXThrowsMultiple(
+		category={Category.SUBSYSTEM_OR_SERVICE_DOWN,Category.SUBSYSTEM_OR_SERVICE_DOWN,Category.SUBSYSTEM_OR_SERVICE_DOWN},
+		desc={"","",""},
+		exceptionId={0,1,2},
+		msg={"Cannot commit transaction to write DB", "Cannot rollback transaction in write DB", "Cannot finish transaction"}
+)
 public class RequestDBProvider implements DBProvider {
 
 	private static final ThreadLocal<DBTransaction> txIds = new ThreadLocal<DBTransaction>();
 
 	private static final Log LOG = LogFactory.getLog(RequestDBProvider.class);
+	private static final TXExceptionFactory EXCEPTIONS = new TXExceptionFactory(RequestDBProvider.class);
 	
 	public static class DBTransaction {
 		public Connection writeConnection;
@@ -171,7 +185,7 @@ public class RequestDBProvider implements DBProvider {
 				tx.writeConnection.commit();
 			}
 		} catch (final SQLException e) {
-			throw new TransactionException(new OXException(e)); // FIXME
+			throw EXCEPTIONS.create(0,e);
 		}
 	}
 
@@ -187,7 +201,7 @@ public class RequestDBProvider implements DBProvider {
 				tx.writeConnection.rollback();
 			}
 		} catch (final SQLException e) {
-			throw new TransactionException(new OXException(e)); //FIXME
+			throw EXCEPTIONS.create(1,e);
 		}
 	}
 	
@@ -309,7 +323,7 @@ public class RequestDBProvider implements DBProvider {
 				tx.readConnection = null;
 			}
 		} catch (final SQLException e) {
-			throw new TransactionException(new OXException(e)); //FIXME
+			throw EXCEPTIONS.create(2,e);
 		}
 		txIds.set(null);
 		final DBProvider prov = getProvider();

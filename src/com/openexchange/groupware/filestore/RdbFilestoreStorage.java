@@ -84,11 +84,13 @@ public class RdbFilestoreStorage extends FilestoreStorage {
 	
 	@Override
     @OXThrowsMultiple(
-        category = { Category.SETUP_ERROR, Category.SETUP_ERROR },
+        category = { Category.SETUP_ERROR, Category.SETUP_ERROR, Category.SUBSYSTEM_OR_SERVICE_DOWN, Category.CODE_ERROR },
         desc = { "", "" },
-        exceptionId = { 3, 4 },
+        exceptionId = { 3, 4, 5, 6 },
         msg = { "Cannot find filestore with id %1$d.",
-            "Cannot create URI from \"%1$s\"." }
+            "Cannot create URI from \"%1$s\".",
+            "Can't access DBPool",
+            "Got SQL Exception"}
     )
 	public Filestore getFilestore(final int id) throws FilestoreException {
 		
@@ -121,25 +123,23 @@ public class RdbFilestoreStorage extends FilestoreStorage {
 			filestore.setMaxContext(rs.getLong("max_context"));
 			return filestore;
 		} catch (final DBPoolingException e) {
-			LOG.debug(e);
-			return null;
+			throw EXCEPTION.create(5,e);
 		} catch (final SQLException e) {
-			LOG.debug(e);
-			return null;
+			throw EXCEPTION.create(6,e);
 		} finally {
 			
 			if(stmt!=null) {
 				try {
 					stmt.close();
 				} catch (final SQLException e1) {
-					LOG.debug("",e1);
+					LOG.error("",e1);
 				}
 			}
 			if(rs!=null) {
 				try {
 					rs.close();
 				} catch (final SQLException e) {
-					LOG.debug("",e);
+					LOG.error("",e);
 				}
 			}
 			if(readCon!=null){

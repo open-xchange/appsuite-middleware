@@ -68,6 +68,7 @@ import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.Component;
+import com.openexchange.tools.exceptions.LoggingLogic;
 
 @OXExceptionSource(
 		classId = Classes.COM_OPENEXCHANGE_GROUPWARE_TX_DBSERVICE, 
@@ -77,6 +78,7 @@ public abstract class DBService implements Service, DBProviderUser, DBProvider{
 	private RequestDBProvider provider;
 	
 	private static final Log LOG = LogFactory.getLog(DBService.class);
+	private static final LoggingLogic LL = LoggingLogic.getLoggingLogic(DBService.class);
 	private static final TXExceptionFactory EXCEPTIONS = new TXExceptionFactory(DBService.class);
 		
 	private final ThreadLocal<ThreadState> txState = new ThreadLocal<ThreadState>();
@@ -238,12 +240,20 @@ public abstract class DBService implements Service, DBProviderUser, DBProvider{
 			}
 		} catch (final AbstractOXException e) {	
 			if(dbTransaction) {
-				rollbackDBTransaction();
+				try {
+					rollbackDBTransaction();
+				} catch (TransactionException x) {
+					LL.log(x);
+				}
 			}
 			throw e;
 		} finally {
 			if(dbTransaction) {
-				finishDBTransaction();
+				try {
+					finishDBTransaction();
+				} catch (TransactionException x) {
+					LL.log(x);
+				}
 			}
 		}
 	}

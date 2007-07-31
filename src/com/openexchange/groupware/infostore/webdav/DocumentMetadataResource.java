@@ -217,10 +217,8 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 				if(InfostoreExceptionFactory.isPermissionException(x)) {
 					throw new WebdavException(x.getMessage(), x, getUrl(), HttpServletResponse.SC_FORBIDDEN);				
 				}
-				LOG.debug(x.getMessage(),x);
 				throw new WebdavException(x.getMessage(), x, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			} catch (final Exception x) {
-				LOG.debug(x.getMessage(),x);
 				throw new WebdavException(x.getMessage(), x, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			}
 		}
@@ -423,7 +421,6 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 		try {
 			lockHelper.deleteLocks();
 		} catch (final OXException e) {
-			LOG.debug("",e);
 			throw new WebdavException(getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 		return this;
@@ -459,7 +456,6 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 		try {
 			lockHelper.deleteLocks();
 		} catch (final OXException e) {
-			LOG.debug("",e);
 			throw new WebdavException(getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 		return copy;
@@ -557,7 +553,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 			try {
 				database.rollback();
 			} catch (final TransactionException e) {
-				LOG.fatal("Couldn't rollback transaction. Run the recovery tool.");
+				LOG.error("Couldn't rollback transaction. Run the recovery tool.");
 			}
 			throw new WebdavException(x.getMessage(), x, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
@@ -592,7 +588,11 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 				database.commit();
 				setId(metadata.getId());
 			} catch (final OXException x) {
-				database.rollback();
+				try {
+					database.rollback();
+				} catch (TransactionException x2) {
+					LOG.error("Couldn't roll back: ",x2);
+				}
 				throw x;
 			}
 		} else {
@@ -604,7 +604,11 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 				database.saveDocumentMetadata(metadata, Long.MAX_VALUE, setMetadata.toArray(new Metadata[setMetadata.size()]),session);
 				database.commit();
 			} catch (final OXException x) {
-				database.rollback();
+				try {
+					database.rollback();
+				} catch (TransactionException x2) {
+					LOG.error("Can't roll back", x2);
+				}
 				throw x;
 			}
 		}

@@ -222,7 +222,6 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 		try {
 			lockHelper.deleteLocks();
 		} catch (final OXException e) {
-			LOG.debug("",e);
 			throw new WebdavException(getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 		return this;
@@ -448,7 +447,7 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 				
 			}
 		} catch (final FolderCacheNotEnabledException e) {
-			LOG.debug("",e);
+			LOG.error("",e);
 		} catch (final Exception e) {
 			throw new WebdavException(e.getMessage(), e, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		} finally {

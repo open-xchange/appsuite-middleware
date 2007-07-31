@@ -59,6 +59,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.event.AppointmentEvent;
 import com.openexchange.event.ContactEvent;
 import com.openexchange.event.TaskEvent;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.impl.AttachmentBaseImpl;
 import com.openexchange.groupware.container.AppointmentObject;
@@ -68,6 +69,7 @@ import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tx.DBPoolProvider;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.sessiond.SessionObject;
+import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 
@@ -76,7 +78,7 @@ public class AttachmentCleaner implements AppointmentEvent, TaskEvent,
 	
 	private static final AttachmentBase ATTACHMENT_BASE = new AttachmentBaseImpl(new DBPoolProvider()); // No notifications, no permission check.
 
-	private static final Log LOG = LogFactory.getLog(AttachmentCleaner.class);
+	private static final LoggingLogic LL = LoggingLogic.getLoggingLogic(AttachmentCleaner.class);
 	
 	public final void appointmentDeleted(final AppointmentObject appointmentObj,
 			final SessionObject sessionObj) {
@@ -162,26 +164,24 @@ public class AttachmentCleaner implements AppointmentEvent, TaskEvent,
 				try {
 					iter.close();
 				} catch (SearchIteratorException e) {
-					LOG.error("",e);
+					LL.log(e);
 				}
 			}
 			try {
 				ATTACHMENT_BASE.finish();
 			} catch (TransactionException e) {
-				LOG.error("",e);
+				LL.log(e);
 			}
 		}
 	}
 
-	private void rollback(Exception x) {
+	private void rollback(AbstractOXException x) {
 		try {
 			ATTACHMENT_BASE.rollback();
 		} catch (TransactionException e) {
-			LOG.error("",e);
+			LL.log(e);
 		}
-		if (LOG.isErrorEnabled()) {
-			LOG.error(x);
-		}	
+		LL.log(x);
 	}
 
 }

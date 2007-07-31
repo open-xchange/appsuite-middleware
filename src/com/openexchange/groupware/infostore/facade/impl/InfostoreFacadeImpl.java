@@ -120,6 +120,7 @@ import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.server.EffectivePermission;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.collections.Injector;
+import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.FileStorageException;
 import com.openexchange.tools.file.QuotaFileStorage;
@@ -141,6 +142,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 		DBProviderUser {
 
 	private static final Log LOG = LogFactory.getLog(InfostoreFacadeImpl.class);
+	private static final LoggingLogic LL = LoggingLogic.getLoggingLogic(InfostoreFacadeImpl.class);
 
 	private static final InfostoreExceptionFactory EXCEPTIONS = new InfostoreExceptionFactory(
 			InfostoreFacadeImpl.class);
@@ -327,7 +329,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 			throw x;
 		} catch (final Exception e) {
 			// FIXME Client
-			LOG.debug("", e);
+			LOG.error("", e);
 		}
 	}
 
@@ -816,7 +818,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 			throw x;
 		} catch (final Exception e) {
 			// FIXME Client
-			LOG.debug("", e);
+			LOG.error("", e);
 		}
 	}
 

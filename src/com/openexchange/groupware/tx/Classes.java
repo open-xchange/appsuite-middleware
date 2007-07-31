@@ -54,5 +54,6 @@ public class Classes {
 	public static final int COM_OPENEXCHANGE_GROUPWARE_TX_DBPOOLPROVIDER = 1;
 	public static final int COM_OPENEXCHANGE_GROUPWARE_TX_DBSERVICE = 2;
 	public static final int COM_OPENEXCHANGE_GROUPWARE_TX_ABSTRACTUNDOABLE = 3;
+	public static final int COM_OPENEXCHANGE_GROUPWARE_TX_REQUESTDBPROVIDER = 4;
 	
 }

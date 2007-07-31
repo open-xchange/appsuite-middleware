@@ -70,6 +70,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.OXException;
 import com.openexchange.event.AppointmentEvent;
 import com.openexchange.event.TaskEvent;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.container.AppointmentObject;
@@ -92,6 +93,7 @@ import com.openexchange.i18n.StringTemplate;
 import com.openexchange.i18n.Template;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.sessiond.SessionObject;
+import com.openexchange.tools.exceptions.LoggingLogic;
 
 import com.openexchange.groupware.notify.NotificationConfig.NotificationProperty;
 
@@ -99,8 +101,11 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 	
 	//TODO: Signatur?
 	//TODO: Abgesagt / Zugesagt
+	
+	//TODO: user getLocale of user instead of detemining locale yourself
 
 	private final static Log LOG = LogFactory.getLog(ParticipantNotify.class);
+	private final static LoggingLogic LL = LoggingLogic.getLoggingLogic(ParticipantNotify.class);
 	
 	public ParticipantNotify() {
 	}
@@ -132,7 +137,7 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 		try {
 			mail.send();
 		} catch (final OXException e) {
-			LOG.error(e);
+			LL.log(e);
 		}
 	}
 	
@@ -234,7 +239,7 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 		} catch (final LdapException e) {
 			createdByDisplayName = e.toString();
 			modifiedByDisplayName = e.toString();
-			LOG.debug(e);
+			LL.log(e);
 		}
 		
 		final List<MailMessage> messages = new ArrayList<MailMessage>();
@@ -256,8 +261,10 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 						final UserConfiguration userConfig = getUserConfiguration(p.id,p.groups,sessionObj.getContext());
 						sendMail = state.sendMail(userConfig) && obj.getModifiedBy() != p.id && (obj.getNotification() || p.id == obj.getCreatedBy() || forceNotifyOthers);
 						tz = p.timeZone;
-					} catch (final Exception e) {
-						LOG.debug(e);
+					} catch (final AbstractOXException e) {
+						LL.log(e);
+					} catch (SQLException e) {
+						LOG.error("Error loading user configuration: ",e);
 					}
 				} else {
 					sendMail = obj.getNotification() || (obj.getModifiedBy() != p.id && forceNotifyOthers);
@@ -423,7 +430,7 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 						}
 						}
 					} catch (final LdapException e) {
-						LOG.debug(e);
+						LL.log(e);
 					}
 				break;
 			default:
@@ -475,7 +482,7 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 				//System.out.println("PERSONAL FOLDER ID FOR PARTICIPANT "+userParticipant.getIdentifier()+": "+folderId);
 			}
 		} catch (final LdapException e) {
-			LOG.debug(e);
+			LL.log(e);
 		}
 		
 		final Locale locale = getLocale(lang);
@@ -513,7 +520,7 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 				displayName = participant.getDisplayName();
 			}
 		} catch (final LdapException e) {
-			LOG.debug(e);
+			LL.log(e);
 		}
 				
 		EmailableParticipant p;

@@ -181,10 +181,8 @@ public class QuotaFileStorage extends FileStorage {
 
 			storeUsage(usage);
 		} catch (final SQLException e) {
-			LOG.debug(e);
 			throw new QuotaFileStorageException(QuotaFileStorageException.Code.SQL_EXCEPTION, e);
 		} catch (final TransactionException e) {
-			LOG.debug(e);
 			throw new QuotaFileStorageException(e);
 		} finally {
 			close(readCon,stmt,rs,false);
@@ -407,10 +405,8 @@ public class QuotaFileStorage extends FileStorage {
 			stmt.setInt(2,ctx.getContextId());
 			stmt.executeUpdate();
 		} catch (final SQLException e) {
-			LOG.debug(e);
 			throw new QuotaFileStorageException(QuotaFileStorageException.Code.SQL_EXCEPTION, e);
 		} catch (final TransactionException e) {
-			LOG.debug(e);
 			throw new QuotaFileStorageException(e);
 		} finally {
 			close(writeCon,stmt,null,true);
@@ -422,14 +418,14 @@ public class QuotaFileStorage extends FileStorage {
 			try {
 				stmt.close();
 			} catch (final SQLException e) {
-				LOG.debug("",e);
+				LOG.error("",e);
 			}
 		}
 		if(rs != null) {
 			try {
 				rs.close();
 			} catch (final SQLException e) {
-				LOG.debug("",e);
+				LOG.error("",e);
 			}
 		}
 		
@@ -444,7 +440,6 @@ public class QuotaFileStorage extends FileStorage {
 	}
 
 	private static final QuotaFileStorageException addContextInfo(final FileStorageException x, final Context ctx) {
-		LOG.error("Filestore seems to be broken: FilestoreID: "+ctx.getFilestoreId()+" ContextID: "+ctx.getContextId(), x);
 		return new QuotaFileStorageException(QuotaFileStorageException.Code.UNDERLYING_EXCEPTION, x, String.valueOf(ctx.getFilestoreId()), String.valueOf(ctx.getContextId()), x.getMessage());
 	}
 	

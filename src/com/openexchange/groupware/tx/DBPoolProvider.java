@@ -94,7 +94,6 @@ public class DBPoolProvider implements DBProvider {
 			final Connection writeCon = DBPool.pickupWriteable(ctx);
 			return writeCon;
 		} catch (final DBPoolingException e) {
-			LOG.fatal("",e);
 			throw EXCEPTIONS.create(1,e);
 		}
 	}

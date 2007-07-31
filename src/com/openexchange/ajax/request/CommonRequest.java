@@ -59,13 +59,15 @@ import org.json.JSONWriter;
 
 import com.openexchange.ajax.container.Response;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.tools.exceptions.LoggingLogic;
 
 public abstract class CommonRequest {
 	
 	protected JSONWriter w;
 	
 	private final Log LOG = LogFactory.getLog(CommonRequest.class);
-
+	private final LoggingLogic LL = LoggingLogic.getLoggingLogic(CommonRequest.class, LOG);
+	
 	public CommonRequest(final JSONWriter w) {
 		this.w = w;
 	}
@@ -87,9 +89,9 @@ public abstract class CommonRequest {
 	}
 	
 	protected void handle(final Throwable t) {
-		LOG.debug("",t);
 		final Response res = new Response();
 		if(t instanceof AbstractOXException) {
+			LL.log((AbstractOXException) t);
 			res.setException((AbstractOXException) t);
 		} else {
 			res.setException(new AbstractOXException(t));
