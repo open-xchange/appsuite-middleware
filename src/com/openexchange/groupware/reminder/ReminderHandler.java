@@ -164,7 +164,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 		try {
 			int a  = 0;
 			
-			final int objectId = IDGenerator.getId(context, Types.REMINDER);
+			final int objectId = IDGenerator.getId(context, Types.REMINDER, writeCon);
 			reminderObj.setObjectId(objectId);
 			
 			ps = writeCon.prepareStatement(sqlInsert);
