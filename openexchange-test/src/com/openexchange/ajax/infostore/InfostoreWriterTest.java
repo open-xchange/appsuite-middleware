@@ -14,6 +14,7 @@ import junit.framework.TestCase;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.json.JSONWriter;
 
 import com.openexchange.ajax.writer.InfostoreWriter;
 import com.openexchange.groupware.infostore.DocumentMetadata;
@@ -73,7 +74,7 @@ public class InfostoreWriterTest extends TestCase {
 	
 	public void testWriteList() throws Exception{
 		StringWriter results = new StringWriter();
-		InfostoreWriter w = new InfostoreWriter(new PrintWriter(results));
+		InfostoreWriter w = new InfostoreWriter(new JSONWriter(new PrintWriter(results)));
 		
 		w.writeMetadata(new SearchIteratorAdapter(DUMMY_DATA.iterator()), new Metadata[]{Metadata.URL_LITERAL, Metadata.TITLE_LITERAL, Metadata.CREATED_BY_LITERAL}, TimeZone.getTimeZone("utc"));
 		
@@ -98,7 +99,7 @@ public class InfostoreWriterTest extends TestCase {
 	
 	public void testCategories() throws Exception{
 		StringWriter results = new StringWriter();
-		InfostoreWriter w = new InfostoreWriter(new PrintWriter(results));
+		InfostoreWriter w = new InfostoreWriter(new JSONWriter(new PrintWriter(results)));
 		
 		DocumentMetadata m = new DocumentMetadataImpl();
 		m.setCategories("cat1, cat2, cat3");
@@ -113,7 +114,7 @@ public class InfostoreWriterTest extends TestCase {
 		assertEquals("cat3",categories.get(2));
 		
 		results = new StringWriter();
-		w = new InfostoreWriter(new PrintWriter(results));
+		w = new InfostoreWriter(new JSONWriter(new PrintWriter(results)));
 		w.write(m,TimeZone.getTimeZone("utc"));
 		
 		
@@ -128,7 +129,7 @@ public class InfostoreWriterTest extends TestCase {
 		m.setCategories(null);
 		
 		results = new StringWriter();
-		w = new InfostoreWriter(new PrintWriter(results));
+		w = new InfostoreWriter(new JSONWriter(new PrintWriter(results)));
 		w.writeMetadata(new ArrayIterator(new DocumentMetadata[]{m}),new Metadata[]{Metadata.CATEGORIES_LITERAL},TimeZone.getTimeZone("utc"));
 		
 		listOfArrays = new JSONArray(results.toString());
@@ -138,7 +139,7 @@ public class InfostoreWriterTest extends TestCase {
 		assertEquals(0,categories.length());
 		
 		results = new StringWriter();
-		w = new InfostoreWriter(new PrintWriter(results));
+		w = new InfostoreWriter(new JSONWriter(new PrintWriter(results)));
 		w.write(m,TimeZone.getTimeZone("utc"));
 		
 		o = new JSONObject(results.toString());
@@ -164,7 +165,7 @@ public class InfostoreWriterTest extends TestCase {
 		dm.setId(1);
 		
 		StringWriter result = new StringWriter();
-		InfostoreWriter w = new InfostoreWriter(new PrintWriter(result));
+		InfostoreWriter w = new InfostoreWriter(new JSONWriter(new PrintWriter(result)));
 		
 		w.write(dm,TimeZone.getTimeZone("utc"));
 		
@@ -192,7 +193,7 @@ public class InfostoreWriterTest extends TestCase {
 		dm.setLockedUntil(new Date(System.currentTimeMillis()-1000));
 		
 		StringWriter result = new StringWriter();
-		InfostoreWriter w = new InfostoreWriter(new PrintWriter(result));
+		InfostoreWriter w = new InfostoreWriter(new JSONWriter(new PrintWriter(result)));
 		
 		w.write(dm,TimeZone.getTimeZone("utc"));
 		
@@ -205,7 +206,7 @@ public class InfostoreWriterTest extends TestCase {
 		dm.setLockedUntil(new Date(later));
 		
 		result = new StringWriter();
-		w = new InfostoreWriter(new PrintWriter(result));
+		w = new InfostoreWriter(new JSONWriter(new PrintWriter(result)));
 		
 		w.write(dm,TimeZone.getTimeZone("utc"));
 		
@@ -221,7 +222,7 @@ public class InfostoreWriterTest extends TestCase {
 		dm.setLastModified(new Date(230023));
 		
 		StringWriter result = new StringWriter();
-		InfostoreWriter w = new InfostoreWriter(new PrintWriter(result));
+		InfostoreWriter w = new InfostoreWriter(new JSONWriter(new PrintWriter(result)));
 		
 		w.write(dm,TimeZone.getTimeZone("Europe/Berlin"));
 		

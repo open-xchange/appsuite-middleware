@@ -9,6 +9,7 @@ import java.util.TimeZone;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.json.JSONWriter;
 
 import com.openexchange.ajax.writer.AttachmentWriter;
 import com.openexchange.groupware.attach.AttachmentField;
@@ -50,7 +51,7 @@ public class AttachmentWriterTest extends TestCase {
 	
 	public void testWriteList() throws Exception{
 		StringWriter result = new StringWriter();
-		AttachmentWriter writer = new AttachmentWriter(new PrintWriter(result));
+		AttachmentWriter writer = new AttachmentWriter(new JSONWriter(new PrintWriter(result)));
 		
 		writer.writeAttachments(new SearchIteratorAdapter(DUMMY_VALUES.iterator()), new AttachmentField[]{AttachmentField.ID_LITERAL, AttachmentField.FILENAME_LITERAL, AttachmentField.CREATION_DATE_LITERAL},TimeZone.getTimeZone("utc"));
 		
@@ -66,7 +67,7 @@ public class AttachmentWriterTest extends TestCase {
 	
 	public void testWriteObject() throws Exception {
 		StringWriter result = new StringWriter();
-		AttachmentWriter writer = new AttachmentWriter(new PrintWriter(result));
+		AttachmentWriter writer = new AttachmentWriter(new JSONWriter(new PrintWriter(result)));
 		
 		writer.write(DUMMY_VALUES.get(0),TimeZone.getTimeZone("utc"));
 		
@@ -86,7 +87,7 @@ public class AttachmentWriterTest extends TestCase {
 	
 	public void testTimeZone() throws Exception {
 		StringWriter result = new StringWriter();
-		AttachmentWriter writer = new AttachmentWriter(new PrintWriter(result));
+		AttachmentWriter writer = new AttachmentWriter(new JSONWriter(new PrintWriter(result)));
 		writer.write(DUMMY_VALUES.get(0),TimeZone.getTimeZone("Europe/Berlin"));
 		
 		JSONObject object = new JSONObject(result.toString());
