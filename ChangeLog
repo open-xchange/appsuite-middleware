@@ -1,3 +1,8 @@
+* 2007-07-31 - thorben.betten@open-xchange.com
+
+ - Bugfix #6274: Changed error message if IMAP authentication fails
+   (possibly due to a changed user password)
+
 * 2007-07-30 - francisco.laguna@open-xchange.com
 
  - Bug #7792 : Added Logging code. Error 500 is always logged with a level of ERROR. 

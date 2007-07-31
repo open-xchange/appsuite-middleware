@@ -4870,9 +4870,8 @@ public class MailInterfaceImpl implements MailInterface {
 				}
 			} else {
 				if (temporary) {
-					oxme = new OXMailException(MailCode.LOGIN_FAILED, e, imapProps.getImapServer(),
-							com.openexchange.tools.oxfolder.OXFolderManagerImpl.getUserName(imapProps.getUser(),
-									imapProps.getContext()), Integer.valueOf(imapProps.getContext().getContextId()));
+					oxme = new OXMailException(MailCode.LOGIN_FAILED, e, imapProps.getImapServer(), Integer
+							.valueOf(imapProps.getUser()), Integer.valueOf(imapProps.getContext().getContextId()));
 				} else {
 					oxme = new OXMailException(MailCode.INVALID_CREDENTIALS, e, imapProps.getImapServer(),
 							com.openexchange.tools.oxfolder.OXFolderManagerImpl.getUserName(imapProps.getUser(),
@@ -4969,9 +4968,8 @@ public class MailInterfaceImpl implements MailInterface {
 				if (imapProps == null) {
 					oxme = new OXMailException(MailCode.LOGIN_FAILED, e, STR_EMPTY, STR_EMPTY, STR_EMPTY);
 				} else {
-					oxme = new OXMailException(MailCode.LOGIN_FAILED, e, imapProps.getImapServer(),
-							com.openexchange.tools.oxfolder.OXFolderManagerImpl.getUserName(imapProps.getUser(),
-									imapProps.getContext()), Integer.valueOf(imapProps.getContext().getContextId()));
+					oxme = new OXMailException(MailCode.LOGIN_FAILED, e, imapProps.getImapServer(), Integer
+							.valueOf(imapProps.getUser()), Integer.valueOf(imapProps.getContext().getContextId()));
 				}
 			} else {
 				/*
