@@ -224,7 +224,11 @@ public class Infostore extends PermissionServlet {
 			return;
 		}
 		try {
-			Response.write(new Response((JSONObject) writer.getObject()), res.getWriter());
+			if(writer.isJSONObject()) {
+				Response.write(new Response((JSONObject) writer.getObject()), res.getWriter());
+			} else if(writer.isJSONArray()) {
+				res.getWriter().print(writer.getObject().toString());
+			}
 		} catch (final JSONException e) {
 			LOG.error(e.getLocalizedMessage(), e);
 		}

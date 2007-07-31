@@ -488,10 +488,10 @@ public class InfostoreRequest extends CommonRequest{
 			infostore.removeVersion(id, versionsArray, sessionObj);
 			timestamp = infostore.getDocumentMetadata(id,InfostoreFacade.CURRENT_VERSION,sessionObj.getContext(),sessionObj.getUserObject(),sessionObj.getUserConfiguration()).getSequenceNumber();
 			infostore.commit();
-			final JSONObject object = new JSONObject();
-			object.put("data", new JSONObject());
-			object.put("timestamp", timestamp);
-			w.value(object);
+			w.object();
+			w.key("data").value(new JSONObject())
+			.key("timestamp").value(timestamp);
+			w.endObject();
 		} catch (final Throwable t){
 			try {
 				infostore.rollback();
@@ -668,21 +668,16 @@ public class InfostoreRequest extends CommonRequest{
 			}
 		}
 		
-		final StringBuilder b = new StringBuilder();
-		b.append('[');
-		for (int i = 0; i < notDeleted.length; i++) {
-			final int nd = notDeleted[i];
-			b.append(nd);
-			if(i != notDeleted.length-1) {
-				b.append(',');
-			}
-		}
-		b.append(']');
-		// TODO: Use JSONArray instaed of StringBuilder
 		try {
-			w.value(new JSONArray(b.toString()));
-		} catch (final JSONException e) {
-			LOG.error(e.getLocalizedMessage(), e);
+			w.array();
+			for (int i = 0; i < notDeleted.length; i++) {
+				final int nd = notDeleted[i];
+				w.value(nd);
+			}
+			w.endArray();
+
+		} catch (JSONException e) {
+			LOG.error(e.getLocalizedMessage(),e);
 		}
 	}
 	
@@ -723,19 +718,13 @@ public class InfostoreRequest extends CommonRequest{
 			}
 		}
 		
-		final StringBuilder b = new StringBuilder();
-		b.append('[');
-		for (int i = 0; i < notDetached.length; i++) {
-			final int nd = notDetached[i];
-			b.append(nd);
-			if(i != notDetached.length-1) {
-				b.append(',');
-			}
-		}
-		b.append(']');
-		// TODO: Use JSONArray instaed of StringBuilder
 		try {
-			w.value(new JSONArray(b.toString()));
+			w.array();
+			for (int i = 0; i < notDetached.length; i++) {
+				final int nd = notDetached[i];
+				w.value(nd);
+			}
+			w.endArray();
 		} catch (final JSONException e) {
 			LOG.error(e.getLocalizedMessage(), e);
 		}
@@ -772,9 +761,9 @@ public class InfostoreRequest extends CommonRequest{
 				LOG.error("",e);
 			}	
 		}
-		final JSONObject obj = new JSONObject();
-		obj.put("data", newDocument.getId());
-		w.value(obj);
+		w.object();
+		w.key("data").value(newDocument.getId());
+		w.endObject();
 	}
 	
 	protected void saveAs(final DocumentMetadata newDocument, final Metadata[] fields, final int folderId, final int attachedId, final int moduleId, final int attachment) throws JSONException {
@@ -850,9 +839,9 @@ public class InfostoreRequest extends CommonRequest{
 			}
 		}
 		
-		final JSONObject obj = new JSONObject();
-		obj.put("data", newDocument.getId());
-		w.value(obj);
+		w.object();
+		w.key("data").value(newDocument.getId());
+		w.endObject();
 	}
 	
 	protected void update(final int id, DocumentMetadata updated, final long timestamp, final Metadata[] presentFields) {
@@ -898,7 +887,7 @@ public class InfostoreRequest extends CommonRequest{
 			
 		}
 		try {
-			w.value(new JSONObject());
+			w.object().endObject();
 		} catch (final JSONException e) {
 			LOG.error(e.getLocalizedMessage(), e);
 		}
@@ -958,9 +947,9 @@ public class InfostoreRequest extends CommonRequest{
 			
 		}
 		try {
-			final JSONObject obj = new JSONObject();
-			obj.put("data", metadata.getId());
-			w.value(obj);
+			w.object();
+			w.key("data").value(metadata.getId());
+			w.endObject();
 		} catch (final JSONException e) {
 			LOG.error(e.getLocalizedMessage(), e);
 		}
@@ -978,7 +967,7 @@ public class InfostoreRequest extends CommonRequest{
 			infostore.commit();
 			
 			try {
-				w.value(new JSONObject());
+				w.object().endObject();
 			} catch (final JSONException e) {
 				LOG.error(e.getLocalizedMessage(), e);
 			}
@@ -1011,7 +1000,7 @@ public class InfostoreRequest extends CommonRequest{
 			
 			infostore.commit();
 			try {
-				w.value(new JSONObject());
+				w.object().endObject();
 			} catch (final JSONException e) {
 				LOG.error(e.getLocalizedMessage(), e);
 			}
