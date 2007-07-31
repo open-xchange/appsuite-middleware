@@ -65,8 +65,7 @@ public interface OXContextInterface extends Remote {
     public void delete(final Context ctx, final Credentials auth) throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException, DatabaseUpdateException, InvalidDataException;
 
     /**
-     * Move all data of a context contained on the filestore to another filestore using
-     * specified reason to disable context.
+     * Move all data of a context contained on the filestore to another filestore
      *         <p>
      *         This method returns immediately and the data is going to be copied
      *         in the background. To query the progress and the result of the actual
@@ -90,8 +89,7 @@ public interface OXContextInterface extends Remote {
     public int moveContextFilestore(final Context ctx, final Filestore dst_filestore_id, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, NoSuchFilestoreException, NoSuchReasonException, OXContextException;
 
     /**
-     * Move all data of a context contained in a database to another database using
-     * specified reason to disable context.
+     * Move all data of a context contained in a database to another database
      * 
      * @param ctx Context object
      * @param dst_database_id ID of a registered Database to move all data of this context in.
@@ -117,7 +115,6 @@ public interface OXContextInterface extends Remote {
 
     /**
      * Disable given context.<br>
-     * Note: To disable a context you need a reason
      * 
      * @param ctx Context object.
      * @param auth Credentials for authenticating against server.
@@ -176,7 +173,6 @@ public interface OXContextInterface extends Remote {
 
     /**
      * Disable all contexts.<br>
-     * Note: To disable all contexts, you need a reason.
      * 
      * @param auth Credentials for authenticating against server.
      * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException When the supplied credentials were not correct or invalid.
