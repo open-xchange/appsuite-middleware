@@ -13,7 +13,6 @@ import junit.framework.JUnit4TestAdapter;
 
 import org.junit.Test;
 
-import com.openexchange.admin.rmi.UserTest;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
@@ -31,14 +30,13 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
  */
 public class ContextTest extends AbstractTest {
 
-    
     public static Credentials DummyMasterCredentials(){
         return new Credentials("oxadminmaster","secret");
     }
     
     public static junit.framework.Test suite() {
-		return new JUnit4TestAdapter(ContextTest.class);
-	}
+        return new JUnit4TestAdapter(ContextTest.class);
+    }
     
     
     @Test
@@ -131,12 +129,12 @@ public class ContextTest extends AbstractTest {
         } else {
             mr.setId(mrs[0].getId());
         }
-        disableContext(ctx, mr, hosturl, cred);
+        disableContext(ctx, hosturl, cred);
         Context[] ctxs = searchContext(String.valueOf(ctx.getIdAsInt()), hosturl, cred);
         boolean ctx_disabled = false;
 
         for (final Context elem : ctxs) {            
-            if (!elem.isEnabled() && elem.getMaintenanceReason().getId().intValue() == mr.getId().intValue()) {
+            if (!elem.isEnabled()) {
                 ctx_disabled = true;
             }
         }
@@ -163,11 +161,11 @@ public class ContextTest extends AbstractTest {
             mr.setId(mrs[0].getId());
         }
 
-        disableContext(ctx, mr, hosturl, cred);
-        Context[] ctxs = searchContext(String.valueOf(ctx.getIdAsInt()), hosturl, cred);
+        disableContext(ctx, hosturl, cred);
+        Context[] ctxs = searchContext(ctx.getIdAsString(), hosturl, cred);
         boolean ctx_disabled = false;
         for (final Context elem : ctxs) {
-            if (elem.getIdAsInt().intValue() == ctx.getIdAsInt().intValue() && !elem.isEnabled() && elem.getMaintenanceReason().getId().intValue() == mr.getId().intValue()) {
+            if (elem.getIdAsInt().intValue() == ctx.getIdAsInt().intValue() && !elem.isEnabled()) {
                 ctx_disabled = true;
             }
         }
@@ -221,19 +219,14 @@ public class ContextTest extends AbstractTest {
     }
 
    
-    public static Context[] searchContextByDatabase(Database db, String host, Credentials cred) throws Exception {
+    private Context[] searchContextByDatabase(Database db, String host, Credentials cred) throws Exception {
         OXContextInterface xres = (OXContextInterface) Naming.lookup(host + OXContextInterface.RMI_NAME);
         return xres.listByDatabase(db, cred);
     }
 
-    public static Context[] searchContextByFilestore(Filestore fis, String host, Credentials cred) throws Exception {
+    private Context[] searchContextByFilestore(Filestore fis, String host, Credentials cred) throws Exception {
         OXContextInterface xres = (OXContextInterface) Naming.lookup(host + OXContextInterface.RMI_NAME);
         return xres.listByFilestore(fis, cred);
-    }
-
-    public static Context getContext(Context ctx, String host, Credentials cred) throws Exception {
-        OXContextInterface xres = (OXContextInterface) Naming.lookup(host + OXContextInterface.RMI_NAME);
-        return xres.getData(ctx, cred);
     }
 
     public static Context[] searchContext(String pattern, String host, Credentials cred) throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException {
@@ -241,13 +234,13 @@ public class ContextTest extends AbstractTest {
         return xres.list(pattern, cred);
     }
 
-    public static void deleteContext(Context ctx, String host, Credentials cred) throws Exception {
+    private void deleteContext(Context ctx, String host, Credentials cred) throws Exception {
         OXContextInterface xres = (OXContextInterface) Naming.lookup(host + OXContextInterface.RMI_NAME);
         xres.delete(ctx, cred);
     }
     
     
-    private static Context addSystemContext(Context ctx, String host, Credentials cred) throws Exception {
+    private Context addSystemContext(Context ctx, String host, Credentials cred) throws Exception {
         OXUtilInterface oxu = (OXUtilInterface) Naming.lookup(host + OXUtilInterface.RMI_NAME);
         // first check if the needed server entry is in db, if not, add server
         // first,
@@ -281,23 +274,23 @@ public class ContextTest extends AbstractTest {
         return ctx;
     }
 
-    public static int addContext(Context ctx, String host, Credentials cred) throws Exception {
+    private int addContext(Context ctx, String host, Credentials cred) throws Exception {
         return addSystemContext(ctx,host,cred).getIdAsInt().intValue();
     }
      
 
-    public static void disableContext(Context ctx, MaintenanceReason mr, String host, Credentials cred) throws Exception {
+    private void disableContext(Context ctx, String host, Credentials cred) throws Exception {
         OXContextInterface xres = (OXContextInterface) Naming.lookup(host + OXContextInterface.RMI_NAME);
         //xres.disable(ctx, mr, cred);
         xres.disable(ctx, cred);
     }
 
-    public static void enableContext(Context ctx, String host, Credentials cred) throws Exception {
+    private void enableContext(Context ctx, String host, Credentials cred) throws Exception {
         OXContextInterface xres = (OXContextInterface) Naming.lookup(host + OXContextInterface.RMI_NAME);
         xres.enable(ctx, cred);
     }
 
-    private static int searchNextFreeContextID(int pos, Credentials cred) throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException {
+    public static int searchNextFreeContextID(int pos, Credentials cred) throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException {
         Context[] ctx = searchContext(String.valueOf(pos), getRMIHostUrl(), cred);
         if (ctx.length == 0) {
             return pos;
@@ -310,6 +303,7 @@ public class ContextTest extends AbstractTest {
         return getTestContextObject(createNewContextID(cred), 5000);
     }
 
+    // Must be public static to override method
     public static Context getTestContextObject(int context_id, long quota_max_in_mb) {
         Context ctx = new Context(context_id);        
         final Filestore filestore = new Filestore();
