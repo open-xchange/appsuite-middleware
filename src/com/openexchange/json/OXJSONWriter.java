@@ -310,8 +310,7 @@ public final class OXJSONWriter extends JSONWriter {
 	}
 
 	private void pop() {
-		final StackObject stackObject = stackObjs.pop();
-		if (null == stackObject || stackObjs.isEmpty()) {
+		if (null == stackObjs.pop() || stackObjs.isEmpty()) {
 			/*
 			 * Done
 			 */
