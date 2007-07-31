@@ -145,18 +145,14 @@ public class EffectivePermission extends OCLPermission {
 	@Override
 	public boolean isFolderAdmin() {
 		if (validateUserConfig()) {
-			if (folderType == FolderObject.PUBLIC && folderModule != FolderObject.INFOSTORE
+			if (!hasModuleAccess(folderModule)) {
+				return false;
+			} else if (folderType == FolderObject.PUBLIC && folderModule != FolderObject.INFOSTORE
 					&& !userConfig.hasFullPublicFolderAccess()) {
 				return false;
-			}
-			
-			else if (folderType == FolderObject.PRIVATE && !userConfig.hasFullSharedFolderAccess()) {
+			} /*else if (folderType == FolderObject.SHARED && !userConfig.hasFullSharedFolderAccess()) {
 				return false;
-			}
-			
-			else if (!hasModuleAccess(folderModule)) {
-				return false;
-			}
+			}*/
 		}
 		return super.isFolderAdmin();
 	}
