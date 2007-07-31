@@ -52,7 +52,7 @@ public class PropfindTest extends ActionTestCase {
 		
 		assertTrue(compare.compare(expect, res.getResponseBodyAsString()));
 		
-	}	
+	}
 	
 	public void testManyProperties() throws Exception {
 		final String INDEX_HTML_URL = testCollection+"/index.html";
@@ -128,6 +128,7 @@ public class PropfindTest extends ActionTestCase {
 		final String SITEMAP_HTML_URL = testCollection+"/sitemap.html";
 		final String GUI_URL = DEVELOPMENT_URL+"/gui";
 		final String INDEX3_HTML_URL = GUI_URL+"/index3.html";
+		final String SPECIAL_CHARACTERS_URL = testCollection+"/special%20characters%3F";
 		
 		String testCollDispName = factory.resolveResource(testCollection).getDisplayName();
 		
@@ -150,7 +151,7 @@ public class PropfindTest extends ActionTestCase {
 		assertTrue(compare.compare(expect, res.getResponseBodyAsString()));
 		
 		body = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><D:propfind xmlns:D=\"DAV:\"><D:prop><D:displayname/></D:prop></D:propfind>";
-		expect = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><D:multistatus xmlns:D=\"DAV:\"><D:response><D:href>http://localhost"+testCollection+"</D:href><D:propstat><D:prop><D:displayname>"+testCollDispName+"</D:displayname></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response><D:response><D:href>http://localhost/"+DEVELOPMENT_URL+"</D:href><D:propstat><D:prop><D:displayname>development</D:displayname></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response><D:response><D:href>http://localhost/"+PM_URL+"</D:href><D:propstat><D:prop><D:displayname>pm</D:displayname></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response><D:response><D:href>http://localhost/"+INDEX_HTML_URL+"</D:href><D:propstat><D:prop><D:displayname>index.html</D:displayname></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response><D:response><D:href>http://localhost/"+SITEMAP_HTML_URL+"</D:href><D:propstat><D:prop><D:displayname>sitemap.html</D:displayname></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response></D:multistatus>";
+		expect = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><D:multistatus xmlns:D=\"DAV:\"><D:response><D:href>http://localhost"+testCollection+"</D:href><D:propstat><D:prop><D:displayname>"+testCollDispName+"</D:displayname></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response><D:response><D:href>http://localhost/"+DEVELOPMENT_URL+"</D:href><D:propstat><D:prop><D:displayname>development</D:displayname></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response><D:response><D:href>http://localhost/"+PM_URL+"</D:href><D:propstat><D:prop><D:displayname>pm</D:displayname></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response><D:response><D:href>http://localhost/"+INDEX_HTML_URL+"</D:href><D:propstat><D:prop><D:displayname>index.html</D:displayname></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response><D:response><D:href>http://localhost/"+SITEMAP_HTML_URL+"</D:href><D:propstat><D:prop><D:displayname>sitemap.html</D:displayname></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response><D:response><D:href>http://localhost/"+SPECIAL_CHARACTERS_URL+"</D:href><D:propstat><D:prop><D:displayname>special characters?</D:displayname></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response></D:multistatus>";
 		res = new MockWebdavResponse();
 		
 		req = new MockWebdavRequest(factory, "http://localhost/");
@@ -160,6 +161,7 @@ public class PropfindTest extends ActionTestCase {
 		req.setUrl(testCollection);
 		
 		action.perform(req, res);
+		System.out.println(res.getResponseBodyAsString());
 		assertTrue(compare.compare(expect, res.getResponseBodyAsString()));
 		
 		expect = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><D:multistatus xmlns:D=\"DAV:\"><D:response><D:href>http://localhost/"+DEVELOPMENT_URL+"</D:href><D:propstat><D:prop><D:displayname>development</D:displayname></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response><D:response><D:href>http://localhost/"+GUI_URL+"</D:href><D:propstat><D:prop><D:displayname>gui</D:displayname></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response><D:response><D:href>http://localhost/"+INDEX3_HTML_URL+"</D:href><D:propstat><D:prop><D:displayname>index3.html</D:displayname></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response></D:multistatus>";
@@ -174,7 +176,7 @@ public class PropfindTest extends ActionTestCase {
 		assertEquals(Protocol.SC_MULTISTATUS, res.getStatus());
 		
 		assertTrue(compare.compare(expect, res.getResponseBodyAsString()));
-		
+		 
 	}
 	
 	public void testXMLProperty() throws Exception {
@@ -230,6 +232,30 @@ public class PropfindTest extends ActionTestCase {
 		XMLCompare compare = new XMLCompare();
 		compare.setCheckTextNames("getlastmodified", "displayname","resourcetype","status", "testProp" );
 		
+		assertTrue(compare.compare(expect, res.getResponseBodyAsString()));
+	}
+	
+	public void testURLEncodedHREF() throws Exception{
+		final String SPECIAL_URL = testCollection+"/special characters?";
+		Date lastModified = factory.resolveResource(SPECIAL_URL).getLastModified();
+		
+		String body = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><D:propfind xmlns:D=\"DAV:\"><D:prop><D:getlastmodified/></D:prop></D:propfind>";
+		String expect = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><D:multistatus xmlns:D=\"DAV:\"><D:response><D:href>http://localhost"+testCollection+"/special%20characters%3F</D:href><D:propstat><D:prop><D:getlastmodified>"+Utils.convert(lastModified)+"</D:getlastmodified></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response></D:multistatus>";
+		
+		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
+		MockWebdavResponse res = new MockWebdavResponse();
+		
+		req.setBodyAsString(body);
+		req.setUrl(SPECIAL_URL);
+		
+		WebdavAction action = new WebdavPropfindAction();
+		action.perform(req, res);
+		assertEquals(Protocol.SC_MULTISTATUS, res.getStatus());
+		
+		XMLCompare compare = new XMLCompare();
+		compare.setCheckTextNames("href");
+		
+		System.out.println(res.getResponseBodyAsString());
 		assertTrue(compare.compare(expect, res.getResponseBodyAsString()));
 	}
 	

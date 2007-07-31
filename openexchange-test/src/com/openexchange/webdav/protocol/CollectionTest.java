@@ -98,6 +98,10 @@ public class CollectionTest extends ResourceTest {
 		res.setContentType("text/html");
 		res.setLength((long)INDEX2_HTML.getBytes("UTF-8").length);
 		res.create();
+		
+		res = coll.resolveCollection("special characters?");
+		res.create();
+		
 	}
 	
 	public void testChildren() throws Exception {
