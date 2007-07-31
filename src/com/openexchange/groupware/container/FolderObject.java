@@ -245,7 +245,13 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 
 	// SQL string for standard modules
 	public static final String SQL_IN_STR_STANDARD_MODULES = new StringBuilder().append('(').append(TASK).append(',')
-			.append(CALENDAR).append(',').append(CONTACT).append(',').append(UNBOUND).append(',').append(INFOSTORE).append(')').toString();
+			.append(CALENDAR).append(',').append(CONTACT).append(',').append(UNBOUND).append(',').append(INFOSTORE)
+			.append(')').toString();
+
+	// SQL string for standard modules including system module
+	public static final String SQL_IN_STR_STANDARD_MODULES_ALL = new StringBuilder().append('(').append(TASK).append(
+			',').append(CALENDAR).append(',').append(CONTACT).append(',').append(UNBOUND).append(',').append(
+			SYSTEM_MODULE).append(',').append(INFOSTORE).append(')').toString();
 
 	// Permissions
 	public static final int PRIVATE_PERMISSION = 1;
