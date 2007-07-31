@@ -112,8 +112,7 @@ public class QuotaRequest extends CommonRequest {
 		resp.setException(exception);
 		try {
 			LOG.error(exception.getMessage(), exception);
-			w.value(resp.getJSON());
-			//Response.write(resp, w);
+			Response.write(resp, w);
 		} catch (final JSONException e) {
 			LOG.error(e);
 		}
