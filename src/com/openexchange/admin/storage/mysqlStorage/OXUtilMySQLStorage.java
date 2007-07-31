@@ -1165,6 +1165,9 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             fs.setMaxContexts(rs.getInt("max_context"));
             fs.setCurrentContexts(rs.getInt("COUNT(cid)"));
 
+            // FIXME: This should be reworked. Instead of calling searchContextByFilestoreId a direct
+            // sql query should be made because we only need usage and reserved here but we do full
+            // context lookups
             OXContextStorageInterface oxcox = (OXContextStorageInterface)OXContextMySQLStorage.getInstance();
             final Context[] all_ctx = oxcox.searchContextByFilestoreId(fs);
             if( all_ctx == null ) {
@@ -1172,13 +1175,13 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             }
             long usage = 0;
             long reserved = 0;
-            for(Context ctx : all_ctx) {
-                ctx = oxcox.getData(ctx);
-                if( ctx.getUsedQuota() != null ) {
-                    usage += ctx.getUsedQuota();
+            for (final Context ctx : all_ctx) {
+                final Context ctx_fulldata = oxcox.getData(ctx);
+                if( ctx_fulldata.getUsedQuota() != null ) {
+                    usage += ctx_fulldata.getUsedQuota();
                 }
-                if( ctx.getAverage_size() != null ) {
-                    reserved += ctx.getAverage_size();
+                if( ctx_fulldata.getAverage_size() != null ) {
+                    reserved += ctx_fulldata.getAverage_size();
                 }
             }
             fs.setUsed(usage);
