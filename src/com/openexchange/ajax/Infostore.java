@@ -79,7 +79,6 @@ import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.infostore.InfostoreConfig;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.SearchEngine;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
@@ -97,6 +96,7 @@ import com.openexchange.groupware.upload.UploadEvent;
 import com.openexchange.groupware.upload.UploadException;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.UploadException.UploadCode;
+import com.openexchange.json.OXJSONWriter;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.encoding.Helper;
 import com.openexchange.tools.servlet.UploadServletException;
@@ -191,12 +191,17 @@ public class Infostore extends PermissionServlet {
 			
 			return;
 		}
-		final InfostoreRequest request = new InfostoreRequest(sessionObj,res.getWriter());
+		final OXJSONWriter writer = new OXJSONWriter();
+		final InfostoreRequest request = new InfostoreRequest(sessionObj,writer);
 		if(!request.action(action,new ServletRequestAdapter(req,res))) {
 			unknownAction("GET", action, res, false);
 			return;
 		}
-		
+		try {
+			Response.write(new Response((JSONObject) writer.getObject()), res.getWriter());
+		} catch (final JSONException e) {
+			LOG.error(e.getLocalizedMessage(), e);
+		}
 	}
 
 	
@@ -211,10 +216,16 @@ public class Infostore extends PermissionServlet {
 			missingParameter(PARAMETER_ACTION,res, false, null);
 			return;
 		}
-		final InfostoreRequest request = new InfostoreRequest(sessionObj,res.getWriter());
+		final OXJSONWriter writer = new OXJSONWriter();
+		final InfostoreRequest request = new InfostoreRequest(sessionObj,writer);
 		if(!request.action(action,new ServletRequestAdapter(req,res))) {
 			unknownAction("PUT", action, res, false);
 			return;
+		}
+		try {
+			Response.write(new Response((JSONObject) writer.getObject()), res.getWriter());
+		} catch (final JSONException e) {
+			LOG.error(e.getLocalizedMessage(), e);
 		}
 	}
 	

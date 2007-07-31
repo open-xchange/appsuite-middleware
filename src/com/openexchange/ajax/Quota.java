@@ -55,28 +55,48 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.request.QuotaRequest;
 import com.openexchange.ajax.request.ServletRequestAdapter;
+import com.openexchange.json.OXJSONWriter;
 import com.openexchange.sessiond.SessionObject;
 
 public class Quota extends SessionServlet {
+
+	private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(Quota.class);
+
 	private static final long serialVersionUID = 6477434510302882905L;
-	
-	protected void doGet(final HttpServletRequest req, final HttpServletResponse res)
-	throws ServletException, IOException {
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest,
+	 *      javax.servlet.http.HttpServletResponse)
+	 */
+	@Override
+	protected void doGet(final HttpServletRequest req, final HttpServletResponse res) throws ServletException,
+			IOException {
 		final SessionObject sessionObj = getSessionObject(req);
-		
-		
+
 		final String action = req.getParameter(PARAMETER_ACTION);
 		if (action == null) {
-			missingParameter(PARAMETER_ACTION,res, false, null);
+			missingParameter(PARAMETER_ACTION, res, false, null);
 			return;
 		}
-		
-		final QuotaRequest fsReq = new QuotaRequest(sessionObj, res.getWriter());
-		if(!fsReq.action(action, new ServletRequestAdapter(req,res))) {
+		final OXJSONWriter writer = new OXJSONWriter();
+		final QuotaRequest fsReq = new QuotaRequest(sessionObj, writer);
+		if (!fsReq.action(action, new ServletRequestAdapter(req, res))) {
 			unknownAction("GET", action, res, false);
 			return;
+		}
+		try {
+			Response.write(new Response((JSONObject) writer.getObject()), res.getWriter());
+		} catch (final JSONException e) {
+			LOG.error(e.getLocalizedMessage(), e);
 		}
 	}
 }

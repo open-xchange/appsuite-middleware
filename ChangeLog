@@ -1,3 +1,8 @@
+* 2007-07-31 - thorben.betten@open-xchange.com
+
+ - Multiple servlet changed to use JSON objects to create the multiple
+   response insterad of using thousands of StringWriter instances
+
 * 2007-07-30 - ben.pahne@open-xchange.com
 
  - New Feature: Email Autocomplete

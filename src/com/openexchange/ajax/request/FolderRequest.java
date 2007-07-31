@@ -49,10 +49,9 @@
 
 package com.openexchange.ajax.request;
 
-import java.io.Writer;
-
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONWriter;
 
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Folder;
@@ -64,9 +63,11 @@ public class FolderRequest {
 	
 	private final SessionObject sessionObj;
 	
-	private final Writer pw;
+	private final JSONWriter pw;
+	
+	private static final Folder FOLDER_SERVLET = new Folder();
 
-	public FolderRequest(SessionObject sessionObj, Writer pw) {
+	public FolderRequest(SessionObject sessionObj, JSONWriter pw) {
 		super();
 		this.sessionObj = sessionObj;
 		this.pw = pw;
@@ -74,21 +75,21 @@ public class FolderRequest {
 	
 	public void action(final String action, final JSONObject jsonObject) throws JSONException, OXFolderException {
 		if (action.equalsIgnoreCase(AJAXServlet.ACTION_ROOT)) {
-			new Folder().actionGetRoot(sessionObj, pw, jsonObject);
+			FOLDER_SERVLET.actionGetRoot(sessionObj, pw, jsonObject);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_LIST)) {
-			new Folder().actionGetSubfolders(sessionObj, pw, jsonObject);
+			FOLDER_SERVLET.actionGetSubfolders(sessionObj, pw, jsonObject);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_PATH)) {
-			new Folder().actionGetPath(sessionObj, pw, jsonObject);
+			FOLDER_SERVLET.actionGetPath(sessionObj, pw, jsonObject);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_UPDATES)) {
-			new Folder().actionGetUpdatedFolders(sessionObj, pw, jsonObject);
+			FOLDER_SERVLET.actionGetUpdatedFolders(sessionObj, pw, jsonObject);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_GET)) {
-			new Folder().actionGetFolder(sessionObj, pw, jsonObject);
+			FOLDER_SERVLET.actionGetFolder(sessionObj, pw, jsonObject);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_UPDATE)) {
-			new Folder().actionPutUpdateFolder(sessionObj, pw, jsonObject);
+			FOLDER_SERVLET.actionPutUpdateFolder(sessionObj, pw, jsonObject);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_NEW)) {
-			new Folder().actionPutInsertFolder(sessionObj, pw, jsonObject);
+			FOLDER_SERVLET.actionPutInsertFolder(sessionObj, pw, jsonObject);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_DELETE)) {
-			new Folder().actionPutDeleteFolder(sessionObj, pw, jsonObject);
+			FOLDER_SERVLET.actionPutDeleteFolder(sessionObj, pw, jsonObject);
 		} else {
 			throw new OXFolderException(FolderCode.UNKNOWN_ACTION, action);
 		}

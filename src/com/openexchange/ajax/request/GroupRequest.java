@@ -49,6 +49,13 @@
 
 package com.openexchange.ajax.request;
 
+import java.util.Date;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONWriter;
+
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.ParticipantsFields;
@@ -62,24 +69,17 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.servlet.AjaxException;
 
-import java.io.Writer;
-import java.util.Date;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.JSONWriter;
-
 public class GroupRequest {
 	
-	private SessionObject sessionObj = null;
+	private SessionObject sessionObj;
 	
-	private JSONWriter jsonWriter = null;
+	private JSONWriter jsonWriter;
 	
-	private Date timestamp = null;
+	private Date timestamp;
 	
-	public GroupRequest(SessionObject sessionObj, Writer w) {
+	public GroupRequest(SessionObject sessionObj, JSONWriter w) {
 		this.sessionObj = sessionObj;
-		this.jsonWriter = new JSONWriter(w);
+		this.jsonWriter = w;
 	}
 
 	public Date getTimestamp() {

@@ -51,7 +51,6 @@ package com.openexchange.ajax.request;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -64,6 +63,7 @@ import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONWriter;
 
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Attachment;
@@ -76,7 +76,6 @@ import com.openexchange.api2.OXException;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentField;
 import com.openexchange.groupware.attach.AttachmentMetadata;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.SearchEngine;
@@ -99,7 +98,7 @@ public class InfostoreRequest extends CommonRequest{
 
 	private static final Log LOG = LogFactory.getLog(InfostoreRequest.class);
 	
-	public InfostoreRequest(final SessionObject sessionObj, final Writer w) {
+	public InfostoreRequest(final SessionObject sessionObj, final JSONWriter w) {
 		super(w);
 		this.sessionObj = sessionObj;
 	}
@@ -275,9 +274,6 @@ public class InfostoreRequest extends CommonRequest{
 
 			}
 			return false;
-		} catch (final IOException x) {
-			LOG.info("Lost contact to client", x);
-			return true;
 		} catch (final JSONException x) {
 			handle(x);
 			return true;
@@ -313,7 +309,7 @@ public class InfostoreRequest extends CommonRequest{
 		return ids;
 	}
 	
-	protected void doSortedSearch(final SimpleRequest req) throws JSONException, IOException, SearchIteratorException, OXException {
+	protected void doSortedSearch(final SimpleRequest req) throws JSONException, SearchIteratorException {
 		Metadata[] cols = null;
 		
 		try {
@@ -410,7 +406,7 @@ public class InfostoreRequest extends CommonRequest{
 	
 	// Actions
 
-	protected void list(final int[] ids, final Metadata[] cols) throws JSONException, SearchIteratorException, OXException {
+	protected void list(final int[] ids, final Metadata[] cols) throws SearchIteratorException {
 		final InfostoreFacade infostore = getInfostore();
 		TimedResult result = null;
 		SearchIterator iter = null;
@@ -424,7 +420,6 @@ public class InfostoreRequest extends CommonRequest{
 			iWriter.timedResult(result.sequenceNumber());
 			iWriter.writeMetadata(iter ,cols,TimeZone.getTimeZone(sessionObj.getUserObject().getTimeZone()));
 			iWriter.endTimedResult();
-			w.flush();
 			
 		
 		} catch (final Throwable t){
@@ -461,7 +456,7 @@ public class InfostoreRequest extends CommonRequest{
 		}
 	}
 	
-	protected void revert(final int id, final long ts) throws IOException {
+	protected void revert(final int id, final long ts) {
 		final InfostoreFacade infostore = getInfostore();
 		SearchIterator iter = null;
 		long timestamp = -1;
@@ -494,8 +489,7 @@ public class InfostoreRequest extends CommonRequest{
 			final JSONObject object = new JSONObject();
 			object.put("data", new JSONObject());
 			object.put("timestamp", timestamp);
-			w.write(object.toString());
-			w.flush();
+			w.value(object);
 		} catch (final Throwable t){
 			try {
 				infostore.rollback();
@@ -520,7 +514,7 @@ public class InfostoreRequest extends CommonRequest{
 		}
 	}
 	
-	protected void all(final int folderId, final Metadata[] cols, final Metadata sortedBy, final int dir) throws SearchIteratorException, JSONException, OXException {
+	protected void all(final int folderId, final Metadata[] cols, final Metadata sortedBy, final int dir) throws SearchIteratorException {
 		/**System.out.println("ALL: "+System.currentTimeMillis());
 		System.out.println("---------all-------------");
 		System.out.println(folderId);
@@ -560,7 +554,7 @@ public class InfostoreRequest extends CommonRequest{
 		}
 	}
 	
-	protected void versions(final int id, final Metadata[] cols, final Metadata sortedBy, final int dir) throws SearchIteratorException, JSONException, OXException {
+	protected void versions(final int id, final Metadata[] cols, final Metadata sortedBy, final int dir) throws SearchIteratorException {
 		final InfostoreFacade infostore = getInfostore();
 		TimedResult result = null;
 		SearchIterator iter = null;
@@ -588,7 +582,7 @@ public class InfostoreRequest extends CommonRequest{
 		}
 	}
 	
-	protected void updates(final int folderId, final Metadata[] cols, final Metadata sortedBy, final int dir, final long timestamp, final boolean ignoreDelete) throws SearchIteratorException, JSONException, OXException, IOException {
+	protected void updates(final int folderId, final Metadata[] cols, final Metadata sortedBy, final int dir, final long timestamp, final boolean ignoreDelete) throws SearchIteratorException {
 		final InfostoreFacade infostore = getInfostore(folderId);
 		Delta delta = null;
 		
@@ -612,7 +606,6 @@ public class InfostoreRequest extends CommonRequest{
 			iWriter.timedResult(delta.sequenceNumber());
 			iWriter.writeDelta(iter, iter2, cols,ignoreDelete,TimeZone.getTimeZone(sessionObj.getUserObject().getTimeZone()));
 			iWriter.endTimedResult();
-			w.flush();
 		
 		} catch (final Throwable t){
 			handle(t);
@@ -627,7 +620,7 @@ public class InfostoreRequest extends CommonRequest{
 		}
 	}
 	
-	protected void delete(final int[] ids, final long timestamp) throws IOException {
+	protected void delete(final int[] ids, final long timestamp) {
 		final InfostoreFacade infostore = getInfostore();
 		final SearchEngine searchEngine = getSearchEngine();
 		
@@ -684,11 +677,15 @@ public class InfostoreRequest extends CommonRequest{
 			}
 		}
 		b.append(']');
-		
-		w.write(b.toString());
+		// TODO: Use JSONArray instaed of StringBuilder
+		try {
+			w.value(new JSONArray(b.toString()));
+		} catch (final JSONException e) {
+			LOG.error(e.getLocalizedMessage(), e);
+		}
 	}
 	
-	protected void detach(final int objectId, final int[] ids, final long timestamp) throws IOException {
+	protected void detach(final int objectId, final int[] ids, final long timestamp) {
 		final InfostoreFacade infostore = getInfostore();
 		final SearchEngine searchEngine = getSearchEngine();
 		
@@ -738,11 +735,15 @@ public class InfostoreRequest extends CommonRequest{
 			}
 		}
 		b.append(']');
-		
-		w.write(b.toString());
+		// TODO: Use JSONArray instaed of StringBuilder
+		try {
+			w.value(new JSONArray(b.toString()));
+		} catch (final JSONException e) {
+			LOG.error(e.getLocalizedMessage(), e);
+		}
 	}
 	
-	protected void newDocument(final DocumentMetadata newDocument) throws JSONException, IOException {
+	protected void newDocument(final DocumentMetadata newDocument) throws JSONException {
 		final InfostoreFacade infostore = getInfostore(newDocument.getFolderId());
 		final SearchEngine searchEngine = getSearchEngine();
 		try {
@@ -778,17 +779,18 @@ public class InfostoreRequest extends CommonRequest{
 		}
 		final JSONObject obj = new JSONObject();
 		obj.put("data", newDocument.getId());
-		w.write(obj.toString());
+		w.value(obj);
 	}
 	
-	protected void saveAs(final DocumentMetadata newDocument, final Metadata[] fields, final int folderId, final int attachedId, final int moduleId, final int attachment) throws JSONException, IOException {
+	protected void saveAs(final DocumentMetadata newDocument, final Metadata[] fields, final int folderId, final int attachedId, final int moduleId, final int attachment) throws JSONException {
 		final Set<Metadata> alreadySet = new HashSet<Metadata>(Arrays.asList(fields));
 		if(!alreadySet.contains(Metadata.FOLDER_ID_LITERAL)) {
-			try {
-				missingParameter("folder_id in object",AJAXServlet.ACTION_SAVE_AS);
-			} catch (final IOException e1) {
-				LOG.debug("", e1);
-			}
+			missingParameter("folder_id in object",AJAXServlet.ACTION_SAVE_AS);
+//			try {
+//				missingParameter("folder_id in object",AJAXServlet.ACTION_SAVE_AS);
+//			} catch (final IOException e1) {
+//				LOG.debug("", e1);
+//			}
 		}
 		
 		final AttachmentBase attachmentBase = Attachment.ATTACHMENT_BASE;
@@ -858,10 +860,10 @@ public class InfostoreRequest extends CommonRequest{
 		
 		final JSONObject obj = new JSONObject();
 		obj.put("data", newDocument.getId());
-		w.write(obj.toString());
+		w.value(obj);
 	}
 	
-	protected void update(final int id, DocumentMetadata updated, final long timestamp, final Metadata[] presentFields) throws IOException {
+	protected void update(final int id, DocumentMetadata updated, final long timestamp, final Metadata[] presentFields) {
 		final InfostoreFacade infostore = getInfostore(updated.getFolderId());
 		final SearchEngine searchEngine = getSearchEngine();
 		
@@ -906,11 +908,14 @@ public class InfostoreRequest extends CommonRequest{
 			}
 			
 		}
-				
-		w.write("{}");
+		try {
+			w.value(new JSONObject());
+		} catch (final JSONException e) {
+			LOG.error(e.getLocalizedMessage(), e);
+		}
 	}
 	
-	protected void copy(final int id, final DocumentMetadata updated, final long timestamp, final Metadata[] presentFields) throws IOException {
+	protected void copy(final int id, final DocumentMetadata updated, final long timestamp, final Metadata[] presentFields) {
 
 		final InfostoreFacade infostore = getInfostore(updated.getFolderId());
 		final SearchEngine searchEngine = getSearchEngine();
@@ -966,8 +971,13 @@ public class InfostoreRequest extends CommonRequest{
 			}
 			
 		}
-				
-		w.write("{ \"data\" :"+metadata.getId()+'}');
+		try {
+			final JSONObject obj = new JSONObject();
+			obj.put("data", metadata.getId());
+			w.value(obj);
+		} catch (final JSONException e) {
+			LOG.error(e.getLocalizedMessage(), e);
+		}
 		
 	}
 
@@ -981,8 +991,11 @@ public class InfostoreRequest extends CommonRequest{
 			
 			infostore.commit();
 			
-			w.write("{}");
-			w.flush();
+			try {
+				w.value(new JSONObject());
+			} catch (final JSONException e) {
+				LOG.error(e.getLocalizedMessage(), e);
+			}
 			
 		} catch (final Throwable t) {
 			try {
@@ -1011,9 +1024,11 @@ public class InfostoreRequest extends CommonRequest{
 			infostore.unlock(id, sessionObj);
 			
 			infostore.commit();
-			
-			w.write("{}");
-			w.flush();
+			try {
+				w.value(new JSONObject());
+			} catch (final JSONException e) {
+				LOG.error(e.getLocalizedMessage(), e);
+			}
 			
 		} catch (final Throwable t) {
 			try {
@@ -1045,7 +1060,6 @@ public class InfostoreRequest extends CommonRequest{
 			iWriter.timedResult(System.currentTimeMillis());
 			iWriter.writeMetadata(results,cols,TimeZone.getTimeZone(sessionObj.getUserObject().getTimeZone()));
 			iWriter.endTimedResult();
-			w.flush();
 			
 			searchEngine.commit();
 		} catch (final Throwable t) {
@@ -1069,7 +1083,7 @@ public class InfostoreRequest extends CommonRequest{
 		return Infostore.FACADE;
 	}
 	
-	protected InfostoreFacade getInfostore(long folderId) {
+	protected InfostoreFacade getInfostore(final long folderId) {
 		return Infostore.getInfostore(folderId);
 	}
 	

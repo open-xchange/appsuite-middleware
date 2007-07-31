@@ -49,42 +49,40 @@
 
 package com.openexchange.ajax.request;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.Writer;
 import java.util.Arrays;
-
-import javax.servlet.ServletException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
+import org.json.JSONWriter;
 
 import com.openexchange.ajax.container.Response;
 import com.openexchange.groupware.AbstractOXException;
 
 public abstract class CommonRequest {
-	protected Writer w;
+	
+	protected JSONWriter w;
 	
 	private final Log LOG = LogFactory.getLog(CommonRequest.class);
 
-	public CommonRequest(final Writer w) {
+	public CommonRequest(final JSONWriter w) {
 		this.w = w;
 	}
 	
 	protected void sendErrorAsJS(final String error, final String...errorParams) {
-		final JSONObject response = new JSONObject();
+		//final JSONObject response = new JSONObject();
 		try {
-			response.put("error",error);
+			w.object();
+			w.key("error").value(error);
+			w.key("error_params").value(new JSONArray(Arrays.asList(errorParams)));
+			w.endArray();
+			/*response.put("error",error);
 			final JSONArray arr = new JSONArray(Arrays.asList(errorParams));
 			response.put("error_params",arr);
-			w.write(response.toString());
+			w.value(response);*/
 		} catch (final JSONException e) {
 			LOG.debug(e.getMessage(),e);
-		} catch (final IOException e) {
-			LOG.error(e.getMessage(), e);
 		}
 	}
 	
@@ -111,7 +109,7 @@ public abstract class CommonRequest {
 		sendErrorAsJS("Unknown column id: %s",columnId);
 	}
 
-	protected boolean checkRequired(final SimpleRequest req, final String action, final String ...parameters) throws IOException {
+	protected boolean checkRequired(final SimpleRequest req, final String action, final String ...parameters) {
 		for(final String param : parameters) {
 			if(req.getParameter(param) == null) {
 				missingParameter(param,action);
@@ -121,7 +119,7 @@ public abstract class CommonRequest {
 		return true;
 	}
 	
-	protected void missingParameter(final String parameter, final String action) throws IOException {
+	protected void missingParameter(final String parameter, final String action) {
 		sendErrorAsJS("Missing Parameter: %s for action: %s",parameter,action);
 		
 	}

@@ -53,7 +53,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.Date;
 
 import javax.servlet.ServletException;
@@ -79,6 +78,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.upload.UploadEvent;
 import com.openexchange.groupware.upload.UploadFile;
+import com.openexchange.json.OXJSONWriter;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.Logging;
 import com.openexchange.tools.servlet.AjaxException;
@@ -148,15 +148,16 @@ public class Contact extends DataServlet {
 				
 				return;
 			}
-			final StringWriter sw = new StringWriter();
+			final OXJSONWriter sw = new OXJSONWriter();
 			final ContactRequest contactRequest = new ContactRequest(sessionObj, sw);
 			contactRequest.action(action, jsonObj);
 			response.setTimestamp(contactRequest.getTimestamp());
-			try {
-				response.setData(new JSONArray(sw.toString()));
-			} catch (final JSONException e) {
-				response.setData(new JSONObject(sw.toString()));
-			}
+			response.setData(sw.getObject());
+//			try {
+//				response.setData(new JSONArray(sw.toString()));
+//			} catch (final JSONException e) {
+//				response.setData(new JSONObject(sw.toString()));
+//			}
 		} catch (final JSONException e) {
 			final OXJSONException oje = new OXJSONException(OXJSONException.Code
 					.JSON_WRITE_ERROR, e);
@@ -180,7 +181,7 @@ public class Contact extends DataServlet {
 			final String data = getBody(httpServletRequest);
 			if (data.length() > 0) {
 				final JSONObject jsonObj;
-				final StringWriter sw = new StringWriter();
+				final OXJSONWriter sw = new OXJSONWriter();
 				
 				try {
 					jsonObj = convertParameter2JSONObject(httpServletRequest);
@@ -199,22 +200,24 @@ public class Contact extends DataServlet {
 					
 					contactRequest.action(action, jsonObj);
 					response.setTimestamp(contactRequest.getTimestamp());
-					try {
+					response.setData(sw.getObject());
+					/*try {
 						response.setData(new JSONArray(sw.toString()));
 					} catch (final JSONException e) {
 						response.setData(new JSONObject(sw.toString()));
-					}
+					}*/
 				} else if (data.charAt(0) == '{') {
 					final JSONObject jsonDataObj = new JSONObject(data);
 					jsonObj.put(AJAXServlet.PARAMETER_DATA, jsonDataObj);
 					
 					contactRequest.action(action, jsonObj);
 					response.setTimestamp(contactRequest.getTimestamp());
-					try {
+					response.setData(sw.getObject());
+					/*try {
 						response.setData(new JSONArray(sw.toString()));
 					} catch (final JSONException e) {
 						response.setData(new JSONObject(sw.toString()));
-					}
+					}*/
 				} else {
 					httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "invalid json object");
 				}

@@ -49,25 +49,27 @@
 
 package com.openexchange.ajax;
 
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.request.ResourceRequest;
-import com.openexchange.api.OXMandatoryFieldException;
-import com.openexchange.groupware.ldap.LdapException;
-import com.openexchange.sessiond.SessionObject;
-import com.openexchange.tools.iterator.SearchIteratorException;
-import com.openexchange.tools.servlet.AjaxException;
-import com.openexchange.tools.servlet.OXJSONException;
-
 import java.io.IOException;
-import java.io.StringWriter;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.request.ResourceRequest;
+import com.openexchange.api.OXMandatoryFieldException;
+import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.json.OXJSONWriter;
+import com.openexchange.sessiond.SessionObject;
+import com.openexchange.tools.iterator.SearchIteratorException;
+import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.OXJSONException;
 
 public class Resource extends DataServlet {
 	
@@ -81,7 +83,7 @@ public class Resource extends DataServlet {
 		final Response response = new Response();
 		try {
 			final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
-			final StringWriter sw = new StringWriter();
+			final OXJSONWriter sw = new OXJSONWriter();
 			final SessionObject sessionObj = getSessionObject(httpServletRequest);
 			JSONObject jsonObj = null;
 			try {
@@ -96,11 +98,7 @@ public class Resource extends DataServlet {
 			final ResourceRequest resourceRequest = new ResourceRequest(sessionObj, sw); 
 			resourceRequest.action(action, jsonObj);
 			response.setTimestamp(resourceRequest.getTimestamp());
-			try {
-				response.setData(new JSONArray(sw.toString()));	
-			} catch (JSONException e) {
-				response.setData(new JSONObject(sw.toString()));
-			}
+			response.setData(sw.getObject());	
 		} catch (JSONException e) {
             final OXJSONException oje = new OXJSONException(OXJSONException.Code
                 .JSON_WRITE_ERROR, e);
@@ -154,16 +152,12 @@ public class Resource extends DataServlet {
 				}
 
 				jsonObj.put(PARAMETER_DATA, jData);
-				final StringWriter sw = new StringWriter();
+				final OXJSONWriter sw = new OXJSONWriter();
 				
 				final ResourceRequest resourceRequest = new ResourceRequest(sessionObj, sw); 
 				resourceRequest.action(action, jsonObj);
 				response.setTimestamp(resourceRequest.getTimestamp());
-				try {
-					response.setData(new JSONArray(sw.toString()));	
-				} catch (JSONException e) {
-					response.setData(new JSONObject(sw.toString()));
-				}
+				response.setData(sw.getObject());
 			} else {
 				JSONObject jData = null;
 				JSONObject jsonObj = null;
@@ -178,16 +172,12 @@ public class Resource extends DataServlet {
 				}
 
 				jsonObj.put(PARAMETER_DATA, jData);
-				final StringWriter sw = new StringWriter();
+				final OXJSONWriter sw = new OXJSONWriter();
 				
 				final ResourceRequest resourceRequest = new ResourceRequest(sessionObj, sw);
 				resourceRequest.action(action, jsonObj);
 				response.setTimestamp(resourceRequest.getTimestamp());
-				try {
-					response.setData(new JSONArray(sw.toString()));	
-				} catch (JSONException e) {
-					response.setData(new JSONObject(sw.toString()));
-				}
+				response.setData(sw.getObject());
 			}
 		} catch (JSONException e) {
             final OXJSONException oje = new OXJSONException(OXJSONException.Code

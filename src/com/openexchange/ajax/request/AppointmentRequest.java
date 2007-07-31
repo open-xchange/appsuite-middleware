@@ -146,9 +146,9 @@ public class AppointmentRequest {
 	
 	private static final Log LOG = LogFactory.getLog(AppointmentRequest.class);
 	
-	public AppointmentRequest(SessionObject sessionObj, Writer w) {
+	public AppointmentRequest(SessionObject sessionObj, JSONWriter w) {
 		this.sessionObj = sessionObj;
-		this.jsonWriter = new JSONWriter(w);
+		this.jsonWriter = w;
 		
 		final String sTimeZone = sessionObj.getUserObject().getTimeZone();
 		

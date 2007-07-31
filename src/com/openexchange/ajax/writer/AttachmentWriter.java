@@ -51,11 +51,11 @@
 
 package com.openexchange.ajax.writer;
 
-import java.io.Writer;
 import java.util.Date;
 import java.util.TimeZone;
 
 import org.json.JSONException;
+import org.json.JSONWriter;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.attach.AttachmentField;
@@ -67,22 +67,23 @@ import com.openexchange.tools.iterator.SearchIteratorException;
 
 public class AttachmentWriter extends TimedWriter {
 	
-	public AttachmentWriter(Writer writer) {
+	public AttachmentWriter(final JSONWriter writer) {
 		super(writer);
 	}
 
-	public void writeAttachments(SearchIterator iterator, AttachmentField[] columns, TimeZone tz) throws JSONException, SearchIteratorException, OXException {
+	public void writeAttachments(final SearchIterator iterator, final AttachmentField[] columns, final TimeZone tz) throws JSONException, SearchIteratorException, OXException {
 		jsonWriter.array();
 		fillArray(iterator,columns,tz);
 		jsonWriter.endArray();
 	}
 
-	protected void fillArray(SearchIterator iterator, Object[] columns, TimeZone tz) throws SearchIteratorException, OXException, JSONException {
+	@Override
+	protected void fillArray(final SearchIterator iterator, final Object[] columns, final TimeZone tz) throws SearchIteratorException, OXException, JSONException {
 		while(iterator.hasNext()) {
 			jsonWriter.array();
-			AttachmentMetadata attachment = (AttachmentMetadata) iterator.next();
-			GetSwitch get = new GetSwitch(attachment);
-			for(AttachmentField column : (AttachmentField[])columns) {
+			final AttachmentMetadata attachment = (AttachmentMetadata) iterator.next();
+			final GetSwitch get = new GetSwitch(attachment);
+			for(final AttachmentField column : (AttachmentField[])columns) {
 				Object o = column.doSwitch(get);
 				o = jsonCompat(o,column,tz);
 				jsonWriter.value(o);
@@ -91,19 +92,19 @@ public class AttachmentWriter extends TimedWriter {
 		}
 	}
 
-	private Object jsonCompat(Object o, AttachmentField column, TimeZone tz) {
+	private Object jsonCompat(final Object o, final AttachmentField column, final TimeZone tz) {
 		if(column.getId() == AttachmentField.CREATION_DATE) {
-			long time = ((Date)o).getTime();
-			int offset = tz.getOffset(time);
-			return time + offset;
+			final long time = ((Date)o).getTime();
+			final int offset = tz.getOffset(time);
+			return Long.valueOf(time + offset);
 		} 
 		return o;
 	}
 
-	public void write(AttachmentMetadata attachment, TimeZone tz) throws JSONException {
+	public void write(final AttachmentMetadata attachment, final TimeZone tz) throws JSONException {
 		jsonWriter.object();
-		GetSwitch get = new GetSwitch(attachment);
-		for(AttachmentField column : AttachmentField.VALUES) {
+		final GetSwitch get = new GetSwitch(attachment);
+		for(final AttachmentField column : AttachmentField.VALUES) {
 			jsonWriter.key(column.getName());
 			jsonWriter.value(jsonCompat(column.doSwitch(get),column, tz));
 		}
@@ -111,7 +112,7 @@ public class AttachmentWriter extends TimedWriter {
 	}
 
 	@Override
-	protected int getId(Object object) {
+	protected int getId(final Object object) {
 		return ((AttachmentMetadata)object).getId();
 	}
 }

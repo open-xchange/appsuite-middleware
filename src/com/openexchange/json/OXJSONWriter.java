@@ -107,7 +107,7 @@ public final class OXJSONWriter extends JSONWriter {
 			pushArray(ja);
 			return this;
 		}
-		throw new JSONException("Misplaced array.");
+		throw new JSONException("Misplaced array. Current mode: " + mode2string());
 	}
 
 	/*
@@ -118,7 +118,7 @@ public final class OXJSONWriter extends JSONWriter {
 	@Override
 	public JSONWriter endArray() throws JSONException {
 		if (mode != MODE_ARR) {
-			throw new JSONException("Misplaced endArray.");
+			throw new JSONException("Misplaced endArray. Current mode: " + mode2string());
 		}
 		pop();
 		return this;
@@ -141,7 +141,7 @@ public final class OXJSONWriter extends JSONWriter {
 			pushObject(jo);
 			return this;
 		}
-		throw new JSONException("Misplaced object.");
+		throw new JSONException("Misplaced object. Current mode: " + mode2string());
 	}
 
 	/*
@@ -152,7 +152,7 @@ public final class OXJSONWriter extends JSONWriter {
 	@Override
 	public JSONWriter endObject() throws JSONException {
 		if (mode != MODE_KEY) {
-			throw new JSONException("Misplaced endObject.");
+			throw new JSONException("Misplaced endObject. Current mode: " + mode2string());
 		}
 		pop();
 		return this;
@@ -173,7 +173,7 @@ public final class OXJSONWriter extends JSONWriter {
 			mode = MODE_OBJ;
 			return this;
 		}
-		throw new JSONException("Misplaced key.");
+		throw new JSONException("Misplaced key. Current mode: " + mode2string());
 	}
 
 	/*
@@ -322,13 +322,30 @@ public final class OXJSONWriter extends JSONWriter {
 			/*
 			 * Set mode to object
 			 */
-			mode = MODE_OBJ;
+			mode = MODE_KEY;
 		}
 	}
 
 	private void pushObject(final JSONObject jo) {
 		stackObjs.push(new StackObject(MODE_OBJ, jo));
 		this.mode = MODE_KEY;
+	}
+	
+	private String mode2string() {
+		switch (mode) {
+		case MODE_INIT:
+			return "INIT";
+		case MODE_ARR:
+			return "ARRAY";
+		case MODE_OBJ:
+			return "OBJECT";
+		case MODE_KEY:
+			return "KEY";
+		case MODE_DONE:
+			return "DONE";
+		default:
+			return "UNKNOWN";
+		}
 	}
 	
 	private static class StackObject {

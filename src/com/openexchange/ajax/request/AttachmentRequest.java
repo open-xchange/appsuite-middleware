@@ -49,8 +49,6 @@
 
 package com.openexchange.ajax.request;
 
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -58,6 +56,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONWriter;
 
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Attachment;
@@ -91,7 +90,7 @@ public class AttachmentRequest extends CommonRequest {
 	private User user;
 	private Context ctx;
 
-	public AttachmentRequest(SessionObject session, PrintWriter w) {
+	public AttachmentRequest(final SessionObject session, final JSONWriter w) {
 		super(w);
 		this.ctx = session.getContext();
 		this.user = session.getUserObject();
@@ -195,9 +194,11 @@ public class AttachmentRequest extends CommonRequest {
 				}
 				return true;
 			}
-		} catch (IOException x) {
+		}
+		/*catch (IOException x) {
 			LOG.info("Lost contact to client: ",x);
-		} catch (UnknownColumnException e) {
+		}*/
+		catch (UnknownColumnException e) {
 			handle(e);
 		}
 		
@@ -255,7 +256,7 @@ public class AttachmentRequest extends CommonRequest {
 			aWriter.timedResult(delta.sequenceNumber());
 			aWriter.writeDelta(iter, iter2, fields,ignoreDeleted, TimeZone.getTimeZone(user.getTimeZone()));
 			aWriter.endTimedResult();
-			w.flush();
+			//w.flush();
 			ATTACHMENT_BASE.commit();
 		} catch (Throwable t) {
 			try {
@@ -304,7 +305,7 @@ public class AttachmentRequest extends CommonRequest {
 			aWriter.timedResult(result.sequenceNumber());
 			aWriter.writeAttachments(iter,fields,TimeZone.getTimeZone(user.getTimeZone()));
 			aWriter.endTimedResult();
-			w.flush();
+			//w.flush();
 			ATTACHMENT_BASE.commit();
 		} catch (Throwable t) {
 			try {
@@ -356,7 +357,8 @@ public class AttachmentRequest extends CommonRequest {
 		resp.setData("");
 		resp.setTimestamp(new Date(timestamp));
 		try {
-			Response.write(resp, w);
+			w.value(resp.getJSON());
+			//Response.write(resp, w);
 		} catch (JSONException e) {
 			LOG.debug("Cannot contact client",e);
 		}
@@ -377,7 +379,7 @@ public class AttachmentRequest extends CommonRequest {
 			aWriter.timedResult(result.sequenceNumber());
 			aWriter.writeAttachments(iter,fields,TimeZone.getTimeZone(user.getTimeZone()));
 			aWriter.endTimedResult();
-			w.flush();
+			//w.flush();
 			
 			ATTACHMENT_BASE.commit();
 		} catch (Throwable t) {

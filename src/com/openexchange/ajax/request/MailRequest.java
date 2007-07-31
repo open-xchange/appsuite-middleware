@@ -49,10 +49,10 @@
 
 package com.openexchange.ajax.request;
 
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -64,6 +64,7 @@ import com.openexchange.api2.MailInterface;
 import com.openexchange.groupware.container.mail.JSONMessageObject;
 import com.openexchange.imap.OXMailException;
 import com.openexchange.imap.OXMailException.MailCode;
+import com.openexchange.json.OXJSONWriter;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.iterator.SearchIteratorException;
 
@@ -93,7 +94,7 @@ public final class MailRequest {
 
 	private final SessionObject session;
 
-	private final StringWriter writer;
+	private final OXJSONWriter writer;
 
 	private CollectObject collectObj;
 
@@ -101,10 +102,11 @@ public final class MailRequest {
 
 	private static final Mail MAIL_SERVLET = new Mail();
 
-	public MailRequest(final SessionObject session, final StringWriter writer) {
+	public MailRequest(final SessionObject session, final OXJSONWriter writer) throws JSONException {
 		super();
 		this.session = session;
 		this.writer = writer;
+		this.writer.array();
 	}
 
 	public void action(final String action, final JSONObject jsonObject, final MailInterface mailInterface)
@@ -218,8 +220,9 @@ public final class MailRequest {
 		}
 	}
 
-	public String getContent() {
-		return writer == null ? null : writer.toString();
+	public JSONArray getContent() throws JSONException {
+		writer.endArray();
+		return (JSONArray) (!writer.isEmpty() && writer.isJSONArray() ? writer.getObject() : null);
 	}
 
 	private static boolean isMove(final JSONObject jsonObject) throws JSONException {

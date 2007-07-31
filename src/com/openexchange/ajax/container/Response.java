@@ -54,10 +54,14 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONWriter;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
@@ -388,10 +392,30 @@ public class Response {
         final Writer writer) throws JSONException {
         response.getJSON().write(writer);
     }
+    
+    /**
+	 * Serializes a Response object to given instance of
+	 * <code>{@link JSONWriter}</code>.
+	 * 
+	 * @param response
+	 * @param writer
+	 * @throws JSONException
+	 */
+	public static void write(final Response response, final JSONWriter writer) throws JSONException {
+		writer.object();
+		final Set<Map.Entry<String, Object>> entrySet = response.getJSON().entrySet();
+		final int len = entrySet.size();
+		final Iterator<Map.Entry<String, Object>> iter = entrySet.iterator();
+		for (int i = 0; i < len; i++) {
+			final Map.Entry<String, Object> e = iter.next();
+			writer.key(e.getKey()).value(e.getValue());
+		}
+		writer.endObject();
+	}
 
     /**
-     * {@inheritDoc}
-     */
+	 * {@inheritDoc}
+	 */
     @Override
 	public String toString() {
         final StringWriter writer = new StringWriter();

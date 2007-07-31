@@ -92,6 +92,7 @@ import com.openexchange.groupware.upload.UploadEvent;
 import com.openexchange.groupware.upload.UploadException;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.UploadException.UploadCode;
+import com.openexchange.json.OXJSONWriter;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.encoding.Helper;
 import com.openexchange.tools.servlet.UploadServletException;
@@ -176,9 +177,15 @@ public class Attachment extends PermissionServlet {
 			
 			document(res,isIE(req),isIE7(req), folderId,attachedId,moduleId,id,contentType,ctx,user,userConfig);
 		} else {
-			final AttachmentRequest attRequest = new AttachmentRequest(session,res.getWriter());
+			final OXJSONWriter writer = new OXJSONWriter();
+			final AttachmentRequest attRequest = new AttachmentRequest(session,writer);
 			if(!attRequest.action(action,new ServletRequestAdapter(req,res))){
 				unknownAction("GET",action,res,false);
+			}
+			try {
+				Response.write(new Response((JSONObject) writer.getObject()), res.getWriter());
+			} catch (final JSONException e) {
+				LOG.error(e.getLocalizedMessage(), e);
 			}
 		}
 	}
@@ -193,12 +200,16 @@ public class Attachment extends PermissionServlet {
 			missingParameter(PARAMETER_ACTION,res, false, null);
 			return ;
 		}
-		
-		final AttachmentRequest attRequest = new AttachmentRequest(session,res.getWriter());
+		final OXJSONWriter writer = new OXJSONWriter();
+		final AttachmentRequest attRequest = new AttachmentRequest(session,writer);
 		if(!attRequest.action(action,new ServletRequestAdapter(req,res))){
 			unknownAction("PUT",action,res,false);
 		}
-		
+		try {
+			Response.write(new Response((JSONObject) writer.getObject()), res.getWriter());
+		} catch (final JSONException e) {
+			LOG.error(e.getLocalizedMessage(), e);
+		}
 	}
 
 	@Override

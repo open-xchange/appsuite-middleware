@@ -51,7 +51,6 @@
 
 package com.openexchange.ajax.writer;
 
-import java.io.Writer;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -71,7 +70,7 @@ public class InfostoreWriter extends TimedWriter {
 	
 	public static final Log LOG = LogFactory.getLog(InfostoreWriter.class);
 	
-	public InfostoreWriter(final Writer w) {
+	public InfostoreWriter(final JSONWriter w) {
 		super(w);
 	}
 	

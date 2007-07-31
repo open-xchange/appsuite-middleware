@@ -49,6 +49,18 @@
 
 package com.openexchange.ajax;
 
+import java.io.IOException;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.request.TaskRequest;
 import com.openexchange.api.OXConflictException;
@@ -57,24 +69,12 @@ import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException.Category;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import com.openexchange.json.OXJSONWriter;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
-
-import java.io.IOException;
-import java.io.StringWriter;
-
-import javax.servlet.ServletException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
  * Tasks
@@ -90,7 +90,7 @@ public class Tasks extends DataServlet {
 	protected void doGet(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
 		final Response response = new Response();
 		try {
-			final StringWriter sw = new StringWriter();
+			final OXJSONWriter sw = new OXJSONWriter();
 			final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
 			final SessionObject sessionObj = getSessionObject(httpServletRequest);
 			final JSONObject jsonObj;
@@ -108,14 +108,10 @@ public class Tasks extends DataServlet {
 			response.setTimestamp(taskRequest.getTimestamp());
 			if (retval != -1) {
 				response.setData(retval);
-			} else if (sw.toString().equals("")) {
+			} else if (sw.isEmpty()) {
 				response.setData("");
 			} else {
-				try {
-					response.setData(new JSONArray(sw.toString()));	
-				} catch (JSONException e) {
-					response.setData(new JSONObject(sw.toString()));
-				}
+				response.setData(sw.getObject());	
 			}
 		} catch (OXMandatoryFieldException e) {
 			LOG.error(e.getMessage(), e);
@@ -162,7 +158,7 @@ public class Tasks extends DataServlet {
 	protected void doPut(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
 		final Response response = new Response();
 		try {
-			final StringWriter sw = new StringWriter();
+			final OXJSONWriter sw = new OXJSONWriter();
 			final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
 			final SessionObject sessionObj = getSessionObject(httpServletRequest);
 			
@@ -189,14 +185,10 @@ public class Tasks extends DataServlet {
 					response.setTimestamp(taskRequest.getTimestamp());
 					if (retval != -1) {
 						response.setData(retval);
-					} else if (sw.toString().equals("")) {
+					} else if (sw.isEmpty()) {
 						response.setData("");
 					} else {
-						try {
-							response.setData(new JSONArray(sw.toString()));	
-						} catch (JSONException e) {
-							response.setData(new JSONObject(sw.toString()));
-						}
+						response.setData(sw.getObject());
 					}
 
 				} else if (data.charAt(0) == '{') {

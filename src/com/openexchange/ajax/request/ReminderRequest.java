@@ -49,6 +49,16 @@
 
 package com.openexchange.ajax.request;
 
+import java.sql.SQLException;
+import java.util.Date;
+import java.util.TimeZone;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONWriter;
+
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.writer.ReminderWriter;
@@ -62,16 +72,6 @@ import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.servlet.AjaxException;
-
-import java.io.Writer;
-import java.sql.SQLException;
-import java.util.Date;
-import java.util.TimeZone;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.JSONWriter;
 
 public class ReminderRequest {
 	
@@ -87,9 +87,9 @@ public class ReminderRequest {
 		return timestamp;
 	}
 
-	public ReminderRequest(final SessionObject sessionObj, final Writer w) {
+	public ReminderRequest(final SessionObject sessionObj, final JSONWriter w) {
 		this.sessionObj = sessionObj;
-		this.jsonWriter = new JSONWriter(w);
+		this.jsonWriter = w;
 	}
 	
 	public void action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, OXException, JSONException, SearchIteratorException, AjaxException {

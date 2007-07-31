@@ -49,12 +49,11 @@
 
 package com.openexchange.ajax.request;
 
-import java.io.PrintWriter;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONWriter;
 
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
@@ -82,11 +81,11 @@ public class QuotaRequest extends CommonRequest {
 
 	private final SessionObject session;
 
-	public QuotaRequest(SessionObject sessionObj,PrintWriter w) {
+	public QuotaRequest(final SessionObject sessionObj, final JSONWriter w) {
 		super(w);
 		try {
 			this.qfs = (QuotaFileStorage) FileStorage.getInstance(FilestoreStorage.createURI(sessionObj.getContext()),sessionObj.getContext(),new DBPoolProvider());
-		} catch (AbstractOXException e) {
+		} catch (final AbstractOXException e) {
 			this.fsException = e;
 		}
 		
@@ -113,8 +112,9 @@ public class QuotaRequest extends CommonRequest {
 		resp.setException(exception);
 		try {
 			LOG.error(exception.getMessage(), exception);
-			Response.write(resp, w);
-		} catch (JSONException e) {
+			w.value(resp.getJSON());
+			//Response.write(resp, w);
+		} catch (final JSONException e) {
 			LOG.error(e);
 		}
 	}
@@ -125,15 +125,18 @@ public class QuotaRequest extends CommonRequest {
 			return;
 		}
 		try {
-			long use = qfs.getUsage();
-			long quota = qfs.getQuota();
-			JSONObject res = new JSONObject();
-			JSONObject data = new JSONObject();
+			final long use = qfs.getUsage();
+			final long quota = qfs.getQuota();
+			final JSONObject data = new JSONObject();
 			data.put("quota",quota);
 			data.put("use",use);
-			res.put("data",data);
-			w.write(res.toString());
-		} catch (Exception e) {
+			/*
+			 * Write JSON object into writer as data content of a response object
+			 */
+			w.object();
+			w.key("data").value(data);
+			w.endObject();
+		} catch (final Exception e) {
 			handle(e);
 		}
 	}
@@ -145,27 +148,30 @@ public class QuotaRequest extends CommonRequest {
 			try {
 				mi = MailInterfaceImpl.getInstance(this.session);
 				quotaInfo = mi.getQuota();
-			} catch (AccountExistenceException e) {
+			} catch (final AccountExistenceException e) {
 				quotaInfo = new long[] { MailInterface.UNLIMITED_QUOTA, MailInterface.UNLIMITED_QUOTA };
 			}
 			final long quota = quotaInfo[0];
 			final long use = quotaInfo[1];
-			final JSONObject res = new JSONObject();
 			final JSONObject data = new JSONObject();
 			data.put("quota", quota * 1024);
 			data.put("use", use * 1024);
-			res.put("data", data);
-			w.write(res.toString());
-		} catch (OXException e) {
+			/*
+			 * Write JSON object into writer as data content of a response object
+			 */
+			w.object();
+			w.key("data").value(data);
+			w.endObject();
+		} catch (final OXException e) {
 			exception(e);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			handle(e);
 		} finally {
 			try {
 				if (mi != null) {
 					mi.close(false);
 				}
-			} catch (OXException e) {
+			} catch (final OXException e) {
 				LOG.error(e);
 			}
 		}

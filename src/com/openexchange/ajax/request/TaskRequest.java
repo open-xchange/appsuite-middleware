@@ -49,6 +49,16 @@
 
 package com.openexchange.ajax.request;
 
+import java.util.Date;
+import java.util.TimeZone;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONWriter;
+
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.ajax.fields.FolderChildFields;
@@ -78,16 +88,6 @@ import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
-
-import java.io.Writer;
-import java.util.Date;
-import java.util.TimeZone;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.JSONWriter;
 
 public class TaskRequest {
 	
@@ -135,9 +135,9 @@ public class TaskRequest {
 	
 	private static final Log LOG = LogFactory.getLog(TaskRequest.class);
 	
-	public TaskRequest(SessionObject sessionObj, Writer w) {
+	public TaskRequest(SessionObject sessionObj, JSONWriter w) {
 		this.sessionObj = sessionObj;
-		this.jsonWriter = new JSONWriter(w);
+		this.jsonWriter = w;
 		
 		final String sTimeZone = sessionObj.getUserObject().getTimeZone();
 		

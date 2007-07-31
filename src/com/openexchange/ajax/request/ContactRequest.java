@@ -49,6 +49,16 @@
 
 package com.openexchange.ajax.request;
 
+import java.util.Date;
+import java.util.TimeZone;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONWriter;
+
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.fields.DataFields;
@@ -71,16 +81,6 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.servlet.AjaxException;
 
-import java.io.Writer;
-import java.util.Date;
-import java.util.TimeZone;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.JSONWriter;
-
 public class ContactRequest {
 	
 	final SessionObject sessionObj;
@@ -97,9 +97,9 @@ public class ContactRequest {
 		return timestamp;
 	}
 
-	public ContactRequest(SessionObject sessionObj, Writer pw) {
+	public ContactRequest(SessionObject sessionObj, JSONWriter w) {
 		this.sessionObj = sessionObj;
-		this.jsonWriter = new JSONWriter(pw);
+		this.jsonWriter = w;
 		
 		final String sTimeZone = sessionObj.getUserObject().getTimeZone();
 		

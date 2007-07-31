@@ -49,26 +49,27 @@
 
 package com.openexchange.ajax;
 
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.request.GroupRequest;
-import com.openexchange.api.OXMandatoryFieldException;
-import com.openexchange.groupware.ldap.LdapException;
-import com.openexchange.sessiond.SessionObject;
-import com.openexchange.tools.iterator.SearchIteratorException;
-import com.openexchange.tools.servlet.AjaxException;
-import com.openexchange.tools.servlet.OXJSONException;
-
 import java.io.IOException;
-import java.io.StringWriter;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.request.GroupRequest;
+import com.openexchange.api.OXMandatoryFieldException;
+import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.json.OXJSONWriter;
+import com.openexchange.sessiond.SessionObject;
+import com.openexchange.tools.iterator.SearchIteratorException;
+import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.OXJSONException;
 
 public class Group extends DataServlet {
 	
@@ -81,7 +82,7 @@ public class Group extends DataServlet {
 	protected void doGet(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
 		final Response response = new Response();
 		try {
-			final StringWriter sw = new StringWriter();
+			final OXJSONWriter sw = new OXJSONWriter();
 			final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
 			final SessionObject sessionObj = getSessionObject(httpServletRequest);
 			JSONObject jsonObj;
@@ -98,7 +99,8 @@ public class Group extends DataServlet {
 			final GroupRequest groupRequest = new GroupRequest(sessionObj, sw);
 			groupRequest.action(action, jsonObj);
 			response.setTimestamp(groupRequest.getTimestamp());
-			response.setData(new JSONObject(sw.toString()));
+			response.setData(sw.getObject());
+			//response.setData(new JSONObject(sw.toString()));
 		} catch (OXMandatoryFieldException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
@@ -124,7 +126,7 @@ public class Group extends DataServlet {
 	protected void doPut(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
 		final Response response = new Response();
 		try {
-			final StringWriter sw = new StringWriter();
+			final OXJSONWriter sw = new OXJSONWriter();
 			final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
 			final SessionObject sessionObj = getSessionObject(httpServletRequest);
 			
@@ -150,7 +152,8 @@ public class Group extends DataServlet {
 				groupRequest.action(action, jsonObj);
 				response.setTimestamp(groupRequest.getTimestamp());
 				// According to the documentation this is definitely an array
-				response.setData(new JSONArray(sw.toString()));
+				response.setData(sw.getObject());
+				//response.setData(new JSONArray(sw.toString()));
 
 			} else if (data.charAt(0) == '{') {
 				final JSONObject jData = new JSONObject(data);
@@ -160,7 +163,8 @@ public class Group extends DataServlet {
 				groupRequest.action(action, jsonObj);
 				response.setTimestamp(groupRequest.getTimestamp());
 				// According to the documentation this is definitely an array
-				response.setData(new JSONArray(sw.toString()));
+				response.setData(sw.getObject());
+				//response.setData(new JSONArray(sw.toString()));
 			} else {
 				httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "invalid json object");
 			}

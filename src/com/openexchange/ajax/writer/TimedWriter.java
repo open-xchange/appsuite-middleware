@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.writer;
 
-import java.io.Writer;
 import java.util.TimeZone;
 
 import org.json.JSONException;
@@ -63,11 +62,11 @@ public abstract class TimedWriter {
 	
 	protected JSONWriter jsonWriter;
 
-	public TimedWriter(Writer w){
-		jsonWriter = new JSONWriter(w);
+	public TimedWriter(final JSONWriter w){
+		jsonWriter = w;
 	}
 	
-	public void timedResult(long timestamp) throws JSONException {
+	public void timedResult(final long timestamp) throws JSONException {
 		jsonWriter.object();
 		jsonWriter.key("timestamp");
 		jsonWriter.value(timestamp);
@@ -78,11 +77,11 @@ public abstract class TimedWriter {
 		jsonWriter.endObject();
 	}
 	
-	public void writeDelta(SearchIterator iterator, SearchIterator deleted, Object[] cols, boolean ignoreDeleted, TimeZone tz) throws JSONException, SearchIteratorException, OXException {
+	public void writeDelta(final SearchIterator iterator, final SearchIterator deleted, final Object[] cols, final boolean ignoreDeleted, final TimeZone tz) throws JSONException, SearchIteratorException, OXException {
 		jsonWriter.array();
 		fillArray(iterator,cols, tz);
 		while(deleted.hasNext() && !ignoreDeleted) {
-			int del = getId(deleted.next());
+			final int del = getId(deleted.next());
 			jsonWriter.value(del);
 		}
 		jsonWriter.endArray();
