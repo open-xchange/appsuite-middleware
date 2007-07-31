@@ -353,13 +353,13 @@ public class AttachmentRequest extends CommonRequest {
 				LOG.error(e.getMessage(), e);
 			}
 		}
+		
 		final Response resp = new Response();
 		resp.setData("");
 		resp.setTimestamp(new Date(timestamp));
 		try {
-			w.value(resp.getJSON());
-			//Response.write(resp, w);
-		} catch (JSONException e) {
+			Response.write(resp, w);
+		} catch (final JSONException e) {
 			LOG.debug("Cannot contact client",e);
 		}
 	}
