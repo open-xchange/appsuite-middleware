@@ -106,9 +106,7 @@ public class WebdavLockAction extends AbstractAction {
 			
 			final WebdavResource resource = req.getResource();
 			int status = HttpServletResponse.SC_OK;
-			if(!resource.exists()) {
-				status = HttpServletResponse.SC_CREATED;
-			} 
+			 
 			
 			resource.lock(lock);
 			

@@ -2,7 +2,9 @@
 
  - Bugfix #8622: Properly URLEncode urls in response to propfind requests.
  - Improving logging
-
+ - Bugfix #8643: Fixed response code for LOCK requests
+ 
+ 
 * 2007-07-31 - thorben.betten@open-xchange.com
 
  - Multiple servlet changed to use JSON objects to create the multiple
