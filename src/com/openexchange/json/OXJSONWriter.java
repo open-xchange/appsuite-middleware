@@ -85,8 +85,6 @@ public final class OXJSONWriter extends JSONWriter {
 
 	private final Stack<StackObject> stackObjs = new Stack<StackObject>();
 	
-	//private final Stack<String> stackKeys = new Stack<String>();
-
 	private String key;
 
 	public OXJSONWriter() {
