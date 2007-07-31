@@ -51,6 +51,8 @@ package com.openexchange.webdav.xml.resources;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.List;
 
@@ -129,21 +131,27 @@ public class PropertiesMarshaller implements ResourceMarshaller {
 	}
 	
 	private String escape(final String string) {
-		/*try {
+		try {
 			String[] components = string.split("/+");
 			StringBuilder builder = new StringBuilder();
+			boolean first = true;
 			for(String comp : components) {
 				if(comp != null && !"".equals(comp)) {
-					builder.append("/");
-					builder.append(URLEncoder.encode(comp,charset).replaceAll("\\+","%20")); //FIXME
+					if(first) {
+						first = false;
+						builder.append(comp);
+						builder.append("/");
+					} else {
+						builder.append("/");
+						builder.append(URLEncoder.encode(comp,charset).replaceAll("\\+","%20"));
+					}
 				}
 			}
 			return builder.toString();
 		} catch (UnsupportedEncodingException e) {
 			LOG.fatal(e);
 			return string;
-		} */
-		return string;
+		} 
 	}
 
 	public Element marshalStatus(final int s) {
