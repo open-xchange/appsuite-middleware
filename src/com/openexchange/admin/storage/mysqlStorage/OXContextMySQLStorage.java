@@ -76,9 +76,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     }
 
                     final int store_id = rs.getInt("id");
-                    final long store_size = rs.getLong("size"); // must be as
-                                                                // byte in
-                    // the db
+                    final long store_size = rs.getLong("size"); // must be as byte in the db
                     final PreparedStatement pis = configdb_read.prepareStatement("SELECT COUNT(cid) FROM context WHERE filestore_id = ?");
                     pis.setInt(1, store_id);
                     final ResultSet rsi = pis.executeQuery();
@@ -94,15 +92,10 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                         continue;
                     }
 
-                    final long used_mb = store_count * average_size; // theoretisch
-                    // benutzter
-                    // speicher on store
-                    final long with_this_context = used_mb + average_size; // theoretisch
-                    // benutzter
-                    // speicher
-                    // on store
-                    // inkl. dem
-                    // neuen
+                    final long used_mb = store_count * average_size; // theoretical
+                    // used storage in store
+                    final long with_this_context = used_mb + average_size; // theoretical
+                    // used storage in store including the new one
                     if (with_this_context <= store_size) {
                         return_store_id = store_id;
                         break;
@@ -764,7 +757,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             configdb_read = cache.getREADConnectionForCONFIGDB();
 
             final String search_patterntmp = search_pattern.replace('*', '%');
-            stmt = configdb_read.prepareStatement("SELECT context_server2db_pool.cid FROM context_server2db_pool,server,context WHERE context_server2db_pool.server_id=server.server_id AND server.name=? AND context.cid=context_server2db_pool.cid AND ( context.name LIKE ? OR context.cid LIKE ? )");
+            stmt = configdb_read.prepareStatement("SELECT context_server2db_pool.cid FROM context_server2db_pool INNER JOIN (server, context) ON (context_server2db_pool.server_id=server.server_id AND server.name=? AND context.cid=context_server2db_pool.cid) WHERE  context.name LIKE ? OR context.cid LIKE ?");
             stmt.setString(1, prop.getProp(AdminProperties.Prop.SERVER_NAME, "local"));
             stmt.setString(2, search_patterntmp);
             stmt.setString(3, search_patterntmp);
@@ -821,8 +814,9 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
         try {
             con = cache.getREADConnectionForCONFIGDB();
-            stmt = con.prepareStatement("SELECT context_server2db_pool.cid FROM context_server2db_pool,db_pool WHERE db_pool.url LIKE ? AND db_pool.db_pool_id = context_server2db_pool.write_db_pool_id");
-            stmt.setString(1, db_host.getUrl());
+            stmt = con.prepareStatement("SELECT context_server2db_pool.cid FROM context_server2db_pool INNER JOIN (server, db_pool) ON (context_server2db_pool.server_id=server.server_id AND db_pool.db_pool_id=context_server2db_pool.read_db_pool_id OR context_server2db_pool.write_db_pool_id=db_pool.db_pool_id) WHERE server.name=? AND db_pool.url LIKE ?");
+            stmt.setString(1, prop.getProp(AdminProperties.Prop.SERVER_NAME, "local"));
+            stmt.setString(2, db_host.getUrl());
             final ResultSet rs = stmt.executeQuery();
             final ArrayList<Context> list = new ArrayList<Context>();
             while (rs.next()) {
@@ -867,8 +861,9 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         PreparedStatement stmt = null;
         try {
             con = cache.getREADConnectionForCONFIGDB();
-            stmt = con.prepareStatement("SELECT context.cid FROM context,filestore WHERE filestore.uri LIKE ? AND filestore.id = context.filestore_id");
-            stmt.setString(1, filestore.getUrl());
+            stmt = con.prepareStatement("SELECT context_server2db_pool.cid FROM context_server2db_pool INNER JOIN (server, context, filestore) ON (context_server2db_pool.server_id=server.server_id AND context_server2db_pool.cid=context.cid AND context.filestore_id=filestore.id) WHERE server.name=? AND filestore.uri LIKE ?");
+            stmt.setString(1, prop.getProp(AdminProperties.Prop.SERVER_NAME, "local"));
+            stmt.setString(2, filestore.getUrl());
             final ResultSet rs = stmt.executeQuery();
             final ArrayList<Context> list = new ArrayList<Context>();
             while (rs.next()) {
@@ -902,6 +897,48 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         }
     }
     
+    @Override
+    public Context[] searchContextByFilestoreId(final Filestore filestore) throws StorageException {
+        Connection con = null;
+        PreparedStatement stmt = null;
+        try {
+            con = cache.getREADConnectionForCONFIGDB();
+            stmt = con.prepareStatement("SELECT context_server2db_pool.cid FROM context_server2db_pool INNER JOIN (server, context, filestore) ON (context_server2db_pool.server_id=server.server_id AND context_server2db_pool.cid=context.cid AND context.filestore_id=filestore.id) WHERE server.name=? AND filestore.id=?");
+            stmt.setString(1, prop.getProp(AdminProperties.Prop.SERVER_NAME, "local"));
+            stmt.setInt(2, filestore.getId());
+            final ResultSet rs = stmt.executeQuery();
+            final ArrayList<Context> list = new ArrayList<Context>();
+            while (rs.next()) {
+                list.add(new Context(rs.getInt("cid")));
+            }
+            rs.close();
+            stmt.close();
+    
+            return list.toArray(new Context[list.size()]);
+        } catch (final PoolException e) {
+            log.error("Pool Error", e);
+            throw new StorageException(e);
+        } catch (final SQLException e) {
+            log.error("SQL Error", e);
+            throw new StorageException(e);
+        } finally {
+            try {
+                if (stmt != null) {
+                    stmt.close();
+                }
+            } catch (final SQLException e) {
+                log.error(OXContextMySQLStorageCommon.LOG_ERROR_CLOSING_STATEMENT, e);
+            }
+            if (con != null) {
+                try {
+                    cache.pushConfigDBRead(con);
+                } catch (final PoolException exp) {
+                    log.error("Error pushing configdb connection to pool!", exp);
+                }
+            }
+        }
+    }
+
     private void changeStorageDataImpl(Context ctx,Connection configdb_write_con) throws SQLException, StorageException{
         
         if(ctx.getFilestoreId()!=null){
@@ -2292,47 +2329,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             }
         }
         
-    }
-
-    @Override
-    public Context[] searchContextByFilestoreId(Filestore filestore) throws StorageException {
-        Connection con = null;
-        PreparedStatement stmt = null;
-        try {
-            con = cache.getREADConnectionForCONFIGDB();
-            stmt = con.prepareStatement("SELECT context.cid FROM context,filestore WHERE filestore.id=? AND filestore.id = context.filestore_id");
-            stmt.setInt(1, filestore.getId());
-            final ResultSet rs = stmt.executeQuery();
-            final ArrayList<Context> list = new ArrayList<Context>();
-            while (rs.next()) {
-                list.add(new Context(rs.getInt("cid")));
-            }
-            rs.close();
-            stmt.close();
-
-            return list.toArray(new Context[list.size()]);
-        } catch (final PoolException e) {
-            log.error("Pool Error", e);
-            throw new StorageException(e);
-        } catch (final SQLException e) {
-            log.error("SQL Error", e);
-            throw new StorageException(e);
-        } finally {
-            try {
-                if (stmt != null) {
-                    stmt.close();
-                }
-            } catch (final SQLException e) {
-                log.error(OXContextMySQLStorageCommon.LOG_ERROR_CLOSING_STATEMENT, e);
-            }
-            if (con != null) {
-                try {
-                    cache.pushConfigDBRead(con);
-                } catch (final PoolException exp) {
-                    log.error("Error pushing configdb connection to pool!", exp);
-                }
-            }
-        }
     }
     
     
