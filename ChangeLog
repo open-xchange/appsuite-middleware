@@ -3,6 +3,7 @@
  - Bugfix #8622: Properly URLEncode urls in response to propfind requests.
  - Improving logging
  - Bugfix #8643: Fixed response code for LOCK requests
+ - Bugfix #8644: When infostore is disabled, WebDAV is also disabled
  
  
 * 2007-07-31 - thorben.betten@open-xchange.com
