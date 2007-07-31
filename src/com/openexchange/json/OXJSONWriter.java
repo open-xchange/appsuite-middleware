@@ -292,7 +292,7 @@ public final class OXJSONWriter extends JSONWriter {
 			}
 			return this;
 		}
-		throw new JSONException("Value out of sequence.");
+		throw new JSONException("Value out of sequence. Current mode: " + mode2string());
 	}
 
 	private void pushArray(final JSONArray ja) throws JSONException {
