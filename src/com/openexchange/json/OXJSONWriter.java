@@ -62,7 +62,36 @@ import com.openexchange.tools.stack.Stack;
 /**
  * OXJSONWriter - extends <code>{@link JSONWriter}</code> but does not use an
  * underlying instance of <code>{@link Writer}</code> rather than creating
- * JSON objects thus this JSONWriter will never get into an incomplete state.
+ * JSON objects thus this JSONWriter will always hold a valid and complete JSON
+ * object accessible through <code>{@link #getObject()}</code>.
+ * <p>
+ * The <code>{@link #isEmpty()}</code> method indicates if no root object has
+ * been started, yet, whereby the <code>{@link #isComplete()}</code> method
+ * indicates that the root object is already completed.
+ * <p>
+ * Check the <code>{@link #isJSONArray()}</code> and
+ * <code>{@link #isJSONObject()}</code> methods which indicate whether an
+ * instance of <code>{@link JSONArray}</code> or
+ * <code>{@link JSONObject}</code> is the root object.
+ * 
+ * <blockquote>
+ * 
+ * <pre>
+ * final OXJSONWriter w = new OXJSONWriter();
+ * ...
+ * 
+ * if (w.isJSONArray()) {
+ *     final JSONArray jsonArr = (JSONArray) w.getObject();
+ *     ...
+ *     
+ * } else if (w.isJSONObject()) {
+ *     final JSONObject jsonObj = (JSONObject) w.getObject();
+ *     ...
+ *     
+ * }
+ * </pre>
+ * 
+ * </blockquote>
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
@@ -86,7 +115,7 @@ public final class OXJSONWriter extends JSONWriter {
 	private int jsonObjectType;
 
 	private final Stack<StackObject> stackObjs = new ArrayStack<StackObject>(StackObject.class);
-	
+
 	private String key;
 
 	public OXJSONWriter() {
@@ -345,7 +374,7 @@ public final class OXJSONWriter extends JSONWriter {
 		stackObjs.push(new StackObject(MODE_OBJ, jo));
 		this.mode = MODE_KEY;
 	}
-	
+
 	private String mode2string() {
 		switch (mode) {
 		case MODE_INIT:
@@ -362,7 +391,7 @@ public final class OXJSONWriter extends JSONWriter {
 			return "UNKNOWN";
 		}
 	}
-	
+
 	private static final class StackObject {
 
 		public final int type;
