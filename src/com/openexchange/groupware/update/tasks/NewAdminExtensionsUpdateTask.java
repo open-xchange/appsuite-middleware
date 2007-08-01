@@ -74,12 +74,14 @@ import com.openexchange.groupware.AbstractOXException.Category;
  * @author choeger
  * 
  */
-@OXExceptionSource(classId = Classes.UPDATE_TASK, component = Component.UPDATE)
+@OXExceptionSource(
+        classId = Classes.TASK_NEW_ADMIN_EXTENSIONS,
+        component = Component.UPDATE)
 public class NewAdminExtensionsUpdateTask implements UpdateTask {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(DelFolderTreeTableUpdateTask.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(NewAdminExtensionsUpdateTask.class);
 
-    private static final UpdateExceptionFactory EXCEPTION = new UpdateExceptionFactory(DelFolderTreeTableUpdateTask.class);
+    private static final UpdateExceptionFactory EXCEPTION = new UpdateExceptionFactory(NewAdminExtensionsUpdateTask.class);
 
     /*
      * (non-Javadoc)
@@ -104,9 +106,9 @@ public class NewAdminExtensionsUpdateTask implements UpdateTask {
 
     private static final String STR_INFO = "Performing update task 'NewAdminExtensionsUpdateTask'";
     
-    private static final String CREATE_SEQUENCE_UID  = "CREATE TABLE IF NOT EXISTS `sequence_uid_number` ( `cid` int(10) unsigned NOT NULL, `id` int(10) unsigned NOT NULL, PRIMARY KEY  (`cid`)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
-    private static final String CREATE_SEQUENCE_GID  = "CREATE TABLE IF NOT EXISTS `sequence_gid_number` ( `cid` int(10) unsigned NOT NULL, `id` int(10) unsigned NOT NULL, PRIMARY KEY  (`cid`)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
-    private static final String CREATE_SEQUENCE_MAIL = "CREATE TABLE IF NOT EXISTS `sequence_mail_service` ( `cid` int(10) unsigned NOT NULL, `id` int(10) unsigned NOT NULL, PRIMARY KEY  (`cid`)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+    private static final String CREATE_SEQUENCE_UID  = "CREATE TABLE IF NOT EXISTS `sequence_uid_number` ( `cid` INT4 unsigned NOT NULL, `id` INT4 unsigned NOT NULL, PRIMARY KEY  (`cid`)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+    private static final String CREATE_SEQUENCE_GID  = "CREATE TABLE IF NOT EXISTS `sequence_gid_number` ( `cid` INT4 unsigned NOT NULL, `id` INT4 unsigned NOT NULL, PRIMARY KEY  (`cid`)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+    private static final String CREATE_SEQUENCE_MAIL = "CREATE TABLE IF NOT EXISTS `sequence_mail_service` ( `cid` INT4 unsigned NOT NULL, `id` INT4 unsigned NOT NULL, PRIMARY KEY  (`cid`)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
 
     private static final String TABLE_USER         = "user";
     private static final String TABLE_DEL_USER     = "del_user";
@@ -130,7 +132,10 @@ public class NewAdminExtensionsUpdateTask implements UpdateTask {
      * @see com.openexchange.groupware.update.UpdateTask#perform(com.openexchange.groupware.update.Schema,
      *      int)
      */
-    @OXThrowsMultiple(category = { Category.CODE_ERROR }, desc = { "" }, exceptionId = { 1 }, msg = { "An SQL error occurred while performing task NewAdminExtensionsUpdateTask: %1$s." })
+    @OXThrowsMultiple(category = { Category.CODE_ERROR },
+            desc = { "" },
+            exceptionId = { 1 },
+            msg = { "An SQL error occurred while performing task NewAdminExtensionsUpdateTask: %1$s." })
     public void perform(Schema schema, int contextId) throws AbstractOXException {
         if (LOG.isInfoEnabled()) {
             LOG.info(STR_INFO);
@@ -225,7 +230,10 @@ public class NewAdminExtensionsUpdateTask implements UpdateTask {
 
     }
 
-    @OXThrowsMultiple(category = { Category.CODE_ERROR }, desc = { "" }, exceptionId = { 1 }, msg = { "An SQL error occurred while performing task NewAdminExtensionsUpdateTask: %1$s." })
+    @OXThrowsMultiple(category = { Category.CODE_ERROR },
+            desc = { "" },
+            exceptionId = { 2 },
+            msg = { "An SQL error occurred while performing task NewAdminExtensionsUpdateTask: %1$s." })
     private static final Hashtable<String, ArrayList<String>> missingColumns(final int contextId) throws AbstractOXException {
         Connection readCon = null;
         Statement stmt = null;
@@ -268,7 +276,7 @@ public class NewAdminExtensionsUpdateTask implements UpdateTask {
 
                 return retTables;
             } catch (SQLException e) {
-                throw EXCEPTION.create(1, e, e.getMessage());
+                throw EXCEPTION.create(2, e, e.getMessage());
             }
         } finally {
             closeSQLStuff(rs, stmt);
