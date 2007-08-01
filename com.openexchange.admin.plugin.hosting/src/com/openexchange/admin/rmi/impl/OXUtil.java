@@ -1,6 +1,7 @@
 
 package com.openexchange.admin.rmi.impl;
 
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.rmi.RemoteException;
 import java.util.Arrays;
@@ -20,7 +21,6 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
-import com.openexchange.admin.tools.AdminDaemonTools;
 
 public class OXUtil extends OXCommonImpl implements OXUtilInterface {
 
@@ -42,7 +42,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
 
         log.debug(fstore.getUrl() + " - " + fstore.getSize());
 
-        if (!AdminDaemonTools.checkValidStoreURI(fstore.getUrl())) {
+        if (!checkValidStoreURI(fstore.getUrl())) {
             throw new InvalidDataException("Invalid url sent");           
         }
 
@@ -93,7 +93,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
 
         log.debug(fstore.getUrl() + " " + fstore.getMaxContexts() + " " + fstore.getSize() + " " + fstore.getId());
 
-        if (null != fstore.getUrl() && !AdminDaemonTools.checkValidStoreURI(fstore.getUrl())) {
+        if (null != fstore.getUrl() && !checkValidStoreURI(fstore.getUrl())) {
             throw new InvalidDataException("Invalid store url " + fstore.getUrl());           
         }
         
@@ -497,5 +497,22 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
         }
         
         oxcox.deleteMaintenanceReason(del_ids);
+    }
+
+    private boolean checkValidStoreURI( String uriToCheck ) {
+        boolean isOK = true;
+        
+        try {
+            URI.create( uriToCheck );
+            isOK = true;
+        } catch ( IllegalArgumentException e ) {
+            // given string violates RFC 2396
+            isOK = false;
+        } catch ( NullPointerException e ) {
+            // given uri is null
+            isOK = false;
+        }
+        
+        return isOK;
     }
 }
