@@ -73,6 +73,7 @@ import com.openexchange.ajax.parser.InfostoreParser;
 import com.openexchange.ajax.parser.InfostoreParser.UnknownMetadataException;
 import com.openexchange.ajax.request.InfostoreRequest;
 import com.openexchange.ajax.request.ServletRequestAdapter;
+import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.UserConfiguration;
@@ -142,7 +143,7 @@ public class Infostore extends PermissionServlet {
 	
 	@Override
 	protected boolean hasModulePermission(final SessionObject sessionObj) {
-		return sessionObj.getUserConfiguration().hasInfostore();
+		return InfostoreRequest.hasPermission(sessionObj.getUserConfiguration());
 	}
 
 	@Override
@@ -194,14 +195,16 @@ public class Infostore extends PermissionServlet {
 		}
 		final OXJSONWriter writer = new OXJSONWriter();
 		final InfostoreRequest request = new InfostoreRequest(sessionObj,writer);
-		if(!request.action(action,new ServletRequestAdapter(req,res))) {
-			unknownAction("GET", action, res, false);
-			return;
-		}
 		try {
+			if(!request.action(action,new ServletRequestAdapter(req,res))) {
+				unknownAction("GET", action, res, false);
+				return;
+			}
 			Response.write(new Response((JSONObject) writer.getObject()), res.getWriter());
 		} catch (final JSONException e) {
 			LOG.error(e.getLocalizedMessage(), e);
+		} catch (OXPermissionException e) {
+			LOG.error("Not possible, obviously: "+e.getLocalizedMessage(), e);
 		}
 	}
 
@@ -219,11 +222,11 @@ public class Infostore extends PermissionServlet {
 		}
 		final OXJSONWriter writer = new OXJSONWriter();
 		final InfostoreRequest request = new InfostoreRequest(sessionObj,writer);
-		if(!request.action(action,new ServletRequestAdapter(req,res))) {
-			unknownAction("PUT", action, res, false);
-			return;
-		}
 		try {
+			if(!request.action(action,new ServletRequestAdapter(req,res))) {
+				unknownAction("PUT", action, res, false);
+				return;
+			}
 			if(writer.isJSONObject()) {
 				Response.write(new Response((JSONObject) writer.getObject()), res.getWriter());
 			} else if(writer.isJSONArray()) {
@@ -231,6 +234,8 @@ public class Infostore extends PermissionServlet {
 			}
 		} catch (final JSONException e) {
 			LOG.error(e.getLocalizedMessage(), e);
+		} catch (OXPermissionException e) {
+			LOG.error("Not possible, obviously: "+e.getLocalizedMessage(), e);
 		}
 	}
 	

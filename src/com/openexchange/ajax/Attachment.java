@@ -135,7 +135,7 @@ public class Attachment extends PermissionServlet {
 	
 	@Override
 	protected boolean hasModulePermission(final SessionObject sessionObj) {
-		return true; // FIXME
+		return AttachmentRequest.hasPermission(sessionObj.getUserConfiguration());
 	}
 	
 	

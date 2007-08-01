@@ -97,6 +97,10 @@ public class AttachmentRequest extends CommonRequest {
 		this.userConfig = session.getUserConfiguration();
 	}
 	
+	public static boolean hasPermission(UserConfiguration userConfig) {
+		return true; // FIXME
+	}
+	
 	public boolean action(final String action, final SimpleRequest req){
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("Attachments: " + action + ' ' + req);

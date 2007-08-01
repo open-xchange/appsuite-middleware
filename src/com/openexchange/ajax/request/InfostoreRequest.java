@@ -72,7 +72,9 @@ import com.openexchange.ajax.parser.InfostoreParser;
 import com.openexchange.ajax.parser.InfostoreParser.UnknownMetadataException;
 import com.openexchange.ajax.writer.InfostoreWriter;
 import com.openexchange.api.OXConflictException;
+import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentField;
 import com.openexchange.groupware.attach.AttachmentMetadata;
@@ -104,8 +106,16 @@ public class InfostoreRequest extends CommonRequest{
 		super(w);
 		this.sessionObj = sessionObj;
 	}
+	
+	public static boolean hasPermission(UserConfiguration userConfig) {
+		return userConfig.hasInfostore();
+	}
+	
 		
-	public boolean action(final String action, final SimpleRequest req){
+	public boolean action(final String action, final SimpleRequest req) throws OXPermissionException{
+		if (!hasPermission(sessionObj.getUserConfiguration())) {
+			throw new OXPermissionException(OXPermissionException.Code.NoPermissionForModul, "infostore");
+		}
 		try {
 			if (action.equals(AJAXServlet.ACTION_ALL)) {
 

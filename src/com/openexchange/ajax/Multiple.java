@@ -430,14 +430,17 @@ public class Multiple extends SessionServlet {
 			}
 		} else if (module.equals(MODULE_INFOSTORE)) {
 			final InfostoreRequest infoRequest = new InfostoreRequest(sessionObj, jsonWriter);
-			infoRequest.action(action, new JSONSimpleRequest(jsonObj));
-			
-			
-			if (jsonWriter.isEmpty()) {
-				response.setData(STR_EMPTY);
-			} else {
-				response = new Response((JSONObject) jsonWriter.getObject());
+			try {
+				infoRequest.action(action, new JSONSimpleRequest(jsonObj));
+				if (jsonWriter.isEmpty()) {
+					response.setData(STR_EMPTY);
+				} else {
+					response = new Response((JSONObject) jsonWriter.getObject());
+				}
+			} catch (OXPermissionException e) {
+				response.setException(e);
 			}
+			
 		} else if (module.equals(MODULE_FOLDER)) {
 			final FolderRequest folderequest = new FolderRequest(sessionObj, jsonWriter);
 			try {

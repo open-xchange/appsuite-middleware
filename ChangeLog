@@ -1,6 +1,8 @@
 * 2007-08-01 - francisco.laguna@open-xchange.com
 
- - Fixed Bug #8630 - Check module permission for multiple module
+ - Fixed Bug #8630 - Check module permission for multiple module 
+   (partial fix for infostore and attachments), note though, there is no
+   module permission explicitely for attachments.
 
 * 2007-08-01 - sebastian.kauss@open-xchange.com
 
