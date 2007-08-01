@@ -60,7 +60,7 @@ import java.util.EmptyStackException;
 public interface Stack<T> {
 
 	/**
-	 * Insert a new item into the stack.
+	 * Inserts a new item into the stack.
 	 * 
 	 * @param x -
 	 *            the item to insert.
@@ -68,7 +68,7 @@ public interface Stack<T> {
 	void push(T x);
 
 	/**
-	 * Remove the most recently inserted item from the stack.
+	 * Removes the most recently inserted item from the stack.
 	 * 
 	 * @exception EmptyStackException -
 	 *                if the stack is empty.
@@ -76,8 +76,7 @@ public interface Stack<T> {
 	void pop();
 
 	/**
-	 * Get the most recently inserted item in the stack. Does not alter the
-	 * stack.
+	 * Peeks the most recently inserted item in the stack.
 	 * 
 	 * @return the most recently inserted item in the stack.
 	 * @exception EmptyStackException -
@@ -86,7 +85,7 @@ public interface Stack<T> {
 	T top();
 
 	/**
-	 * Return and remove the most recently inserted item from the stack.
+	 * Returns and removes the most recently inserted item from the stack.
 	 * 
 	 * @return the most recently inserted item in the stack.
 	 * @exception EmptyStackException -
@@ -95,14 +94,21 @@ public interface Stack<T> {
 	T topAndPop();
 
 	/**
-	 * Test if the stack is logically empty.
+	 * Tests if the stack is logically empty.
 	 * 
 	 * @return true if empty, false otherwise.
 	 */
 	boolean isEmpty();
 
 	/**
-	 * Make the stack logically empty.
+	 * Clears the stack
 	 */
-	void makeEmpty();
+	void clear();
+	
+	/**
+	 * Determines the stack's size
+	 * 
+	 * @return stack's size
+	 */
+	int size();
 }

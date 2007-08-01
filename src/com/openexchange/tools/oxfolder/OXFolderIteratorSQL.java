@@ -1014,6 +1014,20 @@ public final class OXFolderIteratorSQL {
 	 * Returns an <code>SearchIterator</code> of <code>FolderObject</code>
 	 * instances which represent <b>all</b> modified folders greater than a
 	 * given date.
+	 * <p>
+	 * Quote from <a
+	 * href="http://www.open-xchange.com/wiki/index.php?title=HTTP_API#Updates">HTTP
+	 * API Updates</a>:
+	 * 
+	 * <code>
+	 * ...
+	 * When requesting updates to a previously retrieved set of objects,
+	 * the client sends the last timestamp which belongs to that set of objects.
+	 * The response contains all updates with timestamps greater than the one
+	 * specified by the client. The field timestamp of the response contains the
+	 * new maximum timestamp value.
+	 * ...
+	 * </code>
 	 */
 	public static SearchIterator getAllModifiedFoldersSince(final Date since, final Context ctx) throws OXException,
 			SearchIteratorException {

@@ -50,6 +50,7 @@
 package com.openexchange.tools.stack;
 
 import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.EmptyStackException;
 
 /**
@@ -69,7 +70,10 @@ public final class ArrayStack<T> implements Stack<T> {
 	private static final int DEFAULT_CAPACITY = 10;
 
 	/**
-	 * Construct the stack.
+	 * Construct the stack with default capacity of 10
+	 * 
+	 * @param clazz -
+	 *            the class of the objects kept in this stack
 	 */
 	public ArrayStack(final Class<T> clazz) {
 		this(clazz, DEFAULT_CAPACITY);
@@ -77,6 +81,11 @@ public final class ArrayStack<T> implements Stack<T> {
 
 	/**
 	 * Construct the stack.
+	 * 
+	 * @param clazz -
+	 *            the class of the objects kept in this stack
+	 * @param capacity -
+	 *            the initial capacity
 	 */
 	@SuppressWarnings("unchecked")
 	public ArrayStack(final Class<T> clazz, final int capacity) {
@@ -102,7 +111,8 @@ public final class ArrayStack<T> implements Stack<T> {
 	 * 
 	 * @see com.openexchange.tools.stack.Stack#makeEmpty()
 	 */
-	public void makeEmpty() {
+	public void clear() {
+		Arrays.fill(arr, null);
 		top = -1;
 	}
 
@@ -154,6 +164,14 @@ public final class ArrayStack<T> implements Stack<T> {
 			doubleArray();
 		}
 		arr[++top] = x;
+	}
+	
+	/* (non-Javadoc)
+	 * 
+	 * @see com.openexchange.tools.stack.Stack#size()
+	 */
+	public int size() {
+		return top + 1;
 	}
 
 	/**
