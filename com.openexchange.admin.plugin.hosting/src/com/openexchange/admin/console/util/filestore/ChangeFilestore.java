@@ -39,7 +39,7 @@ public class ChangeFilestore extends FilestoreAbstraction {
     
             oxutil.changeFilestore(fstore, auth);
             
-            displayChangedMessage(null, null);
+            displayChangedMessage(filestoreid, null);
             sysexit(0);
         } catch (final Exception e) {
             printErrors(filestoreid, null, e, parser);
