@@ -1,3 +1,8 @@
+* 2007-08-01 - sebastian.kauss@open-xchange.com
+
+ - Fixed Bug #8177 - Statement not closed if inserting reminder fails
+ - Fixed Bug #6077 - Redesign of reminder exception handling 
+
 * 2007-08-01 - thorben.betten@open-xchange.com
 
  - Changed folder's "getUpdatedFolders" query according to HTTP API spec to
