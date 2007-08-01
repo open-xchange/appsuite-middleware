@@ -57,6 +57,10 @@ import javax.servlet.http.HttpServletRequest;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+/**
+ * TODO Remove this class from inheritance tree because all its methods are
+ * static.
+ */
 public abstract class DataServlet extends PermissionServlet {
 	
 	private static final String _invalidParameter = "invalid parameter: ";
@@ -150,7 +154,7 @@ public abstract class DataServlet extends PermissionServlet {
 		throw new OXMandatoryFieldException(_missingField + name);
 	}
 
-	protected JSONObject convertParameter2JSONObject(final HttpServletRequest httpServletRequest) throws JSONException {
+	protected static JSONObject convertParameter2JSONObject(final HttpServletRequest httpServletRequest) throws JSONException {
 		final JSONObject jsonObj = new JSONObject();
 		final Enumeration e = httpServletRequest.getParameterNames();
 		final StringBuilder sb = new StringBuilder();
