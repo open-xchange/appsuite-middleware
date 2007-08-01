@@ -1,3 +1,8 @@
+* 2007-08-01 - marcus.klein@open-xchange.com
+
+ - Bugfix #8410: Changed SQL command for deleting task participants to not use
+   if a value is within a set.
+
 * 2007-07-31 - thorben.betten@open-xchange.com
 
  - Bugfix #6274: Changed error message if IMAP authentication fails

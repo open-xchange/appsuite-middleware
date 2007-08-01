@@ -1046,24 +1046,21 @@ public class RdbTaskStorage extends TaskStorage {
         if (participants.length == 0) {
             return;
         }
-        final StringBuilder sql = new StringBuilder();
-        sql.append(SQL.DELETE_PARTS.get(type));
-        for (int i = 0; i < participants.length; i++) {
-            sql.append("?,");
-        }
-        sql.setLength(sql.length() - 1);
-        sql.append(')');
         PreparedStatement stmt = null;
-        final int deleted;
+        int deleted = 0;
         try {
-            stmt = con.prepareStatement(sql.toString());
+            stmt = con.prepareStatement(SQL.DELETE_PARTS.get(type));
             int counter = 1;
             stmt.setInt(counter++, ctx.getContextId());
             stmt.setInt(counter++, taskId);
             for (int participant : participants) {
-                stmt.setInt(counter++, participant);
+                stmt.setInt(counter, participant);
+                stmt.addBatch();
             }
-            deleted = stmt.executeUpdate();
+            final int[] rows = stmt.executeBatch();
+            for (int row : rows) {
+                deleted += row;
+            }
         } finally {
             closeSQLStuff(null, stmt);
         }
