@@ -86,11 +86,11 @@ msgid ""
 "s"
 msgstr ""
 
-msgid "AJP Connection is not set to status \"ASSIGNED\""
+msgid "AJP connection is not set to status \"ASSIGNED\""
 msgstr ""
 
 msgid ""
-"AJP Server socket could not be bind to port %d. Probably another process is "
+"AJP server socket could not be bind to port %d. Probably another process is "
 "already listening on this port."
 msgstr ""
 
@@ -104,49 +104,6 @@ msgid "Action %s is not supported by %s"
 msgstr ""
 
 msgid "Action type not supported : %d"
-msgstr ""
-
-msgid ""
-"An Error occurred during the load of Folder Objects by a extended search. "
-"Context %1$d Folder %2$d User %3$d"
-msgstr ""
-
-msgid ""
-"An Error occurred during the load of Folder Objects by a simple search. "
-"Context %1$d Folder %2$d User %3$d"
-msgstr ""
-
-msgid ""
-"An Error occurred during the load of Folder Objects. Context %1$d Folder %2"
-"$d User %3$d"
-msgstr ""
-
-msgid ""
-"An Error occurred during the load of deleted Objects from a Folder. Context %"
-"1$d Folder %2$d User %3$d"
-msgstr ""
-
-msgid ""
-"An Error occurred during the load of modified Objects from a Folder. Context "
-"%1$d Folder %2$d User %3$d"
-msgstr ""
-
-msgid ""
-"An Error occurred. Unable to delete some links from this Objects. Object %1"
-"$d Folder %2$d Context %3$d"
-msgstr ""
-
-msgid ""
-"An Error occurred. Unable to load some links for this Objects. 1. Object %1"
-"$d 2. Object %2$d Context %3$d"
-msgstr ""
-
-msgid ""
-"An Error occurred. Unable to save this linking between those two Objects.1. "
-"Object %1$d Folder %2$d 2. Object %3$d Folder %4$d Context %5$d"
-msgstr ""
-
-msgid "An Error occurred: Object ID is -1"
 msgstr ""
 
 msgid "An I/O error occurred: %1$s."
@@ -176,6 +133,11 @@ msgid ""
 msgstr ""
 
 msgid ""
+"An SQL error occurred while performing task NewAdminExtensionsUpdateTask: %1"
+"$s."
+msgstr ""
+
+msgid ""
 "An SQL error occurred while performing task PasswordMechUpdateTask: %1$s."
 msgstr ""
 
@@ -199,6 +161,49 @@ msgid "An attempt was made to open a read-only folder with read-write: %s"
 msgstr ""
 
 msgid "An error occurred attaching to the given object."
+msgstr ""
+
+msgid ""
+"An error occurred during the load of deleted objects from a folder. Context %"
+"1$d Folder %2$d User %3$d"
+msgstr ""
+
+msgid ""
+"An error occurred during the load of folder objects by a simple search. "
+"Context %1$d Folder %2$d User %3$d"
+msgstr ""
+
+msgid ""
+"An error occurred during the load of folder objects by an extended search. "
+"Context %1$d Folder %2$d User %3$d"
+msgstr ""
+
+msgid ""
+"An error occurred during the load of folder objects. Context %1$d Folder %2"
+"$d User %3$d"
+msgstr ""
+
+msgid ""
+"An error occurred during the load of modified objects from a folder. Context "
+"%1$d Folder %2$d User %3$d"
+msgstr ""
+
+msgid ""
+"An error occurred. Unable to delete some links from this objects. Object %1"
+"$d Folder %2$d Context %3$d"
+msgstr ""
+
+msgid ""
+"An error occurred. Unable to load some links for this objects. 1. Object %1"
+"$d 2. Object %2$d Context %3$d"
+msgstr ""
+
+msgid ""
+"An error occurred. Unable to save this linking between those two objects. 1. "
+"Object %1$d Folder %2$d 2. Object %3$d Folder %4$d Context %5$d"
+msgstr ""
+
+msgid "An error occurred: Object id is -1"
 msgstr ""
 
 msgid "An invalid SQL query was sent to the server."
@@ -242,6 +247,9 @@ msgstr ""
 msgid "Can only import into one folder at a time."
 msgstr ""
 
+msgid "Can't access DBPool"
+msgstr ""
+
 msgid "Cannot add external participant without email address."
 msgstr ""
 
@@ -255,6 +263,9 @@ msgid "Cannot clone tree."
 msgstr ""
 
 msgid "Cannot close database connection"
+msgstr ""
+
+msgid "Cannot commit transaction to write DB"
 msgstr ""
 
 msgid "Cannot create URI from \"%1$s\"."
@@ -279,6 +290,9 @@ msgid "Cannot find an exporter for folder %s to format %s"
 msgstr ""
 
 msgid "Cannot find an importer for format %s into folders %s"
+msgstr ""
+
+msgid "Cannot find context \"%s\"."
 msgstr ""
 
 msgid "Cannot find context %d."
@@ -314,6 +328,9 @@ msgstr ""
 msgid "Cannot find user with identifier %1$s in context %2$d."
 msgstr ""
 
+msgid "Cannot finish transaction"
+msgstr ""
+
 msgid "Cannot generate ID for new attachment: %s"
 msgstr ""
 
@@ -345,9 +362,6 @@ msgid "Cannot instanciate updater implementation %1$s."
 msgstr ""
 
 msgid "Cannot load class \"%s\"."
-msgstr ""
-
-msgid "Cannot load property file %s due to following exception: %s"
 msgstr ""
 
 msgid "Cannot pre-fetch results."
@@ -382,6 +396,9 @@ msgstr ""
 msgid "Cannot return connection to pool %d."
 msgstr ""
 
+msgid "Cannot rollback transaction in write DB"
+msgstr ""
+
 msgid "Cannot send event to event system."
 msgstr ""
 
@@ -413,7 +430,7 @@ msgstr ""
 msgid "Class %s can not be loaded."
 msgstr ""
 
-msgid "Configuration for user %s could not found in context %d"
+msgid "Configuration for user %s could not be found in context %d"
 msgstr ""
 
 msgid "Connection is broken due to a socket exception on remote server: %s"
@@ -626,7 +643,7 @@ msgid "ERROR:: Unsupported \"shown as\"  value %d"
 msgstr ""
 
 msgid ""
-"Effective permission of Folder %s could not determined for user %s in "
+"Effective permission of folder %s could not determined for user %s in "
 "context %s"
 msgstr ""
 
@@ -735,6 +752,9 @@ msgstr ""
 msgid "File \"%s\" is not readable."
 msgstr ""
 
+msgid "File is not a directory: %s"
+msgstr ""
+
 msgid "File upload failed: %s"
 msgstr ""
 
@@ -757,7 +777,7 @@ msgstr ""
 msgid "Folder %1$s (%2$d) is not a task folder."
 msgstr ""
 
-msgid "Folder %d for task %d cannot be found."
+msgid "Folder %d for task %d cannot be found. User %d, Context %d."
 msgstr ""
 
 msgid "Folder %d has two subfolders named %s. Your database is not consistent."
@@ -791,6 +811,11 @@ msgid "Folder %s does not hold messages and is therefore not selectable"
 msgstr ""
 
 msgid "Folder %s has been modified after last sync timestamp in context %s"
+msgstr ""
+
+msgid ""
+"Folder %s in context %s contains a hidden subfolder. User %s has no delete "
+"rights for this subfolder and consequently cannot delete its parent folder."
 msgstr ""
 
 msgid "Folder %s must not be moved to one of its subfolders in context %s"
@@ -854,6 +879,9 @@ msgstr ""
 msgid "FreeBusyResults calculation problem with oid: %d"
 msgstr ""
 
+msgid "Got SQL Exception"
+msgstr ""
+
 msgid "Got a -1 ID from IDGenerator"
 msgstr ""
 
@@ -884,10 +912,10 @@ msgstr ""
 msgid "I/O error while writing to Writer Object: %s"
 msgstr ""
 
-msgid "IMAP Property error: %s"
+msgid "IMAP default folder %s could not be created"
 msgstr ""
 
-msgid "IMAP default folder %s could not be created"
+msgid "IMAP property error: %s"
 msgstr ""
 
 msgid ""
@@ -928,7 +956,7 @@ msgid "Insufficient rights to attach/detach an attachment to this folder!"
 msgstr ""
 
 msgid ""
-"Insufficient write rights for this folder. Unable to attach Document. "
+"Insufficient write rights for this folder. Unable to attach document. "
 "Context %4$d Folder %1$d Object %2$d User %3$d"
 msgstr ""
 
@@ -1005,11 +1033,6 @@ msgid "Link is not implemented."
 msgstr ""
 
 msgid "Login not possible at the moment. Please try again later."
-msgstr ""
-
-msgid ""
-"Login to imap server %s failed for user %s in context %s. Please try again "
-"later"
 msgstr ""
 
 msgid ""
@@ -1107,6 +1130,9 @@ msgstr ""
 msgid "Missing property %1$s in system.properties."
 msgstr ""
 
+msgid "Missing property %s in 'system.properties'"
+msgstr ""
+
 msgid "Missing property AJP_JVM_ROUTE in file \"ajp.properties\""
 msgstr ""
 
@@ -1129,6 +1155,9 @@ msgid "Module %s is unknown in context %s"
 msgstr ""
 
 msgid "Move not allowed from shared folders"
+msgstr ""
+
+msgid "Move not allowed to a shared folders if the private flag is set"
 msgstr ""
 
 msgid "Move not supported: Source:Destination %d:%d"
@@ -1159,9 +1188,6 @@ msgstr ""
 msgid "Need at least a ContactObject to get the value of %s"
 msgstr ""
 
-msgid "No Changes found. No Update requiered. Context %1$d Object %2$d"
-msgstr ""
-
 msgid "No IMAP account exists for user %s in context %s"
 msgstr ""
 
@@ -1183,6 +1209,9 @@ msgstr ""
 msgid "No attribute name could be found for code: %d"
 msgstr ""
 
+msgid "No changes found. No update requiered. Context %1$d Object %2$d"
+msgstr ""
+
 msgid ""
 "No data provided from web server: input stream returned \"-1\" while reading "
 "AJP magic bytes in package #%d"
@@ -1192,6 +1221,12 @@ msgid "No default folder could be found in module %s for user %s in context %s"
 msgstr ""
 
 msgid "No dictionary could be found for language: %1$s."
+msgstr ""
+
+msgid "No folder permission."
+msgstr ""
+
+msgid "No permission for modul: %s."
 msgstr ""
 
 msgid "No route to host: server (%s) cannot be reached"
@@ -1276,9 +1311,6 @@ msgstr ""
 msgid "Participant %d for task %d is not found."
 msgstr ""
 
-msgid "Per-File Upload Quota (%d) exceeded for file %s (size=%d)"
-msgstr ""
-
 msgid "Percent is %d but must be between 0 and 100."
 msgstr ""
 
@@ -1332,9 +1364,6 @@ msgstr ""
 msgid "Property \"%s\" is not defined."
 msgstr ""
 
-msgid "Property file %s could not be found"
-msgstr ""
-
 msgid "Public folder %s can only be moved to a public folder in context %s"
 msgstr ""
 
@@ -1356,6 +1385,9 @@ msgid "Required value \"End Date\" was not supplied."
 msgstr ""
 
 msgid "Required value \"Title\" was not supplied."
+msgstr ""
+
+msgid "Required value \"user\" was not supplied."
 msgstr ""
 
 msgid "Resolving database for context %1$d and server %2$d not possible!"
@@ -1389,6 +1421,12 @@ msgid "SearchIterator NULL"
 msgstr ""
 
 msgid "Server name is not defined."
+msgstr ""
+
+msgid "Servlet mapping directory does not exist: %s"
+msgstr ""
+
+msgid "Servlet mappings could not be loaded due to following error: %s"
 msgstr ""
 
 msgid "Session attempts to instantiate a provider that doesn't exist: %s"
@@ -1430,7 +1468,7 @@ msgstr ""
 msgid "Store already closed: %s"
 msgstr ""
 
-msgid "String Parse Exception: No ending 0x00 found"
+msgid "String parse exception: No ending 0x00 found"
 msgstr ""
 
 msgid "Subsystem down"
@@ -1460,11 +1498,6 @@ msgstr ""
 msgid "Tasks are disable for you (%d)."
 msgstr ""
 
-msgid ""
-"The Application was unable to validate a given email address from this "
-"contact: %s"
-msgstr ""
-
 msgid "The IP address of host \"%s\" could not be determined"
 msgstr ""
 
@@ -1474,8 +1507,8 @@ msgid ""
 msgstr ""
 
 msgid ""
-"The Object you requested can not be found. Try again. Context %1$d Folder %2"
-"$d User %3$d Object %4$d"
+"The application was unable to validate a given email address from this "
+"contact: %s"
 msgstr ""
 
 msgid "The attachment you requested no longer exists. Please refresh the view."
@@ -1546,6 +1579,11 @@ msgid ""
 "$d Folder %2$d User %3$d Object %4$d"
 msgstr ""
 
+msgid ""
+"The object you requested can not be found. Try again. Context %1$d Folder %2"
+"$d User %3$d Object %4$d"
+msgstr ""
+
 msgid "The requested item does not exist."
 msgstr ""
 
@@ -1572,7 +1610,17 @@ msgstr ""
 msgid "There are no recipient(s) for the new message."
 msgstr ""
 
+msgid ""
+"There was an issue in authenticating your E-Mail password. This may be "
+"because of a recent password change. To continue please logout now and then "
+"log back in with your most current password. (server=%s | user=%s | context=%"
+"s)"
+msgstr ""
+
 msgid "This Contact has no FolderID: Entry %1$d Context %2$d"
+msgstr ""
+
+msgid "This contact has no folder id: Entry %1$d Context %2$d"
 msgstr ""
 
 msgid "This document is locked."
@@ -1582,7 +1630,7 @@ msgid "This folder is a virtual folder. It cannot contain documents."
 msgstr ""
 
 msgid ""
-"This gif Image is to large. It can not be scaled and will not be accepted"
+"This gif image is too large. It can not be scaled and will not be accepted"
 msgstr ""
 
 msgid "This method is not applicable to an IMAP permission"
@@ -1619,24 +1667,18 @@ msgid ""
 "User %3$d"
 msgstr ""
 
-msgid "Unable to Insert Contacts! Context: %d"
-msgstr ""
-
-msgid "Unable to Load Linked Contacts : Context %1$d Contact %2$d"
-msgstr ""
-
 msgid ""
-"Unable to create a link between these two Objects. Insufficient Rights. 1. "
+"Unable to create a link between these two objects. Insufficient rights. 1. "
 "Object %1$d 2. Object %2$d Context %3$d"
 msgstr ""
 
 msgid ""
-"Unable to create a link between these two Objects. Insufficient Rights. 1. "
+"Unable to create a link between these two objects. Insufficient rights. 1. "
 "Object %1$d Folder %2$d 2. Object %3$d Folder %4$d Context %5$d"
 msgstr ""
 
 msgid ""
-"Unable to create a link between these two Objects. Insufficient Rights. "
+"Unable to create a link between these two objects. Insufficient rights. "
 "Object %1$d Folder %2$d Context %3$d"
 msgstr ""
 
@@ -1648,27 +1690,21 @@ msgstr ""
 msgid "Unable to create exception, recurring position can not be calculated !"
 msgstr ""
 
-msgid ""
-"Unable to delete Contact Object. Context %1$d Folder %2$d User %3$d Object %4"
-"$d"
-msgstr ""
-
 msgid "Unable to delete Contact: Context %1$d Contact %2$d"
 msgstr ""
 
-msgid "Unable to delete Contacts from User. Context %1$d User %2$d"
+msgid "Unable to delete Contacts from this user. Context %1$d User %2$d"
 msgstr ""
 
-msgid "Unable to delete Contacts from this folder. Context %1$d Folder %2$d"
+msgid "Unable to delete all links from this objects. Object %1$d Context %2$d"
 msgstr ""
 
-msgid "Unable to delete Dristributionlist by Id : Context %1$d Contact %2$d"
+msgid ""
+"Unable to delete contact object. Context %1$d Folder %2$d User %3$d Object %4"
+"$d"
 msgstr ""
 
-msgid "Unable to delete Linking between Contacts : Context %1$d Contact %2$d"
-msgstr ""
-
-msgid "Unable to delete all links from this Objects. Object %1$d Context %2$d"
+msgid "Unable to delete contacts from this folder. Context %1$d Folder %2$d"
 msgstr ""
 
 msgid ""
@@ -1676,8 +1712,17 @@ msgid ""
 "Context %1$d Folder %2$d User %3$d"
 msgstr ""
 
+msgid "Unable to delete dristributionlist by id : Context %1$d Contact %2$d"
+msgstr ""
+
+msgid "Unable to delete linking between contacts : Context %1$d Contact %2$d"
+msgstr ""
+
+msgid "Unable to delete reminder"
+msgstr ""
+
 msgid ""
-"Unable to delete this Contact. Object not found. Context %1$d Folder %2$d "
+"Unable to delete this contact. Object not found. Context %1$d Folder %2$d "
 "User %3$d Object %4$d"
 msgstr ""
 
@@ -1687,32 +1732,47 @@ msgstr ""
 msgid "Unable to insert Contact. Context: %d"
 msgstr ""
 
-msgid "Unable to load Contact Image : Context %1$d Contact %2$d"
+msgid "Unable to insert contacts! Context: %d"
 msgstr ""
 
-msgid "Unable to load Contact: Context %1$d"
+msgid "Unable to insert reminder"
 msgstr ""
 
-msgid "Unable to load Dristributionlist : Context %1$d Contact %2$d"
-msgstr ""
-
-msgid "Unable to load Objects. Context %1$d User %2$d"
+msgid "Unable to list reminder"
 msgstr ""
 
 msgid ""
-"Unable to load all links from this Objects. Object %1$d Folder %2$d User %3"
+"Unable to load all links from this objects. Object %1$d Folder %2$d User %3"
 "$d Context %4$d"
+msgstr ""
+
+msgid "Unable to load contact image: Context %1$d Contact %2$d"
+msgstr ""
+
+msgid "Unable to load contact: Context %1$d"
+msgstr ""
+
+msgid "Unable to load dristributionlist: Context %1$d Contact %2$d"
+msgstr ""
+
+msgid "Unable to load linked contacts : Context %1$d Contact %2$d"
+msgstr ""
+
+msgid "Unable to load objects. Context %1$d User %2$d"
+msgstr ""
+
+msgid "Unable to load reminder"
 msgstr ""
 
 msgid "Unable to map OCL permission value %s to a JSON permission value"
 msgstr ""
 
 msgid ""
-"Unable to perform Contact Folder check for readable content: Context %1$d "
+"Unable to perform contact folder check for readable content: Context %1$d "
 "Folder %2$d"
 msgstr ""
 
-msgid "Unable to pickup a connection from the DBPool"
+msgid "Unable to pick up a connection from the DBPool"
 msgstr ""
 
 msgid "Unable to remove Participant %d"
@@ -1721,48 +1781,51 @@ msgstr ""
 msgid "Unable to remove Participant because this participant is the last one"
 msgstr ""
 
-msgid "Unable to save Contact Image: Context %1$d Contact %2$d"
-msgstr ""
-
-msgid "Unable to save Dristributionlist : Context %1$d Contact %2$d"
-msgstr ""
-
 msgid "Unable to save Linking between Contacts : Context %1$d Contact %2$d"
+msgstr ""
+
+msgid "Unable to save contact Image: Context %1$d Contact %2$d"
 msgstr ""
 
 msgid "Unable to save contact image. The image appears to be broken."
 msgstr ""
 
-msgid "Unable to scale Image down."
+msgid "Unable to save dristributionlist: Context %1$d Contact %2$d"
+msgstr ""
+
+msgid "Unable to scale image down."
 msgstr ""
 
 msgid ""
-"Unable to scale the contact image. This is a not supported file type or it "
-"is too large! Your mime type is %1$s and your image size is %2$d KB. The "
-"max. allowed image size is %3$d KB."
+"Unable to scale this contact image.  Either the file type is not supported "
+"or the image is too large. Your mime type is %1$s and your image size is %2"
+"$d KB. The max. allowed image size is %3$d KB."
 msgstr ""
 
 msgid ""
-"Unable to syncronice the old contact with the new changes: Context %1$d "
+"Unable to syncronize the old contact with the new changes: Context %1$d "
 "Object %2$d"
 msgstr ""
 
-msgid "Unable to trigger Object Events: Context %1$d Folder %2$d"
+msgid "Unable to trigger object Events: Context %1$d Folder %2$d"
 msgstr ""
 
-msgid "Unable to trigger Object Events: Context %1$d User %2$d"
-msgstr ""
-
-msgid "Unable to update Contact Image: Context %1$d Contact %2$d"
-msgstr ""
-
-msgid "Unable to update Contact. Context %1$d Object %2$d"
-msgstr ""
-
-msgid "Unable to update Dristributionlist : Context %1$d Contact %2$d"
+msgid "Unable to trigger object Events: Context %1$d User %2$d"
 msgstr ""
 
 msgid "Unable to update contact image. The image appears to be broken."
+msgstr ""
+
+msgid "Unable to update contact image: Context %1$d Contact %2$d"
+msgstr ""
+
+msgid "Unable to update contact. Context %1$d Object %2$d"
+msgstr ""
+
+msgid "Unable to update dristributionlist : Context %1$d Contact %2$d"
+msgstr ""
+
+msgid "Unable to update reminder"
 msgstr ""
 
 msgid "Unexpected SQL Error!"
@@ -1860,7 +1923,10 @@ msgstr ""
 msgid "Updating database ... Try again later."
 msgstr ""
 
-msgid "Upload Quota (%d) exceeded"
+msgid "Upload quota (%d) exceeded"
+msgstr ""
+
+msgid "Upload quota (%d) exceeded for file %s (size=%d)"
 msgstr ""
 
 msgid "Uploaded file is of type %s, cannot handle that"
@@ -1913,12 +1979,12 @@ msgstr ""
 msgid "User %s has no read access to mail folder %s"
 msgstr ""
 
-msgid "User %s has no write access on IMAP-Folder %s"
-msgstr ""
-
 msgid ""
 "User %s has no write access on public folder %s in context %s due to user "
 "configuration"
+msgstr ""
+
+msgid "User %s has no write access to IMAP folder %s"
 msgstr ""
 
 msgid "User %s has no write permission on folder %s in context %s"
@@ -1980,7 +2046,7 @@ msgstr ""
 msgid "Wrong filestore %1$d for context %2$d needing filestore %3$d."
 msgstr ""
 
-msgid "Wrong message %sheader: %s"
+msgid "Wrong message %s header: %s"
 msgstr ""
 
 msgid "Wrong or missing login data to access server %s: User: %s | Context: %s"
@@ -2013,8 +2079,8 @@ msgid "You are not allowed to see a private task in shared folder %1$s (%2$d)."
 msgstr ""
 
 msgid ""
-"You are not allowed to store this contact in a non-contact folder:: Folder "
-"id %1$d in Context %2$d with User %3$d"
+"You are not allowed to store this contact in a non-contact folder: folder id "
+"%1$d in context %2$d with user %3$d"
 msgstr ""
 
 msgid "You are not allowed to update this item."
@@ -2028,13 +2094,18 @@ msgid "You cannot unlock this document."
 msgstr ""
 
 msgid ""
-"You do not have permission to delete objects from Folder %1$d in Context %2"
-"$d with User %3$d"
+"You do not have permission to delete objects from folder %1$d in context %2"
+"$d with user %3$d"
 msgstr ""
 
 msgid ""
-"You do not have permission to store objects in Folder %1$d in Context %2$d "
-"with User %3$d"
+"You do not have permission to read objects in folder %1$d in context %2$d "
+"with user %3$d"
+msgstr ""
+
+msgid ""
+"You do not have permission to store objects in folder %1$d in context %2$d "
+"with user %3$d"
 msgstr ""
 
 msgid "You do not have sufficient permission to delete this version."
