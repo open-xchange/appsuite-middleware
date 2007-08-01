@@ -50,6 +50,7 @@
 package com.openexchange.test;
 
 import com.openexchange.ajax.reminder.ReminderAJAXSuite;
+import com.openexchange.ajax.reminder.ReminderBugTestSuite;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -64,6 +65,8 @@ public class CCTests
         tests.addTestSuite(com.openexchange.ajax.session.RedirectTest.class);
         tests.addTestSuite(com.openexchange.ajax.FolderTest.class);
         tests.addTest(ReminderAJAXSuite.suite());
+		tests.addTest(ReminderBugTestSuite.suite());
+		
         tests.addTest(com.openexchange.ajax.infostore.InfostoreAJAXSuite.suite());
         tests.addTest(com.openexchange.ajax.config.ConfigTestSuite.suite());
         tests.addTest(com.openexchange.ajax.appointment.AppointmentAJAXSuite.suite());
