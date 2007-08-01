@@ -94,15 +94,15 @@ import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class OXFolderIteratorSQL {
-	
+
 	private static final String STR_EMPTY = "";
-	
+
 	private static final String STR_SELECT = "SELECT ";
-	
+
 	private OXFolderIteratorSQL() {
 		super();
 	}
-	
+
 	/**
 	 * Returns the core sql statement to query user-visible folders. This query
 	 * can be further parameterized by additional conditions (e.g. only folders
@@ -134,25 +134,25 @@ public final class OXFolderIteratorSQL {
 		}
 		return retValBuilder.toString();
 	}
-	
+
 	private final static String STR_OT = "ot";
-	
+
 	private final static String STR_ORDER_BY = "ORDER BY ";
-	
+
 	private final static String STR_FUID = "fuid";
-	
+
 	private final static String STR_DEFAULTFLAG_DESC = "default_flag DESC";
-	
+
 	private final static String STR_FNAME = "fname";
-	
+
 	private static String getRootOrderBy(final String tableAlias) {
 		return getOrderBy(tableAlias, STR_FUID);
 	}
-	
+
 	private static String getSubfolderOrderBy(final String tableAlias) {
 		return getOrderBy(tableAlias, STR_DEFAULTFLAG_DESC, STR_FNAME);
 	}
-	
+
 	private static String getOrderBy(final String tableAlias, final String... strings) {
 		if (strings == null || strings.length == 0) {
 			return null;
@@ -171,14 +171,14 @@ public final class OXFolderIteratorSQL {
 		}
 		return sb.toString();
 	}
-	
+
 	private final static String STR_GROUP_BY = "GROUP BY ";
-	
+
 	private static String getGroupBy(final String tableAlias) {
 		return new StringBuilder(STR_GROUP_BY).append(tableAlias == null ? STR_EMPTY : tableAlias).append('.').append(
 				STR_FUID).toString();
 	}
-	
+
 	/**
 	 * Returns an <code>SearchIterator</code> of <code>FolderObject</code>
 	 * instances, which represent all user-visible root folders
@@ -222,7 +222,7 @@ public final class OXFolderIteratorSQL {
 		}
 		return new FolderObjectIterator(rs, stmt, true, ctx, readCon, true);
 	}
-	
+
 	/**
 	 * Returns an <code>SearchIterator</code> of <code>FolderObject</code>
 	 * instances, which represent all user-visible sub folders of a certain
@@ -255,7 +255,7 @@ public final class OXFolderIteratorSQL {
 					since);
 		}
 	}
-	
+
 	/**
 	 * Returns an <code>SearchIterator</code> of <code>FolderObject</code>
 	 * instances which are located beneath system's private folder.
@@ -297,7 +297,7 @@ public final class OXFolderIteratorSQL {
 		}
 		return new FolderObjectIterator(rs, stmt, false, ctx, readCon, true);
 	}
-	
+
 	/**
 	 * Returns an <code>SearchIterator</code> of <code>FolderObject</code>
 	 * instances which are located beneath system's public folder.
@@ -338,7 +338,7 @@ public final class OXFolderIteratorSQL {
 		}
 		return new FolderObjectIterator(rs, stmt, false, ctx, readCon, true);
 	}
-	
+
 	/**
 	 * Returns an <code>SearchIterator</code> of <code>FolderObject</code>
 	 * instances which offer a share right for given user and therefore should
@@ -439,9 +439,9 @@ public final class OXFolderIteratorSQL {
 		}
 		return new FolderObjectIterator(rs, stmt, false, ctx, readCon, true);
 	}
-	
+
 	private static final String SQL_SELPBFLD = "SELECT fuid FROM oxfolder_tree WHERE cid = ? AND type = ? AND fuid NOT IN #IDS#";
-	
+
 	/**
 	 * Returns all visible public folders that are not visible in hierarchic
 	 * tree-view (because any ancestor folder is not visible)
@@ -458,8 +458,8 @@ public final class OXFolderIteratorSQL {
 			 */
 			StringBuilder condBuilder = new StringBuilder("AND ot.type = ").append(FolderObject.PUBLIC);
 			String sqlSelectStr = getSQLUserVisibleFolders(FolderObjectIterator.getFieldsForSQL(STR_OT),
-					StringCollection.getSqlInString(userId, groups), StringCollection
-							.getSqlInString(userConfig.getAccessibleModules()), condBuilder.toString(), FolderCacheProperties
+					StringCollection.getSqlInString(userId, groups), StringCollection.getSqlInString(userConfig
+							.getAccessibleModules()), condBuilder.toString(), FolderCacheProperties
 							.isEnableDBGrouping() ? getGroupBy(STR_OT) : null, getOrderBy(STR_OT, "module", "fname"));
 			condBuilder = null;
 			stmt = readCon.prepareStatement(sqlSelectStr);
@@ -521,7 +521,7 @@ public final class OXFolderIteratorSQL {
 			closeResources(rs, stmt, readCon, true, ctx);
 		}
 	}
-	
+
 	private static String queue2SQLString(final Queue<FolderObject> q, final int size) {
 		final Iterator<FolderObject> iter = q.iterator();
 		final StringBuilder sb = new StringBuilder(1024);
@@ -534,7 +534,7 @@ public final class OXFolderIteratorSQL {
 		sb.append(')');
 		return sb.toString();
 	}
-	
+
 	/**
 	 * Returns visible non-shared folders of given module that are not visible
 	 * in hierarchic tree-view (because any ancestor folder is not visible)
@@ -609,7 +609,7 @@ public final class OXFolderIteratorSQL {
 		fillAncestor(folderList, folderId, userId, userConfig, locale, null, ctx);
 		return new FolderObjectIterator(folderList, false);
 	}
-	
+
 	private static void fillAncestor(final List<FolderObject> folderList, final int folderId, final int userId,
 			final UserConfiguration userConfig, final Locale locale, final UserStorage userStoreArg, final Context ctx)
 			throws OXException {
@@ -629,8 +629,9 @@ public final class OXFolderIteratorSQL {
 					/*
 					 * Starting folder is not visible to user
 					 */
-					throw new OXFolderException(FolderCode.NOT_VISIBLE, OXFolderManagerImpl.getFolderName(
-							folderId, ctx), getUserName(userId, ctx), Integer.valueOf(ctx.getContextId()));
+					throw new OXFolderException(FolderCode.NOT_VISIBLE, OXFolderManagerImpl
+							.getFolderName(folderId, ctx), getUserName(userId, ctx), Integer
+							.valueOf(ctx.getContextId()));
 				}
 				return;
 			}
@@ -716,7 +717,7 @@ public final class OXFolderIteratorSQL {
 			throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, Integer.valueOf(ctx.getContextId()));
 		}
 	}
-	
+
 	private static boolean checkForSpecialFolder(final List<FolderObject> folderList, final int folderId,
 			final Locale locale, final Context ctx) throws OXException {
 		final boolean publicParent;
@@ -794,7 +795,7 @@ public final class OXFolderIteratorSQL {
 		}
 		return !parent.getEffectiveUserPermission(userId, userConf).isFolderVisible();
 	}
-	
+
 	/**
 	 * Returns a <code>SearchIterator</code> of <code>FolderObject</code>
 	 * instances, which represent all user-visible folders of a certain type
@@ -872,11 +873,11 @@ public final class OXFolderIteratorSQL {
 	 * instances of a certain module
 	 */
 	public static SearchIterator getAllVisibleFoldersIteratorOfModule(final int userId, final int[] memberInGroups,
-			final int[] accessibleModules, final int module, final Context ctx)
-			throws OXException, SearchIteratorException {
+			final int[] accessibleModules, final int module, final Context ctx) throws OXException,
+			SearchIteratorException {
 		return getAllVisibleFoldersIteratorOfModule(userId, memberInGroups, accessibleModules, module, ctx, null);
 	}
-	
+
 	/**
 	 * Returns a <code>SearchIterator</code> of <code>FolderObject</code>
 	 * instances of a certain module
@@ -1006,18 +1007,18 @@ public final class OXFolderIteratorSQL {
 	}
 
 	private static final String SQL_SELECT_FOLDERS_START = new StringBuilder(200).append(STR_SELECT).append(
-			FolderObjectIterator.getFieldsForSQL(STR_OT)).append(" FROM oxfolder_tree AS ot").append(" WHERE (cid = ?) ")
-			.toString();
+			FolderObjectIterator.getFieldsForSQL(STR_OT)).append(" FROM oxfolder_tree AS ot").append(
+			" WHERE (cid = ?) ").toString();
 
 	/**
 	 * Returns an <code>SearchIterator</code> of <code>FolderObject</code>
-	 * instances which represent <b>all</b> modified folders since a given
-	 * date.
+	 * instances which represent <b>all</b> modified folders greater than a
+	 * given date.
 	 */
 	public static SearchIterator getAllModifiedFoldersSince(final Date since, final Context ctx) throws OXException,
 			SearchIteratorException {
 		final String sqlSelectStr = new StringBuilder(300).append(SQL_SELECT_FOLDERS_START).append(
-				"AND (changing_date >= ?) AND (module IN ").append(FolderObject.SQL_IN_STR_STANDARD_MODULES_ALL).append(
+				"AND (changing_date > ?) AND (module IN ").append(FolderObject.SQL_IN_STR_STANDARD_MODULES_ALL).append(
 				") ").append(FolderCacheProperties.isEnableDBGrouping() ? getGroupBy(STR_OT) : null).append(
 				" ORDER by ot.fuid").toString();
 		Connection readCon = null;

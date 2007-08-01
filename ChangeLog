@@ -1,3 +1,8 @@
+* 2007-08-01 - thorben.betten@open-xchange.com
+
+ - Changed folder's "getUpdatedFolders" query according to HTTP API spec to
+   to query all folder GREATER THAN sent timestamp from GUI.
+
 * 2007-07-31 - francisco.laguna@open-xchange.com
 
  - Bugfix #8622: Properly URLEncode urls in response to propfind requests.
