@@ -55,14 +55,19 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
- * This class represents a very fast thread-safe implementation of a FIFO
- * (first-in-first-out) queue backed by an array of generic objects. This class
- * is only useful if programmer knows the size of the queue in advance.
+ * This class represents a fast (and optional thread-safe) implementation of a
+ * FIFO (<code>first-in-first-out</code>) queue backed by an array of
+ * generic objects. This class is only useful if programmer knows the size of
+ * the queue in advance.
+ * <p>
+ * If this queue is created with enabled synchronization mechanism a
+ * <code>{@link ReadWriteLock}</code> is used for mutually exclusive access
  * 
+ * @see ReadWriteLock
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public class FIFOQueue<T> {
+public final class FIFOQueue<T> {
 
 	private T[] array;
 
@@ -70,37 +75,114 @@ public class FIFOQueue<T> {
 
 	private boolean full;
 
-	private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
+	private ReadWriteLock rwLock;
 
-	private final Lock r = rwLock.readLock(), w = rwLock.writeLock();
+	private Lock r, w;
 
+	private final boolean isSynchronized;
+
+	/**
+	 * Constructor which invokes
+	 * <code>{@link #FIFOQueue(Class, int, boolean)}</code> with last
+	 * <code>boolean</code> parameter (<code>sync</code>) set to
+	 * <code>true</code>
+	 * 
+	 * @param clazz -
+	 *            the class whose instances are kept in FIFO queue
+	 * @param maxsize -
+	 *            the max. size of this queue
+	 * @see #FIFOQueue(Class, int, boolean)
+	 */
 	@SuppressWarnings("unchecked")
 	public FIFOQueue(final Class<T> clazz, final int maxsize) {
+		this(clazz, maxsize, true);
+	}
+
+	/**
+	 * Constructor
+	 * 
+	 * @param clazz -
+	 *            the class whose instances are kept in FIFO queue
+	 * @param maxsize -
+	 *            the max. size of this queue
+	 * @param isSynchronized -
+	 *            whether this queue is synchronized (mutually exclusive) for
+	 *            multiple threads accessing this queue
+	 */
+	@SuppressWarnings("unchecked")
+	public FIFOQueue(final Class<T> clazz, final int maxsize, final boolean isSynchronized) {
 		array = (T[]) Array.newInstance(clazz, maxsize);
 		start = end = 0;
 		full = false;
+		this.isSynchronized = isSynchronized;
+		if (isSynchronized) {
+			rwLock = new ReentrantReadWriteLock();
+			r = rwLock.readLock();
+			w = rwLock.writeLock();
+		}
 	}
 
+	private void acquireReadLock() {
+		if (isSynchronized) {
+			r.lock();
+		}
+	}
+
+	private void releaseReadLock() {
+		if (isSynchronized) {
+			r.unlock();
+		}
+	}
+
+	private void acquireWriteLock() {
+		if (isSynchronized) {
+			w.lock();
+		}
+	}
+
+	private void releaseWriteLock() {
+		if (isSynchronized) {
+			w.unlock();
+		}
+	}
+
+	/**
+	 * Tests if this queue is empty
+	 * 
+	 * @return <code>true</code> if queue is empty; otherwise
+	 *         <code>false</code>
+	 */
 	public boolean isEmpty() {
-		r.lock();
+		acquireReadLock();
 		try {
 			return ((start == end) && !full);
 		} finally {
-			r.unlock();
+			releaseReadLock();
 		}
 	}
 
+	/**
+	 * Tests if this queue is full
+	 * 
+	 * @return <code>true</code> if queue is full; otherwise
+	 *         <code>false</code>
+	 */
 	public boolean isFull() {
-		r.lock();
+		acquireReadLock();
 		try {
 			return full;
 		} finally {
-			r.unlock();
+			releaseReadLock();
 		}
 	}
 
+	/**
+	 * Gets the number of contained objects in queue
+	 * 
+	 * @return the number of contained objects
+	 */
 	public int size() {
-		r.lock();
+		acquireReadLock();
 		try {
 			if (full) {
 				return array.length;
@@ -110,12 +192,18 @@ public class FIFOQueue<T> {
 				return start - end;
 			}
 		} finally {
-			r.unlock();
+			releaseReadLock();
 		}
 	}
 
+	/**
+	 * Enqueues given object to queue's tail
+	 * 
+	 * @param obj -
+	 *            the object to enqueue
+	 */
 	public void enqueue(final T obj) {
-		w.lock();
+		acquireWriteLock();
 		try {
 			if (!full) {
 				array[start = (++start % array.length)] = obj;
@@ -124,12 +212,17 @@ public class FIFOQueue<T> {
 				full = true;
 			}
 		} finally {
-			w.unlock();
+			releaseWriteLock();
 		}
 	}
 
+	/**
+	 * Dequeues the first object (head) in queue
+	 * 
+	 * @return the dequeued object
+	 */
 	public T dequeue() {
-		w.lock();
+		acquireWriteLock();
 		try {
 			if (full) {
 				full = false;
@@ -143,12 +236,17 @@ public class FIFOQueue<T> {
 			array[end] = null;
 			return retval;
 		} finally {
-			w.unlock();
+			releaseWriteLock();
 		}
 	}
 
+	/**
+	 * Peeks (and does not remove) the first object (head) in queue
+	 * 
+	 * @return the first object
+	 */
 	public T get() {
-		r.lock();
+		acquireReadLock();
 		try {
 			if (isEmpty()) {
 				return null;
@@ -161,7 +259,7 @@ public class FIFOQueue<T> {
 			end = tmp;
 			return retval;
 		} finally {
-			r.unlock();
+			releaseReadLock();
 		}
 	}
 
