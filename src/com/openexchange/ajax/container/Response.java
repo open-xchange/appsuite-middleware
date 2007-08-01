@@ -392,14 +392,17 @@ public class Response {
         final Writer writer) throws JSONException {
         response.getJSON().write(writer);
     }
-    
-    /**
+
+	/**
 	 * Serializes a Response object to given instance of
 	 * <code>{@link JSONWriter}</code>.
 	 * 
-	 * @param response
-	 * @param writer
-	 * @throws JSONException
+	 * @param response -
+	 *            the <code>{@link Response}</code> object to serialize.
+	 * @param writer -
+	 *            the <code>{@link JSONWriter}</code> to write to
+	 * @throws JSONException -
+	 *             if writing fails
 	 */
 	public static void write(final Response response, final JSONWriter writer) throws JSONException {
 		writer.object();
@@ -413,7 +416,7 @@ public class Response {
 		writer.endObject();
 	}
 
-    /**
+	/**
 	 * {@inheritDoc}
 	 */
     @Override
