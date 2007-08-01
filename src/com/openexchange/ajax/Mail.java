@@ -346,6 +346,8 @@ public class Mail extends PermissionServlet implements UploadListener {
 			sendErrorAsJS(resp, RESPONSE_ERROR);
 		}
 	}
+	
+	private final transient static JSONArray EMPTY_JSON_ARR = new JSONArray();
 
 	private final Response actionGetUpdates(final SessionObject sessionObj, final ParamContainer paramContainer,
 			final MailInterface mailInterfaceArg) throws JSONException {
@@ -357,7 +359,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 		/*
 		 * Close response and flush print writer
 		 */
-		response.setData(new JSONArray());
+		response.setData(EMPTY_JSON_ARR);
 		response.setTimestamp(null);
 		return response;
 	}
