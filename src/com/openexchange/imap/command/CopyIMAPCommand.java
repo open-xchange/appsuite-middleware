@@ -327,7 +327,7 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
 			}
 		}
 
-		private static final long[] toLongArray(final String s) {
+		private static long[] toLongArray(final String s) {
 			final SmartLongArray arr = new SmartLongArray();
 			final String[] sa = s.split(" *, *");
 			Next: for (int i = 0; i < sa.length; i++) {

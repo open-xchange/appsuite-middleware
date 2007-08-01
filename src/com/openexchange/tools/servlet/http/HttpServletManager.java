@@ -335,7 +335,7 @@ public class HttpServletManager {
 					servletQueue.enqueue(new HttpErrorServlet("No Servlet Constructor found for " + servletKey));
 				} else {
 					try {
-						HttpServlet servletInstance = (HttpServlet) servletConstructor.newInstance(new Object[] {});
+						HttpServlet servletInstance = (HttpServlet) servletConstructor.newInstance(INIT_ARGS);
 						final boolean isSTM = servletInstance instanceof SingleThreadModel;
 						servletQueue = isSTM ? new FIFOQueue<HttpServlet>(HttpServlet.class, AJPv13Config
 								.getServletPoolSize()) : new FIFOQueue<HttpServlet>(HttpServlet.class, 1);
