@@ -87,7 +87,7 @@ public abstract class GroupAbstraction extends ObjectNamingAbstraction {
     protected static final char OPT_MAILADDRESS_SHORT = 'm';
     
     // For right error output
-    protected Integer groupid = null;
+    protected String groupid = null;
     
     protected void setAddMembersOption(final AdminParser admp,boolean required) {
         addMemberOption = setShortLongOpt(admp,OPT_NAME_ADDMEMBERS, OPT_NAME_ADDMEMBERS_LONG, "List of members to add to group", true, convertBooleantoTriState(required));
@@ -134,8 +134,8 @@ public abstract class GroupAbstraction extends ObjectNamingAbstraction {
     }
 
     protected final void parseAndSetGroupId(final AdminParser parser, final Group grp) {
-        groupid = Integer.valueOf((String) parser.getOptionValue(this.IdOption));
-        grp.setId(groupid);
+        groupid = (String) parser.getOptionValue(this.IdOption);
+        grp.setId(Integer.valueOf(groupid));
     }
 
     private void parseAndSetGroupName(final AdminParser parser, final Group grp) {
