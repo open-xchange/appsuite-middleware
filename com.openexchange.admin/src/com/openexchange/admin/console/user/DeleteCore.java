@@ -53,6 +53,7 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 
 import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.console.AdminParser.NeededTriState;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -70,6 +71,7 @@ public abstract class DeleteCore extends UserAbstraction {
     protected final void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptions(parser);
         setIdOption(parser);
+        setUsernameOption(parser, NeededTriState.eitheror);
 
         setFurtherOptions(parser);
     }
@@ -80,9 +82,17 @@ public abstract class DeleteCore extends UserAbstraction {
         // set all needed options in our parser
         setOptions(parser);
 
-        // parse the command line
+        String successtext = null;
         try {
             parser.ownparse(args);
+
+            // create user obj
+            final User usr = new User();
+            
+            parseAndSetUserId(parser, usr);
+            parseAndSetUsername(parser, usr);
+
+            successtext = usernameOrIdSet();
 
             final Context ctx = contextparsing(parser);
 
@@ -91,19 +101,13 @@ public abstract class DeleteCore extends UserAbstraction {
             // get rmi ref
             final OXUserInterface oxusr = getUserInterface();
 
-            // create user obj
-            final User usr = new User();
-
-            parseAndSetUserId(parser, usr);
-            
             maincall(parser, oxusr, ctx, usr, auth);
 
-            displayDeletedMessage(userid, ctx.getIdAsInt());
+            displayDeletedMessage(successtext, ctxid);
             sysexit(0);
         } catch (final Exception e) {
-            printErrors(userid, ctxid, e, parser);
+            printErrors(successtext, ctxid, e, parser);
         }
-
     }
 
     protected abstract void maincall(final AdminParser parser, final OXUserInterface oxusr, final Context ctx, final User usr, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException, DuplicateExtensionException, MalformedURLException, NotBoundException;
