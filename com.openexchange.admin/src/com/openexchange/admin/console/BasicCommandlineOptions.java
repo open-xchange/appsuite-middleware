@@ -153,7 +153,7 @@ public abstract class BasicCommandlineOptions {
     
     private static final String []ENV_OPTIONS = 
         new String[]{ "RMI_HOSTNAME", "COMMANDLINE_TIMEZONE", "COMMANDLINE_DATEFORMAT" };
-    protected static String RMI_HOSTNAME ="rmi://localhost/";
+    protected static String RMI_HOSTNAME ="rmi://localhost:1099/";
     protected static String COMMANDLINE_TIMEZONE ="GMT";
     protected static String COMMANDLINE_DATEFORMAT ="yyyy-MM-dd";
     
