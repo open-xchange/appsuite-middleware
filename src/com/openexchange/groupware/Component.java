@@ -242,7 +242,11 @@ public enum Component {
     /**
      * ACL related error
      */
-    ACL_ERROR("ACL");
+    ACL_ERROR("ACL"),
+    /**
+     * PERMISSION related error
+     */
+    PERMISSION("PERMISSION");
 
     /**
      * The abbrevation for components.
