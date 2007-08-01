@@ -551,6 +551,9 @@ msgstr ""
 msgid "Counting tasks did not return a result."
 msgstr ""
 
+msgid "Cowardly refusing to import an entry flagged as confidential."
+msgstr ""
+
 msgid "Creator cannot be participant."
 msgstr ""
 
@@ -991,11 +994,6 @@ msgid "Invalid unique message identifier: %s"
 msgstr ""
 
 msgid "Link is not implemented."
-msgstr ""
-
-msgid ""
-"Login to imap server %s failed for user %s in context %s. Please try again "
-"later"
 msgstr ""
 
 msgid ""
@@ -1505,6 +1503,9 @@ msgstr ""
 msgid "The folder %d is not an Infostore Folder"
 msgstr ""
 
+msgid "The following field(s) are too long to be imported: %s"
+msgstr ""
+
 msgid ""
 "The image you tried to attach is not a valid picture. It may be broken or is "
 "not a valid file."
@@ -1550,6 +1551,13 @@ msgid ""
 msgstr ""
 
 msgid "There are no recipient(s) for the new message."
+msgstr ""
+
+msgid ""
+"There was an issue in authenticating your E-Mail password. This may be "
+"because of a recent password change. To continue please logout now and then "
+"log back in with your most current password. (server=%s | user=%s | context=%"
+"s)"
 msgstr ""
 
 msgid "This Contact has no FolderID: Entry %1$d Context %2$d"
@@ -1837,6 +1845,9 @@ msgstr ""
 msgid "Update process initialization failed: %1$s."
 msgstr ""
 
+msgid "Updating database ... Try again later."
+msgstr ""
+
 msgid "Upload Quota (%d) exceeded"
 msgstr ""
 
@@ -2032,9 +2043,6 @@ msgid "You need write permissions to lock a document."
 msgstr ""
 
 msgid "You need write permissions to unlock a document."
-msgstr ""
-
-msgid "Your database is currently updated. Try again later."
 msgstr ""
 
 msgid "Your session %s expired. Please start a new browser session."
