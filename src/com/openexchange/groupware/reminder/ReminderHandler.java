@@ -149,6 +149,14 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 		} catch (final DBPoolingException exc) {
 			throw new OXException(exc);
 		} finally {
+			if (writeCon != null) {
+				try {
+					writeCon.setAutoCommit(true);
+				} catch (SQLException exc) {
+					LOG.warn("cannot set autocommit to true on connection", exc);
+				}
+			}
+			
 			DBPool.closeWriterSilent(context,writeCon);
 		}
 	}
@@ -215,6 +223,14 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 		} catch (final DBPoolingException exc) {
 			throw new OXException(exc);
 		} finally {
+			if (writeCon != null) {
+				try {
+					writeCon.setAutoCommit(true);
+				} catch (SQLException exc) {
+					LOG.warn("cannot set autocommit to true on connection", exc);
+				}
+			}
+			
 			DBPool.closeWriterSilent(context,writeCon);
 		}
 	}
@@ -298,6 +314,14 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 				}
 			}
 			
+			if (writeCon != null) {
+				try {
+					writeCon.setAutoCommit(true);
+				} catch (SQLException exc) {
+					LOG.warn("cannot set autocommit to true on connection", exc);
+				}
+			}
+			
 			DBPool.closeWriterSilent(context,writeCon);
 		}
 	}
@@ -320,6 +344,14 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 		} catch (final DBPoolingException exc) {
 			throw new OXException(exc);
 		} finally {
+			if (writeCon != null) {
+				try {
+					writeCon.setAutoCommit(true);
+				} catch (SQLException exc) {
+					LOG.warn("cannot set autocommit to true on connection", exc);
+				}
+			}
+			
 			DBPool.closeWriterSilent(context,writeCon);
 		}
 	}
@@ -383,6 +415,14 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 		} catch (final DBPoolingException exc) {
 			throw new OXException(exc);
 		} finally {
+			if (writeCon != null) {
+				try {
+					writeCon.setAutoCommit(true);
+				} catch (SQLException exc) {
+					LOG.warn("cannot set autocommit to true on connection", exc);
+				}
+			}
+			
 			DBPool.closeWriterSilent(context,writeCon);
 		}
 	}
