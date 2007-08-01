@@ -212,7 +212,7 @@ public abstract class XmlServlet extends PermissionServlet {
 		int object_id = 0;
 		
 		boolean bModified = true;
-		boolean bDeleted = true;
+		boolean bDeleted = false;
 		
 		try {
 			final SessionObject sessionObj = getSession(req);
