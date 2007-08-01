@@ -61,11 +61,38 @@ import com.openexchange.groupware.Component;
 public class OXPermissionException extends OXException {
 
 	private static final long serialVersionUID = 8893780895314747686L;
-
-	public OXPermissionException(final Component component, final Category category, final int number,
-			final String message, final Throwable cause, final Object... messageArgs) {
-		super(component, category, number, message, cause, messageArgs);
-	}
+	
+    public OXPermissionException(final Code code, final Object... messageArgs) {
+        this(code, null, messageArgs);
+    }
+	
+    /**
+     * Initializes a new exception using the information provided by the code.
+     * @param code code for the exception.
+     * @param cause the cause of the exception.
+     * @param messageArgs arguments that will be formatted into the message.
+     */
+    public OXPermissionException(final Code code, final Throwable cause,
+        final Object... messageArgs) {
+        super(Component.PERMISSION, code.category, code.number,
+            null == code.message ? cause.getMessage() : code.message, cause);
+        setMessageArgs(messageArgs);
+    }
+	
+    /**
+     * Constructor with all parameters.
+     * @param component Component.
+     * @param category Category.
+     * @param number detail number.
+     * @param message message of the exception.
+     * @param cause the cause.
+     * @param messageArgs arguments for the exception message.
+     */
+    public OXPermissionException(final Component component, final Category category,
+        final int number, final String message, final Throwable cause, final Object... messageArgs) {
+        super(component, category, number, message, cause);
+        super.setMessageArgs(messageArgs);
+    }
 
 	/**
 	 * Initializes a new exception using the information provides by the cause.
@@ -75,5 +102,63 @@ public class OXPermissionException extends OXException {
 	 */
 	public OXPermissionException(final AbstractOXException cause) {
 		super(cause);
+	}
+	
+    /**
+     * Error codes for permission exceptions.
+     * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
+     */
+    public enum Code {
+        /**
+         * No permission for modul: %s.
+         */
+        NoPermissionForModul("No permission for modul: %s.",
+            Category.USER_INPUT, 1),
+        
+		/**
+         * No folder permission.
+         */
+        NoFolderPermission("No folder permission.",
+            Category.PERMISSION, 2);		
+
+        /**
+         * Message of the exception.
+         */
+        private final String message;
+
+        /**
+         * Category of the exception.
+         */
+        private final Category category;
+
+        /**
+         * Detail number of the exception.
+         */
+        private final int number;
+
+        /**
+         * Default constructor.
+         * @param message message.
+         * @param category category.
+         * @param detailNumber detail number.
+         */
+        private Code(final String message, final Category category,
+            final int detailNumber) {
+            this.message = message;
+            this.category = category;
+            this.number = detailNumber;
+        }
+
+		public Category getCategory() {
+			return category;
+		}
+
+		public String getMessage() {
+			return message;
+		}
+
+		public int getNumber() {
+			return number;
+		}
 	}
 }
