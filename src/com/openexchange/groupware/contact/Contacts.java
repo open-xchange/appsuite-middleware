@@ -772,7 +772,13 @@ public class Contacts implements DeleteListener {
 						co.setDisplayName(co.getSurName());
 					}
 				}
-			} else if (co.getDisplayName() != null || co.getDisplayName().length() > 0) {				
+			} else {
+				/**
+				 * Previous condition threw a critical warning since co.getDisplayName() may be null
+				 * <pre>
+				 * else if (co.getDisplayName() != null || co.getDisplayName().length() > 0) {
+				 * </pre>
+				 */
 				if (co.getSurName() == null || co.getSurName().length() < 1){
 					co.setSurName(co.getDisplayName());
 				} else if (co.getSurName() != null && co.getSurName().length() > 0) {					
