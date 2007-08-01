@@ -1,17 +1,13 @@
 package com.openexchange.json;
 
-import java.io.StringWriter;
-
 import junit.framework.TestCase;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONWriter;
 
 public class JSONWriterTest extends TestCase{
 	public void testEmptyObject(){
-		StringWriter w = new StringWriter();
 		OXJSONWriter json = new OXJSONWriter();
 		
 		try {
@@ -24,7 +20,6 @@ public class JSONWriterTest extends TestCase{
 	}
 	
 	public void testObjectWithScalars(){
-		StringWriter w = new StringWriter();
 		OXJSONWriter json = new OXJSONWriter();
 		
 		try {
@@ -50,7 +45,6 @@ public class JSONWriterTest extends TestCase{
 	}
 	
 	public void testEmptyArray(){
-		StringWriter w = new StringWriter();
 		OXJSONWriter json = new OXJSONWriter();
 		
 		try {
@@ -63,7 +57,6 @@ public class JSONWriterTest extends TestCase{
 	}
 	
 	public void testArrayWithScalars(){
-		StringWriter w = new StringWriter();
 		OXJSONWriter json = new OXJSONWriter();
 		
 		try {
@@ -85,7 +78,6 @@ public class JSONWriterTest extends TestCase{
 	}
 	
 	public void testObjectWithObjects(){
-		StringWriter w = new StringWriter();
 		OXJSONWriter json = new OXJSONWriter();
 		
 		try {
@@ -121,7 +113,6 @@ public class JSONWriterTest extends TestCase{
 	}
 	
 	public void testObjectWithArrays(){
-		StringWriter w = new StringWriter();
 		OXJSONWriter json = new OXJSONWriter();
 		
 		try {
@@ -154,7 +145,6 @@ public class JSONWriterTest extends TestCase{
 	}
 	
 	public void testArrayWithObjects(){
-		StringWriter w = new StringWriter();
 		OXJSONWriter json = new OXJSONWriter();
 		
 		try {
@@ -183,6 +173,36 @@ public class JSONWriterTest extends TestCase{
 			assertEquals("von Testeringen", object2.optString("last"));
 			
 		} catch (JSONException e) {
+			fail(e.getLocalizedMessage());
+		}
+	}
+	
+	public void testDeepLevelObjects() {
+		OXJSONWriter json = new OXJSONWriter();
+
+		try {
+
+			json.array();
+			json.object().key("level-key" + String.valueOf(0));
+			json.value("level-val" + String.valueOf(0)).endObject();
+
+			final int level = 20;
+			for (int i = 0; i < level; i++) {
+				json.object().key("level-key" + String.valueOf(i + 1));
+			}
+			json.value("thevalue");
+			for (int i = 19; i >= 0; i--) {
+				json.endObject();
+			}
+
+			json.object().key("first1").object().key("second1").object().key("third1").value("dasd").endObject().key(
+					"asasasas").value("sdfsdfsdf").endObject().endObject();
+			json.endArray();
+
+			json.getObject().toString();
+
+		} catch (JSONException e) {
+			e.printStackTrace();
 			fail(e.getLocalizedMessage());
 		}
 	}
