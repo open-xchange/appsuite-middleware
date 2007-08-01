@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.update.exception;
 
+import com.openexchange.groupware.update.tasks.NewAdminExtensionsUpdateTask;
 import com.openexchange.groupware.update.tasks.TaskReminderFolderZero;
 
 /**
@@ -96,6 +97,11 @@ public final class Classes {
      * {@link TaskReminderFolderZero}
      */
     public static final int TASK_REMINDER_FOLDER_ZERO = 8;
+
+    /**
+     * {@link NewAdminExtensionsUpdateTask}
+     */
+    public static final int TASK_NEW_ADMIN_EXTENSIONS = 9;
 
     /**
      * Prevent instanciation.
