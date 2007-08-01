@@ -145,8 +145,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     }
 
     @Override
-    public void change(final Context ctx, final User usrdata)
-            throws StorageException {
+    public void change(final Context ctx, final User usrdata) throws StorageException {
         Connection write_ox_con = null;
         PreparedStatement stmt = null;
         PreparedStatement folder_update = null;
@@ -159,8 +158,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             write_ox_con.setAutoCommit(false);
 
             if (usrdata.getPrimaryEmail() != null) {
-                stmt = write_ox_con
-                        .prepareStatement("UPDATE user SET mail = ? WHERE cid = ? AND id = ?");
+                stmt = write_ox_con.prepareStatement("UPDATE user SET mail = ? WHERE cid = ? AND id = ?");
                 stmt.setString(1, usrdata.getPrimaryEmail());
                 stmt.setInt(2, context_id);
                 stmt.setInt(3, user_id);
@@ -169,8 +167,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
 
             if (usrdata.getLanguage() != null) {
-                stmt = write_ox_con
-                        .prepareStatement("UPDATE user SET preferredlanguage = ? WHERE cid = ? AND id = ?");
+                stmt = write_ox_con.prepareStatement("UPDATE user SET preferredlanguage = ? WHERE cid = ? AND id = ?");
                 stmt.setString(1, usrdata.getLanguage().getLanguage() + "_"
                         + usrdata.getLanguage().getCountry());
                 stmt.setInt(2, context_id);
@@ -180,8 +177,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
 
             if (usrdata.getTimezone() != null) {
-                stmt = write_ox_con
-                        .prepareStatement("UPDATE user SET timezone = ? WHERE cid = ? AND id = ?");
+                stmt = write_ox_con.prepareStatement("UPDATE user SET timezone = ? WHERE cid = ? AND id = ?");
                 stmt.setString(1, usrdata.getTimezone().getID());
                 stmt.setInt(2, context_id);
                 stmt.setInt(3, user_id);
@@ -190,8 +186,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
 
             if (usrdata.getEnabled() != null) {
-                stmt = write_ox_con
-                        .prepareStatement("UPDATE user SET mailEnabled = ? WHERE cid = ? AND id = ?");
+                stmt = write_ox_con.prepareStatement("UPDATE user SET mailEnabled = ? WHERE cid = ? AND id = ?");
                 stmt.setBoolean(1, usrdata.getEnabled().booleanValue());
                 stmt.setInt(2, context_id);
                 stmt.setInt(3, user_id);
@@ -200,8 +195,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
 
             if (usrdata.getPassword_expired() != null) {
-                stmt = write_ox_con
-                        .prepareStatement("UPDATE user SET  shadowLastChange = ? WHERE cid = ? AND id = ?");
+                stmt = write_ox_con.prepareStatement("UPDATE user SET  shadowLastChange = ? WHERE cid = ? AND id = ?");
                 stmt.setInt(1, getintfrombool(usrdata.getPassword_expired()));
                 stmt.setInt(2, context_id);
                 stmt.setInt(3, user_id);
@@ -210,8 +204,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
 
             if (usrdata.getImapServer() != null) {
-                stmt = write_ox_con
-                        .prepareStatement("UPDATE user SET  imapserver = ? WHERE cid = ? AND id = ?");
+                stmt = write_ox_con.prepareStatement("UPDATE user SET  imapserver = ? WHERE cid = ? AND id = ?");
                 stmt.setString(1, usrdata.getImapServer());
                 stmt.setInt(2, context_id);
                 stmt.setInt(3, user_id);
@@ -220,16 +213,14 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
 
             if (usrdata.getImapLogin() == null && usrdata.isImapLoginset() ) {
-                stmt = write_ox_con
-                .prepareStatement("UPDATE user SET  imapLogin = ? WHERE cid = ? AND id = ?");
+                stmt = write_ox_con.prepareStatement("UPDATE user SET  imapLogin = ? WHERE cid = ? AND id = ?");
                 stmt.setNull(1, java.sql.Types.VARCHAR);
                 stmt.setInt(2, context_id);
                 stmt.setInt(3, user_id);
                 stmt.executeUpdate();
                 stmt.close();
             } else {
-                stmt = write_ox_con
-                        .prepareStatement("UPDATE user SET  imapLogin = ? WHERE cid = ? AND id = ?");
+                stmt = write_ox_con.prepareStatement("UPDATE user SET  imapLogin = ? WHERE cid = ? AND id = ?");
                 stmt.setString(1, usrdata.getImapLogin());
                 stmt.setInt(2, context_id);
                 stmt.setInt(3, user_id);
@@ -238,8 +229,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
 
             if (usrdata.getSmtpServer() != null) {
-                stmt = write_ox_con
-                        .prepareStatement("UPDATE user SET  smtpserver = ? WHERE cid = ? AND id = ?");
+                stmt = write_ox_con.prepareStatement("UPDATE user SET  smtpserver = ? WHERE cid = ? AND id = ?");
                 stmt.setString(1, usrdata.getSmtpServer());
                 stmt.setInt(2, context_id);
                 stmt.setInt(3, user_id);
@@ -248,8 +238,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
 
             if (usrdata.getPassword() != null) {
-                stmt = write_ox_con
-                        .prepareStatement("UPDATE user SET  userPassword = ? WHERE cid = ? AND id = ?");
+                stmt = write_ox_con.prepareStatement("UPDATE user SET  userPassword = ? WHERE cid = ? AND id = ?");
                 stmt.setString(1, password2crypt(usrdata));
                 stmt.setInt(2, context_id);
                 stmt.setInt(3, user_id);
@@ -258,8 +247,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
 
             if (usrdata.getPasswordMech() != null) {
-                stmt = write_ox_con
-                        .prepareStatement("UPDATE user SET  passwordMech = ? WHERE cid = ? AND id = ?");
+                stmt = write_ox_con.prepareStatement("UPDATE user SET  passwordMech = ? WHERE cid = ? AND id = ?");
                 stmt.setString(1, usrdata.getPasswordMech2String());
                 stmt.setInt(2, context_id);
                 stmt.setInt(3, user_id);
@@ -681,8 +669,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         final String LOGINSHELL = "/bin/bash";
         
         try {
-            ps = write_ox_con
-                    .prepareStatement("SELECT user FROM user_setting_admin WHERE cid=?");
+            ps = write_ox_con.prepareStatement("SELECT user FROM user_setting_admin WHERE cid=?");
             ps.setInt(1, ctx.getIdAsInt());
             ResultSet rs = ps.executeQuery();
             int admin_id = 0;
@@ -699,9 +686,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
             PreparedStatement stmt = null;
             try {
-
-                stmt = write_ox_con
-                        .prepareStatement("INSERT INTO user (cid,id,userPassword,passwordMech,shadowLastChange,mail,timeZone,preferredLanguage,mailEnabled,imapserver,smtpserver,contactId,homeDirectory,uidNumber,gidNumber,loginShell,imapLogin) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+                stmt = write_ox_con.prepareStatement("INSERT INTO user (cid,id,userPassword,passwordMech,shadowLastChange,mail,timeZone,preferredLanguage,mailEnabled,imapserver,smtpserver,contactId,homeDirectory,uidNumber,gidNumber,loginShell,imapLogin) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
                 stmt.setInt(1, ctx.getIdAsInt().intValue());
                 stmt.setInt(2, internal_user_id);
                 stmt.setString(3, passwd);
@@ -1169,8 +1154,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     }
 
     @Override
-    public int create(final Context ctx, final User usrdata,
-            final UserModuleAccess moduleAccess) throws StorageException {
+    public int create(final Context ctx, final User usrdata, final UserModuleAccess moduleAccess) throws StorageException {
         final int context_id = ctx.getIdAsInt();
         Connection write_ox_con = null;
         try {
