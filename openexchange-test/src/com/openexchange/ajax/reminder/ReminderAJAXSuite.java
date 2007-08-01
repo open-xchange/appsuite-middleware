@@ -11,8 +11,6 @@ public class ReminderAJAXSuite extends TestSuite{
 		tests.addTestSuite( RangeTest.class );
 		tests.addTestSuite( UpdatesTest.class );
 		tests.addTestSuite( DeleteTest.class );
-		tests.addTestSuite( Bug4342Test.class );
-		tests.addTestSuite( Bug5128Test.class );
 		
 		return tests;
 	}
