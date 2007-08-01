@@ -12,12 +12,12 @@ import org.json.JSONWriter;
 public class JSONWriterTest extends TestCase{
 	public void testEmptyObject(){
 		StringWriter w = new StringWriter();
-		JSONWriter json = new JSONWriter(w);
+		OXJSONWriter json = new OXJSONWriter();
 		
 		try {
 			json.object();
 			json.endObject();
-			assertEquals("{}", w.toString());
+			assertEquals("{}", json.getObject().toString());
 		} catch (JSONException e) {
 			fail(e.getLocalizedMessage());
 		}
@@ -25,7 +25,7 @@ public class JSONWriterTest extends TestCase{
 	
 	public void testObjectWithScalars(){
 		StringWriter w = new StringWriter();
-		JSONWriter json = new JSONWriter(w);
+		OXJSONWriter json = new OXJSONWriter();
 		
 		try {
 			json.object();
@@ -38,7 +38,7 @@ public class JSONWriterTest extends TestCase{
 			json.key("boolean");
 			json.value(true);
 			json.endObject();
-			JSONObject object = new JSONObject(w.toString());
+			JSONObject object = (JSONObject) json.getObject();
 			assertEquals("String", object.optString("string"));
 			assertEquals(23, object.optLong("integer"));
 			assertEquals(3.14, object.optDouble("float"));
@@ -51,12 +51,12 @@ public class JSONWriterTest extends TestCase{
 	
 	public void testEmptyArray(){
 		StringWriter w = new StringWriter();
-		JSONWriter json = new JSONWriter(w);
+		OXJSONWriter json = new OXJSONWriter();
 		
 		try {
 			json.array();
 			json.endArray();
-			assertEquals("[]", w.toString());
+			assertEquals("[]", json.getObject().toString());
 		} catch (JSONException e) {
 			fail(e.getLocalizedMessage());
 		}
@@ -64,7 +64,7 @@ public class JSONWriterTest extends TestCase{
 	
 	public void testArrayWithScalars(){
 		StringWriter w = new StringWriter();
-		JSONWriter json = new JSONWriter(w);
+		OXJSONWriter json = new OXJSONWriter();
 		
 		try {
 			json.array();
@@ -73,7 +73,7 @@ public class JSONWriterTest extends TestCase{
 			json.value(3.14);
 			json.value(true);
 			json.endArray();
-			JSONArray arr = new JSONArray(w.toString());
+			JSONArray arr = (JSONArray) json.getObject();
 			assertEquals("string", arr.getString(0));
 			assertEquals(23, arr.getLong(1));
 			assertEquals(3.14, arr.getDouble(2));
@@ -86,7 +86,7 @@ public class JSONWriterTest extends TestCase{
 	
 	public void testObjectWithObjects(){
 		StringWriter w = new StringWriter();
-		JSONWriter json = new JSONWriter(w);
+		OXJSONWriter json = new OXJSONWriter();
 		
 		try {
 			json.object();
@@ -105,7 +105,7 @@ public class JSONWriterTest extends TestCase{
 			json.value("von Testeringen");
 			json.endObject();
 			json.endObject();
-			JSONObject object = new JSONObject(w.toString());
+			JSONObject object = json.isJSONObject() ? (JSONObject) json.getObject() : null;
 			JSONObject object1 = object.getJSONObject("object1");
 			JSONObject object2 = object.getJSONObject("object2");
 			
@@ -122,7 +122,7 @@ public class JSONWriterTest extends TestCase{
 	
 	public void testObjectWithArrays(){
 		StringWriter w = new StringWriter();
-		JSONWriter json = new JSONWriter(w);
+		OXJSONWriter json = new OXJSONWriter();
 		
 		try {
 			json.object();
@@ -137,7 +137,7 @@ public class JSONWriterTest extends TestCase{
 			json.value("von Testeringen");
 			json.endArray();
 			json.endObject();
-			JSONObject object = new JSONObject(w.toString());
+			JSONObject object = (JSONObject) json.getObject();
 			JSONArray arr1 = object.getJSONArray("array1");
 			JSONArray arr2 = object.getJSONArray("array2");
 			
@@ -148,13 +148,14 @@ public class JSONWriterTest extends TestCase{
 			
 			
 		} catch (JSONException e) {
+			e.printStackTrace();
 			fail(e.getLocalizedMessage());
 		}
 	}
 	
 	public void testArrayWithObjects(){
 		StringWriter w = new StringWriter();
-		JSONWriter json = new JSONWriter(w);
+		OXJSONWriter json = new OXJSONWriter();
 		
 		try {
 			json.array();
@@ -171,7 +172,7 @@ public class JSONWriterTest extends TestCase{
 			json.value("von Testeringen");
 			json.endObject();
 			json.endArray();
-			JSONArray arr = new JSONArray(w.toString());
+			JSONArray arr = (JSONArray) json.getObject();
 			
 			JSONObject object1 = arr.getJSONObject(0);
 			JSONObject object2 = arr.getJSONObject(1);
