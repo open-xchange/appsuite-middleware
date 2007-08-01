@@ -93,7 +93,7 @@ public abstract class CreateCore extends ResourceAbstraction {
             
             final Integer id = oxres.create(ctx, res, auth).getId();
 
-            displayCreatedMessage(id, ctxid);
+            displayCreatedMessage(String.valueOf(id), ctxid);
             sysexit(0);
         } catch (final Exception e) {
             printErrors(null, ctxid, e, parser);
