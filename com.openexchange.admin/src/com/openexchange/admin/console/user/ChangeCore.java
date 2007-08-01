@@ -76,13 +76,9 @@ public abstract class ChangeCore extends UserAbstraction {
 
         // required
         setIdOption(parser);
+        setUsernameOption(parser, NeededTriState.eitheror);
 
-        displayNameOption = setShortLongOpt(parser,OPT_DISPLAYNAME_SHORT,OPT_DISPLAYNAME_LONG,"Display name of the user", true, NeededTriState.notneeded); 
-        givenNameOption =  setShortLongOpt(parser,OPT_GIVENNAME_SHORT,OPT_GIVENNAME_LONG,"Given name for the user", true, NeededTriState.notneeded); 
-        surNameOption =  setShortLongOpt(parser,OPT_SURNAME_SHORT,OPT_SURNAME_LONG,"Sur name for the user", true, NeededTriState.notneeded); 
-        passwordOption = setShortLongOpt(parser,OPT_PASSWORD_SHORT,OPT_PASSWORD_LONG,"Password for the user", true, NeededTriState.notneeded); 
-        primaryMailOption = setShortLongOpt(parser,OPT_PRIMARY_EMAIL_SHORT,OPT_PRIMARY_EMAIL_LONG,"Primary mail address", true, NeededTriState.notneeded); 
-
+        setMandatoryOptionsWithoutUsername(parser, NeededTriState.notneeded);
         
         // add optional opts
         setOptionalOptions(parser);
@@ -98,9 +94,16 @@ public abstract class ChangeCore extends UserAbstraction {
 
         setExtendedOptions(parser);
 
-        // parse the command line
+        String successtext = null;
         try {
             parser.ownparse(args);
+
+            // create user obj
+            final User usr = new User();
+            parseAndSetUserId(parser, usr);
+            parseAndSetUsername(parser, usr);
+            
+            successtext = usernameOrIdSet();
 
             final Context ctx = contextparsing(parser);
 
@@ -109,11 +112,6 @@ public abstract class ChangeCore extends UserAbstraction {
             // get rmi ref
             final OXUserInterface oxusr = getUserInterface();
 
-            // create user obj
-            final User usr = new User();
-
-            // set mandatory id
-            parseAndSetUserId(parser, usr);
 
             // fill user obj with mandatory values from console
             parseAndSetMandatoryOptionsWithoutUsernameInUser(parser, usr);
@@ -135,10 +133,10 @@ public abstract class ChangeCore extends UserAbstraction {
             // apply changes in module access on server
             oxusr.changeModuleAccess(ctx, usr, access, auth);
 
-            displayChangedMessage(userid, ctx.getIdAsInt());
+            displayChangedMessage(successtext, ctx.getIdAsInt());
             sysexit(0);
         } catch (final Exception e) {
-            printErrors(userid, ctxid, e, parser);
+            printErrors(successtext, ctxid, e, parser);
             sysexit(1);
         }
 
