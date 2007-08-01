@@ -131,16 +131,19 @@ public final class IMAPConnectionWatcher {
 				final StringBuilder sb = new StringBuilder(512);
 				final Iterator<Entry<IMAPConnection, Long>> iter = imapCons.entrySet().iterator();
 				final List<IMAPConnection> exceededCons = new ArrayList<IMAPConnection>();
-				for (int i = 0, n = imapCons.size(); i < n; i++) {
-					final Entry<IMAPConnection, Long> e = iter.next();
-					if ((System.currentTimeMillis() - e.getValue().longValue()) > IMAPProperties
-							.getWatcherTime()) {
-						sb.setLength(0);
-						LOG.info(sb.append(
-								INFO_PREFIX
-										.replaceFirst("#N#", String.valueOf(IMAPProperties.getWatcherTime())))
-								.append(e.getKey().getTrace()).toString());
-						exceededCons.add(e.getKey());
+				{
+					final int n = imapCons.size();
+					for (int i = 0; i < n; i++) {
+						final Entry<IMAPConnection, Long> e = iter.next();
+						if ((System.currentTimeMillis() - e.getValue().longValue()) > IMAPProperties
+								.getWatcherTime()) {
+							sb.setLength(0);
+							LOG.info(sb.append(
+									INFO_PREFIX
+											.replaceFirst("#N#", String.valueOf(IMAPProperties.getWatcherTime())))
+									.append(e.getKey().getTrace()).toString());
+							exceededCons.add(e.getKey());
+						}
 					}
 				}
 				if (!exceededCons.isEmpty()) {
@@ -148,27 +151,30 @@ public final class IMAPConnectionWatcher {
 					 * Remove/Close exceeded connections
 					 */
 					final boolean closeAllowed = IMAPProperties.isWatcherShallClose();
-					for (int i = 0, n = exceededCons.size(); i < n; i++) {
-						final IMAPConnection imapCon = exceededCons.get(i);
-						boolean remove = true;
-						try {
-							if (closeAllowed) {
-								sb.setLength(0);
-								sb.append(INFO_PREFIX2).append(imapCon.toString());
-								if (imapCon instanceof DefaultIMAPConnection) {
-									MailInterfaceImpl.closeIMAPConnection((DefaultIMAPConnection) imapCon);
-									remove = false;
-								} else {
-									imapCon.close();
+					{
+						final int n = exceededCons.size();
+						for (int i = 0; i < n; i++) {
+							final IMAPConnection imapCon = exceededCons.get(i);
+							boolean remove = true;
+							try {
+								if (closeAllowed) {
+									sb.setLength(0);
+									sb.append(INFO_PREFIX2).append(imapCon.toString());
+									if (imapCon instanceof DefaultIMAPConnection) {
+										MailInterfaceImpl.closeIMAPConnection((DefaultIMAPConnection) imapCon);
+										remove = false;
+									} else {
+										imapCon.close();
+									}
+									sb.append(INFO_PREFIX3);
+									LOG.info(sb.toString());
 								}
-								sb.append(INFO_PREFIX3);
-								LOG.info(sb.toString());
-							}
-						} catch (final MessagingException e1) {
-							LOG.error(e1.getLocalizedMessage(), e1);
-						} finally {
-							if (remove) {
-								imapCons.remove(imapCon);
+							} catch (final MessagingException e1) {
+								LOG.error(e1.getLocalizedMessage(), e1);
+							} finally {
+								if (remove) {
+									imapCons.remove(imapCon);
+								}
 							}
 						}
 					}
