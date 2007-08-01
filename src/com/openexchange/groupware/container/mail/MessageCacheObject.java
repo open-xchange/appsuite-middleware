@@ -75,6 +75,7 @@ import javax.mail.internet.MimeUtility;
 import com.openexchange.api2.MailInterfaceImpl;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.mail.parser.MessageUtils;
+import com.openexchange.imap.MessageHeaders;
 import com.openexchange.tools.mail.ContentType;
 import com.sun.mail.imap.protocol.BODYSTRUCTURE;
 
@@ -95,12 +96,12 @@ import com.sun.mail.imap.protocol.BODYSTRUCTURE;
  */
 public final class MessageCacheObject extends Message implements Serializable {
 
-	private static final long serialVersionUID = -5236672658788027516L;
-	
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(MessageCacheObject.class);
+	private static final String ERR_METHOD_NOT_SUPPORTED = "Method not supported";
 
-	private static final String HDR_X_PRIORITY = "X-Priority";
+	private static final long serialVersionUID = -5236672658788027516L;
+
+	private static transient final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(MessageCacheObject.class);
 
 	/**
 	 * Folder's full name
@@ -212,8 +213,8 @@ public final class MessageCacheObject extends Message implements Serializable {
 			this.contentType = new ContentType(msg.getContentType());
 			this.size = msg.getSize();
 			final String[] tmp;
-			this.priority = (tmp = msg.getHeader(HDR_X_PRIORITY)) == null || tmp[0] == null || tmp[0].length() == 0 ? JSONMessageObject.PRIORITY_NORMAL
-					: parsePriorityStr(tmp[0]);
+			this.priority = (tmp = msg.getHeader(MessageHeaders.HDR_X_PRIORITY)) == null || tmp[0] == null
+					|| tmp[0].length() == 0 ? JSONMessageObject.PRIORITY_NORMAL : parsePriorityStr(tmp[0]);
 		}
 	}
 
@@ -230,15 +231,13 @@ public final class MessageCacheObject extends Message implements Serializable {
 		}
 	}
 
-	private static final String HDR_FROM = "From";
-
 	@Override
 	public Address[] getFrom() {
 		if (from != null) {
 			return from;
 		}
-		return headers.containsKey(HDR_FROM) ? (from = new InternetAddress[] { new DummyAddress(headers.get(HDR_FROM)) })
-				: null;
+		return headers.containsKey(MessageHeaders.HDR_FROM) ? (from = new InternetAddress[] { new DummyAddress(headers
+				.get(MessageHeaders.HDR_FROM)) }) : null;
 	}
 
 	@Override
@@ -289,25 +288,19 @@ public final class MessageCacheObject extends Message implements Serializable {
 		throw new MessagingException("Unknown recipient type");
 	}
 
-	private static final String HDR_TO = "To";
-
-	private static final String HDR_CC = "Cc";
-
-	private static final String HDR_BCC = "Bcc";
-
 	@Override
 	public Address[] getRecipients(final RecipientType type) throws MessagingException {
 		Address[] retval = getRecipientsInternal(type);
 		if (retval == null) {
 			if (type.equals(RecipientType.TO)) {
-				retval = headers.containsKey(HDR_TO) ? new InternetAddress[] { new DummyAddress(headers.get(HDR_TO)) }
-						: null;
+				retval = headers.containsKey(MessageHeaders.HDR_TO) ? new InternetAddress[] { new DummyAddress(headers
+						.get(MessageHeaders.HDR_TO)) } : null;
 			} else if (type.equals(RecipientType.CC)) {
-				retval = headers.containsKey(HDR_CC) ? new InternetAddress[] { new DummyAddress(headers.get(HDR_CC)) }
-						: null;
+				retval = headers.containsKey(MessageHeaders.HDR_CC) ? new InternetAddress[] { new DummyAddress(headers
+						.get(MessageHeaders.HDR_CC)) } : null;
 			} else if (type.equals(RecipientType.BCC)) {
-				retval = headers.containsKey(HDR_BCC) ? new InternetAddress[] { new DummyAddress(headers.get(HDR_BCC)) }
-						: null;
+				retval = headers.containsKey(MessageHeaders.HDR_BCC) ? new InternetAddress[] { new DummyAddress(headers
+						.get(MessageHeaders.HDR_BCC)) } : null;
 			} else {
 				throw new MessagingException("Unknown recipient type!");
 			}
@@ -353,18 +346,16 @@ public final class MessageCacheObject extends Message implements Serializable {
 		}
 	}
 
-	private static final String HDR_SUBJECT = "Subject";
-
 	@Override
 	public String getSubject() {
 		try {
-			return subject != null ? subject : headers.containsKey(HDR_SUBJECT) ? MimeUtility.decodeText(headers
-					.get(HDR_SUBJECT)) : null;
+			return subject != null ? subject : headers.containsKey(MessageHeaders.HDR_SUBJECT) ? MimeUtility
+					.decodeText(headers.get(MessageHeaders.HDR_SUBJECT)) : null;
 		} catch (final UnsupportedEncodingException e) {
 			LOG.error("Unsupported encoding in a message detected and monitored.", e);
 			MailInterfaceImpl.mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
-			return headers.containsKey(HDR_SUBJECT) ? MessageUtils.decodeMultiEncodedHeader(headers.get(HDR_SUBJECT))
-					: null;
+			return headers.containsKey(MessageHeaders.HDR_SUBJECT) ? MessageUtils.decodeMultiEncodedHeader(headers
+					.get(MessageHeaders.HDR_SUBJECT)) : null;
 		}
 	}
 
@@ -391,14 +382,13 @@ public final class MessageCacheObject extends Message implements Serializable {
 		this.bodystructure = bodystructure;
 	}
 
-	private static final String HDR_DATE = "Date";
-
 	private static final MailDateFormat MDF = new MailDateFormat();
 
 	@Override
 	public Date getSentDate() throws MessagingException {
 		try {
-			return date != null ? date : headers.containsKey(HDR_DATE) ? MDF.parse(headers.get(HDR_SUBJECT)) : null;
+			return date != null ? date : headers.containsKey(MessageHeaders.HDR_DATE) ? MDF.parse(headers
+					.get(MessageHeaders.HDR_SUBJECT)) : null;
 		} catch (final ParseException e) {
 			throw new MessagingException(e.getMessage(), e);
 		}
@@ -425,7 +415,7 @@ public final class MessageCacheObject extends Message implements Serializable {
 
 	@Override
 	public void setFlags(final Flags flag, final boolean set) throws MessagingException {
-		throw new MessagingException("Method not supported");
+		throw new MessagingException(ERR_METHOD_NOT_SUPPORTED);
 
 	}
 
@@ -435,12 +425,12 @@ public final class MessageCacheObject extends Message implements Serializable {
 
 	@Override
 	public Message reply(final boolean replyToAll) throws MessagingException {
-		throw new MessagingException("Method not supported");
+		throw new MessagingException(ERR_METHOD_NOT_SUPPORTED);
 	}
 
 	@Override
 	public void saveChanges() throws MessagingException {
-		throw new MessagingException("Method not supported");
+		throw new MessagingException(ERR_METHOD_NOT_SUPPORTED);
 	}
 
 	/*
@@ -462,28 +452,28 @@ public final class MessageCacheObject extends Message implements Serializable {
 	}
 
 	public int getLineCount() throws MessagingException {
-		throw new MessagingException("Method not supported");
+		throw new MessagingException(ERR_METHOD_NOT_SUPPORTED);
 	}
 
-	private static final String HDR_CONTENT_TYPE = "Content-Type";
-
 	public String getContentType() {
-		return contentType != null ? contentType.toString() : headers.containsKey(HDR_CONTENT_TYPE) ? headers
-				.get(HDR_CONTENT_TYPE) : null;
+		return contentType != null ? contentType.toString()
+				: headers.containsKey(MessageHeaders.HDR_CONTENT_TYPE) ? headers.get(MessageHeaders.HDR_CONTENT_TYPE)
+						: null;
 	}
 
 	public boolean isMimeType(final String mimeType) throws MessagingException {
 		if (contentType != null) {
 			return contentType.isMimeType(mimeType);
-		} else if (headers.containsKey(HDR_CONTENT_TYPE)) {
+		} else if (headers.containsKey(MessageHeaders.HDR_CONTENT_TYPE)) {
 			try {
-				return (contentType = new ContentType(headers.get(HDR_CONTENT_TYPE))).isMimeType(mimeType);
+				return (contentType = new ContentType(headers.get(MessageHeaders.HDR_CONTENT_TYPE)))
+						.isMimeType(mimeType);
 			} catch (final OXException e) {
 				throw new MessagingException(e.getMessage(), e);
 			}
 		}
-		throw new MessagingException(new StringBuilder().append("Header ").append(HDR_CONTENT_TYPE).append(" not set!")
-				.toString());
+		throw new MessagingException(new StringBuilder().append("Header ").append(MessageHeaders.HDR_CONTENT_TYPE)
+				.append(" not set!").toString());
 	}
 
 	public void setContentType(final ContentType ct) {
@@ -491,72 +481,72 @@ public final class MessageCacheObject extends Message implements Serializable {
 	}
 
 	public String getDisposition() throws MessagingException {
-		throw new MessagingException("Method not supported");
+		throw new MessagingException(ERR_METHOD_NOT_SUPPORTED);
 	}
 
 	public void setDisposition(final String disposition) throws MessagingException {
-		throw new MessagingException("Method not supported");
+		throw new MessagingException(ERR_METHOD_NOT_SUPPORTED);
 	}
 
 	public String getDescription() throws MessagingException {
-		throw new MessagingException("Method not supported");
+		throw new MessagingException(ERR_METHOD_NOT_SUPPORTED);
 	}
 
 	public void setDescription(final String description) throws MessagingException {
-		throw new MessagingException("Method not supported");
+		throw new MessagingException(ERR_METHOD_NOT_SUPPORTED);
 	}
 
 	public String getFileName() throws MessagingException {
-		throw new MessagingException("Method not supported");
+		throw new MessagingException(ERR_METHOD_NOT_SUPPORTED);
 	}
 
 	public void setFileName(final String filename) throws MessagingException {
-		throw new MessagingException("Method not supported");
+		throw new MessagingException(ERR_METHOD_NOT_SUPPORTED);
 	}
 
 	public InputStream getInputStream() throws MessagingException {
-		throw new MessagingException("Method not supported");
+		throw new MessagingException(ERR_METHOD_NOT_SUPPORTED);
 	}
 
 	public DataHandler getDataHandler() throws MessagingException {
-		throw new MessagingException("Method not supported");
+		throw new MessagingException(ERR_METHOD_NOT_SUPPORTED);
 	}
 
 	public Object getContent() throws MessagingException {
-		throw new MessagingException("Method not supported");
+		throw new MessagingException(ERR_METHOD_NOT_SUPPORTED);
 	}
 
 	public void setDataHandler(final DataHandler dh) throws MessagingException {
-		throw new MessagingException("Method not supported");
+		throw new MessagingException(ERR_METHOD_NOT_SUPPORTED);
 	}
 
 	public void setContent(final Object obj, final String type) throws MessagingException {
-		throw new MessagingException("Method not supported");
+		throw new MessagingException(ERR_METHOD_NOT_SUPPORTED);
 	}
 
 	public void setText(final String text) throws MessagingException {
-		throw new MessagingException("Method not supported");
+		throw new MessagingException(ERR_METHOD_NOT_SUPPORTED);
 	}
 
 	public void setContent(final Multipart mp) throws MessagingException {
-		throw new MessagingException("Method not supported");
+		throw new MessagingException(ERR_METHOD_NOT_SUPPORTED);
 	}
 
 	public void writeTo(final OutputStream os) throws MessagingException {
-		throw new MessagingException("Method not supported");
+		throw new MessagingException(ERR_METHOD_NOT_SUPPORTED);
 	}
 
 	private static final String SPLIT_COMMA = " *, *";
 
 	public String[] getHeader(final String header_name) {
-		if (header_name.equalsIgnoreCase(HDR_X_PRIORITY)) {
+		if (header_name.equalsIgnoreCase(MessageHeaders.HDR_X_PRIORITY)) {
 			return new String[] { String.valueOf(priority) };
 		}
 		return headers.containsKey(header_name) ? headers.get(header_name).split(SPLIT_COMMA) : null;
 	}
 
 	public void setHeader(final String header_name, final String header_value) throws MessagingException {
-		if (header_name.equalsIgnoreCase(HDR_X_PRIORITY)) {
+		if (header_name.equalsIgnoreCase(MessageHeaders.HDR_X_PRIORITY)) {
 			try {
 				priority = parsePriorityStr(header_value);
 			} catch (final NumberFormatException e) {
@@ -593,28 +583,27 @@ public final class MessageCacheObject extends Message implements Serializable {
 	}
 
 	public Enumeration getAllHeaders() throws MessagingException {
-		throw new MessagingException("Method not supported");
+		throw new MessagingException(ERR_METHOD_NOT_SUPPORTED);
 	}
 
 	public Enumeration getMatchingHeaders(final String[] header_names) throws MessagingException {
-		throw new MessagingException("Method not supported");
+		throw new MessagingException(ERR_METHOD_NOT_SUPPORTED);
 	}
 
 	public Enumeration getNonMatchingHeaders(final String[] header_names) throws MessagingException {
-		throw new MessagingException("Method not supported");
+		throw new MessagingException(ERR_METHOD_NOT_SUPPORTED);
 	}
 
 	public String getFolderFullname() {
 		return folderFullname;
 	}
 
-	private static final String HDR_REPLY_TO = "Reply-To";
-
 	@Override
 	public Address[] getReplyTo() {
 		return replyTo != null ? replyTo
-				: headers.containsKey(HDR_REPLY_TO) ? (replyTo = new InternetAddress[] { new DummyAddress(headers
-						.get(HDR_REPLY_TO)) }) : null;
+				: headers.containsKey(MessageHeaders.HDR_REPLY_TO) ? (replyTo = new InternetAddress[] { new DummyAddress(
+						headers.get(MessageHeaders.HDR_REPLY_TO)) })
+						: null;
 	}
 
 	@Override
@@ -638,7 +627,7 @@ public final class MessageCacheObject extends Message implements Serializable {
 		this.uid = uid;
 	}
 
-	public final char getSeparator() {
+	public char getSeparator() {
 		return separator;
 	}
 
@@ -664,7 +653,7 @@ public final class MessageCacheObject extends Message implements Serializable {
 		return store.getFolder(folderFullname);
 	}
 
-	public static class DummyAddress extends InternetAddress {
+	public static final class DummyAddress extends InternetAddress {
 
 		private static final long serialVersionUID = -3276144799717449603L;
 
