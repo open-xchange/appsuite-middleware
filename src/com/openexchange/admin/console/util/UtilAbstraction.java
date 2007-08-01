@@ -23,16 +23,16 @@ public abstract class UtilAbstraction extends ObjectNamingAbstraction {
         this.searchOption = setShortLongOpt(parser, OPT_NAME_SEARCH_PATTERN_SHORT,OPT_NAME_SEARCH_PATTERN_LONG,"Search/List pattern!",true, NeededTriState.notneeded);
     }
     
-    protected void displayRegisteredMessage(final Integer id) {
+    protected void displayRegisteredMessage(final String id) {
         createMessageForStdout(id, null, "registered");
     }
 
-    protected void displayUnregisteredMessage(final Integer id) {
+    protected void displayUnregisteredMessage(final String id) {
         createMessageForStdout(id, null, "unregistered");
     }
 
     @Override
-    protected void printFirstPartOfErrorText(Integer id, Integer ctxid) {
+    protected void printFirstPartOfErrorText(final String id, final Integer ctxid) {
         if (getClass().getName().matches("^.*\\.\\w*(?i)register\\w*$")) {
             createMessageForStderr(id, ctxid, "could not be registered: ");
         } else if (getClass().getName().matches("^.*\\.\\w*(?i)unregister\\w*$")) {
