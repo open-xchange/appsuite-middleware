@@ -1,3 +1,7 @@
+* 2007-08-01 - francisco.laguna@open-xchange.com
+
+ - Fixed Bug #8630 - Check module permission for multiple module
+
 * 2007-08-01 - sebastian.kauss@open-xchange.com
 
  - Fixed Bug #8177 - Statement not closed if inserting reminder fails
