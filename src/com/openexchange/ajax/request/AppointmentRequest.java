@@ -234,7 +234,7 @@ public class AppointmentRequest {
 		}
 	}
 	
-	public void actionUpdate(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXConflictException, OXException {
+	public void actionUpdate(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXConflictException, OXException, OXJSONException {
 		final int objectId = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
 		final int inFolder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_INFOLDER);
 		timestamp = DataParser.checkDate(jsonObj, AJAXServlet.PARAMETER_TIMESTAMP);
@@ -277,7 +277,7 @@ public class AppointmentRequest {
 		}
 	}
 	
-	public void actionUpdates(final JSONObject jsonObj) throws JSONException, SearchIteratorException, OXException {
+	public void actionUpdates(final JSONObject jsonObj) throws JSONException, SearchIteratorException, OXException, OXJSONException {
 		Date lastModified = null;
 		
 		timestamp = new Date(0);
@@ -415,7 +415,7 @@ public class AppointmentRequest {
 		}
 	}
 	
-	public void actionDelete(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException {
+	public void actionDelete(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, OXJSONException {
 		timestamp = DataParser.checkDate(jsonObj, AJAXServlet.PARAMETER_TIMESTAMP);
 		final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
 		
@@ -439,7 +439,7 @@ public class AppointmentRequest {
 //		jsonWriter.value("");
 	}
 	
-	public void actionList(final JSONObject jsonObj) throws JSONException, SearchIteratorException, OXException {
+	public void actionList(final JSONObject jsonObj) throws JSONException, SearchIteratorException, OXException, OXJSONException {
 		timestamp = new Date(0);
 		
 		Date lastModified = null;
@@ -569,7 +569,7 @@ public class AppointmentRequest {
 		}
 	}
 	
-	public void actionAll(final JSONObject jsonObj) throws SearchIteratorException, OXMandatoryFieldException, JSONException, OXException {
+	public void actionAll(final JSONObject jsonObj) throws SearchIteratorException, OXMandatoryFieldException, JSONException, OXException, OXJSONException {
 		timestamp = new Date(0);
 		
 		SearchIterator it = null;
@@ -652,7 +652,7 @@ public class AppointmentRequest {
 		}
 	}
 	
-	public void actionGet(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXObjectNotFoundException, OXException {
+	public void actionGet(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXObjectNotFoundException, OXException, OXJSONException {
 		timestamp = null;
 		final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
 		final int inFolder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
@@ -698,7 +698,7 @@ public class AppointmentRequest {
 //		jsonWriter.value("");
 	}
 	
-	public void actionHas(final JSONObject jsonObj) throws JSONException, OXException {
+	public void actionHas(final JSONObject jsonObj) throws JSONException, OXException, OXJSONException {
 		final Date start = DataParser.checkTime(jsonObj, AJAXServlet.PARAMETER_START, timeZone);
 		final Date end = DataParser.checkTime(jsonObj, AJAXServlet.PARAMETER_END, timeZone);
 		
@@ -889,7 +889,7 @@ public class AppointmentRequest {
 		}
 	}
 	
-	public void actionFreeBusy(final JSONObject jsonObj) throws JSONException, SearchIteratorException, OXMandatoryFieldException, OXException {
+	public void actionFreeBusy(final JSONObject jsonObj) throws JSONException, SearchIteratorException, OXMandatoryFieldException, OXException, OXJSONException {
 		final int userId = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
 		final int type = DataParser.checkInt(jsonObj, "type");
 		final Date start = DataParser.checkTime(jsonObj, AJAXServlet.PARAMETER_START, timeZone);
@@ -918,7 +918,7 @@ public class AppointmentRequest {
 		}
 	}
 	
-	public void actionCopy(final JSONObject jsonObj) throws JSONException, OXMandatoryFieldException, OXObjectNotFoundException, OXException {
+	public void actionCopy(final JSONObject jsonObj) throws JSONException, OXMandatoryFieldException, OXObjectNotFoundException, OXException, OXJSONException {
 		final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
 		final int inFolder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
 		final boolean ignoreConflicts = DataParser.checkBoolean(jsonObj, AppointmentFields.IGNORE_CONFLICTS);

@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.request;
 
+import com.openexchange.tools.servlet.OXJSONException;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.TimeZone;
@@ -92,7 +93,7 @@ public class ReminderRequest {
 		this.jsonWriter = w;
 	}
 	
-	public void action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, OXException, JSONException, SearchIteratorException, AjaxException {
+	public void action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, OXException, JSONException, SearchIteratorException, AjaxException, OXJSONException {
 		if (action.equalsIgnoreCase(AJAXServlet.ACTION_DELETE)) {
 			actionDelete(jsonObject);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_UPDATES)) {
@@ -104,7 +105,7 @@ public class ReminderRequest {
 		}
 	}
 
-	private void actionDelete(final JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXException {
+	private void actionDelete(final JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXException, OXJSONException {
 		final JSONObject jData = DataParser.checkJSONObject(jsonObject, "data");
 		final int id = DataParser.checkInt(jData, AJAXServlet.PARAMETER_ID);
 		
@@ -119,7 +120,7 @@ public class ReminderRequest {
 		
 	}
 
-	private void actionUpdates(final JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXException, SearchIteratorException {
+	private void actionUpdates(final JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXException, SearchIteratorException, OXJSONException {
 		timestamp = DataParser.checkDate(jsonObject, AJAXServlet.PARAMETER_TIMESTAMP);
 		
 		final ReminderSQLInterface reminderSql = new ReminderHandler(sessionObj);
@@ -158,7 +159,7 @@ public class ReminderRequest {
 		}
 	}
 
-	private void actionRange(final JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXException, SearchIteratorException {
+	private void actionRange(final JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXException, SearchIteratorException, OXJSONException {
 		final Date end = DataParser.checkDate(jsonObject, AJAXServlet.PARAMETER_END);
 		
 		SearchIterator it = null;

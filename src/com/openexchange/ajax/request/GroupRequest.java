@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.request;
 
+import com.openexchange.tools.servlet.OXJSONException;
 import java.util.Date;
 
 import org.json.JSONArray;
@@ -86,7 +87,7 @@ public class GroupRequest {
 		return timestamp;
 	}
 
-	public void action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, LdapException, JSONException, SearchIteratorException, AjaxException {
+	public void action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, LdapException, JSONException, SearchIteratorException, AjaxException, OXJSONException {
 		if (action.equalsIgnoreCase(AJAXServlet.ACTION_LIST)) {
 			actionList(jsonObject);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_GET)) {
@@ -98,7 +99,7 @@ public class GroupRequest {
 		}
 	}
 	
-	public void actionList(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, LdapException {
+	public void actionList(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, LdapException, OXJSONException {
 		final JSONArray jsonArray = DataParser.checkJSONArray(jsonObj, "data");
 		
 		timestamp = new Date(0);
@@ -127,7 +128,7 @@ public class GroupRequest {
 		}
 	}
 
-	public void actionGet(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, LdapException {
+	public void actionGet(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, LdapException, OXJSONException {
 		final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
 		
 		timestamp = new Date(0);

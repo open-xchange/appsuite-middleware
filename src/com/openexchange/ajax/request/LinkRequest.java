@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.request;
 
+import com.openexchange.tools.servlet.OXJSONException;
 import java.io.Writer;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -79,7 +80,7 @@ public class LinkRequest {
 		
 	}
 	
-	public void action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, OXException, JSONException, AjaxException {
+	public void action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, OXException, JSONException, AjaxException, OXJSONException {
 		if (action.equalsIgnoreCase(AJAXServlet.ACTION_ALL)) {
 			actionAll(jsonObject);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_NEW)) {
@@ -91,7 +92,7 @@ public class LinkRequest {
 		}
 	}
 	
-	public void actionAll(final JSONObject jsonObj) throws JSONException, OXMandatoryFieldException, OXException {
+	public void actionAll(final JSONObject jsonObj) throws JSONException, OXMandatoryFieldException, OXException, OXJSONException {
 		final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
 		final int folder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_INFOLDER);
 		final int type = DataParser.checkInt(jsonObj, PARAMETER_MODULE);
@@ -167,7 +168,7 @@ public class LinkRequest {
 
 	}
 
-	public void actionDelete(final JSONObject jsonObj) throws JSONException, OXMandatoryFieldException, OXException {
+	public void actionDelete(final JSONObject jsonObj) throws JSONException, OXMandatoryFieldException, OXException, OXJSONException {
 		final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
 		final int folder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_INFOLDER);
 		final int type = DataParser.checkInt(jsonObj, PARAMETER_MODULE);

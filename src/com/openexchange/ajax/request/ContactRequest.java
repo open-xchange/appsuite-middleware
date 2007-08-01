@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.request;
 
+import com.openexchange.tools.servlet.OXJSONException;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -111,7 +112,7 @@ public class ContactRequest {
 		}
 	}
 	
-	public void action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXConcurrentModificationException, SearchIteratorException, AjaxException, OXException {
+	public void action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXConcurrentModificationException, SearchIteratorException, AjaxException, OXException, OXJSONException {
 		if (!sessionObj.getUserConfiguration().hasContact()) {
 			throw new OXPermissionException(OXPermissionException.Code.NoPermissionForModul, "contact");
 		}
@@ -163,7 +164,7 @@ public class ContactRequest {
 		
 	}
 	
-	public void actionUpdate(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXConcurrentModificationException, OXException {
+	public void actionUpdate(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXConcurrentModificationException, OXException, OXJSONException {
 		final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
 		final int inFolder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_INFOLDER);
 		timestamp = DataParser.checkDate(jsonObj, AJAXServlet.PARAMETER_TIMESTAMP);
@@ -183,7 +184,7 @@ public class ContactRequest {
 		jsonWriter.endArray();
 	}
 	
-	public void actionUpdates(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, SearchIteratorException, OXException {
+	public void actionUpdates(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, SearchIteratorException, OXException, OXJSONException {
 		final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
 		final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
 		
@@ -247,7 +248,7 @@ public class ContactRequest {
 		}
 	}
 	
-	public void actionDelete(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException {
+	public void actionDelete(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, OXJSONException {
 		timestamp = DataParser.checkDate(jsonObj, AJAXServlet.PARAMETER_TIMESTAMP);
 		final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
 		
@@ -264,7 +265,7 @@ public class ContactRequest {
 		jsonWriter.endArray();
 	}
 	
-	public void actionList(final JSONObject jsonObj) throws JSONException, OXMandatoryFieldException, SearchIteratorException, OXException {
+	public void actionList(final JSONObject jsonObj) throws JSONException, OXMandatoryFieldException, SearchIteratorException, OXException, OXJSONException {
 		timestamp = new Date(0);
 		
 		Date lastModified = null;
@@ -315,7 +316,7 @@ public class ContactRequest {
 		}
 	}
 	
-	public void actionAll(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, SearchIteratorException, OXException {
+	public void actionAll(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, SearchIteratorException, OXException, OXJSONException {
 		final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
 		final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
 		final int folderId = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
@@ -357,7 +358,7 @@ public class ContactRequest {
 		}
 	}
 	
-	public void actionGet(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException {
+	public void actionGet(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, OXJSONException {
 		final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
 		final int inFolder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_INFOLDER);
 		
@@ -373,7 +374,7 @@ public class ContactRequest {
 		timestamp = contactObj.getLastModified();
 	}
 	
-	public void actionCount(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException {
+	public void actionCount(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, OXJSONException {
 		final int folderId = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
 		
 		final ContactSQLInterface contactsql = new RdbContactSQLInterface(sessionObj);
@@ -382,7 +383,7 @@ public class ContactRequest {
 		jsonWriter.value(count);
 	}
 	
-	public void actionSearch(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, SearchIteratorException, OXException {
+	public void actionSearch(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, SearchIteratorException, OXException, OXJSONException {
 		final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
 		final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
 		
@@ -483,7 +484,7 @@ public class ContactRequest {
 		}
 	}
 	
-	public void actionCopy(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException {
+	public void actionCopy(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, OXJSONException {
 		timestamp = new Date(0);
 		
 		final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);

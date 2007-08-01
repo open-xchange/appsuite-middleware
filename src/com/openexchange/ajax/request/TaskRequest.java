@@ -214,7 +214,7 @@ public class TaskRequest {
 		}
 	}
 	
-	public void actionUpdate(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException {
+	public void actionUpdate(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, OXJSONException {
 		final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
 		final int inFolder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_INFOLDER);
 		timestamp = DataParser.checkDate(jsonObj, AJAXServlet.PARAMETER_TIMESTAMP);
@@ -233,7 +233,7 @@ public class TaskRequest {
         timestamp = task.getLastModified();
 	}
 	
-	public void actionUpdates(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, SearchIteratorException, OXException {
+	public void actionUpdates(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, SearchIteratorException, OXException, OXJSONException {
 		final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
 		final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
 		timestamp = DataParser.checkDate(jsonObj, AJAXServlet.PARAMETER_TIMESTAMP);
@@ -294,7 +294,7 @@ public class TaskRequest {
 		}
 	}
 	
-	public void actionDelete(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXPermissionException, OXConflictException, OXObjectNotFoundException, OXFolderNotFoundException, OXException {
+	public void actionDelete(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXPermissionException, OXConflictException, OXObjectNotFoundException, OXFolderNotFoundException, OXException, OXJSONException {
 		final JSONObject jsonobject = DataParser.checkJSONObject(jsonObj, JSON_KEY_DATA);
 		final int id = DataParser.checkInt(jsonobject, AJAXServlet.PARAMETER_ID);
 		final int inFolder = DataParser.checkInt(jsonobject, AJAXServlet.PARAMETER_INFOLDER);
@@ -310,7 +310,7 @@ public class TaskRequest {
 		}
 	}
 	
-	public void actionList(final JSONObject jsonObj) throws JSONException, OXMandatoryFieldException, SearchIteratorException, OXException {
+	public void actionList(final JSONObject jsonObj) throws JSONException, OXMandatoryFieldException, SearchIteratorException, OXException, OXJSONException {
 		timestamp = new Date(0);
 		
 		Date lastModified = null;
@@ -358,7 +358,7 @@ public class TaskRequest {
 		}
 	}
 	
-	public void actionAll(final JSONObject jsonObj) throws JSONException, OXMandatoryFieldException, SearchIteratorException, OXException {
+	public void actionAll(final JSONObject jsonObj) throws JSONException, OXMandatoryFieldException, SearchIteratorException, OXException, OXJSONException {
 		final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
 		final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
 		final int folderId = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
@@ -400,7 +400,7 @@ public class TaskRequest {
 		}
 	}
 	
-	public void actionGet(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException {
+	public void actionGet(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, OXJSONException {
 		final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
 		final int inFolder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_INFOLDER);
 		
@@ -429,7 +429,7 @@ public class TaskRequest {
 	
 	// Because we can't return a single value via the JSNOWriter we return the value itself and
 	// build the response object in Tasks
-	public int actionCount(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException {
+	public int actionCount(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, OXJSONException {
 		final int folderId = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
 		
 		final TasksSQLInterface taskssql = new TasksSQLInterfaceImpl(sessionObj);
@@ -527,7 +527,7 @@ public class TaskRequest {
 		}
 	}
 	
-	public void actionCopy(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException {
+	public void actionCopy(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, OXJSONException {
 		final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
 		final int inFolder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
 		final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);

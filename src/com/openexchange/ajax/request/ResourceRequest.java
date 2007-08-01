@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.request;
 
+import com.openexchange.tools.servlet.OXJSONException;
 import java.util.Date;
 
 import org.apache.commons.logging.Log;
@@ -92,7 +93,7 @@ public class ResourceRequest {
 		return timestamp;
 	}
 	
-	public void action(String action, JSONObject jsonObject) throws OXMandatoryFieldException, LdapException, JSONException, SearchIteratorException, AjaxException {
+	public void action(String action, JSONObject jsonObject) throws OXMandatoryFieldException, LdapException, JSONException, SearchIteratorException, AjaxException, OXJSONException {
 		if (action.equalsIgnoreCase(AJAXServlet.ACTION_LIST)) {
 			actionList(jsonObject);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_GET)) {
@@ -104,7 +105,7 @@ public class ResourceRequest {
 		}
 	}
 	
-	public void actionList(JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, LdapException {
+	public void actionList(JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, LdapException, OXJSONException {
 		timestamp = new Date(0);
 		
 		Date lastModified = null;
@@ -155,7 +156,7 @@ public class ResourceRequest {
 		}
 	}
 
-	public void actionGet(JSONObject jsonObj) throws LdapException, OXMandatoryFieldException, JSONException {
+	public void actionGet(JSONObject jsonObj) throws LdapException, OXMandatoryFieldException, JSONException, OXJSONException {
 		
 		timestamp = new Date(0);
 		
