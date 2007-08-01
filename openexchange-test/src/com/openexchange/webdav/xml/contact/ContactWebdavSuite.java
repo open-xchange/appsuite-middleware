@@ -12,6 +12,7 @@ public class ContactWebdavSuite extends TestSuite{
 		tests.addTestSuite( ListTest.class );
 		tests.addTestSuite( NewTest.class );
 		tests.addTestSuite( UpdateTest.class );
+		tests.addTestSuite( Bug8182Test.class );
 		
 		return tests;
 	}
