@@ -8,6 +8,7 @@
 
  - Fixed Bug #8177 - Statement not closed if inserting reminder fails
  - Fixed Bug #6077 - Redesign of reminder exception handling 
+ - Fixed Bug #6990 - Replace JSONException with OXJSONException
 
 * 2007-08-01 - thorben.betten@open-xchange.com
 
