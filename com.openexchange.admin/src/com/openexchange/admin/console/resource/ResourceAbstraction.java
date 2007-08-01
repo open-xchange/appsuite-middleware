@@ -86,7 +86,7 @@ public abstract class ResourceAbstraction extends ObjectNamingAbstraction {
     protected Option resourceRecipientOption = null;
     
     // For right error output
-    protected Integer resourceid = null;
+    protected String resourceid = null;
     
     protected void setDisplayNameOption(final AdminParser admp,final boolean required){
         resourceDisplayNameOption = setShortLongOpt(admp, _OPT_DISPNAME_SHORT,_OPT_DISPNAME_LONG,"The resource display name",true, convertBooleantoTriState(required));        
@@ -173,8 +173,8 @@ public abstract class ResourceAbstraction extends ObjectNamingAbstraction {
     }
 
     protected void parseAndSetResourceId(final AdminParser parser, final Resource res) {
-        resourceid = Integer.parseInt((String) parser.getOptionValue(this.resourceIdOption));
-        res.setId(resourceid);
+        resourceid = (String) parser.getOptionValue(this.resourceIdOption);
+        res.setId(Integer.parseInt(resourceid));
     }
     
     
