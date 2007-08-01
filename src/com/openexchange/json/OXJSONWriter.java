@@ -50,12 +50,14 @@
 package com.openexchange.json;
 
 import java.io.Writer;
-import java.util.Stack;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONWriter;
+
+import com.openexchange.tools.stack.ArrayStack;
+import com.openexchange.tools.stack.Stack;
 
 /**
  * OXJSONWriter - extends <code>{@link JSONWriter}</code> but does not use an
@@ -83,7 +85,7 @@ public final class OXJSONWriter extends JSONWriter {
 
 	private int jsonObjectType;
 
-	private final Stack<StackObject> stackObjs = new Stack<StackObject>();
+	private final Stack<StackObject> stackObjs = new ArrayStack<StackObject>(StackObject.class);
 	
 	private String key;
 
@@ -280,7 +282,7 @@ public final class OXJSONWriter extends JSONWriter {
 	 */
 	private JSONWriter append(final Object value) throws JSONException {
 		if (this.mode == MODE_OBJ || this.mode == MODE_ARR) {
-			final StackObject so = stackObjs.peek();
+			final StackObject so = stackObjs.top();
 			if (MODE_ARR == so.type) {
 				((JSONArray) so.jsonObject).put(value);
 			} else if (MODE_OBJ == so.type) {
@@ -297,7 +299,7 @@ public final class OXJSONWriter extends JSONWriter {
 
 	private void pushArray(final JSONArray ja) throws JSONException {
 		if (!stackObjs.isEmpty()) {
-			final StackObject stackObject = stackObjs.peek();
+			final StackObject stackObject = stackObjs.top();
 			if (MODE_ARR == stackObject.type) {
 				((JSONArray) stackObject.jsonObject).put(ja);
 			} else if (MODE_OBJ == stackObject.type) {
@@ -310,19 +312,19 @@ public final class OXJSONWriter extends JSONWriter {
 	}
 
 	private void pop() {
-		if (null == stackObjs.pop() || stackObjs.isEmpty()) {
+		if (null == stackObjs.topAndPop() || stackObjs.isEmpty()) {
 			/*
 			 * Done
 			 */
 			mode = MODE_DONE;
 			return;
 		}
-		if (MODE_ARR == stackObjs.peek().type) {
+		if (MODE_ARR == stackObjs.top().type) {
 			/*
 			 * Set mode to arary
 			 */
 			mode = MODE_ARR;
-		} else if (MODE_OBJ == stackObjs.peek().type) {
+		} else if (MODE_OBJ == stackObjs.top().type) {
 			/*
 			 * Set mode to object
 			 */
@@ -332,7 +334,7 @@ public final class OXJSONWriter extends JSONWriter {
 
 	private void pushObject(final JSONObject jo) throws JSONException {
 		if (!stackObjs.isEmpty()) {
-			final StackObject stackObject = stackObjs.peek();
+			final StackObject stackObject = stackObjs.top();
 			if (MODE_ARR == stackObject.type) {
 				((JSONArray) stackObject.jsonObject).put(jo);
 			} else if (MODE_OBJ == stackObject.type) {
@@ -361,24 +363,16 @@ public final class OXJSONWriter extends JSONWriter {
 		}
 	}
 	
-	private static class StackObject {
+	private static final class StackObject {
 
-		private final int type;
+		public final int type;
 
-		private final Object jsonObject;
+		public final Object jsonObject;
 
 		public StackObject(final int type, final Object jsonObject) {
 			super();
 			this.type = type;
 			this.jsonObject = jsonObject;
-		}
-
-		public Object getJsonObject() {
-			return jsonObject;
-		}
-
-		public int getType() {
-			return type;
 		}
 
 	}
