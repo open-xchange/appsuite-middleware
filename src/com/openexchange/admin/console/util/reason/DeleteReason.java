@@ -28,7 +28,7 @@ public class DeleteReason extends ReasonAbstraction {
     
         setOptions(parser);
     
-        Integer reason_id = null;
+        String reason_id = null;
         try {
             parser.ownparse(args2);
     
@@ -37,10 +37,10 @@ public class DeleteReason extends ReasonAbstraction {
             // get rmi ref
             final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME +OXUtilInterface.RMI_NAME);
     
-            reason_id = Integer.parseInt((String) parser.getOptionValue(this.reasonIDOption));
+            reason_id = (String) parser.getOptionValue(this.reasonIDOption);
             MaintenanceReason[] mrs = new MaintenanceReason[1];
             mrs[0] = new MaintenanceReason();
-            mrs[0].setId(reason_id);
+            mrs[0].setId(Integer.parseInt(reason_id));
             oxutil.deleteMaintenanceReason(mrs, auth);
             
             displayDeletedMessage(reason_id, null);

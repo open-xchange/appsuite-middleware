@@ -56,15 +56,15 @@ public class ContextHostingAbstraction extends ContextAbstraction {
     }
     
     protected final void displayDisabledMessage(final Integer id, final Integer ctxid) {
-        createMessageForStdout(id, ctxid, "disabled");
+        createMessageForStdout(String.valueOf(id), ctxid, "disabled");
     }
 
     protected final void displayEnabledMessage(final Integer id, final Integer ctxid) {
-        createMessageForStdout(id, ctxid, "enabled");
+        createMessageForStdout(String.valueOf(id), ctxid, "enabled");
     }
 
     protected final void displayMovedMessage(final Integer id, final Integer ctxid, final String text) {
-        createMessageForStdout(id, ctxid, text);
+        createMessageForStdout(String.valueOf(id), ctxid, text);
     }
 
     public void parseAndSetRemoveLoginMapping(AdminParser parser) {
@@ -105,7 +105,7 @@ public class ContextHostingAbstraction extends ContextAbstraction {
      * this method in order to create proper error messages.
      */
     @Override
-    protected void printFirstPartOfErrorText(final Integer id, final Integer ctxid) {
+    protected void printFirstPartOfErrorText(final String id, final Integer ctxid) {
         if (getClass().getName().matches("^.*\\.\\w*(?i)enable\\w*$")) {
             createMessageForStderr(id, ctxid, "could not be enabled: ");
         } else if (getClass().getName().matches("^.*\\.\\w*(?i)disable\\w*$")) {
@@ -140,7 +140,7 @@ public class ContextHostingAbstraction extends ContextAbstraction {
     }
 
     @Override
-    protected void printErrors(final Integer id, final Integer ctxid, final Exception e, final AdminParser parser) {
+    protected void printErrors(final String id, final Integer ctxid, final Exception e, final AdminParser parser) {
         if (e instanceof NoSuchReasonException) {
             final NoSuchReasonException exc = (NoSuchReasonException) e;
             printServerException(id, ctxid, exc);
