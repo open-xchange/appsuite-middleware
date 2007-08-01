@@ -80,6 +80,7 @@ public abstract class PermissionServlet extends SessionServlet {
 	 * @throws IOException
 	 */
 	
+	@Override
 	protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         // FIXME this needs a major rewrite. Executing everything before checking permissions isn't useful.
 		super.service(req, resp);
