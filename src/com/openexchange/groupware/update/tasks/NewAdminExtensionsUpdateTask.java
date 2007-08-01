@@ -69,6 +69,7 @@ import com.openexchange.groupware.update.exception.Classes;
 import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.server.DBPoolingException;
 
 /**
  * @author choeger
@@ -132,109 +133,51 @@ public class NewAdminExtensionsUpdateTask implements UpdateTask {
      * @see com.openexchange.groupware.update.UpdateTask#perform(com.openexchange.groupware.update.Schema,
      *      int)
      */
-    @OXThrowsMultiple(category = { Category.CODE_ERROR },
-            desc = { "" },
-            exceptionId = { 1 },
-            msg = { "An SQL error occurred while performing task NewAdminExtensionsUpdateTask: %1$s." })
+    @OXThrowsMultiple(category = { Category.SUBSYSTEM_OR_SERVICE_DOWN, Category.CODE_ERROR },
+            desc = { "", "" },
+            exceptionId = { 1, 2 },
+            msg = { "Cannot get database connection.", "SQL Problem: \"%s\"." })
     public void perform(Schema schema, int contextId) throws AbstractOXException {
         if (LOG.isInfoEnabled()) {
             LOG.info(STR_INFO);
         }
 
         Hashtable<String, ArrayList<String>> missingCols = missingColumns(contextId);
+        boolean deleteLastmodified = tableContainsColumn(contextId, "del_user", "lastModified");
 
         Connection writeCon = null;
-        PreparedStatement stmt = null;
         try {
             writeCon = Database.get(contextId, true);
-            try {
-                // create missing sequence tables
-                for(final String createStmt : new String[]{CREATE_SEQUENCE_UID, CREATE_SEQUENCE_GID,
-                        CREATE_SEQUENCE_MAIL}) {
-                    stmt = writeCon.prepareStatement(createStmt);
-                    stmt.executeUpdate();
-                    stmt.close();
-                }
-                // create missing columns in user and groups table
-                for(final String table : missingCols.keySet() ) {
-                    ArrayList<String> cols = missingCols.get(table);
-                    if( cols.size() > 0 && 
-                            ( table.equals(TABLE_USER) || table.equals(TABLE_DEL_USER) ) ) {
-                        for( final String col : cols ) {
-                            if( col.equals(COL_GID_NUMBER) ) {
-                                stmt = writeCon.prepareStatement("ALTER TABLE "+table+" ADD COLUMN gidNumber INT4 UNSIGNED NOT NULL");
-                                stmt.executeUpdate();
-                                stmt.close();
-                                stmt = writeCon.prepareStatement("UPDATE "+table+" SET gidNumber=?");
-                                stmt.setInt(1, NOGROUP);
-                                stmt.executeUpdate();
-                                stmt.close();
-                            } else if( col.equals(COL_UID_NUMBER) ) {
-                                stmt = writeCon.prepareStatement("ALTER TABLE "+table+" ADD COLUMN uidNumber INT4 UNSIGNED NOT NULL");
-                                stmt.executeUpdate();
-                                stmt.close();
-                                stmt = writeCon.prepareStatement("UPDATE "+table+" SET uidNumber=?");
-                                stmt.setInt(1, NOBODY);
-                                stmt.executeUpdate();
-                                stmt.close();
-                            } else if( col.equals(COL_HOME_DIRECTORY) ) {
-                                stmt = writeCon.prepareStatement("ALTER TABLE "+table+" ADD COLUMN homeDirectory VARCHAR(128) NOT NULL");
-                                stmt.executeUpdate();
-                                stmt.close();
-                                stmt = writeCon.prepareStatement("UPDATE "+table+" SET homeDirectory=?");
-                                stmt.setString(1, NOHOME);
-                                stmt.executeUpdate();
-                                stmt.close();
-                            } else if( col.equals(COL_LOGIN_SHELL) ) {
-                                stmt = writeCon.prepareStatement("ALTER TABLE "+table+" ADD COLUMN loginShell VARCHAR(128) NOT NULL");
-                                stmt.executeUpdate();
-                                stmt.close();
-                                stmt = writeCon.prepareStatement("UPDATE "+table+" SET loginShell=?");
-                                stmt.setString(1, NOSHELL);
-                                stmt.executeUpdate();
-                                stmt.close();
-                            } else if( col.equals(COL_PASSWORD_MECH) && table.equals(TABLE_DEL_USER) ) {
-                                stmt = writeCon.prepareStatement("ALTER TABLE "+table+" ADD COLUMN passwordMech VARCHAR(128) NOT NULL");
-                                stmt.executeUpdate();
-                                stmt.close();
-                                stmt = writeCon.prepareStatement("UPDATE "+table+" SET passwordMech=?");
-                                stmt.setString(1, SHA);
-                                stmt.executeUpdate();
-                                stmt.close();
-                            }
-                        }                        
-                    } else if( cols.size() > 0 && 
-                            ( table.equals(TABLE_GROUPS) || table.equals(TABLE_DEL_GROUPS) ) ) {
-                        for( final String col : cols ) {
-                            if( col.equals(COL_GID_NUMBER) ) {
-                                stmt = writeCon.prepareStatement("ALTER TABLE "+table+" ADD COLUMN gidNumber INT4 UNSIGNED NOT NULL");
-                                stmt.executeUpdate();
-                                stmt.close();
-                                stmt = writeCon.prepareStatement("UPDATE "+table+" SET gidNumber=?");
-                                stmt.setInt(1, NOGROUP);
-                                stmt.executeUpdate();
-                                stmt.close();
-                            }
-                        }
-                    }
-                }
-            } catch (SQLException e) {
-                throw EXCEPTION.create(1, e, e.getMessage());
+        } catch (DBPoolingException e) {
+            throw EXCEPTION.create(1, e);
+        }
+        try {
+            writeCon.setAutoCommit(false);
+            createSequenceTables(writeCon, contextId);
+            alterTables(writeCon, contextId, missingCols);
+            updateTables(writeCon, contextId, missingCols);
+            if( deleteLastmodified ) {
+                removeColumnFromTable(writeCon, contextId, "lastModified", "del_user");
             }
+            writeCon.commit();
+        } catch (SQLException e) {
+            throw EXCEPTION.create(2, e, e.getMessage());
         } finally {
-                closeSQLStuff(null, stmt);
-                if (writeCon != null) {
-                        Database.back(contextId, true, writeCon);
-                }
+            try {
+                writeCon.setAutoCommit(true);
+            } catch (SQLException e) {
+                LOG.error("Problem setting autocommit to true.", e);
+            }
+            Database.back(contextId, true, writeCon);
         }
 
     }
 
-    @OXThrowsMultiple(category = { Category.CODE_ERROR },
-            desc = { "" },
-            exceptionId = { 2 },
-            msg = { "An SQL error occurred while performing task NewAdminExtensionsUpdateTask: %1$s." })
-    private static final Hashtable<String, ArrayList<String>> missingColumns(final int contextId) throws AbstractOXException {
+    @OXThrowsMultiple(category = { Category.SUBSYSTEM_OR_SERVICE_DOWN, Category.CODE_ERROR },
+            desc = { "", "" },
+            exceptionId = { 3, 4 },
+            msg = { "Cannot get database connection.", "SQL Problem: \"%s\"." })
+    private final Hashtable<String, ArrayList<String>> missingColumns(final int contextId) throws AbstractOXException {
         Connection readCon = null;
         Statement stmt = null;
         ResultSet rs = null;
@@ -256,33 +199,221 @@ public class NewAdminExtensionsUpdateTask implements UpdateTask {
 
         try {
             readCon = Database.get(contextId, false);
-            try {
-                stmt = readCon.createStatement();
-                for(final String table : new String[]{ TABLE_USER, TABLE_GROUPS, TABLE_DEL_USER, TABLE_DEL_GROUPS } ) {
-                    rs = stmt.executeQuery("SELECT * FROM " + table);
-                    final ResultSetMetaData meta = rs.getMetaData();
-                    final int length = meta.getColumnCount();
-                    ArrayList<String> colList = retTables.get(table);
-                    for (int i = 1; i <= length && colList.size() > 0; i++) {
-                        for(final String col : new String[] { COL_GID_NUMBER, COL_UID_NUMBER,
-                                COL_HOME_DIRECTORY, COL_LOGIN_SHELL, COL_PASSWORD_MECH} ) {
-                            if( col.equals(meta.getColumnName(i)) ) {
-                                colList.remove(col);
-                            }
+        } catch (DBPoolingException e) {
+            throw EXCEPTION.create(3, e);
+        }
+        try {
+            stmt = readCon.createStatement();
+            for(final String table : new String[]{ TABLE_USER, TABLE_GROUPS, TABLE_DEL_USER, TABLE_DEL_GROUPS } ) {
+                rs = stmt.executeQuery("SELECT * FROM " + table);
+                final ResultSetMetaData meta = rs.getMetaData();
+                final int length = meta.getColumnCount();
+                ArrayList<String> colList = retTables.get(table);
+                for (int i = 1; i <= length && colList.size() > 0; i++) {
+                    for(final String col : new String[] { COL_GID_NUMBER, COL_UID_NUMBER,
+                            COL_HOME_DIRECTORY, COL_LOGIN_SHELL, COL_PASSWORD_MECH} ) {
+                        if( col.equals(meta.getColumnName(i)) ) {
+                            colList.remove(col);
                         }
                     }
-                    
                 }
 
-                return retTables;
+            }
+
+            return retTables;
+        } catch (SQLException e) {
+            throw EXCEPTION.create(4, e, e.getMessage());
+        } finally {
+            closeSQLStuff(rs, stmt);
+            if (readCon != null) {
+                Database.back(contextId, false, readCon);
+            }
+        }
+    }
+
+    @OXThrowsMultiple(category = { Category.CODE_ERROR },
+            desc = { "" },
+            exceptionId = { 5 },
+            msg = { "SQL Problem: \"%s\"." })
+    private void createSequenceTables(final Connection con, final int contextId) throws AbstractOXException {
+        PreparedStatement stmt = null;
+        try {
+            // create missing sequence tables
+            for(final String createStmt : new String[]{CREATE_SEQUENCE_UID, CREATE_SEQUENCE_GID,
+                    CREATE_SEQUENCE_MAIL}) {
+                stmt = con.prepareStatement(createStmt);
+                stmt.executeUpdate();
+                stmt.close();
+            }
+        } catch (SQLException e) {
+            throw EXCEPTION.create(5, e, e.getMessage());
+        } finally {
+            closeSQLStuff(null, stmt);
+        }
+    }
+
+    @OXThrowsMultiple(category = { Category.CODE_ERROR },
+            desc = { "" },
+            exceptionId = { 6 },
+            msg = { "SQL Problem: \"%s\"." })
+    private void alterTables(final Connection con, final int contextId, final Hashtable<String, ArrayList<String>> missingCols) throws AbstractOXException {
+        PreparedStatement stmt = null;
+        try {
+            for(final String table : missingCols.keySet() ) {
+                ArrayList<String> cols = missingCols.get(table);
+                if( cols.size() > 0 && 
+                        ( table.equals(TABLE_USER) || table.equals(TABLE_DEL_USER) ) ) {
+                    for( final String col : cols ) {
+                        if( col.equals(COL_GID_NUMBER) ) {
+                            stmt = con.prepareStatement("ALTER TABLE "+table+" ADD COLUMN gidNumber INT4 UNSIGNED NOT NULL");
+                            stmt.executeUpdate();
+                            stmt.close();
+                        } else if( col.equals(COL_UID_NUMBER) ) {
+                            stmt = con.prepareStatement("ALTER TABLE "+table+" ADD COLUMN uidNumber INT4 UNSIGNED NOT NULL");
+                            stmt.executeUpdate();
+                            stmt.close();
+                        } else if( col.equals(COL_HOME_DIRECTORY) ) {
+                            stmt = con.prepareStatement("ALTER TABLE "+table+" ADD COLUMN homeDirectory VARCHAR(128) NOT NULL");
+                            stmt.executeUpdate();
+                            stmt.close();
+                        } else if( col.equals(COL_LOGIN_SHELL) ) {
+                            stmt = con.prepareStatement("ALTER TABLE "+table+" ADD COLUMN loginShell VARCHAR(128) NOT NULL");
+                            stmt.executeUpdate();
+                            stmt.close();
+                        } else if( col.equals(COL_PASSWORD_MECH) && table.equals(TABLE_DEL_USER) ) {
+                            stmt = con.prepareStatement("ALTER TABLE "+table+" ADD COLUMN passwordMech VARCHAR(128) NOT NULL");
+                            stmt.executeUpdate();
+                            stmt.close();
+                        }
+                    }                        
+                } else if( cols.size() > 0 && 
+                        ( table.equals(TABLE_GROUPS) || table.equals(TABLE_DEL_GROUPS) ) ) {
+                    for( final String col : cols ) {
+                        if( col.equals(COL_GID_NUMBER) ) {
+                            stmt = con.prepareStatement("ALTER TABLE "+table+" ADD COLUMN gidNumber INT4 UNSIGNED NOT NULL");
+                            stmt.executeUpdate();
+                            stmt.close();
+                        }
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw EXCEPTION.create(6, e, e.getMessage());
+        } finally {
+            closeSQLStuff(null, stmt);
+        }
+    }
+
+    @OXThrowsMultiple(category = { Category.CODE_ERROR },
+            desc = { "" },
+            exceptionId = { 7 },
+            msg = { "SQL Problem: \"%s\"." })
+    private void updateTables(final Connection con, final int contextId, final Hashtable<String, ArrayList<String>> missingCols) throws AbstractOXException {
+        PreparedStatement stmt = null;
+        try {
+            for(final String table : missingCols.keySet() ) {
+                ArrayList<String> cols = missingCols.get(table);
+                if( cols.size() > 0 && 
+                        ( table.equals(TABLE_USER) || table.equals(TABLE_DEL_USER) ) ) {
+                    for( final String col : cols ) {
+                        if( col.equals(COL_GID_NUMBER) ) {
+                            stmt = con.prepareStatement("UPDATE "+table+" SET gidNumber=?");
+                            stmt.setInt(1, NOGROUP);
+                            stmt.executeUpdate();
+                            stmt.close();
+                        } else if( col.equals(COL_UID_NUMBER) ) {
+                            stmt = con.prepareStatement("UPDATE "+table+" SET uidNumber=?");
+                            stmt.setInt(1, NOBODY);
+                            stmt.executeUpdate();
+                            stmt.close();
+                        } else if( col.equals(COL_HOME_DIRECTORY) ) {
+                            stmt = con.prepareStatement("UPDATE "+table+" SET homeDirectory=?");
+                            stmt.setString(1, NOHOME);
+                            stmt.executeUpdate();
+                            stmt.close();
+                        } else if( col.equals(COL_LOGIN_SHELL) ) {
+                            stmt = con.prepareStatement("UPDATE "+table+" SET loginShell=?");
+                            stmt.setString(1, NOSHELL);
+                            stmt.executeUpdate();
+                            stmt.close();
+                        } else if( col.equals(COL_PASSWORD_MECH) && table.equals(TABLE_DEL_USER) ) {
+                            stmt = con.prepareStatement("UPDATE "+table+" SET passwordMech=?");
+                            stmt.setString(1, SHA);
+                            stmt.executeUpdate();
+                            stmt.close();
+                        }
+                    }                        
+                } else if( cols.size() > 0 && 
+                        ( table.equals(TABLE_GROUPS) || table.equals(TABLE_DEL_GROUPS) ) ) {
+                    for( final String col : cols ) {
+                        if( col.equals(COL_GID_NUMBER) ) {
+                            stmt = con.prepareStatement("UPDATE "+table+" SET gidNumber=?");
+                            stmt.setInt(1, NOGROUP);
+                            stmt.executeUpdate();
+                            stmt.close();
+                        }
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw EXCEPTION.create(7, e, e.getMessage());
+        } finally {
+            closeSQLStuff(null, stmt);
+        }
+    }
+
+    @OXThrowsMultiple(category = { Category.SUBSYSTEM_OR_SERVICE_DOWN, Category.CODE_ERROR },
+            desc = { "", "" },
+            exceptionId = { 8, 9 },
+            msg = { "Cannot get database connection.", "SQL Problem: \"%s\"." })
+    private final boolean tableContainsColumn(final int contextId, final String table, final String column) throws AbstractOXException {
+        Connection readCon = null;
+        Statement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            readCon = Database.get(contextId, false);
+        } catch (DBPoolingException e) {
+            throw EXCEPTION.create(8, e);
+        }
+        try {
+            try {
+                stmt = readCon.createStatement();
+                rs = stmt.executeQuery("SELECT * FROM " + table);
+                final ResultSetMetaData meta = rs.getMetaData();
+                final int length = meta.getColumnCount();
+                boolean found = false;
+                for (int i = 1; i <= length && !found; i++) {
+                    if( column.equals(meta.getColumnName(i)) ) {
+                        found = true;
+                    }
+                }
+                return found;
             } catch (SQLException e) {
-                throw EXCEPTION.create(2, e, e.getMessage());
+                throw EXCEPTION.create(9, e, e.getMessage());
             }
         } finally {
             closeSQLStuff(rs, stmt);
             if (readCon != null) {
                 Database.back(contextId, false, readCon);
             }
+        }
+    }
+
+    @OXThrowsMultiple(category = { Category.CODE_ERROR },
+            desc = { "" },
+            exceptionId = { 10 },
+            msg = { "SQL Problem: \"%s\"." })
+    private void removeColumnFromTable(final Connection con, final int contextId, final String column, final String table) throws AbstractOXException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("ALTER TABLE "+table+" DROP "+column);
+            stmt.executeUpdate();
+            stmt.close();
+        } catch (SQLException e) {
+            throw EXCEPTION.create(10, e, e.getMessage());
+        } finally {
+            closeSQLStuff(null, stmt);
         }
     }
 
