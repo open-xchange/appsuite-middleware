@@ -200,14 +200,10 @@ public class Tasks extends DataServlet {
 					response.setTimestamp(taskRequest.getTimestamp());
 					if (retval != -1) {
 						response.setData(retval);
-					} else if (sw.toString().equals("")) {
+					} else if (sw.isEmpty()) {
 						response.setData(null);
 					} else {
-						try {
-							response.setData(new JSONArray(sw.toString()));	
-						} catch (JSONException e) {
-							response.setData(new JSONObject(sw.toString()));
-						}
+						response.setData(sw.getObject());
 					}
 				} else {
 					httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "invalid json object");
