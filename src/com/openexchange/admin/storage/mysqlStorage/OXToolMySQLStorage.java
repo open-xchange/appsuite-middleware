@@ -1121,7 +1121,7 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
             rs = prep_check.executeQuery();
             if (rs.next()) {
                 // grab username and return 
-                return rs.getInt("identifier");
+                return rs.getInt("id");
             }else{
                 throw new StorageException("No such resource "+resourcename+" in context "+ctx.getIdAsInt().intValue()+"");
             }
