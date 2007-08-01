@@ -1131,20 +1131,22 @@ public class DatabaseImpl extends DBService {
 		final Connection con = getReadConnection(ctx);
 		final StringBuilder SQL = new StringBuilder(
 				"SELECT file_store_location from infostore_document where infostore_document.cid=? AND file_store_location is not null");
+        PreparedStatement stmt = null;
+        ResultSet result = null;
 		try {
-			final PreparedStatement stmt = con.prepareStatement(SQL.toString());
+			stmt = con.prepareStatement(SQL.toString());
 			stmt.setInt(1, ctx.getContextId());
-			final ResultSet result = stmt.executeQuery();
+			result = stmt.executeQuery();
 			while (result.next()) {
 				_strReturnArray.add(result.getString(1));
 			}
-			result.close();
-			stmt.close();
 		} catch (final SQLException e) {
 			LOG.error("", e);
 			throw new OXException(e);
-		}
-
+		} finally {
+            close(stmt, result);
+            releaseReadConnection(ctx, con);
+        }
 		return _strReturnArray;
 	}
 
@@ -1154,10 +1156,12 @@ public class DatabaseImpl extends DBService {
 		final Connection con = getReadConnection(ctx);
 		final StringBuilder SQL = new StringBuilder(
 				"SELECT file_store_location from del_infostore_document where del_infostore_document.cid=? AND file_store_location is not null");
+        PreparedStatement stmt = null;
+        ResultSet result = null;
 		try {
-			final PreparedStatement stmt = con.prepareStatement(SQL.toString());
+			stmt = con.prepareStatement(SQL.toString());
 			stmt.setInt(1, ctx.getContextId());
-			final ResultSet result = stmt.executeQuery();
+			result = stmt.executeQuery();
 			while (result.next()) {
 				_strReturnArray.add(result.getString(1));
 			}
@@ -1166,7 +1170,10 @@ public class DatabaseImpl extends DBService {
 		} catch (final SQLException e) {
 			LOG.error("", e);
 			throw new OXException(e);
-		}
+		} finally {
+            close(stmt, result);
+            releaseReadConnection(ctx, con);
+        }
 
 		return _strReturnArray;
 	}

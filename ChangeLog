@@ -1,3 +1,9 @@
+* 2007-08-01 - marcus.klein@open-xchange.com
+
+ - Bugfix #8410: Changed SQL command for deleting task participants to not use
+   if a value is within a set.
+ - Bugfix #8253: Fixed NPE in checkConsistency tool.
+
 * 2007-08-01 - francisco.laguna@open-xchange.com
 
  - Fixed Bug #8630 - Check module permission for multiple module 

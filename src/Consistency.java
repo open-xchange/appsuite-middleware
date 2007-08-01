@@ -73,6 +73,7 @@ import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.ContextException;
+import com.openexchange.groupware.contexts.ContextInit;
 import com.openexchange.groupware.contexts.ContextStorage;
 import com.openexchange.groupware.filestore.FilestoreException;
 import com.openexchange.groupware.filestore.FilestoreStorage;
@@ -425,6 +426,12 @@ public class Consistency {
             DatabaseInit.init();
         } catch (DBPoolingException e) {
             LOG.error("Initializing the database system failed.", e);
+            System.exit(1);
+        }
+        try {
+            ContextInit.init();
+        } catch (AbstractOXException e) {
+            LOG.error("Initializing the context system failed.", e);
             System.exit(1);
         }
 		if (args.length >= 0) {
