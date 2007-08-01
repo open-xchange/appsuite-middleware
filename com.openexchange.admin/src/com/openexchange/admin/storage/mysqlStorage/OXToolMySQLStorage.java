@@ -865,6 +865,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         for(int i=0; i<ids.length; i++) {
             ids[i] = users[i].getId();
         }
+        // FIXME: Should be rewritten to optimize performance
         return existsUser(ctx, ids);
     }
 
