@@ -51,6 +51,8 @@ package com.openexchange.admin.console;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
+import com.openexchange.admin.rmi.exceptions.MissingOptionException;
+
 /**
  * This class is used to extend the CmdLineParser which two main things:
  * 1. The ability to output help texts
@@ -70,18 +72,6 @@ public class AdminParser extends CmdLineParser {
     private static final String OPT_ENVOPTS_LONG = "environment";
     
     private static final String OPT_EXTENDED_LONG = "extendedoptions";
-    
-    public class MissingOptionException extends Exception {
-        /**
-         * 
-         */
-        private static final long serialVersionUID = 8134438398224308263L;
-
-        MissingOptionException(final String msg) {
-            super(msg);
-        }
-    }
-
     
     private class OptionInfo {
         public NeededTriState needed = NeededTriState.notneeded;
