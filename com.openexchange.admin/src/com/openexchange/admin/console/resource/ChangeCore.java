@@ -51,6 +51,7 @@ package com.openexchange.admin.console.resource;
 import java.rmi.RemoteException;
 
 import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.console.AdminParser.NeededTriState;
 import com.openexchange.admin.rmi.OXResourceInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -63,10 +64,10 @@ public abstract class ChangeCore extends ResourceAbstraction {
         setDefaultCommandLineOptions(parser);
 
         // id is required
-        setIdOption(parser, true);
+        setIdOption(parser);
+        setNameOption(parser, NeededTriState.eitheror);
 
         // optional
-        setNameOption(parser, false);
         setDisplayNameOption(parser, false);
         setAvailableOption(parser, false);
         setDescriptionOption(parser, false);
@@ -80,12 +81,16 @@ public abstract class ChangeCore extends ResourceAbstraction {
     protected final void commonfunctions(final AdminParser parser, final String[] args) {
         setOptions(parser);
 
+        String successtext = null;
         try {
             parser.ownparse(args);
 
             final Resource res = new Resource();
             
             parseAndSetResourceId(parser, res);
+            parseAndSetResourceName(parser, res);
+            
+            successtext = resourcenameOrIdSet();
 
             final Context ctx = contextparsing(parser);
 
@@ -99,10 +104,10 @@ public abstract class ChangeCore extends ResourceAbstraction {
             
             oxres.change(ctx, res, auth);
 
-            displayChangedMessage(resourceid, ctxid);
+            displayChangedMessage(successtext, ctxid);
             sysexit(0);
         } catch (final Exception e) {
-            printErrors(resourceid, ctxid, e, parser);
+            printErrors(successtext, ctxid, e, parser);
             sysexit(1);
         }
     }

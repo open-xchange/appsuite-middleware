@@ -55,9 +55,11 @@ import java.rmi.RemoteException;
 
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.ObjectNamingAbstraction;
+import com.openexchange.admin.console.AdminParser.NeededTriState;
 import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.rmi.OXResourceInterface;
 import com.openexchange.admin.rmi.dataobjects.Resource;
+import com.openexchange.admin.rmi.exceptions.MissingOptionException;
 
 public abstract class ResourceAbstraction extends ObjectNamingAbstraction {
     
@@ -87,6 +89,7 @@ public abstract class ResourceAbstraction extends ObjectNamingAbstraction {
     
     // For right error output
     protected String resourceid = null;
+    protected String resourcename = null;
     
     protected void setDisplayNameOption(final AdminParser admp,final boolean required){
         resourceDisplayNameOption = setShortLongOpt(admp, _OPT_DISPNAME_SHORT,_OPT_DISPNAME_LONG,"The resource display name",true, convertBooleantoTriState(required));        
@@ -96,8 +99,8 @@ public abstract class ResourceAbstraction extends ObjectNamingAbstraction {
         resourceRecipientOption = setShortLongOpt(admp, OPT_RECIPIENT_SHORT,OPT_RECIPIENT_LONG,"Recipient who should receive mail addressed to the resource",true, convertBooleantoTriState(required));        
     }
     
-    protected void setNameOption(final AdminParser admp,final boolean required){
-        resourceNameOption =  setShortLongOpt(admp, _OPT_NAME_SHORT,_OPT_NAME_LONG,"The resource name",true, convertBooleantoTriState(required)); 
+    protected void setNameOption(final AdminParser admp,final NeededTriState required){
+        resourceNameOption =  setShortLongOpt(admp, _OPT_NAME_SHORT,_OPT_NAME_LONG,"The resource name",true, required); 
     }
     
     protected void setAvailableOption(final AdminParser admp,final boolean required){
@@ -112,8 +115,8 @@ public abstract class ResourceAbstraction extends ObjectNamingAbstraction {
         resourceEmailOption =  setShortLongOpt(admp,_OPT_EMAIL_SHORT,_OPT_EMAIL_LONG,"Email of this resource", true, convertBooleantoTriState(required)); 
     }
     
-    protected void setIdOption(final AdminParser admp,final boolean required){
-        resourceIdOption = setShortLongOpt(admp,_OPT_RESOURCEID_SHORT,_OPT_RESOURCEID_LONG,"Id of this resource", true, convertBooleantoTriState(required)); 
+    protected void setIdOption(final AdminParser admp){
+        resourceIdOption = setShortLongOpt(admp,_OPT_RESOURCEID_SHORT,_OPT_RESOURCEID_LONG,"Id of this resource", true, NeededTriState.eitheror); 
     }
 
     protected final OXResourceInterface getResourceInterface() throws NotBoundException, MalformedURLException, RemoteException {
@@ -153,10 +156,10 @@ public abstract class ResourceAbstraction extends ObjectNamingAbstraction {
         }
     }
 
-    private void parseAndSetResourceName(final AdminParser parser, final Resource res) {
-        final String resourceName = (String) parser.getOptionValue(this.resourceNameOption);
-        if (resourceName != null) {
-            res.setName(resourceName);
+    protected void parseAndSetResourceName(final AdminParser parser, final Resource res) {
+        this.resourcename = (String) parser.getOptionValue(this.resourceNameOption);
+        if (this.resourcename != null) {
+            res.setName(this.resourcename);
         }
     }
 
@@ -174,8 +177,25 @@ public abstract class ResourceAbstraction extends ObjectNamingAbstraction {
 
     protected void parseAndSetResourceId(final AdminParser parser, final Resource res) {
         resourceid = (String) parser.getOptionValue(this.resourceIdOption);
-        res.setId(Integer.parseInt(resourceid));
+        if (null != resourceid) {
+            res.setId(Integer.parseInt(resourceid));
+        }
     }
     
+    protected String resourcenameOrIdSet() throws MissingOptionException {
+        String successtext;
+        // Throw the order of this checks we archive that the id is preferred over the name
+        if (null == this.resourceid) {
+            if (null == this.resourcename) {
+                throw new MissingOptionException("Either resourcename or resourceid must be given");
+            } else {
+                successtext = this.resourcename;
+            }
+        } else {
+            successtext = String.valueOf(this.resourceid);
+        }
+        return successtext;
+    }
+
     
 }
