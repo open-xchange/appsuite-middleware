@@ -62,6 +62,7 @@ public class AdminParser extends CmdLineParser {
     public enum NeededTriState {
         notneeded,
         possibly,
+        eitheror,
         needed;
     }
 
@@ -323,7 +324,6 @@ public class AdminParser extends CmdLineParser {
             sb.deleteCharAt(sb.length() - 1);
             throw new MissingOptionException("Option(s) \"" + sb.toString() + "\" missing");
         }
-
     }
 
     public final void setExtendedOptions() {
@@ -352,8 +352,15 @@ public class AdminParser extends CmdLineParser {
                 basicOutput(optInfo);
             }
         }
+        printFinalLines();
+    }
+
+    private void printFinalLines() {
         System.err.println("\nEntries marked with an asterisk (*) are mandatory.");
-        System.err.println("Entries marked with an question mark (?) are mandatory depending on your configuration.\n");
+        System.err.println("Entries marked with an question mark (?) are mandatory depending on your");
+        System.err.println("configuration.");
+        System.err.println("Entries marked with a pipe (|) are mandatory for one another which means that");
+        System.err.println("at least one of them must be set.\n");
     }
 
     public final void printUsageExtended() {
@@ -362,8 +369,7 @@ public class AdminParser extends CmdLineParser {
         for (final OptionInfo optInfo : this.optinfolist) {
             basicOutput(optInfo);
         }
-        System.err.println("\nEntries marked with an asterisk (*) are mandatory.");
-        System.err.println("Entries marked with an question mark (?) are mandatory depending on your configuration.\n");
+        printFinalLines();
     }
 
     private final void basicOutput(final OptionInfo optInfo) {
@@ -416,6 +422,8 @@ public class AdminParser extends CmdLineParser {
             return "*";
         } else if (needed == NeededTriState.possibly) {
             return "?";
+        } else if (needed == NeededTriState.eitheror) {
+            return "|";
         } else {
             return " ";
         }
