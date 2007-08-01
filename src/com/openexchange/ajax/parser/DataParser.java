@@ -51,6 +51,7 @@
 
 package com.openexchange.ajax.parser;
 
+import com.openexchange.tools.servlet.OXJSONException;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -237,7 +238,7 @@ public abstract class DataParser {
 		return tmp;
 	}
 	
-	public static int checkInt(final JSONObject jsonObj, final String name) throws JSONException, OXMandatoryFieldException {
+	public static int checkInt(final JSONObject jsonObj, final String name) throws OXMandatoryFieldException, OXJSONException, JSONException {
 		final String tmp = jsonObj.getString(name);
 		if (tmp != null && tmp.length() == 0) {
 			throw new OXMandatoryFieldException(_missingField + name);
@@ -246,7 +247,7 @@ public abstract class DataParser {
         try {
             return Integer.parseInt(tmp);
 		} catch (NumberFormatException exc) {
-			throw new JSONException(STR_INVALID_VALUE_IN_ATTRIBUTE + name + STR_VALUE + tmp + '\'');
+			throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, STR_INVALID_VALUE_IN_ATTRIBUTE + name + STR_VALUE + tmp + '\'');
         }
 	}
 	
@@ -258,7 +259,7 @@ public abstract class DataParser {
 		return Boolean.parseBoolean(tmp);
 	}
 	
-	public static float checkFloat(final JSONObject jsonObj, final String name) throws JSONException, OXMandatoryFieldException {
+	public static float checkFloat(final JSONObject jsonObj, final String name) throws JSONException, OXMandatoryFieldException, OXJSONException {
 		final String tmp = jsonObj.getString(name);
 		if (tmp != null && tmp.length() == 0) {
 			throw new OXMandatoryFieldException(_missingField + name);
@@ -267,11 +268,11 @@ public abstract class DataParser {
 		try {
 			return Float.parseFloat(tmp);
 		} catch (NumberFormatException exc) {
-			throw new JSONException(STR_INVALID_VALUE_IN_ATTRIBUTE + name + STR_VALUE + tmp + '\'');
+			throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, STR_INVALID_VALUE_IN_ATTRIBUTE + name + STR_VALUE + tmp + '\'');
 		}
 	}
 	
-	public static Date checkDate(final JSONObject jsonObj, final String name) throws JSONException, OXMandatoryFieldException {
+	public static Date checkDate(final JSONObject jsonObj, final String name) throws JSONException, OXMandatoryFieldException, OXJSONException {
 		final String tmp = parseString(jsonObj, name);
 		if (tmp == null) {
 			throw new OXMandatoryFieldException(_missingField + name);
@@ -280,11 +281,11 @@ public abstract class DataParser {
 		try {
 			return new Date(Long.parseLong(tmp));
 		} catch (NumberFormatException exc) {
-			throw new JSONException(STR_INVALID_VALUE_IN_ATTRIBUTE + name + STR_VALUE + tmp + '\'');
+			throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, STR_INVALID_VALUE_IN_ATTRIBUTE + name + STR_VALUE + tmp + '\'');
 		}
 	}
 	
-	public static Date checkTime(final JSONObject jsonObj, final String name, final TimeZone timeZone) throws JSONException, OXMandatoryFieldException {
+	public static Date checkTime(final JSONObject jsonObj, final String name, final TimeZone timeZone) throws JSONException, OXMandatoryFieldException, OXJSONException {
 		final String tmp = parseString(jsonObj, name);
 		if (tmp == null) {
 			throw new OXMandatoryFieldException(_missingField + name);
@@ -295,7 +296,7 @@ public abstract class DataParser {
 			d.setTime(d.getTime()-offset);
 			return d;
 		} catch (NumberFormatException exc) {
-			throw new JSONException(STR_INVALID_VALUE_IN_ATTRIBUTE + name + STR_VALUE + tmp + '\'');
+			throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, STR_INVALID_VALUE_IN_ATTRIBUTE + name + STR_VALUE + tmp + '\'');
 		}
 	}
 	
@@ -315,7 +316,7 @@ public abstract class DataParser {
 		return tmp;
 	}
 	
-	public static int[] parseJSONIntArray(final JSONObject jsonObj, final String name) throws JSONException {
+	public static int[] parseJSONIntArray(final JSONObject jsonObj, final String name) throws JSONException, OXJSONException {
 		if (!jsonObj.has(name)) {
 			return null;
 		}
@@ -333,7 +334,7 @@ public abstract class DataParser {
 		
 			return i;
 		} catch (NumberFormatException exc) {
-			throw new JSONException(STR_INVALID_VALUE_IN_ATTRIBUTE + name + STR_VALUE + tmp + '\'');
+			throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, STR_INVALID_VALUE_IN_ATTRIBUTE + name + STR_VALUE + tmp + '\'');
 		}
 	}
 	
@@ -355,7 +356,7 @@ public abstract class DataParser {
 		return s;
 	}
 	
-	public static Date[] parseJSONDateArray(final JSONObject jsonObj, final String name) throws JSONException {
+	public static Date[] parseJSONDateArray(final JSONObject jsonObj, final String name) throws JSONException, OXJSONException {
 		if (!jsonObj.has(name)) {
 			return null;
 		}
@@ -373,11 +374,11 @@ public abstract class DataParser {
 		
 			return d;
 		} catch (NumberFormatException exc) {
-			throw new JSONException(STR_INVALID_VALUE_IN_ATTRIBUTE + name + STR_VALUE + tmp + '\'');
+			throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, STR_INVALID_VALUE_IN_ATTRIBUTE + name + STR_VALUE + tmp + '\'');
 		}
 	}
 	
-	public static int[] checkJSONIntArray(final JSONObject jsonObj, final String name) throws JSONException, OXMandatoryFieldException {
+	public static int[] checkJSONIntArray(final JSONObject jsonObj, final String name) throws JSONException, OXMandatoryFieldException, OXJSONException {
 		final int[] i = parseJSONIntArray(jsonObj, name);
 		if (i == null) {
 			throw new OXMandatoryFieldException(_missingField + name);
