@@ -29,7 +29,7 @@ public class UnregisterServer extends ServerAbstraction {
 
         setOptions(parser);
 
-        Integer serverid = null;
+        String serverid = null;
         try {
             parser.ownparse(args2);
 
@@ -38,11 +38,11 @@ public class UnregisterServer extends ServerAbstraction {
             // get rmi ref
             final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME +OXUtilInterface.RMI_NAME);
             Server sv = new Server();
-            serverid = Integer.parseInt((String) parser.getOptionValue(serverIdOption));
-            sv.setId(serverid);
+            serverid = (String) parser.getOptionValue(serverIdOption);
+            sv.setId(Integer.parseInt(serverid));
             oxutil.unregisterServer(sv, auth);
             
-            displayUnregisteredMessage(sv.getId());
+            displayUnregisteredMessage(serverid);
             sysexit(0);
         } catch (final Exception e) {
             printErrors(serverid, null, e, parser);
