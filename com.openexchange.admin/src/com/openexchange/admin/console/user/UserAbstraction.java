@@ -71,6 +71,7 @@ import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.MissingOptionException;
 
 public abstract class UserAbstraction extends ObjectNamingAbstraction {
     
@@ -265,6 +266,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected Option accessWebmailOption = null;
     
     // For right error output
+    protected String username = null;
     protected Integer userid = null;
     
     /**
@@ -289,27 +291,27 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
 
     
     protected final void setIdOption(final AdminParser admp){
-        this.idOption =  setShortLongOpt(admp,OPT_ID_SHORT,OPT_ID_LONG,"Id of the user", true, NeededTriState.needed);
+        this.idOption =  setShortLongOpt(admp,OPT_ID_SHORT,OPT_ID_LONG,"Id of the user", true, NeededTriState.eitheror);
     }
     
-    protected final void setUsernameOption(final AdminParser admp){
-        this.userNameOption = setShortLongOpt(admp,OPT_USERNAME_SHORT,OPT_USERNAME_LONG,"Username of the user", true, NeededTriState.needed);
+    protected final void setUsernameOption(final AdminParser admp, final NeededTriState needed) {
+        this.userNameOption = setShortLongOpt(admp,OPT_USERNAME_SHORT,OPT_USERNAME_LONG,"Username of the user", true, needed);
     }
     
-    protected final void setDisplayNameOption(final AdminParser admp){
-        this.displayNameOption = setShortLongOpt(admp,OPT_DISPLAYNAME_SHORT,OPT_DISPLAYNAME_LONG,"Display name of the user", true, NeededTriState.needed); 
+    protected final void setDisplayNameOption(final AdminParser admp, final NeededTriState needed) {
+        this.displayNameOption = setShortLongOpt(admp,OPT_DISPLAYNAME_SHORT,OPT_DISPLAYNAME_LONG,"Display name of the user", true, needed); 
     }
     
-    protected final void setPasswordOption(final AdminParser admp){
-        this.passwordOption =  setShortLongOpt(admp,OPT_PASSWORD_SHORT,OPT_PASSWORD_LONG,"Password for the user", true, NeededTriState.needed); 
+    protected final void setPasswordOption(final AdminParser admp, final NeededTriState needed) {
+        this.passwordOption =  setShortLongOpt(admp,OPT_PASSWORD_SHORT,OPT_PASSWORD_LONG,"Password for the user", true, needed); 
     }
     
-    protected final void setGivenNameOption(final AdminParser admp){
-        this.givenNameOption =  setShortLongOpt(admp,OPT_GIVENNAME_SHORT,OPT_GIVENNAME_LONG,"Given name for the user", true, NeededTriState.needed); 
+    protected final void setGivenNameOption(final AdminParser admp, final NeededTriState needed) {
+        this.givenNameOption =  setShortLongOpt(admp,OPT_GIVENNAME_SHORT,OPT_GIVENNAME_LONG,"Given name for the user", true, needed); 
     }
     
-    protected final void setSurNameOption(final AdminParser admp){
-        this.surNameOption =  setShortLongOpt(admp,OPT_SURNAME_SHORT,OPT_SURNAME_LONG,"Sur name for the user", true, NeededTriState.needed); 
+    protected final void setSurNameOption(final AdminParser admp, final NeededTriState needed){
+        this.surNameOption =  setShortLongOpt(admp,OPT_SURNAME_SHORT,OPT_SURNAME_LONG,"Sur name for the user", true, needed); 
     }
     
     protected final void setLanguageOption(final AdminParser admp){
@@ -320,8 +322,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         this.timezoneOption =  setShortLongOpt(admp,OPT_TIMEZONE_SHORT,OPT_TIMEZONE_LONG,"Timezone of the user (Europe/Berlin)", true, NeededTriState.notneeded); 
     }
     
-    protected final void setPrimaryMailOption(final AdminParser admp){
-        this.primaryMailOption =  setShortLongOpt(admp,OPT_PRIMARY_EMAIL_SHORT,OPT_PRIMARY_EMAIL_LONG,"Primary mail address", true, NeededTriState.needed); 
+    protected final void setPrimaryMailOption(final AdminParser admp, final NeededTriState needed){
+        this.primaryMailOption =  setShortLongOpt(admp,OPT_PRIMARY_EMAIL_SHORT,OPT_PRIMARY_EMAIL_LONG,"Primary mail address", true, needed); 
     }
     
     protected final void setDepartmentOption(final AdminParser admp){
@@ -459,49 +461,43 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
      * @param usr User object which will be changed
      */
     protected final void parseAndSetMandatoryOptionsinUser(final AdminParser parser, final User usr) {
-        if(parser.getOptionValue(this.userNameOption)!=null){
-            final String optionValue = (String) parser.getOptionValue(this.userNameOption);
-            if (null != optionValue) {
-                usr.setUsername(optionValue);
-            }        
-        }
+        parseAndSetUsername(parser, usr);
         parseAndSetMandatoryOptionsWithoutUsernameInUser(parser, usr);
     }
 
+    protected void parseAndSetUsername(final AdminParser parser, final User usr) {
+        this.username = (String) parser.getOptionValue(this.userNameOption);
+        if (null != this.username) {
+            usr.setUsername(this.username);
+        }
+    }
+
     protected final void parseAndSetMandatoryOptionsWithoutUsernameInUser(final AdminParser parser, final User usr) {
-        if(parser.getOptionValue(this.displayNameOption)!=null){
-            final String optionValue2 = (String) parser.getOptionValue(this.displayNameOption);
-            if (null != optionValue2) {
-                usr.setDisplay_name(optionValue2);
-            }        
+        final String optionValue2 = (String) parser.getOptionValue(this.displayNameOption);
+        if (null != optionValue2) {
+            usr.setDisplay_name(optionValue2);
+        }        
+        
+        final String optionValue3 = (String) parser.getOptionValue(this.givenNameOption);
+        if (null != optionValue3) {
+            usr.setGiven_name(optionValue3);
         }
         
-        if(parser.getOptionValue(this.givenNameOption)!=null){
-            final String optionValue3 = (String) parser.getOptionValue(this.givenNameOption);
-            if (null != optionValue3) {
-                usr.setGiven_name(optionValue3);
-            }
-        }
-        
-        if(parser.getOptionValue(this.surNameOption)!=null){
-            final String optionValue4 = (String) parser.getOptionValue(this.surNameOption);
-            if (null != optionValue4) {
-                usr.setSur_name(optionValue4);
-            }        
-        }
-        if(parser.getOptionValue(this.passwordOption)!=null){
-            final String optionValue5 = (String) parser.getOptionValue(this.passwordOption);
-            if (null != optionValue5) {
-                usr.setPassword(optionValue5);
-            }   
-        }
-        if(parser.getOptionValue(this.primaryMailOption)!=null){
-            final String optionValue6 = (String) parser.getOptionValue(this.primaryMailOption);
-            if (null != optionValue6) {
-                usr.setPrimaryEmail(optionValue6);
-                usr.setEmail1(optionValue6);
-            }        
-        }
+        final String optionValue4 = (String) parser.getOptionValue(this.surNameOption);
+        if (null != optionValue4) {
+            usr.setSur_name(optionValue4);
+        }        
+
+        final String optionValue5 = (String) parser.getOptionValue(this.passwordOption);
+        if (null != optionValue5) {
+            usr.setPassword(optionValue5);
+        }   
+
+        final String optionValue6 = (String) parser.getOptionValue(this.primaryMailOption);
+        if (null != optionValue6) {
+            usr.setPrimaryEmail(optionValue6);
+            usr.setEmail1(optionValue6);
+        }        
     }
     
     /**
@@ -686,12 +682,16 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     }
 
     protected final void setMandatoryOptions(final AdminParser parser) {
-        setUsernameOption(parser);
-        setDisplayNameOption(parser);
-        setGivenNameOption(parser);
-        setSurNameOption(parser);
-        setPasswordOption(parser);
-        setPrimaryMailOption(parser);
+        setUsernameOption(parser, NeededTriState.needed);
+        setMandatoryOptionsWithoutUsername(parser, NeededTriState.needed);
+    }
+
+    protected void setMandatoryOptionsWithoutUsername(final AdminParser parser, final NeededTriState needed) {
+        setDisplayNameOption(parser, needed);
+        setGivenNameOption(parser, needed);
+        setSurNameOption(parser, needed);
+        setPasswordOption(parser, needed);
+        setPrimaryMailOption(parser, needed);
     }
 
     protected final void setOptionalOptions(final AdminParser parser) {
@@ -806,8 +806,26 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     }
 
     protected void parseAndSetUserId(final AdminParser parser, final User usr) {
-        userid = Integer.parseInt((String) parser.getOptionValue(this.idOption));
-        usr.setId(userid);
+        final String optionValue = (String) parser.getOptionValue(this.idOption);
+        if (null != optionValue) {
+            userid = Integer.parseInt(optionValue);
+            usr.setId(userid);
+        }
+    }
+
+    protected String usernameOrIdSet() throws MissingOptionException {
+        String successtext;
+        // Throw the order of this checks we archive that the id is preferred over the name
+        if (null == this.userid) {
+            if (null == this.username) {
+                throw new MissingOptionException("Either username or userid must be given");
+            } else {
+                successtext = this.username;
+            }
+        } else {
+            successtext = String.valueOf(this.userid);
+        }
+        return successtext;
     }
 }
 
