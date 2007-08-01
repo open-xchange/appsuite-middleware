@@ -200,10 +200,13 @@ public class UserTest extends AbstractTest {
         final UserModuleAccess access = new UserModuleAccess();
         
         final User urs = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
-        final User createduser = oxu.create(ctx, urs, access, cred);     
+        final User createduser = oxu.create(ctx, urs, access, cred); 
+        
+        final User usernameuser = new User();
+        usernameuser.setUsername(createduser.getUsername());
         
         // now load user from server and check if data is correct, else fail
-        final User srv_loaded = oxu.getData(ctx,createduser,cred);
+        final User srv_loaded = oxu.getData(ctx, usernameuser, cred);
         if(createduser.getId().equals(srv_loaded.getId())){
             //verify data
             compareUser(createduser,srv_loaded);
