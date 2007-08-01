@@ -851,7 +851,7 @@ public class RdbTaskStorage extends TaskStorage {
      */
     private void deleteInternals(final Context ctx, final Connection con,
         final int taskId, final Set<InternalParticipant> participants,
-        final StorageType type, final boolean sanityCheck) throws SQLException {
+        final StorageType type, final boolean sanityCheck) throws TaskException {
         final int[] identifier = new int[participants.size()];
         int pos = 0;
         for (InternalParticipant participant : participants) {
@@ -883,41 +883,14 @@ public class RdbTaskStorage extends TaskStorage {
      * @param type type of participants to delete.
      * @param sanityCheck if <code>true</code> it will be checked if all given
      * participants have been deleted.
-     * @throws SQLException if a SQL error occurs.
+     * @throws TaskException 
      * @deprecated Use ParticipantStorage.
      */
     private void deleteInternals(final Context ctx, final Connection con,
         final int taskId, final int[] participants, final StorageType type,
-        final boolean sanityCheck) throws SQLException {
-        if (participants.length == 0) {
-            return;
-        }
-        final StringBuilder sql = new StringBuilder();
-        sql.append(SQL.DELETE_PARTS.get(type));
-        for (int i = 0; i < participants.length; i++) {
-            sql.append("?,");
-        }
-        sql.setLength(sql.length() - 1);
-        sql.append(')');
-        PreparedStatement stmt = null;
-        final int deleted;
-        try {
-            stmt = con.prepareStatement(sql.toString());
-            int counter = 1;
-            stmt.setInt(counter++, ctx.getContextId());
-            stmt.setInt(counter++, taskId);
-            for (int participant : participants) {
-                stmt.setInt(counter++, participant);
-            }
-            deleted = stmt.executeUpdate();
-        } finally {
-            closeSQLStuff(null, stmt);
-        }
-        if (sanityCheck && participants.length != deleted) {
-            final TaskException tske = new TaskException(Code
-                .PARTICIPANT_DELETE_WRONG, participants.length, deleted);
-            LOG.error(tske.getMessage(), tske);
-        }
+        final boolean sanityCheck) throws TaskException {
+        RdbParticipantStorage.getInstance().deleteInternal(ctx, con, taskId,
+            participants, type, sanityCheck);
     }
 
     /**

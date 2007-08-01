@@ -194,23 +194,21 @@ public class RdbParticipantStorage extends ParticipantStorage {
         if (users.length == 0) {
             return;
         }
-        final StringBuilder sql = new StringBuilder();
-        sql.append(SQL.DELETE_PARTS.get(type));
-        for (int i = 0; i < users.length; i++) {
-            sql.append("?,");
-        }
-        sql.setCharAt(sql.length() - 1, ')');
         PreparedStatement stmt = null;
-        final int deleted;
+        int deleted = 0;
         try {
-            stmt = con.prepareStatement(sql.toString());
+            stmt = con.prepareStatement(SQL.DELETE_PARTS.get(type));
             int counter = 1;
             stmt.setInt(counter++, ctx.getContextId());
             stmt.setInt(counter++, taskId);
             for (int user : users) {
-                stmt.setInt(counter++, user);
+                stmt.setInt(counter, user);
+                stmt.addBatch();
             }
-            deleted = stmt.executeUpdate();
+            final int[] rows = stmt.executeBatch();
+            for (int row : rows) {
+                deleted += row;
+            }
         } catch (SQLException e) {
             throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
         } finally {
