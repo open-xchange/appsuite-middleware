@@ -1988,11 +1988,10 @@ public class Mail extends PermissionServlet implements UploadListener {
 				if (msgUIDs.length > 0) {
 					final StringBuilder sb = new StringBuilder();
 					final Response response = new Response();
-					final JSONArray jsonArr = new JSONArray();
 					for (int k = 0; k < msgUIDs.length; k++) {
 						response.reset();
-						jsonArr.reset();
 						sb.setLength(0);
+						final JSONArray jsonArr = new JSONArray();
 						jsonArr.put(sb.append(destFolder).append(SEPERATOR).append(msgUIDs[k]).toString());
 						response.setData(jsonArr);
 						response.setTimestamp(null);

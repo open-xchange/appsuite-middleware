@@ -241,18 +241,12 @@ public class Multiple extends SessionServlet {
 			final Response mailResp = new Response();
 			mailResp.setData(STR_EMPTY);
 			respArr.put(mailResp.getJSON());
-			//Response.write(mailResp, w);
 		} else {
 			final JSONArray ja = mailReq.getContent();
 			final int len = ja.length();
 			for (int i = 0; i < len; i++) {
 				respArr.put(ja.getJSONObject(i));
 			}
-			/*try {
-				w.write(mailReq.getContent());
-			} catch (IOException e) {
-				LOG.error(e.getMessage(), e);
-			}*/
 		}
 	}
 
@@ -266,15 +260,6 @@ public class Multiple extends SessionServlet {
 				appointmentRequest.action(action, jsonObj);
 				response.setTimestamp(appointmentRequest.getTimestamp());
 				response.setData(jsonWriter.isEmpty() ? STR_EMPTY : jsonWriter.getObject());
-				/*if (sw.toString().equals(STR_EMPTY)) {
-					response.setData(STR_EMPTY);
-				} else {
-					try {
-						response.setData(new JSONArray(sw.toString()));
-					} catch (JSONException e) {
-						response.setData(new JSONObject(sw.toString()));
-					}
-				}*/
 			} catch (OXMandatoryFieldException e) {
 				LOG.error(e.getMessage(), e);
 				response.setException(e);
@@ -411,17 +396,6 @@ public class Multiple extends SessionServlet {
 				} else {
 					response.setData(jsonWriter.getObject());
 				}
-				/*if (retval != -1) {
-					response.setData(Integer.valueOf(retval));
-				} else if (sw.toString().equals(STR_EMPTY)) {
-					response.setData(STR_EMPTY);
-				} else {
-					try {
-						response.setData(new JSONArray(sw.toString()));
-					} catch (JSONException e) {
-						response.setData(new JSONObject(sw.toString()));
-					}
-				}*/
 			} catch (OXFolderNotFoundException e) {
 				LOG.error(e.getMessage(), e);
 				response.setException(e);
@@ -528,11 +502,6 @@ public class Multiple extends SessionServlet {
 				} else {
 					LOG.error("Non-Continguous mail request with more than one response");
 				}
-				/*if (mailrequest.getContent().equals(STR_EMPTY)) {
-					response.setData(STR_EMPTY);
-				} else {
-					response = Response.parse(mailrequest.getContent());
-				}*/
 			} catch (OXException e) {
 				LOG.error(e.getMessage(), e);
 				response.setException(e);

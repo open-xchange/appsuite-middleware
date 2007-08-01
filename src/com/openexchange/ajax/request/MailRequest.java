@@ -220,8 +220,7 @@ public final class MailRequest {
 		}
 	}
 
-	public JSONArray getContent() throws JSONException {
-		writer.endArray();
+	public JSONArray getContent() {
 		return (JSONArray) (!writer.isEmpty() && writer.isJSONArray() ? writer.getObject() : null);
 	}
 

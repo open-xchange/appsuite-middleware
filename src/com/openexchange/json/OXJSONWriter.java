@@ -300,6 +300,16 @@ public final class OXJSONWriter extends JSONWriter {
 		return (mode == MODE_INIT);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return jsonObject.toString();
+	}
+
 	/**
 	 * Append a value.
 	 * 

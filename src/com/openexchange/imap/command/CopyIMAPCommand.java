@@ -87,7 +87,7 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
 
 	private final String destFolderName;
 
-	private int fetchRespIndex;
+	private boolean proceed = true;
 
 	/**
 	 * Constructor using UIDs ans consequently performs a <code>UID COPY</code>
@@ -152,7 +152,7 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
 	 */
 	@Override
 	protected boolean addLoopCondition() {
-		return (fast ? true : fetchRespIndex < length);
+		return (fast ? false : proceed);
 	}
 
 	/*
@@ -227,43 +227,43 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
 		} else if (!(response instanceof IMAPResponse)) {
 			return;
 		}
-		try {
-			final IMAPResponse ir = (IMAPResponse) response;
-			/**
-			 * Parse response:
-			 * 
-			 * <pre>
-			 * OK [COPYUID 1184051486 10031:10523,10525:11020,11022:11027,11030:11047,11050:11051,11053:11558 1024:2544] Completed
-			 * </pre>
-			 */
-			UIDCopyResponse copyResp = null;
-			int atomCount = 0;
-			String next = null;
-			while ((next = ir.readAtom()) != null) {
-				switch (++atomCount) {
-				case 1:
-					if (!"[COPYUID".equals(next)) {
-						return;
-					}
-					copyResp = new UIDCopyResponse();
-					break;
-				case 3:
-					copyResp.src = next;
-					break;
-				case 4:
-					copyResp.dest = next.replaceFirst("\\]", "");
-					break;
-				default:
-					break;
+		final IMAPResponse ir = (IMAPResponse) response;
+		/**
+		 * Parse response:
+		 * 
+		 * <pre>
+		 * OK [COPYUID 1184051486 10031:10523,10525:11020,11022:11027,11030:11047,11050:11051,11053:11558 1024:2544] Completed
+		 * </pre>
+		 * <pre>
+		 * * 45 EXISTS..* 2 RECENT..A4 OK [COPYUID 1185853191 7,32 44:45] Completed
+		 * </pre>
+		 */
+		UIDCopyResponse copyResp = null;
+		int atomCount = 0;
+		String next = null;
+		while ((next = ir.readAtom()) != null) {
+			switch (++atomCount) {
+			case 1:
+				if (!"[COPYUID".equals(next)) {
+					return;
 				}
+				copyResp = new UIDCopyResponse();
+				break;
+			case 3:
+				copyResp.src = next;
+				break;
+			case 4:
+				copyResp.dest = next.replaceFirst("\\]", "");
+				break;
+			default:
+				break;
 			}
-			if (copyResp == null) {
-				return;
-			}
-			copyResp.fillResponse(uids, retval);
-		} finally {
-			fetchRespIndex++;
 		}
+		if (copyResp == null) {
+			return;
+		}
+		copyResp.fillResponse(uids, retval);
+		proceed = false;
 	}
 
 	/*

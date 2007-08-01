@@ -9,6 +9,7 @@
    to query all folder GREATER THAN sent timestamp from GUI.
  - Enhanced com.openexchange.tools.stack.Stack interface to offer size()
    method
+ - Fixed moving/copying of messages
 
 * 2007-07-31 - francisco.laguna@open-xchange.com
 
