@@ -29,7 +29,7 @@ public class Enable extends ContextHostingAbstraction {
             displayEnabledMessage(ctxid, null);
             sysexit(0);
         } catch (final Exception e) {
-            printErrors(ctxid, null, e, parser);
+            printErrors(String.valueOf(ctxid), null, e, parser);
         }
 
     }

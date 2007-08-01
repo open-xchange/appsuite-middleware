@@ -48,7 +48,7 @@ public class MoveContextFilestore extends ContextHostingAbstraction {
             // In this special case the second parameter is not the context id but the filestore id
             // this also applies to all following error outputting methods
             // see com.openexchange.admin.console.context.ContextHostingAbstraction.printFirstPartOfErrorText(Integer, Integer)
-            printErrors(ctxid, filestoreid, e, parser);
+            printErrors(String.valueOf(ctxid), filestoreid, e, parser);
         }
     }
 

@@ -49,7 +49,7 @@ public class MoveContextDatabase extends ContextHostingAbstraction {
             // In this special case the second parameter is not the context id but the database id
             // this also applies to all following error outputting methods
             // see com.openexchange.admin.console.context.ContextHostingAbstraction.printFirstPartOfErrorText(Integer, Integer)
-            printErrors(ctxid, dbid, e, parser);
+            printErrors(String.valueOf(ctxid), dbid, e, parser);
         }
     }
 
