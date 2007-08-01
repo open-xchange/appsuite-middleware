@@ -112,12 +112,12 @@ public abstract class CreateCore extends ContextAbstraction {
 
             parseAndSetContextQuota(parser, ctx);
             
-            final Integer id = maincall(parser, ctx, usr, auth).getIdAsInt();
+            maincall(parser, ctx, usr, auth).getIdAsInt();
             
-            displayCreatedMessage(id, null);
+            displayCreatedMessage(String.valueOf(ctxid), null);
             sysexit(0);
         } catch (final Exception e) {
-            printErrors(ctxid, null, e, parser);
+            printErrors(String.valueOf(ctxid), null, e, parser);
         }
     }
 

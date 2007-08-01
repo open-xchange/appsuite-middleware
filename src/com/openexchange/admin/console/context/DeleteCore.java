@@ -78,10 +78,10 @@ public abstract class DeleteCore extends ContextAbstraction {
     
             maincall(ctx, auth);
     
-            displayDeletedMessage(ctxid, null);
+            displayDeletedMessage(String.valueOf(ctxid), null);
             sysexit(0);
         } catch (final Exception e) {
-            printErrors(ctxid, null, e, parser);
+            printErrors(String.valueOf(ctxid), null, e, parser);
         }
     }
     

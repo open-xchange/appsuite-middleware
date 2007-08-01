@@ -41,10 +41,10 @@ public abstract class ChangeCore extends ContextAbstraction {
 
             maincall(parser, ctx, auth);
 
-            displayChangedMessage(ctxid, null);
+            displayChangedMessage(String.valueOf(ctxid), null);
             sysexit(0);
         } catch (final Exception e) {
-            printErrors(ctxid, null, e, parser);
+            printErrors(String.valueOf(ctxid), null, e, parser);
         }
     }
 
