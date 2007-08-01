@@ -56,11 +56,11 @@ public abstract class DatabaseAbstraction extends UtilAbstraction{
     protected Option poolMaxOption = null;
     
     // Needed for right error output
-    protected Integer dbid = null;
+    protected String dbid = null;
     
     protected void parseAndSetDatabaseID(final AdminParser parser, final Database db) {
-        dbid = Integer.parseInt((String) parser.getOptionValue(this.databaseIdOption));
-        db.setId(dbid);
+        dbid = (String) parser.getOptionValue(this.databaseIdOption);
+        db.setId(Integer.parseInt(dbid));
     }
     
     protected void parseAndSetHostname(final AdminParser parser, final Database db) {
