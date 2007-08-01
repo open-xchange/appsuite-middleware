@@ -84,7 +84,7 @@ import com.openexchange.tools.stack.Stack;
  *     final JSONArray jsonArr = (JSONArray) w.getObject();
  *     ...
  *     
- * } else if (w.isJSONObject()) {
+ * } else if (w.isJSONObject()) { //what else?!
  *     final JSONObject jsonObj = (JSONObject) w.getObject();
  *     ...
  *     
