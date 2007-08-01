@@ -63,6 +63,7 @@ import com.openexchange.ajax.writer.AppointmentWriter;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api.OXObjectNotFoundException;
+import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.calendar.CalendarCommonCollection;
@@ -84,8 +85,6 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
-
-import java.io.Writer;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -164,6 +163,10 @@ public class AppointmentRequest {
 	}
 	
 	public void action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, OXConflictException, OXException, JSONException, SearchIteratorException, AjaxException, OXJSONException {
+		if (!sessionObj.getUserConfiguration().hasCalendar()) {
+			throw new OXPermissionException(OXPermissionException.Code.NoPermissionForModul, "calendar");
+		}
+		
 		if (action.equalsIgnoreCase(AJAXServlet.ACTION_CONFIRM)) {
 			actionConfirm(jsonObject);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_NEW)) {

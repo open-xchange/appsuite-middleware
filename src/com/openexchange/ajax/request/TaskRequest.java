@@ -153,6 +153,10 @@ public class TaskRequest {
 	}
 
 	public int action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXObjectNotFoundException, OXConflictException, OXPermissionException, OXFolderNotFoundException, SearchIteratorException, AjaxException, OXException, OXJSONException {
+		if (!sessionObj.getUserConfiguration().hasTask()) {
+			throw new OXPermissionException(OXPermissionException.Code.NoPermissionForModul, "task");
+		}
+		
 		if (action.equalsIgnoreCase(AJAXServlet.ACTION_CONFIRM)) {
 			actionConfirm(jsonObject);
 			return -1;

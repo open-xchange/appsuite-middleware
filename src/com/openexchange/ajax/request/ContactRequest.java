@@ -67,6 +67,7 @@ import com.openexchange.ajax.parser.ContactParser;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.writer.ContactWriter;
 import com.openexchange.api.OXMandatoryFieldException;
+import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.api2.OXException;
@@ -111,6 +112,10 @@ public class ContactRequest {
 	}
 	
 	public void action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXConcurrentModificationException, SearchIteratorException, AjaxException, OXException {
+		if (!sessionObj.getUserConfiguration().hasContact()) {
+			throw new OXPermissionException(OXPermissionException.Code.NoPermissionForModul, "contact");
+		}
+		
 		if (action.equalsIgnoreCase(AJAXServlet.ACTION_NEW)) {
 			actionNew(jsonObject);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_DELETE)) {
