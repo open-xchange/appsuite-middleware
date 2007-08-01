@@ -51,6 +51,7 @@ package com.openexchange.admin.console.resource;
 import java.rmi.RemoteException;
 
 import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.console.AdminParser.NeededTriState;
 import com.openexchange.admin.rmi.OXResourceInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -62,7 +63,7 @@ public abstract class CreateCore extends ResourceAbstraction {
     protected final void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptions(parser);
 
-        setNameOption(parser, true);
+        setNameOption(parser, NeededTriState.needed);
         setDisplayNameOption(parser, true);
         setAvailableOption(parser, false);
         setDescriptionOption(parser, false);
