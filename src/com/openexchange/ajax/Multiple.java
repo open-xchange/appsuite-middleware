@@ -309,6 +309,9 @@ public class Multiple extends SessionServlet {
 			} catch (OXException e) {
 				LOG.error(e.getMessage(), e);
 				response.setException(e);
+			} catch (OXJSONException exc) {
+		        LOG.error(exc.getMessage(), exc);
+			    response.setException(exc);
 			} catch (JSONException e) {
 				final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
 				LOG.error(oje.getMessage(), oje);
@@ -332,6 +335,9 @@ public class Multiple extends SessionServlet {
 			} catch (AjaxException e) {
 				LOG.error(e.getMessage(), e);
 				response.setException(e);
+			} catch (OXJSONException exc) {
+		        LOG.error(exc.getMessage(), exc);
+			    response.setException(exc);
 			} catch (JSONException e) {
 				final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
 				LOG.error(oje.getMessage(), oje);
@@ -355,6 +361,9 @@ public class Multiple extends SessionServlet {
 			} catch (AjaxException e) {
 				LOG.error(e.getMessage(), e);
 				response.setException(e);
+			} catch (OXJSONException exc) {
+		        LOG.error(exc.getMessage(), exc);
+			    response.setException(exc);
 			} catch (JSONException e) {
 				final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
 				LOG.error(oje.getMessage(), oje);
@@ -378,6 +387,9 @@ public class Multiple extends SessionServlet {
 			} catch (AjaxException e) {
 				LOG.error(e.getMessage(), e);
 				response.setException(e);
+			} catch (OXJSONException exc) {
+		        LOG.error(exc.getMessage(), exc);
+			    response.setException(exc);
 			} catch (JSONException e) {
 				final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
 				LOG.error(oje.getMessage(), oje);

@@ -98,7 +98,10 @@ public class Resource extends DataServlet {
 			final ResourceRequest resourceRequest = new ResourceRequest(sessionObj, sw); 
 			resourceRequest.action(action, jsonObj);
 			response.setTimestamp(resourceRequest.getTimestamp());
-			response.setData(sw.getObject());	
+			response.setData(sw.getObject());
+		} catch (OXJSONException exc) {
+            LOG.error(exc.getMessage(), exc);
+            response.setException(exc);
 		} catch (JSONException e) {
             final OXJSONException oje = new OXJSONException(OXJSONException.Code
                 .JSON_WRITE_ERROR, e);
@@ -179,6 +182,9 @@ public class Resource extends DataServlet {
 				response.setTimestamp(resourceRequest.getTimestamp());
 				response.setData(sw.getObject());
 			}
+		} catch (OXJSONException exc) {
+            LOG.error(exc.getMessage(), exc);
+            response.setException(exc);
 		} catch (JSONException e) {
             final OXJSONException oje = new OXJSONException(OXJSONException.Code
                 .JSON_WRITE_ERROR, e);
@@ -199,7 +205,6 @@ public class Resource extends DataServlet {
 		}
 		
 		writeResponse(response, httpServletResponse);
-
 	}
 	
 	protected boolean hasModulePermission(final SessionObject sessionObj) {

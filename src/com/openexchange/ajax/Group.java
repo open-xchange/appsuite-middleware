@@ -104,6 +104,9 @@ public class Group extends DataServlet {
 		} catch (OXMandatoryFieldException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
+		} catch (OXJSONException exc) {
+            LOG.error(exc.getMessage(), exc);
+            response.setException(exc);
 		} catch (JSONException e) {
             final OXJSONException oje = new OXJSONException(OXJSONException.Code
                 .JSON_WRITE_ERROR, e);
@@ -171,6 +174,9 @@ public class Group extends DataServlet {
 		} catch (OXMandatoryFieldException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
+		} catch (OXJSONException exc) {
+            LOG.error(exc.getMessage(), exc);
+            response.setException(exc);
 		} catch (JSONException e) {
             final OXJSONException oje = new OXJSONException(OXJSONException.Code
                 .JSON_WRITE_ERROR, e);

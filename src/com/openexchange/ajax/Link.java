@@ -104,6 +104,9 @@ public class Link extends DataServlet {
 		} catch (OXConflictException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
+		} catch (OXJSONException exc) {
+            LOG.error(exc.getMessage(), exc);
+            response.setException(exc);
 		} catch (OXException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
@@ -163,6 +166,9 @@ public class Link extends DataServlet {
 			} else {
 				httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "no data found");
 			}
+		} catch (OXJSONException exc) {
+            LOG.error(exc.getMessage(), exc);
+            response.setException(exc);
 		} catch (JSONException e) {
             final OXJSONException oje = new OXJSONException(OXJSONException.Code
                 .JSON_WRITE_ERROR, e);
