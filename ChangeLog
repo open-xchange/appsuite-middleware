@@ -10,6 +10,7 @@
  - Enhanced com.openexchange.tools.stack.Stack interface to offer size()
    method
  - Fixed moving/copying of messages
+ - Added module permission check in Multiple servlet's mail request
 
 * 2007-07-31 - francisco.laguna@open-xchange.com
 

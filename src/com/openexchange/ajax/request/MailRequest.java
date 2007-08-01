@@ -60,6 +60,7 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.ajax.fields.FolderFields;
+import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.MailInterface;
 import com.openexchange.groupware.container.mail.JSONMessageObject;
 import com.openexchange.imap.OXMailException;
@@ -110,7 +111,10 @@ public final class MailRequest {
 	}
 
 	public void action(final String action, final JSONObject jsonObject, final MailInterface mailInterface)
-			throws SearchIteratorException, JSONException, OXMailException {
+			throws SearchIteratorException, JSONException, OXMailException, OXPermissionException {
+		if (!session.getUserConfiguration().hasCalendar()) {
+			throw new OXPermissionException(OXPermissionException.Code.NoPermissionForModul, "mail");
+		}
 		if (action.equalsIgnoreCase(AJAXServlet.ACTION_ALL)) {
 			MAIL_SERVLET.actionGetAllMails(session, writer, jsonObject, mailInterface);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_COUNT)) {
