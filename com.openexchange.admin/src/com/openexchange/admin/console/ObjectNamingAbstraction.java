@@ -33,23 +33,23 @@ public abstract class ObjectNamingAbstraction extends BasicCommandlineOptions {
 
     protected abstract String getObjectName();
 
-    protected final void displayCreatedMessage(final Integer id, final Integer ctxid) {
+    protected final void displayCreatedMessage(final String id, final Integer ctxid) {
         createMessageForStdout(id, ctxid, "created");
     }
 
-    protected final void displayChangedMessage(final Integer id, final Integer ctxid) {
+    protected final void displayChangedMessage(final String id, final Integer ctxid) {
         createMessageForStdout(id, ctxid, "changed");
     }
 
-    protected final void displayDeletedMessage(Integer id, Integer ctxid) {
+    protected final void displayDeletedMessage(final String id, final Integer ctxid) {
         createMessageForStdout(id, ctxid, "deleted");
     }
     
-    protected void createMessageForStdout(final Integer id, final Integer ctxid, final String type) {
+    protected void createMessageForStdout(final String id, final Integer ctxid, final String type) {
         createMessage(id, ctxid, type, System.out);
     }
 
-    private void createMessage(final Integer id, final Integer ctxid, final String type, final PrintStream ps) {
+    private void createMessage(final String id, final Integer ctxid, final String type, final PrintStream ps) {
         final StringBuilder sb = new StringBuilder(getObjectName());
         if (null != id) {
             sb.append(" ");
@@ -64,21 +64,21 @@ public abstract class ObjectNamingAbstraction extends BasicCommandlineOptions {
         ps.println(sb.toString());
     }
     
-    protected void createMessageForStderr(final Integer id, final Integer ctxid, final String type) {
+    protected void createMessageForStderr(final String id, final Integer ctxid, final String type) {
         createMessage(id, ctxid, type, System.err);
     }
     
-    protected final void printError(final Integer id, final Integer ctxid, final String msg) {
+    protected final void printError(final String id, final Integer ctxid, final String msg) {
         printFirstPartOfErrorText(id, ctxid);
         printError(msg);    
     }
 
-    protected final void printInvalidInputMsg(final Integer id, final Integer ctxid, final String msg) {
+    protected final void printInvalidInputMsg(final String id, final Integer ctxid, final String msg) {
         printFirstPartOfErrorText(id, ctxid);
         printInvalidInputMsg(msg);    
     }    
 
-    protected void printServerException(final Integer id, final Integer ctxid, final Exception e) {
+    protected void printServerException(final String id, final Integer ctxid, final Exception e) {
         printFirstPartOfErrorText(id, ctxid);
         printServerException(e);
     }
@@ -87,7 +87,7 @@ public abstract class ObjectNamingAbstraction extends BasicCommandlineOptions {
         System.err.println("RMI module "+nbe.getMessage()+" not available on server");
     }
 
-    protected void printFirstPartOfErrorText(final Integer id, final Integer ctxid) {
+    protected void printFirstPartOfErrorText(final String id, final Integer ctxid) {
         if (getClass().getName().matches("^.*\\.\\w*(?i)create\\w*$")) {
             createMessageForStderr(id, ctxid, "could not be created: ");
         } else if (getClass().getName().matches("^.*\\.\\w*(?i)change\\w*$")) {
@@ -99,7 +99,7 @@ public abstract class ObjectNamingAbstraction extends BasicCommandlineOptions {
         }
     }
 
-    protected void printErrors(final Integer id, final Integer ctxid, final Exception e, AdminParser parser) {
+    protected void printErrors(final String id, final Integer ctxid, final Exception e, AdminParser parser) {
         // Remember that all the exceptions in this list must be written in the order with the lowest exception first
         // e.g. if Aexception extends Bexception then Aexception has to be written before Bexception in this list. Otherwise
         // the if clause for Bexception will match beforehand
@@ -187,6 +187,10 @@ public abstract class ObjectNamingAbstraction extends BasicCommandlineOptions {
             sysexit(1);
         } else if (e instanceof URISyntaxException) {
             final URISyntaxException exc = (URISyntaxException) e;
+            printServerException(id, ctxid, exc);
+            sysexit(1);
+        } else if (e instanceof RuntimeException) {
+            final RuntimeException exc = (RuntimeException) e;
             printServerException(id, ctxid, exc);
             sysexit(1);
         }
