@@ -20,12 +20,16 @@ jcs.region.OXFolderCache.cacheattributes=org.apache.jcs.engine.CompositeCacheAtt
 jcs.region.OXFolderCache.cacheattributes.MaxObjects=1000000
 jcs.region.OXFolderCache.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache
 jcs.region.OXFolderCache.cacheattributes.UseMemoryShrinker=true
-jcs.region.OXFolderCache.cacheattributes.MaxMemoryIdleTimeSeconds=1800
+# Disabe MaxMemoryIdleTimeSeconds cause some entries can be eternal
+# Shrinker removal works as follows:
+# 1. Check 'Eternal', 'MaxLifeSeconds' AND 'IdleTime' for element-attribute-caused removal
+# 2. Check 'MaxMemoryIdleTime' for cache-attribute-caused removal
+jcs.region.OXFolderCache.cacheattributes.MaxMemoryIdleTimeSeconds=-1
 jcs.region.OXFolderCache.cacheattributes.ShrinkerIntervalSeconds=60
 jcs.region.OXFolderCache.elementattributes=org.apache.jcs.engine.ElementAttributes
 jcs.region.OXFolderCache.elementattributes.IsEternal=false
 # NO MAX LIFE SECONDS FOR FOLDER ENTRIES
-jcs.region.OXFolderCache.elementattributes.MaxLifeSeconds=300
+jcs.region.OXFolderCache.elementattributes.MaxLifeSeconds=-1
 jcs.region.OXFolderCache.elementattributes.IdleTime=1800
 jcs.region.OXFolderCache.elementattributes.IsSpool=false
 jcs.region.OXFolderCache.elementattributes.IsRemote=false
@@ -99,6 +103,23 @@ jcs.region.User.elementattributes.IdleTime=180
 jcs.region.User.elementattributes.IsSpool=false
 jcs.region.User.elementattributes.IsRemote=false
 jcs.region.User.elementattributes.IsLateral=false
+
+# UserConfiguration Cache only uses RAM
+jcs.region.UserConfiguration=LTCP
+jcs.region.UserConfiguration.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
+jcs.region.UserConfiguration.cacheattributes.MaxObjects=1000000
+jcs.region.UserConfiguration.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache
+jcs.region.UserConfiguration.cacheattributes.UseMemoryShrinker=true
+jcs.region.UserConfiguration.cacheattributes.MaxMemoryIdleTimeSeconds=180
+jcs.region.UserConfiguration.cacheattributes.ShrinkerIntervalSeconds=60
+jcs.region.UserConfiguration.cacheattributes.MaxSpoolPerRun=500
+jcs.region.UserConfiguration.elementattributes=org.apache.jcs.engine.ElementAttributes
+jcs.region.UserConfiguration.elementattributes.IsEternal=false
+jcs.region.UserConfiguration.elementattributes.MaxLifeSeconds=300
+jcs.region.UserConfiguration.elementattributes.IdleTime=180
+jcs.region.UserConfiguration.elementattributes.IsSpool=false
+jcs.region.UserConfiguration.elementattributes.IsRemote=false
+jcs.region.UserConfiguration.elementattributes.IsLateral=false
 
 # Context Cache only uses RAM
 jcs.region.Context=LTCP
@@ -174,9 +195,9 @@ jcs.auxiliary.LTCP=org.apache.jcs.auxiliary.lateral.socket.tcp.LateralTCPCacheFa
 jcs.auxiliary.LTCP.attributes=org.apache.jcs.auxiliary.lateral.socket.tcp.TCPLateralCacheAttributes
 # jcs.auxiliary.LTCP.attributes.TcpServers=localhost:1111,localhost:1112
 jcs.auxiliary.LTCP.attributes.TcpListenerPort=1118
-# jcs.auxiliary.LTCP.attributes.UdpDiscoveryAddr=224.0.0.1
-# jcs.auxiliary.LTCP.attributes.UdpDiscoveryPort=6780
-# jcs.auxiliary.LTCP.attributes.UdpDiscoveryEnabled=true
+jcs.auxiliary.LTCP.attributes.UdpDiscoveryAddr=224.0.0.1
+jcs.auxiliary.LTCP.attributes.UdpDiscoveryPort=6780
+jcs.auxiliary.LTCP.attributes.UdpDiscoveryEnabled=true
 # Setting Receive equal to false means the cache operates in send-only mode
 jcs.auxiliary.LTCP.attributes.Receive=true
 # Setting AllowGet equal to false would cause the auxiliary cache to return null from any get request

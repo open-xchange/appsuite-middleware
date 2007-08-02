@@ -4,9 +4,6 @@
 # processed.
 # * com.openexchange.groupware.contexts.RdbLoginInfo split only the login info
 #   by the @ sign and resolve context and user in database.
-# * com.openexchange.groupware.contexts.LoginLDAPAuth authenticates the user
-#   against an LDAP server. This is a special implementation for using an OX5
-#   RHEL ldap.
 LoginInfo=com.openexchange.groupware.contexts.RdbLoginInfo
 
 # Name of the class implementing the UserConfigurationStorage.
@@ -54,6 +51,9 @@ Notification=@oxgroupwaresysconfdir@/notification.properties
 # Location of the participant.properties configuration file. This file
 # configures certain options about participants.
 Participant=@oxgroupwaresysconfdir@/participant.properties
+
+# Directory in which all property files for servlet mapping are kept
+ServletMappingDir=@oxgroupwaresysconfdir@/servletmappings
 
 CONFIGPATH:@oxgroupwaresysconfdir@
 AJPPROPERTIES:@oxgroupwaresysconfdir@/ajp.properties
