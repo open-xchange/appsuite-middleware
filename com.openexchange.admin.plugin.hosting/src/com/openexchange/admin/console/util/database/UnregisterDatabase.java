@@ -3,6 +3,7 @@ package com.openexchange.admin.console.util.database;
 import java.rmi.Naming;
 
 import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
@@ -19,12 +20,16 @@ public class UnregisterDatabase extends DatabaseAbstraction {
 
         setOptions(parser);
 
+        String successtext = null;
         try {
             parser.ownparse(args2);
 
             final Database db = new Database();
             
             parseAndSetDatabaseID(parser, db);
+            parseAndSetDatabasename(parser, db);
+            
+            successtext = databasenameOrIdSet();
             
             final Credentials auth = credentialsparsing(parser);
             
@@ -33,10 +38,10 @@ public class UnregisterDatabase extends DatabaseAbstraction {
 
             oxutil.unregisterDatabase(db, auth);
             
-            displayUnregisteredMessage(dbid);
+            displayUnregisteredMessage(successtext);
             sysexit(0);
         } catch (final Exception e) {
-            printErrors(String.valueOf(dbid), null, e, parser);
+            printErrors(successtext, null, e, parser);
         }
     }
 
@@ -48,5 +53,6 @@ public class UnregisterDatabase extends DatabaseAbstraction {
         setDefaultCommandLineOptionsWithoutContextID(parser);
 
         setDatabaseIDOption(parser);
+        setDatabaseNameOption(parser, NeededQuadState.eitheror);
     }
 }
