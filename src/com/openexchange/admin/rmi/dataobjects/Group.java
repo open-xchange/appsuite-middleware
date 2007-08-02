@@ -221,7 +221,7 @@ public class Group extends ExtendableDataObject {
     
     @Override
     protected final String[] getMandatoryMembersChange() {
-        return new String[]{ "id" };
+        return null;
     }
 
 

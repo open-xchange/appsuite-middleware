@@ -51,6 +51,7 @@ package com.openexchange.admin.console.group;
 import java.rmi.RemoteException;
 
 import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.rmi.OXGroupInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -63,7 +64,7 @@ public abstract class CreateCore extends GroupAbstraction {
         setDefaultCommandLineOptions(parser);
 
         // create options for this command line tool
-        setGroupNameOption(parser, true);
+        setGroupNameOption(parser, NeededQuadState.needed);
         setGroupDisplayNameOption(parser, true);
         setAddMembersOption(parser, false);
         
