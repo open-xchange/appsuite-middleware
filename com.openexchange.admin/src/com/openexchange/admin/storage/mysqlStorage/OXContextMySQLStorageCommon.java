@@ -252,9 +252,8 @@ public abstract class OXContextMySQLStorageCommon {
 
     }
 
-    public final void createAdminForContext(final Context ctx, final User admin_user, final Connection ox_write_con, final int internal_user_id, final int contact_id, final int uid_number) throws StorageException, InvalidDataException {
+    public final void createAdminForContext(final Context ctx, final User admin_user, final Connection ox_write_con, final int internal_user_id, final int contact_id, final int uid_number, final UserModuleAccess access) throws StorageException, InvalidDataException {
         final OXUserStorageInterface oxs = OXUserStorageInterface.getInstance();
-        final UserModuleAccess access = new UserModuleAccess(true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true);
 
         final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
         tool.primaryMailExists(ctx, admin_user.getPrimaryEmail());
