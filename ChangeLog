@@ -7,6 +7,8 @@
 
  - Fixed Bug #7393 - Folder 0 cannot be resolved
  - Fixed Bug #8618 - ICal import is possible if calendar module is disabled 
+ - Fixed Bug #8635 - Use transaction to generate unique id for reminder
+ - Fixed Bug #8545 - Reminder import use more database connections
 
 * 2007-08-02 - marcus.klein@open-xchange.com
 
