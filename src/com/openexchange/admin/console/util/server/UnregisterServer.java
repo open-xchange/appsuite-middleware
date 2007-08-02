@@ -3,7 +3,7 @@ package com.openexchange.admin.console.util.server;
 import java.rmi.Naming;
 
 import com.openexchange.admin.console.AdminParser;
-import com.openexchange.admin.console.AdminParser.NeededTriState;
+import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -56,6 +56,6 @@ public class UnregisterServer extends ServerAbstraction {
     private void setOptions(AdminParser parser) {
         setDefaultCommandLineOptionsWithoutContextID(parser);
 
-        serverIdOption = setShortLongOpt(parser, OPT_NAME_SERVER_ID_SHORT, OPT_NAME_SERVER_ID_LONG, "The id of the server which should be deleted", true, NeededTriState.needed);
+        serverIdOption = setShortLongOpt(parser, OPT_NAME_SERVER_ID_SHORT, OPT_NAME_SERVER_ID_LONG, "The id of the server which should be deleted", true, NeededQuadState.needed);
     }
 }

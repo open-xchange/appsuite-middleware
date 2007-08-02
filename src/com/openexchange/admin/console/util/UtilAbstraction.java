@@ -2,7 +2,7 @@ package com.openexchange.admin.console.util;
 
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.ObjectNamingAbstraction;
-import com.openexchange.admin.console.AdminParser.NeededTriState;
+import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.CmdLineParser.Option;
 
 /**
@@ -20,7 +20,7 @@ public abstract class UtilAbstraction extends ObjectNamingAbstraction {
     protected final static String OPT_NAME_SEARCH_PATTERN_LONG = "searchpattern";
     
     protected void setSearchOption(final AdminParser parser){
-        this.searchOption = setShortLongOpt(parser, OPT_NAME_SEARCH_PATTERN_SHORT,OPT_NAME_SEARCH_PATTERN_LONG,"Search/List pattern!",true, NeededTriState.notneeded);
+        this.searchOption = setShortLongOpt(parser, OPT_NAME_SEARCH_PATTERN_SHORT,OPT_NAME_SEARCH_PATTERN_LONG,"Search/List pattern!",true, NeededQuadState.notneeded);
     }
     
     protected void displayRegisteredMessage(final String id) {

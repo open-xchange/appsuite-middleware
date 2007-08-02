@@ -3,7 +3,7 @@ package com.openexchange.admin.console.context;
 import java.rmi.Naming;
 
 import com.openexchange.admin.console.AdminParser;
-import com.openexchange.admin.console.AdminParser.NeededTriState;
+import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -59,6 +59,6 @@ public class MoveContextFilestore extends ContextHostingAbstraction {
     private void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptions(parser);
         //setMaintenanceReasodIDOption(parser, true);
-        this.targetFilestoreIDOption = setShortLongOpt(parser, OPT_FILESTORE_SHORT, OPT_FILESTORE_LONG, "Target filestore id", true, NeededTriState.needed);
+        this.targetFilestoreIDOption = setShortLongOpt(parser, OPT_FILESTORE_SHORT, OPT_FILESTORE_LONG, "Target filestore id", true, NeededQuadState.needed);
     }
 }

@@ -3,7 +3,7 @@ package com.openexchange.admin.console.util.filestore;
 import java.net.URISyntaxException;
 
 import com.openexchange.admin.console.AdminParser;
-import com.openexchange.admin.console.AdminParser.NeededTriState;
+import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.console.util.UtilAbstraction;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
@@ -51,28 +51,28 @@ public abstract class FilestoreAbstraction extends UtilAbstraction {
         }
     }
 
-    protected void setPathOption(final AdminParser parser, final NeededTriState needed) {
+    protected void setPathOption(final AdminParser parser, final NeededQuadState needed) {
         this.filestorePathOption = setShortLongOpt(parser, OPT_NAME_STORE_PATH_SHORT, OPT_NAME_STORE_PATH_LONG, "Path to store filestore contents in URI format e.g. file:///tmp/filestore", true, needed);
     }
 
     protected void setSizeOption(final AdminParser parser, final String defaultvalue) {
         if (null != defaultvalue) {
-            this.filestoreSizeOption = setShortLongOptWithDefault(parser, OPT_NAME_STORE_SIZE_SHORT, OPT_NAME_STORE_SIZE_LONG, "The maximum size of the filestore", defaultvalue, true, NeededTriState.notneeded);
+            this.filestoreSizeOption = setShortLongOptWithDefault(parser, OPT_NAME_STORE_SIZE_SHORT, OPT_NAME_STORE_SIZE_LONG, "The maximum size of the filestore", defaultvalue, true, NeededQuadState.notneeded);
         } else {
-            this.filestoreSizeOption = setShortLongOpt(parser, OPT_NAME_STORE_SIZE_SHORT, OPT_NAME_STORE_SIZE_LONG, "The maximum size of the filestore", true, NeededTriState.notneeded);
+            this.filestoreSizeOption = setShortLongOpt(parser, OPT_NAME_STORE_SIZE_SHORT, OPT_NAME_STORE_SIZE_LONG, "The maximum size of the filestore", true, NeededQuadState.notneeded);
         }
     }
 
     protected void setMaxCtxOption(final AdminParser parser, final String defaultvalue) {
         if (null != defaultvalue) {
-            this.filestoreMaxContextsOption = setShortLongOptWithDefault(parser, OPT_NAME_STORE_MAX_CTX_SHORT, OPT_NAME_STORE_MAX_CTX_LONG, "the maximum number of contexts", defaultvalue, true, NeededTriState.notneeded);
+            this.filestoreMaxContextsOption = setShortLongOptWithDefault(parser, OPT_NAME_STORE_MAX_CTX_SHORT, OPT_NAME_STORE_MAX_CTX_LONG, "the maximum number of contexts", defaultvalue, true, NeededQuadState.notneeded);
         } else {
-            this.filestoreMaxContextsOption = setShortLongOpt(parser, OPT_NAME_STORE_MAX_CTX_SHORT, OPT_NAME_STORE_MAX_CTX_LONG, "the maximum number of contexts", true, NeededTriState.notneeded);
+            this.filestoreMaxContextsOption = setShortLongOpt(parser, OPT_NAME_STORE_MAX_CTX_SHORT, OPT_NAME_STORE_MAX_CTX_LONG, "the maximum number of contexts", true, NeededQuadState.notneeded);
         }
     }
 
     protected void setFilestoreIDOption(final AdminParser parser) {
-        this.filestoreIdOption = setShortLongOpt(parser, OPT_NAME_STORE_FILESTORE_ID_SHORT, OPT_NAME_STORE_FILESTORE_ID_LONG, "The id of the filestore which should be deleted", true, NeededTriState.needed);
+        this.filestoreIdOption = setShortLongOpt(parser, OPT_NAME_STORE_FILESTORE_ID_SHORT, OPT_NAME_STORE_FILESTORE_ID_LONG, "The id of the filestore which should be deleted", true, NeededQuadState.needed);
     }
 
     protected void parseAndSetFilestoreID(final AdminParser parser, final Filestore fstore) {

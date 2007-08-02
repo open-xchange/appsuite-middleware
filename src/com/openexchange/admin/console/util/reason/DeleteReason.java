@@ -3,7 +3,7 @@ package com.openexchange.admin.console.util.reason;
 import java.rmi.Naming;
 
 import com.openexchange.admin.console.AdminParser;
-import com.openexchange.admin.console.AdminParser.NeededTriState;
+import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -57,6 +57,6 @@ public class DeleteReason extends ReasonAbstraction {
     private void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptionsWithoutContextID(parser);
 
-        this.reasonIDOption = setShortLongOpt(parser, OPT_NAME_REASON_ID_SHORT, OPT_NAME_REASON_ID_LONG, "the id for the reason to be deleted", true, NeededTriState.needed);
+        this.reasonIDOption = setShortLongOpt(parser, OPT_NAME_REASON_ID_SHORT, OPT_NAME_REASON_ID_LONG, "the id for the reason to be deleted", true, NeededQuadState.needed);
     }
 }
