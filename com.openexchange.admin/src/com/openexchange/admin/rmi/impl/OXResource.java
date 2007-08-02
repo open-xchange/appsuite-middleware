@@ -89,8 +89,6 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
 
     private static final Log log = LogFactory.getLog(OXResource.class);    
     
-    private final OXToolStorageInterface tool;
-    
     private final BasicAuthenticator basicauth;
     
     private final OXResourceStorageInterface oxRes;
@@ -101,20 +99,19 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
     
     private PropertyHandler prop = null;
     
-    public OXResource(final BundleContext context) throws RemoteException {
+    public OXResource(final BundleContext context) throws RemoteException, StorageException {
         super();
+        try {
+            oxRes = OXResourceStorageInterface.getInstance();
+        } catch (final StorageException e) {
+            log.error(e.getMessage(), e);
+            throw new RemoteException(e.getMessage());
+        }
         this.context = context;
         cache = ClientAdminThread.cache;
         prop = cache.getProperties();     
         if (log.isInfoEnabled()) {
             log.info("Class loaded: " + this.getClass().getName());
-        }
-        try {
-            tool = OXToolStorageInterface.getInstance();
-            oxRes = OXResourceStorageInterface.getInstance();
-        } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
-            throw new RemoteException(e.getMessage());
         }
         basicauth = new BasicAuthenticator();
     }
