@@ -3,7 +3,7 @@ package com.openexchange.admin.console.util.filestore;
 import java.rmi.Naming;
 
 import com.openexchange.admin.console.AdminParser;
-import com.openexchange.admin.console.AdminParser.NeededTriState;
+import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
@@ -51,7 +51,7 @@ public class RegisterFilestore extends FilestoreAbstraction {
     private void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptionsWithoutContextID(parser);
 
-        setPathOption(parser, NeededTriState.needed);
+        setPathOption(parser, NeededQuadState.needed);
 
         setSizeOption(parser, String.valueOf(OXUtilInterface.DEFAULT_STORE_SIZE));
 

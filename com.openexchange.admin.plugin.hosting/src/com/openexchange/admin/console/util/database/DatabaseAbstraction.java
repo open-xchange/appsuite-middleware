@@ -1,7 +1,7 @@
 package com.openexchange.admin.console.util.database;
 
 import com.openexchange.admin.console.AdminParser;
-import com.openexchange.admin.console.AdminParser.NeededTriState;
+import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.console.util.UtilAbstraction;
 import com.openexchange.admin.rmi.dataobjects.Database;
@@ -160,7 +160,7 @@ public abstract class DatabaseAbstraction extends UtilAbstraction{
     }
 
     protected void setDatabaseIDOption(final AdminParser parser) {
-        this.databaseIdOption = setShortLongOpt(parser, OPT_NAME_DATABASE_ID_SHORT,OPT_NAME_DATABASE_ID_LONG,"The id of the database.",true, NeededTriState.needed);
+        this.databaseIdOption = setShortLongOpt(parser, OPT_NAME_DATABASE_ID_SHORT,OPT_NAME_DATABASE_ID_LONG,"The id of the database.",true, NeededQuadState.needed);
     }
 
     protected void setDatabasePoolMaxOption(final AdminParser parser, final String defaultvalue, final boolean required) {

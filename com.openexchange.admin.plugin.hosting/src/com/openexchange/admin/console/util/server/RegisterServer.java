@@ -3,7 +3,7 @@ package com.openexchange.admin.console.util.server;
 import java.rmi.Naming;
 
 import com.openexchange.admin.console.AdminParser;
-import com.openexchange.admin.console.AdminParser.NeededTriState;
+import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -56,7 +56,7 @@ public class RegisterServer extends ServerAbstraction {
     private void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptionsWithoutContextID(parser);
 
-        this.serverNameOption = setShortLongOpt(parser, OPT_NAME_HOSTNAME_SHORT, OPT_NAME_HOSTNAME_LONG, "The hostname of the server", true, NeededTriState.needed);
+        this.serverNameOption = setShortLongOpt(parser, OPT_NAME_HOSTNAME_SHORT, OPT_NAME_HOSTNAME_LONG, "The hostname of the server", true, NeededQuadState.needed);
 
     }
 }

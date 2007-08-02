@@ -3,7 +3,7 @@ package com.openexchange.admin.console.util.filestore;
 import java.rmi.Naming;
 
 import com.openexchange.admin.console.AdminParser;
-import com.openexchange.admin.console.AdminParser.NeededTriState;
+import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
@@ -55,7 +55,7 @@ public class ChangeFilestore extends FilestoreAbstraction {
 
         setFilestoreIDOption(parser);
 
-        setPathOption(parser, NeededTriState.notneeded);
+        setPathOption(parser, NeededQuadState.notneeded);
 
         setSizeOption(parser, null);
 

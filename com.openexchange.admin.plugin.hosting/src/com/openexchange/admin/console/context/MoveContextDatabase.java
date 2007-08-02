@@ -3,7 +3,7 @@ package com.openexchange.admin.console.context;
 import java.rmi.Naming;
 
 import com.openexchange.admin.console.AdminParser;
-import com.openexchange.admin.console.AdminParser.NeededTriState;
+import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -61,7 +61,7 @@ public class MoveContextDatabase extends ContextHostingAbstraction {
         setDefaultCommandLineOptions(parser);
         //setMaintenanceReasodIDOption(parser, true);
 
-        this.targetDatabaseIDOption = setShortLongOpt(parser, OPT_DATABASE_SHORT, OPT_DATABASE_LONG, "Target database id", true, NeededTriState.needed);
+        this.targetDatabaseIDOption = setShortLongOpt(parser, OPT_DATABASE_SHORT, OPT_DATABASE_LONG, "Target database id", true, NeededQuadState.needed);
     }
 
     @Override

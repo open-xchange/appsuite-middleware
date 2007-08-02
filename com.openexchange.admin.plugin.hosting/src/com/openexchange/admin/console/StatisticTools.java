@@ -24,7 +24,7 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
-import com.openexchange.admin.console.AdminParser.NeededTriState;
+import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.CmdLineParser.IllegalOptionValueException;
 import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.console.CmdLineParser.UnknownOptionException;
@@ -246,13 +246,13 @@ public class StatisticTools extends BasicCommandlineOptions {
 
     private void setOptions(AdminParser parser) {
         this.host = setShortLongOpt(parser, OPT_HOST_SHORT, OPT_HOST_LONG, "host", "specifies the host", false);
-        this.xchangestats = setShortLongOpt(parser, OPT_STATS_SHORT, OPT_STATS_LONG, "shows Open-Xchange stats", false, NeededTriState.notneeded);
-        this.runtimestats = setShortLongOpt(parser, OPT_RUNTIME_STATS_SHORT, OPT_RUNTIME_STATS_LONG, "shows Java runtime stats", false, NeededTriState.notneeded);
-        this.osstats = setShortLongOpt(parser, OPT_OS_STATS_SHORT, OPT_OS_STATS_LONG, "shows operating system stats", false, NeededTriState.notneeded);
-        this.threadingstats = setShortLongOpt(parser, OPT_THREADING_STATS_SHORT, OPT_THREADING_STATS_LONG, "shows threading stats", false, NeededTriState.notneeded);
-        this.allstats = setShortLongOpt(parser, OPT_ALL_STATS_SHORT, OPT_ALL_STATS_LONG, "shows all stats", false, NeededTriState.notneeded);
-        this.admindaemonstats = setShortLongOpt(parser, OPT_ADMINDAEMON_STATS_SHORT, OPT_ADMINDAEMON_STATS_LONG, "shows stats for the admin instead of the groupware", false, NeededTriState.notneeded);
-        this.showoperation = setShortLongOpt(parser, OPT_SHOWOPERATIONS_STATS_SHORT, OPT_SHOWOPERATIONS_STATS_LONG, "shows the operations for the registered beans", false, NeededTriState.notneeded);
+        this.xchangestats = setShortLongOpt(parser, OPT_STATS_SHORT, OPT_STATS_LONG, "shows Open-Xchange stats", false, NeededQuadState.notneeded);
+        this.runtimestats = setShortLongOpt(parser, OPT_RUNTIME_STATS_SHORT, OPT_RUNTIME_STATS_LONG, "shows Java runtime stats", false, NeededQuadState.notneeded);
+        this.osstats = setShortLongOpt(parser, OPT_OS_STATS_SHORT, OPT_OS_STATS_LONG, "shows operating system stats", false, NeededQuadState.notneeded);
+        this.threadingstats = setShortLongOpt(parser, OPT_THREADING_STATS_SHORT, OPT_THREADING_STATS_LONG, "shows threading stats", false, NeededQuadState.notneeded);
+        this.allstats = setShortLongOpt(parser, OPT_ALL_STATS_SHORT, OPT_ALL_STATS_LONG, "shows all stats", false, NeededQuadState.notneeded);
+        this.admindaemonstats = setShortLongOpt(parser, OPT_ADMINDAEMON_STATS_SHORT, OPT_ADMINDAEMON_STATS_LONG, "shows stats for the admin instead of the groupware", false, NeededQuadState.notneeded);
+        this.showoperation = setShortLongOpt(parser, OPT_SHOWOPERATIONS_STATS_SHORT, OPT_SHOWOPERATIONS_STATS_LONG, "shows the operations for the registered beans", false, NeededQuadState.notneeded);
         this.dooperation = setShortLongOpt(parser, OPT_DOOPERATIONS_STATS_SHORT, OPT_DOOPERATIONS_STATS_LONG, "operation", "Syntax is <canonical object name (the first part from showoperatons)>!<operationname>", false);
     }
 
