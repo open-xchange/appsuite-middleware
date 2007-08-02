@@ -65,6 +65,10 @@ import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 
 public abstract class OXContextCommonImpl extends OXCommonImpl {
 
+    public OXContextCommonImpl() throws StorageException {
+        super();
+    }
+
     private final static Log log = LogFactory.getLog(OXContextCommonImpl.class);
     
     protected void createchecks(final Context ctx, final User admin_user, final OXToolStorageInterface tool) throws StorageException, ContextExistsException, InvalidDataException {
