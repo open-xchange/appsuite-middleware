@@ -174,7 +174,9 @@ public abstract class OXToolStorageInterface {
 
     public abstract boolean existsDatabase(final String db_name) throws StorageException;
 
-    public abstract boolean existsGroup(final Context ctx, final Group[] gid) throws StorageException;
+    public abstract boolean existsGroup(final Context ctx, final Group[] grps) throws StorageException;
+
+    public abstract boolean existsGroup(final Context ctx, final Group grp) throws StorageException;
 
     public abstract boolean existsGroup(final Context ctx, final int gid) throws StorageException;
 

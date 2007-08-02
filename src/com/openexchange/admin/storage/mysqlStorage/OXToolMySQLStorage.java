@@ -317,6 +317,11 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         return retBool;
     }
 
+    @Override
+    public boolean existsGroup(final Context ctx, final Group grp) throws StorageException {
+        return existsGroup(ctx, new Group[]{grp});
+    }
+
     /**
      * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsGroup(int,
      *      int)
