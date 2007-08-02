@@ -142,7 +142,11 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 			}
 			
 			//check format of folder
-			if ( fo.getModule() != FolderObject.CONTACT){
+			if ( fo.getModule() == FolderObject.CONTACT){
+				if (!sessObj.getUserConfiguration().hasContact()) {
+					return false;
+				}
+			} else {
 				return false;
 			}
 			//check read access to folder

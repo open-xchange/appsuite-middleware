@@ -140,9 +140,18 @@ public class ICalImporter extends AbstractImporter implements Importer {
 			
 			//check format of folder
 			int module = fo.getModule(); 
-			if (module  != FolderObject.CALENDAR && module != FolderObject.TASK) {
+			if (module == FolderObject.CALENDAR) {
+				if (!sessObj.getUserConfiguration().hasCalendar()) {
+					return false;
+				}
+			} else if (module == FolderObject.TASK) {
+				if (sessObj.getUserConfiguration().hasTask()) {
+					return false;
+				}
+			} else {
 				return false;
 			}
+
 			//check read access to folder
 			EffectivePermission perm;
 			try {
