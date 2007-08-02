@@ -217,8 +217,13 @@ public final class calendar extends XmlServlet {
 	
 	@Override
 	protected void startWriter(final SessionObject sessionObj, final int folderId, final boolean bModified, final boolean bDelete, final Date lastsync, final OutputStream os) throws Exception {
+		startWriter(sessionObj, folderId, bModified, bDelete, false, lastsync, os);
+	}
+	
+	@Override
+	protected void startWriter(final SessionObject sessionObj, final int folderId, final boolean bModified, final boolean bDelete, final boolean bList, final Date lastsync, final OutputStream os) throws Exception {
 		final AppointmentWriter appointmentwriter = new AppointmentWriter(sessionObj);
-		appointmentwriter.startWriter(bModified, bDelete, folderId, lastsync, os);
+		appointmentwriter.startWriter(bModified, bDelete, bList, folderId, lastsync, os);
 	}
 	
 	@Override

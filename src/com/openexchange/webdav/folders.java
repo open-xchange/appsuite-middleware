@@ -178,16 +178,24 @@ public final class folders extends XmlServlet {
 		}
 	}
 	
+	@Override
 	protected void startWriter(final SessionObject sessionObj, final int objectId, final int folderId, final OutputStream os) throws Exception {
 		final FolderWriter folderwriter = new FolderWriter(sessionObj);
 		folderwriter.startWriter(objectId, os);
 	}
-	
+
+	@Override
 	protected void startWriter(final SessionObject sessionObj, final int folderId, final boolean modified, final boolean deleted, final Date lastsync, final OutputStream os) throws Exception {
-		final FolderWriter folderwriter = new FolderWriter(sessionObj);
-		folderwriter.startWriter(modified, deleted, lastsync, os);
+		startWriter(sessionObj, folderId, modified, deleted, false, lastsync, os);
 	}
 	
+	@Override
+	protected void startWriter(final SessionObject sessionObj, final int folderId, final boolean modified, final boolean deleted, final boolean bList, final Date lastsync, final OutputStream os) throws Exception {
+		final FolderWriter folderwriter = new FolderWriter(sessionObj);
+		folderwriter.startWriter(modified, deleted, bList, lastsync, os);
+	}
+	
+	@Override
 	protected boolean hasModulePermission(final SessionObject sessionObj) {
 		return sessionObj.getUserConfiguration().hasWebDAVXML();
 	}

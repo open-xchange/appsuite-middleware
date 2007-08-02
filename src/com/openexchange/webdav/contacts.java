@@ -185,10 +185,14 @@ public final class contacts extends XmlServlet {
 		final ContactWriter contactwriter = new ContactWriter(sessionObj);
 		contactwriter.startWriter(objectId, folderId, os);
 	}
-	
+
 	protected void startWriter(final SessionObject sessionObj, final int folderId, final boolean bModified, final boolean bDelete, final Date lastsync, final OutputStream os) throws Exception {
+		startWriter(sessionObj, folderId, bModified, bDelete, false, lastsync, os);
+	}
+	
+	protected void startWriter(final SessionObject sessionObj, final int folderId, final boolean bModified, final boolean bDelete, final boolean bList, final Date lastsync, final OutputStream os) throws Exception {
 		final ContactWriter contactwriter = new ContactWriter(sessionObj);
-		contactwriter.startWriter(bModified, bDelete, folderId, lastsync, os);
+		contactwriter.startWriter(bModified, bDelete, bList, folderId, lastsync, os);
 	}
 	
 	protected boolean hasModulePermission(final SessionObject sessionObj) {

@@ -194,8 +194,12 @@ public final class tasks extends XmlServlet {
 	}
 	
 	protected void startWriter(final SessionObject sessionObj, final int folderId, final boolean bModified, final boolean bDelete, final Date lastsync, final OutputStream os) throws Exception {
+		startWriter(sessionObj, folderId, bModified, bDelete, false, lastsync, os);
+	}
+	
+	protected void startWriter(final SessionObject sessionObj, final int folderId, final boolean bModified, final boolean bDelete, final boolean bList, final Date lastsync, final OutputStream os) throws Exception {
 		final TaskWriter taskwriter = new TaskWriter(sessionObj);
-		taskwriter.startWriter(bModified, bDelete, folderId, lastsync, os);
+		taskwriter.startWriter(bModified, bDelete, bList, folderId, lastsync, os);
 	}
 	
 	protected boolean hasModulePermission(final SessionObject sessionObj) {
