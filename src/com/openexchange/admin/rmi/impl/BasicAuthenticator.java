@@ -74,8 +74,9 @@ public class BasicAuthenticator extends OXCommonImpl {
     private OXAuthStorageInterface fileAuth = null;
     private AdminCache cache = null;
 
-    /** */
-    public BasicAuthenticator() {
+    /**
+     * @throws StorageException  */
+    public BasicAuthenticator() throws StorageException {
         super();
         sqlAuth  = OXAuthStorageInterface.getInstanceSQL();
         fileAuth = OXAuthStorageInterface.getInstanceFile();
