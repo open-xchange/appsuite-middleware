@@ -53,7 +53,10 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.net.MalformedURLException;
 import java.rmi.Naming;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 import java.util.Collection;
 
 import junit.framework.JUnit4TestAdapter;
@@ -65,6 +68,12 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Group;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
+import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
+import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
+import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
+import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
+import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.extensions.OXCommonExtension;
 
 /**
@@ -112,7 +121,7 @@ public class GroupTest extends AbstractTest {
         deleteGroup(ctx, grp, hosturl, cred);
         // now load the group again, this MUST fail
         try {
-            loadGroup(ctx, grp, hosturl, cred);
+            getData(ctx, grp, hosturl, cred);
             fail("group not exists expected");
         } catch (final Exception ecp) {
             if (ecp.toString().toLowerCase().indexOf("group does not exist") != -1) {
@@ -134,7 +143,7 @@ public class GroupTest extends AbstractTest {
         assertTrue("expected id > 0", createdgroup.getId() > 0);
         
         // load from server 
-        Group srv_group = loadGroup(ctx, createdgroup, hosturl, cred);
+        Group srv_group = getData(ctx, createdgroup, hosturl, cred);
         
         // compare group fields
         assertEquals("displayname id not equal", createdgroup.getDisplayname(), srv_group.getDisplayname());
@@ -225,7 +234,7 @@ public class GroupTest extends AbstractTest {
         assertTrue("expected id > 0", createdgroup.getId() > 0);
 
         // load group from server
-        Group srv_response = loadGroup(ctx, createdgroup, hosturl, cred);
+        Group srv_response = getData(ctx, createdgroup, hosturl, cred);
         
         // check if group is created on server correct
         assertEquals("displayname id not equal", createdgroup.getDisplayname(), srv_response.getDisplayname());
@@ -239,7 +248,7 @@ public class GroupTest extends AbstractTest {
         changeGroup(ctx, createdgroup, hosturl, cred);
 
         // load group which was modified
-        final Group remote_grp = loadGroup(ctx, createdgroup, hosturl, cred);
+        final Group remote_grp = getData(ctx, createdgroup, hosturl, cred);
 
         // check if group is created on server correct
         assertEquals("displayname id not equal", createdgroup.getDisplayname(), remote_grp.getDisplayname());
@@ -296,6 +305,68 @@ public class GroupTest extends AbstractTest {
         assertTrue("members could not be loaded", remote_members.length > 0);
     }
 
+    @Test
+    public void testlistGroupsForUser() throws Exception {
+        final int context_id = getContextID();
+        final Context ctx = new Context(context_id);
+        final Credentials cred = DummyCredentials();
+        final String hosturl = getRMIHostUrl();
+        final Group addgroup = getTestGroupObject("memberaddgroup" + VALID_CHAR_TESTGROUP+System.currentTimeMillis(), ctx, cred);
+        final Group createdgroup = createGroup(ctx, addgroup, hosturl, cred);
+        assertTrue("group id > 0 expected", createdgroup.getId() > 0);
+    
+        // create user to add
+        final User usr = UserTest.getTestUserObject("groupmemberadduser" + System.currentTimeMillis(), "netline");
+        final UserModuleAccess access = new UserModuleAccess();
+        final User createduser = UserTest.addUser(ctx, usr, access);
+    
+        // We only want to resolve by name
+        createduser.setId(null);
+        // add user as groupmember
+        addMemberToGroup(ctx, createdgroup, new User[]{createduser}, hosturl, cred);
+    
+        // We have to fetch the Group because the create on (createdgroup) doesn't contain
+        // the members.
+        final Group newgroup = getData(ctx, createdgroup, hosturl, cred);
+        // now get all members of group, and check if user is member
+        final Group[] remote_members = listGroupsForUser(ctx, usr, hosturl, cred);
+        assertTrue("members could not be loaded", remote_members.length > 0);
+        // The right group must be the second one in the array, the first one is the all
+        // users group
+        assertEquals("no right group", newgroup, remote_members[1]);
+    }
+
+    @Test
+    public void testlistGroupsForUserByName() throws Exception {
+        final int context_id = getContextID();
+        final Context ctx = new Context(context_id);
+        final Credentials cred = DummyCredentials();
+        final String hosturl = getRMIHostUrl();
+        final Group addgroup = getTestGroupObject("memberaddgroup" + VALID_CHAR_TESTGROUP+System.currentTimeMillis(), ctx, cred);
+        final Group createdgroup = createGroup(ctx, addgroup, hosturl, cred);
+        assertTrue("group id > 0 expected", createdgroup.getId() > 0);
+    
+        // create user to add
+        final User usr = UserTest.getTestUserObject("groupmemberadduser" + System.currentTimeMillis(), "netline");
+        final UserModuleAccess access = new UserModuleAccess();
+        final User createduser = UserTest.addUser(ctx, usr, access);
+    
+        // We only want to resolve by name
+        createduser.setId(null);
+        // add user as groupmember
+        addMemberToGroup(ctx, createdgroup, new User[]{createduser}, hosturl, cred);
+    
+        // We have to fetch the Group because the create on (createdgroup) doesn't contain
+        // the members.
+        final Group newgroup = getData(ctx, createdgroup, hosturl, cred);
+        // now get all members of group, and check if user is member
+        final Group[] remote_members = listGroupsForUser(ctx, createduser, hosturl, cred);
+        assertTrue("members could not be loaded", remote_members.length > 0);
+        // The right group must be the second one in the array, the first one is the all
+        // users group
+        assertEquals("no right group", newgroup, remote_members[1]);
+    }
+
     private void changeGroup(final Context ctx, final Group grp, final String host, final Credentials cred) throws Exception {
         final OXGroupInterface xres = (OXGroupInterface) Naming.lookup(host + OXGroupInterface.RMI_NAME);
         xres.change(ctx, grp, cred);
@@ -304,6 +375,11 @@ public class GroupTest extends AbstractTest {
     private User[] getMembers(final Context ctx, final Group group, final String host, final Credentials cred) throws Exception {
         final OXGroupInterface xres = (OXGroupInterface) Naming.lookup(host + OXGroupInterface.RMI_NAME);
         return xres.getMembers(ctx, group, cred);
+    }
+    
+    private Group[] listGroupsForUser(final Context ctx, final User usr, final String host, final Credentials cred) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException, NoSuchUserException, MalformedURLException, NotBoundException {
+        final OXGroupInterface xres = (OXGroupInterface) Naming.lookup(host + OXGroupInterface.RMI_NAME);
+        return xres.listGroupsForUser(ctx, usr, cred);
     }
 
     private void addMemberToGroup(final Context ctx, final Group grp, final User[] members, final String host, final Credentials cred) throws Exception {
@@ -316,7 +392,7 @@ public class GroupTest extends AbstractTest {
         xres.removeMember(ctx, grp, members, cred);
     }
 
-    private Group loadGroup(final Context ctx, final Group grp, final String host, final Credentials cred) throws Exception {
+    private Group getData(final Context ctx, final Group grp, final String host, final Credentials cred) throws Exception {
         final OXGroupInterface xres = (OXGroupInterface) Naming.lookup(host + OXGroupInterface.RMI_NAME);
         return xres.getData(ctx, grp, cred);
     }
@@ -349,7 +425,7 @@ public class GroupTest extends AbstractTest {
     }
 
     private int getContextID() throws Exception {
-        return 1;
+        return 424242666;
     }
 
     private void createChangeGroupData(final Group group) {
