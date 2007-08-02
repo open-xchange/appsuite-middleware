@@ -84,10 +84,10 @@ import java.util.Map;
 import java.util.TimeZone;
 
 @OXExceptionSource(
-		classId=ImportExportExceptionClasses.VCARDEXPORTER,
+classId=ImportExportExceptionClasses.VCARDEXPORTER,
 		component=Component.IMPORT_EXPORT)
 		@OXThrowsMultiple(
-		category={
+category={
 	Category.PERMISSION,
 	Category.SUBSYSTEM_OR_SERVICE_DOWN,
 	Category.USER_INPUT,
@@ -227,7 +227,11 @@ import java.util.TimeZone;
 			return false;
 		}
 		//check format of folder
-		if ( fo.getModule() != FolderObject.CONTACT){
+		if ( fo.getModule() == FolderObject.CONTACT){
+			if (!sessObj.getUserConfiguration().hasContact()) {
+				return false;
+			}
+		} else {
 			return false;
 		}
 		//check read access to folder

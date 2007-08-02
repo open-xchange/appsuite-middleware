@@ -185,9 +185,19 @@ public class ICalExporter implements Exporter {
 			return false;
 		}
 		//check format of folder
-		if (fo.getModule() != FolderObject.CALENDAR && fo.getModule() != FolderObject.TASK) {
+		int module = fo.getModule(); 
+		if (module == FolderObject.CALENDAR) {
+			if (!sessObj.getUserConfiguration().hasCalendar()) {
+				return false;
+			}
+		} else if (module == FolderObject.TASK) {
+			if (sessObj.getUserConfiguration().hasTask()) {
+				return false;
+			}
+		} else {
 			return false;
 		}
+
 		//check read access to folder
 		EffectivePermission perm;
 		try {
