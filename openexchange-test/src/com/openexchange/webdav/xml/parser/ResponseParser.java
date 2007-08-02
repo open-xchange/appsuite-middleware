@@ -136,7 +136,7 @@ public class ResponseParser {
 	}
 	
 	protected static int[] parseList(final Element eProp) throws Exception {
-		final Element eIdList = eProp.getChild("id_list", XmlServlet.NS);
+		final Element eIdList = eProp.getChild("object_list", XmlServlet.NS);
 		final List idList = eIdList.getChildren(DataFields.ID, XmlServlet.NS);
 		int[] idArray = new int[idList.size()];
 		for (int a = 0; a < idList.size(); a++) {
