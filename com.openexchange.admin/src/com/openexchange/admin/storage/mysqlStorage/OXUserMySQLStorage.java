@@ -203,7 +203,14 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.close();
             }
 
-            if (usrdata.getImapServer() != null) {
+            if (usrdata.getImapServer() == null && usrdata.isImapServerset() ) {
+                stmt = write_ox_con.prepareStatement("UPDATE user SET  imapserver = ? WHERE cid = ? AND id = ?");
+                stmt.setNull(1, java.sql.Types.VARCHAR);
+                stmt.setInt(2, context_id);
+                stmt.setInt(3, user_id);
+                stmt.executeUpdate();
+                stmt.close();
+            } else if (usrdata.getImapServer() != null) {
                 stmt = write_ox_con.prepareStatement("UPDATE user SET  imapserver = ? WHERE cid = ? AND id = ?");
                 stmt.setString(1, usrdata.getImapServer());
                 stmt.setInt(2, context_id);
@@ -219,7 +226,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.setInt(3, user_id);
                 stmt.executeUpdate();
                 stmt.close();
-            } else {
+            } else if(usrdata.getImapLogin() != null){
                 stmt = write_ox_con.prepareStatement("UPDATE user SET  imapLogin = ? WHERE cid = ? AND id = ?");
                 stmt.setString(1, usrdata.getImapLogin());
                 stmt.setInt(2, context_id);
@@ -228,7 +235,14 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.close();
             }
 
-            if (usrdata.getSmtpServer() != null) {
+            if (usrdata.getSmtpServer() == null && usrdata.isSmtpServerset() ) {
+                stmt = write_ox_con.prepareStatement("UPDATE user SET  smtpserver = ? WHERE cid = ? AND id = ?");
+                stmt.setNull(1, java.sql.Types.VARCHAR);
+                stmt.setInt(2, context_id);
+                stmt.setInt(3, user_id);
+                stmt.executeUpdate();
+                stmt.close();
+            } else if (usrdata.getSmtpServer() != null) {
                 stmt = write_ox_con.prepareStatement("UPDATE user SET  smtpserver = ? WHERE cid = ? AND id = ?");
                 stmt.setString(1, usrdata.getSmtpServer());
                 stmt.setInt(2, context_id);
@@ -291,6 +305,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             notallowed.add("TimeZone");
             notallowed.add("Enabled");
             notallowed.add("ImapServer");
+            notallowed.add("ImapLogin");
             notallowed.add("SmtpServer");
             notallowed.add("Password_expired");
             notallowed.add("Locale");

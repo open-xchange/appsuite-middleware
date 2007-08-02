@@ -1,3 +1,7 @@
+* 2007-08-02 - choeger@open-xchange.com
+
+  - Bugfix ID#8666 imapLogin field get lost after changing module access
+
 * 2007-07-26 - dennis.sieben@open-xchange.com
 
  - Bugfix ID#8553 CLT: After running CLT no reasonable message on console appear for user
