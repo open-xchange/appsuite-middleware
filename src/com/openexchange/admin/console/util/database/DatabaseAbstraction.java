@@ -6,6 +6,7 @@ import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.console.util.UtilAbstraction;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.MissingOptionException;
 
 /**
  * This is an abstract class for all common attributes and methods of database related command line tools
@@ -57,48 +58,51 @@ public abstract class DatabaseAbstraction extends UtilAbstraction{
     
     // Needed for right error output
     protected String dbid = null;
+    protected String dbname = null;
     
     protected void parseAndSetDatabaseID(final AdminParser parser, final Database db) {
         dbid = (String) parser.getOptionValue(this.databaseIdOption);
-        db.setId(Integer.parseInt(dbid));
+        if (null != dbid) {
+            db.setId(Integer.parseInt(dbid));
+        }
     }
     
-    protected void parseAndSetHostname(final AdminParser parser, final Database db) {
+    protected void parseAndSetDatabasename(final AdminParser parser, final Database db) {
+        dbname = (String) parser.getOptionValue(this.databaseNameOption);
+        if (null != dbname) {
+            db.setName(dbname);
+        }
+    }
+    
+    private void parseAndSetHostname(final AdminParser parser, final Database db) {
         final String hostname = (String)parser.getOptionValue(this.hostnameOption);
         if (null != hostname) {
             db.setUrl("jdbc:mysql://" + hostname + "/?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&useUnicode=true&useServerPrepStmts=false&useTimezone=true&serverTimezone=UTC&connectTimeout=15000&socketTimeout=15000");
         }
     }
 
-    protected void parseAndSetDatabasename(final AdminParser parser, final Database db) {
-        final String databasename = (String) parser.getOptionValue(this.databaseNameOption);
-        if (databasename != null) {
-            db.setDisplayname(databasename);
-        }
-    }
-
-    protected void parseAndSetPasswd(final AdminParser parser, final Database db) {
+    private void parseAndSetPasswd(final AdminParser parser, final Database db) {
         final String passwd = (String) parser.getOptionValue(this.databasePasswdOption);
         if (null != passwd) {
             db.setPassword(passwd);
         }
     }
 
-    protected void parseAndSetPoolmax(final AdminParser parser, final Database db) {
+    private void parseAndSetPoolmax(final AdminParser parser, final Database db) {
         final String pool_max = (String) parser.getOptionValue(this.poolMaxOption);
         if (pool_max != null) {
             db.setPoolMax(Integer.parseInt(pool_max));
         }
     }
 
-    protected void parseAndSetPoolInitial(final AdminParser parser, final Database db) {
+    private void parseAndSetPoolInitial(final AdminParser parser, final Database db) {
         final String pool_initial = (String) parser.getOptionValue(this.poolInitialOption);
         if (null != pool_initial) {
             db.setPoolInitial(Integer.parseInt(pool_initial));
         }
     }
 
-    protected void parseAndSetPoolHardLimit(final AdminParser parser, final Database db) throws InvalidDataException {
+    private void parseAndSetPoolHardLimit(final AdminParser parser, final Database db) throws InvalidDataException {
         final String pool_hard_limit = (String) parser.getOptionValue(this.poolHardlimitOption);
         if (pool_hard_limit != null) {
             if (!pool_hard_limit.matches("true|false")) {
@@ -108,28 +112,28 @@ public abstract class DatabaseAbstraction extends UtilAbstraction{
         }
     }
 
-    protected void parseAndSetMaxUnits(final AdminParser parser, final Database db) {
+    private void parseAndSetMaxUnits(final AdminParser parser, final Database db) {
         final String maxunits = (String) parser.getOptionValue(this.maxUnitsOption);
         if (maxunits != null) {
             db.setMaxUnits(Integer.parseInt(maxunits));
         }
     }
 
-    protected void parseAndSetDatabaseWeight(final AdminParser parser, final Database db) {
+    private void parseAndSetDatabaseWeight(final AdminParser parser, final Database db) {
         final String databaseweight = (String) parser.getOptionValue(this.databaseWeightOption);
         if (databaseweight != null) {
             db.setClusterWeight(Integer.parseInt(databaseweight));
         }
     }
 
-    protected void parseAndSetDBUsername(final AdminParser parser, final Database db) {
+    private void parseAndSetDBUsername(final AdminParser parser, final Database db) {
         final String username = (String) parser.getOptionValue(this.databaseUsernameOption);
         if (null != username) {
             db.setLogin(username);
         }
     }
 
-    protected void parseAndSetDriver(final AdminParser parser, final Database db) {
+    private void parseAndSetDriver(final AdminParser parser, final Database db) {
         final String driver = (String) parser.getOptionValue(this.databaseDriverOption);
         if (driver != null) {
             db.setDriver(driver);
@@ -160,7 +164,7 @@ public abstract class DatabaseAbstraction extends UtilAbstraction{
     }
 
     protected void setDatabaseIDOption(final AdminParser parser) {
-        this.databaseIdOption = setShortLongOpt(parser, OPT_NAME_DATABASE_ID_SHORT,OPT_NAME_DATABASE_ID_LONG,"The id of the database.",true, NeededQuadState.needed);
+        this.databaseIdOption = setShortLongOpt(parser, OPT_NAME_DATABASE_ID_SHORT,OPT_NAME_DATABASE_ID_LONG,"The id of the database.",true, NeededQuadState.eitheror);
     }
 
     protected void setDatabasePoolMaxOption(final AdminParser parser, final String defaultvalue, final boolean required) {
@@ -232,12 +236,47 @@ public abstract class DatabaseAbstraction extends UtilAbstraction{
         }
     }
 
-    protected void setDatabaseNameOption(final AdminParser parser,final boolean required){
-        this.databaseNameOption = setShortLongOpt(parser, OPT_NAME_DBNAME_SHORT,OPT_NAME_DBNAME_LONG,"Name of the database",true, convertBooleantoTriState(required)); 
+    protected void setDatabaseNameOption(final AdminParser parser, final NeededQuadState required){
+        this.databaseNameOption = setShortLongOpt(parser, OPT_NAME_DBNAME_SHORT,OPT_NAME_DBNAME_LONG,"Name of the database",true, required); 
     }
 
     @Override
     protected String getObjectName() {
         return "database";
+    }
+    
+    protected String databasenameOrIdSet() throws MissingOptionException {
+        String successtext;
+        // Throw the order of this checks we archive that the id is preferred over the name
+        if (null == this.dbid) {
+            if (null == this.dbname) {
+                throw new MissingOptionException("Either databasename or databaseid must be given");
+            } else {
+                successtext = this.dbname;
+            }
+        } else {
+            successtext = String.valueOf(this.dbid);
+        }
+        return successtext;
+    }
+
+    protected void parseAndSetMandatoryOptions(final AdminParser parser, final Database db) throws InvalidDataException {
+        parseAndSetHostname(parser, db);
+        
+        parseAndSetDriver(parser, db);
+    
+        parseAndSetDBUsername(parser, db);
+        
+        parseAndSetPasswd(parser, db);
+    
+        parseAndSetMaxUnits(parser, db);
+    
+        parseAndSetPoolHardLimit(parser, db);
+    
+        parseAndSetPoolInitial(parser, db);
+    
+        parseAndSetPoolmax(parser, db);
+    
+        parseAndSetDatabaseWeight(parser, db);
     }
 }

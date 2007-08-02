@@ -3,6 +3,7 @@ package com.openexchange.admin.console.util.database;
 import java.rmi.Naming;
 
 import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
@@ -20,46 +21,32 @@ public class ChangeDatabase extends DatabaseAbstraction {
 
         setOptions(parser);
 
+        String successtext = null;
         try {
             parser.ownparse(args2);
 
             final Database db = new Database();
 
             parseAndSetDatabaseID(parser, db);
+            parseAndSetDatabasename(parser, db);
+            
+            successtext = databasenameOrIdSet();
             
             final Credentials auth = new Credentials((String) parser.getOptionValue(this.adminUserOption), (String) parser.getOptionValue(this.adminPassOption));
 
             // get rmi ref
             final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME + OXUtilInterface.RMI_NAME);
 
-            parseAndSetHostname(parser, db);
-            
-            parseAndSetDatabasename(parser, db);
-
-            parseAndSetDriver(parser, db);
-
-            parseAndSetDBUsername(parser, db);
-            
-            parseAndSetPasswd(parser, db);
-
-            parseAndSetMaxUnits(parser, db);
-
-            parseAndSetPoolHardLimit(parser, db);
-
-            parseAndSetPoolInitial(parser, db);
-
-            parseAndSetPoolmax(parser, db);
-
-            parseAndSetDatabaseWeight(parser, db);
+            parseAndSetMandatoryOptions(parser, db);
 
 //            parseAndSetMasterAndID(parser, db);
 
             oxutil.changeDatabase(db, auth);
             
-            displayChangedMessage(String.valueOf(dbid), null);
+            displayChangedMessage(successtext, null);
             sysexit(0);
         } catch (final Exception e) {
-            printErrors(String.valueOf(dbid), null, e, parser);
+            printErrors(successtext, null, e, parser);
         }
     }
 
@@ -71,7 +58,9 @@ public class ChangeDatabase extends DatabaseAbstraction {
         // oxadmin,oxadmin passwd
         setDefaultCommandLineOptionsWithoutContextID(parser);
 
-        setDatabaseNameOption(parser, false);
+        setDatabaseIDOption(parser);
+        setDatabaseNameOption(parser, NeededQuadState.eitheror);
+
         setDatabaseHostnameOption(parser, false);
         setDatabaseUsernameOption(parser, false);
         setDatabaseDriverOption(parser, null, false);
@@ -84,7 +73,5 @@ public class ChangeDatabase extends DatabaseAbstraction {
         setDatabasePoolHardlimitOption(parser, null, false);
         setDatabasePoolInitialOption(parser, null, false);
         setDatabasePoolMaxOption(parser, null, false);
-
-        setDatabaseIDOption(parser);
     }
 }
