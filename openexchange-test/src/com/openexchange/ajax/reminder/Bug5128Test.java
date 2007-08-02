@@ -36,7 +36,7 @@ public class Bug5128Test extends ReminderTest {
 		final int folderId = folderObj.getObjectID();
 		
 		AppointmentObject appointmentObj = new AppointmentObject();
-		appointmentObj.setTitle("testBug4342");
+		appointmentObj.setTitle("testBug5128");
 		appointmentObj.setStartDate(new Date(startTime));
 		appointmentObj.setEndDate(new Date(endTime));
 		appointmentObj.setShownAs(AppointmentObject.ABSENT);
