@@ -58,7 +58,6 @@ import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.User;
-import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.DuplicateExtensionException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
@@ -114,14 +113,7 @@ public abstract class CreateCore extends UserAbstraction {
 
             applyExtendedOptionsToUser(parser, usr);
 
-            // default set all access rights
-            final UserModuleAccess access = new UserModuleAccess();
-            access.enableAll();
-
-            // set module access rights
-            setModuleAccessOptionsinUserCreate(parser, access);
-            
-            maincall(parser, oxusr, ctx, usr, access, auth);
+            maincall(parser, oxusr, ctx, usr, auth);
             
             sysexit(0);
         } catch (final Exception e) {
@@ -129,5 +121,5 @@ public abstract class CreateCore extends UserAbstraction {
         }
     }
 
-    protected abstract void maincall(final AdminParser parser, final OXUserInterface oxusr, final Context ctx, final User usr, final UserModuleAccess access, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, DuplicateExtensionException, MalformedURLException, NotBoundException, ConnectException;
+    protected abstract void maincall(final AdminParser parser, final OXUserInterface oxusr, final Context ctx, final User usr, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, DuplicateExtensionException, MalformedURLException, NotBoundException, ConnectException;
 }
