@@ -52,8 +52,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.admin.rmi.dataobjects.Context;
+import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 
 /**
  * General abstraction class used by all impl classes
@@ -64,6 +67,17 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 public abstract class OXCommonImpl {
     private final static Log log = LogFactory.getLog(OXCommonImpl.class);
     
+    final OXToolStorageInterface tool;
+    
+    public OXCommonImpl() throws StorageException {
+        try {
+            tool = OXToolStorageInterface.getInstance();
+        } catch (final StorageException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        }
+    }
+    
     protected final void contextcheck(final Context ctx) throws InvalidCredentialsException {
         if (null == ctx || null == ctx.getIdAsInt()) {
             final InvalidCredentialsException e = new InvalidCredentialsException("Client sent invalid context data object");
@@ -72,6 +86,24 @@ public abstract class OXCommonImpl {
         }
     }
     
+    protected void setUserIdInArrayOfUsers(final Context ctx, final User[] users) throws InvalidDataException, StorageException {
+        for (final User user : users) {
+            setIdOrGetIDFromUsername(ctx, user);
+        }
+    }
+
+    protected void setIdOrGetIDFromUsername(final Context ctx, final User user) throws StorageException, InvalidDataException {
+        final Integer id = user.getId();
+        if (null == id) {
+            final String username = user.getUsername();
+            if (null != username) {
+                user.setId(tool.getUserIDByUsername(ctx, username));
+            } else {
+                throw new InvalidDataException("One user object has no id or username");
+            }
+        }
+    }
+
     /**
      * @param objects
      * @throws InvalidDataException
