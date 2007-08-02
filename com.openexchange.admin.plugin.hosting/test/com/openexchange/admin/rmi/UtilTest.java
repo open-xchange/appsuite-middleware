@@ -54,7 +54,7 @@ public class UtilTest extends AbstractTest {
     public static Database getTestDatabaseObject(String hostname,String name){
         
         Database client_db = new Database();        
-        client_db.setDisplayname(name);
+        client_db.setName(name);
         client_db.setDriver("com.mysql.jdbc.Driver");
         client_db.setLogin("openexchange");
         client_db.setMaster(true);
@@ -185,7 +185,7 @@ public class UtilTest extends AbstractTest {
             // we found our added db, check now the data 
             if(tmp.getId().equals(client_db.getId())){
                 // check if data is same 
-                assertEquals(client_db.getDisplayname(),tmp.getDisplayname());
+                assertEquals(client_db.getName(),tmp.getName());
                 assertEquals(client_db.getDriver(),tmp.getDriver());
                 assertEquals(client_db.getLogin(),tmp.getLogin());               
                 assertEquals(client_db.getMaxUnits(),tmp.getMaxUnits());
@@ -218,7 +218,7 @@ public class UtilTest extends AbstractTest {
             // we found our added db, check now the data 
             if(tmp.getId().equals(client_db.getId())){
                 // check if data is same 
-                assertEquals(client_db.getDisplayname(),tmp.getDisplayname());
+                assertEquals(client_db.getName(),tmp.getName());
                 assertEquals(client_db.getDriver(),tmp.getDriver());
                 assertEquals(client_db.getLogin(),tmp.getLogin());               
                 assertEquals(client_db.getMaxUnits(),tmp.getMaxUnits());
@@ -234,7 +234,7 @@ public class UtilTest extends AbstractTest {
         assertTrue("Expected to find registered db with data",found_db);
         
         // now change the db data and fetch it again
-        client_db.setDisplayname(client_db.getDisplayname()+change_suffix);
+        client_db.setName(client_db.getName()+change_suffix);
         client_db.setDriver(client_db.getDriver()+change_suffix);
         client_db.setLogin(client_db.getLogin()+change_suffix);        
         client_db.setMaxUnits(2000);
@@ -255,7 +255,7 @@ public class UtilTest extends AbstractTest {
             // we found our added db, check now the data 
             if(tmp.getId()==client_db.getId()){
                 // check if data is same 
-                assertEquals(client_db.getDisplayname(),tmp.getDisplayname());
+                assertEquals(client_db.getName(),tmp.getName());
                 assertEquals(client_db.getDriver(),tmp.getDriver());
                 assertEquals(client_db.getLogin(),tmp.getLogin());               
                 assertEquals(client_db.getMaxUnits(),tmp.getMaxUnits());
@@ -284,7 +284,7 @@ public class UtilTest extends AbstractTest {
             // we found our added db, check now the data 
             if(tmp.getId().equals(client_db.getId())){
                 // check if data is same 
-                assertEquals(client_db.getDisplayname(),tmp.getDisplayname());
+                assertEquals(client_db.getName(),tmp.getName());
                 assertEquals(client_db.getDriver(),tmp.getDriver());
                 assertEquals(client_db.getLogin(),tmp.getLogin());               
                 assertEquals(client_db.getMaxUnits(),tmp.getMaxUnits());
@@ -336,7 +336,7 @@ public class UtilTest extends AbstractTest {
             // we found our added db, check now the data 
             if(tmp.getId().equals(client_db.getId())){
                 // check if data is same
-                if(null != tmp.getDisplayname() && tmp.getDisplayname().equals(db_name) && 
+                if(null != tmp.getName() && tmp.getName().equals(db_name) && 
                    null != tmp.getDriver() && tmp.getDriver().equals(client_db.getDriver()) && 
                    null != tmp.getLogin() && tmp.getLogin().equals(client_db.getLogin()) && 
                    null != tmp.isMaster() && tmp.isMaster().equals(client_db.isMaster()) && 
