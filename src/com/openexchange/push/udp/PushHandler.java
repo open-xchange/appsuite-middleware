@@ -165,6 +165,10 @@ public class PushHandler implements AppointmentEvent, ContactEvent, TaskEvent, F
 	}
 	
 	protected int[] getAffectedUsers4Object(final int folderId, final SessionObject sessionObj, final Set<Integer> hs) {
+		if (folderId == 0) {
+			return null;
+		}
+		
 		try {
 			groupStorage = GroupStorage.getInstance(sessionObj.getContext(), true);
 			
