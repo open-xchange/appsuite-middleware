@@ -47,6 +47,7 @@ import com.openexchange.groupware.ldap.ResourceGroup;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.XmlServlet;
+import com.openexchange.webdav.xml.fields.DataFields;
 import com.openexchange.webdav.xml.types.Response;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -54,6 +55,7 @@ import java.util.List;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.Namespace;
+import org.xmlpull.v1.XmlPullParserException;
 
 /**
  * Parses a Webdav XML response into the Response object.
@@ -63,8 +65,12 @@ import org.jdom.Namespace;
 public class ResponseParser {
 	
 	public static final Namespace webdav = Namespace.getNamespace("D", "DAV:");
-
+	
 	public static Response[] parse(final Document doc, int module) throws Exception {
+		return parse(doc, module, false);
+	}
+	
+	public static Response[] parse(final Document doc, int module, boolean bList) throws Exception {
 		Element rootElement = doc.getRootElement();
 		List responseElements = rootElement.getChildren("response", webdav);
 		
@@ -80,34 +86,38 @@ public class ResponseParser {
 			response = new Response[responseElements.size()];
 			
 			for (int a = 0; a < response.length; a++) {
-				response[a] = parseResponse((Element)responseElements.get(a), module);
+				response[a] = parseResponse((Element)responseElements.get(a), module, bList);
 			}
-		} 
+		}
 		
 		return response;
 	}
 	
-	protected static Response parseResponse(Element eResponse, int module) throws Exception {
+	protected static Response parseResponse(Element eResponse, int module, boolean bList) throws Exception {
 		Response response = new Response();
 		
 		Element ePropstat = eResponse.getChild("propstat", webdav);
 		Element eProp = ePropstat.getChild("prop", webdav);
 		
-		switch (module) {
-			case Types.APPOINTMENT:
-				response.setDataObject(parseAppointmentResponse(eProp));
-				break;
-			case Types.CONTACT:
-				response.setDataObject(parseContactResponse(eProp));
-				break;
-			case Types.FOLDER:
-				response.setDataObject(parseFolderResponse(eProp));
-				break;
-			case Types.TASK:
-				response.setDataObject(parseTaskResponse(eProp));
-				break;
-			default:
-				throw new TestException("invalid module!");
+		if (bList) {
+			response.setDataObject(parseList(eProp));
+		} else {
+			switch (module) {
+				case Types.APPOINTMENT:
+					response.setDataObject(parseAppointmentResponse(eProp));
+					break;
+				case Types.CONTACT:
+					response.setDataObject(parseContactResponse(eProp));
+					break;
+				case Types.FOLDER:
+					response.setDataObject(parseFolderResponse(eProp));
+					break;
+				case Types.TASK:
+					response.setDataObject(parseTaskResponse(eProp));
+					break;
+				default:
+					throw new TestException("invalid module!");
+			}
 		}
 		
 		Element eStatus = ePropstat.getChild("status", webdav);
@@ -123,6 +133,17 @@ public class ResponseParser {
 		}
 		
 		return response;
+	}
+	
+	protected static int[] parseList(final Element eProp) throws Exception {
+		final Element eIdList = eProp.getChild("id_list", XmlServlet.NS);
+		final List idList = eIdList.getChildren(DataFields.ID, XmlServlet.NS);
+		int[] idArray = new int[idList.size()];
+		for (int a = 0; a < idList.size(); a++) {
+			final Element eId = (Element)idList.get(a);
+			idArray[a] = DataParser.getValueAsInt(eId);
+		}
+		return idArray;
 	}
 	
 	protected static Response[] parseGroupUserResponse(Element eResponse) throws Exception {
@@ -165,7 +186,7 @@ public class ResponseParser {
 			resourcegroupList = new ArrayList();
 		}
 		
-		Response[] response = new Response[userList.size() + groupList.size() + resourceList.size() + resourcegroupList.size()];		
+		Response[] response = new Response[userList.size() + groupList.size() + resourceList.size() + resourcegroupList.size()];
 		
 		int counter = 0;
 		
@@ -176,7 +197,7 @@ public class ResponseParser {
 			
 			counter++;
 		}
-
+		
 		for (int a = 0; a < groupList.size(); a++) {
 			response[counter] = new Response();
 			response[counter].setDataObject(parseGroupResponse((Element)groupList.get(a)));
@@ -200,7 +221,7 @@ public class ResponseParser {
 			
 			counter++;
 		}
-
+		
 		
 		return response;
 	}
@@ -241,9 +262,9 @@ public class ResponseParser {
 		HashMap hm = new HashMap();
 		
 		if (DataParser.hasElement(eProp.getChild("myidentity", XmlServlet.NS))) {
-			hm.put("myidentity", DataParser.getValue(eProp.getChild("myidentity", XmlServlet.NS)));			
+			hm.put("myidentity", DataParser.getValue(eProp.getChild("myidentity", XmlServlet.NS)));
 		}
-
+		
 		if (DataParser.hasElement(eProp.getChild("context_id", XmlServlet.NS))) {
 			hm.put("context_id", DataParser.getValue(eProp.getChild("context_id", XmlServlet.NS)));
 		}
@@ -252,21 +273,21 @@ public class ResponseParser {
 		
 		return contactObj;
 	}
-
+	
 	protected static Group parseGroupResponse(Element eProp) throws Exception {
 		Group groupObj = new Group();
 		GroupParser groupParser = new GroupParser();
 		groupParser.parse(groupObj, eProp);
 		return groupObj;
 	}
-
+	
 	protected static Resource parseResourceResponse(Element eProp) throws Exception {
 		Resource resourceObj = new Resource();
 		ResourceParser resourceParser = new ResourceParser();
 		resourceParser.parse(resourceObj, eProp);
 		return resourceObj;
 	}
-
+	
 	protected static ResourceGroup parseResourceGroupResponse(Element eProp) throws Exception {
 		ResourceGroup resourcegroupObj = new ResourceGroup();
 		ResourceGroupParser resourcegroupParser = new ResourceGroupParser();
