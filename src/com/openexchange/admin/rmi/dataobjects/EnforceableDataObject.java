@@ -156,14 +156,14 @@ public abstract class EnforceableDataObject implements Serializable, Cloneable {
             } else {
                 return true;
             }
-        } catch (SecurityException e) {
-            throw new EnforceableDataObjectException(e.getMessage());
-        } catch (NoSuchFieldException e) {
+        } catch (final SecurityException e) {
+            throw new EnforceableDataObjectException(e);
+        } catch (final NoSuchFieldException e) {
             throw new EnforceableDataObjectException("No such member: " + e.getMessage());
-        } catch (IllegalArgumentException e) {
-            throw new EnforceableDataObjectException(e.getMessage());
-        } catch (IllegalAccessException e) {
-            throw new EnforceableDataObjectException(e.getMessage());
+        } catch (final IllegalArgumentException e) {
+            throw new EnforceableDataObjectException(e);
+        } catch (final IllegalAccessException e) {
+            throw new EnforceableDataObjectException(e);
         }
     }
 
