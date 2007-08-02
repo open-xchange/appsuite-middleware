@@ -67,7 +67,7 @@ import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 public abstract class OXCommonImpl {
     private final static Log log = LogFactory.getLog(OXCommonImpl.class);
     
-    final OXToolStorageInterface tool;
+    protected final OXToolStorageInterface tool;
     
     public OXCommonImpl() throws StorageException {
         try {
