@@ -68,7 +68,7 @@ public class Database extends EnforceableDataObject implements Serializable {
 
     private String password;
 
-    private String displayname;
+    private String name;
 
     private String driver;
 
@@ -125,7 +125,7 @@ public class Database extends EnforceableDataObject implements Serializable {
         this.driver = driver;
         this.url = url;
         this.id = id;
-        this.displayname = displayname;
+        this.name = displayname;
     }
 
     /**
@@ -171,12 +171,12 @@ public class Database extends EnforceableDataObject implements Serializable {
         this.password = val;
     }
 
-    public String getDisplayname() {
-        return this.displayname;
+    public String getName() {
+        return this.name;
     }
 
-    public void setDisplayname(final String val) {
-        this.displayname = val;
+    public void setName(final String val) {
+        this.name = val;
     }
 
     public String getDriver() {
@@ -323,7 +323,7 @@ public class Database extends EnforceableDataObject implements Serializable {
         this.url = null;
         this.login = null;
         this.password = null;
-        this.displayname = null;
+        this.name = null;
         this.driver = null;
         this.scheme = null;
         this.maxUnits = null;
@@ -352,7 +352,7 @@ public class Database extends EnforceableDataObject implements Serializable {
 
     @Override
     protected String[] getMandatoryMembersRegister() {
-        return new String[] { "password", "displayname", "master" };
+        return new String[] { "password", "name", "master" };
     }
 
 }
