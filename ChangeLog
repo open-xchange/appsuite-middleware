@@ -1,3 +1,8 @@
+* 2007-08-02 - martin.kauss@open-xchange.com
+
+ - Fixed bug #6408. Reminders greater than 3 weeks did not work as expected
+   because the calculation was done with an int instead of a long. Fixed.
+
 * 2007-08-02 - sebastian.kauss@open-xchange.com
 
  - Fixed Bug #7393 - Folder 0 cannot be resolved
