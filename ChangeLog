@@ -13,6 +13,8 @@
  - Bugfix #7202: Fixed creating the next recurrence of tasks.
  - Bugfix #8301: Next Recurrence is only created if task state is changed to
    DONE.
+ - Bugfix #7733: Changed error message for a task that has been changed by
+   someone else.
 
 * 2007-08-02 - thorben.betten@open-xchange.com
 

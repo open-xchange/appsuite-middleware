@@ -280,9 +280,7 @@ public class RdbTaskStorage extends TaskStorage {
             stmt.setLong(pos++, lastRead.getTime());
             final int count = stmt.executeUpdate();
             if (1 != count) {
-                final Task forTime = selectTask(ctx, con, taskId, type);
-                throw new TaskException(Code.MODIFIED,
-                    forTime.getLastModified().getTime(), lastRead.getTime());
+                throw new TaskException(Code.MODIFIED);
             }
         } catch (SQLException e) {
             throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
@@ -596,10 +594,7 @@ public class RdbTaskStorage extends TaskStorage {
             stmt.setLong(pos++, lastRead.getTime());
             final int updatedRows = stmt.executeUpdate();
             if (0 == updatedRows) {
-                final Task forTime = selectTask(ctx, con, task.getObjectID(),
-                    type);
-                throw new TaskException(Code.MODIFIED, forTime.getLastModified()
-                    .getTime(), lastRead.getTime());
+                throw new TaskException(Code.MODIFIED);
             }
         } catch (DataTruncation e) {
             throw parseTruncated(e);

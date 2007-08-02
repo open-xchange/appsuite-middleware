@@ -178,13 +178,14 @@ public class TaskException extends AbstractOXException {
         NOT_TASK_FOLDER("Folder %1$s (%2$d) is not a task folder.",
             Category.PERMISSION, Detail.PERMISSION, 6),
         /**
-         * The task has been changed in the meantime. Task changing date: %1$d,
-         * your task changing date: %2$d.
+         * Edit Conflict. Your change cannot be completed because somebody else
+         * has made a conflicting change to the same item. Please refresh or
+         * synchronize and try again.
          */
-        MODIFIED("The task has been changed in the meantime. Task changing "
-            + "date: %1$d, your task changing date: %2$d.",
-            Category.CONCURRENT_MODIFICATION, Detail.CONCURRENT_MODIFICATION,
-            7),
+        MODIFIED("Edit Conflict. Your change cannot be completed because "
+            + "somebody else has made a conflicting change to the same item. "
+            + "Please refresh or synchronize and try again.", Category
+            .CONCURRENT_MODIFICATION, Detail.CONCURRENT_MODIFICATION, 7),
         /**
          * Cannot create private task in public/shared folder %1$d.
          */

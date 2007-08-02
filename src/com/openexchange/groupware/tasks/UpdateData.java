@@ -276,8 +276,7 @@ class UpdateData {
      */
     void prepare() throws TaskException {
         if (getOrigTask().getLastModified().after(lastRead)) {
-            throw new TaskException(Code.MODIFIED,
-                getOrigTask().getLastModified().getTime(), lastRead.getTime());
+            throw new TaskException(Code.MODIFIED);
         }
         checkPermission();
         // Do logic checks.
