@@ -1,3 +1,8 @@
+* 2007-08-02 - choeger@open-xchange.com
+
+  - Bugfix ID#8651 no access must be the default when not specifying access on commandline
+    using lowest set of access options as default (webmail)
+  
 * 2007-07-31 - dennis.sieben@open-xchange.com
 
   - Bugfix ID#8597 [DEV] searchContextByFilestoreId,searchContextByFilestore and
