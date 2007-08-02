@@ -35,7 +35,7 @@ public class Create extends CreateCore {
         access.setWebmail(true);
         access.setContacts(true);
         // set module access rights
-        setModuleAccessOptionsinUserCreate(parser, access);
+        setModuleAccessOptionsinUserChange(parser, access);
         
         final Integer id = oxusr.create(ctx, usr, access, auth).getId();
         displayCreatedMessage(String.valueOf(id), ctx.getIdAsInt());
