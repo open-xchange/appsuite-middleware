@@ -220,6 +220,8 @@ public abstract class OXToolStorageInterface {
 
     public abstract boolean existsUser(final Context ctx, final User[] users) throws StorageException;
 
+    public abstract boolean existsUser(final Context ctx, final User user) throws StorageException;
+
     public abstract int getAdminForContext(final Context ctx, final Connection con) throws StorageException;
     
     public abstract int getDefaultGroupForContext(final Context ctx, final Connection con) throws StorageException;
