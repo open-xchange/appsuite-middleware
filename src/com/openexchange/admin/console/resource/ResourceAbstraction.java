@@ -196,6 +196,4 @@ public abstract class ResourceAbstraction extends ObjectNamingAbstraction {
         }
         return successtext;
     }
-
-    
 }
