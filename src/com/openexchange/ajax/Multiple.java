@@ -211,9 +211,10 @@ public class Multiple extends SessionServlet {
 			throw new AjaxException(AjaxException.Code.NoField, PARAMETER_ACTION);
 		}
 
-		final Response response = doAction(module, action, jsonObj, sessionObj, req);
-		if (response != null) {
-			if (req.getAttribute(ATTRIBUTE_MAIL_REQUEST) != null) {
+		final Response[] responses = doAction(module, action, jsonObj, sessionObj, req);
+		if (responses != null) {
+			final MailRequest mailRequest = (MailRequest) req.getAttribute(ATTRIBUTE_MAIL_REQUEST);
+			if (mailRequest != null && mailRequest.isContinuousCollect()) {
 				/*
 				 * Write withheld mail request first
 				 */
@@ -227,7 +228,9 @@ public class Multiple extends SessionServlet {
 					req.setAttribute(ATTRIBUTE_MAIL_REQUEST, null);
 				}
 			}
-			respArr.put(response.getJSON());
+			for (int i = 0; i < responses.length; i++) {
+				respArr.put(responses[i].getJSON());
+			}
 		}
 	}
 
@@ -237,7 +240,7 @@ public class Multiple extends SessionServlet {
 		 * Write withheld mail response first
 		 */
 		mailReq.performMultiple(mailInterface);
-		if (mailReq.getContent().equals(STR_EMPTY)) {
+		if (mailReq.getContent() == null) {
 			final Response mailResp = new Response();
 			mailResp.setData(STR_EMPTY);
 			respArr.put(mailResp.getJSON());
@@ -249,8 +252,10 @@ public class Multiple extends SessionServlet {
 			}
 		}
 	}
+	
+	private static transient final Response[] RETVAL = new Response[1];
 
-	protected static final Response doAction(final String module, final String action, final JSONObject jsonObj,
+	protected static final Response[] doAction(final String module, final String action, final JSONObject jsonObj,
 			final SessionObject sessionObj, final HttpServletRequest req) throws AjaxException {
 		Response response = new Response();
 		final OXJSONWriter jsonWriter = new OXJSONWriter();
@@ -497,7 +502,7 @@ public class Multiple extends SessionServlet {
 					mi = ((MailInterface) tmp);
 				}
 				mailrequest.action(action, jsonObj, mi);
-				if (mailrequest.hasMultiple()) {
+				if (mailrequest.isContinuousCollect()) {
 					/*
 					 * Put into attributes to further collect move/copy requests
 					 * and return a null reference to avoid writing response
@@ -515,7 +520,11 @@ public class Multiple extends SessionServlet {
 				} else if (len == 1) {
 					response = new Response(ja.getJSONObject(0));
 				} else {
-					LOG.error("Non-Continguous mail request with more than one response");
+					final Response[] retval = new Response[len];
+					for (int i = 0; i < len; i++) {
+						retval[i] = new Response(ja.getJSONObject(i));
+					}
+					return retval;
 				}
 			} catch (OXException e) {
 				LOG.error(e.getMessage(), e);
@@ -531,6 +540,7 @@ public class Multiple extends SessionServlet {
 		} else {
 			throw new AjaxException(AjaxException.Code.UnknownAction, action);
 		}
-		return response;
+		RETVAL[0] = response;
+		return RETVAL;
 	}
 }

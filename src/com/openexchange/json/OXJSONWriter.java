@@ -118,8 +118,52 @@ public final class OXJSONWriter extends JSONWriter {
 
 	private String key;
 
+	/**
+	 * Default constructor to start with an empty JSON writer
+	 */
 	public OXJSONWriter() {
 		super(null);
+	}
+
+	/**
+	 * Creates a JSON writer that further writes to given JSON object
+	 * <p>
+	 * <b>NOTE</b>: To get this writer into a complete state the
+	 * <code>{@link #endObject()}</code> method must be invoked since this
+	 * constructor implicitely puts the writer into the same state as
+	 * <code>{@link #object()}</code> does.
+	 * 
+	 * @param jsonObject -
+	 *            the JSON object to write to
+	 * @throws JSONException -
+	 *             if unbalanced
+	 */
+	public OXJSONWriter(final JSONObject jsonObject) throws JSONException {
+		super(null);
+		this.jsonObject = jsonObject;
+		jsonObjectType = MODE_OBJ;
+		mode = MODE_OBJ;
+		pushObject(jsonObject);
+	}
+
+	/**
+	 * Creates a JSON writer that further writes to given JSON array
+	 * <p>
+	 * <b>NOTE</b>: To get this writer into a complete state the
+	 * <code>{@link #endArray()}</code> method must be invoked since this
+	 * constructor implicitely puts the writer into the same state as
+	 * <code>{@link #array()}</code> does.
+	 * 
+	 * @param jsonArray -
+	 *            the JSON array to write to
+	 * @throws JSONException -
+	 *             if unbalanced
+	 */
+	public OXJSONWriter(final JSONArray jsonArray) throws JSONException {
+		super(null);
+		this.jsonObject = jsonArray;
+		jsonObjectType = MODE_ARR;
+		pushArray(jsonArray);
 	}
 
 	/*
@@ -300,6 +344,17 @@ public final class OXJSONWriter extends JSONWriter {
 		return (mode == MODE_INIT);
 	}
 
+	/**
+	 * Resets this <code>OXJSONWriter</code>
+	 */
+	public void reset() {
+		mode = MODE_INIT;
+		stackObjs.clear();
+		jsonObject = null;
+		jsonObjectType = 0;
+		key = null;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -307,7 +362,7 @@ public final class OXJSONWriter extends JSONWriter {
 	 */
 	@Override
 	public String toString() {
-		return jsonObject.toString();
+		return jsonObject == null ? "[empty]" : jsonObject.toString();
 	}
 
 	/**

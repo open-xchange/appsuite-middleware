@@ -1,3 +1,7 @@
+* 2007-08-02 - thorben.betten@open-xchange.com
+
+ - Fixed multiple mail requests
+
 * 2007-08-02 - francisco.laguna@open-xchange.com
 
  - Bugfix #7936: Changed error messages for infostore and attachments. 

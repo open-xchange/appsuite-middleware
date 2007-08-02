@@ -70,20 +70,21 @@ import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.iterator.SearchIteratorException;
 
 public final class MailRequest {
-	
+
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(MailRequest.class);
-	
+
 	private static enum CollectableOperation {
 		MOVE("Move"), COPY("Copy"), STORE_FLAG("Store Flag"), COLOR_LABEL("Color Label");
-		
+
 		private final String str;
-		
+
 		private CollectableOperation(final String str) {
 			this.str = str;
 		}
-		
-		/* (non-Javadoc)
+
+		/*
+		 * (non-Javadoc)
 		 * 
 		 * @see java.lang.Enum#toString()
 		 */
@@ -93,15 +94,17 @@ public final class MailRequest {
 		}
 	}
 
+	private static final String STR_DATA = "data";
+
+	private static final Mail MAIL_SERVLET = new Mail();
+
 	private final SessionObject session;
 
 	private final OXJSONWriter writer;
 
 	private CollectObject collectObj;
 
-	private static final String STR_DATA = "data";
-
-	private static final Mail MAIL_SERVLET = new Mail();
+	private boolean contCollecting;
 
 	public MailRequest(final SessionObject session, final OXJSONWriter writer) throws JSONException {
 		super();
@@ -112,7 +115,7 @@ public final class MailRequest {
 
 	public void action(final String action, final JSONObject jsonObject, final MailInterface mailInterface)
 			throws SearchIteratorException, JSONException, OXMailException, OXPermissionException {
-		if (!session.getUserConfiguration().hasCalendar()) {
+		if (!session.getUserConfiguration().hasWebMail()) {
 			throw new OXPermissionException(OXPermissionException.Code.NoPermissionForModul, "mail");
 		}
 		if (action.equalsIgnoreCase(AJAXServlet.ACTION_ALL)) {
@@ -161,14 +164,20 @@ public final class MailRequest {
 		}
 	}
 
-	private void handleMultiple(final JSONObject jsonObject, final MailInterface mailInterface, final CollectableOperation op)
-			throws JSONException {
+	private void handleMultiple(final JSONObject jsonObject, final MailInterface mailInterface,
+			final CollectableOperation op) throws JSONException {
 		if (collectObj != null) {
 			if (collectObj.collectable(jsonObject, op)) {
 				collectObj.addMailID(jsonObject.getString(AJAXServlet.PARAMETER_ID));
+				contCollecting = true;
 			} else {
 				performMultipleInternal(mailInterface);
-				collectObj = null;
+				/*
+				 * Start new collect
+				 */
+				collectObj = new CollectObject(jsonObject, op);
+				collectObj.addMailID(jsonObject.getString(AJAXServlet.PARAMETER_ID));
+				contCollecting = false;
 			}
 		} else {
 			/*
@@ -176,11 +185,18 @@ public final class MailRequest {
 			 */
 			collectObj = new CollectObject(jsonObject, op);
 			collectObj.addMailID(jsonObject.getString(AJAXServlet.PARAMETER_ID));
+			contCollecting = true;
 		}
 	}
 
-	public boolean hasMultiple() {
-		return (collectObj != null);
+	/**
+	 * Indicates if this MailRequest is collecting continuously
+	 * 
+	 * @return <code>true</code> if this MailRequest is collecting
+	 *         continuously; otherwise <code>false</code>
+	 */
+	public boolean isContinuousCollect() {
+		return contCollecting;
 	}
 
 	public void performMultiple(final MailInterface mailInterface) throws JSONException {
@@ -189,8 +205,9 @@ public final class MailRequest {
 			collectObj = null;
 		}
 	}
-	
+
 	private void performMultipleInternal(final MailInterface mailInterface) throws JSONException {
+		writer.reset();
 		final long start = System.currentTimeMillis();
 		switch (collectObj.getOperation()) {
 		case MOVE:
@@ -218,8 +235,8 @@ public final class MailRequest {
 		}
 		if (LOG.isInfoEnabled()) {
 			LOG.info(new StringBuilder(100).append("Multiple '").append(collectObj.getOperation().toString()).append(
-					"' mail request successfully performed: ").append(System.currentTimeMillis() - start).append("msec")
-					.toString());
+					"' mail request successfully performed: ").append(System.currentTimeMillis() - start)
+					.append("msec").toString());
 		}
 	}
 
@@ -230,11 +247,11 @@ public final class MailRequest {
 	private static boolean isMove(final JSONObject jsonObject) throws JSONException {
 		return jsonObject.has(STR_DATA) && jsonObject.getJSONObject(STR_DATA).has(FolderFields.FOLDER_ID);
 	}
-	
+
 	private static boolean isStoreFlags(final JSONObject jsonObject) throws JSONException {
 		return jsonObject.has(STR_DATA) && jsonObject.getJSONObject(STR_DATA).has(JSONMessageObject.JSON_FLAGS);
 	}
-	
+
 	private static boolean isColorLabel(final JSONObject jsonObject) throws JSONException {
 		return jsonObject.has(STR_DATA) && jsonObject.getJSONObject(STR_DATA).has(CommonFields.COLORLABEL);
 	}
@@ -248,9 +265,9 @@ public final class MailRequest {
 		private final List<String> mailIDs;
 
 		private final CollectableOperation op;
-		
+
 		private final int flagInt;
-		
+
 		private final boolean flagValue;
 
 		public CollectObject(final JSONObject jsonObject, final CollectableOperation op) throws JSONException {
@@ -294,8 +311,8 @@ public final class MailRequest {
 						&& flagInt == bodyObj.getInt(JSONMessageObject.JSON_FLAGS) && flagValue == bodyObj
 						.getBoolean(JSONMessageObject.JSON_VALUE));
 			} else if (CollectableOperation.COLOR_LABEL.equals(op)) {
-				return (this.op.equals(op) && this.srcFld.equals(jsonObject.getString(AJAXServlet.PARAMETER_FOLDERID))
-						&& flagInt == jsonObject.getJSONObject(STR_DATA).getInt(CommonFields.COLORLABEL));
+				return (this.op.equals(op) && this.srcFld.equals(jsonObject.getString(AJAXServlet.PARAMETER_FOLDERID)) && flagInt == jsonObject
+						.getJSONObject(STR_DATA).getInt(CommonFields.COLORLABEL));
 			}
 			throw new InternalError("Unknown collectable operation: " + op);
 		}
@@ -319,11 +336,11 @@ public final class MailRequest {
 		public String getSrcFld() {
 			return srcFld;
 		}
-		
+
 		public int getFlagInt() {
 			return flagInt;
 		}
-		
+
 		public boolean getFlagValue() {
 			return flagValue;
 		}
