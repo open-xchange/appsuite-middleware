@@ -66,6 +66,10 @@ import com.openexchange.admin.taskmanagement.TaskManager;
 
 public class OXTaskMgmtImpl extends OXCommonImpl implements OXTaskMgmtInterface {
     
+    public OXTaskMgmtImpl() throws StorageException {
+        super();
+    }
+
     private static final Log log = LogFactory.getLog(OXTaskMgmtImpl.class);
     
     public void deleteJob(final Context ctx, final Credentials cred, final int id) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, TaskManagerException {
