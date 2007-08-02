@@ -115,7 +115,7 @@ public class PathResolverImpl extends AbstractPathResolver implements PathResolv
 			category=Category.CODE_ERROR,
 			desc="A WebdavPath for a document without an attached file was requested. In WebDAV only infoitems with files are visible. This points to a problem with the cola supply for the developer and can only be fixed by R&D.",
 			exceptionId=0,
-			msg="Illegal Argument: Document %d contains no file"
+			msg="Illegal argument: Document %d contains no file"
 	)
 	public String getPathForDocument(final int relativeToFolder, final int documentId,
 			final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {

@@ -70,9 +70,9 @@ public class UpdateAttachmentAction extends AttachmentListQueryAction {
 
 	@OXThrows(
 			category = Category.CODE_ERROR,
-			desc = "An invalid SQL Query was sent to the Server. This can only be fixed in R&D.",
+			desc = "An invalid SQL query was sent to the Server. This can only be fixed in R&D.",
 			exceptionId = 0,
-			msg = "Invalid SQL Query: %s"
+			msg = "Invalid SQL query: %s"
 	)
 	@Override
 	protected void undoAction() throws AbstractOXException {
@@ -88,9 +88,9 @@ public class UpdateAttachmentAction extends AttachmentListQueryAction {
 
 	@OXThrows(
 			category = Category.CODE_ERROR,
-			desc = "An invalid SQL Query was sent to the Server. This can only be fixed in R&D.",
+			desc = "An invalid SQL query was sent to the Server. This can only be fixed in R&D.",
 			exceptionId = 1,
-			msg = "Invalid SQL Query: %s"
+			msg = "Invalid SQL query: %s"
 	)
 	public void perform() throws AbstractOXException {
 		if(getAttachments().size() == 0) {

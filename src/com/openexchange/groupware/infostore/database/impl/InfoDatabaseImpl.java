@@ -320,7 +320,7 @@ public class InfoDatabaseImpl  extends DBService implements InfoDatabase {
 		return t.getTablename()+'.'+m.doSwitch(t.getFieldSwitcher());
 	}
 
-	@OXThrows(category=Category.CODE_ERROR, desc="An invalid SQL Query was used sent to the SQL Server. This can only be fixed by R&D", exceptionId=1, msg="Invalid SQL Query: %s")
+	@OXThrows(category=Category.CODE_ERROR, desc="An invalid SQL query was used sent to the SQL Server. This can only be fixed by R&D", exceptionId=1, msg="Invalid SQL query: %s")
 	private DocumentMetadata[] select(final Metadata[] fields, final String where, final String orderBy, final boolean asc, final FieldChooser chooser, final Context ctx, final Object...queryArgs) throws OXException {
 		final StringBuilder query = new StringBuilder();
 		query.append("SELECT ");
@@ -391,7 +391,7 @@ public class InfoDatabaseImpl  extends DBService implements InfoDatabase {
 		}
 	}
 
-	@OXThrows(category=Category.CODE_ERROR, desc="An invalid SQL Query was used sent to the SQL Server. This can only be fixed by R&D", exceptionId=0, msg="Invalid SQL Query: %s")
+	@OXThrows(category=Category.CODE_ERROR, desc="An invalid SQL query was used sent to the SQL Server. This can only be fixed by R&D", exceptionId=0, msg="Invalid SQL query: %s")
 	private final void executeUpdate(final String statement, final Metadata[] fields, final DocumentMetadata document, final Context ctx, final Object...additionals) throws OXException {
 		Connection con = null;
 		PreparedStatement stmt = null;

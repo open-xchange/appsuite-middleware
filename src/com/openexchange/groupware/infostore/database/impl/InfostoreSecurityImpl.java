@@ -169,7 +169,7 @@ public class InfostoreSecurityImpl extends DBService{
 			category = Category.CODE_ERROR,
 			desc = "The client tries to put an infoitem into a non infoitem folder.",
 			exceptionId = 2,
-			msg = "The folder %d is not an Infostore Folder"
+			msg = "The folder %d is not an Infostore folder"
 	)
 	public void checkFolderId(final long folderId, final Context ctx) throws OXException {
 		final FolderCacheManager cache = FolderCacheManager.getInstance();

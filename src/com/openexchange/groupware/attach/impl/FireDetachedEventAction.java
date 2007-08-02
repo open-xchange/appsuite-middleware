@@ -95,9 +95,9 @@ public class FireDetachedEventAction extends AttachmentEventAction {
 	
 	@OXThrows(
 			category = Category.INTERNAL_ERROR,
-			desc = "The Object could not be detached because the update to an underlying object failed.",
+			desc = "The object could not be detached because the update to an underlying object failed.",
 			exceptionId = 2,
-			msg = "The Object could not be detached because the update to an underlying object failed."
+			msg = "The object could not be detached because the update to an underlying object failed."
 			
 	)
 	public void perform() throws AbstractOXException {

@@ -482,7 +482,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 	}
 	
 	@OXThrows(
-			category = Category.CODE_ERROR, desc = "An invalid SQL Query was sent to the server", exceptionId = 3, msg = "Invalid SQL Query: %s"
+			category = Category.CODE_ERROR, desc = "An invalid SQL query was sent to the server", exceptionId = 3, msg = "Invalid SQL query: %s"
 	)
 	private List<String> getFiles(final int folderId, final int objectId, final int moduleId, final int[] ids, final Context ctx, final User user) throws OXException {
 		final List<String> files = new ArrayList<String>();
@@ -538,9 +538,9 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 
 	@OXThrowsMultiple(
 			category={Category.USER_INPUT, Category.CODE_ERROR},
-			desc={"An attachment with the given ID does not exist, so it cannot be downloaded.","An invalid SQL Query was sent to the database."},
+			desc={"An attachment with the given ID does not exist, so it cannot be downloaded.","An invalid SQL query was sent to the database."},
 			exceptionId={5,6},
-			msg={"The attachment you requested no longer exists. Please refresh the view.", "Invalid SQL Query: %s"}
+			msg={"The attachment you requested no longer exists. Please refresh the view.", "Invalid SQL query: %s"}
 	)
 	private String findFileId(final int id, final Context ctx) throws OXException {
 		PreparedStatement stmt = null;
@@ -617,9 +617,9 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 	
 	@OXThrowsMultiple(
 			category = { Category.INTERNAL_ERROR, Category.CODE_ERROR, Category.CODE_ERROR },
-			desc = { "Didn't find an attachment with the given file_id, so the file is propably orphaned or does not belong to the Attachments.","An invalid SQL Query was sent to the database.","An invalid SQL Query was sent to the database" },
+			desc = { "Didn't find an attachment with the given file_id, so the file is propably orphaned or does not belong to the Attachments.","An invalid SQL query was sent to the database.","An invalid SQL query was sent to the database" },
 			exceptionId = { 8,9,10 },
-			msg = { "Could not find an attachment with the file_id %s. Either the file is orphaned or belongs to another module.", "Invalid SQL Query: %s", "Invalid SQL Query: %s" }
+			msg = { "Could not find an attachment with the file_id %s. Either the file is orphaned or belongs to another module.", "Invalid SQL query: %s", "Invalid SQL query: %s" }
 			
 	)
 	public int[] removeAttachment(final String file_id, final Context ctx) throws OXException {
@@ -690,9 +690,9 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 
 	@OXThrowsMultiple(
 			category={Category.CODE_ERROR, Category.CODE_ERROR},
-			desc={"An invalid SQL Query was sent to the database.", "An invalid SQL Query was sent to the database."},
+			desc={"An invalid SQL query was sent to the database.", "An invalid SQL query was sent to the database."},
 			exceptionId={11,12},
-			msg={"Invalid SQL Query: %s", "Invalid SQL Query: %s"})
+			msg={"Invalid SQL query: %s", "Invalid SQL query: %s"})
 	public int modifyAttachment(final String file_id, final String new_file_id,
 			final String new_comment, final String new_mime, final Context ctx) throws OXException {
 		int retval = -1;
@@ -780,9 +780,9 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 	
 	@OXThrowsMultiple(
 			category = { Category.USER_INPUT, Category.CODE_ERROR },
-			desc = { "The Attachment does not exist (anymore). Reloading the view will propably help.","An invalid SQL Query was snet to the database." },
+			desc = { "The Attachment does not exist (anymore). Reloading the view will propably help.","An invalid SQL query was snet to the database." },
 			exceptionId = { 13,14 },
-			msg = { "The attachment you requested no longer exists. Please refresh the view.","Invalid SQL Query: %s" }
+			msg = { "The attachment you requested no longer exists. Please refresh the view.","Invalid SQL query: %s" }
 	)
 	private AttachmentMetadata loadAttachment(final int folderId, final int id, final Context ctx) throws OXException  {
 		
