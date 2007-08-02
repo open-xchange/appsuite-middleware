@@ -19,14 +19,16 @@
 # Antje Faber, 2007.
 # Antje Faber, 2007.
 # Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
 msgid ""
 msgstr ""
 "Project-Id-Version: server.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2006-11-13 15:15+0100\n"
-"PO-Revision-Date: 2007-04-25 10:24+0200\n"
+"PO-Revision-Date: 2007-08-02 16:37+0200\n"
 "Last-Translator: Antje Faber\n"
-"Language-Team:  <en@li.org>\n"
+"Language-Team:  <de@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -94,32 +96,40 @@ msgid "My Infostore Folder"
 msgstr "Mein InfoStore-Ordner"
 
 #: com/openexchange/groupware/i18n/FolderStrings.java:92
-msgid "All Groups and Users"
-msgstr "Alle Gruppen und Anwender"
-
-#: com/openexchange/groupware/i18n/FolderStrings.java:94
 msgid "Tasks"
 msgstr "Aufgaben"
 
-#: com/openexchange/groupware/i18n/FolderStrings.java:96
+#: com/openexchange/groupware/i18n/FolderStrings.java:94
 msgid "Calendar"
 msgstr "Kalender"
 
-#: com/openexchange/groupware/i18n/FolderStrings.java:98
+#: com/openexchange/groupware/i18n/FolderStrings.java:96
 msgid "Contacts"
 msgstr "Kontakte"
 
 #: com/openexchange/groupware/i18n/Groups.java:68
-msgid "All groups and users"
-msgstr "Alle Gruppen und Anwender"
+msgid "All internal users"
+msgstr "Alle internen Benutzer"
 
 #: com/openexchange/groupware/i18n/MailStrings.java:62
 msgid "Read Acknowledgement"
 msgstr "Lesebestätigung"
 
 #: com/openexchange/groupware/i18n/MailStrings.java:64
-msgid "Receipt Acknowledgement"
-msgstr "Empfangsbestätigung"
+msgid ""
+"This is a Return Receipt for the mail that you sent on #DATE# to #RECIPIENT# "
+"with subject \"#SUBJECT#\".\n"
+"\n"
+"Note: This return receipt only acknowledges that the message was displayed "
+"on the recipients computer. There is no guarantee that the recipient has "
+"read or understood the message contents."
+msgstr ""
+"Dies ist eine Empfangsbestätigung für die am #DATE# an #RECIPIENT# gesendete "
+"E-Mail mit dem Betreff \"#SUBJECT#\".\n"
+"\n"
+"Hinweis: Diese Empfangsbestätigung bestätigt lediglich die Anzeige der "
+"Nachricht am Rechner des Empfängers. Es gibt keine Garantie, dass der "
+"Empfänger die Nachricht gelesen oder deren Inhalt verstanden hat."
 
 #: com/openexchange/groupware/i18n/MailStrings.java:66
 msgid "On #DATE# at #TIME# #SENDER# wrote:"
