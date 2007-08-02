@@ -1046,8 +1046,8 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
             prep_check.setString(2, groupname);
             rs = prep_check.executeQuery();
             if (rs.next()) {
-                // grab username and return 
-                return rs.getInt("identifier");
+                // grab id and return 
+                return rs.getInt("id");
             }else{
                 throw new StorageException("No such group "+groupname+" in context "+ctx.getIdAsInt().intValue()+"");
             }
