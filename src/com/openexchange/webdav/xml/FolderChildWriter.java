@@ -88,7 +88,7 @@ public class FolderChildWriter extends DataWriter {
 		
 		try {
 			addElement("object_status", "LIST", eProp);
-			final Element eIds = new Element("id_list", namespace);
+			final Element eIds = new Element("object_list", namespace);
 			while (searchIterator.hasNext()) {
 				addElement(DataFields.ID, ((DataObject)searchIterator.next()).getObjectID(), eIds);
 			}
