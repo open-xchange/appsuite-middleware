@@ -68,6 +68,10 @@ import org.jdom.output.XMLOutputter;
 
 public class DataWriter {
 	
+	public static final int ACTION_MODIFIED = 1;
+	public static final int ACTION_DELETE = 2;
+	public static final int ACTION_LIST = 3;
+	
 	private static final Namespace dav = Namespace.getNamespace("D", "DAV:");
 	
 	public static final Namespace namespace = Namespace.getNamespace(XmlServlet.PREFIX, XmlServlet.NAMESPACE);

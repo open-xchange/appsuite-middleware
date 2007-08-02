@@ -51,8 +51,15 @@
 
 package com.openexchange.webdav.xml;
 
+import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
+import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.webdav.xml.fields.DataFields;
+import java.io.OutputStream;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.jdom.Element;
+import org.jdom.output.XMLOutputter;
 
 /**
  * FolderChildWriter
@@ -62,12 +69,39 @@ import org.jdom.Element;
 
 public class FolderChildWriter extends DataWriter {
 	
+	private static final Log LOG = LogFactory.getLog(FolderChildWriter.class);
+	
 	protected void writeFolderChildElements(final FolderChildObject folderchildobject, final Element e_prop) throws Exception {
 		writeDataElements(folderchildobject, e_prop);
 		
 		if (folderchildobject.containsParentFolderID()) {
 			addElement("folder_id", folderchildobject.getParentFolderID(), e_prop);
 		} 
+	}
+	
+	public void writeList(final SearchIterator searchIterator, final XMLOutputter xo, final OutputStream os) throws Exception {
+		int status = 200;
+		String description = "OK";
+		int object_id = 0;
+		
+		final Element eProp = new Element("prop", "D", "DAV:");
+		
+		try {
+			addElement("object_status", "LIST", eProp);
+			final Element eIds = new Element("id_list", namespace);
+			while (searchIterator.hasNext()) {
+				addElement(DataFields.ID, ((DataObject)searchIterator.next()).getObjectID(), eIds);
+			}
+			
+			eProp.addContent(eIds);
+		} catch (Exception exc) {
+			LOG.error("writeList", exc);
+			status = 500;
+			description = "Server Error: " + exc.getMessage();
+			object_id = 0;
+		}
+
+		writeResponseElement(eProp, object_id, status, description, xo, os);
 	}
 }
 

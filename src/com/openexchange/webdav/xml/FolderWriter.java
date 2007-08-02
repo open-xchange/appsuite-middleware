@@ -116,7 +116,7 @@ public class FolderWriter extends FolderChildWriter {
 		}
 	}
 	
-	public void startWriter(final boolean modified, final boolean deleted, Date lastsync, final OutputStream os) throws Exception {
+	public void startWriter(final boolean modified, final boolean deleted, final boolean bList, Date lastsync, final OutputStream os) throws Exception {
 		final FolderSQLInterface sqlinterface = new RdbFolderSQLInterface(sessionObj);
 		
 		final XMLOutputter xo = new XMLOutputter();
@@ -142,6 +142,18 @@ public class FolderWriter extends FolderChildWriter {
 			try {
 				it = sqlinterface.getDeletedFolders(lastsync);
 				writeIterator(it, true, xo, os);
+			} finally {
+				if (it != null) {
+					it.close();
+				}
+			}
+		}
+		
+		if (bList) {
+			SearchIterator it = null;
+			try {
+				it = sqlinterface.getModifiedUserFolders(new Date(0));
+				writeList(it, xo, os);
 			} finally {
 				if (it != null) {
 					it.close();
@@ -281,7 +293,3 @@ public class FolderWriter extends FolderChildWriter {
 		e.setAttribute("admin_flag", String.valueOf(adminFlag), namespace);
 	}
 }
-
-
-
-

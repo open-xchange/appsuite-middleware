@@ -146,13 +146,13 @@ public class AppointmentWriter extends CalendarWriter {
 		}
 	}
 	
-	public void startWriter(final boolean modified, final boolean deleted, final int folder_id, final Date lastsync, final OutputStream os) throws Exception {
+	public void startWriter(final boolean bModified, final boolean bDeleted, final boolean bList, final int folder_id, final Date lastsync, final OutputStream os) throws Exception {
 		final AppointmentSQLInterface appointmentsql = new CalendarSql(sessionObj);
 		final XMLOutputter xo = new XMLOutputter();
 		
 		SearchIterator it = null;
 		
-		if (modified) {
+		if (bModified) {
 			try {
 				it = appointmentsql.getModifiedAppointmentsInFolder(folder_id, changeFields, lastsync);
 				writeIterator(it, false, xo, os);
@@ -163,7 +163,7 @@ public class AppointmentWriter extends CalendarWriter {
 			}
 		}
 		
-		if (deleted) {
+		if (bDeleted) {
 			try {
 				it = appointmentsql.getDeletedAppointmentsInFolder(folder_id, deleteFields, lastsync);
 				writeIterator(it, true, xo, os);
@@ -174,6 +174,16 @@ public class AppointmentWriter extends CalendarWriter {
 			}
 		}
 		
+		if (bList) {
+			try {
+				it = appointmentsql.getModifiedAppointmentsInFolder(folder_id, changeFields, new Date(0));
+				writeList(it, xo, os);
+			} finally {
+				if (it != null) {
+					it.close();
+				}
+			}
+		}
 	}
 	
 	public void writeIterator(final SearchIterator it, final boolean delete, final XMLOutputter xo, final OutputStream os) throws Exception {

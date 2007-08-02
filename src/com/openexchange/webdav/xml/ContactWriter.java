@@ -228,10 +228,10 @@ public class ContactWriter extends CommonWriter {
 		}
 	}
 	
-	public void startWriter(boolean modified, boolean deleted, int folder_id, Date lastsync, OutputStream os) throws Exception {
+	public void startWriter(boolean bModified, boolean bDeleted, boolean bList, int folder_id, Date lastsync, OutputStream os) throws Exception {
 		XMLOutputter xo = new XMLOutputter();
 		
-		if (modified) {
+		if (bModified) {
 			SearchIterator it = null;
 			try {
 				it = contactsql.getModifiedContactsInFolder(folder_id, changeFields, lastsync);
@@ -243,11 +243,23 @@ public class ContactWriter extends CommonWriter {
 			}
 		}
 		
-		if (deleted) {
+		if (bDeleted) {
 			SearchIterator it = null;
 			try {
 				it = contactsql.getDeletedContactsInFolder(folder_id, deleteFields, lastsync);
 				writeIterator(it, true, xo, os);
+			} finally {
+				if (it != null) {
+					it.close();
+				}
+			}
+		}
+		
+		if (bList) {
+			SearchIterator it = null;
+			try {
+				it = contactsql.getContactsInFolder(folder_id, 0, 50000, 0, null, deleteFields);
+				writeList(it, xo, os);
 			} finally {
 				if (it != null) {
 					it.close();

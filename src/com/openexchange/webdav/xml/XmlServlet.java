@@ -213,6 +213,7 @@ public abstract class XmlServlet extends PermissionServlet {
 		
 		boolean bModified = true;
 		boolean bDeleted = false;
+		boolean bList = false;
 		
 		try {
 			final SessionObject sessionObj = getSession(req);
@@ -223,8 +224,8 @@ public abstract class XmlServlet extends PermissionServlet {
 			resp.setStatus(207);
 			resp.setContentType("text/xml; charset=UTF-8");
 			
-			boolean hasLastSync = false;
 			boolean hasObjectId = false;
+			boolean hasObjectMode = false;
 			
 			if (input_doc != null) {
 				final Element el = input_doc.getRootElement();
@@ -236,8 +237,10 @@ public abstract class XmlServlet extends PermissionServlet {
 				}
 				
 				final Element eLastSync = eProp.getChild("lastsync", Namespace.getNamespace(PREFIX, NAMESPACE));
-				if (eLastSync != null) {
-					hasLastSync = true;
+				final Element eObjectMode = eProp.getChild("objectmode", Namespace.getNamespace(PREFIX, NAMESPACE));
+				
+				if (eObjectMode != null) {
+					hasObjectMode = true;
 				}
 				
 				final Element eObjectId = eProp.getChild(DataFields.OBJECT_ID, Namespace.getNamespace(PREFIX, NAMESPACE));
@@ -245,9 +248,11 @@ public abstract class XmlServlet extends PermissionServlet {
 					hasObjectId = true;
 				}
 				
-				if (hasLastSync) {
+				if (hasObjectMode) {
 					try {
-						lastsync = new Date(Long.parseLong(eLastSync.getText()));
+						if (eLastSync != null) {
+							lastsync = new Date(Long.parseLong(eLastSync.getText()));
+						}
 					} catch (NumberFormatException exc) {
 						System.out.println("invalid value in element lastsync");
 					}
@@ -260,11 +265,11 @@ public abstract class XmlServlet extends PermissionServlet {
 							throw new OXConflictException("invalid value in element folder_id: " + eFolderId.getText(), exc);
 						}
 					}
-					
-					final Element eObjectMode = eProp.getChild("objectmode", Namespace.getNamespace(PREFIX, NAMESPACE));
+
 					if (eObjectMode != null) {
 						bModified = false;
 						bDeleted = false;
+						bList = false;
 						final String[] value = eObjectMode.getText().trim().toUpperCase().split(",");
 						
 						for (int a = 0; a < value.length; a++) {
@@ -272,6 +277,8 @@ public abstract class XmlServlet extends PermissionServlet {
 								bModified = true;
 							} else if (value[a].trim().equals("DELETED")) {
 								bDeleted = true;
+							} else if (value[a].trim().equals("LIST")) {
+								bList = true;
 							} else {
 								throw new OXConflictException("invalid value in element objectmode: " + value[a]);
 							}
@@ -304,11 +311,11 @@ public abstract class XmlServlet extends PermissionServlet {
 			os.write(("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n").getBytes());
 			os.write(("<D:multistatus xmlns:D=\"DAV:\" buildnumber=\"" + Version.BUILDNUMBER + "\" buildname=\"" + Version.NAME + "\">").getBytes());
 			
-			if (hasLastSync) {
+			if (hasObjectMode) {
 				if (lastsync == null) {
 					lastsync = new Date(0);
 				}
-				startWriter(sessionObj, folder_id, bModified, bDeleted, lastsync, resp.getOutputStream());
+				startWriter(sessionObj, folder_id, bModified, bDeleted, bList, lastsync, resp.getOutputStream());
 			} else {
 				startWriter(sessionObj, object_id, folder_id, resp.getOutputStream());
 			}
@@ -495,6 +502,8 @@ public abstract class XmlServlet extends PermissionServlet {
 	protected abstract void startWriter(SessionObject sessionObj, int objectId, int folderId, OutputStream os) throws Exception;
 	
 	protected abstract void startWriter(SessionObject sessionObj, int folderId, boolean bModified, boolean bDelete, Date lastsync, OutputStream os) throws Exception;
+
+	protected abstract void startWriter(SessionObject sessionObj, int folderId, boolean bModified, boolean bDelete, boolean bList, Date lastsync, OutputStream os) throws Exception;
 }
 
 

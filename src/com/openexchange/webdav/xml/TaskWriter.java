@@ -145,7 +145,7 @@ public class TaskWriter extends CalendarWriter {
 		}
 	}
 	
-	public void startWriter(final boolean modified, final boolean deleted, final int folder_id, final Date lastsync, final OutputStream os) throws Exception {
+	public void startWriter(final boolean modified, final boolean deleted, final boolean bList, final int folder_id, final Date lastsync, final OutputStream os) throws Exception {
 		final TasksSQLInterface tasksql = new TasksSQLInterfaceImpl(sessionObj);
 		final XMLOutputter xo = new XMLOutputter();
 		
@@ -166,6 +166,19 @@ public class TaskWriter extends CalendarWriter {
 			try {
 				it = tasksql.getDeletedTasksInFolder(folder_id, deleteFields, lastsync);
 				writeIterator(it, true, xo, os);
+			} finally {
+				if (it != null) {
+					it.close();
+				}
+			}
+		}
+		
+		
+		if (bList) {
+			SearchIterator it = null;
+			try {
+				it = tasksql.getTaskList(folder_id, -1, -1, 0, null, deleteFields);
+				writeList(it, xo, os);
 			} finally {
 				if (it != null) {
 					it.close();
