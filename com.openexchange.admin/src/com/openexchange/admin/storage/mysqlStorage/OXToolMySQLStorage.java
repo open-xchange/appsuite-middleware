@@ -865,13 +865,19 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     }
     
     @Override
-    public boolean existsUser(Context ctx, User[] users) throws StorageException {
+    public boolean existsUser(final Context ctx, final User[] users) throws StorageException {
         int []ids = new int[users.length];
         for(int i=0; i<ids.length; i++) {
             ids[i] = users[i].getId();
         }
         // FIXME: Should be rewritten to optimize performance
         return existsUser(ctx, ids);
+    }
+
+    @Override
+    public boolean existsUser(final Context ctx, final User user) throws StorageException {
+        // FIXME: Should be rewritten to optimize performance
+        return existsUser(ctx, new User[]{user});
     }
 
     /**
