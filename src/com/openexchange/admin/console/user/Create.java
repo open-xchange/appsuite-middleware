@@ -28,7 +28,15 @@ public class Create extends CreateCore {
     }
 
     @Override
-    protected void maincall(final AdminParser parser, final OXUserInterface oxusr, final Context ctx, final User usr, final UserModuleAccess access, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
+    protected void maincall(final AdminParser parser, final OXUserInterface oxusr, final Context ctx, final User usr, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
+        final UserModuleAccess access = new UserModuleAccess();
+        // webmail package access per default
+        access.disableAll();
+        access.setWebmail(true);
+        access.setContacts(true);
+        // set module access rights
+        setModuleAccessOptionsinUserCreate(parser, access);
+        
         final Integer id = oxusr.create(ctx, usr, access, auth).getId();
         displayCreatedMessage(String.valueOf(id), ctx.getIdAsInt());
     }
