@@ -53,7 +53,7 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 
 import com.openexchange.admin.console.AdminParser;
-import com.openexchange.admin.console.AdminParser.NeededTriState;
+import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -71,7 +71,7 @@ public abstract class DeleteCore extends UserAbstraction {
     protected final void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptions(parser);
         setIdOption(parser);
-        setUsernameOption(parser, NeededTriState.eitheror);
+        setUsernameOption(parser, NeededQuadState.eitheror);
 
         setFurtherOptions(parser);
     }

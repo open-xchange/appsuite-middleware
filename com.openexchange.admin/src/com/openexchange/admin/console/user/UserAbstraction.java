@@ -65,7 +65,7 @@ import java.util.TimeZone;
 
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.ObjectNamingAbstraction;
-import com.openexchange.admin.console.AdminParser.NeededTriState;
+import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.User;
@@ -291,51 +291,51 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
 
     
     protected final void setIdOption(final AdminParser admp){
-        this.idOption =  setShortLongOpt(admp,OPT_ID_SHORT,OPT_ID_LONG,"Id of the user", true, NeededTriState.eitheror);
+        this.idOption =  setShortLongOpt(admp,OPT_ID_SHORT,OPT_ID_LONG,"Id of the user", true, NeededQuadState.eitheror);
     }
     
-    protected final void setUsernameOption(final AdminParser admp, final NeededTriState needed) {
+    protected final void setUsernameOption(final AdminParser admp, final NeededQuadState needed) {
         this.userNameOption = setShortLongOpt(admp,OPT_USERNAME_SHORT,OPT_USERNAME_LONG,"Username of the user", true, needed);
     }
     
-    protected final void setDisplayNameOption(final AdminParser admp, final NeededTriState needed) {
+    protected final void setDisplayNameOption(final AdminParser admp, final NeededQuadState needed) {
         this.displayNameOption = setShortLongOpt(admp,OPT_DISPLAYNAME_SHORT,OPT_DISPLAYNAME_LONG,"Display name of the user", true, needed); 
     }
     
-    protected final void setPasswordOption(final AdminParser admp, final NeededTriState needed) {
+    protected final void setPasswordOption(final AdminParser admp, final NeededQuadState needed) {
         this.passwordOption =  setShortLongOpt(admp,OPT_PASSWORD_SHORT,OPT_PASSWORD_LONG,"Password for the user", true, needed); 
     }
     
-    protected final void setGivenNameOption(final AdminParser admp, final NeededTriState needed) {
+    protected final void setGivenNameOption(final AdminParser admp, final NeededQuadState needed) {
         this.givenNameOption =  setShortLongOpt(admp,OPT_GIVENNAME_SHORT,OPT_GIVENNAME_LONG,"Given name for the user", true, needed); 
     }
     
-    protected final void setSurNameOption(final AdminParser admp, final NeededTriState needed){
+    protected final void setSurNameOption(final AdminParser admp, final NeededQuadState needed){
         this.surNameOption =  setShortLongOpt(admp,OPT_SURNAME_SHORT,OPT_SURNAME_LONG,"Sur name for the user", true, needed); 
     }
     
     protected final void setLanguageOption(final AdminParser admp){
-        this.languageOption =  setShortLongOpt(admp,OPT_LANGUAGE_SHORT,OPT_LANGUAGE_LONG,"Language for the user (de_DE,en_US)", true, NeededTriState.notneeded); 
+        this.languageOption =  setShortLongOpt(admp,OPT_LANGUAGE_SHORT,OPT_LANGUAGE_LONG,"Language for the user (de_DE,en_US)", true, NeededQuadState.notneeded); 
     }
     
     protected final void setTimezoneOption(final AdminParser admp){
-        this.timezoneOption =  setShortLongOpt(admp,OPT_TIMEZONE_SHORT,OPT_TIMEZONE_LONG,"Timezone of the user (Europe/Berlin)", true, NeededTriState.notneeded); 
+        this.timezoneOption =  setShortLongOpt(admp,OPT_TIMEZONE_SHORT,OPT_TIMEZONE_LONG,"Timezone of the user (Europe/Berlin)", true, NeededQuadState.notneeded); 
     }
     
-    protected final void setPrimaryMailOption(final AdminParser admp, final NeededTriState needed){
+    protected final void setPrimaryMailOption(final AdminParser admp, final NeededQuadState needed){
         this.primaryMailOption =  setShortLongOpt(admp,OPT_PRIMARY_EMAIL_SHORT,OPT_PRIMARY_EMAIL_LONG,"Primary mail address", true, needed); 
     }
     
     protected final void setDepartmentOption(final AdminParser admp){
-        this.departmentOption = setShortLongOpt(admp,OPT_DEPARTMENT_SHORT,OPT_DEPARTMENT_LONG,"Department of the user", true, NeededTriState.notneeded); 
+        this.departmentOption = setShortLongOpt(admp,OPT_DEPARTMENT_SHORT,OPT_DEPARTMENT_LONG,"Department of the user", true, NeededQuadState.notneeded); 
     }
     
     protected final void setCompanyOption(final AdminParser admp){
-        this.companyOption = setShortLongOpt(admp,OPT_COMPANY_SHORT,OPT_COMPANY_LONG,"Company of the user", true, NeededTriState.notneeded); 
+        this.companyOption = setShortLongOpt(admp,OPT_COMPANY_SHORT,OPT_COMPANY_LONG,"Company of the user", true, NeededQuadState.notneeded); 
     }
 
     protected final void setAliasesOption(final AdminParser admp){
-        this.aliasesOption = setShortLongOpt(admp,OPT_ALIASES_SHORT,OPT_ALIASES_LONG,"Email aliases of the user", true, NeededTriState.notneeded); 
+        this.aliasesOption = setShortLongOpt(admp,OPT_ALIASES_SHORT,OPT_ALIASES_LONG,"Email aliases of the user", true, NeededQuadState.notneeded); 
     }
     
     protected final void setImapOnlyOption(final AdminParser admp){
@@ -682,11 +682,11 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     }
 
     protected final void setMandatoryOptions(final AdminParser parser) {
-        setUsernameOption(parser, NeededTriState.needed);
-        setMandatoryOptionsWithoutUsername(parser, NeededTriState.needed);
+        setUsernameOption(parser, NeededQuadState.needed);
+        setMandatoryOptionsWithoutUsername(parser, NeededQuadState.needed);
     }
 
-    protected void setMandatoryOptionsWithoutUsername(final AdminParser parser, final NeededTriState needed) {
+    protected void setMandatoryOptionsWithoutUsername(final AdminParser parser, final NeededQuadState needed) {
         setDisplayNameOption(parser, needed);
         setGivenNameOption(parser, needed);
         setSurNameOption(parser, needed);

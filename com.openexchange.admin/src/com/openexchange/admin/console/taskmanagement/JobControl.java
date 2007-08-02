@@ -56,7 +56,7 @@ import java.util.concurrent.ExecutionException;
 
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.BasicCommandlineOptions;
-import com.openexchange.admin.console.AdminParser.NeededTriState;
+import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.CmdLineParser.IllegalOptionValueException;
 import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.console.CmdLineParser.UnknownOptionException;
@@ -191,9 +191,9 @@ public class JobControl extends BasicCommandlineOptions {
     private void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptions(parser);
         
-        this.list = setShortLongOpt(parser, OPT_LIST_SHORT, OPT_LIST_LONG, "list the jobs of this open-xchange server", false, NeededTriState.notneeded);
+        this.list = setShortLongOpt(parser, OPT_LIST_SHORT, OPT_LIST_LONG, "list the jobs of this open-xchange server", false, NeededQuadState.notneeded);
         this.delete = setShortLongOpt(parser, OPT_DELETE_SHORT, OPT_DELETE_LONG, "id", "delete the the given job id", false);
         this.details = setShortLongOpt(parser, OPT_DETAILS_SHORT, OPT_DETAILS_LONG, "id", "show details for the given job", false);
-        this.flush = setShortLongOpt(parser, OPT_FLUSH_SHORT, OPT_FLUSH_LONG, "flush all finished jobs from the queue", false, NeededTriState.notneeded);
+        this.flush = setShortLongOpt(parser, OPT_FLUSH_SHORT, OPT_FLUSH_LONG, "flush all finished jobs from the queue", false, NeededQuadState.notneeded);
     }
 }
