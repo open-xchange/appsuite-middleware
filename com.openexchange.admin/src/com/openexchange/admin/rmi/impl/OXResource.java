@@ -587,5 +587,4 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
             }
         }
     }
-
 }
