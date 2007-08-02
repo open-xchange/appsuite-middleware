@@ -902,5 +902,4 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             }
         }
     }
-
 }
