@@ -119,9 +119,9 @@ public class FileStorageException extends AbstractOXException {
          */
         CLASS_NOT_FOUND("Class %s can not be loaded.", Category.SETUP_ERROR, 2),
         /**
-         * An IO Error occurred
+         * An IO error occurred: %s
          */
-        IOERROR("An IOError occurred: %s", Category.SUBSYSTEM_OR_SERVICE_DOWN,
+        IOERROR("An IO error occurred: %s", Category.SUBSYSTEM_OR_SERVICE_DOWN,
             3),
         /**
          * May be used to turn the IOException of getInstance into a proper
@@ -158,9 +158,9 @@ public class FileStorageException extends AbstractOXException {
          */
         NO_NUMBER("Number parsing problem.", Category.CODE_ERROR, 10),
         /**
-         * FileStorage is full.
+         * File storage is full.
          */
-        STORE_FULL("FileStorage is full.", Category.EXTERNAL_RESOURCE_FULL, 11),
+        STORE_FULL("File storage is full.", Category.EXTERNAL_RESOURCE_FULL, 11),
         /**
          * Depth mismatch while computing next entry.
          */

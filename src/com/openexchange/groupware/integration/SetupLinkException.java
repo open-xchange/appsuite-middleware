@@ -98,9 +98,9 @@ public class SetupLinkException extends AbstractOXException {
      */
     public enum Code {
         /**
-         * Unknown Problem: "%s".
+         * Unknown problem: "%s".
          */
-        UNKNOWN("Unknown Problem: \"%s\".", Category.CODE_ERROR, 1),
+        UNKNOWN("Unknown problem: \"%s\".", Category.CODE_ERROR, 1),
         /**
          * Too few (%d) login attributes.
          */

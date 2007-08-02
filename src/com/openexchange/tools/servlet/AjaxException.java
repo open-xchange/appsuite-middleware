@@ -114,9 +114,10 @@ public class AjaxException extends AbstractOXException {
         InvalidParameter("Invalid parameter: %s",
             Category.CODE_ERROR, 4),
         /**
-         * I/O error while writing to Writer Object: %s
+         * I/O error while writing to Writer object: %s
          */
-        IOError("I/O error while writing to Writer Object: %s", Category.INTERNAL_ERROR, 5),
+        IOError("I/O error while writing to Writer object: %s", Category
+            .INTERNAL_ERROR, 5),
         /**
          * Missing parameter: %s
          */

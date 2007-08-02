@@ -143,9 +143,9 @@ public class LoginException extends AbstractOXException {
         ACCOUNT_NOT_READY_YET("Account \"%s\" is not ready yet.",
             Category.TRY_AGAIN, Source.SYSTEM, 2),
         /**
-         * Unknown Problem: "%s".
+         * Unknown problem: "%s".
          */
-        UNKNOWN("Unknown Problem: \"%s\".", Category.CODE_ERROR,
+        UNKNOWN("Unknown problem: \"%s\".", Category.CODE_ERROR,
             Source.SYSTEM, 3),
         /**
          * Too few (%d) login attributes.

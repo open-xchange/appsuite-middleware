@@ -101,7 +101,7 @@ public class QuotaFileStorageException extends FileStorageException {
             Category.CODE_ERROR, 1),
         SQL_EXCEPTION("An invalid SQL query was sent to the server.", Category.CODE_ERROR, 2),
         TOO_LARGE("The file cannot be added to filestore. File size: %s Quota: %s Used: %s", Category.USER_INPUT, 3),
-        UNDERLYING_EXCEPTION("Got a FileStorageException for FileStorage with id %s in Context %s . Underlying message is: %s. Check the StackTrace", Category.INTERNAL_ERROR, 4);
+        UNDERLYING_EXCEPTION("Got a FileStorageException for FileStorage with id %s in context %s. Underlying message is: %s. Check the StackTrace.", Category.INTERNAL_ERROR, 4);
 
 
         /**

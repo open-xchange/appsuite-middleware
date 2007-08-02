@@ -1,3 +1,7 @@
+* 2007-08-02 - marcus.klein@open-xchange.com
+
+ - Bugfix #7936: Changed error messages for filestore, ajax and login.
+
 * 2007-08-02 - thorben.betten@open-xchange.com
 
  - Fixed multiple mail requests
