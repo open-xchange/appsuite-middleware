@@ -36,7 +36,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
     private final Log log = LogFactory.getLog(this.getClass());
 
-    public OXContext() {
+    public OXContext() throws StorageException {
         super();
         if (log.isDebugEnabled()) {
             log.debug("Class loaded: " + this.getClass().getName());
