@@ -146,8 +146,8 @@ public class ListDatabases extends DatabaseAbstraction {
         
         rea_data.add(db.getId().toString());
         
-        if (null != db.getDisplayname()) {
-            rea_data.add(db.getDisplayname());
+        if (null != db.getName()) {
+            rea_data.add(db.getName());
         } else {
             rea_data.add(null);
         }

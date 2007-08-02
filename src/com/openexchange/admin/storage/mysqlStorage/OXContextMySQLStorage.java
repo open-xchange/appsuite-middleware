@@ -1067,7 +1067,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                         configdb_write_con.setAutoCommit(false);
                         final int srv_id = IDGenerator.getId(configdb_write_con);
                         configdb_write_con.commit();
-                        schema_name = db.getDisplayname() + '_' + srv_id;
+                        schema_name = db.getName() + '_' + srv_id;
                     }
 
                     db.setScheme(schema_name);
@@ -1085,7 +1085,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                             configdb_write_con.setAutoCommit(false);
                             final int srv_id = IDGenerator.getId(configdb_write_con);
                             configdb_write_con.commit();
-                            schema_name = db.getDisplayname() + '_' + srv_id;
+                            schema_name = db.getName() + '_' + srv_id;
                             db.setScheme(schema_name);
                             oxu.createDatabase(db);
                             newSchemaCreated = true;
@@ -1300,7 +1300,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             retval.setPassword(rs.getString("password"));
             retval.setDriver(rs.getString("driver"));
             retval.setUrl(rs.getString("url"));
-            retval.setDisplayname(rs.getString("name"));
+            retval.setName(rs.getString("name"));
             rs.close();
         } finally {
             try {
@@ -1385,7 +1385,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 configdb_write_con.setAutoCommit(false);
                 final int srv_id = IDGenerator.getId(configdb_write_con);
                 configdb_write_con.commit();
-                schema_name = db.getDisplayname() + "_" + srv_id;
+                schema_name = db.getName() + "_" + srv_id;
             }
             db.setScheme(schema_name);
             oxu.createDatabase(db);
@@ -1403,7 +1403,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     final int srv_id = IDGenerator.getId(configdb_write_con);
                     configdb_write_con.commit();
                     configdb_write_con.setAutoCommit(true);
-                    schema_name = db.getDisplayname() + "_" + srv_id;
+                    schema_name = db.getName() + "_" + srv_id;
 
                     db.setScheme(schema_name);
                     oxu.createDatabase(db);
@@ -1965,7 +1965,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
                 totalDatabases += db_count;
                 final String name = rs.getString("name");
-                datahandle.setDisplayname(name);
+                datahandle.setName(name);
 
                 list.add(datahandle);
 
@@ -1983,7 +1983,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 final int unit_max = handle.getMaxUnits();
                 final int weight = handle.getClusterWeight();
                 final int db_count = handle.getCount();
-                final String name = handle.getDisplayname();
+                final String name = handle.getName();
 
                 if (unit_max == -1 || (unit_max != 0 && db_count < unit_max)) {
                     double currweight = (double) totalDatabases / 100 * db_count;

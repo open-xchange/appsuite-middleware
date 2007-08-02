@@ -110,9 +110,9 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             con = cache.getWRITEConnectionForCONFIGDB();
             con.setAutoCommit(false);
             
-            if (db.getDisplayname() != null && db.getDisplayname().length() > 0) {
+            if (db.getName() != null && db.getName().length() > 0) {
                 prep = con.prepareStatement("UPDATE db_pool,db_cluster SET db_pool.name = ? WHERE db_pool.db_pool_id = ? AND (db_cluster.write_db_pool_id = ? OR db_cluster.read_db_pool_id = ?)");
-                prep.setString(1, db.getDisplayname());
+                prep.setString(1, db.getName());
                 prep.setInt(2, db.getId());
                 prep.setInt(3, db.getId());
                 prep.setInt(4, db.getId());
@@ -639,8 +639,8 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             prep.setInt(6, db.getPoolHardLimit());
             prep.setInt(7, db.getPoolMax());
             prep.setInt(8, db.getPoolInitial());
-            if (db.getDisplayname() != null) {
-                prep.setString(9, db.getDisplayname());
+            if (db.getName() != null) {
+                prep.setString(9, db.getName());
             } else {
                 prep.setNull(9, Types.VARCHAR);
             }
@@ -901,7 +901,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                     cstmt.close();
                 }
                 db.setClusterWeight(rs.getInt("weight"));
-                db.setDisplayname(rs.getString("name"));
+                db.setName(rs.getString("name"));
                 db.setDriver(rs.getString("driver"));
                 db.setId(rs.getInt("db_pool_id"));
                 db.setLogin(rs.getString("login"));
