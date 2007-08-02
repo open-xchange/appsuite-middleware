@@ -6,6 +6,7 @@
 * 2007-08-02 - sebastian.kauss@open-xchange.com
 
  - Fixed Bug #7393 - Folder 0 cannot be resolved
+ - Fixed Bug #8618 - ICal import is possible if calendar module is disabled 
 
 * 2007-08-02 - marcus.klein@open-xchange.com
 
