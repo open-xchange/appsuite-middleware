@@ -98,9 +98,6 @@ import com.openexchange.tools.stack.Stack;
  */
 public final class OXJSONWriter extends JSONWriter {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(OXJSONWriter.class);
-
 	private static final int MODE_INIT = 0;
 
 	private static final int MODE_ARR = 1;
