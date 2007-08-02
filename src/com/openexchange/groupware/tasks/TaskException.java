@@ -294,11 +294,6 @@ public class TaskException extends AbstractOXException {
         NO_PRIVATE_DELEGATE("Private flagged tasks cannot be delegated.",
             Category.USER_INPUT, Detail.OTHER, 28),
         /**
-         * Creator cannot be participant.
-         */
-        NO_CREATOR_PARTICIPANT("Creator cannot be participant.",
-            Category.USER_INPUT, Detail.OTHER, 29),
-        /**
          * Percent is %d but must be between 0 and 100.
          */
         INVALID_PERCENTAGE("Percent is %d but must be between 0 and 100.",

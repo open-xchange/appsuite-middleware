@@ -18,6 +18,7 @@
    DONE.
  - Bugfix #7733: Changed error message for a task that has been changed by
    someone else.
+ - Allowed creator to be participant of tasks.
 
 * 2007-08-02 - thorben.betten@open-xchange.com
 

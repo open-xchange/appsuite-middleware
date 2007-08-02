@@ -296,15 +296,6 @@ public final class TaskLogic {
         if (null == participants) {
             return;
         }
-        if (Configuration.isNoCreatorToParticipants()) {
-            for (TaskParticipant participant : participants) {
-                if (Type.INTERNAL == participant.getType() &&
-                    ((InternalParticipant) participant)
-                    .getIdentifier() == creator) {
-                    throw new TaskException(Code.NO_CREATOR_PARTICIPANT);
-                }
-            }
-        }
         checkExternal(ParticipantStorage.extractExternal(participants));
     }
 
