@@ -263,6 +263,8 @@ public abstract class XmlServlet extends PermissionServlet {
 					
 					final Element eObjectMode = eProp.getChild("objectmode", Namespace.getNamespace(PREFIX, NAMESPACE));
 					if (eObjectMode != null) {
+						bModified = false;
+						bDeleted = false;
 						final String[] value = eObjectMode.getText().trim().toUpperCase().split(",");
 						
 						for (int a = 0; a < value.length; a++) {
