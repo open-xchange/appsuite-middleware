@@ -1318,7 +1318,7 @@ public class Folder extends SessionServlet {
 	}
 
 	private final Response actionPutUpdateFolder(final SessionObject sessionObj, final String body,
-			final ParamContainer paramContainer) throws JSONException {
+			final ParamContainer paramContainer) {
 		/*
 		 * Some variables
 		 */
@@ -1397,7 +1397,7 @@ public class Folder extends SessionServlet {
 	}
 
 	private final Response actionPutInsertFolder(final SessionObject sessionObj, final String body,
-			final ParamContainer paramContainer) throws JSONException {
+			final ParamContainer paramContainer) {
 		/*
 		 * Some variables
 		 */
