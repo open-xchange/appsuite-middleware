@@ -51,6 +51,7 @@ package com.openexchange.admin.rmi.dataobjects;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import com.openexchange.admin.rmi.extensions.OXCommonExtension;
 import com.openexchange.admin.rmi.extensions.OXGroupExtensionInterface;
@@ -234,5 +235,16 @@ public class Group extends ExtendableDataObject {
     @Override
     protected String[] getMandatoryMembersRegister() {
         return null;
+    }
+
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (obj instanceof Group) {
+            Group grp = (Group) obj;
+            return (id.equals(grp.id) && name.equals(grp.name) && displayname.equals(grp.displayname) && Arrays.equals(members, grp.members));
+        } else {
+            return false;
+        }
     }
 }
