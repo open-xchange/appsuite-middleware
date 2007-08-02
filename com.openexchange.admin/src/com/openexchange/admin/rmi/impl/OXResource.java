@@ -47,7 +47,7 @@
  *
  */
 /*
- * $Id: OXResource.java,v 1.42 2007/08/01 21:29:15 dennis Exp $
+ * $Id: OXResource.java,v 1.43 2007/08/02 11:35:29 dennis Exp $
  */
 package com.openexchange.admin.rmi.impl;
 
@@ -587,5 +587,4 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
             }
         }
     }
-
 }
