@@ -52,7 +52,6 @@ package com.openexchange.ajax.request;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -106,11 +105,10 @@ public final class MailRequest {
 
 	private boolean contCollecting;
 
-	public MailRequest(final SessionObject session, final OXJSONWriter writer) throws JSONException {
+	public MailRequest(final SessionObject session, final OXJSONWriter writer) {
 		super();
 		this.session = session;
 		this.writer = writer;
-		this.writer.array();
 	}
 
 	public void action(final String action, final JSONObject jsonObject, final MailInterface mailInterface)
@@ -199,6 +197,14 @@ public final class MailRequest {
 		return contCollecting;
 	}
 
+	/**
+	 * Executes gathered actions and writes their response to writer
+	 * 
+	 * @param mailInterface -
+	 *            the mail interface
+	 * @throws JSONException -
+	 *             if writing fails
+	 */
 	public void performMultiple(final MailInterface mailInterface) throws JSONException {
 		if (collectObj != null) {
 			performMultipleInternal(mailInterface);
@@ -207,7 +213,6 @@ public final class MailRequest {
 	}
 
 	private void performMultipleInternal(final MailInterface mailInterface) throws JSONException {
-		writer.reset();
 		final long start = System.currentTimeMillis();
 		switch (collectObj.getOperation()) {
 		case MOVE:
@@ -238,10 +243,6 @@ public final class MailRequest {
 					"' mail request successfully performed: ").append(System.currentTimeMillis() - start)
 					.append("msec").toString());
 		}
-	}
-
-	public JSONArray getContent() {
-		return (JSONArray) (!writer.isEmpty() && writer.isJSONArray() ? writer.getObject() : null);
 	}
 
 	private static boolean isMove(final JSONObject jsonObject) throws JSONException {

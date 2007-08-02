@@ -231,6 +231,16 @@ public class TaskRequest {
 		final TasksSQLInterface sqlinterface = new TasksSQLInterfaceImpl(sessionObj);
 		sqlinterface.updateTaskObject(task, inFolder, timestamp);
         timestamp = task.getLastModified();
+        try {
+			jsonWriter.value("");
+		} catch (final JSONException e) {
+			/*
+			 * Ignore
+			 */
+			if (LOG.isDebugEnabled()) {
+				LOG.debug(e.getLocalizedMessage(), e);
+			}
+		}
 	}
 	
 	public void actionUpdates(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, SearchIteratorException, OXException, OXJSONException {
@@ -425,6 +435,16 @@ public class TaskRequest {
 		
 		final TasksSQLInterface taskSql = new TasksSQLInterfaceImpl(sessionObj);
 		taskSql.setUserConfirmation(taskObj.getObjectID(), sessionObj.getUserObject().getId(), taskObj.getConfirm(), taskObj.getConfirmMessage());
+		try {
+			jsonWriter.value("");
+		} catch (final JSONException e) {
+			/*
+			 * Ignore
+			 */
+			if (LOG.isDebugEnabled()) {
+				LOG.debug(e.getLocalizedMessage(), e);
+			}
+		}
 	}
 	
 	// Because we can't return a single value via the JSNOWriter we return the value itself and

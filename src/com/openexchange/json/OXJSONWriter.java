@@ -98,6 +98,9 @@ import com.openexchange.tools.stack.Stack;
  */
 public final class OXJSONWriter extends JSONWriter {
 
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(OXJSONWriter.class);
+
 	private static final int MODE_INIT = 0;
 
 	private static final int MODE_ARR = 1;
@@ -243,7 +246,7 @@ public final class OXJSONWriter extends JSONWriter {
 		if (key == null) {
 			throw new JSONException("Null key.");
 		}
-		if (this.mode == MODE_KEY) {
+		if (mode == MODE_KEY) {
 			this.key = key;
 			mode = MODE_OBJ;
 			return this;
@@ -345,6 +348,30 @@ public final class OXJSONWriter extends JSONWriter {
 	}
 
 	/**
+	 * Checks if next action should be any of the <code>{@link #value(X)}</code>
+	 * methods. Within JSON object it's really expected and no other action is
+	 * allowed, but within JSON array <code>{@link #endArray()}</code> is also
+	 * allowed
+	 * 
+	 * @return <code>true</code> if a value is expected; otherwise
+	 *         <code>false</code>
+	 */
+	public boolean isExpectingValue() {
+		return (mode == MODE_OBJ || mode == MODE_ARR);
+	}
+
+	/**
+	 * Checks if next action can be the <code>{@link #key(String)}</code>
+	 * method.
+	 * 
+	 * @return <code>true</code> if a key is expected; otherrwise
+	 *         <code>false</code>
+	 */
+	public boolean isExpectingKey() {
+		return (mode == MODE_KEY);
+	}
+
+	/**
 	 * Resets this <code>OXJSONWriter</code>
 	 */
 	public void reset() {
@@ -375,7 +402,7 @@ public final class OXJSONWriter extends JSONWriter {
 	 *             If the value is out of sequence.
 	 */
 	private JSONWriter append(final Object value) throws JSONException {
-		if (this.mode == MODE_OBJ || this.mode == MODE_ARR) {
+		if (mode == MODE_OBJ || mode == MODE_ARR) {
 			final StackObject so = stackObjs.top();
 			if (MODE_ARR == so.type) {
 				((JSONArray) so.jsonObject).put(value);
@@ -383,8 +410,8 @@ public final class OXJSONWriter extends JSONWriter {
 				((JSONObject) so.jsonObject).put(key, value);
 				key = null;
 			}
-			if (this.mode == MODE_OBJ) {
-				this.mode = MODE_KEY;
+			if (mode == MODE_OBJ) {
+				mode = MODE_KEY;
 			}
 			return this;
 		}
@@ -402,7 +429,7 @@ public final class OXJSONWriter extends JSONWriter {
 			}
 		}
 		stackObjs.push(new StackObject(MODE_ARR, ja));
-		this.mode = MODE_ARR;
+		mode = MODE_ARR;
 	}
 
 	private void pop() {

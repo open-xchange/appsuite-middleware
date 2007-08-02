@@ -1977,7 +1977,6 @@ public class Mail extends PermissionServlet implements UploadListener {
 	public final void actionPutMailMultiple(final SessionObject sessionObj, final JSONWriter writer,
 			final String[] mailIDs, final String srcFolder, final String destFolder, final boolean move,
 			final MailInterface mailInterfaceArg) throws JSONException {
-		writer.array();
 		try {
 			MailInterface mailInterface = mailInterfaceArg;
 			boolean closeMailInterface = false;
@@ -2036,7 +2035,6 @@ public class Mail extends PermissionServlet implements UploadListener {
 			response.setTimestamp(null);
 			Response.write(response, writer);
 		}
-		writer.endArray();
 	}
 
 	public void actionPutStoreFlagsMultiple(final SessionObject sessionObj, final JSONWriter writer,

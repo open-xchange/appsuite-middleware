@@ -695,7 +695,16 @@ public class AppointmentRequest {
 		
 		final AppointmentSQLInterface appointmentSql = new CalendarSql(sessionObj);
 		appointmentSql.setUserConfirmation(appointmentObj.getObjectID(), sessionObj.getUserObject().getId(), appointmentObj.getConfirm(), appointmentObj.getConfirmMessage());
-//		jsonWriter.value("");
+		try {
+			jsonWriter.value("");
+		} catch (final JSONException e) {
+			/*
+			 * Ignore
+			 */
+			if (LOG.isDebugEnabled()) {
+				LOG.debug(e.getLocalizedMessage(), e);
+			}
+		}
 	}
 	
 	public void actionHas(final JSONObject jsonObj) throws JSONException, OXException, OXJSONException {
