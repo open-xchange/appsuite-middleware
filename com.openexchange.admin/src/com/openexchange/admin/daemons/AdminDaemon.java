@@ -55,6 +55,7 @@ import com.openexchange.admin.rmi.OXLoginInterface;
 import com.openexchange.admin.rmi.OXResourceInterface;
 import com.openexchange.admin.rmi.OXTaskMgmtInterface;
 import com.openexchange.admin.rmi.OXUserInterface;
+import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.impl.OXAdminCoreImpl;
 import com.openexchange.admin.rmi.impl.OXTaskMgmtImpl;
 
@@ -200,6 +201,8 @@ public class AdminDaemon {
             log.fatal("Error creating RMI registry!",e);
         } catch (final AlreadyBoundException e) {
             log.fatal("One RMI name is already bound!", e);
+        } catch (final StorageException e) {
+            log.fatal("Error while creating one instance for RMI interface", e);
         }
     }
 
