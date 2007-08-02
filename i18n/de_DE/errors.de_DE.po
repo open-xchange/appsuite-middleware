@@ -792,14 +792,16 @@
 # Antje Faber, 2007.
 # Antje Faber, 2007.
 # Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER.
 # Antje Faber, 2007.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: errors\n"
+"Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2007-06-29 15:12+0200\n"
+"PO-Revision-Date: 2007-08-02 11:29+0200\n"
 "Last-Translator: Antje Faber\n"
 "Language-Team:  <de@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -1902,13 +1904,6 @@ msgid "Link is not implemented."
 msgstr "Link ist nicht implementiert."
 
 msgid ""
-"Login to imap server %s failed for user %s in context %s. Please try again "
-"later"
-msgstr ""
-"Anmelden am IMAP-Server %s für Benutzer %s im Kontext %s fehlgeschlagen. "
-"Bitte später erneut versuchen."
-
-msgid ""
 "Mail folder \"%s\" could not be created (maybe due to insufficient "
 "permission on parental folder %s)"
 msgstr ""
@@ -2541,6 +2536,15 @@ msgstr ""
 
 msgid "There are no recipient(s) for the new message."
 msgstr "Kein(e) Empfänger für neue Nachricht angegeben"
+
+msgid ""
+"There was an issue in authenticating your E-Mail password. This may be "
+"because of a recent password change. To continue please logout now and then "
+"log back in with your most current password. (server=%s | user=%s | context=%"
+"s)"
+msgstr ""
+"Bei der Authentifikation Ihres Passwords trat ein Problem auf. Dies ist möglicherweise auf eine kürzliche Passwortänderung zurückzuführen. Bitte melden Sie sich ab und verwenden Sie zum erneuten Anmelden Ihr aktuelles Passwort. (Server=%s | Benutzer=%s | Kontext=%"
+"s)"
 
 msgid "This Contact has no FolderID: Entry %1$d Context %2$d"
 msgstr "Dieser Kontakt hat keine FolderID: Eintrag %1$d Kontext %2$d"
