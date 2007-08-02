@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.request;
 
+import static com.openexchange.ajax.container.Response.DATA;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
@@ -133,7 +135,7 @@ public class QuotaRequest extends CommonRequest {
 			 * Write JSON object into writer as data content of a response object
 			 */
 			w.object();
-			w.key("data").value(data);
+			w.key(DATA).value(data);
 			w.endObject();
 		} catch (final Exception e) {
 			handle(e);
@@ -159,7 +161,7 @@ public class QuotaRequest extends CommonRequest {
 			 * Write JSON object into writer as data content of a response object
 			 */
 			w.object();
-			w.key("data").value(data);
+			w.key(DATA).value(data);
 			w.endObject();
 		} catch (final OXException e) {
 			exception(e);

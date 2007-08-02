@@ -346,7 +346,7 @@ public class Attachment extends PermissionServlet {
 			// in a new window. To call the JS callback routine from a popup we
 			// can use parent.callback_error() but
 			// must use window.opener.callback_error()
-			rollback(t, res, "error", contentType == null ? JS_FRAGMENT_POPUP : null);
+			rollback(t, res, Response.ERROR, contentType == null ? JS_FRAGMENT_POPUP : null);
 			return;
 		} finally {
 			if(documentData != null) {
@@ -417,8 +417,8 @@ public class Attachment extends PermissionServlet {
 				arr.put(attachment.getId());
 				
 			}
-			result.put("data",arr);
-			result.put("timestamp", timestamp);
+			result.put(Response.DATA,arr);
+			result.put(Response.TIMESTAMP, timestamp);
 			w = res.getWriter();
 			w.print(substitute(JS_FRAGMENT, "json", result.toString(),"action",ACTION_ATTACH));
 			ATTACHMENT_BASE.commit();
@@ -428,7 +428,7 @@ public class Attachment extends PermissionServlet {
 			} catch (TransactionException e) {
 				LOG.error(e);
 			}
-			handle(res,t,"error", null);
+			handle(res,t,Response.ERROR, null);
 			return;
 		} catch (JSONException e) {
 			try {
@@ -436,7 +436,7 @@ public class Attachment extends PermissionServlet {
 			} catch (TransactionException x) {
 				LOG.error(e);
 			}
-			handle(res,new OXException(e),"error", null);
+			handle(res,new OXException(e),Response.ERROR, null);
 			return;
 		} catch (IOException e) {
 			try {
@@ -444,7 +444,7 @@ public class Attachment extends PermissionServlet {
 			} catch (TransactionException x) {
 				LOG.error(e);
 			}
-			handle(res,new OXException(e),"error", null);
+			handle(res,new OXException(e),Response.ERROR, null);
 			return;
 		} finally {
 			try {

@@ -390,7 +390,7 @@ public class Infostore extends PermissionServlet {
 		try {
 			w = res.getWriter();
 			final JSONObject obj = new JSONObject();
-			obj.put("data",newDocument.getId());
+			obj.put(Response.DATA,newDocument.getId());
 			w.print(substitute(JS_FRAGMENT, STR_JSON, obj.toString(),STR_ACTION,ACTION_NEW));
 			
 			w.flush();
@@ -523,7 +523,7 @@ public class Infostore extends PermissionServlet {
 		try {
 			w = res.getWriter();
 			final JSONObject obj = new JSONObject();
-			obj.put("data",metadata.getId());
+			obj.put(Response.DATA,metadata.getId());
 			w.print(substitute(JS_FRAGMENT, STR_JSON, obj.toString(),STR_ACTION,ACTION_NEW));
 			w.flush();
 		} catch (IOException e) {
@@ -635,9 +635,13 @@ public class Infostore extends PermissionServlet {
 			commaSeperatedErrorParams.append(',');
 		}
 		commaSeperatedErrorParams.setLength(commaSeperatedErrorParams.length()-1);
-		w.print("{ \"error\" : \"");
+		w.print("{ \"");
+		w.print(Response.ERROR);
+		w.print("\" : \"");
 		w.print(error);
-		w.print("\", \"error_params\" : [");
+		w.print("\", \"");
+		w.print(Response.ERROR_PARAMS);
+		w.print("\" : [");
 		w.print(commaSeperatedErrorParams.toString());
 		w.print("}");
 		w.flush();

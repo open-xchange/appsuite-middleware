@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.request;
 
+import static com.openexchange.ajax.container.Response.DATA;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -56,31 +58,37 @@ public class JSONSimpleRequest implements SimpleRequest {
 
 	private JSONObject jsonObject;
 
-	public JSONSimpleRequest(JSONObject object) {
+	public JSONSimpleRequest(final JSONObject object) {
 		this.jsonObject = object;
 	}
-	
-	public String getParameter(String param) {
+
+	public String getParameter(final String param) {
 		try {
 			return jsonObject.getString(param);
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
 			return null;
 		}
 	}
 
-	public String[] getParameterValues(String param) {
+	public String[] getParameterValues(final String param) {
 		return getParameter(param).split("\\s*,\\s*");
 	}
 
 	public Object getBody() {
 		try {
-			return jsonObject.get("data");
-		} catch (JSONException e) {
-			return null; 
+			return jsonObject.get(DATA);
+		} catch (final JSONException e) {
+			return null;
 		}
 	}
-	
-	public String toString(){
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
 		return jsonObject.toString();
 	}
 

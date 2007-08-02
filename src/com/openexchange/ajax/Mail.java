@@ -213,8 +213,6 @@ public class Mail extends PermissionServlet implements UploadListener {
 
 	private static final String STR_UTF8 = "UTF-8";
 
-	private static final String JSON_KEY_DATA = "data";
-
 	private static final String STR_1 = "1";
 
 	private static final String STR_EMPTY = "";
@@ -1270,7 +1268,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 
 	public void actionPutClear(final SessionObject session, final JSONWriter writer, final JSONObject jsonObj,
 			final MailInterface mi) throws JSONException {
-		Response.write(actionPutClear(session, jsonObj.getString(JSON_KEY_DATA), ParamContainer.getInstance(jsonObj,
+		Response.write(actionPutClear(session, jsonObj.getString(Response.DATA), ParamContainer.getInstance(jsonObj,
 				Component.EMAIL), mi), writer);
 	}
 
@@ -1346,7 +1344,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 
 	public void actionPutMailSearch(final SessionObject session, final JSONWriter writer, final JSONObject jsonObj,
 			final MailInterface mi) throws JSONException, SearchIteratorException {
-		Response.write(actionPutMailSearch(session, jsonObj.getString(JSON_KEY_DATA), ParamContainer.getInstance(
+		Response.write(actionPutMailSearch(session, jsonObj.getString(Response.DATA), ParamContainer.getInstance(
 				jsonObj, Component.EMAIL), mi), writer);
 	}
 
@@ -1497,7 +1495,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 
 	public void actionPutMailList(final SessionObject session, final JSONWriter writer, final JSONObject jsonObj,
 			final MailInterface mi) throws JSONException {
-		Response.write(actionPutMailList(session, jsonObj.getString(JSON_KEY_DATA), ParamContainer.getInstance(jsonObj,
+		Response.write(actionPutMailList(session, jsonObj.getString(Response.DATA), ParamContainer.getInstance(jsonObj,
 				Component.EMAIL), mi), writer);
 	}
 
@@ -1657,7 +1655,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 
 	public void actionPutDeleteMails(final SessionObject sessionObj, final JSONWriter writer, final JSONObject jsonObj,
 			final MailInterface mi) throws JSONException {
-		Response.write(actionPutDeleteMails(sessionObj, jsonObj.getString(JSON_KEY_DATA), ParamContainer.getInstance(
+		Response.write(actionPutDeleteMails(sessionObj, jsonObj.getString(Response.DATA), ParamContainer.getInstance(
 				jsonObj, Component.EMAIL), mi), writer);
 	}
 
@@ -1759,7 +1757,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 
 	public void actionPutUpdateMail(final SessionObject sessionObj, final JSONWriter writer, final JSONObject jsonObj,
 			final MailInterface mailInterface) throws JSONException {
-		Response.write(actionPutUpdateMail(sessionObj, jsonObj.getString(JSON_KEY_DATA), ParamContainer.getInstance(
+		Response.write(actionPutUpdateMail(sessionObj, jsonObj.getString(Response.DATA), ParamContainer.getInstance(
 				jsonObj, Component.EMAIL), mailInterface), writer);
 	}
 
@@ -1883,7 +1881,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 
 	public void actionPutCopyMail(final SessionObject sessionObj, final JSONWriter writer, final JSONObject jsonObj,
 			final MailInterface mailInterface) throws JSONException {
-		Response.write(actionPutCopyMail(sessionObj, jsonObj.getString(JSON_KEY_DATA), ParamContainer.getInstance(
+		Response.write(actionPutCopyMail(sessionObj, jsonObj.getString(Response.DATA), ParamContainer.getInstance(
 				jsonObj, Component.EMAIL), mailInterface), writer);
 	}
 
@@ -2157,7 +2155,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 
 	public void actionPutAttachment(final SessionObject sessionObj, final JSONWriter writer, final JSONObject jsonObj,
 			final MailInterface mi) throws JSONException {
-		Response.write(actionPutAttachment(sessionObj, jsonObj.getString(JSON_KEY_DATA), ParamContainer.getInstance(
+		Response.write(actionPutAttachment(sessionObj, jsonObj.getString(Response.DATA), ParamContainer.getInstance(
 				jsonObj, Component.EMAIL), mi), writer);
 	}
 
@@ -2295,7 +2293,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 
 	public void actionPutReceiptAck(final SessionObject sessionObj, final JSONWriter writer, final JSONObject jsonObj,
 			final MailInterface mi) throws JSONException {
-		Response.write(actionPutReceiptAck(sessionObj, jsonObj.getString(JSON_KEY_DATA), ParamContainer.getInstance(
+		Response.write(actionPutReceiptAck(sessionObj, jsonObj.getString(Response.DATA), ParamContainer.getInstance(
 				jsonObj, Component.EMAIL), mi), writer);
 	}
 

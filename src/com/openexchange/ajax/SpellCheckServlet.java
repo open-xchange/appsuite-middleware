@@ -64,6 +64,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONWriter;
 
+import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.spellcheck.AJAXSpellCheck;
 import com.openexchange.ajax.spellcheck.AJAXUserDictionaryException;
 import com.openexchange.ajax.spellcheck.AJAXUserDictionaryException.DictionaryCode;
@@ -109,7 +110,7 @@ public class SpellCheckServlet extends PermissionServlet {
 				}
 				jw.object();
 				closeObject = true;
-				jw.key("data");
+				jw.key(Response.DATA);
 				final AJAXSpellCheck spellCheck = new AJAXSpellCheck(sessionObj);
 				final JSONArray ja = spellCheck.getSpellCheckResultsAsJSONArray(text);
 				jw.value(ja);
@@ -124,14 +125,14 @@ public class SpellCheckServlet extends PermissionServlet {
 				if (jw != null) {
 					if (closeObject) {
 						jw.value(JSONObject.NULL);
-						jw.key("error");
+						jw.key(Response.ERROR);
 						jw.value(e.getMessage());
 						jw.endObject();
 						w.flush();
 						return;
 					}
 					jw.object();
-					jw.key("error");
+					jw.key(Response.ERROR);
 					jw.value(e.getMessage());
 					jw.endObject();
 					w.flush();

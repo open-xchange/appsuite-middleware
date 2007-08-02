@@ -68,6 +68,7 @@ import org.json.JSONWriter;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Attachment;
 import com.openexchange.ajax.Infostore;
+import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.parser.InfostoreParser;
 import com.openexchange.ajax.parser.InfostoreParser.UnknownMetadataException;
 import com.openexchange.ajax.writer.InfostoreWriter;
@@ -499,8 +500,8 @@ public class InfostoreRequest extends CommonRequest{
 			timestamp = infostore.getDocumentMetadata(id,InfostoreFacade.CURRENT_VERSION,sessionObj.getContext(),sessionObj.getUserObject(),sessionObj.getUserConfiguration()).getSequenceNumber();
 			infostore.commit();
 			w.object();
-			w.key("data").value(new JSONObject())
-			.key("timestamp").value(timestamp);
+			w.key(Response.DATA).value(new JSONObject())
+			.key(Response.TIMESTAMP).value(timestamp);
 			w.endObject();
 		} catch (final Throwable t){
 			try {
@@ -772,7 +773,7 @@ public class InfostoreRequest extends CommonRequest{
 			}	
 		}
 		w.object();
-		w.key("data").value(newDocument.getId());
+		w.key(Response.DATA).value(newDocument.getId());
 		w.endObject();
 	}
 	
@@ -850,7 +851,7 @@ public class InfostoreRequest extends CommonRequest{
 		}
 		
 		w.object();
-		w.key("data").value(newDocument.getId());
+		w.key(Response.DATA).value(newDocument.getId());
 		w.endObject();
 	}
 	
@@ -958,7 +959,7 @@ public class InfostoreRequest extends CommonRequest{
 		}
 		try {
 			w.object();
-			w.key("data").value(metadata.getId());
+			w.key(Response.DATA).value(metadata.getId());
 			w.endObject();
 		} catch (final JSONException e) {
 			LOG.error(e.getLocalizedMessage(), e);

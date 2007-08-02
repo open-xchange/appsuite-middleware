@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.request;
 
+import static com.openexchange.ajax.container.Response.DATA;
+
 import com.openexchange.tools.servlet.OXJSONException;
 import java.io.Writer;
 import org.json.JSONArray;
@@ -163,7 +165,7 @@ public class LinkRequest {
 		linksql.saveLink(lo,user,group,sessionObj);
 		
 		jsonWriter.object();
-		jsonWriter.key("data").value("");
+		jsonWriter.key(DATA).value("");
 		jsonWriter.endObject();
 
 	}
@@ -176,7 +178,7 @@ public class LinkRequest {
 		final int[] group =	sessionObj.getUserObject().getGroups();
 		final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
 		
-		final JSONArray jo = jData.getJSONArray("data");
+		final JSONArray jo = jData.getJSONArray(DATA);
 		
 		final int[][] del = new int[jo.length()][3];
 		

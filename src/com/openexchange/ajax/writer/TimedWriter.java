@@ -54,6 +54,7 @@ import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONWriter;
 
+import com.openexchange.ajax.container.Response;
 import com.openexchange.api2.OXException;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -68,9 +69,9 @@ public abstract class TimedWriter {
 	
 	public void timedResult(final long timestamp) throws JSONException {
 		jsonWriter.object();
-		jsonWriter.key("timestamp");
+		jsonWriter.key(Response.TIMESTAMP);
 		jsonWriter.value(timestamp);
-		jsonWriter.key("data");
+		jsonWriter.key(Response.DATA);
 	}
 
 	public void endTimedResult() throws JSONException {

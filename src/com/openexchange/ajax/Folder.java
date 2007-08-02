@@ -116,8 +116,6 @@ public class Folder extends SessionServlet {
 
 	private static final String SPLIT_PAT = " *, *";
 
-	private static final String JSON_KEY_DATA = "data";
-
 	/**
 	 * The constant for Inbox mail folder. TODO: Should be read from
 	 * StringHelper utility class!
@@ -1303,7 +1301,7 @@ public class Folder extends SessionServlet {
 
 	public void actionPutUpdateFolder(final SessionObject sessionObj, final JSONWriter w, final JSONObject requestObj)
 			throws JSONException {
-		Response.write(actionPutUpdateFolder(sessionObj, requestObj.getString(JSON_KEY_DATA), ParamContainer
+		Response.write(actionPutUpdateFolder(sessionObj, requestObj.getString(Response.DATA), ParamContainer
 				.getInstance(requestObj, Component.FOLDER)), w);
 	}
 
@@ -1382,7 +1380,7 @@ public class Folder extends SessionServlet {
 
 	public void actionPutInsertFolder(final SessionObject sessionObj, final JSONWriter w, final JSONObject requestObj)
 			throws JSONException {
-		Response.write(actionPutInsertFolder(sessionObj, requestObj.getString(JSON_KEY_DATA), ParamContainer
+		Response.write(actionPutInsertFolder(sessionObj, requestObj.getString(Response.DATA), ParamContainer
 				.getInstance(requestObj, Component.FOLDER)), w);
 	}
 
@@ -1455,7 +1453,7 @@ public class Folder extends SessionServlet {
 
 	public void actionPutDeleteFolder(final SessionObject sessionObj, final JSONWriter w, final JSONObject requestObj)
 			throws JSONException {
-		Response.write(actionPutDeleteFolder(sessionObj, requestObj.getString(JSON_KEY_DATA), ParamContainer
+		Response.write(actionPutDeleteFolder(sessionObj, requestObj.getString(Response.DATA), ParamContainer
 				.getInstance(requestObj, Component.FOLDER)), w);
 	}
 

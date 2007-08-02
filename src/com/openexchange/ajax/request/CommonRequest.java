@@ -49,6 +49,9 @@
 
 package com.openexchange.ajax.request;
 
+import static com.openexchange.ajax.container.Response.ERROR;
+import static com.openexchange.ajax.container.Response.ERROR_PARAMS;
+
 import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
@@ -76,10 +79,10 @@ public abstract class CommonRequest {
 		//final JSONObject response = new JSONObject();
 		try {
 			w.object();
-			w.key("error").value(error);
-			w.key("error_params").value(new JSONArray(Arrays.asList(errorParams)));
+			w.key(ERROR).value(error);
+			w.key(ERROR_PARAMS).value(new JSONArray(Arrays.asList(errorParams)));
 			w.endArray();
-			/*response.put("error",error);
+			/*response.put(ERROR,error);
 			final JSONArray arr = new JSONArray(Arrays.asList(errorParams));
 			response.put("error_params",arr);
 			w.value(response);*/
