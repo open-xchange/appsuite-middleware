@@ -51,6 +51,7 @@ package com.openexchange.admin.console.group;
 import java.rmi.RemoteException;
 
 import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.rmi.OXGroupInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -62,10 +63,11 @@ public abstract class ChangeCore extends GroupAbstraction {
     
     protected final void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptions(parser);
+        
+        setGroupIdOption(parser, NeededQuadState.eitheror);
+        setGroupNameOption(parser, NeededQuadState.eitheror);
 
         // create options for this command line tool
-        setGroupIdOption(parser, true);
-        setGroupNameOption(parser, false);
         setGroupDisplayNameOption(parser, false);
         setAddMembersOption(parser, false);
         setRemoveMembersOption(parser, false);
@@ -78,12 +80,16 @@ public abstract class ChangeCore extends GroupAbstraction {
     protected final void commonfunctions(final AdminParser parser, final String[] args) {
         setOptions(parser);
 
+        String successtext = null;
         try {
             parser.ownparse(args);
 
             final Group grp = new Group();
             
             parseAndSetGroupId(parser, grp);
+            parseAndSetGroupName(parser, grp);
+            
+            successtext = groupnameOrIdSet();
             
             final Context ctx = contextparsing(parser);
 
@@ -113,10 +119,10 @@ public abstract class ChangeCore extends GroupAbstraction {
 
             oxgrp.change(ctx, grp, auth);
 
-            displayChangedMessage(groupid, ctxid);
+            displayChangedMessage(successtext, ctxid);
             sysexit(0);
         } catch (final Exception e) {
-            printErrors(groupid, ctxid, e, parser);
+            printErrors(successtext, ctxid, e, parser);
         }
     }
 

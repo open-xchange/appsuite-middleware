@@ -55,9 +55,11 @@ import java.rmi.RemoteException;
 
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.ObjectNamingAbstraction;
+import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.rmi.OXGroupInterface;
 import com.openexchange.admin.rmi.dataobjects.Group;
+import com.openexchange.admin.rmi.exceptions.MissingOptionException;
 
 public abstract class GroupAbstraction extends ObjectNamingAbstraction {
 
@@ -88,6 +90,7 @@ public abstract class GroupAbstraction extends ObjectNamingAbstraction {
     
     // For right error output
     protected String groupid = null;
+    protected String groupName = null;
     
     protected void setAddMembersOption(final AdminParser admp,boolean required) {
         addMemberOption = setShortLongOpt(admp,OPT_NAME_ADDMEMBERS, OPT_NAME_ADDMEMBERS_LONG, "List of members to add to group", true, convertBooleantoTriState(required));
@@ -97,32 +100,22 @@ public abstract class GroupAbstraction extends ObjectNamingAbstraction {
 
     protected void setRemoveMembersOption(final AdminParser admp,boolean required) {
         removeMemberOption = setShortLongOpt(admp,OPT_NAME_REMOVEMEMBERS, OPT_NAME_REMOVEMEMBERS_LONG, "List of members to be removed from group", true, convertBooleantoTriState(required));
-//        retval.setArgName(OPT_NAME_REMOVEMEMBERS_LONG);
-       
     }
 
-    protected void setGroupIdOption(final AdminParser admp,boolean required) {
-        IdOption = setShortLongOpt(admp,OPT_NAME_GROUPID, OPT_NAME_GROUPID_LONG, "The id of the group", true, convertBooleantoTriState(required));
-//        retval.setArgName("id");
-        
+    protected void setGroupIdOption(final AdminParser admp, final NeededQuadState required) {
+        IdOption = setShortLongOpt(admp,OPT_NAME_GROUPID, OPT_NAME_GROUPID_LONG, "The id of the group", true, required);
     }
     
-    protected void setGroupNameOption(final AdminParser admp,boolean required) {
-        nameOption= setShortLongOpt(admp,OPT_NAME_GROUPNAME, OPT_NAME_GROUPNAME_LONG, "The group name", true, convertBooleantoTriState(required));
-//        retval.setArgName(OPT_NAME_GROUPDISPLAYNAME_LONG);
-        
+    protected void setGroupNameOption(final AdminParser admp, final NeededQuadState required) {
+        nameOption= setShortLongOpt(admp,OPT_NAME_GROUPNAME, OPT_NAME_GROUPNAME_LONG, "The group name", true, required);
     }
     
     protected void setGroupDisplayNameOption(final AdminParser admp,boolean required) {
         displayNameOption = setShortLongOpt(admp,OPT_NAME_GROUPDISPLAYNAME, OPT_NAME_GROUPDISPLAYNAME_LONG, "The displayname for the Group", true, convertBooleantoTriState(required));
-//        retval.setArgName(OPT_NAME_GROUPNAME_LONG);
-        
     }
     
     protected void setMailOption(final AdminParser admp,boolean required) {
         mailOption = setShortLongOpt(admp,OPT_MAILADDRESS_SHORT, OPT_MAILADDRESS_LONG, "email address if the group should receive mail", true, convertBooleantoTriState(required));
-//        retval.setArgName(OPT_NAME_GROUPNAME_LONG);
-        
     }
     
     protected final OXGroupInterface getGroupInterface() throws NotBoundException, MalformedURLException, RemoteException {
@@ -135,12 +128,14 @@ public abstract class GroupAbstraction extends ObjectNamingAbstraction {
 
     protected final void parseAndSetGroupId(final AdminParser parser, final Group grp) {
         groupid = (String) parser.getOptionValue(this.IdOption);
-        grp.setId(Integer.valueOf(groupid));
+        if (null != groupid) {
+            grp.setId(Integer.valueOf(groupid));
+        }
     }
 
-    private void parseAndSetGroupName(final AdminParser parser, final Group grp) {
-        final String groupName = (String) parser.getOptionValue(this.nameOption);
-        if (groupName != null) {
+    protected void parseAndSetGroupName(final AdminParser parser, final Group grp) {
+        groupName = (String) parser.getOptionValue(this.nameOption);
+        if (null != groupName) {
             grp.setName(groupName);
         }
     }
@@ -155,5 +150,20 @@ public abstract class GroupAbstraction extends ObjectNamingAbstraction {
     protected final void parseAndSetGroupAndDisplayName(final AdminParser parser, final Group grp) {
         parseAndSetGroupName(parser, grp);
         parseAndSetDisplayName(parser, grp);
+    }
+    
+    protected String groupnameOrIdSet() throws MissingOptionException {
+        String successtext;
+        // Throw the order of this checks we archive that the id is preferred over the name
+        if (null == this.groupid) {
+            if (null == this.groupName) {
+                throw new MissingOptionException("Either groupname or groupid must be given");
+            } else {
+                successtext = this.groupName;
+            }
+        } else {
+            successtext = String.valueOf(this.groupid);
+        }
+        return successtext;
     }
 }

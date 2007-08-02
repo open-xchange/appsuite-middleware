@@ -51,6 +51,7 @@ package com.openexchange.admin.console.group;
 import java.rmi.RemoteException;
 
 import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.rmi.OXGroupInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -63,19 +64,24 @@ public abstract class DeleteCore extends GroupAbstraction {
         setDefaultCommandLineOptions(parser);
 
         // create id option for this command line tool
-        setGroupIdOption(parser, true);
+        setGroupIdOption(parser, NeededQuadState.eitheror);
+        setGroupNameOption(parser, NeededQuadState.eitheror);
     }
 
     protected final void commonfunctions(final AdminParser parser, final String[] args) {
         setOptions(parser);
 
+        String successtext = null;
         try {
             parser.ownparse(args);
 
             final Group grp = new Group();
             
             parseAndSetGroupId(parser, grp);
+            parseAndSetGroupName(parser, grp);
 
+            successtext = groupnameOrIdSet();
+            
             final Context ctx = contextparsing(parser);
 
             final Credentials auth = credentialsparsing(parser);
@@ -86,10 +92,10 @@ public abstract class DeleteCore extends GroupAbstraction {
 
             oxgrp.delete(ctx, new Group[] { grp }, auth);
             
-            displayDeletedMessage(groupid, ctxid);
+            displayDeletedMessage(successtext, ctxid);
             sysexit(0);
         } catch (final Exception e) {
-            printErrors(groupid, ctxid, e, parser);
+            printErrors(successtext, ctxid, e, parser);
         }
     }
 
