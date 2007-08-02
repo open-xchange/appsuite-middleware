@@ -71,7 +71,6 @@ import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
 import com.openexchange.groupware.contexts.ContextImpl;
 import com.openexchange.groupware.update.Updater;
@@ -88,7 +87,7 @@ public class OXLogin extends OXCommonImpl implements OXLoginInterface {
 
     private BundleContext context = null;
 
-    public OXLogin(final BundleContext context) throws RemoteException {
+    public OXLogin(final BundleContext context) throws RemoteException, StorageException {
         super();
         this.context = context;
         if (log.isInfoEnabled()) {
@@ -111,9 +110,8 @@ public class OXLogin extends OXCommonImpl implements OXLoginInterface {
         
         triggerUpdateProcess(ctx);
 
-        final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
-        final int user_id = tools.getUserIDByUsername(ctx, auth.getLogin());
-        tools.isContextAdmin(ctx, user_id);
+        final int user_id = tool.getUserIDByUsername(ctx, auth.getLogin());
+        tool.isContextAdmin(ctx, user_id);
         final User retval = new User(user_id);
         retval.setUsername(auth.getLogin());
 
@@ -156,7 +154,7 @@ public class OXLogin extends OXCommonImpl implements OXLoginInterface {
             if (updater.isLocked(ctxas)) {
                 throw new DatabaseUpdateException("Database is just beeing updated. Try again.");
             }
-        } catch (UpdateException e) {
+        } catch (final UpdateException e) {
             throw new DatabaseUpdateException(e);
         }
     }
