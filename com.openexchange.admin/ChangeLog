@@ -1,6 +1,9 @@
 * 2007-08-02 - choeger@open-xchange.com
 
   - Bugfix ID#8666 imapLogin field get lost after changing module access
+  - Bugfix ID#8611 admindaemon must use groupware config files
+    now only system.properties, configdb.properties and cache.ccf is part of
+    open-xchange-admin. The rest is used from the groupware config files (see system.properties)
 
 * 2007-07-26 - dennis.sieben@open-xchange.com
 
