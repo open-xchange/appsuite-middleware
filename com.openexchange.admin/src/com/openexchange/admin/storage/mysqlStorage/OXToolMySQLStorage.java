@@ -916,11 +916,49 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         return admin_id;
     }
 
+    @Override
+    public int getDatabaseIDByDatabasename(final String dbname) throws StorageException {
+        
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            con = cache.getREADConnectionForCONFIGDB();
+            stmt = con.prepareStatement("SELECT db_pool_id FROM db_pool WHERE name=?");
+            stmt.setString(1, dbname);
+            rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            } else {
+                throw new SQLException("No such database "+dbname);
+            }
+        } catch (final SQLException e) {
+            log.error("SQL Error",e);
+            throw new StorageException(e);
+        } catch (final PoolException e) {
+            log.error(e.getMessage(), e);
+            throw new StorageException(e);
+        } finally {
+            try {
+                rs.close();
+            } catch (final SQLException e) {
+                log.error("Error closing resultset!", e);
+            }
+            try {
+                if (stmt != null) {
+                    stmt.close();
+                }
+            } catch (final SQLException e) {
+                log.error("Error closing prepared statement!", e);
+            }
+        }
+    }
+
     /**
      * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#getDefaultGroupForContext(int,
      *      java.sql.Connection)
      */
-public int getDefaultGroupForContext(final Context ctx, final Connection con) throws StorageException {
+    public int getDefaultGroupForContext(final Context ctx, final Connection con) throws StorageException {
         int group_id = 0;
 
         PreparedStatement stmt = null;
@@ -1894,6 +1932,4 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
 
         return retBool;
     }
-    
-
 }
