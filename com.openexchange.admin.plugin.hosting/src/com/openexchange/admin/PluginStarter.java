@@ -18,6 +18,7 @@ import com.openexchange.admin.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.OXUtilInterface;
+import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.tools.AdminCacheExtended;
 import com.openexchange.admin.tools.PropertyHandlerExtended;
 import com.openexchange.admin.tools.monitoring.MonitorAgent;
@@ -76,6 +77,8 @@ public class PluginStarter {
         } catch (final AlreadyBoundException e) {
             log.error(e.getMessage(), e);
             throw e;
+        } catch (final StorageException e) {
+            log.fatal("Error while creating one instance for RMI interface", e);
         }
     }
 

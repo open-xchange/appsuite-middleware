@@ -26,7 +26,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
 
     private final static Log log = LogFactory.getLog(OXUtil.class);
 
-    public OXUtil() throws RemoteException {
+    public OXUtil() throws RemoteException, StorageException {
         super();
     }
 
