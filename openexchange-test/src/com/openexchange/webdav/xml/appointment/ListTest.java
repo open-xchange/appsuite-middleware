@@ -212,5 +212,26 @@ public class ListTest extends AppointmentTest {
 		int[][] objectIdAndFolderId = { {objectId, appointmentFolderId } };
 		deleteAppointment(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password );
 	}
+	
+	public void testList() throws Exception {
+		AppointmentObject appointmentObj = createAppointmentObject("testObjectNotFound");
+		appointmentObj.setIgnoreConflicts(true);
+		int objectId = insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
+		
+		final int[] idArray = listAppointment(getWebConversation(), appointmentFolderId, getHostName(), getLogin(), getPassword());
+		
+		boolean found = false;
+		for (int a = 0; a < idArray.length; a++) {
+			if (idArray[a] == objectId) {
+				found = true;
+				break;
+			}
+		}
+		
+		assertTrue("id " + objectId + " not found in response", found);
+		
+		int[][] objectIdAndFolderId = { { objectId ,appointmentFolderId } };
+		deleteAppointment(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password );
+	}
 }
 

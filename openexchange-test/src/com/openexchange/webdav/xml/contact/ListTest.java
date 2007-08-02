@@ -12,6 +12,7 @@ public class ListTest extends ContactTest {
 		super(name);
 	}
 
+	/*
 	public void testPropFindWithModified() throws Exception {
 		Date modified = new Date();
 		
@@ -85,5 +86,23 @@ public class ListTest extends ContactTest {
 		compareObject(contactObj, loadContact);
 		deleteContact(getWebConversation(), objectId, contactFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
 	}
+	*/
 	
+	public void testList() throws Exception {
+		ContactObject contactObj = createContactObject("testObjectNotFound");
+		int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
+		
+		final int[] idArray = listContact(getWebConversation(), contactFolderId, getHostName(), getLogin(), getPassword());
+		
+		boolean found = false;
+		for (int a = 0; a < idArray.length; a++) {
+			if (idArray[a] == objectId) {
+				found = true;
+				break;
+			}
+		}
+		
+		assertTrue("id " + objectId + " not found in response", found);
+		deleteContact(getWebConversation(), objectId, contactFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+	}	
 }

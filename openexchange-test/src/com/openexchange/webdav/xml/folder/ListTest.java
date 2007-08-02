@@ -17,6 +17,7 @@ public class ListTest extends FolderTest {
 		
 	}
 	
+	/*
 	public void testPropFindWithModified() throws Exception {
 		Date modified = new Date();
 		
@@ -111,5 +112,35 @@ public class ListTest extends FolderTest {
 		
 		deleteFolder(getWebConversation(), new int[] { objectId }, PROTOCOL + getHostName(), getLogin(), getPassword());
 	}
+	*/
+	
+	public void testList() throws Exception {
+		FolderObject folderObj = new FolderObject();
+		folderObj.setFolderName("testList" + System.currentTimeMillis());
+		folderObj.setModule(FolderObject.TASK);
+		folderObj.setType(FolderObject.PRIVATE);
+		folderObj.setParentFolderID(1);
+		
+		OCLPermission[] permission = new OCLPermission[] {
+			createPermission( userId, false, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS)
+		};
+		
+		folderObj.setPermissionsAsArray( permission );
+		
+		int objectId = insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), getLogin(), getPassword());
+		
+		final int[] idArray = listFolder(getWebConversation(), getHostName(), getLogin(), getPassword());
+		
+		boolean found = false;
+		for (int a = 0; a < idArray.length; a++) {
+			if (idArray[a] == objectId) {
+				found = true;
+				break;
+			}
+		}
+		
+		assertTrue("id " + objectId + " not found in response", found);
+		deleteFolder(getWebConversation(), new int[] { objectId }, PROTOCOL + getHostName(), getLogin(), getPassword());
+	}	
 }
 

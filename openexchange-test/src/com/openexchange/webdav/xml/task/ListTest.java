@@ -143,5 +143,23 @@ public class ListTest extends TaskTest {
 		taskObj.setParentFolderID(taskFolderId);
 		compareObject(taskObj, loadTask);
 	}
+	
+	public void testList() throws Exception {
+		Task taskObj = createTask("testList");
+		int objectId = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password);
+		
+		final int[] idArray = listTask(getWebConversation(), taskFolderId, getHostName(), getLogin(), getPassword());
+		
+		boolean found = false;
+		for (int a = 0; a < idArray.length; a++) {
+			if (idArray[a] == objectId) {
+				found = true;
+				break;
+			}
+		}
+		
+		assertTrue("id " + objectId + " not found in response", found);
+		deleteTask(getWebConversation(), objectId, taskFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+	}	
 }
 
