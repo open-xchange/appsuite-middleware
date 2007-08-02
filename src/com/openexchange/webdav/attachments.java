@@ -70,6 +70,8 @@ import org.jdom.output.XMLOutputter;
 
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXObjectNotFoundException;
+import com.openexchange.api2.OXException;
+import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.groupware.attach.impl.AttachmentImpl;
 import com.openexchange.sessiond.SessionObject;
@@ -220,6 +222,15 @@ public final class attachments extends OXServlet {
 			doError(req, resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, exc.toString());
 			LOG.error("doPut", exc);
 			exc.printStarterTrace();
+			rollbackTransaction();
+		} catch (OXException exc) {
+			if (exc.getCategory() == Category.PERMISSION) {
+				LOG.debug("doPut", exc);
+			} else {
+				LOG.error("doPut", exc);
+			}
+			
+			doError(req, resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, exc.toString());
 			rollbackTransaction();
 		} catch (Exception exc) {
 			doError(req, resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, exc.toString());
