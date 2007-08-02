@@ -753,7 +753,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
 
     public Group[] listGroupsForUser(final Context ctx, final User usr, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         try {
-            doNullCheck(usr,usr.getId());
+            doNullCheck(usr);
         } catch (final InvalidDataException e3) {
             log.error("One of the given arguments for getMembers is null", e3);
             throw e3;
@@ -767,12 +767,13 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         }
 
         if (log.isDebugEnabled()) {
-            log.debug(ctx.toString() + " - " + usr.getId().intValue() + " - "+ auth.toString());
+            log.debug(ctx.toString() + " - " + usr + " - "+ auth.toString());
         }
 
         checkSchemaBeingLocked(ctx, tool);
 
-        if (!tool.existsUser(ctx, usr.getId().intValue())) {
+        setIdOrGetIDFromUsername(ctx, usr);
+        if (!tool.existsUser(ctx, usr)) {
             throw new NoSuchUserException("No such user");
         }
 
