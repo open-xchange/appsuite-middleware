@@ -66,6 +66,7 @@ import com.openexchange.ajax.writer.ReminderWriter;
 import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.ReminderSQLInterface;
+import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.CalendarCommonCollection;
 import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.reminder.ReminderObject;
@@ -147,7 +148,9 @@ public class ReminderRequest {
 					reminderObj.setDate(alarm);
 				}
 				
-				reminderWriter.writeObject(reminderObj);
+				if (hasModulePermission(sessionObj, reminderObj)) {
+					reminderWriter.writeObject(reminderObj);
+				}
 			}
 		} catch (SQLException e) {
 			throw new OXException("SQLException occurred", e);
@@ -188,8 +191,9 @@ public class ReminderRequest {
 					reminderObj.setDate(alarm);
 				}
 				
-				reminderWriter.writeObject(reminderObj);
-				
+				if (hasModulePermission(sessionObj, reminderObj)) {
+					reminderWriter.writeObject(reminderObj);
+				}
 			}
 		} catch (SQLException e) {
 			throw new OXException("SQLException occurred", e);
@@ -198,6 +202,17 @@ public class ReminderRequest {
 			if (null != it) {
 				it.close();
 			}
+		}
+	}
+
+	protected boolean hasModulePermission(SessionObject sessionObj, ReminderObject reminderObj) {
+		switch (reminderObj.getModule()) {
+			case Types.APPOINTMENT:
+				return sessionObj.getUserConfiguration().hasCalendar();
+			case Types.TASK:
+				return sessionObj.getUserConfiguration().hasTask();
+			default:
+				return true;
 		}
 	}
 
