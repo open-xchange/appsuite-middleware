@@ -266,6 +266,52 @@ public class FolderTest extends AbstractWebdavXMLTest {
 		return failed;
 	}
 	
+	public static int[] listFolder(WebConversation webCon, String host, String login, String password) throws Exception {
+		host = appendPrefix(host);
+		
+		Element ePropfind = new Element("propfind", webdav);
+		Element eProp = new Element("prop", webdav);
+		
+		Element eObjectmode = new Element("objectmode", XmlServlet.NS);
+		
+		eObjectmode.addContent("LIST");
+		
+		eProp.addContent(eObjectmode);
+		
+		ePropfind.addContent(eProp);
+		
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		
+		Document doc = new Document(ePropfind);
+		
+		XMLOutputter xo = new XMLOutputter();
+		xo.output(doc, baos);
+		
+		baos.flush();
+		
+		HttpClient httpclient = new HttpClient();
+		
+		httpclient.getState().setCredentials(null, new UsernamePasswordCredentials(login, password));
+		PropFindMethod propFindMethod = new PropFindMethod(host + FOLDER_URL);
+		propFindMethod.setDoAuthentication( true );
+		
+		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+		propFindMethod.setRequestBody(bais);
+		
+		int status = httpclient.executeMethod(propFindMethod);
+		
+		assertEquals("check propfind response", 207, status);
+		
+		byte responseByte[] = propFindMethod.getResponseBody();
+		
+		bais = new ByteArrayInputStream(responseByte);
+		final Response[] response = ResponseParser.parse(new SAXBuilder().build(bais), Types.FOLDER, true);
+		
+		assertEquals("response length not is 1", 1, response.length);
+		
+		return (int[])response[0].getDataObject();
+	}
+	
 	public static FolderObject[] listFolder(WebConversation webCon, Date modified, boolean changed, boolean deleted, String host, String login, String password) throws Exception {
 		host = appendPrefix(host);
 		

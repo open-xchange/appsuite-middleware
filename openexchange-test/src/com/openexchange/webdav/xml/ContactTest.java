@@ -465,6 +465,55 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		assertEquals("check response status", 200, response[0].getStatus());
 	}
 	
+	public static int[] listContact(WebConversation webCon, int inFolder, String host, String login, String password) throws Exception {
+		host = appendPrefix(host);
+		
+		Element ePropfind = new Element("propfind", webdav);
+		Element eProp = new Element("prop", webdav);
+		
+		Element eFolderId = new Element("folder_id", XmlServlet.NS);
+		Element eObjectmode = new Element("objectmode", XmlServlet.NS);
+		
+		eFolderId.addContent(String.valueOf(inFolder));
+		eObjectmode.addContent("LIST");
+		
+		eProp.addContent(eFolderId);
+		eProp.addContent(eObjectmode);
+		
+		ePropfind.addContent(eProp);
+		
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		
+		Document doc = new Document(ePropfind);
+		
+		XMLOutputter xo = new XMLOutputter();
+		xo.output(doc, baos);
+		
+		baos.flush();
+		
+		HttpClient httpclient = new HttpClient();
+		
+		httpclient.getState().setCredentials(null, new UsernamePasswordCredentials(login, password));
+		PropFindMethod propFindMethod = new PropFindMethod(host + CONTACT_URL);
+		propFindMethod.setDoAuthentication( true );
+		
+		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+		propFindMethod.setRequestBody(bais);
+		
+		int status = httpclient.executeMethod(propFindMethod);
+		
+		assertEquals("check propfind response", 207, status);
+		
+		byte responseByte[] = propFindMethod.getResponseBody();
+		
+		bais = new ByteArrayInputStream(responseByte);
+		final Response[] response = ResponseParser.parse(new SAXBuilder().build(bais), Types.CONTACT, true);
+		
+		assertEquals("response length not is 1", 1, response.length);
+		
+		return (int[])response[0].getDataObject();
+	}
+	
 	public static ContactObject[] listContact(WebConversation webCon, int inFolder, Date modified, boolean changed, boolean deleted, String host, String login, String password) throws Exception {
 		host = appendPrefix(host);
 		
