@@ -50,7 +50,7 @@ package com.openexchange.admin.console.context;
 
 
 import com.openexchange.admin.console.AdminParser;
-import com.openexchange.admin.console.AdminParser.NeededTriState;
+import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.console.user.UserAbstraction;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -90,11 +90,11 @@ public abstract class ContextAbstraction extends UserAbstraction {
     }
     
     protected void setAdminPassOption(final AdminParser admp) {
-        this.adminPassOption = setShortLongOpt(admp,OPT_NAME_ADMINPASS_SHORT, OPT_NAME_ADMINPASS_LONG, OPT_NAME_ADMINPASS_DESCRIPTION, true, NeededTriState.possibly);
+        this.adminPassOption = setShortLongOpt(admp,OPT_NAME_ADMINPASS_SHORT, OPT_NAME_ADMINPASS_LONG, OPT_NAME_ADMINPASS_DESCRIPTION, true, NeededQuadState.possibly);
     }
     
     protected void setAdminUserOption(final AdminParser admp) {
-        this.adminUserOption= setShortLongOpt(admp,OPT_NAME_ADMINUSER_SHORT, OPT_NAME_ADMINUSER_LONG, OPT_NAME_ADMINUSER_DESCRIPTION, true, NeededTriState.possibly);
+        this.adminUserOption= setShortLongOpt(admp,OPT_NAME_ADMINUSER_SHORT, OPT_NAME_ADMINUSER_LONG, OPT_NAME_ADMINUSER_DESCRIPTION, true, NeededQuadState.possibly);
     }
     
     protected void setCommonIDOption(final AdminParser parser,final boolean required ){

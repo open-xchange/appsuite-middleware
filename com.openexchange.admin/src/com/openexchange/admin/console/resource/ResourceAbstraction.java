@@ -55,7 +55,7 @@ import java.rmi.RemoteException;
 
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.ObjectNamingAbstraction;
-import com.openexchange.admin.console.AdminParser.NeededTriState;
+import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.rmi.OXResourceInterface;
 import com.openexchange.admin.rmi.dataobjects.Resource;
@@ -99,7 +99,7 @@ public abstract class ResourceAbstraction extends ObjectNamingAbstraction {
         resourceRecipientOption = setShortLongOpt(admp, OPT_RECIPIENT_SHORT,OPT_RECIPIENT_LONG,"Recipient who should receive mail addressed to the resource",true, convertBooleantoTriState(required));        
     }
     
-    protected void setNameOption(final AdminParser admp,final NeededTriState required){
+    protected void setNameOption(final AdminParser admp,final NeededQuadState required){
         resourceNameOption =  setShortLongOpt(admp, _OPT_NAME_SHORT,_OPT_NAME_LONG,"The resource name",true, required); 
     }
     
@@ -116,7 +116,7 @@ public abstract class ResourceAbstraction extends ObjectNamingAbstraction {
     }
     
     protected void setIdOption(final AdminParser admp){
-        resourceIdOption = setShortLongOpt(admp,_OPT_RESOURCEID_SHORT,_OPT_RESOURCEID_LONG,"Id of this resource", true, NeededTriState.eitheror); 
+        resourceIdOption = setShortLongOpt(admp,_OPT_RESOURCEID_SHORT,_OPT_RESOURCEID_LONG,"Id of this resource", true, NeededQuadState.eitheror); 
     }
 
     protected final OXResourceInterface getResourceInterface() throws NotBoundException, MalformedURLException, RemoteException {

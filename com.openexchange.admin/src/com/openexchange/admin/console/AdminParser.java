@@ -59,7 +59,7 @@ import com.openexchange.admin.rmi.exceptions.MissingOptionException;
  * 2. The ability to have mandatory options
  */
 public class AdminParser extends CmdLineParser {
-    public enum NeededTriState {
+    public enum NeededQuadState {
         notneeded,
         possibly,
         eitheror,
@@ -75,7 +75,7 @@ public class AdminParser extends CmdLineParser {
     private static final String OPT_EXTENDED_LONG = "extendedoptions";
     
     private class OptionInfo {
-        public NeededTriState needed = NeededTriState.notneeded;
+        public NeededQuadState needed = NeededQuadState.notneeded;
 
         public Option option = null;
 
@@ -89,7 +89,7 @@ public class AdminParser extends CmdLineParser {
 
         public boolean extended = false;
 
-        public OptionInfo(final NeededTriState needed, final Option option, final char shortForm, final String longForm, final String longFormParameterDescription, final String description) {
+        public OptionInfo(final NeededQuadState needed, final Option option, final char shortForm, final String longForm, final String longFormParameterDescription, final String description) {
             super();
             this.needed = needed;
             this.option = option;
@@ -99,7 +99,7 @@ public class AdminParser extends CmdLineParser {
             this.description = description;
         }
 
-        public OptionInfo(final NeededTriState needed, final Option option, final String longForm, final String longFormParameterDescription, final String description) {
+        public OptionInfo(final NeededQuadState needed, final Option option, final String longForm, final String longFormParameterDescription, final String description) {
             super();
             this.needed = needed;
             this.option = option;
@@ -108,7 +108,7 @@ public class AdminParser extends CmdLineParser {
             this.description = description;
         }
 
-        public OptionInfo(final NeededTriState needed, final Option option, final char shortForm, final String longForm, final String description) {
+        public OptionInfo(final NeededQuadState needed, final Option option, final char shortForm, final String longForm, final String description) {
             super();
             this.needed = needed;
             this.option = option;
@@ -117,7 +117,7 @@ public class AdminParser extends CmdLineParser {
             this.description = description;
         }
 
-        public OptionInfo(final NeededTriState needed, final Option option, final String longForm, final String description) {
+        public OptionInfo(final NeededQuadState needed, final Option option, final String longForm, final String description) {
             super();
             this.needed = needed;
             this.option = option;
@@ -125,7 +125,7 @@ public class AdminParser extends CmdLineParser {
             this.description = description;
         }
 
-        public OptionInfo(final NeededTriState needed, final Option option, final String longForm, final String description, final boolean extended) {
+        public OptionInfo(final NeededQuadState needed, final Option option, final String longForm, final String description, final boolean extended) {
             super();
             this.needed = needed;
             this.option = option;
@@ -134,7 +134,7 @@ public class AdminParser extends CmdLineParser {
             this.extended = extended;
         }
 
-        public OptionInfo(final NeededTriState needed, final Option option, final String longForm, final String longFormParameterDescription, final String description, final boolean extended) {
+        public OptionInfo(final NeededQuadState needed, final Option option, final String longForm, final String longFormParameterDescription, final String description, final boolean extended) {
             super();
             this.needed = needed;
             this.option = option;
@@ -149,7 +149,7 @@ public class AdminParser extends CmdLineParser {
     public AdminParser(final String appname) {
         super();
         this.appname = appname;
-        this.helpoption = this.addOption(OPT_HELP_SHORT, OPT_HELP_LONG, null, "Prints a help text", NeededTriState.notneeded, false);
+        this.helpoption = this.addOption(OPT_HELP_SHORT, OPT_HELP_LONG, null, "Prints a help text", NeededQuadState.notneeded, false);
         this.envoption = this.addOption(OPT_ENVOPTS_LONG, "Output this help text", "Show info about commandline environment", false, false);
     }
 
@@ -205,14 +205,14 @@ public class AdminParser extends CmdLineParser {
      * @param hasarg
      * @return
      */
-    public final Option addOption(final char shortForm, final String longForm, final String longFormParameterDescription, final String description, final NeededTriState needed, final boolean hasarg) {
+    public final Option addOption(final char shortForm, final String longForm, final String longFormParameterDescription, final String description, final NeededQuadState needed, final boolean hasarg) {
         if (hasarg) {
             final Option retval = this.addStringOption(shortForm, longForm);
             this.optinfolist.add(new OptionInfo(needed, retval, shortForm, longForm, longFormParameterDescription, description));
             return retval;
         } else {
             final Option retval = this.addBooleanOption(shortForm, longForm);
-            this.optinfolist.add(new OptionInfo(NeededTriState.notneeded, retval, shortForm, longForm, description));
+            this.optinfolist.add(new OptionInfo(NeededQuadState.notneeded, retval, shortForm, longForm, description));
             return retval;
         }
     }
@@ -247,7 +247,7 @@ public class AdminParser extends CmdLineParser {
             return retval;
         } else {
             final Option retval = this.addBooleanOption(longForm);
-            this.optinfolist.add(new OptionInfo(NeededTriState.notneeded, retval, longForm, description));
+            this.optinfolist.add(new OptionInfo(NeededQuadState.notneeded, retval, longForm, description));
             return retval;
         }
 
@@ -270,7 +270,7 @@ public class AdminParser extends CmdLineParser {
             return retval;
         } else {
             final Option retval = this.addBooleanOption(longForm);
-            this.optinfolist.add(new OptionInfo(NeededTriState.notneeded, retval, longForm, description, extended));
+            this.optinfolist.add(new OptionInfo(NeededQuadState.notneeded, retval, longForm, description, extended));
             return retval;
         }
 
@@ -284,7 +284,7 @@ public class AdminParser extends CmdLineParser {
             return retval;
         } else {
             final Option retval = this.addBooleanOption(longForm);
-            this.optinfolist.add(new OptionInfo(NeededTriState.notneeded, retval, longForm, description, extended));
+            this.optinfolist.add(new OptionInfo(NeededQuadState.notneeded, retval, longForm, description, extended));
             return retval;
         }
 
@@ -311,7 +311,7 @@ public class AdminParser extends CmdLineParser {
         }
         final StringBuilder sb = new StringBuilder();
         for (final OptionInfo optInfo : this.optinfolist) {
-            if (optInfo.needed == NeededTriState.needed) {
+            if (optInfo.needed == NeededQuadState.needed) {
                 if (null == getOptionValue(optInfo.option)) {
                     sb.append(optInfo.longForm);
                     sb.append(",");
@@ -409,20 +409,20 @@ public class AdminParser extends CmdLineParser {
         }
     }
 
-    private NeededTriState convertBooleantoTriState(boolean needed) {
+    private NeededQuadState convertBooleantoTriState(boolean needed) {
         if (needed) {
-            return NeededTriState.needed;
+            return NeededQuadState.needed;
         } else {
-            return NeededTriState.notneeded;
+            return NeededQuadState.notneeded;
         }
     }
 
-    private String getrightmarker(final NeededTriState needed) {
-        if (needed == NeededTriState.needed) {
+    private String getrightmarker(final NeededQuadState needed) {
+        if (needed == NeededQuadState.needed) {
             return "*";
-        } else if (needed == NeededTriState.possibly) {
+        } else if (needed == NeededQuadState.possibly) {
             return "?";
-        } else if (needed == NeededTriState.eitheror) {
+        } else if (needed == NeededQuadState.eitheror) {
             return "|";
         } else {
             return " ";
