@@ -3,6 +3,7 @@ package com.openexchange.admin.console.util.database;
 import java.rmi.Naming;
 
 import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
@@ -30,26 +31,9 @@ public class RegisterDatabase extends DatabaseAbstraction {
             final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME + OXUtilInterface.RMI_NAME);
 
             final Database db = new Database();
-
-            parseAndSetHostname(parser, db);
-
             parseAndSetDatabasename(parser, db);
-            
-            parseAndSetPasswd(parser, db);
-            
-            parseAndSetDriver(parser, db);
-            
-            parseAndSetDBUsername(parser, db);
-            
-            parseAndSetMaxUnits(parser, db);
-            
-            parseAndSetPoolHardLimit(parser, db);
-            
-            parseAndSetPoolInitial(parser, db);
-            
-            parseAndSetPoolmax(parser, db);
-            
-            parseAndSetDatabaseWeight(parser, db);
+
+            parseAndSetMandatoryOptions(parser, db);
             
             parseAndSetMasterAndID(parser, db);
             
@@ -68,7 +52,7 @@ public class RegisterDatabase extends DatabaseAbstraction {
     private void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptionsWithoutContextID(parser);
 
-        setDatabaseNameOption(parser, true);
+        setDatabaseNameOption(parser, NeededQuadState.needed);
         setDatabaseHostnameOption(parser, false);
         setDatabaseUsernameOption(parser, false);
         setDatabaseDriverOption(parser, OXUtil.DEFAULT_DRIVER, false);
