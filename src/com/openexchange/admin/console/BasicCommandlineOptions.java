@@ -52,7 +52,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
-import com.openexchange.admin.console.AdminParser.NeededTriState;
+import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -354,12 +354,12 @@ public abstract class BasicCommandlineOptions {
         return retval;
     }
 
-    protected final Option setShortLongOpt(final AdminParser admp,final char shortopt, final String longopt, final String description, final boolean hasarg, final NeededTriState required) {
+    protected final Option setShortLongOpt(final AdminParser admp,final char shortopt, final String longopt, final String description, final boolean hasarg, final NeededQuadState required) {
         final Option retval = admp.addOption(shortopt,longopt, longopt, description, required, hasarg);       
         return retval;
     }
     
-    protected final Option setShortLongOptWithDefault(final AdminParser admp,final char shortopt, final String longopt, final String description, final String defaultvalue, final boolean hasarg, final NeededTriState required) {
+    protected final Option setShortLongOptWithDefault(final AdminParser admp,final char shortopt, final String longopt, final String description, final String defaultvalue, final boolean hasarg, final NeededQuadState required) {
         final StringBuilder desc = new StringBuilder();
         desc.append(description);
         desc.append(". Default: ");
@@ -378,15 +378,15 @@ public abstract class BasicCommandlineOptions {
     }
 
     private final void setContextOption(final AdminParser admp) {
-        this.contextOption = setShortLongOpt(admp,OPT_NAME_CONTEXT_SHORT, OPT_NAME_CONTEXT_LONG, OPT_NAME_CONTEXT_DESCRIPTION, true, NeededTriState.needed);        
+        this.contextOption = setShortLongOpt(admp,OPT_NAME_CONTEXT_SHORT, OPT_NAME_CONTEXT_LONG, OPT_NAME_CONTEXT_DESCRIPTION, true, NeededQuadState.needed);        
     }
     
     protected final void setContextNameOption(final AdminParser admp) {
-        this.contextNameOption = setShortLongOpt(admp,OPT_NAME_CONTEXT_NAME_SHORT, OPT_NAME_CONTEXT_NAME_LONG, OPT_NAME_CONTEXT_NAME_DESCRIPTION, true, NeededTriState.notneeded);
+        this.contextNameOption = setShortLongOpt(admp,OPT_NAME_CONTEXT_NAME_SHORT, OPT_NAME_CONTEXT_NAME_LONG, OPT_NAME_CONTEXT_NAME_DESCRIPTION, true, NeededQuadState.notneeded);
     }
     
     protected void setAdminPassOption(final AdminParser admp) {
-        this.adminPassOption = setShortLongOpt(admp,OPT_NAME_ADMINPASS_SHORT, OPT_NAME_ADMINPASS_LONG, OPT_NAME_ADMINPASS_DESCRIPTION, true, NeededTriState.possibly);
+        this.adminPassOption = setShortLongOpt(admp,OPT_NAME_ADMINPASS_SHORT, OPT_NAME_ADMINPASS_LONG, OPT_NAME_ADMINPASS_DESCRIPTION, true, NeededQuadState.possibly);
     }
     
     protected final void setCSVOutputOption(final AdminParser admp) {
@@ -394,11 +394,11 @@ public abstract class BasicCommandlineOptions {
     }
     
     protected void setAdminUserOption(final AdminParser admp) {
-        this.adminUserOption= setShortLongOpt(admp,OPT_NAME_ADMINUSER_SHORT, OPT_NAME_ADMINUSER_LONG, OPT_NAME_ADMINUSER_DESCRIPTION, true, NeededTriState.possibly);
+        this.adminUserOption= setShortLongOpt(admp,OPT_NAME_ADMINUSER_SHORT, OPT_NAME_ADMINUSER_LONG, OPT_NAME_ADMINUSER_DESCRIPTION, true, NeededQuadState.possibly);
     }
     
     protected final void setSearchPatternOption(final AdminParser admp){
-        this.searchOption = setShortLongOpt(admp,OPT_NAME_SEARCHPATTERN, OPT_NAME_SEARCHPATTERN_LONG, "The search pattern which is used for listing", true, NeededTriState.notneeded);
+        this.searchOption = setShortLongOpt(admp,OPT_NAME_SEARCHPATTERN, OPT_NAME_SEARCHPATTERN_LONG, "The search pattern which is used for listing", true, NeededQuadState.notneeded);
     }
 
 //    protected final Option addArgName(final Option option, final String argname) {
@@ -573,11 +573,11 @@ public abstract class BasicCommandlineOptions {
         }
     }
 
-    protected final NeededTriState convertBooleantoTriState(boolean needed) {
+    protected final NeededQuadState convertBooleantoTriState(boolean needed) {
         if (needed) {
-            return NeededTriState.needed;
+            return NeededQuadState.needed;
         } else {
-            return NeededTriState.notneeded;
+            return NeededQuadState.notneeded;
         }
     }
 }

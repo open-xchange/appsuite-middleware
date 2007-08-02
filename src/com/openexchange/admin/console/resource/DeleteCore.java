@@ -51,7 +51,7 @@ package com.openexchange.admin.console.resource;
 import java.rmi.RemoteException;
 
 import com.openexchange.admin.console.AdminParser;
-import com.openexchange.admin.console.AdminParser.NeededTriState;
+import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.rmi.OXResourceInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -63,7 +63,7 @@ public abstract class DeleteCore extends ResourceAbstraction {
     protected final void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptions(parser);
         setIdOption(parser);
-        setNameOption(parser, NeededTriState.eitheror);
+        setNameOption(parser, NeededQuadState.eitheror);
     }
 
     protected final void commonfunctions(final AdminParser parser, final String[] args) {

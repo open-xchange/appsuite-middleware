@@ -53,7 +53,7 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 
 import com.openexchange.admin.console.AdminParser;
-import com.openexchange.admin.console.AdminParser.NeededTriState;
+import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -76,9 +76,9 @@ public abstract class ChangeCore extends UserAbstraction {
 
         // required
         setIdOption(parser);
-        setUsernameOption(parser, NeededTriState.eitheror);
+        setUsernameOption(parser, NeededQuadState.eitheror);
 
-        setMandatoryOptionsWithoutUsername(parser, NeededTriState.notneeded);
+        setMandatoryOptionsWithoutUsername(parser, NeededQuadState.notneeded);
         
         // add optional opts
         setOptionalOptions(parser);
