@@ -10,6 +10,9 @@
 * 2007-08-02 - marcus.klein@open-xchange.com
 
  - Bugfix #7936: Changed error messages for filestore, ajax and login.
+ - Bugfix #7202: Fixed creating the next recurrence of tasks.
+ - Bugfix #8301: Next Recurrence is only created if task state is changed to
+   DONE.
 
 * 2007-08-02 - thorben.betten@open-xchange.com
 

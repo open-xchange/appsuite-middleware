@@ -73,7 +73,9 @@ import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.TaskException.Code;
+import com.openexchange.groupware.tasks.mapping.Status;
 import com.openexchange.sessiond.SessionObject;
+import com.openexchange.tools.Arrays;
 import com.openexchange.tools.iterator.ArrayIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -388,8 +390,9 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
             fixAlarm(updated, removedParts, updatedFolder);
         }
         try {
-            if (Task.NO_RECURRENCE != updated.getRecurrenceType()
-                && Task.DONE == updated.getStatus()) {
+            if (Task.NO_RECURRENCE != updated.getRecurrenceType() && Task.DONE
+                == updated.getStatus() && Arrays.contains(update
+                    .getModifiedFields(), Status.SINGLETON.getId())) {
                 insertNextRecurrence(updated, updatedParts, updatedFolder);
             }
         } catch (TaskException e) {

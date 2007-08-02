@@ -61,6 +61,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import com.openexchange.groupware.tasks.mapping.Status;
+
 /**
  * This class contains the methods for mapping object attributes to database+
  * columns and vice versa.
@@ -480,37 +482,7 @@ public final class Mapping {
                 task.setNote(value);
             }
         },
-        new Mapper<Integer>() {
-            public int getId() {
-                return Task.STATUS;
-            }
-            public boolean isSet(final Task task) {
-                return task.containsStatus();
-            }
-            public String getDBColumnName() {
-                return "state";
-            }
-            public void toDB(final PreparedStatement stmt, final int pos,
-                final Task task) throws SQLException {
-                stmt.setInt(pos, task.getStatus());
-            }
-            public void fromDB(final ResultSet result, final int pos,
-                final Task task) throws SQLException {
-                final int status = result.getInt(pos);
-                if (!result.wasNull()) {
-                    task.setStatus(status);
-                }
-            }
-            public boolean equals(final Task task1, final Task task2) {
-                return task1.getStatus() == task2.getStatus();
-            }
-            public Integer get(final Task task) {
-                return task.getStatus();
-            }
-            public void set(final Task task, final Integer value) {
-                task.setStatus(value);
-            }
-        },
+        Status.SINGLETON,
         new Mapper<Integer>() {
             public int getId() {
                 return Task.PRIORITY;
