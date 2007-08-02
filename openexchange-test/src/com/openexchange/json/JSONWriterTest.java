@@ -207,6 +207,53 @@ public class JSONWriterTest extends TestCase{
 		}
 	}
 	
+	public void testArrayInitializedWriter() {
+		JSONArray ja = new JSONArray().put("Value01").put("Value02");
+		try {
+			OXJSONWriter json = new OXJSONWriter(ja);
+			
+			json.array().value("Foo").value("Bar").endArray();
+			json.value("Value03");
+			
+			/*
+			 * Optional, but sets writer into completed mode
+			 */
+			json.endArray();
+			
+			assertEquals(ja.toString(), json.getObject().toString());
+		} catch (JSONException e) {
+			e.printStackTrace();
+			fail(e.getLocalizedMessage());
+		}
+		
+	}
+	
+	public void testObjectInitializedWriter() {
+		try {
+			JSONObject jo = new JSONObject().put("Key01", "Value01").put("Key02", "Value02");
+			
+			
+			OXJSONWriter json = new OXJSONWriter(jo);
+			
+			json.key("InnerArr");
+			json.array().value("Foo").value("Bar").endArray();
+			json.key("Key03").value("Value03");
+			
+			/*
+			 * Optional, but sets writer into completed mode
+			 */
+			json.endObject();
+			
+			
+			assertEquals(jo.toString(), json.getObject().toString());
+			
+		} catch (JSONException e) {
+			e.printStackTrace();
+			fail(e.getLocalizedMessage());
+		}
+		
+	}
+	
 	public void testComplex(){
 		
 	}
