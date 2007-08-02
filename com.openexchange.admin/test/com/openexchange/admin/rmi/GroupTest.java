@@ -270,6 +270,32 @@ public class GroupTest extends AbstractTest {
         assertTrue("members could not be loaded", remote_members.length > 0);
     }
 
+    @Test
+    public void testGetMembersByName() throws Exception {
+        final int context_id = getContextID();
+        final Context ctx = new Context(context_id);
+        final Credentials cred = DummyCredentials();
+        final String hosturl = getRMIHostUrl();
+        final Group addgroup = getTestGroupObject("memberaddgroup" + VALID_CHAR_TESTGROUP+System.currentTimeMillis(), ctx, cred);
+        final Group createdgroup = createGroup(ctx, addgroup, hosturl, cred);
+        assertTrue("group id > 0 expected", createdgroup.getId() > 0);
+    
+        // create user to add
+        final User usr = UserTest.getTestUserObject("groupmemberadduser" + System.currentTimeMillis(), "netline");
+        final UserModuleAccess access = new UserModuleAccess();
+        final User createduser = UserTest.addUser(ctx, usr, access);
+    
+        // We only want to resolve by name
+        createdgroup.setId(null);
+        createduser.setId(null);
+        // add user as groupmember
+        addMemberToGroup(ctx, createdgroup, new User[]{createduser}, hosturl, cred);
+    
+        // now get all members of group, and check if user is member
+        final User[] remote_members = getMembers(ctx, createdgroup, hosturl, cred);
+        assertTrue("members could not be loaded", remote_members.length > 0);
+    }
+
     private void changeGroup(final Context ctx, final Group grp, final String host, final Credentials cred) throws Exception {
         final OXGroupInterface xres = (OXGroupInterface) Naming.lookup(host + OXGroupInterface.RMI_NAME);
         xres.change(ctx, grp, cred);
