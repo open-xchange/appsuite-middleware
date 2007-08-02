@@ -17,7 +17,6 @@ public class ListTest extends FolderTest {
 		
 	}
 	
-	/*
 	public void testPropFindWithModified() throws Exception {
 		Date modified = new Date();
 		
@@ -112,7 +111,6 @@ public class ListTest extends FolderTest {
 		
 		deleteFolder(getWebConversation(), new int[] { objectId }, PROTOCOL + getHostName(), getLogin(), getPassword());
 	}
-	*/
 	
 	public void testList() throws Exception {
 		FolderObject folderObj = new FolderObject();

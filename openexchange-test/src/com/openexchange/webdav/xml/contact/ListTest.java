@@ -12,7 +12,6 @@ public class ListTest extends ContactTest {
 		super(name);
 	}
 
-	/*
 	public void testPropFindWithModified() throws Exception {
 		Date modified = new Date();
 		
@@ -86,7 +85,6 @@ public class ListTest extends ContactTest {
 		compareObject(contactObj, loadContact);
 		deleteContact(getWebConversation(), objectId, contactFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
 	}
-	*/
 	
 	public void testList() throws Exception {
 		ContactObject contactObj = createContactObject("testObjectNotFound");
