@@ -472,6 +472,9 @@ public final class TaskLogic {
             retval.add(new Folder(folderId, userId));
         }
         for (InternalParticipant participant : participants) {
+            if (participant.getIdentifier() == userId) {
+                continue;
+            }
             final Folder folder = new Folder(participant.getFolderId(),
                 participant.getIdentifier());
             if (!retval.contains(folder)) {
