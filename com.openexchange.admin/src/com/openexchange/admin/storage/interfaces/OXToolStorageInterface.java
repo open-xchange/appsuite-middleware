@@ -164,11 +164,18 @@ public abstract class OXToolStorageInterface {
      */
     public abstract User[] domainInUseByUser(final Context ctx,final String domain) throws StorageException;
 
+    /**
+     * Although this method get's a context Object it will only look after the cid
+     * 
+     * @param ctx
+     * @return
+     * @throws StorageException
+     */
     public abstract boolean existsContext(final Context ctx) throws StorageException;
 
-    public abstract boolean existsContextLoginMappings(Context ctx) throws StorageException;
+    public abstract boolean existsContextLoginMappings(final Context ctx) throws StorageException;
 
-    public abstract boolean existsContextLoginMappings(Context ctx,Connection configdb_connection) throws StorageException;
+    public abstract boolean existsContextLoginMappings(final Context ctx, final Connection configdb_connection) throws StorageException;
 
     public abstract boolean existsDatabase(final int db_id) throws StorageException;
 
@@ -224,6 +231,8 @@ public abstract class OXToolStorageInterface {
 
     public abstract int getAdminForContext(final Context ctx, final Connection con) throws StorageException;
     
+    public abstract int getContextIDByContextname(final String ctxname) throws StorageException;
+
     public abstract int getDatabaseIDByDatabasename(final String dbname) throws StorageException;
     
     public abstract int getDefaultGroupForContext(final Context ctx, final Connection con) throws StorageException;
