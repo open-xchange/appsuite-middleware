@@ -54,6 +54,7 @@ import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.console.user.UserAbstraction;
 import com.openexchange.admin.rmi.dataobjects.Context;
+import com.openexchange.admin.rmi.exceptions.MissingOptionException;
 
 public abstract class ContextAbstraction extends UserAbstraction {   
 
@@ -64,21 +65,19 @@ public abstract class ContextAbstraction extends UserAbstraction {
     protected static final String OPT_NAME_ADMINPASS_DESCRIPTION="master Admin password";
     protected static final String OPT_NAME_ADMINUSER_DESCRIPTION="master Admin user name";
     
-    protected final static char OPT_NAME_COMMON_ID_SHORT = 'i';
-    protected final static String OPT_NAME_COMMON_ID_LONG  = "id";
-    
-    protected Option commonIDOption = null;
     protected Option contextQuotaOption = null;
 
+    protected String contextname = null;
+    
     @Override
     protected String getObjectName() {
         return "context";
     }
 
     protected void parseAndSetContextName(final AdminParser parser, final Context ctx) {
-        final String optionValue = (String) parser.getOptionValue(contextNameOption);
-        if (optionValue != null) {
-            ctx.setName(optionValue);
+        this.contextname = (String) parser.getOptionValue(contextNameOption);
+        if (this.contextname != null) {
+            ctx.setName(this.contextname);
         }
     }
 
@@ -97,17 +96,23 @@ public abstract class ContextAbstraction extends UserAbstraction {
         this.adminUserOption= setShortLongOpt(admp,OPT_NAME_ADMINUSER_SHORT, OPT_NAME_ADMINUSER_LONG, OPT_NAME_ADMINUSER_DESCRIPTION, true, NeededQuadState.possibly);
     }
     
-    protected void setCommonIDOption(final AdminParser parser,final boolean required ){
-        this.commonIDOption = setShortLongOpt(parser, OPT_NAME_COMMON_ID_SHORT,OPT_NAME_COMMON_ID_LONG,"Object Id",true, convertBooleantoTriState(required));
-    }
-
-    protected void setContextNameOption(final AdminParser parser,final boolean required ){
-        this.contextNameOption = setShortLongOpt(parser, OPT_NAME_CONTEXT_NAME_SHORT,OPT_NAME_CONTEXT_NAME_LONG,OPT_NAME_CONTEXT_NAME_DESCRIPTION,true, convertBooleantoTriState(required));
-    }
-
     protected void setContextQuotaOption(final AdminParser parser,final boolean required ){
         this.contextQuotaOption = setShortLongOpt(parser, OPT_QUOTA_SHORT,OPT_QUOTA_LONG,OPT_NAME_CONTEXT_QUOTA_DESCRIPTION,true, convertBooleantoTriState(required));
     }
 
+    protected String contextnameOrIdSet() throws MissingOptionException {
+        String successtext;
+        // Through the order of this checks we archive that the id is preferred over the name
+        if (null == this.ctxid) {
+            if (null == this.contextname) {
+                throw new MissingOptionException("Either resourcename or resourceid must be given");
+            } else {
+                successtext = this.contextname;
+            }
+        } else {
+            successtext = String.valueOf(this.contextname);
+        }
+        return successtext;
+    }
 }
 
