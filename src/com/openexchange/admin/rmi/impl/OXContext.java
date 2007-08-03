@@ -207,7 +207,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
     public void enable(final Context ctx, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
         try {
-            doNullCheck(ctx,ctx.getIdAsInt());
+            doNullCheck(ctx);
         } catch (final InvalidDataException e1) {
             final InvalidDataException invalidDataException = new InvalidDataException("Context is null");
             log.error(invalidDataException.getMessage(), invalidDataException);
@@ -216,8 +216,8 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         
         new BasicAuthenticator().doAuthentication(auth);
         
-        final int context_id = ctx.getIdAsInt();
-        log.debug("" + context_id);
+        setIdOrGetIDFromContextname(ctx);
+        log.debug(ctx);
         try {
             if (!tool.existsContext(ctx)) {
                 throw new NoSuchContextException();
