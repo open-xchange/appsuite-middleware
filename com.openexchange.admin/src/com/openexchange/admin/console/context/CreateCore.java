@@ -55,6 +55,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.User;
@@ -67,7 +68,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 public abstract class CreateCore extends ContextAbstraction {
     protected void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptions(parser);
-        setContextNameOption(parser);
+        setContextNameOption(parser, NeededQuadState.notneeded);
         setMandatoryOptions(parser);
         
         setLanguageOption(parser);
