@@ -272,7 +272,7 @@ public class Context extends EnforceableDataObject implements Serializable {
     }
 
     private void init() {
-        this.id = -1;
+        this.id = null;
         this.name = null;
         this.enabled = false;
         this.filestore_id = null;
