@@ -59,8 +59,8 @@ public class ContextHostingAbstraction extends ContextAbstraction {
         createMessageForStdout(String.valueOf(id), ctxid, "disabled");
     }
 
-    protected final void displayEnabledMessage(final Integer id, final Integer ctxid) {
-        createMessageForStdout(String.valueOf(id), ctxid, "enabled");
+    protected final void displayEnabledMessage(final String id, final Integer ctxid) {
+        createMessageForStdout(id, ctxid, "enabled");
     }
 
     protected final void displayMovedMessage(final Integer id, final Integer ctxid, final String text) {
