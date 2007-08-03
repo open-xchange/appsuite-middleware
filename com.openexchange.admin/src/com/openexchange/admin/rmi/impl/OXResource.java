@@ -580,7 +580,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
             if (null != resourcename) {
                 res.setId(tool.getResourceIDByResourcename(ctx, resourcename));
             } else {
-                throw new InvalidDataException("One resource object has no id or username");
+                throw new InvalidDataException("One resource object has no id or resourcename");
             }
         }
     }
