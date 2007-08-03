@@ -377,12 +377,12 @@ public abstract class BasicCommandlineOptions {
         return setShortLongOpt(admp, shortopt, longopt, argdescription, desc.toString(), required);
     }
 
-    private final void setContextOption(final AdminParser admp) {
-        this.contextOption = setShortLongOpt(admp,OPT_NAME_CONTEXT_SHORT, OPT_NAME_CONTEXT_LONG, OPT_NAME_CONTEXT_DESCRIPTION, true, NeededQuadState.needed);        
+    protected final void setContextOption(final AdminParser admp, final NeededQuadState needed) {
+        this.contextOption = setShortLongOpt(admp,OPT_NAME_CONTEXT_SHORT, OPT_NAME_CONTEXT_LONG, OPT_NAME_CONTEXT_DESCRIPTION, true, needed);        
     }
     
-    protected final void setContextNameOption(final AdminParser admp) {
-        this.contextNameOption = setShortLongOpt(admp,OPT_NAME_CONTEXT_NAME_SHORT, OPT_NAME_CONTEXT_NAME_LONG, OPT_NAME_CONTEXT_NAME_DESCRIPTION, true, NeededQuadState.notneeded);
+    protected final void setContextNameOption(final AdminParser admp, final NeededQuadState needed) {
+        this.contextNameOption = setShortLongOpt(admp,OPT_NAME_CONTEXT_NAME_SHORT, OPT_NAME_CONTEXT_NAME_LONG, OPT_NAME_CONTEXT_NAME_DESCRIPTION, true, needed);
     }
     
     protected void setAdminPassOption(final AdminParser admp) {
@@ -442,7 +442,7 @@ public abstract class BasicCommandlineOptions {
      * 
      */
     protected void setDefaultCommandLineOptions(final AdminParser admp){
-        setContextOption(admp);
+        setContextOption(admp, NeededQuadState.needed);
         setAdminUserOption(admp); 
         setAdminPassOption(admp);
     }
@@ -462,7 +462,7 @@ public abstract class BasicCommandlineOptions {
     }
 
     protected final Context contextparsing(final AdminParser parser) {
-        final Context ctx = new Context(DEFAULT_CONTEXT);
+        final Context ctx = new Context();
     
         if (parser.getOptionValue(this.contextOption) != null) {
             ctxid = Integer.parseInt((String) parser.getOptionValue(this.contextOption));
