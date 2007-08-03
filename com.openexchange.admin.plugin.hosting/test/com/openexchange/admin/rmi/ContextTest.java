@@ -75,6 +75,24 @@ public class ContextTest extends AbstractTest {
     }
 
     @Test
+    public void testGetByName() throws Exception {
+        final Credentials cred = DummyMasterCredentials();
+        final String hosturl = getRMIHostUrl();
+        final Context ctx = addSystemContext(getTestContextObject(cred), getRMIHostUrl(), cred);
+
+        OXContextInterface xctx = (OXContextInterface) Naming.lookup(hosturl + OXContextInterface.RMI_NAME);
+
+        final Integer idAsInt = ctx.getIdAsInt();
+        ctx.setID(null);
+        final Context srv_loaded = xctx.getData(ctx, cred);
+
+        // Reset for compare
+        ctx.setID(idAsInt);
+        // FIXME: Add equals for context here. Same at nearly all other occurrences
+        assertTrue("Expected same context ids", idAsInt.intValue() == srv_loaded.getIdAsInt().intValue());
+    }
+
+    @Test
     public void testListContextByDatabase() throws Exception {
         final Credentials cred = DummyMasterCredentials();
         final Context ctx = getTestContextObject(cred);
