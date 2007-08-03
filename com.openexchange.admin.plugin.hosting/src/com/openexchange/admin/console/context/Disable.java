@@ -3,6 +3,7 @@ package com.openexchange.admin.console.context;
 import java.rmi.Naming;
 
 import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -15,11 +16,16 @@ public class Disable extends ContextHostingAbstraction {
 
         setOptions(parser);
 
+        String successtext = null;
         try {
 
             parser.ownparse(args2);
             final Context ctx = contextparsing(parser);
 
+            parseAndSetContextName(parser, ctx);
+            
+            successtext = contextnameOrIdSet();
+            
             final Credentials auth = credentialsparsing(parser);
 
             // get rmi ref
@@ -29,10 +35,10 @@ public class Disable extends ContextHostingAbstraction {
             oxres.disable(ctx, mr, auth); */
             oxres.disable(ctx, auth);
 
-            displayDisabledMessage(ctxid, null);
+            displayDisabledMessage(successtext, null);
             sysexit(0);
         } catch (final Exception e) {
-            printErrors(String.valueOf(ctxid), null, e, parser);
+            printErrors(successtext, null, e, parser);
         }
     }
 
@@ -41,7 +47,9 @@ public class Disable extends ContextHostingAbstraction {
     }
 
     private void setOptions(final AdminParser parser) {
-        setDefaultCommandLineOptions(parser);
+        setDefaultCommandLineOptionsWithoutContextID(parser);
+        setContextOption(parser, NeededQuadState.eitheror);
+        setContextNameOption(parser, NeededQuadState.eitheror);
         //setMaintenanceReasodIDOption(parser, true);
     }
 }
