@@ -130,10 +130,8 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
     }
 
     public void disable(final Context ctx, final MaintenanceReason reason, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, NoSuchReasonException, OXContextException {
-        
-        
         try {
-            doNullCheck(ctx, ctx.getIdAsInt(),reason,reason.getId());        
+            doNullCheck(ctx, reason,reason.getId());        
         } catch (final InvalidDataException e1) {            
             log.error("Invalid data sent by client!", e1);
             throw e1;
@@ -141,9 +139,8 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         
         new BasicAuthenticator().doAuthentication(auth);
         
-        final int context_id = ctx.getIdAsInt();
-        final int reason_id = reason.getId();
-        log.debug("" + context_id + " - " + reason_id);
+        setIdOrGetIDFromContextname(ctx);
+        log.debug(ctx + " - " + reason);
         try {
             // try {
             if (!tool.existsContext(ctx)) {
