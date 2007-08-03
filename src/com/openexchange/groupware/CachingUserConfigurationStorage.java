@@ -180,10 +180,7 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
 	public void removeUserConfiguration(final int userId, final Context ctx) throws UserConfigurationException {
 		WRITE_LOCK.lock();
 		try {
-			final CacheKey key = getKey(userId, ctx);
-			if (null != cache.get(key)) {
-				cache.remove(key);
-			}
+			cache.remove(getKey(userId, ctx));
 		} catch (final CacheException e) {
 			throw new UserConfigurationException(UserConfigurationCode.CACHE_REMOVE_ERROR, e, e.getLocalizedMessage());
 		} finally {
