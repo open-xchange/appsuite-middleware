@@ -1,19 +1,18 @@
 # translation of errors.fr_FR.po to
-# translation of errors.fr_FR.po to Français
 # Antje Faber, 2007.
 # Éric Bischoff <eric@bureau-cornavin.com>, 2007.
-# Antje Faber, 2007.
+# translation of errors.fr_FR.po to Français
 msgid ""
 msgstr ""
 "Project-Id-Version: errors.fr_FR\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2007-07-03 14:10+0200\n"
-"Last-Translator: Antje Faber\n"
-"Language-Team:  <de@li.org>\n"
+"PO-Revision-Date: 2007-08-03 10:58+0200\n"
+"Last-Translator: Éric Bischoff <eric@bureau-cornavin.com>\n"
+"Language-Team: Français <fr@bureau-cornavin.com>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: KBabel 1.10.2\n"
+"X-Generator: KBabel 1.11.2\n"
 
 msgid "%1$d statements aren't closed."
 msgstr "%1$d instructions ne sont pas closes."
@@ -399,7 +398,9 @@ msgid "Cannot load class \"%s\"."
 msgstr "Impossible de charger la classe \"%s\"."
 
 msgid "Cannot load property file %s due to following exception: %s"
-msgstr "Le fichier de propriétés %s n'a pas pu être chargé suite à l'exception suivante : %s"
+msgstr ""
+"Le fichier de propriétés %s n'a pas pu être chargé suite à l'exception "
+"suivante : %s"
 
 msgid "Cannot pre-fetch results."
 msgstr "Impossible de pré-charger les résultats."
@@ -476,7 +477,9 @@ msgid "Class %s can not be loaded."
 msgstr "La classe %s ne peut pas être chargée."
 
 msgid "Configuration for user %s could not found in context %d"
-msgstr "Les réglages de l'utilisateur %s n'ont pas pu être trouvés dans le contexte %d."
+msgstr ""
+"Les réglages de l'utilisateur %s n'ont pas pu être trouvés dans le contexte %"
+"d."
 
 msgid "Connection is broken due to a socket exception on remote server: %s"
 msgstr ""
@@ -1147,13 +1150,6 @@ msgid "Link is not implemented."
 msgstr "La liaison n'est pas implémentée."
 
 msgid ""
-"Login to imap server %s failed for user %s in context %s. Please try again "
-"later"
-msgstr ""
-"La connexion au serveur IMAP %s a échoué pour l'utilisateur %s dans le "
-"contexte %s. Veuillez réessayer plus tard"
-
-msgid ""
 "Mail folder \"%s\" could not be created (maybe due to insufficient "
 "permission on parental folder %s)"
 msgstr ""
@@ -1452,8 +1448,8 @@ msgstr "Opération ne pouvant pas être menée sur un dossier %s dans le context
 
 msgid "Owner %s of default folder %s must keep the folder admin permission"
 msgstr ""
-"Le propriétaire %s du dossier par défaut %s doit conserver "
-"le droit d'administrer le dossier"
+"Le propriétaire %s du dossier par défaut %s doit conserver le droit "
+"d'administrer le dossier"
 
 msgid "Parameter %s does not match JSON key %s"
 msgstr "Le paramètre %s ne correspond pas à la clé JSON %s"
@@ -1812,6 +1808,18 @@ msgstr ""
 
 msgid "There are no recipient(s) for the new message."
 msgstr "Il n'y a pas de destinataires pour le nouveau message."
+
+msgid ""
+"There was an issue in authenticating your E-Mail password. This may be "
+"because of a recent password change. To continue please logout now and then "
+"log back in with your most current password. (server=%s | user=%s | context=%"
+"s)"
+msgstr ""
+"Il y a eu un problème pendant l'authentification de votre mot de passe "
+"de courrier électronique. Cela peut être dû à un changement récent du "
+"mot de passe. Pour continuer, veuillez vous déconnecter maintenant et "
+"vous reconnecter avec votre mot de passe le plus récent. "
+"(serveur=%s | utilisateur=%s | contexte=%s)"
 
 msgid "This Contact has no FolderID: Entry %1$d Context %2$d"
 msgstr "Ce contact n'a pas d'identifiant de dossier : Élément %1$d Contexte %2$d"
