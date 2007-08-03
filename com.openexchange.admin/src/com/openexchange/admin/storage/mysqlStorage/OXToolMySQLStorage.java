@@ -917,41 +917,13 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     }
 
     @Override
+    public int getContextIDByContextname(String ctxname) throws StorageException {
+        return getByNameForConfigDB(ctxname, "context", "SELECT cid FROM context WHERE name=?");
+    }
+
+    @Override
     public int getDatabaseIDByDatabasename(final String dbname) throws StorageException {
-        
-        Connection con = null;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            con = cache.getREADConnectionForCONFIGDB();
-            stmt = con.prepareStatement("SELECT db_pool_id FROM db_pool WHERE name=?");
-            stmt.setString(1, dbname);
-            rs = stmt.executeQuery();
-            if (rs.next()) {
-                return rs.getInt(1);
-            } else {
-                throw new SQLException("No such database "+dbname);
-            }
-        } catch (final SQLException e) {
-            log.error("SQL Error",e);
-            throw new StorageException(e);
-        } catch (final PoolException e) {
-            log.error(e.getMessage(), e);
-            throw new StorageException(e);
-        } finally {
-            try {
-                rs.close();
-            } catch (final SQLException e) {
-                log.error("Error closing resultset!", e);
-            }
-            try {
-                if (stmt != null) {
-                    stmt.close();
-                }
-            } catch (final SQLException e) {
-                log.error("Error closing prepared statement!", e);
-            }
-        }
+        return getByNameForConfigDB(dbname, "database", "SELECT db_pool_id FROM db_pool WHERE name=?");
     }
 
     /**
@@ -1710,6 +1682,42 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
                 rs.close();
             } catch (final SQLException e) {
                 log.error("Error closing resultset", e);
+            }
+        }
+    }
+
+    private int getByNameForConfigDB(final String name, final String objectname, final String SQLQuery) throws StorageException {
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            con = cache.getREADConnectionForCONFIGDB();
+            stmt = con.prepareStatement(SQLQuery);
+            stmt.setString(1, name);
+            rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            } else {
+                throw new SQLException("No such " + objectname + " " + name);
+            }
+        } catch (final SQLException e) {
+            log.error("SQL Error",e);
+            throw new StorageException(e);
+        } catch (final PoolException e) {
+            log.error(e.getMessage(), e);
+            throw new StorageException(e);
+        } finally {
+            try {
+                rs.close();
+            } catch (final SQLException e) {
+                log.error("Error closing resultset!", e);
+            }
+            try {
+                if (stmt != null) {
+                    stmt.close();
+                }
+            } catch (final SQLException e) {
+                log.error("Error closing prepared statement!", e);
             }
         }
     }
