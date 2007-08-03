@@ -20,7 +20,7 @@ JkMount /infostore/ ajp13
 JkMount /infostore/* ajp13
 
 #####################################################################
-
+ - Fixed Bug #8676: Return correct lockdiscovery property on LOCK for LockNull resources.
 
 * 2007-08-02 - martin.kauss@open-xchange.com
 

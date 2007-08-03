@@ -104,11 +104,14 @@ public class WebdavLockAction extends AbstractAction {
 			
 			lock.setOwner(outputter.outputString(owner.cloneContent()));
 			
-			final WebdavResource resource = req.getResource();
+			WebdavResource resource = req.getResource();
 			int status = HttpServletResponse.SC_OK;
 			 
 			
 			resource.lock(lock);
+			
+			// Reload, because it might have been switched to a lock null resource
+			resource = req.getFactory().resolveResource(req.getUrl());
 			
 			res.setStatus(status);
 			res.setHeader("Lock-Token",lock.getToken());
