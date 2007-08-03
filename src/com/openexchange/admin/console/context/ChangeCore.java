@@ -5,6 +5,7 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 
 import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
@@ -17,7 +18,7 @@ public abstract class ChangeCore extends ContextAbstraction {
     protected void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptions(parser);
         
-        setContextNameOption(parser);
+        setContextNameOption(parser, NeededQuadState.notneeded);
 
         setContextQuotaOption(parser, false);
         
