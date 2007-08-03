@@ -115,7 +115,7 @@ public class WebdavLockAction extends AbstractAction {
 			
 			res.setStatus(status);
 			res.setHeader("Lock-Token",lock.getToken());
-			
+			res.setHeader("content-type", "application/xml");
 			final WebdavProperty lockdiscovery = resource.getProperty("DAV:", "lockdiscovery");
 			
 			final Element lockDiscoveryElement = new PropertiesMarshaller(req.getCharset()).marshalProperty(lockdiscovery);
