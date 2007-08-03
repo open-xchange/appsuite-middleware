@@ -898,7 +898,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             if (null != groupname) {
                 grp.setId(tool.getGroupIDByGroupname(ctx, groupname));
             } else {
-                throw new InvalidDataException("One resource object has no id or username");
+                throw new InvalidDataException("One group object has no id or groupname");
             }
         }
     }
