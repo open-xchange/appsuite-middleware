@@ -105,12 +105,12 @@ public abstract class ContextAbstraction extends UserAbstraction {
         // Through the order of this checks we archive that the id is preferred over the name
         if (null == this.ctxid) {
             if (null == this.contextname) {
-                throw new MissingOptionException("Either resourcename or resourceid must be given");
+                throw new MissingOptionException("Either contextname or contextid must be given");
             } else {
                 successtext = this.contextname;
             }
         } else {
-            successtext = String.valueOf(this.contextname);
+            successtext = String.valueOf(this.ctxid);
         }
         return successtext;
     }
