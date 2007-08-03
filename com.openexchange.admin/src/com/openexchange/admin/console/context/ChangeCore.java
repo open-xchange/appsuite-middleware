@@ -16,9 +16,10 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 public abstract class ChangeCore extends ContextAbstraction {
     
     protected void setOptions(final AdminParser parser) {
-        setDefaultCommandLineOptions(parser);
+        setDefaultCommandLineOptionsWithoutContextID(parser);
         
-        setContextNameOption(parser, NeededQuadState.notneeded);
+        setContextOption(parser, NeededQuadState.eitheror);
+        setContextNameOption(parser, NeededQuadState.eitheror);
 
         setContextQuotaOption(parser, false);
         
@@ -28,24 +29,27 @@ public abstract class ChangeCore extends ContextAbstraction {
     protected final void commonfunctions(final AdminParser parser, final String[] args) {
         setOptions(parser);
         
+        String successtext = null;
         try {
             parser.ownparse(args);
             final Context ctx = contextparsing(parser);
+
+            // context name
+            parseAndSetContextName(parser, ctx);
+            
+            successtext = contextnameOrIdSet();
             
             // context filestore quota
             parseAndSetContextQuota(parser, ctx);
-            
-            // context name
-            parseAndSetContextName(parser, ctx);
             
             final Credentials auth = credentialsparsing(parser);
 
             maincall(parser, ctx, auth);
 
-            displayChangedMessage(String.valueOf(ctxid), null);
+            displayChangedMessage(successtext, null);
             sysexit(0);
         } catch (final Exception e) {
-            printErrors(String.valueOf(ctxid), null, e, parser);
+            printErrors(successtext, null, e, parser);
         }
     }
 
