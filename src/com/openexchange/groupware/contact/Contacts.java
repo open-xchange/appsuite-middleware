@@ -159,7 +159,7 @@ public class Contacts implements DeleteListener {
 								Category.USER_INPUT},
 			desc={"1", "2"},
 			exceptionId={1,2 },
-			msg={"Unable to scale this contact image.  Either the file type is not supported or the image is too large. Your mime type is %1$s and your image size is %2$d KB. The max. allowed image size is %3$d KB.",		
+			msg={"Unable to scale this contact image.  Either the file type is not supported or the image is too large. Your mime type is %1$s and your image size is %2$d. The max. allowed image size is %3$d.",		
 					"This gif image is too large. It can not be scaled and will not be accepted"}
 	)
 	public static byte[] scaleContactImage(final byte[] img, String mime) throws OXConflictException, OXException, IOException {
@@ -206,10 +206,10 @@ public class Contacts implements DeleteListener {
 		}
 		if (!check){
 			
-			final int ilkb = img.length / 1024;
-			final int mskb = max_size / 1024;
+			//final int ilkb = img.length / 1024;
+			//final int mskb = max_size / 1024;
 			
-			throw EXCEPTIONS.createOXConflictException(1,mime,Integer.valueOf(ilkb),Integer.valueOf(mskb));
+			throw EXCEPTIONS.createOXConflictException(1,mime,img.length,max_size);
 			//throw new OXException("This is a not supported file type for an Image or it is to large! MimeType ="+mime+" / Image Size = "+img.length+" / max. allowed Image size = "+max_size);
 		}
 		
@@ -298,7 +298,7 @@ public class Contacts implements DeleteListener {
 			
 			final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			try{
-			ImageIO.write(scaledBufferedImage,fileType,baos);
+				ImageIO.write(scaledBufferedImage,fileType,baos);
 			} catch (final Exception fallback){
 				/**
 				 * This is just a basic fallback i try when he is not able to scale the image 
