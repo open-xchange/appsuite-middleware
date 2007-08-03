@@ -53,6 +53,7 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 
 import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
@@ -63,25 +64,32 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public abstract class DeleteCore extends ContextAbstraction {
     protected void setOptions(final AdminParser parser) {
-        setDefaultCommandLineOptions(parser);
+        setDefaultCommandLineOptionsWithoutContextID(parser);
+        setContextOption(parser, NeededQuadState.eitheror);
+        setContextNameOption(parser, NeededQuadState.eitheror);
     }
     
     protected final void commonfunctions(final AdminParser parser, final String[] args) {
         setOptions(parser);
         
+        String successtext = null;
         try {
             parser.ownparse(args);
     
             final Context ctx = contextparsing(parser);
-    
+
+            parseAndSetContextName(parser, ctx);
+            
+            successtext = contextnameOrIdSet();
+            
             final Credentials auth = credentialsparsing(parser);
     
             maincall(ctx, auth);
     
-            displayDeletedMessage(String.valueOf(ctxid), null);
+            displayDeletedMessage(successtext, null);
             sysexit(0);
         } catch (final Exception e) {
-            printErrors(String.valueOf(ctxid), null, e, parser);
+            printErrors(successtext, null, e, parser);
         }
     }
     
