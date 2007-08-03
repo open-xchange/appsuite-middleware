@@ -47,7 +47,7 @@
  *
  */
 /*
- * $Id: OXResource.java,v 1.44 2007/08/02 14:07:54 dennis Exp $
+ * $Id: OXResource.java,v 1.45 2007/08/03 10:31:11 dennis Exp $
  */
 package com.openexchange.admin.rmi.impl;
 
@@ -580,7 +580,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
             if (null != resourcename) {
                 res.setId(tool.getResourceIDByResourcename(ctx, resourcename));
             } else {
-                throw new InvalidDataException("One resource object has no id or username");
+                throw new InvalidDataException("One resource object has no id or resourcename");
             }
         }
     }
