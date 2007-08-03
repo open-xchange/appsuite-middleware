@@ -108,7 +108,6 @@ public abstract class AbstractIMAPCommand<T> {
 				 */
 				return abstractIMAPCommand.getDefaultValue();
 			}
-			final boolean notifyResponseHandlers = abstractIMAPCommand.performNotifyResponseHandlers();
 			final String[] args = abstractIMAPCommand.getArgs();
 			Response[] r = null;
 			Response response = null;
@@ -140,7 +139,7 @@ public abstract class AbstractIMAPCommand<T> {
 						r[index] = null;
 					}
 				} finally {
-					if (notifyResponseHandlers) {
+					if (abstractIMAPCommand.performNotifyResponseHandlers()) {
 						/*
 						 * Dispatch unhandled responses
 						 */

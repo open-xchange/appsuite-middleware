@@ -90,7 +90,7 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
 	private boolean proceed = true;
 
 	/**
-	 * Constructor using UIDs ans consequently performs a <code>UID COPY</code>
+	 * Constructor using UIDs and consequently performs a <code>UID COPY</code>
 	 * command
 	 * 
 	 * @param imapFolder -
