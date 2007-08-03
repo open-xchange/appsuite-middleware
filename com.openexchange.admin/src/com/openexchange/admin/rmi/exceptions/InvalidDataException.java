@@ -52,7 +52,9 @@ package com.openexchange.admin.rmi.exceptions;
 import java.util.ArrayList;
 
 /**
- * @author cutmasta Is thrown when user sends invalid data to the server. *
+ * Is thrown when user sends invalid data to the server.
+ * 
+ * @author cutmasta 
  * 
  */
 public class InvalidDataException extends Exception {
