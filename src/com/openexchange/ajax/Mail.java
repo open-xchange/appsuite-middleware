@@ -114,6 +114,7 @@ import com.openexchange.groupware.Component;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.container.MailFolderObject;
 import com.openexchange.groupware.container.mail.JSONMessageAttachmentObject;
 import com.openexchange.groupware.container.mail.JSONMessageObject;
 import com.openexchange.groupware.container.mail.MessageCacheObject;
@@ -497,14 +498,23 @@ public class Mail extends PermissionServlet implements UploadListener {
 				if (threadSort) {
 					it = mailInterface.getAllThreadedMessages(folderId, columns);
 					final int size = it.size();
-					final boolean useCache = ((size < IMAPProperties.getMessageFetchLimit()));
+					final boolean useCache;
+					final Map<String, MessageCacheObject> msgMap;
+					if (size < IMAPProperties.getMessageFetchLimit()) {
+						useCache = true;
+						msgMap = MessageCacheManager.getInstance().getUserMessageMap(sessionObj);
+					} else {
+						useCache = false;
+						msgMap = null;
+					}
 					for (int i = 0; i < size; i++) {
 						final MessageCacheObject msg = (MessageCacheObject) it.next();
 						if (useCache) {
 							/*
-							 * Put into cache
+							 * Put into msg map (and implicitely into cache)
 							 */
-							MessageCacheManager.getInstance().putMessage(sessionObj, msg.getUid(), msg);
+							msgMap.put(MessageCacheManager.getMsgKey(msg.getUid(), MailFolderObject.prepareFullname(msg
+									.getFolderFullname(), msg.getSeparator())), msg);
 						}
 						jsonWriter.array();
 						try {
@@ -542,14 +552,23 @@ public class Mail extends PermissionServlet implements UploadListener {
 					 * exception telling that field is not present in message
 					 * object.
 					 */
-					final boolean useCache = ((size < IMAPProperties.getMessageFetchLimit()));
+					final boolean useCache;
+					final Map<String, MessageCacheObject> msgMap;
+					if (size < IMAPProperties.getMessageFetchLimit()) {
+						useCache = true;
+						msgMap = MessageCacheManager.getInstance().getUserMessageMap(sessionObj);
+					} else {
+						useCache = false;
+						msgMap = null;
+					}
 					for (int i = 0; i < size; i++) {
 						final MessageCacheObject msg = (MessageCacheObject) it.next();
 						if (useCache) {
 							/*
-							 * Put into cache
+							 * Put into msg map (and implicitely into cache)
 							 */
-							MessageCacheManager.getInstance().putMessage(sessionObj, msg.getUid(), msg);
+							msgMap.put(MessageCacheManager.getMsgKey(msg.getUid(), MailFolderObject.prepareFullname(msg
+									.getFolderFullname(), msg.getSeparator())), msg);
 						}
 						/*
 						 * Write message
@@ -594,7 +613,6 @@ public class Mail extends PermissionServlet implements UploadListener {
 		response.setData(jsonWriter.getObject());
 		response.setTimestamp(null);
 		return response;
-		// Response.write(response, writer);
 	}
 
 	public void actionGetReply(final SessionObject sessionObj, final JSONWriter writer, final JSONObject jo,

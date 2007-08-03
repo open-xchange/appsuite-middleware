@@ -1,6 +1,7 @@
 * 2007-08-03 - thorben.betten@open-xchange.com
 
  - Fixed forwarding of messages with inline images
+ - Fastened message cache
 
 * 2007-08-03 - francisco.laguna@open-xchange.com
 

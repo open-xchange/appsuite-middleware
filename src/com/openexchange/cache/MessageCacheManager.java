@@ -66,6 +66,8 @@ import com.openexchange.groupware.container.MailFolderObject;
 import com.openexchange.groupware.container.mail.MessageCacheObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.sessiond.SessionObject;
+import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIteratorException;
 
 /**
  * MessageCacheManager - a tiny cache for instances of
@@ -103,16 +105,16 @@ public class MessageCacheManager {
 			ConfigurationInit.init();
 			Configuration.load();
 			msgCache = JCS.getInstance(MSG_CACHE_REGION_NAME);
-		} catch (CacheException e) {
+		} catch (final CacheException e) {
 			LOG.error(e.getMessage(), e);
 			throw new OXCachingException(OXCachingException.Code.FAILED_INIT, e, MSG_CACHE_REGION_NAME, e.getMessage());
-		} catch (FileNotFoundException e) {
+		} catch (final FileNotFoundException e) {
 			LOG.error(e.getMessage(), e);
 			throw new OXCachingException(OXCachingException.Code.FAILED_INIT, e, MSG_CACHE_REGION_NAME, e.getMessage());
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			LOG.error(e.getMessage(), e);
 			throw new OXCachingException(OXCachingException.Code.FAILED_INIT, e, MSG_CACHE_REGION_NAME, e.getMessage());
-		} catch (AbstractOXException e) {
+		} catch (final AbstractOXException e) {
 			LOG.error(e.getMessage(), e);
 			throw new OXCachingException(OXCachingException.Code.FAILED_INIT, e, MSG_CACHE_REGION_NAME, e.getMessage());
 		}
@@ -186,11 +188,130 @@ public class MessageCacheManager {
 		if (msgMap == null) {
 			return null;
 		}
-		MessageCacheObject[] retval = new MessageCacheObject[msgUIDs.length];
+		final MessageCacheObject[] retval = new MessageCacheObject[msgUIDs.length];
 		for (int i = 0; i < retval.length; i++) {
 			retval[i] = msgMap.get(getMsgKey(msgUIDs[i], folder));
 		}
 		return retval;
+	}
+
+	/**
+	 * Puts all instances of <code>MessageCacheObject</code> contained in
+	 * given <code>SearchIterator</code> reference into cache
+	 * 
+	 * @param session -
+	 *            the session containing user data
+	 * @param iter -
+	 *            the iterator
+	 * @throws OXException -
+	 *             if a cache error occurs
+	 * @throws SearchIteratorException -
+	 *             if iterator traversal fails
+	 */
+	public final void putIteratorMessages(final SessionObject session, final SearchIterator iter) throws OXException,
+			SearchIteratorException {
+		putIteratorMessages(session.getUserObject().getId(), iter, session.getContext());
+	}
+
+	/**
+	 * Puts all instances of <code>MessageCacheObject</code> contained in
+	 * given <code>SearchIterator</code> reference into cache
+	 * 
+	 * @param user -
+	 *            the user id
+	 * @param iter -
+	 *            the ierator
+	 * @param ctx -
+	 *            the context
+	 * @throws OXException -
+	 *             if a cache error occurs
+	 * @throws SearchIteratorException -
+	 *             if iterator traversal fails
+	 */
+	@SuppressWarnings(STR_UNCHECKED)
+	public final void putIteratorMessages(final int user, final SearchIterator iter, final Context ctx)
+			throws OXException, SearchIteratorException {
+		if (iter == null) {
+			return;
+		}
+		Map<String, MessageCacheObject> msgMap = (HashMap<String, MessageCacheObject>) msgCache.get(getUserKey(user,
+				ctx));
+		boolean insert = false;
+		if (msgMap == null) {
+			/*
+			 * Does not exist in cache, yet
+			 */
+			msgMap = new HashMap<String, MessageCacheObject>();
+			insert = true;
+		}
+		if (iter.hasSize()) {
+			final int size = iter.size();
+			for (int i = 0; i < size; i++) {
+				final MessageCacheObject msg = (MessageCacheObject) iter.next();
+				msgMap.put(getMsgKey(msg.getUid(), MailFolderObject.prepareFullname(msg.getFolderFullname(), msg
+						.getSeparator())), msg);
+			}
+		} else {
+			while (iter.hasNext()) {
+				final MessageCacheObject msg = (MessageCacheObject) iter.next();
+				msgMap.put(getMsgKey(msg.getUid(), MailFolderObject.prepareFullname(msg.getFolderFullname(), msg
+						.getSeparator())), msg);
+			}
+		}
+		if (insert) {
+			try {
+				msgCache.put(getUserKey(user, ctx), msgMap);
+			} catch (final CacheException e) {
+				throw new OXCachingException(OXCachingException.Code.FAILED_PUT, e, new Object[0]);
+			}
+		}
+	}
+
+	/**
+	 * Return s user's message map which is kept in cache
+	 * 
+	 * @param session -
+	 *            the session
+	 * @return user's message map
+	 * @throws OXCachingException -
+	 *             if a cache error occurs
+	 */
+	public final Map<String, MessageCacheObject> getUserMessageMap(final SessionObject session)
+			throws OXCachingException {
+		return getUserMessageMap(session.getUserObject().getId(), session.getContext());
+	}
+
+	/**
+	 * Return s user's message map which is kept in cache
+	 * 
+	 * @param user -
+	 *            the user ID
+	 * @param ctx -
+	 *            the context
+	 * @return user's message map
+	 * @throws OXCachingException -
+	 *             if a cache error occurs
+	 */
+	@SuppressWarnings(STR_UNCHECKED)
+	public final Map<String, MessageCacheObject> getUserMessageMap(final int user, final Context ctx)
+			throws OXCachingException {
+		Map<String, MessageCacheObject> msgMap = (HashMap<String, MessageCacheObject>) msgCache.get(getUserKey(user,
+				ctx));
+		if (msgMap == null) {
+			/*
+			 * Does not exist in cache, yet
+			 */
+			msgMap = new HashMap<String, MessageCacheObject>();
+			try {
+				msgCache.put(getUserKey(user, ctx), msgMap);
+			} catch (final CacheException e) {
+				throw new OXCachingException(OXCachingException.Code.FAILED_PUT, e, new Object[0]);
+			}
+		}
+		/*
+		 * Return reference
+		 */
+		return msgMap;
 	}
 
 	/**
@@ -225,7 +346,7 @@ public class MessageCacheManager {
 		if (insert) {
 			try {
 				msgCache.put(getUserKey(user, ctx), msgMap);
-			} catch (CacheException e) {
+			} catch (final CacheException e) {
 				throw new OXCachingException(OXCachingException.Code.FAILED_PUT, e, new Object[0]);
 			}
 		}
@@ -268,7 +389,7 @@ public class MessageCacheManager {
 	public final boolean containsUserMessages(final int user, final Context ctx) {
 		try {
 			return (msgCache.get(getUserKey(user, ctx)) != null);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			return false;
 		}
 	}
@@ -286,7 +407,7 @@ public class MessageCacheManager {
 	public void clearUserMessages(final int user, final Context ctx) throws OXException {
 		try {
 			msgCache.remove(getUserKey(user, ctx));
-		} catch (CacheException e) {
+		} catch (final CacheException e) {
 			throw new OXCachingException(OXCachingException.Code.FAILED_REMOVE, e, new Object[0]);
 		}
 	}
@@ -295,7 +416,7 @@ public class MessageCacheManager {
 		return new CacheKey(ctx, user);
 	}
 
-	private static final String getMsgKey(final long uid, final String folder) {
+	public static final String getMsgKey(final long uid, final String folder) {
 		return new StringBuilder().append(uid).append('@').append(folder).toString();
 	}
 
