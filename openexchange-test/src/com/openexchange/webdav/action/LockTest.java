@@ -183,5 +183,16 @@ public class LockTest extends ActionTestCase {
 		WebdavResource resource = factory.resolveResource(LOCK_HTML_URL);
 		assertTrue(resource.isLockNull());
 		
+		WebdavLock lock = resource.getLocks().get(0);
+		String lockToken = lock.getToken();
+		
+		String expect = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><prop xmlns=\"DAV:\"><lockdiscovery><activelock><lockscope><exclusive /></lockscope><locktype><write /></locktype><owner>me</owner><depth>0</depth><locktoken><href>"+lockToken+"</href></locktoken><timeout></timeout></activelock></lockdiscovery></prop>";
+		
+		XMLCompare compare = new XMLCompare();
+		compare.setCheckTextNames("owner","locktoken");
+		
+		System.out.println(res.getResponseBodyAsString());
+		assertTrue(compare.compare(expect, res.getResponseBodyAsString()));
+		
 	}
 }
