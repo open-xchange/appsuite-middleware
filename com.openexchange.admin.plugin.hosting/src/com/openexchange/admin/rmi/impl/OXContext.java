@@ -88,7 +88,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
     public void delete(final Context ctx, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, DatabaseUpdateException, InvalidDataException {
         try {
-            doNullCheck(ctx,ctx.getIdAsInt());
+            doNullCheck(ctx);
         } catch (final InvalidDataException e) {
             final InvalidDataException invalidDataException = new InvalidDataException("Context is null");
             log.error(invalidDataException.getMessage(), invalidDataException);
@@ -98,8 +98,8 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         final BasicAuthenticator basicAuthenticator = new BasicAuthenticator();
         basicAuthenticator.doAuthentication(auth);
         
-        final int context_id = ctx.getIdAsInt();
-        log.debug("" + context_id);
+        setIdOrGetIDFromContextname(ctx);
+        log.debug(ctx);
         try {
             if (!tool.existsContext(ctx)) {
                 throw new NoSuchContextException();
@@ -112,7 +112,6 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
             oxcox.delete(ctx);
             basicAuthenticator.removeFromAuthCache(ctx);
-            
         } catch (final StorageException e) {
             log.error(e.getMessage(), e);
             throw e;
@@ -534,5 +533,17 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
     
     private void reEnableContext(final Context ctx, final OXContextStorageInterface oxcox) throws StorageException {
         oxcox.enable(ctx);
+    }
+    
+    private void setIdOrGetIDFromContextname(final Context ctx) throws StorageException, InvalidDataException {
+        final Integer id = ctx.getIdAsInt();
+        if (null == id) {
+            final String ctxname = ctx.getName();
+            if (null != ctxname) {
+                ctx.setID(tool.getContextIDByContextname(ctxname));
+            } else {
+                throw new InvalidDataException("One resource object has no id or username");
+            }
+        }
     }
 }
