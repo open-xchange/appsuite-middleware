@@ -26,7 +26,6 @@ import com.openexchange.admin.rmi.exceptions.NoSuchFilestoreException;
 import com.openexchange.admin.rmi.exceptions.NoSuchReasonException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.interfaces.OXContextStorageInterface;
-import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
 import com.openexchange.admin.taskmanagement.TaskManager;
 import com.openexchange.admin.tools.DatabaseDataMover;
@@ -58,7 +57,6 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         final int context_id = ctx.getIdAsInt();
         log.debug("" + context_id);
         try {
-            final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
             if (!tool.existsContext(ctx)) {
                 throw new NoSuchContextException();
             }
@@ -103,7 +101,6 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         final int context_id = ctx.getIdAsInt();
         log.debug("" + context_id);
         try {
-            final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
             if (!tool.existsContext(ctx)) {
                 throw new NoSuchContextException();
             }
@@ -150,7 +147,6 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         log.debug("" + context_id + " - " + reason_id);
         try {
             // try {
-            final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
             if (!tool.existsContext(ctx)) {
                 throw new NoSuchContextException();
             }
@@ -224,7 +220,6 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         final int context_id = ctx.getIdAsInt();
         log.debug("" + context_id);
         try {
-            final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
             if (!tool.existsContext(ctx)) {
                 throw new NoSuchContextException();
             }
@@ -266,7 +261,6 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         final int context_id = ctx.getIdAsInt();
         log.debug("" + context_id);
         try {
-            final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
             if (!tool.existsContext(ctx)) {
                 throw new NoSuchContextException();
             }
@@ -384,7 +378,6 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             log.debug("" + context_id + " - " + db + " - " + reason_id);
         }
         try {
-            final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
             /*if (!tool.existsReason(reason_id)) {
                 // FIXME: Util in context???
                 throw new OXContextException(OXUtilException.NO_SUCH_REASON);
@@ -438,9 +431,6 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         log.debug("" + ctx.getIdAsInt() + " - " + dst_filestore);
         
         try {
-            
-            final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
-            
             if (!tool.existsContext(ctx)) {
                 throw new NoSuchContextException();
             } else if (!tool.existsStore(dst_filestore.getId())) {
