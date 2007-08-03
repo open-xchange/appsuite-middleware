@@ -68,6 +68,7 @@ import com.openexchange.imap.OXMailException;
 import com.openexchange.imap.OXMailException.MailCode;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.sessiond.SessionObject;
+import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 
 public final class MailRequest {
@@ -105,12 +106,43 @@ public final class MailRequest {
 
 	private boolean contCollecting;
 
+	/**
+	 * Constructor
+	 * 
+	 * @param session -
+	 *            the session reference keeping user-specific data
+	 * @param writer -
+	 *            the instance of <code>{@link OXJSONWriter}</code> to whom
+	 *            response data is written
+	 */
 	public MailRequest(final SessionObject session, final OXJSONWriter writer) {
 		super();
 		this.session = session;
 		this.writer = writer;
 	}
 
+	/**
+	 * Performs the action associated with given <code>action</code> parameter
+	 * 
+	 * @param action -
+	 *            the action to perform
+	 * @param jsonObject -
+	 *            the instance of <code>{@link JSONObject}</code> keeping
+	 *            request's data
+	 * @param mailInterface -
+	 *            the instance of <code>{@link MailInterface}</code> to access
+	 *            mail module
+	 * @throws SearchIteratorException -
+	 *             if a <code>{@link SearchIterator}</code> related exception
+	 *             occurs
+	 * @throws JSONException -
+	 *             if JSON response data could not be successfully written
+	 * @throws OXMailException -
+	 *             if a mail related exception occurs
+	 * @throws OXPermissionException -
+	 *             if an action is performed which violates certain user
+	 *             permission(s)
+	 */
 	public void action(final String action, final JSONObject jsonObject, final MailInterface mailInterface)
 			throws SearchIteratorException, JSONException, OXMailException, OXPermissionException {
 		if (!session.getUserConfiguration().hasWebMail()) {
@@ -198,7 +230,9 @@ public final class MailRequest {
 	}
 
 	/**
-	 * Executes gathered actions and writes their response to writer
+	 * Executes gathered actions and writes their response to the instance of
+	 * <code>{@link OXJSONWriter}</code> given through constructor
+	 * <code>{@link #MailRequest(SessionObject, OXJSONWriter)}</code>
 	 * 
 	 * @param mailInterface -
 	 *            the mail interface
@@ -304,8 +338,8 @@ public final class MailRequest {
 
 		public boolean collectable(final JSONObject jsonObject, final CollectableOperation op) throws JSONException {
 			if (CollectableOperation.MOVE.equals(op) || CollectableOperation.COPY.equals(op)) {
-				return collectable(jsonObject.getString(AJAXServlet.PARAMETER_FOLDERID), jsonObject.getJSONObject(
-						DATA).getString(FolderFields.FOLDER_ID), op);
+				return collectable(jsonObject.getString(AJAXServlet.PARAMETER_FOLDERID), jsonObject.getJSONObject(DATA)
+						.getString(FolderFields.FOLDER_ID), op);
 			} else if (CollectableOperation.STORE_FLAG.equals(op)) {
 				final JSONObject bodyObj = jsonObject.getJSONObject(DATA);
 				return (this.op.equals(op) && this.srcFld.equals(jsonObject.getString(AJAXServlet.PARAMETER_FOLDERID))

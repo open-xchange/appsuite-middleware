@@ -72,7 +72,7 @@ import com.openexchange.groupware.AbstractOXException.Category;
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class Response {
+public final class Response {
 
 	/**
 	 * Name of the JSON attribute containing the response data.
@@ -446,7 +446,7 @@ public class Response {
 	 * @throws JSONException -
 	 *             if writing fails
 	 */
-	public static void write(final AbstractOXException exception, final JSONWriter writer) throws JSONException {
+	public static void writeException(final AbstractOXException exception, final JSONWriter writer) throws JSONException {
 		writer.key(ERROR).value(exception.getOrigMessage());
 		if (exception.getMessageArgs() != null) {
 			final JSONArray array = new JSONArray();
