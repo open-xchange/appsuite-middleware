@@ -107,6 +107,8 @@ public class JSONMessageHandler implements MessageHandler {
 
 	private boolean isAlternative;
 
+	private String altId;
+
 	private boolean textFound;
 
 	private final boolean createVersionForDisplay;
@@ -613,7 +615,16 @@ public class JSONMessageHandler implements MessageHandler {
 		/*
 		 * Determine if message is of MIME type multipart/alternative
 		 */
-		isAlternative = (mp.getContentType().regionMatches(true, 0, MIME_MULTIPART_ALT, 0, 21) && bodyPartCount >= 2);
+		if (mp.getContentType().regionMatches(true, 0, MIME_MULTIPART_ALT, 0, 21) && bodyPartCount >= 2) {
+			isAlternative = true;
+			altId = id;
+		} else if (null != altId && !id.startsWith(altId)) {
+			/*
+			 * No more within multipart/alternative since current ID is not
+			 * nested below remembered ID
+			 */
+			isAlternative = false;
+		}
 		return true;
 	}
 
@@ -628,7 +639,7 @@ public class JSONMessageHandler implements MessageHandler {
 		try {
 			new MessageDumper(session).dumpMessage(nestedMsg, msgHandler, id);
 		} catch (final MessagingException e) {
-			throw handleMessagingException(e, session.getIMAPProperties(),session.getContext() );
+			throw handleMessagingException(e, session.getIMAPProperties(), session.getContext());
 		}
 		msgObj.addNestedMessage(msgHandler.getMessageObject());
 		return true;

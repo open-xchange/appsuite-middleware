@@ -60,6 +60,7 @@ import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -72,6 +73,7 @@ import javax.activation.FileDataSource;
 import javax.activation.MimetypesFileTypeMap;
 import javax.mail.BodyPart;
 import javax.mail.Flags;
+import javax.mail.Header;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
@@ -175,7 +177,7 @@ public class MessageFiller {
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(MessageFiller.class);
 
-	private static final Pattern PATTERN_EMBD_IMG = Pattern.compile("(<img *src=\"cid:)(.+?)(\" */?>)",
+	private static final Pattern PATTERN_EMBD_IMG = Pattern.compile("(<img.*src=\"cid:)([^\"]+)(\"[^/]*/?>)",
 			Pattern.CASE_INSENSITIVE);
 	
 	private final Html2TextConverter converter;
@@ -559,35 +561,36 @@ public class MessageFiller {
 			final List<String> cidList = getContentIDs(mailText);
 			final int size = cidList.size();
 			final Iterator<String> cidIter = cidList.iterator();
-			final StringBuilder cidBuilder = new StringBuilder();
 			NextImg: for (int a = 0; a < size; a++) {
 				final String cid = cidIter.next();
 				/*
 				 * Content-ID should match pattern: [filename]@[uid] (e.g.
 				 * image001.png@1856FA34AE23C.org)
 				 */
-				final JSONMessageAttachmentObject imgAttach = getAndRemoveImageAttachment(cid.substring(0, cid
-						.indexOf('@')), msgObj.getMsgAttachments());
-				if (imgAttach == null) {
+				final Part imgPart = getAndRemoveImageAttachment(cid, msgObj, session, originalMsg);
+				if (imgPart == null) {
 					continue NextImg;
 				}
-				final MimeBodyPart relatedImageBodyPart = new MimeBodyPart();
-				final FileDataSource ifds = new FileDataSource(imgAttach.getUniqueDiskFileName());
+				/*
+				 * Create new body part from part's data handler
+				 */
+				final BodyPart relatedImageBodyPart = new MimeBodyPart();
+				relatedImageBodyPart.setDataHandler(imgPart.getDataHandler());
+				for (final Enumeration e = imgPart.getAllHeaders(); e.hasMoreElements();) {
+					final Header h = (Header) e.nextElement();
+					relatedImageBodyPart.setHeader(h.getName(), h.getValue());
+				}
 				/*
 				 * Add image to "related" multipart
 				 */
-				relatedImageBodyPart.setFileName(ifds.getName());
-				relatedImageBodyPart.setText(ifds.getName());
-				relatedImageBodyPart.setDataHandler(new DataHandler(ifds));
-				relatedImageBodyPart.setHeader(MessageHeaders.HDR_CONTENT_ID, cidBuilder.append('<').append(cid).append('>')
-						.toString());
-				cidBuilder.setLength(0);
-				relatedImageBodyPart.setDisposition(Part.INLINE);
 				relatedMultipart.addBodyPart(relatedImageBodyPart);
-				final BodyPart altBodyPart = new MimeBodyPart();
-				altBodyPart.setContent(relatedMultipart);
-				alternativeMultipart.addBodyPart(altBodyPart);
 			}
+			/*
+			 * Add multipart/related as a body part to superior multipart
+			 */
+			final BodyPart altBodyPart = new MimeBodyPart();
+			altBodyPart.setContent(relatedMultipart);
+			alternativeMultipart.addBodyPart(altBodyPart);
 		} else {
 			/*
 			 * Add html part to superior multipart
@@ -977,17 +980,41 @@ public class MessageFiller {
 		return retval;
 	}
 
-	private static final JSONMessageAttachmentObject getAndRemoveImageAttachment(final String fileName,
-			final List<JSONMessageAttachmentObject> attachList) {
+	private static final Part getAndRemoveImageAttachment(final String cid, final JSONMessageObject msgObj,
+			final SessionObject session, final Message originalMsg) throws OXException, MessagingException {
+		final List<JSONMessageAttachmentObject> attachList = msgObj.getMsgAttachments();
 		final int size = attachList.size();
 		final Iterator<JSONMessageAttachmentObject> iter = attachList.iterator();
+		final MessageDumper dumper = new MessageDumper(session);
+		PartMessageHandler msgHandler = null;
 		for (int i = 0; i < size; i++) {
-			final JSONMessageAttachmentObject current = iter.next();
-			if (fileName.equalsIgnoreCase(current.getFileName())) {
-				iter.remove();
-				return current;
+			final JSONMessageAttachmentObject mao = iter.next();
+			if (mao.getUniqueDiskFileName() != null) {
+				LOG.error("Inline image file from disk not supported,yet");
+			} else if (msgObj.getMsgref() != null && mao.getFileName() != null && mao.getPositionInMail() != null) {
+				dumper.reset();
+				dumper.dumpMessage(originalMsg, msgHandler == null ? (msgHandler = new PartMessageHandler(session, mao
+						.getPositionInMail())) : msgHandler.reset(mao.getPositionInMail()));
+				final Part msgPart = msgHandler.getPart();
+				String[] contentId = null;
+				if (msgPart != null && (contentId = msgPart.getHeader(MessageHeaders.HDR_CONTENT_ID)) != null
+						&& equalsCID(cid, contentId[0])) {
+					iter.remove();
+					return msgPart;
+				}
 			}
 		}
 		return null;
+	}
+
+	private static final boolean equalsCID(final String contentId1Arg, final String contentId2Arg) {
+		if (null != contentId1Arg && null != contentId2Arg) {
+			final String contentId1 = contentId1Arg.charAt(0) == '<' ? contentId1Arg.substring(1, contentId1Arg
+					.length() - 1) : contentId1Arg;
+			final String contentId2 = contentId2Arg.charAt(0) == '<' ? contentId2Arg.substring(1, contentId2Arg
+					.length() - 1) : contentId2Arg;
+			return contentId1.equals(contentId2);
+		}
+		return false;
 	}
 }

@@ -2850,8 +2850,7 @@ public class MailInterfaceImpl implements MailInterface {
 			final List<JSONMessageObject> nestedMsgs) {
 		final int size = nestedMsgs.size();
 		for (int i = 0; i < size; i++) {
-			final JSONMessageObject nestedMsg = nestedMsgs.get(i);
-			appendAttachments(msgObj, nestedMsg.getMsgAttachments());
+			appendAttachments(msgObj, nestedMsgs.get(i).getMsgAttachments());
 		}
 	}
 
@@ -3234,7 +3233,6 @@ public class MailInterfaceImpl implements MailInterface {
 					return new StringBuilder(draftFolder.getFullName()).append(Mail.SEPERATOR).append(uidNext)
 							.toString();
 				}
-				final IMAPFolder inboxFolder = (IMAPFolder) imapCon.getIMAPStore().getFolder(STR_INBOX);
 				final IMAPFolder sentFolder = (IMAPFolder) imapCon.getIMAPStore().getFolder(
 						prepareMailFolderParam(getSentFolder()));
 				/*
@@ -3319,6 +3317,7 @@ public class MailInterfaceImpl implements MailInterface {
 				/*
 				 * Append message to folder "SENT"
 				 */
+				final IMAPFolder inboxFolder = (IMAPFolder) imapCon.getIMAPStore().getFolder(STR_INBOX);
 				checkAndCreateFolder(sentFolder, inboxFolder);
 				if (!sentFolder.isOpen()) {
 					sentFolder.open(Folder.READ_WRITE);

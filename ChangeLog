@@ -1,3 +1,7 @@
+* 2007-08-03 - thorben.betten@open-xchange.com
+
+ - Fixed forwarding of messages with inline images
+
 * 2007-08-03 - francisco.laguna@open-xchange.com
 
  - Fixed bug #8673. Added a new servletmapping to allow Vista Home Basic to connect

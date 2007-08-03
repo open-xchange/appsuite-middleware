@@ -51,7 +51,6 @@ package com.openexchange.groupware.container.mail.parser;
 
 import static com.openexchange.api2.MailInterfaceImpl.handleMessagingException;
 
-import java.io.IOException;
 import java.util.Date;
 import java.util.Map;
 
@@ -82,7 +81,7 @@ public class PartMessageHandler implements MessageHandler {
 
 	private final SessionObject session;
 
-	private final String id;
+	private String id;
 
 	private Part part;
 
@@ -94,6 +93,24 @@ public class PartMessageHandler implements MessageHandler {
 		this.session = session;
 		this.id = id;
 		part = null;
+	}
+
+	/**
+	 * Resets this handler while keeping <code>{@link SessionObject}</code>
+	 * reference
+	 * 
+	 * @param id -
+	 *            the new part id to search for
+	 * @throws OXException -
+	 *             id is <code>null</code> or empty
+	 */
+	public PartMessageHandler reset(final String id) throws OXException {
+		if (id == null || id.length() == 0) {
+			throw new OXMailException(MailCode.MISSING_PARAM, "id");
+		}
+		this.id = id;
+		part = null;
+		return this;
 	}
 
 	/*
