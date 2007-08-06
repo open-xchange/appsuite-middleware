@@ -49,7 +49,6 @@
 
 package com.openexchange.admin.rmi.dataobjects;
 
-import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.HashSet;
@@ -59,7 +58,7 @@ import java.util.HashSet;
  * 
  * @author cutmasta
  */
-public class Context extends EnforceableDataObject implements Serializable {
+public class Context extends EnforceableDataObject implements NameAndIdObject {
     /**
      * 
      */
@@ -104,7 +103,7 @@ public class Context extends EnforceableDataObject implements Serializable {
         this.name = name;
     }
 
-    public final Integer getIdAsInt() {
+    public final Integer getId() {
         return this.id;
     }
 
@@ -112,7 +111,7 @@ public class Context extends EnforceableDataObject implements Serializable {
         return String.valueOf(this.id);
     }
 
-    public final void setID(final Integer id) {
+    public final void setId(final Integer id) {
         this.id = id;
     }
     

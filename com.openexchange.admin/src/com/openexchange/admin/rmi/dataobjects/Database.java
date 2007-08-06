@@ -49,10 +49,9 @@
 
 package com.openexchange.admin.rmi.dataobjects;
 
-import java.io.Serializable;
 import java.lang.reflect.Field;
 
-public class Database extends EnforceableDataObject implements Serializable {
+public class Database extends EnforceableDataObject implements NameAndIdObject {
     /**
      * For serialization
      */
@@ -143,7 +142,7 @@ public class Database extends EnforceableDataObject implements Serializable {
         return this.id;
     }
 
-    public void setId(final int val) {
+    public void setId(final Integer val) {
         this.id = val;
     }
 
