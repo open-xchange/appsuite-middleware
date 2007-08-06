@@ -53,8 +53,6 @@ import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Arrays;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -67,8 +65,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.imap.UserSettingMail;
-import com.openexchange.imap.UserSettingMailStorage;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.tools.Collections.SmartIntArray;
 
@@ -140,10 +136,6 @@ public final class UserConfiguration implements Serializable, DeleteListener, Cl
 
 	private final transient Context ctx;
 
-	//private transient boolean userSettingMailLoaded;
-
-	//private transient UserSettingMail userSettingMail;
-
 	private transient AJAXUserDictionary userDictionary;
 
 	private int[] accessibleModules;
@@ -183,9 +175,10 @@ public final class UserConfiguration implements Serializable, DeleteListener, Cl
 				clone.accessibleModules = new int[accessibleModules.length];
 				System.arraycopy(accessibleModules, 0, clone.accessibleModules, 0, accessibleModules.length);
 			}
-			/*if (userSettingMail != null) {
-				clone.userSettingMail = (UserSettingMail) userSettingMail.clone();
-			}*/
+			/*
+			 * if (userSettingMail != null) { clone.userSettingMail =
+			 * (UserSettingMail) userSettingMail.clone(); }
+			 */
 			if (userDictionary != null) {
 				clone.userDictionary = (AJAXUserDictionary) userDictionary.clone();
 			}
@@ -646,46 +639,6 @@ public final class UserConfiguration implements Serializable, DeleteListener, Cl
 	public Context getContext() {
 		return ctx;
 	}
-
-	//private static final transient Lock LOCK = new ReentrantLock();
-
-	/*public UserSettingMail getUserSettingMail() {
-		if (!userSettingMailLoaded) {
-			LOCK.lock();
-			try {
-				if (userSettingMail == null) {
-					try {
-						userSettingMail = UserSettingMailStorage.getInstance().loadUserSettingMail(userId, ctx);
-					} catch (final OXException e) {
-						LOG.error(e.getMessage(), e);
-						userSettingMail = new UserSettingMail();
-					}
-					userSettingMailLoaded = true;
-				}
-			} finally {
-				LOCK.unlock();
-			}
-		}
-		return userSettingMail;
-	}*/
-
-	/*public void setUserSettingMail(final UserSettingMail imapUserSetting) {
-		setUserSettingMail(imapUserSetting, false);
-	}
-
-	public void setUserSettingMail(final UserSettingMail imapUserSetting, final boolean save) {
-		this.userSettingMail = imapUserSetting;
-		if (this.userSettingMail != null) {
-			userSettingMailLoaded = true;
-			if (save) {
-				try {
-					UserSettingMailStorage.getInstance().saveUserSettingMail(userSettingMail, userId, ctx);
-				} catch (final OXException e) {
-					LOG.error(e.getMessage(), e);
-				}
-			}
-		}
-	}*/
 
 	public AJAXUserDictionary getUserDictionary() throws OXException {
 		try {
