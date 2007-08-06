@@ -421,7 +421,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 		try {
 			final ContactSql cs = new ContactMySql(sessionobject);
 			
-			if (!searchobject.isAllFolders() && !searchobject.getEmailAutoComplete()){	
+			if (!(searchobject.isAllFolders() || searchobject.getEmailAutoComplete())){	
 				cs.setFolder(folderId);
 
 				final EffectivePermission oclPerm = new OXFolderAccess(readcon, ctx).getFolderPermission(folderId, userId, sessionobject.getUserConfiguration());
