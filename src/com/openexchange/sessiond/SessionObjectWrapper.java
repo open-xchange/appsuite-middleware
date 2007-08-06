@@ -61,7 +61,6 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.IMAPPropertiesFactory;
-import com.openexchange.imap.UserSettingMailStorage;
 
 /**
  * SessionObjectWrapper
@@ -85,7 +84,7 @@ public class SessionObjectWrapper {
 		final User userObj = UserStorage.getInstance(ctx).getUser(user_id);
 		so.setContext(ctx);
 		so.setUserObject(userObj);
-		so.setUserSettingMail(UserSettingMailStorage.getInstance().loadUserSettingMail(user_id, ctx));
+		// so.setUserSettingMail(UserSettingMailStorage.getInstance().loadUserSettingMail(user_id, ctx));
 		// so.setUserConfiguration(UserConfiguration.loadUserConfiguration(user_id,
 		// userObj.getGroups(), ctx));
 		try {

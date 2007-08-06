@@ -19,6 +19,9 @@
    & delete)
  - Added cache for user's mail settings (according to other existing storage
    classes)
+ - Refactored UserSettingMail: SessionObject no more holds a reference to
+   an instance of UserSettingMail rather than fetching a cached instance on
+   SessionObject.getUserSettingMail() invokations.
 
 * 2007-08-03 - thorben.betten@open-xchange.com
 

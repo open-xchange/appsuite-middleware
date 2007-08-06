@@ -92,9 +92,11 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 
 	private static final String CACHE_REGION_NAME = "UserSettingMail";
 
-	private final JCS userSettingMailCache;
+	private boolean useCache;
 
-	private final Lock cacheWriteLock;
+	private JCS cache;
+
+	private Lock cacheWriteLock;
 
 	/**
 	 * Private default constructor
@@ -102,25 +104,30 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 	 * @throws UserConfigurationException
 	 *             if cache initialization failed
 	 */
-	protected CachingUserSettingMailStorage() throws UserConfigurationException {
+	protected CachingUserSettingMailStorage() {
 		super();
-		cacheWriteLock = new ReentrantLock();
 		try {
 			ConfigurationInit.init();
 			Configuration.load();
-			userSettingMailCache = JCS.getInstance(CACHE_REGION_NAME);
+			cache = JCS.getInstance(CACHE_REGION_NAME);
+			cacheWriteLock = new ReentrantLock();
+			useCache = true;
 		} catch (final CacheException e) {
-			throw new UserConfigurationException(UserConfigurationCode.CACHE_INITIALIZATION_FAILED, e,
-					CACHE_REGION_NAME);
+			final UserConfigurationException ue = new UserConfigurationException(
+					UserConfigurationCode.CACHE_INITIALIZATION_FAILED, e, CACHE_REGION_NAME);
+			LOG.error(ue.getLocalizedMessage(), ue);
 		} catch (final FileNotFoundException e) {
-			throw new UserConfigurationException(UserConfigurationCode.CACHE_INITIALIZATION_FAILED, e,
-					CACHE_REGION_NAME);
+			final UserConfigurationException ue = new UserConfigurationException(
+					UserConfigurationCode.CACHE_INITIALIZATION_FAILED, e, CACHE_REGION_NAME);
+			LOG.error(ue.getLocalizedMessage(), ue);
 		} catch (final IOException e) {
-			throw new UserConfigurationException(UserConfigurationCode.CACHE_INITIALIZATION_FAILED, e,
-					CACHE_REGION_NAME);
+			final UserConfigurationException ue = new UserConfigurationException(
+					UserConfigurationCode.CACHE_INITIALIZATION_FAILED, e, CACHE_REGION_NAME);
+			LOG.error(ue.getLocalizedMessage(), ue);
 		} catch (final AbstractOXException e) {
-			throw new UserConfigurationException(UserConfigurationCode.CACHE_INITIALIZATION_FAILED, e,
-					CACHE_REGION_NAME);
+			final UserConfigurationException ue = new UserConfigurationException(
+					UserConfigurationCode.CACHE_INITIALIZATION_FAILED, e, CACHE_REGION_NAME);
+			LOG.error(ue.getLocalizedMessage(), ue);
 		}
 	}
 
@@ -184,14 +191,18 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 				closeResources(rs, stmt, closeCon ? writeCon : null, false, ctx);
 			}
 			usm.setModifiedDuringSession(false);
-			/*
-			 * Put into cache
-			 */
-			cacheWriteLock.lock();
-			try {
-				userSettingMailCache.put(new CacheKey(ctx, user), usm);
-			} finally {
-				cacheWriteLock.unlock();
+			if (useCache) {
+				/*
+				 * Put clone into cache
+				 */
+				cacheWriteLock.lock();
+				try {
+					cache.put(new CacheKey(ctx, user), usm.clone());
+				} catch (final CacheException e) {
+					LOG.error("UserSettingMail could not be put into cache", e);
+				} finally {
+					cacheWriteLock.unlock();
+				}
 			}
 		} catch (final SQLException e) {
 			LOG.error(e.getMessage(), e);
@@ -199,9 +210,6 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 		} catch (final DBPoolingException e) {
 			LOG.error(e.getMessage(), e);
 			throw new UserConfigurationException(UserConfigurationCode.DBPOOL_ERROR, e, new Object[0]);
-		} catch (final CacheException e) {
-			LOG.error(e.getMessage(), e);
-			throw new UserConfigurationException(UserConfigurationCode.CACHE_PUT_ERROR, e, e.getLocalizedMessage());
 		}
 	}
 
@@ -250,14 +258,16 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 				stmt.executeUpdate();
 				stmt.close();
 				stmt = null;
-				/*
-				 * Remove from cache
-				 */
-				cacheWriteLock.lock();
-				try {
-					userSettingMailCache.remove(new CacheKey(ctx, user));
-				} finally {
-					cacheWriteLock.unlock();
+				if (useCache) {
+					/*
+					 * Remove from cache
+					 */
+					cacheWriteLock.lock();
+					try {
+						cache.remove(new CacheKey(ctx, user));
+					} finally {
+						cacheWriteLock.unlock();
+					}
 				}
 			} finally {
 				closeResources(null, stmt, closeWriteCon ? writeCon : null, false, ctx);
@@ -293,9 +303,9 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 	public UserSettingMail loadUserSettingMail(final int user, final Context ctx, final Connection readConArg)
 			throws OXException {
 		try {
-			UserSettingMail usm = (UserSettingMail) userSettingMailCache.get(new CacheKey(ctx, user));
+			UserSettingMail usm = useCache ? (UserSettingMail) cache.get(new CacheKey(ctx, user)) : null;
 			if (null != usm) {
-				return usm;
+				return (UserSettingMail) usm.clone();
 			}
 			/*
 			 * Fetch from database
@@ -305,7 +315,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 				/*
 				 * Still not in cache?
 				 */
-				if (null == (usm = (UserSettingMail) userSettingMailCache.get(new CacheKey(ctx, user)))) {
+				if (null == (usm = useCache ? (UserSettingMail) cache.get(new CacheKey(ctx, user)) : null)) {
 					usm = new UserSettingMail();
 					Connection readCon = readConArg;
 					boolean closeCon = false;
@@ -341,10 +351,12 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 						usm.setConfirmedHam(rs.getString(14));
 						loadSignatures(usm, user, ctx, readCon);
 						usm.setModifiedDuringSession(false);
-						/*
-						 * Put into cache
-						 */
-						userSettingMailCache.put(new CacheKey(ctx, user), usm);
+						if (useCache) {
+							/*
+							 * Put clone into cache
+							 */
+							cache.put(new CacheKey(ctx, user), usm.clone());
+						}
 					} finally {
 						closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
 					}

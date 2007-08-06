@@ -54,7 +54,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.UserConfigurationException;
 import com.openexchange.groupware.contexts.Context;
 
 /**
@@ -64,9 +63,6 @@ import com.openexchange.groupware.contexts.Context;
  * 
  */
 public abstract class UserSettingMailStorage {
-
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(UserSettingMailStorage.class);
 
 	private static final Lock INIT_LOCK = new ReentrantLock();
 
@@ -92,8 +88,6 @@ public abstract class UserSettingMailStorage {
 					singleton = new CachingUserSettingMailStorage();
 					initialized = true;
 				}
-			} catch (final UserConfigurationException e) {
-				LOG.error(e.getLocalizedMessage(), e);
 			} finally {
 				INIT_LOCK.unlock();
 			}

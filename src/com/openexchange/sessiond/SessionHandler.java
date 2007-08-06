@@ -245,13 +245,6 @@ public class SessionHandler extends TimerTask {
 
         sessionobject.setRandomToken(randomId);
         sessionobject.setSecret(sessionIdGenerator.createSecretId(loginName, client_ip));
-        
-        try {
-			sessionobject.setUserSettingMail(UserSettingMailStorage.getInstance().loadUserSettingMail(u.getId(), context));
-		} catch (final OXException e) {
-			LOG.error(e.getLocalizedMessage(), e);
-			sessionobject.setUserSettingMail(null);
-		}
 
         // Load IMAP Info
         try {

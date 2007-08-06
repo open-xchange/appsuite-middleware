@@ -57,6 +57,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.mail.MessagingException;
 import javax.mail.Session;
 
+import com.openexchange.api2.OXException;
 import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.UserConfigurationException;
 import com.openexchange.groupware.UserConfigurationStorage;
@@ -66,6 +67,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.imap.IMAPProperties;
 import com.openexchange.imap.IMAPUtils;
 import com.openexchange.imap.UserSettingMail;
+import com.openexchange.imap.UserSettingMailStorage;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.Rights;
 
@@ -112,8 +114,6 @@ public class SessionObject {
 	private Map hm;
 
 	private User u;
-
-	private UserSettingMail userSettingMail;
 
 	private IMAPProperties imapProperties;
 
@@ -225,10 +225,6 @@ public class SessionObject {
 		this.u = u;
 	}
 
-	public void setUserSettingMail(final UserSettingMail userSettingMail) {
-		this.userSettingMail = userSettingMail;
-	}
-
 	public void setIMAPProperties(final IMAPProperties imapProperties) {
 		this.imapProperties = imapProperties;
 	}
@@ -306,7 +302,12 @@ public class SessionObject {
 	}
 	
 	public UserSettingMail getUserSettingMail() {
-		return userSettingMail;
+		try {
+			return UserSettingMailStorage.getInstance().loadUserSettingMail(u.getId(), context);
+		} catch (final OXException e) {
+			LOG.error(e.getLocalizedMessage(), e);
+			return null;
+		}
 	}
 
 	public IMAPProperties getIMAPProperties() {
