@@ -1,7 +1,6 @@
 * 2007-08-06 - manuel.kraft@open-xchange.com
 
  - Bugfix ID#8694: Users which are downgraded to "Basic" are still able to create public folders.
- - Bugfix ID#8697: Module configuration of logged in users is not updated
 
 * 2007-08-02 - choeger@open-xchange.com
 
