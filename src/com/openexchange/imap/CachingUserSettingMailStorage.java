@@ -100,9 +100,6 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 
 	/**
 	 * Private default constructor
-	 * 
-	 * @throws UserConfigurationException
-	 *             if cache initialization failed
 	 */
 	protected CachingUserSettingMailStorage() {
 		super();
