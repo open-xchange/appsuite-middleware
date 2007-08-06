@@ -58,7 +58,8 @@ public class ListFilestores extends FilestoreAbstraction {
             data.add(makeCSVData(filestore, false));
         }
         
-        doOutput(new String[] { "3r", "35l", "7r", "8r", "7r", "7r", "7r" },
+        //doOutput(new String[] { "3r", "35l", "7r", "8r", "7r", "7r", "7r" },
+        doOutput(new String[] { "r", "l", "r", "r", "r", "r", "r" },
                  new String[] { "id", "path", "size", "reserved", "used", "maxctx", "curctx" }, data);
     }
 

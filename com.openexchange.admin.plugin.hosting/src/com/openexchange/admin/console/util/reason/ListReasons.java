@@ -63,7 +63,8 @@ public class ListReasons extends ReasonAbstraction {
             data.add(makeCSVData(mr));
         }
         
-        doOutput(new String[] { "3r", "72l" }, new String[] { "Id", "Text" }, data);
+        //doOutput(new String[] { "3r", "72l" }, new String[] { "Id", "Text" }, data);
+        doOutput(new String[] { "r", "l" }, new String[] { "Id", "Text" }, data);
     }
 
     private void precsvinfos(final MaintenanceReason[] mrs) {
