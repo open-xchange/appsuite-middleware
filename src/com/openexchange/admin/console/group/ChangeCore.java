@@ -89,7 +89,7 @@ public abstract class ChangeCore extends GroupAbstraction {
             parseAndSetGroupId(parser, grp);
             parseAndSetGroupName(parser, grp);
             
-            successtext = groupnameOrIdSet();
+            successtext = nameOrIdSet(this.groupid, this.groupName, "group");
             
             final Context ctx = contextparsing(parser);
 

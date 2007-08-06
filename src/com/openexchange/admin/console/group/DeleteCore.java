@@ -80,7 +80,7 @@ public abstract class DeleteCore extends GroupAbstraction {
             parseAndSetGroupId(parser, grp);
             parseAndSetGroupName(parser, grp);
 
-            successtext = groupnameOrIdSet();
+            successtext = nameOrIdSet(this.groupid, this.groupName, "context");
             
             final Context ctx = contextparsing(parser);
 
