@@ -52,24 +52,24 @@ package com.openexchange.admin.rmi.dataobjects;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 
-public class Server implements Serializable {
+public class Server implements Serializable, NameAndIdObject {
     /**
      * For serialization
      */
     private static final long serialVersionUID = -1752789033012449187L;
 
-    private int id;
+    private Integer id;
 
     private String name;
 
     public Server() {
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int val) {
+    public void setId(final Integer val) {
         this.id = val;
     }
 

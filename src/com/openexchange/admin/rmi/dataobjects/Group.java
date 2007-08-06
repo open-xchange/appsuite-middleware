@@ -56,7 +56,7 @@ import java.util.Arrays;
 import com.openexchange.admin.rmi.extensions.OXCommonExtension;
 import com.openexchange.admin.rmi.extensions.OXGroupExtensionInterface;
 
-public class Group extends ExtendableDataObject {
+public class Group extends ExtendableDataObject implements NameAndIdObject {
     /**
      * For serialization
      */
