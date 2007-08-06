@@ -211,7 +211,7 @@ public abstract class ListCore extends UserAbstraction {
         
         res_data.add(String.valueOf(user.getId())); // id
     
-        final String name = user.getUsername();
+        final String name = user.getName();
         if (name != null && name.trim().length() > 0) {
             res_data.add(name); // name
         } else {

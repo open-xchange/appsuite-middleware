@@ -71,7 +71,6 @@ import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
-import com.openexchange.admin.rmi.exceptions.MissingOptionException;
 
 public abstract class UserAbstraction extends ObjectNamingAbstraction {
     
@@ -468,7 +467,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected void parseAndSetUsername(final AdminParser parser, final User usr) {
         this.username = (String) parser.getOptionValue(this.userNameOption);
         if (null != this.username) {
-            usr.setUsername(this.username);
+            usr.setName(this.username);
         }
     }
 
@@ -811,21 +810,6 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             userid = Integer.parseInt(optionValue);
             usr.setId(userid);
         }
-    }
-
-    protected String usernameOrIdSet() throws MissingOptionException {
-        String successtext;
-        // Throw the order of this checks we archive that the id is preferred over the name
-        if (null == this.userid) {
-            if (null == this.username) {
-                throw new MissingOptionException("Either username or userid must be given");
-            } else {
-                successtext = this.username;
-            }
-        } else {
-            successtext = String.valueOf(this.userid);
-        }
-        return successtext;
     }
 }
 
