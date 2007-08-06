@@ -963,9 +963,8 @@ public class OXFolderSQL {
 
 	/**
 	 * Handles entity' permissions located in given permission table. If
-	 * permission is associated with a private folder or with the default
-	 * infostore folder, it is going to be deleted. Otherwise the permission is
-	 * reassigned to mailadmin.
+	 * permission is associated with a private folder, it is going to be
+	 * deleted. Otherwise the permission is reassigned to mailadmin.
 	 */
 	public static final void handleEntityPermissions(final int entity, final int mailAdmin, final long lastModified,
 			final String folderTable, final String permTable, final Connection readConArg,
