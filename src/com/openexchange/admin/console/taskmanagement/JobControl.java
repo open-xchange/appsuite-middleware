@@ -112,7 +112,7 @@ public class JobControl extends BasicCommandlineOptions {
             final Context ctx = new Context(DEFAULT_CONTEXT);
 
             if (parser.getOptionValue(this.contextOption) != null) {
-                ctx.setID(Integer.parseInt((String) parser.getOptionValue(this.contextOption)));
+                ctx.setId(Integer.parseInt((String) parser.getOptionValue(this.contextOption)));
             }
 
             final Credentials auth = new Credentials((String) parser.getOptionValue(this.adminUserOption), (String) parser.getOptionValue(this.adminPassOption));
