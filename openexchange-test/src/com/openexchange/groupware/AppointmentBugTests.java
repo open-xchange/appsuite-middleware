@@ -2377,4 +2377,81 @@ public class AppointmentBugTests extends TestCase {
         
     }
     
+    /*
+    Steps to Reproduce:
+    1. Login to Outlook (OXtender started green icon in taskbar)
+    2. Go to private calendar and set view to 'Week'
+    3. Select a day (e.g Friday) and create a new series appointment like:
+    Weekly on Friday and Saturday series ands after 10 appointments NOT whole day
+    only from 8:00 - 9:00
+    4. Set reminder to 'none' (DO NOT SET ANY REMINDER) 
+    5. Save
+    6. DLMB on any appointment of the series (e.g on Saturday (the second
+    appointment)
+    7. Select WHOLE SERIES to edit
+    8. Set reminder to 1hour for the WHOLE Series and save
+    9. DLMB on any appointment of the series 
+    10. Select ONLY this appointment (not the whole series)
+    11. Verify that 1hour is set and set the reminder to 30minutes do not change
+    anything else only the reminder from 1hour to 30minutes
+    12. DLMB again on any appointment of the series (NOT the exception)
+    13. Verify reminder
+    14. Select (DLMB) the exception where the 30minutes reminder is set and verify
+    reminder  
+    */
+    public void testBug8510() throws Throwable {
+        Context context = new ContextImpl(contextid);
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestSearch");        
+        int fid = AppointmentBugTests.getPrivateFolder(userid);
+        CalendarSql csql = new CalendarSql(so);
+        
+        CalendarDataObject cdao = new CalendarDataObject();
+        cdao.setContext(context);
+        cdao.setTimezone(TIMEZONE);
+        cdao.setTitle("testBug8510");
+        CalendarTest.fillDatesInDao(cdao);
+        cdao.setParentFolderID(fid);
+        cdao.setRecurrenceType(CalendarObject.DAILY);
+        cdao.setInterval(1);
+        int rec_reminder = 60;
+        cdao.setAlarm(rec_reminder);
+        cdao.setIgnoreConflicts(true);
+        
+        csql.insertAppointmentObject(cdao);
+        int object_id = cdao.getObjectID();
+        assertTrue("Got object_id", object_id > 0);
+        
+        CalendarDataObject update = new CalendarDataObject();
+        update.setContext(context);
+        update.setObjectID(object_id);
+        update.setTimezone(TIMEZONE);
+        int exc_reminder = 15;
+        update.setAlarm(exc_reminder);
+        update.setTitle("testBug8510 - Exception 2");
+        update.setIgnoreConflicts(true);
+        update.setRecurrencePosition(2);
+        
+        csql.updateAppointmentObject(update, fid, new Date(SUPER_END));
+        int object_id2 = update.getObjectID();
+        assertTrue("Got new object_id", object_id2 > 0 && object_id2 != object_id);
+        
+        SearchIterator si = csql.getModifiedAppointmentsInFolder(fid, CalendarTest.cols, cdao.getLastModified());
+        
+        int check_rec_reminder = -1;
+        int check_exc_reminder = -1;
+        
+        while (si.hasNext()) {
+            CalendarDataObject tcdao = (CalendarDataObject)si.next();
+            if (tcdao.getObjectID() == object_id) {
+                check_rec_reminder = tcdao.getAlarm();
+            } else if (tcdao.getObjectID() == object_id2){
+                check_exc_reminder = tcdao.getAlarm();
+            }
+        }
+        si.close();
+        assertTrue("Got two reminder", check_exc_reminder > 0 && check_rec_reminder > 0);
+        assertEquals("Recurring reminder", rec_reminder, check_rec_reminder);
+        assertEquals("Excption reminder", exc_reminder, check_exc_reminder);
+    } 
+    
 }
