@@ -53,6 +53,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import com.openexchange.configuration.ConfigurationException;
+import com.openexchange.groupware.configuration.GenericImplConfig;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.ContextException;
 import com.openexchange.groupware.contexts.ContextStorage;

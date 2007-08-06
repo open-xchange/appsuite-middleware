@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.groupware.integration;
+package com.openexchange.groupware.configuration;
 
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;

@@ -139,7 +139,18 @@ public abstract class LoginInfo {
      * @throws LoginException if no seperator is found.
      */
     protected String[] split(final String loginInfo) throws LoginException {
-        final int pos = loginInfo.lastIndexOf('@');
+        return split(loginInfo, '@');
+    }
+
+    /**
+     * Splits user name and context.
+     * @param loginInfo combined information seperated by an @ sign.
+     * @param character for spliting user name and context.
+     * @return a string array with context and user name (in this order).
+     * @throws LoginException if no seperator is found.
+     */
+    protected String[] split(final String loginInfo, final char separator) {
+        final int pos = loginInfo.lastIndexOf(separator);
         final String[] splitted = new String[2];
         if (-1 == pos) {
             splitted[1] = loginInfo;
