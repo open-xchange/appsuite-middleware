@@ -55,7 +55,7 @@ import java.util.ArrayList;
 import com.openexchange.admin.rmi.extensions.OXCommonExtension;
 import com.openexchange.admin.rmi.extensions.OXResourceExtensionInterface;
 
-public class Resource extends ExtendableDataObject {
+public class Resource extends ExtendableDataObject implements NameAndIdObject {
     /**
      * For serialization
      */
