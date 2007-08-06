@@ -129,7 +129,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         disable(ctx, reason, auth);
     }
 
-    public void disable(final Context ctx, final MaintenanceReason reason, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, NoSuchReasonException, OXContextException {
+    private void disable(final Context ctx, final MaintenanceReason reason, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, NoSuchReasonException, OXContextException {
         try {
             doNullCheck(ctx, reason,reason.getId());        
         } catch (final InvalidDataException e1) {            
@@ -174,7 +174,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         disableAll(reason, auth);
     }
 
-    public void disableAll(final MaintenanceReason reason, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchReasonException {
+    private void disableAll(final MaintenanceReason reason, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchReasonException {
         try{
             doNullCheck(reason,reason.getId());
         } catch (final InvalidDataException e1) {            
@@ -352,12 +352,15 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         }
     }
 
+    /**
+     * @see com.openexchange.admin.rmi.OXContextInterface#moveContextDatabase(com.openexchange.admin.rmi.dataobjects.Context, com.openexchange.admin.rmi.dataobjects.Database, com.openexchange.admin.rmi.dataobjects.Credentials)
+     */
     public int moveContextDatabase(final Context ctx, final Database db, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException, OXContextException {
         MaintenanceReason reason = new MaintenanceReason(42);
         return moveContextDatabase(ctx, db, reason, auth);
     }
 
-    public int moveContextDatabase(final Context ctx, final Database db, final MaintenanceReason reason, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException, OXContextException {
+    private int moveContextDatabase(final Context ctx, final Database db, final MaintenanceReason reason, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException, OXContextException {
         
         try{
             doNullCheck(ctx,ctx.getIdAsInt(),db,db.getId(),reason,reason.getId());
@@ -411,7 +414,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         return moveContextFilestore(ctx, dst_filestore, reason, auth);
     }
 
-    public int moveContextFilestore(final Context ctx, final Filestore dst_filestore, final MaintenanceReason reason, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, NoSuchFilestoreException, NoSuchReasonException, OXContextException {
+    private int moveContextFilestore(final Context ctx, final Filestore dst_filestore, final MaintenanceReason reason, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, NoSuchFilestoreException, NoSuchReasonException, OXContextException {
         
         try {
             doNullCheck(ctx, ctx.getIdAsInt(),dst_filestore,dst_filestore.getId(), reason,reason.getId());
