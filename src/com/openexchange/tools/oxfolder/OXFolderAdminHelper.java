@@ -64,6 +64,8 @@ import java.util.List;
 import java.util.Set;
 
 import com.openexchange.api2.OXException;
+import com.openexchange.cache.FolderCacheManager;
+import com.openexchange.cache.FolderCacheNotEnabledException;
 import com.openexchange.cache.FolderCacheProperties;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.SystemConfig;
@@ -500,10 +502,23 @@ public final class OXFolderAdminHelper {
 			if (!list.isEmpty()) {
 				stmt = writeCon.prepareStatement(SQL_UPDATE_FOLDER_TIMESTAMP.replaceFirst("#FT#", STR_OXFOLDERTREE));
 				do {
+					final int fuid = list.remove(0).intValue();
 					stmt.setLong(1, lastModified);
 					stmt.setInt(2, cid);
-					stmt.setInt(3, list.remove(0).intValue());
+					stmt.setInt(3, fuid);
 					stmt.addBatch();
+					if (FolderCacheManager.isInitialized()) {
+						/*
+						 * Remove from cache
+						 */
+						try {
+							FolderCacheManager.getInstance().removeFolderObject(fuid, new ContextImpl(cid));
+						} catch (final FolderCacheNotEnabledException e) {
+							LOG.error("Folder could not be removed from cache", e);
+						} catch (final OXException e) {
+							LOG.error("Folder could not be removed from cache", e);
+						}
+					}
 				} while (!list.isEmpty());
 				stmt.executeBatch();
 			}
