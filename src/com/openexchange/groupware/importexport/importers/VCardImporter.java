@@ -133,7 +133,13 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 		while (iterator.hasNext()) {
 			final String folder = iterator.next().toString();
 			
-			int folderId = Integer.parseInt(folder);
+			int folderId = 0;
+			try {
+				folderId = Integer.parseInt(folder);
+			} catch (NumberFormatException exc) {
+				throw importExportExceptionFactory.create(0, folder);
+			}
+
 			FolderObject fo;
 			try {
 				fo = FolderObject.loadFolderObjectFromDB(folderId, sessObj.getContext());

@@ -130,7 +130,13 @@ public class ICalImporter extends AbstractImporter implements Importer {
 		while (iterator.hasNext()) {
 			final String folder = iterator.next().toString();
 			
-			int folderId = Integer.parseInt(folder);
+			int folderId = 0;
+			try {
+				folderId = Integer.parseInt(folder);
+			} catch (NumberFormatException exc) {
+				throw EXCEPTIONS.create(0, folder);
+			}
+
 			FolderObject fo;
 			try {
 				fo = FolderObject.loadFolderObjectFromDB(folderId, sessObj.getContext());
@@ -157,9 +163,9 @@ public class ICalImporter extends AbstractImporter implements Importer {
 			try {
 				perm = fo.getEffectiveUserPermission(sessObj.getUserObject().getId(), sessObj.getUserConfiguration());
 			} catch (DBPoolingException e) {
-				throw EXCEPTIONS.create(1, folder);
+				throw EXCEPTIONS.create(0, folder);
 			} catch (SQLException e) {
-				throw EXCEPTIONS.create(1, folder);
+				throw EXCEPTIONS.create(0, folder);
 			}
 			
 			if (perm.canCreateObjects()) {
