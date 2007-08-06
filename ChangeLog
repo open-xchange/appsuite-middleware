@@ -22,6 +22,7 @@
  - Refactored UserSettingMail: SessionObject no more holds a reference to
    an instance of UserSettingMail rather than fetching a cached instance on
    SessionObject.getUserSettingMail() invokations.
+ - Added error codes to DeletionFailedException (extends AbstractOXException)
 
 * 2007-08-03 - thorben.betten@open-xchange.com
 

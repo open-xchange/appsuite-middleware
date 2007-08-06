@@ -636,7 +636,7 @@ public final class UserSettingMail implements DeleteListener, Cloneable, Seriali
 			try {
 				getInstance().deleteUserSettingMail(delEvent.getId(), delEvent.getContext(), writeCon);
 			} catch (final OXException e) {
-				throw new DeleteFailedException(e.getMessage(), e);
+				throw new DeleteFailedException(e);
 			}
 		}
 	}

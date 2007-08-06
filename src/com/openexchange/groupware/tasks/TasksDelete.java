@@ -50,7 +50,6 @@
 package com.openexchange.groupware.tasks;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.Date;
 import java.util.Set;
 
@@ -61,7 +60,6 @@ import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.tasks.TaskException.Code;
-import com.openexchange.server.DBPoolingException;
 import com.openexchange.sessiond.SessionObject;
 
 /**
@@ -130,9 +128,8 @@ public class TasksDelete implements DeleteListener {
             assignToAdmin(event, readCon, writeCon);
             // Change createdFrom and modifiedBy attributes of left over tasks.
             changeCFMB(event, readCon, writeCon);
-        } catch (TaskException e) {
-            throw new DeleteFailedException("Problem while deleting from "
-                + "tasks.", e);
+        } catch (final TaskException e) {
+            throw new DeleteFailedException(e);
         }
     }
 
@@ -211,10 +208,6 @@ public class TasksDelete implements DeleteListener {
         final SessionObject session;
         try {
             session = event.getSession();
-        } catch (SQLException e) {
-            throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
-        } catch (DBPoolingException e) {
-            throw new TaskException(Code.NO_CONNECTION, e);
         } catch (LdapException e) {
             throw new TaskException(e);
         } catch (OXException e) {
@@ -283,9 +276,8 @@ public class TasksDelete implements DeleteListener {
                         type);
                 }
             }
-        } catch (TaskException e) {
-            throw new DeleteFailedException("Problem while deleting from "
-                + "tasks.", e);
+        } catch (final TaskException e) {
+            throw new DeleteFailedException(e);
         }
     }
 

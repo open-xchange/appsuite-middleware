@@ -205,7 +205,7 @@ public final class DeleteRegistry {
 	 *             if no connection could be fetched from pool
 	 */
 	public void fireDeleteEvent(final DeleteEvent deleteEvent, final Connection readCon, final Connection writeCon)
-			throws DeleteFailedException, LdapException, SQLException, DBPoolingException {
+			throws DeleteFailedException {
 		registryLock.lock();
 		try {
 			final int size = listeners.size();

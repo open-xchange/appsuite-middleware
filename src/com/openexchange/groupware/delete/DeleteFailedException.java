@@ -47,34 +47,75 @@
  *
  */
 
-
-
 package com.openexchange.groupware.delete;
+
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.Component;
 
 /**
  * DeleteFailedException
- * TODO Error codes
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- *
+ * 
  */
-public class DeleteFailedException extends Exception {
+public class DeleteFailedException extends AbstractOXException {
 
 	private static final long serialVersionUID = -5601390102811112914L;
 
-	public DeleteFailedException() {
-		super();
+	public static enum Code {
+
+		/**
+		 * Unknown delete event type: %d
+		 */
+		UNKNOWN_TYPE("Unknown delete event type: %d", Category.CODE_ERROR, 1),
+		/**
+		 * A SQL error occured: %s
+		 */
+		SQL_ERROR("A SQL error occured: %s", Category.CODE_ERROR, 2);
+
+		private final String message;
+
+		private final Category category;
+
+		private final int detailNumber;
+
+		private Code(final String message, final Category category, final int detailNumber) {
+			this.message = message;
+			this.category = category;
+			this.detailNumber = detailNumber;
+		}
+
+		public Category getCategory() {
+			return category;
+		}
+
+		public int getDetailNumber() {
+			return detailNumber;
+		}
+
+		public String getMessage() {
+			return message;
+		}
 	}
 
-	public DeleteFailedException(String message) {
-		super(message);
-	}
-
-	public DeleteFailedException(String message, Throwable cause) {
-		super(message, cause);
-	}
-
-	public DeleteFailedException(Throwable cause) {
+	public DeleteFailedException(final AbstractOXException cause) {
 		super(cause);
+	}
+
+	private static final transient Object[] EMPTY_ARGS = new Object[0];
+
+	public DeleteFailedException(final DeleteFailedException.Code code) {
+		this(code, null, EMPTY_ARGS);
+	}
+
+	public DeleteFailedException(final DeleteFailedException.Code code, final Object... messageArgs) {
+		this(code, null, messageArgs);
+	}
+
+	public DeleteFailedException(final DeleteFailedException.Code code, final Throwable cause,
+			final Object... messageArgs) {
+		super(Component.DELETE_EVENT, code.getCategory(), code.getDetailNumber(), code.getMessage(), cause);
+		setMessageArgs(messageArgs);
 	}
 
 }

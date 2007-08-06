@@ -368,7 +368,9 @@ public final class AJAXUserDictionary implements DeleteListener, Cloneable {
 				 * Delete user dictionary
 				 */
 				deleteUserDictionary(userId, ctx, writeConArg);
-			} catch (final Exception e) {
+			} catch (final SQLException e) {
+				throw new DeleteFailedException(DeleteFailedException.Code.SQL_ERROR, e, e.getMessage());
+			} catch (final DBPoolingException e) {
 				throw new DeleteFailedException(e);
 			}
 		}

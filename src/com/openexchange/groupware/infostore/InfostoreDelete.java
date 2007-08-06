@@ -80,10 +80,6 @@ public class InfostoreDelete implements DeleteListener {
 			throw new DeleteFailedException(e);
 		} catch (final LdapException e) {
 			throw new DeleteFailedException(e);
-		} catch (final DBPoolingException e) {
-			throw new DeleteFailedException(e);
-		} catch (final SQLException e) {
-			throw new DeleteFailedException(e);
 		} finally {
 			provider.reset();
 		}

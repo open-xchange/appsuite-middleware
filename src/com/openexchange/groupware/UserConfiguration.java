@@ -706,7 +706,10 @@ public final class UserConfiguration implements Serializable, DeleteListener, Cl
 				 */
 				RdbUserConfigurationStorage.deleteUserConfiguration(delEvent.getId(), writeConArg, delEvent
 						.getContext());
-			} catch (final Exception e) {
+			} catch (final SQLException e) {
+				LOG.error(e.getMessage(), e);
+				throw new DeleteFailedException(DeleteFailedException.Code.SQL_ERROR, e, e.getLocalizedMessage());
+			} catch (DBPoolingException e) {
 				LOG.error(e.getMessage(), e);
 				throw new DeleteFailedException(e);
 			}

@@ -2433,7 +2433,7 @@ public class Contacts implements DeleteListener {
 		}
 	}
 	
-	public void deletePerformed(final DeleteEvent sqlDelEvent, final Connection readCon, final Connection writeCon) throws DeleteFailedException,LdapException, SQLException, DBPoolingException {
+	public void deletePerformed(final DeleteEvent sqlDelEvent, final Connection readCon, final Connection writeCon) throws DeleteFailedException {
 	
 		try{
 			if (sqlDelEvent.getType() == DeleteEvent.TYPE_USER){
@@ -2442,9 +2442,7 @@ public class Contacts implements DeleteListener {
 		}catch (final OXException ox){
 			throw new DeleteFailedException(ox);
 		} catch (final LdapException e) {
-			throw e;
-		} catch (final SQLException e) {
-			throw e;
+			throw new DeleteFailedException(e);
 		}
 	}
 	

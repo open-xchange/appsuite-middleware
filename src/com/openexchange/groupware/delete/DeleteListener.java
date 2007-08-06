@@ -83,6 +83,6 @@ public interface DeleteListener extends EventListener {
 	 *             if a connection pool related error occured
 	 */
 	public void deletePerformed(DeleteEvent deleteEvent, Connection readCon, Connection writeCon)
-			throws DeleteFailedException, LdapException, SQLException, DBPoolingException;
+			throws DeleteFailedException;
 
 }

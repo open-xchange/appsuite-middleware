@@ -53,6 +53,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.openexchange.groupware.delete.DeleteEvent;
+
 public enum Component {
 
 	/**
@@ -246,7 +248,11 @@ public enum Component {
     /**
      * PERMISSION related error
      */
-    PERMISSION("PERMISSION");
+    PERMISSION("PERMISSION"),
+    /**
+     * Any errors related to handling a <code>{@link DeleteEvent}</code>
+     */
+    DELETE_EVENT("DEL");
 
     /**
      * The abbrevation for components.

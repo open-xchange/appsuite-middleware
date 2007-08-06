@@ -49,6 +49,14 @@
 
 package com.openexchange.groupware.calendar;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXException;
@@ -61,15 +69,6 @@ import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.sessiond.SessionObject;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.jcs.access.exception.CacheException;
 
 /**
  *  CalendarAdministration
@@ -84,17 +83,23 @@ public class CalendarAdministration implements DeleteListener {
         
     }
     
-    public void deletePerformed(DeleteEvent deleteEvent, Connection readcon, Connection writecon) throws DeleteFailedException, LdapException, SQLException {
-        if (deleteEvent.getType() == DeleteEvent.TYPE_USER) {
-            deleteUser(deleteEvent, readcon, writecon);
-        } else if (deleteEvent.getType() == DeleteEvent.TYPE_GROUP) {
-            deleteGroup(deleteEvent, readcon, writecon);
-        } else if (deleteEvent.getType() == DeleteEvent.TYPE_RESOURCE) {
-            deleteResource(deleteEvent, readcon, writecon);
-        } else if (deleteEvent.getType() == DeleteEvent.TYPE_RESOURCE_GROUP) {
-            deleteResourceGroup(deleteEvent, readcon, writecon);
-        } else {
-            throw new DeleteFailedException("FATAL: Unknown delete event type deteced: "+deleteEvent.getType());
+    public void deletePerformed(DeleteEvent deleteEvent, Connection readcon, Connection writecon) throws DeleteFailedException {
+        try {
+	    	if (deleteEvent.getType() == DeleteEvent.TYPE_USER) {
+	            deleteUser(deleteEvent, readcon, writecon);
+	        } else if (deleteEvent.getType() == DeleteEvent.TYPE_GROUP) {
+	            deleteGroup(deleteEvent, readcon, writecon);
+	        } else if (deleteEvent.getType() == DeleteEvent.TYPE_RESOURCE) {
+	            deleteResource(deleteEvent, readcon, writecon);
+	        } else if (deleteEvent.getType() == DeleteEvent.TYPE_RESOURCE_GROUP) {
+	            deleteResourceGroup(deleteEvent, readcon, writecon);
+	        } else {
+	        	throw new DeleteFailedException(DeleteFailedException.Code.UNKNOWN_TYPE, Integer.valueOf(deleteEvent.getType()));
+	        }
+        } catch (final SQLException e) {
+        	throw new DeleteFailedException(DeleteFailedException.Code.SQL_ERROR, e, e.getLocalizedMessage());
+        } catch (final LdapException e) {
+        	throw new DeleteFailedException(e);
         }
     }
     
@@ -146,8 +151,6 @@ public class CalendarAdministration implements DeleteListener {
                 try {
                     eventHandling(object_id, deleteEvent.getContext(), deleteEvent.getSession(), CalendarOperation.UPDATE, readcon);
                 } catch (OXException ex) {
-                    throw new DeleteFailedException(ex);
-                } catch (DBPoolingException ex) {
                     throw new DeleteFailedException(ex);
                 }
                 rs.deleteRow();
@@ -249,8 +252,6 @@ public class CalendarAdministration implements DeleteListener {
                 try {
                     eventHandling(object_id, deleteEvent.getContext(), deleteEvent.getSession(), CalendarOperation.UPDATE, readcon);
                 } catch (OXException ex) {
-                    throw new DeleteFailedException(ex);
-                } catch (DBPoolingException ex) {
                     throw new DeleteFailedException(ex);
                 }
             }

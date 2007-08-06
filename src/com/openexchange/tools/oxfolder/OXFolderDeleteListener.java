@@ -57,7 +57,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.server.DBPool;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
@@ -110,7 +109,7 @@ public class OXFolderDeleteListener implements DeleteListener {
 	}
 
 	public void deletePerformed(final DeleteEvent delEvent, final Connection readConArg, final Connection writeConArg)
-			throws DeleteFailedException, LdapException, SQLException, DBPoolingException {
+			throws DeleteFailedException {
 		Connection readCon = readConArg;
 		Connection writeCon = writeConArg;
 		final long lastModified = System.currentTimeMillis();
@@ -234,7 +233,7 @@ public class OXFolderDeleteListener implements DeleteListener {
 					LOG.warn(e1.getMessage(), e1);
 				}
 				LOG.error(e.getMessage(), e);
-				throw new DeleteFailedException(e);
+				throw new DeleteFailedException(DeleteFailedException.Code.SQL_ERROR, e, e.getLocalizedMessage());
 			} catch (DBPoolingException e) {
 				try {
 					if (performTransaction && writeCon != null) {
@@ -322,7 +321,7 @@ public class OXFolderDeleteListener implements DeleteListener {
 					LOG.warn(e1.getMessage(), e1);
 				}
 				LOG.error(e.getMessage(), e);
-				throw new DeleteFailedException(e);
+				throw new DeleteFailedException(DeleteFailedException.Code.SQL_ERROR, e, e.getLocalizedMessage());
 			} catch (DBPoolingException e) {
 				try {
 					if (performTransaction && writeCon != null) {
