@@ -68,7 +68,7 @@ import com.openexchange.admin.rmi.extensions.OXUserExtensionInterface;
  * @author cutmasta
  * @author d7
  */
-public class User extends ExtendableDataObject {
+public class User extends ExtendableDataObject implements NameAndIdObject {
     /**
      * For serialization
      */
@@ -80,9 +80,9 @@ public class User extends ExtendableDataObject {
 
     private boolean idset = false;
 
-    private String username;
+    private String name;
 
-    private boolean usernameset = false;
+    private boolean nameset = false;
 
     private String password;
 
@@ -1016,8 +1016,8 @@ public class User extends ExtendableDataObject {
         return userfield20set;
     }
 
-    public boolean isUsernameset() {
-        return usernameset;
+    public boolean isNameset() {
+        return nameset;
     }
 
     /**
@@ -1032,18 +1032,18 @@ public class User extends ExtendableDataObject {
         this.id = userid;
     }
 
-    public String getUsername() {
-        return username;
+    public String getName() {
+        return name;
     }
 
     /**
      * Set symbolic user identifier
      */
-    public void setUsername(final String username) {
+    public void setName(final String username) {
         if (null == username) {
-            this.usernameset = true;
+            this.nameset = true;
         }
-        this.username = username;
+        this.name = username;
     }
 
     public String getPassword() {
@@ -2396,7 +2396,7 @@ public class User extends ExtendableDataObject {
     private void init() {
         initExtendable();
         this.id = null;
-        this.username = null;
+        this.name = null;
         this.password = null;
         this.passwordMech = null;
         this.primaryEmail = null;
@@ -2709,7 +2709,7 @@ public class User extends ExtendableDataObject {
 
     @Override
     protected final String[] getMandatoryMembersCreate() {
-        return new String[]{ "username", "display_name", "password", "given_name", "sur_name", "primaryEmail" };
+        return new String[]{ "name", "display_name", "password", "given_name", "sur_name", "primaryEmail" };
     }
     
     @Override
