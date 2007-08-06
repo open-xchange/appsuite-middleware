@@ -57,7 +57,8 @@ public class ListDatabases extends DatabaseAbstraction {
             data.add(makeStandardData(database, false));
         }
         
-        doOutput(new String[] { "3r", "10l", "20l", "7l", "7r", "7r", "7r", "7r", "6l", "4r", "7r" },
+        doOutput(new String[] { "r", "l", "l", "l", "r", "r", "r", "r", "l", "r", "r" },
+//        doOutput(new String[] { "3r", "10l", "20l", "7l", "7r", "7r", "7r", "7r", "6l", "4r", "7r" },
                  new String[] { "id", "name", "hostname", "master", "mid", "weight", "maxctx", "curctx", "hlimit", "max", "inital" }, data);
     }
 
