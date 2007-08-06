@@ -1619,8 +1619,19 @@ class CalendarMySQL implements CalendarSqlImp {
             clone = CalendarRecurringCollection.cloneObjectForRecurringException(cdao, edao);
             try {
                 cdao.setRecurrenceCalculator(edao.getRecurrenceCalculator());
+                if (cdao.containsAlarm()) {
+                    if (cdao.containsUserParticipants() && cdao.getUsers() != null) {
+                        CalendarCommonCollection.checkAndModifyAlarm(cdao, cdao.getUsers(), so.getUserObject().getId(), edao.getUsers());
+                    } else {
+                        CalendarCommonCollection.checkAndModifyAlarm(cdao, edao.getUsers(), so.getUserObject().getId(), edao.getUsers());
+                    }
+                    cdao.removeAlarm();
+                }                
                 insertAppointment(clone, writecon, so);
                 CalendarCommonCollection.removeFieldsFromObject(cdao);
+                // no update here 
+                cdao.setParticipants(edao.getParticipants());
+                cdao.setUsers(edao.getUsers());
                 cdao.setRecurrence(edao.getRecurrence());
                 cdao.setLastModified(clone.getLastModified());
             } catch( final SQLException sqle) {

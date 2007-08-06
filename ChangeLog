@@ -2,6 +2,10 @@
 
  - Documented calendar.properties options and parameters.   
 
+ - Fixed bug #8510. Creating an recurring exception and setting a reminder
+   for the exception exchanged the reminder from the recurring appointment
+   and the exception. This has been fixed.
+
 * 2007-08-06 - thorben.betten@open-xchange.com
 
  - Fixed JSON error when deleting appointment through multiple servlet
