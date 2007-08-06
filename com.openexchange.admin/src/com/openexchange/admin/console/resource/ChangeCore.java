@@ -90,7 +90,7 @@ public abstract class ChangeCore extends ResourceAbstraction {
             parseAndSetResourceId(parser, res);
             parseAndSetResourceName(parser, res);
             
-            successtext = resourcenameOrIdSet();
+            successtext = nameOrIdSet(this.resourceid, this.resourcename, "resource");
 
             final Context ctx = contextparsing(parser);
 
