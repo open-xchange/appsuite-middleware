@@ -59,7 +59,6 @@ import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.rmi.OXGroupInterface;
 import com.openexchange.admin.rmi.dataobjects.Group;
-import com.openexchange.admin.rmi.exceptions.MissingOptionException;
 
 public abstract class GroupAbstraction extends ObjectNamingAbstraction {
 
@@ -150,20 +149,5 @@ public abstract class GroupAbstraction extends ObjectNamingAbstraction {
     protected final void parseAndSetGroupAndDisplayName(final AdminParser parser, final Group grp) {
         parseAndSetGroupName(parser, grp);
         parseAndSetDisplayName(parser, grp);
-    }
-    
-    protected String groupnameOrIdSet() throws MissingOptionException {
-        String successtext;
-        // Throw the order of this checks we archive that the id is preferred over the name
-        if (null == this.groupid) {
-            if (null == this.groupName) {
-                throw new MissingOptionException("Either groupname or groupid must be given");
-            } else {
-                successtext = this.groupName;
-            }
-        } else {
-            successtext = String.valueOf(this.groupid);
-        }
-        return successtext;
     }
 }
