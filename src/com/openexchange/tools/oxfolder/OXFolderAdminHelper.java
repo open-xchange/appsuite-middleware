@@ -470,7 +470,7 @@ public final class OXFolderAdminHelper {
 
 	private static final String SQL_UPDATE_FOLDER_TIMESTAMP = "UPDATE #FT# AS ot SET ot.changing_date = ? WHERE ot.cid = ? AND ot.fuid = ?";
 	
-	private static final String SQL_SELECT_FOLDER_IN_PERMISSIONS = "SELECT ot.fuid FROM #FT# AS ot JOIN #PT# as op ON ot.fuid = op.fuid AND ot.cid = ? AND op.cid = ? WHERE op.permission_id = ?";
+	private static final String SQL_SELECT_FOLDER_IN_PERMISSIONS = "SELECT ot.fuid FROM #FT# AS ot JOIN #PT# as op ON ot.fuid = op.fuid AND ot.cid = ? AND op.cid = ? WHERE op.permission_id = ? GROUP BY ot.fuid";
 
 	/**
 	 * Propagates that a group has been modified throughout affected folders by
