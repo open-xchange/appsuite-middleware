@@ -63,8 +63,8 @@ public class ContextHostingAbstraction extends ContextAbstraction {
         createMessageForStdout(id, ctxid, "enabled");
     }
 
-    protected final void displayMovedMessage(final Integer id, final Integer ctxid, final String text) {
-        createMessageForStdout(String.valueOf(id), ctxid, text);
+    protected final void displayMovedMessage(final String id, final Integer ctxid, final String text) {
+        createMessageForStdout(id, ctxid, text);
     }
 
     public void parseAndSetRemoveLoginMapping(AdminParser parser) {
