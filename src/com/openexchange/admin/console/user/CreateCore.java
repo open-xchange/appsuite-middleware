@@ -95,7 +95,7 @@ public abstract class CreateCore extends UserAbstraction {
             parser.ownparse(args);
 
             final Context ctx = contextparsing(parser);
-            ctxid = ctx.getIdAsInt();
+            ctxid = ctx.getId();
             
             final Credentials auth = credentialsparsing(parser);
 

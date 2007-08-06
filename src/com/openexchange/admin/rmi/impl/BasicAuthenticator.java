@@ -129,7 +129,7 @@ public class BasicAuthenticator extends OXCommonImpl {
             if (!OXToolStorageInterface.getInstance().existsContext(ctx)) {
                 final InvalidCredentialsException invalidCredentialsException = new InvalidCredentialsException(
                         "Authentication failed");
-                log.error("Requested context " + ctx.getIdAsInt()
+                log.error("Requested context " + ctx.getId()
                         + " does not exist!", invalidCredentialsException);
                 throw invalidCredentialsException;
             }
@@ -161,7 +161,7 @@ public class BasicAuthenticator extends OXCommonImpl {
         if (!OXToolStorageInterface.getInstance().existsContext(ctx)) {
             final InvalidCredentialsException invalidCredentialsException = new InvalidCredentialsException(
                     "Authentication failed for user " + authdata.getLogin());
-            log.error("Requested context " + ctx.getIdAsInt()
+            log.error("Requested context " + ctx.getId()
                     + " does not exist!", invalidCredentialsException);
             throw invalidCredentialsException;
         }

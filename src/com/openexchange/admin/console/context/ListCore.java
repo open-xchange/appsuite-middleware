@@ -132,7 +132,7 @@ public abstract class ListCore extends ContextAbstraction {
 
     public ArrayList<String> makeCSVData(final Context ctx) throws StorageException {
         final ArrayList<String> srv_data = new ArrayList<String>();
-        srv_data.add(String.valueOf(ctx.getIdAsInt()));
+        srv_data.add(String.valueOf(ctx.getId()));
 
         final Integer filestoreId = ctx.getFilestoreId();
         if (filestoreId != null) {
