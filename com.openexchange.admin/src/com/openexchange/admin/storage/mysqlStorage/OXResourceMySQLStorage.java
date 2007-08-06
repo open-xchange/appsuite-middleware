@@ -321,14 +321,6 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             log.error("Context Error", e);
             dorollback(con);
             throw new StorageException(e);
-        } catch (final LdapException e) {
-            log.error("LDAP Error", e);
-            dorollback(con);
-            throw new StorageException(e);
-        } catch (final DBPoolingException e) {
-            log.error("DBPooling Error", e);
-            dorollback(con);
-            throw new StorageException(e);
         } catch (final DeleteFailedException e) {
             log.error("Delete Error", e);
             dorollback(con);
@@ -382,14 +374,6 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             throw new StorageException(e);
         } catch (final ContextException e) {
             log.error("Context Error", e);
-            dorollback(con);
-            throw new StorageException(e);
-        } catch (final LdapException e) {
-            log.error("LDAP Error", e);
-            dorollback(con);
-            throw new StorageException(e);
-        } catch (final DBPoolingException e) {
-            log.error("DBPooling Error", e);
             dorollback(con);
             throw new StorageException(e);
         } catch (final DeleteFailedException e) {

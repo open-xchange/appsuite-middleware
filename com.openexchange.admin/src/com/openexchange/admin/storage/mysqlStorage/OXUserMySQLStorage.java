@@ -1626,12 +1626,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.close();
 
             }
-        } catch (final DBPoolingException dbex) {
-            log.error("DBPooling Error", dbex);
-            throw new StorageException(dbex);
-        } catch (final LdapException ldex) {
-            log.error("LDAP Error", ldex);
-            throw new StorageException(ldex);
         } catch (final DeleteFailedException dex) {
             log.error("Delete Error", dex);
             throw new StorageException(dex);
@@ -1738,12 +1732,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.close();
                 
             }
-        } catch (final DBPoolingException dbex) {
-            log.error("DBPooling Error", dbex);
-            throw new StorageException(dbex);
-        } catch (final LdapException ldex) {
-            log.error("LDAP Error", ldex);
-            throw new StorageException(ldex);
         } catch (final DeleteFailedException dex) {
             log.error("Delete Error", dex);
             throw new StorageException(dex);

@@ -480,22 +480,6 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
                 log.error("Error rollback ox db write connection ", ecp);
             }
             throw new StorageException(e);
-        } catch (final LdapException e) {
-            log.error("LDAP Error", e);
-            try {
-                con.rollback();
-            } catch (final SQLException ecp) {
-                log.error("Error rollback ox db write connection ", ecp);
-            }
-            throw new StorageException(e);
-        } catch (final DBPoolingException e) {
-            log.error("DBPooling Error", e);
-            try {
-                con.rollback();
-            } catch (final SQLException ecp) {
-                log.error("Error rollback ox db write connection ", ecp);
-            }
-            throw new StorageException(e);
         } catch (final DeleteFailedException e) {
             log.error("Delete Error", e);
             try {
