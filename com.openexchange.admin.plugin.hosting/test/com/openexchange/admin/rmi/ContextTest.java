@@ -50,9 +50,9 @@ public class ContextTest extends AbstractTest {
         
        Context srv_loaded =  xctx.getData(ctx, cred);
        
-       assertTrue("Expected same context ids", ctx.getIdAsInt().intValue()==srv_loaded.getIdAsInt().intValue());
+       assertTrue("Expected same context ids", ctx.getId().intValue()==srv_loaded.getId().intValue());
               
-       String add_mapping = srv_loaded.getIdAsInt().intValue()+"_"+System.currentTimeMillis();
+       String add_mapping = srv_loaded.getId().intValue()+"_"+System.currentTimeMillis();
        srv_loaded.addLoginMapping(add_mapping);
        
        String changed_context_name = srv_loaded.getName()+"_"+System.currentTimeMillis();
@@ -64,7 +64,7 @@ public class ContextTest extends AbstractTest {
        Context edited_ctx = xctx.getData(ctx, cred);
        
        // ids must be correct again and the mapping should now exist
-       assertTrue("Expected same context ids", edited_ctx.getIdAsInt().intValue()==srv_loaded.getIdAsInt().intValue());
+       assertTrue("Expected same context ids", edited_ctx.getId().intValue()==srv_loaded.getId().intValue());
        
        // new mapping must exists
        assertTrue("Expected changed login mapping in loaded context", edited_ctx.getLoginMappings().contains(add_mapping));
@@ -82,14 +82,14 @@ public class ContextTest extends AbstractTest {
 
         OXContextInterface xctx = (OXContextInterface) Naming.lookup(hosturl + OXContextInterface.RMI_NAME);
 
-        final Integer idAsInt = ctx.getIdAsInt();
-        ctx.setID(null);
+        final Integer idAsInt = ctx.getId();
+        ctx.setId(null);
         final Context srv_loaded = xctx.getData(ctx, cred);
 
         // Reset for compare
-        ctx.setID(idAsInt);
+        ctx.setId(idAsInt);
         // FIXME: Add equals for context here. Same at nearly all other occurrences
-        assertTrue("Expected same context ids", idAsInt.intValue() == srv_loaded.getIdAsInt().intValue());
+        assertTrue("Expected same context ids", idAsInt.intValue() == srv_loaded.getId().intValue());
     }
 
     @Test
@@ -148,7 +148,7 @@ public class ContextTest extends AbstractTest {
             mr.setId(mrs[0].getId());
         }
         disableContext(ctx, hosturl, cred);
-        Context[] ctxs = searchContext(String.valueOf(ctx.getIdAsInt()), hosturl, cred);
+        Context[] ctxs = searchContext(String.valueOf(ctx.getId()), hosturl, cred);
         boolean ctx_disabled = false;
 
         for (final Context elem : ctxs) {            
@@ -183,7 +183,7 @@ public class ContextTest extends AbstractTest {
         Context[] ctxs = searchContext(ctx.getIdAsString(), hosturl, cred);
         boolean ctx_disabled = false;
         for (final Context elem : ctxs) {
-            if (elem.getIdAsInt().intValue() == ctx.getIdAsInt().intValue() && !elem.isEnabled()) {
+            if (elem.getId().intValue() == ctx.getId().intValue() && !elem.isEnabled()) {
                 ctx_disabled = true;
             }
         }
@@ -191,10 +191,10 @@ public class ContextTest extends AbstractTest {
 
         // now enable context again
         enableContext(ctx, hosturl, cred);
-        ctxs = searchContext(String.valueOf(ctx.getIdAsInt()), hosturl, cred);
+        ctxs = searchContext(String.valueOf(ctx.getId()), hosturl, cred);
         boolean ctx_ensabled = false;
         for (final Context elem : ctxs) {
-            if ((elem.getIdAsInt().intValue() == ctx.getIdAsInt().intValue()) && elem.isEnabled()) {
+            if ((elem.getId().intValue() == ctx.getId().intValue()) && elem.isEnabled()) {
                 ctx_ensabled = true;
             }
         }
@@ -214,7 +214,7 @@ public class ContextTest extends AbstractTest {
         int ctxid = createNewContextID(cred);
         final String hosturl = getRMIHostUrl();
         final Context ctx = getTestContextObject(ctxid, 50);
-        ctxid = addSystemContext(ctx, hosturl, cred).getIdAsInt().intValue();
+        ctxid = addSystemContext(ctx, hosturl, cred).getId().intValue();
         deleteContext(ctx, hosturl, cred);
     }
 
@@ -229,7 +229,7 @@ public class ContextTest extends AbstractTest {
         Context[] ctxs = searchContext(String.valueOf(ctxid), hosturl, cred);
         boolean foundctx = false;
         for (final Context elem : ctxs) {
-            if (elem.getIdAsInt().intValue() == ctxid) {
+            if (elem.getId().intValue() == ctxid) {
                 foundctx = true;
             }
         }
@@ -293,7 +293,7 @@ public class ContextTest extends AbstractTest {
     }
 
     private int addContext(Context ctx, String host, Credentials cred) throws Exception {
-        return addSystemContext(ctx,host,cred).getIdAsInt().intValue();
+        return addSystemContext(ctx,host,cred).getId().intValue();
     }
      
 
@@ -327,7 +327,7 @@ public class ContextTest extends AbstractTest {
         final Filestore filestore = new Filestore();
         filestore.setSize(quota_max_in_mb);
         ctx.setFilestoreId(filestore.getId());
-        ctx.setName("Name-"+ctx.getIdAsInt());
+        ctx.setName("Name-"+ctx.getId());
         ctx.setMaxQuota(quota_max_in_mb);
         return ctx;
     }

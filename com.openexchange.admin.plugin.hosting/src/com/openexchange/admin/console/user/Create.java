@@ -38,7 +38,7 @@ public class Create extends CreateCore {
         setModuleAccessOptionsinUserChange(parser, access);
         
         final Integer id = oxusr.create(ctx, usr, access, auth).getId();
-        displayCreatedMessage(String.valueOf(id), ctx.getIdAsInt());
+        displayCreatedMessage(String.valueOf(id), ctx.getId());
     }
 
     @Override
