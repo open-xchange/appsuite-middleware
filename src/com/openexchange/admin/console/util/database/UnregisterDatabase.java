@@ -29,7 +29,7 @@ public class UnregisterDatabase extends DatabaseAbstraction {
             parseAndSetDatabaseID(parser, db);
             parseAndSetDatabasename(parser, db);
             
-            successtext = databasenameOrIdSet();
+            successtext = nameOrIdSet(this.dbid, this.dbname, "database");
             
             final Credentials auth = credentialsparsing(parser);
             

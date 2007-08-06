@@ -24,7 +24,7 @@ public class Disable extends ContextHostingAbstraction {
 
             parseAndSetContextName(parser, ctx);
             
-            successtext = contextnameOrIdSet();
+            successtext = nameOrIdSet(String.valueOf(this.ctxid), this.contextname, "context");
             
             final Credentials auth = credentialsparsing(parser);
 

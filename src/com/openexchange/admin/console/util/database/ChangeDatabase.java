@@ -30,7 +30,7 @@ public class ChangeDatabase extends DatabaseAbstraction {
             parseAndSetDatabaseID(parser, db);
             parseAndSetDatabasename(parser, db);
             
-            successtext = databasenameOrIdSet();
+            successtext = nameOrIdSet(this.dbid, this.dbname, "database");
             
             final Credentials auth = new Credentials((String) parser.getOptionValue(this.adminUserOption), (String) parser.getOptionValue(this.adminPassOption));
 
