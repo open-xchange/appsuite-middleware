@@ -30,6 +30,8 @@ import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
 import com.openexchange.admin.taskmanagement.TaskManager;
 import com.openexchange.admin.tools.DatabaseDataMover;
 import com.openexchange.admin.tools.FilestoreDataMover;
+import com.openexchange.groupware.contexts.ContextException;
+import com.openexchange.groupware.contexts.ContextStorage;
 
 public class OXContext extends OXContextCommonImpl implements OXContextInterface {
 
@@ -78,7 +80,13 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         } catch (final NoSuchContextException e) {
             log.error(e.getMessage(), e);
             throw e;
-        }        
+        }   
+        
+        try {
+            ContextStorage.getInstance().invalidateContext(ctx.getIdAsInt());
+        } catch (ContextException e) {
+            log.error("Error invalidating context "+ctx.getIdAsInt()+" in ox context storage",e);
+        }
     
     }
 
@@ -122,6 +130,14 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             log.error(e.getMessage(), e);
             throw e;
         }
+        
+        
+        try {
+            ContextStorage.getInstance().invalidateContext(ctx.getIdAsInt());
+        } catch (ContextException e) {
+            log.error("Error invalidating context "+ctx.getIdAsInt()+" in ox context storage",e);
+        }
+        
     }
 
     public void disable(final Context ctx, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, NoSuchReasonException, OXContextException {
