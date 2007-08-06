@@ -51,6 +51,7 @@ package com.openexchange.imap;
 
 import static com.openexchange.imap.UserSettingMailStorage.getInstance;
 
+import java.io.Serializable;
 import java.sql.Connection;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -66,9 +67,14 @@ import com.openexchange.groupware.delete.DeleteListener;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class UserSettingMail implements DeleteListener, Cloneable {
+public final class UserSettingMail implements DeleteListener, Cloneable, Serializable {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+	/**
+	 * serialVersionUID
+	 */
+	private static final long serialVersionUID = -5787223065275414178L;
+
+	private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(UserSettingMail.class);
 
 	/*

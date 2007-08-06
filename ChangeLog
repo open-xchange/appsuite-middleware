@@ -17,6 +17,8 @@
    SessionObject
  - UserSettingMailStorage class for typical storage operatinos (save, load
    & delete)
+ - Added cache for user's mail settings (according to other existing storage
+   classes)
 
 * 2007-08-03 - thorben.betten@open-xchange.com
 

@@ -75,7 +75,7 @@ import com.openexchange.server.DBPoolingException;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public class AJAXUserDictionary implements DeleteListener, Cloneable {
+public final class AJAXUserDictionary implements DeleteListener, Cloneable {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(AJAXUserDictionary.class);
