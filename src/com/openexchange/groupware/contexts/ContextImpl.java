@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.groupware.contexts;
 
 import java.io.Serializable;
@@ -68,6 +66,11 @@ public class ContextImpl implements ContextExtended, Serializable {
      * Unique identifier of the context.
      */
     private final int contextId;
+
+    /**
+     * The login informations of a context.
+     */
+    private String[] loginInfo;
 
     /**
      * Unique identifier of the contexts mailadmin.
@@ -105,21 +108,6 @@ public class ContextImpl implements ContextExtended, Serializable {
      */
     public ContextImpl(final int contextId) {
         this.contextId = contextId;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Object getValue(final Attribute attribute) {
-        Object retval = null;
-        switch (attribute) {
-        case RDB_IDENTIFIER:
-            retval = Integer.valueOf(contextId);
-            break;
-        default:
-            break;
-        }
-        return retval;
     }
 
     /**
@@ -238,5 +226,19 @@ public class ContextImpl implements ContextExtended, Serializable {
      */
     public String[] getFileStorageAuth() {
         return filestorageAuth.clone();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String[] getLoginInfo() {
+        return loginInfo.clone();
+    }
+
+    /**
+     * @param loginInfo the loginInfo to set
+     */
+    protected void setLoginInfo(final String[] loginInfo) {
+        this.loginInfo = loginInfo.clone();
     }
 }

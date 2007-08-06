@@ -51,6 +51,9 @@ package com.openexchange.groupware.contexts;
 
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.groupware.update.Updater;
 import com.openexchange.groupware.update.exception.UpdateException;
 
@@ -60,6 +63,11 @@ import com.openexchange.groupware.update.exception.UpdateException;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class ContextStorage {
+
+    /**
+     * Logger.
+     */
+    private static final Log LOG = LogFactory.getLog(ContextStorage.class);
 
     /**
      * Singleton implementation.
@@ -130,8 +138,12 @@ public abstract class ContextStorage {
      * @param contextId unique identifier of the context to invalidate
      * @throws ContextException if invalidating the context fails
      */
-    public abstract void invalidateContext(int contextId)
-        throws ContextException;
+    public void invalidateContext(final int contextId) throws ContextException {
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("invalidateContext not implemented in " + this.getClass()
+                .getCanonicalName());
+        }
+    }
 
     /**
      * Gives a list of all context ids which are stored in the config database.

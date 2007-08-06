@@ -1,3 +1,7 @@
+* 2007-08-06 - marcus.klein@open-xchange.com
+
+ - Implemented generic config jump.
+
 * 2007-08-06 - martin.kauss@open-xchange.com
 
  - Documented calendar.properties options and parameters.   

@@ -130,4 +130,15 @@ public abstract class SetupLink {
         }
     }
 
+    protected int getContextId(final Object... values) {
+        return (Integer) values[0];
+    }
+
+    protected String getUserLogin(final Object... values) {
+        return (String) values[1];
+    }
+
+    protected String getPassword(final Object... values) {
+        return (String) values[2];
+    }
 }

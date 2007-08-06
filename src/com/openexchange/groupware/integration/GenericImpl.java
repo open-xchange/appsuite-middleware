@@ -47,69 +47,62 @@
  *
  */
 
-package com.openexchange.groupware.contexts;
+package com.openexchange.groupware.integration;
 
-import com.openexchange.cache.dynamic.OXNoRefresh;
+import java.net.MalformedURLException;
+import java.net.URL;
+
+import com.openexchange.configuration.ConfigurationException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.ContextException;
+import com.openexchange.groupware.contexts.ContextStorage;
 
 /**
- * The context stores all attributes that are necessary for components dealing
- * with context specific data. This are especially which database stores the
- * data of the context, the unique numerical identifier used in the relational
- * database to assign persistent stored data to their contexts and is the base
- * distinguished name used in the directory service to seperate contexts.
- * Objects implementing this interface must implement
- * {@link java.lang.Object#equals(java.lang.Object)} and
- * {@link java.lang.Object#hashCode()} because this interface is used as key for
- * maps.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public interface Context {
+public class GenericImpl extends SetupLink {
 
     /**
-     * Returns the unique identfier of the context.
-     * @return unique identifier of the context.
+     * Default constructor.
      */
-    @OXNoRefresh
-    int getContextId();
+    public GenericImpl() {
+        super();
+    }
 
     /**
-     * @return the login informations of a context.
+     * {@inheritDoc}
      */
-    String[] getLoginInfo();
-    
-    /**
-     * Returns the unique identfier of context's mailadmin.
-     * @return unique identifier of the context's mailadmin
-     */
-    int getMailadmin();
+    @Override
+    public URL getLink(final Object... values) throws SetupLinkException {
+        final String userLogin = getUserLogin(values);
+        final String password = getPassword(values);
+        String url = GenericImplConfig.getProperty(GenericImplConfig.Property
+            .URL);
+        url = url.replace("%u", userLogin);
+        url = url.replace("%p", password);
+        try {
+            final Context ctx = ContextStorage.getInstance().getContext(
+                getContextId());
+            url = url.replace("%c", ctx.getLoginInfo()[0]);
+            return new URL(url);
+        } catch (MalformedURLException e) {
+            throw new SetupLinkException(SetupLinkException.Code.MALFORMED_URL,
+                e, url);
+        } catch (ContextException e) {
+            throw new SetupLinkException(e);
+        }
+    }
 
     /**
-     * @return a string array with login and password of the file storage.
+     * {@inheritDoc}
      */
-    String[] getFileStorageAuth();
-
-    /**
-     * @return the quota for the file storage or <code>0</code> if there is no
-     * quota.
-     */
-    long getFileStorageQuota();
-
-    /**
-     * @return the filestoreId
-     */
-    int getFilestoreId();
-
-    /**
-     * Returns if a context is enabled. All sessions that belong to a disabled
-     * context have to die as fast as possible to be able to maintain these
-     * contexts.
-     * @return <code>true</code> if the context ist enabled, <code>false</code>
-     * otherwise.
-     */
-    boolean isEnabled();
-
-    /**
-     * @return the context specific location inside the filestore.
-     */
-    String getFilestoreName();
+    @Override
+    protected void initialize() throws SetupLinkException {
+        try {
+            GenericImplConfig.init();
+        } catch (ConfigurationException e) {
+            throw new SetupLinkException(e);
+        }
+    }
 }

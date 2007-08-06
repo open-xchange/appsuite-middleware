@@ -62,20 +62,12 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 /**
  * This class implements a storage for contexts in a relational database.
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class RdbContextStorage extends ContextStorage {
-
-    /**
-     * Logger.
-     */
-    private static final Log LOG = LogFactory.getLog(RdbContextStorage.class);
 
     /**
      * SQL select statement for loading a context.
@@ -98,6 +90,12 @@ public class RdbContextStorage extends ContextStorage {
     private static final String GET_MAILADMIN =
         "SELECT user FROM user_setting_admin WHERE cid=?";
 
+    /**
+     * SQL select statement for reading the login informations of a context.
+     */
+    private static final String GET_LOGININFOS =
+        "SELECT login_info FROM login2context WHERE cid=?";
+    
     /**
      * Default constructor.
      */
@@ -179,6 +177,38 @@ public class RdbContextStorage extends ContextStorage {
     }
 
     /**
+     * Reads the login informations of a context.
+     * @param ctx Context.
+     * @return a string array with all login informations of a context.
+     * @throws ContextException if loading the login informations fails.
+     */
+    private String[] getLoginInfos(final Context ctx) throws ContextException {
+        Connection con = null;
+        try {
+            con = DBPool.pickup();
+        } catch (DBPoolingException e) {
+            throw new ContextException(Code.NO_CONNECTION, e);
+        }
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        final List<String> loginInfo = new ArrayList<String>();
+        try {
+            stmt = con.prepareStatement(GET_LOGININFOS);
+            stmt.setInt(1, ctx.getContextId());
+            result = stmt.executeQuery();
+            while (result.next()) {
+                loginInfo.add(result.getString(1));
+            }
+        } catch (SQLException e) {
+            throw new ContextException(Code.SQL_ERROR, e, e.getMessage());
+        } finally {
+            closeSQLStuff(result, stmt);
+            DBPool.closeReaderSilent(con);
+        }
+        return loginInfo.toArray(new String[loginInfo.size()]);
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -216,6 +246,7 @@ public class RdbContextStorage extends ContextStorage {
         }
         if (null != context) {
             context.setMailadmin(getMailadmin(context));
+            context.setLoginInfo(getLoginInfos(context));
         }
         return context;
     }
@@ -248,14 +279,4 @@ public class RdbContextStorage extends ContextStorage {
         }
         return retval;
     }
-
-    /**
-     * {@inheritDoc}
-     */
-	@Override
-	public void invalidateContext(int contextId) throws ContextException {
-		if (LOG.isTraceEnabled()) {
-			LOG.trace("invalidateContext not implemented in " + this.getClass().getCanonicalName());
-		}
-	}
 }
