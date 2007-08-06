@@ -8,6 +8,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.OXExceptionSource;
+import com.openexchange.groupware.RdbUserConfigurationStorage;
 import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -40,7 +41,7 @@ public class DelUserFolderDiscoverer extends DBService {
 		final List<FolderObject> discovered = new ArrayList<FolderObject>();
 		try {
 			final User user = UserStorage.getInstance(ctx).getUser(userId);
-			final UserConfiguration userConfig = UserConfiguration.loadUserConfiguration(userId, ctx);
+			final UserConfiguration userConfig = RdbUserConfigurationStorage.loadUserConfiguration(userId, ctx);
 
 			final SearchIterator iter = OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(userId, user
 					.getGroups(), userConfig.getAccessibleModules(), FolderObject.INFOSTORE, ctx);

@@ -47,17 +47,12 @@
  *
  */
 
-
-
 package com.openexchange.sessiond;
-
-import java.sql.SQLException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.ContextException;
 import com.openexchange.groupware.contexts.ContextStorage;
@@ -66,7 +61,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.IMAPPropertiesFactory;
-import com.openexchange.server.DBPoolingException;
+import com.openexchange.imap.UserSettingMailStorage;
 
 /**
  * SessionObjectWrapper
@@ -79,18 +74,20 @@ public class SessionObjectWrapper {
 	private static final Log LOG = LogFactory.getLog(SessionObjectWrapper.class);
 
 	public static final SessionObject createSessionObject(final int user_id, final int context_id,
-			final String sessionobjectidentifier) throws LdapException, SQLException, ContextException, DBPoolingException, OXException {
+			final String sessionobjectidentifier) throws LdapException, ContextException, OXException {
 		final Context context = ContextStorage.getInstance().getContext(context_id);
 		return createSessionObject(user_id, context, sessionobjectidentifier);
 	}
 
 	public static final SessionObject createSessionObject(final int user_id, final Context ctx,
-			final String sessionobjectidentifier) throws LdapException, SQLException, DBPoolingException, OXException {
+			final String sessionobjectidentifier) throws LdapException, OXException {
 		final SessionObject so = new SessionObject(sessionobjectidentifier);
 		final User userObj = UserStorage.getInstance(ctx).getUser(user_id);
 		so.setContext(ctx);
 		so.setUserObject(userObj);
-		so.setUserConfiguration(UserConfiguration.loadUserConfiguration(user_id, userObj.getGroups(), ctx));
+		so.setUserSettingMail(UserSettingMailStorage.getInstance().loadUserSettingMail(user_id, ctx));
+		// so.setUserConfiguration(UserConfiguration.loadUserConfiguration(user_id,
+		// userObj.getGroups(), ctx));
 		try {
 			so.setIMAPProperties(IMAPPropertiesFactory.getImapProperties(so));
 		} catch (IMAPException e) {

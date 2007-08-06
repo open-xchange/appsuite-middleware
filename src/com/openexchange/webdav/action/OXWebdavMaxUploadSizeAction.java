@@ -12,7 +12,7 @@ public class OXWebdavMaxUploadSizeAction extends WebdavMaxUploadSizeAction {
 			return true;
 		}
 		
-		long maxSize = InfostoreConfigUtils.determineRelevantUploadSize(sessionHolder.getSessionObject().getUserConfiguration());
+		long maxSize = InfostoreConfigUtils.determineRelevantUploadSize(sessionHolder.getSessionObject().getUserSettingMail());
 		if(maxSize < 1)
 			return true;
 		

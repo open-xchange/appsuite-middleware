@@ -71,6 +71,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.event.AppointmentEvent;
 import com.openexchange.event.TaskEvent;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.RdbUserConfigurationStorage;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.container.AppointmentObject;
@@ -91,6 +92,8 @@ import com.openexchange.groupware.tasks.Task;
 import com.openexchange.i18n.StringHelper;
 import com.openexchange.i18n.StringTemplate;
 import com.openexchange.i18n.Template;
+import com.openexchange.imap.UserSettingMail;
+import com.openexchange.imap.UserSettingMailStorage;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.exceptions.LoggingLogic;
@@ -174,7 +177,11 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 	}
 	
 	protected UserConfiguration getUserConfiguration(final int id, final int[] groups, final Context context) throws SQLException, LdapException, DBPoolingException, OXException {
-		return UserConfiguration.loadUserConfiguration(id,groups,context);
+		return RdbUserConfigurationStorage.loadUserConfiguration(id,groups,context);
+	}
+	
+	protected UserSettingMail getUserSettingMail(final int id, final Context context) throws OXException {
+		return UserSettingMailStorage.getInstance().loadUserSettingMail(id, context);
 	}
 	
 	public void appointmentCreated(final AppointmentObject appointmentObj,
@@ -258,13 +265,11 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 				
 				if(p.type != Participant.EXTERNAL_USER) {
 					try {
-						final UserConfiguration userConfig = getUserConfiguration(p.id,p.groups,sessionObj.getContext());
-						sendMail = state.sendMail(userConfig) && obj.getModifiedBy() != p.id && (obj.getNotification() || p.id == obj.getCreatedBy() || forceNotifyOthers);
+						final UserSettingMail userSettingMail = getUserSettingMail(p.id, sessionObj.getContext());
+						sendMail = state.sendMail(userSettingMail) && obj.getModifiedBy() != p.id && (obj.getNotification() || p.id == obj.getCreatedBy() || forceNotifyOthers);
 						tz = p.timeZone;
 					} catch (final AbstractOXException e) {
 						LL.log(e);
-					} catch (SQLException e) {
-						LOG.error("Error loading user configuration: ",e);
 					}
 				} else {
 					sendMail = obj.getNotification() || (obj.getModifiedBy() != p.id && forceNotifyOthers);
@@ -654,7 +659,7 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 	
 	// Special handling for Appointments or Tasks goes here
 	static interface State {
-		public boolean sendMail(UserConfiguration userConfig);
+		public boolean sendMail(UserSettingMail userSettingMail);
 		public void addSpecial(CalendarObject obj, Map<String,String> subst, EmailableParticipant p);
 		public int getModule();
 	}
@@ -662,7 +667,7 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 	public static abstract class LinkableState implements State {
 		
 		protected static Template object_link_template;
-		private static String hostname = null;
+		private static String hostname;
 		private static UnknownHostException warnSpam;
 		static {
 			try {
@@ -714,8 +719,8 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 	
 	private static class AppointmentState extends LinkableState {
 
-		public boolean sendMail(final UserConfiguration userConfig) {
-			return userConfig.getUserSettingMail().isNotifyAppointments();
+		public boolean sendMail(final UserSettingMail userSettingMail) {
+			return userSettingMail.isNotifyAppointments();
 		}
 		
 		@Override
@@ -732,8 +737,8 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 	
 	private static class TaskState extends LinkableState {
 
-		public boolean sendMail(final UserConfiguration userConfig) {
-			return userConfig.getUserSettingMail().isNotifyTasks();
+		public boolean sendMail(final UserSettingMail userSettingMail) {
+			return userSettingMail.isNotifyTasks();
 		}
 		
 		public int getModule(){

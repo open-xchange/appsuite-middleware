@@ -49,15 +49,8 @@
 
 package com.openexchange.groupware;
 
-import static com.openexchange.tools.oxfolder.OXFolderManagerImpl.getUserName;
-import static com.openexchange.tools.oxfolder.OXFolderManagerImpl.folderModule2String;
-
-import static com.openexchange.tools.sql.DBUtils.closeResources;
-
 import java.io.Serializable;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.concurrent.locks.Lock;
@@ -71,17 +64,13 @@ import com.openexchange.api2.OXException;
 import com.openexchange.groupware.UserConfigurationException.UserConfigurationCode;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.ContextImpl;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.groupware.ldap.LdapException;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.imap.UserSettingMail;
-import com.openexchange.server.DBPool;
+import com.openexchange.imap.UserSettingMailStorage;
 import com.openexchange.server.DBPoolingException;
-import com.openexchange.tools.oxfolder.OXFolderException;
-import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
+import com.openexchange.tools.Collections.SmartIntArray;
 
 /**
  * <ul>
@@ -103,21 +92,6 @@ public final class UserConfiguration implements Serializable, DeleteListener, Cl
 	private static final long serialVersionUID = -8277899698366715803L;
 
 	private static final transient Log LOG = LogFactory.getLog(UserConfiguration.class);
-
-	private static final String LOAD_USER_CONFIGURATION = "SELECT permissions FROM user_configuration WHERE cid = ? AND user = ?";
-
-	private static final String INSERT_USER_CONFIGURATION = "INSERT INTO user_configuration (cid, user, permissions) VALUES (?, ?, ?)";
-
-	private static final String UPDATE_USER_CONFIGURATION = "UPDATE user_configuration SET permissions = ? WHERE cid = ? AND user = ?";
-
-	private static final String DELETE_USER_CONFIGURATION = "DELETE FROM user_configuration WHERE cid = ? AND user = ?";
-
-	private static final String SELECT_MYINFOSTORE_PERMISSION = "SELECT ot.fuid, op.admin_flag FROM oxfolder_permissions AS op "
-			+ "JOIN oxfolder_tree AS ot ON op.fuid = ot.fuid AND op.cid = ? AND ot.cid = ? "
-			+ "WHERE ot.created_from = ? AND ot.module = ? AND ot.default_flag = ?";
-
-	private static final String UPDATE_MYINFOSTORE_PERMISSION = "UPDATE oxfolder_permissions SET admin_flag = 1 "
-			+ "WHERE cid = ? AND permission_id = ? AND fuid = ?";
 
 	private static final int WEBMAIL = 1;
 
@@ -155,16 +129,9 @@ public final class UserConfiguration implements Serializable, DeleteListener, Cl
 
 	private static final int DELEGATE_TASKS = 131072;
 
-	/**
-	 * Permission bits for standard users
+	/*
+	 * Field members
 	 */
-	private static final int STANDARD_VERSION = 31;
-
-	/**
-	 * Permission bits for premium users
-	 */
-	private static final int PREMIUM_VERSION = Integer.MAX_VALUE;
-
 	private int permissionBits;
 
 	private final int userId;
@@ -173,7 +140,9 @@ public final class UserConfiguration implements Serializable, DeleteListener, Cl
 
 	private final transient Context ctx;
 
-	private transient UserSettingMail userSettingMail;
+	//private transient boolean userSettingMailLoaded;
+
+	//private transient UserSettingMail userSettingMail;
 
 	private transient AJAXUserDictionary userDictionary;
 
@@ -214,9 +183,9 @@ public final class UserConfiguration implements Serializable, DeleteListener, Cl
 				clone.accessibleModules = new int[accessibleModules.length];
 				System.arraycopy(accessibleModules, 0, clone.accessibleModules, 0, accessibleModules.length);
 			}
-			if (userSettingMail != null) {
+			/*if (userSettingMail != null) {
 				clone.userSettingMail = (UserSettingMail) userSettingMail.clone();
-			}
+			}*/
 			if (userDictionary != null) {
 				clone.userDictionary = (AJAXUserDictionary) userDictionary.clone();
 			}
@@ -225,20 +194,6 @@ public final class UserConfiguration implements Serializable, DeleteListener, Cl
 			LOG.error(e.getMessage(), e);
 			throw new InternalError(e.getMessage());
 		}
-	}
-
-	public boolean isStandardVersion() {
-		return permissionBits == STANDARD_VERSION;
-	}
-
-	public void setStandardVersion() {
-		this.permissionBits = STANDARD_VERSION;
-		downgradeUser();
-	}
-
-	public void setPremiumVersion() throws OXException {
-		this.permissionBits = PREMIUM_VERSION;
-		upgradeUser();
 	}
 
 	/**
@@ -620,7 +575,7 @@ public final class UserConfiguration implements Serializable, DeleteListener, Cl
 		return cloneAccessibleModules();
 	}
 
-	private final int[] cloneAccessibleModules() {
+	private int[] cloneAccessibleModules() {
 		final int[] clone = new int[accessibleModules.length];
 		System.arraycopy(accessibleModules, 0, clone, 0, clone.length);
 		return clone;
@@ -692,42 +647,45 @@ public final class UserConfiguration implements Serializable, DeleteListener, Cl
 		return ctx;
 	}
 
-	private static final transient Lock LOCK = new ReentrantLock();
+	//private static final transient Lock LOCK = new ReentrantLock();
 
-	public UserSettingMail getUserSettingMail() {
-		if (userSettingMail == null) {
+	/*public UserSettingMail getUserSettingMail() {
+		if (!userSettingMailLoaded) {
 			LOCK.lock();
 			try {
 				if (userSettingMail == null) {
-					final UserSettingMail tmp = new UserSettingMail();
 					try {
-						tmp.loadUserSettingMail(userId, ctx);
+						userSettingMail = UserSettingMailStorage.getInstance().loadUserSettingMail(userId, ctx);
 					} catch (final OXException e) {
 						LOG.error(e.getMessage(), e);
+						userSettingMail = new UserSettingMail();
 					}
-					userSettingMail = tmp;
+					userSettingMailLoaded = true;
 				}
 			} finally {
 				LOCK.unlock();
 			}
 		}
 		return userSettingMail;
-	}
+	}*/
 
-	public void setUserSettingMail(final UserSettingMail imapUserSetting) {
+	/*public void setUserSettingMail(final UserSettingMail imapUserSetting) {
 		setUserSettingMail(imapUserSetting, false);
 	}
 
 	public void setUserSettingMail(final UserSettingMail imapUserSetting, final boolean save) {
 		this.userSettingMail = imapUserSetting;
-		if (save && this.userSettingMail != null) {
-			try {
-				this.userSettingMail.saveUserSettingMail(userId, ctx);
-			} catch (final OXException e) {
-				LOG.error(e.getMessage(), e);
+		if (this.userSettingMail != null) {
+			userSettingMailLoaded = true;
+			if (save) {
+				try {
+					UserSettingMailStorage.getInstance().saveUserSettingMail(userSettingMail, userId, ctx);
+				} catch (final OXException e) {
+					LOG.error(e.getMessage(), e);
+				}
 			}
 		}
-	}
+	}*/
 
 	public AJAXUserDictionary getUserDictionary() throws OXException {
 		try {
@@ -780,272 +738,6 @@ public final class UserConfiguration implements Serializable, DeleteListener, Cl
 				Integer.toBinaryString(permissionBits)).toString();
 	}
 
-	/**
-	 * This method performs some necessary changes if a user is downgraded to a
-	 * standard user.
-	 */
-	private void downgradeUser() {
-		/*
-		 * TODO: Some changes due to user's downgrade to standard version
-		 */
-	}
-
-	/**
-	 * This method performs some necessary changes if a user becomes a premium
-	 * user.
-	 */
-	private void upgradeUser() throws OXException {
-		Connection readCon = null;
-		Connection writeCon = null;
-		try {
-			readCon = DBPool.pickup(ctx);
-			writeCon = DBPool.pickupWriteable(ctx);
-			/*
-			 * Add admin permission to user's MyInfostore folder
-			 */
-			PreparedStatement stmt = null;
-			ResultSet rs = null;
-			try {
-				stmt = readCon.prepareStatement(SELECT_MYINFOSTORE_PERMISSION);
-				stmt.setInt(1, ctx.getContextId());
-				stmt.setInt(2, ctx.getContextId());
-				stmt.setInt(3, userId);
-				stmt.setInt(4, FolderObject.INFOSTORE);
-				stmt.setInt(5, 1);
-				rs = stmt.executeQuery();
-				if (rs.next()) {
-					final int fuid = rs.getInt(1);
-					final boolean adminFlag = (rs.getInt(2) > 0);
-					if (!adminFlag) {
-						rs.close();
-						stmt.close();
-						stmt = writeCon.prepareStatement(UPDATE_MYINFOSTORE_PERMISSION);
-						stmt.setInt(1, ctx.getContextId());
-						stmt.setInt(2, userId);
-						stmt.setInt(3, fuid);
-						stmt.executeUpdate();
-					}
-				} else {
-					throw new OXFolderException(FolderCode.NO_DEFAULT_FOLDER_FOUND,
-							folderModule2String(FolderObject.INFOSTORE), getUserName(userId, ctx), Integer.valueOf(ctx
-									.getContextId()));
-				}
-			} finally {
-				closeResources(rs, stmt, readCon, true, ctx);
-				if (writeCon != null) {
-					DBPool.pushWrite(ctx, writeCon);
-					writeCon = null;
-				}
-			}
-		} catch (final SQLException e) {
-			throw new UserConfigurationException(UserConfigurationCode.SQL_ERROR, e, new Object[0]);
-		} catch (final DBPoolingException e) {
-			throw new UserConfigurationException(UserConfigurationCode.DBPOOL_ERROR, e, new Object[0]);
-		}
-	}
-
-	private static final String SQL_SELECT = "SELECT user FROM user_configuration WHERE cid = ? AND user = ?";
-
-	public static void saveUserConfiguration(final UserConfiguration userConfig) throws OXException {
-		boolean insert = false;
-		try {
-			Connection readCon = null;
-			PreparedStatement stmt = null;
-			ResultSet rs = null;
-			try {
-				readCon = DBPool.pickup(userConfig.getContext());
-				stmt = readCon.prepareStatement(SQL_SELECT);
-				stmt.setInt(1, userConfig.getContext().getContextId());
-				stmt.setInt(2, userConfig.userId);
-				rs = stmt.executeQuery();
-				insert = !rs.next();
-			} finally {
-				closeResources(rs, stmt, readCon, true, userConfig.getContext());
-			}
-			saveUserConfiguration(userConfig, insert, userConfig.getContext(), null);
-		} catch (final SQLException e) {
-			throw new UserConfigurationException(UserConfigurationCode.SQL_ERROR, e, new Object[0]);
-		} catch (final DBPoolingException e) {
-			throw new UserConfigurationException(UserConfigurationCode.DBPOOL_ERROR, e, new Object[0]);
-		}
-	}
-
-	public static void saveUserConfiguration(final UserConfiguration userConfig, final boolean insert,
-			final Connection writeCon) throws SQLException, DBPoolingException {
-		saveUserConfiguration(userConfig, insert, userConfig.getContext(), writeCon);
-	}
-
-	public static void saveUserConfiguration(final UserConfiguration userConfig, final boolean insert,
-			final Context ctx, final Connection writeConArg) throws SQLException, DBPoolingException {
-		Connection writeCon = writeConArg;
-		boolean closeConnection = false;
-		PreparedStatement stmt = null;
-		try {
-			if (writeCon == null) {
-				writeCon = DBPool.pickupWriteable(ctx);
-				closeConnection = true;
-			}
-			if (insert) {
-				stmt = writeCon.prepareStatement(INSERT_USER_CONFIGURATION);
-				stmt.setInt(1, userConfig.ctx.getContextId());
-				stmt.setInt(2, userConfig.userId);
-				stmt.setInt(3, userConfig.permissionBits);
-			} else {
-				stmt = writeCon.prepareStatement(UPDATE_USER_CONFIGURATION);
-				stmt.setInt(1, userConfig.permissionBits);
-				stmt.setInt(2, userConfig.ctx.getContextId());
-				stmt.setInt(3, userConfig.userId);
-			}
-			stmt.executeUpdate();
-			if (!insert) {
-				try {
-					UserConfigurationStorage.getInstance().removeUserConfiguration(userConfig.userId, userConfig.ctx);
-				} catch (UserConfigurationException e) {
-					LOG.warn("User Configuration could not be removed from cache", e);
-				}
-			}
-		} finally {
-			closeResources(null, stmt, closeConnection ? writeCon : null, false, ctx);
-		}
-	}
-
-	public static UserConfiguration loadUserConfiguration(final int userId, final int[] groups, final int cid,
-			final Connection readConArg) throws SQLException, DBPoolingException {
-		final Context ctx = new ContextImpl(cid);
-		Connection readCon = readConArg;
-		boolean closeReadCon = false;
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
-		try {
-			if (readCon == null) {
-				readCon = DBPool.pickup(ctx);
-				closeReadCon = true;
-			}
-			stmt = readCon.prepareStatement(LOAD_USER_CONFIGURATION);
-			stmt.setInt(1, ctx.getContextId());
-			stmt.setInt(2, userId);
-			rs = stmt.executeQuery();
-			if (rs.next()) {
-				return new UserConfiguration(rs.getInt(1), userId, groups, ctx);
-			}
-			return new UserConfiguration(0, userId, groups, ctx);
-		} finally {
-			closeResources(rs, stmt, closeReadCon ? readCon : null, true, ctx);
-		}
-	}
-
-	public static UserConfiguration loadUserConfiguration(final int userId, final int[] groupsArg, final Context ctx,
-			final Connection readConArg) throws SQLException, LdapException, DBPoolingException, OXException {
-		int[] groups = groupsArg;
-		Connection readCon = readConArg;
-		boolean closeCon = false;
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
-		try {
-			if (readCon == null) {
-				readCon = DBPool.pickup(ctx);
-				closeCon = true;
-			}
-			stmt = readCon.prepareStatement(LOAD_USER_CONFIGURATION);
-			stmt.setInt(1, ctx.getContextId());
-			stmt.setInt(2, userId);
-			rs = stmt.executeQuery();
-			if (rs.next()) {
-				if (groups == null) {
-					final UserStorage uStorage = UserStorage.getInstance(ctx);
-					groups = uStorage.getUser(userId).getGroups();
-				}
-				return new UserConfiguration(rs.getInt(1), userId, groups, ctx);
-			}
-			throw new UserConfigurationException(UserConfigurationCode.NOT_FOUND, Integer.valueOf(userId), Integer
-					.valueOf(ctx.getContextId()));
-		} finally {
-			closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
-		}
-	}
-
-	public static UserConfiguration loadUserConfiguration(final int userId, final int[] groups, final Context ctx)
-			throws SQLException, LdapException, DBPoolingException, OXException {
-		return loadUserConfiguration(userId, groups, ctx, null);
-	}
-
-	public static UserConfiguration loadUserConfiguration(final int userId, final Context ctx) throws SQLException,
-			LdapException, DBPoolingException, OXException {
-		return loadUserConfiguration(userId, null, ctx, null);
-	}
-
-	public static void deleteUserConfiguration(final int userId, final Context ctx) throws SQLException,
-			DBPoolingException {
-		deleteUserConfiguration(userId, null, ctx);
-	}
-
-	public static void deleteUserConfiguration(final int userId, final Connection writeConArg, final Context ctx)
-			throws SQLException, DBPoolingException {
-		Connection writeCon = writeConArg;
-		boolean closeWriteCon = false;
-		PreparedStatement stmt = null;
-		try {
-			if (writeCon == null) {
-				writeCon = DBPool.pickupWriteable(ctx);
-				closeWriteCon = true;
-			}
-			stmt = writeCon.prepareStatement(DELETE_USER_CONFIGURATION);
-			stmt.setInt(1, ctx.getContextId());
-			stmt.setInt(2, userId);
-			stmt.executeUpdate();
-			try {
-				UserConfigurationStorage.getInstance().removeUserConfiguration(userId, ctx);
-			} catch (UserConfigurationException e) {
-				LOG.warn("User Configuration could not be removed from cache", e);
-			}
-		} finally {
-			closeResources(null, stmt, closeWriteCon ? writeCon : null, false, ctx);
-		}
-	}
-
-	private static class SmartIntArray {
-		/**
-		 * Pointer to keep track of position in the array
-		 */
-		private int pointer;
-
-		private int[] array;
-
-		private final int growthSize;
-
-		public SmartIntArray() {
-			this(1024);
-		}
-
-		public SmartIntArray(final int initialSize) {
-			this(initialSize, (initialSize / 4));
-		}
-
-		public SmartIntArray(final int initialSize, final int growthSize) {
-			this.growthSize = growthSize;
-			array = new int[initialSize];
-		}
-
-		public SmartIntArray append(final int i) {
-			if (pointer >= array.length) {
-				/*
-				 * time to grow!
-				 */
-				final int[] tmpArray = new int[array.length + growthSize];
-				System.arraycopy(array, 0, tmpArray, 0, array.length);
-				array = tmpArray;
-			}
-			array[pointer++] = i;
-			return this;
-		}
-
-		public int[] toArray() {
-			final int[] trimmedArray = new int[pointer];
-			System.arraycopy(array, 0, trimmedArray, 0, trimmedArray.length);
-			return trimmedArray;
-		}
-	}
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -1056,12 +748,11 @@ public final class UserConfiguration implements Serializable, DeleteListener, Cl
 			throws DeleteFailedException {
 		if (delEvent.getType() == DeleteEvent.TYPE_USER) {
 			try {
-				final Context ctx = delEvent.getContext();
-				final int userId = delEvent.getId();
 				/*
 				 * Delete user configuration
 				 */
-				deleteUserConfiguration(userId, writeConArg, ctx);
+				RdbUserConfigurationStorage.deleteUserConfiguration(delEvent.getId(), writeConArg, delEvent
+						.getContext());
 			} catch (final Exception e) {
 				LOG.error(e.getMessage(), e);
 				throw new DeleteFailedException(e);

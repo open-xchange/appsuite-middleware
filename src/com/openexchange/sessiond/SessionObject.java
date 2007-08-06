@@ -57,13 +57,15 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.mail.MessagingException;
 import javax.mail.Session;
 
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.UserConfiguration;
+import com.openexchange.groupware.UserConfigurationException;
+import com.openexchange.groupware.UserConfigurationStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.Credentials;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.imap.IMAPProperties;
 import com.openexchange.imap.IMAPUtils;
+import com.openexchange.imap.UserSettingMail;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.Rights;
 
@@ -73,6 +75,9 @@ import com.sun.mail.imap.Rights;
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
 public class SessionObject {
+
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(SessionObject.class);
 
 	private final String sessionid;
 
@@ -108,9 +113,9 @@ public class SessionObject {
 
 	private User u;
 
-	private IMAPProperties imapProperties;
+	private UserSettingMail userSettingMail;
 
-	private UserConfiguration userConfig;
+	private IMAPProperties imapProperties;
 
 	private Session mailSession;
 
@@ -220,12 +225,12 @@ public class SessionObject {
 		this.u = u;
 	}
 
-	public void setIMAPProperties(final IMAPProperties imapProperties) {
-		this.imapProperties = imapProperties;
+	public void setUserSettingMail(final UserSettingMail userSettingMail) {
+		this.userSettingMail = userSettingMail;
 	}
 
-	public void setUserConfiguration(final UserConfiguration userConfig) {
-		this.userConfig = userConfig;
+	public void setIMAPProperties(final IMAPProperties imapProperties) {
+		this.imapProperties = imapProperties;
 	}
 
 	public String getSessionID() {
@@ -299,13 +304,22 @@ public class SessionObject {
 	public User getUserObject() {
 		return u;
 	}
+	
+	public UserSettingMail getUserSettingMail() {
+		return userSettingMail;
+	}
 
 	public IMAPProperties getIMAPProperties() {
 		return imapProperties;
 	}
 
 	public UserConfiguration getUserConfiguration() {
-		return this.userConfig;
+		try {
+			return UserConfigurationStorage.getInstance().getUserConfiguration(u.getId(), u.getGroups(), context);
+		} catch (final UserConfigurationException e) {
+			LOG.error(e.getLocalizedMessage(), e);
+			return null;
+		}
 	}
 
 	public void setLoginName(final String loginName) {
@@ -332,13 +346,7 @@ public class SessionObject {
 		this.mailSession = mailSession;
 	}
 
-	public void closingOperations() throws OXException {
-		if (userConfig != null) {
-			if (userConfig.getUserSettingMail() != null) {
-				userConfig.getUserSettingMail().saveUserSettingMail(userConfig.getUserId(), userConfig.getContext());
-			}
-			UserConfiguration.saveUserConfiguration(userConfig);
-		}
+	public void closingOperations() {
 	}
 
 	public String getSecret() {

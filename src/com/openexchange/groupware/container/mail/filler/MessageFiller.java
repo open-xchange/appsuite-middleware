@@ -210,11 +210,11 @@ public class MessageFiller {
 			final IMAPFolder destinationFolder) {
 		super();
 		this.session = session;
-		this.usm = session.getUserConfiguration().getUserSettingMail();
+		this.usm = session.getUserSettingMail();
 		this.originalMsg = originalMsg;
 		this.mailSession = mailSession;
 		this.destinationFolder = destinationFolder;
-		this.linewrap = session.getUserConfiguration().getUserSettingMail().getAutoLinebreak();
+		this.linewrap = usm.getAutoLinebreak();
 		converter = new Html2TextConverter();
 	}
 

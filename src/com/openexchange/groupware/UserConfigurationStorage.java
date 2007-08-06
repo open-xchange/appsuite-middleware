@@ -66,7 +66,7 @@ import com.openexchange.groupware.contexts.Context;
 public abstract class UserConfigurationStorage {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(UserConfigurationImpl.class);
+			.getLog(UserConfigurationStorage.class);
 
 	private static enum UserConfigurationImpl {
 
@@ -115,7 +115,7 @@ public abstract class UserConfigurationStorage {
 	private static Class<? extends UserConfigurationStorage> implementingClass;
 
 	private static UserConfigurationStorage singleton;
-	
+
 	private static boolean initialized;
 
 	/**
@@ -162,7 +162,8 @@ public abstract class UserConfigurationStorage {
 	/**
 	 * Factory method for an instance of UserConfigurationStorage.
 	 * 
-	 * @return an instance implementing the UserConfigurationStorage interface
+	 * @return an instance implementing the
+	 *         <code>UserConfigurationStorage</code> interface
 	 * @throws UserConfigurationException
 	 *             if instanciation fails.
 	 */

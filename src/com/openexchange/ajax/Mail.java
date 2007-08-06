@@ -345,7 +345,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 			sendErrorAsJS(resp, RESPONSE_ERROR);
 		}
 	}
-	
+
 	private final transient static JSONArray EMPTY_JSON_ARR = new JSONArray();
 
 	private final Response actionGetUpdates(final SessionObject sessionObj, final ParamContainer paramContainer,
@@ -2413,8 +2413,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 					 * Append UploadListener instances
 					 */
 					((UploadListener) this).getRegistry().addUploadListener(
-							new UploadQuotaChecker(sessionObj.getUserConfiguration().getUserSettingMail(), resp,
-									actionStr));
+							new UploadQuotaChecker(sessionObj.getUserSettingMail(), resp, actionStr));
 					((UploadListener) this).getRegistry().addUploadListener(new Mail());
 					/*
 					 * Create and fire upload event
@@ -2498,9 +2497,8 @@ public class Mail extends PermissionServlet implements UploadListener {
 				}
 			}
 			try {
-				final JSONMessageObject msgObj = new JSONMessageObject(sessionObj.getUserConfiguration()
-						.getUserSettingMail(), TimeZone.getTimeZone(sessionObj.getUserObject().getTimeZone()))
-						.parseJSONObject(jsonMailObj);
+				final JSONMessageObject msgObj = new JSONMessageObject(sessionObj.getUserSettingMail(), TimeZone
+						.getTimeZone(sessionObj.getUserObject().getTimeZone())).parseJSONObject(jsonMailObj);
 				if (uploadEvent.getAction().equals(ACTION_NEW)) {
 					/*
 					 * Add file & infostore attachments to message

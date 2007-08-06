@@ -97,6 +97,7 @@ import com.openexchange.groupware.upload.UploadEvent;
 import com.openexchange.groupware.upload.UploadException;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.UploadException.UploadCode;
+import com.openexchange.imap.UserSettingMail;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.encoding.Helper;
@@ -256,14 +257,14 @@ public class Infostore extends PermissionServlet {
 		}
 		
 		try {
-			checkSize(req.getContentLength(), sessionObj.getUserConfiguration());
+			checkSize(req.getContentLength(), sessionObj.getUserSettingMail());
 			if(action.equals(ACTION_NEW) || action.equals(ACTION_UPDATE) || action.equals(ACTION_COPY)) {
 				UploadEvent upload = null;
 				try {
 					upload = processUpload(req);
 					final UploadFile uploadFile = upload.getUploadFileByFieldName("file");
 					if(null != uploadFile) {
-						checkSize(uploadFile.getSize(), sessionObj.getUserConfiguration());
+						checkSize(uploadFile.getSize(), sessionObj.getUserSettingMail());
 					}
 					final String obj = upload.getFormField(STR_JSON);
 					if(obj == null) {
@@ -321,8 +322,8 @@ public class Infostore extends PermissionServlet {
 		}
 	}
 
-	private void checkSize(final long size, final UserConfiguration userConfig) throws UploadException {
-		long maxSize = InfostoreConfigUtils.determineRelevantUploadSize(userConfig);
+	private void checkSize(final long size, final UserSettingMail userSettingMail) throws UploadException {
+		long maxSize = InfostoreConfigUtils.determineRelevantUploadSize(userSettingMail);
 		if(maxSize == 0) {
 			return;
 		}

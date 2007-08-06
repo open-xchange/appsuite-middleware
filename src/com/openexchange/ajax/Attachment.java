@@ -92,6 +92,7 @@ import com.openexchange.groupware.upload.UploadEvent;
 import com.openexchange.groupware.upload.UploadException;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.UploadException.UploadCode;
+import com.openexchange.imap.UserSettingMail;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.encoding.Helper;
@@ -231,7 +232,7 @@ public class Attachment extends PermissionServlet {
 		final UserConfiguration userConfig = session.getUserConfiguration();
 		
 		try {
-			checkSize(req.getContentLength(), session.getUserConfiguration());
+			checkSize(req.getContentLength(), session.getUserSettingMail());
 			if (ACTION_ATTACH.equals(action)) {
 				UploadEvent upload = null;
 				try {
@@ -266,8 +267,8 @@ public class Attachment extends PermissionServlet {
 						attachments.set(index, attachment);
 						uploadFiles.set(index, uploadFile);
 						sum += uploadFile.getSize();
-						checkSingleSize(uploadFile.getSize(), session.getUserConfiguration());
-						checkSize(sum, session.getUserConfiguration());
+						checkSingleSize(uploadFile.getSize(), session.getUserSettingMail());
+						checkSize(sum, session.getUserSettingMail());
 					}
 					attach(res,attachments,uploadFiles,ctx,user,userConfig);
 				} finally {
@@ -517,12 +518,12 @@ public class Attachment extends PermissionServlet {
 		}
 	}
 	
-	private void checkSize(final long size, final UserConfiguration userConfig) throws UploadException {
+	private void checkSize(final long size, final UserSettingMail userSettingMail) throws UploadException {
 		if(maxUploadSize == -2) {
 			maxUploadSize = AttachmentConfig.getMaxUploadSize();
 		}
 		long maxSize = 0;
-		maxSize = userConfig.getUserSettingMail().getUploadQuota();
+		maxSize = userSettingMail.getUploadQuota();
 		maxSize = maxSize < 0 ? maxUploadSize : maxSize;
 		if(maxSize == 0) {
 			return;
@@ -533,8 +534,8 @@ public class Attachment extends PermissionServlet {
 		}
 	}
 	
-	private void checkSingleSize(final long size, final UserConfiguration userConfig) throws UploadException {
-		final long maxSize = userConfig.getUserSettingMail().getUploadQuotaPerFile();
+	private void checkSingleSize(final long size, final UserSettingMail userSettingMail) throws UploadException {
+		final long maxSize = userSettingMail.getUploadQuotaPerFile();
 		if(maxSize < 1) {
 			return;
 		}

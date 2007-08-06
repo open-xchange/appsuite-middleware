@@ -52,6 +52,7 @@ package com.openexchange.groupware.settings;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.imap.UserSettingMail;
+import com.openexchange.imap.UserSettingMailStorage;
 import com.openexchange.sessiond.SessionObject;
 
 /**
@@ -73,7 +74,7 @@ public abstract class AbstractMailFuncs implements SharedValue {
         final Setting setting) {
         final UserConfiguration userConf = session.getUserConfiguration();
         if (userConf.hasWebMail()) {
-            setting.setSingleValue(isSet(userConf.getUserSettingMail()));
+            setting.setSingleValue(isSet(session.getUserSettingMail()));
         }
     }
 
@@ -91,25 +92,25 @@ public abstract class AbstractMailFuncs implements SharedValue {
     }
 
     /**
-     * {@inheritDoc}
-     */
-    public void writeValue(final SessionObject session,
+	 * {@inheritDoc}
+	 */
+	public void writeValue(final SessionObject session,
         final Setting setting) throws SettingException {
-        final UserSettingMail settings = session.getUserConfiguration()
-            .getUserSettingMail();
+        final UserSettingMail settings = session.getUserSettingMail();
         setValue(settings, (String) setting.getSingleValue());
         try {
-            settings.saveUserSettingMail(session.getUserObject().getId(),
-                session.getContext());
+        	UserSettingMailStorage.getInstance().saveUserSettingMail(settings, session.getUserObject().getId(), session.getContext());
         } catch (OXException e) {
             throw new SettingException(e);
         }
     }
 
-    /**
-     * @param settings in this mail settings the bit will be set.
-     * @param value value of the bit that should be set.
-     */
+	/**
+	 * @param settings
+	 *            in this mail settings the bit will be set.
+	 * @param value
+	 *            value of the bit that should be set.
+	 */
     protected abstract void setValue(UserSettingMail settings,
         String value);
 }

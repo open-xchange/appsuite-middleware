@@ -118,7 +118,7 @@ public class JSONMessageHandler implements MessageHandler {
 	public JSONMessageHandler(final SessionObject session, final String msgUID, final boolean createVersionForDisplay) {
 		super();
 		this.session = session;
-		this.usm = session.getUserConfiguration().getUserSettingMail();
+		this.usm = session.getUserSettingMail();
 		this.msgObj = new JSONMessageObject(usm, TimeZone.getTimeZone(session.getUserObject().getTimeZone()));
 		this.msgUID = msgUID;
 		this.createVersionForDisplay = createVersionForDisplay;

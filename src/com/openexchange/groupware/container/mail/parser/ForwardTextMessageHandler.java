@@ -120,7 +120,7 @@ public class ForwardTextMessageHandler implements MessageHandler {
 	public ForwardTextMessageHandler(final SessionObject session, final String msgUID) {
 		super();
 		this.session = session;
-		this.usm = session.getUserConfiguration().getUserSettingMail();
+		this.usm = session.getUserSettingMail();
 		this.msgUID = msgUID;
 		this.firstText = null;
 		strHelper = new StringHelper(session.getLocale());

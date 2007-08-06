@@ -96,7 +96,11 @@ public class UserConfigurationException extends OXException {
 		/**
 		 * User configuration could not be removed from cache: %1$s
 		 */
-		CACHE_REMOVE_ERROR("User configuration could not be removed from cache: %1$s", Category.CODE_ERROR, 9);
+		CACHE_REMOVE_ERROR("User configuration could not be removed from cache: %1$s", Category.CODE_ERROR, 9),
+		/**
+		 * Mail settings for user %s could not be found in context %d
+		 */
+		MAIL_SETTING_NOT_FOUND("Mail settings for user %s could not be found in context %d", Category.CODE_ERROR, 10);
 
 		private final String message;
 

@@ -62,7 +62,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.UserConfigurationStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.ContextException;
 import com.openexchange.groupware.contexts.ContextStorage;
@@ -72,6 +71,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.IMAPPropertiesFactory;
+import com.openexchange.imap.UserSettingMailStorage;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.server.ServerTimer;
 
@@ -245,11 +245,18 @@ public class SessionHandler extends TimerTask {
 
         sessionobject.setRandomToken(randomId);
         sessionobject.setSecret(sessionIdGenerator.createSecretId(loginName, client_ip));
+        
+        try {
+			sessionobject.setUserSettingMail(UserSettingMailStorage.getInstance().loadUserSettingMail(u.getId(), context));
+		} catch (final OXException e) {
+			LOG.error(e.getLocalizedMessage(), e);
+			sessionobject.setUserSettingMail(null);
+		}
 
         // Load IMAP Info
         try {
             sessionobject.setIMAPProperties(IMAPPropertiesFactory.getImapProperties(sessionobject));
-        } catch (IMAPException e) {
+        } catch (final IMAPException e) {
             LOG.error("ERROR! IMAPException OCCURRED " + e.getMessage());
         }
 
@@ -258,14 +265,6 @@ public class SessionHandler extends TimerTask {
                 LOG.debug("session REBORN sessionid=" + sessionId);
             //}
         }
-
-        // Load user's configuration
-		try {
-			sessionobject.setUserConfiguration(UserConfigurationStorage.getInstance().getUserConfiguration(u.getId(),
-					u.getGroups(), context));
-		} catch (Exception exc) {
-			throw new SessiondException(exc);
-		}
 
         sessions.put(sessionId, sessionobject);
         randomMap.put(randomId, sessionId);
@@ -325,11 +324,7 @@ public class SessionHandler extends TimerTask {
 
             if (sessions.containsKey(sessionid)) {
                 final SessionObject session = sessions.remove(sessionid);
-                try {
-                    session.closingOperations();
-                } catch (OXException e) {
-                    LOG.error(e);
-                }
+                session.closingOperations();
                 MonitoringInfo.decrementNumberOfActiveSessions();
 
                 return true;

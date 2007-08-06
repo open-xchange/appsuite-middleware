@@ -336,7 +336,7 @@ public final class MessageUtils {
 	 */
 	public static String formatContentForDisplay(final String s, final boolean isHtml, final SessionObject session,
 			final String msgUID) {
-		final UserSettingMail usm = session.getUserConfiguration().getUserSettingMail();
+		final UserSettingMail usm = session.getUserSettingMail();
 		String retval = s;
 		if (isHtml) {
 			/*
@@ -522,7 +522,7 @@ public final class MessageUtils {
 
 	public static String getFormattedText(final String text, final boolean isHtmlContent, final SessionObject session,
 			final String msgUID) {
-		final UserSettingMail usm = session.getUserConfiguration().getUserSettingMail();
+		final UserSettingMail usm = session.getUserSettingMail();
 		final StringBuilder formattedText = new StringBuilder();
 		if (isHtmlContent) {
 			String htmlContent = text;

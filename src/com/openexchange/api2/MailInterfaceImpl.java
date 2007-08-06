@@ -559,7 +559,7 @@ public class MailInterfaceImpl implements MailInterface {
 			throw new OXMailException(sessionObj.getIMAPProperties().getError());
 		}
 		this.sessionObj = sessionObj;
-		this.usm = sessionObj.getUserConfiguration().getUserSettingMail();
+		this.usm = sessionObj.getUserSettingMail();
 		userTimeZone = TimeZone.getTimeZone(sessionObj.getUserObject().getTimeZone());
 	}
 

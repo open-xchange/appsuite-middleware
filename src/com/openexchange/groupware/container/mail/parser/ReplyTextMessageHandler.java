@@ -137,7 +137,7 @@ public class ReplyTextMessageHandler implements MessageHandler {
 	public ReplyTextMessageHandler(final SessionObject session, final String msgUID) {
 		super();
 		this.session = session;
-		this.usm = session.getUserConfiguration().getUserSettingMail();
+		this.usm = session.getUserSettingMail();
 		this.msgUID = msgUID;
 		this.textBuilder = new StringBuilder();
 		this.nestedTextBuilder = new StringBuilder();

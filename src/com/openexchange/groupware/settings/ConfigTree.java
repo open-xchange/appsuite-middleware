@@ -72,6 +72,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.settings.SettingException.Code;
 import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.UserSettingMail;
+import com.openexchange.imap.UserSettingMailStorage;
 import com.openexchange.server.Version;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
@@ -581,8 +582,7 @@ public final class ConfigTree {
         tmp.put(sendaddress.getPath(), new SharedValue() {
             public void getValue(final SessionObject session,
                 final Setting setting) throws SettingException {
-                final UserSettingMail settings = session.getUserConfiguration()
-                    .getUserSettingMail();
+                final UserSettingMail settings = session.getUserSettingMail();
                 setting.setSingleValue(settings.getSendAddr());
             }
             public boolean isAvailable(final SessionObject session) {
@@ -591,18 +591,16 @@ public final class ConfigTree {
             public boolean isWritable() {
                 return true;
             }
-            public void writeValue(final SessionObject session,
-                final Setting setting) throws SettingException {
-                final UserSettingMail settings = session.getUserConfiguration()
-                    .getUserSettingMail();
-                settings.setSendAddr((String) setting.getSingleValue());
-                try {
-                    settings.saveUserSettingMail(
-                        session.getUserObject().getId(), session.getContext());
-                } catch (OXException e) {
-                    throw new SettingException(e);
-                }
-            }
+            public void writeValue(final SessionObject session, final Setting setting) throws SettingException {
+				final UserSettingMail settings = session.getUserSettingMail();
+				settings.setSendAddr((String) setting.getSingleValue());
+				try {
+					UserSettingMailStorage.getInstance().saveUserSettingMail(settings, session.getUserObject().getId(),
+							session.getContext());
+				} catch (OXException e) {
+					throw new SettingException(e);
+				}
+			}
         });
         tmp.put(inbox.getPath(), new ReadOnlyValue() {
             public boolean isAvailable(final SessionObject session) {
@@ -804,8 +802,7 @@ public final class ConfigTree {
         tmp.put(linewrap.getPath(), new SharedValue() {
             public void getValue(final SessionObject session,
                 final Setting setting) throws SettingException {
-                final UserSettingMail settings = session.getUserConfiguration()
-                    .getUserSettingMail();
+                final UserSettingMail settings = session.getUserSettingMail();
                 setting.setSingleValue(settings.getAutoLinebreak());
             }
             public boolean isAvailable(final SessionObject session) {
@@ -816,13 +813,12 @@ public final class ConfigTree {
             }
             public void writeValue(final SessionObject session,
                 final Setting setting) throws SettingException {
-                final UserSettingMail settings = session.getUserConfiguration()
-                    .getUserSettingMail();
+                final UserSettingMail settings = session.getUserSettingMail();
                 try {
                     settings.setAutoLinebreak(Integer.parseInt(
                         (String) setting.getSingleValue()));
-                    settings.saveUserSettingMail(
-                        session.getUserObject().getId(), session.getContext());
+                    UserSettingMailStorage.getInstance().saveUserSettingMail(settings,
+                    		session.getUserObject().getId(), session.getContext());
                 } catch (NumberFormatException e) {
                     throw new SettingException(Code.JSON_READ_ERROR, e);
                 } catch (OXException e) {
@@ -848,8 +844,7 @@ public final class ConfigTree {
             }
             public void getValue(final SessionObject session,
                 final Setting setting) throws SettingException {
-                final UserSettingMail settings = session.getUserConfiguration()
-                    .getUserSettingMail();
+                final UserSettingMail settings = session.getUserSettingMail();
                 try {
                     setting.setSingleValue(settings.isSpamEnabled());
                 } catch (IMAPException e) {
