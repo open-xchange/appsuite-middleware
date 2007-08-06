@@ -6,7 +6,6 @@ import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.console.util.UtilAbstraction;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
-import com.openexchange.admin.rmi.exceptions.MissingOptionException;
 
 /**
  * This is an abstract class for all common attributes and methods of database related command line tools
@@ -243,21 +242,6 @@ public abstract class DatabaseAbstraction extends UtilAbstraction{
     @Override
     protected String getObjectName() {
         return "database";
-    }
-    
-    protected String databasenameOrIdSet() throws MissingOptionException {
-        String successtext;
-        // Throw the order of this checks we archive that the id is preferred over the name
-        if (null == this.dbid) {
-            if (null == this.dbname) {
-                throw new MissingOptionException("Either databasename or databaseid must be given");
-            } else {
-                successtext = this.dbname;
-            }
-        } else {
-            successtext = String.valueOf(this.dbid);
-        }
-        return successtext;
     }
 
     protected void parseAndSetMandatoryOptions(final AdminParser parser, final Database db) throws InvalidDataException {
