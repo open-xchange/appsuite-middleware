@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.openexchange.groupware.Init;
+import com.openexchange.groupware.RdbUserConfigurationStorage;
 import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -56,8 +57,8 @@ public class DelUserFolderDiscovererTest extends TestCase{
 		userA = UserStorage.getInstance(ctx).getUser(userIdA);
 		userB = UserStorage.getInstance(ctx).getUser(userIdB);
 		
-		userConfigA = UserConfiguration.loadUserConfiguration(userIdA, ctx);
-		userConfigB = UserConfiguration.loadUserConfiguration(userIdB, ctx);
+		userConfigA = RdbUserConfigurationStorage.loadUserConfiguration(userIdA, ctx);
+		userConfigB = RdbUserConfigurationStorage.loadUserConfiguration(userIdB, ctx);
 		
 		
 		session = SessionObjectWrapper.createSessionObject(userIdA, ctx, "blupp");

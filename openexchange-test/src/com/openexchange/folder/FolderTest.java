@@ -13,7 +13,7 @@ import com.openexchange.api2.FolderSQLInterface;
 import com.openexchange.api2.RdbFolderSQLInterface;
 import com.openexchange.cache.FolderCacheManager;
 import com.openexchange.groupware.Init;
-import com.openexchange.groupware.UserConfiguration;
+import com.openexchange.groupware.RdbUserConfigurationStorage;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarRecurringCollection;
 import com.openexchange.groupware.calendar.CalendarSql;
@@ -564,7 +564,7 @@ public class FolderTest extends TestCase {
 				assertTrue(fo.getLastModified().getTime() == lastModified);
 				assertTrue(fo.getModifiedBy() == userId);
 				assertTrue(fo.getParentFolderID() == stdCalFolder);
-				final EffectivePermission ep = fo.getEffectiveUserPermission(secondUserId, UserConfiguration.loadUserConfiguration(secondUserId, new ContextImpl(CONTEXT_ID)));
+				final EffectivePermission ep = fo.getEffectiveUserPermission(secondUserId, RdbUserConfigurationStorage.loadUserConfiguration(secondUserId, new ContextImpl(CONTEXT_ID)));
 				assertTrue(ep.isFolderVisible());
 				assertTrue(ep.canCreateSubfolders());
 				assertTrue(ep.canDeleteAllObjects());

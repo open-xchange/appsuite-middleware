@@ -15,6 +15,7 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
+import com.openexchange.api2.OXException;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.Types;
@@ -38,10 +39,11 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserConfigurationFactory;
 import com.openexchange.groupware.notify.ParticipantNotify.EmailableParticipant;
 import com.openexchange.groupware.notify.ParticipantNotify.LinkableState;
-import com.openexchange.groupware.notify.ParticipantNotify.State;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.i18n.StringTemplate;
 import com.openexchange.i18n.TemplateListResourceBundle;
+import com.openexchange.imap.UserSettingMail;
+import com.openexchange.imap.UserSettingMailStorage;
 import com.openexchange.sessiond.SessionObject;
 
 public class ParticipantNotifyTest extends TestCase{
@@ -426,7 +428,7 @@ public class ParticipantNotifyTest extends TestCase{
 		
 		session.setContext(new ContextImpl(1));
 		session.setUserObject(new MockUserLookup().getUser(1)); 
-		session.setUserConfiguration(new UserConfigurationFactory().getConfiguration(1));
+		//session.setUserConfiguration(new UserConfigurationFactory().getConfiguration(1));
 	}
 	
 	public void tearDown() throws Exception {
@@ -520,6 +522,11 @@ public class ParticipantNotifyTest extends TestCase{
 		protected UserConfiguration getUserConfiguration(int id, int[] groups, Context context) throws SQLException {
 			return USER_CONFIGS.getConfiguration(id);
 		}
+		
+		@Override
+		protected UserSettingMail getUserSettingMail(final int id, final Context context) throws OXException {
+			return USER_CONFIGS.getSetting(id);
+		}
 
 		@Override
 		protected void sendMessage(String messageTitle, String message, List<String> name, SessionObject session, CalendarObject obj, int folderId, State state, boolean suppressOXReminderHeader) {
@@ -538,7 +545,7 @@ public class ParticipantNotifyTest extends TestCase{
 			return module;
 		}
 
-		public boolean sendMail(UserConfiguration userConfig) {
+		public boolean sendMail(final UserSettingMail userSettingMail) {
 			// TODO Auto-generated method stub
 			return false;
 		}
