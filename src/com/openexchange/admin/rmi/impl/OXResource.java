@@ -47,7 +47,7 @@
  *
  */
 /*
- * $Id: OXResource.java,v 1.45 2007/08/03 10:31:11 dennis Exp $
+ * $Id: OXResource.java,v 1.46 2007/08/06 14:25:40 dennis Exp $
  */
 package com.openexchange.admin.rmi.impl;
 
@@ -137,7 +137,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
         }
         
         try {
-            setIdOrGetIDFromResourcename(ctx, res);
+            setIdOrGetIDFromNameAndIdObject(ctx, res);
             final int resource_ID = res.getId();        
             
             checkSchemaBeingLocked(ctx, tool);
@@ -320,7 +320,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
         try {
             basicauth.doAuthentication(auth,ctx);
             
-            setIdOrGetIDFromResourcename(ctx, res);
+            setIdOrGetIDFromNameAndIdObject(ctx, res);
             if (log.isDebugEnabled()) {
                 log.debug(ctx.toString() + " - " + res + " - " + auth.toString());
             }
@@ -570,18 +570,6 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
         final String illegal = resName.replaceAll(resource_check_regexp, "");
         if( illegal.length() > 0 ) {
             throw new InvalidDataException( "Illegal chars: \""+illegal+"\"");
-        }
-    }
-    
-    private void setIdOrGetIDFromResourcename(final Context ctx, final Resource res) throws StorageException, InvalidDataException {
-        final Integer id = res.getId();
-        if (null == id) {
-            final String resourcename = res.getName();
-            if (null != resourcename) {
-                res.setId(tool.getResourceIDByResourcename(ctx, resourcename));
-            } else {
-                throw new InvalidDataException("One resource object has no id or resourcename");
-            }
         }
     }
 }
