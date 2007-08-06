@@ -54,7 +54,6 @@ import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.console.user.UserAbstraction;
 import com.openexchange.admin.rmi.dataobjects.Context;
-import com.openexchange.admin.rmi.exceptions.MissingOptionException;
 
 public abstract class ContextAbstraction extends UserAbstraction {   
 
@@ -98,21 +97,6 @@ public abstract class ContextAbstraction extends UserAbstraction {
     
     protected void setContextQuotaOption(final AdminParser parser,final boolean required ){
         this.contextQuotaOption = setShortLongOpt(parser, OPT_QUOTA_SHORT,OPT_QUOTA_LONG,OPT_NAME_CONTEXT_QUOTA_DESCRIPTION,true, convertBooleantoTriState(required));
-    }
-
-    protected String contextnameOrIdSet() throws MissingOptionException {
-        String successtext;
-        // Through the order of this checks we archive that the id is preferred over the name
-        if (null == this.ctxid) {
-            if (null == this.contextname) {
-                throw new MissingOptionException("Either contextname or contextid must be given");
-            } else {
-                successtext = this.contextname;
-            }
-        } else {
-            successtext = String.valueOf(this.ctxid);
-        }
-        return successtext;
     }
 }
 
