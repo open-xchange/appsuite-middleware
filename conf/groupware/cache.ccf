@@ -107,7 +107,7 @@ jcs.region.User.elementattributes.IsLateral=false
 # UserConfiguration Cache only uses RAM
 jcs.region.UserConfiguration=LTCP
 jcs.region.UserConfiguration.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
-jcs.region.UserConfiguration.cacheattributes.MaxObjects=1000
+jcs.region.UserConfiguration.cacheattributes.MaxObjects=1000000
 jcs.region.UserConfiguration.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache
 jcs.region.UserConfiguration.cacheattributes.UseMemoryShrinker=true
 jcs.region.UserConfiguration.cacheattributes.MaxMemoryIdleTimeSeconds=180
@@ -120,6 +120,23 @@ jcs.region.UserConfiguration.elementattributes.IdleTime=180
 jcs.region.UserConfiguration.elementattributes.IsSpool=false
 jcs.region.UserConfiguration.elementattributes.IsRemote=false
 jcs.region.UserConfiguration.elementattributes.IsLateral=false
+
+# UserSettingMail Cache only uses RAM
+jcs.region.UserSettingMail=LTCP
+jcs.region.UserSettingMail.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
+jcs.region.UserSettingMail.cacheattributes.MaxObjects=1000000
+jcs.region.UserSettingMail.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache
+jcs.region.UserSettingMail.cacheattributes.UseMemoryShrinker=true
+jcs.region.UserSettingMail.cacheattributes.MaxMemoryIdleTimeSeconds=180
+jcs.region.UserSettingMail.cacheattributes.ShrinkerIntervalSeconds=60
+jcs.region.UserSettingMail.cacheattributes.MaxSpoolPerRun=500
+jcs.region.UserSettingMail.elementattributes=org.apache.jcs.engine.ElementAttributes
+jcs.region.UserSettingMail.elementattributes.IsEternal=false
+jcs.region.UserSettingMail.elementattributes.MaxLifeSeconds=300
+jcs.region.UserSettingMail.elementattributes.IdleTime=180
+jcs.region.UserSettingMail.elementattributes.IsSpool=false
+jcs.region.UserSettingMail.elementattributes.IsRemote=false
+jcs.region.UserSettingMail.elementattributes.IsLateral=false
 
 # Context Cache only uses RAM
 jcs.region.Context=LTCP
