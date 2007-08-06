@@ -493,7 +493,7 @@ public class ContactMySql implements ContactSql {
 			
 			if (cso.getEmailAutoComplete()){
 				folder = -1;
-				sb.append(' ').append("(fid = ").append(FolderObject.SYSTEM_LDAP_FOLDER_ID).append(" or fid =").append(cso.getEmailAutoCompleteFolder()).append(") AND ");
+				sb.append(' ').append("(fid = ").append(FolderObject.SYSTEM_LDAP_FOLDER_ID).append(" or fid =").append(cso.getEmailAutoCompleteFolder()).append(")  AND ("+Contacts.mapping[ContactObject.EMAIL1].getDBFieldName()+" is not null OR "+Contacts.mapping[ContactObject.EMAIL2].getDBFieldName()+" is not null OR "+Contacts.mapping[ContactObject.EMAIL3].getDBFieldName()+" is not null) AND ");
 			} else if (cso.isAllFolders()){
 				folder = -1;
 				sb.append(' ').append(cso.getAllFolderSQLINString()).append(" AND ");
