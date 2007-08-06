@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.groupware.delete;
 
 import java.sql.Connection;
@@ -58,6 +56,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import com.openexchange.ajax.spellcheck.AJAXUserDictionary;
 import com.openexchange.configuration.SystemConfig;
@@ -77,26 +77,30 @@ import com.openexchange.tools.oxfolder.OXFolderDeleteListener;
  * DeleteRegistry
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- *
+ * 
  */
-public class DeleteRegistry {
-	
+public final class DeleteRegistry {
+
 	private static DeleteRegistry instance;
-	
+
 	private final Set<Class> classes;
-	
+
 	private final List<DeleteListener> listeners;
-	
-	//private final Map<Class,DeleteListener> listeners;
+
+	private final Lock registryLock = new ReentrantLock();
+
+	private static final Lock INIT_LOCK = new ReentrantLock();
+
+	private static boolean initialized;
 
 	private DeleteRegistry() {
 		super();
 		listeners = new ArrayList<DeleteListener>(10);
-		classes =  new HashSet<Class>();
+		classes = new HashSet<Class>();
 	}
-	
+
 	private void init() throws Exception {
-        SystemConfig.init();
+		SystemConfig.init();
 		/*
 		 * Insert module delete listener
 		 */
@@ -112,53 +116,106 @@ public class DeleteRegistry {
 		registerDeleteListener(new UserSettingMail());
 		registerDeleteListener(new QuotaUsageDelete());
 		registerDeleteListener(new AttachmentDelDelete());
-		
 		/*
 		 * At last insert folder delete listener
 		 */
 		registerDeleteListener(new OXFolderDeleteListener());
-		//registerDeleteListener(new OXFolderAction());
 	}
-	
+
+	/**
+	 * Factory method
+	 * 
+	 * @return the singleton instance of <code>{@link DeleteRegistry}</code>
+	 */
 	public static DeleteRegistry getInstance() {
-		synchronized (DeleteRegistry.class) {
-			if (instance == null) {
-				instance = new DeleteRegistry();
-				try {
-					instance.init();
-				} catch (Exception e) {
-					instance = null;
+		if (!initialized) {
+			INIT_LOCK.lock();
+			try {
+				if (instance == null) {
+					instance = new DeleteRegistry();
+					try {
+						instance.init();
+						initialized = true;
+					} catch (Exception e) {
+						instance = null;
+					}
 				}
+			} finally {
+				INIT_LOCK.unlock();
 			}
 		}
 		return instance;
 	}
-	
+
+	/**
+	 * Registers an instance of <code>{@link DeleteListener}</code>. <b>Note</b>:
+	 * Only one instance of a certain <code>{@link DeleteListener}</code>
+	 * implementation is added, meaning if you try to register a certain
+	 * implementation twice, the latter one is going to be discarded
+	 * 
+	 * @param listener
+	 *            the listener to register
+	 */
 	public void registerDeleteListener(final DeleteListener listener) {
-		synchronized (this) {
+		registryLock.lock();
+		try {
 			if (classes.contains(listener.getClass())) {
 				return;
 			}
 			listeners.add(listener);
 			classes.add(listener.getClass());
+		} finally {
+			registryLock.unlock();
 		}
 	}
-	
+
+	/**
+	 * Removes given instance of <code>{@link DeleteListener}</code> from this
+	 * registry's known listeners.
+	 * 
+	 * @param listener -
+	 *            the listener to remove
+	 */
 	public void unregisterDeleteListener(final DeleteListener listener) {
-		synchronized (this) {
+		registryLock.lock();
+		try {
 			listeners.remove(listener);
 			classes.remove(listener.getClass());
+		} finally {
+			registryLock.unlock();
 		}
 	}
-	
-	public void fireDeleteEvent(final DeleteEvent sqlDelEvent, final Connection readCon, final Connection writeCon) throws DeleteFailedException, LdapException, SQLException, DBPoolingException {
-		synchronized (this) {
+
+	/**
+	 * Fires the delete event
+	 * 
+	 * @param deleteEvent
+	 *            the delete event
+	 * @param readCon
+	 *            a readable connection
+	 * @param writeCon
+	 *            a writeable connection
+	 * @throws DeleteFailedException
+	 *             if delete event could not be performed
+	 * @throws LdapException
+	 *             if any user/group data could not be determined
+	 * @throws SQLException
+	 *             if an SQL error occured
+	 * @throws DBPoolingException
+	 *             if no connection could be fetched from pool
+	 */
+	public void fireDeleteEvent(final DeleteEvent deleteEvent, final Connection readCon, final Connection writeCon)
+			throws DeleteFailedException, LdapException, SQLException, DBPoolingException {
+		registryLock.lock();
+		try {
 			final int size = listeners.size();
 			final Iterator<DeleteListener> iter = listeners.iterator();
 			for (int i = 0; i < size; i++) {
 				final DeleteListener listener = iter.next();
-				listener.deletePerformed(sqlDelEvent, readCon, writeCon);
+				listener.deletePerformed(deleteEvent, readCon, writeCon);
 			}
+		} finally {
+			registryLock.unlock();
 		}
 	}
 
