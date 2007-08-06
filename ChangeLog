@@ -1,3 +1,7 @@
+* 2007-08-06 - martin.kauss@open-xchange.com
+
+ - Documented calendar.properties options and parameters.   
+
 * 2007-08-06 - thorben.betten@open-xchange.com
 
  - Fixed JSON error when deleting appointment through multiple servlet
