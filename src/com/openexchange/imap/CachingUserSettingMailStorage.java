@@ -80,7 +80,7 @@ import com.openexchange.server.DBPool;
 import com.openexchange.server.DBPoolingException;
 
 /**
- * CachingUserSettingMailStorage - this torage tries to use a cache for
+ * CachingUserSettingMailStorage - this storage tries to use a cache for
  * instances of <code>{@link UserSettingMail}</code> and falls back to
  * database-based storage if any cache-related errors occur
  * 
