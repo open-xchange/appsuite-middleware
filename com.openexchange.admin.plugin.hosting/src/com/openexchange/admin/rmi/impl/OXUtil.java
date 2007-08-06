@@ -347,7 +347,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
 
         log.debug(database);
 
-        setIdOrGetIDFromDatabasename(database);
+        setIdOrGetIDFromNameAndIdObject(null, database);
         if (!tool.existsDatabase(database.getId())) {
             throw new InvalidDataException("No such database " + database);
         }
@@ -448,7 +448,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             }
         }
         
-        setIdOrGetIDFromDatabasename(db);
+        setIdOrGetIDFromNameAndIdObject(null, db);
         final Integer id = db.getId();
         if (!tool.existsDatabase(id)) {
             throw new InvalidDataException("No such database with id " + id);
@@ -503,17 +503,5 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
         }
         
         return isOK;
-    }
-    
-    private void setIdOrGetIDFromDatabasename(final Database db) throws StorageException, InvalidDataException {
-        final Integer id = db.getId();
-        if (null == id) {
-            final String groupname = db.getName();
-            if (null != groupname) {
-                db.setId(tool.getDatabaseIDByDatabasename(groupname));
-            } else {
-                throw new InvalidDataException("One resource object has no id or username");
-            }
-        }
     }
 }
