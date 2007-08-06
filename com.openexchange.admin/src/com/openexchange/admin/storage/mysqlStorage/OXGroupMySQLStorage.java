@@ -111,7 +111,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
     public void addMember(final Context ctx, final int grp_id, final User[] members) throws StorageException {
         Connection con = null;
         PreparedStatement prep_add_member = null;
-        final int context_id = ctx.getIdAsInt().intValue();
+        final int context_id = ctx.getId().intValue();
         try {
 
             con = cache.getWRITEConnectionForContext(context_id);
@@ -174,7 +174,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
     public void removeMember(final Context ctx, final int grp_id, final User[] members) throws StorageException {
         Connection con = null;
         PreparedStatement prep_del_member = null;
-        final int context_id = ctx.getIdAsInt().intValue();
+        final int context_id = ctx.getId().intValue();
         try {
             con = cache.getWRITEConnectionForContext(context_id);
             con.setAutoCommit(false);
@@ -239,7 +239,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
     public void change(final Context ctx, final Group grp) throws StorageException {
         Connection con = null;
         PreparedStatement prep_edit_group = null;
-        final int context_id = ctx.getIdAsInt();
+        final int context_id = ctx.getId();
         try {
             con = cache.getWRITEConnectionForContext(context_id);
             con.setAutoCommit(false);
@@ -336,7 +336,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
         int retval = -1;
         Connection con = null;
         PreparedStatement prep_insert = null;
-        final int context_ID = ctx.getIdAsInt().intValue();
+        final int context_ID = ctx.getId().intValue();
         try {
             con = cache.getWRITEConnectionForContext(context_ID);
             con.setAutoCommit(false);
@@ -430,7 +430,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
         Connection con = null;
         PreparedStatement prep_del_members = null;
         PreparedStatement prep_del_group = null;
-        final int context_id = ctx.getIdAsInt();
+        final int context_id = ctx.getId();
         try {
             final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
             
@@ -542,7 +542,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
     @Override
     public User[] getMembers(final Context ctx, final int grp_id) throws StorageException {
         Connection con = null;
-        final int context_id = ctx.getIdAsInt();
+        final int context_id = ctx.getId();
         try {
 
             con = cache.getREADConnectionForContext(context_id);
@@ -570,7 +570,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
     
     private Integer[] getMembers(final Context ctx, final int grp_id, Connection con) throws StorageException {        
         PreparedStatement prep_list = null;
-        final int context_id = ctx.getIdAsInt();
+        final int context_id = ctx.getId();
         try {
             
             prep_list = con.prepareStatement("SELECT member FROM groups_member WHERE groups_member.cid = ? AND groups_member.id = ?;");
@@ -600,7 +600,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
 
     private Group get(final Context ctx, Group grp,Connection con) throws StorageException{
         PreparedStatement prep_list = null;
-        final int context_ID = ctx.getIdAsInt();
+        final int context_ID = ctx.getId();
         try {
 
             prep_list = con.prepareStatement("SELECT cid,identifier,displayName FROM groups WHERE groups.cid = ? AND groups.id = ?");
@@ -641,7 +641,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
         
         try {
         	
-            con = cache.getREADConnectionForContext(ctx.getIdAsInt().intValue());
+            con = cache.getREADConnectionForContext(ctx.getId().intValue());
 
             return get(ctx, grp, con);        
         } catch (final PoolException e) {
@@ -650,7 +650,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
         } finally {
             try {
                 if (con != null) {
-                    cache.pushOXDBRead(ctx.getIdAsInt().intValue(), con);
+                    cache.pushOXDBRead(ctx.getId().intValue(), con);
                 }
             } catch (final PoolException e) {
                 log.error("Pool Error", e);
@@ -664,7 +664,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
         Connection con = null;
         PreparedStatement prep_list = null;
         ResultSet rs = null;
-        final int context_id = ctx.getIdAsInt();
+        final int context_id = ctx.getId();
         try {
             String pattern_temp = null;
             if (pattern != null) {
@@ -730,7 +730,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
     public void deleteRecoveryData(final Context ctx, final int group_id, final Connection con) throws StorageException {
         // delete from del_groups table
         PreparedStatement del_st = null;
-        final int context_id = ctx.getIdAsInt();
+        final int context_id = ctx.getId();
         try {
             del_st = con.prepareStatement("DELETE from del_groups WHERE id = ? AND cid = ?");
             del_st.setInt(1, group_id);
@@ -759,7 +759,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
     public void deleteAllRecoveryData(final Context ctx, final Connection con) throws StorageException {
         // delete from del_groups table
         PreparedStatement del_st = null;
-        final int context_id = ctx.getIdAsInt();
+        final int context_id = ctx.getId();
         try {
             del_st = con.prepareStatement("DELETE from del_groups WHERE cid = ?");
             del_st.setInt(1, context_id);
@@ -831,10 +831,10 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
         PreparedStatement prep_list = null;  
         try {
 
-            con = cache.getREADConnectionForContext(ctx.getIdAsInt().intValue());
+            con = cache.getREADConnectionForContext(ctx.getId().intValue());
             // fetch all group ids the user is member of
             prep_list = con.prepareStatement("SELECT id FROM groups_member WHERE cid = ? AND member = ?");
-            prep_list.setInt(1, ctx.getIdAsInt().intValue());
+            prep_list.setInt(1, ctx.getId().intValue());
             prep_list.setInt(2, usr.getId().intValue());
             
             final ResultSet rs = prep_list.executeQuery();
@@ -860,7 +860,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
 
             try {
                 if (con != null) {
-                    cache.pushOXDBRead(ctx.getIdAsInt().intValue(), con);
+                    cache.pushOXDBRead(ctx.getId().intValue(), con);
                 }
             } catch (final PoolException e) {
                 log.error("Pool Error", e);

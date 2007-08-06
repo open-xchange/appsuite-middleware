@@ -47,7 +47,7 @@
  *
  */
 /*
- * $Id: OXLogin.java,v 1.15 2007/08/02 14:07:26 dennis Exp $
+ * $Id: OXLogin.java,v 1.16 2007/08/06 14:25:14 dennis Exp $
  */
 package com.openexchange.admin.rmi.impl;
 
@@ -113,7 +113,7 @@ public class OXLogin extends OXCommonImpl implements OXLoginInterface {
         final int user_id = tool.getUserIDByUsername(ctx, auth.getLogin());
         tool.isContextAdmin(ctx, user_id);
         final User retval = new User(user_id);
-        retval.setUsername(auth.getLogin());
+        retval.setName(auth.getLogin());
 
         final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
 
@@ -145,7 +145,7 @@ public class OXLogin extends OXCommonImpl implements OXLoginInterface {
     private void triggerUpdateProcess(Context ctx) throws DatabaseUpdateException{
         // Check for update.
         try {
-            com.openexchange.groupware.contexts.Context ctxas = new ContextImpl(ctx.getIdAsInt().intValue());
+            com.openexchange.groupware.contexts.Context ctxas = new ContextImpl(ctx.getId().intValue());
             final Updater updater = Updater.getInstance();
             if (updater.toUpdate(ctxas)){
                 updater.startUpdate(ctxas);

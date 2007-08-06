@@ -102,7 +102,7 @@ public abstract class OXContextMySQLStorageCommon {
     public Context getData(final Context ctx, final Connection configdb_con, final long average_size) throws SQLException, PoolException  {
         Connection oxdb_read = null;
         PreparedStatement prep = null;
-        final int context_id = ctx.getIdAsInt();
+        final int context_id = ctx.getId();
 
         try {
             oxdb_read = cache.getREADConnectionForContext(context_id);
@@ -213,7 +213,7 @@ public abstract class OXContextMySQLStorageCommon {
             
             
             // context id
-            cs.setID(context_id);
+            cs.setId(context_id);
             return cs;
         } finally {
             try {
@@ -601,7 +601,7 @@ public abstract class OXContextMySQLStorageCommon {
                 final int server_id = getMyServerID(configdb_write_con);
                 stmt = configdb_write_con.prepareStatement("INSERT INTO context_server2db_pool (server_id,cid,read_db_pool_id,write_db_pool_id,db_schema)" + " VALUES " + " (?,?,?,?,?)");
                 stmt.setInt(1, server_id);
-                stmt.setInt(2, ctx.getIdAsInt());
+                stmt.setInt(2, ctx.getId());
                 stmt.setInt(3, read_id);
                 stmt.setInt(4, write_id);
                 stmt.setString(5, db_schema);
@@ -628,7 +628,7 @@ public abstract class OXContextMySQLStorageCommon {
             // table and login2context
 
             stmt = configdb_write_con.prepareStatement("INSERT INTO context (cid,name,enabled,filestore_id,filestore_name,quota_max) VALUES (?,?,?,?,?,?)");
-            stmt.setInt(1, ctx.getIdAsInt());
+            stmt.setInt(1, ctx.getId());
             if (ctx.getName() != null && ctx.getName().trim().length() > 0) {
                 stmt.setString(2, ctx.getName());
             } else {

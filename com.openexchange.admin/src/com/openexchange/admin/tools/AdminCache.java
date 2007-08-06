@@ -197,22 +197,22 @@ public class AdminCache {
      * @return the adminCredentials
      */
     public final Credentials getAdminCredentials(Context ctx) {        
-        return this.adminCredentialsCache.get(ctx.getIdAsInt());
+        return this.adminCredentialsCache.get(ctx.getId());
     }
 
     /**
      * @return authMech
      */
     public final String getAdminAuthMech(Context ctx) {        
-        return this.adminAuthMechCache.get(ctx.getIdAsInt());
+        return this.adminAuthMechCache.get(ctx.getId());
     }
 
     /**
      * @param adminCredentials the adminCredentials to set
      */
     public final void setAdminCredentials(Context ctx, String authMech, Credentials adminCredentials) {
-        this.adminCredentialsCache.put(ctx.getIdAsInt(),adminCredentials);
-        this.adminAuthMechCache.put(ctx.getIdAsInt(),authMech);
+        this.adminCredentialsCache.put(ctx.getId(),adminCredentials);
+        this.adminAuthMechCache.put(ctx.getId(),authMech);
     }
 
     /**
