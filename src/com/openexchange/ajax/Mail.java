@@ -496,33 +496,38 @@ public class Mail extends PermissionServlet implements UploadListener {
 				 * Receive message iterator
 				 */
 				if (threadSort) {
-					it = mailInterface.getAllThreadedMessages(folderId, columns);
-					final int size = it.size();
-					final boolean useCache;
-					final Map<String, MessageCacheObject> msgMap;
-					if (size < IMAPProperties.getMessageFetchLimit()) {
-						useCache = true;
-						msgMap = MessageCacheManager.getInstance().getUserMessageMap(sessionObj);
-					} else {
-						useCache = false;
-						msgMap = null;
-					}
-					for (int i = 0; i < size; i++) {
-						final MessageCacheObject msg = (MessageCacheObject) it.next();
-						if (useCache) {
-							/*
-							 * Put into msg map (and implicitely into cache)
-							 */
-							msgMap.put(MessageCacheManager.getMsgKey(msg.getUid(), MailFolderObject.prepareFullname(msg
-									.getFolderFullname(), msg.getSeparator())), msg);
+					boolean useCache = false;
+					try {
+						it = mailInterface.getAllThreadedMessages(folderId, columns);
+						final int size = it.size();
+						final Map<String, MessageCacheObject> msgMap;
+						if (size < IMAPProperties.getMessageFetchLimit()) {
+							useCache = true;
+							msgMap = MessageCacheManager.getInstance().getUserMessageMap(sessionObj);
+						} else {
+							msgMap = null;
 						}
-						jsonWriter.array();
-						try {
-							for (int j = 0; j < writers.length; j++) {
-								writers[j].writeField(jsonWriter, msg, msg.getThreadLevel(), false);
+						for (int i = 0; i < size; i++) {
+							final MessageCacheObject msg = (MessageCacheObject) it.next();
+							if (useCache) {
+								/*
+								 * Put into msg map (and implicitely into cache)
+								 */
+								msgMap.put(MessageCacheManager.getMsgKey(msg.getUid(), MailFolderObject.prepareFullname(msg
+										.getFolderFullname(), msg.getSeparator())), msg);
 							}
-						} finally {
-							jsonWriter.endArray();
+							jsonWriter.array();
+							try {
+								for (int j = 0; j < writers.length; j++) {
+									writers[j].writeField(jsonWriter, msg, msg.getThreadLevel(), false);
+								}
+							} finally {
+								jsonWriter.endArray();
+							}
+						}
+					} finally {
+						if (useCache) {
+							MessageCacheManager.getInstance().releaseUserMessageMap(sessionObj);
 						}
 					}
 				} else {
@@ -537,49 +542,54 @@ public class Mail extends PermissionServlet implements UploadListener {
 							throw new OXMailException(MailCode.INVALID_INT_VALUE, PARAMETER_ORDER);
 						}
 					}
-					/*
-					 * Get iterator
-					 */
-					it = mailInterface.getAllMessages(folderId, sortCol, orderDir, columns);
-					final int size = it.size();
-					/*
-					 * Cache must not be used if number of contained messages
-					 * exceeds max. fetch limit. If it does, slim message
-					 * objects of type MessageCacheObject are going to be
-					 * returned on fetch request which are only filled with
-					 * fields necessary to fullfill client request and sorting.
-					 * Thus upcoming client's PUT request would end up in an
-					 * exception telling that field is not present in message
-					 * object.
-					 */
-					final boolean useCache;
-					final Map<String, MessageCacheObject> msgMap;
-					if (size < IMAPProperties.getMessageFetchLimit()) {
-						useCache = true;
-						msgMap = MessageCacheManager.getInstance().getUserMessageMap(sessionObj);
-					} else {
-						useCache = false;
-						msgMap = null;
-					}
-					for (int i = 0; i < size; i++) {
-						final MessageCacheObject msg = (MessageCacheObject) it.next();
-						if (useCache) {
-							/*
-							 * Put into msg map (and implicitely into cache)
-							 */
-							msgMap.put(MessageCacheManager.getMsgKey(msg.getUid(), MailFolderObject.prepareFullname(msg
-									.getFolderFullname(), msg.getSeparator())), msg);
-						}
+					boolean useCache = false;
+					try {
 						/*
-						 * Write message
+						 * Get iterator
 						 */
-						jsonWriter.array();
-						try {
-							for (int j = 0; j < writers.length; j++) {
-								writers[j].writeField(jsonWriter, msg, 0, false);
+						it = mailInterface.getAllMessages(folderId, sortCol, orderDir, columns);
+						final int size = it.size();
+						/*
+						 * Cache must not be used if number of contained messages
+						 * exceeds max. fetch limit. If it does, slim message
+						 * objects of type MessageCacheObject are going to be
+						 * returned on fetch request which are only filled with
+						 * fields necessary to fullfill client request and sorting.
+						 * Thus upcoming client's PUT request would end up in an
+						 * exception telling that field is not present in message
+						 * object.
+						 */
+						final Map<String, MessageCacheObject> msgMap;
+						if (size < IMAPProperties.getMessageFetchLimit()) {
+							useCache = true;
+							msgMap = MessageCacheManager.getInstance().getUserMessageMap(sessionObj);
+						} else {
+							msgMap = null;
+						}
+						for (int i = 0; i < size; i++) {
+							final MessageCacheObject msg = (MessageCacheObject) it.next();
+							if (useCache) {
+								/*
+								 * Put into msg map (and implicitely into cache)
+								 */
+								msgMap.put(MessageCacheManager.getMsgKey(msg.getUid(), MailFolderObject.prepareFullname(msg
+										.getFolderFullname(), msg.getSeparator())), msg);
 							}
-						} finally {
-							jsonWriter.endArray();
+							/*
+							 * Write message
+							 */
+							jsonWriter.array();
+							try {
+								for (int j = 0; j < writers.length; j++) {
+									writers[j].writeField(jsonWriter, msg, 0, false);
+								}
+							} finally {
+								jsonWriter.endArray();
+							}
+						}
+					} finally {
+						if (useCache) {
+							MessageCacheManager.getInstance().releaseUserMessageMap(sessionObj);
 						}
 					}
 				}

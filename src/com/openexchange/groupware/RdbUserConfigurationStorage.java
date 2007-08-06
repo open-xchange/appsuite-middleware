@@ -322,8 +322,10 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
 	}
 
 	/**
-	 * Loads the user configuration from database specified through user ID and
-	 * context
+	 * Special method invoked by admin to load user configuration since no
+	 * exception is thrown if no matching config could be found. In this case an
+	 * instance of {@link UserConfiguration} is returned that does not hold any
+	 * permissions.
 	 * 
 	 * @param userId -
 	 *            the user ID
@@ -339,16 +341,30 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
 	 * @throws DBPoolingException -
 	 *             if a readable connection could not be obtained from
 	 *             connection pool
-	 * @throws LdapException -
-	 *             if user's groups are <code>null</code> and could not be
-	 *             determined by <code>{@link UserStorage}</code>
-	 *             implementation
-	 * @throws OXException -
-	 *             if no matching user configuration is kept in database
 	 */
-	public static UserConfiguration loadUserConfiguration(final int userId, final int[] groups, final int cid,
-			final Connection readConArg) throws SQLException, DBPoolingException, LdapException, OXException {
-		return loadUserConfiguration(userId, groups, new ContextImpl(cid), readConArg);
+	public static UserConfiguration adminLoadUserConfiguration(final int userId, final int[] groups, final int cid,
+			final Connection readConArg) throws SQLException, DBPoolingException {
+		final Context ctx = new ContextImpl(cid);
+		Connection readCon = readConArg;
+		boolean closeReadCon = false;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		try {
+			if (readCon == null) {
+				readCon = DBPool.pickup(ctx);
+				closeReadCon = true;
+			}
+			stmt = readCon.prepareStatement(LOAD_USER_CONFIGURATION);
+			stmt.setInt(1, ctx.getContextId());
+			stmt.setInt(2, userId);
+			rs = stmt.executeQuery();
+			if (rs.next()) {
+				return new UserConfiguration(rs.getInt(1), userId, groups, ctx);
+			}
+			return new UserConfiguration(0, userId, groups, ctx);
+		} finally {
+			closeResources(rs, stmt, closeReadCon ? readCon : null, true, ctx);
+		}
 	}
 
 	private static final String LOAD_USER_CONFIGURATION = "SELECT permissions FROM user_configuration WHERE cid = ? AND user = ?";
