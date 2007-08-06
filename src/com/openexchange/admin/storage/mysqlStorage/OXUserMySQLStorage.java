@@ -1914,7 +1914,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             final int[] all_groups_of_user = getGroupsForUser(ctx, user_id,
                     read_ox_con);
             final UserConfiguration user = RdbUserConfigurationStorage
-                    .loadUserConfiguration(user_id, all_groups_of_user, ctx
+                    .adminLoadUserConfiguration(user_id, all_groups_of_user, ctx
                             .getIdAsInt(), read_ox_con);
 
             final UserModuleAccess acc = new UserModuleAccess();
@@ -1948,13 +1948,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         } catch (final SQLException sqle) {
             log.error("SQL Error ", sqle);
             throw new StorageException(sqle);
-        } catch (LdapException e) {
-        	log.error("LDAP Error ", e);
-            throw new StorageException(e);
-		} catch (OXException e) {
-			log.error("OX Error ", e);
-            throw new StorageException(e);
-		} finally {
+        } finally {
             try {
                 if (read_ox_con != null) {
                     cache.pushOXDBRead(ctx.getIdAsInt(), read_ox_con);
@@ -2254,7 +2248,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
         try {
             final UserConfiguration user = RdbUserConfigurationStorage
-                    .loadUserConfiguration(user_id, groups, ctx.getIdAsInt(),
+                    .adminLoadUserConfiguration(user_id, groups, ctx.getIdAsInt(),
                             read_ox_con);
 
             user.setCalendar(access.getCalendar());
@@ -2284,13 +2278,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         } catch (final SQLException sqle) {
             log.error("SQL Error", sqle);
             throw new StorageException(sqle);
-        } catch (LdapException e) {
-        	log.error("LDAP Error", e);
-            throw new StorageException(e);
-		} catch (OXException e) {
-			log.error("OX Error", e);
-            throw new StorageException(e);
-		}
+        }
     }
 
     private ArrayList<MethodAndNames> getGetters(final Method[] theMethods) {
