@@ -122,17 +122,17 @@ public class OXAuthMySQLStorage extends OXAuthStorageInterface {
                     ResultSet rs = null;
                     try {
 
-                        sql_con = ClientAdminThread.cache.getREADConnectionForContext(ctx.getIdAsInt());
+                        sql_con = ClientAdminThread.cache.getREADConnectionForContext(ctx.getId());
                         prep = sql_con.prepareStatement("select u.userPassword,u.passwordMech from user u JOIN login2user l JOIN user_setting_admin usa ON u.id = l.id AND u.cid = l.cid AND u.cid = usa.cid AND u.id = usa.user WHERE u.cid = ? AND l.uid = ?");
 
-                        prep.setInt(1, ctx.getIdAsInt());
+                        prep.setInt(1, ctx.getId());
                         prep.setString(2, authdata.getLogin());
 
                         rs = prep.executeQuery();
                         if (!rs.next()) {
                             // auth failed , admin user not found in context
                             if (log.isDebugEnabled()) {
-                                log.debug("Admin user \"" + authdata.getLogin() + "\" not found in context \"" + ctx.getIdAsInt() + "\"!");
+                                log.debug("Admin user \"" + authdata.getLogin() + "\" not found in context \"" + ctx.getId() + "\"!");
                             }
                             return false;
                         } else {
@@ -175,7 +175,7 @@ public class OXAuthMySQLStorage extends OXAuthStorageInterface {
                         }
 
                         try {
-                            ClientAdminThread.cache.pushOXDBRead(ctx.getIdAsInt(), sql_con);
+                            ClientAdminThread.cache.pushOXDBRead(ctx.getId(), sql_con);
                         } catch (final PoolException ecp) {
                             log.error("Pool Error", ecp);
                         }
@@ -220,17 +220,17 @@ public class OXAuthMySQLStorage extends OXAuthStorageInterface {
             ResultSet rs = null;
             try {
 
-                sql_con = ClientAdminThread.cache.getREADConnectionForContext(ctx.getIdAsInt());
+                sql_con = ClientAdminThread.cache.getREADConnectionForContext(ctx.getId());
                 prep = sql_con.prepareStatement("SELECT u.userPassword,u.passwordMech FROM user u JOIN login2user l ON u.id = l.id AND u.cid = l.cid WHERE u.cid = ? AND l.uid = ?");
 
-                prep.setInt(1, ctx.getIdAsInt());
+                prep.setInt(1, ctx.getId());
                 prep.setString(2, authdata.getLogin());
 
                 rs = prep.executeQuery();
                 if (!rs.next()) {
                     // auth failed , user not found in context
                     if (log.isDebugEnabled()) {
-                        log.debug("User \"" + authdata.getLogin() + "\" not found in context \"" + ctx.getIdAsInt() + "\"!");
+                        log.debug("User \"" + authdata.getLogin() + "\" not found in context \"" + ctx.getId() + "\"!");
                     }
                     return false;
                 } else {
@@ -277,7 +277,7 @@ public class OXAuthMySQLStorage extends OXAuthStorageInterface {
                 }
 
                 try {
-                    ClientAdminThread.cache.pushOXDBRead(ctx.getIdAsInt(), sql_con);
+                    ClientAdminThread.cache.pushOXDBRead(ctx.getId(), sql_con);
                 } catch (final PoolException ecp) {
                     log.error("Pool Error", ecp);
                 }

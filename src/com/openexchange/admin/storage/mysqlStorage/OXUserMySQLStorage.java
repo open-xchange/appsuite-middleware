@@ -150,7 +150,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         Connection write_ox_con = null;
         PreparedStatement stmt = null;
         PreparedStatement folder_update = null;
-        final int context_id = ctx.getIdAsInt();
+        final int context_id = ctx.getId();
         final int user_id = usrdata.getId();
         try {
 
@@ -686,7 +686,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         
         try {
             ps = write_ox_con.prepareStatement("SELECT user FROM user_setting_admin WHERE cid=?");
-            ps.setInt(1, ctx.getIdAsInt());
+            ps.setInt(1, ctx.getId());
             ResultSet rs = ps.executeQuery();
             int admin_id = 0;
             boolean mustMapAdmin = false;
@@ -703,7 +703,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             PreparedStatement stmt = null;
             try {
                 stmt = write_ox_con.prepareStatement("INSERT INTO user (cid,id,userPassword,passwordMech,shadowLastChange,mail,timeZone,preferredLanguage,mailEnabled,imapserver,smtpserver,contactId,homeDirectory,uidNumber,gidNumber,loginShell,imapLogin) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
-                stmt.setInt(1, ctx.getIdAsInt().intValue());
+                stmt.setInt(1, ctx.getId().intValue());
                 stmt.setInt(2, internal_user_id);
                 stmt.setString(3, passwd);
                 stmt.setString(4, usrdata.getPasswordMech2String());
@@ -756,7 +756,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.setInt(12, contact_id);
 
                 String homedir = prop.getUserProp(AdminProperties.User.HOME_DIR_ROOT, "/home");
-                homedir += "/" + usrdata.getUsername();
+                homedir += "/" + usrdata.getName();
                 stmt.setString(13, homedir);
 
                 if( Integer.parseInt(prop.getUserProp(AdminProperties.User.UID_NUMBER_START, "-1")) > 0 ) {
@@ -874,7 +874,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
                 stmt = write_ox_con.prepareStatement(contact_query.toString());
 
-                stmt.setInt(1, ctx.getIdAsInt());
+                stmt.setInt(1, ctx.getId());
                 stmt.setInt(2, internal_user_id);
                 stmt.setLong(3, System.currentTimeMillis());
                 stmt.setInt(4, internal_user_id);
@@ -979,7 +979,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                        if(tmp_mail.length()>0){
                            stmt = write_ox_con
                                 .prepareStatement("INSERT INTO user_attribute (cid,id,name,value) VALUES (?,?,?,?)");
-                           stmt.setInt(1, ctx.getIdAsInt());
+                           stmt.setInt(1, ctx.getId());
                            stmt.setInt(2, internal_user_id);
                            stmt.setString(3, "alias");
                            stmt.setString(4, tmp_mail);
@@ -992,15 +992,15 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 // add user to login2user table with the internal id
                 stmt = write_ox_con
                         .prepareStatement("INSERT INTO login2user (cid,id,uid) VALUES (?,?,?)");
-                stmt.setInt(1, ctx.getIdAsInt());
+                stmt.setInt(1, ctx.getId());
                 stmt.setInt(2, internal_user_id);
-                stmt.setString(3, usrdata.getUsername());
+                stmt.setString(3, usrdata.getName());
                 stmt.executeUpdate();
                 stmt.close();
 
                 stmt = write_ox_con
                         .prepareStatement("INSERT INTO groups_member (cid,id,member) VALUES (?,?,?)");
-                stmt.setInt(1, ctx.getIdAsInt());
+                stmt.setInt(1, ctx.getId());
                 stmt.setInt(2, def_group_id);
                 stmt.setInt(3, internal_user_id);
                 stmt.executeUpdate();
@@ -1009,7 +1009,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 if (mustMapAdmin) {
                     stmt = write_ox_con
                             .prepareStatement("INSERT INTO user_setting_admin (cid,user) VALUES (?,?)");
-                    stmt.setInt(1, ctx.getIdAsInt());
+                    stmt.setInt(1, ctx.getId());
                     stmt.setInt(2, admin_id);
                     stmt.executeUpdate();
                     stmt.close();
@@ -1025,7 +1025,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 // add users standard mail settings
                 stmt = write_ox_con
                         .prepareStatement("INSERT INTO user_setting_mail (cid,user,std_trash,std_sent,std_drafts,std_spam,send_addr,bits,confirmed_spam,confirmed_ham) VALUES (?,?,?,?,?,?,?,?,?,?)");
-                stmt.setInt(1, ctx.getIdAsInt());
+                stmt.setInt(1, ctx.getId());
                 stmt.setInt(2, internal_user_id);
                 stmt.setString(3, std_mail_folder_trash);
                 stmt.setString(4, std_mail_folder_sent);
@@ -1053,7 +1053,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 if (internal_user_id != admin_id) {
                     final OXFolderAdminHelper oxa = new OXFolderAdminHelper();
                     oxa.addUserToOXFolders(internal_user_id, usrdata
-                            .getDisplay_name(), lang, ctx.getIdAsInt(),
+                            .getDisplay_name(), lang, ctx.getId(),
                             write_ox_con);
                 }
             } finally {
@@ -1069,8 +1069,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             // return the client the id to work with the user in the system
             return_db_id = write_ox_con
                     .prepareStatement("SELECT id FROM login2user WHERE cid = ? AND uid = ?");
-            return_db_id.setInt(1, ctx.getIdAsInt());
-            return_db_id.setString(2, usrdata.getUsername());
+            return_db_id.setInt(1, ctx.getId());
+            return_db_id.setString(2, usrdata.getName());
             rs = return_db_id.executeQuery();
             int id_for_client = -1;
             if (rs.next()) {
@@ -1171,7 +1171,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
     @Override
     public int create(final Context ctx, final User usrdata, final UserModuleAccess moduleAccess) throws StorageException {
-        final int context_id = ctx.getIdAsInt();
+        final int context_id = ctx.getId();
         Connection write_ox_con = null;
         try {
             write_ox_con = cache.getWRITEConnectionForContext(context_id);
@@ -1239,7 +1239,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     public int[] getAll(final Context ctx) throws StorageException {
         Connection read_ox_con = null;
         PreparedStatement stmt = null;
-        final int context_id = ctx.getIdAsInt();
+        final int context_id = ctx.getId();
         try {
             final ArrayList<Integer> list = new ArrayList<Integer>();
             read_ox_con = cache.getREADConnectionForContext(context_id);
@@ -1291,7 +1291,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         if (null != search_pattern) {
             new_search_pattern = search_pattern.replace('*', '%');
         }
-        final int context_id = ctx.getIdAsInt();
+        final int context_id = ctx.getId();
         try {
             final ArrayList<User> retval = new ArrayList<User>();
             read_ox_con = cache.getREADConnectionForContext(context_id);
@@ -1335,7 +1335,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     @Override
     public User[] getData(final Context ctx, final User[] users)
             throws StorageException {
-        final int context_id = ctx.getIdAsInt();
+        final int context_id = ctx.getId();
         final Class<User> c = User.class;
         final Method[] theMethods = c.getMethods();
         final ArrayList<Method> list = new ArrayList<Method>();
@@ -1384,7 +1384,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             for (final User user : users) {
                 int user_id = user.getId();
                 final User newuser = (User) user.clone();
-                String username = user.getUsername();
+                String username = user.getName();
                 if (-1 != user_id) {
                     if (null == username) {
                         stmt = read_ox_con
@@ -1394,18 +1394,18 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                         final ResultSet rs = stmt.executeQuery();
                         if (rs.next()) {
                             username = rs.getString("uid");
-                            user.setUsername(username);
+                            user.setName(username);
                         }
                         rs.close();
                         stmt.close();
                     }
                     stmt = read_ox_con.prepareStatement(query.toString());
                     stmt.setInt(1, user_id);
-                } else if (null != user.getUsername()) {
+                } else if (null != user.getName()) {
                     stmt = read_ox_con
                             .prepareStatement("SELECT id FROM login2user WHERE cid = ? AND uid = ?");
                     stmt.setInt(1, context_id);
-                    stmt.setString(2, user.getUsername());
+                    stmt.setString(2, user.getName());
                     final ResultSet rs = stmt.executeQuery();
                     if (rs.next()) {
                         user_id = rs.getInt("id");
@@ -1415,7 +1415,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     stmt = read_ox_con.prepareStatement(query.toString());
                     stmt.setInt(1, user_id);
                 }
-                newuser.setUsername(username);
+                newuser.setName(username);
 
                 stmt.setInt(2, context_id);
                 ResultSet rs3 = stmt.executeQuery();
@@ -1548,46 +1548,46 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             // delete all users
             for (final int user_id : user_ids) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Start delete user " + user_id + " in context "+ ctx.getIdAsInt());
-                    log.debug("Delete user " + user_id + "(" + ctx.getIdAsInt()+ ") via OX API...");
+                    log.debug("Start delete user " + user_id + " in context "+ ctx.getId());
+                    log.debug("Delete user " + user_id + "(" + ctx.getId()+ ") via OX API...");
                 }
                 final DeleteEvent delev = new DeleteEvent(this, user_id,
-                        DeleteEvent.TYPE_USER, ctx.getIdAsInt());
+                        DeleteEvent.TYPE_USER, ctx.getId());
                 AdminCache.delreg.fireDeleteEvent(delev, write_ox_con,
                         write_ox_con);
                 if (log.isDebugEnabled()) {
-                    log.debug("Delete user " + user_id + "(" + ctx.getIdAsInt()+ ") from login2user...");
+                    log.debug("Delete user " + user_id + "(" + ctx.getId()+ ") from login2user...");
                 }
                 stmt = write_ox_con
                         .prepareStatement("DELETE FROM login2user WHERE cid = ? AND id = ?");
-                stmt.setInt(1, ctx.getIdAsInt());
+                stmt.setInt(1, ctx.getId());
                 stmt.setInt(2, user_id);
                 stmt.executeUpdate();
                 stmt.close();
                 if (log.isDebugEnabled()) {
-                    log.debug("Delete user " + user_id + "(" + ctx.getIdAsInt()+ ") from groups member...");
+                    log.debug("Delete user " + user_id + "(" + ctx.getId()+ ") from groups member...");
                 }
                 stmt = write_ox_con
                         .prepareStatement("DELETE FROM groups_member WHERE cid = ? AND member = ?");
-                stmt.setInt(1, ctx.getIdAsInt());
+                stmt.setInt(1, ctx.getId());
                 stmt.setInt(2, user_id);
                 stmt.executeUpdate();
                 stmt.close();
                 if (log.isDebugEnabled()) {
-                    log.debug("Delete user " + user_id + "(" + ctx.getIdAsInt()+ ") from user attribute ...");
+                    log.debug("Delete user " + user_id + "(" + ctx.getId()+ ") from user attribute ...");
                 }
                 stmt = write_ox_con
                         .prepareStatement("DELETE FROM user_attribute WHERE cid = ? AND id = ?");
-                stmt.setInt(1, ctx.getIdAsInt());
+                stmt.setInt(1, ctx.getId());
                 stmt.setInt(2, user_id);
                 stmt.executeUpdate();
                 stmt.close();
                 if (log.isDebugEnabled()) {
-                    log.debug("Delete user " + user_id + "(" + ctx.getIdAsInt() + ") from user mail setting...");
+                    log.debug("Delete user " + user_id + "(" + ctx.getId() + ") from user mail setting...");
                 }
                 stmt = write_ox_con
                         .prepareStatement("DELETE FROM user_setting_mail WHERE cid = ? AND user = ?");
-                stmt.setInt(1, ctx.getIdAsInt());
+                stmt.setInt(1, ctx.getId());
                 stmt.setInt(2, user_id);
                 stmt.executeUpdate();
                 stmt.close();
@@ -1598,7 +1598,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 if (user_id == tools.getAdminForContext(ctx, write_ox_con)) {
                     stmt = write_ox_con
                             .prepareStatement("DELETE FROM user_setting_admin WHERE cid = ? AND user = ?");
-                    stmt.setInt(1, ctx.getIdAsInt());
+                    stmt.setInt(1, ctx.getId());
                     stmt.setInt(2, user_id);
                     stmt.executeUpdate();
                     stmt.close();
@@ -1607,20 +1607,20 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 // when table ready, enable this
                 createRecoveryData(ctx, user_id, write_ox_con);
                 if (log.isDebugEnabled()) {
-                    log.debug("Delete user " + user_id + "(" + ctx.getIdAsInt() + ") from user ...");
+                    log.debug("Delete user " + user_id + "(" + ctx.getId() + ") from user ...");
                 }
                 stmt = write_ox_con
                         .prepareStatement("DELETE FROM user WHERE cid = ? AND id = ?");
-                stmt.setInt(1, ctx.getIdAsInt());
+                stmt.setInt(1, ctx.getId());
                 stmt.setInt(2, user_id);
                 stmt.executeUpdate();
                 stmt.close();
                 if (log.isDebugEnabled()) {
-                    log.debug("Delete user " + user_id + "(" + ctx.getIdAsInt() + ") from contacts ...");
+                    log.debug("Delete user " + user_id + "(" + ctx.getId() + ") from contacts ...");
                 }
                 stmt = write_ox_con
                         .prepareStatement("DELETE FROM prg_contacts WHERE cid = ? AND userid = ?");
-                stmt.setInt(1, ctx.getIdAsInt());
+                stmt.setInt(1, ctx.getId());
                 stmt.setInt(2, user_id);
                 stmt.executeUpdate();
                 stmt.close();
@@ -1660,46 +1660,46 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             for (final User user : users) {
                 final int user_id = user.getId();
                 if (log.isDebugEnabled()) {
-                    log.debug("Start delete user " + user_id + " in context "+ ctx.getIdAsInt());
-                    log.debug("Delete user " + user_id + "(" + ctx.getIdAsInt()+ ") via OX API...");
+                    log.debug("Start delete user " + user_id + " in context "+ ctx.getId());
+                    log.debug("Delete user " + user_id + "(" + ctx.getId()+ ") via OX API...");
                 }
                 final DeleteEvent delev = new DeleteEvent(this, user_id,
-                        DeleteEvent.TYPE_USER, ctx.getIdAsInt());
+                        DeleteEvent.TYPE_USER, ctx.getId());
                 AdminCache.delreg.fireDeleteEvent(delev, write_ox_con,
                         write_ox_con);
                 if (log.isDebugEnabled()) {
-                    log.debug("Delete user " + user_id + "(" + ctx.getIdAsInt()+ ") from login2user...");
+                    log.debug("Delete user " + user_id + "(" + ctx.getId()+ ") from login2user...");
                 }
                 stmt = write_ox_con
                 .prepareStatement("DELETE FROM login2user WHERE cid = ? AND id = ?");
-                stmt.setInt(1, ctx.getIdAsInt());
+                stmt.setInt(1, ctx.getId());
                 stmt.setInt(2, user_id);
                 stmt.executeUpdate();
                 stmt.close();
                 if (log.isDebugEnabled()) {
-                    log.debug("Delete user " + user_id + "(" + ctx.getIdAsInt()+ ") from groups member...");
+                    log.debug("Delete user " + user_id + "(" + ctx.getId()+ ") from groups member...");
                 }
                 stmt = write_ox_con
                 .prepareStatement("DELETE FROM groups_member WHERE cid = ? AND member = ?");
-                stmt.setInt(1, ctx.getIdAsInt());
+                stmt.setInt(1, ctx.getId());
                 stmt.setInt(2, user_id);
                 stmt.executeUpdate();
                 stmt.close();
                 if (log.isDebugEnabled()) {
-                    log.debug("Delete user " + user_id + "(" + ctx.getIdAsInt()+ ") from user attribute ...");
+                    log.debug("Delete user " + user_id + "(" + ctx.getId()+ ") from user attribute ...");
                 }
                 stmt = write_ox_con
                 .prepareStatement("DELETE FROM user_attribute WHERE cid = ? AND id = ?");
-                stmt.setInt(1, ctx.getIdAsInt());
+                stmt.setInt(1, ctx.getId());
                 stmt.setInt(2, user_id);
                 stmt.executeUpdate();
                 stmt.close();
                 if (log.isDebugEnabled()) {
-                    log.debug("Delete user " + user_id + "(" + ctx.getIdAsInt() + ") from user mail setting...");
+                    log.debug("Delete user " + user_id + "(" + ctx.getId() + ") from user mail setting...");
                 }
                 stmt = write_ox_con
                 .prepareStatement("DELETE FROM user_setting_mail WHERE cid = ? AND user = ?");
-                stmt.setInt(1, ctx.getIdAsInt());
+                stmt.setInt(1, ctx.getId());
                 stmt.setInt(2, user_id);
                 stmt.executeUpdate();
                 stmt.close();
@@ -1710,7 +1710,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 if (user_id == tools.getAdminForContext(ctx, write_ox_con)) {
                     stmt = write_ox_con
                     .prepareStatement("DELETE FROM user_setting_admin WHERE cid = ? AND user = ?");
-                    stmt.setInt(1, ctx.getIdAsInt());
+                    stmt.setInt(1, ctx.getId());
                     stmt.setInt(2, user_id);
                     stmt.executeUpdate();
                     stmt.close();
@@ -1719,20 +1719,20 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 // when table ready, enable this
                 createRecoveryData(ctx, user_id, write_ox_con);
                 if (log.isDebugEnabled()) {
-                    log.debug("Delete user " + user_id + "(" + ctx.getIdAsInt() + ") from user ...");
+                    log.debug("Delete user " + user_id + "(" + ctx.getId() + ") from user ...");
                 }
                 stmt = write_ox_con
                 .prepareStatement("DELETE FROM user WHERE cid = ? AND id = ?");
-                stmt.setInt(1, ctx.getIdAsInt());
+                stmt.setInt(1, ctx.getId());
                 stmt.setInt(2, user_id);
                 stmt.executeUpdate();
                 stmt.close();
                 if (log.isDebugEnabled()) {
-                    log.debug("Delete user " + user_id + "(" + ctx.getIdAsInt() + ") from contacts ...");
+                    log.debug("Delete user " + user_id + "(" + ctx.getId() + ") from contacts ...");
                 }
                 stmt = write_ox_con
                 .prepareStatement("DELETE FROM prg_contacts WHERE cid = ? AND userid = ?");
-                stmt.setInt(1, ctx.getIdAsInt());
+                stmt.setInt(1, ctx.getId());
                 stmt.setInt(2, user_id);
                 stmt.executeUpdate();
                 stmt.close();
@@ -1771,7 +1771,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
         try {
 
-            write_ox_con = cache.getWRITEConnectionForContext(ctx.getIdAsInt());
+            write_ox_con = cache.getWRITEConnectionForContext(ctx.getId());
             write_ox_con.setAutoCommit(false);
 
             delete(ctx, user_ids, write_ox_con);
@@ -1804,7 +1804,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         } finally {
             try {
                 if (write_ox_con != null) {
-                    cache.pushOXDBWrite(ctx.getIdAsInt(), write_ox_con);
+                    cache.pushOXDBWrite(ctx.getId(), write_ox_con);
                 }
             } catch (final PoolException aexp) {
                 log.error("Pool Error pushing ox write connection to pool!", aexp);
@@ -1818,7 +1818,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         Connection write_ox_con = null;
         
         try {
-            write_ox_con = cache.getWRITEConnectionForContext(ctx.getIdAsInt());
+            write_ox_con = cache.getWRITEConnectionForContext(ctx.getId());
             write_ox_con.setAutoCommit(false);
             
             delete(ctx, users, write_ox_con);
@@ -1851,7 +1851,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         } finally {
             try {
                 if (write_ox_con != null) {
-                    cache.pushOXDBWrite(ctx.getIdAsInt(), write_ox_con);
+                    cache.pushOXDBWrite(ctx.getId(), write_ox_con);
                 }
             } catch (final PoolException aexp) {
                 log.error("Pool Error pushing ox write connection to pool!", aexp);
@@ -1872,8 +1872,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         Connection write_ox_con = null;
 
         try {
-            read_ox_con = cache.getREADConnectionForContext(ctx.getIdAsInt());
-            write_ox_con = cache.getWRITEConnectionForContext(ctx.getIdAsInt());
+            read_ox_con = cache.getREADConnectionForContext(ctx.getId());
+            write_ox_con = cache.getWRITEConnectionForContext(ctx.getId());
 
             // first get all groups the user is in
             final int[] all_groups = getGroupsForUser(ctx, user_id, read_ox_con);
@@ -1890,14 +1890,14 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         } finally {
             try {
                 if (read_ox_con != null) {
-                    cache.pushOXDBRead(ctx.getIdAsInt(), read_ox_con);
+                    cache.pushOXDBRead(ctx.getId(), read_ox_con);
                 }
             } catch (final PoolException exp) {
                 log.error("Pool Error pushing ox read connection to pool!", exp);
             }
             try {
                 if (write_ox_con != null) {
-                    cache.pushOXDBWrite(ctx.getIdAsInt(), write_ox_con);
+                    cache.pushOXDBWrite(ctx.getId(), write_ox_con);
                 }
             } catch (final PoolException exp) {
                 log.error("Pool Error pushing ox write connection to pool!", exp);
@@ -1910,12 +1910,11 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             throws StorageException {
         Connection read_ox_con = null;
         try {
-            read_ox_con = cache.getREADConnectionForContext(ctx.getIdAsInt());
+            read_ox_con = cache.getREADConnectionForContext(ctx.getId());
             final int[] all_groups_of_user = getGroupsForUser(ctx, user_id,
                     read_ox_con);
             final UserConfiguration user = RdbUserConfigurationStorage
-                    .adminLoadUserConfiguration(user_id, all_groups_of_user, ctx
-                            .getIdAsInt(), read_ox_con);
+                    .adminLoadUserConfiguration(user_id, all_groups_of_user, ctx.getId(), read_ox_con);
 
             final UserModuleAccess acc = new UserModuleAccess();
 
@@ -1951,7 +1950,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         } finally {
             try {
                 if (read_ox_con != null) {
-                    cache.pushOXDBRead(ctx.getIdAsInt(), read_ox_con);
+                    cache.pushOXDBRead(ctx.getId(), read_ox_con);
                 }
             } catch (final PoolException exp) {
                 log.error("Pool Error pushing ox read connection to pool!", exp);
@@ -1967,7 +1966,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             prep_edit_user = write_ox_con
                     .prepareStatement("UPDATE prg_contacts SET changing_date=? WHERE cid=? AND userid=?;");
             prep_edit_user.setLong(1, System.currentTimeMillis());
-            prep_edit_user.setInt(2, ctx.getIdAsInt());
+            prep_edit_user.setInt(2, ctx.getId());
             prep_edit_user.setInt(3, user_id);
             prep_edit_user.executeUpdate();
             
@@ -1996,7 +1995,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                             "preferredLanguage,shadowLastChange,timeZone,contactId,userPassword,"+
                             "passwordMech,uidNumber,gidNumber,homeDirectory,loginShell FROM user WHERE id = ? AND cid = ?");
             del_st.setInt(1, user_id);
-            del_st.setInt(2, ctx.getIdAsInt());
+            del_st.setInt(2, ctx.getId());
             rs = del_st.executeQuery();
 
             String iserver = null;
@@ -2042,7 +2041,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     .prepareStatement("INSERT into del_user (id,cid,imapServer,smtpServer,imapLogin,mail,maildomain,mailEnabled,preferredLanguage,shadowLastChange,timeZone,contactId,userPassword,"+
                             "passwordMech,uidNumber,gidNumber,homeDirectory,loginShell) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
             del_st.setInt(1, user_id);
-            del_st.setInt(2, ctx.getIdAsInt());
+            del_st.setInt(2, ctx.getId());
             if (iserver != null) {
                 del_st.setString(3, iserver);
             } else {
@@ -2146,7 +2145,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         PreparedStatement del_st = null;
         try {
             del_st = con.prepareStatement("DELETE from del_user WHERE cid = ?");
-            del_st.setInt(1, ctx.getIdAsInt());
+            del_st.setInt(1, ctx.getId());
             del_st.executeUpdate();
         } catch (final SQLException sqle) {
             log.error("SQL Error ", sqle);
@@ -2170,7 +2169,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             del_st = con
                     .prepareStatement("DELETE from del_user WHERE id = ? AND cid = ?");
             del_st.setInt(1, user_id);
-            del_st.setInt(2, ctx.getIdAsInt());
+            del_st.setInt(2, ctx.getId());
             del_st.executeUpdate();
         } catch (final SQLException sqle) {
             log.error("SQL Error ", sqle);
@@ -2210,7 +2209,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
             prep = read_ox_con
                     .prepareStatement("SELECT id FROM groups_member WHERE cid = ? AND member = ?");
-            prep.setInt(1, ctx.getIdAsInt());
+            prep.setInt(1, ctx.getId());
             prep.setInt(2, user_id);
 
             final ResultSet rs = prep.executeQuery();
@@ -2248,7 +2247,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
         try {
             final UserConfiguration user = RdbUserConfigurationStorage
-                    .adminLoadUserConfiguration(user_id, groups, ctx.getIdAsInt(),
+                    .adminLoadUserConfiguration(user_id, groups, ctx.getId(),
                             read_ox_con);
 
             user.setCalendar(access.getCalendar());

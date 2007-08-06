@@ -88,7 +88,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             throws StorageException {
         Connection con = null;
         PreparedStatement editres = null;
-        final int context_id = ctx.getIdAsInt();
+        final int context_id = ctx.getId();
         final int resource_id = res.getId();
         try {
 
@@ -203,7 +203,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             throws StorageException {
         Connection con = null;
         PreparedStatement prep_insert = null;
-        final int context_ID = ctx.getIdAsInt();
+        final int context_ID = ctx.getId();
         try {
 
             con = cache.getWRITEConnectionForContext(context_ID);
@@ -293,7 +293,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             throws StorageException {
         Connection con = null;
         PreparedStatement prep_del = null;
-        final int context_id = ctx.getIdAsInt();
+        final int context_id = ctx.getId();
         try {
             con = cache.getWRITEConnectionForContext(context_id);
             con.setAutoCommit(false);
@@ -356,7 +356,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
         Connection con = null;
         PreparedStatement prep_del = null;
         final int resource_id = resource.getId().intValue();
-        final int context_id = ctx.getIdAsInt();
+        final int context_id = ctx.getId();
         try {
             con = cache.getWRITEConnectionForContext(context_id);
             con.setAutoCommit(false);
@@ -419,7 +419,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             throws StorageException {
         Connection con = null;
         PreparedStatement prep_list = null;
-        final int context_id = ctx.getIdAsInt();
+        final int context_id = ctx.getId();
         try {
             
             con = cache.getREADConnectionForContext(context_id);
@@ -493,7 +493,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
     public Resource getData(final Context ctx, final Resource resource) throws StorageException {
         Connection con = null;
         PreparedStatement prep_list = null;
-        final int context_id = ctx.getIdAsInt();
+        final int context_id = ctx.getId();
         try {
             
             con = cache.getREADConnectionForContext(context_id);
@@ -574,7 +574,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
         ResultSet rs = null;
         PreparedStatement prep_list = null;
         final String patterntemp = pattern.replace('*', '%');
-        final int context_id = ctx.getIdAsInt();
+        final int context_id = ctx.getId();
         try {
             final ArrayList<Resource> list = new ArrayList<Resource>();
             con = cache.getREADConnectionForContext(context_id);
@@ -658,7 +658,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
         try {
             prep_edit_user = write_ox_con.prepareStatement("UPDATE resource SET lastModified=? WHERE cid=? AND id=?");
             prep_edit_user.setLong(1, System.currentTimeMillis());
-            prep_edit_user.setInt(2, ctx.getIdAsInt());
+            prep_edit_user.setInt(2, ctx.getId());
             prep_edit_user.setInt(3, resource_id);
             prep_edit_user.executeUpdate();
             prep_edit_user.close();
@@ -681,7 +681,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
         // insert into del_resource table
         PreparedStatement del_st = null;
         ResultSet rs = null;
-        final int context_id = ctx.getIdAsInt();
+        final int context_id = ctx.getId();
         try {
 
             del_st = con.prepareStatement("SELECT identifier,displayName,mail,description,available FROM resource WHERE id = ? AND cid = ?");
@@ -737,7 +737,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             throws StorageException {
         // delete from del_resource table
         PreparedStatement del_st = null;
-        final int context_id = ctx.getIdAsInt();
+        final int context_id = ctx.getId();
         try {
             del_st = con.prepareStatement("DELETE from del_resource WHERE cid = ?");
             del_st.setInt(1, context_id);
@@ -762,7 +762,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             throws StorageException {
         // delete from del_resource table
         PreparedStatement del_st = null;
-        final int context_id = ctx.getIdAsInt();
+        final int context_id = ctx.getId();
         try {
             del_st = con.prepareStatement("DELETE from del_resource WHERE id = ? AND cid = ?");
             del_st.setInt(1, resource_id);
