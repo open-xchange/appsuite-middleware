@@ -59,7 +59,6 @@ import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.rmi.OXResourceInterface;
 import com.openexchange.admin.rmi.dataobjects.Resource;
-import com.openexchange.admin.rmi.exceptions.MissingOptionException;
 
 public abstract class ResourceAbstraction extends ObjectNamingAbstraction {
     
@@ -180,20 +179,5 @@ public abstract class ResourceAbstraction extends ObjectNamingAbstraction {
         if (null != resourceid) {
             res.setId(Integer.parseInt(resourceid));
         }
-    }
-    
-    protected String resourcenameOrIdSet() throws MissingOptionException {
-        String successtext;
-        // Throw the order of this checks we archive that the id is preferred over the name
-        if (null == this.resourceid) {
-            if (null == this.resourcename) {
-                throw new MissingOptionException("Either resourcename or resourceid must be given");
-            } else {
-                successtext = this.resourcename;
-            }
-        } else {
-            successtext = String.valueOf(this.resourceid);
-        }
-        return successtext;
     }
 }
