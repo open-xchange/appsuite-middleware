@@ -82,6 +82,7 @@ import com.openexchange.admin.tools.SHACrypt;
 import com.openexchange.admin.tools.UnixCrypt;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.IDGenerator;
+import com.openexchange.groupware.RdbUserConfigurationStorage;
 import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.imap.UserSettingMail;
@@ -1912,7 +1913,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             read_ox_con = cache.getREADConnectionForContext(ctx.getIdAsInt());
             final int[] all_groups_of_user = getGroupsForUser(ctx, user_id,
                     read_ox_con);
-            final UserConfiguration user = UserConfiguration
+            final UserConfiguration user = RdbUserConfigurationStorage
                     .loadUserConfiguration(user_id, all_groups_of_user, ctx
                             .getIdAsInt(), read_ox_con);
 
@@ -1947,7 +1948,13 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         } catch (final SQLException sqle) {
             log.error("SQL Error ", sqle);
             throw new StorageException(sqle);
-        } finally {
+        } catch (LdapException e) {
+        	log.error("LDAP Error ", e);
+            throw new StorageException(e);
+		} catch (OXException e) {
+			log.error("OX Error ", e);
+            throw new StorageException(e);
+		} finally {
             try {
                 if (read_ox_con != null) {
                     cache.pushOXDBRead(ctx.getIdAsInt(), read_ox_con);
@@ -2246,7 +2253,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             throws StorageException {
 
         try {
-            final UserConfiguration user = UserConfiguration
+            final UserConfiguration user = RdbUserConfigurationStorage
                     .loadUserConfiguration(user_id, groups, ctx.getIdAsInt(),
                             read_ox_con);
 
@@ -2269,7 +2276,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             user.setWebMail(access.getWebmail());
             user.setDelegateTasks(access.getDelegateTask());
 
-            UserConfiguration.saveUserConfiguration(user, insert_or_update,
+            RdbUserConfigurationStorage.saveUserConfiguration(user, insert_or_update,
                     write_ox_con);
         } catch (final DBPoolingException pole) {
             log.error("DBPooling Error", pole);
@@ -2277,7 +2284,13 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         } catch (final SQLException sqle) {
             log.error("SQL Error", sqle);
             throw new StorageException(sqle);
-        }
+        } catch (LdapException e) {
+        	log.error("LDAP Error", e);
+            throw new StorageException(e);
+		} catch (OXException e) {
+			log.error("OX Error", e);
+            throw new StorageException(e);
+		}
     }
 
     private ArrayList<MethodAndNames> getGetters(final Method[] theMethods) {
