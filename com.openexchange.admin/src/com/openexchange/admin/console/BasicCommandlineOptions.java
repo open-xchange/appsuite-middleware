@@ -58,6 +58,7 @@ import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.ExtendableDataObject;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.MissingOptionException;
 import com.openexchange.admin.rmi.extensions.OXCommonExtension;
 
 
@@ -466,7 +467,7 @@ public abstract class BasicCommandlineOptions {
     
         if (parser.getOptionValue(this.contextOption) != null) {
             ctxid = Integer.parseInt((String) parser.getOptionValue(this.contextOption));
-            ctx.setID(ctxid);
+            ctx.setId(ctxid);
         }
         return ctx;
     }
@@ -593,5 +594,20 @@ public abstract class BasicCommandlineOptions {
         } else {
             return NeededQuadState.notneeded;
         }
+    }
+
+    protected String nameOrIdSet(final String id, final String name, final String objectname) throws MissingOptionException {
+        String successtext;
+        // Through the order of this checks we archive that the id is preferred over the name
+        if (null == id) {
+            if (null == name) {
+                throw new MissingOptionException("Either " + objectname + "name or " + objectname + "id must be given");
+            } else {
+                successtext = name;
+            }
+        } else {
+            successtext = String.valueOf(id);
+        }
+        return successtext;
     }
 }
