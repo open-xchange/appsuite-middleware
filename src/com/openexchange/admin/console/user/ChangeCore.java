@@ -103,7 +103,7 @@ public abstract class ChangeCore extends UserAbstraction {
             parseAndSetUserId(parser, usr);
             parseAndSetUsername(parser, usr);
             
-            successtext = usernameOrIdSet();
+            successtext = nameOrIdSet(String.valueOf(this.userid), this.username, "user");
 
             final Context ctx = contextparsing(parser);
 
@@ -133,7 +133,7 @@ public abstract class ChangeCore extends UserAbstraction {
             // apply changes in module access on server
             oxusr.changeModuleAccess(ctx, usr, access, auth);
 
-            displayChangedMessage(successtext, ctx.getIdAsInt());
+            displayChangedMessage(successtext, ctx.getId());
             sysexit(0);
         } catch (final Exception e) {
             printErrors(successtext, ctxid, e, parser);
