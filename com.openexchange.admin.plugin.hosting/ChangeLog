@@ -1,3 +1,8 @@
+* 2007-08-06 - choeger@open-xchange.com
+
+  - Bugfix ID#8642 "listusers" command line tool output is limited to three digits
+    as a side effect of now dynamically determining the widest row, this is also fixed
+  
 * 2007-08-02 - choeger@open-xchange.com
 
   - Bugfix ID#8651 no access must be the default when not specifying access on commandline
