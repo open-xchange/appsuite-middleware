@@ -80,7 +80,9 @@ import com.openexchange.server.DBPool;
 import com.openexchange.server.DBPoolingException;
 
 /**
- * CachingUserSettingMailStorage
+ * CachingUserSettingMailStorage - this torage tries to use a cache for
+ * instances of <code>{@link UserSettingMail}</code> and falls back to
+ * database-based storage if any cache-related errors occur
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
@@ -262,6 +264,8 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 					cacheWriteLock.lock();
 					try {
 						cache.remove(new CacheKey(ctx, user));
+					} catch (final CacheException e) {
+						LOG.error("UserSettingMail could not be removed from cache", e);
 					} finally {
 						cacheWriteLock.unlock();
 					}
@@ -276,9 +280,6 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 		} catch (final DBPoolingException e) {
 			LOG.error(e.getMessage(), e);
 			throw new UserConfigurationException(UserConfigurationCode.DBPOOL_ERROR, e, new Object[0]);
-		} catch (final CacheException e) {
-			LOG.error(e.getMessage(), e);
-			throw new UserConfigurationException(UserConfigurationCode.CACHE_REMOVE_ERROR, e, e.getLocalizedMessage());
 		}
 	}
 
@@ -352,7 +353,11 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 							/*
 							 * Put clone into cache
 							 */
-							cache.put(new CacheKey(ctx, user), usm.clone());
+							try {
+								cache.put(new CacheKey(ctx, user), usm.clone());
+							} catch (final CacheException e) {
+								LOG.error("UserSettingMail could not be put into cache", e);
+							}
 						}
 					} finally {
 						closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
@@ -368,9 +373,6 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 		} catch (final DBPoolingException e) {
 			LOG.error(e.getMessage(), e);
 			throw new UserConfigurationException(UserConfigurationCode.DBPOOL_ERROR, e, new Object[0]);
-		} catch (final CacheException e) {
-			LOG.error(e.getMessage(), e);
-			throw new UserConfigurationException(UserConfigurationCode.CACHE_PUT_ERROR, e, new Object[0]);
 		}
 	}
 
