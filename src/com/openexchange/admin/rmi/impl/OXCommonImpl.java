@@ -51,7 +51,11 @@ package com.openexchange.admin.rmi.impl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.openexchange.admin.properties.AdminProperties.Resource;
 import com.openexchange.admin.rmi.dataobjects.Context;
+import com.openexchange.admin.rmi.dataobjects.Database;
+import com.openexchange.admin.rmi.dataobjects.Group;
+import com.openexchange.admin.rmi.dataobjects.NameAndIdObject;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
@@ -79,7 +83,7 @@ public abstract class OXCommonImpl {
     }
     
     protected final void contextcheck(final Context ctx) throws InvalidCredentialsException {
-        if (null == ctx || null == ctx.getIdAsInt()) {
+        if (null == ctx || null == ctx.getId()) {
             final InvalidCredentialsException e = new InvalidCredentialsException("Client sent invalid context data object");
             log.error(e.getMessage(), e);
             throw e;
@@ -88,18 +92,29 @@ public abstract class OXCommonImpl {
     
     protected void setUserIdInArrayOfUsers(final Context ctx, final User[] users) throws InvalidDataException, StorageException {
         for (final User user : users) {
-            setIdOrGetIDFromUsername(ctx, user);
+            setIdOrGetIDFromNameAndIdObject(ctx, user);
         }
     }
 
-    protected void setIdOrGetIDFromUsername(final Context ctx, final User user) throws StorageException, InvalidDataException {
-        final Integer id = user.getId();
+    protected void setIdOrGetIDFromNameAndIdObject(final Context ctx, final NameAndIdObject nameandid) throws StorageException, InvalidDataException {
+        final Integer id = nameandid.getId();
         if (null == id) {
-            final String username = user.getUsername();
-            if (null != username) {
-                user.setId(tool.getUserIDByUsername(ctx, username));
+            final String name = nameandid.getName();
+            if (null != name) {
+                if (nameandid instanceof User) {
+                    nameandid.setId(tool.getUserIDByUsername(ctx, name));
+                } else if (nameandid instanceof Group) {
+                    nameandid.setId(tool.getGroupIDByGroupname(ctx, name));
+                } else if (nameandid instanceof Resource) {
+                    nameandid.setId(tool.getResourceIDByResourcename(ctx, name));
+                } else if (nameandid instanceof Context) {
+                    nameandid.setId(tool.getContextIDByContextname(name));
+                } else if (nameandid instanceof Database) {
+                    nameandid.setId(tool.getDatabaseIDByDatabasename(name));
+                }
             } else {
-                throw new InvalidDataException("One user object has no id or username");
+                final String simpleName = nameandid.getClass().getSimpleName().toLowerCase();
+                throw new InvalidDataException("One " + simpleName + "object has no " + simpleName + "id or " + simpleName + "name");
             }
         }
     }
