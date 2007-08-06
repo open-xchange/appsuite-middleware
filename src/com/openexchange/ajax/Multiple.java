@@ -223,6 +223,9 @@ public class Multiple extends SessionServlet {
 				try {
 					jsonWriter.key(Response.DATA);
 					appointmentRequest.action(action, jsonObj);
+					if (jsonWriter.isExpectingValue()) {
+						jsonWriter.value("");
+					}
 					jsonWriter.key(Response.TIMESTAMP).value(appointmentRequest.getTimestamp().getTime());
 				} catch (final OXMandatoryFieldException e) {
 					LOG.error(e.getMessage(), e);
@@ -281,6 +284,9 @@ public class Multiple extends SessionServlet {
 				try {
 					jsonWriter.key(Response.DATA);
 					contactRequest.action(action, jsonObj);
+					if (jsonWriter.isExpectingValue()) {
+						jsonWriter.value("");
+					}
 					jsonWriter.key(Response.TIMESTAMP).value(contactRequest.getTimestamp().getTime());
 				} catch (final OXMandatoryFieldException e) {
 					LOG.error(e.getMessage(), e);
@@ -335,6 +341,9 @@ public class Multiple extends SessionServlet {
 				try {
 					jsonWriter.key(Response.DATA);
 					groupRequest.action(action, jsonObj);
+					if (jsonWriter.isExpectingValue()) {
+						jsonWriter.value("");
+					}
 					jsonWriter.key(Response.TIMESTAMP).value(groupRequest.getTimestamp().getTime());
 				} catch (final OXMandatoryFieldException e) {
 					LOG.error(e.getMessage(), e);
@@ -383,6 +392,9 @@ public class Multiple extends SessionServlet {
 				try {
 					jsonWriter.key(Response.DATA);
 					reminderRequest.action(action, jsonObj);
+					if (jsonWriter.isExpectingValue()) {
+						jsonWriter.value("");
+					}
 					jsonWriter.key(Response.TIMESTAMP).value(reminderRequest.getTimestamp().getTime());
 				} catch (final OXMandatoryFieldException e) {
 					LOG.error(e.getMessage(), e);
@@ -431,6 +443,9 @@ public class Multiple extends SessionServlet {
 				try {
 					jsonWriter.key(Response.DATA);
 					resourceRequest.action(action, jsonObj);
+					if (jsonWriter.isExpectingValue()) {
+						jsonWriter.value("");
+					}
 					jsonWriter.key(Response.TIMESTAMP).value(resourceRequest.getTimestamp().getTime());
 				} catch (final OXMandatoryFieldException e) {
 					LOG.error(e.getMessage(), e);

@@ -1,7 +1,12 @@
+* 2007-08-06 - thorben.betten@open-xchange.com
+
+ - Fixed JSON error when deleting appointment through multiple servlet
+
 * 2007-08-03 - thorben.betten@open-xchange.com
 
  - Fixed forwarding of messages with inline images
  - Fastened message cache
+ - Fixed: Invalidation of user configuration now affects session, too
 
 * 2007-08-03 - francisco.laguna@open-xchange.com
 
