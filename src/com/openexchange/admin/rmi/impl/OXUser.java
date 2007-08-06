@@ -178,14 +178,14 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 
             if(!tool.existsContext(ctx)){           
                  final InvalidCredentialsException invalidCredentialsException = new InvalidCredentialsException("Authentication failed for user " + auth.getLogin());
-                 log.error("Requested context "+ctx.getIdAsInt()+" does not exist!",invalidCredentialsException);
+                 log.error("Requested context "+ctx.getId()+" does not exist!",invalidCredentialsException);
                  throw invalidCredentialsException;
             }
            
-            setIdOrGetIDFromUsername(ctx, usrdata);
+            setIdOrGetIDFromNameAndIdObject(ctx, usrdata);
 
             if (!tool.existsUser(ctx, usrdata.getId())) {
-                final NoSuchUserException noSuchUserException = new NoSuchUserException("No such user " + usrdata.getId() + " in context " + ctx.getIdAsInt());
+                final NoSuchUserException noSuchUserException = new NoSuchUserException("No such user " + usrdata.getId() + " in context " + ctx.getId());
                 log.error(noSuchUserException.getMessage(), noSuchUserException);
                 throw noSuchUserException;
             }
@@ -276,7 +276,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
         try {
             JCS cache = JCS.getInstance("User");
-            cache.remove(new CacheKey(ctx.getIdAsInt(), usrdata.getId()));
+            cache.remove(new CacheKey(ctx.getId(), usrdata.getId()));
         } catch (final CacheException e) {
             log.error(e.getMessage(), e);
         }
@@ -299,7 +299,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         checkSchemaBeingLocked(ctx);
 
         if (!tool.existsUser(ctx, user_id)) {
-            final NoSuchUserException noSuchUserException = new NoSuchUserException("No such user " + user_id + " in context " + ctx.getIdAsInt());
+            final NoSuchUserException noSuchUserException = new NoSuchUserException("No such user " + user_id + " in context " + ctx.getId());
             log.error(noSuchUserException.getMessage(), noSuchUserException);
             throw noSuchUserException;
         }
@@ -309,9 +309,9 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         
         // JCS
         try {
-            UserConfigurationStorage.getInstance().removeUserConfiguration(user_id, new ContextImpl(ctx.getIdAsInt()));
+            UserConfigurationStorage.getInstance().removeUserConfiguration(user_id, new ContextImpl(ctx.getId()));
         } catch (UserConfigurationException e) {
-            log.error("Error removing user "+user_id+" in context "+ctx.getIdAsInt()+" from configuration storage",e);            
+            log.error("Error removing user "+user_id+" in context "+ctx.getId()+" from configuration storage",e);            
         }        
         // END OF JCS
     }
@@ -332,10 +332,10 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         try {
             basicauth.doAuthentication(auth, ctx);
             checkSchemaBeingLocked(ctx);
-            setIdOrGetIDFromUsername(ctx, user);
+            setIdOrGetIDFromNameAndIdObject(ctx, user);
             final int user_id = user.getId();
             if (!tool.existsUser(ctx, user_id)) {
-                throw new NoSuchUserException("No such user " + user_id + " in context " + ctx.getIdAsInt());
+                throw new NoSuchUserException("No such user " + user_id + " in context " + ctx.getId());
             }
             oxu.changeModuleAccess(ctx, user_id, moduleAccess);
         } catch (final StorageException e) {
@@ -360,9 +360,9 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         
 //      JCS
         try {
-            UserConfigurationStorage.getInstance().removeUserConfiguration(user.getId(), new ContextImpl(ctx.getIdAsInt()));
+            UserConfigurationStorage.getInstance().removeUserConfiguration(user.getId(), new ContextImpl(ctx.getId()));
         } catch (UserConfigurationException e) {
-            log.error("Error removing user "+user.getId()+" in context "+ctx.getIdAsInt()+" from configuration storage",e);            
+            log.error("Error removing user "+user.getId()+" in context "+ctx.getId()+" from configuration storage",e);            
         }        
         // END OF JCS
     }
@@ -386,8 +386,8 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             
             checkCreateUserData(ctx, usr, this.prop);
 
-            if (tool.existsUser(ctx, usr.getUsername())) {
-                throw new InvalidDataException("User " + usr.getUsername() + " already exists in this context");
+            if (tool.existsUser(ctx, usr.getName())) {
+                throw new InvalidDataException("User " + usr.getName() + " already exists in this context");
             }
 
             // validate email adresss
@@ -405,7 +405,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         final ArrayList<OXUserPluginInterface> interfacelist = new ArrayList<OXUserPluginInterface>();
 
         // homedirectory
-        final String homedir = this.prop.getUserProp(AdminProperties.User.HOME_DIR_ROOT, "/home") + "/" + usr.getUsername();
+        final String homedir = this.prop.getUserProp(AdminProperties.User.HOME_DIR_ROOT, "/home") + "/" + usr.getName();
         if (this.prop.getUserProp(AdminProperties.User.CREATE_HOMEDIRECTORY, false) && !tool.isContextAdmin(ctx, usr.getId())) {
             if (!new File(homedir).mkdir()) {
                 log.error("unable to create directory: " + homedir);
@@ -413,7 +413,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             final String CHOWN = "/bin/chown";
             final Process p;
             try {
-                p = Runtime.getRuntime().exec(new String[] { CHOWN, usr.getUsername() + ":", homedir });
+                p = Runtime.getRuntime().exec(new String[] { CHOWN, usr.getName() + ":", homedir });
                 p.waitFor();
                 if (p.exitValue() != 0) {
                     log.error(CHOWN + " exited abnormally");
@@ -504,8 +504,8 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             setUserIdInArrayOfUsers(ctx, users);
             // FIXME: Change function from int to user object
             if (!tool.existsUser(ctx, users)) {
-                final NoSuchUserException noSuchUserException = new NoSuchUserException("No such user(s) " + getUserIdArrayFromUsersAsString(users) + " in context " + ctx.getIdAsInt());
-                log.error("No such user(s) " + Arrays.toString(users) + " in context " + ctx.getIdAsInt(), noSuchUserException);
+                final NoSuchUserException noSuchUserException = new NoSuchUserException("No such user(s) " + getUserIdArrayFromUsersAsString(users) + " in context " + ctx.getId());
+                log.error("No such user(s) " + Arrays.toString(users) + " in context " + ctx.getId(), noSuchUserException);
                 throw noSuchUserException;
             }
             for (final User user : users) {
@@ -564,7 +564,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             for(final User usr : users) {
                 // homedirectory
                 String homedir = this.prop.getUserProp(AdminProperties.User.HOME_DIR_ROOT, "/home");
-                homedir += "/" + usr.getUsername();
+                homedir += "/" + usr.getName();
                 // FIXME: if(! tool.isContextAdmin(ctx, usr.getId()) ) {} ??
                 try {
                     FileUtils.deleteDirectory(new File(homedir));
@@ -582,15 +582,15 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             
             try {
                 JCS cache = JCS.getInstance("User");
-                cache.remove(new CacheKey(ctx.getIdAsInt(), user.getId()));
+                cache.remove(new CacheKey(ctx.getId(), user.getId()));
             } catch (final CacheException e) {
                 log.error(e.getMessage(), e);
             }
 
             try {
-                UserConfigurationStorage.getInstance().removeUserConfiguration(user.getId(), new ContextImpl(ctx.getIdAsInt()));
+                UserConfigurationStorage.getInstance().removeUserConfiguration(user.getId(), new ContextImpl(ctx.getId()));
             } catch (UserConfigurationException e) {
-                log.error("Error removing user "+user.getId()+" in context "+ctx.getIdAsInt()+" from configuration storage",e);            
+                log.error("Error removing user "+user.getId()+" in context "+ctx.getId()+" from configuration storage",e);            
             }        
             
         }
@@ -681,8 +681,8 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                             // id not set, try to resolv id by username and then
                             // check
                             // again
-                            if (users[0].getUsername() != null) {
-                                final int check_user_id = tool.getUserIDByUsername(ctx, users[0].getUsername());
+                            if (users[0].getName() != null) {
+                                final int check_user_id = tool.getUserIDByUsername(ctx, users[0].getName());
                                 if (check_user_id != auth_user_id) {
                                     log.debug("user[0].getId() does not match id from Credentials.getLogin()");
                                     throw invalidCredentialsException;
@@ -707,16 +707,16 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 if (usr.getId()!=null && !tool.existsUser(ctx, usr.getId())) {
                     throw new NoSuchUserException("No such user "+usr);
                 }
-                if (usr.getUsername() != null && !tool.existsUser(ctx, usr.getUsername())) {
+                if (usr.getName() != null && !tool.existsUser(ctx, usr.getName())) {
                     throw new NoSuchUserException("No such user " + usr);
                 }
-                final String username = usr.getUsername();
+                final String username = usr.getName();
                 if (username == null && usr.getId() == null) {
                     throw new InvalidDataException("Username and userid missing.");
                 } else {
                     // ok , try to get the username by id or username
                     if (username == null) {
-                        usr.setUsername(tool.getUsernameByUserID(ctx, usr.getId().intValue()));
+                        usr.setName(tool.getUsernameByUserID(ctx, usr.getId().intValue()));
                     }
 
                     if (usr.getId() == null) {
@@ -768,7 +768,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         checkSchemaBeingLocked(ctx);
 
         if (!tool.existsUser(ctx, user_id)) {
-            final NoSuchUserException noSuchUserException = new NoSuchUserException("No such user " + user_id + " in context " + ctx.getIdAsInt());
+            final NoSuchUserException noSuchUserException = new NoSuchUserException("No such user " + user_id + " in context " + ctx.getId());
             log.error(noSuchUserException.getMessage(), noSuchUserException);
             throw noSuchUserException;
         }
@@ -790,10 +790,10 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         try {
             basicauth.doAuthentication(auth, ctx);
             checkSchemaBeingLocked(ctx);
-            setIdOrGetIDFromUsername(ctx, user);
+            setIdOrGetIDFromNameAndIdObject(ctx, user);
             final int user_id = user.getId();
             if (!tool.existsUser(ctx, user_id)) {
-                throw new NoSuchUserException("No such user " + user + " in context " + ctx.getIdAsInt());
+                throw new NoSuchUserException("No such user " + user + " in context " + ctx.getId());
             }
             return oxu.getModuleAccess(ctx, user_id);
         } catch (final StorageException e) {
@@ -830,7 +830,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         checkSchemaBeingLocked(ctx);
         
         if (user.getId()!=null && !tool.existsUser(ctx, user.getId().intValue())) {
-            final NoSuchUserException noSuchUserException = new NoSuchUserException("No such user " + user.getId().intValue() + " in context " + ctx.getIdAsInt());
+            final NoSuchUserException noSuchUserException = new NoSuchUserException("No such user " + user.getId().intValue() + " in context " + ctx.getId());
             log.error(noSuchUserException.getMessage(), noSuchUserException);
             throw noSuchUserException;           
         }
@@ -963,7 +963,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     }
 
     private void checkContext(final Context ctx) throws InvalidDataException {
-        if (null == ctx.getIdAsInt()) {
+        if (null == ctx.getId()) {
             throw new InvalidDataException("Context invalid");
         }
     }
@@ -989,11 +989,11 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
     
         if (prop.getUserProp(AdminProperties.User.CHECK_NOT_ALLOWED_CHARS, true)) {
-            validateUserName(usr.getUsername());
+            validateUserName(usr.getName());
         }
     
         if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, true)) {
-            usr.setUsername(usr.getUsername().toLowerCase());
+            usr.setName(usr.getName().toLowerCase());
         }
     
         // checks below throw InvalidDataException
