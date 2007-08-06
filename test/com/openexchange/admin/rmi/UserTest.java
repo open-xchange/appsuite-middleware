@@ -48,19 +48,9 @@
  */
 package com.openexchange.admin.rmi;
 
-import static org.junit.Assert.*;
-
-import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.admin.rmi.dataobjects.Context;
-import com.openexchange.admin.rmi.dataobjects.User;
-import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
-import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
-import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
-import com.openexchange.admin.rmi.exceptions.InvalidDataException;
-import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
-import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
-import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.admin.rmi.extensions.OXCommonExtension;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.net.MalformedURLException;
 import java.rmi.Naming;
@@ -76,6 +66,18 @@ import java.util.TimeZone;
 import junit.framework.JUnit4TestAdapter;
 
 import org.junit.Test;
+
+import com.openexchange.admin.rmi.dataobjects.Context;
+import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
+import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
+import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
+import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
+import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
+import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.rmi.extensions.OXCommonExtension;
 
 /**
  * 
@@ -203,7 +205,7 @@ public class UserTest extends AbstractTest {
         final User createduser = oxu.create(ctx, urs, access, cred); 
         
         final User usernameuser = new User();
-        usernameuser.setUsername(createduser.getUsername());
+        usernameuser.setName(createduser.getName());
         
         // now load user from server and check if data is correct, else fail
         final User srv_loaded = oxu.getData(ctx, usernameuser, cred);
@@ -370,13 +372,43 @@ public class UserTest extends AbstractTest {
         // load again
         final User user_changed_loaded = oxu.getData(ctx, srv_loaded, cred);
         // set Username to old value for verification
-        srv_loaded.setUsername(createduser.getUsername());
+        srv_loaded.setName(createduser.getName());
         if (srv_loaded.getId().equals(user_changed_loaded.getId())) {
             //verify data
             compareUser(srv_loaded, user_changed_loaded);
         }else{
             fail("Expected to get correct changed user data");
         } 
+    }
+    
+    @Test(expected=InvalidDataException.class)
+    public void testChangeWithoutIdAndName() throws Exception {
+        
+        // get context to create an user
+        final Credentials cred = DummyCredentials();
+        final Context ctx = getTestContextObject(cred);
+        
+        // create new user
+        final OXUserInterface oxu = getUserClient();
+        final UserModuleAccess access = new UserModuleAccess();    
+        final User usr = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass);
+        final User createduser = oxu.create(ctx,usr,access,cred);     
+        // now load user from server and check if data is correct, else fail
+        User srv_loaded = oxu.getData(ctx, createduser, cred);
+        if (createduser.getId().equals(srv_loaded.getId())) {
+            //verify data
+            compareUser(createduser, srv_loaded);
+        } else {
+            fail("Expected to get user data");
+        } 
+        
+        
+        // now change data
+        srv_loaded = createChangeUserData(srv_loaded);
+        srv_loaded.setId(null);
+        srv_loaded.setName(null);
+        // submit changes
+        oxu.change(ctx,srv_loaded,cred);
     }
     
     // This test is used to check how the change method deals with changing values which are null before changing
@@ -397,11 +429,11 @@ public class UserTest extends AbstractTest {
         usr.setSur_name("test");
         usr.setEmail1(usr.getPrimaryEmail());
         // Store username to be able to restore it after change
-        final String username = usr.getUsername();
-        usr.setUsername(null);
+        final String username = usr.getName();
+        usr.setName(null);
         System.out.println(usr.isCompanyset());
         user.change(ctx, usr, cred);
-        usr.setUsername(username);
+        usr.setName(username);
         final User usr2 = oxl.login2User(ctx, cred);
         compareUser(usr, usr2);
     }
@@ -446,7 +478,7 @@ public class UserTest extends AbstractTest {
 
     public static User getTestUserObject(final String ident, final String password) {
         final User usr = new User();
-        usr.setUsername(ident);
+        usr.setName(ident);
         usr.setPassword(password);
         usr.setEnabled(true);
         usr.setPrimaryEmail("primaryemail-" + ident + "@" + AbstractTest.TEST_DOMAIN);
@@ -588,7 +620,7 @@ public class UserTest extends AbstractTest {
         System.out.println("USERA" + a.toString());
         System.out.println("USERB" + b.toString());
         
-        assertEquals("username not equal", a.getUsername(), b.getUsername());
+        assertEquals("username not equal", a.getName(), b.getName());
         assertEquals("enabled not equal", a.getEnabled(), b.getEnabled());
         assertEquals("primaryemail not equal",a.getPrimaryEmail(),b.getPrimaryEmail());        
         assertEquals("display name not equal", a.getDisplay_name(), b.getDisplay_name());
@@ -736,7 +768,7 @@ public class UserTest extends AbstractTest {
     private User createChangeUserData(final User usr) throws CloneNotSupportedException{
         // change all fields of the user
         final User retval = (User) usr.clone();
-        retval.setUsername(null);
+        retval.setName(null);
         retval.setEnabled(!usr.getEnabled());        
         // do not change primary mail, that's forbidden per default, see
         //PRIMARY_MAIL_UNCHANGEABLE in User.properties
