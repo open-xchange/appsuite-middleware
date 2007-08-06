@@ -116,7 +116,8 @@ public abstract class ListCore extends ResourceAbstraction {
             data.add(makeStandardData(resource));
         }
         
-        doOutput(new String[] { "3r", "30l", "20l", "14l", "9l" },
+        //doOutput(new String[] { "3r", "30l", "20l", "14l", "9l" },
+        doOutput(new String[] { "r", "l", "l", "l", "l" },
                  new String[] { "Id", "Name", "Displayname", "Email", "Available" }, data);
     }
 

@@ -122,7 +122,8 @@ public abstract class ListCore extends GroupAbstraction {
             data.add(makeStandardData(group));
         }
         
-        doOutput(new String[] { "3r", "30l", "30l", "14l" },
+//        doOutput(new String[] { "3r", "30l", "30l", "14l" },
+        doOutput(new String[] { "r", "l", "l", "l" },
                  new String[] { "Id", "Name", "Displayname", "Members" }, data);
     }
     

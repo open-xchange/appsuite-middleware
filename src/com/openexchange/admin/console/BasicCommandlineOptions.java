@@ -515,6 +515,19 @@ public abstract class BasicCommandlineOptions {
         
     }
 
+    private final int longestLine(final ArrayList<ArrayList<String>> data, final String[] columnnames, final int row) {
+        //long start = System.currentTimeMillis();
+        int max = columnnames[row].length();
+        for(int i=0; i<data.size(); i++) {
+            final int curLength = data.get(i).get(row).length();
+            if( curLength > max ) {
+                max = curLength;
+            }
+        }
+        //System.out.println("calc took " + (System.currentTimeMillis()-start) + "ms");
+        return max;
+    }
+   
     protected void doOutput(final String[] columnsizesandalignments, final String[] columnnames, final ArrayList<ArrayList<String>> data) throws InvalidDataException {
         if (columnsizesandalignments.length != columnnames.length) {
             throw new InvalidDataException("The sizes of columnsizes and columnnames aren't equal");
@@ -527,7 +540,8 @@ public abstract class BasicCommandlineOptions {
             try {
                 columnsizes[i] = Integer.parseInt(columnsizesandalignments[i].substring(0, columnsizesandalignments[i].length() - 1));
             } catch (final NumberFormatException e) {
-                throw new InvalidDataException("Error while parsing integer from columnsizesandalignments");
+                // there's no number, so use longest line as alignment value
+                columnsizes[i] = longestLine(data,columnnames,i);
             }            
             alignments[i] = columnsizesandalignments[i].charAt(columnsizesandalignments[i].length() - 1);
 

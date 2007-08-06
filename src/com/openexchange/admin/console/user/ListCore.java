@@ -201,7 +201,8 @@ public abstract class ListCore extends UserAbstraction {
             data.add(makeStandardData(user));
         }
         
-        doOutput(new String[] { "3r", "30l", "30l", "14l" },
+//        doOutput(new String[] { "3r", "30l", "30l", "14l" },
+        doOutput(new String[] { "r", "l", "l", "l" },
                  new String[] { "Id", "Name", "Displayname", "Email" }, data);
     }
 
