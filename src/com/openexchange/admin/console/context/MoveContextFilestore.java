@@ -25,9 +25,13 @@ public class MoveContextFilestore extends ContextHostingAbstraction {
 
         Integer filestoreid = null;
         
+        String successtext = null;
         try {
             parser.ownparse(args2);
             final Context ctx = contextparsing(parser);
+            parseAndSetContextName(parser, ctx);
+            
+            successtext = nameOrIdSet(String.valueOf(this.ctxid), this.contextname, "context");
             
             final Credentials auth = credentialsparsing(parser);
 
@@ -42,13 +46,13 @@ public class MoveContextFilestore extends ContextHostingAbstraction {
             oxres.moveContextFilestore(ctx, fs, mr, auth);*/
             final int jobId = oxres.moveContextFilestore(ctx, fs, auth);
 
-            displayMovedMessage(ctxid, null, "to filestore " + filestoreid + " scheduled as job " + jobId);
+            displayMovedMessage(successtext, null, "to filestore " + filestoreid + " scheduled as job " + jobId);
             sysexit(0);
         } catch (final Exception e) {
             // In this special case the second parameter is not the context id but the filestore id
             // this also applies to all following error outputting methods
             // see com.openexchange.admin.console.context.ContextHostingAbstraction.printFirstPartOfErrorText(Integer, Integer)
-            printErrors(String.valueOf(ctxid), filestoreid, e, parser);
+            printErrors(successtext, filestoreid, e, parser);
         }
     }
 
