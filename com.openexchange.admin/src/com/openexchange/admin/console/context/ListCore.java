@@ -105,7 +105,8 @@ public abstract class ListCore extends ContextAbstraction {
             data.add(makeCSVData(ctx));
         }
         
-        doOutput(new String[] { "3r", "3r", "21l", "10l", "10r", "10r", "10l", "10l" },
+//        doOutput(new String[] { "3r", "30l", "20l", "14l", "9l" },
+        doOutput(new String[] { "r", "r", "l", "l", "r", "r", "l", "l" },
                  new String[] { "cid", "fid", "fname", "enabled", "qmax", "qused", "name", "lmappings" }, data);
     }
 
