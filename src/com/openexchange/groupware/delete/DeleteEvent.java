@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.delete;
 
-import java.sql.SQLException;
 import java.util.EventObject;
 
 import com.openexchange.api2.OXException;
@@ -57,7 +56,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.ContextException;
 import com.openexchange.groupware.contexts.ContextStorage;
 import com.openexchange.groupware.ldap.LdapException;
-import com.openexchange.server.DBPoolingException;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.sessiond.SessionObjectWrapper;
 
@@ -87,14 +85,47 @@ public class DeleteEvent extends EventObject {
 
 	private transient SessionObject session;
 
-	public DeleteEvent(Object source, int id, int type, int cid) throws ContextException {
+	/**
+	 * Constructor
+	 * 
+	 * @param source
+	 *            the object on which the Event initially occurred
+	 * @param id
+	 *            the object's ID
+	 * @param type
+	 *            the object's type; either <code>{@link #TYPE_USER}</code>,
+	 *            <code>{@link #TYPE_GROUP}</code>,
+	 *            <code>{@link #TYPE_RESOURCE}</code>, or
+	 *            <code>{@value #TYPE_RESOURCE_GROUP}</code>
+	 * @param cid
+	 *            the context ID
+	 * @throws ContextException
+	 *             if context object could not be fetched from
+	 *             <code>{@link ContextStorage}</code>
+	 */
+	public DeleteEvent(final Object source, final int id, final int type, final int cid) throws ContextException {
 		super(source);
 		this.id = id;
 		this.type = type;
 		this.ctx = ContextStorage.getInstance().getContext(cid);
 	}
 
-	public DeleteEvent(Object source, int id, int type, Context ctx) {
+	/**
+	 * Constructor
+	 * 
+	 * @param source
+	 *            the object on which the Event initially occurred
+	 * @param id
+	 *            the object's ID
+	 * @param type
+	 *            the object's type; either <code>{@link #TYPE_USER}</code>,
+	 *            <code>{@link #TYPE_GROUP}</code>,
+	 *            <code>{@link #TYPE_RESOURCE}</code>, or
+	 *            <code>{@value #TYPE_RESOURCE_GROUP}</code>
+	 * @param ctx
+	 *            the context
+	 */
+	public DeleteEvent(final Object source, final int id, final int type, final Context ctx) {
 		super(source);
 		this.id = id;
 		this.type = type;
@@ -131,7 +162,7 @@ public class DeleteEvent extends EventObject {
 	 * 
 	 * @return a SessionObject belonging to context's mailadmin
 	 */
-	public SessionObject getSession() throws LdapException, SQLException, DBPoolingException, OXException {
+	public SessionObject getSession() throws LdapException, OXException {
 		if (session == null) {
 			session = SessionObjectWrapper.createSessionObject(ctx.getMailadmin(), ctx, "DeleteEventSessionObject");
 		}

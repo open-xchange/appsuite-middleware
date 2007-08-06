@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.groupware.delete;
 
 import java.sql.Connection;
@@ -62,10 +60,29 @@ import com.openexchange.server.DBPoolingException;
  * DeleteListener
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- *
+ * 
  */
 public interface DeleteListener extends EventListener {
 
-	public void deletePerformed(DeleteEvent sqlDelEvent, Connection readCon, Connection writeCon) throws DeleteFailedException, LdapException, SQLException, DBPoolingException;
+	/**
+	 * Performs the action(s) related to received delete event
+	 * 
+	 * @param deleteEvent
+	 *            the delete event
+	 * @param readCon
+	 *            a readable connection
+	 * @param writeCon
+	 *            a writeable connection
+	 * @throws DeleteFailedException
+	 *             if deletion fails
+	 * @throws LdapException
+	 *             if any user/group data could not be loaded
+	 * @throws SQLException
+	 *             if a SQL error occured
+	 * @throws DBPoolingException
+	 *             if a connection pool related error occured
+	 */
+	public void deletePerformed(DeleteEvent deleteEvent, Connection readCon, Connection writeCon)
+			throws DeleteFailedException, LdapException, SQLException, DBPoolingException;
 
 }
