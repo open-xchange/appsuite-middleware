@@ -56,7 +56,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         
         new BasicAuthenticator().doAuthentication(auth);
         
-        setIdOrGetIDFromContextname(ctx);
+        setIdOrGetIDFromNameAndIdObject(null, ctx);
         log.debug(ctx);
         try {
             if (!tool.existsContext(ctx)) {
@@ -83,9 +83,9 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         }   
         
         try {
-            ContextStorage.getInstance().invalidateContext(ctx.getIdAsInt());
+            ContextStorage.getInstance().invalidateContext(ctx.getId());
         } catch (ContextException e) {
-            log.error("Error invalidating context "+ctx.getIdAsInt()+" in ox context storage",e);
+            log.error("Error invalidating context "+ctx.getId()+" in ox context storage",e);
         }
     
     }
@@ -106,7 +106,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         final BasicAuthenticator basicAuthenticator = new BasicAuthenticator();
         basicAuthenticator.doAuthentication(auth);
         
-        setIdOrGetIDFromContextname(ctx);
+        setIdOrGetIDFromNameAndIdObject(null, ctx);
         log.debug(ctx);
         try {
             if (!tool.existsContext(ctx)) {
@@ -133,9 +133,9 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         
         
         try {
-            ContextStorage.getInstance().invalidateContext(ctx.getIdAsInt());
+            ContextStorage.getInstance().invalidateContext(ctx.getId());
         } catch (ContextException e) {
-            log.error("Error invalidating context "+ctx.getIdAsInt()+" in ox context storage",e);
+            log.error("Error invalidating context "+ctx.getId()+" in ox context storage",e);
         }
         
     }
@@ -155,10 +155,9 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         
         new BasicAuthenticator().doAuthentication(auth);
         
-        setIdOrGetIDFromContextname(ctx);
+        setIdOrGetIDFromNameAndIdObject(null, ctx);
         log.debug(ctx + " - " + reason);
         try {
-            // try {
             if (!tool.existsContext(ctx)) {
                 throw new NoSuchContextException();
             }
@@ -202,18 +201,17 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         final int reason_id = reason.getId();
         log.debug("" + reason_id);
         try {
-            /*final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
-            if (!tool.existsReason(reason_id)) {
-                throw new NoSuchReasonException();
-            }*/
+//            if (!tool.existsReason(reason_id)) {
+//                throw new NoSuchReasonException();
+//            }
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
             oxcox.disableAll(reason);
         } catch (final StorageException e) {
             log.error(e.getMessage(), e);
             throw e;
-        /*} catch (final NoSuchReasonException e) {
-            log.error(e.getMessage(), e);
-            throw e;*/
+//        } catch (final NoSuchReasonException e) {
+//            log.error(e.getMessage(), e);
+//            throw e;
         }
         
     }
@@ -229,7 +227,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         
         new BasicAuthenticator().doAuthentication(auth);
         
-        setIdOrGetIDFromContextname(ctx);
+        setIdOrGetIDFromNameAndIdObject(null, ctx);
         log.debug(ctx);
         try {
             if (!tool.existsContext(ctx)) {
@@ -270,7 +268,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         
         new BasicAuthenticator().doAuthentication(auth);
         
-        setIdOrGetIDFromContextname(ctx);
+        setIdOrGetIDFromNameAndIdObject(null, ctx);
         log.debug(ctx);
         try {
             if (!tool.existsContext(ctx)) {
@@ -377,9 +375,9 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
     }
 
     private int moveContextDatabase(final Context ctx, final Database db, final MaintenanceReason reason, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException, OXContextException {
-        
+        final Integer dbid = db.getId();
         try{
-            doNullCheck(ctx,ctx.getIdAsInt(),db,db.getId(),reason,reason.getId());
+            doNullCheck(ctx,db,reason, reason.getId());
         } catch (final InvalidDataException e1) {            
             log.error("Invalid data sent by client!", e1);
             throw e1;
@@ -387,10 +385,11 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         
         new BasicAuthenticator().doAuthentication(auth);
         
-        final int context_id = ctx.getIdAsInt();
+        setIdOrGetIDFromNameAndIdObject(null, ctx);
+        setIdOrGetIDFromNameAndIdObject(null, db);
         final int reason_id = reason.getId();
         if (log.isDebugEnabled()) {
-            log.debug("" + context_id + " - " + db + " - " + reason_id);
+            log.debug(ctx + " - " + db + " - " + reason_id);
         }
         try {
             /*if (!tool.existsReason(reason_id)) {
@@ -406,13 +405,12 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             if (!tool.isContextEnabled(ctx)) {
                 throw new OXContextException(OXContextException.CONTEXT_DISABLED);
             }
-            if (!tool.isMasterDatabase(db.getId())) {
-                throw new OXContextException("Database with id " + db.getId() + " is NOT a master!");
+            if (!tool.isMasterDatabase(dbid)) {
+                throw new OXContextException("Database with id " + dbid + " is NOT a master!");
             }
             final DatabaseDataMover ddm = new DatabaseDataMover(ctx, db, reason);
 
-            return TaskManager.getInstance().addJob(ddm, "movedatabase", "move context " + context_id + " to database " + db.getId());
-//            ClientAdminThreadExtended.ajx.addJob(ddm, context_id, db.getId(), reason_id, AdminJob.Mode.MOVE_DATABASE);
+            return TaskManager.getInstance().addJob(ddm, "movedatabase", "move context " + ctx.getIdAsString() + " to database " + dbid);
         } catch (final OXContextException e) {
             log.error(e.getMessage(), e);
             throw e;
@@ -433,7 +431,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
     private int moveContextFilestore(final Context ctx, final Filestore dst_filestore, final MaintenanceReason reason, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, NoSuchFilestoreException, NoSuchReasonException, OXContextException {
         
         try {
-            doNullCheck(ctx, ctx.getIdAsInt(),dst_filestore,dst_filestore.getId(), reason,reason.getId());
+            doNullCheck(ctx, dst_filestore,dst_filestore.getId(), reason,reason.getId());
         } catch (final InvalidDataException e1) {            
             log.error("Invalid data sent by client!", e1);
             throw e1;
@@ -443,9 +441,10 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         
         Context retval = null;
         
-        log.debug("" + ctx.getIdAsInt() + " - " + dst_filestore);
+        log.debug(ctx+ " - " + dst_filestore);
         
         try {
+            setIdOrGetIDFromNameAndIdObject(null, ctx);
             if (!tool.existsContext(ctx)) {
                 throw new NoSuchContextException();
             } else if (!tool.existsStore(dst_filestore.getId())) {
@@ -549,17 +548,5 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
     
     private void reEnableContext(final Context ctx, final OXContextStorageInterface oxcox) throws StorageException {
         oxcox.enable(ctx);
-    }
-    
-    private void setIdOrGetIDFromContextname(final Context ctx) throws StorageException, InvalidDataException {
-        final Integer id = ctx.getIdAsInt();
-        if (null == id) {
-            final String ctxname = ctx.getName();
-            if (null != ctxname) {
-                ctx.setID(tool.getContextIDByContextname(ctxname));
-            } else {
-                throw new InvalidDataException("One resource object has no id or username");
-            }
-        }
     }
 }
