@@ -93,6 +93,9 @@ import com.openexchange.admin.tools.PropertyHandler;
 import com.openexchange.admin.tools.SHACrypt;
 import com.openexchange.admin.tools.UnixCrypt;
 import com.openexchange.cache.CacheKey;
+import com.openexchange.groupware.UserConfigurationException;
+import com.openexchange.groupware.UserConfigurationStorage;
+import com.openexchange.groupware.contexts.ContextImpl;
 /**
  * @author d7
  * @author cutmasta
@@ -302,6 +305,15 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
 
         oxu.changeModuleAccess(ctx, user_id, moduleAccess);
+        
+        
+        // JCS
+        try {
+            UserConfigurationStorage.getInstance().removeUserConfiguration(user_id, new ContextImpl(ctx.getIdAsInt()));
+        } catch (UserConfigurationException e) {
+            log.error("Error removing user "+user_id+" in context "+ctx.getIdAsInt()+" from configuration storage");            
+        }        
+        // END OF JCS
     }
 
     public void changeModuleAccess(final Context ctx, final User user, final UserModuleAccess moduleAccess, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchUserException {
@@ -345,6 +357,14 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             log.error(e.getMessage(), e);
             throw e;
         }
+        
+//      JCS
+        try {
+            UserConfigurationStorage.getInstance().removeUserConfiguration(user.getId(), new ContextImpl(ctx.getIdAsInt()));
+        } catch (UserConfigurationException e) {
+            log.error("Error removing user "+user.getId()+" in context "+ctx.getIdAsInt()+" from configuration storage");            
+        }        
+        // END OF JCS
     }
 
     public User create(final Context ctx, final User usr, final UserModuleAccess access, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
@@ -556,14 +576,26 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         
         oxu.delete(ctx, users);
 
+        
+        // JCS
         for (final User user : users) {
+            
             try {
                 JCS cache = JCS.getInstance("User");
                 cache.remove(new CacheKey(ctx.getIdAsInt(), user.getId()));
             } catch (final CacheException e) {
                 log.error(e.getMessage(), e);
             }
+
+            try {
+                UserConfigurationStorage.getInstance().removeUserConfiguration(user.getId(), new ContextImpl(ctx.getIdAsInt()));
+            } catch (UserConfigurationException e) {
+                log.error("Error removing user "+user.getId()+" in context "+ctx.getIdAsInt()+" from configuration storage");            
+            }        
+            
         }
+        // END OF JCS
+        
     }
 
     public int[] getAll(final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
