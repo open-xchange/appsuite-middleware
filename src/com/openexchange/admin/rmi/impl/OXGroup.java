@@ -178,7 +178,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         try {
             JCS cache = JCS.getInstance("User");
             for (int user_id : member_ids) {
-                cache.remove(new CacheKey(ctx.getIdAsInt(), user_id));
+                cache.remove(new CacheKey(ctx.getId(), user_id));
             }
         } catch (final CacheException e) {
             log.error(e.getMessage(), e);
@@ -207,7 +207,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             throw e;
         }
 
-        setIdOrGetIDFromGroupname(ctx, grp);
+        setIdOrGetIDFromNameAndIdObject(ctx, grp);
 
         if (log.isDebugEnabled()) {
             log.debug(ctx.toString() + " - " + grp + " - "
@@ -241,7 +241,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         try {
             JCS cache = JCS.getInstance("User");
             for (User user : members) {
-                cache.remove(new CacheKey(ctx.getIdAsInt(), user.getId()));
+                cache.remove(new CacheKey(ctx.getId(), user.getId()));
             }
         } catch (final CacheException e) {
             log.error(e.getMessage(), e);
@@ -306,9 +306,9 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
                     throw new NoSuchUserException("No such user");
                 }
             }
-
-            setIdOrGetIDFromGroupname(ctx, grp);
-
+            
+            setIdOrGetIDFromNameAndIdObject(ctx, grp);
+            
             if (!tool.existsGroup(ctx, grp.getId())) {
                 throw new NoSuchGroupException("No such group");
             }
@@ -504,7 +504,23 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             try {
                 JCS cache = JCS.getInstance("User");
                 for (Integer member_id : mems) {
-                    cache.remove(new CacheKey(ctx.getIdAsInt(), member_id));
+                    cache.remove(new CacheKey(ctx.getId(), member_id));
+                }
+            } catch (final CacheException e) {
+                log.error(e.getMessage(), e);
+            }
+        }
+        // END OF JCS
+
+        // JCS
+        // If members sent, remove each from cache
+        if (grp.getMembers() != null && grp.getMembers().length > 0) {
+            final Integer[] mems = grp.getMembers();
+
+            try {
+                JCS cache = JCS.getInstance("User");
+                for (Integer member_id : mems) {
+                    cache.remove(new CacheKey(ctx.getId(), member_id));
                 }
             } catch (final CacheException e) {
                 log.error(e.getMessage(), e);
@@ -547,7 +563,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
 
             for (final Group elem : grp) {
                 // should we allow of deleting the users group?
-                setIdOrGetIDFromGroupname(ctx, elem);
+                setIdOrGetIDFromNameAndIdObject(ctx, elem);
                 final int grp_id = elem.getId();
                 if (1 == grp_id) {
                     throw new InvalidDataException("Group with id " + grp_id
@@ -863,7 +879,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             throw e;
         }
 
-        setIdOrGetIDFromGroupname(ctx, grp);
+        setIdOrGetIDFromNameAndIdObject(ctx, grp);
         final int grp_id = grp.getId();
 
         if (log.isDebugEnabled()) {
@@ -942,7 +958,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
 
         checkSchemaBeingLocked(ctx, tool);
 
-        setIdOrGetIDFromUsername(ctx, usr);
+        setIdOrGetIDFromNameAndIdObject(ctx, usr);
         if (!tool.existsUser(ctx, usr)) {
             throw new NoSuchUserException("No such user");
         }
@@ -1018,7 +1034,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             throw e;
         }
 
-        setIdOrGetIDFromGroupname(ctx, grp);
+        setIdOrGetIDFromNameAndIdObject(ctx, grp);
         final int grp_id = grp.getId();
         if (log.isDebugEnabled()) {
             log.debug(ctx.toString() + " - " + grp_id + " - "
@@ -1080,20 +1096,6 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         final String illegal = groupName.replaceAll(group_check_regexp, "");
         if (illegal.length() > 0) {
             throw new InvalidDataException("Illegal chars: \"" + illegal + "\"");
-        }
-    }
-
-    private void setIdOrGetIDFromGroupname(final Context ctx, final Group grp)
-            throws StorageException, InvalidDataException {
-        final Integer id = grp.getId();
-        if (null == id) {
-            final String groupname = grp.getName();
-            if (null != groupname) {
-                grp.setId(tool.getGroupIDByGroupname(ctx, groupname));
-            } else {
-                throw new InvalidDataException(
-                        "One group object has no id or groupname");
-            }
         }
     }
 }
