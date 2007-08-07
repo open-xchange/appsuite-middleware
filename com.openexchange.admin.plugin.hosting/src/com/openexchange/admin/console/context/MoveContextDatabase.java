@@ -4,7 +4,6 @@ import java.rmi.Naming;
 
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
-import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -12,22 +11,6 @@ import com.openexchange.admin.rmi.dataobjects.Database;
 
 public class MoveContextDatabase extends ContextHostingAbstraction {
 
-    private final static char OPT_DATABASE_SHORT = 'd';
-
-    private final static String OPT_DATABASE_LONG = "database";
-
-    protected final static char OPT_NAME_DBNAME_SHORT = 'n';
-
-    protected final static String OPT_NAME_DBNAME_LONG = "name";
-
-    private Option databaseIdOption = null;
-
-    private Option databaseNameOption = null;
-
-    private Integer dbid = null;
-    
-    private String dbname = null;
-    
     public MoveContextDatabase(final String[] args2) {
 
         final AdminParser parser = new AdminParser("movecontextdatabase");
@@ -39,7 +22,7 @@ public class MoveContextDatabase extends ContextHostingAbstraction {
             final Context ctx = contextparsing(parser);
             parseAndSetContextName(parser, ctx);
             
-            successcontext = nameOrIdSet(String.valueOf(this.ctxid), this.contextname, "context");
+            successcontext = nameOrIdSetInt(this.ctxid, this.contextname, "context");
             
             final Credentials auth = credentialsparsing(parser);
 
@@ -75,23 +58,8 @@ public class MoveContextDatabase extends ContextHostingAbstraction {
         setContextNameOption(parser, NeededQuadState.eitheror);
         //setMaintenanceReasodIDOption(parser, true);
 
-        this.databaseIdOption = setShortLongOpt(parser, OPT_DATABASE_SHORT, OPT_DATABASE_LONG, "Target database id", true, NeededQuadState.eitheror);
-        this.databaseNameOption = setShortLongOpt(parser, OPT_NAME_DBNAME_SHORT,OPT_NAME_DBNAME_LONG,"Name of the database",true, NeededQuadState.eitheror);
-    }
-
-    protected void parseAndSetDatabaseID(final AdminParser parser, final Database db) {
-        final String optionvalue = (String) parser.getOptionValue(this.databaseIdOption);
-        if (null != optionvalue) {
-            dbid = Integer.parseInt(optionvalue);
-            db.setId(dbid);
-        }
-    }
-    
-    protected void parseAndSetDatabasename(final AdminParser parser, final Database db) {
-        dbname = (String) parser.getOptionValue(this.databaseNameOption);
-        if (null != dbname) {
-            db.setName(dbname);
-        }
+        setDatabaseIDOption(parser);
+        setDatabaseNameOption(parser, NeededQuadState.eitheror);
     }
 
     @Override
