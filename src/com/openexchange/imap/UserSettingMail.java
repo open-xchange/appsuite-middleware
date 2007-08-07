@@ -245,7 +245,7 @@ public final class UserSettingMail implements DeleteListener, Cloneable, Seriali
 
 	private String[] stdFolderFullnames;
 
-	private Lock stdFolderCreationLock;
+	private transient Lock stdFolderCreationLock;
 
 	public UserSettingMail() {
 		super();
@@ -282,7 +282,13 @@ public final class UserSettingMail implements DeleteListener, Cloneable, Seriali
 		}
 	}
 
-	void parseBits(final int onOffOptions) {
+	/**
+	 * Parses given bit pattern and applies it to this settings
+	 * 
+	 * @param onOffOptions
+	 *            The bit pattern
+	 */
+	public void parseBits(final int onOffOptions) {
 		displayHtmlInlineContent = ((onOffOptions & INT_DISPLAY_HTML_INLINE_CONTENT) == INT_DISPLAY_HTML_INLINE_CONTENT);
 		useColorQuote = ((onOffOptions & INT_USE_COLOR_QUOTE) == INT_USE_COLOR_QUOTE);
 		showGraphicEmoticons = ((onOffOptions & INT_SHOW_GRAPHIC_EMOTICONS) == INT_SHOW_GRAPHIC_EMOTICONS);
@@ -299,7 +305,12 @@ public final class UserSettingMail implements DeleteListener, Cloneable, Seriali
 		textOnlyCompose = ((onOffOptions & INT_TEXT_ONLY_COMPOSE) == INT_TEXT_ONLY_COMPOSE);
 	}
 
-	int getBitsValue() {
+	/**
+	 * Generates a bit pattern from this settings
+	 * 
+	 * @return a bit pattern from this settings
+	 */
+	public int getBitsValue() {
 		int retval = 0;
 		retval = displayHtmlInlineContent ? (retval | INT_DISPLAY_HTML_INLINE_CONTENT) : retval;
 		retval = useColorQuote ? (retval | INT_USE_COLOR_QUOTE) : retval;
@@ -641,8 +652,13 @@ public final class UserSettingMail implements DeleteListener, Cloneable, Seriali
 		}
 	}
 
-	public static final class Signature implements Cloneable {
-		
+	public static final class Signature implements Cloneable, Serializable {
+
+		/**
+		 * Serial Version UID
+		 */
+		private static final long serialVersionUID = 357223875887317509L;
+
 		private String id;
 
 		private String signature;
