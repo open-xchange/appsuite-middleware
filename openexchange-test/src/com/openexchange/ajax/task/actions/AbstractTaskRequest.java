@@ -59,6 +59,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.writer.TaskWriter;
 import com.openexchange.groupware.tasks.Task;
+import org.json.JSONWriter;
 
 /**
  * 
@@ -89,8 +90,11 @@ public abstract class AbstractTaskRequest implements AJAXRequest {
         throws JSONException {
         final StringWriter stringW = new StringWriter();
         final PrintWriter printW = new PrintWriter(stringW);
-        final TaskWriter taskW = new TaskWriter(printW, timeZone);
-        taskW.writeTask(task);
+		final JSONWriter jsonWriter = new JSONWriter(printW);
+		final JSONObject jsonObj = new JSONObject();
+        final TaskWriter taskW = new TaskWriter(timeZone);
+		taskW.writeTask(task, jsonObj);
+		printW.print(jsonObj.toString());
         printW.flush();
         return new JSONObject(stringW.toString());
     }
