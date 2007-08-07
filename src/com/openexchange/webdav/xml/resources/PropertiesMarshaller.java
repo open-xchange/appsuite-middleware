@@ -64,6 +64,7 @@ import org.jdom.JDOMException;
 import org.jdom.Namespace;
 import org.jdom.input.SAXBuilder;
 
+import com.openexchange.webdav.action.behaviour.BehaviourLookup;
 import com.openexchange.webdav.protocol.Multistatus;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavProperty;
@@ -131,6 +132,10 @@ public class PropertiesMarshaller implements ResourceMarshaller {
 	}
 	
 	private String escape(final String string) {
+		PropfindResponseUrlEncoder encoder = BehaviourLookup.getInstance().get(PropfindResponseUrlEncoder.class);
+		if(null != encoder) {
+			return encoder.encode(string);
+		}
 		try {
 			String[] components = string.split("/+");
 			StringBuilder builder = new StringBuilder();

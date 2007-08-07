@@ -109,6 +109,8 @@ public class UserAgentBehaviour implements Behaviour{
 	}
 
 	public boolean matches(WebdavRequest req) {
+		if(req.getHeader("user-agent") == null)
+			return false;
 		return pattern.matcher(req.getHeader("user-agent")).find();
 	}
 

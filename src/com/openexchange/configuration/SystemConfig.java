@@ -221,7 +221,14 @@ public final class SystemConfig extends AbstractConfig {
 		/**
 		 * Directory in which all property files for servlet mapping are kept
 		 */
-		ServletMappingDir("ServletMappingDir");
+		ServletMappingDir("ServletMappingDir"),
+		
+		/**
+		 * Spring XML file with overrides for WebDAV 
+		 */
+		
+		WebdavOverrides("WEBDAVOVERRIDES")
+		;
 
         /**
          * Name of the property in the server.properties file.

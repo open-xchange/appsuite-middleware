@@ -47,34 +47,72 @@
  *
  */
 
-package com.openexchange.webdav.action;
+package com.openexchange.webdav.action.behaviour;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.webdav.protocol.WebdavException;
+import com.openexchange.webdav.action.WebdavRequest;
 
-public class WebdavRequestCycleAction extends AbstractAction {
-	private static final Log LOG = LogFactory.getLog(WebdavRequestCycleAction.class);
+public class RequestSpecificBehaviourRegistry {
 	
-	public void perform(WebdavRequest req, WebdavResponse res)
-			throws WebdavException {
+	private static final Log LOG = LogFactory.getLog(RequestSpecificBehaviourRegistry.class);
+	
+	
+	//Generic-o-rama! Is it just me or does Java start to gain the same aesthetic appeal as c++?
+	private Map<Class<? extends Object>, List<Behaviour>> registry = new HashMap<Class<? extends Object>, List<Behaviour>>();
+	
+	public void add(Behaviour behaviour) {
+		for(Class<? extends Object> clazz : behaviour.provides()) {
+			List<Behaviour> behaviours = registry.get(clazz);
+			if(behaviours == null) {
+				behaviours = new ArrayList<Behaviour>();
+				registry.put(clazz, behaviours);
+			}
+			behaviours.add(behaviour);
+		}
+	}
+	
+	public void addAll(Collection<Behaviour> behaviours) {
+		for(Behaviour behaviour : behaviours) { add (behaviour); }
+	}
+	
+	public void setBehaviours(Collection<Behaviour> behaviours) {
+		registry.clear();
+		addAll(behaviours);
+	}
+
+	public <T> T get(WebdavRequest request, Class<T> clazz) {
+		List<Behaviour> behaviours = registry.get(clazz);
+		for(Behaviour behaviour : behaviours) {
+			if(behaviour.matches(request)) {
+				return behaviour.get(clazz);
+			}
+		}
+		return null;
+	}
+
+	public void log() {
+		if(LOG.isInfoEnabled()) {
+			int sum = 0;
+			for(Map.Entry<Class<? extends Object>, List<Behaviour>> entry : registry.entrySet()) {
+				sum += entry.getValue().size();
+			}
+			LOG.info("Using "+sum+" overrides for WebDAV");
+		}
 		
-		
-		req.getFactory().beginRequest();
-		boolean stopped = false;
-		try {
-			yield(req,res);
-			req.getFactory().endRequest(200);
-			stopped = true;
-		} catch (WebdavException x) {
-			LOG.debug("Got Webdav Exception", x);
-			req.getFactory().endRequest(x.getStatus());
-			stopped = true;
-			throw x;
-		} finally {
-			if(!stopped) {
-				req.getFactory().endRequest(500);
+		if(LOG.isDebugEnabled()) {
+			LOG.debug("Overrides for WebDAV:");
+			for(Map.Entry<Class<? extends Object>, List<Behaviour>> entry : registry.entrySet()) {
+				for(Behaviour behaviour : entry.getValue()) {
+					LOG.debug(behaviour+" provides override for "+entry.getKey());
+				}
 			}
 		}
 	}

@@ -49,6 +49,7 @@
 
 package com.openexchange.webdav;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.EnumMap;
 import java.util.Map;
@@ -59,8 +60,12 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.core.io.FileSystemResource;
 
+import com.openexchange.configuration.SystemConfig;
 import com.openexchange.groupware.FolderLockManagerImpl;
+import com.openexchange.groupware.importexport.ImporterExporter;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.infostore.paths.impl.PathResolverImpl;
 import com.openexchange.groupware.infostore.webdav.EntityLockManagerImpl;
@@ -92,13 +97,19 @@ import com.openexchange.webdav.action.WebdavOptionsAction;
 import com.openexchange.webdav.action.WebdavPropfindAction;
 import com.openexchange.webdav.action.WebdavProppatchAction;
 import com.openexchange.webdav.action.WebdavPutAction;
+import com.openexchange.webdav.action.WebdavRequest;
 import com.openexchange.webdav.action.WebdavRequestCycleAction;
+import com.openexchange.webdav.action.WebdavResponse;
 import com.openexchange.webdav.action.WebdavTraceAction;
 import com.openexchange.webdav.action.WebdavUnlockAction;
+import com.openexchange.webdav.action.behaviour.BehaviourLookup;
+import com.openexchange.webdav.action.behaviour.RequestSpecificBehaviourRegistry;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavException;
 
 public class InfostorePerformer implements SessionHolder {
+	
+	private static  final Log LOG = LogFactory.getLog(InfostorePerformer.class);
 	
 	private static final InfostorePerformer INSTANCE = new InfostorePerformer();
 	
@@ -122,7 +133,6 @@ public class InfostorePerformer implements SessionHolder {
 		TRACE
 	}
 	
-	private static  final Log LOG = LogFactory.getLog(Infostore.class);
 	
 	private  InfostoreWebdavFactory factory;
 	private  Protocol protocol = new Protocol();
@@ -195,9 +205,24 @@ public class InfostorePerformer implements SessionHolder {
 		actions.put(Action.PUT, put);
 		actions.put(Action.TRACE, trace);
 		
-	
+		loadRequestSpecificBehaviourRegistry();
 	}
 	
+	private void loadRequestSpecificBehaviourRegistry() {
+		String beanPath = SystemConfig.getProperty(SystemConfig.Property.WebdavOverrides);
+		if (beanPath != null && new File(beanPath).exists()) {
+			try {
+				XmlBeanFactory beanfactory = new XmlBeanFactory( new FileSystemResource( new File(beanPath) ) );
+				RequestSpecificBehaviourRegistry registry = (RequestSpecificBehaviourRegistry) beanfactory.getBean("registry");
+				registry.log();
+			} catch (Exception x) {
+				LOG.error("Can't load webdav overrides", x);
+			}
+		} else {
+			LOG.info("No WebDAV overrides configured in SystemConfig");
+		}
+	}
+
 	private final WebdavAction prepare(final AbstractAction action, final boolean logBody, final boolean logResponse, final AbstractAction...additionals) {
 		final WebdavLogAction logAction = new WebdavLogAction();
 		logAction.setLogRequestBody(logBody);
@@ -234,16 +259,21 @@ public class InfostorePerformer implements SessionHolder {
 	
 	public final void doIt(HttpServletRequest req, HttpServletResponse resp, Action action, SessionObject sess) throws ServletException, IOException {
 		try {
+			WebdavRequest webdavRequest = new ServletWebdavRequest(factory, req);
+			WebdavResponse webdavResponse = new ServletWebdavResponse(resp);
+			
 			session.set(sess);
+			BehaviourLookup.getInstance().setRequest(webdavRequest);
 			if (LOG.isDebugEnabled()) {
 				LOG.debug("Executing "+action);
 			}
-			actions.get(action).perform(new ServletWebdavRequest(factory, req), new ServletWebdavResponse(resp));
+			actions.get(action).perform(webdavRequest, webdavResponse);
 		} catch (WebdavException x) {
 			resp.setStatus(x.getStatus());
 		} catch (NullPointerException x) {
 			x.printStackTrace();
 		} finally {
+			BehaviourLookup.getInstance().unsetRequest();
 			session.set(null);
 		}
 	}

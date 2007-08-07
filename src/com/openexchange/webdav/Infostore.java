@@ -65,7 +65,8 @@ public class Infostore extends OXServlet {
 
 	
 	public Infostore(){
-		
+		// Force Loading of InfostorePerformer
+		InfostorePerformer.getInstance();
 	}
 	
 	@Override

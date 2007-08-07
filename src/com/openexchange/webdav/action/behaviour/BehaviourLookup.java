@@ -47,36 +47,45 @@
  *
  */
 
-package com.openexchange.webdav.action;
+package com.openexchange.webdav.action.behaviour;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.webdav.action.WebdavRequest;
 
-import com.openexchange.webdav.protocol.WebdavException;
-
-public class WebdavRequestCycleAction extends AbstractAction {
-	private static final Log LOG = LogFactory.getLog(WebdavRequestCycleAction.class);
+public class BehaviourLookup {
 	
-	public void perform(WebdavRequest req, WebdavResponse res)
-			throws WebdavException {
-		
-		
-		req.getFactory().beginRequest();
-		boolean stopped = false;
-		try {
-			yield(req,res);
-			req.getFactory().endRequest(200);
-			stopped = true;
-		} catch (WebdavException x) {
-			LOG.debug("Got Webdav Exception", x);
-			req.getFactory().endRequest(x.getStatus());
-			stopped = true;
-			throw x;
-		} finally {
-			if(!stopped) {
-				req.getFactory().endRequest(500);
-			}
-		}
+	private static final BehaviourLookup INSTANCE = new BehaviourLookup();
+	
+	public static BehaviourLookup getInstance(){
+		return INSTANCE;
 	}
-
+	
+	
+	private final ThreadLocal<WebdavRequest> requestHolder = new ThreadLocal<WebdavRequest>();
+	private RequestSpecificBehaviourRegistry registry = null;
+	
+	
+	public void setRequest(WebdavRequest req) {
+		requestHolder.set(req);
+	}
+	
+	
+	public void unsetRequest(){
+		requestHolder.set(null);	
+	}
+	
+	public void setRegistry(RequestSpecificBehaviourRegistry reg) {
+		registry = reg;
+	}
+	
+	public <T> T get(Class<T> clazz) {
+		if(null == registry) {
+			return null;
+		}
+		WebdavRequest req = requestHolder.get();
+		if(req == null) {
+			return null;
+		}
+		
+		return registry.get(req, clazz);
+	}
 }

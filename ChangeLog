@@ -6,6 +6,7 @@
 * 2007-08-07 - francisco.laguna@open-xchange.com
 
  - Added license to classes.
+ - Bugfix #8622: Provide overridability for url encoding in propfind responses.
 
 * 2007-08-06 - marcus.klein@open-xchange.com
 

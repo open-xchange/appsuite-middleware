@@ -118,7 +118,12 @@ public class ConfigurationException extends AbstractOXException {
         /**
          * Cannot load class "%s".
          */
-        CLASS_NOT_FOUND("Cannot load class \"%s\".", Category.SETUP_ERROR, 6);
+        CLASS_NOT_FOUND("Cannot load class \"%s\".", Category.SETUP_ERROR, 6),
+        
+        /**
+         * Invalid configuration: %s
+         */
+        INVALID_CONFIGURATION("Invalid configuration: %s", Category.SETUP_ERROR, 7);
 
         /**
          * Message of the exception.

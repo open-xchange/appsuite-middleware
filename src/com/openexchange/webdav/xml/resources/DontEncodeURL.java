@@ -47,36 +47,12 @@
  *
  */
 
-package com.openexchange.webdav.action;
+package com.openexchange.webdav.xml.resources;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+public class DontEncodeURL implements PropfindResponseUrlEncoder {
 
-import com.openexchange.webdav.protocol.WebdavException;
-
-public class WebdavRequestCycleAction extends AbstractAction {
-	private static final Log LOG = LogFactory.getLog(WebdavRequestCycleAction.class);
-	
-	public void perform(WebdavRequest req, WebdavResponse res)
-			throws WebdavException {
-		
-		
-		req.getFactory().beginRequest();
-		boolean stopped = false;
-		try {
-			yield(req,res);
-			req.getFactory().endRequest(200);
-			stopped = true;
-		} catch (WebdavException x) {
-			LOG.debug("Got Webdav Exception", x);
-			req.getFactory().endRequest(x.getStatus());
-			stopped = true;
-			throw x;
-		} finally {
-			if(!stopped) {
-				req.getFactory().endRequest(500);
-			}
-		}
+	public String encode(String url) {
+		return url;
 	}
 
 }

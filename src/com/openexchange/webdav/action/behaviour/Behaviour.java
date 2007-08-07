@@ -47,36 +47,15 @@
  *
  */
 
-package com.openexchange.webdav.action;
+package com.openexchange.webdav.action.behaviour;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.util.Set;
 
-import com.openexchange.webdav.protocol.WebdavException;
+import com.openexchange.webdav.action.WebdavRequest;
 
-public class WebdavRequestCycleAction extends AbstractAction {
-	private static final Log LOG = LogFactory.getLog(WebdavRequestCycleAction.class);
+public interface Behaviour {
+	public boolean matches(WebdavRequest req);
+	public Set<Class<? extends Object>> provides();
 	
-	public void perform(WebdavRequest req, WebdavResponse res)
-			throws WebdavException {
-		
-		
-		req.getFactory().beginRequest();
-		boolean stopped = false;
-		try {
-			yield(req,res);
-			req.getFactory().endRequest(200);
-			stopped = true;
-		} catch (WebdavException x) {
-			LOG.debug("Got Webdav Exception", x);
-			req.getFactory().endRequest(x.getStatus());
-			stopped = true;
-			throw x;
-		} finally {
-			if(!stopped) {
-				req.getFactory().endRequest(500);
-			}
-		}
-	}
-
+	public <T> T get(Class<T> clazz);
 }
