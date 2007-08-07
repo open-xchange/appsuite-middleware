@@ -184,8 +184,8 @@ public class MessageCacheManager {
 	@SuppressWarnings(STR_UNCHECKED)
 	public final MessageCacheObject[] getMessages(final int user, final long[] msgUIDs, final String folder,
 			final Context ctx) {
-		final Map<String, MessageCacheObject> msgMap = (ConcurrentHashMap<String, MessageCacheObject>) msgCache.get(getUserKey(
-				user, ctx));
+		final Map<String, MessageCacheObject> msgMap = (ConcurrentHashMap<String, MessageCacheObject>) msgCache
+				.get(getUserKey(user, ctx));
 		if (msgMap == null) {
 			return null;
 		}
@@ -235,8 +235,8 @@ public class MessageCacheManager {
 		if (iter == null) {
 			return;
 		}
-		Map<String, MessageCacheObject> msgMap = (ConcurrentHashMap<String, MessageCacheObject>) msgCache.get(getUserKey(user,
-				ctx));
+		Map<String, MessageCacheObject> msgMap = (ConcurrentHashMap<String, MessageCacheObject>) msgCache
+				.get(getUserKey(user, ctx));
 		boolean insert = false;
 		if (msgMap == null) {
 			/*
@@ -269,9 +269,8 @@ public class MessageCacheManager {
 	}
 
 	/**
-	 * Return s user's message map which is kept in cache. <b>NOTE</b>: Don't
-	 * forget to release message map through
-	 * <code>releaseUserMessageMap(X)</code> method
+	 * Returns user's message map which is kept in cache. If none is in cache, a
+	 * new map is going to be created, put into cache and returned.
 	 * 
 	 * @param session -
 	 *            the session
@@ -285,7 +284,8 @@ public class MessageCacheManager {
 	}
 
 	/**
-	 * Return s user's message map which is kept in cache.
+	 * Returns user's message map which is kept in cache. If none is in cache, a
+	 * new map is going to be created, put into cache and returned.
 	 * 
 	 * @param user -
 	 *            the user ID
@@ -298,8 +298,8 @@ public class MessageCacheManager {
 	@SuppressWarnings(STR_UNCHECKED)
 	public final Map<String, MessageCacheObject> getUserMessageMap(final int user, final Context ctx)
 			throws OXCachingException {
-		Map<String, MessageCacheObject> msgMap = (ConcurrentHashMap<String, MessageCacheObject>) msgCache.get(getUserKey(user,
-				ctx));
+		Map<String, MessageCacheObject> msgMap = (ConcurrentHashMap<String, MessageCacheObject>) msgCache
+				.get(getUserKey(user, ctx));
 		if (msgMap == null) {
 			/*
 			 * Does not exist in cache, yet
@@ -334,8 +334,8 @@ public class MessageCacheManager {
 		if (msg == null) {
 			return;
 		}
-		Map<String, MessageCacheObject> msgMap = (ConcurrentHashMap<String, MessageCacheObject>) msgCache.get(getUserKey(user,
-				ctx));
+		Map<String, MessageCacheObject> msgMap = (ConcurrentHashMap<String, MessageCacheObject>) msgCache
+				.get(getUserKey(user, ctx));
 		boolean insert = false;
 		if (msgMap == null) {
 			/*
@@ -369,8 +369,8 @@ public class MessageCacheManager {
 	 */
 	@SuppressWarnings(STR_UNCHECKED)
 	public final void removeMessage(final int user, final long msgUID, final String folder, final Context ctx) {
-		final Map<String, MessageCacheObject> msgMap = (ConcurrentHashMap<String, MessageCacheObject>) msgCache.get(getUserKey(
-				user, ctx));
+		final Map<String, MessageCacheObject> msgMap = (ConcurrentHashMap<String, MessageCacheObject>) msgCache
+				.get(getUserKey(user, ctx));
 		if (msgMap == null) {
 			return;
 		}
