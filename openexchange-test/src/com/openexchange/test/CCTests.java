@@ -149,6 +149,10 @@ public class CCTests
 		tests.addTestSuite(com.openexchange.groupware.attach.AttachmentBaseTest.class);
 		
 		tests.addTest(com.openexchange.groupware.importexport.ImportExportStandaloneSuite.suite());
+		
+		tests.addTestSuite(com.openexchange.webdav.action.behaviour.RequestSpecificBehaviourRegistryTest.class);
+		tests.addTestSuite(com.openexchange.webdav.action.behaviour.UserAgentBehaviourTest.class);
+		
 		return tests;
 	}
 }
