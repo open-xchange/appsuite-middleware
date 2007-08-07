@@ -1169,7 +1169,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             // sql query should be made because we only need usage and reserved here but we do full
             // context lookups
             OXContextStorageInterface oxcox = (OXContextStorageInterface)OXContextMySQLStorage.getInstance();
-            final Context[] all_ctx = oxcox.searchContextByFilestoreId(fs);
+            final Context[] all_ctx = oxcox.searchContextByFilestore(fs);
             if( all_ctx == null ) {
                 throw new StorageException("Unable to determine filestore data");
             }
