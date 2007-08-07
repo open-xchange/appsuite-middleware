@@ -194,7 +194,8 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             if(usrdata.getName()!=null  && tool.existsUserName(ctx, usrdata)){
                 throw new InvalidDataException("User " + usrdata.getName() + " already exists in this context");
             }
-
+            
+            if(!ClientAdminThread.cache.contextAuthenticationDisabled()){
             final int auth_user_id = tool.getUserIDByUsername(ctx, auth.getLogin());
             // check if given user is admin
             if (tool.isContextAdmin(ctx, auth_user_id)) {
@@ -208,6 +209,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     throw new InvalidCredentialsException("Permission denied");
                 }
             } 
+            }
             
             if (tool.schemaBeingLockedOrNeedsUpdate(ctx)) {
                 final DatabaseUpdateException databaseUpdateException = new DatabaseUpdateException("Database must be updated or currently is beeing updated");
