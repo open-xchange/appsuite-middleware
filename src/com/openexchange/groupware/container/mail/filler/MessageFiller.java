@@ -51,6 +51,7 @@ package com.openexchange.groupware.container.mail.filler;
 
 import static com.openexchange.groupware.container.mail.parser.MessageUtils.performLineWrap;
 import static com.openexchange.groupware.container.mail.parser.MessageUtils.removeHdrLineBreak;
+import static com.openexchange.groupware.container.mail.parser.MessageUtils.replaceHTMLSimpleQuotesForDisplay;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -178,8 +179,8 @@ public class MessageFiller {
 			.getLog(MessageFiller.class);
 
 	private static final Pattern PATTERN_EMBD_IMG = Pattern.compile("(<img.*src=\"cid:)([^\"]+)(\"[^/]*/?>)",
-			Pattern.CASE_INSENSITIVE);
-	
+			Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+
 	private final Html2TextConverter converter;
 
 	private final SessionObject session;
@@ -359,7 +360,7 @@ public class MessageFiller {
 							break AppendVCard;
 						}
 					}
-					
+
 				}
 				if (primaryMultipart == null) {
 					primaryMultipart = new MimeMultipart();
@@ -533,7 +534,8 @@ public class MessageFiller {
 			throw new OXMailException(MailCode.HTML2TEXT_CONVERTER_ERROR, e, e.getMessage());
 		}
 		text.setHeader(MessageHeaders.HDR_MIME_VERSION, VERSION);
-		text.setHeader(MessageHeaders.HDR_CONTENT_TYPE, PAT_TEXT_CT.replaceFirst(REPLACE_CS, IMAPProperties.getDefaultMimeCharset()));
+		text.setHeader(MessageHeaders.HDR_CONTENT_TYPE, PAT_TEXT_CT.replaceFirst(REPLACE_CS, IMAPProperties
+				.getDefaultMimeCharset()));
 		alternativeMultipart.addBodyPart(text);
 		/*
 		 * Define html content
@@ -879,30 +881,6 @@ public class MessageFiller {
 		}
 	}
 
-	private static final String BLOCKQUOTE_START_TMPL = "<blockquote type=\"cite\" style=\"margin-left: 0px; padding-left: 10px; color:%s; border-left: solid 1px %s;\">\n";
-
-	private static final String BLOCKQUOTE_END = "</blockquote>\n";
-
-	private static final String HTML_BREAK = "<br>";
-
-	private static final String DEFAULT_COLOR = "#0026ff";
-
-	private static final String STR_HTML_QUOTE = "&gt;";
-
-	private static final String STR_SPLIT_BR = "<br/?>";
-
-	private static final String[] COLORS;
-
-	static {
-		String[] tmp = null;
-		try {
-			tmp = IMAPProperties.getQuoteLineColors();
-		} catch (final OXException e) {
-			tmp = new String[] { "#454545" };
-		}
-		COLORS = tmp;
-	}
-
 	/**
 	 * <p>
 	 * Turns simple quotes ("> " or "&gt; ") into html blockquotes when sending
@@ -914,64 +892,31 @@ public class MessageFiller {
 	 * </p>
 	 */
 	private static final String insertColorQuotes(final String s) {
-		final StringBuilder sb = new StringBuilder();
-		final String[] lines = s.split(STR_SPLIT_BR);
-		int levelBefore = 0;
-		for (int i = 0; i < lines.length; i++) {
-			String line = lines[i];
-			int currentLevel = 0;
-			int offset = 0;
-			if (line.startsWith(STR_HTML_QUOTE)) {
-				currentLevel++;
-				offset = 4;
-				int pos = -1;
-				boolean next = true;
-				while (next && (pos = line.indexOf(STR_HTML_QUOTE, offset)) > -1) {
-					/*
-					 * Continue only if next starting position is equal to
-					 * offset or if just one whitespace character has been
-					 * skipped
-					 */
-					next = (offset == pos || (pos - offset == 1 && Character.isWhitespace(line.charAt(offset))));
-					if (next) {
-						currentLevel++;
-						offset = (pos + 4);
-					}
-				}
-			}
-			if (offset > 0) {
-				try {
-					offset = offset < line.length() && Character.isWhitespace(line.charAt(offset)) ? offset + 1
-							: offset;
-				} catch (final StringIndexOutOfBoundsException e) {
-					if (LOG.isTraceEnabled()) {
-						LOG.trace(e.getMessage(), e);
-					}
-				}
-				line = line.substring(offset);
-			}
-			if (levelBefore < currentLevel) {
-				for (; levelBefore < currentLevel; levelBefore++) {
-					final String color = COLORS != null && COLORS.length > 0 ? (levelBefore >= COLORS.length ? COLORS[COLORS.length - 1]
-							: COLORS[levelBefore])
-							: DEFAULT_COLOR;
-					sb.append(String.format(BLOCKQUOTE_START_TMPL, color, color));
-				}
-			} else if (levelBefore > currentLevel) {
-				for (; levelBefore > currentLevel; levelBefore--) {
-					sb.append(BLOCKQUOTE_END);
-				}
-			}
-			sb.append(line).append(HTML_BREAK);
-		}
-		return sb.toString();
+		return replaceHTMLSimpleQuotesForDisplay(s);
 	}
 
-	private static final boolean hasEmbeddedImages(final String htmlContent) {
+	/**
+	 * Detects if given html content contains references to inlined images
+	 * 
+	 * @param htmlContent
+	 *            The html content
+	 * @return <code>true</code> if given html content contains references to
+	 *         inlined images; otherwise <code>false</code>
+	 */
+	public static final boolean hasEmbeddedImages(final String htmlContent) {
 		return PATTERN_EMBD_IMG.matcher(htmlContent).find();
 	}
 
-	private static final List<String> getContentIDs(final String htmlContent) {
+	/**
+	 * Gathers all occuring content IDs in html content and returns them as a
+	 * list
+	 * 
+	 * @param htmlContent
+	 *            The html content
+	 * @return an instance of <code>{@link List}</code> containing all
+	 *         occuring content IDs
+	 */
+	public static final List<String> getContentIDs(final String htmlContent) {
 		final List<String> retval = new ArrayList<String>();
 		final Matcher m = PATTERN_EMBD_IMG.matcher(htmlContent);
 		while (m.find()) {
@@ -1007,7 +952,17 @@ public class MessageFiller {
 		return null;
 	}
 
-	private static final boolean equalsCID(final String contentId1Arg, final String contentId2Arg) {
+	/**
+	 * Compares the given vaslues of message header "Content-ID"
+	 * 
+	 * @param contentId1Arg
+	 *            The first content ID
+	 * @param contentId2Arg
+	 *            The second content ID
+	 * @return <code>true</code> if both are equal; otherwise
+	 *         <code>false</code>
+	 */
+	public static final boolean equalsCID(final String contentId1Arg, final String contentId2Arg) {
 		if (null != contentId1Arg && null != contentId2Arg) {
 			final String contentId1 = contentId1Arg.charAt(0) == '<' ? contentId1Arg.substring(1, contentId1Arg
 					.length() - 1) : contentId1Arg;

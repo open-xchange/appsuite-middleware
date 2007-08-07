@@ -295,9 +295,8 @@ public class Html2TextConverter {
 	private static final Pattern PATTERN_HREF_CONTENT = Pattern.compile("href=\"?([^\\s\">]+)\"?",
 			Pattern.CASE_INSENSITIVE);
 
-	private static final Pattern PATTERN_ALT_CONTENT = Pattern.compile("alt=\"?([^\">]+)\"?",
-			Pattern.CASE_INSENSITIVE);
-	
+	private static final Pattern PATTERN_ALT_CONTENT = Pattern.compile("alt=\"?([^\">]+)\"?", Pattern.CASE_INSENSITIVE);
+
 	private static final Pattern PATTERN_SRC_CONTENT = Pattern.compile("src=\"?([^\\s\">]+)\"?",
 			Pattern.CASE_INSENSITIVE);
 
@@ -357,15 +356,21 @@ public class Html2TextConverter {
 			result = LINEBREAK;
 		} else if (isTag(t, "/form")) {
 			result = LINEBREAK;
-		} else if (isTag(t, "b")) {
-			result = "*";
-		} else if (isTag(t, "/b")) {
-			result = "*";
-		} else if (isTag(t, "i")) {
-			result = "\"";
-		} else if (isTag(t, "/i")) {
-			result = "\"";
-		} else if (isTag(t, "img")) {
+		}
+		/**
+		 * <pre>
+		 * else if (isTag(t, &quot;b&quot;)) {
+		 * 		result = &quot;*&quot;;
+		 * } else if (isTag(t, &quot;/b&quot;)) {
+		 * 		result = &quot;*&quot;;
+		 * } else if (isTag(t, &quot;i&quot;)) {
+		 * 		result = &quot;\&quot;&quot;;
+		 * } else if (isTag(t, &quot;/i&quot;)) {
+		 * 		result = &quot;\&quot;&quot;;
+		 * } 	
+		 * </pre>
+		 */
+		else if (isTag(t, "img")) {
 			final StringBuilder sb = new StringBuilder(100);
 			Matcher matcher = PATTERN_ALT_CONTENT.matcher(t);
 			if (matcher.find()) {

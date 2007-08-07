@@ -131,6 +131,8 @@ public class ReplyTextMessageHandler implements MessageHandler {
 	private boolean isHtml;
 
 	private boolean isAlternative;
+	
+	private String altId;
 
 	private boolean textFound;
 
@@ -335,6 +337,8 @@ public class ReplyTextMessageHandler implements MessageHandler {
 	public boolean handleImagePart(final Part part, final String imageCID, final String baseContentType, final String id) {
 		return true;
 	}
+	
+	private static final String MIME_MULTIPART_ALT = "multipart/alternative";
 
 	/*
 	 * (non-Javadoc)
@@ -346,7 +350,16 @@ public class ReplyTextMessageHandler implements MessageHandler {
 		/*
 		 * Determine if message is of MIME type multipart/alternative
 		 */
-		isAlternative = (mp.getContentType().regionMatches(true, 0, "multipart/alternative", 0, 21) && bodyPartCount >= 2);
+		if (mp.getContentType().regionMatches(true, 0, MIME_MULTIPART_ALT, 0, 21) && bodyPartCount >= 2) {
+			isAlternative = true;
+			altId = id;
+		} else if (null != altId && !id.startsWith(altId)) {
+			/*
+			 * No more within multipart/alternative since current ID is not
+			 * nested below remembered ID
+			 */
+			isAlternative = false;
+		}
 		return true;
 	}
 

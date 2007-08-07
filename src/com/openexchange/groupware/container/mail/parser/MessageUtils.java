@@ -430,6 +430,8 @@ public final class MessageUtils {
 
 	private static final String BLOCKQUOTE_END = "</blockquote>\n";
 
+	private static final String REGEX_HTML_QUOTE = "\\s*&gt;\\s*";
+
 	private static final String STR_HTML_QUOTE = "&gt;";
 
 	private static final String STR_SPLIT_BR = "<br/?>";
@@ -438,7 +440,7 @@ public final class MessageUtils {
 	 * Turns all simple quotes "&amp;gt; " to colored "&lt;blockquote&gt;" tags
 	 * according to configured quote colors in file "imap.properties"
 	 */
-	private static String replaceHTMLSimpleQuotesForDisplay(final String htmlText) {
+	public static String replaceHTMLSimpleQuotesForDisplay(final String htmlText) {
 		final StringBuilder sb = new StringBuilder();
 		final String[] lines = htmlText.split(STR_SPLIT_BR);
 		int levelBefore = 0;
@@ -446,9 +448,8 @@ public final class MessageUtils {
 			String line = lines[i];
 			int currentLevel = 0;
 			int offset = 0;
-			if (line.startsWith(STR_HTML_QUOTE)) {
+			if ((offset = startsWithRegex(line, REGEX_HTML_QUOTE)) != -1) {
 				currentLevel++;
-				offset = 4;
 				int pos = -1;
 				boolean next = true;
 				while (next && (pos = line.indexOf(STR_HTML_QUOTE, offset)) > -1) {
@@ -488,6 +489,15 @@ public final class MessageUtils {
 			sb.append(line).append(HTML_BREAK);
 		}
 		return sb.toString();
+	}
+
+	private static int startsWithRegex(final String str, final String regex) {
+		final Pattern p = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
+		final Matcher m = p.matcher(str);
+		if (m.find() && m.start() == 0) {
+			return m.end();
+		}
+		return -1;
 	}
 
 	private static final Pattern PATTERN_BLOCKQUOTE = Pattern.compile("(?:(<blockquote.*?>)|(</blockquote>))",
@@ -612,7 +622,7 @@ public final class MessageUtils {
 	 * Replaces all occurences of <code>&lt;img cid:&quot;[cid]&quot;...</code>
 	 * with links to the image content
 	 */
-	private static String filterInlineImages(final String content, final SessionObject session, final String msgUID) {
+	public static String filterInlineImages(final String content, final SessionObject session, final String msgUID) {
 		String reval = content;
 		try {
 			final Matcher imgMatcher = IMG_PATTERN.matcher(reval);

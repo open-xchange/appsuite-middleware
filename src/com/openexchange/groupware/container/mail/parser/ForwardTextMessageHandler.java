@@ -114,6 +114,8 @@ public class ForwardTextMessageHandler implements MessageHandler {
 	private String preparedText;
 
 	private boolean isAlternative;
+	
+	private String altId;
 
 	private boolean textFound;
 
@@ -334,6 +336,8 @@ public class ForwardTextMessageHandler implements MessageHandler {
 			throws OXException {
 		return true;
 	}
+	
+	private static final String MIME_MULTIPART_ALT = "multipart/alternative";
 
 	/*
 	 * (non-Javadoc)
@@ -345,7 +349,16 @@ public class ForwardTextMessageHandler implements MessageHandler {
 		/*
 		 * Determine if message is of MIME type multipart/alternative
 		 */
-		isAlternative = (mp.getContentType().regionMatches(true, 0, "multipart/alternative", 0, 21) && bodyPartCount >= 2);
+		if (mp.getContentType().regionMatches(true, 0, MIME_MULTIPART_ALT, 0, 21) && bodyPartCount >= 2) {
+			isAlternative = true;
+			altId = id;
+		} else if (null != altId && !id.startsWith(altId)) {
+			/*
+			 * No more within multipart/alternative since current ID is not
+			 * nested below remembered ID
+			 */
+			isAlternative = false;
+		}
 		return true;
 	}
 

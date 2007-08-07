@@ -228,6 +228,8 @@ public class MailInterfaceImpl implements MailInterface {
 	private static final String MIME_TEXT_VCARD = "text/vcard";
 
 	private static final String MIME_TEXT_X_VCARD = "text/x-vcard";
+	
+	private static final String MIME_IMAGE_ALL = "image/*";
 
 	/*
 	 * Property name constants
@@ -2085,7 +2087,7 @@ public class MailInterfaceImpl implements MailInterface {
 	 *      long, java.lang.String)
 	 */
 	public JSONMessageAttachmentObject getMessageAttachment(final String folderArg, final long msgUID,
-			final String attachmentPosition) throws OXException {
+			final String attachmentPosition, final boolean displayVersion) throws OXException {
 		try {
 			init();
 			final String folder = prepareMailFolderParam(folderArg);
@@ -2122,7 +2124,7 @@ public class MailInterfaceImpl implements MailInterface {
 				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 			}
 			final JSONAttachmentMessageHandler msgHandler = new JSONAttachmentMessageHandler(sessionObj,
-					attachmentPosition);
+					attachmentPosition, msg, displayVersion);
 			new MessageDumper(sessionObj).dumpMessage(msg, msgHandler);
 			return msgHandler.getAttachmentObject();
 		} catch (final MessagingException e) {
@@ -2549,7 +2551,8 @@ public class MailInterfaceImpl implements MailInterface {
 				 * Append quoted original mail text
 				 */
 				final ReplyTextMessageHandler msgHandler = new ReplyTextMessageHandler(sessionObj, msgUID);
-				new MessageDumper(sessionObj).dumpMessage(originalMsg, msgHandler);
+				final MessageDumper msgDumper = new MessageDumper(sessionObj);
+				msgDumper.dumpMessage(originalMsg, msgHandler);
 				final JSONMessageAttachmentObject mao = new JSONMessageAttachmentObject();
 				mao.setContentID(JSONMessageAttachmentObject.CONTENT_STRING);
 				mao.setContent(msgHandler.getReplyText());
@@ -2557,6 +2560,19 @@ public class MailInterfaceImpl implements MailInterface {
 				mao.setDisposition(Part.INLINE);
 				mao.setSize(-1);
 				retval.addMessageAttachment(mao);
+				/*
+				 * Check for inline images
+				 */
+				if (msgHandler.isHtml() && MessageFiller.hasEmbeddedImages(msgHandler.getReplyText())) {
+					/*
+					 * Append inline image attachments
+					 */
+					final JSONMessageHandler jsonMsgHandler = new JSONMessageHandler(sessionObj, msgUID, false);
+					msgDumper.reset();
+					msgDumper.dumpMessage(originalMsg, jsonMsgHandler);
+					appendInlineImages(retval, jsonMsgHandler.getMessageObject().getMsgAttachments(), MessageFiller
+							.getContentIDs(msgHandler.getReplyText()));
+				}
 			}
 			/*
 			 * Set message reference
@@ -2565,6 +2581,21 @@ public class MailInterfaceImpl implements MailInterface {
 			return retval;
 		} catch (final MessagingException e) {
 			throw handleMessagingException(e, sessionObj.getIMAPProperties(), sessionObj.getContext());
+		}
+	}
+
+	private static final void appendInlineImages(final JSONMessageObject msgObj,
+			final List<JSONMessageAttachmentObject> attachments, final List<String> cids) throws OXException {
+		final int size = attachments.size();
+		for (int i = 0; i < size; i++) {
+			final JSONMessageAttachmentObject mao = attachments.get(i);
+			if (ContentType.isMimeType(mao.getContentType(), MIME_IMAGE_ALL) && mao.getCid() != null) {
+				for (String cid : cids) {
+					if (MessageFiller.equalsCID(cid, mao.getCid())) {
+						msgObj.addMessageAttachment(mao);
+					}
+				}
+			}
 		}
 	}
 
@@ -2833,7 +2864,7 @@ public class MailInterfaceImpl implements MailInterface {
 	/**
 	 * Appends list of attachments to message object
 	 */
-	private final void appendAttachments(final JSONMessageObject msgObj,
+	private static final void appendAttachments(final JSONMessageObject msgObj,
 			final List<JSONMessageAttachmentObject> attachments) {
 		final int size = attachments.size();
 		for (int i = 0; i < size; i++) {
@@ -2846,7 +2877,7 @@ public class MailInterfaceImpl implements MailInterface {
 		}
 	}
 
-	private final void appendAttachmentsFromNestedMessages(final JSONMessageObject msgObj,
+	private static final void appendAttachmentsFromNestedMessages(final JSONMessageObject msgObj,
 			final List<JSONMessageObject> nestedMsgs) {
 		final int size = nestedMsgs.size();
 		for (int i = 0; i < size; i++) {

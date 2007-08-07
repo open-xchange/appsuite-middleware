@@ -49,6 +49,9 @@
 
 package com.openexchange.groupware.container.mail.parser;
 
+import static com.openexchange.groupware.container.mail.parser.MessageUtils.filterInlineImages;
+import static com.openexchange.groupware.container.mail.parser.MessageUtils.getMessageUniqueIdentifier;
+
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -88,16 +91,22 @@ public class JSONAttachmentMessageHandler implements MessageHandler {
 	private final SessionObject session;
 
 	private final String id;
+	
+	private final Message msg;
+	
+	private final boolean displayVersion;
 
 	private JSONMessageAttachmentObject attachment;
 	
 	private boolean multipartDetected;
 
-	public JSONAttachmentMessageHandler(final SessionObject session, final String id) throws OXException {
+	public JSONAttachmentMessageHandler(final SessionObject session, final String id, final Message msg, final boolean displayVersion) throws OXException {
 		super();
 		if (id == null || id.length() == 0) {
 			throw new OXMailException(MailCode.MISSING_PARAM, "id");
 		}
+		this.msg = msg;
+		this.displayVersion = displayVersion;
 		this.session = session;
 		this.id = id;
 		attachment = null;
@@ -259,7 +268,22 @@ public class JSONAttachmentMessageHandler implements MessageHandler {
 				attachment.setFileName(fileName);
 				attachment.setContentType(baseContentType);
 				attachment.setDisposition(Part.INLINE);
-				attachment.setContent(new ByteArrayInputStream(htmlContent.getBytes("UTF-8")));
+				if (displayVersion) {
+					/*
+					 * Show inline images
+					 */
+					try {
+						attachment.setContent(new ByteArrayInputStream(filterInlineImages(htmlContent, session,
+								getMessageUniqueIdentifier(msg)).getBytes("UTF-8")));
+					} catch (MessagingException e) {
+						if (LOG.isWarnEnabled()) {
+							LOG.warn("Inline images could not be resolved", e);
+						}
+						attachment.setContent(new ByteArrayInputStream(htmlContent.getBytes("UTF-8")));
+					}
+				} else {
+					attachment.setContent(new ByteArrayInputStream(htmlContent.getBytes("UTF-8")));
+				}
 				attachment.setContentID(JSONMessageAttachmentObject.CONTENT_INPUT_STREAM);
 				return false;
 			} catch (IOException e) {
@@ -402,7 +426,7 @@ public class JSONAttachmentMessageHandler implements MessageHandler {
 	 *      java.lang.String)
 	 */
 	public boolean handleNestedMessage(final Message nestedMsg, final String id) throws OXException {
-		final JSONAttachmentMessageHandler msgHandler = new JSONAttachmentMessageHandler(session, this.id);
+		final JSONAttachmentMessageHandler msgHandler = new JSONAttachmentMessageHandler(session, this.id, msg, displayVersion);
 		try {
 			new MessageDumper(session).dumpMessage(nestedMsg, msgHandler, id);
 			if (msgHandler.getAttachmentObject() != null) {

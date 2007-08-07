@@ -67,26 +67,29 @@ import com.openexchange.imap.OXMailException.MailCode;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public class ContentType implements Serializable {
+public final class ContentType implements Serializable {
 
 	private static final long serialVersionUID = -9197784872892324694L;
 
-	private static final Pattern PATTERN_CONTENT_TYPE = Pattern.compile(
-			"([^\\s]+)(/)([^\\s]+?\\s*)((?:(?:;\\s*|\\s+)\\S+=(?:(?:[^;]*)|(?:\"\\S+?\")))*)", Pattern.CASE_INSENSITIVE);
+	private static final Pattern PATTERN_CONTENT_TYPE = Pattern
+			.compile("([^\\s]+)(/)([^\\s]+?\\s*)((?:(?:;\\s*|\\s+)\\S+=(?:(?:[^;]*)|(?:\"\\S+?\")))*)",
+					Pattern.CASE_INSENSITIVE);
 
-	private static final Pattern PATTERN_PARAMETER = Pattern.compile("(;\\s*|\\s+)(\\S+)(=)((?:(?:[^;]*)|(?:\"\\S+?\")))",
+	private static final Pattern PATTERN_PARAMETER = Pattern.compile(
+			"(;\\s*|\\s+)(\\S+)(=)((?:(?:[^;]*)|(?:\"\\S+?\")))", Pattern.CASE_INSENSITIVE);
+
+	private static final Pattern PATTERN_BASETYPE = Pattern
+			.compile("([^\\s]+)(/)([^\\s^;]+)", Pattern.CASE_INSENSITIVE);
+
+	private static final Pattern PATTERN_SINGLE_PARAM = Pattern.compile("([^\\s]+)(\\s*[=|:]\\s*)([^\\s^;]+)",
 			Pattern.CASE_INSENSITIVE);
 
-	private static final Pattern PATTERN_BASETYPE = Pattern.compile("([^\\s]+)(/)([^\\s^;]+)", Pattern.CASE_INSENSITIVE);
-	
-	private static final Pattern PATTERN_SINGLE_PARAM = Pattern.compile("([^\\s]+)(\\s*[=|:]\\s*)([^\\s^;]+)", Pattern.CASE_INSENSITIVE);
-
 	private static final char DELIMITER = '/';
-	
+
 	private static final char SEMICOLON = ';';
-	
+
 	private static final int NONE = -1;
-	
+
 	private static final String SPLIT = "\\s*";
 
 	private String primaryType;
@@ -105,7 +108,7 @@ public class ContentType implements Serializable {
 	public ContentType(final String contentType) throws OXException {
 		this(contentType, true);
 	}
-	
+
 	public ContentType(final String contentType, final boolean strict) throws OXException {
 		this();
 		if (strict) {
@@ -127,8 +130,8 @@ public class ContentType implements Serializable {
 			}
 			if (pos != NONE) {
 				final String paramStr = contentType.substring(pos);
-				final int delim = paramStr.charAt(0) == SEMICOLON ? SEMICOLON
-						: Character.isWhitespace(paramStr.charAt(0)) ? paramStr.charAt(0) : NONE;
+				final int delim = paramStr.charAt(0) == SEMICOLON ? SEMICOLON : Character.isWhitespace(paramStr
+						.charAt(0)) ? paramStr.charAt(0) : NONE;
 				if (delim != NONE) {
 					final String[] paramArr = paramStr.split(new StringBuilder(SPLIT).append((char) delim)
 							.append(SPLIT).toString());
@@ -145,7 +148,7 @@ public class ContentType implements Serializable {
 		}
 	}
 
-	private final void parseContentType(final String ct) throws OXException {
+	private void parseContentType(final String ct) throws OXException {
 		final Matcher ctMatcher = PATTERN_CONTENT_TYPE.matcher(ct);
 		if (!ctMatcher.matches()) {
 			throw new OXMailException(MailCode.INVALID_CONTENT_TYPE, ct);
@@ -156,7 +159,7 @@ public class ContentType implements Serializable {
 		parseParameters(ct);
 	}
 
-	private final void parseParameters(final String ct) {
+	private void parseParameters(final String ct) {
 		final Matcher paramMatcher = PATTERN_PARAMETER.matcher(ct);
 		NextParam: while (paramMatcher.find()) {
 			final String value = paramMatcher.group(4);
@@ -167,7 +170,7 @@ public class ContentType implements Serializable {
 		}
 	}
 
-	private final void parseBaseType(final String baseType) throws OXException {
+	private void parseBaseType(final String baseType) throws OXException {
 		final Matcher baseTypeMatcher = PATTERN_BASETYPE.matcher(baseType);
 		if (!baseTypeMatcher.matches()) {
 			throw new OXMailException(MailCode.INVALID_CONTENT_TYPE, baseType);
@@ -291,6 +294,43 @@ public class ContentType implements Serializable {
 		final Pattern p = Pattern.compile(pattern.replaceAll("\\*", ".*").replaceAll("\\?", ".?"),
 				Pattern.CASE_INSENSITIVE);
 		return p.matcher(getBaseType()).matches();
+	}
+
+	/**
+	 * Checks if given MIME type's base type matches given wilcard pattern (e.g
+	 * text/plain, text/* or text/htm*)
+	 * 
+	 * 
+	 * @param mimeType
+	 *            The MIME type
+	 * @param pattern
+	 *            The pattern
+	 * @return <code>true</code> if pattern matches; otherwise
+	 *         <code>false</code>
+	 * @throws OXMailException
+	 *             If an invalid MIME type is detected
+	 */
+	public static boolean isMimeType(final String mimeType, final String pattern) throws OXMailException {
+		final Pattern p = Pattern.compile(pattern.replaceAll("\\*", ".*").replaceAll("\\?", ".?"),
+				Pattern.CASE_INSENSITIVE);
+		return p.matcher(getBaseType(mimeType)).matches();
+	}
+
+	/**
+	 * Detects the base type of given MIME type
+	 * 
+	 * @param mimeType
+	 *            The MIME type
+	 * @return the base type
+	 * @throws OXMailException
+	 *             If an invalid MIME type is detected
+	 */
+	public static String getBaseType(final String mimeType) throws OXMailException {
+		final Matcher m = PATTERN_BASETYPE.matcher(mimeType);
+		if (m.find()) {
+			return new StringBuilder(32).append(m.group(1)).append('/').append(m.group(3)).toString();
+		}
+		throw new OXMailException(MailCode.INVALID_CONTENT_TYPE, mimeType);
 	}
 
 	/*

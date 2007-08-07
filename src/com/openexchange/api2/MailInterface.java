@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.api2;
 
 import javax.mail.Message;
@@ -76,15 +74,15 @@ public interface MailInterface {
 	public static final int INDEX_SPAM = 2;
 
 	public static final int INDEX_TRASH = 3;
-	
+
 	public static final int INDEX_CONFIRMED_SPAM = 4;
-	
+
 	public static final int INDEX_CONFIRMED_HAM = 5;
-	
+
 	public static final int INDEX_INBOX = 6;
 
 	public static final int MAIL_PARAM_HARD_DELETE = 1;
-	
+
 	public static final int UNLIMITED_QUOTA = -1;
 
 	// Order direction
@@ -204,9 +202,13 @@ public interface MailInterface {
 	 * <code>attachmentPosition</code> wrapped by an instance of
 	 * <code>JSONMessageAttachmentObject</code> for a convenient access to its
 	 * attributes and content.
+	 * 
+	 * @param displayVersion
+	 *            <code>true</code> if returned object is for display purpose;
+	 *            otherwise <code>false</code>
 	 */
-	public JSONMessageAttachmentObject getMessageAttachment(String folder, long msgUID, String attachmentPosition)
-			throws OXException;
+	public JSONMessageAttachmentObject getMessageAttachment(String folder, long msgUID, String attachmentPosition,
+			boolean displayVersion) throws OXException;
 
 	/**
 	 * Returns a message's inline image located identified with given
@@ -215,11 +217,11 @@ public interface MailInterface {
 	 * attributes and content.
 	 */
 	public JSONMessageAttachmentObject getMessageImage(String folder, long msgUID, String cid) throws OXException;
-	
+
 	/**
 	 * Saves the versit object specified through given
-	 * <code>partIdentifier</code> and returns its corresponding
-	 * array of <code>CommonObject</code> instances which are either of type
+	 * <code>partIdentifier</code> and returns its corresponding array of
+	 * <code>CommonObject</code> instances which are either of type
 	 * <code>AppointmentObject</code>, <code>Task</code> or
 	 * <code>ContactObject </code>
 	 */
@@ -267,28 +269,28 @@ public interface MailInterface {
 	 * <code>msgUID</code>
 	 */
 	public boolean deleteMessages(String folder, long[] msgUIDs, boolean hardDelete) throws OXException;
-	
+
 	/**
 	 * Clears all messages out of given folder. <b>NOTE</b> this is a hard
 	 * delete, thus no copies are created
 	 */
 	public boolean clearFolder(final String folderArg) throws OXException;
-	
+
 	/**
 	 * Copies or moves (if <code>move</code> is set) the defined message from
 	 * source folder to destination folder.
 	 */
 	public long[] copyMessages(String sourceFolder, String destFolder, long[] msgUIDs, boolean move) throws OXException;
-	
+
 	/**
 	 * Updates the color label stored in message's user flags
 	 */
 	public Message[] updateMessageColorLabel(String folder, long[] msgUID, int newColorLabel) throws OXException;
-	
+
 	/**
 	 * Updates message's client-alterable system flags (e.g. //SEEN or
-	 * //ANSWERED). <code>flagVal</code> determines whether the affected flags are
-	 * set (<code>true</code>) or unset (<code>false</code>).
+	 * //ANSWERED). <code>flagVal</code> determines whether the affected flags
+	 * are set (<code>true</code>) or unset (<code>false</code>).
 	 */
 	public Message[] updateMessageFlags(String folder, long[] msgUID, int flagBits, boolean flagVal) throws OXException;
 
@@ -308,7 +310,7 @@ public interface MailInterface {
 	 * subfolders of given folder
 	 */
 	public SearchIterator getChildFolders(String parentFolder, boolean all) throws OXException;
-	
+
 	/**
 	 * Returns an instance of <code>SearchIterator</code> containing all
 	 * folders located beneath user's default folder regardless of their
@@ -330,7 +332,9 @@ public interface MailInterface {
 
 	/**
 	 * Closes the interface and releases all resources
-	 * @param putIntoCache - whether or not to put associated conenction into pool
+	 * 
+	 * @param putIntoCache -
+	 *            whether or not to put associated conenction into pool
 	 */
 	public void close(boolean putIntoCache) throws OXException;
 
@@ -344,7 +348,7 @@ public interface MailInterface {
 	 * Deletes given folder
 	 */
 	public String deleteFolder(String folder) throws OXException;
-	
+
 	/**
 	 * Returns user-defined inbox folder
 	 */
@@ -369,12 +373,12 @@ public interface MailInterface {
 	 * Returns user-defined trash folder
 	 */
 	public String getTrashFolder() throws OXException;
-	
+
 	/**
 	 * Returns user-defined confirmed spam folder
 	 */
 	public String getConfirmedSpamFolder() throws OXException;
-	
+
 	/**
 	 * Returns user-defined confirmed ham folder
 	 */

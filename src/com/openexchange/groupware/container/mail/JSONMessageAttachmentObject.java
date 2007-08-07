@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.groupware.container.mail;
 
 import java.io.File;
@@ -86,6 +84,8 @@ public class JSONMessageAttachmentObject implements Cloneable {
 
 	private Object content;
 
+	private String cid;
+
 	private String contentType;
 
 	private long size = -1;
@@ -112,6 +112,7 @@ public class JSONMessageAttachmentObject implements Cloneable {
 	public void reset() {
 		fileName = null;
 		content = null;
+		cid = null;
 		contentType = null;
 		size = -1;
 		positionInMail = null;
@@ -142,6 +143,14 @@ public class JSONMessageAttachmentObject implements Cloneable {
 
 	public void setContentType(final String contentType) {
 		this.contentType = contentType;
+	}
+
+	public String getCid() {
+		return cid;
+	}
+
+	public void setCid(final String cid) {
+		this.cid = cid;
 	}
 
 	public String getDisposition() {
@@ -240,6 +249,9 @@ public class JSONMessageAttachmentObject implements Cloneable {
 		jsonObj.put(JSONMessageObject.JSON_ID, positionInMail);
 		jsonObj.put(JSONMessageObject.JSON_ATTACHMENT_FILE_NAME, fileName);
 		jsonObj.put(JSONMessageObject.JSON_SIZE, size);
+		if (cid != null) {
+			jsonObj.put(JSONMessageObject.JSON_CID, cid);
+		}
 		jsonObj.put(JSONMessageObject.JSON_CONTENT_TYPE, contentType);
 		jsonObj.put(JSONMessageObject.JSON_CONTENT, content == null ? JSONObject.NULL : content);
 		jsonObj.put(JSONMessageObject.JSON_ATTACHMENT_UNIQUE_DISK_FILE_NAME,
@@ -248,8 +260,8 @@ public class JSONMessageAttachmentObject implements Cloneable {
 		return jsonObj;
 	}
 
-	public JSONMessageAttachmentObject parseJSONObject(final JSONObject jo, final int partLevel,
-			final int partCount) throws OXException {
+	public JSONMessageAttachmentObject parseJSONObject(final JSONObject jo, final int partLevel, final int partCount)
+			throws OXException {
 		try {
 			/*
 			 * Set attachment's position in mail
@@ -261,9 +273,14 @@ public class JSONMessageAttachmentObject implements Cloneable {
 				setPositionInMail(jo.getString(JSONMessageObject.JSON_ID));
 			} else {
 				/*
-				 * None found in JSON object. Create one according to given message level, multipart level & part count
+				 * None found in JSON object. Create one according to given
+				 * message level, multipart level & part count
 				 */
-				setPositionInMail(MessageUtils.getIdentifier(new int[] { partLevel, partCount}));
+				setPositionInMail(MessageUtils.getIdentifier(new int[] { partLevel, partCount }));
+			}
+
+			if (jo.has(JSONMessageObject.JSON_CID) && !jo.isNull(JSONMessageObject.JSON_CID)) {
+				setCid(jo.getString(JSONMessageObject.JSON_CID));
 			}
 
 			if (jo.has(JSONMessageObject.JSON_CONTENT_TYPE) && !jo.isNull(JSONMessageObject.JSON_CONTENT_TYPE)) {
@@ -311,9 +328,12 @@ public class JSONMessageAttachmentObject implements Cloneable {
 
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Object#clone()
 	 */
+	@Override
 	public Object clone() {
 		JSONMessageAttachmentObject copy;
 		try {

@@ -136,6 +136,8 @@ public class JSONMessageObject {
 	public static final String JSON_SIZE = "size";
 
 	public static final String JSON_CONTENT_TYPE = "content_type";
+	
+	public static final String JSON_CID = "cid";
 
 	public static final String JSON_CONTENT = "content";
 

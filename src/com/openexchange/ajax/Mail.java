@@ -168,6 +168,10 @@ public class Mail extends PermissionServlet implements UploadListener {
 	private static final String STR_NAME = "name";
 
 	private static final String MIME_APPLICATION_OCTET_STREAM = "application/octet-stream";
+	
+	private static final String MIME_TEXT_PLAIN = "text/plain";
+	
+	private static final String MIME_TEXT_HTML = "text/htm";
 
 	private static final String STR_ATTACHMENT_FILENAME = "attachment; filename=\"";
 
@@ -835,7 +839,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 						paramContainer.getHttpServletResponse().setHeader(
 								STR_CONTENT_DISPOSITION,
 								new StringBuilder(50).append(STR_ATTACHMENT_FILENAME).append(
-										getSaveAsFileName(fileName, internetExplorer)).append('"').toString());
+										getSaveAsFileName(fileName, internetExplorer, null)).append('"').toString());
 						paramContainer.getHttpServletResponse().setContentType(contentType.toString());
 						final OutputStream out = paramContainer.getHttpServletResponse().getOutputStream();
 						out.write(baos.toByteArray());
@@ -1110,6 +1114,8 @@ public class Mail extends PermissionServlet implements UploadListener {
 			final String attachmentIdentifier = req.getParameter(PARAMETER_MAILATTCHMENT);
 			final String imageContentId = req.getParameter(PARAMETER_MAILCID);
 			String saveIdentifier = req.getParameter(PARAMETER_SAVE);
+			saveToDisk = ((saveIdentifier == null || saveIdentifier.length() == 0) ? false : ((Integer.parseInt(saveIdentifier)) > 0)); 
+			saveIdentifier = null;
 			/*
 			 * Get attachment
 			 */
@@ -1123,7 +1129,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 				final JSONMessageAttachmentObject mao;
 				if (imageContentId == null) {
 					mao = mailInterface.getMessageAttachment(mailIdentifier.folder, mailIdentifier.msgUID,
-							attachmentIdentifier);
+							attachmentIdentifier, !saveToDisk);
 					if (mao == null) {
 						throw new OXMailException(MailCode.NO_ATTACHMENT_FOUND, attachmentIdentifier,
 								mailIdentifier.str);
@@ -1135,10 +1141,6 @@ public class Mail extends PermissionServlet implements UploadListener {
 								mailIdentifier.str);
 					}
 				}
-				if (saveIdentifier == null || saveIdentifier.length() == 0) {
-					saveIdentifier = "0";
-				}
-				saveToDisk = ((Integer.parseInt(saveIdentifier)) > 0);
 				/*
 				 * Write to response
 				 */
@@ -1153,9 +1155,9 @@ public class Mail extends PermissionServlet implements UploadListener {
 						contentType.setPrimaryType(STR_APPLICATION);
 						contentType.setSubType(STR_OCTET_STREAM);
 						resp.setHeader(STR_CONTENT_DISPOSITION, new StringBuilder(50).append(STR_ATTACHMENT_FILENAME)
-								.append(getSaveAsFileName(mao.getFileName(), internetExplorer)).append('"').toString());
+								.append(getSaveAsFileName(mao.getFileName(), internetExplorer, mao.getContentType())).append('"').toString());
 					} else {
-						final String fileName = getSaveAsFileName(mao.getFileName(), internetExplorer);
+						final String fileName = getSaveAsFileName(mao.getFileName(), internetExplorer, mao.getContentType());
 						contentType = new ContentType(mao.getContentType());
 						if (contentType.getBaseType().equalsIgnoreCase(MIME_APPLICATION_OCTET_STREAM)) {
 							/*
@@ -1260,26 +1262,44 @@ public class Mail extends PermissionServlet implements UploadListener {
 		resp.getOutputStream().flush();
 	}
 
-	private static final Pattern PART_FILENAME_PATTERN = Pattern.compile("(part )([0-9]+)(\\.)([0-9]+)",
+	private static final Pattern PART_FILENAME_PATTERN = Pattern.compile("(part )([0-9]+)(?:(\\.)([0-9]+))*",
 			Pattern.CASE_INSENSITIVE);
 
 	private static final String DEFAULT_FILENAME = "file.dat";
 
-	public static final String getSaveAsFileName(final String fileName, final boolean internetExplorer) {
+	private static final String getSaveAsFileName(final String fileName, final boolean internetExplorer,
+			final String baseCT) {
 		if (null == fileName) {
 			return DEFAULT_FILENAME;
 		}
+		final StringBuilder tmp = new StringBuilder(32);
 		final Matcher m = PART_FILENAME_PATTERN.matcher(fileName);
 		if (m.matches()) {
-			return fileName.replaceAll(" ", "_");
+			tmp.append(fileName.replaceAll(" ", "_"));
+		} else {
+			try {
+				tmp
+						.append(new String(Helper.encodeFilename(fileName, STR_UTF8, internetExplorer).getBytes(
+								"US-ASCII")));
+			} catch (UnsupportedEncodingException e) {
+				LOG.error("Unsupported encoding in a message detected and monitored.", e);
+				MailInterfaceImpl.mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
+				return fileName;
+			}
 		}
-		try {
-			return new String(Helper.encodeFilename(fileName, STR_UTF8, internetExplorer).getBytes("US-ASCII"));
-		} catch (UnsupportedEncodingException e) {
-			LOG.error("Unsupported encoding in a message detected and monitored.", e);
-			MailInterfaceImpl.mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
-			return fileName;
+		if (null != baseCT) {
+			if (baseCT.regionMatches(true, 0, MIME_TEXT_PLAIN, 0, MIME_TEXT_PLAIN.length())) {
+				if (!fileName.toLowerCase(Locale.ENGLISH).endsWith(".txt")) {
+					tmp.append(".txt");
+				}
+			} else if (baseCT.regionMatches(true, 0, MIME_TEXT_HTML, 0, MIME_TEXT_HTML.length())) {
+				if (!fileName.toLowerCase(Locale.ENGLISH).endsWith(".htm")
+						&& !fileName.toLowerCase(Locale.ENGLISH).endsWith(".html")) {
+					tmp.append(".html");
+				}
+			}
 		}
+		return tmp.toString();
 	}
 
 	public void actionPutClear(final SessionObject session, final JSONWriter writer, final JSONObject jsonObj,
@@ -2221,7 +2241,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 					closeMailInterface = true;
 				}
 				mao = mailInterface.getMessageAttachment(mailIdentifier.folder, mailIdentifier.msgUID,
-						attachmentIdentifier);
+						attachmentIdentifier, false);
 				if (mao == null) {
 					throw new OXMailException(MailCode.NO_ATTACHMENT_FOUND, attachmentIdentifier, mailIdentifier
 							.toString());

@@ -75,6 +75,7 @@ import com.openexchange.api2.MailInterfaceImpl;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.mail.JSONMessageAttachmentObject;
 import com.openexchange.groupware.container.mail.JSONMessageObject;
+import com.openexchange.imap.MessageHeaders;
 import com.openexchange.imap.OXMailException;
 import com.openexchange.imap.UserSettingMail;
 import com.openexchange.sessiond.SessionObject;
@@ -92,7 +93,7 @@ import com.openexchange.tools.mail.UUEncodedPart;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public class JSONMessageHandler implements MessageHandler {
+public final class JSONMessageHandler implements MessageHandler {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(JSONMessageHandler.class);
@@ -109,19 +110,19 @@ public class JSONMessageHandler implements MessageHandler {
 
 	private String altId;
 
-	private boolean textFound;
+	private boolean textAppended;
 
-	private final boolean createVersionForDisplay;
+	private final boolean displayVersion;
 
 	private final Html2TextConverter converter;
 
-	public JSONMessageHandler(final SessionObject session, final String msgUID, final boolean createVersionForDisplay) {
+	public JSONMessageHandler(final SessionObject session, final String msgUID, final boolean displayVersion) {
 		super();
 		this.session = session;
 		this.usm = session.getUserSettingMail();
 		this.msgObj = new JSONMessageObject(usm, TimeZone.getTimeZone(session.getUserObject().getTimeZone()));
 		this.msgUID = msgUID;
-		this.createVersionForDisplay = createVersionForDisplay;
+		this.displayVersion = displayVersion;
 		converter = new Html2TextConverter();
 	}
 
@@ -313,11 +314,11 @@ public class JSONMessageHandler implements MessageHandler {
 	 */
 	public boolean handleInlinePlainText(final String plainTextContentArg, final String baseContentType,
 			final int size, final String fileName, final String id) throws OXException {
-		if (isAlternative && usm.isDisplayHtmlInlineContent() && !textFound) {
+		if (isAlternative && usm.isDisplayHtmlInlineContent()/*&& !textAppended*/) {
 			/*
 			 * User wants to see message's alternative content
 			 */
-			textFound = true;
+			/* textAppended = true; */
 			return true;
 		}
 		final boolean isEnriched = MIME_TEXT_ENRICHED.equals(baseContentType.toLowerCase(Locale.ENGLISH));
@@ -336,7 +337,7 @@ public class JSONMessageHandler implements MessageHandler {
 		mao.setContentID(JSONMessageAttachmentObject.CONTENT_STRING);
 		mao.setSize(formattedText.length());
 		msgObj.addMessageAttachment(mao);
-		textFound = true;
+		textAppended = true;
 		return true;
 	}
 
@@ -405,87 +406,103 @@ public class JSONMessageHandler implements MessageHandler {
 	 */
 	public boolean handleInlineHtml(final String htmlContent, final String baseContentType, final int size,
 			final String fileName, final String id) throws OXException {
-		final JSONMessageAttachmentObject mao = new JSONMessageAttachmentObject(id);
-		JSONMessageAttachmentObject htmlAttach = null;
-		if (isAlternative && usm.isDisplayHtmlInlineContent()) {
+		if (textAppended) {
 			/*
-			 * multipart/alternative and user wants to see content's html
-			 * version
+			 * A text part has already been detected as message's body
 			 */
-			final String content = MessageUtils.formatContentForDisplay(htmlContent, true, session, msgUID);
-			mao.setContentType(baseContentType);
-			mao.setSize(content.length());
-			mao.setDisposition(Part.INLINE);
-			mao.setContent(content);
-			mao.setContentID(JSONMessageAttachmentObject.CONTENT_STRING);
-		} else if (!textFound) {
-			if (usm.isDisplayHtmlInlineContent()) {
-				/*
-				 * Still no text found til here. Insert html content
-				 */
-				final String content = MessageUtils.formatContentForDisplay(htmlContent, true, session, msgUID);
-				mao.setContentType(baseContentType);
-				mao.setSize(content.length());
-				mao.setDisposition(Part.INLINE);
-				mao.setContent(content);
-				mao.setContentID(JSONMessageAttachmentObject.CONTENT_STRING);
+			if (isAlternative) {
+				if (displayVersion) {
+					/*
+					 * Add html alternative part as attachment
+					 */
+					asAttachment(id, baseContentType, htmlContent.length(), fileName);
+				} else {
+					/*
+					 * Discard
+					 */
+					return true;
+				}
 			} else {
 				/*
-				 * Still no text found til here. Insert text-converted html
-				 * content
+				 * Add html part as attachment
 				 */
-				mao.setContentType(MIME_TEXT_PLAIN);
-				try {
-					/*
-					 * Try to convert the given html to regular text
-					 */
-					final String content;
-					if (createVersionForDisplay && usm.isUseColorQuote()) {
-						content = MailTools.formatHrefLinks(MessageUtils.convertAndKeepQuotes(htmlContent, converter));
-					} else {
-						final String convertedHtml = converter.convertWithQuotes(htmlContent);
-						content = MessageUtils.formatContentForDisplay(convertedHtml, false, session, msgUID);
-					}
-					mao.setDisposition(Part.INLINE);
-					// MessageUtils.getFormattedText(convertedHtml, false,
-					// session, msgUID);
-					mao.setContent(content);
-					mao.setSize(content.length());
-					mao.setContentID(JSONMessageAttachmentObject.CONTENT_STRING);
-					if (createVersionForDisplay) {
-						/*
-						 * Create attachment object for original html content
-						 */
-						htmlAttach = new JSONMessageAttachmentObject(id);
-						htmlAttach.setContentType(baseContentType);
-						htmlAttach.setSize(htmlContent.length());
-						htmlAttach.setDisposition(Part.ATTACHMENT);
-						htmlAttach.setContent(null);
-						htmlAttach.setContentID(JSONMessageAttachmentObject.CONTENT_NONE);
-						htmlAttach.setFileName(fileName);
-					}
-				} catch (final Exception e) {
-					final Throwable t = new Throwable("Unable to parse html2text for message view: " + e.getMessage());
-					LOG.error(t.getMessage(), e);
-				}
+				asAttachment(id, baseContentType, htmlContent.length(), fileName);
 			}
 		} else {
 			/*
-			 * No multipart/alternative or user does not want to see content's
-			 * html version or text was already found: Insert as an attachment
+			 * No text part was present before
 			 */
-			mao.setContentType(baseContentType);
-			mao.setSize(htmlContent.length());
-			mao.setDisposition(Part.ATTACHMENT);
-			mao.setContent(null);
-			mao.setContentID(JSONMessageAttachmentObject.CONTENT_NONE);
-			mao.setFileName(fileName);
+			if (usm.isDisplayHtmlInlineContent()) {
+				asHtml(id, baseContentType, htmlContent);
+			} else {
+				asText(id, baseContentType, htmlContent, fileName);
+			}
+		}
+		return true;
+	}
+
+	private void asAttachment(final String id, final String baseContentType, final int len, final String fileName) {
+		final JSONMessageAttachmentObject mao = new JSONMessageAttachmentObject(id);
+		mao.setContentType(baseContentType);
+		mao.setSize(len);
+		mao.setDisposition(Part.ATTACHMENT);
+		mao.setContent(null);
+		mao.setContentID(JSONMessageAttachmentObject.CONTENT_NONE);
+		mao.setFileName(fileName);
+		msgObj.addMessageAttachment(mao);
+	}
+
+	private void asHtml(final String id, final String baseContentType, final String htmlContent) {
+		final JSONMessageAttachmentObject mao = new JSONMessageAttachmentObject(id);
+		final String content = MessageUtils.formatContentForDisplay(htmlContent, true, session, msgUID);
+		mao.setContentType(baseContentType);
+		mao.setSize(content.length());
+		mao.setDisposition(Part.INLINE);
+		mao.setContent(content);
+		mao.setContentID(JSONMessageAttachmentObject.CONTENT_STRING);
+		msgObj.addMessageAttachment(mao);
+	}
+
+	private void asText(final String id, final String baseContentType, final String htmlContent, final String fileName) {
+		final JSONMessageAttachmentObject mao = new JSONMessageAttachmentObject(id);
+		JSONMessageAttachmentObject htmlAttach = null;
+		mao.setContentType(MIME_TEXT_PLAIN);
+		try {
+			/*
+			 * Try to convert the given html to regular text
+			 */
+			final String content;
+			if (displayVersion && usm.isUseColorQuote()) {
+				content = MailTools.formatHrefLinks(MessageUtils.replaceHTMLSimpleQuotesForDisplay(MessageUtils
+						.convertAndKeepQuotes(htmlContent, converter)));
+			} else {
+				final String convertedHtml = converter.convertWithQuotes(htmlContent);
+				content = MessageUtils.formatContentForDisplay(convertedHtml, false, session, msgUID);
+			}
+			mao.setDisposition(Part.INLINE);
+			mao.setContent(content);
+			mao.setSize(content.length());
+			mao.setContentID(JSONMessageAttachmentObject.CONTENT_STRING);
+			if (displayVersion) {
+				/*
+				 * Create attachment object for original html content
+				 */
+				htmlAttach = new JSONMessageAttachmentObject(id);
+				htmlAttach.setContentType(baseContentType);
+				htmlAttach.setSize(htmlContent.length());
+				htmlAttach.setDisposition(Part.ATTACHMENT);
+				htmlAttach.setContent(null);
+				htmlAttach.setContentID(JSONMessageAttachmentObject.CONTENT_NONE);
+				htmlAttach.setFileName(fileName);
+			}
+		} catch (final Exception e) {
+			final Throwable t = new Throwable("Unable to parse html2text for message view: " + e.getMessage());
+			LOG.error(t.getMessage(), e);
 		}
 		msgObj.addMessageAttachment(mao);
 		if (htmlAttach != null) {
 			msgObj.addMessageAttachment(htmlAttach);
 		}
-		return true;
 	}
 
 	private static final String MIME_PGP_SIGN = "APPLICATION/PGP-SIGNATURE";
@@ -563,6 +580,15 @@ public class JSONMessageHandler implements MessageHandler {
 			} else {
 				mao.setContent(null);
 				mao.setContentID(JSONMessageAttachmentObject.CONTENT_NONE);
+				final String[] cids;
+				if ((cids = part.getHeader(MessageHeaders.HDR_CONTENT_ID)) != null && cids.length > 0) {
+					final StringBuilder tmp = new StringBuilder(128);
+					tmp.append(cids[0]);
+					for (int i = 1; i < cids.length; i++) {
+						tmp.append(',').append(cids[0]);
+					}
+					mao.setCid(tmp.toString());
+				}
 			}
 			msgObj.addMessageAttachment(mao);
 			return true;
@@ -635,7 +661,7 @@ public class JSONMessageHandler implements MessageHandler {
 	 *      java.lang.String)
 	 */
 	public boolean handleNestedMessage(final Message nestedMsg, final String id) throws OXException {
-		final JSONMessageHandler msgHandler = new JSONMessageHandler(session, msgUID, createVersionForDisplay);
+		final JSONMessageHandler msgHandler = new JSONMessageHandler(session, msgUID, displayVersion);
 		try {
 			new MessageDumper(session).dumpMessage(nestedMsg, msgHandler, id);
 		} catch (final MessagingException e) {
@@ -661,7 +687,7 @@ public class JSONMessageHandler implements MessageHandler {
 	public String toString() {
 		final String delim = " | ";
 		return new StringBuilder(100).append("isAlternative=").append(isAlternative).append(delim).append("textFound=")
-				.append(textFound).append(delim).append("msgUID=").append(msgUID).append(delim).append("msgObject=")
+				.append(textAppended).append(delim).append("msgUID=").append(msgUID).append(delim).append("msgObject=")
 				.append(msgObj.toString()).toString();
 	}
 
@@ -676,7 +702,7 @@ public class JSONMessageHandler implements MessageHandler {
 		 * message object as seen
 		 */
 		msgObj.setSeen(true);
-		if (createVersionForDisplay && msg.getFolder() != null) {
+		if (displayVersion && msg.getFolder() != null) {
 			/*
 			 * Try to fill folder information into message object
 			 */
