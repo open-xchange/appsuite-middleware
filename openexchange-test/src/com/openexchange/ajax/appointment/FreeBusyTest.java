@@ -1,8 +1,12 @@
 package com.openexchange.ajax.appointment;
 
 import com.openexchange.ajax.AppointmentTest;
+import com.openexchange.ajax.GroupTest;
+import com.openexchange.ajax.ResourceTest;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.Participant;
+import com.openexchange.groupware.container.ResourceParticipant;
+import com.openexchange.groupware.container.UserParticipant;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
@@ -139,14 +143,43 @@ public class FreeBusyTest extends AppointmentTest {
 		appointmentObj.setParentFolderID(appointmentFolderId);
 		appointmentObj.setIgnoreConflicts(true);
 		
+		int resourceParticipantId = ResourceTest.searchResource(getWebConversation(), resourceParticipant, PROTOCOL + getHostName(), getSessionId())[0].getIdentifier();
+		
+		com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[2];
+		participants[0] = new UserParticipant();
+		participants[0].setIdentifier(userId);
+		participants[1] = new ResourceParticipant();
+		participants[1].setIdentifier(resourceParticipantId);
+		
+		appointmentObj.setParticipants(participants);
+		
 		int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		appointmentObj.setObjectID(objectId);
 		
+		appointmentObj.removeParticipants();
+		
 		Date start = new Date(System.currentTimeMillis()-(dayInMillis*2));
 		Date end = new Date(System.currentTimeMillis()+(dayInMillis*2));
+		
 		AppointmentObject[] appointmentArray = getFreeBusy(getWebConversation(), userId, Participant.USER, start, end, timeZone, PROTOCOL + getHostName(), getSessionId());
 		
 		boolean found = false;
+		
+		for (int a = 0; a < appointmentArray.length; a++) {
+			if (objectId == appointmentArray[a].getObjectID()) {
+				found = true;
+				
+				appointmentObj.removeTitle();
+				appointmentObj.removeParentFolderID();
+				compareObject(appointmentObj, appointmentArray[a], startTime, endTime);
+			}
+		}
+		
+		assertTrue("appointment with id " + objectId + " was found in free busy response!", found);
+		
+		appointmentArray = getFreeBusy(getWebConversation(), resourceParticipantId, Participant.RESOURCE, start, end, timeZone, PROTOCOL + getHostName(), getSessionId());
+		
+		found = false;
 		
 		for (int a = 0; a < appointmentArray.length; a++) {
 			if (objectId == appointmentArray[a].getObjectID()) {

@@ -16,6 +16,7 @@ import com.openexchange.tools.URLParameter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
@@ -469,13 +470,13 @@ public class ConflictTest extends AppointmentTest {
 		int objectId = 0;
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		OutputStreamWriter pw = new OutputStreamWriter(baos, "UTF-8");
-		JSONWriter jsonWriter = new JSONWriter(pw);
+		PrintWriter pw = new PrintWriter(baos, true);
+
+		final JSONObject jsonObj = new JSONObject();
+		AppointmentWriter appointmentwriter = new AppointmentWriter(userTimeZone);
+		appointmentwriter.writeAppointment(appointmentObj, jsonObj);
 		
-		AppointmentWriter appointmentwriter = new AppointmentWriter(jsonWriter,
-				userTimeZone);
-		appointmentwriter.writeAppointment(appointmentObj);
-		
+		pw.print(jsonObj.toString());		
 		pw.flush();
 		
 		byte b[] = baos.toByteArray();

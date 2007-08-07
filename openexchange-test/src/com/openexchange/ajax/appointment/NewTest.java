@@ -158,7 +158,7 @@ public class NewTest extends AppointmentTest {
 		appointmentObj.setParentFolderID(appointmentFolderId);
 		appointmentObj.setIgnoreConflicts(true);
 		
-		int resourceParticipantId = GroupTest.searchGroup(getWebConversation(), groupParticipant, PROTOCOL + getHostName(), getSessionId())[0].getIdentifier();
+		int resourceParticipantId = ResourceTest.searchResource(getWebConversation(), resourceParticipant, PROTOCOL + getHostName(), getSessionId())[0].getIdentifier();
 		
 		com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[2];
 		participants[0] = new UserParticipant();
