@@ -21,7 +21,13 @@ public class SearchTest extends ContactTest {
 	}
 
 	public void testSearchLoginUser() throws Exception {
-		ContactObject[] contactArray = searchContact(getWebConversation(), getLogin(), FolderObject.SYSTEM_LDAP_FOLDER_ID, new int[] { ContactObject.INTERNAL_USERID }, PROTOCOL + getHostName(), getSessionId());
+		String username = getAJAXProperty("username");
+		
+		if (username == null) {
+			username = getLogin();
+		}
+		
+		ContactObject[] contactArray = searchContact(getWebConversation(), username, FolderObject.SYSTEM_LDAP_FOLDER_ID, new int[] { ContactObject.INTERNAL_USERID }, PROTOCOL + getHostName(), getSessionId());
 		assertTrue("contact array size is 0", contactArray.length > 0);
 		assertEquals("user id is not equals", userId, contactArray[0].getInternalUserId());
 	}
