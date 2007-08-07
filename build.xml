@@ -9,11 +9,20 @@
 	<property name="serverconfdir" value="etc/groupware"/>
     <property name="admin.classpath" value="../open-xchange-admin/classes"/>
 	<property name="client.jar" value="ox_admin_hosting_rmiclient.jar"/>
-    <path id="project.classpath">
-	  <pathelement location="${lib.dir}/ox_server.jar"/>
-	  <pathelement location="${lib.dir}/commons-logging.jar"/>
-      <pathelement location="${lib.dir}/commons-io.jar"/>
-	  <pathelement location="${lib.dir}/org.eclipse.osgi_3.2.2.ox.jar"/>
+
+	<!-- all required jars -->
+	<property name="oxserver" value="ox_server.jar"/>
+	<property name="commons-io" value="commons-io.jar"/>
+	<property name="commons-logging" value="commons-logging.jar"/>
+	<property name="mysql-connector" value="mysql-connector-java-3.1.13-bin.jar"/>
+	<property name="eclipse-osgi" value="org.eclipse.osgi_3.2.2.ox.jar"/>
+	<property name="log4j" value="log4j-1.2.14.jar"/>
+
+	<path id="project.classpath">
+	  <pathelement location="${lib.dir}/${oxserver}"/>
+	  <pathelement location="${lib.dir}/${commons-logging}"/>
+      <pathelement location="${lib.dir}/${commons-io}"/>
+	  <pathelement location="${lib.dir}/${eclipse-osgi}"/>
       <pathelement location="${admin.classpath}"/>
     </path>
 
@@ -45,11 +54,21 @@
         </javac>
     </target>
 
-    <target name="jar" depends="compile">
+	<target name="manifest">
+		<copy file="META-INF/MANIFEST.MF" tofile="META-INF/MANIFEST.MF.package"/>
+		<manifest mode="update" file="META-INF/MANIFEST.MF.package">
+				<attribute name="Bundle-ClassPath" value=".,
+					 external:$libdir$/${mysql-connector},
+					 external:$libdir$/${log4j},
+					 external:$log4j$"/>
+		</manifest>
+	</target>
+
+    <target name="jar" depends="compile,manifest">
         <mkdir dir="jar"/>
         <jar jarfile="jar/${plugin.jar}"
         basedir="classes"
-        manifest="META-INF/MANIFEST.MF"/>
+        manifest="META-INF/MANIFEST.MF.package"/>
     </target>
 
     <target name="client" depends="compile">
