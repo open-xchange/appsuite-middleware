@@ -121,12 +121,14 @@ public class UtilTest extends AbstractTest {
         
         Server[] srv_resp = oxu.listServers("testcase-register-server-*",ContextTest.DummyMasterCredentials());
         int resp = 0;
-        for(int a = 0;a<srv_resp.length;a++){
-            if(srv_resp[a].getName().equals(reg_srv.getName()) &&
-               srv_resp[a].getId()==reg_srv.getId()){
-               resp++;
+        for (Server server : srv_resp) {
+            if(server.getName().equals(reg_srv.getName()) && server.getId().intValue()==reg_srv.getId().intValue()){
+                    resp++;
             }
         }
+//        for(int a = 0;a<=srv_resp.length;a++){
+//            
+//        }
         // resp muss 1 sein , ansonsten gibts 2 server mit selber id und name
         assertTrue("Expected 1 server",resp==1);
     }
@@ -144,7 +146,7 @@ public class UtilTest extends AbstractTest {
         int resp = 0;
         for(int a = 0;a<srv_resp.length;a++){
             if(srv_resp[a].getName().equals(reg_srv.getName()) &&
-               srv_resp[a].getId()==reg_srv.getId()){
+               srv_resp[a].getId().intValue()==reg_srv.getId().intValue()){
                resp++;
             }
         }
@@ -162,7 +164,7 @@ public class UtilTest extends AbstractTest {
         resp = 0;
         for(int a = 0;a<srv_resp.length;a++){
             if(srv_resp[a].getName().equals(reg_srv.getName()) &&
-               srv_resp[a].getId()==reg_srv.getId()){
+               srv_resp[a].getId().intValue()==reg_srv.getId().intValue()){
                resp++;
             }
         }
@@ -366,7 +368,7 @@ public class UtilTest extends AbstractTest {
         boolean found_srv = false;
         for(int a = 0;a<srv_response.length;a++){
             Server tmp = srv_response[a];
-            if(tmp.getId()==client_srv.getId() && 
+            if(tmp.getId().intValue()==client_srv.getId().intValue() && 
                     tmp.getName().equals(client_srv.getName())){
                 found_srv = true;
             }
