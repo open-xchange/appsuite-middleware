@@ -49,8 +49,6 @@
 
 package com.openexchange.ajax.task.actions;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.TimeZone;
 
 import org.json.JSONException;
@@ -59,7 +57,6 @@ import org.json.JSONObject;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.writer.TaskWriter;
 import com.openexchange.groupware.tasks.Task;
-import org.json.JSONWriter;
 
 /**
  * 
@@ -88,14 +85,8 @@ public abstract class AbstractTaskRequest implements AJAXRequest {
 
     protected JSONObject convert(final Task task, final TimeZone timeZone)
         throws JSONException {
-        final StringWriter stringW = new StringWriter();
-        final PrintWriter printW = new PrintWriter(stringW);
-		final JSONWriter jsonWriter = new JSONWriter(printW);
-		final JSONObject jsonObj = new JSONObject();
-        final TaskWriter taskW = new TaskWriter(timeZone);
-		taskW.writeTask(task, jsonObj);
-		printW.print(jsonObj.toString());
-        printW.flush();
-        return new JSONObject(stringW.toString());
+		final JSONObject retval = new JSONObject();
+        new TaskWriter(timeZone).writeTask(task, retval);
+        return retval;
     }
 }
