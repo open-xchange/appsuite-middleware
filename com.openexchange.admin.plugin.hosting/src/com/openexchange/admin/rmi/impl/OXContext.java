@@ -365,7 +365,6 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
     }
 
     private int moveContextDatabase(final Context ctx, final Database db, final MaintenanceReason reason, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException, OXContextException {
-        final Integer dbid = db.getId();
         try{
             doNullCheck(ctx,db,reason, reason.getId());
         } catch (final InvalidDataException e1) {            
@@ -395,6 +394,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             if (!tool.isContextEnabled(ctx)) {
                 throw new OXContextException(OXContextException.CONTEXT_DISABLED);
             }
+            final Integer dbid = db.getId();
             if (!tool.isMasterDatabase(dbid)) {
                 throw new OXContextException("Database with id " + dbid + " is NOT a master!");
             }
@@ -433,6 +433,13 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         
         log.debug(ctx+ " - " + dst_filestore);
         
+        final OXContextStorageInterface oxcox;
+        try {
+            oxcox = OXContextStorageInterface.getInstance();
+        } catch (final StorageException e) {
+            log.error(e.getMessage(), e);
+            throw new OXContextException(e);
+        }
         try {
             setIdOrGetIDFromNameAndIdObject(null, ctx);
             if (!tool.existsContext(ctx)) {
@@ -445,66 +452,49 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 throw new OXContextException("Unable to disable Context " + ctx.getIdAsString());
             }
 
-            final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
-
+            
             oxcox.disable(ctx, reason);
             retval = oxcox.getData(ctx);
 
             final int srcStore_id = retval.getFilestoreId();
 
             if (srcStore_id == dst_filestore.getId()) {
-                reEnableContext(ctx, oxcox);
                 throw new OXContextException("Src and dst store id is the same: " + dst_filestore);
             }
 
             final String ctxdir = retval.getFilestore_name();
             if (ctxdir == null) {
-                reEnableContext(ctx, oxcox);
                 throw new OXContextException("Unable to get filestore directory " + ctx.getIdAsString());
             }
 
             // get src and dst path from filestores
             final OXUtilStorageInterface oxu = OXUtilStorageInterface.getInstance();
             try {
-                final Filestore[] fstores = oxu.listFilestores("*");
-
-                final StringBuilder src = new StringBuilder();
-                final StringBuilder dst = new StringBuilder();
-
-                for (final Filestore elem : fstores) {
-                    final String s_url = elem.getUrl();
-                    final int id = elem.getId();
-                    final URI uri = new URI(s_url);
-                    if (id == srcStore_id) {
-                        builduppath(ctxdir, src, uri);
-                    } else if (id == dst_filestore.getId()) {
-                        builduppath(ctxdir, dst, uri);
-                    }
-                }
-
+                final Filestore srcfilestore = oxu.getFilestore(srcStore_id);
+                final StringBuilder src = builduppath(ctxdir, new URI(srcfilestore.getUrl()));
+                final Filestore fulldstfilestore = oxu.getFilestore(dst_filestore.getId());
+                final StringBuilder dst = builduppath(ctxdir, new URI(fulldstfilestore.getUrl()));
+                
                 final OXContextException contextException = new OXContextException("Unable to move filestore");
                 if (src == null) {
                     log.error("src is null");
-                    reEnableContext(ctx, oxcox);
                     throw contextException;
                 } else if (dst == null) {
                     log.error("dst is null");
-                    reEnableContext(ctx, oxcox);
                     throw contextException;
                 }
 
                 final FilestoreDataMover fsdm = new FilestoreDataMover(src.toString(), dst.toString(), ctx, dst_filestore);
                 return TaskManager.getInstance().addJob(fsdm, "movefilestore", "move context " + ctx.getIdAsString() + " to filestore " + dst_filestore.getId());
-
             } catch (final StorageException e) {
-                reEnableContext(ctx, oxcox);
-                throw new OXContextException("Unable to list filestores");
+                throw new OXContextException(e);
             } catch (final IOException e) {
-                reEnableContext(ctx, oxcox);
-                throw new OXContextException("Unable to list filestores");
+                throw new OXContextException(e);
             }
         } catch (final URISyntaxException e) {
-            throw new StorageException(e);
+            final StorageException storageException = new StorageException(e);
+            log.error(storageException.getMessage(), storageException);
+            throw storageException;
         } catch (final NoSuchFilestoreException e) {
             log.error(e.getMessage(), e);
             throw e;
@@ -514,6 +504,8 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         } catch (final OXContextException e) {
             log.error(e.getMessage(), e);
             throw e;
+        } finally {
+            oxcox.enable(ctx);
         }
     }
 
@@ -523,20 +515,15 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         return retval;
     }
     
-    private StringBuilder builduppath(final String ctxdir, final StringBuilder src, final URI uri) {
-        src.append(uri.getPath());
-        if (src.charAt(src.length()) != '/') {
+    private StringBuilder builduppath(final String ctxdir, final URI uri) {
+        final StringBuilder src = new StringBuilder(uri.getPath());
+        if (src.charAt(src.length()-1) != '/') {
             src.append('/');
         }
         src.append(ctxdir);
-        if (src.charAt(src.length()) == '/') {
+        if (src.charAt(src.length()-1) == '/') {
             src.deleteCharAt(src.length() - 1);
         }
         return src;
-    }
-    
-    
-    private void reEnableContext(final Context ctx, final OXContextStorageInterface oxcox) throws StorageException {
-        oxcox.enable(ctx);
     }
 }
