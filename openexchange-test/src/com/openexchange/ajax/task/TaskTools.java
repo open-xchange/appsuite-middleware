@@ -51,8 +51,6 @@ package com.openexchange.ajax.task;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -97,7 +95,6 @@ import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TaskException;
 import com.openexchange.tools.URLParameter;
 import com.openexchange.tools.servlet.AjaxException;
-import org.json.JSONWriter;
 
 /**
  * Utility class that contains all methods for making task requests to the
@@ -160,15 +157,11 @@ public final class TaskTools extends Assert {
         final String hostName, final String sessionId, final Task task)
         throws JSONException, IOException, SAXException {
         LOG.trace("Inserting task.");
-        final StringWriter stringW = new StringWriter();
         final TimeZone timezone = ConfigTools.getTimeZone(conversation,
             hostName, sessionId);
 		final JSONObject jsonObj = new JSONObject();
-        final TaskWriter taskW = new TaskWriter( timezone);
-        taskW.writeTask(task, jsonObj);
-		stringW.write(jsonObj.toString());
-        stringW.flush();
-        final String object = stringW.toString();
+        new TaskWriter( timezone).writeTask(task, jsonObj);
+        final String object = jsonObj.toString();
         LOG.trace(object);
         final ByteArrayInputStream bais = new ByteArrayInputStream(object
             .getBytes(ENCODING));
@@ -236,20 +229,12 @@ public final class TaskTools extends Assert {
         final String hostName, final String sessionId, final int folderId,
         final Task task, final Date lastModified) throws JSONException,
         IOException, SAXException {
-        final StringWriter stringW = new StringWriter();
         final TimeZone timeZone = getUserTimeZone(conversation, hostName,
             sessionId);
 		final JSONObject jsonObj = new JSONObject();
-        final TaskWriter taskW = new TaskWriter( timeZone);
-        taskW.writeTask(task, jsonObj);
-		
-		// fertiges task json object
-		
-		stringW.write(jsonObj.toString());
-        stringW.flush();
-        return updateTask(conversation, hostName, sessionId, folderId,
-            task.getObjectID(), jsonObj,
-            lastModified);
+        new TaskWriter( timeZone).writeTask(task, jsonObj);
+        return updateTask(conversation, hostName, sessionId, folderId, task
+            .getObjectID(), jsonObj, lastModified);
     }
 
     public static UpdateResponse update(final AJAXSession session,
@@ -340,8 +325,7 @@ public final class TaskTools extends Assert {
         return (DeleteResponse) Executor.execute(session, request);
     }
     
-	/*
-    public static int _nocountTasks(final WebConversation conversation,
+    public static int countTasks(final WebConversation conversation,
         final String hostName, final String sessionId, final int folderId)
         throws IOException, SAXException, JSONException {
         LOG.trace("Counting tasks.");
@@ -359,7 +343,6 @@ public final class TaskTools extends Assert {
         LOG.trace("Response body: " + body);
         return (Integer) Response.parse(body).getData();
     }
-	 **/
 
     public static Response getAllTasksInFolder(
         final WebConversation conversation, final String hostName,

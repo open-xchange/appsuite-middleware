@@ -108,7 +108,6 @@ public class TasksTest extends AbstractAJAXTest {
      * Tests counting of tasks in the private folder.
      * @throws Throwable if an error occurs.
      */
-	/*
     public void testCountPrivateFolder() throws Throwable {
         final int folderId = TaskTools.getPrivateTaskFolder(getWebConversation(),
             getHostName(), getSessionId());
@@ -118,13 +117,11 @@ public class TasksTest extends AbstractAJAXTest {
         LOG.trace(number);
         assertTrue("Number of tasks is not okay.", number >= 0);
     }
-	 **/
 
     /**
      * Tests counting of tasks in a public folder.
      * @throws Throwable if an error occurs.
      */
-	/*
     public void notestCountPublicFolder() throws Throwable {
         final List<FolderObject> folders = FolderTest.getSubfolders(
             getWebConversation(), getHostName(), getSessionId(), "2", false);
@@ -142,7 +139,6 @@ public class TasksTest extends AbstractAJAXTest {
         LOG.trace(number);
         assertTrue("Number of tasks is not okay.", number >= 0);
     }
-	 **/
 
     /**
      * Tests inserting a private task.
