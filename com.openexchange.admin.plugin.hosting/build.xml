@@ -16,7 +16,6 @@
 	<property name="commons-logging" value="commons-logging.jar"/>
 	<property name="mysql-connector" value="mysql-connector-java-3.1.13-bin.jar"/>
 	<property name="eclipse-osgi" value="org.eclipse.osgi_3.2.2.ox.jar"/>
-	<property name="log4j" value="log4j-1.2.14.jar"/>
 
 	<path id="project.classpath">
 	  <pathelement location="${lib.dir}/${oxserver}"/>
@@ -59,7 +58,6 @@
 		<manifest mode="update" file="META-INF/MANIFEST.MF.package">
 				<attribute name="Bundle-ClassPath" value=".,
 					 external:$libdir$/${mysql-connector},
-					 external:$libdir$/${log4j},
 					 external:$log4j$"/>
 		</manifest>
 	</target>
