@@ -39,19 +39,11 @@ public class MultipleTest extends AbstractAJAXTest {
 		contactObj.setSurName("testMultiple1");
 		contactObj.setParentFolderID(folderId);
 		
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		PrintWriter pw = new PrintWriter(baos);
-		JSONWriter jsonWriter = new JSONWriter(pw);
-		
 		JSONObject jsonDataObj = new JSONObject();
 		ContactWriter contactWriter = new ContactWriter(TimeZone.getDefault());
 		contactWriter.writeContact(contactObj, jsonDataObj);
 		
-		jsonWriter.value(jsonDataObj);
-		pw.flush();
-		
-		String data = new String(baos.toByteArray());
-		jsonObj.put("data", new JSONObject(data));
+		jsonObj.put("data", jsonDataObj);
 		jsonArray.put(jsonObj);
 		
 		jsonObj = new JSONObject();
@@ -62,19 +54,11 @@ public class MultipleTest extends AbstractAJAXTest {
 		contactObj.setSurName("testMultiple2");
 		contactObj.setParentFolderID(folderId);
 		
-		baos = new ByteArrayOutputStream();
-		pw = new PrintWriter(baos);
-		jsonWriter = new JSONWriter(pw);
-		
 		jsonDataObj = new JSONObject();
 		contactWriter = new ContactWriter(TimeZone.getDefault());
 		contactWriter.writeContact(contactObj, jsonDataObj);
 		
-		jsonWriter.value(jsonObj);
-		pw.flush();
-		
-		data = new String(baos.toByteArray());
-		jsonObj.put("data", new JSONObject(data));
+		jsonObj.put("data", jsonDataObj);
 		jsonArray.put(jsonObj);
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(jsonArray.toString().getBytes());
