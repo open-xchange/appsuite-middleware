@@ -271,6 +271,10 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             if (!db.mandatoryRegisterMembersSet()) {
                 throw new InvalidDataException("Mandatory fields not set: " + db.getUnsetMembers());
             }
+            if(db.getName()!=null && tool.existsDatabaseName(db.getName())){
+                throw new InvalidDataException("Database " + db.getName() + " already exists!");
+            }
+            
         } catch (final EnforceableDataObjectException e) {
             log.error(e.getMessage(), e);
             throw new InvalidDataException(e);
@@ -331,7 +335,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
         }
 
         if (tool.existsServerName(srv.getName())) {
-            throw new InvalidDataException("Server already exists!");
+            throw new InvalidDataException("Server " + srv.getName() + " already exists!");          
         }
 
         final Server sr = new Server ();
