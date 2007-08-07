@@ -1,10 +1,7 @@
 * 2007-08-07 - dennis.sieben@open-xchange.com
 
- - Bugfix ID#8571 Problems with multiple unique displaynames for internal users
- 
-* 2007-08-07 - dennis.sieben@open-xchange.com
-
  - Bugfix ID#8593 Operations by name not possible
+ - Bugfix ID#8571 Problems with multiple unique displaynames for internal users
 
 * 2007-08-07 - choeger@open-xchange.com
 
