@@ -14,6 +14,7 @@ import java.io.PrintWriter;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.json.JSONWriter;
 
 public class MultipleTest extends AbstractAJAXTest {
 	
@@ -40,8 +41,13 @@ public class MultipleTest extends AbstractAJAXTest {
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		PrintWriter pw = new PrintWriter(baos);
-		ContactWriter contactWriter = new ContactWriter(pw, TimeZone.getDefault());
-		contactWriter.writeContact(contactObj);
+		JSONWriter jsonWriter = new JSONWriter(pw);
+		
+		JSONObject jsonDataObj = new JSONObject();
+		ContactWriter contactWriter = new ContactWriter(TimeZone.getDefault());
+		contactWriter.writeContact(contactObj, jsonDataObj);
+		
+		jsonWriter.value(jsonDataObj);
 		pw.flush();
 		
 		String data = new String(baos.toByteArray());
@@ -58,8 +64,13 @@ public class MultipleTest extends AbstractAJAXTest {
 		
 		baos = new ByteArrayOutputStream();
 		pw = new PrintWriter(baos);
-		contactWriter = new ContactWriter(pw, TimeZone.getDefault());
-		contactWriter.writeContact(contactObj);
+		jsonWriter = new JSONWriter(pw);
+		
+		jsonDataObj = new JSONObject();
+		contactWriter = new ContactWriter(TimeZone.getDefault());
+		contactWriter.writeContact(contactObj, jsonDataObj);
+		
+		jsonWriter.value(jsonObj);
 		pw.flush();
 		
 		data = new String(baos.toByteArray());

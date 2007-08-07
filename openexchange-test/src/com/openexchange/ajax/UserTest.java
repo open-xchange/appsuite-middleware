@@ -7,11 +7,13 @@ import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.ParticipantsFields;
 import com.openexchange.ajax.user.UserImpl4Test;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserImpl;
+import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.DataObject;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.tools.URLParameter;
 import java.io.ByteArrayInputStream;
 import org.json.JSONArray;
@@ -19,11 +21,16 @@ import org.json.JSONObject;
 
 public class UserTest extends AbstractAJAXTest {
 	
+	protected final static int[] CONTACT_FIELDS = {
+		DataObject.OBJECT_ID,
+		ContactObject.EMAIL1,
+	};
+	
 	public UserTest(String name) {
 		super(name);
 	}
 
-	private static final String GROUP_URL = "/ajax/user";
+	private static final String USER_URL = "/ajax/contacts";
 	
 	public void testSearch() throws Exception {
 		com.openexchange.groupware.ldap.User users[] = searchUser(getWebConversation(), "*", PROTOCOL + getHostName(), getSessionId());
@@ -61,11 +68,21 @@ public class UserTest extends AbstractAJAXTest {
 		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
 		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_SEARCH);
 		
+		final StringBuffer stringBuffer = new StringBuffer();
+		for (int a = 0; a < CONTACT_FIELDS.length; a++) {
+			if (a > 0) {
+				stringBuffer.append(',');
+			} 
+			stringBuffer.append(CONTACT_FIELDS[a]);
+		}
+		
+		parameter.setParameter(AJAXServlet.PARAMETER_COLUMNS, stringBuffer.toString());
+		
 		JSONObject jsonObj = new JSONObject();
 		jsonObj.put("pattern", searchpattern);
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(jsonObj.toString().getBytes());
-		WebRequest req = new PutMethodWebRequest(host + GROUP_URL + parameter.getURLParameters(), bais, "text/javascript");
+		WebRequest req = new PutMethodWebRequest(host + USER_URL + parameter.getURLParameters(), bais, "text/javascript");
 		WebResponse resp = webCon.getResponse(req);
 		
 		assertEquals(200, resp.getResponseCode());
@@ -78,13 +95,13 @@ public class UserTest extends AbstractAJAXTest {
 		
 		assertNotNull("timestamp", response.getTimestamp());
 		
-		JSONArray jsonArray = (JSONArray)response.getData();
-		UserImpl4Test[] user = new UserImpl4Test[jsonArray.length()];
+		final JSONArray jsonArray = (JSONArray)response.getData();
+		final UserImpl4Test[] user = new UserImpl4Test[jsonArray.length()];
 		for (int a = 0; a < user.length; a++) {
-			JSONObject jObj = jsonArray.getJSONObject(a);
+			final JSONArray jsonContactArray = jsonArray.getJSONArray(a);
 			user[a] = new UserImpl4Test();
-			user[a].setId(jObj.getInt("id"));
-			user[a].setMail(jObj.getString("mail"));
+			user[a].setId(jsonContactArray.getInt(0));
+			user[a].setMail(jsonContactArray.getString(1));
 		}
 		
 		return user;
@@ -97,15 +114,26 @@ public class UserTest extends AbstractAJAXTest {
 		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
 		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LIST);
 		
+		final StringBuffer stringBuffer = new StringBuffer();
+		for (int a = 0; a < CONTACT_FIELDS.length; a++) {
+			if (a > 0) {
+				stringBuffer.append(',');
+			} 
+			stringBuffer.append(CONTACT_FIELDS[a]);
+		}
+		
+		parameter.setParameter(AJAXServlet.PARAMETER_COLUMNS, stringBuffer.toString());
+		
 		JSONArray requestArray = new JSONArray();
 		for (int a = 0; a < id.length; a++) {
 			JSONObject jData = new JSONObject();
 			jData.put(DataFields.ID, id[a]);
+			jData.put(AJAXServlet.PARAMETER_FOLDERID, FolderObject.SYSTEM_LDAP_FOLDER_ID);
 			requestArray.put(jData);
 		}
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(requestArray.toString().getBytes());
-		WebRequest req = new PutMethodWebRequest(host + GROUP_URL + parameter.getURLParameters(), bais, "text/javascript");
+		WebRequest req = new PutMethodWebRequest(host + USER_URL + parameter.getURLParameters(), bais, "text/javascript");
 		WebResponse resp = webCon.getResponse(req);
 		
 		assertEquals(200, resp.getResponseCode());
@@ -121,10 +149,10 @@ public class UserTest extends AbstractAJAXTest {
 		JSONArray jsonArray = (JSONArray)response.getData();
 		UserImpl4Test[] user = new UserImpl4Test[jsonArray.length()];
 		for (int a = 0; a < user.length; a++) {
-			JSONObject jObj = jsonArray.getJSONObject(a);
+			final JSONArray jsonContactArray = jsonArray.getJSONArray(a);
 			user[a] = new UserImpl4Test();
-			user[a].setId(jObj.getInt("id"));
-			user[a].setMail(jObj.getString("mail"));
+			user[a].setId(jsonContactArray.getInt(0));
+			user[a].setMail(jsonContactArray.getString(1));
 		}
 		
 		return user;
@@ -137,8 +165,9 @@ public class UserTest extends AbstractAJAXTest {
 		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
 		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET);
 		parameter.setParameter(AJAXServlet.PARAMETER_ID, String.valueOf(userId));
+		parameter.setParameter(AJAXServlet.PARAMETER_FOLDERID, FolderObject.SYSTEM_LDAP_FOLDER_ID);
 		
-		WebRequest req = new GetMethodWebRequest(host + GROUP_URL + parameter.getURLParameters());
+		WebRequest req = new GetMethodWebRequest(host + USER_URL + parameter.getURLParameters());
 		WebResponse resp = webCon.getResponse(req);
 
 		assertEquals(200, resp.getResponseCode());
@@ -155,8 +184,8 @@ public class UserTest extends AbstractAJAXTest {
 		
 		UserImpl4Test user = new UserImpl4Test();
 		assertTrue("check id", jsonObj.has(ParticipantsFields.ID));
-		user.setId(jsonObj.getInt("id"));
-		user.setMail(jsonObj.getString("mail"));
+		user.setId(jsonObj.getInt(DataFields.ID));
+		user.setMail(jsonObj.getString(ContactFields.EMAIL1));
 		
 		return user;
 	}

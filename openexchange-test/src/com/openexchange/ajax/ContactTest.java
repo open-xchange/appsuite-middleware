@@ -31,7 +31,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
@@ -477,16 +477,14 @@ public class ContactTest extends AbstractAJAXTest {
 		
 		int objectId = 0;
 		
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		PrintWriter pw = new PrintWriter(baos);
+		final StringWriter stringWriter = new StringWriter();		
+		final JSONObject jsonObj = new JSONObject();
+		ContactWriter contactWriter = new ContactWriter(TimeZone.getDefault());
+		contactWriter.writeContact(contactObj, jsonObj);
 		
-		ContactWriter contactWriter = new ContactWriter(pw, TimeZone.getDefault());
-		contactWriter.writeContact(contactObj);
-		
-		pw.flush();
-		
-		byte b[] = baos.toByteArray();
-		
+		stringWriter.write(jsonObj.toString());
+		stringWriter.flush();
+
 		final URLParameter parameter = new URLParameter();
 		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
 		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW);
@@ -500,7 +498,7 @@ public class ContactTest extends AbstractAJAXTest {
 			PostMethodWebRequest postReq = new PostMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters());
 			postReq.setMimeEncoded(true);
 			
-			postReq.setParameter("json", new String(baos.toByteArray()));
+			postReq.setParameter("json", stringWriter.toString());
 			
 			File f = File.createTempFile("open-xchange_image", ".jpg");
 			FileOutputStream fos = new FileOutputStream(f);
@@ -514,7 +512,7 @@ public class ContactTest extends AbstractAJAXTest {
 			resp = webCon.getResource(req);
 			jResponse = extractFromCallback(resp.getText());
 		} else {
-			ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+			final ByteArrayInputStream bais = new ByteArrayInputStream(stringWriter.toString().getBytes("UTF-8"));
 			
 			req = new PutMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters(), bais, "text/javascript");
 			resp = webCon.getResponse(req);
@@ -541,15 +539,13 @@ public class ContactTest extends AbstractAJAXTest {
 	public static void updateContact(WebConversation webCon, ContactObject contactObj, int objectId, int inFolder, String host, String session) throws Exception {
 		host = appendPrefix(host);
 		
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		PrintWriter pw = new PrintWriter(baos);
+		final StringWriter stringWriter = new StringWriter();
+		final JSONObject jsonObj = new JSONObject();
+		ContactWriter contactWriter = new ContactWriter(TimeZone.getDefault());
+		contactWriter.writeContact(contactObj, jsonObj);
 		
-		ContactWriter contactWriter = new ContactWriter(pw, TimeZone.getDefault());
-		contactWriter.writeContact(contactObj);
-		
-		pw.flush();
-		
-		byte b[] = baos.toByteArray();
+		stringWriter.write(jsonObj.toString());
+		stringWriter.flush();
 		
 		final URLParameter parameter = new URLParameter();
 		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
@@ -566,7 +562,7 @@ public class ContactTest extends AbstractAJAXTest {
 		if (contactObj.containsImage1()) {
 			PostMethodWebRequest postReq = new PostMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters());
 			postReq.setMimeEncoded(true);
-			postReq.setParameter("json", new String(baos.toByteArray()));
+			postReq.setParameter("json", stringWriter.toString());
 			
 			File f = File.createTempFile("open-xchange_image", ".jpg");
 			FileOutputStream fos = new FileOutputStream(f);
@@ -580,7 +576,7 @@ public class ContactTest extends AbstractAJAXTest {
 			resp = webCon.getResource(req);
 			jResponse = extractFromCallback(resp.getText());
 		} else {
-			ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+			ByteArrayInputStream bais = new ByteArrayInputStream(stringWriter.toString().getBytes("UTF-8"));
 			
 			req = new PutMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters(), bais, "text/javascript");
 			resp = webCon.getResponse(req);

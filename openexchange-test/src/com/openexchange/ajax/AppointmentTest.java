@@ -3,7 +3,6 @@ package com.openexchange.ajax;
 import com.openexchange.tools.StringCollection;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.Calendar;
 import java.util.Date;
@@ -43,7 +42,7 @@ import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.test.TestException;
 import com.openexchange.tools.URLParameter;
-import org.json.JSONWriter;
+import java.io.StringWriter;
 
 public class AppointmentTest extends AbstractAJAXTest {
 	
@@ -200,24 +199,21 @@ public class AppointmentTest extends AbstractAJAXTest {
 		
 		int objectId = 0;
 		
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		OutputStreamWriter pw = new OutputStreamWriter(baos, "UTF-8");
-		JSONWriter jsonWriter = new JSONWriter(pw);
+		StringWriter stringWriter = new StringWriter();
 		
-		AppointmentWriter appointmentwriter = new AppointmentWriter(jsonWriter,
-				userTimeZone);
-		appointmentwriter.writeAppointment(appointmentObj);
+		final JSONObject jsonObj = new JSONObject();
+		AppointmentWriter appointmentwriter = new AppointmentWriter(userTimeZone);
+		appointmentwriter.writeAppointment(appointmentObj, jsonObj);
 		
-		pw.flush();
-		
-		byte b[] = baos.toByteArray();
+		stringWriter.write(jsonObj.toString());
+		stringWriter.flush();
 		
 		final URLParameter parameter = new URLParameter();
 		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
 		parameter.setParameter(AJAXServlet.PARAMETER_ACTION,
 				AJAXServlet.ACTION_NEW);
 		
-		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+		ByteArrayInputStream bais = new ByteArrayInputStream(stringWriter.toString().getBytes("UTF-8"));
 		WebRequest req = new PutMethodWebRequest(host + APPOINTMENT_URL
 				+ parameter.getURLParameters(), bais, "text/javascript");
 		WebResponse resp = webCon.getResponse(req);
@@ -248,17 +244,13 @@ public class AppointmentTest extends AbstractAJAXTest {
 			throws Exception {
 		host = appendPrefix(host);
 		
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		PrintWriter pw = new PrintWriter(baos);
-		JSONWriter jsonWriter = new JSONWriter(pw);
+		final StringWriter stringWriter = new StringWriter();
+		final JSONObject jsonObj = new JSONObject();
+		AppointmentWriter appointmentwriter = new AppointmentWriter(userTimeZone);
+		appointmentwriter.writeAppointment(appointmentObj, jsonObj);
 		
-		AppointmentWriter appointmentwriter = new AppointmentWriter(jsonWriter,
-				userTimeZone);
-		appointmentwriter.writeAppointment(appointmentObj);
-		
-		pw.flush();
-		
-		byte b[] = baos.toByteArray();
+		stringWriter.write(jsonObj.toString());
+		stringWriter.flush();
 		
 		final URLParameter parameter = new URLParameter();
 		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
@@ -269,7 +261,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 				.valueOf(inFolder));
 		parameter.setParameter(AJAXServlet.PARAMETER_TIMESTAMP, new Date());
 		
-		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+		ByteArrayInputStream bais = new ByteArrayInputStream(stringWriter.toString().getBytes("UTF-8"));
 		WebRequest req = new PutMethodWebRequest(host + APPOINTMENT_URL
 				+ parameter.getURLParameters(), bais, "text/javascript");
 		WebResponse resp = webCon.getResponse(req);
