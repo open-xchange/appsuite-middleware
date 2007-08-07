@@ -6,10 +6,7 @@ OSGIPATH=@oxprefix@/@oxconfdir@/osgi
 
 # when log4j should be used, these options should work:
 #
-# NOTE: this requires a log4j jar file with a specific name to be available
-#       in libdir. That's a compile time option, see build.xml
-#
-# JAVA_XTRAOPTS="-Xms50M -Xmx50M -XX:+AggressiveHeap -Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger -Dlog4j.configuration=file:/opt/open-xchange/etc/admindaemon/log4j/log4j.xml"
+# JAVA_XTRAOPTS="-Xms50M -Xmx50M -XX:+AggressiveHeap -Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger -Dlog4j.configuration=file:/opt/open-xchange/etc/admindaemon/log4j/log4j.xml -Dlog4j=/opt/open-xchange/lib/log4j-1.2.14.jar"
 JAVA_XTRAOPTS="-Xms50M -Xmx50M -XX:+AggressiveHeap"
 
 NRFILES="1024"
