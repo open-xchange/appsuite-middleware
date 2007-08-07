@@ -23,7 +23,7 @@ public class ListDatabases extends DatabaseAbstraction {
         final AdminParser parser = new AdminParser("listdatabases");
 
         setOptions(parser);
-        setCSVOutputOption(parser);
+
         try {
             parser.ownparse(args2);
 
@@ -97,7 +97,8 @@ public class ListDatabases extends DatabaseAbstraction {
 
     private void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptionsWithoutContextID(parser);
-        setSearchOption(parser);       
+        setSearchOption(parser);
+        setCSVOutputOption(parser);
     }
     
     /**
