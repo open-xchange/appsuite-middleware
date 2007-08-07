@@ -115,11 +115,12 @@ public abstract class ContextAbstraction extends UserAbstraction {
                      new String[] { "cid", "fid", "fname", "enabled", "qmax", "qused", "name", "lmappings" }, data);
         }
 
-    protected void precsvinfos(final Context[] ctxs) throws StorageException {
+    protected void precsvinfos(final Context[] ctxs) throws StorageException, InvalidDataException {
         // needed for csv output, KEEP AN EYE ON ORDER!!!
         final ArrayList<String> columns = new ArrayList<String>();
         columns.add("id");
         columns.add("filestore_id");
+        columns.add("filestore_name");
         columns.add("enabled");
         columns.add("max_quota");
         columns.add("used_quota");
