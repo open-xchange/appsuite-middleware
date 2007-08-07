@@ -11,6 +11,8 @@ enableallcontexts \
 movedatabasecontext \
 movefilestorecontext \
 listcontexts \
+listcontextsbydatabase \
+listcontextsbyfilestore \
 changefilestore \
 listdatabases \
 listfilestores \

@@ -99,6 +99,12 @@ case "${BNAME}" in
     "listcontexts")
     ACTION="context.List"
     ;;
+    "listcontextsbydatabase")
+    ACTION="context.ListContextByDatabase"
+    ;;
+    "listcontextsbyfilestore")
+    ACTION="context.ListContextByFilestore"
+    ;;
     "changefilestore")
     ACTION="util.filestore.ChangeFilestore"
     ;;
