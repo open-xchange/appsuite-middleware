@@ -230,7 +230,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
        checkSchemaBeingLocked(ctx, tool);
 
        try {
-           if (tool.existsResource(ctx, res.getName())) {
+           if (tool.existsResourceName(ctx, res.getName())) {
                 throw new InvalidDataException("Resource with this name already exists");
             }
 
@@ -460,7 +460,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
                 if (resource.getId() != null && !tool.existsResource(ctx, resource.getId().intValue())) {
                     throw new NoSuchResourceException("No such resource " + resource.getId().intValue());
                 }
-                if (resource.getName() != null && !tool.existsResource(ctx, resource.getName())) {
+                if (resource.getName() != null && !tool.existsResourceName(ctx, resource.getName())) {
                     throw new NoSuchResourceException("No such resource " + resource.getName());
                 }
                 if (resource.getName() == null && resource.getId() == null) {
