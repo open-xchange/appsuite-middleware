@@ -37,7 +37,7 @@ public abstract class ChangeCore extends ContextAbstraction {
             // context name
             parseAndSetContextName(parser, ctx);
             
-            successtext = nameOrIdSet(String.valueOf(this.ctxid), this.contextname, "context");
+            successtext = nameOrIdSetInt(this.ctxid, this.contextname, "context");
             
             // context filestore quota
             parseAndSetContextQuota(parser, ctx);
