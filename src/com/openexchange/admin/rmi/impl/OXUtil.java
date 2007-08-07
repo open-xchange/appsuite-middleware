@@ -325,7 +325,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             throw new InvalidDataException("Invalid server name");
         }
 
-        if (tool.existsServer(srv.getName())) {
+        if (tool.existsServerName(srv.getName())) {
             throw new InvalidDataException("Server already exists!");
         }
 
@@ -443,7 +443,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
         // existing name if have have got both (name and id) from the command line. Because
         // only in that case the name will be used for the change.
         if (null != name && null != db.getId()) {
-            if (tool.existsDatabase(name)) {
+            if (tool.existsDatabaseName(name)) {
                 throw new InvalidDataException("Database with name " + name + " already exists");
             }
         }
