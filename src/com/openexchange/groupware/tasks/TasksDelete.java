@@ -53,7 +53,6 @@ import java.sql.Connection;
 import java.util.Date;
 import java.util.Set;
 
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
@@ -209,8 +208,6 @@ public class TasksDelete implements DeleteListener {
         try {
             session = event.getSession();
         } catch (LdapException e) {
-            throw new TaskException(e);
-        } catch (OXException e) {
             throw new TaskException(e);
         }
         return session;

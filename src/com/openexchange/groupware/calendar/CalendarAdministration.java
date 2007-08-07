@@ -148,11 +148,7 @@ public class CalendarAdministration implements DeleteListener {
             PreparedStatement update = getUpdatePreparedStatement(writecon);
             while (rs.next()) {
                 int object_id = rs.getInt(1);
-                try {
-                    eventHandling(object_id, deleteEvent.getContext(), deleteEvent.getSession(), CalendarOperation.UPDATE, readcon);
-                } catch (OXException ex) {
-                    throw new DeleteFailedException(ex);
-                }
+                eventHandling(object_id, deleteEvent.getContext(), deleteEvent.getSession(), CalendarOperation.UPDATE, readcon);
                 rs.deleteRow();
                 addUpdateMasterObjectBatch(update, deleteEvent.getContext().getMailadmin(), deleteEvent.getContext().getContextId(), object_id);
             }
@@ -249,11 +245,7 @@ public class CalendarAdministration implements DeleteListener {
                 int object_id = rs2.getInt(1);
                 int fid = rs2.getInt(2);
                 addUpdateMasterObjectBatch(update, deleteEvent.getContext().getMailadmin(), deleteEvent.getContext().getContextId(), object_id);
-                try {
-                    eventHandling(object_id, deleteEvent.getContext(), deleteEvent.getSession(), CalendarOperation.UPDATE, readcon);
-                } catch (OXException ex) {
-                    throw new DeleteFailedException(ex);
-                }
+                eventHandling(object_id, deleteEvent.getContext(), deleteEvent.getSession(), CalendarOperation.UPDATE, readcon);
             }
             update.executeBatch();
             update.close();

@@ -52,12 +52,10 @@ package com.openexchange.sessiond;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.ContextException;
 import com.openexchange.groupware.contexts.ContextStorage;
 import com.openexchange.groupware.ldap.LdapException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.IMAPPropertiesFactory;
@@ -73,20 +71,16 @@ public class SessionObjectWrapper {
 	private static final Log LOG = LogFactory.getLog(SessionObjectWrapper.class);
 
 	public static final SessionObject createSessionObject(final int user_id, final int context_id,
-			final String sessionobjectidentifier) throws LdapException, ContextException, OXException {
+			final String sessionobjectidentifier) throws LdapException, ContextException {
 		final Context context = ContextStorage.getInstance().getContext(context_id);
 		return createSessionObject(user_id, context, sessionobjectidentifier);
 	}
 
 	public static final SessionObject createSessionObject(final int user_id, final Context ctx,
-			final String sessionobjectidentifier) throws LdapException, OXException {
+			final String sessionobjectidentifier) throws LdapException {
 		final SessionObject so = new SessionObject(sessionobjectidentifier);
-		final User userObj = UserStorage.getInstance(ctx).getUser(user_id);
 		so.setContext(ctx);
-		so.setUserObject(userObj);
-		// so.setUserSettingMail(UserSettingMailStorage.getInstance().loadUserSettingMail(user_id, ctx));
-		// so.setUserConfiguration(UserConfiguration.loadUserConfiguration(user_id,
-		// userObj.getGroups(), ctx));
+		so.setUserObject(UserStorage.getInstance(ctx).getUser(user_id));
 		try {
 			so.setIMAPProperties(IMAPPropertiesFactory.getImapProperties(so));
 		} catch (IMAPException e) {
