@@ -191,7 +191,8 @@
 					 external:$libdir$/${jdom},
 					 external:$libdir$/${mail},
 					 external:$libdir$/${mysql-connector},
-					 external:$libdir$/${log4j}"/>
+					 external:$libdir$/${log4j},
+					 external:$log4j$"/>
 		</manifest>
 	</target>
 
