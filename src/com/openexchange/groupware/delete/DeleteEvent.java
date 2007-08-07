@@ -133,6 +133,8 @@ public class DeleteEvent extends EventObject {
 	}
 
 	/**
+	 * Getter for context
+	 * 
 	 * @return the context
 	 */
 	public Context getContext() {
@@ -140,8 +142,9 @@ public class DeleteEvent extends EventObject {
 	}
 
 	/**
-	 * @return the unique ID of entity (either group or user) that ought to be
-	 *         deleted
+	 * Getter for the unique ID of entity that ought to be deleted
+	 * 
+	 * @return the unique ID of entity that ought to be deleted
 	 * @see <code>getType()</code> to determine entity type
 	 */
 	public int getId() {
@@ -149,8 +152,10 @@ public class DeleteEvent extends EventObject {
 	}
 
 	/**
-	 * Check return value against public constants TYPE_USER, TYPE_GROUP,
-	 * TYPE_RESOURCE & TYPE_RESOURCE_GROUP
+	 * Check return value against public constants
+	 * <code>{@link #TYPE_USER}</code>, <code>{@link #TYPE_GROUP}</code>,
+	 * <code>{@link #TYPE_RESOURCE}</code>, and
+	 * <code>{@link #TYPE_RESOURCE_GROUP}</code>
 	 * 
 	 * @return the type
 	 */
@@ -159,8 +164,12 @@ public class DeleteEvent extends EventObject {
 	}
 
 	/**
+	 * Getter for the instance of {@link SessionObject} belonging to context's
+	 * mailadmin
 	 * 
-	 * @return a SessionObject belonging to context's mailadmin
+	 * 
+	 * @return an instance of {@link SessionObject} belonging to context's
+	 *         mailadmin
 	 */
 	public SessionObject getSession() throws LdapException, OXException {
 		if (session == null) {
