@@ -244,9 +244,10 @@ public abstract class ListCore extends UserAbstraction {
      * @throws InvocationTargetException 
      * @throws IllegalAccessException 
      * @throws IllegalArgumentException 
+     * @throws InvalidDataException 
      * 
      */
-    private void precsvinfos(final User[] users,final HashMap<Integer, UserModuleAccess> access_map) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+    private void precsvinfos(final User[] users,final HashMap<Integer, UserModuleAccess> access_map) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException, InvalidDataException {
         final Method[] methods = User.class.getMethods();
         final ArrayList<MethodAndNames> methArrayList = getGetters(methods, new HashSet<String>());
         

@@ -124,7 +124,7 @@ public abstract class ListCore extends ResourceAbstraction {
 
     protected abstract void maincall(final AdminParser parser, final OXResourceInterface oxres, final Context ctx, final ArrayList<Resource> reslist, final Resource[] allres, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchResourceException, DuplicateExtensionException;
 
-    private void precsvinfos(final ArrayList<Resource> resourceList) {
+    private void precsvinfos(final ArrayList<Resource> resourceList) throws InvalidDataException {
         // needed for csv output, KEEP AN EYE ON ORDER!!!
         final ArrayList<String> columns = new ArrayList<String>();
         columns.add("id");
