@@ -1,6 +1,8 @@
 
 package com.openexchange.admin;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.rmi.AccessException;
 import java.rmi.AlreadyBoundException;
 import java.rmi.NotBoundException;
@@ -104,9 +106,20 @@ public class PluginStarter {
     
     private void startJMX() {
         int jmx_port = Integer.parseInt(prop.getProp("JMX_PORT", "9998"));
-        moni = new MonitorAgent(jmx_port);
-        moni.start();
-
+        String addr = prop.getProp("JMX_BIND_ADDRESS","localhost");
+        InetAddress iaddr = null;
+        if(!addr.trim().equals("0")){
+            // bind only on specified interfaces
+            try {
+                iaddr = InetAddress.getByName(addr);
+                
+                moni = new MonitorAgent(jmx_port,iaddr);
+                moni.start();
+            } catch (UnknownHostException e) {
+               log.error("Could NOT start start JMX monitor ",e);
+            }
+        }
+        
         String servername = prop.getProp(AdminProperties.Prop.SERVER_NAME, "local");
         log.info("Admindaemon Name: " + servername);
     }

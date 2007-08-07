@@ -12,11 +12,14 @@ import java.lang.management.MemoryPoolMXBean;
 import java.lang.management.OperatingSystemMXBean;
 import java.lang.management.RuntimeMXBean;
 import java.lang.management.ThreadMXBean;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.rmi.registry.LocateRegistry;
+import java.rmi.server.RMIServerSocketFactory;
 import java.util.List;
 import java.util.logging.LogManager;
 import java.util.logging.LoggingMXBean;
+
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanRegistrationException;
@@ -28,6 +31,7 @@ import javax.management.ObjectName;
 import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -40,18 +44,31 @@ public class MonitorAgent {
     private static Log log = LogFactory.getLog(MonitorAgent.class);
     private MBeanServer mbs = null;
     private JMXConnectorServer cs = null;
-    
+    private RMIServerSocketFactory caf = null;
+    private InetAddress bindAddr = null;
     
     private void openRmiRegistryPort() {
         try {
-            LocateRegistry.createRegistry(getPort());
+            if(caf!=null){
+                // Add our custom server socket factory to the jmx connector
+                LocateRegistry.createRegistry(getPort(),null,caf);
+            }else{
+                LocateRegistry.createRegistry(getPort());
+            }
         } catch (Exception e) {
             log.error("Error creating Registry on port "+getPort());
         }
     }
     
-    public MonitorAgent(int jmx_port) {
+    public MonitorAgent(int jmx_port,InetAddress bindAddress) {
+        
         setPort(jmx_port);
+        
+        setBindAddr(bindAddress);
+        
+        if(getBindAddr()!=null){        
+            caf = new CustomAddressServerSocketFactory(getBindAddr());        
+        }
     }
     
     public void start() {
@@ -109,9 +126,16 @@ public class MonitorAgent {
     
     private void startConnectors() throws MalformedURLException, IOException{
         JMXServiceURL url = new JMXServiceURL(getServerURL());
+                
         this.cs = JMXConnectorServerFactory.newJMXConnectorServer(url,null,mbs);
         this.cs.start();
-        log.info("Admindaemon JMX server running on: "+getServerURL());
+        
+        if(caf!=null){
+            log.info("Admindaemon JMX server running on "+getBindAddr().getHostAddress()+": "+getServerURL());
+        }else{
+            log.info("Admindaemon JMX server running on all interfaces!: "+getServerURL());
+        }
+        
     }
     
     private void stopConnectors() throws IOException {
@@ -245,6 +269,9 @@ public class MonitorAgent {
     private int getPort(){
         return this.port;
     }
+    
+    
+    
     private void setPort(int jmx_port){
         this.port = jmx_port;
     }
@@ -252,6 +279,20 @@ public class MonitorAgent {
         return "service:jmx:rmi:///jndi/rmi://localhost:"+getPort()+"/server";
     }
     private int port = 9998;
+
+    /**
+     * @return the bindAddr
+     */
+    public InetAddress getBindAddr() {
+        return bindAddr;
+    }
+
+    /**
+     * @param bindAddr the bindAddr to set
+     */
+    public void setBindAddr(InetAddress bindAddr) {
+        this.bindAddr = bindAddr;
+    }
     
     
 }
