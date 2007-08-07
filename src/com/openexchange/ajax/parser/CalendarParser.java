@@ -53,6 +53,7 @@ package com.openexchange.ajax.parser;
 
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import java.util.Date;
+import java.util.TimeZone;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -78,8 +79,20 @@ import com.openexchange.tools.servlet.OXJSONException;
  */
 
 public class CalendarParser extends CommonParser {
-	
-	protected void parseElementCalendar(final CalendarObject calendarobject, final JSONObject jsonobject) throws JSONException, OXConflictException, OXJSONException {
+
+    protected CalendarParser() {
+        super();
+    }
+
+    protected CalendarParser(final TimeZone timeZone) {
+        super(timeZone);
+    }
+
+	protected CalendarParser(final boolean parseAll, final TimeZone timeZone) {
+        super(parseAll, timeZone);
+    }
+
+    protected void parseElementCalendar(final CalendarObject calendarobject, final JSONObject jsonobject) throws JSONException, OXConflictException, OXJSONException {
 		if (jsonobject.has(CalendarFields.TITLE)) {
 			calendarobject.setTitle(parseString(jsonobject, CalendarFields.TITLE));
 		}

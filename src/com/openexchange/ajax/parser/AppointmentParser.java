@@ -69,11 +69,15 @@ import org.json.JSONObject;
  */
 
 public class AppointmentParser extends CalendarParser {
-	
+
+    protected AppointmentParser() {
+        super();
+    }
+
 	public AppointmentParser(TimeZone timeZone) {
 		this.timeZone = timeZone;
 	}
-	
+
 	public void parse(final AppointmentObject appointmentobject, final JSONObject jsonobject) throws OXConflictException, OXException {
 		try {
 			parseElementAppointment(appointmentobject, jsonobject);

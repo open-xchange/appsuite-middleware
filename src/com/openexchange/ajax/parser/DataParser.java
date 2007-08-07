@@ -101,6 +101,10 @@ public abstract class DataParser {
         this(false, timeZone, null);
     }
 
+    protected DataParser(final boolean parseAll, final TimeZone timeZone) {
+        this(parseAll, timeZone, null);
+    }
+
     /**
      * Constructor with all fields.
      * @param parseAll <code>true</code> to parse all fields.

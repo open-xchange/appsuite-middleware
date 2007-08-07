@@ -51,6 +51,8 @@
 
 package com.openexchange.ajax.parser;
 
+import java.util.TimeZone;
+
 import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.tools.servlet.OXJSONException;
@@ -64,8 +66,20 @@ import org.json.JSONObject;
  */
 
 public class CommonParser extends FolderChildParser {
-	
-	protected void parseElementCommon(final CommonObject commonobject, final JSONObject jsonobject) throws JSONException, OXJSONException {
+
+	protected CommonParser() {
+        super();
+    }
+
+    protected CommonParser(final TimeZone timeZone) {
+        super(timeZone);
+    }
+
+    protected CommonParser(final boolean parseAll, final TimeZone timeZone) {
+        super(parseAll, timeZone);
+    }
+
+    protected void parseElementCommon(final CommonObject commonobject, final JSONObject jsonobject) throws JSONException, OXJSONException {
 		if (jsonobject.has(CommonFields.CATEGORIES)) {
 			commonobject.setCategories(parseString(jsonobject, CommonFields.CATEGORIES));
 		}

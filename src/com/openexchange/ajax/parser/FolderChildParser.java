@@ -51,6 +51,8 @@
 
 package com.openexchange.ajax.parser;
 
+import java.util.TimeZone;
+
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.tools.servlet.OXJSONException;
@@ -64,8 +66,20 @@ import org.json.JSONObject;
  */
 
 public class FolderChildParser extends DataParser {
-	
-	protected void parseElementFolderChildObject(final FolderChildObject folderchildobject, final JSONObject jsonobject) throws JSONException, OXJSONException {
+
+    protected FolderChildParser() {
+        super();
+    }
+
+    protected FolderChildParser(final TimeZone timeZone) {
+        super(timeZone);
+    }
+
+    protected FolderChildParser(final boolean parseAll, final TimeZone timeZone) {
+        super(parseAll, timeZone);
+    }
+
+    protected void parseElementFolderChildObject(final FolderChildObject folderchildobject, final JSONObject jsonobject) throws JSONException, OXJSONException {
 		if (jsonobject.has(FolderChildFields.FOLDER_ID)) {
 			folderchildobject.setParentFolderID(parseInt(jsonobject, FolderChildFields.FOLDER_ID));
 		}

@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.ajax.parser;
 
 import java.util.TimeZone;
@@ -61,94 +59,103 @@ import org.json.JSONObject;
 
 /**
  * TaskParser
+ * 
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
 public class TaskParser extends CalendarParser {
 
     public TaskParser(final TimeZone timeZone) {
-        super();
-        super.timeZone = timeZone;
+        super(timeZone);
     }
-	
-	public TaskParser(boolean parseAll) {
-		super();
-		this.parseAll = parseAll;
-	}
 
-	public void parse(final Task taskobject, final JSONObject jsonobject) throws OXException {
-		try {
-			parseElementTask(taskobject, jsonobject);
-		} catch (Exception exc) {
-			throw new OXException(exc);
-		}
-	}
-	
-	protected void parseElementTask(final Task taskobject, final JSONObject jsonobject) throws Exception {
-		if (jsonobject.has(CalendarFields.START_DATE)) {
-			taskobject.setStartDate(parseDate(jsonobject, CalendarFields.START_DATE));
-		}
-		
-		if (jsonobject.has(CalendarFields.END_DATE)) {
-			taskobject.setEndDate(parseDate(jsonobject, CalendarFields.END_DATE));
-		}
-		
-		if (jsonobject.has(TaskFields.STATUS)) {
-			taskobject.setStatus(parseInt(jsonobject, TaskFields.STATUS));
-		}
-		
-		if (jsonobject.has(TaskFields.ACTUAL_COSTS)) {
-			taskobject.setActualCosts(parseFloat(jsonobject, TaskFields.ACTUAL_COSTS));
-		}
-		
-		if (jsonobject.has(TaskFields.ACTUAL_DURATION)) {
-			taskobject.setActualDuration(parseLong(jsonobject, TaskFields.ACTUAL_DURATION));
-		}
-		
-		if (jsonobject.has(TaskFields.PERCENT_COMPLETED)) {
-			taskobject.setPercentComplete(parseInt(jsonobject, TaskFields.PERCENT_COMPLETED));
-		}
-		
-		if (jsonobject.has(TaskFields.DATE_COMPLETED)) {
-			taskobject.setDateCompleted(parseDate(jsonobject, TaskFields.DATE_COMPLETED));
-		}
-		
-		if (jsonobject.has(TaskFields.BILLING_INFORMATION)) {
-			taskobject.setBillingInformation(parseString(jsonobject, TaskFields.BILLING_INFORMATION));
-		}
-		
-		if (jsonobject.has(TaskFields.TARGET_COSTS)) {
-			taskobject.setTargetCosts(parseFloat(jsonobject, TaskFields.TARGET_COSTS));
-		}
-		
-		if (jsonobject.has(TaskFields.TARGET_DURATION)) {
-			taskobject.setTargetDuration(parseLong(jsonobject, TaskFields.TARGET_DURATION));
-		}
-		
-		if (jsonobject.has(TaskFields.PRIORITY)) {
-			taskobject.setPriority(parseInt(jsonobject, TaskFields.PRIORITY));
-		}
-		
-		if (jsonobject.has(TaskFields.CURRENCY)) {
-			taskobject.setCurrency(parseString(jsonobject, TaskFields.CURRENCY));
-		}
-		
-		if (jsonobject.has(TaskFields.TRIP_METER)) {
-			taskobject.setTripMeter(parseString(jsonobject, TaskFields.TRIP_METER));
-		}
-		
-		if (jsonobject.has(TaskFields.COMPANIES)) {
-			taskobject.setCompanies(parseString(jsonobject, TaskFields.COMPANIES));
-		}
-		
-		if (jsonobject.has(CalendarFields.ALARM)) {
-			taskobject.setAlarm(parseTime(jsonobject, CalendarFields.ALARM,
+    public TaskParser(final boolean parseAll, final TimeZone timeZone) {
+        super(parseAll, timeZone);
+    }
+
+    public void parse(final Task taskobject, final JSONObject jsonobject)
+        throws OXException {
+        try {
+            parseElementTask(taskobject, jsonobject);
+        } catch (Exception exc) {
+            throw new OXException(exc);
+        }
+    }
+
+    protected void parseElementTask(final Task taskobject,
+        final JSONObject jsonobject) throws Exception {
+        if (jsonobject.has(CalendarFields.START_DATE)) {
+            taskobject.setStartDate(parseDate(jsonobject,
+                CalendarFields.START_DATE));
+        }
+
+        if (jsonobject.has(CalendarFields.END_DATE)) {
+            taskobject
+                .setEndDate(parseDate(jsonobject, CalendarFields.END_DATE));
+        }
+
+        if (jsonobject.has(TaskFields.STATUS)) {
+            taskobject.setStatus(parseInt(jsonobject, TaskFields.STATUS));
+        }
+
+        if (jsonobject.has(TaskFields.ACTUAL_COSTS)) {
+            taskobject.setActualCosts(parseFloat(jsonobject,
+                TaskFields.ACTUAL_COSTS));
+        }
+
+        if (jsonobject.has(TaskFields.ACTUAL_DURATION)) {
+            taskobject.setActualDuration(parseLong(jsonobject,
+                TaskFields.ACTUAL_DURATION));
+        }
+
+        if (jsonobject.has(TaskFields.PERCENT_COMPLETED)) {
+            taskobject.setPercentComplete(parseInt(jsonobject,
+                TaskFields.PERCENT_COMPLETED));
+        }
+
+        if (jsonobject.has(TaskFields.DATE_COMPLETED)) {
+            taskobject.setDateCompleted(parseDate(jsonobject,
+                TaskFields.DATE_COMPLETED));
+        }
+
+        if (jsonobject.has(TaskFields.BILLING_INFORMATION)) {
+            taskobject.setBillingInformation(parseString(jsonobject,
+                TaskFields.BILLING_INFORMATION));
+        }
+
+        if (jsonobject.has(TaskFields.TARGET_COSTS)) {
+            taskobject.setTargetCosts(parseFloat(jsonobject,
+                TaskFields.TARGET_COSTS));
+        }
+
+        if (jsonobject.has(TaskFields.TARGET_DURATION)) {
+            taskobject.setTargetDuration(parseLong(jsonobject,
+                TaskFields.TARGET_DURATION));
+        }
+
+        if (jsonobject.has(TaskFields.PRIORITY)) {
+            taskobject.setPriority(parseInt(jsonobject, TaskFields.PRIORITY));
+        }
+
+        if (jsonobject.has(TaskFields.CURRENCY)) {
+            taskobject
+                .setCurrency(parseString(jsonobject, TaskFields.CURRENCY));
+        }
+
+        if (jsonobject.has(TaskFields.TRIP_METER)) {
+            taskobject.setTripMeter(parseString(jsonobject,
+                TaskFields.TRIP_METER));
+        }
+
+        if (jsonobject.has(TaskFields.COMPANIES)) {
+            taskobject.setCompanies(parseString(jsonobject,
+                TaskFields.COMPANIES));
+        }
+
+        if (jsonobject.has(CalendarFields.ALARM)) {
+            taskobject.setAlarm(parseTime(jsonobject, CalendarFields.ALARM,
                 timeZone));
-		}
+        }
 
-		parseElementCalendar(taskobject, jsonobject);
-	}
+        parseElementCalendar(taskobject, jsonobject);
+    }
 }
-
-
-
-
