@@ -51,6 +51,7 @@
 
 package com.openexchange.ajax.parser;
 
+import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
 import java.util.Date;
 import java.util.TimeZone;
@@ -114,7 +115,7 @@ public abstract class DataParser {
         this.sessionObj = sessionObj;
     }
 
-    protected void parseElementDataObject(final DataObject dataobject, final JSONObject jsonobject) throws JSONException {
+    protected void parseElementDataObject(final DataObject dataobject, final JSONObject jsonobject) throws JSONException, OXJSONException {
 		if (jsonobject.has(DataFields.ID)) {
 			dataobject.setObjectID(parseInt(jsonobject, DataFields.ID));
 		}
@@ -148,7 +149,7 @@ public abstract class DataParser {
 		return tmp;
 	}
 	
-	public static int parseInt(final JSONObject jsonObj, final String name) throws JSONException {
+	public static int parseInt(final JSONObject jsonObj, final String name) throws JSONException, OXJSONException {
 		if (!jsonObj.has(name)) {
 			return 0;
 		}
@@ -161,7 +162,7 @@ public abstract class DataParser {
 		try {
 			return Integer.parseInt(tmp);
 		} catch (NumberFormatException exc) {
-			throw new JSONException(STR_INVALID_VALUE_IN_ATTRIBUTE + name + STR_VALUE + tmp + '\'');
+			throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, STR_INVALID_VALUE_IN_ATTRIBUTE + name + STR_VALUE + tmp + '\'');
 		}
 	}
 	
@@ -173,7 +174,7 @@ public abstract class DataParser {
 		return jsonObj.getBoolean(name);
 	}
 	
-	public static float parseFloat(final JSONObject jsonObj, final String name) throws JSONException {
+	public static float parseFloat(final JSONObject jsonObj, final String name) throws JSONException, OXJSONException {
 		if (!jsonObj.has(name)) {
 			return 0;
 		}
@@ -186,11 +187,11 @@ public abstract class DataParser {
 		try {
 			return Float.parseFloat(tmp);
 		} catch (NumberFormatException exc) {
-			throw new JSONException(STR_INVALID_VALUE_IN_ATTRIBUTE + name + STR_VALUE + tmp + '\'');
+			throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, STR_INVALID_VALUE_IN_ATTRIBUTE + name + STR_VALUE + tmp + '\'');
 		}
 	}
 	
-	public static long parseLong(final JSONObject jsonObj, final String name) throws JSONException {
+	public static long parseLong(final JSONObject jsonObj, final String name) throws JSONException, OXJSONException {
 		if (!jsonObj.has(name)) {
 			return 0;
 		}
@@ -203,7 +204,7 @@ public abstract class DataParser {
 		try {
 			return Long.parseLong(tmp);
 		} catch (NumberFormatException exc) {
-			throw new JSONException(STR_INVALID_VALUE_IN_ATTRIBUTE + name + STR_VALUE + tmp + '\'');
+			throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, STR_INVALID_VALUE_IN_ATTRIBUTE + name + STR_VALUE + tmp + '\'');
 		}
 	}
 	
@@ -230,18 +231,23 @@ public abstract class DataParser {
 		return new Date(Long.parseLong(tmp));
 	}
 	
-	public static String checkString(final JSONObject jsonObj, final String name) throws JSONException, OXMandatoryFieldException {
+	public static String checkString(final JSONObject jsonObj, final String name) throws JSONException, OXMandatoryFieldException, AjaxException {
 		final String tmp = parseString(jsonObj, name);
+		
+		if (tmp == null) {
+			throw new AjaxException(AjaxException.Code.NoField, name);
+		}
+
 		if (tmp != null && tmp.length() == 0) {
-			throw new OXMandatoryFieldException(_missingField + name);
+			throw new AjaxException(AjaxException.Code.NoField, name);
 		}
 		return tmp;
 	}
 	
-	public static int checkInt(final JSONObject jsonObj, final String name) throws OXMandatoryFieldException, OXJSONException, JSONException {
-		final String tmp = jsonObj.getString(name);
+	public static int checkInt(final JSONObject jsonObj, final String name) throws OXMandatoryFieldException, OXJSONException, JSONException, AjaxException {
+		final String tmp = checkString(jsonObj, name);
 		if (tmp != null && tmp.length() == 0) {
-			throw new OXMandatoryFieldException(_missingField + name);
+			throw new AjaxException(AjaxException.Code.NoField, name);
 		}
 		
         try {
@@ -251,18 +257,18 @@ public abstract class DataParser {
         }
 	}
 	
-	public static boolean checkBoolean(final JSONObject jsonObj, final String name) throws JSONException, OXMandatoryFieldException {
+	public static boolean checkBoolean(final JSONObject jsonObj, final String name) throws JSONException, OXMandatoryFieldException, AjaxException {
 		final String tmp = jsonObj.getString(name);
 		if (tmp != null && tmp.length() == 0) {
-			throw new OXMandatoryFieldException(_missingField + name);
+			throw new AjaxException(AjaxException.Code.NoField, name);
 		}
 		return Boolean.parseBoolean(tmp);
 	}
 	
-	public static float checkFloat(final JSONObject jsonObj, final String name) throws JSONException, OXMandatoryFieldException, OXJSONException {
+	public static float checkFloat(final JSONObject jsonObj, final String name) throws JSONException, OXMandatoryFieldException, OXJSONException, AjaxException {
 		final String tmp = jsonObj.getString(name);
 		if (tmp != null && tmp.length() == 0) {
-			throw new OXMandatoryFieldException(_missingField + name);
+			throw new AjaxException(AjaxException.Code.NoField, name);
 		}
 		
 		try {
@@ -272,10 +278,10 @@ public abstract class DataParser {
 		}
 	}
 	
-	public static Date checkDate(final JSONObject jsonObj, final String name) throws JSONException, OXMandatoryFieldException, OXJSONException {
+	public static Date checkDate(final JSONObject jsonObj, final String name) throws JSONException, OXMandatoryFieldException, OXJSONException, AjaxException {
 		final String tmp = parseString(jsonObj, name);
 		if (tmp == null) {
-			throw new OXMandatoryFieldException(_missingField + name);
+			throw new AjaxException(AjaxException.Code.NoField, name);
 		}
 		
 		try {
@@ -285,10 +291,10 @@ public abstract class DataParser {
 		}
 	}
 	
-	public static Date checkTime(final JSONObject jsonObj, final String name, final TimeZone timeZone) throws JSONException, OXMandatoryFieldException, OXJSONException {
+	public static Date checkTime(final JSONObject jsonObj, final String name, final TimeZone timeZone) throws JSONException, OXMandatoryFieldException, OXJSONException, AjaxException {
 		final String tmp = parseString(jsonObj, name);
 		if (tmp == null) {
-			throw new OXMandatoryFieldException(_missingField + name);
+			throw new AjaxException(AjaxException.Code.NoField, name);
 		}
 		try {
 			final Date d = new Date(Long.parseLong(tmp));
@@ -300,18 +306,18 @@ public abstract class DataParser {
 		}
 	}
 	
-	public static JSONObject checkJSONObject(final JSONObject jsonObj, final String name) throws JSONException, OXMandatoryFieldException {
+	public static JSONObject checkJSONObject(final JSONObject jsonObj, final String name) throws JSONException, OXMandatoryFieldException, AjaxException {
 		final JSONObject tmp = jsonObj.getJSONObject(name);
 		if (tmp == null) {
-			throw new OXMandatoryFieldException(_missingField + name);
+			throw new AjaxException(AjaxException.Code.NoField, name);
 		}
 		return tmp;
 	}
 	
-	public static JSONArray checkJSONArray(final JSONObject jsonObj, final String name) throws JSONException, OXMandatoryFieldException {
+	public static JSONArray checkJSONArray(final JSONObject jsonObj, final String name) throws JSONException, OXMandatoryFieldException, AjaxException {
 		final JSONArray tmp = jsonObj.getJSONArray(name);
 		if (tmp == null) {
-			throw new OXMandatoryFieldException(_missingField + name);
+			throw new AjaxException(AjaxException.Code.NoField, name);
 		}
 		return tmp;
 	}
@@ -378,10 +384,10 @@ public abstract class DataParser {
 		}
 	}
 	
-	public static int[] checkJSONIntArray(final JSONObject jsonObj, final String name) throws JSONException, OXMandatoryFieldException, OXJSONException {
+	public static int[] checkJSONIntArray(final JSONObject jsonObj, final String name) throws JSONException, OXMandatoryFieldException, OXJSONException, AjaxException {
 		final int[] i = parseJSONIntArray(jsonObj, name);
 		if (i == null) {
-			throw new OXMandatoryFieldException(_missingField + name);
+			throw new AjaxException(AjaxException.Code.NoField, name);
 		}
 		
 		return i;

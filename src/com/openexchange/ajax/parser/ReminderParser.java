@@ -91,7 +91,7 @@ public class ReminderParser extends DataParser {
     }
 
     protected void parseElementReminder(final ReminderObject reminder,
-        final JSONObject json) throws JSONException {
+        final JSONObject json) throws JSONException, OXJSONException {
         if (json.has(ReminderFields.LAST_MODIFIED)) {
             reminder.setLastModified(parseTime(json, ReminderFields.LAST_MODIFIED, getTimeZone()));
         }
