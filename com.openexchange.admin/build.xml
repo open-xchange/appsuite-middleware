@@ -32,7 +32,6 @@
 	<property name="mysql-connector" value="mysql-connector-java-3.1.13-bin.jar"/>
 	<property name="jdom" value="jdom.jar"/>
 	<property name="eclipse-osgi" value="org.eclipse.osgi_3.2.2.ox.jar"/>
-	<property name="log4j" value="log4j-1.2.14.jar"/>
 	
 	
 	<path id="project.classpath">
@@ -191,7 +190,6 @@
 					 external:$libdir$/${jdom},
 					 external:$libdir$/${mail},
 					 external:$libdir$/${mysql-connector},
-					 external:$libdir$/${log4j},
 					 external:$log4j$"/>
 		</manifest>
 	</target>
