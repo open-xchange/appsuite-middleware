@@ -83,7 +83,6 @@ public class Resource extends DataServlet {
 		final Response response = new Response();
 		try {
 			final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
-			final OXJSONWriter sw = new OXJSONWriter();
 			final SessionObject sessionObj = getSessionObject(httpServletRequest);
 			JSONObject jsonObj = null;
 			try {
@@ -95,10 +94,10 @@ public class Resource extends DataServlet {
 	            return;
 			}
 
-			final ResourceRequest resourceRequest = new ResourceRequest(sessionObj, sw); 
-			resourceRequest.action(action, jsonObj);
+			final ResourceRequest resourceRequest = new ResourceRequest(sessionObj); 
+			final Object responseObj = resourceRequest.action(action, jsonObj);
 			response.setTimestamp(resourceRequest.getTimestamp());
-			response.setData(sw.getObject());
+			response.setData(responseObj);
 		} catch (OXJSONException exc) {
             LOG.error(exc.getMessage(), exc);
             response.setException(exc);
@@ -155,12 +154,11 @@ public class Resource extends DataServlet {
 				}
 
 				jsonObj.put(PARAMETER_DATA, jData);
-				final OXJSONWriter sw = new OXJSONWriter();
 				
-				final ResourceRequest resourceRequest = new ResourceRequest(sessionObj, sw); 
-				resourceRequest.action(action, jsonObj);
+				final ResourceRequest resourceRequest = new ResourceRequest(sessionObj); 
+				final Object responseObj = resourceRequest.action(action, jsonObj);
 				response.setTimestamp(resourceRequest.getTimestamp());
-				response.setData(sw.getObject());
+				response.setData(responseObj);
 			} else {
 				JSONObject jData = null;
 				JSONObject jsonObj = null;
@@ -175,12 +173,11 @@ public class Resource extends DataServlet {
 				}
 
 				jsonObj.put(PARAMETER_DATA, jData);
-				final OXJSONWriter sw = new OXJSONWriter();
 				
-				final ResourceRequest resourceRequest = new ResourceRequest(sessionObj, sw);
-				resourceRequest.action(action, jsonObj);
+				final ResourceRequest resourceRequest = new ResourceRequest(sessionObj);
+				final Object responseObj = resourceRequest.action(action, jsonObj);
 				response.setTimestamp(resourceRequest.getTimestamp());
-				response.setData(sw.getObject());
+				response.setData(responseObj);
 			}
 		} catch (OXJSONException exc) {
             LOG.error(exc.getMessage(), exc);

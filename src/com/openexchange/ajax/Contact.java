@@ -149,15 +149,10 @@ public class Contact extends DataServlet {
 				return;
 			}
 			final OXJSONWriter sw = new OXJSONWriter();
-			final ContactRequest contactRequest = new ContactRequest(sessionObj, sw);
-			contactRequest.action(action, jsonObj);
+			final ContactRequest contactRequest = new ContactRequest(sessionObj);
+			final Object responseObj = contactRequest.action(action, jsonObj);
 			response.setTimestamp(contactRequest.getTimestamp());
-			response.setData(sw.getObject());
-//			try {
-//				response.setData(new JSONArray(sw.toString()));
-//			} catch (final JSONException e) {
-//				response.setData(new JSONObject(sw.toString()));
-//			}
+			response.setData(responseObj);
 		} catch (final JSONException e) {
 			final OXJSONException oje = new OXJSONException(OXJSONException.Code
 					.JSON_WRITE_ERROR, e);
@@ -181,7 +176,6 @@ public class Contact extends DataServlet {
 			final String data = getBody(httpServletRequest);
 			if (data.length() > 0) {
 				final JSONObject jsonObj;
-				final OXJSONWriter sw = new OXJSONWriter();
 				
 				try {
 					jsonObj = convertParameter2JSONObject(httpServletRequest);
@@ -192,32 +186,23 @@ public class Contact extends DataServlet {
 					return;
 				}
 				
-				final ContactRequest contactRequest = new ContactRequest(sessionObj, sw);
+				final ContactRequest contactRequest = new ContactRequest(sessionObj);
 				
 				if (data.charAt(0) == '[') {
 					final JSONArray jsonDataArray = new JSONArray(data);
 					jsonObj.put(AJAXServlet.PARAMETER_DATA, jsonDataArray);
 					
-					contactRequest.action(action, jsonObj);
+					final Object responseObj = contactRequest.action(action, jsonObj);
 					response.setTimestamp(contactRequest.getTimestamp());
-					response.setData(sw.getObject());
-					/*try {
-						response.setData(new JSONArray(sw.toString()));
-					} catch (final JSONException e) {
-						response.setData(new JSONObject(sw.toString()));
-					}*/
+					response.setData(responseObj);
+
 				} else if (data.charAt(0) == '{') {
 					final JSONObject jsonDataObj = new JSONObject(data);
 					jsonObj.put(AJAXServlet.PARAMETER_DATA, jsonDataObj);
 					
-					contactRequest.action(action, jsonObj);
+					final Object responseObj = contactRequest.action(action, jsonObj);
 					response.setTimestamp(contactRequest.getTimestamp());
-					response.setData(sw.getObject());
-					/*try {
-						response.setData(new JSONArray(sw.toString()));
-					} catch (final JSONException e) {
-						response.setData(new JSONObject(sw.toString()));
-					}*/
+					response.setData(responseObj);
 				} else {
 					httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "invalid json object");
 				}

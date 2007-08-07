@@ -53,9 +53,9 @@ package com.openexchange.ajax.writer;
 
 import com.openexchange.ajax.fields.ParticipantsFields;
 import com.openexchange.groupware.ldap.Group;
-import java.io.PrintWriter;
+import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONWriter;
+import org.json.JSONObject;
 
 /**
  * GroupWriter
@@ -65,32 +65,24 @@ import org.json.JSONWriter;
 
 public class GroupWriter extends DataWriter {
 	
-	public GroupWriter(PrintWriter w) {
-		jsonwriter = new JSONWriter(w);
-	}
-	
-	public GroupWriter(JSONWriter jsonwriter) {
-		this.jsonwriter = jsonwriter;
-	}
-	
-	public void writeGroup(Group g) throws JSONException {
-		jsonwriter.object();
-
-		writeParameter(ParticipantsFields.ID, g.getIdentifier());
-		writeParameter(ParticipantsFields.DISPLAY_NAME, g.getDisplayName());
+	public GroupWriter() {
 		
-		writeMembers(g);
-		
-		jsonwriter.endObject();
 	}
 	
-	protected void writeMembers(Group g) throws JSONException {
-		jsonwriter.key("members");
-		jsonwriter.array();
-		int members[] = g.getMember();
+	public void writeGroup(final Group g, JSONObject jsonObj) throws JSONException {
+		writeParameter(ParticipantsFields.ID, g.getIdentifier(), jsonObj);
+		writeParameter(ParticipantsFields.DISPLAY_NAME, g.getDisplayName(), jsonObj);
+		
+		writeMembers(g, jsonObj);
+	}
+	
+	protected void writeMembers(final Group g, final JSONObject jsonObj) throws JSONException {
+		final JSONArray jsonArray = new JSONArray();
+		final int members[] = g.getMember();
 		for (int a = 0; a < members.length; a++) {
-			writeValue(members[a]);
+			jsonArray.put(members[a]);
 		}
-		jsonwriter.endArray();
+
+		jsonObj.put("members", jsonArray);
 	}
 }

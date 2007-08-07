@@ -53,12 +53,12 @@ package com.openexchange.ajax.writer;
 
 import com.openexchange.ajax.fields.TaskFields;
 import com.openexchange.groupware.tasks.Task;
-import java.io.PrintWriter;
 import java.util.TimeZone;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONWriter;
+import org.json.JSONObject;
 
 /**
  * TaskWriter
@@ -69,167 +69,153 @@ import org.json.JSONWriter;
 public class TaskWriter extends CalendarWriter {
 	
 	private static final Log LOG = LogFactory.getLog(TaskWriter.class);
-	
-	public TaskWriter(final PrintWriter w, final TimeZone timeZone) {
-		jsonwriter = new JSONWriter(w);
-		this.timeZone = timeZone;
-	}
-	
-	public TaskWriter(final JSONWriter jsonwriter, final TimeZone timeZone) {
-		this.jsonwriter = jsonwriter;
-		this.timeZone = timeZone;
-	}
-	
-	public void writeArray(final Task taskObject, final int cols[]) throws JSONException {
-		jsonwriter.array();
-		for (int a = 0; a < cols.length; a++) {
-			write(cols[a], taskObject);
-		}
-		jsonwriter.endArray();
-	}
-	
-	public void writeTask(final Task taskObject) throws JSONException {
-		jsonwriter.object();
-		
-		writeCommonFields(taskObject);
 
-		writeParameter(TaskFields.TITLE, taskObject.getTitle());
-		writeParameter(TaskFields.START_DATE, taskObject.getStartDate());
-		writeParameter(TaskFields.END_DATE, taskObject.getEndDate());
+	public TaskWriter(final TimeZone timeZone) {
+		this.timeZone = timeZone;
+	}
+	
+	public void writeArray(final Task taskObject, final int cols[], final JSONArray jsonArray) throws JSONException {
+		for (int a = 0; a < cols.length; a++) {
+			write(cols[a], taskObject, jsonArray);
+		}
+	}
+	
+	public void writeTask(final Task taskObject, final JSONObject jsonObj) throws JSONException {
+		writeCommonFields(taskObject, jsonObj);
+
+		writeParameter(TaskFields.TITLE, taskObject.getTitle(), jsonObj);
+		writeParameter(TaskFields.START_DATE, taskObject.getStartDate(), jsonObj);
+		writeParameter(TaskFields.END_DATE, taskObject.getEndDate(), jsonObj);
         if (taskObject.containsActualCosts()) {
-		    writeParameter(TaskFields.ACTUAL_COSTS, taskObject.getActualCosts());
+		    writeParameter(TaskFields.ACTUAL_COSTS, taskObject.getActualCosts(), jsonObj);
         }
         if (taskObject.containsActualDuration()) {
-		    writeParameter(TaskFields.ACTUAL_DURATION, taskObject.getActualDuration());
+		    writeParameter(TaskFields.ACTUAL_DURATION, taskObject.getActualDuration(), jsonObj);
         }
-		writeParameter(TaskFields.NOTE, taskObject.getNote());
-		writeParameter(TaskFields.AFTER_COMPLETE, taskObject.getAfterComplete());
-		writeParameter(TaskFields.BILLING_INFORMATION, taskObject.getBillingInformation());
-		writeParameter(TaskFields.CATEGORIES, taskObject.getCategories());
-		writeParameter(TaskFields.COMPANIES, taskObject.getCompanies());
-		writeParameter(TaskFields.CURRENCY, taskObject.getCurrency());
-		writeParameter(TaskFields.DATE_COMPLETED, taskObject.getDateCompleted());
+		writeParameter(TaskFields.NOTE, taskObject.getNote(), jsonObj);
+		writeParameter(TaskFields.AFTER_COMPLETE, taskObject.getAfterComplete(), jsonObj);
+		writeParameter(TaskFields.BILLING_INFORMATION, taskObject.getBillingInformation(), jsonObj);
+		writeParameter(TaskFields.CATEGORIES, taskObject.getCategories(), jsonObj);
+		writeParameter(TaskFields.COMPANIES, taskObject.getCompanies(), jsonObj);
+		writeParameter(TaskFields.CURRENCY, taskObject.getCurrency(), jsonObj);
+		writeParameter(TaskFields.DATE_COMPLETED, taskObject.getDateCompleted(), jsonObj);
         if (taskObject.containsPercentComplete()) {
-		    writeParameter(TaskFields.PERCENT_COMPLETED, taskObject.getPercentComplete());
+		    writeParameter(TaskFields.PERCENT_COMPLETED, taskObject.getPercentComplete(), jsonObj);
         }
         if (taskObject.containsPriority()) {
-		    writeParameter(TaskFields.PRIORITY, taskObject.getPriority());
+		    writeParameter(TaskFields.PRIORITY, taskObject.getPriority(), jsonObj);
         }
         if (taskObject.containsStatus()) {
-		    writeParameter(TaskFields.STATUS, taskObject.getStatus());
+		    writeParameter(TaskFields.STATUS, taskObject.getStatus(), jsonObj);
         }
         if (taskObject.containsTargetCosts()) {
-		    writeParameter(TaskFields.TARGET_COSTS, taskObject.getTargetCosts());
+		    writeParameter(TaskFields.TARGET_COSTS, taskObject.getTargetCosts(), jsonObj);
         }
         if (taskObject.containsTargetDuration()) {
-		    writeParameter(TaskFields.TARGET_DURATION, taskObject.getTargetDuration());
+		    writeParameter(TaskFields.TARGET_DURATION, taskObject.getTargetDuration(), jsonObj);
         }
 		if (taskObject.containsLabel()) {
-			writeParameter(TaskFields.COLORLABEL,  taskObject.getLabel());
+			writeParameter(TaskFields.COLORLABEL,  taskObject.getLabel(), jsonObj);
 		} 
 		
-		writeParameter(TaskFields.TRIP_METER, taskObject.getTripMeter());
-		writeParameter(TaskFields.ALARM, taskObject.getAlarm(), timeZone);
-		writeRecurrenceParameter(taskObject);
+		writeParameter(TaskFields.TRIP_METER, taskObject.getTripMeter(), jsonObj);
+		writeParameter(TaskFields.ALARM, taskObject.getAlarm(), timeZone, jsonObj);
+		writeRecurrenceParameter(taskObject, jsonObj);
 		
-        if (taskObject.containsParticipants()) {
-            jsonwriter.key(TaskFields.PARTICIPANTS);
-            writeParticipants(taskObject);
-        }
+		if (taskObject.containsParticipants()) {
+			jsonObj.put(TaskFields.PARTICIPANTS, getParticipantsAsJSONArray(taskObject));
+		}
 		
 		if (taskObject.containsUserParticipants()) {
-            jsonwriter.key(TaskFields.USERS);
-			writeUsers(taskObject);
-		} 
-		
-		jsonwriter.endObject();
+			jsonObj.put(TaskFields.USERS, getUsersAsJSONArray(taskObject));
+		}
 	}
 	
-	public void write(final int field, final Task taskObject) throws JSONException {
+	public void write(final int field, final Task taskObject, final JSONArray jsonArray) throws JSONException {
 		switch (field) {
 			case Task.OBJECT_ID:
-				writeValue(taskObject.getObjectID());
+				writeValue(taskObject.getObjectID(), jsonArray);
 				break;
 			case Task.CREATED_BY:
-				writeValue(taskObject.getCreatedBy());
+				writeValue(taskObject.getCreatedBy(), jsonArray);
 				break;
 			case Task.CREATION_DATE:
-                writeValue(taskObject.getCreationDate(), timeZone);
+                writeValue(taskObject.getCreationDate(), timeZone, jsonArray);
 				break;
 			case Task.MODIFIED_BY:
-				writeValue(taskObject.getModifiedBy());
+				writeValue(taskObject.getModifiedBy(), jsonArray);
 				break;
 			case Task.LAST_MODIFIED:
-                writeValue(taskObject.getLastModified(), timeZone);
+                writeValue(taskObject.getLastModified(), timeZone, jsonArray);
 				break;
 			case Task.FOLDER_ID:
-				writeValue(taskObject.getParentFolderID());
+				writeValue(taskObject.getParentFolderID(), jsonArray);
 				break;
 			case Task.TITLE:
-				writeValue(taskObject.getTitle());
+				writeValue(taskObject.getTitle(), jsonArray);
 				break;
 			case Task.START_DATE:
-                writeValue(taskObject.getStartDate());
+                writeValue(taskObject.getStartDate(), jsonArray);
 				break;
 			case Task.END_DATE:
-                writeValue(taskObject.getEndDate());
+                writeValue(taskObject.getEndDate(), jsonArray);
 				break;
 			case Task.NOTE:
-				writeValue(taskObject.getNote());
+				writeValue(taskObject.getNote(), jsonArray);
 				break;
 			case Task.ACTUAL_COSTS:
-				writeValue(taskObject.getActualCosts());
+				writeValue(taskObject.getActualCosts(), jsonArray);
 				break;
 			case Task.ACTUAL_DURATION:
-				writeValue(taskObject.getActualDuration());
+				writeValue(taskObject.getActualDuration(), jsonArray);
 				break;
 			case Task.BILLING_INFORMATION:
-				writeValue(taskObject.getBillingInformation());
+				writeValue(taskObject.getBillingInformation(), jsonArray);
 				break;
 			case Task.CATEGORIES:
-				writeValue(taskObject.getCategories());
+				writeValue(taskObject.getCategories(), jsonArray);
 				break;
 			case Task.COMPANIES:
-				writeValue(taskObject.getCompanies());
+				writeValue(taskObject.getCompanies(), jsonArray);
 				break;
 			case Task.CURRENCY:
-				writeValue(taskObject.getCurrency());
+				writeValue(taskObject.getCurrency(), jsonArray);
 				break;
 			case Task.DATE_COMPLETED:
-                writeValue(taskObject.getDateCompleted());
+                writeValue(taskObject.getDateCompleted(), jsonArray);
 				break;
 			case Task.PERCENT_COMPLETED:
-				writeValue(taskObject.getPercentComplete());
+				writeValue(taskObject.getPercentComplete(), jsonArray);
 				break;
 			case Task.PRIORITY:
-				writeValue(taskObject.getPriority());
+				writeValue(taskObject.getPriority(), jsonArray);
 				break;
 			case Task.STATUS:
-				writeValue(taskObject.getStatus());
+				writeValue(taskObject.getStatus(), jsonArray);
 				break;
 			case Task.TARGET_COSTS:
-				writeValue(taskObject.getTargetCosts());
+				writeValue(taskObject.getTargetCosts(), jsonArray);
 				break;
 			case Task.TARGET_DURATION:
-				writeValue(taskObject.getTargetDuration());
+				writeValue(taskObject.getTargetDuration(), jsonArray);
 				break;
 			case Task.TRIP_METER:
-				writeValue(taskObject.getTripMeter());
+				writeValue(taskObject.getTripMeter(), jsonArray);
 				break;
 			case Task.RECURRENCE_TYPE:
-				writeValue(taskObject.getRecurrenceType());
+				writeValue(taskObject.getRecurrenceType(), jsonArray);
 				break;
 			case Task.COLOR_LABEL:
-				writeValue(taskObject.getLabel());
+				writeValue(taskObject.getLabel(), jsonArray);
 				break;
 			case Task.PARTICIPANTS:
-				writeParticipants(taskObject);
+				jsonArray.put(getParticipantsAsJSONArray(taskObject));
 				break;
 			case Task.USERS:
-				writeUsers(taskObject);
+				jsonArray.put(getUsersAsJSONArray(taskObject));
 				break;
             case Task.PRIVATE_FLAG:
-                writeValue(taskObject.getPrivateFlag());
+                writeValue(taskObject.getPrivateFlag(), jsonArray);
                 break;
 			default: 
 				LOG.warn("missing field in mapping: " + field);

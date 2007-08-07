@@ -82,7 +82,6 @@ public class Group extends DataServlet {
 	protected void doGet(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
 		final Response response = new Response();
 		try {
-			final OXJSONWriter sw = new OXJSONWriter();
 			final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
 			final SessionObject sessionObj = getSessionObject(httpServletRequest);
 			JSONObject jsonObj;
@@ -96,10 +95,10 @@ public class Group extends DataServlet {
 	            return;
 			}
 			
-			final GroupRequest groupRequest = new GroupRequest(sessionObj, sw);
-			groupRequest.action(action, jsonObj);
+			final GroupRequest groupRequest = new GroupRequest(sessionObj);
+			final Object responseObj = groupRequest.action(action, jsonObj);
 			response.setTimestamp(groupRequest.getTimestamp());
-			response.setData(sw.getObject());
+			response.setData(responseObj);
 			//response.setData(new JSONObject(sw.toString()));
 		} catch (OXMandatoryFieldException e) {
 			LOG.error(e.getMessage(), e);
@@ -129,7 +128,6 @@ public class Group extends DataServlet {
 	protected void doPut(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
 		final Response response = new Response();
 		try {
-			final OXJSONWriter sw = new OXJSONWriter();
 			final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
 			final SessionObject sessionObj = getSessionObject(httpServletRequest);
 			
@@ -145,17 +143,17 @@ public class Group extends DataServlet {
 	            return;
 			}
 
-			final GroupRequest groupRequest = new GroupRequest(sessionObj, sw);
+			final GroupRequest groupRequest = new GroupRequest(sessionObj);
 			
 			if (data.charAt(0) == '[') {
 				final JSONArray jData = new JSONArray(data);
 			
 				jsonObj.put(AJAXServlet.PARAMETER_DATA, jData);
 
-				groupRequest.action(action, jsonObj);
+				final Object responseObj = groupRequest.action(action, jsonObj);
 				response.setTimestamp(groupRequest.getTimestamp());
 				// According to the documentation this is definitely an array
-				response.setData(sw.getObject());
+				response.setData(responseObj);
 				//response.setData(new JSONArray(sw.toString()));
 
 			} else if (data.charAt(0) == '{') {
@@ -163,10 +161,10 @@ public class Group extends DataServlet {
 
 				jsonObj.put(AJAXServlet.PARAMETER_DATA, jData);
 				
-				groupRequest.action(action, jsonObj);
+				final Object responseObj = groupRequest.action(action, jsonObj);
 				response.setTimestamp(groupRequest.getTimestamp());
 				// According to the documentation this is definitely an array
-				response.setData(sw.getObject());
+				response.setData(responseObj);
 				//response.setData(new JSONArray(sw.toString()));
 			} else {
 				httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "invalid json object");

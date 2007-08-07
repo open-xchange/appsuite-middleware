@@ -54,6 +54,7 @@ package com.openexchange.ajax.writer;
 import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.groupware.container.CommonObject;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * CommonWriter
@@ -63,45 +64,45 @@ import org.json.JSONException;
 
 public class CommonWriter extends DataWriter {
 	
-	public void writeCommonFields(CommonObject commonObj) throws JSONException {
+	public void writeCommonFields(CommonObject commonObj, JSONObject jsonObj) throws JSONException {
 		if (commonObj.containsObjectID()) {
-			writeParameter(CommonFields.ID, commonObj.getObjectID());
+			writeParameter(CommonFields.ID, commonObj.getObjectID(), jsonObj);
 		} 
 		
 		if (commonObj.containsCreatedBy()) {
-			writeParameter(CommonFields.CREATED_BY, commonObj.getCreatedBy());
+			writeParameter(CommonFields.CREATED_BY, commonObj.getCreatedBy(), jsonObj);
 		}
 		
 		if (commonObj.containsCreationDate()) {			
-			writeParameter(CommonFields.CREATION_DATE, commonObj.getCreationDate(), timeZone);
+			writeParameter(CommonFields.CREATION_DATE, commonObj.getCreationDate(), timeZone, jsonObj);
 		} 
 		
 		if (commonObj.containsModifiedBy()) {
-			writeParameter(CommonFields.MODIFIED_BY, commonObj.getModifiedBy());
+			writeParameter(CommonFields.MODIFIED_BY, commonObj.getModifiedBy(), jsonObj);
 		} 
 	
 		if (commonObj.containsLastModified()) {
-			writeParameter(CommonFields.LAST_MODIFIED, commonObj.getLastModified(), timeZone);
+			writeParameter(CommonFields.LAST_MODIFIED, commonObj.getLastModified(), timeZone, jsonObj);
 		} 
 		
 		if (commonObj.containsParentFolderID()) {
-			writeParameter(CommonFields.FOLDER_ID, commonObj.getParentFolderID());
+			writeParameter(CommonFields.FOLDER_ID, commonObj.getParentFolderID(), jsonObj);
 		} 
 		
 		if (commonObj.containsCategories()) {
-			writeParameter(CommonFields.CATEGORIES, commonObj.getCategories());
+			writeParameter(CommonFields.CATEGORIES, commonObj.getCategories(), jsonObj);
 		} 
 		
 		if (commonObj.containsLabel()) {
-			writeParameter(CommonFields.COLORLABEL, commonObj.getLabel());
+			writeParameter(CommonFields.COLORLABEL, commonObj.getLabel(), jsonObj);
 		} 
 		
 		if (commonObj.containsPrivateFlag()) {
-			writeParameter(CommonFields.PRIVATE_FLAG, commonObj.getPrivateFlag());
+			writeParameter(CommonFields.PRIVATE_FLAG, commonObj.getPrivateFlag(), jsonObj);
 		}
 
         if (commonObj.containsNumberOfAttachments()) {
-            writeParameter(CommonFields.NUMBER_OF_ATTACHMENTS, commonObj.getNumberOfAttachments());
+            writeParameter(CommonFields.NUMBER_OF_ATTACHMENTS, commonObj.getNumberOfAttachments(), jsonObj);
         }
 	}
 }

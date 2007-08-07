@@ -83,7 +83,6 @@ public class Appointment extends DataServlet {
 	protected void doGet(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
 		final Response response = new Response();
 		try {
-			final OXJSONWriter sw = new OXJSONWriter();
 			final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
 			final SessionObject sessionObj = getSessionObject(httpServletRequest);
 			JSONObject jsonObj;
@@ -96,10 +95,10 @@ public class Appointment extends DataServlet {
 	            return;
 			}
 
-			final AppointmentRequest appointmentRequest = new AppointmentRequest(sessionObj, sw);
-			appointmentRequest.action(action, jsonObj);
+			final AppointmentRequest appointmentRequest = new AppointmentRequest(sessionObj);
+			final Object responseObj = appointmentRequest.action(action, jsonObj);
 			response.setTimestamp(appointmentRequest.getTimestamp());
-			response.setData(sw.getObject());
+			response.setData(responseObj);
 		} catch (OXMandatoryFieldException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
@@ -137,7 +136,6 @@ public class Appointment extends DataServlet {
 	protected void doPut(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
 		final Response response = new Response();
 		try {
-			final OXJSONWriter sw = new OXJSONWriter();
 			final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
 			final SessionObject sessionObj = getSessionObject(httpServletRequest);
 			
@@ -159,18 +157,18 @@ public class Appointment extends DataServlet {
 					final JSONArray jsonDataArray = new JSONArray(data);
 					jsonObj.put(AJAXServlet.PARAMETER_DATA, jsonDataArray);
 					
-					appointmentRequest = new AppointmentRequest(sessionObj, sw);
-					appointmentRequest.action(action, jsonObj);
+					appointmentRequest = new AppointmentRequest(sessionObj);
+					final Object responseObj = appointmentRequest.action(action, jsonObj);
 					response.setTimestamp(appointmentRequest.getTimestamp());
-					response.setData(sw.isEmpty() ? "" : sw.getObject());
+					response.setData(responseObj);
 				} else if (data.charAt(0) == '{') {
 					final JSONObject jsonDataObject = new JSONObject(data);
 					jsonObj.put(AJAXServlet.PARAMETER_DATA, jsonDataObject);
 					
-					appointmentRequest = new AppointmentRequest(sessionObj, sw);
-					appointmentRequest.action(action, jsonObj);
+					appointmentRequest = new AppointmentRequest(sessionObj);
+					final Object responseObj = appointmentRequest.action(action, jsonObj);
 					response.setTimestamp(appointmentRequest.getTimestamp());
-					response.setData(sw.isEmpty() ? "" : sw.getObject());
+					response.setData(responseObj);
 				} else {
 					httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "invalid json object");
 				}

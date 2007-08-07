@@ -218,11 +218,11 @@ public class Multiple extends SessionServlet {
 		try {
 			if (module.equals(MODULE_CALENDAR)) {
 				writeMailRequest(req);
-				final AppointmentRequest appointmentRequest = new AppointmentRequest(sessionObj, jsonWriter);
+				final AppointmentRequest appointmentRequest = new AppointmentRequest(sessionObj);
 				jsonWriter.object();
 				try {
 					jsonWriter.key(Response.DATA);
-					appointmentRequest.action(action, jsonObj);
+					jsonWriter.value(appointmentRequest.action(action, jsonObj));
 					if (jsonWriter.isExpectingValue()) {
 						jsonWriter.value("");
 					}
@@ -279,11 +279,11 @@ public class Multiple extends SessionServlet {
 				}
 			} else if (module.equals(MODULE_CONTACT)) {
 				writeMailRequest(req);
-				final ContactRequest contactRequest = new ContactRequest(sessionObj, jsonWriter);
+				final ContactRequest contactRequest = new ContactRequest(sessionObj);
 				jsonWriter.object();
 				try {
 					jsonWriter.key(Response.DATA);
-					contactRequest.action(action, jsonObj);
+					jsonWriter.value(contactRequest.action(action, jsonObj));
 					if (jsonWriter.isExpectingValue()) {
 						jsonWriter.value("");
 					}
@@ -336,11 +336,11 @@ public class Multiple extends SessionServlet {
 				}
 			} else if (module.equals(MODULE_GROUP)) {
 				writeMailRequest(req);
-				final GroupRequest groupRequest = new GroupRequest(sessionObj, jsonWriter);
+				final GroupRequest groupRequest = new GroupRequest(sessionObj);
 				jsonWriter.object();
 				try {
 					jsonWriter.key(Response.DATA);
-					groupRequest.action(action, jsonObj);
+					jsonWriter.value(groupRequest.action(action, jsonObj));
 					if (jsonWriter.isExpectingValue()) {
 						jsonWriter.value("");
 					}
@@ -387,11 +387,11 @@ public class Multiple extends SessionServlet {
 				}
 			} else if (module.equals(MODULE_REMINDER)) {
 				writeMailRequest(req);
-				final ReminderRequest reminderRequest = new ReminderRequest(sessionObj, jsonWriter);
+				final ReminderRequest reminderRequest = new ReminderRequest(sessionObj);
 				jsonWriter.object();
 				try {
 					jsonWriter.key(Response.DATA);
-					reminderRequest.action(action, jsonObj);
+					jsonWriter.value(reminderRequest.action(action, jsonObj));
 					if (jsonWriter.isExpectingValue()) {
 						jsonWriter.value("");
 					}
@@ -438,11 +438,11 @@ public class Multiple extends SessionServlet {
 				}
 			} else if (module.equals(MODULE_RESOURCE)) {
 				writeMailRequest(req);
-				final ResourceRequest resourceRequest = new ResourceRequest(sessionObj, jsonWriter);
+				final ResourceRequest resourceRequest = new ResourceRequest(sessionObj);
 				jsonWriter.object();
 				try {
 					jsonWriter.key(Response.DATA);
-					resourceRequest.action(action, jsonObj);
+					jsonWriter.value(resourceRequest.action(action, jsonObj));
 					if (jsonWriter.isExpectingValue()) {
 						jsonWriter.value("");
 					}
@@ -489,20 +489,11 @@ public class Multiple extends SessionServlet {
 				}
 			} else if (module.equals(MODULE_TASK)) {
 				writeMailRequest(req);
-				final TaskRequest taskRequest = new TaskRequest(sessionObj, jsonWriter);
+				final TaskRequest taskRequest = new TaskRequest(sessionObj);
 				jsonWriter.object();
 				try {
 					jsonWriter.key(Response.DATA);
-					final int retval = taskRequest.action(action, jsonObj);
-					if (retval != -1) {
-						if (jsonWriter.isExpectingKey()) {
-							/*
-							 * Override data
-							 */
-							jsonWriter.key(Response.DATA);
-						}
-						jsonWriter.value(Integer.valueOf(retval));
-					}
+					jsonWriter.value(taskRequest.action(action, jsonObj));
 					jsonWriter.key(Response.TIMESTAMP).value(taskRequest.getTimestamp().getTime());
 				} catch (final OXFolderNotFoundException e) {
 					LOG.error(e.getMessage(), e);

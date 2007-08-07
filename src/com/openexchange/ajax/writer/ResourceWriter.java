@@ -53,32 +53,23 @@ package com.openexchange.ajax.writer;
 
 import com.openexchange.ajax.fields.ParticipantsFields;
 import com.openexchange.groupware.ldap.Resource;
-import java.io.PrintWriter;
 import org.json.JSONException;
-import org.json.JSONWriter;
+import org.json.JSONObject;
 
 /**
- * GroupWriter
+ * ResourceWriter
  *
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
 
 public class ResourceWriter extends DataWriter {
 	
-	public ResourceWriter(PrintWriter w) {
-		jsonwriter = new JSONWriter(w);
-	}
-	
-	public ResourceWriter(JSONWriter jsonwriter) {
-		this.jsonwriter = jsonwriter;
-	}
-	
-	public void writeResource(Resource r) throws JSONException {
-		jsonwriter.object();
+	public ResourceWriter() {
 
-		writeParameter(ParticipantsFields.ID, r.getIdentifier());
-		writeParameter(ParticipantsFields.DISPLAY_NAME, r.getDisplayName());
-		
-		jsonwriter.endObject();
+	}
+	
+	public void writeResource(final Resource r, final JSONObject jsonObj) throws JSONException {
+		writeParameter(ParticipantsFields.ID, r.getIdentifier(), jsonObj);
+		writeParameter(ParticipantsFields.DISPLAY_NAME, r.getDisplayName(), jsonObj);
 	}
 }

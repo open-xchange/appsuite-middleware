@@ -55,11 +55,10 @@ import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.ReminderFields;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.ajax.fields.CalendarFields;
-import java.io.PrintWriter;
 import java.util.Date;
 import java.util.TimeZone;
 import org.json.JSONException;
-import org.json.JSONWriter;
+import org.json.JSONObject;
 
 /**
  * ReminderWriter
@@ -69,28 +68,19 @@ import org.json.JSONWriter;
 
 public class ReminderWriter extends DataWriter {
 	
-	private TimeZone timeZone = null;
-	
-	public ReminderWriter(PrintWriter w) {
-		jsonwriter = new JSONWriter(w);
-	}
-	
-	public ReminderWriter(JSONWriter jsonwriter, TimeZone timeZone) {
-		this.jsonwriter = jsonwriter;
+	public ReminderWriter(TimeZone timeZone) {
 		this.timeZone = timeZone;
 	}
 	
-	public void writeObject(ReminderObject reminderObj) throws JSONException {
-		jsonwriter.object();
-		writeParameter(DataFields.ID, reminderObj.getObjectId());
-		writeParameter(ReminderFields.LAST_MODIFIED, reminderObj.getLastModified());
-		writeParameter(ReminderFields.TARGET_ID, reminderObj.getTargetId());
-		writeParameter(ReminderFields.FOLDER, reminderObj.getFolder());
-		writeParameter(ReminderFields.ALARM, reminderObj.getDate(), timeZone);
-		writeParameter(ReminderFields.MODULE, reminderObj.getModule());
-		writeParameter(ReminderFields.USER_ID, reminderObj.getUser());
-		writeParameter(CalendarFields.RECURRENCE_POSITION, 0);
-		writeParameter(ReminderFields.SERVER_TIME, new Date(), timeZone);
-		jsonwriter.endObject();
+	public void writeObject(final ReminderObject reminderObj, final JSONObject jsonObj) throws JSONException {
+		writeParameter(DataFields.ID, reminderObj.getObjectId(), jsonObj);
+		writeParameter(ReminderFields.LAST_MODIFIED, reminderObj.getLastModified(), jsonObj);
+		writeParameter(ReminderFields.TARGET_ID, reminderObj.getTargetId(), jsonObj);
+		writeParameter(ReminderFields.FOLDER, reminderObj.getFolder(), jsonObj);
+		writeParameter(ReminderFields.ALARM, reminderObj.getDate(), timeZone, jsonObj);
+		writeParameter(ReminderFields.MODULE, reminderObj.getModule(), jsonObj);
+		writeParameter(ReminderFields.USER_ID, reminderObj.getUser(), jsonObj);
+		writeParameter(CalendarFields.RECURRENCE_POSITION, 0, jsonObj);
+		writeParameter(ReminderFields.SERVER_TIME, new Date(), timeZone, jsonObj);
 	}
 }

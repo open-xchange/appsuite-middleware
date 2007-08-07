@@ -57,7 +57,9 @@ import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import java.util.Date;
+import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * CalendarWriter
@@ -67,39 +69,41 @@ import org.json.JSONException;
 
 public class CalendarWriter extends CommonWriter {
 	
-	public void writeParticipants(CalendarObject calendarObject) throws JSONException {
-		jsonwriter.array();
+	protected JSONArray getParticipantsAsJSONArray(final CalendarObject calendarObj) throws JSONException {
+		final JSONArray jsonArray = new JSONArray();
 		
-		Participant[] participants = calendarObject.getParticipants();
+		final Participant[] participants = calendarObj.getParticipants();
 		if (participants != null) {
 			for (int a = 0; a < participants.length; a++) {
-				Participant p = participants[a];
-				writeParticipant(p.getIdentifier(), p.getDisplayName(), p.getEmailAddress(), p.getType());
+				final Participant p = participants[a];
+				final JSONObject jsonObj = getParticipantAsJSONObject(p.getIdentifier(), p.getDisplayName(), p.getEmailAddress(), p.getType());
+				jsonArray.put(jsonObj);
 			}
 		}
 		
-		jsonwriter.endArray();
+		return jsonArray;
 	}
 	
-	public void writeUsers(CalendarObject calendarObject) throws JSONException {
-		jsonwriter.array();
+	public JSONArray getUsersAsJSONArray(final CalendarObject calendarObject) throws JSONException {
+		final JSONArray jsonArray = new JSONArray();
 		
-		UserParticipant[] users = calendarObject.getUsers();
+		final UserParticipant[] users = calendarObject.getUsers();
 		if (users != null) {
 			for (int a = 0; a < users.length; a++) {
-				UserParticipant userParticipant = users[a];
-				writeParticipantUser(userParticipant);
+				final UserParticipant userParticipant = users[a];
+				final JSONObject jsonObj = getUserParticipantAsJSONObject(userParticipant);
+				jsonArray.put(jsonObj);
 			}
 		}
 		
-		jsonwriter.endArray();
+		return jsonArray;
 	}
 	
-	public void writeRecurrenceParameter(CalendarObject calendarObject) throws JSONException {
-		int recurrenceType = calendarObject.getRecurrenceType();
+	public void writeRecurrenceParameter(final CalendarObject calendarObject, final JSONObject jsonObj) throws JSONException {
+		final int recurrenceType = calendarObject.getRecurrenceType();
 		
 		if (calendarObject.containsRecurrenceType()) {
-			writeParameter(CalendarFields.RECURRENCE_TYPE, recurrenceType);
+			writeParameter(CalendarFields.RECURRENCE_TYPE, recurrenceType, jsonObj);
 		}
 		
 		switch (recurrenceType) {
@@ -108,11 +112,11 @@ public class CalendarWriter extends CommonWriter {
 			case CalendarObject.DAILY:
 				break;
 			case CalendarObject.WEEKLY:
-				writeParameter(CalendarFields.DAYS, calendarObject.getDays());
+				writeParameter(CalendarFields.DAYS, calendarObject.getDays(), jsonObj);
 				break;
 			case CalendarObject.MONTHLY:
 				if (calendarObject.containsDays()) {
-					writeParameter(CalendarFields.DAYS, calendarObject.getDays());
+					writeParameter(CalendarFields.DAYS, calendarObject.getDays(), jsonObj);
 				}
 				
 				int dayInMonth = calendarObject.getDayInMonth();
@@ -120,66 +124,67 @@ public class CalendarWriter extends CommonWriter {
 					dayInMonth = -1;
 				}
 				
-				writeParameter(CalendarFields.DAY_IN_MONTH, dayInMonth);
+				writeParameter(CalendarFields.DAY_IN_MONTH, dayInMonth, jsonObj);
 				break;
 			case CalendarObject.YEARLY:
 				if (calendarObject.containsDays()) {
-					writeParameter(CalendarFields.DAYS, calendarObject.getDays());
+					writeParameter(CalendarFields.DAYS, calendarObject.getDays(), jsonObj);
 				}
 				
-				writeParameter(CalendarFields.DAY_IN_MONTH, calendarObject.getDayInMonth());
-				writeParameter(CalendarFields.MONTH, calendarObject.getMonth());
+				writeParameter(CalendarFields.DAY_IN_MONTH, calendarObject.getDayInMonth(), jsonObj);
+				writeParameter(CalendarFields.MONTH, calendarObject.getMonth(), jsonObj);
 				break;
 			default:
 				throw new JSONException("invalid recurrence type: " + recurrenceType);
 		}
 		
 		if (calendarObject.containsInterval()) {
-			writeParameter(CalendarFields.INTERVAL, calendarObject.getInterval());
+			writeParameter(CalendarFields.INTERVAL, calendarObject.getInterval(), jsonObj);
 		}
 		
 		if (calendarObject.containsUntil()) {
-			writeParameter(CalendarFields.UNTIL, calendarObject.getUntil());
+			writeParameter(CalendarFields.UNTIL, calendarObject.getUntil(), jsonObj);
 		}
 		
 		if (calendarObject.containsOccurrence()) {
-			writeParameter(CalendarFields.OCCURRENCES, calendarObject.getOccurrence());
+			writeParameter(CalendarFields.OCCURRENCES, calendarObject.getOccurrence(), jsonObj);
 		}
 	}
 	
-	public void writeParticipant(int id, String displayname, String email, int type) throws JSONException {
-		jsonwriter.object();
-		writeParameter(ParticipantsFields.ID, id);
-		writeParameter(ParticipantsFields.DISPLAY_NAME, displayname);
-		writeParameter(ParticipantsFields.MAIL, email);
-		writeParameter("type", type);
-		jsonwriter.endObject();
+	public JSONObject getParticipantAsJSONObject(final int id, final String displayname, final String email, final int type) throws JSONException {
+		final JSONObject jsonObj = new JSONObject();
+		writeParameter(ParticipantsFields.ID, id, jsonObj);
+		writeParameter(ParticipantsFields.DISPLAY_NAME, displayname, jsonObj);
+		writeParameter(ParticipantsFields.MAIL, email, jsonObj);
+		writeParameter("type", type, jsonObj);
+		return jsonObj;
 	}
 	
-	public void writeUser(int userId, int status) throws JSONException {
-		jsonwriter.object();
-		writeParameter("id", userId);
-		writeParameter("status", status);
-		jsonwriter.endObject();
+	public JSONObject getUserAsJSONObject(final int userId, final int status) throws JSONException {
+		final JSONObject jsonObj = new JSONObject();
+		writeParameter("id", userId, jsonObj);
+		writeParameter("status", status, jsonObj);
+		return jsonObj;
 	}
 	
-	public void writeException(Date[] dateExceptions) throws JSONException {
+	public JSONArray getExceptionAsJSONArray(final Date[] dateExceptions) throws JSONException {
 		if (dateExceptions != null) {
-			jsonwriter.array();
+			final JSONArray jsonArray = new JSONArray();
 			for (int a = 0; a < dateExceptions.length; a++) {
-				writeValue(dateExceptions[a]);
+				writeValue(dateExceptions[a], jsonArray);
 			}
-			jsonwriter.endArray();
+			return jsonArray;
 		}
+		return null;
 	}
 	
-	private void writeParticipantUser(UserParticipant userParticipant) throws JSONException {
-		jsonwriter.object();
-		writeParameter("id", userParticipant.getIdentifier());
-		writeParameter(CalendarFields.CONFIRMATION, userParticipant.getConfirm());
+	public JSONObject getUserParticipantAsJSONObject(final UserParticipant userParticipant) throws JSONException {
+		final JSONObject jsonObj = new JSONObject();
+		writeParameter("id", userParticipant.getIdentifier(), jsonObj);
+		writeParameter(CalendarFields.CONFIRMATION, userParticipant.getConfirm(), jsonObj);
 		if (userParticipant.containsConfirmMessage()) {
-			writeParameter(CalendarFields.CONFIRM_MESSAGE, userParticipant.getConfirmMessage());
+			writeParameter(CalendarFields.CONFIRM_MESSAGE, userParticipant.getConfirmMessage(), jsonObj);
 		}
-		jsonwriter.endObject();
+		return jsonObj;
 	}
 }

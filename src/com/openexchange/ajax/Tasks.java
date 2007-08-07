@@ -103,16 +103,10 @@ public class Tasks extends DataServlet {
 	            return;
 			}
 
-			final TaskRequest taskRequest = new TaskRequest(sessionObj, sw);
-			final int retval = taskRequest.action(action, jsonObj);
+			final TaskRequest taskRequest = new TaskRequest(sessionObj);
+			final Object responseObj = taskRequest.action(action, jsonObj);
 			response.setTimestamp(taskRequest.getTimestamp());
-			if (retval != -1) {
-				response.setData(retval);
-			} else if (sw.isEmpty()) {
-				response.setData("");
-			} else {
-				response.setData(sw.getObject());	
-			}
+			response.setData(responseObj);
 		} catch (OXMandatoryFieldException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
@@ -164,7 +158,7 @@ public class Tasks extends DataServlet {
 			
 			final String data = getBody(httpServletRequest);
 			if (data.length() > 0) {
-				final TaskRequest taskRequest;
+				final TaskRequest taskRequest = new TaskRequest(sessionObj);
 				final JSONObject jsonObj;
 
 				try {
@@ -180,31 +174,16 @@ public class Tasks extends DataServlet {
 					JSONArray jsonDataArray = new JSONArray(data);
 					jsonObj.put(PARAMETER_DATA, jsonDataArray);
 				
-					taskRequest = new TaskRequest(sessionObj, sw);
-					final int retval = taskRequest.action(action, jsonObj);
+					final Object responseObj = taskRequest.action(action, jsonObj);
 					response.setTimestamp(taskRequest.getTimestamp());
-					if (retval != -1) {
-						response.setData(retval);
-					} else if (sw.isEmpty()) {
-						response.setData("");
-					} else {
-						response.setData(sw.getObject());
-					}
-
+					response.setData(responseObj);
 				} else if (data.charAt(0) == '{') {
 					JSONObject jsonDataObject = new JSONObject(data);
 					jsonObj.put(PARAMETER_DATA, jsonDataObject);
-				
-					taskRequest = new TaskRequest(sessionObj, sw);
-					final int retval = taskRequest.action(action, jsonObj);
+
+					final Object responseObj = taskRequest.action(action, jsonObj);
 					response.setTimestamp(taskRequest.getTimestamp());
-					if (retval != -1) {
-						response.setData(retval);
-					} else if (sw.isEmpty()) {
-						response.setData(null);
-					} else {
-						response.setData(sw.getObject());
-					}
+					response.setData(responseObj);
 				} else {
 					httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "invalid json object");
 				}

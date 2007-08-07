@@ -84,7 +84,6 @@ public class Reminder extends DataServlet {
 	protected void doGet(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
 		Response response = new Response();
 		try {
-			final OXJSONWriter sw = new OXJSONWriter();
 			final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
 			final SessionObject sessionObj = getSessionObject(httpServletRequest);
 			JSONObject jsonObj;
@@ -98,10 +97,10 @@ public class Reminder extends DataServlet {
 	            return;
 			}
 
-			final ReminderRequest reminderRequest = new ReminderRequest(sessionObj, sw);
-			reminderRequest.action(action, jsonObj);
+			final ReminderRequest reminderRequest = new ReminderRequest(sessionObj);
+			final Object responseObj = reminderRequest.action(action, jsonObj);
 			response.setTimestamp(reminderRequest.getTimestamp());
-			response.setData(sw.getObject());
+			response.setData(responseObj);
 		} catch (OXMandatoryFieldException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
@@ -133,7 +132,6 @@ public class Reminder extends DataServlet {
 	protected void doPut(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
 		final Response response = new Response();
 		try {
-			final OXJSONWriter sw = new OXJSONWriter();
 			final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
 			final SessionObject sessionObj = getSessionObject(httpServletRequest);
 			
@@ -149,21 +147,21 @@ public class Reminder extends DataServlet {
 	            return;
 			}
 
-			final ReminderRequest reminderRequest = new ReminderRequest(sessionObj, sw);
+			final ReminderRequest reminderRequest = new ReminderRequest(sessionObj);
 
 			if (data.charAt(0) == '[') {
 				final JSONArray jData = new JSONArray(data);
 
 				jsonObj.put(PARAMETER_DATA, jData);
 				
-				reminderRequest.action(action, jsonObj);
-				response.setData(sw.getObject());
+				final Object responseObj = reminderRequest.action(action, jsonObj);
+				response.setData(responseObj);
 			} else {
 				final JSONObject jData = new JSONObject(data);
 				jsonObj.put(PARAMETER_DATA, jData);
 				
-				reminderRequest.action(action, jsonObj);
-				response.setData(sw.getObject());
+				final Object responseObj = reminderRequest.action(action, jsonObj);
+				response.setData(responseObj);
 			}
 		} catch (OXMandatoryFieldException e) {
 			LOG.error(e.getMessage(), e);
