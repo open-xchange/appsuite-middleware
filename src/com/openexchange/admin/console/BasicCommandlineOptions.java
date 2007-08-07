@@ -270,10 +270,13 @@ public abstract class BasicCommandlineOptions {
      * 
      * @param columns
      * @param data
+     * @throws InvalidDataException 
      */
-    protected final void doCSVOutput(final ArrayList<String> columns, final ArrayList<ArrayList<String>> data){
-        if(columns!=null && data!=null){
-            
+    protected final void doCSVOutput(final ArrayList<String> columns, final ArrayList<ArrayList<String>> data) throws InvalidDataException{
+        if (columns != null && data != null && !data.isEmpty()) {
+            if (columns.size()!=data.get(0).size()) {
+                throw new InvalidDataException("Number of columnnames and number of columns in data object must be the same");
+            }
             // first prepare the columns line
             StringBuilder sb = new StringBuilder();
             for (final String column_entry : columns) {
