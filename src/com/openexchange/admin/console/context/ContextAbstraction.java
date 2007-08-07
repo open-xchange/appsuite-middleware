@@ -49,11 +49,16 @@
 package com.openexchange.admin.console.context;
 
 
+import java.util.ArrayList;
+import java.util.HashSet;
+
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.console.user.UserAbstraction;
 import com.openexchange.admin.rmi.dataobjects.Context;
+import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public abstract class ContextAbstraction extends UserAbstraction {   
 
@@ -97,6 +102,95 @@ public abstract class ContextAbstraction extends UserAbstraction {
     
     protected void setContextQuotaOption(final AdminParser parser,final boolean required ){
         this.contextQuotaOption = setShortLongOpt(parser, OPT_QUOTA_SHORT,OPT_QUOTA_LONG,OPT_NAME_CONTEXT_QUOTA_DESCRIPTION,true, convertBooleantoTriState(required));
+    }
+
+    protected void sysoutOutput(final Context[] ctxs) throws InvalidDataException, StorageException {
+            final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
+            for (final Context ctx : ctxs) {
+                data.add(makeCSVData(ctx));
+            }
+            
+    //        doOutput(new String[] { "3r", "30l", "20l", "14l", "9l" },
+            doOutput(new String[] { "r", "r", "l", "l", "r", "r", "l", "l" },
+                     new String[] { "cid", "fid", "fname", "enabled", "qmax", "qused", "name", "lmappings" }, data);
+        }
+
+    protected void precsvinfos(final Context[] ctxs) throws StorageException {
+        // needed for csv output, KEEP AN EYE ON ORDER!!!
+        final ArrayList<String> columns = new ArrayList<String>();
+        columns.add("id");
+        columns.add("filestore_id");
+        columns.add("enabled");
+        columns.add("max_quota");
+        columns.add("used_quota");
+        columns.add("name");
+        columns.add("lmappings");
+    
+        final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
+    
+        for (final Context ctx_tmp : ctxs) {
+            data.add(makeCSVData(ctx_tmp));
+        }
+        
+        doCSVOutput(columns, data);
+    }
+
+    public ArrayList<String> makeCSVData(final Context ctx) throws StorageException {
+        final ArrayList<String> srv_data = new ArrayList<String>();
+        srv_data.add(String.valueOf(ctx.getId()));
+    
+        final Integer filestoreId = ctx.getFilestoreId();
+        if (filestoreId != null) {
+            srv_data.add(String.valueOf(filestoreId));
+        } else {
+            srv_data.add(null);
+        }
+    
+        final String filestore_name = ctx.getFilestore_name();
+        if (filestore_name != null) {
+            srv_data.add(filestore_name);
+        } else {
+            srv_data.add(null);
+        }
+    
+        final Boolean enabled = ctx.isEnabled();
+        if (enabled != null) {
+            srv_data.add(String.valueOf(enabled));
+        } else {
+            srv_data.add(null);
+        }
+    
+        final Long maxQuota = ctx.getMaxQuota();
+        if (maxQuota != null) {
+            srv_data.add(String.valueOf(maxQuota));
+        } else {
+            srv_data.add(null);
+        }
+    
+        final Long usedQuota = ctx.getUsedQuota();
+        if (usedQuota != null) {
+            srv_data.add(String.valueOf(usedQuota));
+        } else {
+            srv_data.add(null);
+        }
+    
+        final String name = ctx.getName();
+        if (name != null) {
+            srv_data.add(name);
+        } else {
+            srv_data.add(null);
+        }
+    
+        //      loginl mappings
+    
+        final HashSet<String> loginMappings = ctx.getLoginMappings();
+        if (loginMappings != null && loginMappings.size() > 0) {
+            srv_data.add(getObjectsAsString(loginMappings.toArray()));
+        } else {
+            srv_data.add(null);
+        }
+    
+        return srv_data;
     }
 }
 
