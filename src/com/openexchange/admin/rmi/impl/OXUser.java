@@ -386,7 +386,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             
             checkCreateUserData(ctx, usr, this.prop);
 
-            if (tool.existsUser(ctx, usr.getName())) {
+            if (tool.existsUserName(ctx, usr.getName())) {
                 throw new InvalidDataException("User " + usr.getName() + " already exists in this context");
             }
 
@@ -707,7 +707,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 if (usr.getId()!=null && !tool.existsUser(ctx, usr.getId())) {
                     throw new NoSuchUserException("No such user "+usr);
                 }
-                if (usr.getName() != null && !tool.existsUser(ctx, usr.getName())) {
+                if (usr.getName() != null && !tool.existsUserName(ctx, usr.getName())) {
                     throw new NoSuchUserException("No such user " + usr);
                 }
                 final String username = usr.getName();

@@ -79,9 +79,9 @@ public abstract class OXToolSQLStorage extends OXToolStorageInterface {
     public abstract boolean existsDatabase(final int db_id) throws StorageException;
 
     /**
-     * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsDatabase(java.lang.String)
+     * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsDatabaseName(java.lang.String)
      */
-    public abstract boolean existsDatabase(final String db_name) throws StorageException;
+    public abstract boolean existsDatabaseName(final String db_name) throws StorageException;
 
     /**
      * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsGroup(int,
@@ -100,10 +100,10 @@ public abstract class OXToolSQLStorage extends OXToolStorageInterface {
     public abstract boolean existsGroup(final Context ctx, final int[] gid) throws StorageException;
 
     /**
-     * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsGroup(int,
+     * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsGroupName(int,
      *      java.lang.String)
      */
-    public abstract boolean existsGroup(final Context ctx, final String identifier) throws StorageException;
+    public abstract boolean existsGroupName(final Context ctx, final String identifier) throws StorageException;
 
     /**
      * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsGroupMember(int,
@@ -139,7 +139,7 @@ public abstract class OXToolSQLStorage extends OXToolStorageInterface {
      * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsResource(int,
      *      java.lang.String, int)
      */
-    public abstract boolean existsResource(final Context ctx, final String identifier) throws StorageException;
+    public abstract boolean existsResourceName(final Context ctx, final String identifier) throws StorageException;
 
     /**
      * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsResource(int,
@@ -153,9 +153,9 @@ public abstract class OXToolSQLStorage extends OXToolStorageInterface {
     public abstract boolean existsServer(final int server_id) throws StorageException;
 
     /**
-     * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsServer(java.lang.String)
+     * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsServerName(java.lang.String)
      */
-    public abstract boolean existsServer(final String server_name) throws StorageException;
+    public abstract boolean existsServerName(final String server_name) throws StorageException;
 
     /**
      * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsServerID(int,
@@ -174,10 +174,10 @@ public abstract class OXToolSQLStorage extends OXToolStorageInterface {
     public abstract boolean existsStore(final String url) throws StorageException;
 
     /**
-     * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsUser(int,
+     * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsUserName(int,
      *      java.lang.String)
      */
-    public abstract boolean existsUser(final Context ctx, final String username) throws StorageException;
+    public abstract boolean existsUserName(final Context ctx, final String username) throws StorageException;
 
     /**
      * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsUser(int,
