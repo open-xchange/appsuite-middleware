@@ -413,7 +413,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
                 validateGroupName(grp.getName());
             }
 
-            if (tool.existsGroup(ctx, grp.getName())) {
+            if (tool.existsGroupName(ctx, grp.getName())) {
                 throw new InvalidDataException("Group already exists!");
             }
 
@@ -748,7 +748,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
                             + group.getId().intValue());
                 }
                 if (group.getName() != null
-                        && !tool.existsGroup(ctx, group.getName())) {
+                        && !tool.existsGroupName(ctx, group.getName())) {
                     throw new NoSuchGroupException("No such group "
                             + group.getName());
                 }

@@ -177,9 +177,7 @@ public abstract class OXToolStorageInterface {
 
     public abstract boolean existsContextLoginMappings(final Context ctx, final Connection configdb_connection) throws StorageException;
 
-    public abstract boolean existsDatabase(final int db_id) throws StorageException;
-
-    public abstract boolean existsDatabase(final String db_name) throws StorageException;
+    public abstract boolean existsDatabase(final int db_id) throws StorageException;    
 
     public abstract boolean existsGroup(final Context ctx, final Group[] grps) throws StorageException;
 
@@ -187,9 +185,7 @@ public abstract class OXToolStorageInterface {
 
     public abstract boolean existsGroup(final Context ctx, final int gid) throws StorageException;
 
-    public abstract boolean existsGroup(final Context ctx, final int[] gid) throws StorageException;
-
-    public abstract boolean existsGroup(final Context ctx, final String identifier) throws StorageException;
+    public abstract boolean existsGroup(final Context ctx, final int[] gid) throws StorageException;    
 
     public abstract boolean existsGroupMember(final Context ctx, final int group_ID, final int member_ID) throws StorageException;
 
@@ -202,16 +198,12 @@ public abstract class OXToolStorageInterface {
     public abstract boolean existsReason(final String reason) throws StorageException;
 
     public abstract boolean existsResource(final Context ctx, final int resource_id) throws StorageException;
-
-    public abstract boolean existsResource(final Context ctx, final String identifier) throws StorageException;
-
+    
     public abstract boolean existsResourceAddress(final Context ctx, final String address) throws StorageException;
 
     public abstract boolean existsResourceAddress(Context ctx, String address,Integer resource_id) throws StorageException;
 
-    public abstract boolean existsServer(final int server_id) throws StorageException;
-    
-    public abstract boolean existsServer(final String server_name) throws StorageException;
+    public abstract boolean existsServer(final int server_id) throws StorageException;   
     
     public abstract boolean existsServerID(final int check_ID, final String table, final String field) throws StorageException;
 
@@ -221,13 +213,62 @@ public abstract class OXToolStorageInterface {
 
     public abstract boolean existsUser(final Context ctx, final int uid) throws StorageException;
 
-    public abstract boolean existsUser(final Context ctx, final int[] user_ids) throws StorageException;
-
-    public abstract boolean existsUser(final Context ctx, final String username) throws StorageException;
+    public abstract boolean existsUser(final Context ctx, final int[] user_ids) throws StorageException;    
 
     public abstract boolean existsUser(final Context ctx, final User[] users) throws StorageException;
 
-    public abstract boolean existsUser(final Context ctx, final User user) throws StorageException;
+    public abstract boolean existsUser(final Context ctx, final User user) throws StorageException;    
+    
+    /**
+     * Checks if given name is already used for a group in given context.
+     * @param ctx
+     * @param groupName
+     * @return
+     * @throws StorageException
+     */
+    public abstract boolean existsGroupName(final Context ctx, final String groupName) throws StorageException;
+    
+    /**
+     * Checks if given name is already used for an user in given context.
+     * @param ctx
+     * @param userName
+     * @return
+     * @throws StorageException
+     */
+    public abstract boolean existsUserName(final Context ctx, final String userName) throws StorageException;
+    
+    /**
+     * Checks if given name is already used!
+     * @param serverName
+     * @return
+     * @throws StorageException
+     */
+    public abstract boolean existsServerName(final String serverName) throws StorageException;
+    
+    /**
+     *  Checks if given name is already used!
+     * @param databaseName
+     * @return
+     * @throws StorageException
+     */
+    public abstract boolean existsDatabaseName(final String databaseName) throws StorageException;
+    
+    /**
+     *  Checks if given name is already used for resource in given context!
+     * @param ctx
+     * @param resourceName
+     * @return
+     * @throws StorageException
+     */
+    public abstract boolean existsResourceName(final Context ctx, final String resourceName) throws StorageException;
+    
+    /**
+     * Checks if given context name already exists!
+     * @param contextName
+     * @return
+     * @throws StorageException
+     */
+    public abstract boolean existsContextName(final String contextName) throws StorageException;
 
     public abstract int getAdminForContext(final Context ctx, final Connection con) throws StorageException;
     

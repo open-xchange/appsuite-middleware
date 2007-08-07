@@ -47,7 +47,7 @@
  *
  */
 /*
- * $Id: OXResource.java,v 1.46 2007/08/06 14:25:40 dennis Exp $
+ * $Id: OXResource.java,v 1.47 2007/08/07 08:41:28 cutmasta Exp $
  */
 package com.openexchange.admin.rmi.impl;
 
@@ -230,7 +230,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
        checkSchemaBeingLocked(ctx, tool);
 
        try {
-           if (tool.existsResource(ctx, res.getName())) {
+           if (tool.existsResourceName(ctx, res.getName())) {
                 throw new InvalidDataException("Resource with this name already exists");
             }
 
@@ -460,7 +460,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
                 if (resource.getId() != null && !tool.existsResource(ctx, resource.getId().intValue())) {
                     throw new NoSuchResourceException("No such resource " + resource.getId().intValue());
                 }
-                if (resource.getName() != null && !tool.existsResource(ctx, resource.getName())) {
+                if (resource.getName() != null && !tool.existsResourceName(ctx, resource.getName())) {
                     throw new NoSuchResourceException("No such resource " + resource.getName());
                 }
                 if (resource.getName() == null && resource.getId() == null) {

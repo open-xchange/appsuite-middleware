@@ -241,9 +241,9 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     }
 
     /**
-     * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsDatabase(java.lang.String)
+     * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsDatabaseName(java.lang.String)
      */
-    public boolean existsDatabase(final String db_name) throws StorageException {
+    public boolean existsDatabaseName(final String db_name) throws StorageException {
         return selectwithstring(-1, "SELECT db_pool_id FROM db_pool WHERE name = ?;", db_name);
     }
 
@@ -373,10 +373,10 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     }
 
     /**
-     * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsGroup(int,
+     * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsGroupName(int,
      *      java.lang.String)
      */
-    public boolean existsGroup(final Context ctx, final String identifier) throws StorageException {
+    public boolean existsGroupName(final Context ctx, final String identifier) throws StorageException {
         boolean retBool = false;
         final AdminCache cache = ClientAdminThread.cache;
         Connection con = null;
@@ -546,7 +546,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
      * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsResource(int,
      *      java.lang.String, int)
      */
-    public boolean existsResource(final Context ctx, final String identifier) throws StorageException {
+    public boolean existsResourceName(final Context ctx, final String identifier) throws StorageException {
         
         final AdminCache cache = ClientAdminThread.cache;
         Connection con = null;
@@ -682,9 +682,9 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     }
 
     /**
-     * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsServer(java.lang.String)
+     * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsServerName(java.lang.String)
      */
-    public boolean existsServer(final String server_name) throws StorageException {
+    public boolean existsServerName(final String server_name) throws StorageException {
         return selectwithstring(-1, "SELECT server_id FROM server WHERE name = ?;", server_name);
     }
     
@@ -822,10 +822,10 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     }
 
     /**
-     * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsUser(int,
+     * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsUserName(int,
      *      java.lang.String)
      */
-    public boolean existsUser(final Context ctx, final String username) throws StorageException {
+    public boolean existsUserName(final Context ctx, final String username) throws StorageException {
         final AdminCache cache = ClientAdminThread.cache;
         Connection con = null;
         PreparedStatement prep_check = null;
@@ -1939,5 +1939,10 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
         }
 
         return retBool;
+    }
+
+    @Override
+    public boolean existsContextName(String contextName) throws StorageException {
+        return selectwithstring(-1, "SELECT cid FROM context WHERE name = ?", contextName);
     }
 }
