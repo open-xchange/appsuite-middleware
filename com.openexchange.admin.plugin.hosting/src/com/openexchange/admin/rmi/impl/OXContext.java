@@ -64,7 +64,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 throw new NoSuchContextException();
             }
             
-            if(ctx.getName()!=null && tool.existsContext(ctx)){
+            if(ctx.getName()!=null && tool.existsContextName(ctx)){
                 throw new InvalidDataException("Context " + ctx.getName() + " already exists!");
             }
             
