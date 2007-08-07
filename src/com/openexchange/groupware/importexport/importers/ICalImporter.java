@@ -151,7 +151,7 @@ public class ICalImporter extends AbstractImporter implements Importer {
 					return false;
 				}
 			} else if (module == FolderObject.TASK) {
-				if (sessObj.getUserConfiguration().hasTask()) {
+				if (!sessObj.getUserConfiguration().hasTask()) {
 					return false;
 				}
 			} else {
