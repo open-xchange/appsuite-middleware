@@ -47,7 +47,7 @@
  *
  */
 /*
- * $Id: OXResource.java,v 1.47 2007/08/07 08:41:28 cutmasta Exp $
+ * $Id: OXResource.java,v 1.48 2007/08/07 10:33:04 cutmasta Exp $
  */
 package com.openexchange.admin.rmi.impl;
 
@@ -146,6 +146,10 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
                 throw new NoSuchResourceException("Resource with this id does not exists");
             }
             
+            if(res.getName()!=null && tool.existsResourceName(ctx, res)){
+                throw new InvalidDataException("Resource " + res.getName() + " already exists in this context");
+            }
+            
             if (res.getEmail() != null && tool.existsResourceAddress(ctx, res.getEmail(), res.getId())) {
                 throw new InvalidDataException("Resource with this email address already exists");
             }
@@ -210,7 +214,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
     
     public Resource create(final Context ctx, final Resource res, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {        
        try {
-           doNullCheck(res);
+           doNullCheck(res,res.getName());
        } catch (final InvalidDataException e3) {
            log.error("One of the given arguments for create is null", e3);
            throw e3;
@@ -230,8 +234,9 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
        checkSchemaBeingLocked(ctx, tool);
 
        try {
+           
            if (tool.existsResourceName(ctx, res.getName())) {
-                throw new InvalidDataException("Resource with this name already exists");
+               throw new InvalidDataException("Resource " + res.getName() + " already exists in this context");
             }
 
             if (res.getEmail() != null && tool.existsResourceAddress(ctx, res.getEmail())) {
