@@ -67,7 +67,7 @@ public class ListReasons extends ReasonAbstraction {
         doOutput(new String[] { "r", "l" }, new String[] { "Id", "Text" }, data);
     }
 
-    private void precsvinfos(final MaintenanceReason[] mrs) {
+    private void precsvinfos(final MaintenanceReason[] mrs) throws InvalidDataException {
         // needed for csv output, KEEP AN EYE ON ORDER!!!
         final ArrayList<String> columns = new ArrayList<String>();
         columns.add("id");

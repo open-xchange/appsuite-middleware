@@ -63,7 +63,7 @@ public class ListFilestores extends FilestoreAbstraction {
                  new String[] { "id", "path", "size", "reserved", "used", "maxctx", "curctx" }, data);
     }
 
-    private void precsvinfos(final Filestore[] filestores) throws URISyntaxException {
+    private void precsvinfos(final Filestore[] filestores) throws URISyntaxException, InvalidDataException {
         // needed for csv output, KEEP AN EYE ON ORDER!!!
         final ArrayList<String> columns = new ArrayList<String>();
         columns.add("id");

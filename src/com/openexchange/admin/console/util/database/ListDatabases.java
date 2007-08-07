@@ -62,7 +62,7 @@ public class ListDatabases extends DatabaseAbstraction {
                  new String[] { "id", "name", "hostname", "master", "mid", "weight", "maxctx", "curctx", "hlimit", "max", "inital" }, data);
     }
 
-    private void precsvinfos(Database[] databases) throws URISyntaxException {
+    private void precsvinfos(Database[] databases) throws URISyntaxException, InvalidDataException {
         // needed for csv output, KEEP AN EYE ON ORDER!!!
         final ArrayList<String> columns = new ArrayList<String>();
         columns.add("id");

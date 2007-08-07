@@ -69,7 +69,7 @@ public class ListServers extends ServerAbstraction {
         doOutput(new String[] { "r", "l" }, new String[] { "Id", "Name" }, data);
     }
 
-    private void precsvinfos(Server[] servers) {
+    private void precsvinfos(Server[] servers) throws InvalidDataException {
         // needed for csv output, KEEP AN EYE ON ORDER!!!
         final ArrayList<String> columns = new ArrayList<String>();
         columns.add("id");
