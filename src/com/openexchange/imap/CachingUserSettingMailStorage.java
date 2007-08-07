@@ -427,7 +427,6 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 		PreparedStatement stmt;
 		stmt = writeCon.prepareStatement(SQL_UPDATE);
 		stmt.setInt(1, usm.getBitsValue());
-		// stmt.setString(2, signature);
 		stmt.setString(2, usm.getSendAddr() == null ? "" : usm.getSendAddr());
 		stmt.setString(3, usm.getReplyToAddr() == null ? "" : usm.getReplyToAddr());
 		stmt.setInt(4, usm.getMsgFormat());
@@ -461,7 +460,6 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 		stmt.setInt(1, ctx.getContextId());
 		stmt.setInt(2, user);
 		stmt.setInt(3, usm.getBitsValue());
-		// stmt.setString(4, signature);
 		stmt.setString(4, usm.getSendAddr() == null ? "" : usm.getSendAddr());
 		stmt.setString(5, usm.getReplyToAddr() == null ? "" : usm.getReplyToAddr());
 		stmt.setInt(6, usm.getMsgFormat());
