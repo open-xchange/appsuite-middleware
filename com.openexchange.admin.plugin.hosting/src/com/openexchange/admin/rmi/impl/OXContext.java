@@ -320,19 +320,12 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         }        
         new BasicAuthenticator().doAuthentication(auth);
         
-        final String db_host_url = db.getUrl();
-        log.debug("" + db_host_url);
+        setIdOrGetIDFromNameAndIdObject(null, db);
+        log.debug(db);
         try {
-            if (db_host_url != null) {
-                final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
-                return oxcox.searchContextByDatabase(db);
-            } else {
-                throw new InvalidDataException("Invalid db url");
-            }
+            final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
+            return oxcox.searchContextByDatabase(db);
         } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
-            throw e;
-        } catch (final InvalidDataException e) {
             log.error(e.getMessage(), e);
             throw e;
         }
@@ -340,7 +333,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
     public Context[] listByFilestore(final Filestore filestore, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         try {
-            doNullCheck(filestore);
+            doNullCheck(filestore, filestore.getId());
         } catch (final InvalidDataException e) {
             final InvalidDataException invalidDataException = new InvalidDataException("Filestore is null");
             log.error(invalidDataException.getMessage(), invalidDataException);
@@ -348,19 +341,11 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         }        
         new BasicAuthenticator().doAuthentication(auth);
         
-        final String filestore_url = filestore.getUrl();
-        log.debug("" + filestore_url);
+        log.debug(filestore);
         try {
-            if (null != filestore_url) {
-                final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
-                return oxcox.searchContextByFilestore(filestore);
-            } else {
-                throw new InvalidDataException("Invalid store url");
-            }
+            final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
+            return oxcox.searchContextByFilestore(filestore);
         } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
-            throw e;
-        } catch (final InvalidDataException e) {
             log.error(e.getMessage(), e);
             throw e;
         }
