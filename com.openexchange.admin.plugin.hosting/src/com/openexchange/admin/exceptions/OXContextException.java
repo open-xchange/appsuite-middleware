@@ -43,6 +43,13 @@ public class OXContextException extends Exception {
     
 
     /**
+     * @param cause
+     */
+    public OXContextException(Throwable cause) {
+        super(cause);
+    }
+
+    /**
      * OX exceptions for context handling with various messages
      * 
      * @see #CONTEXT_EXISTS
