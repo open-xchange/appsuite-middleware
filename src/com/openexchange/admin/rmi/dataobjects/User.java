@@ -555,7 +555,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
      * 
      * @return String representation of PASSWORDMECH
      */
-    public String getPasswordMech2String() {
+    final public String getPasswordMech2String() {
         if (null != this.passwordMech) {
             switch (this.passwordMech) {
             case CRYPT:
@@ -576,447 +576,447 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
      * 
      * @return Returns the id of the user as a long.
      */
-    public Integer getId() {
+    final public Integer getId() {
         return id;
     }
 
-    public boolean isAliasesset() {
+    final public boolean isAliasesset() {
         return aliasesset;
     }
 
-    public boolean isAnniversaryset() {
+    final public boolean isAnniversaryset() {
         return anniversaryset;
     }
 
-    public boolean isAssistant_nameset() {
+    final public boolean isAssistant_nameset() {
         return assistant_nameset;
     }
 
-    public boolean isBirthdayset() {
+    final public boolean isBirthdayset() {
         return birthdayset;
     }
 
-    public boolean isBranchesset() {
+    final public boolean isBranchesset() {
         return branchesset;
     }
 
-    public boolean isBusiness_categoryset() {
+    final public boolean isBusiness_categoryset() {
         return business_categoryset;
     }
 
-    public boolean isCategoriesset() {
+    final public boolean isCategoriesset() {
         return categoriesset;
     }
 
-    public boolean isCellular_telephone1set() {
+    final public boolean isCellular_telephone1set() {
         return cellular_telephone1set;
     }
 
-    public boolean isCellular_telephone2set() {
+    final public boolean isCellular_telephone2set() {
         return cellular_telephone2set;
     }
 
-    public boolean isCity_businessset() {
+    final public boolean isCity_businessset() {
         return city_businessset;
     }
 
-    public boolean isCity_homeset() {
+    final public boolean isCity_homeset() {
         return city_homeset;
     }
 
-    public boolean isCity_otherset() {
+    final public boolean isCity_otherset() {
         return city_otherset;
     }
 
-    public boolean isCommercial_registerset() {
+    final public boolean isCommercial_registerset() {
         return commercial_registerset;
     }
 
-    public boolean isCompanyset() {
+    final public boolean isCompanyset() {
         return companyset;
     }
 
-    public boolean isCountry_businessset() {
+    final public boolean isCountry_businessset() {
         return country_businessset;
     }
 
-    public boolean isCountry_homeset() {
+    final public boolean isCountry_homeset() {
         return country_homeset;
     }
 
-    public boolean isCountry_otherset() {
+    final public boolean isCountry_otherset() {
         return country_otherset;
     }
 
-    public boolean isDefault_groupset() {
+    final public boolean isDefault_groupset() {
         return default_groupset;
     }
 
-    public boolean isDepartmentset() {
+    final public boolean isDepartmentset() {
         return departmentset;
     }
 
-    public boolean isDisplay_nameset() {
+    final public boolean isDisplay_nameset() {
         return display_nameset;
     }
 
-    public boolean isEmail1set() {
+    final public boolean isEmail1set() {
         return email1set;
     }
 
-    public boolean isEmail2set() {
+    final public boolean isEmail2set() {
         return email2set;
     }
 
-    public boolean isEmail3set() {
+    final public boolean isEmail3set() {
         return email3set;
     }
 
-    public boolean isEmployeeTypeset() {
+    final public boolean isEmployeeTypeset() {
         return employeeTypeset;
     }
 
-    public Boolean getEnabled() {
+    final public Boolean getEnabled() {
         return enabled;
     }
 
-    public boolean isEnabledset() {
+    final public boolean isEnabledset() {
         return enabledset;
     }
 
-    public boolean isFax_businessset() {
+    final public boolean isFax_businessset() {
         return fax_businessset;
     }
 
-    public boolean isFax_homeset() {
+    final public boolean isFax_homeset() {
         return fax_homeset;
     }
 
-    public boolean isFax_otherset() {
+    final public boolean isFax_otherset() {
         return fax_otherset;
     }
 
-    public boolean isGiven_nameset() {
+    final public boolean isGiven_nameset() {
         return given_nameset;
     }
 
-    public boolean isIdset() {
+    final public boolean isIdset() {
         return idset;
     }
 
-    public boolean isImapServerset() {
+    final public boolean isImapServerset() {
         return imapServerset;
     }
 
-    public boolean isImapLoginset() {
+    final public boolean isImapLoginset() {
         return imapLoginset;
     }
 
-    public boolean isInfoset() {
+    final public boolean isInfoset() {
         return infoset;
     }
 
-    public boolean isInstant_messenger1set() {
+    final public boolean isInstant_messenger1set() {
         return instant_messenger1set;
     }
 
-    public boolean isInstant_messenger2set() {
+    final public boolean isInstant_messenger2set() {
         return instant_messenger2set;
     }
 
-    public boolean isLanguageset() {
+    final public boolean isLanguageset() {
         return languageset;
     }
 
-    public boolean isMail_folder_drafts_nameset() {
+    final public boolean isMail_folder_drafts_nameset() {
         return mail_folder_drafts_nameset;
     }
 
-    public boolean isMail_folder_sent_nameset() {
+    final public boolean isMail_folder_sent_nameset() {
         return mail_folder_sent_nameset;
     }
 
-    public boolean isMail_folder_spam_nameset() {
+    final public boolean isMail_folder_spam_nameset() {
         return mail_folder_spam_nameset;
     }
 
-    public boolean isMail_folder_trash_nameset() {
+    final public boolean isMail_folder_trash_nameset() {
         return mail_folder_trash_nameset;
     }
 
-    public boolean isManager_nameset() {
+    final public boolean isManager_nameset() {
         return manager_nameset;
     }
 
-    public boolean isMarital_statusset() {
+    final public boolean isMarital_statusset() {
         return marital_statusset;
     }
 
-    public boolean isMiddle_nameset() {
+    final public boolean isMiddle_nameset() {
         return middle_nameset;
     }
 
-    public boolean isNicknameset() {
+    final public boolean isNicknameset() {
         return nicknameset;
     }
 
-    public boolean isNoteset() {
+    final public boolean isNoteset() {
         return noteset;
     }
 
-    public boolean isNumber_of_childrenset() {
+    final public boolean isNumber_of_childrenset() {
         return number_of_childrenset;
     }
 
-    public boolean isNumber_of_employeeset() {
+    final public boolean isNumber_of_employeeset() {
         return number_of_employeeset;
     }
 
-    public boolean isPassword_expiredset() {
+    final public boolean isPassword_expiredset() {
         return password_expiredset;
     }
 
-    public boolean isPasswordMechset() {
+    final public boolean isPasswordMechset() {
         return passwordMechset;
     }
 
-    public boolean isPasswordset() {
+    final public boolean isPasswordset() {
         return passwordset;
     }
 
-    public boolean isPositionset() {
+    final public boolean isPositionset() {
         return positionset;
     }
 
-    public boolean isPostal_code_businessset() {
+    final public boolean isPostal_code_businessset() {
         return postal_code_businessset;
     }
 
-    public boolean isPostal_code_homeset() {
+    final public boolean isPostal_code_homeset() {
         return postal_code_homeset;
     }
 
-    public boolean isPostal_code_otherset() {
+    final public boolean isPostal_code_otherset() {
         return postal_code_otherset;
     }
 
-    public boolean isPrimaryEmailset() {
+    final public boolean isPrimaryEmailset() {
         return primaryEmailset;
     }
 
-    public boolean isProfessionset() {
+    final public boolean isProfessionset() {
         return professionset;
     }
 
-    public boolean isRoom_numberset() {
+    final public boolean isRoom_numberset() {
         return room_numberset;
     }
 
-    public boolean isSales_volumeset() {
+    final public boolean isSales_volumeset() {
         return sales_volumeset;
     }
 
-    public boolean isSmtpServerset() {
+    final public boolean isSmtpServerset() {
         return smtpServerset;
     }
 
-    public boolean isSpouse_nameset() {
+    final public boolean isSpouse_nameset() {
         return spouse_nameset;
     }
 
-    public boolean isState_businessset() {
+    final public boolean isState_businessset() {
         return state_businessset;
     }
 
-    public boolean isState_homeset() {
+    final public boolean isState_homeset() {
         return state_homeset;
     }
 
-    public boolean isState_otherset() {
+    final public boolean isState_otherset() {
         return state_otherset;
     }
 
-    public boolean isStreet_businessset() {
+    final public boolean isStreet_businessset() {
         return street_businessset;
     }
 
-    public boolean isStreet_homeset() {
+    final public boolean isStreet_homeset() {
         return street_homeset;
     }
 
-    public boolean isStreet_otherset() {
+    final public boolean isStreet_otherset() {
         return street_otherset;
     }
 
-    public boolean isSuffixset() {
+    final public boolean isSuffixset() {
         return suffixset;
     }
 
-    public boolean isSur_nameset() {
+    final public boolean isSur_nameset() {
         return sur_nameset;
     }
 
-    public boolean isTax_idset() {
+    final public boolean isTax_idset() {
         return tax_idset;
     }
 
-    public boolean isTelephone_assistantset() {
+    final public boolean isTelephone_assistantset() {
         return telephone_assistantset;
     }
 
-    public boolean isTelephone_business1set() {
+    final public boolean isTelephone_business1set() {
         return telephone_business1set;
     }
 
-    public boolean isTelephone_business2set() {
+    final public boolean isTelephone_business2set() {
         return telephone_business2set;
     }
 
-    public boolean isTelephone_callbackset() {
+    final public boolean isTelephone_callbackset() {
         return telephone_callbackset;
     }
 
-    public boolean isTelephone_carset() {
+    final public boolean isTelephone_carset() {
         return telephone_carset;
     }
 
-    public boolean isTelephone_companyset() {
+    final public boolean isTelephone_companyset() {
         return telephone_companyset;
     }
 
-    public boolean isTelephone_home1set() {
+    final public boolean isTelephone_home1set() {
         return telephone_home1set;
     }
 
-    public boolean isTelephone_home2set() {
+    final public boolean isTelephone_home2set() {
         return telephone_home2set;
     }
 
-    public boolean isTelephone_ipset() {
+    final public boolean isTelephone_ipset() {
         return telephone_ipset;
     }
 
-    public boolean isTelephone_isdnset() {
+    final public boolean isTelephone_isdnset() {
         return telephone_isdnset;
     }
 
-    public boolean isTelephone_otherset() {
+    final public boolean isTelephone_otherset() {
         return telephone_otherset;
     }
 
-    public boolean isTelephone_pagerset() {
+    final public boolean isTelephone_pagerset() {
         return telephone_pagerset;
     }
 
-    public boolean isTelephone_primaryset() {
+    final public boolean isTelephone_primaryset() {
         return telephone_primaryset;
     }
 
-    public boolean isTelephone_radioset() {
+    final public boolean isTelephone_radioset() {
         return telephone_radioset;
     }
 
-    public boolean isTelephone_telexset() {
+    final public boolean isTelephone_telexset() {
         return telephone_telexset;
     }
 
-    public boolean isTelephone_ttytddset() {
+    final public boolean isTelephone_ttytddset() {
         return telephone_ttytddset;
     }
 
-    public boolean isTimezoneset() {
+    final public boolean isTimezoneset() {
         return timezoneset;
     }
 
-    public boolean isTitleset() {
+    final public boolean isTitleset() {
         return titleset;
     }
 
-    public boolean isUrlset() {
+    final public boolean isUrlset() {
         return urlset;
     }
 
-    public boolean isUserfield01set() {
+    final public boolean isUserfield01set() {
         return userfield01set;
     }
 
-    public boolean isUserfield02set() {
+    final public boolean isUserfield02set() {
         return userfield02set;
     }
 
-    public boolean isUserfield03set() {
+    final public boolean isUserfield03set() {
         return userfield03set;
     }
 
-    public boolean isUserfield04set() {
+    final public boolean isUserfield04set() {
         return userfield04set;
     }
 
-    public boolean isUserfield05set() {
+    final public boolean isUserfield05set() {
         return userfield05set;
     }
 
-    public boolean isUserfield06set() {
+    final public boolean isUserfield06set() {
         return userfield06set;
     }
 
-    public boolean isUserfield07set() {
+    final public boolean isUserfield07set() {
         return userfield07set;
     }
 
-    public boolean isUserfield08set() {
+    final public boolean isUserfield08set() {
         return userfield08set;
     }
 
-    public boolean isUserfield09set() {
+    final public boolean isUserfield09set() {
         return userfield09set;
     }
 
-    public boolean isUserfield10set() {
+    final public boolean isUserfield10set() {
         return userfield10set;
     }
 
-    public boolean isUserfield11set() {
+    final public boolean isUserfield11set() {
         return userfield11set;
     }
 
-    public boolean isUserfield12set() {
+    final public boolean isUserfield12set() {
         return userfield12set;
     }
 
-    public boolean isUserfield13set() {
+    final public boolean isUserfield13set() {
         return userfield13set;
     }
 
-    public boolean isUserfield14set() {
+    final public boolean isUserfield14set() {
         return userfield14set;
     }
 
-    public boolean isUserfield15set() {
+    final public boolean isUserfield15set() {
         return userfield15set;
     }
 
-    public boolean isUserfield16set() {
+    final public boolean isUserfield16set() {
         return userfield16set;
     }
 
-    public boolean isUserfield17set() {
+    final public boolean isUserfield17set() {
         return userfield17set;
     }
 
-    public boolean isUserfield18set() {
+    final public boolean isUserfield18set() {
         return userfield18set;
     }
 
-    public boolean isUserfield19set() {
+    final public boolean isUserfield19set() {
         return userfield19set;
     }
 
-    public boolean isUserfield20set() {
+    final public boolean isUserfield20set() {
         return userfield20set;
     }
 
-    public boolean isNameset() {
+    final public boolean isNameset() {
         return nameset;
     }
 
@@ -1025,28 +1025,28 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
      * 
      * @param userid
      */
-    public void setId(final Integer userid) {
+    final public void setId(final Integer userid) {
         if (null == userid) {
             this.idset = true;
         }
         this.id = userid;
     }
 
-    public String getName() {
+    final public String getName() {
         return name;
     }
 
     /**
      * Set symbolic user identifier
      */
-    public void setName(final String username) {
+    final public void setName(final String username) {
         if (null == username) {
             this.nameset = true;
         }
         this.name = username;
     }
 
-    public String getPassword() {
+    final public String getPassword() {
         return password;
     }
 
@@ -1056,195 +1056,195 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
      * @param passwd
      * @see setPasswordMech
      */
-    public void setPassword(final String passwd) {
+    final public void setPassword(final String passwd) {
         if (null == password) {
             this.passwordset = true;
         }
         this.password = passwd;
     }
 
-    public String getPrimaryEmail() {
+    final public String getPrimaryEmail() {
         return primaryEmail;
     }
 
     /**
      * Primary mail address is the default email address of the user
      */
-    public void setPrimaryEmail(final String primaryEmail) {
+    final public void setPrimaryEmail(final String primaryEmail) {
         if (null == primaryEmail) {
             this.primaryEmailset = true;
         }
         this.primaryEmail = primaryEmail;
     }
 
-    public String getSur_name() {
+    final public String getSur_name() {
         return sur_name;
     }
 
     /**
      * Last name of user
      */
-    public void setSur_name(final String sur_name) {
+    final public void setSur_name(final String sur_name) {
         if (null == sur_name) {
             this.sur_nameset = true;
         }
         this.sur_name = sur_name;
     }
 
-    public String getGiven_name() {
+    final public String getGiven_name() {
         return given_name;
     }
 
     /**
      * First name of user
      */
-    public void setGiven_name(final String given_name) {
+    final public void setGiven_name(final String given_name) {
         if (null == given_name) {
             this.given_nameset = true;
         }
         this.given_name = given_name;
     }
 
-    public void setEnabled(final Boolean enabled) {
+    final public void setEnabled(final Boolean enabled) {
         if (null == enabled) {
             this.enabledset = true;
         }
         this.enabled = enabled;
     }
 
-    public Date getBirthday() {
+    final public Date getBirthday() {
         return birthday;
     }
 
-    public void setBirthday(final Date birthday) {
+    final public void setBirthday(final Date birthday) {
         if (null == birthday) {
             this.birthdayset = true;
         }
         this.birthday = birthday;
     }
 
-    public Date getAnniversary() {
+    final public Date getAnniversary() {
         return anniversary;
     }
 
-    public void setAnniversary(final Date anniversary) {
+    final public void setAnniversary(final Date anniversary) {
         if (null == anniversary) {
             this.anniversaryset = true;
         }
         this.anniversary = anniversary;
     }
 
-    public String getBranches() {
+    final public String getBranches() {
         return branches;
     }
 
-    public void setBranches(final String branches) {
+    final public void setBranches(final String branches) {
         if (null == branches) {
             this.branchesset = true;
         }
         this.branches = branches;
     }
 
-    public String getBusiness_category() {
+    final public String getBusiness_category() {
         return business_category;
     }
 
-    public void setBusiness_category(final String business_category) {
+    final public void setBusiness_category(final String business_category) {
         if (null == business_category) {
             this.business_categoryset = true;
         }
         this.business_category = business_category;
     }
 
-    public String getPostal_code_business() {
+    final public String getPostal_code_business() {
         return postal_code_business;
     }
 
-    public void setPostal_code_business(final String postal_code_business) {
+    final public void setPostal_code_business(final String postal_code_business) {
         if (null == postal_code_business) {
             this.postal_code_businessset = true;
         }
         this.postal_code_business = postal_code_business;
     }
 
-    public String getState_business() {
+    final public String getState_business() {
         return state_business;
     }
 
-    public void setState_business(final String state_business) {
+    final public void setState_business(final String state_business) {
         if (null == state_business) {
             this.state_businessset = true;
         }
         this.state_business = state_business;
     }
 
-    public String getStreet_business() {
+    final public String getStreet_business() {
         return street_business;
     }
 
-    public void setStreet_business(final String street_business) {
+    final public void setStreet_business(final String street_business) {
         if (null == street_business) {
             this.street_businessset = true;
         }
         this.street_business = street_business;
     }
 
-    public String getTelephone_callback() {
+    final public String getTelephone_callback() {
         return telephone_callback;
     }
 
-    public void setTelephone_callback(final String telephone_callback) {
+    final public void setTelephone_callback(final String telephone_callback) {
         if (null == telephone_callback) {
             this.telephone_callbackset = true;
         }
         this.telephone_callback = telephone_callback;
     }
 
-    public String getCity_home() {
+    final public String getCity_home() {
         return city_home;
     }
 
-    public void setCity_home(final String city_home) {
+    final public void setCity_home(final String city_home) {
         if (null == city_home) {
             this.city_homeset = true;
         }
         this.city_home = city_home;
     }
 
-    public String getCommercial_register() {
+    final public String getCommercial_register() {
         return commercial_register;
     }
 
-    public void setCommercial_register(final String commercial_register) {
+    final public void setCommercial_register(final String commercial_register) {
         if (null == commercial_register) {
             this.commercial_registerset = true;
         }
         this.commercial_register = commercial_register;
     }
 
-    public String getCountry_home() {
+    final public String getCountry_home() {
         return country_home;
     }
 
-    public void setCountry_home(final String country_home) {
+    final public void setCountry_home(final String country_home) {
         if (null == country_home) {
             this.country_homeset = true;
         }
         this.country_home = country_home;
     }
 
-    public String getCompany() {
+    final public String getCompany() {
         return company;
     }
 
-    public void setCompany(final String company) {
+    final public void setCompany(final String company) {
         if (null == company) {
             this.companyset = true;
         }
         this.company = company;
     }
 
-    public Group getDefault_group() {
+    final public Group getDefault_group() {
         return default_group;
     }
 
@@ -1252,111 +1252,111 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
      * The default group when creating an user. If not supplied, a default group
      * is used.
      */
-    public void setDefault_group(final Group default_group) {
+    final public void setDefault_group(final Group default_group) {
         if (null == default_group) {
             this.default_groupset = true;
         }
         this.default_group = default_group;
     }
 
-    public String getDepartment() {
+    final public String getDepartment() {
         return department;
     }
 
-    public void setDepartment(final String department) {
+    final public void setDepartment(final String department) {
         if (null == department) {
             this.departmentset = true;
         }
         this.department = department;
     }
 
-    public String getDisplay_name() {
+    final public String getDisplay_name() {
         return display_name;
     }
 
-    public void setDisplay_name(final String display_name) {
+    final public void setDisplay_name(final String display_name) {
         if (null == display_name) {
             this.display_nameset = true;
         }
         this.display_name = display_name;
     }
 
-    public String getEmail2() {
+    final public String getEmail2() {
         return email2;
     }
 
     /**
      * Email (home)
      */
-    public void setEmail2(final String email2) {
+    final public void setEmail2(final String email2) {
         if (null == email2) {
             this.email2set = true;
         }
         this.email2 = email2;
     }
 
-    public String getEmail3() {
+    final public String getEmail3() {
         return email3;
     }
 
     /**
      * Email (other)
      */
-    public void setEmail3(final String email3) {
+    final public void setEmail3(final String email3) {
         if (null == email3) {
             this.email3set = true;
         }
         this.email3 = email3;
     }
 
-    public String getEmployeeType() {
+    final public String getEmployeeType() {
         return employeeType;
     }
 
     /**
      * Job title
      */
-    public void setEmployeeType(final String employeeType) {
+    final public void setEmployeeType(final String employeeType) {
         if (null == employeeType) {
             this.employeeTypeset = true;
         }
         this.employeeType = employeeType;
     }
 
-    public String getFax_business() {
+    final public String getFax_business() {
         return fax_business;
     }
 
-    public void setFax_business(final String fax_business) {
+    final public void setFax_business(final String fax_business) {
         if (null == fax_business) {
             this.fax_businessset = true;
         }
         this.fax_business = fax_business;
     }
 
-    public String getFax_home() {
+    final public String getFax_home() {
         return fax_home;
     }
 
-    public void setFax_home(final String fax_home) {
+    final public void setFax_home(final String fax_home) {
         if (null == fax_home) {
             this.fax_homeset = true;
         }
         this.fax_home = fax_home;
     }
 
-    public String getFax_other() {
+    final public String getFax_other() {
         return fax_other;
     }
 
-    public void setFax_other(final String fax_other) {
+    final public void setFax_other(final String fax_other) {
         if (null == fax_other) {
             this.fax_otherset = true;
         }
         this.fax_other = fax_other;
     }
 
-    public int getImapPort() {
+    final public int getImapPort() {
         // we should be open to the future and accept values like
         // hostname:port
         if (this.imapServer != null && this.imapServer.contains(":")) {
@@ -1368,7 +1368,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         return 143;
     }
 
-    public String getImapServer() {
+    final public String getImapServer() {
         // we should be open to the future and accept values like
         // hostname:port
         if (this.imapServer == null) {
@@ -1381,36 +1381,36 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         }
     }
 
-    public void setImapServer(final String imapServer) {
+    final public void setImapServer(final String imapServer) {
         if (null == imapServer) {
             this.imapServerset = true;
         }
         this.imapServer = imapServer;
     }
 
-    public void setImapLogin(final String imapLogin) {
+    final public void setImapLogin(final String imapLogin) {
         if (null == imapLogin) {
             this.imapLoginset = true;
         }
         this.imapLogin = imapLogin;
     }
 
-    public String getImapLogin() {
+    final public String getImapLogin() {
         return this.imapLogin;
     }
 
-    public String getSmtpServer() {
+    final public String getSmtpServer() {
         return smtpServer;
     }
 
-    public void setSmtpServer(final String smtpServer) {
+    final public void setSmtpServer(final String smtpServer) {
         if (null == smtpServer) {
             this.smtpServerset = true;
         }
         this.smtpServer = smtpServer;
     }
 
-    public int getSmtpPort() {
+    final public int getSmtpPort() {
         // we should be open to the future and accept values like
         // hostname:port
         if (this.smtpServer != null && this.smtpServer.contains(":")) {
@@ -1422,806 +1422,806 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         return 25;
     }
 
-    public String getInstant_messenger1() {
+    final public String getInstant_messenger1() {
         return instant_messenger1;
     }
 
     /**
      * Instant messenger (business)
      */
-    public void setInstant_messenger1(final String instant_messenger1) {
+    final public void setInstant_messenger1(final String instant_messenger1) {
         if (null == instant_messenger1) {
             this.instant_messenger1set = true;
         }
         this.instant_messenger1 = instant_messenger1;
     }
 
-    public String getInstant_messenger2() {
+    final public String getInstant_messenger2() {
         return instant_messenger2;
     }
 
-    public void setInstant_messenger2(final String instant_messenger2) {
+    final public void setInstant_messenger2(final String instant_messenger2) {
         if (null == instant_messenger2) {
             this.instant_messenger2set = true;
         }
         this.instant_messenger2 = instant_messenger2;
     }
 
-    public String getTelephone_ip() {
+    final public String getTelephone_ip() {
         return telephone_ip;
     }
 
-    public void setTelephone_ip(final String telephone_ip) {
+    final public void setTelephone_ip(final String telephone_ip) {
         if (null == telephone_ip) {
             this.telephone_ipset = true;
         }
         this.telephone_ip = telephone_ip;
     }
 
-    public String getTelephone_isdn() {
+    final public String getTelephone_isdn() {
         return telephone_isdn;
     }
 
-    public void setTelephone_isdn(final String telephone_isdn) {
+    final public void setTelephone_isdn(final String telephone_isdn) {
         if (null == telephone_isdn) {
             this.telephone_isdnset = true;
         }
         this.telephone_isdn = telephone_isdn;
     }
 
-    public Locale getLanguage() {
+    final public Locale getLanguage() {
         return language;
     }
 
-    public void setLanguage(final Locale language) {
+    final public void setLanguage(final Locale language) {
         if (null == language) {
             this.languageset = true;
         }
         this.language = language;
     }
 
-    public String getMail_folder_drafts_name() {
+    final public String getMail_folder_drafts_name() {
         return mail_folder_drafts_name;
     }
 
-    public void setMail_folder_drafts_name(final String mail_folder_drafts_name) {
+    final public void setMail_folder_drafts_name(final String mail_folder_drafts_name) {
         if (null == mail_folder_drafts_name) {
             this.mail_folder_drafts_nameset = true;
         }
         this.mail_folder_drafts_name = mail_folder_drafts_name;
     }
 
-    public String getMail_folder_sent_name() {
+    final public String getMail_folder_sent_name() {
         return mail_folder_sent_name;
     }
 
-    public void setMail_folder_sent_name(final String mail_folder_sent_name) {
+    final public void setMail_folder_sent_name(final String mail_folder_sent_name) {
         if (null == mail_folder_sent_name) {
             this.mail_folder_sent_nameset = true;
         }
         this.mail_folder_sent_name = mail_folder_sent_name;
     }
 
-    public String getMail_folder_spam_name() {
+    final public String getMail_folder_spam_name() {
         return mail_folder_spam_name;
     }
 
-    public void setMail_folder_spam_name(final String mail_folder_spam_name) {
+    final public void setMail_folder_spam_name(final String mail_folder_spam_name) {
         if (null == mail_folder_spam_name) {
             this.mail_folder_spam_nameset = true;
         }
         this.mail_folder_spam_name = mail_folder_spam_name;
     }
 
-    public String getMail_folder_trash_name() {
+    final public String getMail_folder_trash_name() {
         return mail_folder_trash_name;
     }
 
-    public void setMail_folder_trash_name(final String mail_folder_trash_name) {
+    final public void setMail_folder_trash_name(final String mail_folder_trash_name) {
         if (null == mail_folder_trash_name) {
             this.mail_folder_trash_nameset = true;
         }
         this.mail_folder_trash_name = mail_folder_trash_name;
     }
 
-    public String getManager_name() {
+    final public String getManager_name() {
         return manager_name;
     }
 
-    public void setManager_name(final String manager_name) {
+    final public void setManager_name(final String manager_name) {
         if (null == manager_name) {
             this.manager_nameset = true;
         }
         this.manager_name = manager_name;
     }
 
-    public String getMarital_status() {
+    final public String getMarital_status() {
         return marital_status;
     }
 
-    public void setMarital_status(final String marital_status) {
+    final public void setMarital_status(final String marital_status) {
         if (null == marital_status) {
             this.marital_statusset = true;
         }
         this.marital_status = marital_status;
     }
 
-    public String getCellular_telephone1() {
+    final public String getCellular_telephone1() {
         return cellular_telephone1;
     }
 
     /**
      * Mobile
      */
-    public void setCellular_telephone1(final String cellular_telephone1) {
+    final public void setCellular_telephone1(final String cellular_telephone1) {
         if (null == cellular_telephone1) {
             this.cellular_telephone1set = true;
         }
         this.cellular_telephone1 = cellular_telephone1;
     }
 
-    public String getCellular_telephone2() {
+    final public String getCellular_telephone2() {
         return cellular_telephone2;
     }
 
     /**
      * Mobile 2
      */
-    public void setCellular_telephone2(final String cellular_telephone2) {
+    final public void setCellular_telephone2(final String cellular_telephone2) {
         if (null == cellular_telephone2) {
             this.cellular_telephone2set = true;
         }
         this.cellular_telephone2 = cellular_telephone2;
     }
 
-    public String getInfo() {
+    final public String getInfo() {
         return info;
     }
 
-    public void setInfo(final String info) {
+    final public void setInfo(final String info) {
         if (null == info) {
             this.infoset = true;
         }
         this.info = info;
     }
 
-    public String getNickname() {
+    final public String getNickname() {
         return nickname;
     }
 
-    public void setNickname(final String nickname) {
+    final public void setNickname(final String nickname) {
         if (null == nickname) {
             this.nicknameset = true;
         }
         this.nickname = nickname;
     }
 
-    public String getNumber_of_children() {
+    final public String getNumber_of_children() {
         return number_of_children;
     }
 
-    public void setNumber_of_children(final String number_of_children) {
+    final public void setNumber_of_children(final String number_of_children) {
         if (null == number_of_children) {
             this.number_of_childrenset = true;
         }
         this.number_of_children = number_of_children;
     }
 
-    public String getNote() {
+    final public String getNote() {
         return note;
     }
 
-    public void setNote(final String note) {
+    final public void setNote(final String note) {
         if (null == note) {
             this.noteset = true;
         }
         this.note = note;
     }
 
-    public String getNumber_of_employee() {
+    final public String getNumber_of_employee() {
         return number_of_employee;
     }
 
     /**
      * Employee ID
      */
-    public void setNumber_of_employee(final String number_of_employee) {
+    final public void setNumber_of_employee(final String number_of_employee) {
         if (null == number_of_employee) {
             this.number_of_employeeset = true;
         }
         this.number_of_employee = number_of_employee;
     }
 
-    public String getTelephone_pager() {
+    final public String getTelephone_pager() {
         return telephone_pager;
     }
 
-    public void setTelephone_pager(final String telephone_pager) {
+    final public void setTelephone_pager(final String telephone_pager) {
         if (null == telephone_pager) {
             this.telephone_pagerset = true;
         }
         this.telephone_pager = telephone_pager;
     }
 
-    public Boolean getPassword_expired() {
+    final public Boolean getPassword_expired() {
         return password_expired;
     }
 
-    public void setPassword_expired(final Boolean password_expired) {
+    final public void setPassword_expired(final Boolean password_expired) {
         if (null == password_expired) {
             this.password_expiredset = true;
         }
         this.password_expired = password_expired;
     }
 
-    public String getTelephone_assistant() {
+    final public String getTelephone_assistant() {
         return telephone_assistant;
     }
 
-    public void setTelephone_assistant(final String telephone_assistant) {
+    final public void setTelephone_assistant(final String telephone_assistant) {
         if (null == telephone_assistant) {
             this.telephone_assistantset = true;
         }
         this.telephone_assistant = telephone_assistant;
     }
 
-    public String getTelephone_business1() {
+    final public String getTelephone_business1() {
         return telephone_business1;
     }
 
-    public void setTelephone_business1(final String telephone_business1) {
+    final public void setTelephone_business1(final String telephone_business1) {
         if (null == telephone_business1) {
             this.telephone_business1set = true;
         }
         this.telephone_business1 = telephone_business1;
     }
 
-    public String getTelephone_business2() {
+    final public String getTelephone_business2() {
         return telephone_business2;
     }
 
-    public void setTelephone_business2(final String telephone_business2) {
+    final public void setTelephone_business2(final String telephone_business2) {
         if (null == telephone_business2) {
             this.telephone_business2set = true;
         }
         this.telephone_business2 = telephone_business2;
     }
 
-    public String getTelephone_car() {
+    final public String getTelephone_car() {
         return telephone_car;
     }
 
-    public void setTelephone_car(final String telephone_car) {
+    final public void setTelephone_car(final String telephone_car) {
         if (null == telephone_car) {
             this.telephone_carset = true;
         }
         this.telephone_car = telephone_car;
     }
 
-    public String getTelephone_company() {
+    final public String getTelephone_company() {
         return telephone_company;
     }
 
-    public void setTelephone_company(final String telephone_company) {
+    final public void setTelephone_company(final String telephone_company) {
         if (null == telephone_company) {
             this.telephone_companyset = true;
         }
         this.telephone_company = telephone_company;
     }
 
-    public String getTelephone_home1() {
+    final public String getTelephone_home1() {
         return telephone_home1;
     }
 
-    public void setTelephone_home1(final String telephone_home1) {
+    final public void setTelephone_home1(final String telephone_home1) {
         if (null == telephone_home1) {
             this.telephone_home1set = true;
         }
         this.telephone_home1 = telephone_home1;
     }
 
-    public String getTelephone_home2() {
+    final public String getTelephone_home2() {
         return telephone_home2;
     }
 
-    public void setTelephone_home2(final String telephone_home2) {
+    final public void setTelephone_home2(final String telephone_home2) {
         if (null == telephone_home2) {
             this.telephone_home2set = true;
         }
         this.telephone_home2 = telephone_home2;
     }
 
-    public String getTelephone_other() {
+    final public String getTelephone_other() {
         return telephone_other;
     }
 
-    public void setTelephone_other(final String telephone_other) {
+    final public void setTelephone_other(final String telephone_other) {
         if (null == telephone_other) {
             this.telephone_otherset = true;
         }
         this.telephone_other = telephone_other;
     }
 
-    public String getPosition() {
+    final public String getPosition() {
         return position;
     }
 
-    public void setPosition(final String position) {
+    final public void setPosition(final String position) {
         if (null == position) {
             this.positionset = true;
         }
         this.position = position;
     }
 
-    public String getPostal_code_home() {
+    final public String getPostal_code_home() {
         return postal_code_home;
     }
 
-    public void setPostal_code_home(final String postal_code_home) {
+    final public void setPostal_code_home(final String postal_code_home) {
         if (null == postal_code_home) {
             this.postal_code_homeset = true;
         }
         this.postal_code_home = postal_code_home;
     }
 
-    public String getProfession() {
+    final public String getProfession() {
         return profession;
     }
 
-    public void setProfession(final String profession) {
+    final public void setProfession(final String profession) {
         if (null == profession) {
             this.professionset = true;
         }
         this.profession = profession;
     }
 
-    public String getTelephone_radio() {
+    final public String getTelephone_radio() {
         return telephone_radio;
     }
 
-    public void setTelephone_radio(final String telephone_radio) {
+    final public void setTelephone_radio(final String telephone_radio) {
         if (null == telephone_radio) {
             this.telephone_radioset = true;
         }
         this.telephone_radio = telephone_radio;
     }
 
-    public String getRoom_number() {
+    final public String getRoom_number() {
         return room_number;
     }
 
-    public void setRoom_number(final String room_number) {
+    final public void setRoom_number(final String room_number) {
         if (null == room_number) {
             this.room_numberset = true;
         }
         this.room_number = room_number;
     }
 
-    public String getSales_volume() {
+    final public String getSales_volume() {
         return sales_volume;
     }
 
-    public void setSales_volume(final String sales_volume) {
+    final public void setSales_volume(final String sales_volume) {
         if (null == sales_volume) {
             this.sales_volumeset = true;
         }
         this.sales_volume = sales_volume;
     }
 
-    public String getCity_other() {
+    final public String getCity_other() {
         return city_other;
     }
 
-    public void setCity_other(final String city_other) {
+    final public void setCity_other(final String city_other) {
         if (null == city_other) {
             this.city_otherset = true;
         }
         this.city_other = city_other;
     }
 
-    public String getCountry_other() {
+    final public String getCountry_other() {
         return country_other;
     }
 
-    public void setCountry_other(final String country_other) {
+    final public void setCountry_other(final String country_other) {
         if (null == country_other) {
             this.country_otherset = true;
         }
         this.country_other = country_other;
     }
 
-    public String getMiddle_name() {
+    final public String getMiddle_name() {
         return middle_name;
     }
 
     /**
      * Second name
      */
-    public void setMiddle_name(final String middle_name) {
+    final public void setMiddle_name(final String middle_name) {
         if (null == middle_name) {
             this.middle_nameset = true;
         }
         this.middle_name = middle_name;
     }
 
-    public String getPostal_code_other() {
+    final public String getPostal_code_other() {
         return postal_code_other;
     }
 
-    public void setPostal_code_other(final String postal_code_other) {
+    final public void setPostal_code_other(final String postal_code_other) {
         if (null == postal_code_other) {
             this.postal_code_otherset = true;
         }
         this.postal_code_other = postal_code_other;
     }
 
-    public String getState_other() {
+    final public String getState_other() {
         return state_other;
     }
 
-    public void setState_other(final String state_other) {
+    final public void setState_other(final String state_other) {
         if (null == state_other) {
             this.state_otherset = true;
         }
         this.state_other = state_other;
     }
 
-    public String getStreet_other() {
+    final public String getStreet_other() {
         return street_other;
     }
 
-    public void setStreet_other(final String street_other) {
+    final public void setStreet_other(final String street_other) {
         if (null == street_other) {
             this.street_otherset = true;
         }
         this.street_other = street_other;
     }
 
-    public String getSpouse_name() {
+    final public String getSpouse_name() {
         return spouse_name;
     }
 
-    public void setSpouse_name(final String spouse_name) {
+    final public void setSpouse_name(final String spouse_name) {
         if (null == spouse_name) {
             this.spouse_nameset = true;
         }
         this.spouse_name = spouse_name;
     }
 
-    public String getState_home() {
+    final public String getState_home() {
         return state_home;
     }
 
-    public void setState_home(final String state_home) {
+    final public void setState_home(final String state_home) {
         if (null == state_home) {
             this.state_homeset = true;
         }
         this.state_home = state_home;
     }
 
-    public String getStreet_home() {
+    final public String getStreet_home() {
         return street_home;
     }
 
-    public void setStreet_home(final String street_home) {
+    final public void setStreet_home(final String street_home) {
         if (null == street_home) {
             this.street_homeset = true;
         }
         this.street_home = street_home;
     }
 
-    public String getSuffix() {
+    final public String getSuffix() {
         return suffix;
     }
 
-    public void setSuffix(final String suffix) {
+    final public void setSuffix(final String suffix) {
         if (null == suffix) {
             this.suffixset = true;
         }
         this.suffix = suffix;
     }
 
-    public String getTax_id() {
+    final public String getTax_id() {
         return tax_id;
     }
 
-    public void setTax_id(final String tax_id) {
+    final public void setTax_id(final String tax_id) {
         if (null == tax_id) {
             this.tax_idset = true;
         }
         this.tax_id = tax_id;
     }
 
-    public String getTelephone_telex() {
+    final public String getTelephone_telex() {
         return telephone_telex;
     }
 
-    public void setTelephone_telex(final String telephone_telex) {
+    final public void setTelephone_telex(final String telephone_telex) {
         if (null == telephone_telex) {
             this.telephone_telexset = true;
         }
         this.telephone_telex = telephone_telex;
     }
 
-    public TimeZone getTimezone() {
+    final public TimeZone getTimezone() {
         return timezone;
     }
 
-    public void setTimezone(final TimeZone timezone) {
+    final public void setTimezone(final TimeZone timezone) {
         if (null == timezone) {
             this.timezoneset = true;
         }
         this.timezone = timezone;
     }
 
-    public String getTitle() {
+    final public String getTitle() {
         return title;
     }
 
-    public void setTitle(final String title) {
+    final public void setTitle(final String title) {
         if (null == title) {
             this.titleset = true;
         }
         this.title = title;
     }
 
-    public String getTelephone_ttytdd() {
+    final public String getTelephone_ttytdd() {
         return telephone_ttytdd;
     }
 
-    public void setTelephone_ttytdd(final String telephone_ttytdd) {
+    final public void setTelephone_ttytdd(final String telephone_ttytdd) {
         if (null == telephone_ttytdd) {
             this.telephone_ttytddset = true;
         }
         this.telephone_ttytdd = telephone_ttytdd;
     }
 
-    public String getUrl() {
+    final public String getUrl() {
         return url;
     }
 
-    public void setUrl(final String url) {
+    final public void setUrl(final String url) {
         if (null == url) {
             this.urlset = true;
         }
         this.url = url;
     }
 
-    public String getUserfield01() {
+    final public String getUserfield01() {
         return userfield01;
     }
 
-    public void setUserfield01(final String userfield01) {
+    final public void setUserfield01(final String userfield01) {
         if (null == userfield01) {
             this.userfield01set = true;
         }
         this.userfield01 = userfield01;
     }
 
-    public String getUserfield02() {
+    final public String getUserfield02() {
         return userfield02;
     }
 
-    public void setUserfield02(final String userfield02) {
+    final public void setUserfield02(final String userfield02) {
         if (null == userfield02) {
             this.userfield02set = true;
         }
         this.userfield02 = userfield02;
     }
 
-    public String getUserfield03() {
+    final public String getUserfield03() {
         return userfield03;
     }
 
-    public void setUserfield03(final String userfield03) {
+    final public void setUserfield03(final String userfield03) {
         if (null == userfield03) {
             this.userfield03set = true;
         }
         this.userfield03 = userfield03;
     }
 
-    public String getUserfield04() {
+    final public String getUserfield04() {
         return userfield04;
     }
 
-    public void setUserfield04(final String userfield04) {
+    final public void setUserfield04(final String userfield04) {
         if (null == userfield04) {
             this.userfield04set = true;
         }
         this.userfield04 = userfield04;
     }
 
-    public String getUserfield05() {
+    final public String getUserfield05() {
         return userfield05;
     }
 
-    public void setUserfield05(final String userfield05) {
+    final public void setUserfield05(final String userfield05) {
         if (null == userfield05) {
             this.userfield05set = true;
         }
         this.userfield05 = userfield05;
     }
 
-    public String getUserfield06() {
+    final public String getUserfield06() {
         return userfield06;
     }
 
-    public void setUserfield06(final String userfield06) {
+    final public void setUserfield06(final String userfield06) {
         if (null == userfield06) {
             this.userfield06set = true;
         }
         this.userfield06 = userfield06;
     }
 
-    public String getUserfield07() {
+    final public String getUserfield07() {
         return userfield07;
     }
 
-    public void setUserfield07(final String userfield07) {
+    final public void setUserfield07(final String userfield07) {
         if (null == userfield07) {
             this.userfield07set = true;
         }
         this.userfield07 = userfield07;
     }
 
-    public String getUserfield08() {
+    final public String getUserfield08() {
         return userfield08;
     }
 
-    public void setUserfield08(final String userfield08) {
+    final public void setUserfield08(final String userfield08) {
         if (null == userfield08) {
             this.userfield08set = true;
         }
         this.userfield08 = userfield08;
     }
 
-    public String getUserfield09() {
+    final public String getUserfield09() {
         return userfield09;
     }
 
-    public void setUserfield09(final String userfield09) {
+    final public void setUserfield09(final String userfield09) {
         if (null == userfield09) {
             this.userfield09set = true;
         }
         this.userfield09 = userfield09;
     }
 
-    public String getUserfield10() {
+    final public String getUserfield10() {
         return userfield10;
     }
 
-    public void setUserfield10(final String userfield10) {
+    final public void setUserfield10(final String userfield10) {
         if (null == userfield10) {
             this.userfield10set = true;
         }
         this.userfield10 = userfield10;
     }
 
-    public String getUserfield11() {
+    final public String getUserfield11() {
         return userfield11;
     }
 
-    public void setUserfield11(final String userfield11) {
+    final public void setUserfield11(final String userfield11) {
         if (null == userfield11) {
             this.userfield11set = true;
         }
         this.userfield11 = userfield11;
     }
 
-    public String getUserfield12() {
+    final public String getUserfield12() {
         return userfield12;
     }
 
-    public void setUserfield12(final String userfield12) {
+    final public void setUserfield12(final String userfield12) {
         if (null == userfield12) {
             this.userfield12set = true;
         }
         this.userfield12 = userfield12;
     }
 
-    public String getUserfield13() {
+    final public String getUserfield13() {
         return userfield13;
     }
 
-    public void setUserfield13(final String userfield13) {
+    final public void setUserfield13(final String userfield13) {
         if (null == userfield13) {
             this.userfield13set = true;
         }
         this.userfield13 = userfield13;
     }
 
-    public String getUserfield14() {
+    final public String getUserfield14() {
         return userfield14;
     }
 
-    public void setUserfield14(final String userfield14) {
+    final public void setUserfield14(final String userfield14) {
         if (null == userfield14) {
             this.userfield14set = true;
         }
         this.userfield14 = userfield14;
     }
 
-    public String getUserfield15() {
+    final public String getUserfield15() {
         return userfield15;
     }
 
-    public void setUserfield15(final String userfield15) {
+    final public void setUserfield15(final String userfield15) {
         if (null == userfield15) {
             this.userfield15set = true;
         }
         this.userfield15 = userfield15;
     }
 
-    public String getUserfield16() {
+    final public String getUserfield16() {
         return userfield16;
     }
 
-    public void setUserfield16(final String userfield16) {
+    final public void setUserfield16(final String userfield16) {
         if (null == userfield16) {
             this.userfield16set = true;
         }
         this.userfield16 = userfield16;
     }
 
-    public String getUserfield17() {
+    final public String getUserfield17() {
         return userfield17;
     }
 
-    public void setUserfield17(final String userfield17) {
+    final public void setUserfield17(final String userfield17) {
         if (null == userfield17) {
             this.userfield17set = true;
         }
         this.userfield17 = userfield17;
     }
 
-    public String getUserfield18() {
+    final public String getUserfield18() {
         return userfield18;
     }
 
-    public void setUserfield18(final String userfield18) {
+    final public void setUserfield18(final String userfield18) {
         if (null == userfield18) {
             this.userfield18set = true;
         }
         this.userfield18 = userfield18;
     }
 
-    public String getUserfield19() {
+    final public String getUserfield19() {
         return userfield19;
     }
 
-    public void setUserfield19(final String userfield19) {
+    final public void setUserfield19(final String userfield19) {
         if (null == userfield19) {
             this.userfield19set = true;
         }
         this.userfield19 = userfield19;
     }
 
-    public String getUserfield20() {
+    final public String getUserfield20() {
         return userfield20;
     }
 
-    public void setUserfield20(final String userfield20) {
+    final public void setUserfield20(final String userfield20) {
         if (null == userfield20) {
             this.userfield20set = true;
         }
         this.userfield20 = userfield20;
     }
 
-    public void setAliases(final HashSet<String> aliases) {
+    final public void setAliases(final HashSet<String> aliases) {
         if (null == aliases) {
             this.aliasesset = true;
         }
         this.aliases = aliases;
     }
 
-    public void addAlias(final String alias) {
+    final public void addAlias(final String alias) {
         if (this.aliases == null) {
             this.aliases = new HashSet<String>();
         }
         this.aliases.add(alias);
     }
 
-    public boolean removeAlias(final String alias) {
+    final public boolean removeAlias(final String alias) {
         if (null != this.aliases) {
             return this.aliases.remove(alias);
         } else {
@@ -2229,73 +2229,73 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         }
     }
 
-    public HashSet<String> getAliases() {
+    final public HashSet<String> getAliases() {
         return this.aliases;
     }
 
-    public String getCity_business() {
+    final public String getCity_business() {
         return city_business;
     }
 
-    public void setCity_business(final String city_business) {
+    final public void setCity_business(final String city_business) {
         if (null == city_business) {
             this.city_businessset = true;
         }
         this.city_business = city_business;
     }
 
-    public String getCountry_business() {
+    final public String getCountry_business() {
         return country_business;
     }
 
-    public void setCountry_business(final String country_business) {
+    final public void setCountry_business(final String country_business) {
         if (null == country_business) {
             this.country_businessset = true;
         }
         this.country_business = country_business;
     }
 
-    public String getAssistant_name() {
+    final public String getAssistant_name() {
         return assistant_name;
     }
 
-    public void setAssistant_name(final String assistant_name) {
+    final public void setAssistant_name(final String assistant_name) {
         if (null == assistant_name) {
             this.assistant_nameset = true;
         }
         this.assistant_name = assistant_name;
     }
 
-    public String getTelephone_primary() {
+    final public String getTelephone_primary() {
         return telephone_primary;
     }
 
-    public void setTelephone_primary(final String telephone_primary) {
+    final public void setTelephone_primary(final String telephone_primary) {
         if (null == telephone_primary) {
             this.telephone_primaryset = true;
         }
         this.telephone_primary = telephone_primary;
     }
 
-    public String getCategories() {
+    final public String getCategories() {
         return categories;
     }
 
-    public void setCategories(final String categories) {
+    final public void setCategories(final String categories) {
         if (null == categories) {
             this.categoriesset = true;
         }
         this.categories = categories;
     }
 
-    public String getEmail1() {
+    final public String getEmail1() {
         return email1;
     }
 
     /**
      * Email (business)
      */
-    public void setEmail1(final String email1) {
+    final public void setEmail1(final String email1) {
         if (null == email1) {
             this.email1set = true;
         }
@@ -2309,7 +2309,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
      * @throws IllegalAccessException
      * @throws InvocationTargetException
      */
-    public static User hashmapToUser(HashMap<String, Object> hm) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+    final public static User hashmapToUser(HashMap<String, Object> hm) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
         User u = new User();
         for (Method m : u.getClass().getMethods()) {
             String mname = m.getName();
@@ -2327,7 +2327,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
     /**
      * @return this user Objects members as key/value pairs in a hashtable
      */
-    public Hashtable<String, Object> toHashtable() {
+    final public Hashtable<String, Object> toHashtable() {
         final Hashtable<String, Object> ht = new Hashtable<String, Object>();
 
         for (final Field f : this.getClass().getDeclaredFields()) {
@@ -2511,7 +2511,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
      * @deprecated Please remove the usage of this method as fast as you can because it used a dangerous downcast.
      * This method will go away with the next update
      */
-    public void addExtension(final OXUserExtensionInterface extension) {
+    final public void addExtension(final OXUserExtensionInterface extension) {
         getAllExtensionsAsHash().put(extension.getClass().getName(), (OXCommonExtension) extension);
     }
 
@@ -2522,7 +2522,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
      *             away with the next update
      */
     @Deprecated
-    public ArrayList<OXUserExtensionInterface> getExtensions() {
+    final public ArrayList<OXUserExtensionInterface> getExtensions() {
         final ArrayList<OXUserExtensionInterface> retval = new ArrayList<OXUserExtensionInterface>();
         for (final OXCommonExtension commoninterface : getAllExtensionsAsHash().values()) {
             retval.add((OXUserExtensionInterface) commoninterface);
@@ -2535,7 +2535,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
      * @return
      * @deprecated Will be removed with next version. Use removeExtension(final OXCommonExtensionInterface o) instead
      */
-    public boolean removeExtension(final OXUserExtensionInterface o) {
+    final public boolean removeExtension(final OXUserExtensionInterface o) {
         if (null == getAllExtensionsAsHash().remove(o.getClass().getName())) {
             return false;
         } else {
@@ -2550,7 +2550,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
      *             because it used a dangerous downcast. This method will go
      *             away with the next update
      */
-    public OXUserExtensionInterface removeExtensionByIndex(final int index) {
+    final public OXUserExtensionInterface removeExtensionByIndex(final int index) {
         final ArrayList<OXCommonExtension> retval = new ArrayList<OXCommonExtension>(getAllExtensionsAsHash().values());
         final OXCommonExtension commonExtensionInterface = retval.get(index);
         return (OXUserExtensionInterface) getAllExtensionsAsHash().remove(commonExtensionInterface);
@@ -2568,7 +2568,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
      *             because it used a dangerous downcast. This method will go
      *             away with the next update
      */
-    public ArrayList<OXUserExtensionInterface> getExtensionbyName(final String extname) {
+    final public ArrayList<OXUserExtensionInterface> getExtensionbyName(final String extname) {
         final ArrayList<OXUserExtensionInterface> retval = new ArrayList<OXUserExtensionInterface>();
         for (final OXCommonExtension ext : getAllExtensionsAsHash().values()) {
             if (extname.equals(ext.getClass().getName())) {
@@ -2589,7 +2589,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
      *             because it used a dangerous downcast. This method will go
      *             away with the next update
      */
-    public OXUserExtensionInterface getFirstExtensionbyName(final String extname) {
+    final public OXUserExtensionInterface getFirstExtensionbyName(final String extname) {
         final ArrayList<OXUserExtensionInterface> list = getExtensionbyName(extname);
         if (!list.isEmpty() && list.size() == 1) {
             return list.get(0);
@@ -2601,7 +2601,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
     /**
      * @return the passwordMech
      */
-    public PASSWORDMECH getPasswordMech() {
+    final public PASSWORDMECH getPasswordMech() {
         return passwordMech;
     }
 
@@ -2612,7 +2612,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
      * @param passwordMech
      *                the passwordMech to set
      */
-    public void setPasswordMech(final PASSWORDMECH passwordMech) {
+    final public void setPasswordMech(final PASSWORDMECH passwordMech) {
         if (null == passwordMech) {
             this.passwordMechset = true;
         }
@@ -2622,7 +2622,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
     /**
      * @return the mail_folder_confirmed_ham_name
      */
-    public final String getMail_folder_confirmed_ham_name() {
+    final public String getMail_folder_confirmed_ham_name() {
         return mail_folder_confirmed_ham_name;
     }
 
@@ -2630,7 +2630,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
      * @param mail_folder_confirmed_ham_name
      *                the mail_folder_confirmed_ham_name to set
      */
-    public final void setMail_folder_confirmed_ham_name(String mail_folder_confirmed_ham_name) {
+    final public void setMail_folder_confirmed_ham_name(String mail_folder_confirmed_ham_name) {
         this.mail_folder_confirmed_ham_nameset = true;
         this.mail_folder_confirmed_ham_name = mail_folder_confirmed_ham_name;
     }
@@ -2638,7 +2638,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
     /**
      * @return the mail_folder_confirmed_spam_name
      */
-    public final String getMail_folder_confirmed_spam_name() {
+    final public String getMail_folder_confirmed_spam_name() {
         return mail_folder_confirmed_spam_name;
     }
 
@@ -2646,27 +2646,27 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
      * @param mail_folder_confirmed_spam_name
      *                the mail_folder_confirmed_spam_name to set
      */
-    public final void setMail_folder_confirmed_spam_name(String mail_folder_confirmed_spam_name) {
+    final public void setMail_folder_confirmed_spam_name(String mail_folder_confirmed_spam_name) {
         this.mail_folder_confirmed_ham_nameset = true;
         this.mail_folder_confirmed_spam_name = mail_folder_confirmed_spam_name;
     }
 
-    public boolean isMail_folder_confirmed_spamset() {
+    final public boolean isMail_folder_confirmed_spamset() {
         return mail_folder_confirmed_spam_nameset;
     }
 
-    public boolean isMail_folder_confirmed_hamset() {
+    final public boolean isMail_folder_confirmed_hamset() {
         return mail_folder_confirmed_ham_nameset;
     }
 
-    public boolean isSpam_filter_enabledset() {
+    final public boolean isSpam_filter_enabledset() {
         return spam_filter_enabledset;
     }
 
     /**
      * @return the spam_filter_enabled
      */
-    public final Boolean getSpam_filter_enabled() {
+    final public Boolean getSpam_filter_enabled() {
         return spam_filter_enabled;
     }
 
@@ -2703,7 +2703,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.defaultSenderAddress = defaultSenderAddress;
     }
 
-    public boolean isDefaultSenderAddressset() {
+    public final boolean isDefaultSenderAddressset() {
         return defaultSenderAddressset;
     }
 
