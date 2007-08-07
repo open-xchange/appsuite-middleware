@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+<!-- ===================================================================== -->
+<!--                                                                       -->
+<!--  Log4j Configuration                                                  -->
+<!--                                                                       -->
+<!-- ===================================================================== -->
+<!--
+   | For more configuration infromation and examples see the Jakarta Log4j
+   | owebsite: http://jakarta.apache.org/log4j
+-->
+<log4j:configuration debug="false" threshold="null">
+
+  <!-- Example: typical LOCAL log4j logger -->
+  <appender name="SERVER_LOG" class="org.apache.log4j.net.SyslogAppender">
+    <param name="SyslogHost" value="localhost"/>
+    <param name="Facility" value="local2"/>
+    <layout class="org.apache.log4j.PatternLayout">
+      <param name="ConversionPattern" value="%d open-xchange-admindaemon %-5p [%c][%t]: %C,%M %m%n"/>
+    </layout>
+  </appender>
+
+  <root>
+    <level value="INFO"/>
+    <appender-ref ref="SERVER_LOG"/>
+  </root>
+
+</log4j:configuration>
