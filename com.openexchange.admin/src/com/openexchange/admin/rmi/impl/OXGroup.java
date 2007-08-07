@@ -312,6 +312,10 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             if (!tool.existsGroup(ctx, grp.getId())) {
                 throw new NoSuchGroupException("No such group");
             }
+            
+            if(grp.getName()!=null && tool.existsGroupName(ctx, grp)){
+                throw new InvalidDataException("Group " + grp.getName() + " already exists in this context");
+            }
 
             oxGroup.change(ctx, grp);
         } catch (final EnforceableDataObjectException e2) {
