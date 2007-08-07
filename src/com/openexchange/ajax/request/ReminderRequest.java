@@ -74,12 +74,11 @@ import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.servlet.AjaxException;
+import org.json.JSONArray;
 
 public class ReminderRequest {
 	
 	private SessionObject sessionObj;
-	
-	private JSONWriter jsonWriter;
 	
 	private Date timestamp;
 	
@@ -89,48 +88,43 @@ public class ReminderRequest {
 		return timestamp;
 	}
 
-	public ReminderRequest(final SessionObject sessionObj, final JSONWriter w) {
+	public ReminderRequest(final SessionObject sessionObj) {
 		this.sessionObj = sessionObj;
-		this.jsonWriter = w;
 	}
 	
-	public void action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, OXException, JSONException, SearchIteratorException, AjaxException, OXJSONException {
+	public Object action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, OXException, JSONException, SearchIteratorException, AjaxException, OXJSONException {
 		if (action.equalsIgnoreCase(AJAXServlet.ACTION_DELETE)) {
-			actionDelete(jsonObject);
+			return actionDelete(jsonObject);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_UPDATES)) {
-			actionUpdates(jsonObject);
+			return actionUpdates(jsonObject);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_RANGE)) {
-			actionRange(jsonObject);
+			return actionRange(jsonObject);
 		} else {
 			throw new AjaxException(AjaxException.Code.UnknownAction, action);
 		}
 	}
 
-	private void actionDelete(final JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXException, OXJSONException {
+	private JSONArray actionDelete(final JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXException, OXJSONException, AjaxException {
 		final JSONObject jData = DataParser.checkJSONObject(jsonObject, "data");
 		final int id = DataParser.checkInt(jData, AJAXServlet.PARAMETER_ID);
 		
 		final ReminderSQLInterface reminderSql = new ReminderHandler(sessionObj);
 
-		jsonWriter.array();
-		try {
-			reminderSql.deleteReminder(id);
-		} finally {
-			jsonWriter.endArray();
-		}
+		reminderSql.deleteReminder(id);
 		
+		return new JSONArray();
 	}
 
-	private void actionUpdates(final JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXException, SearchIteratorException, OXJSONException {
+	private JSONArray actionUpdates(final JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXException, SearchIteratorException, OXJSONException, AjaxException {
 		timestamp = DataParser.checkDate(jsonObject, AJAXServlet.PARAMETER_TIMESTAMP);
 		
 		final ReminderSQLInterface reminderSql = new ReminderHandler(sessionObj);
 		final SearchIterator it = reminderSql.listModifiedReminder(sessionObj.getUserObject().getId(), timestamp);
 
-		jsonWriter.array();
+		final JSONArray jsonResponseArray = new JSONArray();
 		try {
 			while (it.hasNext()) {
-				final ReminderWriter reminderWriter = new ReminderWriter(jsonWriter, TimeZone.getTimeZone(sessionObj.getUserObject().getTimeZone()));
+				final ReminderWriter reminderWriter = new ReminderWriter(TimeZone.getTimeZone(sessionObj.getUserObject().getTimeZone()));
 				final ReminderObject reminderObj = (ReminderObject)it.next();
 				
 				if (reminderObj.isRecurrenceAppointment()) {
@@ -149,25 +143,28 @@ public class ReminderRequest {
 				}
 				
 				if (hasModulePermission(sessionObj, reminderObj)) {
-					reminderWriter.writeObject(reminderObj);
+					final JSONObject jsonReminderObj = new JSONObject();
+					reminderWriter.writeObject(reminderObj, jsonReminderObj);
+					jsonResponseArray.put(jsonReminderObj);
 				}
 			}
+			
+			return jsonResponseArray;
 		} catch (SQLException e) {
 			throw new OXException("SQLException occurred", e);
 		} finally {
 			if (null != it) {
 				it.close();				
 			}
-			jsonWriter.endArray();
 		}
 	}
 
-	private void actionRange(final JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXException, SearchIteratorException, OXJSONException {
+	private JSONArray actionRange(final JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXException, SearchIteratorException, OXJSONException, AjaxException {
 		final Date end = DataParser.checkDate(jsonObject, AJAXServlet.PARAMETER_END);
 		
 		SearchIterator it = null;
 		
-		jsonWriter.array();
+		final JSONArray jsonResponseArray = new JSONArray();
 		
 		try {
 			final ReminderSQLInterface reminderSql = new ReminderHandler(sessionObj);
@@ -175,7 +172,7 @@ public class ReminderRequest {
 			
 
 			while (it.hasNext()) {
-				final ReminderWriter reminderWriter = new ReminderWriter(jsonWriter, TimeZone.getTimeZone(sessionObj.getUserObject().getTimeZone()));
+				final ReminderWriter reminderWriter = new ReminderWriter(TimeZone.getTimeZone(sessionObj.getUserObject().getTimeZone()));
 				final ReminderObject reminderObj = (ReminderObject)it.next();
 				
 				if (reminderObj.isRecurrenceAppointment()) {
@@ -192,13 +189,16 @@ public class ReminderRequest {
 				}
 				
 				if (hasModulePermission(sessionObj, reminderObj)) {
-					reminderWriter.writeObject(reminderObj);
+					final JSONObject jsonReminderObj = new JSONObject();
+					reminderWriter.writeObject(reminderObj, jsonReminderObj);
+					jsonResponseArray.put(jsonReminderObj);
 				}
 			}
+			
+			return jsonResponseArray;
 		} catch (SQLException e) {
 			throw new OXException("SQLException occurred", e);
 		} finally {
-			jsonWriter.endArray();
 			if (null != it) {
 				it.close();
 			}

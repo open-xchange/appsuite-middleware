@@ -55,7 +55,6 @@ import java.util.Date;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONWriter;
 
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.DataFields;
@@ -74,61 +73,58 @@ public class GroupRequest {
 	
 	private SessionObject sessionObj;
 	
-	private JSONWriter jsonWriter;
-	
 	private Date timestamp;
 	
-	public GroupRequest(SessionObject sessionObj, JSONWriter w) {
+	public GroupRequest(SessionObject sessionObj) {
 		this.sessionObj = sessionObj;
-		this.jsonWriter = w;
 	}
-
+	
 	public Date getTimestamp() {
 		return timestamp;
 	}
-
-	public void action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, LdapException, JSONException, SearchIteratorException, AjaxException, OXJSONException {
+	
+	public Object action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, LdapException, JSONException, SearchIteratorException, AjaxException, OXJSONException {
 		if (action.equalsIgnoreCase(AJAXServlet.ACTION_LIST)) {
-			actionList(jsonObject);
+			return actionList(jsonObject);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_GET)) {
-			actionGet(jsonObject);
+			return actionGet(jsonObject);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_SEARCH)) {
-			actionSearch(jsonObject);
+			return actionSearch(jsonObject);
 		} else {
 			throw new AjaxException(AjaxException.Code.UnknownAction, action);
 		}
 	}
 	
-	public void actionList(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, LdapException, OXJSONException {
+	public JSONArray actionList(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, LdapException, OXJSONException, AjaxException {
 		final JSONArray jsonArray = DataParser.checkJSONArray(jsonObj, "data");
 		
 		timestamp = new Date(0);
 		
 		Date lastModified = null;
 		
-		jsonWriter.array();
-		try {
-			final GroupStorage groupStorage = GroupStorage.getInstance(sessionObj.getContext(), true);
+		final JSONArray jsonResponseArray = new JSONArray();
+		final GroupStorage groupStorage = GroupStorage.getInstance(sessionObj.getContext(), true);
+		
+		for (int a = 0; a < jsonArray.length(); a++) {
+			final JSONObject jData = jsonArray.getJSONObject(a);
+			final com.openexchange.groupware.ldap.Group g = groupStorage.getGroup(DataParser.checkInt(jData, DataFields.ID));
 			
-			for (int a = 0; a < jsonArray.length(); a++) {
-				final JSONObject jData = jsonArray.getJSONObject(a);
-				final com.openexchange.groupware.ldap.Group g = groupStorage.getGroup(DataParser.checkInt(jData, DataFields.ID));
+			final GroupWriter groupWriter = new GroupWriter();
+			final JSONObject jsonGroupObj = new JSONObject();
+			groupWriter.writeGroup(g, jsonGroupObj);
+			jsonResponseArray.put(jsonGroupObj);
 			
-				final GroupWriter groupWriter = new GroupWriter(jsonWriter);
-				groupWriter.writeGroup(g);
+			lastModified = g.getLastModified();
 			
-				lastModified = g.getLastModified();
-				
-				if (timestamp.getTime() < lastModified.getTime()) {
-					timestamp = lastModified;
-				}
-			} 
-		} finally {
-			jsonWriter.endArray();			
+			if (timestamp.getTime() < lastModified.getTime()) {
+				timestamp = lastModified;
+			}
 		}
+		
+		return jsonResponseArray;
 	}
-
-	public void actionGet(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, LdapException, OXJSONException {
+	
+	public JSONObject actionGet(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, LdapException, OXJSONException, AjaxException {
 		final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
 		
 		timestamp = new Date(0);
@@ -136,14 +132,16 @@ public class GroupRequest {
 		final GroupStorage groupStorage = GroupStorage.getInstance(sessionObj.getContext(), true);
 		final com.openexchange.groupware.ldap.Group g = groupStorage.getGroup(id);
 		
-		final GroupWriter groupWriter = new GroupWriter(jsonWriter);
-		groupWriter.writeGroup(g);
+		final GroupWriter groupWriter = new GroupWriter();
+		final JSONObject jsonGroupObj = new JSONObject();
+		groupWriter.writeGroup(g, jsonGroupObj);
 		
 		timestamp = g.getLastModified();
 		
+		return jsonGroupObj;
 	}
 	
-	public void actionSearch(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, LdapException, SearchIteratorException {
+	public JSONArray actionSearch(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, LdapException, SearchIteratorException, AjaxException {
 		final JSONObject jData = DataParser.checkJSONObject(jsonObj, "data");
 		
 		String searchpattern = null;
@@ -154,7 +152,7 @@ public class GroupRequest {
 		
 		timestamp = new Date(0);
 		
-		jsonWriter.array();
+		final JSONArray jsonResponseArray = new JSONArray();
 		final SearchIterator it = null;
 		
 		try {
@@ -162,28 +160,29 @@ public class GroupRequest {
 			com.openexchange.groupware.ldap.Group[] groups = null;
 			
 			if ("*".equals(searchpattern)) {
-                groups = groupStorage.getGroups();
+				groups = groupStorage.getGroups();
 			} else {
-                groups = groupStorage.searchGroups(searchpattern);
+				groups = groupStorage.searchGroups(searchpattern);
 			}
 			
-			final GroupWriter groupWriter = new GroupWriter(jsonWriter);
+			final GroupWriter groupWriter = new GroupWriter();
 			
 			for (int a = 0; a < groups.length; a++) {
-				jsonWriter.object();
-				groupWriter.writeParameter(ParticipantsFields.DISPLAY_NAME, groups[a].getDisplayName());
-				groupWriter.writeParameter(ParticipantsFields.ID, groups[a].getIdentifier());
-				jsonWriter.endObject();
+				final JSONObject jsonGroupObj = new JSONObject();
+				groupWriter.writeParameter(ParticipantsFields.DISPLAY_NAME, groups[a].getDisplayName(), jsonGroupObj);
+				groupWriter.writeParameter(ParticipantsFields.ID, groups[a].getIdentifier(), jsonGroupObj);
 				if (groups[a].getLastModified().after(timestamp)) {
 					timestamp = groups[a].getLastModified();
 				}
+				
+				jsonResponseArray.put(jsonGroupObj);
 			}
+			
+			return jsonResponseArray;
 		} finally {
 			if (it != null) {
 				it.close();
 			}
-			jsonWriter.endArray();
 		}
-		
 	}
 }

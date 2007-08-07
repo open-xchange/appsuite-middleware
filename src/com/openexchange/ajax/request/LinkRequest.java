@@ -94,7 +94,7 @@ public class LinkRequest {
 		}
 	}
 	
-	public void actionAll(final JSONObject jsonObj) throws JSONException, OXMandatoryFieldException, OXException, OXJSONException {
+	public void actionAll(final JSONObject jsonObj) throws JSONException, OXMandatoryFieldException, OXException, OXJSONException, AjaxException {
 		final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
 		final int folder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_INFOLDER);
 		final int type = DataParser.checkInt(jsonObj, PARAMETER_MODULE);
@@ -134,7 +134,7 @@ public class LinkRequest {
 		}
 	}
 
-	public void actionNew(final JSONObject jsonObj) throws JSONException, OXException {
+	public void actionNew(final JSONObject jsonObj) throws JSONException, OXException, AjaxException {
 		final LinkObject lo = new LinkObject();
 		final int user = sessionObj.getUserObject().getId();
 		final int[] group =	sessionObj.getUserObject().getGroups();
@@ -170,7 +170,7 @@ public class LinkRequest {
 
 	}
 
-	public void actionDelete(final JSONObject jsonObj) throws JSONException, OXMandatoryFieldException, OXException, OXJSONException {
+	public void actionDelete(final JSONObject jsonObj) throws JSONException, OXMandatoryFieldException, OXException, OXJSONException, AjaxException {
 		final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
 		final int folder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_INFOLDER);
 		final int type = DataParser.checkInt(jsonObj, PARAMETER_MODULE);

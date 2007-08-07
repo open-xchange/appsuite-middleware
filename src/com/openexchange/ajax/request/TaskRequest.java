@@ -127,17 +127,14 @@ public class TaskRequest {
 	
 	private SessionObject sessionObj;
 	
-	private JSONWriter jsonWriter;
-	
 	private Date timestamp;
 	
 	private TimeZone timeZone;
 	
 	private static final Log LOG = LogFactory.getLog(TaskRequest.class);
 	
-	public TaskRequest(SessionObject sessionObj, JSONWriter w) {
+	public TaskRequest(SessionObject sessionObj) {
 		this.sessionObj = sessionObj;
-		this.jsonWriter = w;
 		
 		final String sTimeZone = sessionObj.getUserObject().getTimeZone();
 		
@@ -152,69 +149,54 @@ public class TaskRequest {
 		return timestamp;
 	}
 
-	public int action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXObjectNotFoundException, OXConflictException, OXPermissionException, OXFolderNotFoundException, SearchIteratorException, AjaxException, OXException, OXJSONException {
+	public Object action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXObjectNotFoundException, OXConflictException, OXPermissionException, OXFolderNotFoundException, SearchIteratorException, AjaxException, OXException, OXJSONException {
 		if (!sessionObj.getUserConfiguration().hasTask()) {
 			throw new OXPermissionException(OXPermissionException.Code.NoPermissionForModul, "task");
 		}
 		
 		if (action.equalsIgnoreCase(AJAXServlet.ACTION_CONFIRM)) {
-			actionConfirm(jsonObject);
-			return -1;
+			return actionConfirm(jsonObject);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_NEW)) {
-			actionNew(jsonObject);
-			return -1;
+			return actionNew(jsonObject);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_DELETE)) {
-			actionDelete(jsonObject);
-			return -1;
+			return actionDelete(jsonObject);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_UPDATE)) {
-			actionUpdate(jsonObject);
-			return -1;
+			return actionUpdate(jsonObject);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_UPDATES)) {
-			actionUpdates(jsonObject);
-			return -1;
+			return actionUpdates(jsonObject);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_LIST)) {
-			actionList(jsonObject);
-			return -1;
+			return actionList(jsonObject);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_ALL)) {
-			actionAll(jsonObject);
-			return -1;
+			return actionAll(jsonObject);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_GET)) {
-			actionGet(jsonObject);
-			return -1;
+			return actionGet(jsonObject);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_SEARCH)) {
-			actionSearch(jsonObject);
-			return -1;
-		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_COUNT)) {
-			return actionCount(jsonObject);
+			return actionSearch(jsonObject);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_COPY)) {
-			actionCopy(jsonObject);
-			return -1;
+			return actionCopy(jsonObject);
 		} else {
 			throw new AjaxException(AjaxException.Code.UnknownAction, action);
 		}
 	}
 	
-	public void actionNew(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException {
+	public JSONObject actionNew(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, AjaxException {
 		final Task task = new Task();
 		
 		final JSONObject jsonobject = DataParser.checkJSONObject(jsonObj, DATA);
 		
-		jsonWriter.object();
-		try {
-			final TaskParser taskParser = new TaskParser(timeZone);
-			taskParser.parse(task, jsonobject);
-			
-			final TasksSQLInterface sqlinterface = new TasksSQLInterfaceImpl(sessionObj);
-			sqlinterface.insertTaskObject(task);
-			
-			jsonWriter.key(TaskFields.ID);
-			jsonWriter.value(task.getObjectID());
-		} finally {
-			jsonWriter.endObject();
-		}
+		final TaskParser taskParser = new TaskParser(timeZone);
+		taskParser.parse(task, jsonobject);
+
+		final TasksSQLInterface sqlinterface = new TasksSQLInterfaceImpl(sessionObj);
+		sqlinterface.insertTaskObject(task);
+
+		final JSONObject jsonResponseObject = new JSONObject();
+		jsonResponseObject.put(TaskFields.ID, task.getObjectID());
+		
+		return jsonResponseObject;
 	}
 	
-	public void actionUpdate(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, OXJSONException {
+	public JSONObject actionUpdate(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, OXJSONException, AjaxException {
 		final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
 		final int inFolder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_INFOLDER);
 		timestamp = DataParser.checkDate(jsonObj, AJAXServlet.PARAMETER_TIMESTAMP);
@@ -231,19 +213,11 @@ public class TaskRequest {
 		final TasksSQLInterface sqlinterface = new TasksSQLInterfaceImpl(sessionObj);
 		sqlinterface.updateTaskObject(task, inFolder, timestamp);
         timestamp = task.getLastModified();
-        try {
-			jsonWriter.value("");
-		} catch (final JSONException e) {
-			/*
-			 * Ignore
-			 */
-			if (LOG.isDebugEnabled()) {
-				LOG.debug(e.getLocalizedMessage(), e);
-			}
-		}
+		
+		return new JSONObject();
 	}
 	
-	public void actionUpdates(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, SearchIteratorException, OXException, OXJSONException {
+	public JSONArray actionUpdates(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, SearchIteratorException, OXException, OXJSONException, AjaxException {
 		final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
 		final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
 		timestamp = DataParser.checkDate(jsonObj, AJAXServlet.PARAMETER_TIMESTAMP);
@@ -258,7 +232,7 @@ public class TaskRequest {
 		
 		Date lastModified = null;
 		
-		jsonWriter.array();
+		final JSONArray jsonResponseArray = new JSONArray();
 		SearchIterator it = null;
 		try {
 			int[] internalColumns = new int[columns.length+1];
@@ -266,13 +240,13 @@ public class TaskRequest {
 			internalColumns[columns.length] = DataObject.LAST_MODIFIED;
 			
 			final TasksSQLInterface taskssql = new TasksSQLInterfaceImpl(sessionObj);
-			final TaskWriter taskWriter = new TaskWriter(jsonWriter, timeZone);
+			final TaskWriter taskWriter = new TaskWriter(timeZone);
 			
 			it = taskssql.getModifiedTasksInFolder(folderId, internalColumns, timestamp);
 			while (it.hasNext()) {
 				final Task taskObj = (Task)it.next();
 				
-				taskWriter.writeArray(taskObj, columns);
+				taskWriter.writeArray(taskObj, columns, jsonResponseArray);
 				
 				lastModified = taskObj.getLastModified();
 				
@@ -287,7 +261,7 @@ public class TaskRequest {
 				while (it.hasNext()) {
 					final Task taskObj = (Task)it.next();
 					
-					jsonWriter.value(taskObj.getObjectID());
+					jsonResponseArray.put(taskObj.getObjectID());
 					
 					lastModified = taskObj.getLastModified();
 					
@@ -296,31 +270,28 @@ public class TaskRequest {
 					}
 				}
 			}
+			
+			return jsonResponseArray;
 		} finally {
 			if(it!=null) {
 				it.close();
 			}
-			jsonWriter.endArray();
 		}
 	}
-	
-	public void actionDelete(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXPermissionException, OXConflictException, OXObjectNotFoundException, OXFolderNotFoundException, OXException, OXJSONException {
+
+	public JSONArray actionDelete(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXPermissionException, OXConflictException, OXObjectNotFoundException, OXFolderNotFoundException, OXException, OXJSONException, AjaxException {
 		final JSONObject jsonobject = DataParser.checkJSONObject(jsonObj, DATA);
 		final int id = DataParser.checkInt(jsonobject, AJAXServlet.PARAMETER_ID);
 		final int inFolder = DataParser.checkInt(jsonobject, AJAXServlet.PARAMETER_INFOLDER);
 		timestamp = DataParser.checkDate(jsonObj, AJAXServlet.PARAMETER_TIMESTAMP);
 		
-		jsonWriter.array();
+		final TasksSQLInterface sqlinterface = new TasksSQLInterfaceImpl(sessionObj);
+		sqlinterface.deleteTaskObject(id, inFolder, timestamp);
 		
-		try {
-			final TasksSQLInterface sqlinterface = new TasksSQLInterfaceImpl(sessionObj);
-			sqlinterface.deleteTaskObject(id, inFolder, timestamp);
-		} finally {
-			jsonWriter.endArray();
-		}
+		return new JSONArray();
 	}
 	
-	public void actionList(final JSONObject jsonObj) throws JSONException, OXMandatoryFieldException, SearchIteratorException, OXException, OXJSONException {
+	public JSONArray actionList(final JSONObject jsonObj) throws JSONException, OXMandatoryFieldException, SearchIteratorException, OXException, OXJSONException, AjaxException {
 		timestamp = new Date(0);
 		
 		Date lastModified = null;
@@ -341,18 +312,16 @@ public class TaskRequest {
 
 		SearchIterator it = null;
 		
-		jsonWriter.array();
+		final JSONArray jsonResponseArray = new JSONArray();
 		
 		try {
-
-
 			final TasksSQLInterface taskssql = new TasksSQLInterfaceImpl(sessionObj);
-			final TaskWriter taskwriter = new TaskWriter(jsonWriter, timeZone);
+			final TaskWriter taskwriter = new TaskWriter(timeZone);
 			it = taskssql.getObjectsById(objectIdAndFolderId, internalColumns);
 			
 			while (it.hasNext()) {
 				final Task taskobject = (Task)it.next();
-				taskwriter.writeArray(taskobject, columns);
+				taskwriter.writeArray(taskobject, columns, jsonResponseArray);
 				
 				lastModified = taskobject.getLastModified();
 				
@@ -360,15 +329,16 @@ public class TaskRequest {
 					timestamp = lastModified;
 				}
 			}
+			
+			return jsonResponseArray;
 		} finally {
 			if(it!=null) {
 				it.close();
 			}
-			jsonWriter.endArray();
 		}
 	}
 	
-	public void actionAll(final JSONObject jsonObj) throws JSONException, OXMandatoryFieldException, SearchIteratorException, OXException, OXJSONException {
+	public JSONArray actionAll(final JSONObject jsonObj) throws JSONException, OXMandatoryFieldException, SearchIteratorException, OXException, OXJSONException, AjaxException {
 		final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
 		final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
 		final int folderId = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
@@ -383,18 +353,18 @@ public class TaskRequest {
 		
 		Date lastModified = null;
 		
-		jsonWriter.array();
+		final JSONArray jsonResponseArray = new JSONArray();
 		SearchIterator it = null;
 		try {
 			
-			final TaskWriter taskwriter = new TaskWriter(jsonWriter, timeZone);
+			final TaskWriter taskwriter = new TaskWriter(timeZone);
 
 			final TasksSQLInterface taskssql = new TasksSQLInterfaceImpl(sessionObj);
 			it = taskssql.getTaskList(folderId, 0, 500, orderBy, orderDir, internalColumns);
 			
 			while (it.hasNext()) {
 				final Task taskobject = (Task)it.next();
-				taskwriter.writeArray(taskobject, columns);
+				taskwriter.writeArray(taskobject, columns, jsonResponseArray);
 				
 				lastModified = taskobject.getLastModified();
 				
@@ -402,15 +372,16 @@ public class TaskRequest {
 					timestamp = lastModified;
 				}
 			}
+			
+			return jsonResponseArray;
 		} finally {
 			if(it!=null) {
 				it.close();
 			}
-			jsonWriter.endArray();
 		}
 	}
 	
-	public void actionGet(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, OXJSONException {
+	public JSONObject actionGet(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, OXJSONException, AjaxException {
 		final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
 		final int inFolder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_INFOLDER);
 		
@@ -418,16 +389,18 @@ public class TaskRequest {
 
 		final TasksSQLInterface sqlinterface = new TasksSQLInterfaceImpl(sessionObj);
 		final Task task = sqlinterface.getTaskById(id, inFolder);
+		final TaskWriter taskWriter = new TaskWriter(timeZone);
 		
-		final TaskWriter taskWriter = new TaskWriter(jsonWriter, timeZone);
-		taskWriter.writeTask(task);
+		final JSONObject jsonResponseObject = new JSONObject();
+		taskWriter.writeTask(task, jsonResponseObject);
 		
 		timestamp = task.getLastModified();
-	}
-	
-	public void actionConfirm(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException {
-		final JSONObject jData = DataParser.checkJSONObject(jsonObj, DATA);
 		
+		return jsonResponseObject;
+	}
+
+	public JSONObject actionConfirm(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, AjaxException {
+		final JSONObject jData = DataParser.checkJSONObject(jsonObj, DATA);
 		final Task taskObj = new Task();
 		
 		final TaskParser taskParser = new TaskParser(timeZone);
@@ -435,33 +408,11 @@ public class TaskRequest {
 		
 		final TasksSQLInterface taskSql = new TasksSQLInterfaceImpl(sessionObj);
 		taskSql.setUserConfirmation(taskObj.getObjectID(), sessionObj.getUserObject().getId(), taskObj.getConfirm(), taskObj.getConfirmMessage());
-		try {
-			jsonWriter.value("");
-		} catch (final JSONException e) {
-			/*
-			 * Ignore
-			 */
-			if (LOG.isDebugEnabled()) {
-				LOG.debug(e.getLocalizedMessage(), e);
-			}
-		}
+
+		return new JSONObject();
 	}
 	
-	// Because we can't return a single value via the JSNOWriter we return the value itself and
-	// build the response object in Tasks
-	public int actionCount(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, OXJSONException {
-		final int folderId = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
-		
-		final TasksSQLInterface taskssql = new TasksSQLInterfaceImpl(sessionObj);
-		final int count = taskssql.getNumberOfTasks(folderId);
-//		jsonWriter.object();
-//		jsonWriter.key("data");
-//		jsonWriter.value(count);
-//		jsonWriter.endObject();
-		return count;
-	}
-	
-	public void actionSearch(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXConflictException, SearchIteratorException, OXException, OXJSONException {
+	public JSONArray actionSearch(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXConflictException, SearchIteratorException, OXException, OXJSONException, AjaxException {
 		final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
 		final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
 		
@@ -519,19 +470,19 @@ public class TaskRequest {
 		System.arraycopy(columns, 0, internalColumns, 0, columns.length);
 		internalColumns[columns.length] = DataObject.LAST_MODIFIED;
 
-		jsonWriter.array();
+		final JSONArray jsonResponseArray = new JSONArray();
 		
 		SearchIterator it = null;
 		
 		try {
-			final TaskWriter taskWriter = new TaskWriter(jsonWriter, timeZone);
+			final TaskWriter taskWriter = new TaskWriter(timeZone);
 
 			final TasksSQLInterface taskssql = new TasksSQLInterfaceImpl(sessionObj);
 			it = taskssql.getTasksByExtendedSearch(searchObj, orderBy, orderDir, internalColumns);
 			
 			while (it.hasNext()) {
 				final Task taskObj = (Task)it.next();
-				taskWriter.writeArray(taskObj, columns);
+				taskWriter.writeArray(taskObj, columns, jsonResponseArray);
 				
 				lastModified = taskObj.getLastModified();
 				
@@ -539,15 +490,16 @@ public class TaskRequest {
 					timestamp = lastModified;
 				}
 			}
+			
+			return jsonResponseArray;
 		} finally {
 			if (it != null) {
 				it.close();
 			}
-			jsonWriter.endArray();
 		}
 	}
 	
-	public void actionCopy(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, OXJSONException {
+	public JSONObject actionCopy(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, OXJSONException, AjaxException {
 		final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
 		final int inFolder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
 		final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
@@ -561,12 +513,9 @@ public class TaskRequest {
 		
 		timestamp = new Date(0);
 
-		jsonWriter.object();
-		try {
-			jsonWriter.key(TaskFields.ID);
-			jsonWriter.value(taskObj.getObjectID());
-		} finally {
-			jsonWriter.endObject();			
-		}
+		final JSONObject jsonResponseObject = new JSONObject();
+		jsonResponseObject.put(TaskFields.ID, taskObj.getObjectID());
+		
+		return jsonResponseObject;
 	}
 }
