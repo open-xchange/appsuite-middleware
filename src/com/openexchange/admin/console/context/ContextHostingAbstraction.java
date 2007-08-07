@@ -4,11 +4,14 @@ import java.rmi.RemoteException;
 import java.util.Arrays;
 
 import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.exceptions.OXContextException;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.dataobjects.Database;
+import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
@@ -29,17 +32,37 @@ public class ContextHostingAbstraction extends ContextAbstraction {
 //    private final static char OPT_REASON_SHORT = 'r';
 //    private final static String OPT_REASON_LONG= "reason";
 
+    private final static char OPT_NAME_DATABASE_ID_SHORT = 'd';
+    private final static String OPT_NAME_DATABASE_ID_LONG = "database";
+
+    private final static char OPT_NAME_DBNAME_SHORT = 'n';
+    private final static String OPT_NAME_DBNAME_LONG = "name";
+
+
     private final static char OPT_CONTEXT_ADD_LOGIN_MAPPINGS_SHORT = 'L';
     private final static String OPT_CONTEXT_ADD_LOGIN_MAPPINGS_LONG = "addmapping";
     
     private final static char OPT_CONTEXT_REMOVE_LOGIN_MAPPINGS_SHORT = 'R';
     private final static String OPT_CONTEXT_REMOVE_LOGIN_MAPPINGS_LONG = "removemapping";
+    static final char OPT_FILESTORE_SHORT = 'f';
+    static final String OPT_FILESTORE_LONG = "filestore";
     
     private Option addLoginMappingOption = null;
     private Option removeLoginMappingOption = null;
     
+    private Option databaseIdOption = null;
+    private Option databaseNameOption = null;
+
     private String[] remove_mappings = null;
     private String[] add_mappings = null;
+
+    protected Integer dbid = null;
+    protected String dbname = null;
+    
+    protected Integer filestoreid = null;
+    
+    protected Option targetFilestoreIDOption = null;
+    
 
 //    protected Option maintenanceReasonIDOption = null;
 
@@ -53,6 +76,14 @@ public class ContextHostingAbstraction extends ContextAbstraction {
     
     public void setRemoveMappingOption(final AdminParser parser,final boolean required ){
         this.removeLoginMappingOption = setShortLongOpt(parser, OPT_CONTEXT_REMOVE_LOGIN_MAPPINGS_SHORT,OPT_CONTEXT_REMOVE_LOGIN_MAPPINGS_LONG,"Remove login mappings.Seperated by \",\"",true, convertBooleantoTriState(required));
+    }
+    
+    protected void setDatabaseIDOption(final AdminParser parser) {
+        this.databaseIdOption = setShortLongOpt(parser, OPT_NAME_DATABASE_ID_SHORT,OPT_NAME_DATABASE_ID_LONG,"The id of the database.",true, NeededQuadState.eitheror);
+    }
+
+    protected void setDatabaseNameOption(final AdminParser parser, final NeededQuadState required){
+        this.databaseNameOption = setShortLongOpt(parser, OPT_NAME_DBNAME_SHORT,OPT_NAME_DBNAME_LONG,"Name of the database",true, required); 
     }
     
     protected final void displayDisabledMessage(final String id, final Integer ctxid) {
@@ -157,5 +188,29 @@ public class ContextHostingAbstraction extends ContextAbstraction {
             super.printErrors(id, ctxid, e, parser);
         }
     }
-    
+
+    protected void parseAndSetDatabaseID(final AdminParser parser, final Database db) {
+        final String optionvalue = (String) parser.getOptionValue(this.databaseIdOption);
+        if (null != optionvalue) {
+            dbid = Integer.parseInt(optionvalue);
+            db.setId(dbid);
+        }
+    }
+
+    protected void parseAndSetDatabasename(final AdminParser parser, final Database db) {
+        dbname = (String) parser.getOptionValue(this.databaseNameOption);
+        if (null != dbname) {
+            db.setName(dbname);
+        }
+    }
+
+    protected void setFilestoreIdOption(final AdminParser parser) {
+        this.targetFilestoreIDOption = setShortLongOpt(parser, OPT_FILESTORE_SHORT, OPT_FILESTORE_LONG, "Target filestore id", true, NeededQuadState.needed);
+    }
+
+    protected Filestore parseAndSetFilestoreId(final AdminParser parser) {
+        filestoreid = Integer.parseInt((String) parser.getOptionValue(this.targetFilestoreIDOption));
+        final Filestore fs = new Filestore(filestoreid);
+        return fs;
+    }
 }
