@@ -1,3 +1,7 @@
+* 2007-08-07 - choeger@open-xchange.com
+
+ - Bugfix ID#8679 new admin does not work with log4j
+   
 * 2007-08-06 - manuel.kraft@open-xchange.com
 
  - Bugfix ID#8694: Users which are downgraded to "Basic" are still able to create public folders.
