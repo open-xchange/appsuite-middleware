@@ -76,6 +76,10 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
             throw new ContextExistsException("Context already exists!");
         }        
         
+        if(ctx.getName()!=null && tool.existsContextName(ctx.getName())){
+            throw new InvalidDataException("Context " + ctx.getName() + " already exists!");
+        }
+        
         try {
             if (!admin_user.mandatoryCreateMembersSet()) {
                 throw new InvalidDataException("Mandatory fields in admin user not set: " + admin_user.getUnsetMembers());               
