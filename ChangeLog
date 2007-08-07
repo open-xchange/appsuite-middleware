@@ -1,3 +1,7 @@
+* 2007-08-07 - dennis.sieben@open-xchange.com
+
+ - Bugzilla Bug#8593 Operations by name not possible
+
 * 2007-08-06 - choeger@open-xchange.com
 
   - Bugfix ID#8642 "listusers" command line tool output is limited to three digits
