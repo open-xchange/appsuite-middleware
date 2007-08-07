@@ -17,21 +17,38 @@
 	<property name="version" value="${admin_major}.${admin_minor}.${admin_patch}"/>
 	<property name="masterauthfile" value="mpasswd"/>
 	
+	<!-- all required jars -->
+	<property name="oxserver" value="ox_server.jar"/>
+	<property name="oxlanguages" value="ox_languages.jar"/>
+	<property name="commons-fileupload" value="commons-fileupload.jar"/>
+	<property name="commons-httpclient" value="commons-httpclient-2.0.2.jar"/>
+	<property name="commons-io" value="commons-io.jar"/>
+	<property name="commons-logging" value="commons-logging.jar"/>
+	<property name="concurrent" value="concurrent.jar"/>
+	<property name="activation" value="activation.jar"/>
+	<property name="jcs" value="jcs-1.2.7.9.2.jar"/>
+	<property name="mail" value="mail.jar"/>
+	<property name="junit" value="junit-4.1.jar"/>
+	<property name="mysql-connector" value="mysql-connector-java-3.1.13-bin.jar"/>
+	<property name="jdom" value="jdom.jar"/>
+	<property name="eclipse-osgi" value="org.eclipse.osgi_3.2.2.ox.jar"/>
+	<property name="log4j" value="log4j-1.2.14.jar"/>
+	
+	
 	<path id="project.classpath">
-        <pathelement location="${lib.dir}/ox_server.jar"/>
-        <pathelement location="${lib.dir}/commons-fileupload.jar"/>
-        <pathelement location="${lib.dir}/commons-httpclient-2.0.2.jar"/>
-        <pathelement location="${lib.dir}/commons-io.jar"/>
-        <pathelement location="${lib.dir}/commons-logging.jar"/>
-        <pathelement location="${lib.dir}/concurrent.jar"/>
-        <pathelement location="${lib.dir}/activation.jar"/>
-        <pathelement location="${lib.dir}/jcs-1.2.7.9.2.jar"/>
-        <pathelement location="${lib.dir}/mail.jar"/>
-        <pathelement location="${lib.dir}/jcs-1.2.7.9.2.jar"/>
-        <pathelement location="${lib.dir}/junit-4.1.jar"/>
-        <pathelement location="${lib.dir}/mysql-connector-java-3.1.13-bin.jar"/>
-        <pathelement location="${lib.dir}/jdom.jar"/>
-		<pathelement location="${lib.dir}/org.eclipse.osgi_3.2.2.ox.jar"/>
+        <pathelement location="${lib.dir}/${oxserver}"/>
+        <pathelement location="${lib.dir}/${commons-fileupload}"/>
+        <pathelement location="${lib.dir}/${commons-httpclient}"/>
+        <pathelement location="${lib.dir}/${commons-io}"/>
+        <pathelement location="${lib.dir}/${commons-logging}"/>
+        <pathelement location="${lib.dir}/${concurrent}"/>
+        <pathelement location="${lib.dir}/${activation}"/>
+        <pathelement location="${lib.dir}/${jcs}"/>
+        <pathelement location="${lib.dir}/${mail}"/>
+        <pathelement location="${lib.dir}/${junit}"/>
+        <pathelement location="${lib.dir}/${mysql-connector}"/>
+        <pathelement location="${lib.dir}/${jdom}"/>
+		<pathelement location="${lib.dir}/${eclipse-osgi}"/>
     </path>
 
     <filterset id="pathsubst">
@@ -163,17 +180,18 @@
 		<copy file="META-INF/MANIFEST.MF" tofile="META-INF/MANIFEST.MF.package"/>
 		<manifest mode="update" file="META-INF/MANIFEST.MF.package">
 				<attribute name="Bundle-ClassPath" value=".,
-					 external:$libdir$/ox_server.jar,
-					 external:$libdir$/ox_languages.jar,
-					 external:$libdir$/commons-fileupload.jar,
-					 external:$libdir$/commons-httpclient-2.0.2.jar,
-					 external:$libdir$/commons-io.jar,
-					 external:$libdir$/commons-logging.jar,
-					 external:$libdir$/concurrent.jar,
-					 external:$libdir$/jcs-1.2.7.9.2.jar,
-					 external:$libdir$/jdom.jar,
-					external:$libdir$/mail.jar,
-					 external:$libdir$/mysql-connector-java-3.1.13-bin.jar"/>
+					 external:$libdir$/${oxserver},
+					 external:$libdir$/${oxlanguages},
+					 external:$libdir$/${commons-fileupload},
+					 external:$libdir$/${commons-httpclient},
+					 external:$libdir$/${commons-io},
+					 external:$libdir$/${commons-logging},
+					 external:$libdir$/${concurrent},
+					 external:$libdir$/${jcs},
+					 external:$libdir$/${jdom},
+					 external:$libdir$/${mail},
+					 external:$libdir$/${mysql-connector},
+					 external:$libdir$/${log4j}"/>
 		</manifest>
 	</target>
 
