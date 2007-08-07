@@ -92,7 +92,7 @@ public abstract class DeleteCore extends UserAbstraction {
             parseAndSetUserId(parser, usr);
             parseAndSetUsername(parser, usr);
 
-            successtext = nameOrIdSet(String.valueOf(this.userid), this.username, "user");
+            successtext = nameOrIdSetInt(this.userid, this.username, "user");
 
             final Context ctx = contextparsing(parser);
 
