@@ -85,15 +85,15 @@ public class DeleteFailedException extends AbstractOXException {
 			this.detailNumber = detailNumber;
 		}
 
-		public Category getCategory() {
+		public final Category getCategory() {
 			return category;
 		}
 
-		public int getDetailNumber() {
+		public final int getDetailNumber() {
 			return detailNumber;
 		}
 
-		public String getMessage() {
+		public final String getMessage() {
 			return message;
 		}
 	}

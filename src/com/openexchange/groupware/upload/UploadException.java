@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.groupware.upload;
 
 import com.openexchange.groupware.AbstractOXException;
@@ -56,11 +54,11 @@ import com.openexchange.groupware.Component;
 
 /**
  * UploadException
- * TODO Error codes
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  *
  */
-public class UploadException extends AbstractOXException {
+public final class UploadException extends AbstractOXException {
 
 	private static final long serialVersionUID = 8590042770250274015L;
 	
@@ -103,15 +101,15 @@ public class UploadException extends AbstractOXException {
 			this.detailNumber = detailNumber;
 		}
 
-		public Category getCategory() {
+		public final Category getCategory() {
 			return category;
 		}
 
-		public int getNumber() {
+		public final int getNumber() {
 			return detailNumber;
 		}
 
-		public String getMessage() {
+		public final String getMessage() {
 			return message;
 		}
 	}
