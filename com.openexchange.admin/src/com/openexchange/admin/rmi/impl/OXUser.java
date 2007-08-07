@@ -174,6 +174,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         // SPECIAL USER AUTH CHECK FOR THIS METHOD!
         // check if credentials are from oxadmin or from an user
         try {   
+            
             contextcheck(ctx);
                 
             if(!tool.existsContext(ctx)){           
@@ -188,6 +189,10 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 final NoSuchUserException noSuchUserException = new NoSuchUserException("No such user " + usrdata.getId() + " in context " + ctx.getId());
                 log.error(noSuchUserException.getMessage(), noSuchUserException);
                 throw noSuchUserException;
+            }
+            
+            if(usrdata.getName()!=null  && tool.existsUserName(ctx, usrdata)){
+                throw new InvalidDataException("User " + usrdata.getName() + " already exists in this context");
             }
 
             final int auth_user_id = tool.getUserIDByUsername(ctx, auth.getLogin());
