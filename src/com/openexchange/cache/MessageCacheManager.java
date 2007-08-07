@@ -52,10 +52,8 @@ package com.openexchange.cache;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.locks.Condition;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -102,21 +100,12 @@ public class MessageCacheManager {
 
 	private final JCS msgCache;
 
-	private final Set<CacheKey> blockedMessageMaps;
-
-	private final Lock msgMapLock = new ReentrantLock();
-
-	private final Condition msgMapLockCond = msgMapLock.newCondition();
-
-	private boolean someoneWaiting;
-
 	private MessageCacheManager() throws OXCachingException {
 		super();
 		try {
 			ConfigurationInit.init();
 			Configuration.load();
 			msgCache = JCS.getInstance(MSG_CACHE_REGION_NAME);
-			blockedMessageMaps = new HashSet<CacheKey>();
 		} catch (final CacheException e) {
 			LOG.error(e.getMessage(), e);
 			throw new OXCachingException(OXCachingException.Code.FAILED_INIT, e, MSG_CACHE_REGION_NAME, e.getMessage());
@@ -195,7 +184,7 @@ public class MessageCacheManager {
 	@SuppressWarnings(STR_UNCHECKED)
 	public final MessageCacheObject[] getMessages(final int user, final long[] msgUIDs, final String folder,
 			final Context ctx) {
-		final Map<String, MessageCacheObject> msgMap = (HashMap<String, MessageCacheObject>) msgCache.get(getUserKey(
+		final Map<String, MessageCacheObject> msgMap = (ConcurrentHashMap<String, MessageCacheObject>) msgCache.get(getUserKey(
 				user, ctx));
 		if (msgMap == null) {
 			return null;
@@ -246,14 +235,14 @@ public class MessageCacheManager {
 		if (iter == null) {
 			return;
 		}
-		Map<String, MessageCacheObject> msgMap = (HashMap<String, MessageCacheObject>) msgCache.get(getUserKey(user,
+		Map<String, MessageCacheObject> msgMap = (ConcurrentHashMap<String, MessageCacheObject>) msgCache.get(getUserKey(user,
 				ctx));
 		boolean insert = false;
 		if (msgMap == null) {
 			/*
 			 * Does not exist in cache, yet
 			 */
-			msgMap = new HashMap<String, MessageCacheObject>();
+			msgMap = new ConcurrentHashMap<String, MessageCacheObject>();
 			insert = true;
 		}
 		if (iter.hasSize()) {
@@ -296,9 +285,7 @@ public class MessageCacheManager {
 	}
 
 	/**
-	 * Return s user's message map which is kept in cache. <b>NOTE</b>: Don't
-	 * forget to release message map through
-	 * <code>releaseUserMessageMap(X)</code> method
+	 * Return s user's message map which is kept in cache.
 	 * 
 	 * @param user -
 	 *            the user ID
@@ -311,27 +298,15 @@ public class MessageCacheManager {
 	@SuppressWarnings(STR_UNCHECKED)
 	public final Map<String, MessageCacheObject> getUserMessageMap(final int user, final Context ctx)
 			throws OXCachingException {
-		final CacheKey userKey = getUserKey(user, ctx);
-		msgMapLock.lock();
-		try {
-			while (blockedMessageMaps.contains(userKey)) {
-				someoneWaiting = true;
-				msgMapLockCond.await();
-			}
-		} catch (final InterruptedException e) {
-			LOG.error(e.getMessage(), e);
-		} finally {
-			msgMapLock.unlock();
-		}
-		Map<String, MessageCacheObject> msgMap = (HashMap<String, MessageCacheObject>) msgCache.get(getUserKey(user,
+		Map<String, MessageCacheObject> msgMap = (ConcurrentHashMap<String, MessageCacheObject>) msgCache.get(getUserKey(user,
 				ctx));
 		if (msgMap == null) {
 			/*
 			 * Does not exist in cache, yet
 			 */
-			msgMap = new HashMap<String, MessageCacheObject>();
+			msgMap = new ConcurrentHashMap<String, MessageCacheObject>();
 			try {
-				msgCache.put(userKey, msgMap);
+				msgCache.put(getUserKey(user, ctx), msgMap);
 			} catch (final CacheException e) {
 				throw new OXCachingException(OXCachingException.Code.FAILED_PUT, e, new Object[0]);
 			}
@@ -339,40 +314,7 @@ public class MessageCacheManager {
 		/*
 		 * Return reference
 		 */
-		blockedMessageMaps.add(userKey);
 		return msgMap;
-	}
-
-	/**
-	 * Must be called after obtaining message map through
-	 * <code>getUserMessageMap(X)</code> method
-	 * 
-	 * @param session
-	 *            th esession
-	 */
-	public final void releaseUserMessageMap(final SessionObject session) {
-		releaseUserMessageMap(session.getUserObject().getId(), session.getContext());
-	}
-
-	/**
-	 * Must be called after obtaining message map through
-	 * <code>getUserMessageMap(X)</code> method
-	 * 
-	 * @param user
-	 *            the user ID
-	 * @param ctx
-	 *            the context
-	 */
-	public final void releaseUserMessageMap(final int user, final Context ctx) {
-		blockedMessageMaps.remove(getUserKey(user, ctx));
-		if (someoneWaiting) {
-			msgMapLock.lock();
-			try {
-				msgMapLockCond.signalAll();
-			} finally {
-				msgMapLock.unlock();
-			}
-		}
 	}
 
 	/**
@@ -392,14 +334,14 @@ public class MessageCacheManager {
 		if (msg == null) {
 			return;
 		}
-		Map<String, MessageCacheObject> msgMap = (HashMap<String, MessageCacheObject>) msgCache.get(getUserKey(user,
+		Map<String, MessageCacheObject> msgMap = (ConcurrentHashMap<String, MessageCacheObject>) msgCache.get(getUserKey(user,
 				ctx));
 		boolean insert = false;
 		if (msgMap == null) {
 			/*
 			 * Does not exist in cache, yet
 			 */
-			msgMap = new HashMap<String, MessageCacheObject>();
+			msgMap = new ConcurrentHashMap<String, MessageCacheObject>();
 			insert = true;
 		}
 		msgMap.put(getMsgKey(msgUID, MailFolderObject.prepareFullname(msg.getFolderFullname(), msg.getSeparator())),
@@ -427,7 +369,7 @@ public class MessageCacheManager {
 	 */
 	@SuppressWarnings(STR_UNCHECKED)
 	public final void removeMessage(final int user, final long msgUID, final String folder, final Context ctx) {
-		final Map<String, MessageCacheObject> msgMap = (HashMap<String, MessageCacheObject>) msgCache.get(getUserKey(
+		final Map<String, MessageCacheObject> msgMap = (ConcurrentHashMap<String, MessageCacheObject>) msgCache.get(getUserKey(
 				user, ctx));
 		if (msgMap == null) {
 			return;

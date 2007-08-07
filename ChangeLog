@@ -1,7 +1,11 @@
+* 2007-08-07 - thorben.betten@open-xchange.com
+
+ - Fixed bug when requesting messages from several folders via PUT on mail
+   servlet with action=list
+
 * 2007-08-07 - francisco.laguna@open-xchange.com
 
  - Added license to classes.
-
 
 * 2007-08-06 - marcus.klein@open-xchange.com
 

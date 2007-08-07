@@ -68,6 +68,53 @@ import com.openexchange.groupware.delete.DeleteListener;
  * 
  */
 public final class UserSettingMail implements DeleteListener, Cloneable, Serializable {
+	
+	public static final class Signature implements Cloneable, Serializable {
+
+		/**
+		 * Serial Version UID
+		 */
+		private static final long serialVersionUID = 357223875887317509L;
+
+		private String id;
+
+		private String signature;
+
+		public Signature(final String id, final String signature) {
+			this.id = id;
+			this.signature = signature;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see java.lang.Object#clone()
+		 */
+		@Override
+		public Object clone() {
+			try {
+				final Signature clone = (Signature) super.clone();
+				clone.id = this.id;
+				clone.signature = this.signature;
+				return clone;
+			} catch (final CloneNotSupportedException e) {
+				/*
+				 * Cannot occur since we are cloneable
+				 */
+				LOG.error(e.getMessage(), e);
+				throw new InternalError(e.getMessage());
+			}
+		}
+
+		public String getId() {
+			return id;
+		}
+
+		public String getSignature() {
+			return signature;
+		}
+
+	}
 
 	/**
 	 * serialVersionUID
@@ -282,27 +329,25 @@ public final class UserSettingMail implements DeleteListener, Cloneable, Seriali
 		}
 	}
 
-	/**
-	 * Parses given bit pattern and applies it to this settings
+	/*
+	 * (non-Javadoc)
 	 * 
-	 * @param onOffOptions
-	 *            The bit pattern
+	 * @see com.openexchange.groupware.delete.DeleteListener#deletePerformed(com.openexchange.groupware.delete.DeleteEvent,
+	 *      java.sql.Connection, java.sql.Connection)
 	 */
-	public void parseBits(final int onOffOptions) {
-		displayHtmlInlineContent = ((onOffOptions & INT_DISPLAY_HTML_INLINE_CONTENT) == INT_DISPLAY_HTML_INLINE_CONTENT);
-		useColorQuote = ((onOffOptions & INT_USE_COLOR_QUOTE) == INT_USE_COLOR_QUOTE);
-		showGraphicEmoticons = ((onOffOptions & INT_SHOW_GRAPHIC_EMOTICONS) == INT_SHOW_GRAPHIC_EMOTICONS);
-		hardDeleteMsgs = ((onOffOptions & INT_HARD_DELETE_MSGS) == INT_HARD_DELETE_MSGS);
-		forwardAsAttachment = ((onOffOptions & INT_FORWARD_AS_ATTACHMENT) == INT_FORWARD_AS_ATTACHMENT);
-		appendVCard = ((onOffOptions & INT_APPEND_VCARD) == INT_APPEND_VCARD);
-		notifyOnReadAck = ((onOffOptions & INT_NOTIFY_ON_READ_ACK) == INT_NOTIFY_ON_READ_ACK);
-		msgPreview = ((onOffOptions & INT_MSG_PREVIEW) == INT_MSG_PREVIEW);
-		notifyAppointments = ((onOffOptions & INT_NOTIFY_APPOINTMENTS) == INT_NOTIFY_APPOINTMENTS);
-		notifyTasks = ((onOffOptions & INT_NOTIFY_TASKS) == INT_NOTIFY_TASKS);
-		ignoreOriginalMailTextOnReply = ((onOffOptions & INT_IGNORE_ORIGINAL_TEXT_ON_REPLY) == INT_IGNORE_ORIGINAL_TEXT_ON_REPLY);
-		noCopyIntoStandardSentFolder = ((onOffOptions & INT_NO_COPY_INTO_SENT_FOLDER) == INT_NO_COPY_INTO_SENT_FOLDER);
-		spamEnabled = ((onOffOptions & INT_SPAM_ENABLED) == INT_SPAM_ENABLED);
-		textOnlyCompose = ((onOffOptions & INT_TEXT_ONLY_COMPOSE) == INT_TEXT_ONLY_COMPOSE);
+	public void deletePerformed(final DeleteEvent delEvent, final Connection readCon, final Connection writeCon)
+			throws DeleteFailedException {
+		if (delEvent.getType() == DeleteEvent.TYPE_USER) {
+			try {
+				getInstance().deleteUserSettingMail(delEvent.getId(), delEvent.getContext(), writeCon);
+			} catch (final OXException e) {
+				throw new DeleteFailedException(e);
+			}
+		}
+	}
+
+	public int getAutoLinebreak() {
+		return autoLinebreak;
 	}
 
 	/**
@@ -329,67 +374,33 @@ public final class UserSettingMail implements DeleteListener, Cloneable, Seriali
 		return retval;
 	}
 
-	public boolean isDisplayHtmlInlineContent() {
-		return displayHtmlInlineContent;
+	public String getConfirmedHam() {
+		return confirmedHam;
 	}
 
-	public void setDisplayHtmlInlineContent(final boolean htmlPreview) {
-		this.displayHtmlInlineContent = htmlPreview;
-		modifiedDuringSession = true;
+	public String getConfirmedSpam() {
+		return confirmedSpam;
 	}
 
-	public boolean isShowGraphicEmoticons() {
-		return showGraphicEmoticons;
+	public String[] getDisplayMsgHeaders() {
+		if (displayMsgHeaders == null) {
+			return null;
+		}
+		final String[] retval = new String[displayMsgHeaders.length];
+		System.arraycopy(displayMsgHeaders, 0, retval, 0, displayMsgHeaders.length);
+		return retval;
 	}
 
-	public void setShowGraphicEmoticons(final boolean showGraphicEmoticons) {
-		this.showGraphicEmoticons = showGraphicEmoticons;
-		modifiedDuringSession = true;
+	public int getMsgFormat() {
+		return msgFormat;
 	}
 
-	public boolean isUseColorQuote() {
-		return useColorQuote;
+	public String getReplyToAddr() {
+		return replyToAddr;
 	}
 
-	public void setUseColorQuote(final boolean useColorQuote) {
-		this.useColorQuote = useColorQuote;
-		modifiedDuringSession = true;
-	}
-
-	public boolean isHardDeleteMsgs() {
-		return hardDeleteMsgs;
-	}
-
-	public void setHardDeleteMsgs(final boolean hardDeleteMessages) {
-		this.hardDeleteMsgs = hardDeleteMessages;
-		modifiedDuringSession = true;
-	}
-
-	public boolean isForwardAsAttachment() {
-		return forwardAsAttachment;
-	}
-
-	public void setForwardAsAttachment(final boolean forwardAsAttachment) {
-		this.forwardAsAttachment = forwardAsAttachment;
-		modifiedDuringSession = true;
-	}
-
-	public boolean isAppendVCard() {
-		return appendVCard;
-	}
-
-	public void setAppendVCard(final boolean appendVCard) {
-		this.appendVCard = appendVCard;
-		modifiedDuringSession = true;
-	}
-
-	public boolean isNotifyOnReadAck() {
-		return notifyOnReadAck;
-	}
-
-	public void setNotifyOnReadAck(final boolean notifyOnReadAck) {
-		this.notifyOnReadAck = notifyOnReadAck;
-		modifiedDuringSession = true;
+	public String getSendAddr() {
+		return sendAddr;
 	}
 
 	public Signature[] getSignatures() {
@@ -399,6 +410,228 @@ public final class UserSettingMail implements DeleteListener, Cloneable, Seriali
 		final Signature[] retval = new Signature[signatures.length];
 		System.arraycopy(signatures, 0, retval, 0, signatures.length);
 		return retval;
+	}
+
+	public String getStandardFolder(final int index) {
+		return this.stdFolderFullnames[index];
+	}
+
+	public String getStdDraftsName() {
+		return stdDraftsName;
+	}
+
+	public Lock getStdFolderCreationLock() {
+		return stdFolderCreationLock;
+	}
+
+	public String getStdSentName() {
+		return stdSentName;
+	}
+
+	public String getStdSpamName() {
+		return stdSpamName;
+	}
+
+	public String getStdTrashName() {
+		return stdTrashName;
+	}
+
+	public long getUploadQuota() {
+		return uploadQuota;
+	}
+
+	public long getUploadQuotaPerFile() {
+		return uploadQuotaPerFile;
+	}
+
+	public boolean isAppendVCard() {
+		return appendVCard;
+	}
+
+	public boolean isDisplayHtmlInlineContent() {
+		return displayHtmlInlineContent;
+	}
+
+	public boolean isForwardAsAttachment() {
+		return forwardAsAttachment;
+	}
+
+	public boolean isHardDeleteMsgs() {
+		return hardDeleteMsgs;
+	}
+
+	public boolean isIgnoreOriginalMailTextOnReply() {
+		return ignoreOriginalMailTextOnReply;
+	}
+
+	public boolean isModifiedDuringSession() {
+		return modifiedDuringSession;
+	}
+
+	public boolean isMsgPreview() {
+		return msgPreview;
+	}
+
+	public boolean isNoCopyIntoStandardSentFolder() {
+		return noCopyIntoStandardSentFolder;
+	}
+
+	public boolean isNotifyAppointments() {
+		return notifyAppointments;
+	}
+
+	public boolean isNotifyOnReadAck() {
+		return notifyOnReadAck;
+	}
+
+	public boolean isNotifyTasks() {
+		return notifyTasks;
+	}
+
+	public boolean isShowGraphicEmoticons() {
+		return showGraphicEmoticons;
+	}
+
+	/**
+	 * @return <code>true</code> if both global property for spam enablement
+	 *         <small><b>AND</b></small> user-defined property for spam
+	 *         enablement are turned on; otherwise <code>false</code>
+	 * @throws IMAPException
+	 */
+	public boolean isSpamEnabled() throws IMAPException {
+		return (IMAPProperties.isSpamEnabled() && spamEnabled);
+	}
+
+	public boolean isStdFoldersSetDuringSession() {
+		return stdFoldersSet;
+	}
+
+	public boolean isTextOnlyCompose() {
+		return textOnlyCompose;
+	}
+
+	public boolean isUseColorQuote() {
+		return useColorQuote;
+	}
+
+	/**
+	 * Parses given bit pattern and applies it to this settings
+	 * 
+	 * @param onOffOptions
+	 *            The bit pattern
+	 */
+	public void parseBits(final int onOffOptions) {
+		displayHtmlInlineContent = ((onOffOptions & INT_DISPLAY_HTML_INLINE_CONTENT) == INT_DISPLAY_HTML_INLINE_CONTENT);
+		useColorQuote = ((onOffOptions & INT_USE_COLOR_QUOTE) == INT_USE_COLOR_QUOTE);
+		showGraphicEmoticons = ((onOffOptions & INT_SHOW_GRAPHIC_EMOTICONS) == INT_SHOW_GRAPHIC_EMOTICONS);
+		hardDeleteMsgs = ((onOffOptions & INT_HARD_DELETE_MSGS) == INT_HARD_DELETE_MSGS);
+		forwardAsAttachment = ((onOffOptions & INT_FORWARD_AS_ATTACHMENT) == INT_FORWARD_AS_ATTACHMENT);
+		appendVCard = ((onOffOptions & INT_APPEND_VCARD) == INT_APPEND_VCARD);
+		notifyOnReadAck = ((onOffOptions & INT_NOTIFY_ON_READ_ACK) == INT_NOTIFY_ON_READ_ACK);
+		msgPreview = ((onOffOptions & INT_MSG_PREVIEW) == INT_MSG_PREVIEW);
+		notifyAppointments = ((onOffOptions & INT_NOTIFY_APPOINTMENTS) == INT_NOTIFY_APPOINTMENTS);
+		notifyTasks = ((onOffOptions & INT_NOTIFY_TASKS) == INT_NOTIFY_TASKS);
+		ignoreOriginalMailTextOnReply = ((onOffOptions & INT_IGNORE_ORIGINAL_TEXT_ON_REPLY) == INT_IGNORE_ORIGINAL_TEXT_ON_REPLY);
+		noCopyIntoStandardSentFolder = ((onOffOptions & INT_NO_COPY_INTO_SENT_FOLDER) == INT_NO_COPY_INTO_SENT_FOLDER);
+		spamEnabled = ((onOffOptions & INT_SPAM_ENABLED) == INT_SPAM_ENABLED);
+		textOnlyCompose = ((onOffOptions & INT_TEXT_ONLY_COMPOSE) == INT_TEXT_ONLY_COMPOSE);
+	}
+
+	public void setAppendVCard(final boolean appendVCard) {
+		this.appendVCard = appendVCard;
+		modifiedDuringSession = true;
+	}
+
+	public void setAutoLinebreak(final int autoLineBreak) {
+		this.autoLinebreak = autoLineBreak >= 0 ? autoLineBreak : 0;
+		modifiedDuringSession = true;
+	}
+
+	public void setConfirmedHam(final String confirmedHam) {
+		this.confirmedHam = confirmedHam;
+	}
+
+	public void setConfirmedSpam(final String confirmedSpam) {
+		this.confirmedSpam = confirmedSpam;
+	}
+
+	public void setDisplayHtmlInlineContent(final boolean htmlPreview) {
+		this.displayHtmlInlineContent = htmlPreview;
+		modifiedDuringSession = true;
+	}
+
+	public void setDisplayMsgHeaders(final String[] displayMsgHeaders) {
+		if (displayMsgHeaders == null) {
+			this.displayMsgHeaders = null;
+			modifiedDuringSession = true;
+			return;
+		}
+		this.displayMsgHeaders = new String[displayMsgHeaders.length];
+		System.arraycopy(displayMsgHeaders, 0, this.displayMsgHeaders, 0, displayMsgHeaders.length);
+	}
+
+	public void setForwardAsAttachment(final boolean forwardAsAttachment) {
+		this.forwardAsAttachment = forwardAsAttachment;
+		modifiedDuringSession = true;
+	}
+
+	public void setHardDeleteMsgs(final boolean hardDeleteMessages) {
+		this.hardDeleteMsgs = hardDeleteMessages;
+		modifiedDuringSession = true;
+	}
+
+	public void setIgnoreOriginalMailTextOnReply(final boolean appendOriginalMailTextToReply) {
+		this.ignoreOriginalMailTextOnReply = appendOriginalMailTextToReply;
+		modifiedDuringSession = true;
+	}
+
+	void setModifiedDuringSession(final boolean modifiedDuringSession) {
+		this.modifiedDuringSession = modifiedDuringSession;
+	}
+
+	public void setMsgFormat(final int msgFormat) {
+		this.msgFormat = msgFormat;
+		modifiedDuringSession = true;
+	}
+
+	public void setMsgPreview(final boolean msgPreview) {
+		this.msgPreview = msgPreview;
+		modifiedDuringSession = true;
+	}
+
+	public void setNoCopyIntoStandardSentFolder(final boolean noCopyIntoStandardSentFolder) {
+		this.noCopyIntoStandardSentFolder = noCopyIntoStandardSentFolder;
+		modifiedDuringSession = true;
+	}
+
+	public void setNotifyAppointments(final boolean notifyAppointments) {
+		this.notifyAppointments = notifyAppointments;
+		modifiedDuringSession = true;
+	}
+
+	public void setNotifyOnReadAck(final boolean notifyOnReadAck) {
+		this.notifyOnReadAck = notifyOnReadAck;
+		modifiedDuringSession = true;
+	}
+
+	public void setNotifyTasks(final boolean notifyTasks) {
+		this.notifyTasks = notifyTasks;
+		modifiedDuringSession = true;
+	}
+
+	public void setReplyToAddr(final String replyToAddr) {
+		this.replyToAddr = replyToAddr;
+		modifiedDuringSession = true;
+	}
+
+	public void setSendAddr(final String sendAddr) {
+		this.sendAddr = sendAddr;
+		modifiedDuringSession = true;
+	}
+
+	public void setShowGraphicEmoticons(final boolean showGraphicEmoticons) {
+		this.showGraphicEmoticons = showGraphicEmoticons;
+		modifiedDuringSession = true;
 	}
 
 	public void setSignatures(final Signature[] signatures) {
@@ -412,81 +645,13 @@ public final class UserSettingMail implements DeleteListener, Cloneable, Seriali
 		modifiedDuringSession = true;
 	}
 
-	public int getAutoLinebreak() {
-		return autoLinebreak;
-	}
-
-	public void setAutoLinebreak(final int autoLineBreak) {
-		this.autoLinebreak = autoLineBreak >= 0 ? autoLineBreak : 0;
+	public void setSpamEnabled(final boolean spamEnabled) {
+		this.spamEnabled = spamEnabled;
 		modifiedDuringSession = true;
 	}
 
-	public String[] getDisplayMsgHeaders() {
-		if (displayMsgHeaders == null) {
-			return null;
-		}
-		final String[] retval = new String[displayMsgHeaders.length];
-		System.arraycopy(displayMsgHeaders, 0, retval, 0, displayMsgHeaders.length);
-		return retval;
-	}
-
-	public void setDisplayMsgHeaders(final String[] displayMsgHeaders) {
-		if (displayMsgHeaders == null) {
-			this.displayMsgHeaders = null;
-			modifiedDuringSession = true;
-			return;
-		}
-		this.displayMsgHeaders = new String[displayMsgHeaders.length];
-		System.arraycopy(displayMsgHeaders, 0, this.displayMsgHeaders, 0, displayMsgHeaders.length);
-	}
-
-	public int getMsgFormat() {
-		return msgFormat;
-	}
-
-	public void setMsgFormat(final int msgFormat) {
-		this.msgFormat = msgFormat;
-		modifiedDuringSession = true;
-	}
-
-	public boolean isMsgPreview() {
-		return msgPreview;
-	}
-
-	public void setMsgPreview(final boolean msgPreview) {
-		this.msgPreview = msgPreview;
-		modifiedDuringSession = true;
-	}
-
-	public boolean isStdFoldersSetDuringSession() {
-		return stdFoldersSet;
-	}
-
-	public void setStdFoldersSetDuringSession(final boolean stdFoldersSet) {
-		this.stdFoldersSet = stdFoldersSet;
-		modifiedDuringSession = true;
-	}
-
-	public String getReplyToAddr() {
-		return replyToAddr;
-	}
-
-	public void setReplyToAddr(final String replyToAddr) {
-		this.replyToAddr = replyToAddr;
-		modifiedDuringSession = true;
-	}
-
-	public String getSendAddr() {
-		return sendAddr;
-	}
-
-	public void setSendAddr(final String sendAddr) {
-		this.sendAddr = sendAddr;
-		modifiedDuringSession = true;
-	}
-
-	public String getStdDraftsName() {
-		return stdDraftsName;
+	public void setStandardFolder(final int index, final String fullname) {
+		this.stdFolderFullnames[index] = fullname;
 	}
 
 	public void setStdDraftsName(final String stdDraftsName) {
@@ -494,8 +659,9 @@ public final class UserSettingMail implements DeleteListener, Cloneable, Seriali
 		modifiedDuringSession = true;
 	}
 
-	public String getStdSentName() {
-		return stdSentName;
+	public void setStdFoldersSetDuringSession(final boolean stdFoldersSet) {
+		this.stdFoldersSet = stdFoldersSet;
+		modifiedDuringSession = true;
 	}
 
 	public void setStdSentName(final String stdSentName) {
@@ -503,17 +669,9 @@ public final class UserSettingMail implements DeleteListener, Cloneable, Seriali
 		modifiedDuringSession = true;
 	}
 
-	public String getStdSpamName() {
-		return stdSpamName;
-	}
-
 	public void setStdSpamName(final String stdSpamName) {
 		this.stdSpamName = stdSpamName;
 		modifiedDuringSession = true;
-	}
-
-	public String getStdTrashName() {
-		return stdTrashName;
 	}
 
 	public void setStdTrashName(final String stdTrashName) {
@@ -521,84 +679,9 @@ public final class UserSettingMail implements DeleteListener, Cloneable, Seriali
 		modifiedDuringSession = true;
 	}
 
-	public String getConfirmedHam() {
-		return confirmedHam;
-	}
-
-	public void setConfirmedHam(final String confirmedHam) {
-		this.confirmedHam = confirmedHam;
-	}
-
-	public String getConfirmedSpam() {
-		return confirmedSpam;
-	}
-
-	public void setConfirmedSpam(final String confirmedSpam) {
-		this.confirmedSpam = confirmedSpam;
-	}
-
-	public boolean isNotifyAppointments() {
-		return notifyAppointments;
-	}
-
-	public void setNotifyAppointments(final boolean notifyAppointments) {
-		this.notifyAppointments = notifyAppointments;
-		modifiedDuringSession = true;
-	}
-
-	public boolean isNotifyTasks() {
-		return notifyTasks;
-	}
-
-	public void setNotifyTasks(final boolean notifyTasks) {
-		this.notifyTasks = notifyTasks;
-		modifiedDuringSession = true;
-	}
-
-	public boolean isIgnoreOriginalMailTextOnReply() {
-		return ignoreOriginalMailTextOnReply;
-	}
-
-	public void setIgnoreOriginalMailTextOnReply(final boolean appendOriginalMailTextToReply) {
-		this.ignoreOriginalMailTextOnReply = appendOriginalMailTextToReply;
-		modifiedDuringSession = true;
-	}
-
-	public boolean isNoCopyIntoStandardSentFolder() {
-		return noCopyIntoStandardSentFolder;
-	}
-
-	public void setNoCopyIntoStandardSentFolder(final boolean noCopyIntoStandardSentFolder) {
-		this.noCopyIntoStandardSentFolder = noCopyIntoStandardSentFolder;
-		modifiedDuringSession = true;
-	}
-
-	/**
-	 * @return <code>true</code> if both global property for spam enablement
-	 *         <small><b>AND</b></small> user-defined property for spam
-	 *         enablement are turned on; otherwise <code>false</code>
-	 * @throws IMAPException
-	 */
-	public boolean isSpamEnabled() throws IMAPException {
-		return (IMAPProperties.isSpamEnabled() && spamEnabled);
-	}
-
-	public void setSpamEnabled(final boolean spamEnabled) {
-		this.spamEnabled = spamEnabled;
-		modifiedDuringSession = true;
-	}
-
-	public boolean isTextOnlyCompose() {
-		return textOnlyCompose;
-	}
-
 	public void setTextOnlyCompose(final boolean textOnlyCompose) {
 		this.textOnlyCompose = textOnlyCompose;
 		modifiedDuringSession = true;
-	}
-
-	public long getUploadQuota() {
-		return uploadQuota;
 	}
 
 	public void setUploadQuota(final long uploadQuota) {
@@ -606,96 +689,13 @@ public final class UserSettingMail implements DeleteListener, Cloneable, Seriali
 		modifiedDuringSession = true;
 	}
 
-	public long getUploadQuotaPerFile() {
-		return uploadQuotaPerFile;
-	}
-
 	public void setUploadQuotaPerFile(final long uploadQuotaPerFile) {
 		this.uploadQuotaPerFile = uploadQuotaPerFile;
 		modifiedDuringSession = true;
 	}
 
-	public boolean isModifiedDuringSession() {
-		return modifiedDuringSession;
-	}
-
-	void setModifiedDuringSession(final boolean modifiedDuringSession) {
-		this.modifiedDuringSession = modifiedDuringSession;
-	}
-
-	public void setStandardFolder(final int index, final String fullname) {
-		this.stdFolderFullnames[index] = fullname;
-	}
-
-	public String getStandardFolder(final int index) {
-		return this.stdFolderFullnames[index];
-	}
-
-	public Lock getStdFolderCreationLock() {
-		return stdFolderCreationLock;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.groupware.delete.DeleteListener#deletePerformed(com.openexchange.groupware.delete.DeleteEvent,
-	 *      java.sql.Connection, java.sql.Connection)
-	 */
-	public void deletePerformed(final DeleteEvent delEvent, final Connection readCon, final Connection writeCon)
-			throws DeleteFailedException {
-		if (delEvent.getType() == DeleteEvent.TYPE_USER) {
-			try {
-				getInstance().deleteUserSettingMail(delEvent.getId(), delEvent.getContext(), writeCon);
-			} catch (final OXException e) {
-				throw new DeleteFailedException(e);
-			}
-		}
-	}
-
-	public static final class Signature implements Cloneable, Serializable {
-
-		/**
-		 * Serial Version UID
-		 */
-		private static final long serialVersionUID = 357223875887317509L;
-
-		private String id;
-
-		private String signature;
-
-		public Signature(final String id, final String signature) {
-			this.id = id;
-			this.signature = signature;
-		}
-
-		public String getId() {
-			return id;
-		}
-
-		public String getSignature() {
-			return signature;
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see java.lang.Object#clone()
-		 */
-		@Override
-		public Object clone() {
-			try {
-				final Signature clone = (Signature) super.clone();
-				clone.id = this.id;
-				clone.signature = this.signature;
-				return clone;
-			} catch (final CloneNotSupportedException e) {
-				/*
-				 * Cannot occur since we are cloneable
-				 */
-				LOG.error(e.getMessage(), e);
-				throw new InternalError(e.getMessage());
-			}
-		}
-
+	public void setUseColorQuote(final boolean useColorQuote) {
+		this.useColorQuote = useColorQuote;
+		modifiedDuringSession = true;
 	}
 }
