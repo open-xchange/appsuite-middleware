@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.task.actions;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 
 import com.openexchange.ajax.container.Response;
@@ -58,12 +59,12 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class GetParser extends AbstractAJAXParser {
+public class AllParser extends AbstractAJAXParser {
 
     /**
      * Default constructor.
      */
-    GetParser(final boolean failOnError) {
+    AllParser(boolean failOnError) {
         super(failOnError);
     }
 
@@ -71,8 +72,13 @@ public class GetParser extends AbstractAJAXParser {
      * {@inheritDoc}
      */
     @Override
-    protected GetResponse createResponse(final Response response)
+    protected AllResponse createResponse(final Response response)
         throws JSONException {
-        return new GetResponse(response);
+        final AllResponse retval = new AllResponse(response);
+        if (isFailOnError()) {
+            final JSONArray array = (JSONArray) response.getData();
+            // TODO parse JSON array
+        }
+        return retval;
     }
 }

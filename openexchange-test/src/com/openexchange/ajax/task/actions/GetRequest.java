@@ -70,17 +70,25 @@ public class GetRequest extends AbstractTaskRequest {
      */
     private final int taskId;
 
+    private final boolean failOnError;
+    
     /**
      * Default constructor.
      */
-    public GetRequest(final int folderId, final int taskId) {
+    public GetRequest(final int folderId, final int taskId,
+        final boolean failOnError) {
         super();
         this.folderId = folderId;
         this.taskId = taskId;
+        this.failOnError = failOnError;
     }
 
     public GetRequest(final int folderId, final InsertResponse insert) {
         this(folderId, insert.getId());
+    }
+
+    public GetRequest(final int folderId, final int taskId) {
+        this(folderId, taskId, true);
     }
 
     /**
@@ -113,6 +121,6 @@ public class GetRequest extends AbstractTaskRequest {
      * {@inheritDoc}
      */
     public AbstractAJAXParser getParser() {
-        return new GetParser();
+        return new GetParser(failOnError);
     }
 }

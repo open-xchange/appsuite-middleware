@@ -69,7 +69,7 @@ public abstract class AbstractAJAXParser extends Assert {
     /**
      * Should this parser fail if the response contains an error.
      */
-    final boolean failOnError;
+    private final boolean failOnError;
     
     /**
      * Default constructor.
@@ -107,4 +107,11 @@ public abstract class AbstractAJAXParser extends Assert {
 
     protected abstract AbstractAJAXResponse createResponse(final Response response)
         throws JSONException;
+
+    /**
+     * @return the failOnError
+     */
+    protected boolean isFailOnError() {
+        return failOnError;
+    }
 }

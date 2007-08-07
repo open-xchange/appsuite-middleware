@@ -186,9 +186,10 @@ public final class ConfigTools extends Assert {
      */
     public static TimeZone getTimeZone(final WebConversation conversation,
         final String hostName, final String sessionId) throws IOException,
-        SAXException, JSONException {
-        final String value = readSetting(conversation, hostName, sessionId,
-            "timezone");
+        SAXException, JSONException, AjaxException {
+        final AJAXSession session = new AJAXSession(conversation, sessionId);
+        final String value = ConfigTools.get(session, new GetRequest(GetRequest
+            .Tree.TimeZone)).getString();
         return TimeZone.getTimeZone(value);
     }
 

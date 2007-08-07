@@ -62,10 +62,15 @@ public class AJAXSession {
     private String id;
 
     public AJAXSession() {
-        super();
-        conversation = new WebConversation();
+        this(new WebConversation(), null);
     }
 
+    public AJAXSession(final WebConversation conversation, final String id) {
+        super();
+        this.conversation = conversation;
+        this.id = id;
+    }
+    
     /**
      * @return the conversation
      */

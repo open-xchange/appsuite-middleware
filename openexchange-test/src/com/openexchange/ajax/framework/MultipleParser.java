@@ -12,7 +12,7 @@ import com.openexchange.ajax.container.Response;
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class MultipleResponseParser extends AbstractAJAXParser {
+public class MultipleParser extends AbstractAJAXParser {
 
     private final AJAXRequest[] requests;
 
@@ -20,7 +20,7 @@ public class MultipleResponseParser extends AbstractAJAXParser {
      * @param requests 
      * 
      */
-    public MultipleResponseParser(AJAXRequest[] requests) {
+    public MultipleParser(AJAXRequest[] requests) {
         super();
         this.requests = requests.clone();
     }
@@ -29,7 +29,7 @@ public class MultipleResponseParser extends AbstractAJAXParser {
      * {@inheritDoc}
      */
     @Override
-    public AbstractAJAXResponse parse(final String body) throws JSONException {
+    public MultipleResponse parse(final String body) throws JSONException {
         final Response response = new Response();
         response.setData(new JSONArray(body));
         return createResponse(response);

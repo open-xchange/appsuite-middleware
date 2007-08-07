@@ -79,6 +79,8 @@ public class AJAXClient {
 
     private TimeZone timeZone;
 
+    private int privateTaskFolder = -1;
+
     /**
      * Default constructor.
      */
@@ -115,6 +117,15 @@ public class AJAXClient {
         return timeZone;
     }
 
+    public int getPrivateTaskFolder() throws AjaxException, IOException,
+        SAXException, JSONException {
+        if (-1 == privateTaskFolder) {
+            privateTaskFolder = ConfigTools.get(session, new GetRequest(
+                GetRequest.Tree.PrivateTaskFolder)).getId();
+        }
+        return privateTaskFolder;
+    }
+    
     public enum User {
         User1(Property.LOGIN, Property.PASSWORD);
         private Property login;

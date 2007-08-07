@@ -63,16 +63,10 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
 public class InsertParser extends AbstractAJAXParser {
 
     /**
-     * Remembers if this parser bails out with an error.
-     */
-    private final boolean failOnError;
-
-    /**
      * Default constructor.
      */
     InsertParser(final boolean failOnError) {
         super(failOnError);
-        this.failOnError = failOnError;
     }
 
     /**
@@ -82,14 +76,15 @@ public class InsertParser extends AbstractAJAXParser {
     protected InsertResponse createResponse(final Response response)
         throws JSONException {
         final InsertResponse retval = new InsertResponse(response);
-        final JSONObject data = (JSONObject) response.getData();
-        if (failOnError) {
+        if (isFailOnError()) {
+            final JSONObject data = (JSONObject) response.getData();
             if (data.has(TaskFields.ID)) {
                 final int taskId = data.getInt(TaskFields.ID);
                 assertTrue("Problem while inserting task", taskId > 0);
                 retval.setId(taskId);
             } else {
-                fail(response.getErrorMessage());
+                fail("Missing created object identifier: "
+                    + response.getJSON());
             }
         }
         return retval;

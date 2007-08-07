@@ -49,9 +49,14 @@
 
 package com.openexchange.ajax.task;
 
-import com.openexchange.ajax.framework.AJAXSession;
+import java.io.IOException;
+import java.util.TimeZone;
+
+import org.json.JSONException;
+import org.xml.sax.SAXException;
+
 import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.configuration.AJAXConfig;
+import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * 
@@ -60,42 +65,22 @@ import com.openexchange.configuration.AJAXConfig;
 public class AbstractTaskTest extends AbstractAJAXSession {
 
     /**
-     * Private task folder identifier of the user.
-     */
-    private int privateTaskFolder;
-
-    /**
      * @param name
      */
-    public AbstractTaskTest(String name) {
+    public AbstractTaskTest(final String name) {
         super(name);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        final AJAXSession session = getSession();
-        privateTaskFolder = TaskTools.getPrivateTaskFolder(session
-            .getConversation(), AJAXConfig.getProperty(AJAXConfig.Property
-            .HOSTNAME), session.getId());
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void tearDown() throws Exception {
-        privateTaskFolder = 0;
-        super.tearDown();
     }
 
     /**
      * @return the private task folder of the user.
      */
-    protected int getPrivateTaskFolder() {
-        return privateTaskFolder;
+    protected int getPrivateTaskFolder() throws AjaxException, IOException,
+        SAXException, JSONException {
+        return getClient().getPrivateTaskFolder();
+    }
+
+    protected TimeZone getTimeZone() throws AjaxException, IOException,
+        SAXException, JSONException {
+        return getClient().getTimeZone();
     }
 }

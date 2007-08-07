@@ -47,32 +47,61 @@
  *
  */
 
-package com.openexchange.ajax.task.actions;
+package com.openexchange.ajax.task;
 
-import org.json.JSONException;
+import java.util.TimeZone;
 
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AJAXSession;
+import com.openexchange.ajax.task.actions.DeleteRequest;
+import com.openexchange.ajax.task.actions.DeleteResponse;
+import com.openexchange.ajax.task.actions.GetRequest;
+import com.openexchange.ajax.task.actions.GetResponse;
+import com.openexchange.ajax.task.actions.InsertRequest;
+import com.openexchange.ajax.task.actions.InsertResponse;
+import com.openexchange.groupware.tasks.Task;
 
 /**
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class GetParser extends AbstractAJAXParser {
+public class InsertTest extends AbstractTaskTest {
 
+    private AJAXClient client;
+    
     /**
-     * Default constructor.
+     * @param name
      */
-    GetParser(final boolean failOnError) {
-        super(failOnError);
+    public InsertTest(final String name) {
+        super(name);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected GetResponse createResponse(final Response response)
-        throws JSONException {
-        return new GetResponse(response);
+    protected void setUp() throws Exception {
+        super.setUp();
+        client = getClient();
+    }
+
+    /**
+     * Tests inserting a private task.
+     * @throws Throwable if an error occurs.
+     */
+    public void testInsertPrivateTask() throws Throwable {
+        final int folderId = client.getPrivateTaskFolder();
+        final AJAXSession session = client.getSession();
+        final TimeZone timeZone = client.getTimeZone();
+        final Task task = Create.createTask();
+        task.setParentFolderID(folderId);
+        final InsertResponse insertR = TaskTools.insert(session,
+            new InsertRequest(task, timeZone));
+        final GetResponse getR = TaskTools.get(session, new GetRequest(folderId,
+            insertR));
+        final Task reload = getR.getTask(timeZone);
+        TaskTools.compareAttributes(task, reload);
+        final DeleteResponse deleteR = TaskTools.delete(session,
+            new DeleteRequest(reload));
     }
 }

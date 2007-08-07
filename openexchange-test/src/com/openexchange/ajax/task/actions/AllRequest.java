@@ -49,30 +49,82 @@
 
 package com.openexchange.ajax.task.actions;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.json.JSONException;
 
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.AJAXServlet;
 
 /**
- * 
+ * Contains the data for an task all request.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class GetParser extends AbstractAJAXParser {
+public class AllRequest extends AbstractTaskRequest {
+
+    private final int folderId;
+
+    private final int[] columns;
+
+    private final int sort;
+
+    private final String order;
 
     /**
      * Default constructor.
      */
-    GetParser(final boolean failOnError) {
-        super(failOnError);
+    public AllRequest(final int folderId, final int[] columns, final int sort,
+        final String order) {
+        super();
+        this.folderId = folderId;
+        this.columns = columns;
+        this.sort = sort;
+        this.order = order;
     }
 
     /**
      * {@inheritDoc}
      */
-    @Override
-    protected GetResponse createResponse(final Response response)
-        throws JSONException {
-        return new GetResponse(response);
+    public Object getBody() throws JSONException {
+        return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Method getMethod() {
+        return Method.GET;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Parameter[] getParameters() {
+        final List<Parameter> params = new ArrayList<Parameter>();
+        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet
+            .ACTION_ALL));
+        params.add(new Parameter(AJAXServlet.PARAMETER_FOLDERID, String.valueOf(
+            folderId)));
+        final StringBuilder columnSB = new StringBuilder();
+        for (int i : columns) {
+            columnSB.append(i);
+            columnSB.append(',');
+        }
+        columnSB.delete(columnSB.length() - 1, columnSB.length());
+        params.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, columnSB
+            .toString()));
+        if (null != order) {
+            params.add(new Parameter(AJAXServlet.PARAMETER_SORT, String.valueOf(
+                sort)));
+            params.add(new Parameter(AJAXServlet.PARAMETER_ORDER, order));
+        }
+        return params.toArray(new Parameter[params.size()]);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public AllParser getParser() {
+        return new AllParser(true);
     }
 }

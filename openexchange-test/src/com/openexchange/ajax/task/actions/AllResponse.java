@@ -49,30 +49,20 @@
 
 package com.openexchange.ajax.task.actions;
 
-import org.json.JSONException;
-
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class GetParser extends AbstractAJAXParser {
+public class AllResponse extends AbstractAJAXResponse {
 
     /**
-     * Default constructor.
+     * @param response
      */
-    GetParser(final boolean failOnError) {
-        super(failOnError);
+    public AllResponse(final Response response) {
+        super(response);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected GetResponse createResponse(final Response response)
-        throws JSONException {
-        return new GetResponse(response);
-    }
 }

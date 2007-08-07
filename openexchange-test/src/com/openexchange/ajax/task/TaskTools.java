@@ -80,6 +80,8 @@ import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.parser.TaskParser;
 import com.openexchange.ajax.task.actions.AbstractTaskRequest;
+import com.openexchange.ajax.task.actions.AllRequest;
+import com.openexchange.ajax.task.actions.AllResponse;
 import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.DeleteResponse;
 import com.openexchange.ajax.task.actions.GetRequest;
@@ -131,6 +133,7 @@ public final class TaskTools extends Assert {
      * @throws SAXException if a SAX error occurs.
      * @throws JSONException if parsing of serialized json fails.
      * @throws OXException if reading the folders fails.
+     * @deprecated Use {@link AJAXClient#getPrivateTaskFolder()}.
      */
     public static int getPrivateTaskFolder(final WebConversation conversation,
         final String hostName, final String sessionId)
@@ -155,7 +158,7 @@ public final class TaskTools extends Assert {
      */
     public static Response insertTask(final WebConversation conversation,
         final String hostName, final String sessionId, final Task task)
-        throws JSONException, IOException, SAXException {
+        throws JSONException, IOException, SAXException, AjaxException {
         LOG.trace("Inserting task.");
         final TimeZone timezone = ConfigTools.getTimeZone(conversation,
             hostName, sessionId);
@@ -228,7 +231,7 @@ public final class TaskTools extends Assert {
     public static Response updateTask(final WebConversation conversation,
         final String hostName, final String sessionId, final int folderId,
         final Task task, final Date lastModified) throws JSONException,
-        IOException, SAXException {
+        IOException, SAXException, AjaxException {
         final TimeZone timeZone = getUserTimeZone(conversation, hostName,
             sessionId);
 		final JSONObject jsonObj = new JSONObject();
@@ -245,7 +248,7 @@ public final class TaskTools extends Assert {
     
     public static TimeZone getUserTimeZone(final WebConversation conversation,
         final String hostName, final String sessionId) throws IOException,
-        SAXException, JSONException {
+        SAXException, JSONException, AjaxException {
         return ConfigTools.getTimeZone(conversation, hostName, sessionId);
     }
 
@@ -255,7 +258,7 @@ public final class TaskTools extends Assert {
     public static Response getTask(final WebConversation conversation,
         final String hostName, final String sessionId, final int folderId,
         final int taskId) throws IOException, SAXException, JSONException,
-        OXException {
+        OXException, AjaxException {
         LOG.trace("Getting task.");
         final WebRequest req = new GetMethodWebRequest(AbstractAJAXTest.PROTOCOL
             + hostName + TASKS_URL);
@@ -325,6 +328,9 @@ public final class TaskTools extends Assert {
         return (DeleteResponse) Executor.execute(session, request);
     }
     
+    /**
+     * @deprecated use {@link #all(AJAXSession, AllRequest)}.
+     */
     public static Response getAllTasksInFolder(
         final WebConversation conversation, final String hostName,
         final String sessionId, final int folderId, final int[] columns,
@@ -357,6 +363,12 @@ public final class TaskTools extends Assert {
         final Response response = Response.parse(body);
         assertFalse(response.getErrorMessage(), response.hasError());
         return response;
+    }
+
+    public static AllResponse all(final AJAXSession session,
+        final AllRequest request) throws AjaxException, IOException,
+        SAXException, JSONException {
+        return (AllResponse) Executor.execute(session, request);
     }
 
     public static Response getUpdatedTasks(final WebConversation conversation,
@@ -533,5 +545,51 @@ public final class TaskTools extends Assert {
         final int taskId = data.getInt(TaskFields.ID);
         assertTrue("Problem while inserting task", taskId > 0);
         return taskId;
+    }
+
+    public static void compareAttributes(final Task task, final Task reload) {
+        assertEquals("Title differs", task.containsTitle(),
+            reload.containsTitle());
+        assertEquals("Title differs", task.getTitle(), reload.getTitle());
+        assertEquals("Private Flag differs", task.containsPrivateFlag(),
+            reload.containsPrivateFlag());
+        /* Not implemented in parser
+        assertEquals("Creation date differs", task.containsCreationDate(),
+            reload.containsCreationDate());
+        assertEquals("Creation date differs", task.getCreationDate(),
+            reload.getCreationDate());
+        assertEquals("Last modified differs", task.containsLastModified(),
+            reload.containsLastModified());
+        assertEquals("Last modified differs", task.getLastModified(),
+            reload.getLastModified());
+        */
+        assertEquals("Start date differs", task.containsStartDate(),
+            reload.containsStartDate());
+        assertEquals("Start date differs", task.getStartDate(),
+            reload.getStartDate());
+        assertEquals("End date differs", task.containsEndDate(),
+            reload.containsEndDate());
+        assertEquals("End date differs", task.getEndDate(),
+            reload.getEndDate());
+        /*
+        assertEquals("After complete differs", task.containsAfterComplete(),
+            reload.containsAfterComplete());
+        assertEquals("After complete differs", task.getAfterComplete(),
+            reload.getAfterComplete());
+        */
+        /*
+        task.setNote("Description");
+        task.setStatus(Task.NOT_STARTED); //FIXME!
+        task.setPriority(Task.NORMAL);
+        task.setCategories("Categories");
+        task.setTargetDuration(1440);
+        task.setActualDuration(1440);
+        task.setTargetCosts(1.0f);
+        task.setActualCosts(1.0f);
+        task.setCurrency("\u20ac");
+        task.setTripMeter("trip meter");
+        task.setBillingInformation("billing information");
+        task.setCompanies("companies");
+        */
     }
 }

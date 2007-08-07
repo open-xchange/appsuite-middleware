@@ -75,7 +75,7 @@ public class GetResponse extends AbstractAJAXResponse {
 
     public int getId() {
         fetchValue();
-        return -1;
+        return (Integer) value;
     }
 
     public String getString() {

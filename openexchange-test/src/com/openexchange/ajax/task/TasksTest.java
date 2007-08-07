@@ -68,7 +68,6 @@ import org.xml.sax.SAXException;
 import com.meterware.httpunit.WebConversation;
 import com.openexchange.ajax.AbstractAJAXTest;
 import com.openexchange.ajax.ContactTest;
-import com.openexchange.ajax.FolderTest;
 import com.openexchange.ajax.config.ConfigTools;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.TaskFields;
@@ -102,27 +101,6 @@ public class TasksTest extends AbstractAJAXTest {
      */
     public TasksTest(final String name) {
         super(name);
-    }
-
-    /**
-     * Tests inserting a private task.
-     * @throws Throwable if an error occurs.
-     */
-    public void testInsertPrivateTask() throws Throwable {
-        final int folderId = TaskTools.getPrivateTaskFolder(
-            getWebConversation(), getHostName(), getSessionId());
-        final Task task = Create.createTask();
-        final int taskId = Create.createPrivateTask(getWebConversation(),
-            getHostName(), getSessionId(), folderId, task);
-
-        final Response response = getTask(getWebConversation(), getHostName(),
-            getSessionId(), folderId, taskId);
-        final Task reload = (Task) response.getData();
-        compareAttributes(task, reload);
-        Date lastModified = response.getTimestamp();
-
-        deleteTask(getWebConversation(), getHostName(), getSessionId(),
-            lastModified, folderId, taskId);
     }
 
     /**
@@ -690,52 +668,6 @@ public class TasksTest extends AbstractAJAXTest {
         }
         participants = extractByRandom(participants, count);
         return participants;
-    }
-
-    public void compareAttributes(final Task task, final Task reload) {
-        assertEquals("Title differs", task.containsTitle(),
-            reload.containsTitle());
-        assertEquals("Title differs", task.getTitle(), reload.getTitle());
-        assertEquals("Private Flag differs", task.containsPrivateFlag(),
-            reload.containsPrivateFlag());
-        /* Not implemented in parser
-        assertEquals("Creation date differs", task.containsCreationDate(),
-            reload.containsCreationDate());
-        assertEquals("Creation date differs", task.getCreationDate(),
-            reload.getCreationDate());
-        assertEquals("Last modified differs", task.containsLastModified(),
-            reload.containsLastModified());
-        assertEquals("Last modified differs", task.getLastModified(),
-            reload.getLastModified());
-        */
-        assertEquals("Start date differs", task.containsStartDate(),
-            reload.containsStartDate());
-        assertEquals("Start date differs", task.getStartDate(),
-            reload.getStartDate());
-        assertEquals("End date differs", task.containsEndDate(),
-            reload.containsEndDate());
-        assertEquals("End date differs", task.getEndDate(),
-            reload.getEndDate());
-        /*
-        assertEquals("After complete differs", task.containsAfterComplete(),
-            reload.containsAfterComplete());
-        assertEquals("After complete differs", task.getAfterComplete(),
-            reload.getAfterComplete());
-        */
-        /*
-        task.setNote("Description");
-        task.setStatus(Task.NOT_STARTED); //FIXME!
-        task.setPriority(Task.NORMAL);
-        task.setCategories("Categories");
-        task.setTargetDuration(1440);
-        task.setActualDuration(1440);
-        task.setTargetCosts(1.0f);
-        task.setActualCosts(1.0f);
-        task.setCurrency("\u20ac");
-        task.setTripMeter("trip meter");
-        task.setBillingInformation("billing information");
-        task.setCompanies("companies");
-        */
     }
 
     /**

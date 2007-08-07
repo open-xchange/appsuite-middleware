@@ -89,7 +89,7 @@ public class Bug7377Test extends AbstractTaskTest {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        client1 = new AJAXClient(getSession());
+        client1 = getClient();
     }
 
     /**
@@ -102,7 +102,7 @@ public class Bug7377Test extends AbstractTaskTest {
         task.setTitle("Test bug #8504");
         final int folderId = getPrivateTaskFolder();
         task.setParentFolderID(folderId);
-        final AJAXSession session = getSession();
+        final AJAXSession session = client1.getSession();
         final InsertResponse iResponse = TaskTools.insert(session,
             new InsertRequest(task, client1.getTimeZone()));
         task.setObjectID(iResponse.getId());

@@ -56,12 +56,17 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.ajax.config.ConfigTools;
+import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.MultipleRequest;
 import com.openexchange.ajax.framework.MultipleResponse;
 import com.openexchange.ajax.task.actions.AbstractTaskRequest;
+import com.openexchange.ajax.task.actions.AllRequest;
+import com.openexchange.ajax.task.actions.AllResponse;
 import com.openexchange.ajax.task.actions.DeleteRequest;
+import com.openexchange.ajax.task.actions.GetRequest;
+import com.openexchange.ajax.task.actions.GetResponse;
 import com.openexchange.ajax.task.actions.InsertRequest;
 import com.openexchange.ajax.task.actions.InsertResponse;
 import com.openexchange.configuration.AJAXConfig;
@@ -78,7 +83,7 @@ public final class AllTest extends AbstractTaskTest {
      */
     private static final Log LOG = LogFactory.getLog(AllTest.class);
 
-    private TimeZone timeZone;
+    private static final int NUMBER = 10;
     
     /**
      * Default constructor.
@@ -88,49 +93,34 @@ public final class AllTest extends AbstractTaskTest {
         super(name);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        final AJAXSession session = getSession();
-        timeZone = ConfigTools.getTimeZone(session.getConversation(), AJAXConfig
-            .getProperty(AJAXConfig.Property.HOSTNAME), session.getId());
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void tearDown() throws Exception {
-        timeZone = null;
-        super.tearDown();
-    }
-
     public void testAll() throws Throwable {
-        final AbstractTaskRequest[] inserts = new AbstractTaskRequest[10];
+        final InsertRequest[] inserts = new InsertRequest[NUMBER];
         for (int i = 0; i < inserts.length; i++) {
             final Task task = new Task();
             task.setTitle("Task " + (i + 1));
             task.setParentFolderID(getPrivateTaskFolder());
-            inserts[i] = new InsertRequest(task, timeZone);
+            task.setAlarm(new Date());
+            // TODO add participants
+            inserts[i] = new InsertRequest(task, getTimeZone());
         }
         final MultipleResponse mInsert = (MultipleResponse) Executor.execute(
             getSession(), new MultipleRequest(inserts));
-        for (int i = 0; i < inserts.length; i++) {
-            final InsertResponse ins = (InsertResponse) mInsert
-                .getResponse(i);
+        final GetRequest[] gets = new GetRequest[NUMBER];
+        for (int i = 0; i < gets.length; i++) {
+            final InsertResponse ins = (InsertResponse) mInsert.getResponse(i);
             LOG.info(ins.getId());
+            gets[i] = new GetRequest(getPrivateTaskFolder(), ins);
         }
-        // TODO Get for timestamp
-        // TODO List
-
+        final MultipleResponse mGet = (MultipleResponse) Executor.execute(
+            getSession(), new MultipleRequest(gets));
+        final int[] columns = new int[] { Task.TITLE, Task.OBJECT_ID,
+            Task.LAST_MODIFIED, Task.FOLDER_ID, Task.PARTICIPANTS, Task.ALARM };
+        final AllResponse allR = TaskTools.all(getSession(), new AllRequest(
+            getPrivateTaskFolder(), columns, 0, null));
         final DeleteRequest[] deletes = new DeleteRequest[inserts.length];
         for (int i = 0; i < inserts.length; i++) {
-            deletes[i] = new DeleteRequest(getPrivateTaskFolder(),
-                ((InsertResponse) mInsert.getResponse(i)).getId(),
-                new Date());
+            final GetResponse get = (GetResponse) mGet.getResponse(i);
+            deletes[i] = new DeleteRequest(get.getTask(getTimeZone()));
         }
         final MultipleResponse mDelete = (MultipleResponse) Executor.execute(
             getSession(), new MultipleRequest(deletes)); 

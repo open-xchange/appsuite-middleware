@@ -61,6 +61,7 @@ import org.xml.sax.SAXException;
 import com.meterware.httpunit.WebConversation;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.tools.servlet.AjaxException;
 
 import junit.framework.Assert;
 
@@ -77,24 +78,33 @@ public class Create extends Assert {
         super();
     }
 
+    /**
+     * @deprecated use {@link InsertRequest} and {@link InsertResponse}.
+     */
     public static int createPrivateTask(final WebConversation conv,
         final String host, final String session, final int folderId,
         final Task task) throws OXException, IOException, SAXException,
-        JSONException {
+        JSONException, AjaxException {
         task.setParentFolderID(folderId);
         return extractInsertId(insertTask(conv, host, session, task));
     }
     
+    /**
+     * @deprecated use {@link InsertRequest} and {@link InsertResponse}.
+     */
     public static int createPrivateTask(final WebConversation conv,
         final String host, final String session, final int folderId)
-        throws OXException, IOException, SAXException, JSONException {
+        throws OXException, IOException, SAXException, JSONException, AjaxException {
         final Task task = createTask();
         return createPrivateTask(conv, host, session, folderId, task);
     }
 
+    /**
+     * @deprecated use {@link InsertRequest} and {@link InsertResponse}.
+     */
     public static int createPrivateTask(final WebConversation conv,
         final String host, final String session) throws OXException,
-        IOException, SAXException, JSONException {
+        IOException, SAXException, JSONException, AjaxException {
         final int folderId = TaskTools.getPrivateTaskFolder(conv, host,
             session);
         return createPrivateTask(conv, host, session, folderId);

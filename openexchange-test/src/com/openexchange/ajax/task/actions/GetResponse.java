@@ -81,8 +81,8 @@ public class GetResponse extends AbstractAJAXResponse {
     public Task getTask(final TimeZone timeZone) throws OXException {
         if (null == task) {
             final Task parsed = new Task();
-            new TaskParser(timeZone).parse(parsed, (JSONObject) getResponse()
-                .getData());
+            new TaskParser(true, timeZone).parse(parsed,
+                (JSONObject) getResponse().getData());
             this.task = parsed;
         }
         return task;

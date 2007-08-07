@@ -107,7 +107,8 @@ public class GetRequest extends AbstractConfigRequest {
 
     public enum Tree {
         Identifier("/identifier"),
-        TimeZone("/timezone");
+        TimeZone("/timezone"),
+        PrivateTaskFolder("/folder/tasks");
         private String path;
         private Tree(final String path) {
             this.path=path;
