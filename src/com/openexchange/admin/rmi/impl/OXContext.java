@@ -58,9 +58,14 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         
         setIdOrGetIDFromNameAndIdObject(null, ctx);
         log.debug(ctx);
+        
         try {
             if (!tool.existsContext(ctx)) {
                 throw new NoSuchContextException();
+            }
+            
+            if(ctx.getName()!=null && tool.existsContext(ctx)){
+                throw new InvalidDataException("Context " + ctx.getName() + " already exists!");
             }
             
             // check if he wants to change the filestore id, if yes, make sure filestore with this id exists in the system

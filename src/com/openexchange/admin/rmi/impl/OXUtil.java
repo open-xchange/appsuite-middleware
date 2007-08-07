@@ -220,6 +220,11 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             if (!db.mandatoryCreateMembersSet()) {
                 throw new InvalidDataException("Mandatory fields not set: "+ db.getUnsetMembers());
             }
+            
+            if(db.getName()!=null && tool.existsDatabaseName(db.getName())){
+                throw new InvalidDataException("Database " + db.getName() + " already exists!");
+            }            
+            
         } catch (EnforceableDataObjectException e) {
             throw new InvalidDataException(e.getMessage());
         }
@@ -439,19 +444,15 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
         log.debug(db.toString());
 
         final String name = db.getName();
-        // At this time the id isn't yet got through the name so we check only for a already
-        // existing name if have have got both (name and id) from the command line. Because
-        // only in that case the name will be used for the change.
-        if (null != name && null != db.getId()) {
-            if (tool.existsDatabaseName(name)) {
-                throw new InvalidDataException("Database with name " + name + " already exists");
-            }
-        }
-        
+                
         setIdOrGetIDFromNameAndIdObject(null, db);
         final Integer id = db.getId();
         if (!tool.existsDatabase(id)) {
             throw new InvalidDataException("No such database with id " + id);
+        }
+        
+        if(db.getName()!=null && tool.existsDatabaseName(db)){
+            throw new InvalidDataException("Database " + db.getName() + " already exists!");
         }
 
         if (db.getClusterWeight() != null) {
