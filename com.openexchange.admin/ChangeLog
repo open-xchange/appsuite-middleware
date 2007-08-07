@@ -1,3 +1,7 @@
+* 2007-08-07 - dennis.sieben@open-xchange.com
+
+ - Bugzilla Bug#8593 Operations by name not possible
+
 * 2007-08-07 - choeger@open-xchange.com
 
  - Bugfix ID#8679 new admin does not work with log4j
