@@ -70,12 +70,43 @@ public class SessionObjectWrapper {
 
 	private static final Log LOG = LogFactory.getLog(SessionObjectWrapper.class);
 
+	/**
+	 * Creates a dummy instance of {@link SessionObject} assigned to user whose
+	 * ID matches given <code>user_id</code>
+	 * 
+	 * @param user_id
+	 *            The user ID
+	 * @param context_id
+	 *            The context ID
+	 * @param sessionobjectidentifier
+	 *            The session identifier
+	 * @return a dummy instance of {@link SessionObject}
+	 * @throws LdapException
+	 *             If user data could not be loaded
+	 * @throws ContextException
+	 *             If corresponding {@link Context} object could not be loaded
+	 *             from given <code>context_id</code>
+	 */
 	public static final SessionObject createSessionObject(final int user_id, final int context_id,
 			final String sessionobjectidentifier) throws LdapException, ContextException {
 		final Context context = ContextStorage.getInstance().getContext(context_id);
 		return createSessionObject(user_id, context, sessionobjectidentifier);
 	}
 
+	/**
+	 * Creates a dummy instance of {@link SessionObject} assigned to user whose
+	 * ID matches given <code>user_id</code>
+	 * 
+	 * @param user_id
+	 *            The user ID
+	 * @param ctx
+	 *            The context
+	 * @param sessionobjectidentifier
+	 *            The session identifier
+	 * @return a dummy instance of {@link SessionObject}
+	 * @throws LdapException
+	 *             If user data could not be loaded
+	 */
 	public static final SessionObject createSessionObject(final int user_id, final Context ctx,
 			final String sessionobjectidentifier) throws LdapException {
 		final SessionObject so = new SessionObject(sessionobjectidentifier);
