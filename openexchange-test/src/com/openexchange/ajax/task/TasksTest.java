@@ -105,42 +105,6 @@ public class TasksTest extends AbstractAJAXTest {
     }
 
     /**
-     * Tests counting of tasks in the private folder.
-     * @throws Throwable if an error occurs.
-     */
-    public void testCountPrivateFolder() throws Throwable {
-        final int folderId = TaskTools.getPrivateTaskFolder(getWebConversation(),
-            getHostName(), getSessionId());
-
-        final int number = countTasks(getWebConversation(), getHostName(),
-            getSessionId(), folderId);
-        LOG.trace(number);
-        assertTrue("Number of tasks is not okay.", number >= 0);
-    }
-
-    /**
-     * Tests counting of tasks in a public folder.
-     * @throws Throwable if an error occurs.
-     */
-    public void notestCountPublicFolder() throws Throwable {
-        final List<FolderObject> folders = FolderTest.getSubfolders(
-            getWebConversation(), getHostName(), getSessionId(), "2", false);
-        int folderId = -1;
-        for (FolderObject folder : folders) {
-            if (folder.getModule() == FolderObject.TASK
-                && folder.getObjectID() >= FolderObject.MIN_FOLDER_ID) {
-                folderId = folder.getObjectID();
-            }
-        }
-        assertTrue("Can't find public task folder.", folderId > 0);
-
-        final int number = countTasks(getWebConversation(), getHostName(),
-            getSessionId(), folderId);
-        LOG.trace(number);
-        assertTrue("Number of tasks is not okay.", number >= 0);
-    }
-
-    /**
      * Tests inserting a private task.
      * @throws Throwable if an error occurs.
      */

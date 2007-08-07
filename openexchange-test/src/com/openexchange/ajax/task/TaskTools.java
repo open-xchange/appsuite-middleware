@@ -325,25 +325,6 @@ public final class TaskTools extends Assert {
         return (DeleteResponse) Executor.execute(session, request);
     }
     
-    public static int countTasks(final WebConversation conversation,
-        final String hostName, final String sessionId, final int folderId)
-        throws IOException, SAXException, JSONException {
-        LOG.trace("Counting tasks.");
-        final WebRequest req = new GetMethodWebRequest(AbstractAJAXTest.PROTOCOL
-            + hostName + TASKS_URL);
-        req.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
-        req.setParameter(AJAXServlet.PARAMETER_ACTION,
-            AJAXServlet.ACTION_COUNT);
-        req.setParameter(AJAXServlet.PARAMETER_FOLDERID,
-            String.valueOf(folderId));
-        final WebResponse resp = conversation.getResponse(req);
-        assertEquals("Response code is not okay.", HttpServletResponse.SC_OK,
-            resp.getResponseCode());
-        final String body = resp.getText();
-        LOG.trace("Response body: " + body);
-        return (Integer) Response.parse(body).getData();
-    }
-
     public static Response getAllTasksInFolder(
         final WebConversation conversation, final String hostName,
         final String sessionId, final int folderId, final int[] columns,
