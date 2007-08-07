@@ -57,8 +57,10 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.rmi.dataobjects.Context;
+import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Group;
 import com.openexchange.admin.rmi.dataobjects.Resource;
+import com.openexchange.admin.rmi.dataobjects.Server;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
@@ -219,8 +221,19 @@ public abstract class OXToolStorageInterface {
 
     public abstract boolean existsUser(final Context ctx, final User user) throws StorageException;    
     
+    
     /**
-     * Checks if given name is already used for a group in given context.
+     * Checks via group id and group name if it already exists in this context. Should be used in change method!
+     * @param ctx
+     * @param grp
+     * @return
+     * @throws StorageException
+     */
+    public abstract boolean existsGroupName(final Context ctx, final Group grp) throws StorageException;
+    
+    
+    /**
+     * Checks if given name is already used for a group in given context.Should be used in create method!
      * @param ctx
      * @param groupName
      * @return
@@ -229,7 +242,16 @@ public abstract class OXToolStorageInterface {
     public abstract boolean existsGroupName(final Context ctx, final String groupName) throws StorageException;
     
     /**
-     * Checks if given name is already used for an user in given context.
+     * Checks via user id and user name if it already exists in this context. Should be used in change method!
+     * @param ctx
+     * @param usr
+     * @return
+     * @throws StorageException
+     */
+    public abstract boolean existsUserName(final Context ctx, final User usr) throws StorageException;
+    
+    /**
+     * Checks if given name is already used for an user in given context.Should be used in create method!
      * @param ctx
      * @param userName
      * @return
@@ -238,7 +260,15 @@ public abstract class OXToolStorageInterface {
     public abstract boolean existsUserName(final Context ctx, final String userName) throws StorageException;
     
     /**
-     * Checks if given name is already used!
+     * Checks via server id and server name if it already exists. Should be used in change method!
+     * @param srv
+     * @return
+     * @throws StorageException
+     */
+    public abstract boolean existsServerName(final Server srv) throws StorageException;
+    
+    /**
+     * Checks if given name is already used!Should be used in create method!
      * @param serverName
      * @return
      * @throws StorageException
@@ -246,7 +276,15 @@ public abstract class OXToolStorageInterface {
     public abstract boolean existsServerName(final String serverName) throws StorageException;
     
     /**
-     *  Checks if given name is already used!
+     * Checks via database id and database name if it already exists. Should be used in change method!
+     * @param db
+     * @return
+     * @throws StorageException
+     */
+    public abstract boolean existsDatabaseName(final Database db) throws StorageException;
+    
+    /**
+     *  Checks if given name is already used!Should be used in create method!
      * @param databaseName
      * @return
      * @throws StorageException
@@ -254,16 +292,34 @@ public abstract class OXToolStorageInterface {
     public abstract boolean existsDatabaseName(final String databaseName) throws StorageException;
     
     /**
-     *  Checks if given name is already used for resource in given context!
+     * Checks via resource id and resource name if it already exists. Should be used in change method!
+     * @param ctx
+     * @param res
+     * @return
+     * @throws StorageException
+     */
+    public abstract boolean existsResourceName(final Context ctx, final Resource res) throws StorageException;
+    
+    /**
+     *  Checks if given name is already used for resource in given context!Should be used in create method!
      * @param ctx
      * @param resourceName
      * @return
      * @throws StorageException
      */
     public abstract boolean existsResourceName(final Context ctx, final String resourceName) throws StorageException;
+            
+    /**
+     * Checks via context id and context name if it already exists. Should be used in change method!
+     * @param ctx
+     * @return
+     * @throws StorageException
+     */
+    public abstract boolean existsContextName(final Context ctx) throws StorageException;
+    
     
     /**
-     * Checks if given context name already exists!
+     * Checks if given context name already exists!Should be used in create method!
      * @param contextName
      * @return
      * @throws StorageException
