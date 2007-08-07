@@ -510,7 +510,7 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 				if(isPermissionException(x)) {
 					throw new WebdavException(x.getMessage(), x, getUrl(), HttpServletResponse.SC_FORBIDDEN);
 				}
-				throw new WebdavException(x.getMessage(), x, getUrl(), HttpServletResponse.SC_FORBIDDEN);
+				throw new WebdavException(x.getMessage(), x, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			} catch (final OXFolderPermissionException e) {
 				throw new WebdavException(e.getMessage(), e, getUrl(), HttpServletResponse.SC_FORBIDDEN);
 			} catch (final Exception e) {
