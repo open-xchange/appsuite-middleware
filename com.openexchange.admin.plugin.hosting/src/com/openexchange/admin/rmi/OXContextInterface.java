@@ -238,7 +238,7 @@ public interface OXContextInterface extends Remote {
     /**
      * Search for context on specified db.
      * 
-     * @param db_host_url Database on which to search for contexts.
+     * @param db Database on which to search for contexts.
      * @param auth Credentials for authenticating against server.
      * @return Found contexts on the specified database.
      * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException When the supplied credentials were not correct or invalid.
@@ -247,12 +247,12 @@ public interface OXContextInterface extends Remote {
      * 
      * @throws StorageException When an error in the subsystems occured.
      */
-    public Context[] listByDatabase(final Database db_host_url, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException,InvalidDataException;
+    public Context[] listByDatabase(final Database db, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException,InvalidDataException;
 
     /**
      * Search for context which store data on specified filestore
      * 
-     * @param filestore_url Filestore
+     * @param fs Filestore
      * @param auth Credentials for authenticating against server.
      * @return Contexts found on this filestore.
      * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException When the supplied credentials were not correct or invalid.
@@ -261,5 +261,5 @@ public interface OXContextInterface extends Remote {
      * 
      * @throws StorageException When an error in the subsystems occured.
      */
-    public Context[] listByFilestore(final Filestore filestore_url, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException,InvalidDataException;
+    public Context[] listByFilestore(final Filestore fs, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException,InvalidDataException;
 }
