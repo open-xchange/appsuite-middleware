@@ -64,6 +64,7 @@ public class SearchTest extends ContactTest {
 		
 		int objectId1 = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
 		int objectId2 = insertContact(getWebConversation(), contactObj2, PROTOCOL + getHostName(), getSessionId());
+		int objectId3 = insertContact(getWebConversation(), contactObj3, PROTOCOL + getHostName(), getSessionId());
 		
 		ContactSearchObject cso = new ContactSearchObject();
 		cso.setSurname("Must*");
