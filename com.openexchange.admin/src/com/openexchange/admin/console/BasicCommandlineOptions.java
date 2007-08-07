@@ -489,6 +489,8 @@ public abstract class BasicCommandlineOptions {
         if (null != text && text.length() > length) {
             final int stringlength = length - lastmark.length();
             return new StringBuffer(text.substring(0, stringlength)).append(lastmark).toString();
+        } else if (text == null) {
+            return "";
         } else {
             return text;
         }
@@ -520,9 +522,12 @@ public abstract class BasicCommandlineOptions {
         //long start = System.currentTimeMillis();
         int max = columnnames[column].length();
         for(int row=0; row<data.size(); row++) {
-            final int curLength = data.get(row).get(column).length();
-            if( curLength > max ) {
-                max = curLength;
+            final String value = data.get(row).get(column);
+            if( value != null ) {
+                final int curLength = data.get(row).get(column).length();
+                if( curLength > max ) {
+                    max = curLength;
+                }
             }
         }
         //System.out.println("calc took " + (System.currentTimeMillis()-start) + "ms");
