@@ -1,9 +1,6 @@
 * 2007-08-07 - dennis.sieben@open-xchange.com
 
   - Bugfix ID#8629 movefilestorecontext StringIndexOutOfBoundsException
-
-* 2007-08-07 - dennis.sieben@open-xchange.com
-
   - Bugfix ID#8593 Operations by name not possible
 
 * 2007-08-06 - choeger@open-xchange.com
