@@ -516,11 +516,11 @@ public abstract class BasicCommandlineOptions {
         
     }
 
-    private final int longestLine(final ArrayList<ArrayList<String>> data, final String[] columnnames, final int row) {
+    private final int longestLine(final ArrayList<ArrayList<String>> data, final String[] columnnames, final int column) {
         //long start = System.currentTimeMillis();
-        int max = columnnames[row].length();
-        for(int i=0; i<data.size(); i++) {
-            final int curLength = data.get(i).get(row).length();
+        int max = columnnames[column].length();
+        for(int row=0; row<data.size(); row++) {
+            final int curLength = data.get(row).get(column).length();
             if( curLength > max ) {
                 max = curLength;
             }
@@ -593,6 +593,17 @@ public abstract class BasicCommandlineOptions {
             return NeededQuadState.needed;
         } else {
             return NeededQuadState.notneeded;
+        }
+    }
+
+    // We have to serve this 2nd method here because String.valueOf return "null" as String
+    // instead of null from an Integer null object. So we have to deal with this situation
+    // ourself
+    protected String nameOrIdSetInt(final Integer id, final String name, final String objectname) throws MissingOptionException {
+        if (null == id) {
+            return nameOrIdSet(null, name, objectname);
+        } else {
+            return nameOrIdSet(String.valueOf(id), name, objectname);
         }
     }
 
