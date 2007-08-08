@@ -32,7 +32,7 @@ public class Enable extends ContextHostingAbstraction {
 
             oxres.enable(ctx, auth);
 
-            displayEnabledMessage(successtext, null);
+            displayEnabledMessage(successtext, null, parser);
             sysexit(0);
         } catch (final Exception e) {
             printErrors(successtext, null, e, parser);

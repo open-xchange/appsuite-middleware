@@ -198,46 +198,46 @@ public class StatisticTools extends BasicCommandlineOptions {
                 System.err.println("More than one of the stat options given. Using the first one only");
             }
         } catch (final IllegalOptionValueException e) {
-            printError("Illegal option value : " + e.getMessage());
+            printError("Illegal option value : " + e.getMessage(), parser);
             parser.printUsage();
             sysexit(SYSEXIT_ILLEGAL_OPTION_VALUE);
         } catch (final UnknownOptionException e) {
-            printError("Unrecognized options on the command line: " + e.getMessage());
+            printError("Unrecognized options on the command line: " + e.getMessage(), parser);
             parser.printUsage();
             sysexit(SYSEXIT_UNKNOWN_OPTION);
         } catch (final MissingOptionException e) {
-            printError(e.getMessage());
+            printError(e.getMessage(), parser);
             parser.printUsage();
             sysexit(SYSEXIT_MISSING_OPTION);
         } catch (final IOException e) {
-            printServerException(e);
+            printServerException(e, parser);
             sysexit(1);
         } catch (final InstanceNotFoundException e) {
-            printServerException(e);
+            printServerException(e, parser);
             sysexit(1);
         } catch (final AttributeNotFoundException e) {
-            printServerException(e);
+            printServerException(e, parser);
             sysexit(1);
         } catch (final IntrospectionException e) {
-            printServerException(e);
+            printServerException(e, parser);
             sysexit(1);
         } catch (final MBeanException e) {
-            printServerException(e);
+            printServerException(e, parser);
             sysexit(1);
         } catch (final ReflectionException e) {
-            printServerException(e);
+            printServerException(e, parser);
             sysexit(1);
         } catch (final InterruptedException e) {
-            printServerException(e);
+            printServerException(e, parser);
             sysexit(1);
         } catch (final MalformedObjectNameException e) {
-            printServerException(e);
+            printServerException(e, parser);
             sysexit(1);
         } catch (final NullPointerException e) {
-            printServerException(e);
+            printServerException(e, parser);
             sysexit(1);
         } catch (final InvalidDataException e) {
-            printServerException(e);
+            printServerException(e, parser);
             sysexit(1);
         } finally {
             closeConnection();

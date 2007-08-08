@@ -23,7 +23,7 @@ public class EnableAll extends ContextHostingAbstraction {
 
             oxres.enableAll(auth);
 
-            displayEnabledMessage(null, null);
+            displayEnabledMessage(null, null, parser);
             sysexit(0);
         } catch (final Exception e) {
             printErrors(null, null, e, parser);

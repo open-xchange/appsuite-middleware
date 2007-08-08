@@ -43,7 +43,7 @@ public class DeleteReason extends ReasonAbstraction {
             mrs[0].setId(Integer.parseInt(reason_id));
             oxutil.deleteMaintenanceReason(mrs, auth);
             
-            displayDeletedMessage(reason_id, null);
+            displayDeletedMessage(reason_id, null, parser);
             sysexit(0);
         } catch (final Exception e) {
             printErrors(reason_id, null, e, parser);

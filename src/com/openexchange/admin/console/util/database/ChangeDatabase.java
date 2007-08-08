@@ -43,7 +43,7 @@ public class ChangeDatabase extends DatabaseAbstraction {
 
             oxutil.changeDatabase(db, auth);
             
-            displayChangedMessage(successtext, null);
+            displayChangedMessage(successtext, null, parser);
             sysexit(0);
         } catch (final Exception e) {
             printErrors(successtext, null, e, parser);

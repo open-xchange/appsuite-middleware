@@ -38,7 +38,7 @@ public class CreateReason extends ReasonAbstraction {
     
             final MaintenanceReason reason = new MaintenanceReason((String)parser.getOptionValue(this.reasonTextOption));
     
-            displayCreatedMessage(String.valueOf(oxutil.createMaintenanceReason(reason, auth).getId()), null);
+            displayCreatedMessage(String.valueOf(oxutil.createMaintenanceReason(reason, auth).getId()), null, parser);
             sysexit(0);
         } catch (final Exception e) {
             printErrors(null, null, e, parser);

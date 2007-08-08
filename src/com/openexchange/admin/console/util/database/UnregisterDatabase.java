@@ -38,7 +38,7 @@ public class UnregisterDatabase extends DatabaseAbstraction {
 
             oxutil.unregisterDatabase(db, auth);
             
-            displayUnregisteredMessage(successtext);
+            displayUnregisteredMessage(successtext, parser);
             sysexit(0);
         } catch (final Exception e) {
             printErrors(successtext, null, e, parser);

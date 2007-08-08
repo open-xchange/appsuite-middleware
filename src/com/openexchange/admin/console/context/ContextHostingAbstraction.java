@@ -86,16 +86,16 @@ public class ContextHostingAbstraction extends ContextAbstraction {
         this.databaseNameOption = setShortLongOpt(parser, OPT_NAME_DBNAME_SHORT,OPT_NAME_DBNAME_LONG,"Name of the database",true, required); 
     }
     
-    protected final void displayDisabledMessage(final String id, final Integer ctxid) {
-        createMessageForStdout(id, ctxid, "disabled");
+    protected final void displayDisabledMessage(final String id, final Integer ctxid, final AdminParser parser) {
+        createMessageForStdout(id, ctxid, "disabled", parser);
     }
 
-    protected final void displayEnabledMessage(final String id, final Integer ctxid) {
-        createMessageForStdout(id, ctxid, "enabled");
+    protected final void displayEnabledMessage(final String id, final Integer ctxid, final AdminParser parser) {
+        createMessageForStdout(id, ctxid, "enabled", parser);
     }
 
-    protected final void displayMovedMessage(final String id, final Integer ctxid, final String text) {
-        createMessageForStdout(id, ctxid, text);
+    protected final void displayMovedMessage(final String id, final Integer ctxid, final String text, final AdminParser parser) {
+        createMessageForStdout(id, ctxid, text, parser);
     }
 
     public void parseAndSetRemoveLoginMapping(AdminParser parser) {
@@ -136,11 +136,11 @@ public class ContextHostingAbstraction extends ContextAbstraction {
      * this method in order to create proper error messages.
      */
     @Override
-    protected void printFirstPartOfErrorText(final String id, final Integer ctxid) {
+    protected void printFirstPartOfErrorText(final String id, final Integer ctxid, final AdminParser parser) {
         if (getClass().getName().matches("^.*\\.\\w*(?i)enable\\w*$")) {
-            createMessageForStderr(id, ctxid, "could not be enabled: ");
+            createMessageForStderr(id, ctxid, "could not be enabled: ", parser);
         } else if (getClass().getName().matches("^.*\\.\\w*(?i)disable\\w*$")) {
-            createMessageForStderr(id, ctxid, "could not be disabled: ");
+            createMessageForStderr(id, ctxid, "could not be disabled: ", parser);
         } else if (getClass().getName().matches("^.*\\.\\w*(?i)move\\wdatabase\\w*$")) {
             final StringBuilder sb = new StringBuilder(getObjectName());
             if (null != id) {
@@ -166,7 +166,7 @@ public class ContextHostingAbstraction extends ContextAbstraction {
             sb.append(" could not be scheduled: ");
             System.err.println(sb.toString());
         } else {
-            super.printFirstPartOfErrorText(id, ctxid);
+            super.printFirstPartOfErrorText(id, ctxid, parser);
         }
     }
 
@@ -174,15 +174,15 @@ public class ContextHostingAbstraction extends ContextAbstraction {
     protected void printErrors(final String id, final Integer ctxid, final Exception e, final AdminParser parser) {
         if (e instanceof NoSuchReasonException) {
             final NoSuchReasonException exc = (NoSuchReasonException) e;
-            printServerException(id, ctxid, exc);
+            printServerException(id, ctxid, exc, parser);
             sysexit(1);
         } else if (e instanceof OXContextException) {
             final OXContextException exc = (OXContextException) e;
-            printServerException(id, ctxid, exc);
+            printServerException(id, ctxid, exc, parser);
             sysexit(1);
         } else if (e instanceof NoSuchFilestoreException) {
             final NoSuchFilestoreException exc = (NoSuchFilestoreException) e;
-            printServerException(id, ctxid, exc);
+            printServerException(id, ctxid, exc, parser);
             sysexit(1);
         } else {
             super.printErrors(id, ctxid, e, parser);

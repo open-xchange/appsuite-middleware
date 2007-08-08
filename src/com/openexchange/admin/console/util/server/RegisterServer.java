@@ -41,7 +41,7 @@ public class RegisterServer extends ServerAbstraction {
 
             srv.setName((String) parser.getOptionValue(this.serverNameOption));
 
-            displayRegisteredMessage(String.valueOf(oxutil.registerServer(srv, auth).getId()));
+            displayRegisteredMessage(String.valueOf(oxutil.registerServer(srv, auth).getId()), parser);
             sysexit(0);
         } catch (final Exception e) {
             printErrors(null, null, e, parser);
