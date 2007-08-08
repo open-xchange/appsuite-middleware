@@ -1,6 +1,6 @@
 * 2007-08-08 - marcus.klein@open-xchange.com
 
- - Added method for invalidating context login information mappings.
+ - Bugfix 8720: Added invalidation for context login information mappings.
 
 * 2007-08-08 - thorben.betten@open-xchange.com
 
