@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.rmi.RemoteException;
+import java.util.Iterator;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -59,6 +60,8 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         setIdOrGetIDFromNameAndIdObject(null, ctx);
         log.debug(ctx);
         
+        Context backup_ctx = null; // used for invalidating old login mappings in the cache
+        
         try {
             if (!tool.existsContext(ctx)) {
                 throw new NoSuchContextException();
@@ -78,6 +81,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             }
             
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
+            backup_ctx = oxcox.getData(ctx);
             oxcox.change(ctx);
         } catch (final StorageException e) {
             log.error(e.getMessage(), e);
@@ -88,9 +92,16 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         }   
         
         try {
-            ContextStorage.getInstance().invalidateContext(ctx.getId());
+            ContextStorage cs =ContextStorage.getInstance(); 
+            cs.invalidateContext(ctx.getId());
+            if(backup_ctx.getLoginMappings()!=null && backup_ctx.getLoginMappings().size()>0){
+                Iterator<String> itr = backup_ctx.getLoginMappings().iterator();
+                while(itr.hasNext()){                    
+                    cs.invalidateLoginInfo(itr.next());
+                }
+            }
         } catch (ContextException e) {
-            log.error("Error invalidating context "+ctx.getId()+" in ox context storage",e);
+            log.error("Error invalidating cached infos of context "+ctx.getId()+" in context storage",e);
         }
     
     }
