@@ -810,9 +810,7 @@ public class AppointmentRequest {
 										counter++;
 									}
 								} else {
-									final JSONArray jsonAppointmentArray = new JSONArray();
 									appointmentwriter.writeArray(appointmentobject, columns, jsonResponseArray);
-									jsonResponseArray.put(jsonAppointmentArray);
 									counter++;
 								}
 							}
