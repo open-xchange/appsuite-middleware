@@ -1,7 +1,7 @@
 * 2007-08-08 - tobias.prinz@open-xchange.com
 
  - Refactoring: JSONWriter replaced with OXJSONWriter for ImportServlet
- - Refactoring: Checking for modules in Importers.
+ - Bug 8681: Checking for modules in Importers.
  - Bug 7936: Fixed typos in exception messages.
 
 * 2007-08-08 - marcus.klein@open-xchange.com
