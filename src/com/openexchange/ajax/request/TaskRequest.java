@@ -189,10 +189,11 @@ public class TaskRequest {
 
 		final TasksSQLInterface sqlinterface = new TasksSQLInterfaceImpl(sessionObj);
 		sqlinterface.insertTaskObject(task);
+        timestamp = task.getLastModified();
 
 		final JSONObject jsonResponseObject = new JSONObject();
 		jsonResponseObject.put(TaskFields.ID, task.getObjectID());
-		
+
 		return jsonResponseObject;
 	}
 	
