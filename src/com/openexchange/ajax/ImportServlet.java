@@ -160,21 +160,11 @@ public class ImportServlet extends ImportExport {
 				}
 			}
 			//writing response
-			final StringWriter stringWriter = new StringWriter();
-			final JSONWriter jsonWriter = new JSONWriter(stringWriter);
-			
-			final ImportExportWriter importExportWriter = new ImportExportWriter(jsonWriter);
+			final ImportExportWriter importExportWriter = new ImportExportWriter();
 			try {
-				jsonWriter.array();
-				for (int a = 0; a < importResult.size(); a++) {
-					importExportWriter.writeObject(importResult.get(a));
-				}
-				jsonWriter.endArray();
 				
-				//TODO: just a quick fix using Sebastian's ImportExportWriter. Might be improved.
-				final String content = stringWriter.toString();
-				
-				resObj.setData(new JSONArray(content) );
+				importExportWriter.writeObjects(importResult);
+				resObj.setData( importExportWriter.getObject() );
 				
 				sendResponse(resObj.getJSON(), resp);
 			} catch (JSONException e){

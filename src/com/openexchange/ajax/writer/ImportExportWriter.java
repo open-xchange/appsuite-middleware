@@ -51,32 +51,30 @@
 
 package com.openexchange.ajax.writer;
 
-import java.io.PrintWriter;
+import java.util.List;
 
-import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONWriter;
 
 import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.importexport.ImportResult;
+import com.openexchange.json.OXJSONWriter;
 
 /**
  * ImportExportWriter
  *
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  * @author <a href="mailto:tobias.prinz@open-xchange.org">Tobias Prinz</a> (Refactoring comment and errorhandling workaround)
- * TODO: Tierlieb: Refactoring. Removed this class, build: MultipleResponse extends ...ajax.container.Response
  */
 
 public class ImportExportWriter extends DataWriter {
 	
-	public ImportExportWriter(PrintWriter w) {
-		jsonwriter = new JSONWriter(w);
+	public ImportExportWriter() {
+		jsonwriter = new OXJSONWriter();
 	}
 	
-	public ImportExportWriter(JSONWriter jsonwriter) {
+	public ImportExportWriter(OXJSONWriter jsonwriter) {
 		this.jsonwriter = jsonwriter;
 	}
 	
@@ -86,7 +84,6 @@ public class ImportExportWriter extends DataWriter {
 		writeParameter(DataFields.LAST_MODIFIED, importResult.getDate());
 		writeParameter(CommonFields.FOLDER_ID, importResult.getFolder());
 		
-		//quick fix, should be refactored to MultipleResponse
 		if (importResult.hasError()) {
 			OXException exception = importResult.getException();
 			writeParameter("error", exception.getOrigMessage());
@@ -104,5 +101,23 @@ public class ImportExportWriter extends DataWriter {
 	        writeParameter("entry_number", importResult.getEntryNumber());
 		}
 		jsonwriter.endObject();
+	}
+	
+	
+	
+	public String toString(){
+		return getObject().toString();
+	}
+	
+	public Object getObject(){
+		return ((OXJSONWriter) jsonwriter).getObject();
+	}
+
+	public void writeObjects(List<ImportResult> importResult) throws JSONException {
+		jsonwriter.array();
+		for (int a = 0; a < importResult.size(); a++) {
+			writeObject(importResult.get(a));
+		}
+		jsonwriter.endArray();
 	}
 }

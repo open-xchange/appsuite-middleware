@@ -1,3 +1,8 @@
+* 2007-08-08 - tobias.prinz@open-xchange.com
+
+ - Refactoring: JSONWriter replaced with OXJSONWriter for ImportServlet
+ - Refactoring: Checking for modules in Importers.
+
 * 2007-08-08 - marcus.klein@open-xchange.com
 
  - Bugfix 8720: Added invalidation for context login information mappings.
