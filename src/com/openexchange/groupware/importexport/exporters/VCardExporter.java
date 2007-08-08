@@ -96,9 +96,9 @@ category={
 		exceptionId={0,1,2,3},
 		msg={
 	"Could not import into the folder %s.",
-	"Subsystem down - Could not import into folder %s",
+	"Could not import into folder %s",
 	"User input Error %s",
-	"Programming Error - Could not import into folder %s"})
+	"Could not import into folder %s"})
 	
 	/**
 	 * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>

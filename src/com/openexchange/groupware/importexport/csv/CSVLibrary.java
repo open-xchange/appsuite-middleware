@@ -71,7 +71,11 @@ import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionClasses;
 import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionFactory;
 import com.openexchange.sessiond.SessionObject;
-
+/**
+ * 
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
+ *
+ */
 @OXExceptionSource(
 	classId=ImportExportExceptionClasses.CSVLIBRARY, 
 	component=Component.IMPORT_EXPORT)
@@ -85,8 +89,8 @@ import com.openexchange.sessiond.SessionObject;
 	exceptionId={0,1,2,3}, 
 	msg={
 		"Could not load folder %s",
-		"Could not create folderId from String %s",
-		"Could not read InputStream as String",
+		"Could not create folder id from string %s",
+		"Could not read InputStream as string",
 		"Missing ability to encode or decode UTF-8 on server, cannot read file."})
 public class CSVLibrary {
 	

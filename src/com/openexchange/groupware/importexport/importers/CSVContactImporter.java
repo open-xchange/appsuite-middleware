@@ -87,6 +87,9 @@ import com.openexchange.server.DBPoolingException;
 import com.openexchange.server.EffectivePermission;
 import com.openexchange.sessiond.SessionObject;
 
+/**
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
+ */
 @OXExceptionSource(
 	classId=ImportExportExceptionClasses.CSVCONTACTIMPORTER, 
 	component=Component.IMPORT_EXPORT)

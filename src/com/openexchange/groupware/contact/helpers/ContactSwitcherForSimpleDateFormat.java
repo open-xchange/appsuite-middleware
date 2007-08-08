@@ -70,7 +70,7 @@ import com.openexchange.groupware.contact.ContactExceptionFactory;
 	desc={""}, 
 	exceptionId={0}, 
 	msg={
-		"Could not convert given String %s to a date."
+		"Could not convert given string %s to a date."
 	})
 
 /**

@@ -90,7 +90,9 @@ import com.openexchange.server.EffectivePermission;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
-
+/**
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
+ */
 @OXExceptionSource(
 	classId=ImportExportExceptionClasses.CSVCONTACTEXPORTER, 
 	component=Component.IMPORT_EXPORT)
@@ -107,7 +109,7 @@ import com.openexchange.tools.iterator.SearchIteratorException;
 		"Could not export the folder %s in the format %s.",
 		"Could not load folder %s",
 		"Could not load contacts",
-		"Could not create folderId from String %s",
+		"Could not create folder id from string %s",
 		"Could not encode as UTF-8"})
 
 public class CSVContactExporter implements Exporter {

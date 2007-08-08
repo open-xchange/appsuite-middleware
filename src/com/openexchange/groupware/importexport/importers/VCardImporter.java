@@ -109,12 +109,12 @@ import com.openexchange.tools.versit.filetokenizer.VCardTokenizer;
 		msg={
 	"Could not import into the folder %s.",
 	"Subsystem down",
-	"User input Error %s",
-	"Programming Error - Folder %s",
+	"User input error %s",
+	"Programming error - folder %s",
 	"Could not load folder %s",
 	"Could not recognize format of the following data: %s",
 	"Could not use UTF-8 encoding.",
-	"Module Contacts is not enabled for this user, cannot store Contacts contained in VCard."})
+	"Module Contacts is not enabled for this user, cannot store contacts contained in VCard."})
 	
 	/**
 	 * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>

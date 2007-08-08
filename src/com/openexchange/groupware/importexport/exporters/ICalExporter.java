@@ -101,9 +101,9 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
 		exceptionId={0,1,2,3,4},
 		msg={
 	"Could not import into the folder %s.",
-	"Subsystem down - Could not import into folder %s",
-	"User input Error %s",
-	"Programming Error - Could not import into folder %s",
+	"Could not import into folder %s",
+	"User input error %s",
+	"Could not import into folder %s",
 	"Could not load folder %s"})
 	
 /**

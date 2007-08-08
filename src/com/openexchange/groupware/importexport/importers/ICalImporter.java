@@ -109,8 +109,8 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
 	msg={
 		"Could not import into the folder %s.",
 		"Subsystem down",
-		"User input Error %s",
-		"Programming Error",
+		"User input error %s",
+		"Programming error",
 		"Could not load folder %s",
 		"Broken file uploaded: %s",
 		"Cowardly refusing to import an entry flagged as confidential.",
