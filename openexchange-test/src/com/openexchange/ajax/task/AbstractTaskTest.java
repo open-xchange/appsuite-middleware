@@ -74,7 +74,7 @@ public class AbstractTaskTest extends AbstractAJAXSession {
     /**
      * @return the private task folder of the user.
      */
-    protected int getPrivateTaskFolder() throws AjaxException, IOException,
+    protected int getPrivateFolder() throws AjaxException, IOException,
         SAXException, JSONException {
         return getClient().getPrivateTaskFolder();
     }

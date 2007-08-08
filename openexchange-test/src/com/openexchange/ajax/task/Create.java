@@ -71,6 +71,8 @@ import junit.framework.Assert;
  */
 public class Create extends Assert {
 
+    static final String EURO = String.valueOf('\u20ac');
+
     /**
      * Prevent instanciation.
      */
@@ -127,7 +129,7 @@ public class Create extends Assert {
         task.setActualDuration(1440);
         task.setTargetCosts(1.0f);
         task.setActualCosts(1.0f);
-        task.setCurrency("\u20ac");
+        task.setCurrency(EURO);
         task.setTripMeter("trip meter");
         task.setBillingInformation("billing information");
         task.setCompanies("companies");

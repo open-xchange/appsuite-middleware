@@ -59,12 +59,15 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
 public class InsertResponse extends AbstractAJAXResponse {
 
     private int id;
-    
+
+    private final int folderId;
+
     /**
      * @param response
      */
-    public InsertResponse(final Response response) {
+    InsertResponse(final Response response, final int folderId) {
         super(response);
+        this.folderId = folderId;
     }
 
     /**
@@ -79,5 +82,12 @@ public class InsertResponse extends AbstractAJAXResponse {
      */
     void setId(final int id) {
         this.id = id;
+    }
+
+    /**
+     * @return the folderId
+     */
+    int getFolderId() {
+        return folderId;
     }
 }

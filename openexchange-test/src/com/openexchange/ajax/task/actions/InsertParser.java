@@ -62,11 +62,14 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
  */
 public class InsertParser extends AbstractAJAXParser {
 
+    private final int folderId;
+
     /**
      * Default constructor.
      */
-    InsertParser(final boolean failOnError) {
+    InsertParser(final boolean failOnError, final int folderId) {
         super(failOnError);
+        this.folderId = folderId;
     }
 
     /**
@@ -75,7 +78,7 @@ public class InsertParser extends AbstractAJAXParser {
     @Override
     protected InsertResponse createResponse(final Response response)
         throws JSONException {
-        final InsertResponse retval = new InsertResponse(response);
+        final InsertResponse retval = new InsertResponse(response, folderId);
         if (isFailOnError()) {
             final JSONObject data = (JSONObject) response.getData();
             if (data.has(TaskFields.ID)) {

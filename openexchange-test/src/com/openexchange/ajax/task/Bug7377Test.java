@@ -100,7 +100,7 @@ public class Bug7377Test extends AbstractTaskTest {
         // Create a task.
         final Task task = new Task();
         task.setTitle("Test bug #8504");
-        final int folderId = getPrivateTaskFolder();
+        final int folderId = getPrivateFolder();
         task.setParentFolderID(folderId);
         final AJAXSession session = client1.getSession();
         final InsertResponse iResponse = TaskTools.insert(session,
@@ -109,7 +109,7 @@ public class Bug7377Test extends AbstractTaskTest {
         try {
             // Update timestamp
             final GetResponse gResponse = TaskTools.get(session,
-                new GetRequest(getPrivateTaskFolder(), task.getObjectID()));
+                new GetRequest(getPrivateFolder(), task.getObjectID()));
             task.setLastModified(gResponse.getTimestamp());
             // Update task and insert reminder and don't send folder in task.
             task.setNote("Updated with reminder");

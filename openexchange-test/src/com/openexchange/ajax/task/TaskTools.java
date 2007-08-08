@@ -76,6 +76,7 @@ import com.openexchange.ajax.FolderTest;
 import com.openexchange.ajax.config.ConfigTools;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.TaskFields;
+import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.parser.TaskParser;
@@ -86,6 +87,7 @@ import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.DeleteResponse;
 import com.openexchange.ajax.task.actions.GetRequest;
 import com.openexchange.ajax.task.actions.GetResponse;
+import com.openexchange.ajax.task.actions.InsertRequest;
 import com.openexchange.ajax.task.actions.InsertResponse;
 import com.openexchange.ajax.task.actions.UpdateRequest;
 import com.openexchange.ajax.task.actions.UpdateResponse;
@@ -186,11 +188,17 @@ public final class TaskTools extends Assert {
     }
 
     public static InsertResponse insert(final AJAXSession session,
-        final AbstractTaskRequest request) throws AjaxException, IOException,
+        final InsertRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
         return (InsertResponse) Executor.execute(session, request);
     }
-    
+
+    public static InsertResponse insert(final AJAXClient client,
+        final InsertRequest request) throws AjaxException, IOException,
+        SAXException, JSONException {
+        return insert(client.getSession(), request);
+    }
+
     /**
      * @deprecated use {@link #update(AJAXSession, UpdateRequest)}
      */
@@ -288,6 +296,11 @@ public final class TaskTools extends Assert {
         return (GetResponse) Executor.execute(session, request);
     }
 
+    public static GetResponse get(final AJAXClient client,
+        final GetRequest request) throws AjaxException, IOException,
+        SAXException, JSONException {
+        return get(client.getSession(), request);
+    }
     /**
      * @param folderAndTaskId Contains the folder identifier with the index
      * <code>0</code> and the task identifier with the index <code>1</code>.
@@ -327,7 +340,13 @@ public final class TaskTools extends Assert {
         SAXException, JSONException {
         return (DeleteResponse) Executor.execute(session, request);
     }
-    
+
+    public static DeleteResponse delete(final AJAXClient client,
+        final DeleteRequest request) throws AjaxException, IOException,
+        SAXException, JSONException {
+        return delete(client.getSession(), request);
+    }
+
     /**
      * @deprecated use {@link #all(AJAXSession, AllRequest)}.
      */

@@ -55,7 +55,7 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
- * 
+ * Retrieves a task from the server.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class GetRequest extends AbstractTaskRequest {
@@ -83,8 +83,8 @@ public class GetRequest extends AbstractTaskRequest {
         this.failOnError = failOnError;
     }
 
-    public GetRequest(final int folderId, final InsertResponse insert) {
-        this(folderId, insert.getId());
+    public GetRequest(final InsertResponse insert) {
+        this(insert.getFolderId(), insert.getId());
     }
 
     public GetRequest(final int folderId, final int taskId) {

@@ -49,80 +49,50 @@
 
 package com.openexchange.ajax.task;
 
-import java.util.Date;
-import java.util.TimeZone;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import com.openexchange.ajax.config.ConfigTools;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXSession;
-import com.openexchange.ajax.framework.Executor;
-import com.openexchange.ajax.framework.MultipleRequest;
-import com.openexchange.ajax.framework.MultipleResponse;
-import com.openexchange.ajax.task.actions.AbstractTaskRequest;
-import com.openexchange.ajax.task.actions.AllRequest;
-import com.openexchange.ajax.task.actions.AllResponse;
 import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.GetRequest;
 import com.openexchange.ajax.task.actions.GetResponse;
 import com.openexchange.ajax.task.actions.InsertRequest;
 import com.openexchange.ajax.task.actions.InsertResponse;
-import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.groupware.tasks.Task;
 
 /**
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class AllTest extends AbstractTaskTest {
+public class CharsetTest extends AbstractTaskTest {
 
     /**
-     * Logger.
+     * @param name
      */
-    private static final Log LOG = LogFactory.getLog(AllTest.class);
-
-    private static final int NUMBER = 10;
-    
-    /**
-     * Default constructor.
-     * @param name Name of this test.
-     */
-    public AllTest(final String name) {
+    public CharsetTest(final String name) {
         super(name);
     }
 
-    public void testAll() throws Throwable {
-        final InsertRequest[] inserts = new InsertRequest[NUMBER];
-        for (int i = 0; i < inserts.length; i++) {
-            final Task task = new Task();
-            task.setTitle("Task " + (i + 1));
-            task.setParentFolderID(getPrivateFolder());
-            task.setAlarm(new Date());
-            // TODO add participants
-            inserts[i] = new InsertRequest(task, getTimeZone());
+    /**
+     * Tests if the charset handling is correct.
+     * @throws Throwable if an error occurs.
+     */
+    public void testCharset() throws Throwable {
+        final AJAXClient client = getClient();
+        final Task task = new Task();
+        task.setTitle("\u00E4\u00F6\u00FC\u00DF\u00C4\u00D6\u00DC");
+        task.setNote("\uC11C\uC601\uC9C4");
+        final int folderId = getPrivateFolder();
+
+        task.setParentFolderID(folderId);
+        final InsertResponse insertR = TaskTools.insert(client,
+            new InsertRequest(task, getTimeZone()));
+
+        final GetResponse getR = TaskTools.get(client, new GetRequest(
+            insertR));
+        final Task reload = getR.getTask(getTimeZone());
+        try {
+            assertEquals("Title differs.", task.getTitle(), reload.getTitle());
+            assertEquals("Description differs.", task.getNote(), reload.getNote());
+        } finally {
+            TaskTools.delete(client, new DeleteRequest(reload));
         }
-        final MultipleResponse mInsert = (MultipleResponse) Executor.execute(
-            getSession(), new MultipleRequest(inserts));
-        final GetRequest[] gets = new GetRequest[NUMBER];
-        for (int i = 0; i < gets.length; i++) {
-            final InsertResponse ins = (InsertResponse) mInsert.getResponse(i);
-            LOG.info(ins.getId());
-            gets[i] = new GetRequest(ins);
-        }
-        final MultipleResponse mGet = (MultipleResponse) Executor.execute(
-            getSession(), new MultipleRequest(gets));
-        final int[] columns = new int[] { Task.TITLE, Task.OBJECT_ID,
-            Task.LAST_MODIFIED, Task.FOLDER_ID, Task.PARTICIPANTS, Task.ALARM };
-        final AllResponse allR = TaskTools.all(getSession(), new AllRequest(
-            getPrivateFolder(), columns, 0, null));
-        final DeleteRequest[] deletes = new DeleteRequest[inserts.length];
-        for (int i = 0; i < inserts.length; i++) {
-            final GetResponse get = (GetResponse) mGet.getResponse(i);
-            deletes[i] = new DeleteRequest(get.getTask(getTimeZone()));
-        }
-        final MultipleResponse mDelete = (MultipleResponse) Executor.execute(
-            getSession(), new MultipleRequest(deletes)); 
     }
 }

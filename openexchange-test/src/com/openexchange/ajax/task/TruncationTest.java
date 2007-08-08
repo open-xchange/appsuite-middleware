@@ -101,7 +101,7 @@ public class TruncationTest extends AbstractTaskTest {
         task.setTitle(RandomString.generateFixLetter(200));
         // Trip meter length in database is 255.
         task.setTripMeter(RandomString.generateFixLetter(300));
-        task.setParentFolderID(getPrivateTaskFolder());
+        task.setParentFolderID(getPrivateFolder());
         final InsertResponse response = TaskTools.insert(getSession(),
             new InsertRequest(task, client.getTimeZone(), false));
         assertTrue("Server did not detect truncated data.", response

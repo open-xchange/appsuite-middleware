@@ -97,8 +97,7 @@ public class InsertTest extends AbstractTaskTest {
         task.setParentFolderID(folderId);
         final InsertResponse insertR = TaskTools.insert(session,
             new InsertRequest(task, timeZone));
-        final GetResponse getR = TaskTools.get(session, new GetRequest(folderId,
-            insertR));
+        final GetResponse getR = TaskTools.get(session, new GetRequest(insertR));
         final Task reload = getR.getTask(timeZone);
         TaskTools.compareAttributes(task, reload);
         final DeleteResponse deleteR = TaskTools.delete(session,

@@ -165,13 +165,14 @@ public final class ConfigTools extends Assert {
      * @throws SAXException if parsing of the response fails.
      * @throws IOException if getting the response fails.
      * @throws JSONException if parsing the response fails.
+     * @throws AjaxException if method is wrong.
      */
     public static int getUserId(final WebConversation conversation,
         final String hostName, final String sessionId) throws IOException,
-        SAXException, JSONException {
-        final String value = readSetting(conversation, hostName, sessionId,
-            "identifier");
-        return Integer.parseInt(value);
+        SAXException, JSONException, AjaxException {
+        final AJAXSession session = new AJAXSession(conversation, sessionId);
+        return ConfigTools.get(session, new GetRequest(GetRequest.Tree
+            .Identifier)).getId();
     }
 
     /**

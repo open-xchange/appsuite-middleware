@@ -30,6 +30,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.MailFolderObject;
 import com.openexchange.server.OCLPermission;
 import com.openexchange.tools.URLParameter;
+import com.openexchange.tools.servlet.AjaxException;
 
 public class FolderTest extends AbstractAJAXTest {
 
@@ -74,7 +75,7 @@ public class FolderTest extends AbstractAJAXTest {
 	public static final int getUserId(final WebConversation conversation,
 			final String hostname, final String entityArg,
             final String password) throws IOException, SAXException,
-            JSONException {
+            JSONException, AjaxException {
         final String sessionId = LoginTest.getSessionId(conversation, hostname, entityArg, password);
         return ConfigTools.getUserId(conversation, hostname, sessionId);
 	}

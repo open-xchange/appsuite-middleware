@@ -51,9 +51,9 @@ package com.openexchange.ajax.task;
 
 import java.util.List;
 
-import com.openexchange.ajax.config.ConfigTools;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
+import com.openexchange.ajax.participant.ParticipantTools;
 import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.GetRequest;
 import com.openexchange.ajax.task.actions.GetResponse;
@@ -86,19 +86,17 @@ public class Bug7380Test extends AbstractTaskTest {
         final AJAXClient client = getClient();
         final Task task = new Task();
         task.setTitle("Test bug #7380");
-        task.setParentFolderID(getPrivateTaskFolder());
+        task.setParentFolderID(getPrivateFolder());
         final AJAXSession session = getSession();
-        final List<Participant> participants = TasksTest.getParticipants(session
-            .getConversation(), AJAXConfig.getProperty(AJAXConfig.Property
-            .HOSTNAME), session.getId(), 1, true, ConfigTools.getUserId(session
-            .getConversation(), AJAXConfig.getProperty(AJAXConfig.Property
-            .HOSTNAME), session.getId()));
+        final List<Participant> participants = ParticipantTools.getParticipants(
+            session.getConversation(), AJAXConfig.getProperty(AJAXConfig
+            .Property.HOSTNAME), session.getId(), 1, true, client.getUserId());
         task.setParticipants(participants);
         final InsertResponse iResponse = TaskTools.insert(session,
             new InsertRequest(task, client.getTimeZone()));
         task.setObjectID(iResponse.getId());
         final GetResponse gResponse = TaskTools.get(session,
-            new GetRequest(getPrivateTaskFolder(), task.getObjectID()));
+            new GetRequest(getPrivateFolder(), task.getObjectID()));
         task.setLastModified(gResponse.getTimestamp());
         task.setParticipants((Participant[]) null);
         final UpdateResponse uResponse = TaskTools.update(session,

@@ -131,6 +131,6 @@ public class InsertRequest extends AbstractTaskRequest {
      * {@inheritDoc}
      */
     public AbstractAJAXParser getParser() {
-        return new InsertParser(failOnError);
+        return new InsertParser(failOnError, task.getParentFolderID());
     }
 }

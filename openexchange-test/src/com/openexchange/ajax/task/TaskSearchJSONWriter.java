@@ -47,7 +47,6 @@ import com.openexchange.ajax.fields.TaskFields;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.TaskException;
 import com.openexchange.groupware.tasks.TaskException.Code;
-import com.openexchange.groupware.tasks.TaskException.Detail;
 
 /**
  * Writes task search object to a JSON.
