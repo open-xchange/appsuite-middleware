@@ -93,6 +93,7 @@ import com.openexchange.ajax.task.actions.UpdateRequest;
 import com.openexchange.ajax.task.actions.UpdateResponse;
 import com.openexchange.ajax.writer.TaskWriter;
 import com.openexchange.api2.OXException;
+import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.Task;
@@ -156,11 +157,12 @@ public final class TaskTools extends Assert {
      * @throws JSONException if parsing of serialized json fails.
      * @throws SAXException if a SAX error occurs.
      * @throws IOException if the communication with the server fails.
+     * @throws ConfigurationException 
      * @deprecated use {@link #insert(AJAXSession, TaskInsertRequest)}
      */
     public static Response insertTask(final WebConversation conversation,
         final String hostName, final String sessionId, final Task task)
-        throws JSONException, IOException, SAXException, AjaxException {
+        throws JSONException, IOException, SAXException, AjaxException, ConfigurationException {
         LOG.trace("Inserting task.");
         final TimeZone timezone = ConfigTools.getTimeZone(conversation,
             hostName, sessionId);
@@ -239,7 +241,7 @@ public final class TaskTools extends Assert {
     public static Response updateTask(final WebConversation conversation,
         final String hostName, final String sessionId, final int folderId,
         final Task task, final Date lastModified) throws JSONException,
-        IOException, SAXException, AjaxException {
+        IOException, SAXException, AjaxException, ConfigurationException {
         final TimeZone timeZone = getUserTimeZone(conversation, hostName,
             sessionId);
 		final JSONObject jsonObj = new JSONObject();
@@ -254,9 +256,12 @@ public final class TaskTools extends Assert {
         return (UpdateResponse) Executor.execute(session, request);
     }
     
+    /**
+     * @deprecated Use {@link AJAXClient#getTimeZone()}.
+     */
     public static TimeZone getUserTimeZone(final WebConversation conversation,
         final String hostName, final String sessionId) throws IOException,
-        SAXException, JSONException, AjaxException {
+        SAXException, JSONException, AjaxException, ConfigurationException {
         return ConfigTools.getTimeZone(conversation, hostName, sessionId);
     }
 
@@ -266,7 +271,7 @@ public final class TaskTools extends Assert {
     public static Response getTask(final WebConversation conversation,
         final String hostName, final String sessionId, final int folderId,
         final int taskId) throws IOException, SAXException, JSONException,
-        OXException, AjaxException {
+        OXException, AjaxException, ConfigurationException {
         LOG.trace("Getting task.");
         final WebRequest req = new GetMethodWebRequest(AbstractAJAXTest.PROTOCOL
             + hostName + TASKS_URL);

@@ -74,6 +74,8 @@ import com.openexchange.ajax.config.actions.GetResponse;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.Executor;
+import com.openexchange.configuration.AJAXConfig;
+import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.tools.URLParameter;
 import com.openexchange.tools.servlet.AjaxException;
 
@@ -166,10 +168,12 @@ public final class ConfigTools extends Assert {
      * @throws IOException if getting the response fails.
      * @throws JSONException if parsing the response fails.
      * @throws AjaxException if method is wrong.
+     * @throws ConfigurationException 
      */
     public static int getUserId(final WebConversation conversation,
         final String hostName, final String sessionId) throws IOException,
-        SAXException, JSONException, AjaxException {
+        SAXException, JSONException, AjaxException, ConfigurationException {
+        AJAXConfig.init();
         final AJAXSession session = new AJAXSession(conversation, sessionId);
         return ConfigTools.get(session, new GetRequest(GetRequest.Tree
             .Identifier)).getId();
@@ -184,10 +188,12 @@ public final class ConfigTools extends Assert {
      * @throws SAXException if parsing of the response fails.
      * @throws IOException if getting the response fails.
      * @throws JSONException if parsing the response fails.
+     * @throws ConfigurationException 
      */
     public static TimeZone getTimeZone(final WebConversation conversation,
         final String hostName, final String sessionId) throws IOException,
-        SAXException, JSONException, AjaxException {
+        SAXException, JSONException, AjaxException, ConfigurationException {
+        AJAXConfig.init();
         final AJAXSession session = new AJAXSession(conversation, sessionId);
         final String value = ConfigTools.get(session, new GetRequest(GetRequest
             .Tree.TimeZone)).getString();

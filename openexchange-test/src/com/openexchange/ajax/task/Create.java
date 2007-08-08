@@ -60,6 +60,7 @@ import org.xml.sax.SAXException;
 
 import com.meterware.httpunit.WebConversation;
 import com.openexchange.api2.OXException;
+import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.tools.servlet.AjaxException;
 
@@ -86,7 +87,7 @@ public class Create extends Assert {
     public static int createPrivateTask(final WebConversation conv,
         final String host, final String session, final int folderId,
         final Task task) throws OXException, IOException, SAXException,
-        JSONException, AjaxException {
+        JSONException, AjaxException, ConfigurationException {
         task.setParentFolderID(folderId);
         return extractInsertId(insertTask(conv, host, session, task));
     }
@@ -96,7 +97,7 @@ public class Create extends Assert {
      */
     public static int createPrivateTask(final WebConversation conv,
         final String host, final String session, final int folderId)
-        throws OXException, IOException, SAXException, JSONException, AjaxException {
+        throws OXException, IOException, SAXException, JSONException, AjaxException, ConfigurationException {
         final Task task = createTask();
         return createPrivateTask(conv, host, session, folderId, task);
     }
@@ -106,7 +107,7 @@ public class Create extends Assert {
      */
     public static int createPrivateTask(final WebConversation conv,
         final String host, final String session) throws OXException,
-        IOException, SAXException, JSONException, AjaxException {
+        IOException, SAXException, JSONException, AjaxException, ConfigurationException {
         final int folderId = TaskTools.getPrivateTaskFolder(conv, host,
             session);
         return createPrivateTask(conv, host, session, folderId);

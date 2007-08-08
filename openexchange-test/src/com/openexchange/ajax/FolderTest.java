@@ -26,6 +26,7 @@ import com.openexchange.ajax.config.ConfigTools;
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.ajax.parser.FolderParser;
 import com.openexchange.api2.OXException;
+import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.MailFolderObject;
 import com.openexchange.server.OCLPermission;
@@ -75,7 +76,7 @@ public class FolderTest extends AbstractAJAXTest {
 	public static final int getUserId(final WebConversation conversation,
 			final String hostname, final String entityArg,
             final String password) throws IOException, SAXException,
-            JSONException, AjaxException {
+            JSONException, AjaxException, ConfigurationException {
         final String sessionId = LoginTest.getSessionId(conversation, hostname, entityArg, password);
         return ConfigTools.getUserId(conversation, hostname, sessionId);
 	}
