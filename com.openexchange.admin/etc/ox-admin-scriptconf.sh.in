@@ -6,8 +6,8 @@ OSGIPATH=@oxprefix@/@oxconfdir@/osgi
 
 # when log4j should be used, these options should work:
 #
-# JAVA_XTRAOPTS="-Xms50M -Xmx50M -XX:+AggressiveHeap -Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger -Dlog4j.configuration=file:/opt/open-xchange/etc/admindaemon/log4j/log4j.xml -Dlog4j=/opt/open-xchange/lib/log4j-1.2.14.jar"
-JAVA_XTRAOPTS="-Xms50M -Xmx50M -XX:+AggressiveHeap"
+# JAVA_XTRAOPTS="-Xms50M -Xmx50M -Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger -Dlog4j.configuration=file:/opt/open-xchange/etc/admindaemon/log4j/log4j.xml -Dlog4j=/opt/open-xchange/lib/log4j-1.2.14.jar"
+JAVA_XTRAOPTS="-Xms50M -Xmx50M"
 
 NRFILES="1024"
 
