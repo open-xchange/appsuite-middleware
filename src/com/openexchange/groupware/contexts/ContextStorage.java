@@ -146,6 +146,19 @@ public abstract class ContextStorage {
     }
 
     /**
+     * Invalidates a login information in the cache.
+     * @param loginContextInfo login information to invalidate.
+     * @throws ContextException if invalidating the login information fails.
+     */
+    public void invalidateLoginInfo(final String loginContextInfo)
+        throws ContextException {
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("invalidateLoginInfo not implemented in " + this
+                .getClass().getCanonicalName());
+        }
+    }
+
+    /**
      * Gives a list of all context ids which are stored in the config database.
      * @return the list of context ids
      * @throws ContextException if reading the contexts fails.
