@@ -1,0 +1,327 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.ajax;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.Iterator;
+import java.util.List;
+import java.util.regex.Matcher;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.FileUploadException;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.fileupload.servlet.ServletRequestContext;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.helper.ParamContainer;
+import com.openexchange.api.OXConflictException;
+import com.openexchange.configuration.ServerConfig;
+import com.openexchange.configuration.ServerConfig.Property;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.Component;
+import com.openexchange.groupware.upload.AJAXUploadFile;
+import com.openexchange.groupware.upload.UploadException;
+import com.openexchange.groupware.upload.UploadQuotaChecker;
+import com.openexchange.groupware.upload.UploadException.UploadCode;
+import com.openexchange.json.OXJSONWriter;
+import com.openexchange.sessiond.SessionObject;
+import com.openexchange.tools.servlet.OXJSONException;
+import com.openexchange.tools.servlet.UploadServletException;
+import com.openexchange.tools.servlet.http.Tools;
+
+/**
+ * AJAXFile
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * 
+ */
+public final class AJAXFile extends PermissionServlet {
+
+	/**
+	 * Serial Version UID
+	 */
+	private static final long serialVersionUID = 1L;
+
+	private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(AJAXFile.class);
+
+	private static final String MIME_TEXT_HTML_CHARSET_UTF_8 = "text/html; charset=UTF-8";
+
+	private static final String STR_NULL = "null";
+
+	public AJAXFile() {
+		super();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest,
+	 *      javax.servlet.http.HttpServletResponse)
+	 */
+	@Override
+	protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException,
+			IOException {
+		resp.setContentType(CONTENTTYPE_JAVASCRIPT);
+		/*
+		 * The magic spell to disable caching
+		 */
+		Tools.disableCaching(resp);
+		final String action = req.getParameter(PARAMETER_ACTION);
+		if (ACTION_KEEPALIVE.equalsIgnoreCase(action)) {
+			actionKeepAlive(req, resp);
+		} else {
+			final Response response = new Response();
+			response.setException(new UploadException(UploadException.UploadCode.UNKNOWN_ACTION_VALUE, null,
+					action == null ? STR_NULL : action));
+			try {
+				Response.write(response, resp.getWriter());
+			} catch (final JSONException e) {
+				LOG.error(e.getMessage(), e);
+				throw new ServletException(e.getMessage(), e);
+			}
+		}
+	}
+
+	private void actionKeepAlive(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException,
+			IOException {
+		try {
+			Response.write(actionKeepAlive(getSessionObject(req), ParamContainer.getInstance(req, Component.UPLOAD,
+					resp)), resp.getWriter());
+		} catch (final JSONException e) {
+			final Response response = new Response();
+			response.setException(new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e, new Object[0]));
+			try {
+				Response.write(response, resp.getWriter());
+			} catch (final JSONException e1) {
+				LOG.error(e1.getMessage(), e1);
+				throw new ServletException(e1.getMessage(), e1);
+			}
+		}
+	}
+
+	private Response actionKeepAlive(final SessionObject sessionObj, final ParamContainer paramContainer)
+			throws JSONException {
+		/*
+		 * Some variables
+		 */
+		final Response response = new Response();
+		final OXJSONWriter jsonWriter = new OXJSONWriter();
+		/*
+		 * Start response
+		 */
+		jsonWriter.array();
+		try {
+			final String id = paramContainer.checkStringParam(PARAMETER_ID);
+			if (!sessionObj.touchAJAXUploadFile(id)) {
+				throw new UploadException(UploadCode.UPLOAD_FILE_NOT_FOUND, ACTION_KEEPALIVE, id);
+			}
+		} catch (final AbstractOXException e) {
+			response.setException(e);
+		} finally {
+			jsonWriter.endArray();
+		}
+		/*
+		 * Close response and flush print writer
+		 */
+		response.setData(jsonWriter.getObject());
+		response.setTimestamp(null);
+		return response;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.servlet.http.HttpServlet#doPost(javax.servlet.http.HttpServletRequest,
+	 *      javax.servlet.http.HttpServletResponse)
+	 */
+	@SuppressWarnings("unchecked")
+	@Override
+	protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException,
+			IOException {
+		/*
+		 * The magic spell to disable caching
+		 */
+		Tools.disableCaching(resp);
+		resp.setContentType(MIME_TEXT_HTML_CHARSET_UTF_8);
+		String action = null;
+		try {
+			if (ServletFileUpload.isMultipartContent(new ServletRequestContext(req))) {
+				final DiskFileItemFactory factory = new DiskFileItemFactory();
+				/*
+				 * Set factory constraints
+				 */
+				factory.setSizeThreshold(0);
+				factory.setRepository(new File(ServerConfig.getProperty(Property.UploadDirectory)));
+				/*
+				 * Create a new file upload handler
+				 */
+				final ServletFileUpload upload = new ServletFileUpload(factory);
+				/*
+				 * Set overall request size constraint
+				 */
+				final String moduleParam = req.getParameter(PARAMETER_MODULE);
+				if (moduleParam == null) {
+					throw new UploadException(UploadException.UploadCode.MISSING_PARAM, null, PARAMETER_MODULE);
+				}
+				final SessionObject sessionObj = getSessionObject(req);
+				final UploadQuotaChecker checker = UploadQuotaChecker.getUploadQuotaChecker(
+						getModuleInteger(moduleParam), sessionObj);
+				upload.setSizeMax(checker.getQuotaMax());
+				upload.setFileSizeMax(checker.getFileQuotaMax());
+				/*
+				 * Check action parameter
+				 */
+				try {
+					action = getAction(req);
+				} catch (final OXConflictException e) {
+					throw new UploadException(e, null);
+				}
+				if (!ACTION_NEW.equalsIgnoreCase(action)) {
+					throw new UploadException(UploadException.UploadCode.INVALID_ACTION_VALUE, action, action);
+				}
+				/*
+				 * Process upload
+				 */
+				final List<FileItem> items;
+				try {
+					items = upload.parseRequest(req);
+				} catch (final FileUploadException e) {
+					throw new UploadException(UploadCode.UPLOAD_FAILED, action, e);
+				}
+				final int size = items.size();
+				final Iterator<FileItem> iter = items.iterator();
+				final JSONArray jArray = new JSONArray();
+				try {
+					for (int i = 0; i < size; i++) {
+						final FileItem fileItem = iter.next();
+						if (!fileItem.isFormField() && fileItem.getSize() > 0 && fileItem.getName() != null
+								&& fileItem.getName().length() > 0) {
+							jArray.put(processFileItem(fileItem, sessionObj));
+						}
+					}
+				} catch (final Exception e) {
+					throw new UploadException(UploadCode.UPLOAD_FAILED, action, e);
+				}
+				/*
+				 * Return IDs of upload files in response
+				 */
+				final Response response = new Response();
+				response.setData(jArray);
+				final String jsResponse = JS_FRAGMENT.replaceFirst(JS_FRAGMENT_JSON,
+						Matcher.quoteReplacement(response.getJSON().toString())).replaceFirst(JS_FRAGMENT_ACTION,
+						action);
+				final Writer writer = resp.getWriter();
+				writer.write(jsResponse);
+				writer.flush();
+
+			}
+		} catch (final UploadException e) {
+			LOG.error(e.getMessage(), e);
+			JSONObject responseObj = null;
+			try {
+				final Response response = new Response();
+				response.setException(e);
+				responseObj = response.getJSON();
+			} catch (final JSONException e1) {
+				LOG.error(e1.getMessage(), e1);
+			}
+			throw new UploadServletException(resp, JS_FRAGMENT.replaceFirst(JS_FRAGMENT_JSON,
+					responseObj == null ? STR_NULL : Matcher.quoteReplacement(responseObj.toString())).replaceFirst(
+					JS_FRAGMENT_ACTION, e.getAction() == null ? STR_NULL : e.getAction()), e.getMessage(), e);
+		} catch (final JSONException e) {
+			final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e, new Object[0]);
+			JSONObject responseObj = null;
+			try {
+				final Response response = new Response();
+				response.setException(oje);
+				responseObj = response.getJSON();
+			} catch (final JSONException e1) {
+				LOG.error(e1.getMessage(), e1);
+			}
+			throw new UploadServletException(resp, JS_FRAGMENT.replaceFirst(JS_FRAGMENT_JSON,
+					responseObj == null ? STR_NULL : Matcher.quoteReplacement(responseObj.toString())).replaceFirst(
+					JS_FRAGMENT_ACTION, action == null ? STR_NULL : action), e.getMessage(), e);
+		}
+	}
+
+	private static final File UPLOAD_DIR = new File(ServerConfig.getProperty(Property.UploadDirectory));
+
+	private static final String FILE_PREFIX = "openexchange";
+
+	private static String processFileItem(final FileItem fileItem, final SessionObject session) throws Exception {
+		final File tmpFile = File.createTempFile(FILE_PREFIX, null, UPLOAD_DIR);
+		tmpFile.deleteOnExit();
+		fileItem.write(tmpFile);
+		session.putAJAXUploadFile(tmpFile.getName(), new AJAXUploadFile(tmpFile, System.currentTimeMillis()));
+		return tmpFile.getName();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.ajax.PermissionServlet#hasModulePermission(com.openexchange.sessiond.SessionObject)
+	 */
+	@Override
+	protected boolean hasModulePermission(final SessionObject sessionObj) {
+		return true;
+	}
+
+}

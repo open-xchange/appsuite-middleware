@@ -52,6 +52,7 @@ package com.openexchange.sessiond;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.mail.MessagingException;
@@ -64,10 +65,13 @@ import com.openexchange.groupware.UserConfigurationStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.Credentials;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.upload.AJAXUploadFile;
+import com.openexchange.groupware.upload.AJAXUploadFileTimerTask;
 import com.openexchange.imap.IMAPProperties;
 import com.openexchange.imap.IMAPUtils;
 import com.openexchange.imap.UserSettingMail;
 import com.openexchange.imap.UserSettingMailStorage;
+import com.openexchange.server.ServerTimer;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.Rights;
 
@@ -123,10 +127,92 @@ public class SessionObject {
 
 	private final transient Map<String, Boolean> imapCachedUserFlags;
 
+	private final transient Map<String, AJAXUploadFile> ajaxUploadFiles;
+
 	public SessionObject(final String sessionid) {
 		this.sessionid = sessionid;
 		imapCachedMyRights = new ConcurrentHashMap<String, Rights>();
 		imapCachedUserFlags = new ConcurrentHashMap<String, Boolean>();
+		ajaxUploadFiles = new ConcurrentHashMap<String, AJAXUploadFile>();
+	}
+
+	/**
+	 * Gets the uploaded file associated with given ID
+	 * 
+	 * @param id
+	 *            The id
+	 * @return The uploaded file associated with given ID or <code>null</code>
+	 *         if none found
+	 */
+	public final AJAXUploadFile getAJAXUploadFile(final String id) {
+		return ajaxUploadFiles.get(id);
+	}
+
+	/**
+	 * Touches the uploaded file associated with given ID; meaning to set its
+	 * last access timestamp to current time millis
+	 * 
+	 * @param id
+	 *            The id
+	 * @return <code>true</code> if a matching upload file has been found and
+	 *         successfully touched; otherwise <code>false</code>
+	 */
+	public final boolean touchAJAXUploadFile(final String id) {
+		final AJAXUploadFile uploadFile = ajaxUploadFiles.get(id);
+		if (null != uploadFile) {
+			uploadFile.touch();
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Puts the uploaded file with ID as key and starts timer
+	 * 
+	 * @param id
+	 *            The ID (must not be <code>null</code>)
+	 * @param uploadFile
+	 *            The upload file (must not be <code>null</code>)
+	 */
+	public final void putAJAXUploadFile(final String id, final AJAXUploadFile uploadFile) {
+		ajaxUploadFiles.put(id, uploadFile);
+		final TimerTask timerTask = new AJAXUploadFileTimerTask(uploadFile, 300000/* 5min */, id, ajaxUploadFiles);
+		uploadFile.setTimerTask(timerTask);
+		/*
+		 * Start timer task
+		 */
+		ServerTimer.getTimer().schedule(timerTask, 1000/* 1sec */, 60000/* 1min */);
+		if (LOG.isDebugEnabled()) {
+			LOG.debug(new StringBuilder(256).append("Upload file \"").append(uploadFile).append("\" with ID=").append(
+					id).append(" added to session and timer task started").toString());
+		}
+	}
+
+	/**
+	 * Removes the uploaded file associated with given ID and stops timer
+	 * 
+	 * @param id
+	 *            The ID
+	 * @return The removed uploaded file or <code>null</code> if none removed
+	 */
+	public final AJAXUploadFile removeAJAXUploadFile(final String id) {
+		final AJAXUploadFile uploadFile = ajaxUploadFiles.remove(id);
+		if (null != uploadFile) {
+			/*
+			 * Prevent this uplaod file from being deleted by timer task
+			 */
+			uploadFile.setBlockedForTimer(true);
+			/*
+			 * Cancel timer task and clean from timer
+			 */
+			uploadFile.getTimerTask().cancel();
+			ServerTimer.getTimer().cancel();
+			if (LOG.isDebugEnabled()) {
+				LOG.debug(new StringBuilder(256).append("Upload file \"").append(uploadFile).append("\" with ID=")
+						.append(id).append(" removed from session and timer task canceled").toString());
+			}
+		}
+		return uploadFile;
 	}
 
 	public final Rights getCachedRights(final IMAPFolder f, final boolean load) throws MessagingException {
@@ -300,7 +386,7 @@ public class SessionObject {
 	public User getUserObject() {
 		return u;
 	}
-	
+
 	public UserSettingMail getUserSettingMail() {
 		try {
 			return UserSettingMailStorage.getInstance().loadUserSettingMail(u.getId(), context);

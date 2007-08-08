@@ -91,6 +91,7 @@ import com.openexchange.api.OXConflictException;
 import com.openexchange.api2.OXException;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.upload.UploadEvent;
 import com.openexchange.groupware.upload.UploadException;
@@ -211,6 +212,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 	public static final String ACTION_SAVE_VERSIT = "saveVersit";
 	
 	public static final String ACTION_CLEAR = "clear";
+	
+	public static final String ACTION_KEEPALIVE = "keepalive";
 
 	/**
 	 * The parameter 'from' specifies index of starting entry in list of objects
@@ -1000,6 +1003,68 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 	
 	protected final boolean isIE7(final HttpServletRequest req){
 		return req.getHeader("User-Agent").contains("MSIE 7");
+	}
+
+	public static final String getModuleString(final int module, final int objectId) {
+		String moduleStr = null;
+		switch (module) {
+		case FolderObject.TASK:
+			moduleStr = MODULE_TASK;
+			break;
+		case FolderObject.CONTACT:
+			moduleStr = MODULE_CONTACT;
+			break;
+		case FolderObject.CALENDAR:
+			moduleStr = MODULE_CALENDAR;
+			break;
+		case FolderObject.UNBOUND:
+			moduleStr = MODULE_UNBOUND;
+			break;
+		case FolderObject.MAIL:
+			moduleStr = MODULE_MAIL;
+			break;
+		case FolderObject.PROJECT:
+			moduleStr = MODULE_PROJECT;
+			break;
+		case FolderObject.INFOSTORE:
+			moduleStr = MODULE_INFOSTORE;
+			break;
+		case FolderObject.SYSTEM_MODULE:
+			if (objectId == FolderObject.SYSTEM_OX_PROJECT_FOLDER_ID) {
+				moduleStr = MODULE_PROJECT;
+			} else if (objectId == FolderObject.SYSTEM_INFOSTORE_FOLDER_ID) {
+				moduleStr = MODULE_INFOSTORE;
+			} else {
+				moduleStr = MODULE_SYSTEM;
+			}
+			break;
+		default:
+			moduleStr = "";
+			break;
+		}
+		return moduleStr;
+	}
+	
+	public static final int getModuleInteger(final String moduleStr) {
+		final int module;
+		if (MODULE_TASK.equalsIgnoreCase(moduleStr)) {
+			module = FolderObject.TASK;
+		} else if (MODULE_CONTACT.equalsIgnoreCase(moduleStr)) {
+			module = FolderObject.CONTACT;
+		} else if (MODULE_CALENDAR.equalsIgnoreCase(moduleStr)) {
+			module = FolderObject.CALENDAR;
+		} else if (MODULE_UNBOUND.equalsIgnoreCase(moduleStr)) {
+			module = FolderObject.UNBOUND;
+		} else if (MODULE_MAIL.equalsIgnoreCase(moduleStr)) {
+			module = FolderObject.MAIL;
+		} else if (MODULE_PROJECT.equalsIgnoreCase(moduleStr)) {
+			module = FolderObject.PROJECT;
+		} else if (MODULE_INFOSTORE.equalsIgnoreCase(moduleStr)) {
+			module = FolderObject.INFOSTORE;
+		} else {
+			module = -1;
+		}
+		return module;
 	}
 
 }

@@ -60,6 +60,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONWriter;
 
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Folder;
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.api2.MailInterfaceImpl;
@@ -328,7 +329,7 @@ public final class FolderWriter extends DataWriter {
 						if (withKey) {
 							jsonwriter.key(FolderFields.MODULE);
 						}
-						jsonwriter.value(getModuleString(module == -1 ? FolderObject.MAIL : module, -1));
+						jsonwriter.value(AJAXServlet.getModuleString(module == -1 ? FolderObject.MAIL : module, -1));
 					}
 				};
 				break Fields;
@@ -755,7 +756,7 @@ public final class FolderWriter extends DataWriter {
 						if (withKey) {
 							jsonwriter.key(FolderFields.MODULE);
 						}
-						jsonwriter.value(fo.containsModule() ? getModuleString(fo.getModule(), fo.getObjectID())
+						jsonwriter.value(fo.containsModule() ? AJAXServlet.getModuleString(fo.getModule(), fo.getObjectID())
 								: JSONObject.NULL);
 					}
 				};
@@ -1031,46 +1032,6 @@ public final class FolderWriter extends DataWriter {
 
 	private long addTimeZoneOffset(final long date) {
 		return (date + TimeZone.getTimeZone(userObj.getTimeZone()).getOffset(date));
-	}
-
-	public static String getModuleString(final int module, final int objectId) {
-		String moduleStr = null;
-		switch (module) {
-		case FolderObject.TASK:
-			moduleStr = Folder.MODULE_TASK;
-			break;
-		case FolderObject.CONTACT:
-			moduleStr = Folder.MODULE_CONTACT;
-			break;
-		case FolderObject.CALENDAR:
-			moduleStr = Folder.MODULE_CALENDAR;
-			break;
-		case FolderObject.UNBOUND:
-			moduleStr = Folder.MODULE_UNBOUND;
-			break;
-		case FolderObject.MAIL:
-			moduleStr = Folder.MODULE_MAIL;
-			break;
-		case FolderObject.PROJECT:
-			moduleStr = Folder.MODULE_PROJECT;
-			break;
-		case FolderObject.INFOSTORE:
-			moduleStr = Folder.MODULE_INFOSTORE;
-			break;
-		case FolderObject.SYSTEM_MODULE:
-			if (objectId == FolderObject.SYSTEM_OX_PROJECT_FOLDER_ID) {
-				moduleStr = Folder.MODULE_PROJECT;
-			} else if (objectId == FolderObject.SYSTEM_INFOSTORE_FOLDER_ID) {
-				moduleStr = Folder.MODULE_INFOSTORE;
-			} else {
-				moduleStr = Folder.MODULE_SYSTEM;
-			}
-			break;
-		default:
-			moduleStr = "";
-			break;
-		}
-		return moduleStr;
 	}
 
 }

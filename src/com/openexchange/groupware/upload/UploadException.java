@@ -87,7 +87,23 @@ public final class UploadException extends AbstractOXException {
 		 * size of %d
 		 */
 		MAX_UPLOAD_SIZE_EXCEEDED("Request rejected because its size (%d) exceeds the maximum configured size of %d",
-				Category.USER_INPUT, 5);
+				Category.USER_INPUT, 5),
+		/**		
+		 * Missing parameter %s
+		 */
+		MISSING_PARAM("Missing parameter %s", Category.CODE_ERROR, 6),
+		/**
+		 * Unknown module: %d
+		 */
+		UNKNOWN_MODULE("Unknown module: %d", Category.CODE_ERROR, 7),
+		/**
+		 * An uploaded file referenced by %s could not be found
+		 */
+		UPLOAD_FILE_NOT_FOUND("An uploaded file referenced by %s could not be found", Category.USER_INPUT, 8),
+		/**
+		 * Invalid action value: %s
+		 */
+		INVALID_ACTION_VALUE("Invalid action value: %s", Category.CODE_ERROR, 9);
 
 		private final String message;
 
@@ -112,6 +128,11 @@ public final class UploadException extends AbstractOXException {
 		public final String getMessage() {
 			return message;
 		}
+	}
+	
+	public UploadException(final AbstractOXException cause, final String action) {
+		super(cause);
+		this.action = action;
 	}
 
 	public UploadException(final UploadCode uploadCode, final String action, final Throwable cause) {

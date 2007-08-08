@@ -14,6 +14,8 @@
    requests for throughput accounting purpose
  - Bugfix #8716: Fixed composing JSON response if multiple request element
    does not contain a timestamp value
+ - Added servlet to upload files into download directory and hold in
+   session accessible through an ID
 
 * 2007-08-07 - thorben.betten@open-xchange.com
 

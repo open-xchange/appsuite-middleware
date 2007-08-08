@@ -2461,7 +2461,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 					}
 				}
 			}
-		} catch (UploadException e) {
+		} catch (final UploadException e) {
 			LOG.error(e.getMessage(), e);
 			JSONObject responseObj = null;
 			try {
@@ -2474,7 +2474,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 			throw new UploadServletException(resp, JS_FRAGMENT.replaceFirst(JS_FRAGMENT_JSON,
 					responseObj == null ? STR_NULL : Matcher.quoteReplacement(responseObj.toString())).replaceFirst(
 					JS_FRAGMENT_ACTION, e.getAction() == null ? STR_NULL : e.getAction()), e.getMessage(), e);
-		} catch (OXException e) {
+		} catch (final OXException e) {
 			LOG.error(e.getMessage(), e);
 			sendErrorAsJS(resp, e.getMessage());
 		}
