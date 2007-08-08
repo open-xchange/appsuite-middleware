@@ -51,6 +51,9 @@ package com.openexchange.groupware.integration;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.groupware.configuration.GenericImplConfig;
@@ -59,7 +62,8 @@ import com.openexchange.groupware.contexts.ContextException;
 import com.openexchange.groupware.contexts.ContextStorage;
 
 /**
- * 
+ * Generic implementation of a config jump. Replaces some tags in the URL of
+ * the configjump.properties and sends the link to the GUI.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class GenericImpl extends SetupLink {
@@ -85,7 +89,8 @@ public class GenericImpl extends SetupLink {
         try {
             final Context ctx = ContextStorage.getInstance().getContext(
                 getContextId());
-            url = url.replace("%c", ctx.getLoginInfo()[0]);
+            final String[] loginInfos = ctx.getLoginInfo();
+            url = url.replace("%c", extract(loginInfos, ctx.getContextId()));
             return new URL(url);
         } catch (MalformedURLException e) {
             throw new SetupLinkException(SetupLinkException.Code.MALFORMED_URL,
@@ -105,5 +110,14 @@ public class GenericImpl extends SetupLink {
         } catch (ConfigurationException e) {
             throw new SetupLinkException(e);
         }
+    }
+
+    private String extract(final String[] loginInfos, final int contextId) {
+        final Set<String> infos = new HashSet<String>();
+        infos.addAll(Arrays.asList(loginInfos));
+        if (infos.size() > 1) {
+            infos.remove(String.valueOf(contextId));
+        }
+        return infos.toArray(new String[infos.size()])[0];
     }
 }

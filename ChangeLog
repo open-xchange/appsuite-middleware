@@ -1,12 +1,7 @@
-* 2007-08-08 - tobias.prinz@open-xchange.com
-
- - Refactoring: JSONWriter replaced with OXJSONWriter for ImportServlet
- - Bug 8681: Checking for modules in Importers.
- - Bug 7936: Fixed typos in exception messages.
-
 * 2007-08-08 - marcus.klein@open-xchange.com
 
  - Bugfix 8720: Added invalidation for context login information mappings.
+ - Finished generic config jump.
 
 * 2007-08-08 - thorben.betten@open-xchange.com
 
@@ -14,8 +9,6 @@
    requests for throughput accounting purpose
  - Bugfix #8716: Fixed composing JSON response if multiple request element
    does not contain a timestamp value
- - Added servlet to upload files into download directory and hold in
-   session accessible through an ID
 
 * 2007-08-07 - thorben.betten@open-xchange.com
 
