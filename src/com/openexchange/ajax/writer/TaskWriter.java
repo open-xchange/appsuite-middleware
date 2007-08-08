@@ -75,11 +75,11 @@ public class TaskWriter extends CalendarWriter {
 	}
 	
 	public void writeArray(final Task taskObject, final int cols[], final JSONArray jsonArray) throws JSONException {
-		final JSONArray jsonAppointmentArray = new JSONArray();
+		final JSONArray jsonTaskArray = new JSONArray();
 		for (int a = 0; a < cols.length; a++) {
-			write(cols[a], taskObject, jsonArray);
+			write(cols[a], taskObject, jsonTaskArray);
 		}
-		jsonArray.put(jsonAppointmentArray);
+		jsonArray.put(jsonTaskArray);
 	}
 	
 	public void writeTask(final Task taskObject, final JSONObject jsonObj) throws JSONException {
