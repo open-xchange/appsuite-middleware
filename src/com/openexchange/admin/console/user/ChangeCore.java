@@ -133,7 +133,7 @@ public abstract class ChangeCore extends UserAbstraction {
             // apply changes in module access on server
             oxusr.changeModuleAccess(ctx, usr, access, auth);
 
-            displayChangedMessage(successtext, ctx.getId());
+            displayChangedMessage(successtext, ctx.getId(), parser);
             sysexit(0);
         } catch (final Exception e) {
             printErrors(successtext, ctxid, e, parser);

@@ -119,7 +119,7 @@ public abstract class ChangeCore extends GroupAbstraction {
 
             oxgrp.change(ctx, grp, auth);
 
-            displayChangedMessage(successtext, ctxid);
+            displayChangedMessage(successtext, ctxid, parser);
             sysexit(0);
         } catch (final Exception e) {
             printErrors(successtext, ctxid, e, parser);

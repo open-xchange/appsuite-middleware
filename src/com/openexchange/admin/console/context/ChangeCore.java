@@ -46,7 +46,7 @@ public abstract class ChangeCore extends ContextAbstraction {
 
             maincall(parser, ctx, auth);
 
-            displayChangedMessage(successtext, null);
+            displayChangedMessage(successtext, null, parser);
             sysexit(0);
         } catch (final Exception e) {
             printErrors(successtext, null, e, parser);

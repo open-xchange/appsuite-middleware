@@ -89,7 +89,7 @@ public abstract class DeleteCore extends ResourceAbstraction {
             maincall(parser, oxres, ctx, res, auth);
             oxres.delete(ctx, res, auth);
 
-            displayDeletedMessage(successtext, ctxid);
+            displayDeletedMessage(successtext, ctxid, parser);
             sysexit(0);
         } catch (final Exception e) {
             printErrors(successtext, ctxid, e, parser);

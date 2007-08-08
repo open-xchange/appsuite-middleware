@@ -101,7 +101,7 @@ public abstract class CreateCore extends GroupAbstraction {
             
             final Integer id = oxgrp.create(ctx, grp, auth).getId();
             
-            displayCreatedMessage(String.valueOf(id), ctx.getId());
+            displayCreatedMessage(String.valueOf(id), ctx.getId(), parser);
             sysexit(0);
         } catch (final Exception e) {
             printErrors(null, ctxid, e, parser);
