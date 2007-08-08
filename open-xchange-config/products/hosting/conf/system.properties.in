@@ -59,6 +59,9 @@ Participant=@oxgroupwaresysconfdir@/participant.properties
 # Directory in which all property files for servlet mapping are kept
 ServletMappingDir=@oxgroupwaresysconfdir@/servletmappings
 
+# File configuring special WebDAV overrides for GMX WebDAV client.
+WEBDAVOVERRIDES=@oxgroupwaresysconfdir@/webdav_overrides.xml
+
 CONFIGPATH:@oxgroupwaresysconfdir@
 AJPPROPERTIES:@oxgroupwaresysconfdir@/ajp.properties
 CACHECCF:@oxgroupwaresysconfdir@/cache.ccf
