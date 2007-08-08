@@ -2454,4 +2454,125 @@ public class AppointmentBugTests extends TestCase {
         assertEquals("Excption reminder", exc_reminder, check_exc_reminder);
     } 
     
+    /*
+    Steps to Reproduce:
+    As User A:
+
+    1.  Select your Calendar in the treeview
+    2.  RMB -> 'New subfolder' and enter "My public write folder" as 'Name'
+    3.  Select "calendar" from the 'Type' dropdown list
+    4.  Click the 'Rights' tab and select 'Users' -> 'Add'
+    5.  Search for "*" and add the group "sales" to the temporary user list
+    6.  Click 'OK' to add the selected users to the permission table
+    7.  On the permission table, select "sales" and grant the following rights:
+
+    Administrator: No
+    Ordnerrechte: Objekte anlegen
+    Leserechte: Alle
+    Schreibrechte: Alle
+    Löschrechte: Alle
+
+    8.  Click 'Save' on the panel to store the folder permissions
+    9.  Log out and log in as User B (member of "sales")
+    10.  Go to the calendar of User B in treeview and select a previously added
+    appointment
+    11.  Click 'Appointment' -> 'Move' on the panel and select the public folder
+    created by User A as destination
+    12.  Verify that the appointment is removed from the personal calendar
+    13.  Select 'My public write folder' and verify the appointments in it
+    14.  Drag & Drop an appointment from your calendar to the shared folder 'My
+    public write folder' 
+
+    Actual Results:
+    12. The appointment isn't moved no error is shown
+    13. The app. wasn't moved to the folder
+    14. Fehlermeldung: com.openexchange.tools.iterator.SearchIterator$1
+    (FLD-9999,-215490580-513) is shown, the appointment isn't moved
+    */
+    public void testBug8495() throws Throwable {
+        Context context = new ContextImpl(contextid);
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestSearch");
+        
+        String user2 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant3", "");        
+        int uid2 = resolveUser(user2);        
+        SessionObject so2 = SessionObjectWrapper.createSessionObject(uid2, context.getContextId(), "myTestIdentifier");
+        
+        Connection readcon = DBPool.pickup(context);
+        Connection writecon = DBPool.pickupWriteable(context);        
+        
+        int fid = AppointmentBugTests.getPrivateFolder(userid);
+        int fid2 = AppointmentBugTests.getPrivateFolder(uid2);
+        
+        final OXFolderManager oxma = new OXFolderManagerImpl(so, readcon, writecon);
+        FolderObject fo = new FolderObject();
+        
+        CalendarSql csql = new CalendarSql(so);
+        CalendarSql csql2 = new CalendarSql(so2);
+        
+        
+        OCLPermission oclp1 = new OCLPermission();
+        oclp1.setEntity(userid);
+        oclp1.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+        oclp1.setFolderAdmin(true);
+        OCLPermission oclp2 = new OCLPermission();
+        
+        oclp2.setEntity(uid2);
+        oclp2.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+        fo.setFolderName("testSharedFolder8495");
+        fo.setParentFolderID(fid);
+        fo.setModule(FolderObject.CALENDAR);
+        fo.setType(FolderObject.PRIVATE);
+        fo.setPermissionsAsArray(new OCLPermission[] { oclp1, oclp2 });       
+        
+        int shared_folder_id = 0;
+        try {
+            
+            fo = oxma.createFolder(fo, true, System.currentTimeMillis());
+            shared_folder_id = fo.getObjectID();       
+            
+            CalendarDataObject cdao = new CalendarDataObject();
+            cdao.setContext(so.getContext());
+            cdao.setTitle("testBug8495");
+            CalendarTest.fillDatesInDao(cdao);
+            cdao.setParentFolderID(fid);
+            cdao.setIgnoreConflicts(true);
+            
+            csql.insertAppointmentObject(cdao);
+            int object_id = cdao.getObjectID();
+            assertTrue("Object was created", object_id > 0);
+
+            CalendarDataObject load = csql2.getObjectById(object_id, shared_folder_id);
+            
+            CalendarDataObject move = new CalendarDataObject();
+            move.setContext(so2.getContext());
+            move.setObjectID(object_id);
+            move.setParentFolderID(fid2);
+            
+            try {
+                csql2.updateAppointmentObject(move, shared_folder_id, new Date(shared_folder_id));
+                fail("Move without error message, this should not happen!");
+            } catch(OXCalendarException oxca) {
+                int x = 0;
+                // this is what we expect !
+            }   
+            
+        } finally {
+            try {
+                if (shared_folder_id > 0) {
+                    oxma.deleteFolder(new FolderObject(shared_folder_id), true, SUPER_END);
+                } 
+            } catch(Exception e) {
+                e.printStackTrace();
+                fail("Error deleting folder object.");
+            }
+        }
+        try {
+            DBPool.push(context, readcon);
+            DBPool.pushWrite(context, writecon);        
+        } catch(Exception ignore) { 
+            ignore.printStackTrace();
+        }                        
+        
+    }
+    
 }
