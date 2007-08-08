@@ -151,6 +151,9 @@ public abstract class BasicCommandlineOptions {
     
     protected static final String OPT_NAME_CSVOUTPUT_LONG = "csv";
     protected static final String OPT_NAME_CSVOUTPUT_DESCRIPTION = "Format output to csv";
+
+    protected static final String OPT_NAME_NONEWLINE_LONG = "nonl";
+    protected static final String OPT_NAME_NONEWLINE_DESCRIPTION = "Remove all newlines (\\n) from output";
     
     private static final String []ENV_OPTIONS = 
         new String[]{ "RMI_HOSTNAME", "COMMANDLINE_TIMEZONE", "COMMANDLINE_DATEFORMAT" };
@@ -164,7 +167,8 @@ public abstract class BasicCommandlineOptions {
     protected Option adminPassOption = null;
     protected Option searchOption = null;
     protected Option csvOutputOption = null;
-
+    protected Option noNewlineOption = null;
+    
     // Used for right error output
     protected Integer ctxid = null;
     
@@ -234,22 +238,47 @@ public abstract class BasicCommandlineOptions {
         }
     }
     
-    protected final void printServerException(final Exception e){
+    protected final void printServerException(final Exception e, final AdminParser parser){
+        String output = "";
         String msg = e.getMessage();
-        if( msg != null) {
-            System.err.println("Server response:\n "+msg);
-            //e.printStackTrace(System.err);
+        if( parser != null && parser.getOptionValue(this.noNewlineOption) != null ) {
+            if( msg != null ) {
+                output = "Server response: "+msg.replace("\n", "");
+            } else {
+                output += e.toString();
+                for(final StackTraceElement ste : e.getStackTrace() ) {
+                    output += ": " + ste.toString().replace("\n", "");
+                }
+            }
         } else {
-            e.printStackTrace(System.err);
+            if( msg != null ) {
+                output = "Server response:\n "+msg;
+            } else {
+            output += e.toString() + "\n";
+            for(final StackTraceElement ste : e.getStackTrace() ) {
+                    output += "\tat "+ste.toString()+"\n";
+            }
+            }
         }
+        System.err.println(output);
     }
     
 //    protected final void printNotBoundResponse(final NotBoundException nbe){
 //        System.err.println("RMI module "+nbe.getMessage()+" not available on server");
 //    }
     
-    protected final void printError(final String msg){
-        System.err.println("Error: "+msg+"\n");    
+    protected final void printError(final String msg, final AdminParser parser){
+        String output = null;
+        if( parser == null ) {
+            output = msg;
+        } else {
+            if(parser.getOptionValue(this.noNewlineOption) != null) {
+                output =  msg.replace("\n", "");
+            } else {
+                output = msg;
+            }
+        }
+        System.err.println("Error: "+output+"\n");
     }
     
     protected final void printServerResponse(final String msg){
@@ -397,6 +426,10 @@ public abstract class BasicCommandlineOptions {
         this.csvOutputOption = setLongOpt(admp, OPT_NAME_CSVOUTPUT_LONG, OPT_NAME_CSVOUTPUT_DESCRIPTION, false, false);
     }
     
+    protected final void setNoNewlineOption(final AdminParser admp) {
+        this.noNewlineOption = setLongOpt(admp, OPT_NAME_NONEWLINE_LONG, OPT_NAME_NONEWLINE_DESCRIPTION, false, false);
+    }
+
     protected void setAdminUserOption(final AdminParser admp) {
         this.adminUserOption= setShortLongOpt(admp,OPT_NAME_ADMINUSER_SHORT, OPT_NAME_ADMINUSER_LONG, OPT_NAME_ADMINUSER_DESCRIPTION, true, NeededQuadState.possibly);
     }
@@ -449,12 +482,14 @@ public abstract class BasicCommandlineOptions {
         setContextOption(admp, NeededQuadState.needed);
         setAdminUserOption(admp); 
         setAdminPassOption(admp);
+        setNoNewlineOption(admp);
     }
 
     
     protected final void setDefaultCommandLineOptionsWithoutContextID(final AdminParser parser) {          
         setAdminUserOption(parser);
-        setAdminPassOption(parser);        
+        setAdminPassOption(parser);
+        setNoNewlineOption(parser);
     }
 
     protected void sysexit(final int exitcode) {

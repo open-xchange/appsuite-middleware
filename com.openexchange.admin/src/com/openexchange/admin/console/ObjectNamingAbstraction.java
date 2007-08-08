@@ -33,23 +33,23 @@ public abstract class ObjectNamingAbstraction extends BasicCommandlineOptions {
 
     protected abstract String getObjectName();
 
-    protected final void displayCreatedMessage(final String id, final Integer ctxid) {
-        createMessageForStdout(id, ctxid, "created");
+    protected final void displayCreatedMessage(final String id, final Integer ctxid, final AdminParser parser) {
+        createMessageForStdout(id, ctxid, "created", parser);
     }
 
-    protected final void displayChangedMessage(final String id, final Integer ctxid) {
-        createMessageForStdout(id, ctxid, "changed");
+    protected final void displayChangedMessage(final String id, final Integer ctxid, final AdminParser parser) {
+        createMessageForStdout(id, ctxid, "changed", parser);
     }
 
-    protected final void displayDeletedMessage(final String id, final Integer ctxid) {
-        createMessageForStdout(id, ctxid, "deleted");
+    protected final void displayDeletedMessage(final String id, final Integer ctxid, final AdminParser parser) {
+        createMessageForStdout(id, ctxid, "deleted", parser);
     }
     
-    protected void createMessageForStdout(final String id, final Integer ctxid, final String type) {
-        createMessage(id, ctxid, type, System.out);
+    protected void createMessageForStdout(final String id, final Integer ctxid, final String type, final AdminParser parser) {
+        createMessage(id, ctxid, type, System.out, parser);
     }
 
-    private void createMessage(final String id, final Integer ctxid, final String type, final PrintStream ps) {
+    private void createMessage(final String id, final Integer ctxid, final String type, final PrintStream ps, final AdminParser parser) {
         final StringBuilder sb = new StringBuilder(getObjectName());
         if (null != id) {
             sb.append(" ");
@@ -61,41 +61,45 @@ public abstract class ObjectNamingAbstraction extends BasicCommandlineOptions {
         }
         sb.append(" ");
         sb.append(type);
-        ps.println(sb.toString());
+        if( parser != null && parser.getOptionValue(this.noNewlineOption) != null ) {
+            ps.print(sb.toString());
+        } else {
+            ps.println(sb.toString());
+        }
     }
     
-    protected void createMessageForStderr(final String id, final Integer ctxid, final String type) {
-        createMessage(id, ctxid, type, System.err);
+    protected void createMessageForStderr(final String id, final Integer ctxid, final String type, final AdminParser parser) {
+        createMessage(id, ctxid, type, System.err, parser);
     }
     
-    protected final void printError(final String id, final Integer ctxid, final String msg) {
-        printFirstPartOfErrorText(id, ctxid);
-        printError(msg);    
+    protected final void printError(final String id, final Integer ctxid, final String msg, final AdminParser parser) {
+        printFirstPartOfErrorText(id, ctxid, parser);
+        printError(msg, parser);    
     }
 
-    protected final void printInvalidInputMsg(final String id, final Integer ctxid, final String msg) {
-        printFirstPartOfErrorText(id, ctxid);
+    protected final void printInvalidInputMsg(final String id, final Integer ctxid, final String msg, final AdminParser parser) {
+        printFirstPartOfErrorText(id, ctxid, parser);
         printInvalidInputMsg(msg);    
     }    
 
-    protected void printServerException(final String id, final Integer ctxid, final Exception e) {
-        printFirstPartOfErrorText(id, ctxid);
-        printServerException(e);
+    protected void printServerException(final String id, final Integer ctxid, final Exception e, final AdminParser parser) {
+        printFirstPartOfErrorText(id, ctxid, parser);
+        printServerException(e, parser);
     }
 
     protected final void printNotBoundResponse(final Integer id, final Integer ctxid, final NotBoundException nbe){
         System.err.println("RMI module "+nbe.getMessage()+" not available on server");
     }
 
-    protected void printFirstPartOfErrorText(final String id, final Integer ctxid) {
+    protected void printFirstPartOfErrorText(final String id, final Integer ctxid, final AdminParser parser) {
         if (getClass().getName().matches("^.*\\.\\w*(?i)create\\w*$")) {
-            createMessageForStderr(id, ctxid, "could not be created: ");
+            createMessageForStderr(id, ctxid, "could not be created: ", parser);
         } else if (getClass().getName().matches("^.*\\.\\w*(?i)change\\w*$")) {
-            createMessageForStderr(id, ctxid, "could not be changed: ");
+            createMessageForStderr(id, ctxid, "could not be changed: ", parser);
         } else if (getClass().getName().matches("^.*\\.\\w*(?i)delete\\w*$")) {
-            createMessageForStderr(id, ctxid, "could not be deleted: ");
+            createMessageForStderr(id, ctxid, "could not be deleted: ", parser);
         } else if (getClass().getName().matches("^.*\\.\\w*(?i)list\\w*$")) {
-            createMessageForStderr(id, ctxid, "could not be listed: ");
+            createMessageForStderr(id, ctxid, "could not be listed: ", parser);
         }
     }
 
@@ -105,93 +109,93 @@ public abstract class ObjectNamingAbstraction extends BasicCommandlineOptions {
         // the if clause for Bexception will match beforehand
         if (e instanceof ConnectException) {
             final ConnectException new_name = (ConnectException) e;
-            printError(id, ctxid, new_name.getMessage());
+            printError(id, ctxid, new_name.getMessage(), parser);
             sysexit(SYSEXIT_COMMUNICATION_ERROR);
         } else if (e instanceof NumberFormatException) {
-            printInvalidInputMsg(id, ctxid, "Ids must be numbers!");
+            printInvalidInputMsg(id, ctxid, "Ids must be numbers!", parser);
             sysexit(1);
         } else if (e instanceof MalformedURLException) {
             final MalformedURLException exc = (MalformedURLException) e;
-            printServerException(id, ctxid, exc);
+            printServerException(id, ctxid, exc, parser);
             sysexit(1);
         } else if (e instanceof RemoteException) {
             final RemoteException exc = (RemoteException) e;
-            printServerException(id, ctxid, exc);
+            printServerException(id, ctxid, exc, parser);
             sysexit(SYSEXIT_REMOTE_ERROR);
         } else if (e instanceof NotBoundException) {
             final NotBoundException exc = (NotBoundException) e;
-            printServerException(id, ctxid, exc);
+            printServerException(id, ctxid, exc, parser);
             sysexit(1);
         } else if (e instanceof InvalidCredentialsException) {
             final InvalidCredentialsException exc = (InvalidCredentialsException) e;
-            printServerException(id, ctxid, exc);
+            printServerException(id, ctxid, exc, parser);
             sysexit(SYSEXIT_INVALID_CREDENTIALS);
         } else if (e instanceof NoSuchContextException) {
             final NoSuchContextException exc = (NoSuchContextException) e;
-            printServerException(id, ctxid, exc);
+            printServerException(id, ctxid, exc, parser);
             sysexit(SYSEXIT_NO_SUCH_CONTEXT);
         } else if (e instanceof InvocationTargetException) {
-            printError(id, ctxid, e.getMessage());
+            printError(id, ctxid, e.getMessage(), parser);
             sysexit(1);
         } else if (e instanceof StorageException) {
             final StorageException exc = (StorageException) e;
-            printServerException(id, ctxid, exc);
+            printServerException(id, ctxid, exc, parser);
             sysexit(SYSEXIT_SERVERSTORAGE_ERROR);
         } else if (e instanceof InvalidDataException) {
             final InvalidDataException exc = (InvalidDataException) e;
-            printServerException(id, ctxid, exc);
+            printServerException(id, ctxid, exc, parser);
             sysexit(SYSEXIT_INVALID_DATA);
         } else if (e instanceof IllegalArgumentException) {
-            printError(id, ctxid, e.getMessage());
+            printError(id, ctxid, e.getMessage(), parser);
             sysexit(1);
         } else if (e instanceof IllegalAccessException) {
-            printError(id, ctxid, e.getMessage());
+            printError(id, ctxid, e.getMessage(), parser);
             sysexit(1);
         } else if (e instanceof IllegalOptionValueException) {
             final IllegalOptionValueException exc = (IllegalOptionValueException) e;
-            printError(id, ctxid, "Illegal option value : " + exc.getMessage());
+            printError(id, ctxid, "Illegal option value : " + exc.getMessage(), parser);
             parser.printUsage();
             sysexit(SYSEXIT_ILLEGAL_OPTION_VALUE);
         } else if (e instanceof UnknownOptionException) {
             final UnknownOptionException exc = (UnknownOptionException) e;
-            printError(id, ctxid, "Unrecognized options on the command line: " + exc.getMessage());
+            printError(id, ctxid, "Unrecognized options on the command line: " + exc.getMessage(), parser);
             parser.printUsage();
             sysexit(SYSEXIT_UNKNOWN_OPTION);
         } else if (e instanceof MissingOptionException) {
             final MissingOptionException missing = (MissingOptionException) e;
-            printError(id, ctxid, missing.getMessage());
+            printError(id, ctxid, missing.getMessage(), parser);
             parser.printUsage();
             sysexit(SYSEXIT_MISSING_OPTION);
         } else if (e instanceof DatabaseUpdateException) {
             final DatabaseUpdateException exc = (DatabaseUpdateException) e;
-            printServerException(id, ctxid, exc);
+            printServerException(id, ctxid, exc, parser);
             sysexit(1);
         } else if (e instanceof NoSuchUserException) {
             final NoSuchUserException exc = (NoSuchUserException) e;
-            printServerException(id, ctxid, exc);
+            printServerException(id, ctxid, exc, parser);
             sysexit(SYSEXIT_NO_SUCH_USER);
         } else if (e instanceof NoSuchGroupException) {
             final NoSuchGroupException exc = (NoSuchGroupException) e;
-            printServerException(id, ctxid, exc);
+            printServerException(id, ctxid, exc, parser);
             sysexit(SYSEXIT_NO_SUCH_GROUP);
         } else if (e instanceof NoSuchResourceException) {
-            printServerException(id, ctxid, e);
+            printServerException(id, ctxid, e, parser);
             sysexit(SYSEXIT_NO_SUCH_RESOURCE);
         } else if (e instanceof DuplicateExtensionException) {
             final DuplicateExtensionException exc = (DuplicateExtensionException) e;
-            printServerException(id, ctxid, exc);
+            printServerException(id, ctxid, exc, parser);
             sysexit(1);
         } else if (e instanceof ContextExistsException) {
             final ContextExistsException exc = (ContextExistsException) e;
-            printServerException(id, ctxid, exc);
+            printServerException(id, ctxid, exc, parser);
             sysexit(1);
         } else if (e instanceof URISyntaxException) {
             final URISyntaxException exc = (URISyntaxException) e;
-            printServerException(id, ctxid, exc);
+            printServerException(id, ctxid, exc, parser);
             sysexit(1);
         } else if (e instanceof RuntimeException) {
             final RuntimeException exc = (RuntimeException) e;
-            printServerException(id, ctxid, exc);
+            printServerException(id, ctxid, exc, parser);
             sysexit(1);
         }
     }
