@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans>
+	<bean id="dont_encode_url" class="com.openexchange.webdav.xml.resources.DontEncodeURL"/>
+
+	<bean id="registry" class="com.openexchange.webdav.action.behaviour.RequestSpecificBehaviourRegistry">
+		<property name="behaviours">
+			<list>
+				<bean class="com.openexchange.webdav.action.behaviour.UserAgentBehaviour">
+ 					<property name="pattern" value="1\&amp;1"/>
+                    <property name="change" ref="dont_encode_url"/>
+				</bean>
+			</list>
+         </property>
+    </bean>
+</beans>

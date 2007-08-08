@@ -1,3 +1,7 @@
+* 2007-08-08 - marcus.klein@open-xchange.com
+
+ - Bugfix #8712: Added WebDAV override for GMX WebDAV client.
+
 * 2007-08-06 - marcus.klein@open-xchange.com
 
  - Added configuration file for generic config jump.
