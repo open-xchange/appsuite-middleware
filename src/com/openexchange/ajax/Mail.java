@@ -1267,7 +1267,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 
 	private static final String DEFAULT_FILENAME = "file.dat";
 
-	private static final String getSaveAsFileName(final String fileName, final boolean internetExplorer,
+	public static final String getSaveAsFileName(final String fileName, final boolean internetExplorer,
 			final String baseCT) {
 		if (null == fileName) {
 			return DEFAULT_FILENAME;
