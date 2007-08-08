@@ -35,7 +35,7 @@ public class Disable extends ContextHostingAbstraction {
             oxres.disable(ctx, mr, auth); */
             oxres.disable(ctx, auth);
 
-            displayDisabledMessage(successtext, null);
+            displayDisabledMessage(successtext, null, parser);
             sysexit(0);
         } catch (final Exception e) {
             printErrors(successtext, null, e, parser);

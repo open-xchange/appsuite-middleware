@@ -33,7 +33,7 @@ public class UnregisterFilestore extends FilestoreAbstraction {
 
             oxutil.unregisterFilestore(fstore, auth);
             
-            displayUnregisteredMessage(filestoreid);
+            displayUnregisteredMessage(filestoreid, parser);
             sysexit(0);
         } catch (final Exception e) {
             printErrors(filestoreid, null, e, parser);

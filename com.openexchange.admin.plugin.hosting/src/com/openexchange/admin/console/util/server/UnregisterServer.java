@@ -42,7 +42,7 @@ public class UnregisterServer extends ServerAbstraction {
             sv.setId(Integer.parseInt(serverid));
             oxutil.unregisterServer(sv, auth);
             
-            displayUnregisteredMessage(serverid);
+            displayUnregisteredMessage(serverid, parser);
             sysexit(0);
         } catch (final Exception e) {
             printErrors(serverid, null, e, parser);

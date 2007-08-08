@@ -36,7 +36,7 @@ public class MoveContextFilestore extends ContextHostingAbstraction {
             oxres.moveContextFilestore(ctx, fs, mr, auth);*/
             final int jobId = oxres.moveContextFilestore(ctx, fs, auth);
 
-            displayMovedMessage(successtext, null, "to filestore " + filestoreid + " scheduled as job " + jobId);
+            displayMovedMessage(successtext, null, "to filestore " + filestoreid + " scheduled as job " + jobId, parser);
             sysexit(0);
         } catch (final Exception e) {
             // In this special case the second parameter is not the context id but the filestore id

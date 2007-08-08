@@ -26,7 +26,7 @@ public class DisableAll extends ContextHostingAbstraction {
             oxres.disableAll(mr, auth); */
             oxres.disableAll(auth);
 
-            displayDisabledMessage(null, null);
+            displayDisabledMessage(null, null, parser);
             sysexit(0);
         } catch (final Exception e) {
             printErrors(null, null, e, parser);

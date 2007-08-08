@@ -23,24 +23,24 @@ public abstract class UtilAbstraction extends ObjectNamingAbstraction {
         this.searchOption = setShortLongOpt(parser, OPT_NAME_SEARCH_PATTERN_SHORT,OPT_NAME_SEARCH_PATTERN_LONG,"Search/List pattern!",true, NeededQuadState.notneeded);
     }
     
-    protected void displayRegisteredMessage(final String id) {
-        createMessageForStdout(id, null, "registered");
+    protected void displayRegisteredMessage(final String id, final AdminParser parser) {
+        createMessageForStdout(id, null, "registered", parser);
     }
 
-    protected void displayUnregisteredMessage(final String id) {
-        createMessageForStdout(id, null, "unregistered");
+    protected void displayUnregisteredMessage(final String id, final AdminParser parser) {
+        createMessageForStdout(id, null, "unregistered", parser);
     }
 
     @Override
-    protected void printFirstPartOfErrorText(final String id, final Integer ctxid) {
+    protected void printFirstPartOfErrorText(final String id, final Integer ctxid, final AdminParser parser) {
         // Be aware of the order register matches also unregister so unregister must
         // be checked first
         if (getClass().getName().matches("^.*\\.\\w*(?i)unregister\\w*$")) {
-            createMessageForStderr(id, ctxid, "could not be unregistered: ");
+            createMessageForStderr(id, ctxid, "could not be unregistered: ", parser);
         } else if (getClass().getName().matches("^.*\\.\\w*(?i)register\\w*$")) {
-            createMessageForStderr(id, ctxid, "could not be registered: ");
+            createMessageForStderr(id, ctxid, "could not be registered: ", parser);
         } else {
-            super.printFirstPartOfErrorText(id, ctxid);
+            super.printFirstPartOfErrorText(id, ctxid, parser);
         }
     }
 }

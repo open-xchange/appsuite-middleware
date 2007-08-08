@@ -38,7 +38,7 @@ public class MoveContextDatabase extends ContextHostingAbstraction {
             oxres.moveContextDatabase(ctx, db, mr, auth);*/
             final int jobId = oxres.moveContextDatabase(ctx, db, auth);
 
-            displayMovedMessage(successcontext, null, "to database " + dbid + " scheduled as job " + jobId);
+            displayMovedMessage(successcontext, null, "to database " + dbid + " scheduled as job " + jobId, parser);
             sysexit(0);
         } catch (final Exception e) {
             // In this special case the second parameter is not the context id but the database id

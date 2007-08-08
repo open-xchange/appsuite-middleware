@@ -37,7 +37,7 @@ public class RegisterDatabase extends DatabaseAbstraction {
             
             parseAndSetMasterAndID(parser, db);
             
-            displayRegisteredMessage(String.valueOf(oxutil.registerDatabase(db, auth).getId()));
+            displayRegisteredMessage(String.valueOf(oxutil.registerDatabase(db, auth).getId()), parser);
             sysexit(0);
         } catch (final Exception e) {
             printErrors(null, null, e, parser);
