@@ -57,6 +57,8 @@ public interface AJPv13ListenerMonitorMBean extends MonitorMBean {
 	
 	int getNumProcessing();
 	
+	int getNumRequests();
+	
 	long getMaxProcessingTime();
 	
 	long getMinProcessingTime();

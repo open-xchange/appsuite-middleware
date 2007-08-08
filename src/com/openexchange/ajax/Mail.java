@@ -51,6 +51,7 @@ package com.openexchange.ajax;
 
 import static com.openexchange.tools.oxfolder.OXFolderManagerImpl.getFolderName;
 import static com.openexchange.tools.oxfolder.OXFolderManagerImpl.getUserName;
+import static com.openexchange.ajax.request.MailRequest.MAIL_SERVLET;
 
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
@@ -2439,7 +2440,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 					 */
 					((UploadListener) this).getRegistry().addUploadListener(
 							new UploadQuotaChecker(sessionObj.getUserSettingMail(), resp, actionStr));
-					((UploadListener) this).getRegistry().addUploadListener(new Mail());
+					((UploadListener) this).getRegistry().addUploadListener(MAIL_SERVLET);
 					/*
 					 * Create and fire upload event
 					 */

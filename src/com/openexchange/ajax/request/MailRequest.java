@@ -96,7 +96,7 @@ public final class MailRequest {
 		}
 	}
 
-	private static final Mail MAIL_SERVLET = new Mail();
+	public static final Mail MAIL_SERVLET = new Mail();
 
 	private final SessionObject session;
 

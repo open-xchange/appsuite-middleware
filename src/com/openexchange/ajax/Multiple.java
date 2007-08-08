@@ -226,7 +226,9 @@ public class Multiple extends SessionServlet {
 					if (jsonWriter.isExpectingValue()) {
 						jsonWriter.value("");
 					}
-					jsonWriter.key(Response.TIMESTAMP).value(appointmentRequest.getTimestamp().getTime());
+					if (null != appointmentRequest.getTimestamp()) {
+						jsonWriter.key(Response.TIMESTAMP).value(appointmentRequest.getTimestamp().getTime());
+					}
 				} catch (final OXMandatoryFieldException e) {
 					LOG.error(e.getMessage(), e);
 					if (jsonWriter.isExpectingValue()) {
@@ -287,7 +289,9 @@ public class Multiple extends SessionServlet {
 					if (jsonWriter.isExpectingValue()) {
 						jsonWriter.value("");
 					}
-					jsonWriter.key(Response.TIMESTAMP).value(contactRequest.getTimestamp().getTime());
+					if (null != contactRequest.getTimestamp()) {
+						jsonWriter.key(Response.TIMESTAMP).value(contactRequest.getTimestamp().getTime());
+					}
 				} catch (final OXMandatoryFieldException e) {
 					LOG.error(e.getMessage(), e);
 					if (jsonWriter.isExpectingValue()) {
@@ -344,7 +348,9 @@ public class Multiple extends SessionServlet {
 					if (jsonWriter.isExpectingValue()) {
 						jsonWriter.value("");
 					}
-					jsonWriter.key(Response.TIMESTAMP).value(groupRequest.getTimestamp().getTime());
+					if (null != groupRequest.getTimestamp()) {
+						jsonWriter.key(Response.TIMESTAMP).value(groupRequest.getTimestamp().getTime());
+					}
 				} catch (final OXMandatoryFieldException e) {
 					LOG.error(e.getMessage(), e);
 					if (jsonWriter.isExpectingValue()) {
@@ -395,7 +401,9 @@ public class Multiple extends SessionServlet {
 					if (jsonWriter.isExpectingValue()) {
 						jsonWriter.value("");
 					}
-					jsonWriter.key(Response.TIMESTAMP).value(reminderRequest.getTimestamp().getTime());
+					if (null != reminderRequest.getTimestamp()) {
+						jsonWriter.key(Response.TIMESTAMP).value(reminderRequest.getTimestamp().getTime());
+					}
 				} catch (final OXMandatoryFieldException e) {
 					LOG.error(e.getMessage(), e);
 					if (jsonWriter.isExpectingValue()) {
@@ -446,7 +454,9 @@ public class Multiple extends SessionServlet {
 					if (jsonWriter.isExpectingValue()) {
 						jsonWriter.value("");
 					}
-					jsonWriter.key(Response.TIMESTAMP).value(resourceRequest.getTimestamp().getTime());
+					if (null != resourceRequest.getTimestamp()) {
+						jsonWriter.key(Response.TIMESTAMP).value(resourceRequest.getTimestamp().getTime());
+					}
 				} catch (final OXMandatoryFieldException e) {
 					LOG.error(e.getMessage(), e);
 					if (jsonWriter.isExpectingValue()) {
@@ -494,7 +504,9 @@ public class Multiple extends SessionServlet {
 				try {
 					jsonWriter.key(Response.DATA);
 					jsonWriter.value(taskRequest.action(action, jsonObj));
-					jsonWriter.key(Response.TIMESTAMP).value(taskRequest.getTimestamp().getTime());
+					if (null != taskRequest.getTimestamp()) {
+						jsonWriter.key(Response.TIMESTAMP).value(taskRequest.getTimestamp().getTime());
+					}
 				} catch (final OXFolderNotFoundException e) {
 					LOG.error(e.getMessage(), e);
 					if (jsonWriter.isExpectingValue()) {

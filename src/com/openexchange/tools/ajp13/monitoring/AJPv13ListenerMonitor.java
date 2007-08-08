@@ -63,6 +63,8 @@ public class AJPv13ListenerMonitor implements AJPv13ListenerMonitorMBean {
 	private int numWaiting;
 
 	private int numProcessing;
+	
+	private int numRequests;
 
 	private static final int USE_TIME_COUNT = 1000;
 
@@ -95,6 +97,8 @@ public class AJPv13ListenerMonitor implements AJPv13ListenerMonitorMBean {
 	private final Lock numWaitingLock = new ReentrantLock();
 
 	private final Lock numProcessingLock = new ReentrantLock();
+	
+	private final Lock numRequestsLock = new ReentrantLock();
 
 	public AJPv13ListenerMonitor() {
 		super();
@@ -218,6 +222,19 @@ public class AJPv13ListenerMonitor implements AJPv13ListenerMonitorMBean {
 			numProcessing--;
 		} finally {
 			numProcessingLock.unlock();
+		}
+	}
+	
+	public int getNumRequests() {
+		return numRequests;
+	}
+	
+	public void incrementNumRequests() {
+		numRequestsLock.lock();
+		try {
+			numRequests++;
+		} finally {
+			numRequestsLock.unlock();
 		}
 	}
 

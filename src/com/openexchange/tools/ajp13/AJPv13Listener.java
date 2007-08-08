@@ -270,6 +270,7 @@ public final class AJPv13Listener implements Runnable {
 					ajpCon.resetConnection(false);
 					AJPv13Server.ajpv13ListenerMonitor.decrementNumProcessing();
 					AJPv13Server.ajpv13ListenerMonitor.addProcessingTime(System.currentTimeMillis() - processingStart);
+					AJPv13Server.ajpv13ListenerMonitor.incrementNumRequests();
 					processing = false;
 					client.getOutputStream().flush();
 				}
@@ -306,6 +307,7 @@ public final class AJPv13Listener implements Runnable {
 				if (processing) {
 					AJPv13Server.ajpv13ListenerMonitor.decrementNumProcessing();
 					AJPv13Server.ajpv13ListenerMonitor.addProcessingTime(System.currentTimeMillis() - processingStart);
+					AJPv13Server.ajpv13ListenerMonitor.incrementNumRequests();
 					processing = false;
 				}
 				AJPv13Server.decrementNumberOfOpenAJPSockets();
