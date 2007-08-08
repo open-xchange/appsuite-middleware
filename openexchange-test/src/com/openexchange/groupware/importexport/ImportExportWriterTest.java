@@ -49,45 +49,44 @@
 
 package com.openexchange.groupware.importexport;
 
-import com.openexchange.tools.versit.filetokenizer.VCardTokenizerTest;
+import java.util.Date;
+import java.util.Arrays;
+import java.util.List;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-/**
- * This suite is meant for tests without a running OX instance
- * 
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
- *
- */
-public class ImportExportStandaloneSuite extends TestSuite {
-	
-	public static Test suite(){
-		TestSuite tests = new TestSuite();
-		//basics
-		tests.addTestSuite( ImportExportWriterTest.class );
-		tests.addTestSuite( VCardTokenizerTest.class );
-		tests.addTestSuite( ContactFieldTester.class );
-		tests.addTestSuite( ContactSwitcherTester.class );
-		tests.addTestSuite( VersitParserTest.class );
-		tests.addTestSuite( OXContainerConverterTest.class );
-		tests.addTest( SizedInputStreamTest.suite() );
+import com.openexchange.ajax.fields.CommonFields;
+import com.openexchange.ajax.fields.DataFields;
+import com.openexchange.ajax.writer.ImportExportWriter;
 
-		//CSV
-		tests.addTest( CSVContactImportTest.suite() );
-		tests.addTest( CSVContactExportTest.suite() );
-		tests.addTest( OutlookCSVContactImportTest.suite() );
-		
-		//ICAL
-		tests.addTest( ICalImportTest.suite() );
+import junit.framework.TestCase;
 
-		//VCARD
-		tests.addTest( VCardImportTest.suite() );
-		
-		//separate tests
-		//tests.addTest( Bug7470Test.suite() ); //FIXME
-		tests.addTest( Bug7732Test.suite() );
-		
-		return tests;
+public class ImportExportWriterTest extends TestCase {
+
+	public void testWriteObject() throws JSONException {
+		ImportExportWriter writer = new ImportExportWriter();
+		ImportResult result = new ImportResult("1", "3" , new Date() );
+		writer.writeObject(result);
+		JSONObject temp = (JSONObject) writer.getObject();
+		assertEquals("ID is incorrect" , "1" , temp.get(DataFields.ID) );
+		assertEquals("Folder is incorrect" , "3" , temp.get(CommonFields.FOLDER_ID) );
 	}
+
+	public void testWriteObjects() throws JSONException {
+		ImportExportWriter writer = new ImportExportWriter();
+		List<ImportResult> results = Arrays.asList(
+				new ImportResult("1", "3" , new Date() ), 
+				new ImportResult("2", "4", new Date() ) );
+		writer.writeObjects(results);
+		JSONArray resArr = (JSONArray) writer.getObject();
+		JSONObject temp = resArr.getJSONObject(0); 
+		assertEquals("ID is incorrect" , "1" , temp.get(DataFields.ID) );
+		assertEquals("Folder is incorrect" , "3" , temp.get(CommonFields.FOLDER_ID) );
+		temp = resArr.getJSONObject(1); 
+		assertEquals("ID is incorrect" , "2" , temp.get(DataFields.ID) );
+		assertEquals("Folder is incorrect" , "4" , temp.get(CommonFields.FOLDER_ID) );
+	}
+
 }
