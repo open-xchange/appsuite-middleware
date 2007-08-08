@@ -983,8 +983,9 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 		 */
 	}
 
-	protected void writeResponse(final Response response, final HttpServletResponse httpServletResponse)
-			throws IOException {
+	protected void writeResponse(final Response response,
+        final HttpServletResponse httpServletResponse) throws IOException {
+        httpServletResponse.setContentType(CONTENTTYPE_JAVASCRIPT);
 		try {
 			Response.write(response, httpServletResponse.getWriter());
 		} catch (JSONException e) {

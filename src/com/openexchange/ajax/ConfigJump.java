@@ -114,6 +114,7 @@ public class ConfigJump extends SessionServlet {
             LOG.error(e.getMessage(), e);
             response.setException(e);
         }
+        resp.setContentType(CONTENTTYPE_JAVASCRIPT);
         try {
             Response.write(response, resp.getWriter());
         } catch (JSONException e) {
