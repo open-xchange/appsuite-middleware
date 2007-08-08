@@ -47,82 +47,52 @@
  *
  */
 
-package com.openexchange.ajax.task.actions;
+package com.openexchange.ajax.task;
 
-import java.util.Date;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.task.actions.DeleteRequest;
+import com.openexchange.ajax.task.actions.GetRequest;
+import com.openexchange.ajax.task.actions.GetResponse;
+import com.openexchange.ajax.task.actions.InsertRequest;
+import com.openexchange.ajax.task.actions.InsertResponse;
 import com.openexchange.groupware.tasks.Task;
 
 /**
- * Stores parameters for the task delete request.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class DeleteRequest extends AbstractTaskRequest {
-
-    private final int folderId;
-
-    private final int taskId;
-
-    private final Date lastModified;
+public class FloatTest extends AbstractTaskTest {
 
     /**
-     * Default constructor.
+     * @param name
      */
-    public DeleteRequest(final int folderId, final int taskId,
-        final Date lastModified) {
-        super();
-        this.folderId = folderId;
-        this.taskId = taskId;
-        this.lastModified = lastModified;
+    public FloatTest(final String name) {
+        super(name);
     }
 
     /**
-     * @param task Task object to delete. This object must contain the folder
-     * identifier, the object identifier and the last modification timestamp.
+     * Tests if floats can be stored correctly.
+     * @throws Throwable if an error occurs.
      */
-    public DeleteRequest(final Task task) {
-        this(task.getParentFolderID(), task.getObjectID(),
-            task.getLastModified());
-    }
+    public void testFloats() throws Throwable {
+        final Task task = new Task();
+        task.setActualCosts(1f);
+        task.setTargetCosts(1f);
+        task.setParentFolderID(getPrivateFolder());
+        final InsertResponse insertR = TaskTools.insert(getClient(),
+            new InsertRequest(task, getTimeZone()));
 
-    /**
-     * {@inheritDoc}
-     */
-    public Object getBody() throws JSONException {
-        final JSONObject json = new JSONObject();
-        json.put(AJAXServlet.PARAMETER_ID, taskId);
-        json.put(AJAXServlet.PARAMETER_INFOLDER, folderId);
-        return json;
-    }
+        final GetResponse getR = TaskTools.get(getClient(), new GetRequest(
+            insertR));
+        final Task reload = getR.getTask(getTimeZone());
+        assertEquals("Actual duration differs.", task.getActualDuration(),
+            reload.getActualDuration());
+        assertEquals("Target duration differs.", task.getTargetDuration(),
+            reload.getTargetDuration());
+        assertEquals("Actual costs differs.", task.getActualCosts(),
+            reload.getActualCosts());
+        assertEquals("Target costs differs.", task.getTargetCosts(),
+            reload.getTargetCosts());
 
-    /**
-     * {@inheritDoc}
-     */
-    public Method getMethod() {
-        return Method.PUT;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Parameter[] getParameters() {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet
-                .ACTION_DELETE),
-            new Parameter(AJAXServlet.PARAMETER_TIMESTAMP,
-                String.valueOf(lastModified.getTime()))
-        };
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public AbstractAJAXParser getParser() {
-        return new DeleteParser();
+        TaskTools.delete(getClient(), new DeleteRequest(reload));
     }
 }

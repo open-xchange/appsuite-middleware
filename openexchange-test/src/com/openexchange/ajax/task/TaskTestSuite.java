@@ -78,6 +78,7 @@ public final class TaskTestSuite {
         tests.addTestSuite(TruncationTest.class);
         tests.addTestSuite(InsertTest.class);
         tests.addTestSuite(CharsetTest.class);
+        tests.addTestSuite(FloatTest.class);
         tests.addTestSuite(TasksTest.class);
         return tests;
     }

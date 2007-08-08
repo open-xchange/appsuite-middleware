@@ -99,39 +99,6 @@ public class TasksTest extends AbstractAJAXTest {
     }
 
     /**
-     * Tests if floats can be stored correctly.
-     * @throws Throwable if an error occurs.
-     */
-    public void testFloats() throws Throwable {
-        final Task task = new Task();
-        task.setActualCosts(1f);
-        task.setTargetCosts(1f);
-
-        final int folderId = TaskTools.getPrivateTaskFolder(getWebConversation(),
-            getHostName(), getSessionId());
-
-        task.setParentFolderID(folderId);
-        final int taskId = extractInsertId(insertTask(getWebConversation(),
-            getHostName(), getSessionId(), task));
-
-        final Response response = getTask(getWebConversation(), getHostName(),
-            getSessionId(), folderId, taskId);
-        final Task reload = (Task) response.getData();
-        assertEquals("Actual duration differs.", task.getActualDuration(),
-            reload.getActualDuration());
-        assertEquals("Target duration differs.", task.getTargetDuration(),
-            reload.getTargetDuration());
-        assertEquals("Actual costs differs.", task.getActualCosts(),
-            reload.getActualCosts());
-        assertEquals("Target costs differs.", task.getTargetCosts(),
-            reload.getTargetCosts());
-        final Date lastModified = response.getTimestamp();
-
-        deleteTask(getWebConversation(), getHostName(), getSessionId(),
-            lastModified, folderId, taskId);
-    }
-
-    /**
      * Tests inserting a delegated task.
      * @throws Throwable if an error occurs.
      */

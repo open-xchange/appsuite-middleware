@@ -60,7 +60,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.groupware.tasks.Task;
 
 /**
- * 
+ * Stores the response of getting a task from the server.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class GetResponse extends AbstractAJAXResponse {
