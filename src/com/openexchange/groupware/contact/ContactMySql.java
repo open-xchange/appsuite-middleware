@@ -218,6 +218,7 @@ public class ContactMySql implements ContactSql {
 			
 			if (cso.getEmailAutoComplete()){
 			//	String mumu = null;
+				search_habit = " OR ";
 			}
 			
 			sb.append(" ( ");
