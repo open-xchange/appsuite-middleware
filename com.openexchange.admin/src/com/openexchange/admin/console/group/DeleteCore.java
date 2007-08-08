@@ -92,7 +92,7 @@ public abstract class DeleteCore extends GroupAbstraction {
 
             oxgrp.delete(ctx, new Group[] { grp }, auth);
             
-            displayDeletedMessage(successtext, ctxid);
+            displayDeletedMessage(successtext, ctxid, parser);
             sysexit(0);
         } catch (final Exception e) {
             printErrors(successtext, ctxid, e, parser);

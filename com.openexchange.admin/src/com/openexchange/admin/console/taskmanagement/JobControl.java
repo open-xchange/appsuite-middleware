@@ -146,43 +146,43 @@ public class JobControl extends BasicCommandlineOptions {
                 parser.printUsage();
             }
         } catch (final java.rmi.ConnectException neti) {
-            printError(neti.getMessage());
+            printError(neti.getMessage(), parser);
             sysexit(SYSEXIT_COMMUNICATION_ERROR);
         } catch (final java.lang.NumberFormatException num) {
             printInvalidInputMsg("Ids must be numbers!");
             sysexit(1);
         } catch (final MalformedURLException e) {
-            printServerException(e);
+            printServerException(e,parser);
             sysexit(1);
         } catch (final RemoteException e) {
-            printServerException(e);
+            printServerException(e,parser);
             sysexit(SYSEXIT_REMOTE_ERROR);
         } catch (final NotBoundException e) {
-            printServerException(e);
+            printServerException(e,parser);
             sysexit(1);
         } catch (final IllegalOptionValueException e) {
-            printError("Illegal option value : " + e.getMessage());
+            printError("Illegal option value : " + e.getMessage(), parser);
             parser.printUsage();
             sysexit(SYSEXIT_ILLEGAL_OPTION_VALUE);
         } catch (final UnknownOptionException e) {
-            printError("Unrecognized options on the command line: " + e.getMessage());
+            printError("Unrecognized options on the command line: " + e.getMessage(), parser);
             parser.printUsage();
             sysexit(SYSEXIT_UNKNOWN_OPTION);
         } catch (final MissingOptionException e) {
-            printError(e.getMessage());
+            printError(e.getMessage(), parser);
             parser.printUsage();
             sysexit(SYSEXIT_MISSING_OPTION);
         } catch (final InvalidDataException e) {
-            printServerException(e);
+            printServerException(e,parser);
             sysexit(SYSEXIT_INVALID_DATA);
         } catch (final InvalidCredentialsException e) {
-            printServerException(e);
+            printServerException(e, parser);
             sysexit(SYSEXIT_INVALID_CREDENTIALS);
         } catch (final StorageException e) {
-            printServerException(e);
+            printServerException(e, parser);
             sysexit(SYSEXIT_SERVERSTORAGE_ERROR);
         } catch (final TaskManagerException e) {
-            printServerException(e);
+            printServerException(e, parser);
             sysexit(1);
         }
     }

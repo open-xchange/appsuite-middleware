@@ -72,19 +72,19 @@ public class AllPluginsLoaded extends BasicCommandlineOptions {
                 sysexit(1);
             }
         } catch (final java.rmi.ConnectException neti) {
-            printError(neti.getMessage());
+            printError(neti.getMessage(), null);
             sysexit(SYSEXIT_COMMUNICATION_ERROR);
         } catch (final java.lang.NumberFormatException num) {
             printInvalidInputMsg("Ids must be numbers!");
             sysexit(1);
         } catch (final MalformedURLException e) {
-            printServerException(e);
+            printServerException(e,null);
             sysexit(1);
         } catch (final RemoteException e) {
-            printServerException(e);
+            printServerException(e,null);
             sysexit(SYSEXIT_REMOTE_ERROR);
         } catch (final NotBoundException e) {
-            printServerException(e);
+            printServerException(e,null);
             sysexit(1);
         }
     }

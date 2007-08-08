@@ -86,7 +86,7 @@ public abstract class DeleteCore extends ContextAbstraction {
     
             maincall(ctx, auth);
     
-            displayDeletedMessage(successtext, null);
+            displayDeletedMessage(successtext, null, parser);
             sysexit(0);
         } catch (final Exception e) {
             printErrors(successtext, null, e, parser);
