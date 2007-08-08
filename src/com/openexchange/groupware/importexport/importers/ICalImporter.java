@@ -60,6 +60,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.TasksSQLInterface;
@@ -100,9 +101,11 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
 		Category.CODE_ERROR,
 		Category.CODE_ERROR,
 		Category.USER_INPUT,
-		Category.USER_INPUT}, 
-	desc={"","","","","","",""}, 
-	exceptionId={0,1,2,3,4,5,6}, 
+		Category.USER_INPUT,
+		Category.PERMISSION,
+		Category.PERMISSION}, 
+	desc={"","","","","","","","",""}, 
+	exceptionId={0,1,2,3,4,5,6,7,8}, 
 	msg={
 		"Could not import into the folder %s.",
 		"Subsystem down",
@@ -110,7 +113,9 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
 		"Programming Error",
 		"Could not load folder %s",
 		"Broken file uploaded: %s",
-		"Cowardly refusing to import an entry flagged as confidential."})
+		"Cowardly refusing to import an entry flagged as confidential.",
+		"Module Calendar not enabled for user, cannot import appointments",
+		"Module Tasks not enabled for user, cannot import tasks"})
 
 /**
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
@@ -206,12 +211,18 @@ public class ICalImporter extends AbstractImporter implements Importer {
 		AppointmentSQLInterface appointmentInterface = null;
 		
 		if (importAppointment) {
+			if(! sessObj.getUserConfiguration().hasCalendar() ){
+				throw EXCEPTIONS.create(7, new OXPermissionException(OXPermissionException.Code.NoPermissionForModul, "Calendar") );
+			}
 			appointmentInterface = new CalendarSql(sessObj);
 		}
 		
 		TasksSQLInterface taskInterface = null;
 		
 		if (importTask) {
+			if(! sessObj.getUserConfiguration().hasTask() ){
+				throw EXCEPTIONS.create(8, new OXPermissionException(OXPermissionException.Code.NoPermissionForModul, "Task") );
+			}
 			taskInterface = new TasksSQLInterfaceImpl(sessObj);
 		}
 		

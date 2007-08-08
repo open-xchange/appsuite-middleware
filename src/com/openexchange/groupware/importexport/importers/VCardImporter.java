@@ -63,6 +63,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbContactSQLInterface;
@@ -70,7 +71,6 @@ import com.openexchange.groupware.Component;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.importexport.AbstractImporter;
@@ -90,7 +90,6 @@ import com.openexchange.tools.versit.converter.ConverterException;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
 import com.openexchange.tools.versit.filetokenizer.VCardFileToken;
 import com.openexchange.tools.versit.filetokenizer.VCardTokenizer;
-import com.openexchange.groupware.contact.helpers.ContactField;
 
 @OXExceptionSource(
 		classId=ImportExportExceptionClasses.VCARDIMPORTER,
@@ -103,9 +102,10 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 	Category.CODE_ERROR,
 	Category.CODE_ERROR,
 	Category.USER_INPUT,
-	Category.CODE_ERROR},
-		desc={"","","","","","",""},
-		exceptionId={0,1,2,3,4,5,6},
+	Category.CODE_ERROR,
+	Category.PERMISSION},
+		desc={"","","","","","","",""},
+		exceptionId={0,1,2,3,4,5,6,7},
 		msg={
 	"Could not import into the folder %s.",
 	"Subsystem down",
@@ -113,7 +113,8 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 	"Programming Error - Folder %s",
 	"Could not load folder %s",
 	"Could not recognize format of the following data: %s",
-	"Could not use UTF-8 encoding."})
+	"Could not use UTF-8 encoding.",
+	"Module Contacts is not enabled for this user, cannot store Contacts contained in VCard."})
 	
 	/**
 	 * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
@@ -128,6 +129,9 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 	public boolean canImport(final SessionObject sessObj, final Format format, final List<String> folders, final Map<String, String[]> optionalParams) throws ImportExportException {
 		if (!format.equals(Format.VCARD)) {
 			return false;
+		}
+		if(! sessObj.getUserConfiguration().hasContact() ){
+			throw importExportExceptionFactory.create(7, new OXPermissionException(OXPermissionException.Code.NoPermissionForModul, "Contacts") );
 		}
 		final Iterator iterator = folders.iterator();
 		while (iterator.hasNext()) {
@@ -174,6 +178,7 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 	}
 	
 	public List<ImportResult> importData(final SessionObject sessObj, final Format format, final InputStream is, final List<String> folders, final Map<String, String[]> optionalParams) throws ImportExportException {
+		
 		int contactFolderId = -1;
 		
 		final Iterator iterator = folders.iterator();

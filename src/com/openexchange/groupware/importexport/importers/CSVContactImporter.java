@@ -60,6 +60,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbContactSQLInterface;
@@ -96,16 +97,19 @@ import com.openexchange.sessiond.SessionObject;
 		Category.CODE_ERROR,
 		Category.WARNING,
 		Category.USER_INPUT,
-		Category.USER_INPUT},
-	desc={"","","", "", "", ""}, 
-	exceptionId={0,1,2,3,4,5}, 
+		Category.USER_INPUT,
+		Category.PERMISSION},
+	desc={"","","", "", "", "", ""}, 
+	exceptionId={0,1,2,3,4,5,6}, 
 	msg={
 		"Can only import into one folder at a time.",
 		"Cannot import this kind of data. Use method canImport() first.",
 		"Cannot read given InputStream.",
 		"Could not find the following fields %s",
 		"Could not translate a single column title. Is this a valid CSV file?",
-		"Could not translate a single field of information, did not insert entry %s."})
+		"Could not translate a single field of information, did not insert entry %s.",
+		"Module Contacts not enabled for user, cannot import contacts"
+		})
 		
 public class CSVContactImporter extends AbstractImporter implements Importer {
 	
@@ -116,15 +120,21 @@ public class CSVContactImporter extends AbstractImporter implements Importer {
 	
 	public boolean canImport(final SessionObject sessObj, final Format format, final List<String> folders,
 			final Map<String, String[]> optionalParams) throws ImportExportException {
+
+		if(! format.equals(getResponsibleFor()) ){
+			return false;
+		}
+
+		if(! sessObj.getUserConfiguration().hasContact() ){
+			throw EXCEPTIONS.create(6, new OXPermissionException(OXPermissionException.Code.NoPermissionForModul, "Calendar") );
+		}
+
 		String folder;
 		if(folders.size() != 1){
 			throw EXCEPTIONS.create(0);
 		}
 		folder = folders.get(0);
-
-		if(! format.equals(getResponsibleFor()) ){
-			return false;
-		}
+		
 		FolderObject fo = null;
 		try {
 			fo = getFolderObject(sessObj, folder);
