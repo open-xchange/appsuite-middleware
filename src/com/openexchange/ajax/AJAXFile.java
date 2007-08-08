@@ -80,7 +80,6 @@ import com.openexchange.groupware.upload.AJAXUploadFile;
 import com.openexchange.groupware.upload.UploadException;
 import com.openexchange.groupware.upload.UploadQuotaChecker;
 import com.openexchange.groupware.upload.UploadException.UploadCode;
-import com.openexchange.json.OXJSONWriter;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.servlet.UploadServletException;
@@ -157,17 +156,14 @@ public final class AJAXFile extends PermissionServlet {
 		}
 	}
 
-	private Response actionKeepAlive(final SessionObject sessionObj, final ParamContainer paramContainer)
-			throws JSONException {
+	private Response actionKeepAlive(final SessionObject sessionObj, final ParamContainer paramContainer) {
 		/*
 		 * Some variables
 		 */
 		final Response response = new Response();
-		final OXJSONWriter jsonWriter = new OXJSONWriter();
 		/*
 		 * Start response
 		 */
-		jsonWriter.array();
 		try {
 			final String id = paramContainer.checkStringParam(PARAMETER_ID);
 			if (!sessionObj.touchAJAXUploadFile(id)) {
@@ -175,13 +171,11 @@ public final class AJAXFile extends PermissionServlet {
 			}
 		} catch (final AbstractOXException e) {
 			response.setException(e);
-		} finally {
-			jsonWriter.endArray();
 		}
 		/*
 		 * Close response and flush print writer
 		 */
-		response.setData(jsonWriter.getObject());
+		response.setData(JSONObject.NULL);
 		response.setTimestamp(null);
 		return response;
 	}
@@ -310,7 +304,11 @@ public final class AJAXFile extends PermissionServlet {
 		final File tmpFile = File.createTempFile(FILE_PREFIX, null, UPLOAD_DIR);
 		tmpFile.deleteOnExit();
 		fileItem.write(tmpFile);
-		session.putAJAXUploadFile(tmpFile.getName(), new AJAXUploadFile(tmpFile, System.currentTimeMillis()));
+		final AJAXUploadFile uploadFile = new AJAXUploadFile(tmpFile, System.currentTimeMillis());
+		uploadFile.setFileName(fileItem.getName());
+		uploadFile.setContentType(fileItem.getContentType());
+		uploadFile.setSize(fileItem.getSize());
+		session.putAJAXUploadFile(tmpFile.getName(), uploadFile);
 		return tmpFile.getName();
 	}
 

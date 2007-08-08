@@ -77,6 +77,12 @@ public final class AJAXUploadFile {
 
 	private boolean blockedForTimer;
 
+	private String fileName;
+
+	private String contentType;
+
+	private long size;
+
 	/**
 	 * Constructor
 	 * 
@@ -188,6 +194,65 @@ public final class AJAXUploadFile {
 	 */
 	public boolean isDeleted() {
 		return deleted;
+	}
+
+	/**
+	 * Getter for file name
+	 * 
+	 * @return The file name
+	 */
+	public String getFileName() {
+		return fileName;
+	}
+
+	/**
+	 * Setter for file name. Implicitely invokes
+	 * <code>{@link UploadEvent#getFileName(String)}</code>.
+	 * 
+	 * @param fileName
+	 *            The file name
+	 * @see UploadEvent#getFileName(String)
+	 */
+	public void setFileName(final String fileName) {
+		this.fileName = UploadEvent.getFileName(fileName);
+	}
+
+	/**
+	 * Getter for content type
+	 * 
+	 * @return The content type
+	 */
+	public String getContentType() {
+		return contentType;
+	}
+
+	/**
+	 * Setter for content type
+	 * 
+	 * @param contentType
+	 *            The content type
+	 */
+	public void setContentType(final String contentType) {
+		this.contentType = contentType;
+	}
+
+	/**
+	 * Getter for size
+	 * 
+	 * @return The size
+	 */
+	public long getSize() {
+		return size;
+	}
+
+	/**
+	 * Setter for size
+	 * 
+	 * @param size
+	 *            The size
+	 */
+	public void setSize(final long size) {
+		this.size = size;
 	}
 
 }
