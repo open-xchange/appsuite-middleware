@@ -207,4 +207,24 @@ public class CachingContextStorage extends ContextStorage {
 			CACHE_LOCK.unlock();
 		}
 	}
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void invalidateLoginInfo(final String loginContextInfo)
+        throws ContextException {
+        if (null == cache) {
+            return;
+        }
+        CACHE_LOCK.lock();
+        try {
+            cache.remove(loginContextInfo);
+        } catch (CacheException e) {
+            throw new ContextException(ContextException.Code.CACHE_REMOVE, e,
+                loginContextInfo);
+        } finally {
+            CACHE_LOCK.unlock();
+        }
+    }
 }

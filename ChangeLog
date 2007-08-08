@@ -1,3 +1,7 @@
+* 2007-08-08 - marcus.klein@open-xchange.com
+
+ - Added method for invalidating context login information mappings.
+
 * 2007-08-08 - thorben.betten@open-xchange.com
 
  - Additional monitoring info in AJP monitor to count number of processed
