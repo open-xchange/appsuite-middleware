@@ -97,7 +97,7 @@ category={
 		msg={
 	"Could not import into the folder %s.",
 	"Could not import into folder %s",
-	"User input Error %s",
+	"User input error %s",
 	"Could not import into folder %s"})
 	
 	/**
