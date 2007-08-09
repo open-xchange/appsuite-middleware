@@ -123,6 +123,45 @@ public class UserTest extends AbstractTest {
             fail("Expected to get user data for added user");
         }
     }
+    
+    @Test
+    public void testCreateMandatory() throws Exception {        
+        // this creates an user ONLY with mandatory fields set
+        
+        final Credentials cred = DummyCredentials();
+        final Context ctx = getTestContextObject(cred);
+        
+        // create new user
+        final OXUserInterface oxu = getUserClient();
+        final UserModuleAccess access = new UserModuleAccess();    
+        final User urs = getTestUserMandatoryFieldsObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
+        final User createduser = oxu.create(ctx,urs,access,cred);        
+        
+        // now load user from server and check if data is correct, else fail
+        final User srv_loaded = oxu.getData(ctx,createduser,cred);
+        if(createduser.getId().equals(srv_loaded.getId())){
+            //verify data
+            compareUserMandatory(createduser,srv_loaded);
+        }else{
+            fail("Expected to get user data for added user");
+        }
+        
+    }
+
+    private void compareUserMandatory(User a, User b) {
+        
+        System.out.println("USERA" + a.toString());
+        System.out.println("USERB" + b.toString());
+        
+        assertEquals("username not equal", a.getName(), b.getName());
+        assertEquals("enabled not equal", a.getEnabled(), b.getEnabled());
+        assertEquals("primaryemail not equal",a.getPrimaryEmail(),b.getPrimaryEmail());        
+        assertEquals("display name not equal", a.getDisplay_name(), b.getDisplay_name());
+        assertEquals("firtname not equal", a.getGiven_name(), b.getGiven_name());
+       
+    }
+    
+
 
     @Test(expected=NoSuchUserException.class)
     public void testDelete() throws Exception {
@@ -192,7 +231,7 @@ public class UserTest extends AbstractTest {
     }
 
     @Test
-    public void testGetDataByUsername() throws Exception {
+    public void testGetDataByName() throws Exception {
         // get context to create an user
         final Credentials cred = DummyCredentials();
         final Context ctx = getTestContextObject(cred);
@@ -209,6 +248,32 @@ public class UserTest extends AbstractTest {
         
         // now load user from server and check if data is correct, else fail
         final User srv_loaded = oxu.getData(ctx, usernameuser, cred);
+        if(createduser.getId().equals(srv_loaded.getId())){
+            //verify data
+            compareUser(createduser,srv_loaded);
+        }else{
+            fail("Expected to get user data");
+        }    
+    }
+    
+    @Test
+    public void testGetDataByID() throws Exception {
+        // get context to create an user
+        final Credentials cred = DummyCredentials();
+        final Context ctx = getTestContextObject(cred);
+        
+        // create new user
+        final OXUserInterface oxu = getUserClient();
+        final UserModuleAccess access = new UserModuleAccess();
+        
+        final User urs = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
+        final User createduser = oxu.create(ctx, urs, access, cred); 
+        
+        final User iduser = new User();
+        iduser.setId(createduser.getId());
+        
+        // now load user from server and check if data is correct, else fail
+        final User srv_loaded = oxu.getData(ctx, iduser, cred);
         if(createduser.getId().equals(srv_loaded.getId())){
             //verify data
             compareUser(createduser,srv_loaded);
@@ -381,6 +446,189 @@ public class UserTest extends AbstractTest {
         } 
     }
     
+    @Test
+    public void testChangeWithEmptyUserIdentifiedByID() throws Exception{
+        // test a change with no data set only id set and compare the data aftewards
+        
+        // 1. create user 
+        // 2. check if user was created correctly
+        // 3. change user data but send NO data
+        // 4. load user again from server and compare with 1st created user
+        //     must be equal, because we changed nothing
+        
+        
+        // STEP 1
+        // get context to create an user
+        final Credentials cred = DummyCredentials();
+        final Context ctx = getTestContextObject(cred);
+        
+        // create new user
+        final OXUserInterface oxu = getUserClient();
+        final UserModuleAccess access = new UserModuleAccess();    
+        final User urs = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
+        final User createduser = oxu.create(ctx,urs,access,cred);        
+        
+        
+        // STEP 2
+        // now load user from server and check if data is correct, else fail
+        final User srv_loaded = oxu.getData(ctx,createduser,cred);
+        if(createduser.getId().equals(srv_loaded.getId())){
+            //verify data
+            compareUser(createduser,srv_loaded);
+        }else{
+            fail("Expected to get user data for added user");
+        }
+        
+        // STEP 3
+        User emptyusr = new User(srv_loaded.getId());
+        oxu.change(ctx,emptyusr,cred);
+        
+        // STEP 4
+        // now load user from server and check if data is correct, else fail
+        final User srv_loaded2 = oxu.getData(ctx,createduser,cred);
+        if(createduser.getId().equals(srv_loaded2.getId())){
+            //verify data
+            compareUser(createduser,srv_loaded);
+        }else{
+            fail("Expected to get user data for added user");
+        }
+        
+    }
+    
+    @Test
+    public void testChangeWithEmptyUserIdentifiedByName() throws Exception{
+        // test a change with no data set ONLY username set and compare the data aftewards
+          
+        
+        // STEP 1
+        // get context to create an user
+        final Credentials cred = DummyCredentials();
+        final Context ctx = getTestContextObject(cred);
+        
+        // create new user
+        final OXUserInterface oxu = getUserClient();
+        final UserModuleAccess access = new UserModuleAccess();    
+        final User urs = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
+        final User createduser = oxu.create(ctx,urs,access,cred);        
+        
+        
+        // STEP 2
+        // now load user from server and check if data is correct, else fail
+        final User srv_loaded = oxu.getData(ctx,createduser,cred);
+        if(createduser.getId().equals(srv_loaded.getId())){
+            //verify data
+            compareUser(createduser,srv_loaded);
+        }else{
+            fail("Expected to get user data for added user");
+        }
+        
+        // STEP 3
+        User emptyusr = new User();
+        emptyusr.setName(srv_loaded.getName());
+        oxu.change(ctx,emptyusr,cred);
+        
+        // STEP 4
+        // now load user from server and check if data is correct, else fail
+        final User srv_loaded2 = oxu.getData(ctx,createduser,cred);
+        if(createduser.getId().equals(srv_loaded2.getId())){
+            //verify data
+            compareUser(createduser,srv_loaded);
+        }else{
+            fail("Expected to get user data for added user");
+        }
+        
+    }
+    
+    @Test
+    public void testChangeIdentifiedByName() throws Exception{
+        // test a change with data set  but identified by username and compare the data aftewards
+        
+        
+        // STEP 1
+        // get context to create an user
+        final Credentials cred = DummyCredentials();
+        final Context ctx = getTestContextObject(cred);
+        
+        // create new user
+        final OXUserInterface oxu = getUserClient();
+        final UserModuleAccess access = new UserModuleAccess();    
+        final User urs = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
+        final User createduser = oxu.create(ctx,urs,access,cred);        
+        
+        
+        // STEP 2
+        // now load user from server and check if data is correct, else fail
+        final User srv_loaded = oxu.getData(ctx,createduser,cred);
+        if(createduser.getId().equals(srv_loaded.getId())){
+            //verify data
+            compareUser(createduser,srv_loaded);
+        }else{
+            fail("Expected to get user data for added user");
+        }
+        
+        // STEP 3
+        
+        User emptyusr = createChangeUserData(srv_loaded);
+        emptyusr.setId(null); // reset id, server must ident the user by username
+        oxu.change(ctx,emptyusr,cred);
+        
+        // STEP 4
+        // now load user from server and check if data is correct, else fail
+        final User srv_loaded2 = oxu.getData(ctx,createduser,cred);
+        if(createduser.getId().equals(srv_loaded2.getId())){
+            //verify data
+            compareUser(createduser,srv_loaded);
+        }else{
+            fail("Expected to get user data for added user");
+        }
+        
+    }
+    
+    @Test
+    public void testChangeIdentifiedByID() throws Exception{
+        // test a change with data set but identified by id and compare the data afterwards
+        
+        
+        // STEP 1
+        // get context to create an user
+        final Credentials cred = DummyCredentials();
+        final Context ctx = getTestContextObject(cred);
+        
+        // create new user
+        final OXUserInterface oxu = getUserClient();
+        final UserModuleAccess access = new UserModuleAccess();    
+        final User urs = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
+        final User createduser = oxu.create(ctx,urs,access,cred);        
+        
+        
+        // STEP 2
+        // now load user from server and check if data is correct, else fail
+        final User srv_loaded = oxu.getData(ctx,createduser,cred);
+        if(createduser.getId().equals(srv_loaded.getId())){
+            //verify data
+            compareUser(createduser,srv_loaded);
+        }else{
+            fail("Expected to get user data for added user");
+        }
+        
+        // STEP 3
+        
+        User emptyusr = createChangeUserData(srv_loaded);
+        emptyusr.setName(null); // reset username, server must ident the user by id
+        oxu.change(ctx,emptyusr,cred);
+        
+        // STEP 4
+        // now load user from server and check if data is correct, else fail
+        final User srv_loaded2 = oxu.getData(ctx,createduser,cred);
+        if(createduser.getId().equals(srv_loaded2.getId())){
+            //verify data
+            compareUser(createduser,srv_loaded);
+        }else{
+            fail("Expected to get user data for added user");
+        }
+        
+    }
+    
     @Test(expected=InvalidDataException.class)
     public void testChangeWithoutIdAndName() throws Exception {
         
@@ -474,6 +722,22 @@ public class UserTest extends AbstractTest {
         }else{
             fail("Expected to get correct changed user data");
         } 
+    }
+    public static User getTestUserMandatoryFieldsObject(final String ident, final String password) {
+        final User usr = new User();
+        
+        usr.setName(ident);
+        usr.setPassword(password);
+        
+        usr.setEnabled(true);
+        
+        usr.setPrimaryEmail("primaryemail-" + ident + "@" + AbstractTest.TEST_DOMAIN);
+        usr.setEmail1("primaryemail-"+ident+"@"+AbstractTest.TEST_DOMAIN);        
+        usr.setDisplay_name("Displayname " + ident);
+        usr.setGiven_name(ident);
+        usr.setSur_name("Lastname " + ident);
+        
+        return usr;
     }
 
     public static User getTestUserObject(final String ident, final String password) {
@@ -766,10 +1030,14 @@ public class UserTest extends AbstractTest {
 //    }
     
     private User createChangeUserData(final User usr) throws CloneNotSupportedException{
+        
         // change all fields of the user
+        
         final User retval = (User) usr.clone();
-        retval.setName(null);
+        //retval.setName(null); // INFO: Commented because the server does not throw any exception if username is sent!
+        
         retval.setEnabled(!usr.getEnabled());        
+        
         // do not change primary mail, that's forbidden per default, see
         //PRIMARY_MAIL_UNCHANGEABLE in User.properties
         // retval.setPrimaryEmail(usr.getPrimaryEmail()+change_suffix);
@@ -793,7 +1061,7 @@ public class UserTest extends AbstractTest {
         
         retval.setAliases(lAliases);        
         
-        // set the dates to the acutal + 1 day
+        // set the dates to the actual + 1 day
         retval.setBirthday(new Date(usr.getBirthday().getTime()+(24*60*60*1000)));
         retval.setAnniversary(new Date(usr.getAnniversary().getTime()+(24*60*60*1000)));        
         retval.setAssistant_name(usr.getAssistant_name()+change_suffix);        
