@@ -49,46 +49,60 @@
 
 package com.openexchange.groupware.importexport;
 
-import com.openexchange.tools.versit.filetokenizer.VCardTokenizerTest;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.io.UnsupportedEncodingException;
+import java.sql.SQLException;
 
-/**
- * This suite is meant for tests without a running OX instance
- * 
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
- *
- */
-public class ImportExportStandaloneSuite extends TestSuite {
+import junit.framework.JUnit4TestAdapter;
+
+import org.junit.Test;
+
+import com.openexchange.api.OXObjectNotFoundException;
+import com.openexchange.api2.OXException;
+import com.openexchange.api2.TasksSQLInterface;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.container.Participant;
+import com.openexchange.groupware.tasks.Task;
+import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
+import com.openexchange.server.DBPoolingException;
+
+public class Bug8475 extends AbstractICalImportTest{
 	
-	public static Test suite(){
-		TestSuite tests = new TestSuite();
-		//basics
-		tests.addTestSuite( ImportExportWriterTest.class );
-		tests.addTestSuite( VCardTokenizerTest.class );
-		tests.addTestSuite( ContactFieldTester.class );
-		tests.addTestSuite( ContactSwitcherTester.class );
-		tests.addTestSuite( VersitParserTest.class );
-		tests.addTestSuite( OXContainerConverterTest.class );
-		tests.addTest( SizedInputStreamTest.suite() );
-
-		//CSV
-		tests.addTest( CSVContactImportTest.suite() );
-		tests.addTest( CSVContactExportTest.suite() );
-		tests.addTest( OutlookCSVContactImportTest.suite() );
+	//workaround for JUnit 3 runner
+	public static junit.framework.Test suite() {
+		return new JUnit4TestAdapter(Bug8475.class);
+	}
+	
+	@Test public void testAttendeeNotFound() throws DBPoolingException, UnsupportedEncodingException, SQLException, OXObjectNotFoundException, NumberFormatException, OXException{
+		final String ical = 
+			"BEGIN:VCALENDAR\n" +
+			"VERSION:2.0\n" +
+			"PRODID:-//Apple Computer\\, Inc//iCal 1.5//EN\n" +
+			"BEGIN:VTODO\n" +
+			"ORGANIZER:MAILTO:tobias.friedrich@open-xchange.com\n" +
+			"ATTENDEE:MAILTO:tobias.prinz@open-xchange.com\n" +
+			"DTSTART:20070608T080000Z\n" +
+			"STATUS:COMPLETED\n" +
+			"SUMMARY:Test todo\n" +
+			"UID:8D4FFA7A-ABC0-11D7-8200-00306571349C-RID\n" +
+			"DUE:20070618T080000Z\n" +
+			"END:VTODO\n" +
+			"END:VCALENDAR";
+		ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.TASK, "8475", false);
 		
-		//ICAL
-		tests.addTest( ICalImportTest.suite() );
-
-		//VCARD
-		tests.addTest( VCardImportTest.suite() );
+		final TasksSQLInterface tasks = new TasksSQLInterfaceImpl(sessObj);
+		Task task = tasks.getTaskById(Integer.valueOf( res.getObjectId()), Integer.valueOf(res.getFolder()) );
 		
-		//separate tests
-		tests.addTest( Bug7732Test.suite() );
-//		tests.addTest( Bug7470Test.suite() ); //FIXME
-		tests.addTest( Bug8475.suite() );
-		
-		return tests;
+		Participant[] participants = task.getParticipants();
+		assertEquals("One participant?" , 1, participants.length);
+		boolean found = false;
+		for(Participant p : participants){
+			if("tobias.prinz@open-xchange.com".equals( p.getEmailAddress() ) ){
+				found = true;
+			}
+		}
+		assertTrue("Found attendee?" , found);
 	}
 }

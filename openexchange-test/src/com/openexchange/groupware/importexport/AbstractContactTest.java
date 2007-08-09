@@ -327,7 +327,7 @@ public class AbstractContactTest {
 		List<ImportResult> results = imp.importData(sessObj, format, new ByteArrayInputStream(file.getBytes("UTF-8")), _folders(), null);
 		assertEquals("One import?" , 1 , results.size());
 		ImportResult res = results.get(0);
-		assertEquals("Shoudl have error?" , errorExpected, res.hasError());
+		assertEquals("Should have error?" , errorExpected, res.hasError());
 		
 		return res;
 	}
