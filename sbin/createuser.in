@@ -88,4 +88,4 @@ JAVAMAIN="com.openexchange.admin.console.${MODULE}.${ACTION}"
 ADMINCP=$(for jar in $LIBPATH/ox_admin*.jar; do
     echo -n "${jar}:"
     done)
-$JAVA_BIN -classpath ${ADMINCP}$LIBPATH/commons-cli-1.0.jar $JAVAMAIN "$@"
+$JAVA_BIN -classpath ${ADMINCP} $JAVAMAIN "$@"
