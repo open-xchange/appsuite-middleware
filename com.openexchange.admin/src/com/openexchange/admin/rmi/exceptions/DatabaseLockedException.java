@@ -48,7 +48,6 @@
  */
 package com.openexchange.admin.rmi.exceptions;
 
-import java.io.Serializable;
 
 /**
  * This exception is thrown when the underlying database is locked due to an update or so
@@ -56,7 +55,7 @@ import java.io.Serializable;
  * @author dsieben
  *
  */
-public class DatabaseLockedException extends Exception implements Serializable {
+public class DatabaseLockedException extends Exception {
 
     /**
      * For serialization
