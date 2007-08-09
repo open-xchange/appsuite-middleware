@@ -199,8 +199,10 @@ public class AdminDaemon {
     	    registry.bind(OXTaskMgmtInterface.RMI_NAME, oxtaskmgmt_stub);
     	} catch (final RemoteException e) {
             log.fatal("Error creating RMI registry!",e);
+            System.exit(1);
         } catch (final AlreadyBoundException e) {
             log.fatal("One RMI name is already bound!", e);
+            System.exit(1);
         } catch (final StorageException e) {
             log.fatal("Error while creating one instance for RMI interface", e);
         }
