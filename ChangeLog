@@ -1,3 +1,7 @@
+* 2007-08-09 - marcus.klein@open-xchange.com
+
+ - Added max idle timeout for uploads to configuration setting tree.
+
 * 2007-08-09 - tobias.prinz@open-xchange.com
 
  - Bug 8653: Fixed counting of imports. Again.

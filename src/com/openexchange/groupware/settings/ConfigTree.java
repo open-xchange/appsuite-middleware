@@ -210,6 +210,7 @@ public final class ConfigTree {
             com.openexchange.groupware.settings.tree.Identifier.class,
             com.openexchange.groupware.settings.tree.FastGUI.class,
             com.openexchange.groupware.settings.tree.GUI.class,
+            com.openexchange.groupware.settings.tree.MaxUploadIdleTimeout.class,
             com.openexchange.groupware.settings.tree.Modules.class,
             com.openexchange.groupware.settings.tree.modules.Calendar.class,
             com.openexchange.groupware.settings.tree.modules.calendar.Module.class,
