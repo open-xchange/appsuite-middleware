@@ -117,7 +117,7 @@ public class UpdateRequest extends AbstractAppointmentRequest {
      * {@inheritDoc}
      */
     public AbstractAJAXParser getParser() {
-        return new UpdateParser();
+        return new UpdateParser(false);
     }
 
     /**
