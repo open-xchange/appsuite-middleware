@@ -88,6 +88,8 @@ public class ImportExportStandaloneSuite extends TestSuite {
 		tests.addTest( Bug7732Test.suite() );
 //		tests.addTest( Bug7470Test.suite() ); //FIXME
 		tests.addTest( Bug8475.suite() );
+//		tests.addTest( Bug8527.suite() ); //FIXME
+		tests.addTest( Bug8653.suite() );
 		
 		return tests;
 	}

@@ -319,16 +319,50 @@ public class AbstractContactTest {
 		return Arrays.asList( Integer.toString(folderId) );
 	}
 	
+	/**
+	 * This method perform the import of a file with one one result.
+	 * Kept for backward compatibility, calls <code>performMultipleEntryImport</code>
+	 * 
+	 * @param file Content of file as string
+	 * @param format Format of the file
+	 * @param folderObjectType Type of this folder, usually taken from FolderObject.
+	 * @param foldername Name of the folder to be used for this tests
+	 * @param errorExpected Is an error expected?
+	 * @return
+	 * @throws DBPoolingException
+	 * @throws SQLException
+	 * @throws ImportExportException
+	 * @throws UnsupportedEncodingException
+	 */
 	protected ImportResult performOneEntryCheck(String file, Format format, int folderObjectType, String foldername, boolean errorExpected) throws DBPoolingException, SQLException, ImportExportException, UnsupportedEncodingException{
+		return performMultipleEntryImport(file, format, folderObjectType, foldername, errorExpected).get(0);
+	}
+	
+	/**
+	 * This method performs an import of several entries
+	 * 
+	 * @param file The content of a file as string 
+	 * @param format Format of the file given
+	 * @param folderObjectType Type of this folder, usually taken from FolderObject.
+	 * @param foldername Name of the folder to be used for this tests
+	 * @param expectedErrors Are errors expected? Example: If you expect two ImportResults, which both report failure, write <code>true, true</code>.
+	 * @return
+	 * @throws DBPoolingException
+	 * @throws SQLException
+	 * @throws ImportExportException
+	 * @throws UnsupportedEncodingException
+	 */
+	protected List<ImportResult> performMultipleEntryImport(String file, Format format, int folderObjectType, String foldername, Boolean... expectedErrors) throws DBPoolingException, SQLException, ImportExportException, UnsupportedEncodingException{
 		folderId = createTestFolder(folderObjectType, sessObj, foldername);
 
 		assertTrue("Can import?" ,  imp.canImport(sessObj, format, _folders(), null));
 
 		List<ImportResult> results = imp.importData(sessObj, format, new ByteArrayInputStream(file.getBytes("UTF-8")), _folders(), null);
-		assertEquals("One import?" , 1 , results.size());
-		ImportResult res = results.get(0);
-		assertEquals("Should have error?" , errorExpected, res.hasError());
+		assertEquals("Correct number of results?", expectedErrors.length, results.size());
 		
-		return res;
+		for(int i = 0; i < expectedErrors.length; i++){
+			assertEquals("Entry " +i+ " is as expected?" , expectedErrors[i], results.get(i).hasError());
+		}
+		return results;
 	}
 }
