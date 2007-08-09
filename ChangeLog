@@ -1,3 +1,8 @@
+* 2007-08-09 - tobias.prinz@open-xchange.com
+
+ - Bug 8653: Fixed counting of imports. Again.
+ - Bug 8527: Fixed counting of imports.
+
 * 2007-08-09 - ben.pahne@open-xchange.com
 
 - Fixed Bug 8728: Private Flag was not removed after a move into

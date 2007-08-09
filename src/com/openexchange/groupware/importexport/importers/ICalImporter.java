@@ -103,9 +103,10 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
 		Category.USER_INPUT,
 		Category.USER_INPUT,
 		Category.PERMISSION,
-		Category.PERMISSION}, 
-	desc={"","","","","","","","",""}, 
-	exceptionId={0,1,2,3,4,5,6,7,8}, 
+		Category.PERMISSION,
+		Category.USER_INPUT}, 
+	desc={"","","","","","","","","",""}, 
+	exceptionId={0,1,2,3,4,5,6,7,8,9}, 
 	msg={
 		"Could not import into the folder %s.",
 		"Subsystem down",
@@ -114,8 +115,9 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
 		"Could not load folder %s",
 		"Broken file uploaded: %s",
 		"Cowardly refusing to import an entry flagged as confidential.",
-		"Module Calendar not enabled for user, cannot import appointments",
-		"Module Tasks not enabled for user, cannot import tasks"})
+		"Module Calendar not enabled for user, cannot import appointments.",
+		"Module Tasks not enabled for user, cannot import tasks.",
+		"The element %s is not supported."})
 
 /**
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
@@ -279,7 +281,7 @@ public class ICalImporter extends AbstractImporter implements Importer {
 							importResult.setException(EXCEPTIONS.create(6));
 							importResult.setDate(new Date());
 						}
-						
+						list.add(importResult);
 					} else if ("VTODO".equals(versitObject.name) && importTask) {
 						importResult.setFolder(String.valueOf(taskFolderId));
 						boolean storeData = true;
@@ -299,20 +301,33 @@ public class ICalImporter extends AbstractImporter implements Importer {
 							importResult.setException(EXCEPTIONS.create(6));
 							importResult.setDate(new Date());
 						}
-						
+						list.add(importResult);
 					} else {
-						LOG.warn("invalid versit object: " + versitObject.name);
+						if( "VTODO".equals(versitObject.name) ){
+							LOG.debug("VTODO is only supported when importing tasks");
+						} else
+						if( "VEVENT".equals(versitObject.name) ){
+							LOG.debug("VEVENT is only supported when importing appointments");
+						} else
+						if( "VTIMEZONE".equals(versitObject.name) ){
+							LOG.debug("VTIMEZONE is not supported");
+						} else {
+							LOG.warn("invalid versit object encountered: " + versitObject.name);
+							importResult.setDate( new Date() );
+							importResult.setException( EXCEPTIONS.create(9, versitObject.name));
+							list.add(importResult);
+						}
 					}
 				} catch (OXException exc) {
 					LOG.error("cannot import calendar object", exc);
 					exc = handleDataTruncation(exc); 
 					importResult.setException(exc);
+					list.add(importResult);
 				} catch (VersitException exc) {
 					LOG.error("cannot parse calendar object", exc);
 					importResult.setException(new OXException("cannot parse ical object", exc));
+					list.add(importResult);
 				}
-				
-				list.add(importResult);
 			}
 		} catch (Exception exc) {
 			throw EXCEPTIONS.create(3, exc);
