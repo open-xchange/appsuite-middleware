@@ -47,31 +47,51 @@
  *
  */
 
-package com.openexchange.ajax.task.actions;
+package com.openexchange.ajax.framework;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.CommonInsertResponse;
+import com.openexchange.ajax.fields.DataFields;
 
 /**
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class InsertResponse extends CommonInsertResponse {
-
-    private final int folderId;
+public class CommonInsertParser<T extends CommonInsertResponse> extends
+    AbstractAJAXParser<CommonInsertResponse> {
 
     /**
-     * @param response
+     * @param failOnError
      */
-    InsertResponse(final Response response, final int folderId) {
-        super(response);
-        this.folderId = folderId;
+    public CommonInsertParser(boolean failOnError) {
+        super(failOnError);
     }
 
     /**
-     * @return the folderId
+     * {@inheritDoc}
      */
-    int getFolderId() {
-        return folderId;
+    @Override
+    protected CommonInsertResponse createResponse(final Response response)
+        throws JSONException {
+        final CommonInsertResponse retval = instanciateResponse(response);
+        if (isFailOnError()) {
+            final JSONObject data = (JSONObject) response.getData();
+            if (data.has(DataFields.ID)) {
+                final int taskId = data.getInt(DataFields.ID);
+                assertTrue("Problem while inserting task", taskId > 0);
+                retval.setId(taskId);
+            } else {
+                fail("Missing created object identifier: "
+                    + response.getJSON());
+            }
+        }
+        return retval;
+    }
+
+    protected CommonInsertResponse instanciateResponse(
+        final Response response) {
+        return new CommonInsertResponse(response);
     }
 }

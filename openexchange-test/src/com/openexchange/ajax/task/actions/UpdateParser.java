@@ -65,7 +65,7 @@ public class UpdateParser extends AbstractAJAXParser {
      * Default constructor.
      */
     public UpdateParser() {
-        super();
+        super(true);
     }
 
     /**

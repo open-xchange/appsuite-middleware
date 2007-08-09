@@ -25,7 +25,7 @@ public class RedirectResponseParser extends AbstractAJAXParser {
      * Default constructor.
      */
     RedirectResponseParser() {
-        super();
+        super(true);
     }
 
     /**

@@ -47,31 +47,36 @@
  *
  */
 
-package com.openexchange.ajax.task.actions;
+package com.openexchange.ajax.framework;
 
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.CommonInsertResponse;
 
 /**
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class InsertResponse extends CommonInsertResponse {
+public class CommonInsertResponse extends AbstractAJAXResponse {
 
-    private final int folderId;
+    private int id;
 
     /**
      * @param response
      */
-    InsertResponse(final Response response, final int folderId) {
+    public CommonInsertResponse(final Response response) {
         super(response);
-        this.folderId = folderId;
     }
 
     /**
-     * @return the folderId
+     * @return the id
      */
-    int getFolderId() {
-        return folderId;
+    public int getId() {
+        return id;
+    }
+
+    /**
+     * @param id the id to set
+     */
+    void setId(int id) {
+        this.id = id;
     }
 }

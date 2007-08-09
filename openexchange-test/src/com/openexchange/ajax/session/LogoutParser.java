@@ -19,7 +19,7 @@ public class LogoutParser extends AbstractAJAXParser {
      * Default constructor.
      */
     LogoutParser() {
-        super();
+        super(true);
     }
 
     /**

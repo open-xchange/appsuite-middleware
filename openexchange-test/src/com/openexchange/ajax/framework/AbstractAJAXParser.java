@@ -64,7 +64,8 @@ import com.openexchange.ajax.container.Response;
  * does not provide a standard response.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public abstract class AbstractAJAXParser extends Assert {
+public abstract class AbstractAJAXParser<T extends AbstractAJAXResponse>
+    extends Assert {
 
     /**
      * Should this parser fail if the response contains an error.
@@ -81,14 +82,6 @@ public abstract class AbstractAJAXParser extends Assert {
         this.failOnError = failOnError;
     }
 
-    /**
-     * If the parser is created with this constructor the server response is
-     * checked for containing error messages.
-     */
-    protected AbstractAJAXParser() {
-        this(true);
-    }
-
     protected Response getResponse(final String body) throws JSONException {
         final Response response = Response.parse(body);
         assertFalse(response.getErrorMessage(), failOnError && response
@@ -101,11 +94,11 @@ public abstract class AbstractAJAXParser extends Assert {
             resp.getResponseCode());
     }
 
-    public AbstractAJAXResponse parse(final String body) throws JSONException {
+    public T parse(final String body) throws JSONException {
         return createResponse(getResponse(body));
     }
 
-    protected abstract AbstractAJAXResponse createResponse(final Response response)
+    protected abstract T createResponse(final Response response)
         throws JSONException;
 
     /**

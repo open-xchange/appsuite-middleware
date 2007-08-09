@@ -23,7 +23,7 @@ public class LoginResponseParser extends AbstractAJAXParser {
      * Default constructor.
      */
     LoginResponseParser() {
-        super();
+        super(true);
     }
 
     /**

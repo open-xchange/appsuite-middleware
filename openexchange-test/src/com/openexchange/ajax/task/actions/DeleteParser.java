@@ -65,7 +65,7 @@ public class DeleteParser extends AbstractAJAXParser {
      * Default constructor.
      */
     DeleteParser() {
-        super();
+        super(true);
     }
 
     /**

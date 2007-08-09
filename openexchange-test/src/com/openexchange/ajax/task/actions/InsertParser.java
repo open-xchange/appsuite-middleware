@@ -49,18 +49,15 @@
 
 package com.openexchange.ajax.task.actions;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.fields.TaskFields;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.framework.CommonInsertParser;
+import com.openexchange.ajax.framework.CommonInsertResponse;
 
 /**
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class InsertParser extends AbstractAJAXParser {
+public class InsertParser extends CommonInsertParser<InsertResponse> {
 
     private final int folderId;
 
@@ -76,20 +73,7 @@ public class InsertParser extends AbstractAJAXParser {
      * {@inheritDoc}
      */
     @Override
-    protected InsertResponse createResponse(final Response response)
-        throws JSONException {
-        final InsertResponse retval = new InsertResponse(response, folderId);
-        if (isFailOnError()) {
-            final JSONObject data = (JSONObject) response.getData();
-            if (data.has(TaskFields.ID)) {
-                final int taskId = data.getInt(TaskFields.ID);
-                assertTrue("Problem while inserting task", taskId > 0);
-                retval.setId(taskId);
-            } else {
-                fail("Missing created object identifier: "
-                    + response.getJSON());
-            }
-        }
-        return retval;
+    protected CommonInsertResponse instanciateResponse(final Response response) {
+        return new InsertResponse(response, folderId);
     }
 }

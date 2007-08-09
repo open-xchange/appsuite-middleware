@@ -53,7 +53,6 @@ import org.json.JSONException;
 
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
  * 
@@ -65,7 +64,7 @@ class GetParser extends AbstractAJAXParser {
      * Default constructor.
      */
     public GetParser() {
-        super();
+        super(true);
     }
 
     /**
