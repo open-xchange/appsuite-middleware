@@ -48,7 +48,6 @@
  */
 package com.openexchange.admin.rmi.exceptions;
 
-import java.io.Serializable;
 
 /**
  * This class is used if a shell script return an exitstatus != 0
@@ -56,7 +55,7 @@ import java.io.Serializable;
  * @author d7
  *
  */
-public class ProgrammErrorException extends Exception implements Serializable {
+public class ProgrammErrorException extends Exception {
 
     /**
      * 
