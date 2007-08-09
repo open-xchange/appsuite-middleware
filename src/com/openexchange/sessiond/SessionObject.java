@@ -139,6 +139,23 @@ public class SessionObject {
 	}
 
 	/**
+	 * Detects if session holds an uploaded file which matches given ID
+	 * 
+	 * @param id
+	 *            The id
+	 * @return <code>true</code> if session holds an uploaded file which
+	 *         matches given ID; otherwise <code>false</code>
+	 */
+	public final boolean containsAJAXUploadFile(final String id) {
+		final AJAXUploadFile uploadFile = ajaxUploadFiles.get(id);
+		if (null != uploadFile) {
+			uploadFile.touch();
+			return true;
+		}
+		return false;
+	}
+
+	/**
 	 * Gets the uploaded file associated with given ID and set its last access
 	 * timestamp to current time millis
 	 * 
@@ -225,7 +242,7 @@ public class SessionObject {
 			 * Cancel timer task and clean from timer
 			 */
 			uploadFile.getTimerTask().cancel();
-			ServerTimer.getTimer().cancel();
+			ServerTimer.getTimer().purge();
 			if (LOG.isDebugEnabled()) {
 				LOG.debug(new StringBuilder(256).append("Upload file \"").append(uploadFile).append("\" with ID=")
 						.append(id).append(" removed from session and timer task canceled").toString());

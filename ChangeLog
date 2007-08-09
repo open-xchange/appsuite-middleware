@@ -14,6 +14,7 @@
  - Enhanced file upload servlet by get request for uploaded files
  - New property in server.properties to define the max. idle time in millis
    for a temporary uploaded file
+ - Enhanced mail by inline images referenced by locally stored files
 ############## PAY ATTENTION TO ME ! ################
  - CONFIG change: server.properties got an additonal
    property to define the max. idle time in millis

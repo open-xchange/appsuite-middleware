@@ -99,6 +99,7 @@ import com.openexchange.groupware.container.mail.parser.MessageDumper;
 import com.openexchange.groupware.container.mail.parser.PartMessageHandler;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.upload.AJAXUploadFile;
 import com.openexchange.groupware.upload.UploadEvent;
 import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.IMAPProperties;
@@ -274,7 +275,8 @@ public class MessageFiller {
 		 */
 		final boolean embeddedImages = (sendMultipartAlternative || (mailTextMao.getContentType().regionMatches(true,
 				0, MIME_TEXT_HTM, 0, 8)))
-				&& hasEmbeddedImages((String) mailTextMao.getContent());
+				&& (hasEmbeddedImages((String) mailTextMao.getContent()) || hasReferencedLocalImages(
+						(String) mailTextMao.getContent(), session));
 		/*
 		 * Compose message
 		 */
@@ -540,23 +542,17 @@ public class MessageFiller {
 		/*
 		 * Define html content
 		 */
-		String htmlCT = PAT_HTML_CT.replaceFirst(REPLACE_CS, IMAPProperties.getDefaultMimeCharset());
-		final MimeBodyPart html = new MimeBodyPart();
-		html
-				.setContent(performLineWrap(insertColorQuotes(MailTools.formatHrefLinks(mailText)), true, linewrap),
-						htmlCT);
-		html.setHeader(MessageHeaders.HDR_MIME_VERSION, VERSION);
-		html.setHeader(MessageHeaders.HDR_CONTENT_TYPE, htmlCT);
-		htmlCT = null;
-		/*
-		 * Add to newly created "related" or existing superior multipart
-		 */
 		if (embeddedImages) {
 			/*
 			 * Create "related" multipart
 			 */
 			final Multipart relatedMultipart = new MimeMultipart(MP_RELATED);
-			relatedMultipart.addBodyPart(html);
+			/*
+			 * Process referenced local image files and insert returned html
+			 * content as a new body part to first index
+			 */
+			relatedMultipart.addBodyPart(createHtmlBodyPart(processReferencedLocalImages(mailText, relatedMultipart,
+					session), linewrap), 0);
 			/*
 			 * Traverse Content-IDs
 			 */
@@ -594,12 +590,24 @@ public class MessageFiller {
 			altBodyPart.setContent(relatedMultipart);
 			alternativeMultipart.addBodyPart(altBodyPart);
 		} else {
+			final BodyPart html = createHtmlBodyPart(mailText, linewrap);
 			/*
 			 * Add html part to superior multipart
 			 */
 			alternativeMultipart.addBodyPart(html);
 		}
 		return alternativeMultipart;
+	}
+
+	private static final BodyPart createHtmlBodyPart(final String htmlContent, final int linewrap)
+			throws IMAPException, MessagingException {
+		final String htmlCT = PAT_HTML_CT.replaceFirst(REPLACE_CS, IMAPProperties.getDefaultMimeCharset());
+		final MimeBodyPart html = new MimeBodyPart();
+		html.setContent(performLineWrap(insertColorQuotes(MailTools.formatHrefLinks(htmlContent)), true, linewrap),
+				htmlCT);
+		html.setHeader(MessageHeaders.HDR_MIME_VERSION, VERSION);
+		html.setHeader(MessageHeaders.HDR_CONTENT_TYPE, htmlCT);
+		return html;
 	}
 
 	private final void addMessageBodyPart(final Multipart mp, final JSONMessageObject msgObj,
@@ -895,13 +903,102 @@ public class MessageFiller {
 		return replaceHTMLSimpleQuotesForDisplay(s);
 	}
 
+	// private static final Pattern PATTERN_REF_IMG = Pattern.compile(
+	// "(<img[^/]*?)(src=\")([^\"]+)(\"[^/]*?oxfile=\")([^\"]+)(\"[^/]*/?>)",
+	// Pattern.CASE_INSENSITIVE
+	// | Pattern.DOTALL);
+
+	private static final Pattern PATTERN_REF_IMG = Pattern.compile(
+			"(<img[^/]*?)(src=\")([^\"]+)(id=)([^\"&]+)(?:(&[^\"]+)\"|(\"))([^/]*/?>)", Pattern.CASE_INSENSITIVE
+					| Pattern.DOTALL);
+
 	/**
-	 * Detects if given html content contains references to inlined images
+	 * Detects if given html content contains references to local image files
+	 * <p>
+	 * Example:
+	 * 
+	 * <pre>
+	 * &lt;img src=&quot;cid:s345asd845@12drg&quot;&gt;
+	 * </pre>
 	 * 
 	 * @param htmlContent
 	 *            The html content
+	 * @param session
+	 *            The user session
 	 * @return <code>true</code> if given html content contains references to
-	 *         inlined images; otherwise <code>false</code>
+	 *         local image files; otherwise <code>false</code>
+	 */
+	public static final boolean hasReferencedLocalImages(final String htmlContent, final SessionObject session) {
+		final Matcher m = PATTERN_REF_IMG.matcher(htmlContent);
+		while (m.find()) {
+			if (session.containsAJAXUploadFile(m.group(5))) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private static final String IMG_PAT = "<img src=\"cid:#1#\">";
+
+	private static final String processReferencedLocalImages(final String htmlContent, final Multipart mp,
+			final SessionObject session) throws MessagingException {
+		final StringBuffer sb = new StringBuffer(htmlContent.length());
+		final Matcher m = PATTERN_REF_IMG.matcher(htmlContent);
+		NextImg: while (m.find()) {
+			final String id = m.group(5);
+			final AJAXUploadFile uploadFile = session.removeAJAXUploadFile(id);
+			if (null == uploadFile) {
+				if (LOG.isWarnEnabled()) {
+					LOG.warn(new StringBuilder(128).append("No upload file found with id \"").append(id).append(
+							"\". Referenced image is skipped.").toString());
+				}
+				continue NextImg;
+			}
+			/*
+			 * Append body part
+			 */
+			final MimeBodyPart imgBodyPart = new MimeBodyPart();
+			imgBodyPart.setDataHandler(new DataHandler(new FileDataSource(uploadFile.getFile())));
+			String fileName;
+			try {
+				fileName = MimeUtility.encodeText(uploadFile.getFileName(), IMAPProperties.getDefaultMimeCharset(),
+						ENC_Q);
+			} catch (final UnsupportedEncodingException e) {
+				fileName = uploadFile.getFileName();
+			} catch (final IMAPException e) {
+				fileName = uploadFile.getFileName();
+			}
+			imgBodyPart.setFileName(fileName);
+			StringBuilder tmp = new StringBuilder(128).append(fileName).append('@').append(id);
+			final String cid = tmp.toString();
+			tmp.setLength(0);
+			imgBodyPart.setContentID(tmp.append('<').append(cid).append('>').toString());
+			tmp = null;
+			imgBodyPart.setDisposition(Part.INLINE);
+			imgBodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, uploadFile.getContentType());
+			mp.addBodyPart(imgBodyPart);
+			/*
+			 * Replace image tag
+			 */
+			m.appendReplacement(sb, IMG_PAT.replaceFirst("#1#", cid));
+		}
+		m.appendTail(sb);
+		return sb.toString();
+	}
+
+	/**
+	 * Detects if given html content contains inlined images
+	 * <p>
+	 * Example:
+	 * 
+	 * <pre>
+	 * &lt;img src=&quot;cid:s345asd845@12drg&quot;&gt;
+	 * </pre>
+	 * 
+	 * @param htmlContent
+	 *            The html content
+	 * @return <code>true</code> if given html content contains inlined
+	 *         images; otherwise <code>false</code>
 	 */
 	public static final boolean hasEmbeddedImages(final String htmlContent) {
 		return PATTERN_EMBD_IMG.matcher(htmlContent).find();
