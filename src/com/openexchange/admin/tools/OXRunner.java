@@ -50,6 +50,9 @@ package com.openexchange.admin.tools;
 
 import java.io.IOException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.api2.OXException;
 import com.openexchange.cache.Configuration;
 import com.openexchange.cache.FolderCacheManager;
@@ -64,34 +67,33 @@ import com.openexchange.groupware.contexts.ContextException;
 import com.openexchange.groupware.contexts.ContextStorage;
 import com.openexchange.server.DBPoolingException;
 
-
-
 /**
- *
+ * 
  * @author cutmasta
  */
-public class OXRunner {    
-    
-    public OXRunner() {
+public class OXRunner {
+    private final Log log = LogFactory.getLog(this.getClass());
+
+    private void fatal(Exception e) {
+        this.log.fatal("Unable to initialize OX Process",e);
     }
     
-    
-    public static void init() {
-    	try {
-			SystemConfig.init();
-		} catch (ConfigurationException e1) {
-			throw new RuntimeException(e1);
-		}
-    	//ComfireConfig.loadProperties(System.getProperty("openexchange.propfile"));
-    	try {
+    public void init() {
+        try {
+            SystemConfig.init();
+        } catch (ConfigurationException e1) {
+            fatal(e1);
+        }
+        // ComfireConfig.loadProperties(System.getProperty("openexchange.propfile"));
+        try {
             ConfigurationInit.init();
         } catch (AbstractOXException e) {
-        	throw new RuntimeException(e);
+            fatal(e);
         }
         try {
             Configuration.load();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            fatal(e);
         }
         try {
             DatabaseInit.init();
@@ -102,15 +104,13 @@ public class OXRunner {
             FolderCacheManager.getInstance();
             EventInit.init();
         } catch (DBPoolingException e) {
-            throw new RuntimeException(e);
+            fatal(e);
         } catch (ContextException e) {
-            throw new RuntimeException(e);
+            fatal(e);
         } catch (FolderCacheNotEnabledException e) {
-            throw new RuntimeException(e);
+            fatal(e);
         } catch (OXException e) {
-            throw new RuntimeException(e);
+            fatal(e);
         }
     }
 }
-
-
