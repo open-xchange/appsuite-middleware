@@ -574,7 +574,8 @@ public class Contacts implements DeleteListener {
 									Category.PERMISSION, 
 									Category.PERMISSION, 
 									Category.CODE_ERROR, 
-									Category.PERMISSION, 
+									Category.PERMISSION, 									
+									Category.PERMISSION, 									
 									Category.PERMISSION, 
 									Category.PERMISSION, 
 									Category.CODE_ERROR, 
@@ -587,8 +588,8 @@ public class Contacts implements DeleteListener {
 									Category.TRY_AGAIN,
 									Category.TRY_AGAIN
 			},
-			desc={"10","11","12","13","14","15","16","17","18","19","20","21","22","23", "24","55","56","59","63"},
-			exceptionId={10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,55,56,59,63},
+			desc={"10","11","12","13","14","15","16","17","65","18","19","20","21","22","23", "24","55","56","59","63"},
+			exceptionId={10,11,12,13,14,15,16,17,65,18,19,20,21,22,23,24,55,56,59,63},
 			msg={	ContactException.NON_CONTACT_FOLDER_MSG,
 							ContactException.NO_PERMISSION_MSG, 
 							ContactException.NO_PERMISSION_MSG, 
@@ -596,7 +597,8 @@ public class Contacts implements DeleteListener {
 							ContactException.NO_PERMISSION_MSG, 
 							ContactException.NO_PERMISSION_MSG,
 							"Unable to syncronize the old contact with the new changes: Context %1$d Object %2$d",
-							ContactException.NO_PERMISSION_MSG,		
+							ContactException.NO_PERMISSION_MSG,					
+							"Unable to move this contact because it is marked as private: Context %1$d Object %2$d",
 							"You are not allowed to mark this contact as private contact: Context %1$d Object %2$d",
 							ContactException.OBJECT_HAS_CHANGED_MSG,
 							"Unable to update contact. Context %1$d Object %2$d",
@@ -719,7 +721,8 @@ public class Contacts implements DeleteListener {
 			}
 				
 			if ((contactFolder.getType() != FolderObject.PRIVATE) && (co.getPrivateFlag() || original.getPrivateFlag())){
-				co.setPrivateFlag(false);
+				//co.setPrivateFlag(false);
+				throw EXCEPTIONS.createOXConflictException(64, Integer.valueOf(ctx.getContextId()), Integer.valueOf(co.getObjectID()));
 			} else if ((contactFolder.getType() == FolderObject.PRIVATE) && original.getPrivateFlag() && original.getCreatedBy() != user){
 				throw EXCEPTIONS.createOXConflictException(18, Integer.valueOf(ctx.getContextId()), Integer.valueOf(co.getObjectID()));
 				//throw new OXConflictException("NOT ALLOWED TO SAVE FOLDER OBJECTS CONTACT AS PRIVATE cid="+ctx.getContextId()+" oid="+co.getObjectID());
