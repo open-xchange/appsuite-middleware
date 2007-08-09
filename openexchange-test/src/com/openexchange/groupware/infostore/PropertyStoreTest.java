@@ -49,15 +49,15 @@ public class PropertyStoreTest extends TestCase{
 		property2.setXML(true);
 		
 		
-		propertyStore.saveProperties(entity, Arrays.asList(property, property2), ctx, user, userConfig);
+		propertyStore.saveProperties(entity, Arrays.asList(property, property2), ctx);
 		clean.add(entity);
 		
-		propertyStore.saveProperties(entity2, Arrays.asList(property, property2), ctx, user, userConfig);
+		propertyStore.saveProperties(entity2, Arrays.asList(property, property2), ctx);
 		clean.add(entity2);
 	}
 
 	public void tearDown() throws Exception {
-		propertyStore.removeAll(clean, ctx, user, userConfig);
+		propertyStore.removeAll(clean, ctx);
 		clean.clear();
 		propertyStore.commit();
 		propertyStore.finish();
@@ -66,14 +66,14 @@ public class PropertyStoreTest extends TestCase{
 	}
 	
 	public void testLoadSpecificForOneEntity() throws Exception {
-		List<WebdavProperty> props = propertyStore.loadProperties(entity, p("OX:","testprop"), ctx, user, userConfig);
+		List<WebdavProperty> props = propertyStore.loadProperties(entity, p("OX:","testprop"), ctx);
 		assertEquals(1, props.size());
 		assertEquals("I'm the value", props.get(0).getValue());
 		assertFalse(props.get(0).isXML());
 	}
 
 	public void testLoadSpecificForManyEntities() throws Exception {
-		Map<Integer, List<WebdavProperty>> props = propertyStore.loadProperties(Arrays.asList(entity, entity2), p("OX:","testprop"), ctx, user, userConfig);
+		Map<Integer, List<WebdavProperty>> props = propertyStore.loadProperties(Arrays.asList(entity, entity2), p("OX:","testprop"), ctx);
 		
 		assertEquals(2,props.keySet().size());
 		
@@ -92,12 +92,12 @@ public class PropertyStoreTest extends TestCase{
 	}
 	
 	public void testLoadAllForOneEntity() throws Exception {
-		List<WebdavProperty> props = propertyStore.loadAllProperties(entity, ctx, user, userConfig);
+		List<WebdavProperty> props = propertyStore.loadAllProperties(entity, ctx);
 		checkProps(props);
 	}
 
 	public void testLoadAllForManyEntities() throws Exception {
-		Map<Integer, List<WebdavProperty>> props = propertyStore.loadAllProperties(Arrays.asList(entity, entity2), ctx, user, userConfig);
+		Map<Integer, List<WebdavProperty>> props = propertyStore.loadAllProperties(Arrays.asList(entity, entity2), ctx);
 		
 		assertEquals(2,props.keySet().size());
 		List<WebdavProperty> p = props.get(entity);
@@ -108,15 +108,15 @@ public class PropertyStoreTest extends TestCase{
 	}
 	
 	public void testDeleteSpecificForOneEntity() throws Exception {
-		propertyStore.removeProperties(entity, p("OX:", "testprop"), ctx, user, userConfig);
-		List<WebdavProperty> props = propertyStore.loadAllProperties(entity, ctx, user, userConfig);
+		propertyStore.removeProperties(entity, p("OX:", "testprop"), ctx);
+		List<WebdavProperty> props = propertyStore.loadAllProperties(entity, ctx);
 		assertEquals(1,props.size());
 		assertEquals("testprop2", props.get(0).getName());
 	}
 	
 	public void testDeleteAllForOneEntity() throws Exception {
-		propertyStore.removeAll(entity, ctx, user, userConfig);
-		List<WebdavProperty> props = propertyStore.loadAllProperties(entity, ctx, user, userConfig);
+		propertyStore.removeAll(entity, ctx);
+		List<WebdavProperty> props = propertyStore.loadAllProperties(entity, ctx);
 		assertTrue(props.isEmpty());
 	}
 	
