@@ -134,5 +134,6 @@ public class ListTest extends AbstractTaskTest {
                 Integer.MAX_VALUE } }, columns, false));
         assertTrue("No error when listing not existing object.", listR
             .hasError());
+        LOG.info(listR.getException().toString());
     }
 }

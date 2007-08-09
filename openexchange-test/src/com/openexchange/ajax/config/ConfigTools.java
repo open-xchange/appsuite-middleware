@@ -72,6 +72,7 @@ import com.openexchange.ajax.AbstractAJAXTest;
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.GetResponse;
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.configuration.AJAXConfig;
@@ -176,7 +177,7 @@ public final class ConfigTools extends Assert {
         AJAXConfig.init();
         final AJAXSession session = new AJAXSession(conversation, sessionId);
         return ConfigTools.get(session, new GetRequest(GetRequest.Tree
-            .Identifier)).getId();
+            .Identifier)).getInteger();
     }
 
     /**
@@ -198,6 +199,12 @@ public final class ConfigTools extends Assert {
         final String value = ConfigTools.get(session, new GetRequest(GetRequest
             .Tree.TimeZone)).getString();
         return TimeZone.getTimeZone(value);
+    }
+
+    public static GetResponse get(final AJAXClient client,
+        final GetRequest request) throws AjaxException, IOException,
+        SAXException, JSONException {
+        return get(client.getSession(), request);
     }
 
     public static GetResponse get(final AJAXSession session,

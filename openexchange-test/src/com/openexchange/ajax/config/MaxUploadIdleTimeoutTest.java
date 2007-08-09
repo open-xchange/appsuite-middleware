@@ -47,39 +47,39 @@
  *
  */
 
-package com.openexchange.ajax.config.actions;
+package com.openexchange.ajax.config;
 
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-/**
- * 
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
- */
-public class GetResponse extends AbstractAJAXResponse {
+import com.openexchange.ajax.config.actions.GetRequest;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
 
-    private Object value;
+public class MaxUploadIdleTimeoutTest extends AbstractAJAXSession {
 
     /**
-     * @param response
+     * Logger.
      */
-    GetResponse(final Response response) {
-        super(response);
+    private static final Log LOG = LogFactory.getLog(MaxUploadIdleTimeoutTest
+        .class);
+
+    /**
+     * Default constructor.
+     * @param name Name of the test.
+     */
+    public MaxUploadIdleTimeoutTest(final String name) {
+        super(name);
     }
 
-    private void fetchValue() {
-        if (null == value) {
-            value = getData();
-        }
-    }
-
-    public int getInteger() {
-        fetchValue();
-        return (Integer) value;
-    }
-
-    public String getString() {
-        fetchValue();
-        return (String) value;
+    /**
+     * Tests if the spam button option is sent to the GUI.
+     * @throws Throwable if an exception occurs.
+     */
+    public void testMaxUploadIdleTimeout() throws Throwable {
+        final int value = ConfigTools.get(getClient(), new GetRequest(
+            GetRequest.Tree.MaxUploadIdleTimeout)).getInteger();
+        LOG.info("Max upload idle timeout: " + value);
+        assertTrue("Got no value for the maxUploadIdleTimeout configuration "
+            + "parameter.", value > 0);
     }
 }

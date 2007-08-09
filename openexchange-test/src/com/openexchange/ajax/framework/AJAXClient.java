@@ -102,7 +102,7 @@ public class AJAXClient {
         JSONException {
         if (-1 == userId) {
             userId = ConfigTools.get(session, new GetRequest(GetRequest.Tree
-                .Identifier)).getId();
+                .Identifier)).getInteger();
         }
         return userId;
     }
@@ -121,7 +121,7 @@ public class AJAXClient {
         SAXException, JSONException {
         if (-1 == privateTaskFolder) {
             privateTaskFolder = ConfigTools.get(session, new GetRequest(
-                GetRequest.Tree.PrivateTaskFolder)).getId();
+                GetRequest.Tree.PrivateTaskFolder)).getInteger();
         }
         return privateTaskFolder;
     }
