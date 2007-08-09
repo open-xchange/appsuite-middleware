@@ -49,13 +49,20 @@
 
 package com.openexchange.ajax;
 
+import static com.openexchange.ajax.Mail.getSaveAsFileName;
+
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Writer;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Matcher;
 
+import javax.activation.MimetypesFileTypeMap;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -72,6 +79,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.helper.ParamContainer;
 import com.openexchange.api.OXConflictException;
+import com.openexchange.api2.OXException;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.groupware.AbstractOXException;
@@ -81,6 +89,7 @@ import com.openexchange.groupware.upload.UploadException;
 import com.openexchange.groupware.upload.UploadQuotaChecker;
 import com.openexchange.groupware.upload.UploadException.UploadCode;
 import com.openexchange.sessiond.SessionObject;
+import com.openexchange.tools.mail.ContentType;
 import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.servlet.UploadServletException;
 import com.openexchange.tools.servlet.http.Tools;
@@ -102,6 +111,8 @@ public final class AJAXFile extends PermissionServlet {
 			.getLog(AJAXFile.class);
 
 	private static final String MIME_TEXT_HTML_CHARSET_UTF_8 = "text/html; charset=UTF-8";
+
+	private static final String MIME_APPLICATION_OCTET_STREAM = "application/octet-stream";
 
 	private static final String STR_NULL = "null";
 
@@ -126,6 +137,8 @@ public final class AJAXFile extends PermissionServlet {
 		final String action = req.getParameter(PARAMETER_ACTION);
 		if (ACTION_KEEPALIVE.equalsIgnoreCase(action)) {
 			actionKeepAlive(req, resp);
+		} else if (ACTION_GET.equalsIgnoreCase(action)) {
+			actionGet(req, resp);
 		} else {
 			final Response response = new Response();
 			response.setException(new UploadException(UploadException.UploadCode.UNKNOWN_ACTION_VALUE, null,
@@ -180,6 +193,104 @@ public final class AJAXFile extends PermissionServlet {
 		return response;
 	}
 
+	private void actionGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException,
+			IOException {
+		try {
+			final String id = req.getParameter(PARAMETER_ID);
+			if (id == null || id.length() == 0) {
+				throw new UploadException(UploadException.UploadCode.MISSING_PARAM, ACTION_GET, PARAMETER_ID);
+			}
+			/*
+			 * Check if user agent is internet explorer
+			 */
+			final String userAgent = req.getHeader("user-agent") == null ? null : req.getHeader("user-agent")
+					.toLowerCase(Locale.ENGLISH);
+			final boolean internetExplorer = (userAgent != null && userAgent.indexOf("msie") > -1 && userAgent
+					.indexOf("windows") > -1);
+			/*
+			 * Fetch file from session
+			 */
+			final SessionObject session = getSessionObject(req);
+			final AJAXUploadFile uploadFile = session.getAJAXUploadFile(id);
+			if (uploadFile == null) {
+				throw new UploadException(UploadException.UploadCode.FILE_NOT_FOUND, ACTION_GET, id);
+			}
+			/*
+			 * Set proper headers
+			 */
+			final String fileName = getSaveAsFileName(uploadFile.getFileName(), internetExplorer, uploadFile
+					.getContentType());
+			final ContentType contentType = new ContentType(uploadFile.getContentType());
+			if (contentType.getBaseType().equalsIgnoreCase(MIME_APPLICATION_OCTET_STREAM)) {
+				/*
+				 * Try to determine MIME type via JAF
+				 */
+				final String ct = MimetypesFileTypeMap.getDefaultFileTypeMap().getContentType(fileName);
+				final int pos = ct.indexOf('/');
+				contentType.setPrimaryType(ct.substring(0, pos));
+				contentType.setSubType(ct.substring(pos + 1));
+			}
+			contentType.addParameter("name", fileName);
+			resp.setContentType(contentType.toString());
+			resp.setHeader("Content-disposition", new StringBuilder(50).append("inline; filename=\"").append(fileName)
+					.append('"').toString());
+			/*
+			 * Write from content's input stream to response output stream
+			 */
+			InputStream contentInputStream = null;
+			/*
+			 * Reset response header values since we are going to directly write
+			 * into servlet's output stream and then some browsers do not allow
+			 * header "Pragma"
+			 */
+			Tools.removeCachingHeader(resp);
+			final OutputStream out = resp.getOutputStream();
+			try {
+				contentInputStream = new FileInputStream(uploadFile.getFile());
+				final byte[] buffer = new byte[0xFFFF];
+				for (int len; (len = contentInputStream.read(buffer)) != -1;) {
+					out.write(buffer, 0, len);
+				}
+				out.flush();
+			} finally {
+				if (contentInputStream != null) {
+					contentInputStream.close();
+					contentInputStream = null;
+				}
+			}
+		} catch (final UploadException e) {
+			LOG.error(e.getMessage(), e);
+			resp.setContentType(MIME_TEXT_HTML_CHARSET_UTF_8);
+			Tools.disableCaching(resp);
+			JSONObject responseObj = null;
+			try {
+				final Response response = new Response();
+				response.setException(e);
+				responseObj = response.getJSON();
+			} catch (final JSONException e1) {
+				LOG.error(e1.getMessage(), e1);
+			}
+			throw new UploadServletException(resp, JS_FRAGMENT.replaceFirst(JS_FRAGMENT_JSON,
+					responseObj == null ? STR_NULL : Matcher.quoteReplacement(responseObj.toString())).replaceFirst(
+					JS_FRAGMENT_ACTION, e.getAction() == null ? STR_NULL : e.getAction()), e.getMessage(), e);
+		} catch (final AbstractOXException e) {
+			LOG.error(e.getMessage(), e);
+			resp.setContentType(MIME_TEXT_HTML_CHARSET_UTF_8);
+			Tools.disableCaching(resp);
+			JSONObject responseObj = null;
+			try {
+				final Response response = new Response();
+				response.setException(e);
+				responseObj = response.getJSON();
+			} catch (final JSONException e1) {
+				LOG.error(e1.getMessage(), e1);
+			}
+			throw new UploadServletException(resp, JS_FRAGMENT.replaceFirst(JS_FRAGMENT_JSON,
+					responseObj == null ? STR_NULL : Matcher.quoteReplacement(responseObj.toString())).replaceFirst(
+					JS_FRAGMENT_ACTION, ACTION_GET), e.getMessage(), e);
+		}
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -215,6 +326,10 @@ public final class AJAXFile extends PermissionServlet {
 				if (moduleParam == null) {
 					throw new UploadException(UploadException.UploadCode.MISSING_PARAM, null, PARAMETER_MODULE);
 				}
+				final String fileTypeFilter = req.getParameter(PARAMETER_TYPE);
+				if (fileTypeFilter == null) {
+					throw new UploadException(UploadException.UploadCode.MISSING_PARAM, null, PARAMETER_TYPE);
+				}
 				final SessionObject sessionObj = getSessionObject(req);
 				final UploadQuotaChecker checker = UploadQuotaChecker.getUploadQuotaChecker(
 						getModuleInteger(moduleParam), sessionObj);
@@ -248,9 +363,15 @@ public final class AJAXFile extends PermissionServlet {
 						final FileItem fileItem = iter.next();
 						if (!fileItem.isFormField() && fileItem.getSize() > 0 && fileItem.getName() != null
 								&& fileItem.getName().length() > 0) {
+							if (!checkFileType(fileTypeFilter, fileItem.getContentType())) {
+								throw new UploadException(UploadException.UploadCode.INVALID_FILE_TYPE,
+										action == null ? STR_NULL : action, fileItem.getContentType(), fileTypeFilter);
+							}
 							jArray.put(processFileItem(fileItem, sessionObj));
 						}
 					}
+				} catch (final UploadException e) {
+					throw e;
 				} catch (final Exception e) {
 					throw new UploadException(UploadCode.UPLOAD_FAILED, action, e);
 				}
@@ -294,6 +415,40 @@ public final class AJAXFile extends PermissionServlet {
 					responseObj == null ? STR_NULL : Matcher.quoteReplacement(responseObj.toString())).replaceFirst(
 					JS_FRAGMENT_ACTION, action == null ? STR_NULL : action), e.getMessage(), e);
 		}
+	}
+
+	private static final String FILE_TYPE_ALL = "file";
+
+	private static final String FILE_TYPE_TEXT = "text";
+
+	private static final String FILE_TYPE_MEDIA = "media";
+
+	private static final String FILE_TYPE_IMAGE = "image";
+
+	private static final String FILE_TYPE_AUDIO = "audio";
+
+	private static final String FILE_TYPE_VIDEO = "video";
+
+	private static final String FILE_TYPE_APPLICATION = "application";
+
+	private static boolean checkFileType(final String filter, final String fileContentType) throws OXException {
+		if (FILE_TYPE_ALL.equalsIgnoreCase(filter)) {
+			return true;
+		} else if (FILE_TYPE_TEXT.equalsIgnoreCase(filter)) {
+			return ContentType.isMimeType(fileContentType, "text/*");
+		} else if (FILE_TYPE_MEDIA.equalsIgnoreCase(filter)) {
+			final ContentType tmp = new ContentType(fileContentType);
+			return tmp.isMimeType("image/*") || tmp.isMimeType("audio/*") || tmp.isMimeType("video/*");
+		} else if (FILE_TYPE_IMAGE.equalsIgnoreCase(filter)) {
+			return ContentType.isMimeType(fileContentType, "image/*");
+		} else if (FILE_TYPE_AUDIO.equalsIgnoreCase(filter)) {
+			return ContentType.isMimeType(fileContentType, "audio/*");
+		} else if (FILE_TYPE_VIDEO.equalsIgnoreCase(filter)) {
+			return ContentType.isMimeType(fileContentType, "video/*");
+		} else if (FILE_TYPE_APPLICATION.equalsIgnoreCase(filter)) {
+			return ContentType.isMimeType(fileContentType, "application/*");
+		}
+		return false;
 	}
 
 	private static final File UPLOAD_DIR = new File(ServerConfig.getProperty(Property.UploadDirectory));

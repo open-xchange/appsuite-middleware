@@ -6,6 +6,7 @@
 * 2007-08-09 - thorben.betten@open-xchange.com
 
  - Bugfix 8726: Fixed detection of uuencoded body parts in a message
+ - Enhanced file upload servlet by get request for uploaded files
 
 * 2007-08-09 - martin.kauss@open-xchange.com
 

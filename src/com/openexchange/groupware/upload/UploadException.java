@@ -103,7 +103,15 @@ public final class UploadException extends AbstractOXException {
 		/**
 		 * Invalid action value: %s
 		 */
-		INVALID_ACTION_VALUE("Invalid action value: %s", Category.CODE_ERROR, 9);
+		INVALID_ACTION_VALUE("Invalid action value: %s", Category.CODE_ERROR, 9),
+		/**
+		 * Uplaod file with id %s could not be found
+		 */
+		FILE_NOT_FOUND("Uplaod file with id %s could not be found", Category.CODE_ERROR, 10),
+		/**
+		 * Upload file's content type "%s" does not fit to given file filter "%s"
+		 */
+		INVALID_FILE_TYPE("Upload file's content type \"%s\" does not fit to given file filter \"%s\"", Category.CODE_ERROR, 11);
 
 		private final String message;
 

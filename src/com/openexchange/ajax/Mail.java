@@ -1147,7 +1147,8 @@ public class Mail extends PermissionServlet implements UploadListener {
 				 */
 				final Object content = mao.getContent();
 				if (mao.getContentID() == JSONMessageAttachmentObject.CONTENT_INPUT_STREAM) {
-					final String userAgent = req.getHeader(STR_USER_AGENT).toLowerCase(Locale.ENGLISH);
+					final String userAgent = req.getHeader(STR_USER_AGENT) == null ? null : req.getHeader(
+							STR_USER_AGENT).toLowerCase(Locale.ENGLISH);
 					final boolean internetExplorer = (userAgent != null && userAgent.indexOf(STR_MSIE) > -1 && userAgent
 							.indexOf(STR_WINDOWS) > -1);
 					final ContentType contentType;

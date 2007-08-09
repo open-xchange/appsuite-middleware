@@ -137,7 +137,8 @@ public class SessionObject {
 	}
 
 	/**
-	 * Gets the uploaded file associated with given ID
+	 * Gets the uploaded file associated with given ID and set its last access
+	 * timestamp to current time millis
 	 * 
 	 * @param id
 	 *            The id
@@ -145,7 +146,11 @@ public class SessionObject {
 	 *         if none found
 	 */
 	public final AJAXUploadFile getAJAXUploadFile(final String id) {
-		return ajaxUploadFiles.get(id);
+		final AJAXUploadFile uploadFile = ajaxUploadFiles.get(id);
+		if (null != uploadFile) {
+			uploadFile.touch();
+		}
+		return uploadFile;
 	}
 
 	/**
