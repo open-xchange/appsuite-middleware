@@ -62,11 +62,9 @@ import java.util.Map;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrows;
-import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.tx.DBService;
 import com.openexchange.webdav.protocol.WebdavProperty;
@@ -107,7 +105,7 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
 			exceptionId=0,
 			msg="Invalid SQL: '%s'"
 	)
-	public Map<Integer, List<WebdavProperty>> loadProperties(List<Integer> entities, List<WebdavProperty> properties, Context ctx, User user, UserConfiguration userConfig) throws OXException {
+	public Map<Integer, List<WebdavProperty>> loadProperties(List<Integer> entities, List<WebdavProperty> properties, Context ctx) throws OXException {
 		Connection readCon = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
@@ -162,7 +160,7 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
 			exceptionId=1,
 			msg="Invalid SQL: '%s'"
 	)
-	public List<WebdavProperty> loadProperties(int entity, List<WebdavProperty> properties, Context ctx, User user, UserConfiguration userConfig) throws OXException {
+	public List<WebdavProperty> loadProperties(int entity, List<WebdavProperty> properties, Context ctx) throws OXException {
 		Connection readCon = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
@@ -202,12 +200,12 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
 			exceptionId=2,
 			msg="Invalid SQL: '%s'"
 	)
-	public void saveProperties(int entity, List<WebdavProperty> properties, Context ctx, User user, UserConfiguration userConfig) throws OXException {
+	public void saveProperties(int entity, List<WebdavProperty> properties, Context ctx) throws OXException {
 		Connection writeCon = null;
 		PreparedStatement stmt = null;
 		try {
 			writeCon = getWriteConnection(ctx);
-			removeProperties(entity, properties, ctx, user, userConfig, writeCon);
+			removeProperties(entity, properties, ctx, writeCon);
 			stmt = writeCon.prepareStatement(INSERT);
 			stmt.setInt(1,ctx.getContextId());
 			stmt.setInt(2, entity);
@@ -237,7 +235,7 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
 			exceptionId=3,
 			msg="Invalid SQL: '%s'"
 	)
-	public List<WebdavProperty> loadAllProperties(int entity, Context ctx, User user, UserConfiguration userConfig) throws OXException {
+	public List<WebdavProperty> loadAllProperties(int entity, Context ctx) throws OXException {
 		Connection readCon = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
@@ -271,7 +269,7 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
 			exceptionId=4,
 			msg="Invalid SQL: '%s'"
 	)
-	public Map<Integer, List<WebdavProperty>> loadAllProperties(List<Integer> entities, Context ctx, User user, UserConfiguration userConfig) throws OXException {
+	public Map<Integer, List<WebdavProperty>> loadAllProperties(List<Integer> entities, Context ctx) throws OXException {
 		Connection readCon = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
@@ -312,7 +310,7 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
 			exceptionId=5,
 			msg="Invalid SQL: '%s'"
 	)
-	public void removeAll(List<Integer> entities, Context ctx, User user, UserConfiguration userConfig) throws OXException {
+	public void removeAll(List<Integer> entities, Context ctx) throws OXException {
 		Connection writeCon = null;
 		PreparedStatement stmt = null;
 		try {
@@ -348,12 +346,12 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
 			exceptionId=6,
 			msg="Invalid SQL: '%s'"
 	)
-	public void removeProperties(int entity, List<WebdavProperty> properties, Context ctx, User user, UserConfiguration userConfig) throws OXException {
+	public void removeProperties(int entity, List<WebdavProperty> properties, Context ctx) throws OXException {
 		Connection writeCon = null;
 		PreparedStatement stmt = null;
 		try {
 			writeCon = getWriteConnection(ctx);
-			removeProperties(entity, properties, ctx, user, userConfig, writeCon);
+			removeProperties(entity, properties, ctx, writeCon);
 		} catch (SQLException e) {
 			throw EXCEPTIONS.create(6,e,getStatement(stmt));
 		} finally {
@@ -362,7 +360,7 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
 		}
 	}
 	
-	private void removeProperties(int entity, List<WebdavProperty> properties, Context ctx, User user, UserConfiguration userConfig, Connection writeCon) throws SQLException {
+	private void removeProperties(int entity, List<WebdavProperty> properties, Context ctx, Connection writeCon) throws SQLException {
 		if(properties.isEmpty())
 			return;
 		PreparedStatement stmt = null;
@@ -399,8 +397,8 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
 		builder.setLength(builder.length()-3);
 	}
 
-	public void removeAll(int entity, Context ctx, User user, UserConfiguration userConfig) throws OXException {
-		removeAll(Arrays.asList(entity), ctx, user, userConfig);
+	public void removeAll(int entity, Context ctx) throws OXException {
+		removeAll(Arrays.asList(entity), ctx);
 	}
 
 }

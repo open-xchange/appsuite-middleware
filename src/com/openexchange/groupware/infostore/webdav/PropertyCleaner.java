@@ -49,9 +49,13 @@
 
 package com.openexchange.groupware.infostore.webdav;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.api2.OXException;
 import com.openexchange.event.FolderEvent;
 import com.openexchange.event.InfostoreEvent;
+import com.openexchange.groupware.Component;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.tx.TransactionException;
@@ -64,7 +68,8 @@ public class PropertyCleaner implements FolderEvent, InfostoreEvent {
 	private PropertyStore folderProperties;
 	
 	private static final LoggingLogic LL = LoggingLogic.getLoggingLogic(PropertyCleaner.class);
-
+	private static final Log LOG = LogFactory.getLog(PropertyCleaner.class);
+	
 	public PropertyCleaner(final PropertyStore folderProperties, final PropertyStore infoProperties){
 		this.folderProperties = folderProperties;
 		this.infoProperties = infoProperties;
@@ -78,11 +83,14 @@ public class PropertyCleaner implements FolderEvent, InfostoreEvent {
 	public void folderDeleted(final FolderObject folderObj, final SessionObject sessionObj) {
 		try {
 			folderProperties.startTransaction();
-			folderProperties.removeAll(folderObj.getObjectID(), sessionObj.getContext(), sessionObj.getUserObject(), sessionObj.getUserConfiguration());
+			folderProperties.removeAll(folderObj.getObjectID(), sessionObj.getContext());
 			folderProperties.commit();
 		} catch (final TransactionException e) {
 			LL.log(e); // What shall we do with the drunken Exception? what shall we do with the drunken Exception? What shall we do with the drunken Exception early in the morning?
 		} catch (final OXException e) {
+			if(e.getDetailNumber() == 3 && e.getComponent().equals(Component.USER_SETTING)) {
+				LOG.debug("I assume the user was deleted, so these properties are cleaned elsewhere.");
+			}
 			LL.log(e); // What shall we do with the drunken Exception? what shall we do with the drunken Exception? What shall we do with the drunken Exception early in the morning?
 		} finally {
 			try {
@@ -106,11 +114,14 @@ public class PropertyCleaner implements FolderEvent, InfostoreEvent {
 			final SessionObject sessionObject) {
 		try {
 			infoProperties.startTransaction();
-			infoProperties.removeAll(metadata.getId(), sessionObject.getContext(), sessionObject.getUserObject(), sessionObject.getUserConfiguration());
+			infoProperties.removeAll(metadata.getId(), sessionObject.getContext());
 			infoProperties.commit();
 		} catch (final TransactionException e) {
 			LL.log(e); // What shall we do with the drunken Exception? what shall we do with the drunken Exception? What shall we do with the drunken Exception early in the morning?
 		} catch (final OXException e) {
+			if(e.getDetailNumber() == 3 && e.getComponent().equals(Component.USER_SETTING)) {
+				LOG.debug("I assume the user was deleted, so these properties are cleaned elsewhere.");
+			}
 			LL.log(e); // What shall we do with the drunken Exception? what shall we do with the drunken Exception? What shall we do with the drunken Exception early in the morning?
 		} finally {
 			try {

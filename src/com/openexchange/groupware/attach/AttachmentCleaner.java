@@ -134,7 +134,7 @@ public class AttachmentCleaner implements AppointmentEvent, TaskEvent,
 		SearchIterator iter = null;
 		try {
 			ATTACHMENT_BASE.startTransaction();
-			final TimedResult rs = ATTACHMENT_BASE.getAttachments(parentFolderID,objectID,type,new AttachmentField[]{AttachmentField.ID_LITERAL},AttachmentField.ID_LITERAL,AttachmentBase.ASC,sessionObj.getContext(), sessionObj.getUserObject(), sessionObj.getUserConfiguration());
+			final TimedResult rs = ATTACHMENT_BASE.getAttachments(parentFolderID,objectID,type,new AttachmentField[]{AttachmentField.ID_LITERAL},AttachmentField.ID_LITERAL,AttachmentBase.ASC,sessionObj.getContext(), null, null);
 			final List<Integer> ids = new ArrayList<Integer>();
 			iter = rs.results();
 			if(!iter.hasNext()) {
@@ -150,7 +150,7 @@ public class AttachmentCleaner implements AppointmentEvent, TaskEvent,
 				idA[i++] = id;
 			}
 			
-			ATTACHMENT_BASE.detachFromObject(parentFolderID, objectID, type, idA,sessionObj.getContext(), sessionObj.getUserObject(), sessionObj.getUserConfiguration());
+			ATTACHMENT_BASE.detachFromObject(parentFolderID, objectID, type, idA,sessionObj.getContext(), null, null);
 			ATTACHMENT_BASE.commit();
 		
 		} catch (TransactionException e) {

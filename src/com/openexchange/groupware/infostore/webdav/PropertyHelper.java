@@ -141,7 +141,7 @@ public class PropertyHelper {
 		}
 		final SessionObject session = sessionHolder.getSessionObject();
 		try {
-			final List<WebdavProperty> list = propertyStore.loadProperties(id, Arrays.asList(new WebdavProperty(namespace,name)), session.getContext(), session.getUserObject(), session.getUserConfiguration());
+			final List<WebdavProperty> list = propertyStore.loadProperties(id, Arrays.asList(new WebdavProperty(namespace,name)), session.getContext());
 			if(list.isEmpty()) {
 				return;
 			}
@@ -160,7 +160,7 @@ public class PropertyHelper {
 		loadedAllProps = true;
 		final SessionObject session = sessionHolder.getSessionObject();
 		try {
-			final List<WebdavProperty> list = propertyStore.loadAllProperties(id, session.getContext(), session.getUserObject(), session.getUserConfiguration());
+			final List<WebdavProperty> list = propertyStore.loadAllProperties(id, session.getContext());
 			for(final WebdavProperty prop : list) {
 				properties.put(new WebdavProperty(prop.getNamespace(), prop.getName()), prop);
 			}
@@ -175,15 +175,15 @@ public class PropertyHelper {
 		}
 		changed = false;
 		final SessionObject session = sessionHolder.getSessionObject();
-		propertyStore.saveProperties(id, new ArrayList<WebdavProperty>(changedProps), session.getContext(), session.getUserObject(), session.getUserConfiguration());
+		propertyStore.saveProperties(id, new ArrayList<WebdavProperty>(changedProps), session.getContext());
 		changedProps.clear();
-		propertyStore.removeProperties(id, new ArrayList<WebdavProperty>(removedProperties), session.getContext(), session.getUserObject(), session.getUserConfiguration());
+		propertyStore.removeProperties(id, new ArrayList<WebdavProperty>(removedProperties), session.getContext());
 		removedProperties.clear();
 	}
 	
 	public void deleteProperties() throws OXException {
 		final SessionObject session = sessionHolder.getSessionObject();
-		propertyStore.removeAll(id, session.getContext(), session.getUserObject(), session.getUserConfiguration());
+		propertyStore.removeAll(id, session.getContext());
 	}
 	
 }

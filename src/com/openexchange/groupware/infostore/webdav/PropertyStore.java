@@ -53,19 +53,17 @@ import java.util.List;
 import java.util.Map;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tx.Service;
 import com.openexchange.webdav.protocol.WebdavProperty;
 
 public interface PropertyStore extends Service{
-	public void saveProperties(int entity, List<WebdavProperty> properties, Context ctx, User user, UserConfiguration userConfig) throws OXException;
-	public Map<Integer, List<WebdavProperty>> loadProperties(List<Integer> entities, List<WebdavProperty> properties, Context ctx, User user, UserConfiguration userConfig) throws OXException;
-	public List<WebdavProperty> loadProperties(int entity, List<WebdavProperty> properties, Context ctx, User user, UserConfiguration userConfig) throws OXException;
-	public void removeAll(int entity, Context ctx, User user, UserConfiguration userConfig) throws OXException;
-	public List<WebdavProperty> loadAllProperties(int entity, Context ctx, User user, UserConfiguration userConfig) throws OXException;
-	public Map<Integer, List<WebdavProperty>> loadAllProperties(List<Integer> ids, Context ctx, User user, UserConfiguration userConfig) throws OXException;
-	public void removeProperties(int entity, List<WebdavProperty> properties, Context ctx, User user, UserConfiguration userConfig) throws OXException;
-	public void removeAll(List<Integer> clean, Context ctx, User user, UserConfiguration userConfig) throws OXException;
+	public void saveProperties(int entity, List<WebdavProperty> properties, Context ctx) throws OXException;
+	public Map<Integer, List<WebdavProperty>> loadProperties(List<Integer> entities, List<WebdavProperty> properties, Context ctx) throws OXException;
+	public List<WebdavProperty> loadProperties(int entity, List<WebdavProperty> properties, Context ctx) throws OXException;
+	public void removeAll(int entity, Context ctx) throws OXException;
+	public List<WebdavProperty> loadAllProperties(int entity, Context ctx) throws OXException;
+	public Map<Integer, List<WebdavProperty>> loadAllProperties(List<Integer> ids, Context ctx) throws OXException;
+	public void removeProperties(int entity, List<WebdavProperty> properties, Context ctx) throws OXException;
+	public void removeAll(List<Integer> clean, Context ctx) throws OXException;
 }

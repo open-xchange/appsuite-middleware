@@ -1,3 +1,7 @@
+* 2007-08-09 - francisco.laguna@open-xchange.com
+
+ - Bugfix 8725: Remove depedency on user and userconfiguration for attachment and property cleander.
+
 * 2007-08-08 - marcus.klein@open-xchange.com
 
  - Bugfix 8720: Added invalidation for context login information mappings.
