@@ -278,30 +278,48 @@ public class HttpServletManager {
 					 */
 					final int size = properties.keySet().size();
 					final Iterator<Object> iter = properties.keySet().iterator();
-					for (int k = 0; k < size; k++) {
+					NextMapping: for (int k = 0; k < size; k++) {
 						String value = null;
 						try {
 							final String name = iter.next().toString();
-							value = properties.get(name).toString();
-							if (servletConstructorMap.containsKey(name)) {
+							Object tmp = properties.get(name);
+							if (null == tmp || (value = tmp.toString().trim()).length() == 0) {
 								if (LOG.isWarnEnabled()) {
-									LOG.warn(new StringBuilder(256).append("Name \"").append(name).append(
-											"\" already contained in servlet mapping: Ignoring ").append(value));
+									final OXServletException e = new OXServletException(
+											OXServletException.Code.NO_CLASS_NAME_FOUND, name);
+									LOG.warn(e.getLocalizedMessage(), e);
+								}
+								continue NextMapping;
+							}
+							tmp = null;
+							if (servletConstructorMap.containsKey(name)) {
+								final boolean isEqual = servletConstructorMap.get(name).toString().indexOf(value) != -1;
+								if (!isEqual && LOG.isWarnEnabled()) {
+									final OXServletException e = new OXServletException(
+											OXServletException.Code.ALREADY_PRESENT, name, servletConstructorMap
+													.get(name), value);
+									LOG.warn(e.getLocalizedMessage(), e);
 								}
 							} else {
 								servletConstructorMap.put(name, Class.forName(value).getConstructor(CLASS_ARR));
 							}
 						} catch (final SecurityException e) {
 							if (LOG.isWarnEnabled()) {
-								LOG.warn("SecurityException while loading class " + value, e);
+								final OXServletException se = new OXServletException(
+										OXServletException.Code.SECURITY_ERR, e, value);
+								LOG.warn(se.getLocalizedMessage(), se);
 							}
 						} catch (final ClassNotFoundException e) {
 							if (LOG.isWarnEnabled()) {
-								LOG.warn("Couldn't find class " + value, e);
+								final OXServletException se = new OXServletException(
+										OXServletException.Code.CLASS_NOT_FOUND, e, value);
+								LOG.warn(se.getLocalizedMessage(), se);
 							}
 						} catch (final NoSuchMethodException e) {
 							if (LOG.isWarnEnabled()) {
-								LOG.warn("No default constructor specified in class " + value, e);
+								final OXServletException se = new OXServletException(
+										OXServletException.Code.NO_DEFAULT_CONSTRUCTOR, e, value);
+								LOG.warn(se.getLocalizedMessage(), se);
 							}
 						}
 					}

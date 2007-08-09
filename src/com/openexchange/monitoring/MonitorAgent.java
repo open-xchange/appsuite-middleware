@@ -58,6 +58,7 @@ import java.util.Stack;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 
+import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 
@@ -73,13 +74,25 @@ public class MonitorAgent extends AbstractAgent {
 	 */
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MonitorAgent.class);
 	
-	private static final int JMX_PORT = ServerConfig.getInteger(Property.JMX_PORT);
+	private static final int JMX_PORT;
 	
 	private static final String JMX_BIND_ADDR = ServerConfig.getProperty(Property.JMX_BIND_ADDRESS);
 	
 	private static MonitorAgent instance;
 	
-	//private static MBeanServer alternativeMBeanServer;
+	static {
+		int jmxPort;
+		try {
+			jmxPort = ServerConfig.getInteger(Property.JMX_PORT);
+		} catch (final ConfigurationException e) {
+			LOG.error(e.getLocalizedMessage(), e);
+			/*
+			 * Default
+			 */
+			jmxPort = 9999;
+		}
+		JMX_PORT = jmxPort;
+	}
 	
 	/*
 	 * Member fields

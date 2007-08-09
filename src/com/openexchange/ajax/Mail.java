@@ -108,6 +108,7 @@ import com.openexchange.api2.MailInterfaceImpl;
 import com.openexchange.api2.OXException;
 import com.openexchange.cache.FolderCacheManager;
 import com.openexchange.cache.MessageCacheManager;
+import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.groupware.AbstractOXException;
@@ -2905,7 +2906,14 @@ public class Mail extends PermissionServlet implements UploadListener {
 				if (LOG.isWarnEnabled()) {
 					LOG.warn(WARN01);
 				}
-				this.uploadQuota = ServerConfig.getInteger(Property.MAX_UPLOAD_SIZE);
+				long tmp;
+				try {
+					tmp = ServerConfig.getInteger(Property.MAX_UPLOAD_SIZE);
+				} catch (final ConfigurationException e) {
+					LOG.error(e.getLocalizedMessage(), e);
+					tmp = 0;
+				}
+				this.uploadQuota = tmp;
 			}
 			this.uploadQuotaPerFile = usm.getUploadQuotaPerFile();
 			this.resp = resp;

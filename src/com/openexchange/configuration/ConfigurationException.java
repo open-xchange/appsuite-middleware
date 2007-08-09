@@ -123,7 +123,12 @@ public class ConfigurationException extends AbstractOXException {
         /**
          * Invalid configuration: %s
          */
-        INVALID_CONFIGURATION("Invalid configuration: %s", Category.SETUP_ERROR, 7);
+        INVALID_CONFIGURATION("Invalid configuration: %s", Category.SETUP_ERROR, 7),
+        
+        /**
+         * Property %s is not an integer
+         */
+        PROPERTY_NOT_AN_INTEGER("Property %s is not an integer", Category.CODE_ERROR, 8);
 
         /**
          * Message of the exception.

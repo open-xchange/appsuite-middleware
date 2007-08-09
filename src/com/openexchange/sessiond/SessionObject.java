@@ -59,6 +59,8 @@ import javax.mail.MessagingException;
 import javax.mail.Session;
 
 import com.openexchange.api2.OXException;
+import com.openexchange.configuration.ConfigurationException;
+import com.openexchange.configuration.ServerConfig;
 import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.UserConfigurationException;
 import com.openexchange.groupware.UserConfigurationStorage;
@@ -181,7 +183,19 @@ public class SessionObject {
 	 */
 	public final void putAJAXUploadFile(final String id, final AJAXUploadFile uploadFile) {
 		ajaxUploadFiles.put(id, uploadFile);
-		final TimerTask timerTask = new AJAXUploadFileTimerTask(uploadFile, 300000/* 5min */, id, ajaxUploadFiles);
+		int idleTimeMillis;
+		try {
+			idleTimeMillis = ServerConfig.getInteger(ServerConfig.Property.MaxUploadIdleTimeMillis);
+		} catch (ConfigurationException e) {
+			LOG.error(new StringBuilder(256).append(
+					"Max. upload file idle time millis could not be read, using default ").append(300000).append(
+					". Error message: ").append(e.getLocalizedMessage()).toString(), e);
+			/*
+			 * Default
+			 */
+			idleTimeMillis = 300000;
+		}
+		final TimerTask timerTask = new AJAXUploadFileTimerTask(uploadFile, idleTimeMillis, id, ajaxUploadFiles);
 		uploadFile.setTimerTask(timerTask);
 		/*
 		 * Start timer task

@@ -49,7 +49,9 @@
 
 package com.openexchange.groupware.upload.quotachecker;
 
+import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.ServerConfig;
+import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.groupware.upload.UploadQuotaChecker;
 import com.openexchange.sessiond.SessionObject;
 
@@ -60,6 +62,9 @@ import com.openexchange.sessiond.SessionObject;
  * 
  */
 public final class MailUploadQuotaChecker extends UploadQuotaChecker {
+	
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(MailUploadQuotaChecker.class);
 
 	private final long uploadQuota;
 
@@ -75,7 +80,13 @@ public final class MailUploadQuotaChecker extends UploadQuotaChecker {
 			/*
 			 * Fallback to global upload quota
 			 */
-			final int globalQuota = ServerConfig.getInteger(ServerConfig.Property.MAX_UPLOAD_SIZE);
+			int globalQuota;
+			try {
+				globalQuota = ServerConfig.getInteger(Property.MAX_UPLOAD_SIZE);
+			} catch (final ConfigurationException e) {
+				LOG.error(e.getLocalizedMessage(), e);
+				globalQuota = 0;
+			}
 			if (globalQuota > 0) {
 				uploadQuota = globalQuota;
 			} else {

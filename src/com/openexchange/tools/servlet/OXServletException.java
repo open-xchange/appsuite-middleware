@@ -67,9 +67,9 @@ public class OXServletException extends AbstractOXException {
 
 	/**
 	 * Code
-	 *
+	 * 
 	 * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
-	 *
+	 * 
 	 */
 	public static enum Code {
 
@@ -88,7 +88,30 @@ public class OXServletException extends AbstractOXException {
 		/**
 		 * Servlet mappings could not be loaded due to following error: %s
 		 */
-		SERVLET_MAPPINGS_NOT_LOADED("Servlet mappings could not be loaded due to following error: %s", Category.CODE_ERROR, 4);
+		SERVLET_MAPPINGS_NOT_LOADED("Servlet mappings could not be loaded due to following error: %s",
+				Category.CODE_ERROR, 4),
+		/**
+		 * No servlet class name found for key "%s". Please check servlet
+		 * mappings.
+		 */
+		NO_CLASS_NAME_FOUND("No servlet class name found for key \"%s\". Please check servlet mappings.",
+				Category.SETUP_ERROR, 5),
+		/**
+		 * Name "%s" already mapped to "%s". Ignoring servlet class "%s"
+		 */
+		ALREADY_PRESENT("Name \"%s\" already mapped to \"%s\". Ignoring servlet class \"%s\"", Category.SETUP_ERROR, 6),
+		/**
+		 * SecurityException while loading servlet class "%s"
+		 */
+		SECURITY_ERR("SecurityException while loading servlet class \"%s\"", Category.CODE_ERROR, 7),
+		/**
+		 * Couldn't find servlet class "%s"
+		 */
+		CLASS_NOT_FOUND("Couldn't find servlet class \"%s\"", Category.CODE_ERROR, 8),
+		/**
+		 * No default constructor specified in servlet class "%s"
+		 */
+		NO_DEFAULT_CONSTRUCTOR("No default constructor specified in servlet class \"%s\"", Category.CODE_ERROR, 9);
 
 		/**
 		 * Message of the exception.
@@ -133,11 +156,11 @@ public class OXServletException extends AbstractOXException {
 			return number;
 		}
 	}
-	
+
 	public OXServletException(final AbstractOXException cause) {
 		super(cause);
 	}
-	
+
 	public OXServletException(final Code code, final Object... messageArgs) {
 		this(code, null, messageArgs);
 	}
