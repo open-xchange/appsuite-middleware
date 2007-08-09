@@ -47,46 +47,92 @@
  *
  */
 
-package com.openexchange.ajax.task.actions;
+package com.openexchange.ajax.framework;
 
-import java.util.TimeZone;
-
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.openexchange.ajax.framework.AJAXRequest;
-import com.openexchange.ajax.writer.TaskWriter;
-import com.openexchange.groupware.tasks.Task;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.fields.DataFields;
 
 /**
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public abstract class AbstractTaskRequest implements AJAXRequest {
+public class CommonListRequest implements AJAXRequest {
 
-    /**
-     * URL of the tasks AJAX interface.
-     */
-    public static final String TASKS_URL = "/ajax/tasks";
+    private final String servletPath;
+
+    private final int[][] folderAndObjectIds;
+
+    private final int[] columns;
+
+    private final boolean failOnError;
 
     /**
      * Default constructor.
      */
-    protected AbstractTaskRequest() {
+    public CommonListRequest(final String servletPath,
+        final int[][] folderAndObjectIds, final int[] columns) {
+        this(servletPath, folderAndObjectIds, columns, true);
+    }
+
+    /**
+     * Constructor with all parameters.
+     */
+    public CommonListRequest(final String servletPath,
+        final int[][] folderAndObjectIds, final int[] columns,
+        final boolean failOnError) {
         super();
+        this.servletPath = servletPath;
+        this.folderAndObjectIds = folderAndObjectIds;
+        this.columns = columns;
+        this.failOnError = failOnError;
     }
 
     /**
      * {@inheritDoc}
      */
     public String getServletPath() {
-        return TASKS_URL;
+        return servletPath;
     }
 
-    protected JSONObject convert(final Task task, final TimeZone timeZone)
-        throws JSONException {
-		final JSONObject retval = new JSONObject();
-        new TaskWriter(timeZone).writeTask(task, retval);
-        return retval;
+    /**
+     * {@inheritDoc}
+     */
+    public Object getBody() throws JSONException {
+        final JSONArray array = new JSONArray();
+        for (int[] folderAndObject : folderAndObjectIds) {
+            final JSONObject json = new JSONObject();
+            json.put(AJAXServlet.PARAMETER_INFOLDER, folderAndObject[0]);
+            json.put(DataFields.ID, folderAndObject[1]);
+            array.put(json);
+        }
+        return array;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Method getMethod() {
+        return Method.PUT;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Parameter[] getParameters() {
+        return new Parameter[] {
+            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LIST),
+            new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns)
+        };
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public CommonListParser getParser() {
+        return new CommonListParser(failOnError);
     }
 }

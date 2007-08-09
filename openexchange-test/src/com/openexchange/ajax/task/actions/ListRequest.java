@@ -49,70 +49,24 @@
 
 package com.openexchange.ajax.task.actions;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.fields.TaskFields;
+import com.openexchange.ajax.framework.CommonListRequest;
 
 /**
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class ListRequest extends AbstractTaskRequest {
-
-    private final int[][] folderAndTaskIds;
-
-    private final int[] columns;
+public class ListRequest extends CommonListRequest {
 
     /**
      * Default constructor.
      */
     public ListRequest(final int[][] folderAndTaskIds, final int[] columns) {
-        super();
-        this.folderAndTaskIds = folderAndTaskIds;
-        this.columns = columns;
+        super(AbstractTaskRequest.TASKS_URL, folderAndTaskIds, columns);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public Object getBody() throws JSONException {
-        final JSONArray array = new JSONArray();
-        for (int[] folderAndTask : folderAndTaskIds) {
-            final JSONObject json = new JSONObject();
-            json.put(AJAXServlet.PARAMETER_INFOLDER, folderAndTask[0]);
-            json.put(TaskFields.ID, folderAndTask[1]);
-            array.put(json);
-        }
-        return array;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Method getMethod() {
-        return Method.PUT;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Parameter[] getParameters() {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LIST),
-            new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns)
-        };
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public ListParser getParser() {
-        return new ListParser(true);
+    public ListRequest(final int[][] folderAndTaskIds, final int[] columns,
+        final boolean failOnError) {
+        super(AbstractTaskRequest.TASKS_URL, folderAndTaskIds, columns,
+            failOnError);
     }
 }

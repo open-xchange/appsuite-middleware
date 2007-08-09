@@ -83,7 +83,7 @@ public class GetResponse extends AbstractAJAXResponse {
         throws OXJSONException {
         if (null == reminders) {
             final ReminderParser parser = new ReminderParser(timeZone);
-            final JSONArray array = (JSONArray) getResponse().getData();
+            final JSONArray array = (JSONArray) getData();
             reminders = new ArrayList<ReminderObject>(array.length());
             for (int i = 0; i < array.length(); i++) {
                 try {

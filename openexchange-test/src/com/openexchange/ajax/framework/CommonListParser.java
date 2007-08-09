@@ -47,22 +47,54 @@
  *
  */
 
-package com.openexchange.ajax.task.actions;
+package com.openexchange.ajax.framework;
+
+import org.json.JSONArray;
+import org.json.JSONException;
 
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class ListResponse extends AbstractAJAXResponse {
+public class CommonListParser extends AbstractAJAXParser<CommonListResponse> {
 
     /**
-     * @param response
+     * @param failOnError
      */
-    public ListResponse(final Response response) {
-        super(response);
+    public CommonListParser(boolean failOnError) {
+        super(failOnError);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+
+    @Override
+    protected CommonListResponse createResponse(final Response response)
+        throws JSONException {
+        final CommonListResponse retval = instanciateReponse(response);
+        if (isFailOnError()) {
+            retval.setArray(parseData((JSONArray) retval.getData()));
+        }
+        return retval;
+    }
+
+    public static Object[][] parseData(final JSONArray array)
+        throws JSONException {
+        final Object[][] values = new Object[array.length()][];
+        for (int i = 0; i < array.length(); i++) {
+            final JSONArray inner = array.getJSONArray(i);
+            values[i] = new Object[inner.length()];
+            for (int j = 0; j < inner.length(); j++) {
+                values[i][j] = inner.get(j);
+            }
+        }
+        return values;
+    }
+    
+    protected CommonListResponse instanciateReponse(final Response response) {
+        return new CommonListResponse(response);
+    }
 }

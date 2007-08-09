@@ -71,7 +71,7 @@ public class InsertResponse extends CommonInsertResponse {
     /**
      * @return the folderId
      */
-    int getFolderId() {
+    public int getFolderId() {
         return folderId;
     }
 }

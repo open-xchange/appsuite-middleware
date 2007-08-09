@@ -396,31 +396,6 @@ public class TasksTest extends AbstractAJAXTest {
         }
     }
 
-    public void testTaskList() throws Throwable {
-        final int folderId = TaskTools.getPrivateTaskFolder(getWebConversation(),
-            getHostName(), getSessionId());
-        final Task task = new Task();
-        task.setParentFolderID(folderId);
-        int[][] tasks = new int[10][2];
-        for (int i = 0; i < tasks.length; i++) {
-            task.setTitle("Task " + (i + 1));
-            tasks[i][1] = extractInsertId(insertTask(getWebConversation(),
-                getHostName(), getSessionId(), task));
-            tasks[i][0] = folderId;
-        }
-        final int[] columns = new int[] { Task.TITLE, Task.OBJECT_ID,
-            Task.LAST_MODIFIED };
-        final Response response = getTaskList(getWebConversation(),
-            getHostName(), getSessionId(), tasks, columns);
-        final JSONArray array = (JSONArray) response.getData();
-        // TODO parse JSON array
-        final Date lastModified = response.getTimestamp();
-        for (int[] folderAndTask : tasks) {
-            deleteTask(getWebConversation(), getHostName(), getSessionId(),
-                lastModified, folderAndTask[0], folderAndTask[1]);
-        }
-    }
-
     public void testConfirmation() throws Throwable {
         final int folderId = getPrivateTaskFolder();
 

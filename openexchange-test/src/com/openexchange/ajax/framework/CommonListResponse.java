@@ -47,34 +47,48 @@
  *
  */
 
-package com.openexchange.ajax.task.actions;
+package com.openexchange.ajax.framework;
 
-import org.json.JSONException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
 
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class ListParser extends AbstractAJAXParser {
+public class CommonListResponse extends AbstractAJAXResponse implements
+    Iterable<Object[]> {
+
+    private Object[][] array;
 
     /**
-     * @param failOnError
+     * @param response
      */
-    public ListParser(boolean failOnError) {
-        super(failOnError);
+    public CommonListResponse(final Response response) {
+        super(response);
+    }
+
+    /**
+     * @return the array
+     */
+    public Object[][] getArray() {
+        return array;
+    }
+
+    /**
+     * @param array the array to set
+     */
+    void setArray(Object[][] array) {
+        this.array = array;
     }
 
     /**
      * {@inheritDoc}
      */
-    @Override
-    protected ListResponse createResponse(final Response response)
-        throws JSONException {
-        return new ListResponse(response);
+    public Iterator<Object[]> iterator() {
+        return Collections.unmodifiableList(Arrays.asList(array)).iterator();
     }
-
 }

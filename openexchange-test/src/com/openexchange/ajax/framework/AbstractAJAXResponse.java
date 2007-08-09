@@ -73,6 +73,10 @@ public abstract class AbstractAJAXResponse extends Assert {
         return response;
     }
 
+    public Object getData() {
+        return response.getData();
+    }
+
     public Date getTimestamp() {
         return response.getTimestamp();
     }

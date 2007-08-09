@@ -69,7 +69,7 @@ public class GetResponse extends AbstractAJAXResponse {
 
     private void fetchValue() {
         if (null == value) {
-            value = getResponse().getData();
+            value = getData();
         }
     }
 

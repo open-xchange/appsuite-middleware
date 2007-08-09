@@ -42,6 +42,18 @@ public class Executor extends Assert {
         super();
     }
 
+    public static MultipleResponse multiple(final AJAXClient client,
+        final MultipleRequest request) throws AjaxException, IOException,
+        SAXException, JSONException {
+        return (MultipleResponse) execute(client, request);
+    }
+
+    public static AbstractAJAXResponse execute(final AJAXClient client,
+        final AJAXRequest request) throws AjaxException, IOException,
+        SAXException, JSONException {
+        return execute(client.getSession(), request);
+    }
+
     public static AbstractAJAXResponse execute(final AJAXSession session,
         final AJAXRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
