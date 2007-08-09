@@ -1,3 +1,7 @@
+* 2007-08-09 - thorben.betten@open-xchange.com
+
+ - Bugfix 8726: Fixed detection of uuencoded body parts in a message
+
 * 2007-08-09 - martin.kauss@open-xchange.com
 
  - Fixed some typos related to bug #7936.

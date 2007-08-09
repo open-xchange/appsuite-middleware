@@ -47,14 +47,12 @@
  *
  */
 
-
-
 package com.openexchange.tools.mail;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.StringTokenizer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * UUEncodeMultiPart Find possible UUEncode attachments in "normal" text (like
@@ -81,7 +79,7 @@ public class UUEncodedMultiPart {
 	public UUEncodedMultiPart() {
 		uuencodeParts = new ArrayList<UUEncodedPart>();
 	}
-	
+
 	/**
 	 * Constructs a UUEncodeMultiPart object.
 	 */
@@ -116,49 +114,45 @@ public class UUEncodedMultiPart {
 		return (count >= 1);
 	}
 
+	private static final Pattern PAT_UUENCODED = Pattern.compile(
+			"(^begin |\r?\nbegin )([0-7]{3} )(\\S+\r?\n)(.+?)((?:\r?\n){2}end)", Pattern.DOTALL);
+
 	/**
 	 * Try to find attachments recursive. Must containing the "begin" and "end"
-	 * parameter, and specified tokens as well. Usualy looks like: begin 600
-	 * filename.doc
+	 * parameter, and specified tokens as well. Usualy looks like:
+	 * 
+	 * <pre>
+	 * begin 600 filename.doc
+	 * ...many data...
+	 * 
+	 * end
+	 * </pre>
 	 */
 	private final void findUUEncodedAttachmentCount(final String sBodyPart) {
-		int beginIndex = 0, endIndex = 0;
-		while (beginIndex != -1) {
-			beginIndex = sBodyPart.indexOf("begin ", endIndex);
-			if (beginIndex != -1) {
-				final int eolIndex = sBodyPart.indexOf('\n', beginIndex);
-				final String possibleHeader = sBodyPart.substring(beginIndex, eolIndex);
-				final StringTokenizer st = new StringTokenizer(possibleHeader);
-				// String possibleFileSize;
-				st.nextToken(); // this should be the "begin"
-				try {
-					// possibleFileSize = st.nextToken();
-					// int fileSize = Integer.parseInt(possibleFileSize);
-					st.nextToken();
-					final String sPossibleFileName = st.nextToken();
-					// now we know we have a UUencode header.
-					endIndex = sBodyPart.indexOf("end", eolIndex);
-					// not a regular uuencode attachment
-					if (endIndex == -1) {
-						break;
-					}
-					// add possible attachment as UUEncodePart object to the
-					// container
-					uuencodeParts.add(new UUEncodedPart(beginIndex, endIndex, sBodyPart.substring(beginIndex,
-							endIndex + 3), sPossibleFileName));
-				} catch (NoSuchElementException nsee) {
-					// there are no more tokens in this tokenizer's string,
-					// ignoreable
-					endIndex = eolIndex;
-				} catch (NumberFormatException nfe) {
-					// possibleFileSize was non-numeric, ignoreable
-					endIndex = eolIndex;
-				} catch (Exception e) {
-					LOG.error(e.getMessage(), e);
-					break;
-				}
+		final Matcher m = PAT_UUENCODED.matcher(sBodyPart);
+		while (m.find()) {
+			try {
+				final int skip = examineBeginToken(m.group(1));
+				uuencodeParts.add(new UUEncodedPart(m.start(1) + skip, m.start(5), m.group().substring(skip),
+						cleanAtom(m.group(3))));
+			} catch (final Exception e) {
+				LOG.error(e.getMessage(), e);
+				break;
 			}
 		}
+	}
+
+	private static final int examineBeginToken(final String beginToken) {
+		int count = 0;
+		char c = beginToken.charAt(count);
+		while (c == '\r' || c == '\n') {
+			c = beginToken.charAt(++count);
+		}
+		return count;
+	}
+
+	private static final String cleanAtom(final String atom) {
+		return atom.replaceAll("\r?\n", "");
 	}
 
 	/**
