@@ -103,18 +103,10 @@ public class ListRequest extends AbstractTaskRequest {
      * {@inheritDoc}
      */
     public Parameter[] getParameters() {
-        final List<Parameter> params = new ArrayList<Parameter>();
-        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet
-            .ACTION_LIST));
-        final StringBuilder columnSB = new StringBuilder();
-        for (int i : columns) {
-            columnSB.append(i);
-            columnSB.append(',');
-        }
-        columnSB.delete(columnSB.length() - 1, columnSB.length());
-        params.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, columnSB
-            .toString()));
-        return params.toArray(new Parameter[params.size()]);
+        return new Parameter[] {
+            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LIST),
+            new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns)
+        };
     }
 
     /**

@@ -105,14 +105,7 @@ public class AllRequest extends AbstractTaskRequest {
             .ACTION_ALL));
         params.add(new Parameter(AJAXServlet.PARAMETER_FOLDERID, String.valueOf(
             folderId)));
-        final StringBuilder columnSB = new StringBuilder();
-        for (int i : columns) {
-            columnSB.append(i);
-            columnSB.append(',');
-        }
-        columnSB.delete(columnSB.length() - 1, columnSB.length());
-        params.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, columnSB
-            .toString()));
+        params.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns));
         if (null != order) {
             params.add(new Parameter(AJAXServlet.PARAMETER_SORT, String.valueOf(
                 sort)));
