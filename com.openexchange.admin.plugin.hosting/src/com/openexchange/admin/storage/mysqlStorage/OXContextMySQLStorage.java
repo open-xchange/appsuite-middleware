@@ -322,29 +322,11 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             this.oxcontextcommon.handleContextDeleteRollback(write_ox_con, con_write);
             throw new StorageException(e);
         } finally {
-            try {
-                if (stmt != null) {
-                    stmt.close();
-                }
-            } catch (final SQLException e) {
-                log.error(OXContextMySQLStorageCommon.LOG_ERROR_CLOSING_STATEMENT, e);
-            }
+            closePreparedStatement(stmt);
 
-            try {
-                if (stmt2 != null) {
-                    stmt2.close();
-                }
-            } catch (final SQLException e) {
-                log.error(OXContextMySQLStorageCommon.LOG_ERROR_CLOSING_STATEMENT, e);
-            }
+            closePreparedStatement(stmt2);
 
-            try {
-                if (del_stmt != null) {
-                    del_stmt.close();
-                }
-            } catch (final SQLException e) {
-                log.error(OXContextMySQLStorageCommon.LOG_ERROR_CLOSING_STATEMENT, e);
-            }
+            closePreparedStatement(del_stmt);
 
             try {
                 if (con_write != null) {
@@ -786,13 +768,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             log.error("Pool Error", e);
             throw new StorageException(e);
         } finally {
-            try {
-                if (stmt != null) {
-                    stmt.close();
-                }
-            } catch (final SQLException e) {
-                log.error(OXContextMySQLStorageCommon.LOG_ERROR_CLOSING_STATEMENT, e);
-            }
+            closePreparedStatement(stmt);
             try {
                 if (configdb_read != null) {
                     cache.pushConfigDBRead(configdb_read);
@@ -835,37 +811,91 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             log.error("SQL Error", e);
             throw new StorageException(e);
         } finally {
-            try {
-                if (stmt != null) {
-                    stmt.close();
-                }
-            } catch (final SQLException e) {
-                log.error(OXContextMySQLStorageCommon.LOG_ERROR_CLOSING_STATEMENT, e);
-            }
-            if (con != null) {
-                try {
-                    cache.pushConfigDBRead(con);
-                } catch (final PoolException exp) {
-                    log.error("Error pushing configdb connection to pool!", exp);
-                }
-            }
+            closePreparedStatement(stmt);
+            pushConnectionToPoolConfigDB(con);
         }
     }
 
     @Override
     public Context[] searchContextByFilestore(final Filestore filestore) throws StorageException {
         Connection con = null;
+        Connection oxdb_read = null;
         PreparedStatement stmt = null;
+        PreparedStatement stmt2 = null;
+        PreparedStatement logininfo = null;
+        ResultSet rs = null;
+        ResultSet rs2 = null;
+        int context_id = -1;
         try {
             con = cache.getREADConnectionForCONFIGDB();
-            stmt = con.prepareStatement("SELECT context_server2db_pool.cid FROM context_server2db_pool INNER JOIN (server, context, filestore) ON (context_server2db_pool.server_id=server.server_id AND context_server2db_pool.cid=context.cid AND context.filestore_id=filestore.id) WHERE server.name=? AND filestore.id=?");
+            
+            stmt = con.prepareStatement("SELECT context.cid, context.name, context.enabled, context.reason_id, context.filestore_id, context.filestore_name, context.quota_max, context_server2db_pool.write_db_pool_id, context_server2db_pool.read_db_pool_id, context_server2db_pool.db_schema FROM context LEFT JOIN ( context_server2db_pool, server ) ON ( context.cid = context_server2db_pool.cid AND context_server2db_pool.server_id = server.server_id ) WHERE server.name = ? AND context.filestore_id = ?");
+            logininfo = con.prepareStatement("SELECT login_info FROM `login2context` WHERE cid=?");
             stmt.setString(1, prop.getProp(AdminProperties.Prop.SERVER_NAME, "local"));
             stmt.setInt(2, filestore.getId());
-            final ResultSet rs = stmt.executeQuery();
+            rs = stmt.executeQuery();
             final ArrayList<Context> list = new ArrayList<Context>();
             while (rs.next()) {
-                // TODO: This could be filled with the query directly to optimize performance
-                final Context cs = this.oxcontextcommon.getData(new Context(rs.getInt("cid")), con, Long.parseLong(prop.getProp("AVERAGE_CONTEXT_SIZE", "100")));
+                final Context cs = new Context();
+                
+                context_id = rs.getInt(1);
+
+                final String name = rs.getString(2); // name
+                // name of the context, currently same with contextid
+                if (name != null) {
+                    cs.setName(name);
+                }
+
+                cs.setEnabled(rs.getBoolean(3)); // enabled
+                int reason_id = rs.getInt(4); //reason
+                // CONTEXT STATE INFOS #
+                if (-1 != reason_id) {
+                    cs.setMaintenanceReason(new MaintenanceReason(reason_id));
+                }
+                cs.setFilestoreId(rs.getInt(5)); // filestore_id
+                cs.setFilestore_name(rs.getString(6)); //filestorename
+                long quota_max = rs.getLong(7); //quota max
+                if (quota_max != -1) {
+                    quota_max /= Math.pow(2, 20);
+                    // set quota max also in context setup object
+                    cs.setMaxQuota(quota_max);
+                }
+                int write_pool = rs.getInt(8); // write_pool_id
+                int read_pool = rs.getInt(9); //read_pool_id
+                final String db_schema = rs.getString(10); // db_schema
+                if (null != db_schema) {
+                    cs.setReadDatabase(new Database(read_pool, db_schema));
+                    cs.setWriteDatabase(new Database(write_pool, db_schema));
+                }
+                logininfo.setInt(1, context_id);
+                rs2 = logininfo.executeQuery();
+                while (rs2.next()) {
+                    cs.addLoginMapping(rs.getString(1));
+                }
+                rs2.close();
+
+                oxdb_read = cache.getREADConnectionForContext(context_id);
+                stmt2 = oxdb_read.prepareStatement("SELECT filestore_usage.used FROM filestore_usage WHERE filestore_usage.cid = ?");
+                stmt2.setInt(1, context_id);
+                rs2 = stmt2.executeQuery();
+
+                long quota_used = 0;
+                while (rs2.next()) {
+                    quota_used = rs2.getLong(1);
+                }
+                rs2.close();
+                stmt2.close();
+                cache.pushOXDBRead(context_id, oxdb_read);
+
+                quota_used /= Math.pow(2, 20);
+                // set used quota in context setup
+                cs.setUsedQuota(quota_used);
+
+                cs.setAverage_size(Long.parseLong(prop.getProp("AVERAGE_CONTEXT_SIZE", "100")));
+
+                // context id
+                cs.setId(context_id);
+
                 list.add(cs);
             }
             rs.close();
@@ -879,71 +909,13 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             log.error("SQL Error", e);
             throw new StorageException(e);
         } finally {
-            try {
-                if (stmt != null) {
-                    stmt.close();
-                }
-            } catch (final SQLException e) {
-                log.error(OXContextMySQLStorageCommon.LOG_ERROR_CLOSING_STATEMENT, e);
-            }
-            if (con != null) {
-                try {
-                    cache.pushConfigDBRead(con);
-                } catch (final PoolException exp) {
-                    log.error("Error pushing configdb connection to pool!", exp);
-                }
-            }
-        }
-    }
-
-    private void changeStorageDataImpl(Context ctx,Connection configdb_write_con) throws SQLException, StorageException{
-        
-        if(ctx.getFilestoreId()!=null){
-            final OXUtilStorageInterface oxutil = OXUtilStorageInterface.getInstance();
-            Filestore filestore = oxutil.getFilestore(ctx.getFilestoreId());
-            PreparedStatement prep = null;
-            final int context_id = ctx.getId();
-            try {
-
-                if (filestore.getId()!=null && -1 != filestore.getId().intValue()) {
-                    prep = configdb_write_con.prepareStatement("UPDATE context SET filestore_id = ? WHERE cid = ?");
-                    prep.setInt(1, filestore.getId().intValue());
-                    prep.setInt(2, context_id);
-                    prep.executeUpdate();
-                    prep.close();
-                }
-
-                final String filestore_name = ctx.getFilestore_name();
-                if (null != filestore_name) {
-                    prep = configdb_write_con.prepareStatement("UPDATE context SET filestore_name = ? WHERE cid = ?");
-                    prep.setString(1, filestore_name);
-                    prep.setInt(2, context_id);
-                    prep.executeUpdate();
-                    prep.close();
-                }
-
-
-                if (ctx.getMaxQuota()!=null && ctx.getMaxQuota()!=-1) {
-                    final long filestore_quota_max = ctx.getMaxQuota();
-                    // convert to byte for db
-                    final long quota_max_in_byte = (long) (filestore_quota_max * Math.pow(2, 20));
-                    prep = configdb_write_con.prepareStatement("UPDATE context SET quota_max = ? WHERE cid = ?");
-                    prep.setLong(1, quota_max_in_byte);
-                    prep.setInt(2, context_id);
-                    prep.executeUpdate();
-                    prep.close();
-                }
-
-
-            }finally{
-                try {
-                    if (prep != null) {
-                        prep.close();
-                    }
-                } catch (final SQLException exp) {
-                    log.error(OXContextMySQLStorageCommon.LOG_ERROR_CLOSING_STATEMENT);
-                }
-            }
+            closePreparedStatement(stmt);
+            closePreparedStatement(stmt2);
+            closePreparedStatement(logininfo);
+            closeRecordset(rs);
+            closeRecordset(rs2);
+            pushConnectionToPoolConfigDB(con);
+            pushConnectionToPool(context_id, oxdb_read);
         }
     }
 
@@ -1811,13 +1783,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             }
             throw e;
         } finally {
-            try {
-                if (stmt != null) {
-                    stmt.close();
-                }
-            } catch (final SQLException e) {
-                log.error(OXContextMySQLStorageCommon.LOG_ERROR_CLOSING_STATEMENT, e);
-            }
+            closePreparedStatement(stmt);
             if (con_write != null) {
                 try {
                     cache.pushConfigDBWrite(con_write);
@@ -1871,13 +1837,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             }
             throw e;
         } finally {
-            try {
-                if (stmt != null) {
-                    stmt.close();
-                }
-            } catch (final SQLException e) {
-                log.error(OXContextMySQLStorageCommon.LOG_ERROR_CLOSING_STATEMENT, e);
-            }
+            closePreparedStatement(stmt);
             if (con_write != null) {
                 try {
                     cache.pushConfigDBWrite(con_write);
@@ -1976,13 +1936,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
             return retval;
         } finally {
-            try {
-                if (pstm != null) {
-                    pstm.close();
-                }
-            } catch (final SQLException e) {
-                log.error(OXContextMySQLStorageCommon.LOG_ERROR_CLOSING_STATEMENT, e);
-            }
+            closePreparedStatement(pstm);
         }
 
     }
@@ -2050,20 +2004,8 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
             return count;
         } finally {
-            try {
-                if (ps != null) {
-                    ps.close();
-                }
-            } catch (final SQLException e) {
-                log.error(OXContextMySQLStorageCommon.LOG_ERROR_CLOSING_STATEMENT, e);
-            }
-            try {
-                if (ppool != null) {
-                    ppool.close();
-                }
-            } catch (final SQLException e) {
-                log.error(OXContextMySQLStorageCommon.LOG_ERROR_CLOSING_STATEMENT, e);
-            }
+            closePreparedStatement(ps);
+            closePreparedStatement(ppool);
         }
     }
 
@@ -2086,13 +2028,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             log.error("SQL Error", sql);
             throw sql;
         } finally {
-            try {
-                if (stmt != null) {
-                    stmt.close();
-                }
-            } catch (final SQLException e) {
-                log.error(OXContextMySQLStorageCommon.LOG_ERROR_CLOSING_STATEMENT, e);
-            }
+            closePreparedStatement(stmt);
         }
     }
 
@@ -2292,6 +2228,95 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         }
         
     }
+
+    private void changeStorageDataImpl(Context ctx,Connection configdb_write_con) throws SQLException, StorageException{
+        
+        if(ctx.getFilestoreId()!=null){
+            final OXUtilStorageInterface oxutil = OXUtilStorageInterface.getInstance();
+            Filestore filestore = oxutil.getFilestore(ctx.getFilestoreId());
+            PreparedStatement prep = null;
+            final int context_id = ctx.getId();
+            try {
+    
+                if (filestore.getId()!=null && -1 != filestore.getId().intValue()) {
+                    prep = configdb_write_con.prepareStatement("UPDATE context SET filestore_id = ? WHERE cid = ?");
+                    prep.setInt(1, filestore.getId().intValue());
+                    prep.setInt(2, context_id);
+                    prep.executeUpdate();
+                    prep.close();
+                }
+    
+                final String filestore_name = ctx.getFilestore_name();
+                if (null != filestore_name) {
+                    prep = configdb_write_con.prepareStatement("UPDATE context SET filestore_name = ? WHERE cid = ?");
+                    prep.setString(1, filestore_name);
+                    prep.setInt(2, context_id);
+                    prep.executeUpdate();
+                    prep.close();
+                }
     
     
+                if (ctx.getMaxQuota()!=null && ctx.getMaxQuota()!=-1) {
+                    final long filestore_quota_max = ctx.getMaxQuota();
+                    // convert to byte for db
+                    final long quota_max_in_byte = (long) (filestore_quota_max * Math.pow(2, 20));
+                    prep = configdb_write_con.prepareStatement("UPDATE context SET quota_max = ? WHERE cid = ?");
+                    prep.setLong(1, quota_max_in_byte);
+                    prep.setInt(2, context_id);
+                    prep.executeUpdate();
+                    prep.close();
+                }
+    
+    
+            }finally{
+                try {
+                    if (prep != null) {
+                        prep.close();
+                    }
+                } catch (final SQLException exp) {
+                    log.error(OXContextMySQLStorageCommon.LOG_ERROR_CLOSING_STATEMENT);
+                }
+            }
+        }
+    }
+
+    private void closeRecordset(ResultSet rs) {
+        if (null != rs) {
+            try {
+                rs.close();
+            } catch (final SQLException e) {
+                log.error("Error closing recordset", e);
+            }
+        }
+    }
+
+    private void closePreparedStatement(PreparedStatement stmt) {
+        try {
+            if (stmt != null) {
+                stmt.close();
+            }
+        } catch (final SQLException e) {
+            log.error(OXContextMySQLStorageCommon.LOG_ERROR_CLOSING_STATEMENT, e);
+        }
+    }
+
+    private void pushConnectionToPoolConfigDB(final Connection con) {
+        if (con != null) {
+            try {
+                cache.pushConfigDBRead(con);
+            } catch (final PoolException exp) {
+                log.error("Error pushing configdb connection to pool!", exp);
+            }
+        }
+    }
+    
+    private void pushConnectionToPool(final int ctxid, final Connection con) {
+        if (con != null && -1 != ctxid) {
+            try {
+                cache.pushOXDBRead(ctxid, con);
+            } catch (final PoolException exp) {
+                log.error("Error pushing configdb connection to pool!", exp);
+            }
+        }
+    }
 }

@@ -3,12 +3,10 @@ package com.openexchange.admin.storage.mysqlStorage;
 
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
 import com.openexchange.admin.rmi.dataobjects.Server;
-import com.openexchange.admin.storage.interfaces.OXContextStorageInterface;
 import com.openexchange.admin.storage.sqlStorage.OXUtilSQLStorage;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.groupware.IDGenerator;
@@ -1142,8 +1140,11 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
     @Override
     public Filestore getFilestore(final int id) throws StorageException {
         Connection con = null;
+        Connection oxdb_read = null;
         PreparedStatement stmt = null;
-
+        ResultSet rs = null;
+        ResultSet rs2 = null;
+        int context_id = -1;
         try {
             con = cache.getREADConnectionForCONFIGDB();
             //oxdb_read = cache.getREADConnectionForContext(context_id);
@@ -1151,7 +1152,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             stmt = con.prepareStatement("SELECT id,uri,size,max_context,COUNT(cid) FROM filestore LEFT JOIN context ON filestore.id = context.filestore_id WHERE filestore.id=? GROUP BY filestore.id");
 
             stmt.setInt(1, id);
-            final ResultSet rs = stmt.executeQuery();
+            rs = stmt.executeQuery();
             Filestore fs = new Filestore();
 
             if( ! rs.next() ) {
@@ -1164,26 +1165,62 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             fs.setSize(size);
             fs.setMaxContexts(rs.getInt("max_context"));
             fs.setCurrentContexts(rs.getInt("COUNT(cid)"));
-
-            // FIXME: This should be reworked. Instead of calling searchContextByFilestoreId a direct
-            // sql query should be made because we only need usage and reserved here but we do full
-            // context lookups
-            OXContextStorageInterface oxcox = (OXContextStorageInterface)OXContextMySQLStorage.getInstance();
-            final Context[] all_ctx = oxcox.searchContextByFilestore(fs);
-            if( all_ctx == null ) {
-                throw new StorageException("Unable to determine filestore data");
-            }
+            rs.close();
+            
+            stmt = con.prepareStatement("SELECT cid FROM context WHERE filestore_id=?");
+            stmt.setInt(1, id);
+            rs = stmt.executeQuery();
+            
+            final long average_context_size = Long.parseLong(prop.getProp("AVERAGE_CONTEXT_SIZE", "100"));
             long usage = 0;
             long reserved = 0;
-            for (final Context ctx : all_ctx) {
-                final Context ctx_fulldata = oxcox.getData(ctx);
-                if( ctx_fulldata.getUsedQuota() != null ) {
-                    usage += ctx_fulldata.getUsedQuota();
-                }
-                if( ctx_fulldata.getAverage_size() != null ) {
-                    reserved += ctx_fulldata.getAverage_size();
+            while (rs.next()) {
+                // We have to make a try here in order to be able to close the oxdb connection
+                // properly. We can't do that in the outer try
+                try {
+                    context_id = rs.getInt(1);
+                    oxdb_read = cache.getREADConnectionForContext(context_id);
+                    stmt = oxdb_read.prepareStatement("SELECT filestore_usage.used FROM filestore_usage WHERE filestore_usage.cid = ?");
+                    stmt.setInt(1, context_id);
+                    rs2 = stmt.executeQuery();
+                    long quota_used = 0;
+                    // As we can have only one filestore per context if should fit here instead
+                    // of while
+                    if (rs2.next()) {
+                        quota_used = rs2.getLong(1);
+                        quota_used /= Math.pow(2, 20);
+                        usage += quota_used;
+                    }
+                    reserved += average_context_size;
+                    rs2.close();
+                    stmt.close();
+                } finally {
+                    try {
+                        if (oxdb_read != null && -1 != context_id) {
+                            cache.pushOXDBRead(context_id, oxdb_read);
+                        }
+                    } catch (final PoolException exp) {
+                        log.error("Error pushing configdb connection to pool!", exp);
+                    }
                 }
             }
+            //            // FIXME: This should be reworked. Instead of calling searchContextByFilestoreId a direct
+//            // sql query should be made because we only need usage and reserved here but we do full
+//            // context lookups
+//            OXContextStorageInterface oxcox = (OXContextStorageInterface)OXContextMySQLStorage.getInstance();
+//            final Context[] all_ctx = oxcox.searchContextByFilestore(fs);
+//            if( all_ctx == null ) {
+//                throw new StorageException("Unable to determine filestore data");
+//            }
+//
+//            for (final Context ctx : all_ctx) {
+//                if( ctx.getUsedQuota() != null ) {
+//                    usage += ctx.getUsedQuota();
+//                }
+//                if( ctx.getAverage_size() != null ) {
+//                    reserved += ctx.getAverage_size();
+//                }
+//            }
             fs.setUsed(usage);
             fs.setReserved(reserved);
             
@@ -1195,6 +1232,20 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             log.error("SQL Error", ecp);            
             throw new StorageException(ecp);
         } finally {
+            if (null != rs) {
+                try {
+                    rs.close();
+                } catch (final SQLException e) {
+                    log.error("Error closing resultset", e);
+                }
+            }
+            if (null != rs2) {
+                try {
+                    rs2.close();
+                } catch (final SQLException e) {
+                    log.error("Error closing resultset", e);
+                }
+            }
             try {
                 if (stmt != null) {
                     stmt.close();
