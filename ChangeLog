@@ -28,6 +28,12 @@
  - Bugfix 8720: Added invalidation for context login information mappings.
  - Finished generic config jump.
 
+* 2007-08-08 - tobias.prinz@open-xchange.com
+
+ - Refactoring: JSONWriter replaced with OXJSONWriter for ImportServlet
+ - Bug 8681: Checking for modules in Importers.
+ - Bug 7936: Fixed typos in exception messages.
+
 * 2007-08-08 - thorben.betten@open-xchange.com
 
  - Additional monitoring info in AJP monitor to count number of processed
