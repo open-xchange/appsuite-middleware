@@ -1,3 +1,8 @@
+* 2007-08-09 - ben.pahne@open-xchange.com
+
+- Fixed Bug 8728: Private Flag was not removed after a move into
+  a public folder.
+
 * 2007-08-09 - thorben.betten@open-xchange.com
 
  - Bugfix 8726: Fixed detection of uuencoded body parts in a message
