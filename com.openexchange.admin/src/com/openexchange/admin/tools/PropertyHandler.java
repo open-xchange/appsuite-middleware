@@ -48,7 +48,6 @@
  */
 package com.openexchange.admin.tools;
 
-import com.openexchange.admin.exceptions.OXGenericException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -57,10 +56,10 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Properties;
 
-import com.openexchange.admin.properties.AdminProperties;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.openexchange.admin.properties.AdminProperties;
 
 public class PropertyHandler {
     
@@ -153,7 +152,7 @@ public class PropertyHandler {
                 this.groupPropValues = (Hashtable<String, String>)this.allPropValues.get( PROPERTIES_GROUP );
             } else {
                 if(log.isDebugEnabled()){
-                    log.debug( OXGenericException.GENERAL_ERROR, new Exception( "Property '" + PROPERTIES_GROUP + "' not found in file: " + this.configdirname ) );
+                    log.debug(  "Property '" + PROPERTIES_GROUP + "' not found in file: " + this.configdirname  );
                 }
             }
         }
@@ -184,7 +183,7 @@ public class PropertyHandler {
                 this.groupPropValues = (Hashtable<String, String>)this.allPropValues.get( PROPERTIES_GROUP );
             } else {
                 if(log.isDebugEnabled()){
-                    log.debug( OXGenericException.GENERAL_ERROR, new Exception( "Property '" + PROPERTIES_GROUP + "' not found in file: " + this.configdirname ) );
+                    log.debug(  "Property '" + PROPERTIES_GROUP + "' not found in file: " + this.configdirname );
                 }
             }
         }
@@ -215,7 +214,7 @@ public class PropertyHandler {
                 this.userPropValues = (Hashtable<String, String>)this.allPropValues.get( PROPERTIES_USER );
             } else {
                 if(log.isDebugEnabled()){
-                    log.debug( OXGenericException.GENERAL_ERROR, new Exception( "Property '" + PROPERTIES_USER + "' not found in file: " + this.configdirname ) );
+                    log.debug( "Property '" + PROPERTIES_USER + "' not found in file: " + this.configdirname );
                 }
             }
         }
@@ -247,7 +246,7 @@ public class PropertyHandler {
                 this.userPropValues = (Hashtable<String, String>)this.allPropValues.get( PROPERTIES_USER );
             } else {
                 if(log.isDebugEnabled()){
-                    log.debug( OXGenericException.GENERAL_ERROR, new Exception( "Property '" + PROPERTIES_USER + "' not found in file: " + this.configdirname ) );
+                    log.debug( "Property '" + PROPERTIES_USER + "' not found in file: " + this.configdirname);
                 }
             }
         }
@@ -281,7 +280,7 @@ public class PropertyHandler {
                 this.resPropValues = (Hashtable<String, String>)this.allPropValues.get( PROPERTIES_RESOURCE );
             } else {
                 if(log.isDebugEnabled()){
-                    log.debug( OXGenericException.GENERAL_ERROR, new Exception( "Property '" + PROPERTIES_RESOURCE + "' not found in file: " + this.configdirname ) );
+                    log.debug( "Property '" + PROPERTIES_RESOURCE + "' not found in file: " + this.configdirname);
                 }
             }
         }
@@ -313,7 +312,7 @@ public class PropertyHandler {
                 this.rmiPropValues = (Hashtable<String, String>)this.allPropValues.get( PROPERTIES_RMI );
             } else {
                 if(log.isDebugEnabled()){
-                    log.debug( OXGenericException.GENERAL_ERROR, new Exception( "Property '" + PROPERTIES_RMI + "' not found in file: " + this.configdirname ) );
+                    log.debug(  "Property '" + PROPERTIES_RMI + "' not found in file: " + this.configdirname );
                 }
             }
         }
@@ -421,7 +420,7 @@ public class PropertyHandler {
                 this.resPropValues = (Hashtable<String, String>)this.allPropValues.get( PROPERTIES_RESOURCE );
             } else {
                 if(log.isDebugEnabled()){
-                    log.debug( OXGenericException.GENERAL_ERROR, new Exception( "Property '" + PROPERTIES_RESOURCE + "' not found in file: " + this.configdirname ) );
+                    log.debug(  "Property '" + PROPERTIES_RESOURCE + "' not found in file: " + this.configdirname );
                 }
             }
         }
@@ -450,7 +449,7 @@ public class PropertyHandler {
             if (this.allPropValues.containsKey(PROPERTIES_SQL)) {
                 this.sqlPropValues = (Hashtable<String, String>) this.allPropValues.get(PROPERTIES_SQL);
             } else {
-                log.error(OXGenericException.GENERAL_ERROR, new Exception("Property '" + PROPERTIES_SQL + "' not found."));
+                log.error("Property '" + PROPERTIES_SQL + "' not found.");
             }
         }
 
