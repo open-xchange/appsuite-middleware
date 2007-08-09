@@ -140,13 +140,26 @@ public class Bug8527 extends AbstractICalImportTest {
 					"END:VALARM\n" +
 				"END:VEVENT\n" +
 				"END:VCALENDAR"; 
-		List<ImportResult> res = performMultipleEntryImport(ical, Format.ICAL, FolderObject.CALENDAR, "8475", false);
+		ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.CALENDAR, "8475", false);
 		
 		final AppointmentSQLInterface appointmentSql = new CalendarSql(sessObj);
-		final int oid = Integer.valueOf( res.get(1).getObjectId() );
+		final int oid = Integer.valueOf( res.getObjectId() );
 		final AppointmentObject appointmentObj = appointmentSql.getObjectById(oid, folderId);
 		assertTrue("Has participants" , appointmentObj.containsParticipants());
 		Participant[] participants = appointmentObj.getParticipants();
-		assertEquals("Has two participants", 2, participants.length);
+		assertEquals("Has three participants", 3, participants.length);
+		boolean foundSteve = false, foundStephan = false;
+		for(Participant p : participants){
+			if( "Steve.Dumbleton@colt.net".equals( p.getEmailAddress()) && !foundSteve){
+				foundSteve = true;
+			}
+			if( "stephan.martin@open-xchange.com".equals( p.getEmailAddress()) && !foundSteve){
+				foundStephan = true;
+			}
+		}
+		
+		assertTrue("Found attendee #1" , foundSteve);
+		assertTrue("Found attendee #2" , foundStephan);
+		
 	}
 }

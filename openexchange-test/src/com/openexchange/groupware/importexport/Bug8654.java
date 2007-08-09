@@ -49,49 +49,71 @@
 
 package com.openexchange.groupware.importexport;
 
-import com.openexchange.tools.versit.filetokenizer.VCardTokenizerTest;
+import static org.junit.Assert.*;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.io.UnsupportedEncodingException;
+import java.sql.SQLException;
 
-/**
- * This suite is meant for tests without a running OX instance
- * 
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
- *
- */
-public class ImportExportStandaloneSuite extends TestSuite {
+import junit.framework.JUnit4TestAdapter;
+
+import org.junit.Test;
+
+import com.openexchange.api2.OXException;
+import com.openexchange.api2.TasksSQLInterface;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.tasks.Task;
+import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
+import com.openexchange.server.DBPoolingException;
+
+public class Bug8654 extends AbstractICalImportTest {
 	
-	public static Test suite(){
-		TestSuite tests = new TestSuite();
-		//basics
-		tests.addTestSuite( ImportExportWriterTest.class );
-		tests.addTestSuite( VCardTokenizerTest.class );
-		tests.addTestSuite( ContactFieldTester.class );
-		tests.addTestSuite( ContactSwitcherTester.class );
-		tests.addTestSuite( VersitParserTest.class );
-		tests.addTestSuite( OXContainerConverterTest.class );
-		tests.addTest( SizedInputStreamTest.suite() );
-
-		//CSV
-		tests.addTest( CSVContactImportTest.suite() );
-		tests.addTest( CSVContactExportTest.suite() );
-		tests.addTest( OutlookCSVContactImportTest.suite() );
+	//workaround for JUnit 3 runner
+	public static junit.framework.Test suite() {
+		return new JUnit4TestAdapter(Bug8654.class);
+	}
+	
+	@Test public void bug() throws DBPoolingException, UnsupportedEncodingException, SQLException, NumberFormatException, OXException{
+		final String ical = 
+			"BEGIN:VCALENDAR\n" +
+			"VERSION:2.0\n" +
+			"X-WR-CALNAME:Test\n" +
+			"PRODID:-//Apple Computer\\, Inc//iCal 2.0//EN\n" +
+			"X-WR-RELCALID:F1D0AAC4-A28F-41E1-9FA8-83546CE7D7B8\n" +
+			"X-WR-TIMEZONE:Europe/Berlin\n" +
+			"CALSCALE:GREGORIAN\n" +
+			"METHOD:PUBLISH\n" +
+			"BEGIN:VTIMEZONE\n" +
+				"TZID:Europe/Berlin\n" +
+				"LAST-MODIFIED:20070801T101420Z\n" +
+				"BEGIN:DAYLIGHT\n" +
+					"DTSTART:20070325T010000\n" +
+					"TZOFFSETTO:+0200\n" +
+					"TZOFFSETFROM:+0000\n" +
+					"TZNAME:CEST\n" +
+				"END:DAYLIGHT\n" +
+				"BEGIN:STANDARD\n" +
+					"DTSTART:20071028T030000\n" +
+					"TZOFFSETTO:+0100\n" +
+					"TZOFFSETFROM:+0200\n" +
+					"TZNAME:CET\n" +
+				"END:STANDARD\n" +
+			"END:VTIMEZONE\n" +
+			"BEGIN:VTODO\n" +
+				"PRIORITY:5\n" +
+				"DTSTAMP:20070801T101401Z\n" +
+				"UID:C037CF41-BB61-4BF8-A77A-459D2B754A32\n" +
+				"SEQUENCE:4\n" +
+				"URL;VALUE=URI:http://www.open-xchange.com\n" +
+				"DTSTART;TZID=Europe/Berlin:20070801T000000\n" +
+				"SUMMARY:Teste Task Import von OX\n" +
+				"DESCRIPTION:Test\\, ob die Aufgaben auch ankommen.\n" +
+			"END:VTODO\n" +
+			"END:VCALENDAR";
 		
-		//ICAL
-		tests.addTest( ICalImportTest.suite() );
-
-		//VCARD
-		tests.addTest( VCardImportTest.suite() );
+		ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.TASK, "8654", false);
 		
-		//separate tests
-		tests.addTest( Bug7732Test.suite() );
-//		tests.addTest( Bug7470Test.suite() ); //FIXME
-		tests.addTest( Bug8475.suite() );
-//		tests.addTest( Bug8527.suite() ); //FIXME
-		tests.addTest( Bug8653.suite() );
-		tests.addTest( Bug8654.suite() );
-		
-		return tests;
+		final TasksSQLInterface tasks = new TasksSQLInterfaceImpl(sessObj);
+		Task task = tasks.getTaskById(Integer.valueOf( res.getObjectId()), Integer.valueOf(res.getFolder()) );
+		assertEquals("Teste Task Import von OX" , task.getTitle());
 	}
 }
