@@ -62,7 +62,9 @@ import javax.activation.MimetypesFileTypeMap;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.xml.sax.SAXException;
 
+import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
@@ -119,14 +121,27 @@ public final class AJAXFileUploadTest extends AbstractAJAXTest {
 	public void tearDown() throws Exception {
 		logout();
 	}
+	
+	private static final String getUploadedFile(final WebConversation conversation, final String hostname,
+			final String sessionId, final String id) throws IOException, SAXException {
+		
+		final GetMethodWebRequest getRequest = new GetMethodWebRequest(hostname + URL);
+		getRequest.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
+		getRequest.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET);
+		getRequest.setParameter(AJAXServlet.PARAMETER_ID, id);
+		
+		final WebResponse resp = conversation.getResponse(getRequest);
+		return resp.getText();
+	}
 
 	private static final JSONObject uploadFiles(final WebConversation conversation, final String hostname,
-			final String sessionId, final File[] files, final String module, final boolean setCookie)
-			throws IOException, JSONException {
+			final String sessionId, final File[] files, final String module, final String fileFilter,
+			final boolean setCookie) throws IOException, JSONException {
 		final URLParameter parameter = new URLParameter();
 		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
 		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW);
 		parameter.setParameter(AJAXServlet.PARAMETER_MODULE, module);
+		parameter.setParameter(AJAXServlet.PARAMETER_TYPE, fileFilter);
 
 		WebRequest req = null;
 		WebResponse resp = null;
@@ -183,7 +198,7 @@ public final class AJAXFileUploadTest extends AbstractAJAXTest {
 		try {
 			final File[] fa = { createTempFile(), createTempFile(), createTempFile() };
 			final JSONObject jResp = uploadFiles(getWebConversation(), PROTOCOL + getHostName(), sessionId, fa,
-					AJAXServlet.MODULE_MAIL, false);
+					AJAXServlet.MODULE_MAIL, "file", false);
 
 			assertTrue("JSON response is either null or has key \"error\"!", jResp != null && !jResp.has("error"));
 			assertTrue("JSON response has no key \"data\"", jResp.has("data"));
@@ -193,6 +208,35 @@ public final class AJAXFileUploadTest extends AbstractAJAXTest {
 			e.printStackTrace();
 			fail(e.getMessage());
 		} catch (JSONException e) {
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+	
+	public void testGetUploadedFile() {
+		try {
+			final File[] fa = { createTempFile() };
+			final JSONObject jResp = uploadFiles(getWebConversation(), PROTOCOL + getHostName(), sessionId, fa,
+					AJAXServlet.MODULE_MAIL, "file", false);
+
+			assertTrue("JSON response is either null or has key \"error\"!", jResp != null && !jResp.has("error"));
+			assertTrue("JSON response has no key \"data\"", jResp.has("data"));
+			final JSONArray jArray = jResp.getJSONArray("data");
+			assertTrue("Number of received IDs is " + jArray.length() + " but should be 1", jArray.length() == 1);
+			
+			final String id = jArray.getString(0);
+			final String content = getUploadedFile(getWebConversation(), PROTOCOL + getHostName(), sessionId, id);
+			
+			assertTrue("File content was not present!", content != null && content.length() > 0);
+			assertTrue("File content is not equal to expected one", FILE_CONTENT.replaceAll("\r?\n", "").equalsIgnoreCase(content.replaceAll("\r?\n", "")));
+			
+		} catch (final IOException e) {
+			e.printStackTrace();
+			fail(e.getMessage());
+		} catch (JSONException e) {
+			e.printStackTrace();
+			fail(e.getMessage());
+		} catch (SAXException e) {
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
