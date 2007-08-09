@@ -233,6 +233,7 @@
         <mkdir dir="jar"/>
         <jar jarfile="jar/${client.jar}"
          includes="com/openexchange/admin/rmi/"
+         excludes="com/openexchange/admin/rmi/impl/"
          basedir="classes"/>
     </target>
 
