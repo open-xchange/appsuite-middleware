@@ -718,7 +718,7 @@ public class Contacts implements DeleteListener {
 				//throw new OXConflictException("NOT ALLOWED TO MODIFIE CONTACT cid="+ctx.getContextId()+" oid"+co.getObjectID());
 			}
 				
-			if ((contactFolder.getType() != FolderObject.PRIVATE) && co.getPrivateFlag()){
+			if ((contactFolder.getType() != FolderObject.PRIVATE) && (co.getPrivateFlag() || original.getPrivateFlag())){
 				co.setPrivateFlag(false);
 			} else if ((contactFolder.getType() == FolderObject.PRIVATE) && original.getPrivateFlag() && original.getCreatedBy() != user){
 				throw EXCEPTIONS.createOXConflictException(18, Integer.valueOf(ctx.getContextId()), Integer.valueOf(co.getObjectID()));
