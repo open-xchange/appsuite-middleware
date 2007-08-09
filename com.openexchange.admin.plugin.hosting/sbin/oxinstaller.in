@@ -97,9 +97,12 @@ MASTER_PASS=
 MASTER_PASS_LONG=master-pass
 MASTER_USER=oxadminmaster
 MASTER_USER_LONG=master-user
+DISABLE_RMI_AUTH=
+DISABLE_RMI_AUTH_LONG=disableauth
+
 
 MUSTOPTS="SERVER_NAME CONFIGDB_PASS MASTER_PASS"
-LONGOPTS='$SERVER_NAME_LONG:,$IMAP_SERVER_LONG:,$IMAP_LOGIN_TYPE_LONG:,$CONFIGDB_USER_LONG:,$CONFIGDB_PASS_LONG:,$CONFIGDB_POOL_LONG:,$CONFIGDB_READ_LONG:,$CONFIGDB_WRITE_LONG:,$CONFIGDB_DBNAME_LONG:,$LOGIN_IMPL_TYPE_LONG:,$SERVER_MEMORY_LONG:,$CONFIGDB_READ_PORT_LONG:,$CONFIGDB_WRITE_PORT_LONG:,$TMPDIR_PATH_LONG:,$MASTER_PASS_LONG:,$MASTER_USER_LONG:'
+LONGOPTS='$SERVER_NAME_LONG:,$IMAP_SERVER_LONG:,$IMAP_LOGIN_TYPE_LONG:,$CONFIGDB_USER_LONG:,$CONFIGDB_PASS_LONG:,$CONFIGDB_POOL_LONG:,$CONFIGDB_READ_LONG:,$CONFIGDB_WRITE_LONG:,$CONFIGDB_DBNAME_LONG:,$LOGIN_IMPL_TYPE_LONG:,$SERVER_MEMORY_LONG:,$CONFIGDB_READ_PORT_LONG:,$CONFIGDB_WRITE_PORT_LONG:,$TMPDIR_PATH_LONG:,$MASTER_PASS_LONG:,$MASTER_USER_LONG:,$DISABLE_RMI_AUTH_LONG'
 
 usage() {
     echo
@@ -203,8 +206,13 @@ while true; do
 	    MASTER_USER=$2
 	    shift 2
 	    ;;
+	--$DISABLE_RMI_AUTH_LONG)
+	    DISABLE_RMI_AUTH=true
+	    shift
+	    ;;
 	-h|--help)
 	    usage
+	    exit
 	    shift
 	    ;;
 	--)
@@ -259,7 +267,7 @@ SQLOPTS=$SQLOPTS
 
 # this formular and parameters are from Holger
 NSIZE=$(( ${SERVER_MEMORY} / 2 ))
-SERVEROPTS="-ms${SERVER_MEMORY}m -mx${SERVER_MEMORY}m -XX:+UseConcMarkSweepGC -XX:NewSize=${NSIZE}m -XX:MaxNewSize=${NSIZE}m -XX:SurvivorRatio=6"
+SERVEROPTS="-Xms${SERVER_MEMORY}m -Xmx${SERVER_MEMORY}m -XX:+UseConcMarkSweepGC -XX:NewSize=${NSIZE}m -XX:MaxNewSize=${NSIZE}m -XX:SurvivorRatio=6"
 
 v_setprop JAVA_XTRAOPTS "$SERVEROPTS" ${SERVERCONF}/ox-scriptconf.sh
 
@@ -320,6 +328,20 @@ v_setprop readProperty.2 "password=$CONFIGDB_PASS" ${ADMINCONF}/configdb.propert
 
 v_setprop writeProperty.1 "user=$CONFIGDB_USER" ${ADMINCONF}/configdb.properties
 v_setprop writeProperty.2 "password=$CONFIGDB_PASS" ${ADMINCONF}/configdb.properties
+
+if [ -z "$DISABLE_RMI_AUTH" ]; then
+    echo
+    echo "*** RMI authentication is enabled"
+    v_setprop MASTER_AUTHENTICATION_DISABLED false ${ADMINCONF}/AdminDaemon.properties
+    v_setprop CONTEXT_AUTHENTICATION_DISABLED false ${ADMINCONF}/AdminDaemon.properties
+    echo
+else
+    echo
+    echo "*** RMI authentication is disabled"
+    v_setprop MASTER_AUTHENTICATION_DISABLED true ${ADMINCONF}/AdminDaemon.properties
+    v_setprop CONTEXT_AUTHENTICATION_DISABLED true ${ADMINCONF}/AdminDaemon.properties
+    echo
+fi
 
 echo "using $MASTER_USER as master account"
 /opt/open-xchange/sbin/generatempasswd -A $MASTER_USER \
