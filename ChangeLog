@@ -1,3 +1,7 @@
+* 2007-08-09 - choeger@open-xchange.com
+
+  - Bugfix ID#8623 oxinstaller: switch needed to turn on/of context authentication
+
 * 2007-08-07 - dennis.sieben@open-xchange.com
 
   - Bugfix ID#8629 movefilestorecontext StringIndexOutOfBoundsException
