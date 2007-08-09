@@ -80,7 +80,6 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.parser.TaskParser;
-import com.openexchange.ajax.task.actions.AbstractTaskRequest;
 import com.openexchange.ajax.task.actions.AllRequest;
 import com.openexchange.ajax.task.actions.AllResponse;
 import com.openexchange.ajax.task.actions.DeleteRequest;
@@ -89,6 +88,8 @@ import com.openexchange.ajax.task.actions.GetRequest;
 import com.openexchange.ajax.task.actions.GetResponse;
 import com.openexchange.ajax.task.actions.InsertRequest;
 import com.openexchange.ajax.task.actions.InsertResponse;
+import com.openexchange.ajax.task.actions.ListRequest;
+import com.openexchange.ajax.task.actions.ListResponse;
 import com.openexchange.ajax.task.actions.UpdateRequest;
 import com.openexchange.ajax.task.actions.UpdateResponse;
 import com.openexchange.ajax.writer.TaskWriter;
@@ -431,6 +432,9 @@ public final class TaskTools extends Assert {
         return response;
     }
 
+    /**
+     * @deprecated Use {@link #list(AJAXClient, ListRequest)}.
+     */
     public static Response getTaskList(final WebConversation conversation,
         final String hostName, final String sessionId,
         final int[][] folderAndTaskIds, final int[] columns)
@@ -468,6 +472,12 @@ public final class TaskTools extends Assert {
         final Response response = Response.parse(body);
         assertFalse(response.getErrorMessage(), response.hasError());
         return response;
+    }
+
+    public static ListResponse list(final AJAXClient client,
+        final ListRequest request) throws AjaxException, IOException,
+        SAXException, JSONException {
+        return (ListResponse) Executor.execute(client.getSession(), request);
     }
 
     public static void confirmTask(final WebConversation conversation,
