@@ -86,6 +86,8 @@ public class AdminCache {
 
     private final Log log = LogFactory.getLog(this.getClass());
 
+    private OXRunner oxrunner = null;
+    
     private OXAdminPoolInterface pool = null;
 
     private ArrayList<String> sequence_tables = null;
@@ -450,21 +452,10 @@ public class AdminCache {
     private void initOXProccess() {
         try {
             this.log.info("OX init starting...");
-            // String driver = prop.getSqlProp("CONFIGDB_WRITE_DRIVER",
-            // "com.mysql.jdbc.Driver" );
-            // String url = prop.getSqlProp("CONFIGDB_WRITE_URL",
-            // "jdbc:mysql://127.0.0.1:3306/configdb?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true"
-            // );
-            // String username =
-            // prop.getSqlProp("CONFIGDB_WRITE_USERNAME","openexchange");
-            // String password =
-            // prop.getSqlProp("CONFIGDB_WRITE_PASSWORD","secret");
-            // int pool_size =
-            // Integer.parseInt(prop.getSqlProp("CONFIGDB_WRITE_POOL_SIZE","5"));
-            // oxrunner = new
-            // OXRunner(pool_size,5,url,driver,username,password);
     
-            OXRunner.init();
+            this.oxrunner = new OXRunner();
+            this.oxrunner.init();
+            
             delreg = DeleteRegistry.getInstance();
             this.log.info("...OX init done!");
         } catch (final Exception ecp) {
