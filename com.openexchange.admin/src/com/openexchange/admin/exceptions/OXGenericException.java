@@ -59,11 +59,9 @@ package com.openexchange.admin.exceptions;
  */
 public class OXGenericException extends Exception {
     
-    /**
-     *
-     */
-    private static final long serialVersionUID = 1L;
     
+    private static final long serialVersionUID = 8013716815582743724L;
+
     /**
      * Value is null or empty
      */

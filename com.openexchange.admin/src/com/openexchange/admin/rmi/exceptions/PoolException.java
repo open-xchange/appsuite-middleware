@@ -48,13 +48,12 @@
  */
 package com.openexchange.admin.rmi.exceptions;
 
-import java.io.Serializable;
 
 /**
  * 
  * @author cutmasta
  */
-public class PoolException extends Exception implements Serializable {
+public class PoolException extends Exception {
 
     /**
      * For serialization
