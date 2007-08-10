@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.container.mail;
 
+import static com.openexchange.groupware.container.mail.parser.MessageUtils.decodeMultiEncodedHeader;
 import static com.openexchange.groupware.container.mail.parser.MessageUtils.parseAddressList;
 
 import java.io.UnsupportedEncodingException;
@@ -63,7 +64,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.mail.internet.AddressException;
@@ -81,7 +81,6 @@ import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.mail.parser.MessageUtils;
-import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.IMAPProperties;
 import com.openexchange.imap.OXMailException;
 import com.openexchange.imap.UserSettingMail;
@@ -136,7 +135,7 @@ public class JSONMessageObject {
 	public static final String JSON_SIZE = "size";
 
 	public static final String JSON_CONTENT_TYPE = "content_type";
-	
+
 	public static final String JSON_CID = "cid";
 
 	public static final String JSON_CONTENT = "content";
@@ -160,7 +159,7 @@ public class JSONMessageObject {
 	public static final String JSON_INFOSTORE_IDS = "infostore_ids";
 
 	public static final String JSON_VCARD = "vcard";
-	
+
 	public static final String JSON_TOTAL = "total";
 
 	public static final String JSON_NEW = "new";
@@ -210,7 +209,7 @@ public class JSONMessageObject {
 	public static final int FIELD_FOLDER = 650;
 
 	public static final int FIELD_FLAG_SEEN = 651;
-	
+
 	public static final int FIELD_TOTAL = FolderObject.TOTAL;
 
 	public static final int FIELD_NEW = FolderObject.NEW;
@@ -281,7 +280,7 @@ public class JSONMessageObject {
 	 * @value 64
 	 */
 	public static final int BIT_USER = 64;
-	
+
 	/**
 	 * Virtal Spam flags
 	 * 
@@ -372,15 +371,15 @@ public class JSONMessageObject {
 	private boolean appendVCard;
 
 	private Map<String, String> headers;
-	
+
 	private boolean messageCountInfoSet;
-	
+
 	private int total;
-	
+
 	private int newi;
-	
+
 	private int unread;
-	
+
 	private int deleted;
 
 	/**
@@ -513,7 +512,7 @@ public class JSONMessageObject {
 	public Collection<InternetAddress> getBcc() {
 		return bcc;
 	}
-	
+
 	public InternetAddress[] getBccAsArray() {
 		return bcc.toArray(new InternetAddress[bcc.size()]);
 	}
@@ -536,7 +535,7 @@ public class JSONMessageObject {
 	public Collection<InternetAddress> getCc() {
 		return cc;
 	}
-	
+
 	public InternetAddress[] getCcAsArray() {
 		return cc.toArray(new InternetAddress[cc.size()]);
 	}
@@ -559,7 +558,7 @@ public class JSONMessageObject {
 	public Collection<InternetAddress> getFrom() {
 		return from;
 	}
-	
+
 	public InternetAddress[] getFromAsArray() {
 		return from.toArray(new InternetAddress[from.size()]);
 	}
@@ -630,7 +629,7 @@ public class JSONMessageObject {
 	public Collection<InternetAddress> getTo() {
 		return to;
 	}
-	
+
 	public InternetAddress[] getToAsArray() {
 		return to.toArray(new InternetAddress[to.size()]);
 	}
@@ -746,9 +745,10 @@ public class JSONMessageObject {
 		return messageCountInfoSet;
 	}
 
-	/*public void setMessageCountInfoSet(final boolean messageCountInfoSet) {
-		this.messageCountInfoSet = messageCountInfoSet;
-	}*/
+	/*
+	 * public void setMessageCountInfoSet(final boolean messageCountInfoSet) {
+	 * this.messageCountInfoSet = messageCountInfoSet; }
+	 */
 
 	public boolean isAppendVCard() {
 		return appendVCard;
@@ -766,8 +766,8 @@ public class JSONMessageObject {
 		retval.put(JSON_RECIPIENT_BCC, getAddressesAsArray(this.bcc));
 		retval.put(JSON_SUBJECT, subject);
 		retval.put(JSON_SIZE, size);
-		retval.put(JSON_SENT_DATE, (sentDate == null ? JSONObject.NULL : Long.valueOf(addUserTimezone(sentDate.getTime(),
-				userTimeZone))));
+		retval.put(JSON_SENT_DATE, (sentDate == null ? JSONObject.NULL : Long.valueOf(addUserTimezone(sentDate
+				.getTime(), userTimeZone))));
 		retval.put(JSON_RECEIVED_DATE, (receivedDate == null ? JSONObject.NULL : Long.valueOf(addUserTimezone(
 				receivedDate.getTime(), userTimeZone))));
 		retval.put(JSON_FLAGS, flags);
@@ -814,7 +814,8 @@ public class JSONMessageObject {
 		jw.key(JSON_SENT_DATE);
 		jw.value(sentDate == null ? JSONObject.NULL : Long.valueOf(addUserTimezone(sentDate.getTime(), userTimeZone)));
 		jw.key(JSON_RECEIVED_DATE);
-		jw.value(receivedDate == null ? JSONObject.NULL : Long.valueOf(addUserTimezone(receivedDate.getTime(), userTimeZone)));
+		jw.value(receivedDate == null ? JSONObject.NULL : Long.valueOf(addUserTimezone(receivedDate.getTime(),
+				userTimeZone)));
 		jw.key(JSON_FLAGS);
 		jw.value(flags);
 		jw.key(JSON_THREAD_LEVEL);
@@ -899,21 +900,15 @@ public class JSONMessageObject {
 			/*
 			 * Surround with double-quotes
 			 */
-			String pp;
-			try {
-				pp = MimeUtility.decodeText(personal);
-			} catch (UnsupportedEncodingException e) {
-				LOG.error("Unsupported encoding in a message detected and monitored.", e);
-				MailInterfaceImpl.mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
-				pp = personal;
-			}
-			return new StringBuilder().append('"').append(pp.replaceAll("\"", "\\\\\\\"")).append('"').toString();
+			final String pp = decodeMultiEncodedHeader(personal);
+			return new StringBuilder(pp.length()).append('"').append(pp.replaceAll("\"", "\\\\\\\"")).append('"')
+					.toString();
 		}
-		return personal;
+		return decodeMultiEncodedHeader(personal);
 	}
-	
+
 	private static final String DUMMY_DOMAIN = "@unspecified-domain";
-	
+
 	private static final String prepareAddress(final String address) {
 		try {
 			final String decoded = MimeUtility.decodeText(address);
