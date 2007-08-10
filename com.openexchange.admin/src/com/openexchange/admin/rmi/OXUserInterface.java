@@ -92,7 +92,7 @@ public interface OXUserInterface extends Remote {
      * @throws RemoteException
      *             General RMI Exception
      * @throws StorageException
-     *             When an error in the subsystems occured.
+     *             When an error in the subsystems occurred.
      * @throws InvalidCredentialsException
      *             When the supplied credentials were not correct or invalid.
      * @throws NoSuchContextException
@@ -116,7 +116,7 @@ public interface OXUserInterface extends Remote {
      * @throws RemoteException
      *             General RMI Exception
      * @throws StorageException
-     *             When an error in the subsystems occured.
+     *             When an error in the subsystems occurred.
      * @throws InvalidCredentialsException
      *             When the supplied credentials were not correct or invalid.
      * @throws NoSuchContextException
@@ -141,7 +141,7 @@ public interface OXUserInterface extends Remote {
      * @throws RemoteException
      *             General RMI Exception
      * @throws StorageException
-     *             When an error in the subsystems occured.
+     *             When an error in the subsystems occurred.
      * @throws InvalidCredentialsException
      *             When the supplied credentials were not correct or invalid.
      * @throws NoSuchContextException
@@ -166,7 +166,7 @@ public interface OXUserInterface extends Remote {
      * @throws RemoteException
      *             General RMI Exception
      * @throws StorageException
-     *             When an error in the subsystems occured.
+     *             When an error in the subsystems occurred.
      * @throws InvalidCredentialsException
      *             When the supplied credentials were not correct or invalid.
      * @throws NoSuchContextException
@@ -190,7 +190,7 @@ public interface OXUserInterface extends Remote {
      * @return UserModuleAccess containing the module access rights.
      * 
      * @throws RemoteException General RMI Exception
-     * @throws StorageException When an error in the subsystems occured.
+     * @throws StorageException When an error in the subsystems occurred.
      * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
      * @throws NoSuchContextException If the context does not exist in the system.
      * @throws InvalidDataException If the data sent within the method contained invalid data.
@@ -214,7 +214,7 @@ public interface OXUserInterface extends Remote {
      * @throws RemoteException
      *             General RMI Exception
      * @throws StorageException
-     *             When an error in the subsystems occured.
+     *             When an error in the subsystems occurred.
      * @throws InvalidCredentialsException
      *             When the supplied credentials were not correct or invalid.
      * @throws NoSuchContextException
@@ -239,7 +239,7 @@ public interface OXUserInterface extends Remote {
      *            Credentials for authenticating against server.
      *            
      * @throws RemoteException General RMI Exception
-     * @throws StorageException When an error in the subsystems occured.
+     * @throws StorageException When an error in the subsystems occurred.
      * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
      * @throws NoSuchContextException If the context does not exist in the system.
      * @throws InvalidDataException If the data sent within the method contained invalid data.
@@ -264,7 +264,7 @@ public interface OXUserInterface extends Remote {
      * @throws RemoteException
      *             General RMI Exception
      * @throws StorageException
-     *             When an error in the subsystems occured.
+     *             When an error in the subsystems occurred.
      * @throws InvalidCredentialsException
      *             When the supplied credentials were not correct or invalid.
      * @throws NoSuchContextException
@@ -288,7 +288,7 @@ public interface OXUserInterface extends Remote {
      * @return User containing result object.
      * 
      * @throws RemoteException General RMI Exception
-     * @throws StorageException When an error in the subsystems occured.
+     * @throws StorageException When an error in the subsystems occurred.
      * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
      * @throws NoSuchContextException If the context does not exist in the system.
      * @throws InvalidDataException If the data sent within the method contained invalid data.
@@ -312,7 +312,7 @@ public interface OXUserInterface extends Remote {
      * @return User[] containing result objects.
      * 
      * @throws RemoteException General RMI Exception
-     * @throws StorageException When an error in the subsystems occured.
+     * @throws StorageException When an error in the subsystems occurred.
      * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
      * @throws NoSuchContextException If the context does not exist in the system.
      * @throws InvalidDataException If the data sent within the method contained invalid data.
