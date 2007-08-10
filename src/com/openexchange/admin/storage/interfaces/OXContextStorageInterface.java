@@ -149,7 +149,7 @@ public abstract class OXContextStorageInterface {
      * @return
      * @throws StorageException
      */
-    public abstract Context[] searchContext(final String search_pattern) throws StorageException;
+    public abstract Context[] listContext(final String search_pattern) throws StorageException;
 
     /**
      * @param ctx

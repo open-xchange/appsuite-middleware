@@ -315,7 +315,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         
         try {
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
-            return oxcox.searchContext(search_pattern);
+            return oxcox.listContext(search_pattern);
         } catch (final StorageException e) {
             log.error(e.getMessage(), e);
             throw e;
