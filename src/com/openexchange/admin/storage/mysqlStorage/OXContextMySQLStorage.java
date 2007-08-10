@@ -736,29 +736,85 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     public Context[] listContext(final String search_pattern) throws StorageException {
         Connection configdb_read = null;
         PreparedStatement stmt = null;
+        PreparedStatement stmt2 = null;
+        PreparedStatement mapping = null;
+        ResultSet rs = null;
+        ResultSet rs2 = null;
         try {
             configdb_read = cache.getREADConnectionForCONFIGDB();
 
             final String search_patterntmp = search_pattern.replace('*', '%');
-            stmt = configdb_read.prepareStatement("SELECT context_server2db_pool.cid FROM context_server2db_pool INNER JOIN (server, context) ON (context_server2db_pool.server_id=server.server_id AND server.name=? AND context.cid=context_server2db_pool.cid) WHERE  context.name LIKE ? OR context.cid LIKE ?");
+            stmt = configdb_read.prepareStatement("SELECT context.cid, context.name, context.enabled, context.reason_id, context.filestore_id, context.filestore_name, context.quota_max, context_server2db_pool.write_db_pool_id, context_server2db_pool.read_db_pool_id, context_server2db_pool.db_schema FROM context LEFT JOIN ( context_server2db_pool, server ) ON ( context.cid = context_server2db_pool.cid AND context_server2db_pool.server_id = server.server_id ) WHERE server.name = ? AND context.name LIKE ? OR context.cid LIKE ?");
+            mapping = configdb_read.prepareStatement("SELECT login_info FROM login2context WHERE cid=?"); 
             stmt.setString(1, prop.getProp(AdminProperties.Prop.SERVER_NAME, "local"));
             stmt.setString(2, search_patterntmp);
             stmt.setString(3, search_patterntmp);
-            final ResultSet rs = stmt.executeQuery();
+            rs = stmt.executeQuery();
 
             final ArrayList<Context> list = new ArrayList<Context>();
 
             while (rs.next()) {
-                Context cs = new Context();
-                final int cid = rs.getInt("context_server2db_pool.cid");
-                cs.setId(cid);
-                cs = this.oxcontextcommon.getData(cs, configdb_read,
-                        Long.parseLong(prop.getProp("AVERAGE_CONTEXT_SIZE", "100")));
+                final Context cs = new Context();
+                final int context_id = rs.getInt(1);
+                cs.setId(context_id);
+
+                // filestore_id | filestore_name | filestore_login |
+                // filestore_passwd | quota_max
+                final String name = rs.getString(2); // name
+                // name of the context, currently same with contextid
+                if (name != null) {
+                    cs.setName(name);
+                }
+
+                cs.setEnabled(rs.getBoolean(3)); // enabled
+                int reason_id = rs.getInt(4); //reason
+                // CONTEXT STATE INFOS #
+                if (-1 != reason_id) {
+                    cs.setMaintenanceReason(new MaintenanceReason(reason_id));
+                }
+                cs.setFilestoreId(rs.getInt(5)); // filestore_id
+                cs.setFilestore_name(rs.getString(6)); //filestorename
+                long quota_max = rs.getLong(7); //quota max
+                if (quota_max != -1) {
+                    quota_max /= Math.pow(2, 20);
+                    // set quota max also in context setup object
+                    cs.setMaxQuota(quota_max);
+                }
+                final String db_schema = rs.getString(10); // db_schema
+                if (null != db_schema) {
+                    cs.setReadDatabase(new Database(rs.getInt(9), db_schema)); // read_db_pool_id
+                    cs.setWriteDatabase(new Database(rs.getInt(8), db_schema)); // write_db_pool_id
+                }
+                mapping.setInt(1, context_id);
+                rs2 = mapping.executeQuery();
+                while (rs2.next()) {
+                    cs.addLoginMapping(rs.getString(1));
+                }
+                rs2.close();
                 
+                Connection oxdb_read = null;
+                try {
+                    oxdb_read = cache.getREADConnectionForContext(context_id);
+                    stmt2 = oxdb_read.prepareStatement("SELECT filestore_usage.used FROM filestore_usage WHERE filestore_usage.cid = ?");
+                    stmt2.setInt(1, context_id);
+                    rs2 = stmt2.executeQuery();
+                    long quota_used = 0;
+                    if (rs.next()) {
+                        quota_used = rs.getLong(1);
+                    }
+                    quota_used /= Math.pow(2, 20);
+                    // set used quota in context setup
+                    cs.setUsedQuota(quota_used);
+                } finally {
+                    if (null != oxdb_read) {
+                        cache.pushOXDBRead(context_id, oxdb_read);
+                    }
+                }
+
+                cs.setAverage_size(Long.parseLong(prop.getProp("AVERAGE_CONTEXT_SIZE", "100")));
+
                 list.add(cs);
             }
-            rs.close();
-            stmt.close();
 
             return list.toArray(new Context[list.size()]);
         } catch (final SQLException e) {
@@ -769,6 +825,9 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             throw new StorageException(e);
         } finally {
             closePreparedStatement(stmt);
+            closePreparedStatement(stmt2);
+            closeRecordset(rs);
+            closeRecordset(rs2);
             try {
                 if (configdb_read != null) {
                     cache.pushConfigDBRead(configdb_read);
