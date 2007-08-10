@@ -26,6 +26,10 @@ public class MultipleTest extends ContactTest {
 		super.setUp();
 	}
 	
+	public void testDummy() {
+		
+	}
+	
 	public void testMultipleInsert() throws Exception {
 		ContactObject contactObj = new ContactObject();
 		contactObj.setSurName("testMultipleInsert");
