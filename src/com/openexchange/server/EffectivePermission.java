@@ -120,24 +120,7 @@ public class EffectivePermission extends OCLPermission {
 
 	public boolean hasModuleAccess(final int folderModule) {
 		if (validateUserConfig()) {
-			switch (folderModule) {
-			case FolderObject.MAIL:
-				return userConfig.hasWebMail();
-			case FolderObject.CALENDAR:
-				return userConfig.hasCalendar();
-			case FolderObject.CONTACT:
-				return userConfig.hasContact();
-			case FolderObject.TASK:
-				return userConfig.hasTask();
-			case FolderObject.INFOSTORE:
-				return userConfig.hasInfostore();
-			case FolderObject.PROJECT:
-				return userConfig.hasProject();
-			case FolderObject.SYSTEM_MODULE:
-				return true;
-			default:
-				return true;
-			}
+			return userConfig.hasModuleAccess(folderModule);
 		}
 		return true;
 	}

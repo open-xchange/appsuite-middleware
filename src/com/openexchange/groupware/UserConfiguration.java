@@ -560,6 +560,9 @@ public final class UserConfiguration implements Serializable, DeleteListener, Cl
 		if (hasInfostore()) {
 			array.append(FolderObject.INFOSTORE);
 		}
+		if (hasWebMail()) {
+			array.append(FolderObject.MAIL);
+		}
 		array.append(FolderObject.SYSTEM_MODULE);
 		array.append(FolderObject.UNBOUND);
 		accessibleModulesComputed = true;
