@@ -46,7 +46,7 @@ public interface OXUtilInterface extends Remote {
      *            Credentials for authenticating against server.
      * @return int containing the new id of the added maintenance reason.
      * @throws com.openexchange.admin.rmi.exceptions.StorageException
-     *             When an error in the subsystems occured.
+     *             When an error in the subsystems occurred.
      * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException
      *             When the supplied credentials were not correct or invalid.
      * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException
@@ -64,7 +64,7 @@ public interface OXUtilInterface extends Remote {
      * @param auth
      *            Credentials for authenticating against server.
      * @throws com.openexchange.admin.rmi.exceptions.StorageException
-     *             When an error in the subsystems occured.
+     *             When an error in the subsystems occurred.
      * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException
      *             When the supplied credentials were not correct or invalid.
      * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException
@@ -83,7 +83,7 @@ public interface OXUtilInterface extends Remote {
      * @param auth
      *             Credentials for authenticating against server.
      * @throws com.openexchange.admin.rmi.exceptions.StorageException
-     *             When an error in the subsystems occured.
+     *             When an error in the subsystems occurred.
      * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException
      *             When the supplied credentials were not correct or invalid.
      * @throws RemoteException
@@ -99,7 +99,7 @@ public interface OXUtilInterface extends Remote {
      * @param auth
      *             Credentials for authenticating against server.
      * @throws com.openexchange.admin.rmi.exceptions.StorageException
-     *             When an error in the subsystems occured.
+     *             When an error in the subsystems occurred.
      * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException
      *             When the supplied credentials were not correct or invalid.
      * @throws RemoteException
@@ -117,7 +117,7 @@ public interface OXUtilInterface extends Remote {
      * @param auth
      *            Credentials for authenticating against server.
      * @throws com.openexchange.admin.rmi.exceptions.StorageException
-     *             When an error in the subsystems occured.
+     *             When an error in the subsystems occurred.
      * 
      * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException
      *             When the supplied credentials were not correct or invalid.
@@ -136,7 +136,7 @@ public interface OXUtilInterface extends Remote {
      * @param serv
      *            Server with id set.
      * @throws com.openexchange.admin.rmi.exceptions.StorageException
-     *             When an error in the subsystems occured.
+     *             When an error in the subsystems occurred.
      * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException
      *             When the supplied credentials were not correct or invalid.
      * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException
@@ -148,7 +148,7 @@ public interface OXUtilInterface extends Remote {
 
     /**
      * Register a new database to the system.
-     * HINT: Use unregisterDatabase to remove/unregitser.
+     * HINT: Use unregisterDatabase to remove/unregister.
      * 
      * DONT use deleteDatabase, cause this method performs a real "drop" for its specified Database!
      * 
@@ -178,7 +178,7 @@ public interface OXUtilInterface extends Remote {
      * @param auth
      *            Credentials for authenticating against server.
      * @throws com.openexchange.admin.rmi.exceptions.StorageException
-     *             When an error in the subsystems occured.
+     *             When an error in the subsystems occurred.
      * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException
      *             When the supplied credentials were not correct or invalid.
      * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException
@@ -218,11 +218,11 @@ public interface OXUtilInterface extends Remote {
      * </p>
      * 
      * @param db
-     *            Database containing the infos of the database to edit.
+     *            Database containing the information of the database to edit.
      * @param auth
      *            Credentials for authenticating against server.
      * @throws com.openexchange.admin.rmi.exceptions.StorageException
-     *             When an error in the subsystems occured.
+     *             When an error in the subsystems occurred.
      * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException
      *             When the supplied credentials were not correct or invalid.
      * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException
@@ -240,7 +240,7 @@ public interface OXUtilInterface extends Remote {
      * @param auth
      *            Credentials for authenticating against server.
      * @throws com.openexchange.admin.rmi.exceptions.StorageException
-     *             When an error in the subsystems occured.
+     *             When an error in the subsystems occurred.
      * 
      * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException
      *             When the supplied credentials were not correct or invalid.
@@ -260,7 +260,7 @@ public interface OXUtilInterface extends Remote {
      * @param auth
      *            Credentials for authenticating against server.
      * @throws com.openexchange.admin.rmi.exceptions.StorageException
-     *             When an error in the subsystems occured.
+     *             When an error in the subsystems occurred.
      * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException
      *             When the supplied credentials were not correct or invalid.
      * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException
@@ -277,7 +277,7 @@ public interface OXUtilInterface extends Remote {
      * @param auth
      *            Credentials for authenticating against server.
      * @throws com.openexchange.admin.rmi.exceptions.StorageException
-     *             When an error in the subsystems occured.
+     *             When an error in the subsystems occurred.
      * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException
      *             When the supplied credentials were not correct or invalid.
      * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException
@@ -296,7 +296,7 @@ public interface OXUtilInterface extends Remote {
      * @param auth
      *            Credentials for authenticating against server.
      * @throws com.openexchange.admin.rmi.exceptions.StorageException
-     *             When an error in the subsystems occured.
+     *             When an error in the subsystems occurred.
      * 
      * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException
      *             When the supplied credentials were not correct or invalid.
@@ -314,7 +314,7 @@ public interface OXUtilInterface extends Remote {
      * @param auth
      *            Credentials for authenticating against server.
      * @throws com.openexchange.admin.rmi.exceptions.StorageException
-     *             When an error in the subsystems occured.
+     *             When an error in the subsystems occurred.
      * 
      * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException
      *             When the supplied credentials were not correct or invalid.
@@ -334,7 +334,7 @@ public interface OXUtilInterface extends Remote {
      *            Credentials for authenticating against server.
      * @return Contains the new filestore id.
      * @throws com.openexchange.admin.rmi.exceptions.StorageException
-     *             When an error in the subsystems occured.
+     *             When an error in the subsystems occurred.
      * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException
      *             When the supplied credentials were not correct or invalid.
      * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException
@@ -352,7 +352,7 @@ public interface OXUtilInterface extends Remote {
      * @param auth
      *            Credentials for authenticating against server.
      * @throws com.openexchange.admin.rmi.exceptions.StorageException
-     *             When an error in the subsystems occured.
+     *             When an error in the subsystems occurred.
      * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException
      *             When the supplied credentials were not correct or invalid.
      * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException
@@ -371,7 +371,7 @@ public interface OXUtilInterface extends Remote {
      * @param auth
      *            Credentials for authenticating against server.
      * @throws com.openexchange.admin.rmi.exceptions.StorageException
-     *             When an error in the subsystems occured.
+     *             When an error in the subsystems occurred.
      * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException
      *             When the supplied credentials were not correct or invalid.
      * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException
@@ -388,7 +388,7 @@ public interface OXUtilInterface extends Remote {
      * @param auth
      *            Credentials for authenticating against server.
      * @throws com.openexchange.admin.rmi.exceptions.StorageException
-     *             When an error in the subsystems occured.
+     *             When an error in the subsystems occurred.
      * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException
      *             When the supplied credentials were not correct or invalid.
      * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException
@@ -406,7 +406,7 @@ public interface OXUtilInterface extends Remote {
      * @param auth
      *            Credentials for authenticating against server.
      * @throws com.openexchange.admin.rmi.exceptions.StorageException
-     *             When an error in the subsystems occured.
+     *             When an error in the subsystems occurred.
      * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException
      *             When the supplied credentials were not correct or invalid.
      * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException
