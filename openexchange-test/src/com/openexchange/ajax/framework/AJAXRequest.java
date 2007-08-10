@@ -29,14 +29,22 @@ public interface AJAXRequest {
             this.value = value;
         }
         public Parameter(final String name, final int[] values) {
-            this.name = name;
+            this(name, convert(values));
+        }
+        public Parameter(final String name, final int id) {
+            this(name, String.valueOf(id));
+        }
+        public Parameter(final String name, final long time) {
+            this(name, String.valueOf(time));
+        }
+        public static String convert(final int[] values) {
             final StringBuilder columnSB = new StringBuilder();
             for (int i : values) {
                 columnSB.append(i);
                 columnSB.append(',');
             }
             columnSB.delete(columnSB.length() - 1, columnSB.length());
-            this.value = columnSB.toString();
+            return columnSB.toString();
         }
         /**
          * @return the name

@@ -47,89 +47,39 @@
  *
  */
 
-package com.openexchange.ajax.task.actions;
-
-import java.util.TimeZone;
+package com.openexchange.ajax.folder.actions;
 
 import org.json.JSONException;
 
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.groupware.tasks.Task;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.CommonInsertParser;
+import com.openexchange.ajax.framework.CommonInsertResponse;
 
 /**
- * Stores the parameters for inserting the task.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class InsertRequest extends AbstractTaskRequest {
+class InsertParser extends CommonInsertParser {
 
     /**
-     * Task to insert.
+     * @param failOnError
      */
-    final Task task;
-
-    /**
-     * Time zone of the user.
-     */
-    final TimeZone timeZone;
-
-    /**
-     * Should the parser fail on error in server response.
-     */
-    final boolean failOnError;
-
-    /**
-     * More detailed constructor.
-     * @param task task to insert.
-     * @param timeZone time zone of the user.
-     * @param failOnError <code>true</code> to check the response for error
-     * messages.
-     */
-    public InsertRequest(final Task task, final TimeZone timeZone,
-        final boolean failOnError) {
-        super();
-        this.task = task;
-        this.timeZone = timeZone;
-        this.failOnError = failOnError;
-    }
-
-    /**
-     * Default constructor.
-     * @param task task to insert.
-     * @param timeZone time zone of the user.
-     */
-    public InsertRequest(final Task task, final TimeZone timeZone) {
-        this(task, timeZone, true);
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    public Object getBody() throws JSONException {
-        return convert(task, timeZone);
+    public InsertParser(final boolean failOnError) {
+        super(failOnError);
     }
 
     /**
      * {@inheritDoc}
      */
-    public Method getMethod() {
-        return Method.PUT;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Parameter[] getParameters() {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW),
-            new Parameter(AJAXServlet.PARAMETER_FOLDERID, String.valueOf(task
-                .getParentFolderID()))
-        };
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public InsertParser getParser() {
-        return new InsertParser(failOnError, task.getParentFolderID());
+    @Override
+    protected CommonInsertResponse createResponse(final Response response)
+        throws JSONException {
+        final CommonInsertResponse retval = instanciateResponse(response);
+        if (isFailOnError()) {
+            final int folderId = Integer.parseInt((String) retval.getData());
+            assertTrue("Problem while inserting folder.", folderId > 0);
+            retval.setId(folderId);
+        }
+        return retval;
     }
 }

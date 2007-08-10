@@ -55,6 +55,7 @@ import org.json.JSONException;
 import org.junit.Assert;
 import org.xml.sax.SAXException;
 
+import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.reminder.actions.GetRequest;
@@ -79,6 +80,12 @@ public final class ReminderTools extends Assert {
         final GetRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
         return (GetResponse) Executor.execute(session, request);
+    }
+
+    public static GetResponse get(final AJAXClient client,
+        final GetRequest request) throws AjaxException, IOException,
+        SAXException, JSONException {
+        return get(client.getSession(), request);
     }
 
     public static ReminderObject searchByTarget(final ReminderObject[] list,

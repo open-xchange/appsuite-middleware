@@ -47,89 +47,43 @@
  *
  */
 
-package com.openexchange.ajax.task.actions;
+package com.openexchange.ajax.folder;
 
-import java.util.TimeZone;
+import java.io.IOException;
 
 import org.json.JSONException;
+import org.xml.sax.SAXException;
 
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.groupware.tasks.Task;
+import com.openexchange.ajax.folder.actions.DeleteRequest;
+import com.openexchange.ajax.folder.actions.InsertRequest;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.CommonDeleteResponse;
+import com.openexchange.ajax.framework.CommonInsertResponse;
+import com.openexchange.ajax.framework.Executor;
+import com.openexchange.tools.servlet.AjaxException;
 
 /**
- * Stores the parameters for inserting the task.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class InsertRequest extends AbstractTaskRequest {
+public final class FolderTools {
 
     /**
-     * Task to insert.
+     * Prevent instanciation.
      */
-    final Task task;
-
-    /**
-     * Time zone of the user.
-     */
-    final TimeZone timeZone;
-
-    /**
-     * Should the parser fail on error in server response.
-     */
-    final boolean failOnError;
-
-    /**
-     * More detailed constructor.
-     * @param task task to insert.
-     * @param timeZone time zone of the user.
-     * @param failOnError <code>true</code> to check the response for error
-     * messages.
-     */
-    public InsertRequest(final Task task, final TimeZone timeZone,
-        final boolean failOnError) {
+    private FolderTools() {
         super();
-        this.task = task;
-        this.timeZone = timeZone;
-        this.failOnError = failOnError;
     }
 
-    /**
-     * Default constructor.
-     * @param task task to insert.
-     * @param timeZone time zone of the user.
-     */
-    public InsertRequest(final Task task, final TimeZone timeZone) {
-        this(task, timeZone, true);
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    public Object getBody() throws JSONException {
-        return convert(task, timeZone);
+    public static CommonInsertResponse insert(final AJAXClient client,
+        final InsertRequest request) throws AjaxException, IOException,
+        SAXException, JSONException {
+        return (CommonInsertResponse) Executor.execute(client, request);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public Method getMethod() {
-        return Method.PUT;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Parameter[] getParameters() {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW),
-            new Parameter(AJAXServlet.PARAMETER_FOLDERID, String.valueOf(task
-                .getParentFolderID()))
-        };
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public InsertParser getParser() {
-        return new InsertParser(failOnError, task.getParentFolderID());
+    public static CommonDeleteResponse delete(final AJAXClient client,
+        final DeleteRequest request) throws AjaxException, IOException,
+        SAXException, JSONException {
+        return (CommonDeleteResponse) Executor.execute(client, request);
     }
 }

@@ -47,89 +47,21 @@
  *
  */
 
-package com.openexchange.ajax.task.actions;
+package com.openexchange.ajax.framework;
 
-import java.util.TimeZone;
-
-import org.json.JSONException;
-
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.groupware.tasks.Task;
+import com.openexchange.ajax.container.Response;
 
 /**
- * Stores the parameters for inserting the task.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class InsertRequest extends AbstractTaskRequest {
+public class CommonDeleteResponse extends AbstractAJAXResponse {
 
     /**
-     * Task to insert.
+     * @param response
      */
-    final Task task;
-
-    /**
-     * Time zone of the user.
-     */
-    final TimeZone timeZone;
-
-    /**
-     * Should the parser fail on error in server response.
-     */
-    final boolean failOnError;
-
-    /**
-     * More detailed constructor.
-     * @param task task to insert.
-     * @param timeZone time zone of the user.
-     * @param failOnError <code>true</code> to check the response for error
-     * messages.
-     */
-    public InsertRequest(final Task task, final TimeZone timeZone,
-        final boolean failOnError) {
-        super();
-        this.task = task;
-        this.timeZone = timeZone;
-        this.failOnError = failOnError;
+    public CommonDeleteResponse(final Response response) {
+        super(response);
     }
 
-    /**
-     * Default constructor.
-     * @param task task to insert.
-     * @param timeZone time zone of the user.
-     */
-    public InsertRequest(final Task task, final TimeZone timeZone) {
-        this(task, timeZone, true);
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    public Object getBody() throws JSONException {
-        return convert(task, timeZone);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Method getMethod() {
-        return Method.PUT;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Parameter[] getParameters() {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW),
-            new Parameter(AJAXServlet.PARAMETER_FOLDERID, String.valueOf(task
-                .getParentFolderID()))
-        };
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public InsertParser getParser() {
-        return new InsertParser(failOnError, task.getParentFolderID());
-    }
 }

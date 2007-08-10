@@ -463,7 +463,7 @@ public class FolderTest extends AbstractAJAXTest {
 
 	private static final int[] mapping = { 0, -1, 1, -1, 2, -1, -1, -1, 4 };
 
-	private static int createPermissionBits(int fp, int orp, int owp, int odp, boolean adminFlag) {
+	public static int createPermissionBits(int fp, int orp, int owp, int odp, boolean adminFlag) {
 		int[] perms = new int[5];
 		perms[0] = fp;
 		perms[1] = orp;

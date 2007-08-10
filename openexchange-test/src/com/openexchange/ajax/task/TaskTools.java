@@ -256,7 +256,13 @@ public final class TaskTools extends Assert {
         SAXException, JSONException {
         return (UpdateResponse) Executor.execute(session, request);
     }
-    
+
+    public static UpdateResponse update(final AJAXClient client,
+        final UpdateRequest request) throws AjaxException, IOException,
+        SAXException, JSONException {
+        return update(client.getSession(), request);
+    }
+
     /**
      * @deprecated Use {@link AJAXClient#getTimeZone()}.
      */

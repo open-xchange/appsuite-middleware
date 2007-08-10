@@ -47,89 +47,57 @@
  *
  */
 
-package com.openexchange.ajax.task.actions;
+package com.openexchange.ajax.folder;
 
-import java.util.TimeZone;
-
-import org.json.JSONException;
-
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.groupware.tasks.Task;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.server.OCLPermission;
 
 /**
- * Stores the parameters for inserting the task.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class InsertRequest extends AbstractTaskRequest {
+public final class Create {
 
     /**
-     * Task to insert.
+     * Prevent instanciation.
      */
-    final Task task;
-
-    /**
-     * Time zone of the user.
-     */
-    final TimeZone timeZone;
-
-    /**
-     * Should the parser fail on error in server response.
-     */
-    final boolean failOnError;
-
-    /**
-     * More detailed constructor.
-     * @param task task to insert.
-     * @param timeZone time zone of the user.
-     * @param failOnError <code>true</code> to check the response for error
-     * messages.
-     */
-    public InsertRequest(final Task task, final TimeZone timeZone,
-        final boolean failOnError) {
+    private Create() {
         super();
-        this.task = task;
-        this.timeZone = timeZone;
-        this.failOnError = failOnError;
     }
 
     /**
-     * Default constructor.
-     * @param task task to insert.
-     * @param timeZone time zone of the user.
+     * This method creates a public folder. Everyone gets full object
+     * permissions on this folder.
+     * @param name name of the folder.
+     * @param type PIM type of the folder.
+     * @param admin user identifier of the admin.
+     * @return a ready to insert folder.
      */
-    public InsertRequest(final Task task, final TimeZone timeZone) {
-        this(task, timeZone, true);
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    public Object getBody() throws JSONException {
-        return convert(task, timeZone);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Method getMethod() {
-        return Method.PUT;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Parameter[] getParameters() {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW),
-            new Parameter(AJAXServlet.PARAMETER_FOLDERID, String.valueOf(task
-                .getParentFolderID()))
-        };
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public InsertParser getParser() {
-        return new InsertParser(failOnError, task.getParentFolderID());
+    public static FolderObject createPublicFolder(final String name,
+        final int type, final int admin) {
+        final FolderObject folder = new FolderObject();
+        folder.setFolderName(name);
+        folder.setModule(type);
+        folder.setType(FolderObject.PUBLIC);
+        final OCLPermission perm1 = new OCLPermission();
+        perm1.setEntity(admin);
+        perm1.setGroupPermission(false);
+        perm1.setFolderAdmin(true);
+        perm1.setAllPermission(
+            OCLPermission.ADMIN_PERMISSION,
+            OCLPermission.ADMIN_PERMISSION,
+            OCLPermission.ADMIN_PERMISSION,
+            OCLPermission.ADMIN_PERMISSION);
+        final OCLPermission perm2 = new OCLPermission();
+        perm2.setEntity(OCLPermission.ALL_GROUPS_AND_USERS);
+        perm2.setGroupPermission(true);
+        perm2.setFolderAdmin(false);
+        perm2.setAllPermission(
+            OCLPermission.CREATE_OBJECTS_IN_FOLDER,
+            OCLPermission.READ_ALL_OBJECTS,
+            OCLPermission.WRITE_ALL_OBJECTS,
+            OCLPermission.DELETE_ALL_OBJECTS);
+        folder.setPermissionsAsArray(new OCLPermission[] { perm1, perm2 });
+        return folder;
     }
 }

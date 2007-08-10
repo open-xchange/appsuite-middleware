@@ -59,8 +59,7 @@ import com.openexchange.ajax.fields.DataFields;
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class CommonInsertParser<T extends CommonInsertResponse> extends
-    AbstractAJAXParser<CommonInsertResponse> {
+public class CommonInsertParser extends AbstractAJAXParser<CommonInsertResponse> {
 
     /**
      * @param failOnError
@@ -79,12 +78,11 @@ public class CommonInsertParser<T extends CommonInsertResponse> extends
         if (isFailOnError()) {
             final JSONObject data = (JSONObject) response.getData();
             if (data.has(DataFields.ID)) {
-                final int taskId = data.getInt(DataFields.ID);
-                assertTrue("Problem while inserting task", taskId > 0);
-                retval.setId(taskId);
+                final int objectId = data.getInt(DataFields.ID);
+                assertTrue("Problem while inserting object.", objectId > 0);
+                retval.setId(objectId);
             } else {
-                fail("Missing created object identifier: "
-                    + response.getJSON());
+                fail("Missing created object identifier: " + response.getJSON());
             }
         }
         return retval;

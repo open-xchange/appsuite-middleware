@@ -47,89 +47,88 @@
  *
  */
 
-package com.openexchange.ajax.task.actions;
+package com.openexchange.ajax.folder.actions;
 
-import java.util.TimeZone;
-
+import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.groupware.tasks.Task;
+import com.openexchange.ajax.Folder;
+import com.openexchange.ajax.FolderTest;
+import com.openexchange.ajax.fields.FolderFields;
+import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.server.OCLPermission;
 
 /**
- * Stores the parameters for inserting the task.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class InsertRequest extends AbstractTaskRequest {
+abstract class AbstractFolderRequest implements AJAXRequest {
 
     /**
-     * Task to insert.
+     * URL of the folder AJAX interface.
      */
-    final Task task;
-
-    /**
-     * Time zone of the user.
-     */
-    final TimeZone timeZone;
-
-    /**
-     * Should the parser fail on error in server response.
-     */
-    final boolean failOnError;
-
-    /**
-     * More detailed constructor.
-     * @param task task to insert.
-     * @param timeZone time zone of the user.
-     * @param failOnError <code>true</code> to check the response for error
-     * messages.
-     */
-    public InsertRequest(final Task task, final TimeZone timeZone,
-        final boolean failOnError) {
-        super();
-        this.task = task;
-        this.timeZone = timeZone;
-        this.failOnError = failOnError;
-    }
+    public static final String FOLDER_URL = "/ajax/folders";
 
     /**
      * Default constructor.
-     * @param task task to insert.
-     * @param timeZone time zone of the user.
      */
-    public InsertRequest(final Task task, final TimeZone timeZone) {
-        this(task, timeZone, true);
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    public Object getBody() throws JSONException {
-        return convert(task, timeZone);
+    protected AbstractFolderRequest() {
+        super();
     }
 
     /**
      * {@inheritDoc}
      */
-    public Method getMethod() {
-        return Method.PUT;
+    public String getServletPath() {
+        return FOLDER_URL;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public Parameter[] getParameters() {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW),
-            new Parameter(AJAXServlet.PARAMETER_FOLDERID, String.valueOf(task
-                .getParentFolderID()))
-        };
+    protected JSONObject convert(final FolderObject folder) throws JSONException {
+        final JSONObject jsonFolder = new JSONObject();
+        jsonFolder.put(FolderFields.TITLE, folder.getFolderName());
+        final JSONArray jsonPerms = new JSONArray();
+        for (OCLPermission perm : folder.getPermissions()) {
+            final JSONObject jsonPermission = new JSONObject();
+            jsonPermission.put(FolderFields.ENTITY, perm.getEntity());
+            jsonPermission.put(FolderFields.GROUP, perm.isGroupPermission());
+            jsonPermission.put(FolderFields.BITS,
+                FolderTest.createPermissionBits(
+                    perm.getFolderPermission(),
+                    perm.getReadPermission(),
+                    perm.getWritePermission(),
+                    perm.getDeletePermission(),
+                    perm.isFolderAdmin()));
+            jsonPerms.put(jsonPermission);
+        }
+        jsonFolder.put(FolderFields.PERMISSIONS, jsonPerms);
+        jsonFolder.put(FolderFields.MODULE, convertModule(folder.getModule()));
+        jsonFolder.put(FolderFields.TYPE, folder.getType());
+        return jsonFolder;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public InsertParser getParser() {
-        return new InsertParser(failOnError, task.getParentFolderID());
+    private String convertModule(final int module) {
+        final String retval;
+        switch (module) {
+        case FolderObject.TASK:
+            retval = Folder.MODULE_TASK;
+            break;
+        case FolderObject.CALENDAR:
+            retval = Folder.MODULE_CALENDAR;
+            break;
+        case FolderObject.CONTACT:
+            retval = Folder.MODULE_CONTACT;
+            break;
+        case FolderObject.MAIL:
+            retval = Folder.MODULE_MAIL;
+            break;
+        case FolderObject.INFOSTORE:
+            retval = Folder.MODULE_INFOSTORE;
+            break;
+        default:
+            retval = "";
+        }
+        return retval;
     }
 }

@@ -47,65 +47,35 @@
  *
  */
 
-package com.openexchange.ajax.task.actions;
-
-import java.util.TimeZone;
+package com.openexchange.ajax.folder.actions;
 
 import org.json.JSONException;
 
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.groupware.tasks.Task;
+import com.openexchange.ajax.fields.FolderFields;
+import com.openexchange.groupware.container.FolderObject;
 
 /**
- * Stores the parameters for inserting the task.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class InsertRequest extends AbstractTaskRequest {
+public class InsertRequest extends AbstractFolderRequest {
 
-    /**
-     * Task to insert.
-     */
-    final Task task;
-
-    /**
-     * Time zone of the user.
-     */
-    final TimeZone timeZone;
-
-    /**
-     * Should the parser fail on error in server response.
-     */
-    final boolean failOnError;
-
-    /**
-     * More detailed constructor.
-     * @param task task to insert.
-     * @param timeZone time zone of the user.
-     * @param failOnError <code>true</code> to check the response for error
-     * messages.
-     */
-    public InsertRequest(final Task task, final TimeZone timeZone,
-        final boolean failOnError) {
-        super();
-        this.task = task;
-        this.timeZone = timeZone;
-        this.failOnError = failOnError;
-    }
+    private final FolderObject folder;
 
     /**
      * Default constructor.
-     * @param task task to insert.
-     * @param timeZone time zone of the user.
      */
-    public InsertRequest(final Task task, final TimeZone timeZone) {
-        this(task, timeZone, true);
+    public InsertRequest(final FolderObject folder) {
+        super();
+        this.folder = folder;
     }
-    
+
     /**
      * {@inheritDoc}
      */
     public Object getBody() throws JSONException {
-        return convert(task, timeZone);
+        return convert(folder);
     }
 
     /**
@@ -121,8 +91,7 @@ public class InsertRequest extends AbstractTaskRequest {
     public Parameter[] getParameters() {
         return new Parameter[] {
             new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW),
-            new Parameter(AJAXServlet.PARAMETER_FOLDERID, String.valueOf(task
-                .getParentFolderID()))
+            new Parameter(FolderFields.FOLDER_ID, folder.getParentFolderID())
         };
     }
 
@@ -130,6 +99,6 @@ public class InsertRequest extends AbstractTaskRequest {
      * {@inheritDoc}
      */
     public InsertParser getParser() {
-        return new InsertParser(failOnError, task.getParentFolderID());
+        return new InsertParser(true);
     }
 }

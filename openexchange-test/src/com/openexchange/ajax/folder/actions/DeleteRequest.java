@@ -47,65 +47,49 @@
  *
  */
 
-package com.openexchange.ajax.task.actions;
+package com.openexchange.ajax.folder.actions;
 
-import java.util.TimeZone;
+import java.util.Arrays;
+import java.util.Date;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.groupware.tasks.Task;
+import com.openexchange.ajax.framework.CommonDeleteParser;
 
 /**
- * Stores the parameters for inserting the task.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class InsertRequest extends AbstractTaskRequest {
+public class DeleteRequest extends AbstractFolderRequest {
 
-    /**
-     * Task to insert.
-     */
-    final Task task;
+    private final int[] folderIds;
 
-    /**
-     * Time zone of the user.
-     */
-    final TimeZone timeZone;
-
-    /**
-     * Should the parser fail on error in server response.
-     */
-    final boolean failOnError;
-
-    /**
-     * More detailed constructor.
-     * @param task task to insert.
-     * @param timeZone time zone of the user.
-     * @param failOnError <code>true</code> to check the response for error
-     * messages.
-     */
-    public InsertRequest(final Task task, final TimeZone timeZone,
-        final boolean failOnError) {
-        super();
-        this.task = task;
-        this.timeZone = timeZone;
-        this.failOnError = failOnError;
-    }
+    private final Date lastModified;
 
     /**
      * Default constructor.
-     * @param task task to insert.
-     * @param timeZone time zone of the user.
      */
-    public InsertRequest(final Task task, final TimeZone timeZone) {
-        this(task, timeZone, true);
+    public DeleteRequest(final int[] folderIds, final Date lastModified) {
+        super();
+        this.folderIds = folderIds;
+        this.lastModified = lastModified;
     }
-    
+
+    public DeleteRequest(final int folderId, final Date lastModified) {
+        this(new int[] { folderId }, lastModified);
+    }
+
     /**
      * {@inheritDoc}
      */
     public Object getBody() throws JSONException {
-        return convert(task, timeZone);
+        final JSONArray array = new JSONArray();
+        for (int folderId : folderIds) {
+            array.put(folderId);
+        }
+        return array;
     }
 
     /**
@@ -120,16 +104,15 @@ public class InsertRequest extends AbstractTaskRequest {
      */
     public Parameter[] getParameters() {
         return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW),
-            new Parameter(AJAXServlet.PARAMETER_FOLDERID, String.valueOf(task
-                .getParentFolderID()))
+            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE),
+            new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, lastModified.getTime())
         };
     }
 
     /**
      * {@inheritDoc}
      */
-    public InsertParser getParser() {
-        return new InsertParser(failOnError, task.getParentFolderID());
+    public CommonDeleteParser getParser() {
+        return new CommonDeleteParser(true);
     }
 }

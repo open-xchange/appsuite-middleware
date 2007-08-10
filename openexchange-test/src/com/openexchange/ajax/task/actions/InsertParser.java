@@ -51,13 +51,12 @@ package com.openexchange.ajax.task.actions;
 
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.CommonInsertParser;
-import com.openexchange.ajax.framework.CommonInsertResponse;
 
 /**
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class InsertParser extends CommonInsertParser<InsertResponse> {
+public class InsertParser extends CommonInsertParser {
 
     private final int folderId;
 
@@ -73,7 +72,7 @@ public class InsertParser extends CommonInsertParser<InsertResponse> {
      * {@inheritDoc}
      */
     @Override
-    protected CommonInsertResponse instanciateResponse(final Response response) {
+    protected InsertResponse instanciateResponse(final Response response) {
         return new InsertResponse(response, folderId);
     }
 }
