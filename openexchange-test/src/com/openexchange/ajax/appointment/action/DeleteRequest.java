@@ -109,7 +109,7 @@ public class DeleteRequest extends AbstractAppointmentRequest {
         final JSONObject json = new JSONObject();
         json.put(DataFields.ID, objectId);
         json.put(AJAXServlet.PARAMETER_INFOLDER, folderId);
-		if (recurrencePosition == 0) {
+		if (recurrencePosition > 0) {
 			json.put(CalendarFields.RECURRENCE_POSITION, recurrencePosition);
 		}
 		
