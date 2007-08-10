@@ -537,8 +537,25 @@ public final class UserConfiguration implements Serializable, DeleteListener, Cl
 	}
 
 	/**
-	 * @return a sorted array of <tt>int</tt> representing user's accessible
-	 *         modules
+	 * Determines all accessible modules as defined in user configuration. The
+	 * returned array of <code>int</code> is sorted according to
+	 * <code>{@link Arrays#sort(int[])}</code>, thus
+	 * <code>{@link Arrays#binarySearch(int[], int)}</code> can be used to
+	 * detect if a user holds module access to a certain module (or invoke
+	 * <code>{@link UserConfiguration#hasModuleAccess(int)}</code>).
+	 * <p>
+	 * The <code>int</code> values matches the constants
+	 * <code>{@link FolderObject#TASK}</code>,
+	 * <code>{@link FolderObject#CALENDAR}</code>,
+	 * <code>{@link FolderObject#CONTACT}</code>,
+	 * <code>{@link FolderObject#UNBOUND}</code>,
+	 * <code>{@link FolderObject#SYSTEM_MODULE}</code>,
+	 * <code>{@link FolderObject#PROJECT}</code>,
+	 * <code>{@link FolderObject#MAIL}</code>,
+	 * <code>{@link FolderObject#INFOSTORE}</code>
+	 * 
+	 * @return A sorted array of <code>int</code> carrying accessible module
+	 *         integer constants
 	 */
 	public int[] getAccessibleModules() {
 		if (accessibleModulesComputed) {
