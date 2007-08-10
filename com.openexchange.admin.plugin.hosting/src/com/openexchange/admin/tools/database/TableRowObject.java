@@ -27,7 +27,7 @@ public class TableRowObject {
         return (TableColumnObject)columns.get(name);
     }
     
-    public Enumeration getColumnNames(){
+    public Enumeration<String> getColumnNames(){
         return this.columns.keys();
     }
     

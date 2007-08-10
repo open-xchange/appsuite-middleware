@@ -67,7 +67,7 @@ public class DataFetcherMysql implements DataFetcher{
     
     public TableObject getDataForTable(TableObject to) throws SQLException{
         
-        Vector column_objects = to.getColumns();
+        Vector<TableColumnObject> column_objects = to.getColumns();
         // build the statement string
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT ");
@@ -125,7 +125,7 @@ public class DataFetcherMysql implements DataFetcher{
         
     }
     
-    public Vector fetchTableObjects() throws SQLException{
+    public Vector<TableObject> fetchTableObjects() throws SQLException{
         tableObjects = new Vector<TableObject>();
         
         dbmetadata = dbConnection.getMetaData();
@@ -271,7 +271,7 @@ public class DataFetcherMysql implements DataFetcher{
      * remove no more needed element from list and remove the reference to removed element
      * so that a new element exists which has now references.
      */
-    private void removeAndSortNew(Vector v,TableObject to){
+    private void removeAndSortNew(Vector<TableObject> v,TableObject to){
         v.remove(to);
         for(int i = 0;i<v.size();i++){
             TableObject tob = (TableObject)v.get(i);

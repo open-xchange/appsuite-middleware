@@ -15,6 +15,7 @@ public abstract class AbstractAdminTest extends TestCase{
     protected  static String TEST_DOMAIN = "example.org";
     protected  static String change_suffix = "_changed";
     
+    @SuppressWarnings("unchecked")
     protected static void parseResponse(Vector resp) throws Exception{
         if(resp.size()==0){
             throw new Exception("Invalid Response:");

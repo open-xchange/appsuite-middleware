@@ -1454,7 +1454,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
             prep_sql.append("UPDATE " + contextserver2dbpool_backup.getName() + " SET ");
 
-            Enumeration enumi = tro.getColumnNames();
+            Enumeration<String> enumi = tro.getColumnNames();
 
             // Save the order of the columns in this list, that all values are
             // correct mapped to their fields
@@ -1521,7 +1521,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     sb_values.append("(");
 
                     final TableRowObject tro = to.getDataRow(i);
-                    Enumeration enumi = tro.getColumnNames();
+                    Enumeration<String> enumi = tro.getColumnNames();
 
                     // Save the order of the columns in this list, that all
                     // values are correct mapped to their fields
@@ -1700,7 +1700,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     }
 
     private TableObject getDataForTable(final TableObject to) throws SQLException {
-        final Vector column_objects = to.getColumns();
+        final Vector<TableColumnObject> column_objects = to.getColumns();
         // build the statement string
         final StringBuilder sb = new StringBuilder();
         sb.append("SELECT ");
