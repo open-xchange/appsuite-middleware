@@ -48,34 +48,34 @@
  */
 package com.openexchange.admin.storage.mysqlStorage;
 
-import com.openexchange.admin.rmi.exceptions.PoolException;
-import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.admin.properties.AdminProperties;
-import com.openexchange.admin.rmi.impl.OXUser;
-import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
-import com.openexchange.groupware.contexts.ContextException;
-import com.openexchange.groupware.delete.DeleteFailedException;
-import com.openexchange.groupware.ldap.LdapException;
-import com.openexchange.server.DBPoolingException;
-
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
+import java.sql.DataTruncation;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.TimeZone;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
+import com.openexchange.admin.rmi.exceptions.PoolException;
+import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.rmi.impl.OXUser;
+import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.sqlStorage.OXUserSQLStorage;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.SHACrypt;
@@ -84,15 +84,12 @@ import com.openexchange.api2.OXException;
 import com.openexchange.groupware.IDGenerator;
 import com.openexchange.groupware.RdbUserConfigurationStorage;
 import com.openexchange.groupware.UserConfiguration;
+import com.openexchange.groupware.contexts.ContextException;
 import com.openexchange.groupware.delete.DeleteEvent;
+import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.imap.UserSettingMail;
+import com.openexchange.server.DBPoolingException;
 import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
-
-import java.sql.DataTruncation;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Types;
-import java.util.Iterator;
 
 /**
  * @author cutmasta
