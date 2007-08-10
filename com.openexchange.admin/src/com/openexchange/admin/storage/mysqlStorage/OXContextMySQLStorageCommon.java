@@ -115,7 +115,7 @@ public abstract class OXContextMySQLStorageCommon {
 
             final Context cs = new Context();
 
-            // DATBASE HANDLE
+            // DATABASE HANDLE
             if (rs.next()) {
                 // filestore_id | filestore_name | filestore_login |
                 // filestore_passwd | quota_max
