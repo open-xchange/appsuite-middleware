@@ -107,7 +107,7 @@ public final class UploadException extends AbstractOXException {
 		/**
 		 * Uplaod file with id %s could not be found
 		 */
-		FILE_NOT_FOUND("Uplaod file with id %s could not be found", Category.CODE_ERROR, 10),
+		FILE_NOT_FOUND("Upload file with id %s could not be found", Category.CODE_ERROR, 10),
 		/**
 		 * Upload file's content type "%s" does not fit to given file filter "%s"
 		 */
