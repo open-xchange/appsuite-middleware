@@ -472,10 +472,6 @@ public class UserTest extends AbstractTest {
             fail("Expected to get user data");
         } 
         
-        
-        
-       
-        
         // which attributes should not be edited in a single change call 
         // because of trouble when server needs combined attribute changed like mail attributes
         // or server does not support it
@@ -504,7 +500,7 @@ public class UserTest extends AbstractTest {
                     
                     String oldvalue = (String)map_obj.getGetter().invoke(srv_loaded);                
                     map_obj.getSetter().invoke(tmp_usr, oldvalue+"_singlechange");
-                    System.out.println("Setting "+map_obj.getMethodName() +" -> "+map_obj.getGetter().invoke(tmp_usr));
+                    //System.out.println("Setting "+map_obj.getMethodName() +" -> "+map_obj.getGetter().invoke(tmp_usr));
                     
                     //  submit changes  for string valued attributes
                     oxu.change(ctx,tmp_usr,cred);
