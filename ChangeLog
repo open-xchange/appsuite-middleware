@@ -13,6 +13,7 @@
  - More reliable message attachment detection
  - Proper error codes in ParamContainer class
  - Removed unused methods from OCLPermission class and its subclasses
+ - Ensure fully loaded folder object on delet or update
 
 * 2007-08-09 - marcus.klein@open-xchange.com
 

@@ -182,7 +182,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 	public static final String SYSTEM_OX_PROJECT_FOLDER_NAME = "projects";
 
 	public static final String SYSTEM_INFOSTORE_FOLDER_NAME = "infostore";
-	
+
 	/**
 	 * The UID prefix of a virtual shared folder
 	 */
@@ -214,9 +214,9 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 	public static final int DELETED = 312;
 
 	public static final int CAPABILITIES = 313;
-	
+
 	public static final int SUBSCRIBED = 314;
-	
+
 	public static final int SUBSCR_SUBFLDS = 315;
 
 	// Modules
@@ -533,8 +533,8 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 					|| objectId == VIRTUAL_LIST_TASK_FOLDER_ID || objectId == VIRTUAL_LIST_INFOSTORE_FOLDER_ID) {
 				return subfolderFlag;
 			}
-			return (iter = OXFolderIteratorSQL.getVisibleSubfoldersIterator(objectId, userId, groups, ctx, userConfig, null))
-					.hasNext();
+			return (iter = OXFolderIteratorSQL.getVisibleSubfoldersIterator(objectId, userId, groups, ctx, userConfig,
+					null)).hasNext();
 		} finally {
 			if (iter != null) {
 				iter.close();
@@ -573,7 +573,8 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 			final UserConfiguration userConfig, final Context ctx) throws DBPoolingException, OXException,
 			SQLException, SearchIteratorException {
 		if (objectId == VIRTUAL_USER_INFOSTORE_FOLDER_ID) {
-			throw new OXFolderException(FolderCode.UNSUPPORTED_OPERATION, String.valueOf(objectId), String.valueOf(ctx.getContextId()));
+			throw new OXFolderException(FolderCode.UNSUPPORTED_OPERATION, String.valueOf(objectId), String.valueOf(ctx
+					.getContextId()));
 		} else if (b_subfolderFlag && !subfolderFlag) {
 			return new ArrayList<FolderObject>(0);
 		}
@@ -581,8 +582,8 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 		SearchIterator iter = null;
 		try {
 			if (objectId == VIRTUAL_LIST_TASK_FOLDER_ID) {
-				iter = OXFolderIteratorSQL.getVisibleFoldersNotSeenInTreeView(userId, groups, FolderObject.TASK, userConfig,
-						ctx);
+				iter = OXFolderIteratorSQL.getVisibleFoldersNotSeenInTreeView(userId, groups, FolderObject.TASK,
+						userConfig, ctx);
 			} else if (objectId == VIRTUAL_LIST_CALENDAR_FOLDER_ID) {
 				iter = OXFolderIteratorSQL.getVisibleFoldersNotSeenInTreeView(userId, groups, FolderObject.CALENDAR,
 						userConfig, ctx);
@@ -593,7 +594,8 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 				iter = OXFolderIteratorSQL.getVisibleFoldersNotSeenInTreeView(userId, groups, FolderObject.INFOSTORE,
 						userConfig, ctx);
 			} else {
-				iter = OXFolderIteratorSQL.getVisibleSubfoldersIterator(objectId, userId, groups, ctx, userConfig, null);
+				iter = OXFolderIteratorSQL
+						.getVisibleSubfoldersIterator(objectId, userId, groups, ctx, userConfig, null);
 			}
 			if (iter.hasSize()) {
 				final int size = iter.size();
@@ -647,7 +649,8 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 				return new ArrayList<Integer>(0);
 			}
 			if (!enforce) {
-				throw new OXFolderException(FolderCode.ATTRIBUTE_NOT_SET, "subfolderIds", String.valueOf(getObjectID()), "");
+				throw new OXFolderException(FolderCode.ATTRIBUTE_NOT_SET, "subfolderIds",
+						String.valueOf(getObjectID()), "");
 			}
 			subfolderIds = getSubfolderIds(objectId, ctx, readCon);
 			b_subfolderIds = true;
@@ -707,60 +710,77 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 	}
 
 	/**
-	 * Fills this folder with all availbable values from given folder
-	 * and returns itself.
+	 * Fills this folder with all availbable values from given folder and
+	 * returns itself.
 	 * 
 	 * @return filled folder
 	 */
 	public final FolderObject fill(final FolderObject other) {
+		return fill(other, true);
+	}
+
+	/**
+	 * Fills this folder with all availbable values from given folder and
+	 * returns itself.
+	 * 
+	 * @param other
+	 *            The other instance of <code>{@link FolderObject}</code>
+	 *            serving as source
+	 * @param overwrite
+	 *            <code>true</code> to overwrite even if value is already
+	 *            present; <code>false</code> to only fill value if not
+	 *            present
+	 * @return filled folder
+	 */
+	public final FolderObject fill(final FolderObject other, final boolean overwrite) {
 		reset();
-		if (other.containsObjectID()) {
+		if (other.containsObjectID() && (overwrite || !containsObjectID())) {
 			setObjectID(other.getObjectID());
 		}
-		if (other.containsCreatedBy()) {
+		if (other.containsCreatedBy() && (overwrite || !containsCreatedBy())) {
 			setCreatedBy(other.getCreatedBy());
 		}
-		if (other.containsCreationDate()) {
+		if (other.containsCreationDate() && (overwrite || !containsCreationDate())) {
 			setCreationDate(other.getCreationDate());
 		}
-		if (other.containsDefaultFolder()) {
+		if (other.containsDefaultFolder() && (overwrite || !containsDefaultFolder())) {
 			setDefaultFolder(other.isDefaultFolder());
 		}
-		if (other.containsFolderName()) {
+		if (other.containsFolderName() && (overwrite || !containsFolderName())) {
 			setFolderName(other.getFolderName());
 		}
-		if (other.containsFullName()) {
+		if (other.containsFullName() && (overwrite || !containsFullName())) {
 			setFullName(other.getFullName());
 		}
-		if (other.containsLastModified()) {
+		if (other.containsLastModified() && (overwrite || !containsLastModified())) {
 			setLastModified(other.getLastModified());
 		}
-		if (other.containsModifiedBy()) {
+		if (other.containsModifiedBy() && (overwrite || !containsModifiedBy())) {
 			setModifiedBy(other.getModifiedBy());
 		}
-		if (other.containsModule()) {
+		if (other.containsModule() && (overwrite || !containsModule())) {
 			setModule(other.getModule());
 		}
-		if (other.containsParentFolderID()) {
+		if (other.containsParentFolderID() && (overwrite || !containsParentFolderID())) {
 			setParentFolderID(other.getParentFolderID());
 		}
-		if (other.containsPermissionFlag()) {
+		if (other.containsPermissionFlag() && (overwrite || !containsPermissionFlag())) {
 			setPermissionFlag(other.getPermissionFlag());
 		}
-		if (other.containsPermissions()) {
+		if (other.containsPermissions() && (overwrite || !containsPermissions())) {
 			setPermissions((ArrayList) other.getPermissions());
 		}
-		if (other.containsSubfolderFlag()) {
+		if (other.containsSubfolderFlag() && (overwrite || !containsSubfolderFlag())) {
 			setSubfolderFlag(other.hasSubfolders());
 		}
-		if (other.containsSubfolderIds()) {
+		if (other.containsSubfolderIds() && (overwrite || !containsSubfolderIds())) {
 			try {
 				setSubfolderIds((ArrayList<Integer>) other.getSubfolderIds());
 			} catch (final OXFolderException e) {
 				LOG.error(e.getMessage(), e);
 			}
 		}
-		if (other.containsType()) {
+		if (other.containsType() && (overwrite || !containsType())) {
 			setType(other.getType());
 		}
 		return this;
@@ -768,9 +788,9 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 
 	/**
 	 * Checks if this folder exists in underlying storage by checking its object
-	 * ID or (if object ID is not present) by its folder name, parent and module. An
-	 * <code>OXException</code> is thrown if folder does not hold sufficient
-	 * information to verify existence.
+	 * ID or (if object ID is not present) by its folder name, parent and
+	 * module. An <code>OXException</code> is thrown if folder does not hold
+	 * sufficient information to verify existence.
 	 * 
 	 * @return <code>true</code> if a corresponding folder can be detected,
 	 *         otherwise <code>false</code>
@@ -1090,9 +1110,11 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 				closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
 			}
 		} catch (final SQLException e) {
-			throw new OXFolderException(FolderCode.FOLDER_COULD_NOT_BE_LOADED, e, String.valueOf(folderId), String.valueOf(ctx.getContextId()));
+			throw new OXFolderException(FolderCode.FOLDER_COULD_NOT_BE_LOADED, e, String.valueOf(folderId), String
+					.valueOf(ctx.getContextId()));
 		} catch (final DBPoolingException e) {
-			throw new OXFolderException(FolderCode.FOLDER_COULD_NOT_BE_LOADED, e, String.valueOf(folderId), String.valueOf(ctx.getContextId()));
+			throw new OXFolderException(FolderCode.FOLDER_COULD_NOT_BE_LOADED, e, String.valueOf(folderId), String
+					.valueOf(ctx.getContextId()));
 		}
 	}
 
