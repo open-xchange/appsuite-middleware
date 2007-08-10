@@ -115,6 +115,53 @@ public final class MessageUtils {
 		super();
 	}
 
+	private static final Pattern PAT_QUOTED = Pattern.compile("(^\")([^\"]+?)(\"$)");
+
+	private static final Pattern PAT_QUOTABLE_CHAR = Pattern.compile("[.,:;<>\"]");
+
+	/**
+	 * Quotes given personal part of an internet address according to RFC 822
+	 * syntax if needed; otherwise the personal is returned unchanged.
+	 * <p>
+	 * This method guarantees that the resulting string can be used to build an
+	 * internet address according to RFC 822 syntax so that the
+	 * <code>{@link InternetAddress#parse(String)}</code> constructor won't
+	 * throw an instance of <code>{@link AddressException}</code>.
+	 * 
+	 * <pre>
+	 * final String quotedPersonal = quotePersonal(&quot;Doe, Jané&quot;);
+	 * 
+	 * final String buildAddr = quotedPersonal + &quot; &lt;someone@somewhere.com&gt;&quot;;
+	 * System.out.println(buildAddr);
+	 * //Plain Address: &quot;=?UTF-8?Q?Doe=2C_Jan=C3=A9?=&quot; &lt;someone@somewhere.com&gt;
+	 * 
+	 * final InternetAddress ia = new InternetAddress(buildAddr);
+	 * System.out.println(ia.toUnicodeString());
+	 * //Unicode Address: &quot;Doe, Jané&quot; &lt;someone@somewhere.com&gt;
+	 * </pre>
+	 * 
+	 * @param personal
+	 *            The personal
+	 * @return The properly quoted personal for building an internet address
+	 *         according to RFC 822 syntax
+	 */
+	public static String quotePersonal(final String personal) {
+		try {
+			if (PAT_QUOTED.matcher(personal).matches() ? false : PAT_QUOTABLE_CHAR.matcher(personal).find()) {
+				/*
+				 * Quote
+				 */
+				return new StringBuilder(personal.length()).append('"').append(
+						MimeUtility.encodeWord(personal.replaceAll("\"", "\\\\\\\""))).append('"').toString();
+			}
+			return MimeUtility.encodeWord(personal);
+		} catch (final UnsupportedEncodingException e) {
+			LOG.error("Unsupported encoding in a message detected and monitored.", e);
+			MailInterfaceImpl.mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
+			return personal;
+		}
+	}
+
 	/**
 	 * Parse the given sequence of addresses into InternetAddress objects by
 	 * invoking <code>{@link InternetAddress#parse(String, boolean)}</code>.
