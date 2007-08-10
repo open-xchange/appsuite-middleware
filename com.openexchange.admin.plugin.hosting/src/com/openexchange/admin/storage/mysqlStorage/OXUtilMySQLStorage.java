@@ -1204,23 +1204,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                     }
                 }
             }
-            //            // FIXME: This should be reworked. Instead of calling searchContextByFilestoreId a direct
-//            // sql query should be made because we only need usage and reserved here but we do full
-//            // context lookups
-//            OXContextStorageInterface oxcox = (OXContextStorageInterface)OXContextMySQLStorage.getInstance();
-//            final Context[] all_ctx = oxcox.searchContextByFilestore(fs);
-//            if( all_ctx == null ) {
-//                throw new StorageException("Unable to determine filestore data");
-//            }
-//
-//            for (final Context ctx : all_ctx) {
-//                if( ctx.getUsedQuota() != null ) {
-//                    usage += ctx.getUsedQuota();
-//                }
-//                if( ctx.getAverage_size() != null ) {
-//                    reserved += ctx.getAverage_size();
-//                }
-//            }
+
             fs.setUsed(usage);
             fs.setReserved(reserved);
             
