@@ -50,9 +50,9 @@
 package com.openexchange.groupware.importexport;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.fail;
 
-import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -62,55 +62,49 @@ import junit.framework.JUnit4TestAdapter;
 
 import org.junit.Test;
 
-import com.openexchange.api.OXObjectNotFoundException;
-import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.OXException;
-import com.openexchange.api2.RdbContactSQLInterface;
+import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.contact.helpers.ContactField;
-import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.server.DBPoolingException;
 
-public class VCardImportTest extends AbstractVCardTest {
+public class Bug8681forVCard extends AbstractVCardTest {
+
+	
 	//workaround for JUnit 3 runner
 	public static junit.framework.Test suite() {
-		return new JUnit4TestAdapter(VCardImportTest.class);
+		return new JUnit4TestAdapter(Bug8681forVCard.class);
 	}
 	
-	@Test public void test6825_tooMuchInformation() throws DBPoolingException, SQLException, OXObjectNotFoundException, NumberFormatException, OXException, UnsupportedEncodingException{
-		//setup: building an VCard file with a summary longer than 255 characters.
-		folderId = createTestFolder(FolderObject.CONTACT, sessObj, "vcard6825Folder");
-		final String stringTooLong = "zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... ";
-		final String vcard = "BEGIN:VCARD\nVERSION:3.0\n\nN:"+stringTooLong+";givenName;;;\nEND:VCARD\n";
-		final List <String> folders = Arrays.asList( Integer.toString(folderId) );
-		//import and tests
-		final List<ImportResult> results = imp.importData(sessObj, format, new ByteArrayInputStream(vcard.getBytes("UTF-8")), folders, null);
-		assertEquals("One import?" , 1 , results.size());
-		assertTrue("Should have an error" , results.get(0).hasError() );
-		final OXException e = results.get(0).getException();
-		assertEquals("Should be truncation error" , Category.TRUNCATED , e.getCategory());
-		assertEquals("GIVEN NAME was too long" , ContactField.SUR_NAME.getReadableName() , e.getMessageArgs()[0]);
-	}
-	
-	/*
-	 * TELEX is not read.
-	 */
-	@Test public void test7719() throws DBPoolingException, SQLException, OXObjectNotFoundException, NumberFormatException, OXException, UnsupportedEncodingException{
-		//setup
+	@Test public void checkVCard() throws DBPoolingException, UnsupportedEncodingException, SQLException, OXException{
+		//creating folder before changing permissions...
 		folderId = createTestFolder(FolderObject.CONTACT, sessObj, "vcard7719Folder");
-		final String telex = "7787987897897897897";
-		final String vcard = "BEGIN:VCARD\nVERSION:2.1\nN:Schmitz;Hansi;;Dr.;\nFN:Dr. Hansi Schmitz\nEMAIL;PREF;INTERNET;CHARSET=Windows-1252:Hansi@Schmitz.super\nEMAIL;TLX:"+telex+"\nEND:VCARD";
-		final List <String> folders = Arrays.asList( Integer.toString(folderId) );
-
-		//import and tests
-		final List<ImportResult> results = imp.importData(sessObj, format, new ByteArrayInputStream(vcard.getBytes("UTF-8")), folders, null);
-		assertEquals("One import?" , 1 , results.size());
-		final ImportResult res = results.get(0);
-		assertEquals("Should have no error" , null, res.getException() );
-
-		ContactSQLInterface contacts = new RdbContactSQLInterface(sessObj);
-		ContactObject co = contacts.getObjectById(Integer.parseInt( res.getObjectId()), Integer.parseInt( res.getFolder() ) );
-		assertEquals("Has telex" , telex , co.getTelephoneTelex());
+		
+		//changing user permissions
+		final TestSession newSession = new TestSession("elvis");
+		newSession.delegateSessionObject = sessObj;
+		try {
+			final UserConfiguration conf = sessObj.getUserConfiguration();
+			conf.setContact(false);
+			newSession.delegateUserConfiguration = conf;
+			sessObj = newSession;
+			assertFalse( sessObj.getUserConfiguration().hasContact() );
+			
+			//uploading
+			final List <String> folders = Arrays.asList( Integer.toString(folderId) );
+	
+			try{
+				imp.canImport(newSession, Format.VCARD, folders, null);
+				fail("Could import Contacts without permission on Contact module!");
+			} catch(ImportExportException e) {
+				assertEquals(Category.PERMISSION, e.getCategory());
+				assertEquals("I_E-0607" , e.getErrorCode() );
+			}
+		} finally {
+			//undo changes
+			sessObj = newSession.delegateSessionObject;
+		}
 	}
+	
 }

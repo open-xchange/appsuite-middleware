@@ -49,59 +49,51 @@
 
 package com.openexchange.groupware.importexport;
 
-import static org.junit.Assert.assertEquals;
-
-import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 
 import junit.framework.JUnit4TestAdapter;
 
-import org.junit.Test;
+import org.junit.After;
+import org.junit.BeforeClass;
 
-import com.openexchange.api.OXObjectNotFoundException;
-import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.calendar.CalendarSql;
-import com.openexchange.groupware.container.AppointmentObject;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.server.DBPoolingException;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.Init;
+import com.openexchange.groupware.contact.ContactConfig;
+import com.openexchange.groupware.contexts.ContextImpl;
+import com.openexchange.groupware.contexts.ContextStorage;
+import com.openexchange.groupware.importexport.importers.VCardImporter;
+import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.sessiond.SessionObjectWrapper;
 
-public class Bug7732Test extends AbstractICalImportTest {
-	//workaround for JUnit 3 runner
+public class AbstractVCardTest extends AbstractContactTest {
+
+	public final Format format = Format.VCARD;
+	@SuppressWarnings("hiding")
+	public final Importer imp = new VCardImporter();
+
 	public static junit.framework.Test suite() {
-		return new JUnit4TestAdapter(Bug7732Test.class);
+		return new JUnit4TestAdapter(VCardImportTest.class);
 	}
-	
-	
-	@Test public void test7732() throws DBPoolingException, SQLException, UnsupportedEncodingException, OXObjectNotFoundException, NumberFormatException, OXException{
-		int count = 10;
-		String ical = 
-			"BEGIN:VCALENDAR\n" +
-			"PRODID:-//Microsoft Corporation//Outlook 12.0 MIMEDIR//EN\n" +
-			"VERSION:2.0\n" +
-			"METHOD:PUBLISH\n" +
-				"BEGIN:VEVENT\n" +
-				"CLASS:PUBLIC\n" +
-				"CREATED:20070531T130514Z\n" +
-				"DESCRIPTION:\\n\n" +
-				"DTEND:20070912T083000Z\n" +
-				"DTSTAMP:20070531T130514Z\n" +
-				"DTSTART:20070912T080000Z\n" +
-				"LAST-MODIFIED:20070531T130514Z\n" +
-				"LOCATION:loc\n" +
-				"PRIORITY:5\n" +
-				"RRULE:FREQ=DAILY;COUNT="+count+"\n" +
-				"SEQUENCE:0\n" +
-				"SUMMARY;LANGUAGE=de:Daily iCal\n" +
-				"TRANSP:OPAQUE\n" +
-				"UID:040000008200E00074C5B7101A82E008000000005059CADA94A3C701000000000000000010000000A1B56CAC71BB0948833B0C11C333ADB0\n" +
-				"END:VEVENT\n" +
-			"END:VCALENDAR";
 
-		ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.CALENDAR, "7732", false);
-		final AppointmentSQLInterface appointmentSql = new CalendarSql(sessObj);
-		final AppointmentObject appointmentObj = appointmentSql.getObjectById(Integer.parseInt( res.getObjectId() ), folderId);
-		assertEquals(count + " occurences found?" , count , appointmentObj.getOccurrence());
+	@BeforeClass
+	public static void initialize() throws SQLException, AbstractOXException {
+		Init.initDB();
+		ContactConfig.init();
+		ContextStorage.init();
+		final UserStorage uStorage = UserStorage.getInstance(new ContextImpl(1));
+	    userId = uStorage.getUserId( Init.getAJAXProperty("login") );
+	    sessObj = SessionObjectWrapper.createSessionObject(userId, 1, "csv-tests");
+		userId = sessObj.getUserObject().getId();
+	}
+
+	public AbstractVCardTest() {
+		super();
+	}
+
+	@After
+	public void cleanUpAfterTest() throws OXException {
+		deleteTestFolder(folderId);
 	}
 
 }

@@ -59,7 +59,12 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
+import javax.mail.Session;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -69,16 +74,21 @@ import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbContactSQLInterface;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Init;
+import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.contact.ContactConfig;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.ContextImpl;
 import com.openexchange.groupware.contexts.ContextStorage;
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
+import com.openexchange.groupware.ldap.Credentials;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.imap.IMAPProperties;
+import com.openexchange.imap.UserSettingMail;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.server.OCLPermission;
 import com.openexchange.sessiond.SessionObject;
@@ -93,6 +103,154 @@ import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
  *
  */
 public class AbstractContactTest {
+	
+	public static class TestSession extends SessionObject{
+		
+		/**
+		 * This class is needed to fake permissions for different modules.
+		 * @param sessionid
+		 */
+		public TestSession(String sessionid) {
+			super(sessionid);
+		}
+		
+		public SessionObject delegateSessionObject;
+		public UserConfiguration delegateUserConfiguration;
+		
+		public void closingOperations() {
+			delegateSessionObject.closingOperations();
+		}
+		public boolean equals(Object obj) {
+			return delegateSessionObject.equals(obj);
+		}
+		public Context getContext() {
+			return delegateSessionObject.getContext();
+		}
+		public Date getCreationtime() {
+			return delegateSessionObject.getCreationtime();
+		}
+		public Credentials getCredentials() {
+			return delegateSessionObject.getCredentials();
+		}
+		public Map getDynamicMap() {
+			return delegateSessionObject.getDynamicMap();
+		}
+		public String getHost() {
+			return delegateSessionObject.getHost();
+		}
+		public IMAPProperties getIMAPProperties() {
+			return delegateSessionObject.getIMAPProperties();
+		}
+		public String getLanguage() {
+			return delegateSessionObject.getLanguage();
+		}
+		public long getLifetime() {
+			return delegateSessionObject.getLifetime();
+		}
+		public Locale getLocale() {
+			return delegateSessionObject.getLocale();
+		}
+		public String getLocalIp() {
+			return delegateSessionObject.getLocalIp();
+		}
+		public String getLoginName() {
+			return delegateSessionObject.getLoginName();
+		}
+		public Session getMailSession() {
+			return delegateSessionObject.getMailSession();
+		}
+		public String getPassword() {
+			return delegateSessionObject.getPassword();
+		}
+		public String getRandomToken() {
+			return delegateSessionObject.getRandomToken();
+		}
+		public String getSecret() {
+			return delegateSessionObject.getSecret();
+		}
+		public String getSessionID() {
+			return delegateSessionObject.getSessionID();
+		}
+		public Date getTimestamp() {
+			return delegateSessionObject.getTimestamp();
+		}
+		public UserConfiguration getUserConfiguration() {
+			return delegateUserConfiguration;
+		}
+		public String getUserlogin() {
+			return delegateSessionObject.getUserlogin();
+		}
+		public String getUsername() {
+			return delegateSessionObject.getUsername();
+		}
+		public User getUserObject() {
+			return delegateSessionObject.getUserObject();
+		}
+		public UserSettingMail getUserSettingMail() {
+			return delegateSessionObject.getUserSettingMail();
+		}
+		public int hashCode() {
+			return delegateSessionObject.hashCode();
+		}
+		public void setContext(Context context) {
+			delegateSessionObject.setContext(context);
+		}
+		public void setCreationtime(Date creationtime) {
+			delegateSessionObject.setCreationtime(creationtime);
+		}
+		public void setCredentials(Credentials cred) {
+			delegateSessionObject.setCredentials(cred);
+		}
+		public void setDynamicMap(Map hm) {
+			delegateSessionObject.setDynamicMap(hm);
+		}
+		public void setHost(String host) {
+			delegateSessionObject.setHost(host);
+		}
+		public void setIMAPProperties(IMAPProperties imapProperties) {
+			delegateSessionObject.setIMAPProperties(imapProperties);
+		}
+		public void setLanguage(String language) {
+			delegateSessionObject.setLanguage(language);
+		}
+		public void setLifetime(long lifetime) {
+			delegateSessionObject.setLifetime(lifetime);
+		}
+		public void setLocalIp(String localip) {
+			delegateSessionObject.setLocalIp(localip);
+		}
+		public void setLoginName(String loginName) {
+			delegateSessionObject.setLoginName(loginName);
+		}
+		public void setMailSession(Session mailSession) {
+			delegateSessionObject.setMailSession(mailSession);
+		}
+		public void setPassword(String password) {
+			delegateSessionObject.setPassword(password);
+		}
+		public void setRandomToken(String randomToken) {
+			delegateSessionObject.setRandomToken(randomToken);
+		}
+		public void setSecret(String secret) {
+			delegateSessionObject.setSecret(secret);
+		}
+		public void setTimestamp(Date timestamp) {
+			delegateSessionObject.setTimestamp(timestamp);
+		}
+		public void setUserlogin(String userlogin) {
+			delegateSessionObject.setUserlogin(userlogin);
+		}
+		public void setUsername(String username) {
+			delegateSessionObject.setUsername(username);
+		}
+		public void setUserObject(User u) {
+			delegateSessionObject.setUserObject(u);
+		}
+		public String toString() {
+			return delegateSessionObject.toString();
+		}
+	}
+	
 	protected static final int[] POSSIBLE_FIELDS = {
 			DataObject.OBJECT_ID,
 			DataObject.CREATED_BY,
@@ -245,8 +403,6 @@ public class AbstractContactTest {
 			System.out.println("Could not create test folder");
 			e.printStackTrace();
 		}
-		
-		
 		return tempFolderId; 
 	}
 
