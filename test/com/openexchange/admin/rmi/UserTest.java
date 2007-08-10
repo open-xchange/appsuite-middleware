@@ -52,14 +52,17 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 
@@ -85,7 +88,8 @@ import com.openexchange.admin.rmi.extensions.OXCommonExtension;
  * @author d7
  */
 public class UserTest extends AbstractTest {
-
+    
+    
     // list of chars that must be valid
 //    protected static final String VALID_CHAR_TESTUSER = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-+.%$@";
     protected static final String VALID_CHAR_TESTUSER = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -445,6 +449,183 @@ public class UserTest extends AbstractTest {
             fail("Expected to get correct changed user data");
         } 
     }
+    
+    @Test
+    public void testChangeSingleAttribute() throws Exception {
+        // change only 1 attribute per of user object call
+        
+//      get context to create an user
+        final Credentials cred = DummyCredentials();
+        final Context ctx = getTestContextObject(cred);
+        
+        // create new user
+        final OXUserInterface oxu = getUserClient();
+        final UserModuleAccess access = new UserModuleAccess();    
+        final User usr = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
+        final User createduser = oxu.create(ctx,usr,access,cred);     
+        // now load user from server and check if data is correct, else fail
+        User srv_loaded = oxu.getData(ctx, createduser, cred);
+        if (createduser.getId().equals(srv_loaded.getId())) {
+            //verify data
+            compareUser(createduser, srv_loaded);
+        } else {
+            fail("Expected to get user data");
+        } 
+        
+        
+        
+       
+        
+        // which attributes should not be edited in a single change call 
+        // because of trouble when server needs combined attribute changed like mail attributes
+        // or server does not support it
+        HashSet<String> notallowed = new HashSet<String>();
+        
+        // # mail attribs must be combined in a change #
+        notallowed.add("setEmail1");
+        notallowed.add("setPrimaryEmail");
+        notallowed.add("setDefaultSenderAddress");
+        // #                                                                     #
+        
+        notallowed.add("setId"); // we cannot change the id of a user, is a mandatory field for a change
+        notallowed.add("setPassword"); // server password is always different(crypted)
+        notallowed.add("setName"); // server does not support username change
+        
+        // loop through methods and change each attribute per single call and load and compare
+        MethodMapObject[] meth_objects = getSetableAttributeMethods(usr.getClass());
+        
+        for (MethodMapObject map_obj : meth_objects) {
+            
+            if(!notallowed.contains(map_obj.getMethodName())){
+                
+                User tmp_usr  = new User(srv_loaded.getId());
+                
+                if(map_obj.getMethodParameterType().equalsIgnoreCase("java.lang.String")){
+                    
+                    String oldvalue = (String)map_obj.getGetter().invoke(srv_loaded);                
+                    map_obj.getSetter().invoke(tmp_usr, oldvalue+"_singlechange");
+                    System.out.println("Setting "+map_obj.getMethodName() +" -> "+map_obj.getGetter().invoke(tmp_usr));
+                    
+                    //  submit changes  for string valued attributes
+                    oxu.change(ctx,tmp_usr,cred);
+                    
+                    
+                    // load from server and compare the single changed value
+                    final User user_single_change_loaded = oxu.getData(ctx, srv_loaded, cred);
+                    
+                    // compare both string values , server and local copy must be same, else, the change was unsuccessfull
+                    assertEquals(map_obj.getGetter().getName().substring(3)+" not equal", map_obj.getGetter().invoke(tmp_usr), map_obj.getGetter().invoke(user_single_change_loaded));
+                }
+                
+                // TODO: add here changes for int,date,boolean valued fields 
+            }            
+        }
+        
+    }
+    
+    
+    public  MethodMapObject[] getSetableAttributeMethods(final Class clazz){
+        
+        Method[] theMethods = clazz.getMethods();
+        List<MethodMapObject> tmplist = new ArrayList<MethodMapObject>();
+        
+        MethodMapObject map_obj = null;
+        
+        // first fill setter and other infos in map object        
+        for (Method method : theMethods) {
+            String method_name =  method.getName();
+            if(method_name.startsWith("set")){      
+                // check if it is a type we support
+                if(method.getParameterTypes()[0].getName().equalsIgnoreCase("java.lang.String") 
+                        || method.getParameterTypes()[0].getName().equalsIgnoreCase("java.lang.Integer")
+                        || method.getParameterTypes()[0].getName().equalsIgnoreCase("java.util.Date")
+                        || method.getParameterTypes()[0].getName().equalsIgnoreCase("java.lang.Boolean")){
+                    
+                    map_obj = new MethodMapObject();
+                    map_obj.setMethodName(method_name); 
+                    map_obj.setMethodParameterType(method.getParameterTypes()[0].getName());
+                    map_obj.setSetter(method);
+                    
+                    tmplist.add(map_obj);
+                }
+            }        
+        }
+        
+        for(MethodMapObject obj_map : tmplist){
+            String obj_method_name = obj_map.getMethodName();
+            for (Method method : theMethods)  {
+                String meth_name =  method.getName();
+                if(meth_name.startsWith("get")){
+                    if(meth_name.substring(3).equalsIgnoreCase(obj_method_name.substring(3))){
+                        obj_map.setGetter(method);
+                        break;
+                    }
+                }
+            }
+        }
+        
+        // now fill the getter in the map obj
+                
+        return tmplist.toArray(new MethodMapObject[tmplist.size()]);
+    }
+    
+    private class MethodMapObject{
+        private Method getter = null;
+        private Method setter = null;
+        private String methodParameterType = null;
+        private String methodName = null;
+        /**
+         * @return the getter
+         */
+        public Method getGetter() {
+            return getter;
+        }
+        /**
+         * @param getter the getter to set
+         */
+        public void setGetter(Method getter) {
+            this.getter = getter;
+        }
+        /**
+         * @return the methodName
+         */
+        public String getMethodName() {
+            return methodName;
+        }
+        /**
+         * @param methodName the methodName to set
+         */
+        public void setMethodName(String methodName) {
+            this.methodName = methodName;
+        }
+        /**
+         * @return the methodType
+         */
+        public String getMethodParameterType() {
+            return methodParameterType;
+        }
+        /**
+         * @param methodType the methodType to set
+         */
+        public void setMethodParameterType(String methodType) {
+            this.methodParameterType = methodType;
+        }
+        /**
+         * @return the setter
+         */
+        public Method getSetter() {
+            return setter;
+        }
+        /**
+         * @param setter the setter to set
+         */
+        public void setSetter(Method setter) {
+            this.setter = setter;
+        }
+    }
+    
+    
+    
     
     @Test
     public void testChangeWithEmptyUserIdentifiedByID() throws Exception{
