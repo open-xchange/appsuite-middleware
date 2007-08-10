@@ -294,6 +294,7 @@ public class StatisticTools extends BasicCommandlineOptions {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void showStats(final MBeanServerConnection mbc, final String class_name) throws IOException, InstanceNotFoundException, MBeanException, AttributeNotFoundException, ReflectionException, IntrospectionException {
         final Iterator<ObjectInstance> itr = mbc.queryMBeans(null, null).iterator();
         while (itr.hasNext()) {
@@ -355,6 +356,7 @@ public class StatisticTools extends BasicCommandlineOptions {
         }
     }
     
+    @SuppressWarnings("unchecked")
     private void showOperations(final MBeanServerConnection mbc) throws IOException, InstanceNotFoundException, IntrospectionException, ReflectionException {
         final Set<ObjectName> queryNames = mbc.queryNames(null, null);
         for (final ObjectName objname : queryNames) {

@@ -49,7 +49,7 @@ public interface DataFetcher {
      * Returns an unsorted list of tables with their data.<br>
      * Perhaps tables must be sorted cause of contraints etc.
      */
-    public Vector fetchTableObjects() throws SQLException;
+    public Vector<TableObject> fetchTableObjects() throws SQLException;
     
     /**
      * Returns an sorted list of tables with their data.<br>

@@ -14,7 +14,7 @@ public class TableObject {
     // table name
     private String name = null;
     
-    private HashSet<String> xrefenrencetables = null;
+    private HashSet<String> xreferencetables = null;
     private HashSet<String> referencedby = null;
     private Vector<TableColumnObject> columns = null;
     // all rows in table
@@ -23,7 +23,7 @@ public class TableObject {
     // Holds all infos about a table
     public TableObject() {
         table_rows = new Vector<TableRowObject>();
-        xrefenrencetables = new HashSet<String>();
+        xreferencetables = new HashSet<String>();
         referencedby = new HashSet<String>();
         columns = new Vector<TableColumnObject>();
     }
@@ -40,7 +40,7 @@ public class TableObject {
         this.columns.remove(to);
     }
     
-    public Vector getColumns(){
+    public Vector<TableColumnObject> getColumns(){
         return this.columns;
     }
     
@@ -61,20 +61,20 @@ public class TableObject {
     }
     
     public void addCrossReferenceTable(String reference_table){
-        this.xrefenrencetables.add(reference_table);
+        this.xreferencetables.add(reference_table);
     }
     
     public void removeCrossReferenceTable(String reference_table){
-        this.xrefenrencetables.remove(reference_table);
+        this.xreferencetables.remove(reference_table);
     }
     
-    public Iterator getCrossReferenceTables(){
-        return this.xrefenrencetables.iterator();
+    public Iterator<String> getCrossReferenceTables(){
+        return this.xreferencetables.iterator();
     }
     
     public boolean hasCrossReferences(){
-        //System.out.println(this.name+"--> "+xrefenrencetables.size());        
-        if(xrefenrencetables.size()>0){
+        //System.out.println(this.name+"--> "+xreferencetables.size());        
+        if(xreferencetables.size()>0){
             return true;
         }else{
             return false;
@@ -82,7 +82,7 @@ public class TableObject {
     }
     
     public boolean hasCrossReference2Table(TableObject checkref){
-        return this.xrefenrencetables.contains(checkref.getName());
+        return this.xreferencetables.contains(checkref.getName());
     }
     
     public void addReferencedBy(String table_name) {
@@ -93,7 +93,7 @@ public class TableObject {
         this.referencedby.remove(reference_table);
     }
     
-    public Iterator getReferencedByTables(){
+    public Iterator<String> getReferencedByTables(){
         return this.referencedby.iterator();
     }
     

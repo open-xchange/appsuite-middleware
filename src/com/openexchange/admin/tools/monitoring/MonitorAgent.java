@@ -16,7 +16,6 @@ import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.server.RMIServerSocketFactory;
-import java.util.List;
 import java.util.logging.LogManager;
 import java.util.logging.LoggingMXBean;
 
@@ -169,24 +168,18 @@ public class MonitorAgent {
         ox = new ObjectName(ManagementFactory.MEMORY_MXBEAN_NAME);
         mbs.registerMBean(mm,ox);
         
-        List mp = ManagementFactory.getMemoryPoolMXBeans();
-        for(int a = 0;a<mp.size();a++){
-            MemoryPoolMXBean mbbm = (MemoryPoolMXBean)mp.get(a);
+        for(MemoryPoolMXBean mbbm : ManagementFactory.getMemoryPoolMXBeans() ) {
             ox = new ObjectName(ManagementFactory.MEMORY_POOL_MXBEAN_DOMAIN_TYPE+",name="+mbbm.getName());
             mbs.registerMBean(mbbm,ox);
         }
         
-        mp = ManagementFactory.getMemoryManagerMXBeans();
-        for(int a = 0;a<mp.size();a++){
-            MemoryManagerMXBean mbbm = (MemoryManagerMXBean)mp.get(a);
+        for(MemoryManagerMXBean mbbm : ManagementFactory.getMemoryManagerMXBeans()) {
             ox = new ObjectName(ManagementFactory.MEMORY_MANAGER_MXBEAN_DOMAIN_TYPE+",name="+mbbm.getName());
             mbs.registerMBean(mbbm,ox);
         }
         
         //gc bean
-        mp = ManagementFactory.getGarbageCollectorMXBeans();
-        for(int a = 0;a<mp.size();a++){
-            GarbageCollectorMXBean mbbm = (GarbageCollectorMXBean)mp.get(a);
+        for(GarbageCollectorMXBean mbbm : ManagementFactory.getGarbageCollectorMXBeans()) {
             ox = new ObjectName(ManagementFactory.GARBAGE_COLLECTOR_MXBEAN_DOMAIN_TYPE+",name="+mbbm.getName());
             mbs.registerMBean(mbbm,ox);
         }        
@@ -216,24 +209,18 @@ public class MonitorAgent {
         mbs.unregisterMBean(thread);
         mbs.unregisterMBean(memory);
 
-        List mp = ManagementFactory.getMemoryPoolMXBeans();
-        for(int a = 0;a<mp.size();a++){
-            MemoryPoolMXBean mbbm = (MemoryPoolMXBean)mp.get(a);
+        for(MemoryPoolMXBean mbbm : ManagementFactory.getMemoryPoolMXBeans() ) {
             ox = new ObjectName(ManagementFactory.MEMORY_POOL_MXBEAN_DOMAIN_TYPE+",name="+mbbm.getName());
             mbs.unregisterMBean(ox);
         }
         
-        mp = ManagementFactory.getMemoryManagerMXBeans();
-        for(int a = 0;a<mp.size();a++){
-            MemoryManagerMXBean mbbm = (MemoryManagerMXBean)mp.get(a);
+        for(MemoryManagerMXBean mbbm : ManagementFactory.getMemoryManagerMXBeans()) {
             ox = new ObjectName(ManagementFactory.MEMORY_MANAGER_MXBEAN_DOMAIN_TYPE+",name="+mbbm.getName());
             mbs.unregisterMBean(ox);
         }
         
         //gc bean
-        mp = ManagementFactory.getGarbageCollectorMXBeans();
-        for(int a = 0;a<mp.size();a++){
-            GarbageCollectorMXBean mbbm = (GarbageCollectorMXBean)mp.get(a);
+        for(GarbageCollectorMXBean mbbm : ManagementFactory.getGarbageCollectorMXBeans()) {
             ox = new ObjectName(ManagementFactory.GARBAGE_COLLECTOR_MXBEAN_DOMAIN_TYPE+",name="+mbbm.getName());
             mbs.unregisterMBean(ox);
         }        

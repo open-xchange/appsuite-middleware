@@ -447,8 +447,6 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
 
         log.debug(db.toString());
 
-        final String name = db.getName();
-                
         setIdOrGetIDFromNameAndIdObject(null, db);
         final Integer id = db.getId();
         if (!tool.existsDatabase(id)) {
