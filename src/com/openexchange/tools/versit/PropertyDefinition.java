@@ -57,6 +57,7 @@ import java.util.Locale;
 
 /**
  * @author Viktor Pracht
+ * @author Tobias Prinz (handling markInvalid() for empty properties)
  */
 public class PropertyDefinition {
 
@@ -134,9 +135,10 @@ public class PropertyDefinition {
 		}
 		final Object value = valueDefinition.parse(s, property);
 		if (value == null) {
-			return null;
+			property.markInvalid();
+		} else {
+			property.setValue(value);
 		}
-		property.setValue(value);
 		return property;
 	}
 

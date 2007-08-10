@@ -56,7 +56,8 @@ import java.util.HashMap;
 import java.util.Locale;
 
 /**
- * @author Viktor Pracht
+ * @author Viktor Pracht (design)
+ * @author Tobias Prinz (added invalid flag to fix bug 8527)
  */
 public class Property {
 
@@ -67,9 +68,12 @@ public class Property {
 	private final HashMap<String, Parameter> Index = new HashMap<String, Parameter>();
 
 	private Object value = null;
+	
+	private boolean invalid;
 
 	public Property(String name) {
 		this.name = name;
+		this.invalid = false;
 	}
 
 	public Parameter getParameter(final String name) {
@@ -105,6 +109,14 @@ public class Property {
 	public Property setValue(final Object value) {
 		this.value = value;
 		return this;
+	}
+	
+	public void markInvalid(){
+		this.invalid = true;
+	}
+	
+	public boolean isInvalid(){
+		return this.invalid;
 	}
 
 }

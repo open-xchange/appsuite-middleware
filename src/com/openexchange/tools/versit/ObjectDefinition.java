@@ -60,6 +60,7 @@ import java.util.Locale;
 
 /**
  * @author Viktor Pracht
+ * @author Tobias Prinz (handling of invalid values, bug 8527)
  */
 public class ObjectDefinition implements VersitDefinition {
 	
@@ -177,7 +178,9 @@ public class ObjectDefinition implements VersitDefinition {
 				}
 				return child;
 			}
-			object.addProperty(property);
+			if(! property.isInvalid()){
+				object.addProperty(property);
+			}
 			property = parseProperty(s);
 		}
 		if (property == null) {
