@@ -730,10 +730,10 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
     /**
      * 
-     * @see com.openexchange.admin.storage.OXContextSQLStorage#searchContext(java.lang.String)
+     * @see com.openexchange.admin.storage.OXContextSQLStorage#listContext(java.lang.String)
      */
     @Override
-    public Context[] searchContext(final String search_pattern) throws StorageException {
+    public Context[] listContext(final String search_pattern) throws StorageException {
         Connection configdb_read = null;
         PreparedStatement stmt = null;
         try {
