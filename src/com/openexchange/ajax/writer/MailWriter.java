@@ -84,6 +84,7 @@ import com.openexchange.imap.OXMailException.MailCode;
 import com.openexchange.imap.threadsort.ThreadSortMessage;
 import com.openexchange.sessiond.SessionObject;
 import com.sun.mail.imap.IMAPFolder;
+import com.sun.mail.imap.protocol.BODYSTRUCTURE;
 
 /**
  * MailWriter
@@ -92,11 +93,13 @@ import com.sun.mail.imap.IMAPFolder;
  * 
  */
 public class MailWriter extends DataWriter {
-	
+
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(MailWriter.class);
+
+	private static final String MIME_SUBTYPE_ALTERNATIVE = "ALTERNATIVE";
 	
-	private static final String MIME_MULTIPART_MIXED = "multipart/mixed";
+	private static final String MIME_SUBTYPE_MIXED = "MIXED";
 
 	public static interface MailFieldWriter {
 		public void writeField(JSONWriter jsonwriter, Message msg, int level, boolean withKey) throws OXException,
@@ -116,14 +119,15 @@ public class MailWriter extends DataWriter {
 	public final void writeJSONMessageObject(final JSONMessageObject msgObj) throws JSONException {
 		msgObj.writeAsJSONObjectIntoJSONWriter(jsonwriter);
 	}
-	
+
 	public final void writeMessageAsJSONObject(final Message msg) throws OXException {
 		writeMessageAsJSONObject(msg, true);
 	}
-	
+
 	private static final String ERR_BROKEN_BODYSTRUCTURE = "unable to load bodystructure";
 
-	public final void writeMessageAsJSONObject(final Message msg, final boolean createVersionForDisplay) throws OXException {
+	public final void writeMessageAsJSONObject(final Message msg, final boolean createVersionForDisplay)
+			throws OXException {
 		try {
 			final JSONMessageHandler msgHandler = new JSONMessageHandler(session, MessageUtils
 					.getMessageUniqueIdentifier(msg), createVersionForDisplay);
@@ -131,7 +135,8 @@ public class MailWriter extends DataWriter {
 			final JSONMessageObject msgObj = msgHandler.getMessageObject();
 			msgObj.writeAsJSONObjectIntoJSONWriter(jsonwriter);
 		} catch (MessagingException e) {
-			if (e.getMessage().toLowerCase(Locale.ENGLISH).indexOf(ERR_BROKEN_BODYSTRUCTURE) != -1 && LOG.isWarnEnabled()) {
+			if (e.getMessage().toLowerCase(Locale.ENGLISH).indexOf(ERR_BROKEN_BODYSTRUCTURE) != -1
+					&& LOG.isWarnEnabled()) {
 				LOG.warn(e.getMessage(), e);
 			} else {
 				throw MailInterfaceImpl.handleMessagingException(e, session.getIMAPProperties(), session.getContext());
@@ -193,8 +198,8 @@ public class MailWriter extends DataWriter {
 						 */
 						if (msg instanceof MessageCacheObject) {
 							final MessageCacheObject msgco = (MessageCacheObject) msg;
-							final String msgUIDStr = new StringBuilder(msgco.getFolderFullname()).append(
-									Mail.SEPERATOR).append(msgco.getUid()).toString();
+							final String msgUIDStr = new StringBuilder(msgco.getFolderFullname())
+									.append(Mail.SEPERATOR).append(msgco.getUid()).toString();
 							jsonwriter.value(msgUIDStr == null ? JSONObject.NULL : msgUIDStr);
 						} else {
 							final String msgUIDStr = new StringBuilder(msg.getFolder().getFullName()).append(
@@ -230,7 +235,10 @@ public class MailWriter extends DataWriter {
 						if (withKey) {
 							jsonwriter.key(JSONMessageObject.JSON_HAS_ATTACHMENTS);
 						}
-						jsonwriter.value(msg.isMimeType(MIME_MULTIPART_MIXED));
+						final BODYSTRUCTURE bodystructure = ((MessageCacheObject) msg).getBodystructure();
+						jsonwriter
+								.value(bodystructure.isMulti()
+										&& (MIME_SUBTYPE_MIXED.equalsIgnoreCase(bodystructure.subtype) || hasAttachments(bodystructure)));
 					}
 				};
 				break Fields;
@@ -483,6 +491,23 @@ public class MailWriter extends DataWriter {
 		return retval;
 	}
 
+	private static final boolean hasAttachments(final BODYSTRUCTURE bodystructure) {
+		if (bodystructure.isMulti()) {
+			if (MIME_SUBTYPE_ALTERNATIVE.equalsIgnoreCase(bodystructure.subtype) && bodystructure.bodies.length > 2) {
+				return true;
+			} else if (bodystructure.bodies.length > 1) {
+				return true;
+			} else {
+				boolean found = false;
+				for (int i = 0; i < bodystructure.bodies.length && !found; i++) {
+					found |= hasAttachments(bodystructure.bodies[i]);
+				}
+				return found;
+			}
+		}
+		return false;
+	}
+
 	public final void writeMessageFieldAsJSONValue(final int field, final Message msg, final boolean withKey)
 			throws OXException {
 		writeMessageFieldAsJSONValue(field, msg, 0, withKey);
@@ -519,7 +544,7 @@ public class MailWriter extends DataWriter {
 		}
 		return values[0];
 	}
-	
+
 	private static final JSONArray EMPTY_JSON_ARR = new JSONArray();
 
 	private final JSONArray getFromAddr(final Message msg) throws MessagingException {
