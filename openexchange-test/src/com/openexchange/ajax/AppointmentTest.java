@@ -302,6 +302,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 		
 		final AJAXSession ajaxSession = new AJAXSession(webCon, session);
 		final DeleteRequest deleteRequest = new DeleteRequest(inFolder, id, recurrencePosition, new Date());
+		deleteRequest.setFailOnError(false);
 		final AbstractAJAXResponse response = Executor.execute(ajaxSession, deleteRequest);
 		
 		if (response.hasError()) {

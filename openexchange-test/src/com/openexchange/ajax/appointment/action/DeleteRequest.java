@@ -76,6 +76,8 @@ public class DeleteRequest extends AbstractAppointmentRequest {
 	private final int recurrencePosition;
 	
 	private final Date recurrenceDatePosition;
+	
+	private boolean failOnError = true;
 
     /**
      * Default constructor.
@@ -101,6 +103,10 @@ public class DeleteRequest extends AbstractAppointmentRequest {
 		this.recurrenceDatePosition = recurrenceDatePosition;
 		this.recurrencePosition = 0;
     }
+	
+	public void setFailOnError(final boolean failOnError) {
+		this.failOnError = failOnError;
+	}
 
     /**
      * {@inheritDoc}
@@ -143,6 +149,6 @@ public class DeleteRequest extends AbstractAppointmentRequest {
      * {@inheritDoc}
      */
     public AbstractAJAXParser getParser() {
-        return new DeleteParser();
+        return new DeleteParser(failOnError);
     }
 }
