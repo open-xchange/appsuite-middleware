@@ -3,6 +3,7 @@
  - Forgot to delete temporary uploaded files manually after sending message
  - Bugfix #8701: Invoking own decoding method for MIME-encoded personal
    parts in internet addresses
+ - Bugfix #8686: Closing first statement
 
 * 2007-08-09 - marcus.klein@open-xchange.com
 

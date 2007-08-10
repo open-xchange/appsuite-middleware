@@ -144,6 +144,7 @@ public final class UnboundFolderReplacementUpdateTask implements UpdateTask {
 			try {
 				stmt = writeCon.prepareStatement(SQL_UPDATE.replaceFirst(TABLE_REPL, TABLE_WORKING));
 				stmt.executeUpdate();
+				stmt.close();
 				stmt = writeCon.prepareStatement(SQL_UPDATE.replaceFirst(TABLE_REPL, TABLE_BACKUP));
 				stmt.executeUpdate();
 			} catch (final SQLException e) {
