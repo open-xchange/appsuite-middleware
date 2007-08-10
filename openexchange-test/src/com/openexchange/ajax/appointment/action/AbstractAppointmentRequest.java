@@ -65,7 +65,7 @@ import com.openexchange.groupware.container.AppointmentObject;
 public abstract class AbstractAppointmentRequest implements AJAXRequest {
 
     /**
-     * URL of the tasks AJAX interface.
+     * URL of the calendar AJAX interface.
      */
     private static final String URL = "/ajax/calendar";
 

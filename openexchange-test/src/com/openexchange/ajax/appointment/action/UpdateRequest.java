@@ -121,7 +121,7 @@ public class UpdateRequest extends AbstractAppointmentRequest {
     }
 
     /**
-     * @return the task
+     * @return the appointment
      */
     protected AppointmentObject getAppointment() {
         return appointmentObj;
