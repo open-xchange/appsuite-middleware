@@ -557,7 +557,11 @@ public class OXMailException extends OXException {
 		/**
 		 * The rights choosed by user %s could not be applied to new folder %s due to missing administer right in its initial rights specified by IMAP server. The folder has been created anyway.
 		 */
-		NO_ADMINISTER_ACCESS_ON_INITIAL("The rights composed by user %s could not be applied to new folder %s due to missing administer right in its initial rights specified by IMAP server. The folder has been created anyway.", Category.PERMISSION, 102);
+		NO_ADMINISTER_ACCESS_ON_INITIAL("The rights composed by user %s could not be applied to new folder %s due to missing administer right in its initial rights specified by IMAP server. The folder has been created anyway.", Category.PERMISSION, 102),
+		/**
+		 * Bad value %s in parameter %s
+		 */
+		BAD_PARAM_VALUE("Bad value %s in parameter %s", Category.USER_INPUT, 103);
 
 		/**
 		 * Message of the exception.

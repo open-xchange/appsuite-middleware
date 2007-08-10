@@ -60,6 +60,61 @@ import com.openexchange.groupware.Component;
  */
 public class ParamContainerException extends AbstractOXException {
 
+	public static enum Code {
+
+		/**
+		 * Bad value %s in parameter %s
+		 */
+		BAD_PARAM_VALUE("Bad value %s in parameter %s", Category.USER_INPUT, 1),
+		/**
+		 * Missing parameter %s
+		 */
+		MISSING_PARAMETER("Missing parameter %s", Category.CODE_ERROR, 2);
+
+		/**
+		 * Message of the exception.
+		 */
+		private final String message;
+
+		/**
+		 * Category of the exception.
+		 */
+		private final Category category;
+
+		/**
+		 * Detail number of the exception.
+		 */
+		private final int detailNumber;
+
+		/**
+		 * Default constructor.
+		 * 
+		 * @param message
+		 *            message.
+		 * @param category
+		 *            category.
+		 * @param detailNumber
+		 *            detail number.
+		 */
+		private Code(final String message, final Category category, final int detailNumber) {
+			this.message = message;
+			this.category = category;
+			this.detailNumber = detailNumber;
+		}
+
+		public int getNumber() {
+			return detailNumber;
+		}
+
+		public String getMessage() {
+			return message;
+		}
+
+		public Category getCategory() {
+			return category;
+		}
+	}
+
 	/**
 	 * serialVersionUID
 	 */

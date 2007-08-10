@@ -6,6 +6,7 @@
  - Bugfix #8686: Closing first statement
  - Additional folder field for mail folder attribute "hasSubscribedSubfolders"
  - More reliable message attachment detection
+ - Proper error codes in ParamContainer class
 
 * 2007-08-09 - marcus.klein@open-xchange.com
 
