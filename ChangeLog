@@ -4,6 +4,7 @@
  - Bugfix #8701: Invoking own decoding method for MIME-encoded personal
    parts in internet addresses
  - Bugfix #8686: Closing first statement
+ - Additional folder field for mail folder attribute "hasSubscribedSubfolders"
 
 * 2007-08-09 - marcus.klein@open-xchange.com
 

@@ -93,4 +93,6 @@ public interface FolderFields extends FolderChildFields {
 	
 	public static final String SUBSCRIBED = "subscribed";
 	
+	public static final String SUBSCR_SUBFLDS = "subscr_subflds";
+
 }

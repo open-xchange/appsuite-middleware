@@ -216,6 +216,8 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 	public static final int CAPABILITIES = 313;
 	
 	public static final int SUBSCRIBED = 314;
+	
+	public static final int SUBSCR_SUBFLDS = 315;
 
 	// Modules
 	public static final int TASK = 1;

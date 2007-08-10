@@ -571,6 +571,31 @@ public final class FolderWriter extends DataWriter {
 					}
 				};
 				break Fields;
+			case FolderObject.SUBSCR_SUBFLDS:
+				retval[i] = new IMAPFolderFieldWriter() {
+					@Override
+					public void writeField(final JSONWriter jsonwriter, final MailFolderObject folder,
+							final boolean withKey, final String name, final int hasSubfolders, final String fullName,
+							final int module, final boolean all) throws JSONException, OXException {
+						if (withKey) {
+							jsonwriter.key(FolderFields.SUBSCR_SUBFLDS);
+						}
+						if (IMAPProperties.isIgnoreSubscription()) {
+							if (hasSubfolders == -1) {
+								jsonwriter.value(folder.hasSubfolders());
+								return;
+							}
+							jsonwriter.value(hasSubfolders > 0);
+							return;
+						}
+						if (hasSubfolders == -1) {
+							jsonwriter.value(folder.hasSubfolders() ? folder.hasSubscribedSubfolders() : false);
+							return;
+						}
+						jsonwriter.value(hasSubfolders > 0);
+					}
+				};
+				break Fields;
 			default:
 				retval[i] = new IMAPFolderFieldWriter() {
 					@Override
@@ -639,7 +664,7 @@ public final class FolderWriter extends DataWriter {
 			FolderObject.FOLDER_NAME, FolderObject.MODULE, FolderObject.TYPE, FolderObject.SUBFOLDERS,
 			FolderObject.OWN_RIGHTS, FolderObject.PERMISSIONS_BITS, FolderObject.SUMMARY, FolderObject.STANDARD_FOLDER,
 			FolderObject.TOTAL, FolderObject.NEW, FolderObject.UNREAD, FolderObject.DELETED, FolderObject.CAPABILITIES,
-			FolderObject.SUBSCRIBED };
+			FolderObject.SUBSCRIBED, FolderObject.SUBSCR_SUBFLDS };
 
 	public static int[] getAllFolderFields() {
 		final int[] retval = new int[ALL_FLD_FIELDS.length];
@@ -965,6 +990,18 @@ public final class FolderWriter extends DataWriter {
 							final String name, final int hasSubfolders) throws JSONException {
 						if (withKey) {
 							jsonwriter.key(FolderFields.SUBSCRIBED);
+						}
+						jsonwriter.value(JSONObject.NULL);
+					}
+				};
+				break Fields;
+			case FolderObject.SUBSCR_SUBFLDS:
+				retval[i] = new FolderFieldWriter() {
+					@Override
+					public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey,
+							final String name, final int hasSubfolders) throws JSONException {
+						if (withKey) {
+							jsonwriter.key(FolderFields.SUBSCR_SUBFLDS);
 						}
 						jsonwriter.value(JSONObject.NULL);
 					}
