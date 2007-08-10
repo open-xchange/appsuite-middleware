@@ -1,5 +1,6 @@
 package com.openexchange.ajax;
 
+import com.openexchange.configuration.ConfigurationException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,6 +23,7 @@ import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.container.Response;
+import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.groupware.Init;
 import java.util.Date;
 import java.util.regex.Matcher;
@@ -74,6 +76,12 @@ public abstract class AbstractAJAXTest extends TestCase {
 	
 	public AbstractAJAXTest(String name) {
 		super(name);
+
+		try {
+			AJAXConfig.init();
+		} catch (ConfigurationException ex) {
+			ex.printStackTrace();
+		}
 	}
 	
 	/**
