@@ -52,6 +52,8 @@ package com.openexchange.groupware.upload;
 import java.util.Map;
 import java.util.TimerTask;
 
+import com.openexchange.server.ServerTimer;
+
 /**
  * AJAXUploadFileTimerTask
  * 
@@ -98,6 +100,11 @@ public final class AJAXUploadFileTimerTask extends TimerTask {
 				LOG.debug(new StringBuilder(256).append("Upload file \"").append(fileName).append(
 						"\" removed from session and deleted from disk through timer task").toString());
 			}
+			/*
+			 * Cancel this task
+			 */
+			this.cancel();
+			ServerTimer.getTimer().purge();
 		}
 	}
 

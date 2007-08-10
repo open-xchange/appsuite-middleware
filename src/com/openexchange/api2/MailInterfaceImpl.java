@@ -228,7 +228,7 @@ public class MailInterfaceImpl implements MailInterface {
 	private static final String MIME_TEXT_VCARD = "text/vcard";
 
 	private static final String MIME_TEXT_X_VCARD = "text/x-vcard";
-	
+
 	private static final String MIME_IMAGE_ALL = "image/*";
 
 	/*
@@ -3095,6 +3095,7 @@ public class MailInterfaceImpl implements MailInterface {
 			MimeMessage originalMsg = null;
 			boolean isReadWrite = true;
 			Mail.MailIdentifier mailId = null;
+			MessageFiller msgFiller = null;
 			try {
 				if (msgObj.getMsgref() != null) {
 					/*
@@ -3191,8 +3192,7 @@ public class MailInterfaceImpl implements MailInterface {
 					/*
 					 * Fill message
 					 */
-					final MessageFiller msgFiller = new MessageFiller(sessionObj, originalMsg, imapCon.getSession(),
-							draftFolder);
+					msgFiller = new MessageFiller(sessionObj, originalMsg, imapCon.getSession(), draftFolder);
 					msgFiller.fillMessage(msgObj, newSMTPMsg, uploadEvent, sendType);
 					checkAndCreateFolder(draftFolder, inboxFolder);
 					if (!draftFolder.isOpen()) {
@@ -3269,7 +3269,7 @@ public class MailInterfaceImpl implements MailInterface {
 				/*
 				 * Fill message
 				 */
-				final MessageFiller msgFiller = new MessageFiller(sessionObj, originalMsg, imapCon.getSession(), usm
+				msgFiller = new MessageFiller(sessionObj, originalMsg, imapCon.getSession(), usm
 						.isNoCopyIntoStandardSentFolder() ? null : sentFolder);
 				msgFiller.fillMessage(msgObj, newSMTPMsg, uploadEvent, sendType);
 				/*
@@ -3400,6 +3400,9 @@ public class MailInterfaceImpl implements MailInterface {
 						LOG.warn(WARN_FLD_ALREADY_CLOSED, e);
 					}
 					originalMsgFolder = null;
+				}
+				if (msgFiller != null) {
+					msgFiller.close();
 				}
 			}
 		} catch (final MessagingException e) {

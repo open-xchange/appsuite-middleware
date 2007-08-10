@@ -56,7 +56,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -463,8 +466,49 @@ public final class AJAXFile extends PermissionServlet {
 		uploadFile.setFileName(fileItem.getName());
 		uploadFile.setContentType(fileItem.getContentType());
 		uploadFile.setSize(fileItem.getSize());
-		session.putAJAXUploadFile(tmpFile.getName(), uploadFile);
-		return tmpFile.getName();
+		final String id = plainStringToMD5(tmpFile.getName());
+		session.putAJAXUploadFile(id, uploadFile);
+		return id;
+	}
+	
+	private static final String ALG_MD5 = "MD5";
+
+	private static String plainStringToMD5(final String input) {
+		final MessageDigest md;
+		try {
+			/*
+			 * Choose MD5 (SHA1 is also possible)
+			 */
+			md = MessageDigest.getInstance(ALG_MD5);
+		} catch (final NoSuchAlgorithmException e) {
+			LOG.error("Unable to generate file ID", e);
+			return input;
+		}
+		/*
+		 * Reset
+		 */
+		md.reset();
+		/*
+		 * Update the digest
+		 */
+		try {
+			md.update(input.getBytes("UTF-8"));
+		} catch (final UnsupportedEncodingException e) {
+			/*
+			 * Should not occur since utf-8 is a known encoding in jsdk
+			 */
+			LOG.error("Unable to generate file ID", e);
+			return input;
+		}
+		/*
+		 * Here comes the hash
+		 */
+		final byte[] byteHash = md.digest();
+		final StringBuilder resultString = new StringBuilder();
+		for (int i = 0; i < byteHash.length; i++) {
+			resultString.append(Integer.toHexString(0xF0 & byteHash[i]).charAt(0));
+		}
+		return resultString.toString();
 	}
 
 	/*

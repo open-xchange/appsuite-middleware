@@ -1,3 +1,7 @@
+* 2007-08-10 - thorben.betten@open-xchange.com
+
+ - Forgot to delete temporary uploaded files manually after sending message
+
 * 2007-08-09 - marcus.klein@open-xchange.com
 
  - Added max idle timeout for uploads to configuration setting tree.

@@ -62,6 +62,7 @@ import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -129,7 +130,7 @@ import com.sun.mail.imap.IMAPFolder;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MessageFiller {
+public final class MessageFiller {
 
 	/*
 	 * Constants for MIME types
@@ -196,6 +197,8 @@ public class MessageFiller {
 
 	private final int linewrap;
 
+	private Map<String, AJAXUploadFile> map;
+
 	/**
 	 * Creates a new instance of <code>MessageFiller</code>
 	 * 
@@ -220,13 +223,21 @@ public class MessageFiller {
 		converter = new Html2TextConverter();
 	}
 
+	/**
+	 * Performs some necessary final operations
+	 */
 	public void close() {
-		// if (origMsgFolder != null && origMsgFolder.isOpen()) {
-		// origMsgFolder.close(false);
-		// }
+		if (map != null) {
+			final int size = map.size();
+			final Iterator<AJAXUploadFile> iter = map.values().iterator();
+			for (int i = 0; i < size; i++) {
+				iter.next().delete();
+			}
+			map.clear();
+		}
 	}
 
-	public final void fillMessage(final JSONMessageObject msgObj, final MimeMessage newMimeMessage,
+	public void fillMessage(final JSONMessageObject msgObj, final MimeMessage newMimeMessage,
 			final UploadEvent uploadEvent, final int sendType) throws IOException, MessagingException, OXException,
 			JSONException {
 		/*
@@ -515,7 +526,7 @@ public class MessageFiller {
 	 * <code>true</code> a sub-multipart of MIME type multipart/related is
 	 * going to be appended as the "html" version
 	 */
-	private final Multipart createMultipartAlternative(final JSONMessageAttachmentObject mailTextMao,
+	private Multipart createMultipartAlternative(final JSONMessageAttachmentObject mailTextMao,
 			final boolean embeddedImages, final JSONMessageObject msgObj) throws OXException, MessagingException {
 		/*
 		 * Create an "alternative" multipart
@@ -552,7 +563,7 @@ public class MessageFiller {
 			 * content as a new body part to first index
 			 */
 			relatedMultipart.addBodyPart(createHtmlBodyPart(processReferencedLocalImages(mailText, relatedMultipart,
-					session), linewrap), 0);
+					this), linewrap), 0);
 			/*
 			 * Traverse Content-IDs
 			 */
@@ -599,7 +610,7 @@ public class MessageFiller {
 		return alternativeMultipart;
 	}
 
-	private static final BodyPart createHtmlBodyPart(final String htmlContent, final int linewrap)
+	private static BodyPart createHtmlBodyPart(final String htmlContent, final int linewrap)
 			throws IMAPException, MessagingException {
 		final String htmlCT = PAT_HTML_CT.replaceFirst(REPLACE_CS, IMAPProperties.getDefaultMimeCharset());
 		final MimeBodyPart html = new MimeBodyPart();
@@ -610,7 +621,7 @@ public class MessageFiller {
 		return html;
 	}
 
-	private final void addMessageBodyPart(final Multipart mp, final JSONMessageObject msgObj,
+	private void addMessageBodyPart(final Multipart mp, final JSONMessageObject msgObj,
 			final JSONMessageAttachmentObject mao) throws MessagingException, OXException, IOException {
 		if (mao.getContentType().regionMatches(true, 0, MIME_TEXT, 0, 5) && mao.getContent() != null) {
 			/*
@@ -735,7 +746,7 @@ public class MessageFiller {
 		}
 	}
 
-	private final void setMessageHeaders(final MimeMessage msg, final JSONMessageObject msgObj)
+	private void setMessageHeaders(final MimeMessage msg, final JSONMessageObject msgObj)
 			throws MessagingException, OXException {
 		/*
 		 * Set from
@@ -857,7 +868,7 @@ public class MessageFiller {
 		}
 	}
 
-	private final String getUserVCard() throws DBPoolingException, IOException, ConverterException, OXException {
+	private String getUserVCard() throws DBPoolingException, IOException, ConverterException, OXException {
 		final User userObj = session.getUserObject();
 		final OXContainerConverter converter = new OXContainerConverter(session);
 		Connection readCon = null;
@@ -899,7 +910,7 @@ public class MessageFiller {
 	 * display html blockquotes
 	 * </p>
 	 */
-	private static final String insertColorQuotes(final String s) {
+	private static String insertColorQuotes(final String s) {
 		return replaceHTMLSimpleQuotesForDisplay(s);
 	}
 
@@ -928,7 +939,7 @@ public class MessageFiller {
 	 * @return <code>true</code> if given html content contains references to
 	 *         local image files; otherwise <code>false</code>
 	 */
-	public static final boolean hasReferencedLocalImages(final String htmlContent, final SessionObject session) {
+	public static boolean hasReferencedLocalImages(final String htmlContent, final SessionObject session) {
 		final Matcher m = PATTERN_REF_IMG.matcher(htmlContent);
 		while (m.find()) {
 			if (session.containsAJAXUploadFile(m.group(5))) {
@@ -940,47 +951,53 @@ public class MessageFiller {
 
 	private static final String IMG_PAT = "<img src=\"cid:#1#\">";
 
-	private static final String processReferencedLocalImages(final String htmlContent, final Multipart mp,
-			final SessionObject session) throws MessagingException {
+	private static String processReferencedLocalImages(final String htmlContent, final Multipart mp,
+			final MessageFiller msgFiller) throws MessagingException {
 		final StringBuffer sb = new StringBuffer(htmlContent.length());
 		final Matcher m = PATTERN_REF_IMG.matcher(htmlContent);
-		NextImg: while (m.find()) {
-			final String id = m.group(5);
-			final AJAXUploadFile uploadFile = session.removeAJAXUploadFile(id);
-			if (null == uploadFile) {
-				if (LOG.isWarnEnabled()) {
-					LOG.warn(new StringBuilder(128).append("No upload file found with id \"").append(id).append(
-							"\". Referenced image is skipped.").toString());
+		if (m.find()) {
+			msgFiller.map = new HashMap<String, AJAXUploadFile>();
+			NextImg: do {
+				final String id = m.group(5);
+				final AJAXUploadFile uploadFile = msgFiller.session.containsAJAXUploadFile(id) ? msgFiller.session
+						.removeAJAXUploadFile(id) : msgFiller.map.get(id);
+				if (null == uploadFile) {
+					if (LOG.isWarnEnabled()) {
+						LOG.warn(new StringBuilder(128).append("No upload file found with id \"").append(id).append(
+								"\". Referenced image is skipped.").toString());
+					}
+					continue NextImg;
+				} else if (!msgFiller.map.containsKey(id)) {
+					msgFiller.map.put(id, uploadFile);
 				}
-				continue NextImg;
-			}
-			/*
-			 * Append body part
-			 */
-			final MimeBodyPart imgBodyPart = new MimeBodyPart();
-			imgBodyPart.setDataHandler(new DataHandler(new FileDataSource(uploadFile.getFile())));
-			String fileName;
-			try {
-				fileName = MimeUtility.encodeText(uploadFile.getFileName(), IMAPProperties.getDefaultMimeCharset(),
-						ENC_Q);
-			} catch (final UnsupportedEncodingException e) {
-				fileName = uploadFile.getFileName();
-			} catch (final IMAPException e) {
-				fileName = uploadFile.getFileName();
-			}
-			imgBodyPart.setFileName(fileName);
-			StringBuilder tmp = new StringBuilder(128).append(fileName).append('@').append(id);
-			final String cid = tmp.toString();
-			tmp.setLength(0);
-			imgBodyPart.setContentID(tmp.append('<').append(cid).append('>').toString());
-			tmp = null;
-			imgBodyPart.setDisposition(Part.INLINE);
-			imgBodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, uploadFile.getContentType());
-			mp.addBodyPart(imgBodyPart);
-			/*
-			 * Replace image tag
-			 */
-			m.appendReplacement(sb, IMG_PAT.replaceFirst("#1#", cid));
+				/*
+				 * Append body part
+				 */
+				final MimeBodyPart imgBodyPart = new MimeBodyPart();
+				imgBodyPart.setDataHandler(new DataHandler(new FileDataSource(uploadFile.getFile())));
+				String fileName;
+				try {
+					fileName = MimeUtility.encodeText(uploadFile.getFileName(), IMAPProperties.getDefaultMimeCharset(),
+							ENC_Q);
+				} catch (final UnsupportedEncodingException e) {
+					fileName = uploadFile.getFileName();
+				} catch (final IMAPException e) {
+					fileName = uploadFile.getFileName();
+				}
+				imgBodyPart.setFileName(fileName);
+				StringBuilder tmp = new StringBuilder(128).append(fileName).append('@').append(id);
+				final String cid = tmp.toString();
+				tmp.setLength(0);
+				imgBodyPart.setContentID(tmp.append('<').append(cid).append('>').toString());
+				tmp = null;
+				imgBodyPart.setDisposition(Part.INLINE);
+				imgBodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, uploadFile.getContentType());
+				mp.addBodyPart(imgBodyPart);
+				/*
+				 * Replace image tag
+				 */
+				m.appendReplacement(sb, IMG_PAT.replaceFirst("#1#", cid));
+			} while (m.find());
 		}
 		m.appendTail(sb);
 		return sb.toString();
@@ -1000,7 +1017,7 @@ public class MessageFiller {
 	 * @return <code>true</code> if given html content contains inlined
 	 *         images; otherwise <code>false</code>
 	 */
-	public static final boolean hasEmbeddedImages(final String htmlContent) {
+	public static boolean hasEmbeddedImages(final String htmlContent) {
 		return PATTERN_EMBD_IMG.matcher(htmlContent).find();
 	}
 
@@ -1013,7 +1030,7 @@ public class MessageFiller {
 	 * @return an instance of <code>{@link List}</code> containing all
 	 *         occuring content IDs
 	 */
-	public static final List<String> getContentIDs(final String htmlContent) {
+	public static List<String> getContentIDs(final String htmlContent) {
 		final List<String> retval = new ArrayList<String>();
 		final Matcher m = PATTERN_EMBD_IMG.matcher(htmlContent);
 		while (m.find()) {
@@ -1022,7 +1039,7 @@ public class MessageFiller {
 		return retval;
 	}
 
-	private static final Part getAndRemoveImageAttachment(final String cid, final JSONMessageObject msgObj,
+	private static Part getAndRemoveImageAttachment(final String cid, final JSONMessageObject msgObj,
 			final SessionObject session, final Message originalMsg) throws OXException, MessagingException {
 		final List<JSONMessageAttachmentObject> attachList = msgObj.getMsgAttachments();
 		final int size = attachList.size();
@@ -1059,7 +1076,7 @@ public class MessageFiller {
 	 * @return <code>true</code> if both are equal; otherwise
 	 *         <code>false</code>
 	 */
-	public static final boolean equalsCID(final String contentId1Arg, final String contentId2Arg) {
+	public static boolean equalsCID(final String contentId1Arg, final String contentId2Arg) {
 		if (null != contentId1Arg && null != contentId2Arg) {
 			final String contentId1 = contentId1Arg.charAt(0) == '<' ? contentId1Arg.substring(1, contentId1Arg
 					.length() - 1) : contentId1Arg;
