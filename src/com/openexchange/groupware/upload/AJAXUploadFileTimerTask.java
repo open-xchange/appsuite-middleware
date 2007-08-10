@@ -96,8 +96,8 @@ public final class AJAXUploadFileTimerTask extends TimerTask {
 			ajaxUploadFiles.remove(id);
 			final String fileName = file.getFile().getName();
 			file.delete();
-			if (LOG.isDebugEnabled()) {
-				LOG.debug(new StringBuilder(256).append("Upload file \"").append(fileName).append(
+			if (LOG.isInfoEnabled()) {
+				LOG.info(new StringBuilder(256).append("Upload file \"").append(fileName).append(
 						"\" removed from session and deleted from disk through timer task").toString());
 			}
 			/*
