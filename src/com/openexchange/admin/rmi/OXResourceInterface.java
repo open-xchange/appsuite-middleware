@@ -82,7 +82,7 @@ public interface OXResourceInterface extends Remote {
      * @param res Resource which should be created
      * @param auth Credentials for authenticating against server.
      * @return Contains the new resource id.
-     * @throws StorageException When an error in the subsystems occured.
+     * @throws StorageException When an error in the subsystems occurred.
      * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
      * @throws NoSuchContextException If the context does not exist in the system.
      * @throws InvalidDataException If the data sent within the method contained invalid data.
@@ -97,7 +97,7 @@ public interface OXResourceInterface extends Remote {
      * @param ctx Change Resource in this Context.
      * @param res Resource containing the data.
      * @param auth Credentials for authenticating against server.
-     * @throws StorageException When an error in the subsystems occured.
+     * @throws StorageException When an error in the subsystems occurred.
      * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
      * @throws NoSuchContextException If the context does not exist in the system.
      * @throws InvalidDataException If the data sent within the method contained invalid data.
@@ -113,7 +113,7 @@ public interface OXResourceInterface extends Remote {
      * @param ctx Context object.
      * @param res Resource which should be deleted.
      * @param auth Credentials for authenticating against server.
-     * @throws StorageException When an error in the subsystems occured.
+     * @throws StorageException When an error in the subsystems occurred.
      * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
      * @throws NoSuchContextException If the context does not exist in the system.
      * 
@@ -131,7 +131,7 @@ public interface OXResourceInterface extends Remote {
      * @param ctx Context object.
      * @param res Resource containing the resource id.
      * @param auth Credentials for authenticating against server.
-     * @throws StorageException When an error in the subsystems occured.
+     * @throws StorageException When an error in the subsystems occurred.
      * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
      * @throws NoSuchContextException If the context does not exist in the system.
      * 
@@ -150,7 +150,7 @@ public interface OXResourceInterface extends Remote {
      * @param ctx Context object.
      * @param res Resource containing the resource id.
      * @param auth Credentials for authenticating against server.
-     * @throws StorageException When an error in the subsystems occured.
+     * @throws StorageException When an error in the subsystems occurred.
      * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
      * @throws NoSuchContextException If the context does not exist in the system.
      * 
@@ -185,7 +185,7 @@ public interface OXResourceInterface extends Remote {
      * @param ctx Context object.
      * @param pattern Search pattern like * or mon* (e.g. for monitor)
      * @param auth Credentials for authenticating against server.
-     * @throws StorageException When an error in the subsystems occured.
+     * @throws StorageException When an error in the subsystems occurred.
      * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
      * @throws NoSuchContextException If the context does not exist in the system.
      * @throws InvalidDataException If the data sent within the method contained invalid data.
@@ -200,7 +200,7 @@ public interface OXResourceInterface extends Remote {
      * @return Resource[] containing result objects.
      * @param ctx Context object.
      * @param auth Credentials for authenticating against server.
-     * @throws StorageException When an error in the subsystems occured.
+     * @throws StorageException When an error in the subsystems occurred.
      * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
      * @throws NoSuchContextException If the context does not exist in the system.
      * @throws InvalidDataException If the data sent within the method contained invalid data.
