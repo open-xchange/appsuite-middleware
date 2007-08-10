@@ -326,6 +326,9 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 	 */
 	public int deleteFolderObject(final FolderObject folderobject, final Date clientLastModified) throws OXException {
 		try {
+			if (!folderobject.containsType()) {
+				folderobject.setType(oxfolderAccess.getFolderType(folderobject.getObjectID()));
+			}
 			if (folderobject.getType() == FolderObject.PUBLIC
 					&& !sessionObj.getUserConfiguration().hasFullPublicFolderAccess()) {
 				throw new OXFolderException(FolderCode.NO_PUBLIC_FOLDER_WRITE_ACCESS,
@@ -341,6 +344,9 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 			}
 			final EffectivePermission effectivePerm = folderobject.getEffectiveUserPermission(userId, sessionObj
 					.getUserConfiguration());
+			if (!folderobject.containsModule()) {
+				folderobject.setModule(oxfolderAccess.getFolderModule(folderobject.getObjectID()));
+			}
 			if (!effectivePerm.hasModuleAccess(folderobject.getModule())) {
 				throw new OXFolderException(FolderCode.NO_MODULE_ACCESS, getUserName(sessionObj),
 						folderModule2String(folderobject.getModule()), Integer.valueOf(ctx.getContextId()));
