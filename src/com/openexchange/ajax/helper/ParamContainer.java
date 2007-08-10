@@ -239,13 +239,13 @@ public abstract class ParamContainer {
 			final String tmp = req.getParameter(paramName);
 			if (tmp == null) {
 				throw new ParamContainerException(component, errorInfo.getMissingParamCategory(), errorInfo
-						.getMissingParamNum(), errorInfo.getMissingParamMsg(), null);
+						.getMissingParamNum(), errorInfo.getMissingParamMsg(), null, paramName);
 			}
 			try {
 				return Integer.parseInt(tmp);
 			} catch (final NumberFormatException e) {
 				throw new ParamContainerException(component, errorInfo.getBadParamCategory(), errorInfo
-						.getBadParamNum(), errorInfo.getBadParamMsg(), null);
+						.getBadParamNum(), errorInfo.getBadParamMsg(), null, tmp, paramName);
 			}
 		}
 
@@ -254,7 +254,7 @@ public abstract class ParamContainer {
 			final String tmp = req.getParameter(paramName);
 			if (tmp == null) {
 				throw new ParamContainerException(component, errorInfo.getMissingParamCategory(), errorInfo
-						.getMissingParamNum(), errorInfo.getMissingParamMsg(), null);
+						.getMissingParamNum(), errorInfo.getMissingParamMsg(), null, paramName);
 			}
 			return tmp;
 		}
@@ -269,7 +269,7 @@ public abstract class ParamContainer {
 				return new Date(Long.parseLong(tmp));
 			} catch (final NumberFormatException e) {
 				throw new ParamContainerException(component, errorInfo.getBadParamCategory(), errorInfo
-						.getBadParamNum(), errorInfo.getBadParamMsg(), null);
+						.getBadParamNum(), errorInfo.getBadParamMsg(), null, tmp, paramName);
 			}
 		}
 
@@ -307,7 +307,7 @@ public abstract class ParamContainer {
 				return Integer.parseInt(tmp);
 			} catch (final NumberFormatException e) {
 				throw new ParamContainerException(component, errorInfo.getBadParamCategory(), errorInfo
-						.getBadParamNum(), errorInfo.getBadParamMsg(), null);
+						.getBadParamNum(), errorInfo.getBadParamMsg(), null, tmp, paramName);
 			}
 		}
 
@@ -344,7 +344,7 @@ public abstract class ParamContainer {
 		public Date checkDateParam(final String paramName) throws AbstractOXException {
 			if (!jo.has(paramName) || jo.isNull(paramName)) {
 				throw new ParamContainerException(component, errorInfo.getMissingParamCategory(), errorInfo
-						.getMissingParamNum(), errorInfo.getMissingParamMsg(), null);
+						.getMissingParamNum(), errorInfo.getMissingParamMsg(), null, paramName);
 			}
 			try {
 				return new Date(jo.getLong(paramName));
@@ -358,7 +358,7 @@ public abstract class ParamContainer {
 		public int[] checkIntArrayParam(final String paramName) throws AbstractOXException {
 			if (!jo.has(paramName) || jo.isNull(paramName)) {
 				throw new ParamContainerException(component, errorInfo.getMissingParamCategory(), errorInfo
-						.getMissingParamNum(), errorInfo.getMissingParamMsg(), null);
+						.getMissingParamNum(), errorInfo.getMissingParamMsg(), null, paramName);
 			}
 			String[] tmp;
 			try {
@@ -383,7 +383,7 @@ public abstract class ParamContainer {
 		public int checkIntParam(final String paramName) throws AbstractOXException {
 			if (!jo.has(paramName) || jo.isNull(paramName)) {
 				throw new ParamContainerException(component, errorInfo.getMissingParamCategory(), errorInfo
-						.getMissingParamNum(), errorInfo.getMissingParamMsg(), null);
+						.getMissingParamNum(), errorInfo.getMissingParamMsg(), null, paramName);
 			}
 			try {
 				return jo.getInt(paramName);
@@ -397,7 +397,7 @@ public abstract class ParamContainer {
 		public String checkStringParam(final String paramName) throws AbstractOXException {
 			if (!jo.has(paramName) || jo.isNull(paramName)) {
 				throw new ParamContainerException(component, errorInfo.getMissingParamCategory(), errorInfo
-						.getMissingParamNum(), errorInfo.getMissingParamMsg(), null);
+						.getMissingParamNum(), errorInfo.getMissingParamMsg(), null, paramName);
 			}
 			try {
 				return jo.getString(paramName);
