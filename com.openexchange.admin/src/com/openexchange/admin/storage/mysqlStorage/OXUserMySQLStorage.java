@@ -524,7 +524,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             if (null != mailfolderconfirmedham) {
                 folder_update = write_ox_con
                         .prepareStatement("UPDATE user_setting_mail SET confirmed_ham = ? WHERE cid = ? AND user = ?");
-                folder_update.setString(1, mailfolderconfirmedspam);
+                folder_update.setString(1, mailfolderconfirmedham);
                 folder_update.setInt(2, context_id);
                 folder_update.setInt(3, user_id);
                 folder_update.executeUpdate();
