@@ -260,6 +260,34 @@ public class UserTest extends AbstractTest {
         }    
     }
     
+
+    @Test
+    public void testGetDataByNameWithUserAuth() throws Exception {
+        // get context to create an user
+        final Credentials cred = DummyCredentials();
+        final Context ctx = getTestContextObject(cred);
+        
+        // create new user
+        final OXUserInterface oxu = getUserClient();
+        final UserModuleAccess access = new UserModuleAccess();
+        
+        final User urs = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
+        final User createduser = oxu.create(ctx, urs, access, cred); 
+        
+        final User usernameuser = new User();
+        usernameuser.setName(createduser.getName());
+        
+        final Credentials usercred = new Credentials(urs.getName(), urs.getPassword());
+        // now load user from server and check if data is correct, else fail
+        final User srv_loaded = oxu.getData(ctx, usernameuser, usercred);
+        if(createduser.getId().equals(srv_loaded.getId())){
+            //verify data
+            compareUser(createduser,srv_loaded);
+        }else{
+            fail("Expected to get user data");
+        }    
+    }
+
     @Test
     public void testGetDataByID() throws Exception {
         // get context to create an user
