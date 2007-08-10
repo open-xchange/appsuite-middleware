@@ -211,6 +211,10 @@ public class OXFolderManagerImpl implements OXFolderManager {
 					throw new OXFolderException(FolderCode.NO_CREATE_SUBFOLDER_PERMISSION, Category.USER_CONFIGURATION,
 							getUserName(user.getId(), ctx), getFolderName(parentFolder), Integer.valueOf(ctx
 									.getContextId()));
+				} else if (!userConfig.hasModuleAccess(folderObj.getModule())) {
+					throw new OXFolderException(FolderCode.NO_MODULE_ACCESS, Category.USER_CONFIGURATION, getUserName(
+							user.getId(), ctx), folderModule2String(folderObj.getModule()), Integer.valueOf(ctx
+							.getContextId()));
 				} else if (parentFolder.getType() == FolderObject.PUBLIC && !userConfig.hasFullPublicFolderAccess()) {
 					throw new OXFolderException(FolderCode.NO_PUBLIC_FOLDER_WRITE_ACCESS,
 							getUserName(user.getId(), ctx), getFolderName(parentFolder), Integer.valueOf(ctx

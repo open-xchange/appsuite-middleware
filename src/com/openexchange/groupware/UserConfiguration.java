@@ -568,6 +568,26 @@ public final class UserConfiguration implements Serializable, DeleteListener, Cl
 		return cloneAccessibleModules();
 	}
 
+	/**
+	 * Checks if user has access to given module
+	 * 
+	 * @param module
+	 *            The module carrying a value defined in constants
+	 *            <code>{@link FolderObject#TASK}</code>,
+	 *            <code>{@link FolderObject#CALENDAR}</code>,
+	 *            <code>{@link FolderObject#CONTACT}</code>,
+	 *            <code>{@link FolderObject#UNBOUND}</code>,
+	 *            <code>{@link FolderObject#SYSTEM_MODULE}</code>,
+	 *            <code>{@link FolderObject#PROJECT}</code>,
+	 *            <code>{@link FolderObject#MAIL}</code>,
+	 *            <code>{@link FolderObject#INFOSTORE}</code>
+	 * @return <code>true</code> if user configuration permits access to given
+	 *         module; otherwise <code>false</code>
+	 */
+	public boolean hasModuleAccess(final int module) {
+		return Arrays.binarySearch(getAccessibleModules(), module) >= 0;
+	}
+
 	private int[] cloneAccessibleModules() {
 		final int[] clone = new int[accessibleModules.length];
 		System.arraycopy(accessibleModules, 0, clone, 0, clone.length);
