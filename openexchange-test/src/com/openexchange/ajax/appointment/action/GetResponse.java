@@ -90,7 +90,7 @@ public class GetResponse extends AbstractAJAXResponse {
     /**
      * @param appointmentObj the appointment to set
      */
-    public void setTask(final AppointmentObject appointmentObj) {
+    public void setAppointment(final AppointmentObject appointmentObj) {
         this.appointmentObj = appointmentObj;
     }
 }
