@@ -48,12 +48,22 @@
  */
 package com.openexchange.admin.storage.mysqlStorage;
 
+import java.sql.Connection;
+import java.sql.DataTruncation;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.admin.properties.AdminProperties;
-import com.openexchange.admin.rmi.exceptions.PoolException;
-import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Group;
 import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.exceptions.PoolException;
+import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.sqlStorage.OXGroupSQLStorage;
 import com.openexchange.admin.tools.AdminCache;
@@ -61,18 +71,7 @@ import com.openexchange.groupware.IDGenerator;
 import com.openexchange.groupware.contexts.ContextException;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
-import com.openexchange.groupware.ldap.LdapException;
-import com.openexchange.server.DBPoolingException;
 import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
-
-import java.sql.Connection;
-import java.sql.DataTruncation;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * @author d7

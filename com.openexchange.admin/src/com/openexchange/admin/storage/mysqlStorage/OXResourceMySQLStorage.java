@@ -69,8 +69,6 @@ import com.openexchange.groupware.IDGenerator;
 import com.openexchange.groupware.contexts.ContextException;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
-import com.openexchange.groupware.ldap.LdapException;
-import com.openexchange.server.DBPoolingException;
 
 /**
  * @author d7
