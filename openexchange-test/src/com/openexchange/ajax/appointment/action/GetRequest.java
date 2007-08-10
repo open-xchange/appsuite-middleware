@@ -65,12 +65,12 @@ import java.util.List;
 public class GetRequest extends AbstractAppointmentRequest {
 
     /**
-     * Task is requested through this folder.
+     * Appointment is requested through this folder.
      */
     private final int folderId;
 
     /**
-     * Unique identifier of the task.
+     * Unique identifier of the appointment.
      */
     private final int objectId;
 	

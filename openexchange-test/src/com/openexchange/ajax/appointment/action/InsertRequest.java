@@ -66,7 +66,7 @@ import com.openexchange.groupware.container.AppointmentObject;
 public class InsertRequest extends AbstractAppointmentRequest {
 
     /**
-     * Task to insert.
+     * Appointment to insert.
      */
     final AppointmentObject appointmentObj;
 
@@ -97,7 +97,7 @@ public class InsertRequest extends AbstractAppointmentRequest {
 
     /**
      * Default constructor.
-     * @param appointmentObj task to insert.
+     * @param appointmentObj appointment to insert.
      * @param timeZone time zone of the user.
      */
     public InsertRequest(final AppointmentObject appointmentObj, final TimeZone timeZone) {
