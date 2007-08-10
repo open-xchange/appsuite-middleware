@@ -47,20 +47,11 @@
  *
  */
 
-
-
 package com.openexchange.server;
-
-import static com.openexchange.tools.sql.DBUtils.closeResources;
 
 import java.io.Serializable;
 import java.security.acl.Permission;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.tools.OXCloneable;
 
 /**
@@ -122,8 +113,9 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 	private static final String STR_FOLDER_ADMIN = "_FolderAdmin";
 
 	private static final long serialVersionUID = 3740098766897625419L;
-	
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(OCLPermission.class);
+
+	private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(OCLPermission.class);
 
 	public static final int NO_PERMISSIONS = 0;
 
@@ -155,34 +147,26 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 
 	private int entity = -1;
 
-	private int fp = 0;
+	private int fp;
 
-	private int orp = 0;
+	private int orp;
 
-	private int owp = 0;
+	private int owp;
 
-	private int odp = 0;
+	private int odp;
 
 	/**
 	 * This property defines if this permission declares the owner to be the
 	 * folder administrator who posseses the rights to alter a folder's
 	 * properties or to rename a folder
 	 */
-	private boolean folderAdmin = false;
+	private boolean folderAdmin;
 
 	/**
 	 * This property defines if this permission is applied to a system group or
 	 * to a single user instead
 	 */
-	private boolean groupPermission = false;
-
-	private static final String P_INSERT_STRING = "INSERT INTO oxfolder_permissions (cid, fuid, permission_id, fp, orp, owp, odp, admin_flag, group_flag) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
-	private static final String P_UPDATE_STRING = "UPDATE oxfolder_permissions SET fp = ?, orp = ?, owp = ?, odp = ?, admin_flag = ?, group_flag = ? WHERE cid = ? AND permission_id = ? AND fuid = ?";
-
-	private static final String P_DELETE_STRING = "DELETE FROM oxfolder_permissions WHERE cid = ? AND permission_id = ? AND fuid = ?";
-
-	private static final String P_SELECT_STRING = "SELECT fuid, permission_id, fp, orp, owp, odp, admin_flag, group_flag FROM oxfolder_permissions WHERE cid = ? AND permission_id = ? AND fuid = ?";
+	private boolean groupPermission;
 
 	/**
 	 * Constructor
@@ -201,7 +185,7 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 		this.entity = entity;
 		this.fuid = fuid;
 	}
-	
+
 	public void reset() {
 		name = null;
 		fuid = 0;
@@ -375,128 +359,6 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 		return fuid;
 	}
 
-	public void storePermissions(final Context ctx, final Connection writeCon, final boolean insert) throws Exception {
-		storePermissions(ctx, writeCon, this.fuid, insert);
-	}
-
-	/**
-	 * <code>storePermissions</code>
-	 * 
-	 * @param writeCon
-	 *            a <code>Connection</code> value
-	 * @param fuid
-	 *            an <code>int</code> value (permission id)
-	 * @param insert
-	 *            a <code>boolean</code> value. true = insert, false = update
-	 * 
-	 * @throws Exception
-	 */
-	public void storePermissions(final Context ctx, final Connection writeConArg, final int fuid, final boolean insert)
-			throws Exception {
-		if (entity < 0) {
-			throw new Exception("Invalid entity specified: " + entity);
-		}
-		Connection writeCon = writeConArg;
-		boolean closeCon = false;
-		PreparedStatement pst = null;
-		try {
-			if (writeCon == null) {
-				writeCon = DBPool.pickupWriteable(ctx);
-				closeCon = true;
-			}
-			if (insert) {
-				pst = writeCon.prepareStatement(P_INSERT_STRING);
-				pst.setInt(1, ctx.getContextId());
-				pst.setInt(2, fuid);
-				pst.setInt(3, getEntity());
-				pst.setInt(4, getFolderPermission());
-				pst.setInt(5, getReadPermission());
-				pst.setInt(6, getWritePermission());
-				pst.setInt(7, getDeletePermission());
-				pst.setInt(8, isFolderAdmin() ? 1 : 0);
-				pst.setInt(9, isGroupPermission() ? 1 : 0);
-			} else {
-				pst = writeCon.prepareStatement(P_UPDATE_STRING);
-				pst.setInt(1, getFolderPermission());
-				pst.setInt(2, getReadPermission());
-				pst.setInt(3, getWritePermission());
-				pst.setInt(4, getDeletePermission());
-				pst.setInt(5, isFolderAdmin() ? 1 : 0);
-				pst.setInt(6, isGroupPermission() ? 1 : 0);
-				pst.setInt(7, ctx.getContextId());
-				pst.setInt(8, entity);
-				pst.setInt(9, fuid);
-			}
-			pst.executeUpdate();
-		} finally {
-			closeResources(null, pst, closeCon ? writeCon : null, false, ctx);
-		}
-	}
-
-	public void deletePermission(final Context ctx, final Connection writeConArg) throws SQLException, DBPoolingException {
-		if (entity < 0) {
-			throw new SQLException("Invalid entity specified: " + entity);
-		} else if (fuid < 0) {
-			throw new SQLException("Invalid fuid specified: " + fuid);
-		}
-		Connection writeCon = writeConArg;
-		boolean closeCon = false;
-		PreparedStatement pst = null;
-		try {
-			if (writeCon == null) {
-				writeCon = DBPool.pickupWriteable(ctx);
-				closeCon = true;
-			}
-			pst = writeCon.prepareStatement(P_DELETE_STRING);
-			pst.setInt(1, ctx.getContextId());
-			pst.setInt(2, entity);
-			pst.setInt(3, fuid);
-			pst.executeUpdate();
-		} finally {
-			closeResources(null, pst, closeCon ? writeCon : null, false, ctx);
-		}
-	}
-
-	public boolean loadPermissions(final Context ctx, final Connection conArg) throws SQLException, DBPoolingException {
-		if (entity < 0) {
-			throw new SQLException("Invalid entity specified: " + entity);
-		} else if (fuid < 0) {
-			throw new SQLException("Invalid fuid specified: " + fuid);
-		}
-		Connection con = conArg;
-		boolean closeCon = false;
-		boolean load = false;
-		PreparedStatement pst = null;
-		ResultSet rs = null;
-		try {
-			if (con == null) {
-				con = DBPool.pickup(ctx);
-				closeCon = true;
-			}
-			pst = con.prepareStatement(P_SELECT_STRING);
-			pst.setInt(1, ctx.getContextId());
-			pst.setInt(2, entity);
-			pst.setInt(2, fuid);
-			rs = pst.executeQuery();
-			if (rs.next()) {
-				fuid = rs.getInt(1);
-				this.entity = rs.getInt(2);
-				final int fp = rs.getInt(3);
-				final int orp = rs.getInt(4);
-				final int owp = rs.getInt(5);
-				final int odp = rs.getInt(6);
-				this.folderAdmin = rs.getInt(7) > 1 ? true : false;
-				this.groupPermission = rs.getInt(8) > 1 ? true : false;
-				load = setAllPermission(fp, orp, owp, odp);
-			}
-			rs.close();
-			pst.close();
-			return load;
-		} finally {
-			closeResources(rs, pst, closeCon ? con : null, true, ctx);
-		}
-	}
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -521,15 +383,16 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 	public Object clone() throws CloneNotSupportedException {
 		return ((OCLPermission) super.clone());
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
 	 * 
 	 * @see com.openexchange.tools.OXCloneable#deepClone()
 	 */
 	public OCLPermission deepClone() {
 		try {
 			return ((OCLPermission) super.clone());
-		} catch (CloneNotSupportedException e) {
+		} catch (final CloneNotSupportedException e) {
 			LOG.error(e.getMessage(), e);
 			return null;
 		}

@@ -49,11 +49,7 @@
 
 package com.openexchange.server;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.imap.user2imap.User2IMAP;
 import com.openexchange.imap.user2imap.User2IMAPInfo;
@@ -235,61 +231,6 @@ public class IMAPPermission extends OCLPermission {
 			LOG.warn(FolderCode.IMAP_PERMISSION_ERROR.getMessage());
 		}
 		return -1;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.server.OCLPermission#storePermissions(com.openexchange.groupware.contexts.Context,
-	 *      java.sql.Connection, boolean)
-	 */
-	@Override
-	public void storePermissions(final Context ctx, final Connection writeCon, final boolean insert) throws Exception {
-		if (LOG.isWarnEnabled()) {
-			LOG.warn(FolderCode.IMAP_PERMISSION_ERROR.getMessage());
-		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.server.OCLPermission#storePermissions(com.openexchange.groupware.contexts.Context,
-	 *      java.sql.Connection, int, boolean)
-	 */
-	@Override
-	public void storePermissions(final Context ctx, final Connection writeConArg, final int fuid, final boolean insert)
-			throws Exception {
-		if (LOG.isWarnEnabled()) {
-			LOG.warn(FolderCode.IMAP_PERMISSION_ERROR.getMessage());
-		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.server.OCLPermission#deletePermission(com.openexchange.groupware.contexts.Context,
-	 *      java.sql.Connection)
-	 */
-	@Override
-	public void deletePermission(final Context ctx, final Connection writeConArg) throws SQLException,
-			DBPoolingException {
-		if (LOG.isWarnEnabled()) {
-			LOG.warn(FolderCode.IMAP_PERMISSION_ERROR.getMessage());
-		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.server.OCLPermission#loadPermissions(com.openexchange.groupware.contexts.Context,
-	 *      java.sql.Connection)
-	 */
-	@Override
-	public boolean loadPermissions(final Context ctx, final Connection conArg) throws SQLException, DBPoolingException {
-		if (LOG.isWarnEnabled()) {
-			LOG.warn(FolderCode.IMAP_PERMISSION_ERROR.getMessage());
-		}
-		return false;
 	}
 
 	/*

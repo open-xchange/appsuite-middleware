@@ -49,35 +49,37 @@
 
 package com.openexchange.groupware.infostore;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.EffectivePermission;
 import com.openexchange.server.OCLPermission;
 
 public class EffectiveInfostorePermission {
 	private EffectivePermission permission;
+
 	private User user;
+
 	private DocumentMetadata document;
 
-	public EffectiveInfostorePermission(EffectivePermission permission, DocumentMetadata document, User user) {
+	public EffectiveInfostorePermission(final EffectivePermission permission, final DocumentMetadata document,
+			final User user) {
 		this.document = document;
 		this.user = user;
 		this.permission = permission;
 	}
-	
-	public boolean canReadObject(){
-		return permission.canReadAllObjects() || (permission.canReadOwnObjects() && document.getCreatedBy() == user.getId());	
+
+	public boolean canReadObject() {
+		return permission.canReadAllObjects()
+				|| (permission.canReadOwnObjects() && document.getCreatedBy() == user.getId());
 	}
-	
+
 	public boolean canDeleteObject() {
-		return permission.canDeleteAllObjects() || (permission.canDeleteOwnObjects() && document.getCreatedBy() == user.getId());	
+		return permission.canDeleteAllObjects()
+				|| (permission.canDeleteOwnObjects() && document.getCreatedBy() == user.getId());
 	}
-	
-	public boolean canWriteObject(){
-		return permission.canWriteAllObjects() || (permission.canWriteOwnObjects() && document.getCreatedBy() == user.getId());	
+
+	public boolean canWriteObject() {
+		return permission.canWriteAllObjects()
+				|| (permission.canWriteOwnObjects() && document.getCreatedBy() == user.getId());
 	}
 
 	public boolean canCreateObjects() {
@@ -112,11 +114,13 @@ public class EffectiveInfostorePermission {
 		return permission.canWriteOwnObjects();
 	}
 
-	public void deletePermission(Context ctx, Connection writeCon) throws SQLException {
-		permission.deletePermission(ctx, writeCon);
-	}
-
-	public boolean equals(Object obj) {
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(final Object obj) {
 		return permission.equals(obj);
 	}
 
@@ -152,11 +156,17 @@ public class EffectiveInfostorePermission {
 		return permission.getWritePermission();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
 	public int hashCode() {
 		return permission.hashCode();
 	}
 
-	public boolean hasModuleAccess(int folderModule) {
+	public boolean hasModuleAccess(final int folderModule) {
 		return permission.hasModuleAccess(folderModule);
 	}
 
@@ -172,62 +182,56 @@ public class EffectiveInfostorePermission {
 		return permission.isGroupPermission();
 	}
 
-	public boolean loadPermissions(Context ctx, Connection con) throws SQLException {
-		return permission.loadPermissions(ctx, con);
-	}
-
-	public boolean setAllObjectPermission(int pr, int pw, int pd) {
+	public boolean setAllObjectPermission(final int pr, final int pw, final int pd) {
 		return permission.setAllObjectPermission(pr, pw, pd);
 	}
 
-	public boolean setAllPermission(int fp, int opr, int opw, int opd) {
+	public boolean setAllPermission(final int fp, final int opr, final int opw, final int opd) {
 		return permission.setAllPermission(fp, opr, opw, opd);
 	}
 
-	public boolean setDeleteObjectPermission(int p) {
+	public boolean setDeleteObjectPermission(final int p) {
 		return permission.setDeleteObjectPermission(p);
 	}
 
-	public void setEntity(int entity) {
+	public void setEntity(final int entity) {
 		permission.setEntity(entity);
 	}
 
-	public void setFolderAdmin(boolean folderAdmin) {
+	public void setFolderAdmin(final boolean folderAdmin) {
 		permission.setFolderAdmin(folderAdmin);
 	}
 
-	public boolean setFolderPermission(int p) {
+	public boolean setFolderPermission(final int p) {
 		return permission.setFolderPermission(p);
 	}
 
-	public void setFuid(int pid) {
+	public void setFuid(final int pid) {
 		permission.setFuid(pid);
 	}
 
-	public void setGroupPermission(boolean groupPermission) {
+	public void setGroupPermission(final boolean groupPermission) {
 		permission.setGroupPermission(groupPermission);
 	}
 
-	public void setName(String name) {
+	public void setName(final String name) {
 		permission.setName(name);
 	}
 
-	public boolean setReadObjectPermission(int p) {
+	public boolean setReadObjectPermission(final int p) {
 		return permission.setReadObjectPermission(p);
 	}
 
-	public boolean setWriteObjectPermission(int p) {
+	public boolean setWriteObjectPermission(final int p) {
 		return permission.setWriteObjectPermission(p);
 	}
 
-	public void storePermissions(Context ctx, Connection writeCon, boolean action) throws Exception {
-		permission.storePermissions(ctx, writeCon, action);
-	}
-
-	public void storePermissions(Context ctx, Connection writeCon, int fuid, boolean insert) throws Exception {
-		permission.storePermissions(ctx, writeCon, fuid, insert);
-	}
-
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
 	public String toString() {
 		return permission.toString();
 	}
@@ -235,8 +239,8 @@ public class EffectiveInfostorePermission {
 	public int getObjectID() {
 		return document.getId();
 	}
-	
-	public DocumentMetadata getObject(){
+
+	public DocumentMetadata getObject() {
 		return document;
 	}
 }
