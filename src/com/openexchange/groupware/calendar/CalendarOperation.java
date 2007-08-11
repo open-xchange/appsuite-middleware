@@ -1123,14 +1123,16 @@ public class CalendarOperation implements SearchIterator {
         }
         if (cdao.containsPrivateFlag()) {
             if (cdao.getPrivateflag() == 1) {
-                if (cdao.containsObjectID() && cdao.getSharedFolderOwner() != uid) {
-                    throw new OXCalendarException(OXCalendarException.Code.MOVE_TO_SHARED_FOLDER_NOT_SUPPORTED);
-                }
-                if (cdao.getFolderType() != FolderObject.PRIVATE) {
-                    throw new OXCalendarException(OXCalendarException.Code.PRIVATE_FLAG_IN_PRIVATE_FOLDER);
-                }
-                if ( (cdao.getUsers() != null && cdao.getUsers().length > 1) || (cdao.getParticipants() != null && cdao.getParticipants().length > 1) ) {
-                    throw new OXCalendarException(OXCalendarException.Code.PRIVATE_FLAG_AND_PARTICIPANTS);
+                if (edao != null && edao.containsPrivateFlag() && edao.getPrivateflag() == 1) {
+                    if (cdao.containsObjectID() && cdao.getSharedFolderOwner() != uid) {
+                        throw new OXCalendarException(OXCalendarException.Code.MOVE_TO_SHARED_FOLDER_NOT_SUPPORTED);
+                    }
+                    if (cdao.getFolderType() != FolderObject.PRIVATE) {
+                        throw new OXCalendarException(OXCalendarException.Code.PRIVATE_FLAG_IN_PRIVATE_FOLDER);
+                    }
+                    if ( (cdao.getUsers() != null && cdao.getUsers().length > 1) || (cdao.getParticipants() != null && cdao.getParticipants().length > 1) ) {
+                        throw new OXCalendarException(OXCalendarException.Code.PRIVATE_FLAG_AND_PARTICIPANTS);
+                    }
                 }
             } else if (cdao.getPrivateflag() != 0) {
                 throw new OXCalendarException(OXCalendarException.Code.UNSUPPORTED_PRIVATE_FLAG, cdao.getPrivateflag());
