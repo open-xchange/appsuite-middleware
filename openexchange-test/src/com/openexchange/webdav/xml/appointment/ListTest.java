@@ -143,7 +143,16 @@ public class ListTest extends AppointmentTest {
 		
 		AppointmentObject[] appointmentArray = listAppointment(webCon, appointmentFolderId, modified, false, true, PROTOCOL + hostName, login, password);
 		
-		assertTrue("wrong response array length (length=" + appointmentArray.length + ")", appointmentArray.length >= 2);
+		boolean found = true;
+		
+		for (int a = 0; a < appointmentArray.length; a++) {
+			if (objectId1 == appointmentArray[a].getObjectID()) {
+				found = true;
+				break;
+			}
+		}
+		
+		assertTrue("object not found in response", found);
 	}
 	
 	public void testPropFindWithObjectId() throws Exception {
