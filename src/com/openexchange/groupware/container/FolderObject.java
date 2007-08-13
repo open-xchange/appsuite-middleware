@@ -733,7 +733,9 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 	 * @return filled folder
 	 */
 	public final FolderObject fill(final FolderObject other, final boolean overwrite) {
-		reset();
+		if (overwrite) {
+			reset();
+		}
 		if (other.containsObjectID() && (overwrite || !containsObjectID())) {
 			setObjectID(other.getObjectID());
 		}
