@@ -1600,7 +1600,7 @@ class CalendarMySQL implements CalendarSqlImp {
                 final Object oids[] = exceptions.toArray();
                 deleteAllRecurringExceptions(StringCollection.getSqlInString(oids), so, writecon);
                 for (int a = 0; a < exceptions.size(); a++) {
-                    triggerDeleteEvent(exceptions.get(a).intValue(), inFolder, so, null);
+                    triggerDeleteEvent(exceptions.get(a).intValue(), inFolder, so, null, null);
                 }
             }
         } else if (rec_action == CalendarRecurringCollection.RECURRING_EXCEPTION_DELETE) {
@@ -1609,7 +1609,7 @@ class CalendarMySQL implements CalendarSqlImp {
                 final Object oids[] = exceptions.toArray();
                 deleteAllRecurringExceptions(StringCollection.getSqlInString(oids), so, writecon);
                 for (int a = 0; a < exceptions.size(); a++) {
-                    triggerDeleteEvent(exceptions.get(a).intValue(), inFolder, so, null);
+                    triggerDeleteEvent(exceptions.get(a).intValue(), inFolder, so, null, null);
                 }
             }
             CalendarCommonCollection.purgeExceptionFieldsFromObject(cdao);
@@ -2677,6 +2677,7 @@ class CalendarMySQL implements CalendarSqlImp {
         ao.setObjectID(oid);
         ao.setParentFolderID(fid);
         CalendarCommonCollection.triggerEvent(so, CalendarOperation.UPDATE, ao);
+        changeReminder(oid, uid, fid, c, false, null, null, CalendarOperation.DELETE);
     }
     
     
@@ -2890,7 +2891,7 @@ class CalendarMySQL implements CalendarSqlImp {
                 final Object oids[] = al.toArray();
                 deleteAllRecurringExceptions(StringCollection.getSqlInString(oids), so, writecon);
                 for (int a = 0; a < al.size(); a++) {
-                    triggerDeleteEvent(al.get(a).intValue(), fid, so, null);
+                    triggerDeleteEvent(al.get(a).intValue(), fid, so, null, readcon);
                 }
             }
             oid = edao.getRecurrenceID();
@@ -3015,13 +3016,13 @@ class CalendarMySQL implements CalendarSqlImp {
         if (edao != null) {
             edao.setModifiedBy(uid);
             edao.setChangingDate(new Timestamp(modified));
-            triggerDeleteEvent(oid, fid, so, edao);
+            triggerDeleteEvent(oid, fid, so, edao, readcon);
         } else {
-            triggerDeleteEvent(oid, fid, so, null);
+            triggerDeleteEvent(oid, fid, so, null, readcon);
         }
     }
     
-    private final void triggerDeleteEvent(final int oid, final int fid, final SessionObject so, final CalendarDataObject edao) throws OXException, SQLException {
+    private final void triggerDeleteEvent(final int oid, final int fid, final SessionObject so, final CalendarDataObject edao, final Connection readcon) throws OXException, SQLException {
         CalendarDataObject ao = null;
         if (edao != null) {
             ao = (CalendarDataObject)edao.clone();
@@ -3031,7 +3032,7 @@ class CalendarMySQL implements CalendarSqlImp {
         ao.setObjectID(oid);
         ao.setParentFolderID(fid);
         CalendarCommonCollection.triggerEvent(so, CalendarOperation.DELETE, ao);
-        changeReminder(oid, so.getUserObject().getId(), fid, so.getContext(), false, null, null, CalendarOperation.DELETE);
+        deleteAllReminderEntries(edao, oid, fid, so, readcon);
     }
     
     
@@ -3173,6 +3174,60 @@ class CalendarMySQL implements CalendarSqlImp {
             CalendarCommonCollection.closePreparedStatement(del_rights);
             CalendarCommonCollection.closePreparedStatement(del_members);
             CalendarCommonCollection.closePreparedStatement(del_dates);
+        }
+    }
+    
+    private final void deleteAllReminderEntries(CalendarDataObject edao, int oid, int inFolder, SessionObject so, Connection readcon) throws SQLException, OXMandatoryFieldException, OXConflictException, OXException {
+        UserParticipant up[] = null;
+        boolean close_read = false;
+        if (edao == null) {
+            PreparedStatement prep = null;
+            ResultSet rs = null;
+            try {
+                if (readcon == null) {
+                    readcon = DBPool.pickup(so.getContext());
+                    close_read = true;
+                }
+                final CalendarOperation co = new CalendarOperation();
+                prep = getPreparedStatement(readcon, loadAppointment(oid, so.getContext()));
+                rs = getResultSet(prep);
+                edao = co.loadAppointment(rs, oid, inFolder, this, readcon, so, CalendarOperation.DELETE, inFolder, false); // No permission checks at all!
+            } catch(final SQLException sqle) {
+                throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
+            } catch(final OXPermissionException oxpe ) {
+                throw oxpe;
+            } catch(final OXException oxe) {
+                throw oxe;
+            } catch(final DBPoolingException dbpe) {
+                throw new OXException(dbpe);
+            } finally {
+                CalendarCommonCollection.closeResultSet(rs);
+                CalendarCommonCollection.closePreparedStatement(prep);
+                if (close_read && readcon != null) {
+                    try {
+                        DBPool.push(so.getContext(), readcon);
+                    } catch (final DBPoolingException dbpe) {
+                        LOG.error("DBPoolingException:deleteAppointment (push)", dbpe);
+                    }
+                }
+            }
+        } 
+        up = edao.getUsers();
+        for (int a = 0; a < up.length; a++) {
+            int uid = up[a].getIdentifier();
+            int fid = 0;
+            if (up[a].getPersonalFolderId() > 0) {
+                fid = up[a].getPersonalFolderId();
+            } else {
+                fid = edao.getEffectiveFolderId();
+            }
+            if (uid > 0 && fid > 0) {
+                changeReminder(oid, uid, fid, so.getContext(), edao.isSequence(), null, null, CalendarOperation.DELETE);
+            } else {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(StringCollection.convertArraytoString(new Object[] { "Reminder object will neither be checked nor deleted -> oid:uid:fid ", oid,":",uid,":",fid }));
+                }                
+            }
         }
     }
     

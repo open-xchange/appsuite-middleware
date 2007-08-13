@@ -1006,7 +1006,7 @@ public class CalendarCommonCollection {
         cdao.removeOccurrence();
     }
     
-    static final void closeResultSet(final ResultSet rs) {
+    public static final void closeResultSet(final ResultSet rs) {
         if (rs != null) {
             try {
                 rs.close();
@@ -1016,7 +1016,7 @@ public class CalendarCommonCollection {
         }
     }
     
-    static final void  closePreparedStatement(final PreparedStatement prep) {
+    public static final void  closePreparedStatement(final PreparedStatement prep) {
         if (prep != null) {
             try {
                 prep.close();
