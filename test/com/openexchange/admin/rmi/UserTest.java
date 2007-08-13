@@ -480,7 +480,7 @@ public class UserTest extends AbstractTest {
     
     @Test
     public void testChangeSingleAttribute() throws Exception {
-        // change only 1 attribute per of user object call
+        // change only 1 attribute of user object per call
         
 //      get context to create an user
         final Credentials cred = DummyCredentials();
@@ -526,9 +526,9 @@ public class UserTest extends AbstractTest {
                 
                 if(map_obj.getMethodParameterType().equalsIgnoreCase("java.lang.String")){
                     
-                    String oldvalue = (String)map_obj.getGetter().invoke(srv_loaded);                
+                    String oldvalue = (String)map_obj.getGetter().invoke(srv_loaded); 
                     map_obj.getSetter().invoke(tmp_usr, oldvalue+"_singlechange");
-                    //System.out.println("Setting "+map_obj.getMethodName() +" -> "+map_obj.getGetter().invoke(tmp_usr));
+                    //System.out.println("Setting String via "+map_obj.getMethodName() +" -> "+map_obj.getGetter().invoke(tmp_usr));
                     
                     //  submit changes  for string valued attributes
                     oxu.change(ctx,tmp_usr,cred);
@@ -541,7 +541,55 @@ public class UserTest extends AbstractTest {
                     assertEquals(map_obj.getGetter().getName().substring(3)+" not equal", map_obj.getGetter().invoke(tmp_usr), map_obj.getGetter().invoke(user_single_change_loaded));
                 }
                 
-                // TODO: add here changes for int,date,boolean valued fields 
+                if(map_obj.getMethodParameterType().equalsIgnoreCase("java.lang.Integer")){
+                    
+                    Integer oldvalue = (Integer)map_obj.getGetter().invoke(srv_loaded); 
+                    map_obj.getSetter().invoke(tmp_usr, oldvalue+1);
+                    //System.out.println("Setting Integer via "+map_obj.getMethodName() +" -> "+map_obj.getGetter().invoke(tmp_usr));
+                                        
+                    // change data
+                    oxu.change(ctx,tmp_usr,cred);
+                    
+                    //  load from server and compare the single changed value
+                    final User user_single_change_loaded = oxu.getData(ctx, srv_loaded, cred);
+                  
+                    // compare
+                    assertEquals(map_obj.getGetter().getName().substring(3)+" not equal", map_obj.getGetter().invoke(tmp_usr), map_obj.getGetter().invoke(user_single_change_loaded));              
+                }
+                
+                
+                if(map_obj.getMethodParameterType().equalsIgnoreCase("java.lang.Boolean")){
+                    Boolean oldvalue = (Boolean)map_obj.getGetter().invoke(srv_loaded); 
+                    map_obj.getSetter().invoke(tmp_usr, !oldvalue);
+                    
+                    //System.out.println("Setting Boolean via "+map_obj.getMethodName() +" -> "+map_obj.getGetter().invoke(tmp_usr));
+                    
+                    // change
+                    oxu.change(ctx,tmp_usr,cred);
+                    
+                    // load from server and compare the single changed value
+                    final User user_single_change_loaded = oxu.getData(ctx, srv_loaded, cred);
+                    
+                    // compare
+                    assertEquals(map_obj.getGetter().getName().substring(3)+" not equal", map_obj.getGetter().invoke(tmp_usr), map_obj.getGetter().invoke(user_single_change_loaded));                            
+                    
+                }
+                
+                if(map_obj.getMethodParameterType().equalsIgnoreCase("java.util.Date")){
+                    Date oldvalue = (Date)map_obj.getGetter().invoke(srv_loaded); 
+                    // set date to current +1 day
+                    map_obj.getSetter().invoke(tmp_usr, new Date(oldvalue.getTime()+(24*60*60*1000)));
+                    
+                    //System.out.println("Setting Date via "+map_obj.getMethodName() +" -> "+map_obj.getGetter().invoke(tmp_usr));
+                    
+                    // change
+                    oxu.change(ctx,tmp_usr,cred);
+                    
+                    final User user_single_change_loaded = oxu.getData(ctx, srv_loaded, cred);
+                    
+                    assertEquals(map_obj.getGetter().getName().substring(3)+" not equal", map_obj.getGetter().invoke(tmp_usr), map_obj.getGetter().invoke(user_single_change_loaded));                                        
+                    
+                }
             }            
         }
         
