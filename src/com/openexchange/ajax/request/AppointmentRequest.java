@@ -257,6 +257,8 @@ public class AppointmentRequest {
 				appointmentWriter.writeAppointment(conflicts[a], jsonAppointmentObj);
 				jsonConflictArray.put(jsonAppointmentObj);
 			}
+			
+			jsonResponseObj.put("conflicts", jsonConflictArray);
 		} else {
 			jsonResponseObj.put(AppointmentFields.ID, appointmentObj.getObjectID());
 		}
