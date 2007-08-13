@@ -330,6 +330,8 @@ public class IMAPUtils {
 	private static final String COMMAND_SORT = "SORT";
 
 	private static final String COMMAND_SORT_REVERSE_DATE_PEFIX = "SORT (REVERSE DATE) UTF-8 ";
+	
+	private static final int MAX_IMAP_CMD_LENGTH = 16384;
 
 	/**
 	 * Determines all messages in given folder which have the \UNSEEN flag set
@@ -393,9 +395,16 @@ public class IMAPUtils {
 				/*
 				 * Sort new messages
 				 */
-				final String seqNumArg = IMAPNumArgSplitter.splitSeqNumArg(newMsgSeqNums)[0];
+				{
+					final StringBuilder cmdBuilder = new StringBuilder(COMMAND_SORT_REVERSE_DATE_PEFIX)
+							.append(IMAPNumArgSplitter.splitSeqNumArg(newMsgSeqNums)[0]);
+					if (cmdBuilder.length() > MAX_IMAP_CMD_LENGTH) {
+						throw new ProtocolException(OXMailException.getFormattedMessage(MailCode.CMD_TOO_LARGE,
+								MAX_IMAP_CMD_LENGTH, cmdBuilder.toString()));
+					}
+					r = p.command(cmdBuilder.toString(), null);
+				}
 				final List<Message> newMsgs = new ArrayList<Message>(newMsgSeqNums.length);
-				r = p.command(new StringBuilder(COMMAND_SORT_REVERSE_DATE_PEFIX).append(seqNumArg).toString(), null);
 				response = r[r.length - 1];
 				try {
 					if (response.isOK()) {

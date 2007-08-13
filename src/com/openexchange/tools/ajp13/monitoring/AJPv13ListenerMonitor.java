@@ -55,17 +55,17 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class AJPv13ListenerMonitor implements AJPv13ListenerMonitorMBean {
 
-	private AtomicInteger poolSize;
+	private final AtomicInteger poolSize = new AtomicInteger();
 
-	private AtomicInteger numActive;
+	private final AtomicInteger numActive = new AtomicInteger();
 
-	private AtomicInteger numIdle;
+	private final AtomicInteger numIdle = new AtomicInteger();
 
-	private AtomicInteger numWaiting;
+	private final AtomicInteger numWaiting = new AtomicInteger();
 
-	private AtomicInteger numProcessing;
+	private final AtomicInteger numProcessing = new AtomicInteger();
 	
-	private AtomicInteger numRequests;
+	private final AtomicInteger numRequests = new AtomicInteger();
 
 	private static final int USE_TIME_COUNT = 1000;
 

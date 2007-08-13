@@ -561,7 +561,11 @@ public class OXMailException extends OXException {
 		/**
 		 * Bad value %s in parameter %s
 		 */
-		BAD_PARAM_VALUE("Bad value %s in parameter %s", Category.USER_INPUT, 103);
+		BAD_PARAM_VALUE("Bad value %s in parameter %s", Category.USER_INPUT, 103),
+		/**
+		 * IMAP command exceeds max. allowed length of %d: %s
+		 */
+		CMD_TOO_LARGE("IMAP command exceeds max. allowed length of %d: %s", Category.CODE_ERROR, 104);
 
 		/**
 		 * Message of the exception.

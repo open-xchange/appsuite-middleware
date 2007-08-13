@@ -60,9 +60,9 @@ import com.openexchange.tools.ajp13.AJPv13Server;
 
 public class AJPv13ServerThreadsMonitor implements AJPv13ServerThreadsMonitorMBean {
 
-	private AtomicInteger numActive;
+	private final AtomicInteger numActive = new AtomicInteger();
 	
-	private AtomicInteger numIdle;
+	private final AtomicInteger numIdle = new AtomicInteger();
 	
 	private static final int USE_TIME_COUNT = 1000;
 	
