@@ -260,9 +260,9 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
 
     private boolean mail_folder_confirmed_ham_nameset = false;
 
-    private Boolean spam_filter_enabled;
+    private Boolean gui_spam_filter_enabled;
 
-    private boolean spam_filter_enabledset = false;
+    private boolean gui_spam_filter_enabledset = false;
 
     private String manager_name;
 
@@ -2659,24 +2659,29 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         return mail_folder_confirmed_ham_nameset;
     }
 
-    final public boolean isSpam_filter_enabledset() {
-        return spam_filter_enabledset;
+    final public boolean isGUI_Spam_filter_capabilities_enabledset() {
+        return gui_spam_filter_enabledset;
     }
 
     /**
-     * @return the spam_filter_enabled
+     * @return the gui_spam_filter_enabled
      */
+    final public Boolean getGUI_Spam_filter_capabilities_enabled() {
+        return gui_spam_filter_enabled;
+    }
+
+    @Deprecated
     final public Boolean getSpam_filter_enabled() {
-        return spam_filter_enabled;
+        return gui_spam_filter_enabled;
     }
-
+    
     /**
-     * @param spam_filter_enabled
-     *                the spam_filter_enabled to set
+     * @param gui_spam_filter_enabled
+     *                the gui_spam_filter_enabled to set
      */
-    public final void setGUI_Spam_filter_capabilities_enabled(Boolean spam_filter_enabled) {
-        this.spam_filter_enabledset = true;
-        this.spam_filter_enabled = spam_filter_enabled;
+    public final void setGUI_Spam_filter_capabilities_enabled(Boolean gui_spam_filter_enabled) {
+        this.gui_spam_filter_enabledset = true;
+        this.gui_spam_filter_enabled = gui_spam_filter_enabled;
     }
 
     public final boolean isContextadmin() {

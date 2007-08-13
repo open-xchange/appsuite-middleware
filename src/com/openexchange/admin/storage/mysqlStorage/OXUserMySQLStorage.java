@@ -448,7 +448,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
 
             
-            final Boolean spam_filter_enabled = usrdata.getSpam_filter_enabled();
+            final Boolean spam_filter_enabled = usrdata.getGUI_Spam_filter_capabilities_enabled();
             if(null != spam_filter_enabled ) {
                 final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
                 if( spam_filter_enabled ) {
@@ -1034,7 +1034,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 // TODO: choeger: Extend API to allow setting of these flags
                 int flags = UserSettingMail.INT_NOTIFY_TASKS | UserSettingMail.INT_NOTIFY_APPOINTMENTS;
 
-                if( usrdata.getSpam_filter_enabled() != null && usrdata.getSpam_filter_enabled() ) {
+                if( usrdata.getGUI_Spam_filter_capabilities_enabled() != null && usrdata.getGUI_Spam_filter_capabilities_enabled() ) {
                     flags |= UserSettingMail.INT_SPAM_ENABLED;
                 }
                 stmt.setInt(8, flags);
