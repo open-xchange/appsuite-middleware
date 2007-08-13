@@ -240,10 +240,12 @@ public class Html2TextConverter {
 		}
 		return body_found ? result.toString() : result2.toString();
 	}
+	
+	private static final int NONE = -99;
 
-	private static final char getLastChar(final StringBuilder sb) {
+	private static final int getLastChar(final StringBuilder sb) {
 		if (sb.length() == 0) {
-			return ' ';
+			return NONE;
 		}
 		return sb.charAt(sb.length() - 1);
 	}
@@ -300,7 +302,7 @@ public class Html2TextConverter {
 	private static final Pattern PATTERN_SRC_CONTENT = Pattern.compile("src=\"?([^\\s\">]+)\"?",
 			Pattern.CASE_INSENSITIVE);
 
-	private final String convertTag(final String t, final char prevChar) {
+	private final String convertTag(final String t, final int prevChar) {
 		String result = STR_EMPTY;
 		if (isTag(t, "body")) {
 			in_body = true;
@@ -319,7 +321,9 @@ public class Html2TextConverter {
 			result = LINEBREAK;
 			pre = false;
 		} else if (isTag(t, "p")) {
-			if (prevChar == '\n') {
+			if (prevChar == NONE) {
+				result = STR_EMPTY;
+			} else if (((char) prevChar) == '\n') {
 				result = LINEBREAK;
 			} else {
 				result = "\n\n";

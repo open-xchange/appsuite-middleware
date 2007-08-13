@@ -35,6 +35,8 @@
  - Additional methods for UserSettingMailStorage to remove single cached
    user's mail settings or whole cache
  - Bugfix #8767: Fixed new message display on portal side
+ - Bugfix #8793: Starting html paragraph is skipped by html2text conversion
+   to avoid double new line at the beginning
 
 * 2007-08-10 - tobias.prinz@open-xchange.com
 
