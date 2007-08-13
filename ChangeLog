@@ -18,6 +18,9 @@
    database from older version. INFO: A config file has been changed:
    updatetasks.cfg
 
+ - Fixed bug #8741. If the first appointment of a sequence is an exception
+   the GUI gets wrong start/end dates. This has been fixed.
+
 * 2007-08-13 - tobias.prinz@open-xchange.com
 
  - Bugfix #8475: Opposed to the definition, UserParticipants are not 
