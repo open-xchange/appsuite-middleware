@@ -217,8 +217,25 @@ public abstract class OXToolStorageInterface {
 
     public abstract boolean existsUser(final Context ctx, final int[] user_ids) throws StorageException;    
 
+    /**
+     * This method will detect if a specified user exists. It check this through the user id and the
+     * user name specified in the user object
+     * 
+     * @param ctx
+     * @param users
+     * @return
+     * @throws StorageException
+     */
     public abstract boolean existsUser(final Context ctx, final User[] users) throws StorageException;
 
+    /**
+     * A convenience method for a single user object. See {@link #existsUser(Context, User[])}
+     * 
+     * @param ctx
+     * @param user
+     * @return
+     * @throws StorageException
+     */
     public abstract boolean existsUser(final Context ctx, final User user) throws StorageException;    
     
     
@@ -351,6 +368,18 @@ public abstract class OXToolStorageInterface {
     public abstract String getUsernameByUserID(final Context ctx,final int user_id) throws StorageException;
     
     public abstract boolean isContextAdmin(final Context ctx, final int user_id) throws StorageException;
+
+    /**
+     * This method determines if the user is the context admin. Therefore either the user_id or the username
+     * have to be filled. Furthermore this methods sets the uid in the given user object to the correct
+     * value if the object contains the name only.
+     * 
+     * @param ctx
+     * @param user
+     * @return
+     * @throws StorageException
+     */
+    public abstract boolean isContextAdmin(final Context ctx, User user) throws StorageException;
     
     public abstract boolean isContextEnabled(final Context ctx) throws StorageException;
     
