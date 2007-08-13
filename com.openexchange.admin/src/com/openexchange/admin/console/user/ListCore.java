@@ -92,7 +92,6 @@ public abstract class ListCore extends UserAbstraction {
     protected final void commonfunctions(final AdminParser parser, final String[] args) {
         // set all needed options in our parser
         setOptions(parser);
-
         // parse the command line
         try {
             parser.ownparse(args);
@@ -112,25 +111,23 @@ public abstract class ListCore extends UserAbstraction {
 
             final User[] allusers = maincall(parser, oxusr, pattern, ctx, auth);
 
-            // map user data to corresponding module access
-            final HashMap<Integer, UserModuleAccess> usr2axs = new HashMap<Integer, UserModuleAccess>();
-
-            for (final User user : allusers) {      
-                // fetch module access for every user
-                usr2axs.put(user.getId(), oxusr.getModuleAccess(ctx, user, auth));
-            }           
-
             if (null != parser.getOptionValue(this.csvOutputOption)) {
-                precsvinfos(allusers,usr2axs);
+                // map user data to corresponding module access
+                final HashMap<Integer, UserModuleAccess> usr2axs = new HashMap<Integer, UserModuleAccess>();
+                
+                for (final User user : allusers) {
+                    // fetch module access for every user
+                    usr2axs.put(user.getId(), oxusr.getModuleAccess(ctx, user, auth));
+                }
+                precsvinfos(allusers, usr2axs);
             } else {
-                sysoutOutput(allusers,usr2axs);
+                sysoutOutput(allusers);
             }
 
             sysexit(0);
         } catch (final Exception e) {
             printErrors(null, ctxid, e, parser);
         }
-
     }
 
     protected abstract User[] maincall(final AdminParser parser, final OXUserInterface oxusr, final String search_pattern, final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException, DuplicateExtensionException;
@@ -193,7 +190,7 @@ public abstract class ListCore extends UserAbstraction {
         }
     }
 
-    protected final void sysoutOutput(final User[] users, final HashMap<Integer, UserModuleAccess> user_access) throws InvalidDataException {
+    protected final void sysoutOutput(final User[] users) throws InvalidDataException {
 
         final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
         for (final User user : users) {
