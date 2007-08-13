@@ -65,10 +65,16 @@ public class Group extends ExtendableDataObject implements NameAndIdObject {
     private Integer id;
 
     private String name;
+    
+    private boolean nameset;
 
     private String displayname;
+    
+    private boolean displaynameset;
 
     private Integer[] members;
+    
+    private boolean membersset;
 
     public Group() {
         super();
@@ -76,7 +82,7 @@ public class Group extends ExtendableDataObject implements NameAndIdObject {
     }
 
     
-    public Group(Integer id) {
+    public Group(final Integer id) {
         super();
         init();
         this.id = id;
@@ -87,7 +93,7 @@ public class Group extends ExtendableDataObject implements NameAndIdObject {
      * @param name
      * @param displayname
      */
-    public Group(Integer id, String name, String displayname) {
+    public Group(final Integer id, final String name, final String displayname) {
         super();
         init();
         this.id = id;
@@ -103,40 +109,58 @@ public class Group extends ExtendableDataObject implements NameAndIdObject {
         this.members = null;
     }
 
-    public Integer getId() {
+    public final boolean isDisplaynameset() {
+        return displaynameset;
+    }
+
+
+    public final boolean isMembersset() {
+        return membersset;
+    }
+
+
+    public final boolean isNameset() {
+        return nameset;
+    }
+
+
+    public final Integer getId() {
         return id;
     }
 
-    public void setId(Integer val) {
+    public final void setId(final Integer val) {
         this.id = val;
     }
 
-    public String getName() {
+    public final String getName() {
         return name;
     }
 
-    public void setName(String val) {
+    public final void setName(final String val) {
+        nameset = true;
         this.name = val;
     }
 
-    public String getDisplayname() {
+    public final String getDisplayname() {
         return displayname;
     }
 
-    public void setDisplayname(String val) {
+    public final void setDisplayname(final String val) {
+        displaynameset = true;
         this.displayname = val;
     }
 
-    public Integer[] getMembers() {
+    public final Integer[] getMembers() {
         return members;
     }
 
-    public void setMembers(Integer[] val) {
+    public final void setMembers(final Integer[] val) {
+        membersset = true;
         this.members = val;
     }
 
 
-    public String toString() {
+    public final String toString() {
         StringBuilder ret = new StringBuilder();
         ret.append("[ \n");
         for (final Field f : this.getClass().getDeclaredFields()) {
@@ -165,7 +189,7 @@ public class Group extends ExtendableDataObject implements NameAndIdObject {
      * @deprecated Please remove the usage of this method as fast as you can because it used a dangerous downcast.
      * This method will go away with the next update
      */
-    public void addExtension(final OXGroupExtensionInterface extension) {
+    public final void addExtension(final OXGroupExtensionInterface extension) {
         getAllExtensionsAsHash().put(extension.getClass().getName(), (OXCommonExtension) extension);
     }
 
@@ -174,7 +198,7 @@ public class Group extends ExtendableDataObject implements NameAndIdObject {
      * @deprecated Please remove the usage of this method as fast as you can because it used a dangerous downcast.
      * This method will go away with the next update
      */
-    public ArrayList<OXGroupExtensionInterface> getExtensions() {
+    public final ArrayList<OXGroupExtensionInterface> getExtensions() {
         final ArrayList<OXGroupExtensionInterface> retval = new ArrayList<OXGroupExtensionInterface>();
         for (final OXCommonExtension commoninterface : getAllExtensionsAsHash().values()) {
             retval.add((OXGroupExtensionInterface) commoninterface);
@@ -188,7 +212,7 @@ public class Group extends ExtendableDataObject implements NameAndIdObject {
      * @deprecated Please remove the usage of this method as fast as you can because it used a dangerous downcast.
      * This method will go away with the next update
      */
-    public boolean removeExtension(final OXGroupExtensionInterface o) {
+    public final boolean removeExtension(final OXGroupExtensionInterface o) {
         if (null == getAllExtensionsAsHash().remove(o)) {
             return false;
         } else {
@@ -206,7 +230,7 @@ public class Group extends ExtendableDataObject implements NameAndIdObject {
      * @deprecated Please remove the usage of this method as fast as you can because it used a dangerous downcast.
      * This method will go away with the next update
      */
-    public OXGroupExtensionInterface getExtensionbyName(final String extname) {
+    public final OXGroupExtensionInterface getExtensionbyName(final String extname) {
         for (final OXCommonExtension ext : getAllExtensionsAsHash().values()) {
             if (extname.equals(ext.getClass().getName())) {
                 return (OXGroupExtensionInterface) ext;
@@ -216,7 +240,7 @@ public class Group extends ExtendableDataObject implements NameAndIdObject {
     }
 
     @Override
-    public String[] getMandatoryMembersCreate() {
+    public final String[] getMandatoryMembersCreate() {
         return new String[]{ "displayname", "name" };
     }
     
@@ -227,24 +251,68 @@ public class Group extends ExtendableDataObject implements NameAndIdObject {
 
 
     @Override
-    public String[] getMandatoryMembersDelete() {
+    public final String[] getMandatoryMembersDelete() {
         return null;
     }
 
 
     @Override
-    public String[] getMandatoryMembersRegister() {
+    public final String[] getMandatoryMembersRegister() {
         return null;
     }
 
 
     @Override
-    public boolean equals(final Object obj) {
+    public final boolean equals(final Object obj) {
         if (obj instanceof Group) {
-            Group grp = (Group) obj;
-            return (id.equals(grp.id) && name.equals(grp.name) && displayname.equals(grp.displayname) && Arrays.equals(members, grp.members));
+            final Group grp = (Group) obj;
+            if (!checkEqualsWithNull(this.id, grp.id)) {
+                return false;
+            }
+            if (!checkEqualsWithNull(this.name, grp.name)) {
+                return false;
+            }
+            if (!checkEqualsWithNull(this.displayname, grp.displayname)) {
+                return false;
+            }
+            if (!checkEqualsWithNullForArray(this.members, grp.members)) {
+                return false;
+            }
+            return true;
         } else {
             return false;
+        }
+    }
+
+    private boolean checkEqualsWithNull(final Object a, final Object b) {
+        if (null == a) {
+            if (null != b) {
+                return false;
+            } else {
+                return true;
+            }
+        } else {
+            if (!a.equals(b)) {
+                return false;
+            } else {
+                return true;
+            }
+        }
+    }
+
+    private boolean checkEqualsWithNullForArray(final Object[] a, final Object[] b) {
+        if (null == a) {
+            if (null != b) {
+                return false;
+            } else {
+                return true;
+            }
+        } else {
+            if (!Arrays.equals(a, b)) {
+                return false;
+            } else {
+                return true;
+            }
         }
     }
 }
