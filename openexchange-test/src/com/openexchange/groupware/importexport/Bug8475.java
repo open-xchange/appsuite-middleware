@@ -134,6 +134,5 @@ public class Bug8475 extends AbstractICalImportTest{
 		assertEquals("One participant?" , 1, participants.length);
 		final Participant p =  participants[0];
 		assertEquals("User loaded is well-known internal user", testUser.getContactId() , p.getIdentifier());
-		
 	}
 }
