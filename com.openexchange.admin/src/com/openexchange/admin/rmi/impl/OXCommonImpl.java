@@ -105,7 +105,7 @@ public abstract class OXCommonImpl {
                     nameandid.setId(tool.getUserIDByUsername(ctx, name));
                 } else if (nameandid instanceof Group) {
                     nameandid.setId(tool.getGroupIDByGroupname(ctx, name));
-                } else if (nameandid instanceof Resource) {
+                } else if (nameandid instanceof com.openexchange.admin.rmi.dataobjects.Resource) {
                     nameandid.setId(tool.getResourceIDByResourcename(ctx, name));
                 } else if (nameandid instanceof Context) {
                     nameandid.setId(tool.getContextIDByContextname(name));
