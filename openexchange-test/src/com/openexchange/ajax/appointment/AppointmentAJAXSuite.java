@@ -23,6 +23,7 @@ public class AppointmentAJAXSuite extends TestSuite{
 		tests.addTestSuite( UpdatesTest.class );
 		tests.addTestSuite( ConflictTest.class );
 		tests.addTestSuite( MultipleTest.class );
+		tests.addTestSuite( PortalSearchTest.class );
 		
 		tests.addTest( RecurrenceTestSuite.suite() );
 		
