@@ -191,4 +191,24 @@ public abstract class UserSettingMailStorage {
 	public abstract UserSettingMail loadUserSettingMail(final int user, final Context ctx, final Connection readConArg)
 			throws OXException;
 
+	/**
+	 * Removes the user's mail settings from cache if any used
+	 * 
+	 * @param user
+	 *            the user
+	 * @param ctx
+	 *            the context
+	 * @throws OXException
+	 *             if cache removal fails
+	 */
+	public abstract void removeUserSettingMail(final int user, final Context ctx) throws OXException;
+
+	/**
+	 * Clears this storage's cache if any used
+	 * 
+	 * @throws OXException
+	 *             if cache clearing fails
+	 */
+	public abstract void clearStorage() throws OXException;
+
 }

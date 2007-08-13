@@ -22,6 +22,8 @@
    atomic access to monitoring variables instead of using own locking
    mechanism
  - MailWriter.getMailWriters() made static to reduce object instantiation
+ - Additional methods for UserSettingMailStorage to remove single cached
+   user's mail settings or whole cache
 
 * 2007-08-10 - tobias.prinz@open-xchange.com
 

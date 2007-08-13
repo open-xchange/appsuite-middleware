@@ -557,4 +557,50 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 		usm.setModifiedDuringSession(true);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.imap.UserSettingMailStorage#clearStorage()
+	 */
+	@Override
+	public void clearStorage() throws OXException {
+		if (useCache) {
+			/*
+			 * Put clone into cache
+			 */
+			cacheWriteLock.lock();
+			try {
+				cache.clear();
+			} catch (final CacheException e) {
+				LOG.error("UserSettingMail's cache could not be cleared", e);
+			} finally {
+				cacheWriteLock.unlock();
+			}
+		}
+
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.imap.UserSettingMailStorage#removeUserSettingMail(int,
+	 *      com.openexchange.groupware.contexts.Context)
+	 */
+	@Override
+	public void removeUserSettingMail(final int user, final Context ctx) throws OXException {
+		if (useCache) {
+			/*
+			 * Put clone into cache
+			 */
+			cacheWriteLock.lock();
+			try {
+				cache.remove(new CacheKey(ctx, user));
+			} catch (final CacheException e) {
+				LOG.error("UserSettingMail could not be removed from cache", e);
+			} finally {
+				cacheWriteLock.unlock();
+			}
+		}
+	}
+
 }
