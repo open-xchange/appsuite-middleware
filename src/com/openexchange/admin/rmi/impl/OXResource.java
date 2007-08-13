@@ -47,7 +47,7 @@
  *
  */
 /*
- * $Id: OXResource.java,v 1.48 2007/08/07 10:33:04 cutmasta Exp $
+ * $Id: OXResource.java,v 1.49 2007/08/13 12:43:58 cutmasta Exp $
  */
 package com.openexchange.admin.rmi.impl;
 
@@ -393,7 +393,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
 
     public Resource getData(final Context ctx, final Resource res, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchResourceException {
         try {
-            doNullCheck(res,res.getId());
+            doNullCheck(res);
         } catch (final InvalidDataException e3) {
             log.error("One of the given arguments for get is null", e3);
             throw e3;
@@ -405,6 +405,8 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
             log.error(e.getMessage(), e);
             throw e;
         }        
+        
+        setIdOrGetIDFromNameAndIdObject(ctx, res);
         
         final int resource_id = res.getId();
         
