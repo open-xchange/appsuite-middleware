@@ -792,7 +792,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 		return appointmentArray;
 	}
 	
-	private static AppointmentObject[] jsonArray2AppointmentArray(
+	public static AppointmentObject[] jsonArray2AppointmentArray(
 			JSONArray jsonArray, int[] cols, TimeZone userTimeZone)
 			throws Exception {
 		AppointmentObject[] appointmentArray = new AppointmentObject[jsonArray
