@@ -667,7 +667,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             InvalidCredentialsException, NoSuchContextException,
             InvalidDataException, DatabaseUpdateException, NoSuchGroupException {
         try {
-            doNullCheck(grp, grp.getId());
+            doNullCheck(grp);
         } catch (final InvalidDataException e3) {
             log.error("One of the given arguments for get is null", e3);
             throw e3;
@@ -679,7 +679,9 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             log.error(e.getMessage(), e);
             throw e;
         }
-
+        
+        setIdOrGetIDFromNameAndIdObject(ctx, grp);
+        
         final int grp_id = grp.getId();
 
         if (log.isDebugEnabled()) {
