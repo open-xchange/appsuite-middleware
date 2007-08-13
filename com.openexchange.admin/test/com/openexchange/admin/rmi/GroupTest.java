@@ -48,6 +48,7 @@
  */
 package com.openexchange.admin.rmi;
 
+import static junit.framework.Assert.assertNotNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -130,6 +131,57 @@ public class GroupTest extends AbstractTest {
             }
         }
     }
+    
+    @Test
+    public void testDeleteGroupIdentifiedByName() throws Exception {
+        
+        // delete group ident by name
+        
+        final int context_id = getContextID();
+        final Context ctx = new Context(context_id);
+        final Credentials cred = DummyCredentials();
+        final String hosturl = getRMIHostUrl();
+        final Group grp = createGroup(ctx, getTestGroupObject(VALID_CHAR_TESTGROUP+System.currentTimeMillis(), ctx, cred), hosturl, cred);
+        
+        final Group del_grp = new Group();
+        del_grp.setName(grp.getName());
+        deleteGroup(ctx, del_grp, hosturl, cred);
+        // now load the group again, this MUST fail
+        try {
+            getData(ctx, grp, hosturl, cred);
+            fail("group not exists expected");
+        } catch (final Exception ecp) {
+            if (ecp.toString().toLowerCase().indexOf("group does not exist") != -1) {
+                // this exception MUST happen, if not, test MUST fail :)
+                assertTrue(true);
+            }
+        }
+    }
+    
+    @Test
+    public void testDeleteGroupIdentifiedByID() throws Exception {
+        
+        // delete group ident by id
+        
+        final int context_id = getContextID();
+        final Context ctx = new Context(context_id);
+        final Credentials cred = DummyCredentials();
+        final String hosturl = getRMIHostUrl();
+        final Group grp = createGroup(ctx, getTestGroupObject(VALID_CHAR_TESTGROUP+System.currentTimeMillis(), ctx, cred), hosturl, cred);
+        
+        final Group del_grp = new Group(grp.getId());
+        deleteGroup(ctx, del_grp, hosturl, cred);
+        // now load the group again, this MUST fail
+        try {
+            getData(ctx, grp, hosturl, cred);
+            fail("group not exists expected");
+        } catch (final Exception ecp) {
+            if (ecp.toString().toLowerCase().indexOf("group does not exist") != -1) {
+                // this exception MUST happen, if not, test MUST fail :)
+                assertTrue(true);
+            }
+        }
+    }
 
     @Test
     public void testLoadGroup() throws Exception {
@@ -144,6 +196,49 @@ public class GroupTest extends AbstractTest {
         
         // load from server 
         Group srv_group = getData(ctx, createdgroup, hosturl, cred);
+        
+        // compare group fields
+        assertEquals("displayname id not equal", createdgroup.getDisplayname(), srv_group.getDisplayname());
+        assertEquals("id not equals", createdgroup.getId(), srv_group.getId());
+        assertEquals("identifier not equal",createdgroup.getName(), srv_group.getName());
+    }
+    
+    @Test
+    public void testLoadGroupIdentifiedByName() throws Exception {
+        
+        final int context_id = getContextID();
+        final Context ctx = new Context(context_id);
+        final Credentials cred = DummyCredentials();
+        final Group addgroup = getTestGroupObject(cred);
+        final String hosturl = getRMIHostUrl();
+        final Group createdgroup = createGroup(ctx, addgroup, hosturl, cred);
+        assertTrue("expected id > 0", createdgroup.getId() > 0);
+        
+        // load from server 
+        Group tmp = new Group();
+        tmp.setName(createdgroup.getName());
+        Group srv_group = getData(ctx, tmp, hosturl, cred);
+        
+        // compare group fields
+        assertEquals("displayname id not equal", createdgroup.getDisplayname(), srv_group.getDisplayname());
+        assertEquals("id not equals", createdgroup.getId(), srv_group.getId());
+        assertEquals("identifier not equal",createdgroup.getName(), srv_group.getName());
+    }
+    
+    @Test
+    public void testLoadGroupIdentifiedByID() throws Exception {
+        
+        final int context_id = getContextID();
+        final Context ctx = new Context(context_id);
+        final Credentials cred = DummyCredentials();
+        final Group addgroup = getTestGroupObject(cred);
+        final String hosturl = getRMIHostUrl();
+        final Group createdgroup = createGroup(ctx, addgroup, hosturl, cred);
+        assertTrue("expected id > 0", createdgroup.getId() > 0);
+        
+        // load from server 
+        Group tmp = new Group(createdgroup.getId());        
+        Group srv_group = getData(ctx, tmp, hosturl, cred);
         
         // compare group fields
         assertEquals("displayname id not equal", createdgroup.getDisplayname(), srv_group.getDisplayname());
@@ -168,6 +263,67 @@ public class GroupTest extends AbstractTest {
 
         // add user as groupmember
         addMemberToGroup(ctx, createdgroup, new User[]{createduser}, hosturl, cred);
+
+        // now get all members of group, and check if user is member
+        final User[] remote_members = getMembers(ctx, createdgroup, hosturl, cred);
+        boolean foundmember = false;
+        for (User element : remote_members) {
+            if (element.getId() == createduser.getId().intValue()) {
+                foundmember = true;
+            }
+        }
+        assertTrue("member not added to group", foundmember);
+    }
+    
+    @Test
+    public void testAddMemberToGroupIdentifiedByName() throws Exception {
+        final int context_id = getContextID();
+        final Context ctx = new Context(context_id);
+        final Credentials cred = DummyCredentials();
+        final String hosturl = getRMIHostUrl();
+        final Group addgroup = getTestGroupObject("memberaddgroup" + VALID_CHAR_TESTGROUP+System.currentTimeMillis(), ctx, cred);
+        final Group createdgroup = createGroup(ctx, addgroup, hosturl, cred);
+        assertTrue("group id > 0 expected", createdgroup.getId() > 0);
+
+        // create user to add
+        final User usr = UserTest.getTestUserObject("groupmemberadduser" + System.currentTimeMillis(), "netline");
+        final UserModuleAccess access = new UserModuleAccess();
+        final User createduser = UserTest.addUser(ctx, usr, access);
+
+        // add user as groupmember
+        Group tmp = new Group();
+        tmp.setName(createdgroup.getName());
+        addMemberToGroup(ctx, tmp, new User[]{createduser}, hosturl, cred);
+
+        // now get all members of group, and check if user is member
+        final User[] remote_members = getMembers(ctx, createdgroup, hosturl, cred);
+        boolean foundmember = false;
+        for (User element : remote_members) {
+            if (element.getId() == createduser.getId().intValue()) {
+                foundmember = true;
+            }
+        }
+        assertTrue("member not added to group", foundmember);
+    }
+    
+    @Test
+    public void testAddMemberToGroupIdentifiedByID() throws Exception {
+        final int context_id = getContextID();
+        final Context ctx = new Context(context_id);
+        final Credentials cred = DummyCredentials();
+        final String hosturl = getRMIHostUrl();
+        final Group addgroup = getTestGroupObject("memberaddgroup" + VALID_CHAR_TESTGROUP+System.currentTimeMillis(), ctx, cred);
+        final Group createdgroup = createGroup(ctx, addgroup, hosturl, cred);
+        assertTrue("group id > 0 expected", createdgroup.getId() > 0);
+
+        // create user to add
+        final User usr = UserTest.getTestUserObject("groupmemberadduser" + System.currentTimeMillis(), "netline");
+        final UserModuleAccess access = new UserModuleAccess();
+        final User createduser = UserTest.addUser(ctx, usr, access);
+
+        // add user as groupmember
+        Group tmp = new Group(createdgroup.getId());
+        addMemberToGroup(ctx, tmp, new User[]{createduser}, hosturl, cred);
 
         // now get all members of group, and check if user is member
         final User[] remote_members = getMembers(ctx, createdgroup, hosturl, cred);
@@ -222,6 +378,97 @@ public class GroupTest extends AbstractTest {
         assertFalse("member not removed from group", foundmember);
 
     }
+    
+    @Test
+    public void testRemoveMemberFromGroupIdentifiedByName() throws Exception {
+        final int context_id = getContextID();
+        final Context ctx = new Context(context_id);
+        final Credentials cred = DummyCredentials();
+        final String hosturl = getRMIHostUrl();
+        final Group addgroup = getTestGroupObject("memberaddgroup" + VALID_CHAR_TESTGROUP+System.currentTimeMillis(), ctx, cred);
+        final Group createdgroup = createGroup(ctx, addgroup, hosturl, cred);
+        assertTrue("group id > 0 expected", createdgroup.getId() > 0);
+
+        // create user to add
+        
+        final User usr = UserTest.getTestUserObject("groupmemberadduser" + System.currentTimeMillis(), "netline");
+        final UserModuleAccess access = new UserModuleAccess();
+        final User createduser = UserTest.addUser(ctx, usr, access);
+
+        // add user as groupmember
+        addMemberToGroup(ctx, createdgroup, new User[]{createduser}, hosturl, cred);
+
+        // now get all members of group, and check if user is member
+        User[] remote_members = getMembers(ctx, createdgroup, hosturl, cred);
+        boolean foundmember = false;
+        for (User element : remote_members) {
+            if (element.getId() == createduser.getId().intValue()) {
+                foundmember = true;
+            }
+        }
+        assertTrue("member not added to group", foundmember);
+
+        // now remove user from group;
+        Group tmp = new Group();
+        tmp.setName(createdgroup.getName());
+        removeMemberFromGroup(ctx, tmp, new User[]{createduser}, hosturl, cred);
+        
+        // now get all members of group, and check if user is member
+        remote_members = getMembers(ctx, createdgroup, hosturl, cred);
+        foundmember = false;
+        for (User element : remote_members) {
+            if (element.getId() == createduser.getId().intValue()) {
+                foundmember = true;
+            }
+        }
+        assertFalse("member not removed from group", foundmember);
+
+    }
+    
+    @Test
+    public void testRemoveMemberFromGroupIdentifiedByID() throws Exception {
+        final int context_id = getContextID();
+        final Context ctx = new Context(context_id);
+        final Credentials cred = DummyCredentials();
+        final String hosturl = getRMIHostUrl();
+        final Group addgroup = getTestGroupObject("memberaddgroup" + VALID_CHAR_TESTGROUP+System.currentTimeMillis(), ctx, cred);
+        final Group createdgroup = createGroup(ctx, addgroup, hosturl, cred);
+        assertTrue("group id > 0 expected", createdgroup.getId() > 0);
+
+        // create user to add
+        
+        final User usr = UserTest.getTestUserObject("groupmemberadduser" + System.currentTimeMillis(), "netline");
+        final UserModuleAccess access = new UserModuleAccess();
+        final User createduser = UserTest.addUser(ctx, usr, access);
+
+        // add user as groupmember
+        addMemberToGroup(ctx, createdgroup, new User[]{createduser}, hosturl, cred);
+
+        // now get all members of group, and check if user is member
+        User[] remote_members = getMembers(ctx, createdgroup, hosturl, cred);
+        boolean foundmember = false;
+        for (User element : remote_members) {
+            if (element.getId() == createduser.getId().intValue()) {
+                foundmember = true;
+            }
+        }
+        assertTrue("member not added to group", foundmember);
+
+        // now remove user from group;
+        Group tmp = new Group(createdgroup.getId());
+        removeMemberFromGroup(ctx, tmp, new User[]{createduser}, hosturl, cred);
+        
+        // now get all members of group, and check if user is member
+        remote_members = getMembers(ctx, createdgroup, hosturl, cred);
+        foundmember = false;
+        for (User element : remote_members) {
+            if (element.getId() == createduser.getId().intValue()) {
+                foundmember = true;
+            }
+        }
+        assertFalse("member not removed from group", foundmember);
+
+    }
 
     @Test
     public void testChangeGroup() throws Exception {
@@ -237,7 +484,7 @@ public class GroupTest extends AbstractTest {
         Group srv_response = getData(ctx, createdgroup, hosturl, cred);
         
         // check if group is created on server correct
-        assertEquals("displayname id not equal", createdgroup.getDisplayname(), srv_response.getDisplayname());
+        assertEquals("displayname not equal", createdgroup.getDisplayname(), srv_response.getDisplayname());
         assertEquals("id not equals", createdgroup.getId(), srv_response.getId());
         assertEquals("identifier not equal", createdgroup.getName(), srv_response.getName());
 
@@ -251,10 +498,115 @@ public class GroupTest extends AbstractTest {
         final Group remote_grp = getData(ctx, createdgroup, hosturl, cred);
 
         // check if group is created on server correct
-        assertEquals("displayname id not equal", createdgroup.getDisplayname(), remote_grp.getDisplayname());
+        assertEquals("displayname not equal", createdgroup.getDisplayname(), remote_grp.getDisplayname());
         assertEquals("id not equals", createdgroup.getId(), remote_grp.getId());
         assertEquals("identifier not equal", createdgroup.getName(), remote_grp.getName());
     }
+    
+    
+    @Test
+    public void testChangeGroupIdentifiedbyID() throws Exception {
+        
+        final int context_id = getContextID();
+        final Context ctx = new Context(context_id);
+        final Credentials cred = DummyCredentials();
+        final String hosturl = getRMIHostUrl();
+        final Group addgroup = getTestGroupObject("changed_this_group"+System.currentTimeMillis(), ctx, cred);
+        final Group createdgroup = createGroup(ctx, addgroup, hosturl, cred);
+        assertTrue("expected id > 0", createdgroup.getId() > 0);
+
+        // load group from server
+        Group srv_response = getData(ctx, createdgroup, hosturl, cred);
+        
+        // check if group is created on server correct
+        assertEquals("displayname not equal", createdgroup.getDisplayname(), srv_response.getDisplayname());
+        assertEquals("id not equals", createdgroup.getId(), srv_response.getId());
+        assertEquals("identifier not equal", createdgroup.getName(), srv_response.getName());
+        
+        Group tmp_group = new Group(srv_response.getId());
+        tmp_group.setDisplayname(srv_response.getDisplayname()+"_changed");
+        
+        // do the changes on the remote server for the group
+        changeGroup(ctx, tmp_group, hosturl, cred);
+
+        // load group which was modified
+        final Group remote_grp = getData(ctx, createdgroup, hosturl, cred);
+
+        // check if group is change correctly on server
+        assertEquals("displayname not equal", tmp_group.getDisplayname(), remote_grp.getDisplayname());        
+        
+    }
+    
+    @Test
+    public void testChangeNull() throws Exception {
+        
+        // change group displayname and name to null, this must fail
+        
+        final int context_id = getContextID();
+        final Context ctx = new Context(context_id);
+        final Credentials cred = DummyCredentials();
+        final String hosturl = getRMIHostUrl();
+        final Group addgroup = getTestGroupObject("changed_this_group"+System.currentTimeMillis(), ctx, cred);
+        final Group createdgroup = createGroup(ctx, addgroup, hosturl, cred);
+        assertTrue("expected id > 0", createdgroup.getId() > 0);
+
+        // load group from server
+        Group srv_response = getData(ctx, createdgroup, hosturl, cred);
+        
+        // check if group is created on server correct
+        assertEquals("displayname id not equal", createdgroup.getDisplayname(), srv_response.getDisplayname());
+        assertEquals("id not equals", createdgroup.getId(), srv_response.getId());
+        assertEquals("identifier not equal", createdgroup.getName(), srv_response.getName());
+        
+        // set display name to null and name to null
+        Group tmp_group = new Group(srv_response.getId());
+        tmp_group.setDisplayname(null);
+        tmp_group.setName(null);
+        
+        // do the changes on the remote server for the group
+        changeGroup(ctx, tmp_group, hosturl, cred);
+
+        // load group which was modified
+        final Group remote_grp = getData(ctx, createdgroup, hosturl, cred);
+
+        // check that displayname and name arent changed!
+        assertNotNull("displayname cannot be null", remote_grp.getDisplayname());        
+        assertNotNull("name of group cannot be null", remote_grp.getName());
+    }
+    
+    @Test
+    public void testChangeGroupIdentifiedbyName() throws Exception {
+        
+        final int context_id = getContextID();
+        final Context ctx = new Context(context_id);
+        final Credentials cred = DummyCredentials();
+        final String hosturl = getRMIHostUrl();
+        final Group addgroup = getTestGroupObject("changed_this_group"+System.currentTimeMillis(), ctx, cred);
+        final Group createdgroup = createGroup(ctx, addgroup, hosturl, cred);
+        assertTrue("expected id > 0", createdgroup.getId() > 0);
+
+        // load group from server
+        Group srv_response = getData(ctx, createdgroup, hosturl, cred);
+        
+        // check if group is created on server correct
+        assertEquals("displayname id not equal", createdgroup.getDisplayname(), srv_response.getDisplayname());
+        assertEquals("id not equals", createdgroup.getId(), srv_response.getId());
+        assertEquals("identifier not equal", createdgroup.getName(), srv_response.getName());
+        
+        Group tmp_group = new Group();
+        tmp_group.setDisplayname(srv_response.getDisplayname()+"_changed");
+        tmp_group.setName(srv_response.getName());
+        // do the changes on the remote server for the group
+        changeGroup(ctx, tmp_group, hosturl, cred);
+
+        // load group which was modified
+        final Group remote_grp = getData(ctx, createdgroup, hosturl, cred);
+
+        // check if group is changed correctly on server
+        assertEquals("displayname id not equal", tmp_group.getDisplayname(), remote_grp.getDisplayname());        
+    }
+    
+    
 
     @Test
     public void testGetMembers() throws Exception {
