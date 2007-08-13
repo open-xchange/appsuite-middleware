@@ -8,6 +8,9 @@
                      are shown on the start page. Added new ajax method 
                      newappointments for portal search.
 
+ - Fixed Bug #8760 - Appointment conflicts were not in ajax response after
+                     update request.
+
 * 2007-08-13 - martin.kauss@open-xchange.com
 
  - Bugfix #8505 and #8722. Reminder data still exist after an appointment was
