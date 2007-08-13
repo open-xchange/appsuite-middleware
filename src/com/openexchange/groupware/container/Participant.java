@@ -71,7 +71,10 @@ public interface Participant
 	
 	public static final int EXTERNAL_GROUP = 6;
 	
-	public void setIdentifier( int name ) ;
+	/**
+     * @deprecated Use explicit constructor.
+	 */
+    public void setIdentifier( int name ) ;
 	
 	public int getIdentifier( );
 	

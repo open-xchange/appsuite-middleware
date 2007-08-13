@@ -94,15 +94,30 @@ public class UserParticipant implements Participant, Comparable {
 	
 	private boolean b_emailaddress = false;
 	
-	public UserParticipant() {
-		
+	/**
+     * @deprecated User {@link #UserParticipant(int)}.
+	 */
+    public UserParticipant() {
 	}
-	
+
+    /**
+     * Default constructor.
+     * @param id unique identifier of the user.
+     */
+    public UserParticipant(final int id) {
+        super();
+        this.id = id;
+        b_id = true;
+    }
+
 	public void setPersonalFolderId(final int pfid) {
 		this.pfid = pfid;
 	}
 	
-	public void setIdentifier(final int id) {
+	/**
+     * @deprecated Use {@link #UserParticipant(int)}.
+	 */
+    public void setIdentifier(final int id) {
 		this.id = id;
 		b_id = true;
 	}
