@@ -53,6 +53,7 @@ import java.io.File;
 import java.util.Map;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -139,7 +140,7 @@ public final class AJAXUploadFile {
 
 	private File file;
 
-	private long lastAccess;
+	private final AtomicLong lastAccess;
 
 	private boolean deleted;
 
@@ -167,7 +168,7 @@ public final class AJAXUploadFile {
 	 */
 	public AJAXUploadFile(final File file, final long initialTimestamp) {
 		this.file = file;
-		this.lastAccess = initialTimestamp;
+		lastAccess = new AtomicLong(initialTimestamp);
 		blockedForTimer = new AtomicBoolean();
 	}
 
@@ -179,17 +180,17 @@ public final class AJAXUploadFile {
 	}
 
 	/**
-	 * @return The timestamp
+	 * @return The last access timestamp
 	 */
 	public long getLastAccess() {
-		return lastAccess;
+		return lastAccess.get();
 	}
 
 	/**
 	 * Touches this file's last access timestamp
 	 */
 	public void touch() {
-		lastAccess = System.currentTimeMillis();
+		lastAccess.set(System.currentTimeMillis());
 	}
 
 	/**
@@ -228,7 +229,7 @@ public final class AJAXUploadFile {
 					/*
 					 * Start timer task
 					 */
-					ServerTimer.getTimer().schedule(timerTask, 1000/* 1sec */, 60000/* 1min */);
+					ServerTimer.getTimer().schedule(timerTask, 1000/* 1sec */, IDLE_TIME_MILLIS / 5);
 					timerTaskStarted = true;
 				}
 			} finally {
@@ -246,7 +247,7 @@ public final class AJAXUploadFile {
 		 * Prevent this upload file from being deleted by timer task
 		 */
 		if (timerTaskStarted) {
-			this.blockedForTimer.set(true);
+			blockedForTimer.set(true);
 			timerTask.cancel();
 			/*
 			 * Clean from timer
