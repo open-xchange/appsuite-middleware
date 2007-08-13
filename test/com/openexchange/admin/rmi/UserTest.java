@@ -508,7 +508,17 @@ public class UserTest extends AbstractTest {
         notallowed.add("setDefaultSenderAddress");
         notallowed.add("setId"); 
         notallowed.add("setPassword"); 
-        //notallowed.add("setName"); 
+        notallowed.add("setName"); 
+        notallowed.add("setMail_folder_drafts_name"); 
+        notallowed.add("setMail_folder_sent_name");
+        notallowed.add("setMail_folder_spam_name");
+        notallowed.add("setMail_folder_trash_name");
+        notallowed.add("setMail_folder_confirmed_ham_name");
+        notallowed.add("setMail_folder_confirmed_spam_name");
+        notallowed.add("setGUI_Spam_filter_capabilities_enabled");
+        notallowed.add("setPassword_expired");
+        notallowed.add("setEnabled");
+        
         
         // loop through methods and change each attribute per single call and load and compare
         MethodMapObject[] meth_objects = getSetableAttributeMethods(usr.getClass());
