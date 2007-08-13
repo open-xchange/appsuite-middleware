@@ -51,9 +51,12 @@ package com.openexchange.admin.rmi.dataobjects;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 
 import com.openexchange.admin.rmi.exceptions.EnforceableDataObjectException;
+import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 
 /**
  * @author choeger
@@ -71,7 +74,7 @@ public abstract class EnforceableDataObject implements Serializable, Cloneable {
      * @return String array containing names of mandatory members or null if
      *         unwanted
      */
-    protected abstract String[] getMandatoryMembersCreate();
+    public abstract String[] getMandatoryMembersCreate();
 
     /**
      * This method must be implemented and it must return a String array
@@ -81,7 +84,7 @@ public abstract class EnforceableDataObject implements Serializable, Cloneable {
      * @return String array containing names of mandatory members or null if
      *         unwanted
      */
-    protected abstract String[] getMandatoryMembersChange();
+    public abstract String[] getMandatoryMembersChange();
 
     /**
      * This method must be implemented and it must return a String array
@@ -91,7 +94,7 @@ public abstract class EnforceableDataObject implements Serializable, Cloneable {
      * @return String array containing names of mandatory members or null if
      *         unwanted
      */
-    protected abstract String[] getMandatoryMembersDelete();
+    public abstract String[] getMandatoryMembersDelete();
 
     /**
      * This method must be implemented and it must return a String array
@@ -101,7 +104,7 @@ public abstract class EnforceableDataObject implements Serializable, Cloneable {
      * @return String array containing names of mandatory members or null if
      *         unwanted
      */
-    protected abstract String[] getMandatoryMembersRegister();
+    public abstract String[] getMandatoryMembersRegister();
 
     /**
      * @return
@@ -235,6 +238,48 @@ public abstract class EnforceableDataObject implements Serializable, Cloneable {
         }
 
         return ret.toString();
+    }
+
+    /**
+     * This method is used to check that the mandatory fields specified for create aren't set to null through a change
+     * so we have to check for this here
+     * 
+     * @param enforcableobject
+     * @throws InvalidDataException 
+     */
+    public void testMandatoryCreateFieldsNull() throws InvalidDataException {
+        final String[] mandatoryMembersCreate = this.getMandatoryMembersCreate();
+        try {
+            for (final String name : mandatoryMembersCreate) {
+                StringBuilder sb = new StringBuilder("get");
+                final String firstletter = name.substring(0, 1).toUpperCase();
+                sb.append(firstletter);
+                final String lasttext = name.substring(1);
+                sb.append(lasttext);
+                final Class<? extends EnforceableDataObject> class1 = this.getClass();
+                final Method getter = class1.getMethod(sb.toString(), (Class[])null);
+                sb = new StringBuilder("is");
+                sb.append(firstletter);
+                sb.append(lasttext);
+                sb.append("set");
+                final Method isset = this.getClass().getMethod(sb.toString(), (Class[])null);
+                final Object getresult = getter.invoke(this, (Object[])null);
+                final boolean issetresult = (Boolean)isset.invoke(this, (Object[])null);
+                if (issetresult && null == getresult) {
+                    throw new InvalidDataException("Field \"" + name + "\" is a mandatory field and can't be set to null.");
+                }
+            }
+        } catch (final SecurityException e) {
+            throw new InvalidDataException(e);
+        } catch (final NoSuchMethodException e) {
+            throw new InvalidDataException("No such method " + e.getMessage());
+        } catch (final IllegalArgumentException e) {
+            throw new InvalidDataException(e);
+        } catch (final IllegalAccessException e) {
+            throw new InvalidDataException(e);
+        } catch (final InvocationTargetException e) {
+            throw new InvalidDataException(e);
+        }
     }
 
     /**
