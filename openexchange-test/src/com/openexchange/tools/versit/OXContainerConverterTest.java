@@ -53,12 +53,18 @@ import java.io.ByteArrayInputStream;
 
 import junit.framework.TestCase;
 
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.contact.ContactConfig;
+import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.Participant;
+import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.ContextImpl;
 import com.openexchange.groupware.contexts.ContextStorage;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.tasks.Task;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.sessiond.SessionObjectWrapper;
 import com.openexchange.tools.versit.converter.ConverterPrivacyException;
@@ -119,6 +125,61 @@ public class OXContainerConverterTest extends TestCase {
 		String versitData = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Apple Computer\\, Inc//iCal 2.0//EN\nBEGIN:VEVENT\nCLASS:PUBLIC\nDTSTART:20070514T150000Z\nDTEND:20070514T163000Z\nLOCATION:Olpe\nSUMMARY:Simple iCal Appointment\nDESCRIPTION:Notes here...\nEND:VEVENT\nEND:VCALENDAR\n";
 		assertFalse(isFlaggedAsPrivate(versitData));
 	}
+	
+	public void test8475() throws Exception{
+		final User testUser = getUserParticipant();
+		final String participantEmail = testUser.getMail();
+		final String versitData =
+			"BEGIN:VCALENDAR\n" +
+			"VERSION:2.0\n" +
+			"PRODID:-//Apple Computer\\, Inc//iCal 1.5//EN\n" +
+			"BEGIN:VTODO\n" +
+			"ORGANIZER:MAILTO:tobias.friedrich@open-xchange.com\n" +
+			"ATTENDEE:MAILTO:"+ participantEmail+"\n" +
+			"DTSTART:20070608T080000Z\n" +
+			"STATUS:COMPLETED\n" +
+			"SUMMARY:Test todo\n" +
+			"UID:8D4FFA7A-ABC0-11D7-8200-00306571349C-RID\n" +
+			"DUE:20070618T080000Z\n" +
+			"END:VTODO\n" +
+			"END:VCALENDAR";
+		final Task task = convertTask(versitData);
+		Participant[] participants = task.getParticipants();
+		assertEquals(1,participants.length);
+		
+		try {
+			UserParticipant p = (UserParticipant) participants[0];
+			assertEquals(testUser.getContactId() ,p.getIdentifier());
+		} catch (ClassCastException e){
+			fail("User with e-mail " + participantEmail + " should be internal user");
+		}
+	}
+	
+	public Task convertTask(String versitData) throws Exception{
+		VersitDefinition def = ICalendar.definition;
+		
+		final VersitDefinition.Reader versitReader = def.getReader(
+				new ByteArrayInputStream(versitData.getBytes("UTF-8")), "UTF-8");
+		
+		VersitObject rootVersitObject = def.parseBegin(versitReader);
+		VersitObject versitObject = def.parseChild(versitReader, rootVersitObject);
+		
+		final OXContainerConverter oxContainerConverter = new OXContainerConverter(getSession());
+		return oxContainerConverter.convertTask(versitObject);
+	}
+	
+	public AppointmentObject convertAppointment(String versitData) throws Exception{
+		VersitDefinition def = ICalendar.definition;
+		
+		final VersitDefinition.Reader versitReader = def.getReader(
+				new ByteArrayInputStream(versitData.getBytes("UTF-8")), "UTF-8");
+		
+		VersitObject rootVersitObject = def.parseBegin(versitReader);
+		VersitObject versitObject = def.parseChild(versitReader, rootVersitObject);
+		
+		final OXContainerConverter oxContainerConverter = new OXContainerConverter(getSession());
+		return oxContainerConverter.convertAppointment(versitObject);
+	}
 
 	
 	public boolean isFlaggedAsPrivate(String versitData) throws Exception{
@@ -136,4 +197,12 @@ public class OXContainerConverterTest extends TestCase {
 		return appointmentObj.getPrivateFlag();
 	}
 	
+	public static User getUserParticipant() throws AbstractOXException{
+		Init.initDB();
+		ContactConfig.init();
+		ContextStorage.init();
+		final UserStorage uStorage = UserStorage.getInstance(new ContextImpl(1));
+		final int uid = uStorage.getUserId( Init.getAJAXProperty("user_participant1") );
+		return uStorage.getUser(uid);
+	}
 }

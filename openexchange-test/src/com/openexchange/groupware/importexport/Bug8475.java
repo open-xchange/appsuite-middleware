@@ -62,8 +62,11 @@ import org.junit.Test;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.TasksSQLInterface;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
+import com.openexchange.groupware.importexport.exceptions.ImportExportException;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
 import com.openexchange.server.DBPoolingException;
@@ -104,5 +107,33 @@ public class Bug8475 extends AbstractICalImportTest{
 			}
 		}
 		assertTrue("Found attendee?" , found);
+	}
+	
+	@Test public void testInternalAttendee() throws UnsupportedEncodingException, SQLException, NumberFormatException, AbstractOXException{
+		final User testUser = getUserParticipant();
+		final String ical = 
+			"BEGIN:VCALENDAR\n" +
+			"VERSION:2.0\n" +
+			"PRODID:-//Apple Computer\\, Inc//iCal 1.5//EN\n" +
+			"BEGIN:VTODO\n" +
+			"ORGANIZER:MAILTO:tobias.friedrich@open-xchange.com\n" +
+			"ATTENDEE:MAILTO:"+testUser.getMail()+"\n" +
+			"DTSTART:20070608T080000Z\n" +
+			"STATUS:COMPLETED\n" +
+			"SUMMARY:Test todo\n" +
+			"UID:8D4FFA7A-ABC0-11D7-8200-00306571349C-RID\n" +
+			"DUE:20070618T080000Z\n" +
+			"END:VTODO\n" +
+			"END:VCALENDAR";
+		ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.TASK, "8475", false);
+		
+		final TasksSQLInterface tasks = new TasksSQLInterfaceImpl(sessObj);
+		Task task = tasks.getTaskById(Integer.valueOf( res.getObjectId()), Integer.valueOf(res.getFolder()) );
+		
+		Participant[] participants = task.getParticipants();
+		assertEquals("One participant?" , 1, participants.length);
+		final Participant p =  participants[0];
+		assertEquals("User loaded is well-known internal user", testUser.getContactId() , p.getIdentifier());
+		
 	}
 }

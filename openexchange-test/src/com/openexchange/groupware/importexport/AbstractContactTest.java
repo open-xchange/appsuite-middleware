@@ -521,4 +521,19 @@ public class AbstractContactTest {
 		}
 		return results;
 	}
+	
+	/**
+	 * Loads a user that is different from the usual user for testing
+	 * 
+	 * @return the user information of user_participant1 as defined in ajax.properties 
+	 * @throws AbstractOXException
+	 */
+	public static User getUserParticipant() throws AbstractOXException{
+		Init.initDB();
+		ContactConfig.init();
+		ContextStorage.init();
+		final UserStorage uStorage = UserStorage.getInstance(new ContextImpl(1));
+		final int uid = uStorage.getUserId( Init.getAJAXProperty("user_participant1") );
+		return uStorage.getUser(uid);
+	}
 }
