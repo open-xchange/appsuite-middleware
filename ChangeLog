@@ -5,6 +5,9 @@
  - Bugfix #8784: Mail folders with more messages than
    "imapMessageFetchLimit" defined in "imap.properties" can be sorted
    against "unread"
+ - Using atomic datatypes from java.util.concurrent.atomic package for
+   atomic access to monitoring variables instead of using own locking
+   mechanism
 
 * 2007-08-10 - tobias.prinz@open-xchange.com
 

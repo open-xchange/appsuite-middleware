@@ -49,22 +49,23 @@
 
 package com.openexchange.tools.ajp13.monitoring;
 
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class AJPv13ListenerMonitor implements AJPv13ListenerMonitorMBean {
 
-	private int poolSize;
+	private AtomicInteger poolSize;
 
-	private int numActive;
+	private AtomicInteger numActive;
 
-	private int numIdle;
+	private AtomicInteger numIdle;
 
-	private int numWaiting;
+	private AtomicInteger numWaiting;
 
-	private int numProcessing;
+	private AtomicInteger numProcessing;
 	
-	private int numRequests;
+	private AtomicInteger numRequests;
 
 	private static final int USE_TIME_COUNT = 1000;
 
@@ -84,21 +85,9 @@ public class AJPv13ListenerMonitor implements AJPv13ListenerMonitorMBean {
 
 	private long minProcessingTime = Long.MAX_VALUE;
 
-	private final Lock poolSizeLock = new ReentrantLock();
-
 	private final Lock useTimeLock = new ReentrantLock();
 
 	private final Lock processingTimeLock = new ReentrantLock();
-
-	private final Lock numActiveLock = new ReentrantLock();
-
-	private final Lock numIdleLock = new ReentrantLock();
-
-	private final Lock numWaitingLock = new ReentrantLock();
-
-	private final Lock numProcessingLock = new ReentrantLock();
-	
-	private final Lock numRequestsLock = new ReentrantLock();
 
 	public AJPv13ListenerMonitor() {
 		super();
@@ -107,135 +96,79 @@ public class AJPv13ListenerMonitor implements AJPv13ListenerMonitorMBean {
 	}
 
 	public int getPoolSize() {
-		return poolSize;
+		return poolSize.get();
 	}
 	
 	public void incrementPoolSize() {
-		poolSize++;
+		poolSize.incrementAndGet();
 	}
 	
 	public void decrementPoolSize() {
-		poolSize--;
+		poolSize.decrementAndGet();
 	}
 
 	public void setPoolSize(final int poolSize) {
-		if (poolSizeLock.tryLock()) {
-			try {
-				this.poolSize = poolSize;
-			} finally {
-				poolSizeLock.unlock();
-			}
-		}
+		this.poolSize.set(poolSize);
 	}
 
 	public int getNumActive() {
-		return numActive;
+		return numActive.get();
 	}
 
 	public void incrementNumActive() {
-		numActiveLock.lock();
-		try {
-			numActive++;
-		} finally {
-			numActiveLock.unlock();
-		}
+		numActive.incrementAndGet();
 	}
 
 	public void decrementNumActive() {
-		numActiveLock.lock();
-		try {
-			numActive--;
-		} finally {
-			numActiveLock.unlock();
-		}
+		numActive.decrementAndGet();
 	}
 
 	public int getNumIdle() {
-		return numIdle;
+		return numIdle.get();
 	}
 
 	public void incrementNumIdle() {
-		numIdleLock.lock();
-		try {
-			numIdle++;
-		} finally {
-			numIdleLock.unlock();
-		}
+		numIdle.incrementAndGet();
 	}
 
 	public void decrementNumIdle() {
-		numIdleLock.lock();
-		try {
-			numIdle--;
-		} finally {
-			numIdleLock.unlock();
-		}
+		numIdle.decrementAndGet();
 	}
 
 	public void setNumIdle(final int numIdle) {
-		numIdleLock.lock();
-		try {
-			this.numIdle = numIdle;
-		} finally {
-			numIdleLock.unlock();
-		}
+		this.numIdle.set(numIdle);
 	}
 
 	public int getNumWaiting() {
-		return numWaiting;
+		return numWaiting.get();
 	}
 
 	public void incrementNumWaiting() {
-		numWaitingLock.lock();
-		try {
-			numWaiting++;
-		} finally {
-			numWaitingLock.unlock();
-		}
+		numWaiting.incrementAndGet();
 	}
 
 	public void decrementNumWaiting() {
-		numWaitingLock.lock();
-		try {
-			numWaiting--;
-		} finally {
-			numWaitingLock.unlock();
-		}
+		numWaiting.decrementAndGet();
 	}
 
 	public int getNumProcessing() {
-		return numProcessing;
+		return numProcessing.get();
 	}
 
 	public void incrementNumProcessing() {
-		numProcessingLock.lock();
-		try {
-			numProcessing++;
-		} finally {
-			numProcessingLock.unlock();
-		}
+		numProcessing.incrementAndGet();
 	}
 
 	public void decrementNumProcessing() {
-		numProcessingLock.lock();
-		try {
-			numProcessing--;
-		} finally {
-			numProcessingLock.unlock();
-		}
+		numProcessing.decrementAndGet();
 	}
 	
 	public int getNumRequests() {
-		return numRequests;
+		return numRequests.get();
 	}
 	
 	public void incrementNumRequests() {
-		numRequestsLock.lock();
-		try {
-			numRequests++;
-		} finally {
-			numRequestsLock.unlock();
-		}
+		numRequests.incrementAndGet();
 	}
 
 	public double getAvgUseTime() {

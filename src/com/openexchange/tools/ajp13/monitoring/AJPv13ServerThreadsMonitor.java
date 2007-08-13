@@ -49,6 +49,7 @@
 
 package com.openexchange.tools.ajp13.monitoring;
 
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -59,13 +60,9 @@ import com.openexchange.tools.ajp13.AJPv13Server;
 
 public class AJPv13ServerThreadsMonitor implements AJPv13ServerThreadsMonitorMBean {
 
-	private int numActive;
+	private AtomicInteger numActive;
 	
-	private final Lock numActiveLock = new ReentrantLock();
-	
-	private int numIdle;
-	
-	private final Lock numIdleLock = new ReentrantLock();
+	private AtomicInteger numIdle;
 	
 	private static final int USE_TIME_COUNT = 1000;
 	
@@ -73,7 +70,7 @@ public class AJPv13ServerThreadsMonitor implements AJPv13ServerThreadsMonitorMBe
 	
 	private int avgUseTimePointer;
 	
-	private long maxUseTime = 0;
+	private long maxUseTime;
 	
 	private long minUseTime = Long.MAX_VALUE; 
 	
@@ -89,31 +86,19 @@ public class AJPv13ServerThreadsMonitor implements AJPv13ServerThreadsMonitorMBe
 	}
 
 	public int getNumActive() {
-		return numActive;
+		return numActive.get();
 	}
 	
 	public void setNumActive(final int numActive) {
-		if (numActiveLock.tryLock()) {
-			try {
-				this.numActive = numActive;
-			} finally {
-				numActiveLock.unlock();
-			}
-		}
+		this.numActive.set(numActive);
 	}
 
 	public int getNumIdle() {
-		return numIdle;
+		return numIdle.get();
 	}
 	
 	public void setNumIdle(final int numIdle) {
-		if (numIdleLock.tryLock()) {
-			try {
-				this.numIdle = numIdle;
-			} finally {
-				numIdleLock.unlock();
-			}
-		}
+		this.numIdle.set(numIdle);
 	}
 
 	public double getAvgUseTime() {
