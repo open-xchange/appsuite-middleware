@@ -170,9 +170,9 @@ public class Mail extends PermissionServlet implements UploadListener {
 	private static final String STR_NAME = "name";
 
 	private static final String MIME_APPLICATION_OCTET_STREAM = "application/octet-stream";
-	
+
 	private static final String MIME_TEXT_PLAIN = "text/plain";
-	
+
 	private static final String MIME_TEXT_HTML = "text/htm";
 
 	private static final String STR_ATTACHMENT_FILENAME = "attachment; filename=\"";
@@ -481,17 +481,16 @@ public class Mail extends PermissionServlet implements UploadListener {
 			 */
 			MailInterface mailInterface = mailInterfaceArg;
 			boolean closeMailInterface = false;
-			MailWriter mailWriter = null;
 			try {
 				if (mailInterface == null) {
 					mailInterface = MailInterfaceImpl.getInstance(sessionObj);
 					closeMailInterface = true;
 				}
-				mailWriter = new MailWriter(jsonWriter, sessionObj);
 				/*
 				 * Pre-Select field writers
 				 */
-				final MailFieldWriter[] writers = mailWriter.getMailFieldWriters(columns);
+				final MailFieldWriter[] writers = MailWriter.getMailFieldWriters(columns, TimeZone
+						.getTimeZone(sessionObj.getUserObject().getTimeZone()));
 				/*
 				 * Clear cache
 				 */
@@ -938,13 +937,11 @@ public class Mail extends PermissionServlet implements UploadListener {
 			 */
 			MailInterface mailInterface = mailInterfaceArg;
 			boolean closeMailInterface = false;
-			MailWriter mailWriter = null;
 			try {
 				if (mailInterface == null) {
 					mailInterface = MailInterfaceImpl.getInstance(sessionObj);
 					closeMailInterface = true;
 				}
-				mailWriter = new MailWriter(jsonWriter, sessionObj);
 				/*
 				 * Receive message iterator
 				 */
@@ -962,7 +959,8 @@ public class Mail extends PermissionServlet implements UploadListener {
 				/*
 				 * Pre-Select field writers
 				 */
-				final MailFieldWriter[] writers = mailWriter.getMailFieldWriters(columns);
+				final MailFieldWriter[] writers = MailWriter.getMailFieldWriters(columns, TimeZone
+						.getTimeZone(sessionObj.getUserObject().getTimeZone()));
 				it = mailInterface.getNewMessages(folderId, sortCol, orderDir, columns,
 						limit == ParamContainer.NOT_FOUND ? -1 : limit);
 				final int size = it.size();
@@ -1116,7 +1114,8 @@ public class Mail extends PermissionServlet implements UploadListener {
 			final String attachmentIdentifier = req.getParameter(PARAMETER_MAILATTCHMENT);
 			final String imageContentId = req.getParameter(PARAMETER_MAILCID);
 			String saveIdentifier = req.getParameter(PARAMETER_SAVE);
-			saveToDisk = ((saveIdentifier == null || saveIdentifier.length() == 0) ? false : ((Integer.parseInt(saveIdentifier)) > 0)); 
+			saveToDisk = ((saveIdentifier == null || saveIdentifier.length() == 0) ? false : ((Integer
+					.parseInt(saveIdentifier)) > 0));
 			saveIdentifier = null;
 			/*
 			 * Get attachment
@@ -1158,9 +1157,11 @@ public class Mail extends PermissionServlet implements UploadListener {
 						contentType.setPrimaryType(STR_APPLICATION);
 						contentType.setSubType(STR_OCTET_STREAM);
 						resp.setHeader(STR_CONTENT_DISPOSITION, new StringBuilder(50).append(STR_ATTACHMENT_FILENAME)
-								.append(getSaveAsFileName(mao.getFileName(), internetExplorer, mao.getContentType())).append('"').toString());
+								.append(getSaveAsFileName(mao.getFileName(), internetExplorer, mao.getContentType()))
+								.append('"').toString());
 					} else {
-						final String fileName = getSaveAsFileName(mao.getFileName(), internetExplorer, mao.getContentType());
+						final String fileName = getSaveAsFileName(mao.getFileName(), internetExplorer, mao
+								.getContentType());
 						contentType = new ContentType(mao.getContentType());
 						if (contentType.getBaseType().equalsIgnoreCase(MIME_APPLICATION_OCTET_STREAM)) {
 							/*
@@ -1442,17 +1443,16 @@ public class Mail extends PermissionServlet implements UploadListener {
 				 */
 				MailInterface mailInterface = mailInterfaceArg;
 				boolean closeMailInterface = false;
-				MailWriter mailWriter = null;
 				try {
 					if (mailInterface == null) {
 						mailInterface = MailInterfaceImpl.getInstance(sessionObj);
 						closeMailInterface = true;
 					}
-					mailWriter = new MailWriter(jsonWriter, sessionObj);
 					/*
 					 * Pre-Select field writers
 					 */
-					final MailFieldWriter[] writers = mailWriter.getMailFieldWriters(columns);
+					final MailFieldWriter[] writers = MailWriter.getMailFieldWriters(columns, TimeZone
+							.getTimeZone(sessionObj.getUserObject().getTimeZone()));
 					/*
 					 * Receive message iterator
 					 */
@@ -1564,11 +1564,11 @@ public class Mail extends PermissionServlet implements UploadListener {
 			final JSONArray jsonIDs = new JSONArray(body);
 			final int length = jsonIDs.length();
 			if (length > 0) {
-				final MailWriter mailWriter = new MailWriter(jsonWriter, sessionObj);
 				/*
 				 * Pre-Select field writers
 				 */
-				final MailFieldWriter[] writers = mailWriter.getMailFieldWriters(columns);
+				final MailFieldWriter[] writers = MailWriter.getMailFieldWriters(columns, TimeZone
+						.getTimeZone(sessionObj.getUserObject().getTimeZone()));
 				final Map<String, SmartLongArray> idMap = new HashMap<String, SmartLongArray>();
 				fillMap(idMap, body, length);
 				final int size = idMap.size();
@@ -1662,7 +1662,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 		response.setTimestamp(null);
 		return response;
 	}
-	
+
 	private static final boolean containsNullElements(final Message[] msgs) {
 		for (int i = 0; i < msgs.length; i++) {
 			if (null == msgs[i]) {

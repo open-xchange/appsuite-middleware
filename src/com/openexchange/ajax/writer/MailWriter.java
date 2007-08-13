@@ -92,13 +92,13 @@ import com.sun.mail.imap.protocol.BODYSTRUCTURE;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public class MailWriter extends DataWriter {
+public final class MailWriter extends DataWriter {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(MailWriter.class);
 
 	private static final String MIME_SUBTYPE_ALTERNATIVE = "ALTERNATIVE";
-	
+
 	private static final String MIME_SUBTYPE_MIXED = "MIXED";
 
 	public static interface MailFieldWriter {
@@ -110,43 +110,42 @@ public class MailWriter extends DataWriter {
 
 	private final TimeZone userTimeZone;
 
-	public MailWriter(JSONWriter jw, SessionObject session) {
+	public MailWriter(final JSONWriter jw, final SessionObject session) {
 		jsonwriter = jw;
 		this.session = session;
 		userTimeZone = TimeZone.getTimeZone(session.getUserObject().getTimeZone());
 	}
 
-	public final void writeJSONMessageObject(final JSONMessageObject msgObj) throws JSONException {
+	public void writeJSONMessageObject(final JSONMessageObject msgObj) throws JSONException {
 		msgObj.writeAsJSONObjectIntoJSONWriter(jsonwriter);
 	}
 
-	public final void writeMessageAsJSONObject(final Message msg) throws OXException {
+	public void writeMessageAsJSONObject(final Message msg) throws OXException {
 		writeMessageAsJSONObject(msg, true);
 	}
 
 	private static final String ERR_BROKEN_BODYSTRUCTURE = "unable to load bodystructure";
 
-	public final void writeMessageAsJSONObject(final Message msg, final boolean createVersionForDisplay)
-			throws OXException {
+	public void writeMessageAsJSONObject(final Message msg, final boolean createVersionForDisplay) throws OXException {
 		try {
 			final JSONMessageHandler msgHandler = new JSONMessageHandler(session, MessageUtils
 					.getMessageUniqueIdentifier(msg), createVersionForDisplay);
 			new MessageDumper(session).dumpMessage(msg, msgHandler);
 			final JSONMessageObject msgObj = msgHandler.getMessageObject();
 			msgObj.writeAsJSONObjectIntoJSONWriter(jsonwriter);
-		} catch (MessagingException e) {
+		} catch (final MessagingException e) {
 			if (e.getMessage().toLowerCase(Locale.ENGLISH).indexOf(ERR_BROKEN_BODYSTRUCTURE) != -1
 					&& LOG.isWarnEnabled()) {
 				LOG.warn(e.getMessage(), e);
 			} else {
 				throw MailInterfaceImpl.handleMessagingException(e, session.getIMAPProperties(), session.getContext());
 			}
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
 			throw new OXMailException(MailCode.JSON_ERROR, e, e.getMessage());
 		}
 	}
 
-	public final void writeThreadSortMessageAsArray(final int[] fields, final ThreadSortMessage threadSortMsg)
+	public void writeThreadSortMessageAsArray(final int[] fields, final ThreadSortMessage threadSortMsg)
 			throws OXException {
 		try {
 			try {
@@ -157,17 +156,17 @@ public class MailWriter extends DataWriter {
 			} finally {
 				jsonwriter.endArray();
 			}
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
 			throw new OXMailException(MailCode.JSON_ERROR, e, e.getMessage());
 		}
 	}
 
-	public final void writeThreadSortMessageFieldAsJSONValue(final int field, final ThreadSortMessage threadSortMsg,
+	public void writeThreadSortMessageFieldAsJSONValue(final int field, final ThreadSortMessage threadSortMsg,
 			final boolean withKey) throws OXException {
 		writeMessageFieldAsJSONValue(field, threadSortMsg.getMsg(), threadSortMsg.getThreadLevel(), withKey);
 	}
 
-	public final void writeMessageAsArray(final int[] fields, final Message msg) throws OXException {
+	public void writeMessageAsArray(final int[] fields, final Message msg) throws OXException {
 		try {
 			try {
 				jsonwriter.array();
@@ -177,13 +176,13 @@ public class MailWriter extends DataWriter {
 			} finally {
 				jsonwriter.endArray();
 			}
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
 			throw new OXMailException(MailCode.JSON_ERROR, e, e.getMessage());
 		}
 	}
 
-	public final MailFieldWriter[] getMailFieldWriters(final int[] fields) {
-		MailFieldWriter[] retval = new MailFieldWriter[fields.length];
+	public static MailFieldWriter[] getMailFieldWriters(final int[] fields, final TimeZone userTimeZone) {
+		final MailFieldWriter[] retval = new MailFieldWriter[fields.length];
 		for (int i = 0; i < retval.length; i++) {
 			Fields: switch (fields[i]) {
 			case JSONMessageObject.FIELD_ID:
@@ -491,7 +490,7 @@ public class MailWriter extends DataWriter {
 		return retval;
 	}
 
-	private static final boolean hasAttachments(final BODYSTRUCTURE bodystructure) {
+	private static boolean hasAttachments(final BODYSTRUCTURE bodystructure) {
 		if (bodystructure.isMulti()) {
 			if (MIME_SUBTYPE_ALTERNATIVE.equalsIgnoreCase(bodystructure.subtype) && bodystructure.bodies.length > 2) {
 				return true;
@@ -508,23 +507,23 @@ public class MailWriter extends DataWriter {
 		return false;
 	}
 
-	public final void writeMessageFieldAsJSONValue(final int field, final Message msg, final boolean withKey)
+	public void writeMessageFieldAsJSONValue(final int field, final Message msg, final boolean withKey)
 			throws OXException {
 		writeMessageFieldAsJSONValue(field, msg, 0, withKey);
 	}
 
-	private final void writeMessageFieldAsJSONValue(final int field, final Message msg, final int threadLevel,
+	private void writeMessageFieldAsJSONValue(final int field, final Message msg, final int threadLevel,
 			final boolean withKey) throws OXException {
 		try {
-			getMailFieldWriters(new int[] { field })[0].writeField(jsonwriter, msg, threadLevel, withKey);
-		} catch (JSONException e) {
+			getMailFieldWriters(new int[] { field }, userTimeZone)[0].writeField(jsonwriter, msg, threadLevel, withKey);
+		} catch (final JSONException e) {
 			throw new OXMailException(MailCode.JSON_ERROR, e, e.getMessage());
-		} catch (MessagingException e) {
+		} catch (final MessagingException e) {
 			throw MailInterfaceImpl.handleMessagingException(e, session.getIMAPProperties(), session.getContext());
 		}
 	}
 
-	private final String getMessageHeader(final String headerName, final Message msg) throws MessagingException {
+	private static String getMessageHeader(final String headerName, final Message msg) throws MessagingException {
 		final String[] values = msg.getHeader(headerName);
 		if (values == null || values.length == 0) {
 			return null;
@@ -537,7 +536,7 @@ public class MailWriter extends DataWriter {
 		return sb.toString();
 	}
 
-	private final String getSingleMessageHeader(final String headerName, final Message msg) throws MessagingException {
+	private static String getSingleMessageHeader(final String headerName, final Message msg) throws MessagingException {
 		final String[] values = msg.getHeader(headerName);
 		if (values == null || values.length == 0) {
 			return null;
@@ -547,7 +546,7 @@ public class MailWriter extends DataWriter {
 
 	private static final JSONArray EMPTY_JSON_ARR = new JSONArray();
 
-	private final JSONArray getFromAddr(final Message msg) throws MessagingException {
+	private static JSONArray getFromAddr(final Message msg) throws MessagingException {
 		final Address[] adrs = msg.getFrom();
 		if (null == adrs) {
 			return EMPTY_JSON_ARR;
@@ -555,7 +554,7 @@ public class MailWriter extends DataWriter {
 		return getAddressesAsArray(Arrays.asList((InternetAddress[]) adrs));
 	}
 
-	private final JSONArray getRecipientAddresses(final Message msg, final javax.mail.Message.RecipientType type)
+	private static JSONArray getRecipientAddresses(final Message msg, final javax.mail.Message.RecipientType type)
 			throws MessagingException {
 		final Address[] adrs = msg.getRecipients(type);
 		if (null == adrs) {
@@ -564,7 +563,7 @@ public class MailWriter extends DataWriter {
 		return getAddressesAsArray(Arrays.asList((InternetAddress[]) adrs));
 	}
 
-	private final int getFlags(final Message msg) throws MessagingException {
+	private static int getFlags(final Message msg) throws MessagingException {
 		int flags = 0;
 		if (msg.isSet(Flags.Flag.ANSWERED)) {
 			flags |= JSONMessageObject.BIT_ANSWERED;
