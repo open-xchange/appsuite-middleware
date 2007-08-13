@@ -1,3 +1,9 @@
+* 2007-08-13 - tobias.prinz@open-xchange.com
+
+ - Bugfix #8475: Opposed to the definition, UserParticipants are not 
+   supposed to be identified by e-mail address, so I changed this in 
+   OXContainerConverter.
+   
 * 2007-08-13 - thorben.betten@open-xchange.com
 
  - Moved flag to store mail default folder have been checked to session due

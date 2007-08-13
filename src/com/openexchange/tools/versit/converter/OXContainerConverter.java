@@ -97,7 +97,7 @@ import com.openexchange.tools.versit.values.RecurrenceValue;
 
 /**
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> (adapted Victor's parser for OX6)
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> (bugfixes: 7248, 7249, 7472, 7703, 7718, 7719)
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> (bugfixes: 7248, 7249, 7472, 7703, 7718, 7719, 8475)
  * 
  */
 public class OXContainerConverter {
@@ -1102,11 +1102,12 @@ public class OXContainerConverter {
 			final Participant participant;
 			if(isInternalUser(mail)){
 				participant = new UserParticipant();
+				participant.setIdentifier( getInternalUser(mail).getContactId() ); //fix for bug 8475
 			} else {
 				participant = new ExternalUserParticipant();
 				participant.setDisplayName(mail);
+				participant.setEmailAddress(mail);
 			}
-			participant.setEmailAddress(mail);
 			calContainerObj.addParticipant(participant);
 		} catch (Exception e) {
 			throw new ConverterException(e);
@@ -1121,6 +1122,14 @@ public class OXContainerConverter {
 		} catch (LdapException e){
 			return false;
 		}
+	}
+	
+	/*
+	 * Should only be called after using <code>isInternalUser</code>.
+	 */
+	public User getInternalUser(String mail) throws LdapException {
+		final UserStorage us = UserStorage.getInstance(session.getContext());
+		return us.searchUser(mail);
 	}
 
 	private static void RecurrenceProperty(final CalendarObject calContainerObj, final Property property,
