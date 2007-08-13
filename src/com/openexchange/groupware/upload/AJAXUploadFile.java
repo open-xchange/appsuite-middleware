@@ -116,17 +116,13 @@ public final class AJAXUploadFile {
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(AJAXUploadFile.class);
 
-	private static final long IDLE_TIME_MILLIS;
-
-	static {
-		IDLE_TIME_MILLIS = getIdleTimeMillis();
-	}
+	private static final long IDLE_TIME_MILLIS = getIdleTimeMillis();
 
 	private static long getIdleTimeMillis() {
 		int idleTimeMillis;
 		try {
 			idleTimeMillis = ServerConfig.getInteger(ServerConfig.Property.MaxUploadIdleTimeMillis);
-		} catch (ConfigurationException e) {
+		} catch (final ConfigurationException e) {
 			LOG.error(new StringBuilder(256).append(
 					"Max. upload file idle time millis could not be read, using default ").append(300000).append(
 					". Error message: ").append(e.getLocalizedMessage()).toString(), e);
