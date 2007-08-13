@@ -113,7 +113,7 @@ public class TasksDelete implements DeleteListener {
         try {
             // First remove the user from the participants of tasks. Then only
             // tasks exist that have other users as participants or no one.
-            removeUserFromParticipants(event, readCon, writeCon);
+            removeUserFromParticipants(event, writeCon);
             // Check now the folder mappings. Find all folder mappings for the
             // user to delete. If tasks has participants and several folder
             // mappings(delegated in private folder) the folder mapping can be
@@ -124,9 +124,9 @@ public class TasksDelete implements DeleteListener {
             // changed to mailadmin. Remaining task with single folder mappings
             // must be private tasks that can be deleted.
             // Delete private task in private folders.
-            assignToAdmin(event, readCon, writeCon);
+            assignToAdmin(event, writeCon);
             // Change createdFrom and modifiedBy attributes of left over tasks.
-            changeCFMB(event, readCon, writeCon);
+            changeCFMB(event, writeCon);
         } catch (final TaskException e) {
             throw new DeleteFailedException(e);
         }
@@ -140,14 +140,14 @@ public class TasksDelete implements DeleteListener {
      * @throws TaskException if an exception occurs.
      */
     private void removeUserFromParticipants(final DeleteEvent event,
-        final Connection readCon, final Connection writeCon)
+        final Connection writeCon)
         throws TaskException {
         final Context ctx = event.getContext();
         final int userId = event.getId();
         final ParticipantStorage partStor = ParticipantStorage.getInstance();
         for (StorageType type : StorageType.values()) {
             final int[] tasks = partStor.findTasksWithParticipant(ctx,
-                readCon, userId, type);
+                writeCon, userId, type);
             for (int task : tasks) {
                 partStor.deleteInternal(ctx, writeCon, task, userId , type,
                     true);
@@ -158,24 +158,22 @@ public class TasksDelete implements DeleteListener {
     /**
      * Assigns all left tasks to mailadmin.
      * @param event Event.
-     * @param readCon readable database connection.
      * @param writeCon writable database connection.
      * @throws TaskException if a problem occurs.
      */
     private void assignToAdmin(final DeleteEvent event,
-        final Connection readCon, final Connection writeCon)
-        throws TaskException {
+        final Connection writeCon) throws TaskException {
         final SessionObject session = getSession(event);
         final Context ctx = event.getContext();
         final int userId = event.getId();
         final FolderStorage foldStor = FolderStorage.getInstance();
         for (StorageType type : TYPES_AD) {
-            final int[][] result = foldStor.searchFolderByUser(ctx, readCon,
+            final int[][] result = foldStor.searchFolderByUser(ctx, writeCon,
                 userId, type);
             for (int[] folderAndTask : result) {
                 final int folderId = folderAndTask[0];
                 final int taskId = folderAndTask[1];
-                final Set<Folder> folders = foldStor.selectFolder(ctx, readCon,
+                final Set<Folder> folders = foldStor.selectFolder(ctx, writeCon,
                     taskId, type);
                 if (folders.size() == 0) {
                     throw new TaskException(TaskException.Code.FOLDER_NOT_FOUND,
@@ -189,7 +187,7 @@ public class TasksDelete implements DeleteListener {
                     foldStor.deleteFolder(ctx, writeCon, taskId, folderId,
                         type);
                 } else if (Tools.isFolderPrivate(ctx, folderId)) {
-                    TaskLogic.removeTask(session, folderId, taskId, type);
+                    TaskLogic.removeTask(session, writeCon, folderId, taskId, type);
                 } else {
                     throw new TaskException(Code.UNIMPLEMENTED);
                 }
@@ -221,8 +219,8 @@ public class TasksDelete implements DeleteListener {
      * @param writeCon writable database connection.
      * @throws TaskException if an exception occurs.
      */
-    private void changeCFMB(final DeleteEvent event, final Connection readCon,
-        final Connection writeCon) throws TaskException {
+    private void changeCFMB(final DeleteEvent event, final Connection writeCon)
+        throws TaskException {
         final int[] modified = new int[] { Task.CREATED_BY, Task.MODIFIED_BY,
             Task.LAST_MODIFIED };
         final Context ctx = event.getContext();
@@ -230,9 +228,10 @@ public class TasksDelete implements DeleteListener {
         final TaskStorage stor = TaskStorage.getInstance();
         for (StorageType type : TYPES_AD) {
             final int[] tasks = TaskSearch.getInstance().findDelegatedTasks(ctx,
-                readCon, userId, type);
+                writeCon, userId, type);
             for  (int taskId : tasks) {
-                final Task update = stor.selectTask(ctx, readCon, taskId, type);
+                final Task update = stor.selectTask(ctx, writeCon, taskId,
+                    type);
                 final Date lastModified = update.getLastModified();
                 if (update.getCreatedBy() == userId) {
                     update.setCreatedBy(ctx.getMailadmin());

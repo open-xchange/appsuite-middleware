@@ -1,3 +1,7 @@
+* 2007-08-13 - marcus.klein@open-xchange.com
+
+ - Bugfix #8410: Removed duplicate write database connection.
+
 * 2007-08-13 - sebastian.kauss@open-xchange.com
 
  - Fixed Bug #8785 - Only iCal imported fullday holiday appointments 

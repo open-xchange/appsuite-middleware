@@ -451,7 +451,7 @@ public final class SQL {
                 .get(type)));
         }
         sql = "DELETE FROM " + tableName
-            + " WHERE cid=? AND task=? AND user=?";
+            + " WHERE cid=? AND task=? AND user IN (";
         for (StorageType type : StorageType.values()) {
             DELETE_PARTS.put(type, sql.replace(tableName, PARTS_TABLES
                 .get(type)));

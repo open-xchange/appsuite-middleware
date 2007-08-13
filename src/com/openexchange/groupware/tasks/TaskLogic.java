@@ -774,57 +774,33 @@ public final class TaskLogic {
      * @throws TaskException if an exception occurs.
      */
     public static void removeTask(final SessionObject session,
-        final int folderId, final int taskId, final StorageType type)
-        throws TaskException {
+        final Connection writeCon, final int folderId, final int taskId,
+        final StorageType type) throws TaskException {
         final Context ctx = session.getContext();
         // Load the task.
-        final Task task = storage.selectTask(ctx, taskId, type);
+        final Task task = storage.selectTask(ctx, writeCon, taskId, type);
         task.setParentFolderID(folderId);
-        final Set<InternalParticipant> internal = partStor.selectInternal(
-            ctx, taskId, type);
-        final Set<ExternalParticipant> external = partStor.selectExternal(
-            ctx, taskId, type);
-        final Set<Folder> folders = foldStor.selectFolder(ctx, taskId, type);
+        final Set<InternalParticipant> internal = partStor.selectInternal(ctx,
+            writeCon, taskId, type);
+        final Set<ExternalParticipant> external = partStor.selectExternal(ctx,
+            writeCon, taskId, type);
+        final Set<Folder> folders = foldStor.selectFolder(ctx, writeCon, taskId,
+            type);
         final Set<TaskParticipant> parts = new HashSet<TaskParticipant>();
         parts.addAll(internal); parts.addAll(external);
         task.setParticipants(TaskLogic.createParticipants(parts));
         task.setUsers(TaskLogic.createUserParticipants(parts));
         // Now remove it.
-        Connection con;
-        try {
-            con = DBPool.pickupWriteable(ctx);
-        } catch (DBPoolingException e) {
-            throw new TaskException(Code.NO_CONNECTION, e);
+        partStor.deleteInternal(ctx, writeCon, taskId, internal, type, true);
+        if (StorageType.ACTIVE == type) {
+            final Set<InternalParticipant> removed = partStor.selectInternal(
+                ctx, writeCon, taskId, StorageType.REMOVED);
+            partStor.deleteInternal(ctx, writeCon, taskId, removed, StorageType
+                .REMOVED, true);
         }
-        try {
-            con.setAutoCommit(false);
-            partStor.deleteInternal(ctx, con, taskId, internal, type, true);
-            if (StorageType.ACTIVE == type) {
-                final Set<InternalParticipant> removed = partStor
-                    .selectInternal(ctx, con, taskId, StorageType.REMOVED);
-                partStor.deleteInternal(ctx, con, taskId, removed,
-                    StorageType.REMOVED, true);
-            }
-            partStor.deleteExternal(ctx, con, taskId, external, type, true);
-            foldStor.deleteFolder(ctx, con, taskId, folders, type);
-            storage.delete(ctx, con, taskId, task.getLastModified(), type);
-            con.commit();
-        } catch (SQLException e) {
-            rollback(con);
-            throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
-        } catch (TaskException e) {
-            rollback(con);
-            throw e;
-        } finally {
-            try {
-                con.setAutoCommit(true);
-            } catch (SQLException e) {
-                final TaskException exc = new TaskException(Code.SQL_ERROR, e,
-                    e.getMessage());
-                LOG.error(exc.getMessage(), e);
-            }
-            DBPool.closeWriterSilent(ctx, con);
-        }
+        partStor.deleteExternal(ctx, writeCon, taskId, external, type, true);
+        foldStor.deleteFolder(ctx, writeCon, taskId, folders, type);
+        storage.delete(ctx, writeCon, taskId, task.getLastModified(), type);
         informDelete(session, task);
     }
 }
