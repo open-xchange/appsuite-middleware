@@ -2713,22 +2713,22 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
     }
 
     @Override
-    protected final String[] getMandatoryMembersCreate() {
+    public final String[] getMandatoryMembersCreate() {
         return new String[]{ "name", "display_name", "password", "given_name", "sur_name", "primaryEmail" };
     }
     
     @Override
-    protected final String[] getMandatoryMembersChange() {
+    public final String[] getMandatoryMembersChange() {
         return null;
     }
 
     @Override
-    protected String[] getMandatoryMembersDelete() {
+    public String[] getMandatoryMembersDelete() {
         return null;
     }
 
     @Override
-    protected String[] getMandatoryMembersRegister() {
+    public String[] getMandatoryMembersRegister() {
         return null;
     }
 

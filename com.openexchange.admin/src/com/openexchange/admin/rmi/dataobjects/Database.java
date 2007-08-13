@@ -335,22 +335,22 @@ public class Database extends EnforceableDataObject implements NameAndIdObject {
     }
 
     @Override
-    protected String[] getMandatoryMembersChange() {
+    public String[] getMandatoryMembersChange() {
         return null;
     }
 
     @Override
-    protected String[] getMandatoryMembersCreate() {
+    public String[] getMandatoryMembersCreate() {
         return new String[] { "id", "driver", "url", "scheme" };
     }
 
     @Override
-    protected String[] getMandatoryMembersDelete() {
+    public String[] getMandatoryMembersDelete() {
         return new String[] { "driver", "url", "scheme", "password", "login" };
     }
 
     @Override
-    protected String[] getMandatoryMembersRegister() {
+    public String[] getMandatoryMembersRegister() {
         return new String[] { "password", "name", "master" };
     }
 
