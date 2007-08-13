@@ -54,7 +54,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
-import java.util.List;
 
 import junit.framework.JUnit4TestAdapter;
 

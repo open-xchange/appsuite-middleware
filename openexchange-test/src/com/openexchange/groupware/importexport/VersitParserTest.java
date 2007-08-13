@@ -160,6 +160,37 @@ public class VersitParserTest extends TestCase {
 			"END:VCALENDAR";
 		List<VersitObject> list = parse(ical);
 		assertEquals("Two elements in list?" , list.size() , 2);
-		
+	}
+	
+	/*
+	 * Parsing empty properties
+	 */
+	public void test8527() throws IOException{
+		final String ical = 
+			"BEGIN:VCALENDAR\n" +
+			"METHOD:REQUEST\n" +
+			"PRODID:Microsoft CDO for Microsoft Exchange\n" +
+			"VERSION:2.0\n" +
+			"BEGIN:VEVENT\n" +
+				"DTSTAMP:20070719T155206Z\n" +
+				"DTSTART;TZID=\"(GMT) Greenwich Mean Time/Dublin/Edinburgh/London\":20070724T1\n" +
+				" 10000\n" +
+				"SUMMARY:Open-Xchange discussion \n" +
+				"DTEND;TZID=\"(GMT) Greenwich Mean Time/Dublin/Edinburgh/London\":20070724T113\n" +
+				" 000\n" +
+				"PRIORITY:5\n" +
+				"CLASS:\n" +
+				"DESCRIPTION:Added after empty element\\, but still parsed. Yeah!\n" +
+				"CREATED:20070719T154738Z\n" +
+				"LAST-MODIFIED:20070719T155206Z\n" +
+				"STATUS:CONFIRMED\n" +
+				"TRANSP:OPAQUE\n" +
+			"END:VEVENT\n" +
+			"END:VCALENDAR"; 
+		List<VersitObject> list = parse(ical);
+		VersitObject obj = list.get(1);
+		assertEquals("Properties after empty are parsed?", "Added after empty element, but still parsed. Yeah!" , obj.getProperty("DESCRIPTION").getValue());
+		assertEquals("All properties are parsed?" , 10, obj.getPropertyCount() );
+		System.out.println(obj);
 	}
 }
