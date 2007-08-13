@@ -50,6 +50,7 @@
 package com.openexchange.admin.rmi;
 
 import static org.junit.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -159,6 +160,61 @@ public class ResourceTest extends AbstractTest{
     }
     
     @Test
+    public void testChangeNull() throws Exception {
+        
+        // set all attributes to null 
+        
+        OXResourceInterface oxres = getResourceClient();
+        final int context_id = getContextID();
+        final Context ctx = new Context(context_id);
+        Resource res = getTestResourceObject("tescase-create-resource-"+System.currentTimeMillis());
+        final Resource createdresource = oxres.create(ctx,res,DummyCredentials());
+        
+        Resource[] srv_response = oxres.list(ctx,"*",DummyCredentials());
+        if(srv_response==null){
+            fail("server response is null");
+        }
+        boolean found_resource = false;
+        for(int a = 0;a<srv_response.length;a++){
+            Resource tmp = srv_response[a];
+            if(tmp.getId().equals(createdresource.getId())){
+                assertEquals(createdresource.getDescription(),tmp.getDescription());
+                assertEquals(createdresource.getDisplayname(),tmp.getDisplayname());
+                assertEquals(createdresource.getEmail(),tmp.getEmail());
+                assertEquals(createdresource.getName(),tmp.getName());
+                found_resource = true;
+            }
+        }
+        
+        assertTrue("Expected to find resource with correct data",found_resource);
+        
+        
+        // set change data
+        if (null != createdresource.getAvailable()) {
+            createdresource.setAvailable(!createdresource.getAvailable());
+        } else {
+            createdresource.setAvailable(true);
+        }
+        
+        createdresource.setDescription(null);
+        createdresource.setDisplayname(null);
+        createdresource.setEmail(null);
+        createdresource.setName(null);
+        
+        // change on server
+        oxres.change(ctx,createdresource,DummyCredentials());
+        
+        // get resource from server and verify changed data
+        Resource srv_res = oxres.getData(ctx,createdresource,DummyCredentials());                       
+        
+        assertEquals(createdresource.getDescription(),srv_res.getDescription()); // must be able to null description        
+                
+        assertNotNull("email cannot be null", srv_res.getEmail());
+        assertNotNull("name cannot be null", srv_res.getName());
+        assertNotNull("display name cannot be null", srv_res.getDisplayname());        
+    }
+    
+    @Test
     public void testGet() throws Exception {
         OXResourceInterface oxres = getResourceClient();
         final int context_id = getContextID();
@@ -168,6 +224,43 @@ public class ResourceTest extends AbstractTest{
         
         // get resource from server
         Resource srv_res = oxres.getData(ctx,createdresource,DummyCredentials());        
+        
+        assertEquals(createdresource.getDescription(),srv_res.getDescription());
+        assertEquals(createdresource.getDisplayname(),srv_res.getDisplayname());
+        assertEquals(createdresource.getEmail(),srv_res.getEmail());
+        assertEquals(createdresource.getName(),srv_res.getName());
+    }
+    
+    @Test
+    public void testGetIdentifiedByID() throws Exception {
+        OXResourceInterface oxres = getResourceClient();
+        final int context_id = getContextID();
+        final Context ctx = new Context(context_id);
+        Resource res = getTestResourceObject("tescase-create-resource-"+System.currentTimeMillis());
+        final Resource createdresource = oxres.create(ctx,res,DummyCredentials());
+        
+        // get resource from server
+        Resource tmp = new Resource(createdresource.getId());
+        Resource srv_res = oxres.getData(ctx,tmp,DummyCredentials());        
+        
+        assertEquals(createdresource.getDescription(),srv_res.getDescription());
+        assertEquals(createdresource.getDisplayname(),srv_res.getDisplayname());
+        assertEquals(createdresource.getEmail(),srv_res.getEmail());
+        assertEquals(createdresource.getName(),srv_res.getName());
+    }
+    
+    @Test
+    public void testGetIdentifiedByName() throws Exception {
+        OXResourceInterface oxres = getResourceClient();
+        final int context_id = getContextID();
+        final Context ctx = new Context(context_id);
+        Resource res = getTestResourceObject("tescase-create-resource-"+System.currentTimeMillis());
+        final Resource createdresource = oxres.create(ctx,res,DummyCredentials());
+        
+        // get resource from server
+        Resource tmp = new Resource();
+        tmp.setName(createdresource.getName());
+        Resource srv_res = oxres.getData(ctx,tmp,DummyCredentials());        
         
         assertEquals(createdresource.getDescription(),srv_res.getDescription());
         assertEquals(createdresource.getDisplayname(),srv_res.getDisplayname());
@@ -194,6 +287,65 @@ public class ResourceTest extends AbstractTest{
         
         // delete resource
         oxres.delete(ctx,createdresource,DummyCredentials());
+        
+        // try to get resource again, this MUST fail
+        try{
+            srv_res = oxres.getData(ctx,createdresource,DummyCredentials());   
+            fail("Expected that the resource was deleted!");
+        }catch(NoSuchResourceException nsr){  }
+        
+    }
+    
+    @Test
+    public void testDeleteIdentifiedByName() throws Exception {
+        OXResourceInterface oxres = getResourceClient();
+        final int context_id = getContextID();
+        final Context ctx = new Context(context_id);
+        Resource res = getTestResourceObject("tescase-create-resource-"+System.currentTimeMillis());
+        final Resource createdresource = oxres.create(ctx,res,DummyCredentials());
+        
+        // get resource from server
+        Resource srv_res = oxres.getData(ctx,createdresource,DummyCredentials());        
+        
+        assertEquals(createdresource.getDescription(),srv_res.getDescription());
+        assertEquals(createdresource.getDisplayname(),srv_res.getDisplayname());
+        assertEquals(createdresource.getEmail(),srv_res.getEmail());
+        assertEquals(createdresource.getName(),srv_res.getName());
+        
+        
+        // delete resource
+        Resource tmp = new Resource();
+        tmp.setName(createdresource.getName());
+        oxres.delete(ctx,tmp,DummyCredentials());
+        
+        // try to get resource again, this MUST fail
+        try{
+            srv_res = oxres.getData(ctx,createdresource,DummyCredentials());   
+            fail("Expected that the resource was deleted!");
+        }catch(NoSuchResourceException nsr){  }
+        
+    }
+    
+    @Test
+    public void testDeleteIdentifiedByID() throws Exception {
+        OXResourceInterface oxres = getResourceClient();
+        final int context_id = getContextID();
+        final Context ctx = new Context(context_id);
+        Resource res = getTestResourceObject("tescase-create-resource-"+System.currentTimeMillis());
+        final Resource createdresource = oxres.create(ctx,res,DummyCredentials());
+        
+        // get resource from server
+        Resource srv_res = oxres.getData(ctx,createdresource,DummyCredentials());        
+        
+        assertEquals(createdresource.getDescription(),srv_res.getDescription());
+        assertEquals(createdresource.getDisplayname(),srv_res.getDisplayname());
+        assertEquals(createdresource.getEmail(),srv_res.getEmail());
+        assertEquals(createdresource.getName(),srv_res.getName());
+        
+        
+        // delete resource
+        Resource tmp = new Resource(createdresource.getId());
+        oxres.delete(ctx,tmp,DummyCredentials());
         
         // try to get resource again, this MUST fail
         try{
