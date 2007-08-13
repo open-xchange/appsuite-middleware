@@ -702,7 +702,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             rs.close();
 
             if (count == user_ids.length) {
-                // ok, die user gibts alle
+                // ok, those users all exist
                 ret = true;
             }
         } catch (final PoolException e) {
@@ -735,12 +735,65 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     
     @Override
     public boolean existsUser(final Context ctx, final User[] users) throws StorageException {
-        int []ids = new int[users.length];
-        for(int i=0; i<ids.length; i++) {
-            ids[i] = users[i].getId();
+        Connection con = null;
+        final AdminCache cache = ClientAdminThread.cache;
+        ResultSet rs = null;
+        PreparedStatement prep = null;
+        PreparedStatement prep2 = null;
+        final Integer ctxid = ctx.getId();
+        try {
+            con = cache.getWRITEConnectionForContext(ctxid);
+            prep = con.prepareStatement("SELECT id FROM user WHERE cid = ? AND id = ?");
+            prep.setInt(1, ctxid);
+            prep2 = con.prepareStatement("SELECT id FROM login2user WHERE cid = ? AND uid = ?");
+            prep2.setInt(1, ctxid);
+            for (final User user : users) {
+                final Integer userid = user.getId();
+                final String username = user.getName();
+                if (null != userid) {
+                    prep.setInt(2, userid);
+                    rs = prep.executeQuery();
+                    if (!rs.next()) {
+                        return false;
+                    }
+                    rs.close();
+                } else if (null != username) {
+                    prep2.setString(2, username);
+                    rs = prep.executeQuery();
+                    if (rs.next()) {
+                        user.setId(rs.getInt(1));
+                    } else {
+                        return false;
+                    }
+                    rs.close();
+                } else {
+                    throw new StorageException("One user object doesn't contain a user id or user name");
+                }
+            }
+            return true;
+        } catch (final PoolException e) {
+            log.error("Pool Error",e);
+            throw new StorageException(e);
+        } catch (final SQLException e) {
+            log.error("SQL Error",e);
+            throw new StorageException(e);
+        } finally {
+            try {
+                if (prep != null) {
+                    prep.close();
+                }
+            } catch (final SQLException e) {
+                log.error("Error closing statement", e);
+            }
+
+            if (null != con) {
+                try {
+                    cache.pushOXDBWrite(ctxid, con);
+                } catch (final PoolException ecp) {
+                    log.error("Error pushing ox db write connection to pool!", ecp);
+                }
+            }
         }
-        // FIXME: Should be rewritten to optimize performance
-        return existsUser(ctx, ids);
     }
 
     @Override
@@ -1251,6 +1304,68 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
             }
         }
         return isadmin;
+    }
+
+    @Override
+    public boolean isContextAdmin(final Context ctx, User user) throws StorageException {
+        final AdminCache cache = ClientAdminThread.cache;
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        final String username = user.getName();
+        final Integer userid = user.getId();
+        final Integer ctxid = ctx.getId();
+        try {
+            if (null == userid) {
+                if (null != username) {
+                    con = cache.getREADConnectionForContext(ctxid);
+                    stmt = con.prepareStatement("SELECT id, user FROM login2user LEFT JOIN user_setting_admin ON user_setting_admin.user = login2user.id AND user_setting_admin.cid = login2user.cid WHERE login2user.cid = ? AND uid = ?");
+                    stmt.setInt(1, ctxid);
+                    stmt.setString(2, username);
+                    rs = stmt.executeQuery();
+                    if (rs.next()) {
+                        user.setId(rs.getInt(1));
+                        if (null == rs.getString(2)) {
+                            return false;
+                        } else {
+                            return true;
+                        }
+                    } else {
+                        throw new StorageException("No such user " + username + " in context " + ctxid + "");
+                    }
+                } else {
+                    throw new StorageException("No id or user name given");
+                }
+            } else {
+                con = cache.getREADConnectionForContext(ctxid);
+                stmt = con.prepareStatement("SELECT user FROM user_setting_admin WHERE cid = ? AND user = ?");
+                stmt.setInt(1, ctxid);
+                stmt.setInt(2, userid);
+                rs = stmt.executeQuery();
+                if (rs.next()) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        } catch (final PoolException e) {
+            log.error("Pool Error",e);
+            throw new StorageException(e);
+        } catch (SQLException e) {
+            log.error("SQL Error",e);
+            throw new StorageException(e);
+        } finally {
+            closePreparedStatement(stmt);
+            closeRecordSet(rs);
+            try {
+                if (con != null) {
+                    cache.pushOXDBRead(ctxid, con);
+                }
+            } catch (final PoolException e) {
+                log.error("Error pushing oxdb read connection to pool!", e);
+            }
+        }
     }
 
     /**
