@@ -161,6 +161,32 @@ public class ICalImportTest extends AbstractICalImportTest {
 		assertEquals("SUMMARY was too long" , String.valueOf( AppointmentObject.TITLE ) , e.getMessageArgs()[0]);
 	}
 	
+	@Test public void test6825_fieldTranslation() throws DBPoolingException, SQLException, OXObjectNotFoundException, NumberFormatException, OXException, UnsupportedEncodingException{
+		//setup: building an ICAL file with a summary longer than 255 characters.
+		final String testMailAddress = "stephan.martin@open-xchange.com";
+		final String stringTooLong = "zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... ";
+		final String ical = 
+			"BEGIN:VCALENDAR\n" +
+			"VERSION:2.0\n" +
+			"PRODID:OPEN-XCHANGE\n" +
+			"BEGIN:VEVENT\n" +
+			"CLASS:PUBLIC\n" +
+			"CREATED:20060519T120300Z\n" +
+			"DTSTART:20060519T110000Z\n" +
+			"DTSTAMP:20070423T063205Z\n" +
+			"SUMMARY:" + stringTooLong + "\n" +
+			"DTEND:20060519T120000Z\n" +
+			"ATTENDEE:mailto:"+ testMailAddress + "\n" +
+			"END:VEVENT\n" +
+			"END:VCALENDAR";
+
+		final OXException e = performOneEntryCheck(ical, Format.ICAL, FolderObject.CALENDAR, "6825_trans", true).getException();
+
+		assertEquals("Should be truncation error" , Category.TRUNCATED , e.getCategory());
+		assertEquals("SUMMARY was too long" , String.valueOf( AppointmentObject.TITLE ) , e.getMessageArgs()[0]);
+		System.out.println();
+	}
+	
 	/*
 	 * Description gets lost when importing task
 	 */
