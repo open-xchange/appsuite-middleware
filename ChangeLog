@@ -1,3 +1,10 @@
+* 2007-08-13 - martin.kauss@open-xchange.com
+
+ - Bugfix #8505 and #8722. Reminder data still exist after an appointment was
+   deleted. In addition, an update task exist to fix corrupt data in the 
+   database from older version. INFO: A config file has been changed:
+   updatetasks.cfg
+
 * 2007-08-13 - tobias.prinz@open-xchange.com
 
  - Bugfix #8475: Opposed to the definition, UserParticipants are not 
