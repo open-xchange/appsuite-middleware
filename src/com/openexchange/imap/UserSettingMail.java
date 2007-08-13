@@ -53,8 +53,6 @@ import static com.openexchange.imap.UserSettingMailStorage.getInstance;
 
 import java.io.Serializable;
 import java.sql.Connection;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.delete.DeleteEvent;
@@ -288,11 +286,8 @@ public final class UserSettingMail implements DeleteListener, Cloneable, Seriali
 
 	private long uploadQuotaPerFile;
 
-	private String[] stdFolderFullnames;
-
 	public UserSettingMail() {
 		super();
-		stdFolderFullnames = new String[6];
 	}
 
 	/*
@@ -304,8 +299,6 @@ public final class UserSettingMail implements DeleteListener, Cloneable, Seriali
 	public Object clone() {
 		try {
 			final UserSettingMail clone = (UserSettingMail) super.clone();
-			clone.stdFolderFullnames = new String[stdFolderFullnames.length];
-			System.arraycopy(stdFolderFullnames, 0, clone.stdFolderFullnames, 0, stdFolderFullnames.length);
 			if (displayMsgHeaders != null) {
 				clone.displayMsgHeaders = new String[displayMsgHeaders.length];
 				System.arraycopy(displayMsgHeaders, 0, clone.displayMsgHeaders, 0, displayMsgHeaders.length);
@@ -404,10 +397,6 @@ public final class UserSettingMail implements DeleteListener, Cloneable, Seriali
 		final Signature[] retval = new Signature[signatures.length];
 		System.arraycopy(signatures, 0, retval, 0, signatures.length);
 		return retval;
-	}
-
-	public String getStandardFolder(final int index) {
-		return this.stdFolderFullnames[index];
 	}
 
 	public String getStdDraftsName() {
@@ -634,10 +623,6 @@ public final class UserSettingMail implements DeleteListener, Cloneable, Seriali
 	public void setSpamEnabled(final boolean spamEnabled) {
 		this.spamEnabled = spamEnabled;
 		modifiedDuringSession = true;
-	}
-
-	public void setStandardFolder(final int index, final String fullname) {
-		this.stdFolderFullnames[index] = fullname;
 	}
 
 	public void setStdDraftsName(final String stdDraftsName) {

@@ -855,7 +855,7 @@ public class MailInterfaceImpl implements MailInterface {
 				 */
 				final int l = usm.isSpamEnabled() ? defaultFolderNames.length : defaultFolderNames.length - 2;
 				for (int i = 0; i < l; i++) {
-					usm.setStandardFolder(i, checkDefaultFolder(imapCon.getIMAPStore(), prefix, defaultFolderNames[i],
+					sessionObj.setDefaultMailFolder(i, checkDefaultFolder(imapCon.getIMAPStore(), prefix, defaultFolderNames[i],
 							type, tmp));
 				}
 			}
@@ -5185,7 +5185,7 @@ public class MailInterfaceImpl implements MailInterface {
 				final Folder inbox = imapCon.getIMAPStore().getFolder(STR_INBOX);
 				return MailFolderObject.prepareFullname(inbox.getFullName(), inbox.getSeparator());
 			}
-			return usm.getStandardFolder(index);
+			return sessionObj.getDefaultMailFolder(index);
 		} catch (final MessagingException e) {
 			throw handleMessagingException(e);
 		}

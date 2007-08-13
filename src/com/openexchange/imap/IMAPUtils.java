@@ -330,7 +330,7 @@ public class IMAPUtils {
 	private static final String COMMAND_SORT = "SORT";
 
 	private static final String COMMAND_SORT_REVERSE_DATE_PEFIX = "SORT (REVERSE DATE) UTF-8 ";
-	
+
 	private static final int MAX_IMAP_CMD_LENGTH = 16384;
 
 	/**
@@ -370,7 +370,7 @@ public class IMAPUtils {
 								while ((num = ir.readAtomString()) != null) {
 									try {
 										tmp.append(Integer.parseInt(num));
-									} catch (NumberFormatException e) {
+									} catch (final NumberFormatException e) {
 										continue;
 									}
 								}
@@ -399,8 +399,8 @@ public class IMAPUtils {
 					final StringBuilder cmdBuilder = new StringBuilder(COMMAND_SORT_REVERSE_DATE_PEFIX)
 							.append(IMAPNumArgSplitter.splitSeqNumArg(newMsgSeqNums)[0]);
 					if (cmdBuilder.length() > MAX_IMAP_CMD_LENGTH) {
-						throw new ProtocolException(OXMailException.getFormattedMessage(MailCode.CMD_TOO_LARGE,
-								MAX_IMAP_CMD_LENGTH, cmdBuilder.toString()));
+						throw new ProtocolException(OXMailException.getFormattedMessage(MailCode.CMD_TOO_LARGE, Integer
+								.valueOf(MAX_IMAP_CMD_LENGTH), cmdBuilder.toString()));
 					}
 					r = p.command(cmdBuilder.toString(), null);
 				}
@@ -1205,8 +1205,8 @@ public class IMAPUtils {
 	 */
 	public static final boolean fastExpunge(final IMAPFolder imapFolder) throws ProtocolException {
 		final IMAPProtocol p = imapFolder.getProtocol();
-		Response[] r = p.command(COMMAND_EXPUNGE, null);
-		Response response = r[r.length - 1];
+		final Response[] r = p.command(COMMAND_EXPUNGE, null);
+		final Response response = r[r.length - 1];
 		try {
 			if (response.isOK()) {
 				return true;

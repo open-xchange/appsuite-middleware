@@ -52,7 +52,6 @@ package com.openexchange.sessiond;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
-import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -60,9 +59,8 @@ import java.util.concurrent.locks.ReentrantLock;
 import javax.mail.MessagingException;
 import javax.mail.Session;
 
+import com.openexchange.api2.MailInterface;
 import com.openexchange.api2.OXException;
-import com.openexchange.configuration.ConfigurationException;
-import com.openexchange.configuration.ServerConfig;
 import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.UserConfigurationException;
 import com.openexchange.groupware.UserConfigurationStorage;
@@ -70,12 +68,10 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.Credentials;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.upload.AJAXUploadFile;
-import com.openexchange.groupware.upload.AJAXUploadFileTimerTask;
 import com.openexchange.imap.IMAPProperties;
 import com.openexchange.imap.IMAPUtils;
 import com.openexchange.imap.UserSettingMail;
 import com.openexchange.imap.UserSettingMailStorage;
-import com.openexchange.server.ServerTimer;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.Rights;
 
@@ -137,12 +133,15 @@ public class SessionObject {
 
 	private final Lock mailFldsLock;
 
+	private final String[] defaultMailFolders;
+
 	public SessionObject(final String sessionid) {
 		this.sessionid = sessionid;
 		imapCachedMyRights = new ConcurrentHashMap<String, Rights>();
 		imapCachedUserFlags = new ConcurrentHashMap<String, Boolean>();
 		ajaxUploadFiles = new ConcurrentHashMap<String, AJAXUploadFile>();
 		mailFldsLock = new ReentrantLock();
+		defaultMailFolders = new String[6];
 	}
 
 	/**
@@ -207,27 +206,10 @@ public class SessionObject {
 	 */
 	public final void putAJAXUploadFile(final String id, final AJAXUploadFile uploadFile) {
 		ajaxUploadFiles.put(id, uploadFile);
-		int idleTimeMillis;
-		try {
-			idleTimeMillis = ServerConfig.getInteger(ServerConfig.Property.MaxUploadIdleTimeMillis);
-		} catch (ConfigurationException e) {
-			LOG.error(new StringBuilder(256).append(
-					"Max. upload file idle time millis could not be read, using default ").append(300000).append(
-					". Error message: ").append(e.getLocalizedMessage()).toString(), e);
-			/*
-			 * Default
-			 */
-			idleTimeMillis = 300000;
-		}
-		final TimerTask timerTask = new AJAXUploadFileTimerTask(uploadFile, idleTimeMillis, id, ajaxUploadFiles);
-		uploadFile.setTimerTask(timerTask);
-		/*
-		 * Start timer task
-		 */
-		ServerTimer.getTimer().schedule(timerTask, 1000/* 1sec */, 60000/* 1min */);
-		if (LOG.isDebugEnabled()) {
-			LOG.debug(new StringBuilder(256).append("Upload file \"").append(uploadFile).append("\" with ID=").append(
-					id).append(" added to session and timer task started").toString());
+		uploadFile.startTimerTask(id, ajaxUploadFiles);
+		if (LOG.isInfoEnabled()) {
+			LOG.info(new StringBuilder(256).append("Upload file \"").append(uploadFile).append("\" with ID=")
+					.append(id).append(" added to session and timer task started").toString());
 		}
 	}
 
@@ -242,16 +224,11 @@ public class SessionObject {
 		final AJAXUploadFile uploadFile = ajaxUploadFiles.remove(id);
 		if (null != uploadFile) {
 			/*
-			 * Prevent this uplaod file from being deleted by timer task
+			 * Cancel timer task
 			 */
-			uploadFile.setBlockedForTimer(true);
-			/*
-			 * Cancel timer task and clean from timer
-			 */
-			uploadFile.getTimerTask().cancel();
-			ServerTimer.getTimer().purge();
-			if (LOG.isDebugEnabled()) {
-				LOG.debug(new StringBuilder(256).append("Upload file \"").append(uploadFile).append("\" with ID=")
+			uploadFile.cancelTimerTask();
+			if (LOG.isInfoEnabled()) {
+				LOG.info(new StringBuilder(256).append("Upload file \"").append(uploadFile).append("\" with ID=")
 						.append(id).append(" removed from session and timer task canceled").toString());
 			}
 		}
@@ -362,6 +339,22 @@ public class SessionObject {
 		this.mailFldsChecked = mailFldsChecked;
 	}
 
+	/**
+	 * Sets the default mail folder's fullname associated with given index
+	 * 
+	 * @param index
+	 *            The index taken from constants
+	 *            <code>{@link MailInterface#INDEX_DRAFTS}</code>,
+	 *            <code>{@link MailInterface#INDEX_SENT}</code>,<code>{@link MailInterface#INDEX_SPAM}</code>,
+	 *            <code>{@link MailInterface#INDEX_TRASH}</code>,<code>{@link MailInterface#INDEX_CONFIRMED_SPAM}</code>,
+	 *            <code>{@link MailInterface#INDEX_CONFIRMED_HAM}</code>
+	 * @param fullname
+	 *            The fullname
+	 */
+	public void setDefaultMailFolder(final int index, final String fullname) {
+		defaultMailFolders[index] = fullname;
+	}
+
 	public String getSessionID() {
 		return sessionid;
 	}
@@ -449,6 +442,21 @@ public class SessionObject {
 
 	public boolean isMailFldsChecked() {
 		return mailFldsChecked;
+	}
+
+	/**
+	 * Gets the default mail folder's fullname associated with given index
+	 * 
+	 * @param index
+	 *            The index taken from constants
+	 *            <code>{@link MailInterface#INDEX_DRAFTS}</code>,
+	 *            <code>{@link MailInterface#INDEX_SENT}</code>,<code>{@link MailInterface#INDEX_SPAM}</code>,
+	 *            <code>{@link MailInterface#INDEX_TRASH}</code>,<code>{@link MailInterface#INDEX_CONFIRMED_SPAM}</code>,
+	 *            <code>{@link MailInterface#INDEX_CONFIRMED_HAM}</code>
+	 * @return Default mail folder's fullname
+	 */
+	public String getDefaultMailFolder(final int index) {
+		return defaultMailFolders[index];
 	}
 
 	public Lock getMailFldsLock() {

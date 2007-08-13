@@ -53,8 +53,7 @@ import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.security.Security;
 import java.util.Properties;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.mail.MessagingException;
 import javax.mail.Session;
@@ -87,9 +86,7 @@ public final class DefaultIMAPConnection implements IMAPConnection, Serializable
 
 	private static final String CHARENC_ISO8859 = "ISO-8859-1";
 
-	private static int counter;
-
-	private final transient static Lock COUNTER_LOCK = new ReentrantLock();
+	private static final AtomicInteger COUNTER = new AtomicInteger();
 
 	private String imapServer;
 
@@ -191,7 +188,8 @@ public final class DefaultIMAPConnection implements IMAPConnection, Serializable
 
 	private static final String PROP_MAIL_DEBUG = "mail.debug";
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * 
 	 * @see com.openexchange.imap.IMAPConnection#connect()
 	 */
@@ -243,12 +241,7 @@ public final class DefaultIMAPConnection implements IMAPConnection, Serializable
 		 */
 		MailInterfaceImpl.mailInterfaceMonitor.changeNumActive(true);
 		MonitoringInfo.incrementNumberOfConnections(MonitoringInfo.IMAP);
-		COUNTER_LOCK.lock();
-		try {
-			counter++;
-		} finally {
-			COUNTER_LOCK.unlock();
-		}
+		COUNTER.incrementAndGet();
 		/*
 		 * Remember to decrement
 		 */
@@ -304,12 +297,7 @@ public final class DefaultIMAPConnection implements IMAPConnection, Serializable
 				 */
 				MailInterfaceImpl.mailInterfaceMonitor.changeNumActive(false);
 				MonitoringInfo.decrementNumberOfConnections(MonitoringInfo.IMAP);
-				COUNTER_LOCK.lock();
-				try {
-					counter--;
-				} finally {
-					COUNTER_LOCK.unlock();
-				}
+				COUNTER.decrementAndGet();
 			}
 			/*
 			 * Reset
@@ -381,16 +369,17 @@ public final class DefaultIMAPConnection implements IMAPConnection, Serializable
 		return connected;
 	}
 
+	/**
+	 * Getter for manually counted open IMAP connections
+	 * 
+	 * @return Manually counted open IMAP connections
+	 */
 	public static int getCounter() {
-		COUNTER_LOCK.lock();
-		try {
-			return counter;
-		} finally {
-			COUNTER_LOCK.unlock();
-		}
+		return COUNTER.get();
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * 
 	 * @see com.openexchange.imap.IMAPConnection#getTrace()
 	 */

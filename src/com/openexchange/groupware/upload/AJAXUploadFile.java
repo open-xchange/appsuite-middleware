@@ -50,9 +50,15 @@
 package com.openexchange.groupware.upload;
 
 import java.io.File;
+import java.util.Map;
 import java.util.TimerTask;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
+import com.openexchange.configuration.ConfigurationException;
+import com.openexchange.configuration.ServerConfig;
+import com.openexchange.server.ServerTimer;
 
 /**
  * AJAXUploadFile
@@ -62,8 +68,74 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public final class AJAXUploadFile {
 
+	private final class AJAXUploadFileTimerTask extends TimerTask {
+
+		private final AJAXUploadFile file;
+
+		private final Map<String, AJAXUploadFile> ajaxUploadFiles;
+
+		private final String id;
+
+		/**
+		 * Constructor
+		 */
+		public AJAXUploadFileTimerTask(final AJAXUploadFile file, final String id,
+				final Map<String, AJAXUploadFile> ajaxUploadFiles) {
+			this.file = file;
+			this.ajaxUploadFiles = ajaxUploadFiles;
+			this.id = id;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see java.util.TimerTask#run()
+		 */
+		@Override
+		public void run() {
+			if (file != null && !file.isDeleted() && !file.isBlockedForTimer()
+					&& ((System.currentTimeMillis() - file.getLastAccess()) >= IDLE_TIME_MILLIS)) {
+				ajaxUploadFiles.remove(id);
+				final String fileName = file.getFile().getName();
+				file.delete();
+				if (LOG.isInfoEnabled()) {
+					LOG.info(new StringBuilder(256).append("Upload file \"").append(fileName).append(
+							"\" removed from session and deleted from disk through timer task").toString());
+				}
+				/*
+				 * Cancel this task
+				 */
+				this.cancel();
+				ServerTimer.getTimer().purge();
+			}
+		}
+
+	}
+
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(AJAXUploadFile.class);
+
+	private static final long IDLE_TIME_MILLIS;
+
+	static {
+		IDLE_TIME_MILLIS = getIdleTimeMillis();
+	}
+
+	private static long getIdleTimeMillis() {
+		int idleTimeMillis;
+		try {
+			idleTimeMillis = ServerConfig.getInteger(ServerConfig.Property.MaxUploadIdleTimeMillis);
+		} catch (ConfigurationException e) {
+			LOG.error(new StringBuilder(256).append(
+					"Max. upload file idle time millis could not be read, using default ").append(300000).append(
+					". Error message: ").append(e.getLocalizedMessage()).toString(), e);
+			/*
+			 * Default
+			 */
+			idleTimeMillis = 300000;
+		}
+		return idleTimeMillis;
+	}
 
 	private File file;
 
@@ -73,9 +145,11 @@ public final class AJAXUploadFile {
 
 	private TimerTask timerTask;
 
-	private final Lock lock = new ReentrantLock();
+	private boolean timerTaskStarted;
 
-	private boolean blockedForTimer;
+	private final Lock timerTaskLock = new ReentrantLock();
+
+	private final AtomicBoolean blockedForTimer;
 
 	private String fileName;
 
@@ -94,6 +168,7 @@ public final class AJAXUploadFile {
 	public AJAXUploadFile(final File file, final long initialTimestamp) {
 		this.file = file;
 		this.lastAccess = initialTimestamp;
+		blockedForTimer = new AtomicBoolean();
 	}
 
 	/**
@@ -136,22 +211,48 @@ public final class AJAXUploadFile {
 	}
 
 	/**
-	 * Setter for time task
+	 * Starts the timer task in a thread-safe manner. The second and subsequent
+	 * calls have no effect.
 	 * 
-	 * @param timerTask
-	 *            The time task
+	 * @param id
+	 *            The upload file's ID
+	 * @param ajaxUploadFiles
+	 *            Session's map where the upload file is kept
 	 */
-	public void setTimerTask(final TimerTask timerTask) {
-		this.timerTask = timerTask;
+	public void startTimerTask(final String id, final Map<String, AJAXUploadFile> ajaxUploadFiles) {
+		if (!timerTaskStarted) {
+			timerTaskLock.lock();
+			try {
+				if (timerTask == null) {
+					timerTask = new AJAXUploadFileTimerTask(this, id, ajaxUploadFiles);
+					/*
+					 * Start timer task
+					 */
+					ServerTimer.getTimer().schedule(timerTask, 1000/* 1sec */, 60000/* 1min */);
+					timerTaskStarted = true;
+				}
+			} finally {
+				timerTaskLock.unlock();
+			}
+		}
 	}
 
 	/**
-	 * Getter for timer task
-	 * 
-	 * @return The time task
+	 * Cancels timer task if already started through
+	 * <code>{@link #startTimerTask(String, Map)}</code> method
 	 */
-	public TimerTask getTimerTask() {
-		return timerTask;
+	public void cancelTimerTask() {
+		/*
+		 * Prevent this upload file from being deleted by timer task
+		 */
+		if (timerTaskStarted) {
+			this.blockedForTimer.set(true);
+			timerTask.cancel();
+			/*
+			 * Clean from timer
+			 */
+			ServerTimer.getTimer().purge();
+		}
 	}
 
 	/**
@@ -160,30 +261,8 @@ public final class AJAXUploadFile {
 	 * @return <code>true</code> if this upload file should be ignored by
 	 *         timer task; otherwise <code>false</code>
 	 */
-	public boolean isBlockedForTimer() {
-		lock.lock();
-		try {
-			return blockedForTimer;
-		} finally {
-			lock.unlock();
-		}
-	}
-
-	/**
-	 * Blocks this upload file for timer task; meaning it is ignored when timer
-	 * runs
-	 * 
-	 * @param blockedForTimer
-	 *            <code>true</code> to blocks this upload file for timer task;
-	 *            otherwise <code>false</code>
-	 */
-	public void setBlockedForTimer(final boolean blockedForTimer) {
-		lock.lock();
-		try {
-			this.blockedForTimer = blockedForTimer;
-		} finally {
-			lock.unlock();
-		}
+	private boolean isBlockedForTimer() {
+		return blockedForTimer.get();
 	}
 
 	/**
