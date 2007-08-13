@@ -63,7 +63,7 @@ import javax.mail.Message;
  * 
  */
 public final class IMAPNumArgSplitter {
-	
+
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(IMAPNumArgSplitter.class);
 
@@ -141,14 +141,22 @@ public final class IMAPNumArgSplitter {
 	 * 
 	 * @param arr -
 	 *            the array of sequence numbers
+	 * @param keepOrder -
+	 *            whether the values' ordering in array parameter
+	 *            <code>arr</code> shall be kept or not; if ordering does not
+	 *            care a more compact number argument for IMAP command is going
+	 *            to be created by grouping sequential numbers e.g.
+	 *            <code>1,2,3,4,5 -> 1:5</code>
 	 * @return an appropriate array of command arguments
 	 */
-	public static String[] splitSeqNumArg(final int[] arr) {
+	public static String[] splitSeqNumArg(final int[] arr, final boolean keepOrder) {
 		final List<Integer> l = new ArrayList<Integer>(arr.length);
 		for (int i = 0; i < arr.length; i++) {
 			l.add(Integer.valueOf(arr[i]));
 		}
-		Collections.sort(l);
+		if (!keepOrder) {
+			Collections.sort(l);
+		}
 		return split(getNumArg(l), MAX_IMAP_COMMAND_LENGTH);
 	}
 
@@ -159,14 +167,22 @@ public final class IMAPNumArgSplitter {
 	 * 
 	 * @param arr -
 	 *            the array of sequence numbers
+	 * @param keepOrder -
+	 *            whether the values' ordering in array parameter
+	 *            <code>arr</code> shall be kept or not; if ordering does not
+	 *            care a more compact number argument for IMAP command is going
+	 *            to be created by grouping sequential numbers e.g.
+	 *            <code>1,2,3,4,5 -> 1:5</code>
 	 * @return an appropriate array of command arguments
 	 */
-	public static String[] splitMessageArg(final Message[] arr) {
+	public static String[] splitMessageArg(final Message[] arr, final boolean keepOrder) {
 		final List<Integer> l = new ArrayList<Integer>(arr.length);
 		for (int i = 0; i < arr.length; i++) {
 			l.add(Integer.valueOf(arr[i].getMessageNumber()));
 		}
-		Collections.sort(l);
+		if (!keepOrder) {
+			Collections.sort(l);
+		}
 		return split(getNumArg(l), MAX_IMAP_COMMAND_LENGTH);
 	}
 
@@ -177,14 +193,22 @@ public final class IMAPNumArgSplitter {
 	 * 
 	 * @param arr -
 	 *            the array of sequence numbers
+	 * @param keepOrder -
+	 *            whether the values' ordering in array parameter
+	 *            <code>arr</code> shall be kept or not; if ordering does not
+	 *            care a more compact number argument for IMAP command is going
+	 *            to be created by grouping sequential numbers e.g.
+	 *            <code>1,2,3,4,5 -> 1:5</code>
 	 * @return an appropriate array of command arguments
 	 */
-	public static String[] splitUIDArg(final long[] arr) {
+	public static String[] splitUIDArg(final long[] arr, final boolean keepOrder) {
 		final List<Long> l = new ArrayList<Long>(arr.length);
 		for (int i = 0; i < arr.length; i++) {
 			l.add(Long.valueOf(arr[i]));
 		}
-		Collections.sort(l);
+		if (!keepOrder) {
+			Collections.sort(l);
+		}
 		return split(getNumArg(l), MAX_IMAP_COMMAND_LENGTH);
 	}
 

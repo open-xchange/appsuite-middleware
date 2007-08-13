@@ -855,8 +855,8 @@ public class MailInterfaceImpl implements MailInterface {
 				 */
 				final int l = usm.isSpamEnabled() ? defaultFolderNames.length : defaultFolderNames.length - 2;
 				for (int i = 0; i < l; i++) {
-					sessionObj.setDefaultMailFolder(i, checkDefaultFolder(imapCon.getIMAPStore(), prefix, defaultFolderNames[i],
-							type, tmp));
+					sessionObj.setDefaultMailFolder(i, checkDefaultFolder(imapCon.getIMAPStore(), prefix,
+							defaultFolderNames[i], type, tmp));
 				}
 			}
 		} catch (final MessagingException e) {
@@ -1524,9 +1524,10 @@ public class MailInterfaceImpl implements MailInterface {
 			}
 			if (newMsgs.length <= IMAPProperties.getMessageFetchLimit()) {
 				newMsgs = new FetchIMAPCommand(imapCon.getImapFolder(), newMsgs, IMAPUtils.getDefaultFetchProfile(),
-						false).doCommand();
+						false, true).doCommand();
 			} else {
-				newMsgs = new FetchIMAPCommand(imapCon.getImapFolder(), newMsgs, fields, sortCol, false).doCommand();
+				newMsgs = new FetchIMAPCommand(imapCon.getImapFolder(), newMsgs, fields, sortCol, false, true)
+						.doCommand();
 			}
 			if (limit > 0) {
 				final int newLength = Math.min(limit, newMsgs.length);
@@ -1626,9 +1627,9 @@ public class MailInterfaceImpl implements MailInterface {
 					if (!search) {
 						if (retval.length < IMAPProperties.getMessageFetchLimit()) {
 							retval = new FetchIMAPCommand(imapCon.getImapFolder(), retval, IMAPUtils
-									.getDefaultFetchProfile(), true).doCommand();
+									.getDefaultFetchProfile(), true, true).doCommand();
 						} else {
-							retval = new FetchIMAPCommand(imapCon.getImapFolder(), retval, fields, sortCol, true)
+							retval = new FetchIMAPCommand(imapCon.getImapFolder(), retval, fields, sortCol, true, true)
 									.doCommand();
 						}
 					}
@@ -1747,10 +1748,10 @@ public class MailInterfaceImpl implements MailInterface {
 				final SearchTerm searchTerm = IMAPUtils.getSearchTerm(searchCols, searchPatterns, linkWithOR);
 				msgs = imapFolder.search(searchTerm);
 				if (msgs.length < IMAPProperties.getMessageFetchLimit()) {
-					msgs = new FetchIMAPCommand(imapFolder, msgs, IMAPUtils.getDefaultFetchProfile(), false)
+					msgs = new FetchIMAPCommand(imapFolder, msgs, IMAPUtils.getDefaultFetchProfile(), false, false)
 							.doCommand();
 				} else {
-					msgs = new FetchIMAPCommand(imapFolder, msgs, fields, sortCol, false).doCommand();
+					msgs = new FetchIMAPCommand(imapFolder, msgs, fields, sortCol, false, false).doCommand();
 				}
 				applicationSearch = false;
 			} catch (final Throwable t) {
@@ -1893,10 +1894,10 @@ public class MailInterfaceImpl implements MailInterface {
 			 */
 			if (msgs.length < IMAPProperties.getMessageFetchLimit()) {
 				msgs = (MessageCacheObject[]) new FetchIMAPCommand(imapCon.getImapFolder(), msgs, IMAPUtils
-						.getDefaultFetchProfile(), false).doCommand();
+						.getDefaultFetchProfile(), false, true).doCommand();
 			} else {
-				msgs = (MessageCacheObject[]) new FetchIMAPCommand(imapCon.getImapFolder(), msgs, fields, -1, false)
-						.doCommand();
+				msgs = (MessageCacheObject[]) new FetchIMAPCommand(imapCon.getImapFolder(), msgs, fields, -1, false,
+						true).doCommand();
 			}
 			createThreadSortMessages(threadList, 0, msgs, 0);
 			if (fromToIndices != null && fromToIndices.length == 2) {
@@ -1965,10 +1966,10 @@ public class MailInterfaceImpl implements MailInterface {
 			}
 			final Message[] msgs;
 			if (uids.length < IMAPProperties.getMessageFetchLimit()) {
-				msgs = new FetchIMAPCommand(imapCon.getImapFolder(), uids, IMAPUtils.getDefaultFetchProfile(), false)
-						.doCommand();
+				msgs = new FetchIMAPCommand(imapCon.getImapFolder(), uids, IMAPUtils.getDefaultFetchProfile(), false,
+						true).doCommand();
 			} else {
-				msgs = new FetchIMAPCommand(imapCon.getImapFolder(), uids, fields, -1, false).doCommand();
+				msgs = new FetchIMAPCommand(imapCon.getImapFolder(), uids, fields, -1, false, true).doCommand();
 			}
 
 			/*
@@ -3898,10 +3899,10 @@ public class MailInterfaceImpl implements MailInterface {
 					 * Fetch modified messages
 					 */
 					msgs = new FetchIMAPCommand(imapCon.getImapFolder(), msgUIDs, IMAPUtils.getDefaultFetchProfile(),
-							false).doCommand();
+							false, true).doCommand();
 				} else {
-					msgs = new FetchIMAPCommand(imapCon.getImapFolder(), msgUIDs, IMAPUtils.getUIDFetchProfile(), false)
-							.doCommand();
+					msgs = new FetchIMAPCommand(imapCon.getImapFolder(), msgUIDs, IMAPUtils.getUIDFetchProfile(),
+							false, true).doCommand();
 				}
 				imapCon.getImapFolder().close(false);
 				imapCon.resetImapFolder();
@@ -4019,11 +4020,11 @@ public class MailInterfaceImpl implements MailInterface {
 				/*
 				 * Fetch modified messages in a fast manner
 				 */
-				msgs = new FetchIMAPCommand(imapCon.getImapFolder(), msgUIDs, IMAPUtils.getDefaultFetchProfile(), false)
-						.doCommand();
+				msgs = new FetchIMAPCommand(imapCon.getImapFolder(), msgUIDs, IMAPUtils.getDefaultFetchProfile(),
+						false, true).doCommand();
 			} else {
-				msgs = new FetchIMAPCommand(imapCon.getImapFolder(), msgUIDs, IMAPUtils.getUIDFetchProfile(), false)
-						.doCommand();
+				msgs = new FetchIMAPCommand(imapCon.getImapFolder(), msgUIDs, IMAPUtils.getUIDFetchProfile(), false,
+						true).doCommand();
 			}
 			imapCon.getImapFolder().close(false);
 			imapCon.resetImapFolder();
@@ -4238,7 +4239,7 @@ public class MailInterfaceImpl implements MailInterface {
 			fp.add(MessageHeaders.HDR_X_SPAM_FLAG);
 			fp.add(FetchProfile.Item.CONTENT_INFO);
 			final MessageCacheObject[] msgs = (MessageCacheObject[]) new FetchIMAPCommand(imapCon.getImapFolder(),
-					msgUIDs, fp, false).doCommand();
+					msgUIDs, fp, false, true).doCommand();
 			/*
 			 * Seperate the plain from the nested messages inside spam folder
 			 */

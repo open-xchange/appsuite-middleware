@@ -116,7 +116,7 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
 		length = this.uids.length;
 		args = length == 0 ? ARGS_EMPTY : (isSequential ? new String[] { new StringBuilder(64).append(this.uids[0])
 				.append(':').append(this.uids[this.uids.length - 1]).toString() } : IMAPNumArgSplitter
-				.splitUIDArg(this.uids));
+				.splitUIDArg(this.uids, false));
 		if (fast) {
 			retval = DEFAULT_RETVAL;
 		} else {

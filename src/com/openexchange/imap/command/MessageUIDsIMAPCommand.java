@@ -88,7 +88,7 @@ public final class MessageUIDsIMAPCommand extends AbstractIMAPCommand<long[]> {
 			length = -1;
 			sla = null;
 		} else {
-			args = IMAPNumArgSplitter.splitMessageArg(msgs);
+			args = IMAPNumArgSplitter.splitMessageArg(msgs, true);
 			length = msgs.length;
 			sla = new SmartLongArray(length);
 		}

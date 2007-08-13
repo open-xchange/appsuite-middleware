@@ -93,7 +93,7 @@ public final class SimpleIMAPCommand extends AbstractIMAPCommand<Boolean> {
 			returnDefaultValue = true;
 		}
 		this.command = command;
-		args = IMAPNumArgSplitter.splitUIDArg(uids);
+		args = IMAPNumArgSplitter.splitUIDArg(uids, true);
 		this.performNotifyResponseHandlers = performNotifyResponseHandlers;
 	}
 

@@ -397,7 +397,7 @@ public class IMAPUtils {
 				 */
 				{
 					final StringBuilder cmdBuilder = new StringBuilder(COMMAND_SORT_REVERSE_DATE_PEFIX)
-							.append(IMAPNumArgSplitter.splitSeqNumArg(newMsgSeqNums)[0]);
+							.append(IMAPNumArgSplitter.splitSeqNumArg(newMsgSeqNums, false)[0]);
 					if (cmdBuilder.length() > MAX_IMAP_CMD_LENGTH) {
 						throw new ProtocolException(OXMailException.getFormattedMessage(MailCode.CMD_TOO_LARGE, Integer
 								.valueOf(MAX_IMAP_CMD_LENGTH), cmdBuilder.toString()));
@@ -1095,7 +1095,7 @@ public class IMAPUtils {
 	 */
 	public static final boolean clearAllColorLabels(final IMAPFolder imapFolder, final long[] msgUIDs)
 			throws ProtocolException {
-		final String[] args = IMAPNumArgSplitter.splitUIDArg(msgUIDs);
+		final String[] args = IMAPNumArgSplitter.splitUIDArg(msgUIDs, false);
 		final IMAPProtocol p = imapFolder.getProtocol();
 		Response[] r = null;
 		Response response = null;
@@ -1148,7 +1148,7 @@ public class IMAPUtils {
 	 */
 	public static final boolean setColorLabel(final IMAPFolder imapFolder, final long[] msgUIDs,
 			final String colorLabelFlag) throws ProtocolException {
-		final String[] args = IMAPNumArgSplitter.splitUIDArg(msgUIDs);
+		final String[] args = IMAPNumArgSplitter.splitUIDArg(msgUIDs, false);
 		final IMAPProtocol p = imapFolder.getProtocol();
 		Response[] r = null;
 		Response response = null;
@@ -1259,7 +1259,7 @@ public class IMAPUtils {
 	 *             if an error occurs in underlying protocol
 	 */
 	public static final boolean uidExpunge(final IMAPFolder imapFolder, final long[] uids) throws ProtocolException {
-		final String[] args = IMAPNumArgSplitter.splitUIDArg(uids);
+		final String[] args = IMAPNumArgSplitter.splitUIDArg(uids, false);
 		final IMAPProtocol p = imapFolder.getProtocol();
 		Response[] r = null;
 		Response response = null;

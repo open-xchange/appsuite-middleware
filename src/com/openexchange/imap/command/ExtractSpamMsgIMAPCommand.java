@@ -104,7 +104,7 @@ public final class ExtractSpamMsgIMAPCommand extends AbstractIMAPCommand<Message
 		this.uids = uids == null ? L1 : uids;
 		returnDefaultValue = (this.uids.length == 0);
 		this.length = this.uids.length;
-		args = length == 0 ? ARGS_EMPTY : IMAPNumArgSplitter.splitUIDArg(uids);
+		args = length == 0 ? ARGS_EMPTY : IMAPNumArgSplitter.splitUIDArg(uids, true);
 		msgList = new ArrayList<Message>(length);
 		dummySession = Session.getDefaultInstance(MailInterfaceImpl.getDefaultIMAPProperties());
 	}

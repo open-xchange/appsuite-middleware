@@ -91,7 +91,7 @@ public final class SeqNumIMAPCommand extends AbstractIMAPCommand<int[]> {
 		returnDefaultValue = (this.uids.length == 0);
 		length = this.uids.length;
 		args = length == 0 ? ARGS_EMPTY : (isSequential ? new String[] { new StringBuilder(64).append(this.uids[0])
-				.append(':').append(this.uids[this.uids.length - 1]).toString() } : IMAPNumArgSplitter.splitUIDArg(this.uids));
+				.append(':').append(this.uids[this.uids.length - 1]).toString() } : IMAPNumArgSplitter.splitUIDArg(this.uids, true));
 		sia = new SmartIntArray(length);
 	}
 

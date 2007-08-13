@@ -102,7 +102,7 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
 			flagsStr = null;
 		} else {
 			args = isSequential ? new String[] { new StringBuilder(64).append(uids[0]).append(':').append(
-					uids[uids.length - 1]).toString() } : IMAPNumArgSplitter.splitUIDArg(uids);
+					uids[uids.length - 1]).toString() } : IMAPNumArgSplitter.splitUIDArg(uids, true);
 			final Flag[] systemFlags;
 			if (flags == null || (systemFlags = flags.getSystemFlags()).length == 0) {
 				returnDefaultValue = true;

@@ -34,6 +34,7 @@
  - MailWriter.getMailWriters() made static to reduce object instantiation
  - Additional methods for UserSettingMailStorage to remove single cached
    user's mail settings or whole cache
+ - Bugfix #8767: Fixed new message display on portal side
 
 * 2007-08-10 - tobias.prinz@open-xchange.com
 
