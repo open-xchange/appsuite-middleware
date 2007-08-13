@@ -43,6 +43,8 @@
  - Bugfix #8767: Fixed new message display on portal side
  - Bugfix #8793: Starting html paragraph is skipped by html2text conversion
    to avoid double new line at the beginning
+ - Reading html entities from resource:
+   "com/sun/org/apache/xml/internal/serializer/HTMLEntities.properties"
 
 * 2007-08-10 - tobias.prinz@open-xchange.com
 

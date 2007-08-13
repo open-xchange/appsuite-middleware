@@ -52,6 +52,9 @@ package com.openexchange.tools.mail;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -62,6 +65,9 @@ import java.util.regex.Pattern;
  * 
  */
 public class Html2TextConverter {
+
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(Html2TextConverter.class);
 
 	private static final String STR_EMPTY = "";
 
@@ -78,6 +84,90 @@ public class Html2TextConverter {
 	private boolean gatherAnchor;
 
 	private final StringBuilder anchorBuilder;
+
+	private static Properties htmlEntities;
+
+	private static final Map<String, String> specialMap;
+
+	static {
+		htmlEntities = new Properties();
+		try {
+			htmlEntities.load(Html2TextConverter.class.getClassLoader().getResourceAsStream(
+					"com/sun/org/apache/xml/internal/serializer/HTMLEntities.properties"));
+		} catch (final IOException e) {
+			LOG.error(e.getLocalizedMessage(), e);
+			htmlEntities = null;
+		}
+
+		specialMap = new HashMap<String, String>();
+		specialMap.put("lt", "<");
+		specialMap.put("#60", "<");
+
+		specialMap.put("gt", ">");
+		specialMap.put("#62", ">");
+
+		specialMap.put("amp", "&");
+		specialMap.put("#38", "&");
+
+		specialMap.put("auml", "ä");
+		specialMap.put("#228", "ä");
+
+		specialMap.put("Auml", "Ä");
+		specialMap.put("#196", "Ä");
+
+		specialMap.put("uuml", "ü");
+		specialMap.put("#252", "ü");
+
+		specialMap.put("Uuml", "Ü");
+		specialMap.put("#220", "Ü");
+
+		specialMap.put("ouml", "ö");
+		specialMap.put("#246", "ö");
+
+		specialMap.put("Ouml", "Ö");
+		specialMap.put("#214", "Ö");
+
+		specialMap.put("szlig", "ß");
+		specialMap.put("#223", "ß");
+
+		specialMap.put("uml", "¨");
+
+		specialMap.put("para", "¶");
+
+		specialMap.put("nbsp", " ");
+
+		specialMap.put("quot", "\"");
+		specialMap.put("#34", "\"");
+
+		specialMap.put("copy", "[Copyright]");
+		specialMap.put("#169", "[Copyright]");
+
+		specialMap.put("reg", "[Registered]");
+		specialMap.put("#174", "[Registered]");
+
+		specialMap.put("trade", "[Trademark]");
+		specialMap.put("#153", "[Trademark]");
+
+		/**
+		 * TODO: to be continued: <a
+		 * href="http://de.selfhtml.org/html/referenz/zeichen.htm">HTML
+		 * Sonderzeichen</a>
+		 */
+	}
+
+	private static final String getHTMLEntity(final String specialArg) {
+		final String special;
+		if (specialArg.charAt(specialArg.length() - 1) == ';') {
+			special = specialArg.substring(0, specialArg.length() - 1);
+		} else {
+			special = specialArg;
+		}
+		String tmp;
+		if (htmlEntities != null && (tmp = (String) htmlEntities.get(special)) != null) {
+			return String.valueOf((char) Integer.parseInt(tmp));
+		}
+		return specialMap.get(special);
+	}
 
 	public Html2TextConverter() {
 		super();
@@ -198,24 +288,11 @@ public class Html2TextConverter {
 					text = convertTag(CurrentTag, in_body ? getLastChar(result) : getLastChar(result2));
 				} else if (c == '&') {
 					final String special = getSpecial(input);
-					if ("lt;".equals(special) || "#60".equals(special)) {
-						text = "<";
-					} else if ("gt;".equals(special) || "#62".equals(special)) {
-						text = ">";
-					} else if ("amp;".equals(special) || "#38".equals(special)) {
-						text = "&";
-					} else if ("nbsp;".equals(special)) {
-						text = " ";
-					} else if ("quot;".equals(special) || "#34".equals(special)) {
-						text = "\"";
-					} else if ("copy;".equals(special) || "#169".equals(special)) {
-						text = "[Copyright]";
-					} else if ("reg;".equals(special) || "#174".equals(special)) {
-						text = "[Registered]";
-					} else if ("trade;".equals(special) || "#153".equals(special)) {
-						text = "[Trademark]";
-					} else {
+					final String tmp = getHTMLEntity(special);
+					if (tmp == null) {
 						text = '&' + special;
+					} else {
+						text = tmp;
 					}
 				} else if (!pre && Character.isWhitespace((char) c)) {
 					final StringBuilder s = in_body ? result : result2;
@@ -240,7 +317,7 @@ public class Html2TextConverter {
 		}
 		return body_found ? result.toString() : result2.toString();
 	}
-	
+
 	private static final int NONE = -99;
 
 	private static final int getLastChar(final StringBuilder sb) {
