@@ -1,3 +1,8 @@
+* 2007-08-13 - thorben.betten@open-xchange.com
+
+ - Moved flag to store mail default folder have been checked to session due
+   to new storage concept for UserSettingMail instances
+
 * 2007-08-10 - tobias.prinz@open-xchange.com
 
  - Fixed bug #8527: Versitparser now does not break if empty properties

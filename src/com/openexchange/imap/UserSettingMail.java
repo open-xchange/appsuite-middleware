@@ -68,7 +68,7 @@ import com.openexchange.groupware.delete.DeleteListener;
  * 
  */
 public final class UserSettingMail implements DeleteListener, Cloneable, Serializable {
-	
+
 	public static final class Signature implements Cloneable, Serializable {
 
 		/**
@@ -252,8 +252,6 @@ public final class UserSettingMail implements DeleteListener, Cloneable, Seriali
 
 	private boolean msgPreview;
 
-	private boolean stdFoldersSet;
-
 	private boolean ignoreOriginalMailTextOnReply;
 
 	private boolean noCopyIntoStandardSentFolder;
@@ -292,12 +290,9 @@ public final class UserSettingMail implements DeleteListener, Cloneable, Seriali
 
 	private String[] stdFolderFullnames;
 
-	private transient Lock stdFolderCreationLock;
-
 	public UserSettingMail() {
 		super();
 		stdFolderFullnames = new String[6];
-		stdFolderCreationLock = new ReentrantLock();
 	}
 
 	/*
@@ -311,7 +306,6 @@ public final class UserSettingMail implements DeleteListener, Cloneable, Seriali
 			final UserSettingMail clone = (UserSettingMail) super.clone();
 			clone.stdFolderFullnames = new String[stdFolderFullnames.length];
 			System.arraycopy(stdFolderFullnames, 0, clone.stdFolderFullnames, 0, stdFolderFullnames.length);
-			clone.stdFolderCreationLock = new ReentrantLock();
 			if (displayMsgHeaders != null) {
 				clone.displayMsgHeaders = new String[displayMsgHeaders.length];
 				System.arraycopy(displayMsgHeaders, 0, clone.displayMsgHeaders, 0, displayMsgHeaders.length);
@@ -420,10 +414,6 @@ public final class UserSettingMail implements DeleteListener, Cloneable, Seriali
 		return stdDraftsName;
 	}
 
-	public Lock getStdFolderCreationLock() {
-		return stdFolderCreationLock;
-	}
-
 	public String getStdSentName() {
 		return stdSentName;
 	}
@@ -500,10 +490,6 @@ public final class UserSettingMail implements DeleteListener, Cloneable, Seriali
 	 */
 	public boolean isSpamEnabled() throws IMAPException {
 		return (IMAPProperties.isSpamEnabled() && spamEnabled);
-	}
-
-	public boolean isStdFoldersSetDuringSession() {
-		return stdFoldersSet;
 	}
 
 	public boolean isTextOnlyCompose() {
@@ -656,11 +642,6 @@ public final class UserSettingMail implements DeleteListener, Cloneable, Seriali
 
 	public void setStdDraftsName(final String stdDraftsName) {
 		this.stdDraftsName = stdDraftsName;
-		modifiedDuringSession = true;
-	}
-
-	public void setStdFoldersSetDuringSession(final boolean stdFoldersSet) {
-		this.stdFoldersSet = stdFoldersSet;
 		modifiedDuringSession = true;
 	}
 

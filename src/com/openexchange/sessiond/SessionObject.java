@@ -54,6 +54,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.mail.MessagingException;
 import javax.mail.Session;
@@ -131,11 +133,16 @@ public class SessionObject {
 
 	private final transient Map<String, AJAXUploadFile> ajaxUploadFiles;
 
+	private boolean mailFldsChecked;
+
+	private final Lock mailFldsLock;
+
 	public SessionObject(final String sessionid) {
 		this.sessionid = sessionid;
 		imapCachedMyRights = new ConcurrentHashMap<String, Rights>();
 		imapCachedUserFlags = new ConcurrentHashMap<String, Boolean>();
 		ajaxUploadFiles = new ConcurrentHashMap<String, AJAXUploadFile>();
+		mailFldsLock = new ReentrantLock();
 	}
 
 	/**
@@ -351,6 +358,10 @@ public class SessionObject {
 		this.imapProperties = imapProperties;
 	}
 
+	public void setMailFldsChecked(final boolean mailFldsChecked) {
+		this.mailFldsChecked = mailFldsChecked;
+	}
+
 	public String getSessionID() {
 		return sessionid;
 	}
@@ -434,6 +445,14 @@ public class SessionObject {
 
 	public IMAPProperties getIMAPProperties() {
 		return imapProperties;
+	}
+
+	public boolean isMailFldsChecked() {
+		return mailFldsChecked;
+	}
+
+	public Lock getMailFldsLock() {
+		return mailFldsLock;
 	}
 
 	public UserConfiguration getUserConfiguration() {

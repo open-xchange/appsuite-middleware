@@ -721,14 +721,14 @@ public class MailInterfaceImpl implements MailInterface {
 		/*
 		 * Check user's default mailbox folders
 		 */
-		CheckDefaultFolders: if (!usm.isStdFoldersSetDuringSession()) {
-			final Lock creationLock = usm.getStdFolderCreationLock();
+		CheckDefaultFolders: if (!sessionObj.isMailFldsChecked()) {
+			final Lock creationLock = sessionObj.getMailFldsLock();
 			creationLock.lock();
 			try {
 				/*
 				 * Already set by previous thread?
 				 */
-				if (usm.isStdFoldersSetDuringSession()) {
+				if (sessionObj.isMailFldsChecked()) {
 					break CheckDefaultFolders;
 				}
 				final String[] stdFolderNames = new String[IMAPProperties.isSpamEnabled() ? 6 : 4];
@@ -795,7 +795,7 @@ public class MailInterfaceImpl implements MailInterface {
 					}
 				}
 				checkDefaultFolders(stdFolderNames, false);
-				usm.setStdFoldersSetDuringSession(true);
+				sessionObj.setMailFldsChecked(true);
 			} finally {
 				creationLock.unlock();
 			}
@@ -815,7 +815,7 @@ public class MailInterfaceImpl implements MailInterface {
 	private final void checkDefaultFolders(final String[] defaultFolderNames, final boolean initCon) throws OXException {
 		try {
 			if (initCon) {
-				usm.setStdFoldersSetDuringSession(false);
+				sessionObj.setMailFldsChecked(false);
 				init();
 			} else {
 				/*
