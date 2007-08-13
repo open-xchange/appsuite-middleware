@@ -90,6 +90,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
@@ -98,7 +99,6 @@ import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONWriter;
 
 /**
  * AppointmentRequest
@@ -182,6 +182,8 @@ public class AppointmentRequest {
 			return actionGet(jsonObject);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_SEARCH)) {
 			return actionSearch(jsonObject);
+		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_NEW_APPOINTMENTS)) {
+			return actionNewAppointmentsSearch(jsonObject);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_HAS)) {
 			return actionHas(jsonObject);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_FREEBUSY)) {
@@ -852,6 +854,103 @@ public class AppointmentRequest {
 		}
 	}
 	
+	public JSONArray actionNewAppointmentsSearch(final JSONObject jsonObj) throws JSONException, OXMandatoryFieldException, SearchIteratorException, OXConflictException, OXException, OXJSONException, AjaxException {
+		final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
+		final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
+		
+		final Date start = DataParser.checkTime(jsonObj, AJAXServlet.PARAMETER_START, timeZone);
+		final Date end = DataParser.checkTime(jsonObj, AJAXServlet.PARAMETER_END, timeZone);
+		
+		final Date startUTC = DataParser.checkDate(jsonObj, AJAXServlet.PARAMETER_START);
+		final Date endUTC = DataParser.checkDate(jsonObj, AJAXServlet.PARAMETER_END);
+		
+		int orderBy = DataParser.parseInt(jsonObj, AJAXServlet.PARAMETER_SORT);
+		
+		if (orderBy == 0) {
+			orderBy = CalendarObject.START_DATE;
+		}
+		
+		String orderDir = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_ORDER);
+		if (orderDir == null) {
+			orderDir = "asc";
+		}
+
+		final int limit = DataParser.checkInt(jsonObj, "limit");
+		
+		timestamp = new Date(0);
+		
+		Date lastModified = null;
+		
+		final AppointmentSearchObject searchObj = new AppointmentSearchObject();
+		searchObj.setRange(new Date[] { start, end } );
+		
+		final LinkedList<CalendarDataObject> appointmentList = new LinkedList<CalendarDataObject>();
+		
+		final JSONArray jsonResponseArray = new JSONArray();
+		
+		SearchIterator searchIterator = null;
+		try {
+			final AppointmentSQLInterface appointmentsql = new CalendarSql(sessionObj);
+			searchIterator = appointmentsql.getAppointmentsByExtendedSearch(searchObj, orderBy, orderDir, _appointmentFields);
+			
+			final AppointmentWriter appointmentwriter = new AppointmentWriter(timeZone);
+			
+			while (searchIterator.hasNext()) {
+				final CalendarDataObject appointmentobject = (CalendarDataObject)searchIterator.next();
+				
+				if (appointmentobject.getRecurrenceType() != CalendarObject.NONE && appointmentobject.getRecurrencePosition() == 0) {
+					appointmentobject.calculateRecurrence();
+					final RecurringResults recuResults = CalendarRecurringCollection.calculateRecurring(appointmentobject, start.getTime(), end.getTime(), 0);
+					if (recuResults.size() > 0) {
+						final RecurringResult result = recuResults.getRecurringResult(0);
+						appointmentobject.setStartDate(new Date(result.getStart()));
+						appointmentobject.setEndDate(new Date(result.getEnd()));
+						appointmentobject.setRecurrencePosition(result.getPosition());
+								
+						if (appointmentobject.getFullTime()) {
+							if (CalendarCommonCollection.inBetween(appointmentobject.getStartDate().getTime(), appointmentobject.getEndDate().getTime(), startUTC.getTime(), endUTC.getTime())) {
+								compareStartDateForList(appointmentList, appointmentobject, limit);
+							}
+						} else {
+							compareStartDateForList(appointmentList, appointmentobject, limit);
+						}
+					}
+				} else {
+					if (appointmentobject.getFullTime() && (startUTC != null && endUTC != null)) {
+						if (CalendarCommonCollection.inBetween(appointmentobject.getStartDate().getTime(), appointmentobject.getEndDate().getTime(), startUTC.getTime(), endUTC.getTime())) {
+							compareStartDateForList(appointmentList, appointmentobject, limit);
+						}
+					} else {
+						compareStartDateForList(appointmentList, appointmentobject, limit);
+					}
+				}
+				
+				lastModified = appointmentobject.getLastModified();
+				
+				if (timestamp.getTime() < lastModified.getTime()) {
+					timestamp = lastModified;
+				}
+			}
+			
+			for (int a = 0; a < appointmentList.size(); a++) {
+				final AppointmentObject appointmentObj = appointmentList.get(a);
+				if (appointmentObj.getFullTime()) {
+					appointmentwriter.writeArray(appointmentObj, columns, startUTC, endUTC, jsonResponseArray);
+				} else {
+					appointmentwriter.writeArray(appointmentObj, columns, jsonResponseArray);
+				}
+			}
+			
+			return jsonResponseArray;
+		} catch (SQLException e) {
+			throw new OXException("SQLException occurred", e);
+		} finally {
+			if (searchIterator != null) {
+				searchIterator.close();
+			}
+		}
+	}
+	
 	public JSONArray actionFreeBusy(final JSONObject jsonObj) throws JSONException, SearchIteratorException, OXMandatoryFieldException, OXException, OXJSONException, AjaxException {
 		final int userId = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
 		final int type = DataParser.checkInt(jsonObj, "type");
@@ -923,5 +1022,22 @@ public class AppointmentRequest {
 		}
 		
 		return jsonResponseObj;
+	}
+	
+	private void compareStartDateForList(final LinkedList appointmentList, final AppointmentObject appointmentObj, final int limit) {
+		if (limit > 0) {
+			for (int a = 0; a < appointmentList.size(); a++) {
+				final AppointmentObject compareAppointment = (AppointmentObject)appointmentList.get(a);
+				if (appointmentObj.getStartDate().getTime() < compareAppointment.getStartDate().getTime()) {
+					appointmentList.add(a, appointmentObj);
+				}
+				
+				if (appointmentList.size() > limit) {
+					appointmentList.removeLast();
+				}
+			}
+		} else {
+			appointmentList.add(appointmentObj);
+		}
 	}
 }
