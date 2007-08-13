@@ -53,6 +53,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.rmi.Naming;
@@ -501,24 +502,7 @@ public class UserTest extends AbstractTest {
             fail("Expected to get user data");
         } 
        
-        HashSet<String> notallowed = new HashSet<String>();
-        
-        notallowed.add("setEmail1");
-        notallowed.add("setPrimaryEmail");
-        notallowed.add("setDefaultSenderAddress");
-        notallowed.add("setId"); 
-        notallowed.add("setPassword"); 
-        notallowed.add("setName"); 
-        notallowed.add("setMail_folder_drafts_name"); 
-        notallowed.add("setMail_folder_sent_name");
-        notallowed.add("setMail_folder_spam_name");
-        notallowed.add("setMail_folder_trash_name");
-        notallowed.add("setMail_folder_confirmed_ham_name");
-        notallowed.add("setMail_folder_confirmed_spam_name");
-        notallowed.add("setGUI_Spam_filter_capabilities_enabled");
-        notallowed.add("setPassword_expired");
-        notallowed.add("setEnabled");
-        
+        HashSet<String> notallowed = getNotNullableFields();
         
         // loop through methods and change each attribute per single call and load and compare
         MethodMapObject[] meth_objects = getSetableAttributeMethods(usr.getClass());
@@ -557,8 +541,12 @@ public class UserTest extends AbstractTest {
         }
     }
     
-    
-    @Test
+    /**
+     * This test should fail
+     * 
+     * @throws Exception
+     */
+    @Test(expected=InvalidDataException.class)
     public void testChangeAllAttributesNull() throws Exception {
         // set all values to null in the user object and then call change, what
         // happens?
@@ -581,36 +569,24 @@ public class UserTest extends AbstractTest {
             fail("Expected to get user data");
         } 
        
-        HashSet<String> notallowed = new HashSet<String>();
-        
-        notallowed.add("setEmail1");
-        notallowed.add("setPrimaryEmail");
-        notallowed.add("setDefaultSenderAddress");
-        notallowed.add("setId"); 
-        notallowed.add("setPassword"); 
-        //notallowed.add("setName"); 
-        
         // loop through methods and change each attribute per single call and load and compare
         MethodMapObject[] meth_objects = getSetableAttributeMethods(usr.getClass());
         User tmp_usr = new User();
         for (MethodMapObject map_obj : meth_objects) {
-               
-                if(!map_obj.getMethodName().equals("setId")){
-                    // resolv by name
-                    tmp_usr.setId(srv_loaded.getId());
-                }else{
-                    // server must resolv by name
-                    tmp_usr.setName(srv_loaded.getName());                    
-                }
-                
-                map_obj.getSetter().invoke(tmp_usr, new Object[]{null});
-                
-                System.out.println("Setting null via "+map_obj.getMethodName() +" -> "+map_obj.getGetter().invoke(tmp_usr));
-                               
-               
+            if (!map_obj.getMethodName().equals("setId")) {
+                // resolv by name
+                tmp_usr.setId(srv_loaded.getId());
+            } else {
+                // server must resolv by name
+                tmp_usr.setName(srv_loaded.getName());
+            }
+
+            map_obj.getSetter().invoke(tmp_usr, new Object[] { null });
+
+            System.out.println("Setting null via " + map_obj.getMethodName() + " -> " + map_obj.getGetter().invoke(tmp_usr));
         }
         
-        //      submit changes 
+        // submit changes 
         oxu.change(ctx,tmp_usr,cred);
         
         // load from server and compare the single changed value
@@ -619,7 +595,86 @@ public class UserTest extends AbstractTest {
         // TODO 
         // special compare must be written that checks for special attributes like username etc which cannot be null
         compareUserSpecialForNulledAttributes(tmp_usr, user_single_change_loaded);
+    }
+    
+    @Test
+    public void testChangeAllAllowedAttributesNull() throws Exception {
+        // set all values to null in the user object and then call change, what
+        // happens?
         
+// get context to create an user
+        final Credentials cred = DummyCredentials();
+        final Context ctx = getTestContextObject(cred);
+        
+        // create new user
+        final OXUserInterface oxu = getUserClient();
+        final UserModuleAccess access = new UserModuleAccess();    
+        final User usr = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
+        final User createduser = oxu.create(ctx,usr,access,cred);     
+        // now load user from server and check if data is correct, else fail
+        User srv_loaded = oxu.getData(ctx, createduser, cred);
+        if (createduser.getId().equals(srv_loaded.getId())) {
+            //verify data
+            compareUser(createduser, srv_loaded);
+        } else {
+            fail("Expected to get user data");
+        } 
+        
+        HashSet<String> notallowed = getNotNullableFields();
+ 
+        // loop through methods and change each attribute per single call and load and compare
+        MethodMapObject[] meth_objects = getSetableAttributeMethods(usr.getClass());
+        User tmp_usr = (User) createduser.clone();
+        for (MethodMapObject map_obj : meth_objects) {
+            if (!map_obj.getMethodName().equals("setId")) {
+                // resolv by name
+                tmp_usr.setId(srv_loaded.getId());
+            } else {
+                // server must resolv by name
+                tmp_usr.setName(srv_loaded.getName());
+            }
+            
+            if (notallowed.contains(map_obj.methodName)) {
+                continue;
+            }
+            map_obj.getSetter().invoke(tmp_usr, new Object[] { null });
+            
+            System.out.println("Setting null via " + map_obj.getMethodName() + " -> " + map_obj.getGetter().invoke(tmp_usr));
+        }
+        
+        // submit changes 
+        oxu.change(ctx,tmp_usr,cred);
+        
+        // load from server and compare the single changed value
+        final User user_single_change_loaded = oxu.getData(ctx, srv_loaded, cred);
+        
+        // TODO 
+        // special compare must be written that checks for special attributes like username etc which cannot be null
+        compareUserSpecialForNulledAttributes(tmp_usr, user_single_change_loaded);
+    }
+
+    private HashSet<String> getNotNullableFields() {
+        final HashSet<String> notallowed = new HashSet<String>();
+        notallowed.add("setEmail1");
+        notallowed.add("setDefaultSenderAddress");
+        notallowed.add("setId");
+        final String[] mandatoryMembersCreate = new User().getMandatoryMembersCreate();
+        for (final String name : mandatoryMembersCreate) {
+            final StringBuilder sb = new StringBuilder("set");
+            sb.append(name.substring(0, 1).toUpperCase());
+            sb.append(name.substring(1));
+            notallowed.add(sb.toString());
+        }
+        notallowed.add("setMail_folder_drafts_name"); 
+        notallowed.add("setMail_folder_sent_name");
+        notallowed.add("setMail_folder_spam_name");
+        notallowed.add("setMail_folder_trash_name");
+        notallowed.add("setMail_folder_confirmed_ham_name");
+        notallowed.add("setMail_folder_confirmed_spam_name");
+        notallowed.add("setGUI_Spam_filter_capabilities_enabled");
+        notallowed.add("setPassword_expired");
+        notallowed.add("setEnabled");
+        return notallowed;
     }
     
     @Test
@@ -986,9 +1041,12 @@ public class UserTest extends AbstractTest {
         }
         
         // STEP 3
-        
         User emptyusr = createChangeUserData(srv_loaded);
-        emptyusr.setName(null); // reset username, server must ident the user by id
+        // reset username, server must ident the user by id
+        // This is a dirty trick to circumvent the setter method. Don't do this at home ;-)
+        final Field field = emptyusr.getClass().getDeclaredField("name");
+        field.setAccessible(true);
+        field.set(emptyusr, null);
         oxu.change(ctx,emptyusr,cred);
         
         // STEP 4
@@ -1052,7 +1110,10 @@ public class UserTest extends AbstractTest {
         usr.setEmail1(usr.getPrimaryEmail());
         // Store username to be able to restore it after change
         final String username = usr.getName();
-        usr.setName(null);
+        // This is a dirty trick to circumvent the setter method. Don't do this at home ;-)
+        final Field field = usr.getClass().getDeclaredField("name");
+        field.setAccessible(true);
+        field.set(usr, null);
         System.out.println(usr.isCompanyset());
         user.change(ctx, usr, cred);
         usr.setName(username);
@@ -1060,7 +1121,7 @@ public class UserTest extends AbstractTest {
         compareUser(usr, usr2);
     }
     
-    @Test(expected=AssertionError.class)
+    @Test//(expected=AssertionError.class)
     public void testChangefailing() throws Exception {
         
         // get context to create an user
@@ -1097,6 +1158,7 @@ public class UserTest extends AbstractTest {
             fail("Expected to get correct changed user data");
         } 
     }
+    
     public static User getTestUserMandatoryFieldsObject(final String ident, final String password) {
         final User usr = new User();
         
@@ -1267,115 +1329,14 @@ public class UserTest extends AbstractTest {
         assertEquals("language not equal", a.getLanguage(), b.getLanguage());
         // test aliasing comparing the content of the hashset
         assertEquals(a.getAliases(), b.getAliases());
-        assertEquals("aniversary not equal", a.getAnniversary(), b.getAnniversary());
-        assertEquals("assistants name not equal", a.getAssistant_name(), b.getAssistant_name());
-        assertEquals("birthday not equal", a.getBirthday(), b.getBirthday());
-        assertEquals("branches not equal", a.getBranches(), b.getBranches());
-        assertEquals("BusinessCategory not equal", a.getBusiness_category(), b.getBusiness_category());
-        assertEquals("BusinessCity not equal", a.getCity_business(), b.getCity_business());
-        assertEquals("BusinessCountry not equal", a.getCountry_business(), b.getCountry_business());
-        assertEquals("BusinessPostalCode not equal", a.getPostal_code_business(), b.getPostal_code_business());
-        assertEquals("BusinessState not equal", a.getState_business(), b.getState_business());
-        assertEquals("BusinessStreet not equal", a.getStreet_business(), b.getStreet_business());
-        assertEquals("callback not equal", a.getTelephone_callback(), b.getTelephone_callback());
-        assertEquals("CommercialRegister not equal", a.getCommercial_register(), b.getCommercial_register());
-        assertEquals("Company not equal", a.getCompany(), b.getCompany());
-        assertEquals("Country not equal", a.getCountry_home(), b.getCountry_home());
-        assertEquals("Department not equal", a.getDepartment(), b.getDepartment());
-        assertEquals("EmployeeType not equal", a.getEmployeeType(), b.getEmployeeType());
-        assertEquals("FaxBusiness not equal", a.getFax_business(), b.getFax_business());
-        assertEquals("FaxHome not equal", a.getFax_home(), b.getFax_home());
-        assertEquals("FaxOther not equal", a.getFax_other(), b.getFax_other());
-        assertEquals("ImapServer not equal", a.getImapServer(), b.getImapServer());
-        assertEquals("InstantMessenger not equal", a.getInstant_messenger1(), b.getInstant_messenger1());
-        assertEquals("InstantMessenger2 not equal", a.getInstant_messenger2(), b.getInstant_messenger2());
-        assertEquals("IpPhone not equal", a.getTelephone_ip(), b.getTelephone_ip());
-        assertEquals("Isdn not equal", a.getTelephone_isdn(), b.getTelephone_isdn());
-        assertEquals("MailFolderDrafts not equal", a.getMail_folder_drafts_name(), b.getMail_folder_drafts_name());
-        assertEquals("MailFolderSent not equal", a.getMail_folder_sent_name(), b.getMail_folder_sent_name());
-        assertEquals("MailFolderSpam not equal", a.getMail_folder_spam_name(), b.getMail_folder_spam_name());
-        assertEquals("MailFolderTrash not equal", a.getMail_folder_trash_name(), b.getMail_folder_trash_name());
-        assertEquals("ManagersName not equal", a.getManager_name(), b.getManager_name());
-        assertEquals("MaritalStatus not equal", a.getMarital_status(), b.getMarital_status());
-        assertEquals("Mobile1 not equal", a.getCellular_telephone1(), b.getCellular_telephone1());
-        assertEquals("Mobile2 not equal", a.getCellular_telephone2(), b.getCellular_telephone2());
-        assertEquals("MoreInfo not equal", a.getInfo(), b.getInfo());
-        assertEquals("NickName not equal", a.getNickname(), b.getNickname());
-        assertEquals("Note not equal", a.getNote(), b.getNote());
-        assertEquals("NumberOfChildren not equal", a.getNumber_of_children(), b.getNumber_of_children());
-        assertEquals("NumberOfEmployee not equal", a.getNumber_of_employee(), b.getNumber_of_employee());
-        assertEquals("Pager not equal", a.getTelephone_pager(), b.getTelephone_pager());
-        assertEquals("PasswordExpired not equal", a.getPassword_expired(), b.getPassword_expired());
-        assertEquals("PhoneAssistant not equal", a.getTelephone_assistant(), b.getTelephone_assistant());
-        assertEquals("PhoneBusiness not equal", a.getTelephone_business1(), b.getTelephone_business1());
-        assertEquals("PhoneBusiness2 not equal", a.getTelephone_business2(), b.getTelephone_business2());
-        assertEquals("PhoneCar not equal", a.getTelephone_car(), b.getTelephone_car());
-        assertEquals("PhoneCompany not equal", a.getTelephone_company(), b.getTelephone_company());
-        assertEquals("PhoneHome not equal", a.getTelephone_home1(), b.getTelephone_home1());
-        assertEquals("PhoneHome2 not equal", a.getTelephone_home2(), b.getTelephone_home2());
-        assertEquals("PhoneOther not equal", a.getTelephone_other(), b.getTelephone_other());
-        assertEquals("Position not equal", a.getPosition(), b.getPosition());
-        assertEquals("PostalCode not equal", a.getPostal_code_home(), b.getPostal_code_home());        
-        assertEquals("Email2 not equal", a.getEmail2(), b.getEmail2());
-        assertEquals("Email3 not equal", a.getEmail3(), b.getEmail3());
-        assertEquals("Profession not equal", a.getProfession(), b.getProfession());
-        assertEquals("Radio not equal", a.getTelephone_radio(), b.getTelephone_radio());
-        assertEquals("RoomNumber not equal", a.getRoom_number(), b.getRoom_number());
-        assertEquals("SalesVolume not equal", a.getSales_volume(), b.getSales_volume());
-        assertEquals("SecondCity not equal", a.getCity_other(), b.getCity_other());
-        assertEquals("SecondCountry not equal", a.getCountry_other(), b.getCountry_other());
-        assertEquals("SecondName not equal", a.getMiddle_name(), b.getMiddle_name());
-        assertEquals("SecondPostalCode not equal", a.getPostal_code_other(), b.getPostal_code_other());
-        assertEquals("SecondState not equal", a.getState_other(), b.getState_other());
-        assertEquals("SecondStreet not equal", a.getStreet_other(), b.getStreet_other());
-        assertEquals("SmtpServer not equal", a.getSmtpServer(), b.getSmtpServer());
-        assertEquals("SpouseName not equal", a.getSpouse_name(), b.getSpouse_name());
-        assertEquals("State not equal", a.getState_home(), b.getState_home());
-        assertEquals("Street not equal", a.getStreet_home(), b.getStreet_home());
-        assertEquals("Suffix not equal", a.getSuffix(), b.getSuffix());
-        assertEquals("TaxId not equal", a.getTax_id(), b.getTax_id());
-        assertEquals("Telex not equal", a.getTelephone_telex(), b.getTelephone_telex());
-        assertEquals("Timezone not equal", a.getTimezone(), b.getTimezone());
-        assertEquals("Title not equal", a.getTitle(), b.getTitle());
-        assertEquals("TtyTdd not equal", a.getTelephone_ttytdd(), b.getTelephone_ttytdd());
-        assertEquals("Url not equal", a.getUrl(), b.getUrl());
-        assertEquals("Userfield01 not equal", a.getUserfield01(), b.getUserfield01());
-        assertEquals("Userfield02 not equal", a.getUserfield02(), b.getUserfield02());
-        assertEquals("Userfield03 not equal", a.getUserfield03(), b.getUserfield03());
-        assertEquals("Userfield04 not equal", a.getUserfield04(), b.getUserfield04());
-        assertEquals("Userfield05 not equal", a.getUserfield05(), b.getUserfield05());
-        assertEquals("Userfield06 not equal", a.getUserfield06(), b.getUserfield06());
-        assertEquals("Userfield07 not equal", a.getUserfield07(), b.getUserfield07());
-        assertEquals("Userfield08 not equal", a.getUserfield08(), b.getUserfield08());
-        assertEquals("Userfield09 not equal", a.getUserfield09(), b.getUserfield09());
-        assertEquals("Userfield10 not equal", a.getUserfield10(), b.getUserfield10());
-        assertEquals("Userfield11 not equal", a.getUserfield11(), b.getUserfield11());
-        assertEquals("Userfield12 not equal", a.getUserfield12(), b.getUserfield12());
-        assertEquals("Userfield13 not equal", a.getUserfield13(), b.getUserfield13());
-        assertEquals("Userfield14 not equal", a.getUserfield14(), b.getUserfield14());
-        assertEquals("Userfield15 not equal", a.getUserfield15(), b.getUserfield15());
-        assertEquals("Userfield16 not equal", a.getUserfield16(), b.getUserfield16());
-        assertEquals("Userfield17 not equal", a.getUserfield17(), b.getUserfield17());
-        assertEquals("Userfield18 not equal", a.getUserfield18(), b.getUserfield18());
-        assertEquals("Userfield19 not equal", a.getUserfield19(), b.getUserfield19());
-        assertEquals("Userfield20 not equal", a.getUserfield20(), b.getUserfield20());
-        final Hashtable<String, OXCommonExtension> aexts = a.getAllExtensionsAsHash();
-        final Hashtable<String, OXCommonExtension> bexts = b.getAllExtensionsAsHash();
-        if (aexts.size() == bexts.size()) {
-            assertTrue("Extensions not equal: " + aexts.toString() + ",\n" + bexts.toString(), aexts.values().containsAll(bexts.values()));
-//            for (int i = 0; i < aexts.size(); i++) {
-//                final OXCommonExtensionInterface aext = aexts.get(i);
-//                final OXCommonExtensionInterface bext = bexts.get(i);
-//                assertTrue("Extensions not equal: " + aext.toString() + ",\n" + bext.toString(), aext.equals(bext));
-//            }
-        }
+        compareNonCriticFields(a, b);
     }
-    
-    public static void compareUserSpecialForNulledAttributes(final User a, final User b) {
+
+    private static void compareUserSpecialForNulledAttributes(final User a, final User b) {
         System.out.println("USERA" + a.toString());
         System.out.println("USERB" + b.toString());
         
-        // all these attribs cannot be null | cannot changed by server to null/empty
+        // all these attributes cannot be null | cannot changed by server to null/empty
         assertNotNull("username cannot be null",b.getName());        
         assertNotNull("enabled cannot be null",b.getEnabled());                
         assertNotNull("primaryemail cannot be null",b.getPrimaryEmail());
@@ -1386,9 +1347,10 @@ public class UserTest extends AbstractTest {
         
         // can alias be null?
         //assertEquals(a.getAliases(), b.getAliases());
-        
-        
-        
+        compareNonCriticFields(a, b);
+    }
+
+    private static void compareNonCriticFields(final User a, final User b) {
         assertEquals("aniversary not equal", a.getAnniversary(), b.getAnniversary());
         assertEquals("assistants name not equal", a.getAssistant_name(), b.getAssistant_name());
         assertEquals("birthday not equal", a.getBirthday(), b.getBirthday());
@@ -1485,14 +1447,14 @@ public class UserTest extends AbstractTest {
         final Hashtable<String, OXCommonExtension> bexts = b.getAllExtensionsAsHash();
         if (aexts.size() == bexts.size()) {
             assertTrue("Extensions not equal: " + aexts.toString() + ",\n" + bexts.toString(), aexts.values().containsAll(bexts.values()));
-//            for (int i = 0; i < aexts.size(); i++) {
-//                final OXCommonExtensionInterface aext = aexts.get(i);
-//                final OXCommonExtensionInterface bext = bexts.get(i);
-//                assertTrue("Extensions not equal: " + aext.toString() + ",\n" + bext.toString(), aext.equals(bext));
-//            }
+//          for (int i = 0; i < aexts.size(); i++) {
+//          final OXCommonExtensionInterface aext = aexts.get(i);
+//          final OXCommonExtensionInterface bext = bexts.get(i);
+//          assertTrue("Extensions not equal: " + aext.toString() + ",\n" + bext.toString(), aext.equals(bext));
+//          }
         }
     }
-
+    
     private void compareUserAccess(final UserModuleAccess a, final UserModuleAccess b) {
         assertEquals("access calendar not equal", a.getCalendar(), b.getCalendar());
         assertEquals("access contacts not equal", a.getContacts(), b.getContacts());
@@ -1514,7 +1476,7 @@ public class UserTest extends AbstractTest {
         assertEquals("access webmail not equal", a.getWebmail(), b.getWebmail());
     }
     
-    public static User addUser(final Context ctx,final User usr,final UserModuleAccess access) throws Exception{
+    public static User addUser(final Context ctx, final User usr, final UserModuleAccess access) throws Exception {
         // create new user
         final OXUserInterface oxu = getUserClient();        
         return oxu.create(ctx,usr,access,DummyCredentials());
