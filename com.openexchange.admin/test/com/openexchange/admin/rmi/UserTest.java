@@ -514,44 +514,46 @@ public class UserTest extends AbstractTest {
         MethodMapObject[] meth_objects = getSetableAttributeMethods(usr.getClass());
        
         for (MethodMapObject map_obj : meth_objects) {
-            
-                User tmp_usr = new User();
-                if(!map_obj.getMethodName().equals("setId")){
-                    // resolv by name
-                    tmp_usr.setId(srv_loaded.getId());
-                }else{
-                    // server must resolv by name
-                    tmp_usr.setName(srv_loaded.getName());                    
-                }
-                
-                map_obj.getSetter().invoke(tmp_usr, new Object[]{null});
-                
-                System.out.println("Setting null via "+map_obj.getMethodName() +" -> "+map_obj.getGetter().invoke(tmp_usr));
-                
-                //  submit changes 
-                oxu.change(ctx,tmp_usr,cred);                
-                
-                // load from server and compare the single changed value
-                final User user_single_change_loaded = oxu.getData(ctx, srv_loaded, cred);
-            
-                if(!notallowed.contains(map_obj.getMethodName())){
-                    // local and remote must be null
-                    assertEquals(map_obj.getGetter().getName().substring(3)+" not equal", map_obj.getGetter().invoke(tmp_usr), map_obj.getGetter().invoke(user_single_change_loaded));               
-                }else{
-                    // we wanted to change a attribute which cannot be changed by server, so we check for not null
-                    assertNotNull(map_obj.getMethodName()+" cannot be null",map_obj.getGetter().invoke(user_single_change_loaded));
-                }
-               
+            if (notallowed.contains(map_obj.getMethodName())) {
+                continue;
+            }
+            User tmp_usr = new User();
+            if (!map_obj.getMethodName().equals("setId")) {
+                // resolv by name
+                tmp_usr.setId(srv_loaded.getId());
+            } else {
+                // server must resolv by name
+                tmp_usr.setName(srv_loaded.getName());
+            }
+
+            map_obj.getSetter().invoke(tmp_usr, new Object[] { null });
+
+            System.out.println("Setting null via " + map_obj.getMethodName() + " -> " + map_obj.getGetter().invoke(tmp_usr));
+
+            // submit changes
+            oxu.change(ctx, tmp_usr, cred);
+
+            // load from server and compare the single changed value
+            final User user_single_change_loaded = oxu.getData(ctx, srv_loaded, cred);
+
+            if (!notallowed.contains(map_obj.getMethodName())) {
+                // local and remote must be null
+                assertEquals(map_obj.getGetter().getName().substring(3) + " not equal", map_obj.getGetter().invoke(tmp_usr), map_obj.getGetter().invoke(user_single_change_loaded));
+            } else {
+                // we wanted to change a attribute which cannot be changed by
+                // server, so we check for not null
+                assertNotNull(map_obj.getMethodName() + " cannot be null", map_obj.getGetter().invoke(user_single_change_loaded));
+            }
         }
-        
     }
     
     
     @Test
     public void testChangeAllAttributesNull() throws Exception {
-        // set all values to null in the user object and then call change, what happens?
+        // set all values to null in the user object and then call change, what
+        // happens?
         
-//      get context to create an user
+// get context to create an user
         final Credentials cred = DummyCredentials();
         final Context ctx = getTestContextObject(cred);
         
