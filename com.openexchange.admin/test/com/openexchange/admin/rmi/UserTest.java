@@ -530,15 +530,6 @@ public class UserTest extends AbstractTest {
                     map_obj.getSetter().invoke(tmp_usr, oldvalue+"_singlechange");
                     //System.out.println("Setting String via "+map_obj.getMethodName() +" -> "+map_obj.getGetter().invoke(tmp_usr));
                     
-                    //  submit changes  for string valued attributes
-                    oxu.change(ctx,tmp_usr,cred);
-                    
-                    
-                    // load from server and compare the single changed value
-                    final User user_single_change_loaded = oxu.getData(ctx, srv_loaded, cred);
-                    
-                    // compare both string values , server and local copy must be same, else, the change was unsuccessfull
-                    assertEquals(map_obj.getGetter().getName().substring(3)+" not equal", map_obj.getGetter().invoke(tmp_usr), map_obj.getGetter().invoke(user_single_change_loaded));
                 }
                 
                 if(map_obj.getMethodParameterType().equalsIgnoreCase("java.lang.Integer")){
@@ -546,15 +537,6 @@ public class UserTest extends AbstractTest {
                     Integer oldvalue = (Integer)map_obj.getGetter().invoke(srv_loaded); 
                     map_obj.getSetter().invoke(tmp_usr, oldvalue+1);
                     //System.out.println("Setting Integer via "+map_obj.getMethodName() +" -> "+map_obj.getGetter().invoke(tmp_usr));
-                                        
-                    // change data
-                    oxu.change(ctx,tmp_usr,cred);
-                    
-                    //  load from server and compare the single changed value
-                    final User user_single_change_loaded = oxu.getData(ctx, srv_loaded, cred);
-                  
-                    // compare
-                    assertEquals(map_obj.getGetter().getName().substring(3)+" not equal", map_obj.getGetter().invoke(tmp_usr), map_obj.getGetter().invoke(user_single_change_loaded));              
                 }
                 
                 
@@ -563,16 +545,7 @@ public class UserTest extends AbstractTest {
                     map_obj.getSetter().invoke(tmp_usr, !oldvalue);
                     
                     //System.out.println("Setting Boolean via "+map_obj.getMethodName() +" -> "+map_obj.getGetter().invoke(tmp_usr));
-                    
-                    // change
-                    oxu.change(ctx,tmp_usr,cred);
-                    
-                    // load from server and compare the single changed value
-                    final User user_single_change_loaded = oxu.getData(ctx, srv_loaded, cred);
-                    
-                    // compare
-                    assertEquals(map_obj.getGetter().getName().substring(3)+" not equal", map_obj.getGetter().invoke(tmp_usr), map_obj.getGetter().invoke(user_single_change_loaded));                            
-                    
+                 
                 }
                 
                 if(map_obj.getMethodParameterType().equalsIgnoreCase("java.util.Date")){
@@ -581,15 +554,19 @@ public class UserTest extends AbstractTest {
                     map_obj.getSetter().invoke(tmp_usr, new Date(oldvalue.getTime()+(24*60*60*1000)));
                     
                     //System.out.println("Setting Date via "+map_obj.getMethodName() +" -> "+map_obj.getGetter().invoke(tmp_usr));
-                    
-                    // change
-                    oxu.change(ctx,tmp_usr,cred);
-                    
-                    final User user_single_change_loaded = oxu.getData(ctx, srv_loaded, cred);
-                    
-                    assertEquals(map_obj.getGetter().getName().substring(3)+" not equal", map_obj.getGetter().invoke(tmp_usr), map_obj.getGetter().invoke(user_single_change_loaded));                                        
-                    
+                                 
                 }
+                
+                //  submit changes 
+                oxu.change(ctx,tmp_usr,cred);
+                
+                
+                // load from server and compare the single changed value
+                final User user_single_change_loaded = oxu.getData(ctx, srv_loaded, cred);
+                
+                // compare both string values , server and local copy must be same, else, the change was unsuccessfull
+                assertEquals(map_obj.getGetter().getName().substring(3)+" not equal", map_obj.getGetter().invoke(tmp_usr), map_obj.getGetter().invoke(user_single_change_loaded));
+          
             }            
         }
         
