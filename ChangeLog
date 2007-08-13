@@ -1,3 +1,9 @@
+* 2007-08-13 - sebastian.kauss@open-xchange.com
+
+ - Fixed Bug #8785 - Only iCal imported fullday holiday appointments 
+                     are shown on the start page. Added new ajax method 
+                     newappointments for portal search.
+
 * 2007-08-13 - martin.kauss@open-xchange.com
 
  - Bugfix #8505 and #8722. Reminder data still exist after an appointment was
