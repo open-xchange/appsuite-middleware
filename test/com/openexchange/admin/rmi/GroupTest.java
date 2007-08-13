@@ -537,7 +537,7 @@ public class GroupTest extends AbstractTest {
         
     }
     
-    @Test
+    @Test(expected=InvalidDataException.class)
     public void testChangeNull() throws Exception {
         
         // change group displayname and name to null, this must fail
@@ -565,13 +565,41 @@ public class GroupTest extends AbstractTest {
         
         // do the changes on the remote server for the group
         changeGroup(ctx, tmp_group, hosturl, cred);
+    }
 
+    @Test
+    public void testChangeAllowedNull() throws Exception {
+        
+        // change group displayname and name to null, this must fail
+        
+        final int context_id = getContextID();
+        final Context ctx = new Context(context_id);
+        final Credentials cred = DummyCredentials();
+        final String hosturl = getRMIHostUrl();
+        final Group addgroup = getTestGroupObject("changed_this_group"+System.currentTimeMillis(), ctx, cred);
+        final Group createdgroup = createGroup(ctx, addgroup, hosturl, cred);
+        assertTrue("expected id > 0", createdgroup.getId() > 0);
+        
+        // load group from server
+        Group srv_response = getData(ctx, createdgroup, hosturl, cred);
+        
+        // check if group is created on server correct
+        assertEquals("displayname id not equal", createdgroup.getDisplayname(), srv_response.getDisplayname());
+        assertEquals("id not equals", createdgroup.getId(), srv_response.getId());
+        assertEquals("identifier not equal", createdgroup.getName(), srv_response.getName());
+        
+        // set display name to null and name to null
+        Group tmp_group = new Group(srv_response.getId());
+        tmp_group.setMembers(new Integer[0]);
+        
+        // do the changes on the remote server for the group
+        changeGroup(ctx, tmp_group, hosturl, cred);
+        
         // load group which was modified
         final Group remote_grp = getData(ctx, createdgroup, hosturl, cred);
-
-        // check that displayname and name arent changed!
-        assertNotNull("displayname cannot be null", remote_grp.getDisplayname());        
-        assertNotNull("name of group cannot be null", remote_grp.getName());
+        
+        createdgroup.setMembers(new Integer[0]);
+        assertEquals("Group aren't equal", createdgroup, remote_grp);
     }
     
     @Test
