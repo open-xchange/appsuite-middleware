@@ -1026,15 +1026,23 @@ public class AppointmentRequest {
 	
 	private void compareStartDateForList(final LinkedList appointmentList, final AppointmentObject appointmentObj, final int limit) {
 		if (limit > 0) {
+			boolean found = false;
+			
 			for (int a = 0; a < appointmentList.size(); a++) {
 				final AppointmentObject compareAppointment = (AppointmentObject)appointmentList.get(a);
 				if (appointmentObj.getStartDate().getTime() < compareAppointment.getStartDate().getTime()) {
 					appointmentList.add(a, appointmentObj);
+					found = true;
+					break;
 				}
-				
-				if (appointmentList.size() > limit) {
-					appointmentList.removeLast();
-				}
+			}
+			
+			if (!found) {
+				appointmentList.addLast(appointmentObj);
+			}
+			
+			if (appointmentList.size() > limit) {
+				appointmentList.removeLast();
 			}
 		} else {
 			appointmentList.add(appointmentObj);
