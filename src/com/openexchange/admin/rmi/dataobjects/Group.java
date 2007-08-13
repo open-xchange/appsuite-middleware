@@ -216,24 +216,24 @@ public class Group extends ExtendableDataObject implements NameAndIdObject {
     }
 
     @Override
-    protected String[] getMandatoryMembersCreate() {
+    public String[] getMandatoryMembersCreate() {
         return new String[]{ "displayname", "name" };
     }
     
     @Override
-    protected final String[] getMandatoryMembersChange() {
+    public final String[] getMandatoryMembersChange() {
         return null;
     }
 
 
     @Override
-    protected String[] getMandatoryMembersDelete() {
+    public String[] getMandatoryMembersDelete() {
         return null;
     }
 
 
     @Override
-    protected String[] getMandatoryMembersRegister() {
+    public String[] getMandatoryMembersRegister() {
         return null;
     }
 
