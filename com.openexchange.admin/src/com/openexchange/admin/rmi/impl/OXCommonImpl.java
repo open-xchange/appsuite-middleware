@@ -55,6 +55,7 @@ import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Group;
 import com.openexchange.admin.rmi.dataobjects.NameAndIdObject;
+import com.openexchange.admin.rmi.dataobjects.Resource;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
@@ -104,7 +105,7 @@ public abstract class OXCommonImpl {
                     nameandid.setId(tool.getUserIDByUsername(ctx, name));
                 } else if (nameandid instanceof Group) {
                     nameandid.setId(tool.getGroupIDByGroupname(ctx, name));
-                } else if (nameandid instanceof com.openexchange.admin.rmi.dataobjects.Resource) {
+                } else if (nameandid instanceof Resource) {
                     nameandid.setId(tool.getResourceIDByResourcename(ctx, name));
                 } else if (nameandid instanceof Context) {
                     nameandid.setId(tool.getContextIDByContextname(name));
