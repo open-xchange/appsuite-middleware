@@ -173,20 +173,22 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         
         // SPECIAL USER AUTH CHECK FOR THIS METHOD!
         // check if credentials are from oxadmin or from an user
-        try {   
-            
+        Integer userid = null;
+        try {
             contextcheck(ctx);
-                
-            if(!tool.existsContext(ctx)){           
+
+            if (!tool.existsContext(ctx)) {           
                  final InvalidCredentialsException invalidCredentialsException = new InvalidCredentialsException("Authentication failed for user " + auth.getLogin());
-                 log.error("Requested context "+ctx.getId()+" does not exist!",invalidCredentialsException);
+                 log.error("Requested context " + ctx.getId() + " does not exist!", invalidCredentialsException);
                  throw invalidCredentialsException;
             }
-           
+
             setIdOrGetIDFromNameAndIdObject(ctx, usrdata);
 
-            if (!tool.existsUser(ctx, usrdata.getId())) {
-                final NoSuchUserException noSuchUserException = new NoSuchUserException("No such user " + usrdata.getId() + " in context " + ctx.getId());
+            usrdata.testMandatoryCreateFieldsNull();
+            userid = usrdata.getId();
+            if (!tool.existsUser(ctx, userid)) {
+                final NoSuchUserException noSuchUserException = new NoSuchUserException("No such user " + userid + " in context " + ctx.getId());
                 log.error(noSuchUserException.getMessage(), noSuchUserException);
                 throw noSuchUserException;
             }
@@ -205,7 +207,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 // now check if user which authed has the same id as the user he
                 // wants to change,else fail,
                 // cause then he/she wants to change not his own data!
-                if (usrdata.getId().intValue() != auth_user_id) {
+                if (userid.intValue() != auth_user_id) {
                     throw new InvalidCredentialsException("Permission denied");
                 }
             } 
@@ -232,7 +234,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             throw e1;
         }
         
-        boolean isContextAdmin = tool.isContextAdmin(ctx, usrdata.getId());
+        boolean isContextAdmin = tool.isContextAdmin(ctx, userid);
 
         oxu.change(ctx, usrdata);
 
@@ -283,7 +285,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
         try {
             JCS cache = JCS.getInstance("User");
-            cache.remove(new CacheKey(ctx.getId(), usrdata.getId()));
+            cache.remove(new CacheKey(ctx.getId(), userid));
         } catch (final CacheException e) {
             log.error(e.getMessage(), e);
         }
