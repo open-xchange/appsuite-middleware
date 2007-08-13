@@ -285,22 +285,22 @@ public class Context extends EnforceableDataObject implements NameAndIdObject {
     }
 
     @Override
-    protected String[] getMandatoryMembersChange() {
+    public String[] getMandatoryMembersChange() {
         return null;
     }
 
     @Override
-    protected String[] getMandatoryMembersCreate() {
+    public String[] getMandatoryMembersCreate() {
         return new String[]{ "id", "maxQuota" };
     }
 
     @Override
-    protected String[] getMandatoryMembersDelete() {
+    public String[] getMandatoryMembersDelete() {
         return null;
     }
 
     @Override
-    protected String[] getMandatoryMembersRegister() {
+    public String[] getMandatoryMembersRegister() {
         return null;
     }
 
