@@ -453,7 +453,9 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 			fp.add(MessageHeaders.HDR_DATE);
 			break;
 		case JSONMessageObject.FIELD_FLAGS:
-			fp.add(FetchProfile.Item.FLAGS);
+			if (!fp.contains(FetchProfile.Item.FLAGS)) {
+				fp.add(FetchProfile.Item.FLAGS);
+			}
 			break;
 		case JSONMessageObject.FIELD_DISPOSITION_NOTIFICATION_TO:
 			fp.add(MessageHeaders.HDR_DISP_NOT_TO);
@@ -462,7 +464,14 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 			fp.add(MessageHeaders.HDR_X_PRIORITY);
 			break;
 		case JSONMessageObject.FIELD_COLOR_LABEL:
-			fp.add(FetchProfile.Item.FLAGS);
+			if (!fp.contains(FetchProfile.Item.FLAGS)) {
+				fp.add(FetchProfile.Item.FLAGS);
+			}
+			break;
+		case JSONMessageObject.FIELD_FLAG_SEEN:
+			if (!fp.contains(FetchProfile.Item.FLAGS)) {
+				fp.add(FetchProfile.Item.FLAGS);
+			}
 			break;
 		default:
 			return;

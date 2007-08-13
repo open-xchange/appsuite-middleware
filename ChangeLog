@@ -2,6 +2,9 @@
 
  - Moved flag to store mail default folder have been checked to session due
    to new storage concept for UserSettingMail instances
+ - Bugfix #8784: Mail folders with more messages than
+   "imapMessageFetchLimit" defined in "imap.properties" can be sorted
+   against "unread"
 
 * 2007-08-10 - tobias.prinz@open-xchange.com
 
