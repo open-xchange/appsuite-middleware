@@ -80,13 +80,12 @@ public abstract class AbstractImporter implements Importer {
 	protected OXException handleDataTruncation(OXException oxEx){
 		if(oxEx.getCategory() == Category.TRUNCATED){
 			final String separator = ", ";
-			final String unidentifiedField = "unknown field";
 			final StringBuilder bob = new StringBuilder();
 			final int[] ids = oxEx.getTruncatedIds();			
 			if(oxEx.getComponent() == Component.CONTACT){
 				for(int id : ids){
 					final ContactField field = ContactField.getByValue(id);
-					bob.append( field == null ? unidentifiedField : field.getReadableName() );
+					bob.append( field == null ? id : field.getReadableName() );
 					bob.append(separator);
 				}
 			} else {
