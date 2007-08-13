@@ -669,27 +669,27 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 // ok here its possible that a user wants to get his own data
                 // SPECIAL USER AUTH CHECK FOR THIS METHOD!
                 // check if credentials are from oxadmin or from an user
-                final int auth_user_id = tool.getUserIDByUsername(ctx, auth.getLogin());
                 // check if given user is not admin, if he is admin, the
-                if (!tool.isContextAdmin(ctx, auth_user_id)) {
+                final User authuser = new User();
+                authuser.setName(auth.getLogin());
+                if (!tool.isContextAdmin(ctx, authuser)) {
                     final InvalidCredentialsException invalidCredentialsException = new InvalidCredentialsException("Permission denied");
-                    if (users.length > 1) {
-                        log.error("User sent more than 1 users to get data for. Only context admin is allowed to do that", invalidCredentialsException);
-                        throw invalidCredentialsException;
-                        // one user cannot edit more than his own data
-                    } else {
+                    if (users.length == 1) {
+                        int auth_user_id = authuser.getId();
                         basicauth.doUserAuthentication(auth, ctx);
                         // its possible that he wants his own data
-                        if (users[0].getId() != null) {
-                            if (users[0].getId().intValue() != auth_user_id) {
+                        final Integer userid = users[0].getId();
+                        if (userid != null) {
+                            if (userid.intValue() != auth_user_id) {
                                 throw invalidCredentialsException;
                             }
                         } else {
                             // id not set, try to resolv id by username and then
                             // check
                             // again
-                            if (users[0].getName() != null) {
-                                final int check_user_id = tool.getUserIDByUsername(ctx, users[0].getName());
+                            final String username = users[0].getName();
+                            if (username != null) {
+                                final int check_user_id = tool.getUserIDByUsername(ctx, username);
                                 if (check_user_id != auth_user_id) {
                                     log.debug("user[0].getId() does not match id from Credentials.getLogin()");
                                     throw invalidCredentialsException;
@@ -699,11 +699,14 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                                 throw new InvalidDataException("Username and userid missing.");
                             }
                         }
+                    } else {
+                        log.error("User sent " + users.length + " users to get data for. Only context admin is allowed to do that", invalidCredentialsException);
+                        throw invalidCredentialsException;
+                        // one user cannot edit more than his own data
                     }
                 } else {
                     basicauth.doAuthentication(auth, ctx);
                 }
-
             } else {
                 basicauth.doAuthentication(auth, ctx);
             }
@@ -711,22 +714,23 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             checkSchemaBeingLocked(ctx);
             
             for (final User usr : users) {
-                if (usr.getId()!=null && !tool.existsUser(ctx, usr.getId())) {
+                final String username = usr.getName();
+                final Integer userid = usr.getId();
+                if (userid != null && !tool.existsUser(ctx, userid)) {
                     throw new NoSuchUserException("No such user "+usr);
                 }
-                if (usr.getName() != null && !tool.existsUserName(ctx, usr.getName())) {
+                if (username != null && !tool.existsUserName(ctx, username)) {
                     throw new NoSuchUserException("No such user " + usr);
                 }
-                final String username = usr.getName();
-                if (username == null && usr.getId() == null) {
+                if (username == null && userid == null) {
                     throw new InvalidDataException("Username and userid missing.");
                 } else {
                     // ok , try to get the username by id or username
                     if (username == null) {
-                        usr.setName(tool.getUsernameByUserID(ctx, usr.getId().intValue()));
+                        usr.setName(tool.getUsernameByUserID(ctx, userid.intValue()));
                     }
 
-                    if (usr.getId() == null) {
+                    if (userid == null) {
                         usr.setId(new Integer(tool.getUserIDByUsername(ctx, username)));
                     }
                 }
@@ -883,7 +887,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     private boolean aliasesContain(final HashSet<String> aliases, final String address) {
         if (null != aliases) {
             for (final String addr : aliases) {
-                if (address.equals(addr)) {
+                if (addr.equals(address)) {
                     return true;
                 }
             }
@@ -941,6 +945,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             } else {
                 check_primary_mail = dbuser.getPrimaryEmail();
             }
+
             if (email1 != null) {
                 check_email1 = email1;
             } else {
