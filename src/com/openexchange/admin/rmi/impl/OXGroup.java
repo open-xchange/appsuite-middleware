@@ -249,11 +249,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         // END OF JCS
     }
 
-    public void change(final Context ctx, final Group grp,
-            final Credentials auth) throws RemoteException, StorageException,
-            InvalidCredentialsException, NoSuchContextException,
-            InvalidDataException, DatabaseUpdateException,
-            NoSuchGroupException, NoSuchUserException {
+    public void change(final Context ctx, final Group grp, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchGroupException, NoSuchUserException {
         try {
             doNullCheck(grp);
         } catch (final InvalidDataException e3) {
@@ -269,29 +265,21 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         }
 
         if (log.isDebugEnabled()) {
-            log.debug(ctx.toString() + " - " + grp.toString() + " - "
-                    + auth.toString());
+            log.debug(ctx.toString() + " - " + grp.toString() + " - " + auth.toString());
         }
 
         try {
             checkSchemaBeingLocked(ctx, tool);
 
             if (!grp.mandatoryChangeMembersSet()) {
-                throw new InvalidDataException("Mandatory fields not set: "
-                        + grp.getUnsetMembers());
+                throw new InvalidDataException("Mandatory fields not set: " + grp.getUnsetMembers());
             }
 
-            if (grp.getName() != null
-                    && prop.getGroupProp(AdminProperties.Group.AUTO_LOWERCASE,
-                            true)) {
+            if (grp.getName() != null && prop.getGroupProp(AdminProperties.Group.AUTO_LOWERCASE, true)) {
                 grp.setName(grp.getName().toLowerCase());
             }
 
-            if (grp.getName() != null
-                    && prop
-                            .getGroupProp(
-                                    AdminProperties.Group.CHECK_NOT_ALLOWED_CHARS,
-                                    true)) {
+            if (grp.getName() != null && prop.getGroupProp(AdminProperties.Group.CHECK_NOT_ALLOWED_CHARS, true)) {
                 validateGroupName(grp.getName());
             }
 
@@ -308,7 +296,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             }
             
             setIdOrGetIDFromNameAndIdObject(ctx, grp);
-            
+            grp.testMandatoryCreateFieldsNull();
             if (!tool.existsGroup(ctx, grp.getId())) {
                 throw new NoSuchGroupException("No such group");
             }
@@ -319,8 +307,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
 
             oxGroup.change(ctx, grp);
         } catch (final EnforceableDataObjectException e2) {
-            final InvalidDataException invalidDataException = new InvalidDataException(
-                    e2.getMessage());
+            final InvalidDataException invalidDataException = new InvalidDataException(e2.getMessage());
             log.error(invalidDataException.getMessage(), invalidDataException);
             throw invalidDataException;
         } catch (final StorageException e) {
@@ -347,27 +334,19 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         for (final Bundle bundle : bundles) {
             final String bundlename = bundle.getSymbolicName();
             if (Bundle.ACTIVE == bundle.getState()) {
-                final ServiceReference[] servicereferences = bundle
-                        .getRegisteredServices();
+                final ServiceReference[] servicereferences = bundle.getRegisteredServices();
                 if (null != servicereferences) {
                     for (final ServiceReference servicereference : servicereferences) {
-                        final Object property = servicereference
-                                .getProperty("name");
-                        if (null != property
-                                && property.toString().equalsIgnoreCase(
-                                        "oxgroup")) {
-                            final OXGroupPluginInterface oxgroup = (OXGroupPluginInterface) this.context
-                                    .getService(servicereference);
+                        final Object property = servicereference.getProperty("name");
+                        if (null != property && property.toString().equalsIgnoreCase("oxgroup")) {
+                            final OXGroupPluginInterface oxgroup = (OXGroupPluginInterface) this.context.getService(servicereference);
                             try {
                                 if (log.isDebugEnabled()) {
-                                    log.debug("Calling change for plugin: "
-                                            + bundlename);
+                                    log.debug("Calling change for plugin: " + bundlename);
                                 }
                                 oxgroup.change(ctx, grp, auth);
                             } catch (final PluginException e) {
-                                log.error(
-                                        "Error while calling change for plugin: "
-                                                + bundlename, e);
+                                log.error("Error while calling change for plugin: " + bundlename, e);
                                 throw new StorageException(e);
                             }
                         }
