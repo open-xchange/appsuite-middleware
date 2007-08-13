@@ -788,7 +788,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 mapping.setInt(1, context_id);
                 rs2 = mapping.executeQuery();
                 while (rs2.next()) {
-                    cs.addLoginMapping(rs.getString(1));
+                    cs.addLoginMapping(rs2.getString(1));
                 }
                 rs2.close();
                 
@@ -799,8 +799,8 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     stmt2.setInt(1, context_id);
                     rs2 = stmt2.executeQuery();
                     long quota_used = 0;
-                    if (rs.next()) {
-                        quota_used = rs.getLong(1);
+                    if (rs2.next()) {
+                        quota_used = rs2.getLong(1);
                     }
                     quota_used /= Math.pow(2, 20);
                     // set used quota in context setup
