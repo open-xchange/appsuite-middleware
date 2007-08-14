@@ -1,6 +1,7 @@
 * 2007-08-14 - dennis.sieben@open-xchange.com
 
   - Bugfix ID#8802 no error message when display_name is changed
+  - Bugfix ID#8837 'createuser' command line tool shows wrong default settings for modularization
   
 * 2007-08-07 - dennis.sieben@open-xchange.com
 
