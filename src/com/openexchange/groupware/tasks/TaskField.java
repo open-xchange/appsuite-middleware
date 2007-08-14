@@ -47,52 +47,78 @@
  *
  */
 
-package com.openexchange.groupware.importexport;
+package com.openexchange.groupware.tasks;
 
-import com.openexchange.api2.OXException;
-import com.openexchange.groupware.Component;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrowsMultiple;
-import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.contact.helpers.ContactField;
-import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionClasses;
-import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionFactory;
-
-/**
- * This class contains basic helper methods needed by all importers.
- *  
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
- *
- */
-@OXExceptionSource(
-		classId=ImportExportExceptionClasses.ABSTRACTIMPORTER, 
-		component=Component.IMPORT_EXPORT)
-	@OXThrowsMultiple(
-		category={
-			Category.TRUNCATED}, 
-		desc={""}, 
-		exceptionId={0}, 
-		msg={
-			"The following field(s) are too long to be imported: %s"})
-public abstract class AbstractImporter implements Importer {
-	private static final ImportExportExceptionFactory EXCEPTIONS = new ImportExportExceptionFactory(AbstractImporter.class);
+public enum TaskField {
+	OBJECTID ( Task.OBJECT_ID , "ObjectID" ),
+	CREATEDBY ( Task.CREATED_BY , "CreatedBy" ),
+	CREATIONDATE ( Task.CREATION_DATE , "CreationDate" ),
+	MODIFIEDBY ( Task.MODIFIED_BY , "ModifiedBy" ),
+	LASTMODIFIED ( Task.LAST_MODIFIED , "LastModified" ),
+	PARENTFOLDERID ( Task.FOLDER_ID , "ParentFolderID" ),
+	TITLE ( Task.TITLE , "Title" ),
+	STARTDATE ( Task.START_DATE , "StartDate" ),
+	ENDDATE ( Task.END_DATE , "EndDate" ),
+	NOTE ( Task.NOTE , "Note" ),
+	ACTUALCOSTS ( Task.ACTUAL_COSTS , "ActualCosts" ),
+	ACTUALDURATION ( Task.ACTUAL_DURATION , "ActualDuration" ),
+	BILLINGINFORMATION ( Task.BILLING_INFORMATION , "BillingInformation" ),
+	CATEGORIES ( Task.CATEGORIES , "Categories" ),
+	COMPANIES ( Task.COMPANIES , "Companies" ),
+	CURRENCY ( Task.CURRENCY , "Currency" ),
+	DATECOMPLETED ( Task.DATE_COMPLETED , "DateCompleted" ),
+	PERCENTCOMPLETE ( Task.PERCENT_COMPLETED , "PercentComplete" ),
+	PRIORITY ( Task.PRIORITY , "Priority" ),
+	STATUS ( Task.STATUS , "Status" ),
+	TARGETCOSTS ( Task.TARGET_COSTS , "TargetCosts" ),
+	TARGETDURATION ( Task.TARGET_DURATION , "TargetDuration" ),
+	TRIPMETER ( Task.TRIP_METER , "TripMeter" ),
+	RECURRENCETYPE ( Task.RECURRENCE_TYPE , "RecurrenceType" ),
+	LABEL ( Task.COLOR_LABEL , "Label" );
 	
-	protected abstract String getNameForFieldInTruncationError(int id, OXException dataTruncation);
+	private int taskID; //ID used in Task.*
+	private String name; //name used for getters & setters
 	
-	protected OXException handleDataTruncation(OXException oxEx){
-		if(oxEx.getCategory() == Category.TRUNCATED){
-			final String separator = ", ";
-			final StringBuilder bob = new StringBuilder();
-			final int[] ids = oxEx.getTruncatedIds();			
-			for(int id : ids){
-				bob.append( getNameForFieldInTruncationError(id, oxEx) );
-				bob.append( separator );
-			}
-			bob.setLength(bob.length() - separator.length());
-			oxEx = EXCEPTIONS.create(0, bob.toString());
-		}
-		return oxEx;
+	private TaskField(int taskID, String name){
+		this.taskID = taskID;
+		this.name = name;
 	}
 
+	public static TaskField getByTaskID(int id){
+		for(TaskField field : values() ){
+			if(field.getTaskID() == id){
+				return field;
+			}
+		}
+		return null;
+	}
+	
+	public static TaskField getByName(String name){
+		for(TaskField field : values() ){
+			if(name.equals( field.getName() )){
+				return field;
+			}
+		}
+		return null;
+	}
 
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public int getTaskID() {
+		return taskID;
+	}
+
+	public void setTaskID(int taskID) {
+		this.taskID = taskID;
+	}
+	
+	public String getICalName(){
+		return name; //TODO get real ICAL element name
+	}
 }

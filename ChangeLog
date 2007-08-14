@@ -1,3 +1,9 @@
+* 2007-08-14 - tobias.prinz@open-xchange.com
+
+ - Bugfix #6825: Implemented new classes for translating fieldnames for
+   Appointments/Calendar and Tasks. Now the users gets better hints what
+   fields could not be imported.
+
 * 2007-08-14 - thorben.betten@open-xchange.com
 
  - More reliable sorting when requesting user's new messages

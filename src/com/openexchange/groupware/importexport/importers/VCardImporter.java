@@ -71,6 +71,7 @@ import com.openexchange.groupware.Component;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.importexport.AbstractImporter;
@@ -257,6 +258,15 @@ import com.openexchange.tools.versit.filetokenizer.VCardTokenizer;
 		}
 		
 		return list;
+	}
+
+	@Override
+	protected String getNameForFieldInTruncationError(int id, OXException unused) {
+		final ContactField field = ContactField.getByValue(id);
+		if(field == null){
+			return String.valueOf( id );
+		}
+		return field.getReadableName();
 	}
 
 }

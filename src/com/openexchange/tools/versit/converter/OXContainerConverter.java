@@ -1101,12 +1101,15 @@ public class OXContainerConverter {
 			final String mail = ((URI) property.getValue()).getSchemeSpecificPart();
 			final Participant participant;
 			if(isInternalUser(mail)){
-				participant = new UserParticipant();
-				participant.setIdentifier( getInternalUser(mail).getContactId() ); //fix for bug 8475
+				//fix for bug 8475
+				participant = new UserParticipant(
+						getInternalUser(mail).
+							getContactId()
+				);
+				//end:fix
 			} else {
-				participant = new ExternalUserParticipant();
+				participant = new ExternalUserParticipant(mail);
 				participant.setDisplayName(mail);
-				participant.setEmailAddress(mail);
 			}
 			calContainerObj.addParticipant(participant);
 		} catch (Exception e) {

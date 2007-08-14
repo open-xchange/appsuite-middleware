@@ -53,7 +53,6 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.TimeZone;
 
-import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.OXExceptionSource;
@@ -69,7 +68,6 @@ import com.openexchange.groupware.contact.mappers.EnglishOutlookMapper;
 import com.openexchange.groupware.contact.mappers.FrenchOutlookMapper;
 import com.openexchange.groupware.contact.mappers.GermanOutlookMapper;
 import com.openexchange.groupware.importexport.Format;
-import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.groupware.importexport.Importer;
 import com.openexchange.groupware.importexport.csv.CSVParser;
 import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionClasses;
@@ -178,22 +176,11 @@ public class OutlookCSVContactImporter extends CSVContactImporter implements Imp
 	}
 
 	@Override
-	protected OXException handleDataTruncation(OXException oxEx) {
-		if(oxEx.getCategory() == Category.TRUNCATED 
-		&& oxEx.getComponent() == Component.CONTACT){
-			final String separator = ", ";
-			final StringBuilder bob = new StringBuilder();
-			final int[] ids = oxEx.getTruncatedIds();			
-			for(int id : ids){
-				final ContactField field = ContactField.getByValue(id);
-				bob.append(	fieldMapper.getNameOfField(field) );
-				bob.append(separator);
-			}
-			bob.setLength(bob.length() - separator.length());
-			oxEx = EXCEPTIONS.create(0, bob.toString());
-		} else {
-			return super.handleDataTruncation(oxEx);
+	protected String getNameForFieldInTruncationError(int id, OXException notused) {
+		final ContactField field = ContactField.getByValue(id);
+		if(field == null){
+			return String.valueOf( id );
 		}
-		return oxEx;
+		return fieldMapper.getNameOfField(field);
 	}
 }

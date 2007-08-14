@@ -301,6 +301,18 @@ public class CSVContactImporter extends AbstractImporter implements Importer {
 		dateSwitch.setDelegate(new ContactSetter());
 		return boolSwitch;
 	}
+
+
+	@Override
+	protected String getNameForFieldInTruncationError(int id, OXException unused) {
+		final ContactField field = ContactField.getByValue(id);
+		if(field == null){
+			return String.valueOf( id );
+		}
+		return field.getReadableName();
+	}
+
+
 	
 	
 }

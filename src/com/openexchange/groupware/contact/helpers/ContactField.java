@@ -237,6 +237,10 @@ public enum ContactField{
 	public String getAjaxName(){
 		return ajaxName;
 	}
+	
+	public String getVCardElementName(){
+		return readableName; //TODO get real VCard element name
+	}
 
 
 	public static ContactField getByDBFieldName(final String dbFieldName){
