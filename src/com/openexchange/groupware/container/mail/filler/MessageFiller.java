@@ -920,7 +920,7 @@ public final class MessageFiller {
 	// | Pattern.DOTALL);
 
 	private static final Pattern PATTERN_REF_IMG = Pattern.compile(
-			"(<img[^/]*?)(src=\")([^\"]+)(id=)([^\"&]+)(?:(&[^\"]+)\"|(\"))([^/]*/?>)", Pattern.CASE_INSENSITIVE
+			"(<img[^/>]*?)(src=\")([^\"]+)(id=)([^\"&]+)(?:(&[^\"]+\")|(\"))([^/>]*/?>)", Pattern.CASE_INSENSITIVE
 					| Pattern.DOTALL);
 
 	/**
