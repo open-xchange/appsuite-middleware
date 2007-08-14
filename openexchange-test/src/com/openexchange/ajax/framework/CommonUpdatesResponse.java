@@ -115,4 +115,8 @@ public class CommonUpdatesResponse extends AbstractAJAXResponse implements
     public void setColumns(final int[] columns) {
         this.columns = columns;
     }
+
+    public int size() {
+        return array.length;
+    }
 }

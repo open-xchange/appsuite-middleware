@@ -122,7 +122,7 @@ public class CommonUpdatesRequest implements AJAXRequest {
     public Parameter[] getParameters() {
         final List<Parameter> params = new ArrayList<Parameter>();
         params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet
-            .ACTION_ALL));
+            .ACTION_UPDATES));
         params.add(new Parameter(AJAXServlet.PARAMETER_FOLDERID, folderId));
         params.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns));
         if (null != order) {

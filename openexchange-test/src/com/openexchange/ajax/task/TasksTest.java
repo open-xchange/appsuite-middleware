@@ -335,68 +335,6 @@ public class TasksTest extends AbstractAJAXTest {
         }
     }
 
-    public void testUpdates() throws Throwable {
-        final int folderId = TaskTools.getPrivateTaskFolder(getWebConversation(),
-            getHostName(), getSessionId());
-        final Task task = new Task();
-        task.setParentFolderID(folderId);
-        int[][] tasks = new int[10][2];
-        for (int i = 0; i < tasks.length; i++) {
-            task.setTitle("Task " + (i + 1));
-            tasks[i][1] = extractInsertId(insertTask(getWebConversation(),
-                getHostName(), getSessionId(), task));
-            tasks[i][0] = folderId;
-        }
-        int[] columns = new int[] { Task.TITLE, Task.OBJECT_ID,
-            Task.FOLDER_ID };
-        Response response = getAllTasksInFolder(getWebConversation(),
-            getHostName(), getSessionId(), folderId, columns, Task.TITLE,
-            "asc");
-        JSONArray array = (JSONArray) response.getData();
-        assertTrue("Can't find " + tasks.length + " inserted tasks.",
-            array.length() >= tasks.length);
-        // TODO parse JSON array
-        Date timestamp = response.getTimestamp();
-        if (null == timestamp) {
-            // TODO This has to be fixed.
-            timestamp = new Date();
-        }
-        // Now update 5
-        for (int i = 0; i < tasks.length / 2; i++) {
-            task.setTitle("UpdatedTask " + (i + 1));
-            task.setObjectID(tasks[i][1]);
-            failOnError(updateTask(getWebConversation(), getHostName(),
-                getSessionId(), folderId, task, timestamp));
-        }
-        // And delete 2
-        final int[][] deltasks = new int[2][2];
-        System.arraycopy(tasks, 8, deltasks, 0, 2);
-        for (int[] folderAndTask : deltasks) {
-            deleteTask(getWebConversation(), getHostName(), getSessionId(),
-                timestamp, folderAndTask[0], folderAndTask[1]);
-        }
-        final int[][] remainingTasks = new int[8][2];
-        System.arraycopy(tasks, 0, remainingTasks, 0, 8);
-        tasks = remainingTasks;
-        // Now request updates for the list
-        columns = new int[] { Task.OBJECT_ID, Task.FOLDER_ID, Task.TITLE,
-            Task.START_DATE, Task.END_DATE, Task.PERCENT_COMPLETED,
-            Task.PRIORITY };
-        response = getUpdatedTasks(getWebConversation(), getHostName(),
-            getSessionId(), folderId, columns, 0, null, timestamp);
-        array = (JSONArray) response.getData();
-        assertTrue("Only found " + array.length()
-            + " updated tasks but should be more than "
-            + (tasks.length / 2 + 2) + ".",
-            array.length() >= tasks.length / 2 + 2);
-        // Clean up
-        timestamp = response.getTimestamp();
-        for (int[] folderAndTask : tasks) {
-            deleteTask(getWebConversation(), getHostName(), getSessionId(),
-                timestamp, folderAndTask[0], folderAndTask[1]);
-        }
-    }
-
     public void testConfirmation() throws Throwable {
         final int folderId = getPrivateTaskFolder();
 
