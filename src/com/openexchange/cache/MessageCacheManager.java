@@ -66,6 +66,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.MailFolderObject;
 import com.openexchange.groupware.container.mail.MessageCacheObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.imap.IMAPProperties;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -73,15 +74,18 @@ import com.openexchange.tools.iterator.SearchIteratorException;
 /**
  * MessageCacheManager - a tiny cache for instances of
  * <code>MessageCacheObject</code> which does only operate in local memory and
- * does not use any auxiliary. Furthermore it is heavily volatile cause it's
- * intended to fasten list requests on IMAP folders. All user-constrained
- * entries are going to be deleted (if any present) and refilled on every list
- * request. Moreover the number of allowed cache entries per user is limited to
- * constant <code>IMAPProperties.getMessageFetchLimit()</code> defined in file
+ * does not use any auxiliary.
+ * <p>
+ * Furthermore it is heavily volatile because it's intended to fasten list
+ * requests on IMAP folders. All user-constrained entries are going to be
+ * deleted (if any present) and refilled on every list request.
+ * <p>
+ * Moreover the number of allowed cache entries per user is limited to constant
+ * <code>{@link IMAPProperties#getMessageFetchLimit()}</code> defined in file
  * "imap.properties".
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @see com.openexchange.imap.IMAPProperties
+ * @see com.openexchange.imap.IMAPProperties#getMessageFetchLimit()
  */
 public class MessageCacheManager {
 
@@ -161,7 +165,7 @@ public class MessageCacheManager {
 	 */
 	@SuppressWarnings(STR_UNCHECKED)
 	public final MessageCacheObject getMessage(final int user, final long msgUID, final String folder, final Context ctx) {
-		final Map<String, MessageCacheObject> msgMap = (HashMap<String, MessageCacheObject>) msgCache.get(getUserKey(
+		final Map<String, MessageCacheObject> msgMap = (HashMap<String, MessageCacheObject>) msgCache.get(getMapKey(
 				user, ctx));
 		if (msgMap == null) {
 			return null;
@@ -185,7 +189,7 @@ public class MessageCacheManager {
 	public final MessageCacheObject[] getMessages(final int user, final long[] msgUIDs, final String folder,
 			final Context ctx) {
 		final Map<String, MessageCacheObject> msgMap = (ConcurrentHashMap<String, MessageCacheObject>) msgCache
-				.get(getUserKey(user, ctx));
+				.get(getMapKey(user, ctx));
 		if (msgMap == null) {
 			return null;
 		}
@@ -236,7 +240,7 @@ public class MessageCacheManager {
 			return;
 		}
 		Map<String, MessageCacheObject> msgMap = (ConcurrentHashMap<String, MessageCacheObject>) msgCache
-				.get(getUserKey(user, ctx));
+				.get(getMapKey(user, ctx));
 		boolean insert = false;
 		if (msgMap == null) {
 			/*
@@ -261,7 +265,7 @@ public class MessageCacheManager {
 		}
 		if (insert) {
 			try {
-				msgCache.put(getUserKey(user, ctx), msgMap);
+				msgCache.put(getMapKey(user, ctx), msgMap);
 			} catch (final CacheException e) {
 				throw new OXCachingException(OXCachingException.Code.FAILED_PUT, e, new Object[0]);
 			}
@@ -298,15 +302,15 @@ public class MessageCacheManager {
 	@SuppressWarnings(STR_UNCHECKED)
 	public final Map<String, MessageCacheObject> getUserMessageMap(final int user, final Context ctx)
 			throws OXCachingException {
-		Map<String, MessageCacheObject> msgMap = (ConcurrentHashMap<String, MessageCacheObject>) msgCache
-				.get(getUserKey(user, ctx));
+		final CacheKey mapKey = getMapKey(user, ctx);
+		Map<String, MessageCacheObject> msgMap = (ConcurrentHashMap<String, MessageCacheObject>) msgCache.get(mapKey);
 		if (msgMap == null) {
 			/*
 			 * Does not exist in cache, yet
 			 */
 			msgMap = new ConcurrentHashMap<String, MessageCacheObject>();
 			try {
-				msgCache.put(getUserKey(user, ctx), msgMap);
+				msgCache.put(mapKey, msgMap);
 			} catch (final CacheException e) {
 				throw new OXCachingException(OXCachingException.Code.FAILED_PUT, e, new Object[0]);
 			}
@@ -334,8 +338,8 @@ public class MessageCacheManager {
 		if (msg == null) {
 			return;
 		}
-		Map<String, MessageCacheObject> msgMap = (ConcurrentHashMap<String, MessageCacheObject>) msgCache
-				.get(getUserKey(user, ctx));
+		final CacheKey mapKey = getMapKey(user, ctx);
+		Map<String, MessageCacheObject> msgMap = (ConcurrentHashMap<String, MessageCacheObject>) msgCache.get(mapKey);
 		boolean insert = false;
 		if (msgMap == null) {
 			/*
@@ -348,7 +352,7 @@ public class MessageCacheManager {
 				msg);
 		if (insert) {
 			try {
-				msgCache.put(getUserKey(user, ctx), msgMap);
+				msgCache.put(mapKey, msgMap);
 			} catch (final CacheException e) {
 				throw new OXCachingException(OXCachingException.Code.FAILED_PUT, e, new Object[0]);
 			}
@@ -370,7 +374,7 @@ public class MessageCacheManager {
 	@SuppressWarnings(STR_UNCHECKED)
 	public final void removeMessage(final int user, final long msgUID, final String folder, final Context ctx) {
 		final Map<String, MessageCacheObject> msgMap = (ConcurrentHashMap<String, MessageCacheObject>) msgCache
-				.get(getUserKey(user, ctx));
+				.get(getMapKey(user, ctx));
 		if (msgMap == null) {
 			return;
 		}
@@ -391,7 +395,7 @@ public class MessageCacheManager {
 	 */
 	public final boolean containsUserMessages(final int user, final Context ctx) {
 		try {
-			return (msgCache.get(getUserKey(user, ctx)) != null);
+			return (msgCache.get(getMapKey(user, ctx)) != null);
 		} catch (final Exception e) {
 			return false;
 		}
@@ -409,18 +413,18 @@ public class MessageCacheManager {
 	 */
 	public void clearUserMessages(final int user, final Context ctx) throws OXException {
 		try {
-			msgCache.remove(getUserKey(user, ctx));
+			msgCache.remove(getMapKey(user, ctx));
 		} catch (final CacheException e) {
 			throw new OXCachingException(OXCachingException.Code.FAILED_REMOVE, e, new Object[0]);
 		}
 	}
 
-	private static final CacheKey getUserKey(final int user, final Context ctx) {
+	private static final CacheKey getMapKey(final int user, final Context ctx) {
 		return new CacheKey(ctx, user);
 	}
 
 	public static final String getMsgKey(final long uid, final String folder) {
-		return new StringBuilder().append(uid).append('@').append(folder).toString();
+		return new StringBuilder(32).append(uid).append('@').append(folder).toString();
 	}
 
 }

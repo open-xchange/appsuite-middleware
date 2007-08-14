@@ -957,17 +957,22 @@ public final class MessageFiller {
 		final Matcher m = PATTERN_REF_IMG.matcher(htmlContent);
 		if (m.find()) {
 			msgFiller.map = new HashMap<String, AJAXUploadFile>();
+			final StringBuilder tmp = new StringBuilder(128);
 			NextImg: do {
 				final String id = m.group(5);
 				final AJAXUploadFile uploadFile = msgFiller.session.containsAJAXUploadFile(id) ? msgFiller.session
 						.removeAJAXUploadFile(id) : msgFiller.map.get(id);
 				if (null == uploadFile) {
 					if (LOG.isWarnEnabled()) {
-						LOG.warn(new StringBuilder(128).append("No upload file found with id \"").append(id).append(
+						tmp.setLength(0);
+						LOG.warn(tmp.append("No upload file found with id \"").append(id).append(
 								"\". Referenced image is skipped.").toString());
 					}
 					continue NextImg;
 				} else if (!msgFiller.map.containsKey(id)) {
+					/*
+					 * The same image is used again
+					 */
 					msgFiller.map.put(id, uploadFile);
 				}
 				/*
@@ -985,11 +990,11 @@ public final class MessageFiller {
 					fileName = uploadFile.getFileName();
 				}
 				imgBodyPart.setFileName(fileName);
-				StringBuilder tmp = new StringBuilder(128).append(fileName).append('@').append(id);
+				tmp.setLength(0);
+				tmp.append(fileName).append('@').append(id);
 				final String cid = tmp.toString();
 				tmp.setLength(0);
 				imgBodyPart.setContentID(tmp.append('<').append(cid).append('>').toString());
-				tmp = null;
 				imgBodyPart.setDisposition(Part.INLINE);
 				imgBodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, uploadFile.getContentType());
 				mp.addBodyPart(imgBodyPart);
