@@ -235,6 +235,20 @@ public class SessionObject {
 		return uploadFile;
 	}
 
+	/**
+	 * Gets user's rights that apply to given IMAP folder. If none found in
+	 * cache and parameter <code>load</code> is set to <code>true</code>,
+	 * {@link IMAPFolder#myRights()} is invoked.
+	 * 
+	 * @param f
+	 *            The IMAP folder
+	 * @param load
+	 *            Whether to load user's rights or not
+	 * @return user's rights that apply to given IMAP folder or
+	 *         <code>null</code>
+	 * @throws MessagingException
+	 *             If user's rights could not be determined
+	 */
 	public final Rights getCachedRights(final IMAPFolder f, final boolean load) throws MessagingException {
 		Rights r = imapCachedMyRights.get(f.getFullName());
 		if (load && r == null) {
@@ -245,18 +259,53 @@ public class SessionObject {
 
 	}
 
+	/**
+	 * Removes user's rights that apply to given IMAP folder from cache
+	 * 
+	 * @param f
+	 *            The IMAP folder
+	 */
 	public final void removeCachedRights(final IMAPFolder f) {
 		imapCachedMyRights.remove(f.getFullName());
 	}
 
+	/**
+	 * Puts user's rights that apply to given IMAP folder into cache
+	 * 
+	 * @param f
+	 *            The IMAP folder
+	 * @throws MessagingException
+	 *             If user's rights could not be determined
+	 */
 	public final void setCachedRights(final IMAPFolder f) throws MessagingException {
 		imapCachedMyRights.put(f.getFullName(), f.myRights());
 	}
 
+	/**
+	 * Checks if cache contains user's rights that apply to given IMAP folder
+	 * 
+	 * @param f
+	 *            The IMAP folder
+	 * @return <code>true</code> if located in cache; otherwise
+	 *         <code>false</code>
+	 */
 	public final boolean containsCachedRights(final IMAPFolder f) {
 		return imapCachedMyRights.containsKey(f.getFullName());
 	}
 
+	/**
+	 * Gets the user flags of given IMAP folder. If none found in cache and
+	 * parameter <code>load</code> is set to <code>true</code>,
+	 * {@link IMAPUtils#supportsUserDefinedFlags(javax.mail.Folder)} is invoked.
+	 * 
+	 * @param f
+	 *            The IMAP folder
+	 * @param load
+	 *            Whether to load user flags or not
+	 * @return The user flags of given IMAP folder or <code>null</code>
+	 * @throws MessagingException
+	 *             If user flags could not be determined
+	 */
 	public final boolean getCachedUserFlags(final IMAPFolder f, final boolean load) throws MessagingException {
 		Boolean b = imapCachedUserFlags.get(f.getFullName());
 		if (load && b == null) {
@@ -266,18 +315,44 @@ public class SessionObject {
 		return b.booleanValue();
 	}
 
+	/**
+	 * Removes the user flags of given IMAP folder from cache
+	 * 
+	 * @param f
+	 *            The IMAP folder
+	 */
 	public final void removeCachedUserFlags(final IMAPFolder f) {
 		imapCachedUserFlags.remove(f.getFullName());
 	}
 
+	/**
+	 * Puts the user flags of given IMAP folder into cache
+	 * 
+	 * @param f
+	 *            The IMAP folder
+	 * @throws MessagingException
+	 *             If user flags could not be determined
+	 */
 	public final void setCachedUserFlags(final IMAPFolder f) throws MessagingException {
 		imapCachedUserFlags.put(f.getFullName(), Boolean.valueOf(IMAPUtils.supportsUserDefinedFlags(f)));
 	}
 
+	/**
+	 * Checks if cache contains user flags of given IMAP folder
+	 * 
+	 * @param f
+	 *            The IMAP folder
+	 * @return code>true</code> if located in cache; otherwise <code>false</code>
+	 */
 	public final boolean containsCachedUserFlags(final IMAPFolder f) {
 		return imapCachedUserFlags.containsKey(f.getFullName());
 	}
 
+	/**
+	 * Cleans all IMAP-related caches.
+	 * <p>
+	 * Currently a cache for user's rights and folders' user flags
+	 */
 	public final void cleanIMAPCaches() {
 		imapCachedMyRights.clear();
 		imapCachedUserFlags.clear();
