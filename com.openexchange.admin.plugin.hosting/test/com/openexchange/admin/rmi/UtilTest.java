@@ -2,6 +2,7 @@
 package com.openexchange.admin.rmi;
 
 
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -266,6 +267,81 @@ public class UtilTest extends AbstractTest {
                 assertEquals(client_db.getPoolInitial(),tmp.getPoolInitial());
                 assertEquals(client_db.getPoolMax(),tmp.getPoolMax());
                 assertEquals(client_db.getUrl(),tmp.getUrl());   
+            }
+        }        
+    }   
+    
+    @Test
+    public void testChangeDatabaseAllNull() throws Exception {
+        
+        // set all attributes to null and see what happens
+        
+        OXUtilInterface oxu = getUtilClient();
+        
+        String db_name = "db_test_null_change"+System.currentTimeMillis();
+        
+        Database client_db =  getTestDatabaseObject("localhost",db_name);        
+        client_db.setId(oxu.registerDatabase(client_db,ContextTest.DummyMasterCredentials()).getId());
+        
+        Database[] srv_dbs = oxu.listDatabases("db_*",ContextTest.DummyMasterCredentials());
+        boolean found_db = false;
+        for(int a = 0;a<srv_dbs.length;a++){
+            Database tmp = srv_dbs[a];
+            // we found our added db, check now the data 
+            if(tmp.getId().equals(client_db.getId())){
+                // check if data is same 
+                assertEquals(client_db.getName(),tmp.getName());
+                assertEquals(client_db.getDriver(),tmp.getDriver());
+                assertEquals(client_db.getLogin(),tmp.getLogin());               
+                assertEquals(client_db.getMaxUnits(),tmp.getMaxUnits());
+                assertEquals(client_db.getPassword(),tmp.getPassword());
+                assertEquals(client_db.getPoolHardLimit(),tmp.getPoolHardLimit());   
+                assertEquals(client_db.getPoolInitial(),tmp.getPoolInitial());
+                assertEquals(client_db.getPoolMax(),tmp.getPoolMax());
+                assertEquals(client_db.getUrl(),tmp.getUrl());   
+                found_db=true;
+            }
+        }
+        
+        assertTrue("Expected to find registered db with data",found_db);
+        
+        // now change the db data and fetch it again
+        client_db.setName(null);
+        client_db.setDriver(null);
+        client_db.setLogin(null);        
+        client_db.setMaxUnits(-1);
+        client_db.setPassword(null);
+        client_db.setPoolHardLimit(-1);
+        client_db.setPoolInitial(-1);
+        client_db.setPoolMax(-1);
+        client_db.setUrl(null);
+        
+        // change db data
+        oxu.changeDatabase(client_db,ContextTest.DummyMasterCredentials());
+        
+        srv_dbs = oxu.listDatabases("db_*",ContextTest.DummyMasterCredentials());        
+        // remove the broken _changed entries from configdb because later tests might fail
+        oxu.unregisterDatabase(new Database(client_db.getId()), ContextTest.DummyMasterCredentials());
+        for(int a = 0;a<srv_dbs.length;a++){
+            Database tmp = srv_dbs[a];
+            // we found our added db, check now the data 
+            if(tmp.getId().intValue()==client_db.getId().intValue()){
+                // check if data is same 
+                
+                assertNotNull("name cannot be null",tmp.getName());
+                assertNotNull("password cannot be null",tmp.getPassword());
+                
+                assertEquals("driver must be able to set to null",client_db.getDriver(),tmp.getDriver()); // can be null, is not mandatory
+                assertEquals("login must be able to set to null", client_db.getLogin(),tmp.getLogin());  // can be null, is not mandatory
+                
+                // TODO: check why url can be nulled or is not mandatory on register
+                assertEquals(client_db.getUrl(),tmp.getUrl()); // can be null??????why???? is not mandatory 
+                
+                assertEquals(client_db.getMaxUnits(),tmp.getMaxUnits());               
+                assertEquals(client_db.getPoolHardLimit(),tmp.getPoolHardLimit());   
+                assertEquals(client_db.getPoolInitial(),tmp.getPoolInitial());
+                assertEquals(client_db.getPoolMax(),tmp.getPoolMax());
+                
             }
         }        
     }   
