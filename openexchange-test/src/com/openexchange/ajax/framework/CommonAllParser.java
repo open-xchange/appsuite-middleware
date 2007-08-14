@@ -84,7 +84,7 @@ public class CommonAllParser extends AbstractAJAXParser {
             for (int i = 0; i < array.length(); i++) {
                 final JSONArray inner = array.getJSONArray(i);
                 values[i] = new Object[inner.length()];
-                for (int j = 0; j < inner.length(); i++) {
+                for (int j = 0; j < inner.length(); j++) {
                     values[i][j] = inner.get(j);
                 }
             }
