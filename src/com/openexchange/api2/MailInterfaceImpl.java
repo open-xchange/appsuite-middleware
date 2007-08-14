@@ -1441,7 +1441,8 @@ public class MailInterfaceImpl implements MailInterface {
 			setAndOpenFolder(folder == null ? STR_INBOX : folder, Folder.READ_ONLY);
 			try {
 				if (!imapCon.isHoldsMessages()) {
-					throw new OXMailException(MailCode.FOLDER_DOES_NOT_HOLD_MESSAGES, imapCon.getImapFolder().getFullName());
+					throw new OXMailException(MailCode.FOLDER_DOES_NOT_HOLD_MESSAGES, imapCon.getImapFolder()
+							.getFullName());
 				} else if (IMAPProperties.isSupportsACLs()
 						&& !sessionObj.getCachedRights(imapCon.getImapFolder(), true).contains(Rights.Right.READ)) {
 					throw new OXMailException(MailCode.NO_READ_ACCESS, getUserName(sessionObj), imapCon.getImapFolder()
@@ -3103,7 +3104,6 @@ public class MailInterfaceImpl implements MailInterface {
 			MimeMessage originalMsg = null;
 			boolean isReadWrite = true;
 			Mail.MailIdentifier mailId = null;
-			MessageFiller msgFiller = null;
 			try {
 				if (msgObj.getMsgref() != null) {
 					/*
@@ -3200,7 +3200,7 @@ public class MailInterfaceImpl implements MailInterface {
 					/*
 					 * Fill message
 					 */
-					msgFiller = new MessageFiller(sessionObj, originalMsg, imapCon.getSession(), draftFolder);
+					final MessageFiller msgFiller = new MessageFiller(sessionObj, originalMsg, imapCon.getSession(), draftFolder);
 					msgFiller.fillMessage(msgObj, newSMTPMsg, uploadEvent, sendType);
 					checkAndCreateFolder(draftFolder, inboxFolder);
 					if (!draftFolder.isOpen()) {
@@ -3230,6 +3230,7 @@ public class MailInterfaceImpl implements MailInterface {
 							}
 							draftFolder.appendMessages(new Message[] { newSMTPMsg });
 						}
+						msgFiller.deleteReferencedUploadFiles();
 					} finally {
 						mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 						draftFolder.close(false);
@@ -3277,7 +3278,7 @@ public class MailInterfaceImpl implements MailInterface {
 				/*
 				 * Fill message
 				 */
-				msgFiller = new MessageFiller(sessionObj, originalMsg, imapCon.getSession(), usm
+				final MessageFiller msgFiller = new MessageFiller(sessionObj, originalMsg, imapCon.getSession(), usm
 						.isNoCopyIntoStandardSentFolder() ? null : sentFolder);
 				msgFiller.fillMessage(msgObj, newSMTPMsg, uploadEvent, sendType);
 				/*
@@ -3351,6 +3352,7 @@ public class MailInterfaceImpl implements MailInterface {
 					/*
 					 * No copy in sent folder
 					 */
+					msgFiller.deleteReferencedUploadFiles();
 					return STR_EMPTY;
 				}
 				/*
@@ -3382,6 +3384,7 @@ public class MailInterfaceImpl implements MailInterface {
 						}
 						sentFolder.appendMessages(new Message[] { newSMTPMsg });
 					}
+					msgFiller.deleteReferencedUploadFiles();
 				} catch (final MessagingException e) {
 					if (e.getNextException() instanceof CommandFailedException) {
 						final CommandFailedException exc = (CommandFailedException) e.getNextException();
@@ -3408,9 +3411,6 @@ public class MailInterfaceImpl implements MailInterface {
 						LOG.warn(WARN_FLD_ALREADY_CLOSED, e);
 					}
 					originalMsgFolder = null;
-				}
-				if (msgFiller != null) {
-					msgFiller.close();
 				}
 			}
 		} catch (final MessagingException e) {

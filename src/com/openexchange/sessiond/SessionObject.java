@@ -145,23 +145,6 @@ public class SessionObject {
 	}
 
 	/**
-	 * Detects if session holds an uploaded file which matches given ID
-	 * 
-	 * @param id
-	 *            The id
-	 * @return <code>true</code> if session holds an uploaded file which
-	 *         matches given ID; otherwise <code>false</code>
-	 */
-	public final boolean containsAJAXUploadFile(final String id) {
-		final AJAXUploadFile uploadFile = ajaxUploadFiles.get(id);
-		if (null != uploadFile) {
-			uploadFile.touch();
-			return true;
-		}
-		return false;
-	}
-
-	/**
 	 * Gets the uploaded file associated with given ID and set its last access
 	 * timestamp to current time millis
 	 * 
@@ -214,7 +197,7 @@ public class SessionObject {
 	}
 
 	/**
-	 * Removes the uploaded file associated with given ID and stops timer
+	 * Removes the uploaded file associated with given ID and stops timer task
 	 * 
 	 * @param id
 	 *            The ID

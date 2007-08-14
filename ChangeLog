@@ -15,6 +15,8 @@
 
  - More reliable sorting when requesting user's new messages
  - Removed some warnings from IDE
+ - Fixed too early removal of temporary uploaded files if message transport
+   fails
 
 * 2007-08-14 - marcus.klein@open-xchange.com
 

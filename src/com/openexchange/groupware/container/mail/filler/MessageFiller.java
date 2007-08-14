@@ -62,10 +62,11 @@ import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -197,7 +198,7 @@ public final class MessageFiller {
 
 	private final int linewrap;
 
-	private Map<String, AJAXUploadFile> map;
+	private Set<String> uploadFileIDs;
 
 	/**
 	 * Creates a new instance of <code>MessageFiller</code>
@@ -224,16 +225,30 @@ public final class MessageFiller {
 	}
 
 	/**
-	 * Performs some necessary final operations
+	 * Deletes referenced local uploaded files from session and disk after
+	 * filled instance of <code>{@link Message}</code> is dispatched
 	 */
-	public void close() {
-		if (map != null) {
-			final int size = map.size();
-			final Iterator<AJAXUploadFile> iter = map.values().iterator();
-			for (int i = 0; i < size; i++) {
-				iter.next().delete();
+	public void deleteReferencedUploadFiles() {
+		if (uploadFileIDs != null) {
+			final int size = uploadFileIDs.size();
+			final Iterator<String> iter = uploadFileIDs.iterator();
+			final StringBuilder sb;
+			if (LOG.isInfoEnabled()) {
+				sb = new StringBuilder(128);
+			} else {
+				sb = null;
 			}
-			map.clear();
+			for (int i = 0; i < size; i++) {
+				final AJAXUploadFile uploadFile = session.removeAJAXUploadFile(iter.next());
+				final String fileName = uploadFile.getFile().getName();
+				uploadFile.delete();
+				if (null != sb) {
+					sb.setLength(0);
+					LOG.info(sb.append("Upload file \"").append(fileName).append(
+							"\" removed from session and deleted from disk"));
+				}
+			}
+			uploadFileIDs.clear();
 		}
 	}
 
@@ -610,8 +625,8 @@ public final class MessageFiller {
 		return alternativeMultipart;
 	}
 
-	private static BodyPart createHtmlBodyPart(final String htmlContent, final int linewrap)
-			throws IMAPException, MessagingException {
+	private static BodyPart createHtmlBodyPart(final String htmlContent, final int linewrap) throws IMAPException,
+			MessagingException {
 		final String htmlCT = PAT_HTML_CT.replaceFirst(REPLACE_CS, IMAPProperties.getDefaultMimeCharset());
 		final MimeBodyPart html = new MimeBodyPart();
 		html.setContent(performLineWrap(insertColorQuotes(MailTools.formatHrefLinks(htmlContent)), true, linewrap),
@@ -746,8 +761,8 @@ public final class MessageFiller {
 		}
 	}
 
-	private void setMessageHeaders(final MimeMessage msg, final JSONMessageObject msgObj)
-			throws MessagingException, OXException {
+	private void setMessageHeaders(final MimeMessage msg, final JSONMessageObject msgObj) throws MessagingException,
+			OXException {
 		/*
 		 * Set from
 		 */
@@ -942,7 +957,7 @@ public final class MessageFiller {
 	public static boolean hasReferencedLocalImages(final String htmlContent, final SessionObject session) {
 		final Matcher m = PATTERN_REF_IMG.matcher(htmlContent);
 		while (m.find()) {
-			if (session.containsAJAXUploadFile(m.group(5))) {
+			if (session.touchAJAXUploadFile(m.group(5))) {
 				return true;
 			}
 		}
@@ -951,61 +966,111 @@ public final class MessageFiller {
 
 	private static final String IMG_PAT = "<img src=\"cid:#1#\">";
 
+	/**
+	 * Processes referenced local images, inserts them as inlined html images
+	 * and adds their binary data to parental instance of
+	 * <code>{@link Multipart}</code>
+	 * 
+	 * @param htmlContent
+	 *            The html content whose &lt;img&gt; tags must be replaced with
+	 *            real content ids
+	 * @param mp
+	 *            The parental instance of <code>{@link Multipart}</code>
+	 * @param msgFiller
+	 *            The message filler
+	 * @return the replaced html content
+	 * @throws MessagingException
+	 *             If appending as body part fails
+	 */
 	private static String processReferencedLocalImages(final String htmlContent, final Multipart mp,
 			final MessageFiller msgFiller) throws MessagingException {
 		final StringBuffer sb = new StringBuffer(htmlContent.length());
 		final Matcher m = PATTERN_REF_IMG.matcher(htmlContent);
 		if (m.find()) {
-			msgFiller.map = new HashMap<String, AJAXUploadFile>();
+			msgFiller.uploadFileIDs = new HashSet<String>();
 			final StringBuilder tmp = new StringBuilder(128);
 			NextImg: do {
 				final String id = m.group(5);
-				final AJAXUploadFile uploadFile = msgFiller.session.containsAJAXUploadFile(id) ? msgFiller.session
-						.removeAJAXUploadFile(id) : msgFiller.map.get(id);
-				if (null == uploadFile) {
+				final AJAXUploadFile uploadFile = msgFiller.session.getAJAXUploadFile(id);
+				if (uploadFile == null) {
 					if (LOG.isWarnEnabled()) {
 						tmp.setLength(0);
 						LOG.warn(tmp.append("No upload file found with id \"").append(id).append(
 								"\". Referenced image is skipped.").toString());
 					}
 					continue NextImg;
-				} else if (!msgFiller.map.containsKey(id)) {
+				}
+				final boolean appendBodyPart;
+				if (!msgFiller.uploadFileIDs.contains(id)) {
 					/*
-					 * The same image is used again
+					 * Remember id to avoid duplicate attachment and for later
+					 * cleanup
 					 */
-					msgFiller.map.put(id, uploadFile);
+					msgFiller.uploadFileIDs.add(id);
+					appendBodyPart = true;
+				} else {
+					appendBodyPart = false;
 				}
-				/*
-				 * Append body part
-				 */
-				final MimeBodyPart imgBodyPart = new MimeBodyPart();
-				imgBodyPart.setDataHandler(new DataHandler(new FileDataSource(uploadFile.getFile())));
-				String fileName;
-				try {
-					fileName = MimeUtility.encodeText(uploadFile.getFileName(), IMAPProperties.getDefaultMimeCharset(),
-							ENC_Q);
-				} catch (final UnsupportedEncodingException e) {
-					fileName = uploadFile.getFileName();
-				} catch (final IMAPException e) {
-					fileName = uploadFile.getFileName();
-				}
-				imgBodyPart.setFileName(fileName);
-				tmp.setLength(0);
-				tmp.append(fileName).append('@').append(id);
-				final String cid = tmp.toString();
-				tmp.setLength(0);
-				imgBodyPart.setContentID(tmp.append('<').append(cid).append('>').toString());
-				imgBodyPart.setDisposition(Part.INLINE);
-				imgBodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, uploadFile.getContentType());
-				mp.addBodyPart(imgBodyPart);
 				/*
 				 * Replace image tag
 				 */
-				m.appendReplacement(sb, IMG_PAT.replaceFirst("#1#", cid));
+				m.appendReplacement(sb, IMG_PAT.replaceFirst("#1#", processLocalImage(uploadFile, id, appendBodyPart,
+						tmp, mp)));
 			} while (m.find());
 		}
 		m.appendTail(sb);
 		return sb.toString();
+	}
+
+	/**
+	 * Processes a local image and returns its content id
+	 * 
+	 * @param uploadFile
+	 *            The uploaded file
+	 * @param id
+	 *            uploaded file's ID
+	 * @param appendBodyPart
+	 * @param tmp
+	 *            An instance of {@link StringBuilder}
+	 * @param mp
+	 *            The parental instance of {@link Multipart}
+	 * @return the content id
+	 * @throws MessagingException
+	 *             If appending as body part fails
+	 */
+	private static String processLocalImage(final AJAXUploadFile uploadFile, final String id,
+			final boolean appendBodyPart, final StringBuilder tmp, final Multipart mp) throws MessagingException {
+		/*
+		 * Determine filename
+		 */
+		String fileName;
+		try {
+			fileName = MimeUtility.encodeText(uploadFile.getFileName(), IMAPProperties.getDefaultMimeCharset(), ENC_Q);
+		} catch (final UnsupportedEncodingException e) {
+			fileName = uploadFile.getFileName();
+		} catch (final IMAPException e) {
+			fileName = uploadFile.getFileName();
+		}
+		/*
+		 * ... and cid
+		 */
+		tmp.setLength(0);
+		tmp.append(fileName).append('@').append(id);
+		final String cid = tmp.toString();
+		if (appendBodyPart) {
+			/*
+			 * Append body part
+			 */
+			final MimeBodyPart imgBodyPart = new MimeBodyPart();
+			imgBodyPart.setDataHandler(new DataHandler(new FileDataSource(uploadFile.getFile())));
+			imgBodyPart.setFileName(fileName);
+			tmp.setLength(0);
+			imgBodyPart.setContentID(tmp.append('<').append(cid).append('>').toString());
+			imgBodyPart.setDisposition(Part.INLINE);
+			imgBodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, uploadFile.getContentType());
+			mp.addBodyPart(imgBodyPart);
+		}
+		return cid;
 	}
 
 	/**
