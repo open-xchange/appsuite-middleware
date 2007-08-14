@@ -17,6 +17,7 @@
  - Removed some warnings from IDE
  - Fixed too early removal of temporary uploaded files if message transport
    fails
+ - Removing message cache entries on delete
 
 * 2007-08-14 - marcus.klein@open-xchange.com
 
