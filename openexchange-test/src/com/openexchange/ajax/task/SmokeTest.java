@@ -47,73 +47,60 @@
  *
  */
 
-package com.openexchange.ajax.config.actions;
+package com.openexchange.ajax.task;
 
-import org.json.JSONException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.TimeZone;
 
-import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.task.actions.DeleteRequest;
+import com.openexchange.ajax.task.actions.GetRequest;
+import com.openexchange.ajax.task.actions.GetResponse;
+import com.openexchange.ajax.task.actions.InsertRequest;
+import com.openexchange.ajax.task.actions.InsertResponse;
+import com.openexchange.groupware.tasks.Task;
 
 /**
- * 
+ * Implements test case 1803 partly.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class GetRequest extends AbstractConfigRequest {
-
-    private final Tree param;
+public class SmokeTest extends AbstractTaskTest {
 
     /**
-     * Default constructor.
+     * @param name
      */
-    public GetRequest(final Tree param) {
-        super();
-        this.param = param;
+    public SmokeTest(final String name) {
+        super(name);
     }
 
     /**
-     * {@inheritDoc}
+     * Tests inserting a private task.
+     * @throws Throwable if an error occurs.
      */
-    @Override
-    public String getServletPath() {
-        return super.getServletPath() + param.path;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Object getBody() throws JSONException {
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Method getMethod() {
-        return Method.GET;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Parameter[] getParameters() {
-        return new Parameter[0];
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public AbstractAJAXParser getParser() {
-        return new GetParser();
-    }
-
-    public enum Tree {
-        Identifier("/identifier"),
-        TimeZone("/timezone"),
-        PrivateTaskFolder("/folder/tasks"),
-        MaxUploadIdleTimeout("/maxUploadIdleTimeout"),
-        Language("/language");
-        private String path;
-        private Tree(final String path) {
-            this.path=path;
-        }
+    public void testCase1803() throws Throwable {
+        final AJAXClient client = getClient();
+        final int folderId = client.getPrivateTaskFolder();
+        final Task task = Create.createWithDefaults();
+        task.setParentFolderID(folderId);
+        task.setTitle("Buy a birthday gift for Mr. Kärner");
+        final TimeZone timeZone = client.getTimeZone();
+        final DateFormat dateF = new SimpleDateFormat("dd.MM.yyyy", client
+            .getLocale());
+        dateF.setTimeZone(timeZone);
+        task.setStartDate(dateF.parse("26.02.2007"));
+        task.setEndDate(dateF.parse("27.02.2007"));
+        task.setStatus(Task.IN_PROGRESS);
+        task.setPriority(Task.HIGH);
+        task.setPercentComplete(75);
+        task.setTargetDuration(2);
+        task.setActualDuration(2);
+        final InsertResponse insertR = TaskTools.insert(client,
+            new InsertRequest(task, timeZone));
+        final GetResponse getR = TaskTools.get(client, new GetRequest(insertR));
+        final Task reload = getR.getTask(timeZone);
+        TaskTools.compareAttributes(task, reload);
+        // TODO Use list an check if list contains the entered attributes.
+        TaskTools.delete(client, new DeleteRequest(reload));
     }
 }

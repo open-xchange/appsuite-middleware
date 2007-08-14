@@ -136,4 +136,10 @@ public class Create extends Assert {
         task.setCompanies("companies");
         return task;
     }
+
+    public static Task createWithDefaults() {
+        final Task task = new Task();
+        task.setPrivateFlag(false);
+        return task;
+    }
 }

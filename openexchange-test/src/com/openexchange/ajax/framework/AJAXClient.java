@@ -50,6 +50,7 @@
 package com.openexchange.ajax.framework;
 
 import java.io.IOException;
+import java.util.Locale;
 import java.util.TimeZone;
 
 import org.json.JSONException;
@@ -63,6 +64,7 @@ import com.openexchange.ajax.session.LogoutRequest;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.AJAXConfig.Property;
+import com.openexchange.tools.LocaleTools;
 import com.openexchange.tools.servlet.AjaxException;
 
 /**
@@ -78,6 +80,8 @@ public class AJAXClient {
     private int userId = -1;
 
     private TimeZone timeZone;
+
+    private Locale locale;
 
     private int privateTaskFolder = -1;
 
@@ -115,6 +119,16 @@ public class AJAXClient {
             timeZone = TimeZone.getTimeZone(tzId);
         }
         return timeZone;
+    }
+
+    public Locale getLocale() throws AjaxException, IOException, SAXException,
+        JSONException {
+        if (null == locale) {
+            final String localeId = ConfigTools.get(session, new GetRequest(
+                GetRequest.Tree.Language)).getString();
+            locale = LocaleTools.getLocale(localeId);
+        }
+        return locale;
     }
 
     public int getPrivateTaskFolder() throws AjaxException, IOException,

@@ -593,6 +593,8 @@ public final class TaskTools extends Assert {
         assertEquals("Title differs", task.getTitle(), reload.getTitle());
         assertEquals("Private Flag differs", task.containsPrivateFlag(),
             reload.containsPrivateFlag());
+        assertEquals("Private Flag differs", task.getPrivateFlag(),
+            reload.getPrivateFlag());
         /* Not implemented in parser
         assertEquals("Creation date differs", task.containsCreationDate(),
             reload.containsCreationDate());
@@ -611,25 +613,36 @@ public final class TaskTools extends Assert {
             reload.containsEndDate());
         assertEquals("End date differs", task.getEndDate(),
             reload.getEndDate());
-        /*
-        assertEquals("After complete differs", task.containsAfterComplete(),
-            reload.containsAfterComplete());
-        assertEquals("After complete differs", task.getAfterComplete(),
-            reload.getAfterComplete());
-        */
-        /*
-        task.setNote("Description");
-        task.setStatus(Task.NOT_STARTED); //FIXME!
-        task.setPriority(Task.NORMAL);
-        task.setCategories("Categories");
-        task.setTargetDuration(1440);
-        task.setActualDuration(1440);
-        task.setTargetCosts(1.0f);
-        task.setActualCosts(1.0f);
-        task.setCurrency("\u20ac");
-        task.setTripMeter("trip meter");
-        task.setBillingInformation("billing information");
-        task.setCompanies("companies");
-        */
+//        assertEquals("After complete differs", task.containsAfterComplete(),
+//            reload.containsAfterComplete());
+//        assertEquals("After complete differs", task.getAfterComplete(),
+//            reload.getAfterComplete());
+//        task.setNote("Description");
+        assertEquals("Status differs", task.containsStatus(),
+            reload.containsStatus());
+        assertEquals("Status differs", task.getStatus(), reload.getStatus());
+        assertEquals("Priority differs", task.containsPriority(),
+            reload.containsPriority());
+        assertEquals("Priority differs", task.getPriority(),
+            reload.getPriority());
+        assertEquals("PercentComplete differs", task.containsPercentComplete(),
+            reload.containsPercentComplete());
+        assertEquals("PercentComplete differs", task.getPercentComplete(),
+            reload.getPercentComplete());
+//        task.setCategories("Categories");
+        assertEquals("TargetDuration differs", task.containsTargetDuration(),
+            reload.containsTargetDuration());
+        assertEquals("TargetDuration differs", task.getTargetDuration(),
+            reload.getTargetDuration());
+        assertEquals("ActualDuration differs", task.containsActualDuration(),
+            reload.containsActualDuration());
+        assertEquals("ActualDuration differs", task.getActualDuration(),
+            reload.getActualDuration());
+//        task.setTargetCosts(1.0f);
+//        task.setActualCosts(1.0f);
+//        task.setCurrency("\u20ac");
+//        task.setTripMeter("trip meter");
+//        task.setBillingInformation("billing information");
+//        task.setCompanies("companies");
     }
 }
