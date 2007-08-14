@@ -1440,7 +1440,9 @@ public class MailInterfaceImpl implements MailInterface {
 			final String folder = prepareMailFolderParam(folderArg);
 			setAndOpenFolder(folder == null ? STR_INBOX : folder, Folder.READ_ONLY);
 			try {
-				if (IMAPProperties.isSupportsACLs()
+				if (!imapCon.isHoldsMessages()) {
+					throw new OXMailException(MailCode.FOLDER_DOES_NOT_HOLD_MESSAGES, imapCon.getImapFolder().getFullName());
+				} else if (IMAPProperties.isSupportsACLs()
 						&& !sessionObj.getCachedRights(imapCon.getImapFolder(), true).contains(Rights.Right.READ)) {
 					throw new OXMailException(MailCode.NO_READ_ACCESS, getUserName(sessionObj), imapCon.getImapFolder()
 							.getFullName());
@@ -1448,9 +1450,6 @@ public class MailInterfaceImpl implements MailInterface {
 			} catch (final MessagingException e) {
 				throw new OXMailException(MailCode.NO_ACCESS, getUserName(sessionObj), imapCon.getImapFolder()
 						.getFullName());
-			}
-			if ((imapCon.getImapFolder().getType() & Folder.HOLDS_MESSAGES) == 0) {
-				throw new OXMailException(MailCode.FOLDER_DOES_NOT_HOLD_MESSAGES, imapCon.getImapFolder().getFullName());
 			}
 			/*
 			 * Get ( & fetch) new messages
@@ -1721,6 +1720,19 @@ public class MailInterfaceImpl implements MailInterface {
 			init();
 			final String folder = prepareMailFolderParam(folderArg);
 			setAndOpenFolder(folder, Folder.READ_ONLY);
+			try {
+				if (!imapCon.isHoldsMessages()) {
+					throw new OXMailException(MailCode.FOLDER_DOES_NOT_HOLD_MESSAGES, imapCon.getImapFolder()
+							.getFullName());
+				} else if (IMAPProperties.isSupportsACLs()
+						&& !sessionObj.getCachedRights(imapCon.getImapFolder(), true).contains(Rights.Right.READ)) {
+					throw new OXMailException(MailCode.NO_READ_ACCESS, getUserName(sessionObj), imapCon.getImapFolder()
+							.getFullName());
+				}
+			} catch (final MessagingException e) {
+				throw new OXMailException(MailCode.NO_ACCESS, getUserName(sessionObj), imapCon.getImapFolder()
+						.getFullName());
+			}
 			return SearchIteratorAdapter.createArrayIterator(searchMessages(imapCon.getImapFolder(), searchCols,
 					searchPatterns, linkWithOR, fields, -1));
 		} catch (final MessagingException e) {
@@ -1850,9 +1862,6 @@ public class MailInterfaceImpl implements MailInterface {
 			} catch (final MessagingException e) {
 				throw new OXMailException(MailCode.NO_ACCESS, getUserName(sessionObj), imapCon.getImapFolder()
 						.getFullName());
-			}
-			if ((imapCon.getImapFolder().getType() & Folder.HOLDS_MESSAGES) == 0) {
-				throw new OXMailException(MailCode.FOLDER_DOES_NOT_HOLD_MESSAGES, imapCon.getImapFolder().getFullName());
 			}
 			/*
 			 * Check if a search should be done and if IMAP server supports
@@ -2381,9 +2390,6 @@ public class MailInterfaceImpl implements MailInterface {
 				throw new OXMailException(MailCode.NO_ACCESS, getUserName(sessionObj), imapCon.getImapFolder()
 						.getFullName());
 			}
-			if ((imapCon.getImapFolder().getType() & Folder.HOLDS_MESSAGES) == 0) {
-				throw new OXMailException(MailCode.FOLDER_DOES_NOT_HOLD_MESSAGES, imapCon.getImapFolder().getFullName());
-			}
 			final MimeMessage originalMsg;
 			final long start = System.currentTimeMillis();
 			try {
@@ -2784,9 +2790,6 @@ public class MailInterfaceImpl implements MailInterface {
 			} catch (final MessagingException e) {
 				throw new OXMailException(MailCode.NO_ACCESS, getUserName(sessionObj), imapCon.getImapFolder()
 						.getFullName());
-			}
-			if ((imapCon.getImapFolder().getType() & Folder.HOLDS_MESSAGES) == 0) {
-				throw new OXMailException(MailCode.FOLDER_DOES_NOT_HOLD_MESSAGES, imapCon.getImapFolder().getFullName());
 			}
 			final MimeMessage originalMsg;
 			final long start = System.currentTimeMillis();
