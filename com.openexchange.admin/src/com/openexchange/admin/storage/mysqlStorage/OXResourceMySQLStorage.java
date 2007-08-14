@@ -117,7 +117,15 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             }
 
             // update description of resource
-            if (null != res.getDescription()) {
+            if (null == res.getDescription() && res.isDescriptionset()) {
+                editres = con.prepareStatement("UPDATE resource SET description = ? WHERE cid = ? AND id = ?");
+                editres.setNull(1, java.sql.Types.VARCHAR);
+                editres.setInt(2, context_id);
+                editres.setInt(3, resource_id);
+                editres.executeUpdate();
+                editres.close();
+                edited_the_resource++;
+            }else if(null != res.getDescription()){
                 editres = con.prepareStatement("UPDATE resource SET description = ? WHERE cid = ? AND id = ?");
                 editres.setString(1, res.getDescription());
                 editres.setInt(2, context_id);
@@ -151,7 +159,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
                 edited_the_resource++;
             }
 
-            // update displayName of resource
+            // update name of resource
             final String rid = res.getName();
             if (null != rid) {
                 editres = con.prepareStatement("UPDATE resource SET identifier = ? WHERE cid = ? AND id = ?");
