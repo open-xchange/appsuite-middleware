@@ -1,3 +1,7 @@
+* 2007-08-14 - choeger@open-xchange.com
+
+  - Bugfix ID#8822 'generatepassword' creates curious output
+
 * 2007-08-09 - choeger@open-xchange.com
 
   - Bugfix ID#8623 oxinstaller: switch needed to turn on/of context authentication

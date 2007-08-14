@@ -74,7 +74,7 @@ if( ! defined $OXPASSWORD ) {
 }
 
 if( defined $cryptedpw && length($cryptedpw)>0 ) {
-	print "saving password for user $OXMPWFILE in $OXMPWFILE";
+	print "saving password for user $OXMASTER in $OXMPWFILE";
 	open(OUT,">$OXMPWFILE") || die "unable to open $OXMPWFILE: $!";
 	print OUT "$OXMASTER:$cryptedpw\n";
 	close(OUT);
