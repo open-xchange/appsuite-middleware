@@ -92,10 +92,6 @@ public class NewAppointmentSearchRequest extends AbstractAppointmentRequest {
 	
 	private int[] columns = {
 		DataObject.OBJECT_ID,
-		DataObject.CREATED_BY,
-		DataObject.CREATION_DATE,
-		DataObject.LAST_MODIFIED,
-		DataObject.MODIFIED_BY,
 		FolderChildObject.FOLDER_ID,
 		CommonObject.PRIVATE_FLAG,
 		CommonObject.CATEGORIES,
@@ -105,14 +101,9 @@ public class NewAppointmentSearchRequest extends AbstractAppointmentRequest {
 		CalendarObject.END_DATE,
 		CalendarObject.NOTE,
 		CalendarObject.RECURRENCE_TYPE,
-		CalendarObject.RECURRENCE_CALCULATOR,
-		CalendarObject.RECURRENCE_ID,
-		CalendarObject.PARTICIPANTS,
-		CalendarObject.USERS,
 		AppointmentObject.SHOWN_AS,
 		AppointmentObject.FULL_TIME,
-		AppointmentObject.COLOR_LABEL,
-		CalendarDataObject.TIMEZONE
+		AppointmentObject.COLOR_LABEL
 	};
 	
 	/**
