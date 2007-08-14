@@ -162,7 +162,7 @@ public class ResourceTest extends AbstractTest{
     @Test
     public void testChangeNull() throws Exception {
         
-        // set all attributes to null 
+        // set description attribute to null 
         
         OXResourceInterface oxres = getResourceClient();
         final int context_id = getContextID();
@@ -196,6 +196,7 @@ public class ResourceTest extends AbstractTest{
             createdresource.setAvailable(true);
         }
         
+        // Set to null
         createdresource.setDescription(null);
         
         // change on server
