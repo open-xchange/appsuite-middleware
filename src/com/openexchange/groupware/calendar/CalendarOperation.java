@@ -1153,7 +1153,7 @@ public class CalendarOperation implements SearchIterator {
         }
     }
     
-    final int checkUpdateRecurring(final CalendarDataObject cdao, final CalendarDataObject edao) throws OXException {
+    final int checkUpdateRecurring(final CalendarDataObject cdao, final CalendarDataObject edao) throws OXException {        
         if (!edao.containsRecurrenceType() && !cdao.containsRecurrenceType()) {
             return CalendarRecurringCollection.RECURRING_NO_ACTION;
         } else if (edao.containsRecurrenceType() && edao.getRecurrenceType() > CalendarDataObject.NO_RECURRENCE && (!cdao.containsRecurrenceType() || cdao.getRecurrenceType() == edao.getRecurrenceType())) {

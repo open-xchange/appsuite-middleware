@@ -1601,6 +1601,15 @@ class CalendarMySQL implements CalendarSqlImp {
         }
         
         final int rec_action = co.checkUpdateRecurring(cdao, edao);
+        if (edao.containsRecurrencePosition() && edao.getRecurrencePosition() > 0) {
+            if (cdao.getFolderMove()) {
+                throw new OXCalendarException(OXCalendarException.Code.RECURRING_EXCEPTION_MOVE_EXCEPTION);
+            }
+            if (edao.containsPrivateFlag() && cdao.containsPrivateFlag() && edao.getPrivateflag() != cdao.getPrivateflag()) {
+                throw new OXCalendarException(OXCalendarException.Code.RECURRING_EXCEPTION_PRIVATE_FLAG);
+            }            
+        }
+        
         CalendarDataObject clone = null;
         
         if (rec_action == CalendarRecurringCollection.CHANGE_RECURRING_TYPE) {
@@ -1625,6 +1634,9 @@ class CalendarMySQL implements CalendarSqlImp {
         } else if (rec_action == CalendarRecurringCollection.RECURRING_CREATE_EXCEPTION) {
             // Because the GUI only sends changed fields, we have to create a merged object
             // from cdao and edao and then we force an insert!
+            if (edao.containsPrivateFlag() && cdao.containsPrivateFlag() && edao.getPrivateflag() != cdao.getPrivateflag()) {
+                throw new OXCalendarException(OXCalendarException.Code.RECURRING_EXCEPTION_PRIVATE_FLAG);
+            }
             clone = CalendarRecurringCollection.cloneObjectForRecurringException(cdao, edao);
             try {
                 cdao.setRecurrenceCalculator(edao.getRecurrenceCalculator());
