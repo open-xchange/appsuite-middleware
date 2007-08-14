@@ -581,12 +581,10 @@ public class CalendarRecurringTests extends TestCase {
         SessionObject so2 = SessionObjectWrapper.createSessionObject(uid2, context.getContextId(), "myTestIdentifier");
         
         Participants p = new Participants();
-        Participant pa = new UserParticipant();
-        pa.setIdentifier(userid);
+        Participant pa = new UserParticipant(userid);
         p.add(pa);
         
-        Participant pa2 = new UserParticipant();
-        pa2.setIdentifier(uid2);
+        Participant pa2 = new UserParticipant(uid2);        
         p.add(pa2);
         
         cdao.setParticipants(p.getList());

@@ -227,11 +227,8 @@ public class AppointmentBugTests extends TestCase {
         cdao.setIgnoreConflicts(true);
         CalendarTest.fillDatesInDao(cdao);
         
-        UserParticipant userA = new UserParticipant();
-        userA.setIdentifier(userid);
-       
-        UserParticipant userB = new UserParticipant();
-        userB.setIdentifier(userid2);        
+        UserParticipant userA = new UserParticipant(userid);
+        UserParticipant userB = new UserParticipant(userid2);
         
         cdao.setUsers(new UserParticipant[] { userA, userB });        
         
@@ -283,11 +280,8 @@ public class AppointmentBugTests extends TestCase {
         cdao.setIgnoreConflicts(true);
         CalendarTest.fillDatesInDao(cdao);
         
-        UserParticipant userA = new UserParticipant();
-        userA.setIdentifier(userid);
-       
-        UserParticipant userB = new UserParticipant();
-        userB.setIdentifier(userid2);        
+        UserParticipant userA = new UserParticipant(userid);       
+        UserParticipant userB = new UserParticipant(userid2);
         
         cdao.setUsers(new UserParticipant[] { userA, userB });        
         
@@ -333,11 +327,8 @@ public class AppointmentBugTests extends TestCase {
         cdao.setIgnoreConflicts(true);
         CalendarTest.fillDatesInDao(cdao);
         
-        UserParticipant userA = new UserParticipant();
-        userA.setIdentifier(userid);
-       
-        UserParticipant userB = new UserParticipant();
-        userB.setIdentifier(userid2);        
+        UserParticipant userA = new UserParticipant(userid);
+        UserParticipant userB = new UserParticipant(userid2);
         
         cdao.setUsers(new UserParticipant[] { userA, userB });        
         
@@ -351,8 +342,7 @@ public class AppointmentBugTests extends TestCase {
         update.setObjectID(object_id);
         
         Participants p = new Participants();
-        Participant resource = new ResourceParticipant();
-        resource.setIdentifier(100);
+        Participant resource = new ResourceParticipant(100);
         p.add(resource);
         p.add(userB);
         Participant pu[] = p.getList();
@@ -541,12 +531,10 @@ public class AppointmentBugTests extends TestCase {
             udao.setTitle("testBug4717 - updated by "+user2);
             
             Participants participants = new Participants();
-            Participant p = new UserParticipant();
-            p.setIdentifier(userid);
+            Participant p = new UserParticipant(userid);
             participants.add(p);            
             
-            Participant p2 = new UserParticipant();
-            p2.setIdentifier(uid2);
+            Participant p2 = new UserParticipant(uid2);
             participants.add(p2);            
             udao.setParticipants(participants.getList());
             udao.setUsers(participants.getUsers());
@@ -855,11 +843,8 @@ public class AppointmentBugTests extends TestCase {
         cdao.setIgnoreConflicts(true);
         CalendarTest.fillDatesInDao(cdao);
         
-        UserParticipant userA = new UserParticipant();
-        userA.setIdentifier(userid);
-       
-        UserParticipant userB = new UserParticipant();
-        userB.setIdentifier(userid2);        
+        UserParticipant userA = new UserParticipant(userid);
+        UserParticipant userB = new UserParticipant(userid2);
         
         cdao.setUsers(new UserParticipant[] { userA, userB });        
         
@@ -1599,8 +1584,7 @@ public class AppointmentBugTests extends TestCase {
        
         cdao.setIgnoreConflicts(true);
         
-        UserParticipant userparticipants = new UserParticipant();
-        userparticipants.setIdentifier(userid);
+        UserParticipant userparticipants = new UserParticipant(userid);
         userparticipants.setConfirm(AppointmentObject.ACCEPT);
         cdao.setUsers(new UserParticipant[] { userparticipants });
         
@@ -1735,12 +1719,9 @@ public class AppointmentBugTests extends TestCase {
         cdao.setIgnoreConflicts(true);
         CalendarTest.fillDatesInDao(cdao);
         
-        UserParticipant userA = new UserParticipant();
-        userA.setIdentifier(userid);
+        UserParticipant userA = new UserParticipant(userid);
         userA.setAlarmMinutes(15);
-       
-        UserParticipant userB = new UserParticipant();
-        userB.setIdentifier(userid2);        
+        UserParticipant userB = new UserParticipant(userid2);
         
         cdao.setUsers(new UserParticipant[] { userA, userB });        
         
@@ -1785,8 +1766,7 @@ public class AppointmentBugTests extends TestCase {
         cdao_update.setContext(so.getContext());
         cdao_update.setTitle("testBug7883-update");
         cdao_update.setObjectID(object_id);
-        userA = new UserParticipant();
-        userA.setIdentifier(userid);
+        userA = new UserParticipant(userid);
         cdao_update.setAlarm(-1);
         cdao_update.setUsers(new UserParticipant[] { userA, userB });        
         cdao_update.setIgnoreConflicts(true);
@@ -1852,8 +1832,7 @@ public class AppointmentBugTests extends TestCase {
         cdao.setStartDate(new Date(cdao.getStartDate().getTime()+ 3600000));
         cdao.setEndDate(new Date(cdao.getEndDate().getTime()+ 7200000));        
         Participants p = new Participants();
-        Participant resource = new ResourceParticipant();
-        resource.setIdentifier(100);
+        Participant resource = new ResourceParticipant(100);
         p.add(resource);
         cdao.setParticipants(p.getList());        
         cdao.setIgnoreConflicts(true);
@@ -2219,10 +2198,9 @@ public class AppointmentBugTests extends TestCase {
             CalendarTest.fillDatesInDao(cdao);
             cdao.setIgnoreConflicts(true);
             
-            UserParticipant up = new UserParticipant();
-            up.setIdentifier(userid);
-            UserParticipant up2 = new UserParticipant();
-            up2.setIdentifier(uid2);
+            UserParticipant up = new UserParticipant(userid);
+            UserParticipant up2 = new UserParticipant(uid2);
+            
             cdao.setUsers(new UserParticipant[] { up, up2 });            
             
             cdao.setTitle("testBug8490");

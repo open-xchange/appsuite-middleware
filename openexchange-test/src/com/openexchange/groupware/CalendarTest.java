@@ -289,15 +289,13 @@ public class CalendarTest extends TestCase {
         CalendarDataObject cdao = new CalendarDataObject();
         cdao.setContext(getContext());
         Participants participants = new Participants();
-        Participant p = new UserParticipant();
-        p.setIdentifier(userid);
+        Participant p = new UserParticipant(userid);
         participants.add(p);
  
         String user2 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant3", "");        
         
-        Participant p2 = new UserParticipant();
         int uid2 = resolveUser(user2);
-        p2.setIdentifier(uid2);
+        Participant p2 = new UserParticipant(uid2);
         participants.add(p2);
         
         cdao.setParticipants(participants.getList());
@@ -400,21 +398,18 @@ public class CalendarTest extends TestCase {
         cdao.setContext(so.getContext());
         cdao.setIgnoreConflicts(true);
         
-        UserParticipant up = new UserParticipant();
-        up.setIdentifier(userid);
+        UserParticipant up = new UserParticipant(userid);
         up.setAlarmMinutes(5);
         cdao.setUsers(new UserParticipant[] { up });
         
         
         Participants participants = new Participants();
-        Participant p = new UserParticipant();
-        p.setIdentifier(userid);
+        Participant p = new UserParticipant(userid);
         participants.add(p);
  
         String user2 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant3", "");        
         
-        Participant p2 = new UserParticipant();
-        p2.setIdentifier(resolveUser(user2));
+        Participant p2 = new UserParticipant(resolveUser(user2));
         participants.add(p2);        
         
         cdao.setParticipants(participants.getList());        
@@ -861,8 +856,7 @@ public class CalendarTest extends TestCase {
         
         Participants p = new Participants();
         
-        Participant resource = new ResourceParticipant();
-        resource.setIdentifier(100);
+        Participant resource = new ResourceParticipant(100);
         
         p.add(resource);
         
@@ -897,8 +891,7 @@ public class CalendarTest extends TestCase {
         assertTrue("Conflict object not found", found);
         
         Participants p2 = new Participants();
-        Participant resource2 = new ResourceParticipant();
-        resource2.setIdentifier(1001);
+        Participant resource2 = new ResourceParticipant(1001);
         p2.add(resource2);
         
         cdao.setParticipants(p2.getList());        
@@ -991,8 +984,7 @@ public class CalendarTest extends TestCase {
         cdao.setContext(so.getContext());
         cdao.setIgnoreConflicts(true);
         
-        UserParticipant userparticipants = new UserParticipant();
-        userparticipants.setIdentifier(userid);
+        UserParticipant userparticipants = new UserParticipant(userid);
         userparticipants.setConfirm(AppointmentObject.ACCEPT);
         String check_confirm_message = "Check this";
         userparticipants.setConfirmMessage(check_confirm_message);
@@ -1004,8 +996,7 @@ public class CalendarTest extends TestCase {
         
         Participants participants = new Participants();
         
-        Participant p2 = new UserParticipant();
-        p2.setIdentifier(resolveUser(user2));
+        Participant p2 = new UserParticipant(resolveUser(user2));
         participants.add(p2);        
         
         cdao.setParticipants(participants.getList());        
@@ -1267,8 +1258,7 @@ public class CalendarTest extends TestCase {
         update2.setContext(so.getContext());
         update2.setIgnoreConflicts(true);
         
-        UserParticipant up = new UserParticipant();
-        up.setIdentifier(userid);
+        UserParticipant up = new UserParticipant(userid);
         update2.setUsers(new UserParticipant[] { up });        
         
         csql.updateAppointmentObject(update2, fid, testobject.getLastModified());
@@ -1384,11 +1374,9 @@ public class CalendarTest extends TestCase {
         update.setIgnoreConflicts(true);
          
         Participants participants = new Participants();
-        Participant p = new UserParticipant();
-        p.setIdentifier(userid);
+        Participant p = new UserParticipant(userid);
         participants.add(p);        
-        UserParticipant up = new UserParticipant();
-        up.setIdentifier(userid);
+        UserParticipant up = new UserParticipant(userid);
         
         update.setUsers(new UserParticipant[] { up });        
         update.setParticipants(participants.getList());
@@ -1482,8 +1470,7 @@ public class CalendarTest extends TestCase {
         cdao.setContext(so.getContext());
         cdao.setIgnoreConflicts(true);
         
-        UserParticipant up = new UserParticipant();
-        up.setIdentifier(userid);
+        UserParticipant up = new UserParticipant(userid);
         up.setAlarmMinutes(5);
         cdao.setUsers(new UserParticipant[] { up });
         
@@ -1496,12 +1483,12 @@ public class CalendarTest extends TestCase {
         
         
         Participants participants = new Participants();
-        Participant p1 = new ExternalUserParticipant();
+        ExternalUserParticipant p1 = new ExternalUserParticipant(mail_address);
         p1.setEmailAddress(mail_address);
         p1.setDisplayName(display_name);
         participants.add(p1);
         
-        Participant p2 = new ExternalUserParticipant();
+        ExternalUserParticipant p2 = new ExternalUserParticipant(mail_address2);
         p2.setEmailAddress(mail_address2);
         p2.setDisplayName(display_name2);
         participants.add(p2);
@@ -1537,7 +1524,7 @@ public class CalendarTest extends TestCase {
         
         String display_name_2_fail = "Externer test user without mail address";
         participants = new Participants();
-        Participant p_fail = new ExternalUserParticipant();
+        ExternalUserParticipant p_fail = new ExternalUserParticipant(null);
         p_fail.setDisplayName(display_name_2_fail);
         participants.add(p_fail);
         
@@ -1566,12 +1553,12 @@ public class CalendarTest extends TestCase {
         String update_new_mail_2 = "abc2@de";        
         
         Participants participants_update = new Participants();
-        Participant p3 = new ExternalUserParticipant();
+        ExternalUserParticipant p3 = new ExternalUserParticipant(update_new_mail_1);
         p3.setDisplayName(update_new_display_1);
         p3.setEmailAddress(update_new_mail_1);
         participants_update.add(p3);
         
-        Participant p4 = new ExternalUserParticipant();
+        ExternalUserParticipant p4 = new ExternalUserParticipant(update_new_mail_2);
         p4.setDisplayName(update_new_display_2);
         p4.setEmailAddress(update_new_mail_2);
         participants_update.add(p4);
@@ -1670,8 +1657,7 @@ public class CalendarTest extends TestCase {
         CalendarDataObject cdao = new CalendarDataObject();
         cdao.setContext(getContext());
         Participants participants = new Participants();
-        Participant p = new GroupParticipant();
-        p.setIdentifier(0);
+        Participant p = new GroupParticipant(0);
         participants.add(p);
         cdao.setParticipants(participants.getList());
         cdao.setTitle("testGroupZero");
@@ -1706,12 +1692,10 @@ public class CalendarTest extends TestCase {
         cdao.setIgnoreConflicts(true);
         CalendarTest.fillDatesInDao(cdao);
         
-        UserParticipant userA = new UserParticipant();
-        userA.setIdentifier(userid);
+        UserParticipant userA = new UserParticipant(userid);
         userA.setAlarmMinutes(15);
        
-        UserParticipant userB = new UserParticipant();
-        userB.setIdentifier(userid2);        
+        UserParticipant userB = new UserParticipant(userid2);
         
         cdao.setUsers(new UserParticipant[] { userA, userB });        
         
