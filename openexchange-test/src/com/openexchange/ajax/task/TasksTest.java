@@ -74,6 +74,7 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * This class tests the AJAX interface of the tasks.
@@ -536,7 +537,7 @@ public class TasksTest extends AbstractAJAXTest {
      * @throws OXException if reading the folders fails.
      */
     protected int getPrivateTaskFolder() throws IOException, SAXException,
-        JSONException, OXException {
+        JSONException, OXException, AjaxException {
         if (0 == privateTaskFolder) {
             privateTaskFolder = TaskTools.getPrivateTaskFolder(getWebConversation(),
                 getHostName(), getSessionId());

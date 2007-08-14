@@ -47,92 +47,32 @@
  *
  */
 
-package com.openexchange.ajax.framework;
+package com.openexchange.ajax.task.actions;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Date;
 
-import org.json.JSONException;
-
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.fields.OrderFields;
+import com.openexchange.ajax.framework.CommonUpdatesRequest;
 import com.openexchange.groupware.search.Order;
 
 /**
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class CommonAllRequest implements AJAXRequest {
-
-    private final String servletPath;
-
-    private final int folderId;
-
-    private final int[] columns;
-
-    private final int sort;
-
-    private final Order order;
-
-    private final boolean failOnError;
+public final class UpdatesRequest extends CommonUpdatesRequest {
 
     /**
-     * Default constructor.
+     * @param servletPath
+     * @param folderId
+     * @param columns
+     * @param sort
+     * @param order
+     * @param lastModified
+     * @param failOnError
      */
-    public CommonAllRequest(final String servletPath, final int folderId,
-        final int[] columns, final int sort, final Order order,
-        final boolean failOnError) {
-        super();
-        this.servletPath = servletPath;
-        this.folderId = folderId;
-        this.columns = columns;
-        this.sort = sort;
-        this.order = order;
-        this.failOnError = failOnError;
+    public UpdatesRequest(final int folderId, final int[] columns,
+        final int sort, final Order order, final Date lastModified) {
+        super(AbstractTaskRequest.TASKS_URL, folderId, columns, sort, order,
+            lastModified, true);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public String getServletPath() {
-        return servletPath;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Object getBody() throws JSONException {
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Method getMethod() {
-        return Method.GET;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Parameter[] getParameters() {
-        final List<Parameter> params = new ArrayList<Parameter>();
-        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet
-            .ACTION_ALL));
-        params.add(new Parameter(AJAXServlet.PARAMETER_FOLDERID, folderId));
-        params.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns));
-        if (null != order) {
-            params.add(new Parameter(AJAXServlet.PARAMETER_SORT, sort));
-            params.add(new Parameter(AJAXServlet.PARAMETER_ORDER, OrderFields
-                .write(order)));
-        }
-        return params.toArray(new Parameter[params.size()]);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public CommonAllParser getParser() {
-        return new CommonAllParser(failOnError, columns);
-    }
 }

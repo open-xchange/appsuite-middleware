@@ -50,6 +50,7 @@
 package com.openexchange.ajax.framework;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.json.JSONException;
@@ -62,7 +63,7 @@ import com.openexchange.groupware.search.Order;
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class CommonAllRequest implements AJAXRequest {
+public class CommonUpdatesRequest implements AJAXRequest {
 
     private final String servletPath;
 
@@ -74,20 +75,23 @@ public class CommonAllRequest implements AJAXRequest {
 
     private final Order order;
 
+    private final Date lastModified;
+
     private final boolean failOnError;
 
     /**
      * Default constructor.
      */
-    public CommonAllRequest(final String servletPath, final int folderId,
+    public CommonUpdatesRequest(final String servletPath, final int folderId,
         final int[] columns, final int sort, final Order order,
-        final boolean failOnError) {
+        final Date lastModified, final boolean failOnError) {
         super();
         this.servletPath = servletPath;
         this.folderId = folderId;
         this.columns = columns;
         this.sort = sort;
         this.order = order;
+        this.lastModified = lastModified;
         this.failOnError = failOnError;
     }
 
@@ -126,13 +130,15 @@ public class CommonAllRequest implements AJAXRequest {
             params.add(new Parameter(AJAXServlet.PARAMETER_ORDER, OrderFields
                 .write(order)));
         }
+        params.add(new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, lastModified));
+        params.add(new Parameter(AJAXServlet.PARAMETER_IGNORE, "deleted"));
         return params.toArray(new Parameter[params.size()]);
     }
 
     /**
      * {@inheritDoc}
      */
-    public CommonAllParser getParser() {
-        return new CommonAllParser(failOnError, columns);
+    public CommonUpdatesParser getParser() {
+        return new CommonUpdatesParser(failOnError, columns);
     }
 }

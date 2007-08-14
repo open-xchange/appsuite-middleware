@@ -3,6 +3,8 @@
  */
 package com.openexchange.ajax.framework;
 
+import java.util.Date;
+
 import org.json.JSONException;
 
 /**
@@ -36,6 +38,9 @@ public interface AJAXRequest {
         }
         public Parameter(final String name, final long time) {
             this(name, String.valueOf(time));
+        }
+        public Parameter(final String name, final Date time) {
+            this(name, time.getTime());
         }
         public static String convert(final int[] values) {
             final StringBuilder columnSB = new StringBuilder();

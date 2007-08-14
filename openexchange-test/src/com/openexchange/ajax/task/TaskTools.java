@@ -60,7 +60,6 @@ import junit.framework.Assert;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
@@ -72,16 +71,15 @@ import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.AbstractAJAXTest;
-import com.openexchange.ajax.FolderTest;
-import com.openexchange.ajax.config.ConfigTools;
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.fields.OrderFields;
 import com.openexchange.ajax.fields.TaskFields;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
+import com.openexchange.ajax.framework.CommonUpdatesResponse;
 import com.openexchange.ajax.framework.Executor;
-import com.openexchange.ajax.parser.TaskParser;
 import com.openexchange.ajax.task.actions.AllRequest;
 import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.DeleteResponse;
@@ -92,10 +90,10 @@ import com.openexchange.ajax.task.actions.InsertResponse;
 import com.openexchange.ajax.task.actions.ListRequest;
 import com.openexchange.ajax.task.actions.UpdateRequest;
 import com.openexchange.ajax.task.actions.UpdateResponse;
+import com.openexchange.ajax.task.actions.UpdatesRequest;
 import com.openexchange.ajax.writer.TaskWriter;
 import com.openexchange.api2.OXException;
 import com.openexchange.configuration.ConfigurationException;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TaskException;
@@ -142,10 +140,10 @@ public final class TaskTools extends Assert {
     public static int getPrivateTaskFolder(final WebConversation conversation,
         final String hostName, final String sessionId)
         throws IOException, SAXException, JSONException,
-        OXException {
-        final FolderObject myTasks = FolderTest.getStandardTaskFolder(
-            conversation, hostName, sessionId);
-        return myTasks.getObjectID();
+        OXException, AjaxException {
+        final AJAXClient client = new AJAXClient(new AJAXSession(conversation,
+            sessionId));
+        return client.getPrivateTaskFolder();
     }
 
     /**
@@ -163,31 +161,14 @@ public final class TaskTools extends Assert {
      */
     public static Response insertTask(final WebConversation conversation,
         final String hostName, final String sessionId, final Task task)
-        throws JSONException, IOException, SAXException, AjaxException, ConfigurationException {
+        throws JSONException, IOException, SAXException, AjaxException,
+        ConfigurationException {
         LOG.trace("Inserting task.");
-        final TimeZone timezone = ConfigTools.getTimeZone(conversation,
-            hostName, sessionId);
-		final JSONObject jsonObj = new JSONObject();
-        new TaskWriter( timezone).writeTask(task, jsonObj);
-        final String object = jsonObj.toString();
-        LOG.trace(object);
-        final ByteArrayInputStream bais = new ByteArrayInputStream(object
-            .getBytes(ENCODING));
-        final URLParameter parameter = new URLParameter();
-        parameter.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
-        parameter.setParameter(AJAXServlet.PARAMETER_ACTION,
-            AJAXServlet.ACTION_NEW);
-        parameter.setParameter(AJAXServlet.PARAMETER_FOLDERID,
-            String.valueOf(task.getParentFolderID()));
-        final WebRequest req = new PutMethodWebRequest(AbstractAJAXTest.PROTOCOL
-            + hostName + TASKS_URL + parameter.getURLParameters(), bais,
-            AJAXServlet.CONTENTTYPE_JAVASCRIPT);
-        final WebResponse resp = conversation.getResponse(req);
-        assertEquals("Response code is not okay.", HttpServletResponse.SC_OK,
-            resp.getResponseCode());
-        final String body = resp.getText();
-        LOG.trace("Response body: " + body);
-        return Response.parse(body);
+        final AJAXClient client = new AJAXClient(new AJAXSession(conversation,
+            sessionId));
+        final InsertResponse insertR = insert(client, new InsertRequest(task,
+            client.getTimeZone()));
+        return insertR.getResponse();
     }
 
     public static InsertResponse insert(final AJAXSession session,
@@ -389,36 +370,36 @@ public final class TaskTools extends Assert {
         final String hostName, final String sessionId, final int folderId,
         final int[] columns, final int sort, final String order,
         final Date lastModified) throws IOException, SAXException,
-        JSONException {
+        JSONException, AjaxException {
         LOG.trace("Getting updated tasks in a folder.");
-        final WebRequest req = new GetMethodWebRequest(AbstractAJAXTest.PROTOCOL
-            + hostName + TASKS_URL);
-        req.setParameter(AJAXServlet.PARAMETER_ACTION,
-            AJAXServlet.ACTION_UPDATES);
-        req.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
-        req.setParameter(AJAXServlet.PARAMETER_FOLDERID,
-            String.valueOf(folderId));
-        final StringBuilder columnSB = new StringBuilder();
-        for (int i : columns) {
-            columnSB.append(i);
-            columnSB.append(',');
-        }
-        columnSB.delete(columnSB.length() - 1, columnSB.length());
-        req.setParameter(AJAXServlet.PARAMETER_COLUMNS, columnSB.toString());
-        if (null != order) {
-            req.setParameter(AJAXServlet.PARAMETER_SORT, String.valueOf(sort));
-            req.setParameter(AJAXServlet.PARAMETER_ORDER, order);
-        }
-        req.setParameter(AJAXServlet.PARAMETER_TIMESTAMP,
-            String.valueOf(lastModified.getTime()));
-        final WebResponse resp = conversation.getResponse(req);
-        assertEquals("Response code is not okay.", HttpServletResponse.SC_OK,
-            resp.getResponseCode());
-        final String body = resp.getText();
-        LOG.trace("Response body: " + body);
-        final Response response = Response.parse(body);
-        assertFalse(response.getErrorMessage(), response.hasError());
-        return response;
+        final AJAXClient client = new AJAXClient(new AJAXSession(conversation,
+            sessionId));
+        final CommonUpdatesResponse response = updates(client,
+            new UpdatesRequest(folderId, columns, sort,
+            OrderFields.parse(order), lastModified));
+        return response.getResponse();
+    }
+
+    public static CommonUpdatesResponse updates(final AJAXClient client,
+        final UpdatesRequest request) throws AjaxException, IOException,
+        SAXException, JSONException {
+        return (CommonUpdatesResponse) Executor.execute(client.getSession(),
+            request);
+    }
+
+    /**
+     * @deprecated Use {@link #list(AJAXClient, ListRequest)}.
+     */
+    public static Response getTaskList(final WebConversation conversation,
+        final String hostName, final String sessionId,
+        final int[][] folderAndTaskIds, final int[] columns)
+        throws IOException, SAXException, JSONException, AjaxException {
+        LOG.trace("Get a list of tasks.");
+        final AJAXClient client = new AJAXClient(new AJAXSession(conversation,
+            sessionId));
+        final CommonListResponse listR = list(client, new ListRequest(
+            folderAndTaskIds, columns));
+        return listR.getResponse();
     }
 
     public static CommonListResponse list(final AJAXClient client,

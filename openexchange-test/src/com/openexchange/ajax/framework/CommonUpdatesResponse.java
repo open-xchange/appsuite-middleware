@@ -49,90 +49,70 @@
 
 package com.openexchange.ajax.framework;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
 
-import org.json.JSONException;
-
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.fields.OrderFields;
-import com.openexchange.groupware.search.Order;
+import com.openexchange.ajax.container.Response;
 
 /**
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class CommonAllRequest implements AJAXRequest {
+public class CommonUpdatesResponse extends AbstractAJAXResponse implements
+    Iterable<Object[]> {
 
-    private final String servletPath;
+    private int[] columns;
 
-    private final int folderId;
-
-    private final int[] columns;
-
-    private final int sort;
-
-    private final Order order;
-
-    private final boolean failOnError;
+    private Object[][] array;
 
     /**
-     * Default constructor.
+     * @param response
      */
-    public CommonAllRequest(final String servletPath, final int folderId,
-        final int[] columns, final int sort, final Order order,
-        final boolean failOnError) {
-        super();
-        this.servletPath = servletPath;
-        this.folderId = folderId;
+    public CommonUpdatesResponse(final Response response) {
+        super(response);
+    }
+
+    /**
+     * @return the array
+     */
+    public Object[][] getArray() {
+        return array;
+    }
+
+    /**
+     * @param array the array to set
+     */
+    void setArray(final Object[][] array) {
+        this.array = array;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Iterator<Object[]> iterator() {
+        return Collections.unmodifiableList(Arrays.asList(array)).iterator();
+    }
+
+    public Object getValue(final int row, final int attributeId) {
+        return array[row][getColumnPos(attributeId)];
+    }
+
+    private int getColumnPos(final int attributeId) {
+        return Arrays.asList(columns).indexOf(attributeId);
+    }
+
+    /**
+     * @return the columns
+     */
+    public int[] getColumns() {
+        return columns;
+    }
+
+    /**
+     * @param columns the columns to set
+     */
+    public void setColumns(final int[] columns) {
         this.columns = columns;
-        this.sort = sort;
-        this.order = order;
-        this.failOnError = failOnError;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public String getServletPath() {
-        return servletPath;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Object getBody() throws JSONException {
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Method getMethod() {
-        return Method.GET;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Parameter[] getParameters() {
-        final List<Parameter> params = new ArrayList<Parameter>();
-        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet
-            .ACTION_ALL));
-        params.add(new Parameter(AJAXServlet.PARAMETER_FOLDERID, folderId));
-        params.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns));
-        if (null != order) {
-            params.add(new Parameter(AJAXServlet.PARAMETER_SORT, sort));
-            params.add(new Parameter(AJAXServlet.PARAMETER_ORDER, OrderFields
-                .write(order)));
-        }
-        return params.toArray(new Parameter[params.size()]);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public CommonAllParser getParser() {
-        return new CommonAllParser(failOnError, columns);
     }
 }

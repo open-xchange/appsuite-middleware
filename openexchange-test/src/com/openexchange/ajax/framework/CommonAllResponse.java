@@ -62,16 +62,15 @@ import com.openexchange.ajax.container.Response;
 public class CommonAllResponse extends AbstractAJAXResponse implements
     Iterable<Object[]> {
 
-    private final int[] columns;
+    private int[] columns;
 
     private Object[][] array;
 
     /**
      * @param response
      */
-    public CommonAllResponse(final Response response, final int[] columns) {
+    public CommonAllResponse(final Response response) {
         super(response);
-        this.columns = columns;
     }
 
     /**
@@ -101,5 +100,19 @@ public class CommonAllResponse extends AbstractAJAXResponse implements
 
     private int getColumnPos(final int attributeId) {
         return Arrays.asList(columns).indexOf(attributeId);
+    }
+
+    /**
+     * @return the columns
+     */
+    public int[] getColumns() {
+        return columns;
+    }
+
+    /**
+     * @param columns the columns to set
+     */
+    public void setColumns(final int[] columns) {
+        this.columns = columns;
     }
 }

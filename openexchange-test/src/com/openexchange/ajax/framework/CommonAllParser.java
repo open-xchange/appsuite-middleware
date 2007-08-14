@@ -76,8 +76,8 @@ public class CommonAllParser extends AbstractAJAXParser {
     @Override
     protected CommonAllResponse createResponse(final Response response)
         throws JSONException {
-        final CommonAllResponse retval = new CommonAllResponse(response,
-            columns);
+        final CommonAllResponse retval = instanciateResponse(response);
+        retval.setColumns(columns);
         if (isFailOnError()) {
             final JSONArray array = (JSONArray) retval.getData();
             final Object[][] values = new Object[array.length()][];
@@ -91,5 +91,9 @@ public class CommonAllParser extends AbstractAJAXParser {
             retval.setArray(values);
         }
         return retval;
+    }
+
+    protected CommonAllResponse instanciateResponse(final Response response) {
+        return new CommonAllResponse(response);
     }
 }

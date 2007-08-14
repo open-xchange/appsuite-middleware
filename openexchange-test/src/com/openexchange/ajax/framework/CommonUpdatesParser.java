@@ -49,90 +49,51 @@
 
 package com.openexchange.ajax.framework;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import org.json.JSONArray;
 import org.json.JSONException;
 
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.fields.OrderFields;
-import com.openexchange.groupware.search.Order;
+import com.openexchange.ajax.container.Response;
 
 /**
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class CommonAllRequest implements AJAXRequest {
-
-    private final String servletPath;
-
-    private final int folderId;
+public class CommonUpdatesParser extends AbstractAJAXParser {
 
     private final int[] columns;
-
-    private final int sort;
-
-    private final Order order;
-
-    private final boolean failOnError;
 
     /**
      * Default constructor.
      */
-    public CommonAllRequest(final String servletPath, final int folderId,
-        final int[] columns, final int sort, final Order order,
-        final boolean failOnError) {
-        super();
-        this.servletPath = servletPath;
-        this.folderId = folderId;
+    CommonUpdatesParser(final boolean failOnError, final int[] columns) {
+        super(failOnError);
         this.columns = columns;
-        this.sort = sort;
-        this.order = order;
-        this.failOnError = failOnError;
     }
 
     /**
      * {@inheritDoc}
      */
-    public String getServletPath() {
-        return servletPath;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Object getBody() throws JSONException {
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Method getMethod() {
-        return Method.GET;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Parameter[] getParameters() {
-        final List<Parameter> params = new ArrayList<Parameter>();
-        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet
-            .ACTION_ALL));
-        params.add(new Parameter(AJAXServlet.PARAMETER_FOLDERID, folderId));
-        params.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns));
-        if (null != order) {
-            params.add(new Parameter(AJAXServlet.PARAMETER_SORT, sort));
-            params.add(new Parameter(AJAXServlet.PARAMETER_ORDER, OrderFields
-                .write(order)));
+    @Override
+    protected CommonUpdatesResponse createResponse(final Response response)
+        throws JSONException {
+        final CommonUpdatesResponse retval = instanciateResponse(response);
+        retval.setColumns(columns);
+        if (isFailOnError()) {
+            final JSONArray array = (JSONArray) retval.getData();
+            final Object[][] values = new Object[array.length()][];
+            for (int i = 0; i < array.length(); i++) {
+                final JSONArray inner = array.getJSONArray(i);
+                values[i] = new Object[inner.length()];
+                for (int j = 0; j < inner.length(); j++) {
+                    values[i][j] = inner.get(j);
+                }
+            }
+            retval.setArray(values);
         }
-        return params.toArray(new Parameter[params.size()]);
+        return retval;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public CommonAllParser getParser() {
-        return new CommonAllParser(failOnError, columns);
+    protected CommonUpdatesResponse instanciateResponse(final Response response) {
+        return new CommonUpdatesResponse(response);
     }
 }
