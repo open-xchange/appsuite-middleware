@@ -3,7 +3,10 @@ package com.openexchange.groupware;
 
 import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.contexts.ContextStorage;
+import com.openexchange.server.OCLPermission;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
+import com.openexchange.tools.oxfolder.OXFolderManager;
+import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
 import java.sql.Connection;
 import java.util.Calendar;
 import java.util.Date;
@@ -1411,5 +1414,111 @@ public class CalendarRecurringTests extends TestCase {
         
     }
     
+    public void testMoveExceptionToDifferentFolerAndSetPrivateFlag() throws Throwable {
+        Context context = new ContextImpl(contextid);
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestSearch");
+               
+        Connection readcon = DBPool.pickup(context);
+        Connection writecon = DBPool.pickupWriteable(context);        
+        
+        int fid = AppointmentBugTests.getPrivateFolder(userid);
+        
+        final OXFolderManager oxma = new OXFolderManagerImpl(so, readcon, writecon);
+        FolderObject fo = new FolderObject();
+        
+        CalendarSql csql = new CalendarSql(so);
+        
+        OCLPermission oclp1 = new OCLPermission();
+        oclp1.setEntity(userid);
+        oclp1.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+        oclp1.setFolderAdmin(true);
+        OCLPermission oclp2 = new OCLPermission();
+        
+        fo.setFolderName("testExceptionHandlingFolder");
+        fo.setParentFolderID(fid);
+        fo.setModule(FolderObject.CALENDAR);
+        fo.setType(FolderObject.PRIVATE);
+        fo.setPermissionsAsArray(new OCLPermission[] { oclp1 });       
+        
+        int test_folder = 0;
+        try {
+            fo = oxma.createFolder(fo, true, System.currentTimeMillis());
+            test_folder = fo.getObjectID();       
+            
+            CalendarDataObject cdao = new CalendarDataObject();
+            cdao.setContext(so.getContext());
+            cdao.setParentFolderID(fid);
+        
+            CalendarTest.fillDatesInDao(cdao);
+        
+            cdao.setTitle("testMoveExceptionToDifferentFolerAndSetPrivateFlag");
+            cdao.setRecurrenceType(CalendarObject.DAILY);
+            cdao.setRecurrenceCalculator(1);
+            cdao.setInterval(1);
+            cdao.setDays(1);        
+            cdao.setIgnoreConflicts(true);
+        
+
+            csql.insertAppointmentObject(cdao);
+            int object_id = cdao.getObjectID();            
+ 
+            CalendarDataObject exception = new CalendarDataObject();
+            exception.setContext(so.getContext());
+            exception.setObjectID(object_id);
+            exception.setIgnoreConflicts(true);            
+            exception.setTitle("testMoveExceptionToDifferentFolerAndSetPrivateFlag - Update (create exception)");
+            exception.setRecurrencePosition(3);            
+            
+            csql.updateAppointmentObject(exception, fid, new Date(SUPER_END));
+            int exception_id = exception.getObjectID();
+            assertTrue("Object was created", exception_id > 0);
+            assertTrue("Got a new object_id" , object_id != exception_id);
+            
+            CalendarDataObject test_move_folder = new CalendarDataObject();
+            test_move_folder.setContext(so.getContext());
+            test_move_folder.setObjectID(exception_id);
+            test_move_folder.setParentFolderID(test_folder);
+            test_move_folder.setIgnoreConflicts(true);
+            try {
+                csql.updateAppointmentObject(test_move_folder, fid, new Date(SUPER_END));
+                fail("An exception should not be moved to a different folder");
+            } catch(OXCalendarException oxca) {
+                // this is what we want
+                assertEquals("Check correct error code", 66, oxca.getDetailNumber());                
+            }
+            
+            CalendarDataObject test_private_flag = new CalendarDataObject();
+            test_private_flag.setContext(so.getContext());
+            test_private_flag.setObjectID(exception_id);
+            test_private_flag.setParentFolderID(fid);
+            test_private_flag.setPrivateFlag(true);
+            test_private_flag.setIgnoreConflicts(true);
+            try {
+                csql.updateAppointmentObject(test_private_flag, fid, new Date(SUPER_END));
+                fail("An exception should not be flagged as private");
+            } catch(OXCalendarException oxca) {
+                // this is what we want
+                assertEquals("Check correct error code", 69, oxca.getDetailNumber()); 
+            }            
+            
+        } finally {
+            try {
+                if (test_folder > 0) {
+                    oxma.deleteFolder(new FolderObject(test_folder), true, SUPER_END);
+                } 
+            } catch(Exception e) {
+                e.printStackTrace();
+                fail("Error deleting folder object.");
+            }
+        }
+        try {
+            DBPool.push(context, readcon);
+            DBPool.pushWrite(context, writecon);        
+        } catch(Exception ignore) { 
+            ignore.printStackTrace();
+        }                        
+        
+    }
+
     
 }
