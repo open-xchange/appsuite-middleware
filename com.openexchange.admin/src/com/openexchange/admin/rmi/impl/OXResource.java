@@ -138,6 +138,9 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
         
         try {
             setIdOrGetIDFromNameAndIdObject(ctx, res);
+            
+            res.testMandatoryCreateFieldsNull();
+            
             final int resource_ID = res.getId();        
             
             checkSchemaBeingLocked(ctx, tool);
