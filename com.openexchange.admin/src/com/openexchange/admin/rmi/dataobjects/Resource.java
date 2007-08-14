@@ -64,14 +64,24 @@ public class Resource extends ExtendableDataObject implements NameAndIdObject {
     private Integer id;
 
     private String name;
+    
+    private boolean nameset;
 
     private String displayname;
+    
+    private boolean displaynameset;
 
     private String description;
+    
+    private boolean descriptionset;
 
     private String email;
+    
+    private boolean emailset;
 
     private Boolean available;
+    
+    private boolean availableset;
 
     public Resource() {
         super();
@@ -107,6 +117,7 @@ public class Resource extends ExtendableDataObject implements NameAndIdObject {
     }
 
     public void setName(String val) {
+        nameset = true;
         this.name = val;
     }
 
@@ -115,6 +126,7 @@ public class Resource extends ExtendableDataObject implements NameAndIdObject {
     }
 
     public void setDisplayname(String val) {
+        displaynameset = true;
         this.displayname = val;
     }
 
@@ -123,6 +135,7 @@ public class Resource extends ExtendableDataObject implements NameAndIdObject {
     }
 
     public void setEmail(String val) {
+        emailset = true;
         this.email = val;
     }
 
@@ -131,6 +144,7 @@ public class Resource extends ExtendableDataObject implements NameAndIdObject {
     }
 
     public void setAvailable(Boolean available) {
+        availableset = true;
         this.available = available;
     }
 
@@ -139,6 +153,7 @@ public class Resource extends ExtendableDataObject implements NameAndIdObject {
     }
 
     public void setDescription(String description) {
+        descriptionset = true;
         this.description = description;
     }
 
@@ -245,4 +260,41 @@ public class Resource extends ExtendableDataObject implements NameAndIdObject {
     public String[] getMandatoryMembersRegister() {
         return null;
     }
+
+    /**
+     * @return the nameset
+     */
+    public boolean isNameset() {
+        return nameset;
+    }
+
+    /**
+     * @return the displaynameset
+     */
+    public boolean isDisplaynameset() {
+        return displaynameset;
+    }
+
+    /**
+     * @return the descriptionset
+     */
+    public boolean isDescriptionset() {
+        return descriptionset;
+    }
+
+    /**
+     * @return the emailset
+     */
+    public boolean isEmailset() {
+        return emailset;
+    }
+
+    /**
+     * @return the availableset
+     */
+    public boolean isAvailableset() {
+        return availableset;
+    }
+
+   
 }
