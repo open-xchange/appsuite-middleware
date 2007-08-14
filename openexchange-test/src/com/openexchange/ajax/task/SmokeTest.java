@@ -76,6 +76,7 @@ public class SmokeTest extends AbstractTaskTest {
 
     /**
      * Tests inserting a private task.
+     * http://testlink6.open-xchange.com/testlink/lib/execute/execSetResults.php?level=testcase&id=1803
      * @throws Throwable if an error occurs.
      */
     public void testCase1803() throws Throwable {

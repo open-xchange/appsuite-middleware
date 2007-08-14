@@ -49,18 +49,29 @@
 
 package com.openexchange.test;
 
+import com.openexchange.SmokeTestSuite;
 import com.openexchange.ajax.reminder.ReminderAJAXSuite;
 import com.openexchange.ajax.reminder.ReminderBugTestSuite;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-public class CCTests
- {
-	public static Test suite(){
+public class CCTests {
+
+    /**
+     * Prevent instanciation.
+     */
+    private CCTests() {
+        super();
+    }
+
+	public static Test suite() {
 			
 		TestSuite tests = new TestSuite();
 
+        // First of all the smoke tests.
+        tests.addTest(SmokeTestSuite.suite());
+        
         tests.addTestSuite(com.openexchange.ajax.session.LoginTest.class);
         tests.addTestSuite(com.openexchange.ajax.session.RedirectTest.class);
         tests.addTestSuite(com.openexchange.ajax.FolderTest.class);
