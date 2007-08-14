@@ -73,6 +73,10 @@ public interface Participant
 	
 	/**
      * @deprecated Use explicit constructor.
+     * {@link UserParticipant#UserParticipant(int)},
+     * {@link GroupParticipant#GroupParticipant(int)},
+     * {@link ResourceParticipant#ResourceParticipant(int)},
+     * {@link ResourceGroupParticipant#ResourceGroupParticipant(int)}
 	 */
     public void setIdentifier( int name ) ;
 	
@@ -81,8 +85,13 @@ public interface Participant
 	public void setDisplayName(String displayName);
 	
 	public String getDisplayName();
-	
-	public void setEmailAddress(String emailaddress);
+
+	/**
+     * @deprecated Use explicit constructor.
+     * {@link ExternalUserParticipant#ExternalUserParticipant(String)},
+     * {@link ExternalGroupParticipant#ExternalGroupParticipant(String)}
+	 */
+    public void setEmailAddress(String emailaddress);
 	
 	public String getEmailAddress();
 	

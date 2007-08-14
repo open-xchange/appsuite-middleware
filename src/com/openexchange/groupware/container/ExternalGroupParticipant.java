@@ -71,7 +71,23 @@ public class ExternalGroupParticipant implements Participant, Comparable
 	private boolean b_displayName = false;
 	
 	private boolean b_emailaddress = false;
-	
+
+    /**
+     * Default constructor.
+     * @param emailAddress unique email address of the external group participant.
+     */
+    public ExternalGroupParticipant(final String emailAddress) {
+        super();
+        this.emailaddress = emailAddress;
+    }
+
+    /**
+     * @deprecated Use {@link #ExternalGroupParticipant(String)}.
+     */
+    public ExternalGroupParticipant() {
+        this(null);
+    }
+
 	public void setIdentifier( final int id ) {
 		this.id = id;
 	}

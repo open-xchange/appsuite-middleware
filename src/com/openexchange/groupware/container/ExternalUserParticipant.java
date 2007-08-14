@@ -70,7 +70,23 @@ public class ExternalUserParticipant implements Participant, Comparable
 	private boolean b_displayName;
 	
 	private boolean b_emailaddress;
-	
+
+    /**
+     * Default constructur.
+     * @param emailAddress unique email address of the external participant.
+     */
+    public ExternalUserParticipant(final String emailAddress) {
+        super();
+        this.emailaddress = emailAddress;
+    }
+
+    /**
+     * @deprecated Use {@link #ExternalUserParticipant(String)}.
+     */
+    public ExternalUserParticipant() {
+        this(null);
+    }
+
 	public void setIdentifier( final int id ) {
 		this.id = id;
 	}
@@ -92,7 +108,10 @@ public class ExternalUserParticipant implements Participant, Comparable
 		return emailaddress;
 	}
 
-	public void setEmailAddress( final String emailaddress) {
+	/**
+     * {@inheritDoc}
+	 */
+    public void setEmailAddress( final String emailaddress) {
 		this.emailaddress = emailaddress;
 		b_emailaddress = true;
 	}

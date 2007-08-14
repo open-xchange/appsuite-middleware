@@ -69,7 +69,23 @@ public class GroupParticipant implements Participant, Comparable {
 	private boolean b_displayName = false;
 	
 	private boolean b_emailaddress = false;
-	
+
+    /**
+     * Default constructor.
+     * @param id unique identifier of the group.
+     */
+    public GroupParticipant(final int id) {
+        super();
+        this.id = id;
+    }
+
+    /**
+     * @deprecated Use {@link #GroupParticipant(int)}.
+     */
+    public GroupParticipant() {
+        this(0);
+    }
+
 	public void setIdentifier( final int id ) {
 		this.id = id;
 	}

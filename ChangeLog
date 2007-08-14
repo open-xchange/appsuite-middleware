@@ -1,3 +1,7 @@
+* 2007-08-14 - marcus.klein@open-xchange.com
+
+ - Marked some methods for participants deprecated to prevent coding problems.
+
 * 2007-08-13 - marcus.klein@open-xchange.com
 
  - Bugfix #8410: Removed duplicate write database connection.

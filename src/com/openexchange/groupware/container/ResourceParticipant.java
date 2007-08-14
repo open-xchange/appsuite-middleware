@@ -70,8 +70,24 @@ public class ResourceParticipant implements Participant, Comparable
 	private boolean b_displayName = false;
 	
 	private boolean b_emailaddress = false;
-	
-	public void setIdentifier( final int id ) {
+
+	/**
+     * Default constructor.
+     * @param id unique identifier of the resource.
+     */
+    public ResourceParticipant(final int id) {
+        super();
+        this.id = id;
+    }
+
+    /**
+     * @deprecated Use {@link #ResourceParticipant(int)}.
+     */
+    public ResourceParticipant() {
+        this(0);
+    }
+
+    public void setIdentifier( final int id ) {
 		this.id = id;
 	}
 	
