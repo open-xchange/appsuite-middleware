@@ -627,7 +627,7 @@ public class OXMailException extends OXException {
 		this(mailCode, null, messageArgs);
 	}
 
-	public OXMailException(final MailCode mailCode, final Exception cause, final Object... messageArgs) {
+	public OXMailException(final MailCode mailCode, final Throwable cause, final Object... messageArgs) {
 		super(Component.EMAIL, mailCode.category, mailCode.detailNumber, mailCode.message, cause, messageArgs);
 	}
 

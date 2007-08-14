@@ -66,6 +66,9 @@ import com.sun.mail.imap.protocol.IMAPProtocol;
  */
 public abstract class AbstractIMAPCommand<T> {
 
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(AbstractIMAPCommand.class);
+
 	private static final String ERR_01 = "No matching messages";
 
 	protected static final String[] ARGS_EMPTY = { "" };
@@ -73,7 +76,7 @@ public abstract class AbstractIMAPCommand<T> {
 	protected static final String[] ARGS_ALL = { "1:*" };
 
 	protected final IMAPFolder imapFolder;
-	
+
 	protected boolean returnDefaultValue;
 
 	private final AbstractIMAPProtocolCommand protocolCommand;
@@ -112,7 +115,14 @@ public abstract class AbstractIMAPCommand<T> {
 			Response[] r = null;
 			Response response = null;
 			for (int k = 0; k < args.length; k++) {
-				r = protocol.command(abstractIMAPCommand.getCommand(k), null);
+				{
+					final String imapCmd = abstractIMAPCommand.getCommand(k);
+					if (LOG.isDebugEnabled()) {
+						LOG.debug(new StringBuilder(imapCmd.length() + 21).append("Firing IMAP command:\n").append(
+								imapCmd).toString());
+					}
+					r = protocol.command(imapCmd, null);
+				}
 				response = r[r.length - 1];
 				try {
 					abstractIMAPCommand.handleLastResponse(response);

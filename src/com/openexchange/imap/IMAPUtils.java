@@ -54,6 +54,7 @@ import static com.openexchange.groupware.container.mail.parser.MessageUtils.remo
 import java.io.IOException;
 import java.text.Collator;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -86,6 +87,7 @@ import com.openexchange.groupware.container.mail.JSONMessageObject;
 import com.openexchange.groupware.container.mail.MessageCacheObject;
 import com.openexchange.groupware.container.mail.MessageCacheObject.DummyAddress;
 import com.openexchange.imap.OXMailException.MailCode;
+import com.openexchange.imap.command.FetchIMAPCommand;
 import com.openexchange.imap.command.IMAPNumArgSplitter;
 import com.openexchange.imap.threadsort.TreeNode;
 import com.openexchange.tools.Collections.SmartIntArray;
@@ -337,7 +339,7 @@ public class IMAPUtils {
 	 * Determines all messages in given folder which have the \UNSEEN flag set
 	 * and sorts them to criteria "REVERSE DATE"
 	 */
-	public static Message[] getNewMessages(final IMAPFolder folder) throws MessagingException {
+	public static Message[] getNewMessages(final IMAPFolder folder, final int[] fields) throws MessagingException {
 		final IMAPFolder imapFolder = folder;
 		final Message[] val = (Message[]) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 			/*
@@ -350,42 +352,44 @@ public class IMAPUtils {
 				/*
 				 * Result is something like: * SEARCH 12 20 24
 				 */
+				int[] newMsgSeqNums = null;
 				Response response = r[r.length - 1];
-				SmartIntArray tmp = new SmartIntArray(32);
-				try {
-					if (response.isOK()) {
-						for (int i = 0, len = r.length - 1; i < len; i++) {
-							if (!(r[i] instanceof IMAPResponse)) {
-								continue;
-							}
-							final IMAPResponse ir = (IMAPResponse) r[i];
-							/*
-							 * The SEARCH response from the server contains a
-							 * listing of message sequence numbers corresponding
-							 * to those messages that match the searching
-							 * criteria.
-							 */
-							if (ir.keyEquals(COMMAND_SEARCH)) {
-								String num;
-								while ((num = ir.readAtomString()) != null) {
-									try {
-										tmp.append(Integer.parseInt(num));
-									} catch (final NumberFormatException e) {
-										continue;
+				{
+					final SmartIntArray tmp = new SmartIntArray(32);
+					try {
+						if (response.isOK()) {
+							for (int i = 0, len = r.length - 1; i < len; i++) {
+								if (!(r[i] instanceof IMAPResponse)) {
+									continue;
+								}
+								final IMAPResponse ir = (IMAPResponse) r[i];
+								/*
+								 * The SEARCH response from the server contains a
+								 * listing of message sequence numbers corresponding
+								 * to those messages that match the searching
+								 * criteria.
+								 */
+								if (ir.keyEquals(COMMAND_SEARCH)) {
+									String num;
+									while ((num = ir.readAtomString()) != null) {
+										try {
+											tmp.append(Integer.parseInt(num));
+										} catch (final NumberFormatException e) {
+											continue;
+										}
 									}
 								}
+								r[i] = null;
 							}
-							r[i] = null;
+						} else {
+							throw new ProtocolException(String.format(PROTOCOL_ERROR_TEMPL, COMMAND_SEARCH));
 						}
-					} else {
-						throw new ProtocolException(String.format(PROTOCOL_ERROR_TEMPL, COMMAND_SEARCH));
+					} finally {
+						p.notifyResponseHandlers(r);
+						p.handleResult(response);
 					}
-				} finally {
-					p.notifyResponseHandlers(r);
-					p.handleResult(response);
+					newMsgSeqNums = tmp.toArray();
 				}
-				final int[] newMsgSeqNums = tmp.toArray();
-				tmp = null;
 				/*
 				 * No new messages found
 				 */
@@ -393,49 +397,17 @@ public class IMAPUtils {
 					return null;
 				}
 				/*
-				 * Sort new messages
+				 * Fetch messages and sort them
 				 */
-				{
-					final StringBuilder cmdBuilder = new StringBuilder(COMMAND_SORT_REVERSE_DATE_PEFIX)
-							.append(IMAPNumArgSplitter.splitSeqNumArg(newMsgSeqNums, false)[0]);
-					if (cmdBuilder.length() > MAX_IMAP_CMD_LENGTH) {
-						throw new ProtocolException(OXMailException.getFormattedMessage(MailCode.CMD_TOO_LARGE, Integer
-								.valueOf(MAX_IMAP_CMD_LENGTH), cmdBuilder.toString()));
-					}
-					r = p.command(cmdBuilder.toString(), null);
-				}
-				final List<Message> newMsgs = new ArrayList<Message>(newMsgSeqNums.length);
-				response = r[r.length - 1];
+				final Message[] newMsgs;
 				try {
-					if (response.isOK()) {
-						for (int i = 0, len = r.length - 1; i < len; i++) {
-							if (!(r[i] instanceof IMAPResponse)) {
-								continue;
-							}
-							IMAPResponse ir = (IMAPResponse) r[i];
-							if (ir.keyEquals(COMMAND_SORT)) {
-								String num;
-								while ((num = ir.readAtomString()) != null) {
-									try {
-										newMsgs.add(new MessageCacheObject(imapFolder.getFullName(), imapFolder
-												.getSeparator(), Integer.parseInt(num)));
-									} catch (NumberFormatException e) {
-										LOG.error(e.getMessage(), e);
-										throw new ProtocolException("Invalid Message Number: " + num);
-									} catch (MessagingException e) {
-										LOG.error(e.getMessage(), e);
-										throw new ProtocolException(e.getMessage());
-									}
-								}
-							}
-							r[i] = null;
-						}
-					}
-				} finally {
-					p.notifyResponseHandlers(r);
-					p.handleResult(response);
+					newMsgs = new FetchIMAPCommand(folder, newMsgSeqNums, fields, JSONMessageObject.FIELD_RECEIVED_DATE, false, false).doCommand();
+				} catch (final MessagingException e) {
+					throw new ProtocolException(e.getLocalizedMessage());
 				}
-				return newMsgs.toArray(new Message[newMsgs.size()]);
+				final List<Message> msgList = Arrays.asList(newMsgs);
+				Collections.sort(msgList, getComparator(JSONMessageObject.FIELD_RECEIVED_DATE, false, Locale.ENGLISH));
+				return msgList.toArray(newMsgs);			
 			}
 		});
 		return val;

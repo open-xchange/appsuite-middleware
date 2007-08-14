@@ -228,8 +228,7 @@ public final class IMAPNumArgSplitter {
 	 * <code>10031:10523,10525:11020,11022:11027,11030:11047,11050:11051,11053,11055:11558</code>
 	 * 
 	 * @param l -
-	 *            the <b>sorted</b> list of numbers; either sequence numbers or
-	 *            UIDs
+	 *            the list of numbers; either sequence numbers or UIDs
 	 * @return the number argument
 	 */
 	public static String getNumArg(final List<? extends Number> l) {

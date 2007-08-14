@@ -1,3 +1,7 @@
+* 2007-08-14 - thorben.betten@open-xchange.com
+
+ - More reliable sorting when requesting user's new messages
+
 * 2007-08-14 - marcus.klein@open-xchange.com
 
  - Marked some methods for participants deprecated to prevent coding problems.

@@ -1457,11 +1457,13 @@ public class MailInterfaceImpl implements MailInterface {
 			 */
 			Message[] newMsgs = null;
 			boolean tryAgain = true;
+			boolean fetchMessages = true;
 			if (IMAPProperties.isCapabilitiesLoaded() && IMAPProperties.getImapCapabilities().hasSort()) {
 				final long start = System.currentTimeMillis();
-				newMsgs = IMAPUtils.getNewMessages(imapCon.getImapFolder());
+				newMsgs = IMAPUtils.getNewMessages(imapCon.getImapFolder(), fields);
 				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 				tryAgain = false;
+				fetchMessages = false;
 			}
 			if (tryAgain
 					&& IMAPProperties.isCapabilitiesLoaded()
@@ -1522,18 +1524,20 @@ public class MailInterfaceImpl implements MailInterface {
 				 */
 				return SearchIteratorAdapter.createEmptyIterator();
 			}
-			if (newMsgs.length <= IMAPProperties.getMessageFetchLimit()) {
-				newMsgs = new FetchIMAPCommand(imapCon.getImapFolder(), newMsgs, IMAPUtils.getDefaultFetchProfile(),
-						false, true).doCommand();
-			} else {
-				newMsgs = new FetchIMAPCommand(imapCon.getImapFolder(), newMsgs, fields, sortCol, false, true)
-						.doCommand();
+			if (fetchMessages) {
+				if (newMsgs.length <= IMAPProperties.getMessageFetchLimit()) {
+					newMsgs = new FetchIMAPCommand(imapCon.getImapFolder(), newMsgs,
+							IMAPUtils.getDefaultFetchProfile(), false, true).doCommand();
+				} else {
+					newMsgs = new FetchIMAPCommand(imapCon.getImapFolder(), newMsgs, fields, sortCol, false, true)
+							.doCommand();
+				}
 			}
 			if (limit > 0) {
 				final int newLength = Math.min(limit, newMsgs.length);
 				final Message[] retval = new Message[newLength];
-				for (int i = 0; i < newLength; i++) {
-					retval[i] = newMsgs[i];
+				for (int i = 0/* , j = newMsgs.length - limit */; i < newLength; i++) {
+					retval[i] = newMsgs[i/* j++ */];
 				}
 				return SearchIteratorAdapter.createArrayIterator(retval);
 			}
@@ -1726,6 +1730,8 @@ public class MailInterfaceImpl implements MailInterface {
 		}
 	}
 
+	private static final Message[] EMPTY_MSGS = new Message[0];
+
 	private final Message[] searchMessages(final Folder folder, final int[] searchCols, final String[] searchPatterns,
 			final boolean linkWithOR, final int[] fields, final int sortCol) throws MessagingException, OXException,
 			IMAPException {
@@ -1746,17 +1752,21 @@ public class MailInterfaceImpl implements MailInterface {
 							Integer.valueOf(searchPatterns.length));
 				}
 				final SearchTerm searchTerm = IMAPUtils.getSearchTerm(searchCols, searchPatterns, linkWithOR);
-				msgs = imapFolder.search(searchTerm);
-				if (msgs.length < IMAPProperties.getMessageFetchLimit()) {
-					msgs = new FetchIMAPCommand(imapFolder, msgs, IMAPUtils.getDefaultFetchProfile(), false, false)
-							.doCommand();
+				final int[] matchSeqNums = imapFolder.getProtocol().search(searchTerm);
+				if (null == matchSeqNums || matchSeqNums.length == 0) {
+					return EMPTY_MSGS;
+				}
+				// msgs = imapFolder.search(searchTerm);
+				if (matchSeqNums.length < IMAPProperties.getMessageFetchLimit()) {
+					msgs = new FetchIMAPCommand(imapFolder, matchSeqNums, IMAPUtils.getDefaultFetchProfile(), false,
+							false).doCommand();
 				} else {
-					msgs = new FetchIMAPCommand(imapFolder, msgs, fields, sortCol, false, false).doCommand();
+					msgs = new FetchIMAPCommand(imapFolder, matchSeqNums, fields, sortCol, false, false).doCommand();
 				}
 				applicationSearch = false;
 			} catch (final Throwable t) {
 				if (LOG.isWarnEnabled()) {
-					LOG.warn(new OXMailException(MailCode.IMAP_SEARCH_FAILED, t.getMessage()).getMessage());
+					LOG.warn(new OXMailException(MailCode.IMAP_SEARCH_FAILED, t, t.getMessage()).getMessage());
 				}
 				applicationSearch = true;
 			}
@@ -1964,14 +1974,8 @@ public class MailInterfaceImpl implements MailInterface {
 				throw new OXMailException(MailCode.NO_ACCESS, getUserName(sessionObj), imapCon.getImapFolder()
 						.getFullName());
 			}
-			final Message[] msgs;
-			if (uids.length < IMAPProperties.getMessageFetchLimit()) {
-				msgs = new FetchIMAPCommand(imapCon.getImapFolder(), uids, IMAPUtils.getDefaultFetchProfile(), false,
-						true).doCommand();
-			} else {
-				msgs = new FetchIMAPCommand(imapCon.getImapFolder(), uids, fields, -1, false, true).doCommand();
-			}
-
+			final Message[] msgs = new FetchIMAPCommand(imapCon.getImapFolder(), uids, fields, -1, false, true)
+					.doCommand();
 			/*
 			 * Force message cache update
 			 */

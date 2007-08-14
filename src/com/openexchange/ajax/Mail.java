@@ -409,7 +409,6 @@ public class Mail extends PermissionServlet implements UploadListener {
 				if (closeMailInterface && mailInterface != null) {
 					mailInterface.close(true);
 				}
-				mailInterface = null;
 			}
 		} catch (OXMailException e) {
 			LOG.error(e.getMessage(), e);
@@ -590,7 +589,6 @@ public class Mail extends PermissionServlet implements UploadListener {
 				if (closeMailInterface && mailInterface != null) {
 					mailInterface.close(true);
 				}
-				mailInterface = null;
 			}
 		} catch (OXMailException e) {
 			LOG.error(e.getMessage(), e);
@@ -607,7 +605,6 @@ public class Mail extends PermissionServlet implements UploadListener {
 			if (it != null) {
 				it.close();
 			}
-			it = null;
 		}
 		/*
 		 * Close response and flush print writer
@@ -668,7 +665,6 @@ public class Mail extends PermissionServlet implements UploadListener {
 			} finally {
 				if (closeMailInterface && mailInterface != null) {
 					mailInterface.close(true);
-					mailInterface = null;
 				}
 			}
 		} catch (OXMailException e) {
@@ -728,20 +724,17 @@ public class Mail extends PermissionServlet implements UploadListener {
 			 */
 			MailInterface mailInterface = mailInterfaceArg;
 			boolean closeMailInterface = false;
-			MailWriter mailWriter = null;
 			try {
 				if (mailInterface == null) {
 					mailInterface = MailInterfaceImpl.getInstance(sessionObj);
 					closeMailInterface = true;
 				}
-				mailWriter = new MailWriter(jsonWriter, sessionObj);
-				mailWriter.writeJSONMessageObject(mailInterface.getForwardMessageForDisplay(mailIdentifier.folder,
-						mailIdentifier.msgUID));
+				new MailWriter(jsonWriter, sessionObj).writeJSONMessageObject(mailInterface
+						.getForwardMessageForDisplay(mailIdentifier.folder, mailIdentifier.msgUID));
 				valueWritten = true;
 			} finally {
 				if (closeMailInterface && mailInterface != null) {
 					mailInterface.close(true);
-					mailInterface = null;
 				}
 			}
 		} catch (OXMailException e) {
@@ -862,7 +855,6 @@ public class Mail extends PermissionServlet implements UploadListener {
 			} finally {
 				if (closeMailInterface && mailInterface != null) {
 					mailInterface.close(true);
-					mailInterface = null;
 				}
 			}
 		} catch (OXMailException e) {
@@ -978,7 +970,6 @@ public class Mail extends PermissionServlet implements UploadListener {
 			} finally {
 				if (closeMailInterface && mailInterface != null) {
 					mailInterface.close(true);
-					mailInterface = null;
 				}
 			}
 		} catch (OXMailException e) {
@@ -995,7 +986,6 @@ public class Mail extends PermissionServlet implements UploadListener {
 		} finally {
 			if (it != null) {
 				it.close();
-				it = null;
 			}
 		}
 		/*
@@ -1063,7 +1053,6 @@ public class Mail extends PermissionServlet implements UploadListener {
 			} finally {
 				if (closeMailInterface && mailInterface != null) {
 					mailInterface.close(true);
-					mailInterface = null;
 				}
 			}
 		} catch (OXMailException e) {
@@ -1199,7 +1188,6 @@ public class Mail extends PermissionServlet implements UploadListener {
 					} finally {
 						if (contentInputStream != null) {
 							contentInputStream.close();
-							contentInputStream = null;
 						}
 					}
 				} else if (mao.getContentID() == JSONMessageAttachmentObject.CONTENT_BYTE_ARRAY) {
@@ -1223,7 +1211,6 @@ public class Mail extends PermissionServlet implements UploadListener {
 			} finally {
 				if (mailInterface != null) {
 					mailInterface.close(true);
-					mailInterface = null;
 				}
 			}
 		} catch (final Exception e) {
@@ -1363,7 +1350,6 @@ public class Mail extends PermissionServlet implements UploadListener {
 					if (closeMailInterface && mailInterface != null) {
 						mailInterface.close(true);
 					}
-					mailInterface = null;
 				}
 			}
 		} catch (final AbstractOXException e) {
@@ -1503,7 +1489,6 @@ public class Mail extends PermissionServlet implements UploadListener {
 					if (closeMailInterface && mailInterface != null) {
 						mailInterface.close(true);
 					}
-					mailInterface = null;
 				}
 			}
 		} catch (OXMailException e) {
@@ -1521,7 +1506,6 @@ public class Mail extends PermissionServlet implements UploadListener {
 			if (it != null) {
 				it.close();
 			}
-			it = null;
 		}
 		/*
 		 * Close response and flush print writer
@@ -1637,7 +1621,6 @@ public class Mail extends PermissionServlet implements UploadListener {
 					} finally {
 						if (closeMailInterface && mailInterface != null) {
 							mailInterface.close(true);
-							mailInterface = null;
 						}
 					}
 				}
@@ -1777,7 +1760,6 @@ public class Mail extends PermissionServlet implements UploadListener {
 			} finally {
 				if (closeMailInterface && mailInterface != null) {
 					mailInterface.close(true);
-					mailInterface = null;
 				}
 			}
 		} catch (OXMailException e) {
@@ -1901,7 +1883,6 @@ public class Mail extends PermissionServlet implements UploadListener {
 			} finally {
 				if (closeMailInterface && mailInterface != null) {
 					mailInterface.close(true);
-					mailInterface = null;
 				}
 			}
 		} catch (OXMailException e) {
@@ -1982,7 +1963,6 @@ public class Mail extends PermissionServlet implements UploadListener {
 			} finally {
 				if (closeMailInterface && mailInterface != null) {
 					mailInterface.close(true);
-					mailInterface = null;
 				}
 			}
 		} catch (OXMailException e) {
@@ -2052,7 +2032,6 @@ public class Mail extends PermissionServlet implements UploadListener {
 			} finally {
 				if (closeMailInterface && mailInterface != null) {
 					mailInterface.close(true);
-					mailInterface = null;
 				}
 			}
 		} catch (OXMailException e) {
@@ -2111,7 +2090,6 @@ public class Mail extends PermissionServlet implements UploadListener {
 			} finally {
 				if (closeMailInterface && mailInterface != null) {
 					mailInterface.close(true);
-					mailInterface = null;
 				}
 			}
 		} catch (OXMailException e) {
@@ -2170,7 +2148,6 @@ public class Mail extends PermissionServlet implements UploadListener {
 			} finally {
 				if (closeMailInterface && mailInterface != null) {
 					mailInterface.close(true);
-					mailInterface = null;
 				}
 			}
 		} catch (OXMailException e) {
@@ -2310,7 +2287,6 @@ public class Mail extends PermissionServlet implements UploadListener {
 			} finally {
 				if (closeMailInterface && mailInterface != null) {
 					mailInterface.close(true);
-					mailInterface = null;
 				}
 				if (db != null) {
 					db.finish();
@@ -2379,7 +2355,6 @@ public class Mail extends PermissionServlet implements UploadListener {
 			} finally {
 				if (closeMailInterface && mailInterface != null) {
 					mailInterface.close(true);
-					mailInterface = null;
 				}
 			}
 		} catch (OXMailException e) {
@@ -2457,8 +2432,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 				if (mailInterface != null) {
 					try {
 						mailInterface.close(true);
-						mailInterface = null;
-					} catch (Exception e) {
+					} catch (final Exception e) {
 						LOG.error(e.getMessage(), e);
 					}
 				}
