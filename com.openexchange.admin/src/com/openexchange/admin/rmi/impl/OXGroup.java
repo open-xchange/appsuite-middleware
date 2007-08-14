@@ -275,15 +275,15 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
                 throw new InvalidDataException("Mandatory fields not set: " + grp.getUnsetMembers());
             }
 
-            if (grp.getName() != null && prop.getGroupProp(AdminProperties.Group.AUTO_LOWERCASE, true)) {
+            if (null != grp.getName() && prop.getGroupProp(AdminProperties.Group.AUTO_LOWERCASE, true)) {
                 grp.setName(grp.getName().toLowerCase());
             }
 
-            if (grp.getName() != null && prop.getGroupProp(AdminProperties.Group.CHECK_NOT_ALLOWED_CHARS, true)) {
+            if (null != grp.getName() && prop.getGroupProp(AdminProperties.Group.CHECK_NOT_ALLOWED_CHARS, true)) {
                 validateGroupName(grp.getName());
             }
 
-            // if members sent, check exist
+            // if members sent, check existence
             if (grp.getMembers() != null && grp.getMembers().length > 0) {
                 final Integer[] mems = grp.getMembers();
                 final int[] tmp_mems = new int[mems.length];
@@ -301,7 +301,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
                 throw new NoSuchGroupException("No such group");
             }
             
-            if(grp.getName()!=null && tool.existsGroupName(ctx, grp)){
+            if (grp.getName() != null && tool.existsGroupName(ctx, grp)) {
                 throw new InvalidDataException("Group " + grp.getName() + " already exists in this context");
             }
 
