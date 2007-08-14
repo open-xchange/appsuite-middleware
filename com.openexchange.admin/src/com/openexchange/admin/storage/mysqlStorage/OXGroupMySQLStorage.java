@@ -263,15 +263,16 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
                 prep_edit_group.close();
             }
             // check for members and add them after deleting old ones, cause we overwrite the members in this method (change)
-            if (grp.getMembers() != null) {
+            final Integer[] members = grp.getMembers();
+            if (members != null) {
                 // first delete all old members
                 prep_edit_group = con.prepareStatement("DELETE FROM groups_member WHERE cid = ? AND id = ?");
                 prep_edit_group.setInt(1, context_id);
                 prep_edit_group.setInt(2, group_id);
                 prep_edit_group.executeUpdate();
                 prep_edit_group.close();
-                
-                Integer[] as = grp.getMembers();
+
+                Integer[] as = members;
                 for (final Integer member_id : as) {
                     prep_edit_group = con.prepareStatement("INSERT INTO groups_member (cid,id,member) VALUES (?,?,?)");
                     prep_edit_group.setInt(1, context_id);
@@ -280,6 +281,12 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
                     prep_edit_group.executeUpdate();
                     prep_edit_group.close();
                 }                
+            } else if (null == members && grp.isMembersset()) {
+                prep_edit_group = con.prepareStatement("DELETE FROM groups_member WHERE cid = ? AND id = ?");
+                prep_edit_group.setInt(1, context_id);
+                prep_edit_group.setInt(2, group_id);
+                prep_edit_group.executeUpdate();
+                prep_edit_group.close();
             }
 
             // set last modified
