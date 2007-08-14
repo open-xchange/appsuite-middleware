@@ -207,9 +207,8 @@ public final class TaskTools extends Assert {
      */
     public static Response updateTask(final WebConversation conversation,
         final String hostName, final String sessionId, final int folderId,
-        final int taskId,
-        final JSONObject json, final Date lastModified) throws JSONException,
-        IOException, SAXException {
+        final int taskId, final JSONObject json, final Date lastModified)
+        throws JSONException, IOException, SAXException {
         LOG.trace("Updating task.");
         final String object = json.toString();
         LOG.trace(object);
@@ -243,8 +242,8 @@ public final class TaskTools extends Assert {
         final String hostName, final String sessionId, final int folderId,
         final Task task, final Date lastModified) throws JSONException,
         IOException, SAXException, AjaxException, ConfigurationException {
-        final TimeZone timeZone = getUserTimeZone(conversation, hostName,
-            sessionId);
+        final TimeZone timeZone = new AJAXClient(new AJAXSession(conversation,
+            sessionId)).getTimeZone();
 		final JSONObject jsonObj = new JSONObject();
         new TaskWriter( timeZone).writeTask(task, jsonObj);
         return updateTask(conversation, hostName, sessionId, folderId, task
@@ -264,15 +263,6 @@ public final class TaskTools extends Assert {
     }
 
     /**
-     * @deprecated Use {@link AJAXClient#getTimeZone()}.
-     */
-    public static TimeZone getUserTimeZone(final WebConversation conversation,
-        final String hostName, final String sessionId) throws IOException,
-        SAXException, JSONException, AjaxException, ConfigurationException {
-        return ConfigTools.getTimeZone(conversation, hostName, sessionId);
-    }
-
-    /**
      * @deprecated use {@link #get(AJAXSession, GetRequest)}
      */
     public static Response getTask(final WebConversation conversation,
@@ -280,25 +270,12 @@ public final class TaskTools extends Assert {
         final int taskId) throws IOException, SAXException, JSONException,
         OXException, AjaxException, ConfigurationException {
         LOG.trace("Getting task.");
-        final WebRequest req = new GetMethodWebRequest(AbstractAJAXTest.PROTOCOL
-            + hostName + TASKS_URL);
-        req.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET);
-        req.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
-        req.setParameter(AJAXServlet.PARAMETER_INFOLDER,
-            String.valueOf(folderId));
-        req.setParameter(AJAXServlet.PARAMETER_ID, String.valueOf(taskId));
-        final WebResponse resp = conversation.getResponse(req);
-        assertEquals("Response code is not okay.", HttpServletResponse.SC_OK,
-            resp.getResponseCode());
-        final String body = resp.getText();
-        LOG.trace("Body: \"" + body + "\"");
-        final Response response = Response.parse(body);
-        assertFalse(response.getErrorMessage(), response.hasError());
-        final Task task = new Task();
-        final TimeZone timeZone = getUserTimeZone(conversation, hostName,
-            sessionId);
-        new TaskParser(timeZone).parse(task, (JSONObject) response.getData());
-        response.setData(task);
+        final AJAXClient client = new AJAXClient(new AJAXSession(conversation,
+            sessionId));
+        final GetResponse getR = get(client, new GetRequest(folderId,
+            taskId));
+        final Response response = getR.getResponse();
+        response.setData(getR.getTask(client.getTimeZone()));
         return response;
     }
 
@@ -434,48 +411,6 @@ public final class TaskTools extends Assert {
         }
         req.setParameter(AJAXServlet.PARAMETER_TIMESTAMP,
             String.valueOf(lastModified.getTime()));
-        final WebResponse resp = conversation.getResponse(req);
-        assertEquals("Response code is not okay.", HttpServletResponse.SC_OK,
-            resp.getResponseCode());
-        final String body = resp.getText();
-        LOG.trace("Response body: " + body);
-        final Response response = Response.parse(body);
-        assertFalse(response.getErrorMessage(), response.hasError());
-        return response;
-    }
-
-    /**
-     * @deprecated Use {@link #list(AJAXClient, ListRequest)}.
-     */
-    public static Response getTaskList(final WebConversation conversation,
-        final String hostName, final String sessionId,
-        final int[][] folderAndTaskIds, final int[] columns)
-        throws IOException, SAXException, JSONException {
-        LOG.trace("Get a list of tasks.");
-        final JSONArray json = new JSONArray();
-        for (int[] folderAndTask : folderAndTaskIds) {
-            final JSONObject json2 = new JSONObject();
-            json2.put(TaskFields.ID, folderAndTask[1]);
-            json2.put(AJAXServlet.PARAMETER_INFOLDER, folderAndTask[0]);
-            json.put(json2);
-        }
-        final ByteArrayInputStream bais = new ByteArrayInputStream(json
-            .toString().getBytes(ENCODING));
-        final URLParameter parameter = new URLParameter();
-        parameter.setParameter(AJAXServlet.PARAMETER_ACTION,
-            AJAXServlet.ACTION_LIST);
-        parameter.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
-        final StringBuilder columnString = new StringBuilder();
-        for (int i : columns) {
-            columnString.append(i);
-            columnString.append(',');
-        }
-        columnString.delete(columnString.length() - 1, columnString.length());
-        parameter.setParameter(AJAXServlet.PARAMETER_COLUMNS,
-            columnString.toString());
-        final WebRequest req = new PutMethodWebRequest(AbstractAJAXTest.PROTOCOL
-            + hostName + TASKS_URL + parameter.getURLParameters(), bais,
-            AJAXServlet.CONTENTTYPE_JAVASCRIPT);
         final WebResponse resp = conversation.getResponse(req);
         assertEquals("Response code is not okay.", HttpServletResponse.SC_OK,
             resp.getResponseCode());

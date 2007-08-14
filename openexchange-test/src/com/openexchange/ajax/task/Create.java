@@ -72,45 +72,11 @@ import junit.framework.Assert;
  */
 public class Create extends Assert {
 
-    static final String EURO = String.valueOf('\u20ac');
-
     /**
      * Prevent instanciation.
      */
     private Create() {
         super();
-    }
-
-    /**
-     * @deprecated use {@link InsertRequest} and {@link InsertResponse}.
-     */
-    public static int createPrivateTask(final WebConversation conv,
-        final String host, final String session, final int folderId,
-        final Task task) throws OXException, IOException, SAXException,
-        JSONException, AjaxException, ConfigurationException {
-        task.setParentFolderID(folderId);
-        return extractInsertId(insertTask(conv, host, session, task));
-    }
-    
-    /**
-     * @deprecated use {@link InsertRequest} and {@link InsertResponse}.
-     */
-    public static int createPrivateTask(final WebConversation conv,
-        final String host, final String session, final int folderId)
-        throws OXException, IOException, SAXException, JSONException, AjaxException, ConfigurationException {
-        final Task task = createTask();
-        return createPrivateTask(conv, host, session, folderId, task);
-    }
-
-    /**
-     * @deprecated use {@link InsertRequest} and {@link InsertResponse}.
-     */
-    public static int createPrivateTask(final WebConversation conv,
-        final String host, final String session) throws OXException,
-        IOException, SAXException, JSONException, AjaxException, ConfigurationException {
-        final int folderId = TaskTools.getPrivateTaskFolder(conv, host,
-            session);
-        return createPrivateTask(conv, host, session, folderId);
     }
 
     public static Task createTask() {
@@ -130,7 +96,7 @@ public class Create extends Assert {
         task.setActualDuration(1440);
         task.setTargetCosts(1.0f);
         task.setActualCosts(1.0f);
-        task.setCurrency(EURO);
+        task.setCurrency("\u20ac");
         task.setTripMeter("trip meter");
         task.setBillingInformation("billing information");
         task.setCompanies("companies");
