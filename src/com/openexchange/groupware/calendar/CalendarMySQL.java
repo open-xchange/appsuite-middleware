@@ -1097,7 +1097,10 @@ class CalendarMySQL implements CalendarSqlImp {
                 int lasttype = -1;
                 for (int a = 0; a < p.length; a++) {
                     if (p[a].getIdentifier() == 0 && p[a].getType() == Participant.EXTERNAL_USER && p[a].getEmailAddress() != null) {
-                        p[a].setIdentifier(p[a].getEmailAddress().hashCode());
+                        ExternalUserParticipant eup = new ExternalUserParticipant(p[a].getEmailAddress());
+                        eup.setIdentifier(p[a].getEmailAddress().hashCode());
+                        eup.setDisplayName(p[a].getDisplayName());
+                        p[a] = eup;
                     }
                     if (!(lastid == p[a].getIdentifier() && lasttype == p[a].getType())) {
                         lastid = p[a].getIdentifier();
@@ -1266,37 +1269,41 @@ class CalendarMySQL implements CalendarSqlImp {
                 final int id = rs.getInt(2);
                 final int type = rs.getInt(3);
                 if (type == Participant.USER) {
-                    participant = new UserParticipant();
-                    participant.setIdentifier(id);
+                    participant = new UserParticipant(id);
                 } else if (type == Participant.GROUP) {
-                    participant = new GroupParticipant();
-                    participant.setIdentifier(id);
+                    participant = new GroupParticipant(id);
                 } else if (type == Participant.RESOURCE) {
-                    participant = new ResourceParticipant();
-                    participant.setIdentifier(id);
+                    participant = new ResourceParticipant(id);
                     cdao.setContainsResources(true);
                 } else if (type == Participant.RESOURCEGROUP) {
-                    participant = new ResourceGroupParticipant();
-                    participant.setIdentifier(id);
+                    participant = new ResourceGroupParticipant(id);
                 } else if (type == Participant.EXTERNAL_USER) {
-                    participant = new ExternalUserParticipant();
                     String temp = rs.getString(4);
-                    if (!rs.wasNull()) {
-                        participant.setDisplayName(temp);
+                    if (rs.wasNull()) {
+                        temp = null;
                     }
-                    temp = rs.getString(5);
+                    String temp2 = rs.getString(5);
                     if (!rs.wasNull()) {
-                        participant.setEmailAddress(temp);
+                        participant = new ExternalUserParticipant(temp2);
+                        if (temp != null) {
+                            participant.setDisplayName(temp);
+                        }
+                    } else {
+                        participant = null;
                     }
                 } else if (type == Participant.EXTERNAL_GROUP) {
-                    participant = new ExternalGroupParticipant();
                     String temp = rs.getString(4);
-                    if (!rs.wasNull()) {
-                        participant.setDisplayName(temp);
+                    if (rs.wasNull()) {
+                        temp = null;
                     }
-                    temp = rs.getString(5);
+                    String temp2 = rs.getString(5);
                     if (!rs.wasNull()) {
-                        participant.setEmailAddress(temp);
+                        participant = new ExternalGroupParticipant(temp2);
+                        if (temp != null) {
+                            participant.setDisplayName(temp);
+                        }
+                    } else {
+                        participant = null;
                     }
                 } else {
                     LOG.warn("Unknown type detected for Participant :"+type);
@@ -1329,37 +1336,41 @@ class CalendarMySQL implements CalendarSqlImp {
                 final int id = rs.getInt(1);
                 final int type = rs.getInt(2);
                 if (type == Participant.USER) {
-                    participant = new UserParticipant();
-                    participant.setIdentifier(id);
+                    participant = new UserParticipant(id);
                 } else if (type == Participant.GROUP) {
-                    participant = new GroupParticipant();
-                    participant.setIdentifier(id);
+                    participant = new GroupParticipant(id);
                 } else if (type == Participant.RESOURCE) {
-                    participant = new ResourceParticipant();
-                    participant.setIdentifier(id);
+                    participant = new ResourceParticipant(id);
                     cdao.setContainsResources(true);
                 } else if (type == Participant.RESOURCEGROUP) {
-                    participant = new ResourceGroupParticipant();
-                    participant.setIdentifier(id);
+                    participant = new ResourceGroupParticipant(id);
                 } else if (type == Participant.EXTERNAL_USER) {
-                    participant = new ExternalUserParticipant();
                     String temp = rs.getString(3);
-                    if (!rs.wasNull()) {
-                        participant.setDisplayName(temp);
+                    if (rs.wasNull()) {
+                        temp = null;
                     }
-                    temp = rs.getString(4);
+                    String temp2 = rs.getString(4);
                     if (!rs.wasNull()) {
-                        participant.setEmailAddress(rs.getString(4));
+                        participant = new ExternalUserParticipant(temp2);
+                        if (temp != null) {
+                            participant.setDisplayName(temp);
+                        }
+                    } else {
+                        participant = null;
                     }
                 } else if (type == Participant.EXTERNAL_GROUP) {
-                    participant = new ExternalGroupParticipant();
                     String temp = rs.getString(3);
-                    if (!rs.wasNull()) {
-                        participant.setDisplayName(temp);
+                    if (rs.wasNull()) {
+                        temp = null;
                     }
-                    temp = rs.getString(4);
+                    String temp2 = rs.getString(4);
                     if (!rs.wasNull()) {
-                        participant.setEmailAddress(rs.getString(4));
+                        participant = new ExternalGroupParticipant(temp2);
+                        if (temp != null) {
+                            participant.setDisplayName(temp);
+                        }
+                    } else {
+                        participant = null;
                     }
                 } else {
                     LOG.warn("Unknown type detected for Participant :"+type);
@@ -1403,9 +1414,8 @@ class CalendarMySQL implements CalendarSqlImp {
                     last_oid = oid;
                     cdao = CalendarCommonCollection.getDAOFromList(al, oid);
                 }
-                up = new UserParticipant();
                 final int tuid = rs.getInt(2);
-                up.setIdentifier(tuid);
+                up = new UserParticipant(tuid);
                 up.setConfirm(rs.getInt(3));
                 temp = rs.getString(4);
                 if (!rs.wasNull()) {
@@ -1475,9 +1485,8 @@ class CalendarMySQL implements CalendarSqlImp {
         String temp = null;
         try {
             while (rs.next()) {
-                final UserParticipant up = new UserParticipant();
                 final int tuid = rs.getInt(1);
-                up.setIdentifier(tuid);
+                final UserParticipant up = new UserParticipant(tuid);
                 up.setConfirm(rs.getInt(2));
                 temp = rs.getString(3);
                 if (!rs.wasNull()) {
@@ -1872,7 +1881,10 @@ class CalendarMySQL implements CalendarSqlImp {
                 int lasttype = -1;
                 for (int a = 0; a < new_participants.length; a++) {
                     if (new_participants[a].getIdentifier() == 0 && new_participants[a].getType() == Participant.EXTERNAL_USER && new_participants[a].getEmailAddress() != null) {
-                        new_participants[a].setIdentifier(new_participants[a].getEmailAddress().hashCode());
+                        ExternalUserParticipant eup = new ExternalUserParticipant(new_participants[a].getEmailAddress());
+                        eup.setIdentifier(new_participants[a].getEmailAddress().hashCode());
+                        eup.setDisplayName(new_participants[a].getDisplayName());
+                        new_participants[a] = eup;
                     }
                     if (!(lastid == new_participants[a].getIdentifier() && lasttype == new_participants[a].getType())) {
                         lastid = new_participants[a].getIdentifier();
