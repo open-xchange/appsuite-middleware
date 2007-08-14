@@ -1740,6 +1740,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 					}
 					Collections.sort(l, MailIdentifier.getMailIdentifierComparator());
 					String lastFld = l.get(0).folder;
+					final boolean cachedUserMsgs = MessageCacheManager.getInstance().containsUserMessages(sessionObj);
 					final SmartLongArray arr = new SmartLongArray(length);
 					for (int i = 0; i < length; i++) {
 						final MailIdentifier current = l.get(i);
@@ -1747,14 +1748,36 @@ public class Mail extends PermissionServlet implements UploadListener {
 							/*
 							 * Delete all collected UIDs til here and reset
 							 */
-							mailInterface.deleteMessages(lastFld, arr.toArray(), hardDelete);
+							final long[] uids = arr.toArray();
+							mailInterface.deleteMessages(lastFld, uids, hardDelete);
+							/*
+							 * Clear cache
+							 */
+							if (cachedUserMsgs) {
+								final Map<String, MessageCacheObject> msgMap = MessageCacheManager.getInstance()
+										.getUserMessageMap(sessionObj);
+								for (int j = 0; j < uids.length; j++) {
+									msgMap.remove(MessageCacheManager.getMsgKey(uids[j], lastFld));
+								}
+							}
 							arr.reset();
 							lastFld = current.folder;
 						}
 						arr.append(current.msgUID);
 					}
 					if (arr.size() > 0) {
-						mailInterface.deleteMessages(lastFld, arr.toArray(), hardDelete);
+						final long[] uids = arr.toArray();
+						mailInterface.deleteMessages(lastFld, uids, hardDelete);
+						/*
+						 * Clear cache
+						 */
+						if (cachedUserMsgs) {
+							final Map<String, MessageCacheObject> msgMap = MessageCacheManager.getInstance()
+									.getUserMessageMap(sessionObj);
+							for (int j = 0; j < uids.length; j++) {
+								msgMap.remove(MessageCacheManager.getMsgKey(uids[j], lastFld));
+							}
+						}
 					}
 				}
 			} finally {
