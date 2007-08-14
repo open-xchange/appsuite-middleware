@@ -98,7 +98,7 @@ public class ReplyTextMessageHandler implements MessageHandler {
 
 	private static final Pattern PATTERN_HTML_END = Pattern.compile("</html>", Pattern.CASE_INSENSITIVE);
 
-	private static final String BLOCKQUOTE_START = "<blockquote type=\"cite\">\n";
+	private static final String BLOCKQUOTE_START = "<blockquote type=\"cite\" style=\"margin-left: 0px; padding-left: 10px; border-left: solid 1px blue;\">\n";
 
 	private static final String BLOCKQUOTE_END = "</blockquote>\n<br>&nbsp;";
 	
