@@ -90,7 +90,7 @@ public class VCardImportTest extends AbstractVCardTest {
 		assertTrue("Should have an error" , results.get(0).hasError() );
 		final OXException e = results.get(0).getException();
 		assertEquals("Should be truncation error" , Category.TRUNCATED , e.getCategory());
-		assertEquals("GIVEN NAME was too long" , ContactField.SUR_NAME.getReadableName() , e.getMessageArgs()[0]);
+		assertEquals("GIVEN NAME was too long" , ContactField.SUR_NAME.getVCardElementName() , e.getMessageArgs()[0]);
 	}
 	
 	/*
