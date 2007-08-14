@@ -50,26 +50,20 @@
 package com.openexchange.ajax.task;
 
 import java.util.Date;
-import java.util.TimeZone;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.ajax.config.ConfigTools;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXSession;
+import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.MultipleRequest;
 import com.openexchange.ajax.framework.MultipleResponse;
-import com.openexchange.ajax.task.actions.AbstractTaskRequest;
 import com.openexchange.ajax.task.actions.AllRequest;
-import com.openexchange.ajax.task.actions.AllResponse;
 import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.GetRequest;
 import com.openexchange.ajax.task.actions.GetResponse;
 import com.openexchange.ajax.task.actions.InsertRequest;
 import com.openexchange.ajax.task.actions.InsertResponse;
-import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.groupware.tasks.Task;
 
 /**
@@ -115,7 +109,7 @@ public final class AllTest extends AbstractTaskTest {
             getSession(), new MultipleRequest(gets));
         final int[] columns = new int[] { Task.TITLE, Task.OBJECT_ID,
             Task.LAST_MODIFIED, Task.FOLDER_ID, Task.PARTICIPANTS, Task.ALARM };
-        final AllResponse allR = TaskTools.all(getSession(), new AllRequest(
+        final CommonAllResponse allR = TaskTools.all(getSession(), new AllRequest(
             getPrivateFolder(), columns, 0, null));
         final DeleteRequest[] deletes = new DeleteRequest[inserts.length];
         for (int i = 0; i < inserts.length; i++) {

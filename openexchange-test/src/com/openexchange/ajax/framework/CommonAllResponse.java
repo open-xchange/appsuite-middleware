@@ -47,22 +47,59 @@
  *
  */
 
-package com.openexchange.ajax.task.actions;
+package com.openexchange.ajax.framework;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
 
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class AllResponse extends AbstractAJAXResponse {
+public class CommonAllResponse extends AbstractAJAXResponse implements
+    Iterable<Object[]> {
+
+    private final int[] columns;
+
+    private Object[][] array;
 
     /**
      * @param response
      */
-    public AllResponse(final Response response) {
+    public CommonAllResponse(final Response response, final int[] columns) {
         super(response);
+        this.columns = columns;
     }
 
+    /**
+     * @return the array
+     */
+    public Object[][] getArray() {
+        return array;
+    }
+
+    /**
+     * @param array the array to set
+     */
+    void setArray(final Object[][] array) {
+        this.array = array;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Iterator<Object[]> iterator() {
+        return Collections.unmodifiableList(Arrays.asList(array)).iterator();
+    }
+
+    public Object getValue(final int row, final int attributeId) {
+        return array[row][getColumnPos(attributeId)];
+    }
+
+    private int getColumnPos(final int attributeId) {
+        return Arrays.asList(columns).indexOf(attributeId);
+    }
 }

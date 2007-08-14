@@ -47,33 +47,49 @@
  *
  */
 
-package com.openexchange.ajax.task.actions;
+package com.openexchange.ajax.framework;
 
-import com.openexchange.ajax.framework.CommonAllRequest;
-import com.openexchange.groupware.search.Order;
-import com.openexchange.groupware.tasks.Task;
+import org.json.JSONArray;
+import org.json.JSONException;
+
+import com.openexchange.ajax.container.Response;
 
 /**
- * Contains the data for an task all request.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class AllRequest extends CommonAllRequest {
+public class CommonAllParser extends AbstractAJAXParser {
 
-    public static final int[] GUI_COLUMNS = new int[] {
-        Task.OBJECT_ID,
-        Task.FOLDER_ID
-    };
-
-    public static final int GUI_SORT = Task.END_DATE;
-
-    public static final Order GUI_ORDER = Order.DESCENDING;
+    private final int[] columns;
 
     /**
      * Default constructor.
      */
-    public AllRequest(final int folderId, final int[] columns, final int sort,
-        final Order order) {
-        super(AbstractTaskRequest.TASKS_URL, folderId, columns, sort, order,
-            true);
+    CommonAllParser(final boolean failOnError, final int[] columns) {
+        super(failOnError);
+        this.columns = columns;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected CommonAllResponse createResponse(final Response response)
+        throws JSONException {
+        final CommonAllResponse retval = new CommonAllResponse(response,
+            columns);
+        if (isFailOnError()) {
+            final JSONArray array = (JSONArray) retval.getData();
+            final Object[][] values = new Object[array.length()][];
+            for (int i = 0; i < array.length(); i++) {
+                final JSONArray inner = array.getJSONArray(i);
+                values[i] = new Object[inner.length()];
+                for (int j = 0; j < inner.length(); i++) {
+                    values[i][j] = inner.get(j);
+                }
+            }
+            retval.setArray(values);
+        }
+        return retval;
     }
 }
