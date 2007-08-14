@@ -197,9 +197,6 @@ public class ResourceTest extends AbstractTest{
         }
         
         createdresource.setDescription(null);
-        createdresource.setDisplayname(null);
-        createdresource.setEmail(null);
-        createdresource.setName(null);
         
         // change on server
         oxres.change(ctx,createdresource,DummyCredentials());
