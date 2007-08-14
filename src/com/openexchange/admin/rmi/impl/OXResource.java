@@ -47,7 +47,7 @@
  *
  */
 /*
- * $Id: OXResource.java,v 1.49 2007/08/13 12:43:58 cutmasta Exp $
+ * $Id: OXResource.java,v 1.50 2007/08/14 09:44:03 cutmasta Exp $
  */
 package com.openexchange.admin.rmi.impl;
 
@@ -138,6 +138,9 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
         
         try {
             setIdOrGetIDFromNameAndIdObject(ctx, res);
+            
+            res.testMandatoryCreateFieldsNull();
+            
             final int resource_ID = res.getId();        
             
             checkSchemaBeingLocked(ctx, tool);
