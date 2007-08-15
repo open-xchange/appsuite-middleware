@@ -917,7 +917,7 @@ public final class MessageFiller {
 
 	/**
 	 * <p>
-	 * Turns simple quotes ("> " or "&gt; ") into html blockquotes when sending
+	 * Turns simple quotes ("> " or "&amp;gt; ") into html blockquotes when sending
 	 * messages. Thus other mail clients are able to properly display quotes.
 	 * </p>
 	 * <p>

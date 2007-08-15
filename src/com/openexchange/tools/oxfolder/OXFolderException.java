@@ -54,9 +54,9 @@ import com.openexchange.groupware.Component;
 
 /**
  * OXFolderException
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- *
+ * 
  */
 public class OXFolderException extends OXException {
 
@@ -504,7 +504,8 @@ public class OXFolderException extends OXException {
 		NO_SUBFOLDER_BELOW_SHARED_FOLDER("No subfolder creation underneath shared folder %s in context %s",
 				Category.PERMISSION, 69),
 		/**
-		 * User %s grants invalid permissions on shared folder %s in context %s. Only owner of parental shared folder %s may be folder admin
+		 * User %s grants invalid permissions on shared folder %s in context %s.
+		 * Only owner of parental shared folder %s may be folder admin
 		 */
 		INVALID_SHARED_FOLDER_SUBFOLDER_PERMISSION(
 				"User %s grants invalid permissions on shared folder %s in context %s. Only owner of parental shared folder %s may be folder admin",
@@ -534,7 +535,14 @@ public class OXFolderException extends OXException {
 		 */
 		HIDDEN_FOLDER_ON_DELETION(
 				"Folder %s in context %s contains a hidden subfolder. User %s has no delete rights for this subfolder and consequently cannot delete its parent folder.",
-				Category.PERMISSION, 74);
+				Category.PERMISSION, 74),
+		/**
+		 * An infostore folder named %s already exists below folder %s (%d) in
+		 * context %d. Please choose another display name.
+		 */
+		NO_DEFAULT_INFOSTORE_CREATE(
+				"An infostore folder named %s already exists below folder %s (%d) in context %d. Please choose another display name.",
+				Category.PERMISSION, 75);
 
 		/**
 		 * Message of the exception.

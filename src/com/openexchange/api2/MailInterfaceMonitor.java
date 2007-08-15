@@ -47,18 +47,17 @@
  *
  */
 
-
-
 package com.openexchange.api2;
 
 import java.io.InputStream;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -94,18 +93,18 @@ public class MailInterfaceMonitor implements MailInterfaceMonitorMBean {
 
 	private long minUseTime = Long.MAX_VALUE;
 
-	private int numBrokenConnections;
+	private final AtomicInteger numBrokenConnections = new AtomicInteger();
 
-	private int numTimeoutConnections;
+	private final AtomicInteger numTimeoutConnections = new AtomicInteger();
 
-	private int numSuccessfulLogins;
+	private final AtomicInteger numSuccessfulLogins = new AtomicInteger();
 
-	private int numFailedLogins;
-	
-	private int numActive;
+	private final AtomicInteger numFailedLogins = new AtomicInteger();
+
+	private final AtomicInteger numActive = new AtomicInteger();
 
 	private final Lock useTimeLock = new ReentrantLock();
-	
+
 	private final Map<String, Integer> unsupportedEnc;
 
 	/**
@@ -114,22 +113,26 @@ public class MailInterfaceMonitor implements MailInterfaceMonitorMBean {
 	public MailInterfaceMonitor() {
 		super();
 		avgUseTimeArr = new long[USE_TIME_COUNT];
-		unsupportedEnc = new HashMap<String, Integer>();
+		unsupportedEnc = new ConcurrentHashMap<String, Integer>();
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see com.openexchange.api2.MailInterfaceMonitorMBean#getNumActive()
 	 */
 	public int getNumActive() {
-		return numActive;
+		return numActive.get();
 	}
-	
+
 	public void changeNumActive(final boolean increment) {
-		numActive += increment ? 1 : -1;
-		if (numActive < 0) {
-			numActive = 0;
+		if (increment) {
+			numActive.incrementAndGet();
+		} else {
+			numActive.decrementAndGet();
+		}
+		if (numActive.get() < 0) {
+			numActive.set(0);
 		}
 	}
 
@@ -220,14 +223,18 @@ public class MailInterfaceMonitor implements MailInterfaceMonitorMBean {
 	 * @see com.openexchange.api2.MailInterfaceMonitorMBean#getNumBrokenConnections()
 	 */
 	public int getNumBrokenConnections() {
-		return numBrokenConnections;
+		return numBrokenConnections.get();
 	}
 
 	/**
 	 * Changes number of broken connections
 	 */
 	public void changeNumBrokenConnections(final boolean increment) {
-		numBrokenConnections += increment ? 1 : -1;
+		if (increment) {
+			numBrokenConnections.incrementAndGet();
+		} else {
+			numBrokenConnections.decrementAndGet();
+		}
 	}
 
 	/*
@@ -236,14 +243,18 @@ public class MailInterfaceMonitor implements MailInterfaceMonitorMBean {
 	 * @see com.openexchange.api2.MailInterfaceMonitorMBean#getNumTimeoutConnections()
 	 */
 	public int getNumTimeoutConnections() {
-		return numTimeoutConnections;
+		return numTimeoutConnections.get();
 	}
 
 	/**
 	 * Changes number of timed-out connections
 	 */
 	public void changeNumTimeoutConnections(final boolean increment) {
-		numTimeoutConnections += increment ? 1 : -1;
+		if (increment) {
+			numTimeoutConnections.incrementAndGet();
+		} else {
+			numTimeoutConnections.decrementAndGet();
+		}
 	}
 
 	/*
@@ -252,14 +263,18 @@ public class MailInterfaceMonitor implements MailInterfaceMonitorMBean {
 	 * @see com.openexchange.api2.MailInterfaceMonitorMBean#getNumSuccessfulLogins()
 	 */
 	public int getNumSuccessfulLogins() {
-		return numSuccessfulLogins;
+		return numSuccessfulLogins.get();
 	}
 
 	/**
 	 * Changes number of successful logins
 	 */
 	public void changeNumSuccessfulLogins(final boolean increment) {
-		numSuccessfulLogins += increment ? 1 : -1;
+		if (increment) {
+			numSuccessfulLogins.incrementAndGet();
+		} else {
+			numSuccessfulLogins.decrementAndGet();
+		}
 	}
 
 	/*
@@ -268,14 +283,18 @@ public class MailInterfaceMonitor implements MailInterfaceMonitorMBean {
 	 * @see com.openexchange.api2.MailInterfaceMonitorMBean#getNumFailedLogins()
 	 */
 	public int getNumFailedLogins() {
-		return numFailedLogins;
+		return numFailedLogins.get();
 	}
 
 	/**
 	 * Changes number of failes logins
 	 */
 	public void changeNumFailedLogins(final boolean increment) {
-		numFailedLogins += increment ? 1 : -1;
+		if (increment) {
+			numFailedLogins.incrementAndGet();
+		} else {
+			numFailedLogins.decrementAndGet();
+		}
 	}
 
 	/*
@@ -284,7 +303,7 @@ public class MailInterfaceMonitor implements MailInterfaceMonitorMBean {
 	 * @see com.openexchange.api2.MailInterfaceMonitorMBean#resetNumBrokenConnections()
 	 */
 	public void resetNumBrokenConnections() {
-		numBrokenConnections = 0;
+		numBrokenConnections.set(0);
 	}
 
 	/*
@@ -293,7 +312,7 @@ public class MailInterfaceMonitor implements MailInterfaceMonitorMBean {
 	 * @see com.openexchange.api2.MailInterfaceMonitorMBean#resetNumTimeoutConnections()
 	 */
 	public void resetNumTimeoutConnections() {
-		numTimeoutConnections = 0;
+		numTimeoutConnections.set(0);
 	}
 
 	/*
@@ -302,7 +321,7 @@ public class MailInterfaceMonitor implements MailInterfaceMonitorMBean {
 	 * @see com.openexchange.api2.MailInterfaceMonitorMBean#resetNumSuccessfulLogins()
 	 */
 	public void resetNumSuccessfulLogins() {
-		numSuccessfulLogins = 0;
+		numSuccessfulLogins.set(0);
 	}
 
 	/*
@@ -311,7 +330,7 @@ public class MailInterfaceMonitor implements MailInterfaceMonitorMBean {
 	 * @see com.openexchange.api2.MailInterfaceMonitorMBean#resetNumFailedLogins()
 	 */
 	public void resetNumFailedLogins() {
-		numFailedLogins = 0;
+		numFailedLogins.set(0);
 	}
 
 	/*
@@ -404,13 +423,13 @@ public class MailInterfaceMonitor implements MailInterfaceMonitorMBean {
 			return "Message could not be dumped: " + t.getMessage();
 		}
 	}
-	
+
 	private final void dumpMsg(final StringBuilder sb, final Message msg) throws Exception {
 		dumpPart(msg, sb);
 	}
-	
+
 	private static final String SEPERATOR = "---------------------------";
-	
+
 	private static void dumpPart(final Part p, final StringBuilder out) throws Exception {
 		if (p instanceof Message) {
 			dumpEnvelope((Message) p, out);
@@ -483,7 +502,7 @@ public class MailInterfaceMonitor implements MailInterfaceMonitorMBean {
 			}
 		}
 	}
-	
+
 	private static final void dumpEnvelope(final Message m, final StringBuilder out) throws Exception {
 		pr("This is the message envelope", out);
 		pr(SEPERATOR, out);
@@ -560,11 +579,11 @@ public class MailInterfaceMonitor implements MailInterfaceMonitorMBean {
 			pr("X-Mailer NOT available", out);
 		}
 	}
-	
+
 	private static String indentStr = "                                               ";
 
 	private static int level;
-	
+
 	/**
 	 * Print a, possibly indented, string.
 	 */
@@ -572,6 +591,5 @@ public class MailInterfaceMonitor implements MailInterfaceMonitorMBean {
 		sb.append(indentStr.substring(0, level * 2));
 		sb.append(s).append('\n');
 	}
-	
 
 }

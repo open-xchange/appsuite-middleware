@@ -141,7 +141,7 @@ public final class OXFolderAdminHelper {
 	 * INSERT INTO oxfolder_userfolders VALUES ('projects',
 	 * 'projects/projects_list_all', null, 'folder/item_projects.png');
 	 */
-	
+
 	private static final String STR_TABLE = "#TABLE#";
 
 	private static final String SQL_SELECT_ADMIN = "SELECT user FROM user_setting_admin WHERE cid = ?";
@@ -372,7 +372,7 @@ public final class OXFolderAdminHelper {
 			}
 		}
 	}
-	
+
 	private static final String STR_OXFOLDERTREE = "oxfolder_tree";
 
 	private static final String STR_DELOXFOLDERTREE = "del_oxfolder_tree";
@@ -469,22 +469,22 @@ public final class OXFolderAdminHelper {
 	}
 
 	private static final String SQL_UPDATE_FOLDER_TIMESTAMP = "UPDATE #FT# AS ot SET ot.changing_date = ? WHERE ot.cid = ? AND ot.fuid = ?";
-	
+
 	private static final String SQL_SELECT_FOLDER_IN_PERMISSIONS = "SELECT ot.fuid FROM #FT# AS ot JOIN #PT# as op ON ot.fuid = op.fuid AND ot.cid = ? AND op.cid = ? WHERE op.permission_id = ? GROUP BY ot.fuid";
 
 	/**
 	 * Propagates that a group has been modified throughout affected folders by
 	 * touching folder's last-modified timestamp.
 	 */
-	public static void propagateGroupModification(final int group, final Connection readCon,
-			final Connection writeCon, final int cid) throws SQLException {
+	public static void propagateGroupModification(final int group, final Connection readCon, final Connection writeCon,
+			final int cid) throws SQLException {
 		final long lastModified = System.currentTimeMillis();
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		try {
 			/*
-			 * Touch all folder timestamps in whose permissions the group's entity
-			 * identifier occurs
+			 * Touch all folder timestamps in whose permissions the group's
+			 * entity identifier occurs
 			 */
 			stmt = readCon.prepareStatement(SQL_SELECT_FOLDER_IN_PERMISSIONS.replaceFirst("#FT#", STR_OXFOLDERTREE)
 					.replaceFirst("#PT#", STR_OXFOLDERPERMS));
@@ -526,11 +526,11 @@ public final class OXFolderAdminHelper {
 			closeResources(rs, stmt, null, true, cid);
 		}
 	}
-	
+
 	private static final String DEFAULT_CAL_NAME = "My Calendar";
-	
+
 	private static final String DEFAULT_CON_NAME = "My Contacts";
-	
+
 	private static final String DEFAULT_TASK_NAME = "My Tasks";
 
 	/**
@@ -553,8 +553,20 @@ public final class OXFolderAdminHelper {
 				 * Propfile could NOT be loaded
 				 */
 				LOG.error(e.getMessage(), e);
-				return;
+				throw new OXException(e);
 			}
+			/*
+			 * Check infostore sibling
+			 */
+			if (OXFolderSQL.lookUpFolder(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, displayName, FolderObject.INFOSTORE,
+					null, ctx) != -1) {
+				throw new OXFolderException(FolderCode.NO_DEFAULT_INFOSTORE_CREATE, displayName,
+						FolderObject.SYSTEM_INFOSTORE_FOLDER_NAME, Integer
+								.valueOf(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID), Integer.valueOf(ctx.getContextId()));
+			}
+			/*
+			 * Proceed
+			 */
 			String defaultCalName = strHelper.getString(FolderStrings.DEFAULT_CALENDAR_FOLDER_NAME);
 			if (defaultCalName == null || defaultCalName.length() == 0) {
 				defaultCalName = DEFAULT_CAL_NAME;

@@ -12,6 +12,7 @@
 
  - Special HTML entities moved to external properties file
  - Enhanced text2html conversion through including more HTML entities
+ - Added check for duplicate infostore folder on user creation
  
 ############## PAY ATTENTION TO ME ! ################
  - CONFIG change: new property file "HTMLEntities.properties" which
