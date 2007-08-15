@@ -627,7 +627,7 @@ public class ContactTest extends AbstractAJAXTest {
 		parameter.setParameter(AJAXServlet.PARAMETER_INFOLDER, inFolder);
 		parameter.setParameter(AJAXServlet.PARAMETER_COLUMNS, URLParameter.colsArray2String(cols));
 		
-		System.out.println(host + CONTACT_URL + parameter.getURLParameters());
+		//System.out.println(host + CONTACT_URL + parameter.getURLParameters());
 		
 		WebRequest req = new GetMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters());
 		WebResponse resp = webCon.getResponse(req);
@@ -691,7 +691,7 @@ public class ContactTest extends AbstractAJAXTest {
 		parameter.setParameter(AJAXServlet.PARAMETER_COLUMNS, URLParameter.colsArray2String(cols));
 	
 		JSONObject jsonObj = new JSONObject();
-		jsonObj.put(AJAXServlet.PARAMETER_INFOLDER, folder);
+		//jsonObj.put(AJAXServlet.PARAMETER_INFOLDER, folder);
 		jsonObj.put(ContactFields.LAST_NAME,cso.getSurname());
 		jsonObj.put(ContactFields.FIRST_NAME ,cso.getGivenName());
 		jsonObj.put(ContactFields.DISPLAY_NAME ,cso.getDisplayName());
