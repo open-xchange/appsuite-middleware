@@ -59,8 +59,12 @@ public class MaintenanceReason implements Serializable{
     private static final long serialVersionUID = -7581806972771279403L;
 
     private Integer id;
+    
+    private boolean idset;
 
     private String text;
+    
+    private boolean textset;
 
     public MaintenanceReason () {
         super();
@@ -103,6 +107,7 @@ public class MaintenanceReason implements Serializable{
 
     public void setId (final Integer val) {
         this.id = val;
+        this.idset = true;
     }
 
     public String getText () {
@@ -111,6 +116,7 @@ public class MaintenanceReason implements Serializable{
 
     public void setText (final String val) {
         this.text = val;
+        this.textset = true;
     }
     
     public String toString() {
@@ -135,5 +141,19 @@ public class MaintenanceReason implements Serializable{
         }
         ret.append("]");
         return ret.toString();
+    }
+
+    /**
+     * @return the idset
+     */
+    public boolean isIdset() {
+        return idset;
+    }
+
+    /**
+     * @return the textset
+     */
+    public boolean isTextset() {
+        return textset;
     }
 }
