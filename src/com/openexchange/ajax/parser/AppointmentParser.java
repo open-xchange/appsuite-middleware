@@ -74,7 +74,12 @@ public class AppointmentParser extends CalendarParser {
         super();
     }
 
-	public AppointmentParser(TimeZone timeZone) {
+	public AppointmentParser(final TimeZone timeZone) {
+		this.timeZone = timeZone;
+	}
+
+	public AppointmentParser(final boolean parseAll, final TimeZone timeZone) {
+		this.parseAll = parseAll;
 		this.timeZone = timeZone;
 	}
 
