@@ -58,18 +58,32 @@ public class Filestore implements Serializable {
     private static final long serialVersionUID = -6970026864761440793L;
 
     private Integer id;
+    
+    private boolean idset;    
 
     private String url;
+    
+    private boolean urlset;
 
     private Long size;
+    
+    private boolean sizeset;
 
     private Long used;
+    
+    private boolean usedset;
 
     private Long reserved;
     
+    private boolean reservedset;
+    
     private Integer maxContexts;
+    
+    private boolean maxContextsset;
 
     private Integer currentContexts;
+    
+    private boolean currentContextsset;
 
     public Filestore() {
         super();
@@ -88,6 +102,7 @@ public class Filestore implements Serializable {
 
     public void setId(final Integer val) {
         this.id = val;
+        this.idset = true;
     }
 
     public String getUrl() {
@@ -96,6 +111,7 @@ public class Filestore implements Serializable {
 
     public void setUrl(final String val) {
         this.url = val;
+        this.urlset = true;
     }
 
     public Long getSize() {
@@ -104,6 +120,7 @@ public class Filestore implements Serializable {
 
     public void setSize(final Long val) {
         this.size = val;
+        this.sizeset = true;
     }
 
     public Integer getMaxContexts() {
@@ -112,6 +129,7 @@ public class Filestore implements Serializable {
 
     public void setMaxContexts(final Integer val) {
         this.maxContexts = val;
+        this.maxContextsset = true;
     }
 
     public Integer getCurrentContexts() {
@@ -120,6 +138,7 @@ public class Filestore implements Serializable {
 
     public void setCurrentContexts(final Integer val) {
         this.currentContexts = val;
+        this.currentContextsset = true;
     }
 
     public Long getUsed() {
@@ -128,6 +147,7 @@ public class Filestore implements Serializable {
 
     public void setUsed(final Long quota_used) {
         this.used = quota_used;
+        this.usedset = true;
     }
 
     private void init() {
@@ -192,6 +212,55 @@ public class Filestore implements Serializable {
      */
     public final void setReserved(Long reserved) {
         this.reserved = reserved;
+    }
+
+    /**
+     * @return the currentContextsset
+     */
+    public boolean isCurrentContextsset() {
+        return currentContextsset;
+    }
+
+    /**
+     * @return the idset
+     */
+    public boolean isIdset() {
+        return idset;
+    }
+
+    /**
+     * @return the maxContextsset
+     */
+    public boolean isMaxContextsset() {
+        return maxContextsset;
+    }
+
+    /**
+     * @return the reservedset
+     */
+    public boolean isReservedset() {
+        return reservedset;
+    }
+
+    /**
+     * @return the sizeset
+     */
+    public boolean isSizeset() {
+        return sizeset;
+    }
+
+    /**
+     * @return the urlset
+     */
+    public boolean isUrlset() {
+        return urlset;
+    }
+
+    /**
+     * @return the usedset
+     */
+    public boolean isUsedset() {
+        return usedset;
     }
 
 }
