@@ -38,6 +38,9 @@
    In addition an exception can not have a different private state than the
    main object.
 
+ - Fixed bug #8836. Updating a normal appointment and set the private flag
+   failed. This has been fixed.
+
 * 2007-08-14 - tobias.prinz@open-xchange.com
 
  - Bugfix #6825: Implemented new classes for translating fieldnames for
