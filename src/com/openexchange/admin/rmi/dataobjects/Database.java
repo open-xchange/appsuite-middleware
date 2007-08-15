@@ -58,36 +58,68 @@ public class Database extends EnforceableDataObject implements NameAndIdObject {
     private static final long serialVersionUID = -3068828009821317094L;
 
     private Integer id;
+    
+    private boolean idset;
 
     private Integer read_id;
+    
+    private boolean read_idset;
 
     private String url;
+    
+    private boolean urlset;
 
     private String login;
+    
+    private boolean loginset;
 
     private String password;
+    
+    private boolean passwordset;
 
     private String name;
+    
+    private boolean nameset;
 
     private String driver;
+    
+    private boolean driverset;
 
     private String scheme;
+    
+    private boolean schemeset;
 
     private Integer clusterWeight;
+    
+    private boolean clusterWeightset;
 
     private Integer maxUnits;
+    
+    private boolean maxUnitsset;
 
     private Integer poolHardLimit;
+    
+    private boolean poolHardLimitset;
 
     private Integer poolInitial;
+    
+    private boolean poolInitialset;
 
     private Integer poolMax;
+    
+    private boolean poolMaxset;
 
     private Integer masterId;
+    
+    private boolean masterIdset;
 
     private Integer currentUnits;
+    
+    private boolean currentUnitsset;
 
     private Boolean master;
+    
+    private boolean masterset;
 
     /**
      * @param id
@@ -144,6 +176,7 @@ public class Database extends EnforceableDataObject implements NameAndIdObject {
 
     public void setId(final Integer val) {
         this.id = val;
+        this.idset = true;
     }
 
     public String getUrl() {
@@ -152,6 +185,7 @@ public class Database extends EnforceableDataObject implements NameAndIdObject {
 
     public void setUrl(final String val) {
         this.url = val;
+        this.urlset = true;
     }
 
     public String getLogin() {
@@ -160,6 +194,7 @@ public class Database extends EnforceableDataObject implements NameAndIdObject {
 
     public void setLogin(final String val) {
         this.login = val;
+        this.loginset = true;
     }
 
     public String getPassword() {
@@ -168,6 +203,7 @@ public class Database extends EnforceableDataObject implements NameAndIdObject {
 
     public void setPassword(final String val) {
         this.password = val;
+        this.passwordset = true;
     }
 
     public String getName() {
@@ -176,6 +212,7 @@ public class Database extends EnforceableDataObject implements NameAndIdObject {
 
     public void setName(final String val) {
         this.name = val;
+        this.nameset = true;
     }
 
     public String getDriver() {
@@ -184,6 +221,7 @@ public class Database extends EnforceableDataObject implements NameAndIdObject {
 
     public void setDriver(final String val) {
         this.driver = val;
+        this.driverset = true;
     }
 
     public String getScheme() {
@@ -192,6 +230,7 @@ public class Database extends EnforceableDataObject implements NameAndIdObject {
 
     public void setScheme(final String scheme) {
         this.scheme = scheme;
+        this.schemeset = true;
     }
 
     public Integer getClusterWeight() {
@@ -203,40 +242,45 @@ public class Database extends EnforceableDataObject implements NameAndIdObject {
      * This value defines how contexts will be distributed over multiple
      * databases/db pools.
      */
-    public void setClusterWeight(final int clusterWeight) {
+    public void setClusterWeight(final Integer clusterWeight) {
         this.clusterWeight = clusterWeight;
+        this.clusterWeightset = true;
     }
 
     public Integer getMaxUnits() {
         return this.maxUnits;
     }
 
-    public void setMaxUnits(final int maxunits) {
+    public void setMaxUnits(final Integer maxunits) {
         this.maxUnits = maxunits;
+        this.maxUnitsset = true;
     }
 
     public Integer getPoolInitial() {
         return this.poolInitial;
     }
 
-    public void setPoolInitial(final int poolInitial) {
+    public void setPoolInitial(final Integer poolInitial) {
         this.poolInitial = poolInitial;
+        this.poolInitialset = true;
     }
 
     public Integer getPoolMax() {
         return this.poolMax;
     }
 
-    public void setPoolMax(final int poolMax) {
+    public void setPoolMax(final Integer poolMax) {
         this.poolMax = poolMax;
+        this.poolMaxset = true;
     }
 
     public Integer getMasterId() {
         return this.masterId;
     }
 
-    public void setMasterId(final int masterId) {
+    public void setMasterId(final Integer masterId) {
         this.masterId = masterId;
+        this.masterIdset = true;
     }
 
     public Boolean isMaster() {
@@ -245,30 +289,34 @@ public class Database extends EnforceableDataObject implements NameAndIdObject {
 
     public void setMaster(final boolean master) {
         this.master = master;
+        this.masterset = true;
     }
 
     public Integer getRead_id() {
         return this.read_id;
     }
 
-    public void setRead_id(final int read_id) {
+    public void setRead_id(final Integer read_id) {
         this.read_id = read_id;
+        this.read_idset = true;
     }
 
     public Integer getCurrentUnits() {
         return this.currentUnits;
     }
 
-    public void setCurrentUnits(final int units) {
+    public void setCurrentUnits(final Integer units) {
         this.currentUnits = units;
+        this.currentUnitsset = true;
     }
 
     public Integer getPoolHardLimit() {
         return this.poolHardLimit;
     }
 
-    public void setPoolHardLimit(final int poolHardLimit) {
+    public void setPoolHardLimit(final Integer poolHardLimit) {
         this.poolHardLimit = poolHardLimit;
+        this.poolHardLimitset = true;
     }
 
     @Override
@@ -352,6 +400,118 @@ public class Database extends EnforceableDataObject implements NameAndIdObject {
     @Override
     public String[] getMandatoryMembersRegister() {
         return new String[] { "password", "name", "master" };
+    }
+
+    /**
+     * @return the clusterWeightset
+     */
+    public boolean isClusterWeightset() {
+        return clusterWeightset;
+    }
+
+    /**
+     * @return the currentUnitsset
+     */
+    public boolean isCurrentUnitsset() {
+        return currentUnitsset;
+    }
+
+    /**
+     * @return the driverset
+     */
+    public boolean isDriverset() {
+        return driverset;
+    }
+
+    /**
+     * @return the idset
+     */
+    public boolean isIdset() {
+        return idset;
+    }
+
+    /**
+     * @return the loginset
+     */
+    public boolean isLoginset() {
+        return loginset;
+    }
+
+    /**
+     * @return the masterIdset
+     */
+    public boolean isMasterIdset() {
+        return masterIdset;
+    }
+
+    /**
+     * @return the masterset
+     */
+    public boolean isMasterset() {
+        return masterset;
+    }
+
+    /**
+     * @return the maxUnitsset
+     */
+    public boolean isMaxUnitsset() {
+        return maxUnitsset;
+    }
+
+    /**
+     * @return the nameset
+     */
+    public boolean isNameset() {
+        return nameset;
+    }
+
+    /**
+     * @return the passwordset
+     */
+    public boolean isPasswordset() {
+        return passwordset;
+    }
+
+    /**
+     * @return the poolHardLimitset
+     */
+    public boolean isPoolHardLimitset() {
+        return poolHardLimitset;
+    }
+
+    /**
+     * @return the poolInitialset
+     */
+    public boolean isPoolInitialset() {
+        return poolInitialset;
+    }
+
+    /**
+     * @return the poolMaxset
+     */
+    public boolean isPoolMaxset() {
+        return poolMaxset;
+    }
+
+    /**
+     * @return the read_idset
+     */
+    public boolean isRead_idset() {
+        return read_idset;
+    }
+
+    /**
+     * @return the schemeset
+     */
+    public boolean isSchemeset() {
+        return schemeset;
+    }
+
+    /**
+     * @return the urlset
+     */
+    public boolean isUrlset() {
+        return urlset;
     }
 
 }
