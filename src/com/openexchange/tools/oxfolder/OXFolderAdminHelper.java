@@ -146,6 +146,24 @@ public final class OXFolderAdminHelper {
 
 	private static final String SQL_SELECT_ADMIN = "SELECT user FROM user_setting_admin WHERE cid = ?";
 
+	/**
+	 * Creates the standard system folders located in each context for given
+	 * context in database and creates the default folders for context's admin
+	 * user by invoking
+	 * <code>{@link #addUserToOXFolders(int, String, String, int, Connection)}</code>
+	 * 
+	 * @param cid
+	 *            The context ID
+	 * @param mailAdminDisplayName
+	 *            The display name of context's admin user
+	 * @param language
+	 *            The language
+	 * @param con
+	 *            A writeable connection
+	 * @throws OXException
+	 *             If system folder could not be created successfully or default
+	 *             folders for context's admin user could not be created
+	 */
 	public void addContextSystemFolders(final int cid, final String mailAdminDisplayName, final String language,
 			final Connection con) throws OXException {
 		try {
@@ -381,6 +399,17 @@ public final class OXFolderAdminHelper {
 
 	private static final String SQL_DELETE_TABLE = "DELETE FROM #TABLE# WHERE cid = ?";
 
+	/**
+	 * Deletes all context associated folder in both working and backup tables
+	 * from database
+	 * 
+	 * @param cid
+	 *            The context ID
+	 * @param readCon
+	 *            A readable connection
+	 * @param writeCon
+	 *            A writeable connection
+	 */
 	public void deleteAllContextFolders(final int cid, final Connection readCon, final Connection writeCon) {
 		try {
 			final Set<String> oxfolderTables = new HashSet<String>();
