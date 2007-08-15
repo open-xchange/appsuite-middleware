@@ -93,6 +93,7 @@ public class ImportExportStandaloneSuite extends TestSuite {
 		tests.addTest( Bug8653.suite() );
 		tests.addTest( Bug8654.suite() );
 		tests.addTest( Bug8681Suite.suite() );
+		tests.addTest( MessageFillerTest.suite() );
 		
 		return tests;
 	}
