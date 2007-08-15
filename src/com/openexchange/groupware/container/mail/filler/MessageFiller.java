@@ -140,7 +140,7 @@ public final class MessageFiller {
 
 	private static final String MIME_MESSAGE_RFC822 = "message/rfc822";
 
-	private static final String MIME_TEXT_VCARD = "text/vcard";
+	private static final String MIME_TEXT_VCARD = "text/x-vcard";
 
 	private static final String MIME_TEXT_PLAIN = "text/plain";
 
@@ -898,7 +898,7 @@ public final class MessageFiller {
 			} catch (final Exception e) {
 				throw new OXMailException(MailCode.INTERNAL_ERROR, e, e.getMessage());
 			}
-			final VersitObject versitObj = converter.convertContact(contactObj, "3.0");
+			final VersitObject versitObj = converter.convertContact(contactObj, "2.1");
 			final ByteArrayOutputStream os = new ByteArrayOutputStream();
 			final VersitDefinition def = Versit.getDefinition(MIME_TEXT_VCARD);
 			final VersitDefinition.Writer w = def.getWriter(os, IMAPProperties.getDefaultMimeCharset());

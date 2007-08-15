@@ -7,6 +7,9 @@
 
  - Fixed bug in OldNPropertyDefinition causing NoSuchElementException.
    Preparation for bugfix #8844.
+ - Bugfix #8844: Changed mailer to use v2.1 as format for attached
+   VCards instead of v3.0, because Outlook 2003 has Problems with escaped
+   commas.
 
 * 2007-08-15 - thorben.betten@open-xchange.com
 
