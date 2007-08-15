@@ -432,8 +432,7 @@ public class CalendarOperation implements SearchIterator {
                 
                 if (cdao.getFolderType() == FolderObject.PRIVATE) {
                     if (action || cdao.containsParticipants()) {
-                        UserParticipant up = new UserParticipant();
-                        up.setIdentifier(uid);
+                        UserParticipant up = new UserParticipant(uid);
                         up.setConfirm(CalendarDataObject.ACCEPT);
                         CalendarCommonCollection.checkAndFillIfUserIsParticipant(cdao, up);
                     }
@@ -446,26 +445,23 @@ public class CalendarOperation implements SearchIterator {
                     if (!action && !cdao.containsUserParticipants()) {
                         cdao.setUsers(edao.getUsers());
                     }
-                    
-                    UserParticipant up = new UserParticipant();
-                    up.setIdentifier(cdao.getSharedFolderOwner());
+                    UserParticipant up = new UserParticipant(cdao.getSharedFolderOwner());
                     if (action) {
                         up.setConfirm(CalendarDataObject.ACCEPT);
                     }
                     CalendarCommonCollection.checkAndFillIfUserIsParticipant(cdao, up);
                     
                 } else if (cdao.getFolderType() == FolderObject.PUBLIC) {
-                    UserParticipant up = new UserParticipant();
-                    up.setIdentifier(uid);
+                    UserParticipant up = new UserParticipant(uid);
                     up.setConfirm(CalendarDataObject.ACCEPT);
                     CalendarCommonCollection.checkAndConfirmIfUserUserIsParticipant(cdao, up);
                 }
                 
-                Participant p = new UserParticipant();
+                Participant p = null;
                 if (cdao.getFolderType() == FolderObject.SHARED) {
-                    p.setIdentifier(cdao.getSharedFolderOwner());
+                    p = new UserParticipant(cdao.getSharedFolderOwner());
                 } else {
-                    p.setIdentifier(uid);
+                    p = new UserParticipant(uid);
                 }
                 if ((action || cdao.containsUserParticipants()) && cdao.getFolderType() != FolderObject.PUBLIC) {
                     CalendarCommonCollection.checkAndFillIfUserIsUser(cdao, p);
@@ -487,8 +483,7 @@ public class CalendarOperation implements SearchIterator {
         simpleDataCheck(cdao, edao, uid);
         if (action && cdao.getParticipants() == null && cdao.getFolderType() == FolderObject.PUBLIC) {
             Participant np[] = new Participant[1];
-            final Participant p = new UserParticipant();
-            p.setIdentifier(uid);
+            final Participant p = new UserParticipant(uid);
             np[0] = p;
             cdao.setParticipants(np);
         }
@@ -911,15 +906,13 @@ public class CalendarOperation implements SearchIterator {
                 Group g = gs.getGroup(p.getIdentifier());
                 int m[] = g.getMember();
                 for (int b = 0; b < m.length; b++) {
-                    final UserParticipant up = new UserParticipant();
-                    up.setIdentifier(m[b]);
+                    final UserParticipant up = new UserParticipant(m[b]);
                     if (!userparticipants.containsUserParticipant(up)) {
                         userparticipants.add(up);
                     }
                 }
             } else if (p.getType() == Participant.USER) {
-                final UserParticipant up = new UserParticipant();
-                up.setIdentifier(p.getIdentifier());
+                final UserParticipant up = new UserParticipant(p.getIdentifier());
                 up.setDisplayName(p.getDisplayName());
                 if (!userparticipants.containsUserParticipant(up)) {
                     userparticipants.add(up);
