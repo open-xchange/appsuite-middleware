@@ -60,9 +60,8 @@ import java.util.Locale;
 import com.openexchange.tools.conf.GlobalConfig;
 
 /**
- * Mit dieser Klasse koennen Datumsformatierungen durchgefuehrt werden.
- * 
  * @author Benjamin Otterbach
+ * @deprecated this class doesn't work anymore.
  */
 public class FormatDate {
 
@@ -88,56 +87,8 @@ public class FormatDate {
 	originalPatternFormat = new String[2];
 	originalPatternFormat[0] = GlobalConfig.getDateTimePattern(language);
 	originalPatternFormat[1] = GlobalConfig.getDatePattern(language);
-		
-
-	/*
-	if (language.equals("de")) {
-	    originalPatternFormat = new String[] {"dd.MM.yyyy HH:mm", "dd.MM.yyyy"};
-	} else if (language.equals("en")) {
-	    originalPatternFormat = new String[] {"dd-MM-yyyy HH:mm", "dd-MM-yyyy"};
-	} else if (language.equals("us")) {
-	    originalPatternFormat = new String[] {"MM/dd/yyyy HH:mm", "MM/dd/yyyy"};
-	} else {
-	    originalPatternFormat = new String[] {"dd.MM.yyyy HH:mm", "dd.MM.yyyy"};
-	}
-	*/
-	/*
-	  originalPatternFormat[0] = Datumsformat mit Zeitangabe
-	  originalPatternFormat[1] = Datumsformat ohne Zeitangabe
-	 */
-
     }
 
-    /**
-     * Mit dieser Methode kann ein Datum konvertiert werden,
-     * wobei das Original Format angegeben werden muss.
-     * Das ausgabeformat des Datums entspricht dem angegebenen Laendercode,
-     * der beim Initialisieren angegeben wurde.
-     * @param String Das Datum das konvertiert werden soll.
-     * @param String Format des Original Datum.
-     * @param boolean gibt an ob im Ausgabe Format die Zeitangabe mit enthalten sein soll.
-     * @return String - Formatiertes Datum
-     */
-    /*
-    public String formatDate(String originalDate, String originalPattern, boolean withTime) throws ParseException {
-	
-	int timeCount = 0;
-	if (!withTime) {
-	    timeCount = 1;
-	}
-
-	if ((originalPattern == null) && (originalPattern.trim().length() <= 0)) {
-	    originalPattern = "MM.dd.yyyy HH:mm";
-	}
-
-	Locale l = new Locale(language,country);
-	SimpleDateFormat sdfi = new SimpleDateFormat(originalPattern);
-	SimpleDateFormat sdfo = new SimpleDateFormat (originalPatternFormat[timeCount], l);
-	
-	return(sdfo.format(sdfi.parse(originalDate)));
-	
-    }
-    */
     /**
      * Mit dieser Methode kann ein Datum konvertiert werden,
      * wobei das Original Format sowie das Ausgabe Format angegeben werden muss.
