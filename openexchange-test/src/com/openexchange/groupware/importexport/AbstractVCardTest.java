@@ -83,7 +83,7 @@ public class AbstractVCardTest extends AbstractContactTest {
 		ContextStorage.init();
 		final UserStorage uStorage = UserStorage.getInstance(new ContextImpl(1));
 	    userId = uStorage.getUserId( Init.getAJAXProperty("login") );
-	    sessObj = SessionObjectWrapper.createSessionObject(userId, 1, "csv-tests");
+	    sessObj = SessionObjectWrapper.createSessionObject(userId, 1, "vcard-tests");
 		userId = sessObj.getUserObject().getId();
 	}
 
