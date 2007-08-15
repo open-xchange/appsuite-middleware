@@ -81,7 +81,6 @@ public class CCTests {
         tests.addTest(com.openexchange.ajax.infostore.InfostoreAJAXSuite.suite());
         tests.addTest(com.openexchange.ajax.config.ConfigTestSuite.suite());
         tests.addTest(com.openexchange.ajax.appointment.AppointmentAJAXSuite.suite());
-        tests.addTest(com.openexchange.ajax.appointment.AppointmentBugTestSuite.suite());
 		
 		tests.addTest(com.openexchange.ajax.contact.ContactAJAXSuite.suite());
 		tests.addTestSuite(com.openexchange.ajax.UserTest.class);
