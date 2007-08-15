@@ -59,50 +59,142 @@ import java.util.regex.Pattern;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 
-public class MailTools {
+public final class MailTools {
+
+	private static final String HTML_BR = "<br>";
+
+	private static final String HTML_QUOT = "&quot;";
+
+	private static final String REPL_QUOTE = "\"";
+
+	private static final String REPL_LINEBREAK = "\r?\n";
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(MailTools.class);
 
-	private static final String[] tags = new String[] { "\"", "'", ">", "<", "(\\r)?\\n" };
+	private static final String[] htmlchars = new String[256];
 
-	private static final String[] replace = new String[] { "&quot;", "&#39;", "&gt;", "&lt;", "<br>" };
+	static {
+		final String[] entry = { "nbsp", "iexcl", "cent", "pound", "curren", "yen", "brvbar", "sect", "uml", "copy",
+				"ordf", "laquo", "not", "shy", "reg", "macr", "deg", "plusmn", "sup2", "sup3", "acute", "micro",
+				"para", "middot", "cedil", "sup1", "ordm", "raquo", "frac14", "frac12", "frac34", "iquest", "Agrave",
+				"Aacute", "Acirc", "Atilde", "Auml", "Aring", "AElig", "CCedil", "Egrave", "Eacute", "Ecirc", "Euml",
+				"Igrave", "Iacute", "Icirc", "Iuml", "ETH", "Ntilde", "Ograve", "Oacute", "Ocirc", "Otilde", "Ouml",
+				"times", "Oslash", "Ugrave", "Uacute", "Ucirc", "Uuml", "Yacute", "THORN", "szlig", "agrave", "aacute",
+				"acirc", "atilde", "auml", "aring", "aelig", "ccedil", "egrave", "eacute", "ecirc", "euml", "igrave",
+				"iacute", "icirc", "iuml", "eth", "ntilde", "ograve", "oacute", "ocirc", "otilde", "ouml", "divid",
+				"oslash", "ugrave", "uacute", "ucirc", "uuml", "yacute", "thorn", "yuml" };
+
+		htmlchars['&'] = "&amp;";
+		htmlchars['<'] = "&lt;";
+		htmlchars['>'] = "&gt;";
+		htmlchars['\''] = "&#39;";
+
+		for (int c = '\u00A0', i = 0; c <= '\u00FF'; c++, i++) {
+			htmlchars[c] = '&' + entry[i] + ';';
+		}
+
+		for (int c = '\u0083', i = 131; c <= '\u009f'; c++, i++) {
+			htmlchars[c] = "&#" + i + ';';
+		}
+
+		htmlchars['\u0088'] = htmlchars['\u008D'] = htmlchars['\u008E'] = null;
+		htmlchars['\u008F'] = htmlchars['\u0090'] = htmlchars['\u0098'] = null;
+		htmlchars['\u009D'] = null;
+	}
+
+	/*
+	 * private static final String[] tags = new String[] { "\"", "'", ">", "<",
+	 * "\r?\n" };
+	 * 
+	 * private static final String[] replace = new String[] { "&quot;", "&#39;",
+	 * "&gt;", "&lt;", "<br>" };
+	 */
 
 	public static final String NUMBER_DIGITS = "###,##0.00";
 
 	public static final String NUMBER_WO_DIGITS = "#####0";
 
-	public static String htmlFormat(final String str, final boolean withQuote) {
-		String retval = str;
-		for (int i = withQuote ? 0 : 1; i < tags.length; i++) {
-			retval = retval.replaceAll(tags[i], replace[i]);
+	private static String escape(final String s, final boolean withQuote) {
+		final int len = s.length();
+		final StringBuilder sb = new StringBuilder(len * 5 / 4);
+		/*
+		 * Escape
+		 */
+		for (int i = 0; i < len; i++) {
+			final char c = s.charAt(i);
+			final String elem = htmlchars[c & 0xff];
+			if (elem == null) {
+				sb.append(c);
+			} else {
+				sb.append(elem);
+			}
 		}
-		return retval;
+		return withQuote ? sb.toString().replaceAll(REPL_QUOTE, HTML_QUOT) : sb.toString();
 	}
 
-	public static String htmlFormat(final String originalTag) {
-		return htmlFormat(originalTag, false);
+	/**
+	 * Formats plain text to html by escaping html special characters e.g.
+	 * <code>&lt;</code> => <code>&amp;lt;</code>
+	 * 
+	 * @param plainText
+	 *            The plain text
+	 * @param withQuote
+	 *            Whether to escape quotes (<code>&quot;</code>) or not
+	 * @return properly escaped html content
+	 */
+	public static String htmlFormat(final String plainText, final boolean withQuote) {
+		/*
+		 * String retval = str; for (int i = withQuote ? 0 : 1; i < tags.length;
+		 * i++) { retval = retval.replaceAll(tags[i], replace[i]); } return
+		 * retval;
+		 */
+		return escape(plainText, withQuote).replaceAll(REPL_LINEBREAK, HTML_BR);
 	}
 
-	public static final Pattern PATTERN_HREF = Pattern
+	/**
+	 * Formats plain text to html by escaping html special characters e.g.
+	 * <code>&lt;</code> => <code>&amp;lt;</code>
+	 * <p>
+	 * This is just a convenience method which invokes
+	 * <code>{@link #htmlFormat(String, boolean)}</code> with latter parameter
+	 * set to <code>true</code>
+	 * 
+	 * @param plainText
+	 *            The plain text
+	 * @return properly escaped html content
+	 * @see #htmlFormat(String, boolean)
+	 */
+	public static String htmlFormat(final String plainText) {
+		// XXX: Maybe set to false
+		return htmlFormat(plainText, true);
+	}
+
+	public static Pattern PATTERN_HREF = Pattern
 			.compile(
 					"<a\\s+href[^>]+>.*?</a>|((?:https?://|ftp://|mailto:|news.|www.)(?:[-A-Z0-9+@#/%?=~_|!:,.;]|&amp;|&(?!\\w+;))*(?:[-A-Z0-9+@#/%=~_|]|&amp;|&(?!\\w+;)))",
 					Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
 
 	/**
-	 * Searching for links using a regexp pattern and convert them to valid href
+	 * Searches for non-html links and convert them to valid html links
+	 * <p>
+	 * Example: <code>http://www.somewhere.com</code> is converted to
+	 * <code>&lt;a&nbsp;href=&quot;http://www.somewhere.com&quot;&gt;http://www.somewhere.com&lt;/a&gt;</code>
 	 * 
-	 * @return
+	 * @param content
+	 *            The content to search in
+	 * @return The given content with all non-html links converted to valid html
+	 *         links
+	 * @see #PATTERN_HREF
 	 */
-	public static String formatHrefLinks(final String lineArg) {
-		String line = lineArg;
+	public static String formatHrefLinks(final String content) {
 		try {
-			final Matcher m = PATTERN_HREF.matcher(line);
-			final StringBuffer sb = new StringBuffer(line.length());
+			final Matcher m = PATTERN_HREF.matcher(content);
+			final StringBuffer sb = new StringBuffer(content.length());
 			final StringBuilder tmp = new StringBuilder(200);
 			while (m.find()) {
 				final String nonHtmlLink = m.group(1);
-				if (nonHtmlLink == null || (isImgSrc(line, m.start(1)))) {
+				if (nonHtmlLink == null || (isImgSrc(content, m.start(1)))) {
 					m.appendReplacement(sb, Matcher.quoteReplacement(checkTarget(m.group())));
 				} else {
 					tmp.setLength(0);
@@ -112,11 +204,11 @@ public class MailTools {
 				}
 			}
 			m.appendTail(sb);
-			line = sb.toString();
-		} catch (Exception e) {
+			return sb.toString();
+		} catch (final Exception e) {
 			LOG.error(e.getMessage(), e);
 		}
-		return line;
+		return content;
 	}
 
 	private static final Pattern PATTERN_TARGET = Pattern.compile("(<a.*target=\"?)([^\\s\">]+)(\"?.*</a>)",
@@ -124,7 +216,7 @@ public class MailTools {
 
 	private static final String STR_BLANK = "_blank";
 
-	private static final String checkTarget(final String anchorTag) {
+	private static String checkTarget(final String anchorTag) {
 		final Matcher m = PATTERN_TARGET.matcher(anchorTag);
 		if (m.matches()) {
 			if (!STR_BLANK.equalsIgnoreCase(m.group(2))) {
@@ -144,7 +236,7 @@ public class MailTools {
 
 	private static final String STR_IMG_SRC = "src=\"";
 
-	private static final boolean isImgSrc(final String line, final int start) {
+	private static boolean isImgSrc(final String line, final int start) {
 		return start >= 5 && STR_IMG_SRC.equalsIgnoreCase(line.substring(start - 5, start));
 	}
 

@@ -674,21 +674,28 @@ public final class MessageUtils {
 		try {
 			final Matcher imgMatcher = IMG_PATTERN.matcher(reval);
 			final StringBuffer sb = new StringBuffer(reval.length());
-			while (imgMatcher.find()) {
-				final String foundImg = imgMatcher.group(1);
-				final Matcher cidMatcher = CID_PATTERN.matcher(foundImg);
-				final StringBuffer cidBuffer = new StringBuffer(foundImg.length());
-				while (cidMatcher.find()) {
-					final String cid = (cidMatcher.group(1) == null ? cidMatcher.group(2) : cidMatcher.group(1));
-					final StringBuilder linkBuilder = new StringBuilder().append(STR_AJAX_MAIL).append(
-							Mail.PARAMETER_SESSION).append('=').append(session.getSecret()).append('&').append(
-							Mail.PARAMETER_ACTION).append('=').append(Mail.ACTION_MATTACH).append('&').append(
-							Mail.PARAMETER_ID).append('=').append(msgUID).append('&').append(Mail.PARAMETER_MAILCID)
-							.append('=').append(cid).append('"');
-					cidMatcher.appendReplacement(cidBuffer, Matcher.quoteReplacement(linkBuilder.toString()));
-				}
-				cidMatcher.appendTail(cidBuffer);
-				imgMatcher.appendReplacement(sb, Matcher.quoteReplacement(cidBuffer.toString()));
+			if (imgMatcher.find()) {
+				final StringBuffer cidBuffer = new StringBuffer(256);
+				do {
+					final String foundImg = imgMatcher.group(1);
+					final Matcher cidMatcher = CID_PATTERN.matcher(foundImg);
+					cidBuffer.setLength(0);
+					if (cidMatcher.find()) {
+						final StringBuilder linkBuilder = new StringBuilder(256);
+						do {
+							final String cid = (cidMatcher.group(1) == null ? cidMatcher.group(2) : cidMatcher.group(1));
+							linkBuilder.setLength(0);
+							linkBuilder.append(STR_AJAX_MAIL).append(
+									Mail.PARAMETER_SESSION).append('=').append(session.getSecret()).append('&').append(
+									Mail.PARAMETER_ACTION).append('=').append(Mail.ACTION_MATTACH).append('&').append(
+									Mail.PARAMETER_ID).append('=').append(msgUID).append('&').append(Mail.PARAMETER_MAILCID)
+									.append('=').append(cid).append('"');
+							cidMatcher.appendReplacement(cidBuffer, Matcher.quoteReplacement(linkBuilder.toString()));
+						} while (cidMatcher.find());
+					}
+					cidMatcher.appendTail(cidBuffer);
+					imgMatcher.appendReplacement(sb, Matcher.quoteReplacement(cidBuffer.toString()));
+				} while (imgMatcher.find());
 			}
 			imgMatcher.appendTail(sb);
 			reval = sb.toString();

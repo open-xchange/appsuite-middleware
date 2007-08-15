@@ -1,3 +1,13 @@
+* 2007-08-15 - thorben.betten@open-xchange.com
+
+ - Special HTML entities moved to external properties file
+ - Enhanced text2html conversion through including more HTML entities
+ 
+############## PAY ATTENTION TO ME ! ################
+ - CONFIG change: new property file "HTMLEntities.properties" which
+   holds known HTML entities and their character mapping
+#####################################################
+
 * 2007-08-15 - marcus.klein@open-xchange.com
 
  - Removed unused JNI SSL stuff.

@@ -49,14 +49,18 @@
 
 package com.openexchange.tools.mail;
 
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import com.openexchange.configuration.SystemConfig;
 
 /**
  * Html2TextConverter
@@ -64,10 +68,14 @@ import java.util.regex.Pattern;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public class Html2TextConverter {
+public final class Html2TextConverter {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(Html2TextConverter.class);
+
+	private static boolean initialized;
+
+	private static final Lock INIT_LOCK = new ReentrantLock();
 
 	private static final String STR_EMPTY = "";
 
@@ -87,75 +95,37 @@ public class Html2TextConverter {
 
 	private static Properties htmlEntities;
 
-	private static final Map<String, String> specialMap;
-
-	static {
-		htmlEntities = new Properties();
-		try {
-			htmlEntities.load(Html2TextConverter.class.getClassLoader().getResourceAsStream(
-					"com/sun/org/apache/xml/internal/serializer/HTMLEntities.properties"));
-		} catch (final IOException e) {
-			LOG.error(e.getLocalizedMessage(), e);
-			htmlEntities = null;
+	private static void init() {
+		if (!initialized) {
+			INIT_LOCK.lock();
+			try {
+				if (null == htmlEntities) {
+					htmlEntities = new Properties();
+					InputStream in = null;
+					try {
+						in = new FileInputStream(SystemConfig.getProperty(SystemConfig.Property.HTMLEntities));
+						htmlEntities.load(in);
+					} catch (final IOException e) {
+						LOG.error(e.getLocalizedMessage(), e);
+						htmlEntities = null;
+					} finally {
+						if (null != in) {
+							try {
+								in.close();
+							} catch (final IOException e) {
+								LOG.error(e.getLocalizedMessage(), e);
+							}
+						}
+					}
+					initialized = true;
+				}
+			} finally {
+				INIT_LOCK.unlock();
+			}
 		}
-
-		specialMap = new HashMap<String, String>();
-		specialMap.put("lt", "<");
-		specialMap.put("#60", "<");
-
-		specialMap.put("gt", ">");
-		specialMap.put("#62", ">");
-
-		specialMap.put("amp", "&");
-		specialMap.put("#38", "&");
-
-		specialMap.put("auml", "ä");
-		specialMap.put("#228", "ä");
-
-		specialMap.put("Auml", "Ä");
-		specialMap.put("#196", "Ä");
-
-		specialMap.put("uuml", "ü");
-		specialMap.put("#252", "ü");
-
-		specialMap.put("Uuml", "Ü");
-		specialMap.put("#220", "Ü");
-
-		specialMap.put("ouml", "ö");
-		specialMap.put("#246", "ö");
-
-		specialMap.put("Ouml", "Ö");
-		specialMap.put("#214", "Ö");
-
-		specialMap.put("szlig", "ß");
-		specialMap.put("#223", "ß");
-
-		specialMap.put("uml", "¨");
-
-		specialMap.put("para", "¶");
-
-		specialMap.put("nbsp", " ");
-
-		specialMap.put("quot", "\"");
-		specialMap.put("#34", "\"");
-
-		specialMap.put("copy", "[Copyright]");
-		specialMap.put("#169", "[Copyright]");
-
-		specialMap.put("reg", "[Registered]");
-		specialMap.put("#174", "[Registered]");
-
-		specialMap.put("trade", "[Trademark]");
-		specialMap.put("#153", "[Trademark]");
-
-		/**
-		 * TODO: to be continued: <a
-		 * href="http://de.selfhtml.org/html/referenz/zeichen.htm">HTML
-		 * Sonderzeichen</a>
-		 */
 	}
 
-	private static final String getHTMLEntity(final String specialArg) {
+	private static String getHTMLEntity(final String specialArg) {
 		final String special;
 		if (specialArg.charAt(specialArg.length() - 1) == ';') {
 			special = specialArg.substring(0, specialArg.length() - 1);
@@ -166,15 +136,16 @@ public class Html2TextConverter {
 		if (htmlEntities != null && (tmp = (String) htmlEntities.get(special)) != null) {
 			return String.valueOf((char) Integer.parseInt(tmp));
 		}
-		return specialMap.get(special);
+		return null;
 	}
 
 	public Html2TextConverter() {
 		super();
+		init();
 		anchorBuilder = new StringBuilder(100);
 	}
 
-	private final void reset() {
+	private void reset() {
 		body_found = false;
 		in_body = false;
 		pre = false;
@@ -195,7 +166,7 @@ public class Html2TextConverter {
 	 * 
 	 * @return plain text version of given HTML content
 	 */
-	public final String convertWithQuotes(final String htmlContent) throws IOException {
+	public String convertWithQuotes(final String htmlContent) throws IOException {
 		final StringBuilder sb = new StringBuilder(htmlContent.length() + 100);
 		final Matcher m = PATTERN_BLOCKQUOTE.matcher(htmlContent);
 		boolean found = false;
@@ -247,11 +218,11 @@ public class Html2TextConverter {
 		return sb.toString();
 	}
 
-	private static final String addSimpleQuote(final String htmlContent) {
+	private static String addSimpleQuote(final String htmlContent) {
 		return addSimpleQuote(htmlContent, 1);
 	}
 
-	private static final String addSimpleQuote(final String htmlContent, final int quoteLevel) {
+	private static String addSimpleQuote(final String htmlContent, final int quoteLevel) {
 		final String[] lines = htmlContent.split("<br>");
 		final StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < lines.length; i++) {
@@ -268,7 +239,7 @@ public class Html2TextConverter {
 	 * 
 	 * @return plain text version of given HTML content
 	 */
-	public final String convert(final String htmlContent) throws IOException {
+	public String convert(final String htmlContent) throws IOException {
 		reset();
 		final StringBuilder result = new StringBuilder(1024);
 		final StringBuilder result2 = new StringBuilder(1024);
@@ -320,14 +291,14 @@ public class Html2TextConverter {
 
 	private static final int NONE = -99;
 
-	private static final int getLastChar(final StringBuilder sb) {
+	private static int getLastChar(final StringBuilder sb) {
 		if (sb.length() == 0) {
 			return NONE;
 		}
 		return sb.charAt(sb.length() - 1);
 	}
 
-	private static final String getTag(final Reader r) throws IOException {
+	private static String getTag(final Reader r) throws IOException {
 		final StringBuilder result = new StringBuilder();
 		int level = 1;
 		result.append('<');
@@ -346,7 +317,7 @@ public class Html2TextConverter {
 		return result.toString();
 	}
 
-	private static final String getSpecial(final Reader r) throws IOException {
+	private static String getSpecial(final Reader r) throws IOException {
 		final StringBuilder result = new StringBuilder();
 		/*
 		 * Mark the present position in the stream
@@ -366,7 +337,7 @@ public class Html2TextConverter {
 		return result.toString();
 	}
 
-	private static final boolean isTag(final String tag, final String pattern) {
+	private static boolean isTag(final String tag, final String pattern) {
 		return tag.regionMatches(true, 0, '<' + pattern + '>', 0, pattern.length() + 2)
 				|| tag.regionMatches(true, 0, '<' + pattern + ' ', 0, pattern.length() + 2);
 	}
@@ -379,7 +350,7 @@ public class Html2TextConverter {
 	private static final Pattern PATTERN_SRC_CONTENT = Pattern.compile("src=\"?([^\\s\">]+)\"?",
 			Pattern.CASE_INSENSITIVE);
 
-	private final String convertTag(final String t, final int prevChar) {
+	private String convertTag(final String t, final int prevChar) {
 		String result = STR_EMPTY;
 		if (isTag(t, "body")) {
 			in_body = true;
