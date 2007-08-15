@@ -15,8 +15,8 @@ import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.tools.URLParameter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
@@ -24,7 +24,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.json.JSONWriter;
 
 public class ConflictTest extends AppointmentTest {
 	
@@ -58,8 +57,21 @@ public class ConflictTest extends AppointmentTest {
 	 * Conflict End: 10:00
 	 */
 	public void testConflict1() throws Exception {
+		Calendar calendar = Calendar.getInstance(timeZone);
+		calendar.setTimeInMillis(startTime);
+		calendar.set(Calendar.HOUR_OF_DAY, 0);
+		calendar.set(Calendar.MINUTE, 0);
+		calendar.set(Calendar.SECOND, 0);
+		calendar.set(Calendar.MILLISECOND, 0);
+		
+		final Date rangeStart = calendar.getTime();
+		
+		calendar.add(Calendar.DAY_OF_MONTH, 1);
+		
+		final Date rangeEnd = calendar.getTime();
+		
 		AppointmentObject appointmentObj = new AppointmentObject();
-		appointmentObj.setTitle("testConflict1");
+		appointmentObj.setTitle("testConflict1 - insert");
 		appointmentObj.setStartDate(new Date(startTime));
 		appointmentObj.setEndDate(new Date(endTime));
 		appointmentObj.setShownAs(AppointmentObject.ABSENT);
@@ -81,7 +93,38 @@ public class ConflictTest extends AppointmentTest {
 		
 		assertTrue("appointment id " + objectId + " not found in conflicts", found);
 		
-		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
+		appointmentObj.setIgnoreConflicts(true);
+		int secondObjectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+		
+		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), secondObjectId, appointmentFolderId, rangeStart, rangeEnd, APPOINTMENT_FIELDS, timeZone, getHostName(), getSessionId());
+		Date modified = loadAppointment.getCreationDate();
+
+		appointmentObj.setObjectID(secondObjectId);
+		appointmentObj.setIgnoreConflicts(true);
+		appointmentObj.setShownAs(AppointmentObject.FREE);
+		updateAppointment(getWebConversation(), appointmentObj, secondObjectId, appointmentFolderId, modified, timeZone, PROTOCOL + getHostName(), getSessionId());
+
+		loadAppointment = loadAppointment(getWebConversation(), secondObjectId, appointmentFolderId, rangeStart, rangeEnd, APPOINTMENT_FIELDS, timeZone, getHostName(), getSessionId());
+		modified = loadAppointment.getLastModified();
+
+		appointmentObj.setIgnoreConflicts(false);
+		appointmentObj.setShownAs(AppointmentObject.ABSENT);
+		appointmentObj.setTitle("testConflict1 - update");
+		appointmentConflicts = updateAppointmentReturnConflicts(getWebConversation(), appointmentObj, secondObjectId, appointmentFolderId, modified, timeZone, getHostName(), getSessionId());
+		assertNotNull("conflicts expected!", appointmentConflicts);
+		
+		found = false;
+		
+		for (int a = 0; a < appointmentConflicts.length; a++) {
+			if (appointmentConflicts[a].getObjectID() == objectId) {
+				found = true;
+			}
+		}
+		
+		assertTrue("appointment id " + objectId + " not found in conflicts", found);		
+
+		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, modified, PROTOCOL + getHostName(), getSessionId());
+		deleteAppointment(getWebConversation(), secondObjectId, appointmentFolderId, modified, PROTOCOL + getHostName(), getSessionId());
 	}
 	
 	/**
@@ -487,6 +530,62 @@ public class ConflictTest extends AppointmentTest {
 				AJAXServlet.ACTION_NEW);
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+		WebRequest req = new PutMethodWebRequest(host + APPOINTMENT_URL
+				+ parameter.getURLParameters(), bais, "text/javascript");
+		WebResponse resp = webCon.getResponse(req);
+		
+		assertEquals(200, resp.getResponseCode());
+		
+		final Response response = Response.parse(resp.getText());
+		
+		if (response.hasError()) {
+			fail("json error: " + response.getErrorMessage());
+		}
+		
+		JSONObject data = (JSONObject) response.getData();
+		if (data.has(DataFields.ID)) {
+			objectId = data.getInt(DataFields.ID);
+		}
+		
+		if (data.has("conflicts")) {
+			AppointmentParser appointmentParser = new AppointmentParser(userTimeZone);
+			
+			JSONArray jsonArray = data.getJSONArray("conflicts");
+			AppointmentObject[] appointmentArray = new AppointmentObject[jsonArray.length()];
+			for (int a = 0; a < jsonArray.length(); a++) {
+				appointmentArray[a] = new AppointmentObject();
+				appointmentParser.parse(appointmentArray[a], jsonArray.getJSONObject(a));
+			}
+			
+			return appointmentArray;
+		}
+		
+		return null;
+	}
+	
+	public static AppointmentObject[] updateAppointmentReturnConflicts(WebConversation webCon,
+			AppointmentObject appointmentObj, int objectId, int inFolder, Date modified, TimeZone userTimeZone,
+			String host, String session) throws Exception, OXConflictException {
+		host = appendPrefix(host);
+		
+		final StringWriter stringWriter = new StringWriter();
+		final JSONObject jsonObj = new JSONObject();
+		AppointmentWriter appointmentwriter = new AppointmentWriter(userTimeZone);
+		appointmentwriter.writeAppointment(appointmentObj, jsonObj);
+		
+		stringWriter.write(jsonObj.toString());
+		stringWriter.flush();
+		
+		final URLParameter parameter = new URLParameter();
+		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
+		parameter.setParameter(AJAXServlet.PARAMETER_ACTION,
+				AJAXServlet.ACTION_UPDATE);
+		parameter.setParameter(DataFields.ID, String.valueOf(objectId));
+		parameter.setParameter(AJAXServlet.PARAMETER_INFOLDER, String
+				.valueOf(inFolder));
+		parameter.setParameter(AJAXServlet.PARAMETER_TIMESTAMP, modified);
+
+		ByteArrayInputStream bais = new ByteArrayInputStream(stringWriter.toString().getBytes("UTF-8"));
 		WebRequest req = new PutMethodWebRequest(host + APPOINTMENT_URL
 				+ parameter.getURLParameters(), bais, "text/javascript");
 		WebResponse resp = webCon.getResponse(req);
