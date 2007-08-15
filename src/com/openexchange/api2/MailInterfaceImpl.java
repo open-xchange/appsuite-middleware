@@ -4872,7 +4872,8 @@ public class MailInterfaceImpl implements MailInterface {
 				} finally {
 					mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 				}
-				ACLS: if (folderObj.containsACLs() && IMAPProperties.isSupportsACLs()) {
+				ACLS: if ((folderObj.containsACLs() || folderObj.containsIMAPPermissions())
+						&& IMAPProperties.isSupportsACLs()) {
 					final ACL[] initialACLs = createMe.getACL();
 					ACL[] newACLs;
 					try {
@@ -4884,9 +4885,9 @@ public class MailInterfaceImpl implements MailInterface {
 						break ACLS;
 					}
 					boolean hasAdministerRight = false;
-					for (final ACL current : initialACLs) {
-						if (sessionObj.getIMAPProperties().getImapLogin().equals(current.getName())
-								&& current.getRights().contains(Rights.Right.ADMINISTER)) {
+					for (int i = 0; i < initialACLs.length && !hasAdministerRight; i++) {
+						if (sessionObj.getIMAPProperties().getImapLogin().equals(initialACLs[i].getName())
+								&& initialACLs[i].getRights().contains(Rights.Right.ADMINISTER)) {
 							hasAdministerRight = true;
 						}
 					}
@@ -4909,8 +4910,18 @@ public class MailInterfaceImpl implements MailInterface {
 					 * folderObj
 					 */
 					try {
+						/*
+						 * Apply new ACLs
+						 */
 						for (int i = 0; i < folderObj.getACL().length; i++) {
 							createMe.addACL(folderObj.getACL()[i]);
+						}
+						/*
+						 * Remove other ACLs
+						 */
+						final ACL[] removedACLs = getRemovedACLs(newACLs, initialACLs);
+						for (int i = 0; i < removedACLs.length; i++) {
+							createMe.removeACL(removedACLs[i].getName());
 						}
 					} catch (AbstractOXException e) {
 						throw new OXMailException(e);
