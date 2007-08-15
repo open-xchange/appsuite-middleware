@@ -58,6 +58,11 @@ import java.util.Iterator;
 import com.openexchange.tools.versit.Property;
 import com.openexchange.tools.versit.StringScanner;
 
+/**
+ * @author Viktor Pracht (design)
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a> (bugfix 8844)
+ *
+ */
 public class OldNPropertyDefinition extends OldCompoundPropertyDefinition {
 
 	public OldNPropertyDefinition(String[] paramNames,
@@ -111,11 +116,11 @@ public class OldNPropertyDefinition extends OldCompoundPropertyDefinition {
 		if (size == 0) {
 			return;
 		}
-		Object val = i.next();
+		Object val = i.next(); //remember: size decreases by one, for loop must start with 1 - found during bugfix 8844 
 		if (val != null) {
 			sb.append(val.toString().replaceAll(";", "\\\\;"));
 		}
-		for (int k = 0; k < size; k++) {
+		for (int k = 1; k < size; k++) {
 			sb.append(',');
 			val = i.next();
 			if (val != null) {

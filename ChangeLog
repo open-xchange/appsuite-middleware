@@ -1,3 +1,8 @@
+* 2007-08-15 - tobias.prinz@open-xchange.com
+
+ - Fixed bug in OldNPropertyDefinition causing NoSuchElementException.
+   Preparation for bugfix #8844.
+
 * 2007-08-15 - thorben.betten@open-xchange.com
 
  - Special HTML entities moved to external properties file
