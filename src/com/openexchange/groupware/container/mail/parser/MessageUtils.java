@@ -940,8 +940,11 @@ public final class MessageUtils {
 					.toString();
 		} finally {
 			if (closeFolder) {
-				imapFolder.close(false);
-				MailInterfaceImpl.mailInterfaceMonitor.changeNumActive(false);
+				try {
+					imapFolder.close(false);
+				} finally {
+					MailInterfaceImpl.mailInterfaceMonitor.changeNumActive(false);
+				}
 			}
 		}
 	}

@@ -13,6 +13,7 @@
  - Special HTML entities moved to external properties file
  - Enhanced text2html conversion through including more HTML entities
  - Added check for duplicate infostore folder on user creation
+ - Fixed usages of MailInterfaceMonitor.numActive
  
 ############## PAY ATTENTION TO ME ! ################
  - CONFIG change: new property file "HTMLEntities.properties" which

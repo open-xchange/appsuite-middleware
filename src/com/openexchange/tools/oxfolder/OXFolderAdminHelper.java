@@ -157,7 +157,7 @@ public final class OXFolderAdminHelper {
 	 * @param mailAdminDisplayName
 	 *            The display name of context's admin user
 	 * @param language
-	 *            The language
+	 *            The language conforming to syntax rules of locales
 	 * @param con
 	 *            A writeable connection
 	 * @throws OXException

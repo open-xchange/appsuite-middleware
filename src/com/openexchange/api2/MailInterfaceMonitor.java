@@ -128,11 +128,8 @@ public class MailInterfaceMonitor implements MailInterfaceMonitorMBean {
 	public void changeNumActive(final boolean increment) {
 		if (increment) {
 			numActive.incrementAndGet();
-		} else {
+		} else if (numActive.get() > 0) {
 			numActive.decrementAndGet();
-		}
-		if (numActive.get() < 0) {
-			numActive.set(0);
 		}
 	}
 

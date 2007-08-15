@@ -949,14 +949,18 @@ public class MailInterfaceImpl implements MailInterface {
 					keepSeen();
 					sessionObj.setMailSession(null);
 					if (tmpFolder != null) {
+						boolean decrement = true;
 						try {
 							tmpFolder.close(true); // expunge
 						} catch (final MessagingException e) {
 							LOG.error("Temporary folder could not be closed", e);
 						} catch (final IllegalStateException e) {
 							LOG.warn(WARN_FLD_ALREADY_CLOSED, e);
+							decrement = false;
 						} finally {
-							mailInterfaceMonitor.changeNumActive(false);
+							if (decrement) {
+								mailInterfaceMonitor.changeNumActive(false);
+							}
 							tmpFolder = null;
 						}
 					}
@@ -1022,12 +1026,16 @@ public class MailInterfaceImpl implements MailInterface {
 				 * Release folder
 				 */
 				if (imapCon.getImapFolder() != null) {
+					boolean decrement = true;
 					try {
 						imapCon.getImapFolder().close(false);
-						mailInterfaceMonitor.changeNumActive(false);
 					} catch (final IllegalStateException e) {
 						LOG.warn(WARN_FLD_ALREADY_CLOSED, e);
+						decrement = false;
 					} finally {
+						if (decrement) {
+							mailInterfaceMonitor.changeNumActive(false);
+						}
 						imapCon.resetImapFolder();
 					}
 				}
@@ -1135,20 +1143,26 @@ public class MailInterfaceImpl implements MailInterface {
 		try {
 			try {
 				if (imapFolder.getMode() == Folder.READ_ONLY) {
-					imapFolder.close(false);
-					mailInterfaceMonitor.changeNumActive(false);
+					boolean decrement = true;
+					try {
+						imapFolder.close(false);
+					} catch (final IllegalStateException e) {
+						LOG.warn(WARN_FLD_ALREADY_CLOSED, e);
+						decrement = false;
+					} finally {
+						if (decrement) {
+							mailInterfaceMonitor.changeNumActive(false);
+						}
+					}
 					imapFolder.open(Folder.READ_WRITE);
 					mailInterfaceMonitor.changeNumActive(true);
 				}
 			} catch (final IllegalStateException e) {
+				LOG.warn(WARN_FLD_ALREADY_CLOSED, e);
 				/*
 				 * Folder is closed
 				 */
 				try {
-					if (imapFolder.isOpen()) {
-						imapFolder.close(false);
-						mailInterfaceMonitor.changeNumActive(false);
-					}
 					imapFolder.open(Folder.READ_WRITE);
 					mailInterfaceMonitor.changeNumActive(true);
 				} catch (final ReadOnlyFolderException e1) {
@@ -2028,9 +2042,12 @@ public class MailInterfaceImpl implements MailInterface {
 						 */
 						keepSeen();
 					}
-					imapCon.getImapFolder().close(false);
-					mailInterfaceMonitor.changeNumActive(false);
-					imapCon.resetImapFolder();
+					try {
+						imapCon.getImapFolder().close(false);
+					} finally {
+						mailInterfaceMonitor.changeNumActive(false);
+						imapCon.resetImapFolder();
+					}
 				}
 				imapCon.setImapFolder((IMAPFolder) (folder == null ? imapCon.getIMAPStore().getFolder(STR_INBOX)
 						: imapCon.getIMAPStore().getFolder(folder)));
@@ -2117,9 +2134,12 @@ public class MailInterfaceImpl implements MailInterface {
 				 * Another folder than previous one
 				 */
 				if (imapCon.getImapFolder().isOpen()) {
-					imapCon.getImapFolder().close(false);
-					mailInterfaceMonitor.changeNumActive(false);
-					imapCon.resetImapFolder();
+					try {
+						imapCon.getImapFolder().close(false);
+					} finally {
+						mailInterfaceMonitor.changeNumActive(false);
+						imapCon.resetImapFolder();
+					}
 				}
 				imapCon.setImapFolder((IMAPFolder) (folder == null ? imapCon.getIMAPStore().getFolder(STR_INBOX)
 						: imapCon.getIMAPStore().getFolder(folder)));
@@ -2666,9 +2686,12 @@ public class MailInterfaceImpl implements MailInterface {
 					 */
 					keepSeen();
 				}
-				imapCon.getImapFolder().close(false);
-				mailInterfaceMonitor.changeNumActive(false);
-				imapCon.resetImapFolder();
+				try {
+					imapCon.getImapFolder().close(false);
+				} finally {
+					mailInterfaceMonitor.changeNumActive(false);
+					imapCon.resetImapFolder();
+				}
 			}
 			if (isIdenticalFolder) {
 				if (mode == Folder.READ_WRITE
@@ -2731,9 +2754,12 @@ public class MailInterfaceImpl implements MailInterface {
 				}
 			}
 			if (tmpFolder.isOpen()) {
-				tmpFolder.close(false);
-				mailInterfaceMonitor.changeNumActive(false);
-				tmpFolder = null;
+				try {
+					tmpFolder.close(false);
+				} finally {
+					mailInterfaceMonitor.changeNumActive(false);
+					tmpFolder = null;
+				}
 			}
 			if (isIdenticalFolder) {
 				if (mode == Folder.READ_WRITE
@@ -3055,24 +3081,24 @@ public class MailInterfaceImpl implements MailInterface {
 		 * Send message
 		 */
 		final long start = System.currentTimeMillis();
-		Transport transport = null;
+		final Transport transport = imapCon.getSession().getTransport(PROTOCOL_SMTP);
+		if (IMAPProperties.isSmtpAuth()) {
+			transport.connect(sessionObj.getIMAPProperties().getSmtpServer(), sessionObj.getIMAPProperties()
+					.getImapLogin(), encodePassword(sessionObj.getIMAPProperties().getImapPassword()));
+		} else {
+			transport.connect();
+		}
+		mailInterfaceMonitor.changeNumActive(true);
 		try {
-			transport = imapCon.getSession().getTransport(PROTOCOL_SMTP);
-			if (IMAPProperties.isSmtpAuth()) {
-				transport.connect(sessionObj.getIMAPProperties().getSmtpServer(), sessionObj.getIMAPProperties()
-						.getImapLogin(), encodePassword(sessionObj.getIMAPProperties().getImapPassword()));
-			} else {
-				transport.connect();
-			}
-			mailInterfaceMonitor.changeNumActive(true);
 			msg.saveChanges();
 			transport.sendMessage(msg, msg.getAllRecipients());
+			mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 		} finally {
-			if (transport != null) {
+			try {
 				transport.close();
+			} finally {
 				mailInterfaceMonitor.changeNumActive(false);
 			}
-			mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 		}
 	}
 
@@ -3213,8 +3239,8 @@ public class MailInterfaceImpl implements MailInterface {
 					 * Append message to draft folder
 					 */
 					long uidNext = -1;
-					final long start = System.currentTimeMillis();
 					try {
+						final long start = System.currentTimeMillis();
 						if (IMAPProperties.isCapabilitiesLoaded() && IMAPProperties.getImapCapabilities().hasUIDPlus()) {
 							final AppendUID appendUID = draftFolder.appendUIDMessages(new Message[] { newSMTPMsg })[0];
 							if (appendUID != null) {
@@ -3230,11 +3256,14 @@ public class MailInterfaceImpl implements MailInterface {
 							}
 							draftFolder.appendMessages(new Message[] { newSMTPMsg });
 						}
+						mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 						msgFiller.deleteReferencedUploadFiles();
 					} finally {
-						mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-						draftFolder.close(false);
-						mailInterfaceMonitor.changeNumActive(false);
+						try {
+							draftFolder.close(false);
+						} finally {
+							mailInterfaceMonitor.changeNumActive(false);
+						}
 					}
 					/*
 					 * Check for draft-edit operation
@@ -3261,8 +3290,12 @@ public class MailInterfaceImpl implements MailInterface {
 							LOG.error(e.getLocalizedMessage(), e);
 						} finally {
 							if (originalMsgFolderOpened) {
-								originalMsgFolder.close(false);
-								mailInterfaceMonitor.changeNumActive(false);
+								try {
+									originalMsgFolder.close(false);
+								} finally {
+									mailInterfaceMonitor.changeNumActive(false);
+									originalMsgFolderOpened = false;
+								}
 							}
 						}
 						/*
@@ -3325,25 +3358,25 @@ public class MailInterfaceImpl implements MailInterface {
 				}
 				try {
 					final long start = System.currentTimeMillis();
-					Transport transport = null;
+					final Transport transport = imapCon.getSession().getTransport(PROTOCOL_SMTP);
+					if (IMAPProperties.isSmtpAuth()) {
+						transport.connect(sessionObj.getIMAPProperties().getSmtpServer(), sessionObj
+								.getIMAPProperties().getImapLogin(), encodePassword(sessionObj.getIMAPProperties()
+								.getImapPassword()));
+					} else {
+						transport.connect();
+					}
+					mailInterfaceMonitor.changeNumActive(true);
 					try {
-						transport = imapCon.getSession().getTransport(PROTOCOL_SMTP);
-						if (IMAPProperties.isSmtpAuth()) {
-							transport.connect(sessionObj.getIMAPProperties().getSmtpServer(), sessionObj
-									.getIMAPProperties().getImapLogin(), encodePassword(sessionObj.getIMAPProperties()
-									.getImapPassword()));
-						} else {
-							transport.connect();
-						}
-						mailInterfaceMonitor.changeNumActive(true);
 						newSMTPMsg.saveChanges();
 						transport.sendMessage(newSMTPMsg, allRecipients);
+						mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 					} finally {
-						if (transport != null) {
+						try {
 							transport.close();
+						} finally {
 							mailInterfaceMonitor.changeNumActive(false);
 						}
-						mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 					}
 				} catch (final MessagingException e) {
 					throw handleMessagingException(e, sessionObj.getIMAPProperties(), sessionObj.getContext());
@@ -3364,11 +3397,11 @@ public class MailInterfaceImpl implements MailInterface {
 					sentFolder.open(Folder.READ_WRITE);
 					mailInterfaceMonitor.changeNumActive(true);
 				}
-				newSMTPMsg.setFlag(Flags.Flag.SEEN, true);
-				newSMTPMsg.saveChanges();
-				long uidNext = -1;
-				final long start = System.currentTimeMillis();
 				try {
+					newSMTPMsg.setFlag(Flags.Flag.SEEN, true);
+					newSMTPMsg.saveChanges();
+					long uidNext = -1;
+					final long start = System.currentTimeMillis();
 					if (IMAPProperties.isCapabilitiesLoaded() && IMAPProperties.getImapCapabilities().hasUIDPlus()) {
 						final AppendUID appendUID = sentFolder.appendUIDMessages(new Message[] { newSMTPMsg })[0];
 						if (appendUID != null) {
@@ -3384,7 +3417,9 @@ public class MailInterfaceImpl implements MailInterface {
 						}
 						sentFolder.appendMessages(new Message[] { newSMTPMsg });
 					}
+					mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 					msgFiller.deleteReferencedUploadFiles();
+					return new StringBuilder(sentFolder.getFullName()).append(Mail.SEPERATOR).append(uidNext).toString();
 				} catch (final MessagingException e) {
 					if (e.getNextException() instanceof CommandFailedException) {
 						final CommandFailedException exc = (CommandFailedException) e.getNextException();
@@ -3396,19 +3431,24 @@ public class MailInterfaceImpl implements MailInterface {
 							.append(e.getMessage()).toString(), e);
 					return STR_EMPTY;
 				} finally {
-					mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-					sentFolder.close(false);
-					mailInterfaceMonitor.changeNumActive(false);
+					try {
+						sentFolder.close(false);
+					} finally {
+						mailInterfaceMonitor.changeNumActive(false);
+					}
 				}
-				return new StringBuilder(sentFolder.getFullName()).append(Mail.SEPERATOR).append(uidNext).toString();
-
 			} finally {
-				if (originalMsgFolder != null) {
+				if (originalMsgFolder != null && originalMsgFolderOpened) {
+					boolean decrement = true;
 					try {
 						originalMsgFolder.close(false);
-						mailInterfaceMonitor.changeNumActive(false);
 					} catch (final IllegalStateException e) {
 						LOG.warn(WARN_FLD_ALREADY_CLOSED, e);
+						decrement = false;
+					} finally {
+						if (decrement) {
+							mailInterfaceMonitor.changeNumActive(false);
+						}
 					}
 					originalMsgFolder = null;
 				}
@@ -4086,11 +4126,16 @@ public class MailInterfaceImpl implements MailInterface {
 					destFullname = prepareMailFolderParam(getSpamFolder());
 				} finally {
 					if (confirmedSpamFld != null) {
+						boolean decrement = true;
 						try {
 							confirmedSpamFld.close(false);
-							mailInterfaceMonitor.changeNumActive(false);
 						} catch (final IllegalStateException e) {
 							LOG.warn(WARN_FLD_ALREADY_CLOSED, e);
+							decrement = false;
+						} finally {
+							if (decrement) {
+								mailInterfaceMonitor.changeNumActive(false);
+							}
 						}
 						confirmedSpamFld = null;
 					}
@@ -4124,11 +4169,16 @@ public class MailInterfaceImpl implements MailInterface {
 					destFullname = STR_INBOX;
 				} finally {
 					if (confirmedHamFld != null) {
+						boolean decrement = true;
 						try {
 							confirmedHamFld.close(false);
-							mailInterfaceMonitor.changeNumActive(false);
 						} catch (final IllegalStateException e) {
 							LOG.warn(WARN_FLD_ALREADY_CLOSED, e);
+							decrement = false;
+						} finally {
+							if (decrement) {
+								mailInterfaceMonitor.changeNumActive(false);
+							}
 						}
 						confirmedHamFld = null;
 					}
@@ -4149,11 +4199,16 @@ public class MailInterfaceImpl implements MailInterface {
 					destFld.appendMessages(msgArr);
 				} finally {
 					if (destFld != null) {
+						boolean decrement = true;
 						try {
 							destFld.close(false);
-							mailInterfaceMonitor.changeNumActive(false);
 						} catch (final IllegalStateException e) {
 							LOG.warn(WARN_FLD_ALREADY_CLOSED, e);
+							decrement = false;
+						} finally {
+							if (decrement) {
+								mailInterfaceMonitor.changeNumActive(false);
+							}
 						}
 						destFld = null;
 					}
@@ -4340,11 +4395,16 @@ public class MailInterfaceImpl implements MailInterface {
 				throw new MessagingException(e1.getMessage(), e1);
 			} finally {
 				if (confirmedHamFld != null) {
+					boolean decrement = true;
 					try {
 						confirmedHamFld.close(false);
-						mailInterfaceMonitor.changeNumActive(false);
 					} catch (final IllegalStateException e) {
-						LOG.warn(e.getMessage(), e);
+						LOG.warn(WARN_FLD_ALREADY_CLOSED, e);
+						decrement = false;
+					} finally {
+						if (decrement) {
+							mailInterfaceMonitor.changeNumActive(false);
+						}
 					}
 				}
 			}
@@ -4629,8 +4689,11 @@ public class MailInterfaceImpl implements MailInterface {
 					 * Rename can only be invoked on a closed folder
 					 */
 					if (updateMe.isOpen()) {
-						updateMe.close(false);
-						mailInterfaceMonitor.changeNumActive(false);
+						try {
+							updateMe.close(false);
+						} finally {
+							mailInterfaceMonitor.changeNumActive(false);
+						}
 					}
 					final String parentFullName = folderObj.getImapFolder().getParent().getFullName();
 					StringBuilder tmp = new StringBuilder();
@@ -5010,16 +5073,22 @@ public class MailInterfaceImpl implements MailInterface {
 		try {
 			newFolder.open(Folder.READ_WRITE);
 			mailInterfaceMonitor.changeNumActive(true);
-			newFolder.setSubscribed(toMove.isSubscribed());
-			/*
-			 * Copy ACLs
-			 */
-			final ACL[] acls = toMove.getACL();
-			for (int i = 0; i < acls.length; i++) {
-				newFolder.addACL(acls[i]);
+			try {
+				newFolder.setSubscribed(toMove.isSubscribed());
+				/*
+				 * Copy ACLs
+				 */
+				final ACL[] acls = toMove.getACL();
+				for (int i = 0; i < acls.length; i++) {
+					newFolder.addACL(acls[i]);
+				}
+			} finally {
+				try {
+					newFolder.close(false);
+				} finally {
+					mailInterfaceMonitor.changeNumActive(false);
+				}
 			}
-			newFolder.close(false);
-			mailInterfaceMonitor.changeNumActive(false);
 		} catch (final ReadOnlyFolderException e) {
 			throw new OXMailException(MailCode.NO_WRITE_ACCESS, getUserName(sessionObj), newFolder.getFullName());
 		}
@@ -5031,14 +5100,17 @@ public class MailInterfaceImpl implements MailInterface {
 				toMove.open(Folder.READ_ONLY);
 				mailInterfaceMonitor.changeNumActive(true);
 			}
-			final long start = System.currentTimeMillis();
 			try {
+				final long start = System.currentTimeMillis();
 				toMove.copyMessages(toMove.getMessages(), newFolder);
-			} finally {
 				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+			} finally {
+				try {
+					toMove.close(false);
+				} finally {
+					mailInterfaceMonitor.changeNumActive(false);
+				}
 			}
-			toMove.close(false);
-			mailInterfaceMonitor.changeNumActive(false);
 		}
 		/*
 		 * Iterate subfolders
@@ -5082,8 +5154,11 @@ public class MailInterfaceImpl implements MailInterface {
 			throw new OXMailException(MailCode.NO_ACCESS, getUserName(sessionObj), deleteMe.getFullName());
 		}
 		if (deleteMe.isOpen()) {
-			deleteMe.close(false);
-			mailInterfaceMonitor.changeNumActive(false);
+			try {
+				deleteMe.close(false);
+			} finally {
+				mailInterfaceMonitor.changeNumActive(false);
+			}
 		}
 		/*
 		 * Unsubscribe prio to deletion

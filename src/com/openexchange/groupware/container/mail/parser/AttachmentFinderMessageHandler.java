@@ -76,17 +76,18 @@ import com.openexchange.tools.mail.UUEncodedPart;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class AttachmentFinderMessageHandler implements MessageHandler {
-	
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AttachmentFinderMessageHandler.class);
-	
+
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(AttachmentFinderMessageHandler.class);
+
 	private final Flags storedMsgFlags;
-	
+
 	private final SessionObject session;
-	
+
 	private boolean hasAttachment;
-	
+
 	private boolean isFlagged;
-	
+
 	private boolean isMultipart;
 
 	/**
@@ -290,8 +291,8 @@ public class AttachmentFinderMessageHandler implements MessageHandler {
 		if (!isMultipart) {
 			/*
 			 * In the simplest case, a message of MIME type multipart/mixed with
-			 * more than one body part is likely a message with attachments. So this
-			 * is treated as a necessary pre-condition
+			 * more than one body part is likely a message with attachments. So
+			 * this is treated as a necessary pre-condition
 			 */
 			isMultipart = (bodyPartCount > 1);
 			return isMultipart;
@@ -309,16 +310,17 @@ public class AttachmentFinderMessageHandler implements MessageHandler {
 		hasAttachment = isMultipart;
 		return !hasAttachment;
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
 	 * 
 	 * @see com.openexchange.groupware.container.mail.parser.MessageHandler#handleMessageEnd()
 	 */
 	public void handleMessageEnd(final Message msg) throws OXException {
 		if (!isFlagged) {
 			final Folder fld = msg.getFolder();
-			if ("false".equalsIgnoreCase(MailInterfaceImpl.getDefaultIMAPProperties().getProperty("mail.imap.allowreadonlyselect",
-					"false"))
+			if ("false".equalsIgnoreCase(MailInterfaceImpl.getDefaultIMAPProperties().getProperty(
+					"mail.imap.allowreadonlyselect", "false"))
 					&& IMAPUtils.isReadOnly(fld)) {
 				if (LOG.isDebugEnabled()) {
 					LOG.debug(new StringBuilder().append("Folder ").append(fld.getFullName()).append(" is read-only")
@@ -338,10 +340,14 @@ public class AttachmentFinderMessageHandler implements MessageHandler {
 					MailInterfaceImpl.mailInterfaceMonitor.changeNumActive(true);
 					closeFolder = true;
 				} else if (fld.getMode() == Folder.READ_ONLY) {
-					fld.close(false);
-					MailInterfaceImpl.mailInterfaceMonitor.changeNumActive(false);
+					try {
+						fld.close(false);
+					} finally {
+						MailInterfaceImpl.mailInterfaceMonitor.changeNumActive(false);
+					}
 					fld.open(Folder.READ_WRITE);
 					MailInterfaceImpl.mailInterfaceMonitor.changeNumActive(true);
+					closeFolder = true;
 				}
 				/*
 				 * Message was not seen before. Since we have to access
@@ -358,25 +364,28 @@ public class AttachmentFinderMessageHandler implements MessageHandler {
 				if (!storedMsgFlags.contains(Flags.Flag.DRAFT)) {
 					setAttachUserFlag(msg, hasAttachment);
 				}
-			} catch (MessagingException e) {
+			} catch (final MessagingException e) {
 				throw MailInterfaceImpl.handleMessagingException(e);
 			} finally {
 				if (closeFolder) {
 					try {
 						fld.close(false);
-						MailInterfaceImpl.mailInterfaceMonitor.changeNumActive(false);
-					} catch (MessagingException e) {
+					} catch (final IllegalStateException e) {
 						LOG.error(e.getMessage(), e);
+					} catch (final MessagingException e) {
+						LOG.error(e.getMessage(), e);
+					} finally {
+						MailInterfaceImpl.mailInterfaceMonitor.changeNumActive(false);
 					}
 				}
 			}
 		}
 	}
-	
+
 	private final boolean isAttachment(final Part part) throws MessagingException {
 		return (Part.ATTACHMENT.equalsIgnoreCase(part.getDisposition()) && part.getFileName() != null);
 	}
-	
+
 	public boolean hasAttachment() {
 		return hasAttachment;
 	}
@@ -388,8 +397,7 @@ public class AttachmentFinderMessageHandler implements MessageHandler {
 	 * @returns <code>true</code> if traversed message contains at least one
 	 *          attachment, <code>false</code> otherwise
 	 */
-	public static boolean hasAttachment(final Message msg, final SessionObject session) throws MessagingException,
-			OXException, IOException {
+	public static boolean hasAttachment(final Message msg, final SessionObject session) throws MessagingException {
 		final AttachmentFinderMessageHandler msgHandler = new AttachmentFinderMessageHandler(session, msg.getFlags());
 		try {
 			new MessageDumper(session).dumpMessage(msg, msgHandler);
@@ -414,18 +422,25 @@ public class AttachmentFinderMessageHandler implements MessageHandler {
 				MailInterfaceImpl.mailInterfaceMonitor.changeNumActive(true);
 				closeFld = true;
 			} else if (fld.getMode() != Folder.READ_WRITE) {
-				fld.close(false);
-				MailInterfaceImpl.mailInterfaceMonitor.changeNumActive(false);
+				try {
+					fld.close(false);
+				} finally {
+					MailInterfaceImpl.mailInterfaceMonitor.changeNumActive(false);
+				}
 				fld.open(Folder.READ_WRITE);
 				MailInterfaceImpl.mailInterfaceMonitor.changeNumActive(true);
+				closeFld = true;
 			}
 			final Flags attachFlags = new Flags(hasAttachment ? JSONMessageObject.USER_FLAG_ATTACHMENT
 					: JSONMessageObject.USER_FLAG_NO_ATTACHMENT);
 			msg.setFlags(attachFlags, true);
 		} finally {
 			if (closeFld) {
-				fld.close(false);
-				MailInterfaceImpl.mailInterfaceMonitor.changeNumActive(false);
+				try {
+					fld.close(false);
+				} finally {
+					MailInterfaceImpl.mailInterfaceMonitor.changeNumActive(false);
+				}
 			}
 		}
 	}

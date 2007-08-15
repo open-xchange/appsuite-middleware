@@ -271,12 +271,11 @@ public final class DefaultIMAPConnection implements IMAPConnection, Serializable
 	public void close() throws javax.mail.MessagingException {
 		try {
 			try {
-				if (imapFolder != null) {
+				if (imapFolder != null && imapFolder.isOpen()) {
 					try {
 						imapFolder.close(false);
+					} finally {
 						MailInterfaceImpl.mailInterfaceMonitor.changeNumActive(false);
-					} catch (final IllegalStateException e) {
-						LOG.warn("Invoked close() on a closed folder", e);
 					}
 				}
 			} catch (final Throwable t) {

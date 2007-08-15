@@ -149,9 +149,9 @@ public class MailObject {
 	private final static String HEADER_XOXREMINDER = "X-OX-Reminder";
 
 	private final static String VALUE_PRIORITYNROM = "3 (normal)";
-	
+
 	private final static String HEADER_ORGANIZATION = "Organization";
-	
+
 	private final static String HEADER_X_MAILER = "X-Mailer";
 
 	public final void send() throws OXException {
@@ -254,25 +254,27 @@ public class MailObject {
 			/*
 			 * Finally send mail
 			 */
-			Transport transport = null;
+			final Transport transport = mailSession.getTransport("smtp");
+			if (IMAPProperties.isSmtpAuth()) {
+				transport.connect(sessionObj.getIMAPProperties().getSmtpServer(), sessionObj.getIMAPProperties()
+						.getImapLogin(), MailInterfaceImpl.encodePassword(sessionObj.getIMAPProperties()
+						.getImapPassword()));
+			} else {
+				transport.connect();
+			}
+			MailInterfaceImpl.mailInterfaceMonitor.changeNumActive(true);
 			try {
-				transport = mailSession.getTransport("smtp");
 				final long start = System.currentTimeMillis();
-				if (IMAPProperties.isSmtpAuth()) {
-					transport.connect(sessionObj.getIMAPProperties().getSmtpServer(), sessionObj.getIMAPProperties()
-							.getImapLogin(), MailInterfaceImpl.encodePassword(sessionObj.getIMAPProperties().getImapPassword()));
-				} else {
-					transport.connect();
-				}
-				MailInterfaceImpl.mailInterfaceMonitor.changeNumActive(true);
 				msg.saveChanges();
 				transport.sendMessage(msg, msg.getAllRecipients());
 				MailInterfaceImpl.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 			} finally {
-				if (transport != null) {
+				try {
 					transport.close();
+				} finally {
 					MailInterfaceImpl.mailInterfaceMonitor.changeNumActive(false);
 				}
+
 			}
 		} catch (final MessagingException e) {
 			throw MailInterfaceImpl.handleMessagingException(e);
