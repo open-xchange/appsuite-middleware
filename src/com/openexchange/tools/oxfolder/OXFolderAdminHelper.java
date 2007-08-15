@@ -475,6 +475,17 @@ public final class OXFolderAdminHelper {
 	/**
 	 * Propagates that a group has been modified throughout affected folders by
 	 * touching folder's last-modified timestamp.
+	 * 
+	 * @param group
+	 *            The affected group ID
+	 * @param readCon
+	 *            A readable connection to database
+	 * @param writeCon
+	 *            A writeable connection to database
+	 * @param cid
+	 *            The context ID
+	 * @throws SQLException
+	 *             If a SQL related error occurs
 	 */
 	public static void propagateGroupModification(final int group, final Connection readCon, final Connection writeCon,
 			final int cid) throws SQLException {
