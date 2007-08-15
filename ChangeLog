@@ -1,3 +1,8 @@
+* 2007-08-15 - ben.pahne@open-xchange.com
+
+ - Bug Fix 8880: It was possible to move contacts into the global
+   address book. Fixed this.
+
 * 2007-08-15 - tobias.prinz@open-xchange.com
 
  - Fixed bug in OldNPropertyDefinition causing NoSuchElementException.
