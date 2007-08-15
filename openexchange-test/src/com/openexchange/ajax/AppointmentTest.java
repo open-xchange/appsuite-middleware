@@ -242,7 +242,13 @@ public class AppointmentTest extends AbstractAJAXTest {
 	
 	public static int updateAppointment(WebConversation webCon,
 			AppointmentObject appointmentObj, int objectId, int inFolder,
-			TimeZone userTimeZone, String host, String session)
+			TimeZone userTimeZone, String host, String session) throws Exception {
+		return updateAppointment(webCon, appointmentObj, objectId, inFolder, new Date(), userTimeZone, host, session);		
+	}
+
+	public static int updateAppointment(WebConversation webCon,
+			AppointmentObject appointmentObj, int objectId, int inFolder,
+			Date modified, TimeZone userTimeZone, String host, String session)
 			throws Exception {
 		host = appendPrefix(host);
 		
@@ -261,7 +267,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 		parameter.setParameter(DataFields.ID, String.valueOf(objectId));
 		parameter.setParameter(AJAXServlet.PARAMETER_INFOLDER, String
 				.valueOf(inFolder));
-		parameter.setParameter(AJAXServlet.PARAMETER_TIMESTAMP, new Date());
+		parameter.setParameter(AJAXServlet.PARAMETER_TIMESTAMP, modified);
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(stringWriter.toString().getBytes("UTF-8"));
 		WebRequest req = new PutMethodWebRequest(host + APPOINTMENT_URL
@@ -290,6 +296,11 @@ public class AppointmentTest extends AbstractAJAXTest {
 	
 	public static void deleteAppointment(WebConversation webCon, int id,
 			int inFolder, String host, String session) throws Exception {
+		
+		deleteAppointment(webCon, id, inFolder, new Date(), host, session);
+	}
+	public static void deleteAppointment(WebConversation webCon, int id,
+			int inFolder, Date modified, String host, String session) throws Exception {
 		host = appendPrefix(host);
 		
 		deleteAppointment(webCon, id, inFolder, 0, host, session);
@@ -298,10 +309,16 @@ public class AppointmentTest extends AbstractAJAXTest {
 	public static void deleteAppointment(WebConversation webCon, int id,
 			int inFolder, int recurrencePosition, String host, String session)
 			throws Exception {
+		
+		deleteAppointment(webCon, id, inFolder, recurrencePosition, new Date(), host, session);
+	}
+	public static void deleteAppointment(WebConversation webCon, int id,
+			int inFolder, int recurrencePosition, Date modified, String host, String session)
+			throws Exception {
 		host = appendPrefix(host);
 		
 		final AJAXSession ajaxSession = new AJAXSession(webCon, session);
-		final DeleteRequest deleteRequest = new DeleteRequest(inFolder, id, recurrencePosition, new Date());
+		final DeleteRequest deleteRequest = new DeleteRequest(inFolder, id, recurrencePosition, modified);
 		deleteRequest.setFailOnError(false);
 		final AbstractAJAXResponse response = Executor.execute(ajaxSession, deleteRequest);
 		
@@ -460,8 +477,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 		
 		AppointmentObject appointmentObj = new AppointmentObject();
 		
-		AppointmentParser appointmentParser = new AppointmentParser(
-				userTimeZone);
+		AppointmentParser appointmentParser = new AppointmentParser(true, userTimeZone);
 		appointmentParser
 				.parse(appointmentObj, (JSONObject) response.getData());
 		
@@ -845,6 +861,12 @@ public class AppointmentTest extends AbstractAJAXTest {
 				break;
 			case AppointmentObject.TITLE:
 				appointmentObj.setTitle(jsonArray.getString(pos));
+				break;
+			case AppointmentObject.CREATION_DATE:
+				appointmentObj.setCreationDate(new Date(jsonArray.getLong(pos)));
+				break;
+			case AppointmentObject.LAST_MODIFIED:
+				appointmentObj.setLastModified(new Date(jsonArray.getLong(pos)));
 				break;
 			case AppointmentObject.START_DATE:
 				appointmentObj.setStartDate(new Date(jsonArray.getLong(pos)));
