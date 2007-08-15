@@ -156,7 +156,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 		 */
 		headerDateFormat = new SimpleDateFormat(HTTP_HEADER_DATE_FORMAT);
 		final DateFormatSymbols dfs = headerDateFormat.getDateFormatSymbols();
-		String[] shortWeekdays = new String[8];
+		final String[] shortWeekdays = new String[8];
 		shortWeekdays[Calendar.SUNDAY] = "Sun";
 		shortWeekdays[Calendar.MONDAY] = "Mon";
 		shortWeekdays[Calendar.TUESDAY] = "Tue";
@@ -165,7 +165,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 		shortWeekdays[Calendar.FRIDAY] = "Fri";
 		shortWeekdays[Calendar.SATURDAY] = "Sat";
 		dfs.setShortWeekdays(shortWeekdays);
-		String[] shortMonths = new String[12];
+		final String[] shortMonths = new String[12];
 		shortMonths[Calendar.JANUARY] = "Jan";
 		shortMonths[Calendar.FEBRUARY] = "Feb";
 		shortMonths[Calendar.MARCH] = "Mar";
@@ -197,14 +197,29 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 		this.request = request;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.servlet.http.HttpServletResponse#encodeRedirectUrl(java.lang.String)
+	 */
 	public String encodeRedirectUrl(final String url) {
 		return encodeURL(url);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.servlet.http.HttpServletResponse#containsHeader(java.lang.String)
+	 */
 	public boolean containsHeader(final String name) {
 		return headers.containsKey(name);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.tools.servlet.ServletResponseWrapper#reset()
+	 */
 	@Override
 	public void reset() {
 		super.reset();
@@ -308,16 +323,33 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 		return (sb.toString());
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.servlet.http.HttpServletResponse#addDateHeader(java.lang.String,
+	 *      long)
+	 */
 	public void addDateHeader(final String name, final long l) {
 		synchronized (headerDateFormat) {
 			addHeader(name, headerDateFormat.format(new Date(l)));
 		}
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.servlet.http.HttpServletResponse#addIntHeader(java.lang.String,
+	 *      int)
+	 */
 	public void addIntHeader(final String name, final int i) {
 		addHeader(name, String.valueOf(i));
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.servlet.http.HttpServletResponse#addCookie(javax.servlet.http.Cookie)
+	 */
 	public void addCookie(final Cookie cookie) {
 		cookies.add(cookie);
 	}
@@ -374,6 +406,12 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 		return retvalBuilder.toString();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.servlet.http.HttpServletResponse#addHeader(java.lang.String,
+	 *      java.lang.String)
+	 */
 	public void addHeader(final String name, final String value) {
 		if (!headers.containsKey(name)) {
 			headers.put(name, new String[] { value });
@@ -396,24 +434,53 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 		return statusMsg != null ? statusMsg : statusMsgs.get(Integer.valueOf(status));
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.servlet.http.HttpServletResponse#setStatus(int)
+	 */
 	public void setStatus(final int status) {
 		this.status = status;
 		this.statusMsg = statusMsgs.get(Integer.valueOf(status));
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.servlet.http.HttpServletResponse#setStatus(int,
+	 *      java.lang.String)
+	 */
 	public void setStatus(final int status, final String statusMsg) {
 		this.status = status;
 		this.statusMsg = statusMsg != null ? statusMsg : statusMsgs.get(Integer.valueOf(status));
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.servlet.http.HttpServletResponse#setDateHeader(java.lang.String,
+	 *      long)
+	 */
 	public void setDateHeader(final String name, final long l) {
 		setHeader(name, headerDateFormat.format(new Date(l)));
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.servlet.http.HttpServletResponse#setIntHeader(java.lang.String,
+	 *      int)
+	 */
 	public void setIntHeader(final String name, final int i) {
 		setHeader(name, String.valueOf(i));
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.servlet.http.HttpServletResponse#setHeader(java.lang.String,
+	 *      java.lang.String)
+	 */
 	public final void setHeader(final String name, final String value) {
 		if (value == null) {
 			/*
@@ -455,12 +522,23 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 		return retval.toString();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.servlet.http.HttpServletResponse#sendRedirect(java.lang.String)
+	 */
 	public final void sendRedirect(final String location) {
 		status = HttpServletResponse.SC_MOVED_TEMPORARILY;
 		statusMsg = statusMsgs.get(Integer.valueOf(HttpServletResponse.SC_MOVED_TEMPORARILY));
 		addHeader("Location", location);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.servlet.http.HttpServletResponse#sendError(int,
+	 *      java.lang.String)
+	 */
 	public final void sendError(final int status, final String statusMsg) throws IOException {
 		this.status = status;
 		this.statusMsg = statusMsg != null ? statusMsg : statusMsgs.get(Integer.valueOf(status));
@@ -470,13 +548,18 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 					headers.containsKey("Language") ? headers.get("Language")[0] : "en").replaceAll("#STATUS_MSG#",
 					this.statusMsg).replaceAll("#STATUS_CODE#", String.valueOf(this.status)).replaceAll(
 					"#STATUS_DESC#", "").replaceAll("#IP_ADR#", getOwnIP()).replaceAll("#DATE#", "");
-			setContentType("text/html; charset=UTF-8");
+			setContentType(new StringBuilder("text/html; charset=").append(getCharacterEncoding()).toString());
 			errormessage = errorMsgStr.getBytes(getCharacterEncoding());
-			oxOutputStream.write(errormessage);
 			setContentLength(errormessage.length);
+			oxOutputStream.write(errormessage);
 		}
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.servlet.http.HttpServletResponse#sendError(int)
+	 */
 	public void sendError(final int status) throws IOException {
 		sendError(status, "Error");
 	}
@@ -486,7 +569,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 		try {
 			final InetAddress myAddr = InetAddress.getLocalHost();
 			ip = myAddr.getHostAddress();
-		} catch (UnknownHostException ex) {
+		} catch (final UnknownHostException ex) {
 			LOG.error(ex.getMessage(), ex);
 		}
 		return ip;
