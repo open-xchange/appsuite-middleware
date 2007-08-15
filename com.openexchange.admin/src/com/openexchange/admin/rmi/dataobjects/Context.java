@@ -65,17 +65,48 @@ public class Context extends EnforceableDataObject implements NameAndIdObject {
     private static final long serialVersionUID = -8939189372445990901L;
 
     private Integer id;
+    
+    private boolean idset;
+    
     private Database readDatabase;
+    
+    private boolean readDatabaseset;
+    
     private Database writeDatabase;
+    
+    private boolean writeDatabaseset;
+    
     private Integer filestore_id;
+    
+    private boolean filestore_idset;
+    
     private String filestore_name;
+    
+    private boolean filestore_nameset;
+    
     private Long average_size;
+    
+    private boolean average_sizeset;
+    
     private Long maxQuota;
+    
+    private boolean maxQuotaset;
+    
     private Long usedQuota;
+    
+    private boolean usedQuotaset;
+    
     private MaintenanceReason maintenanceReason;
+    
+    private boolean maintenanceReasonset;
+    
     private Boolean enabled;
+    
+    private boolean enabledset;    
 
     private String name;
+    
+    private boolean nameset;    
     
     private HashSet<String> login_mappings;
 
@@ -113,6 +144,7 @@ public class Context extends EnforceableDataObject implements NameAndIdObject {
 
     public final void setId(final Integer id) {
         this.id = id;
+        this.idset = true;
     }
     
     public final String getName() {
@@ -121,6 +153,7 @@ public class Context extends EnforceableDataObject implements NameAndIdObject {
 
     public final void setName(final String name) {
         this.name = name;
+        this.nameset = true;
     }
 
     /*
@@ -180,6 +213,7 @@ public class Context extends EnforceableDataObject implements NameAndIdObject {
 
     public final void setFilestoreId(final Integer filestore_id) {
         this.filestore_id = filestore_id;
+        this.filestore_idset = true;
     }
 
     public final Long getMaxQuota() {
@@ -188,6 +222,7 @@ public class Context extends EnforceableDataObject implements NameAndIdObject {
 
     public final void setMaxQuota(final Long maxQuota) {
         this.maxQuota = maxQuota;
+        this.maxQuotaset = true;
     }
 
     public final Long getUsedQuota() {
@@ -196,6 +231,7 @@ public class Context extends EnforceableDataObject implements NameAndIdObject {
 
     public final void setUsedQuota(final Long usedQuota) {
         this.usedQuota = usedQuota;
+        this.usedQuotaset = true;
     }
 
     public final MaintenanceReason getMaintenanceReason() {
@@ -204,6 +240,7 @@ public class Context extends EnforceableDataObject implements NameAndIdObject {
 
     public final void setMaintenanceReason(final MaintenanceReason maintenanceReason) {
         this.maintenanceReason = maintenanceReason;
+        this.maintenanceReasonset = true;
     }
 
     public final Boolean isEnabled() {
@@ -212,6 +249,7 @@ public class Context extends EnforceableDataObject implements NameAndIdObject {
 
     public final void setEnabled(final Boolean enabled) {
         this.enabled = enabled;
+        this.enabledset = true;
     }
 
     public final Database getReadDatabase() {
@@ -220,6 +258,7 @@ public class Context extends EnforceableDataObject implements NameAndIdObject {
 
     public final void setReadDatabase(final Database readDatabase) {
         this.readDatabase = readDatabase;
+        this.readDatabaseset = true;
     }
 
     public final Database getWriteDatabase() {
@@ -228,6 +267,7 @@ public class Context extends EnforceableDataObject implements NameAndIdObject {
 
     public final void setWriteDatabase(final Database writeDatabase) {
         this.writeDatabase = writeDatabase;
+        this.writeDatabaseset = true;
     }
 
     public final Long getAverage_size() {
@@ -236,6 +276,7 @@ public class Context extends EnforceableDataObject implements NameAndIdObject {
 
     public final void setAverage_size(final Long average_size) {
         this.average_size = average_size;
+        this.average_sizeset = true;
     }
     
     public final String getFilestore_name() {
@@ -244,6 +285,7 @@ public class Context extends EnforceableDataObject implements NameAndIdObject {
 
     public final void setFilestore_name(final String filestore_name) {
         this.filestore_name = filestore_name;
+        this.filestore_nameset = true;
     }
 
     public final String toString() {
@@ -302,6 +344,83 @@ public class Context extends EnforceableDataObject implements NameAndIdObject {
     @Override
     public String[] getMandatoryMembersRegister() {
         return null;
+    }
+
+    /**
+     * @return the average_sizeset
+     */
+    public boolean isAverage_sizeset() {
+        return average_sizeset;
+    }
+
+    /**
+     * @return the enabledset
+     */
+    public boolean isEnabledset() {
+        return enabledset;
+    }
+
+    /**
+     * @return the filestore_idset
+     */
+    public boolean isFilestore_idset() {
+        return filestore_idset;
+    }
+
+    /**
+     * @return the filestore_nameset
+     */
+    public boolean isFilestore_nameset() {
+        return filestore_nameset;
+    }
+
+    /**
+     * @return the idset
+     */
+    public boolean isIdset() {
+        return idset;
+    }
+
+    /**
+     * @return the maintenanceReasonset
+     */
+    public boolean isMaintenanceReasonset() {
+        return maintenanceReasonset;
+    }
+
+    /**
+     * @return the maxQuotaset
+     */
+    public boolean isMaxQuotaset() {
+        return maxQuotaset;
+    }
+
+    /**
+     * @return the nameset
+     */
+    public boolean isNameset() {
+        return nameset;
+    }
+
+    /**
+     * @return the readDatabaseset
+     */
+    public boolean isReadDatabaseset() {
+        return readDatabaseset;
+    }
+
+    /**
+     * @return the usedQuotaset
+     */
+    public boolean isUsedQuotaset() {
+        return usedQuotaset;
+    }
+
+    /**
+     * @return the writeDatabaseset
+     */
+    public boolean isWriteDatabaseset() {
+        return writeDatabaseset;
     }
 
 }
