@@ -59,8 +59,12 @@ public class Server implements Serializable, NameAndIdObject {
     private static final long serialVersionUID = -1752789033012449187L;
 
     private Integer id;
+    
+    private boolean idset;
 
     private String name;
+    
+    private boolean nameset;
 
     public Server() {
     }
@@ -71,6 +75,7 @@ public class Server implements Serializable, NameAndIdObject {
 
     public void setId(final Integer val) {
         this.id = val;
+        this.idset = true;
     }
 
     public String getName() {
@@ -79,6 +84,7 @@ public class Server implements Serializable, NameAndIdObject {
 
     public void setName(String val) {
         this.name = val;
+        this.nameset = true;
     }
     
     public String toString() {
@@ -103,5 +109,19 @@ public class Server implements Serializable, NameAndIdObject {
         }
         ret.append("]");
         return ret.toString();
+    }
+
+    /**
+     * @return the idset
+     */
+    public boolean isIdset() {
+        return idset;
+    }
+
+    /**
+     * @return the nameset
+     */
+    public boolean isNameset() {
+        return nameset;
     }
 }
