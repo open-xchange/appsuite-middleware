@@ -18,6 +18,8 @@
  - Added check for duplicate infostore folder on user creation
  - Fixed usages of MailInterfaceMonitor.numActive
  - Removing unspecified initial ACLs on IMAP folder creation
+ - Bugfix #8823: Allowing to look-up IMAP folder's ACLs if either READ or
+   ADMINISTER right is granted to user
  
 ############## PAY ATTENTION TO ME ! ################
  - CONFIG change: new property file "HTMLEntities.properties" which

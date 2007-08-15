@@ -4471,13 +4471,11 @@ public class MailInterfaceImpl implements MailInterface {
 			}
 			final Folder[] childFolders;
 			final long start = System.currentTimeMillis();
-			try {
-				if (IMAPProperties.isIgnoreSubscription() || all) {
-					childFolders = p.list(PATTERN_ALL);
-				} else {
-					childFolders = p.listSubscribed(PATTERN_ALL);
-				}
-			} finally {
+			if (IMAPProperties.isIgnoreSubscription() || all) {
+				childFolders = p.list(PATTERN_ALL);
+				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+			} else {
+				childFolders = p.listSubscribed(PATTERN_ALL);
 				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 			}
 			final List<MailFolderObject> list = new ArrayList<MailFolderObject>(childFolders.length);

@@ -203,7 +203,8 @@ public final class MailFolderObject implements User2IMAPInfo {
 		}
 		this.subscribed = folder.isSubscribed();
 		b_subscribed = true;
-		if (IMAPProperties.isSupportsACLs() && holdsMessages && this.exists && ownRights.contains(Rights.Right.READ)
+		if (IMAPProperties.isSupportsACLs() && holdsMessages && this.exists
+				&& (ownRights.contains(Rights.Right.READ) || ownRights.contains(Rights.Right.ADMINISTER))
 				&& !(folder instanceof DefaultFolder)) {
 			try {
 				this.acls = folder.getACL();
