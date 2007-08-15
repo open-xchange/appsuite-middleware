@@ -813,7 +813,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                     co.setOIDS(true, oids);
                     co.setResultSet(rs, prep, cols, cimp, readcon, 0, 0, sessionobject);
                     close_connection = false;
-                    return new CachedCalendarIterator(co, sessionobject.getContext(), sessionobject.getUserObject().getId());
+                    return new CachedCalendarIterator(co, sessionobject.getContext(), sessionobject.getUserObject().getId(), oids);
                 } catch(SQLException sqle) {
                     throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
                 } catch(DBPoolingException dbpe) {

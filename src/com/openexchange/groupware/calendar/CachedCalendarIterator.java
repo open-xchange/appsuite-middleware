@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.calendar;
 
+import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.OXException;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
@@ -79,18 +80,33 @@ public class CachedCalendarIterator implements SearchIterator {
     private boolean closed;
     private Context c;
     private int uid;
+    private int[][] oids = null;
+    private int cc = 0;
+    private boolean oxonfe = false;
     
-    public static boolean CACHED_ITERATOR_FAST_FETCH = true; 
-    public static int MAX_PRE_FETCH = 20; 
-    private int pre_fetch = 0;   
+    public static boolean CACHED_ITERATOR_FAST_FETCH = true;
+    public static int MAX_PRE_FETCH = 20;
+    private int pre_fetch = 0;
     
     private static final Log LOG = LogFactory.getLog(CachedCalendarIterator.class);
     
-    public CachedCalendarIterator(SearchIterator non_cached_iterator, Context c, int uid) throws SearchIteratorException, OXException, SQLException, DBPoolingException {     
+    public CachedCalendarIterator(SearchIterator non_cached_iterator, Context c, int uid) throws SearchIteratorException, OXException, SQLException, DBPoolingException {
         list = new ArrayList<CalendarDataObject>(16);
         this.non_cached_iterator = non_cached_iterator;
         this.c = c;
         this.uid = uid;
+        cache = ServerConfig.getBoolean(Property.PrefetchEnabled);
+        if (cache) {
+            fillCachedResultSet();
+        }
+    }
+    
+    public CachedCalendarIterator(SearchIterator non_cached_iterator, Context c, int uid, int[][] oids) throws SearchIteratorException, OXException, SQLException, DBPoolingException {
+        list = new ArrayList<CalendarDataObject>(16);
+        this.non_cached_iterator = non_cached_iterator;
+        this.c = c;
+        this.uid = uid;
+        this.oids = oids;
         cache = ServerConfig.getBoolean(Property.PrefetchEnabled);
         if (cache) {
             fillCachedResultSet();
@@ -104,15 +120,37 @@ public class CachedCalendarIterator implements SearchIterator {
         if (list.size() > 0 && counter < list.size()) {
             return true;
         }
+        if (oids != null) {
+            if (cc < oids.length) {
+                oxonfe = true;
+                return true;
+            }
+        }
         return false;
     }
     
     public Object next() throws SearchIteratorException, OXException {
-        if (!cache) {
-            return non_cached_iterator.next();
-        }
-        if (hasNext()) {
-            return getPreFilledResult();
+        if (!oxonfe) {
+            if (!cache) {
+                if (oids != null) {
+                    CalendarDataObject cdao = (CalendarDataObject)non_cached_iterator.next();
+                    cc++;
+                    return cdao;
+                } else {
+                    return non_cached_iterator.next();
+                }
+            }
+            if (hasNext()) {
+                if (oids != null) {
+                    CalendarDataObject cdao = (CalendarDataObject)getPreFilledResult();
+                    cc++;
+                    return cdao;
+                } else {
+                    return getPreFilledResult();
+                }
+            }
+        } else {
+            throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, com.openexchange.groupware.Component.APPOINTMENT);
         }
         return null;
     }
