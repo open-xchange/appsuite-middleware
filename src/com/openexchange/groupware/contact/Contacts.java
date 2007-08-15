@@ -672,32 +672,32 @@ public class Contacts implements DeleteListener {
 			 *  Check Rights if this is a Move
 			 */
 			if(co.getParentFolderID() != fid){
-				if (!oclPerm.canCreateObjects()){
-					throw EXCEPTIONS.createOXPermissionException(12, Integer.valueOf(co.getParentFolderID()), Integer.valueOf(ctx.getContextId()), Integer.valueOf(user));
-				}
 				
+				int fid2 = co.getParentFolderID();
+				final EffectivePermission op = oxfs.getFolderPermission(fid2, user, uc);
+					
+				if (!op.canCreateObjects()){
+					throw EXCEPTIONS.createOXPermissionException(12, Integer.valueOf(co.getParentFolderID()), Integer.valueOf(ctx.getContextId()), Integer.valueOf(user));
+				}	
 				FolderObject source;
 				if (FolderCacheManager.isEnabled()){
-					source = FolderCacheManager.getInstance().getFolderObject(fid, true, ctx, readcon);
+					source = FolderCacheManager.getInstance().getFolderObject(fid2, true, ctx, readcon);
 				}else{
-					source = FolderObject.loadFolderObjectFromDB(fid, ctx, readcon);
+					source = FolderObject.loadFolderObjectFromDB(fid2, ctx, readcon);
 				}
 				if (source.getModule() != FolderObject.CONTACT) {
-					throw EXCEPTIONS.createOXConflictException(13,Integer.valueOf(fid), Integer.valueOf(ctx.getContextId()), Integer.valueOf(user));
+					throw EXCEPTIONS.createOXConflictException(13,Integer.valueOf(fid2), Integer.valueOf(ctx.getContextId()), Integer.valueOf(user));
 					//throw new OXConflictException("saveContactObject() called with a non-Contact-Folder! cid="+ctx.getContextId()+" fid"+fid);
-				}
-
-				final EffectivePermission op = oxfs.getFolderPermission(fid, user, uc);
-				
+				}	
 				if (op.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {
-					throw EXCEPTIONS.createOXPermissionException(14, Integer.valueOf(fid), Integer.valueOf(ctx.getContextId()), Integer.valueOf(user));
+					throw EXCEPTIONS.createOXPermissionException(14, Integer.valueOf(fid2), Integer.valueOf(ctx.getContextId()), Integer.valueOf(user));
 					//throw new OXConflictException("NOT ALLOWED TO MODIFIE CONTACT cid="+ctx.getContextId()+" fid"+fid);
 				}
 				if (!op.canWriteAllObjects()) {
 					if (oclPerm.canWriteOwnObjects()){
 						can_edit_only_own = true;
 					}else{
-						throw EXCEPTIONS.createOXPermissionException(15, Integer.valueOf(fid), Integer.valueOf(ctx.getContextId()), Integer.valueOf(user));
+						throw EXCEPTIONS.createOXPermissionException(15, Integer.valueOf(fid2), Integer.valueOf(ctx.getContextId()), Integer.valueOf(user));
 						//throw new OXConflictException("NOT ALLOWED TO MODIFIE CONTACT cid="+ctx.getContextId()+" fid="+fid);
 					}
 				}
