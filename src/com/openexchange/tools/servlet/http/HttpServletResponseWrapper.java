@@ -51,8 +51,6 @@ package com.openexchange.tools.servlet.http;
 
 import java.io.IOException;
 import java.lang.reflect.Array;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -90,18 +88,14 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 			+ "\"http://www.w3.org/TR/html4/strict.dtd\">\n"
 			+ "<html xmlns=\"http://www.w3.org/1999/xhtml\" language=\"#LANGUAGE#\" xml:lang=\"#LANGUAGE#\">\n"
 			+ "<head>\n" + "\t<title>#STATUS_MSG#</title>\n"
-			+ "\t<link rev=\"made\" href=\"mailto:%5bno%20address%20given%5d\"/>"
 			+ "\t<style type=\"text/css\"><!--/*--><![CDATA[/*><!--*/ " + "\n"
 			+ "\t\tbody { color: #000000; background-color: #FFFFFF; }\n" + "\t\ta:link { color: #0000CC; }\n"
 			+ "\t\tp, address {margin-left: 3em;}" + "\t\tspan {font-size: smaller;}" + "\t/*]]>*/--></style>\n"
 			+ "</head>\n\n" + "<body>\n" + "<h1>#STATUS_MSG#</h1>\n" + "<p>\n#STATUS_DESC#\n</p>\n\n"
-			+ "<h2>Error #STATUS_CODE#</h2>\n" + "<address>\n" + "<a href=\"/\">#IP_ADR#</a><br />\n\n"
-			+ "<span>#DATE#<br />\n" + "\tOpen-Xchange</span>\n" + "</address>\n" + "</body>\n" + "</html>";
+			+ "<h2>Error #STATUS_CODE#</h2>\n" + "<address>\n" + "<span>#DATE#<br />\n" + "\tOpen-Xchange</span>\n"
+			+ "</address>\n" + "</body>\n" + "</html>";
 
 	private static final String HTTP_HEADER_DATE_FORMAT = "EEE',' dd MMMM yyyy hh:mm:ss z";
-
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(HttpServletResponseWrapper.class);
 
 	private static Map<Integer, String> statusMsgs;
 
@@ -547,7 +541,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 			errorMsgStr = errorMsgStr.replaceAll("#LANGUAGE#",
 					headers.containsKey("Language") ? headers.get("Language")[0] : "en").replaceAll("#STATUS_MSG#",
 					this.statusMsg).replaceAll("#STATUS_CODE#", String.valueOf(this.status)).replaceAll(
-					"#STATUS_DESC#", "").replaceAll("#IP_ADR#", getOwnIP()).replaceAll("#DATE#", "");
+					"#STATUS_DESC#", "").replaceAll("#DATE#", "");
 			setContentType(new StringBuilder("text/html; charset=").append(getCharacterEncoding()).toString());
 			errormessage = errorMsgStr.getBytes(getCharacterEncoding());
 			setContentLength(errormessage.length);
@@ -562,17 +556,6 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 	 */
 	public void sendError(final int status) throws IOException {
 		sendError(status, "Error");
-	}
-
-	private String getOwnIP() {
-		String ip = null;
-		try {
-			final InetAddress myAddr = InetAddress.getLocalHost();
-			ip = myAddr.getHostAddress();
-		} catch (final UnknownHostException ex) {
-			LOG.error(ex.getMessage(), ex);
-		}
-		return ip;
 	}
 
 	private Enumeration makeEnumeration(final Object obj) {

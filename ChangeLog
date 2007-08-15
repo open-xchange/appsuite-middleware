@@ -20,6 +20,8 @@
  - Removing unspecified initial ACLs on IMAP folder creation
  - Bugfix #8823: Allowing to look-up IMAP folder's ACLs if either READ or
    ADMINISTER right is granted to user
+ - Bugfix #8900: Removed unnecessary informations from html error page
+   template
  
 ############## PAY ATTENTION TO ME ! ################
  - CONFIG change: new property file "HTMLEntities.properties" which
