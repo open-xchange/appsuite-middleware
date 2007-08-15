@@ -534,8 +534,23 @@ public final class OXFolderAdminHelper {
 	private static final String DEFAULT_TASK_NAME = "My Tasks";
 
 	/**
-	 * <code>addUserToOXFolders</code> adds rights to the oxfolder tables so
-	 * that the user can use the oxfolders
+	 * Creates default folders for modules task, calendar, contact, and
+	 * infostore for given user ID
+	 * 
+	 * @param userId
+	 *            The user ID
+	 * @param displayName
+	 *            The display name which is taken as folder name for user's
+	 *            default infostore folder
+	 * @param language
+	 *            User's language which determines the translation of default
+	 *            folder names
+	 * @param cid
+	 *            The context ID
+	 * @param writeCon
+	 *            A writeable connection to (master) database
+	 * @throws OXException
+	 *             If user's default folders could not be created successfully
 	 */
 	public void addUserToOXFolders(final int userId, final String displayName, final String language, final int cid,
 			final Connection writeCon) throws OXException {
