@@ -51,9 +51,6 @@
 
 package com.openexchange.sessiond;
 
-import com.openexchange.ssl.SSLCtx;
-import com.openexchange.ssl.SSLServerSocket;
-import com.openexchange.ssl.SSLSocket;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -71,8 +68,8 @@ public class SocketHandler implements Runnable {
 	
 	private ServerSocket ss;
 	
-	private SSLServerSocket ssl;
-	private SSLCtx ctx;
+//	private SSLServerSocket ssl;
+//	private SSLCtx ctx;
 	
 	private Thread th;
 	
@@ -106,21 +103,21 @@ public class SocketHandler implements Runnable {
 			}
 			
 			if (isSecureConnection) {
-				ctx = new SSLCtx(config.getCAFile(), config.getCertFile(), config.getKeyFile());
-				
-				if (objectstream) {
-					if (acceptAll) {
-						ssl = new SSLServerSocket(ctx, config.getServerObjectStreamPort(), 0);
-					} else {
-						ssl = new SSLServerSocket(ctx, config.getServerPort(), 0, InetAddress.getByName(config.getServerBindAddress()));
-					}
-				} else {
-					if (acceptAll) {
-						ssl = new SSLServerSocket(ctx, config.getServerObjectStreamPort(), 0);
-					} else {
-						ssl = new SSLServerSocket(ctx, config.getServerPort(), 0, InetAddress.getByName(config.getServerBindAddress()));
-					}
-				}
+//				ctx = new SSLCtx(config.getCAFile(), config.getCertFile(), config.getKeyFile());
+//				
+//				if (objectstream) {
+//					if (acceptAll) {
+//						ssl = new SSLServerSocket(ctx, config.getServerObjectStreamPort(), 0);
+//					} else {
+//						ssl = new SSLServerSocket(ctx, config.getServerPort(), 0, InetAddress.getByName(config.getServerBindAddress()));
+//					}
+//				} else {
+//					if (acceptAll) {
+//						ssl = new SSLServerSocket(ctx, config.getServerObjectStreamPort(), 0);
+//					} else {
+//						ssl = new SSLServerSocket(ctx, config.getServerPort(), 0, InetAddress.getByName(config.getServerBindAddress()));
+//					}
+//				}
 			} else {
 				if (objectstream) {
 					if (acceptAll) {
@@ -148,16 +145,16 @@ public class SocketHandler implements Runnable {
 	public void run() {
 		while (th != null) {
 			Socket socket = null;
-			SSLSocket sslSocket = null;
+//			SSLSocket sslSocket = null;
 			
 			try {
 				if (isSecureConnection) {
-					sslSocket = ssl.accept();
-					sslSocket.setSoTimeout(60000);
-					
-					if (!objectstream) {
-						doRequest(sslSocket, config);
-					}
+//					sslSocket = ssl.accept();
+//					sslSocket.setSoTimeout(60000);
+//					
+//					if (!objectstream) {
+//						doRequest(sslSocket, config);
+//					}
 				} else {
 					socket = ss.accept();
 					socket.setSoTimeout(60000);
@@ -177,10 +174,10 @@ public class SocketHandler implements Runnable {
 		sessionReq.init();
 	}
 
-	private void doRequest(final SSLSocket sslSocket, final SessiondConfig config) {
-		final SessionRequest sessionReq = new SessionRequest(sslSocket, config);
-		sessionReq.init();
-	}
+//	private void doRequest(final SSLSocket sslSocket, final SessiondConfig config) {
+//		final SessionRequest sessionReq = new SessionRequest(sslSocket, config);
+//		sessionReq.init();
+//	}
 }
 
 

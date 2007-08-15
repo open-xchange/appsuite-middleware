@@ -1,3 +1,7 @@
+* 2007-08-15 - marcus.klein@open-xchange.com
+
+ - Removed unused JNI SSL stuff.
+
 * 2007-08-14 - martin.kauss@open-xchange.com
 
  - Fixed bug #8567. An exception of a recurring appointment could be moved

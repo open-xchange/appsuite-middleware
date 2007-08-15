@@ -51,7 +51,6 @@
 
 package com.openexchange.sessiond;
 
-import com.openexchange.ssl.SSLSocket;
 import com.openexchange.tools.encoding.Base64;
 
 import java.io.BufferedInputStream;
@@ -88,7 +87,7 @@ public class SessionRequest implements Runnable {
 	
 	private Socket socket;
 	
-	private SSLSocket sslSocket;
+//	private SSLSocket sslSocket;
 	
 	private Thread th;
 	
@@ -103,10 +102,10 @@ public class SessionRequest implements Runnable {
 		this.config = config;
 	}
 	
-	public SessionRequest(SSLSocket sslSocket, SessiondConfig config) {
-		this.sslSocket = sslSocket;
-		this.config = config;
-	}
+//	public SessionRequest(SSLSocket sslSocket, SessiondConfig config) {
+//		this.sslSocket = sslSocket;
+//		this.config = config;
+//	}
 	
 	public void init() {
 		isSecureConnection = config.isSecureConnection();
@@ -115,12 +114,12 @@ public class SessionRequest implements Runnable {
 		th.start();
 	}
 	
-	private void endCon(final Socket s, final SSLSocket s_ssl) {
+	private void endCon(final Socket s) {
 		try {
 			if (isSecureConnection) {
-				if (s_ssl != null) {
-					s_ssl.close();
-				}
+//				if (s_ssl != null) {
+//					s_ssl.close();
+//				}
 			} else {
 				if (s != null) {
 					s.close();
@@ -137,8 +136,8 @@ public class SessionRequest implements Runnable {
 		
 		try {
 			if (isSecureConnection) {
-				is = new BufferedInputStream(sslSocket.getInputStream());
-				os = new BufferedOutputStream(sslSocket.getOutputStream());
+//				is = new BufferedInputStream(sslSocket.getInputStream());
+//				os = new BufferedOutputStream(sslSocket.getOutputStream());
 			} else {
 				is = socket.getInputStream();
 				os = socket.getOutputStream();
@@ -171,7 +170,7 @@ public class SessionRequest implements Runnable {
 		} catch (Exception exc) {
 			LOG.error("run", exc);
 		} finally {
-			endCon(socket, sslSocket);
+			endCon(socket);
 		}
 	}
 	

@@ -50,7 +50,6 @@
 package com.openexchange.sessiond;
 
 import com.openexchange.groupware.contexts.ContextException;
-import com.openexchange.ssl.SSLSocket;
 import com.openexchange.tools.encoding.Base64;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -70,7 +69,7 @@ public class SessiondConnector {
 	protected static SessiondConfig config = null;
 	
 	private Socket s = null;
-	private SSLSocket ssl = null;
+//	private SSLSocket ssl = null;
 	private InputStream is = null;
 	private OutputStream os = null;
 	
@@ -110,7 +109,7 @@ public class SessiondConnector {
 		if (config.isTcpClientSocketEnabled()) {
 			try {
 				if (config.isSecureConnection()) {
-					ssl.close();
+//					ssl.close();
 				} else {
 					s.close();
 				}
