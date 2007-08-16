@@ -51,6 +51,10 @@ package com.openexchange.admin.rmi.dataobjects;
 
 import java.io.Serializable;
 
+/**
+ * @author choeger
+ *
+ */
 public class Filestore implements Serializable {
     /**
      * For serialization
@@ -114,10 +118,16 @@ public class Filestore implements Serializable {
         this.urlset = true;
     }
 
+    /**
+     * @return Size (in MB)
+     */
     public Long getSize() {
         return this.size;
     }
 
+    /**
+     * @param Size (in MB)
+     */
     public void setSize(final Long val) {
         this.size = val;
         this.sizeset = true;
@@ -141,6 +151,9 @@ public class Filestore implements Serializable {
         this.currentContextsset = true;
     }
 
+    /**
+     * @return Size (in MB)
+     */
     public Long getUsed() {
         return this.used;
     }
