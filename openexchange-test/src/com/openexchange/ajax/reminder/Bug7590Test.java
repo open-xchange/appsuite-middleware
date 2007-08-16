@@ -20,25 +20,19 @@ public class Bug7590Test extends ReminderTest {
 		final int userId = ConfigTools.getUserId(getWebConversation(), getHostName(), getSessionId());
 		final TimeZone timeZone = ConfigTools.getTimeZone(getWebConversation(), getHostName(), getSessionId());
 		
-		Calendar c = Calendar.getInstance();
-		c.setTimeZone(timeZone);
-		c.add(Calendar.DAY_OF_MONTH, -1);
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTimeZone(timeZone);
+		calendar.set(Calendar.HOUR_OF_DAY, 8);
+		calendar.set(Calendar.MINUTE, 0);
+		calendar.set(Calendar.SECOND, 0);
+		calendar.set(Calendar.MILLISECOND, 0);
 		
-		c.set(Calendar.HOUR_OF_DAY, 8);
-		c.set(Calendar.MINUTE, 0);
-		c.set(Calendar.SECOND, 0);
-		c.set(Calendar.MILLISECOND, 0);
-		
-		long startTime = c.getTimeInMillis();
+		long startTime = calendar.getTimeInMillis();
 		startTime += timeZone.getOffset(startTime);
 		long endTime = startTime + 3600000;
 		
-		c.add(Calendar.DAY_OF_MONTH, 1);
-		final Date rangeEnd = c.getTime();
-		
-		c.add(Calendar.HOUR_OF_DAY, -1);
-		
-		final long alarmLong = c.getTimeInMillis();
+		calendar.add(Calendar.HOUR_OF_DAY, -1);
+		final long alarmLong = calendar.getTimeInMillis();
 		final Date alarm = new Date(alarmLong+timeZone.getOffset(alarmLong));		
 		
 		final FolderObject folderObj = FolderTest.getStandardCalendarFolder(getWebConversation(), getHostName(), getSessionId());
@@ -55,7 +49,7 @@ public class Bug7590Test extends ReminderTest {
 		appointmentObj.setParentFolderID(folderId);
 		appointmentObj.setRecurrenceType(AppointmentObject.DAILY);
 		appointmentObj.setInterval(1);
-		appointmentObj.setRecurrenceCount(3);
+		appointmentObj.setOccurrence(3);
 		appointmentObj.setIgnoreConflicts(true);
 		
 		final int targetId = AppointmentTest.insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
