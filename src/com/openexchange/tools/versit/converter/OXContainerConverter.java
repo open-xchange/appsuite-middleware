@@ -96,6 +96,12 @@ import com.openexchange.tools.versit.values.DurationValue;
 import com.openexchange.tools.versit.values.RecurrenceValue;
 
 /**
+ * This class transforms VersitObjects to OX Contacts, Appointments and Tasks
+ * and back.
+ * 
+ * If you want to translate more fields used in ICAL or VCard, you're at the
+ * right place - but don't forget to do it in both directions.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> (adapted Victor's parser for OX6)
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> (bugfixes: 7248, 7249, 7472, 7703, 7718, 7719, 8475)
  * 
@@ -1117,6 +1123,13 @@ public class OXContainerConverter {
 		}
 	}
 
+	/**
+	 * Finds out whether a user is internal, since internal users get treated differently
+	 * when entering appointments or tasks.
+	 * 
+	 * @param mail - Mail address as string
+	 * @return true if is internal user, false otherwise
+	 */
 	public boolean isInternalUser(String mail) {
 		try {
 			final UserStorage us = UserStorage.getInstance(session.getContext());
@@ -1127,8 +1140,13 @@ public class OXContainerConverter {
 		}
 	}
 	
-	/*
-	 * Should only be called after using <code>isInternalUser</code>.
+	/**
+	 * Finds an internal user by its e-mail address. Note that an e-mail
+	 * address is unique, but the identifier for an internal user is
+	 * its id.
+	 * 
+	 * Should only be called after using <code>isInternalUser</code> or
+	 * you have to live with the LdapException.
 	 */
 	public User getInternalUser(String mail) throws LdapException {
 		final UserStorage us = UserStorage.getInstance(session.getContext());

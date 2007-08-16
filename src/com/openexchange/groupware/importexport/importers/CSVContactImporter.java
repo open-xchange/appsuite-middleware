@@ -88,6 +88,11 @@ import com.openexchange.server.EffectivePermission;
 import com.openexchange.sessiond.SessionObject;
 
 /**
+ * Importer for OX own CSV file format - this format is able to represent a 
+ * contact with all fields that appear in the OX. 
+ * 
+ * 
+ * @see com.openexchange.groupware.importexport.importers.OutlookCSVContactImporter - imports files prduced by Outlook
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  */
 @OXExceptionSource(
@@ -102,7 +107,7 @@ import com.openexchange.sessiond.SessionObject;
 		Category.USER_INPUT,
 		Category.USER_INPUT,
 		Category.PERMISSION},
-	desc={"","","", "", "", "", ""}, 
+	desc={"", "", "", "", "", "", ""}, 
 	exceptionId={0,1,2,3,4,5,6}, 
 	msg={
 		"Can only import into one folder at a time.",
@@ -171,6 +176,11 @@ public class CSVContactImporter extends AbstractImporter implements Importer {
 		return Format.CSV;
 	}
 	
+	/**
+	 * The encoding this importers assumes is used for the file. 
+	 *  
+	 * @return UTF-8 since if you write your own format, you may actually specify something useful.
+	 */
 	public String getEncoding(){
 		return "UTF-8";
 	}

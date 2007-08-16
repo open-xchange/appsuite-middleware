@@ -49,6 +49,17 @@
 
 package com.openexchange.groupware.tasks;
 
+/**
+ * This class lists different names used for fields of a Task.
+ * 
+ * TODO: This is not a complete overview, currently it only maps
+ * the number set in Task and the name of the setter and getter methods 
+ * (the set... and get... being cut off).
+ * It might be extended by the names displayed by the GUI so
+ * users might understand error messages better.
+ * 
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
+ */
 public enum TaskField {
 	OBJECTID ( Task.OBJECT_ID , "ObjectID" ),
 	CREATEDBY ( Task.CREATED_BY , "CreatedBy" ),

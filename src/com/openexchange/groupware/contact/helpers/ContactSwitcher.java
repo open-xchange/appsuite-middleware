@@ -58,6 +58,12 @@ import com.openexchange.groupware.contact.ContactException;
  * ContactFields. Implementations might be used to set the value
  * of an ContactObject based on the database field name, for example. 
  * 
+ * Reason for the existence of this class: A contat in OX has more than 
+ * 100 fields. Imagine you have some values you want to insert into 
+ * a contact. You might call every single setter method. But maybe you
+ * are lazy. Or you don't know the names, but have only a list of values.
+ * Then you should use an object whose class implements this interface. 
+ * 
  * Note: This class was generated automagically.
  * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>

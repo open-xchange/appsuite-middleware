@@ -62,7 +62,8 @@ import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.json.OXJSONWriter;
 
 /**
- * ImportExportWriter
+ * This writer's main objective is to wrap ImportResults into JSON,
+ * which then is fed to the AJAX GUI of the OX.
  *
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  * @author <a href="mailto:tobias.prinz@open-xchange.org">Tobias Prinz</a> (Refactoring comment and errorhandling workaround)

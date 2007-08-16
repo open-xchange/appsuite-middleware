@@ -66,8 +66,8 @@ import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionF
  * 
  * Note: Proper CSV files should have the dimensions M x N. If this
  * parser encounters a line that has not as many columns as the others,
- * it will not parse it but add it to a list you can access via
- * getUnparsableLineNumbers() 
+ * it would not be right, but the behaviour can be switched to be 
+ * strict or not.
  * 
  * Note: See also RFC 4180
  * 
@@ -93,7 +93,6 @@ public class CSVParser {
 	public static final char CELL_DELIMITER = ',';
 	public static final char ESCAPER = '"';
 	public static final int STARTING_LENGTH = -1;
-	private List<Integer> unparsableLines;
 	private String file;
 	private int numberOfCells, currentLineNumber;
 	private StringBuilder currentCell = new StringBuilder();
@@ -108,7 +107,6 @@ public class CSVParser {
 	}
 	
 	public CSVParser(){
-		unparsableLines = new LinkedList<Integer>();
 		isTolerant = false;
 		numberOfCells = STARTING_LENGTH;
 		currentLineNumber = 0;
@@ -130,9 +128,15 @@ public class CSVParser {
 		this.isTolerant = isTolerant;
 	}
 
+	/**
+	 * Convenience method, combines setContent() and parse().
+	 * 
+	 * @param str - CSV to be parsed
+	 * @return
+	 * @throws ImportExportException
+	 */
 	public List< List<String> > parse(final String str) throws ImportExportException{
 		this.file = str;
-		this.unparsableLines = new LinkedList<Integer>();
 		return parse();
 	}
 	
@@ -236,14 +240,14 @@ public class CSVParser {
 		}
 	}
 
-	public List<Integer> getUnparsableLineNumbers(){
-		return this.unparsableLines;
-	}
-	
 	public void setFileContent(final String content){
 		this.file = content;
 	}
 	
+	/**
+	 * Returns a line from the CSV file given.
+	 * Starts counting at 0.
+	 */
 	public String getLine(final int lineNumber){
 		file = wellform(file);
 		return file.split("\n")[lineNumber];

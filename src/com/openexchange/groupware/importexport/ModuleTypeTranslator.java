@@ -84,6 +84,9 @@ import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionF
 public class ModuleTypeTranslator {
 	private static final ImportExportExceptionFactory EXCEPTIONS = new ImportExportExceptionFactory(ModuleTypeTranslator.class); 
 	
+	/**
+	 * Translates a FolderObject value to a Types value.
+	 */
 	public static int getTypesConstant(final int folderObjectConstant) throws ImportExportException{
 		switch(folderObjectConstant){
 			case FolderObject.CONTACT:		return Types.CONTACT;
@@ -95,6 +98,9 @@ public class ModuleTypeTranslator {
 		}
 	}
 	
+	/**
+	 * Translates a Types value to a FolderObject value
+	 */
 	public static int getFolderObjectConstant(int typeConstant) throws ImportExportException{
 		switch(typeConstant){
 			case Types.CONTACT:		return FolderObject.CONTACT;

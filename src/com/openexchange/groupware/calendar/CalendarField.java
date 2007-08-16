@@ -55,6 +55,14 @@ import com.openexchange.groupware.container.AppointmentObject;
  * This class is meant for translating the different names and IDs
  * used in different modules.
  * 
+ * TODO: This is not a complete overview, currently it only maps
+ * the number set in AppointmentObject and the name of the 
+ * setter and getter methods (the set... and get... being cut off).
+ * It might be extended by the names displayed by the GUI so
+ * users might understand error messages better. 
+ * 
+ * @see ContactField for a fully implemented version
+ * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  *
  */

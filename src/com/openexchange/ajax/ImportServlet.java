@@ -53,7 +53,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -63,11 +62,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.LogFactory;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONWriter;
-
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.writer.ImportExportWriter;
 import com.openexchange.groupware.AbstractOXException;
@@ -102,23 +98,35 @@ import com.openexchange.groupware.upload.UploadFile;
 		component=Component.IMPORT_EXPORT)
 
 /**
- * Servlet for doing imports of data like contacts stored in CSV format.
+ * Servlet for doing imports of data like contacts stored in CSV format,
+ * contacts stored as VCards or tasks and appointments within an ICAL file.
  *
- * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a> (spring configuration and refactoring)
+ * You do a basic POST request uploading a file. A bit different is the 
+ * response: Since this servlet works with an AJAX GUI, the upload is 
+ * normally targetted at a hidden frame somewhere (not to cause a reload 
+ * of the whole GUI) and this frame needs a JavaScript method call to come 
+ * back from the dead.
+ * So the response is a HTML page calling a JavaScript.
+ * 
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a> (development)
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a> (refactoring, redesign)
  */
 public class ImportServlet extends ImportExport {
 	
 	private final static ImportExportExceptionFactory EXCEPTIONS = new ImportExportExceptionFactory(ImportServlet.class);
-	public static final String JSON_CALLBACK = "import";
+	public static final String JSON_CALLBACK = "import"; //identifying part of the ajax method that does the callback after the upload
 	private static final long serialVersionUID = -4691910391290394603L;
 
 	public ImportServlet() {
 		super();
 		LOG = LogFactory.getLog(ImportServlet.class);
 	}
-	
-	@Override
+
+
+	/**
+	 * So this method
+	 */
+	@Override 
 	protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
 		final Response resObj = new Response();
 		try {

@@ -83,7 +83,10 @@ import com.openexchange.sessiond.SessionObject;
 
 
 /** 
- * Meant for the import and export of data in OX folders.
+ * Selects the appropriate importer or exporter for an import or export.
+ * 
+ * The list of importers and exports is usually loaded via Spring in the
+ * ImportServlet or ExportServlet, but this might be changed in the future. 
  * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  */

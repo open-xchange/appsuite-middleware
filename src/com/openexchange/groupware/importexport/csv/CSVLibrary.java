@@ -72,6 +72,8 @@ import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionC
 import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionFactory;
 import com.openexchange.sessiond.SessionObject;
 /**
+ * This is a library with little helpers needed when preparing
+ * the parsing of a CSV file.
  * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  *
@@ -101,6 +103,14 @@ public class CSVLibrary {
 	public static final char CELL_DELIMITER = ',';
 	public static final char ROW_DELIMITER = '\n';
 
+	/**
+	 * Translates the folder number for a certain user to a FolderObject
+	 *  
+	 * @param sessObj The user's session
+	 * @param folder The folder, usually a number, but for mails it really might be a string
+	 * @return
+	 * @throws ImportExportException - if could not be loaded
+	 */
 	public static FolderObject getFolderObject(final SessionObject sessObj, final String folder) throws ImportExportException {
 		final int folderId = getFolderId(folder);
 		FolderObject fo = null;
@@ -116,6 +126,13 @@ public class CSVLibrary {
 		return fo;
 	}
 
+	/**
+	 * ...because OX throws OXExceptions not NumberFormatExceptions 
+	 * 
+	 * @param folderString
+	 * @return
+	 * @throws ImportExportException
+	 */	
 	public static int getFolderId(final String folderString) throws ImportExportException {
 		try{
 			return Integer.parseInt(folderString);
@@ -124,6 +141,11 @@ public class CSVLibrary {
 		}
 	}
 
+	 /**
+	  * Translates a list of column numbers to readable titles. 
+	  * @param cols
+	  * @return
+	  */
 	public static List<String> convertToList(final int[] cols) {
 		final List<String> l = new LinkedList<String>();
 		for(int col : cols){

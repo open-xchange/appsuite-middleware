@@ -62,7 +62,9 @@ import com.openexchange.groupware.importexport.ImporterExporter;
 
 /**
  * Abtract class for both importers and exporters that does 
- * the configuration via Spring. 
+ * the configuration via Spring. This means importers and
+ * exporters are loaded from a configuration file and you
+ * do not need to hardcode them somewhere. 
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a> (spring configuration)

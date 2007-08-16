@@ -71,7 +71,6 @@ import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarField;
 import com.openexchange.groupware.calendar.CalendarSql;
-import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.importexport.AbstractImporter;
 import com.openexchange.groupware.importexport.Format;
@@ -123,8 +122,15 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
 		"The element %s is not supported."})
 
 /**
+ * Imports ICal files. ICal files can be translated to either tasks or 
+ * appointments within the OX, so the importer works with both SQL interfaces.
+ * 
+ * @see OXContainerConverter - if you have a problem with the contend of the parsed ICAL file
+ * @see AppointmentSQLInterface - if you have a problem entering the parsed entry as Appointment
+ * @see TasksSQLInterface - if you have trouble entering the parsed entry as Task
+ * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a> (minor: changes to new interface, bugfixes)
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a> (changes to new interface, bugfixes, maintenance)
  */
 public class ICalImporter extends AbstractImporter implements Importer {
 	

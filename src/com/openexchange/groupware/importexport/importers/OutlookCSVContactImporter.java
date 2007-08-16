@@ -114,7 +114,11 @@ public class OutlookCSVContactImporter extends CSVContactImporter implements Imp
 	}
 
 	
-	
+	/**
+	 * This importers assumes the encoding CP-1252 for files uploaded,
+	 * since this format is mainly used on European and American
+	 * Windows systems. 
+	 */
 	@Override
 	public String getEncoding() {
 		return "cp1252";
