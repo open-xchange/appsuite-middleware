@@ -326,11 +326,11 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
         } catch (final ContextException e) {
             log.error("Context Error", e);
             dorollback(con);
-            throw new StorageException(e);
+            throw new StorageException(e.toString());
         } catch (final DeleteFailedException e) {
             log.error("Delete Error", e);
             dorollback(con);
-            throw new StorageException(e);
+            throw new StorageException(e.toString());
         } finally {
             try {
                 if (prep_del != null) {
@@ -381,11 +381,11 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
         } catch (final ContextException e) {
             log.error("Context Error", e);
             dorollback(con);
-            throw new StorageException(e);
+            throw new StorageException(e.toString());
         } catch (final DeleteFailedException e) {
             log.error("Delete Error", e);
             dorollback(con);
-            throw new StorageException(e);
+            throw new StorageException(e.toString());
         } finally {
             try {
                 if (prep_del != null) {
