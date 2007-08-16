@@ -535,6 +535,10 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         
         final ArrayList<OXUserPluginInterface> interfacelist = new ArrayList<OXUserPluginInterface>();
 
+        // Here we define a list which takes all exceptions which occur during plugin-processing
+        // By this we are able to throw all exceptions to the client while concurrently processing all plugins
+        final ArrayList<Exception> exceptionlist = new ArrayList<Exception>();
+        
         final ArrayList<Bundle> bundles = AdminDaemon.getBundlelist();
         final ArrayList<Bundle> revbundles = new ArrayList<Bundle>();
         for (int i = bundles.size() - 1; i >= 0; i--) {
@@ -555,13 +559,19 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                                     if (log.isDebugEnabled()) {
                                         log.debug("Calling delete for plugin: " + bundlename);
                                     }
-                                    callDeleteForPlugin(ctx, auth, retusers, interfacelist, bundlename, oxuser);
+                                    final Exception exception = callDeleteForPlugin(ctx, auth, retusers, interfacelist, bundlename, oxuser);
+                                    if (null != exception) {
+                                        exceptionlist.add(exception);
+                                    }
                                 }
                             } else {
                                 if (log.isDebugEnabled()) {
                                     log.debug("Calling delete for plugin: " + bundlename);
                                 }
-                                callDeleteForPlugin(ctx, auth, retusers, interfacelist, bundlename, oxuser);
+                                final Exception exception = callDeleteForPlugin(ctx, auth, retusers, interfacelist, bundlename, oxuser);
+                                if (null != exception) {
+                                    exceptionlist.add(exception);
+                                }
                             }
                         }
                     }
@@ -605,6 +615,14 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
         // END OF JCS
         
+        if (!exceptionlist.isEmpty()) {
+            final StringBuilder sb = new StringBuilder("The following exceptions occured in the plugins: ");
+            for (final Exception e : exceptionlist) {
+                sb.append(e.toString());
+                sb.append('\n');
+            }
+            throw new StorageException(sb.toString());
+        }
     }
 
     public int[] getAll(final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
@@ -869,15 +887,17 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         return list(ctx, "*", auth);
     }
 
-    private void callDeleteForPlugin(final Context ctx, final Credentials auth, User[] retusers, final ArrayList<OXUserPluginInterface> interfacelist, final String bundlename, final OXUserPluginInterface oxuser) {
+    private Exception callDeleteForPlugin(final Context ctx, final Credentials auth, User[] retusers, final ArrayList<OXUserPluginInterface> interfacelist, final String bundlename, final OXUserPluginInterface oxuser) {
         try {
             if (log.isDebugEnabled()) {
                 log.debug("Calling delete for plugin: " + bundlename);
             }
             oxuser.delete(ctx, retusers, auth);
             interfacelist.add(oxuser);
+            return null;
         } catch (final PluginException e) {
             log.error("Error while calling delete for plugin: " + bundlename, e);
+            return e;
         }
     }
 
