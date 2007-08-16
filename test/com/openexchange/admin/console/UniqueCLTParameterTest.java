@@ -26,7 +26,7 @@ public class UniqueCLTParameterTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testUniqueCLTParameter() throws IOException, InterruptedException {
-        final String envPrefix = System.getenv("SBINPREFIX");
+        final String envPrefix = System.getProperty("SBINPREFIX");
         if( envPrefix.length() > 0 ) {
             System.out.println("Using " + envPrefix + "/ as path to commands to test...");
             this.prefix = envPrefix;
