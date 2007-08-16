@@ -1,6 +1,7 @@
 <project name="open-xchange-admin-plugin-hosting" default="jar" basedir=".">
 
     <property name="project.name" value="open-xchange-admin-plugin-hosting" />
+    <property name="test.xml.dir" value="test-results" />
     <property name="prefix" value="/opt/open-xchange"/>
     <property name="destdir" value=""/>
     <property name="plugin.jar" value="ox_admin_plugin_hosting.jar"/>
@@ -16,6 +17,7 @@
 	<property name="commons-logging" value="commons-logging.jar"/>
 	<property name="mysql-connector" value="mysql-connector-java-3.1.13-bin.jar"/>
 	<property name="eclipse-osgi" value="org.eclipse.osgi_3.2.2.ox.jar"/>
+	<property name="junit" value="junit-4.1.jar"/>
 
 	<path id="project.classpath">
 	  <pathelement location="${lib.dir}/${oxserver}"/>
@@ -23,6 +25,7 @@
       <pathelement location="${lib.dir}/${commons-io}"/>
 	  <pathelement location="${lib.dir}/${eclipse-osgi}"/>
       <pathelement location="${admin.classpath}"/>
+	  <pathelement location="${lib.dir}/${junit}"/>
     </path>
 
 	<filterset id="pathsubst">
@@ -146,5 +149,38 @@
         </chmod>
     </target>
 	
+	<target name="compile-tests">
+		<mkdir dir="classes"/>
+        <javac failonerror="true" srcdir="test" debug="true" destdir="classes">
+        	<include name="**/*UniqueCLTParameterTest*"/>
+        	<classpath>
+        		<path refid="project.classpath"/>
+            </classpath>
+        </javac>
+	</target>
+
+	<property name="ctx.build" value="${destdir}/${prefix}/sbin/createcontext"/>
+	<available file="${ctx.build}" property="ctx.available"/>
+	
+    <target name="cc-test" if="ctx.available" depends="compile-tests">
+        <delete dir="${test.xml.dir}"/>
+        <mkdir dir="${test.xml.dir}"/>
+        <junit errorProperty="test.failed" failureProperty="test.failed">
+            <classpath>
+                <pathelement location="classes" />
+            	<path refid="project.classpath" />
+            </classpath>
+
+            <sysproperty key="config" value="/opt/open-xchange/etc/admindaemon/AdminDaemon.properties"/>
+            <sysproperty key="openexchange.propfile" value="/opt/open-xchange/etc/admindaemon/system.properties"/>
+	
+            <test name="com.openexchange.admin.console.UniqueCLTParameterTest" todir="${test.xml.dir}" />
+
+            <formatter type="brief" usefile="false" />
+            <formatter type="xml" />
+        </junit>
+        <fail message="Tests failed!" if="test.failed" />
+    </target>
+
 
 </project>
