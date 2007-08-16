@@ -107,7 +107,7 @@ jcs.region.User.elementattributes.IsLateral=false
 # UserConfiguration Cache only uses RAM
 jcs.region.UserConfiguration=LTCP
 jcs.region.UserConfiguration.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
-jcs.region.UserConfiguration.cacheattributes.MaxObjects=1000000
+jcs.region.UserConfiguration.cacheattributes.MaxObjects=1000
 jcs.region.UserConfiguration.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache
 jcs.region.UserConfiguration.cacheattributes.UseMemoryShrinker=true
 jcs.region.UserConfiguration.cacheattributes.MaxMemoryIdleTimeSeconds=180
@@ -124,7 +124,7 @@ jcs.region.UserConfiguration.elementattributes.IsLateral=false
 # UserSettingMail Cache only uses RAM
 jcs.region.UserSettingMail=LTCP
 jcs.region.UserSettingMail.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
-jcs.region.UserSettingMail.cacheattributes.MaxObjects=1000000
+jcs.region.UserSettingMail.cacheattributes.MaxObjects=1000
 jcs.region.UserSettingMail.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache
 jcs.region.UserSettingMail.cacheattributes.UseMemoryShrinker=true
 jcs.region.UserSettingMail.cacheattributes.MaxMemoryIdleTimeSeconds=180
