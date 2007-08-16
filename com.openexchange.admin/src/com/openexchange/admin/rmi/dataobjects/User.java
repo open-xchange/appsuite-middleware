@@ -1381,6 +1381,14 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         }
     }
 
+    /*
+     * set the users imapserver if not localhost should be used. Syntax of
+     * imapserver String: HOSTNAME[:PORT] if PORT is omitted, the default port
+     * is used
+     * 
+     * Note: to get used imapserver and port, the methods getImapPort and
+     * getImapServer are used
+     */
     final public void setImapServer(final String imapServer) {
         if (null == imapServer) {
             this.imapServerset = true;
@@ -1400,9 +1408,26 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
     }
 
     final public String getSmtpServer() {
-        return smtpServer;
+        // we should be open to the future and accept values like
+        // hostname:port
+        if (this.smtpServer == null) {
+            return null;
+        }
+        if (this.smtpServer.contains(":")) {
+            return this.smtpServer.split(":")[0];
+        } else {
+            return smtpServer;
+        }
     }
 
+    /*
+     * set the users smtpserver if not localhost should be used. Syntax of
+     * smtpserver String: HOSTNAME[:PORT] if PORT is omitted, the default port
+     * is used
+     * 
+     * Note: to get used smtpserver and port, the methods getSmtpPort and
+     * getSmtpServer are used
+     */
     final public void setSmtpServer(final String smtpServer) {
         if (null == smtpServer) {
             this.smtpServerset = true;
