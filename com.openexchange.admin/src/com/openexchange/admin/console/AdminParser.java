@@ -49,6 +49,7 @@
 package com.openexchange.admin.console;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Hashtable;
 
 import com.openexchange.admin.rmi.exceptions.MissingOptionException;
@@ -70,9 +71,23 @@ public class AdminParser extends CmdLineParser {
 
     private static final char OPT_HELP_SHORT = 'h';
 
+    private static final String OPT_CHECK_UNIQUENESS = "check";
+
     private static final String OPT_ENVOPTS_LONG = "environment";
     
     private static final String OPT_EXTENDED_LONG = "extendedoptions";
+    
+    private ArrayList<OptionInfo> optinfolist = new ArrayList<OptionInfo>();
+    
+    private String appname = null;
+    
+    final private Option helpoption;
+    
+    final private Option envoption;
+    
+    private Option checkuniquenessoption;
+    
+    private Option extendedoption;
     
     private class OptionInfo {
         public NeededQuadState needed = NeededQuadState.notneeded;
@@ -88,6 +103,8 @@ public class AdminParser extends CmdLineParser {
         public String description = null;
 
         public boolean extended = false;
+
+        public boolean hidden = false;
 
         public OptionInfo(final NeededQuadState needed, final Option option, final char shortForm, final String longForm, final String longFormParameterDescription, final String description) {
             super();
@@ -134,6 +151,16 @@ public class AdminParser extends CmdLineParser {
             this.extended = extended;
         }
 
+        public OptionInfo(final NeededQuadState needed, final Option option, final String longForm, final String description, final boolean extended, final boolean hidden) {
+            super();
+            this.needed = needed;
+            this.option = option;
+            this.longForm = longForm;
+            this.description = description;
+            this.extended = extended;
+            this.hidden = hidden;
+        }
+
         public OptionInfo(final NeededQuadState needed, final Option option, final String longForm, final String longFormParameterDescription, final String description, final boolean extended) {
             super();
             this.needed = needed;
@@ -151,17 +178,9 @@ public class AdminParser extends CmdLineParser {
         this.appname = appname;
         this.helpoption = this.addOption(OPT_HELP_SHORT, OPT_HELP_LONG, null, "Prints a help text", NeededQuadState.notneeded, false);
         this.envoption = this.addOption(OPT_ENVOPTS_LONG, "Output this help text", "Show info about commandline environment", false, false);
+        this.checkuniquenessoption = this.addOption(OPT_CHECK_UNIQUENESS, "Checks if short parameters are unique", false, false, true);
     }
 
-    ArrayList<OptionInfo> optinfolist = new ArrayList<OptionInfo>();
-
-    private String appname = null;
-
-    private Option helpoption;
-
-    private Option envoption;
-    
-    private Option extendedoption;
     
     /**
      * This method is used to add an option with a mandatory field
@@ -240,7 +259,6 @@ public class AdminParser extends CmdLineParser {
      * @return
      */
     public final Option addOption(final String longForm, final String longFormParameterDescription, final String description, final boolean needed, final boolean hasarg) {
-
         if (hasarg) {
             final Option retval = this.addStringOption(longForm);
             this.optinfolist.add(new OptionInfo(convertBooleantoTriState(needed), retval, longForm, longFormParameterDescription, description));
@@ -250,7 +268,6 @@ public class AdminParser extends CmdLineParser {
             this.optinfolist.add(new OptionInfo(NeededQuadState.notneeded, retval, longForm, description));
             return retval;
         }
-
     }
     
     /**
@@ -263,7 +280,6 @@ public class AdminParser extends CmdLineParser {
      * @return
      */
     public final Option addOption(final String longForm, final String longFormParameterDescription, final String description, final boolean needed, final boolean hasarg, final boolean extended) {
-
         if (hasarg) {
             final Option retval = this.addStringOption(longForm);
             this.optinfolist.add(new OptionInfo(convertBooleantoTriState(needed), retval, longForm, longFormParameterDescription, description, extended));
@@ -273,11 +289,24 @@ public class AdminParser extends CmdLineParser {
             this.optinfolist.add(new OptionInfo(NeededQuadState.notneeded, retval, longForm, description, extended));
             return retval;
         }
+    }
 
+    /**
+     * @param longForm
+     * @param longFormParameterDescription
+     * @param description
+     * @param needed
+     * @param hasarg
+     * @param extended
+     * @return
+     */
+    private final Option addOption(final String longForm, final String description, final boolean needed, final boolean extended, final boolean hidden) {
+        final Option retval = this.addBooleanOption(longForm);
+        this.optinfolist.add(new OptionInfo(NeededQuadState.notneeded, retval, longForm, description, extended));
+        return retval;
     }
     
     public final Option addSettableBooleanOption(final String longForm, final String longFormParameterDescription, final String description, final boolean needed, final boolean hasarg, final boolean extended) {
-
         if (hasarg) {
             final Option retval = this.addSettableBooleanOption(longForm);
             this.optinfolist.add(new OptionInfo(convertBooleantoTriState(needed), retval, longForm, longFormParameterDescription, description, extended));
@@ -287,7 +316,6 @@ public class AdminParser extends CmdLineParser {
             this.optinfolist.add(new OptionInfo(NeededQuadState.notneeded, retval, longForm, description, extended));
             return retval;
         }
-
     }
 
 
@@ -297,6 +325,9 @@ public class AdminParser extends CmdLineParser {
         // First parse the whole args then get through the list an check is options that are needed
         // aren't set. By this we implement the missing feature of mandatory options
         parse(args);
+        if (null != this.getOptionValue(this.checkuniquenessoption)) {
+            checkOptionUniqueness();
+        }
         if (null != this.getOptionValue(this.helpoption)) {
             printUsage();
             System.exit(0);
@@ -348,7 +379,7 @@ public class AdminParser extends CmdLineParser {
         System.err.println("Usage: " + this.appname);
 
         for (final OptionInfo optInfo : this.optinfolist) {
-            if (!optInfo.extended) {
+            if (!optInfo.extended && !optInfo.hidden) {
                 basicOutput(optInfo);
             }
         }
@@ -417,6 +448,22 @@ public class AdminParser extends CmdLineParser {
         }
     }
 
+    private void checkOptionUniqueness() {
+        final HashSet<String> set = new HashSet<String>();
+        final HashSet<String> longset = new HashSet<String>();
+        for (final OptionInfo optinfo : this.optinfolist) {
+            if (null != optinfo.shortForm && !set.add(optinfo.shortForm)) {
+                System.err.println(this.appname + ": The option: " + optinfo.shortForm + " for "+ optinfo.description + " is duplicate");
+                System.exit(1);
+            }
+            if (null != optinfo.longForm && !longset.add(optinfo.longForm)) {
+                System.err.println(this.appname + ": The option: " + optinfo.longForm + " for "+ optinfo.description + " is duplicate");
+                System.exit(1);
+            }
+        }
+        System.exit(0);
+    }
+    
     private String getrightmarker(final NeededQuadState needed) {
         if (needed == NeededQuadState.needed) {
             return "*";
