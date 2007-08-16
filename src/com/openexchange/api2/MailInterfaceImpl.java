@@ -4825,7 +4825,7 @@ public class MailInterfaceImpl implements MailInterface {
 					IMAPUtils.forceSetSubscribed(imapCon.getIMAPStore(), updateMe.getFullName(), folderObj
 							.isSubscribed());
 				}
-				retval = updateMe.getFullName();
+				retval = MailFolderObject.prepareFullname(updateMe.getFullName(), updateMe.getSeparator());
 			} else {
 				/*
 				 * Insert
@@ -4925,7 +4925,7 @@ public class MailInterfaceImpl implements MailInterface {
 						throw new OXMailException(e);
 					}
 				}
-				retval = createMe.getFullName();
+				retval = MailFolderObject.prepareFullname(createMe.getFullName(), createMe.getSeparator());
 			}
 			return retval;
 		} catch (final MessagingException e) {
