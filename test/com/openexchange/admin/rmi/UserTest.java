@@ -160,7 +160,7 @@ public class UserTest extends AbstractTest {
         System.out.println("USERB" + b.toString());
         
         assertEquals("username not equal", a.getName(), b.getName());
-        assertEquals("enabled not equal", a.getEnabled(), b.getEnabled());
+        assertEquals("enabled not equal", a.getMailenabled(), b.getMailenabled());
         assertEquals("primaryemail not equal",a.getPrimaryEmail(),b.getPrimaryEmail());        
         assertEquals("display name not equal", a.getDisplay_name(), b.getDisplay_name());
         assertEquals("firtname not equal", a.getGiven_name(), b.getGiven_name());
@@ -1129,7 +1129,7 @@ public class UserTest extends AbstractTest {
         usr.setName(ident);
         usr.setPassword(password);
         
-        usr.setEnabled(true);
+        usr.setMailenabled(true);
         
         usr.setPrimaryEmail("primaryemail-" + ident + "@" + AbstractTest.TEST_DOMAIN);
         usr.setEmail1("primaryemail-"+ident+"@"+AbstractTest.TEST_DOMAIN);        
@@ -1144,7 +1144,7 @@ public class UserTest extends AbstractTest {
         final User usr = new User();
         usr.setName(ident);
         usr.setPassword(password);
-        usr.setEnabled(true);
+        usr.setMailenabled(true);
         usr.setPrimaryEmail("primaryemail-" + ident + "@" + AbstractTest.TEST_DOMAIN);
         usr.setDisplay_name("Displayname " + ident);
         usr.setGiven_name(ident);
@@ -1285,7 +1285,7 @@ public class UserTest extends AbstractTest {
         System.out.println("USERB" + b.toString());
         
         assertEquals("username not equal", a.getName(), b.getName());
-        assertEquals("enabled not equal", a.getEnabled(), b.getEnabled());
+        assertEquals("enabled not equal", a.getMailenabled(), b.getMailenabled());
         assertEquals("primaryemail not equal",a.getPrimaryEmail(),b.getPrimaryEmail());        
         assertEquals("display name not equal", a.getDisplay_name(), b.getDisplay_name());
         assertEquals("firtname not equal", a.getGiven_name(), b.getGiven_name());
@@ -1302,7 +1302,7 @@ public class UserTest extends AbstractTest {
         
         // all these attributes cannot be null | cannot changed by server to null/empty
         assertNotNull("username cannot be null",b.getName());        
-        assertNotNull("enabled cannot be null",b.getEnabled());                
+        assertNotNull("enabled cannot be null",b.getMailenabled());                
         assertNotNull("primaryemail cannot be null",b.getPrimaryEmail());
         assertNotNull("display name cannot be null",b.getDisplay_name());
         assertNotNull("firstname name cannot be null",b.getGiven_name());
@@ -1458,7 +1458,7 @@ public class UserTest extends AbstractTest {
         final User retval = (User) usr.clone();
         //retval.setName(null); // INFO: Commented because the server does not throw any exception if username is sent!
         
-        retval.setEnabled(!usr.getEnabled());        
+        retval.setMailenabled(!usr.getMailenabled());        
         
         // do not change primary mail, that's forbidden per default, see
         //PRIMARY_MAIL_UNCHANGEABLE in User.properties

@@ -120,9 +120,9 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
 
     private boolean given_nameset = false;
 
-    private Boolean enabled;
+    private Boolean mailenabled;
 
-    private boolean enabledset = false;
+    private boolean mailenabledset = false;
 
     private Date birthday;
 
@@ -676,12 +676,12 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         return employeeTypeset;
     }
 
-    final public Boolean getEnabled() {
-        return enabled;
+    final public Boolean getMailenabled() {
+        return mailenabled;
     }
 
-    final public boolean isEnabledset() {
-        return enabledset;
+    final public boolean isMailenabledset() {
+        return mailenabledset;
     }
 
     final public boolean isFax_businessset() {
@@ -1105,11 +1105,11 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.given_name = given_name;
     }
 
-    final public void setEnabled(final Boolean enabled) {
+    final public void setMailenabled(final Boolean enabled) {
         if (null == enabled) {
-            this.enabledset = true;
+            this.mailenabledset = true;
         }
-        this.enabled = enabled;
+        this.mailenabled = enabled;
     }
 
     final public Date getBirthday() {
@@ -1381,7 +1381,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         }
     }
     
-    /*
+    /**
      * Set the users imapserver if not localhost should be used. Syntax of
      * imapserver String: HOSTNAME[:PORT] if PORT is omitted, the default port
      * is used
@@ -1420,7 +1420,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         }
     }
 
-    /*
+    /**
      * Set the users smtpserver if not localhost should be used. Syntax of
      * smtpserver String: HOSTNAME[:PORT] if PORT is omitted, the default port
      * is used
@@ -1531,7 +1531,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         return mail_folder_spam_name;
     }
 
-    /*
+    /**
      * Set the name of the users SPAM folder where detected SPAM mail will be
      * moved into
      */
@@ -2435,7 +2435,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.aliases = null;
         this.sur_name = null;
         this.given_name = null;
-        this.enabled = null;
+        this.mailenabled = null;
         this.birthday = null;
         this.anniversary = null;
         this.branches = null;
@@ -2717,6 +2717,11 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         return contextadmin;
     }
 
+    /**
+     * Note: calling this setter on a user object has no influence on the user
+     * stored within the ox subsystem, as it is not possible to change the admin
+     * status of a user.
+     */
     public final void setContextadmin(boolean contextadmin) {
         this.contextadmin = contextadmin;
     }
