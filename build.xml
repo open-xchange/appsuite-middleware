@@ -135,10 +135,10 @@
             <fileset dir="etc" excludes="**/*.in"/>
         </copy>
         <copy todir="${destdir}/${prefix}/sbin" overwrite="true">
-            <fileset dir="sbin" excludes="*.in,linkhelper" followsymlinks="true"/>
+            <fileset dir="sbin" excludes="*.in,linkhelper,contextcltlist,usercltlist" followsymlinks="true"/>
         </copy>
     	<chmod perm="755" file="${basedir}/sbin/linkhelper"/>
-    	<exec executable="${basedir}/sbin/linkhelper">
+    	<exec executable="${basedir}/sbin/linkhelper" dir="${basedir}/sbin">
 			<arg value="${destdir}/${prefix}/sbin"/>
 		</exec>
     	<chmod perm="755">
