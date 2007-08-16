@@ -68,5 +68,5 @@ test -z "$SERVERNAME"       && SERVERNAME=$HOSTNAME
 test -z "$LIBPATH"          && LIBPATH=${PREFIX}jar
 
 
-$JAVA_BIN -classpath $LIBPATH/ox_admindaemon.jar: \
+$JAVA_BIN -classpath $LIBPATH/ox_admindaemon.jar:$LIBPATH/ox_admin_plugin_hosting.jar: \
 	com.openexchange.admin.console.StatisticTools "$@"
