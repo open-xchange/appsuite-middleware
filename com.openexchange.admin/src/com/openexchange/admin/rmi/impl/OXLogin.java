@@ -47,7 +47,7 @@
  *
  */
 /*
- * $Id: OXLogin.java,v 1.16 2007/08/06 14:25:14 dennis Exp $
+ * $Id: OXLogin.java,v 1.17 2007/08/16 13:00:54 choeger Exp $
  */
 package com.openexchange.admin.rmi.impl;
 
@@ -155,7 +155,8 @@ public class OXLogin extends OXCommonImpl implements OXLoginInterface {
                 throw new DatabaseUpdateException("Database is just beeing updated. Try again.");
             }
         } catch (final UpdateException e) {
-            throw new DatabaseUpdateException(e);
+            log.error("Error running updateprocess",e);
+            throw new DatabaseUpdateException(e.toString());
         }
     }
 

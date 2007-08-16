@@ -491,7 +491,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             } catch (final SQLException ecp) {
                 log.error("Error rollback ox db write connection ", ecp);
             }
-            throw new StorageException(e);
+            throw new StorageException(e.toString());
         } catch (final ContextException e) {
             log.error("Context Error", e);
             try {
@@ -499,7 +499,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             } catch (final SQLException ecp) {
                 log.error("Error rollback ox db write connection ", ecp);
             }
-            throw new StorageException(e);
+            throw new StorageException(e.toString());
         } finally {
             try {
                 if (prep_del_members != null) {

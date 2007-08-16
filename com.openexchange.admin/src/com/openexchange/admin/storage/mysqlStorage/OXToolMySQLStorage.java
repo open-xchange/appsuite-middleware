@@ -1558,7 +1558,7 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
                 return false;
             }
             log.error("UpdateCheck Error",e);
-            throw new StorageException(e);
+            throw new StorageException(e.toString());
         }
     }
 
