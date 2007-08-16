@@ -1,3 +1,7 @@
+* 2007-08-16 - choeger@open-xchange.com
+
+  - Bugfix ID#8915 Classpath problems with CLTs
+
 * 2007-08-14 - choeger@open-xchange.com
 
   - Bugfix ID#8822 'generatepassword' creates curious output
