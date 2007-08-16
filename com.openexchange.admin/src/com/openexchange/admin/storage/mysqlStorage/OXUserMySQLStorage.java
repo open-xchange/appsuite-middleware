@@ -183,9 +183,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.close();
             }
 
-            if (usrdata.getEnabled() != null) {
+            if (usrdata.getMailenabled() != null) {
                 stmt = write_ox_con.prepareStatement("UPDATE user SET mailEnabled = ? WHERE cid = ? AND id = ?");
-                stmt.setBoolean(1, usrdata.getEnabled().booleanValue());
+                stmt.setBoolean(1, usrdata.getMailenabled().booleanValue());
                 stmt.setInt(2, context_id);
                 stmt.setInt(3, user_id);
                 stmt.executeUpdate();
@@ -717,10 +717,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.setString(8, lang);
 
                 // mailenabled
-                if (usrdata.getEnabled() == null) {
-                    usrdata.setEnabled(true);
+                if (usrdata.getMailenabled() == null) {
+                    usrdata.setMailenabled(true);
                 }
-                stmt.setBoolean(9, usrdata.getEnabled().booleanValue());
+                stmt.setBoolean(9, usrdata.getMailenabled().booleanValue());
 
                 // imap and smtp server
                 if (usrdata.getImapServer() != null) {
