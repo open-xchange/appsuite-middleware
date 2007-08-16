@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.tools.servlet.http;
 
 import java.security.Principal;
@@ -84,6 +82,8 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
 
 	private String pathInfo;
 
+	private String requestURL;
+
 	private String requestURI;
 
 	private String pathTranslated;
@@ -96,13 +96,11 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
 
 	private String remoteUser;
 
-	private StringBuffer requestURL;
-
 	private Principal userPrincipal;
 
 	private HttpSessionWrapper session;
 
-	private boolean requestedSessionIdFromCookie;
+	private boolean requestedSessionIdFromCookie = true;
 
 	private boolean requestedSessionIdFromURL;
 
@@ -115,6 +113,11 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
 		this.ajpRequestHandler = ajpRequestHandler;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.servlet.http.HttpServletRequest#getAuthType()
+	 */
 	public String getAuthType() {
 		return authType;
 	}
@@ -124,6 +127,11 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
 		System.arraycopy(cookies, 0, this.cookies, 0, cookies.length);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.servlet.http.HttpServletRequest#getCookies()
+	 */
 	public Cookie[] getCookies() {
 		if (cookies == null) {
 			return null;
@@ -133,10 +141,20 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
 		return retval;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.servlet.http.HttpServletRequest#getDateHeader(java.lang.String)
+	 */
 	public long getDateHeader(final String name) {
 		return containsHeader(name) ? getDateValueFromHeaderField(getHeader(name)) : -1;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.servlet.http.HttpServletRequest#getIntHeader(java.lang.String)
+	 */
 	public int getIntHeader(final String name) {
 		return containsHeader(name) ? Integer.parseInt(getHeader(name)) : -1;
 	}
@@ -145,6 +163,11 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
 		this.method = method;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.servlet.http.HttpServletRequest#getMethod()
+	 */
 	public String getMethod() {
 		return method;
 	}
@@ -153,6 +176,11 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
 		this.pathInfo = path_info;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.servlet.http.HttpServletRequest#getPathInfo()
+	 */
 	public String getPathInfo() {
 		return pathInfo;
 	}
@@ -161,6 +189,11 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
 		this.pathTranslated = path_translated;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.servlet.http.HttpServletRequest#getPathTranslated()
+	 */
 	public String getPathTranslated() {
 		return pathTranslated;
 	}
@@ -169,6 +202,11 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
 		this.contextPath = context_path;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.servlet.http.HttpServletRequest#getContextPath()
+	 */
 	public String getContextPath() {
 		return contextPath;
 	}
@@ -177,6 +215,11 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
 		this.queryString = query_string;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.servlet.http.HttpServletRequest#getQueryString()
+	 */
 	public String getQueryString() {
 		return queryString;
 	}
@@ -185,10 +228,20 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
 		this.remoteUser = remote_user;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.servlet.http.HttpServletRequest#getRemoteUser()
+	 */
 	public String getRemoteUser() {
 		return remoteUser;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.servlet.http.HttpServletRequest#isUserInRole(java.lang.String)
+	 */
 	public boolean isUserInRole(final String role) {
 		if (LOG.isWarnEnabled()) {
 			LOG.warn("Method isUserInRole() is not implemented in HttpServletRequestWrapper, yet!");
@@ -196,6 +249,11 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
 		return false;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.servlet.http.HttpServletRequest#getUserPrincipal()
+	 */
 	public java.security.Principal getUserPrincipal() {
 		return userPrincipal;
 	}
@@ -204,6 +262,11 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
 		this.userPrincipal = userPrincipal;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.servlet.http.HttpServletRequest#getRequestedSessionId()
+	 */
 	public String getRequestedSessionId() {
 		return session.getId();
 	}
@@ -212,18 +275,42 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
 		this.requestURI = request_uri;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.servlet.http.HttpServletRequest#getRequestURI()
+	 */
 	public String getRequestURI() {
 		return requestURI;
 	}
 
-	public void setRequestURL(final StringBuffer request_url) {
-		this.requestURL = request_url;
-	}
-
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.servlet.http.HttpServletRequest#getRequestURL()
+	 */
 	public StringBuffer getRequestURL() {
-		return requestURL;
+		if (null == requestURL) {
+			final StringBuilder tmp = new StringBuilder(256);
+			tmp.append(getProtocol());
+			if (isSecure()) {
+				tmp.append('s');
+			}
+			tmp.append("://").append(getServerName());
+			if (requestURI.charAt(0) != '/') {
+				tmp.append('/');
+			}
+			tmp.append(getRequestURI());
+			requestURL = tmp.toString();
+		}
+		return new StringBuffer(requestURL);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.servlet.http.HttpServletRequest#getServletPath()
+	 */
 	public String getServletPath() {
 		return servletPath;
 	}
@@ -286,10 +373,20 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
 		this.session = (HttpSessionWrapper) session;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.servlet.http.HttpServletRequest#isRequestedSessionIdValid()
+	 */
 	public boolean isRequestedSessionIdValid() {
 		return !HttpSessionManagement.isHttpSessionExpired(session);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.servlet.http.HttpServletRequest#isRequestedSessionIdFromCookie()
+	 */
 	public boolean isRequestedSessionIdFromCookie() {
 		return requestedSessionIdFromCookie;
 	}
@@ -298,10 +395,20 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
 		this.requestedSessionIdFromCookie = requestedSessionIdFromCookie;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.servlet.http.HttpServletRequest#isRequestedSessionIdFromURL()
+	 */
 	public boolean isRequestedSessionIdFromURL() {
 		return requestedSessionIdFromURL;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.servlet.http.HttpServletRequest#isRequestedSessionIdFromUrl()
+	 */
 	public boolean isRequestedSessionIdFromUrl() {
 		return requestedSessionIdFromURL;
 	}
@@ -318,7 +425,7 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
 		this.servletInstance = servletInstance;
 	}
 
-	private final long getDateValueFromHeaderField(final String headerValue) {
+	private static final long getDateValueFromHeaderField(final String headerValue) {
 		try {
 			return Tools.parseHeaderDate(headerValue).getTime();
 		} catch (ParseException e) {
@@ -326,10 +433,9 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
 			throw new IllegalArgumentException(e.getMessage());
 		}
 	}
-	
+
 	private final ServletContext getServletContext() {
 		return AJPv13Server.SERVLET_CONFIGS.getContext(servletInstance.getClass().getCanonicalName(), servletPath);
 	}
-
 
 }

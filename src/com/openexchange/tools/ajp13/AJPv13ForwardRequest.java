@@ -83,6 +83,8 @@ import com.openexchange.tools.servlet.http.HttpSessionManagement;
  */
 public final class AJPv13ForwardRequest extends AJPv13Request {
 
+	private static final String STR_EMPTY = "";
+
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(AJPv13ForwardRequest.class);
 
@@ -200,6 +202,8 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 			if (pos > -1) {
 				jsessionID = requestURI.substring(pos + 12);
 				requestURI = requestURI.substring(0, pos);
+				servletRequest.setRequestedSessionIdFromURL(true);
+				servletRequest.setRequestedSessionIdFromCookie(false);
 			}
 			servletRequest.setRequestURI(requestURI);
 			servletRequest.setPathInfo(requestURI);
@@ -307,8 +311,25 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 		/*
 		 * Apply the servlet path with leading "/" to the request
 		 */
-		servletRequest.setServletPath(new StringBuilder().append('/').append(ajpRequestHandler.getServletPath())
-				.toString());
+		if (allPath(ajpRequestHandler.getServletPath())) {
+			/*
+			 * Set an empty string ("") if the servlet used to process this
+			 * request was matched using the "/*" pattern.
+			 */
+			servletRequest.setServletPath(STR_EMPTY);
+		} else {
+			/*
+			 * The path starts with a "/" character and includes either the
+			 * servlet name or a path to the servlet, but does not include any
+			 * extra path information or a query string.
+			 */
+			servletRequest.setServletPath(new StringBuilder().append('/').append(ajpRequestHandler.getServletPath())
+					.toString());
+		}
+	}
+
+	private static boolean allPath(final String servletPath) {
+		return servletPath.length() == 1 && servletPath.charAt(0) == '*';
 	}
 
 	private static void parseQueryString(final HttpServletRequestWrapper servletRequest, final String queryStr)
@@ -324,7 +345,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 				servletRequest.setParameter(paramsNVPs[i].substring(0, pos), decodeQueryStringValue(servletRequest
 						.getCharacterEncoding(), paramsNVPs[i].substring(pos + 1)));
 			} else {
-				servletRequest.setParameter(paramsNVPs[i], "");
+				servletRequest.setParameter(paramsNVPs[i], STR_EMPTY);
 			}
 		}
 	}
@@ -371,7 +392,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 					final Cookie c;
 					final String[] cookieNameValuePair = cookies[j].trim().split("=");
 					if (cookieNameValuePair.length == 1) {
-						c = new Cookie(cookieNameValuePair[0], "");
+						c = new Cookie(cookieNameValuePair[0], STR_EMPTY);
 						c.setVersion(version);
 						cookieList.add(c);
 					} else if (cookieNameValuePair[0].length() > 0 && cookieNameValuePair[0].charAt(0) == '$') {
@@ -506,7 +527,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 		 * Special Byte 0xFF indicates absence of current string value.
 		 */
 		if (firstByte == ((byte) REQUEST_TERMINATOR) && secondByte == (byte) REQUEST_TERMINATOR) {
-			return "";
+			return STR_EMPTY;
 		}
 		final StringBuilder sb = new StringBuilder();
 		boolean encoded = false;

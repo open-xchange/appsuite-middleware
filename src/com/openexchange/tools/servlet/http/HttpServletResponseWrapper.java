@@ -71,6 +71,7 @@ import javax.servlet.http.HttpSession;
 
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.SessionServlet;
+import com.openexchange.server.Version;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.ajp13.AJPv13Config;
 import com.openexchange.tools.ajp13.AJPv13RequestHandler;
@@ -84,22 +85,30 @@ import com.openexchange.tools.servlet.ServletResponseWrapper;
  */
 public class HttpServletResponseWrapper extends ServletResponseWrapper implements HttpServletResponse {
 
-	private static final String ERROR_PAGE_TEMPLATE = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\""
-			+ "\"http://www.w3.org/TR/html4/strict.dtd\">\n"
-			+ "<html xmlns=\"http://www.w3.org/1999/xhtml\" language=\"#LANGUAGE#\" xml:lang=\"#LANGUAGE#\">\n"
-			+ "<head>\n" + "\t<title>#STATUS_MSG#</title>\n"
-			+ "\t<style type=\"text/css\"><!--/*--><![CDATA[/*><!--*/ " + "\n"
-			+ "\t\tbody { color: #000000; background-color: #FFFFFF; }\n" + "\t\ta:link { color: #0000CC; }\n"
-			+ "\t\tp, address {margin-left: 3em;}" + "\t\tspan {font-size: smaller;}" + "\t/*]]>*/--></style>\n"
-			+ "</head>\n\n" + "<body>\n" + "<h1>#STATUS_MSG#</h1>\n" + "<p>\n#STATUS_DESC#\n</p>\n\n"
-			+ "<h2>Error #STATUS_CODE#</h2>\n" + "<address>\n" + "<span>#DATE#<br />\n" + "\tOpen-Xchange</span>\n"
-			+ "</address>\n" + "</body>\n" + "</html>";
+	private static final String ERROR_PAGE_TEMPL = "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\r\n"
+			+ "<html><head>\r\n" + "<title>#STATUS_CODE# #STATUS_MSG#</title>\r\n" + "</head><body>\r\n"
+			+ "<h1>#STATUS_CODE# #STATUS_MSG#</h1>\r\n" + "<p>#STATUS_DESC#</p>\r\n" + "<hr>\r\n"
+			+ "<address>#DATE#,&nbsp;Open-Xchange v#VERSION#</address>\r\n" + "</body></html>";
+
+// private static final String ERROR_PAGE_TEMPLATE = "<!DOCTYPE HTML PUBLIC
+// \"-//W3C//DTD HTML 4.01//EN\""
+//			+ "\"http://www.w3.org/TR/html4/strict.dtd\">\n"
+//			+ "<html xmlns=\"http://www.w3.org/1999/xhtml\" language=\"#LANGUAGE#\" xml:lang=\"#LANGUAGE#\">\n"
+//			+ "<head>\n" + "\t<title>#STATUS_MSG#</title>\n"
+//			+ "\t<style type=\"text/css\"><!--/*--><![CDATA[/*><!--*/ " + "\n"
+//			+ "\t\tbody { color: #000000; background-color: #FFFFFF; }\n" + "\t\tp, address {margin-left: 3em;}"
+//			+ "\t\tspan {font-size: smaller;}" + "\t/*]]>*/--></style>\n" + "</head>\n\n" + "<body>\n"
+//			+ "<h1>#STATUS_MSG#</h1>\n" + "<p>\n#STATUS_DESC#\n</p>\n\n" + "<h2>Error #STATUS_CODE#</h2>\n"
+//			+ "<address>\n" + "<span>#DATE#<br />\n" + "\tOpen-Xchange</span>\n" + "</address>\n" + "</body>\n"
+//			+ "</html>";
 
 	private static final String HTTP_HEADER_DATE_FORMAT = "EEE',' dd MMMM yyyy hh:mm:ss z";
 
-	private static Map<Integer, String> statusMsgs;
+	private static final Map<Integer, String> statusMsgs;
+	
+	private static final Map<Integer, String> statusDesc;
 
-	private static SimpleDateFormat headerDateFormat;
+	private static final SimpleDateFormat headerDateFormat;
 
 	static {
 		statusMsgs = new HashMap<Integer, String>();
@@ -145,6 +154,12 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 		statusMsgs.put(Integer.valueOf(503), "Service Unavailable");
 		statusMsgs.put(Integer.valueOf(504), "Gateway Timeout");
 		statusMsgs.put(Integer.valueOf(505), "HTTP Version Not Supported");
+		/*
+		 * Status descriptions
+		 */
+		statusDesc = new HashMap<Integer, String>();
+		statusDesc.put(Integer.valueOf(404), "The requested URL %s was not found on this server.");
+		statusDesc.put(Integer.valueOf(503), "The server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.");
 		/*
 		 * Date Format
 		 */
@@ -527,6 +542,8 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 		addHeader("Location", location);
 	}
 
+	private static final String ERR_DESC_NOT_AVAILABLE = "[no description available]";
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -537,11 +554,16 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 		this.status = status;
 		this.statusMsg = statusMsg != null ? statusMsg : statusMsgs.get(Integer.valueOf(status));
 		if (errormessage == null) {
-			String errorMsgStr = ERROR_PAGE_TEMPLATE;
-			errorMsgStr = errorMsgStr.replaceAll("#LANGUAGE#",
-					headers.containsKey("Language") ? headers.get("Language")[0] : "en").replaceAll("#STATUS_MSG#",
-					this.statusMsg).replaceAll("#STATUS_CODE#", String.valueOf(this.status)).replaceAll(
-					"#STATUS_DESC#", "").replaceAll("#DATE#", "");
+			String desc = statusDesc.containsKey(Integer.valueOf(this.status)) ? statusDesc.get(Integer
+					.valueOf(this.status)) : ERR_DESC_NOT_AVAILABLE;
+			if (HttpServletResponse.SC_NOT_FOUND == status) {
+				desc = String.format(desc, request.getServletPath());
+			}
+			String errorMsgStr = ERROR_PAGE_TEMPL;
+			errorMsgStr = errorMsgStr.replaceAll("#STATUS_CODE#", String.valueOf(this.status)).replaceAll(
+					"#STATUS_MSG#", this.statusMsg).replaceFirst("#STATUS_DESC#", desc).replaceFirst("#DATE#",
+					headerDateFormat.format(new Date(System.currentTimeMillis()))).replaceFirst("#VERSION#",
+					Version.VERSION_STRING);
 			setContentType(new StringBuilder("text/html; charset=").append(getCharacterEncoding()).toString());
 			errormessage = errorMsgStr.getBytes(getCharacterEncoding());
 			setContentLength(errormessage.length);
@@ -555,7 +577,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 	 * @see javax.servlet.http.HttpServletResponse#sendError(int)
 	 */
 	public void sendError(final int status) throws IOException {
-		sendError(status, "Error");
+		sendError(status, statusMsgs.get(Integer.valueOf(status)));
 	}
 
 	private Enumeration makeEnumeration(final Object obj) {

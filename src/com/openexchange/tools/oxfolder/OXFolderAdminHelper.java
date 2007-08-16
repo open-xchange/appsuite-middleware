@@ -58,6 +58,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -69,10 +70,13 @@ import com.openexchange.cache.FolderCacheNotEnabledException;
 import com.openexchange.cache.FolderCacheProperties;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.SystemConfig;
+import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.ContextImpl;
 import com.openexchange.groupware.i18n.FolderStrings;
+import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.StringHelper;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.server.OCLPermission;
@@ -167,21 +171,30 @@ public final class OXFolderAdminHelper {
 	public void addContextSystemFolders(final int cid, final String mailAdminDisplayName, final String language,
 			final Connection con) throws OXException {
 		try {
+			final int contextMalAdmin = getContextAdminID(cid, con);
+			addContextSystemFolders(cid, contextMalAdmin, mailAdminDisplayName, language, con);
+		} catch (final SQLException e) {
+			throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(cid));
+		}
+	}
+
+	private static int getContextAdminID(final int cid, final Connection readCon) throws OXException {
+		try {
 			int contextMalAdmin = -1;
 			PreparedStatement stmt = null;
 			ResultSet rs = null;
 			try {
-				stmt = con.prepareStatement(SQL_SELECT_ADMIN);
+				stmt = readCon.prepareStatement(SQL_SELECT_ADMIN);
 				stmt.setInt(1, cid);
 				rs = stmt.executeQuery();
 				if (!rs.next()) {
 					throw new OXFolderException(FolderCode.NO_ADMIN_USER_FOUND_IN_CONTEXT, Integer.valueOf(cid));
 				}
 				contextMalAdmin = rs.getInt(1);
+				return contextMalAdmin;
 			} finally {
 				closeSQLStuff(rs, stmt);
 			}
-			addContextSystemFolders(cid, contextMalAdmin, mailAdminDisplayName, language, con);
 		} catch (final SQLException e) {
 			throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(cid));
 		}
@@ -564,6 +577,88 @@ public final class OXFolderAdminHelper {
 			}
 		} finally {
 			closeResources(rs, stmt, null, true, cid);
+		}
+	}
+
+	/**
+	 * Propagates modifications <b>already</b> performed on an existing user
+	 * throughout folder module.
+	 * 
+	 * @param userId
+	 *            The ID of the user who has been modified
+	 * @param changedFields
+	 *            The changed fields of the user taken from constants defined in
+	 *            {@link ContactObject}; e.g.
+	 *            {@link ContactObject#DISPLAY_NAME}
+	 * @param lastModified
+	 *            The last modified timestamp that should be taken on folder
+	 *            modifications
+	 * @param readCon
+	 *            A readable connection if a writeable connection should not be
+	 *            used for read access to database
+	 * @param writeCon
+	 *            A writeable connection
+	 * @param cid
+	 *            The context ID
+	 * @throws OXException
+	 *             If user's modifications could not be successfully propagated
+	 */
+	public static void propagateUserModification(final int userId, final int[] changedFields, final long lastModified,
+			final Connection readCon, final Connection writeCon, final int cid) throws OXException {
+		Arrays.sort(changedFields);
+		final int adminID = getContextAdminID(cid, writeCon);
+		if (Arrays.binarySearch(changedFields, ContactObject.DISPLAY_NAME) > -1) {
+			propagateDisplayNameModification(userId, lastModified, adminID, readCon, writeCon, cid);
+		}
+	}
+
+	private static void propagateDisplayNameModification(final int userId, final long lastModified,
+			final int contextAdminID, final Connection readCon, final Connection writeCon, final int cid)
+			throws OXException {
+		final Context ctx = new ContextImpl(cid);
+		/*
+		 * Update shared folder's last modified timestamp
+		 */
+		try {
+			OXFolderSQL.updateLastModified(FolderObject.SYSTEM_SHARED_FOLDER_ID, lastModified, contextAdminID,
+					writeCon, ctx);
+			/*
+			 * Reload cache entry
+			 */
+			if (FolderCacheManager.isInitialized()) {
+				/*
+				 * Distribute remove among remote caches
+				 */
+				FolderCacheManager.getInstance().removeFolderObject(FolderObject.SYSTEM_SHARED_FOLDER_ID, ctx);
+			}
+		} catch (final SQLException e) {
+			throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(cid));
+		} catch (final DBPoolingException e) {
+			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(cid));
+		}
+		/*
+		 * Update user's default infostore folder name
+		 */
+		try {
+			final int defaultInfostoreId = OXFolderSQL.getUserDefaultFolder(userId, FolderObject.INFOSTORE, readCon,
+					ctx);
+			OXFolderSQL.updateName(defaultInfostoreId, UserStorage.getInstance(ctx).getUser(userId).getDisplayName(),
+					contextAdminID, userId, writeCon, ctx);
+			/*
+			 * Reload cache entry
+			 */
+			if (FolderCacheManager.isInitialized()) {
+				/*
+				 * Distribute remove among remote caches
+				 */
+				FolderCacheManager.getInstance().removeFolderObject(defaultInfostoreId, ctx);
+			}
+		} catch (final SQLException e) {
+			throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(cid));
+		} catch (final DBPoolingException e) {
+			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(cid));
+		} catch (final LdapException e) {
+			throw new OXFolderException(FolderCode.LDAP_ERROR, e, Integer.valueOf(cid));
 		}
 	}
 

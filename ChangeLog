@@ -2,6 +2,8 @@
 
  - Partial bugfix #8885: Avoiding translating IO errors to "instantiation
    failed" errors
+ - Partial bugfix #8839: New method added to OXFolderAdminHelper class to
+   propagate user modifications throughout folder module
 
 * 2007-08-15 - ben.pahne@open-xchange.com
 
