@@ -17,7 +17,7 @@ import com.openexchange.admin.tools.ShellExecutor.ArrayOutput;
 
 public class UniqueCLTParameterTest {
 
-    private final String prefix = "/opt/open-xchange/sbin/";
+    private String prefix = "/opt/open-xchange/sbin/";
     
     public static junit.framework.Test suite() {
         return new JUnit4TestAdapter(UniqueCLTParameterTest.class);
@@ -26,6 +26,11 @@ public class UniqueCLTParameterTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testUniqueCLTParameter() throws IOException, InterruptedException {
+        final String envPrefix = System.getenv("SBINPREFIX");
+        if( envPrefix.length() > 0 ) {
+            System.out.println("Using " + envPrefix + "/ as path to commands to test...");
+            this.prefix = envPrefix;
+        }
         final URL resource = this.getClass().getClassLoader().getResource("");
         final List<String> cltlist = FileUtils.readLines(new File(resource.getFile() + "../sbin/contextcltlist"));
         cltlist.addAll(FileUtils.readLines(new File(resource.getFile() + "../sbin/usercltlist")));
