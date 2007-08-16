@@ -2,38 +2,18 @@
 
 DDIR=$1 || DDIR="/opt/open-xchange/sbin"
 
-COMMANDS="changecontext \
-deletecontext \
-disablecontext \
-disableallcontexts \
-enablecontext \
-enableallcontexts \
-movedatabasecontext \
-movefilestorecontext \
-listcontexts \
-listcontextsbydatabase \
-listcontextsbyfilestore \
-changefilestore \
-listdatabases \
-listfilestores \
-listservers \
-registerdatabase \
-registerfilestore \
-registerserver \
-unregisterdatabase \
-unregisterfilestore \
-unregisterserver \
-changedatabase"
+contextlist=$(<contextcltlist)
+userlist=$(<usercltlist)
 pushd $DDIR
-for linkname in $COMMANDS; do
-    ln -sf createcontext $linkname
+for linkname in $contextlist; do
+	if [ "$linkname" != "createcontext" ]; then
+	    rm -f $linkname
+	    ln -sf createcontext $linkname
+	fi
 done
-for method in create delete change list; do
-    for module in user group resource; do
-	linkname="${method}${module}"
+for linkname in $userlist; do
 	if [ "$linkname" != "createuser" ]; then
 	    rm -f $linkname
 	    ln -sf createuser $linkname
 	fi
-    done
 done
