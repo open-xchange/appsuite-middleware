@@ -42,12 +42,27 @@ public class AllTest extends AppointmentTest {
 	public void testShowFullTimeAppointments() throws Exception {
 		final int cols[] = new int[]{ AppointmentObject.OBJECT_ID };
 		
+		Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+		calendar.setTimeInMillis(startTime);
+		calendar.set(Calendar.HOUR_OF_DAY, 0);
+		calendar.set(Calendar.MINUTE, 0);
+		calendar.set(Calendar.SECOND, 0);
+		calendar.set(Calendar.MILLISECOND, 0);
+		
+		final Date startDate = calendar.getTime();
+		
+		calendar.add(Calendar.DAY_OF_MONTH, 1);
+		
+		final Date endDate = calendar.getTime();
+		
 		AppointmentObject appointmentObj = createAppointmentObject("testShowFullTimeAppointments");
+		appointmentObj.setStartDate(startDate);
+		appointmentObj.setEndDate(endDate);
 		appointmentObj.setFullTime(true);
 		appointmentObj.setIgnoreConflicts(true);
 		int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
 		
-		Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+		calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
 		calendar.set(Calendar.HOUR_OF_DAY, 0);
 		calendar.set(Calendar.MINUTE, 0);
 		calendar.set(Calendar.SECOND, 0);
