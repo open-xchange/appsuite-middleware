@@ -1179,7 +1179,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         } catch (final OXException oxae) {
             log.error("Error", oxae);
             this.oxcontextcommon.handleCreateContextRollback(configdb_write_con, ox_write_con, context_id);
-            throw new StorageException(oxae);
+            throw new StorageException(oxae.toString());
         } catch (final StorageException ste) {
             log.error("Storage Error", ste);
             this.oxcontextcommon.handleCreateContextRollback(configdb_write_con, ox_write_con, context_id);
