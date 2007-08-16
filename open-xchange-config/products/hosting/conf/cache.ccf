@@ -1,5 +1,5 @@
 # DEFAULT CACHE REGION   
-jcs.default=
+jcs.default=LTCP
 jcs.default.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
 jcs.default.cacheattributes.MaxObjects=1000
 jcs.default.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache
@@ -121,6 +121,23 @@ jcs.region.UserConfiguration.elementattributes.IsSpool=false
 jcs.region.UserConfiguration.elementattributes.IsRemote=false
 jcs.region.UserConfiguration.elementattributes.IsLateral=false
 
+# UserSettingMail Cache only uses RAM
+jcs.region.UserSettingMail=LTCP
+jcs.region.UserSettingMail.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
+jcs.region.UserSettingMail.cacheattributes.MaxObjects=1000000
+jcs.region.UserSettingMail.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache
+jcs.region.UserSettingMail.cacheattributes.UseMemoryShrinker=true
+jcs.region.UserSettingMail.cacheattributes.MaxMemoryIdleTimeSeconds=180
+jcs.region.UserSettingMail.cacheattributes.ShrinkerIntervalSeconds=60
+jcs.region.UserSettingMail.cacheattributes.MaxSpoolPerRun=500
+jcs.region.UserSettingMail.elementattributes=org.apache.jcs.engine.ElementAttributes
+jcs.region.UserSettingMail.elementattributes.IsEternal=false
+jcs.region.UserSettingMail.elementattributes.MaxLifeSeconds=300
+jcs.region.UserSettingMail.elementattributes.IdleTime=180
+jcs.region.UserSettingMail.elementattributes.IsSpool=false
+jcs.region.UserSettingMail.elementattributes.IsRemote=false
+jcs.region.UserSettingMail.elementattributes.IsLateral=false
+
 # Context Cache only uses RAM
 jcs.region.Context=LTCP
 jcs.region.Context.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
@@ -193,8 +210,9 @@ jcs.region.CalendarCache.elementattributes.IsLateral=false
 # TCP Lateral Cache to broadcast PUTS and REMOVALS (and possibly GETS) to other local caches
 jcs.auxiliary.LTCP=org.apache.jcs.auxiliary.lateral.socket.tcp.LateralTCPCacheFactory
 jcs.auxiliary.LTCP.attributes=org.apache.jcs.auxiliary.lateral.socket.tcp.TCPLateralCacheAttributes
-# jcs.auxiliary.LTCP.attributes.TcpServers=localhost:1111,localhost:1112
-jcs.auxiliary.LTCP.attributes.TcpListenerPort=1118
+# jcs.auxiliary.LTCP.attributes.TcpServers=localhost:57461
+jcs.auxiliary.LTCP.attributes.TcpListenerPort=57462
+# Define UDP discovery here, but ensure you do not specify static TCP server via jcs.auxiliary.LTCP.attributes.TcpServers
 jcs.auxiliary.LTCP.attributes.UdpDiscoveryAddr=224.0.0.1
 jcs.auxiliary.LTCP.attributes.UdpDiscoveryPort=6780
 jcs.auxiliary.LTCP.attributes.UdpDiscoveryEnabled=true
@@ -204,4 +222,3 @@ jcs.auxiliary.LTCP.attributes.Receive=true
 jcs.auxiliary.LTCP.attributes.AllowGet=false
 jcs.auxiliary.LTCP.attributes.IssueRemoveOnPut=true
 jcs.auxiliary.LTCP.attributes.FilterRemoveByHashCode=false
-
