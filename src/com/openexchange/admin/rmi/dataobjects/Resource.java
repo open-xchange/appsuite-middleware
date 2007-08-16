@@ -143,6 +143,9 @@ public class Resource extends ExtendableDataObject implements NameAndIdObject {
         return available;
     }
 
+    /**
+     * This attribute is not used
+     */
     public void setAvailable(Boolean available) {
         availableset = true;
         this.available = available;
