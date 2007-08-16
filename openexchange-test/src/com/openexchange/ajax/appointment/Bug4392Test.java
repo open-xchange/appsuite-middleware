@@ -49,28 +49,32 @@ public class Bug4392Test extends AppointmentTest {
 		super.setUp();
 	}
 	
+	/**
+	 * This test case check the until date of recurrence appointments
+	 */
 	public void testBug4392() throws Exception {
-		Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+		final int occurrences = 4;
+
+		final Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+		calendar.setTimeInMillis(startTime);
 		calendar.set(Calendar.HOUR_OF_DAY, 0);
 		calendar.set(Calendar.MINUTE, 0);
 		calendar.set(Calendar.SECOND, 0);
 		calendar.set(Calendar.MILLISECOND, 0);
 		
-		Date start = new Date(calendar.getTimeInMillis() + dayInMillis);
-		Date end = new Date(start.getTime()+dayInMillis);
+		calendar.add(Calendar.DAY_OF_MONTH, occurrences);
+		final Date until = calendar.getTime();
 		
-		int occurrences = 4;
-		
-		AppointmentObject appointmentObj = createAppointmentObject("testBug4392");
+		final AppointmentObject appointmentObj = createAppointmentObject("testBug4392");
 		appointmentObj.setRecurrenceType(AppointmentObject.DAILY);
 		appointmentObj.setInterval(1);
 		appointmentObj.setOccurrence(4);
 		appointmentObj.setIgnoreConflicts(true);
-		int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
+		final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
 		appointmentObj.setObjectID(objectId);
-		appointmentObj.setUntil(new Date(calendar.getTimeInMillis() + ((occurrences) * dayInMillis)));
+		appointmentObj.setUntil(until);
 		
-		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, getHostName(), getSessionId());
+		final AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, getHostName(), getSessionId());
 		try {
 			compareObject(appointmentObj, loadAppointment, appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime());
 		} catch (TestException exc) {
