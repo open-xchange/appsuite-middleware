@@ -1066,6 +1066,8 @@ public class Folder extends SessionServlet {
 		}
 	}
 
+	private static final Date DATE_0 = new Date(0);
+
 	private final Response actionGetUpdatedFolders(final SessionObject sessionObj, final ParamContainer paramContainer)
 			throws JSONException {
 		/*
@@ -1095,28 +1097,73 @@ public class Folder extends SessionServlet {
 			 */
 			Queue<FolderObject> q = ((FolderObjectIterator) foldersqlinterface.getAllModifiedFolders(timestamp))
 					.asQueue();
+			final OXFolderAccess access = new OXFolderAccess(sessionObj.getContext());
 			final Queue<FolderObject> updatedQueue = new LinkedList<FolderObject>();
 			final Queue<FolderObject> deletedQueue = new LinkedList<FolderObject>();
-			boolean add2Update = false;
+			boolean addSystemSharedFolder = false;
+			boolean checkVirtualListFolders = false;
 			int size = q.size();
 			Iterator<FolderObject> iter = q.iterator();
 			for (int i = 0; i < size; i++) {
 				final FolderObject fo = iter.next();
 				if (fo.isVisible(sessionObj.getUserObject().getId(), sessionObj.getUserConfiguration())) {
 					if (fo.isShared(sessionObj.getUserObject().getId())) {
-						add2Update = true;
+						addSystemSharedFolder = true;
+					} else if (FolderObject.PUBLIC == fo.getType()) {
+						if (access.getFolderPermission(fo.getParentFolderID(), sessionObj.getUserObject().getId(),
+								sessionObj.getUserConfiguration()).isFolderVisible()) {
+							/*
+							 * Parent is already visible: Add real parent
+							 */
+							updatedQueue.add(access.getFolderObject(fo.getParentFolderID()));
+						} else {
+							/*
+							 * Parent is not visible: Update superior system
+							 * folder to let the newly visible folder appear
+							 * underneath virtual "Other XYZ folders"
+							 */
+							updatedQueue.add(fo.getModule() == FolderObject.INFOSTORE ? access
+									.getFolderObject(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID) : access
+									.getFolderObject(FolderObject.SYSTEM_PUBLIC_FOLDER_ID));
+						}
 					}
 					updatedQueue.add(fo);
 				} else {
+					checkVirtualListFolders = (FolderObject.PUBLIC == fo.getType());
 					deletedQueue.add(fo);
+				}
+			}
+			/*
+			 * Check virtual list folders
+			 */
+			if (checkVirtualListFolders) {
+				if (!foldersqlinterface.getNonTreeVisiblePublicTaskFolders().hasNext()) {
+					final FolderObject virtualTasks = new FolderObject(FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID);
+					virtualTasks.setLastModified(DATE_0);
+					deletedQueue.add(virtualTasks);
+				}
+				if (!foldersqlinterface.getNonTreeVisiblePublicCalendarFolders().hasNext()) {
+					final FolderObject virtualCalendar = new FolderObject(FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID);
+					virtualCalendar.setLastModified(DATE_0);
+					deletedQueue.add(virtualCalendar);
+				}
+				if (!foldersqlinterface.getNonTreeVisiblePublicContactFolders().hasNext()) {
+					final FolderObject virtualContact = new FolderObject(FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID);
+					virtualContact.setLastModified(DATE_0);
+					deletedQueue.add(virtualContact);
+				}
+				if (!foldersqlinterface.getNonTreeVisiblePublicInfostoreFolders().hasNext()) {
+					final FolderObject virtualInfostore = new FolderObject(
+							FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID);
+					virtualInfostore.setLastModified(DATE_0);
+					deletedQueue.add(virtualInfostore);
 				}
 			}
 			/*
 			 * Check if shared folder must be updated, too
 			 */
-			if (add2Update) {
-				final FolderObject sharedFolder = new OXFolderAccess(sessionObj.getContext())
-						.getFolderObject(FolderObject.SYSTEM_SHARED_FOLDER_ID);
+			if (addSystemSharedFolder) {
+				final FolderObject sharedFolder = access.getFolderObject(FolderObject.SYSTEM_SHARED_FOLDER_ID);
 				sharedFolder.setFolderName(FolderObject.getFolderString(FolderObject.SYSTEM_SHARED_FOLDER_ID,
 						sessionObj.getLocale()));
 				updatedQueue.add(sharedFolder);

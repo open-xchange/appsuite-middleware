@@ -4,6 +4,8 @@
    failed" errors
  - Partial bugfix #8839: New method added to OXFolderAdminHelper class to
    propagate user modifications throughout folder module
+ - Bugfix #8901: Sending correct update informations (action=updates) on
+   public folder's permission modification
 
 * 2007-08-15 - ben.pahne@open-xchange.com
 

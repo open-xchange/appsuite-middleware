@@ -334,7 +334,7 @@ public class OXFolderManagerImpl implements OXFolderManager {
 					folderObj.fill(FolderObject.loadFolderObjectFromDB(fuid, ctx, wc));
 				}
 				if (FolderQueryCacheManager.isInitialized()) {
-					FolderQueryCacheManager.getInstance().invalidateUserQueries(session);
+					FolderQueryCacheManager.getInstance().invalidateContextQueries(session);
 				}
 				if (CalendarCache.isInitialized()) {
 					CalendarCache.getInstance().invalidateGroup(ctx.getContextId());
@@ -427,7 +427,7 @@ public class OXFolderManagerImpl implements OXFolderManager {
 					fo.fill(FolderObject.loadFolderObjectFromDB(fo.getObjectID(), ctx, wc));
 				}
 				if (FolderQueryCacheManager.isInitialized()) {
-					FolderQueryCacheManager.getInstance().invalidateUserQueries(session);
+					FolderQueryCacheManager.getInstance().invalidateContextQueries(session);
 				}
 				if (CalendarCache.isInitialized()) {
 					CalendarCache.getInstance().invalidateGroup(ctx.getContextId());
@@ -956,7 +956,7 @@ public class OXFolderManagerImpl implements OXFolderManager {
 		 * Invalidate query caches
 		 */
 		if (FolderQueryCacheManager.isInitialized()) {
-			FolderQueryCacheManager.getInstance().invalidateUserQueries(session);
+			FolderQueryCacheManager.getInstance().invalidateContextQueries(session);
 		}
 		if (CalendarCache.isInitialized()) {
 			CalendarCache.getInstance().invalidateGroup(ctx.getContextId());
@@ -1389,7 +1389,7 @@ public class OXFolderManagerImpl implements OXFolderManager {
 
 	/**
 	 * Ensures that an user who does not hold full shared folder access cannot
-	 * share on of his private folders
+	 * share one of his private folders
 	 * 
 	 * @param folderObj -
 	 *            the folder object

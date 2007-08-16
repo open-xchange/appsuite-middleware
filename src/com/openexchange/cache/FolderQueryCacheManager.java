@@ -247,7 +247,7 @@ public class FolderQueryCacheManager {
 	/**
 	 * Clears all cache entries belonging to given context
 	 */
-	public final void invalidateUserQueries(final SessionObject session) {
+	public final void invalidateContextQueries(final SessionObject session) {
 		invalidateContextQueries(session.getContext().getContextId());
 	}
 
