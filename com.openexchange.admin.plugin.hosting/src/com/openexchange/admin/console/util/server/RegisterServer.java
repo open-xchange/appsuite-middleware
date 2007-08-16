@@ -17,7 +17,7 @@ import com.openexchange.admin.rmi.dataobjects.Server;
 public class RegisterServer extends ServerAbstraction {
 
     // Setting names for options
-    private final static char OPT_NAME_HOSTNAME_SHORT = 'h';
+    private final static char OPT_NAME_HOSTNAME_SHORT = 'H';
 
     private final static String OPT_NAME_HOSTNAME_LONG = "hostname";
 
