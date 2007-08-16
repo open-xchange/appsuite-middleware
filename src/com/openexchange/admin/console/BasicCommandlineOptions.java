@@ -302,23 +302,23 @@ public abstract class BasicCommandlineOptions {
      * @throws InvalidDataException 
      */
     protected final void doCSVOutput(final ArrayList<String> columns, final ArrayList<ArrayList<String>> data) throws InvalidDataException{
+        // first prepare the columns line
+        StringBuilder sb = new StringBuilder();
+        for (final String column_entry : columns) {
+            sb.append(column_entry);
+            sb.append(",");
+        }
+        if(sb.length()>0){
+            // remove last ","
+            sb.deleteCharAt(sb.length()-1);
+        }
+        
+        // print the columns line
+        System.out.println(sb.toString());            
         if (columns != null && data != null && !data.isEmpty()) {
             if (columns.size()!=data.get(0).size()) {
                 throw new InvalidDataException("Number of columnnames and number of columns in data object must be the same");
             }
-            // first prepare the columns line
-            StringBuilder sb = new StringBuilder();
-            for (final String column_entry : columns) {
-                sb.append(column_entry);
-                sb.append(",");
-            }
-            if(sb.length()>0){
-                // remove last ","
-                sb.deleteCharAt(sb.length()-1);
-            }
-            
-            // print the columns line
-            System.out.println(sb.toString());            
             
             // now prepare all data lines
             for (final ArrayList<String> data_list : data) {
