@@ -342,21 +342,41 @@ public class Context extends EnforceableDataObject implements NameAndIdObject {
         this.login_mappings = null;
     }
 
+    /**
+     * {@inheritDoc}<p>
+     * 
+     * At the moment no field are defined here
+     */
     @Override
     public String[] getMandatoryMembersChange() {
         return null;
     }
 
+    /**
+     * {@inheritDoc}<p>
+     * 
+     * At the moment {@code id} and {@code maxQuota} are defined here
+     */
     @Override
     public String[] getMandatoryMembersCreate() {
         return new String[]{ "id", "maxQuota" };
     }
 
+    /**
+     * {@inheritDoc}<p>
+     * 
+     * At the moment no field are defined here
+     */
     @Override
     public String[] getMandatoryMembersDelete() {
         return null;
     }
 
+    /**
+     * {@inheritDoc}<p>
+     * 
+     * At the moment no field are defined here
+     */
     @Override
     public String[] getMandatoryMembersRegister() {
         return null;
