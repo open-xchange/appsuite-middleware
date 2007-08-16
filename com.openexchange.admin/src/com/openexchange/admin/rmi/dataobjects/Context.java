@@ -216,15 +216,25 @@ public class Context extends EnforceableDataObject implements NameAndIdObject {
         this.filestore_idset = true;
     }
 
+    /**
+     * @return max Quota (in MB)
+     */
     public final Long getMaxQuota() {
         return maxQuota;
     }
 
+    /**
+     * 
+     * @param maxQuota (in MB)
+     */
     public final void setMaxQuota(final Long maxQuota) {
         this.maxQuota = maxQuota;
         this.maxQuotaset = true;
     }
 
+    /**
+     * @return used Quota (in MB)
+     */
     public final Long getUsedQuota() {
         return usedQuota;
     }
@@ -270,10 +280,16 @@ public class Context extends EnforceableDataObject implements NameAndIdObject {
         this.writeDatabaseset = true;
     }
 
+    /**
+     * @return configured average size (in MB)
+     */
     public final Long getAverage_size() {
         return average_size;
     }
 
+    /**
+     * The context average size can only be configured in AdminDaemon.properties
+     */
     public final void setAverage_size(final Long average_size) {
         this.average_size = average_size;
         this.average_sizeset = true;
