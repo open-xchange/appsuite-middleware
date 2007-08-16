@@ -673,7 +673,7 @@ public class UserTest extends AbstractTest {
         notallowed.add("setMail_folder_confirmed_spam_name");
         notallowed.add("setGUI_Spam_filter_capabilities_enabled");
         notallowed.add("setPassword_expired");
-        notallowed.add("setEnabled");
+        notallowed.add("setMailenabled");
         return notallowed;
     }
     
