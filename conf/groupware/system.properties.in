@@ -81,7 +81,4 @@ CalendarSQL=com.openexchange.groupware.calendar.CalendarMySQL
 # contains the most HTML entities and maps them to their character value
 HTMLEntities=@oxgroupwaresysconfdir@/HTMLEntities.properties
 
-# ERROR=1, WARN=3, INFO=5 (DEFAULT), DEBUG=10
-LOGLEVEL:5
-
 SERVER_NAME=local
