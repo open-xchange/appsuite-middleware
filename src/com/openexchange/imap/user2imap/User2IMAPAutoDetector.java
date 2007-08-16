@@ -143,14 +143,19 @@ public final class User2IMAPAutoDetector {
 			User2IMAPException {
 		CONTACT_LOCK.lock();
 		try {
-			User2IMAP user2IMAP;
-			if ((user2IMAP = map.get(inetAddress)) != null) {
+			User2IMAP user2IMAP = map.get(inetAddress);
+			if (user2IMAP != null) {
 				return user2IMAP;
 			}
 			Socket s = null;
 			InputStreamReader isr = null;
 			try {
-				s = new Socket(inetAddress, imapPort);
+				try {
+					s = new Socket(inetAddress, imapPort);
+				} catch (final IOException e) {
+					throw new User2IMAPException(User2IMAPException.Code.CREATING_SOCKET_FAILED, e, inetAddress
+							.toString(), e.getLocalizedMessage());
+				}
 				isr = new InputStreamReader(s.getInputStream(), CHARSET_US_ASCII);
 				final StringBuilder sb = new StringBuilder(BUFSIZE);
 				final char[] buf = new char[BUFSIZE];
@@ -162,11 +167,11 @@ public final class User2IMAPAutoDetector {
 				try {
 					user2IMAP = Class.forName(imapServer.getImpl()).asSubclass(User2IMAP.class).newInstance();
 				} catch (final InstantiationException e) {
-					throw new User2IMAPException(User2IMAPException.Code.INSTANCIATION_FAILED, e, EMPTY_ARGS);
+					throw new User2IMAPException(User2IMAPException.Code.INSTANTIATION_FAILED, e, EMPTY_ARGS);
 				} catch (final IllegalAccessException e) {
-					throw new User2IMAPException(User2IMAPException.Code.INSTANCIATION_FAILED, e, EMPTY_ARGS);
+					throw new User2IMAPException(User2IMAPException.Code.INSTANTIATION_FAILED, e, EMPTY_ARGS);
 				} catch (final ClassNotFoundException e) {
-					throw new User2IMAPException(User2IMAPException.Code.INSTANCIATION_FAILED, e, EMPTY_ARGS);
+					throw new User2IMAPException(User2IMAPException.Code.INSTANTIATION_FAILED, e, EMPTY_ARGS);
 				}
 				s.getOutputStream().write(IMAPCMD_LOGOUT.getBytes(CHARSET_US_ASCII));
 				s.getOutputStream().flush();

@@ -168,9 +168,9 @@ public abstract class User2IMAP {
 		public static enum Code {
 
 			/**
-			 * Instanciating the class failed.
+			 * Instantiating the class failed.
 			 */
-			INSTANCIATION_FAILED("Instanciating the class failed.", Category.CODE_ERROR, 1),
+			INSTANTIATION_FAILED("Instantiating the class failed.", Category.CODE_ERROR, 1),
 			/**
 			 * Implementing class could not be found
 			 */
@@ -182,7 +182,17 @@ public abstract class User2IMAP {
 			/**
 			 * Unknown IMAP server: %1$s
 			 */
-			UNKNOWN_IMAP_SERVER("Unknown IMAP server: %1$s", Category.CODE_ERROR, 4);
+			UNKNOWN_IMAP_SERVER("Unknown IMAP server: %1$s", Category.CODE_ERROR, 4),
+			/**
+			 * An I/O error occured when creating the socket connection to IMAP
+			 * server (%s): %s
+			 */
+			CREATING_SOCKET_FAILED("An I/O error occured when creating the socket connection to IMAP server (%s): %s",
+					Category.SUBSYSTEM_OR_SERVICE_DOWN, 5),
+			/**
+			 * An I/O error occured: %s
+			 */
+			IO_ERROR("An I/O error occured: %s", Category.SUBSYSTEM_OR_SERVICE_DOWN, 6);
 
 			/**
 			 * Message of the exception.
@@ -289,11 +299,11 @@ public abstract class User2IMAP {
 						singleton = implementingClass.newInstance();
 						instancialized = true;
 					} catch (final InstantiationException e) {
-						throw new User2IMAPException(User2IMAPException.Code.INSTANCIATION_FAILED, e, EMPTY_ARGS);
+						throw new User2IMAPException(User2IMAPException.Code.INSTANTIATION_FAILED, e, EMPTY_ARGS);
 					} catch (final IllegalAccessException e) {
-						throw new User2IMAPException(User2IMAPException.Code.INSTANCIATION_FAILED, e, EMPTY_ARGS);
+						throw new User2IMAPException(User2IMAPException.Code.INSTANTIATION_FAILED, e, EMPTY_ARGS);
 					} catch (final SecurityException e) {
-						throw new User2IMAPException(User2IMAPException.Code.INSTANCIATION_FAILED, e, EMPTY_ARGS);
+						throw new User2IMAPException(User2IMAPException.Code.INSTANTIATION_FAILED, e, EMPTY_ARGS);
 					}
 				}
 			} finally {
@@ -308,9 +318,9 @@ public abstract class User2IMAP {
 			final Object[] args = getIMAPServer(sessionUser);
 			return User2IMAPAutoDetector.getUser2IMAPImpl((String) args[0], ((Integer) args[1]).intValue());
 		} catch (final IOException e) {
-			throw new User2IMAPException(User2IMAPException.Code.INSTANCIATION_FAILED, e, EMPTY_ARGS);
+			throw new User2IMAPException(User2IMAPException.Code.IO_ERROR, e, e.getLocalizedMessage());
 		} catch (final IMAPException e) {
-			throw new User2IMAPException(User2IMAPException.Code.INSTANCIATION_FAILED, e, EMPTY_ARGS);
+			throw new User2IMAPException(e);
 		}
 	}
 

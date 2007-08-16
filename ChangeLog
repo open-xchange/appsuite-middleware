@@ -1,3 +1,8 @@
+* 2007-08-16 - thorben.betten@open-xchange.com
+
+ - Partial bugfix #8885: Avoiding translating IO errors to "instantiation
+   failed" errors
+
 * 2007-08-15 - ben.pahne@open-xchange.com
 
  - Bug Fix 8880: It was possible to move contacts into the global
