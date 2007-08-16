@@ -155,7 +155,8 @@ public class OXLogin extends OXCommonImpl implements OXLoginInterface {
                 throw new DatabaseUpdateException("Database is just beeing updated. Try again.");
             }
         } catch (final UpdateException e) {
-            throw new DatabaseUpdateException(e);
+            log.error("Error running updateprocess",e);
+            throw new DatabaseUpdateException(e.toString());
         }
     }
 
