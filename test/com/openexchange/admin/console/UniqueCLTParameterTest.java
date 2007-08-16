@@ -1,0 +1,34 @@
+package com.openexchange.admin.console;
+
+import static org.junit.Assert.assertTrue;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.util.List;
+
+import org.apache.commons.io.FileUtils;
+import org.junit.Test;
+
+import com.openexchange.admin.tools.ShellExecutor;
+import com.openexchange.admin.tools.ShellExecutor.ArrayOutput;
+
+public class UniqueCLTParameterTest {
+
+    private final String prefix = "/opt/open-xchange/sbin/";
+    
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testUniqueCLTParameter() throws IOException, InterruptedException {
+        final URL resource = this.getClass().getClassLoader().getResource("");
+        final List<String> cltlist = FileUtils.readLines(new File(resource.getFile() + "../sbin/contextcltlist"));
+        cltlist.addAll(FileUtils.readLines(new File(resource.getFile() + "../sbin/usercltlist")));
+        final ShellExecutor se = new ShellExecutor();
+        for (final String command :  cltlist) {
+            System.out.println("Testing " + command + " ...");
+            final ArrayOutput result = se.executeprocargs(new String[] { prefix + command, "--check" });
+            assertTrue(command + " failed: " + result.errOutput, result.exitstatus==0);
+        }
+    }
+    
+}
