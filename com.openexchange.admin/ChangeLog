@@ -1,3 +1,7 @@
+* 2007-08-16 - manuel.kraft@open-xchange.com
+
+ - Bugfix ID#8839 "Virtual" PIM folders are not updated when changing users displayname
+
 * 2007-08-16 - choeger@open-xchange.com
 
   - Bugfix ID#8895 Misleading server response if "listuser --csv" doesn't find any match
