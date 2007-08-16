@@ -87,7 +87,7 @@ public abstract class OXUserSQLStorage extends OXUserStorageInterface {
             notallowed.add("Password");
             notallowed.add("PrimaryEmail");
             notallowed.add("Timezone");
-            notallowed.add("Enabled");
+            notallowed.add("Mailenabled");
             notallowed.add("ImapServer");
             notallowed.add("ImapLogin");
             notallowed.add("SmtpServer");
@@ -100,7 +100,7 @@ public abstract class OXUserSQLStorage extends OXUserStorageInterface {
             method2field.put("PrimaryEmail", "mail");
             method2field.put("Language", "preferredlanguage");
             method2field.put("Timezone", "timezone");
-            method2field.put("Enabled", "mailEnabled");
+            method2field.put("Mailenabled", "mailEnabled");
             method2field.put(PASSWORD_EXPIRED, "shadowLastChange");
             method2field.put("ImapServer", "imapserver");
             method2field.put("ImapLogin", "imapLogin");
