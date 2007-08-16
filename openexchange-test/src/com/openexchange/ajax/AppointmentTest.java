@@ -438,7 +438,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 		final Response response = Response.parse(resp.getText());
 		
 		if (response.hasError()) {
-			fail("json error: " + response.getErrorMessage());
+			throw new TestException("json error: " + response.getErrorMessage());
 		}
 		
 		assertNotNull("timestamp", response.getTimestamp());
