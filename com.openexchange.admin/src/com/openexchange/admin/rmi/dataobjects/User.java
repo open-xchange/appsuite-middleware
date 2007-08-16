@@ -1380,9 +1380,9 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
             return imapServer;
         }
     }
-
+    
     /*
-     * set the users imapserver if not localhost should be used. Syntax of
+     * Set the users imapserver if not localhost should be used. Syntax of
      * imapserver String: HOSTNAME[:PORT] if PORT is omitted, the default port
      * is used
      * 
@@ -1421,7 +1421,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
     }
 
     /*
-     * set the users smtpserver if not localhost should be used. Syntax of
+     * Set the users smtpserver if not localhost should be used. Syntax of
      * smtpserver String: HOSTNAME[:PORT] if PORT is omitted, the default port
      * is used
      * 
@@ -1531,6 +1531,10 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         return mail_folder_spam_name;
     }
 
+    /*
+     * Set the name of the users SPAM folder where detected SPAM mail will be
+     * moved into
+     */
     final public void setMail_folder_spam_name(final String mail_folder_spam_name) {
         if (null == mail_folder_spam_name) {
             this.mail_folder_spam_nameset = true;
@@ -2652,8 +2656,8 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
     }
 
     /**
-     * @param mail_folder_confirmed_ham_name
-     *                the mail_folder_confirmed_ham_name to set
+     * Set the name of the folder where mail should be copied, that should be
+     * learned as HAM using whatever mechanism on the server side
      */
     final public void setMail_folder_confirmed_ham_name(String mail_folder_confirmed_ham_name) {
         this.mail_folder_confirmed_ham_nameset = true;
@@ -2668,8 +2672,8 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
     }
 
     /**
-     * @param mail_folder_confirmed_spam_name
-     *                the mail_folder_confirmed_spam_name to set
+     * Set the name of the folder where mail should be moved, that should be
+     * learned as SPAM using whatever mechanism on the server side
      */
     final public void setMail_folder_confirmed_spam_name(String mail_folder_confirmed_spam_name) {
         this.mail_folder_confirmed_ham_nameset = true;
