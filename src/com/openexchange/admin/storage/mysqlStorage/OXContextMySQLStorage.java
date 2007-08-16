@@ -2151,7 +2151,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
            
            long quota_max_temp = ctx.getMaxQuota().longValue();
            
-           if (ctx.getMaxQuota().longValue() != -1) {
+           if (quota_max_temp != -1) {
                quota_max_temp *= Math.pow(2, 20);
            }  
            
@@ -2309,18 +2309,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 if (null != filestore_name) {
                     prep = configdb_write_con.prepareStatement("UPDATE context SET filestore_name = ? WHERE cid = ?");
                     prep.setString(1, filestore_name);
-                    prep.setInt(2, context_id);
-                    prep.executeUpdate();
-                    prep.close();
-                }
-    
-    
-                if (ctx.getMaxQuota()!=null && ctx.getMaxQuota()!=-1) {
-                    final long filestore_quota_max = ctx.getMaxQuota();
-                    // convert to byte for db
-                    final long quota_max_in_byte = (long) (filestore_quota_max * Math.pow(2, 20));
-                    prep = configdb_write_con.prepareStatement("UPDATE context SET quota_max = ? WHERE cid = ?");
-                    prep.setLong(1, quota_max_in_byte);
                     prep.setInt(2, context_id);
                     prep.executeUpdate();
                     prep.close();
