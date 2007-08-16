@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 
+import junit.framework.JUnit4TestAdapter;
+
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 
@@ -17,6 +19,10 @@ public class UniqueCLTParameterTest {
 
     private final String prefix = "/opt/open-xchange/sbin/";
     
+    public static junit.framework.Test suite() {
+        return new JUnit4TestAdapter(UniqueCLTParameterTest.class);
+    }
+
     @SuppressWarnings("unchecked")
     @Test
     public void testUniqueCLTParameter() throws IOException, InterruptedException {
