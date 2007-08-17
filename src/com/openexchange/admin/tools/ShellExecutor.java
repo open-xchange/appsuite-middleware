@@ -66,11 +66,11 @@ public class ShellExecutor {
             String ret = "";
             ret = "Stdout:\n";
             for(final String line : stdOutput) {
-                ret += line;
+                ret += line+"\n";
             }
             ret += "Stderr:\n";
             for(final String line : errOutput) {
-                ret += line;
+                ret += line+"\n";
             }
             return ret;
         }
