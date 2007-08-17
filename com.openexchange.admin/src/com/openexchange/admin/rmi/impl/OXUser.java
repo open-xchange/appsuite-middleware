@@ -92,10 +92,13 @@ import com.openexchange.admin.tools.GenericChecks;
 import com.openexchange.admin.tools.PropertyHandler;
 import com.openexchange.admin.tools.SHACrypt;
 import com.openexchange.admin.tools.UnixCrypt;
+import com.openexchange.api2.OXException;
 import com.openexchange.cache.CacheKey;
 import com.openexchange.groupware.UserConfigurationException;
 import com.openexchange.groupware.UserConfigurationStorage;
+import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.contexts.ContextImpl;
+import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
 /**
  * @author d7
  * @author cutmasta
@@ -289,6 +292,19 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         } catch (final CacheException e) {
             log.error(e.getMessage(), e);
         }
+        
+        if(usrdata.getDisplay_name()!=null){
+            //  update folder name via ox api if displayname was changed 
+            int[] changedfields = new int[]{ContactObject.DISPLAY_NAME};
+            
+            try {
+                OXFolderAdminHelper.propagateUserModification(usrdata.getId(), changedfields, System.currentTimeMillis(), null,null, ctx.getId().intValue());
+            } catch (OXException e) {
+                log.error("Error propagatinguser modification",e);
+                throw new StorageException(e.getMessage());
+            }
+        }
+        
     }
 
     public void changeModuleAccess(final Context ctx, final int user_id, final UserModuleAccess moduleAccess, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchUserException {

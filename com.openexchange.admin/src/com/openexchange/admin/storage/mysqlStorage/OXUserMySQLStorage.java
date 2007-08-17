@@ -524,11 +524,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             // update last modified column
             changeLastModified(user_id, ctx, write_ox_con);
             
-            if(usrdata.getDisplay_name()!=null){
-                //  update folder name via ox api if displayname was changed 
-                int[] changedfields = new int[]{ContactObject.DISPLAY_NAME};
-                OXFolderAdminHelper.propagateUserModification(user_id, changedfields, System.currentTimeMillis(), write_ox_con, write_ox_con, ctx.getId().intValue());
-            }
+            
             
             // fire up
             write_ox_con.commit();
@@ -611,15 +607,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             } catch (final SQLException e2) {
                 log.error("Error doing rollback", e2);
             }
-            throw new StorageException(e);
-        } catch (OXException e) {
-            log.error("Error", e);
-            try {
-                write_ox_con.rollback();
-            } catch (final SQLException e2) {
-                log.error("Error doing rollback", e2);
-            }
-            throw new StorageException(e.toString());
+            throw new StorageException(e);       
         } finally {
             try {
                 if (folder_update != null) {
