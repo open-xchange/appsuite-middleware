@@ -68,7 +68,7 @@ public class ShellExecutor {
             for(final String line : stdOutput) {
                 ret += line;
             }
-            ret = "Stderr:\n";
+            ret += "Stderr:\n";
             for(final String line : errOutput) {
                 ret += line;
             }
