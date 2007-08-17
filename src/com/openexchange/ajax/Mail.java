@@ -2528,8 +2528,8 @@ public class Mail extends PermissionServlet implements UploadListener {
 				}
 			}
 			try {
-				final JSONMessageObject msgObj = new JSONMessageObject(sessionObj.getUserSettingMail(), TimeZone
-						.getTimeZone(sessionObj.getUserObject().getTimeZone())).parseJSONObject(jsonMailObj);
+				final JSONMessageObject msgObj = new JSONMessageObject(TimeZone.getTimeZone(sessionObj.getUserObject()
+						.getTimeZone())).parseJSONObject(jsonMailObj);
 				if (uploadEvent.getAction().equals(ACTION_NEW)) {
 					/*
 					 * Add file & infostore attachments to message

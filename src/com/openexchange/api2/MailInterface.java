@@ -50,7 +50,6 @@
 package com.openexchange.api2;
 
 import javax.mail.Message;
-import javax.mail.Store;
 
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.MailFolderObject;
@@ -384,8 +383,4 @@ public interface MailInterface {
 	 */
 	public String getConfirmedHamFolder() throws OXException;
 
-	/**
-	 * Returns underlying imap store
-	 */
-	public Store getStore() throws OXException;
 }

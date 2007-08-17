@@ -101,7 +101,6 @@ import javax.mail.Part;
 import javax.mail.Quota;
 import javax.mail.ReadOnlyFolderException;
 import javax.mail.SendFailedException;
-import javax.mail.Store;
 import javax.mail.StoreClosedException;
 import javax.mail.Transport;
 import javax.mail.Message.RecipientType;
@@ -920,20 +919,6 @@ public class MailInterfaceImpl implements MailInterface {
 			altnamespace = true;
 		}
 		return altnamespace;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.api2.MailInterface#getStore()
-	 */
-	public Store getStore() throws OXException {
-		try {
-			init();
-			return imapCon.getIMAPStore();
-		} catch (final MessagingException e) {
-			throw handleMessagingException(e, sessionObj.getIMAPProperties(), sessionObj.getContext());
-		}
 	}
 
 	/*
@@ -2421,7 +2406,7 @@ public class MailInterfaceImpl implements MailInterface {
 			/*
 			 * Create the reply message
 			 */
-			final JSONMessageObject retval = new JSONMessageObject(usm, userTimeZone);
+			final JSONMessageObject retval = new JSONMessageObject(userTimeZone);
 			/*
 			 * Set headers of reply message
 			 */
@@ -2828,7 +2813,7 @@ public class MailInterfaceImpl implements MailInterface {
 			/*
 			 * Create the foward message
 			 */
-			final JSONMessageObject retval = new JSONMessageObject(usm, userTimeZone);
+			final JSONMessageObject retval = new JSONMessageObject(userTimeZone);
 			/*
 			 * Set its headers. Start with subject.
 			 */

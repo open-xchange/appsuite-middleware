@@ -83,7 +83,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.mail.parser.MessageUtils;
 import com.openexchange.imap.IMAPProperties;
 import com.openexchange.imap.OXMailException;
-import com.openexchange.imap.UserSettingMail;
 import com.openexchange.imap.OXMailException.MailCode;
 
 /**
@@ -358,8 +357,6 @@ public class JSONMessageObject {
 
 	private String dispositionNotification;
 
-	private final UserSettingMail userSettingMail;
-
 	private final TimeZone userTimeZone;
 
 	private int priority = PRIORITY_NORMAL;
@@ -387,7 +384,7 @@ public class JSONMessageObject {
 	 */
 	private List<String> userFlags;
 
-	public JSONMessageObject(UserSettingMail userSettingMail, TimeZone userTimeZone) {
+	public JSONMessageObject(final TimeZone userTimeZone) {
 		super();
 		nestedMsgs = new ArrayList<JSONMessageObject>();
 		msgAttachments = new ArrayList<JSONMessageAttachmentObject>();
@@ -396,7 +393,6 @@ public class JSONMessageObject {
 		cc = new HashSet<InternetAddress>();
 		bcc = new HashSet<InternetAddress>();
 		userFlags = new ArrayList<String>();
-		this.userSettingMail = userSettingMail;
 		this.userTimeZone = userTimeZone;
 		this.headers = new HashMap<String, String>();
 	}
@@ -594,10 +590,6 @@ public class JSONMessageObject {
 		this.dispositionNotification = dispositionNotification;
 	}
 
-	public UserSettingMail getUserSettingMail() {
-		return userSettingMail;
-	}
-
 	public TimeZone getUserTimeZone() {
 		return userTimeZone;
 	}
@@ -783,7 +775,7 @@ public class JSONMessageObject {
 			} else {
 				retval.put(JSON_COLOR_LABEL, COLOR_LABEL_NONE);
 			}
-		} catch (OXException e) {
+		} catch (final OXException e) {
 			retval.put(JSON_COLOR_LABEL, COLOR_LABEL_NONE);
 		}
 		if (messageCountInfoSet) {
@@ -835,7 +827,7 @@ public class JSONMessageObject {
 			} else {
 				jw.value(COLOR_LABEL_NONE);
 			}
-		} catch (OXException e) {
+		} catch (final OXException e) {
 			jw.value(COLOR_LABEL_NONE);
 		}
 		if (messageCountInfoSet) {
@@ -1133,15 +1125,15 @@ public class JSONMessageObject {
 				final JSONArray arr = jo.getJSONArray(JSONMessageObject.JSON_NESTED_MESSAGES);
 				final int length = arr.length();
 				for (int i = 0; i < length; i++) {
-					msgObjs.add(new JSONMessageObject(this.userSettingMail, this.userTimeZone).parseJSONObject(arr
-							.getJSONObject(i), partLevel + 1));
+					msgObjs.add(new JSONMessageObject(this.userTimeZone).parseJSONObject(arr.getJSONObject(i),
+							partLevel + 1));
 				}
 				setNestedMsgs(msgObjs);
 			}
 			return this;
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
 			throw new OXMailException(MailCode.JSON_ERROR, e, e.getMessage());
-		} catch (AddressException e) {
+		} catch (final AddressException e) {
 			throw MailInterfaceImpl.handleMessagingException(e);
 		}
 	}
@@ -1164,7 +1156,7 @@ public class JSONMessageObject {
 		try {
 			new InternetAddress(addrStr).validate();
 			return true;
-		} catch (AddressException e) {
+		} catch (final AddressException e) {
 			return false;
 		}
 	}

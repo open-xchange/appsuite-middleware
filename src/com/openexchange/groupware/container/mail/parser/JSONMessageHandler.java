@@ -120,7 +120,7 @@ public final class JSONMessageHandler implements MessageHandler {
 		super();
 		this.session = session;
 		this.usm = session.getUserSettingMail();
-		this.msgObj = new JSONMessageObject(usm, TimeZone.getTimeZone(session.getUserObject().getTimeZone()));
+		this.msgObj = new JSONMessageObject(TimeZone.getTimeZone(session.getUserObject().getTimeZone()));
 		this.msgUID = msgUID;
 		this.displayVersion = displayVersion;
 		converter = new Html2TextConverter();
