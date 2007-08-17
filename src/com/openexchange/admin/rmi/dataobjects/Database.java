@@ -382,21 +382,33 @@ public class Database extends EnforceableDataObject implements NameAndIdObject {
         this.currentUnits = null;
     }
 
+    /**
+     * At the moment no fields are defined here
+     */
     @Override
     public String[] getMandatoryMembersChange() {
         return null;
     }
 
+    /**
+     * At the moment {@link #setId}, {@link #setDriver}, {@link #setUrl} and {@link #setScheme} are defined here
+     */
     @Override
     public String[] getMandatoryMembersCreate() {
         return new String[] { "id", "driver", "url", "scheme" };
     }
 
+    /**
+     * At the moment {@link #setDriver}, {@link #setUrl}, {@link #setScheme}, {@link #setPassword} and {@link #setLogin} are defined here
+     */
     @Override
     public String[] getMandatoryMembersDelete() {
         return new String[] { "driver", "url", "scheme", "password", "login" };
     }
 
+    /**
+     * At the moment {@link #setPassword}, {@link #setName} and {@link #setMaster} are defined here
+     */
     @Override
     public String[] getMandatoryMembersRegister() {
         return new String[] { "password", "name", "master" };

@@ -55,6 +55,15 @@ import java.util.Hashtable;
 import com.openexchange.admin.rmi.exceptions.DuplicateExtensionException;
 import com.openexchange.admin.rmi.extensions.OXCommonExtension;
 
+/**
+ * This class defines all those methods which make and object capable of being dynamically extended by other
+ * attributes.<p>
+ * 
+ * To implement this in our class simply extend from this class.
+ * 
+ * @author d7
+ *
+ */
 public abstract class ExtendableDataObject extends EnforceableDataObject implements Serializable, Cloneable {
 
     private Hashtable<String, OXCommonExtension> extensions = null;
@@ -67,6 +76,12 @@ public abstract class ExtendableDataObject extends EnforceableDataObject impleme
      */
     private boolean extensionsok = true;
     
+    /**
+     * Adds an extension to an object
+     * 
+     * @param extension An {@link OXCommonExtension} object
+     * @throws DuplicateExtensionException
+     */
     public void addExtension(final OXCommonExtension extension) throws DuplicateExtensionException {
         final String extensionName = extension.getClass().getName();
         if (this.extensions.containsKey(extensionName)) {
@@ -76,7 +91,6 @@ public abstract class ExtendableDataObject extends EnforceableDataObject impleme
     }
 
     /**
-     * @return
      * 
      * @deprecated Will be removed with next release. Please use getAllExtensionsAsHash instead
      */
@@ -84,6 +98,11 @@ public abstract class ExtendableDataObject extends EnforceableDataObject impleme
         return new ArrayList<OXCommonExtension>(this.extensions.values());
     }
 
+    /**
+     * Returns a {@link Hashtable} of all extensions with the name of the extensions as key
+     * 
+     * @return A {@link Hashtable}
+     */
     public Hashtable<String, OXCommonExtension> getAllExtensionsAsHash() {
         return this.extensions;
     }
@@ -119,16 +138,35 @@ public abstract class ExtendableDataObject extends EnforceableDataObject impleme
         return this.extensions.get(extname);
     }
     
+    /**
+     * Shows if an error occurred in any of the extensions of this object. If you get {@code true} here everything
+     * is fine. Otherwise an error occurred and you have to go through all extensions to find out in which one this
+     * was happening
+     * 
+     * @return A {@link boolean} value
+     */
     public boolean isExtensionsok() {
         return extensionsok;
     }
 
+    /**
+     * This method will be used in the future
+     * 
+     * @return
+     */
     public boolean isExtensionsset() {
         return extensionsset;
     }
 
-    public boolean removeExtension(final OXCommonExtension o) {
-        if (null == extensions.remove(o.getClass().getName())) {
+    /**
+     * Removes the given extension from this object. Note that only the name of the Class is interesting here
+     * so you don't have to provide the exact Object but only an Object from the fitting type.
+     * 
+     * @param extension An {@link OXCommonExtension} object specifying the extension to be removed
+     * @return
+     */
+    public boolean removeExtension(final OXCommonExtension extension) {
+        if (null == extensions.remove(extension.getClass().getName())) {
             return false;
         } else {
             return true;

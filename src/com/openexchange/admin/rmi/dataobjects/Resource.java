@@ -186,7 +186,7 @@ public class Resource extends ExtendableDataObject implements NameAndIdObject {
 
     /**
      * @param extension
-     * @deprecated Please remove the usage of this method as fast as you can because it used a dangerous downcast.
+     * @deprecated Please remove the usage of this method as fast as you can because it uses a dangerous downcast.
      * This method will go away with the next update
      */
     public void addExtension(final OXResourceExtensionInterface extension) {
@@ -195,7 +195,7 @@ public class Resource extends ExtendableDataObject implements NameAndIdObject {
 
     /**
      * @return
-     * @deprecated Please remove the usage of this method as fast as you can because it used a dangerous downcast.
+     * @deprecated Please remove the usage of this method as fast as you can because it uses a dangerous downcast.
      * This method will go away with the next update
      */
     public ArrayList<OXResourceExtensionInterface> getExtensions() {
@@ -209,7 +209,7 @@ public class Resource extends ExtendableDataObject implements NameAndIdObject {
     /**
      * @param o
      * @return
-     * @deprecated Please remove the usage of this method as fast as you can because it used a dangerous downcast.
+     * @deprecated Please remove the usage of this method as fast as you can because it uses a dangerous downcast.
      * This method will go away with the next update
      */
     public boolean removeExtension(final OXResourceExtensionInterface o) {
@@ -227,7 +227,7 @@ public class Resource extends ExtendableDataObject implements NameAndIdObject {
      * 
      * @param extname a String for the extension
      * @return the {@link OXResourceExtensionInterface} with extname
-     * @deprecated Please remove the usage of this method as fast as you can because it used a dangerous downcast.
+     * @deprecated Please remove the usage of this method as fast as you can because it uses a dangerous downcast.
      * This method will go away with the next update
      */
     public OXResourceExtensionInterface getExtensionbyName(final String extname) {
@@ -244,21 +244,33 @@ public class Resource extends ExtendableDataObject implements NameAndIdObject {
         return super.clone();
     }
 
+    /**
+     * At the moment no fields are defined here
+     */
     @Override
     public String[] getMandatoryMembersChange() {
         return null;
     }
 
+    /**
+     * At the moment {@link #setName}, {@link #setDisplayname} and {@link #setEmail} are defined here
+     */
     @Override
     public String[] getMandatoryMembersCreate() {
         return new String[]{ "name", "displayname", "email"};
     }
 
+    /**
+     * At the moment no fields are defined here
+     */
     @Override
     public String[] getMandatoryMembersDelete() {
         return null;
     }
 
+    /**
+     * At the moment no fields are defined here
+     */
     @Override
     public String[] getMandatoryMembersRegister() {
         return null;

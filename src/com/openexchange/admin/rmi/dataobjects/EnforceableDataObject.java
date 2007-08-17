@@ -241,8 +241,8 @@ public abstract class EnforceableDataObject implements Serializable, Cloneable {
     }
 
     /**
-     * This method is used to check that the mandatory fields specified for create aren't set to null through a change
-     * so we have to check for this here
+     * This method is used to check that the mandatory fields specified for create aren't set to null through a
+     * change
      * 
      * @param enforcableobject
      * @throws InvalidDataException 
