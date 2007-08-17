@@ -29,7 +29,7 @@ public class UniqueCLTParameterTest {
         final String envPrefix = System.getProperty("SBINPREFIX");
         if( envPrefix.length() > 0 ) {
             System.out.println("Using " + envPrefix + "/ as path to commands to test...");
-            this.prefix = envPrefix;
+            this.prefix = envPrefix+"/";
         }
         final URL resource = this.getClass().getClassLoader().getResource("");
         final List<String> cltlist = FileUtils.readLines(new File(resource.getFile() + "../sbin/contextcltlist"));
