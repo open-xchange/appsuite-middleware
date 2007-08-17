@@ -1,6 +1,7 @@
 * 2007-08-17 - thorben.betten@open-xchange.com
 
  - More granular thread synchronization in folder and message caches
+ - Added field "defailt_folder" to IMAP folders
 
 * 2007-08-16 - thorben.betten@open-xchange.com
 

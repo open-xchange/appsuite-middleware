@@ -5272,11 +5272,15 @@ public class MailInterfaceImpl implements MailInterface {
 
 	private String getStdFolder(final int index) throws OXException {
 		try {
-			init();
 			if (INDEX_INBOX == index) {
+				init();
 				final Folder inbox = imapCon.getIMAPStore().getFolder(STR_INBOX);
 				return MailFolderObject.prepareFullname(inbox.getFullName(), inbox.getSeparator());
 			}
+			if (sessionObj.isMailFldsChecked()) {
+				return sessionObj.getDefaultMailFolder(index);
+			}
+			init();
 			return sessionObj.getDefaultMailFolder(index);
 		} catch (final MessagingException e) {
 			throw handleMessagingException(e);

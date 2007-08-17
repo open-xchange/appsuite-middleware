@@ -475,6 +475,10 @@ public final class FolderWriter extends DataWriter {
 						if (withKey) {
 							jsonwriter.key(FolderFields.STANDARD_FOLDER);
 						}
+						if (folder.containsDefaultFolder()) {
+							jsonwriter.value(folder.isDefaultFolder());
+							return;
+						}
 						jsonwriter.value(false);
 					}
 				};

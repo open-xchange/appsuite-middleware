@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.container;
 
+import javax.mail.Folder;
 import javax.mail.MessagingException;
 
 import com.openexchange.api2.OXException;
@@ -85,6 +86,8 @@ public final class MailFolderObject implements User2IMAPInfo {
 
 	private static final String ATTRIBUTE_HAS_CHILDREN = "\\HasChildren";
 
+	private static final String INBOX = "INBOX";
+
 	private String fullName;
 
 	private String parentFullName;
@@ -100,6 +103,10 @@ public final class MailFolderObject implements User2IMAPInfo {
 	private boolean holdsMessages;
 
 	private boolean rootFolder;
+
+	private boolean defaultFolder;
+
+	private boolean b_defaultFolder;
 
 	private String summary;
 
@@ -145,34 +152,34 @@ public final class MailFolderObject implements User2IMAPInfo {
 	public MailFolderObject(final IMAPFolder folder, final SessionObject session) throws MessagingException,
 			OXException {
 		this(session.getUserObject().getId());
-		this.exists = folder.exists();
+		exists = folder.exists();
 		final String[] attrs = folder.getAttributes();
 		Attribs: for (final String attribute : attrs) {
 			if (ATTRIBUTE_NON_EXISTENT.equalsIgnoreCase(attribute)) {
-				this.nonExistent = true;
+				nonExistent = true;
 				break Attribs;
 			}
 		}
-		this.fullName = prepareFullname(folder.getFullName(), folder.getSeparator());
-		this.name = folder.getName();
-		this.parentFullName = prepareParentFullname(folder.getParent());
-		this.separator = folder.getSeparator();
+		fullName = prepareFullname(folder.getFullName(), folder.getSeparator());
+		name = folder.getName();
+		parentFullName = prepareParentFullname(folder.getParent());
+		separator = folder.getSeparator();
 		/*
 		 * Determine if subfolders exist
 		 */
-		if (this.exists && (folder.getType() & javax.mail.Folder.HOLDS_FOLDERS) == 0) {
-			this.hasSubfolders = false;
-			this.hasSubscribedSubfolders = false;
+		if (exists && ((folder.getType() & javax.mail.Folder.HOLDS_FOLDERS) == 0)) {
+			hasSubfolders = false;
+			hasSubscribedSubfolders = false;
 		} else {
-			this.hasSubfolders = false;
+			hasSubfolders = false;
 			Attribs: for (final String attribute : attrs) {
 				if (ATTRIBUTE_HAS_CHILDREN.equalsIgnoreCase(attribute)) {
-					this.hasSubfolders = true;
+					hasSubfolders = true;
 					break Attribs;
 				}
 			}
-			this.hasSubscribedSubfolders = false;
-			if (this.hasSubfolders) {
+			hasSubscribedSubfolders = false;
+			if (hasSubfolders) {
 				final ListInfo[] li = (ListInfo[]) folder.doCommand(new IMAPFolder.ProtocolCommand() {
 					public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
 						return protocol.lsub("", folder.getFullName());
@@ -182,57 +189,73 @@ public final class MailFolderObject implements User2IMAPInfo {
 					final String[] lsubAttrs = li[findName(li, folder.getFullName())].attrs;
 					Attribs: for (final String attribute : lsubAttrs) {
 						if (ATTRIBUTE_HAS_CHILDREN.equalsIgnoreCase(attribute)) {
-							this.hasSubscribedSubfolders = true;
+							hasSubscribedSubfolders = true;
 							break Attribs;
 						}
 					}
 				}
 			}
 		}
-		this.holdsMessages = this.exists ? ((folder.getType() & IMAPFolder.HOLDS_MESSAGES) > 0) : false;
-		this.ownRights = this.exists && holdsMessages ? getOwnRightsInternal(folder, session) : (Rights) RIGHTS_EMPTY
-				.clone();
-		this.rootFolder = (folder instanceof DefaultFolder);
-		if (holdsMessages && ownRights.contains(Rights.Right.READ)) {
-			this.summary = new StringBuilder().append('(').append(folder.getMessageCount()).append('/').append(
-					folder.getUnreadMessageCount()).append(')').toString();
-			this.total = folder.getMessageCount();
-			this.newi = folder.getNewMessageCount();
-			this.unread = folder.getUnreadMessageCount();
-			this.deleted = folder.getDeletedMessageCount();
+		holdsMessages = exists ? ((folder.getType() & Folder.HOLDS_MESSAGES) > 0) : false;
+		ownRights = exists && holdsMessages ? getOwnRightsInternal(folder, session) : (Rights) RIGHTS_EMPTY.clone();
+		rootFolder = (folder instanceof DefaultFolder);
+		if (!rootFolder) {
+			/*
+			 * Default folder
+			 */
+			if (INBOX.equals(folder.getFullName())) {
+				defaultFolder = true;
+			} else if (session.isMailFldsChecked()) {
+				final int len = IMAPProperties.isSpamEnabled() ? 6 : 4;
+				for (int i = 0; (i < len) && !defaultFolder; i++) {
+					if (fullName.equals(session.getDefaultMailFolder(i))) {
+						defaultFolder = true;
+					}
+				}
+			}
 		}
-		this.subscribed = folder.isSubscribed();
+		b_defaultFolder = true;
+		if (holdsMessages && ownRights.contains(Rights.Right.READ)) {
+			summary = new StringBuilder().append('(').append(folder.getMessageCount()).append('/').append(
+					folder.getUnreadMessageCount()).append(')').toString();
+			total = folder.getMessageCount();
+			newi = folder.getNewMessageCount();
+			unread = folder.getUnreadMessageCount();
+			deleted = folder.getDeletedMessageCount();
+		}
+		subscribed = folder.isSubscribed();
 		b_subscribed = true;
-		if (IMAPProperties.isSupportsACLs() && holdsMessages && this.exists
+		if (IMAPProperties.isSupportsACLs() && holdsMessages && exists
 				&& (ownRights.contains(Rights.Right.READ) || ownRights.contains(Rights.Right.ADMINISTER))
 				&& !(folder instanceof DefaultFolder)) {
 			try {
-				this.acls = folder.getACL();
+				acls = folder.getACL();
 				b_acls = true;
 			} catch (final MessagingException e) {
 				if (LOG.isWarnEnabled()) {
 					LOG.warn(new StringBuilder("ACL could not be requested for folder ").append(folder.getFullName()),
 							e);
 				}
-				this.acls = null;
+				acls = null;
 				b_acls = false;
 			}
 		}
-		this.imapFolder = folder;
+		imapFolder = folder;
 	}
 
 	/**
 	 * Which entry in <code>li</code> matches <code>lname</code>? If the
 	 * name contains wildcards, more than one entry may be returned.
 	 */
-	private static final int findName(final ListInfo[] li, final String lname) {
+	private static int findName(final ListInfo[] li, final String lname) {
 		int i;
 		/*
 		 * If the name contains a wildcard, there might be more than one
 		 */
 		for (i = 0; i < li.length; i++) {
-			if (li[i].name.equals(lname))
+			if (li[i].name.equals(lname)) {
 				break;
+			}
 		}
 		if (i >= li.length) {
 			/*
@@ -257,8 +280,8 @@ public final class MailFolderObject implements User2IMAPInfo {
 			try {
 				retval = session.getCachedRights(folder, true);
 			} catch (final MessagingException e) {
-				if (e.getNextException() instanceof com.sun.mail.iap.CommandFailedException
-						&& e.getNextException().getMessage().indexOf(STR_MAILBOX_NOT_EXISTS) != -1) {
+				if ((e.getNextException() instanceof com.sun.mail.iap.CommandFailedException)
+						&& (e.getNextException().getMessage().indexOf(STR_MAILBOX_NOT_EXISTS) != -1)) {
 					/*
 					 * This occurs when requesting MYRIGHTS on a shared folder.
 					 * Just log a warning!
@@ -373,20 +396,20 @@ public final class MailFolderObject implements User2IMAPInfo {
 			throw new IllegalStateException("ACLs could not be applied: IMAP permissions are already set!");
 		}
 		if (acls == null) {
-			this.acls = new ACL[1];
-			this.acls[0] = acl;
+			acls = new ACL[1];
+			acls[0] = acl;
 			b_acls = true;
 			return;
 		}
-		final ACL[] tmp = this.acls;
-		this.acls = new ACL[tmp.length + 1];
+		final ACL[] tmp = acls;
+		acls = new ACL[tmp.length + 1];
 		System.arraycopy(tmp, 0, acls, 0, tmp.length);
 		acls[acls.length - 1] = acl;
 		b_acls = true;
 	}
 
 	public void removeACL() {
-		this.acls = null;
+		acls = null;
 		b_acls = false;
 	}
 
@@ -409,8 +432,8 @@ public final class MailFolderObject implements User2IMAPInfo {
 		if (b_acls) {
 			throw new IllegalStateException("IMAP permission could not be applied: ACLs are already set!");
 		}
-		this.imapPermissions = new IMAPPermission[iperms.length];
-		System.arraycopy(iperms, 0, this.imapPermissions, 0, iperms.length);
+		imapPermissions = new IMAPPermission[iperms.length];
+		System.arraycopy(iperms, 0, imapPermissions, 0, iperms.length);
 		b_iperms = true;
 	}
 
@@ -419,24 +442,24 @@ public final class MailFolderObject implements User2IMAPInfo {
 			throw new IllegalStateException("IMAP permissions could not be applied: ACLs are already set!");
 		}
 		if (imapPermissions == null) {
-			this.imapPermissions = new IMAPPermission[1];
-			this.imapPermissions[0] = iperm;
+			imapPermissions = new IMAPPermission[1];
+			imapPermissions[0] = iperm;
 			b_iperms = true;
 			return;
 		}
-		final IMAPPermission[] tmp = this.imapPermissions;
-		this.imapPermissions = new IMAPPermission[tmp.length + 1];
+		final IMAPPermission[] tmp = imapPermissions;
+		imapPermissions = new IMAPPermission[tmp.length + 1];
 		System.arraycopy(tmp, 0, imapPermissions, 0, tmp.length);
 		imapPermissions[imapPermissions.length - 1] = iperm;
 		b_iperms = true;
 	}
 
 	public void removeIMAPPermission() {
-		this.imapPermissions = null;
+		imapPermissions = null;
 		b_iperms = false;
 	}
 
-	private final void getIMAPPermsFromACLs(final Context ctx) throws AbstractOXException {
+	private void getIMAPPermsFromACLs(final Context ctx) throws AbstractOXException {
 		imapPermissions = new IMAPPermission[acls.length];
 		final String fn = imapFolder == null ? null : imapFolder.getFullName();
 		final UserStorage us = UserStorage.getInstance(ctx);
@@ -449,7 +472,7 @@ public final class MailFolderObject implements User2IMAPInfo {
 		b_iperms = true;
 	}
 
-	private final void getACLsFromIMAPPerms() throws AbstractOXException {
+	private void getACLsFromIMAPPerms() throws AbstractOXException {
 		acls = new ACL[imapPermissions.length];
 		for (int i = 0; i < imapPermissions.length; i++) {
 			acls[i] = imapPermissions[i].getPermissionACL(this);
@@ -462,7 +485,7 @@ public final class MailFolderObject implements User2IMAPInfo {
 	}
 
 	public boolean isNonExistent() {
-		return this.nonExistent;
+		return nonExistent;
 	}
 
 	public char getSeparator() throws MessagingException {
@@ -529,6 +552,24 @@ public final class MailFolderObject implements User2IMAPInfo {
 		return unread;
 	}
 
+	public boolean isDefaultFolder() {
+		return defaultFolder;
+	}
+
+	public boolean containsDefaultFolder() {
+		return b_defaultFolder;
+	}
+
+	public void setDefaultFolder(final boolean defaultFolder) {
+		this.defaultFolder = defaultFolder;
+		b_defaultFolder = true;
+	}
+
+	public void removeDefaultFolder() {
+		defaultFolder = false;
+		b_defaultFolder = false;
+	}
+
 	public boolean isSubscribed() {
 		return subscribed;
 	}
@@ -538,12 +579,12 @@ public final class MailFolderObject implements User2IMAPInfo {
 	}
 
 	public void setSubscribed(final boolean subscribe) {
-		this.subscribed = subscribe;
+		subscribed = subscribe;
 		b_subscribed = true;
 	}
 
 	public void removeSubscribe() {
-		this.subscribed = false;
+		subscribed = false;
 		b_subscribed = false;
 	}
 
