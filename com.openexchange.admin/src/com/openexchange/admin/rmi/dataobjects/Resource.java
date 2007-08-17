@@ -55,6 +55,13 @@ import java.util.ArrayList;
 import com.openexchange.admin.rmi.extensions.OXCommonExtension;
 import com.openexchange.admin.rmi.extensions.OXResourceExtensionInterface;
 
+/**
+ * This dataobject stores all the data which is related to a resource
+ * 
+ * @author d7
+ * @author cutmasta
+ *
+ */
 public class Resource extends ExtendableDataObject implements NameAndIdObject {
     /**
      * For serialization
@@ -83,11 +90,19 @@ public class Resource extends ExtendableDataObject implements NameAndIdObject {
     
     private boolean availableset;
 
+    /**
+     * Instantiates a new {@link Resource} object
+     */
     public Resource() {
         super();
         init();
     }
 
+    /**
+     * Instantiates a new {@link Resource} object with the given id
+     * 
+     * @param id An {@link Integer} object containing the id
+     */
     public Resource(final Integer id) {
         super();
         init();
@@ -104,41 +119,76 @@ public class Resource extends ExtendableDataObject implements NameAndIdObject {
         this.available = null;
     }
     
+    /* (non-Javadoc)
+     * @see com.openexchange.admin.rmi.dataobjects.NameAndIdObject#getId()
+     */
     public Integer getId() {
         return id;
     }
 
-    public void setId(Integer val) {
-        this.id = val;
+    /* (non-Javadoc)
+     * @see com.openexchange.admin.rmi.dataobjects.NameAndIdObject#setId(java.lang.Integer)
+     */
+    public void setId(final Integer id) {
+        this.id = id;
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.admin.rmi.dataobjects.NameAndIdObject#getName()
+     */
     public String getName() {
         return name;
     }
 
-    public void setName(String val) {
+    /* (non-Javadoc)
+     * @see com.openexchange.admin.rmi.dataobjects.NameAndIdObject#setName(java.lang.String)
+     */
+    public void setName(final String name) {
         nameset = true;
-        this.name = val;
+        this.name = name;
     }
 
+    /**
+     * Returns the displayname of this resource
+     * 
+     * @return A {@link String} containing the displayname
+     */
     public String getDisplayname() {
         return displayname;
     }
 
-    public void setDisplayname(String val) {
+    /**
+     * Sets the displayname for this resource
+     * 
+     * @param displayname A {@link String} containing the displayname
+     */
+    public void setDisplayname(final String displayname) {
         displaynameset = true;
-        this.displayname = val;
+        this.displayname = displayname;
     }
 
+    /**
+     * Returns the E-Mail of this resource
+     * 
+     * @return A {@link String} object containing the E-Mail address
+     */
     public String getEmail() {
         return email;
     }
 
-    public void setEmail(String val) {
+    /**
+     * Sets the email address for this resource
+     * 
+     * @param email A {@link String} object containing the E-Mail address
+     */
+    public void setEmail(final String email) {
         emailset = true;
-        this.email = val;
+        this.email = email;
     }
 
+    /**
+     * This attribute is not used
+     */
     public Boolean getAvailable() {
         return available;
     }
@@ -151,15 +201,29 @@ public class Resource extends ExtendableDataObject implements NameAndIdObject {
         this.available = available;
     }
 
+    /**
+     * Returns the description of this resource
+     * 
+     * @return A {@link String} object containing the description
+     */
     public String getDescription() {
         return description;
     }
 
-    public void setDescription(String description) {
+    /**
+     * Sets the description for this resource
+     * 
+     * @param description A {@link String} object containing the description
+     */
+    public void setDescription(final String description) {
         descriptionset = true;
         this.description = description;
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.admin.rmi.dataobjects.ExtendableDataObject#toString()
+     */
+    @Override
     public String toString() {
         StringBuilder ret = new StringBuilder();
         ret.append("[ \n");
@@ -239,6 +303,9 @@ public class Resource extends ExtendableDataObject implements NameAndIdObject {
         return null;
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.admin.rmi.dataobjects.ExtendableDataObject#clone()
+     */
     @Override
     public Object clone() throws CloneNotSupportedException {
         return super.clone();
@@ -277,39 +344,45 @@ public class Resource extends ExtendableDataObject implements NameAndIdObject {
     }
 
     /**
-     * @return the nameset
+     * Used to check if the member of this object has been changed
+     * 
+     * @return true if set; false if not
      */
     public boolean isNameset() {
         return nameset;
     }
 
     /**
-     * @return the displaynameset
+     * Used to check if the displayname of this object has been changed
+     * 
+     * @return true if set; false if not
      */
     public boolean isDisplaynameset() {
         return displaynameset;
     }
 
     /**
-     * @return the descriptionset
+     * Used to check if the description of this object has been changed
+     * 
+     * @return true if set; false if not
      */
     public boolean isDescriptionset() {
         return descriptionset;
     }
 
     /**
-     * @return the emailset
+     * Used to check if the E-Mail of this object has been changed
+     * 
+     * @return true if set; false if not
      */
     public boolean isEmailset() {
         return emailset;
     }
 
     /**
-     * @return the availableset
+     * This attribute is not used
      */
     public boolean isAvailableset() {
         return availableset;
     }
-
-   
 }

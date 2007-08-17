@@ -109,15 +109,20 @@ public class Group extends ExtendableDataObject implements NameAndIdObject {
         this.members = null;
     }
 
+    /**
+     * Used to check if the displayname of this object has been changed
+     * 
+     * @return true if set; false if not
+     */
     public final boolean isDisplaynameset() {
         return displaynameset;
     }
 
 
     /**
-     * Used to check if the member of this object has been changed
+     * Used to check if the members of this object have been changed
      * 
-     * @return
+     * @return true if set; false if not
      */
     public final boolean isMembersset() {
         return membersset;
@@ -127,15 +132,12 @@ public class Group extends ExtendableDataObject implements NameAndIdObject {
     /**
      * Used to check if the name of this object has been changed
      * 
-     * @return
+     * @return true if set; false if not
      */
     public final boolean isNameset() {
         return nameset;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     /* (non-Javadoc)
      * @see com.openexchange.admin.rmi.dataobjects.NameAndIdObject#getId()
      */
@@ -143,9 +145,6 @@ public class Group extends ExtendableDataObject implements NameAndIdObject {
         return id;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     /* (non-Javadoc)
      * @see com.openexchange.admin.rmi.dataobjects.NameAndIdObject#setId(java.lang.Integer)
      */
@@ -153,9 +152,6 @@ public class Group extends ExtendableDataObject implements NameAndIdObject {
         this.id = val;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     /* (non-Javadoc)
      * @see com.openexchange.admin.rmi.dataobjects.NameAndIdObject#getName()
      */
@@ -163,9 +159,6 @@ public class Group extends ExtendableDataObject implements NameAndIdObject {
         return name;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     /* (non-Javadoc)
      * @see com.openexchange.admin.rmi.dataobjects.NameAndIdObject#setName(java.lang.String)
      */

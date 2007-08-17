@@ -56,11 +56,31 @@ package com.openexchange.admin.rmi.dataobjects;
  */
 public interface NameAndIdObject {
 
+    /**
+     * Sets the id for this object
+     * 
+     * @param id An {@link Integer} object containing the id
+     */
     abstract void setId(final Integer id);
     
+    /**
+     * Returns the id of this object
+     * 
+     * @return An {@link Integer} object containing the id
+     */
     abstract Integer getId();
     
+    /**
+     * Sets the name for this object
+     * 
+     * @param name A {@link String} containing the name
+     */
     abstract void setName(final String name);
     
+    /**
+     * Returns the name of this object
+     * 
+     * @return A {@link String} containing the name
+     */
     abstract String getName();
 }
