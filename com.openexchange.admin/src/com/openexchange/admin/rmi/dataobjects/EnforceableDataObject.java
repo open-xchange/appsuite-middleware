@@ -186,6 +186,9 @@ public abstract class EnforceableDataObject implements Serializable, Cloneable {
         return object;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     /*
      * (non-Javadoc)
      * 
