@@ -64,11 +64,15 @@ public class ShellExecutor {
         public int exitstatus;
     }
 
-    public final ArrayOutput executeprocargs(final String[] args) throws IOException, InterruptedException {
-        final Process proc = Runtime.getRuntime().exec(args);
+    public final ArrayOutput executeprocargs(final String[] args, final String[] env) throws IOException, InterruptedException {
+        final Process proc = Runtime.getRuntime().exec(args, env);
         final ArrayOutput retval = getoutputs(proc);
         retval.exitstatus = proc.waitFor();
         return retval;
+    }
+
+    public final ArrayOutput executeprocargs(final String[] args) throws IOException, InterruptedException {
+        return executeprocargs(args, null);
     }
 
     private final ArrayOutput getoutputs(final Process proc) throws IOException {
