@@ -2537,7 +2537,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
 
     /**
      * @param extension
-     * @deprecated Please remove the usage of this method as fast as you can because it used a dangerous downcast.
+     * @deprecated Please remove the usage of this method as fast as you can because it uses a dangerous downcast.
      * This method will go away with the next update
      */
     final public void addExtension(final OXUserExtensionInterface extension) {
@@ -2547,7 +2547,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
     /**
      * @return
      * @deprecated Please remove the usage of this method as fast as you can
-     *             because it used a dangerous downcast. This method will go
+     *             because it uses a dangerous downcast. This method will go
      *             away with the next update
      */
     @Deprecated
@@ -2576,7 +2576,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
      * @param index
      * @return
      * @deprecated Please remove the usage of this method as fast as you can
-     *             because it used a dangerous downcast. This method will go
+     *             because it uses a dangerous downcast. This method will go
      *             away with the next update
      */
     final public OXUserExtensionInterface removeExtensionByIndex(final int index) {
@@ -2594,7 +2594,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
      *                a String for the extension
      * @return the ArrayList of {@link OXUserExtensionInterface} with extname
      * @deprecated Please remove the usage of this method as fast as you can
-     *             because it used a dangerous downcast. This method will go
+     *             because it uses a dangerous downcast. This method will go
      *             away with the next update
      */
     final public ArrayList<OXUserExtensionInterface> getExtensionbyName(final String extname) {
@@ -2615,7 +2615,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
      * @param extname
      * @return
      * @deprecated Please remove the usage of this method as fast as you can
-     *             because it used a dangerous downcast. This method will go
+     *             because it uses a dangerous downcast. This method will go
      *             away with the next update
      */
     final public OXUserExtensionInterface getFirstExtensionbyName(final String extname) {
@@ -2746,21 +2746,35 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         return defaultSenderAddressset;
     }
 
+    /**
+     * At the moment {@link #setName}, {@link #setDisplay_name}, {@link #setPassword(String)},
+     * {@link #setGiven_name(String)}, {@link #setSur_name(String)} and {@link #setPrimaryEmail(String)} 
+     * are defined here
+     */
     @Override
     public final String[] getMandatoryMembersCreate() {
         return new String[]{ "name", "display_name", "password", "given_name", "sur_name", "primaryEmail" };
     }
     
+    /**
+     * At the moment no fields are defined here
+     */
     @Override
     public final String[] getMandatoryMembersChange() {
         return null;
     }
 
+    /**
+     * At the moment no fields are defined here
+     */
     @Override
     public String[] getMandatoryMembersDelete() {
         return null;
     }
 
+    /**
+     * At the moment no fields are defined here
+     */
     @Override
     public String[] getMandatoryMembersRegister() {
         return null;
