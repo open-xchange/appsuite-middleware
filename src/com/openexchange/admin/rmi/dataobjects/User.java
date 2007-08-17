@@ -529,7 +529,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
     private boolean defaultSenderAddressset = false;
 
     /**
-     * Creates a new instance of user
+     * Instantiates a new empty user object
      */
     public User() {
         super();
@@ -537,7 +537,9 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
     }
 
     /**
-     * @param id
+     * Instantiates a new user object with the given id set
+     * 
+     * @param id An {@code int} value
      */
     public User(final int id) {
         super();
@@ -545,6 +547,11 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.id = id;
     }
 
+    /**
+     * An enumeration which lists the different password mechanisms
+     * 
+     * @author d7
+     */
     public enum PASSWORDMECH {
         CRYPT, SHA
     }
@@ -580,98 +587,218 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         return id;
     }
 
+    /**
+     * Used to check if the aliases field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isAliasesset() {
         return aliasesset;
     }
 
+    /**
+     * Used to check if the anniversary field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isAnniversaryset() {
         return anniversaryset;
     }
 
+    /**
+     * Used to check if the assistant_name field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isAssistant_nameset() {
         return assistant_nameset;
     }
 
+    /**
+     * Used to check if the birthday field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isBirthdayset() {
         return birthdayset;
     }
 
+    /**
+     * Used to check if the branches field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isBranchesset() {
         return branchesset;
     }
 
+    /**
+     * Used to check if the business_category field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isBusiness_categoryset() {
         return business_categoryset;
     }
 
+    /**
+     * Used to check if the categories field of this user user has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isCategoriesset() {
         return categoriesset;
     }
 
+    /**
+     * Used to check if the cellular_telephone1 field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isCellular_telephone1set() {
         return cellular_telephone1set;
     }
 
+    /**
+     * Used to check if the cellular_telephone2 field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isCellular_telephone2set() {
         return cellular_telephone2set;
     }
 
+    /**
+     * Used to check if the city_business field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isCity_businessset() {
         return city_businessset;
     }
 
+    /**
+     * Used to check if the city_home field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isCity_homeset() {
         return city_homeset;
     }
 
+    /**
+     * Used to check if the city_other field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isCity_otherset() {
         return city_otherset;
     }
 
+    /**
+     * Used to check if the commercial_register field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isCommercial_registerset() {
         return commercial_registerset;
     }
 
+    /**
+     * Used to check if the company field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isCompanyset() {
         return companyset;
     }
 
+    /**
+     * Used to check if the country_business field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isCountry_businessset() {
         return country_businessset;
     }
 
+    /**
+     * Used to check if the country_home field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isCountry_homeset() {
         return country_homeset;
     }
 
+    /**
+     * Used to check if the country_other field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isCountry_otherset() {
         return country_otherset;
     }
 
+    /**
+     * Used to check if the default_group field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isDefault_groupset() {
         return default_groupset;
     }
 
+    /**
+     * Used to check if the department field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isDepartmentset() {
         return departmentset;
     }
 
+    /**
+     * Used to check if the display_name field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isDisplay_nameset() {
         return display_nameset;
     }
 
+    /**
+     * Used to check if the email1 field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isEmail1set() {
         return email1set;
     }
 
+    /**
+     * Used to check if the email2 field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isEmail2set() {
         return email2set;
     }
 
+    /**
+     * Used to check if the email3 field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isEmail3set() {
         return email3set;
     }
 
+    /**
+     * Used to check if the employeetype field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isEmployeeTypeset() {
         return employeeTypeset;
     }
@@ -680,342 +807,767 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         return mailenabled;
     }
 
+    /**
+     * Used to check if the mailenabled field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isMailenabledset() {
         return mailenabledset;
     }
 
+    /**
+     * Used to check if the fax_business field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isFax_businessset() {
         return fax_businessset;
     }
 
+    /**
+     * Used to check if the fax_home field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isFax_homeset() {
         return fax_homeset;
     }
 
+    /**
+     * Used to check if the fax_other field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isFax_otherset() {
         return fax_otherset;
     }
 
+    /**
+     * Used to check if the given_name field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isGiven_nameset() {
         return given_nameset;
     }
 
+    /**
+     * Used to check if the id field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isIdset() {
         return idset;
     }
 
+    /**
+     * Used to check if the imapserver field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isImapServerset() {
         return imapServerset;
     }
 
+    /**
+     * Used to check if the imaplogin field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isImapLoginset() {
         return imapLoginset;
     }
 
+    /**
+     * Used to check if the info field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isInfoset() {
         return infoset;
     }
 
+    /**
+     * Used to check if the instant_messenger1 field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isInstant_messenger1set() {
         return instant_messenger1set;
     }
 
+    /**
+     * Used to check if the instant_messenger2 field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isInstant_messenger2set() {
         return instant_messenger2set;
     }
 
+    /**
+     * Used to check if the language field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isLanguageset() {
         return languageset;
     }
 
+    /**
+     * Used to check if the mail_folder_drafts_name field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isMail_folder_drafts_nameset() {
         return mail_folder_drafts_nameset;
     }
 
+    /**
+     * Used to check if the mail_folder_sent_name field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isMail_folder_sent_nameset() {
         return mail_folder_sent_nameset;
     }
 
+    /**
+     * Used to check if the mail_folder_spam_name field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isMail_folder_spam_nameset() {
         return mail_folder_spam_nameset;
     }
 
+    /**
+     * Used to check if the mail_folder_trash_name field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isMail_folder_trash_nameset() {
         return mail_folder_trash_nameset;
     }
 
+    /**
+     * Used to check if the manager_name field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isManager_nameset() {
         return manager_nameset;
     }
 
+    /**
+     * Used to check if the marital_status field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isMarital_statusset() {
         return marital_statusset;
     }
 
+    /**
+     * Used to check if the middle_name field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isMiddle_nameset() {
         return middle_nameset;
     }
 
+    /**
+     * Used to check if the nickname field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isNicknameset() {
         return nicknameset;
     }
 
+    /**
+     * Used to check if the note field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isNoteset() {
         return noteset;
     }
 
+    /**
+     * Used to check if the number_of_children field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isNumber_of_childrenset() {
         return number_of_childrenset;
     }
 
+    /**
+     * Used to check if the number_of_employee field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isNumber_of_employeeset() {
         return number_of_employeeset;
     }
 
+    /**
+     * Used to check if the password_expired field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isPassword_expiredset() {
         return password_expiredset;
     }
 
+    /**
+     * Used to check if the passwordmech field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isPasswordMechset() {
         return passwordMechset;
     }
 
+    /**
+     * Used to check if the password field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isPasswordset() {
         return passwordset;
     }
 
+    /**
+     * Used to check if the position field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isPositionset() {
         return positionset;
     }
 
+    /**
+     * Used to check if the postal_code_business field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isPostal_code_businessset() {
         return postal_code_businessset;
     }
 
+    /**
+     * Used to check if the postal_code_home field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isPostal_code_homeset() {
         return postal_code_homeset;
     }
 
+    /**
+     * Used to check if the postal_code_other field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isPostal_code_otherset() {
         return postal_code_otherset;
     }
 
+    /**
+     * Used to check if the primaryemail field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isPrimaryEmailset() {
         return primaryEmailset;
     }
 
+    /**
+     * Used to check if the profession field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isProfessionset() {
         return professionset;
     }
 
+    /**
+     * Used to check if the room_number field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isRoom_numberset() {
         return room_numberset;
     }
 
+    /**
+     * Used to check if the sales_volume field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isSales_volumeset() {
         return sales_volumeset;
     }
 
+    /**
+     * Used to check if the smtpserver field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isSmtpServerset() {
         return smtpServerset;
     }
 
+    /**
+     * Used to check if the spouse_name field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isSpouse_nameset() {
         return spouse_nameset;
     }
 
+    /**
+     * Used to check if the state_business field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isState_businessset() {
         return state_businessset;
     }
 
+    /**
+     * Used to check if the state_home field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isState_homeset() {
         return state_homeset;
     }
 
+    /**
+     * Used to check if the state_other field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isState_otherset() {
         return state_otherset;
     }
 
+    /**
+     * Used to check if the street_business field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isStreet_businessset() {
         return street_businessset;
     }
 
+    /**
+     * Used to check if the street_home field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isStreet_homeset() {
         return street_homeset;
     }
 
+    /**
+     * Used to check if the street_other field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isStreet_otherset() {
         return street_otherset;
     }
 
+    /**
+     * Used to check if the suffix field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isSuffixset() {
         return suffixset;
     }
 
+    /**
+     * Used to check if the sur_name field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isSur_nameset() {
         return sur_nameset;
     }
 
+    /**
+     * Used to check if the tax_id field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isTax_idset() {
         return tax_idset;
     }
 
+    /**
+     * Used to check if the telephone_assistant field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isTelephone_assistantset() {
         return telephone_assistantset;
     }
 
+    /**
+     * Used to check if the telephone_business1 field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isTelephone_business1set() {
         return telephone_business1set;
     }
 
+    /**
+     * Used to check if the telephone_business2 field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isTelephone_business2set() {
         return telephone_business2set;
     }
 
+    /**
+     * Used to check if the telephone_callback field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isTelephone_callbackset() {
         return telephone_callbackset;
     }
 
+    /**
+     * Used to check if the telephone_car field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isTelephone_carset() {
         return telephone_carset;
     }
 
+    /**
+     * Used to check if the telephone_company field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isTelephone_companyset() {
         return telephone_companyset;
     }
 
+    /**
+     * Used to check if the telephone_home1 field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isTelephone_home1set() {
         return telephone_home1set;
     }
 
+    /**
+     * Used to check if the telephone_home2 field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isTelephone_home2set() {
         return telephone_home2set;
     }
 
+    /**
+     * Used to check if the telephone_ip field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isTelephone_ipset() {
         return telephone_ipset;
     }
 
+    /**
+     * Used to check if the telephone_isdn field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isTelephone_isdnset() {
         return telephone_isdnset;
     }
 
+    /**
+     * Used to check if the telephone_other field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isTelephone_otherset() {
         return telephone_otherset;
     }
 
+    /**
+     * Used to check if the telephone_pager field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isTelephone_pagerset() {
         return telephone_pagerset;
     }
 
+    /**
+     * Used to check if the telephone_primary field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isTelephone_primaryset() {
         return telephone_primaryset;
     }
 
+    /**
+     * Used to check if the telephone_radio field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isTelephone_radioset() {
         return telephone_radioset;
     }
 
+    /**
+     * Used to check if the telephone_telex field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isTelephone_telexset() {
         return telephone_telexset;
     }
 
+    /**
+     * Used to check if the telephone_ttytdd field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isTelephone_ttytddset() {
         return telephone_ttytddset;
     }
 
+    /**
+     * Used to check if the timezone field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isTimezoneset() {
         return timezoneset;
     }
 
+    /**
+     * Used to check if the title field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isTitleset() {
         return titleset;
     }
 
+    /**
+     * Used to check if the url field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isUrlset() {
         return urlset;
     }
 
+    /**
+     * Used to check if the userfield01 field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isUserfield01set() {
         return userfield01set;
     }
 
+    /**
+     * Used to check if the userfield02 field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isUserfield02set() {
         return userfield02set;
     }
 
+    /**
+     * Used to check if the userfield03 field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isUserfield03set() {
         return userfield03set;
     }
 
+    /**
+     * Used to check if the userfield04 field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isUserfield04set() {
         return userfield04set;
     }
 
+    /**
+     * Used to check if the userfield05 field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isUserfield05set() {
         return userfield05set;
     }
 
+    /**
+     * Used to check if the userfield06 field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isUserfield06set() {
         return userfield06set;
     }
 
+    /**
+     * Used to check if the userfield07 field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isUserfield07set() {
         return userfield07set;
     }
 
+    /**
+     * Used to check if the userfield08 field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isUserfield08set() {
         return userfield08set;
     }
 
+    /**
+     * Used to check if the userfield09 field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isUserfield09set() {
         return userfield09set;
     }
 
+    /**
+     * Used to check if the userfield10 field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isUserfield10set() {
         return userfield10set;
     }
 
+    /**
+     * Used to check if the userfield11 field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isUserfield11set() {
         return userfield11set;
     }
 
+    /**
+     * Used to check if the userfield12 field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isUserfield12set() {
         return userfield12set;
     }
 
+    /**
+     * Used to check if the userfield13 field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isUserfield13set() {
         return userfield13set;
     }
 
+    /**
+     * Used to check if the userfield14 field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isUserfield14set() {
         return userfield14set;
     }
 
+    /**
+     * Used to check if the userfield15 field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isUserfield15set() {
         return userfield15set;
     }
 
+    /**
+     * Used to check if the userfield16 field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isUserfield16set() {
         return userfield16set;
     }
 
+    /**
+     * Used to check if the userfield17 field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isUserfield17set() {
         return userfield17set;
     }
 
+    /**
+     * Used to check if the userfield18 field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isUserfield18set() {
         return userfield18set;
     }
 
+    /**
+     * Used to check if the userfield19 field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isUserfield19set() {
         return userfield19set;
     }
 
+    /**
+     * Used to check if the userfield20 field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isUserfield20set() {
         return userfield20set;
     }
 
+    /**
+     * Used to check if the name field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isNameset() {
         return nameset;
     }
@@ -2680,14 +3232,29 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.mail_folder_confirmed_spam_name = mail_folder_confirmed_spam_name;
     }
 
+    /**
+     * Used to check if the mail_folder_confirmed_spam field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isMail_folder_confirmed_spamset() {
         return mail_folder_confirmed_spam_nameset;
     }
 
+    /**
+     * Used to check if the mail_folder_confirmed_ham field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isMail_folder_confirmed_hamset() {
         return mail_folder_confirmed_ham_nameset;
     }
 
+    /**
+     * Used to check if the gui_spam_filter_capabilities_enabled field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     final public boolean isGUI_Spam_filter_capabilities_enabledset() {
         return gui_spam_filter_enabledset;
     }
