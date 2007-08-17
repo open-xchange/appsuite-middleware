@@ -1,3 +1,8 @@
+* 2007-08-17 - marcus.klein@open-xchange.com
+
+ - Bugfix #8934: Switched deleting user folder mapping and inserting admin
+   folder mapping.
+
 * 2007-08-17 - thorben.betten@open-xchange.com
 
  - More granular thread synchronization in folder and message caches
