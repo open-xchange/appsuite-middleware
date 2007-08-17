@@ -114,49 +114,102 @@ public class Group extends ExtendableDataObject implements NameAndIdObject {
     }
 
 
+    /**
+     * Used to check if the member of this object has been changed
+     * 
+     * @return
+     */
     public final boolean isMembersset() {
         return membersset;
     }
 
 
+    /**
+     * Used to check if the name of this object has been changed
+     * 
+     * @return
+     */
     public final boolean isNameset() {
         return nameset;
     }
 
-
+    /**
+     * {@inheritDoc}
+     */
+    /* (non-Javadoc)
+     * @see com.openexchange.admin.rmi.dataobjects.NameAndIdObject#getId()
+     */
     public final Integer getId() {
         return id;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    /* (non-Javadoc)
+     * @see com.openexchange.admin.rmi.dataobjects.NameAndIdObject#setId(java.lang.Integer)
+     */
     public final void setId(final Integer val) {
         this.id = val;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    /* (non-Javadoc)
+     * @see com.openexchange.admin.rmi.dataobjects.NameAndIdObject#getName()
+     */
     public final String getName() {
         return name;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    /* (non-Javadoc)
+     * @see com.openexchange.admin.rmi.dataobjects.NameAndIdObject#setName(java.lang.String)
+     */
     public final void setName(final String val) {
         nameset = true;
         this.name = val;
     }
 
+    /**
+     * Returns the displayname of this group
+     * 
+     * @return A String containing the displayname
+     */
     public final String getDisplayname() {
         return displayname;
     }
 
-    public final void setDisplayname(final String val) {
+    /**
+     * Sets the displayname for this group
+     * 
+     * @param displayname The displayname as string
+     */
+    public final void setDisplayname(final String displayname) {
         displaynameset = true;
-        this.displayname = val;
+        this.displayname = displayname;
     }
 
+    /**
+     * Returns the members of this group
+     * 
+     * @return An {@link Integer} array containing the member ids
+     */
     public final Integer[] getMembers() {
         return members;
     }
 
-    public final void setMembers(final Integer[] val) {
+    /**
+     * Sets the the members for this group
+     * 
+     * @param members An {@link Integer} array containing the member ids
+     */
+    public final void setMembers(final Integer[] members) {
         membersset = true;
-        this.members = val;
+        this.members = members;
     }
 
 
@@ -186,7 +239,7 @@ public class Group extends ExtendableDataObject implements NameAndIdObject {
 
     /**
      * @param extension
-     * @deprecated Please remove the usage of this method as fast as you can because it used a dangerous downcast.
+     * @deprecated Please remove the usage of this method as fast as you can because it uses a dangerous downcast.
      * This method will go away with the next update
      */
     public final void addExtension(final OXGroupExtensionInterface extension) {
@@ -195,7 +248,7 @@ public class Group extends ExtendableDataObject implements NameAndIdObject {
 
     /**
      * @return
-     * @deprecated Please remove the usage of this method as fast as you can because it used a dangerous downcast.
+     * @deprecated Please remove the usage of this method as fast as you can because it uses a dangerous downcast.
      * This method will go away with the next update
      */
     public final ArrayList<OXGroupExtensionInterface> getExtensions() {
@@ -209,7 +262,7 @@ public class Group extends ExtendableDataObject implements NameAndIdObject {
     /**
      * @param o
      * @return
-     * @deprecated Please remove the usage of this method as fast as you can because it used a dangerous downcast.
+     * @deprecated Please remove the usage of this method as fast as you can because it uses a dangerous downcast.
      * This method will go away with the next update
      */
     public final boolean removeExtension(final OXGroupExtensionInterface o) {
@@ -239,23 +292,35 @@ public class Group extends ExtendableDataObject implements NameAndIdObject {
         return null;
     }
 
+    /**
+     * At the moment {@link #setDisplayname} and {@link #setName} are defined here
+     */
     @Override
     public final String[] getMandatoryMembersCreate() {
         return new String[]{ "displayname", "name" };
     }
     
+    /**
+     * At the moment no fields are defined here
+     */
     @Override
     public final String[] getMandatoryMembersChange() {
         return null;
     }
 
 
+    /**
+     * At the moment no fields are defined here
+     */
     @Override
     public final String[] getMandatoryMembersDelete() {
         return null;
     }
 
 
+    /**
+     * At the moment no fields are defined here
+     */
     @Override
     public final String[] getMandatoryMembersRegister() {
         return null;
