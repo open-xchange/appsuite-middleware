@@ -1,3 +1,7 @@
+* 2007-08-17 - thorben.betten@open-xchange.com
+
+ - More granular thread synchronization in folder and message caches
+
 * 2007-08-16 - thorben.betten@open-xchange.com
 
  - Partial bugfix #8885: Avoiding translating IO errors to "instantiation

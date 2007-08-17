@@ -55,7 +55,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.apache.jcs.JCS;
 import org.apache.jcs.access.exception.CacheException;
@@ -96,13 +98,34 @@ public class MessageCacheManager {
 
 	private static final String MSG_CACHE_REGION_NAME = "OXMessageCache";
 
-	private static final Lock LOCK = new ReentrantLock();
+	private static final Lock INIT_LOCK = new ReentrantLock();
+
+	private static final Map<Integer, ReadWriteLock> contextLocks = new HashMap<Integer, ReadWriteLock>();
+
+	private static final Lock LOCK_MOD = new ReentrantLock();
 
 	private static MessageCacheManager instance;
 
 	private static boolean initialized;
 
 	private final JCS msgCache;
+
+	private static final ReadWriteLock getContextLock(final int cid) {
+		final Integer key = Integer.valueOf(cid);
+		ReadWriteLock l = contextLocks.get(key);
+		if (l == null) {
+			LOCK_MOD.lock();
+			try {
+				if ((l = contextLocks.get(key)) == null) {
+					l = new ReentrantReadWriteLock();
+					contextLocks.put(key, l);
+				}
+			} finally {
+				LOCK_MOD.unlock();
+			}
+		}
+		return l;
+	}
 
 	private MessageCacheManager() throws OXCachingException {
 		super();
@@ -138,14 +161,14 @@ public class MessageCacheManager {
 	 */
 	public final static MessageCacheManager getInstance() throws OXException {
 		if (!initialized) {
-			LOCK.lock();
+			INIT_LOCK.lock();
 			try {
 				if (instance == null) {
 					instance = new MessageCacheManager();
 					initialized = true;
 				}
 			} finally {
-				LOCK.unlock();
+				INIT_LOCK.unlock();
 			}
 		}
 		return instance;
@@ -165,12 +188,18 @@ public class MessageCacheManager {
 	 */
 	@SuppressWarnings(STR_UNCHECKED)
 	public final MessageCacheObject getMessage(final int user, final long msgUID, final String folder, final Context ctx) {
-		final Map<String, MessageCacheObject> msgMap = (HashMap<String, MessageCacheObject>) msgCache.get(getMapKey(
-				user, ctx));
-		if (msgMap == null) {
-			return null;
+		final Lock ctxReadLock = getContextLock(ctx.getContextId()).readLock();
+		ctxReadLock.lock();
+		try {
+			final Map<String, MessageCacheObject> msgMap = (HashMap<String, MessageCacheObject>) msgCache
+					.get(getMapKey(user, ctx));
+			if (msgMap == null) {
+				return null;
+			}
+			return msgMap.get(getMsgKey(msgUID, folder));
+		} finally {
+			ctxReadLock.unlock();
 		}
-		return msgMap.get(getMsgKey(msgUID, folder));
 	}
 
 	/**
@@ -188,16 +217,22 @@ public class MessageCacheManager {
 	@SuppressWarnings(STR_UNCHECKED)
 	public final MessageCacheObject[] getMessages(final int user, final long[] msgUIDs, final String folder,
 			final Context ctx) {
-		final Map<String, MessageCacheObject> msgMap = (ConcurrentHashMap<String, MessageCacheObject>) msgCache
-				.get(getMapKey(user, ctx));
-		if (msgMap == null) {
-			return null;
+		final Lock ctxReadLock = getContextLock(ctx.getContextId()).readLock();
+		ctxReadLock.lock();
+		try {
+			final Map<String, MessageCacheObject> msgMap = (ConcurrentHashMap<String, MessageCacheObject>) msgCache
+					.get(getMapKey(user, ctx));
+			if (msgMap == null) {
+				return null;
+			}
+			final MessageCacheObject[] retval = new MessageCacheObject[msgUIDs.length];
+			for (int i = 0; i < retval.length; i++) {
+				retval[i] = msgMap.get(getMsgKey(msgUIDs[i], folder));
+			}
+			return retval;
+		} finally {
+			ctxReadLock.unlock();
 		}
-		final MessageCacheObject[] retval = new MessageCacheObject[msgUIDs.length];
-		for (int i = 0; i < retval.length; i++) {
-			retval[i] = msgMap.get(getMsgKey(msgUIDs[i], folder));
-		}
-		return retval;
 	}
 
 	/**
@@ -239,36 +274,42 @@ public class MessageCacheManager {
 		if (iter == null) {
 			return;
 		}
-		Map<String, MessageCacheObject> msgMap = (ConcurrentHashMap<String, MessageCacheObject>) msgCache
-				.get(getMapKey(user, ctx));
-		boolean insert = false;
-		if (msgMap == null) {
-			/*
-			 * Does not exist in cache, yet
-			 */
-			msgMap = new ConcurrentHashMap<String, MessageCacheObject>();
-			insert = true;
-		}
-		if (iter.hasSize()) {
-			final int size = iter.size();
-			for (int i = 0; i < size; i++) {
-				final MessageCacheObject msg = (MessageCacheObject) iter.next();
-				msgMap.put(getMsgKey(msg.getUid(), MailFolderObject.prepareFullname(msg.getFolderFullname(), msg
-						.getSeparator())), msg);
+		final Lock ctxWriteLock = getContextLock(ctx.getContextId()).writeLock();
+		ctxWriteLock.lock();
+		try {
+			Map<String, MessageCacheObject> msgMap = (ConcurrentHashMap<String, MessageCacheObject>) msgCache
+					.get(getMapKey(user, ctx));
+			boolean insert = false;
+			if (msgMap == null) {
+				/*
+				 * Does not exist in cache, yet
+				 */
+				msgMap = new ConcurrentHashMap<String, MessageCacheObject>();
+				insert = true;
 			}
-		} else {
-			while (iter.hasNext()) {
-				final MessageCacheObject msg = (MessageCacheObject) iter.next();
-				msgMap.put(getMsgKey(msg.getUid(), MailFolderObject.prepareFullname(msg.getFolderFullname(), msg
-						.getSeparator())), msg);
+			if (iter.hasSize()) {
+				final int size = iter.size();
+				for (int i = 0; i < size; i++) {
+					final MessageCacheObject msg = (MessageCacheObject) iter.next();
+					msgMap.put(getMsgKey(msg.getUid(), MailFolderObject.prepareFullname(msg.getFolderFullname(), msg
+							.getSeparator())), msg);
+				}
+			} else {
+				while (iter.hasNext()) {
+					final MessageCacheObject msg = (MessageCacheObject) iter.next();
+					msgMap.put(getMsgKey(msg.getUid(), MailFolderObject.prepareFullname(msg.getFolderFullname(), msg
+							.getSeparator())), msg);
+				}
 			}
-		}
-		if (insert) {
-			try {
-				msgCache.put(getMapKey(user, ctx), msgMap);
-			} catch (final CacheException e) {
-				throw new OXCachingException(OXCachingException.Code.FAILED_PUT, e, new Object[0]);
+			if (insert) {
+				try {
+					msgCache.put(getMapKey(user, ctx), msgMap);
+				} catch (final CacheException e) {
+					throw new OXCachingException(OXCachingException.Code.FAILED_PUT, e, new Object[0]);
+				}
 			}
+		} finally {
+			ctxWriteLock.unlock();
 		}
 	}
 
@@ -302,23 +343,30 @@ public class MessageCacheManager {
 	@SuppressWarnings(STR_UNCHECKED)
 	public final Map<String, MessageCacheObject> getUserMessageMap(final int user, final Context ctx)
 			throws OXCachingException {
-		final CacheKey mapKey = getMapKey(user, ctx);
-		Map<String, MessageCacheObject> msgMap = (ConcurrentHashMap<String, MessageCacheObject>) msgCache.get(mapKey);
-		if (msgMap == null) {
-			/*
-			 * Does not exist in cache, yet
-			 */
-			msgMap = new ConcurrentHashMap<String, MessageCacheObject>();
-			try {
-				msgCache.put(mapKey, msgMap);
-			} catch (final CacheException e) {
-				throw new OXCachingException(OXCachingException.Code.FAILED_PUT, e, new Object[0]);
+		final Lock ctxReadLock = getContextLock(ctx.getContextId()).readLock();
+		ctxReadLock.lock();
+		try {
+			final CacheKey mapKey = getMapKey(user, ctx);
+			Map<String, MessageCacheObject> msgMap = (ConcurrentHashMap<String, MessageCacheObject>) msgCache
+					.get(mapKey);
+			if (msgMap == null) {
+				/*
+				 * Does not exist in cache, yet
+				 */
+				msgMap = new ConcurrentHashMap<String, MessageCacheObject>();
+				try {
+					msgCache.put(mapKey, msgMap);
+				} catch (final CacheException e) {
+					throw new OXCachingException(OXCachingException.Code.FAILED_PUT, e, new Object[0]);
+				}
 			}
+			/*
+			 * Return reference
+			 */
+			return msgMap;
+		} finally {
+			ctxReadLock.unlock();
 		}
-		/*
-		 * Return reference
-		 */
-		return msgMap;
 	}
 
 	/**
@@ -338,24 +386,32 @@ public class MessageCacheManager {
 		if (msg == null) {
 			return;
 		}
-		final CacheKey mapKey = getMapKey(user, ctx);
-		Map<String, MessageCacheObject> msgMap = (ConcurrentHashMap<String, MessageCacheObject>) msgCache.get(mapKey);
-		boolean insert = false;
-		if (msgMap == null) {
-			/*
-			 * Does not exist in cache, yet
-			 */
-			msgMap = new ConcurrentHashMap<String, MessageCacheObject>();
-			insert = true;
-		}
-		msgMap.put(getMsgKey(msgUID, MailFolderObject.prepareFullname(msg.getFolderFullname(), msg.getSeparator())),
-				msg);
-		if (insert) {
-			try {
-				msgCache.put(mapKey, msgMap);
-			} catch (final CacheException e) {
-				throw new OXCachingException(OXCachingException.Code.FAILED_PUT, e, new Object[0]);
+		final Lock ctxWriteLock = getContextLock(ctx.getContextId()).writeLock();
+		ctxWriteLock.lock();
+		try {
+			final CacheKey mapKey = getMapKey(user, ctx);
+			Map<String, MessageCacheObject> msgMap = (ConcurrentHashMap<String, MessageCacheObject>) msgCache
+					.get(mapKey);
+			boolean insert = false;
+			if (msgMap == null) {
+				/*
+				 * Does not exist in cache, yet
+				 */
+				msgMap = new ConcurrentHashMap<String, MessageCacheObject>();
+				insert = true;
 			}
+			msgMap.put(
+					getMsgKey(msgUID, MailFolderObject.prepareFullname(msg.getFolderFullname(), msg.getSeparator())),
+					msg);
+			if (insert) {
+				try {
+					msgCache.put(mapKey, msgMap);
+				} catch (final CacheException e) {
+					throw new OXCachingException(OXCachingException.Code.FAILED_PUT, e, new Object[0]);
+				}
+			}
+		} finally {
+			ctxWriteLock.unlock();
 		}
 	}
 
@@ -373,12 +429,18 @@ public class MessageCacheManager {
 	 */
 	@SuppressWarnings(STR_UNCHECKED)
 	public final void removeMessage(final int user, final long msgUID, final String folder, final Context ctx) {
-		final Map<String, MessageCacheObject> msgMap = (ConcurrentHashMap<String, MessageCacheObject>) msgCache
-				.get(getMapKey(user, ctx));
-		if (msgMap == null) {
-			return;
+		final Lock ctxWriteLock = getContextLock(ctx.getContextId()).writeLock();
+		ctxWriteLock.lock();
+		try {
+			final Map<String, MessageCacheObject> msgMap = (ConcurrentHashMap<String, MessageCacheObject>) msgCache
+					.get(getMapKey(user, ctx));
+			if (msgMap == null) {
+				return;
+			}
+			msgMap.remove(getMsgKey(msgUID, folder));
+		} finally {
+			ctxWriteLock.unlock();
 		}
-		msgMap.remove(getMsgKey(msgUID, folder));
 	}
 
 	/**
@@ -412,10 +474,14 @@ public class MessageCacheManager {
 	 * Clears cache from messages belonging to given user
 	 */
 	public void clearUserMessages(final int user, final Context ctx) throws OXException {
+		final Lock ctxWriteLock = getContextLock(ctx.getContextId()).writeLock();
+		ctxWriteLock.lock();
 		try {
 			msgCache.remove(getMapKey(user, ctx));
 		} catch (final CacheException e) {
 			throw new OXCachingException(OXCachingException.Code.FAILED_REMOVE, e, new Object[0]);
+		} finally {
+			ctxWriteLock.unlock();
 		}
 	}
 

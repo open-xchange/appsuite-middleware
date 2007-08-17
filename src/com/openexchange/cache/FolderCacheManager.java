@@ -55,7 +55,9 @@ import java.sql.Connection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.apache.jcs.JCS;
 import org.apache.jcs.access.exception.CacheException;
@@ -92,7 +94,7 @@ public class FolderCacheManager {
 
 	private static final Lock LOCK_INIT = new ReentrantLock();
 
-	private static final Map<Integer, Lock> contextModLocks = new HashMap<Integer, Lock>();
+	private static final Map<Integer, ReadWriteLock> contextLocks = new HashMap<Integer, ReadWriteLock>();
 
 	private static final Lock LOCK_MOD = new ReentrantLock();
 
@@ -153,19 +155,19 @@ public class FolderCacheManager {
 		return instance;
 	}
 
-	private static final Lock getContextModLock(final Context ctx) {
-		return getContextModLock(ctx.getContextId());
+	private static final ReadWriteLock getContextLock(final Context ctx) {
+		return getContextLock(ctx.getContextId());
 	}
 
-	private static final Lock getContextModLock(final int cid) {
+	private static final ReadWriteLock getContextLock(final int cid) {
 		final Integer key = Integer.valueOf(cid);
-		Lock l = contextModLocks.get(key);
+		ReadWriteLock l = contextLocks.get(key);
 		if (l == null) {
 			LOCK_MOD.lock();
 			try {
-				if ((l = contextModLocks.get(key)) == null) {
-					l = new ReentrantLock();
-					contextModLocks.put(key, l);
+				if ((l = contextLocks.get(key)) == null) {
+					l = new ReentrantReadWriteLock();
+					contextLocks.put(key, l);
 				}
 			} finally {
 				LOCK_MOD.unlock();
@@ -188,20 +190,44 @@ public class FolderCacheManager {
 	 */
 	public FolderObject getFolderObject(final int objectId, final boolean fromCache, final Context ctx,
 			final Connection readConArg) throws OXException {
-		FolderObject folderObj = null;
-		if (fromCache) {
-			folderObj = (FolderObject) folderCache.get(new CacheKey(ctx, objectId));
+		final Lock ctxReadLock = getContextLock(ctx).readLock();
+		ctxReadLock.lock();
+		try {
+			FolderObject folderObj = null;
+			if (fromCache) {
+				folderObj = (FolderObject) folderCache.get(new CacheKey(ctx, objectId));
+			}
+			/*
+			 * Either fromCache was false or folder object was not found.
+			 */
+			if (folderObj == null) {
+				/*
+				 * Upgrade lock: unlock first to acquire write lock
+				 */
+				ctxReadLock.unlock();
+				final Lock ctxWriteLock = getContextLock(ctx).writeLock();
+				ctxWriteLock.lock();
+				try {
+					folderObj = loadFolderObjectInternal(objectId, ctx, readConArg);
+				} finally {
+					/*
+					 * Downgrade lock: reacquire read without giving up write
+					 * lock and...
+					 */
+					ctxReadLock.lock();
+					/*
+					 * ... unlock write.
+					 */
+					ctxWriteLock.unlock();
+				}
+			}
+			/*
+			 * Return a copy, NOT a reference
+			 */
+			return (FolderObject) folderObj.clone();
+		} finally {
+			ctxReadLock.unlock();
 		}
-		/*
-		 * Either fromCache was false or folder object was not found.
-		 */
-		if (folderObj == null) {
-			return loadFolderObject(objectId, ctx, readConArg);
-		}
-		/*
-		 * Return CLONED version
-		 */
-		return (FolderObject) folderObj.clone();
 	}
 
 	/**
@@ -218,8 +244,14 @@ public class FolderCacheManager {
 	 *         <code>null</code>
 	 */
 	public FolderObject getFolderObject(final int objectId, final Context ctx) {
-		final FolderObject retval = (FolderObject) folderCache.get(new CacheKey(ctx, objectId));
-		return retval == null ? null : (FolderObject) retval.clone();
+		final Lock ctxReadLock = getContextLock(ctx).readLock();
+		ctxReadLock.lock();
+		try {
+			final FolderObject retval = (FolderObject) folderCache.get(new CacheKey(ctx, objectId));
+			return retval == null ? null : (FolderObject) retval.clone();
+		} finally {
+			ctxReadLock.unlock();
+		}
 	}
 
 	/**
@@ -238,12 +270,41 @@ public class FolderCacheManager {
 	 */
 	public FolderObject loadFolderObject(final int folderId, final Context ctx, final Connection readCon)
 			throws OXException {
+		final Lock ctxWriteLock = getContextLock(ctx).writeLock();
+		ctxWriteLock.lock();
+		try {
+			/*
+			 * Return a copy, NOT a reference
+			 */
+			return (FolderObject) loadFolderObjectInternal(folderId, ctx, readCon).clone();
+		} finally {
+			ctxWriteLock.unlock();
+		}
+	}
+
+	/**
+	 * Loads the folder object from underlying database storage whose id matches
+	 * given parameter <code>folderId</code>.
+	 * <p>
+	 * The returned object references the actually cached entry
+	 * 
+	 * @param folderId
+	 *            The folder ID
+	 * @param ctx
+	 *            The context
+	 * @param readCon
+	 *            A readable connection or <code>null</code> to fetch a new
+	 *            one from connection pool
+	 * @return The object referencing the actually cached entry
+	 * @throws OXException
+	 *             If folder object could not be loaded
+	 */
+	private FolderObject loadFolderObjectInternal(final int folderId, final Context ctx, final Connection readCon)
+			throws OXException {
 		if (folderId <= 0) {
 			throw new OXFolderNotFoundException(folderId, ctx.getContextId());
 		}
 		final FolderObject folderObj;
-		final Lock modLock = getContextModLock(ctx);
-		modLock.lock();
 		try {
 			folderObj = FolderObject.loadFolderObjectFromDB(folderId, ctx, readCon);
 			final CacheKey key = new CacheKey(ctx, folderId);
@@ -264,13 +325,11 @@ public class FolderCacheManager {
 			}
 		} catch (final CacheException e) {
 			throw new OXCachingException(Code.FAILED_PUT, e, new Object[0]);
-		} finally {
-			modLock.unlock();
 		}
 		/*
-		 * Return a copy, NOT a reference to cached element
+		 * Return a reference to cached element
 		 */
-		return (FolderObject) folderObj.clone();
+		return folderObj;
 	}
 
 	/**
@@ -322,8 +381,8 @@ public class FolderCacheManager {
 			final IElementAttributes elemAttribs) throws OXException {
 		try {
 			if (!folderObj.containsObjectID()) {
-				throw new OXFolderException(FolderCode.MISSING_FOLDER_ATTRIBUTE, FolderFields.ID, Integer
-						.valueOf(-1), Integer.valueOf(ctx.getContextId()));
+				throw new OXFolderException(FolderCode.MISSING_FOLDER_ATTRIBUTE, FolderFields.ID, Integer.valueOf(-1),
+						Integer.valueOf(ctx.getContextId()));
 			}
 			final CacheKey ck = new CacheKey(ctx, folderObj.getObjectID());
 			if (!overwrite) {
@@ -333,8 +392,8 @@ public class FolderCacheManager {
 				/*
 				 * Wait for other threads that currently own PUT lock
 				 */
-				final Lock modLock = getContextModLock(ctx);
-				modLock.lock();
+				final Lock ctxWriteLock = getContextLock(ctx).writeLock();
+				ctxWriteLock.lock();
 				try {
 					if (folderCache.get(ck) != null) {
 						/*
@@ -356,15 +415,15 @@ public class FolderCacheManager {
 					}
 					folderCache.put(ck, folderObj.clone(), attribs);
 				} finally {
-					modLock.unlock();
+					ctxWriteLock.unlock();
 				}
 			} else {
 				/*
 				 * Put clone of new object into cache. If there is currently an
 				 * object associated with this key in the region it is replaced.
 				 */
-				final Lock modLock = getContextModLock(ctx);
-				modLock.lock();
+				final Lock ctxWriteLock = getContextLock(ctx).writeLock();
+				ctxWriteLock.lock();
 				try {
 					final IElementAttributes attribs = getAppliedAttributes(ck, elemAttribs);
 					if (attribs == null) {
@@ -376,7 +435,7 @@ public class FolderCacheManager {
 						folderCache.put(ck, folderObj.clone(), attribs);
 					}
 				} finally {
-					modLock.unlock();
+					ctxWriteLock.unlock();
 				}
 			}
 		} catch (final CacheException e) {
@@ -394,21 +453,19 @@ public class FolderCacheManager {
 	 * @throws OXException
 	 */
 	public void removeFolderObject(final int key, final Context ctx) throws OXException {
-		try {
-			/*
-			 * Remove object in cache if exist
-			 */
-			if (key > 0) {
-				final Lock modLock = getContextModLock(ctx);
-				modLock.lock();
-				try {
-					folderCache.remove(new CacheKey(ctx, key));
-				} finally {
-					modLock.unlock();
-				}
+		/*
+		 * Remove object in cache if exist
+		 */
+		if (key > 0) {
+			final Lock ctxWriteLock = getContextLock(ctx).writeLock();
+			ctxWriteLock.lock();
+			try {
+				folderCache.remove(new CacheKey(ctx, key));
+			} catch (final CacheException e) {
+				throw new OXCachingException(Code.FAILED_REMOVE, e, new Object[0]);
+			} finally {
+				ctxWriteLock.unlock();
 			}
-		} catch (final CacheException e) {
-			throw new OXCachingException(Code.FAILED_REMOVE, e, new Object[0]);
 		}
 	}
 

@@ -54,9 +54,10 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.apache.jcs.JCS;
 import org.apache.jcs.access.exception.CacheException;
@@ -75,8 +76,9 @@ import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
  */
 public class FolderQueryCacheManager {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(FolderQueryCacheManager.class);
+	private static final Map<Integer, ReadWriteLock> contextLocks = new HashMap<Integer, ReadWriteLock>();
+
+	private static final Lock LOCK_MOD = new ReentrantLock();
 
 	private static final Lock LOCK_INIT = new ReentrantLock();
 
@@ -88,11 +90,22 @@ public class FolderQueryCacheManager {
 
 	private final JCS folderQueryCache;
 
-	private final Lock LOCK_MODIFY = new ReentrantLock();
-
-	private final Condition WAIT = LOCK_MODIFY.newCondition();
-
-	private boolean busy;
+	private static final ReadWriteLock getContextLock(final int cid) {
+		final Integer key = Integer.valueOf(cid);
+		ReadWriteLock l = contextLocks.get(key);
+		if (l == null) {
+			LOCK_MOD.lock();
+			try {
+				if ((l = contextLocks.get(key)) == null) {
+					l = new ReentrantReadWriteLock();
+					contextLocks.put(key, l);
+				}
+			} finally {
+				LOCK_MOD.unlock();
+			}
+		}
+		return l;
+	}
 
 	private FolderQueryCacheManager() throws OXException {
 		super();
@@ -152,28 +165,19 @@ public class FolderQueryCacheManager {
 	 */
 	@SuppressWarnings("unchecked")
 	public final LinkedList<Integer> getFolderQuery(final int queryNum, final int userId, final int cid) {
-		if (busy) {
-			/*
-			 * Another thread performs a PUT at the moment
-			 */
-			LOCK_MODIFY.lock();
-			try {
-				while (busy) {
-					WAIT.await();
-				}
-			} catch (final InterruptedException e) {
-				LOG.error(e.getMessage(), e);
-			} finally {
-				LOCK_MODIFY.unlock();
+		final Lock ctxReadLock = getContextLock(cid).readLock();
+		ctxReadLock.lock();
+		try {
+			final Map<CacheKey, LinkedList<Integer>> map = (Map<CacheKey, LinkedList<Integer>>) folderQueryCache
+					.getFromGroup(createUserKey(userId), createContextKey(cid));
+			final LinkedList<Integer> q;
+			if (map == null || (q = map.get(createQueryKey(queryNum))) == null) {
+				return null;
 			}
+			return (LinkedList<Integer>) q.clone();
+		} finally {
+			ctxReadLock.unlock();
 		}
-		final Map<CacheKey, LinkedList<Integer>> map = (Map<CacheKey, LinkedList<Integer>>) folderQueryCache
-				.getFromGroup(createUserKey(userId), createContextKey(cid));
-		final LinkedList<Integer> q;
-		if (map == null || (q = map.get(createQueryKey(queryNum))) == null) {
-			return null;
-		}
-		return (LinkedList<Integer>) q.clone();
 	}
 
 	/**
@@ -215,9 +219,9 @@ public class FolderQueryCacheManager {
 		if (q == null) {
 			return;
 		}
-		LOCK_MODIFY.lock();
+		final Lock ctxWriteLock = getContextLock(cid).writeLock();
+		ctxWriteLock.lock();
 		try {
-			busy = true;
 			boolean insertMap = false;
 			Map<CacheKey, LinkedList<Integer>> map = (Map<CacheKey, LinkedList<Integer>>) folderQueryCache
 					.getFromGroup(createUserKey(userId), createContextKey(cid));
@@ -238,14 +242,12 @@ public class FolderQueryCacheManager {
 		} catch (final CacheException e) {
 			throw new OXCachingException(OXCachingException.Code.FAILED_PUT, e, new Object[0]);
 		} finally {
-			busy = false;
-			WAIT.signalAll();
-			LOCK_MODIFY.unlock();
+			ctxWriteLock.unlock();
 		}
 	}
 
 	/**
-	 * Clears all cache entries belonging to given context
+	 * Clears all cache entries belonging to given session's context
 	 */
 	public final void invalidateContextQueries(final SessionObject session) {
 		invalidateContextQueries(session.getContext().getContextId());
@@ -255,14 +257,12 @@ public class FolderQueryCacheManager {
 	 * Clears all cache entries belonging to given context
 	 */
 	public final void invalidateContextQueries(final int cid) {
-		LOCK_MODIFY.lock();
+		final Lock ctxWriteLock = getContextLock(cid).writeLock();
+		ctxWriteLock.lock();
 		try {
-			busy = true;
 			folderQueryCache.invalidateGroup(createContextKey(cid));
 		} finally {
-			busy = false;
-			WAIT.signalAll();
-			LOCK_MODIFY.unlock();
+			ctxWriteLock.unlock();
 		}
 	}
 
@@ -275,7 +275,7 @@ public class FolderQueryCacheManager {
 	private final static Integer createUserKey(final int userId) {
 		return Integer.valueOf(userId);
 	}
-	
+
 	private final static String createContextKey(final int cid) {
 		return String.valueOf(cid);
 	}
