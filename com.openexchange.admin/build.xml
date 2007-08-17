@@ -241,6 +241,7 @@
     <target name="doc">
 		<property name="plugdocpath" value="open-xchange-admin-plugin**/src/com/openexchange/admin/rmi"/>
     	<mkdir dir="doc"/>
+    	<copy todir="doc/resources" file="javadoc/OX_Logo.jpg"/>
         <javadoc
             failonerror="true"
 			sourcepath="src"
@@ -248,6 +249,7 @@
             author="true"
             public="true"
             Windowtitle="ox_admin_interface">
+        	<Header><![CDATA[<img src="${prefix}/doc/oxadmin/resources/OX_Logo.jpg">]]></Header>
             <fileset dir="src/com/openexchange/admin/rmi" defaultexcludes="yes">
 				<include name="*Interface*"/>
 				<include name="dataobjects/*"/>
@@ -267,6 +269,7 @@
 					<fileset dir="${lib.dir}" includes="*.jar"/>
 				</path>
             </classpath>
+        	<link href="http://java.sun.com/j2se/1.5.0/docs/api/"/>
         </javadoc>
     </target>
 
