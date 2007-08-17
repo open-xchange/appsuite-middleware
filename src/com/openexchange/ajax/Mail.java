@@ -1740,7 +1740,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 					}
 					Collections.sort(l, MailIdentifier.getMailIdentifierComparator());
 					String lastFld = l.get(0).folder;
-					/*final boolean cachedUserMsgs = MessageCacheManager.getInstance().containsUserMessages(sessionObj);*/
+					final boolean cachedUserMsgs = MessageCacheManager.getInstance().containsUserMessages(sessionObj);
 					final SmartLongArray arr = new SmartLongArray(length);
 					for (int i = 0; i < length; i++) {
 						final MailIdentifier current = l.get(i);
@@ -1753,13 +1753,13 @@ public class Mail extends PermissionServlet implements UploadListener {
 							/*
 							 * Clear cache
 							 */
-							/*if (cachedUserMsgs) {
+							if (cachedUserMsgs) {
 								final Map<String, MessageCacheObject> msgMap = MessageCacheManager.getInstance()
 										.getUserMessageMap(sessionObj);
 								for (int j = 0; j < uids.length; j++) {
 									msgMap.remove(MessageCacheManager.getMsgKey(uids[j], lastFld));
 								}
-							}*/
+							}
 							arr.reset();
 							lastFld = current.folder;
 						}
@@ -1771,13 +1771,13 @@ public class Mail extends PermissionServlet implements UploadListener {
 						/*
 						 * Clear cache
 						 */
-						/*if (cachedUserMsgs) {
+						if (cachedUserMsgs) {
 							final Map<String, MessageCacheObject> msgMap = MessageCacheManager.getInstance()
 									.getUserMessageMap(sessionObj);
 							for (int j = 0; j < uids.length; j++) {
 								msgMap.remove(MessageCacheManager.getMsgKey(uids[j], lastFld));
 							}
-						}*/
+						}
 					}
 				}
 			} finally {
@@ -2281,7 +2281,13 @@ public class Mail extends PermissionServlet implements UploadListener {
 					docMetaData.setFileName(mao.getFileName());
 				}
 				docMetaData.setFileMIMEType(mao.getContentType());
-				docMetaData.setFileSize(mao.getSize());
+				/*
+				 * Since file's size given from IMAP server is just an
+				 * estimation and therefore does not exactly match the file's
+				 * size a future file access via webdav can fail because of the
+				 * size mismatch. Thus we do not set the file's size here
+				 */
+				// docMetaData.setFileSize(mao.getSize());
 				if (!metSet.contains(Metadata.TITLE_LITERAL)) {
 					docMetaData.setTitle(mao.getFileName());
 				}

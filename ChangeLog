@@ -2,6 +2,8 @@
 
  - More granular thread synchronization in folder and message caches
  - Added field "defailt_folder" to IMAP folders
+ - Bugfix #8926: Avoiding setting IMAP's estimated file size when storing
+   message attachments into infostore
 
 * 2007-08-16 - thorben.betten@open-xchange.com
 
