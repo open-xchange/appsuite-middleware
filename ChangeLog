@@ -2,6 +2,7 @@
 
  - Bugfix #8934: Switched deleting user folder mapping and inserting admin
    folder mapping.
+ - Bugfix #8936: Fixed SQL statement for deleting participants.
 
 * 2007-08-17 - thorben.betten@open-xchange.com
 
