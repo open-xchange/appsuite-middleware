@@ -1573,9 +1573,9 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
     }
 
     /**
-     * Set user numeric user id
+     * Sets the numeric user id
      * 
-     * @param userid
+     * @param userid An {@link Integer} containing the user id
      */
     final public void setId(final Integer userid) {
         if (null == userid) {
@@ -1589,7 +1589,9 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
     }
 
     /**
-     * Set symbolic user identifier
+     * Sets the symbolic user identifier
+     * 
+     * @param username A {@link String} containing the user name
      */
     final public void setName(final String username) {
         if (null == username) {
@@ -1598,14 +1600,19 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.name = username;
     }
 
+    /**
+     * Return the password of this user object.
+     * 
+     * @return A {@link String} containing the password
+     */
     final public String getPassword() {
         return password;
     }
 
     /**
-     * The users password must be plaintext
+     * Sets the password for this user object. The users password must be plaintext
      * 
-     * @param passwd
+     * @param passwd A {@link String} containing the password
      * @see setPasswordMech
      */
     final public void setPassword(final String passwd) {
@@ -1615,12 +1622,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.password = passwd;
     }
 
+    /**
+     * Returns the primary E-Mail address of this user object
+     * 
+     * @return A {@link String} containing the primary E-Mail address
+     */
     final public String getPrimaryEmail() {
         return primaryEmail;
     }
 
     /**
-     * Primary mail address is the default email address of the user
+     * Sets the primary mail address of this user object. Primary mail address is the default email
+     * address of the user
+     * 
+     * @param primaryEmail A {@link String} containing the primary E-Mail address
      */
     final public void setPrimaryEmail(final String primaryEmail) {
         if (null == primaryEmail) {
@@ -1629,12 +1644,19 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.primaryEmail = primaryEmail;
     }
 
+    /**
+     * Return the last name of this user object
+     * 
+     * @return A {@link String} containing the last name
+     */
     final public String getSur_name() {
         return sur_name;
     }
 
     /**
-     * Last name of user
+     * Sets the last name of user object
+     * 
+     * @param sur_name A {@link String} containing the last name
      */
     final public void setSur_name(final String sur_name) {
         if (null == sur_name) {
@@ -1643,12 +1665,19 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.sur_name = sur_name;
     }
 
+    /**
+     * Returns the the first name of user
+     * 
+     * @return A {@link String} containing the first name
+     */
     final public String getGiven_name() {
         return given_name;
     }
 
     /**
-     * First name of user
+     * Sets the first name of user
+     * 
+     * @param given_name A {@link String} containing the first name
      */
     final public void setGiven_name(final String given_name) {
         if (null == given_name) {
@@ -1657,6 +1686,12 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.given_name = given_name;
     }
 
+    /**
+     * Sets the mailenabled flag of this user object. This allows the corresponding user to mail to the outside
+     * world
+     * 
+     * @param enabled A {@link Boolean} to activate/deactivate
+     */
     final public void setMailenabled(final Boolean enabled) {
         if (null == enabled) {
             this.mailenabledset = true;
@@ -1664,10 +1699,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.mailenabled = enabled;
     }
 
+    /**
+     * Returns the birthday of this user object
+     * 
+     * @return A {@link Date} containing the birthday
+     */
     final public Date getBirthday() {
         return birthday;
     }
 
+    /**
+     * Sets the birthday for this user object
+     * 
+     * @param birthday A {@link Date} containing the birthday
+     */
     final public void setBirthday(final Date birthday) {
         if (null == birthday) {
             this.birthdayset = true;
@@ -1675,10 +1720,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.birthday = birthday;
     }
 
+    /**
+     * Returns the anniversary of this user object
+     * 
+     * @return A {@link Date} containing the anniversary
+     */
     final public Date getAnniversary() {
         return anniversary;
     }
 
+    /**
+     * Sets the anniversary for this user object
+     * 
+     * @param anniversary A {@link Date} containing the anniversary
+     */
     final public void setAnniversary(final Date anniversary) {
         if (null == anniversary) {
             this.anniversaryset = true;
@@ -1686,10 +1741,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.anniversary = anniversary;
     }
 
+    /**
+     * Returns the branches of this user object
+     * 
+     * @return A {@link String} containing the branches
+     */
     final public String getBranches() {
         return branches;
     }
 
+    /**
+     * Sets the branches for this user object
+     * 
+     * @param branches A {@link String} containing the branches
+     */
     final public void setBranches(final String branches) {
         if (null == branches) {
             this.branchesset = true;
@@ -1697,10 +1762,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.branches = branches;
     }
 
+    /**
+     * Returns the business_category of this user object
+     * 
+     * @return A {@link String} containing the business_category
+     */
     final public String getBusiness_category() {
         return business_category;
     }
 
+    /**
+     * Sets the business_category for this user object
+     * 
+     * @param business_category A {@link String} containing the business_category
+     */
     final public void setBusiness_category(final String business_category) {
         if (null == business_category) {
             this.business_categoryset = true;
@@ -1708,10 +1783,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.business_category = business_category;
     }
 
+    /**
+     * Returns the postal_code_otherset of this user object
+     * 
+     * @return A {@link String} containing the postal_code_otherset
+     */
     final public String getPostal_code_business() {
         return postal_code_business;
     }
 
+    /**
+     * Sets the postal_code_business for this user object
+     * 
+     * @param postal_code_business A {@link String} containing the postal_code_otherset
+     */
     final public void setPostal_code_business(final String postal_code_business) {
         if (null == postal_code_business) {
             this.postal_code_businessset = true;
@@ -1719,10 +1804,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.postal_code_business = postal_code_business;
     }
 
+    /**
+     * Returns the state of the business of this user object
+     * 
+     * @return A {@link String} containing the state of the business
+     */
     final public String getState_business() {
         return state_business;
     }
 
+    /**
+     * Sets the state of the business for this user object
+     * 
+     * @param state_business A {@link String} containing the state of the business
+     */
     final public void setState_business(final String state_business) {
         if (null == state_business) {
             this.state_businessset = true;
@@ -1730,10 +1825,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.state_business = state_business;
     }
 
+    /**
+     * Returns the street of the business of this user object
+     * 
+     * @return A {@link String} containing the street of the business
+     */
     final public String getStreet_business() {
         return street_business;
     }
 
+    /**
+     * Sets the street of the business for this user object
+     * 
+     * @param street_business A {@link String} containing the street of the business
+     */
     final public void setStreet_business(final String street_business) {
         if (null == street_business) {
             this.street_businessset = true;
@@ -1741,10 +1846,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.street_business = street_business;
     }
 
+    /**
+     * Returns the telephone_callback of this user object
+     * 
+     * @return A {@link String} containing the telephone_callback
+     */
     final public String getTelephone_callback() {
         return telephone_callback;
     }
 
+    /**
+     * Sets the telephone_callback for this user object
+     * 
+     * @param telephone_callback A {@link String} containing the telephone_callback
+     */
     final public void setTelephone_callback(final String telephone_callback) {
         if (null == telephone_callback) {
             this.telephone_callbackset = true;
