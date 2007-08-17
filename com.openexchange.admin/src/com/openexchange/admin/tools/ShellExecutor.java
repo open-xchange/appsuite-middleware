@@ -57,6 +57,24 @@ import java.util.ArrayList;
 public class ShellExecutor {
 
     public class ArrayOutput {
+
+        /* (non-Javadoc)
+         * @see java.lang.Object#toString()
+         */
+        @Override
+        public String toString() {
+            String ret = "";
+            ret = "Stdout:\n";
+            for(final String line : stdOutput) {
+                ret += line;
+            }
+            ret = "Stderr:\n";
+            for(final String line : errOutput) {
+                ret += line;
+            }
+            return ret;
+        }
+
         public final ArrayList<String> errOutput = new ArrayList<String>();
 
         public final ArrayList<String> stdOutput = new ArrayList<String>();
