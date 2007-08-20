@@ -107,7 +107,9 @@ public abstract class EnforceableDataObject implements Serializable, Cloneable {
     public abstract String[] getMandatoryMembersRegister();
 
     /**
-     * @return
+     * Checks if the mandatory members for create are set for an object
+     * 
+     * @return true if they are set; false otherwise
      * @throws EnforceableDataObjectException
      */
     public boolean mandatoryCreateMembersSet() throws EnforceableDataObjectException {
@@ -115,7 +117,9 @@ public abstract class EnforceableDataObject implements Serializable, Cloneable {
     }
 
     /**
-     * @return
+     * Checks if the mandatory members for change are set for an object
+     * 
+     * @return true if they are set; false otherwise
      * @throws EnforceableDataObjectException
      */
     public boolean mandatoryChangeMembersSet() throws EnforceableDataObjectException {
@@ -123,7 +127,9 @@ public abstract class EnforceableDataObject implements Serializable, Cloneable {
     }
 
     /**
-     * @return
+     * Checks if the mandatory members for delete are set for an object
+     * 
+     * @return true if they are set; false otherwise
      * @throws EnforceableDataObjectException
      */
     public boolean mandatoryDeleteMembersSet() throws EnforceableDataObjectException {
@@ -131,7 +137,9 @@ public abstract class EnforceableDataObject implements Serializable, Cloneable {
     }
 
     /**
-     * @return
+     * Checks if the mandatory members for register are set for an object
+     * 
+     * @return true if they are set; false otherwise
      * @throws EnforceableDataObjectException
      */
     public boolean mandatoryRegisterMembersSet() throws EnforceableDataObjectException {
@@ -170,6 +178,13 @@ public abstract class EnforceableDataObject implements Serializable, Cloneable {
         }
     }
 
+    /**
+     * Returns those fields which are failing during a mandatory members check. This method is intended to be used
+     * after a call of {@link #mandatoryCreateMembersSet()}, {@link #mandatoryChangeMembersSet()},
+     * {@link #mandatoryDeleteMembersSet()} or {@link #mandatoryRegisterMembersSet()} to determine the missing fields
+     * 
+     * @return An {@link ArrayList<String>} containing the missing fields
+     */
     public ArrayList<String> getUnsetMembers() {
         return this.unset_members;
     }
@@ -286,7 +301,7 @@ public abstract class EnforceableDataObject implements Serializable, Cloneable {
     }
 
     /**
-     * 
+     * The default constructor
      */
     public EnforceableDataObject() {
         this.unset_members = new ArrayList<String>();

@@ -803,12 +803,17 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         return employeeTypeset;
     }
 
+    /**
+     * Currently not used
+     * 
+     * @return true if set; false if not
+     */
     final public Boolean getMailenabled() {
         return mailenabled;
     }
 
     /**
-     * Used to check if the mailenabled field of this user object has been changed
+     * Currently not used
      *
      * @return true if set; false if not
      **/
@@ -1687,8 +1692,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
     }
 
     /**
-     * Sets the mailenabled flag of this user object. This allows the corresponding user to mail to the outside
-     * world
+     * Currently not used
      * 
      * @param enabled A {@link Boolean} to activate/deactivate
      */
@@ -1867,10 +1871,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.telephone_callback = telephone_callback;
     }
 
+    /**
+     * Returns the city for the home location of this user object
+     * 
+     * @return A {@link String} containing the city for the home location 
+     */
     final public String getCity_home() {
         return city_home;
     }
 
+    /**
+     * Sets the city for the home location for this user object
+     * 
+     * @param city_home A {@link String} containing the city for the home location
+     */
     final public void setCity_home(final String city_home) {
         if (null == city_home) {
             this.city_homeset = true;
@@ -1878,10 +1892,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.city_home = city_home;
     }
 
+    /**
+     * Returns the commercial_register of this user object
+     * 
+     * @return A {@link String} containing commercial_register
+     */
     final public String getCommercial_register() {
         return commercial_register;
     }
 
+    /**
+     * Sets the commercial_register for this user object
+     * 
+     * @param commercial_register A {@link String} containing commercial_register
+     */
     final public void setCommercial_register(final String commercial_register) {
         if (null == commercial_register) {
             this.commercial_registerset = true;
@@ -1889,10 +1913,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.commercial_register = commercial_register;
     }
 
+    /**
+     * Returns the country of the home location of this user object
+     * 
+     * @return A {@link String} containing the country of the home location
+     */
     final public String getCountry_home() {
         return country_home;
     }
 
+    /**
+     * Sets the country of the home location for this user object
+     * 
+     * @param country_home A {@link String} containing the country of the home location
+     */
     final public void setCountry_home(final String country_home) {
         if (null == country_home) {
             this.country_homeset = true;
@@ -1900,10 +1934,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.country_home = country_home;
     }
 
+    /**
+     * Returns the company of this user object
+     * 
+     * @return A {@link String} containing the company
+     */
     final public String getCompany() {
         return company;
     }
 
+    /**
+     * Sets the company for this user object
+     * 
+     * @param company A {@link String} containing the company
+     */
     final public void setCompany(final String company) {
         if (null == company) {
             this.companyset = true;
@@ -1911,6 +1955,11 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.company = company;
     }
 
+    /**
+     * Returns the default group of this user object
+     * 
+     * @return A {@link Group} object containing the default group
+     */
     final public Group getDefault_group() {
         return default_group;
     }
@@ -1918,6 +1967,8 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
     /**
      * The default group when creating an user. If not supplied, a default group
      * is used.
+     * 
+     * @param default_group A {@link Group} object containing the default group
      */
     final public void setDefault_group(final Group default_group) {
         if (null == default_group) {
@@ -1926,10 +1977,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.default_group = default_group;
     }
 
+    /**
+     * Returns the department of this user object
+     * 
+     * @return A {@link String} containing the department
+     */
     final public String getDepartment() {
         return department;
     }
 
+    /**
+     * Sets the department for this user object
+     * 
+     * @param department A {@link String} containing the department
+     */
     final public void setDepartment(final String department) {
         if (null == department) {
             this.departmentset = true;
@@ -1937,10 +1998,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.department = department;
     }
 
+    /**
+     * Returns the display name of this user object
+     * 
+     * @return A {@link String} containing the display name
+     */
     final public String getDisplay_name() {
         return display_name;
     }
 
+    /**
+     * Sets the display name for this user object
+     * 
+     * @param display_name A {@link String} containing the display name
+     */
     final public void setDisplay_name(final String display_name) {
         if (null == display_name) {
             this.display_nameset = true;
@@ -1948,12 +2019,19 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.display_name = display_name;
     }
 
+    /**
+     * Returns the home E-Mail of this user object
+     * 
+     * @return A {@link String} containing the home E-Mail
+     */
     final public String getEmail2() {
         return email2;
     }
 
     /**
-     * Email (home)
+     * Sets the home E-Mail for this user object
+     * 
+     * @param email2 A {@link String} containing the home E-Mail 
      */
     final public void setEmail2(final String email2) {
         if (null == email2) {
@@ -1962,12 +2040,19 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.email2 = email2;
     }
 
+    /**
+     * Returns the E-Mail (other) of this user object
+     * 
+     * @return A {@link String} containing the E-Mail (other)
+     */
     final public String getEmail3() {
         return email3;
     }
 
     /**
-     * Email (other)
+     * Sets the E-Mail (other) for this user object
+     * 
+     * @param email3 A {@link String} containing the E-Mail (other)
      */
     final public void setEmail3(final String email3) {
         if (null == email3) {
@@ -1976,12 +2061,19 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.email3 = email3;
     }
 
+    /**
+     * Returns the job title of this user object
+     * 
+     * @return A {@link String} containing the job title
+     */
     final public String getEmployeeType() {
         return employeeType;
     }
 
     /**
-     * Job title
+     * Sets the job title for this user object
+     * 
+     * @param employeeType A {@link String} containing the job title 
      */
     final public void setEmployeeType(final String employeeType) {
         if (null == employeeType) {
@@ -1990,10 +2082,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.employeeType = employeeType;
     }
 
+    /**
+     * Returns the fax number for the business location of this user object
+     * 
+     * @return A {@link String} containing the fax number for the business location 
+     */
     final public String getFax_business() {
         return fax_business;
     }
 
+    /**
+     * Sets the fax number for the business location for this user object
+     * 
+     * @param fax_business A {@link String} containing the fax number for the business location  
+     */
     final public void setFax_business(final String fax_business) {
         if (null == fax_business) {
             this.fax_businessset = true;
@@ -2001,10 +2103,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.fax_business = fax_business;
     }
 
+    /**
+     * Returns the fax number for the home location of this user object
+     * 
+     * @return A {@link String} containing the fax number for the home location 
+     */
     final public String getFax_home() {
         return fax_home;
     }
 
+    /**
+     * Sets the fax number for the home location for this user object
+     * 
+     * @param fax_home A {@link String} containing the fax number for the home location  
+     */
     final public void setFax_home(final String fax_home) {
         if (null == fax_home) {
             this.fax_homeset = true;
@@ -2012,10 +2124,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.fax_home = fax_home;
     }
 
+    /**
+     * Returns the fax number for a further location of this user object
+     * 
+     * @return A {@link String} containing the fax number for a further location 
+     */
     final public String getFax_other() {
         return fax_other;
     }
 
+    /**
+     * Sets the fax number for a further location for this user object
+     * 
+     * @param fax_other A {@link String} containing the fax number for a further location  
+     */
     final public void setFax_other(final String fax_other) {
         if (null == fax_other) {
             this.fax_otherset = true;
@@ -2023,6 +2145,11 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.fax_other = fax_other;
     }
 
+    /**
+     * Returns the port of the imap server of this user object
+     * 
+     * @return An {@link int} containing the port number
+     */
     final public int getImapPort() {
         // we should be open to the future and accept values like
         // hostname:port
@@ -2035,6 +2162,11 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         return 143;
     }
 
+    /**
+     * Returns the hostname for the imap server of this user object
+     * 
+     * @return A {@link String} containing the hostname for the imap server
+     */
     final public String getImapServer() {
         // we should be open to the future and accept values like
         // hostname:port
@@ -2049,12 +2181,14 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
     }
     
     /**
-     * Set the users imapserver if not localhost should be used. Syntax of
-     * imapserver String: HOSTNAME[:PORT] if PORT is omitted, the default port
+     * Sets the users imap server if not localhost should be used. Syntax of
+     * imap server String: HOSTNAME[:PORT] if PORT is omitted, the default port
      * is used
      * 
-     * Note: to get used imapserver and port, the methods getImapPort and
+     * Note: to get used imap server and port, the methods getImapPort and
      * getImapServer are used
+     * 
+     * @param imapServer A {@link String} containing the imap server
      */
     final public void setImapServer(final String imapServer) {
         if (null == imapServer) {
@@ -2063,6 +2197,11 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.imapServer = imapServer;
     }
 
+    /**
+     * Sets the login for the imap server for this user object
+     * 
+     * @param imapLogin A {@link String} containing the login
+     */
     final public void setImapLogin(final String imapLogin) {
         if (null == imapLogin) {
             this.imapLoginset = true;
@@ -2070,10 +2209,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.imapLogin = imapLogin;
     }
 
+    /**
+     * Returns the login for the imap server of this user object
+     * 
+     * @return A {@link String} containing the login
+     */
     final public String getImapLogin() {
         return this.imapLogin;
     }
 
+    /**
+     * Returns the hostname for the smtp server of this user object
+     * 
+     * @return A {@link String} containing the hostname for the smtp server
+     */
     final public String getSmtpServer() {
         // we should be open to the future and accept values like
         // hostname:port
@@ -2088,12 +2237,14 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
     }
 
     /**
-     * Set the users smtpserver if not localhost should be used. Syntax of
-     * smtpserver String: HOSTNAME[:PORT] if PORT is omitted, the default port
+     * Set the users smtp server if not localhost should be used. Syntax of
+     * smtp server String: HOSTNAME[:PORT] if PORT is omitted, the default port
      * is used
      * 
-     * Note: to get used smtpserver and port, the methods getSmtpPort and
+     * Note: to get used smtp server and port, the methods getSmtpPort and
      * getSmtpServer are used
+     * 
+     * @param smtpServer A {@link String} containting the smtp server
      */
     final public void setSmtpServer(final String smtpServer) {
         if (null == smtpServer) {
@@ -2102,6 +2253,11 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.smtpServer = smtpServer;
     }
 
+    /**
+     * Returns the port for the smtp server of this user object
+     * 
+     * @return An {@link int} containing the port for the smtp server
+     */
     final public int getSmtpPort() {
         // we should be open to the future and accept values like
         // hostname:port
@@ -2114,12 +2270,19 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         return 25;
     }
 
+    /**
+     * Returns the instant messenger address for the business location of this user
+     * 
+     * @return A {@link String} containing the instant messenger address
+     */
     final public String getInstant_messenger1() {
         return instant_messenger1;
     }
 
     /**
-     * Instant messenger (business)
+     * Sets the instant messenger address for the business location of this user
+     * 
+     * @param instant_messenger1 A {@link String} containing the instant messenger address
      */
     final public void setInstant_messenger1(final String instant_messenger1) {
         if (null == instant_messenger1) {
