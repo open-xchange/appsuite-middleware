@@ -36,7 +36,11 @@ public class PortalSearchTest extends AppointmentTest {
 		calendar.add(Calendar.YEAR, 1);
 		
 		final Date end = calendar.getTime();
-			
+		
+		final AppointmentObject appointmentObj = createAppointmentObject("testNewAppointmentsSearch");
+
+		final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
+		
 		final AJAXSession ajaxSession = new AJAXSession(getWebConversation(), getSessionId());
 		final NewAppointmentSearchRequest request = new NewAppointmentSearchRequest(start, end, 5, timeZone);
 		final NewAppointmentSearchResponse response = (NewAppointmentSearchResponse)Executor.execute(ajaxSession, request);
@@ -46,6 +50,17 @@ public class PortalSearchTest extends AppointmentTest {
 		}
 		
 		final AppointmentObject[] appointmentArray = response.getAppointments();
+		
+		boolean found = false;
+		for (int a = 0; a < appointmentArray.length; a++) {
+			if (appointmentArray[a].getObjectID() == objectId) {
+				found = true;
+			}
+		}
+		
+		assertTrue("object with id " + objectId + " not found in response", found);
+		
+		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId());
     }
 }
 
