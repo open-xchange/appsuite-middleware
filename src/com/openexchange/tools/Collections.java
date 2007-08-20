@@ -75,7 +75,7 @@ public final class Collections {
     private static final Log LOG = LogFactory.getLog(Collections.class);
 
 	/**
-	 * Prevent instanciation.
+	 * Prevent instantiation
 	 */
 	private Collections() {
 		super();

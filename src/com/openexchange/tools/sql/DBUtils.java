@@ -80,7 +80,7 @@ public final class DBUtils {
 	private static final Log LOG = LogFactory.getLog(DBUtils.class);
 
 	/**
-	 * Prevent instanciation.
+	 * Prevent instantiation
 	 */
 	private DBUtils() {
 		super();

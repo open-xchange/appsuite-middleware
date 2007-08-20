@@ -72,7 +72,7 @@ public final class UserTools {
     private static final String HASH_ALGO = "SHA-1";
 
     /**
-     * Prevent instanciation.
+     * Prevent instantiation
      */
     private UserTools() {
         super();

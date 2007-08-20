@@ -56,7 +56,7 @@ package com.openexchange.groupware.i18n;
 public final class Groups {
 
     /**
-     * Prevent instanciation.
+     * Prevent instantiation
      */
     private Groups() {
         super();

@@ -69,7 +69,7 @@ import com.openexchange.tools.oxfolder.OXFolderTools;
 public final class Permission {
 
     /**
-     * Prevent instanciation.
+     * Prevent instantiation
      */
     private Permission() {
         super();

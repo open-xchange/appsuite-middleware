@@ -151,7 +151,7 @@ public class RdbTaskStorage extends TaskStorage {
     private static final String NO_PRIVATE = " AND private=false";
 
     /**
-     * Prevent instanciation.
+     * Prevent instantiation
      */
     RdbTaskStorage() {
         super();

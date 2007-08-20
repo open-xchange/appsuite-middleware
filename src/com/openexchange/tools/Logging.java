@@ -60,7 +60,7 @@ import com.openexchange.groupware.AbstractOXException;
 public final class Logging {
 
     /**
-     * Prevent instanciation.
+     * Prevent instantiation
      */
     private Logging() {
         super();

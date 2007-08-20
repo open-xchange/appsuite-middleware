@@ -60,7 +60,7 @@ import com.openexchange.groupware.AbstractOXException;
 public final class ConfigurationInit {
 
     /**
-     * Prevent instanciation.
+     * Prevent instantiation
      */
     private ConfigurationInit() {
         super();

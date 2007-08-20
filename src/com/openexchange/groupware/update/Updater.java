@@ -86,13 +86,13 @@ public abstract class Updater {
     /**
      * Factory method to get an updater.
      * @return the updater.
-     * @throws UpdateException if instanciating the implementation fails.
+     * @throws UpdateException if instantiating the implementation fails.
      */
     @OXThrows(
         category = Category.SETUP_ERROR,
         desc = "",
         exceptionId = 1,
-        msg = "Cannot instanciate updater implementation %1$s."
+        msg = "Cannot instantiate updater implementation %1$s."
     )
     public static Updater getInstance() throws UpdateException {
         try {

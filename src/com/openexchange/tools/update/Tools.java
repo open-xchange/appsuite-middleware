@@ -63,7 +63,7 @@ import com.openexchange.tools.sql.DBUtils;
 public final class Tools {
 
     /**
-     * Prevent instanciation.
+     * Prevent instantiation
      */
     private Tools() {
         super();

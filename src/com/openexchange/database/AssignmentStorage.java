@@ -103,7 +103,7 @@ public final class AssignmentStorage {
     private static JCS CACHE;
 
     /**
-     * Prevent instanciation.
+     * Prevent instantiation
      */
     private AssignmentStorage() {
         super();

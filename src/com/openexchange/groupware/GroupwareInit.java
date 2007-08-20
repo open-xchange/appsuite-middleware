@@ -69,7 +69,7 @@ import com.openexchange.sessiond.SessiondInit;
 public final class GroupwareInit {
 
     /**
-     * Prevent instanciation.
+     * Prevent instantiation
      */
     private GroupwareInit() {
         super();

@@ -68,7 +68,7 @@ public final class OrderFields {
     private static final Map<String, Order> PARSE_MAP;
 
     /**
-     * Prevent instanciation.
+     * Prevent instantiation.
      */
     private OrderFields() {
         super();

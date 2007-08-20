@@ -83,7 +83,7 @@ public final class CacheProxy {
     }
 
     /**
-     * Prevent instanciation.
+     * Prevent instantiation.
      */
     private CacheProxy() {
         super();

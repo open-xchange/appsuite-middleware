@@ -63,7 +63,7 @@ import javax.net.ssl.X509TrustManager;
 public class TrustAllManager implements X509TrustManager {
 
    /**
-    * Friendly constructor to allow instanciation only for the
+    * Friendly constructor to allow instantiation only for the
     * TrustAllSSLSocketFactory.
     */
    TrustAllManager() {

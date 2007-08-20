@@ -74,7 +74,7 @@ public final class ParticipantConfig extends AbstractConfig {
     private static final ParticipantConfig SINGLETON = new ParticipantConfig();
 
     /**
-     * Prevent instanciation.
+     * Prevent instantiation
      */
     private ParticipantConfig() {
         super();

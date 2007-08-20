@@ -68,7 +68,7 @@ public final class Task2Links {
     private static final Log LOG = LogFactory.getLog(Task2Links.class);
 
     /**
-     * Prevent instanciation.
+     * Prevent instantiation
      */
     private Task2Links() {
         super();

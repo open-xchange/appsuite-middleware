@@ -123,7 +123,7 @@ public final class Tools {
 	private static final String PRAGMA_VALUE = "no-cache";
 
 	/**
-	 * Prevent instanciation.
+	 * Prevent instantiation
 	 */
 	private Tools() {
 		super();

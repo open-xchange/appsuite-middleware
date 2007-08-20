@@ -74,7 +74,7 @@ public final class ConnectionDataStorage {
         + "WHERE db_pool_id=?";
 
     /**
-     * Prevent instanciation.
+     * Prevent instantiation
      */
     private ConnectionDataStorage() {
         super();

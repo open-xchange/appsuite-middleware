@@ -65,7 +65,7 @@ import java.util.Map;
 public final class Mapping {
 
     /**
-     * Prevent instanciation.
+     * Prevent instantiation
      */
     private Mapping() {
         super();

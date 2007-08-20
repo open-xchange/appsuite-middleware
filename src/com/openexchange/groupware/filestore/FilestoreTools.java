@@ -75,7 +75,7 @@ public final class FilestoreTools {
         new FilestoreExceptionFactory(FilestoreTools.class);
 
     /**
-     * Prevent instanciation. 
+     * Prevent instantiation 
      */
     private FilestoreTools() {
         super();

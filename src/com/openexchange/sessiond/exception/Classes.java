@@ -66,7 +66,7 @@ public final class Classes {
     public static final int SESSION_SERVLET = 2;
 
     /**
-     * Prevent instanciation.
+     * Prevent instantiation
      */
     private Classes() {
         super();

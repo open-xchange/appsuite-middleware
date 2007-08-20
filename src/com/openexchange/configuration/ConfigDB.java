@@ -70,7 +70,7 @@ public final class ConfigDB {
     private static Properties writeProps;
 
     /**
-     * Prevent instanciation.
+     * Prevent instantiation
      */
     private ConfigDB() {
         super();

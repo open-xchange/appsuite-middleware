@@ -67,7 +67,7 @@ public final class LocaleTools {
 			.compile("(\\p{Lower}{2})(?:_(\\p{Upper}{2}))?(?:_([a-zA-Z]{2}))?");
 
 	/**
-	 * Prevent instanciation.
+	 * Prevent instantiation
 	 */
 	private LocaleTools() {
 		super();

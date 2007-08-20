@@ -103,7 +103,7 @@ public final class TaskLogic {
     private static final Log LOG = LogFactory.getLog(TaskLogic.class);
 
     /**
-     * Prevent instanciation.
+     * Prevent instantiation
      */
     private TaskLogic() {
         super();

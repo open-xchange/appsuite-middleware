@@ -82,7 +82,7 @@ public final class IMAPConnectionWatcher {
 	private static final Lock LOCK = new ReentrantLock();
 
 	/**
-	 * Prevent instanciation
+	 * Prevent instantiation
 	 */
 	private IMAPConnectionWatcher() {
 		super();

@@ -68,7 +68,7 @@ public final class GroupTools {
     static final Group GROUP_ZERO;
 
     /**
-     * Prevent instanciation.
+     * Prevent instantiation
      */
     private GroupTools() {
         super();

@@ -70,7 +70,7 @@ import com.openexchange.tools.Collections;
 public class ConfigDBStorage {
 
 	/*
-	 * Prevent instanciation
+	 * Prevent instantiation
 	 */
 	private ConfigDBStorage() {
 		super();

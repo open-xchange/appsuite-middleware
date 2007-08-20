@@ -82,7 +82,7 @@ public final class Configuration {
     private static final Log LOG = LogFactory.getLog(Configuration.class);
 
     /**
-     * Private constructor prevents instanciation.
+     * Private constructor prevents instantiation.
      */
     private Configuration() {
         super();

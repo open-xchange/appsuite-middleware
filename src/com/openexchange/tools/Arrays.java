@@ -56,7 +56,7 @@ package com.openexchange.tools;
 public final class Arrays {
 
     /**
-     * Prevent instanciation.
+     * Prevent instantiation
      */
     private Arrays() {
         super();

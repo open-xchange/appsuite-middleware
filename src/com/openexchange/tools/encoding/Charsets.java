@@ -70,7 +70,7 @@ public final class Charsets {
     public static final Charset UTF_8 = Charset.forName("UTF-8");
 
     /**
-     * Prevent instanciation.
+     * Prevent instantiation
      */
     private Charsets() {
         super();

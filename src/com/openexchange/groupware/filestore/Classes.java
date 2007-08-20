@@ -62,7 +62,7 @@ public final class Classes {
     public static final int RDB_FILESTORE_STORAGE = 3;
 
     /**
-     * Prevent instanciation.
+     * Prevent instantiation
      */
     private Classes() {
         super();

@@ -77,7 +77,7 @@ public abstract class SetupLink {
     /**
      * Factory method for an instance of SetupLink.
      * @return an instance implementing the getLink() method.
-     * @throws SetupLinkException if instanciation fails.
+     * @throws SetupLinkException if instantiation fails.
      */
     public static SetupLink getInstance() throws SetupLinkException {
         SetupLink instance = null;
@@ -85,9 +85,9 @@ public abstract class SetupLink {
             instance = implementingClass.newInstance();
             instance.initialize();
         } catch (InstantiationException e) {
-            throw new SetupLinkException(Code.INSTANCIATION_FAILED, e);
+            throw new SetupLinkException(Code.INSTANTIATION_FAILED, e);
         } catch (IllegalAccessException e) {
-            throw new SetupLinkException(Code.INSTANCIATION_FAILED, e);
+            throw new SetupLinkException(Code.INSTANTIATION_FAILED, e);
         }
         return instance;
     }

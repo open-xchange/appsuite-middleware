@@ -92,7 +92,7 @@ public abstract class SchemaStore {
 	 * @return an implementation for this interface.
 	 */
 	@OXThrowsMultiple(category = { Category.SETUP_ERROR, Category.SETUP_ERROR }, desc = { "", "" }, exceptionId = { 1,
-			2 }, msg = { "Class %1$s can not be loaded.", "Cannot instanciate class %1$s." })
+			2 }, msg = { "Class %1$s can not be loaded.", "Cannot instantiate class %1$s." })
 	public static SchemaStore getInstance(final String className) throws SchemaException {
 		try {
 			synchronized (SchemaStore.class) {

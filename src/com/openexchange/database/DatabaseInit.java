@@ -68,7 +68,7 @@ public final class DatabaseInit {
     private static final Log LOG = LogFactory.getLog(DatabaseInit.class);
 
     /**
-     * Prevent instanciation.
+     * Prevent instantiation
      */
     private DatabaseInit() {
         super();

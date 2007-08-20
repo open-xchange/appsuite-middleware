@@ -80,7 +80,7 @@ public class GenericImplConfig extends AbstractConfig {
     private static final GenericImplConfig SINGLETON = new GenericImplConfig();
     
     /**
-     * Prevent instanciation.
+     * Prevent instantiation
      */
     private GenericImplConfig() {
         super();

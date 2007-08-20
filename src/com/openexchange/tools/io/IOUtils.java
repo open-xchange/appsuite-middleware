@@ -69,7 +69,7 @@ public final class IOUtils {
     private static final Log LOG = LogFactory.getLog(IOUtils.class);
     
     /**
-     * Prevent instanciation.
+     * Prevent instantiation
      */
     private IOUtils() {
         super();

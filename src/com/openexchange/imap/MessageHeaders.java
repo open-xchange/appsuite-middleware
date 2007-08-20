@@ -58,7 +58,7 @@ package com.openexchange.imap;
 public class MessageHeaders {
 
 	/**
-	 * Prevent instanciation
+	 * Prevent instantiation
 	 */
 	private MessageHeaders() {
 		super();

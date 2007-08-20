@@ -57,7 +57,7 @@ package com.openexchange.tools.encoding;
 public class Base64 {
     
 	/**
-     * Prevent instanciation.
+     * Prevent instantiation
 	 */
     private Base64() {
 		super();

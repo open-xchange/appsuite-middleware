@@ -106,7 +106,7 @@ public final class Pools implements Runnable {
     private static final Lock lock = new ReentrantLock(true);
 
     /**
-     * Prevent instanciation.
+     * Prevent instantiation
      */
     private Pools() {
         super();

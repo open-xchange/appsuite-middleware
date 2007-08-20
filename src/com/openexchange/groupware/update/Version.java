@@ -61,7 +61,7 @@ public final class Version {
     public static final int NUMBER = 0;
 
     /**
-     * Prevent instanciation.
+     * Prevent instantiation
      */
     private Version() {
         super();

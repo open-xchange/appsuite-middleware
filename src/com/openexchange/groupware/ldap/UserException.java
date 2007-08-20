@@ -146,9 +146,9 @@ public class UserException extends AbstractOXException {
         CLASS_NOT_FOUND("Class %s can not be loaded.", Category.SETUP_ERROR,
             Detail.ERROR, 3),
         /**
-         * An implementation can not be instanciated.
+         * An implementation can not be instantiated.
          */
-        INSTANCIATION_PROBLEM("Cannot instanciate class %s.",
+        INSTANTIATION_PROBLEM("Cannot instantiate class %s.",
             Category.SETUP_ERROR, Detail.ERROR, 4),
         /**
          * A database connection cannot be obtained.

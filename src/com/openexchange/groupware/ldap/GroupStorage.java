@@ -92,7 +92,7 @@ public abstract class GroupStorage {
     private static Class<? extends GroupStorage> implementingClass;
 
     /**
-     * Private constructor to prevent instanciation.
+     * Private constructor to prevent instantiation.
      */
     protected GroupStorage() {
         super();

@@ -112,9 +112,9 @@ public class SetupLinkException extends AbstractOXException {
         COMMUNICATION("Problem while communicating with external "
             + "authorization.", Category.SUBSYSTEM_OR_SERVICE_DOWN, 3),
        /**
-         * Instanciating the class failed.
+         * Instantiating the class failed.
          */
-        INSTANCIATION_FAILED("Instanciating the class failed.",
+        INSTANTIATION_FAILED("Instantiating the class failed.",
             Category.CODE_ERROR, 4),
         /**
          * Class %1$s can not be found.

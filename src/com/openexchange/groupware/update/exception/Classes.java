@@ -104,7 +104,7 @@ public final class Classes {
     public static final int TASK_NEW_ADMIN_EXTENSIONS = 9;
 
     /**
-     * Prevent instanciation.
+     * Prevent instantiation
      */
     private Classes() {
         super();

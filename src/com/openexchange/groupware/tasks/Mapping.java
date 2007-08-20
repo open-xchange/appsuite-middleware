@@ -71,7 +71,7 @@ import com.openexchange.groupware.tasks.mapping.Status;
 public final class Mapping {
 
     /**
-     * Prevent instanciation.
+     * Prevent instantiation
      */
     private Mapping() {
         super();

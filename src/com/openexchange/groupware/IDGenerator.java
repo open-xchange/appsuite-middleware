@@ -89,7 +89,7 @@ public final class IDGenerator {
     private static final IGetId GETID_IMPL;
 
     /**
-     * Private constructor prevents instanciation.
+     * Private constructor prevents instantiation.
      */
     private IDGenerator() {
         super();

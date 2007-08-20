@@ -68,7 +68,7 @@ public final class Status implements Mapper<Integer> {
     public static final Mapper<Integer> SINGLETON = new Status();
 
     /**
-     * Prevent instanciation.
+     * Prevent instantiation
      */
     private Status() {
         super();

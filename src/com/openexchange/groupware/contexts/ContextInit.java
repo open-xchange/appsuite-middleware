@@ -60,7 +60,7 @@ import com.openexchange.groupware.AbstractOXException;
 public final class ContextInit {
 
     /**
-     * Prevent instanciation.
+     * Prevent instantiation
      */
     private ContextInit() {
         super();

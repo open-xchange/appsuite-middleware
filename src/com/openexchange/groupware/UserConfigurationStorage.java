@@ -165,7 +165,7 @@ public abstract class UserConfigurationStorage {
 	 * @return an instance implementing the
 	 *         <code>UserConfigurationStorage</code> interface
 	 * @throws UserConfigurationException
-	 *             if instanciation fails.
+	 *             if instantiation fails.
 	 */
 	public static UserConfigurationStorage getInstance() throws UserConfigurationException {
 		if (!initialized) {
@@ -177,9 +177,9 @@ public abstract class UserConfigurationStorage {
 						singleton = implementingClass.newInstance();
 						initialized = true;
 					} catch (final InstantiationException e) {
-						throw new UserConfigurationException(UserConfigurationCode.INSTANCIATION_FAILED, e);
+						throw new UserConfigurationException(UserConfigurationCode.INSTANTIATION_FAILED, e);
 					} catch (final IllegalAccessException e) {
-						throw new UserConfigurationException(UserConfigurationCode.INSTANCIATION_FAILED, e);
+						throw new UserConfigurationException(UserConfigurationCode.INSTANTIATION_FAILED, e);
 					}
 				}
 			} finally {

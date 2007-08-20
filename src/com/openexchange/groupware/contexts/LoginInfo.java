@@ -79,17 +79,17 @@ public abstract class LoginInfo {
     /**
      * Creates an instance implementing the login info.
      * @return an instance implementing the login info.
-     * @throws LoginException if instanciation fails.
+     * @throws LoginException if instantiation fails.
      */
     public static LoginInfo getInstance() throws LoginException {
         LoginInfo instance = null;
         try {
             instance = implementingClass.newInstance();
         } catch (InstantiationException e) {
-            throw new LoginException(LoginException.Code.INSTANCIATION_FAILED,
+            throw new LoginException(LoginException.Code.INSTANTIATION_FAILED,
                 e);
         } catch (IllegalAccessException e) {
-            throw new LoginException(LoginException.Code.INSTANCIATION_FAILED,
+            throw new LoginException(LoginException.Code.INSTANTIATION_FAILED,
                 e);
         }
         return instance;

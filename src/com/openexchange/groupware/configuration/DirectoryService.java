@@ -160,7 +160,7 @@ public final class DirectoryService {
    private static boolean writeSameAsRead = false;
 
    /**
-    * Private constructor prevents instanciation.
+    * Private constructor prevents instantiation.
     */
    private DirectoryService() {
        super();

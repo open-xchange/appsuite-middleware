@@ -71,7 +71,7 @@ public final class SystemConfig extends AbstractConfig {
     private static SystemConfig singleton;
 
     /**
-     * Prevent instanciation.
+     * Prevent instantiation
      */
     private SystemConfig() {
         super();

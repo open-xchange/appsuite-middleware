@@ -163,9 +163,9 @@ public class LoginException extends AbstractOXException {
         INVALID_CREDENTIALS("Invalid credentials.", Category.USER_INPUT,
             Source.USER, 6),
         /**
-         * Instanciating the class failed.
+         * Instantiating the class failed.
          */
-        INSTANCIATION_FAILED("Instanciating the class failed.",
+        INSTANTIATION_FAILED("Instantiating the class failed.",
             Category.CODE_ERROR, Source.SYSTEM, 7),
         /**
          * Class %1$s can not be found.

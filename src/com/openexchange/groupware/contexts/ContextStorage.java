@@ -88,7 +88,7 @@ public abstract class ContextStorage {
     }
 
     /**
-     * Instanciates an implementation of the context interface and fill its
+     * Instantiates an implementation of the context interface and fill its
      * attributes according to the needs to be able to seperate contexts.
      * @param loginContextInfo the login info for the context.
      * @return the unique identifier of the context or <code>-1</code> if no

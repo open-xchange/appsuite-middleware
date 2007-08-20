@@ -94,7 +94,7 @@ public final class Tools {
     private static final Log LOG = LogFactory.getLog(Tools.class);
     
     /**
-     * Prevent instanciation.
+     * Prevent instantiation
      */
     private Tools() {
         super();

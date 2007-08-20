@@ -78,9 +78,9 @@ public class UserConfigurationException extends OXException {
 		 */
 		CLASS_NOT_FOUND("Class %1$s can not be found.", Category.SETUP_ERROR, 5),
 		/**
-		 * Instanciating the class failed.
+		 * Instantiating the class failed.
 		 */
-		INSTANCIATION_FAILED("Instanciating the class failed.", Category.CODE_ERROR, 6),
+		INSTANTIATION_FAILED("Instantiating the class failed.", Category.CODE_ERROR, 6),
 		/**
 		 * Cache initialization failed. Region: %1$s
 		 */

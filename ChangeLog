@@ -2,6 +2,8 @@
 
  - Bugfix #8921: Fixed indexing of mail default folders dependent on spam
    activation
+ - Bugfix #8937: Fixed typo by replacing all occurences of "instanciat"
+   with "instantiat"
 
 * 2007-08-17 - marcus.klein@open-xchange.com
 

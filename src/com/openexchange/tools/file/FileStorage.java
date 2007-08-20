@@ -150,7 +150,7 @@ public abstract class FileStorage {
      * filestorage.
      * @return a file storage implementation.
      * @throws FileStorageException if the file storage implementation can't be
-     * instanciated.
+     * instantiated.
      */
     public static final FileStorage getInstance(final Object... initData)
         throws FileStorageException {
@@ -166,7 +166,7 @@ public abstract class FileStorage {
      * filestorage.
      * @return a file storage implementation.
      * @throws IOException if the file storage implementation can't be
-     * instanciated.
+     * instantiated.
      */
     public static final FileStorage getInstance(final int depth,
         final int entries, final Object... initData)

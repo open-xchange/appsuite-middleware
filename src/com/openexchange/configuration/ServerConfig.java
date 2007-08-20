@@ -93,7 +93,7 @@ public final class ServerConfig extends AbstractConfig {
 	private String jmxBindAddress;
 
 	/**
-	 * Prevent instanciation.
+	 * Prevent instantiation
 	 */
 	private ServerConfig() {
 		super();

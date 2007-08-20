@@ -104,7 +104,7 @@ public final class ConfigTree {
     private static Map<String, SharedValue> readers;
 
     /**
-     * Prevent instanciation.
+     * Prevent instantiation
      */
     private ConfigTree() {
         super();

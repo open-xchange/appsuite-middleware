@@ -84,7 +84,7 @@ public final class Server {
     private static int serverId = -1;
 
     /**
-     * Prevent instanciation.
+     * Prevent instantiation
      */
     private Server() {
         super();

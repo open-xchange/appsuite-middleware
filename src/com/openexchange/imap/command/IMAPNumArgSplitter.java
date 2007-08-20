@@ -72,7 +72,7 @@ public final class IMAPNumArgSplitter {
 	}
 
 	/**
-	 * Prevent instanciation
+	 * Prevent instantiation
 	 */
 	private IMAPNumArgSplitter() {
 		super();

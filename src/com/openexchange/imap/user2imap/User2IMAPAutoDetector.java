@@ -85,7 +85,7 @@ public final class User2IMAPAutoDetector {
 	private static final String CHARSET_US_ASCII = "US-ASCII";
 
 	/**
-	 * Prevent instanciation
+	 * Prevent instantiation
 	 */
 	private User2IMAPAutoDetector() {
 		super();

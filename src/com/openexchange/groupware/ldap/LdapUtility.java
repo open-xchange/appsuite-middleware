@@ -90,7 +90,7 @@ public final class LdapUtility {
     private static final Map<String, String> EMPTY_MAP = Collections.emptyMap();
 
     /**
-     * Private constructor prevents instanciation.
+     * Private constructor prevents instantiation.
      */
     private LdapUtility() {
         super();
@@ -338,7 +338,7 @@ public final class LdapUtility {
     /**
      * Creates a new instance implementing the resources interface.
      * @param <T> Type of the class.
-     * @param clazz class that should be instanciated.
+     * @param clazz class that should be instantiated.
      * @param context Context.
      * @return an instance implementing the resources interface.
      * @throws LdapException if the instance can't be created.
@@ -353,22 +353,22 @@ public final class LdapUtility {
                     .class });
             return cons.newInstance(new Object[] { context });
         } catch (SecurityException e) {
-            throw new LdapException(Component.LDAP, Code.INSTANCIATION_PROBLEM,
+            throw new LdapException(Component.LDAP, Code.INSTANTIATION_PROBLEM,
                 e, clazz.getName());
         } catch (NoSuchMethodException e) {
-            throw new LdapException(Component.LDAP, Code.INSTANCIATION_PROBLEM,
+            throw new LdapException(Component.LDAP, Code.INSTANTIATION_PROBLEM,
                 e, clazz.getName());
         } catch (InstantiationException e) {
-            throw new LdapException(Component.LDAP, Code.INSTANCIATION_PROBLEM,
+            throw new LdapException(Component.LDAP, Code.INSTANTIATION_PROBLEM,
                 e, clazz.getName());
         } catch (IllegalAccessException e) {
-            throw new LdapException(Component.LDAP, Code.INSTANCIATION_PROBLEM,
+            throw new LdapException(Component.LDAP, Code.INSTANTIATION_PROBLEM,
                 e, clazz.getName());
         } catch (IllegalArgumentException e) {
-            throw new LdapException(Component.LDAP, Code.INSTANCIATION_PROBLEM,
+            throw new LdapException(Component.LDAP, Code.INSTANTIATION_PROBLEM,
                 e, clazz.getName());
         } catch (InvocationTargetException e) {
-            throw new LdapException(Component.LDAP, Code.INSTANCIATION_PROBLEM,
+            throw new LdapException(Component.LDAP, Code.INSTANTIATION_PROBLEM,
                 e, clazz.getName());
         }
     }

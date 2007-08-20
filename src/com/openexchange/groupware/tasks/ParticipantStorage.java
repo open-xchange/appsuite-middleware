@@ -78,7 +78,7 @@ abstract class ParticipantStorage {
         new RdbParticipantStorage();
 
     /**
-     * Prevent instanciation.
+     * Prevent instantiation
      */
     protected ParticipantStorage() {
         super();

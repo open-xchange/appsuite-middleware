@@ -192,7 +192,7 @@ public final class SQL {
         new EnumMap<StorageType, String>(StorageType.class);
 
     /**
-     * Prevent instanciation.
+     * Prevent instantiation
      */
     private SQL() {
         super();
