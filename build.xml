@@ -249,7 +249,7 @@
             author="true"
             public="true"
             Windowtitle="ox_admin_interface">
-        	<Header><![CDATA[<img src="${prefix}/doc/oxadmin/resources/OX_Logo.jpg">]]></Header>
+        	<Header><![CDATA[<img src="{@docRoot}/resources/OX_Logo.jpg">]]></Header>
             <fileset dir="src/com/openexchange/admin/rmi" defaultexcludes="yes">
 				<include name="*Interface*"/>
 				<include name="dataobjects/*"/>
