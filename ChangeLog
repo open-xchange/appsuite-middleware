@@ -1,3 +1,8 @@
+* 2007-08-20 - thorben.betten@open-xchange.com
+
+ - Bugfix #8921: Fixed indexing of mail default folders dependent on spam
+   activation
+
 * 2007-08-17 - marcus.klein@open-xchange.com
 
  - Bugfix #8934: Switched deleting user folder mapping and inserting admin

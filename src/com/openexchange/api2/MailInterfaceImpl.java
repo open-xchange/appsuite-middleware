@@ -852,8 +852,7 @@ public class MailInterfaceImpl implements MailInterface {
 				/*
 				 * Check default folders
 				 */
-				final int l = usm.isSpamEnabled() ? defaultFolderNames.length : defaultFolderNames.length - 2;
-				for (int i = 0; i < l; i++) {
+				for (int i = 0; i < defaultFolderNames.length; i++) {
 					sessionObj.setDefaultMailFolder(i, checkDefaultFolder(imapCon.getIMAPStore(), prefix,
 							defaultFolderNames[i], type, tmp));
 				}
