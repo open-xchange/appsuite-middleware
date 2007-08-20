@@ -61,6 +61,7 @@ import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
+import com.openexchange.admin.tools.GenericChecks;
 
 
 public abstract class OXContextCommonImpl extends OXCommonImpl {
@@ -93,7 +94,9 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
             }
         } catch (EnforceableDataObjectException e) {
             throw new InvalidDataException(e.getMessage());
-        }
+        }        
+        
+        GenericChecks.checkValidMailAddress(admin_user.getPrimaryEmail());
     }
 
     protected abstract Context createmaincall(final Context ctx, final User admin_user, Database db) throws StorageException, InvalidDataException;
