@@ -4,6 +4,7 @@
    activation
  - Bugfix #8937: Fixed typo by replacing all occurences of "instanciat"
    with "instantiat"
+ - Fixed regex to detect uuencoded attachments inside a plaint text message
 
 * 2007-08-17 - marcus.klein@open-xchange.com
 

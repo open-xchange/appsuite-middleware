@@ -115,7 +115,7 @@ public class UUEncodedMultiPart {
 	}
 
 	private static final Pattern PAT_UUENCODED = Pattern.compile(
-			"(^begin |\r?\nbegin )([0-7]{3} )(\\S+\r?\n)(.+?)((?:\r?\n){2}end)", Pattern.DOTALL);
+			"(^begin |\r?\nbegin )([0-7]{3} )(\\S+\r?\n)(.+?)(\r?\n`\r?\nend)", Pattern.DOTALL);
 
 	/**
 	 * Try to find attachments recursive. Must containing the "begin" and "end"
@@ -124,7 +124,7 @@ public class UUEncodedMultiPart {
 	 * <pre>
 	 * begin 600 filename.doc
 	 * ...many data...
-	 * 
+	 * `
 	 * end
 	 * </pre>
 	 */
@@ -145,7 +145,7 @@ public class UUEncodedMultiPart {
 	private static final int examineBeginToken(final String beginToken) {
 		int count = 0;
 		char c = beginToken.charAt(count);
-		while (c == '\r' || c == '\n') {
+		while (Character.isWhitespace(c)) {
 			c = beginToken.charAt(++count);
 		}
 		return count;
