@@ -148,8 +148,6 @@ public final class OXFolderAdminHelper {
 
 	private static final String STR_TABLE = "#TABLE#";
 
-	private static final String SQL_SELECT_ADMIN = "SELECT user FROM user_setting_admin WHERE cid = ?";
-
 	/**
 	 * Creates the standard system folders located in each context for given
 	 * context in database and creates the default folders for context's admin
@@ -180,22 +178,14 @@ public final class OXFolderAdminHelper {
 
 	private static int getContextAdminID(final int cid, final Connection readCon) throws OXException {
 		try {
-			int contextMalAdmin = -1;
-			PreparedStatement stmt = null;
-			ResultSet rs = null;
-			try {
-				stmt = readCon.prepareStatement(SQL_SELECT_ADMIN);
-				stmt.setInt(1, cid);
-				rs = stmt.executeQuery();
-				if (!rs.next()) {
-					throw new OXFolderException(FolderCode.NO_ADMIN_USER_FOUND_IN_CONTEXT, Integer.valueOf(cid));
-				}
-				contextMalAdmin = rs.getInt(1);
-				return contextMalAdmin;
-			} finally {
-				closeSQLStuff(rs, stmt);
+			final int retval = OXFolderSQL.getContextAdminID(new ContextImpl(cid), readCon);
+			if (retval == -1) {
+				throw new OXFolderException(FolderCode.NO_ADMIN_USER_FOUND_IN_CONTEXT, Integer.valueOf(cid));
 			}
-		} catch (final SQLException e) {
+			return retval;
+		} catch (DBPoolingException e) {
+			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(cid));
+		} catch (SQLException e) {
 			throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(cid));
 		}
 	}

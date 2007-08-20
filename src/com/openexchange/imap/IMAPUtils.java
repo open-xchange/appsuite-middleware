@@ -84,7 +84,6 @@ import javax.mail.search.SubjectTerm;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.mail.JSONMessageObject;
-import com.openexchange.groupware.container.mail.MessageCacheObject;
 import com.openexchange.groupware.container.mail.MessageCacheObject.DummyAddress;
 import com.openexchange.imap.OXMailException.MailCode;
 import com.openexchange.imap.command.FetchIMAPCommand;

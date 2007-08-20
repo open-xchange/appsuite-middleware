@@ -191,7 +191,7 @@ public class OXFolderSQL {
 		PreparedStatement stmt = null;
 		try {
 			if (writeCon == null) {
-				writeCon = DBPool.pickup(ctx);
+				writeCon = DBPool.pickupWriteable(ctx);
 				closeWriteCon = true;
 			}
 			stmt = writeCon.prepareStatement(SQL_UPDATE_LAST_MOD);
@@ -238,7 +238,7 @@ public class OXFolderSQL {
 		PreparedStatement stmt = null;
 		try {
 			if (writeCon == null) {
-				writeCon = DBPool.pickup(ctx);
+				writeCon = DBPool.pickupWriteable(ctx);
 				closeWriteCon = true;
 			}
 			stmt = writeCon.prepareStatement(SQL_UPDATE_NAME);
