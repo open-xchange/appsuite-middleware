@@ -92,6 +92,48 @@ public class OXFolderSQL {
 		super();
 	}
 
+	private static final String SQL_SELECT_ADMIN = "SELECT user FROM user_setting_admin WHERE cid = ?";
+
+	/**
+	 * Determines the ID of the user who is defined as admin for given context
+	 * or <code>-1</code> if none found
+	 * 
+	 * @param ctx
+	 *            The context
+	 * @param readConArg
+	 *            A readable connection or <code>null</code> to fetch a new
+	 *            one from connection pool
+	 * @return The ID of context admin or <code>-1</code> if none found
+	 * @throws DBPoolingException
+	 *             If parameter <code>readConArg</code> is <code>null</code>
+	 *             and no readable connection could be fetched from or put back
+	 *             into connection pool
+	 * @throws SQLException
+	 *             If a SQL error occurs
+	 */
+	public static final int getContextAdminID(final Context ctx, final Connection readConArg)
+			throws DBPoolingException, SQLException {
+		Connection readCon = readConArg;
+		boolean closeReadCon = false;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		try {
+			if (readCon == null) {
+				readCon = DBPool.pickup(ctx);
+				closeReadCon = true;
+			}
+			stmt = readCon.prepareStatement(SQL_SELECT_ADMIN);
+			stmt.setInt(1, ctx.getContextId());
+			rs = stmt.executeQuery();
+			if (!rs.next()) {
+				return -1;
+			}
+			return rs.getInt(1);
+		} finally {
+			closeResources(rs, stmt, closeReadCon ? readCon : null, true, ctx);
+		}
+	}
+
 	private static final String SQL_DEFAULTFLD = "SELECT ot.fuid FROM oxfolder_tree AS ot WHERE ot.cid = ? AND ot.created_from = ? AND ot.module = ? AND ot.default_flag = 1";
 
 	public static final int getUserDefaultFolder(final int userId, final int module, final Connection readConArg,
