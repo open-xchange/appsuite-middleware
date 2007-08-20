@@ -66,27 +66,51 @@ public class Server implements Serializable, NameAndIdObject {
     
     private boolean nameset;
 
+    /**
+     * Initiates an empty server object
+     */
     public Server() {
     }
 
+    /**
+     * Returns the id of this server object
+     * 
+     * @return An {@link Integer} containing the id
+     */
     public Integer getId() {
         return id;
     }
 
-    public void setId(final Integer val) {
-        this.id = val;
+    /**
+     * Sets the id for this server object
+     * 
+     * @param id An {@link Integer} containing the id
+     */
+    public void setId(final Integer id) {
+        this.id = id;
         this.idset = true;
     }
 
+    /**
+     * Returns the name of this server object
+     * 
+     * @return A {@link String} containing the name
+     */
     public String getName() {
         return name;
     }
 
-    public void setName(String val) {
-        this.name = val;
+    /**
+     * Sets the name for this server object
+     * 
+     * @param name A {@link String} containing the name
+     */
+    public void setName(final String name) {
+        this.name = name;
         this.nameset = true;
     }
     
+    @Override
     public String toString() {
         StringBuilder ret = new StringBuilder();
         ret.append("[ \n");
@@ -112,15 +136,19 @@ public class Server implements Serializable, NameAndIdObject {
     }
 
     /**
-     * @return the idset
-     */
+     * Used to check if the id field of this server object has been changed
+     *
+     * @return true if set; false if not
+     **/
     public boolean isIdset() {
         return idset;
     }
 
     /**
-     * @return the nameset
-     */
+     * Used to check if the name field of this server object has been changed
+     *
+     * @return true if set; false if not
+     **/
     public boolean isNameset() {
         return nameset;
     }

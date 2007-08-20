@@ -89,37 +89,67 @@ public class Filestore implements Serializable {
     
     private boolean currentContextsset;
 
+    /**
+     * Initiates an empty filestore object
+     */
     public Filestore() {
         super();
         init();
     }
 
+    /**
+     * Initiates a filestore object with given id set
+     * 
+     * @param id An {@link Integer} containing the id
+     */
     public Filestore(final Integer id) {
         super();
         init();
         this.id = id;
     }
 
+    /**
+     * Returns the id of this filestore object
+     * 
+     * @return An {@link Integer} containing the id
+     */
     public Integer getId() {
         return this.id;
     }
 
-    public void setId(final Integer val) {
-        this.id = val;
+    /**
+     * Sets the id for this filestore object
+     * 
+     * @param id An {@link Integer} containing the id
+     */
+    public void setId(final Integer id) {
+        this.id = id;
         this.idset = true;
     }
 
+    /**
+     * Returns the url of this filestore object
+     * 
+     * @return A {@link String} containing the url
+     */
     public String getUrl() {
         return this.url;
     }
 
-    public void setUrl(final String val) {
-        this.url = val;
+    /**
+     * Sets the url for this filestore object
+     * 
+     * @param url A {@link String} containing the url
+     */
+    public void setUrl(final String url) {
+        this.url = url;
         this.urlset = true;
     }
 
     /**
-     * @return Size (in MB)
+     * Returns the size of this filestore object (in MB)
+     * 
+     * @return A {@link Long} containing the size (in MB)
      */
     public Long getSize() {
         return this.size;
@@ -128,36 +158,68 @@ public class Filestore implements Serializable {
     /**
      * @param Size (in MB)
      */
-    public void setSize(final Long val) {
-        this.size = val;
+    /**
+     * Sets the size for this filestore object (in MB)
+     * 
+     * @param size A {@link Long} containing the size (in MB)
+     */
+    public void setSize(final Long size) {
+        this.size = size;
         this.sizeset = true;
     }
 
+    /**
+     * Returns the maximum amount of contexts of this filestore object
+     * 
+     * @return An {@link Integer} containing the maximum amoung of contexts
+     */
     public Integer getMaxContexts() {
         return this.maxContexts;
     }
 
-    public void setMaxContexts(final Integer val) {
-        this.maxContexts = val;
+    /**
+     * Sets the maximum amount of contexts for this filestore object
+     * 
+     * @param maxContexts A {@link String} containing the maximum amount of contexts
+     */
+    public void setMaxContexts(final Integer maxContexts) {
+        this.maxContexts = maxContexts;
         this.maxContextsset = true;
     }
 
+    /**
+     * Returns the current amount of contexts of this filestore object
+     * 
+     * @return An {@link Integer} containing the current
+     */
     public Integer getCurrentContexts() {
         return this.currentContexts;
     }
 
-    public void setCurrentContexts(final Integer val) {
-        this.currentContexts = val;
+    /**
+     * Sets the current amount of contexts for this filestore object
+     * 
+     * @param currentContexts An {@link Integer} containing the current amount of contexts
+     */
+    public void setCurrentContexts(final Integer currentContexts) {
+        this.currentContexts = currentContexts;
         this.currentContextsset = true;
     }
 
     /**
-     * @return Size (in MB)
+     * Returns the currently used size of this filestore object (in MB)
+     * 
+     * @return A {@link Long} containing the currently used size (in MB)
      */
     public Long getUsed() {
         return this.used;
     }
 
+    /**
+     * Sets the currently used size for this filestore object
+     * 
+     * @param quota_used A {@link Long} containing the currently used size
+     */
     public void setUsed(final Long quota_used) {
         this.used = quota_used;
         this.usedset = true;
