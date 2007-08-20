@@ -76,12 +76,20 @@ public class Group extends ExtendableDataObject implements NameAndIdObject {
     
     private boolean membersset;
 
+    /**
+     * Initiates an empty group object
+     */
     public Group() {
         super();
         init();
     }
 
     
+    /**
+     * Initiates a group object with the given id set
+     * 
+     * @param id An {@link Integer} containing the id
+     */
     public Group(final Integer id) {
         super();
         init();
@@ -89,9 +97,11 @@ public class Group extends ExtendableDataObject implements NameAndIdObject {
     }
 
     /**
-     * @param id
-     * @param name
-     * @param displayname
+     * Initiates a group object with the given id, name and display name set
+     * 
+     * @param id An {@link Integer} containing the id
+     * @param name A {@link String} containing the name
+     * @param displayname A {@link String} containing the display name
      */
     public Group(final Integer id, final String name, final String displayname) {
         super();
@@ -110,7 +120,7 @@ public class Group extends ExtendableDataObject implements NameAndIdObject {
     }
 
     /**
-     * Used to check if the displayname of this object has been changed
+     * Used to check if the display name of this object has been changed
      * 
      * @return true if set; false if not
      */
