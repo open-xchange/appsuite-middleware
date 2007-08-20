@@ -3741,6 +3741,11 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.userfield20 = userfield20;
     }
 
+    /**
+     * Sets the E-Mail aliases for this user object
+     * 
+     * @param aliases A {@link HashSet} containing the E-Mail aliases
+     */
     final public void setAliases(final HashSet<String> aliases) {
         if (null == aliases) {
             this.aliasesset = true;
@@ -3748,6 +3753,11 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.aliases = aliases;
     }
 
+    /**
+     * Adds an E-Mail alias to the current list of aliases of this user object
+     * 
+     * @param alias A {@link String} containing the E-Mail alias to add
+     */
     final public void addAlias(final String alias) {
         if (this.aliases == null) {
             this.aliases = new HashSet<String>();
@@ -3755,6 +3765,12 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.aliases.add(alias);
     }
 
+    /**
+     * Removes the specified E-Mail alias from the list of this user object
+     * 
+     * @param alias A {@link String} containing the E-Mail alias to be removed
+     * @return true if removing was successful; false otherwise
+     */
     final public boolean removeAlias(final String alias) {
         if (null != this.aliases) {
             return this.aliases.remove(alias);
@@ -3763,14 +3779,29 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         }
     }
 
+    /**
+     * Returns the complete E-mail aliases of this user object
+     * 
+     * @return A {@link HashSet} containing the complete E-mail aliases
+     */
     final public HashSet<String> getAliases() {
         return this.aliases;
     }
 
+    /**
+     * Returns the city for the business location of this user object
+     * 
+     * @return A {@link String} containing the city for the business location
+     */
     final public String getCity_business() {
         return city_business;
     }
 
+    /**
+     * Sets the city for the business location for this user object
+     * 
+     * @param city_business A {@link String} containing the city for the business location
+     */
     final public void setCity_business(final String city_business) {
         if (null == city_business) {
             this.city_businessset = true;
@@ -3778,10 +3809,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.city_business = city_business;
     }
 
+    /**
+     * Returns the country for the business location of this user object
+     * 
+     * @return A {@link String} containing the country for the business location
+     */
     final public String getCountry_business() {
         return country_business;
     }
 
+    /**
+     * Sets the country for the business location for this user object
+     * 
+     * @param country_business A {@link String} containing the country for the business location
+     */
     final public void setCountry_business(final String country_business) {
         if (null == country_business) {
             this.country_businessset = true;
@@ -3789,10 +3830,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.country_business = country_business;
     }
 
+    /**
+     * Returns the name of the assistant of this user object
+     * 
+     * @return A {@link String} containing the name of the assistant
+     */
     final public String getAssistant_name() {
         return assistant_name;
     }
 
+    /**
+     * Sets the name of the assistant for this user object
+     * 
+     * @param assistant_name A {@link String} containing the name of the assistant
+     */
     final public void setAssistant_name(final String assistant_name) {
         if (null == assistant_name) {
             this.assistant_nameset = true;
@@ -3800,10 +3851,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.assistant_name = assistant_name;
     }
 
+    /**
+     * Currently not used
+     * 
+     * @return A {@link String} containing the fields value
+     */
     final public String getTelephone_primary() {
         return telephone_primary;
     }
 
+    /**
+     * Currently not used
+     * 
+     * @param telephone_primary A {@link String} containing the fields value
+     */
     final public void setTelephone_primary(final String telephone_primary) {
         if (null == telephone_primary) {
             this.telephone_primaryset = true;
@@ -3811,10 +3872,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.telephone_primary = telephone_primary;
     }
 
+    /**
+     * Returns the categories of this user object
+     * 
+     * @return A {@link String} containing the categories
+     */
     final public String getCategories() {
         return categories;
     }
 
+    /**
+     * Sets the categories for this user object
+     * 
+     * @param categories A {@link String} containing the categories
+     */
     final public void setCategories(final String categories) {
         if (null == categories) {
             this.categoriesset = true;
@@ -3827,7 +3898,9 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
     }
 
     /**
-     * Email (business)
+     * Sets the E-Mail for the business location for this user object
+     * 
+     * @param email1 A {@link String} containing the E-Mail for the business location
      */
     final public void setEmail1(final String email1) {
         if (null == email1) {
@@ -3859,7 +3932,9 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
     }
 
     /**
-     * @return this user Objects members as key/value pairs in a hashtable
+     * A wrapper function to get fields of this user object as key/value pairs in a {@link Hashtable}
+     * 
+     * @return The {@link Hashtable} containing the keys/values of this user object
      */
     final public Hashtable<String, Object> toHashtable() {
         final Hashtable<String, Object> ht = new Hashtable<String, Object>();
@@ -4219,6 +4294,10 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         return gui_spam_filter_enabled;
     }
 
+    /**
+     * @return
+     * @deprecated Will be removed with next version
+     */
     @Deprecated
     final public Boolean getSpam_filter_enabled() {
         return gui_spam_filter_enabled;
@@ -4233,6 +4312,11 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.gui_spam_filter_enabled = gui_spam_filter_enabled;
     }
 
+    /**
+     * Used to check if the contextadmin field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     public final boolean isContextadmin() {
         return contextadmin;
     }
@@ -4247,21 +4331,29 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
     }
 
     /**
-     * @return the defaultSenderAddress
+     * Returns the default sender address of this user object
+     * 
+     * @return A {@link String} containing the default sender address
      */
     public final String getDefaultSenderAddress() {
         return defaultSenderAddress;
     }
 
     /**
-     * @param defaultSenderAddress
-     *                the defaultSenderAddress to set
+     * Sets the default sender address for this user object
+     * 
+     * @param defaultSenderAddress A {@link String} containing the default sender address
      */
-    public final void setDefaultSenderAddress(String defaultSenderAddress) {
+    public final void setDefaultSenderAddress(final String defaultSenderAddress) {
         this.defaultSenderAddressset = true;
         this.defaultSenderAddress = defaultSenderAddress;
     }
 
+    /**
+     * Used to check if the contextadmin field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
     public final boolean isDefaultSenderAddressset() {
         return defaultSenderAddressset;
     }
