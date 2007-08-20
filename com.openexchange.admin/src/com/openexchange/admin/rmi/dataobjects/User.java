@@ -2271,7 +2271,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
     }
 
     /**
-     * Returns the instant messenger address for the business location of this user
+     * Returns the instant messenger address for the business location of this user object
      * 
      * @return A {@link String} containing the instant messenger address
      */
@@ -2280,7 +2280,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
     }
 
     /**
-     * Sets the instant messenger address for the business location of this user
+     * Sets the instant messenger address for the business location for this user object
      * 
      * @param instant_messenger1 A {@link String} containing the instant messenger address
      */
@@ -2291,10 +2291,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.instant_messenger1 = instant_messenger1;
     }
 
+    /**
+     * Returns the instant messenger address for the private location of this user object
+     * 
+     * @return A {@link String} containing the instant messenger address for the private location
+     */
     final public String getInstant_messenger2() {
         return instant_messenger2;
     }
 
+    /**
+     * Sets the instant messenger address for the private location for this user object
+     * 
+     * @param instant_messenger2 A {@link String} containing the instant messenger address for the private location
+     */
     final public void setInstant_messenger2(final String instant_messenger2) {
         if (null == instant_messenger2) {
             this.instant_messenger2set = true;
@@ -2302,10 +2312,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.instant_messenger2 = instant_messenger2;
     }
 
+    /**
+     * Returns the telephone number for ip telephony of this user object
+     * 
+     * @return A {@link String} containing the telephone number for ip telephony
+     */
     final public String getTelephone_ip() {
         return telephone_ip;
     }
 
+    /**
+     * Sets the telephone number for ip telephony for this user object
+     * 
+     * @param telephone_ip A {@link String} containing the telephone number for ip telephony
+     */
     final public void setTelephone_ip(final String telephone_ip) {
         if (null == telephone_ip) {
             this.telephone_ipset = true;
@@ -2313,10 +2333,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.telephone_ip = telephone_ip;
     }
 
+    /**
+     * Returns the telephone number for isdn telephony of this user object
+     * 
+     * @return A {@link String} containing the telephone number for isdn telephony
+     */
     final public String getTelephone_isdn() {
         return telephone_isdn;
     }
 
+    /**
+     * Sets the telephone number for isdn telephony for this user object
+     * 
+     * @param telephone_isdn A {@link String} containing the telephone number for isdn telephony
+     */
     final public void setTelephone_isdn(final String telephone_isdn) {
         if (null == telephone_isdn) {
             this.telephone_isdnset = true;
@@ -2324,10 +2354,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.telephone_isdn = telephone_isdn;
     }
 
+    /**
+     * Returns the language setting of this user object
+     * 
+     * @return A {@link Locale} object containing the language setting
+     */
     final public Locale getLanguage() {
         return language;
     }
 
+    /**
+     * Sets the language for this user object
+     * 
+     * @param language A {@link Locale} object containing the language setting
+     */
     final public void setLanguage(final Locale language) {
         if (null == language) {
             this.languageset = true;
@@ -2335,10 +2375,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.language = language;
     }
 
+    /**
+     * Returns the mail folder name of the drafts folder of this user object
+     * 
+     * @return A {@link String} containing the mail folder name of the drafts folder
+     */
     final public String getMail_folder_drafts_name() {
         return mail_folder_drafts_name;
     }
 
+    /**
+     * Sets the mail folder name of the drafts folder for this user object
+     * 
+     * @param mail_folder_drafts_name A {@link String} containing the mail folder name of the drafts folder
+     */
     final public void setMail_folder_drafts_name(final String mail_folder_drafts_name) {
         if (null == mail_folder_drafts_name) {
             this.mail_folder_drafts_nameset = true;
@@ -2346,10 +2396,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.mail_folder_drafts_name = mail_folder_drafts_name;
     }
 
+    /**
+     * Returns the mail folder name of the sent folder of this user object
+     * 
+     * @return A {@link String} containing the mail folder name of the sent folder
+     */
     final public String getMail_folder_sent_name() {
         return mail_folder_sent_name;
     }
 
+    /**
+     * Sets the mail folder name of the sent folder for this user object
+     * 
+     * @param mail_folder_sent_name A {@link String} containing the mail folder name of the sent folder
+     */
     final public void setMail_folder_sent_name(final String mail_folder_sent_name) {
         if (null == mail_folder_sent_name) {
             this.mail_folder_sent_nameset = true;
@@ -2357,13 +2417,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.mail_folder_sent_name = mail_folder_sent_name;
     }
 
+    /**
+     * Returns the mail folder name of the spam folder of this user object
+     * 
+     * @return A {@link String} containing the mail folder name of the spam folder
+     */
     final public String getMail_folder_spam_name() {
         return mail_folder_spam_name;
     }
 
     /**
-     * Set the name of the users SPAM folder where detected SPAM mail will be
-     * moved into
+     * Sets the name of the users SPAM folder where detected SPAM mail will be
+     * moved into.
+     * 
+     * @param mail_folder_spam_name A {@link String} containing the mail folder name of the spam folder
      */
     final public void setMail_folder_spam_name(final String mail_folder_spam_name) {
         if (null == mail_folder_spam_name) {
@@ -2372,10 +2439,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.mail_folder_spam_name = mail_folder_spam_name;
     }
 
+    /**
+     * Returns the mail folder name of the trash folder of this user object
+     * 
+     * @return A {@link String} containing the mail folder name of the trash folder
+     */
     final public String getMail_folder_trash_name() {
         return mail_folder_trash_name;
     }
 
+    /**
+     * Sets the mail folder name of the trash folder of this user object
+     * 
+     * @param mail_folder_trash_name A {@link String} containing the mail folder name of the trash folder
+     */
     final public void setMail_folder_trash_name(final String mail_folder_trash_name) {
         if (null == mail_folder_trash_name) {
             this.mail_folder_trash_nameset = true;
@@ -2383,10 +2460,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.mail_folder_trash_name = mail_folder_trash_name;
     }
 
+    /**
+     * Returns the name of the manager of this user object
+     * 
+     * @return A {@link String} containing the name of the manager
+     */
     final public String getManager_name() {
         return manager_name;
     }
 
+    /**
+     * Sets the name of the manager for this user object
+     * 
+     * @param manager_name A {@link String} containing the name of the manager
+     */
     final public void setManager_name(final String manager_name) {
         if (null == manager_name) {
             this.manager_nameset = true;
@@ -2394,10 +2481,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.manager_name = manager_name;
     }
 
+    /**
+     * Returns the marital status of this user object
+     * 
+     * @return A {@link String} containing the marital status
+     */
     final public String getMarital_status() {
         return marital_status;
     }
 
+    /**
+     * Sets the marital status for this user object
+     * 
+     * @param marital_status A {@link String} containing the marital status
+     */
     final public void setMarital_status(final String marital_status) {
         if (null == marital_status) {
             this.marital_statusset = true;
@@ -2405,12 +2502,19 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.marital_status = marital_status;
     }
 
+    /**
+     * Returns the mobile phone number of this user object
+     * 
+     * @return A {@link String} containing the mobile phone number
+     */
     final public String getCellular_telephone1() {
         return cellular_telephone1;
     }
 
     /**
-     * Mobile
+     * Sets the mobile phone number for this user object
+     * 
+     * @param cellular_telephone1 A {@link String} containing the mobile phone number
      */
     final public void setCellular_telephone1(final String cellular_telephone1) {
         if (null == cellular_telephone1) {
@@ -2419,12 +2523,19 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.cellular_telephone1 = cellular_telephone1;
     }
 
+    /**
+     * Returns the second mobile phone number of this user object
+     * 
+     * @return A {@link String} containing the second mobile phone number
+     */
     final public String getCellular_telephone2() {
         return cellular_telephone2;
     }
 
     /**
-     * Mobile 2
+     * Sets the second mobile phone number for this user object
+     * 
+     * @param cellular_telephone2 A {@link String} containing the second mobile phone number
      */
     final public void setCellular_telephone2(final String cellular_telephone2) {
         if (null == cellular_telephone2) {
@@ -2433,10 +2544,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.cellular_telephone2 = cellular_telephone2;
     }
 
+    /**
+     * Returns the info field of this user object
+     * 
+     * @return A {@link String} containing the info field
+     */
     final public String getInfo() {
         return info;
     }
 
+    /**
+     * Sets the info field for this user object
+     * 
+     * @param info A {@link String} containing the info field
+     */
     final public void setInfo(final String info) {
         if (null == info) {
             this.infoset = true;
@@ -2444,10 +2565,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.info = info;
     }
 
+    /**
+     * Returns the nickname of this user object
+     * 
+     * @return A {@link String} containing the nickname
+     */
     final public String getNickname() {
         return nickname;
     }
 
+    /**
+     * Sets the nickname of this user object
+     * 
+     * @param nickname A {@link String} containing the nickname
+     */
     final public void setNickname(final String nickname) {
         if (null == nickname) {
             this.nicknameset = true;
@@ -2455,10 +2586,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.nickname = nickname;
     }
 
+    /**
+     * Returns the number of children of this user object
+     * 
+     * @return A {@link String} containing the number of children
+     */
     final public String getNumber_of_children() {
         return number_of_children;
     }
 
+    /**
+     * Sets the number of children for this user object
+     * 
+     * @param number_of_children A {@link String} containing the number of children
+     */
     final public void setNumber_of_children(final String number_of_children) {
         if (null == number_of_children) {
             this.number_of_childrenset = true;
@@ -2466,10 +2607,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.number_of_children = number_of_children;
     }
 
+    /**
+     * Returns the note field of this user object
+     * 
+     * @return A {@link String} containing the note field
+     */
     final public String getNote() {
         return note;
     }
 
+    /**
+     * Sets the note field for this user object
+     * 
+     * @param note A {@link String} containing the note field
+     */
     final public void setNote(final String note) {
         if (null == note) {
             this.noteset = true;
@@ -2477,12 +2628,19 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.note = note;
     }
 
+    /**
+     * Returns the employee identifier of this user object
+     * 
+     * @return A {@link String} containing the employee identifier
+     */
     final public String getNumber_of_employee() {
         return number_of_employee;
     }
 
     /**
-     * Employee ID
+     * Sets the employee identifier for this user object
+     * 
+     * @param A {@link String} containing the employee identifier
      */
     final public void setNumber_of_employee(final String number_of_employee) {
         if (null == number_of_employee) {
@@ -2491,10 +2649,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.number_of_employee = number_of_employee;
     }
 
+    /**
+     * Returns the number of the telephone pager of this user object
+     * 
+     * @return A {@link String} containing the number of the telephone pager
+     */
     final public String getTelephone_pager() {
         return telephone_pager;
     }
 
+    /**
+     * Sets the number of the telephone pager of this user object
+     * 
+     * @param telephone_pager A {@link String} containing the number of the telephone pager
+     */
     final public void setTelephone_pager(final String telephone_pager) {
         if (null == telephone_pager) {
             this.telephone_pagerset = true;
@@ -2502,10 +2670,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.telephone_pager = telephone_pager;
     }
 
+    /**
+     * Returns if the password of this user object is expired
+     * 
+     * @return true if the password is expired; false otherwise
+     */
     final public Boolean getPassword_expired() {
         return password_expired;
     }
 
+    /**
+     * Sets if the password for this user object is expired
+     * 
+     * @param password_expired A {@link Boolean} containing the value
+     */
     final public void setPassword_expired(final Boolean password_expired) {
         if (null == password_expired) {
             this.password_expiredset = true;
@@ -2513,10 +2691,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.password_expired = password_expired;
     }
 
+    /**
+     * Returns the telephone number of the assistant of this user object
+     * 
+     * @return A {@link String} containing the telephone number of the assistant
+     */
     final public String getTelephone_assistant() {
         return telephone_assistant;
     }
 
+    /**
+     * Sets the telephone number of the assistant for this user object
+     * 
+     * @param telephone_assistant A {@link String} containing the telephone number of the assistant
+     */
     final public void setTelephone_assistant(final String telephone_assistant) {
         if (null == telephone_assistant) {
             this.telephone_assistantset = true;
@@ -2524,10 +2712,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.telephone_assistant = telephone_assistant;
     }
 
+    /**
+     * Returns the telephone number of the business location of this user object
+     * 
+     * @return A {@link String} containing the telephone number of the business location
+     */
     final public String getTelephone_business1() {
         return telephone_business1;
     }
 
+    /**
+     * Sets the telephone number of the business location for this user object
+     * 
+     * @param telephone_business1 A {@link String} containing the telephone number of the business location
+     */
     final public void setTelephone_business1(final String telephone_business1) {
         if (null == telephone_business1) {
             this.telephone_business1set = true;
@@ -2535,10 +2733,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.telephone_business1 = telephone_business1;
     }
 
+    /**
+     * Returns the second telephone number of the business location of this user object
+     * 
+     * @return A {@link String} containing the second telephone number of the business location
+     */
     final public String getTelephone_business2() {
         return telephone_business2;
     }
 
+    /**
+     * Sets the second telephone number of the business location for this user object
+     * 
+     * @param telephone_business2 A {@link String} containing the second telephone number of the business location
+     */
     final public void setTelephone_business2(final String telephone_business2) {
         if (null == telephone_business2) {
             this.telephone_business2set = true;
@@ -2546,10 +2754,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.telephone_business2 = telephone_business2;
     }
 
+    /**
+     * Returns the telephone number for the car phone of this user object
+     * 
+     * @return A {@link String} containing the telephone number for the car phone
+     */
     final public String getTelephone_car() {
         return telephone_car;
     }
 
+    /**
+     * Sets the telephone number for the car phone for this user object
+     * 
+     * @param telephone_car A {@link String} containing the telephone number for the car phone
+     */
     final public void setTelephone_car(final String telephone_car) {
         if (null == telephone_car) {
             this.telephone_carset = true;
@@ -2557,10 +2775,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.telephone_car = telephone_car;
     }
 
+    /**
+     * Returns the telephone number of the company of this user object
+     * 
+     * @return A {@link String} containing the telephone number of the company
+     */
     final public String getTelephone_company() {
         return telephone_company;
     }
 
+    /**
+     * Sets the telephone number of the company for this user object
+     * 
+     * @param telephone_company A {@link String} containing the telephone number of the company
+     */
     final public void setTelephone_company(final String telephone_company) {
         if (null == telephone_company) {
             this.telephone_companyset = true;
@@ -2568,10 +2796,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.telephone_company = telephone_company;
     }
 
+    /**
+     * Returns the first telephone number of the home location of this user object
+     * 
+     * @return A {@link String} containing the first telephone number of the home location
+     */
     final public String getTelephone_home1() {
         return telephone_home1;
     }
 
+    /**
+     * Sets the first telephone number of the home location for this user object
+     * 
+     * @param telephone_home1 A {@link String} containing the first telephone number of the home location
+     */
     final public void setTelephone_home1(final String telephone_home1) {
         if (null == telephone_home1) {
             this.telephone_home1set = true;
@@ -2579,10 +2817,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.telephone_home1 = telephone_home1;
     }
 
+    /**
+     * Returns the second telephone number of the home location of this user object
+     * 
+     * @return A {@link String} containing the second telephone number of the home location
+     */
     final public String getTelephone_home2() {
         return telephone_home2;
     }
 
+    /**
+     * Sets the second telephone number of the home location for this user object
+     * 
+     * @param telephone_home2 A {@link String} containing the second telephone number of the home location
+     */
     final public void setTelephone_home2(final String telephone_home2) {
         if (null == telephone_home2) {
             this.telephone_home2set = true;
@@ -2590,10 +2838,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.telephone_home2 = telephone_home2;
     }
 
+    /**
+     * Returns a further specified telephone number of this user object
+     * 
+     * @return A {@link String} containing the number
+     */
     final public String getTelephone_other() {
         return telephone_other;
     }
 
+    /**
+     * Sets the further telephone number for this user object
+     * 
+     * @param telephone_other A {@link String} containing the further telephone number
+     */
     final public void setTelephone_other(final String telephone_other) {
         if (null == telephone_other) {
             this.telephone_otherset = true;
@@ -2601,10 +2859,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.telephone_other = telephone_other;
     }
 
+    /**
+     * Returns the position field of this user object
+     * 
+     * @return A {@link String} containing the position
+     */
     final public String getPosition() {
         return position;
     }
 
+    /**
+     * Sets the position field for this user object
+     * 
+     * @param position A {@link String} containing the position field
+     */
     final public void setPosition(final String position) {
         if (null == position) {
             this.positionset = true;
@@ -2612,10 +2880,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.position = position;
     }
 
+    /**
+     * Returns the postal code of the home location of this user object
+     * 
+     * @return A {@link String} containing the postal code of the home location
+     */
     final public String getPostal_code_home() {
         return postal_code_home;
     }
 
+    /**
+     * Sets the postal code of the home location for this user object
+     * 
+     * @param postal_code_home A {@link String} containing the postal code of the home location
+     */
     final public void setPostal_code_home(final String postal_code_home) {
         if (null == postal_code_home) {
             this.postal_code_homeset = true;
@@ -2623,10 +2901,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.postal_code_home = postal_code_home;
     }
 
+    /**
+     * Returns the profession of this user object
+     * 
+     * @return A {@link String} containing the profession
+     */
     final public String getProfession() {
         return profession;
     }
 
+    /**
+     * Sets the profession for this user object
+     * 
+     * @param profession A {@link String} containing the profession
+     */
     final public void setProfession(final String profession) {
         if (null == profession) {
             this.professionset = true;
@@ -2634,10 +2922,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.profession = profession;
     }
 
+    /**
+     * Currently not used
+     * 
+     * @return A {@link String} containing the field content
+     */
     final public String getTelephone_radio() {
         return telephone_radio;
     }
 
+    /**
+     * Currently not used
+     * 
+     * @param test2 A {@link String} containing the field content
+     */
     final public void setTelephone_radio(final String telephone_radio) {
         if (null == telephone_radio) {
             this.telephone_radioset = true;
@@ -2645,10 +2943,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.telephone_radio = telephone_radio;
     }
 
+    /**
+     * Returns the room number of this user object
+     * 
+     * @return A {@link String} containing the room number
+     */
     final public String getRoom_number() {
         return room_number;
     }
 
+    /**
+     * Sets the room number for this user object
+     * 
+     * @param room_number A {@link String} containing the room number
+     */
     final public void setRoom_number(final String room_number) {
         if (null == room_number) {
             this.room_numberset = true;
@@ -2656,10 +2964,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.room_number = room_number;
     }
 
+    /**
+     * Returns the sales volume of this user object
+     * 
+     * @return A {@link String} containing the sales volume
+     */
     final public String getSales_volume() {
         return sales_volume;
     }
 
+    /**
+     * Sets the sales volume for this user object
+     * 
+     * @param sales_volume A {@link String} containing the sales volume
+     */
     final public void setSales_volume(final String sales_volume) {
         if (null == sales_volume) {
             this.sales_volumeset = true;
@@ -2667,10 +2985,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.sales_volume = sales_volume;
     }
 
+    /**
+     * Returns the city for a further location of this user object
+     * 
+     * @return A {@link String} containing the city for a further location
+     */
     final public String getCity_other() {
         return city_other;
     }
 
+    /**
+     * Sets the city for a further location for this user object
+     * 
+     * @param city_other A {@link String} containing the city for a further location
+     */
     final public void setCity_other(final String city_other) {
         if (null == city_other) {
             this.city_otherset = true;
@@ -2678,10 +3006,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.city_other = city_other;
     }
 
+    /**
+     * Returns the country for a further location of this user object
+     * 
+     * @return A {@link String} containing the country for a further location
+     */
     final public String getCountry_other() {
         return country_other;
     }
 
+    /**
+     * Sets the country for a further location for this user object
+     * 
+     * @param country_other A {@link String} containing the country for a further location
+     */
     final public void setCountry_other(final String country_other) {
         if (null == country_other) {
             this.country_otherset = true;
@@ -2689,12 +3027,19 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.country_other = country_other;
     }
 
+    /**
+     * Returns the middle name of this user object
+     * 
+     * @return A {@link String} containing the middle name
+     */
     final public String getMiddle_name() {
         return middle_name;
     }
 
     /**
-     * Second name
+     * Sets the middle name for this user object
+     * 
+     * @param middle_name A {@link String} containing the middle name
      */
     final public void setMiddle_name(final String middle_name) {
         if (null == middle_name) {
@@ -2703,10 +3048,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.middle_name = middle_name;
     }
 
+    /**
+     * Returns the postal code for a further location of this user object
+     * 
+     * @return A {@link String} containing the postal code for a further location
+     */
     final public String getPostal_code_other() {
         return postal_code_other;
     }
 
+    /**
+     * Sets the postal code for a further location for this user object
+     * 
+     * @param postal_code_other A {@link String} containing the postal code for a further location
+     */
     final public void setPostal_code_other(final String postal_code_other) {
         if (null == postal_code_other) {
             this.postal_code_otherset = true;
@@ -2714,10 +3069,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.postal_code_other = postal_code_other;
     }
 
+    /**
+     * Returns the state for a further location of this user object
+     * 
+     * @return A {@link String} containing the state for a further location
+     */
     final public String getState_other() {
         return state_other;
     }
 
+    /**
+     * Sets the state for a further location for this user object
+     * 
+     * @param state_other A {@link String} containing the state for a further location
+     */
     final public void setState_other(final String state_other) {
         if (null == state_other) {
             this.state_otherset = true;
@@ -2725,10 +3090,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.state_other = state_other;
     }
 
+    /**
+     * Returns the street for a further location of this user object
+     * 
+     * @return A {@link String} containing the street for a further location
+     */
     final public String getStreet_other() {
         return street_other;
     }
 
+    /**
+     * Sets the street for a further location for this user object
+     * 
+     * @param street_other A {@link String} containing the street for a further location
+     */
     final public void setStreet_other(final String street_other) {
         if (null == street_other) {
             this.street_otherset = true;
@@ -2736,10 +3111,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.street_other = street_other;
     }
 
+    /**
+     * Returns the name of the spouse of this user object
+     * 
+     * @return A {@link String} containing the name of the spouse
+     */
     final public String getSpouse_name() {
         return spouse_name;
     }
 
+    /**
+     * Sets the name of the spouse for this user object
+     * 
+     * @param spouse_name A {@link String} containing the name of the spouse
+     */
     final public void setSpouse_name(final String spouse_name) {
         if (null == spouse_name) {
             this.spouse_nameset = true;
@@ -2747,10 +3132,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.spouse_name = spouse_name;
     }
 
+    /**
+     * Returns the state of the home location of this user object
+     * 
+     * @return A {@link String} containing the state of the home location
+     */
     final public String getState_home() {
         return state_home;
     }
 
+    /**
+     * Sets the state of the home location for this user object
+     * 
+     * @param state_home A {@link String} containing the state of the home location
+     */
     final public void setState_home(final String state_home) {
         if (null == state_home) {
             this.state_homeset = true;
@@ -2758,10 +3153,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.state_home = state_home;
     }
 
+    /**
+     * Returns the street of the home location of this user object
+     * 
+     * @return A {@link String} containing the street of the home location
+     */
     final public String getStreet_home() {
         return street_home;
     }
 
+    /**
+     * Sets the street of the home location for this user object
+     * 
+     * @param street_home A {@link String} containing the street of the home location
+     */
     final public void setStreet_home(final String street_home) {
         if (null == street_home) {
             this.street_homeset = true;
@@ -2769,10 +3174,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.street_home = street_home;
     }
 
+    /**
+     * Returns the suffix of this user object
+     * 
+     * @return A {@link String} containing the suffix
+     */
     final public String getSuffix() {
         return suffix;
     }
 
+    /**
+     * Sets the suffix for this user object
+     * 
+     * @param suffix A {@link String} containing the suffix
+     */
     final public void setSuffix(final String suffix) {
         if (null == suffix) {
             this.suffixset = true;
@@ -2780,10 +3195,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.suffix = suffix;
     }
 
+    /**
+     * Returns the tax id of this user object
+     * 
+     * @return A {@link String} containing the tax id
+     */
     final public String getTax_id() {
         return tax_id;
     }
 
+    /**
+     * Sets the tax id for this user object
+     * 
+     * @param tax_id A {@link String} containing the tax id
+     */
     final public void setTax_id(final String tax_id) {
         if (null == tax_id) {
             this.tax_idset = true;
@@ -2791,10 +3216,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.tax_id = tax_id;
     }
 
+    /**
+     * Returns the telephone number for the telex of this user object
+     * 
+     * @return A {@link String} containing the telephone number for the telex
+     */
     final public String getTelephone_telex() {
         return telephone_telex;
     }
 
+    /**
+     * Sets the telephone number for the telex for this user object
+     * 
+     * @param telephone_telex A {@link String} containing the telephone number for the telex
+     */
     final public void setTelephone_telex(final String telephone_telex) {
         if (null == telephone_telex) {
             this.telephone_telexset = true;
@@ -2802,10 +3237,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.telephone_telex = telephone_telex;
     }
 
+    /**
+     * Returns the timezone of this user object
+     * 
+     * @return A {@link String} containing the timezone
+     */
     final public TimeZone getTimezone() {
         return timezone;
     }
 
+    /**
+     * Sets the timezone for this user object
+     * 
+     * @param timezone A {@link String} containing the timezone
+     */
     final public void setTimezone(final TimeZone timezone) {
         if (null == timezone) {
             this.timezoneset = true;
@@ -2813,10 +3258,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.timezone = timezone;
     }
 
+    /**
+     * Returns the title of this user object
+     * 
+     * @return A {@link String} containing the title
+     */
     final public String getTitle() {
         return title;
     }
 
+    /**
+     * Sets the title for this user object
+     * 
+     * @param title A {@link String} containing the title
+     */
     final public void setTitle(final String title) {
         if (null == title) {
             this.titleset = true;
@@ -2824,10 +3279,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.title = title;
     }
 
+    /**
+     * Returns the telephone number for the TTY/TDD of this user object
+     * 
+     * @return A {@link String} containing the telephone number for the TTY/TDD
+     */
     final public String getTelephone_ttytdd() {
         return telephone_ttytdd;
     }
 
+    /**
+     * Sets the telephone number for the TTY/TDD for this user object
+     * 
+     * @param telephone_ttytdd A {@link String} containing the telephone number for the TTY/TDD
+     */
     final public void setTelephone_ttytdd(final String telephone_ttytdd) {
         if (null == telephone_ttytdd) {
             this.telephone_ttytddset = true;
@@ -2835,10 +3300,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.telephone_ttytdd = telephone_ttytdd;
     }
 
+    /**
+     * Returns the URL of this user object
+     * 
+     * @return A {@link String} containing the URL
+     */
     final public String getUrl() {
         return url;
     }
 
+    /**
+     * Sets the URL for this user object
+     * 
+     * @param url A {@link String} containing the URL
+     */
     final public void setUrl(final String url) {
         if (null == url) {
             this.urlset = true;
@@ -2846,10 +3321,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.url = url;
     }
 
+    /**
+     * Returns the dynamic field no 1 of this user object
+     * 
+     * @return A {@link String} containing the dynamic field no 1
+     */
     final public String getUserfield01() {
         return userfield01;
     }
 
+    /**
+     * Sets the dynamic field no 1 for this user object
+     * 
+     * @param userfield01 A {@link String} containing the dynamic field no 1
+     */
     final public void setUserfield01(final String userfield01) {
         if (null == userfield01) {
             this.userfield01set = true;
@@ -2857,10 +3342,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.userfield01 = userfield01;
     }
 
+    /**
+     * Returns the dynamic field no 2 of this user object
+     * 
+     * @return A {@link String} containing the dynamic field no 2
+     */
     final public String getUserfield02() {
         return userfield02;
     }
 
+    /**
+     * Sets the dynamic field no 2 for this user object
+     * 
+     * @param userfield02 A {@link String} containing the dynamic field no 2
+     */
     final public void setUserfield02(final String userfield02) {
         if (null == userfield02) {
             this.userfield02set = true;
@@ -2868,10 +3363,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.userfield02 = userfield02;
     }
 
+    /**
+     * Returns the dynamic field no 3 of this user object
+     * 
+     * @return A {@link String} containing the dynamic field no 3
+     */
     final public String getUserfield03() {
         return userfield03;
     }
 
+    /**
+     * Sets the dynamic field no 3 for this user object
+     * 
+     * @param userfield03 A {@link String} containing the dynamic field no 3
+     */
     final public void setUserfield03(final String userfield03) {
         if (null == userfield03) {
             this.userfield03set = true;
@@ -2879,10 +3384,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.userfield03 = userfield03;
     }
 
+    /**
+     * Returns the dynamic field no 4 of this user object
+     * 
+     * @return A {@link String} containing the dynamic field no 4
+     */
     final public String getUserfield04() {
         return userfield04;
     }
 
+    /**
+     * Sets the dynamic field no 4 for this user object
+     * 
+     * @param userfield04 A {@link String} containing the dynamic field no 4
+     */
     final public void setUserfield04(final String userfield04) {
         if (null == userfield04) {
             this.userfield04set = true;
@@ -2890,10 +3405,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.userfield04 = userfield04;
     }
 
+    /**
+     * Returns the dynamic field no 5 of this user object
+     * 
+     * @return A {@link String} containing the dynamic field no 5
+     */
     final public String getUserfield05() {
         return userfield05;
     }
 
+    /**
+     * Sets the dynamic field no 5 for this user object
+     * 
+     * @param userfield05 A {@link String} containing the dynamic field no 5
+     */
     final public void setUserfield05(final String userfield05) {
         if (null == userfield05) {
             this.userfield05set = true;
@@ -2901,10 +3426,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.userfield05 = userfield05;
     }
 
+    /**
+     * Returns the dynamic field no 6 of this user object
+     * 
+     * @return A {@link String} containing the dynamic field no 6
+     */
     final public String getUserfield06() {
         return userfield06;
     }
 
+    /**
+     * Sets the dynamic field no 6 for this user object
+     * 
+     * @param userfield06 A {@link String} containing the dynamic field no 6
+     */
     final public void setUserfield06(final String userfield06) {
         if (null == userfield06) {
             this.userfield06set = true;
@@ -2912,10 +3447,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.userfield06 = userfield06;
     }
 
+    /**
+     * Returns the dynamic field no 7 of this user object
+     * 
+     * @return A {@link String} containing the dynamic field no 7
+     */
     final public String getUserfield07() {
         return userfield07;
     }
 
+    /**
+     * Sets the dynamic field no 7 for this user object
+     * 
+     * @param userfield07 A {@link String} containing the dynamic field no 7
+     */
     final public void setUserfield07(final String userfield07) {
         if (null == userfield07) {
             this.userfield07set = true;
@@ -2923,10 +3468,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.userfield07 = userfield07;
     }
 
+    /**
+     * Returns the dynamic field no 8 of this user object
+     * 
+     * @return A {@link String} containing the dynamic field no 8
+     */
     final public String getUserfield08() {
         return userfield08;
     }
 
+    /**
+     * Sets the dynamic field no 8 for this user object
+     * 
+     * @param userfield08 A {@link String} containing the dynamic field no 8
+     */
     final public void setUserfield08(final String userfield08) {
         if (null == userfield08) {
             this.userfield08set = true;
@@ -2934,10 +3489,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.userfield08 = userfield08;
     }
 
+    /**
+     * Returns the dynamic field no 9 of this user object
+     * 
+     * @return A {@link String} containing the dynamic field no 9
+     */
     final public String getUserfield09() {
         return userfield09;
     }
 
+    /**
+     * Sets the dynamic field no 9 for this user object
+     * 
+     * @param userfield09 A {@link String} containing the dynamic field no 9
+     */
     final public void setUserfield09(final String userfield09) {
         if (null == userfield09) {
             this.userfield09set = true;
@@ -2945,10 +3510,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.userfield09 = userfield09;
     }
 
+    /**
+     * Returns the dynamic field no 10 of this user object
+     * 
+     * @return A {@link String} containing the dynamic field no 10
+     */
     final public String getUserfield10() {
         return userfield10;
     }
 
+    /**
+     * Sets the dynamic field no 10 for this user object
+     * 
+     * @param userfield10 A {@link String} containing the dynamic field no 10
+     */
     final public void setUserfield10(final String userfield10) {
         if (null == userfield10) {
             this.userfield10set = true;
@@ -2956,10 +3531,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.userfield10 = userfield10;
     }
 
+    /**
+     * Returns the dynamic field no 11 of this user object
+     * 
+     * @return A {@link String} containing the dynamic field no 11
+     */
     final public String getUserfield11() {
         return userfield11;
     }
 
+    /**
+     * Sets the dynamic field no 11 for this user object
+     * 
+     * @param userfield11 A {@link String} containing the dynamic field no 11
+     */
     final public void setUserfield11(final String userfield11) {
         if (null == userfield11) {
             this.userfield11set = true;
@@ -2967,10 +3552,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.userfield11 = userfield11;
     }
 
+    /**
+     * Returns the dynamic field no 12 of this user object
+     * 
+     * @return A {@link String} containing the dynamic field no 12
+     */
     final public String getUserfield12() {
         return userfield12;
     }
 
+    /**
+     * Sets the dynamic field no 12 for this user object
+     * 
+     * @param userfield12 A {@link String} containing the dynamic field no 12
+     */
     final public void setUserfield12(final String userfield12) {
         if (null == userfield12) {
             this.userfield12set = true;
@@ -2978,10 +3573,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.userfield12 = userfield12;
     }
 
+    /**
+     * Returns the dynamic field no 13 of this user object
+     * 
+     * @return A {@link String} containing the dynamic field no 13
+     */
     final public String getUserfield13() {
         return userfield13;
     }
 
+    /**
+     * Sets the dynamic field no 13 for this user object
+     * 
+     * @param userfield13 A {@link String} containing the dynamic field no 13
+     */
     final public void setUserfield13(final String userfield13) {
         if (null == userfield13) {
             this.userfield13set = true;
@@ -2989,10 +3594,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.userfield13 = userfield13;
     }
 
+    /**
+     * Returns the dynamic field no 14 of this user object
+     * 
+     * @return A {@link String} containing the dynamic field no 14
+     */
     final public String getUserfield14() {
         return userfield14;
     }
 
+    /**
+     * Sets the dynamic field no 14 for this user object
+     * 
+     * @param userfield14 A {@link String} containing the dynamic field no 14
+     */
     final public void setUserfield14(final String userfield14) {
         if (null == userfield14) {
             this.userfield14set = true;
@@ -3000,10 +3615,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.userfield14 = userfield14;
     }
 
+    /**
+     * Returns the dynamic field no 15 of this user object
+     * 
+     * @return A {@link String} containing the dynamic field no 15
+     */
     final public String getUserfield15() {
         return userfield15;
     }
 
+    /**
+     * Sets the dynamic field no 15 for this user object
+     * 
+     * @param userfield15 A {@link String} containing the dynamic field no 15
+     */
     final public void setUserfield15(final String userfield15) {
         if (null == userfield15) {
             this.userfield15set = true;
@@ -3011,10 +3636,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.userfield15 = userfield15;
     }
 
+    /**
+     * Returns the dynamic field no 16 of this user object
+     * 
+     * @return A {@link String} containing the dynamic field no 16
+     */
     final public String getUserfield16() {
         return userfield16;
     }
 
+    /**
+     * Sets the dynamic field no 16 for this user object
+     * 
+     * @param userfield16 A {@link String} containing the dynamic field no 16
+     */
     final public void setUserfield16(final String userfield16) {
         if (null == userfield16) {
             this.userfield16set = true;
@@ -3022,10 +3657,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.userfield16 = userfield16;
     }
 
+    /**
+     * Returns the dynamic field no 17 of this user object
+     * 
+     * @return A {@link String} containing the dynamic field no 17
+     */
     final public String getUserfield17() {
         return userfield17;
     }
 
+    /**
+     * Sets the dynamic field no 17 for this user object
+     * 
+     * @param userfield17 A {@link String} containing the dynamic field no 17
+     */
     final public void setUserfield17(final String userfield17) {
         if (null == userfield17) {
             this.userfield17set = true;
@@ -3033,10 +3678,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.userfield17 = userfield17;
     }
 
+    /**
+     * Returns the dynamic field no 18 of this user object
+     * 
+     * @return A {@link String} containing the dynamic field no 18
+     */
     final public String getUserfield18() {
         return userfield18;
     }
 
+    /**
+     * Sets the dynamic field no 18 for this user object
+     * 
+     * @param userfield18 A {@link String} containing the dynamic field no 18
+     */
     final public void setUserfield18(final String userfield18) {
         if (null == userfield18) {
             this.userfield18set = true;
@@ -3044,10 +3699,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.userfield18 = userfield18;
     }
 
+    /**
+     * Returns the dynamic field no 19 of this user object
+     * 
+     * @return A {@link String} containing the dynamic field no 19
+     */
     final public String getUserfield19() {
         return userfield19;
     }
 
+    /**
+     * Sets the dynamic field no 19 for this user object
+     * 
+     * @param userfield19 A {@link String} containing the dynamic field no 19
+     */
     final public void setUserfield19(final String userfield19) {
         if (null == userfield19) {
             this.userfield19set = true;
@@ -3055,10 +3720,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         this.userfield19 = userfield19;
     }
 
+    /**
+     * Returns the dynamic field no 20 of this user object
+     * 
+     * @return A {@link String} containing the dynamic field no 20
+     */
     final public String getUserfield20() {
         return userfield20;
     }
 
+    /**
+     * Sets the dynamic field no 20 for this user object
+     * 
+     * @param userfield20 A {@link String} containing the dynamic field no 20
+     */
     final public void setUserfield20(final String userfield20) {
         if (null == userfield20) {
             this.userfield20set = true;
