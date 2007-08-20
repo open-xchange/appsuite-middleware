@@ -1,3 +1,8 @@
+* 2007-08-20 - martin.kauss@open-xchange.com
+
+ - Fixed bug #8957. A searh without a folder id returned -1 as folder instead
+   of the real folder id. This has been fixed.
+
 * 2007-08-20 - thorben.betten@open-xchange.com
 
  - Bugfix #8921: Fixed indexing of mail default folders dependent on spam
