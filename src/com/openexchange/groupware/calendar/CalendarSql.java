@@ -857,11 +857,11 @@ public class CalendarSql implements AppointmentSQLInterface {
             boolean close_connection = true;
             try {
                 CalendarOperation co = new CalendarOperation();
-                if (searchobject.getFolder() != 0) {
+                if (searchobject.getFolder() > 0) {
                     co.setRequestedFolder(searchobject.getFolder());
                 } else {
                     int ara[] = new int[1];
-                    ara[0] = AppointmentObject.USERS;
+                    ara[0] = AppointmentObject.PARTICIPANTS;
                     cols = CalendarCommonCollection.enhanceCols(cols, ara, 1);
                 }
                 cols = CalendarCommonCollection.checkAndAlterCols(cols);
