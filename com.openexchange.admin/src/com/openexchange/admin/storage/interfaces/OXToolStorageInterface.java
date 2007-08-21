@@ -362,7 +362,9 @@ public abstract class OXToolStorageInterface {
     public abstract int getResourceIDByResourcename(final Context ctx,final String resourcename) throws StorageException;
     
     public abstract String getResourcenameByResourceID(final Context ctx,final int resource_id) throws StorageException;
-    
+
+    public abstract int getServerIDByServername(final String servername) throws StorageException;
+
     public abstract int getUserIDByUsername(final Context ctx,final String username) throws StorageException;
     
     public abstract String getUsernameByUserID(final Context ctx,final int user_id) throws StorageException;
