@@ -64,6 +64,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.regex.Pattern;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.SingleThreadModel;
@@ -282,6 +283,10 @@ public class HttpServletManager {
 						String value = null;
 						try {
 							final String name = iter.next().toString();
+							if (!checkServletPath(name)) {
+								LOG.error(new StringBuilder("Invalid servlet path: ").append(name).toString());
+								continue NextMapping;
+							}
 							Object tmp = properties.get(name);
 							if (null == tmp || (value = tmp.toString().trim()).length() == 0) {
 								if (LOG.isWarnEnabled()) {
@@ -332,6 +337,12 @@ public class HttpServletManager {
 				INIT_LOCK.unlock();
 			}
 		}
+	}
+	
+	private static final Pattern PATTERN_SERVLET_PATH = Pattern.compile("([\\p{ASCII}&&[^\\s]]+)\\*?");
+	
+	private static boolean checkServletPath(final String servletPath) {
+		return PATTERN_SERVLET_PATH.matcher(servletPath).matches();
 	}
 
 	private static final Object[] INIT_ARGS = new Object[] {};
