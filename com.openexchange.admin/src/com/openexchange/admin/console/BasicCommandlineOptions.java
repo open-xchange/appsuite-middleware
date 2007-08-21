@@ -240,10 +240,10 @@ public abstract class BasicCommandlineOptions {
     
     protected final void printServerException(final Exception e, final AdminParser parser){
         String output = "";
-        String msg = e.getMessage();
+        final String msg = e.getMessage();
         if( parser != null && parser.getOptionValue(this.noNewlineOption) != null ) {
             if( msg != null ) {
-                output = "Server response: "+msg.replace("\n", "");
+                output = "Server response: " + msg.replace("\n", "");
             } else {
                 output += e.toString();
                 for(final StackTraceElement ste : e.getStackTrace() ) {
@@ -254,10 +254,10 @@ public abstract class BasicCommandlineOptions {
             if( msg != null ) {
                 output = "Server response:\n "+msg;
             } else {
-            output += e.toString() + "\n";
-            for(final StackTraceElement ste : e.getStackTrace() ) {
-                    output += "\tat "+ste.toString()+"\n";
-            }
+                output += e.toString() + "\n";
+                for (final StackTraceElement ste : e.getStackTrace()) {
+                    output += "\tat " + ste.toString() + "\n";
+                }
             }
         }
         System.err.println(output);
@@ -272,7 +272,7 @@ public abstract class BasicCommandlineOptions {
         if( parser == null ) {
             output = msg;
         } else {
-            if(parser.getOptionValue(this.noNewlineOption) != null) {
+            if (parser.getOptionValue(this.noNewlineOption) != null) {
                 output =  msg.replace("\n", "");
             } else {
                 output = msg;
