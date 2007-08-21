@@ -1,6 +1,7 @@
 * 2007-08-21 - dennis.sieben@open-xchange.com
 
- - Bugfix ID#8998 --nonl not consistent
+  - Bugfix ID#8998 --nonl not consistent
+  - Bugfix ID#8985 createuser doesn't check --timezone format
  
 * 2007-08-20 - manuel.kraft@open-xchange.com
 

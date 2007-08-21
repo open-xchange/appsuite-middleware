@@ -58,6 +58,7 @@ import java.rmi.RemoteException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Locale;
@@ -607,8 +608,9 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
      * 
      * @param parser The parser object
      * @param usr User object which will be changed
+     * @throws InvalidDataException 
      */
-    protected final void parseAndSetOptionalOptionsinUser(final AdminParser parser, final User usr) {
+    protected final void parseAndSetOptionalOptionsinUser(final AdminParser parser, final User usr) throws InvalidDataException {
         final String optionValue = (String) parser.getOptionValue(this.companyOption);
         if (null != optionValue) {
             usr.setCompany(optionValue);
@@ -629,6 +631,9 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     
         final String optionValue4 = (String) parser.getOptionValue(this.timezoneOption);
         if (null != optionValue4) {
+            if (!Arrays.asList(TimeZone.getAvailableIDs()).contains(optionValue4)) {
+                throw new InvalidDataException("The given timezone is invalid");
+            }
             usr.setTimezone(TimeZone.getTimeZone(optionValue4));
         }
     
