@@ -5,11 +5,13 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.rmi.RemoteException;
+import java.util.HashSet;
 import java.util.Iterator;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.openexchange.admin.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.exceptions.OXContextException;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -54,6 +56,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             log.error(invalidDataException.getMessage(), invalidDataException);
             throw invalidDataException;
         }
+        validateloginmapping(ctx);
         
         new BasicAuthenticator().doAuthentication(auth);
         
@@ -521,11 +524,25 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
     }
 
     protected Context createmaincall(final Context ctx, final User admin_user, Database db) throws StorageException, InvalidDataException {
+        validateloginmapping(ctx);
         final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
         final Context retval = oxcox.create(ctx, admin_user);
         return retval;
     }
     
+    private void validateloginmapping(final Context ctx) throws InvalidDataException {
+        final HashSet<String> loginMappings = ctx.getLoginMappings();
+        final String login_regexp = ClientAdminThreadExtended.cache.getProperties().getProp("CHECK_CONTEXT_LOGIN_MAPPING_REGEXP", "[$%\\.+a-zA-Z0-9_-]");        
+        if (null != loginMappings) {
+            for (final String mapping : loginMappings) {
+                final String illegal = mapping.replaceAll(login_regexp,"");
+                if( illegal.length() > 0 ) {
+                    throw new InvalidDataException("Illegal chars: \"" + illegal + "\"" + " in login mapping");
+                }
+            }
+        }
+    }
+
     private StringBuilder builduppath(final String ctxdir, final URI uri) {
         final StringBuilder src = new StringBuilder(uri.getPath());
         if (src.charAt(src.length()-1) != '/') {
