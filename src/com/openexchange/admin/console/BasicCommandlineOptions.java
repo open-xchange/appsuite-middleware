@@ -278,7 +278,7 @@ public abstract class BasicCommandlineOptions {
                 output = msg;
             }
         }
-        System.err.println("Error: "+output+"\n");
+        System.err.println("Error: " + output);
     }
     
     protected final void printServerResponse(final String msg){
