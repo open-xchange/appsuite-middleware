@@ -288,7 +288,6 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         standardoptions.add(OPT_ALIASES_LONG);
     }
 
-    
     protected final void setIdOption(final AdminParser admp){
         this.idOption =  setShortLongOpt(admp,OPT_ID_SHORT,OPT_ID_LONG,"Id of the user", true, NeededQuadState.eitheror);
     }
@@ -345,11 +344,6 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         this.dbOnlyOption =  setLongOpt(admp,OPT_DBONLY_LONG,"Do this operation only in Database system (parameters which apply to extensions will be ignored)", false, false); 
     }
     
-//    protected final void setExtendedOption(final AdminParser admp) {
-//        final Option retval = admp.addOption(OPT_EXTENDED_LONG, OPT_EXTENDED_LONG, "Set this if you want to see all options, use this instead of help option", false,false);
-//        this.extendedOption  = retval;
-//    }
-
     /**
      * @param theMethods
      * @param notallowed Here we define the methods we don't want. The name is the name of method without the prefix
@@ -357,7 +351,6 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
      * @return
      */
     protected final ArrayList<MethodAndNames> getGetters(final Method[] theMethods, final HashSet<String> notallowed) {
-    
         // Define the returntypes we search for
         final HashSet<String> returntypes = new HashSet<String>(7);
         returntypes.add(JAVA_LANG_STRING);
@@ -378,7 +371,6 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
      * @return
      */
     protected final ArrayList<MethodAndNames> getGettersforExtensions(final Method[] theMethods, final HashSet<String> notallowed) {
-        
         // Define the returntypes we search for
         final HashSet<String> returntypes = new HashSet<String>(7);
         returntypes.add(JAVA_LANG_STRING);
@@ -506,7 +498,6 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
      * @param usr User object which will be changed
      */
     protected final void setModuleAccessOptionsinUserCreate(final AdminParser parser, final UserModuleAccess access) {
-                
         access.setCalendar(accessOption2BooleanCreate(parser,this.accessCalendarOption));
         access.setContacts(accessOption2BooleanCreate(parser,this.accessContactOption));
         access.setDelegateTask(accessOption2BooleanCreate(parser,this.accessDelegateTasksOption));
@@ -529,94 +520,87 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     }
     
     protected final boolean accessOption2BooleanCreate(final AdminParser parser,final Option accessOption){
-       
-            // option was set, check what text was sent
-            final String optionValue = (String) parser.getOptionValue(accessOption);
-            if(optionValue==null){
-                // option was not set in create. we return true, because default is on
+        // option was set, check what text was sent
+        final String optionValue = (String) parser.getOptionValue(accessOption);
+        if (optionValue == null) {
+            // option was not set in create. we return true, because default is
+            // on
+            return true;
+        } else {
+            if (optionValue.trim().length() > 0 && optionValue.trim().equalsIgnoreCase("on")) {
                 return true;
-            }else{
-                if(optionValue.trim().length()>0 && optionValue.trim().equalsIgnoreCase("on")){
-                    return true;
-                }else{
-                    return false;
-                }
+            } else {
+                return false;
             }
-        
+        }
     }
     
     protected final void setModuleAccessOptionsinUserChange(final AdminParser parser, final UserModuleAccess access) {
-        
-        
-        if((String) parser.getOptionValue(this.accessCalendarOption)!=null){
-            access.setCalendar(accessOption2BooleanCreate(parser,this.accessCalendarOption));
+        if ((String) parser.getOptionValue(this.accessCalendarOption) != null) {
+            access.setCalendar(accessOption2BooleanCreate(parser, this.accessCalendarOption));
         }
-        if((String) parser.getOptionValue(this.accessContactOption)!=null){
-            access.setContacts(accessOption2BooleanCreate(parser,this.accessContactOption));
+        if ((String) parser.getOptionValue(this.accessContactOption) != null) {
+            access.setContacts(accessOption2BooleanCreate(parser, this.accessContactOption));
         }
-        if((String) parser.getOptionValue(this.accessDelegateTasksOption)!=null){
-            access.setDelegateTask(accessOption2BooleanCreate(parser,this.accessDelegateTasksOption));
+        if ((String) parser.getOptionValue(this.accessDelegateTasksOption) != null) {
+            access.setDelegateTask(accessOption2BooleanCreate(parser, this.accessDelegateTasksOption));
         }
-        if((String) parser.getOptionValue(this.accessEditPublicFolderOption)!=null){
-            access.setEditPublicFolders(accessOption2BooleanCreate(parser,this.accessEditPublicFolderOption));
+        if ((String) parser.getOptionValue(this.accessEditPublicFolderOption) != null) {
+            access.setEditPublicFolders(accessOption2BooleanCreate(parser, this.accessEditPublicFolderOption));
         }
-        if((String) parser.getOptionValue(this.accessForumOption)!=null){
-            access.setForum(accessOption2BooleanCreate(parser,this.accessForumOption));
+        if ((String) parser.getOptionValue(this.accessForumOption) != null) {
+            access.setForum(accessOption2BooleanCreate(parser, this.accessForumOption));
         }
-        if((String) parser.getOptionValue(this.accessIcalOption)!=null){
-            access.setIcal(accessOption2BooleanCreate(parser,this.accessIcalOption));
+        if ((String) parser.getOptionValue(this.accessIcalOption) != null) {
+            access.setIcal(accessOption2BooleanCreate(parser, this.accessIcalOption));
         }
-        if((String) parser.getOptionValue(this.accessInfostoreOption)!=null){
-            access.setInfostore(accessOption2BooleanCreate(parser,this.accessInfostoreOption));
+        if ((String) parser.getOptionValue(this.accessInfostoreOption) != null) {
+            access.setInfostore(accessOption2BooleanCreate(parser, this.accessInfostoreOption));
         }
-        if((String) parser.getOptionValue(this.accessPinboardWriteOption)!=null){
-            access.setPinboardWrite(accessOption2BooleanCreate(parser,this.accessPinboardWriteOption));
+        if ((String) parser.getOptionValue(this.accessPinboardWriteOption) != null) {
+            access.setPinboardWrite(accessOption2BooleanCreate(parser, this.accessPinboardWriteOption));
         }
-        if((String) parser.getOptionValue(this.accessProjectsOption)!=null){
-            access.setProjects(accessOption2BooleanCreate(parser,this.accessProjectsOption));
+        if ((String) parser.getOptionValue(this.accessProjectsOption) != null) {
+            access.setProjects(accessOption2BooleanCreate(parser, this.accessProjectsOption));
         }
-        if((String) parser.getOptionValue(this.accessReadCreateSharedFolderOption)!=null){
-            access.setReadCreateSharedFolders(accessOption2BooleanCreate(parser,this.accessReadCreateSharedFolderOption));
+        if ((String) parser.getOptionValue(this.accessReadCreateSharedFolderOption) != null) {
+            access.setReadCreateSharedFolders(accessOption2BooleanCreate(parser, this.accessReadCreateSharedFolderOption));
         }
-        if((String) parser.getOptionValue(this.accessRssBookmarkOption)!=null){
-            access.setRssBookmarks(accessOption2BooleanCreate(parser,this.accessRssBookmarkOption));
+        if ((String) parser.getOptionValue(this.accessRssBookmarkOption) != null) {
+            access.setRssBookmarks(accessOption2BooleanCreate(parser, this.accessRssBookmarkOption));
         }
-        if((String) parser.getOptionValue(this.accessRssPortalOption)!=null){
-            access.setRssPortal(accessOption2BooleanCreate(parser,this.accessRssPortalOption));
+        if ((String) parser.getOptionValue(this.accessRssPortalOption) != null) {
+            access.setRssPortal(accessOption2BooleanCreate(parser, this.accessRssPortalOption));
         }
-        if((String) parser.getOptionValue(this.accessSyncmlOption)!=null){
-            access.setSyncml(accessOption2BooleanCreate(parser,this.accessSyncmlOption));
+        if ((String) parser.getOptionValue(this.accessSyncmlOption) != null) {
+            access.setSyncml(accessOption2BooleanCreate(parser, this.accessSyncmlOption));
         }
-        if((String) parser.getOptionValue(this.accessTasksOption)!=null){
-            access.setTasks(accessOption2BooleanCreate(parser,this.accessTasksOption));
+        if ((String) parser.getOptionValue(this.accessTasksOption) != null) {
+            access.setTasks(accessOption2BooleanCreate(parser, this.accessTasksOption));
         }
-        if((String) parser.getOptionValue(this.accessVcardOption)!=null){
-            access.setVcard(accessOption2BooleanCreate(parser,this.accessVcardOption));
+        if ((String) parser.getOptionValue(this.accessVcardOption) != null) {
+            access.setVcard(accessOption2BooleanCreate(parser, this.accessVcardOption));
         }
-        if((String) parser.getOptionValue(this.accessWebdavOption)!=null){
-            access.setWebdav(accessOption2BooleanCreate(parser,this.accessWebdavOption));
+        if ((String) parser.getOptionValue(this.accessWebdavOption) != null) {
+            access.setWebdav(accessOption2BooleanCreate(parser, this.accessWebdavOption));
         }
-        if((String) parser.getOptionValue(this.accessWebdavXmlOption)!=null){
-            access.setWebdavXml(accessOption2BooleanCreate(parser,this.accessWebdavXmlOption));
+        if ((String) parser.getOptionValue(this.accessWebdavXmlOption) != null) {
+            access.setWebdavXml(accessOption2BooleanCreate(parser, this.accessWebdavXmlOption));
         }
-        if((String) parser.getOptionValue(this.accessWebmailOption)!=null){
-            access.setWebmail(accessOption2BooleanCreate(parser,this.accessWebmailOption));
+        if ((String) parser.getOptionValue(this.accessWebmailOption) != null) {
+            access.setWebmail(accessOption2BooleanCreate(parser, this.accessWebmailOption));
         }
-        
     }
     
-    protected final boolean accessOption2BooleanChange(final AdminParser parser,final Option accessOption){
-        
+    protected final boolean accessOption2BooleanChange(final AdminParser parser, final Option accessOption) {
         // option was set, check what text was sent
-        final String optionValue = (String) parser.getOptionValue(accessOption);        
-        if(optionValue.trim().length()>0 && optionValue.trim().equalsIgnoreCase("on")){
-                return true;
-        }else{
-                return false;
+        final String optionValue = (String) parser.getOptionValue(accessOption);
+        if (optionValue.trim().length() > 0 && optionValue.trim().equalsIgnoreCase("on")) {
+            return true;
+        } else {
+            return false;
         }
-        
-    
-}
+    }
 
     /**
      * Get the optional options from the command line and set's them in the user object
@@ -707,7 +691,6 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         final ArrayList<MethodAndNames> methArrayList = getSetters(methods);
     
         for (final MethodAndNames methodandnames : methArrayList) {
-            
             if (!standardoptions.contains(methodandnames.getName().toLowerCase())) {
                 if (methodandnames.getReturntype().equals(JAVA_LANG_STRING)) {
                     final Option option = setLongOpt(parser, methodandnames.getName().toLowerCase(), "stringvalue", methodandnames.getName(), true, false, true);
@@ -793,7 +776,6 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
 //                    optionAndMethod.getMethod().invoke(usr, pwmech);
 //                }
             }
-    
         }
     }
 
