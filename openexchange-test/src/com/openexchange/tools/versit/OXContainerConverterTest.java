@@ -149,7 +149,7 @@ public class OXContainerConverterTest extends TestCase {
 		
 		try {
 			UserParticipant p = (UserParticipant) participants[0];
-			assertEquals(testUser.getContactId() ,p.getIdentifier());
+			assertEquals(testUser.getId() ,p.getIdentifier());
 		} catch (ClassCastException e){
 			fail("User with e-mail " + participantEmail + " should be internal user");
 		}
