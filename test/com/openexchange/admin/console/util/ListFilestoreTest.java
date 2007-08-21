@@ -7,7 +7,7 @@ import org.junit.Test;
 
 import com.openexchange.admin.console.AbstractTest;
 import com.openexchange.admin.console.BasicCommandlineOptions;
-import com.openexchange.admin.console.util.filestore.ListFilestores;
+import com.openexchange.admin.console.util.filestore.ListFilestore;
 
 /**
  * @author cutmasta
@@ -20,7 +20,7 @@ public class ListFilestoreTest extends AbstractTest {
         
         resetBuffers();
         
-        new ListFilestores(getMasterCredentialsOptionData()){
+        new ListFilestore(getMasterCredentialsOptionData()){
             protected void sysexit(int exitCode) {
                 ListFilestoreTest.this.returnCode = exitCode;
             }
@@ -34,7 +34,7 @@ public class ListFilestoreTest extends AbstractTest {
         
         resetBuffers();
         
-        new ListFilestores(getCSVMasterOptionData()){
+        new ListFilestore(getCSVMasterOptionData()){
             protected void sysexit(int exitCode) {
                 ListFilestoreTest.this.returnCode = exitCode;
             }
@@ -48,7 +48,7 @@ public class ListFilestoreTest extends AbstractTest {
         
         resetBuffers();
         
-        new ListFilestores(getWrongMasterCredentialsOptionData()){
+        new ListFilestore(getWrongMasterCredentialsOptionData()){
             protected void sysexit(int exitCode) {
                 ListFilestoreTest.this.returnCode = exitCode;
             }
@@ -62,7 +62,7 @@ public class ListFilestoreTest extends AbstractTest {
         
         resetBuffers();
         
-        new ListFilestores(getUnknownOptionData()){
+        new ListFilestore(getUnknownOptionData()){
             protected void sysexit(int exitCode) {
                 ListFilestoreTest.this.returnCode = exitCode;
             }

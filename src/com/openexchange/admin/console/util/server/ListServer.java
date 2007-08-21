@@ -1,4 +1,4 @@
-package com.openexchange.admin.console.util.reason;
+package com.openexchange.admin.console.util.server;
 
 import java.rmi.Naming;
 import java.util.ArrayList;
@@ -6,21 +6,23 @@ import java.util.ArrayList;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
+import com.openexchange.admin.rmi.dataobjects.Server;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 
 /**
  * 
- * @author d7,cutmasta
+ * @author d7
  * 
  */
-public class ListReasons extends ReasonAbstraction {
+public class ListServer extends ServerAbstraction {
 
-    public ListReasons(final String[] args2) {
+    public ListServer(final String[] args2) {
 
-        final AdminParser parser = new AdminParser("listreasons");
+        final AdminParser parser = new AdminParser("listserver");
+
         setOptions(parser);
         setCSVOutputOption(parser);
+
         try {
             parser.ownparse(args2);
 
@@ -29,17 +31,17 @@ public class ListReasons extends ReasonAbstraction {
             // get rmi ref
             final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME +OXUtilInterface.RMI_NAME);
 
-            String pattern = "*";
+            String searchpattern = "*";
             if (parser.getOptionValue(this.searchOption) != null) {
-                pattern = (String) parser.getOptionValue(this.searchOption);
+                searchpattern = (String) parser.getOptionValue(this.searchOption);
             }
-
-            final MaintenanceReason[] mrs = oxutil.listMaintenanceReasons(pattern, auth);
+            // Setting the options in the dataobject
+            final Server[] servers = oxutil.listServer(searchpattern, auth);
 
             if (null != parser.getOptionValue(this.csvOutputOption)) {
-                precsvinfos(mrs);
+                precsvinfos(servers);
             } else {
-                sysoutOutput(mrs);
+                sysoutOutput(servers);
             }
 
             sysexit(0);
@@ -49,7 +51,7 @@ public class ListReasons extends ReasonAbstraction {
     }
 
     public static void main(final String args[]) {
-        new ListReasons(args);
+        new ListServer(args);
     }
 
     private void setOptions(final AdminParser parser) {
@@ -57,42 +59,46 @@ public class ListReasons extends ReasonAbstraction {
         setSearchOption(parser);
     }
 
-    private void sysoutOutput(final MaintenanceReason[] mrs) throws InvalidDataException {
+    private void sysoutOutput(Server[] servers) throws InvalidDataException {
         final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
-        for (final MaintenanceReason mr : mrs) {
-            data.add(makeCSVData(mr));
+        for (final Server server : servers) {
+            data.add(makeCSVData(server));
         }
         
-        //doOutput(new String[] { "3r", "72l" }, new String[] { "Id", "Text" }, data);
-        doOutput(new String[] { "r", "l" }, new String[] { "Id", "Text" }, data);
+        //doOutput(new String[] { "3r", "35l" }, new String[] { "Id", "Name" }, data);
+        doOutput(new String[] { "r", "l" }, new String[] { "Id", "Name" }, data);
     }
 
-    private void precsvinfos(final MaintenanceReason[] mrs) throws InvalidDataException {
+    private void precsvinfos(Server[] servers) throws InvalidDataException {
         // needed for csv output, KEEP AN EYE ON ORDER!!!
         final ArrayList<String> columns = new ArrayList<String>();
         columns.add("id");
-        columns.add("text");
+        columns.add("name");
     
-        // Needed for csv output
         final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
     
-        for (final MaintenanceReason mr : mrs) {
-            data.add(makeCSVData(mr));
+        for (final Server server : servers) {
+            data.add(makeCSVData(server));
         }
     
         doCSVOutput(columns, data);
     }
 
-    private ArrayList<String> makeCSVData(final MaintenanceReason mr) {
-        final ArrayList<String> rea_data = new ArrayList<String>();
-        rea_data.add(mr.getId().toString());
-        rea_data.add(mr.getText());
-    
-        return rea_data;
+    private ArrayList<String> makeCSVData(Server server) {
+        final ArrayList<String> srv_data = new ArrayList<String>();
+        srv_data.add(String.valueOf(server.getId()));
+        final String servername = server.getName();
+        if (servername != null) {
+            srv_data.add(servername);
+        } else {
+            srv_data.add(null);
+        }
+        return srv_data;
     }
-    
+
     @Override
     protected final String getObjectName() {
-        return "reasons";
+        return "servers";
     }
+
 }

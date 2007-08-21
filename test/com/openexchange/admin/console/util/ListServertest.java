@@ -7,7 +7,7 @@ import org.junit.Test;
 
 import com.openexchange.admin.console.AbstractTest;
 import com.openexchange.admin.console.BasicCommandlineOptions;
-import com.openexchange.admin.console.util.server.ListServers;
+import com.openexchange.admin.console.util.server.ListServer;
 
 /**
  * @author cutmasta
@@ -20,7 +20,7 @@ public class ListServertest extends AbstractTest {
         
         resetBuffers();
         
-        new ListServers(getMasterCredentialsOptionData()){
+        new ListServer(getMasterCredentialsOptionData()){
             protected void sysexit(int exitCode) {
                 ListServertest.this.returnCode = exitCode;
             }
@@ -34,7 +34,7 @@ public class ListServertest extends AbstractTest {
         
         resetBuffers();
         
-        new ListServers(getCSVMasterOptionData()){
+        new ListServer(getCSVMasterOptionData()){
             protected void sysexit(int exitCode) {
                 ListServertest.this.returnCode = exitCode;
             }
@@ -48,7 +48,7 @@ public class ListServertest extends AbstractTest {
         
         resetBuffers();
         
-        new ListServers(getWrongMasterCredentialsOptionData()){
+        new ListServer(getWrongMasterCredentialsOptionData()){
             protected void sysexit(int exitCode) {
                 ListServertest.this.returnCode = exitCode;
             }
@@ -62,7 +62,7 @@ public class ListServertest extends AbstractTest {
         
         resetBuffers();
         
-        new ListServers(getUnknownOptionData()){
+        new ListServer(getUnknownOptionData()){
             protected void sysexit(int exitCode) {
                 ListServertest.this.returnCode = exitCode;
             }

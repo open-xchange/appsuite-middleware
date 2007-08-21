@@ -7,7 +7,7 @@ import org.junit.Test;
 
 import com.openexchange.admin.console.AbstractTest;
 import com.openexchange.admin.console.BasicCommandlineOptions;
-import com.openexchange.admin.console.util.database.ListDatabases;
+import com.openexchange.admin.console.util.database.ListDatabase;
 
 /**
  * @author cutmasta
@@ -21,7 +21,7 @@ public class ListDatabasesTest extends AbstractTest {
         
         resetBuffers();
         
-        new ListDatabases(getMasterCredentialsOptionData()){
+        new ListDatabase(getMasterCredentialsOptionData()){
             protected void sysexit(int exitCode) {
                 ListDatabasesTest.this.returnCode = exitCode;
             }
@@ -35,7 +35,7 @@ public class ListDatabasesTest extends AbstractTest {
         
         resetBuffers();
         
-        new ListDatabases(getCSVMasterOptionData()){
+        new ListDatabase(getCSVMasterOptionData()){
             protected void sysexit(int exitCode) {
                 ListDatabasesTest.this.returnCode = exitCode;
             }
@@ -49,7 +49,7 @@ public class ListDatabasesTest extends AbstractTest {
         
         resetBuffers();
         
-        new ListDatabases(getWrongMasterCredentialsOptionData()){
+        new ListDatabase(getWrongMasterCredentialsOptionData()){
             protected void sysexit(int exitCode) {
                 ListDatabasesTest.this.returnCode = exitCode;
             }
@@ -63,7 +63,7 @@ public class ListDatabasesTest extends AbstractTest {
         
         resetBuffers();
         
-        new ListDatabases(getUnknownOptionData()){
+        new ListDatabase(getUnknownOptionData()){
             protected void sysexit(int exitCode) {
                 ListDatabasesTest.this.returnCode = exitCode;
             }

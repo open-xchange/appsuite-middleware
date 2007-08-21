@@ -81,13 +81,13 @@ case "${BNAME}" in
     "disablecontext")
     ACTION="context.Disable"
     ;;
-    "disableallcontexts")
+    "disableallcontext")
     ACTION="context.DisableAll"
     ;;
     "enablecontext")
     ACTION="context.Enable"
     ;;
-    "enableallcontexts")
+    "enableallcontext")
     ACTION="context.EnableAll"
     ;;
     "movecontextdatabase")
@@ -96,7 +96,7 @@ case "${BNAME}" in
     "movecontextfilestore")
     ACTION="context.MoveContextFilestore"
     ;;
-    "listcontexts")
+    "listcontext")
     ACTION="context.List"
     ;;
     "listcontextsbydatabase")
@@ -108,14 +108,14 @@ case "${BNAME}" in
     "changefilestore")
     ACTION="util.filestore.ChangeFilestore"
     ;;
-    "listdatabases")
-    ACTION="util.database.ListDatabases"
+    "listdatabase")
+    ACTION="util.database.ListDatabase"
     ;;
-    "listfilestores")
-    ACTION="util.filestore.ListFilestores"
+    "listfilestore")
+    ACTION="util.filestore.ListFilestore"
     ;;
-    "listservers")
-    ACTION="util.server.ListServers"
+    "listserver")
+    ACTION="util.server.ListServer"
     ;;
     "registerdatabase")
     ACTION="util.database.RegisterDatabase"

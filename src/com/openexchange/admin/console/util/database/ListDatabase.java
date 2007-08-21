@@ -16,11 +16,11 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
  * @author d7,cutmasta
  *
  */
-public class ListDatabases extends DatabaseAbstraction {
+public class ListDatabase extends DatabaseAbstraction {
 
-    public ListDatabases(final String[] args2) {
+    public ListDatabase(final String[] args2) {
 
-        final AdminParser parser = new AdminParser("listdatabases");
+        final AdminParser parser = new AdminParser("listdatabase");
 
         setOptions(parser);
 
@@ -36,7 +36,7 @@ public class ListDatabases extends DatabaseAbstraction {
             if (parser.getOptionValue(this.searchOption) != null) {
                 searchpattern = (String)parser.getOptionValue(this.searchOption);
             }
-            final Database[] databases = oxutil.listDatabases(searchpattern, auth);
+            final Database[] databases = oxutil.listDatabase(searchpattern, auth);
             
             if (null != parser.getOptionValue(this.csvOutputOption)) {
                 precsvinfos(databases);
@@ -92,7 +92,7 @@ public class ListDatabases extends DatabaseAbstraction {
     }
 
     public static void main(final String args[]) {
-        new ListDatabases(args);
+        new ListDatabase(args);
     }
 
     private void setOptions(final AdminParser parser) {
