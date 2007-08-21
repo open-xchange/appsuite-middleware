@@ -1,3 +1,7 @@
+* 2007-08-21 - dennis.sieben@open-xchange.com
+
+  - Bugfix ID#8543 rename of movedatabasecontext and movefilestorecontext
+  
 * 2007-08-20 - choeger@open-xchange.com
 
   - Bugfix ID#8949 Unable to deinstall admin-plugin-hosting package when removing depending

@@ -90,10 +90,10 @@ case "${BNAME}" in
     "enableallcontexts")
     ACTION="context.EnableAll"
     ;;
-    "movedatabasecontext")
+    "movecontextdatabase")
     ACTION="context.MoveContextDatabase"
     ;;
-    "movefilestorecontext")
+    "movecontextfilestore")
     ACTION="context.MoveContextFilestore"
     ;;
     "listcontexts")

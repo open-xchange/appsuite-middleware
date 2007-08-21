@@ -5,8 +5,8 @@ disablecontext
 disableallcontexts
 enablecontext
 enableallcontexts
-movedatabasecontext
-movefilestorecontext
+movecontextdatabase
+movecontextfilestore
 listcontexts
 listcontextsbydatabase
 listcontextsbyfilestore
