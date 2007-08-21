@@ -1,3 +1,7 @@
+* 2007-08-21 - thorben.betten@open-xchange.com
+
+ - Bugfix #8987: Fixed html2text conversion while keeping quotes
+
 * 2007-08-21 - francisco.laguna@open-xchange.com
 
  - Fixed bug #8971. User userId and not contactId for internal user participants 

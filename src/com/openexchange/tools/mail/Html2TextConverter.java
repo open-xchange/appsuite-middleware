@@ -167,7 +167,7 @@ public final class Html2TextConverter {
 	 * @return plain text version of given HTML content
 	 */
 	public String convertWithQuotes(final String htmlContent) throws IOException {
-		final StringBuilder sb = new StringBuilder(htmlContent.length() + 100);
+		final StringBuilder sb = new StringBuilder(htmlContent.length() + 1024);
 		final Matcher m = PATTERN_BLOCKQUOTE.matcher(htmlContent);
 		boolean found = false;
 		int start = 0, end = 0, bodyStart = htmlContent.length(), bodyEnd = htmlContent.length();
@@ -223,8 +223,8 @@ public final class Html2TextConverter {
 	}
 
 	private static String addSimpleQuote(final String htmlContent, final int quoteLevel) {
-		final String[] lines = htmlContent.split("<br>");
-		final StringBuilder sb = new StringBuilder();
+		final String[] lines = htmlContent.split("<br */?>");
+		final StringBuilder sb = new StringBuilder(htmlContent.length() + 256);
 		for (int i = 0; i < lines.length; i++) {
 			for (int j = 0; j < quoteLevel; j++) {
 				sb.append(HTML_GT);
@@ -363,10 +363,10 @@ public final class Html2TextConverter {
 		} else if (isTag(t, "/center")) {
 			result = LINEBREAK;
 		} else if (isTag(t, "pre")) {
-			result = LINEBREAK;
+			//result = LINEBREAK;
 			pre = true;
 		} else if (isTag(t, "/pre")) {
-			result = LINEBREAK;
+			//result = LINEBREAK;
 			pre = false;
 		} else if (isTag(t, "p")) {
 			if (prevChar == NONE) {
