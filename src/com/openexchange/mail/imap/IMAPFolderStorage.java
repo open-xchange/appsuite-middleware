@@ -60,16 +60,12 @@ import javax.mail.MethodNotSupportedException;
 import javax.mail.ReadOnlyFolderException;
 
 import com.openexchange.api2.MailInterface;
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.MailFolderObject;
-import com.openexchange.imap.IMAPPropertyException;
 import com.openexchange.imap.IMAPProperties;
+import com.openexchange.imap.IMAPPropertyException;
 import com.openexchange.imap.IMAPUtils;
-import com.openexchange.imap.OXMailException;
 import com.openexchange.imap.UserSettingMail;
-import com.openexchange.imap.OXMailException.MailCode;
-import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailFolderStorage;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.imap.converters.IMAPFolderConverter;
