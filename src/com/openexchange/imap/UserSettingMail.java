@@ -475,9 +475,9 @@ public final class UserSettingMail implements DeleteListener, Cloneable, Seriali
 	 * @return <code>true</code> if both global property for spam enablement
 	 *         <small><b>AND</b></small> user-defined property for spam
 	 *         enablement are turned on; otherwise <code>false</code>
-	 * @throws IMAPException
+	 * @throws IMAPPropertyException
 	 */
-	public boolean isSpamEnabled() throws IMAPException {
+	public boolean isSpamEnabled() throws IMAPPropertyException {
 		return (IMAPProperties.isSpamEnabled() && spamEnabled);
 	}
 

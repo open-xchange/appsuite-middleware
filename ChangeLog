@@ -2,6 +2,7 @@
 
  - Bugfix #8987: Fixed html2text conversion while keeping quotes
  - Bugfix #8988: Fixed NPE on non-matching servlet path
+ - Rough new mail interface
 
 * 2007-08-21 - francisco.laguna@open-xchange.com
 

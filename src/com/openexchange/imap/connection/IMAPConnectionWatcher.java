@@ -62,7 +62,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import javax.mail.MessagingException;
 
 import com.openexchange.api2.MailInterfaceImpl;
-import com.openexchange.imap.IMAPException;
+import com.openexchange.imap.IMAPPropertyException;
 import com.openexchange.imap.IMAPProperties;
 import com.openexchange.server.ServerTimer;
 
@@ -179,7 +179,7 @@ public final class IMAPConnectionWatcher {
 						}
 					}
 				}
-			} catch (final IMAPException e) {
+			} catch (final IMAPPropertyException e) {
 				LOG.error(e.getLocalizedMessage(), e);
 			} finally {
 				LOCK.unlock();
@@ -196,7 +196,7 @@ public final class IMAPConnectionWatcher {
 				ServerTimer.getTimer().schedule(new IMAPConnectionWatcherTask(), 1000,
 						IMAPProperties.getWatcherFrequency());
 			}
-		} catch (final IMAPException e) {
+		} catch (final IMAPPropertyException e) {
 			LOG.error(e.getMessage(), e);
 		}
 	}

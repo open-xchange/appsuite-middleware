@@ -103,7 +103,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.upload.AJAXUploadFile;
 import com.openexchange.groupware.upload.UploadEvent;
-import com.openexchange.imap.IMAPException;
+import com.openexchange.imap.IMAPPropertyException;
 import com.openexchange.imap.IMAPProperties;
 import com.openexchange.imap.MessageHeaders;
 import com.openexchange.imap.OXMailException;
@@ -625,7 +625,7 @@ public final class MessageFiller {
 		return alternativeMultipart;
 	}
 
-	private static BodyPart createHtmlBodyPart(final String htmlContent, final int linewrap) throws IMAPException,
+	private static BodyPart createHtmlBodyPart(final String htmlContent, final int linewrap) throws IMAPPropertyException,
 			MessagingException {
 		final String htmlCT = PAT_HTML_CT.replaceFirst(REPLACE_CS, IMAPProperties.getDefaultMimeCharset());
 		final MimeBodyPart html = new MimeBodyPart();
@@ -676,7 +676,7 @@ public final class MessageFiller {
 						LOG.error("Unsupported encoding in a message detected and monitored.", e);
 						MailInterfaceImpl.mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
 						msgBodyPart.setFileName(mao.getFileName());
-					} catch (final IMAPException e) {
+					} catch (final IMAPPropertyException e) {
 						msgBodyPart.setFileName(mao.getFileName());
 					}
 				} else {
@@ -688,7 +688,7 @@ public final class MessageFiller {
 								.getDefaultMimeCharset(), ENC_Q));
 					} catch (final UnsupportedEncodingException e) {
 						msgBodyPart.setFileName(mao.getFileName());
-					} catch (final IMAPException e) {
+					} catch (final IMAPPropertyException e) {
 						msgBodyPart.setFileName(mao.getFileName());
 					}
 				}
@@ -705,7 +705,7 @@ public final class MessageFiller {
 							.getDefaultMimeCharset(), ENC_Q));
 				} catch (final UnsupportedEncodingException e) {
 					messageBodyPart.setFileName(mao.getFileName());
-				} catch (final IMAPException e) {
+				} catch (final IMAPPropertyException e) {
 					messageBodyPart.setFileName(mao.getFileName());
 				}
 				messageBodyPart.setDisposition(mao.getDisposition() == null ? Part.ATTACHMENT : mao.getDisposition());
@@ -729,7 +729,7 @@ public final class MessageFiller {
 							.getDefaultMimeCharset(), ENC_Q));
 				} catch (final UnsupportedEncodingException e) {
 					messageBodyPart.setFileName(mao.getFileName());
-				} catch (final IMAPException e) {
+				} catch (final IMAPPropertyException e) {
 					messageBodyPart.setFileName(mao.getFileName());
 				}
 				messageBodyPart.setDisposition(mao.getDisposition() == null ? Part.ATTACHMENT : mao.getDisposition());
@@ -1048,7 +1048,7 @@ public final class MessageFiller {
 			fileName = MimeUtility.encodeText(uploadFile.getFileName(), IMAPProperties.getDefaultMimeCharset(), ENC_Q);
 		} catch (final UnsupportedEncodingException e) {
 			fileName = uploadFile.getFileName();
-		} catch (final IMAPException e) {
+		} catch (final IMAPPropertyException e) {
 			fileName = uploadFile.getFileName();
 		}
 		/*

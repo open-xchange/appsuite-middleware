@@ -69,7 +69,7 @@ import com.openexchange.groupware.contexts.LoginInfo;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.imap.IMAPException;
+import com.openexchange.imap.IMAPPropertyException;
 import com.openexchange.imap.IMAPPropertiesFactory;
 import com.openexchange.imap.UserSettingMailStorage;
 import com.openexchange.monitoring.MonitoringInfo;
@@ -249,8 +249,8 @@ public class SessionHandler extends TimerTask {
         // Load IMAP Info
         try {
             sessionobject.setIMAPProperties(IMAPPropertiesFactory.getImapProperties(sessionobject));
-        } catch (final IMAPException e) {
-            LOG.error("ERROR! IMAPException OCCURRED " + e.getMessage());
+        } catch (final IMAPPropertyException e) {
+            LOG.error("ERROR! IMAPPropertyException OCCURRED " + e.getMessage());
         }
 
         if (sessions.containsKey(sessionId) && LOG.isDebugEnabled()) {

@@ -243,7 +243,7 @@ public class IMAPProperties {
 		this.smtpServer = smtpServer;
 	}
 
-	public static String getSmtpLocalhost() throws IMAPException {
+	public static String getSmtpLocalhost() throws IMAPPropertyException {
 		checkGlobalImapProperties();
 		return smtpLocalhost;
 	}
@@ -296,7 +296,7 @@ public class IMAPProperties {
 		IMAPProperties.imapCapabilities = imapCapabilities;
 	}
 
-	public static boolean isImapSort() throws IMAPException {
+	public static boolean isImapSort() throws IMAPPropertyException {
 		checkGlobalImapProperties();
 		if (capabilitiesLoaded) {
 			return (imapSort && imapCapabilities.hasSort());
@@ -312,7 +312,7 @@ public class IMAPProperties {
 		IMAPProperties.imapSort = imapSort;
 	}
 
-	public static boolean isImapSearch() throws IMAPException {
+	public static boolean isImapSearch() throws IMAPPropertyException {
 		checkGlobalImapProperties();
 		if (capabilitiesLoaded) {
 			return (imapSearch && (imapCapabilities.hasIMAP4rev1() || imapCapabilities.hasIMAP4()));
@@ -328,7 +328,7 @@ public class IMAPProperties {
 		IMAPProperties.imapSearch = imapSearch;
 	}
 
-	public static int getMessageFetchLimit() throws IMAPException {
+	public static int getMessageFetchLimit() throws IMAPPropertyException {
 		checkGlobalImapProperties();
 		return messageFetchLimit;
 	}
@@ -341,7 +341,7 @@ public class IMAPProperties {
 		IMAPProperties.messageFetchLimit = messageFetchLimit;
 	}
 
-	public static int getAttachmentDisplaySizeLimit() throws IMAPException {
+	public static int getAttachmentDisplaySizeLimit() throws IMAPPropertyException {
 		checkGlobalImapProperties();
 		return attachmentDisplaySizeLimit;
 	}
@@ -354,7 +354,7 @@ public class IMAPProperties {
 		IMAPProperties.attachmentDisplaySizeLimit = attachmentDisplaySizeLimit;
 	}
 
-	public static String[] getQuoteLineColors() throws IMAPException {
+	public static String[] getQuoteLineColors() throws IMAPPropertyException {
 		checkGlobalImapProperties();
 		final String[] retval = new String[quoteLineColors.length];
 		System.arraycopy(quoteLineColors, 0, retval, 0, retval.length);
@@ -366,7 +366,7 @@ public class IMAPProperties {
 		System.arraycopy(quoteLineColors, 0, IMAPProperties.quoteLineColors, 0, quoteLineColors.length);
 	}
 
-	public static boolean isSupportsACLs() throws IMAPException {
+	public static boolean isSupportsACLs() throws IMAPPropertyException {
 		checkGlobalImapProperties();
 		if (capabilitiesLoaded && BoolCapVal.AUTO.equals(supportsACLs)) {
 			return imapCapabilities.hasACL();
@@ -382,7 +382,7 @@ public class IMAPProperties {
 		IMAPProperties.supportsACLs = supportsACLs;
 	}
 
-	public static SpellCheckConfig getSpellCheckConfig() throws IMAPException {
+	public static SpellCheckConfig getSpellCheckConfig() throws IMAPPropertyException {
 		checkGlobalImapProperties();
 		return spellCheckConfig;
 	}
@@ -399,7 +399,7 @@ public class IMAPProperties {
 		IMAPProperties.globalPropertiesLoaded = globalPropertiesLoaded;
 	}
 
-	public static PartModifier getPartModifierImpl() throws IMAPException {
+	public static PartModifier getPartModifierImpl() throws IMAPPropertyException {
 		checkGlobalImapProperties();
 		return partModifierImpl;
 	}
@@ -412,7 +412,7 @@ public class IMAPProperties {
 		IMAPProperties.partModifierImpl = partModifierImpl;
 	}
 
-	public static boolean isSmtpAuth() throws IMAPException {
+	public static boolean isSmtpAuth() throws IMAPPropertyException {
 		checkGlobalImapProperties();
 		return smtpAuth;
 	}
@@ -425,7 +425,7 @@ public class IMAPProperties {
 		IMAPProperties.smtpAuth = smtpAuth;
 	}
 
-	public static int getImapConnectionTimeout() throws IMAPException {
+	public static int getImapConnectionTimeout() throws IMAPPropertyException {
 		checkGlobalImapProperties();
 		return imapConnectionTimeout;
 	}
@@ -438,7 +438,7 @@ public class IMAPProperties {
 		IMAPProperties.imapConnectionTimeout = imapConnectionTimeout;
 	}
 
-	public static int getImapTimeout() throws IMAPException {
+	public static int getImapTimeout() throws IMAPPropertyException {
 		checkGlobalImapProperties();
 		return imapTimeout;
 	}
@@ -451,7 +451,7 @@ public class IMAPProperties {
 		IMAPProperties.imapTimeout = imapConnectionTimeout;
 	}
 
-	public static boolean isUserFlagsEnabled() throws IMAPException {
+	public static boolean isUserFlagsEnabled() throws IMAPPropertyException {
 		checkGlobalImapProperties();
 		return userFlagsEnabled;
 	}
@@ -464,7 +464,7 @@ public class IMAPProperties {
 		IMAPProperties.userFlagsEnabled = userFlagsEnabled;
 	}
 
-	public static long getMaxIMAPConnectionIdleTime() throws IMAPException {
+	public static long getMaxIMAPConnectionIdleTime() throws IMAPPropertyException {
 		checkGlobalImapProperties();
 		return maxIMAPConnectionIdleTime;
 	}
@@ -477,7 +477,7 @@ public class IMAPProperties {
 		IMAPProperties.maxIMAPConnectionIdleTime = maxIMAPConnectionIdleTime;
 	}
 
-	public static int getMaxNumOfIMAPConnections() throws IMAPException {
+	public static int getMaxNumOfIMAPConnections() throws IMAPPropertyException {
 		checkGlobalImapProperties();
 		return maxNumOfIMAPConnections;
 	}
@@ -490,7 +490,7 @@ public class IMAPProperties {
 		IMAPProperties.maxNumOfIMAPConnections = maxNumOfIMAPConnections;
 	}
 
-	public static String getImapAuthEnc() throws IMAPException {
+	public static String getImapAuthEnc() throws IMAPPropertyException {
 		checkGlobalImapProperties();
 		return imapAuthEnc;
 	}
@@ -503,7 +503,7 @@ public class IMAPProperties {
 		IMAPProperties.imapAuthEnc = imapAuthEnc;
 	}
 
-	public static String getDefaultMimeCharset() throws IMAPException {
+	public static String getDefaultMimeCharset() throws IMAPPropertyException {
 		checkGlobalImapProperties();
 		return defaultMimeCharset;
 	}
@@ -523,7 +523,7 @@ public class IMAPProperties {
 				defaultMimeCharset == null ? System.getProperty("file.encoding", "8859_1") : defaultMimeCharset);
 	}
 
-	public static boolean isImapsEnabled() throws IMAPException {
+	public static boolean isImapsEnabled() throws IMAPPropertyException {
 		checkGlobalImapProperties();
 		return imapsEnabled;
 	}
@@ -536,7 +536,7 @@ public class IMAPProperties {
 		IMAPProperties.imapsEnabled = imapsEnables;
 	}
 
-	public static int getImapsPort() throws IMAPException {
+	public static int getImapsPort() throws IMAPPropertyException {
 		checkGlobalImapProperties();
 		return imapsPort;
 	}
@@ -549,7 +549,7 @@ public class IMAPProperties {
 		IMAPProperties.imapsPort = imapsPort;
 	}
 
-	public static boolean isSmtpsEnabled() throws IMAPException {
+	public static boolean isSmtpsEnabled() throws IMAPPropertyException {
 		checkGlobalImapProperties();
 		return smtpsEnabled;
 	}
@@ -562,7 +562,7 @@ public class IMAPProperties {
 		IMAPProperties.smtpsEnabled = smtpsEnabled;
 	}
 
-	public static int getSmtpsPort() throws IMAPException {
+	public static int getSmtpsPort() throws IMAPPropertyException {
 		checkGlobalImapProperties();
 		return smtpsPort;
 	}
@@ -575,7 +575,7 @@ public class IMAPProperties {
 		IMAPProperties.smtpsPort = smtpsPort;
 	}
 
-	public static boolean isAllowNestedDefaultFolderOnAltNamespace() throws IMAPException {
+	public static boolean isAllowNestedDefaultFolderOnAltNamespace() throws IMAPPropertyException {
 		checkGlobalImapProperties();
 		return allowNestedDefaultFolderOnAltNamespace;
 	}
@@ -588,7 +588,7 @@ public class IMAPProperties {
 		IMAPProperties.allowNestedDefaultFolderOnAltNamespace = allowNestedDefaultFolderOnAltNamespace;
 	}
 
-	public static boolean isIgnoreSubscription() throws IMAPException {
+	public static boolean isIgnoreSubscription() throws IMAPPropertyException {
 		checkGlobalImapProperties();
 		return ignoreSubscription;
 	}
@@ -601,7 +601,7 @@ public class IMAPProperties {
 		IMAPProperties.ignoreSubscription = ignoreSubscription;
 	}
 
-	public static boolean isSMTPEnvelopeFrom() throws IMAPException {
+	public static boolean isSMTPEnvelopeFrom() throws IMAPPropertyException {
 		checkGlobalImapProperties();
 		return smtpEnvelopeFrom;
 	}
@@ -614,7 +614,7 @@ public class IMAPProperties {
 		IMAPProperties.smtpEnvelopeFrom = setSMTPEnvelopeFrom;
 	}
 
-	public static boolean isSpamEnabled() throws IMAPException {
+	public static boolean isSpamEnabled() throws IMAPPropertyException {
 		checkGlobalImapProperties();
 		return spamEnabled;
 	}
@@ -627,7 +627,7 @@ public class IMAPProperties {
 		IMAPProperties.spamEnabled = spamEnabled;
 	}
 
-	public static boolean isWatcherEnabled() throws IMAPException {
+	public static boolean isWatcherEnabled() throws IMAPPropertyException {
 		checkGlobalImapProperties();
 		return watcherEnabled;
 	}
@@ -640,7 +640,7 @@ public class IMAPProperties {
 		IMAPProperties.watcherEnabled = watcherEnabled;
 	}
 
-	public static boolean isWatcherShallClose() throws IMAPException {
+	public static boolean isWatcherShallClose() throws IMAPPropertyException {
 		checkGlobalImapProperties();
 		return watcherShallClose;
 	}
@@ -653,7 +653,7 @@ public class IMAPProperties {
 		IMAPProperties.watcherShallClose = watcherShallClose;
 	}
 
-	public static int getWatcherTime() throws IMAPException {
+	public static int getWatcherTime() throws IMAPPropertyException {
 		checkGlobalImapProperties();
 		return watcherTime;
 	}
@@ -666,7 +666,7 @@ public class IMAPProperties {
 		IMAPProperties.watcherTime = watcherTime;
 	}
 
-	public static int getWatcherFrequency() throws IMAPException {
+	public static int getWatcherFrequency() throws IMAPPropertyException {
 		checkGlobalImapProperties();
 		return watcherFrequency;
 	}
@@ -679,7 +679,7 @@ public class IMAPProperties {
 		IMAPProperties.watcherFrequency = watcherFrequency;
 	}
 
-	public static IMAPPropertiesFactory.IMAPCredSrc getImapCredSrc() throws IMAPException {
+	public static IMAPPropertiesFactory.IMAPCredSrc getImapCredSrc() throws IMAPPropertyException {
 		checkGlobalImapProperties();
 		return imapCredSrc;
 	}
@@ -692,7 +692,7 @@ public class IMAPProperties {
 		IMAPProperties.imapCredSrc = imapCredSrc;
 	}
 
-	public static IMAPPropertiesFactory.IMAPLoginType getImapLoginType() throws IMAPException {
+	public static IMAPPropertiesFactory.IMAPLoginType getImapLoginType() throws IMAPPropertyException {
 		checkGlobalImapProperties();
 		return imapLoginType;
 	}
@@ -705,7 +705,7 @@ public class IMAPProperties {
 		IMAPProperties.imapLoginType = imapLoginType;
 	}
 
-	public static Properties getJavaMailProperties() throws IMAPException {
+	public static Properties getJavaMailProperties() throws IMAPPropertyException {
 		checkGlobalImapProperties();
 		return javaMailProperties;
 	}
@@ -718,7 +718,7 @@ public class IMAPProperties {
 		IMAPProperties.javaMailProperties = javaMailProperties;
 	}
 
-	private static final void checkGlobalImapProperties() throws IMAPException {
+	private static final void checkGlobalImapProperties() throws IMAPPropertyException {
 		if (!globalPropertiesLoaded) {
 			IMAPPropertiesFactory.loadGlobalImapProperties();
 		}

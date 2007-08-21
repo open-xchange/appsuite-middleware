@@ -887,7 +887,7 @@ public class IMAPUtils {
 							foundInCurrentField = msgText.toLowerCase(Locale.ENGLISH).indexOf(
 									searchPatterns[i].toLowerCase()) > -1;
 						} else {
-							throw new IMAPException("Unknown Search Field: " + searchFields[i]);
+							throw new IMAPPropertyException("Unknown Search Field: " + searchFields[i]);
 						}
 					} catch (final IOException e) {
 						throw new OXMailException(MailCode.UNREADBALE_PART_CONTENT, e, Integer.valueOf(msg
@@ -904,7 +904,7 @@ public class IMAPUtils {
 			}
 			return result;
 		} catch (final MessagingException e) {
-			throw new IMAPException(e);
+			throw new IMAPPropertyException(e);
 		}
 	}
 
@@ -1557,7 +1557,7 @@ public class IMAPUtils {
 							return 0;
 						}
 					};
-				} catch (final IMAPException e) {
+				} catch (final IMAPPropertyException e) {
 					LOG.error(e.getMessage(), e);
 				}
 				return new FieldComparer(locale) {

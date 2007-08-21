@@ -60,7 +60,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.imap.IMAPException;
+import com.openexchange.imap.IMAPPropertyException;
 import com.openexchange.imap.IMAPProperties;
 import com.openexchange.imap.IMAPPropertiesFactory;
 import com.openexchange.imap.IMAPPropertiesFactory.IMAPLoginType;
@@ -319,12 +319,12 @@ public abstract class User2IMAP {
 			return User2IMAPAutoDetector.getUser2IMAPImpl((String) args[0], ((Integer) args[1]).intValue());
 		} catch (final IOException e) {
 			throw new User2IMAPException(User2IMAPException.Code.IO_ERROR, e, e.getLocalizedMessage());
-		} catch (final IMAPException e) {
+		} catch (final IMAPPropertyException e) {
 			throw new User2IMAPException(e);
 		}
 	}
 
-	private static final Object[] getIMAPServer(final User sessionUser) throws IMAPException {
+	private static final Object[] getIMAPServer(final User sessionUser) throws IMAPPropertyException {
 		final String imapServer;
 		if (IMAPLoginType.GLOBAL.equals(IMAPProperties.getImapLoginType())) {
 			imapServer = IMAPPropertiesFactory.getProperties().getProperty(IMAPPropertiesFactory.PROP_IMAPSERVER);
@@ -461,7 +461,7 @@ public abstract class User2IMAP {
 	 * @param u2iListener -
 	 *            the info container
 	 * @return the user ID whose IMAP login matches given <code>pattern</code>
-	 * @throws IMAPException -
+	 * @throws IMAPPropertyException -
 	 *             if IMAP properties could not be initialized
 	 * @throws LdapException -
 	 *             if user search fails

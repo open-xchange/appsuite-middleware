@@ -219,7 +219,7 @@ public class IMAPPropertiesFactory {
 		return TEST_LOGIN_MAP.get(Integer.valueOf(num));
 	}
 
-	private static void checkImapPropFile() throws IMAPException {
+	private static void checkImapPropFile() throws IMAPPropertyException {
 		/*
 		 * Load properties in a thread-safe manner
 		 */
@@ -227,7 +227,7 @@ public class IMAPPropertiesFactory {
 			PROP_LOCK.lock();
 			try {
 				if (PROP_FILE == null && (PROP_FILE = SystemConfig.getProperty(PROPERTYNAME_IMAP)) == null) {
-					throw new IMAPException(new StringBuilder(50).append("Property \"").append(PROPERTYNAME_IMAP)
+					throw new IMAPPropertyException(new StringBuilder(50).append("Property \"").append(PROPERTYNAME_IMAP)
 							.append("\" not defined in system.properties").toString());
 				}
 				if (props == null) {
@@ -240,7 +240,7 @@ public class IMAPPropertiesFactory {
 		}
 	}
 
-	private static final void loadProps() throws IMAPException {
+	private static final void loadProps() throws IMAPPropertyException {
 		props = new Properties();
 		FileInputStream fis = null;
 		try {
@@ -258,11 +258,11 @@ public class IMAPPropertiesFactory {
 			}
 		} catch (final FileNotFoundException e) {
 			props = null;
-			throw new IMAPException(new StringBuilder(300).append("IMAP properties not found at location: ").append(
+			throw new IMAPPropertyException(new StringBuilder(300).append("IMAP properties not found at location: ").append(
 					PROP_FILE).toString(), e);
 		} catch (final IOException e) {
 			props = null;
-			throw new IMAPException(new StringBuilder(300).append(
+			throw new IMAPPropertyException(new StringBuilder(300).append(
 					"I/O error while reading IMAP properties from file \"").append(PROP_FILE).append("\": ").append(
 					e.getMessage()).toString(), e);
 		} finally {
@@ -280,7 +280,7 @@ public class IMAPPropertiesFactory {
 		}
 	}
 	
-	public static final Properties getProperties() throws IMAPException {
+	public static final Properties getProperties() throws IMAPPropertyException {
 		checkImapPropFile();
 		return (Properties) props.clone();
 	}
@@ -289,7 +289,7 @@ public class IMAPPropertiesFactory {
 
 	private static final String STR_NOTSETIN = " NOT set in ";
 
-	public static final IMAPProperties getImapProperties(final SessionObject sessionObj) throws IMAPException {
+	public static final IMAPProperties getImapProperties(final SessionObject sessionObj) throws IMAPPropertyException {
 		checkImapPropFile();
 		/*
 		 * Load global IMAP properties if not done, yet
@@ -303,7 +303,7 @@ public class IMAPPropertiesFactory {
 		if (IMAPLoginType.GLOBAL.equals(IMAPProperties.getImapLoginTypeInternal())) {
 			String imapServer = props.getProperty(PROP_IMAPSERVER);
 			if (imapServer == null) {
-				throw new IMAPException(new StringBuilder().append(STR_PROPERTY).append(PROP_IMAPSERVER).append(
+				throw new IMAPPropertyException(new StringBuilder().append(STR_PROPERTY).append(PROP_IMAPSERVER).append(
 						STR_NOTSETIN).append(PROP_FILE).toString());
 			}
 			int imapPort = 143;
@@ -314,12 +314,12 @@ public class IMAPPropertiesFactory {
 			}
 			final String masterPw = props.getProperty(PROP_MASTERPW);
 			if (masterPw == null) {
-				throw new IMAPException(new StringBuilder().append(STR_PROPERTY).append(PROP_MASTERPW).append(
+				throw new IMAPPropertyException(new StringBuilder().append(STR_PROPERTY).append(PROP_MASTERPW).append(
 						STR_NOTSETIN).append(PROP_FILE).toString());
 			}
 			String smtpServer = props.getProperty(PROP_SMTPSERVER);
 			if (smtpServer == null) {
-				throw new IMAPException(new StringBuilder().append(STR_PROPERTY).append(PROP_SMTPSERVER).append(
+				throw new IMAPPropertyException(new StringBuilder().append(STR_PROPERTY).append(PROP_SMTPSERVER).append(
 						STR_NOTSETIN).append(PROP_FILE).toString());
 			}
 			int smtpPort = 25;
@@ -399,7 +399,7 @@ public class IMAPPropertiesFactory {
 	/**
 	 * Loads global IMAP properties
 	 */
-	public static void loadGlobalImapProperties() throws IMAPException {
+	public static void loadGlobalImapProperties() throws IMAPPropertyException {
 		loadGlobalImapProperties(true);
 	}
 
@@ -415,7 +415,7 @@ public class IMAPPropertiesFactory {
 	 * Loads global IMAP properties. <code>checkPropFile</code> determines
 	 * whether an availability check for IMAP property file is done or not.
 	 */
-	private static void loadGlobalImapProperties(final boolean checkPropFile) throws IMAPException {
+	private static void loadGlobalImapProperties(final boolean checkPropFile) throws IMAPPropertyException {
 		if (!IMAPProperties.isGlobalPropertiesLoaded()) {
 			GLOBAL_PROP_LOCK.lock();
 			try {
@@ -440,7 +440,7 @@ public class IMAPPropertiesFactory {
 
 				final String loginType = props.getProperty(PROP_LOGINTYPE);
 				if (loginType == null) {
-					throw new IMAPException(new StringBuilder().append(STR_PROPERTY).append(PROP_LOGINTYPE).append(
+					throw new IMAPPropertyException(new StringBuilder().append(STR_PROPERTY).append(PROP_LOGINTYPE).append(
 							STR_NOTSETIN).append(PROP_FILE).toString());
 				}
 				if (IMAPLoginType.GLOBAL.toString().equalsIgnoreCase(loginType)) {
@@ -450,7 +450,7 @@ public class IMAPPropertiesFactory {
 				} else if (IMAPLoginType.ANONYMOUS.toString().equalsIgnoreCase(loginType)) {
 					IMAPProperties.setImapLoginType(IMAPLoginType.ANONYMOUS);
 				} else {
-					throw new IMAPException("Unknown value in property " + PROP_LOGINTYPE + " set in " + PROP_FILE
+					throw new IMAPPropertyException("Unknown value in property " + PROP_LOGINTYPE + " set in " + PROP_FILE
 							+ ": " + loginType);
 				}
 				logBuilder.append("\tIMAP Login Type: ").append(IMAPProperties.getImapLoginTypeInternal().toString())
@@ -464,7 +464,7 @@ public class IMAPPropertiesFactory {
 				} else if (credSrc.equalsIgnoreCase(IMAPCredSrc.USER_IMAPLOGIN.toString())) {
 					IMAPProperties.setImapCredSrc(IMAPCredSrc.USER_IMAPLOGIN);
 				} else {
-					throw new IMAPException("Unknown value in property " + PROP_CREDSRC + " set in " + PROP_FILE + ": "
+					throw new IMAPPropertyException("Unknown value in property " + PROP_CREDSRC + " set in " + PROP_FILE + ": "
 							+ credSrc);
 				}
 				logBuilder.append("\tIMAP Credentials Source: ").append(
@@ -590,7 +590,7 @@ public class IMAPPropertiesFactory {
 				 * Load & parse spell check config
 				 */
 				if (SPELL_CHECK_CONFIG_FILE == null) {
-					throw new IMAPException("Property \"SPELLCHECKCFG\" is not defined in system.properties");
+					throw new IMAPPropertyException("Property \"SPELLCHECKCFG\" is not defined in system.properties");
 				}
 				try {
 					IMAPProperties.setSpellCheckConfig(new SpellCheckConfigParser()

@@ -57,7 +57,7 @@ import com.openexchange.groupware.contexts.ContextException;
 import com.openexchange.groupware.contexts.ContextStorage;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.imap.IMAPException;
+import com.openexchange.imap.IMAPPropertyException;
 import com.openexchange.imap.IMAPPropertiesFactory;
 
 /**
@@ -114,7 +114,7 @@ public class SessionObjectWrapper {
 		so.setUserObject(UserStorage.getInstance(ctx).getUser(user_id));
 		try {
 			so.setIMAPProperties(IMAPPropertiesFactory.getImapProperties(so));
-		} catch (IMAPException e) {
+		} catch (final IMAPPropertyException e) {
 			if (LOG.isWarnEnabled()) {
 				LOG.warn("SessionObject does not hold IMAP Info object", e);
 			}

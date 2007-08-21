@@ -94,9 +94,13 @@ public enum Component {
 	 */
 	PINBOARD("PIN"),
 	/**
-	 * Module EMAIL
+	 * Module MAIL
 	 */
-	EMAIL("MSG"),
+	MAIL("MAIL"),
+	/**
+	 * IMAP
+	 */
+	IMAP("IAP"),
 	/**
 	 * Module FOLDER
 	 */

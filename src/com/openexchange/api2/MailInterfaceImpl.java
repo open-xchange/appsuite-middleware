@@ -153,7 +153,7 @@ import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
 import com.openexchange.groupware.upload.UploadEvent;
 import com.openexchange.i18n.StringHelper;
 import com.openexchange.imap.IMAPCapabilities;
-import com.openexchange.imap.IMAPException;
+import com.openexchange.imap.IMAPPropertyException;
 import com.openexchange.imap.IMAPProperties;
 import com.openexchange.imap.IMAPPropertiesFactory;
 import com.openexchange.imap.IMAPUtils;
@@ -416,7 +416,7 @@ public class MailInterfaceImpl implements MailInterface {
 				imapCaps.setUIDPlus(imapStore.hasCapability(IMAPCapabilities.CAP_UIDPLUS));
 				try {
 					imapCaps.setHasSubscription(!IMAPProperties.isIgnoreSubscription());
-				} catch (final IMAPException e) {
+				} catch (final IMAPPropertyException e) {
 					LOG.error(e.getMessage(), e);
 					imapCaps.setHasSubscription(false);
 				}
@@ -492,7 +492,7 @@ public class MailInterfaceImpl implements MailInterface {
 		 */
 		try {
 			IMAP_PROPS.put(PROP_MAIL_MIME_CHARSET, IMAPProperties.getDefaultMimeCharset());
-		} catch (final IMAPException e1) {
+		} catch (final IMAPPropertyException e1) {
 			LOG.error(e1.getMessage(), e1);
 		}
 		/*
@@ -505,7 +505,7 @@ public class MailInterfaceImpl implements MailInterface {
 				IMAP_PROPS.put(PROP_MAIL_IMAP_SOCKET_FACTORY_FALLBACK, STR_FALSE);
 				IMAP_PROPS.put(PROP_MAIL_SMTP_STARTTLS_ENABLE, STR_TRUE);
 			}
-		} catch (final IMAPException e) {
+		} catch (final IMAPPropertyException e) {
 			LOG.error(e.getMessage(), e);
 		}
 		try {
@@ -515,7 +515,7 @@ public class MailInterfaceImpl implements MailInterface {
 				IMAP_PROPS.put(PROP_MAIL_SMTP_SOCKET_FACTORY_FALLBACK, STR_FALSE);
 				IMAP_PROPS.put(PROP_MAIL_SMTP_STARTTLS_ENABLE, STR_TRUE);
 			}
-		} catch (final IMAPException e) {
+		} catch (final IMAPPropertyException e) {
 			LOG.error(e.getMessage(), e);
 		}
 		if (IMAPProperties.getSmtpLocalhost() != null) {
@@ -529,7 +529,7 @@ public class MailInterfaceImpl implements MailInterface {
 				 */
 				IMAP_PROPS.putAll(IMAPProperties.getJavaMailProperties());
 			}
-		} catch (final IMAPException e) {
+		} catch (final IMAPPropertyException e) {
 			LOG.error(e.getMessage(), e);
 		}
 		if (IMAPProperties.getImapTimeout() > 0) {
@@ -1058,7 +1058,7 @@ public class MailInterfaceImpl implements MailInterface {
 							LOCK_CON.unlock();
 						}
 					}
-				} catch (final IMAPException e) {
+				} catch (final IMAPPropertyException e) {
 					throw new MessagingException(e.getMessage(), e);
 				}
 			} finally {
@@ -1702,7 +1702,7 @@ public class MailInterfaceImpl implements MailInterface {
 			return SearchIteratorAdapter.createArrayIterator(retval);
 		} catch (final MessagingException e) {
 			throw handleMessagingException(e, sessionObj.getIMAPProperties(), sessionObj.getContext());
-		} catch (final IMAPException e) {
+		} catch (final IMAPPropertyException e) {
 			throw new OXMailException(MailCode.IMAP_ERROR, e, e.getMessage());
 		}
 	}
@@ -1736,7 +1736,7 @@ public class MailInterfaceImpl implements MailInterface {
 					searchPatterns, linkWithOR, fields, -1));
 		} catch (final MessagingException e) {
 			throw handleMessagingException(e, sessionObj.getIMAPProperties(), sessionObj.getContext());
-		} catch (final IMAPException e) {
+		} catch (final IMAPPropertyException e) {
 			throw new OXMailException(MailCode.IMAP_ERROR, e, e.getMessage());
 		}
 	}
@@ -1745,7 +1745,7 @@ public class MailInterfaceImpl implements MailInterface {
 
 	private final Message[] searchMessages(final Folder folder, final int[] searchCols, final String[] searchPatterns,
 			final boolean linkWithOR, final int[] fields, final int sortCol) throws MessagingException, OXException,
-			IMAPException {
+			IMAPPropertyException {
 		boolean applicationSearch = true;
 		Message[] msgs = null;
 		if (!folder.exists()) {
@@ -1935,7 +1935,7 @@ public class MailInterfaceImpl implements MailInterface {
 			return SearchIteratorAdapter.createArrayIterator(msgs);
 		} catch (final MessagingException e) {
 			throw handleMessagingException(e, sessionObj.getIMAPProperties(), sessionObj.getContext());
-		} catch (final IMAPException e) {
+		} catch (final IMAPPropertyException e) {
 			throw new OXMailException(MailCode.IMAP_ERROR, e, e.getMessage());
 		}
 	}
@@ -5369,7 +5369,7 @@ public class MailInterfaceImpl implements MailInterface {
 						 */
 						tmp.setCategory(Category.TRY_AGAIN);
 					}
-				} catch (final IMAPException oxExc) {
+				} catch (final IMAPPropertyException oxExc) {
 					LOG.error(oxExc.getMessage(), e);
 					tmp = new OXMailException(MailCode.IMAP_ERROR, e, e.getMessage());
 				}
@@ -5437,7 +5437,7 @@ public class MailInterfaceImpl implements MailInterface {
 			} catch (final UnsupportedEncodingException e) {
 				LOG.error("Unsupported encoding in a message detected and monitored.", e);
 				mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
-			} catch (final IMAPException e) {
+			} catch (final IMAPPropertyException e) {
 				LOG.error(e.getMessage(), e);
 			}
 		}

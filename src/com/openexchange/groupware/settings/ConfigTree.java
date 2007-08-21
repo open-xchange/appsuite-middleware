@@ -70,7 +70,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.settings.SettingException.Code;
-import com.openexchange.imap.IMAPException;
+import com.openexchange.imap.IMAPPropertyException;
 import com.openexchange.imap.UserSettingMail;
 import com.openexchange.imap.UserSettingMailStorage;
 import com.openexchange.server.Version;
@@ -848,7 +848,7 @@ public final class ConfigTree {
                 final UserSettingMail settings = session.getUserSettingMail();
                 try {
                     setting.setSingleValue(settings.isSpamEnabled());
-                } catch (IMAPException e) {
+                } catch (IMAPPropertyException e) {
                     throw new SettingException(e);
                 }
             }

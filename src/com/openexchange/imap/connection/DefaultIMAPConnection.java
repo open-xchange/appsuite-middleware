@@ -59,7 +59,7 @@ import javax.mail.MessagingException;
 import javax.mail.Session;
 
 import com.openexchange.api2.MailInterfaceImpl;
-import com.openexchange.imap.IMAPException;
+import com.openexchange.imap.IMAPPropertyException;
 import com.openexchange.imap.IMAPProperties;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.sun.mail.imap.IMAPFolder;
@@ -207,7 +207,7 @@ public final class DefaultIMAPConnection implements IMAPConnection, Serializable
 				 */
 				Security.setProperty(STR_SECURITY_PROVIDER, STR_SECURITY_FACTORY);
 			}
-		} catch (final IMAPException e1) {
+		} catch (final IMAPPropertyException e1) {
 			throw new MessagingException(e1.getMessage(), e1);
 		}
 		if (imapSession == null) {
@@ -230,7 +230,7 @@ public final class DefaultIMAPConnection implements IMAPConnection, Serializable
 				tmpPass = new String(imapPassword.getBytes(IMAPProperties.getImapAuthEnc()), CHARENC_ISO8859);
 			} catch (final UnsupportedEncodingException e) {
 				LOG.error(e.getMessage(), e);
-			} catch (final IMAPException e) {
+			} catch (final IMAPPropertyException e) {
 				LOG.error(e.getMessage(), e);
 			}
 		}

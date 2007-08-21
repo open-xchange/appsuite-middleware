@@ -168,7 +168,7 @@ public abstract class ParamContainer {
 		switch (component) {
 		case FOLDER:
 			return FOLDER_ERR_INFO;
-		case EMAIL:
+		case MAIL:
 			return MAIL_ERR_INFO;
 		default:
 			return DEFAULT_ERR_INFO;

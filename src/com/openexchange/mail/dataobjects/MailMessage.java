@@ -47,57 +47,26 @@
  *
  */
 
-package com.openexchange.imap;
+package com.openexchange.mail.dataobjects;
 
-import com.openexchange.api2.OXException;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
-import com.openexchange.imap.OXMailException.MailCode;
+import java.util.List;
+
+import javax.mail.internet.InternetAddress;
 
 /**
- * IMAPException
- * 
+ * MailMessage
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ *
  */
-public class IMAPException extends OXException {
-
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 7467142354806667384L;
+public final class MailMessage {
 	
-	IMAPException(final AbstractOXException cause) {
-		super(cause);
-	}
+	private List<InternetAddress> from;
+	
+	
 
-	/**
-	 * Constructs a new exception with the given detail message and cause.
-	 * 
-	 */
-	IMAPException(final String message, final Throwable cause) {
-		super(Component.EMAIL, MailCode.IMAP_PROPERTY_ERROR.getCategory(), MailCode.IMAP_PROPERTY_ERROR.getNumber(),
-				MailCode.IMAP_PROPERTY_ERROR.getMessage(), cause);
-		super.setMessageArgs(message);
-	}
-
-	/**
-	 * Constructs a new exception with the given detail message.
-	 * 
-	 */
-	public IMAPException(final String message) {
-		super(Component.EMAIL, MailCode.IMAP_PROPERTY_ERROR.getCategory(), MailCode.IMAP_PROPERTY_ERROR.getNumber(),
-				MailCode.IMAP_PROPERTY_ERROR.getMessage(), null);
-		super.setMessageArgs(message);
-	}
-
-	/**
-	 * Constructs a new exception from the given <code>Exception</code>
-	 * instance.
-	 */
-	public IMAPException(final Exception e) {
-		super(Component.EMAIL, MailCode.IMAP_PROPERTY_ERROR.getCategory(), MailCode.IMAP_PROPERTY_ERROR.getNumber(),
-				MailCode.IMAP_PROPERTY_ERROR.getMessage(), e);
-		super.setMessageArgs(e.getMessage());
+	public MailMessage() {
+		super();
 	}
 
 }

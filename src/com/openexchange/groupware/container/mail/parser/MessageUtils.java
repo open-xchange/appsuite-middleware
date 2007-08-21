@@ -74,7 +74,7 @@ import com.openexchange.api2.MailInterfaceImpl;
 import com.openexchange.api2.OXException;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
-import com.openexchange.imap.IMAPException;
+import com.openexchange.imap.IMAPPropertyException;
 import com.openexchange.imap.IMAPProperties;
 import com.openexchange.imap.UserSettingMail;
 import com.openexchange.sessiond.SessionObject;
@@ -198,7 +198,7 @@ public final class MessageUtils {
 			} catch (final UnsupportedEncodingException e) {
 				LOG.error("Unsupported encoding in a message detected and monitored.", e);
 				MailInterfaceImpl.mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
-			} catch (final IMAPException e) {
+			} catch (final IMAPPropertyException e) {
 				LOG.error(e.getMessage(), e);
 			}
 		}
