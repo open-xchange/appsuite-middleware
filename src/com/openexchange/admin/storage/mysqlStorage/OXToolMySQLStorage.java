@@ -1126,6 +1126,11 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
     }
 
     @Override
+    public int getServerIDByServername(final String servername) throws StorageException {
+        return getByNameForConfigDB(servername, "server", "SELECT server_id FROM server WHERE name=?");
+    }
+
+    @Override
     public int getUserIDByUsername(final Context ctx, final String username) throws StorageException {
         Connection con = null;
         PreparedStatement prep_check = null;
@@ -1682,7 +1687,7 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
             if (rs.next()) {
                 return rs.getInt(1);
             } else {
-                throw new SQLException("No such " + objectname + " " + name);
+                throw new StorageException("No such " + objectname + " " + name);
             }
         } catch (final SQLException e) {
             log.error("SQL Error",e);
