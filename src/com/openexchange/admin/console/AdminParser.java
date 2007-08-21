@@ -302,7 +302,7 @@ public class AdminParser extends CmdLineParser {
      */
     private final Option addOption(final String longForm, final String description, final boolean needed, final boolean extended, final boolean hidden) {
         final Option retval = this.addBooleanOption(longForm);
-        this.optinfolist.add(new OptionInfo(NeededQuadState.notneeded, retval, longForm, description, extended));
+        this.optinfolist.add(new OptionInfo(NeededQuadState.notneeded, retval, longForm, description, extended, hidden));
         return retval;
     }
     
