@@ -94,10 +94,20 @@ public abstract class ObjectNamingAbstraction extends BasicCommandlineOptions {
     }
     
     protected void createMessageForStdout(final String id, final Integer ctxid, final String type, final AdminParser parser) {
-        createMessage(id, ctxid, type, System.out, parser);
+        createMessage(id, ctxid, type, System.out, parser, false);
     }
 
-    private void createMessage(final String id, final Integer ctxid, final String type, final PrintStream ps, final AdminParser parser) {
+    /**
+     * @param id
+     * @param ctxid
+     * @param type
+     * @param ps
+     * @param parser
+     * @param followingtext Used to define if further text is following, this is especially
+     *        used for displaying error messages, because with the nonl option we have to
+     *        remove the newlines
+     */
+    private void createMessage(final String id, final Integer ctxid, final String type, final PrintStream ps, final AdminParser parser, final boolean followingtext) {
         final StringBuilder sb = new StringBuilder(getObjectName());
         if (null != id) {
             sb.append(" ");
@@ -109,15 +119,20 @@ public abstract class ObjectNamingAbstraction extends BasicCommandlineOptions {
         }
         sb.append(" ");
         sb.append(type);
-        if( parser != null && parser.getOptionValue(this.noNewlineOption) != null ) {
-            ps.print(sb.toString());
+        if( null != parser && null != parser.getOptionValue(this.noNewlineOption)) {
+            final String output = sb.toString().replace("\n", "");
+            if (followingtext) {
+                ps.print(output);
+            } else {
+                ps.println(output);
+            }
         } else {
             ps.println(sb.toString());
         }
     }
     
     protected void createMessageForStderr(final String id, final Integer ctxid, final String type, final AdminParser parser) {
-        createMessage(id, ctxid, type, System.err, parser);
+        createMessage(id, ctxid, type, System.err, parser, true);
     }
     
     protected final void printError(final String id, final Integer ctxid, final String msg, final AdminParser parser) {
