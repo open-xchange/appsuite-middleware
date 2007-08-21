@@ -358,7 +358,19 @@ public final class IMAPException extends MailException {
 		/**
 		 * Missing default %s folder in user mail settings
 		 */
-		MISSING_DEFAULT_FOLDER_NAME("Missing default %s folder in user mail settings", Category.CODE_ERROR, 49);
+		MISSING_DEFAULT_FOLDER_NAME("Missing default %s folder in user mail settings", Category.CODE_ERROR, 49),
+		/**
+		 * Update of folder %s failed
+		 */
+		UPDATE_FAILED("Update of folder %s failed", Category.CODE_ERROR, 50),
+		/**
+		 * Folder %s must not be deleted
+		 */
+		NO_FOLDER_DELETE("Folder %s cannot be deleted", Category.PERMISSION, 51),
+		/**
+		 * Default folder %s must not be deleted
+		 */
+		NO_DEFAULT_FOLDER_DELETE("Default folder %s cannot be deleted", Category.PERMISSION, 39);
 
 		private final String message;
 

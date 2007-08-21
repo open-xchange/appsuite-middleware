@@ -169,6 +169,26 @@ public abstract class MailFolderStorage {
 	 * @return Fullname of the updated mail folder
 	 * @throws MailException
 	 */
-	public abstract String updateFolder(long fullname, MailFolder toUpdate) throws MailException;
+	public abstract String updateFolder(long id, MailFolder toUpdate) throws MailException;
+
+	/**
+	 * Deletes an existing mail folder identifed through given fullname.
+	 * 
+	 * @param fullname
+	 *            The fullname of the mail folder to delete
+	 * @return Fullname of the deleted mail folder
+	 * @throws MailException
+	 */
+	public abstract String deleteFolder(String fullname) throws MailException;
+
+	/**
+	 * Deletes an existing mail folder identifed through given ID.
+	 * 
+	 * @param id
+	 *            The ID of the mail folder to delete
+	 * @return Fullname of the deleted mail folder
+	 * @throws MailException
+	 */
+	public abstract String deleteFolder(long id) throws MailException;
 
 }
