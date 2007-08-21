@@ -339,7 +339,7 @@ public class HttpServletManager {
 		}
 	}
 	
-	private static final Pattern PATTERN_SERVLET_PATH = Pattern.compile("([\\p{ASCII}&&[^\\s]]+)\\*?");
+	private static final Pattern PATTERN_SERVLET_PATH = Pattern.compile("([\\p{ASCII}&&[^\\p{Blank}]]+)\\*?");
 	
 	private static boolean checkServletPath(final String servletPath) {
 		return PATTERN_SERVLET_PATH.matcher(servletPath).matches();

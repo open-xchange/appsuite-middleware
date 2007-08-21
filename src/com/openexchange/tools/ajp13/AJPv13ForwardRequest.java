@@ -308,23 +308,25 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 		 * Create servlet instance dependent on requested URI
 		 */
 		ajpRequestHandler.setServletInstance(requestURI);
-		/*
-		 * Apply the servlet path with leading "/" to the request
-		 */
-		if (allPath(ajpRequestHandler.getServletPath())) {
+		if (null != ajpRequestHandler.getServletPath()) {
 			/*
-			 * Set an empty string ("") if the servlet used to process this
-			 * request was matched using the "/*" pattern.
+			 * Apply the servlet path with leading "/" to the request
 			 */
-			servletRequest.setServletPath(STR_EMPTY);
-		} else {
-			/*
-			 * The path starts with a "/" character and includes either the
-			 * servlet name or a path to the servlet, but does not include any
-			 * extra path information or a query string.
-			 */
-			servletRequest.setServletPath(new StringBuilder().append('/').append(ajpRequestHandler.getServletPath())
-					.toString());
+			if (allPath(ajpRequestHandler.getServletPath())) {
+				/*
+				 * Set an empty string ("") if the servlet used to process this
+				 * request was matched using the "/*" pattern.
+				 */
+				servletRequest.setServletPath(STR_EMPTY);
+			} else {
+				/*
+				 * The path starts with a "/" character and includes either the
+				 * servlet name or a path to the servlet, but does not include
+				 * any extra path information or a query string.
+				 */
+				servletRequest.setServletPath(new StringBuilder().append('/')
+						.append(ajpRequestHandler.getServletPath()).toString());
+			}
 		}
 	}
 

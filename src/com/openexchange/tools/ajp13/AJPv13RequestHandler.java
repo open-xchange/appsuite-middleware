@@ -54,6 +54,7 @@ import java.io.InputStream;
 import java.net.SocketException;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.regex.Pattern;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -112,11 +113,11 @@ public final class AJPv13RequestHandler {
 	 * @value 10
 	 */
 	private static final int CPING_PREFIX_CODE = 10;
-	
+
 	private static final int NOT_SET = -1;
 
 	public static final String JSESSIONID_COOKIE = "JSESSIONID";
-	
+
 	public static final String JSESSIONID_URI = ";jsessionid=";
 
 	private HttpServlet servletInstance;
@@ -150,7 +151,7 @@ public final class AJPv13RequestHandler {
 	private boolean emptyDataPackageReceived;
 
 	private String httpSessionId;
-	
+
 	private boolean httpSessionJoined;
 
 	private String servletPath;
@@ -186,16 +187,18 @@ public final class AJPv13RequestHandler {
 				ajpCon.markListenerNonProcessing();
 				magic = new int[] { ajpCon.getInputStream().read(), ajpCon.getInputStream().read() };
 			} catch (final SocketException e) {
-				throw new AJPv13SocketClosedException(AJPCode.SOCKET_CLOSED_BY_WEB_SERVER, false, e, Integer.valueOf(ajpCon.getPackageNumber()));
+				throw new AJPv13SocketClosedException(AJPCode.SOCKET_CLOSED_BY_WEB_SERVER, false, e, Integer
+						.valueOf(ajpCon.getPackageNumber()));
 			}
 			if (checkMagicBytes(magic)) {
 				dataLength = (ajpCon.getInputStream().read() << 8) + ajpCon.getInputStream().read();
 			} else if (magic[0] == -1 || magic[1] == -1) {
-				throw new AJPv13SocketClosedException(AJPCode.EMPTY_INPUT_SREAM, false, null, Integer.valueOf(ajpCon.getPackageNumber()));
+				throw new AJPv13SocketClosedException(AJPCode.EMPTY_INPUT_SREAM, false, null, Integer.valueOf(ajpCon
+						.getPackageNumber()));
 			} else {
-				throw new AJPv13InvalidByteSequenceException(Integer.valueOf(ajpCon.getPackageNumber()), toHexString(magic[0]),
-						toHexString(magic[1]), dumpBytes((byte) magic[0], (byte) magic[1], getPayloadData(-1, ajpCon
-								.getInputStream(), false)));
+				throw new AJPv13InvalidByteSequenceException(Integer.valueOf(ajpCon.getPackageNumber()),
+						toHexString(magic[0]), toHexString(magic[1]), dumpBytes((byte) magic[0], (byte) magic[1],
+								getPayloadData(-1, ajpCon.getInputStream(), false)));
 			}
 			if (enableTimeout) {
 				/*
@@ -212,14 +215,14 @@ public final class AJPv13RequestHandler {
 		}
 		return dataLength;
 	}
-	
+
 	private static boolean checkMagicBytes(final int[] magic) {
 		if (AJPv13Config.getCheckMagicBytesStrict()) {
 			return (magic[0] == PACKAGE_FROM_SERVER_TO_CONTAINER[0] && magic[1] == PACKAGE_FROM_SERVER_TO_CONTAINER[1]);
 		}
 		return (magic[0] == PACKAGE_FROM_SERVER_TO_CONTAINER[0] || magic[1] == PACKAGE_FROM_SERVER_TO_CONTAINER[1]);
 	}
-	
+
 	private static String dumpBytes(final byte magic1, final byte magic2, final byte[] bytes) {
 		if (bytes == null) {
 			return "";
@@ -315,15 +318,14 @@ public final class AJPv13RequestHandler {
 		int dataLength;
 		if (contentLength == NOT_SET) {
 			/*
-			 * This condition is reached when no content-length
-			 * header was present in forward request package
-			 * (transfer-encoding: chunked)
+			 * This condition is reached when no content-length header was
+			 * present in forward request package (transfer-encoding: chunked)
 			 */
 			servletRequestObj.getOXInputStream().setData(new byte[0]);
 		} else if (contentLength == 0) {
 			/*
-			 * This condition is reached when content-length
-			 * header's value is set to '0'
+			 * This condition is reached when content-length header's value is
+			 * set to '0'
 			 */
 			servletRequestObj.getOXInputStream().setData(null);
 		} else {
@@ -332,8 +334,8 @@ public final class AJPv13RequestHandler {
 			 */
 			ajpCon.increasePackageNumber();
 			/*
-			 * Processed package is an AJP forward request which
-			 * indicates presence of a following request body package.
+			 * Processed package is an AJP forward request which indicates
+			 * presence of a following request body package.
 			 */
 			dataLength = readInitialBytes(false);
 			ajpRequest = new AJPv13RequestBody(getPayloadData(dataLength, ajpCon.getInputStream(), true));
@@ -345,8 +347,8 @@ public final class AJPv13RequestHandler {
 		try {
 			if (ajpRequest == null) {
 				/*
-				 * We received an unsupported prefix code before, thus ajpRequest
-				 * is null. Terminate ajp cycle
+				 * We received an unsupported prefix code before, thus
+				 * ajpRequest is null. Terminate ajp cycle
 				 */
 				ajpCon.getOutputStream().write(AJPv13Response.getEndResponseBytes());
 				ajpCon.getOutputStream().flush();
@@ -489,7 +491,8 @@ public final class AJPv13RequestHandler {
 		sb.append("Servlet: ").append(servletInstance == null ? "null" : servletInstance.getClass().getName()).append(
 				delim);
 		sb.append("Current Request: ").append(ajpRequest.getClass().getName()).append(delim);
-		sb.append("Content Length: ").append(bContentLength ? String.valueOf(contentLength) : "Not available").append(delim);
+		sb.append("Content Length: ").append(bContentLength ? String.valueOf(contentLength) : "Not available").append(
+				delim);
 		sb.append("Sevlet triggered: ").append(serviceMethodCalled).append(delim);
 		sb.append("Headers sent: ").append(headersSent).append(delim);
 		sb.append("End Response sent: ").append(endResponseSent).append(delim);
@@ -518,20 +521,11 @@ public final class AJPv13RequestHandler {
 				 */
 				currentKey = currentKey.substring(1, currentKey.length());
 			}
-			final int lastPos = currentKey.length() - 1;
-			if (currentKey.charAt(lastPos) == '*') {
-				final String tmp = currentKey.substring(0, lastPos);
-				if (pathInfo.startsWith(tmp)) {
-					servletPath = tmp;
-					servletKey = currentKey;
-					found = true;
-				}
-			} else {
-				if (pathInfo.equalsIgnoreCase(currentKey)) {
-					servletPath = currentKey;
-					servletKey = currentKey;
-					found = true;
-				}
+			if (Pattern.compile(currentKey.replaceFirst("\\*", ".*"), Pattern.CASE_INSENSITIVE).matcher(pathInfo)
+					.matches()) {
+				servletPath = currentKey.replaceFirst("\\*", "");
+				servletKey = currentKey;
+				found = true;
 			}
 		}
 		if (servletKey == null) {
@@ -668,7 +662,7 @@ public final class AJPv13RequestHandler {
 		 */
 		return (contentLength != NOT_SET && totalRequestedContentLength < contentLength);
 	}
-	
+
 	public boolean isNotSet() {
 		return (contentLength == NOT_SET);
 	}
@@ -717,9 +711,9 @@ public final class AJPv13RequestHandler {
 	public void setServletId(final String servletId) {
 		this.servletId = servletId;
 	}
-	
+
 	private void supplyRequestWrapperWithServlet() {
-		if(servletRequestObj != null && servletInstance != null) {
+		if (servletRequestObj != null && servletInstance != null) {
 			servletRequestObj.setServletInstance(servletInstance);
 		}
 	}
