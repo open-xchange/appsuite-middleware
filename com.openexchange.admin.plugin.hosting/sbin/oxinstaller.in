@@ -101,7 +101,7 @@ DISABLE_RMI_AUTH=
 DISABLE_RMI_AUTH_LONG=disableauth
 
 
-MUSTOPTS="SERVER_NAME CONFIGDB_PASS MASTER_PASS"
+MUSTOPTS="SERVER_NAME CONFIGDB_PASS"
 LONGOPTS='$SERVER_NAME_LONG:,$IMAP_SERVER_LONG:,$IMAP_LOGIN_TYPE_LONG:,$CONFIGDB_USER_LONG:,$CONFIGDB_PASS_LONG:,$CONFIGDB_POOL_LONG:,$CONFIGDB_READ_LONG:,$CONFIGDB_WRITE_LONG:,$CONFIGDB_DBNAME_LONG:,$LOGIN_IMPL_TYPE_LONG:,$SERVER_MEMORY_LONG:,$CONFIGDB_READ_PORT_LONG:,$CONFIGDB_WRITE_PORT_LONG:,$TMPDIR_PATH_LONG:,$MASTER_PASS_LONG:,$MASTER_USER_LONG:,$DISABLE_RMI_AUTH_LONG'
 
 usage() {
@@ -335,6 +335,13 @@ if [ -z "$DISABLE_RMI_AUTH" ]; then
     v_setprop MASTER_AUTHENTICATION_DISABLED false ${ADMINCONF}/AdminDaemon.properties
     v_setprop CONTEXT_AUTHENTICATION_DISABLED false ${ADMINCONF}/AdminDaemon.properties
     echo
+    if [ -z "$MASTER_PASS" ]; then
+    	die "ERROR: master password cannot be null if authentication is enabled"
+    else
+		echo "using $MASTER_USER as master account"
+		/opt/open-xchange/sbin/generatempasswd -A $MASTER_USER \
+		-f /opt/open-xchange/etc/admindaemon/mpasswd -P "$MASTER_PASS" >/dev/null
+    fi
 else
     echo
     echo "*** RMI authentication is disabled"
@@ -342,9 +349,5 @@ else
     v_setprop CONTEXT_AUTHENTICATION_DISABLED true ${ADMINCONF}/AdminDaemon.properties
     echo
 fi
-
-echo "using $MASTER_USER as master account"
-/opt/open-xchange/sbin/generatempasswd -A $MASTER_USER \
-	-f /opt/open-xchange/etc/admindaemon/mpasswd -P "$MASTER_PASS" >/dev/null
 
 echo "admin daemon must now be restarted if already running"
