@@ -1,3 +1,8 @@
+* 2007-08-21 - francisco.laguna@open-xchange.com
+
+ - Fixed bug #8971. User userId and not contactId for internal user participants 
+   in ICAL import.
+
 * 2007-08-20 - martin.kauss@open-xchange.com
 
  - Fixed bug #8957. A search without a folder id returned -1 as folder instead

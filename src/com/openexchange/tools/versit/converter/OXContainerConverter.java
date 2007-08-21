@@ -1110,7 +1110,7 @@ public class OXContainerConverter {
 				//fix for bug 8475
 				participant = new UserParticipant(
 						getInternalUser(mail).
-							getContactId()
+							getId()
 				);
 				//end:fix
 			} else {
