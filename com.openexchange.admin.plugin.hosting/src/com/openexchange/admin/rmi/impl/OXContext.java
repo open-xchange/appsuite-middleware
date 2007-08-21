@@ -48,7 +48,6 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
     }
 
     public void change(final Context ctx, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
-        
         try {
             doNullCheck(ctx);
         } catch (final InvalidDataException e1) {
@@ -70,7 +69,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 throw new NoSuchContextException();
             }
             
-            if(ctx.getName()!=null && tool.existsContextName(ctx)){
+            if (ctx.getName() != null && tool.existsContextName(ctx)) {
                 throw new InvalidDataException("Context " + ctx.getName() + " already exists!");
             }
             
@@ -106,7 +105,6 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         } catch (ContextException e) {
             log.error("Error invalidating cached infos of context "+ctx.getId()+" in context storage",e);
         }
-    
     }
 
     public Context create(final Context ctx, final User admin_user, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException {
@@ -150,13 +148,11 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             throw e;
         }
         
-        
         try {
             ContextStorage.getInstance().invalidateContext(ctx.getId());
         } catch (ContextException e) {
             log.error("Error invalidating context "+ctx.getId()+" in ox context storage",e);
         }
-        
     }
 
     public void disable(final Context ctx, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, NoSuchReasonException, OXContextException {
@@ -232,7 +228,6 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 //            log.error(e.getMessage(), e);
 //            throw e;
         }
-        
     }
 
     public void enable(final Context ctx, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
@@ -433,7 +428,6 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
     }
 
     private int moveContextFilestore(final Context ctx, final Filestore dst_filestore, final MaintenanceReason reason, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, NoSuchFilestoreException, NoSuchReasonException, OXContextException {
-        
         try {
             doNullCheck(ctx, dst_filestore,dst_filestore.getId(), reason,reason.getId());
         } catch (final InvalidDataException e1) {            
@@ -466,7 +460,6 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 throw new OXContextException("Unable to disable Context " + ctx.getIdAsString());
             }
 
-            
             oxcox.disable(ctx, reason);
             retval = oxcox.getData(ctx);
 
