@@ -4,7 +4,6 @@ import java.rmi.Naming;
 
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
-import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Server;
@@ -16,36 +15,34 @@ import com.openexchange.admin.rmi.dataobjects.Server;
  */
 public class UnregisterServer extends ServerAbstraction {
 
-    // Setting names for options
-    private final static char OPT_NAME_SERVER_ID_SHORT = 'i';
-
-    private final static String OPT_NAME_SERVER_ID_LONG = "id";
-
-    private Option serverIdOption = null;
-
     public UnregisterServer(final String[] args2) {
 
         AdminParser parser = new AdminParser("unregisterserver");
 
         setOptions(parser);
 
-        String serverid = null;
+        String successtext = null;
         try {
             parser.ownparse(args2);
+
+            final Server sv = new Server();
+            
+            parseAndSetServerID(parser, sv);
+            parseAndSetServername(parser, sv);
+            
+            successtext = nameOrIdSet(this.serverid, this.servername, "server");
 
             final Credentials auth = credentialsparsing(parser);
 
             // get rmi ref
-            final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME +OXUtilInterface.RMI_NAME);
-            Server sv = new Server();
-            serverid = (String) parser.getOptionValue(serverIdOption);
-            sv.setId(Integer.parseInt(serverid));
+            final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME + OXUtilInterface.RMI_NAME);
+
             oxutil.unregisterServer(sv, auth);
             
-            displayUnregisteredMessage(serverid, parser);
+            displayUnregisteredMessage(successtext, parser);
             sysexit(0);
         } catch (final Exception e) {
-            printErrors(serverid, null, e, parser);
+            printErrors(successtext, null, e, parser);
         }
     }
 
@@ -56,6 +53,7 @@ public class UnregisterServer extends ServerAbstraction {
     private void setOptions(AdminParser parser) {
         setDefaultCommandLineOptionsWithoutContextID(parser);
 
-        serverIdOption = setShortLongOpt(parser, OPT_NAME_SERVER_ID_SHORT, OPT_NAME_SERVER_ID_LONG, "The id of the server which should be deleted", true, NeededQuadState.needed);
+        setServeridOption(parser);
+        setServernameOption(parser, NeededQuadState.eitheror);
     }
 }

@@ -4,7 +4,6 @@ import java.rmi.Naming;
 
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
-import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Server;
@@ -15,13 +14,6 @@ import com.openexchange.admin.rmi.dataobjects.Server;
  * 
  */
 public class RegisterServer extends ServerAbstraction {
-
-    // Setting names for options
-    private final static char OPT_NAME_HOSTNAME_SHORT = 'H';
-
-    private final static String OPT_NAME_HOSTNAME_LONG = "hostname";
-
-    private Option serverNameOption = null;
 
     public RegisterServer(final String[] args2) {
 
@@ -35,7 +27,7 @@ public class RegisterServer extends ServerAbstraction {
             final Credentials auth = credentialsparsing(parser);
 
             // get rmi ref
-            final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME +OXUtilInterface.RMI_NAME);
+            final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME + OXUtilInterface.RMI_NAME);
 
             final Server srv = new Server();
 
@@ -46,7 +38,6 @@ public class RegisterServer extends ServerAbstraction {
         } catch (final Exception e) {
             printErrors(null, null, e, parser);
         }
-
     }
 
     public static void main(final String args[]) {
@@ -56,7 +47,6 @@ public class RegisterServer extends ServerAbstraction {
     private void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptionsWithoutContextID(parser);
 
-        this.serverNameOption = setShortLongOpt(parser, OPT_NAME_HOSTNAME_SHORT, OPT_NAME_HOSTNAME_LONG, "The hostname of the server", true, NeededQuadState.needed);
-
+        setServernameOption(parser, NeededQuadState.needed);
     }
 }
