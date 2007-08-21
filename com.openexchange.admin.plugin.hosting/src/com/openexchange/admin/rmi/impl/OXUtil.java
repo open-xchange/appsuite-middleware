@@ -370,7 +370,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
   
     public void unregisterServer(final Server server, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         try{
-            doNullCheck(server,server.getId());
+            doNullCheck(server);
         } catch (final InvalidDataException e1) {            
             log.error("Invalid data sent by client!", e1);
             throw e1;
@@ -380,6 +380,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
 
         log.debug(server);
 
+        setIdOrGetIDFromNameAndIdObject(null, server);
         if (!tool.existsServer(server.getId())) {
             throw new InvalidDataException("No such server " + server);
         }
