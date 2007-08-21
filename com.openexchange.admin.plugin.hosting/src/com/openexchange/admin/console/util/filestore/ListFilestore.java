@@ -16,11 +16,11 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
  * @author d7,cutmasta
  * 
  */
-public class ListFilestores extends FilestoreAbstraction {
+public class ListFilestore extends FilestoreAbstraction {
 
-    public ListFilestores(final String[] args2) {
+    public ListFilestore(final String[] args2) {
 
-        final AdminParser parser = new AdminParser("listfilestores");
+        final AdminParser parser = new AdminParser("listfilestore");
 
         setOptions(parser);
         setCSVOutputOption(parser);
@@ -38,7 +38,7 @@ public class ListFilestores extends FilestoreAbstraction {
             }
             // Setting the options in the dataobject
 
-            final Filestore[] filestores = oxutil.listFilestores(searchpattern, auth);
+            final Filestore[] filestores = oxutil.listFilestore(searchpattern, auth);
 
             if (null != parser.getOptionValue(this.csvOutputOption)) {
                 precsvinfos(filestores);
@@ -84,7 +84,7 @@ public class ListFilestores extends FilestoreAbstraction {
     }
 
     public static void main(final String args[]) {
-        new ListFilestores(args);
+        new ListFilestore(args);
     }
 
     private void setOptions(final AdminParser parser) {

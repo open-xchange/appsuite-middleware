@@ -99,7 +99,7 @@ public class ContextTest extends AbstractTest {
         final String hosturl = getRMIHostUrl();
         addContext(ctx, hosturl, cred);
         OXUtilInterface oxu = (OXUtilInterface) Naming.lookup(hosturl + OXUtilInterface.RMI_NAME);
-        Database[] dbs = oxu.listDatabases("*", cred);
+        Database[] dbs = oxu.listDatabase("*", cred);
         if (dbs.length > 0) {
             Context[] ids = searchContextByDatabase(dbs[0], hosturl, cred);
             assertTrue("no contexts found on database " + dbs[0].getUrl(), ids.length > 0);
@@ -115,7 +115,7 @@ public class ContextTest extends AbstractTest {
         final String hosturl = getRMIHostUrl();
         addContext(ctx, hosturl, cred);
         OXUtilInterface oxu = (OXUtilInterface) Naming.lookup(hosturl + OXUtilInterface.RMI_NAME);
-        Filestore[] fiss = oxu.listFilestores("*", cred);
+        Filestore[] fiss = oxu.listFilestore("*", cred);
         if (fiss.length > 0) {
             boolean foundctxviastore = false;
             for (int a = 0; a < fiss.length; a++) {
@@ -137,7 +137,7 @@ public class ContextTest extends AbstractTest {
         final String hosturl = getRMIHostUrl();
         addContext(ctx, hosturl, cred);
         OXUtilInterface oxu = (OXUtilInterface) Naming.lookup(hosturl + OXUtilInterface.RMI_NAME);
-        MaintenanceReason[] mrs = oxu.listMaintenanceReasons("*",cred);
+        MaintenanceReason[] mrs = oxu.listMaintenanceReason("*",cred);
         MaintenanceReason mr = new MaintenanceReason();
         if (mrs.length == 0) {
             // add reason , and then use this reason to disable the context
@@ -168,7 +168,7 @@ public class ContextTest extends AbstractTest {
         
         addContext(ctx, hosturl, cred);
         OXUtilInterface oxu = (OXUtilInterface) Naming.lookup(hosturl + OXUtilInterface.RMI_NAME);
-        MaintenanceReason[] mrs = oxu.listMaintenanceReasons("*",cred);
+        MaintenanceReason[] mrs = oxu.listMaintenanceReason("*",cred);
         MaintenanceReason mr = new MaintenanceReason();
         if (mrs.length == 0) {
             // add reason , and then use this reason to disable the context
@@ -262,14 +262,14 @@ public class ContextTest extends AbstractTest {
         OXUtilInterface oxu = (OXUtilInterface) Naming.lookup(host + OXUtilInterface.RMI_NAME);
         // first check if the needed server entry is in db, if not, add server
         // first,
-        if (oxu.listServers("local", cred).length != 1) {
+        if (oxu.listServer("local", cred).length != 1) {
             Server srv = new Server();
             srv.setName("local");
             oxu.registerServer(srv, cred);
         }
         // then check if filestore is in db, if not, create register filestore
         // first
-        if (oxu.listFilestores("*", cred).length == 0) {
+        if (oxu.listFilestore("*", cred).length == 0) {
             Filestore fis = new Filestore();
             fis.setMaxContexts(10000);
             fis.setSize(8796093022208L);
@@ -281,7 +281,7 @@ public class ContextTest extends AbstractTest {
         // then check if a database is in db for the new ctx, if not register
         // database first,
         // THEN we can add the context with its data
-        if (oxu.listDatabases("test-ox-db", cred).length == 0) {
+        if (oxu.listDatabase("test-ox-db", cred).length == 0) {
             Database db = UtilTest.getTestDatabaseObject("localhost", "test-ox-db");
             oxu.registerDatabase(db, cred);
         }

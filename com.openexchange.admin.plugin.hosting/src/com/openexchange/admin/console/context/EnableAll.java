@@ -10,7 +10,7 @@ public class EnableAll extends ContextHostingAbstraction {
 
     public EnableAll(final String[] args2) {
 
-        final AdminParser parser = new AdminParser("enableallcontexts");
+        final AdminParser parser = new AdminParser("enableallcontext");
 
         setDefaultCommandLineOptionsWithoutContextID(parser);
         try {

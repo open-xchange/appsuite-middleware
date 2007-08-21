@@ -92,7 +92,7 @@ public class UtilTest extends AbstractTest {
         
         // now fetch all reasons, and look if my added reasons are within this data set        
         int resp = 0;
-        MaintenanceReason[] srv_reasons = oxu.listMaintenanceReasons("*",ContextTest.DummyMasterCredentials());
+        MaintenanceReason[] srv_reasons = oxu.listMaintenanceReason("*",ContextTest.DummyMasterCredentials());
         for(int c = 0;c<c_reasons.size();c++){
             
             MaintenanceReason tmp = c_reasons.get(c);
@@ -121,7 +121,7 @@ public class UtilTest extends AbstractTest {
         
         reg_srv.setId(oxu.registerServer(reg_srv,ContextTest.DummyMasterCredentials()).getId());
         
-        Server[] srv_resp = oxu.listServers("testcase-register-server-*",ContextTest.DummyMasterCredentials());
+        Server[] srv_resp = oxu.listServer("testcase-register-server-*",ContextTest.DummyMasterCredentials());
         int resp = 0;
         for (Server server : srv_resp) {
             if(server.getName().equals(reg_srv.getName()) && server.getId().intValue()==reg_srv.getId().intValue()){
@@ -144,7 +144,7 @@ public class UtilTest extends AbstractTest {
         
         reg_srv.setId(oxu.registerServer(reg_srv,ContextTest.DummyMasterCredentials()).getId());
         
-        Server[] srv_resp = oxu.listServers("testcase-register-server-*",ContextTest.DummyMasterCredentials());
+        Server[] srv_resp = oxu.listServer("testcase-register-server-*",ContextTest.DummyMasterCredentials());
         int resp = 0;
         for(int a = 0;a<srv_resp.length;a++){
             if(srv_resp[a].getName().equals(reg_srv.getName()) &&
@@ -162,7 +162,7 @@ public class UtilTest extends AbstractTest {
         // here the server was added correctly to the server, now delete it
         oxu.unregisterServer(sv,ContextTest.DummyMasterCredentials());
         
-        srv_resp = oxu.listServers("testcase-register-server-*",ContextTest.DummyMasterCredentials());
+        srv_resp = oxu.listServer("testcase-register-server-*",ContextTest.DummyMasterCredentials());
         resp = 0;
         for(int a = 0;a<srv_resp.length;a++){
             if(srv_resp[a].getName().equals(reg_srv.getName()) &&
@@ -182,7 +182,7 @@ public class UtilTest extends AbstractTest {
         Database client_db =  getTestDatabaseObject("localhost",db_name);        
         client_db.setId(oxu.registerDatabase(client_db,ContextTest.DummyMasterCredentials()).getId());
         
-        Database[] srv_dbs = oxu.listDatabases("db_*",ContextTest.DummyMasterCredentials());
+        Database[] srv_dbs = oxu.listDatabase("db_*",ContextTest.DummyMasterCredentials());
         boolean found_db = false;
         for(int a = 0;a<srv_dbs.length;a++){
             Database tmp = srv_dbs[a];
@@ -215,7 +215,7 @@ public class UtilTest extends AbstractTest {
         Database client_db =  getTestDatabaseObject("localhost",db_name);        
         client_db.setId(oxu.registerDatabase(client_db,ContextTest.DummyMasterCredentials()).getId());
         
-        Database[] srv_dbs = oxu.listDatabases("db_*",ContextTest.DummyMasterCredentials());
+        Database[] srv_dbs = oxu.listDatabase("db_*",ContextTest.DummyMasterCredentials());
         boolean found_db = false;
         for(int a = 0;a<srv_dbs.length;a++){
             Database tmp = srv_dbs[a];
@@ -251,7 +251,7 @@ public class UtilTest extends AbstractTest {
         // change db data
         oxu.changeDatabase(client_db,ContextTest.DummyMasterCredentials());
         
-        srv_dbs = oxu.listDatabases("db_*",ContextTest.DummyMasterCredentials());        
+        srv_dbs = oxu.listDatabase("db_*",ContextTest.DummyMasterCredentials());        
         // remove the broken _changed entries from configdb because later tests might fail
         oxu.unregisterDatabase(new Database(client_db.getId()), ContextTest.DummyMasterCredentials());
         for(int a = 0;a<srv_dbs.length;a++){
@@ -282,7 +282,7 @@ public class UtilTest extends AbstractTest {
         
         client_db.setId(oxu.registerDatabase(client_db,ContextTest.DummyMasterCredentials()).getId());
         
-        Database[] srv_dbs = oxu.listDatabases("db_*",ContextTest.DummyMasterCredentials());
+        Database[] srv_dbs = oxu.listDatabase("db_*",ContextTest.DummyMasterCredentials());
         boolean found_db = false;
         for(int a = 0;a<srv_dbs.length;a++){
             Database tmp = srv_dbs[a];
@@ -308,7 +308,7 @@ public class UtilTest extends AbstractTest {
         // now unregister database
         oxu.unregisterDatabase(new Database(client_db.getId()),ContextTest.DummyMasterCredentials());
         
-        srv_dbs = oxu.listDatabases("db_*",ContextTest.DummyMasterCredentials());
+        srv_dbs = oxu.listDatabase("db_*",ContextTest.DummyMasterCredentials());
         found_db = false;
         for(int a = 0;a<srv_dbs.length;a++){
             Database tmp = srv_dbs[a];
@@ -334,7 +334,7 @@ public class UtilTest extends AbstractTest {
         }
         client_db.setId(oxu.registerDatabase(client_db,ContextTest.DummyMasterCredentials()).getId());
         
-        Database[] srv_dbs = oxu.listDatabases("db_*",ContextTest.DummyMasterCredentials());
+        Database[] srv_dbs = oxu.listDatabase("db_*",ContextTest.DummyMasterCredentials());
         boolean found_db = false;
         for(int a = 0;a<srv_dbs.length;a++){
             Database tmp = srv_dbs[a];
@@ -367,7 +367,7 @@ public class UtilTest extends AbstractTest {
         client_srv.setName("testcase-search-server-"+System.currentTimeMillis());
         client_srv.setId(oxu.registerServer(client_srv,ContextTest.DummyMasterCredentials()).getId());
         
-        Server[] srv_response = oxu.listServers("testcase-search-server-*",ContextTest.DummyMasterCredentials());
+        Server[] srv_response = oxu.listServer("testcase-search-server-*",ContextTest.DummyMasterCredentials());
         boolean found_srv = false;
         for(int a = 0;a<srv_response.length;a++){
             Server tmp = srv_response[a];
@@ -400,13 +400,13 @@ public class UtilTest extends AbstractTest {
         client_st.setId(oxu.registerFilestore(client_st,ContextTest.DummyMasterCredentials()).getId());
         
         try{
-            oxu.listFilestores(null,ContextTest.DummyMasterCredentials());
+            oxu.listFilestore(null,ContextTest.DummyMasterCredentials());
             fail("Exception expected while listing filestore with invalid pattern!");
         }catch(InvalidDataException ivd){    
             assertTrue(true);
         }
         
-        Filestore[] srv_stores = oxu.listFilestores("file:///tmp/disc_*",ContextTest.DummyMasterCredentials());
+        Filestore[] srv_stores = oxu.listFilestore("file:///tmp/disc_*",ContextTest.DummyMasterCredentials());
         
         // now check if added filestore was correctly registered to the system        
         boolean found_store = false;
@@ -430,7 +430,7 @@ public class UtilTest extends AbstractTest {
          
         client_st.setId(oxu.registerFilestore(client_st,ContextTest.DummyMasterCredentials()).getId());
         
-        Filestore[] srv_stores = oxu.listFilestores("file:///tmp/disc_*",ContextTest.DummyMasterCredentials());
+        Filestore[] srv_stores = oxu.listFilestore("file:///tmp/disc_*",ContextTest.DummyMasterCredentials());
         
         // now check if added filestore was correctly registered to the system        
         boolean found_store = false;
@@ -455,7 +455,7 @@ public class UtilTest extends AbstractTest {
         // change store on server
         oxu.changeFilestore(client_st,ContextTest.DummyMasterCredentials());
         
-        srv_stores = oxu.listFilestores("file:///tmp/disc_*",ContextTest.DummyMasterCredentials());
+        srv_stores = oxu.listFilestore("file:///tmp/disc_*",ContextTest.DummyMasterCredentials());
         
         // now check if added filestore was correctly registered to the system        
         found_store = false;
@@ -480,7 +480,7 @@ public class UtilTest extends AbstractTest {
          
         client_st.setId(oxu.registerFilestore(client_st,ContextTest.DummyMasterCredentials()).getId());
         
-        Filestore[] srv_stores = oxu.listFilestores("file:///tmp/disc_*",ContextTest.DummyMasterCredentials());
+        Filestore[] srv_stores = oxu.listFilestore("file:///tmp/disc_*",ContextTest.DummyMasterCredentials());
         
         assertTrue("Expected list size > 0 ",srv_stores.length>0);
     }
@@ -493,7 +493,7 @@ public class UtilTest extends AbstractTest {
          
         client_st.setId(oxu.registerFilestore(client_st,ContextTest.DummyMasterCredentials()).getId());
         
-        Filestore[] srv_stores = oxu.listFilestores("file:///tmp/disc_*",ContextTest.DummyMasterCredentials());
+        Filestore[] srv_stores = oxu.listFilestore("file:///tmp/disc_*",ContextTest.DummyMasterCredentials());
         
         // now check if added filestore was correctly registered to the system        
         boolean found_store = false;
@@ -512,7 +512,7 @@ public class UtilTest extends AbstractTest {
         // now unregister and search again
         oxu.unregisterFilestore(new Filestore(client_st.getId()),ContextTest.DummyMasterCredentials());
         
-        srv_stores = oxu.listFilestores("file:///tmp/disc_*",ContextTest.DummyMasterCredentials());
+        srv_stores = oxu.listFilestore("file:///tmp/disc_*",ContextTest.DummyMasterCredentials());
         
         // now check if added filestore was correctly registered to the system        
         found_store = false;
