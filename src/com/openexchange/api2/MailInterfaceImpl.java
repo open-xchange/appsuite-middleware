@@ -731,6 +731,10 @@ public class MailInterfaceImpl implements MailInterface {
 					break CheckDefaultFolders;
 				}
 				final String[] stdFolderNames = new String[usm.isSpamEnabled() ? 6 : 4];
+				if (LOG.isDebugEnabled()) {
+					LOG.debug(new StringBuilder(32).append("Checking for ").append(stdFolderNames.length).append(
+							" default folders").toString());
+				}
 				if (usm.getStdDraftsName() == null || usm.getStdDraftsName().length() == 0) {
 					if (LOG.isWarnEnabled()) {
 						final OXMailException e = new OXMailException(MailCode.MISSING_DEFAULT_FOLDER_NAME,
@@ -853,8 +857,14 @@ public class MailInterfaceImpl implements MailInterface {
 				 * Check default folders
 				 */
 				for (int i = 0; i < defaultFolderNames.length; i++) {
-					sessionObj.setDefaultMailFolder(i, checkDefaultFolder(imapCon.getIMAPStore(), prefix,
-							defaultFolderNames[i], type, tmp));
+					if (null == defaultFolderNames[i]) {
+						if (LOG.isDebugEnabled()) {
+							LOG.debug(new StringBuilder(32).append("Missing defaul folder name at index ").append(i));
+						}
+					} else {
+						sessionObj.setDefaultMailFolder(i, checkDefaultFolder(imapCon.getIMAPStore(), prefix,
+								defaultFolderNames[i], type, tmp));
+					}
 				}
 			}
 		} catch (final MessagingException e) {
