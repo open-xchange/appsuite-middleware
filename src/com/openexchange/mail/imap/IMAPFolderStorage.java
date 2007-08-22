@@ -923,7 +923,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 	private static final String SWITCH_DEFAULT_FOLDER = "Switching to default value %s";
 
 	private static String[] getDefaultFolderNames(final UserSettingMail usm) throws IMAPPropertyException {
-		final String[] names = new String[IMAPProperties.isSpamEnabled() ? 6 : 4];
+		final String[] names = new String[usm.isSpamEnabled() ? 6 : 4];
 		if (usm.getStdDraftsName() == null || usm.getStdDraftsName().length() == 0) {
 			if (LOG.isWarnEnabled()) {
 				final IMAPException e = new IMAPException(IMAPException.Code.MISSING_DEFAULT_FOLDER_NAME,

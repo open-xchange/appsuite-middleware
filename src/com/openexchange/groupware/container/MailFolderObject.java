@@ -206,7 +206,7 @@ public final class MailFolderObject implements User2IMAPInfo {
 			if (INBOX.equals(folder.getFullName())) {
 				defaultFolder = true;
 			} else if (session.isMailFldsChecked()) {
-				final int len = IMAPProperties.isSpamEnabled() ? 6 : 4;
+				final int len = session.getUserSettingMail().isSpamEnabled() ? 6 : 4;
 				for (int i = 0; (i < len) && !defaultFolder; i++) {
 					if (fullName.equals(session.getDefaultMailFolder(i))) {
 						defaultFolder = true;

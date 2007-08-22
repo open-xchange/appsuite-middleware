@@ -730,7 +730,7 @@ public class MailInterfaceImpl implements MailInterface {
 				if (sessionObj.isMailFldsChecked()) {
 					break CheckDefaultFolders;
 				}
-				final String[] stdFolderNames = new String[IMAPProperties.isSpamEnabled() ? 6 : 4];
+				final String[] stdFolderNames = new String[usm.isSpamEnabled() ? 6 : 4];
 				if (usm.getStdDraftsName() == null || usm.getStdDraftsName().length() == 0) {
 					if (LOG.isWarnEnabled()) {
 						final OXMailException e = new OXMailException(MailCode.MISSING_DEFAULT_FOLDER_NAME,

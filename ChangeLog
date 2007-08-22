@@ -1,3 +1,7 @@
+* 2007-08-22 - thorben.betten@open-xchange.com
+
+ - Fixed checking for spam activation when checking default folders
+
 * 2007-08-21 - thorben.betten@open-xchange.com
 
  - Bugfix #8987: Fixed html2text conversion while keeping quotes

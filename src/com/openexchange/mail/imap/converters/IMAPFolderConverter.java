@@ -152,6 +152,8 @@ public final class IMAPFolderConverter {
 	 * 
 	 * @param imapFolder
 	 *            The IMAP folder
+	 * @param session
+	 *            The session
 	 * @return an instance of <code>{@link MailFolder}</code> containing the
 	 *         attributes from given IMAP folder
 	 * @throws IMAPException
@@ -224,7 +226,7 @@ public final class IMAPFolderConverter {
 				if (STR_INBOX.equals(imapFolder.getFullName())) {
 					retval.setDefaulFolder(true);
 				} else if (session.isMailFldsChecked()) {
-					final int len = IMAPProperties.isSpamEnabled() ? 6 : 4;
+					final int len = session.getUserSettingMail().isSpamEnabled() ? 6 : 4;
 					for (int i = 0; (i < len) && !retval.isDefaulFolder(); i++) {
 						if (retval.getFullname().equals(session.getDefaultMailFolder(i))) {
 							retval.setDefaulFolder(true);
