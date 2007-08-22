@@ -276,8 +276,9 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     public static final HashSet<String> standardoptions = new HashSet<String>(15);
     
     static {
+        // Here we define those getter which shouldn't be listed in the extendedoptions
         standardoptions.add("id");
-        standardoptions.add(OPT_USERNAME_LONG);
+        standardoptions.add("name");
         standardoptions.add("display_name");
         standardoptions.add(OPT_PASSWORD_LONG);
         standardoptions.add("given_name");
