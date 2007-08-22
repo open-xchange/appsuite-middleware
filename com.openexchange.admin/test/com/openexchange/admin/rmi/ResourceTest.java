@@ -295,6 +295,38 @@ public class ResourceTest extends AbstractTest{
     }
     
     @Test
+    public void testCreateDeleteCreate() throws Exception {
+        OXResourceInterface oxres = getResourceClient();
+        final int context_id = getContextID();
+        final Context ctx = new Context(context_id);
+        Resource res = getTestResourceObject("tescase-create-resource-"+System.currentTimeMillis());
+        Resource createdresource = oxres.create(ctx,res,DummyCredentials());
+        
+        // get resource from server
+        Resource srv_res = oxres.getData(ctx,createdresource,DummyCredentials());        
+        
+        assertEquals(createdresource.getDescription(),srv_res.getDescription());
+        assertEquals(createdresource.getDisplayname(),srv_res.getDisplayname());
+        assertEquals(createdresource.getEmail(),srv_res.getEmail());
+        assertEquals(createdresource.getName(),srv_res.getName());
+        
+        
+        // delete resource
+        oxres.delete(ctx,createdresource,DummyCredentials());
+        
+        // try to get resource again, this MUST fail
+        try{
+            srv_res = oxres.getData(ctx,createdresource,DummyCredentials());   
+            fail("Expected that the resource was deleted!");
+        }catch(NoSuchResourceException nsr){  }
+        
+        
+        // create again
+        oxres.create(ctx,res,DummyCredentials());
+        
+    }
+    
+    @Test
     public void testDeleteIdentifiedByName() throws Exception {
         OXResourceInterface oxres = getResourceClient();
         final int context_id = getContextID();
