@@ -25,6 +25,7 @@ import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
+import com.openexchange.admin.rmi.exceptions.NoSuchDatabaseException;
 import com.openexchange.admin.rmi.exceptions.NoSuchFilestoreException;
 import com.openexchange.admin.rmi.exceptions.NoSuchReasonException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
@@ -324,7 +325,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         return list("*", auth);
     }
     
-    public Context[] listByDatabase(final Database db, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+    public Context[] listByDatabase(final Database db, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchDatabaseException {
         try {
             doNullCheck(db);
         } catch (final InvalidDataException e) {
@@ -337,6 +338,9 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         setIdOrGetIDFromNameAndIdObject(null, db);
         log.debug(db);
         try {
+            if( !tool.existsDatabase(db.getId()) ) {
+                throw new NoSuchDatabaseException();
+            }
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
             return oxcox.searchContextByDatabase(db);
         } catch (final StorageException e) {
@@ -345,7 +349,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         }
     }
 
-    public Context[] listByFilestore(final Filestore filestore, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+    public Context[] listByFilestore(final Filestore filestore, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchFilestoreException {
         try {
             doNullCheck(filestore, filestore.getId());
         } catch (final InvalidDataException e) {
@@ -357,6 +361,9 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         
         log.debug(filestore);
         try {
+            if( !tool.existsStore(filestore.getId()) ) {
+                throw new NoSuchFilestoreException();
+            }
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
             return oxcox.searchContextByFilestore(filestore);
         } catch (final StorageException e) {

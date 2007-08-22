@@ -4,7 +4,7 @@ package com.openexchange.admin.rmi.exceptions;
 
 
 /**
- * Is thrown if a user doesn't exist in an operation
+ * Is thrown if a filestore doesn't exist in an operation
  * 
  * @author d7
  *

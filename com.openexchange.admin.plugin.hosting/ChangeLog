@@ -7,6 +7,7 @@
   - Bugfix ID#8989 generatempasswd no newline in output
   - Bugfix ID#8991 initconfigdb, return code is always 0
   - Bugfix ID#8853 'listcontexts' searchpattern only works for context id
+  - Bugfix ID#9026 listcontextsbyfilestore does not print a error when the given fs does not exist
 
 * 2007-08-21 - dennis.sieben@open-xchange.com
 
