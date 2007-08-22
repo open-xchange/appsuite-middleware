@@ -61,6 +61,7 @@ import java.io.UnsupportedEncodingException;
 import javax.activation.DataSource;
 
 import com.openexchange.api2.OXException;
+import com.openexchange.configuration.ServerConfig;
 import com.openexchange.tools.mail.ContentType;
 
 /**
@@ -73,7 +74,7 @@ public class MessageDataSource implements DataSource {
 
 	protected static final int DEFAULT_BUF_SIZE = 0x2000;
 
-	protected static final String DEFAULT_ENCODING = "UTF-8";
+	protected static final String DEFAULT_ENCODING = ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding);
 
 	protected byte[] data;
 
