@@ -744,11 +744,12 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             configdb_read = cache.getREADConnectionForCONFIGDB();
 
             final String search_patterntmp = search_pattern.replace('*', '%');
-            stmt = configdb_read.prepareStatement("SELECT context.cid, context.name, context.enabled, context.reason_id, context.filestore_id, context.filestore_name, context.quota_max, context_server2db_pool.write_db_pool_id, context_server2db_pool.read_db_pool_id, context_server2db_pool.db_schema FROM context LEFT JOIN ( context_server2db_pool, server ) ON ( context.cid = context_server2db_pool.cid AND context_server2db_pool.server_id = server.server_id ) WHERE server.name = ? AND context.name LIKE ? OR context.cid LIKE ?");
+            stmt = configdb_read.prepareStatement("SELECT DISTINCT context.cid, context.name, context.enabled, context.reason_id, context.filestore_id, context.filestore_name, context.quota_max, context_server2db_pool.write_db_pool_id, context_server2db_pool.read_db_pool_id, context_server2db_pool.db_schema FROM context, context_server2db_pool, server, login2context WHERE ( context.cid = context_server2db_pool.cid AND context.cid = login2context.cid AND context_server2db_pool.server_id = server.server_id AND server.name = ? ) AND (context.name LIKE ? OR context.cid LIKE ? OR login2context.login_info LIKE ?)");
             mapping = configdb_read.prepareStatement("SELECT login_info FROM login2context WHERE cid=?"); 
             stmt.setString(1, prop.getProp(AdminProperties.Prop.SERVER_NAME, "local"));
             stmt.setString(2, search_patterntmp);
             stmt.setString(3, search_patterntmp);
+            stmt.setString(4, search_patterntmp);
             rs = stmt.executeQuery();
 
             final ArrayList<Context> list = new ArrayList<Context>();
