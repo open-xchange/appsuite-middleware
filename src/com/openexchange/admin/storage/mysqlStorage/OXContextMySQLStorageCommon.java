@@ -53,6 +53,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 
 import org.apache.commons.logging.Log;
@@ -95,8 +96,6 @@ public abstract class OXContextMySQLStorageCommon {
     public OXContextMySQLStorageCommon() {
         oxutilcommon = new OXUtilMySQLStorageCommon();
     }
-    
-    
     
     // TODO: The average size parameter can be removed if we have an new property handler which can
     // deal right with plugin properties
@@ -178,13 +177,7 @@ public abstract class OXContextMySQLStorageCommon {
             cs.setId(context_id);
             return cs;
         } finally {
-            try {
-                if (prep != null) {
-                    prep.close();
-                }
-            } catch (final SQLException e) {
-                log.error("SQL Error closing statement!", e);
-            }
+            closePreparedStatement(prep);
             try {
                 if (oxdb_read != null) {
                     cache.pushOXDBRead(context_id, oxdb_read);
@@ -210,7 +203,6 @@ public abstract class OXContextMySQLStorageCommon {
         }
         group_stmt.executeUpdate();
         group_stmt.close();
-
     }
 
     public final void createAdminForContext(final Context ctx, final User admin_user, final Connection ox_write_con, final int internal_user_id, final int contact_id, final int uid_number, final UserModuleAccess access) throws StorageException, InvalidDataException {
@@ -306,27 +298,9 @@ public abstract class OXContextMySQLStorageCommon {
             stmt.close();
     
         } finally {
-            try {
-                if (null != stmt3) {
-                    stmt3.close();
-                }
-            } catch (final SQLException ecp) {
-                log.error(OXContextMySQLStorageCommon.LOG_ERROR_CLOSING_STATEMENT, ecp);
-            }
-            try {
-                if (null != stmt2) {
-                    stmt2.close();
-                }
-            } catch (final SQLException ecp) {
-                log.error(OXContextMySQLStorageCommon.LOG_ERROR_CLOSING_STATEMENT, ecp);
-            }
-            try {
-                if (null != stmt) {
-                    stmt.close();
-                }
-            } catch (final SQLException ecp) {
-                log.error(OXContextMySQLStorageCommon.LOG_ERROR_CLOSING_STATEMENT, ecp);
-            }
+            closePreparedStatement(stmt);
+            closePreparedStatement(stmt2);
+            closePreparedStatement(stmt3);
         }
     }
 
@@ -348,16 +322,8 @@ public abstract class OXContextMySQLStorageCommon {
                 seq_del.close();
             }
         } finally {
-            try {
-                if (del_stmt != null) {
-                    del_stmt.close();
-                }
-                if (seq_del != null) {
-                    seq_del.close();
-                }
-            } catch (final SQLException ecp) {
-                log.error(OXContextMySQLStorageCommon.LOG_ERROR_CLOSING_STATEMENT, ecp);
-            }
+            closePreparedStatement(del_stmt);
+            closePreparedStatement(seq_del);
         }
     }
 
@@ -385,7 +351,6 @@ public abstract class OXContextMySQLStorageCommon {
     }
 
     public final void handleCreateContextRollback(final Connection configdb_write_con, final Connection ox_write_con, final int context_id) {
-    
         try {
             if (configdb_write_con != null && !configdb_write_con.getAutoCommit()) {
                 configdb_write_con.rollback();
@@ -482,13 +447,7 @@ public abstract class OXContextMySQLStorageCommon {
             log.error("Generic Error",oxgen);
             throw new StorageException("" + oxgen.getMessage());
         } finally {
-            try {
-                if (ps != null) {
-                    ps.close();
-                }
-            } catch (final SQLException e) {
-                log.error(OXContextMySQLStorageCommon.LOG_ERROR_CLOSING_STATEMENT, e);
-            }
+            closePreparedStatement(ps);
         }
     }
 
@@ -505,13 +464,7 @@ public abstract class OXContextMySQLStorageCommon {
             ps.executeUpdate();
             ps.close();
         } finally {
-            try {
-                if (ps != null) {
-                    ps.close();
-                }
-            } catch (final SQLException e) {
-                log.error(OXContextMySQLStorageCommon.LOG_ERROR_CLOSING_STATEMENT, e);
-            }
+            closePreparedStatement(ps);
         }
     }
 
@@ -537,11 +490,7 @@ public abstract class OXContextMySQLStorageCommon {
             log.error("SQL Error", sql);
             throw sql;
         } finally {
-            try {
-                sstmt.close();
-            } catch (final SQLException e) {
-                log.error(LOG_ERROR_CLOSING_STATEMENT, e);
-            }
+            closePreparedStatement(sstmt);
         }
         return sid;
     }
@@ -570,13 +519,7 @@ public abstract class OXContextMySQLStorageCommon {
                 stmt.close();
             }
         } finally {
-            if (stmt != null) {
-                try {
-                    stmt.close();
-                } catch (final Exception exp) {
-                    log.error(OXContextMySQLStorageCommon.LOG_ERROR_CLOSING_STATEMENT, exp);
-                }
-            }
+            closePreparedStatement(stmt);
         }
     }
 
@@ -602,15 +545,38 @@ public abstract class OXContextMySQLStorageCommon {
             stmt.executeUpdate();
             stmt.close();
         } finally {
-            if (stmt != null) {
-                try {
-                    stmt.close();
-                } catch (final SQLException e) {
-                    log.error(OXContextMySQLStorageCommon.LOG_ERROR_CLOSING_STATEMENT, e);
-                }
-
-            }
+            closePreparedStatement(stmt);
         }
     }
+
+    public void fillLogin2ContextTable(final Context ctx, final Connection configdb_write_con) throws SQLException {
+        final HashSet<String> loginMappings = ctx.getLoginMappings();
+        final Integer ctxid = ctx.getId();
+        PreparedStatement stmt = null;
+        try {
+            stmt = configdb_write_con.prepareStatement("INSERT INTO login2context (cid,login_info) VALUES (?,?)");
+            for (final String mapping : loginMappings) {
+                stmt.setInt(1, ctxid);
+                stmt.setString(2, mapping);
+                stmt.executeUpdate();
+            }
+        } catch (final SQLException sql) {
+            log.error("SQL Error", sql);
+            throw sql;
+        } finally {
+            closePreparedStatement(stmt);
+        }
+    }
+    
+    private void closePreparedStatement(PreparedStatement stmt) {
+        try {
+            if (stmt != null) {
+                stmt.close();
+            }
+        } catch (final SQLException e) {
+            log.error(OXContextMySQLStorageCommon.LOG_ERROR_CLOSING_STATEMENT, e);
+        }
+    }
+
 
 }
