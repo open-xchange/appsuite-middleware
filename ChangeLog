@@ -1,6 +1,7 @@
 * 2007-08-22 - thorben.betten@open-xchange.com
 
  - Fixed checking for spam activation when checking default folders
+ - Finished IMAP message to mail message conversion
 
 * 2007-08-21 - thorben.betten@open-xchange.com
 

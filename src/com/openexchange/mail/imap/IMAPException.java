@@ -370,7 +370,11 @@ public final class IMAPException extends MailException {
 		/**
 		 * Default folder %s must not be deleted
 		 */
-		NO_DEFAULT_FOLDER_DELETE("Default folder %s cannot be deleted", Category.PERMISSION, 39);
+		NO_DEFAULT_FOLDER_DELETE("Default folder %s cannot be deleted", Category.PERMISSION, 39),
+		/**
+		 * An I/O error occured: %s
+		 */
+		IO_ERROR("An I/O error occured: %s", Category.CODE_ERROR, 40);
 
 		private final String message;
 

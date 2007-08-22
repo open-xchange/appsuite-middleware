@@ -49,16 +49,17 @@
 
 package com.openexchange.mail.dataobjects;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map;
+import java.util.List;
 import java.util.Set;
-import java.util.Map.Entry;
 
 import javax.mail.internet.InternetAddress;
+
+import com.openexchange.groupware.container.mail.JSONMessageObject;
 
 /**
  * MailMessage
@@ -66,31 +67,73 @@ import javax.mail.internet.InternetAddress;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class MailMessage {
+public abstract class MailMessage extends MailContent {
+	
+	/**
+	 * This message has been answered. This flag is set by clients to indicate
+	 * that this message has been answered to.
+	 * 
+	 * @value 1
+	 */
+	public static final int FLAG_ANSWERED = 1;
 
-	private static final Iterator<Map.Entry<String, String>> EMPTY_ITER = new Iterator<Map.Entry<String, String>>() {
-		/**
-		 * @return <tt>true</tt> if the iterator has more elements.
-		 */
-		public boolean hasNext() {
-			return false;
-		}
+	/**
+	 * This message is marked deleted. Clients set this flag to mark a message
+	 * as deleted. The expunge operation on a folder removes all messages in
+	 * that folder that are marked for deletion.
+	 * 
+	 * @value 2
+	 */
+	public static final int FLAG_DELETED = 2;
 
-		/**
-		 * @return The next element in the iteration.
-		 */
-		public Entry<String, String> next() {
-			return null;
-		}
+	/**
+	 * This message is a draft. This flag is set by clients to indicate that the
+	 * message is a draft message.
+	 * 
+	 * @value 4
+	 */
+	public static final int FLAG_DRAFT = 4;
 
-		/**
-		 * Removes from the underlying collection the last element returned by
-		 * the iterator (optional operation).
-		 */
-		public void remove() {
-		}
+	/**
+	 * This message is flagged. No semantic is defined for this flag. Clients
+	 * alter this flag.
+	 * 
+	 * @value 8
+	 */
+	public static final int FLAG_FLAGGED = 8;
 
-	};
+	/**
+	 * This message is recent. Folder implementations set this flag to indicate
+	 * that this message is new to this folder, that is, it has arrived since
+	 * the last time this folder was opened.
+	 * 
+	 * @value 16
+	 * 
+	 */
+	public static final int FLAG_RECENT = 16;
+
+	/**
+	 * This message is seen. This flag is implicitly set by the implementation
+	 * when the this Message's content is returned to the client in some form.
+	 * 
+	 * @value 32
+	 */
+	public static final int FLAG_SEEN = 32;
+
+	/**
+	 * A special flag that indicates that this folder supports user defined
+	 * flags
+	 * 
+	 * @value 64
+	 */
+	public static final int FLAG_USER = 64;
+
+	/**
+	 * Virtal Spam flags
+	 * 
+	 * @value 128
+	 */
+	public static final int FLAG_SPAM = 128;
 
 	private static final InternetAddress[] EMPTY_ADDRS = new InternetAddress[0];
 
@@ -158,32 +201,53 @@ public final class MailMessage {
 	private boolean b_subject;
 
 	/**
-	 * The size
-	 */
-	private int size = -1;
-
-	private boolean b_size;
-
-	/**
-	 * The sent date
+	 * The sent date (the <code>Date</code> header)
 	 */
 	private Date sentDate;
 
 	private boolean b_sentDate;
 
 	/**
-	 * The received date
+	 * The (internal) received date
 	 */
 	private Date receivedDate;
 
 	private boolean b_receivedDate;
 
 	/**
-	 * The headers (if not explicitely set in other fields)
+	 * User flags
 	 */
-	private Map<String, String> headers;
+	private Set<IgnoreCaseString> userFlags;
 
-	private boolean b_headers;
+	private boolean b_userFlags;
+
+	/**
+	 * The color label (set through an user flag)
+	 */
+	private int colorLabel = JSONMessageObject.COLOR_LABEL_NONE;
+
+	private boolean b_colorLabel;
+
+	/**
+	 * The priority (the <code>X-Priority</code> header)
+	 */
+	private int priority = JSONMessageObject.PRIORITY_NORMAL;
+
+	private boolean b_priority;
+
+	/**
+	 * The message reference (on reply or forward)
+	 */
+	private String msgref;
+
+	private boolean b_msgref;
+
+	/**
+	 * The <code>Disposition-Notification-To</code> header
+	 */
+	private String dispositionNotification;
+
+	private boolean b_dispositionNotification;
 
 	/**
 	 * Default constructor
@@ -602,41 +666,6 @@ public final class MailMessage {
 	}
 
 	/**
-	 * Gets the size
-	 * 
-	 * @return the size
-	 */
-	public int getSize() {
-		return size;
-	}
-
-	/**
-	 * @return <code>true</code> if size is set; otherwise <code>false</code>
-	 */
-	public boolean containsSize() {
-		return b_size;
-	}
-
-	/**
-	 * Removes the size
-	 */
-	public void removeSize() {
-		size = -1;
-		b_size = false;
-	}
-
-	/**
-	 * Sets the size
-	 * 
-	 * @param size
-	 *            the size to set
-	 */
-	public void setSize(final int size) {
-		this.size = size;
-		b_size = true;
-	}
-
-	/**
 	 * Gets the sentDate
 	 * 
 	 * @return the sentDate
@@ -709,55 +738,217 @@ public final class MailMessage {
 	}
 
 	/**
-	 * Adds a header
+	 * Adds given user flag
 	 * 
-	 * @param name
-	 *            The header name
-	 * @param value
-	 *            The header value
+	 * @param userFlag
+	 *            The user flag to add
 	 */
-	public void addHeader(final String name, final String value) {
-		if (null == name) {
-			throw new IllegalArgumentException("Header name must not be null");
-		} else if (value == null) {
-			/*
-			 * Don't need to put a null value
-			 */
+	public void addUserFlag(final String userFlag) {
+		if (userFlag == null) {
 			return;
-		} else if (null == headers) {
-			headers = new HashMap<String, String>();
-			b_headers = true;
+		} else if (userFlags == null) {
+			userFlags = new HashSet<IgnoreCaseString>();
+			b_userFlags = true;
 		}
-		headers.put(name, value);
+		userFlags.add(new IgnoreCaseString(userFlag));
 	}
 
 	/**
-	 * @return <code>true</code> if headers is set; otherwise
+	 * Adds given user flags
+	 * 
+	 * @param userFlags
+	 *            The user flags to add
+	 */
+	public void addUserFlags(final String[] userFlags) {
+		if (userFlags == null || userFlags.length == 0) {
+			return;
+		} else if (this.userFlags == null) {
+			this.userFlags = new HashSet<IgnoreCaseString>();
+			b_userFlags = true;
+		}
+		for (int i = 0; i < userFlags.length; i++) {
+			this.userFlags.add(new IgnoreCaseString(userFlags[i]));
+		}
+	}
+
+	/**
+	 * @return <code>true</code> if userFlags is set; otherwise
 	 *         <code>false</code>
 	 */
-	public boolean containsHeaders() {
-		return b_headers;
+	public boolean containsUserFlags() {
+		return b_userFlags;
 	}
 
 	/**
-	 * Removes the headers
+	 * Removes the userFlags
 	 */
-	public void removeHeaders() {
-		headers = null;
-		b_headers = false;
+	public void removeUserFlags() {
+		userFlags = null;
+		b_userFlags = false;
 	}
 
-	public int getHeadersSize() {
-		if (null == headers) {
-			return 0;
+	private static final String[] EMPTY_UF = new String[0];
+
+	/**
+	 * Gets the user flags
+	 * 
+	 * @return The user flags
+	 */
+	public String[] getUserFlags() {
+		if (containsUserFlags() && null != userFlags) {
+			final int size = userFlags.size();
+			final List<String> retval = new ArrayList<String>(size);
+			final Iterator<IgnoreCaseString> iter = userFlags.iterator();
+			for (int i = 0; i < size; i++) {
+				retval.add(iter.next().toString());
+			}
+			return retval.toArray(new String[size]);
 		}
-		return headers.size();
+		return EMPTY_UF;
 	}
 
-	public Iterator<Map.Entry<String, String>> getHeadersIterator() {
-		if (null == headers) {
-			return EMPTY_ITER;
-		}
-		return headers.entrySet().iterator();
+	/**
+	 * Gets the colorLabel
+	 * 
+	 * @return the colorLabel
+	 */
+	public int getColorLabel() {
+		return colorLabel;
 	}
+
+	/**
+	 * @return <code>true</code> if colorLabel is set; otherwise
+	 *         <code>false</code>
+	 */
+	public boolean containsColorLabel() {
+		return b_colorLabel;
+	}
+
+	/**
+	 * Removes the colorLabel
+	 */
+	public void removeColorLabel() {
+		colorLabel = JSONMessageObject.COLOR_LABEL_NONE;
+		b_colorLabel = false;
+	}
+
+	/**
+	 * Sets the colorLabel
+	 * 
+	 * @param colorLabel
+	 *            the colorLabel to set
+	 */
+	public void setColorLabel(final int colorLabel) {
+		this.colorLabel = colorLabel;
+		b_colorLabel = true;
+	}
+
+	/**
+	 * Gets the priority
+	 * 
+	 * @return the priority
+	 */
+	public int getPriority() {
+		return priority;
+	}
+
+	/**
+	 * @return <code>true</code> if priority is set; otherwise
+	 *         <code>false</code>
+	 */
+	public boolean containsPriority() {
+		return b_priority;
+	}
+
+	/**
+	 * Removes the priority
+	 */
+	public void removePriority() {
+		priority = JSONMessageObject.PRIORITY_NORMAL;
+		b_priority = false;
+	}
+
+	/**
+	 * Sets the priority
+	 * 
+	 * @param priority
+	 *            the priority to set
+	 */
+	public void setPriority(final int priority) {
+		this.priority = priority;
+		b_priority = true;
+	}
+
+	/**
+	 * Gets the msgref
+	 * 
+	 * @return the msgref
+	 */
+	public String getMsgref() {
+		return msgref;
+	}
+
+	/**
+	 * @return <code>true</code> if msgref is set; otherwise
+	 *         <code>false</code>
+	 */
+	public boolean containsMsgref() {
+		return b_msgref;
+	}
+
+	/**
+	 * Removes the msgref
+	 */
+	public void removeMsgref() {
+		msgref = null;
+		b_msgref = false;
+	}
+
+	/**
+	 * Sets the msgref
+	 * 
+	 * @param msgref
+	 *            the msgref to set
+	 */
+	public void setMsgref(final String msgref) {
+		this.msgref = msgref;
+		b_msgref = true;
+	}
+
+	/**
+	 * Gets the dispositionNotification
+	 * 
+	 * @return the dispositionNotification
+	 */
+	public String getDispositionNotification() {
+		return dispositionNotification;
+	}
+
+	/**
+	 * @return <code>true</code> if dispositionNotification is set; otherwise
+	 *         <code>false</code>
+	 */
+	public boolean containsDispositionNotification() {
+		return b_dispositionNotification;
+	}
+
+	/**
+	 * Removes the dispositionNotification
+	 */
+	public void removeDispositionNotification() {
+		dispositionNotification = null;
+		b_dispositionNotification = false;
+	}
+
+	/**
+	 * Sets the dispositionNotification
+	 * 
+	 * @param dispositionNotification
+	 *            the dispositionNotification to set
+	 */
+	public void setDispositionNotification(final String dispositionNotification) {
+		this.dispositionNotification = dispositionNotification;
+		b_dispositionNotification = true;
+	}
+
 }
