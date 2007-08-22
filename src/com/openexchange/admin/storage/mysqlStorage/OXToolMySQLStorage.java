@@ -158,6 +158,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     /**
      * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsContext(int)
      */
+    @Override
     public boolean existsContext(final Context ctx) throws StorageException {
         return selectwithint(-1, "SELECT cid FROM context WHERE cid = ?;", ctx.getId());
     }
@@ -165,8 +166,8 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     /*
      * Check if any login mapping in the given context already exists in the system
      */
+    @Override
     public boolean existsContextLoginMappings(final Context ctx) throws StorageException {
-        
         Connection con= null;
         
         try{
@@ -175,31 +176,25 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         } catch (final PoolException e) {
             log.error("Pool Error",e);
             throw new StorageException(e);
-        }finally{
+        } finally {
             returnConnection(ctx.getId(), con);
         }
-        
-        
     }
 
     /*
      * Check if any login mapping in the given context already exists in the system
      */
+    @Override
     public boolean existsContextLoginMappings(final Context ctx,final Connection configdb_connection) throws StorageException {
-        if(ctx.getLoginMappings()!=null){
+        if (ctx.getLoginMappings() != null) {
             boolean retval = false;
             // check if any sent mapping entry already exists            
             PreparedStatement prep_check = null;
             ResultSet rs = null;
             try {
-                                
-                
                 final HashSet<String> logmaps = ctx.getLoginMappings();
-                final Iterator<String> itr = logmaps.iterator();
                 
-                while(itr.hasNext()){
-                    final String mpi = (String)itr.next();
-                    
+                for (final String mpi : logmaps) {
                     prep_check = configdb_connection.prepareStatement("SELECT cid from login2context where login_info = ?");
                     prep_check.setString(1, mpi);
                     rs = prep_check.executeQuery();
@@ -208,36 +203,26 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                     }
                     rs.close();
                     prep_check.close();
-                    if(retval){
+                    if (retval) {
                         break;
                     }
                 }
-                 return retval;              
-           
+                return retval;              
             } catch (final SQLException e) {
                 log.error("SQL Error",e);
                 throw new StorageException(e);
             } finally {
-                if (null != rs) {
-                    try {
-                        if(rs!=null){
-                            rs.close();
-                        }
-                    } catch (final SQLException e) {
-                        log.error("Error closing resultset", e);
-                    }
-                }
+            	closeRecordSet(rs);
                 closePreparedStatement(prep_check);
             }
-            
-        }else{
-            return false;
-        }       
+        }
+        return false;       
     }
 
     /**
      * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsDatabase(int)
      */
+    @Override
     public boolean existsDatabase(final int db_id) throws StorageException {
         return selectwithint(-1, "SELECT name FROM db_pool WHERE db_pool_id = ?", db_id);
     }
@@ -254,14 +239,8 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             ps = con.prepareStatement("SELECT field01 FROM prg_contacts WHERE cid = ? AND field01 = ?;");
             ps.setInt(1, ctx.getId());
             ps.setString(2, usr.getDisplay_name());
-            
             rs = ps.executeQuery();
-            
-            if (rs.next()) {
-                return true;
-            } else {
-                return false;
-            }
+            return rs.next();
         } catch (final SQLException e) {
             log.error("SQL Error",e);
             throw new StorageException(e);
@@ -288,7 +267,6 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                 prep_check = con.prepareStatement("SELECT id FROM groups WHERE cid = ? AND id = ?;");
                 prep_check.setInt(1, ctx.getId());
                 prep_check.setInt(2, grp.getId());
-
                 rs = prep_check.executeQuery();
 
                 if (rs.next()) {
@@ -310,7 +288,6 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             closePreparedStatement(prep_check);
             returnConnection(ctx.getId(), con);
         }
-
         return retBool;
     }
 
@@ -323,6 +300,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
      * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsGroup(int,
      *      int)
      */
+    @Override
     public boolean existsGroup(final Context ctx, final int gid) throws StorageException {
         return selectwithint(ctx.getId(), "SELECT id FROM groups WHERE cid = ? AND id = ?;", ctx.getId(), gid);
     }
@@ -330,6 +308,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     /**
      * @deprecated Use method with User[] instead
      */
+    @Override
     @Deprecated
     public boolean existsGroup(final Context ctx, final int[] gids) throws StorageException {
         boolean retBool = false;
@@ -343,7 +322,6 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                 prep_check = con.prepareStatement("SELECT id FROM groups WHERE cid = ? AND id = ?;");
                 prep_check.setInt(1, ctx.getId());
                 prep_check.setInt(2, elem);
-
                 rs = prep_check.executeQuery();
 
                 if (rs.next()) {
@@ -365,16 +343,14 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             closePreparedStatement(prep_check);
             returnConnection(ctx.getId(), con);
         }
-
         return retBool;
     }
-
-    
 
     /**
      * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsGroupMember(int,
      *      int, int)
      */
+    @Override
     public boolean existsGroupMember(final Context ctx, final int group_ID, final int member_ID) throws StorageException {
         return selectwithint(ctx.getId(), "SELECT id FROM groups_member WHERE cid = ? AND id = ? AND member = ?", ctx.getId(), group_ID, member_ID);
     }
@@ -383,6 +359,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
      * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsGroupMember(int,
      *      int, int[])
      */
+    @Override
     public boolean existsGroupMember(final Context ctx, final int group_ID, final int[] user_ids) throws StorageException {
         boolean ret = false;
         Connection con = null;
@@ -412,20 +389,8 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             log.error("SQL Error",e);
             throw new StorageException(e);
         } finally {
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (final SQLException e) {
-                    log.error("Error closing resultset", e);
-                }
-            }
-            try {
-                if (prep != null) {
-                    prep.close();
-                }
-            } catch (final SQLException e) {
-                log.error("Error closing statement", e);
-            }
+            closeRecordSet(rs);
+            closePreparedStatement(prep);
             try {
                 if (con != null) {
                     cache.pushOXDBWrite(ctx.getId(), con);
@@ -446,10 +411,10 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         return existsGroupMember(ctx, group_ID, ids);
     }
     
-    
     /**
      * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsReason(int)
      */
+    @Override
     public boolean existsReason(final int rid) throws StorageException {
         return selectwithint(-1, "SELECT id FROM reason_text WHERE id = ?;", rid);
     }
@@ -457,6 +422,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     /**
      * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsReason(java.lang.String)
      */
+    @Override
     public boolean existsReason(final String reason) throws StorageException {
         return selectwithstring(-1, "SELECT id FROM reason_text WHERE text = ?;", reason);
     }
@@ -465,24 +431,20 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
      * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsResource(int,
      *      int)
      */
+    @Override
     public boolean existsResource(final Context ctx, final int resource_id) throws StorageException {
         final AdminCache cache = ClientAdminThread.cache;
         Connection con = null;
         PreparedStatement prep_check = null;
         ResultSet rs = null;
         try {
-            
             con = cache.getWRITEConnectionForContext(ctx.getId());
            
             prep_check = con.prepareStatement("SELECT id FROM resource WHERE cid = ? AND id = ?");
             prep_check.setInt(1, ctx.getId());
             prep_check.setInt(2, resource_id);            
             rs = prep_check.executeQuery();
-            if (rs.next()) {
-                return true;
-            }else{
-                return false;
-            }
+            return rs.next();
         } catch (final PoolException e) {
             log.error("Pool Error",e);
             throw new StorageException(e);            
@@ -500,11 +462,8 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             } catch (final PoolException e) {
                 log.error("Error pushing ox write connection to pool!", e);
             }
-
         }
     }
-
-    
 
     /* (non-Javadoc)
      * @see com.openexchange.admin.storage.sqlStorage.OXToolSQLStorage#existsResourceAddress(com.openexchange.admin.rmi.dataobjects.Context, java.lang.String)
@@ -524,11 +483,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             prep_check.setInt(1, ctx.getId());
             prep_check.setString(2, address);            
             rs = prep_check.executeQuery();
-            if (rs.next()) {
-                return true;
-            }else{
-                return false;
-            }
+            return rs.next();
         } catch (final PoolException e) {
             log.error("Pool Error",e);
             throw new StorageException(e);
@@ -546,18 +501,16 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             } catch (final PoolException e) {
                 log.error("Error pushing ox write connection to pool!", e);
             }
-
         }
     }
 
+    @Override
     public boolean existsResourceAddress(Context ctx, String address,Integer resource_id) throws StorageException {
-        
         final AdminCache cache = ClientAdminThread.cache;
         Connection con = null;
         PreparedStatement prep_check = null;
         ResultSet rs = null;
         try {
-            
             con = cache.getWRITEConnectionForContext(ctx.getId());
            
             prep_check = con.prepareStatement("SELECT id from resource where cid = ? and mail = ? AND id != ?");
@@ -565,11 +518,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             prep_check.setString(2, address);      
             prep_check.setInt(3, resource_id);
             rs = prep_check.executeQuery();
-            if (rs.next()) {
-                return true;
-            }else{
-                return false;
-            }
+            return rs.next();
         } catch (final PoolException e) {
             log.error("Pool Error",e);
             throw new StorageException(e);
@@ -587,13 +536,13 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             } catch (final PoolException e) {
                 log.error("Error pushing ox write connection to pool!", e);
             }
-
         }
     }
 
     /**
      * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsServer(int)
      */
+    @Override
     public boolean existsServer(final int server_id) throws StorageException {
         return selectwithint(-1, "SELECT server_id FROM server WHERE server_id = ?", server_id);
     }
@@ -603,6 +552,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
      * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsServerID(int,
      *      java.lang.String, java.lang.String)
      */
+    @Override
     public boolean existsServerID(final int check_ID, final String table, final String field) throws StorageException {
         return selectwithint(-1, "SELECT server_id FROM " + table + " WHERE " + field + " = ?;", check_ID);
     }
@@ -610,6 +560,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     /**
      * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsStore(int)
      */
+    @Override
     public boolean existsStore(final int store_id) throws StorageException {
         return selectwithint(-1, "SELECT uri FROM filestore WHERE id = ?", store_id);
     }
@@ -617,6 +568,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     /**
      * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsStore(java.lang.String)
      */
+    @Override
     public boolean existsStore(final String url) throws StorageException {
         return selectwithstring(-1, "SELECT uri FROM filestore WHERE uri = ?", url);
     }
@@ -625,25 +577,20 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
      * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsUser(int,
      *      int)
      */
+    @Override
     public boolean existsUser(final Context ctx, final int uid) throws StorageException {
-        
         final AdminCache cache = ClientAdminThread.cache;
         Connection con = null;
         PreparedStatement prep_check = null;
         ResultSet rs = null;
         try {
-            
             con = cache.getWRITEConnectionForContext(ctx.getId());
            
             prep_check = con.prepareStatement("SELECT id FROM user WHERE cid = ? AND id = ?;");
             prep_check.setInt(1, ctx.getId());
             prep_check.setInt(2, uid);            
             rs = prep_check.executeQuery();
-            if (rs.next()) {
-                return true;
-            }else{
-                return false;
-            }
+            return rs.next();
         } catch (final PoolException e) {
             log.error("Pool Error",e);
             throw new StorageException(e);
@@ -661,15 +608,14 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             } catch (final PoolException e) {
                 log.error("Error pushing configdb write connection to pool!", e);
             }
-
         }      
-        
     }
 
     /**
      * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsUser(int,
      *      int[])
      */
+    @Override
     @SuppressWarnings("unused")
     public boolean existsUser(final Context ctx, final int[] user_ids) throws StorageException {
         boolean ret = false;
@@ -712,13 +658,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             log.error("SQL Error",e);
             throw new StorageException(e);
         } finally {
-            try {
-                if (prep != null) {
-                    prep.close();
-                }
-            } catch (final SQLException e) {
-                log.error("Error closing statement", e);
-            }
+            closePreparedStatement(prep);
 
             if (null != con) {
                 try {
@@ -731,8 +671,6 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         return ret;
     }
 
-    
-    
     @Override
     public boolean existsUser(final Context ctx, final User[] users) throws StorageException {
         Connection con = null;
@@ -834,7 +772,6 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             }
             closePreparedStatement(stmt);
         }
-
         return admin_id;
     }
 
@@ -883,7 +820,6 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                 log.error("Error closing prepared statement!", e);
             }
         }
-
         return group_id;
     }
 
@@ -891,7 +827,8 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
      * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#getDefaultGroupForContext(int,
      *      java.sql.Connection)
      */
-public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws StorageException {
+    @Override
+    public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws StorageException {
         int group_id = 0;
         Connection con = null;
         
@@ -940,6 +877,7 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
         return group_id;
     }
 
+    @Override
     public int getGidNumberOfGroup(final Context ctx,final int group_id, final Connection con) throws StorageException {
         int gid_number = -1;
 
@@ -973,7 +911,6 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
                 log.error("Error closing prepared statement!", e);
             }
         }
-
         return gid_number;
     }
 
@@ -1002,7 +939,6 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
             throw new StorageException(e);
         } finally {
             closeRecordSet(rs);
-
             closePreparedStatement(prep_check);
 
             try {
@@ -1010,7 +946,6 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
             } catch (final PoolException e) {
                 log.error("Error pushing ox db read connection to pool!", e);
             }
-
         }
     }
 
@@ -1047,7 +982,6 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
             } catch (final PoolException e) {
                 log.error("Error pushing ox db read connection to pool!", e);
             }
-
         }
     }
 
@@ -1076,7 +1010,6 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
             throw new StorageException(e);
         } finally {
             closeRecordSet(rs);
-
             closePreparedStatement(prep_check);
 
             try {
@@ -1084,7 +1017,6 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
             } catch (final PoolException e) {
                 log.error("Error pushing ox db read connection to pool!", e);
             }
-
         }
     }
 
@@ -1113,7 +1045,6 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
             throw new StorageException(e);
         } finally {
             closeRecordSet(rs);
-
             closePreparedStatement(prep_check);
 
             try {
@@ -1121,7 +1052,6 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
             } catch (final PoolException e) {
                 log.error("Error pushing ox db read connection to pool!", e);
             }
-
         }
     }
 
@@ -1155,7 +1085,6 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
             throw new StorageException(e);
         } finally {
             closeRecordSet(rs);
-
             closePreparedStatement(prep_check);
 
             try {
@@ -1163,7 +1092,6 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
             } catch (final PoolException e) {
                 log.error("Error pushing ox db read connection to pool!", e);
             }
-
         }
     }
 
@@ -1192,7 +1120,6 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
             throw new StorageException(e);
         } finally {
             closeRecordSet(rs);
-
             closePreparedStatement(prep_check);
 
             try {
@@ -1200,7 +1127,6 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
             } catch (final PoolException e) {
                 log.error("Error pushing ox db read connection to pool!", e);
             }
-
         }
     }
 
@@ -1285,6 +1211,7 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
      * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#isContextAdmin(int,
      *      int)
      */
+    @Override
     public boolean isContextAdmin(final Context ctx, final int user_id) throws StorageException {
         boolean isadmin = false;
         final AdminCache cache = ClientAdminThread.cache;
@@ -1392,7 +1319,6 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
             } else {
                 throw new SQLException("UNABLE TO QUERY CONTEXT STATUS");
             }
-
         } catch (final PoolException e) {
             log.error("Pool Error",e);
             throw new StorageException(e);
@@ -1400,20 +1326,8 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
             log.error("SQL Error",e);
             throw new StorageException(e);
         } finally {
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (final Exception e) {
-                    log.error("Error closing resultset", e);
-                }
-            }
-            try {
-                if (prep_check != null) {
-                    prep_check.close();
-                }
-            } catch (final SQLException e) {
-                log.error("Error closing prepared statement!", e);
-            }
+            closeRecordSet(rs);
+            closePreparedStatement(prep_check);
 
             try {
                 cache.pushConfigDBWrite(con);
@@ -1421,13 +1335,13 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
                 log.error("Error pushing configdb write connection to pool!", e);
             }
         }
-
         return retBool;
     }
 
     /**
      * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#isMasterDatabase(int)
      */
+    @Override
     public boolean isMasterDatabase(final int database_id) throws StorageException {
         return selectwithint(-1, "SELECT cluster_id FROM db_cluster WHERE write_db_pool_id = ?", database_id);
     }
@@ -1455,13 +1369,7 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
             log.error("SQL Error",e);
             throw new StorageException(e);
         } finally {
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (final SQLException e) {
-                    log.error("Error closing resultset", e);
-                }
-            }
+            closeRecordSet(rs);
             closePreparedStatement(stmt);
         }
     }
@@ -1469,6 +1377,7 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
     /**
      * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#poolInUse(long)
      */
+    @Override
     public boolean poolInUse(final int pool_id) throws StorageException {
         return selectwithint(-1, "SELECT cid FROM context_server2db_pool WHERE write_db_pool_id = ? OR read_db_pool_id = ?", pool_id, pool_id);
     }
@@ -1477,6 +1386,7 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
      * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#primaryMailExists(int,
      *      java.lang.String)
      */
+    @Override
     public void primaryMailExists(final Context ctx, final String primary_mail) throws StorageException, InvalidDataException {
         Connection con = null;
         PreparedStatement prep_check = null;
@@ -1498,7 +1408,6 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
             throw new StorageException(e);
         } finally {
             closeRecordSet(rs);
-
             closePreparedStatement(prep_check);
 
             try {
@@ -1506,7 +1415,6 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
             } catch (final PoolException e) {
                 log.error("Error pushing ox db write connection to pool!", e);
             }
-
         }
     }
 
@@ -1537,7 +1445,6 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
             throw new StorageException(e);
         } finally {
             closeRecordSet(rs);
-
             closePreparedStatement(ps);
 
             try {
@@ -1545,7 +1452,6 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
             } catch (final PoolException e) {
                 log.error("Error pushing ox db read connection to pool!", e);
             }
-
         }
     }
 
@@ -1570,6 +1476,7 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
     /**
      * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#serverInUse(long)
      */
+    @Override
     public boolean serverInUse(final int server_id) throws StorageException {
         return selectwithint(-1, "SELECT cid FROM context_server2db_pool WHERE server_id = ?", server_id);
     }
@@ -1600,13 +1507,7 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
             log.error("SQL Error",e);
             throw new StorageException(e);
         } finally {
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (final SQLException e) {
-                    log.error("Error closing resultset", e);
-                }
-            }
+            closeRecordSet(rs);
             closePreparedStatement(stmt);
         }
     }
@@ -1614,6 +1515,7 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
     /**
      * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#storeInUse(long)
      */
+    @Override
     public boolean storeInUse(final int store_id) throws StorageException {
         return selectwithint(-1, "SELECT cid FROM context WHERE filestore_id = ?", store_id);
     }
@@ -1644,13 +1546,7 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
             log.error("SQL Error",e);
             throw new StorageException(e);
         } finally {
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (final SQLException e) {
-                    log.error("Error closing resultset", e);
-                }
-            }
+            closeRecordSet(rs);
             closePreparedStatement(stmt);
         }
     }
@@ -1696,18 +1592,8 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
             log.error(e.getMessage(), e);
             throw new StorageException(e);
         } finally {
-            try {
-                rs.close();
-            } catch (final SQLException e) {
-                log.error("Error closing resultset!", e);
-            }
-            try {
-                if (stmt != null) {
-                    stmt.close();
-                }
-            } catch (final SQLException e) {
-                log.error("Error closing prepared statement!", e);
-            }
+            closeRecordSet(rs);
+            closePreparedStatement(stmt);
         }
     }
 
@@ -1725,52 +1611,44 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
 
     
     private Resource[] getDomainUsedbyResource(Context ctx,String domain,Connection oxcon) throws SQLException{
-        ArrayList<Resource> data = new ArrayList<Resource>();
-        
-        
+        final ArrayList<Resource> data = new ArrayList<Resource>();
         PreparedStatement prep_check = null;
         ResultSet rs = null;
-        
-        try{
-           
+        try {
             // fetch
             prep_check = oxcon.prepareStatement("SELECT id FROM resource where cid = ? and mail like ?");
             prep_check.setInt(1, ctx.getId());
             prep_check.setString(2, "%@"+domain);
             rs = prep_check.executeQuery();
-            while(rs.next()){                
+            while (rs.next()) {
                 data.add(new Resource(rs.getInt("id")));
             }
             rs.close();
-            prep_check.close();       
-        }finally{
+            prep_check.close();
+        } finally {
             closeRecordSet(rs);
-
             closePreparedStatement(prep_check);
         }
         
-        if(data.size()==0){
+        if (data.size() == 0) {
             return null;
-        }else{
+        } else {
             return data.toArray(new Resource[data.size()]);
         }        
     }
     
     private User[] getDomainUsedbyUser(Context ctx,String domain,Connection oxcon) throws SQLException{
-        ArrayList<User> data = new ArrayList<User>();
-        
-        
+        final ArrayList<User> data = new ArrayList<User>();
         PreparedStatement prep_check = null;
         ResultSet rs = null;
-        
-        try{
+        try {
             HashSet<Integer> usr_ids = new HashSet<Integer>();
             // fetch from alias table
             prep_check = oxcon.prepareStatement("SELECT id FROM user_attribute WHERE cid = ? AND name = 'alias' AND VALUE like ?");
             prep_check.setInt(1, ctx.getId());
             prep_check.setString(2, "%@"+domain);
             rs = prep_check.executeQuery();
-            while(rs.next()){
+            while (rs.next()) {
                 usr_ids.add(rs.getInt("id"));
             }
             rs.close();
@@ -1780,27 +1658,26 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
             prep_check.setInt(1, ctx.getId());
             prep_check.setString(2, "%@"+domain);
             rs = prep_check.executeQuery();
-            while(rs.next()){
+            while (rs.next()) {
                 usr_ids.add(rs.getInt("id"));
             }
             rs.close();
             prep_check.close();
             
             // if we had time we could resolv the complete user object in db but at the moment we only need the ids of the user            
-           Iterator<Integer> ids_itr =  usr_ids.iterator();
-           while (ids_itr.hasNext()) {
-               Integer id  = (Integer) ids_itr.next();
-               data.add(new User(id.intValue()));
-           }            
-        }finally{
+            Iterator<Integer> ids_itr =  usr_ids.iterator();
+            while (ids_itr.hasNext()) {
+                Integer id  = (Integer) ids_itr.next();
+                data.add(new User(id.intValue()));
+            }            
+        } finally {
             closeRecordSet(rs);
-
             closePreparedStatement(prep_check);
         }
         
-        if(data.size()==0){
+        if (data.size() == 0) {
             return null;
-        }else{
+        } else {
             return data.toArray(new User[data.size()]);
         }        
     }
@@ -1868,9 +1745,7 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
             } catch (final PoolException e) {
                 log.error("Error pushing configdb write connection to pool!", e);
             }
-
         }
-
         return retBool;
     }
 
@@ -1924,38 +1799,25 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
             } catch (final PoolException e) {
                 log.error("Error pushing configdb write connection to pool!", e);
             }
-
         }
-
         return retBool;
     }
 
-    
-
     @Override
     public boolean existsContextName(Context ctx) throws StorageException {
-        
         Connection con = null;
         PreparedStatement prep_check = null;
         ResultSet rs = null;
         
         try {
-            
             con = ClientAdminThread.cache.getWRITEConnectionForCONFIGDB();
-            
             prep_check = con.prepareStatement("SELECT cid FROM context WHERE name = ? and cid !=?");
-                        
             prep_check.setString(1, ctx.getName());            
             prep_check.setInt(2,ctx.getId());
             
             rs = prep_check.executeQuery();
             
-            if (rs.next()) {
-                return true;
-            }else{
-                return false;
-            }
-            
+            return rs.next();
         } catch (final PoolException e) {
             log.error("Pool Error",e);
             throw new StorageException(e);
@@ -1963,7 +1825,6 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
             log.error("SQL Error",e);
             throw new StorageException(e);
         } finally {
-            
             closeRecordSet(rs);
             closePreparedStatement(prep_check);
 
@@ -1972,7 +1833,6 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
             } catch (final PoolException e) {
                 log.error("Error pushing connection to pool!", e);
             }
-
         }
     }
     
@@ -1989,22 +1849,15 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
         ResultSet rs = null;
         
         try {
-            
             con = ClientAdminThread.cache.getWRITEConnectionForCONFIGDB();
             
             prep_check = con.prepareStatement("SELECT db_pool_id FROM db_pool WHERE name = ? AND db_pool_id !=?");
-            
             prep_check.setString(1, db.getName());
             prep_check.setInt(2, db.getId());
             
             rs = prep_check.executeQuery();
             
-            if (rs.next()) {
-                return true;
-            }else{
-                return false;
-            }
-            
+            return rs.next();
         } catch (final PoolException e) {
             log.error("Pool Error",e);
             throw new StorageException(e);
@@ -2012,7 +1865,6 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
             log.error("SQL Error",e);
             throw new StorageException(e);
         } finally {
-            
             closeRecordSet(rs);
             closePreparedStatement(prep_check);
 
@@ -2021,11 +1873,10 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
             } catch (final PoolException e) {
                 log.error("Error pushing connection to pool!", e);
             }
-
         }
     }
     
-    
+    @Override
     public boolean existsDatabaseName(final String db_name) throws StorageException {
         Database db = new Database(-1);
         db.setName(db_name);
@@ -2039,23 +1890,14 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
         ResultSet rs = null;
         
         try {
-            
             con = ClientAdminThread.cache.getWRITEConnectionForContext(ctx.getId());
-            
             prep_check = con.prepareStatement("SELECT id FROM groups WHERE cid = ? AND identifier = ? AND id !=?");
-            
             prep_check.setInt(1, ctx.getId());
             prep_check.setString(2, grp.getName());
             prep_check.setInt(3, grp.getId());
-            
             rs = prep_check.executeQuery();
             
-            if (rs.next()) {
-                return true;
-            }else{
-                return false;
-            }
-            
+            return rs.next();
         } catch (final PoolException e) {
             log.error("Pool Error",e);
             throw new StorageException(e);
@@ -2063,7 +1905,6 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
             log.error("SQL Error",e);
             throw new StorageException(e);
         } finally {
-            
             closeRecordSet(rs);
             closePreparedStatement(prep_check);
 
@@ -2072,11 +1913,10 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
             } catch (final PoolException e) {
                 log.error("Error pushing connection to pool!", e);
             }
-
         }
     }
     
-    
+    @Override
     public boolean existsGroupName(final Context ctx, final String identifier) throws StorageException {
         Group grp = new Group(-1);
         grp.setName(identifier);
@@ -2085,29 +1925,20 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
 
     @Override
     public boolean existsResourceName(Context ctx, Resource res) throws StorageException {
-        
         Connection con = null;
         PreparedStatement prep_check = null;
         ResultSet rs = null;
         
         try {
-            
             con = ClientAdminThread.cache.getWRITEConnectionForContext(ctx.getId());
-            
             prep_check = con.prepareStatement("SELECT id FROM resource WHERE cid = ? AND identifier = ? AND id != ?");
-            
             prep_check.setInt(1, ctx.getId());
             prep_check.setString(2, res.getName());
             prep_check.setInt(3, res.getId());
             
             rs = prep_check.executeQuery();
             
-            if (rs.next()) {
-                return true;
-            }else{
-                return false;
-            }
-            
+            return rs.next();
         } catch (final PoolException e) {
             log.error("Pool Error",e);
             throw new StorageException(e);
@@ -2115,7 +1946,6 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
             log.error("SQL Error",e);
             throw new StorageException(e);
         } finally {
-            
             closeRecordSet(rs);
             closePreparedStatement(prep_check);
 
@@ -2124,11 +1954,10 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
             } catch (final PoolException e) {
                 log.error("Error pushing connection to pool!", e);
             }
-
         }
     }
     
-    
+    @Override
     public boolean existsResourceName(final Context ctx, final String identifier) throws StorageException {
         Resource res = new Resource(-1);
         res.setName(identifier);
@@ -2137,28 +1966,18 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
 
     @Override
     public boolean existsServerName(Server srv) throws StorageException {
-        
         Connection con = null;
         PreparedStatement prep_check = null;
         ResultSet rs = null;
         
         try {
-            
             con = ClientAdminThread.cache.getWRITEConnectionForCONFIGDB();
-            
             prep_check = con.prepareStatement("SELECT server_id FROM server WHERE name = ? AND server_id != ?");
-            
             prep_check.setString(1, srv.getName());
             prep_check.setInt(2, srv.getId());
-            
             rs = prep_check.executeQuery();
             
-            if (rs.next()) {
-                return true;
-            }else{
-                return false;
-            }
-            
+            return rs.next();
         } catch (final PoolException e) {
             log.error("Pool Error",e);
             throw new StorageException(e);
@@ -2166,7 +1985,6 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
             log.error("SQL Error",e);
             throw new StorageException(e);
         } finally {
-            
             closeRecordSet(rs);
             closePreparedStatement(prep_check);
 
@@ -2175,11 +1993,10 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
             } catch (final PoolException e) {
                 log.error("Error pushing connection to pool!", e);
             }
-
         }
     }
     
-    
+    @Override
     public boolean existsServerName(final String server_name) throws StorageException {
         Server srv = new Server();
         srv.setId(-1);
@@ -2187,33 +2004,22 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
         return existsServerName(srv);
     }
     
-    
-
     @Override
     public boolean existsUserName(Context ctx, User usr) throws StorageException {
-                
         Connection con = null;
         PreparedStatement prep_check = null;
         ResultSet rs = null;
         
         try {
-            
             con = ClientAdminThread.cache.getWRITEConnectionForContext(ctx.getId());
-            
             prep_check = con.prepareStatement("SELECT id FROM login2user WHERE cid = ? AND uid = ? AND id != ?");
-            
             prep_check.setInt(1, ctx.getId());
             prep_check.setString(2, usr.getName());
             prep_check.setInt(3, usr.getId());
             
             rs = prep_check.executeQuery();
             
-            if (rs.next()) {
-                return true;
-            }else{
-                return false;
-            }
-            
+            return rs.next();
         } catch (final PoolException e) {
             log.error("Pool Error",e);
             throw new StorageException(e);
@@ -2221,7 +2027,6 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
             log.error("SQL Error",e);
             throw new StorageException(e);
         } finally {
-            
             closeRecordSet(rs);
             closePreparedStatement(prep_check);
 
@@ -2230,18 +2035,13 @@ public int getDefaultGroupForContextWithOutConnection(final Context ctx) throws 
             } catch (final PoolException e) {
                 log.error("Error pushing connection to pool!", e);
             }
-
         }
-        
     }
     
-    
+    @Override
     public boolean existsUserName(final Context ctx, final String username) throws StorageException {
         User tmp = new User(-1);
         tmp.setName(username);
         return existsUserName(ctx,tmp);
     }
-    
-    
-    
 }
