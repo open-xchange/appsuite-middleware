@@ -5,13 +5,7 @@
   - Bugfix ID#8993 clts should all be singular
   - Bugfix ID#9007 Context login mappings not validated
   - Bugfix ID#8994 oxinstaller --master-pass should not be needed if --disableauth is in use
-  - Bugfix ID#8998 --nonl not consistent
-  - Bugfix ID#8985 createuser doesn't check --timezone format
   
-* 2007-08-20 - manuel.kraft@open-xchange.com
-
- - Bugfix ID#8875 No email validation for /opt/open-xchange/sbin/createcontext
-
 * 2007-08-20 - choeger@open-xchange.com
 
   - Bugfix ID#8949 Unable to deinstall admin-plugin-hosting package when removing depending
