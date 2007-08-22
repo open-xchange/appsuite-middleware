@@ -49,6 +49,10 @@
 
 package com.openexchange.mail.imap;
 
+import static com.openexchange.mail.imap.IMAPStorageUtils.DEFAULT_IMAP_FOLDER_ID;
+import static com.openexchange.mail.imap.IMAPStorageUtils.prepareMailFolderParam;
+import static com.openexchange.mail.imap.IMAPStorageUtils.prepareFullname;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -61,7 +65,6 @@ import javax.mail.MessagingException;
 import javax.mail.MethodNotSupportedException;
 import javax.mail.ReadOnlyFolderException;
 
-import com.openexchange.api2.MailInterface;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.imap.IMAPProperties;
 import com.openexchange.imap.IMAPPropertyException;
@@ -101,15 +104,19 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 
 	private final transient IMAPStore imapStore;
 
+	private final transient IMAPMailConnection imapMailConnection;
+
 	private final transient SessionObject session;
 
 	/**
 	 * @param imapStore
 	 *            The IMAP store
 	 */
-	public IMAPFolderStorage(final IMAPStore imapStore, final SessionObject session) {
+	public IMAPFolderStorage(final IMAPStore imapStore, final IMAPMailConnection imapMailConnection,
+			final SessionObject session) {
 		super();
 		this.imapStore = imapStore;
+		this.imapMailConnection = imapMailConnection;
 		this.session = session;
 	}
 
@@ -117,12 +124,12 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 	public MailFolder getFolder(final String fullnameArg) throws IMAPException {
 		try {
 			final String fullname = prepareMailFolderParam(fullnameArg);
-			if (IMAPFolderConverter.DEFAULT_IMAP_FOLDER_ID.equals(fullname)) {
+			if (DEFAULT_IMAP_FOLDER_ID.equals(fullname)) {
 				return IMAPFolderConverter.convertIMAPFolder((IMAPFolder) imapStore.getDefaultFolder(), session);
 			}
 			return IMAPFolderConverter.convertIMAPFolder((IMAPFolder) imapStore.getFolder(fullname), session);
 		} catch (final MessagingException e) {
-			throw IMAPException.handleMessagingException(e, null);
+			throw IMAPException.handleMessagingException(e, imapMailConnection);
 		}
 	}
 
@@ -143,7 +150,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 		try {
 			final String parentFullname = prepareMailFolderParam(parentFullnameArg);
 			final IMAPFolder parent;
-			if (IMAPFolderConverter.DEFAULT_IMAP_FOLDER_ID.equals(parentFullname)) {
+			if (DEFAULT_IMAP_FOLDER_ID.equals(parentFullname)) {
 				parent = (IMAPFolder) imapStore.getDefaultFolder();
 			} else {
 				parent = (IMAPFolder) imapStore.getFolder(parentFullname);
@@ -174,7 +181,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 			}
 			return list.toArray(new MailFolder[list.size()]);
 		} catch (final MessagingException e) {
-			throw IMAPException.handleMessagingException(e, null);
+			throw IMAPException.handleMessagingException(e, imapMailConnection);
 		} catch (final IMAPPropertyException e) {
 			throw new IMAPException(e);
 		}
@@ -195,7 +202,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 		try {
 			return IMAPFolderConverter.convertIMAPFolder((IMAPFolder) imapStore.getDefaultFolder(), session);
 		} catch (final MessagingException e) {
-			throw IMAPException.handleMessagingException(e, null);
+			throw IMAPException.handleMessagingException(e, imapMailConnection);
 		}
 	}
 
@@ -249,7 +256,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 				}
 				session.setMailFldsChecked(true);
 			} catch (final MessagingException e) {
-				throw IMAPException.handleMessagingException(e, null);
+				throw IMAPException.handleMessagingException(e, imapMailConnection);
 			} catch (final IMAPPropertyException e) {
 				throw new IMAPException(e);
 			} finally {
@@ -265,14 +272,13 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 			 * Insert
 			 */
 			final String parentStr = prepareMailFolderParam(toCreate.getParentFullname());
-			final IMAPFolder parent = IMAPFolderConverter.DEFAULT_IMAP_FOLDER_ID.equals(parentStr) ? (IMAPFolder) imapStore
-					.getDefaultFolder()
-					: (IMAPFolder) imapStore.getFolder(parentStr);
+			final IMAPFolder parent = DEFAULT_IMAP_FOLDER_ID.equals(parentStr) ? (IMAPFolder) imapStore
+					.getDefaultFolder() : (IMAPFolder) imapStore.getFolder(parentStr);
 			if (!parent.exists()) {
 				throw new IMAPException(IMAPException.Code.FOLDER_NOT_FOUND, parentStr);
 			} else if ((parent.getType() & Folder.HOLDS_FOLDERS) == 0) {
 				throw new IMAPException(IMAPException.Code.FOLDER_DOES_NOT_HOLD_FOLDERS,
-						parent instanceof DefaultFolder ? IMAPFolderConverter.DEFAULT_IMAP_FOLDER_ID : parentStr);
+						parent instanceof DefaultFolder ? DEFAULT_IMAP_FOLDER_ID : parentStr);
 			} else if (IMAPProperties.isSupportsACLs()) {
 				try {
 					if (!session.getCachedRights(parent, true).contains(Rights.Right.CREATE)) {
@@ -293,8 +299,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 			}
 			if (!createMe.create(Folder.HOLDS_MESSAGES | Folder.HOLDS_FOLDERS)) {
 				throw new IMAPException(IMAPException.Code.FOLDER_CREATION_FAILED, createMe.getFullName(),
-						parent instanceof DefaultFolder ? IMAPFolderConverter.DEFAULT_IMAP_FOLDER_ID : parent
-								.getFullName());
+						parent instanceof DefaultFolder ? DEFAULT_IMAP_FOLDER_ID : parent.getFullName());
 			}
 			/*
 			 * Subscribe
@@ -339,9 +344,9 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 					}
 				}
 			}
-			return IMAPFolderConverter.prepareFullname(createMe.getFullName(), createMe.getSeparator());
+			return prepareFullname(createMe.getFullName(), createMe.getSeparator());
 		} catch (final MessagingException e) {
-			throw IMAPException.handleMessagingException(e, null);
+			throw IMAPException.handleMessagingException(e, imapMailConnection);
 		} catch (final IMAPPropertyException e) {
 			throw new IMAPException(e);
 		} catch (final AbstractOXException e) {
@@ -374,8 +379,8 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 				if (isDefaultFolder(updateMe.getFullName())) {
 					throw new IMAPException(IMAPException.Code.NO_DEFAULT_FOLDER_UPDATE, updateMe.getFullName());
 				}
-				final IMAPFolder destFolder = ((IMAPFolder) (IMAPFolderConverter.DEFAULT_IMAP_FOLDER_ID
-						.equals(newParent) ? imapStore.getDefaultFolder() : imapStore.getFolder(newParent)));
+				final IMAPFolder destFolder = ((IMAPFolder) (DEFAULT_IMAP_FOLDER_ID.equals(newParent) ? imapStore
+						.getDefaultFolder() : imapStore.getFolder(newParent)));
 				if (!destFolder.exists()) {
 					throw new IMAPException(IMAPException.Code.FOLDER_NOT_FOUND, newParent);
 				}
@@ -538,9 +543,9 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 				updateMe.setSubscribed(toUpdate.isSubscribed());
 				IMAPUtils.forceSetSubscribed(imapStore, updateMe.getFullName(), toUpdate.isSubscribed());
 			}
-			return IMAPFolderConverter.prepareFullname(updateMe.getFullName(), updateMe.getSeparator());
+			return prepareFullname(updateMe.getFullName(), updateMe.getSeparator());
 		} catch (final MessagingException e) {
-			throw IMAPException.handleMessagingException(e, null);
+			throw IMAPException.handleMessagingException(e, imapMailConnection);
 		} catch (final IMAPPropertyException e) {
 			throw new IMAPException(e);
 		} catch (final AbstractOXException e) {
@@ -562,7 +567,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 			deleteFolder(deleteMe);
 			return fullnameArg;
 		} catch (final MessagingException e) {
-			throw IMAPException.handleMessagingException(e);
+			throw IMAPException.handleMessagingException(e, imapMailConnection);
 		} catch (final IMAPPropertyException e) {
 			throw new IMAPException(e);
 		}
@@ -571,6 +576,11 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 	@Override
 	public String deleteFolder(final long id) throws IMAPException {
 		throw new IllegalStateException(ERR_IDS_NOT_SUPPORTED);
+	}
+	
+	@Override
+	public String getDraftsFolder() throws IMAPException {
+		return getStdFolder(IMAPStorageUtils.INDEX_DRAFTS);
 	}
 
 	/*
@@ -615,7 +625,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 		session.removeCachedUserFlags(deleteMe);
 	}
 
-	private static final Rights FULL_RIGHTS = new Rights("lrswipcda");
+	private static final transient Rights FULL_RIGHTS = new Rights("lrswipcda");
 
 	private static boolean stillHoldsFullRights(final IMAPFolder defaultFolder, final ACL[] newACLs,
 			final SessionObject session) throws AbstractOXException, MessagingException {
@@ -717,8 +727,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 		 */
 		if (!newFolder.create(toMoveType)) {
 			throw new IMAPException(IMAPException.Code.FOLDER_CREATION_FAILED, newFolder.getFullName(),
-					destFolder instanceof DefaultFolder ? IMAPFolderConverter.DEFAULT_IMAP_FOLDER_ID : destFolder
-							.getFullName());
+					destFolder instanceof DefaultFolder ? DEFAULT_IMAP_FOLDER_ID : destFolder.getFullName());
 		}
 		try {
 			newFolder.open(Folder.READ_WRITE);
@@ -800,9 +809,9 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 
 	private String getStdFolder(final int index) throws IMAPException {
 		try {
-			if (MailInterface.INDEX_INBOX == index) {
+			if (IMAPStorageUtils.INDEX_INBOX == index) {
 				final Folder inbox = imapStore.getFolder(STR_INBOX);
-				return IMAPFolderConverter.prepareFullname(inbox.getFullName(), inbox.getSeparator());
+				return prepareFullname(inbox.getFullName(), inbox.getSeparator());
 			}
 			if (session.isMailFldsChecked()) {
 				return session.getDefaultMailFolder(index);
@@ -810,7 +819,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 			checkDefaultFolders();
 			return session.getDefaultMailFolder(index);
 		} catch (final MessagingException e) {
-			throw IMAPException.handleMessagingException(e);
+			throw IMAPException.handleMessagingException(e, imapMailConnection);
 		}
 	}
 
@@ -893,7 +902,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 					.toString());
 			tmp.setLength(0);
 		}
-		return IMAPFolderConverter.prepareFullname(f.getFullName(), f.getSeparator());
+		return prepareFullname(f.getFullName(), f.getSeparator());
 	}
 
 	/**
@@ -930,9 +939,9 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 						UserSettingMail.STD_DRAFTS);
 				LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, UserSettingMail.STD_DRAFTS), e);
 			}
-			names[MailInterface.INDEX_DRAFTS] = UserSettingMail.STD_DRAFTS;
+			names[IMAPStorageUtils.INDEX_DRAFTS] = UserSettingMail.STD_DRAFTS;
 		} else {
-			names[MailInterface.INDEX_DRAFTS] = usm.getStdDraftsName();
+			names[IMAPStorageUtils.INDEX_DRAFTS] = usm.getStdDraftsName();
 		}
 		if (usm.getStdSentName() == null || usm.getStdSentName().length() == 0) {
 			if (LOG.isWarnEnabled()) {
@@ -940,9 +949,9 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 						UserSettingMail.STD_SENT);
 				LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, UserSettingMail.STD_SENT), e);
 			}
-			names[MailInterface.INDEX_SENT] = UserSettingMail.STD_SENT;
+			names[IMAPStorageUtils.INDEX_SENT] = UserSettingMail.STD_SENT;
 		} else {
-			names[MailInterface.INDEX_SENT] = usm.getStdSentName();
+			names[IMAPStorageUtils.INDEX_SENT] = usm.getStdSentName();
 		}
 		if (usm.getStdSpamName() == null || usm.getStdSpamName().length() == 0) {
 			if (LOG.isWarnEnabled()) {
@@ -950,9 +959,9 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 						UserSettingMail.STD_SPAM);
 				LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, UserSettingMail.STD_SPAM), e);
 			}
-			names[MailInterface.INDEX_SPAM] = UserSettingMail.STD_SPAM;
+			names[IMAPStorageUtils.INDEX_SPAM] = UserSettingMail.STD_SPAM;
 		} else {
-			names[MailInterface.INDEX_SPAM] = usm.getStdSpamName();
+			names[IMAPStorageUtils.INDEX_SPAM] = usm.getStdSpamName();
 		}
 		if (usm.getStdTrashName() == null || usm.getStdTrashName().length() == 0) {
 			if (LOG.isWarnEnabled()) {
@@ -960,9 +969,9 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 						UserSettingMail.STD_TRASH);
 				LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, UserSettingMail.STD_TRASH), e);
 			}
-			names[MailInterface.INDEX_TRASH] = UserSettingMail.STD_TRASH;
+			names[IMAPStorageUtils.INDEX_TRASH] = UserSettingMail.STD_TRASH;
 		} else {
-			names[MailInterface.INDEX_TRASH] = usm.getStdTrashName();
+			names[IMAPStorageUtils.INDEX_TRASH] = usm.getStdTrashName();
 		}
 		if (usm.isSpamEnabled()) {
 			if (usm.getConfirmedSpam() == null || usm.getConfirmedSpam().length() == 0) {
@@ -971,9 +980,9 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 							UserSettingMail.STD_CONFIRMED_SPAM);
 					LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, UserSettingMail.STD_CONFIRMED_SPAM), e);
 				}
-				names[MailInterface.INDEX_CONFIRMED_SPAM] = UserSettingMail.STD_CONFIRMED_SPAM;
+				names[IMAPStorageUtils.INDEX_CONFIRMED_SPAM] = UserSettingMail.STD_CONFIRMED_SPAM;
 			} else {
-				names[MailInterface.INDEX_CONFIRMED_SPAM] = usm.getConfirmedSpam();
+				names[IMAPStorageUtils.INDEX_CONFIRMED_SPAM] = usm.getConfirmedSpam();
 			}
 			if (usm.getConfirmedHam() == null || usm.getConfirmedHam().length() == 0) {
 				if (LOG.isWarnEnabled()) {
@@ -981,23 +990,12 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 							UserSettingMail.STD_CONFIRMED_HAM);
 					LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, UserSettingMail.STD_CONFIRMED_HAM), e);
 				}
-				names[MailInterface.INDEX_CONFIRMED_HAM] = UserSettingMail.STD_CONFIRMED_HAM;
+				names[IMAPStorageUtils.INDEX_CONFIRMED_HAM] = UserSettingMail.STD_CONFIRMED_HAM;
 			} else {
-				names[MailInterface.INDEX_CONFIRMED_HAM] = usm.getConfirmedHam();
+				names[IMAPStorageUtils.INDEX_CONFIRMED_HAM] = usm.getConfirmedHam();
 			}
 		}
 		return names;
-	}
-
-	private static String prepareMailFolderParam(final String folderStringArg) {
-		if (folderStringArg == null) {
-			return null;
-		} else if (IMAPFolderConverter.DEFAULT_IMAP_FOLDER_ID.equals(folderStringArg)) {
-			return folderStringArg;
-		} else if (folderStringArg.startsWith(IMAPFolderConverter.DEFAULT_IMAP_FOLDER_ID)) {
-			return folderStringArg.substring(8);
-		}
-		return folderStringArg;
 	}
 
 }

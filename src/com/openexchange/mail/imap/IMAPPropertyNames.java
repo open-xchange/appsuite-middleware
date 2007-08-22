@@ -47,52 +47,65 @@
  *
  */
 
-package com.openexchange.mail;
-
-import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.search.MailSearchTerm;
+package com.openexchange.mail.imap;
 
 /**
- * MailMessageStorage
- * 
+ * IMAPPropertyNames
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
-public abstract class MailMessageStorage {
+public final class IMAPPropertyNames {
 
 	/**
-	 * Default constructor
+	 * Prevent instantiation
 	 */
-	protected MailMessageStorage() {
+	private IMAPPropertyNames() {
 		super();
 	}
+	
+	public static final String PROP_MAIL_REPLYALLCC = "mail.replyallcc";
 
-	/**
-	 * Gets the message located in given folder whose UID matches given UID.
-	 * <p>
-	 * The returned instance of {@link MailMessage} is completely pre-filled
-	 * including content references.
-	 * 
-	 * @param folder
-	 *            The folder fullname
-	 * @param msgUID
-	 *            The message UID
-	 * @return Corresponding message
-	 * @throws MailException
-	 *             If message could not be returned
-	 */
-	public abstract MailMessage getMessage(String folder, long msgUID) throws MailException;
+	public static final String PROP_MAIL_ALTERNATES = "mail.alternates";
 
-	/**
-	 * Gets all unread messages located in folder whose fullname matches given
-	 * parameter.
-	 * 
-	 * @param fullname
-	 *            The fullname of the folder
-	 * @return All unread messages contained in an array of {@link MailMessage}
-	 */
-	public abstract MailMessage[] getUnreadMessages(final String fullname);
+	public static final String PROP_ALLOWREADONLYSELECT = "mail.imap.allowreadonlyselect";
 
-	public abstract MailMessage[] searchMessages(final String fullname, final MailSearchTerm searchTerm);
+	public static final String PROP_SMTPHOST = "mail.smtp.host";
+
+	public static final String PROP_SMTPPORT = "mail.smtp.port";
+
+	public static final String PROP_SMTPLOCALHOST = "mail.smtp.localhost";
+
+	public static final String PROP_MAIL_SMTP_AUTH = "mail.smtp.auth";
+
+	public static final String PROP_MAIL_IMAP_CONNECTIONTIMEOUT = "mail.imap.connectiontimeout";
+
+	public static final String PROP_MAIL_IMAP_TIMEOUT = "mail.imap.timeout";
+
+	public static final String PROP_MAIL_SMTP_SOCKET_FACTORY_FALLBACK = "mail.smtp.socketFactory.fallback";
+
+	public static final String PROP_MAIL_SMTP_SOCKET_FACTORY_PORT = "mail.smtp.socketFactory.port";
+
+	public static final String PROP_MAIL_SMTP_SOCKET_FACTORY_CLASS = "mail.smtp.socketFactory.class";
+
+	public static final String PROP_MAIL_SMTP_STARTTLS_ENABLE = "mail.smtp.starttls.enable";
+
+	public static final String PROP_MAIL_IMAP_SOCKET_FACTORY_FALLBACK = "mail.imap.socketFactory.fallback";
+
+	public static final String PROP_MAIL_IMAP_SOCKET_FACTORY_PORT = "mail.imap.socketFactory.port";
+
+	public static final String PROP_MAIL_IMAP_SOCKET_FACTORY_CLASS = "mail.imap.socketFactory.class";
+
+	public static final String PROP_MAIL_MIME_CHARSET = "mail.mime.charset";
+
+	public static final String PROP_MAIL_IMAP_CONNECTIONPOOLTIMEOUT = "mail.imap.connectionpooltimeout";
+
+	public static final String PROP_MAIL_IMAP_CONNECTIONPOOLSIZE = "mail.imap.connectionpoolsize";
+
+	public static final String PROP_MAIL_MIME_DECODETEXT_STRICT = "mail.mime.decodetext.strict";
+
+	public static final String PROP_MAIL_MIME_ENCODEEOL_STRICT = "mail.mime.encodeeol.strict";
+
+	public static final String PROP_MAIL_MIME_BASE64_IGNOREERRORS = "mail.mime.base64.ignoreerrors";
 
 }

@@ -136,6 +136,7 @@ import com.openexchange.imap.UserSettingMail;
 import com.openexchange.imap.OXMailException.MailCode;
 import com.openexchange.imap.threadsort.ThreadSortMessage;
 import com.openexchange.json.OXJSONWriter;
+import com.openexchange.mail.imap.IMAPStorageUtils;
 import com.openexchange.server.EffectivePermission;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.encoding.Helper;
@@ -530,12 +531,12 @@ public class Mail extends PermissionServlet implements UploadListener {
 					}
 				} else {
 					final int sortCol = sort == null ? JSONMessageObject.FIELD_RECEIVED_DATE : Integer.parseInt(sort);
-					int orderDir = MailInterface.ORDER_ASC;
+					int orderDir = IMAPStorageUtils.ORDER_ASC;
 					if (order != null) {
 						if (order.equalsIgnoreCase(STR_ASC)) {
-							orderDir = MailInterface.ORDER_ASC;
+							orderDir = IMAPStorageUtils.ORDER_ASC;
 						} else if (order.equalsIgnoreCase(STR_DESC)) {
-							orderDir = MailInterface.ORDER_DESC;
+							orderDir = IMAPStorageUtils.ORDER_DESC;
 						} else {
 							throw new OXMailException(MailCode.INVALID_INT_VALUE, PARAMETER_ORDER);
 						}
@@ -938,12 +939,12 @@ public class Mail extends PermissionServlet implements UploadListener {
 				 * Receive message iterator
 				 */
 				final int sortCol = sort == null ? JSONMessageObject.FIELD_SENT_DATE : Integer.parseInt(sort);
-				int orderDir = MailInterface.ORDER_ASC;
+				int orderDir = IMAPStorageUtils.ORDER_ASC;
 				if (order != null) {
 					if (order.equalsIgnoreCase(STR_ASC)) {
-						orderDir = MailInterface.ORDER_ASC;
+						orderDir = IMAPStorageUtils.ORDER_ASC;
 					} else if (order.equalsIgnoreCase(STR_DESC)) {
-						orderDir = MailInterface.ORDER_DESC;
+						orderDir = IMAPStorageUtils.ORDER_DESC;
 					} else {
 						throw new OXMailException(MailCode.INVALID_INT_VALUE, PARAMETER_ORDER);
 					}
@@ -1460,12 +1461,12 @@ public class Mail extends PermissionServlet implements UploadListener {
 					} else {
 						final int sortCol = sort == null ? JSONMessageObject.FIELD_RECEIVED_DATE : Integer
 								.parseInt(sort);
-						int orderDir = MailInterface.ORDER_ASC;
+						int orderDir = IMAPStorageUtils.ORDER_ASC;
 						if (order != null) {
 							if (order.equalsIgnoreCase(STR_ASC)) {
-								orderDir = MailInterface.ORDER_ASC;
+								orderDir = IMAPStorageUtils.ORDER_ASC;
 							} else if (order.equalsIgnoreCase(STR_DESC)) {
-								orderDir = MailInterface.ORDER_DESC;
+								orderDir = IMAPStorageUtils.ORDER_DESC;
 							} else {
 								throw new OXMailException(MailCode.INVALID_INT_VALUE, PARAMETER_ORDER);
 							}

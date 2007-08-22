@@ -370,11 +370,23 @@ public final class IMAPException extends MailException {
 		/**
 		 * Default folder %s must not be deleted
 		 */
-		NO_DEFAULT_FOLDER_DELETE("Default folder %s cannot be deleted", Category.PERMISSION, 39),
+		NO_DEFAULT_FOLDER_DELETE("Default folder %s cannot be deleted", Category.PERMISSION, 52),
 		/**
 		 * An I/O error occured: %s
 		 */
-		IO_ERROR("An I/O error occured: %s", Category.CODE_ERROR, 40);
+		IO_ERROR("An I/O error occured: %s", Category.CODE_ERROR, 53),
+		/**
+		 * Flag %s could not be changed due to following reason: %s
+		 */
+		FLAG_FAILED("Flag %s could not be changed due to following reason: %s", Category.INTERNAL_ERROR, 54),
+		/**
+		 * Message(s) %s could not be found in folder %s
+		 */
+		MESSAGE_NOT_FOUND("Message(s) %s could not be found in folder %s", Category.CODE_ERROR, 55),
+		/**
+		 * Folder %s does not hold messages and is therefore not selectable
+		 */
+		FOLDER_DOES_NOT_HOLD_MESSAGES("Folder %s does not hold messages and is therefore not selectable", Category.PERMISSION, 56);
 
 		private final String message;
 

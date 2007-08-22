@@ -267,7 +267,7 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 	 * @throws MailException
 	 *             If connection is not established, yet
 	 */
-	public abstract T getFolderAccess() throws MailException;
+	public abstract T getFolderStorage() throws MailException;
 
 	/**
 	 * Gets the appropiate {@link MailMessageStorage} implementation that
@@ -277,7 +277,7 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 	 * @throws MailException
 	 *             If connection is not established, yet
 	 */
-	public abstract E getMessageAccess() throws MailException;
+	public abstract E getMessageStorage() throws MailException;
 
 	/**
 	 * Checks if this connection is currently connected

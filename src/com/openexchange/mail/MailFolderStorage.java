@@ -190,5 +190,13 @@ public abstract class MailFolderStorage {
 	 * @throws MailException
 	 */
 	public abstract String deleteFolder(long id) throws MailException;
+	
+	/**
+	 * Gets the ID of default drafts folder
+	 * 
+	 * @return The ID of default drafts folder
+	 * @throws MailException
+	 */
+	public abstract String getDraftsFolder() throws MailException;
 
 }

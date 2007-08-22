@@ -66,29 +66,6 @@ import com.openexchange.tools.iterator.SearchIterator;
  */
 public interface MailInterface {
 
-	public static final int INDEX_DRAFTS = 0;
-
-	public static final int INDEX_SENT = 1;
-
-	public static final int INDEX_SPAM = 2;
-
-	public static final int INDEX_TRASH = 3;
-
-	public static final int INDEX_CONFIRMED_SPAM = 4;
-
-	public static final int INDEX_CONFIRMED_HAM = 5;
-
-	public static final int INDEX_INBOX = 6;
-
-	public static final int MAIL_PARAM_HARD_DELETE = 1;
-
-	public static final int UNLIMITED_QUOTA = -1;
-
-	// Order direction
-	public static final int ORDER_ASC = 1;
-
-	public static final int ORDER_DESC = 2;
-
 	/**
 	 * Returns all message counts in specified folder in an <code>int</code>
 	 * array as follows: <code>0</code>: Message Count, <code>1</code>:

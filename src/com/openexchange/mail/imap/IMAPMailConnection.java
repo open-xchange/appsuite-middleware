@@ -253,16 +253,16 @@ public final class IMAPMailConnection extends MailConnection<IMAPFolderStorage, 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.mail.MailConnection#getFolderAccess()
+	 * @see com.openexchange.mail.MailConnection#getFolderStorage()
 	 */
 	@Override
-	public IMAPFolderStorage getFolderAccess() throws IMAPException {
+	public IMAPFolderStorage getFolderStorage() throws IMAPException {
 		if (connected) {
 			if (!folderAccessInit) {
 				folderAccessLock.lock();
 				try {
 					if (null == folderAccess) {
-						folderAccess = new IMAPFolderStorage(imapStore, session);
+						folderAccess = new IMAPFolderStorage(imapStore, this, session);
 						folderAccessInit = true;
 					}
 				} finally {
@@ -277,16 +277,16 @@ public final class IMAPMailConnection extends MailConnection<IMAPFolderStorage, 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.mail.MailConnection#getMessageAccess()
+	 * @see com.openexchange.mail.MailConnection#getMessageStorage()
 	 */
 	@Override
-	public IMAPMessageStorage getMessageAccess() throws IMAPException {
+	public IMAPMessageStorage getMessageStorage() throws IMAPException {
 		if (connected) {
 			if (!messageAccessInit) {
 				messageAccessLock.lock();
 				try {
 					if (null == messageAccess) {
-						messageAccess = new IMAPMessageStorage(imapStore);
+						messageAccess = new IMAPMessageStorage(imapStore, this, session);
 						messageAccessInit = true;
 					}
 				} finally {

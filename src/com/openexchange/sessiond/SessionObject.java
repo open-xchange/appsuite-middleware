@@ -59,7 +59,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import javax.mail.MessagingException;
 import javax.mail.Session;
 
-import com.openexchange.api2.MailInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.UserConfigurationException;
@@ -72,6 +71,7 @@ import com.openexchange.imap.IMAPProperties;
 import com.openexchange.imap.IMAPUtils;
 import com.openexchange.imap.UserSettingMail;
 import com.openexchange.imap.UserSettingMailStorage;
+import com.openexchange.mail.imap.IMAPStorageUtils;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.Rights;
 
@@ -402,10 +402,10 @@ public class SessionObject {
 	 * 
 	 * @param index
 	 *            The index taken from constants
-	 *            <code>{@link MailInterface#INDEX_DRAFTS}</code>,
-	 *            <code>{@link MailInterface#INDEX_SENT}</code>,<code>{@link MailInterface#INDEX_SPAM}</code>,
-	 *            <code>{@link MailInterface#INDEX_TRASH}</code>,<code>{@link MailInterface#INDEX_CONFIRMED_SPAM}</code>,
-	 *            <code>{@link MailInterface#INDEX_CONFIRMED_HAM}</code>
+	 *            <code>{@link IMAPStorageUtils#INDEX_DRAFTS}</code>,
+	 *            <code>{@link IMAPStorageUtils#INDEX_SENT}</code>,<code>{@link IMAPStorageUtils#INDEX_SPAM}</code>,
+	 *            <code>{@link IMAPStorageUtils#INDEX_TRASH}</code>,<code>{@link IMAPStorageUtils#INDEX_CONFIRMED_SPAM}</code>,
+	 *            <code>{@link IMAPStorageUtils#INDEX_CONFIRMED_HAM}</code>
 	 * @param fullname
 	 *            The fullname
 	 */
@@ -507,10 +507,10 @@ public class SessionObject {
 	 * 
 	 * @param index
 	 *            The index taken from constants
-	 *            <code>{@link MailInterface#INDEX_DRAFTS}</code>,
-	 *            <code>{@link MailInterface#INDEX_SENT}</code>,<code>{@link MailInterface#INDEX_SPAM}</code>,
-	 *            <code>{@link MailInterface#INDEX_TRASH}</code>,<code>{@link MailInterface#INDEX_CONFIRMED_SPAM}</code>,
-	 *            <code>{@link MailInterface#INDEX_CONFIRMED_HAM}</code>
+	 *            <code>{@link IMAPStorageUtils#INDEX_DRAFTS}</code>,
+	 *            <code>{@link IMAPStorageUtils#INDEX_SENT}</code>,<code>{@link IMAPStorageUtils#INDEX_SPAM}</code>,
+	 *            <code>{@link IMAPStorageUtils#INDEX_TRASH}</code>,<code>{@link IMAPStorageUtils#INDEX_CONFIRMED_SPAM}</code>,
+	 *            <code>{@link IMAPStorageUtils#INDEX_CONFIRMED_HAM}</code>
 	 * @return Default mail folder's fullname
 	 */
 	public String getDefaultMailFolder(final int index) {

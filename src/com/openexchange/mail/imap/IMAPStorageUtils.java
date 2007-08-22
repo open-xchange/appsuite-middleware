@@ -47,52 +47,67 @@
  *
  */
 
-package com.openexchange.mail;
-
-import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.search.MailSearchTerm;
+package com.openexchange.mail.imap;
 
 /**
- * MailMessageStorage
+ * IMAPStorageUtils
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public abstract class MailMessageStorage {
+public final class IMAPStorageUtils {
+
+	public static final int INDEX_DRAFTS = 0;
+
+	public static final int INDEX_SENT = 1;
+
+	public static final int INDEX_SPAM = 2;
+
+	public static final int INDEX_TRASH = 3;
+
+	public static final int INDEX_CONFIRMED_SPAM = 4;
+
+	public static final int INDEX_CONFIRMED_HAM = 5;
+
+	public static final int INDEX_INBOX = 6;
+
+	public static final int MAIL_PARAM_HARD_DELETE = 1;
+
+	public static final int UNLIMITED_QUOTA = -1;
+
+	public static final int ORDER_ASC = 1;
+
+	public static final int ORDER_DESC = 2;
 
 	/**
-	 * Default constructor
+	 * Prevent instantiation
 	 */
-	protected MailMessageStorage() {
+	private IMAPStorageUtils() {
 		super();
 	}
 
 	/**
-	 * Gets the message located in given folder whose UID matches given UID.
-	 * <p>
-	 * The returned instance of {@link MailMessage} is completely pre-filled
-	 * including content references.
+	 * Virtual ID of mailbox's root folder
 	 * 
-	 * @param folder
-	 *            The folder fullname
-	 * @param msgUID
-	 *            The message UID
-	 * @return Corresponding message
-	 * @throws MailException
-	 *             If message could not be returned
+	 * @value default
 	 */
-	public abstract MailMessage getMessage(String folder, long msgUID) throws MailException;
+	public static final String DEFAULT_IMAP_FOLDER_ID = "default";
 
-	/**
-	 * Gets all unread messages located in folder whose fullname matches given
-	 * parameter.
-	 * 
-	 * @param fullname
-	 *            The fullname of the folder
-	 * @return All unread messages contained in an array of {@link MailMessage}
-	 */
-	public abstract MailMessage[] getUnreadMessages(final String fullname);
+	public static String prepareMailFolderParam(final String folderStringArg) {
+		if (folderStringArg == null) {
+			return null;
+		} else if (DEFAULT_IMAP_FOLDER_ID.equals(folderStringArg)) {
+			return folderStringArg;
+		} else if (folderStringArg.startsWith(DEFAULT_IMAP_FOLDER_ID)) {
+			return folderStringArg.substring(8);
+		}
+		return folderStringArg;
+	}
 
-	public abstract MailMessage[] searchMessages(final String fullname, final MailSearchTerm searchTerm);
-
+	public static String prepareFullname(final String fullname, final char sep) {
+		if (DEFAULT_IMAP_FOLDER_ID.equals(fullname)) {
+			return fullname;
+		}
+		return new StringBuilder(32).append(DEFAULT_IMAP_FOLDER_ID).append(sep).append(fullname).toString();
+	}
 }

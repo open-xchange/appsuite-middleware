@@ -49,6 +49,8 @@
 
 package com.openexchange.mail.imap.converters;
 
+import static com.openexchange.mail.imap.IMAPStorageUtils.DEFAULT_IMAP_FOLDER_ID;
+
 import javax.mail.MessagingException;
 
 import com.openexchange.groupware.AbstractOXException;
@@ -61,6 +63,7 @@ import com.openexchange.imap.user2imap.User2IMAPInfo;
 import com.openexchange.imap.user2imap.User2IMAP.IMAPServer;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.imap.IMAPException;
+import com.openexchange.mail.imap.IMAPStorageUtils;
 import com.openexchange.server.IMAPPermission;
 import com.openexchange.sessiond.SessionObject;
 import com.sun.mail.iap.ProtocolException;
@@ -120,8 +123,6 @@ public final class IMAPFolderConverter {
 
 	private static final String ATTRIBUTE_HAS_CHILDREN = "\\HasChildren";
 
-	public static final String DEFAULT_IMAP_FOLDER_ID = "default";
-
 	/**
 	 * Prevent instantiation
 	 */
@@ -172,7 +173,7 @@ public final class IMAPFolderConverter {
 				}
 			}
 			retval.setSeparator(imapFolder.getSeparator());
-			retval.setFullname(prepareFullname(imapFolder.getFullName(), retval.getSeparator()));
+			retval.setFullname(IMAPStorageUtils.prepareFullname(imapFolder.getFullName(), retval.getSeparator()));
 			retval.setName(imapFolder.getName());
 			retval.setParentFullname(prepareParentFullname(imapFolder.getParent()));
 			/*
@@ -336,13 +337,6 @@ public final class IMAPFolderConverter {
 			retval.remove(Rights.Right.READ);
 		}
 		return retval;
-	}
-
-	public static String prepareFullname(final String fullname, final char sep) {
-		if (DEFAULT_IMAP_FOLDER_ID.equals(fullname)) {
-			return fullname;
-		}
-		return new StringBuilder(32).append(DEFAULT_IMAP_FOLDER_ID).append(sep).append(fullname).toString();
 	}
 
 	private static String prepareParentFullname(final javax.mail.Folder parent) throws MessagingException {

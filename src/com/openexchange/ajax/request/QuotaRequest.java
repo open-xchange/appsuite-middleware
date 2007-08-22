@@ -66,6 +66,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.AccountExistenceException;
 import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.tx.DBPoolProvider;
+import com.openexchange.mail.imap.IMAPStorageUtils;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
@@ -150,7 +151,7 @@ public class QuotaRequest extends CommonRequest {
 				mi = MailInterfaceImpl.getInstance(this.session);
 				quotaInfo = mi.getQuota();
 			} catch (final AccountExistenceException e) {
-				quotaInfo = new long[] { MailInterface.UNLIMITED_QUOTA, MailInterface.UNLIMITED_QUOTA };
+				quotaInfo = new long[] { IMAPStorageUtils.UNLIMITED_QUOTA, IMAPStorageUtils.UNLIMITED_QUOTA };
 			}
 			final long quota = quotaInfo[0];
 			final long use = quotaInfo[1];

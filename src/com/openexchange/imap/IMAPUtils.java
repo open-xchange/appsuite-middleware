@@ -287,7 +287,7 @@ public class IMAPUtils {
 	 * Determines if given folder is marked as read-only when performing a
 	 * SELECT command on it.
 	 */
-	public static boolean isReadOnly(final Folder folder) throws OXException {
+	public static boolean isReadOnly(final Folder folder) throws OXMailException {
 		try {
 			final IMAPFolder f = (IMAPFolder) folder;
 			final Boolean val = (Boolean) f.doCommand(new IMAPFolder.ProtocolCommand() {

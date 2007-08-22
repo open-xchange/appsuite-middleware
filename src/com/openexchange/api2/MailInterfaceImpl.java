@@ -171,6 +171,7 @@ import com.openexchange.imap.connection.DefaultIMAPConnection;
 import com.openexchange.imap.threadsort.ThreadSortUtil;
 import com.openexchange.imap.threadsort.TreeNode;
 import com.openexchange.imap.user2imap.User2IMAP;
+import com.openexchange.mail.imap.IMAPStorageUtils;
 import com.openexchange.monitoring.MonitorAgent;
 import com.openexchange.server.Version;
 import com.openexchange.sessiond.SessionObject;
@@ -741,9 +742,9 @@ public class MailInterfaceImpl implements MailInterface {
 								UserSettingMail.STD_DRAFTS);
 						LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, UserSettingMail.STD_DRAFTS), e);
 					}
-					stdFolderNames[INDEX_DRAFTS] = UserSettingMail.STD_DRAFTS;
+					stdFolderNames[IMAPStorageUtils.INDEX_DRAFTS] = UserSettingMail.STD_DRAFTS;
 				} else {
-					stdFolderNames[INDEX_DRAFTS] = usm.getStdDraftsName();
+					stdFolderNames[IMAPStorageUtils.INDEX_DRAFTS] = usm.getStdDraftsName();
 				}
 				if (usm.getStdSentName() == null || usm.getStdSentName().length() == 0) {
 					if (LOG.isWarnEnabled()) {
@@ -751,9 +752,9 @@ public class MailInterfaceImpl implements MailInterface {
 								UserSettingMail.STD_SENT);
 						LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, UserSettingMail.STD_SENT), e);
 					}
-					stdFolderNames[INDEX_SENT] = UserSettingMail.STD_SENT;
+					stdFolderNames[IMAPStorageUtils.INDEX_SENT] = UserSettingMail.STD_SENT;
 				} else {
-					stdFolderNames[INDEX_SENT] = usm.getStdSentName();
+					stdFolderNames[IMAPStorageUtils.INDEX_SENT] = usm.getStdSentName();
 				}
 				if (usm.getStdSpamName() == null || usm.getStdSpamName().length() == 0) {
 					if (LOG.isWarnEnabled()) {
@@ -761,9 +762,9 @@ public class MailInterfaceImpl implements MailInterface {
 								UserSettingMail.STD_SPAM);
 						LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, UserSettingMail.STD_SPAM), e);
 					}
-					stdFolderNames[INDEX_SPAM] = UserSettingMail.STD_SPAM;
+					stdFolderNames[IMAPStorageUtils.INDEX_SPAM] = UserSettingMail.STD_SPAM;
 				} else {
-					stdFolderNames[INDEX_SPAM] = usm.getStdSpamName();
+					stdFolderNames[IMAPStorageUtils.INDEX_SPAM] = usm.getStdSpamName();
 				}
 				if (usm.getStdTrashName() == null || usm.getStdTrashName().length() == 0) {
 					if (LOG.isWarnEnabled()) {
@@ -771,9 +772,9 @@ public class MailInterfaceImpl implements MailInterface {
 								UserSettingMail.STD_TRASH);
 						LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, UserSettingMail.STD_TRASH), e);
 					}
-					stdFolderNames[INDEX_TRASH] = UserSettingMail.STD_TRASH;
+					stdFolderNames[IMAPStorageUtils.INDEX_TRASH] = UserSettingMail.STD_TRASH;
 				} else {
-					stdFolderNames[INDEX_TRASH] = usm.getStdTrashName();
+					stdFolderNames[IMAPStorageUtils.INDEX_TRASH] = usm.getStdTrashName();
 				}
 				if (usm.isSpamEnabled()) {
 					if (usm.getConfirmedSpam() == null || usm.getConfirmedSpam().length() == 0) {
@@ -782,9 +783,9 @@ public class MailInterfaceImpl implements MailInterface {
 									UserSettingMail.STD_CONFIRMED_SPAM);
 							LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, UserSettingMail.STD_CONFIRMED_SPAM), e);
 						}
-						stdFolderNames[INDEX_CONFIRMED_SPAM] = UserSettingMail.STD_CONFIRMED_SPAM;
+						stdFolderNames[IMAPStorageUtils.INDEX_CONFIRMED_SPAM] = UserSettingMail.STD_CONFIRMED_SPAM;
 					} else {
-						stdFolderNames[INDEX_CONFIRMED_SPAM] = usm.getConfirmedSpam();
+						stdFolderNames[IMAPStorageUtils.INDEX_CONFIRMED_SPAM] = usm.getConfirmedSpam();
 					}
 					if (usm.getConfirmedHam() == null || usm.getConfirmedHam().length() == 0) {
 						if (LOG.isWarnEnabled()) {
@@ -792,9 +793,9 @@ public class MailInterfaceImpl implements MailInterface {
 									UserSettingMail.STD_CONFIRMED_HAM);
 							LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, UserSettingMail.STD_CONFIRMED_HAM), e);
 						}
-						stdFolderNames[INDEX_CONFIRMED_HAM] = UserSettingMail.STD_CONFIRMED_HAM;
+						stdFolderNames[IMAPStorageUtils.INDEX_CONFIRMED_HAM] = UserSettingMail.STD_CONFIRMED_HAM;
 					} else {
-						stdFolderNames[INDEX_CONFIRMED_HAM] = usm.getConfirmedHam();
+						stdFolderNames[IMAPStorageUtils.INDEX_CONFIRMED_HAM] = usm.getConfirmedHam();
 					}
 				}
 				checkDefaultFolders(stdFolderNames, false);
@@ -1207,7 +1208,7 @@ public class MailInterfaceImpl implements MailInterface {
 		try {
 			init();
 			if (!IMAPProperties.getImapCapabilities().hasQuota()) {
-				return new long[] { MailInterface.UNLIMITED_QUOTA, MailInterface.UNLIMITED_QUOTA };
+				return new long[] { IMAPStorageUtils.UNLIMITED_QUOTA, IMAPStorageUtils.UNLIMITED_QUOTA };
 			}
 			final IMAPFolder inboxFolder = (IMAPFolder) imapCon.getIMAPStore().getFolder(STR_INBOX);
 			final Quota[] folderQuota;
@@ -1216,18 +1217,18 @@ public class MailInterfaceImpl implements MailInterface {
 				folderQuota = inboxFolder.getQuota();
 			} catch (final MessagingException mexc) {
 				if (mexc.getNextException() instanceof ParsingException) {
-					return new long[] { MailInterface.UNLIMITED_QUOTA, MailInterface.UNLIMITED_QUOTA };
+					return new long[] { IMAPStorageUtils.UNLIMITED_QUOTA, IMAPStorageUtils.UNLIMITED_QUOTA };
 				}
 				throw mexc;
 			} finally {
 				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 			}
 			if (folderQuota.length == 0) {
-				return new long[] { MailInterface.UNLIMITED_QUOTA, MailInterface.UNLIMITED_QUOTA };
+				return new long[] { IMAPStorageUtils.UNLIMITED_QUOTA, IMAPStorageUtils.UNLIMITED_QUOTA };
 			}
 			final Quota.Resource[] resources = folderQuota[0].resources;
 			if (resources.length == 0) {
-				return new long[] { MailInterface.UNLIMITED_QUOTA, MailInterface.UNLIMITED_QUOTA };
+				return new long[] { IMAPStorageUtils.UNLIMITED_QUOTA, IMAPStorageUtils.UNLIMITED_QUOTA };
 			}
 			return new long[] { resources[0].limit, resources[0].usage };
 		} catch (final MessagingException e) {
@@ -1244,7 +1245,7 @@ public class MailInterfaceImpl implements MailInterface {
 		try {
 			init();
 			if (!IMAPProperties.getImapCapabilities().hasQuota()) {
-				return MailInterface.UNLIMITED_QUOTA;
+				return IMAPStorageUtils.UNLIMITED_QUOTA;
 			}
 			final IMAPFolder inboxFolder = (IMAPFolder) imapCon.getIMAPStore().getFolder(STR_INBOX);
 			final long start = System.currentTimeMillis();
@@ -1253,18 +1254,18 @@ public class MailInterfaceImpl implements MailInterface {
 				folderQuota = inboxFolder.getQuota();
 			} catch (final MessagingException mexc) {
 				if (mexc.getNextException() instanceof ParsingException) {
-					return MailInterface.UNLIMITED_QUOTA;
+					return IMAPStorageUtils.UNLIMITED_QUOTA;
 				}
 				throw mexc;
 			} finally {
 				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 			}
 			if (folderQuota.length == 0) {
-				return MailInterface.UNLIMITED_QUOTA;
+				return IMAPStorageUtils.UNLIMITED_QUOTA;
 			}
 			final Quota.Resource[] resources = folderQuota[0].resources;
 			if (resources.length == 0) {
-				return MailInterface.UNLIMITED_QUOTA;
+				return IMAPStorageUtils.UNLIMITED_QUOTA;
 			}
 			return resources[0].limit;
 		} catch (final MessagingException e) {
@@ -1281,7 +1282,7 @@ public class MailInterfaceImpl implements MailInterface {
 		try {
 			init();
 			if (!IMAPProperties.getImapCapabilities().hasQuota()) {
-				return MailInterface.UNLIMITED_QUOTA;
+				return IMAPStorageUtils.UNLIMITED_QUOTA;
 			}
 			final IMAPFolder inboxFolder = (IMAPFolder) imapCon.getIMAPStore().getFolder(STR_INBOX);
 			final long start = System.currentTimeMillis();
@@ -1290,18 +1291,18 @@ public class MailInterfaceImpl implements MailInterface {
 				folderQuota = inboxFolder.getQuota();
 			} catch (final MessagingException mexc) {
 				if (mexc.getNextException() instanceof ParsingException) {
-					return MailInterface.UNLIMITED_QUOTA;
+					return IMAPStorageUtils.UNLIMITED_QUOTA;
 				}
 				throw mexc;
 			} finally {
 				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 			}
 			if (folderQuota.length == 0) {
-				return MailInterface.UNLIMITED_QUOTA;
+				return IMAPStorageUtils.UNLIMITED_QUOTA;
 			}
 			final Quota.Resource[] resources = folderQuota[0].resources;
 			if (resources.length == 0) {
-				return MailInterface.UNLIMITED_QUOTA;
+				return IMAPStorageUtils.UNLIMITED_QUOTA;
 			}
 			return resources[0].usage;
 		} catch (final MessagingException e) {
@@ -1625,12 +1626,12 @@ public class MailInterfaceImpl implements MailInterface {
 						}
 						final long start = System.currentTimeMillis();
 						retval = IMAPUtils.getServerSortList(imapCon.getImapFolder(), sortCol,
-								order == MailInterface.ORDER_DESC, sortRange);
+								order == IMAPStorageUtils.ORDER_DESC, sortRange);
 						mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 					} else {
 						final long start = System.currentTimeMillis();
 						retval = IMAPUtils.getServerSortList(imapCon.getImapFolder(), sortCol,
-								order == MailInterface.ORDER_DESC);
+								order == IMAPStorageUtils.ORDER_DESC);
 						mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 					}
 					if (retval == null || retval.length == 0) {
@@ -1682,7 +1683,7 @@ public class MailInterfaceImpl implements MailInterface {
 					return SearchIteratorAdapter.createEmptyIterator();
 				}
 				final List<Message> msgList = Arrays.asList(retval);
-				Collections.sort(msgList, IMAPUtils.getComparator(sortCol, order == MailInterface.ORDER_DESC,
+				Collections.sort(msgList, IMAPUtils.getComparator(sortCol, order == IMAPStorageUtils.ORDER_DESC,
 						sessionObj.getLocale()));
 				msgList.toArray(retval);
 			}
@@ -5207,7 +5208,7 @@ public class MailInterfaceImpl implements MailInterface {
 	}
 
 	public String getInboxFolder() throws OXException {
-		return getStdFolder(INDEX_INBOX);
+		return getStdFolder(IMAPStorageUtils.INDEX_INBOX);
 	}
 
 	/*
@@ -5216,7 +5217,7 @@ public class MailInterfaceImpl implements MailInterface {
 	 * @see com.openexchange.api2.MailInterface#getDraftsFolder()
 	 */
 	public String getDraftsFolder() throws OXException {
-		return getStdFolder(INDEX_DRAFTS);
+		return getStdFolder(IMAPStorageUtils.INDEX_DRAFTS);
 	}
 
 	/*
@@ -5225,7 +5226,7 @@ public class MailInterfaceImpl implements MailInterface {
 	 * @see com.openexchange.api2.MailInterface#getSentFolder()
 	 */
 	public String getSentFolder() throws OXException {
-		return getStdFolder(INDEX_SENT);
+		return getStdFolder(IMAPStorageUtils.INDEX_SENT);
 	}
 
 	/*
@@ -5234,7 +5235,7 @@ public class MailInterfaceImpl implements MailInterface {
 	 * @see com.openexchange.api2.MailInterface#getSpamFolder()
 	 */
 	public String getSpamFolder() throws OXException {
-		return getStdFolder(INDEX_SPAM);
+		return getStdFolder(IMAPStorageUtils.INDEX_SPAM);
 	}
 
 	/*
@@ -5243,7 +5244,7 @@ public class MailInterfaceImpl implements MailInterface {
 	 * @see com.openexchange.api2.MailInterface#getTrashFolder()
 	 */
 	public String getTrashFolder() throws OXException {
-		return getStdFolder(INDEX_TRASH);
+		return getStdFolder(IMAPStorageUtils.INDEX_TRASH);
 	}
 
 	/*
@@ -5252,7 +5253,7 @@ public class MailInterfaceImpl implements MailInterface {
 	 * @see com.openexchange.api2.MailInterface#getConfirmedSpamFolder()
 	 */
 	public String getConfirmedSpamFolder() throws OXException {
-		return IMAPProperties.isSpamEnabled() ? getStdFolder(INDEX_CONFIRMED_SPAM) : null;
+		return IMAPProperties.isSpamEnabled() ? getStdFolder(IMAPStorageUtils.INDEX_CONFIRMED_SPAM) : null;
 	}
 
 	/*
@@ -5261,12 +5262,12 @@ public class MailInterfaceImpl implements MailInterface {
 	 * @see com.openexchange.api2.MailInterface#getConfirmedHamFolder()
 	 */
 	public String getConfirmedHamFolder() throws OXException {
-		return IMAPProperties.isSpamEnabled() ? getStdFolder(INDEX_CONFIRMED_HAM) : null;
+		return IMAPProperties.isSpamEnabled() ? getStdFolder(IMAPStorageUtils.INDEX_CONFIRMED_HAM) : null;
 	}
 
 	private String getStdFolder(final int index) throws OXException {
 		try {
-			if (INDEX_INBOX == index) {
+			if (IMAPStorageUtils.INDEX_INBOX == index) {
 				init();
 				final Folder inbox = imapCon.getIMAPStore().getFolder(STR_INBOX);
 				return MailFolderObject.prepareFullname(inbox.getFullName(), inbox.getSeparator());
