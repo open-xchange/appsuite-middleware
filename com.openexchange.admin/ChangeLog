@@ -1,3 +1,8 @@
+* 2007-08-21 - choeger@open-xchange.com
+
+  - Bugfix ID#8995 oxinstaller return value is always 0
+    ox_set_property now checks whether propfile exists
+
 * 2007-08-21 - dennis.sieben@open-xchange.com
 
   - Bugfix ID#8998 --nonl not consistent
