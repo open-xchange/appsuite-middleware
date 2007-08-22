@@ -127,6 +127,7 @@ Example:
   $0 --servername=ox6 --configdb-pass=secret --master-pass=secret --configdb-poolsize=10
 EOF
     echo
+    exit 1
 }
 
 v_setprop() {
