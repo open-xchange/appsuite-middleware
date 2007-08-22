@@ -1086,7 +1086,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 }
                 configdb_write_con.setAutoCommit(false);
                 // create login2context mapping in configdb
-                fillLogin2ContextTable(ctx, configdb_write_con);
+                this.oxcontextcommon.fillLogin2ContextTable(ctx, configdb_write_con);
                 configdb_write_con.commit();
 
                 ox_write_con = cache.getWRITEConnectionForContext(context_id);
@@ -2066,29 +2066,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         } finally {
             closePreparedStatement(ps);
             closePreparedStatement(ppool);
-        }
-    }
-
-    private void fillLogin2ContextTable(final Context ctx, final Connection configdb_write_con) throws SQLException {
-        HashSet<String> loginMappings = ctx.getLoginMappings();
-        final Integer ctxid = ctx.getId();
-        if (null == loginMappings || loginMappings.isEmpty()) {
-            loginMappings = new HashSet<String>();
-            loginMappings.add(ctx.getIdAsString());
-        }
-        PreparedStatement stmt = null;
-        try {
-            stmt = configdb_write_con.prepareStatement("INSERT INTO login2context (cid,login_info) VALUES (?,?)");
-            for (final String mapping : loginMappings) {
-                stmt.setInt(1, ctxid);
-                stmt.setString(2, mapping);
-                stmt.executeUpdate();
-            }
-        } catch (final SQLException sql) {
-            log.error("SQL Error", sql);
-            throw sql;
-        } finally {
-            closePreparedStatement(stmt);
         }
     }
 
