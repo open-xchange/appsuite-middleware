@@ -190,6 +190,31 @@ public class UserTest extends AbstractTest {
         oxu.getData(ctx, createduser, cred);
         fail("user not exists expected");
     }
+    
+    @Test
+    public void testBug9027() throws Exception {
+        
+        // The same user cannot be created after if 
+        // was deleted due to infostore problems
+        // Details: http://bugs.open-xchange.com/cgi-bin/bugzilla/show_bug.cgi?id=9027
+        
+        // get context to create an user
+        final Credentials cred = DummyCredentials();
+        final Context ctx = getTestContextObject(cred);
+        
+        // create new user
+        final OXUserInterface oxu = getUserClient();
+        final UserModuleAccess access = new UserModuleAccess();
+        
+        final User urs = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
+        User createduser = oxu.create(ctx,urs,access,cred);             
+        
+        // delete user
+        oxu.delete(ctx, createduser, cred);
+        
+        // create same user again, this failes as described in the bug
+        createduser = oxu.create(ctx,urs,access,cred);  
+    }
 
     @Test(expected=InvalidDataException.class)
     public void testDeleteEmptyUserList() throws Exception {
