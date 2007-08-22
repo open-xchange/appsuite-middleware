@@ -376,7 +376,7 @@ public class AdminParser extends CmdLineParser {
     }
     
     public final void printUsage() {
-        System.err.println("Usage: " + this.appname);
+        System.out.println("Usage: " + this.appname);
 
         for (final OptionInfo optInfo : this.optinfolist) {
             if (!optInfo.extended && !optInfo.hidden) {
@@ -387,15 +387,15 @@ public class AdminParser extends CmdLineParser {
     }
 
     private void printFinalLines() {
-        System.err.println("\nEntries marked with an asterisk (*) are mandatory.");
-        System.err.println("Entries marked with an question mark (?) are mandatory depending on your");
-        System.err.println("configuration.");
-        System.err.println("Entries marked with a pipe (|) are mandatory for one another which means that");
-        System.err.println("at least one of them must be set.\n");
+        System.out.println("\nEntries marked with an asterisk (*) are mandatory.");
+        System.out.println("Entries marked with an question mark (?) are mandatory depending on your");
+        System.out.println("configuration.");
+        System.out.println("Entries marked with a pipe (|) are mandatory for one another which means that");
+        System.out.println("at least one of them must be set.\n");
     }
 
     public final void printUsageExtended() {
-        System.err.println("Usage: " + this.appname);
+        System.out.println("Usage: " + this.appname);
         
         for (final OptionInfo optInfo : this.optinfolist) {
             basicOutput(optInfo);
@@ -414,10 +414,10 @@ public class AdminParser extends CmdLineParser {
                 sb.append(optInfo.longFormParameterDescription);
                 sb.append(">");
                 final Object[] format_with_ = { "  ", sb.toString(), getrightmarker(optInfo.needed), optInfo.description };
-                System.err.format(format_this, format_with_);
+                System.out.format(format_this, format_with_);
             } else {
                 final Object[] format_with_ = { "  ", "--" + optInfo.longForm, getrightmarker(optInfo.needed), optInfo.description };
-                System.err.format(format_this, format_with_);
+                System.out.format(format_this, format_with_);
             }
         } else {
             final String format_this = " %s,%-45s%-2s%-28s\n";
@@ -432,10 +432,10 @@ public class AdminParser extends CmdLineParser {
                 sb.append(">");
 
                 final Object[] format_with = { "-" + optInfo.shortForm, sb.toString(), getrightmarker(optInfo.needed), optInfo.description };
-                System.err.format(format_this, format_with);
+                System.out.format(format_this, format_with);
             } else {
                 final Object[] format_with = { "-" + optInfo.shortForm, "--" + optInfo.longForm, getrightmarker(optInfo.needed), optInfo.description };
-                System.err.format(format_this, format_with);
+                System.out.format(format_this, format_with);
             }
         }
     }
