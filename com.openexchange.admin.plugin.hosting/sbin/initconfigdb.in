@@ -104,6 +104,7 @@ Example:
   $0 --configdb-pass=secret
 EOF
     echo
+    exit 1
 }
 
 TEMP=$(POSIXLY_CORRECT=true getopt -o ap:h --long "$(eval echo $LONGOPTS),help" -- "$@")
@@ -180,21 +181,21 @@ fi
 echo -n "initializing configdb from scratch..."
 
 if [ -n "$CREATEADMIN" ]; then
-    cat<<EOF | mysql
+    cat<<EOF | mysql || die
 drop database if exists \`${CONFIGDB_DBNAME}\`;
 GRANT ALL PRIVILEGES ON *.* TO '$CONFIGDB_USER'@'%' IDENTIFIED BY '$CONFIGDB_PASS' WITH GRANT OPTION;
 create database \`${CONFIGDB_DBNAME}\`;
 EOF
 else
-    cat<<EOF | mysql -h $CONFIGDB_HOST -P $CONFIGDB_PORT -u $CONFIGDB_USER -p${CONFIGDB_PASS}
+    cat<<EOF | mysql -h $CONFIGDB_HOST -P $CONFIGDB_PORT -u $CONFIGDB_USER -p${CONFIGDB_PASS} || die
 drop database if exists \`${CONFIGDB_DBNAME}\`;
 create database \`${CONFIGDB_DBNAME}\`;
 EOF
 fi
 
-mysqladmin flush-privileges
+mysqladmin flush-privileges || die
 
 cat $ADMINCONF/mysql/configdb.sql \
-    | mysql -h $CONFIGDB_HOST -P $CONFIGDB_PORT -u $CONFIGDB_USER -p${CONFIGDB_PASS} ${CONFIGDB_DBNAME}
+    | mysql -h $CONFIGDB_HOST -P $CONFIGDB_PORT -u $CONFIGDB_USER -p${CONFIGDB_PASS} ${CONFIGDB_DBNAME} || die
 
 echo " done"
