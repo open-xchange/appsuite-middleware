@@ -3,6 +3,7 @@
   - Bugfix ID#9023 createcontext name should be added to lmappings
   - Bugfix ID#9047 createuser not needed parameter --name
   - Bugfix ID#9046 createuser text for --extendedoptions printed on sterr
+  - Bugfix ID#9034 createcontext null printed instead of cid in case of error
   
 * 2007-08-21 - choeger@open-xchange.com
 
