@@ -132,6 +132,30 @@ public class GroupTest extends AbstractTest {
     }
     
     @Test
+    public void testCreateDeleteCreate() throws Exception {
+        final int context_id = getContextID();
+        final Context ctx = new Context(context_id);
+        final Credentials cred = DummyCredentials();
+        final String hosturl = getRMIHostUrl();
+        Group tmp =  getTestGroupObject(VALID_CHAR_TESTGROUP+System.currentTimeMillis(), ctx, cred);
+        final Group grp = createGroup(ctx,tmp, hosturl, cred);
+        deleteGroup(ctx, grp, hosturl, cred);
+        // now load the group again, this MUST fail
+        try {
+            getData(ctx, grp, hosturl, cred);
+            fail("group not exists expected");
+        } catch (final Exception ecp) {
+            if (ecp.toString().toLowerCase().indexOf("group does not exist") != -1) {
+                // this exception MUST happen, if not, test MUST fail :)
+                assertTrue(true);
+            }
+        }
+        
+        // create same group again
+        createGroup(ctx,tmp, hosturl, cred);
+    }
+    
+    @Test
     public void testDeleteGroupIdentifiedByName() throws Exception {
         
         // delete group ident by name
