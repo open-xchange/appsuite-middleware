@@ -1,6 +1,7 @@
 * 2007-08-22 - dennis.sieben@open-xchange.com
 
   - Bugfix ID#9023 createcontext name should be added to lmappings
+  - Bugfix ID#9047 createuser not needed parameter --name
   
 * 2007-08-21 - choeger@open-xchange.com
 
