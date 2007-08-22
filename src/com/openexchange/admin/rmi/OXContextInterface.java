@@ -15,6 +15,7 @@ import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
+import com.openexchange.admin.rmi.exceptions.NoSuchDatabaseException;
 import com.openexchange.admin.rmi.exceptions.NoSuchFilestoreException;
 import com.openexchange.admin.rmi.exceptions.NoSuchReasonException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
@@ -246,8 +247,9 @@ public interface OXContextInterface extends Remote {
      * @throws RemoteException General RMI Exception
      * 
      * @throws StorageException When an error in the subsystems occurred.
+     * @throws NoSuchDatabaseException 
      */
-    public Context[] listByDatabase(final Database db, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException,InvalidDataException;
+    public Context[] listByDatabase(final Database db, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException,InvalidDataException, NoSuchDatabaseException;
 
     /**
      * Search for context which store data on specified filestore
@@ -260,6 +262,7 @@ public interface OXContextInterface extends Remote {
      * @throws RemoteException General RMI Exception
      * 
      * @throws StorageException When an error in the subsystems occurred.
+     * @throws NoSuchFilestoreException 
      */
-    public Context[] listByFilestore(final Filestore fs, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException,InvalidDataException;
+    public Context[] listByFilestore(final Filestore fs, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException,InvalidDataException, NoSuchFilestoreException;
 }
