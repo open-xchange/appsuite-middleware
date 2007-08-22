@@ -48,6 +48,8 @@
  */
 package com.openexchange.admin.rmi.impl;
 
+import java.util.HashSet;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -112,13 +114,22 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
 
         new BasicAuthenticator().doAuthentication(auth);
         
-        if(log.isDebugEnabled()){
+        if (log.isDebugEnabled()) {
             log.debug(ctx + " - " + admin_user + " ");
         }
         
         try {
             final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
             createchecks(ctx, admin_user, tool);
+            final String name = ctx.getName();
+            final HashSet<String> loginMappings = ctx.getLoginMappings();
+            if (null == loginMappings || loginMappings.isEmpty()) {
+                ctx.addLoginMapping(ctx.getIdAsString());
+            }
+            if (null != name) {
+                // Add the name of the context to the login mappings and the id
+                ctx.addLoginMapping(name);
+            }
             return createmaincall(ctx, admin_user, db);
         } catch (final ContextExistsException e) {
             log.error(e.getMessage(),e);
