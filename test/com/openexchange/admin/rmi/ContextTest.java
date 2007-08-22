@@ -207,6 +207,17 @@ public class ContextTest extends AbstractTest {
         Context ctxset = getTestContextObject(cred);
         addContext(ctxset, getRMIHostUrl(), cred);
     }
+    
+    @Test
+    public void testCreateDeleteCreateContext() throws Exception {
+        final Credentials cred = DummyMasterCredentials();
+        int ctxid = createNewContextID(cred);
+        final String hosturl = getRMIHostUrl();
+        final Context ctx = getTestContextObject(ctxid, 50);
+        ctxid = addSystemContext(ctx, hosturl, cred).getId().intValue();
+        deleteContext(ctx, hosturl, cred);
+        addSystemContext(ctx, hosturl, cred).getId().intValue();
+    }
 
     @Test
     public void testDeleteContext() throws Exception {
