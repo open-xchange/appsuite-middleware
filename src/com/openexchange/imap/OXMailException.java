@@ -565,7 +565,11 @@ public class OXMailException extends OXException {
 		/**
 		 * IMAP command exceeds max. allowed length of %d: %s
 		 */
-		CMD_TOO_LARGE("IMAP command exceeds max. allowed length of %d: %s", Category.CODE_ERROR, 104);
+		CMD_TOO_LARGE("IMAP command exceeds max. allowed length of %d: %s", Category.CODE_ERROR, 104),
+		/**
+		 * Mail folder %s must not be moved to subsequent folder %s
+		 */
+		NO_MOVE_TO_SUBFLD("Mail folder %s must not be moved to subsequent folder %s", Category.PERMISSION, 105);
 
 		/**
 		 * Message of the exception.

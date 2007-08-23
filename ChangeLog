@@ -7,6 +7,8 @@
 
  - Bugfix #8498: Checking for an empty content type when attaching
    (infostore) files to a (smtp) message
+ - Bugfix #9069: Checking if destination folder is a subsequent folder on
+   move operation
 
 * 2007-08-22 - thorben.betten@open-xchange.com
 

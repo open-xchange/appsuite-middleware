@@ -47,21 +47,46 @@
  *
  */
 
-package com.openexchange.mail.search;
+package com.openexchange.mail;
 
 /**
- * MailSearchTerm
- *
+ * MailStorageUtils
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- *
+ * 
  */
-public final class MailSearchTerm {
+public final class MailStorageUtils {
 
 	/**
-	 * 
+	 * Prevent instantiation
 	 */
-	public MailSearchTerm() {
+	private MailStorageUtils() {
 		// TODO Auto-generated constructor stub
+	}
+
+	public static enum OrderDirection {
+
+		/**
+		 * Ascending order
+		 */
+		ASC(1),
+		/**
+		 * Descending order
+		 */
+		DESC(2);
+
+		private final int order;
+
+		private OrderDirection(final int order) {
+			this.order = order;
+		}
+
+		/**
+		 * @return The order direction's <code>int</code> value
+		 */
+		public int getOrder() {
+			return order;
+		}
 	}
 
 }

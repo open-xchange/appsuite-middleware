@@ -363,10 +363,10 @@ public class IMAPUtils {
 								}
 								final IMAPResponse ir = (IMAPResponse) r[i];
 								/*
-								 * The SEARCH response from the server contains a
-								 * listing of message sequence numbers corresponding
-								 * to those messages that match the searching
-								 * criteria.
+								 * The SEARCH response from the server contains
+								 * a listing of message sequence numbers
+								 * corresponding to those messages that match
+								 * the searching criteria.
 								 */
 								if (ir.keyEquals(COMMAND_SEARCH)) {
 									String num;
@@ -400,13 +400,14 @@ public class IMAPUtils {
 				 */
 				final Message[] newMsgs;
 				try {
-					newMsgs = new FetchIMAPCommand(folder, newMsgSeqNums, fields, JSONMessageObject.FIELD_RECEIVED_DATE, false, false).doCommand();
+					newMsgs = new FetchIMAPCommand(folder, newMsgSeqNums, fields,
+							JSONMessageObject.FIELD_RECEIVED_DATE, false, false).doCommand();
 				} catch (final MessagingException e) {
 					throw new ProtocolException(e.getLocalizedMessage());
 				}
 				final List<Message> msgList = Arrays.asList(newMsgs);
 				Collections.sort(msgList, getComparator(JSONMessageObject.FIELD_RECEIVED_DATE, false, Locale.ENGLISH));
-				return msgList.toArray(newMsgs);			
+				return msgList.toArray(newMsgs);
 			}
 		});
 		return val;
@@ -908,34 +909,6 @@ public class IMAPUtils {
 		}
 	}
 
-	/**
-	 * Sorts only messages in specified index range according to specified sort
-	 * field and specified sort direction
-	 * 
-	 * @param folder -
-	 *            the mailbox folder in which to sort its messages
-	 * @param sortField -
-	 *            the sort field
-	 * @param descendingDir -
-	 *            whether to sort in descending or ascending order
-	 * @param fromIndex -
-	 *            start index
-	 * @param toIndex -
-	 *            end index
-	 * @return a <code>java.util.List</code> containing the sorted message
-	 *         numbers as <code>java.lang.String</code> objects
-	 * @throws Exception
-	 */
-	public static Message[] getServerSortList(final Folder folder, final int sortField, final boolean descendingDir,
-			final int fromIndex, final int toIndex) throws Exception {
-		StringBuilder sortRange = new StringBuilder();
-		for (int i = fromIndex + 1; i <= toIndex; i++) {
-			sortRange.append(i).append(',');
-		}
-		sortRange = sortRange.deleteCharAt(sortRange.length() - 1);
-		return getServerSortList(folder, getSortCritForIMAPCommand(sortField, descendingDir), sortRange);
-	}
-
 	public static Message[] getServerSortList(final Folder folder, final int sortField, final boolean descendingDir,
 			final StringBuilder sortRange) throws MessagingException {
 		return getServerSortList(folder, getSortCritForIMAPCommand(sortField, descendingDir), sortRange);
@@ -1311,16 +1284,15 @@ public class IMAPUtils {
 		return sets.toArray(new UIDSet[sets.size()]);
 	}
 
-	private static final String getAllAddresses(final Address[] a) {
-		final StringBuilder addressBuilder = new StringBuilder();
+	public static final String getAllAddresses(final Address[] a) {
 		if (a == null || a.length == 0) {
-			addressBuilder.append("");
-		} else {
-			appendAddress(addressBuilder, (InternetAddress) a[0]);
-			for (int i = 1; i < a.length; i++) {
-				addressBuilder.append(", ");
-				appendAddress(addressBuilder, (InternetAddress) a[i]);
-			}
+			return "";
+		}
+		final StringBuilder addressBuilder = new StringBuilder(256);
+		appendAddress(addressBuilder, (InternetAddress) a[0]);
+		for (int i = 1; i < a.length; i++) {
+			addressBuilder.append(", ");
+			appendAddress(addressBuilder, (InternetAddress) a[i]);
 		}
 
 		return (addressBuilder.toString());

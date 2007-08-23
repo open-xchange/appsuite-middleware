@@ -67,10 +67,13 @@ import com.openexchange.imap.IMAPUtils;
 import com.openexchange.imap.OXMailException;
 import com.openexchange.imap.OXMailException.MailCode;
 import com.openexchange.imap.command.FlagsIMAPCommand;
+import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailMessageStorage;
+import com.openexchange.mail.MailStorageUtils.OrderDirection;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.imap.converters.IMAPMessageConverter;
-import com.openexchange.mail.search.MailSearchTerm;
+import com.openexchange.mail.imap.search.IMAPSearch;
+import com.openexchange.mail.imap.sort.IMAPSort;
 import com.openexchange.sessiond.SessionObject;
 import com.sun.mail.imap.DefaultFolder;
 import com.sun.mail.imap.IMAPFolder;
@@ -242,14 +245,14 @@ public final class IMAPMessageStorage extends MailMessageStorage implements Seri
 	 * 
 	 * @param folderName
 	 *            The folder fullname
-	 * @param openMode
-	 *            The opening mode (either {@link Folder#READ_ONLY} or
+	 * @param desiredMode
+	 *            The desired opening mode (either {@link Folder#READ_ONLY} or
 	 *            {@link Folder#READ_WRITE})
 	 * @throws MessagingException
 	 * @throws IMAPException
 	 * @throws OXMailException
 	 */
-	private void setAndOpenFolder(final String folderName, final int openMode) throws MessagingException,
+	private void setAndOpenFolder(final String folderName, final int desiredMode) throws MessagingException,
 			IMAPException, OXMailException {
 		final boolean isDefaultFolder = folderName.equals(DEFAULT_IMAP_FOLDER_ID);
 		final boolean isIdenticalFolder;
@@ -266,12 +269,12 @@ public final class IMAPMessageStorage extends MailMessageStorage implements Seri
 				 */
 				final int mode = imapFolder.getMode();
 				if (isIdenticalFolder && imapFolder.isOpen()) {
-					if (mode == openMode) {
+					if (mode == desiredMode) {
 						/*
 						 * Identical folder is already opened in right mode
 						 */
 						return;
-					} else if (mode == Folder.READ_WRITE && openMode == Folder.READ_ONLY) {
+					} else if (mode == Folder.READ_WRITE && desiredMode == Folder.READ_ONLY) {
 						/*
 						 * Although folder is opened read-write instead of
 						 * read-only, all operations allowed in read-only also
@@ -305,7 +308,7 @@ public final class IMAPMessageStorage extends MailMessageStorage implements Seri
 			 * Folder is closed here
 			 */
 			if (isIdenticalFolder) {
-				if (openMode == Folder.READ_WRITE
+				if (desiredMode == Folder.READ_WRITE
 						&& !holdsMessages() // NoSelect
 						&& STR_FALSE.equalsIgnoreCase(imapMailConnection.getMailProperties().getProperty(
 								IMAPPropertyNames.PROP_ALLOWREADONLYSELECT, STR_FALSE))
@@ -315,7 +318,7 @@ public final class IMAPMessageStorage extends MailMessageStorage implements Seri
 				/*
 				 * Open identical folder in right mode
 				 */
-				imapFolder.open(openMode);
+				imapFolder.open(desiredMode);
 				// TODO: mailInterfaceMonitor.changeNumActive(true);
 				return;
 			}
@@ -325,15 +328,15 @@ public final class IMAPMessageStorage extends MailMessageStorage implements Seri
 		if (!isDefaultFolder && !imapFolder.exists()) {
 			throw new IMAPException(IMAPException.Code.FOLDER_NOT_FOUND, imapFolder.getFullName());
 		}
-		if (openMode != Folder.READ_ONLY && openMode != Folder.READ_WRITE) {
-			throw new OXMailException(MailCode.UNKNOWN_FOLDER_MODE, Integer.valueOf(openMode));
-		} else if (openMode == Folder.READ_WRITE
+		if (desiredMode != Folder.READ_ONLY && desiredMode != Folder.READ_WRITE) {
+			throw new OXMailException(MailCode.UNKNOWN_FOLDER_MODE, Integer.valueOf(desiredMode));
+		} else if (desiredMode == Folder.READ_WRITE
 				&& !holdsMessages() // NoSelect
 				&& STR_FALSE.equalsIgnoreCase(imapMailConnection.getMailProperties().getProperty(
 						IMAPPropertyNames.PROP_ALLOWREADONLYSELECT, STR_FALSE)) && IMAPUtils.isReadOnly(imapFolder)) {
 			throw new IMAPException(IMAPException.Code.READ_ONLY_FOLDER, imapFolder.getFullName());
 		}
-		imapFolder.open(openMode);
+		imapFolder.open(desiredMode);
 		// TODO: mailInterfaceMonitor.changeNumActive(true);
 	}
 
@@ -433,6 +436,73 @@ public final class IMAPMessageStorage extends MailMessageStorage implements Seri
 		}
 	}
 
+	private static final transient MailMessage[] EMPTY_RETVAL = new MailMessage[0];
+
+	@Override
+	public MailMessage[] getMessages(final String folder, final int[] fromToIndices, final MailListField sortField,
+			final OrderDirection order, final MailListField[] searchCols, final String[] searchPatterns,
+			final boolean linkSearchTermsWithOR, final MailListField[] fields) throws IMAPException {
+		try {
+			setAndOpenFolder(prepareMailFolderParam(folder), Folder.READ_ONLY);
+			try {
+				if (!holdsMessages()) {
+					throw new IMAPException(IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, imapFolder.getFullName());
+				} else if (IMAPProperties.isSupportsACLs()
+						&& !session.getCachedRights(imapFolder, true).contains(Rights.Right.READ)) {
+					throw new IMAPException(IMAPException.Code.NO_READ_ACCESS, imapFolder.getFullName());
+				}
+			} catch (final MessagingException e) {
+				throw new IMAPException(IMAPException.Code.NO_ACCESS, imapFolder.getFullName());
+			}
+			Message[] retval = null;
+			/*
+			 * Shall a search be performed?
+			 */
+			final boolean search = (searchCols != null && searchCols.length > 0 && searchPatterns != null && searchPatterns.length > 0);
+			if (search) {
+				/*
+				 * Preselect message list according to given search pattern
+				 */
+				retval = IMAPSearch.searchMessages(imapFolder, searchCols, searchPatterns, linkSearchTermsWithOR,
+						fields, sortField);
+				if (retval == null || retval.length == 0) {
+					return EMPTY_RETVAL;
+				}
+			}
+			retval = IMAPSort.sortMessages(imapFolder, retval, fields, sortField, order, session.getLocale());
+			if (fromToIndices != null && fromToIndices.length == 2) {
+				final int fromIndex = fromToIndices[0];
+				int toIndex = fromToIndices[1];
+				if (retval == null || retval.length == 0) {
+					return EMPTY_RETVAL;
+				}
+				if ((fromIndex) > retval.length) {
+					/*
+					 * Return empty iterator if start is out of range
+					 */
+					return EMPTY_RETVAL;
+				}
+				/*
+				 * Reset end index if out of range
+				 */
+				if (toIndex > retval.length) {
+					toIndex = retval.length;
+				}
+				final Message[] tmp = retval;
+				final int retvalLength = toIndex - fromIndex + 1;
+				retval = new Message[retvalLength];
+				System.arraycopy(tmp, fromIndex, retval, 0, retvalLength);
+			}
+			return IMAPMessageConverter.convertIMAPMessages(retval, fields);
+		} catch (final OXMailException e) {
+			throw new IMAPException(e);
+		} catch (final IMAPPropertyException e) {
+			throw new IMAPException(e);
+		} catch (final MessagingException e) {
+			throw IMAPException.handleMessagingException(e, imapMailConnection);
+		}
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -450,9 +520,34 @@ public final class IMAPMessageStorage extends MailMessageStorage implements Seri
 	 * @see com.openexchange.mail.MailMessageStorage#searchMessages(java.lang.String)
 	 */
 	@Override
-	public MailMessage[] searchMessages(final String fullname, final MailSearchTerm searchTerm) {
-		// TODO Auto-generated method stub
-		return null;
+	public MailMessage[] searchMessages(final String folder, final MailListField[] searchCols, final String[] searchPatterns,
+			final boolean linkWithOR, final MailListField[] fields) throws IMAPException {
+		try {
+			setAndOpenFolder(prepareMailFolderParam(folder), Folder.READ_ONLY);
+			try {
+				if (!holdsMessages()) {
+					throw new IMAPException(IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, imapFolder.getFullName());
+				} else if (IMAPProperties.isSupportsACLs()
+						&& !session.getCachedRights(imapFolder, true).contains(Rights.Right.READ)) {
+					throw new IMAPException(IMAPException.Code.NO_READ_ACCESS, imapFolder.getFullName());
+				}
+			} catch (final MessagingException e) {
+				throw new IMAPException(IMAPException.Code.NO_ACCESS, imapFolder.getFullName());
+			}
+			final Message[] retval = IMAPSearch.searchMessages(imapFolder, searchCols, searchPatterns, linkWithOR,
+					fields, null);
+			if (retval == null || retval.length == 0) {
+				return EMPTY_RETVAL;
+			}
+			
+			return null;
+		} catch (final OXMailException e) {
+			throw new IMAPException(e);
+		} catch (final MessagingException e) {
+			throw IMAPException.handleMessagingException(e, imapMailConnection);
+		} catch (final IMAPPropertyException e) {
+			throw new IMAPException(e);
+		}
 	}
 
 }

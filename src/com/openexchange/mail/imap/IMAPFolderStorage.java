@@ -69,7 +69,9 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.imap.IMAPProperties;
 import com.openexchange.imap.IMAPPropertyException;
 import com.openexchange.imap.IMAPUtils;
+import com.openexchange.imap.OXMailException;
 import com.openexchange.imap.UserSettingMail;
+import com.openexchange.imap.OXMailException.MailCode;
 import com.openexchange.imap.user2imap.User2IMAP;
 import com.openexchange.mail.MailFolderStorage;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -398,6 +400,10 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 						LOG.error(e.getMessage(), e);
 						throw new IMAPException(IMAPException.Code.NO_ACCESS, newParent);
 					}
+				}
+				if (destFolder.getFullName().startsWith(updateMe.getFullName())) {
+					throw new IMAPException(IMAPException.Code.NO_MOVE_TO_SUBFLD, updateMe.getName(), destFolder
+							.getName());
 				}
 				updateMe = moveFolder(updateMe, destFolder, newName);
 			}

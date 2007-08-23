@@ -55,19 +55,24 @@ import java.util.Map;
 
 import javax.mail.Flags;
 import javax.mail.Header;
+import javax.mail.Message;
 import javax.mail.MessagingException;
+import javax.mail.Message.RecipientType;
 import javax.mail.internet.InternetAddress;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.mail.JSONMessageObject;
+import com.openexchange.groupware.container.mail.MessageCacheObject;
 import com.openexchange.imap.IMAPUtils;
 import com.openexchange.imap.MessageHeaders;
+import com.openexchange.mail.MailListField;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.imap.IMAPException;
 import com.openexchange.mail.imap.dataobjects.IMAPMailMessage;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPMessage;
+import com.sun.mail.imap.protocol.BODYSTRUCTURE;
 
 /**
  * IMAPMessageConverter
@@ -80,11 +85,246 @@ public final class IMAPMessageConverter {
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(IMAPMessageConverter.class);
 
+	private static final String MIME_SUBTYPE_ALTERNATIVE = "ALTERNATIVE";
+
+	private static final String MIME_SUBTYPE_MIXED = "MIXED";
+
+	private static interface MessageFieldFiller {
+		/**
+		 * Fills a fields from source message in given mail message
+		 * 
+		 * @param mailMessage
+		 *            The mail message to fill
+		 * @param msg
+		 *            The source message
+		 * @throws MessagingException
+		 * @throws IMAPException
+		 */
+		public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException,
+				IMAPException;
+	}
+
 	/**
 	 * Prevent instantiation
 	 */
 	private IMAPMessageConverter() {
 		super();
+	}
+
+	/**
+	 * Converts given array of {@link Message} instances to an array of
+	 * {@link MailMessage} instances.
+	 * <p>
+	 * Only the fields specified through parameter <code>fields</code> are
+	 * going to be set
+	 * 
+	 * @param msgs
+	 *            The source messages
+	 * @param fields
+	 *            The fields to fill
+	 * @return converted array of {@link Message} instances
+	 * @throws IMAPException
+	 */
+	public static MailMessage[] convertIMAPMessages(final Message[] msgs, final MailListField[] fields)
+			throws IMAPException {
+		try {
+			final MessageFieldFiller[] fillers = createFieldFillers(fields);
+			final MailMessage[] retval = new IMAPMailMessage[msgs.length];
+			for (int i = 0; i < retval.length; i++) {
+				fillMessage(fillers, retval[i], msgs[i]);
+			}
+			return retval;
+		} catch (final MessagingException e) {
+			throw IMAPException.handleMessagingException(e);
+		}
+	}
+
+	private static void fillMessage(final MessageFieldFiller[] fillers, final MailMessage mailMessage, final Message msg)
+			throws IMAPException, MessagingException {
+		for (final MessageFieldFiller filler : fillers) {
+			filler.fillField(mailMessage, msg);
+		}
+	}
+
+	private static MessageFieldFiller[] createFieldFillers(final MailListField[] fields) throws IMAPException {
+		final MessageFieldFiller[] fillers = new MessageFieldFiller[fields.length];
+		for (int i = 0; i < fields.length; i++) {
+			switch (fields[i]) {
+			case ID:
+				fillers[i] = new MessageFieldFiller() {
+					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
+						mailMessage.setUid(((MessageCacheObject) msg).getUid());
+					}
+				};
+				break;
+			case FOLDER_ID:
+				fillers[i] = new MessageFieldFiller() {
+					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
+						mailMessage.setFolder(((MessageCacheObject) msg).getFolderFullname());
+					}
+				};
+				break;
+			case ATTACHMENT:
+				fillers[i] = new MessageFieldFiller() {
+					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
+						final BODYSTRUCTURE bodystructure = ((MessageCacheObject) msg).getBodystructure();
+						mailMessage
+								.setHasAttachment(bodystructure.isMulti()
+										&& (MIME_SUBTYPE_MIXED.equalsIgnoreCase(bodystructure.subtype) || hasAttachments(bodystructure)));
+					}
+				};
+				break;
+			case FROM:
+				fillers[i] = new MessageFieldFiller() {
+					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
+						mailMessage.addFrom((InternetAddress[]) ((MessageCacheObject) msg).getFrom());
+					}
+				};
+				break;
+			case TO:
+				fillers[i] = new MessageFieldFiller() {
+					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
+						mailMessage.addTo((InternetAddress[]) ((MessageCacheObject) msg)
+								.getRecipients(RecipientType.TO));
+					}
+				};
+				break;
+			case CC:
+				fillers[i] = new MessageFieldFiller() {
+					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
+						mailMessage.addCc((InternetAddress[]) ((MessageCacheObject) msg)
+								.getRecipients(RecipientType.CC));
+					}
+				};
+				break;
+			case BCC:
+				fillers[i] = new MessageFieldFiller() {
+					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
+						mailMessage.addBcc((InternetAddress[]) ((MessageCacheObject) msg)
+								.getRecipients(RecipientType.BCC));
+					}
+				};
+				break;
+			case SUBJECT:
+				fillers[i] = new MessageFieldFiller() {
+					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
+						mailMessage.setSubject(((MessageCacheObject) msg).getSubject());
+					}
+				};
+				break;
+			case SIZE:
+				fillers[i] = new MessageFieldFiller() {
+					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
+						mailMessage.setSize(((MessageCacheObject) msg).getSize());
+					}
+				};
+				break;
+			case SENT_DATE:
+				fillers[i] = new MessageFieldFiller() {
+					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
+						mailMessage.setSentDate(((MessageCacheObject) msg).getSentDate());
+					}
+				};
+				break;
+			case RECEIVED_DATE:
+				fillers[i] = new MessageFieldFiller() {
+					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
+						mailMessage.setReceivedDate(((MessageCacheObject) msg).getReceivedDate());
+					}
+				};
+				break;
+			case FLAGS:
+				fillers[i] = new MessageFieldFiller() {
+					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException,
+							IMAPException {
+						parseFlags(((MessageCacheObject) msg).getFlags(), mailMessage);
+					}
+				};
+				break;
+			case THREAD_LEVEL:
+				fillers[i] = new MessageFieldFiller() {
+					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
+						mailMessage.setThreadLevel(((MessageCacheObject) msg).getThreadLevel());
+					}
+				};
+				break;
+			case DISPOSITION_NOTIFICATION_TO:
+				fillers[i] = new MessageFieldFiller() {
+					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
+						final String[] val = ((MessageCacheObject) msg).getHeader(MessageHeaders.HDR_DISP_NOT_TO);
+						if (val != null && val.length > 0) {
+							mailMessage.setDispositionNotification(val[0]);
+						}
+					}
+				};
+				break;
+			case PRIORITY:
+				fillers[i] = new MessageFieldFiller() {
+					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
+						final String[] val = ((MessageCacheObject) msg).getHeader(MessageHeaders.HDR_X_PRIORITY);
+						if (val != null && val.length > 0) {
+							parsePriority(val[0], mailMessage);
+						}
+					}
+				};
+				break;
+			case MSG_REF:
+				fillers[i] = new MessageFieldFiller() {
+					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
+						/*
+						 * Ignore
+						 */
+					}
+				};
+				break;
+			case COLOR_LABEL:
+				fillers[i] = new MessageFieldFiller() {
+					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException,
+							IMAPException {
+						parseFlags(((MessageCacheObject) msg).getFlags(), mailMessage);
+					}
+				};
+				break;
+			case FOLDER:
+				fillers[i] = new MessageFieldFiller() {
+					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
+						/*
+						 * Ignore
+						 */
+					}
+				};
+				break;
+			case FLAG_SEEN:
+				fillers[i] = new MessageFieldFiller() {
+					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
+						/*
+						 * Ignore
+						 */
+					}
+				};
+				break;
+			default:
+				throw new IMAPException(IMAPException.Code.INVALID_FIELD, fields[i].toString());
+			}
+		}
+		return fillers;
+	}
+
+	private static boolean hasAttachments(final BODYSTRUCTURE bodystructure) {
+		if (bodystructure.isMulti()) {
+			if (MIME_SUBTYPE_ALTERNATIVE.equalsIgnoreCase(bodystructure.subtype) && bodystructure.bodies.length > 2) {
+				return true;
+			} else if (bodystructure.bodies.length > 1) {
+				return true;
+			} else {
+				boolean found = false;
+				for (int i = 0; i < bodystructure.bodies.length && !found; i++) {
+					found |= hasAttachments(bodystructure.bodies[i]);
+				}
+				return found;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -101,6 +341,7 @@ public final class IMAPMessageConverter {
 			/*
 			 * Set all cacheable data
 			 */
+			retval.setFolder(msg.getFolder().getFullName());
 			setHeaders(msg, retval);
 			retval.addFrom((InternetAddress[]) msg.getFrom());
 			retval.addTo((InternetAddress[]) msg.getRecipients(IMAPMessage.RecipientType.TO));
@@ -129,7 +370,7 @@ public final class IMAPMessageConverter {
 		}
 	}
 
-	private static void parseFlags(final Flags flags, final IMAPMailMessage mailMessage) throws OXException {
+	private static void parseFlags(final Flags flags, final MailMessage mailMessage) throws IMAPException {
 		{
 			int retval = 0;
 			if (flags.contains(Flags.Flag.ANSWERED)) {
@@ -161,7 +402,11 @@ public final class IMAPMessageConverter {
 			 * Color Label
 			 */
 			if (userFlags[i].startsWith(JSONMessageObject.COLOR_LABEL_PREFIX)) {
-				mailMessage.setColorLabel(JSONMessageObject.getColorLabelIntValue(userFlags[i]));
+				try {
+					mailMessage.setColorLabel(JSONMessageObject.getColorLabelIntValue(userFlags[i]));
+				} catch (final OXException e) {
+					throw new IMAPException(e);
+				}
 			} else {
 				mailMessage.addUserFlag(userFlags[i]);
 			}
@@ -199,7 +444,7 @@ public final class IMAPMessageConverter {
 		mailMessage.addHeaders(headerMap);
 	}
 
-	private static void parsePriority(final String priorityStr, final IMAPMailMessage mailMessage) {
+	private static void parsePriority(final String priorityStr, final MailMessage mailMessage) {
 		int priority = JSONMessageObject.PRIORITY_NORMAL;
 		if (null != priorityStr) {
 			final String[] tmp = priorityStr.split(" +");

@@ -68,7 +68,7 @@ import com.openexchange.groupware.container.mail.JSONMessageObject;
  * 
  */
 public abstract class MailMessage extends MailContent {
-	
+
 	/**
 	 * This message has been answered. This flag is set by clients to indicate
 	 * that this message has been answered to.
@@ -248,6 +248,20 @@ public abstract class MailMessage extends MailContent {
 	private String dispositionNotification;
 
 	private boolean b_dispositionNotification;
+
+	/**
+	 * The message folder fullname
+	 */
+	private String folder;
+
+	private boolean b_folder;
+	
+	/**
+	 * Whether an attachment is present or not
+	 */
+	private boolean hasAttachment;
+	
+	private boolean b_hasAttachment;
 
 	/**
 	 * Default constructor
@@ -949,6 +963,77 @@ public abstract class MailMessage extends MailContent {
 	public void setDispositionNotification(final String dispositionNotification) {
 		this.dispositionNotification = dispositionNotification;
 		b_dispositionNotification = true;
+	}
+
+	/**
+	 * Gets the folder
+	 * 
+	 * @return the folder
+	 */
+	public String getFolder() {
+		return folder;
+	}
+
+	/**
+	 * @return <code>true</code> if folder is set; otherwise
+	 *         <code>false</code>
+	 */
+	public boolean containsFolder() {
+		return b_folder;
+	}
+
+	/**
+	 * Removes the folder
+	 */
+	public void removeFolder() {
+		folder = null;
+		b_folder = false;
+	}
+
+	/**
+	 * Sets the folder
+	 * 
+	 * @param folder
+	 *            the folder to set
+	 */
+	public void setFolder(final String folder) {
+		this.folder = folder;
+		b_folder = true;
+	}
+
+	/**
+	 * Gets the hasAttachment
+	 *
+	 * @return the hasAttachment
+	 */
+	public boolean hasAttachment() {
+		return hasAttachment;
+	}
+
+	/**
+	 * @return <code>true</code> if hasAttachment is set; otherwise
+	 *         <code>false</code>
+	 */
+	public boolean containsHasAttachment() {
+		return b_hasAttachment;
+	}
+
+	/**
+	 * Removes the hasAttachment
+	 */
+	public void removeHasAttachment() {
+		hasAttachment = false;
+		b_hasAttachment = false;
+	}
+	
+	/**
+	 * Sets the hasAttachment
+	 *
+	 * @param hasAttachment the hasAttachment to set
+	 */
+	public void setHasAttachment(final boolean hasAttachment) {
+		this.hasAttachment = hasAttachment;
+		b_hasAttachment = true;
 	}
 
 }

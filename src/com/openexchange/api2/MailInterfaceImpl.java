@@ -3221,7 +3221,8 @@ public class MailInterfaceImpl implements MailInterface {
 					/*
 					 * Fill message
 					 */
-					final MessageFiller msgFiller = new MessageFiller(sessionObj, originalMsg, imapCon.getSession(), draftFolder);
+					final MessageFiller msgFiller = new MessageFiller(sessionObj, originalMsg, imapCon.getSession(),
+							draftFolder);
 					msgFiller.fillMessage(msgObj, newSMTPMsg, uploadEvent, sendType);
 					checkAndCreateFolder(draftFolder, inboxFolder);
 					if (!draftFolder.isOpen()) {
@@ -3414,7 +3415,8 @@ public class MailInterfaceImpl implements MailInterface {
 					}
 					mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 					msgFiller.deleteReferencedUploadFiles();
-					return new StringBuilder(sentFolder.getFullName()).append(Mail.SEPERATOR).append(uidNext).toString();
+					return new StringBuilder(sentFolder.getFullName()).append(Mail.SEPERATOR).append(uidNext)
+							.toString();
 				} catch (final MessagingException e) {
 					if (e.getNextException() instanceof CommandFailedException) {
 						final CommandFailedException exc = (CommandFailedException) e.getNextException();
@@ -4659,6 +4661,10 @@ public class MailInterfaceImpl implements MailInterface {
 							LOG.error(e.getMessage(), e);
 							throw new OXMailException(MailCode.NO_ACCESS, getUserName(sessionObj), newParent);
 						}
+					}
+					if (destFolder.getFullName().startsWith(updateMe.getFullName())) {
+						throw new OXMailException(MailCode.NO_MOVE_TO_SUBFLD, updateMe.getName(), destFolder
+								.getName());
 					}
 					updateMe = moveFolder(updateMe, destFolder, newName);
 				}

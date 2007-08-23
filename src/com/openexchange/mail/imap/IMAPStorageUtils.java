@@ -49,6 +49,21 @@
 
 package com.openexchange.mail.imap;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+
+import javax.mail.FetchProfile;
+import javax.mail.Message;
+import javax.mail.UIDFolder;
+import javax.mail.internet.InternetAddress;
+
+import com.openexchange.groupware.container.mail.parser.MessageUtils;
+import com.openexchange.imap.MessageHeaders;
+import com.openexchange.mail.MailListField;
+import com.sun.mail.imap.IMAPFolder;
+
 /**
  * IMAPStorageUtils
  * 
@@ -56,6 +71,54 @@ package com.openexchange.mail.imap;
  * 
  */
 public final class IMAPStorageUtils {
+
+	public static final class DummyAddress extends InternetAddress {
+
+		private static final long serialVersionUID = -3276144799717449603L;
+
+		private static final String TYPE = "rfc822";
+
+		private final String address;
+
+		public DummyAddress(final String address) {
+			this.address = MessageUtils.decodeMultiEncodedHeader(address);
+		}
+
+		@Override
+		public String getType() {
+			return TYPE;
+		}
+
+		@Override
+		public String toString() {
+			return address;
+		}
+
+		@Override
+		public String getAddress() {
+			return address;
+		}
+
+		@Override
+		public String getPersonal() {
+			return null;
+		}
+
+		@Override
+		public boolean equals(final Object address) {
+			if (address instanceof InternetAddress) {
+				final InternetAddress ia = (InternetAddress) address;
+				return this.address.equalsIgnoreCase(ia.getAddress());
+			}
+			return false;
+		}
+
+		@Override
+		public int hashCode() {
+			return address.hashCode();
+		}
+
+	}
 
 	public static final int INDEX_DRAFTS = 0;
 
@@ -78,6 +141,8 @@ public final class IMAPStorageUtils {
 	public static final int ORDER_ASC = 1;
 
 	public static final int ORDER_DESC = 2;
+
+	public static final Message[] EMPTY_MSGS = new Message[0];
 
 	/**
 	 * Prevent instantiation
@@ -109,5 +174,108 @@ public final class IMAPStorageUtils {
 			return fullname;
 		}
 		return new StringBuilder(32).append(DEFAULT_IMAP_FOLDER_ID).append(sep).append(fullname).toString();
+	}
+
+	/**
+	 * Gets the appropiate IMAP fetch profile
+	 * 
+	 * @param fields
+	 *            The fields
+	 * @param sortField
+	 *            The sort field
+	 * @return The appropiate IMAP fetch profile
+	 */
+	public static FetchProfile getFetchProfile(final MailListField[] fields, final MailListField sortField) {
+		return getFetchProfile(fields, null, sortField);
+	}
+
+	/**
+	 * Gets the appropiate IMAP fetch profile
+	 * 
+	 * @param fields
+	 *            The fields
+	 * @param searchFields
+	 *            The search fields
+	 * @param sortField
+	 *            The sort field
+	 * @return The appropiate IMAP fetch profile
+	 */
+	public static FetchProfile getFetchProfile(final MailListField[] fields, final MailListField[] searchFields,
+			final MailListField sortField) {
+		final FetchProfile retval = new FetchProfile();
+		/*
+		 * Use a set to avoid duplicate entries
+		 */
+		final Set<MailListField> set = new HashSet<MailListField>();
+		if (fields != null) {
+			set.addAll(Arrays.asList(fields));
+		}
+		if (searchFields != null) {
+			set.addAll(Arrays.asList(searchFields));
+		}
+		if (sortField != null) {
+			set.add(sortField);
+		}
+		final int size = set.size();
+		final Iterator<MailListField> iter = set.iterator();
+		for (int i = 0; i < size; i++) {
+			addFetchItem(retval, iter.next());
+		}
+		return retval;
+	}
+
+	private static void addFetchItem(final FetchProfile fp, final MailListField field) {
+		switch (field) {
+		case ID:
+			fp.add(UIDFolder.FetchProfileItem.UID);
+			break;
+		case ATTACHMENT:
+			fp.add(FetchProfile.Item.CONTENT_INFO);
+			break;
+		case FROM:
+			fp.add(MessageHeaders.HDR_FROM);
+			break;
+		case TO:
+			fp.add(MessageHeaders.HDR_TO);
+			break;
+		case CC:
+			fp.add(MessageHeaders.HDR_CC);
+			break;
+		case BCC:
+			fp.add(MessageHeaders.HDR_BCC);
+			break;
+		case SUBJECT:
+			fp.add(MessageHeaders.HDR_SUBJECT);
+			break;
+		case SIZE:
+			fp.add(IMAPFolder.FetchProfileItem.SIZE);
+			break;
+		case SENT_DATE:
+			fp.add(MessageHeaders.HDR_DATE);
+			break;
+		case FLAGS:
+			if (!fp.contains(FetchProfile.Item.FLAGS)) {
+				fp.add(FetchProfile.Item.FLAGS);
+			}
+			break;
+		case DISPOSITION_NOTIFICATION_TO:
+			fp.add(MessageHeaders.HDR_DISP_NOT_TO);
+			break;
+		case PRIORITY:
+			fp.add(MessageHeaders.HDR_X_PRIORITY);
+			break;
+		case COLOR_LABEL:
+			if (!fp.contains(FetchProfile.Item.FLAGS)) {
+				fp.add(FetchProfile.Item.FLAGS);
+			}
+			break;
+		case FLAG_SEEN:
+			if (!fp.contains(FetchProfile.Item.FLAGS)) {
+				fp.add(FetchProfile.Item.FLAGS);
+			}
+			break;
+		default:
+			return;
+		}
 	}
 }

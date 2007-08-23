@@ -49,8 +49,8 @@
 
 package com.openexchange.mail;
 
+import com.openexchange.mail.MailStorageUtils.OrderDirection;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.search.MailSearchTerm;
 
 /**
  * MailMessageStorage
@@ -84,6 +84,43 @@ public abstract class MailMessageStorage {
 	public abstract MailMessage getMessage(String folder, long msgUID) throws MailException;
 
 	/**
+	 * Gets messages located in given folder. See parameter description to know
+	 * which messages are going to be returned
+	 * <p>
+	 * In contrast to {@link #getMessage(String, long)} the returned instances
+	 * of {@link MailMessage} are only pre-filled with the fields specified
+	 * through parameter <code>fields</code>.
+	 * 
+	 * @param folder
+	 *            The folder fullname
+	 * @param fromToIndices
+	 *            The indices range specifying the desired sub-list in sorted
+	 *            list; may be <code>null</code> or must have a length of
+	 *            <code>2</code>
+	 * @param sortCol
+	 *            The sort field
+	 * @param order
+	 *            Whether ascending or descending sort order
+	 * @param searchCols
+	 *            The search fields
+	 * @param searchPatterns
+	 *            The pattern for the search field; therefore this array's
+	 *            length must be equal to length of parameter
+	 *            <code>searchCols</code>
+	 * @param linkSearchTermsWithOR
+	 *            <code>true</code> to link search fields with a logical OR;
+	 *            <code>false</code> to link with logical AND
+	 * @param fields
+	 *            The fields to pre-fill in returned instances of
+	 *            {@link MailMessage}
+	 * @return The desired, pre-filled instances of {@link MailMessage}
+	 * @throws MailException
+	 */
+	public abstract MailMessage[] getMessages(String folder, final int[] fromToIndices, final MailListField sortCol,
+			final OrderDirection order, final MailListField[] searchCols, final String[] searchPatterns,
+			final boolean linkSearchTermsWithOR, final MailListField[] fields) throws MailException;
+
+	/**
 	 * Gets all unread messages located in folder whose fullname matches given
 	 * parameter.
 	 * 
@@ -93,6 +130,7 @@ public abstract class MailMessageStorage {
 	 */
 	public abstract MailMessage[] getUnreadMessages(final String fullname);
 
-	public abstract MailMessage[] searchMessages(final String fullname, final MailSearchTerm searchTerm);
+	public abstract MailMessage[] searchMessages(String folder, MailListField[] searchCols, String[] searchPatterns,
+			boolean linkWithOR, MailListField[] fields) throws MailException;
 
 }

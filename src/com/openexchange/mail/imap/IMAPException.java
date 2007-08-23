@@ -386,7 +386,37 @@ public final class IMAPException extends MailException {
 		/**
 		 * Folder %s does not hold messages and is therefore not selectable
 		 */
-		FOLDER_DOES_NOT_HOLD_MESSAGES("Folder %s does not hold messages and is therefore not selectable", Category.PERMISSION, 56);
+		FOLDER_DOES_NOT_HOLD_MESSAGES("Folder %s does not hold messages and is therefore not selectable", Category.PERMISSION, 56),
+		/**
+		 * Number of search fields (%d) do not match number of search patterns
+		 * (%d)
+		 */
+		INVALID_SEARCH_PARAMS("Number of search fields (%d) do not match number of search patterns (%d)",
+				Category.CODE_ERROR, 57),
+		/**
+		 * IMAP search failed due to following reason: %s Switching to
+		 * application-based search
+		 */
+		IMAP_SEARCH_FAILED("IMAP search failed due to following reason: %s Switching to application-based search",
+				Category.SUBSYSTEM_OR_SERVICE_DOWN, 58),
+		/**
+		 * IMAP sort failed due to following reason: %s Switching to
+		 * application-based sorting
+		 */
+		IMAP_SORT_FAILED("IMAP sort failed due to following reason: %s Switching to application-based sorting",
+				Category.SUBSYSTEM_OR_SERVICE_DOWN, 59),
+		/**
+		 * Unknow serach field: %s
+		 */
+		UNKNOWN_SEARCH_FIELD("Unknow serach field: %s", Category.CODE_ERROR, 60),
+		/**
+		 * Message field %s cannot be handled
+		 */
+		INVALID_FIELD("Message field %s cannot be handled", Category.CODE_ERROR, 61),
+		/**
+		 * Mail folder %s must not be moved to subsequent folder %s
+		 */
+		NO_MOVE_TO_SUBFLD("Mail folder %s must not be moved to subsequent folder %s", Category.PERMISSION, 62);
 
 		private final String message;
 
