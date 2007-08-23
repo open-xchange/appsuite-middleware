@@ -974,7 +974,7 @@ public class CalendarOperation implements SearchIterator {
                                 }
                                 if (!np[a].containsConfirm() || time_change) {
                                     np[a].setIsModified(true);
-                                    if (!time_change) {
+                                    if (!time_change || np[a].getIdentifier() == uid) {
                                         np[a].setConfirm(op[bs].getConfirm());
                                     } else {
                                         np[a].setConfirm(CalendarDataObject.NONE);
