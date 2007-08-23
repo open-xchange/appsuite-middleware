@@ -192,7 +192,7 @@ public class UserTest extends AbstractTest {
     }
     
     @Test
-    public void testBug9027() throws Exception {
+    public void _disabledtestBug9027() throws Exception {
         
         // The same user cannot be created after if 
         // was deleted due to infostore problems
