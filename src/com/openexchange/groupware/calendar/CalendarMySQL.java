@@ -1222,7 +1222,7 @@ class CalendarMySQL implements CalendarSqlImp {
                         }
                         if (up[a].getAlarmMinutes() >= 0 && up[a].getIdentifier() == uid) {
                             long la = up[a].getAlarmMinutes() * 60000L;
-                            changeReminder(cdao.getObjectID(), uid, cdao.getEffectiveFolderId(), cdao.getContext(), cdao.isSequence(true), cdao.getEndDate(), new Date(cdao.getStartDate().getTime()-la), CalendarOperation.INSERT);
+                            changeReminder(cdao.getObjectID(), uid, cdao.getEffectiveFolderId(), cdao.getContext(), cdao.isSequence(true), cdao.getEndDate(), new java.util.Date(cdao.getStartDate().getTime()-la), CalendarOperation.INSERT);
                         }
                         pi.setInt(7, cdao.getContextID());
                         CalendarCommonCollection.checkUserParticipantObject(up[a], cdao.getFolderType());
@@ -1857,6 +1857,10 @@ class CalendarMySQL implements CalendarSqlImp {
         
         final boolean time_change = CalendarCommonCollection.detectTimeChange(cdao, edao);
         
+        if (time_change && users == null) {
+            users = edao.getUsers();
+        }
+        
         if (users != null) {
             Arrays.sort(users);
             Arrays.sort(old_users);
@@ -2072,7 +2076,7 @@ class CalendarMySQL implements CalendarSqlImp {
                             } else {
                                 end_date = edao.getEndDate();
                             }                            
-                            changeReminder(cdao.getObjectID(), uid, cdao.getEffectiveFolderId(), cdao.getContext(), cdao.isSequence(true), end_date, new Date(calc_date.getTime()-la), CalendarOperation.INSERT);
+                            changeReminder(cdao.getObjectID(), uid, cdao.getEffectiveFolderId(), cdao.getContext(), cdao.isSequence(true), end_date, new java.util.Date(calc_date.getTime()-la), CalendarOperation.INSERT);
                         } else {
                             pi.setNull(6, java.sql.Types.INTEGER);
                         }
@@ -2217,7 +2221,8 @@ class CalendarMySQL implements CalendarSqlImp {
                             folder_id = cdao.getEffectiveFolderId();
                         }
                         long la = modified_userparticipants[a].getAlarmMinutes() * 60000L;
-                        changeReminder(cdao.getObjectID(), modified_userparticipants[a].getIdentifier(), folder_id, cdao.getContext(), cdao.isSequence(true), end_date, new Date(calc_date.getTime()-la), CalendarOperation.UPDATE);
+                        java.util.Date reminder = new java.util.Date(calc_date.getTime()-la);
+                        changeReminder(cdao.getObjectID(), modified_userparticipants[a].getIdentifier(), folder_id, cdao.getContext(), cdao.isSequence(true), end_date, reminder, CalendarOperation.UPDATE);
                     } else {
                         pu.setNull(4, java.sql.Types.INTEGER);
                         changeReminder(cdao.getObjectID(), modified_userparticipants[a].getIdentifier(), -1, cdao.getContext(), cdao.isSequence(true), null, null, CalendarOperation.DELETE);
@@ -2257,7 +2262,7 @@ class CalendarMySQL implements CalendarSqlImp {
                     } else {
                         end_date = edao.getEndDate();
                     }
-                    changeReminder(cdao.getObjectID(), uid, -1, cdao.getContext(), cdao.isSequence(true), end_date, new Date(calc_date.getTime()+deleted_userparticipants[a].getAlarmMinutes()), CalendarOperation.DELETE);
+                    changeReminder(cdao.getObjectID(), uid, -1, cdao.getContext(), cdao.isSequence(true), end_date, new java.util.Date(calc_date.getTime()+deleted_userparticipants[a].getAlarmMinutes()), CalendarOperation.DELETE);
                     new_deleted.add(deleted_userparticipants[a]);
                 }
                 pd.executeBatch();
@@ -2706,7 +2711,7 @@ class CalendarMySQL implements CalendarSqlImp {
     
     
     
-    private final void changeReminder(final int oid, final int uid, final int fid, final Context c, final boolean sequence, final java.util.Date end_date, final Date reminder_date, final int action) throws SQLException, OXMandatoryFieldException, OXConflictException, OXException {
+    private final void changeReminder(final int oid, final int uid, final int fid, final Context c, final boolean sequence, final java.util.Date end_date, final java.util.Date reminder_date, final int action) throws SQLException, OXMandatoryFieldException, OXConflictException, OXException {
         final ReminderSQLInterface rsql = new ReminderHandler(c);
         if (action != CalendarOperation.DELETE) {
             if (!CalendarCommonCollection.isInThePast(end_date)) {
