@@ -1,6 +1,7 @@
 * 2007-08-23 - marcus.klein@open-xchange.com
 
  - Bugfix #9013: Added the alarm attribute as possible list attribute.
+ - Bugfix #9045: Fixed html page in TestServlet.
 
 * 2007-08-23 - thorben.betten@open-xchange.com
 

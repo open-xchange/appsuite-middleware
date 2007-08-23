@@ -53,52 +53,68 @@ import java.io.IOException;
 import java.util.Enumeration;
 
 import javax.servlet.ServletException;
-import javax.servlet.SingleThreadModel;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-public class TestServlet extends HttpServlet implements SingleThreadModel {
+public class TestServlet extends HttpServlet {
 
 	/**
-	 * 
+	 * For serialization.
 	 */
 	private static final long serialVersionUID = -4037317824217605551L;
 
+	/**
+	 * Default constructor.
+	 */
 	public TestServlet() {
 		super();
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
-	protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+	protected void doGet(final HttpServletRequest req,
+        final HttpServletResponse resp) throws ServletException, IOException {
 		resp.setStatus(HttpServletResponse.SC_OK);
-		String htmlPage = "<html>\n<head><title>TestServlet's doGet Page</title></head>\n" +
-				"<body>\n<h1><blink>TestServlet's doGet Page</blink></h1><hr/>\n" +
-				"<p>This is a tiny paragraph with stupid text inside!</p>\n" +
-				"<p>Again a tiny paragraph with stupid text inside!</p>\n" +
-				"<ol><li>Erster Eintrag</li><li>Unterliste<ul><li>Foo</li><li>Bar</li></ul></li><li>Dritter Eintrag</li></ol>\n" +
-				"</body>\n" +
-				"</html>";
-		htmlPage += "<p><b>Parameters</b><br>";
-		for (final Enumeration e = req.getParameterNames(); e.hasMoreElements();) {
-			final String pn = (String)e.nextElement();
-			htmlPage += pn + ": " + req.getParameter(pn) + "<br>";
+        final StringBuilder page = new StringBuilder();
+        page.append("<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n");
+        page.append("<html>\n");
+        page.append("<head><title>TestServlet's doGet Page</title></head>\n");
+        page.append("<body>\n");
+        page.append("<h1><blink>TestServlet's doGet Page</blink></h1><hr/>\n");
+        page.append("<p>This is a tiny paragraph with some text inside!</p>\n");
+        page.append("<p>Again a tiny paragraph with some text inside!</p>\n");
+        page.append("<ol><li>First list entry</li>");
+        page.append("<li>Sublist<ul><li>Foo</li><li>Bar</li></ul></li>");
+        page.append("<li>Third list entry</li></ol>\n");
+        page.append("<p><b>Parameters</b><br>");
+        Enumeration paramEnum = req.getParameterNames();
+		while (paramEnum.hasMoreElements()) {
+			final String parameterName = (String) paramEnum.nextElement();
+            page.append(parameterName);
+            page.append(": ");
+            page.append(req.getParameter(parameterName));
+            page.append("<br>");
 		}
-		htmlPage += "</p>";
-		htmlPage += "<p><b>Headers</b><br>";
-		for (final Enumeration e = req.getHeaderNames(); e.hasMoreElements();) {
-			final String hn = (String)e.nextElement();
-			htmlPage += hn + ": ";
-			for (final Enumeration e2 = req.getHeaders(hn); e2.hasMoreElements();) {
-				htmlPage += e2.nextElement() + (e2.hasMoreElements() ? ", " : "");
+        page.append("</p><p><b>Headers</b><br>");
+        paramEnum = req.getHeaderNames();
+		while (paramEnum.hasMoreElements()) {
+			final String headerName = (String) paramEnum.nextElement();
+            page.append(headerName);
+            page.append(": ");
+            final Enumeration valueEnum = req.getHeaders(headerName);
+			while (valueEnum.hasMoreElements()) {
+                page.append(valueEnum.nextElement());
+                page.append(valueEnum.hasMoreElements() ? ", " : "");
 			}
-			htmlPage += "<br>";
+            page.append("<br>");
 		}
-		htmlPage += "</p>";
-		resp.setContentType("text/html");
-		resp.setContentLength(htmlPage.getBytes().length);
-		resp.getOutputStream().write(htmlPage.getBytes());
-		resp.getOutputStream().flush();
+        page.append("</p></body>\n</html>");
+		resp.setContentType("text/html; charset=UTF-8");
+        final byte[] output = page.toString().getBytes("UTF-8");
+		resp.setContentLength(output.length);
+		resp.getOutputStream().write(output);
 	}
-
 }
