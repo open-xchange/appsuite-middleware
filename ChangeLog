@@ -13,6 +13,8 @@
    draft message
  - Bugfix #9059: Skipping leading quote character when comparing email
    addresses based on their personal part
+ - Bugfix #7331: Additional check for an SMTP error's return code if init
+   cause is an exceeded storage allocation
 
 * 2007-08-22 - thorben.betten@open-xchange.com
 

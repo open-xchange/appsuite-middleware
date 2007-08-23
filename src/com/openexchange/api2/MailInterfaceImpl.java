@@ -197,6 +197,7 @@ import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.imap.Rights;
 import com.sun.mail.imap.protocol.BODYSTRUCTURE;
 import com.sun.mail.smtp.SMTPMessage;
+import com.sun.mail.smtp.SMTPSendFailedException;
 
 /**
  * MailInterfaceImpl
@@ -5359,6 +5360,13 @@ public class MailInterfaceImpl implements MailInterface {
 			oxme = new OXMailException(MailCode.READ_ONLY_FOLDER, e, e.getMessage());
 		} else if (e instanceof SearchException) {
 			oxme = new OXMailException(MailCode.SEARCH_ERROR, e, e.getMessage());
+		} else if (e instanceof SMTPSendFailedException) {
+			final SMTPSendFailedException exc = (SMTPSendFailedException) e;
+			if (exc.getReturnCode() == 552 || exc.getMessage().toLowerCase(Locale.ENGLISH).indexOf(ERR_MSG_TOO_LARGE) > -1) {
+				oxme = new OXMailException(MailCode.MESSAGE_TOO_LARGE, exc, new Object[0]);
+			} else {
+				oxme = new OXMailException(MailCode.SEND_FAILED, exc, Arrays.toString(exc.getInvalidAddresses()));
+			}
 		} else if (e instanceof SendFailedException) {
 			final SendFailedException exc = (SendFailedException) e;
 			if (exc.getMessage().toLowerCase(Locale.ENGLISH).indexOf(ERR_MSG_TOO_LARGE) > -1) {
