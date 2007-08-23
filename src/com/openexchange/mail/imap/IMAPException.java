@@ -82,6 +82,7 @@ import com.openexchange.imap.IMAPPropertyException;
 import com.openexchange.mail.MailConnection;
 import com.openexchange.mail.MailException;
 import com.sun.mail.iap.ConnectionException;
+import com.sun.mail.smtp.SMTPSendFailedException;
 
 /**
  * IMAPException
@@ -386,7 +387,8 @@ public final class IMAPException extends MailException {
 		/**
 		 * Folder %s does not hold messages and is therefore not selectable
 		 */
-		FOLDER_DOES_NOT_HOLD_MESSAGES("Folder %s does not hold messages and is therefore not selectable", Category.PERMISSION, 56),
+		FOLDER_DOES_NOT_HOLD_MESSAGES("Folder %s does not hold messages and is therefore not selectable",
+				Category.PERMISSION, 56),
 		/**
 		 * Number of search fields (%d) do not match number of search patterns
 		 * (%d)
@@ -543,6 +545,13 @@ public final class IMAPException extends MailException {
 			return new IMAPException(Code.READ_ONLY_FOLDER, e, e.getMessage());
 		} else if (e instanceof SearchException) {
 			return new IMAPException(Code.SEARCH_ERROR, e, e.getMessage());
+		} else if (e instanceof SMTPSendFailedException) {
+			final SMTPSendFailedException exc = (SMTPSendFailedException) e;
+			if (exc.getReturnCode() == 552
+					|| exc.getMessage().toLowerCase(Locale.ENGLISH).indexOf(ERR_MSG_TOO_LARGE) > -1) {
+				return new IMAPException(Code.MESSAGE_TOO_LARGE, exc, new Object[0]);
+			}
+			return new IMAPException(Code.SEND_FAILED, exc, Arrays.toString(exc.getInvalidAddresses()));
 		} else if (e instanceof SendFailedException) {
 			final SendFailedException exc = (SendFailedException) e;
 			if (exc.getMessage().toLowerCase(Locale.ENGLISH).indexOf(ERR_MSG_TOO_LARGE) > -1) {
