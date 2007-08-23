@@ -361,8 +361,7 @@ public class CalendarCommonCollection {
     
     static final UserParticipant[] checkAndModifyAlarm(final CalendarDataObject cdao, UserParticipant check[], final int uid,  final UserParticipant orig[]) {
         if (cdao.containsAlarm()) {
-            final UserParticipant up = new UserParticipant();
-            up.setIdentifier(uid);
+            final UserParticipant up = new UserParticipant(uid);
             if (check == null) {
                 check = new UserParticipant[1];
                 check[0] = up;
