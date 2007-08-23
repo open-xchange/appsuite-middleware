@@ -868,8 +868,10 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             con = cache.getREADConnectionForCONFIGDB();
             final String my_search_pattern = search_pattern.replace('*', '%');
 
-            pstmt = con.prepareStatement("SELECT db_pool_id,url,driver,login,password,hardlimit,max,initial,name,weight,max_units,read_db_pool_id,write_db_pool_id FROM db_pool,db_cluster WHERE ( db_pool_id = db_cluster.write_db_pool_id OR db_pool_id = db_cluster.read_db_pool_id) AND name LIKE ?");
+            pstmt = con.prepareStatement("SELECT db_pool_id,url,driver,login,password,hardlimit,max,initial,name,weight,max_units,read_db_pool_id,write_db_pool_id FROM db_pool JOIN db_cluster ON ( db_pool_id = db_cluster.write_db_pool_id OR db_pool_id = db_cluster.read_db_pool_id) WHERE name LIKE ? OR db_pool_id LIKE ? OR url LIKE ?");
             pstmt.setString(1, my_search_pattern);
+            pstmt.setString(2, my_search_pattern);
+            pstmt.setString(3, my_search_pattern);
             final ResultSet rs = pstmt.executeQuery();
             final ArrayList<Database> tmp = new ArrayList<Database>();
 
