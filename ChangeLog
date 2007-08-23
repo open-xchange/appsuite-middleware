@@ -9,6 +9,8 @@
    (infostore) files to a (smtp) message
  - Bugfix #9069: Checking if destination folder is a subsequent folder on
    move operation
+ - Bugfix #7928: User's Vcard is not attached twice anymore when sending a
+   draft message
 
 * 2007-08-22 - thorben.betten@open-xchange.com
 

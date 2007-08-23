@@ -378,17 +378,14 @@ public final class MessageFiller {
 				final String fileName = MimeUtility.encodeText(new StringBuilder(session.getUserObject()
 						.getDisplayName().replaceAll(" +", STR_EMPTY)).append(".vcf").toString(), IMAPProperties
 						.getDefaultMimeCharset(), ENC_Q);
-				if (msgObj.isDraft()) {
-					for (int i = 1; i < size; i++) {
-						final JSONMessageAttachmentObject mao = msgObj.getMsgAttachments().get(i);
-						if (fileName.equalsIgnoreCase(mao.getFileName())) {
-							/*
-							 * VCard already attached in draft message
-							 */
-							break AppendVCard;
-						}
+				for (int i = 1; i < size; i++) {
+					final JSONMessageAttachmentObject mao = msgObj.getMsgAttachments().get(i);
+					if (fileName.equalsIgnoreCase(mao.getFileName())) {
+						/*
+						 * VCard already attached in (formerly draft) message
+						 */
+						break AppendVCard;
 					}
-
 				}
 				if (primaryMultipart == null) {
 					primaryMultipart = new MimeMultipart();
