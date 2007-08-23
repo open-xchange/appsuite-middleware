@@ -972,9 +972,14 @@ public class CalendarOperation implements SearchIterator {
                                     np[a].setIsModified(true);
                                     np[a].setAlarmMinutes(op[bs].getAlarmMinutes());
                                 }
-                                if (!np[a].containsConfirm()) {
+                                if (!np[a].containsConfirm() || time_change) {
                                     np[a].setIsModified(true);
-                                    np[a].setConfirm(op[bs].getConfirm());
+                                    if (!time_change) {
+                                        np[a].setConfirm(op[bs].getConfirm());
+                                    } else {
+                                        np[a].setConfirm(CalendarDataObject.NONE);
+                                        np[a].setConfirmMessage(null);
+                                    }
                                 }
                                 if (!np[a].containsConfirmMessage()) {
                                     np[a].setIsModified(true);

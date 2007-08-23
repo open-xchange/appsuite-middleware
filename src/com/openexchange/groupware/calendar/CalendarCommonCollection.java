@@ -330,11 +330,14 @@ public class CalendarCommonCollection {
         final UserParticipant check[] = cdao.getUsers();
         if (check != null && check.length > 0) {
             Arrays.sort(check);
-            if (Arrays.binarySearch(check, up) < 0) {
+            int x = Arrays.binarySearch(check, up);
+            if (x < 0) {
                 final UserParticipant newup[] = new UserParticipant[check.length+1];
                 System.arraycopy(check, 0, newup, 0, check.length);
                 newup[check.length] = up;
                 cdao.setUsers(newup);
+            } else if (!cdao.containsObjectID() && !check[x].containsConfirm() && check[x].getConfirm() == CalendarDataObject.NONE) {
+                check[x].setConfirm(CalendarDataObject.ACCEPT);
             }
         } else {
             final UserParticipant newup[] = new UserParticipant[1];
