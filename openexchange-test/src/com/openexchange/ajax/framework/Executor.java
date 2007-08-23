@@ -57,9 +57,15 @@ public class Executor extends Assert {
     public static AbstractAJAXResponse execute(final AJAXSession session,
         final AJAXRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
-        final String urlString = AJAXConfig.getProperty(AJAXConfig.Property
-            .PROTOCOL) + "://" + AJAXConfig.getProperty(AJAXConfig.Property
-                .HOSTNAME) + request.getServletPath();
+        LOG.trace("Logging in.");
+		return execute(session, request, AJAXConfig.getProperty(AJAXConfig.Property.PROTOCOL), AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME));
+	}
+	
+	public static AbstractAJAXResponse execute(final AJAXSession session,
+        final AJAXRequest request, final String protocol, final String hostname) throws AjaxException, IOException,
+        SAXException, JSONException {
+		
+		final String urlString = protocol + "://" + hostname + request.getServletPath();
         final WebRequest req;
         switch (request.getMethod()) {
         case GET:
