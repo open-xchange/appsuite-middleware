@@ -2,6 +2,8 @@ package com.openexchange.groupware;
 
 import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.contexts.ContextStorage;
+import com.openexchange.groupware.reminder.ReminderHandler;
+import com.openexchange.groupware.reminder.ReminderObject;
 import java.sql.Connection;
 import java.util.Calendar;
 import java.util.Date;
@@ -2550,6 +2552,73 @@ public class AppointmentBugTests extends TestCase {
         } catch(Exception ignore) { 
             ignore.printStackTrace();
         }                        
+        
+    }
+ 
+    /*
+    0. Assume the current time is 09:00
+    1. Create a new appointment on 22:00, set a 15 Minute reminder and save
+    2. Move the appointment to 09:30
+    3. Wait till the reminder occurs
+    -> The reminder does not pop up on 09:30
+    */
+    public void testBug7734() throws Throwable {
+        Context context = new ContextImpl(contextid);
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestSearch");        
+        int fid = AppointmentBugTests.getPrivateFolder(userid);
+        CalendarSql csql = new CalendarSql(so);
+        
+        CalendarDataObject cdao = new CalendarDataObject();
+        cdao.setContext(context);
+        CalendarTest.fillDatesInDao(cdao);
+        cdao.setParentFolderID(fid);
+        cdao.setTimezone(TIMEZONE);
+        cdao.setTitle("testBug7734");        
+        
+        int alarm = 60;
+        long long_alarm = alarm*60*1000L;
+        
+        long start_long = cdao.getStartDate().getTime()+CalendarRecurringCollection.MILLI_DAY;
+        Date start_date = new Date(start_long);
+        long end_long = cdao.getEndDate().getTime()+CalendarRecurringCollection.MILLI_DAY;
+        Date end_date = new Date(end_long);
+        cdao.setStartDate(start_date);
+        cdao.setEndDate(end_date);
+        cdao.setAlarm(alarm);
+        
+        Date check_alarm = new Date(start_long - long_alarm);
+        
+        cdao.setIgnoreConflicts(true);
+        csql.insertAppointmentObject(cdao);
+        int object_id = cdao.getObjectID();
+        assertTrue("Got object_id", object_id > 0);
+        
+        
+        
+        ReminderHandler rh = new ReminderHandler(getContext());        
+        ReminderObject ro = rh.loadReminder(object_id, userid, Types.APPOINTMENT);
+        Date check_date = ro.getDate();
+        assertEquals("Check correct Alarm", check_alarm, check_date);
+        
+        CalendarDataObject update = new CalendarDataObject();
+        update.setContext(context);
+        update.setObjectID(object_id);
+        
+        long start_long_update = start_long - 3600000L;
+        Date update_start = new Date(start_long_update);
+        Date update_end = new Date(end_long - 3600000L);
+        Date check_alarm_update =  new Date(start_long_update - 3600000L);
+        
+        update.setStartDate(update_start);
+        update.setEndDate(update_end);
+        update.setIgnoreConflicts(true);
+        
+        csql.updateAppointmentObject(update, fid, new Date(SUPER_END));
+        
+        ro = rh.loadReminder(object_id, userid, Types.APPOINTMENT);
+        Date check_date_update = ro.getDate();
+        
+        assertEquals("Check correct Alarm", check_alarm_update, check_date_update);
         
     }
     
