@@ -2621,5 +2621,88 @@ public class AppointmentBugTests extends TestCase {
         assertEquals("Check correct Alarm", check_alarm_update, check_date_update);
         
     }
+ 
+    /*
+    1) Create an appointment and invite user B
+    2) b accept the appointment
+    3) Change appointment from today to tomorrow
+
+    result: Status is still accepted although it should be waiting.
+
+    Status should always be reset when date, time, location change.
+    */
+    public void testBug7273() throws Throwable {
+        String user2 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant3", "");        
+        int userid2 = resolveUser(user2);        
+        int fid = AppointmentBugTests.getPrivateFolder(userid);
+        int fid2 = AppointmentBugTests.getPrivateFolder(userid2);
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestIdentifier");
+        SessionObject so2 = SessionObjectWrapper.createSessionObject(userid2, getContext().getContextId(), "myTestIdentifier");
+       
+        CalendarDataObject cdao = new CalendarDataObject();
+        cdao.setContext(so.getContext());
+        cdao.setParentFolderID(fid);
+        cdao.setTitle("testBug7273");
+        cdao.setIgnoreConflicts(true);
+        CalendarTest.fillDatesInDao(cdao);
+        
+        UserParticipant userA = new UserParticipant(userid);
+        UserParticipant userB = new UserParticipant(userid2);
+        
+        cdao.setUsers(new UserParticipant[] { userA, userB });        
+        
+        CalendarSql csql = new CalendarSql(so);
+        CalendarSql csql2 = new CalendarSql(so2);
+        
+        csql.insertAppointmentObject(cdao);        
+        int object_id = cdao.getObjectID();        
+        assertTrue("Got object_id", object_id > 0);
+        
+        CalendarDataObject temp = csql2.getObjectById(object_id, fid2);
+        UserParticipant up[] = temp.getUsers();
+
+        for (int a = 0; a < up.length; a++) {
+            if (up[a].getIdentifier() == userid) {
+                assertEquals("Check confirm state for user "+up[a].getIdentifier(), AppointmentObject.ACCEPT, up[a].getConfirm());
+            }
+        }        
+        
+        CalendarDataObject update = new CalendarDataObject();
+        update.setObjectID(object_id);
+        update.setContext(so2.getContext());
+        update.setTimezone(TIMEZONE);
+        update.setLocation("UPDATE");
+        for (int a = 0; a < up.length; a++) {
+            if (up[a].getIdentifier() == userid2) {
+                up[a].setConfirm(AppointmentObject.ACCEPT);
+            }
+        }
+        update.setUsers(up);
+        update.setIgnoreConflicts(true);
+        csql2.updateAppointmentObject(update, fid2, new Date(SUPER_END));
+        
+        CalendarDataObject temp2 = csql.getObjectById(object_id, fid);
+        UserParticipant up_check2[] = temp2.getUsers();        
+        for (int a = 0; a < up_check2.length; a++) {
+            assertEquals("Check confirm state for user "+up_check2[a].getIdentifier(), AppointmentObject.ACCEPT, up_check2[a].getConfirm());
+        }
+        
+        CalendarDataObject update_with_time_change = new CalendarDataObject();
+        update_with_time_change.setObjectID(object_id);
+        update_with_time_change.setContext(so.getContext());
+        update_with_time_change.setTimezone(TIMEZONE);
+        update_with_time_change.setNote("UPDATE WITH TIME CHANGE");
+        update_with_time_change.setStartDate(new Date(cdao.getStartDate().getTime() - 3600000L));
+        update_with_time_change.setEndDate(new Date(cdao.getEndDate().getTime() - 3600000L));
+        update_with_time_change.setIgnoreConflicts(true);
+        
+        csql.updateAppointmentObject(update_with_time_change, fid, new Date(SUPER_END));
+        
+        CalendarDataObject temp3 = csql.getObjectById(object_id, fid);
+        UserParticipant up_check3[] = temp3.getUsers();        
+        for (int a = 0; a < up_check3.length; a++) {
+            assertEquals("Check confirm state for user "+up_check3[a].getIdentifier(), AppointmentObject.NONE, up_check3[a].getConfirm());
+        }
+    }
     
 }
