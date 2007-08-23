@@ -163,7 +163,7 @@ public class AJPv13Exception extends AbstractOXException {
 		 * process is already listening on this port.
 		 */
 		STARTUP_ERROR(
-				"AJP server socket could not be bind to port %d. Probably another process is already listening on this port.",
+				"AJP server socket could not be bound to port %d. Probably another process is already listening on this port.",
 				Category.SOCKET_CONNECTION, 21);
 
 		private final String message;
