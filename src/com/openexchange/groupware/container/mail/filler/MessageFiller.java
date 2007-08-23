@@ -651,7 +651,8 @@ public final class MessageFiller {
 			msgBodyPart.setContent(mao.getContent(), contentType == null ? mao.getContentType() : contentType);
 			mp.addBodyPart(msgBodyPart);
 		} else {
-			final ContentType contentType = new ContentType(mao.getContentType());
+			final ContentType contentType = new ContentType(mao.getContentType() == null
+					|| mao.getContentType().length() == 0 ? MIME_APPLICATION_OCTET_STREAM : mao.getContentType());
 			if (MIME_APPLICATION_OCTET_STREAM.equalsIgnoreCase(contentType.getBaseType()) && mao.getFileName() != null) {
 				/*
 				 * Try to determine MIME type via JAF
