@@ -65,6 +65,10 @@ public class AJAXSession {
         this(new WebConversation(), null);
     }
 
+	public AJAXSession(final WebConversation conversation) {
+        this(conversation, null);
+    }
+	
     public AJAXSession(final WebConversation conversation, final String id) {
         super();
         this.conversation = conversation;
