@@ -3612,6 +3612,13 @@ public class MailInterfaceImpl implements MailInterface {
 			 */
 			final String trashFullname = prepareMailFolderParam(getTrashFolder());
 			if (!usm.isHardDeleteMsgs() && !hardDelete && !(folder.equals(trashFullname))) {
+				if (null == trashFullname) {
+					// TODO: Bug#8992 -> What to do if trash folder is null
+					if (LOG.isErrorEnabled()) {
+						LOG.error("\n\tDefault trash folder is not set: aborting delete operation");
+					}
+					throw new OXMailException(MailCode.MISSING_DEFAULT_FOLDER_NAME, "trash");
+				}
 				/*
 				 * Copy messages to folder "TRASH"
 				 */

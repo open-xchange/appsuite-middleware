@@ -154,13 +154,20 @@ public final class IMAPSort {
 		}
 
 		private static String getCompareStringFromAddress(final Address addr, final Locale locale) {
-			if (addr instanceof InternetAddress) {
-				final InternetAddress ia1 = (InternetAddress) addr;
-				return ia1.getPersonal() != null && ia1.getPersonal().length() > 0 ? ia1.getPersonal().toLowerCase(
-						locale) : ia1.getAddress().toLowerCase(Locale.ENGLISH);
-			} else if (addr instanceof DummyAddress) {
+			if (addr instanceof DummyAddress) {
 				final DummyAddress da1 = (DummyAddress) addr;
 				return da1.getAddress().toLowerCase(Locale.ENGLISH);
+			} else if (addr instanceof InternetAddress) {
+				final InternetAddress ia1 = (InternetAddress) addr;
+				final String personal = ia1.getPersonal();
+				if (personal != null && personal.length() > 0) {
+					/*
+					 * Personal is present. Skip leading quotes.
+					 */
+					return personal.charAt(0) == '\'' || personal.charAt(0) == '"' ? personal.substring(1).toLowerCase(
+							locale) : personal.toLowerCase(locale);
+				}
+				return ia1.getAddress().toLowerCase(Locale.ENGLISH);
 			} else {
 				return STR_EMPTY;
 			}

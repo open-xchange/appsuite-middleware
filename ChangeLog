@@ -11,6 +11,8 @@
    move operation
  - Bugfix #7928: User's Vcard is not attached twice anymore when sending a
    draft message
+ - Bugfix #9059: Skipping leading quote character when comparing email
+   addresses based on their personal part
 
 * 2007-08-22 - thorben.betten@open-xchange.com
 
