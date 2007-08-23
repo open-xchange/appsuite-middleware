@@ -2701,7 +2701,11 @@ public class AppointmentBugTests extends TestCase {
         CalendarDataObject temp3 = csql.getObjectById(object_id, fid);
         UserParticipant up_check3[] = temp3.getUsers();        
         for (int a = 0; a < up_check3.length; a++) {
-            assertEquals("Check confirm state for user "+up_check3[a].getIdentifier(), AppointmentObject.NONE, up_check3[a].getConfirm());
+            if (up_check3[a].getIdentifier() == userid2) {
+                assertEquals("Check confirm state for user "+up_check3[a].getIdentifier(), AppointmentObject.NONE, up_check3[a].getConfirm());
+            } else if (up_check3[a].getIdentifier() == userid) {
+                assertEquals("Check confirm state for user "+up_check3[a].getIdentifier(), AppointmentObject.ACCEPT, up_check3[a].getConfirm());
+            }
         }
     }
     

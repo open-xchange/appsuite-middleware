@@ -1783,7 +1783,7 @@ public class CalendarTest extends TestCase {
                         Date check_date = ro.getDate();
                         assertEquals("Check correct Alarm", new Date(test_date.getTime()-(30*60000)), check_date);                        
                     } else if (up_test[a].getIdentifier() == userid) {
-                        assertEquals("Check Confirm State", CalendarDataObject.NONE, up_test[a].getConfirm());
+                        assertEquals("Check Confirm State", CalendarDataObject.ACCEPT, up_test[a].getConfirm());
                         ReminderHandler rh = new ReminderHandler(getContext());
                         ReminderObject ro = rh.loadReminder(object_id, userid, Types.APPOINTMENT);
                         Date check_date = ro.getDate();
