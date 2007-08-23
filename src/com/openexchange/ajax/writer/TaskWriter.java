@@ -219,6 +219,9 @@ public class TaskWriter extends CalendarWriter {
             case Task.PRIVATE_FLAG:
                 writeValue(taskObject.getPrivateFlag(), jsonArray);
                 break;
+            case Task.ALARM:
+                writeValue(taskObject.getAlarm(), timeZone, jsonArray);
+                break;
 			default: 
 				LOG.warn("missing field in mapping: " + field);
 		}
