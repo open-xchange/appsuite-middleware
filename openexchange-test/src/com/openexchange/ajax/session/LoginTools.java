@@ -21,10 +21,22 @@ public class LoginTools {
         return (LoginResponse) Executor.execute(session, request);
     }
 
+    public static LoginResponse login(final AJAXSession session,
+        final LoginRequest request, final String protocol, final String hostname) throws AjaxException, IOException,
+        SAXException, JSONException {
+        return (LoginResponse) Executor.execute(session, request, protocol, hostname);
+    }
+
     public static LogoutResponse logout(final AJAXSession session,
         final LogoutRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
         return (LogoutResponse) Executor.execute(session, request);
+    }
+	
+    public static LogoutResponse logout(final AJAXSession session,
+        final LogoutRequest request, final String protocol, final String hostname) throws AjaxException, IOException,
+        SAXException, JSONException {
+        return (LogoutResponse) Executor.execute(session, request, protocol, hostname);
     }
 
     public static RedirectResponse redirect(final AJAXSession session,
