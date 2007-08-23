@@ -290,8 +290,9 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
                 parts);
             // Check access rights
             final int folderId = task.getParentFolderID();
-            Permission.checkCreateInFolder(session, folderId);
             final FolderObject folder = Tools.getFolder(ctx, folderId);
+            final UserConfiguration userConfig = session.getUserConfiguration();
+            Permission.checkCreate(ctx, user, userConfig, folder);
             if (task.getPrivateFlag() && (Tools.isFolderPublic(folder)
                 || Tools.isFolderShared(folder, user))) {
                 throw new TaskException(Code.PRIVATE_FLAG, folderId);

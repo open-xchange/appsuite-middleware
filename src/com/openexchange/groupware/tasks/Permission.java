@@ -168,33 +168,33 @@ public final class Permission {
     }
 
     /**
-     * Checks if the folder is a tasks folder and if the user is allowed to
-     * create object in that folder.
-     * @param session Session.
-     * @param folderId unique identifier of the folder.
-     * @throws TaskException if an error occurs or the user is not allowed to
-     * create object in that folder.
+     * Checks if a user is allowed to create a task in a folder.
+     * @param ctx Context.
+     * @param user User.
+     * @param userConfig Module configuration of the user.
+     * @param folder Folder in that a task should be created.
+     * @throws TaskException if the user is not allowed to create the task.
      */
-    static void checkCreateInFolder(final SessionObject session,
-        final int folderId) throws TaskException {
-        final UserConfiguration config = session.getUserConfiguration();
-        final User user = session.getUserObject();
-        if (!config.hasTask()) {
+    static void checkCreate(final Context ctx, final User user,
+        final UserConfiguration userConfig, final FolderObject folder)
+        throws TaskException {
+        if (!userConfig.hasTask()) {
             throw new TaskException(Code.NO_TASKS, user.getId());
         }
-        final Context ctx = session.getContext();
-        if (!Tools.isFolderTask(ctx, folderId)) {
-            throw new TaskException(Code.NOT_TASK_FOLDER, "", folderId);
+        if (!Tools.isFolderTask(folder)) {
+            throw new TaskException(Code.NOT_TASK_FOLDER, "", folder
+                .getObjectID());
         }
         final OCLPermission permission;
         try {
-            permission = OXFolderTools.getEffectiveFolderOCL(folderId,
-                user.getId(), user.getGroups(), ctx, config);
+            permission = new OXFolderAccess(ctx).getFolderPermission(folder
+                .getObjectID(), user.getId(), userConfig);
         } catch (OXException e) {
             throw new TaskException(e);
         }
         if (!permission.canCreateObjects()) {
-            throw new TaskException(Code.NO_CREATE_PERMISSION, "", folderId);
+            throw new TaskException(Code.NO_CREATE_PERMISSION, "", folder
+                .getObjectID());
         }
     }
 

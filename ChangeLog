@@ -1,5 +1,7 @@
 * 2007-08-23 - marcus.klein@open-xchange.com
 
+ - Bugfix #8903: Added check for create permissions on destination folder if
+   tasks are moved.
  - Bugfix #9013: Added the alarm attribute as possible list attribute.
  - Bugfix #9045: Fixed html page in TestServlet.
 

@@ -344,6 +344,7 @@ class UpdateData {
             // folder.
             Permission.checkDelete(ctx, user, userConfig, folder,
                 getOrigTask());
+            Permission.checkCreate(ctx, user, userConfig, getDestFolder());
             // move out of a shared folder is not allowed.
             if (Tools.isFolderShared(folder, user)) {
                 throw new TaskException(Code.NO_SHARED_MOVE,
