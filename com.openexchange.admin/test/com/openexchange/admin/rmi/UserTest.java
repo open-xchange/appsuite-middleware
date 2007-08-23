@@ -191,7 +191,7 @@ public class UserTest extends AbstractTest {
         fail("user not exists expected");
     }
     
-    @Test
+    //@Test
     public void _disabledtestBug9027() throws Exception {
         
         // The same user cannot be created after if 
