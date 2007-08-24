@@ -1,3 +1,8 @@
+* 2007-08-24 - martin.kauss@open-xchange.com
+
+ - Fixed bug #9089. It was possible to set a private flag in a public folder.
+   This has been fixed.
+
 * 2007-08-23 - marcus.klein@open-xchange.com
 
  - Bugfix #8903: Added check for create permissions on destination folder if
