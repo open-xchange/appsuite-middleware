@@ -2708,5 +2708,87 @@ public class AppointmentBugTests extends TestCase {
             }
         }
     }
+
+    /*
+    Steps to Reproduce:
+    1. Create a simple appointment in a public folder
+    2. Save the appointment
+    3. Open the appointment for editing
+    4. Activate the checkbox 'private' and save the appointment
+
+    Actual Results:
+    The appointment is saved and marked as private after editing it. 
+
+    Expected Results:
+    It shouldn't be possible to save the appointment in the public folder with the
+    private flag set when creating or editing it.
+    */     
+    public void testBug9089() throws Throwable {
+        Context context = new ContextImpl(contextid);
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestSearch");
+        Connection readcon = DBPool.pickup(context);
+        Connection writecon = DBPool.pickupWriteable(context);        
+        int fid = AppointmentBugTests.getPrivateFolder(userid);
+        final OXFolderManager oxma = new OXFolderManagerImpl(so, readcon, writecon);
+        FolderObject fo = new FolderObject();
+        CalendarSql csql = new CalendarSql(so);
+        OCLPermission oclp1 = new OCLPermission();
+        oclp1.setEntity(userid);
+        oclp1.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+        oclp1.setFolderAdmin(true);
+        OCLPermission oclp2 = new OCLPermission();
+        fo.setFolderName("testPublicFolder9089");
+        fo.setParentFolderID(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
+        fo.setModule(FolderObject.CALENDAR);
+        fo.setType(FolderObject.PUBLIC);
+        fo.setPermissionsAsArray(new OCLPermission[] { oclp1 });
+        int public_folder_id = 0;
+        try {
+            fo = oxma.createFolder(fo, true, System.currentTimeMillis());
+            public_folder_id = fo.getObjectID();
+            
+            CalendarDataObject cdao = new CalendarDataObject();
+            cdao.setContext(so.getContext());
+            cdao.setTitle("testBug9089");
+            CalendarTest.fillDatesInDao(cdao);
+            cdao.setParentFolderID(public_folder_id);
+            cdao.setIgnoreConflicts(true);
+            
+            csql.insertAppointmentObject(cdao);
+            int object_id = cdao.getObjectID();
+            assertTrue("Object was created", object_id > 0);            
+            
+            CalendarDataObject update = new CalendarDataObject();
+            update.setContext(so.getContext());
+            update.setNote("Mark as private should not worl!");
+            update.setObjectID(object_id);
+            update.setIgnoreConflicts(true);
+            update.setPrivateFlag(true);
+            try {
+                csql.updateAppointmentObject(update, public_folder_id, new Date(SUPER_END));
+                fail("Set the private flag is not allowed in a public folder");
+            } catch(OXCalendarException oxca) {
+                // this is what we want
+                assertEquals("Check correct error number ", OXCalendarException.Code.PIVATE_FLAG_ONLY_IN_PRIVATE_FOLDER.getDetailNumber(), oxca.getDetailNumber());
+            }       
+        } finally {
+            try {
+                if (public_folder_id > 0) {
+                    oxma.deleteFolder(new FolderObject(public_folder_id), true, SUPER_END);
+                } else {
+                    fail("Public folder was not created");
+                }
+            } catch(Exception e) {
+                e.printStackTrace();
+                fail("Error deleting folder object.");
+            }
+        }
+        try {
+            DBPool.push(context, readcon);
+            DBPool.pushWrite(context, writecon);        
+        } catch(Exception ignore) { 
+            ignore.printStackTrace();
+        }
+    }
     
 }
