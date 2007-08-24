@@ -98,46 +98,6 @@ public class OXConcurrentModificationException extends OXException {
 	}
 
 	/**
-	 * use
-	 * <code>OXConcurrentModificationException(Component, int, Object...)</code>
-	 * 
-	 * @deprecated
-	 */
-	public OXConcurrentModificationException() {
-		super();
-	}
-
-	/**
-	 * use
-	 * <code>OXConcurrentModificationException(Component, int, Object...)</code>
-	 * 
-	 * @deprecated
-	 */
-	public OXConcurrentModificationException(String message) {
-		super(message);
-	}
-
-	/**
-	 * use
-	 * <code>OXConcurrentModificationException(Component, int, Object...)</code>
-	 * 
-	 * @deprecated
-	 */
-	public OXConcurrentModificationException(String message, Exception exc) {
-		super(message, exc);
-	}
-
-	/**
-	 * use
-	 * <code>OXConcurrentModificationException(Component, int, Object...)</code>
-	 * 
-	 * @deprecated
-	 */
-	public OXConcurrentModificationException(Exception exc) {
-		super(exc);
-	}
-
-	/**
 	 * Concurrent Modification
 	 * <p>
 	 * Constructs a new <code>OXConcurrentModificationException</code>

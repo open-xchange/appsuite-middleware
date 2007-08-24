@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.cache;
 
 import com.openexchange.api2.OXException;
@@ -57,34 +55,6 @@ import com.openexchange.groupware.Component;
 public class OXCachingException extends OXException {
 	
 	private static final long serialVersionUID = 5892452777053575741L;
-
-	/**
-     * @deprecated use constructor with error code.
-	 */
-    public OXCachingException(String msg) {
-		super(msg);
-	}
-
-    /**
-     * @deprecated use constructor with error code.
-     */
-    public OXCachingException() {
-        super();
-    }
-
-    /**
-     * @deprecated use constructor with error code.
-     */
-    public OXCachingException(final String message, final Throwable cause) {
-        super(message, cause);
-    }
-
-    /**
-     * @deprecated use constructor with error code.
-     */
-    public OXCachingException(final Throwable cause) {
-        super(cause);
-    }
 
     /**
      * Initializes a new exception using the information provides by the code.
