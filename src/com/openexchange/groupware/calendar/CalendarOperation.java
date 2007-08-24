@@ -1121,6 +1121,9 @@ public class CalendarOperation implements SearchIterator {
         }
         if (cdao.containsPrivateFlag()) {
             if (cdao.getPrivateflag() == 1) {
+                if (cdao.getFolderType() != CalendarCommonCollection.PRIVATE) {
+                    throw new OXCalendarException(OXCalendarException.Code.PIVATE_FLAG_ONLY_IN_PRIVATE_FOLDER);
+                }
                 if (edao == null || (edao != null && edao.containsPrivateFlag() && edao.getPrivateflag() == 1)) {
                     if (cdao.containsObjectID() && cdao.getSharedFolderOwner() != 0 && cdao.getSharedFolderOwner() != uid) {
                         throw new OXCalendarException(OXCalendarException.Code.MOVE_TO_SHARED_FOLDER_NOT_SUPPORTED);
