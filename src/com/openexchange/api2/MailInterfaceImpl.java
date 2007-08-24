@@ -5321,19 +5321,15 @@ public class MailInterfaceImpl implements MailInterface {
 			final boolean temporary = e.getMessage() != null
 					&& ERR_TMP.equals(e.getMessage().toLowerCase(Locale.ENGLISH));
 			if (imapProps != null && ctx != null) {
+				oxme = new OXMailException(MailCode.LOGIN_FAILED, e, imapProps.getImapServer(), Integer
+						.valueOf(imapProps.getUser()), Integer.valueOf(ctx.getContextId()));
 				if (temporary) {
-					oxme = new OXMailException(MailCode.LOGIN_FAILED, e, imapProps.getImapServer(), Integer
-							.valueOf(imapProps.getUser()), Integer.valueOf(ctx.getContextId()));
-				} else {
-					oxme = new OXMailException(MailCode.INVALID_CREDENTIALS, e, imapProps.getImapServer(),
-							com.openexchange.tools.oxfolder.OXFolderManagerImpl.getUserName(imapProps.getUser(), ctx),
-							Integer.valueOf(ctx.getContextId()));
+					oxme.setCategory(Category.TRY_AGAIN);
 				}
 			} else {
+				oxme = new OXMailException(MailCode.LOGIN_FAILED, e, STR_EMPTY, STR_EMPTY, STR_EMPTY);
 				if (temporary) {
-					oxme = new OXMailException(MailCode.LOGIN_FAILED, e, STR_EMPTY, STR_EMPTY, STR_EMPTY);
-				} else {
-					oxme = new OXMailException(MailCode.INVALID_CREDENTIALS, e, STR_EMPTY, STR_EMPTY, STR_EMPTY);
+					oxme.setCategory(Category.TRY_AGAIN);
 				}
 			}
 		} else if (e instanceof FolderClosedException) {
