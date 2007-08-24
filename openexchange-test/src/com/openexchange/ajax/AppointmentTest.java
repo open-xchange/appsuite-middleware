@@ -196,7 +196,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 	
 	public static int insertAppointment(WebConversation webCon,
 			AppointmentObject appointmentObj, TimeZone userTimeZone,
-			String host, String session) throws Exception, OXConflictException {
+			String host, String session) throws TestException, Exception, OXConflictException {
 		host = appendPrefix(host);
 		
 		int objectId = 0;
@@ -225,7 +225,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 		final Response response = Response.parse(resp.getText());
 		
 		if (response.hasError()) {
-			fail("json error: " + response.getErrorMessage());
+			throw new TestException("json error: " + response.getErrorMessage());
 		}
 		
 		JSONObject data = (JSONObject) response.getData();
@@ -279,7 +279,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 		final Response response = Response.parse(resp.getText());
 		
 		if (response.hasError()) {
-			fail("json error: " + response.getErrorMessage());
+			throw new TestException("json error: " + response.getErrorMessage());
 		}
 		
 		JSONObject data = (JSONObject) response.getData();
