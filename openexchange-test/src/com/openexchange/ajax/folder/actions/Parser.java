@@ -47,51 +47,64 @@
  *
  */
 
-package com.openexchange.ajax.folder;
+package com.openexchange.ajax.folder.actions;
 
-import java.io.IOException;
-
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
-import org.xml.sax.SAXException;
 
-import com.openexchange.ajax.folder.actions.DeleteRequest;
-import com.openexchange.ajax.folder.actions.InsertRequest;
-import com.openexchange.ajax.folder.actions.ListRequest;
-import com.openexchange.ajax.folder.actions.ListResponse;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.CommonDeleteResponse;
-import com.openexchange.ajax.framework.CommonInsertResponse;
-import com.openexchange.ajax.framework.Executor;
-import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.ajax.parser.FolderParser;
+import com.openexchange.api2.OXException;
+import com.openexchange.groupware.container.FolderObject;
 
 /**
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class FolderTools {
+public final class Parser {
+
+    /**
+     * Logger.
+     */
+    private static final Log LOG = LogFactory.getLog(Parser.class);
 
     /**
      * Prevent instanciation.
      */
-    private FolderTools() {
+    private Parser() {
         super();
     }
 
-    public static CommonInsertResponse insert(final AJAXClient client,
-        final InsertRequest request) throws AjaxException, IOException,
-        SAXException, JSONException {
-        return (CommonInsertResponse) Executor.execute(client, request);
-    }
-
-    public static CommonDeleteResponse delete(final AJAXClient client,
-        final DeleteRequest request) throws AjaxException, IOException,
-        SAXException, JSONException {
-        return (CommonDeleteResponse) Executor.execute(client, request);
-    }
-
-    public static ListResponse list(final AJAXClient client,
-        final ListRequest request) throws AjaxException, IOException,
-        SAXException, JSONException {
-        return (ListResponse) Executor.execute(client, request);
+    public static void parse(final Object value, final int column,
+        final FolderObject folder) throws OXException {
+        switch (column) {
+        case FolderObject.OBJECT_ID:
+            if (value instanceof Integer) {
+                folder.setObjectID((Integer) value);
+            } else if (value instanceof String) {
+                folder.setFullName((String) value);
+            }
+            break;
+        case FolderObject.MODULE:
+            folder.setModule(FolderParser.getModuleFromString((String) value,
+                folder.containsObjectID() ? folder.getObjectID() : -1));
+            break;
+        case FolderObject.FOLDER_NAME:
+            folder.setFolderName((String) value);
+            break;
+        case FolderObject.SUBFOLDERS:
+            folder.setSubfolderFlag((Boolean) value);
+            break;
+        case FolderObject.STANDARD_FOLDER:
+            folder.setDefaultFolder((Boolean) value);
+            break;
+        case FolderObject.CREATED_BY:
+            if (null != value) {
+                folder.setCreatedBy((Integer) value);
+            }
+            break;
+        default:
+            LOG.error("Can't parse column: " + column);
+        }
     }
 }

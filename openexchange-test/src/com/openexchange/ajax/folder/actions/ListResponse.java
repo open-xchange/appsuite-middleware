@@ -47,51 +47,55 @@
  *
  */
 
-package com.openexchange.ajax.folder;
+package com.openexchange.ajax.folder.actions;
 
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
-import org.json.JSONException;
-import org.xml.sax.SAXException;
-
-import com.openexchange.ajax.folder.actions.DeleteRequest;
-import com.openexchange.ajax.folder.actions.InsertRequest;
-import com.openexchange.ajax.folder.actions.ListRequest;
-import com.openexchange.ajax.folder.actions.ListResponse;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.CommonDeleteResponse;
-import com.openexchange.ajax.framework.CommonInsertResponse;
-import com.openexchange.ajax.framework.Executor;
-import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.CommonListResponse;
+import com.openexchange.api2.OXException;
+import com.openexchange.groupware.container.FolderObject;
 
 /**
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class FolderTools {
+public class ListResponse extends CommonListResponse {
+
+    private int[] columns;
 
     /**
-     * Prevent instanciation.
+     * @param response
      */
-    private FolderTools() {
-        super();
+    public ListResponse(final Response response) {
+        super(response);
     }
 
-    public static CommonInsertResponse insert(final AJAXClient client,
-        final InsertRequest request) throws AjaxException, IOException,
-        SAXException, JSONException {
-        return (CommonInsertResponse) Executor.execute(client, request);
+    /**
+     * @return the columns
+     */
+    public int[] getColumns() {
+        return columns;
     }
 
-    public static CommonDeleteResponse delete(final AJAXClient client,
-        final DeleteRequest request) throws AjaxException, IOException,
-        SAXException, JSONException {
-        return (CommonDeleteResponse) Executor.execute(client, request);
+    /**
+     * @param columns the columns to set
+     */
+    void setColumns(final int[] columns) {
+        this.columns = columns;
     }
 
-    public static ListResponse list(final AJAXClient client,
-        final ListRequest request) throws AjaxException, IOException,
-        SAXException, JSONException {
-        return (ListResponse) Executor.execute(client, request);
+    public Iterator<FolderObject> getFolder() throws OXException {
+        final List<FolderObject> folders = new ArrayList<FolderObject>(); 
+        for (Object[] rows : this) {
+            final FolderObject folder = new FolderObject();
+            for (int columnPos = 0; columnPos < columns.length; columnPos++) {
+                Parser.parse(rows[columnPos], columns[columnPos], folder);
+            }
+            folders.add(folder);
+        }
+        return folders.iterator();
     }
 }

@@ -51,12 +51,10 @@ package com.openexchange.ajax.mail;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
 import java.util.Map.Entry;
-
-import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -65,20 +63,20 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
 
-import com.meterware.httpunit.GetMethodWebRequest;
-import com.meterware.httpunit.WebConversation;
-import com.meterware.httpunit.WebRequest;
-import com.meterware.httpunit.WebResponse;
-import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.AbstractAJAXTest;
-import com.openexchange.ajax.FolderTest;
 import com.openexchange.ajax.MailTest;
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.folder.FolderTools;
+import com.openexchange.ajax.folder.actions.ListRequest;
+import com.openexchange.ajax.folder.actions.ListResponse;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.MailFolderObject;
 import com.openexchange.groupware.container.mail.JSONMessageObject;
+import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * @author marcus
@@ -102,7 +100,7 @@ public class AlwaysTest extends AbstractAJAXTest {
      * <li><code>0</code> list no mails
      * </ul>
      */
-    private final static int MAX = 1;
+    private final static int MAX = -1;
     
     /**
      * This attributes of mails are requested when a mail folder is listed.
@@ -115,13 +113,24 @@ public class AlwaysTest extends AbstractAJAXTest {
         JSONMessageObject.FIELD_FLAGS, JSONMessageObject.FIELD_PRIORITY,
         CommonObject.COLOR_LABEL
     };
-    
+
+    private AJAXClient client;
+
     /**
-     * 
      * @param name
      */
     public AlwaysTest(final String name) {
         super(name);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        client = new AJAXClient(new AJAXSession(getWebConversation(),
+            getSessionId()));
     }
 
     public void testFolderListing() throws Throwable {
@@ -130,14 +139,13 @@ public class AlwaysTest extends AbstractAJAXTest {
     }
 
     public void recListFolder(final String folderId, final String rights)
-        throws IOException, SAXException, JSONException, OXException {
+        throws IOException, SAXException, JSONException, OXException,
+        AjaxException {
         LOG.trace("Listing " + folderId);
         if (rights.length() > 0) {
             listMails(folderId, MAX);
         }
-        final Map<String, String> subRights = getIMAPRights(
-            getWebConversation(), getHostName(), getSessionId(),
-            folderId);
+        final Map<String, String> subRights = getIMAPRights(client, folderId);
         for (Entry<String, String> entry : subRights.entrySet()) {
             recListFolder(entry.getKey(), entry.getValue());
         }
@@ -171,40 +179,27 @@ public class AlwaysTest extends AbstractAJAXTest {
         }
     }
 
-    public static Map<String, String> getIMAPRights(
-        final WebConversation conversation, final String hostName,
-        final String sessionId, final String parent) throws IOException,
-        SAXException, JSONException {
-        final WebRequest req = new GetMethodWebRequest(PROTOCOL + hostName
-            + FolderTest.FOLDER_URL);
-        req.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
-        req.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LIST);
-        req.setParameter("parent", parent);
-        final String columns = String.valueOf(FolderObject.OBJECT_ID) + ','
-            + FolderObject.OWN_RIGHTS;
-        req.setParameter(AJAXServlet.PARAMETER_COLUMNS, columns);
-        final WebResponse resp = conversation.getResponse(req);
-        assertEquals("Response code is not okay.", HttpServletResponse.SC_OK,
-            resp.getResponseCode());
-        final String body = resp.getText();
-        LOG.trace("Response body: " + body);
-        final Response response = Response.parse(body);
-        final JSONArray array = (JSONArray) response.getData();
+    public static Map<String, String> getIMAPRights(final AJAXClient client,
+        final String parent) throws IOException,
+        SAXException, JSONException, AjaxException {
+        final ListResponse listR = FolderTools.list(client, new ListRequest(
+            parent, new int[] { FolderObject.OBJECT_ID, FolderObject.OWN_RIGHTS
+            }, false));
         final Map<String, String> retval = new HashMap<String, String>();
-        for (int i = 0; i < array.length(); i++) {
-            final JSONArray folder = array.getJSONArray(i);
-            retval.put(folder.getString(0), folder.getString(1));
+        for (Object[] row : listR) {
+            retval.put((String) row[0], (String) row[1]);
         }
         return retval;
     }
 
     public FolderObject getIMAPRootFolder() throws OXException, IOException,
-        SAXException, JSONException {
-        final List<FolderObject> list = FolderTest.getSubfolders(
-            getWebConversation(), getHostName(), getSessionId(),
-            String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID), false);
+        SAXException, JSONException, AjaxException {
+        final ListResponse listR = FolderTools.list(client, new ListRequest(
+            String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID)));
         FolderObject defaultIMAPFolder = null;
-        for (FolderObject fo : list) {
+        final Iterator<FolderObject> iter = listR.getFolder();
+        while (iter.hasNext()) {
+            final FolderObject fo = iter.next();
             if (fo.containsFullName() && fo.getFullName().equals(
                 MailFolderObject.DEFAULT_IMAP_FOLDER_ID)) {
                 defaultIMAPFolder = fo;
@@ -215,5 +210,4 @@ public class AlwaysTest extends AbstractAJAXTest {
             && defaultIMAPFolder.hasSubfolders());
         return defaultIMAPFolder;
     }
-
 }

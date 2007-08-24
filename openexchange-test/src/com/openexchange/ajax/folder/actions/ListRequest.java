@@ -47,51 +47,85 @@
  *
  */
 
-package com.openexchange.ajax.folder;
+package com.openexchange.ajax.folder.actions;
 
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.json.JSONException;
-import org.xml.sax.SAXException;
 
-import com.openexchange.ajax.folder.actions.DeleteRequest;
-import com.openexchange.ajax.folder.actions.InsertRequest;
-import com.openexchange.ajax.folder.actions.ListRequest;
-import com.openexchange.ajax.folder.actions.ListResponse;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.CommonDeleteResponse;
-import com.openexchange.ajax.framework.CommonInsertResponse;
-import com.openexchange.ajax.framework.Executor;
-import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.Folder;
+import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.groupware.container.FolderObject;
 
 /**
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class FolderTools {
+public class ListRequest extends AbstractFolderRequest implements AJAXRequest {
+
+    private static final int[] DEFAULT_COLUMNS = new int[] {
+        FolderObject.OBJECT_ID,
+        FolderObject.MODULE,
+        FolderObject.FOLDER_NAME,
+        FolderObject.SUBFOLDERS,
+        FolderObject.STANDARD_FOLDER,
+        FolderObject.CREATED_BY
+    };
+
+    private final String parentFolder;
+
+    private final int[] columns;
+
+    private final boolean ignoreMail;
+
+    public ListRequest(final String parentFolder, final int[] columns,
+        final boolean ignoreMail) {
+        super();
+        this.parentFolder = parentFolder;
+        this.columns = columns;
+        this.ignoreMail = ignoreMail;
+    }
+
+    public ListRequest(final String parentFolder) {
+        this(parentFolder, DEFAULT_COLUMNS, false);
+    }
 
     /**
-     * Prevent instanciation.
+     * {@inheritDoc}
      */
-    private FolderTools() {
-        super();
+    public Object getBody() throws JSONException {
+        return null;
     }
 
-    public static CommonInsertResponse insert(final AJAXClient client,
-        final InsertRequest request) throws AjaxException, IOException,
-        SAXException, JSONException {
-        return (CommonInsertResponse) Executor.execute(client, request);
+    /**
+     * {@inheritDoc}
+     */
+    public Method getMethod() {
+        return Method.GET;
     }
 
-    public static CommonDeleteResponse delete(final AJAXClient client,
-        final DeleteRequest request) throws AjaxException, IOException,
-        SAXException, JSONException {
-        return (CommonDeleteResponse) Executor.execute(client, request);
+    /**
+     * {@inheritDoc}
+     */
+    public Parameter[] getParameters() {
+        final List<Parameter> parameters = new ArrayList<Parameter>();
+        parameters.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet
+            .ACTION_LIST));
+        parameters.add(new Parameter(Folder.PARAMETER_PARENT, parentFolder));
+        parameters.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns));
+        if (ignoreMail) {
+            parameters.add(new Parameter(AJAXServlet.PARAMETER_IGNORE,
+                "mailfolder"));
+        }
+        return parameters.toArray(new Parameter[parameters.size()]);
     }
 
-    public static ListResponse list(final AJAXClient client,
-        final ListRequest request) throws AjaxException, IOException,
-        SAXException, JSONException {
-        return (ListResponse) Executor.execute(client, request);
+    /**
+     * {@inheritDoc}
+     */
+    public ListParser getParser() {
+        return new ListParser(columns, true);
     }
 }
