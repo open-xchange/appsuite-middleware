@@ -1,3 +1,7 @@
+* 2007-08-24 - marcus.klein@open-xchange.com
+
+ - Bugfix #9092: Added missing log.install.dir to build script.
+
 * 2007-08-16 - marcus.klein@open-xchange.com
 
  - Bugfix #8907: Inserted actual configuration parameters.
