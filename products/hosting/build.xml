@@ -7,6 +7,7 @@
     <!-- Customizable values -->
     <property name="destdir" value=""/>
     <property name="prefix" location="/opt/open-xchange"/>
+    <property name="log.install.dir" value="/var/log/open-xchange"/>
 
     <!-- Directories -->
     <property name="tmp.dir" value="tmp"/>
