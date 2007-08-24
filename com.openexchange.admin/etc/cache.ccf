@@ -222,10 +222,3 @@ jcs.auxiliary.LTCP.attributes.Receive=true
 jcs.auxiliary.LTCP.attributes.AllowGet=false
 jcs.auxiliary.LTCP.attributes.IssueRemoveOnPut=true
 jcs.auxiliary.LTCP.attributes.FilterRemoveByHashCode=false
-
-# REMOTE RMI CACHE
-jcs.auxiliary.RFailover=org.apache.jcs.auxiliary.remote.RemoteCacheFactory
-jcs.auxiliary.RFailover.attributes=org.apache.jcs.auxiliary.remote.RemoteCacheAttributes
-jcs.auxiliary.RFailover.attributes.FailoverServers=192.168.32.58:1102
-jcs.auxiliary.RFailover.attributes.RemoveUponRemotePut=true
-jcs.auxiliary.RFailover.attributes.GetOnly=false
