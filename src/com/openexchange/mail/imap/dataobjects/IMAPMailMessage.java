@@ -72,6 +72,13 @@ public final class IMAPMailMessage extends MailMessage {
 	/**
 	 * Constructor
 	 */
+	public IMAPMailMessage() {
+		this(null);
+	}
+	
+	/**
+	 * Constructor
+	 */
 	public IMAPMailMessage(final IMAPMessage msg) {
 		super();
 		this.msgContent = new IMAPMailContent(msg);

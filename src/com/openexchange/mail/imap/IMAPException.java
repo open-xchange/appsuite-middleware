@@ -418,7 +418,41 @@ public final class IMAPException extends MailException {
 		/**
 		 * Mail folder %s must not be moved to subsequent folder %s
 		 */
-		NO_MOVE_TO_SUBFLD("Mail folder %s must not be moved to subsequent folder %s", Category.PERMISSION, 62);
+		NO_MOVE_TO_SUBFLD("Mail folder %s must not be moved to subsequent folder %s", Category.PERMISSION, 62),
+		/**
+		 * Message could not be moved to trash folder. Quota exceeded
+		 */
+		DELETE_FAILED_OVER_QUOTA("Message could not be moved to trash folder. Quota exceeded",
+				Category.EXTERNAL_RESOURCE_FULL, 63),
+		/**
+		 * Message could not be moved to trash folder
+		 */
+		MOVE_ON_DELETE_FAILED("Message could not be moved to trash folder", Category.EXTERNAL_RESOURCE_FULL, 64),
+		/**
+		 * Missing %s folder in mail move operation
+		 */
+		MISSING_SOURCE_TARGET_FOLDER_ON_MOVE("Missing %s folder in mail move operation", Category.CODE_ERROR, 65),
+		/**
+		 * Message move aborted for user %s. Source and destination folder are
+		 * equal: %s
+		 */
+		NO_EQUAL_MOVE("Message move aborted for user %s. Source and destination folder are equal: %s",
+				Category.USER_INPUT, 66),
+		/**
+		 * Folder read-only check failed
+		 */
+		FAILED_READ_ONLY_CHECK("IMAP folder read-only check failed", Category.CODE_ERROR, 67),
+		/**
+		 * Unknown folder open mode %d
+		 */
+		UNKNOWN_FOLDER_MODE("Unknown folder open mode %d", Category.CODE_ERROR, 68),
+		/**
+		 * Move partially completed for user %s. Source message(s) %s in folder
+		 * %s could not be deleted due to following error: %s
+		 */
+		MOVE_PARTIALLY_COMPLETED(
+				"Move partially completed for user %s. Source message(s) %s in folder %s could not be deleted due to following error: %s",
+				Category.INTERNAL_ERROR, 69);
 
 		private final String message;
 

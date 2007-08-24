@@ -51,18 +51,23 @@ package com.openexchange.imap;
 
 import java.util.Arrays;
 import java.util.Properties;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.imap.spellcheck.SpellCheckConfig;
+import com.openexchange.mail.imap.IMAPPropertyNames;
 
 /**
- * IMAPProperties
+ * {@link IMAPProperties} - Container for IMAP properties
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
 public class IMAPProperties {
+
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(IMAPProperties.class);
 
 	private final int user;
 
@@ -77,7 +82,7 @@ public class IMAPProperties {
 	private int imapPort = -1;
 
 	private int smtpPort = -1;
-	
+
 	private AbstractOXException error;
 
 	private static boolean globalPropertiesLoaded;
@@ -139,7 +144,7 @@ public class IMAPProperties {
 	private static boolean spamEnabled;
 
 	private static boolean watcherEnabled;
-	
+
 	private static boolean watcherShallClose;
 
 	private static int watcherFrequency;
@@ -149,6 +154,16 @@ public class IMAPProperties {
 	private static IMAPPropertiesFactory.IMAPCredSrc imapCredSrc;
 
 	private static IMAPPropertiesFactory.IMAPLoginType imapLoginType;
+
+	private static Properties JAVAMAIL_PROPS;
+
+	private static final Lock LOCK_JAVAMAIL_PROPS = new ReentrantLock();
+
+	private static boolean javamailPropsInitialized;
+
+	private static final String STR_TRUE = "true";
+
+	private static final String STR_FALSE = "false";
 
 	public static enum BoolCapVal {
 
@@ -196,6 +211,131 @@ public class IMAPProperties {
 			}
 			return FALSE;
 		}
+	}
+
+	/**
+	 * Creates a <b>cloned</b> version of default IMAP properties
+	 * 
+	 * @return a cloned version of default IMAP properties
+	 * @throws IMAPPropertyException
+	 *             If gloabl IMAP proeprties could not be initialized
+	 */
+	public static Properties getDefaultJavaMailProperties() throws IMAPPropertyException {
+		if (!javamailPropsInitialized) {
+			LOCK_JAVAMAIL_PROPS.lock();
+			try {
+				if (null == JAVAMAIL_PROPS) {
+					initializeIMAPProperties();
+					javamailPropsInitialized = true;
+				}
+			} finally {
+				LOCK_JAVAMAIL_PROPS.unlock();
+			}
+		}
+		return (Properties) JAVAMAIL_PROPS.clone();
+	}
+
+	private static final String CLASS_TRUSTALLSSLSOCKETFACTORY = "com.openexchange.tools.ssl.TrustAllSSLSocketFactory";
+
+	/**
+	 * This method can only be exclusively accessed
+	 * 
+	 * @throws IMAPPropertyException
+	 */
+	private static void initializeIMAPProperties() throws IMAPPropertyException {
+		/*
+		 * Define imap properties
+		 */
+		JAVAMAIL_PROPS = ((Properties) (System.getProperties().clone()));
+		/*
+		 * Set some global JavaMail properties
+		 */
+		JAVAMAIL_PROPS.put(IMAPPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS, STR_TRUE);
+		JAVAMAIL_PROPS.put(IMAPPropertyNames.PROP_ALLOWREADONLYSELECT, STR_TRUE);
+		JAVAMAIL_PROPS.put(IMAPPropertyNames.PROP_MAIL_MIME_ENCODEEOL_STRICT, STR_TRUE);
+		JAVAMAIL_PROPS.put(IMAPPropertyNames.PROP_MAIL_MIME_DECODETEXT_STRICT, STR_FALSE);
+		/*
+		 * A connected IMAPStore maintains a pool of IMAP protocol objects for
+		 * use in communicating with the IMAP server. The IMAPStore will create
+		 * the initial AUTHENTICATED connection and seed the pool with this
+		 * connection. As folders are opened and new IMAP protocol objects are
+		 * needed, the IMAPStore will provide them from the connection pool, or
+		 * create them if none are available. When a folder is closed, its IMAP
+		 * protocol object is returned to the connection pool if the pool is not
+		 * over capacity.
+		 */
+		JAVAMAIL_PROPS.put(IMAPPropertyNames.PROP_MAIL_IMAP_CONNECTIONPOOLSIZE, "1");
+		/*
+		 * A mechanism is provided for timing out idle connection pool IMAP
+		 * protocol objects. Timed out connections are closed and removed
+		 * (pruned) from the connection pool.
+		 */
+		JAVAMAIL_PROPS.put(IMAPPropertyNames.PROP_MAIL_IMAP_CONNECTIONPOOLTIMEOUT, "1000"); // 1
+		// sec
+		/*
+		 * Fill global IMAP Properties only once and switch flag
+		 */
+		if (!IMAPProperties.isGlobalPropertiesLoaded()) {
+			IMAPPropertiesFactory.loadGlobalImapProperties();
+		}
+		/*
+		 * Initialize properties
+		 */
+		try {
+			JAVAMAIL_PROPS.put(IMAPPropertyNames.PROP_MAIL_MIME_CHARSET, IMAPProperties.getDefaultMimeCharset());
+		} catch (final IMAPPropertyException e1) {
+			LOG.error(e1.getMessage(), e1);
+		}
+		/*
+		 * Following properties define if IMAPS and/or SMTPS should be enabled
+		 */
+		try {
+			if (IMAPProperties.isImapsEnabled()) {
+				JAVAMAIL_PROPS.put(IMAPPropertyNames.PROP_MAIL_IMAP_SOCKET_FACTORY_CLASS,
+						CLASS_TRUSTALLSSLSOCKETFACTORY);
+				JAVAMAIL_PROPS.put(IMAPPropertyNames.PROP_MAIL_IMAP_SOCKET_FACTORY_PORT, String.valueOf(IMAPProperties
+						.getImapsPort()));
+				JAVAMAIL_PROPS.put(IMAPPropertyNames.PROP_MAIL_IMAP_SOCKET_FACTORY_FALLBACK, STR_FALSE);
+				JAVAMAIL_PROPS.put(IMAPPropertyNames.PROP_MAIL_SMTP_STARTTLS_ENABLE, STR_TRUE);
+			}
+		} catch (final IMAPPropertyException e) {
+			LOG.error(e.getMessage(), e);
+		}
+		try {
+			if (IMAPProperties.isSmtpsEnabled()) {
+				JAVAMAIL_PROPS.put(IMAPPropertyNames.PROP_MAIL_SMTP_SOCKET_FACTORY_CLASS,
+						CLASS_TRUSTALLSSLSOCKETFACTORY);
+				JAVAMAIL_PROPS.put(IMAPPropertyNames.PROP_MAIL_SMTP_SOCKET_FACTORY_PORT, String.valueOf(IMAPProperties
+						.getSmtpsPort()));
+				JAVAMAIL_PROPS.put(IMAPPropertyNames.PROP_MAIL_SMTP_SOCKET_FACTORY_FALLBACK, STR_FALSE);
+				JAVAMAIL_PROPS.put(IMAPPropertyNames.PROP_MAIL_SMTP_STARTTLS_ENABLE, STR_TRUE);
+			}
+		} catch (final IMAPPropertyException e) {
+			LOG.error(e.getMessage(), e);
+		}
+		if (IMAPProperties.getSmtpLocalhost() != null) {
+			JAVAMAIL_PROPS.put(IMAPPropertyNames.PROP_SMTPLOCALHOST, IMAPProperties.getSmtpLocalhost());
+		}
+		try {
+			if (IMAPProperties.getJavaMailProperties() != null) {
+				/*
+				 * Overwrite current JavaMail-Specific properties with the ones
+				 * defined in javamail.properties
+				 */
+				JAVAMAIL_PROPS.putAll(IMAPProperties.getJavaMailProperties());
+			}
+		} catch (final IMAPPropertyException e) {
+			LOG.error(e.getMessage(), e);
+		}
+		if (IMAPProperties.getImapTimeout() > 0) {
+			JAVAMAIL_PROPS.put(IMAPPropertyNames.PROP_MAIL_IMAP_TIMEOUT, Integer.valueOf(IMAPProperties
+					.getImapTimeout()));
+		}
+		if (IMAPProperties.getImapConnectionTimeout() > 0) {
+			JAVAMAIL_PROPS.put(IMAPPropertyNames.PROP_MAIL_IMAP_CONNECTIONTIMEOUT, Integer.valueOf(IMAPProperties
+					.getImapConnectionTimeout()));
+		}
+		JAVAMAIL_PROPS.put(IMAPPropertyNames.PROP_MAIL_SMTP_AUTH, IMAPProperties.isSmtpAuth() ? STR_TRUE : STR_FALSE);
 	}
 
 	public IMAPProperties(final int user) {
@@ -271,7 +411,7 @@ public class IMAPProperties {
 	public AbstractOXException getError() {
 		return error;
 	}
-	
+
 	public boolean hasError() {
 		return (null != error);
 	}

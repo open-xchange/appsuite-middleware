@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import javax.activation.DataHandler;
+import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
@@ -60,6 +61,8 @@ import javax.mail.Part;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailContent;
 import com.openexchange.mail.imap.IMAPException;
+import com.openexchange.mail.imap.converters.IMAPMessageConverter;
+import com.sun.mail.imap.IMAPMessage;
 
 /**
  * IMAPMailContent
@@ -68,6 +71,8 @@ import com.openexchange.mail.imap.IMAPException;
  * 
  */
 public final class IMAPMailContent extends MailContent {
+
+	private static final String ERR_NULL_PART = "Underlying part is null";
 
 	private static final String MIME_MULTIPART_ALL = "multipart/*";
 
@@ -94,10 +99,17 @@ public final class IMAPMailContent extends MailContent {
 	@Override
 	public Object getContent() throws IMAPException {
 		if (null == part) {
-			throw new IllegalStateException("Underlying part is null");
+			throw new IllegalStateException(ERR_NULL_PART);
 		}
 		try {
-			return part.getContent();
+			final Object obj = part.getContent();
+			if (obj instanceof Message) {
+				return IMAPMessageConverter.convertIMAPMessage((IMAPMessage) obj);
+			} else if (obj instanceof Part) {
+				return new IMAPMailContent((Part) obj);
+			} else {
+				return obj;
+			}
 		} catch (final IOException e) {
 			throw new IMAPException(IMAPException.Code.IO_ERROR, e, e.getLocalizedMessage());
 		} catch (final MessagingException e) {
@@ -113,7 +125,7 @@ public final class IMAPMailContent extends MailContent {
 	@Override
 	public DataHandler getDataHandler() throws IMAPException {
 		if (null == part) {
-			throw new IllegalStateException("Underlying part is null");
+			throw new IllegalStateException(ERR_NULL_PART);
 		}
 		try {
 			return part.getDataHandler();
@@ -130,7 +142,7 @@ public final class IMAPMailContent extends MailContent {
 	@Override
 	public InputStream getInputStream() throws IMAPException {
 		if (null == part) {
-			throw new IllegalStateException("Underlying part is null");
+			throw new IllegalStateException(ERR_NULL_PART);
 		}
 		try {
 			return part.getInputStream();
@@ -149,7 +161,7 @@ public final class IMAPMailContent extends MailContent {
 	@Override
 	public MailContent getEnclosedMailContent(final int index) throws IMAPException {
 		if (null == part) {
-			throw new IllegalStateException("Underlying part is null");
+			throw new IllegalStateException(ERR_NULL_PART);
 		}
 		if (isMulti) {
 			try {
@@ -171,7 +183,7 @@ public final class IMAPMailContent extends MailContent {
 	@Override
 	public int getEnclosedCount() throws IMAPException {
 		if (null == part) {
-			throw new IllegalStateException("Underlying part is null");
+			throw new IllegalStateException(ERR_NULL_PART);
 		}
 		if (isMulti) {
 			try {

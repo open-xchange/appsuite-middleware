@@ -49,6 +49,8 @@
 
 package com.openexchange.mail.imap.converters;
 
+import static com.openexchange.mail.imap.IMAPStorageUtils.loadBrokenHeaders;
+
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -63,7 +65,6 @@ import javax.mail.internet.InternetAddress;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.mail.JSONMessageObject;
 import com.openexchange.groupware.container.mail.MessageCacheObject;
-import com.openexchange.imap.IMAPUtils;
 import com.openexchange.imap.MessageHeaders;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -131,7 +132,13 @@ public final class IMAPMessageConverter {
 			final MessageFieldFiller[] fillers = createFieldFillers(fields);
 			final MailMessage[] retval = new IMAPMailMessage[msgs.length];
 			for (int i = 0; i < retval.length; i++) {
-				fillMessage(fillers, retval[i], msgs[i]);
+				if (null != msgs[i]) {
+					/*
+					 * Create with no reference to content
+					 */
+					retval[i] = new IMAPMailMessage();
+					fillMessage(fillers, retval[i], msgs[i]);
+				}
 			}
 			return retval;
 		} catch (final MessagingException e) {
@@ -337,6 +344,9 @@ public final class IMAPMessageConverter {
 	 */
 	public static MailMessage convertIMAPMessage(final IMAPMessage msg) throws IMAPException {
 		try {
+			/*
+			 * Create with reference to content
+			 */
 			final IMAPMailMessage retval = new IMAPMailMessage(msg);
 			/*
 			 * Set all cacheable data
@@ -432,7 +442,7 @@ public final class IMAPMessageConverter {
 				 * Headers could not be loaded
 				 */
 				try {
-					headerMap = IMAPUtils.loadBrokenHeaders(msg, false);
+					headerMap = loadBrokenHeaders(msg, false);
 				} catch (final ProtocolException e1) {
 					LOG.error(e.getMessage(), e);
 					headerMap = new HashMap<String, String>();

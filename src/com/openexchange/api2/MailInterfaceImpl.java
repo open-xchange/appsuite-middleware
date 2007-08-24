@@ -200,7 +200,7 @@ import com.sun.mail.smtp.SMTPMessage;
 import com.sun.mail.smtp.SMTPSendFailedException;
 
 /**
- * MailInterfaceImpl
+ * {@link MailInterfaceImpl}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 

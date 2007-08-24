@@ -52,19 +52,12 @@ package com.openexchange.mail;
 import com.openexchange.mail.dataobjects.MailFolder;
 
 /**
- * MailFolderStorage
+ * {@link MailFolderStorage}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public abstract class MailFolderStorage {
-
-	/**
-	 * Default constructor
-	 */
-	protected MailFolderStorage() {
-		super();
-	}
+public interface MailFolderStorage {
 
 	/**
 	 * Gets the folder identified through given fullname
@@ -75,7 +68,7 @@ public abstract class MailFolderStorage {
 	 * @throws MailException
 	 *             If folder could not be fetched
 	 */
-	public abstract MailFolder getFolder(final String fullname) throws MailException;
+	public MailFolder getFolder(final String fullname) throws MailException;
 
 	/**
 	 * Gets the folder identified through given id
@@ -86,7 +79,7 @@ public abstract class MailFolderStorage {
 	 * @throws MailException
 	 *             If folder could not be fetched
 	 */
-	public abstract MailFolder getFolder(final long id) throws MailException;
+	public MailFolder getFolder(final long id) throws MailException;
 
 	/**
 	 * Gets the subfolders located below the folder whose fullname matches given
@@ -100,7 +93,7 @@ public abstract class MailFolderStorage {
 	 * @throws MailException
 	 *             If subfolders cannot be delivered
 	 */
-	public abstract MailFolder[] getSubfolders(final String parentFullname, final boolean all) throws MailException;
+	public MailFolder[] getSubfolders(final String parentFullname, final boolean all) throws MailException;
 
 	/**
 	 * Gets the subfolders located below the folder whose id matches given
@@ -114,7 +107,7 @@ public abstract class MailFolderStorage {
 	 * @throws MailException
 	 *             If subfolders cannot be delivered
 	 */
-	public abstract MailFolder[] getSubfolders(final long parentId, final boolean all) throws MailException;
+	public MailFolder[] getSubfolders(final long parentId, final boolean all) throws MailException;
 
 	/**
 	 * Gets the mailbox's default folder
@@ -123,7 +116,7 @@ public abstract class MailFolderStorage {
 	 * @throws MailException
 	 *             If mailbox's default folder cannot be delivered
 	 */
-	public abstract MailFolder getRootFolder() throws MailException;
+	public MailFolder getRootFolder() throws MailException;
 
 	/**
 	 * Checks user's default folder as definded in user's mail settings and
@@ -132,7 +125,7 @@ public abstract class MailFolderStorage {
 	 * @throws MailException
 	 *             If user's default folder could not be checked
 	 */
-	public abstract void checkDefaultFolders() throws MailException;
+	public void checkDefaultFolders() throws MailException;
 
 	/**
 	 * Creates a new mail folder with attributes taken from given mail folder
@@ -143,7 +136,7 @@ public abstract class MailFolderStorage {
 	 * @throws MailException
 	 *             If creation fails
 	 */
-	public abstract String createFolder(MailFolder toCreate) throws MailException;
+	public String createFolder(MailFolder toCreate) throws MailException;
 
 	/**
 	 * Updates an existing mail folder identifed through given fullname. All
@@ -156,7 +149,7 @@ public abstract class MailFolderStorage {
 	 * @return Fullname of the updated mail folder
 	 * @throws MailException
 	 */
-	public abstract String updateFolder(String fullname, MailFolder toUpdate) throws MailException;
+	public String updateFolder(String fullname, MailFolder toUpdate) throws MailException;
 
 	/**
 	 * Updates an existing mail folder identifed through given ID. All
@@ -169,7 +162,7 @@ public abstract class MailFolderStorage {
 	 * @return Fullname of the updated mail folder
 	 * @throws MailException
 	 */
-	public abstract String updateFolder(long id, MailFolder toUpdate) throws MailException;
+	public String updateFolder(long id, MailFolder toUpdate) throws MailException;
 
 	/**
 	 * Deletes an existing mail folder identifed through given fullname.
@@ -179,7 +172,7 @@ public abstract class MailFolderStorage {
 	 * @return Fullname of the deleted mail folder
 	 * @throws MailException
 	 */
-	public abstract String deleteFolder(String fullname) throws MailException;
+	public String deleteFolder(String fullname) throws MailException;
 
 	/**
 	 * Deletes an existing mail folder identifed through given ID.
@@ -189,14 +182,46 @@ public abstract class MailFolderStorage {
 	 * @return Fullname of the deleted mail folder
 	 * @throws MailException
 	 */
-	public abstract String deleteFolder(long id) throws MailException;
-	
+	public String deleteFolder(long id) throws MailException;
+
 	/**
 	 * Gets the ID of default drafts folder
 	 * 
 	 * @return The ID of default drafts folder
 	 * @throws MailException
 	 */
-	public abstract String getDraftsFolder() throws MailException;
+	public String getConfirmedHamFolder() throws MailException;
+
+	/**
+	 * Gets the ID of default drafts folder
+	 * 
+	 * @return The ID of default drafts folder
+	 * @throws MailException
+	 */
+	public String getConfirmedSpamFolder() throws MailException;
+
+	/**
+	 * Gets the ID of default drafts folder
+	 * 
+	 * @return The ID of default drafts folder
+	 * @throws MailException
+	 */
+	public String getDraftsFolder() throws MailException;
+
+	/**
+	 * Gets the ID of default spam folder
+	 * 
+	 * @return The ID of default spam folder
+	 * @throws MailException
+	 */
+	public String getSpamFolder() throws MailException;
+
+	/**
+	 * Gets the ID of default trash folder
+	 * 
+	 * @return The ID of default trash folder
+	 * @throws MailException
+	 */
+	public String getTrashFolder() throws MailException;
 
 }

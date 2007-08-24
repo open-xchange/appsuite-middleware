@@ -50,8 +50,8 @@
 package com.openexchange.mail.imap;
 
 import static com.openexchange.mail.imap.IMAPStorageUtils.DEFAULT_IMAP_FOLDER_ID;
-import static com.openexchange.mail.imap.IMAPStorageUtils.prepareMailFolderParam;
 import static com.openexchange.mail.imap.IMAPStorageUtils.prepareFullname;
+import static com.openexchange.mail.imap.IMAPStorageUtils.prepareMailFolderParam;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -69,9 +69,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.imap.IMAPProperties;
 import com.openexchange.imap.IMAPPropertyException;
 import com.openexchange.imap.IMAPUtils;
-import com.openexchange.imap.OXMailException;
 import com.openexchange.imap.UserSettingMail;
-import com.openexchange.imap.OXMailException.MailCode;
 import com.openexchange.imap.user2imap.User2IMAP;
 import com.openexchange.mail.MailFolderStorage;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -90,7 +88,7 @@ import com.sun.mail.imap.Rights;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class IMAPFolderStorage extends MailFolderStorage implements Serializable {
+public final class IMAPFolderStorage implements MailFolderStorage, Serializable {
 
 	private static final String ERR_IDS_NOT_SUPPORTED = "Numeric folder IDs not supported by IMAP";
 
@@ -122,7 +120,6 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 		this.session = session;
 	}
 
-	@Override
 	public MailFolder getFolder(final String fullnameArg) throws IMAPException {
 		try {
 			final String fullname = prepareMailFolderParam(fullnameArg);
@@ -135,19 +132,12 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 		}
 	}
 
-	@Override
 	public MailFolder getFolder(final long id) {
 		throw new IllegalStateException(ERR_IDS_NOT_SUPPORTED);
 	}
 
 	private static final String PATTERN_ALL = "%";
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.MailFolderStorage#getSubfolders(java.lang.String)
-	 */
-	@Override
 	public MailFolder[] getSubfolders(final String parentFullnameArg, final boolean all) throws IMAPException {
 		try {
 			final String parentFullname = prepareMailFolderParam(parentFullnameArg);
@@ -189,17 +179,10 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 		}
 	}
 
-	@Override
 	public MailFolder[] getSubfolders(final long parentId, final boolean all) {
 		throw new IllegalStateException(ERR_IDS_NOT_SUPPORTED);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.MailFolderStorage#getDefaultFolder()
-	 */
-	@Override
 	public MailFolder getRootFolder() throws IMAPException {
 		try {
 			return IMAPFolderConverter.convertIMAPFolder((IMAPFolder) imapStore.getDefaultFolder(), session);
@@ -208,7 +191,6 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 		}
 	}
 
-	@Override
 	public void checkDefaultFolders() throws IMAPException {
 		if (!session.isMailFldsChecked()) {
 			final Lock mailFldLock = session.getMailFldsLock();
@@ -267,7 +249,6 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 		}
 	}
 
-	@Override
 	public String createFolder(final MailFolder toCreate) throws IMAPException {
 		try {
 			/*
@@ -356,7 +337,6 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 		}
 	}
 
-	@Override
 	public String updateFolder(final String fullnameArg, final MailFolder toUpdate) throws IMAPException {
 		try {
 			final String fullname = prepareMailFolderParam(fullnameArg);
@@ -560,12 +540,10 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 
 	}
 
-	@Override
 	public String updateFolder(final long fullname, final MailFolder toUpdate) throws IMAPException {
 		throw new IllegalStateException(ERR_IDS_NOT_SUPPORTED);
 	}
 
-	@Override
 	public String deleteFolder(final String fullnameArg) throws IMAPException {
 		try {
 			final String fullname = prepareMailFolderParam(fullnameArg);
@@ -579,14 +557,28 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 		}
 	}
 
-	@Override
 	public String deleteFolder(final long id) throws IMAPException {
 		throw new IllegalStateException(ERR_IDS_NOT_SUPPORTED);
 	}
-	
-	@Override
+
+	public String getConfirmedHamFolder() throws IMAPException {
+		return getStdFolder(IMAPStorageUtils.INDEX_CONFIRMED_HAM);
+	}
+
+	public String getConfirmedSpamFolder() throws IMAPException {
+		return getStdFolder(IMAPStorageUtils.INDEX_CONFIRMED_SPAM);
+	}
+
 	public String getDraftsFolder() throws IMAPException {
 		return getStdFolder(IMAPStorageUtils.INDEX_DRAFTS);
+	}
+
+	public String getSpamFolder() throws IMAPException {
+		return getStdFolder(IMAPStorageUtils.INDEX_SPAM);
+	}
+
+	public String getTrashFolder() throws IMAPException {
+		return getStdFolder(IMAPStorageUtils.INDEX_TRASH);
 	}
 
 	/*

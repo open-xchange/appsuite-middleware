@@ -59,7 +59,7 @@ import com.openexchange.groupware.Component;
  * 
  */
 public class MailException extends AbstractOXException {
-	
+
 	/**
 	 * Serial Version UID
 	 */
@@ -85,8 +85,20 @@ public class MailException extends AbstractOXException {
 		/**
 		 * IMAP property error: %s
 		 */
-		IMAP_PROPERTY_ERROR("IMAP property error: %s", Category.SETUP_ERROR, 5);
-	
+		IMAP_PROPERTY_ERROR("IMAP property error: %s", Category.SETUP_ERROR, 5),
+		/**
+		 * Invalid multipart content. Number of enclosed contents is 0
+		 */
+		INVALID_MULTIPART_CONTENT("Invalid multipart content. Number of enclosed contents is 0", Category.CODE_ERROR, 6),
+		/**
+		 * A part's content could not be read from message %s in mail folder %s
+		 */
+		UNREADBALE_PART_CONTENT("A part's content could not be read from message %s in mail folder %s", Category.INTERNAL_ERROR, 7),
+		/**
+		 * An I/O error occured
+		 */
+		IO_ERROR("An I/O error occured", Category.CODE_ERROR, 8);
+
 		private final String message;
 
 		private final int detailNumber;
@@ -115,11 +127,11 @@ public class MailException extends AbstractOXException {
 	public MailException(final AbstractOXException cause) {
 		super(cause);
 	}
-	
+
 	public MailException(final Code code, final Object... messageArgs) {
 		this(code, null, messageArgs);
 	}
-	
+
 	public MailException(final Code code, final Throwable cause, final Object... messageArgs) {
 		super(Component.MAIL, code.getCategory(), code.getNumber(), code.getMessage(), cause);
 		super.setMessageArgs(messageArgs);

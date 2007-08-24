@@ -2,6 +2,7 @@
 
  - Bugfix #6274: Using requested error message if IMAP login fails in any
    case
+ - Further work on new mail interface
 
 * 2007-08-24 - martin.kauss@open-xchange.com
 

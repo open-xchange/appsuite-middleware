@@ -50,22 +50,16 @@
 package com.openexchange.mail;
 
 import com.openexchange.mail.MailStorageUtils.OrderDirection;
+import com.openexchange.mail.dataobjects.MailContent;
 import com.openexchange.mail.dataobjects.MailMessage;
 
 /**
- * MailMessageStorage
+ * {@link MailMessageStorage} - the message strorage
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public abstract class MailMessageStorage {
-
-	/**
-	 * Default constructor
-	 */
-	protected MailMessageStorage() {
-		super();
-	}
+public interface MailMessageStorage {
 
 	/**
 	 * Gets the message located in given folder whose UID matches given UID.
@@ -81,7 +75,7 @@ public abstract class MailMessageStorage {
 	 * @throws MailException
 	 *             If message could not be returned
 	 */
-	public abstract MailMessage getMessage(String folder, long msgUID) throws MailException;
+	public MailMessage getMessage(String folder, long msgUID) throws MailException;
 
 	/**
 	 * Gets messages located in given folder. See parameter description to know
@@ -97,11 +91,11 @@ public abstract class MailMessageStorage {
 	 *            The indices range specifying the desired sub-list in sorted
 	 *            list; may be <code>null</code> or must have a length of
 	 *            <code>2</code>
-	 * @param sortCol
+	 * @param sortField
 	 *            The sort field
 	 * @param order
 	 *            Whether ascending or descending sort order
-	 * @param searchCols
+	 * @param searchFields
 	 *            The search fields
 	 * @param searchPatterns
 	 *            The pattern for the search field; therefore this array's
@@ -116,21 +110,109 @@ public abstract class MailMessageStorage {
 	 * @return The desired, pre-filled instances of {@link MailMessage}
 	 * @throws MailException
 	 */
-	public abstract MailMessage[] getMessages(String folder, final int[] fromToIndices, final MailListField sortCol,
-			final OrderDirection order, final MailListField[] searchCols, final String[] searchPatterns,
-			final boolean linkSearchTermsWithOR, final MailListField[] fields) throws MailException;
+	public MailMessage[] getMessages(String folder, int[] fromToIndices, MailListField sortField, OrderDirection order,
+			MailListField[] searchFields, String[] searchPatterns, boolean linkSearchTermsWithOR, MailListField[] fields)
+			throws MailException;
 
 	/**
-	 * Gets all unread messages located in folder whose fullname matches given
-	 * parameter.
+	 * Gets all unread messages located in given folder; meaning messages that
+	 * do not have the \Seen flag set.
 	 * 
-	 * @param fullname
-	 *            The fullname of the folder
-	 * @return All unread messages contained in an array of {@link MailMessage}
+	 * 
+	 * @param folder
+	 *            The folder fullname
+	 * @param sortField
+	 *            The sort field
+	 * @param order
+	 *            The sort order
+	 * @param fields
+	 *            The fields to pre-fill in returned instances of
+	 *            {@link MailMessage}
+	 * @param limit
+	 *            The max. number of returned unread messages
+	 * @return Unread messages contained in an array of {@link MailMessage}
 	 */
-	public abstract MailMessage[] getUnreadMessages(final String fullname);
+	public MailMessage[] getUnreadMessages(String folder, MailListField sortField, OrderDirection order,
+			MailListField[] fields, int limit) throws MailException;
 
-	public abstract MailMessage[] searchMessages(String folder, MailListField[] searchCols, String[] searchPatterns,
+	/**
+	 * Searches for certain messages located in given folder. The messages are
+	 * sorted by received date by default and pre-filled with the fields
+	 * specified through parameter <code>fields</code>.
+	 * 
+	 * @param folder
+	 *            The folder fullname
+	 * @param searchFields
+	 *            The search fields
+	 * @param searchPatterns
+	 *            The search field's patterns
+	 * @param linkWithOR
+	 *            <code>true</code> to link the search patterns with a logical
+	 *            OR; otherwise to link them with a logical AND
+	 * @param fields
+	 *            The fields to pre-fill in returned instances of
+	 *            {@link MailMessage}
+	 * @return The desired, pre-filled instances of {@link MailMessage}
+	 * @throws MailException
+	 */
+	public MailMessage[] searchMessages(String folder, MailListField[] searchFields, String[] searchPatterns,
 			boolean linkWithOR, MailListField[] fields) throws MailException;
+
+	/**
+	 * Deletes the messages located in given folder identified through given
+	 * UIDs
+	 * 
+	 * @param folder
+	 *            The folder fullname
+	 * @param msgUIDs
+	 *            The message UIDs
+	 * @param hardDelete
+	 *            <code>true</code> to hard delete the messages, meaning not
+	 *            to create a backup copy of each message in default trash
+	 *            folder; otherwise <code>false</code>
+	 * @return <code>true</code> if delete was successful; otherwise
+	 *         <code>false</code>
+	 * @throws MailException
+	 */
+	public boolean deleteMessages(String folder, long[] msgUIDs, boolean hardDelete) throws MailException;
+
+	/**
+	 * Copies the messages identifed through given UIDs from source folder to
+	 * destination folder
+	 * 
+	 * @param sourceFolder
+	 *            The source folder fullname
+	 * @param destFolder
+	 *            The destination folder fullname
+	 * @param msgUIDs
+	 *            The message UIDs in source folder
+	 * @param move
+	 *            <code>true</code> to perform a move operation, meaning to
+	 *            delete the copied messages in source folder afterwards,
+	 *            otherwise <code>false</code>
+	 * @return The corresponding UIDs if copied messages in destination folder
+	 * @throws MailException
+	 */
+	public long[] copyMessages(String sourceFolder, String destFolder, long[] msgUIDs, boolean move)
+			throws MailException;
+
+	/**
+	 * Fetches the mail message's attachment identified through given
+	 * <code>sequenceId</code>
+	 * 
+	 * @param folder
+	 *            The folder fullname
+	 * @param msgUID
+	 *            The message UID
+	 * @param sequenceId
+	 *            The attachment sequence ID
+	 * @param displayVersion
+	 *            <code>true</code> if returned value is for displaying
+	 *            purpose
+	 * @return the attachment wrapped by an {@link MailContent} instance
+	 * @throws MailException
+	 */
+	public MailContent getAttachment(String folder, long msgUID, String sequenceId, boolean displayVersion)
+			throws MailException;
 
 }

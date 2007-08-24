@@ -49,6 +49,8 @@
 
 package com.openexchange.imap.command;
 
+import static com.openexchange.imap.IMAPProperties.getDefaultJavaMailProperties;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -57,8 +59,7 @@ import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.internet.MimeMessage;
 
-import com.openexchange.api2.MailInterfaceImpl;
-import com.openexchange.api2.OXException;
+import com.openexchange.imap.IMAPPropertyException;
 import com.openexchange.imap.OXMailException;
 import com.openexchange.imap.OXMailException.MailCode;
 import com.sun.mail.iap.Response;
@@ -99,14 +100,14 @@ public final class ExtractSpamMsgIMAPCommand extends AbstractIMAPCommand<Message
 
 	private int bodyIndex = -1;
 
-	public ExtractSpamMsgIMAPCommand(final IMAPFolder imapFolder, final long[] uids) throws OXException {
+	public ExtractSpamMsgIMAPCommand(final IMAPFolder imapFolder, final long[] uids) throws IMAPPropertyException {
 		super(imapFolder);
 		this.uids = uids == null ? L1 : uids;
 		returnDefaultValue = (this.uids.length == 0);
 		this.length = this.uids.length;
 		args = length == 0 ? ARGS_EMPTY : IMAPNumArgSplitter.splitUIDArg(uids, true);
 		msgList = new ArrayList<Message>(length);
-		dummySession = Session.getDefaultInstance(MailInterfaceImpl.getDefaultIMAPProperties());
+		dummySession = Session.getDefaultInstance(getDefaultJavaMailProperties());
 	}
 
 	/*

@@ -963,7 +963,11 @@ public final class MessageUtils {
 	}
 
 	public static String getFileName(final Part p, final String identifier) throws MessagingException {
-		String filename = p.getFileName();
+		return getFileName(p.getFileName(), identifier);
+	}
+	
+	public static String getFileName(final String rawFileName, final String identifier) {
+		String filename = rawFileName;
 		if (filename == null || isEmptyString(filename)) {
 			filename = new StringBuilder(20).append("Part_").append(identifier).toString();
 		} else {

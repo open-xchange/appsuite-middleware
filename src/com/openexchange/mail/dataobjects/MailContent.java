@@ -241,11 +241,19 @@ public abstract class MailContent {
 	private boolean b_size;
 
 	/**
-	 * Enclosed contents
+	 * The <code>Content-ID</code> header used for inline images in HTML
+	 * content
 	 */
-	private List<MailContent> enclosedContents;
+	private String contentId;
 
-	private boolean b_enclosedContents;
+	private boolean b_contentId;
+
+	/**
+	 * The content's sequence ID inside message (something like <code>1.2</code>)
+	 */
+	private String sequenceId;
+
+	private boolean b_sequenceId;
 
 	/**
 	 * Default constructor
@@ -412,7 +420,7 @@ public abstract class MailContent {
 		}
 		headers.put(new IgnoreCaseString(name), value);
 	}
-	
+
 	/**
 	 * Adds a header
 	 * 
@@ -434,7 +442,7 @@ public abstract class MailContent {
 		}
 		final Iterator<Map.Entry<String, String>> iter = headers.entrySet().iterator();
 		for (int i = 0; i < size; i++) {
-			final Map.Entry<String, String> e = iter.next(); 
+			final Map.Entry<String, String> e = iter.next();
 			this.headers.put(new IgnoreCaseString(e.getKey()), e.getValue());
 		}
 	}
@@ -527,6 +535,77 @@ public abstract class MailContent {
 	public void setSize(final int size) {
 		this.size = size;
 		b_size = true;
+	}
+
+	/**
+	 * Gets the contentId
+	 * 
+	 * @return the contentId
+	 */
+	public String getContentId() {
+		return contentId;
+	}
+
+	/**
+	 * @return <code>true</code> if contentId is set; otherwise
+	 *         <code>false</code>
+	 */
+	public boolean containsContentId() {
+		return b_contentId;
+	}
+
+	/**
+	 * Removes the contentId
+	 */
+	public void removeContentId() {
+		contentId = null;
+		b_contentId = false;
+	}
+
+	/**
+	 * Sets the contentId
+	 * 
+	 * @param contentId
+	 *            the contentId to set
+	 */
+	public void setContentId(final String contentId) {
+		this.contentId = contentId;
+		b_contentId = true;
+	}
+	
+	/**
+	 * Gets the sequenceId
+	 *
+	 * @return the sequenceId
+	 */
+	public String getSequenceId() {
+		return sequenceId;
+	}
+	
+	/**
+	 * @return <code>true</code> if sequenceId is set; otherwise
+	 *         <code>false</code>
+	 */
+	public boolean containsSequenceId() {
+		return b_sequenceId;
+	}
+
+	/**
+	 * Removes the sequenceId
+	 */
+	public void removeSequenceId() {
+		sequenceId = null;
+		b_sequenceId = false;
+	}
+
+	/**
+	 * Sets the sequenceId
+	 *
+	 * @param sequenceId the sequenceId to set
+	 */
+	public void setSequenceId(final String sequenceId) {
+		this.sequenceId = sequenceId;
+		b_sequenceId = true;
 	}
 
 	/**

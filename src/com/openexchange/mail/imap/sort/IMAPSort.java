@@ -98,7 +98,7 @@ public final class IMAPSort {
 
 		private final boolean descendingDir;
 
-		private final MailListField sortCol;
+		private final MailListField sortField;
 
 		private final Locale locale;
 
@@ -129,11 +129,11 @@ public final class IMAPSort {
 			this(MailListField.SENT_DATE, descendingDirection, locale);
 		}
 
-		public MailComparator(final MailListField sortCol, final boolean descendingDirection, final Locale locale) {
-			this.sortCol = sortCol;
+		public MailComparator(final MailListField sortField, final boolean descendingDirection, final Locale locale) {
+			this.sortField = sortField;
 			this.descendingDir = descendingDirection;
 			this.locale = locale;
-			fieldComparer = createFieldComparer(this.sortCol, this.locale);
+			fieldComparer = createFieldComparer(this.sortField, this.locale);
 		}
 
 		private static int compareAddrs(final Address[] addrs1, final Address[] addrs2, final Locale locale,
@@ -331,6 +331,24 @@ public final class IMAPSort {
 	 */
 	private IMAPSort() {
 		super();
+	}
+
+	/**
+	 * Gets a new instance of {@link Comparator} designed to sort a collection
+	 * of {@link Message} objects
+	 * 
+	 * @param sortField
+	 *            The sort field
+	 * @param orderDir
+	 *            {@link OrderDirection#DESC} for descending order or
+	 *            {@link OrderDirection#ASC} for ascending order
+	 * @param locale
+	 *            The locale (needed for proper sorting by textual content)
+	 * @return
+	 */
+	public static Comparator<Message> getMessageComparator(final MailListField sortField,
+			final OrderDirection orderDir, final Locale locale) {
+		return new MailComparator(sortField, orderDir == OrderDirection.DESC, locale);
 	}
 
 	/**

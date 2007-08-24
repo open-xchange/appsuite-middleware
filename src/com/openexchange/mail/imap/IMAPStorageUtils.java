@@ -49,23 +49,38 @@
 
 package com.openexchange.mail.imap;
 
+import static com.openexchange.groupware.container.mail.parser.MessageUtils.removeHdrLineBreak;
+
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.mail.FetchProfile;
 import javax.mail.Message;
+import javax.mail.MessagingException;
 import javax.mail.UIDFolder;
 import javax.mail.internet.InternetAddress;
 
 import com.openexchange.groupware.container.mail.parser.MessageUtils;
 import com.openexchange.imap.MessageHeaders;
 import com.openexchange.mail.MailListField;
+import com.sun.mail.iap.ProtocolException;
+import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
+import com.sun.mail.imap.protocol.FetchResponse;
+import com.sun.mail.imap.protocol.IMAPProtocol;
+import com.sun.mail.imap.protocol.UIDSet;
 
 /**
- * IMAPStorageUtils
+ * {@link IMAPStorageUtils} - Offers general prurpose methods for both IMAP
+ * implementations: folder and message storage
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
@@ -120,6 +135,9 @@ public final class IMAPStorageUtils {
 
 	}
 
+	/*
+	 * Public constants
+	 */
 	public static final int INDEX_DRAFTS = 0;
 
 	public static final int INDEX_SENT = 1;
@@ -149,6 +167,110 @@ public final class IMAPStorageUtils {
 	 */
 	private IMAPStorageUtils() {
 		super();
+	}
+
+	private static final String STR_UID = "UID";
+
+	private static final String TMPL_FETCH_HEADER_REV1 = "FETCH %s (BODY.PEEK[HEADER])";
+
+	private static final String TMPL_FETCH_HEADER_NON_REV1 = "FETCH %s (RFC822.HEADER)";
+
+	private static final Pattern PATTERN_PARSE_HEADER = Pattern
+			.compile("(\\S+):\\s(.*)((?:\r?\n(?:\\s(?:.+)))*|(?:$))");
+
+	/**
+	 * Call this method if JavaMail's routine fails to load a message's header.
+	 * Header is read in a safe manner and filled into given
+	 * <tt>javax.mail.Message</tt> instance
+	 */
+	public static Map<String, String> loadBrokenHeaders(final Message msg, final boolean uid)
+			throws MessagingException, ProtocolException {
+		final IMAPFolder fld = (IMAPFolder) msg.getFolder();
+		final IMAPProtocol p = fld.getProtocol();
+		final String tmpl = p.isREV1() ? TMPL_FETCH_HEADER_REV1 : TMPL_FETCH_HEADER_NON_REV1;
+		final String cmd;
+		if (uid) {
+			cmd = new StringBuilder(50).append(STR_UID).append(' ').append(
+					String.format(tmpl, Long.valueOf(fld.getUID(msg)))).toString();
+		} else {
+			cmd = String.format(tmpl, Integer.valueOf(msg.getMessageNumber()));
+		}
+		final Map<String, String> retval = new HashMap<String, String>();
+		final Response[] r = p.command(cmd, null);
+		final Response response = r[r.length - 1];
+		try {
+			if (response.isOK()) {
+				final int len = r.length - 1;
+				final StringBuilder valBuilder = new StringBuilder();
+				NextResponse: for (int i = 0; i < len; i++) {
+					if (r[i] == null) {
+						continue NextResponse;
+					} else if (!(r[i] instanceof FetchResponse)) {
+						continue NextResponse;
+					}
+					final FetchResponse f = ((FetchResponse) r[i]);
+					if (f.getNumber() != msg.getMessageNumber()) {
+						continue NextResponse;
+					}
+					final Matcher m = PATTERN_PARSE_HEADER.matcher(f.toString());
+					while (m.find()) {
+						valBuilder.append(m.group(2));
+						if (m.group(3) != null) {
+							valBuilder.append(removeHdrLineBreak(m.group(3)));
+						}
+						retval.put(m.group(1), valBuilder.toString());
+						valBuilder.setLength(0);
+					}
+					r[i] = null;
+				}
+			}
+		} finally {
+			// dispatch remaining untagged responses
+			p.notifyResponseHandlers(r);
+			p.handleResult(response);
+		}
+		return null;
+	}
+
+	/**
+	 * Turns given array of <code>long</code> into an array of
+	 * <code>com.sun.mail.imap.protocol.UIDSet</code> which in turn can be
+	 * used for a varieties of <code>IMAPProtocol</code> methods.
+	 * 
+	 * @param uids -
+	 *            the UIDs
+	 * @return an array of <code>com.sun.mail.imap.protocol.UIDSet</code>
+	 */
+	public static UIDSet[] toUIDSet(final long[] uids) {
+		final List<UIDSet> sets = new ArrayList<UIDSet>(uids.length);
+		for (int i = 0; i < uids.length; i++) {
+			long current = uids[i];
+			final UIDSet set = new UIDSet();
+			set.start = current;
+			/*
+			 * Look for contiguous UIDs
+			 */
+			Inner: for (++i; i < uids.length; i++) {
+				final long next = uids[i];
+				if (next == current + 1) {
+					current = next;
+				} else {
+					/*
+					 * Break in sequence. Need to reexamine this message at the
+					 * top of the outer loop, so decrement 'i' to cancel the
+					 * outer loop's autoincrement
+					 */
+					i--;
+					break Inner;
+				}
+			}
+			set.end = current;
+			sets.add(set);
+		}
+		if (sets.isEmpty()) {
+			return null;
+		}
+		return sets.toArray(new UIDSet[sets.size()]);
 	}
 
 	/**
