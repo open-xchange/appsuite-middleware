@@ -305,6 +305,10 @@ public class ICalImporter extends AbstractImporter implements Importer {
 						try {
 							taskObj = oxContainerConverter.convertTask(versitObject);
 						} catch (ConverterPrivacyException e){
+							importResult.setException(EXCEPTIONS.create(6));
+							storeData = false;
+						} catch (ConverterException x) {
+							importResult.setException(EXCEPTIONS.create(10, x.getMessage()));
 							storeData = false;
 						}
 						if(storeData){
@@ -313,7 +317,6 @@ public class ICalImporter extends AbstractImporter implements Importer {
 							importResult.setObjectId(String.valueOf(taskObj.getObjectID()));
 							importResult.setDate(taskObj.getLastModified());
 						} else {
-							importResult.setException(EXCEPTIONS.create(6));
 							importResult.setDate(new Date());
 						}
 						list.add(importResult);

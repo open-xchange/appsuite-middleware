@@ -1207,6 +1207,13 @@ public class OXContainerConverter {
 						throw new ConverterException("Multiple weeks of month are not supported.");
 					}
 					week = wd.week;
+					if(week < 0) {
+						if(week == -1) {
+							week = 5;
+						} else {
+							throw new ConverterException("Only the last week of a month is supported. Counting from the end of the month above the first is not supported.");
+						}
+					}
 				}
 				calContainerObj.setDays(days);
 				calContainerObj.setDayInMonth(week);
