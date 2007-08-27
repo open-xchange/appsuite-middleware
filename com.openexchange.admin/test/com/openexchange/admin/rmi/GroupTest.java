@@ -818,7 +818,7 @@ public class GroupTest extends AbstractTest {
         return getTestGroupObject(VALID_CHAR_TESTGROUP+System.currentTimeMillis(), ctx, cred);
     }
 
-    private Group getTestGroupObject(final String ident, final Context ctx, final Credentials cred) throws Exception {
+    public static Group getTestGroupObject(final String ident, final Context ctx, final Credentials cred) throws Exception {
         final Group grp = new Group();
         grp.setDisplayname("display name " + ident);
         grp.setName(ident);
