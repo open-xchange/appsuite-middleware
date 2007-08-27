@@ -59,7 +59,7 @@ import com.openexchange.server.OCLPermission;
 public final class Create {
 
     /**
-     * Prevent instanciation.
+     * Prevent instantiation
      */
     private Create() {
         super();

@@ -95,7 +95,7 @@ public final class LinkTools extends Assert {
     private static final String LINK_URL = "/ajax/link";
     
     /**
-     * Prevent instanciation.
+     * Prevent instantiation
      */
     private LinkTools() {
         super();

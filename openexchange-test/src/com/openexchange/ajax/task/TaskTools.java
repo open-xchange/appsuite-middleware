@@ -123,7 +123,7 @@ public final class TaskTools extends Assert {
     private static final String TASKS_URL = "/ajax/tasks";
     
     /**
-     * Prevent instanciation.
+     * Prevent instantiation
      */
     private TaskTools() {
         super();

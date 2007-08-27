@@ -55,7 +55,7 @@ import com.openexchange.groupware.tasks.TaskException.Code;
 public class TaskSearchJSONWriter {
 
     /**
-     * Prevent instanciation.
+     * Prevent instantiation
      */
     private TaskSearchJSONWriter() {
         super();

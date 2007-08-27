@@ -59,7 +59,7 @@ import junit.framework.TestSuite;
 public final class SmokeTestSuite {
 
     /**
-     * Prevent instanciation.
+     * Prevent instantiation
      */
     private SmokeTestSuite() {
         super();

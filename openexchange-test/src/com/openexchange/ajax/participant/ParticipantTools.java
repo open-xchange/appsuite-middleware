@@ -69,7 +69,7 @@ import com.openexchange.groupware.container.UserParticipant;
 public final class ParticipantTools {
 
     /**
-     * Prevent instanciation.
+     * Prevent instantiation
      */
     private ParticipantTools() {
         super();

@@ -49,7 +49,7 @@ public class RandomString {
     private final static Random rand = new Random(System.currentTimeMillis());
 
     /**
-     * Prevent instanciation.
+     * Prevent instantiation
      */
     private RandomString() {
         super();

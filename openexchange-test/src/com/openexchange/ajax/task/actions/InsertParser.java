@@ -72,7 +72,7 @@ public class InsertParser extends CommonInsertParser {
      * {@inheritDoc}
      */
     @Override
-    protected InsertResponse instanciateResponse(final Response response) {
+    protected InsertResponse instantiateResponse(final Response response) {
         return new InsertResponse(response, folderId);
     }
 }

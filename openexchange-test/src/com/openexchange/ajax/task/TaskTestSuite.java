@@ -59,7 +59,7 @@ import junit.framework.TestSuite;
 public final class TaskTestSuite {
 
     /**
-     * Prevent instanciation.
+     * Prevent instantiation
      */
     private TaskTestSuite() {
         super();

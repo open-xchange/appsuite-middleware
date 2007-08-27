@@ -98,7 +98,7 @@ public final class ConfigTools extends Assert {
     private static final String CONFIG_URL = "/ajax/config/";
 
     /**
-     * Prevent instanciation.
+     * Prevent instantiation
      */
     private ConfigTools() {
         super();

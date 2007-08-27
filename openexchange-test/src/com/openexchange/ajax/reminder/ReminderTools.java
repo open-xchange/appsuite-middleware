@@ -70,7 +70,7 @@ import com.openexchange.tools.servlet.AjaxException;
 public final class ReminderTools extends Assert {
 
     /**
-     * Prevent instanciation.
+     * Prevent instantiation
      */
     private ReminderTools() {
         super();

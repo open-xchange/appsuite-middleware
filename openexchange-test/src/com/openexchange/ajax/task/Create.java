@@ -73,7 +73,7 @@ import junit.framework.Assert;
 public class Create extends Assert {
 
     /**
-     * Prevent instanciation.
+     * Prevent instantiation
      */
     private Create() {
         super();

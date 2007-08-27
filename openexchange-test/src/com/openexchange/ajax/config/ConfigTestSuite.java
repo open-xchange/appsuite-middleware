@@ -60,7 +60,7 @@ import junit.framework.TestSuite;
 public class ConfigTestSuite {
 
     /**
-     * Prevent instanciation.
+     * Prevent instantiation
      */
     private ConfigTestSuite() {
         super();

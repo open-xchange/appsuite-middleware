@@ -36,7 +36,7 @@ public class Executor extends Assert {
     private static final String ENCODING = "UTF-8";
 
     /**
-     * Prevent instanciation.
+     * Prevent instantiation
      */
     private Executor() {
         super();

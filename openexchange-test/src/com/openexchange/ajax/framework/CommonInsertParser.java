@@ -74,7 +74,7 @@ public class CommonInsertParser extends AbstractAJAXParser<CommonInsertResponse>
     @Override
     protected CommonInsertResponse createResponse(final Response response)
         throws JSONException {
-        final CommonInsertResponse retval = instanciateResponse(response);
+        final CommonInsertResponse retval = instantiateResponse(response);
         if (isFailOnError()) {
             final JSONObject data = (JSONObject) response.getData();
             if (data.has(DataFields.ID)) {
@@ -88,7 +88,7 @@ public class CommonInsertParser extends AbstractAJAXParser<CommonInsertResponse>
         return retval;
     }
 
-    protected CommonInsertResponse instanciateResponse(
+    protected CommonInsertResponse instantiateResponse(
         final Response response) {
         return new CommonInsertResponse(response);
     }

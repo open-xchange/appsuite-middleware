@@ -71,7 +71,7 @@ import com.openexchange.tools.servlet.AjaxException;
 public final class FolderTools {
 
     /**
-     * Prevent instanciation.
+     * Prevent instantiation
      */
     private FolderTools() {
         super();
