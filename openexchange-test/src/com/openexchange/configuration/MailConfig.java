@@ -81,7 +81,15 @@ public final class MailConfig extends AbstractConfig {
 		/**
 		 * Password
 		 */
-		PASSWORD("password");
+		PASSWORD("password"),
+		/**
+		 * User ID
+		 */
+		USER("user"),
+		/**
+		 * Context ID
+		 */
+		CONTEXT("cid");
 
 		/**
 		 * Name of the property in the ajax.properties file.

@@ -122,21 +122,6 @@ public final class MailMessageTest extends AbstractMailTest {
 					assertTrue("Missing To", msgs[i].containsTo());
 					assertTrue("Missing Flags", msgs[i].containsFlags());
 					assertTrue("Missing User Flags", msgs[i].containsUserFlags());
-
-					sb.setLength(0);
-					sb.append("\n\n\t").append(msgs[i].getUid());
-					sb.append('\n').append(msgs[i].getFolder());
-					sb.append('\n').append(msgs[i].getSubject());
-					sb.append('\n').append(Arrays.toString(msgs[i].getUserFlags()));
-					sb.append('\n').append(Arrays.toString(msgs[i].getFrom()));
-					sb.append('\n').append(Arrays.toString(msgs[i].getTo()));
-					sb.append('\n').append(msgs[i].getSize());
-					sb.append('\n').append(msgs[i].getReceivedDate());
-					sb.append('\n').append(msgs[i].getSentDate());
-					sb.append('\n').append(msgs[i].hasAttachment());
-					sb.append('\n').append(msgs[i].getFlags());
-					sb.append('\n').append(msgs[i].getPriority());
-					System.out.println(sb.toString());
 				}
 			} finally {
 				mailConnection.close();

@@ -51,9 +51,7 @@ package com.openexchange.mail;
 
 import junit.framework.TestCase;
 
-import com.openexchange.configuration.ConfigurationInit;
 import com.openexchange.configuration.MailConfig;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Init;
 
 /**
@@ -71,6 +69,10 @@ public abstract class AbstractMailTest extends TestCase {
 	private String login;
 
 	private String password;
+	
+	private int user;
+	
+	private int cid;
 
 	/**
 	 * 
@@ -101,6 +103,8 @@ public abstract class AbstractMailTest extends TestCase {
 			port = Integer.parseInt(MailConfig.getProperty(MailConfig.Property.PORT));
 			login = MailConfig.getProperty(MailConfig.Property.LOGIN);
 			password = MailConfig.getProperty(MailConfig.Property.PASSWORD);
+			user = Integer.parseInt(MailConfig.getProperty(MailConfig.Property.USER));
+			cid = Integer.parseInt(MailConfig.getProperty(MailConfig.Property.CONTEXT));
 		} catch (final Exception e) {
 			e.printStackTrace();
 			throw e;
@@ -143,5 +147,22 @@ public abstract class AbstractMailTest extends TestCase {
 		return server;
 	}
 
-	
+	/**
+	 * Gets the cid
+	 *
+	 * @return the cid
+	 */
+	protected final int getCid() {
+		return cid;
+	}
+
+	/**
+	 * Gets the user
+	 *
+	 * @return the user
+	 */
+	protected final int getUser() {
+		return user;
+	}
+
 }

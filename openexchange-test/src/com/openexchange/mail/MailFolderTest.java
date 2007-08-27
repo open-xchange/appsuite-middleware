@@ -79,7 +79,7 @@ public class MailFolderTest extends AbstractMailTest {
 
 	public void testGetINBOXFolder() {
 		try {
-			SessionObject session = SessionObjectWrapper.createSessionObject(17, new ContextImpl(1337), "mail-test-session");
+			SessionObject session = SessionObjectWrapper.createSessionObject(getUser(), new ContextImpl(getCid()), "mail-test-session");
 			MailConnection mailConnection = MailConnection.getInstance(session);
 			mailConnection.setLogin(getLogin());
 			mailConnection.setMailServer(getServer());
@@ -102,7 +102,7 @@ public class MailFolderTest extends AbstractMailTest {
 	
 	public void testGetSubfolders() {
 		try {
-			SessionObject session = SessionObjectWrapper.createSessionObject(17, new ContextImpl(1337), "mail-test-session");
+			SessionObject session = SessionObjectWrapper.createSessionObject(getUser(), new ContextImpl(getCid()), "mail-test-session");
 			MailConnection mailConnection = MailConnection.getInstance(session);
 			mailConnection.setLogin(getLogin());
 			mailConnection.setMailServer(getServer());
