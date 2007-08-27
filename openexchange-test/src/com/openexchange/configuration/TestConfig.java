@@ -17,7 +17,7 @@ public class TestConfig extends AbstractConfig {
     private static TestConfig singleton;
     
     /**
-     * Prevent instanciation.
+     * Prevent instantiation
      */
     private TestConfig() {
         super();
@@ -64,7 +64,11 @@ public class TestConfig extends AbstractConfig {
         /**
          * ajax.properties.
          */
-        AJAX_PROPS("ajaxPropertiesFile");
+        AJAX_PROPS("ajaxPropertiesFile"),
+        /**
+         * mail.properties
+         */
+        MAIL_PROPS("mailPropertiesFile");
 
         /**
          * Name of the property in the test.properties file.
