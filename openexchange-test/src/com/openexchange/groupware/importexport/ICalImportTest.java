@@ -49,12 +49,12 @@
 
 package com.openexchange.groupware.importexport;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
+import java.util.Calendar;
 import java.util.List;
 
 import junit.framework.JUnit4TestAdapter;
@@ -250,7 +250,7 @@ public class ICalImportTest extends AbstractICalImportTest {
 	/*
 	 * "Every sunday in a month" - this is supposed to work
 	 */
-	@Test public void test7735_positive() throws DBPoolingException, SQLException, ImportExportException, UnsupportedEncodingException{
+	@Test public void test7735_positive() throws DBPoolingException, SQLException, UnsupportedEncodingException, OXObjectNotFoundException, NumberFormatException, OXException{
 		//positive prefix for RRULE
 		String ical = 
 			"BEGIN:VCALENDAR\n" +
@@ -265,14 +265,21 @@ public class ICalImportTest extends AbstractICalImportTest {
 			"END:VEVENT\n" +
 			"END:VCALENDAR";
 
-		performOneEntryCheck(ical, Format.ICAL, FolderObject.CALENDAR, "7735_positive", false);
+		ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.CALENDAR, "7735_positive", false);
+		assertFalse(res.hasError());
+		final AppointmentSQLInterface appointmentSql = new CalendarSql(sessObj);
+		final AppointmentObject appointmentObj = appointmentSql.getObjectById(Integer.parseInt( res.getObjectId() ), folderId);
+		assertTrue(AppointmentObject.YEARLY == appointmentObj.getRecurrenceType());
+		assertTrue(AppointmentObject.SUNDAY == appointmentObj.getDays());
+		assertTrue(1 == appointmentObj.getDayInMonth());
+		assertTrue(Calendar.APRIL == appointmentObj.getMonth());
 	}
 
 	/*
 	 * "Every last sunday in a month" - this is supposed to fail, 
 	 * because this kind of setup is not supported. 
 	 */
-	@Test public void test7735_negative () throws DBPoolingException, SQLException, ImportExportException, UnsupportedEncodingException{
+	@Test public void test7735_negative () throws DBPoolingException, SQLException, UnsupportedEncodingException, OXObjectNotFoundException, NumberFormatException, OXException{
 		//positive prefix for RRULE
 		String ical = 
 			"BEGIN:VCALENDAR\n" +
@@ -282,11 +289,40 @@ public class ICalImportTest extends AbstractICalImportTest {
 			"DTSTART:20070814T150000Z\n" +
 			"DTEND:20070814T163000Z\n" +
 			"LOCATION:Olpe\nSUMMARY:Komplizierte Intervalle\n" +
-			"DESCRIPTION:Jeden ersten Sonntag im April\n" +
+			"DESCRIPTION:Jeden letzten Sonntag im April\n" +
 			"RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=4\n" +
 			"END:VEVENT\n" +
 			"END:VCALENDAR";
-		performOneEntryCheck(ical, Format.ICAL, FolderObject.CALENDAR, "7735_negative", true);
+		ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.CALENDAR, "7735_negative", false);
+		assertFalse(res.hasError());
+		final AppointmentSQLInterface appointmentSql = new CalendarSql(sessObj);
+		final AppointmentObject appointmentObj = appointmentSql.getObjectById(Integer.parseInt( res.getObjectId() ), folderId);
+		assertTrue(AppointmentObject.YEARLY == appointmentObj.getRecurrenceType());
+		assertTrue(AppointmentObject.SUNDAY == appointmentObj.getDays());
+		assertTrue(5 == appointmentObj.getDayInMonth());
+		assertTrue(Calendar.APRIL == appointmentObj.getMonth());
+	}
+	
+	/*
+	 * "Every second last sunday in a month" - this is supposed to fail, 
+	 * because this kind of setup is not supported. 
+	 */
+	@Test public void test7735_negative_above_1 () throws DBPoolingException, SQLException, UnsupportedEncodingException, OXObjectNotFoundException, NumberFormatException, OXException{
+		//positive prefix for RRULE
+		String ical = 
+			"BEGIN:VCALENDAR\n" +
+			"VERSION:2.0\n" +
+			"PRODID:-//Microsoft Corporation//Outlook 12.0 MIMEDIR//EN\n" +
+			"BEGIN:VEVENT\n" +
+			"DTSTART:20070814T150000Z\n" +
+			"DTEND:20070814T163000Z\n" +
+			"LOCATION:Olpe\nSUMMARY:Komplizierte Intervalle\n" +
+			"DESCRIPTION:Jeden letzten Sonntag im April\n" +
+			"RRULE:FREQ=YEARLY;BYDAY=-2SU;BYMONTH=4\n" +
+			"END:VEVENT\n" +
+			"END:VCALENDAR";
+		ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.CALENDAR, "7735_negative", true);
+		assertTrue(res.hasError());
 	}
 	
 	@Test public void test7470() throws DBPoolingException, UnsupportedEncodingException, SQLException, OXObjectNotFoundException, NumberFormatException, OXException{
