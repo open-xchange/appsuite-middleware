@@ -49,9 +49,9 @@
 
 package com.openexchange.ajax;
 
+import static com.openexchange.ajax.request.MailRequest.MAIL_SERVLET;
 import static com.openexchange.tools.oxfolder.OXFolderManagerImpl.getFolderName;
 import static com.openexchange.tools.oxfolder.OXFolderManagerImpl.getUserName;
-import static com.openexchange.ajax.request.MailRequest.MAIL_SERVLET;
 
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
@@ -129,14 +129,13 @@ import com.openexchange.groupware.upload.UploadException;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.UploadListener;
 import com.openexchange.groupware.upload.UploadRegistry;
-import com.openexchange.imap.IMAPPropertyException;
 import com.openexchange.imap.IMAPProperties;
+import com.openexchange.imap.IMAPPropertyException;
 import com.openexchange.imap.OXMailException;
 import com.openexchange.imap.UserSettingMail;
 import com.openexchange.imap.OXMailException.MailCode;
 import com.openexchange.imap.threadsort.ThreadSortMessage;
 import com.openexchange.json.OXJSONWriter;
-import com.openexchange.mail.imap.IMAPStorageUtils;
 import com.openexchange.server.EffectivePermission;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.encoding.Helper;
@@ -531,12 +530,12 @@ public class Mail extends PermissionServlet implements UploadListener {
 					}
 				} else {
 					final int sortCol = sort == null ? JSONMessageObject.FIELD_RECEIVED_DATE : Integer.parseInt(sort);
-					int orderDir = IMAPStorageUtils.ORDER_ASC;
+					int orderDir = MailInterfaceImpl.ORDER_ASC;
 					if (order != null) {
 						if (order.equalsIgnoreCase(STR_ASC)) {
-							orderDir = IMAPStorageUtils.ORDER_ASC;
+							orderDir = MailInterfaceImpl.ORDER_ASC;
 						} else if (order.equalsIgnoreCase(STR_DESC)) {
-							orderDir = IMAPStorageUtils.ORDER_DESC;
+							orderDir = MailInterfaceImpl.ORDER_DESC;
 						} else {
 							throw new OXMailException(MailCode.INVALID_INT_VALUE, PARAMETER_ORDER);
 						}
@@ -939,12 +938,12 @@ public class Mail extends PermissionServlet implements UploadListener {
 				 * Receive message iterator
 				 */
 				final int sortCol = sort == null ? JSONMessageObject.FIELD_SENT_DATE : Integer.parseInt(sort);
-				int orderDir = IMAPStorageUtils.ORDER_ASC;
+				int orderDir = MailInterfaceImpl.ORDER_ASC;
 				if (order != null) {
 					if (order.equalsIgnoreCase(STR_ASC)) {
-						orderDir = IMAPStorageUtils.ORDER_ASC;
+						orderDir = MailInterfaceImpl.ORDER_ASC;
 					} else if (order.equalsIgnoreCase(STR_DESC)) {
-						orderDir = IMAPStorageUtils.ORDER_DESC;
+						orderDir = MailInterfaceImpl.ORDER_DESC;
 					} else {
 						throw new OXMailException(MailCode.INVALID_INT_VALUE, PARAMETER_ORDER);
 					}
@@ -1461,12 +1460,12 @@ public class Mail extends PermissionServlet implements UploadListener {
 					} else {
 						final int sortCol = sort == null ? JSONMessageObject.FIELD_RECEIVED_DATE : Integer
 								.parseInt(sort);
-						int orderDir = IMAPStorageUtils.ORDER_ASC;
+						int orderDir = MailInterfaceImpl.ORDER_ASC;
 						if (order != null) {
 							if (order.equalsIgnoreCase(STR_ASC)) {
-								orderDir = IMAPStorageUtils.ORDER_ASC;
+								orderDir = MailInterfaceImpl.ORDER_ASC;
 							} else if (order.equalsIgnoreCase(STR_DESC)) {
-								orderDir = IMAPStorageUtils.ORDER_DESC;
+								orderDir = MailInterfaceImpl.ORDER_DESC;
 							} else {
 								throw new OXMailException(MailCode.INVALID_INT_VALUE, PARAMETER_ORDER);
 							}
