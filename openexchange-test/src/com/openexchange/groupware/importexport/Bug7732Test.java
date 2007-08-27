@@ -49,7 +49,7 @@
 
 package com.openexchange.groupware.importexport;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
@@ -64,6 +64,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.server.DBPoolingException;
 
 public class Bug7732Test extends AbstractICalImportTest {
@@ -102,6 +103,29 @@ public class Bug7732Test extends AbstractICalImportTest {
 		final AppointmentSQLInterface appointmentSql = new CalendarSql(sessObj);
 		final AppointmentObject appointmentObj = appointmentSql.getObjectById(Integer.parseInt( res.getObjectId() ), folderId);
 		assertEquals(count + " occurences found?" , count , appointmentObj.getOccurrence());
+	}
+	
+	@Test public void testMeaningfulParserMessage() throws Exception {
+		String ical = 
+			"BEGIN:VCALENDAR\n"+
+			"PRODID:-//Microsoft Corporation//Outlook 12.0 MIMEDIR//EN\n"+
+			"VERSION:2.0\n"+
+			"METHOD:PUBLISH\n"+
+			"BEGIN:VEVENT\n"+
+			"DESCRIPTION:Daily for 10 occurrences:\n"+
+			"DTSTAMP:20070102T053656Z\n"+
+			"RRULE:FREQ=DAILY;COUNT=10\n"+
+			"SUMMARY:RExample01\n"+
+			"UID:RExample01\n"+
+			"END:VEVENT\n"+
+			"END:VCALENDAR";
+		ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.CALENDAR, "7732-b", true);
+		assertTrue(res.hasError());
+		OXException x = res.getException();
+		x.printStackTrace();
+		
+		assertEquals("RRULE without DTSTART", x.getMessageArgs()[0]);
+		
 	}
 
 }
