@@ -281,7 +281,7 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 		StringBuffer url = getUrl(sessionId,"new", hostname);
 		JSONObject obj = toJSONArgs(fields);
 		
-		PutMethodWebRequest m = new PutMethodWebRequest(url.toString(), new ByteArrayInputStream(obj.toString().getBytes()),"text/javascript");
+		PutMethodWebRequest m = new PutMethodWebRequest(url.toString(), new ByteArrayInputStream(obj.toString().getBytes("UTF-8")),"text/javascript");
 		
 		WebResponse resp = webConv.getResponse(m);
 		try {
