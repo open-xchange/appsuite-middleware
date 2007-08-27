@@ -89,6 +89,7 @@ import com.openexchange.tools.versit.ICalendar;
 import com.openexchange.tools.versit.VersitDefinition;
 import com.openexchange.tools.versit.VersitException;
 import com.openexchange.tools.versit.VersitObject;
+import com.openexchange.tools.versit.converter.ConverterException;
 import com.openexchange.tools.versit.converter.ConverterPrivacyException;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
 
@@ -106,9 +107,10 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
 		Category.USER_INPUT,
 		Category.PERMISSION,
 		Category.PERMISSION,
+		Category.USER_INPUT,
 		Category.USER_INPUT}, 
-	desc={"","","","","","","","","",""}, 
-	exceptionId={0,1,2,3,4,5,6,7,8,9}, 
+	desc={"","","","","","","","","","",""}, 
+	exceptionId={0,1,2,3,4,5,6,7,8,9,10}, 
 	msg={
 		"Could not import into the folder %s.",
 		"Subsystem down",
@@ -119,7 +121,8 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
 		"Cowardly refusing to import an entry flagged as confidential.",
 		"Module Calendar not enabled for user, cannot import appointments.",
 		"Module Tasks not enabled for user, cannot import tasks.",
-		"The element %s is not supported."})
+		"The element %s is not supported.",
+		"Couldn't convert object: %s"})
 
 /**
  * Imports ICal files. ICal files can be translated to either tasks or 
@@ -277,6 +280,10 @@ public class ICalImporter extends AbstractImporter implements Importer {
 						try {
 							appointmentObj = oxContainerConverter.convertAppointment(versitObject);
 						} catch (ConverterPrivacyException e){
+							importResult.setException(EXCEPTIONS.create(6));
+							storeData = false;
+						} catch (ConverterException x) {
+							importResult.setException(EXCEPTIONS.create(10, x.getMessage()));
 							storeData = false;
 						}
 						if(storeData){
@@ -287,7 +294,6 @@ public class ICalImporter extends AbstractImporter implements Importer {
 							importResult.setObjectId(String.valueOf(appointmentObj.getObjectID()));
 							importResult.setDate(appointmentObj.getLastModified());
 						} else {
-							importResult.setException(EXCEPTIONS.create(6));
 							importResult.setDate(new Date());
 						}
 						list.add(importResult);
