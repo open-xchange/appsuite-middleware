@@ -52,6 +52,8 @@ package com.openexchange.mail;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.openexchange.mail.imap.IMAPMailConnection;
+import com.openexchange.sessiond.SessionObject;
 
 /**
  * MailConnection
@@ -91,9 +93,9 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 		password = null;
 	}
 
-	public static final MailConnection getInstance() {
-
-		return null;
+	public static final MailConnection getInstance(final SessionObject session) {
+		// TODO: return proper implementation
+		return new IMAPMailConnection(session);
 	}
 
 	/**
@@ -263,6 +265,7 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 	/**
 	 * Gets the appropiate {@link MailFolderStorage} implementation that is
 	 * considered as the main entry point to a user's mailbox
+	 * 
 	 * @return The appropiate {@link MailFolderStorage} implementation
 	 * @throws MailException
 	 *             If connection is not established, yet
