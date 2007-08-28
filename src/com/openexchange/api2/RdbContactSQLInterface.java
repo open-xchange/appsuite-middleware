@@ -929,13 +929,15 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 	@OXThrowsMultiple(
 			category={ 	Category.SOCKET_CONNECTION,
 									Category.CODE_ERROR,				
-									Category.CODE_ERROR
+									Category.CODE_ERROR,
+									Category.TRY_AGAIN
 								},
-			desc={"47","48","49"},
-			exceptionId={47,48,49},
+			desc={"47","48","49","59"},
+			exceptionId={47,48,49,59},
 			msg={	ContactException.INIT_CONNECTION_FROM_DBPOOL,	
 							ERR_UNABLE_TO_LOAD_OBJECTS_CONTEXT_1$D_USER_2$D,
-							ERR_UNABLE_TO_LOAD_OBJECTS_CONTEXT_1$D_USER_2$D
+							ERR_UNABLE_TO_LOAD_OBJECTS_CONTEXT_1$D_USER_2$D,
+							"The contact you requested is not valid."
 						}
 	)
 	public SearchIterator getObjectsById(final int[][] object_id, final int[] cols) throws OXException {
@@ -950,6 +952,13 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 			
 			final Statement stmt = readcon.createStatement();
 			final ResultSet rs = stmt.executeQuery(contactSQL.getSqlCommand());
+			
+			if (object_id.length == 1 && !rs.first()){
+				throw EXCEPTIONS.createOXObjectNotFoundException(59);
+			} else {
+				rs.beforeFirst();
+			}
+			
 			si = new ContactObjectIterator(rs,stmt,cols,true,readcon);
 		} catch (DBPoolingException e) {
 			throw EXCEPTIONS.create(47,e);
