@@ -3338,7 +3338,7 @@ msgid "User %s has no delete access to mail folder %s"
 msgstr "Benutzer %s hat keine Löschrechte für den E-Mail-Ordner %s"
 
 msgid "User %s has no insert access to mail folder %s"
-msgstr "Benutzer %s hat keine Einfügezugriff für IMAP-Ordner %s"
+msgstr "Benutzer %s hat keinen Einfügezugriff für IMAP-Ordner %s"
 
 msgid "User %s has no keep-seen access to mail folder %s"
 msgstr "Benutzer %s hat keinen keep-seen-Zugriff auf IMAP-Ordner %s"
