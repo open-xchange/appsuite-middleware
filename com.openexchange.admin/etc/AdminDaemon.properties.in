@@ -3,11 +3,11 @@ SERVER_NAME=local
 BIND_ADDRESS=localhost
 
 # Properties files for the different calls and actions
-SQL_PROP=$PWD/@oxconfdir@/Sql.properties
-USER_PROP=$PWD/@oxconfdir@/User.properties
-GROUP_PROP=$PWD/@oxconfdir@/Group.properties
-RESOURCE_PROP=$PWD/@oxconfdir@/Resource.properties
-RMI_PROP=$PWD/@oxconfdir@/RMI.properties
+SQL_PROP=@oxprefix@/@oxconfdir@/Sql.properties
+USER_PROP=@oxprefix@/@oxconfdir@/User.properties
+GROUP_PROP=@oxprefix@/@oxconfdir@/Group.properties
+RESOURCE_PROP=@oxprefix@/@oxconfdir@/Resource.properties
+RMI_PROP=@oxprefix@/@oxconfdir@/RMI.properties
 
 # Disabling authentication for system calls like context/server etc. creation!
 # ONLY USE THIS SWITCH IF YOU EXACTLY KNOW WHAT YOU DO!!!
@@ -19,7 +19,7 @@ MASTER_AUTHENTICATION_DISABLED=false
 # ONLY USE THIS SWITCH IF YOU EXACTLY KNOW WHAT YOU DO!!!
 CONTEXT_AUTHENTICATION_DISABLED=false
 
-MASTER_AUTH_FILE=$PWD/@oxconfdir@/mpasswd
+MASTER_AUTH_FILE=@oxprefix@/@oxconfdir@/mpasswd
 
 USER_STORAGE=com.openexchange.admin.storage.mysqlStorage.OXUserMySQLStorage
 GROUP_STORAGE=com.openexchange.admin.storage.mysqlStorage.OXGroupMySQLStorage

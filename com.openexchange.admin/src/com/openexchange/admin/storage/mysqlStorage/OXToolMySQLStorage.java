@@ -1387,7 +1387,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
      *      java.lang.String)
      */
     @Override
-    public void primaryMailExists(final Context ctx, final String primary_mail) throws StorageException, InvalidDataException {
+    public void primaryMailExists(final Context ctx, final String primary_mail) throws StorageException {
         Connection con = null;
         PreparedStatement prep_check = null;
         ResultSet rs = null;
@@ -1401,10 +1401,13 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                 throw new InvalidDataException("Primary mail address already exists in this context");
             }
         } catch (final PoolException e) {
-            log.error("Pool Error",e);
+            log.error("Pool error",e);
             throw new StorageException(e);
         } catch (final SQLException e) {
-            log.error("SQL Error",e);
+            log.error("SQL error",e);
+            throw new StorageException(e);
+        } catch (final InvalidDataException e) {
+            log.error("Invalid data",e);
             throw new StorageException(e);
         } finally {
             closeRecordSet(rs);

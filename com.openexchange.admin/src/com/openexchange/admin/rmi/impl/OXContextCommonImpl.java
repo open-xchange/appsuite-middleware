@@ -61,6 +61,7 @@ import com.openexchange.admin.rmi.exceptions.ContextExistsException;
 import com.openexchange.admin.rmi.exceptions.EnforceableDataObjectException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.NoSuchPluginException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.tools.GenericChecks;
@@ -101,7 +102,7 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
         GenericChecks.checkValidMailAddress(admin_user.getPrimaryEmail());
     }
 
-    protected abstract Context createmaincall(final Context ctx, final User admin_user, Database db) throws StorageException, InvalidDataException;
+    protected abstract Context createmaincall(final Context ctx, final User admin_user, Database db) throws StorageException, InvalidDataException, NoSuchPluginException;
 
     protected Context createcommon(final Context ctx, final User admin_user, final Database db, final Credentials auth) throws InvalidCredentialsException, ContextExistsException, InvalidDataException, StorageException {
         try{
@@ -140,6 +141,9 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
         } catch (final StorageException e) {
             log.error(e.getMessage(), e);
             throw e;
+        } catch (final NoSuchPluginException e) {
+            log.error(e.getMessage(), e);
+            throw new StorageException(e);
         }
     }
 }

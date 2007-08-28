@@ -50,6 +50,7 @@ package com.openexchange.admin.properties;
 
 /**
  * This class will hold the properties setting from now on
+ * 
  * @author d7
  *
  */
@@ -60,12 +61,13 @@ public class AdminProperties {
 	 *
 	 */
 	public class Group {
-	    public static final String CHECK_NOT_ALLOWED_CHARS  = "CHECK_GROUP_UID_FOR_NOT_ALLOWED_CHARS";
-	    public static final String AUTO_LOWERCASE           = "AUTO_TO_LOWERCASE_UID";
-	    public static final String CHECK_NOT_ALLOWED_NAMES  = "CHECK_GROUP_UID_FOR_NOT_ALLOWED_NAMES";
-	    public static final String NOT_ALLOWED_NAMES        = "NOT_ALLOWED_GROUP_UID_NAMES";
-            public static final String GID_NUMBER_START        = "GID_NUMBER_START";
-            
+	    public static final String CHECK_NOT_ALLOWED_CHARS = "CHECK_GROUP_UID_FOR_NOT_ALLOWED_CHARS";
+	    public static final String AUTO_LOWERCASE = "AUTO_TO_LOWERCASE_UID";
+	    public static final String CHECK_NOT_ALLOWED_NAMES = "CHECK_GROUP_UID_FOR_NOT_ALLOWED_NAMES";
+	    public static final String NOT_ALLOWED_NAMES = "NOT_ALLOWED_GROUP_UID_NAMES";
+	    public static final String GID_NUMBER_START = "GID_NUMBER_START";
+            public static final String CHECK_GROUP_UID_REGEXP = "CHECK_GROUP_UID_REGEXP";
+            public static final String DEFAULT_CONTEXT_GROUP_ = "DEFAULT_CONTEXT_GROUP_";
 	}
 	
 	/**
@@ -84,6 +86,9 @@ public class AdminProperties {
 	    public static final String PROPERTIES_GROUP_FILE            = "GROUP_PROP";
 	    public static final String PROPERTIES_RESOURCE_FILE         = "RESOURE_PROP";
 	    public static final String PROPERTIES_RMI_FILE              = "RMI_PROP";
+	    public static final String MASTER_AUTH_FILE = "MASTER_AUTH_FILE";
+	    public static final String MASTER_AUTHENTICATION_DISABLED = "MASTER_AUTHENTICATION_DISABLED";
+	    public static final String CONTEXT_AUTHENTICATION_DISABLED = "CONTEXT_AUTHENTICATION_DISABLED";
 	}
 	
 	/**
@@ -96,6 +101,7 @@ public class AdminProperties {
 	    public static final String AUTO_LOWERCASE           = "AUTO_TO_LOWERCASE_UID";
 	    public static final String CHECK_NOT_ALLOWED_NAMES  = "CHECK_RES_UID_FOR_NOT_ALLOWED_NAMES";
 	    public static final String NOT_ALLOWED_NAMES        = "NOT_ALLOWED_RES_UID_NAMES";
+	    public static final String CHECK_RES_UID_REGEXP = "CHECK_RES_UID_REGEXP";
 	}
 	
 	/**
@@ -122,5 +128,34 @@ public class AdminProperties {
             public static final String HOME_DIR_ROOT             = "HOME_DIR_ROOT";
             public static final String PRIMARY_MAIL_UNCHANGEABLE = "PRIMARY_MAIL_UNCHANGEABLE";
             public static final String DISPLAYNAME_UNIQUE = "DISPLAYNAME_UNIQUE";
+            public static final String CHECK_USER_UID_REGEXP = "CHECK_USER_UID_REGEXP";
+            public static final String SPAM_MAILFOLDER_ = "SPAM_MAILFOLDER_";
+	}
+	
+	/**
+	 * The properties for the Storage
+	 * 
+	 * @author d7
+	 *
+	 */
+	public class Storage {
+	    // The following lines define the property values for the database
+	    // implementations
+	    public static final String GROUP_STORAGE = "GROUP_STORAGE";
+	    public static final String RESOURCE_STORAGE = "RESOURCE_STORAGE";
+	    public static final String TOOL_STORAGE = "TOOL_STORAGE";
+	    public static final String USER_STORAGE = "USER_STORAGE";
+	}
+
+	/**
+         * The properties for SQL
+         * 
+         * @author d7
+         *
+         */
+	public class SQL {
+	    public static final String INITIAL_OX_SQL_DIR = "INITIAL_OX_SQL_DIR";
+	    public static final String LOG_PARSED_QUERIES = "LOG_PARSED_QUERIES";
+	    public static final String INITIAL_OX_SQL_ORDER = "INITIAL_OX_SQL_ORDER";
 	}
 }

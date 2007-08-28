@@ -82,6 +82,7 @@ import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.GenericChecks;
 import com.openexchange.admin.tools.PropertyHandler;
+import com.openexchange.admin.tools.PropertyHandler.PropertyFiles;
 
 public class OXResource extends OXCommonImpl implements OXResourceInterface{
     
@@ -157,12 +158,12 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
                 throw new InvalidDataException("Resource with this email address already exists");
             }
 
-            if ((null != res.getName()) && prop.getResourceProp(AdminProperties.Resource.AUTO_LOWERCASE, true)) {
+            if ((null != res.getName()) && prop.getBoolean(PropertyFiles.RESOURCE, AdminProperties.Resource.AUTO_LOWERCASE, true)) {
                 final String rid = res.getName().toLowerCase();
                 res.setName(rid);
             }
 
-            if ((null != res.getName()) && prop.getResourceProp(AdminProperties.Resource.CHECK_NOT_ALLOWED_CHARS, true)) {
+            if ((null != res.getName()) && prop.getBoolean(PropertyFiles.RESOURCE, AdminProperties.Resource.CHECK_NOT_ALLOWED_CHARS, true)) {
                 validateResourceName(res.getName());
             }
 
@@ -251,12 +252,12 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
                 // TODO: cutmasta look here
             }
 
-            if (prop.getResourceProp(AdminProperties.Resource.AUTO_LOWERCASE, true)) {
+            if (prop.getBoolean(PropertyFiles.RESOURCE, AdminProperties.Resource.AUTO_LOWERCASE, true)) {
                 final String uid = res.getName().toLowerCase();
                 res.setName(uid);
             }
 
-            if (prop.getResourceProp(AdminProperties.Resource.CHECK_NOT_ALLOWED_CHARS, true)) {
+            if (prop.getBoolean(PropertyFiles.RESOURCE, AdminProperties.Resource.CHECK_NOT_ALLOWED_CHARS, true)) {
                 validateResourceName(res.getName());
             }
 
@@ -576,7 +577,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
         }
         // Check for allowed chars:
         // abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 _-+.%$@
-        final String resource_check_regexp = prop.getResourceProp("CHECK_RES_UID_REGEXP", "[ $@%\\.+a-zA-Z0-9_-]");        
+        final String resource_check_regexp = prop.getString(PropertyFiles.RESOURCE, AdminProperties.Resource.CHECK_RES_UID_REGEXP, "[ $@%\\.+a-zA-Z0-9_-]");        
         final String illegal = resName.replaceAll(resource_check_regexp, "");
         if( illegal.length() > 0 ) {
             throw new InvalidDataException( "Illegal chars: \""+illegal+"\"");
