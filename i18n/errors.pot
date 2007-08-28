@@ -39,6 +39,9 @@ msgstr ""
 msgid "A DBPooling error occurred"
 msgstr ""
 
+msgid "A JSON error occured: %s"
+msgstr ""
+
 msgid "A JSON error occurred: %s"
 msgstr ""
 
@@ -46,6 +49,9 @@ msgid "A JSON syntax error occurred: %s"
 msgstr ""
 
 msgid "A LDAP error occurred in context %s"
+msgstr ""
+
+msgid "A SQL error occured: %s"
 msgstr ""
 
 msgid "A database error occurred while creating table 'version': %1$s."
@@ -65,6 +71,9 @@ msgid "A group must not hold admin permission on a private folder"
 msgstr ""
 
 msgid "A messaging error occurred: %s"
+msgstr ""
+
+msgid "A part's content could not be read from message %s in mail folder %s"
 msgstr ""
 
 msgid ""
@@ -90,7 +99,7 @@ msgid "AJP connection is not set to status \"ASSIGNED\""
 msgstr ""
 
 msgid ""
-"AJP server socket could not be bind to port %d. Probably another process is "
+"AJP server socket could not be bound to port %d. Probably another process is "
 "already listening on this port."
 msgstr ""
 
@@ -106,6 +115,12 @@ msgstr ""
 msgid "Action type not supported : %d"
 msgstr ""
 
+msgid "An I/O error occured"
+msgstr ""
+
+msgid "An I/O error occured: %s"
+msgstr ""
+
 msgid "An I/O error occurred: %1$s."
 msgstr ""
 
@@ -115,7 +130,7 @@ msgstr ""
 msgid "An IMAP error occurred: %s"
 msgstr ""
 
-msgid "An IOError occurred: %s"
+msgid "An IO error occurred: %s"
 msgstr ""
 
 msgid "An SQL error occurred in context %s"
@@ -129,11 +144,6 @@ msgstr ""
 
 msgid ""
 "An SQL error occurred while performing task DelFolderTreeTableUpdateTask: %1"
-"$s."
-msgstr ""
-
-msgid ""
-"An SQL error occurred while performing task NewAdminExtensionsUpdateTask: %1"
 "$s."
 msgstr ""
 
@@ -206,7 +216,15 @@ msgstr ""
 msgid "An error occurred: Object id is -1"
 msgstr ""
 
+msgid ""
+"An infostore folder named %s already exists below folder %s (%d) in context %"
+"d. Please choose another display name."
+msgstr ""
+
 msgid "An invalid SQL query was sent to the server."
+msgstr ""
+
+msgid "An uploaded file referenced by %s could not be found"
 msgstr ""
 
 msgid "Attachments must contain a file."
@@ -235,7 +253,7 @@ msgstr ""
 msgid "Cache initialization failed. Region: %1$s"
 msgstr ""
 
-msgid "CalendarOperation: Context not set."
+msgid "Calendar operation: Context not set."
 msgstr ""
 
 msgid "Caller does not allow to fetch a connection from pool in context %s"
@@ -313,6 +331,9 @@ msgstr ""
 msgid "Cannot find property %s."
 msgstr ""
 
+msgid "Cannot find reminder (identifier %d). Context %d."
+msgstr ""
+
 msgid "Cannot find resource group with identifier %d."
 msgstr ""
 
@@ -352,13 +373,13 @@ msgstr ""
 msgid "Cannot import this kind of data. Use method canImport() first."
 msgstr ""
 
-msgid "Cannot instanciate class %1$s."
+msgid "Cannot instantiate class %1$s."
 msgstr ""
 
-msgid "Cannot instanciate class %s."
+msgid "Cannot instantiate class %s."
 msgstr ""
 
-msgid "Cannot instanciate updater implementation %1$s."
+msgid "Cannot instantiate updater implementation %1$s."
 msgstr ""
 
 msgid "Cannot load class \"%s\"."
@@ -470,16 +491,16 @@ msgstr ""
 msgid "Could not bind connection to local port %s"
 msgstr ""
 
-msgid "Could not convert given String %s to a date."
+msgid "Could not convert given object %s to a date when setting %s."
 msgstr ""
 
-msgid "Could not convert given object %s to a date when setting %s."
+msgid "Could not convert given string %s to a date."
 msgstr ""
 
 msgid "Could not create a PartModifier instance from name %s"
 msgstr ""
 
-msgid "Could not create folderId from String %s"
+msgid "Could not create folder id from string %s"
 msgstr ""
 
 msgid "Could not delete DocumentMetadata %d. Please try again."
@@ -519,6 +540,9 @@ msgstr ""
 msgid "Could not get file store location."
 msgstr ""
 
+msgid "Could not import into folder %s"
+msgstr ""
+
 msgid "Could not import into the folder %s."
 msgstr ""
 
@@ -534,7 +558,7 @@ msgstr ""
 msgid "Could not load folder %s"
 msgstr ""
 
-msgid "Could not read InputStream as String"
+msgid "Could not read InputStream as string"
 msgstr ""
 
 msgid "Could not recognize format of the following data: %s"
@@ -565,6 +589,12 @@ msgstr ""
 msgid "Could not use UTF-8 encoding."
 msgstr ""
 
+msgid "Couldn't convert object: %s"
+msgstr ""
+
+msgid "Couldn't find servlet class \"%s\""
+msgstr ""
+
 msgid "Couldn't reach the filestore: %s"
 msgstr ""
 
@@ -572,9 +602,6 @@ msgid "Counting tasks did not return a result."
 msgstr ""
 
 msgid "Cowardly refusing to import an entry flagged as confidential."
-msgstr ""
-
-msgid "Creator cannot be participant."
 msgstr ""
 
 msgid ""
@@ -643,6 +670,12 @@ msgid "ERROR:: Unsupported \"shown as\"  value %d"
 msgstr ""
 
 msgid ""
+"Edit Conflict. Your change cannot be completed because somebody else has "
+"made a conflicting change to the same item. Please refresh or synchronize "
+"and try again."
+msgstr ""
+
+msgid ""
 "Effective permission of folder %s could not determined for user %s in "
 "context %s"
 msgstr ""
@@ -706,7 +739,7 @@ msgid ""
 "recurring position nor a recurring date position"
 msgstr ""
 
-msgid "Fatal error. (DAILY) Missing or wrong value interval : %d"
+msgid "Fatal error. (DAILY) Missing or wrong Interval value: %d"
 msgstr ""
 
 msgid "Fatal error. (MONTHLY) Missing or wrong value DayInMonth : %d"
@@ -715,25 +748,25 @@ msgstr ""
 msgid "Fatal error. (MONTHLY) Missing or wrong value Month : %d"
 msgstr ""
 
-msgid "Fatal error. (MONTHLY2) Missing or wrong DayInMonthvalue day : %d"
+msgid "Fatal error. (MONTHLY2) Missing or wrong Day value: %d"
 msgstr ""
 
-msgid "Fatal error. (MONTHLY2) Missing or wrong value day : %d"
+msgid "Fatal error. (MONTHLY2) Missing or wrong DayInMonth value: %d"
 msgstr ""
 
-msgid "Fatal error. (WEEKLY) Missing or wrong value interval : %d"
+msgid "Fatal error. (WEEKLY) Missing or wrong Interval value: %d"
+msgstr ""
+
+msgid "Fatal error. (YEARLY) Missing or wrong Month value: %d"
 msgstr ""
 
 msgid "Fatal error. (YEARLY) Missing or wrong value DayInMonth : %d"
 msgstr ""
 
-msgid "Fatal error. (YEARLY) Missing or wrong value month : %d"
+msgid "Fatal error. (YEARLY2) Missing or wrong Interval value: %d"
 msgstr ""
 
 msgid "Fatal error. (YEARLY2) Missing or wrong day_or_type : %d"
-msgstr ""
-
-msgid "Fatal error. (YEARLY2) Missing or wrong interval : %d"
 msgstr ""
 
 msgid "Fatal error. (YEARLY2) Missing or wrong value day : %d"
@@ -755,10 +788,10 @@ msgstr ""
 msgid "File is not a directory: %s"
 msgstr ""
 
-msgid "File upload failed: %s"
+msgid "File storage is full."
 msgstr ""
 
-msgid "FileStorage is full."
+msgid "File upload failed: %s"
 msgstr ""
 
 msgid "Filename for property file is not defined."
@@ -767,6 +800,9 @@ msgstr ""
 msgid ""
 "Files attached to InfoStore items must have unique names. Filename: %s. The "
 "other document with this file name is %s."
+msgstr ""
+
+msgid "Flag %s could not be changed due to following reason: %s"
 msgstr ""
 
 msgid ""
@@ -886,8 +922,8 @@ msgid "Got a -1 ID from IDGenerator"
 msgstr ""
 
 msgid ""
-"Got a FileStorageException for FileStorage with id %s in Context %s . "
-"Underlying message is: %s. Check the StackTrace"
+"Got a FileStorageException for FileStorage with id %s in context %s. "
+"Underlying message is: %s. Check the StackTrace."
 msgstr ""
 
 msgid ""
@@ -909,10 +945,16 @@ msgstr ""
 msgid "Html-2-Text conversion failed: %s"
 msgstr ""
 
-msgid "I/O error while writing to Writer Object: %s"
+msgid "I/O error while writing to Writer object: %s"
+msgstr ""
+
+msgid "IMAP command exceeds max. allowed length of %d: %s"
 msgstr ""
 
 msgid "IMAP default folder %s could not be created"
+msgstr ""
+
+msgid "IMAP folder read-only check failed"
 msgstr ""
 
 msgid "IMAP property error: %s"
@@ -928,7 +970,7 @@ msgid ""
 "sorting"
 msgstr ""
 
-msgid "Illegal Argument: Document %d contains no file"
+msgid "Illegal argument: Document %d contains no file"
 msgstr ""
 
 msgid "Illegal state: Found data after presumed last line."
@@ -943,10 +985,10 @@ msgstr ""
 msgid "Incorrect SQL Query: %s"
 msgstr ""
 
-msgid "Insert expected but the objectid is already given. Aborting action"
+msgid "Insert expected but the object id is already given. Aborting action..."
 msgstr ""
 
-msgid "Instanciating the class failed."
+msgid "Instantiating the class failed."
 msgstr ""
 
 msgid "Insufficient read rights for this folder!"
@@ -975,10 +1017,19 @@ msgstr ""
 msgid "Invalid SQL Query: %s"
 msgstr ""
 
+msgid "Invalid SQL query: %s"
+msgstr ""
+
 msgid "Invalid SQL: '%s'"
 msgstr ""
 
+msgid "Invalid action value: %s"
+msgstr ""
+
 msgid "Invalid attachment %s: %s"
+msgstr ""
+
+msgid "Invalid configuration: %s"
 msgstr ""
 
 msgid "Invalid constructor argument. Instance of %s not supported"
@@ -1006,6 +1057,9 @@ msgid "Invalid integer value %s"
 msgstr ""
 
 msgid "Invalid method on an expunged message: %s"
+msgstr ""
+
+msgid "Invalid multipart content. Number of enclosed contents is 0"
 msgstr ""
 
 msgid "Invalid object ID %s"
@@ -1037,10 +1091,24 @@ msgstr ""
 
 msgid ""
 "Mail folder \"%s\" could not be created (maybe due to insufficient "
+"permission on parent folder %s)"
+msgstr ""
+
+msgid ""
+"Mail folder \"%s\" could not be created (maybe due to insufficient "
 "permission on parental folder %s)"
 msgstr ""
 
+msgid "Mail folder %s must not be moved to subsequent folder %s"
+msgstr ""
+
 msgid "Mail folder cannot be created. Name must not contain character '%s'"
+msgstr ""
+
+msgid "Mail folder could not be found: %s"
+msgstr ""
+
+msgid "Mail settings for user %s could not be found in context %d"
 msgstr ""
 
 msgid "Mandatory field last name is not set."
@@ -1067,6 +1135,9 @@ msgstr ""
 msgid "Message could not be sent to the following recipients: %s"
 msgstr ""
 
+msgid "Message field %s cannot be handled"
+msgstr ""
+
 msgid ""
 "Message has been successfully sent, but a copy was not placed in your sent "
 "folder due to exceeded quota."
@@ -1077,6 +1148,9 @@ msgid ""
 msgstr ""
 
 msgid "Message(s) %s could not be found in folder %s"
+msgstr ""
+
+msgid "Messaging error: %s"
 msgstr ""
 
 msgid "Method not supported: %s"
@@ -1118,6 +1192,9 @@ msgstr ""
 msgid "Missing parameter %s"
 msgstr ""
 
+msgid "Missing parameter in mail connection: %s"
+msgstr ""
+
 msgid "Missing parameter: %s"
 msgstr ""
 
@@ -1154,6 +1231,20 @@ msgstr ""
 msgid "Module %s is unknown in context %s"
 msgstr ""
 
+msgid "Module Calendar not enabled for user, cannot import appointments."
+msgstr ""
+
+msgid ""
+"Module Contacts is not enabled for this user, cannot store contacts "
+"contained in VCard."
+msgstr ""
+
+msgid "Module Contacts not enabled for user, cannot import contacts"
+msgstr ""
+
+msgid "Module Tasks not enabled for user, cannot import tasks."
+msgstr ""
+
 msgid "Move not allowed from shared folders"
 msgstr ""
 
@@ -1182,6 +1273,9 @@ msgstr ""
 msgid "Multiple rows found."
 msgstr ""
 
+msgid "Name \"%s\" already mapped to \"%s\". Ignoring servlet class \"%s\""
+msgstr ""
+
 msgid "Need at least a ContactObject and a value to set %s"
 msgstr ""
 
@@ -1194,13 +1288,22 @@ msgstr ""
 msgid "No SpellCheckConfig loaded."
 msgstr ""
 
+msgid "No access to mail folder %s"
+msgstr ""
+
 msgid "No admin permission found"
 msgstr ""
 
 msgid "No admin user found in context %s"
 msgstr ""
 
+msgid "No administer access to mail folder %s"
+msgstr ""
+
 msgid "No administer permission specified by user %s for folder %s"
+msgstr ""
+
+msgid "No administer permission specified for folder %s"
 msgstr ""
 
 msgid "No attachment was found with id %s in message %s"
@@ -1212,12 +1315,24 @@ msgstr ""
 msgid "No changes found. No update requiered. Context %1$d Object %2$d"
 msgstr ""
 
+msgid "No connection available to access mailbox"
+msgstr ""
+
+msgid "No create access to mail folder %s"
+msgstr ""
+
 msgid ""
 "No data provided from web server: input stream returned \"-1\" while reading "
 "AJP magic bytes in package #%d"
 msgstr ""
 
+msgid "No default constructor specified in servlet class \"%s\""
+msgstr ""
+
 msgid "No default folder could be found in module %s for user %s in context %s"
+msgstr ""
+
+msgid "No delete access to mail folder %s"
 msgstr ""
 
 msgid "No dictionary could be found for language: %1$s."
@@ -1226,7 +1341,19 @@ msgstr ""
 msgid "No folder permission."
 msgstr ""
 
+msgid "No insert access to mail folder %s"
+msgstr ""
+
+msgid "No keep-seen access to mail folder %s"
+msgstr ""
+
+msgid "No lookup access to mail folder %s"
+msgstr ""
+
 msgid "No permission for modul: %s."
+msgstr ""
+
+msgid "No read access to mail folder %s"
 msgstr ""
 
 msgid "No route to host: server (%s) cannot be reached"
@@ -1238,7 +1365,14 @@ msgstr ""
 msgid "No send address could be found for user %s in user configuration"
 msgstr ""
 
+msgid ""
+"No servlet class name found for key \"%s\". Please check servlet mappings."
+msgstr ""
+
 msgid "No subfolder creation underneath shared folder %s in context %s"
+msgstr ""
+
+msgid "No write access to IMAP folder %s"
 msgstr ""
 
 msgid ""
@@ -1352,16 +1486,16 @@ msgid ""
 "again."
 msgstr ""
 
-msgid "Programming Error"
+msgid "Programming error"
 msgstr ""
 
-msgid "Programming Error - Could not import into folder %s"
-msgstr ""
-
-msgid "Programming Error - Folder %s"
+msgid "Programming error - folder %s"
 msgstr ""
 
 msgid "Property \"%s\" is not defined."
+msgstr ""
+
+msgid "Property %s is not an integer"
 msgstr ""
 
 msgid "Public folder %s can only be moved to a public folder in context %s"
@@ -1420,6 +1554,9 @@ msgstr ""
 msgid "SearchIterator NULL"
 msgstr ""
 
+msgid "SecurityException while loading servlet class \"%s\""
+msgstr ""
+
 msgid "Server name is not defined."
 msgstr ""
 
@@ -1474,9 +1611,6 @@ msgstr ""
 msgid "Subsystem down"
 msgstr ""
 
-msgid "Subsystem down - Could not import into folder %s"
-msgstr ""
-
 msgid "System folder %s cannot be moved in context %s"
 msgstr ""
 
@@ -1517,6 +1651,12 @@ msgstr ""
 msgid "The attribute %1$s has been truncated."
 msgstr ""
 
+msgid ""
+"The composed rights could not be applied to new folder %s due to missing "
+"administer right in its initial rights specified by IMAP server. However, "
+"the folder has been created."
+msgstr ""
+
 msgid "The cookie with the session identifier is missing."
 msgstr ""
 
@@ -1540,6 +1680,9 @@ msgstr ""
 msgid "The document you requested doesn't exist."
 msgstr ""
 
+msgid "The element %s is not supported."
+msgstr ""
+
 msgid "The file cannot be added to filestore. File size: %s Quota: %s Used: %s"
 msgstr ""
 
@@ -1552,7 +1695,7 @@ msgstr ""
 msgid "The file store could not be reched"
 msgstr ""
 
-msgid "The folder %d is not an Infostore Folder"
+msgid "The folder %d is not an Infostore folder"
 msgstr ""
 
 msgid "The following field(s) are too long to be imported: %s"
@@ -1566,6 +1709,11 @@ msgstr ""
 msgid ""
 "The message to send contains an invalid attachment %s: neither content nor "
 "attachment's filename is set"
+msgstr ""
+
+msgid ""
+"The object could not be detached because the update to an underlying object "
+"failed."
 msgstr ""
 
 msgid "The object has been changed in the meantime."
@@ -1602,19 +1750,19 @@ msgstr ""
 msgid "The session parameter is missing."
 msgstr ""
 
-msgid ""
-"The task has been changed in the meantime. Task changing date: %1$d, your "
-"task changing date: %2$d."
-msgstr ""
-
 msgid "There are no recipient(s) for the new message."
 msgstr ""
 
 msgid ""
 "There was an issue in authenticating your E-Mail password. This may be "
 "because of a recent password change. To continue please logout now and then "
-"log back in with your most current password. (server=%s | user=%s | context=%"
-"s)"
+"log back in with your most current password. (server=%s | user=%s)"
+msgstr ""
+
+msgid ""
+"There was an issue in authenticating your E-Mail password. This may be "
+"because of a recent password change. To continue please logout now and then "
+"log back in with your most current password. (server=%s, user=%s, context=%s)"
 msgstr ""
 
 msgid "This Contact has no FolderID: Entry %1$d Context %2$d"
@@ -1768,6 +1916,11 @@ msgid "Unable to map OCL permission value %s to a JSON permission value"
 msgstr ""
 
 msgid ""
+"Unable to move this contact because it is marked as private: Context %1$d "
+"Object %2$d"
+msgstr ""
+
+msgid ""
 "Unable to perform contact folder check for readable content: Context %1$d "
 "Folder %2$d"
 msgstr ""
@@ -1775,10 +1928,10 @@ msgstr ""
 msgid "Unable to pick up a connection from the DBPool"
 msgstr ""
 
-msgid "Unable to remove Participant %d"
+msgid "Unable to remove participant %d"
 msgstr ""
 
-msgid "Unable to remove Participant because this participant is the last one"
+msgid "Unable to remove participant because this participant is the last one"
 msgstr ""
 
 msgid "Unable to save Linking between Contacts : Context %1$d Contact %2$d"
@@ -1799,7 +1952,7 @@ msgstr ""
 msgid ""
 "Unable to scale this contact image.  Either the file type is not supported "
 "or the image is too large. Your mime type is %1$s and your image size is %2"
-"$d KB. The max. allowed image size is %3$d KB."
+"$d. The max. allowed image size is %3$d."
 msgstr ""
 
 msgid ""
@@ -1844,13 +1997,13 @@ msgid ""
 "position %d:%d:%d"
 msgstr ""
 
+msgid "Unknow serach field: %s"
+msgstr ""
+
 msgid "Unknown (IMAP) folder open mode %d"
 msgstr ""
 
 msgid "Unknown AJAX action: %s."
-msgstr ""
-
-msgid "Unknown Problem: \"%s\"."
 msgstr ""
 
 msgid "Unknown Request Prefix Code: %s"
@@ -1865,10 +2018,19 @@ msgstr ""
 msgid "Unknown color label: %s"
 msgstr ""
 
+msgid "Unknown delete event type: %d"
+msgstr ""
+
 msgid "Unknown field: %d"
 msgstr ""
 
+msgid "Unknown folder open mode %d"
+msgstr ""
+
 msgid "Unknown format: %s"
+msgstr ""
+
+msgid "Unknown module: %d"
 msgstr ""
 
 msgid "Unknown or unsupported action: %s"
@@ -1878,6 +2040,9 @@ msgid "Unknown parameter container type %d"
 msgstr ""
 
 msgid "Unknown parameter container type: %d"
+msgstr ""
+
+msgid "Unknown problem: \"%s\"."
 msgstr ""
 
 msgid "Unknown recurrence type %d."
@@ -1911,7 +2076,7 @@ msgstr ""
 msgid "Update conflict detected. Schema %1$s is not marked as LOCKED."
 msgstr ""
 
-msgid "Update expected but no objectid is given. Aborting action"
+msgid "Update expected but no object id is given. Aborting action..."
 msgstr ""
 
 msgid "Update of folder %s failed"
@@ -1921,6 +2086,13 @@ msgid "Update process initialization failed: %1$s."
 msgstr ""
 
 msgid "Updating database ... Try again later."
+msgstr ""
+
+msgid "Upload file with id %s could not be found"
+msgstr ""
+
+msgid ""
+"Upload file's content type \"%s\" does not fit to given file filter \"%s\""
 msgstr ""
 
 msgid "Upload quota (%d) exceeded"
@@ -2022,7 +2194,7 @@ msgstr ""
 msgid "User dictionary could not be found."
 msgstr ""
 
-msgid "User input Error %s"
+msgid "User input error %s"
 msgstr ""
 
 msgid "User's %s dictionary could not be loaded in context %d"
@@ -2047,6 +2219,12 @@ msgid "Wrong filestore %1$d for context %2$d needing filestore %3$d."
 msgstr ""
 
 msgid "Wrong message %s header: %s"
+msgstr ""
+
+msgid "Wrong message header: %s"
+msgstr ""
+
+msgid "Wrong or missing login data to access server %s."
 msgstr ""
 
 msgid "Wrong or missing login data to access server %s: User: %s | Context: %s"
@@ -2088,6 +2266,14 @@ msgstr ""
 
 msgid ""
 "You can not move one element of a recurring appointment into another folder."
+msgstr ""
+
+msgid ""
+"You can not use different private flags for one element of a recurring "
+"appointment"
+msgstr ""
+
+msgid "You can not use the private flags in a non private folder"
 msgstr ""
 
 msgid "You cannot unlock this document."

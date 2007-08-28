@@ -54,31 +54,47 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
 
 /**
- *  OXReminderException
- *  @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
+ * ReminderException
+ * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
-
-public class OXReminderException extends OXException {
+public class ReminderException extends OXException {
 	
-	public OXReminderException(final Code code, Object... messageArgs) {
+	/**
+     * For serialization.
+     */
+    private static final long serialVersionUID = 3162824095925586553L;
+
+    public ReminderException(final Code code, final Object... messageArgs) {
 		this(code, null, messageArgs);
 	}
 	
-	public OXReminderException(final Code code, Throwable throwable, Object... messageArgs) {
-		super(Component.REMINDER, code.category, code.detailNumber, code.message, throwable);
-		super.setMessageArgs(messageArgs);
+	public ReminderException(final Code code, final Throwable throwable,
+        final Object... messageArgs) {
+		super(Component.REMINDER, code.category, code.detailNumber,
+            code.message, throwable);
+		setMessageArgs(messageArgs);
 	}
 	
 	public enum Code {
-		MANDATORY_FIELD_USER("Required value \"user\" was not supplied.", 1, AbstractOXException.Category.CODE_ERROR),
-		MANDATORY_FIELD_TARGET_ID("Required value \"End Date\" was not supplied.", 2, AbstractOXException.Category.CODE_ERROR),
-		MANDATORY_FIELD_ALARM("Required value \"Title\" was not supplied.", 3, AbstractOXException.Category.CODE_ERROR),
-		INSERT_EXCEPTION("Unable to insert reminder", 4, AbstractOXException.Category.CODE_ERROR),
-		UPDATE_EXCEPTION("Unable to update reminder", 5, AbstractOXException.Category.CODE_ERROR),
-		DELETE_EXCEPTION("Unable to delete reminder", 6, AbstractOXException.Category.CODE_ERROR),
-		LOAD_EXCEPTION("Unable to load reminder", 7, AbstractOXException.Category.CODE_ERROR),
-		LIST_EXCEPTION("Unable to list reminder", 8, AbstractOXException.Category.CODE_ERROR),
-		;
+		MANDATORY_FIELD_USER("Required value \"user\" was not supplied.", 1,
+            AbstractOXException.Category.CODE_ERROR),
+		MANDATORY_FIELD_TARGET_ID(
+            "Required value \"End Date\" was not supplied.", 2,
+            AbstractOXException.Category.CODE_ERROR),
+		MANDATORY_FIELD_ALARM("Required value \"Title\" was not supplied.", 3,
+            AbstractOXException.Category.CODE_ERROR),
+		INSERT_EXCEPTION("Unable to insert reminder", 4,
+            AbstractOXException.Category.CODE_ERROR),
+		UPDATE_EXCEPTION("Unable to update reminder", 5,
+            AbstractOXException.Category.CODE_ERROR),
+		DELETE_EXCEPTION("Unable to delete reminder", 6,
+            AbstractOXException.Category.CODE_ERROR),
+		LOAD_EXCEPTION("Unable to load reminder", 7,
+            AbstractOXException.Category.CODE_ERROR),
+		LIST_EXCEPTION("Unable to list reminder", 8,
+            AbstractOXException.Category.CODE_ERROR),
+        NOT_FOUND("Cannot find reminder (identifier %d). Context %d.", 9,
+            Category.CODE_ERROR);
 		
 		/**
 		 * Message of the exception.
@@ -94,7 +110,7 @@ public class OXReminderException extends OXException {
 		 * Detail number of the exception.
 		 */
 		private final int detailNumber;
-		
+
 		/**
 		 * Default constructor.
 		 * @param message message.
@@ -108,22 +124,17 @@ public class OXReminderException extends OXException {
 			this.category = category;
 			this.detailNumber = detailNumber;
 		}
-		
+
 		public Category getCategory() {
 			return category;
 		}
-		
+
 		public int getDetailNumber() {
 			return detailNumber;
 		}
-		
+
 		public String getMessage() {
 			return message;
 		}
-		
-		
 	}
-	
-	
-	
 }

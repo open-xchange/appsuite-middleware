@@ -1,4 +1,8 @@
-* 2007-08-37 - francisco.laguna@open-xchange.com
+* 2007-08-28 - marcus.klein@open-xchange.com
+
+ - Bugfix #6502: Changed exception if a reminder is not found.
+
+* 2007-08-27 - francisco.laguna@open-xchange.com
 
  - Bugfix #7732: Pass the error message from the Versit Converter on to
    the caller in the ImportResult.
