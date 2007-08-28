@@ -55,6 +55,7 @@ import com.openexchange.admin.rmi.OXLoginInterface;
 import com.openexchange.admin.rmi.OXResourceInterface;
 import com.openexchange.admin.rmi.OXTaskMgmtInterface;
 import com.openexchange.admin.rmi.OXUserInterface;
+import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.impl.OXAdminCoreImpl;
 import com.openexchange.admin.rmi.impl.OXTaskMgmtImpl;
@@ -83,6 +84,7 @@ import org.osgi.framework.BundleListener;
 
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
+import com.openexchange.admin.tools.PropertyHandler.PropertyFiles;
 
 public class AdminDaemon {
 
@@ -101,10 +103,15 @@ public class AdminDaemon {
     private static OXTaskMgmtImpl oxtaskmgmt = null;
 
     public class LocalServerFactory implements RMIServerSocketFactory {
-        
         public ServerSocket createServerSocket(final int port) throws IOException {
-            final String hostname_property = ClientAdminThread.cache.getProperties().getProp("BIND_ADDRESS", "localhost");
-            if (hostname_property.equalsIgnoreCase("0")) {
+            String hostname_property = null;
+            try {
+                hostname_property = ClientAdminThread.cache.getProperties().getString(PropertyFiles.ADMIN, "BIND_ADDRESS", "localhost");
+            } catch (InvalidDataException e) {
+                log.fatal("Invalid data in config file", e);
+                System.exit(1);
+            }
+            if ("0".equalsIgnoreCase(hostname_property)) {
                 if(log.isInfoEnabled()){
                     log.info("Admindaemon will listen on all network devices!");
                 }
@@ -135,12 +142,17 @@ public class AdminDaemon {
     }
 
     public void initCache(final BundleContext context) {
-        bundlelist = new ArrayList<Bundle>();
-        this.cache = new AdminCache();
-        this.cache.initCache();
-        ClientAdminThread.cache = this.cache;
-        prop = this.cache.getProperties();        
-        log.info("Cache and Pools initialized!");
+        try {
+            bundlelist = new ArrayList<Bundle>();
+            this.cache = new AdminCache();
+            this.cache.initCache();
+            ClientAdminThread.cache = this.cache;
+            prop = this.cache.getProperties();
+            log.info("Cache and Pools initialized!");
+        } catch (final InvalidDataException e) {
+            log.fatal("Invalid data in config file", e);
+            shutdown();
+        }
     }
 
     public void initRMI(final ClassLoader loader, final BundleContext context) {
@@ -159,7 +171,7 @@ public class AdminDaemon {
             }
             Thread.currentThread().setContextClassLoader(loader);
             
-            final int rmi_port = prop.getRmiProp(AdminProperties.RMI.RMI_PORT, 1099);
+            final int rmi_port = prop.getInt(PropertyFiles.RMI, AdminProperties.RMI.RMI_PORT, 1099);
             try {
                 // Use SslRMIServerSocketFactory for SSL here
                 registry = LocateRegistry.createRegistry(rmi_port, RMISocketFactory.getDefaultSocketFactory(), new LocalServerFactory());
@@ -167,7 +179,7 @@ public class AdminDaemon {
                 // if a registry has be already created in this osgi framework
                 // we just need to get it from the port (normally this happens
                 // on restarting
-                registry = LocateRegistry.getRegistry(ClientAdminThread.cache.getProperties().getProp("BIND_ADDRESS", "localhost"), rmi_port);
+                registry = LocateRegistry.getRegistry(ClientAdminThread.cache.getProperties().getString(PropertyFiles.ADMIN, "BIND_ADDRESS", "localhost"), rmi_port);
             }
 
             // Now export all NEW Objects
@@ -199,12 +211,16 @@ public class AdminDaemon {
     	    registry.bind(OXTaskMgmtInterface.RMI_NAME, oxtaskmgmt_stub);
     	} catch (final RemoteException e) {
             log.fatal("Error creating RMI registry!",e);
-            System.exit(1);
+            shutdown();
         } catch (final AlreadyBoundException e) {
             log.fatal("One RMI name is already bound!", e);
-            System.exit(1);
+            shutdown();
         } catch (final StorageException e) {
             log.fatal("Error while creating one instance for RMI interface", e);
+            shutdown();
+        } catch (final InvalidDataException e) {
+            log.fatal("Invalid data in config file", e);
+            shutdown();
         }
     }
 
@@ -231,6 +247,13 @@ public class AdminDaemon {
 
     public static PropertyHandler getProp() {
         return prop;
+    }
+    
+    /**
+     * This method must now be called to shutdown the whole server
+     */
+    public static void shutdown() {
+        System.exit(1);
     }
 
     public static final ArrayList<Bundle> getBundlelist() {

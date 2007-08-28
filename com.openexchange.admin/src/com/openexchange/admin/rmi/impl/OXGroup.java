@@ -82,6 +82,7 @@ import com.openexchange.admin.storage.interfaces.OXGroupStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
+import com.openexchange.admin.tools.PropertyHandler.PropertyFiles;
 import com.openexchange.cache.CacheKey;
 
 /**
@@ -275,11 +276,11 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
                 throw new InvalidDataException("Mandatory fields not set: " + grp.getUnsetMembers());
             }
 
-            if (null != grp.getName() && prop.getGroupProp(AdminProperties.Group.AUTO_LOWERCASE, true)) {
+            if (null != grp.getName() && prop.getBoolean(PropertyFiles.GROUP, AdminProperties.Group.AUTO_LOWERCASE, true)) {
                 grp.setName(grp.getName().toLowerCase());
             }
 
-            if (null != grp.getName() && prop.getGroupProp(AdminProperties.Group.CHECK_NOT_ALLOWED_CHARS, true)) {
+            if (null != grp.getName() && prop.getBoolean(PropertyFiles.GROUP, AdminProperties.Group.CHECK_NOT_ALLOWED_CHARS, true)) {
                 validateGroupName(grp.getName());
             }
 
@@ -387,12 +388,11 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
                         + grp.getUnsetMembers());
             }
 
-            if (prop.getGroupProp(AdminProperties.Group.AUTO_LOWERCASE, true)) {
+            if (prop.getBoolean(PropertyFiles.GROUP, AdminProperties.Group.AUTO_LOWERCASE, true)) {
                 grp.setName(grp.getName().toLowerCase());
             }
 
-            if (prop.getGroupProp(
-                    AdminProperties.Group.CHECK_NOT_ALLOWED_CHARS, true)) {
+            if (prop.getBoolean(PropertyFiles.GROUP, AdminProperties.Group.CHECK_NOT_ALLOWED_CHARS, true)) {
                 validateGroupName(grp.getName());
             }
 
@@ -1076,8 +1076,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         if (groupName == null || groupName.trim().length() == 0) {
             throw new InvalidDataException("Invalid group name");
         }
-        final String group_check_regexp = prop.getGroupProp(
-                "CHECK_GROUP_UID_REGEXP", "[ $@%\\.+a-zA-Z0-9_-]");
+        final String group_check_regexp = prop.getString(PropertyFiles.GROUP, AdminProperties.Group.CHECK_GROUP_UID_REGEXP, "[ $@%\\.+a-zA-Z0-9_-]");
         final String illegal = groupName.replaceAll(group_check_regexp, "");
         if (illegal.length() > 0) {
             throw new InvalidDataException("Illegal chars: \"" + illegal + "\"");

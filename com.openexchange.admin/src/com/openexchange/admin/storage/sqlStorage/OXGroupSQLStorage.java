@@ -48,12 +48,13 @@
  */
 package com.openexchange.admin.storage.sqlStorage;
 
-import com.openexchange.admin.rmi.exceptions.StorageException;
+import java.sql.Connection;
+
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Group;
 import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.interfaces.OXGroupStorageInterface;
-import java.sql.Connection;
 
 /**
  * This class implements the global storage interface and creates a layer
@@ -80,12 +81,6 @@ public abstract class OXGroupSQLStorage extends OXGroupStorageInterface {
      *      com.openexchange.admin.rmi.dataobjects.Group)
      */
     abstract public void change(final Context ctx, final Group grp) throws StorageException;
-
-    /**
-     * @see com.openexchange.admin.storage.interfaces.OXGroupStorageInterface#create(com.openexchange.admin.rmi.dataobjects.Context,
-     *      com.openexchange.admin.rmi.dataobjects.Group)
-     */
-    abstract public int create(final Context ctx, final Group grp) throws StorageException;
 
     /**
      * @see com.openexchange.admin.storage.interfaces.OXGroupStorageInterface#getMembers(com.openexchange.admin.rmi.dataobjects.Context,

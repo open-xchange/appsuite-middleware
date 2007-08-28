@@ -14,6 +14,9 @@ Bundle-ClassPath: .,../open-xchange/build,
  external:$libdir$/commons-httpclient-2.0.2.jar,
  external:$libdir$/commons-io.jar,
  external:$libdir$/commons-logging.jar,
+ external:$libdir$/commons-collections-3.2.jar,
+ external:$libdir$/commons-configuration-1.4.jar,
+ external:$libdir$/commons-lang.jar,
  external:$libdir$/concurrent.jar,
  external:$libdir$/jcs-1.2.7.9.2.jar,
  external:$libdir$/jdom.jar,
@@ -58,5 +61,6 @@ Export-Package: com.openexchange.admin.console,
  javax.mail.internet,
  org.apache.commons.io,
  org.apache.commons.logging,
- org.apache.commons.logging.impl
+ org.apache.commons.logging.impl,
+ org.apache.commons.configuration
 Eclipse-BuddyPolicy: registered
