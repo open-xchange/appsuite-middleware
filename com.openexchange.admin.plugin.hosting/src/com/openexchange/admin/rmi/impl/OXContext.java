@@ -11,7 +11,6 @@ import java.util.Iterator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.admin.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.exceptions.OXContextException;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -27,6 +26,7 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchDatabaseException;
 import com.openexchange.admin.rmi.exceptions.NoSuchFilestoreException;
+import com.openexchange.admin.rmi.exceptions.NoSuchPluginException;
 import com.openexchange.admin.rmi.exceptions.NoSuchReasonException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.interfaces.OXContextStorageInterface;
@@ -34,6 +34,7 @@ import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
 import com.openexchange.admin.taskmanagement.TaskManager;
 import com.openexchange.admin.tools.DatabaseDataMover;
 import com.openexchange.admin.tools.FilestoreDataMover;
+import com.openexchange.admin.tools.PropertyHelper;
 import com.openexchange.groupware.contexts.ContextException;
 import com.openexchange.groupware.contexts.ContextStorage;
 
@@ -56,16 +57,15 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             log.error(invalidDataException.getMessage(), invalidDataException);
             throw invalidDataException;
         }
-        validateloginmapping(ctx);
-        
-        new BasicAuthenticator().doAuthentication(auth);
-        
-        setIdOrGetIDFromNameAndIdObject(null, ctx);
-        log.debug(ctx);
-        
         Context backup_ctx = null; // used for invalidating old login mappings in the cache
-        
         try {
+            validateloginmapping(ctx);
+
+            new BasicAuthenticator().doAuthentication(auth);
+
+            setIdOrGetIDFromNameAndIdObject(null, ctx);
+            log.debug(ctx);
+
             if (!tool.existsContext(ctx)) {
                 throw new NoSuchContextException();
             }
@@ -92,6 +92,15 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         } catch (final NoSuchContextException e) {
             log.error(e.getMessage(), e);
             throw e;
+        } catch (final InvalidDataException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (final InvalidCredentialsException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (final NoSuchPluginException e) {
+            log.error(e.getMessage(), e);
+            throw new StorageException(e);
         }   
         
         try {
@@ -523,16 +532,16 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         }
     }
 
-    protected Context createmaincall(final Context ctx, final User admin_user, Database db) throws StorageException, InvalidDataException {
+    protected Context createmaincall(final Context ctx, final User admin_user, Database db) throws StorageException, InvalidDataException, NoSuchPluginException {
         validateloginmapping(ctx);
         final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
         final Context retval = oxcox.create(ctx, admin_user);
         return retval;
     }
     
-    private void validateloginmapping(final Context ctx) throws InvalidDataException {
+    private void validateloginmapping(final Context ctx) throws InvalidDataException, NoSuchPluginException {
         final HashSet<String> loginMappings = ctx.getLoginMappings();
-        final String login_regexp = ClientAdminThreadExtended.cache.getProperties().getProp("CHECK_CONTEXT_LOGIN_MAPPING_REGEXP", "[$%\\.+a-zA-Z0-9_-]");        
+        final String login_regexp = PropertyHelper.getString(PropertyHelper.CHECK_CONTEXT_LOGIN_MAPPING_REGEXP, "[$%\\.+a-zA-Z0-9_-]");        
         if (null != loginMappings) {
             for (final String mapping : loginMappings) {
                 final String illegal = mapping.replaceAll(login_regexp,"");

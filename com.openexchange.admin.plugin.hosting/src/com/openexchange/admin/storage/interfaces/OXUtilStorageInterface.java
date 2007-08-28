@@ -7,16 +7,15 @@ import java.lang.reflect.InvocationTargetException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.admin.daemons.ClientAdminThreadExtended;
+import com.openexchange.admin.daemons.AdminDaemon;
+import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
-import com.openexchange.admin.rmi.dataobjects.Database;
-
-import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.dataobjects.Server;
-import com.openexchange.admin.tools.AdminCacheExtended;
-import com.openexchange.admin.tools.PropertyHandler;
-import com.openexchange.admin.tools.PropertyHandlerExtended;
+import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.NoSuchPluginException;
+import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.tools.PropertyHelper;
 
 /**
  * This interface provides an abstraction to the storage of the util information
@@ -34,15 +33,6 @@ public abstract class OXUtilStorageInterface {
 
     private static final Log log = LogFactory.getLog(OXUtilStorageInterface.class);
     
-    protected static AdminCacheExtended cache = null;
-
-    protected static PropertyHandler prop = null;
-
-    static {
-        cache = ClientAdminThreadExtended.cache;
-        prop = cache.getProperties();
-    }
-
     /**
      * Creates a new instance implementing the group storage interface.
      * @return an instance implementing the group storage interface.
@@ -51,7 +41,16 @@ public abstract class OXUtilStorageInterface {
     public static OXUtilStorageInterface getInstance() throws StorageException {
         synchronized (OXUtilStorageInterface.class) {
             if (null == implementingClass) {
-                final String className = prop.getProp(PropertyHandlerExtended.UTIL_STORAGE, null);
+                String className = null;
+                try {
+                    className = PropertyHelper.getString(PropertyHelper.UTIL_STORAGE, null);
+                } catch (final NoSuchPluginException e1) {
+                    log.fatal(e1.getMessage(), e1);
+                    AdminDaemon.shutdown();
+                } catch (final InvalidDataException e1) {
+                    log.fatal("Error while reading an essential property from config file", e1);
+                    AdminDaemon.shutdown();
+                }
                 if (null != className) {
                     try {
                         implementingClass = Class.forName(className).asSubclass(OXUtilStorageInterface.class);
