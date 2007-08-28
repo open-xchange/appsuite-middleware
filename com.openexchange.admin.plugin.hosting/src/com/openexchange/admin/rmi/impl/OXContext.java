@@ -541,7 +541,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
     
     private void validateloginmapping(final Context ctx) throws InvalidDataException, NoSuchPluginException {
         final HashSet<String> loginMappings = ctx.getLoginMappings();
-        final String login_regexp = PropertyHelper.getString(PropertyHelper.CHECK_CONTEXT_LOGIN_MAPPING_REGEXP, "[$%\\.+a-zA-Z0-9_-]");        
+        final String login_regexp = PropertyHelper.getString(PropertyHelper.CHECK_CONTEXT_LOGIN_MAPPING_REGEXP);        
         if (null != loginMappings) {
             for (final String mapping : loginMappings) {
                 final String illegal = mapping.replaceAll(login_regexp,"");

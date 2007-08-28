@@ -56,6 +56,8 @@ public class PluginStarter {
                 });
             }
             registry = AdminDaemon.getRegistry();
+            ClientAdminThread.cache.getProperties().registerPluginProperty(PropertyHelper.PLUGIN_NAME, "hosting.properties");
+            PropertyHelper.initializeDefaults();
 
             // Create all OLD Objects and bind export them
             oxctx_v2 = new com.openexchange.admin.rmi.impl.OXContext();
@@ -67,14 +69,12 @@ public class PluginStarter {
             // bind all NEW Objects to registry
             registry.bind(OXContextInterface.RMI_NAME, oxctx_stub_v2);
             registry.bind(OXUtilInterface.RMI_NAME, oxutil_stub_v2);
-            
-            ClientAdminThread.cache.getProperties().registerPluginProperty(PropertyHelper.PLUGIN_NAME, "hosting.properties");
 
             startJMX();
             
             if (log.isDebugEnabled()) {
-                log.debug("Loading context implementation: " + PropertyHelper.getString(PropertyHelper.CONTEXT_STORAGE, null));
-                log.debug("Loading util implementation: " + PropertyHelper.getString(PropertyHelper.UTIL_STORAGE, null));
+                log.debug("Loading context implementation: " + PropertyHelper.getString(PropertyHelper.CONTEXT_STORAGE));
+                log.debug("Loading util implementation: " + PropertyHelper.getString(PropertyHelper.UTIL_STORAGE));
             }            
         } catch (final RemoteException e) {
             log.fatal(e.getMessage(), e);
@@ -119,8 +119,8 @@ public class PluginStarter {
     }
     
     private void startJMX() throws NoSuchPluginException, InvalidDataException {
-        int jmx_port = PropertyHelper.getInt(PropertyHelper.JMX_PORT, 9998);
-        String addr = PropertyHelper.getString(PropertyHelper.JMX_BIND_ADDRESS,"localhost");
+        int jmx_port = PropertyHelper.getInt(PropertyHelper.JMX_PORT);
+        String addr = PropertyHelper.getString(PropertyHelper.JMX_BIND_ADDRESS);
         InetAddress iaddr = null;
         if(!addr.trim().equals("0")){
             // bind only on specified interfaces
@@ -134,7 +134,7 @@ public class PluginStarter {
             }
         }
         
-        String servername = ClientAdminThread.cache.getProperties().getString(PropertyHandler.PropertyFiles.ADMIN, AdminProperties.Prop.SERVER_NAME, "local");
+        String servername = ClientAdminThread.cache.getProperties().getString(PropertyHandler.PropertyFiles.ADMIN, AdminProperties.Prop.SERVER_NAME);
         log.info("Admindaemon Name: " + servername);
     }
     
