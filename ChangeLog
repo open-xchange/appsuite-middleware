@@ -7,6 +7,7 @@
 
 * 2007-08-28 - ben.pahne@open-xchange.com
 
+ - Fixed Bug #9110, Display name must be unique
  - Fixed Bug #8731, list request for a nonexistent object returns an
     empty array
  - Fixed Bug #9050, Moving private taged contacts into a public folder
