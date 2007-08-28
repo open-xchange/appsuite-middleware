@@ -1,3 +1,9 @@
+* 2007-08-28 - ben.pahne@open-xchange.com
+
+ - Fixed Bug #8731, list request for a nonexistent object returns an
+    empty array
+ - Fixed Bug #9050, Moving private taged contacts into a public folder
+
 * 2007-08-28 - marcus.klein@open-xchange.com
 
  - Bugfix #6502: Changed exception if a reminder is not found.
