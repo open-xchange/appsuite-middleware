@@ -60,6 +60,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.daemons.ClientAdminThread;
+import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.TaskManagerException;
 import com.openexchange.admin.tools.AdminCache;
@@ -109,7 +110,7 @@ public class TaskManager {
         this.prop = this.cache.getProperties();
         int threadCount = 2;
         try {
-            threadCount = this.prop.getInt(PropertyFiles.ADMIN, "CONCURRENT_JOBS", 2);
+            threadCount = this.prop.getInt(PropertyFiles.ADMIN, AdminProperties.Prop.CONCURRENT_JOBS);
         } catch (final InvalidDataException e) {
             log.error("Error while reading concurrent Jobs. Shutting down system...", e);
             AdminDaemon.shutdown();

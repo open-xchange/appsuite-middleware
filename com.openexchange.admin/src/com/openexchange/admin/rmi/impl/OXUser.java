@@ -431,8 +431,8 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         final ArrayList<OXUserPluginInterface> interfacelist = new ArrayList<OXUserPluginInterface>();
 
         // homedirectory
-        final String homedir = this.prop.getString(PropertyFiles.USER, AdminProperties.User.HOME_DIR_ROOT, "/home") + "/" + usr.getName();
-        if (this.prop.getBoolean(PropertyFiles.USER, AdminProperties.User.CREATE_HOMEDIRECTORY, false) && !tool.isContextAdmin(ctx, usr.getId())) {
+        final String homedir = this.prop.getString(PropertyFiles.USER, AdminProperties.User.HOME_DIR_ROOT) + "/" + usr.getName();
+        if (this.prop.getBoolean(PropertyFiles.USER, AdminProperties.User.CREATE_HOMEDIRECTORY) && !tool.isContextAdmin(ctx, usr.getId())) {
             if (!new File(homedir).mkdir()) {
                 log.error("unable to create directory: " + homedir);
             }
@@ -597,7 +597,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             }
         }
 
-        if (this.prop.getBoolean(PropertyFiles.USER, AdminProperties.User.CREATE_HOMEDIRECTORY, false)) {
+        if (this.prop.getBoolean(PropertyFiles.USER, AdminProperties.User.CREATE_HOMEDIRECTORY)) {
             for(final User usr : users) {
                 deleteHomedir(usr);
             }
@@ -638,7 +638,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
     private void deleteHomedir(final User usr) throws InvalidDataException {
         // homedirectory
-        String homedir = this.prop.getString(PropertyFiles.USER, AdminProperties.User.HOME_DIR_ROOT, "/home");
+        String homedir = this.prop.getString(PropertyFiles.USER, AdminProperties.User.HOME_DIR_ROOT);
         homedir += "/" + usr.getName();
         // FIXME: if(! tool.isContextAdmin(ctx, usr.getId()) ) {} ??
         try {
@@ -953,9 +953,8 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
      * @throws InvalidDataException
      */
     private void checkChangeUserData(final Context ctx, final User newuser, final User dbuser, final PropertyHandler prop) throws StorageException, InvalidDataException {
-    
-        if( !prop.getBoolean(PropertyFiles.USER, AdminProperties.User.PRIMARY_MAIL_UNCHANGEABLE, true) ) {
-            if( newuser.getPrimaryEmail() != null && ! newuser.getPrimaryEmail().equals(dbuser.getPrimaryEmail()) ) {
+        if (!prop.getBoolean(PropertyFiles.USER, AdminProperties.User.PRIMARY_MAIL_UNCHANGEABLE)) {
+            if (newuser.getPrimaryEmail() != null && !newuser.getPrimaryEmail().equals(dbuser.getPrimaryEmail())) {
                 throw new InvalidDataException("primary mail must not be changed");
             }
         }
@@ -1039,17 +1038,17 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             throw new InvalidDataException("Mandatory fields not set: " + usr.getUnsetMembers() );
         }
         
-        if (prop.getBoolean(PropertyFiles.USER, AdminProperties.User.DISPLAYNAME_UNIQUE, true)) {
+        if (prop.getBoolean(PropertyFiles.USER, AdminProperties.User.DISPLAYNAME_UNIQUE)) {
             if (tool.existsDisplayName(ctx, usr)) {
                 throw new InvalidDataException("The displayname is already used");
             }
         }
     
-        if (prop.getBoolean(PropertyFiles.USER, AdminProperties.User.CHECK_NOT_ALLOWED_CHARS, true)) {
+        if (prop.getBoolean(PropertyFiles.USER, AdminProperties.User.CHECK_NOT_ALLOWED_CHARS)) {
             validateUserName(usr.getName());
         }
     
-        if (prop.getBoolean(PropertyFiles.USER, AdminProperties.User.AUTO_LOWERCASE, true)) {
+        if (prop.getBoolean(PropertyFiles.USER, AdminProperties.User.AUTO_LOWERCASE)) {
             usr.setName(usr.getName().toLowerCase());
         }
     
@@ -1129,7 +1128,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     private void validateUserName(final String userName) throws InvalidDataException {
         // Check for allowed chars:
         // abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-+.%$@
-        final String usr_uid_regexp = this.prop.getString(PropertyFiles.USER, AdminProperties.User.CHECK_USER_UID_REGEXP, "[$@%\\.+a-zA-Z0-9_-]");        
+        final String usr_uid_regexp = this.prop.getString(PropertyFiles.USER, AdminProperties.User.CHECK_USER_UID_REGEXP);        
         final String illegal = userName.replaceAll(usr_uid_regexp,"");
         if( illegal.length() > 0 ) {
             throw new InvalidDataException("Illegal chars: \""+illegal+"\"");

@@ -739,12 +739,12 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
                 stmt.setInt(12, contact_id);
 
-                String homedir = prop.getString(PropertyFiles.USER, AdminProperties.User.HOME_DIR_ROOT, "/home");
+                String homedir = prop.getString(PropertyFiles.USER, AdminProperties.User.HOME_DIR_ROOT);
                 homedir += "/" + usrdata.getName();
                 stmt.setString(13, homedir);
 
                 final int uid_number_start;
-                uid_number_start = prop.getInt(PropertyFiles.USER, AdminProperties.User.UID_NUMBER_START, -1);
+                uid_number_start = prop.getInt(PropertyFiles.USER, AdminProperties.User.UID_NUMBER_START);
                 if(uid_number_start > 0 ) {
                     stmt.setInt(14,uid_number);
                 } else {
@@ -763,7 +763,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 // default group
                 final int gid_number_start;
                 try {
-                    gid_number_start = prop.getInt(PropertyFiles.GROUP, AdminProperties.Group.GID_NUMBER_START, -1);
+                    gid_number_start = prop.getInt(PropertyFiles.GROUP, AdminProperties.Group.GID_NUMBER_START);
                 } catch (final ConversionException e) {
                     throw new StorageException("Error getting " + AdminProperties.Group.GID_NUMBER_START + ": " + e.toString());
                 }
@@ -921,33 +921,33 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.close();
 
                 // get mailfolder
-                String std_mail_folder_sent = prop.getString(PropertyFiles.USER, "SENT_MAILFOLDER_" + lang.toUpperCase(), "Sent");
+                String std_mail_folder_sent = prop.getString(PropertyFiles.USER, AdminProperties.User.SENT_MAILFOLDER_ + lang.toUpperCase(), "Sent");
                 if (null != usrdata.getMail_folder_sent_name()) {
                     std_mail_folder_sent = usrdata.getMail_folder_sent_name();
                 }
 
-                String std_mail_folder_trash = prop.getString(PropertyFiles.USER, "TRASH_MAILFOLDER_" + lang.toUpperCase(), "Trash");
+                String std_mail_folder_trash = prop.getString(PropertyFiles.USER, AdminProperties.User.TRASH_MAILFOLDER_ + lang.toUpperCase(), "Trash");
                 if (null != usrdata.getMail_folder_trash_name()) {
                     std_mail_folder_trash = usrdata.getMail_folder_trash_name();
                 }
 
-                String std_mail_folder_drafts = prop.getString(PropertyFiles.USER, "DRAFTS_MAILFOLDER_" + lang.toUpperCase(), "Drafts");
+                String std_mail_folder_drafts = prop.getString(PropertyFiles.USER, AdminProperties.User.DRAFTS_MAILFOLDER_ + lang.toUpperCase(), "Drafts");
                 if (null != usrdata.getMail_folder_drafts_name()) {
                     std_mail_folder_drafts = usrdata
                             .getMail_folder_drafts_name();
                 }
 
-                String std_mail_folder_spam = prop.getString(PropertyFiles.USER, "SPAM_MAILFOLDER_" + lang.toUpperCase(), "Spam");
+                String std_mail_folder_spam = prop.getString(PropertyFiles.USER, AdminProperties.User.SPAM_MAILFOLDER_ + lang.toUpperCase(), "Spam");
                 if (null != usrdata.getMail_folder_spam_name()) {
                     std_mail_folder_spam = usrdata.getMail_folder_spam_name();
                 }
 
-                String std_mail_folder_confirmed_spam = prop.getString(PropertyFiles.USER, "CONFIRMED_SPAM_MAILFOLDER_" + lang.toUpperCase(), "confirmed-spam");
+                String std_mail_folder_confirmed_spam = prop.getString(PropertyFiles.USER, AdminProperties.User.CONFIRMED_SPAM_MAILFOLDER_ + lang.toUpperCase(), "confirmed-spam");
                 if (null != usrdata.getMail_folder_confirmed_spam_name()) {
                     std_mail_folder_confirmed_spam = usrdata.getMail_folder_confirmed_spam_name();
                 }
 
-                String std_mail_folder_confirmed_ham = prop.getString(PropertyFiles.USER, "CONFIRMED_HAM_MAILFOLDER_" + lang.toUpperCase(), "confirmed-ham");
+                String std_mail_folder_confirmed_ham = prop.getString(PropertyFiles.USER, AdminProperties.User.CONFIRMED_HAM_MAILFOLDER_ + lang.toUpperCase(), "confirmed-ham");
                 if (null != usrdata.getMail_folder_confirmed_ham_name()) {
                     std_mail_folder_confirmed_ham = usrdata.getMail_folder_confirmed_ham_name();
                 }
@@ -1158,7 +1158,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
             int uid_number = -1;
             final int uid_number_start;
-            uid_number_start = prop.getInt(PropertyFiles.USER, AdminProperties.User.UID_NUMBER_START, -1);
+            uid_number_start = prop.getInt(PropertyFiles.USER, AdminProperties.User.UID_NUMBER_START);
             if (uid_number_start > 0) {
                 uid_number = IDGenerator.getId(context_id, com.openexchange.groupware.Types.UID_NUMBER, write_ox_con);
                 write_ox_con.commit();

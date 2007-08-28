@@ -106,7 +106,7 @@ public class AdminDaemon {
         public ServerSocket createServerSocket(final int port) throws IOException {
             String hostname_property = null;
             try {
-                hostname_property = ClientAdminThread.cache.getProperties().getString(PropertyFiles.ADMIN, "BIND_ADDRESS", "localhost");
+                hostname_property = ClientAdminThread.cache.getProperties().getString(PropertyFiles.ADMIN, AdminProperties.Prop.BIND_ADDRESS);
             } catch (InvalidDataException e) {
                 log.fatal("Invalid data in config file", e);
                 System.exit(1);
@@ -171,7 +171,7 @@ public class AdminDaemon {
             }
             Thread.currentThread().setContextClassLoader(loader);
             
-            final int rmi_port = prop.getInt(PropertyFiles.RMI, AdminProperties.RMI.RMI_PORT, 1099);
+            final int rmi_port = prop.getInt(PropertyFiles.RMI, AdminProperties.RMI.RMI_PORT);
             try {
                 // Use SslRMIServerSocketFactory for SSL here
                 registry = LocateRegistry.createRegistry(rmi_port, RMISocketFactory.getDefaultSocketFactory(), new LocalServerFactory());
@@ -179,7 +179,7 @@ public class AdminDaemon {
                 // if a registry has be already created in this osgi framework
                 // we just need to get it from the port (normally this happens
                 // on restarting
-                registry = LocateRegistry.getRegistry(ClientAdminThread.cache.getProperties().getString(PropertyFiles.ADMIN, "BIND_ADDRESS", "localhost"), rmi_port);
+                registry = LocateRegistry.getRegistry(ClientAdminThread.cache.getProperties().getString(PropertyFiles.ADMIN, AdminProperties.Prop.BIND_ADDRESS), rmi_port);
             }
 
             // Now export all NEW Objects

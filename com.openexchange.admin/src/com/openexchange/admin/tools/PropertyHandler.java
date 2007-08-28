@@ -62,6 +62,7 @@ import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.exceptions.ConfigException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchPluginException;
@@ -166,11 +167,50 @@ public class PropertyHandler {
         }
     }
 
+    public int getInt(final String pluginname, final String key) throws NoSuchPluginException, InvalidDataException {
+        final Configuration pluginconfig = pluginconfigs.get(pluginname);
+        if (null != pluginconfig) {
+            try {
+                return pluginconfig.getInt(key);
+            } catch (final RuntimeException e) {
+                log.error(e.getMessage(), e);
+                throw new InvalidDataException(e.toString());
+            }
+        }
+        throw new NoSuchPluginException(pluginname);
+    }
+
     public int getInt(final String pluginname, final String key, final int defaultValue) throws NoSuchPluginException, InvalidDataException {
         final Configuration pluginconfig = pluginconfigs.get(pluginname);
         if (null != pluginconfig) {
             try {
                 return pluginconfig.getInt(key, defaultValue);
+            } catch (final RuntimeException e) {
+                log.error(e.getMessage(), e);
+                throw new InvalidDataException(e.toString());
+            }
+        }
+        throw new NoSuchPluginException(pluginname);
+    }
+
+    public long getLong(final String pluginname, final String key) throws NoSuchPluginException, InvalidDataException {
+        final Configuration pluginconfig = pluginconfigs.get(pluginname);
+        if (null != pluginconfig) {
+            try {
+                return pluginconfig.getLong(key);
+            } catch (final RuntimeException e) {
+                log.error(e.getMessage(), e);
+                throw new InvalidDataException(e.toString());
+            }
+        }
+        throw new NoSuchPluginException(pluginname);
+    }
+    
+    public long getLong(final String pluginname, final String key, final int defaultValue) throws NoSuchPluginException, InvalidDataException {
+        final Configuration pluginconfig = pluginconfigs.get(pluginname);
+        if (null != pluginconfig) {
+            try {
+                return pluginconfig.getLong(key, defaultValue);
             } catch (final RuntimeException e) {
                 log.error(e.getMessage(), e);
                 throw new InvalidDataException(e.toString());
@@ -196,6 +236,19 @@ public class PropertyHandler {
         }
     }
 
+    public String getString(final String pluginname, final String key) throws NoSuchPluginException, InvalidDataException {
+        final Configuration pluginconfig = pluginconfigs.get(pluginname);
+        if (null != pluginconfig) {
+            try {
+                return pluginconfig.getString(key);
+            } catch (final RuntimeException e) {
+                log.error(e.getMessage(), e);
+                throw new InvalidDataException(e.toString());
+            }
+        }
+        throw new NoSuchPluginException(pluginname);
+    }
+
     public String getString(final String pluginname, final String key, final String defaultValue) throws NoSuchPluginException, InvalidDataException {
         final Configuration pluginconfig = pluginconfigs.get(pluginname);
         if (null != pluginconfig) {
@@ -216,6 +269,55 @@ public class PropertyHandler {
         } catch (final RuntimeException e) {
             log.error(e.getMessage(), e);
             throw new InvalidDataException(e.toString());
+        }
+    }
+    
+    public void initializeDefaults() {
+        // Booleans
+        checkAndSetDefault(PropertyFiles.GROUP, AdminProperties.Group.AUTO_LOWERCASE, Boolean.TRUE);
+        checkAndSetDefault(PropertyFiles.GROUP, AdminProperties.Group.CHECK_NOT_ALLOWED_CHARS, Boolean.TRUE);
+        checkAndSetDefault(PropertyFiles.RESOURCE, AdminProperties.Resource.AUTO_LOWERCASE, Boolean.TRUE);
+        checkAndSetDefault(PropertyFiles.USER, AdminProperties.User.PRIMARY_MAIL_UNCHANGEABLE, Boolean.TRUE);
+        checkAndSetDefault(PropertyFiles.USER, AdminProperties.User.DISPLAYNAME_UNIQUE, Boolean.TRUE);
+        checkAndSetDefault(PropertyFiles.USER, AdminProperties.User.CHECK_NOT_ALLOWED_CHARS, Boolean.TRUE);
+        checkAndSetDefault(PropertyFiles.USER, AdminProperties.User.AUTO_LOWERCASE, Boolean.TRUE);
+        checkAndSetDefault(PropertyFiles.RESOURCE, AdminProperties.Resource.AUTO_LOWERCASE, Boolean.TRUE);
+        checkAndSetDefault(PropertyFiles.RESOURCE, AdminProperties.Resource.CHECK_NOT_ALLOWED_CHARS, Boolean.TRUE);
+        checkAndSetDefault(PropertyFiles.USER, AdminProperties.User.CREATE_HOMEDIRECTORY, Boolean.FALSE);
+        checkAndSetDefault(PropertyFiles.SQL, AdminProperties.SQL.LOG_PARSED_QUERIES, Boolean.FALSE);
+        checkAndSetDefault(PropertyFiles.ADMIN, AdminProperties.Prop.MASTER_AUTHENTICATION_DISABLED, Boolean.FALSE);
+        checkAndSetDefault(PropertyFiles.ADMIN, AdminProperties.Prop.CONTEXT_AUTHENTICATION_DISABLED, Boolean.FALSE);
+        
+        // Ints
+        checkAndSetDefault(PropertyFiles.GROUP, AdminProperties.Group.GID_NUMBER_START, Integer.valueOf(-1));
+        checkAndSetDefault(PropertyFiles.USER, AdminProperties.User.UID_NUMBER_START, Integer.valueOf(-1));
+        checkAndSetDefault(PropertyFiles.RMI, AdminProperties.RMI.RMI_PORT, Integer.valueOf(1099));
+        checkAndSetDefault(PropertyFiles.ADMIN, AdminProperties.Prop.CONCURRENT_JOBS, Integer.valueOf(2));
+        
+        // Strings
+        checkAndSetDefault(PropertyFiles.USER, AdminProperties.User.HOME_DIR_ROOT, "/home");
+        checkAndSetDefault(PropertyFiles.ADMIN, AdminProperties.Prop.BIND_ADDRESS, "localhost");
+        checkAndSetDefault(PropertyFiles.ADMIN, AdminProperties.Prop.SERVER_NAME, "local");
+        checkAndSetDefault(PropertyFiles.SQL, AdminProperties.SQL.INITIAL_OX_SQL_DIR, "/opt/openexchange-internal/system/setup/mysql/");
+        checkAndSetDefault(PropertyFiles.GROUP, AdminProperties.Group.CHECK_GROUP_UID_REGEXP, "[ $@%\\.+a-zA-Z0-9_-]");
+        checkAndSetDefault(PropertyFiles.RESOURCE, AdminProperties.Resource.CHECK_RES_UID_REGEXP, "[ $@%\\.+a-zA-Z0-9_-]");
+        checkAndSetDefault(PropertyFiles.USER, AdminProperties.User.CHECK_USER_UID_REGEXP, "[$@%\\.+a-zA-Z0-9_-]");
+        checkAndSetDefault(PropertyFiles.ADMIN, AdminProperties.Prop.MASTER_AUTH_FILE, "/opt/open-xchange/admindaemon/etc/mpasswd");
+    }
+    
+    private void checkAndSetDefault(final PropertyFiles propfiles, final String key, final Object defaultvalue) {
+        final Configuration configuration = cc.getConfiguration(propfiles.getText());
+        if (!configuration.containsKey(key)) {
+            log.debug("Setting key: " + key + " to our defaultvalue: " + defaultvalue);
+            configuration.setProperty(key, defaultvalue);
+        }
+    }
+
+    public void checkAndSetDefault(final String pluginname, final String key, final Object defaultvalue) {
+        final Configuration pluginconfig = pluginconfigs.get(pluginname);
+        if (!pluginconfig.containsKey(key)) {
+            log.debug("Setting key: " + key + " to our defaultvalue: " + defaultvalue);
+            pluginconfig.setProperty(key, defaultvalue);
         }
     }
     
