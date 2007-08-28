@@ -4,7 +4,6 @@
    is a folder in which some user may only create objects
    (not read, update or delete). This works also via WebDAV Infostore now.
 
-
 * 2007-08-28 - ben.pahne@open-xchange.com
 
  - Fixed Bug #9110, Display name must be unique
@@ -15,6 +14,7 @@
 * 2007-08-28 - marcus.klein@open-xchange.com
 
  - Bugfix #6502: Changed exception if a reminder is not found.
+ - Removed deprecated methods from tasks.
 
 * 2007-08-27 - francisco.laguna@open-xchange.com
 
