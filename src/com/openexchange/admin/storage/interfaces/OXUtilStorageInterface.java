@@ -43,7 +43,7 @@ public abstract class OXUtilStorageInterface {
             if (null == implementingClass) {
                 String className = null;
                 try {
-                    className = PropertyHelper.getString(PropertyHelper.UTIL_STORAGE, null);
+                    className = PropertyHelper.getString(PropertyHelper.UTIL_STORAGE);
                 } catch (final NoSuchPluginException e1) {
                     log.fatal(e1.getMessage(), e1);
                     AdminDaemon.shutdown();

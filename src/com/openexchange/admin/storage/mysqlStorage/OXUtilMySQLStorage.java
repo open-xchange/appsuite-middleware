@@ -1150,7 +1150,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             stmt.setInt(1, id);
             rs = stmt.executeQuery();
             
-            final long average_context_size = Long.parseLong(PropertyHelper.getString(PropertyHelper.AVERAGE_CONTEXT_SIZE, "100"));
+            final long average_context_size = PropertyHelper.getLong(PropertyHelper.AVERAGE_CONTEXT_SIZE);
             long usage = 0;
             long reserved = 0;
             while (rs.next()) {

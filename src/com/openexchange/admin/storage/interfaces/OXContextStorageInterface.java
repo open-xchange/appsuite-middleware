@@ -44,7 +44,7 @@ public abstract class OXContextStorageInterface {
             if (null == implementingClass) {
                 String className = null;
                 try {
-                    className = PropertyHelper.getString(PropertyHelper.CONTEXT_STORAGE, null);
+                    className = PropertyHelper.getString(PropertyHelper.CONTEXT_STORAGE);
                 } catch (final NoSuchPluginException e1) {
                     log.fatal(e1.getMessage(), e1);
                     AdminDaemon.shutdown();

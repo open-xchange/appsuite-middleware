@@ -69,7 +69,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             ResultSet rs = null;
             PreparedStatement stmt = null;
             try {
-                long average_size = Long.parseLong(PropertyHelper.getString(PropertyHelper.AVERAGE_CONTEXT_SIZE, "100"));
+                long average_size = PropertyHelper.getLong(PropertyHelper.AVERAGE_CONTEXT_SIZE);
                 average_size *= Math.pow(2, 20);// to byte
                 stmt = configdb_read.prepareStatement("SELECT id,size,max_context FROM filestore");
 
@@ -167,12 +167,12 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
     public OXContextMySQLStorage() throws NoSuchPluginException, InvalidDataException {
         try {
-            this.CONTEXTS_PER_SCHEMA = PropertyHelper.getInt(PropertyHelper.CONTEXTS_PER_SCHEMA, 1);
+            this.CONTEXTS_PER_SCHEMA = PropertyHelper.getInt(PropertyHelper.CONTEXTS_PER_SCHEMA);
             if (this.CONTEXTS_PER_SCHEMA <= 0) {
                 throw new OXContextException("CONTEXTS_PER_SCHEMA MUST BE > 0");
             }
 
-            final String unit = PropertyHelper.getString(PropertyHelper.CREATE_CONTEXT_USE_UNIT, "context");
+            final String unit = PropertyHelper.getString(PropertyHelper.CREATE_CONTEXT_USE_UNIT);
             if (unit.trim().toLowerCase().equals("context")) {
                 this.USE_UNIT = UNIT_CONTEXT;
             } else if (unit.trim().toLowerCase().equals("user")) {
@@ -436,7 +436,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         try {
             config_db_read = ClientAdminThread.cache.getREADConnectionForCONFIGDB();
             
-            return this.oxcontextcommon.getData(ctx, config_db_read, Long.parseLong(PropertyHelper.getString(PropertyHelper.AVERAGE_CONTEXT_SIZE, "100")));
+            return this.oxcontextcommon.getData(ctx, config_db_read, PropertyHelper.getLong(PropertyHelper.AVERAGE_CONTEXT_SIZE));
             
         } catch (final PoolException e) {
             log.error("Pool Error", e);
@@ -765,7 +765,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             final String search_patterntmp = search_pattern.replace('*', '%');
             stmt = configdb_read.prepareStatement("SELECT DISTINCT context.cid, context.name, context.enabled, context.reason_id, context.filestore_id, context.filestore_name, context.quota_max, context_server2db_pool.write_db_pool_id, context_server2db_pool.read_db_pool_id, context_server2db_pool.db_schema FROM context, context_server2db_pool, server, login2context WHERE ( context.cid = context_server2db_pool.cid AND context.cid = login2context.cid AND context_server2db_pool.server_id = server.server_id AND server.name = ? ) AND (context.name LIKE ? OR context.cid LIKE ? OR login2context.login_info LIKE ?)");
             mapping = configdb_read.prepareStatement("SELECT login_info FROM login2context WHERE cid=?"); 
-            stmt.setString(1, ClientAdminThread.cache.getProperties().getString(PropertyHandler.PropertyFiles.ADMIN, AdminProperties.Prop.SERVER_NAME, "local"));
+            stmt.setString(1, ClientAdminThread.cache.getProperties().getString(PropertyHandler.PropertyFiles.ADMIN, AdminProperties.Prop.SERVER_NAME));
             stmt.setString(2, search_patterntmp);
             stmt.setString(3, search_patterntmp);
             stmt.setString(4, search_patterntmp);
@@ -831,7 +831,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     }
                 }
 
-                cs.setAverage_size(Long.parseLong(PropertyHelper.getString(PropertyHelper.AVERAGE_CONTEXT_SIZE, "100")));
+                cs.setAverage_size(PropertyHelper.getLong(PropertyHelper.AVERAGE_CONTEXT_SIZE));
 
                 list.add(cs);
             }
@@ -880,13 +880,14 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         try {
             con = ClientAdminThread.cache.getREADConnectionForCONFIGDB();
             stmt = con.prepareStatement("SELECT context_server2db_pool.cid FROM context_server2db_pool INNER JOIN (server, db_pool) ON (context_server2db_pool.server_id=server.server_id AND db_pool.db_pool_id=context_server2db_pool.read_db_pool_id OR context_server2db_pool.write_db_pool_id=db_pool.db_pool_id) WHERE server.name=? AND db_pool.db_pool_id=?");
-            stmt.setString(1, ClientAdminThread.cache.getProperties().getString(PropertyHandler.PropertyFiles.ADMIN, AdminProperties.Prop.SERVER_NAME, "local"));
+            stmt.setString(1, ClientAdminThread.cache.getProperties().getString(PropertyHandler.PropertyFiles.ADMIN, AdminProperties.Prop.SERVER_NAME));
             stmt.setInt(2, db_host.getId());
             final ResultSet rs = stmt.executeQuery();
             final ArrayList<Context> list = new ArrayList<Context>();
+            final long avg_context_size = PropertyHelper.getLong(PropertyHelper.AVERAGE_CONTEXT_SIZE);
             while (rs.next()) {
                 // TODO: This could be filled with the query directly to optimize performance
-                final Context cs = this.oxcontextcommon.getData(new Context(rs.getInt("cid")), con, Long.parseLong(PropertyHelper.getString(PropertyHelper.AVERAGE_CONTEXT_SIZE, "100")));
+                final Context cs = this.oxcontextcommon.getData(new Context(rs.getInt("cid")), con, avg_context_size);
                 list.add(cs);
             }
             rs.close();
@@ -928,10 +929,11 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             
             stmt = con.prepareStatement("SELECT context.cid, context.name, context.enabled, context.reason_id, context.filestore_id, context.filestore_name, context.quota_max, context_server2db_pool.write_db_pool_id, context_server2db_pool.read_db_pool_id, context_server2db_pool.db_schema FROM context LEFT JOIN ( context_server2db_pool, server ) ON ( context.cid = context_server2db_pool.cid AND context_server2db_pool.server_id = server.server_id ) WHERE server.name = ? AND context.filestore_id = ?");
             logininfo = con.prepareStatement("SELECT login_info FROM `login2context` WHERE cid=?");
-            stmt.setString(1, ClientAdminThread.cache.getProperties().getString(PropertyHandler.PropertyFiles.ADMIN, AdminProperties.Prop.SERVER_NAME, "local"));
+            stmt.setString(1, ClientAdminThread.cache.getProperties().getString(PropertyHandler.PropertyFiles.ADMIN, AdminProperties.Prop.SERVER_NAME));
             stmt.setInt(2, filestore.getId());
             rs = stmt.executeQuery();
             final ArrayList<Context> list = new ArrayList<Context>();
+            final long avg_context_size = PropertyHelper.getLong(PropertyHelper.AVERAGE_CONTEXT_SIZE);
             while (rs.next()) {
                 final Context cs = new Context();
                 
@@ -988,7 +990,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 // set used quota in context setup
                 cs.setUsedQuota(quota_used);
 
-                cs.setAverage_size(Long.parseLong(PropertyHelper.getString(PropertyHelper.AVERAGE_CONTEXT_SIZE, "100")));
+                cs.setAverage_size(avg_context_size);
 
                 // context id
                 cs.setId(context_id);
@@ -1156,13 +1158,13 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 ox_write_con.commit();
 
                 int uid_number = -1;
-                if (ClientAdminThread.cache.getProperties().getInt(PropertyHandler.PropertyFiles.USER, AdminProperties.User.UID_NUMBER_START, -1) > 0) {
+                if (ClientAdminThread.cache.getProperties().getInt(PropertyHandler.PropertyFiles.USER, AdminProperties.User.UID_NUMBER_START) > 0) {
                     uid_number = IDGenerator.getId(context_id, com.openexchange.groupware.Types.UID_NUMBER, ox_write_con);
                     ox_write_con.commit();
                 }
 
                 int gid_number = -1;
-                if (ClientAdminThread.cache.getProperties().getInt(PropertyHandler.PropertyFiles.GROUP, AdminProperties.Group.GID_NUMBER_START, -1) > 0) {
+                if (ClientAdminThread.cache.getProperties().getInt(PropertyHandler.PropertyFiles.GROUP, AdminProperties.Group.GID_NUMBER_START) > 0) {
                     gid_number = IDGenerator.getId(context_id, com.openexchange.groupware.Types.GID_NUMBER, ox_write_con);
                     ox_write_con.commit();
                 }
