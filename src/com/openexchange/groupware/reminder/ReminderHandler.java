@@ -293,7 +293,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 			final int deleted = ps.executeUpdate();
 			
 			if (deleted == 0) {
-                throw new ReminderException(Code.NOT_FOUND, objectId, contextId);
+                throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, Component.REMINDER, "no reminder found");
 			}
 		} catch (final SQLException exc) {
 			throw new ReminderException(ReminderException.Code.DELETE_EXCEPTION, exc);
@@ -377,7 +377,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 			final int deleted = ps.executeUpdate();
 			
 			if (deleted == 0) {
-                throw new ReminderException(Code.NOT_FOUND, Integer.parseInt(targetId), contextId);
+                throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, Component.REMINDER, "no reminder found");
 			}
 		} catch (final SQLException exc) {
 			throw new ReminderException(ReminderException.Code.DELETE_EXCEPTION, exc);
@@ -444,7 +444,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 			final int deleted = ps.executeUpdate();
 			
 			if (deleted == 0) {
-                throw new ReminderException(Code.NOT_FOUND, Integer.parseInt(targetId), contextId);
+                throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, Component.REMINDER, "no reminder found");
 			}
 		} catch (final SQLException exc) {
 			throw new ReminderException(ReminderException.Code.DELETE_EXCEPTION, exc);
@@ -626,7 +626,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 			if (reminderObj != null) {
 				return reminderObj;
 			}
-            throw new ReminderException(Code.NOT_FOUND, objectId, contextId);
+            throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, Component.REMINDER, "no reminder found");
 		} catch (final SQLException exc) {
 			throw new OXException(Component.REMINDER, Category.CODE_ERROR, -1, "SQL Problem.", exc);
 		}

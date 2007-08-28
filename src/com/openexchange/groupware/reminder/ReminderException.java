@@ -92,9 +92,7 @@ public class ReminderException extends OXException {
 		LOAD_EXCEPTION("Unable to load reminder", 7,
             AbstractOXException.Category.CODE_ERROR),
 		LIST_EXCEPTION("Unable to list reminder", 8,
-            AbstractOXException.Category.CODE_ERROR),
-        NOT_FOUND("Cannot find reminder (identifier %d). Context %d.", 9,
-            Category.CODE_ERROR);
+            AbstractOXException.Category.CODE_ERROR);
 		
 		/**
 		 * Message of the exception.
