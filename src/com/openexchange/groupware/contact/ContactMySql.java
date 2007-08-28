@@ -72,7 +72,6 @@ import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.date.FormatDate;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
-import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderTools;
 
 /**
@@ -479,6 +478,9 @@ public class ContactMySql implements ContactSql {
 					sb.append("( co.").append(field).append(" LIKE '%").append(value).append("%' ) ").append(search_habit).append(' ');
 				}
 			}
+			if (cso.getIgnoreOwn() > 0) {
+				sb.append("( co.intfield01 != ").append(cso.getIgnoreOwn()).append(") ").append(search_habit).append(' ');
+			}
 			
 			final String tmpp = sb.toString().trim();
 			if (tmpp.lastIndexOf('(') == (tmpp.length()-1)) {
@@ -489,6 +491,8 @@ public class ContactMySql implements ContactSql {
 				}
 				sb.append(") AND ");
 			}
+			
+			
 			
 			/*********************** * search in all folder or subfolder * ***********************/ 
 			

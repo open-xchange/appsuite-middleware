@@ -94,6 +94,7 @@ import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.server.DBPool;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.server.EffectivePermission;
@@ -387,7 +388,7 @@ public class Contacts implements DeleteListener {
 			if ((contactFolder.getType() != FolderObject.PRIVATE) && co.getPrivateFlag()){
 				co.setPrivateFlag(false);
 			}
-			
+			/*
 			if (!co.containsDisplayName() || co.getDisplayName() == null || co.getDisplayName().length() < 1){
 				if (co.getSurName() != null && co.getSurName().length() > 0){
 					if (co.getGivenName() != null && co.getGivenName().length() > 0){
@@ -411,10 +412,11 @@ public class Contacts implements DeleteListener {
 					}
 				}
 			} else {
-				if (co.getSurName() == null || co.getSurName().length() < 1){
-					co.setSurName(co.getDisplayName());
-				}
-			}	
+			*/
+			if (co.getSurName() == null || co.getSurName().length() < 1){
+				co.setSurName(co.getDisplayName());
+			}
+			// }
 			if (!co.containsFileAs() || (co.getFileAs() != null && co.getFileAs().length() > 0)){
 				co.setFileAs(co.getDisplayName());
 			}
@@ -586,10 +588,12 @@ public class Contacts implements DeleteListener {
 									Category.CODE_ERROR,
 									Category.USER_INPUT,
 									Category.TRY_AGAIN,
+									Category.TRY_AGAIN,
+									Category.TRY_AGAIN,
 									Category.TRY_AGAIN
 			},
-			desc={"10","11","12","13","14","15","16","17","65","18","19","20","21","22","23", "24","55","56","59","63"},
-			exceptionId={10,11,12,13,14,15,16,17,65,18,19,20,21,22,23,24,55,56,59,63},
+			desc={"10","11","12","13","14","15","16","17","65","18","19","20","21","22","23", "24","55","56","59","63","66","67"},
+			exceptionId={10,11,12,13,14,15,16,17,65,18,19,20,21,22,23,24,55,56,59,63,66,67},
 			msg={	ContactException.NON_CONTACT_FOLDER_MSG,
 							ContactException.NO_PERMISSION_MSG, 
 							ContactException.NO_PERMISSION_MSG, 
@@ -609,7 +613,9 @@ public class Contacts implements DeleteListener {
 							ContactException.INIT_CONNECTION_FROM_DBPOOL,
 							"One or more fields contain too much information. Field: %1$d Character Limit: %2$d Sent %3$d",
 							"The image you tried to attach is not a valid picture. It may be broken or is not a valid file.",
-							"Mandatory field last name is not set."
+							"Mandatory field last name is not set.",
+							"Unable to compare contacts for update. Contect %1$d Object %2$d",
+							"The name you entered is not available. Choose another displayname. Contect %1$d Object %2$d"
 					}
 	)
 	public static void performContactStorageUpdate(final ContactObject co, final int fid, final java.util.Date client_date, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws ContactException, OXConflictException, OXObjectNotFoundException, OXConcurrentModificationException, OXException {
@@ -639,6 +645,7 @@ public class Contacts implements DeleteListener {
 			/*
 			 * Check Rights for Destination Folder
 			 */
+			
 			FolderObject contactFolder;
 			if (FolderCacheManager.isEnabled()){
 				contactFolder = FolderCacheManager.getInstance().getFolderObject(co.getParentFolderID(), true, ctx, readcon);
@@ -743,64 +750,52 @@ public class Contacts implements DeleteListener {
 				throw xoxo;
 			}
 			
-			
-			String firstname = null;
-			if (co.containsGivenName() && co.getGivenName() != null){
-				firstname = co.getGivenName();
-			} else if (co.containsGivenName() && co.getGivenName() == null){
-				firstname = null;
-			} else if (original.containsGivenName() && original.getGivenName() != null){
-				firstname = original.getGivenName();
-			}
-			String secondname = null;
-			if (co.containsMiddleName() && co.getMiddleName() != null){
-				secondname = co.getMiddleName();
-			} else if (co.containsMiddleName() && co.getMiddleName() == null){
-				secondname = null;
-			} else if (original.containsMiddleName() && original.getMiddleName() != null){
-				secondname = original.getMiddleName();
-			}
-			
-			if (co.getDisplayName() == null || co.getDisplayName().length() < 1){
-				if (co.getSurName() != null && co.getSurName().length() > 0){
-					if (firstname != null){
-						if (secondname != null){
-							co.setDisplayName(co.getSurName()+", "+firstname+' '+secondname);
-						}else{
-							co.setDisplayName(co.getSurName()+", "+firstname);
+			if (co.getParentFolderID() == FolderObject.SYSTEM_LDAP_FOLDER_ID && co.getDisplayName() != null){
+				
+				Statement stmt = null;
+				ResultSet rs = null;
+				
+				final ContactSql csql = new ContactMySql(ctx, user);
+				csql.setFolder(co.getParentFolderID());
+				
+				final ContactSearchObject cso = new ContactSearchObject();
+				cso.setDisplayName(co.getDisplayName());
+				cso.setIgnoreOwn(co.getObjectID());
+				
+				csql.setContactSearchObject(cso);				
+				csql.setSelect(csql.iFgetColsString(new int[] {1, 20,  }).toString());
+				csql.setSearchHabit(" AND ");
+				
+				try{
+					stmt = readcon.createStatement();
+					rs = stmt.executeQuery(csql.getSqlCommand());
+					if (rs.next()) {
+						throw EXCEPTIONS.create(67,Integer.valueOf(ctx.getContextId()), co.getObjectID());
+					}		
+				}catch (final SQLException sq){
+					throw EXCEPTIONS.create(66,sq, Integer.valueOf(ctx.getContextId()), co.getObjectID());
+				} finally {
+					try{ 
+						if (rs != null){
+							rs.close();
 						}
-					}else if (secondname != null){
-						co.setDisplayName(co.getSurName()+", "+secondname);
-					}else{
-						co.setDisplayName(co.getSurName());
+						if (stmt != null){
+							stmt.close();
+						}
+					}catch (final SQLException sxe){
+						LOG.error("Unable to close Statement or ResultSet", sxe);
 					}
 				}
-			} else {
-				/**
-				 * Previous condition threw a critical warning since co.getDisplayName() may be null
-				 * <pre>
-				 * else if (co.getDisplayName() != null || co.getDisplayName().length() > 0) {
-				 * </pre>
-				 */
-				if (co.getSurName() == null || co.getSurName().length() < 1){
-					co.setSurName(co.getDisplayName());
-				} else if (co.getSurName() != null && co.getSurName().length() > 0) {					
-					if (firstname != null){
-						if (secondname != null){
-							co.setDisplayName(co.getSurName()+", "+firstname+' '+secondname);
-						}else{
-							co.setDisplayName(co.getSurName()+", "+firstname);
-						}
-					}else if (secondname != null){
-						co.setDisplayName(co.getSurName()+", "+secondname);
-					} else {
-						co.setDisplayName(co.getSurName());
-					}
-				}
-				}
+			}
+			
+
+			if (co.getSurName() == null || co.getSurName().length() < 1){
+				co.setSurName(co.getDisplayName());
+			}
 			if (!co.containsFileAs() || (co.getFileAs() != null && co.getFileAs().length() > 0)){
 				co.setFileAs(co.getDisplayName());
 			}
+			
 		} catch (final OXConcurrentModificationException cme){
 			throw cme;
 		} catch (final OXObjectNotFoundException oe2){

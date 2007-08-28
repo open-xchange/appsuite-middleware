@@ -67,6 +67,8 @@ public class ContactSearchObject extends SearchObject {
 	
 	private String email3 = null;
 	
+	private int ignoreOwn = 0;
+	
 	private int[] dynamicSearchField = null;
 	
 	private String[] dynamicSearchFieldValue = null;
@@ -194,7 +196,15 @@ public class ContactSearchObject extends SearchObject {
 	public String getAllFolderSQLINString(){
 		return allFolderSQLINString;
 	}
-
+	
+	public int getIgnoreOwn(){
+		return ignoreOwn;
+	}
+	
+	public void setIgnoreOwn(int ignoreOwn){
+		this.ignoreOwn = ignoreOwn;
+	}
+	
 	public void setAllFolderSQLINString(String allFolderSQLINString){
 		this.allFolderSQLINString = allFolderSQLINString;
 	}
