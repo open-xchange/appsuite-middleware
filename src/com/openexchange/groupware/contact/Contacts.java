@@ -722,7 +722,7 @@ public class Contacts implements DeleteListener {
 				
 			if ((contactFolder.getType() != FolderObject.PRIVATE) && (co.getPrivateFlag() || original.getPrivateFlag())){
 				//co.setPrivateFlag(false);
-				throw EXCEPTIONS.createOXConflictException(64, Integer.valueOf(ctx.getContextId()), Integer.valueOf(co.getObjectID()));
+				throw EXCEPTIONS.createOXConflictException(65, Integer.valueOf(ctx.getContextId()), Integer.valueOf(co.getObjectID()));
 			} else if ((contactFolder.getType() == FolderObject.PRIVATE) && original.getPrivateFlag() && original.getCreatedBy() != user){
 				throw EXCEPTIONS.createOXConflictException(18, Integer.valueOf(ctx.getContextId()), Integer.valueOf(co.getObjectID()));
 				//throw new OXConflictException("NOT ALLOWED TO SAVE FOLDER OBJECTS CONTACT AS PRIVATE cid="+ctx.getContextId()+" oid="+co.getObjectID());
