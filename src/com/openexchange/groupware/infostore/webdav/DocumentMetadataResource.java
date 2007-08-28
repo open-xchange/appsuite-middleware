@@ -528,8 +528,9 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 	@Override
 	public void putBody(final InputStream body, final boolean guessSize) throws WebdavException{
 		if(!exists && !existsInDB) {
+			// CREATE WITH FILE
 			try {
-				dumpMetadataToDB();
+				dumpMetadataToDB(body, guessSize);
 			} catch (final WebdavException x) {
 				throw x;
 			} catch (final InfostoreException x) {
@@ -540,26 +541,29 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 			} catch (final Exception x) {
 				throw new WebdavException(x.getMessage(), x, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			}
-		}
-		final SessionObject session = sessionHolder.getSessionObject();
-		try {
-			loadMetadata();
-			if(guessSize) {
-				metadata.setFileSize(0);
-			}
-			database.saveDocument(metadata, body, Long.MAX_VALUE, session);
-			database.commit();
-		} catch (final Exception x) {
+		} else {
+			// UPDATE
+			final SessionObject session = sessionHolder.getSessionObject();
 			try {
-				database.rollback();
-			} catch (final TransactionException e) {
-				LOG.error("Couldn't rollback transaction. Run the recovery tool.");
+				loadMetadata();
+				if(guessSize) {
+					metadata.setFileSize(0);
+				}
+				database.saveDocument(metadata, body, Long.MAX_VALUE, session);
+				database.commit();
+			} catch (final Exception x) {
+				try {
+					database.rollback();
+				} catch (final TransactionException e) {
+					LOG.error("Couldn't rollback transaction. Run the recovery tool.");
+				}
+				throw new WebdavException(x.getMessage(), x, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			}
-			throw new WebdavException(x.getMessage(), x, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
+		
 	}
-
-	private void dumpMetadataToDB() throws OXException, IllegalAccessException, ConflictException, WebdavException {
+	
+	private void dumpMetadataToDB(InputStream fileData, boolean guessSize) throws OXException, IllegalAccessException, ConflictException, WebdavException{
 		if((exists || existsInDB) && !metadataChanged) {
 			return;
 		}
@@ -582,9 +586,16 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 					metadata.setFileName(url.substring(url.lastIndexOf("/")+1));
 			}
 			metadata.setTitle(metadata.getFileName());
-			
+			if(fileData != null && guessSize) {
+				metadata.setFileSize(0);
+				
+			}
 			try {
-				database.saveDocumentMetadata(metadata, InfostoreFacade.NEW, session);
+				if(fileData == null) {
+					database.saveDocumentMetadata(metadata, InfostoreFacade.NEW, session);
+				} else {
+					database.saveDocument(metadata, fileData, InfostoreFacade.NEW, session);
+				}
 				database.commit();
 				setId(metadata.getId());
 			} catch (final OXException x) {
@@ -617,6 +628,10 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 		metadataChanged=false;
 	}
 
+	private void dumpMetadataToDB() throws OXException, IllegalAccessException, ConflictException, WebdavException {
+		dumpMetadataToDB(null,false);
+	}
+
 	@OXThrows(
 			category=Category.CONCURRENT_MODIFICATION,
 			desc="The DocumentMetadata entry in the DB for the given resource could not be created. This is mostly due to someone else modifying the entry. This can also mean, that the entry has been deleted already.",
@@ -638,7 +653,8 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 	}
 
 	public int getParentId() throws WebdavException {
-		loadMetadata();
+		if(metadata == null)
+			loadMetadata();
 		return (int) metadata.getFolderId();
 	}
 

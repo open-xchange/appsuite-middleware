@@ -1,3 +1,10 @@
+* 2007-08-28 - francisco.laguna@open-xchange.com
+
+ - Fixed Bug #9109, Support for DropBox scenario via WebDAV. A DropBox
+   is a folder in which some user may only create objects
+   (not read, update or delete). This works also via WebDAV Infostore now.
+
+
 * 2007-08-28 - ben.pahne@open-xchange.com
 
  - Fixed Bug #8731, list request for a nonexistent object returns an
