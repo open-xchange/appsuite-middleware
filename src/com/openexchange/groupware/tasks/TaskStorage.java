@@ -88,17 +88,15 @@ abstract class TaskStorage {
     }
 
     /**
-     * Stores a task.
-     * @param ctx Context.
+     * Stores a task object.
+     * @param ctx Context
+     * @param con writable database connection.
      * @param task Task to store.
-     * @param participants Participants of the task.
-     * @param folders Folders the task should appear in.
-     * @throws TaskException if an error occurs while storing the task.
-     * TODO move to TaskLogic
+     * @param type storage type of the task (ACTIVE, DELETED).
+     * @throws TaskException
      */
-    abstract void insert(Context ctx, Task task,
-        Set<TaskParticipant> participants, Set<Folder> folders)
-        throws TaskException;
+    abstract void insertTask(final Context ctx, final Connection con,
+        final Task task, final StorageType type) throws TaskException;
 
     /**
      * Updates a task without touching folder mappings and participants.
@@ -125,29 +123,6 @@ abstract class TaskStorage {
      */
     abstract void delete(Context ctx, Connection con, int taskId, Date lastRead,
         StorageType type) throws TaskException;
-
-    /**
-     * Deletes a task from the underlying persistant storage. This method mainly
-     * moves the task from the ACTIVE storage type to the DELETED storage type.
-     * @param ctx Context
-     * @param task task to delete.
-     * @param userId unique identifier of the user (own task, modified by).
-     * @param lastRead timestamp when the client read the task last.
-     * @throws TaskException if an error occurs while deleting the task.
-     * @deprecated Use {@link TaskLogic#deleteTask(SessionObject, Task, Date)}
-     */
-    abstract void delete(Context ctx, Task task, int userId, Date lastRead)
-        throws TaskException;
-
-    /**
-     * Only for setConfirmation.
-     * @param ctx Context.
-     * @param taskId unique identifier of the task.
-     * @param participant new participant data.
-     * @throws TaskException if an error occurs.
-     */
-    abstract void updateParticipant(Context ctx, int taskId,
-        InternalParticipant participant) throws TaskException;
 
     /**
      * Counts tasks in a folder.
@@ -252,54 +227,6 @@ abstract class TaskStorage {
             DBPool.closeReaderSilent(ctx, con);
         }
     }
-
-    /**
-     * Only for setConfirmation.
-     * @param ctx Context.
-     * @param taskId unique identifier of the task.
-     * @param userId unique identifier of the user that confirmation should be
-     * set.
-     * @return a TaskInternalParticipant object.
-     * @throws TaskException if an error occurs.
-     * @deprecated Use ParticipantStorage.
-     */
-    abstract InternalParticipant selectParticipant(Context ctx,
-        int taskId, int userId) throws TaskException;
-
-    /**
-     * Reads the participants of a task.
-     * @param ctx Context.
-     * @param taskId unique identifier of the task.
-     * @param type type of participant that should be selected.
-     * @return a set of participants.
-     * @throws TaskException if an error occurs.
-     * @deprecated Use {@link ParticipantStorage}{@link #selectParticipants(Context, int, StorageType)}
-     */
-    abstract Set<TaskParticipant> selectParticipants(Context ctx,
-        int taskId, StorageType type) throws TaskException;
-
-    /**
-     * Reads the folder of a task.
-     * @param ctx Context.
-     * @param taskId unique identifier of the task.
-     * @param folderId unique identifier of the folder.
-     * @return the folder object.
-     * @throws TaskException if the folder isn't found or an error occurs.
-     * @deprecated use {@link FolderStorage#selectFolderById}
-     */
-    abstract Folder selectFolderById(Context ctx, int taskId,
-        int folderId) throws TaskException;
-
-    /**
-     * Reads the folder of a task.
-     * @param ctx Context.
-     * @param taskId unique identifier of the task.
-     * @return the folder objects.
-     * @throws TaskException if an error occurs.
-     * @deprecated Use FolderStorage.
-     */
-    abstract Set<Folder> selectFolders(Context ctx, int taskId)
-        throws TaskException;
 
     public abstract boolean containsNotSelfCreatedTasks(SessionObject session,
         int folderId) throws TaskException;

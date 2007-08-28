@@ -175,6 +175,21 @@ public abstract class FolderStorage {
     abstract Folder selectFolderById(Context ctx, Connection con, int taskId,
         int folderId, StorageType type) throws TaskException;
 
+    Folder selectFolderById(final Context ctx, final int taskId,
+        final int folderId, final StorageType type) throws TaskException {
+        final Connection con;
+        try {
+            con = DBPool.pickup(ctx);
+        } catch (DBPoolingException e) {
+            throw new TaskException(Code.NO_CONNECTION, e);
+        }
+        try {
+            return selectFolderById(ctx, con, taskId, folderId, type);
+        } finally {
+            DBPool.closeReaderSilent(ctx, con);
+        }
+    }
+
     /**
      * Deletes task folder mappings.
      * @param ctx Context.

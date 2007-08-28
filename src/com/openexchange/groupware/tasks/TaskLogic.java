@@ -71,6 +71,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.event.EventClient;
 import com.openexchange.event.InvalidStateException;
 import com.openexchange.groupware.calendar.CalendarRecurringCollection;
+import com.openexchange.groupware.IDGenerator;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.calendar.RecurringResult;
@@ -378,10 +379,8 @@ public final class TaskLogic {
                     final int[] member = GroupStorage.getInstance(ctx).getGroup(
                         group.getIdentifier()).getMember();
                     for (int userId : member) {
-                        final UserParticipant user = new UserParticipant();
-                        user.setIdentifier(userId);
                         final TaskParticipant tParticipant =
-                            new InternalParticipant(user,
+                            new InternalParticipant(new UserParticipant(userId),
                             group.getIdentifier());
                         if (!retval.contains(tParticipant)) {
                             retval.add(tParticipant);
@@ -428,8 +427,7 @@ public final class TaskLogic {
                 if (null == groupId) {
                     retval.add(internal.getUser());
                 } else {
-                    final GroupParticipant group = new GroupParticipant();
-                    group.setIdentifier(groupId);
+                    final GroupParticipant group = new GroupParticipant(groupId);
                     if (!groups.containsKey(groupId)) {
                         groups.put(groupId, group);
                     }
@@ -572,18 +570,6 @@ public final class TaskLogic {
         return retval;
     }
 
-    static InternalParticipant getParticipant(
-        final Set<InternalParticipant> participants, final int userId) {
-        InternalParticipant retval = null;
-        for (InternalParticipant participant : participants) {
-            if (participant.getIdentifier() == userId) {
-                retval = participant;
-                break;
-            }
-        }
-        return retval;
-    }
-
     /**
      * Extracts all participants that are added by the group.
      * @param participants internal task participants.
@@ -654,7 +640,7 @@ public final class TaskLogic {
     static Set<TaskParticipant> loadParticipantsWithFolder(final Context ctx,
         final int folderId, final int taskId, final StorageType type)
         throws TaskException {
-        final Set<TaskParticipant> parts = storage.selectParticipants(ctx,
+        final Set<TaskParticipant> parts = partStor.selectParticipants(ctx,
             taskId, type);
         // TODO Use FolderObject
         if (!Tools.isFolderPublic(ctx, folderId)) {
@@ -665,6 +651,53 @@ public final class TaskLogic {
         return parts;
     }
 
+    /**
+     * Stores a task with its participants and folders.
+     * @param ctx Context.
+     * @param task Task to store.
+     * @param participants Participants of the task.
+     * @param folders Folders the task should appear in.
+     * @throws TaskException if an error occurs while storing the task.
+     */
+    static void insertTask(final Context ctx, final Task task,
+        final Set<TaskParticipant> participants, final Set<Folder> folders)
+        throws TaskException {
+        Connection con;
+        try {
+            con = DBPool.pickupWriteable(ctx);
+        } catch (DBPoolingException e) {
+            throw new TaskException(Code.NO_CONNECTION, e);
+        }
+        try {
+            con.setAutoCommit(false);
+            final int taskId = IDGenerator.getId(ctx, Types.TASK, con);
+            task.setObjectID(taskId);
+            storage.insertTask(ctx, con, task, StorageType.ACTIVE);
+            if (participants.size() != 0) {
+                partStor.insertParticipants(ctx, con, taskId, participants,
+                    StorageType.ACTIVE);
+            }
+            foldStor.insertFolder(ctx, con, taskId, folders,
+                StorageType.ACTIVE);
+            con.commit();
+        } catch (SQLException e) {
+            rollback(con);
+            throw new TaskException(Code.INSERT_FAILED, e, e.getMessage());
+        } catch (TaskException e) {
+            rollback(con);
+            throw e;
+        } finally {
+            try {
+                con.setAutoCommit(true);
+            } catch (SQLException e) {
+                final TaskException tske = new TaskException(Code.AUTO_COMMIT,
+                    e);
+                LOG.error(tske.getMessage(), tske);
+            }
+            DBPool.closeWriterSilent(ctx, con);
+        }
+    }
+    
     static void updateTask(final Context ctx, final Task task,
         final Date lastRead, final int[] modified,
         final Set<TaskParticipant> add, final Set<TaskParticipant> remove,
@@ -730,8 +763,67 @@ public final class TaskLogic {
         final Date lastModified) throws TaskException {
         final Context ctx = session.getContext();
         final int userId = session.getUserObject().getId();
-        storage.delete(ctx, task, userId, lastModified);
+        Connection con;
+        try {
+            con = DBPool.pickupWriteable(ctx);
+        } catch (DBPoolingException e) {
+            throw new TaskException(Code.NO_CONNECTION, e);
+        }
+        try {
+            con.setAutoCommit(false);
+            task.setLastModified(new Date());
+            task.setModifiedBy(userId);
+            storage.insertTask(ctx, con, task, StorageType.DELETED);
+            deleteParticipants(ctx, con, task.getObjectID());
+            deleteFolder(ctx, con, task.getObjectID());
+            storage.delete(ctx, con, task.getObjectID(), lastModified,
+                StorageType.ACTIVE);
+            con.commit();
+        } catch (SQLException e) {
+            rollback(con);
+            throw new TaskException(Code.DELETE_FAILED, e, e.getMessage());
+        } catch (TaskException e) {
+            rollback(con);
+            throw e;
+        } finally {
+            try {
+                con.setAutoCommit(true);
+            } catch (SQLException e) {
+                LOG.error("Problem setting auto commit to true.", e);
+            }
+            DBPool.closeWriterSilent(ctx, con);
+        }
         informDelete(session, task);
+    }
+
+    private static void deleteParticipants(final Context ctx,
+        final Connection con, final int taskId) throws TaskException {
+        final Set<InternalParticipant> participants =
+            new HashSet<InternalParticipant>(partStor.selectInternal(ctx,
+            con, taskId, StorageType.ACTIVE));
+        partStor.deleteInternal(ctx, con, taskId, participants, StorageType
+            .ACTIVE, true);
+        final Set<InternalParticipant> removed = partStor.selectInternal(ctx,
+            con, taskId, StorageType.REMOVED);
+        partStor.deleteInternal(ctx, con, taskId, removed, StorageType.REMOVED,
+            true);
+        participants.addAll(removed);
+        partStor.insertInternals(ctx, con, taskId, participants, StorageType
+            .DELETED);
+        final Set<ExternalParticipant> externals = partStor.selectExternal(ctx,
+            con, taskId, StorageType.ACTIVE);
+        partStor.insertExternals(ctx, con, taskId, externals, StorageType
+            .DELETED);
+        partStor.deleteExternal(ctx, con, taskId, externals, StorageType.ACTIVE,
+            true);
+    }
+
+    private static void deleteFolder(final Context ctx, final Connection con,
+        final int taskId) throws TaskException {
+        final Set<Folder> folders = foldStor.selectFolder(ctx, con, taskId,
+            StorageType.ACTIVE);
+        foldStor.insertFolder(ctx, con, taskId, folders, StorageType.DELETED);
+        foldStor.deleteFolder(ctx, con, taskId, folders, StorageType.ACTIVE);
     }
 
     /**
@@ -802,5 +894,41 @@ public final class TaskLogic {
         foldStor.deleteFolder(ctx, writeCon, taskId, folders, type);
         storage.delete(ctx, writeCon, taskId, task.getLastModified(), type);
         informDelete(session, task);
+    }
+
+    static void setConfirmation(final Context ctx, final int taskId,
+        final int userId, final int confirm, final String message)
+        throws TaskException {
+        final InternalParticipant participant = partStor.selectInternal(ctx,
+            taskId, userId, StorageType.ACTIVE);
+        participant.setConfirm(confirm);
+        participant.setConfirmMessage(message);
+        final Task task = new Task();
+        task.setObjectID(taskId);
+        task.setLastModified(new Date());
+        task.setModifiedBy(userId);
+        Connection con;
+        try {
+            con = DBPool.pickupWriteable(ctx);
+        } catch (DBPoolingException e) {
+            throw new TaskException(Code.NO_CONNECTION, e);
+        }
+        try {
+            con.setAutoCommit(false);
+            partStor.updateInternal(ctx, con, taskId, participant, StorageType
+                .ACTIVE);
+            TaskLogic.updateTask(ctx, task, new Date(), new int[] {
+                Task.LAST_MODIFIED, Task.MODIFIED_BY }, null, null, null, null);
+        } catch (SQLException e) {
+            rollback(con);
+            throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
+        } finally {
+            try {
+                con.setAutoCommit(true);
+            } catch (SQLException e) {
+                LOG.error("Problem setting auto commit to true.", e);
+            }
+            DBPool.closeWriterSilent(ctx, con);
+        }
     }
 }

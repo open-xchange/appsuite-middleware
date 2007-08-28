@@ -280,7 +280,6 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
      */
     public void insertTaskObject(final Task task) throws OXException {
         final Context ctx = session.getContext();
-        final TaskStorage storage = TaskStorage.getInstance();
         final Set<TaskParticipant> parts;
         try {
             final User user = session.getUserObject();
@@ -313,7 +312,7 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
                     ParticipantStorage.extractInternal(parts));
             }
             // Insert task
-            storage.insert(ctx, task, parts, folders);
+            TaskLogic.insertTask(ctx, task, parts, folders);
         } catch (TaskException e) {
             throw Tools.convert(e);
         }
@@ -413,13 +412,12 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
         final Set<TaskParticipant> parts, final Set<Folder> folders)
         throws TaskException,
         OXException {
-        final TaskStorage storage = TaskStorage.getInstance();
         final Context ctx = session.getContext();
         final boolean next = TaskLogic.makeRecurrence(task);
         if (next) {
             TaskLogic.checkNewTask(task, session.getUserObject().getId(),
                 session.getUserConfiguration(), parts);
-            storage.insert(ctx, task, parts, folders);
+            TaskLogic.insertTask(ctx, task, parts, folders);
             try {
                 new EventClient(session).create(task);
             } catch (InvalidStateException e) {
@@ -501,7 +499,7 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
      */
     public void deleteTaskObject(final int taskId, final int folderId,
         final Date lastModified) throws OXException {
-        final TaskStorage storage = TaskStorage.getInstance();
+        final FolderStorage foldStor = FolderStorage.getInstance();
         final FolderObject folder;
         final Context ctx = session.getContext();
         final User user = session.getUserObject();
@@ -510,7 +508,8 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
             // Check if folder exists
             folder = Tools.getFolder(ctx, folderId);
             // Check if folder is correct.
-            storage.selectFolderById(ctx, taskId, folderId);
+            foldStor.selectFolderById(ctx, taskId, folderId, StorageType
+                .ACTIVE);
             // Load task with participants.
             task = TaskLogic.loadTask(ctx, folderId, taskId, StorageType
                 .ACTIVE);
@@ -530,24 +529,13 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
 
     /**
      * {@inheritDoc}
+     * @throws DBPoolingException 
      */
     public void setUserConfirmation(final int taskId, final int userId,
         final int confirm, final String message) throws OXException {
-        final TaskStorage storage = TaskStorage.getInstance();
         try {
-            final Context ctx = session.getContext();
-            final InternalParticipant participant = storage
-                .selectParticipant(ctx, taskId, userId);
-            participant.setConfirm(confirm);
-            participant.setConfirmMessage(message);
-            storage.updateParticipant(ctx, taskId, participant);
-            final Task task = new Task();
-            task.setObjectID(taskId);
-            task.setLastModified(new Date());
-            task.setModifiedBy(session.getUserObject().getId());
-            // FIXME remove new Date()
-            TaskLogic.updateTask(ctx, task, new Date(), new int[] {
-                Task.LAST_MODIFIED, Task.MODIFIED_BY }, null, null, null, null);
+            TaskLogic.setConfirmation(session.getContext(), taskId, userId,
+                confirm, message);
         } catch (TaskException e) {
             throw Tools.convert(e);
         }

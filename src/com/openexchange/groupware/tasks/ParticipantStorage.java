@@ -50,7 +50,6 @@
 package com.openexchange.groupware.tasks;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -92,6 +91,20 @@ abstract class ParticipantStorage {
     }
 
     /**
+     * Reads the internal participants of some tasks.
+     * @param ctx Context.
+     * @param con readable database connection.
+     * @param tasks unique identifier of tasks.
+     * @param type type of participant that should be selected.
+     * @return a map with the task identifier as key and a set of internal
+     * participants as value.
+     * @throws TaskException if an error occurs.
+     */
+    protected abstract Map<Integer, Set<InternalParticipant>>
+        selectInternal(Context ctx, Connection con, int[] tasks,
+        StorageType type) throws TaskException;
+
+    /**
      * Reads the internal participants of a task.
      * @param ctx Context.
      * @param con readable database connection.
@@ -112,18 +125,20 @@ abstract class ParticipantStorage {
     }
 
     /**
-     * Reads the internal participants of some tasks.
+     * Reads a single internal participant.
      * @param ctx Context.
      * @param con readable database connection.
-     * @param tasks unique identifier of tasks.
-     * @param type type of participant that should be selected.
-     * @return a map with the task identifier as key and a set of internal
-     * participants as value.
-     * @throws TaskException if an error occurs.
+     * @param taskId unique identifier of the task.
+     * @param userId unique identifier of the user.
+     * @return a {@link InternalParticipant} object.
+     * @throws TaskException if an error occurs of the participant doesnot
+     * exist.
      */
-    protected abstract Map<Integer, Set<InternalParticipant>>
-        selectInternal(Context ctx, Connection con, int[] tasks,
-        StorageType type) throws TaskException;
+    final InternalParticipant selectInternal(final Context ctx,
+        final Connection con, final int taskId, final int userId,
+        final StorageType type) throws TaskException {
+        return getParticipant(selectInternal(ctx, con, taskId, type), userId);
+    }
 
     /**
      * Reads the internal participants of a task.
@@ -149,6 +164,31 @@ abstract class ParticipantStorage {
     }
 
     /**
+     * Reads a single internal participant.
+     * @param ctx Context.
+     * @param taskId unique identifier of the task.
+     * @param userId unique identifier of the user.
+     * @return a {@link InternalParticipant} object.
+     * @throws TaskException if an error occurs of the participant doesnot
+     * exist.
+     */
+    final InternalParticipant selectInternal(final Context ctx,
+        final int taskId, final int userId, final StorageType type)
+        throws TaskException {
+        final Connection con;
+        try {
+            con = DBPool.pickup(ctx);
+        } catch (DBPoolingException e) {
+            throw new TaskException(Code.NO_CONNECTION, e);
+        }
+        try {
+            return selectInternal(ctx, con, taskId, userId, type);
+        } finally {
+            DBPool.closeReaderSilent(ctx, con);
+        }
+    }
+
+    /**
      * Updates a set of internal participants. This method only updates the
      * fields group, confirmation status and confirmation message. This method
      * does not insert new participants or removes participants.
@@ -162,6 +202,15 @@ abstract class ParticipantStorage {
     abstract void updateInternal(Context ctx, Connection con, int taskId,
         Set<InternalParticipant> participants, StorageType type)
         throws TaskException;
+
+    final void updateInternal(final Context ctx, final Connection con,
+        final int taskId, final InternalParticipant participant,
+        final StorageType type) throws TaskException {
+        final Set<InternalParticipant> participants =
+            new HashSet<InternalParticipant>(1, 1f);
+        participants.add(participant);
+        updateInternal(ctx, con, taskId, participants, type);
+    }
 
     /**
      * Deletes internal participants of a task.
@@ -474,6 +523,18 @@ abstract class ParticipantStorage {
         for (TaskParticipant participant : participants) {
             if (Type.INTERNAL == participant.getType()) {
                 retval.add((InternalParticipant) participant);
+            }
+        }
+        return retval;
+    }
+
+    static InternalParticipant getParticipant(
+        final Set<InternalParticipant> participants, final int userId) {
+        InternalParticipant retval = null;
+        for (InternalParticipant participant : participants) {
+            if (participant.getIdentifier() == userId) {
+                retval = participant;
+                break;
             }
         }
         return retval;

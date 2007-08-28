@@ -117,6 +117,8 @@ final class TasksImpl extends Tasks {
     public void deleteTasksInFolder(final SessionObject session,
         final int folderId) throws OXException {
         final TaskStorage storage = TaskStorage.getInstance();
+        final ParticipantStorage partStor = ParticipantStorage.getInstance();
+        final FolderStorage foldStor = FolderStorage.getInstance();
         final Context ctx = session.getContext();
         final int userId = session.getUserObject().getId();
         final List<Integer> deleteTask = new ArrayList<Integer>();
@@ -147,19 +149,19 @@ final class TasksImpl extends Tasks {
         }
         try {
             for (UpdateData data : removeParticipant) {
-                final Set<Folder> folders = storage.selectFolders(ctx,
-                    data.taskId);
+                final Set<Folder> folders = foldStor.selectFolder(ctx, data
+                    .taskId, StorageType.ACTIVE);
                 if (folders.size() == 1) {
                     // Task is only in the folder that is deleted.
                     deleteTask.add(data.taskId);
                     continue;
                 }
                 final Set<InternalParticipant> participants = ParticipantStorage
-                    .extractInternal(storage.selectParticipants(ctx,
+                    .extractInternal(partStor.selectParticipants(ctx,
                         data.taskId, StorageType.ACTIVE));
                 final Folder folder = FolderStorage.getFolder(folders, folderId);
-                final TaskParticipant participant = TaskLogic.getParticipant(
-                    participants, folder.getUser());
+                final TaskParticipant participant = ParticipantStorage
+                    .getParticipant(participants, folder.getUser());
                 if (null == participant) {
                     // Delegators folder of the task is deleted.
                     deleteTask.add(data.taskId);
