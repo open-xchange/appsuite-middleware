@@ -89,6 +89,8 @@ public class AdminProperties {
 	    public static final String MASTER_AUTH_FILE = "MASTER_AUTH_FILE";
 	    public static final String MASTER_AUTHENTICATION_DISABLED = "MASTER_AUTHENTICATION_DISABLED";
 	    public static final String CONTEXT_AUTHENTICATION_DISABLED = "CONTEXT_AUTHENTICATION_DISABLED";
+	    public static final String CONCURRENT_JOBS = "CONCURRENT_JOBS";
+	    public static final String BIND_ADDRESS = "BIND_ADDRESS";
 	}
 	
 	/**
@@ -130,6 +132,13 @@ public class AdminProperties {
             public static final String DISPLAYNAME_UNIQUE = "DISPLAYNAME_UNIQUE";
             public static final String CHECK_USER_UID_REGEXP = "CHECK_USER_UID_REGEXP";
             public static final String SPAM_MAILFOLDER_ = "SPAM_MAILFOLDER_";
+            public static final String CONFIRMED_HAM_MAILFOLDER_ = "CONFIRMED_HAM_MAILFOLDER_";
+            public static final String CONFIRMED_SPAM_MAILFOLDER_ = "CONFIRMED_SPAM_MAILFOLDER_";
+            public static final String DRAFTS_MAILFOLDER_ = "DRAFTS_MAILFOLDER_";
+            public static final String TRASH_MAILFOLDER_ = "TRASH_MAILFOLDER_";
+            public static final String SENT_MAILFOLDER_ = "SENT_MAILFOLDER_";
+
+
 	}
 	
 	/**

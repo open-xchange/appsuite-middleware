@@ -102,7 +102,7 @@ public abstract class OXUserStorageInterface {
             if (null == implementingClass) {
                 String className = null;
                 try {
-                    className = prop.getString(PropertyFiles.ADMIN, AdminProperties.Storage.USER_STORAGE, null);
+                    className = prop.getString(PropertyFiles.ADMIN, AdminProperties.Storage.USER_STORAGE);
                 } catch (final InvalidDataException e1) {
                     log.fatal("Invalid data in config file", e1);
                     AdminDaemon.shutdown();

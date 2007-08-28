@@ -354,8 +354,8 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             
             int gid_number = -1;
             final int gid_number_start;
-            gid_number_start = prop.getInt(PropertyFiles.GROUP, AdminProperties.Group.GID_NUMBER_START, -1);
-            if(gid_number_start>0){
+            gid_number_start = prop.getInt(PropertyFiles.GROUP, AdminProperties.Group.GID_NUMBER_START);
+            if (gid_number_start > 0) {
                 gid_number = IDGenerator.getId(context_ID, com.openexchange.groupware.Types.GID_NUMBER, con);
                 con.commit();
             }
