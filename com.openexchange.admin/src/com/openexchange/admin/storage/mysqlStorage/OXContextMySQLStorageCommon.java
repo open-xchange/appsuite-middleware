@@ -112,7 +112,7 @@ public abstract class OXContextMySQLStorageCommon {
 
             prep = configdb_con.prepareStatement("SELECT context.name, context.enabled, context.reason_id, context.filestore_id, context.filestore_name, context.quota_max, context_server2db_pool.write_db_pool_id, context_server2db_pool.read_db_pool_id, context_server2db_pool.db_schema, login2context.login_info FROM context LEFT JOIN ( login2context, context_server2db_pool, server ) ON ( context.cid = context_server2db_pool.cid AND context_server2db_pool.server_id = server.server_id AND context.cid = login2context.cid ) WHERE context.cid = ? AND server.name = ?");
             prep.setInt(1, context_id);
-            prep.setString(2, prop.getString(PropertyFiles.ADMIN, AdminProperties.Prop.SERVER_NAME, "local"));
+            prep.setString(2, prop.getString(PropertyFiles.ADMIN, AdminProperties.Prop.SERVER_NAME));
             ResultSet rs = prep.executeQuery();
 
             final Context cs = new Context();
@@ -199,8 +199,7 @@ public abstract class OXContextMySQLStorageCommon {
         group_stmt.setInt(2, group_id);
         group_stmt.setString(3, display_name);
         group_stmt.setLong(4, System.currentTimeMillis());
-        final int gid_number_start;
-        gid_number_start = prop.getInt(PropertyFiles.GROUP, AdminProperties.Group.GID_NUMBER_START, -1);
+        final int gid_number_start = prop.getInt(PropertyFiles.GROUP, AdminProperties.Group.GID_NUMBER_START);
         if (gid_number_start > 0) {
             group_stmt.setInt(5, gid_number);
         } else {
@@ -426,7 +425,7 @@ public abstract class OXContextMySQLStorageCommon {
                 // check for the uid number feature
                 if(table.equals("sequence_uid_number")){
                     final int startnum;
-                    startnum = prop.getInt(PropertyFiles.USER, AdminProperties.User.UID_NUMBER_START, -1);
+                    startnum = prop.getInt(PropertyFiles.USER, AdminProperties.User.UID_NUMBER_START);
                     if(startnum>0){
                         // we use the uid number faeture
                         // set the start number in the sequence for uid_numbers 
@@ -437,7 +436,7 @@ public abstract class OXContextMySQLStorageCommon {
                 if(table.equals("sequence_gid_number")){
                     final int startnum;
                     try {
-                        startnum = prop.getInt(PropertyFiles.GROUP, AdminProperties.Group.GID_NUMBER_START, -1);
+                        startnum = prop.getInt(PropertyFiles.GROUP, AdminProperties.Group.GID_NUMBER_START);
                     } catch (final ConversionException e) {
                         throw new StorageException("Error getting " + AdminProperties.Group.GID_NUMBER_START + ": " + e.toString());
                     }
@@ -471,7 +470,7 @@ public abstract class OXContextMySQLStorageCommon {
             ps.setInt(2, 0);
             ps.setInt(3, 1);
             ps.setInt(4, 1);
-            ps.setString(5, prop.getString(PropertyFiles.ADMIN, AdminProperties.Prop.SERVER_NAME, "local"));
+            ps.setString(5, prop.getString(PropertyFiles.ADMIN, AdminProperties.Prop.SERVER_NAME));
             ps.executeUpdate();
             ps.close();
         } finally {
@@ -488,7 +487,7 @@ public abstract class OXContextMySQLStorageCommon {
         int sid = 0;
         try {
 
-            final String servername = prop.getString(PropertyFiles.ADMIN, AdminProperties.Prop.SERVER_NAME, "local");
+            final String servername = prop.getString(PropertyFiles.ADMIN, AdminProperties.Prop.SERVER_NAME);
             sstmt = configdb_write_con.prepareStatement("SELECT server_id FROM server WHERE name = ?");
             sstmt.setString(1, servername);
             final ResultSet rs2 = sstmt.executeQuery();

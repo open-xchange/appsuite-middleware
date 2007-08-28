@@ -138,6 +138,7 @@ public class AdminCache {
      */
     public void initCache() throws InvalidDataException {
         this.prop = new PropertyHandler(System.getProperties());
+        this.prop.initializeDefaults();
         readSequenceTables();
         cacheSqlScripts();
         readMasterCredentials();
@@ -302,11 +303,11 @@ public class AdminCache {
     }
 
     private String getInitialOXDBSqlDir() throws InvalidDataException {
-        return prop.getString(PropertyFiles.SQL, AdminProperties.SQL.INITIAL_OX_SQL_DIR, "/opt/openexchange-internal/system/setup/mysql/");
+        return prop.getString(PropertyFiles.SQL, AdminProperties.SQL.INITIAL_OX_SQL_DIR);
     }
 
     private void cacheSqlScripts() throws InvalidDataException {
-        if (prop.getString(PropertyFiles.SQL, AdminProperties.SQL.LOG_PARSED_QUERIES, "false").equalsIgnoreCase("true")) {
+        if (prop.getBoolean(PropertyFiles.SQL, AdminProperties.SQL.LOG_PARSED_QUERIES)) {
             log_parsed_sql_queries = true;
         }
 
@@ -371,19 +372,16 @@ public class AdminCache {
     private void configureAuthentication() throws InvalidDataException{
         log.debug("Configuring authentication mechanisms ...");
         
-        final String master_auth_disabled = this.prop.getString(PropertyFiles.ADMIN, AdminProperties.Prop.MASTER_AUTHENTICATION_DISABLED, "false"); // fallback is auth
-        final String context_auth_disabled = this.prop.getString(PropertyFiles.ADMIN, AdminProperties.Prop.CONTEXT_AUTHENTICATION_DISABLED, "false"); // fallback is auth
-        
-        masterAuthenticationDisabled = Boolean.parseBoolean(master_auth_disabled);
+        masterAuthenticationDisabled = this.prop.getBoolean(PropertyFiles.ADMIN, AdminProperties.Prop.MASTER_AUTHENTICATION_DISABLED);
         log.debug("MasterAuthentication mechanism disabled: "+masterAuthenticationDisabled);
         
-        contextAuthenticationDisabled = Boolean.parseBoolean(context_auth_disabled);
+        contextAuthenticationDisabled = this.prop.getBoolean(PropertyFiles.ADMIN, AdminProperties.Prop.CONTEXT_AUTHENTICATION_DISABLED);
         log.debug("ContextAuthentication mechanism disabled: "+contextAuthenticationDisabled);
     }
     
 
     private void readMasterCredentials() throws InvalidDataException {
-        final String masterfile = this.prop.getString(PropertyFiles.ADMIN, AdminProperties.Prop.MASTER_AUTH_FILE, "/opt/open-xchange/admindaemon/etc/mpasswd");
+        final String masterfile = this.prop.getString(PropertyFiles.ADMIN, AdminProperties.Prop.MASTER_AUTH_FILE);
         final File tmp = new File(masterfile);
         if (!tmp.exists()) {
             this.log.fatal("Fatal! Master auth file does not exists:\n" + masterfile);
