@@ -1,8 +1,6 @@
 package com.openexchange.webdav.protocol;
 
-import java.sql.SQLException;
 
-import com.openexchange.api2.OXException;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.groupware.FolderLockManagerImpl;
 import com.openexchange.groupware.Init;
@@ -14,14 +12,8 @@ import com.openexchange.groupware.infostore.paths.impl.PathResolverImpl;
 import com.openexchange.groupware.infostore.webdav.EntityLockManagerImpl;
 import com.openexchange.groupware.infostore.webdav.InfostoreWebdavFactory;
 import com.openexchange.groupware.infostore.webdav.PropertyStoreImpl;
-import com.openexchange.groupware.ldap.LdapException;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tx.AlwaysWriteConnectionProvider;
 import com.openexchange.groupware.tx.DBPoolProvider;
-import com.openexchange.server.DBPoolingException;
-import com.openexchange.sessiond.SessionHolder;
-import com.openexchange.sessiond.SessionObject;
-import com.openexchange.sessiond.SessionObjectWrapper;
 import com.openexchange.webdav.protocol.impl.DummyResourceManager;
 
 public class TestWebdavFactoryBuilder {
@@ -61,20 +53,6 @@ public class TestWebdavFactoryBuilder {
 		return factory;
 	}
 	
-	private static final class DummySessionHolder implements SessionHolder{
-
-		private SessionObject session = null;
-		
-		public DummySessionHolder(String username, Context ctx) throws LdapException, SQLException, DBPoolingException, OXException {
-			session =  SessionObjectWrapper.createSessionObject(UserStorage.getInstance(ctx).getUserId(username)  , ctx,"12345");
-		}
-		
-		public SessionObject getSessionObject() {
-			return session;
-		}
-		
-	}
-
 	public static void setUp() throws Exception {
 		if(mode == INFO) {
 			Init.loadTestProperties();

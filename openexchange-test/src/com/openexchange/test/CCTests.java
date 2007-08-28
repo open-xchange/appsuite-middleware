@@ -115,6 +115,7 @@ public class CCTests {
 		tests.addTest(com.openexchange.webdav.action.ActionTestSuite.suite());
 		tests.addTest(com.openexchange.webdav.xml.writer.WriterSuite.suite());
 		tests.addTestSuite(com.openexchange.webdav.action.IfHeaderParserTest.class);
+		tests.addTestSuite(com.openexchange.webdav.infostore.integration.DropBoxScenarioTest.class);
 		
 		tests.addTestSuite(com.openexchange.groupware.IDGeneratorTest.class);
 		tests.addTestSuite(com.openexchange.sessiond.SessiondTest.class);
