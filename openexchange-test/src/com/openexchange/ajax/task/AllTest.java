@@ -107,8 +107,9 @@ public final class AllTest extends AbstractTaskTest {
         }
         final MultipleResponse mGet = (MultipleResponse) Executor.execute(
             getSession(), new MultipleRequest(gets));
+        // TODO Read Task.ALARM
         final int[] columns = new int[] { Task.TITLE, Task.OBJECT_ID,
-            Task.LAST_MODIFIED, Task.FOLDER_ID, Task.PARTICIPANTS, Task.ALARM };
+            Task.LAST_MODIFIED, Task.FOLDER_ID, Task.PARTICIPANTS };
         final CommonAllResponse allR = TaskTools.all(getSession(), new AllRequest(
             getPrivateFolder(), columns, 0, null));
         final DeleteRequest[] deletes = new DeleteRequest[inserts.length];

@@ -273,38 +273,6 @@ public class TasksTest extends AbstractAJAXTest {
             lastModified, folderId, taskId);
     }
 
-    public void testAll() throws Throwable {
-        final int folderId = TaskTools.getPrivateTaskFolder(getWebConversation(),
-            getHostName(), getSessionId());
-        final Task task = new Task();
-        task.setParentFolderID(folderId);
-        int[][] tasks = new int[10][2];
-        for (int i = 0; i < tasks.length; i++) {
-            task.setTitle("Task " + (i + 1));
-            final List<Participant> participants = ParticipantTools
-                .getParticipants(
-                getWebConversation(), getHostName(), getSessionId(), 2, true,
-                ConfigTools.getUserId(getWebConversation(), getHostName(),
-                    getSessionId()));
-            task.setParticipants(participants);
-            task.setAlarm(new Date(System.currentTimeMillis()));
-            tasks[i][1] = extractInsertId(insertTask(getWebConversation(),
-                getHostName(), getSessionId(), task));
-            tasks[i][0] = folderId;
-        }
-        final int[] columns = new int[] { Task.TITLE, Task.OBJECT_ID,
-            Task.LAST_MODIFIED, Task.FOLDER_ID, Task.PARTICIPANTS, Task.ALARM };
-        final Response response = getAllTasksInFolder(getWebConversation(),
-            getHostName(), getSessionId(), folderId, columns, 0, null);
-        final JSONArray array = (JSONArray) response.getData();
-        // TODO parse JSON array
-        final Date lastModified = response.getTimestamp();
-        for (int[] folderAndTask : tasks) {
-            deleteTask(getWebConversation(), getHostName(), getSessionId(),
-                lastModified, folderAndTask[0], folderAndTask[1]);
-        }
-    }
-
     /**
      * Tests a full list of tasks in a folder with ordering.
      * @throws Throwable if an error occurs.
