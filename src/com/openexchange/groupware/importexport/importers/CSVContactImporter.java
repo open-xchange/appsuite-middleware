@@ -263,6 +263,7 @@ public class CSVContactImporter extends AbstractImporter implements Importer {
 					}
 				}
 			}
+			setDisplayName(contactObj);
 			if(atLeastOneFieldWithWrongName){
 				result.setException(EXCEPTIONS.create(3, wrongFields.toString()));
 				addErrorInformation(result, lineNumber , fields);
@@ -284,6 +285,12 @@ public class CSVContactImporter extends AbstractImporter implements Importer {
 		}
 		return result;
 	}
+
+	private void setDisplayName(ContactObject contactObj) {
+		if(null == contactObj.getDisplayName())
+			contactObj.setDisplayName(contactObj.getGivenName()+" "+contactObj.getSurName());
+	}
+
 
 	/**
 	 * Adds error information to a given ImportResult 

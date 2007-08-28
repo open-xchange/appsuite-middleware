@@ -3,6 +3,8 @@
  - Fixed Bug #9109, Support for DropBox scenario via WebDAV. A DropBox
    is a folder in which some user may only create objects
    (not read, update or delete). This works also via WebDAV Infostore now.
+ - Contacts expect a display name so changed CSV Importer to supply one
+   as needed.
 
 * 2007-08-28 - ben.pahne@open-xchange.com
 
