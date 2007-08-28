@@ -56,6 +56,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import org.apache.commons.configuration.ConversionException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -68,12 +69,14 @@ import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.NoSuchPluginException;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
+import com.openexchange.admin.tools.PropertyHandler.PropertyFiles;
 import com.openexchange.groupware.update.UpdateTaskCollection;
 
 public abstract class OXContextMySQLStorageCommon {
@@ -99,7 +102,7 @@ public abstract class OXContextMySQLStorageCommon {
     
     // TODO: The average size parameter can be removed if we have an new property handler which can
     // deal right with plugin properties
-    public Context getData(final Context ctx, final Connection configdb_con, final long average_size) throws SQLException, PoolException  {
+    public Context getData(final Context ctx, final Connection configdb_con, final long average_size) throws SQLException, PoolException, InvalidDataException {
         Connection oxdb_read = null;
         PreparedStatement prep = null;
         final int context_id = ctx.getId();
@@ -109,7 +112,7 @@ public abstract class OXContextMySQLStorageCommon {
 
             prep = configdb_con.prepareStatement("SELECT context.name, context.enabled, context.reason_id, context.filestore_id, context.filestore_name, context.quota_max, context_server2db_pool.write_db_pool_id, context_server2db_pool.read_db_pool_id, context_server2db_pool.db_schema, login2context.login_info FROM context LEFT JOIN ( login2context, context_server2db_pool, server ) ON ( context.cid = context_server2db_pool.cid AND context_server2db_pool.server_id = server.server_id AND context.cid = login2context.cid ) WHERE context.cid = ? AND server.name = ?");
             prep.setInt(1, context_id);
-            prep.setString(2, prop.getProp(AdminProperties.Prop.SERVER_NAME, "local"));
+            prep.setString(2, prop.getString(PropertyFiles.ADMIN, AdminProperties.Prop.SERVER_NAME, "local"));
             ResultSet rs = prep.executeQuery();
 
             final Context cs = new Context();
@@ -188,7 +191,7 @@ public abstract class OXContextMySQLStorageCommon {
         }
     }
 
-    public final void createStandardGroupForContext(final int context_id, final Connection ox_write_con, final String display_name, final int group_id, final int gid_number) throws SQLException {
+    public final void createStandardGroupForContext(final int context_id, final Connection ox_write_con, final String display_name, final int group_id, final int gid_number) throws StorageException, SQLException, InvalidDataException {
         // TODO: this must be defined somewhere else
         final int NOGROUP = 65534;
         PreparedStatement group_stmt = ox_write_con.prepareStatement("INSERT INTO groups (cid, id, identifier, displayname,lastModified,gidNumber) VALUES (?,?,'users',?,?,?);");
@@ -196,7 +199,9 @@ public abstract class OXContextMySQLStorageCommon {
         group_stmt.setInt(2, group_id);
         group_stmt.setString(3, display_name);
         group_stmt.setLong(4, System.currentTimeMillis());
-        if (Integer.parseInt(prop.getGroupProp(AdminProperties.Group.GID_NUMBER_START, "-1")) > 0) {
+        final int gid_number_start;
+        gid_number_start = prop.getInt(PropertyFiles.GROUP, AdminProperties.Group.GID_NUMBER_START, -1);
+        if (gid_number_start > 0) {
             group_stmt.setInt(5, gid_number);
         } else {
             group_stmt.setInt(5, NOGROUP);
@@ -327,7 +332,7 @@ public abstract class OXContextMySQLStorageCommon {
         }
     }
 
-    public void fillContextAndServer2DBPool(final Context ctx, final Connection con, final Database db) throws SQLException, StorageException {
+    public void fillContextAndServer2DBPool(final Context ctx, final Connection con, final Database db) throws SQLException, StorageException, InvalidDataException, NoSuchPluginException {
         // dbid is the id in db_pool of database engine to use for next context
     
         // if read id -1 (not set by client ) or 0 (there is no read db for this
@@ -405,7 +410,7 @@ public abstract class OXContextMySQLStorageCommon {
         }
     }
 
-    public final void initSequenceTables(final int context_id, final Connection con) throws SQLException, StorageException {
+    public final void initSequenceTables(final int context_id, final Connection con) throws SQLException, StorageException, InvalidDataException {
         PreparedStatement ps = null;
         try {
             final ArrayList<String> sequence_tables = cache.getSequenceTables();
@@ -420,16 +425,22 @@ public abstract class OXContextMySQLStorageCommon {
                 
                 // check for the uid number feature
                 if(table.equals("sequence_uid_number")){
-                        int startnum = Integer.parseInt(prop.getUserProp(AdminProperties.User.UID_NUMBER_START,"-1"));
-                        if(startnum>0){
-                            // we use the uid number faeture
-                            // set the start number in the sequence for uid_numbers 
-                            startval = startnum;
-                        }
+                    final int startnum;
+                    startnum = prop.getInt(PropertyFiles.USER, AdminProperties.User.UID_NUMBER_START, -1);
+                    if(startnum>0){
+                        // we use the uid number faeture
+                        // set the start number in the sequence for uid_numbers 
+                        startval = startnum;
+                    }
                 }
                 //  check for the gid number feature
                 if(table.equals("sequence_gid_number")){
-                    int startnum = Integer.parseInt(prop.getGroupProp(AdminProperties.Group.GID_NUMBER_START,"-1"));
+                    final int startnum;
+                    try {
+                        startnum = prop.getInt(PropertyFiles.GROUP, AdminProperties.Group.GID_NUMBER_START, -1);
+                    } catch (final ConversionException e) {
+                        throw new StorageException("Error getting " + AdminProperties.Group.GID_NUMBER_START + ": " + e.toString());
+                    }
                     if(startnum>0){
                         // we use the gid number faeture
                         // set the start number in the sequence for gid_numbers 
@@ -451,7 +462,7 @@ public abstract class OXContextMySQLStorageCommon {
         }
     }
 
-    public final void initVersionTable(final int context_id, final Connection con) throws SQLException, StorageException {
+    public final void initVersionTable(final int context_id, final Connection con) throws SQLException, StorageException, InvalidDataException {
         PreparedStatement ps = null;
     
         try {
@@ -460,7 +471,7 @@ public abstract class OXContextMySQLStorageCommon {
             ps.setInt(2, 0);
             ps.setInt(3, 1);
             ps.setInt(4, 1);
-            ps.setString(5, prop.getProp(AdminProperties.Prop.SERVER_NAME, "local"));
+            ps.setString(5, prop.getString(PropertyFiles.ADMIN, AdminProperties.Prop.SERVER_NAME, "local"));
             ps.executeUpdate();
             ps.close();
         } finally {
@@ -470,14 +481,14 @@ public abstract class OXContextMySQLStorageCommon {
 
     // This method could be private but due to the fact, that it is abstract, we
     // have to set it to protected
-    protected abstract int getFileStoreID(final Connection configdb_read) throws SQLException, StorageException;
+    protected abstract int getFileStoreID(final Connection configdb_read) throws SQLException, StorageException, InvalidDataException, NoSuchPluginException;
 
-    private final int getMyServerID(final Connection configdb_write_con) throws SQLException, StorageException {
+    private final int getMyServerID(final Connection configdb_write_con) throws SQLException, StorageException, InvalidDataException {
         PreparedStatement sstmt = null;
         int sid = 0;
         try {
 
-            final String servername = prop.getProp(AdminProperties.Prop.SERVER_NAME, "local");
+            final String servername = prop.getString(PropertyFiles.ADMIN, AdminProperties.Prop.SERVER_NAME, "local");
             sstmt = configdb_write_con.prepareStatement("SELECT server_id FROM server WHERE name = ?");
             sstmt.setString(1, servername);
             final ResultSet rs2 = sstmt.executeQuery();
@@ -495,7 +506,7 @@ public abstract class OXContextMySQLStorageCommon {
         return sid;
     }
 
-    private final void fillContextServer2DBPool(final Context ctx, final Database db, final Connection configdb_write_con) throws SQLException, StorageException {
+    private final void fillContextServer2DBPool(final Context ctx, final Database db, final Connection configdb_write_con) throws SQLException, StorageException, InvalidDataException {
 
         PreparedStatement stmt = null;
         try {
@@ -523,7 +534,7 @@ public abstract class OXContextMySQLStorageCommon {
         }
     }
 
-    private final void fillContextTable(final Context ctx, final Connection configdb_write_con) throws SQLException, StorageException {
+    private final void fillContextTable(final Context ctx, final Connection configdb_write_con) throws SQLException, StorageException, InvalidDataException, NoSuchPluginException {
         PreparedStatement stmt = null;
         try {
 

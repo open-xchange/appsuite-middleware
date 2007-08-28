@@ -92,6 +92,7 @@ import com.openexchange.admin.tools.GenericChecks;
 import com.openexchange.admin.tools.PropertyHandler;
 import com.openexchange.admin.tools.SHACrypt;
 import com.openexchange.admin.tools.UnixCrypt;
+import com.openexchange.admin.tools.PropertyHandler.PropertyFiles;
 import com.openexchange.api2.OXException;
 import com.openexchange.cache.CacheKey;
 import com.openexchange.groupware.UserConfigurationException;
@@ -430,8 +431,8 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         final ArrayList<OXUserPluginInterface> interfacelist = new ArrayList<OXUserPluginInterface>();
 
         // homedirectory
-        final String homedir = this.prop.getUserProp(AdminProperties.User.HOME_DIR_ROOT, "/home") + "/" + usr.getName();
-        if (this.prop.getUserProp(AdminProperties.User.CREATE_HOMEDIRECTORY, false) && !tool.isContextAdmin(ctx, usr.getId())) {
+        final String homedir = this.prop.getString(PropertyFiles.USER, AdminProperties.User.HOME_DIR_ROOT, "/home") + "/" + usr.getName();
+        if (this.prop.getBoolean(PropertyFiles.USER, AdminProperties.User.CREATE_HOMEDIRECTORY, false) && !tool.isContextAdmin(ctx, usr.getId())) {
             if (!new File(homedir).mkdir()) {
                 log.error("unable to create directory: " + homedir);
             }
@@ -486,6 +487,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                                     }
                                     try {
                                         oxu.delete(ctx, usr);
+                                        deleteHomedir(usr);
                                     } catch (final StorageException e1) {
                                         log.error("Error doing rollback for creating user in database", e1);
                                     }
@@ -595,17 +597,9 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             }
         }
 
-        if (this.prop.getUserProp(AdminProperties.User.CREATE_HOMEDIRECTORY, false)) {
+        if (this.prop.getBoolean(PropertyFiles.USER, AdminProperties.User.CREATE_HOMEDIRECTORY, false)) {
             for(final User usr : users) {
-                // homedirectory
-                String homedir = this.prop.getUserProp(AdminProperties.User.HOME_DIR_ROOT, "/home");
-                homedir += "/" + usr.getName();
-                // FIXME: if(! tool.isContextAdmin(ctx, usr.getId()) ) {} ??
-                try {
-                    FileUtils.deleteDirectory(new File(homedir));
-                } catch (final IOException e) {
-                    log.error("Could not delete homedir for user: " + usr);
-                }
+                deleteHomedir(usr);
             }
         }
         
@@ -638,6 +632,19 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 sb.append('\n');
             }
             throw new StorageException(sb.toString());
+        }
+    }
+
+
+    private void deleteHomedir(final User usr) throws InvalidDataException {
+        // homedirectory
+        String homedir = this.prop.getString(PropertyFiles.USER, AdminProperties.User.HOME_DIR_ROOT, "/home");
+        homedir += "/" + usr.getName();
+        // FIXME: if(! tool.isContextAdmin(ctx, usr.getId()) ) {} ??
+        try {
+            FileUtils.deleteDirectory(new File(homedir));
+        } catch (final IOException e1) {
+            log.error("Could not delete homedir for user: " + usr);
         }
     }
 
@@ -947,7 +954,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
      */
     private void checkChangeUserData(final Context ctx, final User newuser, final User dbuser, final PropertyHandler prop) throws StorageException, InvalidDataException {
     
-        if( !prop.getUserProp(AdminProperties.User.PRIMARY_MAIL_UNCHANGEABLE, true) ) {
+        if( !prop.getBoolean(PropertyFiles.USER, AdminProperties.User.PRIMARY_MAIL_UNCHANGEABLE, true) ) {
             if( newuser.getPrimaryEmail() != null && ! newuser.getPrimaryEmail().equals(dbuser.getPrimaryEmail()) ) {
                 throw new InvalidDataException("primary mail must not be changed");
             }
@@ -1032,17 +1039,17 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             throw new InvalidDataException("Mandatory fields not set: " + usr.getUnsetMembers() );
         }
         
-        if (prop.getUserProp(AdminProperties.User.DISPLAYNAME_UNIQUE, true)) {
+        if (prop.getBoolean(PropertyFiles.USER, AdminProperties.User.DISPLAYNAME_UNIQUE, true)) {
             if (tool.existsDisplayName(ctx, usr)) {
                 throw new InvalidDataException("The displayname is already used");
             }
         }
     
-        if (prop.getUserProp(AdminProperties.User.CHECK_NOT_ALLOWED_CHARS, true)) {
+        if (prop.getBoolean(PropertyFiles.USER, AdminProperties.User.CHECK_NOT_ALLOWED_CHARS, true)) {
             validateUserName(usr.getName());
         }
     
-        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, true)) {
+        if (prop.getBoolean(PropertyFiles.USER, AdminProperties.User.AUTO_LOWERCASE, true)) {
             usr.setName(usr.getName().toLowerCase());
         }
     
@@ -1122,7 +1129,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     private void validateUserName(final String userName) throws InvalidDataException {
         // Check for allowed chars:
         // abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-+.%$@
-        final String usr_uid_regexp = this.prop.getUserProp("CHECK_USER_UID_REGEXP", "[$@%\\.+a-zA-Z0-9_-]");        
+        final String usr_uid_regexp = this.prop.getString(PropertyFiles.USER, AdminProperties.User.CHECK_USER_UID_REGEXP, "[$@%\\.+a-zA-Z0-9_-]");        
         final String illegal = userName.replaceAll(usr_uid_regexp,"");
         if( illegal.length() > 0 ) {
             throw new InvalidDataException("Illegal chars: \""+illegal+"\"");
