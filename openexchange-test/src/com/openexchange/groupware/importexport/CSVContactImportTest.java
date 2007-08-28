@@ -79,10 +79,10 @@ import com.openexchange.groupware.importexport.importers.CSVContactImporter;
  *
  */
 public class CSVContactImportTest extends AbstractContactTest {
-	public String IMPORT_HEADERS = ContactField.GIVEN_NAME.getReadableName()+","+ContactField.EMAIL1.getReadableName()+"\n";
-	public String IMPORT_ONE = IMPORT_HEADERS +NAME1+", "+EMAIL1;
-	public String IMPORT_MULTIPLE = IMPORT_ONE + "\n"+NAME2+", "+EMAIL2+"\n";
-	public String IMPORT_DUPLICATE = IMPORT_MULTIPLE + "Laguna, francisco.laguna@open-xchange.com\n";
+	public String IMPORT_HEADERS = ContactField.GIVEN_NAME.getReadableName()+","+ContactField.EMAIL1.getReadableName()+", "+ContactField.DISPLAY_NAME.getReadableName()+"\n";
+	public String IMPORT_ONE = IMPORT_HEADERS+NAME1+", "+EMAIL1+", "+DISPLAY_NAME1;
+	public String IMPORT_MULTIPLE = IMPORT_ONE + "\n"+NAME2+", "+EMAIL2+", "+DISPLAY_NAME2+"\n";
+	public String IMPORT_DUPLICATE = IMPORT_MULTIPLE + "Laguna, francisco.laguna@open-xchange.com, Francisco Laguna\n";
 	public boolean doDebugging = false;
 	
 	public String notASingleImport = "I_E-0804";
@@ -228,10 +228,10 @@ public class CSVContactImportTest extends AbstractContactTest {
 	 * Counting the TIMEZONE element? 
 	 */
 	@Test public void bug7109() throws ImportExportException, UnsupportedEncodingException{
-		List<ImportResult> results1 = importStuff(ContactField.GIVEN_NAME.getReadableName() + " , " + ContactField.BIRTHDAY.getReadableName() + "\n" + "Tobias Prinz , "+System.currentTimeMillis());
-		List<ImportResult> results2 = importStuff(ContactField.GIVEN_NAME.getReadableName() + " , " + ContactField.BIRTHDAY.getReadableName() + "\n" + "Tobias Prinz , 1981/04/01");
-		List<ImportResult> results3 = importStuff(ContactField.GIVEN_NAME.getReadableName() + " , " + "stupidColumnName\n" + "Tobias Prinz , 1981/04/01");
-		List<ImportResult> results4 = importStuff(ContactField.BIRTHDAY.getReadableName() + "\n1981/04/01");
+		List<ImportResult> results1 = importStuff(ContactField.DISPLAY_NAME.getReadableName()+", "+ContactField.GIVEN_NAME.getReadableName() + " , " + ContactField.BIRTHDAY.getReadableName() + "\n" + "Tobias Prinz , "+ "Tobias Prinz , "+System.currentTimeMillis());
+		List<ImportResult> results2 = importStuff(ContactField.DISPLAY_NAME.getReadableName()+", "+ContactField.GIVEN_NAME.getReadableName() + " , " + ContactField.BIRTHDAY.getReadableName() + "\n" + "Tobias Prinz , "+ "Tobias Prinz , 1981/04/01");
+		List<ImportResult> results3 = importStuff(ContactField.DISPLAY_NAME.getReadableName()+", "+ContactField.GIVEN_NAME.getReadableName() + " , " + "stupidColumnName\n" + "Tobias Prinz , "+ "Tobias Prinz , 1981/04/01");
+		List<ImportResult> results4 = importStuff(ContactField.DISPLAY_NAME.getReadableName()+", "+ContactField.BIRTHDAY.getReadableName() + "\nTobias Prinz, 1981/04/01");
 		assertEquals("One result for first attempt?" , results1.size(), 1);
 		assertEquals("One result for second attempt?" , results2.size(), 1);
 		assertEquals("One result for third attempt?" , results3.size(), 1);
@@ -269,7 +269,7 @@ public class CSVContactImportTest extends AbstractContactTest {
 	 * This was listed as 6825, 7107 or 7386
 	 */
 	@Test public void bugTooMuchInformation() throws ImportExportException, UnsupportedEncodingException{
-		final List<ImportResult> results = importStuff(ContactField.GIVEN_NAME.getReadableName() + "," + ContactField.SUFFIX.getReadableName() + "\nHadschi Halef Omar, Ben Hadschi Abul Abbas Ibn Hadschi Dawuhd Ben Hadschi Abul Abbas Ibn Hadschi Dawuhd Ben Hadschi Abul Abbas Ibn Hadschi Dawuhd Ben Hadschi Abul Abbas Ibn Hadschi Dawuhd al Gossarah");
+		final List<ImportResult> results = importStuff(ContactField.DISPLAY_NAME.getReadableName()+", "+ContactField.GIVEN_NAME.getReadableName() + "," + ContactField.SUFFIX.getReadableName() + "\nAli, Hadschi Halef Omar, Ben Hadschi Abul Abbas Ibn Hadschi Dawuhd Ben Hadschi Abul Abbas Ibn Hadschi Dawuhd Ben Hadschi Abul Abbas Ibn Hadschi Dawuhd Ben Hadschi Abul Abbas Ibn Hadschi Dawuhd al Gossarah");
 		assertEquals("One result?" , 1, results.size());
 		ImportResult res = results.get(0);
 		OXException exc = res.getException();
@@ -281,7 +281,7 @@ public class CSVContactImportTest extends AbstractContactTest {
 	 * "private" flag is being set
 	 */
 	@Test public void bug7710() throws UnsupportedEncodingException, NumberFormatException, OXException{
-		final String file = ContactField.GIVEN_NAME.getReadableName() + " , " + ContactField.PRIVATE_FLAG.getReadableName() + "\nTobias Prinz,true";
+		final String file = ContactField.DISPLAY_NAME.getReadableName()+", "+ContactField.GIVEN_NAME.getReadableName() + " , " + ContactField.PRIVATE_FLAG.getReadableName() + "\nTobias Prinz, Tobias Prinz,true";
 		final List<ImportResult> results = importStuff(file);
 		assertEquals("Only one result", 1, results.size());
 		ImportResult res = results.get(0);

@@ -51,6 +51,9 @@ package com.openexchange.ajax.importexport;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import org.json.JSONException;
 import org.xml.sax.SAXException;
@@ -124,8 +127,10 @@ public abstract class AbstractImportExportServletTest extends AbstractAJAXTest {
 	
 	public String getCSVColumnUrl(String servlet, int folderId, Format format) throws IOException, SAXException, JSONException{
 		StringBuilder bob = new StringBuilder(getUrl(servlet, folderId, format));
+		
 		addParam(bob, ImportExport.PARAMETER_COLUMNS, ContactField.GIVEN_NAME.getNumber());
 		addParam(bob, ImportExport.PARAMETER_COLUMNS, ContactField.EMAIL1.getNumber());
+		addParam(bob, ImportExport.PARAMETER_COLUMNS, ContactField.DISPLAY_NAME.getNumber());
 		return bob.toString();		
 	}
 	
@@ -168,6 +173,15 @@ public abstract class AbstractImportExportServletTest extends AbstractAJAXTest {
 	
 
 	
+	public static void assertEquals(String message, List l1, List l2){
+		if(l1.size() != l2.size()) {
+			fail(message);
+		}
+		Set s = new HashSet(l1);
+		for(Object o : l2) {
+			assertTrue(message,s.remove(o));
+		}
+	}
 	
 	
 }

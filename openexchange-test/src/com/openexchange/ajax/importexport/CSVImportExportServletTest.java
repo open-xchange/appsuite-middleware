@@ -51,6 +51,7 @@ package com.openexchange.ajax.importexport;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.List;
 
 import org.json.JSONObject;
 
@@ -104,7 +105,9 @@ public class CSVImportExportServletTest extends AbstractImportExportServletTest 
 			//finally: checking
 			CSVParser parser1 = new CSVParser(insertedCSV);
 			CSVParser parser2 = new CSVParser(resultingCSV);
-			assertEquals("input == output ?" , parser1.parse() , parser2.parse());
+			List<List<String>> res1 = parser1.parse();
+			List<List<String>> res2 = parser2.parse();
+			assertEquals("input == output ? "+res1+" "+res2 , res1, res2);
 		} finally {
 			//clean up
 			removeFolder(folderId);

@@ -365,8 +365,10 @@ public class AbstractContactTest {
 	public static int userId;
 	public static int contextId;
 	public static int folderId;
+	public String DISPLAY_NAME1 = "Tobias Prinz";
 	public String NAME1 = "Prinz";
 	public String EMAIL1 = "tobias.prinz@open-xchange.com";
+	public String DISPLAY_NAME2 = "Francisco Laguna";
 	public String NAME2 = "Laguna";
 	public String EMAIL2 = "francisco.laguna@open-xchange.com";
 	public static Importer imp;
