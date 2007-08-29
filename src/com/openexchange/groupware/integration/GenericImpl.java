@@ -88,7 +88,7 @@ public class GenericImpl extends SetupLink {
         url = url.replace("%p", password);
         try {
             final Context ctx = ContextStorage.getInstance().getContext(
-                getContextId());
+                getContextId(values));
             final String[] loginInfos = ctx.getLoginInfo();
             url = url.replace("%c", extract(loginInfos, ctx.getContextId()));
             return new URL(url);
