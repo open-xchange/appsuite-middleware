@@ -52,7 +52,6 @@ package com.openexchange.imap;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
-import com.openexchange.mail.MailException;
 
 /**
  * IMAPPropertyException
@@ -75,8 +74,8 @@ public class IMAPPropertyException extends OXException {
 	 * 
 	 */
 	public IMAPPropertyException(final String message, final Throwable cause) {
-		super(Component.MAIL, MailException.Code.IMAP_PROPERTY_ERROR.getCategory(), MailException.Code.IMAP_PROPERTY_ERROR.getNumber(),
-				MailException.Code.IMAP_PROPERTY_ERROR.getMessage(), cause);
+		super(Component.MAIL, Code.IMAP_PROPERTY_ERROR.getCategory(), Code.IMAP_PROPERTY_ERROR.getNumber(),
+				Code.IMAP_PROPERTY_ERROR.getMessage(), cause);
 		super.setMessageArgs(message);
 	}
 
@@ -85,8 +84,8 @@ public class IMAPPropertyException extends OXException {
 	 * 
 	 */
 	public IMAPPropertyException(final String message) {
-		super(Component.MAIL, MailException.Code.IMAP_PROPERTY_ERROR.getCategory(), MailException.Code.IMAP_PROPERTY_ERROR.getNumber(),
-				MailException.Code.IMAP_PROPERTY_ERROR.getMessage(), null);
+		super(Component.MAIL, Code.IMAP_PROPERTY_ERROR.getCategory(), Code.IMAP_PROPERTY_ERROR.getNumber(),
+				Code.IMAP_PROPERTY_ERROR.getMessage(), null);
 		super.setMessageArgs(message);
 	}
 
@@ -95,9 +94,39 @@ public class IMAPPropertyException extends OXException {
 	 * instance.
 	 */
 	public IMAPPropertyException(final Exception e) {
-		super(Component.MAIL, MailException.Code.IMAP_PROPERTY_ERROR.getCategory(), MailException.Code.IMAP_PROPERTY_ERROR.getNumber(),
-				MailException.Code.IMAP_PROPERTY_ERROR.getMessage(), e);
+		super(Component.MAIL, Code.IMAP_PROPERTY_ERROR.getCategory(), Code.IMAP_PROPERTY_ERROR.getNumber(),
+				Code.IMAP_PROPERTY_ERROR.getMessage(), e);
 		super.setMessageArgs(e.getMessage());
 	}
 
+    public static enum Code {
+        /**
+         * IMAP property error: %s
+         */
+        IMAP_PROPERTY_ERROR("IMAP property error: %s", Category.SETUP_ERROR, 5);
+
+        private final String message;
+
+        private final int detailNumber;
+
+        private final Category category;
+
+        private Code(final String message, final Category category, final int detailNumber) {
+            this.message = message;
+            this.detailNumber = detailNumber;
+            this.category = category;
+        }
+
+        public Category getCategory() {
+            return category;
+        }
+
+        public int getNumber() {
+            return detailNumber;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+    }
 }
