@@ -39,9 +39,6 @@ msgstr ""
 msgid "A DBPooling error occurred"
 msgstr ""
 
-msgid "A JSON error occured: %s"
-msgstr ""
-
 msgid "A JSON error occurred: %s"
 msgstr ""
 
@@ -71,9 +68,6 @@ msgid "A group must not hold admin permission on a private folder"
 msgstr ""
 
 msgid "A messaging error occurred: %s"
-msgstr ""
-
-msgid "A part's content could not be read from message %s in mail folder %s"
 msgstr ""
 
 msgid ""
@@ -113,12 +107,6 @@ msgid "Action %s is not supported by %s"
 msgstr ""
 
 msgid "Action type not supported : %d"
-msgstr ""
-
-msgid "An I/O error occured"
-msgstr ""
-
-msgid "An I/O error occured: %s"
 msgstr ""
 
 msgid "An I/O error occurred: %1$s."
@@ -802,9 +790,6 @@ msgid ""
 "other document with this file name is %s."
 msgstr ""
 
-msgid "Flag %s could not be changed due to following reason: %s"
-msgstr ""
-
 msgid ""
 "Flag %s could not be changed in message %d in folder %s due to following "
 "reason: %s"
@@ -954,9 +939,6 @@ msgstr ""
 msgid "IMAP default folder %s could not be created"
 msgstr ""
 
-msgid "IMAP folder read-only check failed"
-msgstr ""
-
 msgid "IMAP property error: %s"
 msgstr ""
 
@@ -1059,9 +1041,6 @@ msgstr ""
 msgid "Invalid method on an expunged message: %s"
 msgstr ""
 
-msgid "Invalid multipart content. Number of enclosed contents is 0"
-msgstr ""
-
 msgid "Invalid object ID %s"
 msgstr ""
 
@@ -1091,11 +1070,6 @@ msgstr ""
 
 msgid ""
 "Mail folder \"%s\" could not be created (maybe due to insufficient "
-"permission on parent folder %s)"
-msgstr ""
-
-msgid ""
-"Mail folder \"%s\" could not be created (maybe due to insufficient "
 "permission on parental folder %s)"
 msgstr ""
 
@@ -1103,9 +1077,6 @@ msgid "Mail folder %s must not be moved to subsequent folder %s"
 msgstr ""
 
 msgid "Mail folder cannot be created. Name must not contain character '%s'"
-msgstr ""
-
-msgid "Mail folder could not be found: %s"
 msgstr ""
 
 msgid "Mail settings for user %s could not be found in context %d"
@@ -1135,9 +1106,6 @@ msgstr ""
 msgid "Message could not be sent to the following recipients: %s"
 msgstr ""
 
-msgid "Message field %s cannot be handled"
-msgstr ""
-
 msgid ""
 "Message has been successfully sent, but a copy was not placed in your sent "
 "folder due to exceeded quota."
@@ -1148,9 +1116,6 @@ msgid ""
 msgstr ""
 
 msgid "Message(s) %s could not be found in folder %s"
-msgstr ""
-
-msgid "Messaging error: %s"
 msgstr ""
 
 msgid "Method not supported: %s"
@@ -1190,9 +1155,6 @@ msgid "Missing key %s in message's JSON representation"
 msgstr ""
 
 msgid "Missing parameter %s"
-msgstr ""
-
-msgid "Missing parameter in mail connection: %s"
 msgstr ""
 
 msgid "Missing parameter: %s"
@@ -1288,22 +1250,13 @@ msgstr ""
 msgid "No SpellCheckConfig loaded."
 msgstr ""
 
-msgid "No access to mail folder %s"
-msgstr ""
-
 msgid "No admin permission found"
 msgstr ""
 
 msgid "No admin user found in context %s"
 msgstr ""
 
-msgid "No administer access to mail folder %s"
-msgstr ""
-
 msgid "No administer permission specified by user %s for folder %s"
-msgstr ""
-
-msgid "No administer permission specified for folder %s"
 msgstr ""
 
 msgid "No attachment was found with id %s in message %s"
@@ -1313,12 +1266,6 @@ msgid "No attribute name could be found for code: %d"
 msgstr ""
 
 msgid "No changes found. No update requiered. Context %1$d Object %2$d"
-msgstr ""
-
-msgid "No connection available to access mailbox"
-msgstr ""
-
-msgid "No create access to mail folder %s"
 msgstr ""
 
 msgid ""
@@ -1332,28 +1279,13 @@ msgstr ""
 msgid "No default folder could be found in module %s for user %s in context %s"
 msgstr ""
 
-msgid "No delete access to mail folder %s"
-msgstr ""
-
 msgid "No dictionary could be found for language: %1$s."
 msgstr ""
 
 msgid "No folder permission."
 msgstr ""
 
-msgid "No insert access to mail folder %s"
-msgstr ""
-
-msgid "No keep-seen access to mail folder %s"
-msgstr ""
-
-msgid "No lookup access to mail folder %s"
-msgstr ""
-
 msgid "No permission for modul: %s."
-msgstr ""
-
-msgid "No read access to mail folder %s"
 msgstr ""
 
 msgid "No route to host: server (%s) cannot be reached"
@@ -1370,9 +1302,6 @@ msgid ""
 msgstr ""
 
 msgid "No subfolder creation underneath shared folder %s in context %s"
-msgstr ""
-
-msgid "No write access to IMAP folder %s"
 msgstr ""
 
 msgid ""
@@ -1651,10 +1580,7 @@ msgstr ""
 msgid "The attribute %1$s has been truncated."
 msgstr ""
 
-msgid ""
-"The composed rights could not be applied to new folder %s due to missing "
-"administer right in its initial rights specified by IMAP server. However, "
-"the folder has been created."
+msgid "The contact you requested is not valid."
 msgstr ""
 
 msgid "The cookie with the session identifier is missing."
@@ -1712,6 +1638,11 @@ msgid ""
 msgstr ""
 
 msgid ""
+"The name you entered is not available. Choose another displayname. Contect %1"
+"$d Object %2$d"
+msgstr ""
+
+msgid ""
 "The object could not be detached because the update to an underlying object "
 "failed."
 msgstr ""
@@ -1751,12 +1682,6 @@ msgid "The session parameter is missing."
 msgstr ""
 
 msgid "There are no recipient(s) for the new message."
-msgstr ""
-
-msgid ""
-"There was an issue in authenticating your E-Mail password. This may be "
-"because of a recent password change. To continue please logout now and then "
-"log back in with your most current password. (server=%s | user=%s)"
 msgstr ""
 
 msgid ""
@@ -1813,6 +1738,9 @@ msgstr ""
 msgid ""
 "Unable fetch the number of elements in this Folder. Context %1$d Folder %2$d "
 "User %3$d"
+msgstr ""
+
+msgid "Unable to compare contacts for update. Contect %1$d Object %2$d"
 msgstr ""
 
 msgid ""
@@ -1997,9 +1925,6 @@ msgid ""
 "position %d:%d:%d"
 msgstr ""
 
-msgid "Unknow serach field: %s"
-msgstr ""
-
 msgid "Unknown (IMAP) folder open mode %d"
 msgstr ""
 
@@ -2022,9 +1947,6 @@ msgid "Unknown delete event type: %d"
 msgstr ""
 
 msgid "Unknown field: %d"
-msgstr ""
-
-msgid "Unknown folder open mode %d"
 msgstr ""
 
 msgid "Unknown format: %s"
@@ -2219,12 +2141,6 @@ msgid "Wrong filestore %1$d for context %2$d needing filestore %3$d."
 msgstr ""
 
 msgid "Wrong message %s header: %s"
-msgstr ""
-
-msgid "Wrong message header: %s"
-msgstr ""
-
-msgid "Wrong or missing login data to access server %s."
 msgstr ""
 
 msgid "Wrong or missing login data to access server %s: User: %s | Context: %s"
