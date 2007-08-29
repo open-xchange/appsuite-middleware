@@ -49,7 +49,6 @@
     <mkdir dir="${build}"/>
     <mkdir dir="${lib}"/>
     <javac srcdir="${src}" destdir="${build}" optimize="no" debug="yes" encoding="UTF-8">
-    	<exclude name="com/openexchange/mail/**"/> <!-- FIXME -->
     	<classpath refid="project.classpath" />
 	</javac>
   </target>
