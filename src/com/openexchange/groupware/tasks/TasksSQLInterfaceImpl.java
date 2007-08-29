@@ -58,19 +58,14 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.OXException;
-import com.openexchange.api2.ReminderSQLInterface;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.event.EventClient;
 import com.openexchange.event.InvalidStateException;
-import com.openexchange.groupware.Types;
 import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.reminder.ReminderHandler;
-import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.groupware.tasks.mapping.Status;
@@ -207,7 +202,7 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
                 folderId, taskId, userId, ctx.getContextId()));
         }
         try {
-            Tools.loadReminder(ctx, userId, retval);
+            Reminder.loadReminder(ctx, userId, retval);
         } catch (TaskException e) {
             throw Tools.convert(e);
         }
@@ -317,7 +312,7 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
             throw Tools.convert(e);
         }
         if (task.containsAlarm()) {
-            createReminder(task);
+            Reminder.createReminder(ctx, task);
         }
         // Prepare for event
         task.setUsers(TaskLogic.createUserParticipants(parts));
@@ -326,22 +321,6 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
         } catch (InvalidStateException e) {
             throw Tools.convert(new TaskException(Code.EVENT, e));
         }
-    }
-
-    /**
-     * Creates a reminder.
-     * @param task reminder will be created for this task.
-     * @throws OXException if inserting the reminder fails.
-     */
-    private void createReminder(final Task task) throws OXException {
-        final ReminderObject remind = new ReminderObject();
-        remind.setDate(task.getAlarm());
-        remind.setModule(Types.TASK);
-        remind.setTargetId(task.getObjectID());
-        remind.setFolder(String.valueOf(task.getParentFolderID()));
-        remind.setUser(session.getUserObject().getId());
-        final ReminderSQLInterface reminder = new ReminderHandler(session);
-        reminder.insertReminder(remind);
     }
 
     /**
@@ -384,10 +363,10 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
             throw Tools.convert(new TaskException(Code.EVENT, e));
         }
         if (updated.containsAlarm()) {
-            updateAlarm(updated, user);
+            Reminder.updateAlarm(ctx, updated, user);
         }
         if (move) {
-            fixAlarm(updated, removedParts, updatedFolder);
+            Reminder.fixAlarm(ctx, updated, removedParts, updatedFolder);
         }
         try {
             if (Task.NO_RECURRENCE != updated.getRecurrenceType() && Task.DONE
@@ -426,74 +405,6 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
         }
     }
 
-    /**
-     * Updates the alarm for a task.
-     * @param task Task.
-     * @param user User.
-     * @throws OXException if the update of the alarm makes problems.
-     */
-    private void updateAlarm(final Task task, final User user)
-        throws OXException {
-        final ReminderSQLInterface reminder = new ReminderHandler(session);
-        final int taskId = task.getObjectID();
-        final int userId = user.getId();
-        if (null == task.getAlarm()) {
-            try {
-                reminder.deleteReminder(taskId, userId, Types.TASK);
-            } catch (OXObjectNotFoundException ce) {
-                LOG.debug("Cannot delete reminder for task " + taskId
-                    + " and user " + userId + " in context " + session
-                    .getContext().getContextId());
-            }
-        } else {
-			final ReminderObject remind = new ReminderObject();
-            remind.setDate(task.getAlarm());
-            remind.setModule(Types.TASK);
-            remind.setTargetId(taskId);
-            remind.setFolder(String.valueOf(task.getParentFolderID()));
-            remind.setUser(userId);
-			
-			if (reminder.existsReminder(taskId, userId, Types.TASK)) {
-	            reminder.updateReminder(remind);
-			} else {
-				reminder.insertReminder(remind);
-			}
-        }
-    }
-
-    private void fixAlarm(final Task task, final Set<TaskParticipant> removed,
-        final Set<Folder> folders) throws OXException {
-        final ReminderSQLInterface reminder = new ReminderHandler(session);
-        final int taskId = task.getObjectID();
-        for (InternalParticipant participant : ParticipantStorage
-            .extractInternal(removed)) {
-            final int userId = participant.getIdentifier();
-            try {
-                reminder.deleteReminder(taskId, userId, Types.TASK);
-            } catch (OXObjectNotFoundException ce) {
-                LOG.debug("Cannot delete reminder for task " + taskId
-                    + " and user " + userId + " in context " + session
-                    .getContext().getContextId());
-            }
-        }
-        for (Folder folder : folders) {
-            try {
-                final ReminderObject remind = reminder.loadReminder(taskId,
-                    folder.getUser(), Types.TASK);
-                final int folderId = folder.getIdentifier();
-                if (Integer.parseInt(remind.getFolder()) != folderId) {
-                    remind.setFolder(String.valueOf(folderId));
-                    reminder.updateReminder(remind);
-                }
-            } catch (NumberFormatException nfe) {
-                LOG.error("Parsing reminder folder identifier failed.", nfe);
-            } catch (OXObjectNotFoundException nf) {
-                LOG.debug("No reminder to update. Task: " + taskId + ", User: "
-                    + folder.getUser() + '.');
-            }
-        }
-    }
-    
     /**
      * {@inheritDoc}
      */

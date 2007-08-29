@@ -63,7 +63,6 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXMandatoryFieldException;
-import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.ReminderSQLInterface;
 import com.openexchange.groupware.Component;
@@ -293,7 +292,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 			final int deleted = ps.executeUpdate();
 			
 			if (deleted == 0) {
-                throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, Component.REMINDER, "no reminder found");
+                throw new ReminderException(Code.NOT_FOUND, objectId, contextId);
 			}
 		} catch (final SQLException exc) {
 			throw new ReminderException(ReminderException.Code.DELETE_EXCEPTION, exc);
@@ -377,7 +376,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 			final int deleted = ps.executeUpdate();
 			
 			if (deleted == 0) {
-                throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, Component.REMINDER, "no reminder found");
+                throw new ReminderException(Code.NOT_FOUND, Integer.parseInt(targetId), contextId);
 			}
 		} catch (final SQLException exc) {
 			throw new ReminderException(ReminderException.Code.DELETE_EXCEPTION, exc);
@@ -444,7 +443,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 			final int deleted = ps.executeUpdate();
 			
 			if (deleted == 0) {
-                throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, Component.REMINDER, "no reminder found");
+                throw new ReminderException(Code.NOT_FOUND, Integer.parseInt(targetId), contextId);
 			}
 		} catch (final SQLException exc) {
 			throw new ReminderException(ReminderException.Code.DELETE_EXCEPTION, exc);
@@ -463,8 +462,12 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 		try {
 			loadReminder(targetId, userId, module);
 			return true;
-		} catch (final OXObjectNotFoundException exc) {
-			return false;
+		} catch (final ReminderException exc) {
+            if (Code.NOT_FOUND.getDetailNumber() == exc.getDetailNumber()) {
+                return false;
+            } else {
+                throw exc;
+            }
 		}
 	}
 	
@@ -486,11 +489,11 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 		}
 	}
 	
-	public ReminderObject loadReminder( final int targetId, final int userId, final int module, final Connection readCon) throws OXMandatoryFieldException, OXConflictException, OXException, OXObjectNotFoundException {
+	public ReminderObject loadReminder( final int targetId, final int userId, final int module, final Connection readCon) throws OXMandatoryFieldException, OXConflictException, OXException {
 		return loadReminder(String.valueOf(targetId), userId, module, readCon);
 	}
 	
-	public ReminderObject loadReminder( final String targetId, final int userId, final int module, final Connection readCon) throws OXMandatoryFieldException, OXConflictException, OXException, OXObjectNotFoundException {
+	public ReminderObject loadReminder( final String targetId, final int userId, final int module, final Connection readCon) throws OXMandatoryFieldException, OXConflictException, OXException {
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		
@@ -610,7 +613,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 		}
 	}
 	
-	public ReminderObject loadReminder( final int objectId, final Connection readCon) throws OXMandatoryFieldException, OXConflictException, OXException, OXObjectNotFoundException {
+	public ReminderObject loadReminder( final int objectId, final Connection readCon) throws OXMandatoryFieldException, OXConflictException, OXException {
         final int contextId = context.getContextId();
 		PreparedStatement ps = null;
 		try {
@@ -626,13 +629,13 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 			if (reminderObj != null) {
 				return reminderObj;
 			}
-            throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, Component.REMINDER, "no reminder found");
+            throw new ReminderException(Code.NOT_FOUND, objectId, contextId);
 		} catch (final SQLException exc) {
 			throw new OXException(Component.REMINDER, Category.CODE_ERROR, -1, "SQL Problem.", exc);
 		}
 	}
 	
-	public ReminderObject convertResult2ReminderObject(final ResultSet rs, final PreparedStatement preparedStatement, final boolean closeStatements) throws SQLException, OXObjectNotFoundException {
+	public ReminderObject convertResult2ReminderObject(final ResultSet rs, final PreparedStatement preparedStatement, final boolean closeStatements) throws SQLException, ReminderException {
 		try {
 			if (rs.next()) {
 				int a = 0;
@@ -649,7 +652,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 				
 				return reminderObj;
 			}
-			throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, Component.REMINDER, "no reminder found");
+			throw new ReminderException(Code.NOT_FOUND, -1, -1);
 		} finally {
 			if (closeStatements) {
 				if (rs != null) {
@@ -740,7 +743,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 			this.preparedStatement = preparedStatement;
 			try {
 				next = convertResult2ReminderObject(rs, preparedStatement, false);
-			} catch (final OXObjectNotFoundException exc) {
+			} catch (final ReminderException exc) {
 				next = null;
 			} catch (final SQLException exc) {
 				throw new SearchIteratorException(SearchIteratorCode.SQL_ERROR, exc, Component.REMINDER);
@@ -755,7 +758,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 			final ReminderObject reminderObj = next;
 			try {
 				next = convertResult2ReminderObject(rs, preparedStatement, false);
-			} catch (final OXObjectNotFoundException exc) {
+			} catch (final ReminderException exc) {
 				next = null;
 			} catch (final SQLException exc) {
 				throw new SearchIteratorException(SearchIteratorCode.SQL_ERROR, exc, Component.REMINDER);

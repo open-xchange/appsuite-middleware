@@ -51,9 +51,7 @@ package com.openexchange.groupware.tasks;
 
 import static com.openexchange.tools.sql.DBUtils.rollback;
 
-import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.OXException;
-import com.openexchange.api2.ReminderSQLInterface;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -84,7 +82,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.GroupStorage;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.tasks.Mapping.Mapper;
 import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.groupware.tasks.TaskParticipant.Type;
@@ -834,20 +831,7 @@ public final class TaskLogic {
      */
     static void informDelete(final SessionObject session, final Task task)
         throws TaskException {
-        final ReminderSQLInterface reminder = new ReminderHandler(session
-            .getContext());
-        try {
-            reminder.deleteReminder(task.getObjectID(), Types.TASK);
-        } catch (OXObjectNotFoundException e) {
-            // If the task does not have a reminder this exception is
-            // thrown. Which is quite okay because not every task must have
-            // a reminder.
-        	if (LOG.isTraceEnabled()) { // Added to remove PMD warning about an empty catch clause
-        		LOG.trace(e.getMessage(), e);
-        	}
-        } catch (OXException e) {
-            throw new TaskException(e);
-        }
+        Reminder.deleteReminder(session.getContext(), task);
         try {
             new EventClient(session).delete(task);
         } catch (InvalidStateException e) {

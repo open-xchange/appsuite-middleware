@@ -229,7 +229,7 @@ public final class TaskIterator implements SearchIterator<Task>, Runnable {
                         break;
                     case Task.ALARM:
                         try {
-                            Tools.loadReminder(ctx, userId, tasks.values());
+                            Reminder.loadReminder(ctx, userId, tasks.values());
                         } catch (TaskException e) {
                             throw new SearchIteratorException(e);
                         }
