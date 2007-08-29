@@ -1,0 +1,84 @@
+# System Properties
+
+# Name of the class that implements how the login information should be
+# processed.
+# * com.openexchange.groupware.contexts.RdbLoginInfo split only the login info
+#   by the @ sign and resolve context and user in database.
+LoginInfo=com.openexchange.groupware.contexts.RdbLoginInfo
+
+# Name of the class implementing the UserConfigurationStorage.
+# Currenlty known aliases: Caching, DB
+UserConfigurationStorage=Caching
+
+# Name of the class that implements how to get the link for the configuration
+# setup.
+SetupLink=com.openexchange.groupware.integration.EmptyImpl
+
+# Location of the configuration file for the user specific configuration jump.
+# The content of this file depends on the implementation of the SetupLink.
+ConfigJumpConf=@serverconfdir@/configjump.properties
+
+# Name of the class that implements User2IMAP, their alias or "auto" to use auto-detection.
+# Currently known aliases: Cyrus, Courier
+User2IMAPImpl=auto
+
+# Switch for enabling caching in the groupware. Normally this should be set to
+# true or the database will get a lot more load.
+Cache=true
+
+InitWorker:com.openexchange.groupware.InitWorker
+
+# Location of the server.properties configuration file. This file configures
+# essential server settings.
+Server=@serverconfdir@/server.properties
+
+# Location of the calendar.properties configuration file. This file configures
+# the calendar subsystem.
+Calendar=@serverconfdir@/calendar.properties
+
+# Location of the contact.properties configuration file. This file configures
+# the contact subsystem.
+Contact=@serverconfdir@/contact.properties
+
+# Location of the infostore.properties configuration file. This file configures
+# the infostore subsystem.
+Infostore=@serverconfdir@/infostore.properties
+
+# Location of the attachment.properties configuration file. This file configures
+# the attachment subsystem.
+Attachment=@serverconfdir@/attachment.properties
+
+# Location of the notfication.properties configuration file. This file 
+# configures certain assumptions about sending notifications
+Notification=@serverconfdir@/notification.properties
+
+# Location of the participant.properties configuration file. This file
+# configures certain options about participants.
+Participant=@serverconfdir@/participant.properties
+
+# Directory in which all property files for servlet mapping are kept
+ServletMappingDir=@serverconfdir@/servletmappings
+
+CONFIGPATH:@oxconfdir@
+AJPPROPERTIES:@serverconfdir@/ajp.properties
+CACHECCF:@oxconfdir@/cache.ccf
+IMPORTEREXPORTER:@serverconfdir@/importerExporter.xml
+LDAPPROPERTIES:@serverconfdir@/ldap.properties
+SESSIONDPROPERTIES:@serverconfdir@/sessiond.properties
+EVENTPROPERTIES:@serverconfdir@/event.properties
+PUSHPROPERTIES:@serverconfdir@/push.properties
+configDB=@oxconfdir@/configdb.properties
+FOLDERCACHEPROPERTIES=@serverconfdir@/foldercache.properties
+IMAPPROPERTIES=@serverconfdir@/imap.properties
+JAVAMAILPROPERTIES=@serverconfdir@/javamail.properties
+SPELLCHECKCFG=@serverconfdir@/spellcheck.cfg
+
+UPDATETASKSCFG=@serverconfdir@/updatetasks.cfg
+
+CalendarSQL=com.openexchange.groupware.calendar.CalendarMySQL
+
+# Location of the HTMLEntities.properties configuration file. This file
+# contains the most HTML entities and maps them to their character value
+HTMLEntities=@oxgroupwaresysconfdir@/HTMLEntities.properties
+
+SERVER_NAME=local
