@@ -1,3 +1,8 @@
+* 2007-08-30 - francisco.laguna@open-xchange.com
+
+ - Bugfix #9159: explicitely initializing infostore document metadat
+   with filesize 0 for mail attachments.
+
 * 2007-08-30 - thorben.betten@open-xchange.com
 
  - Bugfix #7658: Fixed i18n call for read acknowledge text

@@ -2285,9 +2285,10 @@ public class Mail extends PermissionServlet implements UploadListener {
 				 * Since file's size given from IMAP server is just an
 				 * estimation and therefore does not exactly match the file's
 				 * size a future file access via webdav can fail because of the
-				 * size mismatch. Thus we do not set the file's size here
+				 * size mismatch. Thus set the filesize to 0 to make the infostore
+				 * measure the size.
 				 */
-				// docMetaData.setFileSize(mao.getSize());
+				docMetaData.setFileSize(0);
 				if (!metSet.contains(Metadata.TITLE_LITERAL)) {
 					docMetaData.setTitle(mao.getFileName());
 				}
