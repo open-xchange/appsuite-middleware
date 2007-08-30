@@ -55,7 +55,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
-import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -74,8 +73,8 @@ import com.openexchange.api2.MailInterfaceImpl;
 import com.openexchange.api2.OXException;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
-import com.openexchange.imap.IMAPPropertyException;
 import com.openexchange.imap.IMAPProperties;
+import com.openexchange.imap.IMAPPropertyException;
 import com.openexchange.imap.UserSettingMail;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.Collections.SmartIntArray;
@@ -389,13 +388,13 @@ public final class MessageUtils {
 			/*
 			 * Insert color quotes in html and filter inline images
 			 */
-			if (usm.isUseColorQuote()) {
+			/*if (usm.isUseColorQuote()) {
 				if (retval.toLowerCase(Locale.ENGLISH).indexOf(STR_START_BLOCKQUOTE) > -1) {
 					retval = replaceHTMLBlockQuotesForDisplay(retval);
 				} else {
 					retval = replaceHTMLSimpleQuotesForDisplay(retval);
 				}
-			}
+			}*/
 			if (usm.isDisplayHtmlInlineContent()) {
 				retval = filterInlineImages(retval, session, msgUID);
 			}
@@ -427,41 +426,6 @@ public final class MessageUtils {
 	private static final String DEFAULT_COLOR = "#0026ff";
 
 	private static final String BLOCKQUOTE_START_TEMPLATE = "<blockquote type=\"cite\" style=\"margin-left: 0px; padding-left: 10px; color:%s; border-left: solid 1px %s;\">";
-
-	private static final String STR_BLOCKQUOTE = "blockquote";
-
-	/**
-	 * Replaces all occuring "&lt;blockquote&gt;" tags in given HTML content
-	 * with colored "&lt;blockquote&gt;" tags according to configured quote
-	 * colors in file "imap.properties"
-	 */
-	private static String replaceHTMLBlockQuotesForDisplay(final String htmlText) {
-		final StringBuilder sb = new StringBuilder(htmlText.length() + INT_100);
-		int offset = 0;
-		int pos = -1;
-		int quotelevel = 0;
-		/*
-		 * Find blockquote tags and fill colors
-		 */
-		while ((pos = htmlText.indexOf(STR_BLOCKQUOTE, offset)) != -1) {
-			final int end = htmlText.indexOf('>', pos + 1);
-			if (htmlText.charAt(pos - 1) == '<') {
-				quotelevel++;
-				sb.append(htmlText.subSequence(offset, pos - 1));
-				final String color = getLevelColor(quotelevel);
-				sb.append(String.format(BLOCKQUOTE_START_TEMPLATE, color, color));
-			} else if (htmlText.charAt(pos - 1) == '/') {
-				quotelevel--;
-				sb.append(htmlText.subSequence(offset, pos - 2));
-				sb.append(htmlText.substring(pos - 2, end + 1));
-			} else {
-				LOG.error("Invalid blockquote tag");
-			}
-			offset = end + 1;
-		}
-		sb.append(htmlText.substring(offset));
-		return sb.toString();
-	}
 
 	/**
 	 * Determines the quote color for given <code>quotelevel</code>

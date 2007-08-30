@@ -7,6 +7,8 @@
 
  - Bugfix #7658: Fixed i18n call for read acknowledge text
  - Bugfix #9084: Fixed naming for folders
+ - Bugfix #9163: Occuring blockquote tags in html content are no more
+   colorized
 
 * 2007-08-30 - marcus.klein@open-xchange.com
 
