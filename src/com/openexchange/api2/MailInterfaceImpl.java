@@ -3071,10 +3071,10 @@ public class MailInterfaceImpl implements MailInterface {
 		 * Define text content
 		 */
 		final MimeBodyPart text = new MimeBodyPart();
-		text.setText(performLineWrap(strHelper.getString(MailStrings.ACK_NOTIFICATION_TEXT.replaceFirst(
+		text.setText(performLineWrap(strHelper.getString(MailStrings.ACK_NOTIFICATION_TEXT).replaceFirst(
 				"#DATE#",
 				sentDate == null ? STR_EMPTY : DateFormat.getDateInstance(DateFormat.LONG, sessionObj.getLocale())
-						.format(sentDate)).replaceFirst("#RECIPIENT#", from).replaceFirst("#SUBJECT#", origSubject)),
+						.format(sentDate)).replaceFirst("#RECIPIENT#", from).replaceFirst("#SUBJECT#", origSubject),
 				false, usm.getAutoLinebreak()), IMAPProperties.getDefaultMimeCharset());
 		text.setHeader(MessageHeaders.HDR_MIME_VERSION, STR_1DOT0);
 		text.setHeader(MessageHeaders.HDR_CONTENT_TYPE, ct.toString());

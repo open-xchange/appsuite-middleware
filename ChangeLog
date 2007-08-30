@@ -1,3 +1,7 @@
+* 2007-08-30 - thorben.betten@open-xchange.com
+
+ - Bugfix #7658: Fixed i18n call for read acknowledge text
+
 * 2007-08-30 - marcus.klein@open-xchange.com
 
  - Bugfix #9135: Fixed NullPointerException due to coding problem.
