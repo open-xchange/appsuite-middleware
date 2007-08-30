@@ -59,19 +59,19 @@ package com.openexchange.groupware.i18n;
  */
 public class FolderStrings {
 
-	public static final String SYSTEM_PRIVATE_FOLDER_NAME = "Private Folders";
+	public static final String SYSTEM_PRIVATE_FOLDER_NAME = "Private folders";
 	
-	public static final String SYSTEM_PUBLIC_FOLDER_NAME = "Public Folders";
+	public static final String SYSTEM_PUBLIC_FOLDER_NAME = "Public folders";
 	
-	public static final String SYSTEM_SHARED_FOLDER_NAME = "Shared Folders";
+	public static final String SYSTEM_SHARED_FOLDER_NAME = "Shared folders";
 	
 	public static final String SYSTEM_FOLDER_NAME = "System";
 	
-	public static final String SYSTEM_GLOBAL_FOLDER_NAME = "Shared Address Book";
+	public static final String SYSTEM_GLOBAL_FOLDER_NAME = "Shared address book";
 	
-	public static final String SYSTEM_LDAP_FOLDER_NAME = "Global Address Book";
+	public static final String SYSTEM_LDAP_FOLDER_NAME = "Global address book";
 	
-	public static final String SYSTEM_OX_FOLDER_NAME = "OX Folders";
+	public static final String SYSTEM_OX_FOLDER_NAME = "OX folders";
 	
 	public static final String SYSTEM_OX_PROJECT_FOLDER_NAME = "Projects";
 	
@@ -79,15 +79,15 @@ public class FolderStrings {
 	
 	public static final String VIRTUAL_USER_INFOSTORE_FOLDER_NAME = "Userstore";
 	
-	public static final String VIRTUAL_LIST_TASK_FOLDER_NAME = "Other Task Folders";
+	public static final String VIRTUAL_LIST_TASK_FOLDER_NAME = "Other task folders";
 	
-	public static final String VIRTUAL_LIST_CALENDAR_FOLDER_NAME = "Other Calendar Folders";
+	public static final String VIRTUAL_LIST_CALENDAR_FOLDER_NAME = "Other calendar folders";
 	
-	public static final String VIRTUAL_LIST_CONTACT_FOLDER_NAME = "Other Contact Folders";
+	public static final String VIRTUAL_LIST_CONTACT_FOLDER_NAME = "Other contact folders";
 	
-	public static final String VIRTUAL_LIST_INFOSTORE_FOLDER_NAME = "Other Infostore Folders";
+	public static final String VIRTUAL_LIST_INFOSTORE_FOLDER_NAME = "Other infostore folders";
 	
-	public static final String MY_INFOSTORE_FOLDER_NAME = "My Infostore Folder";
+	public static final String MY_INFOSTORE_FOLDER_NAME = "My infostore folder";
 	
 	public static final String DEFAULT_TASK_FOLDER_NAME = "Tasks";
 	

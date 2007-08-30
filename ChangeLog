@@ -6,6 +6,7 @@
 * 2007-08-30 - thorben.betten@open-xchange.com
 
  - Bugfix #7658: Fixed i18n call for read acknowledge text
+ - Bugfix #9084: Fixed naming for folders
 
 * 2007-08-30 - marcus.klein@open-xchange.com
 
