@@ -492,8 +492,8 @@ public final class MailWriter extends DataWriter {
 
 	private static boolean hasAttachments(final BODYSTRUCTURE bodystructure) {
 		if (bodystructure.isMulti()) {
-			if (MIME_SUBTYPE_ALTERNATIVE.equalsIgnoreCase(bodystructure.subtype) && bodystructure.bodies.length > 2) {
-				return true;
+			if (MIME_SUBTYPE_ALTERNATIVE.equalsIgnoreCase(bodystructure.subtype)) {
+				return (bodystructure.bodies.length > 2);
 			} else if (bodystructure.bodies.length > 1) {
 				return true;
 			} else {
