@@ -552,22 +552,6 @@ public final class TaskLogic {
     }
 
     /**
-     * @param folders Set of task folder mappings.
-     * @param userId unique identifier of a user.
-     * @return the folder mapping for the user.
-     */
-    static Folder getFolderOfUser(final Set<Folder> folders, final int userId) {
-        Folder retval = null;
-        for (Folder folder : folders) {
-            if (folder.getUser() == userId) {
-                retval = folder;
-                break;
-            }
-        }
-        return retval;
-    }
-
-    /**
      * Extracts all participants that are added by the group.
      * @param participants internal task participants.
      * @param groupId the group identifier.
@@ -601,52 +585,6 @@ public final class TaskLogic {
      */
     private static final ParticipantStorage partStor = ParticipantStorage
         .getInstance();
-
-    /**
-     * Does all actions to load a complete task object.
-     * @param ctx Context.
-     * @param folderId unique identifier of the folder through that the task is
-     * accessed.
-     * @param taskId unique identifier of the task to load.
-     * @param type storage type of the task to load.
-     * @return the task object.
-     * @throws TaskException if an exception occurs.
-     */
-    public static Task loadTask(final Context ctx, final int folderId,
-        final int taskId, final StorageType type) throws TaskException {
-        final Task retval = storage.selectTask(ctx, taskId, type);
-        retval.setParentFolderID(folderId);
-        final Set<TaskParticipant> parts = loadParticipantsWithFolder(ctx,
-            folderId, taskId, type);
-        retval.setParticipants(TaskLogic.createParticipants(parts));
-        retval.setUsers(TaskLogic.createUserParticipants(parts));
-        return retval;
-    }
-
-    /**
-     * Loads participants of a task. If the task is in a public folder no folder
-     * mapping for the participants will be loaded.
-     * @param ctx Context.
-     * @param folderId Unique identifier of the folder through that the task is
-     * accessed.
-     * @param taskId Unique identifier of the task.
-     * @param type storage type of the participants (only ACTIVE or DELETED).
-     * @return the loaded participants.
-     * @throws TaskException if an exception occurs.
-     */
-    static Set<TaskParticipant> loadParticipantsWithFolder(final Context ctx,
-        final int folderId, final int taskId, final StorageType type)
-        throws TaskException {
-        final Set<TaskParticipant> parts = partStor.selectParticipants(ctx,
-            taskId, type);
-        // TODO Use FolderObject
-        if (!Tools.isFolderPublic(ctx, folderId)) {
-            final Set<Folder> folders = foldStor.selectFolder(ctx, taskId,
-                type);
-            Tools.fillStandardFolders(parts, folders, true);
-        }
-        return parts;
-    }
 
     /**
      * Stores a task with its participants and folders.
@@ -695,6 +633,9 @@ public final class TaskLogic {
         }
     }
     
+    /**
+     * TODO Move this method to {@link UpdateData}.
+     */
     static void updateTask(final Context ctx, final Task task,
         final Date lastRead, final int[] modified,
         final Set<TaskParticipant> add, final Set<TaskParticipant> remove,

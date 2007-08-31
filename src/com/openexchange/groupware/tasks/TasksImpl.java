@@ -185,7 +185,7 @@ final class TasksImpl extends Tasks {
         removeParticipant.removeAll(deleteTask);
         try {
             for (int taskId : deleteTask) {
-                final Task task = TaskLogic.loadTask(ctx, folderId, taskId,
+                final Task task = GetTask.load(ctx, folderId, taskId,
                     StorageType.ACTIVE);
                 TaskLogic.deleteTask(session, task, task.getLastModified());
             }

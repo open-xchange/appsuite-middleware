@@ -54,9 +54,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api.OXObjectNotFoundException;
@@ -73,7 +70,7 @@ import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.groupware.tasks.TaskParticipant.Type;
 import com.openexchange.server.DBPool;
 import com.openexchange.server.DBPoolingException;
-import com.openexchange.tools.oxfolder.OXFolderTools;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 /**
  * This class contains some tools methods for tasks.
@@ -82,31 +79,10 @@ import com.openexchange.tools.oxfolder.OXFolderTools;
 public final class Tools {
 
     /**
-     * Logger.
-     */
-    private static final Log LOG = LogFactory.getLog(Tools.class);
-    
-    /**
      * Prevent instantiation
      */
     private Tools() {
         super();
-    }
-
-    /**
-     * Checks if the folder is a tasks folder.
-     * @param ctx Context.
-     * @param folderId unique identifier of the folder.
-     * @return <code>true</code> if the folder is a tasks folder,
-     *         <code>false</code> otherwise.
-     * @throws TaskException if no database connection can be obtained or an
-     * error occurs while reading the folder.
-     * @deprecated Use {@link #isFolderTask(FolderObject)}
-     */
-    static boolean isFolderTask(final Context ctx, final int folderId)
-        throws TaskException {
-        final FolderObject folder = getFolder(ctx, folderId);
-        return isFolderTask(folder);
     }
 
     /**
@@ -172,36 +148,6 @@ public final class Tools {
 
     /**
      * Checks if the folder is a shared folder.
-     * @param ctx Context.
-     * @param folderId unique identifier of the folder.
-     * @param userId unique identifier of the requesting user.
-     * @return <code>true</code> if the folder is a shared folder,
-     *         <code>false</code> otherwise.
-     * @throws TaskException if no database connection can be obtained or an
-     * error occurs while reading the folder.
-     * @deprecated Use {@link #isFolderShared(FolderObject, int)}
-     */
-    static boolean isFolderShared(final Context ctx, final int folderId,
-        final int userId) throws TaskException {
-        final FolderObject folder = getFolder(ctx, folderId);
-        return isFolderShared(folder, userId);
-    }
-
-    /**
-     * Checks if the folder is a shared folder.
-     * @param userId unique identifier of the requesting user.
-     * @param folder folder object.
-     * @return <code>true</code> if the folder is a shared folder,
-     * <code>false</code> otherwise.
-     * @deprecated Use {@link #isFolderShared(FolderObject, User)}
-     */
-    static boolean isFolderShared(final FolderObject folder, final int userId) {
-        return (FolderObject.PRIVATE == folder.getType()
-            && folder.getCreatedBy() != userId);
-    }
-
-    /**
-     * Checks if the folder is a shared folder.
      * @param folder folder object.
      * @param user requesting user.
      * @return <code>true</code> if the folder is a shared folder,
@@ -224,7 +170,8 @@ public final class Tools {
         throws TaskException {
         int folder;
         try {
-            folder = OXFolderTools.getTaskDefaultFolder(userId, ctx);
+            folder = new OXFolderAccess(ctx).getDefaultFolder(userId,
+                FolderObject.TASK).getObjectID();
         } catch (OXException e) {
             throw new TaskException(e);
         }
@@ -282,14 +229,14 @@ public final class Tools {
         final Map<Integer, Folder> folderByUser = new HashMap<Integer, Folder>(
             folders.size(), 1);
         for (Folder folder : folders) {
-            folderByUser.put(folder.getUser(), folder);
+            folderByUser.put(Integer.valueOf(folder.getUser()), folder);
         }
         for (TaskParticipant participant : participants) {
             if (Type.INTERNAL == participant.getType()) {
-                final InternalParticipant internal =
-                    (InternalParticipant) participant;
-                final Folder folder = folderByUser.get(
-                    internal.getIdentifier());
+                final InternalParticipant internal = (InternalParticipant)
+                    participant;
+                final Folder folder = folderByUser.get(Integer.valueOf(internal
+                    .getIdentifier()));
                 if (null == folder && privat) {
                     throw new TaskException(Code
                         .PARTICIPANT_FOLDER_INCONSISTENCY);

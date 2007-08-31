@@ -52,6 +52,7 @@ package com.openexchange.groupware.tasks;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.sessiond.SessionObject;
@@ -86,8 +87,11 @@ public final class Task2Links {
     public static boolean checkMayReadTask(final SessionObject session,
         final int taskId, final int folderId) {
         final Context ctx = session.getContext();
-        Task task;
+        final User user = session.getUserObject();
+        final FolderObject folder;
+        final Task task;
         try {
+            folder = Tools.getFolder(ctx, folderId);
             final TaskStorage storage = TaskStorage.getInstance();
             task = storage.selectTask(ctx, taskId, StorageType.ACTIVE);
         } catch (TaskException e) {
@@ -95,9 +99,8 @@ public final class Task2Links {
             return false;
         }
         try {
-            final User user = session.getUserObject();
-            Permission.canReadInFolder(ctx, user.getId(), user.getGroups(),
-                session.getUserConfiguration(), folderId, task.getCreatedBy());
+            Permission.canReadInFolder(ctx, user, session
+                .getUserConfiguration(), folder, task);
         } catch (TaskException e) {
             return false;
         }

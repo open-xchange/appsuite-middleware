@@ -53,14 +53,11 @@ import com.openexchange.api2.OXException;
 import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
-import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.server.OCLPermission;
-import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
-import com.openexchange.tools.oxfolder.OXFolderTools;
 
 /**
  * Contains convenience methods for checking access rights.
@@ -73,37 +70,6 @@ public final class Permission {
      */
     private Permission() {
         super();
-    }
-
-    /**
-     * @deprecated Use {@link #checkDelete(Context, User, UserConfiguration, FolderObject, Task)}
-     */
-    public static void checkDelete(final Context ctx, final int userId,
-        final int[] groups, final UserConfiguration userConfig,
-        final FolderObject folder, final Task task) throws TaskException {
-        final int folderId = folder.getObjectID();
-        if (!Tools.isFolderTask(folder)) {
-            throw new TaskException(Code.NOT_TASK_FOLDER, folder
-                .getFolderName(), folderId);
-        }
-        final OCLPermission permission;
-        try {
-            permission = OXFolderTools.getEffectiveFolderOCL(folderId, userId,
-                groups, ctx, userConfig);
-        } catch (OXException e) {
-            throw new TaskException(e);
-        }
-        if (!permission.canDeleteAllObjects() && !permission
-            .canDeleteOwnObjects()) {
-            throw new TaskException(Code.NO_DELETE_PERMISSION);
-        }
-        final boolean onlyOwn = !permission.canDeleteAllObjects() && permission
-            .canDeleteOwnObjects();
-        final boolean noPrivate = Tools.isFolderShared(folder, userId);
-        if ((onlyOwn && task.getCreatedBy() != userId)
-            || (noPrivate && task.getPrivateFlag())) {
-            throw new TaskException(Code.NO_DELETE_PERMISSION);
-        }
     }
 
     /**
@@ -120,7 +86,7 @@ public final class Permission {
         final Task task) throws TaskException {
         if (!Tools.isFolderTask(folder)) {
             throw new TaskException(Code.NOT_TASK_FOLDER, folder
-                .getFolderName(), folder.getObjectID());
+                .getFolderName(), Integer.valueOf(folder.getObjectID()));
         }
         final OCLPermission permission;
         try {
@@ -142,15 +108,6 @@ public final class Permission {
         if (noPrivate && task.getPrivateFlag()) {
             throw new TaskException(Code.NO_DELETE_PERMISSION);
         }
-    }
-
-    static boolean isTaskInFolder(final Task task, final int folderId) {
-        boolean found = task.getParentFolderID() == folderId;
-        final UserParticipant[] parts = task.getUsers();
-        for (int i = 0; !found && i < parts.length; i++) {
-            found = parts[i].getPersonalFolderId() == folderId;
-        }
-        return found;
     }
 
     /**
@@ -179,11 +136,11 @@ public final class Permission {
         final UserConfiguration userConfig, final FolderObject folder)
         throws TaskException {
         if (!userConfig.hasTask()) {
-            throw new TaskException(Code.NO_TASKS, user.getId());
+            throw new TaskException(Code.NO_TASKS, Integer.valueOf(user.getId()));
         }
         if (!Tools.isFolderTask(folder)) {
-            throw new TaskException(Code.NOT_TASK_FOLDER, "", folder
-                .getObjectID());
+            throw new TaskException(Code.NOT_TASK_FOLDER, "", Integer.valueOf(
+                folder.getObjectID()));
         }
         final OCLPermission permission;
         try {
@@ -193,58 +150,38 @@ public final class Permission {
             throw new TaskException(e);
         }
         if (!permission.canCreateObjects()) {
-            throw new TaskException(Code.NO_CREATE_PERMISSION, "", folder
-                .getObjectID());
+            throw new TaskException(Code.NO_CREATE_PERMISSION, "", Integer
+                .valueOf(folder.getObjectID()));
         }
     }
 
     /**
-     * Checks if the folder is a tasks folder and if the user is allowed to read
-     * objects in that folder.
+     * Checks if the user is allowed to read tasks in a folder. Beware that the
+     * private flag of tasks must be checked.
      * @param ctx Context.
-     * @param userId unique identifier of the user.
-     * @param groups Groups the user belongs to.
+     * @param user User.
      * @param userConfig Groupware configuration of the user.
-     * @param folderId unique identifier of the folder.
-     * @return <code>true</code> if only private objects can be seen.
-     * @throws TaskException if the reading is not okay.
-     */
-    static boolean canReadInFolder(final Context ctx, final int userId,
-        final int[] groups, final UserConfiguration userConfig,
-        final int folderId) throws TaskException {
-        final FolderObject folder = Tools.getFolder(ctx, folderId);
-        return canReadInFolder(ctx, userId, groups, userConfig, folder);
-    }
-
-    /**
-     * Checks if the folder is a tasks folder and if the user is allowed to read
-     * objects in that folder.
-     * @param ctx Context.
-     * @param userId unique identifier of the user.
-     * @param groups Groups the user belongs to.
-     * @param userConfig groupware configuration of the user.
      * @param folder folder object that should be tested for read access.
-     * @return <code>true</code> if only private objects can be seen.
      * @throws TaskException if the reading is not okay.
      */
-    static boolean canReadInFolder(final Context ctx, final int userId,
-        final int[] groups, final UserConfiguration userConfig,
-        final FolderObject folder) throws TaskException {
-        if (!Tools.isFolderTask(ctx, folder.getObjectID())) {
-            throw new TaskException(Code.NOT_TASK_FOLDER,
-                folder.getFolderName(), folder.getObjectID());
+    static boolean canReadInFolder(final Context ctx, final User user,
+        final UserConfiguration userConfig, final FolderObject folder)
+        throws TaskException {
+        if (!Tools.isFolderTask(folder)) {
+            throw new TaskException(Code.NOT_TASK_FOLDER, folder
+                .getFolderName(), Integer.valueOf(folder.getObjectID()));
         }
         final OCLPermission permission;
         try {
-            permission = OXFolderTools.getEffectiveFolderOCL(
-                folder.getObjectID(), userId, groups, ctx, userConfig);
+            permission = new OXFolderAccess(ctx).getFolderPermission(folder
+                .getObjectID(), user.getId(), userConfig);
         } catch (OXException e) {
             throw new TaskException(e);
         }
         if (!permission.canReadAllObjects() && !permission
             .canReadOwnObjects()) {
-            throw new TaskException(Code.NO_READ_PERMISSION,
-                folder.getFolderName(), folder.getObjectID());
+            throw new TaskException(Code.NO_READ_PERMISSION, folder
+                .getFolderName(), Integer.valueOf(folder.getObjectID()));
         }
         final boolean onlyOwn = !permission.canReadAllObjects() && permission
             .canReadOwnObjects();
@@ -254,39 +191,19 @@ public final class Permission {
     /**
      * Checks if the user is allowed to read the task.
      * @param ctx Context.
-     * @param userId unique identifier of the user.
-     * @param groups Groups the user belongs to.
-     * @param userConfig groupware access rights of the user.
-     * @param folderId unique identifier of the folder.
-     * @param taskCreator unique identifier of the user who created the task.
-     * @throws TaskException if the reading is not okay.
-     */
-    static void canReadInFolder(final Context ctx, final int userId,
-        final int[] groups, final UserConfiguration userConfig,
-        final int folderId, final int taskCreator) throws TaskException {
-        final FolderObject folder = Tools.getFolder(ctx, folderId);
-        canReadInFolder(ctx, userId, groups, userConfig, folder, taskCreator);
-    }
-
-    /**
-     * Checks if the user is allowed to read the task.
-     * @param ctx Context.
-     * @param userId unique identifier of the user.
-     * @param groups Groups the user belongs to.
-     * @param userConfig groupware access rights of the user.
+     * @param user User.
+     * @param userConfig Groupware configuration of the user.
      * @param folder folder object that should be tested for read access.
-     * @param taskCreator unique identifier of the user who created the task.
+     * @param task Task to read.
      * @throws TaskException if the reading is not okay.
      */
-    static void canReadInFolder(final Context ctx, final int userId,
-        final int[] groups, final UserConfiguration userConfig,
-        final FolderObject folder, final int taskCreator)
-        throws TaskException {
-        final boolean onlyOwn = canReadInFolder(ctx, userId, groups,
-            userConfig, folder);
-        if (onlyOwn && (userId != taskCreator)) {
-            throw new TaskException(Code.NO_READ_PERMISSION,
-                folder.getFolderName(), folder.getObjectID());
+    static void canReadInFolder(final Context ctx, final User user,
+        final UserConfiguration userConfig, final FolderObject folder,
+        final Task task) throws TaskException {
+        final boolean onlyOwn = canReadInFolder(ctx, user, userConfig, folder);
+        if (onlyOwn && (user.getId() != task.getCreatedBy())) {
+            throw new TaskException(Code.NO_READ_PERMISSION, folder
+                .getFolderName(), Integer.valueOf(folder.getObjectID()));
         }
     }
 
@@ -295,6 +212,7 @@ public final class Permission {
      * @param ctx Context.
      * @param user User.
      * @param userConfig Groupware configuration of the user.
+     * @param folder folder object that should be tested for write access.
      * @param task Task to update.
      * @throws TaskException if the task can't be updated.
      */
@@ -312,29 +230,7 @@ public final class Permission {
             && !(permission.canWriteOwnObjects()
                 && (user.getId() == task.getCreatedBy()))) {
             throw new TaskException(Code.NO_WRITE_PERMISSION, folder
-                .getFolderName(), folder.getObjectID());
-        }
-    }
-
-    /**
-     * @deprecated Use {@link #checkWriteInFolder(Context, User, UserConfiguration, FolderObject, Task)}
-     */
-    static void checkWriteInFolder(final Context ctx, final int userId,
-        final int[] groups, final UserConfiguration userConfig,
-        final int folderId, final int taskCreator)
-        throws TaskException {
-        final OCLPermission permission;
-        try {
-            permission = OXFolderTools.getEffectiveFolderOCL(folderId, userId,
-                groups, ctx, userConfig);
-        } catch (OXException e) {
-            throw new TaskException(e);
-        }
-        if (!permission.canWriteAllObjects()
-            && !(permission.canWriteOwnObjects() && (userId == taskCreator))) {
-            final FolderObject folder = Tools.getFolder(ctx, folderId);
-            throw new TaskException(Code.NO_WRITE_PERMISSION,
-                folder.getFolderName(), folderId);
+                .getFolderName(), Integer.valueOf(folder.getObjectID()));
         }
     }
 }

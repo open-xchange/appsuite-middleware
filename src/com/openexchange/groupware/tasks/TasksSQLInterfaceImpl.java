@@ -118,8 +118,8 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
         }
         boolean onlyOwn;
         try {
-            onlyOwn = Permission.canReadInFolder(ctx, userId, user.getGroups(),
-                session.getUserConfiguration(), folder);
+            onlyOwn = Permission.canReadInFolder(ctx, user, session
+                .getUserConfiguration(), folder);
         } catch (TaskException e) {
             throw Tools.convert(e);
         }
@@ -151,8 +151,8 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
             throw Tools.convert(e);
         }
         try {
-            onlyOwn = Permission.canReadInFolder(ctx, userId, user.getGroups(),
-                session.getUserConfiguration(), folder);
+            onlyOwn = Permission.canReadInFolder(ctx, user, session
+                .getUserConfiguration(), folder);
         } catch (TaskException e) {
             throw Tools.convert(e);
         }
@@ -172,41 +172,14 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
         throws OXException {
         final Context ctx = session.getContext();
         final User user = session.getUserObject();
-        final int userId = user.getId();
-        FolderObject folder;
+        final UserConfiguration userConfig = session.getUserConfiguration();
+        final GetTask get = new GetTask(ctx, user, userConfig, folderId, taskId,
+            StorageType.ACTIVE);
         try {
-            folder = Tools.getFolder(ctx, folderId);
+            return get.loadAndCheck();
         } catch (TaskException e) {
             throw Tools.convert(e);
         }
-        final Task retval;
-        try {
-            retval = TaskLogic.loadTask(ctx, folderId, taskId, StorageType
-                .ACTIVE);
-        } catch (TaskException e) {
-            throw Tools.convert(e);
-        }
-        try {
-            Permission.canReadInFolder(ctx, userId, user.getGroups(), session
-                .getUserConfiguration(), folder, retval.getCreatedBy());
-            if (Tools.isFolderShared(folder, user) && retval
-                .getPrivateFlag()) {
-                throw new TaskException(Code.NO_PRIVATE_PERMISSION, folder
-                    .getFolderName(), Integer.valueOf(folderId));
-            }
-        } catch (TaskException e) {
-            throw Tools.convert(e);
-        }
-        if (!Permission.isTaskInFolder(retval, folderId)) {
-            throw Tools.convert(new TaskException(Code.FOLDER_NOT_FOUND,
-                folderId, taskId, userId, ctx.getContextId()));
-        }
-        try {
-            Reminder.loadReminder(ctx, userId, retval);
-        } catch (TaskException e) {
-            throw Tools.convert(e);
-        }
-        return retval;
     }
 
     /**
@@ -225,8 +198,8 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
         }
         boolean onlyOwn;
         try {
-            onlyOwn = Permission.canReadInFolder(ctx, userId, user.getGroups(),
-                session.getUserConfiguration(), folder);
+            onlyOwn = Permission.canReadInFolder(ctx, user, session
+                .getUserConfiguration(), folder);
         } catch (TaskException e) {
             throw Tools.convert(e);
         }
@@ -255,8 +228,8 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
         }
         boolean onlyOwn;
         try {
-            onlyOwn = Permission.canReadInFolder(ctx, userId, user.getGroups(),
-                session.getUserConfiguration(), folderId);
+            onlyOwn = Permission.canReadInFolder(ctx, user, session
+                .getUserConfiguration(), folder);
         } catch (TaskException e) {
             throw Tools.convert(e);
         }
@@ -422,8 +395,7 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
             foldStor.selectFolderById(ctx, taskId, folderId, StorageType
                 .ACTIVE);
             // Load task with participants.
-            task = TaskLogic.loadTask(ctx, folderId, taskId, StorageType
-                .ACTIVE);
+            task = GetTask.load(ctx, folderId, taskId, StorageType.ACTIVE);
             // TODO Switch to only delete the participant from task
             // Check delete permission
             Permission.checkDelete(ctx, user, session.getUserConfiguration(),
@@ -489,8 +461,8 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
                     final FolderObject folder = (FolderObject) iter.next();
                     if (folder.isShared(userId)) {
                         shared.add(Integer.valueOf(folder.getObjectID()));
-                    } else if (Permission.canReadInFolder(ctx, userId, groups,
-                        config, folder)) {
+                    } else if (Permission.canReadInFolder(ctx, user, config,
+                        folder)) {
                         own.add(Integer.valueOf(folder.getObjectID()));
                     } else {
                         all.add(Integer.valueOf(folder.getObjectID()));
@@ -501,8 +473,8 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
                     search.getFolder());
                 if (folder.isShared(userId)) {
                     shared.add(Integer.valueOf(folder.getObjectID()));
-                } else if (Permission.canReadInFolder(ctx, userId, groups,
-                    config, folder)) {
+                } else if (Permission.canReadInFolder(ctx, user, config,
+                    folder)) {
                     own.add(Integer.valueOf(folder.getObjectID()));
                 } else {
                     all.add(Integer.valueOf(folder.getObjectID()));

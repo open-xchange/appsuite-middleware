@@ -234,6 +234,7 @@ public class TaskException extends AbstractOXException {
             16),
         /**
          * Folder %d for task %d cannot be found. User %d, Context %d.
+         * @deprecated use {@link Code#NO_PERMISSION}.
          */
         FOLDER_NOT_FOUND("Folder %d for task %d cannot be found. User %d, "
             + "Context %d.", Category.CODE_ERROR, Detail.NOT_FOUND, 17),
@@ -323,6 +324,7 @@ public class TaskException extends AbstractOXException {
         /**
          * You are not allowed to see a private task in shared folder %1$s
          * (%2$d).
+         * @deprecated Use {@link Code#NO_PERMISSION}.
          */
         NO_PRIVATE_PERMISSION("You are not allowed to see a private task in "
             + "shared folder %1$s (%2$d).", Category.PERMISSION,
@@ -377,7 +379,12 @@ public class TaskException extends AbstractOXException {
          * Problem with a thread.
          */
         THREAD_ISSUE("Problem with a thread.", Category.CODE_ERROR,
-            Detail.OTHER, 45);
+            Detail.OTHER, 45),
+        /**
+         * You are not allowed to see the task %1$d in folder %2$s (%3$d).
+         */
+        NO_PERMISSION("You are not allowed to see the task %1$d in folder %2$s "
+            + "(%3$d).", Category.PERMISSION, Detail.PERMISSION, 46);
 
         /**
          * Message of the exception.

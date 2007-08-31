@@ -1,3 +1,7 @@
+* 2007-08-30 - marcus.klein@open-xchange.com
+
+ - Bugfix #7276: Fixed handling for task loading to not miss permission checks.
+
 * 2007-08-31 - thorben.betten@open-xchange.com
 
  - Bugfix #7862/#9125: Adding library with additional charsets to Java VM

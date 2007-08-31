@@ -107,15 +107,16 @@ public class TaskAuthorization implements AttachmentAuthorization {
         final User user, final UserConfiguration userConfig, final Context ctx)
         throws OXException {
         final TaskStorage storage = TaskStorage.getInstance();
-        Task task;
+        final FolderObject folder;
+        final Task task;
         try {
+            folder = Tools.getFolder(ctx, folderId);
             task = storage.selectTask(ctx, taskId, StorageType.ACTIVE);
         } catch (TaskException e) {
             throw Tools.convert(e);
         }
         try {
-            Permission.canReadInFolder(ctx, user.getId(), user.getGroups(),
-                userConfig, folderId, task.getCreatedBy());
+            Permission.canReadInFolder(ctx, user, userConfig, folder, task);
         } catch (TaskException e) {
             throw Tools.convert(e);
         }

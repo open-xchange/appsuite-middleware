@@ -253,6 +253,23 @@ public abstract class FolderStorage {
     abstract int[][] searchFolderByUser(Context ctx, Connection readCon,
         int userId, StorageType type) throws TaskException;
 
+    /**
+     * @param folders Set of task folder mappings.
+     * @param userId unique identifier of a user.
+     * @return the folder mapping for the user.
+     */
+    static Folder extractFolderOfUser(final Set<Folder> folders,
+        final int userId) {
+        Folder retval = null;
+        for (Folder folder : folders) {
+            if (folder.getUser() == userId) {
+                retval = folder;
+                break;
+            }
+        }
+        return retval;
+    }
+
     static Folder getFolder(final Set<Folder> folders, final int folderId) {
         Folder retval = null;
         for (Folder folder : folders) {
