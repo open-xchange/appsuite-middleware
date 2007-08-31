@@ -1,3 +1,7 @@
+* 2007-08-31 - choeger@open-xchange.com
+
+  - Bugfix ID#9156 Malformed path to HTMLEntities.properties
+
 * 2007-08-22 - dennis.sieben@open-xchange.com
 
   - Bugfix ID#9023 createcontext name should be added to lmappings
