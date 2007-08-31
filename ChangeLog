@@ -1,3 +1,9 @@
+* 2007-08-31 - thorben.betten@open-xchange.com
+
+ - Bugfix #7862/#9125: Adding library with additional charsets to Java VM
+   to solve encoding problems with messages which uses java-foreign charset
+   encodings
+
 * 2007-08-30 - francisco.laguna@open-xchange.com
 
  - Bugfix #9159: explicitely initializing infostore document metadat
