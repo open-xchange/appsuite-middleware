@@ -55,7 +55,6 @@ import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.MailFolderObject;
 import com.openexchange.groupware.container.mail.JSONMessageAttachmentObject;
 import com.openexchange.groupware.container.mail.JSONMessageObject;
-import com.openexchange.groupware.upload.UploadEvent;
 import com.openexchange.tools.iterator.SearchIterator;
 
 /**
@@ -218,7 +217,7 @@ public interface MailInterface {
 	 * and its possible file attachments contained in given instance of
 	 * <code>uploadEvent</code>.
 	 */
-	public String sendMessage(JSONMessageObject msgObj, UploadEvent uploadEvent, int sendType) throws OXException;
+	public String sendMessage(JSONMessageObject msgObj, int sendType) throws OXException;
 
 	/**
 	 * Creates an instance of <code>JSONMessageObject</code> which contains

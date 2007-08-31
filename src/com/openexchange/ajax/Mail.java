@@ -2541,7 +2541,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 					/*
 					 * Send message
 					 */
-					msgIdentifier = mailInterface.sendMessage(msgObj, uploadEvent, sendType);
+					msgIdentifier = mailInterface.sendMessage(msgObj, sendType);
 					if (msgIdentifier == null) {
 						throw new OXMailException(MailCode.SEND_FAILED_UNKNOWN);
 					}

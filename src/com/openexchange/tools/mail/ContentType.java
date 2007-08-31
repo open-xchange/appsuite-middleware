@@ -181,6 +181,18 @@ public final class ContentType implements Serializable {
 	}
 
 	/**
+	 * Applies given content type to this content type
+	 * 
+	 * @param contentType
+	 *            The content type to apply
+	 * @throws OXException
+	 */
+	public void setContentType(final ContentType contentType) throws OXException {
+		setBaseType(contentType.getBaseType());
+		this.parameters.putAll(contentType.parameters);
+	}
+
+	/**
 	 * @return primary type
 	 */
 	public String getPrimaryType() {

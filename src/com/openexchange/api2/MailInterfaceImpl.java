@@ -150,7 +150,6 @@ import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
-import com.openexchange.groupware.upload.UploadEvent;
 import com.openexchange.i18n.StringHelper;
 import com.openexchange.imap.IMAPCapabilities;
 import com.openexchange.imap.IMAPPropertyException;
@@ -3137,7 +3136,7 @@ public class MailInterfaceImpl implements MailInterface {
 	 * @see com.openexchange.api2.MailInterface#sendMessage(com.openexchange.groupware.container.mail.JSONMessageObject,
 	 *      com.openexchange.groupware.upload.UploadEvent, int)
 	 */
-	public String sendMessage(final JSONMessageObject msgObj, final UploadEvent uploadEvent, final int sendType)
+	public String sendMessage(final JSONMessageObject msgObj, final int sendType)
 			throws OXException {
 		try {
 			init();
@@ -3245,7 +3244,7 @@ public class MailInterfaceImpl implements MailInterface {
 					 */
 					final MessageFiller msgFiller = new MessageFiller(sessionObj, originalMsg, imapCon.getSession(),
 							draftFolder);
-					msgFiller.fillMessage(msgObj, newSMTPMsg, uploadEvent, sendType);
+					msgFiller.fillMessage(msgObj, newSMTPMsg, sendType);
 					checkAndCreateFolder(draftFolder, inboxFolder);
 					if (!draftFolder.isOpen()) {
 						draftFolder.open(Folder.READ_WRITE);
@@ -3331,7 +3330,7 @@ public class MailInterfaceImpl implements MailInterface {
 				 */
 				final MessageFiller msgFiller = new MessageFiller(sessionObj, originalMsg, imapCon.getSession(), usm
 						.isNoCopyIntoStandardSentFolder() ? null : sentFolder);
-				msgFiller.fillMessage(msgObj, newSMTPMsg, uploadEvent, sendType);
+				msgFiller.fillMessage(msgObj, newSMTPMsg, sendType);
 				/*
 				 * Check recipients
 				 */

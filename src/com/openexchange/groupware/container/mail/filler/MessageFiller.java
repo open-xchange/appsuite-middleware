@@ -102,9 +102,8 @@ import com.openexchange.groupware.container.mail.parser.PartMessageHandler;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.upload.AJAXUploadFile;
-import com.openexchange.groupware.upload.UploadEvent;
-import com.openexchange.imap.IMAPPropertyException;
 import com.openexchange.imap.IMAPProperties;
+import com.openexchange.imap.IMAPPropertyException;
 import com.openexchange.imap.MessageHeaders;
 import com.openexchange.imap.OXMailException;
 import com.openexchange.imap.UserSettingMail;
@@ -253,7 +252,7 @@ public final class MessageFiller {
 	}
 
 	public void fillMessage(final JSONMessageObject msgObj, final MimeMessage newMimeMessage,
-			final UploadEvent uploadEvent, final int sendType) throws IOException, MessagingException, OXException,
+			final int sendType) throws IOException, MessagingException, OXException,
 			JSONException {
 		/*
 		 * Set headers
@@ -518,7 +517,7 @@ public final class MessageFiller {
 			for (int i = 0; i < nestedMsgSize; i++) {
 				final JSONMessageObject nestedMsgObj = iter.next();
 				final MimeMessage nestedMsg = new MimeMessage(mailSession);
-				fillMessage(nestedMsgObj, nestedMsg, uploadEvent, sendType);
+				fillMessage(nestedMsgObj, nestedMsg, sendType);
 				final MimeBodyPart msgBodyPart = new MimeBodyPart();
 				msgBodyPart.setContent(nestedMsg, MIME_MESSAGE_RFC822);
 				primaryMultipart.addBodyPart(msgBodyPart);
