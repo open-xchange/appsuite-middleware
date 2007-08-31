@@ -222,8 +222,10 @@ public final class Html2TextConverter {
 		return addSimpleQuote(htmlContent, 1);
 	}
 
+	private static final String SPLIT_BREAK = "<br */?>";
+
 	private static String addSimpleQuote(final String htmlContent, final int quoteLevel) {
-		final String[] lines = htmlContent.split("<br */?>");
+		final String[] lines = htmlContent.split(SPLIT_BREAK);
 		final StringBuilder sb = new StringBuilder(htmlContent.length() + 256);
 		for (int i = 0; i < lines.length; i++) {
 			for (int j = 0; j < quoteLevel; j++) {
@@ -243,7 +245,7 @@ public final class Html2TextConverter {
 		reset();
 		final StringBuilder result = new StringBuilder(1024);
 		final StringBuilder result2 = new StringBuilder(1024);
-		final StringReader input = new StringReader(htmlContent);
+		final StringReader input = new StringReader(removeStyleSheets(htmlContent));
 		try {
 			String text = null;
 			int c = input.read();
@@ -259,11 +261,15 @@ public final class Html2TextConverter {
 					text = convertTag(CurrentTag, in_body ? getLastChar(result) : getLastChar(result2));
 				} else if (c == '&') {
 					final String special = getSpecial(input);
-					final String tmp = getHTMLEntity(special);
-					if (tmp == null) {
-						text = '&' + special;
+					if (special.length() > 0) {
+						final String tmp = getHTMLEntity(special);
+						if (tmp == null) {
+							text = '&' + special;
+						} else {
+							text = tmp;
+						}
 					} else {
-						text = tmp;
+						text = '&' + special;
 					}
 				} else if (!pre && Character.isWhitespace((char) c)) {
 					final StringBuilder s = in_body ? result : result2;
@@ -296,6 +302,19 @@ public final class Html2TextConverter {
 			return NONE;
 		}
 		return sb.charAt(sb.length() - 1);
+	}
+
+	private static final Pattern PAT_STYLE_RM = Pattern.compile("<style[^>]*>.*?</style[^>]*>",
+			Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+
+	private static String removeStyleSheets(final String htmlContent) {
+		final Matcher m = PAT_STYLE_RM.matcher(htmlContent);
+		final StringBuffer sb = new StringBuffer(htmlContent.length());
+		while (m.find()) {
+			m.appendReplacement(sb, "");
+		}
+		m.appendTail(sb);
+		return sb.toString();
 	}
 
 	private static String getTag(final Reader r) throws IOException {
@@ -338,8 +357,8 @@ public final class Html2TextConverter {
 	}
 
 	private static boolean isTag(final String tag, final String pattern) {
-		return tag.regionMatches(true, 0, '<' + pattern + '>', 0, pattern.length() + 2)
-				|| tag.regionMatches(true, 0, '<' + pattern + ' ', 0, pattern.length() + 2);
+		return Pattern.compile(new StringBuilder(16).append('<').append(pattern).append("[^>]*>").toString(),
+				Pattern.CASE_INSENSITIVE).matcher(tag).matches();
 	}
 
 	private static final Pattern PATTERN_HREF_CONTENT = Pattern.compile("href=\"?([^\\s\">]+)\"?",
@@ -363,10 +382,10 @@ public final class Html2TextConverter {
 		} else if (isTag(t, "/center")) {
 			result = LINEBREAK;
 		} else if (isTag(t, "pre")) {
-			//result = LINEBREAK;
+			// result = LINEBREAK;
 			pre = true;
 		} else if (isTag(t, "/pre")) {
-			//result = LINEBREAK;
+			// result = LINEBREAK;
 			pre = false;
 		} else if (isTag(t, "p")) {
 			if (prevChar == NONE) {

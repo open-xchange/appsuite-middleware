@@ -5,6 +5,7 @@
    encodings
  - Bugfix #9169: Sorting messages by date fields (either sent date or
    received date) is no more mixed up with ascending/descending order
+ - Bugfix #9161: Proper htm2text conversion
 
 * 2007-08-30 - francisco.laguna@open-xchange.com
 
