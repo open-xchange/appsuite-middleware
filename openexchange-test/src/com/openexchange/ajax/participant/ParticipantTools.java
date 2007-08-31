@@ -84,9 +84,17 @@ public final class ParticipantTools {
             + hostName, sessionId);
         final List<Participant> participants = new ArrayList<Participant>();
         for (ContactObject userContact : userContacts) {
-            final UserParticipant user = new UserParticipant();
-            user.setIdentifier(userContact.getInternalUserId());
+            final UserParticipant user = new UserParticipant(userContact
+                .getInternalUserId());
             participants.add(user);
+        }
+        return participants;
+    }
+
+    public static List<Participant> createParticipants(final int... userIds) {
+        final List<Participant> participants = new ArrayList<Participant>();
+        for (int userId : userIds) {
+            participants.add(new UserParticipant(userId));
         }
         return participants;
     }

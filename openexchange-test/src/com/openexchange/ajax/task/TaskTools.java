@@ -171,6 +171,9 @@ public final class TaskTools extends Assert {
         return insertR.getResponse();
     }
 
+    /**
+     * @deprecated use {@link #insert(AJAXClient, InsertRequest)}.
+     */
     public static InsertResponse insert(final AJAXSession session,
         final InsertRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
@@ -231,6 +234,9 @@ public final class TaskTools extends Assert {
             .getObjectID(), jsonObj, lastModified);
     }
 
+    /**
+     * @deprecated use {@link #update(AJAXClient, UpdateRequest)}.
+     */
     public static UpdateResponse update(final AJAXSession session,
         final UpdateRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
@@ -260,6 +266,9 @@ public final class TaskTools extends Assert {
         return response;
     }
 
+    /**
+     * @deprecated use {@link #get(AJAXClient, GetRequest)}.
+     */
     public static GetResponse get(final AJAXSession session,
         final GetRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
@@ -305,6 +314,9 @@ public final class TaskTools extends Assert {
         assertFalse(response.getErrorMessage(), response.hasError());
     }
 
+    /**
+     * @deprecated use {@link #delete(AJAXClient, DeleteRequest)}
+     */
     public static DeleteResponse delete(final AJAXSession session,
         final DeleteRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
