@@ -79,6 +79,6 @@ CalendarSQL=com.openexchange.groupware.calendar.CalendarMySQL
 
 # Location of the HTMLEntities.properties configuration file. This file
 # contains the most HTML entities and maps them to their character value
-HTMLEntities=@oxgroupwaresysconfdir@/HTMLEntities.properties
+HTMLEntities=@serverconfdir@/HTMLEntities.properties
 
 SERVER_NAME=local
