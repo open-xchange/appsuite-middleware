@@ -1631,7 +1631,7 @@ public class MailInterfaceImpl implements MailInterface {
 				}
 			}
 			boolean applicationSort = true;
-			if (IMAPProperties.isImapSort()) {
+			if (IMAPProperties.isImapSort() && IMAPProperties.getImapCapabilities().hasSort()) {
 				try {
 					if (search) {
 						if (retval == null || retval.length == 0) {

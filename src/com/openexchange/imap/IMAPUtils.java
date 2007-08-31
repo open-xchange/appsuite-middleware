@@ -704,24 +704,10 @@ public class IMAPUtils {
 		final StringBuilder imapSortCritBuilder = new StringBuilder().append(descendingDirection ? "REVERSE " : "");
 		switch (sortField) {
 		case JSONMessageObject.FIELD_SENT_DATE:
-			/*
-			 * Special treatment for DATE
-			 */
-			if (descendingDirection) {
-				imapSortCritBuilder.append("DATE");
-			} else {
-				imapSortCritBuilder.append("REVERSE DATE");
-			}
+			imapSortCritBuilder.append("DATE");
 			break;
 		case JSONMessageObject.FIELD_RECEIVED_DATE:
-			/*
-			 * Special treatment for DATE
-			 */
-			if (descendingDirection) {
-				imapSortCritBuilder.append("DATE");
-			} else {
-				imapSortCritBuilder.append("REVERSE DATE");
-			}
+			imapSortCritBuilder.append("ARRIVAL");
 			break;
 		case JSONMessageObject.FIELD_FROM:
 			imapSortCritBuilder.append("FROM");
@@ -1446,7 +1432,7 @@ public class IMAPUtils {
 						final Date d1 = msg1.getSentDate();
 						final Date d2 = msg2.getSentDate();
 						final Integer refComp = compareReferences(d1, d2);
-						return refComp == null ? (d1.compareTo(d2) * (-1)) : refComp.intValue();
+						return refComp == null ? d1.compareTo(d2) : refComp.intValue();
 					}
 				};
 			case JSONMessageObject.FIELD_RECEIVED_DATE:
@@ -1456,7 +1442,7 @@ public class IMAPUtils {
 						final Date d1 = msg1.getReceivedDate();
 						final Date d2 = msg2.getReceivedDate();
 						final Integer refComp = compareReferences(d1, d2);
-						return refComp == null ? (d1.compareTo(d2) * (-1)) : refComp.intValue();
+						return refComp == null ? d1.compareTo(d2) : refComp.intValue();
 					}
 				};
 			case JSONMessageObject.FIELD_FROM:
