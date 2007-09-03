@@ -101,8 +101,16 @@ public class OXLogin extends OXCommonImpl implements OXLoginInterface {
     }
 
     public void login(final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
-        doNullCheck(auth);
-        new BasicAuthenticator().doAuthentication(auth);
+        try {
+            doNullCheck(new String[] { "auth" }, new Object[] { auth });
+            new BasicAuthenticator().doAuthentication(auth);
+        } catch (final InvalidDataException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (final InvalidCredentialsException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        }
     }
 
     public User login2User(final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
