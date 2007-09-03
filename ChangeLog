@@ -1,3 +1,7 @@
+* 2007-09-03 - ben.pahne@open-xchange.com
+ 
+  - Fixed Bug 9154: Movings contacts not working
+ 
 * 2007-08-30 - marcus.klein@open-xchange.com
 
  - Bugfix #7276: Fixed handling for task loading to not miss permission checks.
