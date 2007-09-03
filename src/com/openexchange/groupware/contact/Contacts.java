@@ -821,11 +821,12 @@ public class Contacts implements DeleteListener {
 			int cnt = 0;
 			for (int i=0;i<650;i++){
 				if (mapping[i] != null && !mapping[i].compare(co, original)){
+
 					if (i == ContactObject.SUR_NAME && co.containsSurName() && (co.getSurName() == null || co.getSurName().length() < 1)){
 						//System.out.println("---> "+co.getSurName());
-						throw EXCEPTIONS.createOXConflictException(63,ctx.getContextId());
+						//throw EXCEPTIONS.createOXConflictException(63,ctx.getContextId());
+						co.setSurName(original.getSurName());
 					}
-					
 					mod[cnt] = i;
 					cnt ++;
 				}
