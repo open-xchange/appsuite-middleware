@@ -16,15 +16,15 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 #: com/openexchange/groupware/i18n/FolderStrings.java:62
-msgid "Private Folders"
+msgid "Private folders"
 msgstr ""
 
 #: com/openexchange/groupware/i18n/FolderStrings.java:64
-msgid "Public Folders"
+msgid "Public folders"
 msgstr ""
 
 #: com/openexchange/groupware/i18n/FolderStrings.java:66
-msgid "Shared Folders"
+msgid "Shared folders"
 msgstr ""
 
 #: com/openexchange/groupware/i18n/FolderStrings.java:68
@@ -32,15 +32,15 @@ msgid "System"
 msgstr ""
 
 #: com/openexchange/groupware/i18n/FolderStrings.java:70
-msgid "Shared Address Book"
+msgid "Shared address book"
 msgstr ""
 
 #: com/openexchange/groupware/i18n/FolderStrings.java:72
-msgid "Global Address Book"
+msgid "Global address book"
 msgstr ""
 
 #: com/openexchange/groupware/i18n/FolderStrings.java:74
-msgid "OX Folders"
+msgid "OX folders"
 msgstr ""
 
 #: com/openexchange/groupware/i18n/FolderStrings.java:76
@@ -56,23 +56,23 @@ msgid "Userstore"
 msgstr ""
 
 #: com/openexchange/groupware/i18n/FolderStrings.java:82
-msgid "Other Task Folders"
+msgid "Other task folders"
 msgstr ""
 
 #: com/openexchange/groupware/i18n/FolderStrings.java:84
-msgid "Other Calendar Folders"
+msgid "Other calendar folders"
 msgstr ""
 
 #: com/openexchange/groupware/i18n/FolderStrings.java:86
-msgid "Other Contact Folders"
+msgid "Other contact folders"
 msgstr ""
 
 #: com/openexchange/groupware/i18n/FolderStrings.java:88
-msgid "Other Infostore Folders"
+msgid "Other infostore folders"
 msgstr ""
 
 #: com/openexchange/groupware/i18n/FolderStrings.java:90
-msgid "My Infostore Folder"
+msgid "My infostore folder"
 msgstr ""
 
 #: com/openexchange/groupware/i18n/FolderStrings.java:92
