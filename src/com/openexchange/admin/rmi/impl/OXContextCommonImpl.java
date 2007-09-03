@@ -106,20 +106,14 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
 
     protected Context createcommon(final Context ctx, final User admin_user, final Database db, final Credentials auth) throws InvalidCredentialsException, ContextExistsException, InvalidDataException, StorageException {
         try{
-            doNullCheck(ctx,admin_user);
-        } catch (final InvalidDataException e1) {
-            final InvalidDataException invalidDataException = new InvalidDataException("Context or user not correct");
-            log.error(invalidDataException.getMessage(), invalidDataException);
-            throw invalidDataException;
-        }
+            doNullCheck(new String[] { "ctx", "admin_user" }, new Object[] { ctx, admin_user });
 
-        new BasicAuthenticator().doAuthentication(auth);
+            new BasicAuthenticator().doAuthentication(auth);
+
+            if (log.isDebugEnabled()) {
+                log.debug(ctx + " - " + admin_user + " ");
+            }
         
-        if (log.isDebugEnabled()) {
-            log.debug(ctx + " - " + admin_user + " ");
-        }
-        
-        try {
             final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
             createchecks(ctx, admin_user, tool);
             final String name = ctx.getName();
@@ -136,6 +130,9 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
             log.error(e.getMessage(),e);
             throw e;
         } catch (final InvalidDataException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (final InvalidCredentialsException e) {
             log.error(e.getMessage(), e);
             throw e;
         } catch (final StorageException e) {
