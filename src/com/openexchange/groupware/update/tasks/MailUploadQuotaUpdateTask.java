@@ -67,28 +67,38 @@ import com.openexchange.groupware.update.exception.Classes;
 import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
 
 /**
- * DelFolderTreeTableUpdateTask
+ * MailUploadQuotaUpdateTask
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  *
  */
 @OXExceptionSource(classId = Classes.UPDATE_TASK, component = Component.UPDATE)
-public class DelFolderTreeTableUpdateTask implements UpdateTask {
+public final class MailUploadQuotaUpdateTask implements UpdateTask {
 	
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(DelFolderTreeTableUpdateTask.class);
+			.getLog(MailUploadQuotaUpdateTask.class);
 	
-	private static final UpdateExceptionFactory EXCEPTION = new UpdateExceptionFactory(DelFolderTreeTableUpdateTask.class);
+	private static final UpdateExceptionFactory EXCEPTION = new UpdateExceptionFactory(MailUploadQuotaUpdateTask.class);
 
-	/* (non-Javadoc)
+	/**
+	 * Default constructor
+	 */
+	public MailUploadQuotaUpdateTask() {
+		super();
+	}
+
+	/*
+	 * (non-Javadoc)
 	 * 
 	 * @see com.openexchange.groupware.update.UpdateTask#addedWithVersion()
 	 */
 	public int addedWithVersion() {
-		return 4;
+		return 6;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.openexchange.groupware.update.UpdateTask#getPriority()
 	 */
 	public int getPriority() {
@@ -97,15 +107,24 @@ public class DelFolderTreeTableUpdateTask implements UpdateTask {
 		 */
 		return UpdateTask.UpdateTaskPriority.HIGHEST.priority;
 	}
-	
-	private static final String STR_INFO = "Performing update task 'DelFolderTreeTableUpdateTask'";
-	
-	private static final String SQL_MODIFY = "ALTER TABLE del_oxfolder_tree MODIFY `fname` VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL";
 
-	/* (non-Javadoc)
-	 * @see com.openexchange.groupware.update.UpdateTask#perform(com.openexchange.groupware.update.Schema, int)
+	private static final String STR_INFO = "Performing update task 'MailUploadQuotaUpdateTask'";
+
+	private static final String SQL_MODIFY01 = "ALTER TABLE user_setting_mail MODIFY `upload_quota` INT4 DEFAULT -1";
+
+	private static final String SQL_MODIFY02 = "ALTER TABLE user_setting_mail MODIFY `upload_quota_per_file` INT4 DEFAULT -1";
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.groupware.update.UpdateTask#perform(com.openexchange.groupware.update.Schema,
+	 *      int)
 	 */
-	@OXThrowsMultiple(category = { Category.CODE_ERROR }, desc = { "" }, exceptionId = { 1 }, msg = { "An SQL error occurred while performing task DelFolderTreeTableUpdateTask: %1$s." })
+	@OXThrowsMultiple(category = { Category.CODE_ERROR },
+			desc = { "" },
+			exceptionId = { 1 },
+			msg = { "An SQL error occurred while performing task MailUploadQuotaUpdateTask: %1$s." }
+	)
 	public void perform(final Schema schema, final int contextId) throws AbstractOXException {
 		if (LOG.isInfoEnabled()) {
 			LOG.info(STR_INFO);
@@ -115,9 +134,12 @@ public class DelFolderTreeTableUpdateTask implements UpdateTask {
 		try {
 			writeCon = Database.get(contextId, true);
 			try {
-				stmt = writeCon.prepareStatement(SQL_MODIFY);
+				stmt = writeCon.prepareStatement(SQL_MODIFY01);
 				stmt.executeUpdate();
-			} catch (SQLException e) {
+				stmt.close();
+				stmt = writeCon.prepareStatement(SQL_MODIFY02);
+				stmt.executeUpdate();
+			} catch (final SQLException e) {
 				throw EXCEPTION.create(1, e, e.getMessage());
 			}
 		} finally {

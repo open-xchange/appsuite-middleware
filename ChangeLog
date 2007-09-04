@@ -1,3 +1,7 @@
+* 2007-09-04 - thorben.betten@open-xchange.com
+
+ - Bugfix #8470: Applied provided patch
+
 * 2007-09-04 - ben.pahne@open-xchange.com
  
   - Fixed Bug 9204: Participant Notifications emails about tasks now sport
