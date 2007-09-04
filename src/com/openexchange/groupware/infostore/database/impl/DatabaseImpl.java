@@ -1694,10 +1694,11 @@ public class DatabaseImpl extends DBService {
 			} catch (final AbstractOXException e) {
 				try {
 					deleteVersionAction.undo();
-					throw new InfostoreException(e);
 				} catch (final AbstractOXException e1) {
 					LOG.fatal("Can't roll back deleting versions. Run the consistency tool.",e1);
 				}
+				throw new InfostoreException(e);
+				
 			}
 						
 			final FileStorage fs = getFileStorage(ctx);

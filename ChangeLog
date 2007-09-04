@@ -5,11 +5,16 @@
    matching IMAP server implementation could be found and ACLs are not
    supported/turned off
 
-* 2007-09-04 - ben.pahne@open-xchange.com
+* 2007-09-04 - francico.laguna@open-xchange.com
  
-  - Fixed Bug 9204: Participant Notifications emails about tasks now sport
+  - Fixed Bug #9204: Participant Notifications emails about tasks now sport
      the default DateFormat (not DateTimeFormat) for the users locale without
      timezone information.
+     
+  - Fixed Bug #9064: Added update task to fix name collision 
+     in personal infostore folder names.
+ 
+  - Fixed Bug #9112: Log filestore exception and provide simpler message
  
 * 2007-09-03 - ben.pahne@open-xchange.com
  
