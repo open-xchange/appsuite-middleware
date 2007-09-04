@@ -1,0 +1,246 @@
+package com.openexchange.groupware.update.tasks;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.openexchange.database.Database;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.Component;
+import com.openexchange.groupware.OXExceptionSource;
+import com.openexchange.groupware.OXThrowsMultiple;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.update.Schema;
+import com.openexchange.groupware.update.UpdateTask;
+import com.openexchange.groupware.update.exception.Classes;
+import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
+import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.server.DBPoolingException;
+
+@OXExceptionSource(classId = Classes.UPDATE_TASK, component = Component.UPDATE)
+
+@OXThrowsMultiple(category={Category.CODE_ERROR}, desc={""}, exceptionId={0}, msg={"A SQL Error occurred while resolving folder name conflicts: %s"})
+
+public class InfostoreRenamePersonalInfostoreFolders implements UpdateTask {
+
+	private static final Log LOG = LogFactory.getLog(InfostoreRenamePersonalInfostoreFolders.class);
+	private static final UpdateExceptionFactory EXCEPTIONS = new UpdateExceptionFactory(InfostoreRenamePersonalInfostoreFolders.class);
+	
+	public int addedWithVersion() {
+		return 8;
+	}
+
+	public int getPriority() {
+		return UpdateTask.UpdateTaskPriority.NORMAL.priority;
+	}
+
+	public void perform(Schema schema, int contextId)
+			throws AbstractOXException {
+		try {
+			List<NameCollision> collisions = NameCollision.getCollisions(contextId);
+			
+			for(NameCollision collision : collisions) {
+				collision.resolve();
+			}
+			
+		} catch (SQLException e) {
+			LOG.error("Error resolving name collisions: ",e);
+			EXCEPTIONS.create(1, e.getLocalizedMessage(), e);
+		}
+	}
+	
+	
+	private static final class NameCollision {
+		private String name;
+		private int contextId;
+		
+		private int nameCount = 1;
+		
+		public NameCollision(String name, int contextId) {
+			this.name = name;
+			this.contextId = contextId;
+		}
+		
+		public void resolve() throws SQLException, DBPoolingException {
+			LOG.info(String.format("Resolving name collisions for folders named %s in context %d", name, contextId));
+			
+			Connection writeCon = null;
+			PreparedStatement stmt = null;
+			PreparedStatement checkAvailable = null;
+			ResultSet rs = null;
+			
+			try {
+				writeCon = Database.get(contextId, true);
+				writeCon.setAutoCommit(false);
+				stmt = writeCon.prepareStatement("UPDATE oxfolder_tree SET fname = ? WHERE cid = ? and fuid = ?");
+				stmt.setInt(2, contextId);
+				
+				checkAvailable = writeCon.prepareStatement("SELECT 1 FROM oxfolder_tree WHERE cid = ? AND fname = ?");
+				checkAvailable.setInt(1, contextId);
+				
+				
+				List<Integer> rename = discoverIds(writeCon);
+			
+				for(int id : rename) {
+					String newName = String.format("%s (%d)", name, nameCount++);
+					boolean free = false;
+					while(!free) {
+						checkAvailable.setString(2,newName);
+						rs = checkAvailable.executeQuery();
+						free = !rs.next();
+						rs.close();
+						rs = null;
+						if(!free)
+							newName = String.format("%s (%d)", name, nameCount++);
+					}
+					stmt.setString(1, newName);
+					stmt.setInt(3, id);
+					stmt.executeUpdate();
+				}
+				
+				writeCon.commit();
+			} catch (SQLException x) {
+				try {
+					writeCon.rollback();
+				} catch (SQLException x2) {
+					LOG.error("Can't execute rollback.", x2);
+				}
+				throw x;
+			} finally {
+				if(stmt != null) {
+					try {
+						stmt.close();
+					} catch (SQLException x) {
+						LOG.warn("Couldn't close statement", x);
+					}
+				}
+				if(checkAvailable != null) {
+					try {
+						checkAvailable.close();
+					} catch (SQLException x) {
+						LOG.warn("Couldn't close statement", x);
+					}
+				}
+				
+				if(null != rs) {
+					try {
+						rs.close();
+					} catch (SQLException x) {
+						LOG.warn("Couldn't close result set", x);
+					}
+				}
+				
+				if(writeCon != null) {
+					try {
+						writeCon.setAutoCommit(true);
+					} catch (SQLException x){
+						LOG.warn("Can't reset auto commit", x);
+					}
+					
+					if(writeCon != null) {
+						Database.back(contextId, true, writeCon);
+					}
+				}
+			}
+		
+		}
+		
+		
+		private List<Integer> discoverIds(Connection writeCon) throws SQLException {
+			PreparedStatement stmt = null;
+			ResultSet rs = null;
+			List<Integer> ids = new ArrayList<Integer>();
+			try {
+				stmt = writeCon.prepareStatement("SELECT fuid FROM oxfolder_tree WHERE cid = ? and fname = ?");
+				stmt.setInt(1, contextId);
+				stmt.setString(2,name);
+				
+				rs = stmt.executeQuery();
+				while(rs.next()) { ids.add(rs.getInt(1)); }
+				
+				
+			} finally {
+				if(null != stmt) {
+					try {
+						stmt.close();
+					} catch (SQLException x) {
+						LOG.warn("Couldn't close statement:",x);
+					}
+				}
+				if(rs != null){
+					try {
+						rs.close();
+					} catch (SQLException x) {
+						LOG.warn("Couldn't close result set:",x);
+					}
+				}
+			}
+			
+			Collections.sort(ids);
+			ids.remove(ids.size()-1);
+			return ids;
+		}
+
+		public String getName(){
+			return name;
+		}
+		
+		public int getContextId(){
+			return contextId;
+		}
+		
+		
+		
+		public static List<NameCollision> getCollisions(int contextId) throws SQLException, DBPoolingException {
+			List<NameCollision> c = new ArrayList<NameCollision>();
+			Connection writeCon = null;
+			PreparedStatement stmt = null;
+			ResultSet rs = null;
+			try {
+				writeCon = Database.get(contextId, true);
+				stmt = writeCon.prepareStatement("SELECT fname, cid  FROM oxfolder_tree WHERE module = ? and parent = ? GROUP BY fname,cid,parent HAVING count(*) > 1");
+				stmt.setInt(1, FolderObject.INFOSTORE);
+				stmt.setInt(2, FolderObject.SYSTEM_INFOSTORE_FOLDER_ID);
+				
+				rs = stmt.executeQuery();
+				
+				while(rs.next()) {
+					NameCollision nc = new NameCollision(rs.getString(1), rs.getInt(2));
+					c.add(nc);
+				}
+				
+				rs.close();
+				rs = null;
+				
+				return c;
+			} finally {
+				
+				if(null != stmt)
+					try {
+						stmt.close();
+					} catch (SQLException x) {
+						LOG.warn("Couldn't close statement", x);
+					}
+				if(null != rs) {
+					try {
+						rs.close();
+					} catch (SQLException x) {
+						LOG.warn("Couldn't close result set", x);
+					}
+				}
+				
+				if(null != writeCon) {
+					Database.back(contextId, true, writeCon);
+				}
+			}
+		}
+	}
+
+}
