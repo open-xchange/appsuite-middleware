@@ -1,3 +1,9 @@
+* 2007-09-04 - ben.pahne@open-xchange.com
+ 
+  - Fixed Bug 9204: Participant Notifications emails about tasks now sport
+     the default DateFormat (not DateTimeFormat) for the users locale without
+     timezone information.
+ 
 * 2007-09-03 - ben.pahne@open-xchange.com
  
   - Fixed Bug 9154: Movings contacts not working

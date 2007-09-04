@@ -255,8 +255,7 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 			final StringHelper strings = new StringHelper(locale);
 			final Template createTemplate = new StringTemplate(strings.getString(msgKey));
 			
-			DateFormat df = DateFormat.getDateTimeInstance(DateFormat.DEFAULT,DateFormat.DEFAULT,locale);
-			df = tryAppendingTimeZone(df);
+			DateFormat df = state.getDateFormat(locale);
 			final List<EmailableParticipant> participants = receivers.get(locale);
 			
 			for(final EmailableParticipant p : participants) {
@@ -306,15 +305,6 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 			sendMessage(mmsg.title, mmsg.message, mmsg.addresses, sessionObj, obj, mmsg.folderId, state, suppressOXReminderHeader);
 		}
 		
-	}
-
-	private DateFormat tryAppendingTimeZone(final DateFormat df) {
-		if (df instanceof SimpleDateFormat) {
-			final SimpleDateFormat sdf = (SimpleDateFormat) df;
-			final String format = sdf.toPattern();
-			return new SimpleDateFormat(format+", z");
-		}
-		return df;
 	}
 
 	private String list(final SortedSet<String> sSet) {
@@ -660,6 +650,7 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 	// Special handling for Appointments or Tasks goes here
 	static interface State {
 		public boolean sendMail(UserSettingMail userSettingMail);
+		public DateFormat getDateFormat(Locale locale);
 		public void addSpecial(CalendarObject obj, Map<String,String> subst, EmailableParticipant p);
 		public int getModule();
 	}
@@ -717,7 +708,7 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 
 	}
 	
-	private static class AppointmentState extends LinkableState {
+	public static class AppointmentState extends LinkableState {
 
 		public boolean sendMail(final UserSettingMail userSettingMail) {
 			return userSettingMail.isNotifyAppointments();
@@ -733,9 +724,23 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 		public int getModule(){
 			return Types.APPOINTMENT;
 		}
+
+		public DateFormat getDateFormat(Locale locale) {
+			return tryAppendingTimeZone(DateFormat.getDateTimeInstance(DateFormat.DEFAULT,DateFormat.DEFAULT,locale));
+		}
+		
+		private DateFormat tryAppendingTimeZone(final DateFormat df) {
+			if (df instanceof SimpleDateFormat) {
+				final SimpleDateFormat sdf = (SimpleDateFormat) df;
+				final String format = sdf.toPattern();
+				return new SimpleDateFormat(format+", z");
+			}
+			return df;
+		}
+
 	}
 	
-	private static class TaskState extends LinkableState {
+	public static class TaskState extends LinkableState {
 
 		public boolean sendMail(final UserSettingMail userSettingMail) {
 			return userSettingMail.isNotifyTasks();
@@ -743,6 +748,10 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 		
 		public int getModule(){
 			return Types.TASK;
+		}
+
+		public DateFormat getDateFormat(Locale locale) {
+			return DateFormat.getDateInstance(DateFormat.DEFAULT, locale);
 		}
 		
 	}
