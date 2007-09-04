@@ -4,8 +4,10 @@ import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.sql.SQLException;
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
@@ -43,7 +45,6 @@ import com.openexchange.groupware.tasks.Task;
 import com.openexchange.i18n.StringTemplate;
 import com.openexchange.i18n.TemplateListResourceBundle;
 import com.openexchange.imap.UserSettingMail;
-import com.openexchange.imap.UserSettingMailStorage;
 import com.openexchange.sessiond.SessionObject;
 
 public class ParticipantNotifyTest extends TestCase{
@@ -125,6 +126,28 @@ public class ParticipantNotifyTest extends TestCase{
 		assertEquals("25",link);
 		
 		
+		
+	}
+	
+	
+	// Bug 9204
+	public void testDateFormat(){
+		Locale locale = Locale.GERMANY;
+		Calendar calendar = Calendar.getInstance(locale);
+		
+		calendar.set(2017, 4, 2, 13, 30,0);
+		String expect = "02.05.2017 13:30:00, CEST";
+		
+		DateFormat df = new ParticipantNotify.AppointmentState().getDateFormat(locale);
+		
+		assertEquals(expect,df.format(new Date(calendar.getTimeInMillis())));
+		
+		calendar.set(2017, 4, 2, 0, 0, 0);
+		expect = "02.05.2017";
+		
+		df = new ParticipantNotify.TaskState().getDateFormat(locale);
+		
+		assertEquals(expect,df.format(new Date(calendar.getTimeInMillis())));
 		
 	}
 	
@@ -556,6 +579,10 @@ public class ParticipantNotifyTest extends TestCase{
 		
 		public void setTemplateString(String template) {
 			object_link_template = new StringTemplate(template);
+		}
+		public DateFormat getDateFormat(Locale locale) {
+			// TODO Auto-generated method stub
+			return null;
 		}
 		
 		
