@@ -324,6 +324,9 @@ public abstract class User2IMAP {
 		}
 	}
 
+	/**
+	 * @return IP/Hostname of IMAP server and its port
+	 */
 	private static final Object[] getIMAPServer(final User sessionUser) throws IMAPPropertyException {
 		final String imapServer;
 		if (IMAPLoginType.GLOBAL.equals(IMAPProperties.getImapLoginType())) {

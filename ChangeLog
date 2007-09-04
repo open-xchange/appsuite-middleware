@@ -1,6 +1,9 @@
 * 2007-09-04 - thorben.betten@open-xchange.com
 
  - Bugfix #8470: Applied provided patch
+ - Bugfix #9231: Using Cyrus implementation as fallback for User2IMAP if no
+   matching IMAP server implementation could be found and ACLs are not
+   supported/turned off
 
 * 2007-09-04 - ben.pahne@open-xchange.com
  

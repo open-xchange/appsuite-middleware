@@ -58,6 +58,8 @@ import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import com.openexchange.imap.IMAPProperties;
+import com.openexchange.imap.IMAPPropertyException;
 import com.openexchange.imap.user2imap.User2IMAP.IMAPServer;
 import com.openexchange.imap.user2imap.User2IMAP.User2IMAPException;
 
@@ -127,6 +129,25 @@ public final class User2IMAPAutoDetector {
 			if (toLowerCase(info).indexOf(toLowerCase(iServers[i].getName())) > -1) {
 				return iServers[i];
 			}
+		}
+		try {
+			if (!IMAPProperties.isSupportsACLs()) {
+				/*
+				 * Return fallback implementation
+				 */
+				if (LOG.isWarnEnabled()) {
+					LOG
+							.warn(new StringBuilder(512)
+									.append("No IMAP server found that corresponds to greeting:\r\n\"")
+									.append(info.replaceAll("\r?\n", ""))
+									.append(
+											"\"\r\nSince ACLs are disabled (through file 'imap.properties') or not supported by IMAP server, \"")
+									.append(IMAPServer.CYRUS.getName()).append("\" is used as fallback."));
+				}
+				return IMAPServer.CYRUS;
+			}
+		} catch (final IMAPPropertyException e) {
+			throw new User2IMAPException(e);
 		}
 		throw new User2IMAPException(User2IMAPException.Code.UNKNOWN_IMAP_SERVER, info);
 	}
