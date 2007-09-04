@@ -128,7 +128,7 @@ public final class MessageUtils {
 	 * throw an instance of <code>{@link AddressException}</code>.
 	 * 
 	 * <pre>
-	 * final String quotedPersonal = quotePersonal(&quot;Doe, Jané&quot;);
+	 * final String quotedPersonal = quotePersonal(&quot;Doe, Jan&eacute;&quot;);
 	 * 
 	 * final String buildAddr = quotedPersonal + &quot; &lt;someone@somewhere.com&gt;&quot;;
 	 * System.out.println(buildAddr);
@@ -136,7 +136,7 @@ public final class MessageUtils {
 	 * 
 	 * final InternetAddress ia = new InternetAddress(buildAddr);
 	 * System.out.println(ia.toUnicodeString());
-	 * //Unicode Address: &quot;Doe, Jané&quot; &lt;someone@somewhere.com&gt;
+	 * //Unicode Address: &quot;Doe, Jan&eacute;&quot; &lt;someone@somewhere.com&gt;
 	 * </pre>
 	 * 
 	 * @param personal
