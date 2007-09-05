@@ -283,7 +283,7 @@ public abstract class AbstractAgent {
 	 */
 	protected final void addConnector(final String urlstr) throws Exception {
 		final JMXServiceURL url = new JMXServiceURL(urlstr);
-		final JMXConnectorServer cs = JMXConnectorServerFactory.newJMXConnectorServer(url, environment, mbs);
+		final JMXConnectorServer cs = JMXConnectorServerFactory.newJMXConnectorServer(url, null, mbs);
 		cs.start();
 		connectors.put(urlstr, cs);
 		printTrace("Connector on " + urlstr + " is started");

@@ -2,6 +2,7 @@
 
  - Bugfix #9252: Fixed checking access permission when getting a task.
  - Bugfix #6335: Checking for invalid characters in tasks.
+ - Reopen #8699: Removed listening on localhost to get JMX working again.
 
 * 2007-09-04 - thorben.betten@open-xchange.com
 
