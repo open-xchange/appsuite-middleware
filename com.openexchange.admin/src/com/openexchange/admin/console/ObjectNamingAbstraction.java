@@ -119,7 +119,7 @@ public abstract class ObjectNamingAbstraction extends BasicCommandlineOptions {
         }
         sb.append(" ");
         sb.append(type);
-        if( null != parser && null != parser.getOptionValue(this.noNewlineOption)) {
+        if( null != parser && parser.checkNoNewLine()) {
             final String output = sb.toString().replace("\n", "");
             if (followingtext) {
                 ps.print(output);

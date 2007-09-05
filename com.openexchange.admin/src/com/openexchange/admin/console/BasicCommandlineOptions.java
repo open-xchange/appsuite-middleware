@@ -152,9 +152,6 @@ public abstract class BasicCommandlineOptions {
     protected static final String OPT_NAME_CSVOUTPUT_LONG = "csv";
     protected static final String OPT_NAME_CSVOUTPUT_DESCRIPTION = "Format output to csv";
 
-    protected static final String OPT_NAME_NONEWLINE_LONG = "nonl";
-    protected static final String OPT_NAME_NONEWLINE_DESCRIPTION = "Remove all newlines (\\n) from output";
-    
     private static final String []ENV_OPTIONS = 
         new String[]{ "RMI_HOSTNAME", "COMMANDLINE_TIMEZONE", "COMMANDLINE_DATEFORMAT" };
     protected static String RMI_HOSTNAME ="rmi://localhost:1099/";
@@ -167,7 +164,6 @@ public abstract class BasicCommandlineOptions {
     protected Option adminPassOption = null;
     protected Option searchOption = null;
     protected Option csvOutputOption = null;
-    protected Option noNewlineOption = null;
     
     // Used for right error output
     protected Integer ctxid = null;
@@ -241,7 +237,7 @@ public abstract class BasicCommandlineOptions {
     protected final void printServerException(final Exception e, final AdminParser parser){
         String output = "";
         final String msg = e.getMessage();
-        if( parser != null && parser.getOptionValue(this.noNewlineOption) != null ) {
+        if( parser != null && parser.checkNoNewLine() ) {
             if( msg != null ) {
                 output = "Server response: " + msg.replace("\n", "");
             } else {
@@ -272,7 +268,7 @@ public abstract class BasicCommandlineOptions {
         if( parser == null ) {
             output = msg;
         } else {
-            if (parser.getOptionValue(this.noNewlineOption) != null) {
+            if (parser.checkNoNewLine()) {
                 output =  msg.replace("\n", "");
             } else {
                 output = msg;
@@ -426,10 +422,6 @@ public abstract class BasicCommandlineOptions {
         this.csvOutputOption = setLongOpt(admp, OPT_NAME_CSVOUTPUT_LONG, OPT_NAME_CSVOUTPUT_DESCRIPTION, false, false);
     }
     
-    protected final void setNoNewlineOption(final AdminParser admp) {
-        this.noNewlineOption = setLongOpt(admp, OPT_NAME_NONEWLINE_LONG, OPT_NAME_NONEWLINE_DESCRIPTION, false, false);
-    }
-
     protected void setAdminUserOption(final AdminParser admp) {
         this.adminUserOption= setShortLongOpt(admp,OPT_NAME_ADMINUSER_SHORT, OPT_NAME_ADMINUSER_LONG, OPT_NAME_ADMINUSER_DESCRIPTION, true, NeededQuadState.possibly);
     }
@@ -482,14 +474,12 @@ public abstract class BasicCommandlineOptions {
         setContextOption(admp, NeededQuadState.needed);
         setAdminUserOption(admp); 
         setAdminPassOption(admp);
-        setNoNewlineOption(admp);
     }
 
     
     protected final void setDefaultCommandLineOptionsWithoutContextID(final AdminParser parser) {          
         setAdminUserOption(parser);
         setAdminPassOption(parser);
-        setNoNewlineOption(parser);
     }
 
     protected void sysexit(final int exitcode) {
