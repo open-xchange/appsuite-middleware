@@ -77,6 +77,10 @@ public class AdminParser extends CmdLineParser {
     
     private static final String OPT_EXTENDED_LONG = "extendedoptions";
     
+    private static final String OPT_NAME_NONEWLINE_LONG = "nonl";
+    
+    private static final String OPT_NAME_NONEWLINE_DESCRIPTION = "Remove all newlines (\\n) from output";
+    
     private ArrayList<OptionInfo> optinfolist = new ArrayList<OptionInfo>();
     
     private String appname = null;
@@ -88,6 +92,8 @@ public class AdminParser extends CmdLineParser {
     private Option checkuniquenessoption;
     
     private Option extendedoption;
+    
+    private Option noNewlineOption;
     
     private class OptionInfo {
         public NeededQuadState needed = NeededQuadState.notneeded;
@@ -179,6 +185,7 @@ public class AdminParser extends CmdLineParser {
         this.helpoption = this.addOption(OPT_HELP_SHORT, OPT_HELP_LONG, null, "Prints a help text", NeededQuadState.notneeded, false);
         this.envoption = this.addOption(OPT_ENVOPTS_LONG, "Output this help text", "Show info about commandline environment", false, false);
         this.checkuniquenessoption = this.addOption(OPT_CHECK_UNIQUENESS, "Checks if short parameters are unique", false, false, true);
+        this.noNewlineOption = this.addOption(OPT_NAME_NONEWLINE_LONG, OPT_NAME_NONEWLINE_DESCRIPTION, false, false, false);
     }
 
     
@@ -318,6 +325,12 @@ public class AdminParser extends CmdLineParser {
         }
     }
 
+    public final boolean checkNoNewLine() {
+        if (null != this.getOptionValue(this.noNewlineOption)) {
+            return true;
+        }
+        return false;
+    }
 
     // As parse is declared final in CmdLineParser we cannot override it so we use another
     // function name here

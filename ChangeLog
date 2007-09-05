@@ -1,3 +1,7 @@
+* 2007-09-05 - dennis.sieben@open-xchange.com
+
+  - Bugfix ID#9254 showruntimestats gives NullPointerException
+  
 * 2007-08-31 - choeger@open-xchange.com
 
   - Bugfix ID#9156 Malformed path to HTMLEntities.properties
