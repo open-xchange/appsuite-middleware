@@ -66,7 +66,7 @@ import com.openexchange.groupware.tasks.Task;
  * Tests problem described in bug #9295.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class Bug9295Test extends AbstractTaskTest {
+public class Bug9252Test extends AbstractTaskTest {
 
     private AJAXClient client1;
 
@@ -75,7 +75,7 @@ public class Bug9295Test extends AbstractTaskTest {
     /**
      * @param name
      */
-    public Bug9295Test(final String name) {
+    public Bug9252Test(final String name) {
         super(name);
     }
 
