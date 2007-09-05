@@ -1,3 +1,7 @@
+* 2007-09-05 - dennis.sieben@open-xchange.com
+
+  - Bugfix ID#9254 showruntimestats gives NullPointerException
+
 * 2007-08-22 - dennis.sieben@open-xchange.com
 
   - Bugfix ID#9023 createcontext name should be added to lmappings
