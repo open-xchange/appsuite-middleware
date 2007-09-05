@@ -384,7 +384,12 @@ public class TaskException extends AbstractOXException {
          * You are not allowed to see the task %1$d in folder %2$s (%3$d).
          */
         NO_PERMISSION("You are not allowed to see the task %1$d in folder %2$s "
-            + "(%3$d).", Category.PERMISSION, Detail.PERMISSION, 46);
+            + "(%3$d).", Category.PERMISSION, Detail.PERMISSION, 46),
+        /**
+         * Task contains invalid data: "%1$s"
+         */
+        INVALID_DATA("Task contains invalid data: \"%1$s\"", Category
+            .USER_INPUT, Detail.OTHER, 47);
 
         /**
          * Message of the exception.

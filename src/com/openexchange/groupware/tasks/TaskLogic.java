@@ -79,6 +79,7 @@ import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.data.Check;
 import com.openexchange.groupware.ldap.GroupStorage;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
@@ -121,6 +122,7 @@ public final class TaskLogic {
         final UserConfiguration userConfig,
         final Set<TaskParticipant> participants) throws TaskException {
         checkMissingAttributes(task, userId);
+        checkData(task);
         checkDates(task);
         checkStateAndProgress(task);
         Permission.checkDelegation(userConfig, task.getParticipants());
@@ -152,6 +154,7 @@ public final class TaskLogic {
         if (!task.containsModifiedBy()) {
             task.setModifiedBy(user.getId());
         }
+        checkData(task);
         checkDates(task);
         checkStateAndProgress(task);
         Permission.checkDelegation(userConfig, task.getParticipants());
@@ -205,6 +208,22 @@ public final class TaskLogic {
         }
         if (!task.containsNumberOfAttachments()) {
             task.setNumberOfAttachments(0);
+        }
+    }
+
+    /**
+     * Checks every string attribute of a task for invalid characters.
+     * @param task task to check.
+     * @throws TaskException if a string contains invalid characters.
+     */
+    private static void checkData(final Task task) throws TaskException {
+        for (Mapper<String> mapper : Mapping.STRING_MAPPERS) {
+            if (mapper.isSet(task) && null != mapper.get(task)) {
+                final String result = Check.containsInvalidChars(mapper.get(task));
+                if (null != result) {
+                    throw new TaskException(Code.INVALID_DATA, result);
+                }
+            }
         }
     }
 

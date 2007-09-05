@@ -1,6 +1,7 @@
 * 2007-09-05 - marcus.klein@open-xchange.com
 
  - Bugfix #9252: Fixed checking access permission when getting a task.
+ - Bugfix #6335: Checking for invalid characters in tasks.
 
 * 2007-09-04 - thorben.betten@open-xchange.com
 

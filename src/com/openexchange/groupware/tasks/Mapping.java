@@ -49,15 +49,19 @@
 
 package com.openexchange.groupware.tasks;
 
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -151,7 +155,7 @@ public final class Mapping {
     /**
      * Mapping array for all object attributes.
      */
-    static final Mapper[] MAPPERS = new Mapper[] {
+    public static final Mapper<?>[] MAPPERS = new Mapper<?>[] {
         new Mapper<Boolean>() {
             public int getId() {
                 return Task.PRIVATE_FLAG;
@@ -1165,6 +1169,8 @@ public final class Mapping {
         }
     };
 
+    public static final Mapper<String>[] STRING_MAPPERS;
+
     /**
      * Implements equal with check if one of the objects is <code>null</code>.
      * @param obj1 first object.
@@ -1192,7 +1198,7 @@ public final class Mapping {
      * @return the mapper implementation for the given attribute.
      */
     public static Mapper getMapping(final int attributeId) {
-        return ID_MAPPING.get(attributeId);
+        return ID_MAPPING.get(Integer.valueOf(attributeId));
     }
 
     /**
@@ -1204,17 +1210,17 @@ public final class Mapping {
     static boolean implemented(final int[] attributes) {
         boolean retval = true;
         for (int i = 0; i < attributes.length && retval; i++) {
-            retval = ALL_ATTRIBUTES.contains(attributes[i]);
+            retval = ALL_ATTRIBUTES.contains(Integer.valueOf(attributes[i]));
         }
         return retval;
     }
 
     static {
-        Map<Integer, Mapper> tmp = new HashMap<Integer, Mapper>();
+        final Map<Integer, Mapper> tmp = new HashMap<Integer, Mapper>();
         for (Mapper mapper : MAPPERS) {
-            tmp.put(mapper.getId(), mapper);
+            tmp.put(Integer.valueOf(mapper.getId()), mapper);
         }
-        Mapper identifier = new Mapper<Integer>() {
+        final Mapper identifier = new Mapper<Integer>() {
             public int getId() {
                 return Task.OBJECT_ID;
             }
@@ -1237,19 +1243,33 @@ public final class Mapping {
                 return task1.getObjectID() == task2.getObjectID();
             }
             public Integer get(final Task task) {
-                return task.getObjectID();
+                return Integer.valueOf(task.getObjectID());
             }
             public void set(final Task task, final Integer value) {
-                task.setObjectID(value);
+                task.setObjectID(value.intValue());
             }
         };
-        tmp.put(identifier.getId(), identifier);
+        tmp.put(Integer.valueOf(identifier.getId()), identifier);
         ID_MAPPING = Collections.unmodifiableMap(tmp);
-        Set<Integer> tmp2 = new HashSet<Integer>();
+        final Set<Integer> tmp2 = new HashSet<Integer>();
         tmp2.addAll(ID_MAPPING.keySet());
-        tmp2.add(Task.PARTICIPANTS);
-        tmp2.add(Task.FOLDER_ID);
-        tmp2.add(Task.ALARM);
+        tmp2.add(Integer.valueOf(Task.PARTICIPANTS));
+        tmp2.add(Integer.valueOf(Task.FOLDER_ID));
+        tmp2.add(Integer.valueOf(Task.ALARM));
         ALL_ATTRIBUTES = Collections.unmodifiableSet(tmp2);
+        final List<Mapper<String>> tmp3 = new ArrayList<Mapper<String>>();
+        for (Mapper<?> mapper : Mapping.MAPPERS) {
+            for (Type t : mapper.getClass().getGenericInterfaces()) {
+                if (t instanceof ParameterizedType) {
+                    final ParameterizedType pt = ((ParameterizedType) t);
+                    for (Type u : pt.getActualTypeArguments()) {
+                        if (String.class.equals(u)) {
+                            tmp3.add((Mapper<String>) mapper);
+                        }
+                    }
+                }
+            }
+        }
+        STRING_MAPPERS = tmp3.toArray((Mapper<String>[]) new Mapper[tmp3.size()]);
     }
 }
