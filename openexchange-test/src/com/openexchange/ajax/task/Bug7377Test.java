@@ -69,10 +69,8 @@ import com.openexchange.ajax.task.actions.UpdateResponse;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
-import com.openexchange.groupware.ldap.GroupTools;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.server.OCLPermission;
 
 /**
  * Tests problem described in bug #7377.
@@ -112,12 +110,12 @@ public class Bug7377Test extends AbstractTaskTest {
         final int folderId = getPrivateFolder();
         task.setParentFolderID(folderId);
         final AJAXSession session = client1.getSession();
-        final InsertResponse iResponse = TaskTools.insert(session,
+        final InsertResponse iResponse = TaskTools.insert(client1,
             new InsertRequest(task, client1.getTimeZone()));
         task.setObjectID(iResponse.getId());
         try {
             // Update timestamp
-            final GetResponse gResponse = TaskTools.get(session,
+            final GetResponse gResponse = TaskTools.get(client1,
                 new GetRequest(getPrivateFolder(), task.getObjectID()));
             task.setLastModified(gResponse.getTimestamp());
             // Update task and insert reminder and don't send folder in task.
@@ -125,23 +123,23 @@ public class Bug7377Test extends AbstractTaskTest {
             final Date remindDate = new Date();
             task.setAlarm(remindDate);
             task.removeParentFolderID();
-            final UpdateResponse uResponse = TaskTools.update(session,
+            final UpdateResponse uResponse = TaskTools.update(client1,
                 new SpecialUpdateRequest(folderId, task, client1.getTimeZone()));
             task.setLastModified(uResponse.getTimestamp());
             // Check reminder
             final com.openexchange.ajax.reminder.actions.GetResponse rResponse =
-                ReminderTools.get(session, new com.openexchange.ajax.reminder
+                ReminderTools.get(client1, new com.openexchange.ajax.reminder
                 .actions.GetRequest(remindDate));
             final ReminderObject reminder = rResponse.getReminderByTarget(
                 client1.getTimeZone(), task.getObjectID());
     
             assertNotNull("Can't find reminder for task.", reminder);
-            assertNotSame("Found folder 0 for task reminder.", 0, Integer
-                .parseInt(reminder.getFolder()));
+            assertNotSame("Found folder 0 for task reminder.",
+                Integer.valueOf(0), Integer.valueOf(reminder.getFolder()));
         } finally {
             final Date lastModified = task.containsLastModified() ? task
                 .getLastModified() : new Date();
-            TaskTools.delete(session, new DeleteRequest(folderId, task
+            TaskTools.delete(client1, new DeleteRequest(folderId, task
                 .getObjectID(), lastModified));
         }
     }
@@ -155,10 +153,9 @@ public class Bug7377Test extends AbstractTaskTest {
         final Date remindDate = new Date();
         task.setAlarm(remindDate);
         final Participant[] parts = new Participant[] {
-            new UserParticipant(), new UserParticipant()
+            new UserParticipant(client1.getUserId()),
+            new UserParticipant(client2.getUserId())
         };
-        parts[0].setIdentifier(client1.getUserId());
-        parts[1].setIdentifier(client2.getUserId());
         task.setParticipants(parts);
         final InsertResponse iResponse = TaskTools.insert(client1,
             new InsertRequest(task, client1.getTimeZone()));
@@ -195,16 +192,16 @@ public class Bug7377Test extends AbstractTaskTest {
         final ReminderObject reminder1 = rResponse1.getReminderByTarget(
             client1.getTimeZone(), task.getObjectID());
         assertNotNull("Can't find reminder for task.", reminder1);
-        assertNotSame("Found folder 0 for task reminder.", 0, Integer
-            .parseInt(reminder1.getFolder()));
+        assertNotSame("Found folder 0 for task reminder.", Integer.valueOf(0),
+            Integer.valueOf(reminder1.getFolder()));
         final com.openexchange.ajax.reminder.actions.GetResponse rResponse2 =
             ReminderTools.get(client2, new com.openexchange.ajax.reminder
             .actions.GetRequest(remindDate));
         final ReminderObject reminder2 = rResponse2.getReminderByTarget(
             client2.getTimeZone(), task.getObjectID());
         assertNotNull("Can't find reminder for task.", reminder2);
-        assertNotSame("Found folder 0 for task reminder.", 0, Integer
-            .parseInt(reminder2.getFolder()));
+        assertNotSame("Found folder 0 for task reminder.", Integer.valueOf(0),
+            Integer.valueOf(reminder2.getFolder()));
         FolderTools.delete(client1, new com.openexchange.ajax.folder.actions
             .DeleteRequest(fInsertR.getId(), new Date()));
     }
