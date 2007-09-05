@@ -72,6 +72,7 @@ public final class TaskTestSuite {
     public static Test suite() {
         final TestSuite tests = new TestSuite();
         tests.addTestSuite(AllTest.class);
+        tests.addTestSuite(Bug6335Test.class);
         tests.addTestSuite(Bug7276Test.class);
         tests.addTestSuite(Bug7380Test.class);
         tests.addTestSuite(Bug7377Test.class);

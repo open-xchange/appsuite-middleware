@@ -49,50 +49,43 @@
 
 package com.openexchange.ajax.task;
 
-import java.util.Date;
-
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.task.actions.InsertRequest;
+import com.openexchange.ajax.task.actions.InsertResponse;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.Component;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.groupware.tasks.TaskException;
 
 /**
- * 
+ * Tests if bug 6335 appears again in tasks.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class Create {
+public class Bug6335Test extends AbstractTaskTest {
 
     /**
-     * Prevent instantiation
+     * @param name
      */
-    private Create() {
-        super();
+    public Bug6335Test(final String name) {
+        super(name);
     }
 
-    public static Task createTask() {
-        final Task task = new Task();
-        task.setTitle("Private task");
-        task.setPrivateFlag(false);
-        task.setCreationDate(new Date());
-        task.setLastModified(new Date());
-        task.setStartDate(new Date(1133964000000l));
-        task.setEndDate(new Date(1133967600000l));
-        task.setAfterComplete(new Date(1133971200000l));
-        task.setNote("Description");
-        task.setStatus(Task.NOT_STARTED);
-        task.setPriority(Task.NORMAL);
-        task.setCategories("Categories");
-        task.setTargetDuration(1440);
-        task.setActualDuration(1440);
-        task.setTargetCosts(1.0f);
-        task.setActualCosts(1.0f);
-        task.setCurrency("\u20ac");
-        task.setTripMeter("trip meter");
-        task.setBillingInformation("billing information");
-        task.setCompanies("companies");
-        return task;
-    }
-
-    public static Task createWithDefaults() {
-        final Task task = new Task();
-        task.setPrivateFlag(false);
-        return task;
+    /**
+     * Tests if invalid characters are detected.
+     * @throws Throwable if an exception occurs.
+     */
+    public void testCharacter() throws Throwable {
+        final AJAXClient client = getClient();
+        final Task task = Create.createWithDefaults();
+        task.setTitle("\u001f");
+        task.setParentFolderID(client.getPrivateTaskFolder());
+        final InsertResponse iResponse = TaskTools.insert(client,
+            new InsertRequest(task, client.getTimeZone(), false));
+        assertTrue("Invalid character was not detected.", iResponse.hasError());
+        final TaskException.Code code = TaskException.Code.INVALID_DATA;
+        final AbstractOXException exc = iResponse.getException();
+        assertEquals("Wrong exception message.", Component.TASK, exc.getComponent());
+        assertEquals("Wrong exception message.", code.getCategory(), exc.getCategory());
+        assertEquals("Wrong exception message.", code.getNumber(), exc.getDetailNumber());
     }
 }
