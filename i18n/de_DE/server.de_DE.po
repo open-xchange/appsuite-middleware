@@ -21,12 +21,13 @@
 # Antje Faber, 2007.
 # Antje Faber, 2007.
 # Antje Faber, 2007.
+# Antje Faber, 2007.
 msgid ""
 msgstr ""
 "Project-Id-Version: server.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2006-11-13 15:15+0100\n"
-"PO-Revision-Date: 2007-08-02 16:37+0200\n"
+"PO-Revision-Date: 2007-09-05 10:44+0200\n"
 "Last-Translator: Antje Faber\n"
 "Language-Team:  <de@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -36,15 +37,17 @@ msgstr ""
 "X-Generator: KBabel 1.10.2\n"
 
 #: com/openexchange/groupware/i18n/FolderStrings.java:62
-msgid "Private Folders"
-msgstr "Persönliche Ordner"
+msgid "Private folders"
+msgstr "Private Ordner"
 
 #: com/openexchange/groupware/i18n/FolderStrings.java:64
-msgid "Public Folders"
+
+msgid "Public folders"
 msgstr "Öffentliche Ordner"
 
 #: com/openexchange/groupware/i18n/FolderStrings.java:66
-msgid "Shared Folders"
+
+msgid "Shared folders"
 msgstr "Freigegebene Ordner"
 
 #: com/openexchange/groupware/i18n/FolderStrings.java:68
@@ -52,15 +55,18 @@ msgid "System"
 msgstr "System"
 
 #: com/openexchange/groupware/i18n/FolderStrings.java:70
-msgid "Shared Address Book"
+
+msgid "Shared address book"
 msgstr "Freigegebenes Adressbuch"
 
 #: com/openexchange/groupware/i18n/FolderStrings.java:72
-msgid "Global Address Book"
+
+msgid "Global address book"
 msgstr "Globales Adressbuch"
 
 #: com/openexchange/groupware/i18n/FolderStrings.java:74
-msgid "OX Folders"
+
+msgid "OX folders"
 msgstr "OX-Ordner"
 
 #: com/openexchange/groupware/i18n/FolderStrings.java:76
@@ -76,23 +82,28 @@ msgid "Userstore"
 msgstr "UserStore"
 
 #: com/openexchange/groupware/i18n/FolderStrings.java:82
-msgid "Other Task Folders"
+
+msgid "Other task folders"
 msgstr "Weitere Aufgabenordner"
 
 #: com/openexchange/groupware/i18n/FolderStrings.java:84
-msgid "Other Calendar Folders"
+
+msgid "Other calendar folders"
 msgstr "Weitere Kalenderordner"
 
 #: com/openexchange/groupware/i18n/FolderStrings.java:86
-msgid "Other Contact Folders"
+
+msgid "Other contact folders"
 msgstr "Weitere Kontaktordner"
 
 #: com/openexchange/groupware/i18n/FolderStrings.java:88
-msgid "Other Infostore Folders"
+
+msgid "Other infostore folders"
 msgstr "Weitere InfoStore-Ordner"
 
 #: com/openexchange/groupware/i18n/FolderStrings.java:90
-msgid "My Infostore Folder"
+
+msgid "My infostore folder"
 msgstr "Mein InfoStore-Ordner"
 
 #: com/openexchange/groupware/i18n/FolderStrings.java:92
