@@ -51,8 +51,6 @@ package com.openexchange.groupware.tasks;
 
 import java.util.Set;
 
-import sun.tools.tree.ThisExpression;
-
 import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -60,7 +58,8 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tasks.TaskException.Code;
 
 /**
- * 
+ * This class collects all information for getting tasks. It is also able to
+ * check permissions in a fast way.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class GetTask {
@@ -184,10 +183,11 @@ public final class GetTask {
         }
         Permission.canReadInFolder(ctx, user, userConfig, getFolder(),
             getTask());
-        final Folder check = FolderStorage.extractFolderOfUser(getFolders(),
-            getUserId());
-        if (Tools.isFolderShared(getFolder(), user)
-            && getTask().getPrivateFlag() || null == check) {
+        final Folder check = FolderStorage.getFolder(getFolders(),
+            folderId);
+        if (null == check
+            || (Tools.isFolderShared(getFolder(), user)
+                && getTask().getPrivateFlag())) {
             throw new TaskException(Code.NO_PERMISSION, Integer.valueOf(taskId),
                 getFolder().getFolderName(), Integer.valueOf(folderId));
         }
