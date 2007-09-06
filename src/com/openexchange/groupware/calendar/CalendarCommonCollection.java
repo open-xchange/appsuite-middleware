@@ -1068,7 +1068,13 @@ public class CalendarCommonCollection {
             }
         }
         if (edao.getRecurrenceType() != CalendarObject.NONE) {
-            clone.setRecurrenceType(edao.getRecurrenceType());
+            if (cdao.containsRecurrenceDatePosition()) {
+                clone.setRecurrenceDatePosition(cdao.getRecurrenceDatePosition());
+            } else if (cdao.containsRecurrencePosition()) {
+                clone.setRecurrencePosition(cdao.getRecurrencePosition());
+            } else {
+                clone.setRecurrenceType(edao.getRecurrenceType());
+            }
         }
         
         return clone;
