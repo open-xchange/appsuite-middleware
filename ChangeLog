@@ -1,3 +1,11 @@
+* 2007-09-06 - martin.kauss@open-xchange.com
+
+ - Fixed bugs #9205 and 9132
+   9205: Move with participants from a public to a private folder failed 
+   with an error message. This has been fixed.
+   9132: If the original recurring appointment contains a resource an error
+   occurred if an exception is created. This has been fixed.
+
 * 2007-09-06 - thorben.betten@open-xchange.com
 
  - Bugfix #6335: Checking for invalid characters in folders.
