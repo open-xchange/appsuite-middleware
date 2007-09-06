@@ -58,7 +58,7 @@ import org.jdom.Verifier;
 public final class Check {
 
     /**
-     * Prevent instanciation.
+     * Prevent instantiation.
      */
     private Check() {
         super();
