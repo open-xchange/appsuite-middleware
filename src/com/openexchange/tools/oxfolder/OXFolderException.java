@@ -542,7 +542,11 @@ public class OXFolderException extends OXException {
 		 */
 		NO_DEFAULT_INFOSTORE_CREATE(
 				"An infostore folder named %s already exists below folder %s (%d) in context %d. Please choose another display name.",
-				Category.PERMISSION, 75);
+				Category.PERMISSION, 75),
+		/**
+         * Folder contains invalid data: "%1$s"
+         */
+        INVALID_DATA("Folder contains invalid data: \"%1$s\"", Category.USER_INPUT, 76);
 
 		/**
 		 * Message of the exception.
