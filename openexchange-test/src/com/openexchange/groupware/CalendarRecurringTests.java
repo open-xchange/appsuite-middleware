@@ -2,6 +2,7 @@
 package com.openexchange.groupware;
 
 import com.openexchange.groupware.calendar.OXCalendarException;
+import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.contexts.ContextStorage;
 import com.openexchange.server.OCLPermission;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
@@ -964,6 +965,12 @@ public class CalendarRecurringTests extends TestCase {
         cdao.setRecurrenceCalculator(1);
         cdao.setInterval(1);
         cdao.setDays(1);
+        
+        Participants p = new Participants();
+        Participant resource = new ResourceParticipant(100);        
+        //p.add(resource); // TODO: Write a new test case with resources
+
+        cdao.setParticipants(p.getList());        
         
         cdao.setIgnoreConflicts(true);
         
