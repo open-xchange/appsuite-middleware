@@ -1,6 +1,13 @@
 * 2007-09-06 - thorben.betten@open-xchange.com
 
  - Bugfix #6335: Checking for invalid characters in folders.
+ - Bugfix #9299: Added fast IMAP fetch to avoid high time latencies when
+   listing messages in large mail folders
+############## PAY ATTENTION TO ME ! ################
+ - CONFIG change: new property in file "imap.properties"
+   called "imapFastFetch" which enabled/disables usage
+   of fast fetch
+#####################################################
 
 * 2007-09-05 - marcus.klein@open-xchange.com
 

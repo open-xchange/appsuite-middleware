@@ -100,6 +100,8 @@ public class IMAPProperties {
 	private static String smtpLocalhost;
 
 	private static int messageFetchLimit = 1000;
+	
+	private static boolean fastFetch;
 
 	private static int attachmentDisplaySizeLimit = 8192;
 
@@ -479,6 +481,19 @@ public class IMAPProperties {
 
 	public static void setMessageFetchLimit(final int messageFetchLimit) {
 		IMAPProperties.messageFetchLimit = messageFetchLimit;
+	}
+	
+	public static boolean isFastFetch() throws IMAPPropertyException {
+		checkGlobalImapProperties();
+		return fastFetch;
+	}
+
+	static boolean isFastFetchInternal() {
+		return fastFetch;
+	}
+
+	public static void setFastFetch(final boolean fastFetch) {
+		IMAPProperties.fastFetch = fastFetch;
 	}
 
 	public static int getAttachmentDisplaySizeLimit() throws IMAPPropertyException {

@@ -79,6 +79,8 @@ import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.mail.JSONMessageObject;
 import com.openexchange.groupware.container.mail.MessageCacheObject;
 import com.openexchange.groupware.container.mail.parser.MessageUtils;
+import com.openexchange.imap.IMAPProperties;
+import com.openexchange.imap.IMAPPropertyException;
 import com.openexchange.imap.MessageHeaders;
 import com.openexchange.imap.OXMailException;
 import com.openexchange.imap.OXMailException.MailCode;
@@ -451,6 +453,27 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 		return false;
 	}
 
+	private static final Set<Integer> ENV_FIELDS;
+	
+	static {
+		ENV_FIELDS = new HashSet<Integer>(8);
+		/*
+		 * The Envelope is an aggregration of the common attributes of a
+		 * Message: From, To, Cc, Bcc, ReplyTo, Subject and Date.
+		 */
+		ENV_FIELDS.add(Integer.valueOf(JSONMessageObject.FIELD_FROM));
+		ENV_FIELDS.add(Integer.valueOf(JSONMessageObject.FIELD_TO));
+		ENV_FIELDS.add(Integer.valueOf(JSONMessageObject.FIELD_CC));
+		ENV_FIELDS.add(Integer.valueOf(JSONMessageObject.FIELD_BCC));
+		ENV_FIELDS.add(Integer.valueOf(JSONMessageObject.FIELD_SUBJECT));
+		ENV_FIELDS.add(Integer.valueOf(JSONMessageObject.FIELD_SENT_DATE));
+		/*
+		 * Add the two extra fetch profile items contained in JavaMail's ENVELOPE constant
+		 */
+		ENV_FIELDS.add(Integer.valueOf(JSONMessageObject.FIELD_RECEIVED_DATE));
+		ENV_FIELDS.add(Integer.valueOf(JSONMessageObject.FIELD_SIZE));
+	}
+	
 	public static FetchProfile getFetchProfile(final int[] fields, final int sortField) {
 		final FetchProfile retval = new FetchProfile();
 		final Set<Integer> trimmedFields = new HashSet<Integer>();
@@ -460,10 +483,30 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 		if (sortField > -1) {
 			trimmedFields.add(Integer.valueOf(sortField));
 		}
-		final int size = trimmedFields.size();
-		final Iterator<Integer> iter = trimmedFields.iterator();
-		for (int i = 0; i < size; i++) {
-			addFetchItem(retval, iter.next().intValue());
+		try {
+			if (IMAPProperties.isFastFetch()) {
+				/*
+				 * Check which fields are contained in fetch profile item "ENVELOPE"
+				 */
+				if (trimmedFields.removeAll(ENV_FIELDS)) {
+					/*
+					 * Add ENVELOPE since set of fields has changed
+					 */
+					retval.add(FetchProfile.Item.ENVELOPE);
+				}
+			}
+		} catch (final IMAPPropertyException e) {
+			LOG.error(e.getMessage(), e);
+		}
+		if (!trimmedFields.isEmpty()) {
+			/*
+			 * Iterate remained fields
+			 */
+			final int size = trimmedFields.size();
+			final Iterator<Integer> iter = trimmedFields.iterator();
+			for (int i = 0; i < size; i++) {
+				addFetchItem(retval, iter.next().intValue());
+			}
 		}
 		return retval;
 	}
