@@ -615,7 +615,7 @@ public class Contacts implements DeleteListener {
 							"The image you tried to attach is not a valid picture. It may be broken or is not a valid file.",
 							"Mandatory field last name is not set.",
 							"Unable to compare contacts for update. Contect %1$d Object %2$d",
-							"The name you entered is not available. Choose another displayname. Contect %1$d Object %2$d"
+							"The name you entered is not available. Choose another display name. Context %1$d Object %2$d"
 					}
 	)
 	public static void performContactStorageUpdate(final ContactObject co, final int fid, final java.util.Date client_date, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws ContactException, OXConflictException, OXObjectNotFoundException, OXConcurrentModificationException, OXException {
