@@ -57,7 +57,7 @@ public class ContactException extends OXException {
 	private static final long serialVersionUID = -202902687980139008L;
 	
 	public static final String NON_CONTACT_FOLDER_MSG = "You are not allowed to store this contact in a non-contact folder: folder id %1$d in context %2$d with user %3$d";
-	public static final String NO_PERMISSION_MSG = "You do not have permission to store objects in folder %1$d in context %2$d with user %3$d";
+	public static final String NO_PERMISSION_MSG = "You do not have permission to create objects in this folder. %1$d in context %2$d with user %3$d";
 	public static final String NO_READ_PERMISSION_MSG = "You do not have permission to read objects in folder %1$d in context %2$d with user %3$d";
 	public static final String OBJECT_HAS_CHANGED_MSG = "The object has changed on server side since it was last fetched.";
 	public static final String NO_DELETE_PERMISSION_MSG = "You do not have permission to delete objects from folder %1$d in context %2$d with user %3$d";
