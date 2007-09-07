@@ -1,3 +1,7 @@
+* 2007-09-07 - thorben.betten@open-xchange.com
+
+ - Bugfix #9229: Fixed parsing of html links starting with "news."
+
 * 2007-09-07 - ben.pahne@open-xchange.com
 
  - Fixed bug #9255 - Typos in error message
