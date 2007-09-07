@@ -273,7 +273,12 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             final Credentials cauth = ClientAdminThread.cache.getAdminCredentials(ctx);
             final String mech = ClientAdminThread.cache.getAdminAuthMech(ctx);
             if ("{CRYPT}".equals(mech)) {
-                cauth.setPassword(UnixCrypt.crypt(usrdata.getPassword()));
+                try {
+                    cauth.setPassword(UnixCrypt.crypt(usrdata.getPassword()));
+                } catch (UnsupportedEncodingException e) {
+                    log.error("Error encrypting password for credential cache ", e);
+                    throw new StorageException(e);
+                }
             } else if ("{SHA}".equals(mech)) {
                 try {
                     cauth.setPassword(SHACrypt.makeSHAPasswd(usrdata.getPassword()));

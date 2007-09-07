@@ -60,7 +60,11 @@
  */
 package com.openexchange.admin.tools;
 
+import java.io.UnsupportedEncodingException;
+
 public class UnixCrypt {
+    
+    public static String encoding = "UTF-8";
     
     private static final char[] saltChars =
     ("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789./".toCharArray());
@@ -609,7 +613,7 @@ public class UnixCrypt {
         return(out);
      }
 
-    /**
+     /**
      * <P>Encrypt a password given the cleartext password and a "salt".</P>
      * @param salt A two-character string representing the salt used to
      * iterate the encryption engine in lots of different ways. If you
@@ -618,8 +622,9 @@ public class UnixCrypt {
      * @param original The password to be encrypted.
      * @return A string consisting of the 2-character salt followed by the
      * encrypted password.
+     * @throws UnsupportedEncodingException 
      */
-     public static final String crypt(String salt, String original)
+     public static final String crypt(String salt, String original) throws UnsupportedEncodingException
      {
         while(salt.length() < 2)
            salt += "A";
@@ -635,14 +640,16 @@ public class UnixCrypt {
         int Eswap0 = con_salt[(int)charZero];
         int Eswap1 = con_salt[(int)charOne] << 4;
    
+        byte[] bytes = null;
+        bytes = original.getBytes(encoding);
         byte key[] = new byte[8];
 
         for(int i = 0; i < key.length; i ++)
            key[i] = (byte)0;
 
-        for(int i = 0; i < key.length && i < original.length(); i ++)
+        for(int i = 0; i < key.length && i < bytes.length; i ++)
         {
-           int iChar = (int)original.charAt(i);
+           int iChar = (int)bytes[i];
 
            key[i] = (byte)(iChar << 1);
         }
@@ -684,8 +691,9 @@ public class UnixCrypt {
      * @param original The password to be encrypted.
      * @return A string consisting of the 2-character salt followed by the
      * encrypted password.
+     * @throws UnsupportedEncodingException 
      */
-    public static final String crypt(String original)
+    public static final String crypt(String original) throws UnsupportedEncodingException
     {
       java.util.Random randomGenerator = new java.util.Random();
       int numSaltChars = saltChars.length;
@@ -705,12 +713,13 @@ public class UnixCrypt {
      * @param enteredPassword The password as entered by the user (or
      * otherwise aquired).
      * @return <B>true</B> if the password should be considered correct.
+     * @throws UnsupportedEncodingException 
      */
-    public final static boolean matches(String encryptedPassword, String enteredPassword)
+    public final static boolean matches(String encryptedPassword, String enteredPassword) throws UnsupportedEncodingException
     {
       String salt = encryptedPassword.substring(0, 3);
       String newCrypt = crypt(salt, enteredPassword);
       
       return newCrypt.equals(encryptedPassword);
     }
-  }
+}
