@@ -5,6 +5,7 @@
 * 2007-09-07 - ben.pahne@open-xchange.com
 
  - Fixed bug #9255 - Typos in error message
+ - Fixed bug #8456 - Changed an error message
 
 * 2007-09-06 - martin.kauss@open-xchange.com
 
