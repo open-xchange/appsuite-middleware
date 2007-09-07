@@ -1,3 +1,7 @@
+* 2007-09-07 - choeger@open-xchange.com
+
+ - Bugfix #9235 Crypt implementation should be able to handle UTF-8
+
 * 2007-09-07 - thorben.betten@open-xchange.com
 
  - Bugfix #9229: Fixed parsing of html links starting with "news."

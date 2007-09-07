@@ -52,7 +52,7 @@ package com.openexchange.groupware.ldap;
 import java.util.Date;
 
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.UserTools.UnixCrypt;
+import com.openexchange.groupware.ldap.UnixCrypt;
 
 /**
  * This interface provides methods to read data from users in the directory
