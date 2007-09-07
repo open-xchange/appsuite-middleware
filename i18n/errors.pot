@@ -1638,8 +1638,8 @@ msgid ""
 msgstr ""
 
 msgid ""
-"The name you entered is not available. Choose another displayname. Contect %1"
-"$d Object %2$d"
+"The name you entered is not available. Choose another display name. Context %"
+"1$d Object %2$d"
 msgstr ""
 
 msgid ""
@@ -2170,6 +2170,9 @@ msgid "You are not allowed to read the contents of folder %1$s (%2$d)."
 msgstr ""
 
 msgid "You are not allowed to see a private task in shared folder %1$s (%2$d)."
+msgstr ""
+
+msgid "You are not allowed to see the task %1$d in folder %2$s (%3$d)."
 msgstr ""
 
 msgid ""
