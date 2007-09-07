@@ -50,6 +50,11 @@
 package com.openexchange.admin.storage.fileStorage;
 
 
+import java.io.UnsupportedEncodingException;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -63,6 +68,8 @@ import com.openexchange.admin.tools.UnixCrypt;
  * @author choeger
  */
 public class OXAuthFileStorage extends OXAuthStorageInterface {
+
+    private final static Log log = LogFactory.getLog(OXAuthFileStorage.class);
 
     /** */
     public OXAuthFileStorage() {
@@ -79,7 +86,12 @@ public class OXAuthFileStorage extends OXAuthStorageInterface {
            master.getLogin() != null && authdata.getLogin() != null &&
            master.getPassword() != null && authdata.getPassword() != null &&
            master.getLogin().equals(authdata.getLogin())) {
-                return UnixCrypt.matches(master.getPassword(), authdata.getPassword());
+                try {
+                    return UnixCrypt.matches(master.getPassword(), authdata.getPassword());
+                } catch (UnsupportedEncodingException e) {
+                    log.error(e.getMessage(), e);
+                    return false;
+                }
         }else{
             return false;
         }

@@ -1,3 +1,7 @@
+* 2007-09-07 - choeger@open-xchange.com
+
+ - Bugfix #9235 Crypt implementation should be able to handle UTF-8
+
 * 2007-09-05 - dennis.sieben@open-xchange.com
 
   - Bugfix ID#9254 showruntimestats gives NullPointerException
