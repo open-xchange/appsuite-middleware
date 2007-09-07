@@ -46,7 +46,7 @@ jcs.region.OXMessageCache.cacheattributes.ShrinkerIntervalSeconds=60
 jcs.region.OXMessageCache.cacheattributes.MaxSpoolPerRun=500
 jcs.region.OXMessageCache.elementattributes=org.apache.jcs.engine.ElementAttributes
 jcs.region.OXMessageCache.elementattributes.IsEternal=false
-jcs.region.OXMessageCache.elementattributes.MaxLifeSeconds=300
+jcs.region.OXMessageCache.elementattributes.MaxLifeSeconds=3600
 jcs.region.OXMessageCache.elementattributes.IdleTime=60
 # NOT APPLICABLE TO ANY AUXILIARY (NEITHER DISK, REMOTE NOR TCP)
 jcs.region.OXMessageCache.elementattributes.IsSpool=false
@@ -63,7 +63,7 @@ jcs.region.OXIMAPConCache.cacheattributes.MaxMemoryIdleTimeSeconds=7
 jcs.region.OXIMAPConCache.cacheattributes.ShrinkerIntervalSeconds=3
 jcs.region.OXIMAPConCache.elementattributes=org.apache.jcs.engine.ElementAttributes
 jcs.region.OXIMAPConCache.elementattributes.IsEternal=false
-jcs.region.OXIMAPConCache.elementattributes.MaxLifeSeconds=300
+jcs.region.OXIMAPConCache.elementattributes.MaxLifeSeconds=3600
 jcs.region.OXIMAPConCache.elementattributes.IdleTime=7
 # NOT APPLICABLE TO ANY AUXILIARY (NEITHER DISK, REMOTE NOR TCP)
 jcs.region.OXIMAPConCache.elementattributes.IsSpool=false
