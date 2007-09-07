@@ -1,3 +1,7 @@
+* 2007-09-07 - marcus.klein@open-xchange.com
+
+ - Merged changes.
+
 * 2007-08-24 - marcus.klein@open-xchange.com
 
  - Bugfix #9092: Added missing log.install.dir to build script.
