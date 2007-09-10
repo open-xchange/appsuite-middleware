@@ -222,8 +222,17 @@ public class ParticipantNotifyTest extends TestCase{
 		assertEquals("User 1", participantNames[0]);
 		assertEquals("User 2", participantNames[1]);
 		assertEquals("User 3", participantNames[2]);
+	}
+
+	// Bug 9256
+	public void testNullTitle() throws Exception {
+		Participant[] participants = getParticipants(U(2,3,4),G(),S(), R());
+		Task t = getTask(participants);
+		t.setTitle(null);
+		notify.taskCreated(t,session);
 		
-		
+		Message msg = notify.getMessages().get(0);
+		assertFalse(msg.messageTitle, msg.messageTitle.contains("null"));
 	}
 	
 	public void testNoSend() throws Exception{
