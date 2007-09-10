@@ -1,3 +1,8 @@
+* 2007-09-10 - francisco.lagunar@open-xchange.com
+
+ - Bugfix #9256 : Don't write "null" in the subject line for notification
+   mails if the title isn't set.
+
 * 2007-09-07 - choeger@open-xchange.com
 
  - Bugfix #9235 Crypt implementation should be able to handle UTF-8

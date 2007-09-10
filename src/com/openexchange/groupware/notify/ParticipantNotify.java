@@ -293,7 +293,7 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 					
 					final MailMessage msg = new MailMessage();
 					msg.message = createTemplate.render(m);
-					msg.title = strings.getString(titleKey)+": "+obj.getTitle();
+					msg.title = strings.getString(titleKey)+": "+m.get("title");
 					msg.addresses.add(p.email);
 					msg.folderId = p.folderId;
 					messages.add(msg);
