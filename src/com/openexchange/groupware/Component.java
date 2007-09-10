@@ -96,7 +96,7 @@ public enum Component {
 	/**
 	 * Module MAIL
 	 */
-	MAIL("MAIL"),
+	MAIL("MSG"),
 	/**
 	 * IMAP
 	 */
