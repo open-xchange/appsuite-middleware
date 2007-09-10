@@ -1,28 +1,33 @@
+# translation of server.fr_FR.po to
 # translation of server.fr_FR.po to Français
 # Éric Bischoff <eric@bureau-cornavin.com>, 2007.
 # Joëlle Cornavin <joelle@bureau-cornavin.com>, 2007.
+# Antje Faber, 2007.
 msgid ""
 msgstr ""
 "Project-Id-Version: server.fr_FR\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2007-09-01 20:35+0200\n"
-"Last-Translator: Joëlle Cornavin <joelle@bureau-cornavin.com>\n"
-"Language-Team: Français\n"
+"PO-Revision-Date: 2007-09-10 14:54+0200\n"
+"Last-Translator: Antje Faber\n"
+"Language-Team:  <de@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: KBabel 1.11.4\n"
+"X-Generator: KBabel 1.10.2\n"
 
 #: com/openexchange/groupware/i18n/FolderStrings.java:62
-msgid "Private Folders"
+
+msgid "Private folders"
 msgstr "Dossiers privés"
 
 #: com/openexchange/groupware/i18n/FolderStrings.java:64
-msgid "Public Folders"
+
+msgid "Public folders"
 msgstr "Dossiers publics"
 
 #: com/openexchange/groupware/i18n/FolderStrings.java:66
-msgid "Shared Folders"
+
+msgid "Shared folders"
 msgstr "Dossiers partagés"
 
 #: com/openexchange/groupware/i18n/FolderStrings.java:68
@@ -30,15 +35,18 @@ msgid "System"
 msgstr "Système"
 
 #: com/openexchange/groupware/i18n/FolderStrings.java:70
-msgid "Shared Address Book"
+
+msgid "Shared address book"
 msgstr "Carnet d'adresses partagé"
 
 #: com/openexchange/groupware/i18n/FolderStrings.java:72
-msgid "Global Address Book"
+
+msgid "Global address book"
 msgstr "Carnet d'adresses global"
 
 #: com/openexchange/groupware/i18n/FolderStrings.java:74
-msgid "OX Folders"
+
+msgid "OX folders"
 msgstr "Dossiers OX"
 
 #: com/openexchange/groupware/i18n/FolderStrings.java:76
@@ -54,23 +62,28 @@ msgid "Userstore"
 msgstr "Userstore"
 
 #: com/openexchange/groupware/i18n/FolderStrings.java:82
-msgid "Other Task Folders"
+
+msgid "Other task folders"
 msgstr "Autres dossiers de tâches"
 
 #: com/openexchange/groupware/i18n/FolderStrings.java:84
-msgid "Other Calendar Folders"
+
+msgid "Other calendar folders"
 msgstr "Autres dossiers calendriers"
 
 #: com/openexchange/groupware/i18n/FolderStrings.java:86
-msgid "Other Contact Folders"
+
+msgid "Other contact folders"
 msgstr "Autre dossiers de contacts"
 
 #: com/openexchange/groupware/i18n/FolderStrings.java:88
-msgid "Other Infostore Folders"
+
+msgid "Other infostore folders"
 msgstr "Autres dossiers de dépôt de données"
 
 #: com/openexchange/groupware/i18n/FolderStrings.java:90
-msgid "My Infostore Folder"
+
+msgid "My infostore folder"
 msgstr "Mon dossier de dépôt de données"
 
 #: com/openexchange/groupware/i18n/FolderStrings.java:92
