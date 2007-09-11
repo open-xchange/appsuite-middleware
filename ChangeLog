@@ -6,6 +6,8 @@
    and resources.
  - Bugfix #8935: Removed replacing the string "null" with null.
  - Bugfix #9209: Illegal files for import now give all a message in the panel.
+ - Bugfix #9384: Reloading task before updating last_modified to prevent
+   exception on unsynchronized server times.
 
 * 2007-09-10 - thorben.betten@open-xchange.com
 

@@ -651,10 +651,7 @@ public final class TaskLogic {
             DBPool.closeWriterSilent(ctx, con);
         }
     }
-    
-    /**
-     * TODO Move this method to {@link UpdateData}.
-     */
+
     static void updateTask(final Context ctx, final Task task,
         final Date lastRead, final int[] modified,
         final Set<TaskParticipant> add, final Set<TaskParticipant> remove,
@@ -668,29 +665,8 @@ public final class TaskLogic {
         }
         try {
             con.setAutoCommit(false);
-            final int taskId = task.getObjectID();
-            storage.updateTask(ctx, con, task, lastRead, modified, StorageType
-                .ACTIVE);
-            if (null != add) {
-                partStor.insertParticipants(ctx, con, taskId, add, StorageType
-                    .ACTIVE);
-                partStor.deleteParticipants(ctx, con, taskId, add, StorageType
-                    .REMOVED, false);
-            }
-            if (null != remove) {
-                partStor.insertParticipants(ctx, con, taskId, remove,
-                    StorageType.REMOVED);
-                partStor.deleteParticipants(ctx, con, taskId, remove,
-                    StorageType.ACTIVE, true);
-            }
-            if (null != removeFolder) {
-                foldStor.deleteFolder(ctx, con, taskId, removeFolder,
-                    StorageType.ACTIVE);
-            }
-            if (null != addFolder) {
-                foldStor.insertFolder(ctx, con, taskId, addFolder, StorageType
-                    .ACTIVE);
-            }
+            updateTask(ctx, con, task, lastRead, modified, add, remove,
+                addFolder, removeFolder);
             con.commit();
         } catch (SQLException e) {
             rollback(con);
@@ -705,6 +681,39 @@ public final class TaskLogic {
                 LOG.error("Problem setting auto commit to true.", e);
             }
             DBPool.closeWriterSilent(ctx, con);
+        }
+    }
+    
+    /**
+     * TODO Move this method to {@link UpdateData}.
+     */
+    static void updateTask(final Context ctx, final Connection con,
+        final Task task, final Date lastRead, final int[] modified,
+        final Set<TaskParticipant> add, final Set<TaskParticipant> remove,
+        final Set<Folder> addFolder, final Set<Folder> removeFolder)
+        throws TaskException {
+        final int taskId = task.getObjectID();
+        storage.updateTask(ctx, con, task, lastRead, modified, StorageType
+            .ACTIVE);
+        if (null != add) {
+            partStor.insertParticipants(ctx, con, taskId, add, StorageType
+                .ACTIVE);
+            partStor.deleteParticipants(ctx, con, taskId, add, StorageType
+                .REMOVED, false);
+        }
+        if (null != remove) {
+            partStor.insertParticipants(ctx, con, taskId, remove,
+                StorageType.REMOVED);
+            partStor.deleteParticipants(ctx, con, taskId, remove,
+                StorageType.ACTIVE, true);
+        }
+        if (null != removeFolder) {
+            foldStor.deleteFolder(ctx, con, taskId, removeFolder,
+                StorageType.ACTIVE);
+        }
+        if (null != addFolder) {
+            foldStor.insertFolder(ctx, con, taskId, addFolder, StorageType
+                .ACTIVE);
         }
     }
 
@@ -849,7 +858,6 @@ public final class TaskLogic {
         participant.setConfirmMessage(message);
         final Task task = new Task();
         task.setObjectID(taskId);
-        task.setLastModified(new Date());
         task.setModifiedBy(userId);
         Connection con;
         try {
@@ -861,8 +869,13 @@ public final class TaskLogic {
             con.setAutoCommit(false);
             partStor.updateInternal(ctx, con, taskId, participant, StorageType
                 .ACTIVE);
-            TaskLogic.updateTask(ctx, task, new Date(), new int[] {
-                Task.LAST_MODIFIED, Task.MODIFIED_BY }, null, null, null, null);
+            final Task load = storage.selectTask(ctx, con, taskId, StorageType
+                .ACTIVE);
+            task.setLastModified(new Date());
+            TaskLogic.updateTask(ctx, con, task, load.getLastModified(),
+                new int[] { Task.LAST_MODIFIED, Task.MODIFIED_BY }, null, null,
+                null, null);
+            con.commit();
         } catch (SQLException e) {
             rollback(con);
             throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
