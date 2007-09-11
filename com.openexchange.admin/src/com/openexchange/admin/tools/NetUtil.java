@@ -50,22 +50,88 @@ package com.openexchange.admin.tools;
 
 /**
  * @author choeger
- *
+ * 
  */
 public class NetUtil {
 
+    /**
+     * INTERNAL: check if address or mask is a valid dotted decimal notation
+     *  
+     * @param qdot
+     * @return
+     */
+    private static boolean isValidDDN(final String qdot) {
+        if( qdot.length() == 0 ) {
+            return false;
+        }
+        if( qdot.replaceAll("[0-9.]", "").length() > 0 ) {
+            return false;
+        }
+        if( qdot.split("\\.").length < 4 ) {
+            return false;
+        }
+        return true;
+    }
+    
+    /**
+     * check if mask is a valid netmask in dotted decimal notation.
+     * 
+     * @param mask
+     * @return
+     */
+    public static boolean isValidNetmask(final String mask) {
+        if (mask == null) {
+            return false;
+        } else {
+            return isValidDDN(mask);
+        }
+    }
+
+    /**
+     * @param ipmask
+     * @return
+     */
+    public static boolean isValidIPNetmask(final String ipmask) {
+        if (ipmask == null) {
+            return false;
+        } else {
+            if (!ipmask.contains("/")) {
+                return false;
+            }
+            final String ip = ipmask.split("/")[0];
+            if( !isValidDDN(ip) ) {
+                return false;
+            }
+            final String mask = ipmask.split("/")[1];
+            if( mask.contains(".") ) {
+                return isValidNetmask(mask);
+            }
+            if( mask.replaceAll("[0-9]", "").length() > 0 )  {
+                return false;
+            }
+            return true;
+        }
+    }
+
+    /**
+     * return dotted decimal notation representation as a String of the CIDR
+     * representation of the netmask
+     * 
+     * @param cidr
+     * @return
+     */
     public static final String CIDR2Mask(final int cidr) {
         int mask = cidr;
-        String ret="";
-        for(int p=0; p<4; p++) {
+        String ret = "";
+        for (int p = 0; p < 4; p++) {
             int bitset = 0;
-            for(int bs=0; bs<8; bs++) {
-                if( mask > 0 ) {
+            for (int bs = 0; bs < 8; bs++) {
+                if (mask > 0) {
                     bitset |= (1 << bs);
                     mask--;
                 }
             }
-            ret += bitset + ( p<3 ? "." : "");
+            ret += bitset + (p < 3 ? "." : "");
         }
         return ret;
     }
