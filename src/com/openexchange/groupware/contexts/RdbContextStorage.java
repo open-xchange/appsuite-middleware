@@ -237,6 +237,9 @@ public class RdbContextStorage extends ContextStorage {
                 auth[1] = result.getString(pos++);
                 context.setFilestoreAuth(auth);
                 context.setFileStorageQuota(result.getLong(pos++));
+            } else {
+                throw new ContextException(Code.NOT_FOUND, Integer.valueOf(
+                    contextId));
             }
         } catch (SQLException e) {
             throw new ContextException(Code.SQL_ERROR, e, e.getMessage());

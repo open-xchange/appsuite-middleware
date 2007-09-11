@@ -1,3 +1,8 @@
+* 2007-09-11 - marcus.klein@open-xchange.com
+
+ - Bugfix #9341: Fixed returning null instead of throwing exception if context
+   is not found.
+
 * 2007-09-10 - thorben.betten@open-xchange.com
 
  - Bugfix #9346: Changed mail component's code back to "MSG"
