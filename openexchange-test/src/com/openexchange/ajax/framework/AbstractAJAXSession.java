@@ -55,6 +55,10 @@ public abstract class AbstractAJAXSession extends TestCase {
 
     private AJAXClient client;
 
+    /**
+     * Default constructor.
+     * @param name name of the test.
+     */
     protected AbstractAJAXSession(final String name) {
         super(name);
     }

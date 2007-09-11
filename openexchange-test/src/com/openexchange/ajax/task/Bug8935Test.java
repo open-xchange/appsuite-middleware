@@ -49,42 +49,43 @@
 
 package com.openexchange.ajax.task;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.task.actions.DeleteRequest;
+import com.openexchange.ajax.task.actions.GetRequest;
+import com.openexchange.ajax.task.actions.GetResponse;
+import com.openexchange.ajax.task.actions.InsertRequest;
+import com.openexchange.ajax.task.actions.InsertResponse;
+import com.openexchange.groupware.tasks.Task;
 
 /**
- * Suite for all task tests.
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * Checks if the problem described in bug 8935 appears again.
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class TaskTestSuite {
+public class Bug8935Test extends AbstractTaskTest {
 
     /**
-     * Prevent instantiation
+     * Default constructor.
+     * @param name name of the test.
      */
-    private TaskTestSuite() {
-        super();
+    public Bug8935Test(final String name) {
+        super(name);
     }
-    
+
     /**
-     * Generates the task test suite.
-     * @return the task tests suite.
+     * Checks if a task can be created with a title of "null";
+     * @throws Throwable if an exception occurs.
      */
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(AllTest.class);
-        tests.addTestSuite(Bug6335Test.class);
-        tests.addTestSuite(Bug7276Test.class);
-        tests.addTestSuite(Bug7380Test.class);
-        tests.addTestSuite(Bug7377Test.class);
-        tests.addTestSuite(Bug8935Test.class);
-        tests.addTestSuite(Bug9252Test.class);
-        tests.addTestSuite(TruncationTest.class);
-        tests.addTestSuite(InsertTest.class);
-        tests.addTestSuite(CharsetTest.class);
-        tests.addTestSuite(FloatTest.class);
-        tests.addTestSuite(ListTest.class);
-        tests.addTestSuite(UpdatesTest.class);
-        tests.addTestSuite(TasksTest.class);
-        return tests;
+    public void testNull() throws Throwable {
+        final AJAXClient client = getClient();
+        final Task task = Create.createWithDefaults();
+        task.setTitle("null");
+        task.setParentFolderID(client.getPrivateTaskFolder());
+        final InsertResponse iResponse = TaskTools.insert(client,
+            new InsertRequest(task, client.getTimeZone()));
+        final GetResponse gResponse = TaskTools.get(client,
+            new GetRequest(iResponse));
+        final Task reload = gResponse.getTask(client.getTimeZone());
+        TaskTools.compareAttributes(task, reload);
+        TaskTools.delete(client, new DeleteRequest(reload));
     }
 }

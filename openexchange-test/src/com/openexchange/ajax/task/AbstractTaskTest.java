@@ -59,15 +59,16 @@ import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.tools.servlet.AjaxException;
 
 /**
- * 
+ * Super class for task ajax tests.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class AbstractTaskTest extends AbstractAJAXSession {
+public abstract class AbstractTaskTest extends AbstractAJAXSession {
 
     /**
-     * @param name
+     * Default constructor.
+     * @param name name of the test.
      */
-    public AbstractTaskTest(final String name) {
+    protected AbstractTaskTest(final String name) {
         super(name);
     }
 
