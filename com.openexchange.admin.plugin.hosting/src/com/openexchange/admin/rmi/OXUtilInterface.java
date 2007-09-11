@@ -14,9 +14,54 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 
 /**
  * This class defines the Open-Xchange API Version 2 for creating and
- * manipulating the service system.
+ * manipulating needed components of the system.<br><br>
  * 
- * @author cutmasta
+ * <b>Example for initializing the system:</b>
+ * <pre>
+ * <b>// Register database,server and a filestore.</b>
+ * final OXUtilInterface iface = (OXUtilInterface)Naming.lookup("rmi:///oxhost/"+OXUtilInterface.RMI_NAME);
+ * 
+ * final Credentials auth = new Credentials();
+ * auth.setLogin("masteradmin");
+ * auth.setPassword("secret");
+ * 
+ * Database client_db = new Database();        
+ * client_db.setName(name);
+ * client_db.setDriver("com.mysql.jdbc.Driver");
+ * client_db.setLogin("openexchange");
+ * client_db.setMaster(true);
+ * client_db.setMaxUnits(1000);
+ * client_db.setPassword("secret");
+ * client_db.setPoolHardLimit(20);
+ * client_db.setPoolInitial(5);
+ * client_db.setPoolMax(100);
+ * client_db.setUrl("jdbc:mysql://localhost/?useUnicode=true&characterEncoding=UTF-8&
+ * autoReconnect=true&useUnicode=true&useServerPrepStmts=false&useTimezone=true&
+ * serverTimezone=UTC&connectTimeout=15000&socketTimeout=15000");
+ * client_db.setClusterWeight(100);
+ * 
+ * <b>// Register database</b>
+ * iface.registerDatabase(client_db,auth);
+ * 
+ * <b>// Register server</b>
+ * Server srv = new Server();
+ * srv.setName("local");
+ * iface.registerServer(srv,auth);
+ *  
+ * <b>// Register filestore</b>
+ * Filestore client_st = new Filestore();
+ * client_st.setUrl("file:///var/ox/filestore");
+ * client_st.setSize(100L);        
+ * client_st.setMaxContexts(100);
+ * iface.registerFilestore(srv,auth);
+ * </pre>
+ * The system is now ready to be filled with 100 contexts.<br>
+ * See {@link OXContextInterface} for an example of creating a context.
+ * 
+ * 
+ * @author <a href="mailto:manuel.kraft@open-xchange.com">Manuel Kraft</a>
+ * @author <a href="mailto:carsten.hoeger@open-xchange.com">Carsten Hoeger</a>
+ * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  */
 public interface OXUtilInterface extends Remote {
 
@@ -33,7 +78,7 @@ public interface OXUtilInterface extends Remote {
 
     
     /**
-     * RMI name to be used in RMI URL
+     * RMI name to be used in the naming lookup.
      */
     public static final String RMI_NAME = "OXUtil_V2";
 
