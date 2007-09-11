@@ -1,3 +1,8 @@
+* 2007-09-11 - martin.kauss@open-xchange.com
+
+ - Fixed bug #9137. It was not possible to move/edit an private appointment.
+   This has been fixed.
+
 * 2007-09-11 - marcus.klein@open-xchange.com
 
  - Bugfix #9341: Fixed returning null instead of throwing exception if context
