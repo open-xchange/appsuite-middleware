@@ -52,6 +52,15 @@ package com.openexchange.admin.rmi.dataobjects;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 
+/**
+ * 
+ * This class represents a maintenance reason.
+ * 
+ * @author <a href="mailto:manuel.kraft@open-xchange.com">Manuel Kraft</a>
+ * @author <a href="mailto:carsten.hoeger@open-xchange.com">Carsten Hoeger</a>
+ * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
+ *
+ */
 public class MaintenanceReason implements Serializable{
     /**
      * For serialization

@@ -58,8 +58,9 @@ import com.openexchange.admin.rmi.extensions.OXResourceExtensionInterface;
 /**
  * This dataobject stores all the data which is related to a resource
  * 
- * @author d7
- * @author cutmasta
+ * @author <a href="mailto:manuel.kraft@open-xchange.com">Manuel Kraft</a>
+ * @author <a href="mailto:carsten.hoeger@open-xchange.com">Carsten Hoeger</a>
+ * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  *
  */
 public class Resource extends ExtendableDataObject implements NameAndIdObject {

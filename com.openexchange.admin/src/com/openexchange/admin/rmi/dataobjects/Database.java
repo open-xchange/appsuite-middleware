@@ -51,6 +51,14 @@ package com.openexchange.admin.rmi.dataobjects;
 
 import java.lang.reflect.Field;
 
+/**
+ * This class represents a database.
+ * 
+ * @author <a href="mailto:manuel.kraft@open-xchange.com">Manuel Kraft</a>
+ * @author <a href="mailto:carsten.hoeger@open-xchange.com">Carsten Hoeger</a>
+ * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
+ *
+ */
 public class Database extends EnforceableDataObject implements NameAndIdObject {
     /**
      * For serialization
