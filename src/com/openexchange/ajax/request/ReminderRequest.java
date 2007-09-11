@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.request;
 
+import com.openexchange.ajax.Reminder;
+import com.openexchange.groupware.calendar.CalendarRecurringCollection;
 import com.openexchange.tools.servlet.OXJSONException;
 import java.sql.SQLException;
 import java.util.Date;
@@ -77,143 +79,174 @@ import com.openexchange.tools.servlet.AjaxException;
 import org.json.JSONArray;
 
 public class ReminderRequest {
-	
-	private SessionObject sessionObj;
-	
-	private Date timestamp;
-	
-	private static final Log LOG = LogFactory.getLog(ReminderRequest.class);
-	
-	public Date getTimestamp() {
-		return timestamp;
-	}
-
-	public ReminderRequest(final SessionObject sessionObj) {
-		this.sessionObj = sessionObj;
-	}
-	
-	public Object action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, OXException, JSONException, SearchIteratorException, AjaxException, OXJSONException {
-		if (action.equalsIgnoreCase(AJAXServlet.ACTION_DELETE)) {
-			return actionDelete(jsonObject);
-		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_UPDATES)) {
-			return actionUpdates(jsonObject);
-		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_RANGE)) {
-			return actionRange(jsonObject);
-		} else {
-			throw new AjaxException(AjaxException.Code.UnknownAction, action);
-		}
-	}
-
-	private JSONArray actionDelete(final JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXException, OXJSONException, AjaxException {
-		final JSONObject jData = DataParser.checkJSONObject(jsonObject, "data");
-		final int id = DataParser.checkInt(jData, AJAXServlet.PARAMETER_ID);
-		
-		final ReminderSQLInterface reminderSql = new ReminderHandler(sessionObj);
-
-		reminderSql.deleteReminder(id);
-		
-		return new JSONArray();
-	}
-
-	private JSONArray actionUpdates(final JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXException, SearchIteratorException, OXJSONException, AjaxException {
-		timestamp = DataParser.checkDate(jsonObject, AJAXServlet.PARAMETER_TIMESTAMP);
-		
-		final ReminderSQLInterface reminderSql = new ReminderHandler(sessionObj);
-		final SearchIterator it = reminderSql.listModifiedReminder(sessionObj.getUserObject().getId(), timestamp);
-
-		final JSONArray jsonResponseArray = new JSONArray();
-		try {
-			while (it.hasNext()) {
-				final ReminderWriter reminderWriter = new ReminderWriter(TimeZone.getTimeZone(sessionObj.getUserObject().getTimeZone()));
-				final ReminderObject reminderObj = (ReminderObject)it.next();
-				
-				if (reminderObj.isRecurrenceAppointment()) {
-					final int targetId = Integer.parseInt(reminderObj.getTargetId());
-					final int inFolder = Integer.parseInt(reminderObj.getFolder());
-					
-					final Date alarm = CalendarCommonCollection.getNextReminderDate(targetId, inFolder, sessionObj);
-					
-					if (alarm == null) {
-						if (LOG.isWarnEnabled()) {
-							LOG.warn("alarm is null in reminder with id: " + reminderObj.getObjectId());
-						}
-						continue;
-					}
-					reminderObj.setDate(alarm);
-				}
-				
-				if (hasModulePermission(sessionObj, reminderObj)) {
-					final JSONObject jsonReminderObj = new JSONObject();
-					reminderWriter.writeObject(reminderObj, jsonReminderObj);
-					jsonResponseArray.put(jsonReminderObj);
-				}
-			}
-			
-			return jsonResponseArray;
-		} catch (SQLException e) {
-			throw new OXException("SQLException occurred", e);
-		} finally {
-			if (null != it) {
-				it.close();				
-			}
-		}
-	}
-
-	private JSONArray actionRange(final JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXException, SearchIteratorException, OXJSONException, AjaxException {
-		final Date end = DataParser.checkDate(jsonObject, AJAXServlet.PARAMETER_END);
-		
-		SearchIterator it = null;
-		
-		final JSONArray jsonResponseArray = new JSONArray();
-		
-		try {
-			final ReminderSQLInterface reminderSql = new ReminderHandler(sessionObj);
-			it = reminderSql.listReminder(sessionObj.getUserObject().getId(), end);
-			
-
-			while (it.hasNext()) {
-				final ReminderWriter reminderWriter = new ReminderWriter(TimeZone.getTimeZone(sessionObj.getUserObject().getTimeZone()));
-				final ReminderObject reminderObj = (ReminderObject)it.next();
-				
-				if (reminderObj.isRecurrenceAppointment()) {
-					final int targetId = Integer.parseInt(reminderObj.getTargetId());
-					final int inFolder = Integer.parseInt(reminderObj.getFolder());
-					
-					final Date alarm = CalendarCommonCollection.getNextReminderDate(targetId, inFolder, sessionObj);
-					
-					if (alarm == null) {
-						LOG.warn("alarm is null in reminder with id: " + reminderObj.getObjectId());
-						continue;
-					}
-					reminderObj.setDate(alarm);
-				}
-				
-				if (hasModulePermission(sessionObj, reminderObj)) {
-					final JSONObject jsonReminderObj = new JSONObject();
-					reminderWriter.writeObject(reminderObj, jsonReminderObj);
-					jsonResponseArray.put(jsonReminderObj);
-				}
-			}
-			
-			return jsonResponseArray;
-		} catch (SQLException e) {
-			throw new OXException("SQLException occurred", e);
-		} finally {
-			if (null != it) {
-				it.close();
-			}
-		}
-	}
-
-	protected boolean hasModulePermission(SessionObject sessionObj, ReminderObject reminderObj) {
-		switch (reminderObj.getModule()) {
-			case Types.APPOINTMENT:
-				return sessionObj.getUserConfiguration().hasCalendar();
-			case Types.TASK:
-				return sessionObj.getUserConfiguration().hasTask();
-			default:
-				return true;
-		}
-	}
-
+    
+    private SessionObject sessionObj;
+    
+    private Date timestamp;
+    
+    private static final Log LOG = LogFactory.getLog(ReminderRequest.class);
+    
+    public Date getTimestamp() {
+        return timestamp;
+    }
+    
+    public ReminderRequest(final SessionObject sessionObj) {
+        this.sessionObj = sessionObj;
+    }
+    
+    public Object action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, OXException, JSONException, SearchIteratorException, AjaxException, OXJSONException {
+        if (action.equalsIgnoreCase(AJAXServlet.ACTION_DELETE)) {
+            return actionDelete(jsonObject);
+        } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_UPDATES)) {
+            return actionUpdates(jsonObject);
+        } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_RANGE)) {
+            return actionRange(jsonObject);
+        } else {
+            throw new AjaxException(AjaxException.Code.UnknownAction, action);
+        }
+    }
+    
+    private JSONArray actionDelete(final JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXException, OXJSONException, AjaxException {
+        final JSONObject jData = DataParser.checkJSONObject(jsonObject, "data");
+        final int id = DataParser.checkInt(jData, AJAXServlet.PARAMETER_ID);
+        
+        final ReminderHandler reminderSql = new ReminderHandler(sessionObj); // changed by bishoph to be able to load the object by id !
+        
+        // TODO: Check if this is an exception, get the next reminder date and update !!!
+        try {
+            int uid = sessionObj.getUserObject().getId();
+            final ReminderObject reminder = reminderSql.loadReminder(id);
+            if (reminder != null) {
+                if (reminder.isRecurrenceAppointment()) {
+                    int oid = Integer.valueOf(reminder.getTargetId());
+                    int fid = Integer.valueOf(reminder.getFolder());
+                    Date old_reminder = reminder.getDate();
+                    Date next_reminder = null;
+                    if (CalendarCommonCollection.isInThePast(old_reminder)) {
+                        next_reminder = CalendarCommonCollection.getNextReminderDate(oid, fid, sessionObj);
+                    } else {
+                        next_reminder = CalendarCommonCollection.getNextReminderDate(oid, fid, sessionObj, old_reminder.getTime());
+                    }
+                    if (next_reminder != null) {
+                        reminder.setDate(next_reminder);
+                        reminderSql.updateReminder(reminder);
+                        final JSONArray jsonResponseArray = new JSONArray();
+                        jsonResponseArray.put(id);
+                        return jsonResponseArray;
+                    }
+                }
+            }
+        } catch(SQLException sqle) {
+            throw new OXException("SQLException occurred", sqle);
+        } catch(OXException oxe) {
+            // TODO: Add error handling
+            // Here we could try to delete the reminder because if we can't load the damn thing what else can we do ... ?
+            throw oxe;
+        }
+        
+        reminderSql.deleteReminder(id);
+        return new JSONArray();
+    }
+    
+    private JSONArray actionUpdates(final JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXException, SearchIteratorException, OXJSONException, AjaxException {
+        timestamp = DataParser.checkDate(jsonObject, AJAXServlet.PARAMETER_TIMESTAMP);
+        
+        final ReminderSQLInterface reminderSql = new ReminderHandler(sessionObj);
+        final SearchIterator it = reminderSql.listModifiedReminder(sessionObj.getUserObject().getId(), timestamp);
+        
+        final JSONArray jsonResponseArray = new JSONArray();
+        try {
+            while (it.hasNext()) {
+                final ReminderWriter reminderWriter = new ReminderWriter(TimeZone.getTimeZone(sessionObj.getUserObject().getTimeZone()));
+                final ReminderObject reminderObj = (ReminderObject)it.next();
+                
+                if (reminderObj.isRecurrenceAppointment()) {
+                    final int targetId = Integer.parseInt(reminderObj.getTargetId());
+                    final int inFolder = Integer.parseInt(reminderObj.getFolder());
+                    
+                    final Date alarm = CalendarCommonCollection.getNextReminderDate(targetId, inFolder, sessionObj);
+                    
+                    if (alarm == null) {
+                        if (LOG.isWarnEnabled()) {
+                            LOG.warn("alarm is null in reminder with id: " + reminderObj.getObjectId());
+                        }
+                        continue;
+                    }
+                    reminderObj.setDate(alarm);
+                }
+                
+                if (hasModulePermission(sessionObj, reminderObj)) {
+                    final JSONObject jsonReminderObj = new JSONObject();
+                    reminderWriter.writeObject(reminderObj, jsonReminderObj);
+                    jsonResponseArray.put(jsonReminderObj);
+                }
+            }
+            
+            return jsonResponseArray;
+        } catch (SQLException e) {
+            throw new OXException("SQLException occurred", e);
+        } finally {
+            if (null != it) {
+                it.close();
+            }
+        }
+    }
+    
+    private JSONArray actionRange(final JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXException, SearchIteratorException, OXJSONException, AjaxException {
+        final Date end = DataParser.checkDate(jsonObject, AJAXServlet.PARAMETER_END);
+        
+        SearchIterator it = null;
+        
+        final JSONArray jsonResponseArray = new JSONArray();
+        
+        try {
+            final ReminderSQLInterface reminderSql = new ReminderHandler(sessionObj);
+            it = reminderSql.listReminder(sessionObj.getUserObject().getId(), end);
+            
+            
+            while (it.hasNext()) {
+                final ReminderWriter reminderWriter = new ReminderWriter(TimeZone.getTimeZone(sessionObj.getUserObject().getTimeZone()));
+                final ReminderObject reminderObj = (ReminderObject)it.next();
+                
+                if (reminderObj.isRecurrenceAppointment()) {
+                    final int targetId = Integer.parseInt(reminderObj.getTargetId());
+                    final int inFolder = Integer.parseInt(reminderObj.getFolder());
+                    
+                    final Date alarm = CalendarCommonCollection.getNextReminderDate(targetId, inFolder, sessionObj);
+                    
+                    if (alarm == null) {
+                        LOG.warn("alarm is null in reminder with id: " + reminderObj.getObjectId());
+                        continue;
+                    }
+                    reminderObj.setDate(alarm);
+                }
+                
+                if (hasModulePermission(sessionObj, reminderObj)) {
+                    final JSONObject jsonReminderObj = new JSONObject();
+                    reminderWriter.writeObject(reminderObj, jsonReminderObj);
+                    jsonResponseArray.put(jsonReminderObj);
+                }
+            }
+            
+            return jsonResponseArray;
+        } catch (SQLException e) {
+            throw new OXException("SQLException occurred", e);
+        } finally {
+            if (null != it) {
+                it.close();
+            }
+        }
+    }
+    
+    protected boolean hasModulePermission(SessionObject sessionObj, ReminderObject reminderObj) {
+        switch (reminderObj.getModule()) {
+            case Types.APPOINTMENT:
+                return sessionObj.getUserConfiguration().hasCalendar();
+            case Types.TASK:
+                return sessionObj.getUserConfiguration().hasTask();
+            default:
+                return true;
+        }
+    }
+    
 }

@@ -2102,6 +2102,7 @@ class CalendarMySQL implements CalendarSqlImp {
                 pu = writecon.prepareStatement("update prg_dates_members SET confirm = ?, reason = ?, pfid = ?, reminder = ? WHERE object_id = ? AND cid = ? and member_uid = ?");
                 final OXFolderAccess access = new OXFolderAccess(cdao.getContext());
                 for (int a = 0; a < modified_userparticipants.length; a++) {
+                    // TODO: Enhance this and add a condition for lastid
                     pu.setInt(1, modified_userparticipants[a].getConfirm());
                     if (modified_userparticipants[a].getConfirmMessage() != null) {
                         pu.setString(2, modified_userparticipants[a].getConfirmMessage());

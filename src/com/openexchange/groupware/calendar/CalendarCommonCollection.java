@@ -448,19 +448,29 @@ public class CalendarCommonCollection {
     }
     
     public static final Date getNextReminderDate(final int oid, final int fid, final SessionObject so) throws OXException, SQLException {
+        return getNextReminderDate(oid, fid, so, 0L);
+    }
+    
+    public static final Date getNextReminderDate(final int oid, final int fid, final SessionObject so, long last) throws OXException, SQLException {
         final CalendarSql csql = new CalendarSql(so);
         final CalendarDataObject cdao = csql.getObjectById(oid, fid);
         final int alarm = cdao.getAlarm();
         long start = System.currentTimeMillis();
-        start = ((start/CalendarRecurringCollection.MILLI_DAY)*CalendarRecurringCollection.MILLI_DAY);
-        final long end = (start + (CalendarRecurringCollection.MILLI_YEAR * 10));
+        if (last > 0) {
+            start = last;
+            start = ((start/CalendarRecurringCollection.MILLI_DAY)*CalendarRecurringCollection.MILLI_DAY);
+            start += CalendarRecurringCollection.MILLI_DAY;
+        } else {
+            start = ((start/CalendarRecurringCollection.MILLI_DAY)*CalendarRecurringCollection.MILLI_DAY);
+        }
+        final long end = (start + (CalendarRecurringCollection.MILLI_YEAR * 10L));
         final  RecurringResults rss = CalendarRecurringCollection.calculateRecurring(cdao, start, end, 0, 1, false);
         if (rss != null && rss.size() >= 1) {
             final RecurringResult rs = rss.getRecurringResult(0);
             return new Date(rs.getStart()-(alarm*60*1000L));
         }
         return null;
-    }
+    }    
     
     public static final boolean existsReminder(final Context c, final int oid, final int uid) {
         final ReminderSQLInterface rsql = new ReminderHandler(c);
