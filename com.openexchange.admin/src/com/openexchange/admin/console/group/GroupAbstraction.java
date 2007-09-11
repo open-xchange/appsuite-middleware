@@ -92,7 +92,7 @@ public abstract class GroupAbstraction extends ObjectNamingAbstraction {
     protected String groupName = null;
     
     protected void setAddMembersOption(final AdminParser admp,boolean required) {
-        addMemberOption = setShortLongOpt(admp,OPT_NAME_ADDMEMBERS, OPT_NAME_ADDMEMBERS_LONG, "List of members to add to group", true, convertBooleantoTriState(required));
+        addMemberOption = setShortLongOpt(admp,OPT_NAME_ADDMEMBERS, OPT_NAME_ADDMEMBERS_LONG, "userid(s)", "List of members to add to group", required);
 //        retval.setArgName(OPT_NAME_ADDMEMBERS_LONG);
         
     }
