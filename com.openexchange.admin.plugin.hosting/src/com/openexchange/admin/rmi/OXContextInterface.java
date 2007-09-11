@@ -22,15 +22,45 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 
 
 /**
- * This interface defines the Open-Xchange API Version 2 for creating and manipulating OX Contexts.
+ * This class defines the Open-Xchange API Version 2 for creating and manipulating OX Contexts.<br><br>
+ * 
+ * To create a new context, you must first register a database,server and filestore to the system!<br>
+ * For details about registering a filestore,server or databases have a look in the {@link OXUtilInterface}.<br><br>
+ * 
+ * <b>Example:</b>
+ * <pre>
+ * final OXContextInterface iface = (OXContextInterface)Naming.lookup("rmi:///oxhost/"+OXContextInterface.RMI_NAME);
+ * 
+ * final Context ctx = new Context(1337);
+ * 
+ * User usr = new User();
+ * usr.setDisplay_name("admin display name");
+ * usr.setName("admin");
+ * usr.setPassword("secret");  
+ * usr.setMailenabled(true);       
+ * usr.setPrimaryEmail("admin@example.org");
+ * usr.setEmail1("admin@example.org");
+ * usr.setGiven_name("my");
+ * usr.setSur_name("admin");
+ * 
+ * 
+ * final Credentials auth = new Credentials();
+ * auth.setLogin("admin");
+ * auth.setPassword("secret");
+ * 
+ * iface.create(ctx,usr,access,auth);
+ *  
+ * </pre>
  *
- * @author cutmasta
+ * @author <a href="mailto:manuel.kraft@open-xchange.com">Manuel Kraft</a>
+ * @author <a href="mailto:carsten.hoeger@open-xchange.com">Carsten Hoeger</a>
+ * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  *
  */
 public interface OXContextInterface extends Remote {
 
     /**
-     * RMI name to be used in RMI URL
+     * RMI name to be used in the naming lookup.
      */
     public static final String RMI_NAME = "OXContext_V2";
 
