@@ -63,10 +63,11 @@ import com.openexchange.admin.rmi.extensions.OXCommonExtension;
 import com.openexchange.admin.rmi.extensions.OXUserExtensionInterface;
 
 /**
- * Class representing a user
+ * Class representing a user.
  * 
- * @author cutmasta
- * @author d7
+ * @author <a href="mailto:manuel.kraft@open-xchange.com">Manuel Kraft</a>
+ * @author <a href="mailto:carsten.hoeger@open-xchange.com">Carsten Hoeger</a>
+ * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  */
 public class User extends ExtendableDataObject implements NameAndIdObject {
     /**
