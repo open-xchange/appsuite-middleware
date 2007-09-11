@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.importexport.importers;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -94,36 +95,41 @@ import com.openexchange.tools.versit.converter.ConverterPrivacyException;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
 
 @OXExceptionSource(
-	classId=ImportExportExceptionClasses.ICALIMPORTER, 
-	component=Component.IMPORT_EXPORT)
+    classId=ImportExportExceptionClasses.ICALIMPORTER, 
+	component=Component.IMPORT_EXPORT
+)
 @OXThrowsMultiple(
 	category={
 		Category.PERMISSION, 
 		Category.SUBSYSTEM_OR_SERVICE_DOWN,
 		Category.USER_INPUT,
-		Category.CODE_ERROR,
+		Category.USER_INPUT,
 		Category.CODE_ERROR,
 		Category.USER_INPUT,
 		Category.USER_INPUT,
 		Category.PERMISSION,
 		Category.PERMISSION,
 		Category.USER_INPUT,
-		Category.USER_INPUT}, 
-	desc={"","","","","","","","","","",""}, 
-	exceptionId={0,1,2,3,4,5,6,7,8,9,10}, 
+		Category.USER_INPUT,
+        Category.USER_INPUT
+    }, 
+	desc={ "", "", "", "", "", "", "", "", "", "", "", "" }, 
+	exceptionId={ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 }, 
 	msg={
 		"Could not import into the folder %s.",
 		"Subsystem down",
 		"User input error %s",
-		"Programming error",
+		"Problem while reading ICal file: %s.",
 		"Could not load folder %s",
 		"Broken file uploaded: %s",
 		"Cowardly refusing to import an entry flagged as confidential.",
 		"Module Calendar not enabled for user, cannot import appointments.",
 		"Module Tasks not enabled for user, cannot import tasks.",
 		"The element %s is not supported.",
-		"Couldn't convert object: %s"})
-
+		"Couldn't convert object: %s",
+        "No ICal to import found."
+    }
+)
 /**
  * Imports ICal files. ICal files can be translated to either tasks or 
  * appointments within the OX, so the importer works with both SQL interfaces.
@@ -247,8 +253,10 @@ public class ICalImporter extends AbstractImporter implements Importer {
 		try {
 			final VersitDefinition def = ICalendar.definition;
 			final VersitDefinition.Reader versitReader = def.getReader(is, "UTF-8");
-			VersitObject rootVersitObject = def.parseBegin(versitReader);
-			
+			final VersitObject rootVersitObject = def.parseBegin(versitReader);
+			if (null == rootVersitObject) {
+                throw EXCEPTIONS.create(11);
+            }
 			boolean hasMoreObjects = true;
 			
 			while (hasMoreObjects) {
@@ -256,7 +264,7 @@ public class ICalImporter extends AbstractImporter implements Importer {
 				try {
 					VersitObject versitObject = null;
 					try {
-						versitObject=  def.parseChild(versitReader, rootVersitObject);
+						versitObject = def.parseChild(versitReader, rootVersitObject);
 					} catch (VersitException ve){
 						LOG.info("Trying to import ICAL file, but:\n" + ve);
 						importResult.setException(EXCEPTIONS.create(5, ve.getLocalizedMessage()));
@@ -347,9 +355,9 @@ public class ICalImporter extends AbstractImporter implements Importer {
 					list.add(importResult);
 				}
 			}
-		} catch (Exception exc) {
-			throw EXCEPTIONS.create(3, exc);
-		} finally {
+		} catch (IOException e) {
+            throw EXCEPTIONS.create(3, e, e.getMessage());
+        } finally {
 			oxContainerConverter.close();
 		}
 		

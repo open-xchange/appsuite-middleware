@@ -54,6 +54,7 @@ package com.openexchange.ajax;
 import java.io.File;
 
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.core.io.FileSystemResource;
 
@@ -76,10 +77,9 @@ public abstract class ImportExport extends SessionServlet {
 
 	public static final String AJAX_TYPE = "type";
 	
-	protected static Log LOG;
+	private static final Log LOG = LogFactory.getLog(ImportExport.class);
 	
 	protected ImporterExporter importerExporter = null;
-	
 	
 	public ImportExport(){
 		//spring init

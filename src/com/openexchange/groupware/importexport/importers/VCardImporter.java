@@ -93,30 +93,35 @@ import com.openexchange.tools.versit.filetokenizer.VCardFileToken;
 import com.openexchange.tools.versit.filetokenizer.VCardTokenizer;
 
 @OXExceptionSource(
-		classId=ImportExportExceptionClasses.VCARDIMPORTER,
-		component=Component.IMPORT_EXPORT)
-		@OXThrowsMultiple(
-		category={
-	Category.PERMISSION,
-	Category.SUBSYSTEM_OR_SERVICE_DOWN,
-	Category.USER_INPUT,
-	Category.CODE_ERROR,
-	Category.CODE_ERROR,
-	Category.USER_INPUT,
-	Category.CODE_ERROR,
-	Category.PERMISSION},
-		desc={"","","","","","","",""},
-		exceptionId={0,1,2,3,4,5,6,7},
-		msg={
-	"Could not import into the folder %s.",
-	"Subsystem down",
-	"User input error %s",
-	"Programming error - folder %s",
-	"Could not load folder %s",
-	"Could not recognize format of the following data: %s",
-	"Could not use UTF-8 encoding.",
-	"Module Contacts is not enabled for this user, cannot store contacts contained in VCard."})
-	
+    classId=ImportExportExceptionClasses.VCARDIMPORTER,
+    component=Component.IMPORT_EXPORT
+)
+@OXThrowsMultiple(
+    category={
+        Category.PERMISSION,
+    	Category.SUBSYSTEM_OR_SERVICE_DOWN,
+    	Category.USER_INPUT,
+    	Category.CODE_ERROR,
+    	Category.CODE_ERROR,
+    	Category.USER_INPUT,
+    	Category.CODE_ERROR,
+    	Category.PERMISSION,
+        Category.USER_INPUT
+    },
+	desc={"", "", "", "", "", "", "", "", ""},
+	exceptionId={0, 1, 2, 3, 4, 5, 6, 7, 8},
+	msg={
+    	"Could not import into the folder %s.",
+    	"Subsystem down",
+    	"User input error %s",
+    	"Programming error - folder %s",
+    	"Could not load folder %s",
+    	"Could not recognize format of the following data: %s",
+    	"Could not use UTF-8 encoding.",
+    	"Module Contacts is not enabled for this user, cannot store contacts contained in VCard.",
+        "No VCard to import found."
+    }
+)
 	/**
 	 * This importer translates VCards into contacts for the OX.
 	 * 
@@ -213,6 +218,9 @@ import com.openexchange.tools.versit.filetokenizer.VCardTokenizer;
 		try {
 			VCardTokenizer tokenizer = new VCardTokenizer(is);
 			List<VCardFileToken> chunks = tokenizer.split();
+            if (0 == chunks.size()) {
+                throw importExportExceptionFactory.create(8);
+            }
 			for(VCardFileToken chunk: chunks){
 				VersitDefinition def = chunk.getVersitDefinition();
 				ImportResult importResult = new ImportResult();

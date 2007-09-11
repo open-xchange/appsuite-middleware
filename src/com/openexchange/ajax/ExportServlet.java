@@ -56,6 +56,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.groupware.importexport.Format;
@@ -69,11 +70,15 @@ import com.openexchange.groupware.importexport.SizedInputStream;
  */
 public class ExportServlet extends ImportExport {
 	
+    /**
+     * Logger.
+     */
+    private static final Log LOG = LogFactory.getLog(ExportServlet.class);
+
 	private static final long serialVersionUID = -4391378107330348835L;
 
 	public ExportServlet(){
 		super();
-		LOG = LogFactory.getLog(ExportServlet.class);
 	}
 	
 	@SuppressWarnings("unchecked")

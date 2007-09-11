@@ -301,6 +301,7 @@
             <arg value="-AerrorCodeProcessor=com.openexchange.tools.exceptions.SerializationProcessor" />
             <arg value="-factory" />
             <arg value="com.openexchange.tools.exceptions.OXExceptionAnnotationFactory" />
+            <arg value="-nocompile" />
             <fileset dir="${src.dir}">
                 <include name="**/*.java"/>
             </fileset>

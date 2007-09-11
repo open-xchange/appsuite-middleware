@@ -326,7 +326,6 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 	public static final String PARAMETER_LIMIT = "limit";
 	
 	public static final String PARAMETER_TYPE = "type";
-	
 
 	/**
 	 * The content type if the response body contains javascript data. Set it
@@ -334,6 +333,12 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 	 */
 	public static final String CONTENTTYPE_JAVASCRIPT = "text/javascript; charset=UTF-8";
 
+    /**
+     * The content type if the reponse body contains the html page include the
+     * response for uploads.
+     */
+    public static final String CONTENTTYPE_HTML = "text/html; charset=UTF-8";
+    
 	/**
 	 * This is the error message if the session identifier isn't sent by the
 	 * client or the session timed out or no session can be found for the given

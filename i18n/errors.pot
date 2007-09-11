@@ -48,6 +48,9 @@ msgstr ""
 msgid "A LDAP error occurred in context %s"
 msgstr ""
 
+msgid "A SQL Error occurred while resolving folder name conflicts: %s"
+msgstr ""
+
 msgid "A SQL error occured: %s"
 msgstr ""
 
@@ -133,6 +136,10 @@ msgstr ""
 msgid ""
 "An SQL error occurred while performing task DelFolderTreeTableUpdateTask: %1"
 "$s."
+msgstr ""
+
+msgid ""
+"An SQL error occurred while performing task MailUploadQuotaUpdateTask: %1$s."
 msgstr ""
 
 msgid ""
@@ -564,9 +571,6 @@ msgstr ""
 msgid "Could not save file to the file store."
 msgstr ""
 
-msgid "Could not send results of importing process."
-msgstr ""
-
 msgid "Could not translate a single column title. Is this a valid CSV file?"
 msgstr ""
 
@@ -851,6 +855,9 @@ msgid ""
 msgstr ""
 
 msgid "Folder cache has not been enabled in config file %s"
+msgstr ""
+
+msgid "Folder contains invalid data: \"%1$s\""
 msgstr ""
 
 msgid ""
@@ -1244,10 +1251,16 @@ msgstr ""
 msgid "Need at least a ContactObject to get the value of %s"
 msgstr ""
 
+msgid "No ICal to import found."
+msgstr ""
+
 msgid "No IMAP account exists for user %s in context %s"
 msgstr ""
 
 msgid "No SpellCheckConfig loaded."
+msgstr ""
+
+msgid "No VCard to import found."
 msgstr ""
 
 msgid "No admin permission found"
@@ -1401,6 +1414,9 @@ msgstr ""
 msgid "Problem while initialising configuration tree."
 msgstr ""
 
+msgid "Problem while reading ICal file: %s."
+msgstr ""
+
 msgid "Problem with URI when creating context specific filestore location."
 msgstr ""
 
@@ -1413,9 +1429,6 @@ msgstr ""
 msgid ""
 "Process was interrupted while waiting for a free IMAP connection. Please try "
 "again."
-msgstr ""
-
-msgid "Programming error"
 msgstr ""
 
 msgid "Programming error - folder %s"
@@ -1553,6 +1566,9 @@ msgid "Target and source folder cannot be equal in context %s"
 msgstr ""
 
 msgid "Target folder %s contains a duplicate folder in context %s"
+msgstr ""
+
+msgid "Task contains invalid data: \"%1$s\""
 msgstr ""
 
 msgid "Task with private flags cannot be moved to public folder %1$s (%2$d)."
@@ -2199,17 +2215,17 @@ msgid "You cannot unlock this document."
 msgstr ""
 
 msgid ""
+"You do not have permission to create objects in this folder. %1$d in context "
+"%2$d with user %3$d"
+msgstr ""
+
+msgid ""
 "You do not have permission to delete objects from folder %1$d in context %2"
 "$d with user %3$d"
 msgstr ""
 
 msgid ""
 "You do not have permission to read objects in folder %1$d in context %2$d "
-"with user %3$d"
-msgstr ""
-
-msgid ""
-"You do not have permission to store objects in folder %1$d in context %2$d "
 "with user %3$d"
 msgstr ""
 

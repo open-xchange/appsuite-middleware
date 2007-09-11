@@ -5,6 +5,7 @@
  - Bugfix #9364: Using same mechanisms for modifying a search pattern for groups
    and resources.
  - Bugfix #8935: Removed replacing the string "null" with null.
+ - Bugfix #9209: Illegal files for import now give all a message in the panel.
 
 * 2007-09-10 - thorben.betten@open-xchange.com
 
