@@ -369,7 +369,7 @@ public class RdbResourceStorage extends ResourceStorage {
         try {
             stmt = con.prepareStatement(sql);
             stmt.setLong(1, context.getContextId());
-            stmt.setString(2, pattern.replace('*', '%'));
+            stmt.setString(2, LdapUtility.prepareSearchPattern(pattern));
             result = stmt.executeQuery();
             while (result.next()) {
                 final Resource res = new Resource();

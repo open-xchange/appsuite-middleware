@@ -197,6 +197,28 @@ public final class LdapUtility {
     }
 
     /**
+     * This method prepare some pattern to make it useful for a relational
+     * database search. The pattern is surounded by wildcards and the wildcard
+     * character * is replaced with its database pendant %.
+     * @param pattern pattern to modify.
+     * @return the modified pattern.
+     */
+    public static String prepareSearchPattern(String pattern) {
+        final StringBuilder modifiedPattern = new StringBuilder(pattern.replace(
+            '*', '%'));
+        if (modifiedPattern.length() == 0) {
+            modifiedPattern.append('%');
+        }
+        if (modifiedPattern.charAt(0) != '%') {
+            modifiedPattern.insert(0, '%');
+        }
+        if (modifiedPattern.charAt(modifiedPattern.length() - 1) != '%') {
+            modifiedPattern.append('%');
+        }
+        return modifiedPattern.toString();
+    }
+
+    /**
      * This class is a container for the temporary data for the TagFiller.
      */
     private static class TagFillerData {

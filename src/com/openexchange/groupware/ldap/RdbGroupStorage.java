@@ -170,17 +170,6 @@ public class RdbGroupStorage extends GroupStorage {
      * {@inheritDoc}
      */
     public Group[] searchGroups(final String pattern) throws LdapException {
-        final StringBuilder modifiedPattern = new StringBuilder(pattern.replace(
-            '*', '%'));
-        if (modifiedPattern.length() == 0) {
-            modifiedPattern.append('%');
-        }
-        if (modifiedPattern.charAt(0) != '%') {
-            modifiedPattern.insert(0, '%');
-        }
-        if (modifiedPattern.charAt(modifiedPattern.length() - 1) != '%') {
-            modifiedPattern.append('%');
-        }
         Connection con = null;
         try {
             con = DBPool.pickup(context);
@@ -194,7 +183,7 @@ public class RdbGroupStorage extends GroupStorage {
         try {
             stmt = con.prepareStatement(sql);
             stmt.setLong(1, context.getContextId());
-            stmt.setString(2, modifiedPattern.toString());
+            stmt.setString(2, LdapUtility.prepareSearchPattern(pattern));
             result = stmt.executeQuery();
             while (result.next()) {
                 final Group group = new Group();
