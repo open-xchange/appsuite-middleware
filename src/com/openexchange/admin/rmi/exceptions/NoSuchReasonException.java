@@ -4,9 +4,11 @@ package com.openexchange.admin.rmi.exceptions;
 
 
 /**
- * Is thrown if a user doesn't exist in an operation
+ * Thrown if an user doesn't exist in an operation.
  * 
- * @author d7
+ * @author <a href="mailto:manuel.kraft@open-xchange.com">Manuel Kraft</a>
+ * @author <a href="mailto:carsten.hoeger@open-xchange.com">Carsten Hoeger</a>
+ * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  *
  */
 public class NoSuchReasonException extends Exception {
