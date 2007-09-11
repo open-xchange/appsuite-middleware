@@ -58,6 +58,8 @@ public class ParticipantNotifyTest extends TestCase{
 	
 	public static final int EN = 0;
 	public static final int DE = 1;
+	public static final int FR = 2;
+	
 	
 	private TestParticipantNotify notify = new TestParticipantNotify();
 	
@@ -472,15 +474,22 @@ public class ParticipantNotifyTest extends TestCase{
 		switch(language) {
 		case DE: return getLines(msg,"Teilnehmer","Ressourcen");
 		case EN: return getLines(msg,"Participants", "Resources");
+		case FR: return getLines(msg, "Participants", "Ressources");
 		default: return null;
 		}
 	}
 
 	private static int guessLanguage(Message msg) {
 		String[] german = new String[]{"Aufgabe", "erstellt", "geändert", "entfernt"};
+		String[] french = new String[]{"tâche", "cr\u00e9e", "modifi\u00e9", "supprim\u00e9" };
 		for(String g : german) {
 			if(msg.messageTitle.contains(g))
 				return DE;
+		}
+		for(String f : french) {
+			if(msg.messageTitle.contains(f)) {
+				return FR;
+			}
 		}
 		return EN;
 	}
