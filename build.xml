@@ -261,10 +261,10 @@
         </exec>
     	<!-- french -->
     	<exec executable="${msgfmt}" dir="${basedir}">
-            <arg line="--java2 -d ${build.dir} -r com.openexchange.groupware.i18n.ServerMessages -l fr_FR ${i18n.dir}/fr_FR/server.po" />
+            <arg line="--java2 -d ${build.dir} -r com.openexchange.groupware.i18n.ServerMessages -l fr_FR ${i18n.dir}/fr_FR/server.fr_FR.po" />
         </exec>
         <exec executable="${msgfmt}" dir="${basedir}">
-            <arg line="--java2 -d ${build.dir} -r com.openexchange.groupware.i18n.ServerMessages -l fr ${i18n.dir}/fr_FR/server.po" />
+            <arg line="--java2 -d ${build.dir} -r com.openexchange.groupware.i18n.ServerMessages -l fr ${i18n.dir}/fr_FR/server.fr_FR.po" />
         </exec>
         <jar jarfile="${lib.dir}/ox_languages.jar" basedir="${build.dir}"
             includes="com/openexchange/groupware/i18n/ServerMessages*" />
@@ -363,30 +363,39 @@
         <replaceregexp file="${i18n.dir}/errors.pot" match="#:(.*)\n" replace="" flags="g"/>
         <delete file="${i18n.dir}/GUIMessages.java" />
     </target>
-	
+
 	<!-- comparing source .pot files to translated .po files-->
 	<target name="check-pot" depends="create-pot">
+	    <antcall target="check-lang-pot">
+	    	<param name="lang" value="de_DE"/>
+	    </antcall>
+	    <antcall target="check-lang-pot">
+	    	<param name="lang" value="fr_FR"/>
+	    </antcall>
+	</target>
+
+    <target name="check-lang-pot" if="lang">
         <exec executable="${msgcmp}" dir="${i18n.dir}" failonerror="false" failifexecutionfails="false" resultproperty="translation-return-1" outputproperty="translation-result-1">
-            <arg value="de_DE/server.de_DE.po"/>
-            <arg value="server.pot"/>
+            <arg value="${lang}/server.${lang}.po"/>
+        	<arg value="server.pot"/>
         </exec>
 		<antcall target="check-pot-warning" inheritAll="false">
 			<param name="translation-success" value="${translation-return-1}" />
-			<param name="translation-step" value="German (de_DE) server texts" />
+			<param name="translation-step" value="${lang} server texts" />
 			<param name="translation-message" value="${translation-result-1}"/>
 		</antcall>
-		
+
         <exec executable="${msgcmp}" dir="${i18n.dir}" failonerror="false" failifexecutionfails="false" resultproperty="translation-return-2" outputproperty="translation-result-2">
-            <arg value="de_DE/errors.de_DE.po"/>
+            <arg value="${lang}/errors.${lang}.po"/>
         	<arg value="errors.pot"/>
         </exec>
 		<antcall target="check-pot-warning" inheritAll="false">
 			<param name="translation-success" value="${translation-return-2}" />
-			<param name="translation-step" value="German (de_DE) error texts" />
+			<param name="translation-step" value="${lang} error texts" />
 			<param name="translation-message" value="${translation-result-2}"/>
 		</antcall>
-	</target>
-	
+    </target>
+
 	<target name="check-pot-warning">
 		<condition property="translation-warning-needed">
             <not>
@@ -398,7 +407,7 @@
 			<param name="translation-message" value="${translation-message}"/>
 		</antcall>
 	</target>
-	
+
 	<target name="show-pot-warning" if="translation-warning-needed" >
 		<echo message="Warnings for ${translation-step}:" />
 		<echo message="${translation-message}" />
