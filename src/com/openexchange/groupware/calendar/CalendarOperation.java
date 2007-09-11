@@ -1140,7 +1140,9 @@ public class CalendarOperation implements SearchIterator {
             }
         } else if (edao != null && edao.containsPrivateFlag() && edao.getPrivateflag() == 1) {
             if (cdao.getSharedFolderOwner() != uid) {
-                throw new OXCalendarException(OXCalendarException.Code.MOVE_TO_SHARED_FOLDER_NOT_SUPPORTED);
+                if (cdao.getFolderType() != CalendarCommonCollection.PRIVATE) {
+                    throw new OXCalendarException(OXCalendarException.Code.MOVE_TO_SHARED_FOLDER_NOT_SUPPORTED);
+                }
             }
         }
         if (cdao.containsShownAs() && (cdao.getShownAs() < 0 || cdao.getShownAs() > 4)) {
