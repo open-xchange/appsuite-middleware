@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.ajax.parser;
 
 import com.openexchange.tools.servlet.AjaxException;
@@ -79,10 +77,6 @@ public abstract class DataParser {
 	protected boolean parseAll;
 	
 	protected TimeZone timeZone;
-	
-	private static final String NULL = "null";
-	
-	private static final String _missingField = "missing field: ";
 	
 	protected SessionObject sessionObj;
 
@@ -140,19 +134,15 @@ public abstract class DataParser {
 			dataobject.setLastModified(parseTime(jsonobject, DataFields.LAST_MODIFIED, timeZone));
 		}
 	}
-	
+
 	public static String parseString(final JSONObject jsonObj, final String name) throws JSONException {
-		if (!jsonObj.has(name)) {
-			return null;
-		}
-		
-		final String tmp = jsonObj.getString(name);
-		if ((tmp != null) && (tmp.length() == 0 || tmp.equals(NULL))) {
-			return null;
-		}
-		return tmp;
+        String retval = jsonObj.optString(name, null);
+        if (null != retval && retval.length() == 0) {
+            retval = null;
+        }
+		return retval;
 	}
-	
+
 	public static int parseInt(final JSONObject jsonObj, final String name) throws JSONException, OXJSONException {
 		if (!jsonObj.has(name)) {
 			return 0;
