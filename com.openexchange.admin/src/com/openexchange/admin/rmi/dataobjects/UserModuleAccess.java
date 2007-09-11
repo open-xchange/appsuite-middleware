@@ -54,6 +54,12 @@ import java.lang.reflect.Field;
 
 /**
  * Object for setting/getting access informations to the different ox modules
+ *
+ *
+ * @author <a href="mailto:manuel.kraft@open-xchange.com">Manuel Kraft</a>
+ * @author <a href="mailto:carsten.hoeger@open-xchange.com">Carsten Hoeger</a>
+ * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
+ *
  */
 public class UserModuleAccess implements Serializable {
 

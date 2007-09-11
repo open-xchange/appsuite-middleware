@@ -53,7 +53,10 @@ import java.io.Serializable;
 
 /**
  * This object must be send with every method call in ox rmi interface!
- * @author cutmasta
+ * 
+ * @author <a href="mailto:manuel.kraft@open-xchange.com">Manuel Kraft</a>
+ * @author <a href="mailto:carsten.hoeger@open-xchange.com">Carsten Hoeger</a>
+ * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  */
 public class Credentials implements Serializable{
     /**

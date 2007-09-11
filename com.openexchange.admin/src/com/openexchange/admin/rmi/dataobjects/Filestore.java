@@ -52,7 +52,12 @@ package com.openexchange.admin.rmi.dataobjects;
 import java.io.Serializable;
 
 /**
- * @author choeger
+ * 
+ * This class represents a filestore.
+ * 
+ * @author <a href="mailto:manuel.kraft@open-xchange.com">Manuel Kraft</a>
+ * @author <a href="mailto:carsten.hoeger@open-xchange.com">Carsten Hoeger</a>
+ * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  *
  */
 public class Filestore implements Serializable {

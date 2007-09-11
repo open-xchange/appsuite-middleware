@@ -56,6 +56,15 @@ import java.util.Arrays;
 import com.openexchange.admin.rmi.extensions.OXCommonExtension;
 import com.openexchange.admin.rmi.extensions.OXGroupExtensionInterface;
 
+/**
+ * 
+ * This class represents a group.
+ * 
+ * @author <a href="mailto:manuel.kraft@open-xchange.com">Manuel Kraft</a>
+ * @author <a href="mailto:carsten.hoeger@open-xchange.com">Carsten Hoeger</a>
+ * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
+ *
+ */
 public class Group extends ExtendableDataObject implements NameAndIdObject {
     /**
      * For serialization

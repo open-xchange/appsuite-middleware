@@ -64,15 +64,44 @@ import java.rmi.RemoteException;
 
 /**
  * This class defines the Open-Xchange API Version 2 for creating and
- * manipulating OX Users within an OX context.
+ * manipulating OX Users within an OX context.<br><br>
  * 
- * @author cutmasta
+ * <b>Example:</b>
+ * <pre>
+ * final OXUserInterface iface = (OXUserInterface)Naming.lookup("rmi:///oxhost/"+OXUserInterface.RMI_NAME);
+ * 
+ * final Context ctx = new Context(1);
+ * 
+ * User usr = new User();
+ * usr.setDisplay_name("display name");
+ * usr.setName("name");
+ * usr.setPassword("secret");  
+ * usr.setMailenabled(true);       
+ * usr.setPrimaryEmail("primaryemail@example.org");
+ * usr.setEmail1("primaryemail@example.org");
+ * usr.setGiven_name("Givenname");
+ * usr.setSur_name("Lastname");
+ * 
+ * final UserModuleAccess access = new UserModuleAccess();  
+ * access.access.enableAll();  // give access to all modules.
+ * 
+ * final Credentials auth = new Credentials();
+ * auth.setLogin("admin");
+ * auth.setPassword("secret");
+ * 
+ * User created = iface.create(ctx,usr,access,auth);
+ *  
+ * </pre>
+ * 
+ * @author <a href="mailto:manuel.kraft@open-xchange.com">Manuel Kraft</a>
+ * @author <a href="mailto:carsten.hoeger@open-xchange.com">Carsten Hoeger</a>
+ * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  * 
  */
 public interface OXUserInterface extends Remote {
 
     /**
-     * RMI name to be used in RMI URL
+     * RMI name to be used in the naming lookup.
      */
     public static final String RMI_NAME = "OXUser_V2";
 

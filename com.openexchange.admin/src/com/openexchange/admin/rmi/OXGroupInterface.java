@@ -65,16 +65,36 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 
 /**
  * This interface defines the Open-Xchange API Version 2 for creating and
- * manipulating OX groups within an OX context.
+ * manipulating OX groups within an OX context.<br><br>
  * 
- * @author cutmasta
- * @author d7
+ * <b>Example:</b>
+ * <pre>
+ * final OXGroupInterface iface = (OXGroupInterface)Naming.lookup("rmi:///oxhost/"+OXGroupInterface.RMI_NAME);
+ * 
+ * final Context ctx = new Context(1);
+ * 
+ * Group grp = new Group();
+ * grp.setDisplayname("display name");
+ * grp.setName("name");
+ * 
+ * final Credentials auth = new Credentials();
+ * auth.setLogin("admin");
+ * auth.setPassword("secret");
+ * 
+ * Group created = iface.create(ctx,group,auth);
+ *  
+ * </pre>
+ *  
+ * 
+ * @author <a href="mailto:manuel.kraft@open-xchange.com">Manuel Kraft</a>
+ * @author <a href="mailto:carsten.hoeger@open-xchange.com">Carsten Hoeger</a>
+ * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  * 
  */
 public interface OXGroupInterface extends Remote {
 
     /**
-     * RMI name to be used in RMI URL
+     * RMI name to be used in the naming lookup.
      */
     public static final String RMI_NAME = "OXGroup_V2";
 
@@ -174,7 +194,7 @@ public interface OXGroupInterface extends Remote {
      *                Group which should be created.
      * @param auth
      *                Credentials for authenticating against server.
-     * @return int containing the id of the new group.
+     * @return Group containing the id of the new group.
      * @throws RemoteException
      *                 General RMI Exception
      * @throws InvalidCredentialsException

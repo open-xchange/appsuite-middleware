@@ -63,15 +63,36 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 
 /**
  * This interface defines the Open-Xchange API Version 2 for creating and
- * manipulating OX resources within an OX context.
+ * manipulating OX resources within an OX context.<br><br>
  * 
- * @author cutmasta
+ * <b>Example:</b>
+ * <pre>
+ * final OXResourceInterface iface = (OXResourceInterface)Naming.lookup("rmi:///oxhost/"+OXResourceInterface.RMI_NAME);
+ * 
+ * final Context ctx = new Context(1);
+ * 
+ * final Credentials auth = new Credentials();
+ * auth.setLogin("myuser");
+ * auth.setPassword("secret");
+ * 
+ * final Resource res = new Resource();
+ * res.setName("resource");
+ * res.setDisplayName("my resource display name");
+ * 
+ * Resource res_created = iface.create(ctx,res,auth);
+ * 
+ * </pre> 
+ * 
+ * 
+ * @author <a href="mailto:manuel.kraft@open-xchange.com">Manuel Kraft</a>
+ * @author <a href="mailto:carsten.hoeger@open-xchange.com">Carsten Hoeger</a>
+ * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  * 
  */
 public interface OXResourceInterface extends Remote {
 
     /**
-     * RMI name to be used in RMI URL
+     * RMI name to be used in the naming lookup.
      */
     public static final String RMI_NAME = "OXResource_V2";
 
@@ -81,7 +102,7 @@ public interface OXResourceInterface extends Remote {
      * @param ctx Create Resource in this Context
      * @param res Resource which should be created
      * @param auth Credentials for authenticating against server.
-     * @return Contains the new resource id.
+     * @return Resource containing the resource id.
      * @throws StorageException When an error in the subsystems occurred.
      * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
      * @throws NoSuchContextException If the context does not exist in the system.
@@ -162,7 +183,7 @@ public interface OXResourceInterface extends Remote {
     public Resource getData(final Context ctx, final Resource res, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchResourceException;
 
     /**
-     * Fetch specified resources from server. Can be used to fetch resource data including extensions.
+     * Get specified resources from server. Can be used to get resource data including extensions.
      * Resources will be identified by id or by name.
      * @param ctx
      * @param resources
@@ -195,7 +216,7 @@ public interface OXResourceInterface extends Remote {
     public Resource[] list(final Context ctx, final String pattern, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException;
     
     /**
-     * Lists all resources in given context.
+     * List all resources in given context.
      * 
      * @return Resource[] containing result objects.
      * @param ctx Context object.

@@ -54,9 +54,12 @@ import java.util.Collection;
 import java.util.HashSet;
 
 /**
- * Class representing a context
+ * Class representing a context.
  * 
- * @author cutmasta
+ * @author <a href="mailto:manuel.kraft@open-xchange.com">Manuel Kraft</a>
+ * @author <a href="mailto:carsten.hoeger@open-xchange.com">Carsten Hoeger</a>
+ * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
+ * 
  */
 public class Context extends EnforceableDataObject implements NameAndIdObject {
     /**
