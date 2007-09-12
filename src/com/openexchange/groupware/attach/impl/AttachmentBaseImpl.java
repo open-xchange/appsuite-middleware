@@ -87,8 +87,10 @@ import com.openexchange.groupware.attach.AttachmentField;
 import com.openexchange.groupware.attach.AttachmentListener;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.Classes;
+import com.openexchange.groupware.attach.util.GetSwitch;
 import com.openexchange.groupware.attach.util.SetSwitch;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.data.Check;
 import com.openexchange.groupware.filestore.FilestoreException;
 import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.ldap.User;
@@ -153,6 +155,8 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 	public long attachToObject(final AttachmentMetadata attachment, final InputStream data, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
 		
 		checkMayAttach(attachment.getFolderId(),attachment.getAttachedId(),attachment.getModuleId(), ctx, user, userConfig);
+		
+		checkCharacters(attachment);
 		
 		contextHolder.set(ctx);
 		final boolean newAttachment = attachment.getId() == NEW || attachment.getId() == 0;
@@ -776,6 +780,27 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 			return fireAttached(attachment, user, userConfig, ctx, null);
 		}
 		return System.currentTimeMillis();
+	}
+	
+	
+	@OXThrows(category=Category.USER_INPUT, desc="", exceptionId=18, msg="Validation failed: %s")
+	private void checkCharacters(AttachmentMetadata attachment) throws OXException {
+		StringBuilder errors = new StringBuilder();
+		boolean invalid = false;
+		GetSwitch get = new GetSwitch(attachment);
+		for(AttachmentField field : AttachmentField.VALUES_ARRAY) {
+			Object value = field.doSwitch(get);
+			if(null != value && value instanceof String) {
+				String error = Check.containsInvalidChars((String)value);
+				if(null != error) {
+					invalid = true;
+					errors.append(field.getName()).append(" ").append(error);
+				}
+			}
+		}
+		if(invalid) {
+			throw EXCEPTIONS.create(18, errors.toString());
+		}
 	}
 	
 	@OXThrowsMultiple(
