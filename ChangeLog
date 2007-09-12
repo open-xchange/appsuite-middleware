@@ -1,8 +1,11 @@
+* 2007-09-12 - ben.pahne@open-xchange.com
+
+ - Fixed Bug 9224: Display Name / File as not synchronized to Outlook
+
 * 2007-09-11 - francisco.laguna@open-xchange.com
 
  - Fix for Bug #6335, infostore. Strings are run against the validator.
  - Fix for Bug #6335, attachments. Strings are run against the validator.
- 
 
 * 2007-09-11 - martin.kauss@open-xchange.com
 
