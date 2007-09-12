@@ -148,6 +148,8 @@ public class CCTests {
 		tests.addTestSuite(com.openexchange.groupware.infostore.UpdateVersionActionTest.class);
 		tests.addTestSuite(com.openexchange.groupware.infostore.DeleteDocumentActionTest.class);
 		tests.addTestSuite(com.openexchange.groupware.infostore.DeleteVersionActionTest.class);
+		tests.addTestSuite(com.openexchange.groupware.infostore.validation.ValidationChainTest.class);
+		tests.addTestSuite(com.openexchange.groupware.infostore.validation.InfostoreInvalidCharactersCheckTest.class);
 		//tests.addTestSuite(com.openexchange.groupware.infostore.DelUserFolderDiscovererTest.class);
 		
 		
