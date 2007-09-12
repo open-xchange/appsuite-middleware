@@ -49,6 +49,12 @@
 
 package com.openexchange.ajax.task;
 
+import java.util.TimeZone;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.openexchange.ajax.fields.TaskFields;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.GetRequest;
@@ -63,6 +69,8 @@ import com.openexchange.groupware.tasks.Task;
  */
 public class Bug8935Test extends AbstractTaskTest {
 
+    private AJAXClient client;
+
     /**
      * Default constructor.
      * @param name name of the test.
@@ -72,11 +80,19 @@ public class Bug8935Test extends AbstractTaskTest {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        client = getClient();
+    }
+
+    /**
      * Checks if a task can be created with a title of "null";
      * @throws Throwable if an exception occurs.
      */
     public void testNull() throws Throwable {
-        final AJAXClient client = getClient();
         final Task task = Create.createWithDefaults();
         task.setTitle("null");
         task.setParentFolderID(client.getPrivateTaskFolder());
@@ -87,5 +103,36 @@ public class Bug8935Test extends AbstractTaskTest {
         final Task reload = gResponse.getTask(client.getTimeZone());
         TaskTools.compareAttributes(task, reload);
         TaskTools.delete(client, new DeleteRequest(reload));
+    }
+
+    public void testRealNull() throws Throwable {
+        final Task task = Create.createWithDefaults();
+        task.removeTitle();
+        task.setParentFolderID(client.getPrivateTaskFolder());
+        final InsertResponse iResponse = TaskTools.insert(client,
+            new SpecialInsertRequest(task, client.getTimeZone()));
+        // remove it because server won't sent empty fields.
+        final GetResponse gResponse = TaskTools.get(client,
+            new GetRequest(iResponse));
+        final Task reload = gResponse.getTask(client.getTimeZone());
+        TaskTools.compareAttributes(task, reload);
+        TaskTools.delete(client, new DeleteRequest(reload));
+    }
+
+    private class SpecialInsertRequest extends InsertRequest {
+
+        public SpecialInsertRequest(final Task task, final TimeZone timeZone) {
+            super(task, timeZone);
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public JSONObject getBody() throws JSONException {
+            final JSONObject json = super.getBody();
+            json.put(TaskFields.TITLE, JSONObject.NULL);
+            return json;
+        }
     }
 }
