@@ -1,3 +1,7 @@
+* 2007-09-11 - francisco.laguna@open-xchange.com
+
+ - Fix for Bug #6335, infostore. Strings are run against the validator.
+
 * 2007-09-11 - martin.kauss@open-xchange.com
 
  - Fixed bug #9137. It was not possible to move/edit an private appointment.

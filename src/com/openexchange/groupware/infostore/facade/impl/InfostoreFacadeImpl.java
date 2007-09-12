@@ -101,6 +101,8 @@ import com.openexchange.groupware.infostore.database.impl.SetSwitch;
 import com.openexchange.groupware.infostore.database.impl.UpdateDocumentAction;
 import com.openexchange.groupware.infostore.database.impl.UpdateVersionAction;
 import com.openexchange.groupware.infostore.utils.Metadata;
+import com.openexchange.groupware.infostore.validation.InvalidCharactersValidator;
+import com.openexchange.groupware.infostore.validation.ValidationChain;
 import com.openexchange.groupware.infostore.webdav.EntityLockManager;
 import com.openexchange.groupware.infostore.webdav.EntityLockManagerImpl;
 import com.openexchange.groupware.infostore.webdav.Lock;
@@ -140,6 +142,12 @@ import com.openexchange.tools.iterator.SearchIteratorException;
 @OXExceptionSource(classId = Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_FACADE_IMPL_INFOSTOREFACADEIMPL, component = Component.INFOSTORE)
 public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 		DBProviderUser {
+
+	private static final ValidationChain VALIDATION = new ValidationChain();
+	static {
+		VALIDATION.add(new InvalidCharactersValidator());
+		// Add more infostore validators here, as needed
+	}
 
 	private static final Log LOG = LogFactory.getLog(InfostoreFacadeImpl.class);
 	private static final LoggingLogic LL = LoggingLogic.getLoggingLogic(InfostoreFacadeImpl.class);
@@ -438,6 +446,8 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 			setDefaults(document);
 			checkUniqueFilename(document.getFileName(), document.getFolderId(), document.getId(), sessionObj.getContext());
 			
+			VALIDATION.validate(document);
+			
 			Connection writeCon = null;
 			try {
 				startDBTransaction();
@@ -669,11 +679,14 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 					throw EXCEPTIONS.create(4);
 				}
 			}
+			
 			final DocumentMetadata oldDocument = checkWriteLock(document.getId(), sessionObj);
-
 			document.setLastModified(new Date());
 			document.setModifiedBy(sessionObj.getUserObject().getId());
-
+			
+			VALIDATION.validate(document);
+			
+			
 			// db.updateDocument(document, data, sequenceNumber,
 			// modifiedColumns, sessionObj.getContext(),
 			// sessionObj.getUserObject(), sessionObj.getUserConfiguration());
