@@ -12,6 +12,7 @@
  - Fix for Bug #6335, infostore. Strings are run against the validator.
  - Fix for Bug #6335, attachments. Strings are run against the validator.
  - Fix for Bug #9224: Allow import of empty contacts
+ - Fix for Bug #9390: Calculate boundaries for webdav partial GET correctly
 
 * 2007-09-11 - martin.kauss@open-xchange.com
 
