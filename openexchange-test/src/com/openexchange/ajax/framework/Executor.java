@@ -15,9 +15,12 @@ import org.xml.sax.SAXException;
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.PutMethodWebRequest;
+import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.framework.AJAXRequest.FileParameter;
+import com.openexchange.ajax.framework.AJAXRequest.Method;
 import com.openexchange.ajax.framework.AJAXRequest.Parameter;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.tools.URLParameter;
@@ -77,6 +80,13 @@ public class Executor extends Assert {
             req = new PostMethodWebRequest(urlString);
             addParameter(req, session, request);
             break;
+        case UPLOAD:
+            final PostMethodWebRequest post = new PostMethodWebRequest(urlString
+                + getPUTParameter(session, request));
+            post.setMimeEncoded(true);
+            req = post;
+            addFileParameter(post, request);
+            break;
         case PUT:
             req = new PutMethodWebRequest(urlString + getPUTParameter(session,
                 request), createBody(request.getBody()), AJAXServlet
@@ -86,7 +96,14 @@ public class Executor extends Assert {
             throw new AjaxException(AjaxException.Code.InvalidParameter, request
                 .getMethod().name());
         }
-        final WebResponse resp = session.getConversation().getResponse(req);
+        final WebConversation conv = session.getConversation();
+        final WebResponse resp;
+        // The upload returns a web page that should not be interpreted.
+        if (Method.UPLOAD == request.getMethod()) {
+            resp = conv.getResource(req);
+        } else {
+            resp = conv.getResponse(req);
+        }
         final AbstractAJAXParser parser = request.getParser();
         parser.checkResponse(resp);
         return parser.parse(resp.getText());
@@ -97,8 +114,21 @@ public class Executor extends Assert {
         if (null != session.getId()) {
             req.setParameter(AJAXServlet.PARAMETER_SESSION, session.getId());
         }
-        for (Parameter parameter : request.getParameters()) {
-            req.setParameter(parameter.getName(), parameter.getValue());
+        for (Parameter param : request.getParameters()) {
+            if (!(param instanceof FileParameter)) {
+                req.setParameter(param.getName(), param.getValue());
+            }
+        }
+    }
+
+    private static void addFileParameter(final PostMethodWebRequest post,
+        final AJAXRequest request) {
+        for (Parameter param : request.getParameters()) {
+            if (param instanceof FileParameter) {
+                final FileParameter fparam = (FileParameter) param;
+                post.selectFile(fparam.getName(), fparam.getFileName(),
+                    fparam.getInputStream(), fparam.getMimeType());
+            }
         }
     }
 
@@ -110,7 +140,9 @@ public class Executor extends Assert {
                 .getId());
         }
         for (Parameter param : request.getParameters()) {
-            parameter.setParameter(param.getName(), param.getValue());
+            if (!(param instanceof FileParameter)) {
+                parameter.setParameter(param.getName(), param.getValue());
+            }
         }
         return parameter.getURLParameters();
     }

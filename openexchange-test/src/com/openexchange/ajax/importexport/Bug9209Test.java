@@ -47,74 +47,36 @@
  *
  */
 
-package com.openexchange.ajax.config.actions;
+package com.openexchange.ajax.importexport;
 
-import org.json.JSONException;
+import java.io.ByteArrayInputStream;
 
-import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.importexport.actions.CSVImportRequest;
+import com.openexchange.ajax.importexport.actions.CSVImportResponse;
 
 /**
- * 
+ * This test verifies if the problem described in bug 9209 does not appear
+ * anymore.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class GetRequest extends AbstractConfigRequest {
+public final class Bug9209Test extends AbstractAJAXSession {
 
-    private final Tree param;
-
+    private static final byte[] testBytes = new byte[] { 0, 0, 0 };
+    
     /**
      * Default constructor.
+     * @param name name of the test.
      */
-    public GetRequest(final Tree param) {
-        super();
-        this.param = param;
+    public Bug9209Test(final String name) {
+        super(name);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String getServletPath() {
-        return super.getServletPath() + param.path;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Object getBody() throws JSONException {
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Method getMethod() {
-        return Method.GET;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Parameter[] getParameters() {
-        return new Parameter[0];
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public AbstractAJAXParser getParser() {
-        return new GetParser();
-    }
-
-    public enum Tree {
-        Identifier("/identifier"),
-        TimeZone("/timezone"),
-        PrivateContactFolder("/folder/contacts"),
-        PrivateTaskFolder("/folder/tasks"),
-        MaxUploadIdleTimeout("/maxUploadIdleTimeout"),
-        Language("/language");
-        private String path;
-        private Tree(final String path) {
-            this.path=path;
-        }
+    public void test9209() throws Throwable {
+        final AJAXClient client = getClient();
+        final CSVImportResponse iResponse = Tools.doImport(client,
+            new CSVImportRequest(client.getPrivateContactFolder(),
+            new ByteArrayInputStream(testBytes)));
     }
 }

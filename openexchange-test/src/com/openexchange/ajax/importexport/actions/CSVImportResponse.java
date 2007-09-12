@@ -47,74 +47,22 @@
  *
  */
 
-package com.openexchange.ajax.config.actions;
+package com.openexchange.ajax.importexport.actions;
 
-import org.json.JSONException;
-
-import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class GetRequest extends AbstractConfigRequest {
-
-    private final Tree param;
+public final class CSVImportResponse extends AbstractAJAXResponse {
 
     /**
-     * Default constructor.
+     * @param response
      */
-    public GetRequest(final Tree param) {
-        super();
-        this.param = param;
+    public CSVImportResponse(final Response response) {
+        super(response);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String getServletPath() {
-        return super.getServletPath() + param.path;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Object getBody() throws JSONException {
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Method getMethod() {
-        return Method.GET;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Parameter[] getParameters() {
-        return new Parameter[0];
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public AbstractAJAXParser getParser() {
-        return new GetParser();
-    }
-
-    public enum Tree {
-        Identifier("/identifier"),
-        TimeZone("/timezone"),
-        PrivateContactFolder("/folder/contacts"),
-        PrivateTaskFolder("/folder/tasks"),
-        MaxUploadIdleTimeout("/maxUploadIdleTimeout"),
-        Language("/language");
-        private String path;
-        private Tree(final String path) {
-            this.path=path;
-        }
-    }
 }

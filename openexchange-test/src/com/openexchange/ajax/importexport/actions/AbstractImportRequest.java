@@ -47,34 +47,42 @@
  *
  */
 
-package com.openexchange.ajax.config.actions;
+package com.openexchange.ajax.importexport.actions;
+
+import java.io.InputStream;
 
 import org.json.JSONException;
 
-import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.groupware.importexport.Format;
 
 /**
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class GetRequest extends AbstractConfigRequest {
+public abstract class AbstractImportRequest implements AJAXRequest {
 
-    private final Tree param;
+    /**
+     * URL of the tasks AJAX interface.
+     */
+    public static final String IMPORT_URL = "/ajax/import";
+
+    private final Action action;
+
+    private final int folderId;
+
+    private final InputStream upload;
 
     /**
      * Default constructor.
      */
-    public GetRequest(final Tree param) {
+    public AbstractImportRequest(final Action action, final int folderId,
+        final InputStream upload) {
         super();
-        this.param = param;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String getServletPath() {
-        return super.getServletPath() + param.path;
+        this.action = action;
+        this.folderId = folderId;
+        this.upload = upload;
     }
 
     /**
@@ -88,33 +96,38 @@ public class GetRequest extends AbstractConfigRequest {
      * {@inheritDoc}
      */
     public Method getMethod() {
-        return Method.GET;
+        return Method.UPLOAD;
     }
 
     /**
      * {@inheritDoc}
      */
     public Parameter[] getParameters() {
-        return new Parameter[0];
+        return new Parameter[] {
+            new Parameter(AJAXServlet.PARAMETER_ACTION, action.name),
+            new Parameter(AJAXServlet.PARAMETER_FOLDERID, folderId),
+            new FileParameter("file", action.fileName, upload,
+                action.format.getMimeType())
+        };
+    }
+
+    protected enum Action {
+        CSV("CSV", "vcard.vcf", Format.CSV);
+        private String name;
+        private String fileName;
+        private Format format;
+        private Action(final String name, final String fileName,
+            final Format format) {
+            this.name = name;
+            this.fileName = fileName;
+            this.format = format;
+        }
     }
 
     /**
      * {@inheritDoc}
      */
-    public AbstractAJAXParser getParser() {
-        return new GetParser();
-    }
-
-    public enum Tree {
-        Identifier("/identifier"),
-        TimeZone("/timezone"),
-        PrivateContactFolder("/folder/contacts"),
-        PrivateTaskFolder("/folder/tasks"),
-        MaxUploadIdleTimeout("/maxUploadIdleTimeout"),
-        Language("/language");
-        private String path;
-        private Tree(final String path) {
-            this.path=path;
-        }
+    public String getServletPath() {
+        return IMPORT_URL;
     }
 }

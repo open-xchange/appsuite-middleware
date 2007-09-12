@@ -47,74 +47,25 @@
  *
  */
 
-package com.openexchange.ajax.config.actions;
+package com.openexchange.ajax.importexport.actions;
 
-import org.json.JSONException;
-
-import com.openexchange.ajax.framework.AbstractAJAXParser;
+import java.io.InputStream;
 
 /**
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class GetRequest extends AbstractConfigRequest {
-
-    private final Tree param;
+public final class CSVImportRequest extends AbstractImportRequest {
 
     /**
      * Default constructor.
      */
-    public GetRequest(final Tree param) {
-        super();
-        this.param = param;
+    public CSVImportRequest(final int folderId, final InputStream csv) {
+        super(Action.CSV, folderId, csv);
+        
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String getServletPath() {
-        return super.getServletPath() + param.path;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Object getBody() throws JSONException {
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Method getMethod() {
-        return Method.GET;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Parameter[] getParameters() {
-        return new Parameter[0];
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public AbstractAJAXParser getParser() {
-        return new GetParser();
-    }
-
-    public enum Tree {
-        Identifier("/identifier"),
-        TimeZone("/timezone"),
-        PrivateContactFolder("/folder/contacts"),
-        PrivateTaskFolder("/folder/tasks"),
-        MaxUploadIdleTimeout("/maxUploadIdleTimeout"),
-        Language("/language");
-        private String path;
-        private Tree(final String path) {
-            this.path=path;
-        }
+    public CSVImportParser getParser() {
+        return new CSVImportParser(true);
     }
 }

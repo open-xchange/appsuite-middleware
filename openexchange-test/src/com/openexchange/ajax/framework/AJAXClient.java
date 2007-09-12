@@ -85,6 +85,8 @@ public class AJAXClient {
 
     private int privateTaskFolder = -1;
 
+    private int privateContactFolder = -1;
+
     /**
      * Default constructor.
      */
@@ -139,7 +141,16 @@ public class AJAXClient {
         }
         return privateTaskFolder;
     }
-    
+
+    public int getPrivateContactFolder() throws AjaxException, IOException,
+        SAXException, JSONException {
+        if (-1 == privateContactFolder) {
+            privateContactFolder = ConfigTools.get(this, new GetRequest(
+                GetRequest.Tree.PrivateContactFolder)).getInteger();
+        }
+        return privateContactFolder;
+    }
+
     public enum User {
         User1(Property.LOGIN, Property.PASSWORD),
         User2(Property.SECONDUSER, Property.PASSWORD);

@@ -47,74 +47,45 @@
  *
  */
 
-package com.openexchange.ajax.config.actions;
+package com.openexchange.ajax.framework;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.json.JSONException;
 
-import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.container.Response;
 
 /**
- * 
+ * This parser extracts the JSON object from the web site returned by the server
+ * if an upload has been made.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class GetRequest extends AbstractConfigRequest {
+public abstract class AbstractUploadParser<T extends AbstractAJAXResponse> extends AbstractAJAXParser<T> {
 
-    private final Tree param;
+    private static Pattern CALLBACK_ARG_PATTERN = Pattern.compile("callback\\s*\\((.*?)\\);");
 
     /**
-     * Default constructor.
+     * @param failOnError
      */
-    public GetRequest(final Tree param) {
-        super();
-        this.param = param;
+    public AbstractUploadParser(final boolean failOnError) {
+        super(failOnError);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public String getServletPath() {
-        return super.getServletPath() + param.path;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Object getBody() throws JSONException {
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Method getMethod() {
-        return Method.GET;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Parameter[] getParameters() {
-        return new Parameter[0];
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public AbstractAJAXParser getParser() {
-        return new GetParser();
-    }
-
-    public enum Tree {
-        Identifier("/identifier"),
-        TimeZone("/timezone"),
-        PrivateContactFolder("/folder/contacts"),
-        PrivateTaskFolder("/folder/tasks"),
-        MaxUploadIdleTimeout("/maxUploadIdleTimeout"),
-        Language("/language");
-        private String path;
-        private Tree(final String path) {
-            this.path=path;
+    protected Response getResponse(final String body) throws JSONException {
+        final Matcher matcher = CALLBACK_ARG_PATTERN.matcher(body);
+        final Response response;
+        if (matcher.find()) {
+            response = Response.parse(matcher.group(1));
+        } else {
+            throw new JSONException("Can't parse body: \"" + body + "\"");
         }
+        assertFalse(response.getErrorMessage(), isFailOnError() && response
+            .hasError());
+        return response;
     }
 }
