@@ -94,7 +94,16 @@ public class CSVContactExportTest extends AbstractContactTest {
 	public static int[] TEST2_BASE ={
 		ContactField.GIVEN_NAME.getNumber(), 
 		ContactField.EMAIL1.getNumber()}; 
-	
+
+	public static String TEST_EMPTY_RESULT = 
+		"Given name, " +
+		"Email 1\n" +
+		",\n" +
+		",";
+	public static int[] TEST_EMPTY_BASE ={
+		ContactField.GIVEN_NAME.getNumber(), 
+		ContactField.EMAIL1.getNumber()}; 
+
 
 	public static junit.framework.Test suite() {
 		return new JUnit4TestAdapter(CSVContactExportTest.class);
@@ -126,6 +135,29 @@ public class CSVContactExportTest extends AbstractContactTest {
 		CSVParser parser = new CSVParser();
 		String resStr = readStreamAsString(is);
 		assertEquals("Two imports", parser.parse(TEST2_RESULT), parser.parse(resStr) );
+		
+		//cleaning up
+		final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj);
+		for(ImportResult res : results){
+			contactSql.deleteContactObject(Integer.parseInt(res.getObjectId()), Integer.parseInt(res.getFolder()), res.getDate());
+		}
+	}
+	
+	@Test public void exportEmpty() throws NumberFormatException, Exception{
+		final Importer imp = new CSVContactImporter();
+		InputStream is;
+		
+		//importing prior to export test
+		is = new ByteArrayInputStream( TEST_EMPTY_RESULT.getBytes() ); 
+		Map <String, Integer>folderMappings = new HashMap<String, Integer>();
+		folderMappings.put(Integer.toString(folderId), new Integer(Types.CONTACT) );
+		List<ImportResult> results = imp.importData(sessObj, Format.CSV, is, new LinkedList<String>( folderMappings.keySet()), null);
+		
+		//exporting and asserting
+		is = exp.exportData(sessObj, Format.CSV, String.valueOf( folderId ),TEST_EMPTY_BASE, null);
+		CSVParser parser = new CSVParser();
+		String resStr = readStreamAsString(is);
+		assertEquals("Two imports", parser.parse(TEST_EMPTY_RESULT), parser.parse(resStr) );
 		
 		//cleaning up
 		final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj);

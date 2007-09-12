@@ -70,6 +70,7 @@ import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.server.DBPoolingException;
 
 public class VCardImportTest extends AbstractVCardTest {
@@ -112,5 +113,21 @@ public class VCardImportTest extends AbstractVCardTest {
 		ContactSQLInterface contacts = new RdbContactSQLInterface(sessObj);
 		ContactObject co = contacts.getObjectById(Integer.parseInt( res.getObjectId()), Integer.parseInt( res.getFolder() ) );
 		assertEquals("Has telex" , telex , co.getTelephoneTelex());
+	}
+	
+	@Test public void testEmpty() throws DBPoolingException, SQLException, UnsupportedEncodingException, NumberFormatException, OXException {
+		folderId = createTestFolder(FolderObject.CONTACT, sessObj, "vcard7719Folder");
+		final String vcard = "BEGIN:VCARD\nVERSION:2.1\nN:;;;;\nEND:VCARD\n";
+		final List <String> folders = Arrays.asList( Integer.toString(folderId) );
+
+		//import and tests
+		final List<ImportResult> results = imp.importData(sessObj, format, new ByteArrayInputStream(vcard.getBytes("UTF-8")), folders, null);
+		assertEquals("One import?" , 1 , results.size());
+		final ImportResult res = results.get(0);
+		assertEquals("Should have no error" , null, res.getException() );
+
+		ContactSQLInterface contacts = new RdbContactSQLInterface(sessObj);
+		ContactObject co = contacts.getObjectById(Integer.parseInt( res.getObjectId()), Integer.parseInt( res.getFolder() ) );
+
 	}
 }

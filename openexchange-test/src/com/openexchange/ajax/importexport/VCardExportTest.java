@@ -41,7 +41,7 @@ public class VCardExportTest extends AbstractVCardTest {
 		
 		boolean found = false;
 		for (int a = 0; a < contactArray.length; a++) {
-			if (contactArray[a].getSurName().equals(surname)) {
+			if (contactArray[a].getSurName() != null && contactArray[a].getSurName().equals(surname)) {
 				found = true;
 				ContactTest.compareObject(contactObj, contactArray[a]);
 			}

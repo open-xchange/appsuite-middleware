@@ -175,7 +175,7 @@ public class VCardImportTest extends AbstractVCardTest {
 		assertFalse("Worked?", importResult[0].hasError());
 		int contactId = Integer.parseInt(importResult[0].getObjectId());
 		ContactObject myImport = ContactTest.loadContact(getWebConversation(), contactId, contactFolderId, getHostName(), getLogin(), getPassword());
-		assertEquals("Checking surname:" , "Conference_Room_Olpe" , myImport.getSurName());
+		assertEquals("Checking surname:" , "Conference_Room_Olpe" , myImport.getDisplayName());
 		assertEquals("Checking email1 (must be null):" , null , myImport.getEmail1());
 		assertEquals("Checking email2 (must be null):" , null , myImport.getEmail2());
 		assertEquals("Checking email3 (must be null):" , null , myImport.getEmail3());

@@ -83,6 +83,7 @@ public class CSVContactImportTest extends AbstractContactTest {
 	public String IMPORT_ONE = IMPORT_HEADERS+NAME1+", "+EMAIL1+", "+DISPLAY_NAME1;
 	public String IMPORT_MULTIPLE = IMPORT_ONE + "\n"+NAME2+", "+EMAIL2+", "+DISPLAY_NAME2+"\n";
 	public String IMPORT_DUPLICATE = IMPORT_MULTIPLE + "Laguna, francisco.laguna@open-xchange.com, Francisco Laguna\n";
+	public String IMPORT_EMPTY = IMPORT_HEADERS+",,";
 	public boolean doDebugging = false;
 	
 	public String notASingleImport = "I_E-0804";
@@ -146,6 +147,24 @@ public class CSVContactImportTest extends AbstractContactTest {
 		//cleaning up
 		contactSql.deleteContactObject(Integer.parseInt(res.getObjectId()), Integer.parseInt(res.getFolder()), res.getDate());
 	}
+	
+	@Test public void importEmpty() throws NumberFormatException, Exception{
+		List<ImportResult> results = importStuff(IMPORT_EMPTY); 
+		assertEquals("One result?" , 1, results.size());
+		ImportResult res = results.get(0);
+		if(res.hasError()){
+			res.getException().printStackTrace();
+		}
+		assertTrue( res.isCorrect() );
+
+		//basic check: 1 entry in folder
+		final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj);
+		assertEquals("One contact in folder?", 1, contactSql.getNumberOfContacts(folderId));
+
+		//cleaning up
+		contactSql.deleteContactObject(Integer.parseInt(res.getObjectId()), Integer.parseInt(res.getFolder()), res.getDate());
+	}
+
 	
 	@Test public void importListOfContacts() throws NumberFormatException, Exception{
 		List<ImportResult> results = importStuff(IMPORT_MULTIPLE); 
@@ -288,7 +307,8 @@ public class CSVContactImportTest extends AbstractContactTest {
 		ContactObject conObj = getEntry( Integer.parseInt( res.getObjectId() ) );
 		assertTrue("Is private?", conObj.getPrivateFlag());
 	}
-
+	
+	
 	protected void checkFirstResult(int objectID ) throws OXException{
 		final ContactObject co = new RdbContactSQLInterface(sessObj).getObjectById(objectID, folderId);
 		assertEquals("Checking name" ,  NAME1 , co.getGivenName());
