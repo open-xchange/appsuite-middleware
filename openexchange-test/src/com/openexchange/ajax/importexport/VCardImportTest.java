@@ -143,7 +143,7 @@ public class VCardImportTest extends AbstractVCardTest {
 		assertFalse("Worked?", importResult[0].hasError());
 		int contactId = Integer.parseInt(importResult[0].getObjectId());
 		ContactObject myImport = ContactTest.loadContact(getWebConversation(), contactId, contactFolderId, getHostName(), getLogin(), getPassword());
-		assertEquals("Checking surname:" , "Hübört Sönderzeichön" , myImport.getSurName());
+		assertEquals("Checking surname:" , "Hübört Sönderzeichön" , myImport.getDisplayName());
 	
 		ContactTest.deleteContact(getWebConversation(), contactId, contactFolderId, getHostName(), getLogin(), getPassword());
 	}
