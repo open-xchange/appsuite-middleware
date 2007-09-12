@@ -50,20 +50,18 @@
 package com.openexchange.imap.connection;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TimerTask;
 import java.util.Map.Entry;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.mail.MessagingException;
 
 import com.openexchange.api2.MailInterfaceImpl;
-import com.openexchange.imap.IMAPPropertyException;
 import com.openexchange.imap.IMAPProperties;
+import com.openexchange.imap.IMAPPropertyException;
 import com.openexchange.server.ServerTimer;
 
 /**
@@ -77,9 +75,7 @@ public final class IMAPConnectionWatcher {
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(IMAPConnectionWatcher.class);
 
-	private static final Map<IMAPConnection, Long> imapCons = new HashMap<IMAPConnection, Long>();
-
-	private static final Lock LOCK = new ReentrantLock();
+	private static final Map<IMAPConnection, Long> imapCons = new ConcurrentHashMap<IMAPConnection, Long>();
 
 	/**
 	 * Prevent instantiation
@@ -89,27 +85,17 @@ public final class IMAPConnectionWatcher {
 	}
 
 	public static void addIMAPConnection(final IMAPConnection imapCon) {
-		LOCK.lock();
-		try {
-			imapCons.put(imapCon, Long.valueOf(System.currentTimeMillis()));
-		} finally {
-			LOCK.unlock();
-		}
+		imapCons.put(imapCon, Long.valueOf(System.currentTimeMillis()));
 	}
 
 	public static void removeIMAPConnection(final IMAPConnection imapCon) {
-		LOCK.lock();
-		try {
-			imapCons.remove(imapCon);
-		} finally {
-			LOCK.unlock();
-		}
+		imapCons.remove(imapCon);
 	}
 
 	private static final String INFO_PREFIX = "UNCLOSED IMAP CONNECTION AFTER #N#msec:\n";
 
 	private static final String INFO_PREFIX2 = "CLOSING IMAP CONNECTION BY WATCHER:\n";
-	
+
 	private static final String INFO_PREFIX3 = "\n\tDONE";
 
 	private static class IMAPConnectionWatcherTask extends TimerTask {
@@ -126,7 +112,6 @@ public final class IMAPConnectionWatcher {
 				 */
 				return;
 			}
-			LOCK.lock();
 			try {
 				final StringBuilder sb = new StringBuilder(512);
 				final Iterator<Entry<IMAPConnection, Long>> iter = imapCons.entrySet().iterator();
@@ -135,12 +120,10 @@ public final class IMAPConnectionWatcher {
 					final int n = imapCons.size();
 					for (int i = 0; i < n; i++) {
 						final Entry<IMAPConnection, Long> e = iter.next();
-						if ((System.currentTimeMillis() - e.getValue().longValue()) > IMAPProperties
-								.getWatcherTime()) {
+						if ((System.currentTimeMillis() - e.getValue().longValue()) > IMAPProperties.getWatcherTime()) {
 							sb.setLength(0);
 							LOG.info(sb.append(
-									INFO_PREFIX
-											.replaceFirst("#N#", String.valueOf(IMAPProperties.getWatcherTime())))
+									INFO_PREFIX.replaceFirst("#N#", String.valueOf(IMAPProperties.getWatcherTime())))
 									.append(e.getKey().getTrace()).toString());
 							exceededCons.add(e.getKey());
 						}
@@ -181,8 +164,6 @@ public final class IMAPConnectionWatcher {
 				}
 			} catch (final IMAPPropertyException e) {
 				LOG.error(e.getLocalizedMessage(), e);
-			} finally {
-				LOCK.unlock();
 			}
 		}
 	}

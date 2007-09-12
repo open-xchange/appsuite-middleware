@@ -1,3 +1,8 @@
+* 2007-09-12 - thorben.betten@open-xchange.com
+
+ - Bugfix #9407: Using a thread-safe implementation of java.util.Map in
+   IMAP connection watcher
+
 * 2007-09-12 - ben.pahne@open-xchange.com
 
  - Fixed Bug 9224: Display Name / File as not synchronized to Outlook
