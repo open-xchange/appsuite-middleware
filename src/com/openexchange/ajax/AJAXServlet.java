@@ -383,29 +383,6 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 	 */
 	protected static final String RESPONSE_ERROR = "Error while writing response object.";
 
-	protected static void writeString(final Writer w, final String s) throws IOException {
-		if (s == null) {
-			w.write("null");
-			return;
-		}
-		w.write('"');
-		//w.write("\"");
-		final int len = s.length();
-		for (int i = 0; i < len; i++) {
-			final char c = s.charAt(i);
-			if (c < ' ' || c > 126 || c == '"' || c == '<' || c == '>' || c == '&') {
-				w.write("&#x");
-				final String hex = Integer.toHexString(/*(int) */c & 0xffff);
-				w.write(hex.toUpperCase(Locale.ENGLISH));
-				w.write(';');
-			} else {
-				w.write(c);
-			}
-		}
-		w.write('"');
-		//w.write("\"");
-	}
-
 	public static boolean containsParameter(final HttpServletRequest req, final String name) {
 		return (req.getParameter(name) != null);
 	}
