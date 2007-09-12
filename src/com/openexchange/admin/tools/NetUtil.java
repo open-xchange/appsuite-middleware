@@ -48,6 +48,8 @@
  */
 package com.openexchange.admin.tools;
 
+import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+
 /**
  * @author choeger
  * 
@@ -56,21 +58,43 @@ public class NetUtil {
 
     /**
      * INTERNAL: check if address or mask is a valid dotted decimal notation
-     *  
+     * 
      * @param qdot
      * @return
      */
-    private static boolean isValidDDN(final String qdot) {
-        if( qdot.length() == 0 ) {
+    private final static boolean isValidDDN(final String qdot) {
+        if (qdot.length() == 0) {
             return false;
         }
-        if( qdot.replaceAll("[0-9.]", "").length() > 0 ) {
+        if (qdot.replaceAll("[0-9.]", "").length() > 0) {
             return false;
         }
-        if( qdot.split("\\.").length < 4 ) {
+        final String []sddn = qdot.split("\\.");
+        if (sddn.length != 4) {
             return false;
+        }
+        for(final String p : sddn) {
+            final int ip = Integer.parseInt(p);
+            if( ip < 0 || ip > 255 ) {
+                return false;
+            }
         }
         return true;
+    }
+
+    /**
+     * INTERNAL: convert ddn string representation to int array ddn
+     * 
+     * @param ddn
+     * @return
+     */
+    private final static int[] stringDDN2Int(final String ddn) {
+        int []ret = new int[4];
+        final String []ddnarr = ddn.split("\\.");
+        for(int i=0; i<4; i++) {
+            ret[i] = Integer.parseInt(ddnarr[i]);
+        }
+        return ret;
     }
     
     /**
@@ -79,19 +103,57 @@ public class NetUtil {
      * @param mask
      * @return
      */
-    public static boolean isValidNetmask(final String mask) {
+    public final static boolean isValidNetmask(final String mask) {
         if (mask == null) {
             return false;
         } else {
-            return isValidDDN(mask);
+            if( isValidDDN(mask) ) {
+                int []imask = stringDDN2Int(mask);
+
+                // do the real check:
+                // there must not follow a '1' after a '0' in a netmask
+                boolean foundZero=false;
+                for(int p=0; p<4; p++) {
+                    for(int bs=7; bs>0; bs--) {
+                        final int bit = 1 << bs;
+                        final int erg = (imask[p] & bit);
+                        if( erg == 0) {
+                            foundZero = true;
+                        } else if( erg == bit && foundZero ) {
+                            return false;
+                        }
+                    }
+                }
+
+                return true;
+            } else {
+                return false;
+            }
         }
     }
 
     /**
+     * check if address is a valid ip address in dotted decimal notation.
+     * 
+     * @param address
+     * @return
+     */
+    public final static boolean isValidIPAddress(final String address) {
+        if (address == null) {
+            return false;
+        } else {
+            return isValidDDN(address);
+        }
+    }
+
+    /**
+     * check if ipmask is a valid network definition either in cidr or dotted
+     * decimal notation.
+     * 
      * @param ipmask
      * @return
      */
-    public static boolean isValidIPNetmask(final String ipmask) {
+    public final static boolean isValidIPNetmask(final String ipmask) {
         if (ipmask == null) {
             return false;
         } else {
@@ -99,14 +161,14 @@ public class NetUtil {
                 return false;
             }
             final String ip = ipmask.split("/")[0];
-            if( !isValidDDN(ip) ) {
+            if (!isValidIPAddress(ip)) {
                 return false;
             }
             final String mask = ipmask.split("/")[1];
-            if( mask.contains(".") ) {
+            if (mask.contains(".")) {
                 return isValidNetmask(mask);
             }
-            if( mask.replaceAll("[0-9]", "").length() > 0 )  {
+            if (mask.replaceAll("[0-9]", "").length() > 0) {
                 return false;
             }
             return true;
@@ -114,13 +176,26 @@ public class NetUtil {
     }
 
     /**
+     * check if ipmask is a valid network definition either in cidr or dotted
+     * decimal notation.
+     *
+     * @param ipmask
+     * @throws InvalidDataException
+     */
+    public final static void checkValidIPNetmask(final String ipmask) throws InvalidDataException {
+        if(!isValidIPNetmask(ipmask)) {
+            throw new InvalidDataException(ipmask+" is not a valid network definition");
+        }
+    }
+    
+    /**
      * return dotted decimal notation representation as a String of the CIDR
      * representation of the netmask
      * 
      * @param cidr
      * @return
      */
-    public static final String CIDR2Mask(final int cidr) {
+    public final static String CIDR2Mask(final int cidr) {
         int mask = cidr;
         String ret = "";
         for (int p = 0; p < 4; p++) {
