@@ -136,9 +136,9 @@ public abstract class DataParser {
 	}
 
 	public static String parseString(final JSONObject jsonObj, final String name) throws JSONException {
-        String retval = jsonObj.optString(name, null);
-        if (null != retval && retval.length() == 0) {
-            retval = null;
+        String retval = null;
+        if (jsonObj.has(name) && !jsonObj.isNull(name)) {
+            retval = jsonObj.getString(name);
         }
 		return retval;
 	}
