@@ -1,3 +1,7 @@
+* 2007-09-11 - marcus.klein@open-xchange.com
+
+ - Bugfix #9409: Reimplemented bugfix for bug 8935 to prevent this problem.
+
 * 2007-09-12 - thorben.betten@open-xchange.com
 
  - Bugfix #9407: Using a thread-safe implementation of java.util.Map in
