@@ -615,7 +615,7 @@ public class Contacts implements DeleteListener {
 							"One or more fields contain too much information. Field: %1$d Character Limit: %2$d Sent %3$d",
 							"The image you tried to attach is not a valid picture. It may be broken or is not a valid file.",
 							"Mandatory field last name is not set.",
-							"Unable to compare contacts for update. Contect %1$d Object %2$d",
+							"Unable to compare contacts for update. Make sure you have entered a valid display name. Contect %1$d Object %2$d",
 							"The name you entered is not available. Choose another display name. Context %1$d Object %2$d"
 					}
 	)
