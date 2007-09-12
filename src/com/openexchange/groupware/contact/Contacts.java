@@ -333,7 +333,7 @@ public class Contacts implements DeleteListener {
 									Category.TRY_AGAIN
 								},
 			desc={"3","4","5","6","7","8","9","51","53","58","62"},
-			exceptionId={3,4,5,6,7,8,9,51,53,58,99},
+			exceptionId={3,4,5,6,7,8,9,51,53,58,62},
 			msg={	ContactException.NON_CONTACT_FOLDER_MSG, 
 							ContactException.NO_PERMISSION_MSG, 
 							ContactException.NO_PERMISSION_MSG, 
@@ -412,19 +412,20 @@ public class Contacts implements DeleteListener {
 					}
 				}
 			} else {
-			*/
+			
 			if (co.getSurName() == null || co.getSurName().length() < 1){
 				co.setSurName(co.getDisplayName());
 			}
+			*/
 			// }
 			if (!co.containsFileAs() || (co.getFileAs() != null && co.getFileAs().length() > 0)){
 				co.setFileAs(co.getDisplayName());
 			}
-			
+			/*
 			if ((!co.containsSurName() || co.getSurName() == null || co.getSurName().length() < 1) && (!co.containsDisplayName() || co.getDisplayName() == null || co.getDisplayName().length() < 1)){
 				throw EXCEPTIONS.createOXConflictException(62, so.getContext().getContextId());
 			}
-			
+			*/
 			co.removeContextID();
 			co.removeLastModified();
 			co.removeCreationDate();
@@ -750,7 +751,12 @@ public class Contacts implements DeleteListener {
 				throw xoxo;
 			}
 			
-			if (co.getParentFolderID() == FolderObject.SYSTEM_LDAP_FOLDER_ID && co.getDisplayName() != null){
+			/** TODO
+			*/
+			if (co.getParentFolderID() == FolderObject.SYSTEM_LDAP_FOLDER_ID && co.containsDisplayName() && (co.getDisplayName() == null || co.getDisplayName().equals("")))
+				throw EXCEPTIONS.create(66,Integer.valueOf(ctx.getContextId()), co.getObjectID());
+			
+			if (co.getParentFolderID() == FolderObject.SYSTEM_LDAP_FOLDER_ID && co.containsDisplayName() && co.getDisplayName() != null){
 				
 				Statement stmt = null;
 				ResultSet rs = null;
@@ -787,13 +793,15 @@ public class Contacts implements DeleteListener {
 					}
 				}
 			}
-			
-
+			/*
 			if (co.getSurName() == null || co.getSurName().length() < 1){
 				co.setSurName(co.getDisplayName());
 			}
-			if (!co.containsFileAs() || (co.getFileAs() != null && co.getFileAs().length() > 0)){
+			*/
+			if ((!co.containsFileAs() || (co.getFileAs() != null && co.getFileAs().length() > 0)) && co.getDisplayName() != null){
 				co.setFileAs(co.getDisplayName());
+			//} if (co.getDisplayName() == null){
+				//co.setFileAs(null);
 			}
 			
 		} catch (final OXConcurrentModificationException cme){
@@ -821,12 +829,13 @@ public class Contacts implements DeleteListener {
 			int cnt = 0;
 			for (int i=0;i<650;i++){
 				if (mapping[i] != null && !mapping[i].compare(co, original)){
-
+					/*
 					if (i == ContactObject.SUR_NAME && co.containsSurName() && (co.getSurName() == null || co.getSurName().length() < 1)){
 						//System.out.println("---> "+co.getSurName());
 						//throw EXCEPTIONS.createOXConflictException(63,ctx.getContextId());
 						co.setSurName(original.getSurName());
 					}
+					*/
 					mod[cnt] = i;
 					cnt ++;
 				}
