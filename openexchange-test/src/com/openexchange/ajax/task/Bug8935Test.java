@@ -111,7 +111,6 @@ public class Bug8935Test extends AbstractTaskTest {
         task.setParentFolderID(client.getPrivateTaskFolder());
         final InsertResponse iResponse = TaskTools.insert(client,
             new SpecialInsertRequest(task, client.getTimeZone()));
-        // remove it because server won't sent empty fields.
         final GetResponse gResponse = TaskTools.get(client,
             new GetRequest(iResponse));
         final Task reload = gResponse.getTask(client.getTimeZone());
@@ -134,5 +133,21 @@ public class Bug8935Test extends AbstractTaskTest {
             json.put(TaskFields.TITLE, JSONObject.NULL);
             return json;
         }
+    }
+
+    public void testEmptyString() throws Throwable {
+        final Task task = Create.createWithDefaults();
+        // Empty string must be interpreted as null.
+        task.setTitle("");
+        task.setParentFolderID(client.getPrivateTaskFolder());
+        final InsertResponse iResponse = TaskTools.insert(client,
+            new SpecialInsertRequest(task, client.getTimeZone()));
+        // remove it because server won't sent empty fields.
+        task.removeTitle();
+        final GetResponse gResponse = TaskTools.get(client,
+            new GetRequest(iResponse));
+        final Task reload = gResponse.getTask(client.getTimeZone());
+        TaskTools.compareAttributes(task, reload);
+        TaskTools.delete(client, new DeleteRequest(reload));
     }
 }
