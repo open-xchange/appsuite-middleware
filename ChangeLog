@@ -2,6 +2,7 @@
 
  - Bugfix #8935: Fixing once again another case breaking AJAX communication.
  - Bugfix #9445: Added handling for folders that are only visible.
+ - Bugfix #9452: Omitting writing empty data object.
 
 * 2007-09-13 - ben.pahne@open-xchange.com
 
