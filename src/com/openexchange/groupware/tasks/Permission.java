@@ -156,6 +156,35 @@ public final class Permission {
     }
 
     /**
+     * Checks if the user is only allowed to see the folder.
+     * @param ctx Context.
+     * @param user User.
+     * @param userConfig Groupware configuration of the user.
+     * @param folder folder object that should be tested for only see
+     * permission.
+     * @return <code>true</code> if the folder can only be seen.
+     * @throws TaskException if the folder is not a task folder or getting the
+     * user specific permissions fails.
+     */
+    static boolean canOnlySeeFolder(final Context ctx, final User user,
+        final UserConfiguration userConfig, final FolderObject folder) throws
+        TaskException {
+        if (!Tools.isFolderTask(folder)) {
+            throw new TaskException(Code.NOT_TASK_FOLDER, folder
+                .getFolderName(), Integer.valueOf(folder.getObjectID()));
+        }
+        final OCLPermission permission;
+        try {
+            permission = new OXFolderAccess(ctx).getFolderPermission(folder
+                .getObjectID(), user.getId(), userConfig);
+        } catch (OXException e) {
+            throw new TaskException(e);
+        }
+        return permission.isFolderVisible() && !permission.canReadAllObjects()
+            && !permission.canReadOwnObjects();
+    }
+
+    /**
      * Checks if the user is allowed to read tasks in a folder. Beware that the
      * private flag of tasks must be checked.
      * @param ctx Context.

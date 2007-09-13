@@ -461,6 +461,9 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
                     final FolderObject folder = (FolderObject) iter.next();
                     if (folder.isShared(userId)) {
                         shared.add(Integer.valueOf(folder.getObjectID()));
+                    } else if (Permission.canOnlySeeFolder(ctx, user, config,
+                        folder)) {
+                        continue;
                     } else if (Permission.canReadInFolder(ctx, user, config,
                         folder)) {
                         own.add(Integer.valueOf(folder.getObjectID()));
