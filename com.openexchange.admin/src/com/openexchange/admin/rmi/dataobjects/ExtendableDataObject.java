@@ -92,7 +92,7 @@ public abstract class ExtendableDataObject extends EnforceableDataObject impleme
 
     /**
      * 
-     * @deprecated Will be removed with next release. Please use getAllExtensionsAsHash instead
+     * @deprecated 
      */
     public ArrayList<OXCommonExtension> getAllExtensions() {
         return new ArrayList<OXCommonExtension>(this.extensions.values());
@@ -114,7 +114,7 @@ public abstract class ExtendableDataObject extends EnforceableDataObject impleme
      * 
      * @param extname a String for the extension
      * @return the ArrayList of {@link OXCommonExtension} with extname
-     * @deprecated Will be removed with next release
+     * @deprecated 
      */
     public ArrayList<OXCommonExtension> getExtensionsbyName(final String extname) {
         final ArrayList<OXCommonExtension> retval = new ArrayList<OXCommonExtension>();

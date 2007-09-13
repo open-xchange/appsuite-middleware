@@ -54,7 +54,7 @@ import java.io.Serializable;
  * 
  * 
  * @author d7
- * @deprecated This interface will be removed with next version use the abstract class OXCommonExtensionInterface instead
+ * @deprecated 
  */
 public interface OXCommonExtensionInterface extends Serializable {
     /**

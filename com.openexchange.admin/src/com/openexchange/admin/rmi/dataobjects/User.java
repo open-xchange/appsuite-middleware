@@ -4118,8 +4118,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
 
     /**
      * @param extension
-     * @deprecated Please remove the usage of this method as fast as you can because it uses a dangerous downcast.
-     * This method will go away with the next update
+     * @deprecated 
      */
     final public void addExtension(final OXUserExtensionInterface extension) {
         getAllExtensionsAsHash().put(extension.getClass().getName(), (OXCommonExtension) extension);
@@ -4127,9 +4126,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
 
     /**
      * @return
-     * @deprecated Please remove the usage of this method as fast as you can
-     *             because it uses a dangerous downcast. This method will go
-     *             away with the next update
+     * @deprecated
      */
     @Deprecated
     final public ArrayList<OXUserExtensionInterface> getExtensions() {
@@ -4143,7 +4140,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
     /**
      * @param o
      * @return
-     * @deprecated Will be removed with next version. Use removeExtension(final OXCommonExtensionInterface o) instead
+     * @deprecated 
      */
     final public boolean removeExtension(final OXUserExtensionInterface o) {
         if (null == getAllExtensionsAsHash().remove(o.getClass().getName())) {
@@ -4156,9 +4153,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
     /**
      * @param index
      * @return
-     * @deprecated Please remove the usage of this method as fast as you can
-     *             because it uses a dangerous downcast. This method will go
-     *             away with the next update
+     * @deprecated 
      */
     final public OXUserExtensionInterface removeExtensionByIndex(final int index) {
         final ArrayList<OXCommonExtension> retval = new ArrayList<OXCommonExtension>(getAllExtensionsAsHash().values());
@@ -4174,9 +4169,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
      * @param extname
      *                a String for the extension
      * @return the ArrayList of {@link OXUserExtensionInterface} with extname
-     * @deprecated Please remove the usage of this method as fast as you can
-     *             because it uses a dangerous downcast. This method will go
-     *             away with the next update
+     * @deprecated 
      */
     final public ArrayList<OXUserExtensionInterface> getExtensionbyName(final String extname) {
         final ArrayList<OXUserExtensionInterface> retval = new ArrayList<OXUserExtensionInterface>();
@@ -4195,9 +4188,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
      * 
      * @param extname
      * @return
-     * @deprecated Please remove the usage of this method as fast as you can
-     *             because it uses a dangerous downcast. This method will go
-     *             away with the next update
+     * @deprecated 
      */
     final public OXUserExtensionInterface getFirstExtensionbyName(final String extname) {
         final ArrayList<OXUserExtensionInterface> list = getExtensionbyName(extname);
@@ -4297,7 +4288,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
 
     /**
      * @return
-     * @deprecated Will be removed with next version
+     * @deprecated 
      */
     @Deprecated
     final public Boolean getSpam_filter_enabled() {

@@ -125,7 +125,7 @@ public interface OXGroupInterface extends Remote {
      * @throws DatabaseUpdateException
      * @throws NoSuchUserException
      * @throws NoSuchGroupException
-     * @deprecated Will be removed with the next service pack
+     * @deprecated 
      */
     public void addMember(final Context ctx, final Group grp, int[] member_ids, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException, NoSuchUserException, NoSuchGroupException;
 
@@ -288,7 +288,7 @@ public interface OXGroupInterface extends Remote {
      * @return The Group with its data.
      * @throws DatabaseUpdateException
      * @throws NoSuchGroupException
-     * @deprecated Will be removed with the next service pack
+     * @deprecated 
      */
     public Group get(final Context ctx, final Group grp, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException, NoSuchGroupException;
 
@@ -404,7 +404,7 @@ public interface OXGroupInterface extends Remote {
      *                 data.
      * @throws DatabaseUpdateException
      * @throws NoSuchUserException
-     * @deprecated Will be remove with next service pack
+     * @deprecated 
      */
     public Group[] getGroupsForUser(final Context ctx, final User usr, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
 
@@ -510,7 +510,7 @@ public interface OXGroupInterface extends Remote {
      * @throws DatabaseUpdateException
      * @throws NoSuchGroupException
      * @throws NoSuchUserException
-     * @deprecated Will be removed with the next service pack
+     * @deprecated 
      */
     public void removeMember(final Context ctx, final Group grp, int[] member_ids, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException, NoSuchGroupException, NoSuchUserException;
 
