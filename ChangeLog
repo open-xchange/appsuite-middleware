@@ -1,8 +1,12 @@
+* 2007-09-13 - marcus.klein@open-xchange.com
+
+ - Bugfix #8935: Fixing once again another case breaking AJAX communication.
+
 * 2007-09-13 - ben.pahne@open-xchange.com
 
  - Fixed Bug #6335 - Check for bad characters impletemented
 
-* 2007-09-11 - marcus.klein@open-xchange.com
+* 2007-09-12 - marcus.klein@open-xchange.com
 
  - Bugfix #9409: Reimplemented bugfix for bug 8935 to prevent this problem.
 
