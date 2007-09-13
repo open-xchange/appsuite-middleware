@@ -531,6 +531,19 @@ public class FolderTest extends AbstractAJAXTest {
 		throw new OXException("No Standard Contact Folder found!");
 	}
 
+	public static FolderObject getStandardInfostoreFolder(final WebConversation conversation, final String hostname,
+			final String sessionId) throws MalformedURLException, IOException, SAXException, JSONException, OXException {
+		List<FolderObject> subfolders = getSubfolders(conversation, hostname, sessionId, ""
+				+ FolderObject.SYSTEM_PRIVATE_FOLDER_ID, false, true);
+		for (Iterator iter = subfolders.iterator(); iter.hasNext();) {
+			FolderObject subfolder = (FolderObject) iter.next();
+			if (subfolder.getModule() == FolderObject.INFOSTORE && subfolder.isDefaultFolder()) {
+				return subfolder;
+			}
+		}
+		throw new OXException("No Standard Infostore Folder found!");
+	}
+	
 	public static FolderObject getMyInfostoreFolder(final WebConversation conversation, final String hostname,
 			final String sessionId, final int loginId) throws MalformedURLException, IOException, SAXException,
 			JSONException, OXException {
