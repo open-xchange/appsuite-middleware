@@ -251,8 +251,7 @@ public class Group extends ExtendableDataObject implements NameAndIdObject {
 
     /**
      * @param extension
-     * @deprecated Please remove the usage of this method as fast as you can because it uses a dangerous downcast.
-     * This method will go away with the next update
+     * @deprecated 
      */
     public final void addExtension(final OXGroupExtensionInterface extension) {
         getAllExtensionsAsHash().put(extension.getClass().getName(), (OXCommonExtension) extension);
@@ -260,8 +259,7 @@ public class Group extends ExtendableDataObject implements NameAndIdObject {
 
     /**
      * @return
-     * @deprecated Please remove the usage of this method as fast as you can because it uses a dangerous downcast.
-     * This method will go away with the next update
+     * @deprecated 
      */
     public final ArrayList<OXGroupExtensionInterface> getExtensions() {
         final ArrayList<OXGroupExtensionInterface> retval = new ArrayList<OXGroupExtensionInterface>();
@@ -274,8 +272,7 @@ public class Group extends ExtendableDataObject implements NameAndIdObject {
     /**
      * @param o
      * @return
-     * @deprecated Please remove the usage of this method as fast as you can because it uses a dangerous downcast.
-     * This method will go away with the next update
+     * @deprecated 
      */
     public final boolean removeExtension(final OXGroupExtensionInterface o) {
         if (null == getAllExtensionsAsHash().remove(o)) {
@@ -292,8 +289,7 @@ public class Group extends ExtendableDataObject implements NameAndIdObject {
      * 
      * @param extname a String for the extension
      * @return the {@link OXGroupExtensionInterface} with extname
-     * @deprecated Please remove the usage of this method as fast as you can because it used a dangerous downcast.
-     * This method will go away with the next update
+     * @deprecated 
      */
     public final OXGroupExtensionInterface getExtensionbyName(final String extname) {
         for (final OXCommonExtension ext : getAllExtensionsAsHash().values()) {
