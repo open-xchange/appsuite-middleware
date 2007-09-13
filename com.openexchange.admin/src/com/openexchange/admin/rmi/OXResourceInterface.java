@@ -160,7 +160,7 @@ public interface OXResourceInterface extends Remote {
      * @throws RemoteException General RMI Exception
      * @throws DatabaseUpdateException 
      * @throws NoSuchResourceException
-     * @deprecated Will be removed with next service pack 
+     * @deprecated
      */
     public Resource get(final Context ctx, final Resource res, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchResourceException;
 
