@@ -1,0 +1,148 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.ajax.contact;
+
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.StringWriter;
+import java.util.TimeZone;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.json.JSONObject;
+
+import com.meterware.httpunit.PostMethodWebRequest;
+import com.meterware.httpunit.PutMethodWebRequest;
+import com.meterware.httpunit.WebConversation;
+import com.meterware.httpunit.WebRequest;
+import com.meterware.httpunit.WebResponse;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.ContactTest;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.fields.DataFields;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.task.actions.InsertRequest;
+import com.openexchange.ajax.task.actions.InsertResponse;
+import com.openexchange.ajax.writer.ContactWriter;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.Component;
+import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.tasks.Task;
+import com.openexchange.groupware.tasks.TaskException;
+import com.openexchange.tools.URLParameter;
+
+/**
+ * Tests if bug 6335 appears again in tasks.
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ */
+public class Bug6335Test extends ContactTest {
+
+    /**
+     * @param name
+     */
+    public Bug6335Test(final String name) {
+        super(name);
+    }
+
+    
+	protected void setUp() throws Exception {
+		super.setUp();
+	}
+	
+	public void testBug6335() throws Exception {
+		
+		final ContactObject contactObj = new ContactObject();
+		contactObj.setSurName("\u001f");
+		contactObj.setParentFolderID(contactFolderId);
+		
+		//final int objectId = insertContact(getWebConversation(), contactObj, getHostName(), getSessionId());
+		WebConversation webCon = getWebConversation();
+		String host = getHostName();
+		host = appendPrefix(host);
+		
+		final StringWriter stringWriter = new StringWriter();		
+		final JSONObject jsonObj = new JSONObject();
+		ContactWriter contactWriter = new ContactWriter(TimeZone.getDefault());
+		contactWriter.writeContact(contactObj, jsonObj);
+		
+		stringWriter.write(jsonObj.toString());
+		stringWriter.flush();
+
+		final URLParameter parameter = new URLParameter();
+		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, getSessionId());
+		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW);
+		
+		WebRequest req = null;
+		WebResponse resp = null;
+		
+		JSONObject jResponse = null;
+		
+		final ByteArrayInputStream bais = new ByteArrayInputStream(stringWriter.toString().getBytes("UTF-8"));
+			
+		req = new PutMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters(), bais, "text/javascript");
+		resp = webCon.getResponse(req);
+			
+		jResponse = new JSONObject(resp.getText());
+		
+		assertEquals(200, resp.getResponseCode());
+		
+		final Response response = Response.parse(jResponse.toString());
+		
+		
+        assertTrue("Invalid character was not detected.", response.hasError());
+        //final TaskException.Code code = TaskException.Code.INVALID_DATA;
+        final AbstractOXException exc = response.getException();
+        assertEquals("Wrong exception message.", Component.CONTACT, exc.getComponent());
+        assertEquals("Wrong exception message.", Category.USER_INPUT, exc.getCategory());
+        assertEquals("Wrong exception message.", 168, exc.getDetailNumber());
+	}
+}
