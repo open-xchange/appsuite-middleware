@@ -8,6 +8,7 @@ public class ContactBugTestSuite extends TestSuite{
 	public static Test suite(){
 		TestSuite tests = new TestSuite();
 		tests.addTestSuite( Bug4409Test.class );
+		tests.addTestSuite( Bug6335Test.class );
 		return tests;
 	}
 }
