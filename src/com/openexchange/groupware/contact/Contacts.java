@@ -102,7 +102,7 @@ import com.openexchange.server.OCLPermission;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.sql.DBUtils;
-
+import com.openexchange.groupware.data.Check;
 
 /**
  Contacts
@@ -433,6 +433,10 @@ public class Contacts implements DeleteListener {
 			co.removeModifiedBy();
 			co.removeObjectID();
 
+			/*
+			 * Check for bad characters insite strings
+			 */
+			checkCharacters(co);
 			
 			StringBuilder sb = null;
 			for (int i=0;i<650;i++){
@@ -804,6 +808,11 @@ public class Contacts implements DeleteListener {
 				//co.setFileAs(null);
 			}
 			
+			/*
+			 * Check for bad characters
+			 */
+			checkCharacters(co);
+			
 		} catch (final OXConcurrentModificationException cme){
 			throw cme;
 		} catch (final OXObjectNotFoundException oe2){
@@ -829,13 +838,6 @@ public class Contacts implements DeleteListener {
 			int cnt = 0;
 			for (int i=0;i<650;i++){
 				if (mapping[i] != null && !mapping[i].compare(co, original)){
-					/*
-					if (i == ContactObject.SUR_NAME && co.containsSurName() && (co.getSurName() == null || co.getSurName().length() < 1)){
-						//System.out.println("---> "+co.getSurName());
-						//throw EXCEPTIONS.createOXConflictException(63,ctx.getContextId());
-						co.setSurName(original.getSurName());
-					}
-					*/
 					mod[cnt] = i;
 					cnt ++;
 				}
@@ -854,7 +856,6 @@ public class Contacts implements DeleteListener {
 				final int id = co.getObjectID();
 				if (id == -1){
 					throw EXCEPTIONS.createOXConflictException(21);
-					//throw new OXConflictException("New ID is -1!");
 				}
 				final long lmd = System.currentTimeMillis();
 				
@@ -874,7 +875,6 @@ public class Contacts implements DeleteListener {
 				co.setLastModified(ddd);
 			} else {
 				throw EXCEPTIONS.create(22, Integer.valueOf(ctx.getContextId()), Integer.valueOf(co.getObjectID()));
-				//throw new OXException("NOTHING TO UPDATE - NOTHING CHANGED cid="+ctx.getContextId()+" oid"+co.getObjectID());
 			}
 			
 			writecon.setAutoCommit(false);
@@ -882,7 +882,6 @@ public class Contacts implements DeleteListener {
 			if (LOG.isDebugEnabled()) {
 				LOG.debug(new StringBuilder("INFO: YOU WANT TO UPDATE THIS: cid="+ctx.getContextId()+" oid="+co.getObjectID()+" -> "+ps.toString()));
 			}
-			//System.out.println(new StringBuilder("INFO: YOU WANT TO UPDATE THIS: cid="+ctx.getContextId()+" oid="+co.getObjectID()+" -> "+ps.toString()));
 			ps.execute();	
 
 			if(co.containsNumberOfDistributionLists() && (co.getSizeOfDistributionListArray() > 0)){
@@ -2567,39 +2566,58 @@ public class Contacts implements DeleteListener {
 	)
 	
 	
-	   public static OXException getTruncation(final DataTruncation se) {
+	public static OXException getTruncation(final DataTruncation se) {
 		   
-	        final String[] fields = DBUtils.parseTruncatedFields(se);
-	        final StringBuilder sFields = new StringBuilder();
+		final String[] fields = DBUtils.parseTruncatedFields(se);
+		final StringBuilder sFields = new StringBuilder();
 	        
-	        for (final String field : fields) {
-	            sFields.append(field);
-	            sFields.append(", ");
-	        }
-	        sFields.setLength(sFields.length() - 2);
-	        
-	        
-			final OXException oxx = EXCEPTIONS.create(
-					DATA_TRUNCATION,
-					se,
-					sFields.toString(),
-					se.getDataSize(), 
-					se.getTransferSize());
+		for (final String field : fields) {
+			sFields.append(field);
+			sFields.append(", ");
+		}
+		sFields.setLength(sFields.length() - 2);
+	             
+		final OXException oxx = EXCEPTIONS.create(
+				DATA_TRUNCATION,
+				se,
+				sFields.toString(),
+				se.getDataSize(), 
+				se.getTransferSize());
 			
-
-	        if (fields.length > 0){
-		        for (final String field : fields) {
-		        	for (int i =0;i<650;i++){
-		        		if (mapping[i] != null && mapping[i].getDBFieldName().equals(field)){
+		if (fields.length > 0){
+			for (final String field : fields) {
+				for (int i =0;i<650;i++){
+					if (mapping[i] != null && mapping[i].getDBFieldName().equals(field)){
 		        			oxx.addTruncatedId(i);
-		        		}
-		        	}
-		        }
-	        }
+					}
+				}
+			}	
+		}
 	        
-	        return oxx;
-	    }
+		return oxx;
+	}
 
+	@OXThrows(
+			category=Category.USER_INPUT,
+			desc="68",
+			exceptionId=68,
+			msg="Bad character in field %2$s. Error: %1$s"
+	)
+	
+	private static void checkCharacters(ContactObject co) throws OXException {
+		for (int i=0;i < 650;i++){
+			if (mapping[i] != null) { 
+				String error = null;
+				try{
+					error = Check.containsInvalidChars(mapping[i].getValueAsString(co));
+				} catch (NullPointerException npe){ }
+				if (error != null){
+					throw EXCEPTIONS.create(68,error, mapping[i].getReadableTitle());
+				}
+			}
+		}
+		
+	}
 	   
 	/***************** MAPPER ******************/
 	
@@ -2703,7 +2721,7 @@ public class Contacts implements DeleteListener {
 				return co.getSurName();
 			}
 			public String getReadableTitle() {
-				return "Sur name";
+				return "Surname";
 			}
 		};	
 		/**************** * field03 *  * *************/
