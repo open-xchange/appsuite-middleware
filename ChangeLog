@@ -1,3 +1,8 @@
+* 2007-09-14 - choeger@open-xchange.com
+
+ - Bugfix #9455 Vista Home Basic Infostore added on every package install
+   fixed postinst for open-xchange-config-standard
+
 * 2007-09-13 - marcus.klein@open-xchange.com
 
  - Bugfix #8935: Fixing once again another case breaking AJAX communication.
