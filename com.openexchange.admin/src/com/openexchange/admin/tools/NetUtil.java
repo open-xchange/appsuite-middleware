@@ -96,6 +96,51 @@ public class NetUtil {
         }
         return ret;
     }
+
+    /**
+     * INTERNAL: convert ddn to long
+     * 
+     * @param ddn
+     * @return
+     */
+    private final static long stringDDN2Long(final String ddn) {
+        long ret = 0;
+        int shift = 3;
+        for(final String part : ddn.split("\\.") ) {
+            long lpart = Long.parseLong(part) << (shift--*8);
+            ret |= lpart;
+        }
+        return ret;
+    }
+    
+    /**
+     * check if broadcast address matches with given network and netmask
+     * 
+     * @param broadcast
+     * @param net
+     * @param mask
+     * @return
+     */
+    public final static boolean isValidBroadcast(final String broadcast, final String net, final String mask) {
+        if( net == null || mask == null || broadcast == null) {
+            return false;
+        }
+        if( !isValidDDN(net) || !isValidDDN(mask) || !isValidDDN(broadcast) ) {
+            return false;
+        }
+
+        long lmask  = stringDDN2Long(mask);
+        long lnet   = stringDDN2Long(net);
+        long lbcast = stringDDN2Long(broadcast);
+        
+        long invlmask = 0x00000000ffffff & ~lmask;
+        
+        if( (lnet & lmask | invlmask) == lbcast ) {
+            return true;
+        }
+
+        return false;
+    }
     
     /**
      * check if mask is a valid netmask in dotted decimal notation.
@@ -114,7 +159,7 @@ public class NetUtil {
                 // there must not follow a '1' after a '0' in a netmask
                 boolean foundZero=false;
                 for(int p=0; p<4; p++) {
-                    for(int bs=7; bs>0; bs--) {
+                    for(int bs=7; bs>=0; bs--) {
                         final int bit = 1 << bs;
                         final int erg = (imask[p] & bit);
                         if( erg == 0) {
@@ -200,7 +245,7 @@ public class NetUtil {
         String ret = "";
         for (int p = 0; p < 4; p++) {
             int bitset = 0;
-            for (int bs = 0; bs < 8; bs++) {
+            for (int bs = 7; bs >= 0; bs--) {
                 if (mask > 0) {
                     bitset |= (1 << bs);
                     mask--;
