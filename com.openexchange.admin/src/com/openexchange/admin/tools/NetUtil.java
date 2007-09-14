@@ -115,6 +115,7 @@ public class NetUtil {
     
     /**
      * check if broadcast address matches with given network and netmask
+     * network could also be an ip address fitting in the network
      * 
      * @param broadcast
      * @param net
