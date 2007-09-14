@@ -1,5 +1,10 @@
 * 2007-09-14 - choeger@open-xchange.com
 
+ - Fixed Bug #9466 - User was able to move his
+   contact out of the global address book.
+
+* 2007-09-14 - choeger@open-xchange.com
+
  - Bugfix #9455 Vista Home Basic Infostore added on every package install
    fixed postinst for open-xchange-config-standard
 
