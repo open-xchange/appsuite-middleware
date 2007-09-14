@@ -595,11 +595,10 @@ public class Contacts implements DeleteListener {
 									Category.TRY_AGAIN,
 									Category.TRY_AGAIN,
 									Category.TRY_AGAIN,
-									Category.TRY_AGAIN,
-									Category.PERMISSION
+									Category.TRY_AGAIN
 			},
-			desc={"10","11","12","13","14","15","16","17","65","18","19","20","21","22","23", "24","55","56","59","63","66","67","69"},
-			exceptionId={10,11,12,13,14,15,16,17,65,18,19,20,21,22,23,24,55,56,59,63,66,67,69},
+			desc={"10","11","12","13","14","15","16","17","65","18","19","20","21","22","23", "24","55","56","59","63","66","67"},
+			exceptionId={10,11,12,13,14,15,16,17,65,18,19,20,21,22,23,24,55,56,59,63,66,67},
 			msg={	ContactException.NON_CONTACT_FOLDER_MSG,
 							ContactException.NO_PERMISSION_MSG, 
 							ContactException.NO_PERMISSION_MSG, 
@@ -621,8 +620,7 @@ public class Contacts implements DeleteListener {
 							"The image you tried to attach is not a valid picture. It may be broken or is not a valid file.",
 							"Mandatory field last name is not set.",
 							"Unable to compare contacts for update. Make sure you have entered a valid display name. Contect %1$d Object %2$d",
-							"The name you entered is not available. Choose another display name. Context %1$d Object %2$d",
-							ContactException.NO_DELETE_PERMISSION_MSG
+							"The name you entered is not available. Choose another display name. Context %1$d Object %2$d"
 					}
 	)
 	public static void performContactStorageUpdate(final ContactObject co, final int fid, final java.util.Date client_date, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws ContactException, OXConflictException, OXObjectNotFoundException, OXConcurrentModificationException, OXException {
@@ -636,7 +634,6 @@ public class Contacts implements DeleteListener {
 		validateEmailAddress(co);
 		
 		boolean can_edit_only_own = false;
-		boolean can_delete_only_own = false;
 		
 		if(!co.containsParentFolderID() || co.getParentFolderID() == 0){
 			co.setParentFolderID(fid);
@@ -651,29 +648,27 @@ public class Contacts implements DeleteListener {
 			readcon = DBPool.pickup(ctx);
 			
 			/*
-			 * Check Rights for Source Folder
+			 * Check Rights for Destination Folder
 			 */
-			
-			int folder_whereto = co.getParentFolderID();
-			int folder_comesfrom = fid;
 			
 			FolderObject contactFolder;
 			if (FolderCacheManager.isEnabled()){
-				contactFolder = FolderCacheManager.getInstance().getFolderObject(folder_comesfrom, true, ctx, readcon);
+				contactFolder = FolderCacheManager.getInstance().getFolderObject(co.getParentFolderID(), true, ctx, readcon);
 			}else{
-				contactFolder = FolderObject.loadFolderObjectFromDB(folder_comesfrom, ctx, readcon);
+				contactFolder = FolderObject.loadFolderObjectFromDB(co.getParentFolderID(), ctx, readcon);
 			}
 			if (contactFolder.getModule() != FolderObject.CONTACT) {
-				throw EXCEPTIONS.createOXConflictException(10, Integer.valueOf(folder_comesfrom), Integer.valueOf(ctx.getContextId()), Integer.valueOf(user));
+				throw EXCEPTIONS.createOXConflictException(10, Integer.valueOf(co.getParentFolderID()), Integer.valueOf(ctx.getContextId()), Integer.valueOf(user));
 				//throw new OXConflictException("saveContactObject() called with a non-Contact-Folder! cid="+ctx.getContextId()+" fid="+co.getParentFolderID());
 			}
 			final OXFolderAccess oxfs = new OXFolderAccess(readcon, ctx);
-			final EffectivePermission oclPerm = oxfs.getFolderPermission(folder_comesfrom, user, uc);
+			final EffectivePermission oclPerm = oxfs.getFolderPermission(fid, user, uc);
 
 			if (oclPerm.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {
-				throw EXCEPTIONS.createOXPermissionException(11, Integer.valueOf(folder_comesfrom), Integer.valueOf(ctx.getContextId()), Integer.valueOf(user));
+				throw EXCEPTIONS.createOXPermissionException(11, Integer.valueOf(co.getParentFolderID()), Integer.valueOf(ctx.getContextId()), Integer.valueOf(user));
 				//throw new OXConflictException("NOT ALLOWED TO MODIFIE CONTACT cid="+ctx.getContextId()+" fid="+co.getParentFolderID());
 			}
+
 			if (!oclPerm.canWriteAllObjects()) {
 				if (oclPerm.canWriteOwnObjects()){
 					can_edit_only_own = true;
@@ -686,45 +681,35 @@ public class Contacts implements DeleteListener {
 			/*
 			 *  ++++ MOVE ++++
 			 *  
-			 *  Check Rights for destination
+			 *  Check Rights if this is a Move
 			 */
-			// Can delete from source?
 			if(co.getParentFolderID() != fid){
-				if (!oclPerm.canDeleteAllObjects()){
-					if (oclPerm.canDeleteOwnObjects()){
-						can_delete_only_own = true;
-					}else{
-						throw EXCEPTIONS.createOXPermissionException(69, Integer.valueOf(folder_comesfrom), Integer.valueOf(ctx.getContextId()), Integer.valueOf(user));
-						//throw new OXConflictException("NOT ALLOWED TO MODIFIE CONTACT cid="+ctx.getContextId()+" fid="+fid);
-					}				
-				}
 				
-				final EffectivePermission op = oxfs.getFolderPermission(folder_whereto, user, uc);
+				int fid2 = co.getParentFolderID();
+				final EffectivePermission op = oxfs.getFolderPermission(fid2, user, uc);
 					
-				// Can create in destination?
 				if (!op.canCreateObjects()){
-					throw EXCEPTIONS.createOXPermissionException(12, Integer.valueOf(folder_whereto), Integer.valueOf(ctx.getContextId()), Integer.valueOf(user));
+					throw EXCEPTIONS.createOXPermissionException(12, Integer.valueOf(co.getParentFolderID()), Integer.valueOf(ctx.getContextId()), Integer.valueOf(user));
 				}	
 				FolderObject source;
 				if (FolderCacheManager.isEnabled()){
-					source = FolderCacheManager.getInstance().getFolderObject(folder_whereto, true, ctx, readcon);
+					source = FolderCacheManager.getInstance().getFolderObject(fid2, true, ctx, readcon);
 				}else{
-					source = FolderObject.loadFolderObjectFromDB(folder_whereto, ctx, readcon);
+					source = FolderObject.loadFolderObjectFromDB(fid2, ctx, readcon);
 				}
 				if (source.getModule() != FolderObject.CONTACT) {
-					throw EXCEPTIONS.createOXConflictException(13,Integer.valueOf(folder_whereto), Integer.valueOf(ctx.getContextId()), Integer.valueOf(user));
+					throw EXCEPTIONS.createOXConflictException(13,Integer.valueOf(fid2), Integer.valueOf(ctx.getContextId()), Integer.valueOf(user));
 					//throw new OXConflictException("saveContactObject() called with a non-Contact-Folder! cid="+ctx.getContextId()+" fid"+fid);
 				}	
 				if (op.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {
-					throw EXCEPTIONS.createOXPermissionException(14, Integer.valueOf(folder_whereto), Integer.valueOf(ctx.getContextId()), Integer.valueOf(user));
+					throw EXCEPTIONS.createOXPermissionException(14, Integer.valueOf(fid2), Integer.valueOf(ctx.getContextId()), Integer.valueOf(user));
 					//throw new OXConflictException("NOT ALLOWED TO MODIFIE CONTACT cid="+ctx.getContextId()+" fid"+fid);
 				}
-
 				if (!op.canWriteAllObjects()) {
-					if (op.canWriteOwnObjects()){
+					if (oclPerm.canWriteOwnObjects()){
 						can_edit_only_own = true;
 					}else{
-						throw EXCEPTIONS.createOXPermissionException(15, Integer.valueOf(folder_whereto), Integer.valueOf(ctx.getContextId()), Integer.valueOf(user));
+						throw EXCEPTIONS.createOXPermissionException(15, Integer.valueOf(fid2), Integer.valueOf(ctx.getContextId()), Integer.valueOf(user));
 						//throw new OXConflictException("NOT ALLOWED TO MODIFIE CONTACT cid="+ctx.getContextId()+" fid="+fid);
 					}
 				}
@@ -746,10 +731,7 @@ public class Contacts implements DeleteListener {
 				throw EXCEPTIONS.createOXConflictException(17, Integer.valueOf(fid), Integer.valueOf(ctx.getContextId()), Integer.valueOf(user));
 				//throw new OXConflictException("NOT ALLOWED TO MODIFIE CONTACT cid="+ctx.getContextId()+" oid"+co.getObjectID());
 			}
-			if (can_delete_only_own && original.getCreatedBy() != user){
-				throw EXCEPTIONS.createOXConflictException(69, Integer.valueOf(fid), Integer.valueOf(ctx.getContextId()), Integer.valueOf(user));
-				//throw new OXConflictException("NOT ALLOWED TO MODIFIE CONTACT cid="+ctx.getContextId()+" oid"+co.getObjectID());
-			}	
+				
 			if ((contactFolder.getType() != FolderObject.PRIVATE) && (co.getPrivateFlag() || original.getPrivateFlag())){
 				//co.setPrivateFlag(false);
 				throw EXCEPTIONS.createOXConflictException(65, Integer.valueOf(ctx.getContextId()), Integer.valueOf(co.getObjectID()));

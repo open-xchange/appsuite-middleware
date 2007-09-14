@@ -1,18 +1,7 @@
-* 2007-09-14 - choeger@open-xchange.com
-
- - Fixed Bug #9466 - User was able to move his
-   contact out of the global address book.
-
-* 2007-09-14 - choeger@open-xchange.com
-
- - Bugfix #9455 Vista Home Basic Infostore added on every package install
-   fixed postinst for open-xchange-config-standard
-
 * 2007-09-13 - marcus.klein@open-xchange.com
 
  - Bugfix #8935: Fixing once again another case breaking AJAX communication.
  - Bugfix #9445: Added handling for folders that are only visible.
- - Bugfix #9452: Omitting writing empty data object.
 
 * 2007-09-13 - ben.pahne@open-xchange.com
 
