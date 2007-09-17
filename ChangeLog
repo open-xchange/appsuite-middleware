@@ -1,3 +1,9 @@
+* 2007-09-17 - martin.kauss@open-xchange.com
+
+ - Fixed bug #9497. Recurring appointments with a start before 1970 caused a
+   NullPointer by viewing the detail page of a single occurrence. This has been
+   fixed.
+
 * 2007-09-17 - marcus.klein@open-xchange.com
 
  - Bugfix #9475: Improved VCardTokenizer to use byte arrays instead of Byte
