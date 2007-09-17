@@ -3,6 +3,11 @@
  - Bugfix #9475: Improved VCardTokenizer to use byte arrays instead of Byte
    lists.
 
+* 2007-09-14 - ben.pahne@open-xchange.com
+
+ - Fixed Bug #9466 - User was able to move his
+   contact out of the global address book.
+
 * 2007-09-13 - marcus.klein@open-xchange.com
 
  - Bugfix #8935: Fixing once again another case breaking AJAX communication.
