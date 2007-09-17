@@ -112,10 +112,12 @@ public abstract class AbstractImportRequest implements AJAXRequest {
     }
 
     protected enum Action {
-        CSV("CSV", "vcard.vcf", Format.CSV);
-        private String name;
-        private String fileName;
-        private Format format;
+        CSV("CSV", "contacts.csv", Format.CSV),
+        ICal("ICAL", "ical.ics", Format.ICAL),
+        VCard("VCARD", "vcard.vcf", Format.VCARD),
+        OUTLOOK_CSV("OUTLOOK_CSV", "contacts.csv", Format.OUTLOOK_CSV);
+        private final String name, fileName;
+        private final Format format;
         private Action(final String name, final String fileName,
             final Format format) {
             this.name = name;

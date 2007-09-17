@@ -55,24 +55,29 @@ import java.io.InputStream;
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class CSVImportRequest extends AbstractImportRequest {
+public final class ICalImportRequest extends AbstractImportRequest {
 
     private final boolean failOnError;
 
     /**
-     * Default constructor.
+     * @param folderId
+     * @param upload
      */
-    public CSVImportRequest(final int folderId, final InputStream csv) {
-        this(folderId, csv, true);
+    public ICalImportRequest(final int folderId, final InputStream iCal) {
+        this(folderId, iCal, true);
     }
 
-    public CSVImportRequest(final int folderId, final InputStream csv,
+    public ICalImportRequest(final int folderId, final InputStream iCal,
         final boolean failOnError) {
-        super(Action.CSV, folderId, csv);
+        super(Action.ICal, folderId, iCal);
         this.failOnError = failOnError;
     }
 
-    public CSVImportParser getParser() {
-        return new CSVImportParser(failOnError);
+    /**
+     * {@inheritDoc}
+     */
+    public ICalImportParser getParser() {
+        return new ICalImportParser(failOnError);
     }
+
 }

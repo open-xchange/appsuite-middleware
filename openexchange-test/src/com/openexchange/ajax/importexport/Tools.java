@@ -58,6 +58,12 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.importexport.actions.CSVImportRequest;
 import com.openexchange.ajax.importexport.actions.CSVImportResponse;
+import com.openexchange.ajax.importexport.actions.ICalImportRequest;
+import com.openexchange.ajax.importexport.actions.ICalImportResponse;
+import com.openexchange.ajax.importexport.actions.OutlookCSVImportRequest;
+import com.openexchange.ajax.importexport.actions.OutlookCSVImportResponse;
+import com.openexchange.ajax.importexport.actions.VCardImportRequest;
+import com.openexchange.ajax.importexport.actions.VCardImportResponse;
 import com.openexchange.tools.servlet.AjaxException;
 
 /**
@@ -69,13 +75,31 @@ public final class Tools {
     /**
      * Prevent instantiation.
      */
-    public Tools() {
+    private Tools() {
         super();
     }
 
-    public static CSVImportResponse doImport(final AJAXClient client,
+    public static CSVImportResponse importCSV(final AJAXClient client,
         final CSVImportRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
         return (CSVImportResponse) Executor.execute(client, request);
+    }
+
+    public static ICalImportResponse importICal(final AJAXClient client,
+        final ICalImportRequest request) throws AjaxException, IOException,
+        SAXException, JSONException {
+        return (ICalImportResponse) Executor.execute(client, request);
+    }
+
+    public static VCardImportResponse importVCard(final AJAXClient client,
+        final VCardImportRequest request) throws AjaxException, IOException,
+        SAXException, JSONException {
+        return (VCardImportResponse) Executor.execute(client, request);
+    }
+
+    public static OutlookCSVImportResponse importOutlookCSV(final AJAXClient client,
+        final OutlookCSVImportRequest request) throws AjaxException, IOException,
+        SAXException, JSONException {
+        return (OutlookCSVImportResponse) Executor.execute(client, request);
     }
 }

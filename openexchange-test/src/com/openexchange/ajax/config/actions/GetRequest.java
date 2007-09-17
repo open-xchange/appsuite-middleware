@@ -108,6 +108,7 @@ public class GetRequest extends AbstractConfigRequest {
     public enum Tree {
         Identifier("/identifier"),
         TimeZone("/timezone"),
+        PrivateAppointmentFolder("/folder/calendar"),
         PrivateContactFolder("/folder/contacts"),
         PrivateTaskFolder("/folder/tasks"),
         MaxUploadIdleTimeout("/maxUploadIdleTimeout"),

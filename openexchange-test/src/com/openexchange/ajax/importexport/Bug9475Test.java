@@ -47,32 +47,77 @@
  *
  */
 
-package com.openexchange.ajax.importexport.actions;
+package com.openexchange.ajax.importexport;
 
-import java.io.InputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.util.Random;
+
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.importexport.actions.VCardImportRequest;
+import com.openexchange.ajax.importexport.actions.VCardImportResponse;
 
 /**
- * 
+ * Checks if the problem described in bug 9475 appears again.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class CSVImportRequest extends AbstractImportRequest {
+public final class Bug9475Test extends AbstractAJAXSession {
 
-    private final boolean failOnError;
+    private static final int SIZE = 30 * 1024 * 1024;
+
+    /**
+     * Big tmp file with lots of unuseful bytes.
+     */
+    private File tmp;
 
     /**
      * Default constructor.
+     * @param name name of the test.
      */
-    public CSVImportRequest(final int folderId, final InputStream csv) {
-        this(folderId, csv, true);
+    public Bug9475Test(final String name) {
+        super(name);
     }
 
-    public CSVImportRequest(final int folderId, final InputStream csv,
-        final boolean failOnError) {
-        super(Action.CSV, folderId, csv);
-        this.failOnError = failOnError;
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        tmp = File.createTempFile("tmp", null);
+        final FileOutputStream fos = new FileOutputStream(tmp);
+        try {
+            final Random rand = new Random(System.currentTimeMillis());
+            final byte[] buf = new byte[512];
+            for (int i = 0; i < SIZE; i = i + buf.length) {
+                rand.nextBytes(buf);
+                fos.write(buf);
+            }
+        } finally {
+            fos.close();
+        }
     }
 
-    public CSVImportParser getParser() {
-        return new CSVImportParser(failOnError);
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void tearDown() throws Exception {
+        tmp.delete();
+        super.tearDown();
+    }
+
+    /**
+     * Checks if the vcard tokenizer is too slow to parse a big unuseful file.
+     * @throws Throwable if an exception occurs.
+     */
+    public void testBigFile() throws Throwable {
+        final AJAXClient client = getClient();
+        final VCardImportResponse iResponse = Tools.importVCard(client,
+            new VCardImportRequest(client.getPrivateContactFolder(),
+            new FileInputStream(tmp), false));
+        assertTrue("VCard importer does not give an error.", iResponse.hasError());
     }
 }

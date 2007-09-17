@@ -83,6 +83,8 @@ public class AJAXClient {
 
     private Locale locale;
 
+    private int privateAppointmentFolder = -1;
+
     private int privateTaskFolder = -1;
 
     private int privateContactFolder = -1;
@@ -131,6 +133,15 @@ public class AJAXClient {
             locale = LocaleTools.getLocale(localeId);
         }
         return locale;
+    }
+
+    public int getPrivateAppointmentFolder() throws AjaxException, IOException,
+        SAXException, JSONException {
+        if (-1 == privateAppointmentFolder) {
+            privateAppointmentFolder = ConfigTools.get(session, new GetRequest(
+                GetRequest.Tree.PrivateAppointmentFolder)).getInteger();
+        }
+        return privateAppointmentFolder;
     }
 
     public int getPrivateTaskFolder() throws AjaxException, IOException,

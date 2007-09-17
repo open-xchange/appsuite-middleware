@@ -49,30 +49,20 @@
 
 package com.openexchange.ajax.importexport.actions;
 
-import java.io.InputStream;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class CSVImportRequest extends AbstractImportRequest {
-
-    private final boolean failOnError;
+public final class OutlookCSVImportResponse extends AbstractAJAXResponse {
 
     /**
-     * Default constructor.
+     * @param response
      */
-    public CSVImportRequest(final int folderId, final InputStream csv) {
-        this(folderId, csv, true);
+    public OutlookCSVImportResponse(final Response response) {
+        super(response);
     }
 
-    public CSVImportRequest(final int folderId, final InputStream csv,
-        final boolean failOnError) {
-        super(Action.CSV, folderId, csv);
-        this.failOnError = failOnError;
-    }
-
-    public CSVImportParser getParser() {
-        return new CSVImportParser(failOnError);
-    }
 }

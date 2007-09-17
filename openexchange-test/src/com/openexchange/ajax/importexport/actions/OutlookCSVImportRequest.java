@@ -55,24 +55,24 @@ import java.io.InputStream;
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class CSVImportRequest extends AbstractImportRequest {
+public final class OutlookCSVImportRequest extends AbstractImportRequest {
 
     private final boolean failOnError;
 
     /**
      * Default constructor.
      */
-    public CSVImportRequest(final int folderId, final InputStream csv) {
+    public OutlookCSVImportRequest(final int folderId, final InputStream csv) {
         this(folderId, csv, true);
     }
 
-    public CSVImportRequest(final int folderId, final InputStream csv,
+    public OutlookCSVImportRequest(final int folderId, final InputStream csv,
         final boolean failOnError) {
-        super(Action.CSV, folderId, csv);
+        super(Action.OUTLOOK_CSV, folderId, csv);
         this.failOnError = failOnError;
     }
 
-    public CSVImportParser getParser() {
-        return new CSVImportParser(failOnError);
+    public OutlookCSVImportParser getParser() {
+        return new OutlookCSVImportParser(failOnError);
     }
 }
