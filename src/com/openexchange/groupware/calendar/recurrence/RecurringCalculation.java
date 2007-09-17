@@ -284,20 +284,9 @@ public class RecurringCalculation {
     }
     
     private void checkValues() throws RecurringException {
-        if (!contains_until && !contains_occurrence)  {
-            if (e > 0) {
-                e = (e + (CalendarRecurringCollection.MILLI_YEAR * 99));
-                this.until = e;
-            } else {
-                // TODO: throw error
-            }            
-        } else if (!contains_until && contains_occurrence) {
-            if (e > 0) {
-                e = (e + (CalendarRecurringCollection.MILLI_YEAR * 99));
-                this.until = e;
-            } else {
-                // TODO: throw error
-            }
+        if (!contains_until)  {
+            e = (e + (CalendarRecurringCollection.MILLI_YEAR * 99));
+            this.until = e;
         }
     }
     
@@ -413,7 +402,7 @@ public class RecurringCalculation {
             if (hi < sd) {
                 e = (e+(CalendarRecurringCollection.MILLI_DAY*(sd-hi)));
             }
-        }        
+        }
         loop: while (sr <= e) {
             for (int a = 0; a < c; a++) {
                 calc.setTimeInMillis(s);
@@ -722,14 +711,14 @@ public class RecurringCalculation {
                         // normal operation
                         calc.set(Calendar.YEAR, helper.get(Calendar.YEAR));
                         calc.set(Calendar.MONTH, helper.get(Calendar.MONTH));
-                        calc.set(Calendar.DAY_OF_MONTH, 1);           
+                        calc.set(Calendar.DAY_OF_MONTH, 1);
                         for (int x = 0; x < 13; x++) {
                             if (calc.get(Calendar.DAY_OF_WEEK) == a) {
                                 break;
                             }
                             calc.add(Calendar.DAY_OF_MONTH, 1);
                         }
-                        calc.add(Calendar.WEEK_OF_MONTH, day_or_type-1);    
+                        calc.add(Calendar.WEEK_OF_MONTH, day_or_type-1);
                     } else {
                         // DAY, WEEKDAY OR WEEKENDDAY
                         if (a == CalendarObject.DAY) {
