@@ -1,3 +1,8 @@
+* 2007-09-17 - marcus.klein@open-xchange.com
+
+ - Bugfix #9475: Improved VCardTokenizer to use byte arrays instead of Byte
+   lists.
+
 * 2007-09-13 - marcus.klein@open-xchange.com
 
  - Bugfix #8935: Fixing once again another case breaking AJAX communication.

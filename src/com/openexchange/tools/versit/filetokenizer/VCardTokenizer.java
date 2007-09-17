@@ -50,6 +50,7 @@
 package com.openexchange.tools.versit.filetokenizer;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.LinkedList;
@@ -94,7 +95,7 @@ public class VCardTokenizer {
 
     private int entriesRecognized = 0;
 
-    private List<Byte> streamAsBytes;
+    private ByteArrayOutputStream streamAsBytes;
 
     private boolean streamEnded = false;
 
@@ -106,7 +107,7 @@ public class VCardTokenizer {
      * @throws IOException
      */
     public VCardTokenizer(InputStream is) throws IOException {
-        streamAsBytes = new LinkedList<Byte>();
+        streamAsBytes = new ByteArrayOutputStream();
         vcard = new BufferedInputStream(is);
     }
 
@@ -146,8 +147,8 @@ public class VCardTokenizer {
                 } else if (compLine.startsWith("END")
                     && (compLine.endsWith("VCARD") || compLine
                         .endsWith("VCALENDAR"))) {
-                    currentChunk.setContent(toByteArray(streamAsBytes));
-                    streamAsBytes = new LinkedList<Byte>();
+                    currentChunk.setContent(streamAsBytes.toByteArray());
+                    streamAsBytes = new ByteArrayOutputStream();
                     chunks.add(currentChunk);
                     entriesFound++;
                     potentialCalendar = false;
@@ -189,23 +190,24 @@ public class VCardTokenizer {
         if (streamEnded) {
             return null;
         }
-        final List<Byte> bytez = new LinkedList<Byte>();
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
         final byte buf[] = new byte[1];
-        while (vcard.read(buf) != -1) {
-            bytez.add(Byte.valueOf(buf[0]));
+        int length = -1;
+        while ((length = vcard.read(buf)) != -1) {
+            baos.write(buf, 0, length);
             if ('\n' == buf[0]) {
-                final byte[] ret = toByteArray(bytez);
-                streamAsBytes.addAll(bytez);
+                final byte[] ret = baos.toByteArray();
+                streamAsBytes.write(ret);
                 return new String(ret, ASCII_ENC);
             }
         }
         streamEnded = true;
 
         // cleaning up
-        if (bytez.size() != 0) {
-            bytez.add(Byte.valueOf((byte) 10)); // add final newline
-            final byte[] ret = toByteArray(bytez);
-            streamAsBytes.addAll(bytez);
+        if (baos.size() != 0) {
+            baos.write((byte) 10); // add final newline
+            final byte[] ret = baos.toByteArray();
+            streamAsBytes.write(ret);
             return new String(ret, ASCII_ENC);
         }
         return null;
