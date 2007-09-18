@@ -452,6 +452,12 @@ public class AppointmentTest extends AbstractAJAXTest {
 	public static AppointmentObject loadAppointment(WebConversation webCon,
 			int objectId, int inFolder, TimeZone userTimeZone, String host,
 			String session) throws Exception {
+		return loadAppointment(webCon, objectId, 0, inFolder, userTimeZone, host, session);
+	}
+	
+	public static AppointmentObject loadAppointment(WebConversation webCon,
+			int objectId, int recurrencePosition, int inFolder, TimeZone userTimeZone, String host,
+			String session) throws Exception {
 		host = appendPrefix(host);
 		
 		final URLParameter parameter = new URLParameter();
@@ -460,6 +466,10 @@ public class AppointmentTest extends AbstractAJAXTest {
 				AJAXServlet.ACTION_GET);
 		parameter.setParameter(DataFields.ID, objectId);
 		parameter.setParameter(AJAXServlet.PARAMETER_INFOLDER, inFolder);
+		
+		if (recurrencePosition > 0) {
+			parameter.setParameter(CalendarFields.RECURRENCE_POSITION, recurrencePosition);
+		}
 		
 		WebRequest req = new GetMethodWebRequest(host + APPOINTMENT_URL
 				+ parameter.getURLParameters());
