@@ -976,6 +976,17 @@
 # Antje Faber, 2007.
 # Antje Faber, 2007.
 # Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER.
 # Antje Faber, 2007.
 #
@@ -983,7 +994,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2007-09-05 10:34+0200\n"
+"PO-Revision-Date: 2007-09-20 10:46+0200\n"
 "Last-Translator: Antje Faber\n"
 "Language-Team:  <de@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -1242,6 +1253,9 @@ msgid "Attribute \"%s\" is not set in FolderObject instance %s in context %s"
 msgstr ""
 "Attribut \"%s\" ist nicht in der FolderObject-Instanz %s im Kontext %s "
 "enthalten"
+
+msgid "Bad character in field %2$s. Error: %1$s"
+msgstr "Ungültiges Zeichen in Feld %2$s. Fehler: %1$s"
 
 msgid "Bad value %s in parameter %s"
 msgstr "Fehlerhafter Wert %s in Parameter %s"
@@ -1617,9 +1631,6 @@ msgstr "Datei konnte nicht geholt werden: %s"
 msgid "Could not save file to the file store."
 msgstr "Datei konnte nicht in Dateispeicher gespeichert werden"
 
-msgid "Could not send results of importing process."
-msgstr "Ergebnisse des Import-Vorgangs konnten nicht gesendet werden."
-
 msgid "Could not translate a single column title. Is this a valid CSV file?"
 msgstr "Spaltentitel konnten nicht übersetzt werden. Ist dies eine gültige CSV-Datei?"
 
@@ -1953,6 +1964,9 @@ msgstr ""
 
 msgid "Folder cache has not been enabled in config file %s"
 msgstr "Der Ordner-Cache wurde in der config-Datei %s nicht aktiviert."
+
+msgid "Folder contains invalid data: \"%1$s\""
+msgstr "Ordner enthält ungültige Daten: \"%1$s\""
 
 msgid "Folder existence cannot be checked due to unsufficient folder information)"
 msgstr ""
@@ -2425,11 +2439,17 @@ msgstr "Zum Setzen von %s wird mindestens ein ContactObject und ein Wert benöti
 msgid "Need at least a ContactObject to get the value of %s"
 msgstr "Es wird mindestens ein ContactObject benötigt, um den Wert von %s zu erhalten"
 
+msgid "No ICal to import found."
+msgstr "Kein ICal für Import gefunden."
+
 msgid "No IMAP account exists for user %s in context %s"
 msgstr "Für Benutzer %s ist kein IMAP-Account im Kontext %s vorhanden."
 
 msgid "No SpellCheckConfig loaded."
 msgstr "Kein SpellCheckConfig geladen."
+
+msgid "No VCard to import found."
+msgstr "Kein VCard für Import gefunden."
 
 msgid "No access to mail folder %s"
 msgstr "Kein Zugriff auf E-Mail-Ordner %s"
@@ -2640,6 +2660,9 @@ msgstr "Problem beim Kommunizieren mir externer Autorisierung"
 msgid "Problem while initialising configuration tree."
 msgstr "Problem beim Initialisieren des Konfigurationsbaums."
 
+msgid "Problem while reading ICal file: %s."
+msgstr "Problem beim Lesen der ICal-Datei: %s."
+
 msgid "Problem with URI when creating context specific filestore location."
 msgstr "Problem mit URI beim Erstellen des kontextspezifischen Dateispeicherpfads."
 
@@ -2655,9 +2678,6 @@ msgid ""
 msgstr ""
 "Prozess wurde beim Warten auf eine freie IMAP-Verbindung unterbrochen. Bitte "
 "erneut versuchen."
-
-msgid "Programming error"
-msgstr "Programmierfehler"
 
 msgid "Programming error - folder %s"
 msgstr "Programmierfehler - Ordner %s"
@@ -2804,6 +2824,9 @@ msgstr "Ziel- und Quellordner dürfen im Kontext %s nicht identisch sein"
 msgid "Target folder %s contains a duplicate folder in context %s"
 msgstr "Der Zielordner %s enthält ein Duplikat im Kontext %s"
 
+msgid "Task contains invalid data: \"%1$s\""
+msgstr "Aufgabe enthält ungültige Daten: \"%1$s\""
+
 msgid "Task with private flags cannot be moved to public folder %1$s (%2$d)."
 msgstr ""
 "Aufgabe mit Privatmarkierung (private flage) kann nicht in öffentlichen "
@@ -2913,11 +2936,11 @@ msgstr ""
 "noch der Dateiname der Anlage wurde gesetzt"
 
 msgid ""
-"The name you entered is not available. Choose another displayname. Contect %1"
-"$d Object %2$d"
+"The name you entered is not available. Choose another display name. Context %"
+"1$d Object %2$d"
 msgstr ""
-"Der von Ihnen eingegebene Name ist nicht verfügbar. Wählen Sie einen anderen Anzeigenamen. Kontext %1"
-"$d Objekt %2$d"
+"Der von Ihnen eingegebene Name ist nicht verfügbar. Wählen Sie einen anderen "
+"Anzeigenamen. Kontext %1$d Objekt %2$d"
 
 msgid ""
 "The object could not be detached because the update to an underlying object "
@@ -3051,8 +3074,12 @@ msgstr ""
 "Anzahl der Elemente in diesem Ordner konnte nicht abgerufen werden. Kontext %"
 "1$d Ordner %2$d Benutzer %3$d"
 
-msgid "Unable to compare contacts for update. Contect %1$d Object %2$d"
-msgstr "Kontakte für die Aktualisierung können nicht verglichen werden. Kontext %1$d Objekt %2$d"
+msgid ""
+"Unable to compare contacts for update. Make sure you have entered a valid "
+"display name. Contect %1$d Object %2$d"
+msgstr ""
+"Kontakte für die Aktualisierung können nicht verglichen werden. Stellen Sie sicher, dass Sie einen gültigen Anzeigenamen eingetragen haben. Kontext %1$d "
+"Objekt %2$d"
 
 msgid ""
 "Unable to create a link between these two objects. Insufficient rights. 1. "
@@ -3509,6 +3536,9 @@ msgstr "Benutzereingabe-Fehler %s"
 msgid "User's %s dictionary could not be loaded in context %d"
 msgstr "Das Wörterbuch %s des Benutzers konnte im Kontext %d nicht geladen werden."
 
+msgid "Validation failed: %s"
+msgstr "Validierung fehlgeschlagen: %s"
+
 msgid "Value for the recurrence is missing: %d."
 msgstr "Fehlender Wert für Wiederholung: %d."
 
@@ -3574,7 +3604,9 @@ msgstr ""
 "freigegebenen Ordner %1$s (%2$d)."
 
 msgid "You are not allowed to see the task %1$d in folder %2$s (%3$d)."
-msgstr "Sie haben keine Berechtigung, die Aufgabe %1$d im Ordner %2$s (%3$d) zu sehen."
+msgstr ""
+"Sie haben keine Berechtigung, die Aufgabe %1$d im Ordner %2$s (%3$d) zu "
+"sehen."
 
 msgid ""
 "You are not allowed to store this contact in a non-contact folder: folder id "
@@ -3607,6 +3639,11 @@ msgid "You cannot unlock this document."
 msgstr "Sie können die Sperre für dieses Dokument nicht aufheben."
 
 msgid ""
+"You do not have permission to create objects in this folder. %1$d in context "
+"%2$d with user %3$d"
+msgstr "Sie haben nicht die entsprechenden Berechtigungen zum Erstellen von Objekten in diesem Ordner %1$d im Kontext %2$d als Benutzer %3$d"
+
+msgid ""
 "You do not have permission to delete objects from folder %1$d in context %2"
 "$d with user %3$d"
 msgstr ""
@@ -3619,13 +3656,6 @@ msgid ""
 msgstr ""
 "Sie haben nicht die entsprechenden Berechtigungen zum Lesen von Objekten im "
 "Ordner %1$d im Kontext %2$d als Benutzer %3$d"
-
-msgid ""
-"You do not have permission to store objects in folder %1$d in context %2$d "
-"with user %3$d"
-msgstr ""
-"Sie haben nicht die entsprechenden Berechtigungen zum Speichern von Objekten "
-"im Ordner %1$d im Kontext %2$d als Benutzer %3$d"
 
 msgid "You do not have sufficient permission to delete this version."
 msgstr "Sie haben nicht die entsprechenden Berechtigungen zum Löschen dieser Version."
