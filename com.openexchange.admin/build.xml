@@ -24,9 +24,6 @@
 	<property name="commons-httpclient" value="commons-httpclient-2.0.2.jar"/>
 	<property name="commons-io" value="commons-io.jar"/>
 	<property name="commons-logging" value="commons-logging.jar"/>
-	<property name="commons-collections" value="commons-collections-3.2.jar"/>
-	<property name="commons-lang" value="commons-lang.jar"/>
-	<property name="commons-configuration" value="commons-configuration-1.4.jar"/>
 	<property name="concurrent" value="concurrent.jar"/>
 	<property name="activation" value="activation.jar"/>
 	<property name="jcs" value="jcs-1.2.7.9.2.jar"/>
@@ -43,9 +40,6 @@
         <pathelement location="${lib.dir}/${commons-httpclient}"/>
         <pathelement location="${lib.dir}/${commons-io}"/>
         <pathelement location="${lib.dir}/${commons-logging}"/>
-        <pathelement location="${lib.dir}/${commons-collections}"/>
-        <pathelement location="${lib.dir}/${commons-lang}"/>
-        <pathelement location="${lib.dir}/${commons-configuration}"/>
         <pathelement location="${lib.dir}/${concurrent}"/>
         <pathelement location="${lib.dir}/${activation}"/>
         <pathelement location="${lib.dir}/${jcs}"/>
@@ -191,9 +185,6 @@
 					 external:$libdir$/${commons-httpclient},
 					 external:$libdir$/${commons-io},
 					 external:$libdir$/${commons-logging},
-					 external:$libdir$/${commons-configuration},
-					 external:$libdir$/${commons-lang},
-					 external:$libdir$/${commons-collections},
 					 external:$libdir$/${concurrent},
 					 external:$libdir$/${jcs},
 					 external:$libdir$/${jdom},

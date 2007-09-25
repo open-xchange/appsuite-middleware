@@ -58,14 +58,10 @@ import java.util.concurrent.Executors;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.daemons.ClientAdminThread;
-import com.openexchange.admin.properties.AdminProperties;
-import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.TaskManagerException;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
-import com.openexchange.admin.tools.PropertyHandler.PropertyFiles;
 
 public class TaskManager {
 
@@ -103,18 +99,11 @@ public class TaskManager {
 
     /**
      * This is a singleton so constructor is private use getInstance instead
-     * @throws InvalidDataException 
      */
     private TaskManager() {
         this.cache = ClientAdminThread.cache;
         this.prop = this.cache.getProperties();
-        int threadCount = 2;
-        try {
-            threadCount = this.prop.getInt(PropertyFiles.ADMIN, AdminProperties.Prop.CONCURRENT_JOBS);
-        } catch (final InvalidDataException e) {
-            log.error("Error while reading concurrent Jobs. Shutting down system...", e);
-            AdminDaemon.shutdown();
-        }
+        final int threadCount = Integer.parseInt(this.prop.getProp("CONCURRENT_JOBS", "2"));
         if (log.isInfoEnabled()) {
             log.info("AdminJobExecutor: running " + threadCount + " jobs parallel");
         }

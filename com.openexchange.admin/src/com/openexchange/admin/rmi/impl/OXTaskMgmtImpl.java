@@ -72,12 +72,9 @@ public class OXTaskMgmtImpl extends OXCommonImpl implements OXTaskMgmtInterface 
 
     private static final Log log = LogFactory.getLog(OXTaskMgmtImpl.class);
     
-    /* (non-Javadoc)
-     * @see com.openexchange.admin.rmi.OXTaskMgmtInterface#deleteJob(com.openexchange.admin.rmi.dataobjects.Context, com.openexchange.admin.rmi.dataobjects.Credentials, int)
-     */
     public void deleteJob(final Context ctx, final Credentials cred, final int id) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, TaskManagerException {
         try {
-            doNullCheck(new String[] { "ctx" }, new Object[] { ctx });
+            doNullCheck(ctx);
             contextcheck(ctx);
             new BasicAuthenticator().doAuthentication(cred, ctx);
             if (id < 0) {
@@ -99,12 +96,9 @@ public class OXTaskMgmtImpl extends OXCommonImpl implements OXTaskMgmtInterface 
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.admin.rmi.OXTaskMgmtInterface#flush(com.openexchange.admin.rmi.dataobjects.Context, com.openexchange.admin.rmi.dataobjects.Credentials)
-     */
     public void flush(final Context ctx, final Credentials cred) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, TaskManagerException {
         try {
-            doNullCheck(new String[] { "ctx" }, new Object[] { ctx });
+            doNullCheck(ctx);
             contextcheck(ctx);
             new BasicAuthenticator().doAuthentication(cred, ctx);
             TaskManager.getInstance().flush();
@@ -123,12 +117,9 @@ public class OXTaskMgmtImpl extends OXCommonImpl implements OXTaskMgmtInterface 
         }
     }
     
-    /* (non-Javadoc)
-     * @see com.openexchange.admin.rmi.OXTaskMgmtInterface#getJobList(com.openexchange.admin.rmi.dataobjects.Context, com.openexchange.admin.rmi.dataobjects.Credentials)
-     */
     public String getJobList(final Context ctx, final Credentials cred) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException {
         try {
-            doNullCheck(new String[] { "ctx" }, new Object[] { ctx });
+            doNullCheck(ctx);
             contextcheck(ctx);
             new BasicAuthenticator().doAuthentication(cred, ctx);
             return TaskManager.getInstance().getJobList();
@@ -144,12 +135,9 @@ public class OXTaskMgmtImpl extends OXCommonImpl implements OXTaskMgmtInterface 
         }
     }
     
-    /* (non-Javadoc)
-     * @see com.openexchange.admin.rmi.OXTaskMgmtInterface#getTaskResults(com.openexchange.admin.rmi.dataobjects.Context, com.openexchange.admin.rmi.dataobjects.Credentials, int)
-     */
     public Object getTaskResults(final Context ctx, final Credentials cred, final int id) throws RemoteException, InvalidCredentialsException, StorageException, InterruptedException, ExecutionException, InvalidDataException {
         try {
-            doNullCheck(new String[] { "ctx" }, new Object[] { ctx });
+            doNullCheck(ctx);
             contextcheck(ctx);
             new BasicAuthenticator().doAuthentication(cred, ctx);
             return getTaskResults(id);
@@ -168,13 +156,6 @@ public class OXTaskMgmtImpl extends OXCommonImpl implements OXTaskMgmtInterface 
         } // We needn't catch the ExecutionException because this is logged before
     }
 
-    /**
-     * @param id
-     * @return
-     * @throws InterruptedException
-     * @throws ExecutionException
-     * @throws InvalidDataException
-     */
     public Object getTaskResults(final int id) throws InterruptedException, ExecutionException, InvalidDataException {
         if (id < 0) {
             throw new InvalidDataException("Task must be a value >= 0");
@@ -191,11 +172,6 @@ public class OXTaskMgmtImpl extends OXCommonImpl implements OXTaskMgmtInterface 
         }
     }
 
-    /**
-     * @param id
-     * @return
-     * @throws InvalidDataException
-     */
     public boolean isTaskDone(final int id) throws InvalidDataException {
         if (id < 0) {
             throw new InvalidDataException("Task must be a value >= 0");

@@ -59,7 +59,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Hashtable;
-import java.util.List;
+import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -67,16 +67,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.admin.exceptions.OXGenericException;
-import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.exceptions.DatabaseLockedException;
-import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.sqlStorage.OXAdminPoolDBPool;
 import com.openexchange.admin.storage.sqlStorage.OXAdminPoolInterface;
-import com.openexchange.admin.tools.PropertyHandler.PropertyFiles;
 import com.openexchange.groupware.delete.DeleteRegistry;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -132,13 +129,12 @@ public class AdminCache {
     }
 
     /**
-     * @throws InvalidDataException 
      * 
      * 
      */
-    public void initCache() throws InvalidDataException {
+    public void initCache() {
+
         this.prop = new PropertyHandler(System.getProperties());
-        this.prop.initializeDefaults();
         readSequenceTables();
         cacheSqlScripts();
         readMasterCredentials();
@@ -159,6 +155,9 @@ public class AdminCache {
     }
 
     public PropertyHandler getProperties() {
+        if (this.prop == null) {
+            initCache();
+        }
         return this.prop;
     }
 
@@ -222,10 +221,10 @@ public class AdminCache {
      * @param ctx
      */
     public final void removeAdminCredentials(final Context ctx) {
-        if (this.adminCredentialsCache.contains(ctx)) {
+        if( this.adminCredentialsCache.contains(ctx) ) {
             this.adminCredentialsCache.remove(ctx);
         }
-        if (this.adminAuthMechCache.contains(ctx)) {
+        if( this.adminAuthMechCache.contains(ctx) ) {
             this.adminAuthMechCache.remove(ctx);
         }
     }
@@ -254,7 +253,7 @@ public class AdminCache {
         return ox_queries_initial;
     }
 
-    public Connection getSimpleSqlConnection(final String url, final String user, final String password, final String driver) throws SQLException, ClassNotFoundException {
+    public Connection getSimpleSqlConnection(String url, String user, String password, String driver) throws SQLException, ClassNotFoundException {
         // System.err.println("-->"+driver+" ->"+url+" "+user+" "+password);
         Class.forName(driver);
         // give database some time to react (in seconds)
@@ -262,7 +261,7 @@ public class AdminCache {
         return DriverManager.getConnection(url, user, password);
     }
 
-    public void closeSimpleConnection(final Connection con) {
+    public void closeSimpleConnection(Connection con) {
         if (con != null) {
             try {
                 con.close();
@@ -272,7 +271,7 @@ public class AdminCache {
         }
     }
 
-    private void readSequenceTables() throws InvalidDataException {
+    private void readSequenceTables() {
         final String seqfile = getInitialOXDBSqlDir() + "/sequences.sql";
 
         final File f = new File(seqfile);
@@ -293,6 +292,7 @@ public class AdminCache {
         } catch (Exception e) {
             log.fatal("Error reading sequence tables!", e);
         }
+
     }
 
     public ArrayList<String> getSequenceTables() throws OXGenericException {
@@ -302,36 +302,36 @@ public class AdminCache {
         return sequence_tables;
     }
 
-    private String getInitialOXDBSqlDir() throws InvalidDataException {
-        return prop.getString(PropertyFiles.SQL, AdminProperties.SQL.INITIAL_OX_SQL_DIR);
+    private String getInitialOXDBSqlDir() {
+        return prop.getSqlProp("INITIAL_OX_SQL_DIR", "/opt/openexchange-internal/system/setup/mysql");
     }
 
-    private void cacheSqlScripts() throws InvalidDataException {
-        if (prop.getBoolean(PropertyFiles.SQL, AdminProperties.SQL.LOG_PARSED_QUERIES)) {
+    private void cacheSqlScripts() {
+
+        if (prop.getSqlProp("LOG_PARSED_QUERIES", "false").equalsIgnoreCase("true")) {
             log_parsed_sql_queries = true;
         }
 
         // ox
-        final List<String> list = prop.getList(PropertyFiles.SQL, AdminProperties.SQL.INITIAL_OX_SQL_ORDER);
-        ox_queries_initial = convertData2Objects(getInitialOXDBSqlDir(), list);
+        ox_queries_initial = convertData2Objects(getInitialOXDBSqlDir(), getInitialOXDBOrder());
     }
 
-    private ArrayList<String> convertData2Objects(final String sql_path, final List<String> sql_files_order) {
-        final ArrayList<String> al = new ArrayList<String>();
+    private ArrayList<String> convertData2Objects(String sql_path, String[] sql_files_order) {
+        ArrayList<String> al = new ArrayList<String>();
 
-        for (final String sql_file : sql_files_order) {
-            final File tmp = new File(sql_path + sql_file);
+        for (int a = 0; a < sql_files_order.length; a++) {
+            File tmp = new File(sql_path + "" + sql_files_order[a]);
 
             try {
-                final FileInputStream fis = new FileInputStream(tmp);
-                final byte[] b = new byte[(int) tmp.length()];
+                FileInputStream fis = new FileInputStream(tmp);
+                byte[] b = new byte[(int) tmp.length()];
                 fis.read(b);
                 fis.close();
-                final String data = new String(b);
+                String data = new String(b);
                 Pattern p = Pattern.compile("(" + PATTERN_REGEX_FUNCTION + "|" + PATTERN_REGEX_NORMAL + ")", Pattern.DOTALL + Pattern.CASE_INSENSITIVE);
                 Matcher matchy = p.matcher(data);
                 while (matchy.find()) {
-                    final String exec = matchy.group(0).replaceAll("END\\s*//", "END");
+                    String exec = matchy.group(0).replaceAll("END\\s*//", "END");
                     al.add(exec);
                     if (log_parsed_sql_queries) {
                         log.info(exec);
@@ -339,22 +339,37 @@ public class AdminCache {
                 }
                 if (log_parsed_sql_queries) {
                     if(log.isInfoEnabled()){
-                        log.info(tmp + " PARSED!");
+                    log.info(tmp + " PARSED!");
                     }
                 }
-            } catch (final Exception exp) {
+            } catch (Exception exp) {
                 log.fatal("Parse/Read error on " + tmp, exp);
-                return null;
+                al = null;
             }
+
         }
         return al;
     }
 
+    private String[] getOrdered(String data) {
+        String[] ret = new String[0];
+        if (data != null) {
+            StringTokenizer st = new StringTokenizer(data, ",");
+            ret = new String[st.countTokens()];
+            int a = 0;
+            while (st.hasMoreTokens()) {
+                ret[a] = "" + st.nextToken();
+                a++;
+            }
+        }
+        return ret;
+    }
+    
     /**
      * Parses the truncated fields out of the DataTruncation exception and
      * transforms this to a StorageException.
      * */
-    public final static StorageException parseDataTruncation(final DataTruncation dt){
+    public final static StorageException parseDataTruncation(DataTruncation dt){
         final String[] fields = DBUtils.parseTruncatedFields(dt);
         final StringBuilder sFields = new StringBuilder();
         sFields.append("Data too long for underlying storage!Error field(s): ");
@@ -369,19 +384,27 @@ public class AdminCache {
         return st;
     }
 
-    private void configureAuthentication() throws InvalidDataException{
+    private String[] getInitialOXDBOrder() {
+        return getOrdered(prop.getSqlProp("INITIAL_OX_SQL_ORDER", "sequences.sql,ldap2sql.sql,oxfolder.sql,settings.sql" + ",calendar.sql,contacts.sql,tasks.sql,projects.sql,infostore.sql,attachment.sql,forum.sql,pinboard.sql," + "misc.sql,ical_vcard.sql"));
+    }
+    
+    private void configureAuthentication(){
+        
         log.debug("Configuring authentication mechanisms ...");
         
-        masterAuthenticationDisabled = this.prop.getBoolean(PropertyFiles.ADMIN, AdminProperties.Prop.MASTER_AUTHENTICATION_DISABLED);
+        final String master_auth_disabled = this.prop.getProp("MASTER_AUTHENTICATION_DISABLED", "false"); // fallback is auth
+        final String context_auth_disabled = this.prop.getProp("CONTEXT_AUTHENTICATION_DISABLED", "false"); // fallback is auth
+        
+        masterAuthenticationDisabled = Boolean.parseBoolean(master_auth_disabled);
         log.debug("MasterAuthentication mechanism disabled: "+masterAuthenticationDisabled);
         
-        contextAuthenticationDisabled = this.prop.getBoolean(PropertyFiles.ADMIN, AdminProperties.Prop.CONTEXT_AUTHENTICATION_DISABLED);
+        contextAuthenticationDisabled = Boolean.parseBoolean(context_auth_disabled);
         log.debug("ContextAuthentication mechanism disabled: "+contextAuthenticationDisabled);
     }
     
 
-    private void readMasterCredentials() throws InvalidDataException {
-        final String masterfile = this.prop.getString(PropertyFiles.ADMIN, AdminProperties.Prop.MASTER_AUTH_FILE);
+    private void readMasterCredentials() {
+        final String masterfile = this.prop.getProp("MASTER_AUTH_FILE", "/opt/open-xchange/admindaemon/etc/mpasswd");
         final File tmp = new File(masterfile);
         if (!tmp.exists()) {
             this.log.fatal("Fatal! Master auth file does not exists:\n" + masterfile);
@@ -439,4 +462,5 @@ public class AdminCache {
             this.log.fatal("Error while init OX Process!", ecp);
         }
     }
+
 }

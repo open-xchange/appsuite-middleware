@@ -218,6 +218,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected static final String JAVA_LANG_BOOLEAN = "java.lang.Boolean";
     protected static final String JAVA_LANG_INTEGER = "java.lang.Integer";
     protected static final String JAVA_UTIL_ARRAY_LIST = "java.util.ArrayList";
+    protected static final String JAVA_UTIL_LOCALE = "java.util.Locale";
     protected static final String JAVA_LANG_LONG = "java.lang.Long";
     protected static final String JAVA_LANG_STRING = "java.lang.String";
     protected static final String SIMPLE_INT = "int";
@@ -361,6 +362,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         returntypes.add(JAVA_UTIL_DATE);
         returntypes.add(JAVA_UTIL_HASH_SET);
         returntypes.add(JAVA_UTIL_TIME_ZONE);
+        returntypes.add(JAVA_UTIL_LOCALE);
         returntypes.add(PASSWORDMECH_CLASS);
         
         return getGetterGeneral(theMethods, notallowed, returntypes);
