@@ -2,7 +2,6 @@
 
 package com.openexchange.admin.rmi.exceptions;
 
-
 /**
  * Thrown if an user doesn't exist in an operation.
  * 
