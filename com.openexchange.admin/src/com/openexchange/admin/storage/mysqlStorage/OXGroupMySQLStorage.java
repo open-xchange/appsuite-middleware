@@ -62,13 +62,11 @@ import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Group;
 import com.openexchange.admin.rmi.dataobjects.User;
-import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.sqlStorage.OXGroupSQLStorage;
 import com.openexchange.admin.tools.AdminCache;
-import com.openexchange.admin.tools.PropertyHandler.PropertyFiles;
 import com.openexchange.groupware.IDGenerator;
 import com.openexchange.groupware.contexts.ContextException;
 import com.openexchange.groupware.delete.DeleteEvent;
@@ -353,9 +351,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             con.commit();
             
             int gid_number = -1;
-            final int gid_number_start;
-            gid_number_start = prop.getInt(PropertyFiles.GROUP, AdminProperties.Group.GID_NUMBER_START);
-            if (gid_number_start > 0) {
+            if(Integer.parseInt(prop.getGroupProp(AdminProperties.Group.GID_NUMBER_START,"-1"))>0){
                 gid_number = IDGenerator.getId(context_ID, com.openexchange.groupware.Types.GID_NUMBER, con);
                 con.commit();
             }
@@ -394,7 +390,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             if (log.isInfoEnabled()) {
                 log.info("Group " + groupID + " created!");
             }
-        } catch (final DataTruncation dt) {
+        }catch (final DataTruncation dt){
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             throw AdminCache.parseDataTruncation(dt);
         } catch (final SQLException sql) {
@@ -413,14 +409,6 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
                 log.error("Error rollback configdb connection", ec);
             }
             throw new StorageException(e);
-        } catch (final InvalidDataException e) {
-            log.error("Pool Error", e);
-            try {
-                con.rollback();
-            } catch (final SQLException ec) {
-                log.error("Error rollback configdb connection", ec);
-            }
-            throw new StorageException(e);
         } finally {
             try {
                 if (prep_insert != null) {
@@ -431,7 +419,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             }
 
             try {
-                if (con != null) {
+                if(con!=null){
                     cache.pushOXDBWrite(context_ID, con);
                 }
             } catch (final PoolException e) {
@@ -476,6 +464,8 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
                 prep_del_group.executeUpdate();
                 prep_del_group.close();
             }
+            
+            
             
             con.commit();
         } catch (final SQLException sql) {

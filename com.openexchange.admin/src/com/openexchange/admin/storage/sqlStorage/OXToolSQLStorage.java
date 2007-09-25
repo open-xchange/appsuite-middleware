@@ -49,9 +49,10 @@
 
 package com.openexchange.admin.storage.sqlStorage;
 
+import com.openexchange.admin.rmi.dataobjects.Context;
+import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import java.sql.Connection;
 
-import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 
@@ -65,7 +66,7 @@ public abstract class OXToolSQLStorage extends OXToolStorageInterface {
      * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#primaryMailExists(int,
      *      java.lang.String)
      */
-    public abstract void primaryMailExists(final Context ctx, final String primary_mail) throws StorageException;
+    public abstract void primaryMailExists(final Context ctx, final String primary_mail) throws StorageException, InvalidDataException;
 
     /**
      * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#existsContext(int)

@@ -61,7 +61,6 @@ import com.openexchange.admin.rmi.exceptions.ContextExistsException;
 import com.openexchange.admin.rmi.exceptions.EnforceableDataObjectException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
-import com.openexchange.admin.rmi.exceptions.NoSuchPluginException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.tools.GenericChecks;
@@ -102,18 +101,24 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
         GenericChecks.checkValidMailAddress(admin_user.getPrimaryEmail());
     }
 
-    protected abstract Context createmaincall(final Context ctx, final User admin_user, Database db) throws StorageException, InvalidDataException, NoSuchPluginException;
+    protected abstract Context createmaincall(final Context ctx, final User admin_user, Database db) throws StorageException, InvalidDataException;
 
     protected Context createcommon(final Context ctx, final User admin_user, final Database db, final Credentials auth) throws InvalidCredentialsException, ContextExistsException, InvalidDataException, StorageException {
         try{
-            doNullCheck(new String[] { "ctx", "admin_user" }, new Object[] { ctx, admin_user });
+            doNullCheck(ctx,admin_user);
+        } catch (final InvalidDataException e1) {
+            final InvalidDataException invalidDataException = new InvalidDataException("Context or user not correct");
+            log.error(invalidDataException.getMessage(), invalidDataException);
+            throw invalidDataException;
+        }
 
-            new BasicAuthenticator().doAuthentication(auth);
-
-            if (log.isDebugEnabled()) {
-                log.debug(ctx + " - " + admin_user + " ");
-            }
+        new BasicAuthenticator().doAuthentication(auth);
         
+        if (log.isDebugEnabled()) {
+            log.debug(ctx + " - " + admin_user + " ");
+        }
+        
+        try {
             final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
             createchecks(ctx, admin_user, tool);
             final String name = ctx.getName();
@@ -132,15 +137,9 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
         } catch (final InvalidDataException e) {
             log.error(e.getMessage(), e);
             throw e;
-        } catch (final InvalidCredentialsException e) {
-            log.error(e.getMessage(), e);
-            throw e;
         } catch (final StorageException e) {
             log.error(e.getMessage(), e);
             throw e;
-        } catch (final NoSuchPluginException e) {
-            log.error(e.getMessage(), e);
-            throw new StorageException(e);
         }
     }
 }

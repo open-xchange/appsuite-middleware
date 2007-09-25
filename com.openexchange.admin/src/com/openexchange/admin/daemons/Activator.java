@@ -100,7 +100,7 @@ public class Activator implements BundleActivator {
         ServiceListener sl = new ServiceListener() {
             public void serviceChanged(ServiceEvent ev) {
                 if(log.isInfoEnabled()){
-                    log.info("Service: " + ev.getServiceReference().getBundle().getSymbolicName() + ", " + ev.getType());
+                log.info("Service: " + ev.getServiceReference().getBundle().getSymbolicName() + ", " + ev.getType());
                 }
 
                 switch (ev.getType()) {

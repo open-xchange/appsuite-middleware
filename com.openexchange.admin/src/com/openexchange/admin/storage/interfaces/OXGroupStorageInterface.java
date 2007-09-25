@@ -48,17 +48,13 @@
  */
 package com.openexchange.admin.storage.interfaces;
 
-import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.daemons.ClientAdminThread;
-import com.openexchange.admin.properties.AdminProperties;
-import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Group;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
-import com.openexchange.admin.tools.PropertyHandler.PropertyFiles;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -101,13 +97,7 @@ public abstract class OXGroupStorageInterface {
     public static OXGroupStorageInterface getInstance() throws StorageException {
         synchronized (OXGroupStorageInterface.class) {
             if (null == implementingClass) {
-                String className = null;
-                try {
-                    className = prop.getString(PropertyFiles.ADMIN, AdminProperties.Storage.GROUP_STORAGE);
-                } catch (final InvalidDataException e1) {
-                    log.fatal("Invalid data in config file", e1);
-                    AdminDaemon.shutdown();
-                }
+                final String className = prop.getProp(PropertyHandler.GROUP_STORAGE, null);
                 if (null != className) {
                     try {
                         implementingClass = Class.forName(className).asSubclass(OXGroupStorageInterface.class);
@@ -152,7 +142,6 @@ public abstract class OXGroupStorageInterface {
      * Create new group in given context
      * 
      * @return int with the id of the created group
-     * @throws InvalidDataException 
      */
     public abstract int create(final Context ctx, final Group grp) throws StorageException;
 

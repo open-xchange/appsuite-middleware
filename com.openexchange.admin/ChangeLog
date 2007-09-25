@@ -1,3 +1,7 @@
+* 2007-09-20 - dennis.sieben@open-xchange.com
+
+  - Bugfix ID#9592 Language is not in the output of listuser --csv CLT
+  
 * 2007-09-11 - dennis.sieben@open-xchange.com
 
   - Bugfix ID#9362 <addmembers> should be <userid>

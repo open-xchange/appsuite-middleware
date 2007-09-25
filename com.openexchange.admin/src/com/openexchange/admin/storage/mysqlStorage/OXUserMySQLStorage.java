@@ -65,7 +65,6 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import org.apache.commons.configuration.ConversionException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -73,7 +72,6 @@ import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
-import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.impl.OXUser;
@@ -82,11 +80,11 @@ import com.openexchange.admin.storage.sqlStorage.OXUserSQLStorage;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.SHACrypt;
 import com.openexchange.admin.tools.UnixCrypt;
-import com.openexchange.admin.tools.PropertyHandler.PropertyFiles;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.IDGenerator;
 import com.openexchange.groupware.RdbUserConfigurationStorage;
 import com.openexchange.groupware.UserConfiguration;
+import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.contexts.ContextException;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
@@ -663,7 +661,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     }
 
     @Override
-    public int create(final Context ctx, final User usrdata, final UserModuleAccess moduleAccess, final Connection write_ox_con, final int internal_user_id, final int contact_id, final int uid_number) throws StorageException {
+    public int create(final Context ctx, final User usrdata,
+            final UserModuleAccess moduleAccess, final Connection write_ox_con,
+            final int internal_user_id, final int contact_id,
+            final int uid_number) throws StorageException {
         PreparedStatement ps = null;
         PreparedStatement return_db_id = null;
         final String LOGINSHELL = "/bin/bash";
@@ -739,13 +740,11 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
                 stmt.setInt(12, contact_id);
 
-                String homedir = prop.getString(PropertyFiles.USER, AdminProperties.User.HOME_DIR_ROOT);
+                String homedir = prop.getUserProp(AdminProperties.User.HOME_DIR_ROOT, "/home");
                 homedir += "/" + usrdata.getName();
                 stmt.setString(13, homedir);
 
-                final int uid_number_start;
-                uid_number_start = prop.getInt(PropertyFiles.USER, AdminProperties.User.UID_NUMBER_START);
-                if(uid_number_start > 0 ) {
+                if( Integer.parseInt(prop.getUserProp(AdminProperties.User.UID_NUMBER_START, "-1")) > 0 ) {
                     stmt.setInt(14,uid_number);
                 } else {
                     stmt.setInt(14,NOBODY);
@@ -761,13 +760,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 // now check if gidnumber feature is enabled
                 // if yes, update user table to correct gidnumber of users
                 // default group
-                final int gid_number_start;
-                try {
-                    gid_number_start = prop.getInt(PropertyFiles.GROUP, AdminProperties.Group.GID_NUMBER_START);
-                } catch (final ConversionException e) {
-                    throw new StorageException("Error getting " + AdminProperties.Group.GID_NUMBER_START + ": " + e.toString());
-                }
-                if (gid_number_start > 0) {
+                if (Integer.parseInt(prop.getGroupProp(AdminProperties.Group.GID_NUMBER_START, "-1")) > 0) {
                     final int gid_number = tool.getGidNumberOfGroup(ctx, def_group_id, write_ox_con);
                     stmt.setInt(15,gid_number);
                 } else {
@@ -785,6 +778,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.executeUpdate();
                 stmt.close();
 
+
+
+                
                 // fill up statement for prg_contacts update
 
                 final Class<? extends User> c = usrdata.getClass();
@@ -921,33 +917,39 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.close();
 
                 // get mailfolder
-                String std_mail_folder_sent = prop.getString(PropertyFiles.USER, AdminProperties.User.SENT_MAILFOLDER_ + lang.toUpperCase(), "Sent");
+                String std_mail_folder_sent = prop.getUserProp(
+                        "SENT_MAILFOLDER_" + lang.toUpperCase(), "Sent");
                 if (null != usrdata.getMail_folder_sent_name()) {
                     std_mail_folder_sent = usrdata.getMail_folder_sent_name();
                 }
 
-                String std_mail_folder_trash = prop.getString(PropertyFiles.USER, AdminProperties.User.TRASH_MAILFOLDER_ + lang.toUpperCase(), "Trash");
+                String std_mail_folder_trash = prop.getUserProp(
+                        "TRASH_MAILFOLDER_" + lang.toUpperCase(), "Trash");
                 if (null != usrdata.getMail_folder_trash_name()) {
                     std_mail_folder_trash = usrdata.getMail_folder_trash_name();
                 }
 
-                String std_mail_folder_drafts = prop.getString(PropertyFiles.USER, AdminProperties.User.DRAFTS_MAILFOLDER_ + lang.toUpperCase(), "Drafts");
+                String std_mail_folder_drafts = prop.getUserProp(
+                        "DRAFTS_MAILFOLDER_" + lang.toUpperCase(), "Drafts");
                 if (null != usrdata.getMail_folder_drafts_name()) {
                     std_mail_folder_drafts = usrdata
                             .getMail_folder_drafts_name();
                 }
 
-                String std_mail_folder_spam = prop.getString(PropertyFiles.USER, AdminProperties.User.SPAM_MAILFOLDER_ + lang.toUpperCase(), "Spam");
+                String std_mail_folder_spam = prop.getUserProp(
+                        "SPAM_MAILFOLDER_" + lang.toUpperCase(), "Spam");
                 if (null != usrdata.getMail_folder_spam_name()) {
                     std_mail_folder_spam = usrdata.getMail_folder_spam_name();
                 }
 
-                String std_mail_folder_confirmed_spam = prop.getString(PropertyFiles.USER, AdminProperties.User.CONFIRMED_SPAM_MAILFOLDER_ + lang.toUpperCase(), "confirmed-spam");
+                String std_mail_folder_confirmed_spam = prop.getUserProp(
+                        "CONFIRMED_SPAM_MAILFOLDER_" + lang.toUpperCase(), "confirmed-spam");
                 if (null != usrdata.getMail_folder_confirmed_spam_name()) {
                     std_mail_folder_confirmed_spam = usrdata.getMail_folder_confirmed_spam_name();
                 }
 
-                String std_mail_folder_confirmed_ham = prop.getString(PropertyFiles.USER, AdminProperties.User.CONFIRMED_HAM_MAILFOLDER_ + lang.toUpperCase(), "confirmed-ham");
+                String std_mail_folder_confirmed_ham = prop.getUserProp(
+                        "CONFIRMED_HAM_MAILFOLDER_" + lang.toUpperCase(), "confirmed-ham");
                 if (null != usrdata.getMail_folder_confirmed_ham_name()) {
                     std_mail_folder_confirmed_ham = usrdata.getMail_folder_confirmed_ham_name();
                 }
@@ -1060,7 +1062,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             return id_for_client;
 
             
-        } catch (final DataTruncation dt) {
+        }catch (final DataTruncation dt){
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             try {
                 write_ox_con.rollback();
@@ -1128,15 +1130,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 log.error("Error rollback ox db write connection", ecp);
             }
             throw new StorageException(e);
-        } catch (final InvalidDataException e) {
-            log.error("Invalid data in config file", e);
-            try {
-                write_ox_con.rollback();
-                log.debug("Rollback successfull for ox db write connection");
-            } catch (final SQLException ecp) {
-                log.error("Error rollback ox db write connection", ecp);
-            }
-            throw new StorageException(e);
         } finally {
             closePreparedStatement(return_db_id);
             closePreparedStatement(ps);
@@ -1151,21 +1144,25 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             write_ox_con = cache.getWRITEConnectionForContext(context_id);
             write_ox_con.setAutoCommit(false);
 
-            final int internal_user_id = IDGenerator.getId(context_id, com.openexchange.groupware.Types.PRINCIPAL, write_ox_con);
+            final int internal_user_id = IDGenerator.getId(context_id,
+                    com.openexchange.groupware.Types.PRINCIPAL, write_ox_con);
             write_ox_con.commit();
-            final int contact_id = IDGenerator.getId(context_id, com.openexchange.groupware.Types.CONTACT, write_ox_con);
+            final int contact_id = IDGenerator.getId(context_id,
+                    com.openexchange.groupware.Types.CONTACT, write_ox_con);
             write_ox_con.commit();
 
             int uid_number = -1;
-            final int uid_number_start;
-            uid_number_start = prop.getInt(PropertyFiles.USER, AdminProperties.User.UID_NUMBER_START);
-            if (uid_number_start > 0) {
-                uid_number = IDGenerator.getId(context_id, com.openexchange.groupware.Types.UID_NUMBER, write_ox_con);
+            if (Integer.parseInt(prop.getUserProp(
+                    AdminProperties.User.UID_NUMBER_START, "-1")) > 0) {
+                uid_number = IDGenerator.getId(context_id,
+                        com.openexchange.groupware.Types.UID_NUMBER,
+                        write_ox_con);
                 write_ox_con.commit();
             }
 
-            return create(ctx, usrdata, moduleAccess, write_ox_con, internal_user_id, contact_id, uid_number);
-        } catch (final DataTruncation dt) {
+            return create(ctx, usrdata, moduleAccess, write_ox_con,
+                    internal_user_id, contact_id, uid_number);
+        }catch (final DataTruncation dt){
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             try {
                 write_ox_con.rollback();
@@ -1186,16 +1183,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             throw new StorageException(sql);
         } catch (final PoolException e) {
             log.error("Pool Error", e);
-            // rollback operations on ox db connection
-            try {
-                write_ox_con.rollback();
-                log.debug("Rollback successfull for ox db write connection");
-            } catch (final SQLException ecp) {
-                log.error("SQL Error rollback ox db write connection", ecp);
-            }
-            throw new StorageException(e);
-        } catch (final InvalidDataException e) {
-            log.error("Invalid data in config file", e);
             // rollback operations on ox db connection
             try {
                 write_ox_con.rollback();
@@ -1637,12 +1624,15 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     log.debug("Start delete user " + user_id + " in context "+ ctx.getId());
                     log.debug("Delete user " + user_id + "(" + ctx.getId()+ ") via OX API...");
                 }
-                final DeleteEvent delev = new DeleteEvent(this, user_id, DeleteEvent.TYPE_USER, ctx.getId());
-                AdminCache.delreg.fireDeleteEvent(delev, write_ox_con, write_ox_con);
+                final DeleteEvent delev = new DeleteEvent(this, user_id,
+                        DeleteEvent.TYPE_USER, ctx.getId());
+                AdminCache.delreg.fireDeleteEvent(delev, write_ox_con,
+                        write_ox_con);
                 if (log.isDebugEnabled()) {
                     log.debug("Delete user " + user_id + "(" + ctx.getId()+ ") from login2user...");
                 }
-                stmt = write_ox_con.prepareStatement("DELETE FROM login2user WHERE cid = ? AND id = ?");
+                stmt = write_ox_con
+                .prepareStatement("DELETE FROM login2user WHERE cid = ? AND id = ?");
                 stmt.setInt(1, ctx.getId());
                 stmt.setInt(2, user_id);
                 stmt.executeUpdate();
@@ -1650,7 +1640,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 if (log.isDebugEnabled()) {
                     log.debug("Delete user " + user_id + "(" + ctx.getId()+ ") from groups member...");
                 }
-                stmt = write_ox_con.prepareStatement("DELETE FROM groups_member WHERE cid = ? AND member = ?");
+                stmt = write_ox_con
+                .prepareStatement("DELETE FROM groups_member WHERE cid = ? AND member = ?");
                 stmt.setInt(1, ctx.getId());
                 stmt.setInt(2, user_id);
                 stmt.executeUpdate();
@@ -1658,7 +1649,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 if (log.isDebugEnabled()) {
                     log.debug("Delete user " + user_id + "(" + ctx.getId()+ ") from user attribute ...");
                 }
-                stmt = write_ox_con.prepareStatement("DELETE FROM user_attribute WHERE cid = ? AND id = ?");
+                stmt = write_ox_con
+                .prepareStatement("DELETE FROM user_attribute WHERE cid = ? AND id = ?");
                 stmt.setInt(1, ctx.getId());
                 stmt.setInt(2, user_id);
                 stmt.executeUpdate();
@@ -1666,16 +1658,19 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 if (log.isDebugEnabled()) {
                     log.debug("Delete user " + user_id + "(" + ctx.getId() + ") from user mail setting...");
                 }
-                stmt = write_ox_con.prepareStatement("DELETE FROM user_setting_mail WHERE cid = ? AND user = ?");
+                stmt = write_ox_con
+                .prepareStatement("DELETE FROM user_setting_mail WHERE cid = ? AND user = ?");
                 stmt.setInt(1, ctx.getId());
                 stmt.setInt(2, user_id);
                 stmt.executeUpdate();
                 stmt.close();
                 
                 // delete from user_setting_admin if user is mailadmin
-                final OXToolStorageInterface tools = OXToolStorageInterface.getInstance();
+                final OXToolStorageInterface tools = OXToolStorageInterface
+                .getInstance();
                 if (user_id == tools.getAdminForContext(ctx, write_ox_con)) {
-                    stmt = write_ox_con.prepareStatement("DELETE FROM user_setting_admin WHERE cid = ? AND user = ?");
+                    stmt = write_ox_con
+                    .prepareStatement("DELETE FROM user_setting_admin WHERE cid = ? AND user = ?");
                     stmt.setInt(1, ctx.getId());
                     stmt.setInt(2, user_id);
                     stmt.executeUpdate();
@@ -1687,7 +1682,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 if (log.isDebugEnabled()) {
                     log.debug("Delete user " + user_id + "(" + ctx.getId() + ") from user ...");
                 }
-                stmt = write_ox_con.prepareStatement("DELETE FROM user WHERE cid = ? AND id = ?");
+                stmt = write_ox_con
+                .prepareStatement("DELETE FROM user WHERE cid = ? AND id = ?");
                 stmt.setInt(1, ctx.getId());
                 stmt.setInt(2, user_id);
                 stmt.executeUpdate();
@@ -1695,11 +1691,13 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 if (log.isDebugEnabled()) {
                     log.debug("Delete user " + user_id + "(" + ctx.getId() + ") from contacts ...");
                 }
-                stmt = write_ox_con.prepareStatement("DELETE FROM prg_contacts WHERE cid = ? AND userid = ?");
+                stmt = write_ox_con
+                .prepareStatement("DELETE FROM prg_contacts WHERE cid = ? AND userid = ?");
                 stmt.setInt(1, ctx.getId());
                 stmt.setInt(2, user_id);
                 stmt.executeUpdate();
                 stmt.close();
+                
             }
         } catch (final DeleteFailedException dex) {
             log.error("Delete Error", dex);
