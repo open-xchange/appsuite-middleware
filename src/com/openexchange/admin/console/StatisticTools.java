@@ -112,7 +112,7 @@ public class StatisticTools extends BasicCommandlineOptions {
     }
 
     public void start(final String args[]) {
-        final AdminParser parser = new AdminParser("statistictools");
+        final AdminParser parser = new AdminParser("showruntimestats");
 
         setOptions(parser);
 
