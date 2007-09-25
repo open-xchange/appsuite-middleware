@@ -48,8 +48,6 @@
  */
 package com.openexchange.admin.rmi.impl;
 
-import java.util.ArrayList;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -128,76 +126,12 @@ public abstract class OXCommonImpl {
      * @param objects
      * @throws InvalidDataException
      */
-    protected final void doNullCheck(final String[] variablename, final Object[] objects) throws InvalidDataException {
-        if (variablename.length != objects.length) {
-            log.fatal("Programming error detected, both arrays of do null check aren't equal");
-        }
-        final ArrayList<String> nullobjects = new ArrayList<String>();
-        for (int i = 0; i < objects.length; i++) {
-            if (objects[i] == null) {
-                nullobjects.add(variablename[i]);
+    protected final static void doNullCheck(final Object... objects) throws InvalidDataException {
+        for (final Object object : objects) {
+            if (object == null) {
+                throw new InvalidDataException();
             }
-        }
-        final StackTraceElement stackTraceElement = Thread.currentThread().getStackTrace()[2];
-        final String methodName = stackTraceElement.getMethodName();
-        final String className = stackTraceElement.getClassName();
-
-        if (!nullobjects.isEmpty()) {
-            throw new InvalidDataException("The parameters " + nullobjects + " where null in call of method: " + className + '.' + methodName);
         }
     }
 
-//    protected final void test(final Object... objects) throws InvalidDataException {
-//        final long currentTimeMillis = System.currentTimeMillis();
-//        try {
-//            final ArrayList<String> nullobjects = new ArrayList<String>();
-//            final StackTraceElement stackTraceElement = Thread.currentThread().getStackTrace()[2];
-//            final String methodName = stackTraceElement.getMethodName();
-//            final String className = stackTraceElement.getClassName();
-//            System.out.println("Classname: " + className);
-//            final ChainedParamReader chainedParamReader = new ChainedParamReader(this.getClass());
-//            final Class<?> clazz = Class.forName(className);
-//            final Method[] methods = clazz.getMethods();
-//            Method rightMethod = null;
-//            for (final Method method : methods) {
-//                if (method.getName().equals(methodName)) {
-//                    rightMethod = method;
-//                }
-//            }
-//            if (null == rightMethod) {
-//                throw new NoSuchMethodException();
-//            }
-//            final String[] parameterNames = chainedParamReader.getParameterNames(rightMethod);
-//
-//            final Annotation[] annotations = rightMethod.getAnnotations();
-//            for (final Annotation annotation : annotations) {
-//                if (annotation instanceof NotNullVariables) {
-//                    final NotNullVariables notnull = (NotNullVariables) annotation;
-//                    final String[] variableNames = notnull.variableNames();
-//                    for (int i = 0; i < parameterNames.length; i++) {
-//                        for (int o = 0; o < variableNames.length; o++) {
-//                            if (parameterNames[i].equals(variableNames[o])) {
-//                                if (objects[i] == null) {
-//                                    nullobjects.add(parameterNames[i]);
-//                                }
-//                            }
-//                        }
-//                    }
-//                    log.debug("Check variable " + Arrays.toString(variableNames) + " for null");
-//                }
-//            }
-//            if (!nullobjects.isEmpty()) {
-//                throw new InvalidDataException("The parameters " + nullobjects + " where null in call of method: " + rightMethod.getClass() + '.' + rightMethod.getName());
-//            }
-//        } catch (NoSuchMethodException e) {
-//            // TODO: handle exception
-//        } catch (ClassNotFoundException e) {
-//            // TODO Auto-generated catch block
-//            e.printStackTrace();
-//        } catch (IOException e) {
-//            // TODO Auto-generated catch block
-//            e.printStackTrace();
-//        }
-//        System.out.println(System.currentTimeMillis() - currentTimeMillis);
-//    }
 }

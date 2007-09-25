@@ -55,17 +55,13 @@ import java.sql.Connection;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.daemons.ClientAdminThread;
-import com.openexchange.admin.properties.AdminProperties;
-import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
-import com.openexchange.admin.tools.PropertyHandler.PropertyFiles;
 
 /**
  * This interface provides an abstraction to the storage of the user information
@@ -100,13 +96,7 @@ public abstract class OXUserStorageInterface {
     public static OXUserStorageInterface getInstance() throws StorageException {
         synchronized (OXUserStorageInterface.class) {
             if (null == implementingClass) {
-                String className = null;
-                try {
-                    className = prop.getString(PropertyFiles.ADMIN, AdminProperties.Storage.USER_STORAGE);
-                } catch (final InvalidDataException e1) {
-                    log.fatal("Invalid data in config file", e1);
-                    AdminDaemon.shutdown();
-                }
+                final String className = prop.getProp(PropertyHandler.USER_STORAGE, null);
                 if (null != className) {
                     try {
                         implementingClass = Class.forName(className).asSubclass(OXUserStorageInterface.class);
@@ -196,13 +186,11 @@ public abstract class OXUserStorageInterface {
     /** 
      * Create new user in given connection with given contact and user id
      * If the uid number feature is active then also supply a correct uid_number(IDGenerator with Type UID_NUMBER).Else set this to -1
-     * @throws InvalidDataException 
      */
     public abstract int create(final Context ctx, final User usrdata, final UserModuleAccess moduleAccess, final Connection write_ox_con, final int internal_user_id, final int contact_id,final int uid_number ) throws StorageException;
     
     /**
      * Create new user in context ctx
-     * @throws InvalidDataException 
      */
     public abstract int create(final Context ctx,final User usrdata, final UserModuleAccess moduleAccess) throws StorageException;
     

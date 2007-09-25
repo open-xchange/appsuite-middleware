@@ -60,15 +60,17 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.exceptions.TaskManagerException;
 
 /**
- * This interface defines the methods of the task management which are accessibly through RMI
+ * This interface defines the methods of the task management which are accessibly through RMI.
  * 
- * @author d7
+ * @author <a href="mailto:manuel.kraft@open-xchange.com">Manuel Kraft</a>
+ * @author <a href="mailto:carsten.hoeger@open-xchange.com">Carsten Hoeger</a>
+ * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  *
  */
 public interface OXTaskMgmtInterface extends Remote {
 
     /**
-     * RMI name to be used in RMI URL
+     * RMI name to be used in the naming lookup.
      */
     public static final String RMI_NAME = "OXTaskManagement";
 

@@ -55,16 +55,12 @@ import java.sql.Connection;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.daemons.ClientAdminThread;
-import com.openexchange.admin.properties.AdminProperties;
-import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Resource;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
-import com.openexchange.admin.tools.PropertyHandler.PropertyFiles;
 
 /**
  * This interface provides an abstraction to the storage of the resource
@@ -99,13 +95,7 @@ public abstract class OXResourceStorageInterface {
     public static OXResourceStorageInterface getInstance() throws StorageException {
         synchronized (OXResourceStorageInterface.class) {
             if (null == implementingClass) {
-                String className = null;
-                try {
-                    className = prop.getString(PropertyFiles.ADMIN, AdminProperties.Storage.RESOURCE_STORAGE);
-                } catch (InvalidDataException e1) {
-                    log.fatal("Invalid data in config file", e1);
-                    AdminDaemon.shutdown();
-                }
+                final String className = prop.getProp(PropertyHandler.RESOURCE_STORAGE, null);
                 if (null != className) {
                     try {
                         implementingClass = Class.forName(className).asSubclass(OXResourceStorageInterface.class);

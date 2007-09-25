@@ -56,6 +56,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.TimeZone;
 
 import com.openexchange.admin.console.AdminParser;
@@ -297,6 +298,8 @@ public abstract class ListCore extends UserAbstraction {
                     datarow.add(passwordtostring((PASSWORDMECH)methodandnames.getMethod().invoke(user, (Object[]) null)));
                 } else if (returntype.equals(JAVA_UTIL_TIME_ZONE)) {
                     datarow.add(timezonetostring((TimeZone)methodandnames.getMethod().invoke(user, (Object[]) null)));
+                } else if (returntype.equals(JAVA_UTIL_LOCALE)) {
+                    datarow.add(((Locale)methodandnames.getMethod().invoke(user, (Object[]) null)).toString());
                 }
             }
             datarow.addAll(getDataOfAllExtensions(user));

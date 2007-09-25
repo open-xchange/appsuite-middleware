@@ -47,7 +47,7 @@
  *
  */
 /*
- * $Id: OXResource.java,v 1.53 2007/09/03 11:29:57 dennis Exp $
+ * $Id: OXResource.java,v 1.55 2007/10/15 11:24:03 choeger Exp $
  */
 package com.openexchange.admin.rmi.impl;
 
@@ -82,7 +82,6 @@ import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.GenericChecks;
 import com.openexchange.admin.tools.PropertyHandler;
-import com.openexchange.admin.tools.PropertyHandler.PropertyFiles;
 
 public class OXResource extends OXCommonImpl implements OXResourceInterface{
     
@@ -119,14 +118,25 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
 
     public void change(final Context ctx, final Resource res, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchResourceException {
         try {
-            doNullCheck(new String[]{"res"}, new Object[]{res});
-
+            doNullCheck(res);
+        } catch (final InvalidDataException e3) {
+            final InvalidDataException invalidDataException = new InvalidDataException("One of the given arguments for change is null");
+            log.error(invalidDataException.getMessage(), invalidDataException);
+            throw invalidDataException;
+        }        
+        
+        try {           
             basicauth.doAuthentication(auth,ctx);
+        } catch (final InvalidDataException e1) {
+            log.error(e1.getMessage(), e1);
+            throw e1;
+        }
         
-            if (log.isDebugEnabled()) {
-                log.debug(ctx.toString() + " - " + res.toString() + " - " + auth.toString());
-            }
+        if (log.isDebugEnabled()) {
+            log.debug(ctx.toString() + " - " + res.toString() + " - " + auth.toString());
+        }
         
+        try {
             setIdOrGetIDFromNameAndIdObject(ctx, res);
             
             res.testMandatoryCreateFieldsNull();
@@ -147,12 +157,12 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
                 throw new InvalidDataException("Resource with this email address already exists");
             }
 
-            if ((null != res.getName()) && prop.getBoolean(PropertyFiles.RESOURCE, AdminProperties.Resource.AUTO_LOWERCASE)) {
+            if ((null != res.getName()) && prop.getResourceProp(AdminProperties.Resource.AUTO_LOWERCASE, true)) {
                 final String rid = res.getName().toLowerCase();
                 res.setName(rid);
             }
 
-            if ((null != res.getName()) && prop.getBoolean(PropertyFiles.RESOURCE, AdminProperties.Resource.CHECK_NOT_ALLOWED_CHARS)) {
+            if ((null != res.getName()) && prop.getResourceProp(AdminProperties.Resource.CHECK_NOT_ALLOWED_CHARS, true)) {
                 validateResourceName(res.getName());
             }
 
@@ -175,9 +185,6 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
         } catch (final NoSuchResourceException e1) {
             log.error(e1.getMessage(), e1);
             throw e1;
-        } catch (final InvalidCredentialsException e) {
-            log.error(e.getMessage(), e);
-            throw e;
         }
 
         oxRes.change(ctx, res);
@@ -210,16 +217,27 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
     
     public Resource create(final Context ctx, final Resource res, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {        
        try {
-           doNullCheck(new String[] { "res", "res.getName" }, new Object[] { res, res.getName() });
-
+           doNullCheck(res,res.getName());
+       } catch (final InvalidDataException e3) {
+           log.error("One of the given arguments for create is null", e3);
+           throw e3;
+       }        
+       
+       try {
            basicauth.doAuthentication(auth,ctx);
+       } catch( final InvalidDataException e) {
+           log.error(e.getMessage(), e);
+           throw e;
+       }
       
-           if (log.isDebugEnabled()) {
-               log.debug(ctx.toString() + " - " + res.toString() + " - " + auth.toString()); 
-           }
+       if (log.isDebugEnabled()) {
+           log.debug(ctx.toString() + " - " + res.toString() + " - " + auth.toString()); 
+       }
 
-           checkSchemaBeingLocked(ctx, tool);
+       checkSchemaBeingLocked(ctx, tool);
 
+       try {
+           
            if (tool.existsResourceName(ctx, res.getName())) {
                throw new InvalidDataException("Resource " + res.getName() + " already exists in this context");
             }
@@ -233,12 +251,12 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
                 // TODO: cutmasta look here
             }
 
-            if (prop.getBoolean(PropertyFiles.RESOURCE, AdminProperties.Resource.AUTO_LOWERCASE)) {
+            if (prop.getResourceProp(AdminProperties.Resource.AUTO_LOWERCASE, true)) {
                 final String uid = res.getName().toLowerCase();
                 res.setName(uid);
             }
 
-            if (prop.getBoolean(PropertyFiles.RESOURCE, AdminProperties.Resource.CHECK_NOT_ALLOWED_CHARS)) {
+            if (prop.getResourceProp(AdminProperties.Resource.CHECK_NOT_ALLOWED_CHARS, true)) {
                 validateResourceName(res.getName());
             }
 
@@ -246,19 +264,10 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
             if (resmail != null && !GenericChecks.isValidMailAddress(resmail)) {
                 throw new InvalidDataException("Invalid email address");
             }
-        } catch (final InvalidDataException e) {
-            log.error(e.getMessage(), e);
-            throw e;
-        } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
-            throw e;
-        } catch (final DatabaseUpdateException e) {
-            log.error(e.getMessage(), e);
-            throw e;
-        } catch (final InvalidCredentialsException e) {
-            log.error(e.getMessage(), e);
-            throw e;
-        } catch (final EnforceableDataObjectException e) {
+        } catch (final InvalidDataException e2) {
+            log.error(e2.getMessage(), e2);
+            throw e2;
+        } catch (EnforceableDataObjectException e) {
             throw new InvalidDataException(e.getMessage());
         }
        
@@ -310,8 +319,13 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
     
     public void delete(final Context ctx, final Resource res, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchResourceException {
         try {
-            doNullCheck(new String[] { "res" }, new Object[] { res });
-
+            doNullCheck(res);
+        } catch (final InvalidDataException e3) {
+            log.error("One of the given arguments for delete is null", e3);
+            throw e3;
+        }        
+        
+        try {
             basicauth.doAuthentication(auth,ctx);
             
             setIdOrGetIDFromNameAndIdObject(ctx, res);
@@ -377,48 +391,37 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
     }
     
     public Resource get(final Context ctx, final Resource res, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchResourceException {
-        // Exception already logged
         return getData(ctx, res, auth);
     }
 
     public Resource getData(final Context ctx, final Resource res, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchResourceException {
         try {
-            doNullCheck(new String[] { "res" }, new Object[] { res });
-
-            basicauth.doAuthentication(auth,ctx);
+            doNullCheck(res);
+        } catch (final InvalidDataException e3) {
+            log.error("One of the given arguments for get is null", e3);
+            throw e3;
+        }        
         
-            setIdOrGetIDFromNameAndIdObject(ctx, res);
-
-            final int resource_id = res.getId();
-
-            if (log.isDebugEnabled()) {
-                log.debug(ctx.toString() + " - " + resource_id + " - " + auth.toString());
-            }
-
-            checkSchemaBeingLocked(ctx, tool);
-
-            if (!tool.existsResource(ctx, resource_id)) {
-                throw new NoSuchResourceException("resource with with this id does not exist");           
-            }
+        try {
+            basicauth.doAuthentication(auth,ctx);
         } catch (final InvalidDataException e) {
             log.error(e.getMessage(), e);
             throw e;
-        } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
-            throw e;
-        } catch (final InvalidCredentialsException e) {
-            log.error(e.getMessage(), e);
-            throw e;
-        } catch (final NoSuchContextException e) {
-            log.error(e.getMessage(), e);
-            throw e;
-        } catch (final DatabaseUpdateException e) {
-            log.error(e.getMessage(), e);
-            throw e;
-        } catch (final NoSuchResourceException e) {
-            log.error(e.getMessage(), e);
-            throw e;
         }        
+        
+        setIdOrGetIDFromNameAndIdObject(ctx, res);
+        
+        final int resource_id = res.getId();
+        
+        if (log.isDebugEnabled()) {
+            log.debug(ctx.toString() + " - " + resource_id + " - " + auth.toString());
+        }
+        
+        checkSchemaBeingLocked(ctx, tool);
+        
+        if (!tool.existsResource(ctx, resource_id)) {
+            throw new NoSuchResourceException("resource with with this id does not exist");           
+        }
         
         Resource retres = oxRes.getData(ctx, res);
 
@@ -447,8 +450,13 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
     
     public Resource[] getData(final Context ctx, final Resource[] resources, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchResourceException, DatabaseUpdateException {
         try {
-            doNullCheck(new String[] { "res" }, new Object[] { resources });
-
+            doNullCheck((Object[])resources);
+        } catch (final InvalidDataException e3) {
+            log.error("One of the given arguments for getData is null", e3);
+            throw e3;
+        }        
+        
+        try {
             basicauth.doAuthentication(auth,ctx);
         
             if (log.isDebugEnabled()) {
@@ -477,94 +485,72 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
                     }
                 }
             }
-            final ArrayList<Resource> retval = new ArrayList<Resource>();
+        } catch (final InvalidDataException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        }
+        
+        final ArrayList<Resource> retval = new ArrayList<Resource>();
+        
+        for (final Resource resource : resources) {
+            // not nice, but works ;)
+            final Resource tmp = oxRes.getData(ctx, resource);
+            retval.add(tmp);
+        }        
             
-            for (final Resource resource : resources) {
-                // not nice, but works ;)
-                final Resource tmp = oxRes.getData(ctx, resource);
-                retval.add(tmp);
-            }        
-            
-            final ArrayList<Bundle> bundles = AdminDaemon.getBundlelist();
-            for (final Bundle bundle : bundles) {
-                final String bundlename = bundle.getSymbolicName();
-                if (Bundle.ACTIVE==bundle.getState()) {
-                    final ServiceReference[] servicereferences = bundle.getRegisteredServices();
-                    if (null != servicereferences) {
-                        for (final ServiceReference servicereference : servicereferences) {
-                            final Object property = servicereference.getProperty("name");
-                            if (null != property && property.toString().equalsIgnoreCase("oxresource")) {
-                                final OXResourcePluginInterface oxresourceplugin = (OXResourcePluginInterface) this.context.getService(servicereference);
-                                if (log.isInfoEnabled()) {
-                                    log.info("Calling get for plugin: " + bundlename);
-                                }
-                                for (Resource resource : retval) {
-                                    resource = oxresourceplugin.get(ctx, resource, auth);
-                                }
+        final ArrayList<Bundle> bundles = AdminDaemon.getBundlelist();
+        for (final Bundle bundle : bundles) {
+            final String bundlename = bundle.getSymbolicName();
+            if (Bundle.ACTIVE==bundle.getState()) {
+                final ServiceReference[] servicereferences = bundle.getRegisteredServices();
+                if (null != servicereferences) {
+                    for (final ServiceReference servicereference : servicereferences) {
+                        final Object property = servicereference.getProperty("name");
+                        if (null != property && property.toString().equalsIgnoreCase("oxresource")) {
+                            final OXResourcePluginInterface oxresourceplugin = (OXResourcePluginInterface) this.context.getService(servicereference);
+                            if (log.isInfoEnabled()) {
+                                log.info("Calling get for plugin: " + bundlename);
+                            }
+                            for (Resource resource : retval) {
+                                resource = oxresourceplugin.get(ctx, resource, auth);
                             }
                         }
                     }
                 }
             }
-            return retval.toArray(new Resource[retval.size()]);
-        } catch (final InvalidDataException e) {
-            log.error(e.getMessage(), e);
-            throw e;
-        } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
-            throw e;
-        } catch (final InvalidCredentialsException e) {
-            log.error(e.getMessage(), e);
-            throw e;
-        } catch (final DatabaseUpdateException e) {
-            log.error(e.getMessage(), e);
-            throw e;
-        } catch (final NoSuchContextException e) {
-            log.error(e.getMessage(), e);
-            throw e;
-        } catch (final NoSuchResourceException e) {
-            log.error(e.getMessage(), e);
-            throw e;
         }
-        
+        return retval.toArray(new Resource[retval.size()]);
     }
     
     public Resource[] list(final Context ctx, final String pattern, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {
         try {
-            doNullCheck(new String[] { "pattern" }, new Object[] { pattern });
-
+            doNullCheck(pattern);
+        } catch (final InvalidDataException e3) {
+            log.error("One of the given arguments for list is null", e3);
+            throw e3;
+        }        
+        
+        try {
             if(pattern.length()==0){
                 throw new InvalidDataException("Invalid pattern!");
             }        
             
             basicauth.doAuthentication(auth,ctx);
-            if (log.isDebugEnabled()) {
-                log.debug(ctx.toString() + " - " + pattern + " - " + auth.toString());
-            }
-            
-            checkSchemaBeingLocked(ctx, tool);
-            
-            return oxRes.list(ctx,pattern);
         } catch (final InvalidDataException e) {
             log.error(e.getMessage(), e);
             throw e;
-        } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
-            throw e;
-        } catch (final InvalidCredentialsException e) {
-            log.error(e.getMessage(), e);
-            throw e;
-        } catch (final DatabaseUpdateException e) {
-            log.error(e.getMessage(), e);
-            throw e;
-        } catch (final NoSuchContextException e) {
-            log.error(e.getMessage(), e);
-            throw e;
         }
+        
+        if (log.isDebugEnabled()) {
+            log.debug(ctx.toString() + " - " + pattern + " - " + auth.toString());
+        }
+        
+        checkSchemaBeingLocked(ctx, tool);
+
+        return oxRes.list(ctx,pattern);
     }
     
     public Resource[] listAll(final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {
-        // Already logged
         return list(ctx, "*", auth);
     }
 
@@ -577,7 +563,8 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
      */
     private void checkSchemaBeingLocked(final Context ctx, final OXToolStorageInterface tools) throws StorageException, DatabaseUpdateException, NoSuchContextException {
         if (tools.schemaBeingLockedOrNeedsUpdate(ctx)) {
-            final DatabaseUpdateException databaseUpdateException = new DatabaseUpdateException("Database must be updated or currently is beeing updated");
+            final DatabaseUpdateException databaseUpdateException = new DatabaseUpdateException(
+                    "Database must be updated or currently is beeing updated");
             log.error(databaseUpdateException.getMessage(), databaseUpdateException);
             throw databaseUpdateException;
         }
@@ -589,7 +576,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
         }
         // Check for allowed chars:
         // abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 _-+.%$@
-        final String resource_check_regexp = prop.getString(PropertyFiles.RESOURCE, AdminProperties.Resource.CHECK_RES_UID_REGEXP);        
+        final String resource_check_regexp = prop.getResourceProp("CHECK_RES_UID_REGEXP", "[ $@%\\.+a-zA-Z0-9_-]");        
         final String illegal = resName.replaceAll(resource_check_regexp, "");
         if( illegal.length() > 0 ) {
             throw new InvalidDataException( "Illegal chars: \""+illegal+"\"");

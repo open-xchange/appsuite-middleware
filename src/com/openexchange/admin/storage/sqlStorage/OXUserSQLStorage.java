@@ -48,10 +48,15 @@
  */
 package com.openexchange.admin.storage.sqlStorage;
 
+import java.sql.Connection;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
 
+import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.rmi.dataobjects.Context;
+import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
 
 /**
@@ -204,5 +209,71 @@ public abstract class OXUserSQLStorage extends OXUserStorageInterface {
             }
         }
     }
+
+    /**
+     * @throws StorageException
+     * 
+     */
+    abstract public void changeLastModified(final int user_id, final Context ctx, final Connection write_ox_con) throws StorageException;
+
+    /**
+     * 
+     */
+    abstract public void change(final Context ctx, final User usrdata) throws StorageException;
+
+    /**
+     * 
+     */
+    abstract public void changeModuleAccess(final Context ctx, final int user_id, final UserModuleAccess moduleAccess) throws StorageException;
+
+    /**
+     * 
+     */
+    abstract public int create(final Context ctx, final User usrdata, final UserModuleAccess moduleAccess, final Connection write_ox_con, final int internal_user_id, final int contact_id,final int uid_number) throws StorageException;
+
+    /**
+     * 
+     */
+    abstract public int create(final Context ctx, final User usrdata, final UserModuleAccess moduleAccess) throws StorageException;
+
+    /**
+     * 
+     */
+    abstract public void createRecoveryData(final Context ctx, final int user_id, final Connection write_ox_con) throws StorageException;
+
+    /**
+     * 
+     */
+    abstract public void deleteRecoveryData(final Context ctx, final int user_id, final Connection con) throws StorageException;
+
+    /**
+     * 
+     */
+    abstract public void deleteAllRecoveryData(final Context ctx, final Connection con) throws StorageException;
+
+    /**
+     * 
+     */
+    abstract public void delete(final Context ctx, final int[] user_ids, final Connection write_ox_con) throws StorageException;
+
+    /**
+     * 
+     */
+    abstract public void delete(final Context ctx, final int[] user_ids) throws StorageException;
+
+    /**
+     * 
+     */
+    abstract public int[] getAll(final Context ctx) throws StorageException;
+
+    /**
+     * 
+     */
+    abstract public User[] getData(final Context ctx, User[] users) throws StorageException;
+
+    /**
+     * 
+     */
+    abstract public UserModuleAccess getModuleAccess(final Context ctx, final int user_id) throws StorageException;
 
 }

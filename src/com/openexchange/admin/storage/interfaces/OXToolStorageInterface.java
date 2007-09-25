@@ -55,9 +55,7 @@ import java.sql.Connection;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.daemons.ClientAdminThread;
-import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Group;
@@ -68,7 +66,6 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
-import com.openexchange.admin.tools.PropertyHandler.PropertyFiles;
 
 public abstract class OXToolStorageInterface {
 
@@ -96,13 +93,7 @@ public abstract class OXToolStorageInterface {
     public static OXToolStorageInterface getInstance() throws StorageException {
         synchronized (OXToolStorageInterface.class) {
             if (null == implementingClass) {
-                String className = null;
-                try {
-                    className = prop.getString(PropertyFiles.ADMIN, AdminProperties.Storage.TOOL_STORAGE);
-                } catch (final InvalidDataException e1) {
-                    log.fatal("Invalid data in config file", e1);
-                    AdminDaemon.shutdown();
-                }
+                final String className = prop.getProp(PropertyHandler.TOOL_STORAGE, null);
                 if (null != className) {
                     try {
                         implementingClass = Class.forName(className).asSubclass(OXToolStorageInterface.class);
@@ -402,7 +393,7 @@ public abstract class OXToolStorageInterface {
     
     public abstract boolean poolInUse(final int pool_id) throws StorageException;
     
-    public abstract void primaryMailExists(final Context ctx, final String primary_mail) throws StorageException;
+    public abstract void primaryMailExists(final Context ctx, final String primary_mail) throws StorageException, InvalidDataException;
     
     public abstract boolean schemaBeingLockedOrNeedsUpdate(final Context ctx) throws StorageException;
     
