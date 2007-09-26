@@ -1,3 +1,8 @@
+* 2007-09-26 - choeger@open-xchange.com
+
+  - Bugfix ID#9582 osgi/config.ini does not exist on upgrading the
+  open-xchange-admin
+
 * 2007-09-20 - dennis.sieben@open-xchange.com
 
   - Bugfix ID#9592 Language is not in the output of listuser --csv CLT
