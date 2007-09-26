@@ -1629,7 +1629,7 @@ public class OXFolderSQL {
 				wc = DBPool.pickupWriteable(ctx);
 				closeWrite = true;
 			}
-			final int size = reassignFolders.size();
+			int size = reassignFolders.size();
 			Iterator<Integer> iter = reassignFolders.iterator();
 			{
 				/*
@@ -1642,6 +1642,7 @@ public class OXFolderSQL {
 					if (access.isDefaultFolder(fuid) && (access.getFolderModule(fuid) == FolderObject.INFOSTORE)
 							&& (access.getFolderOwner(fuid) == entity)) {
 						iter.remove();
+						size--;
 						stmt = wc.prepareStatement(SQL_REASSIGN_FOLDERS_WITH_NAME.replaceFirst(TMPL_FOLDER_TABLE,
 								folderTable));
 						stmt.setInt(1, mailAdmin);
@@ -1649,7 +1650,7 @@ public class OXFolderSQL {
 						stmt.setLong(3, lastModified);
 						stmt.setString(4, new StringBuilder(access.getFolderName(fuid)).append(fuid).toString());
 						stmt.setInt(5, ctx.getContextId());
-						stmt.setInt(6, iter.next().intValue());
+						stmt.setInt(6, fuid);
 						stmt.executeUpdate();
 						stmt.close();
 						stmt = null;
