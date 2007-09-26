@@ -1,3 +1,7 @@
+* 2007-09-26 - marcus.klein@open-xchange.com
+
+ - Bugfix #9638: Renaming infostore user folder if user is deleted.
+
 * 2007-09-17 - martin.kauss@open-xchange.com
 
  - Fixed bug #9497. Recurring appointments with a start before 1970 caused a
