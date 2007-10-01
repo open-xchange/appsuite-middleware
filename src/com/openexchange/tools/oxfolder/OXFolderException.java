@@ -497,7 +497,7 @@ public class OXFolderException extends OXException {
 		/**
 		 * This method is not applicable to an IMAP permission
 		 */
-		IMAP_PERMISSION_ERROR("This method is not applicable to an IMAP permission", Category.CODE_ERROR, 68),
+		ACL_PERMISSION_ERROR("This method is not applicable to an IMAP permission", Category.CODE_ERROR, 68),
 		/**
 		 * No subfolder creation underneath shared folder %s in context %s
 		 */

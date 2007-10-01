@@ -50,6 +50,7 @@
 package com.openexchange.ajax.request;
 
 import static com.openexchange.ajax.container.Response.DATA;
+import static com.openexchange.mail.utils.StorageUtility.UNLIMITED_QUOTA;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -59,13 +60,11 @@ import org.json.JSONWriter;
 
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.api2.MailInterface;
-import com.openexchange.api2.MailInterfaceImpl;
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.AccountExistenceException;
 import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.tx.DBPoolProvider;
+import com.openexchange.mail.MailException;
+import com.openexchange.mail.MailInterface;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
@@ -147,10 +146,10 @@ public class QuotaRequest extends CommonRequest {
 		try {
 			long[] quotaInfo = null;
 			try {
-				mi = MailInterfaceImpl.getInstance(this.session);
+				mi = MailInterface.getInstance(this.session);
 				quotaInfo = mi.getQuota();
-			} catch (final AccountExistenceException e) {
-				quotaInfo = new long[] { MailInterfaceImpl.UNLIMITED_QUOTA, MailInterfaceImpl.UNLIMITED_QUOTA };
+			} catch (final MailException e) {
+				quotaInfo = new long[] { UNLIMITED_QUOTA, UNLIMITED_QUOTA };
 			}
 			final long quota = quotaInfo[0];
 			final long use = quotaInfo[1];
@@ -163,8 +162,6 @@ public class QuotaRequest extends CommonRequest {
 			w.object();
 			w.key(DATA).value(data);
 			w.endObject();
-		} catch (final OXException e) {
-			exception(e);
 		} catch (final Exception e) {
 			handle(e);
 		} finally {
@@ -172,7 +169,7 @@ public class QuotaRequest extends CommonRequest {
 				if (mi != null) {
 					mi.close(false);
 				}
-			} catch (final OXException e) {
+			} catch (final MailException e) {
 				LOG.error(e);
 			}
 		}

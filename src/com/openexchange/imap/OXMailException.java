@@ -57,12 +57,18 @@ import com.openexchange.groupware.Component;
  * OXMailException
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ * @deprecated
  */
 public class OXMailException extends OXException {
 
 	private static final long serialVersionUID = -8215419480751315209L;
 
+	/**
+	 * {@link MailCode}
+	 *
+	 * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+	 * @deprecated
+	 */
 	public static enum MailCode {
 		/**
 		 * Connect error: Connection was refused while attempting to connect to

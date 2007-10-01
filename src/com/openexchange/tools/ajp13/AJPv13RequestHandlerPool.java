@@ -51,6 +51,7 @@ package com.openexchange.tools.ajp13;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * A request handler pool to hold pre-initialized instances of <code>AJPv13RequestHandler</code>
@@ -67,29 +68,29 @@ public class AJPv13RequestHandlerPool {
 	private static final BlockingQueue<AJPv13RequestHandler> REQUEST_HANDLER_POOL = new ArrayBlockingQueue<AJPv13RequestHandler>(
 			REQUEST_HANDLER_POOL_SIZE);
 
-	private static boolean initialized;
+	private static final AtomicBoolean initialized = new AtomicBoolean();
 	
 	private AJPv13RequestHandlerPool() {
 		super();
 	}
 
 	public static boolean isInitialized() {
-		return initialized;
+		return initialized.get();
 	}
 
 	public static void initPool() {
-		if (!initialized) {
+		if (!initialized.get()) {
 			for (int i = 0; i < REQUEST_HANDLER_POOL_SIZE; i++) {
 				REQUEST_HANDLER_POOL.add(new AJPv13RequestHandler());
 			}
-			initialized = true;
+			initialized.set(true);
 			LOG.info("AJPv13-RequestHandler-Pool initialized with " + REQUEST_HANDLER_POOL_SIZE);
 		}
 	}
 	
 	public static void resetPool() {
 		REQUEST_HANDLER_POOL.clear();
-		initialized = false;
+		initialized.set(false);
 	}
 
 	/**

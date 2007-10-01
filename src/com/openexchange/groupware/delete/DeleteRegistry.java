@@ -56,6 +56,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -68,7 +69,7 @@ import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.infostore.InfostoreDelete;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.tasks.TasksDelete;
-import com.openexchange.imap.UserSettingMail;
+import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.tools.file.QuotaUsageDelete;
 import com.openexchange.tools.oxfolder.OXFolderDeleteListener;
@@ -91,7 +92,7 @@ public final class DeleteRegistry {
 
 	private static final Lock INIT_LOCK = new ReentrantLock();
 
-	private static boolean initialized;
+	private static final AtomicBoolean initialized = new AtomicBoolean();
 
 	private DeleteRegistry() {
 		super();
@@ -128,14 +129,14 @@ public final class DeleteRegistry {
 	 * @return the singleton instance of <code>{@link DeleteRegistry}</code>
 	 */
 	public static DeleteRegistry getInstance() {
-		if (!initialized) {
+		if (!initialized.get()) {
 			INIT_LOCK.lock();
 			try {
 				if (instance == null) {
 					instance = new DeleteRegistry();
 					try {
 						instance.init();
-						initialized = true;
+						initialized.set(true);
 					} catch (Exception e) {
 						instance = null;
 					}

@@ -1,5 +1,24 @@
 # System Properties
 
+# General mail config
+MailProperties=@oxgroupwaresysconfdir@/mail.properties
+
+# JavaMail Properties
+JavaMailProperties=@oxgroupwaresysconfdir@/javamail.properties
+
+# Name of the class implementing the mail connection
+MailProtocol=com.openexchange.imap.IMAPConnection
+# ... and its config
+IMAPProperties=@oxgroupwaresysconfdir@/imap.properties
+
+# Name of the class implementing the mail transport connection
+MailTransportProtocol=com.openexchange.smtp.SMTPTransport
+# ... and its config
+SMTPProperties=@oxgroupwaresysconfdir@/smtp.properties
+
+# Location of the MIME type file
+MimeTypeFile=@oxgroupwaresysconfdir@/mime.types
+
 # Name of the class that implements how the login information should be
 # processed.
 # * com.openexchange.groupware.contexts.RdbLoginInfo split only the login info
@@ -17,10 +36,6 @@ SetupLink=com.openexchange.groupware.integration.EmptyImpl
 # Location of the configuration file for the user specific configuration jump.
 # The content of this file depends on the implementation of the SetupLink.
 ConfigJumpConf=@oxgroupwaresysconfdir@/configjump.properties
-
-# Name of the class that implements User2IMAP, their alias or "auto" to use auto-detection.
-# Currently known aliases: Cyrus, Courier
-User2IMAPImpl=auto
 
 # Switch for enabling caching in the groupware. Normally this should be set to
 # true or the database will get a lot more load.
@@ -69,8 +84,8 @@ EVENTPROPERTIES:@oxgroupwaresysconfdir@/event.properties
 PUSHPROPERTIES:@oxgroupwaresysconfdir@/push.properties
 configDB=@oxgroupwaresysconfdir@/configdb.properties
 FOLDERCACHEPROPERTIES=@oxgroupwaresysconfdir@/foldercache.properties
-IMAPPROPERTIES=@oxgroupwaresysconfdir@/imap.properties
-JAVAMAILPROPERTIES=@oxgroupwaresysconfdir@/javamail.properties
+#IMAPPROPERTIES=@oxgroupwaresysconfdir@/imap.properties
+#JAVAMAILPROPERTIES=@oxgroupwaresysconfdir@/javamail.properties
 SPELLCHECKCFG=@oxgroupwaresysconfdir@/spellcheck.cfg
 
 UPDATETASKSCFG=@oxgroupwaresysconfdir@/updatetasks.cfg
@@ -80,5 +95,8 @@ CalendarSQL=com.openexchange.groupware.calendar.CalendarMySQL
 # Location of the HTMLEntities.properties configuration file. This file
 # contains the most HTML entities and maps them to their character value
 HTMLEntities=@oxgroupwaresysconfdir@/HTMLEntities.properties
+
+# Location of the configuration file for mail caches
+MailCacheConfig:@oxgroupwaresysconfdir@/mailcache.ccf
 
 SERVER_NAME=local

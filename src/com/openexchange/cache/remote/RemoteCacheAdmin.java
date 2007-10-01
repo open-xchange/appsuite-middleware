@@ -54,6 +54,7 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -74,7 +75,7 @@ public class RemoteCacheAdmin {
 
 	private static RemoteCacheAdmin instance;
 
-	private static boolean initialized;
+	private static final AtomicBoolean initialized = new AtomicBoolean();
 
 	private final Registry registry;
 
@@ -82,13 +83,13 @@ public class RemoteCacheAdmin {
 	 * Start the remote cache administration to handle incoming RMI calls
 	 */
 	public static void startRemoteCacheAdmin() {
-		if (!initialized) {
+		if (!initialized.get()) {
 			LOCK_INIT.lock();
 			try {
 				if (instance == null) {
 					try {
 						instance = new RemoteCacheAdmin();
-						initialized = true;
+						initialized.set(true);
 					} catch (RemoteException e) {
 						LOG.error(e.getMessage(), e);
 					} catch (AlreadyBoundException e) {
@@ -105,7 +106,7 @@ public class RemoteCacheAdmin {
 	 * @return <code>true</code> if intialized; <code>false</code> otherwise
 	 */
 	public static boolean isInitialized() {
-		return initialized;
+		return initialized.get();
 	}
 
 	/**

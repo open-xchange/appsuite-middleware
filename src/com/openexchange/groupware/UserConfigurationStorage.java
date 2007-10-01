@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -116,7 +117,7 @@ public abstract class UserConfigurationStorage {
 
 	private static UserConfigurationStorage singleton;
 
-	private static boolean initialized;
+	private static final AtomicBoolean initialized = new AtomicBoolean();
 
 	/**
 	 * Default constructor
@@ -168,14 +169,14 @@ public abstract class UserConfigurationStorage {
 	 *             if instantiation fails.
 	 */
 	public static UserConfigurationStorage getInstance() throws UserConfigurationException {
-		if (!initialized) {
+		if (!initialized.get()) {
 			INIT_LOCK.lock();
 			try {
 				if (singleton == null) {
 					try {
 						init();
 						singleton = implementingClass.newInstance();
-						initialized = true;
+						initialized.set(true);
 					} catch (final InstantiationException e) {
 						throw new UserConfigurationException(UserConfigurationCode.INSTANTIATION_FAILED, e);
 					} catch (final IllegalAccessException e) {

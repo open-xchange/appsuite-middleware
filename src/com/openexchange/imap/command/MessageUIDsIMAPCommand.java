@@ -52,8 +52,7 @@ package com.openexchange.imap.command;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 
-import com.openexchange.imap.OXMailException;
-import com.openexchange.imap.OXMailException.MailCode;
+import com.openexchange.imap.IMAPException;
 import com.openexchange.tools.Collections.SmartLongArray;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
@@ -61,7 +60,7 @@ import com.sun.mail.imap.protocol.FetchResponse;
 import com.sun.mail.imap.protocol.UID;
 
 /**
- * MessageUIDsIMAPCommand - gets the corresponding message UIDs to given array
+ * {@link MessageUIDsIMAPCommand} - gets the corresponding message UIDs to given array
  * of <code>Message</code> as an array of <code>long</code>
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
@@ -158,7 +157,7 @@ public final class MessageUIDsIMAPCommand extends AbstractIMAPCommand<long[]> {
 	@Override
 	protected void handleLastResponse(final Response lastResponse) throws MessagingException {
 		if (!lastResponse.isOK()) {
-			throw new MessagingException(OXMailException.getFormattedMessage(MailCode.PROTOCOL_ERROR, "FETCH failed: "
+			throw new MessagingException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR, "FETCH failed: "
 					+ lastResponse.getRest()));
 		}
 	}

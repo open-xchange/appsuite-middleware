@@ -69,8 +69,6 @@ import org.json.JSONWriter;
 
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.helper.ParamContainer;
-import com.openexchange.api2.MailInterface;
-import com.openexchange.api2.MailInterfaceImpl;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.sync.FolderSyncInterface;
 import com.openexchange.api2.sync.RdbFolderSyncInterface;
@@ -78,6 +76,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.mail.MailInterface;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderException;
@@ -243,7 +242,7 @@ public class SyncServlet extends PermissionServlet {
 					} else {
 						if (sessionObj.getUserConfiguration().hasWebMail()) {
 							if (mailInterface == null) {
-								mailInterface = MailInterfaceImpl.getInstance(sessionObj);
+								mailInterface = MailInterface.getInstance(sessionObj);
 							}
 							mailInterface.clearFolder(deleteIdentifier);
 						} else {

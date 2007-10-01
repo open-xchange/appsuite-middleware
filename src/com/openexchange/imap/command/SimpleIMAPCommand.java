@@ -51,13 +51,12 @@ package com.openexchange.imap.command;
 
 import javax.mail.MessagingException;
 
-import com.openexchange.imap.OXMailException;
-import com.openexchange.imap.OXMailException.MailCode;
+import com.openexchange.imap.IMAPException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
 
 /**
- * SimpleIMAPCommand
+ * {@link SimpleIMAPCommand}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
@@ -160,7 +159,7 @@ public final class SimpleIMAPCommand extends AbstractIMAPCommand<Boolean> {
 	@Override
 	protected void handleLastResponse(final Response lastResponse) throws MessagingException {
 		if (!lastResponse.isOK()) {
-			throw new MessagingException(OXMailException.getFormattedMessage(MailCode.PROTOCOL_ERROR, "Command \""
+			throw new MessagingException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR, "Command \""
 					+ command + "\" failed: " + lastResponse.getRest()));
 		}
 	}

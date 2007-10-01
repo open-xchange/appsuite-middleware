@@ -51,8 +51,7 @@ package com.openexchange.imap.command;
 
 import javax.mail.MessagingException;
 
-import com.openexchange.imap.OXMailException;
-import com.openexchange.imap.OXMailException.MailCode;
+import com.openexchange.imap.IMAPException;
 import com.openexchange.tools.Collections.SmartIntArray;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
@@ -60,7 +59,7 @@ import com.sun.mail.imap.protocol.FetchResponse;
 import com.sun.mail.imap.protocol.UID;
 
 /**
- * SeqNumIMAPCommand
+ * {@link SeqNumIMAPCommand}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
@@ -159,7 +158,7 @@ public final class SeqNumIMAPCommand extends AbstractIMAPCommand<int[]> {
 	@Override
 	protected void handleLastResponse(final Response lastResponse) throws MessagingException {
 		if (!lastResponse.isOK()) {
-			throw new MessagingException(OXMailException.getFormattedMessage(MailCode.PROTOCOL_ERROR,
+			throw new MessagingException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR,
 					"UID FETCH failed: " + lastResponse.getRest()));
 		}
 	}

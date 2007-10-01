@@ -93,13 +93,16 @@ public final class Configuration {
      * @throws IOException if the configuration can't be loaded.
      */
     public static void load() throws IOException {
-        LOCK.lock();
-        try {
-            if (!loaded) {
-                configure();
-            }
-        } finally {
-            LOCK.unlock();
+        if (!loaded) {
+	    	LOCK.lock();
+	        try {
+	            if (ccmInstance == null) {
+	                configure();
+	                loaded = true;
+	            }
+	        } finally {
+	            LOCK.unlock();
+	        }
         }
     }
 
@@ -120,7 +123,6 @@ public final class Configuration {
                 LOG.error("Missing cache configuration file", fnfe);
             }
             ccmInstance.configure(props);
-            loaded = true;
         } finally {
             if (fis != null) {
                 fis.close();

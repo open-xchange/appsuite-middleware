@@ -65,7 +65,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
 
-import javax.activation.MimetypesFileTypeMap;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -82,7 +81,6 @@ import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.helper.ParamContainer;
 import com.openexchange.api.OXConflictException;
-import com.openexchange.api2.OXException;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.groupware.AbstractOXException;
@@ -91,6 +89,8 @@ import com.openexchange.groupware.upload.AJAXUploadFile;
 import com.openexchange.groupware.upload.UploadException;
 import com.openexchange.groupware.upload.UploadQuotaChecker;
 import com.openexchange.groupware.upload.UploadException.UploadCode;
+import com.openexchange.mail.MailException;
+import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.mail.ContentType;
 import com.openexchange.tools.servlet.OXJSONException;
@@ -226,9 +226,9 @@ public final class AJAXFile extends PermissionServlet {
 			final ContentType contentType = new ContentType(uploadFile.getContentType());
 			if (contentType.getBaseType().equalsIgnoreCase(MIME_APPLICATION_OCTET_STREAM)) {
 				/*
-				 * Try to determine MIME type via JAF
+				 * Try to determine MIME type
 				 */
-				final String ct = MimetypesFileTypeMap.getDefaultFileTypeMap().getContentType(fileName);
+				final String ct = MIMEType2ExtMap.getContentType(fileName);
 				final int pos = ct.indexOf('/');
 				contentType.setPrimaryType(ct.substring(0, pos));
 				contentType.setSubType(ct.substring(pos + 1));
@@ -434,7 +434,7 @@ public final class AJAXFile extends PermissionServlet {
 
 	private static final String FILE_TYPE_APPLICATION = "application";
 
-	private static boolean checkFileType(final String filter, final String fileContentType) throws OXException {
+	private static boolean checkFileType(final String filter, final String fileContentType) throws MailException {
 		if (FILE_TYPE_ALL.equalsIgnoreCase(filter)) {
 			return true;
 		} else if (FILE_TYPE_TEXT.equalsIgnoreCase(filter)) {

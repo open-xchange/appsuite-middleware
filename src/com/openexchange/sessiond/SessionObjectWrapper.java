@@ -49,16 +49,11 @@
 
 package com.openexchange.sessiond;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.ContextException;
 import com.openexchange.groupware.contexts.ContextStorage;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.imap.IMAPPropertyException;
-import com.openexchange.imap.IMAPPropertiesFactory;
 
 /**
  * SessionObjectWrapper
@@ -67,8 +62,6 @@ import com.openexchange.imap.IMAPPropertiesFactory;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class SessionObjectWrapper {
-
-	private static final Log LOG = LogFactory.getLog(SessionObjectWrapper.class);
 
 	/**
 	 * Creates a dummy instance of {@link SessionObject} assigned to user whose
@@ -112,13 +105,6 @@ public class SessionObjectWrapper {
 		final SessionObject so = new SessionObject(sessionobjectidentifier);
 		so.setContext(ctx);
 		so.setUserObject(UserStorage.getInstance(ctx).getUser(user_id));
-		try {
-			so.setIMAPProperties(IMAPPropertiesFactory.getImapProperties(so));
-		} catch (final IMAPPropertyException e) {
-			if (LOG.isWarnEnabled()) {
-				LOG.warn("SessionObject does not hold IMAP Info object", e);
-			}
-		}
 		return so;
 	}
 

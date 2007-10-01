@@ -62,13 +62,11 @@ import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.api.OXPermissionException;
-import com.openexchange.api2.MailInterface;
-import com.openexchange.groupware.container.mail.JSONMessageObject;
-import com.openexchange.imap.OXMailException;
-import com.openexchange.imap.OXMailException.MailCode;
 import com.openexchange.json.OXJSONWriter;
+import com.openexchange.mail.MailException;
+import com.openexchange.mail.MailInterface;
+import com.openexchange.mail.MailJSONField;
 import com.openexchange.sessiond.SessionObject;
-import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 
 public final class MailRequest {
@@ -132,19 +130,9 @@ public final class MailRequest {
 	 * @param mailInterface -
 	 *            the instance of <code>{@link MailInterface}</code> to access
 	 *            mail module
-	 * @throws SearchIteratorException -
-	 *             if a <code>{@link SearchIterator}</code> related exception
-	 *             occurs
-	 * @throws JSONException -
-	 *             if JSON response data could not be successfully written
-	 * @throws OXMailException -
-	 *             if a mail related exception occurs
-	 * @throws OXPermissionException -
-	 *             if an action is performed which violates certain user
-	 *             permission(s)
 	 */
 	public void action(final String action, final JSONObject jsonObject, final MailInterface mailInterface)
-			throws SearchIteratorException, JSONException, OXMailException, OXPermissionException {
+			throws SearchIteratorException, JSONException, MailException, OXPermissionException {
 		if (!session.getUserConfiguration().hasWebMail()) {
 			throw new OXPermissionException(OXPermissionException.Code.NoPermissionForModul, "mail");
 		}
@@ -190,7 +178,7 @@ public final class MailRequest {
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_CLEAR)) {
 			MAIL_SERVLET.actionPutClear(session, writer, jsonObject, mailInterface);
 		} else {
-			throw new OXMailException(MailCode.UNKNOWN_ACTION, action);
+			throw new MailException(MailException.Code.UNKNOWN_ACTION, action);
 		}
 	}
 
@@ -284,7 +272,7 @@ public final class MailRequest {
 	}
 
 	private static boolean isStoreFlags(final JSONObject jsonObject) throws JSONException {
-		return jsonObject.has(DATA) && jsonObject.getJSONObject(DATA).has(JSONMessageObject.JSON_FLAGS);
+		return jsonObject.has(DATA) && jsonObject.getJSONObject(DATA).has(MailJSONField.FLAGS.getKey());
 	}
 
 	private static boolean isColorLabel(final JSONObject jsonObject) throws JSONException {
@@ -314,8 +302,8 @@ public final class MailRequest {
 			} else if (CollectableOperation.STORE_FLAG.equals(op)) {
 				this.destFld = null;
 				final JSONObject bodyObj = jsonObject.getJSONObject(DATA);
-				flagInt = bodyObj.getInt(JSONMessageObject.JSON_FLAGS);
-				flagValue = bodyObj.getBoolean(JSONMessageObject.JSON_VALUE);
+				flagInt = bodyObj.getInt(MailJSONField.FLAGS.getKey());
+				flagValue = bodyObj.getBoolean(MailJSONField.VALUE.getKey());
 			} else if (CollectableOperation.COLOR_LABEL.equals(op)) {
 				this.destFld = null;
 				flagInt = jsonObject.getJSONObject(DATA).getInt(CommonFields.COLORLABEL);
@@ -343,8 +331,8 @@ public final class MailRequest {
 			} else if (CollectableOperation.STORE_FLAG.equals(op)) {
 				final JSONObject bodyObj = jsonObject.getJSONObject(DATA);
 				return (this.op.equals(op) && this.srcFld.equals(jsonObject.getString(AJAXServlet.PARAMETER_FOLDERID))
-						&& flagInt == bodyObj.getInt(JSONMessageObject.JSON_FLAGS) && flagValue == bodyObj
-						.getBoolean(JSONMessageObject.JSON_VALUE));
+						&& flagInt == bodyObj.getInt(MailJSONField.FLAGS.getKey()) && flagValue == bodyObj
+						.getBoolean(MailJSONField.VALUE.getKey()));
 			} else if (CollectableOperation.COLOR_LABEL.equals(op)) {
 				return (this.op.equals(op) && this.srcFld.equals(jsonObject.getString(AJAXServlet.PARAMETER_FOLDERID)) && flagInt == jsonObject
 						.getJSONObject(DATA).getInt(CommonFields.COLORLABEL));

@@ -54,6 +54,7 @@ package com.openexchange.tools.ajp13;
 import java.util.Iterator;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -75,7 +76,7 @@ public class AJPv13ListenerPool {
 	 */
 	private static final Queue<AJPv13Listener> LISTENER_QUEUE = new ConcurrentLinkedQueue<AJPv13Listener>();
 
-	private static boolean initialized;
+	private static final AtomicBoolean initialized = new AtomicBoolean();
 	
 	private static int listenerNum;
 	
@@ -104,7 +105,7 @@ public class AJPv13ListenerPool {
 			AJPv13Watcher.addListener(l);
 			LISTENER_QUEUE.offer(l);
 		}
-		initialized = true;
+		initialized.set(true);
 		if (LOG.isInfoEnabled()) {
 			LOG.info(new StringBuilder(100).append(LISTENER_POOL_SIZE).append(" AJPv13-Listeners created!").toString());
 		}
@@ -154,7 +155,7 @@ public class AJPv13ListenerPool {
 	}
 	
 	public static boolean isInitialized() {
-		return initialized;
+		return initialized.get();
 	}
 
 	/**

@@ -54,6 +54,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -86,7 +87,7 @@ public class FolderQueryCacheManager {
 
 	private static FolderQueryCacheManager instance;
 
-	private static boolean initialized;
+	private static final AtomicBoolean initialized = new AtomicBoolean();
 
 	private final JCS folderQueryCache;
 
@@ -129,16 +130,16 @@ public class FolderQueryCacheManager {
 	}
 
 	public final static boolean isInitialized() {
-		return initialized;
+		return initialized.get();
 	}
 
 	public final static FolderQueryCacheManager getInstance() throws OXException {
-		if (!initialized) {
+		if (!initialized.get()) {
 			LOCK_INIT.lock();
 			try {
 				if (instance == null) {
 					instance = new FolderQueryCacheManager();
-					initialized = true;
+					initialized.set(true);
 				}
 			} finally {
 				LOCK_INIT.unlock();

@@ -58,7 +58,6 @@ import com.openexchange.groupware.contact.ContactConfig;
 import com.openexchange.groupware.contexts.ContextInit;
 import com.openexchange.groupware.integration.SetupLink;
 import com.openexchange.groupware.settings.ConfigTree;
-import com.openexchange.imap.user2imap.User2IMAP;
 import com.openexchange.push.udp.PushInit;
 import com.openexchange.sessiond.SessiondInit;
 
@@ -82,7 +81,6 @@ public final class GroupwareInit {
     public static void init() throws AbstractOXException {
         ContextInit.init();
         UserConfigurationStorage.init();
-        User2IMAP.init();
         SetupLink.init();
         ConfigTree.init();
         CalendarConfig.init();

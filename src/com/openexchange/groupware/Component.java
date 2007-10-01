@@ -100,7 +100,15 @@ public enum Component {
 	/**
 	 * IMAP
 	 */
-	IMAP("IAP"),
+	IMAP("IMAP"),
+	/**
+	 * SMTP
+	 */
+	SMTP("SMTP"),
+	/**
+	 * MAILSTORE
+	 */
+	MAILSTORE("MLST"),
 	/**
 	 * Module FOLDER
 	 */

@@ -108,6 +108,8 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 	private static final String ATTR_STORED_METHOD = "stored_method";
 
 	private static final String ATTR_QUERY_STRING = "query_string";
+	
+	private static final String ATTR_SSL_KEY_SIZE = "ssl_key_size";
 
 	/**
 	 * This byte value indicates termination of request.
@@ -139,7 +141,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 		attributeMapping.put(Integer.valueOf(0x08), "ssl_cipher");
 		attributeMapping.put(Integer.valueOf(0x09), "ssl_session");
 		attributeMapping.put(Integer.valueOf(0x0a), "req_attribute");
-		attributeMapping.put(Integer.valueOf(0x0b), "ssl_key_size");
+		attributeMapping.put(Integer.valueOf(0x0b), ATTR_SSL_KEY_SIZE);
 		attributeMapping.put(Integer.valueOf(0x0c), "secret_attribute");
 		attributeMapping.put(Integer.valueOf(0x0d), ATTR_STORED_METHOD);
 		attributeMapping.put(Integer.valueOf(REQUEST_TERMINATOR), "are_done");
@@ -435,16 +437,16 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 	private void parseAttributes(final HttpServletRequestWrapper servletRequest) throws AJPv13Exception {
 		byte nextByte = (byte) REQUEST_TERMINATOR;
 		while ((nextByte = nextByte()) != ((byte) REQUEST_TERMINATOR)) {
-			String attributeName = null;
-			String attributeValue = null;
-			attributeName = attributeMapping.containsKey(Integer.valueOf(unsignedByte2Int(nextByte))) ? attributeMapping
-					.get(Integer.valueOf(unsignedByte2Int(nextByte)))
-					: null;
-			if (attributeName == null) {
-				throw new AJPv13Exception(AJPCode.NO_ATTRIBUTE_NAME, Byte.valueOf(nextByte));
+			final Integer attrNum = Integer.valueOf(unsignedByte2Int(nextByte));
+			if (attrNum.intValue() == 0x0b) {
+				servletRequest.setAttribute(ATTR_SSL_KEY_SIZE, Integer.valueOf(parseInt()));
+			} else {
+				final String attributeName = attributeMapping.get(attrNum);
+				if (attributeName == null) {
+					throw new AJPv13Exception(AJPCode.NO_ATTRIBUTE_NAME, Byte.valueOf(nextByte));
+				}
+				servletRequest.setAttribute(attributeName, parseString());
 			}
-			attributeValue = parseString();
-			servletRequest.setAttribute(attributeName, attributeValue);
 		}
 	}
 

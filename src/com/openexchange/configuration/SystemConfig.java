@@ -214,10 +214,6 @@ public final class SystemConfig extends AbstractConfig {
          * Config file for the login implementation.
          */
         LoginInfoConfig("LoginInfoConfig"),
-        /**
-		 * Class implementing User2IMAP
-		 */
-		User2IMAPImpl("User2IMAPImpl"),
 		/**
 		 * Directory in which all property files for servlet mapping are kept
 		 */
@@ -229,7 +225,23 @@ public final class SystemConfig extends AbstractConfig {
 		/**
 		 * HTMLEntities.properties configuration file
 		 */
-		HTMLEntities("HTMLEntities");
+		HTMLEntities("HTMLEntities"),
+		/**
+		 * Mime type file
+		 */
+		MimeTypeFile("MimeTypeFile"),
+		/**
+		 * Mail cache configuration file
+		 */
+		MailCacheConfig("MailCacheConfig"),
+		/**
+		 * Mail protocol
+		 */
+		MailProtocol("MailProtocol"),
+		/**
+		 * Mail transport protocol
+		 */
+		MailTransportProtocol("MailTransportProtocol");
 
         /**
          * Name of the property in the server.properties file.

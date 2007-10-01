@@ -60,6 +60,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -91,7 +92,7 @@ public class HttpServletManager {
 
 	private static Map<String, Constructor> servletConstructorMap;
 
-	private static boolean initialized;
+	private static final AtomicBoolean initialized = new AtomicBoolean();
 
 	private static final Lock INIT_LOCK = new ReentrantLock();
 
@@ -228,7 +229,7 @@ public class HttpServletManager {
 	private final static Class[] CLASS_ARR = new Class[] {};
 
 	public final static void loadServletMapping(final String servletMappingDir) throws AbstractOXException {
-		if (!initialized) {
+		if (!initialized.get()) {
 			INIT_LOCK.lock();
 			try {
 				if (servletConstructorMap != null) {
@@ -329,7 +330,7 @@ public class HttpServletManager {
 						}
 					}
 				}
-				initialized = true;
+				initialized.set(true);
 			} catch (final IOException exc) {
 				throw new OXServletException(OXServletException.Code.SERVLET_MAPPINGS_NOT_LOADED, exc, exc
 						.getLocalizedMessage());

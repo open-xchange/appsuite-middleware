@@ -1412,13 +1412,13 @@ public class OXFolderSQL {
 
 	public static final void handleMailAdminFolders(final int mailAdmin, final String folderTable,
 			final String permTable, final Connection readConArg, final Connection writeConArg, final Context ctx)
-			throws DBPoolingException, SQLException {
+			throws DBPoolingException, SQLException, OXException {
 		handleEntityFolders(mailAdmin, null, -1L, folderTable, permTable, readConArg, writeConArg, ctx);
 	}
 
 	public static final void handleEntityFolders(final int entity, final int mailAdmin, final long lastModified,
 			final String folderTable, final String permTable, final Connection readConArg,
-			final Connection writeConArg, final Context ctx) throws DBPoolingException, SQLException {
+			final Connection writeConArg, final Context ctx) throws DBPoolingException, SQLException, OXException {
 		handleEntityFolders(entity, Integer.valueOf(mailAdmin), lastModified, folderTable, permTable, readConArg,
 				writeConArg, ctx);
 	}
@@ -1429,7 +1429,7 @@ public class OXFolderSQL {
 
 	private static final void handleEntityFolders(final int entity, final Integer mailAdmin, final long lastModified,
 			final String folderTable, final String permTable, final Connection readConArg,
-			final Connection writeConArg, final Context ctx) throws DBPoolingException, SQLException {
+			final Connection writeConArg, final Context ctx) throws DBPoolingException, SQLException, OXException {
 		Connection readCon = readConArg;
 		boolean closeReadCon = false;
 		PreparedStatement stmt = null;
@@ -1479,7 +1479,7 @@ public class OXFolderSQL {
 				/*
 				 * Reassign
 				 */
-				reassignFolders(reassignFolders, mailAdmin.intValue(), lastModified, folderTable, writeConArg, ctx);
+				reassignFolders(reassignFolders, entity, mailAdmin.intValue(), lastModified, folderTable, writeConArg, ctx);
 			}
 			/*
 			 * Check column "changed_from"
@@ -1518,7 +1518,7 @@ public class OXFolderSQL {
 				/*
 				 * Reassign
 				 */
-				reassignFolders(reassignFolders, mailAdmin.intValue(), lastModified, folderTable, writeConArg, ctx);
+				reassignFolders(reassignFolders, entity, mailAdmin.intValue(), lastModified, folderTable, writeConArg, ctx);
 			}
 		} finally {
 			closeResources(rs, stmt, closeReadCon ? readCon : null, true, ctx);
@@ -1615,12 +1615,12 @@ public class OXFolderSQL {
 	}
 
 	private static final String SQL_REASSIGN_FOLDERS = "UPDATE #FOLDER# SET created_from = ?, changed_from = ?, changing_date = ?, default_flag = 0 WHERE cid = ? AND fuid = ?";
+	
+	private static final String SQL_REASSIGN_FOLDERS_WITH_NAME = "UPDATE #FOLDER# SET created_from = ?, changed_from = ?, changing_date = ?, default_flag = 0, fname = ? WHERE cid = ? AND fuid = ?";
 
-	private static final void reassignFolders(final Set<Integer> reassignFolders, final int mailAdmin,
-			final long lastModified, final String folderTable, final Connection writeConArg, final Context ctx)
-			throws DBPoolingException, SQLException {
-		final int size = reassignFolders.size();
-		final Iterator<Integer> iter = reassignFolders.iterator();
+	private static final void reassignFolders(final Set<Integer> reassignFolders, final int entity,
+			final int mailAdmin, final long lastModified, final String folderTable, final Connection writeConArg,
+			final Context ctx) throws DBPoolingException, SQLException, OXException {
 		Connection wc = writeConArg;
 		boolean closeWrite = false;
 		PreparedStatement stmt = null;
@@ -1629,6 +1629,42 @@ public class OXFolderSQL {
 				wc = DBPool.pickupWriteable(ctx);
 				closeWrite = true;
 			}
+			int size = reassignFolders.size();
+			Iterator<Integer> iter = reassignFolders.iterator();
+			{
+				/*
+				 * Special handling for default infostore folder
+				 */
+				final OXFolderAccess access = new OXFolderAccess(wc, ctx);
+				boolean found = false;
+				for (int i = 0; i < size && !found; i++) {
+					final int fuid = iter.next().intValue();
+					if (access.isDefaultFolder(fuid) && (access.getFolderModule(fuid) == FolderObject.INFOSTORE)
+							&& (access.getFolderOwner(fuid) == entity)) {
+						iter.remove();
+						size--;
+						stmt = wc.prepareStatement(SQL_REASSIGN_FOLDERS_WITH_NAME.replaceFirst(TMPL_FOLDER_TABLE,
+								folderTable));
+						stmt.setInt(1, mailAdmin);
+						stmt.setInt(2, mailAdmin);
+						stmt.setLong(3, lastModified);
+						stmt.setString(4, new StringBuilder(access.getFolderName(fuid)).append(fuid).toString());
+						stmt.setInt(5, ctx.getContextId());
+						stmt.setInt(6, fuid);
+						stmt.executeUpdate();
+						stmt.close();
+						stmt = null;
+						/*
+						 * Leave loop
+						 */
+						found = true;
+					}
+				}
+			}
+			/*
+			 * Iterate rest
+			 */
+			iter = reassignFolders.iterator();
 			stmt = wc.prepareStatement(SQL_REASSIGN_FOLDERS.replaceFirst(TMPL_FOLDER_TABLE, folderTable));
 			for (int i = 0; i < size; i++) {
 				stmt.setInt(1, mailAdmin);

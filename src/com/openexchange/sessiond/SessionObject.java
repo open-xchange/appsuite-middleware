@@ -56,10 +56,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import javax.mail.MessagingException;
 import javax.mail.Session;
 
-import com.openexchange.api2.MailInterfaceImpl;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.UserConfigurationException;
@@ -68,12 +66,9 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.Credentials;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.upload.AJAXUploadFile;
-import com.openexchange.imap.IMAPProperties;
-import com.openexchange.imap.IMAPUtils;
-import com.openexchange.imap.UserSettingMail;
-import com.openexchange.imap.UserSettingMailStorage;
-import com.sun.mail.imap.IMAPFolder;
-import com.sun.mail.imap.Rights;
+import com.openexchange.mail.cache.SessionMailCache;
+import com.openexchange.mail.usersetting.UserSettingMail;
+import com.openexchange.mail.usersetting.UserSettingMailStorage;
 
 /**
  * SessionObject
@@ -119,13 +114,9 @@ public class SessionObject {
 
 	private User u;
 
-	private IMAPProperties imapProperties;
-
 	private Session mailSession;
-
-	private final transient Map<String, Rights> imapCachedMyRights;
-
-	private final transient Map<String, Boolean> imapCachedUserFlags;
+	
+	private final transient SessionMailCache mailCache;
 
 	private final transient Map<String, AJAXUploadFile> ajaxUploadFiles;
 
@@ -137,11 +128,14 @@ public class SessionObject {
 
 	public SessionObject(final String sessionid) {
 		this.sessionid = sessionid;
-		imapCachedMyRights = new ConcurrentHashMap<String, Rights>();
-		imapCachedUserFlags = new ConcurrentHashMap<String, Boolean>();
+		mailCache = new SessionMailCache();
 		ajaxUploadFiles = new ConcurrentHashMap<String, AJAXUploadFile>();
 		mailFldsLock = new ReentrantLock();
 		defaultMailFolders = new String[6];
+	}
+	
+	public final SessionMailCache getMailCache() {
+		return mailCache;
 	}
 
 	/**
@@ -218,129 +212,6 @@ public class SessionObject {
 		return uploadFile;
 	}
 
-	/**
-	 * Gets user's rights that apply to given IMAP folder. If none found in
-	 * cache and parameter <code>load</code> is set to <code>true</code>,
-	 * {@link IMAPFolder#myRights()} is invoked.
-	 * 
-	 * @param f
-	 *            The IMAP folder
-	 * @param load
-	 *            Whether to load user's rights or not
-	 * @return user's rights that apply to given IMAP folder or
-	 *         <code>null</code>
-	 * @throws MessagingException
-	 *             If user's rights could not be determined
-	 */
-	public final Rights getCachedRights(final IMAPFolder f, final boolean load) throws MessagingException {
-		Rights r = imapCachedMyRights.get(f.getFullName());
-		if (load && r == null) {
-			r = f.myRights();
-			imapCachedMyRights.put(f.getFullName(), r);
-		}
-		return r;
-
-	}
-
-	/**
-	 * Removes user's rights that apply to given IMAP folder from cache
-	 * 
-	 * @param f
-	 *            The IMAP folder
-	 */
-	public final void removeCachedRights(final IMAPFolder f) {
-		imapCachedMyRights.remove(f.getFullName());
-	}
-
-	/**
-	 * Puts user's rights that apply to given IMAP folder into cache
-	 * 
-	 * @param f
-	 *            The IMAP folder
-	 * @throws MessagingException
-	 *             If user's rights could not be determined
-	 */
-	public final void setCachedRights(final IMAPFolder f) throws MessagingException {
-		imapCachedMyRights.put(f.getFullName(), f.myRights());
-	}
-
-	/**
-	 * Checks if cache contains user's rights that apply to given IMAP folder
-	 * 
-	 * @param f
-	 *            The IMAP folder
-	 * @return <code>true</code> if located in cache; otherwise
-	 *         <code>false</code>
-	 */
-	public final boolean containsCachedRights(final IMAPFolder f) {
-		return imapCachedMyRights.containsKey(f.getFullName());
-	}
-
-	/**
-	 * Gets the user flags of given IMAP folder. If none found in cache and
-	 * parameter <code>load</code> is set to <code>true</code>,
-	 * {@link IMAPUtils#supportsUserDefinedFlags(javax.mail.Folder)} is invoked.
-	 * 
-	 * @param f
-	 *            The IMAP folder
-	 * @param load
-	 *            Whether to load user flags or not
-	 * @return The user flags of given IMAP folder or <code>null</code>
-	 * @throws MessagingException
-	 *             If user flags could not be determined
-	 */
-	public final boolean getCachedUserFlags(final IMAPFolder f, final boolean load) throws MessagingException {
-		Boolean b = imapCachedUserFlags.get(f.getFullName());
-		if (load && b == null) {
-			b = Boolean.valueOf(IMAPUtils.supportsUserDefinedFlags(f));
-			imapCachedUserFlags.put(f.getFullName(), b);
-		}
-		return b.booleanValue();
-	}
-
-	/**
-	 * Removes the user flags of given IMAP folder from cache
-	 * 
-	 * @param f
-	 *            The IMAP folder
-	 */
-	public final void removeCachedUserFlags(final IMAPFolder f) {
-		imapCachedUserFlags.remove(f.getFullName());
-	}
-
-	/**
-	 * Puts the user flags of given IMAP folder into cache
-	 * 
-	 * @param f
-	 *            The IMAP folder
-	 * @throws MessagingException
-	 *             If user flags could not be determined
-	 */
-	public final void setCachedUserFlags(final IMAPFolder f) throws MessagingException {
-		imapCachedUserFlags.put(f.getFullName(), Boolean.valueOf(IMAPUtils.supportsUserDefinedFlags(f)));
-	}
-
-	/**
-	 * Checks if cache contains user flags of given IMAP folder
-	 * 
-	 * @param f
-	 *            The IMAP folder
-	 * @return code>true</code> if located in cache; otherwise <code>false</code>
-	 */
-	public final boolean containsCachedUserFlags(final IMAPFolder f) {
-		return imapCachedUserFlags.containsKey(f.getFullName());
-	}
-
-	/**
-	 * Cleans all IMAP-related caches.
-	 * <p>
-	 * Currently a cache for user's rights and folders' user flags
-	 */
-	public final void cleanIMAPCaches() {
-		imapCachedMyRights.clear();
-		imapCachedUserFlags.clear();
-	}
-
 	public void setUsername(final String username) {
 		this.username = username;
 	}
@@ -389,10 +260,6 @@ public class SessionObject {
 		this.u = u;
 	}
 
-	public void setIMAPProperties(final IMAPProperties imapProperties) {
-		this.imapProperties = imapProperties;
-	}
-
 	public void setMailFldsChecked(final boolean mailFldsChecked) {
 		this.mailFldsChecked = mailFldsChecked;
 	}
@@ -401,11 +268,7 @@ public class SessionObject {
 	 * Sets the default mail folder's fullname associated with given index
 	 * 
 	 * @param index
-	 *            The index taken from constants
-	 *            <code>{@link MailInterfaceImpl#INDEX_DRAFTS}</code>,
-	 *            <code>{@link MailInterfaceImpl#INDEX_SENT}</code>,<code>{@link MailInterfaceImpl#INDEX_SPAM}</code>,
-	 *            <code>{@link MailInterfaceImpl#INDEX_TRASH}</code>,<code>{@link MailInterfaceImpl#INDEX_CONFIRMED_SPAM}</code>,
-	 *            <code>{@link MailInterfaceImpl#INDEX_CONFIRMED_HAM}</code>
+	 *            The index
 	 * @param fullname
 	 *            The fullname
 	 */
@@ -494,10 +357,6 @@ public class SessionObject {
 		}
 	}
 
-	public IMAPProperties getIMAPProperties() {
-		return imapProperties;
-	}
-
 	public boolean isMailFldsChecked() {
 		return mailFldsChecked;
 	}
@@ -506,11 +365,7 @@ public class SessionObject {
 	 * Gets the default mail folder's fullname associated with given index
 	 * 
 	 * @param index
-	 *            The index taken from constants
-	 *            <code>{@link MailInterfaceImpl#INDEX_DRAFTS}</code>,
-	 *            <code>{@link MailInterfaceImpl#INDEX_SENT}</code>,<code>{@link MailInterfaceImpl#INDEX_SPAM}</code>,
-	 *            <code>{@link MailInterfaceImpl#INDEX_TRASH}</code>,<code>{@link MailInterfaceImpl#INDEX_CONFIRMED_SPAM}</code>,
-	 *            <code>{@link MailInterfaceImpl#INDEX_CONFIRMED_HAM}</code>
+	 *            The index
 	 * @return Default mail folder's fullname
 	 */
 	public String getDefaultMailFolder(final int index) {

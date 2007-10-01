@@ -49,22 +49,21 @@
 
 package com.openexchange.imap.command;
 
-import static com.openexchange.imap.IMAPUtils.prepareStringArgument;
+import static com.openexchange.imap.IMAPCommandsCollection.prepareStringArgument;
 
 import java.util.Arrays;
 
 import javax.mail.MessagingException;
 
-import com.openexchange.imap.OXMailException;
-import com.openexchange.imap.OXMailException.MailCode;
+import com.openexchange.imap.IMAPException;
 import com.openexchange.tools.Collections.SmartLongArray;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.protocol.IMAPResponse;
 
 /**
- * CopyIMAPCommand - Copies messages from given folder to given destination
- * folder just using their sequence numbers/UIDs
+ * {@link CopyIMAPCommand} - Copies messages from given folder to given
+ * destination folder just using their sequence numbers/UIDs
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
@@ -115,8 +114,8 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
 		this.destFolderName = prepareStringArgument(destFolderName);
 		length = this.uids.length;
 		args = length == 0 ? ARGS_EMPTY : (isSequential ? new String[] { new StringBuilder(64).append(this.uids[0])
-				.append(':').append(this.uids[this.uids.length - 1]).toString() } : IMAPNumArgSplitter
-				.splitUIDArg(this.uids, false));
+				.append(':').append(this.uids[this.uids.length - 1]).toString() } : IMAPNumArgSplitter.splitUIDArg(
+				this.uids, false));
 		if (fast) {
 			retval = DEFAULT_RETVAL;
 		} else {
@@ -210,7 +209,7 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
 	@Override
 	protected void handleLastResponse(final Response lastResponse) throws MessagingException {
 		if (!lastResponse.isOK()) {
-			throw new MessagingException(OXMailException.getFormattedMessage(MailCode.PROTOCOL_ERROR,
+			throw new MessagingException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR,
 					"UID COPY failed: " + lastResponse.getRest()));
 		}
 	}

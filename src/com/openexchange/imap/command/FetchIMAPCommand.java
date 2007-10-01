@@ -74,16 +74,15 @@ import javax.mail.internet.InternetHeaders;
 import javax.mail.internet.MailDateFormat;
 import javax.mail.internet.MimeUtility;
 
-import com.openexchange.api2.MailInterfaceImpl;
-import com.openexchange.api2.OXException;
-import com.openexchange.groupware.container.mail.JSONMessageObject;
-import com.openexchange.groupware.container.mail.MessageCacheObject;
-import com.openexchange.groupware.container.mail.parser.MessageUtils;
-import com.openexchange.imap.IMAPProperties;
-import com.openexchange.imap.IMAPPropertyException;
-import com.openexchange.imap.MessageHeaders;
-import com.openexchange.imap.OXMailException;
-import com.openexchange.imap.OXMailException.MailCode;
+import com.openexchange.imap.IMAPException;
+import com.openexchange.imap.config.IMAPConfig;
+import com.openexchange.mail.MailException;
+import com.openexchange.mail.MailInterfaceImpl;
+import com.openexchange.mail.MailListField;
+import com.openexchange.mail.config.MailConfigException;
+import com.openexchange.mail.mime.ContainerMessage;
+import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.tools.mail.ContentType;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
@@ -99,7 +98,7 @@ import com.sun.mail.imap.protocol.RFC822SIZE;
 import com.sun.mail.imap.protocol.UID;
 
 /**
- * FetchIMAPCommand - performs a prefetch of messages in given folder with only
+ * {@link FetchIMAPCommand} - performs a prefetch of messages in given folder with only
  * those fields set that need to be present for display and sorting. A
  * corresponding instance of <code>javax.mail.FetchProfile</code> is going to
  * be generated from given fields.
@@ -164,7 +163,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 
 	private FetchItemHandler[] itemHandlers;
 
-	private final List<MessageCacheObject> retval;
+	private final List<ContainerMessage> retval;
 
 	/**
 	 * Constructor
@@ -176,9 +175,9 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 	 *            <code>int</code> SeqNums or instances of
 	 *            <code>Message</code>)
 	 * @param fields -
-	 *            the demanded fields as defined in {@link JSONMessageObject}
+	 *            the demanded fields
 	 * @param sortField -
-	 *            the sort field as defined in {@link JSONMessageObject}
+	 *            the sort field
 	 * @param isSequential -
 	 *            whether the source array values are sequential
 	 * @param keepOrder -
@@ -222,7 +221,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 			createArgs(arr, isSequential, keepOrder);
 		}
 		command = getFetchCommand(imapFolder, fp);
-		retval = new ArrayList<MessageCacheObject>(length);
+		retval = new ArrayList<ContainerMessage>(length);
 		index = 0;
 	}
 
@@ -262,9 +261,9 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 	 * @param imapFolder -
 	 *            the imap folder
 	 * @param fields -
-	 *            the demanded fields as defined in {@link JSONMessageObject}
+	 *            the demanded fields
 	 * @param sortField -
-	 *            the sort field as defined in {@link JSONMessageObject}
+	 *            the sort field
 	 * @param fetchLen -
 	 *            the total message count
 	 */
@@ -291,7 +290,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 		uid = false;
 		length = fetchLen;
 		command = getFetchCommand(imapFolder, fp);
-		retval = new ArrayList<MessageCacheObject>(length);
+		retval = new ArrayList<ContainerMessage>(length);
 		index = 0;
 	}
 
@@ -332,7 +331,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 		return sb.toString();
 	}
 
-	private static final MessageCacheObject[] EMPTY_ARR = new MessageCacheObject[0];
+	private static final ContainerMessage[] EMPTY_ARR = new ContainerMessage[0];
 
 	/*
 	 * (non-Javadoc)
@@ -351,7 +350,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 	 */
 	@Override
 	protected Message[] getReturnVal() {
-		return retval.toArray(new MessageCacheObject[retval.size()]);
+		return retval.toArray(new ContainerMessage[retval.size()]);
 	}
 
 	/*
@@ -362,7 +361,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 	@Override
 	protected void handleLastResponse(final Response lastResponse) throws MessagingException {
 		if (!lastResponse.isOK()) {
-			throw new MessagingException(OXMailException.getFormattedMessage(MailCode.PROTOCOL_ERROR,
+			throw new MessagingException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR,
 					(uid ? "UID FETCH failed: " : "FETCH failed: ") + lastResponse.getRest()));
 		}
 	}
@@ -400,7 +399,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 		} else {
 			seqnum = f.getNumber();
 		}
-		final MessageCacheObject msg = new MessageCacheObject(imapFolder.getFullName(), imapFolder.getSeparator(),
+		final ContainerMessage msg = new ContainerMessage(imapFolder.getFullName(), imapFolder.getSeparator(),
 				seqnum);
 		final int itemCount = f.getItemCount();
 		if (itemHandlers == null) {
@@ -415,11 +414,11 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 			/*
 			 * Discard corrupt message
 			 */
-			final OXMailException me = MailInterfaceImpl.handleMessagingException(e);
+			final MailException imapExc = IMAPException.handleMessagingException(e);
 			LOG.error(new StringBuilder(100).append("Message #").append(msg.getMessageNumber()).append(" discarded: ")
-					.append(me.getMessage()).toString(), me);
+					.append(imapExc.getMessage()).toString(), imapExc);
 			error = true;
-		} catch (final OXException e) {
+		} catch (final MailException e) {
 			/*
 			 * Discard corrupt message
 			 */
@@ -454,27 +453,28 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 	}
 
 	private static final Set<Integer> ENV_FIELDS;
-	
+
 	static {
 		ENV_FIELDS = new HashSet<Integer>(8);
 		/*
 		 * The Envelope is an aggregration of the common attributes of a
 		 * Message: From, To, Cc, Bcc, ReplyTo, Subject and Date.
 		 */
-		ENV_FIELDS.add(Integer.valueOf(JSONMessageObject.FIELD_FROM));
-		ENV_FIELDS.add(Integer.valueOf(JSONMessageObject.FIELD_TO));
-		ENV_FIELDS.add(Integer.valueOf(JSONMessageObject.FIELD_CC));
-		ENV_FIELDS.add(Integer.valueOf(JSONMessageObject.FIELD_BCC));
-		ENV_FIELDS.add(Integer.valueOf(JSONMessageObject.FIELD_SUBJECT));
-		ENV_FIELDS.add(Integer.valueOf(JSONMessageObject.FIELD_SENT_DATE));
+		ENV_FIELDS.add(Integer.valueOf(MailListField.FROM.getField()));
+		ENV_FIELDS.add(Integer.valueOf(MailListField.TO.getField()));
+		ENV_FIELDS.add(Integer.valueOf(MailListField.CC.getField()));
+		ENV_FIELDS.add(Integer.valueOf(MailListField.BCC.getField()));
+		ENV_FIELDS.add(Integer.valueOf(MailListField.SUBJECT.getField()));
+		ENV_FIELDS.add(Integer.valueOf(MailListField.SENT_DATE.getField()));
 		/*
-		 * Add the two extra fetch profile items contained in JavaMail's ENVELOPE constant
+		 * Add the two extra fetch profile items contained in JavaMail's
+		 * ENVELOPE constant
 		 */
-		ENV_FIELDS.add(Integer.valueOf(JSONMessageObject.FIELD_RECEIVED_DATE));
-		ENV_FIELDS.add(Integer.valueOf(JSONMessageObject.FIELD_SIZE));
+		ENV_FIELDS.add(Integer.valueOf(MailListField.RECEIVED_DATE.getField()));
+		ENV_FIELDS.add(Integer.valueOf(MailListField.SIZE.getField()));
 	}
-	
-	public static FetchProfile getFetchProfile(final int[] fields, final int sortField) {
+
+	private static FetchProfile getFetchProfile(final int[] fields, final int sortField) {
 		final FetchProfile retval = new FetchProfile();
 		final Set<Integer> trimmedFields = new HashSet<Integer>();
 		for (int i = 0; i < fields.length; i++) {
@@ -484,9 +484,10 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 			trimmedFields.add(Integer.valueOf(sortField));
 		}
 		try {
-			if (IMAPProperties.isFastFetch()) {
+			if (IMAPConfig.isFastFetch()) {
 				/*
-				 * Check which fields are contained in fetch profile item "ENVELOPE"
+				 * Check which fields are contained in fetch profile item
+				 * "ENVELOPE"
 				 */
 				if (trimmedFields.removeAll(ENV_FIELDS)) {
 					/*
@@ -495,7 +496,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 					retval.add(FetchProfile.Item.ENVELOPE);
 				}
 			}
-		} catch (final IMAPPropertyException e) {
+		} catch (final MailConfigException e) {
 			LOG.error(e.getMessage(), e);
 		}
 		if (!trimmedFields.isEmpty()) {
@@ -512,62 +513,43 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 	}
 
 	private static void addFetchItem(final FetchProfile fp, final int field) {
-		switch (field) {
-		case JSONMessageObject.FIELD_ID:
+		if (field == MailListField.ID.getField()) {
 			fp.add(UIDFolder.FetchProfileItem.UID);
-			break;
-		case JSONMessageObject.FIELD_ATTACHMENT:
+		} else if (field == MailListField.ATTACHMENT.getField()) {
 			fp.add(FetchProfile.Item.CONTENT_INFO);
-			break;
-		case JSONMessageObject.FIELD_FROM:
+		} else if (field == MailListField.FROM.getField()) {
 			fp.add(MessageHeaders.HDR_FROM);
-			break;
-		case JSONMessageObject.FIELD_TO:
+		} else if (field == MailListField.TO.getField()) {
 			fp.add(MessageHeaders.HDR_TO);
-			break;
-		case JSONMessageObject.FIELD_CC:
+		} else if (field == MailListField.CC.getField()) {
 			fp.add(MessageHeaders.HDR_CC);
-			break;
-		case JSONMessageObject.FIELD_BCC:
+		} else if (field == MailListField.BCC.getField()) {
 			fp.add(MessageHeaders.HDR_BCC);
-			break;
-		case JSONMessageObject.FIELD_SUBJECT:
+		} else if (field == MailListField.SUBJECT.getField()) {
 			fp.add(MessageHeaders.HDR_SUBJECT);
-			break;
-		case JSONMessageObject.FIELD_SIZE:
+		} else if (field == MailListField.SIZE.getField()) {
 			fp.add(IMAPFolder.FetchProfileItem.SIZE);
-			break;
-		case JSONMessageObject.FIELD_SENT_DATE:
+		} else if (field == MailListField.SENT_DATE.getField()) {
 			fp.add(MessageHeaders.HDR_DATE);
-			break;
-		case JSONMessageObject.FIELD_FLAGS:
+		} else if (field == MailListField.FLAGS.getField()) {
 			if (!fp.contains(FetchProfile.Item.FLAGS)) {
 				fp.add(FetchProfile.Item.FLAGS);
 			}
-			break;
-		case JSONMessageObject.FIELD_DISPOSITION_NOTIFICATION_TO:
+		} else if (field == MailListField.DISPOSITION_NOTIFICATION_TO.getField()) {
 			fp.add(MessageHeaders.HDR_DISP_NOT_TO);
-			break;
-		case JSONMessageObject.FIELD_PRIORITY:
+		} else if (field == MailListField.PRIORITY.getField()) {
 			fp.add(MessageHeaders.HDR_X_PRIORITY);
-			break;
-		case JSONMessageObject.FIELD_COLOR_LABEL:
+		} else if (field == MailListField.COLOR_LABEL.getField()) {
 			if (!fp.contains(FetchProfile.Item.FLAGS)) {
 				fp.add(FetchProfile.Item.FLAGS);
 			}
-			break;
-		case JSONMessageObject.FIELD_FLAG_SEEN:
-			if (!fp.contains(FetchProfile.Item.FLAGS)) {
-				fp.add(FetchProfile.Item.FLAGS);
-			}
-			break;
-		default:
-			return;
+		} else if (field == MailListField.FLAG_SEEN.getField() && !fp.contains(FetchProfile.Item.FLAGS)) {
+			fp.add(FetchProfile.Item.FLAGS);
 		}
 	}
 
 	private static interface HeaderHandler {
-		public void handleHeader(String hdrValue, MessageCacheObject msg) throws MessagingException, OXException;
+		public void handleHeader(String hdrValue, ContainerMessage msg) throws MessagingException, MailException;
 	}
 
 	private static final MailDateFormat mailDateFormat = new MailDateFormat();
@@ -607,7 +589,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 		public final static void addHeaderHandlers(final FetchItemHandler itemHandler, final Header hdr) {
 			if (hdr.getName().equals(MessageHeaders.HDR_FROM)) {
 				itemHandler.hdrHandlers.put(MessageHeaders.HDR_FROM, new HeaderHandler() {
-					public void handleHeader(final String hdrValue, final MessageCacheObject msg)
+					public void handleHeader(final String hdrValue, final ContainerMessage msg)
 							throws MessagingException {
 						try {
 							msg.setFrom(InternetAddress.parse(hdrValue, false));
@@ -618,7 +600,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 				});
 			} else if (hdr.getName().equals(MessageHeaders.HDR_TO)) {
 				itemHandler.hdrHandlers.put(MessageHeaders.HDR_TO, new HeaderHandler() {
-					public void handleHeader(final String hdrValue, final MessageCacheObject msg)
+					public void handleHeader(final String hdrValue, final ContainerMessage msg)
 							throws MessagingException {
 						try {
 							msg.setRecipients(RecipientType.TO, InternetAddress.parse(hdrValue, false));
@@ -629,7 +611,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 				});
 			} else if (hdr.getName().equals(MessageHeaders.HDR_CC)) {
 				itemHandler.hdrHandlers.put(MessageHeaders.HDR_CC, new HeaderHandler() {
-					public void handleHeader(final String hdrValue, final MessageCacheObject msg)
+					public void handleHeader(final String hdrValue, final ContainerMessage msg)
 							throws MessagingException {
 						try {
 							msg.setRecipients(RecipientType.CC, InternetAddress.parse(hdrValue, false));
@@ -640,7 +622,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 				});
 			} else if (hdr.getName().equals(MessageHeaders.HDR_BCC)) {
 				itemHandler.hdrHandlers.put(MessageHeaders.HDR_BCC, new HeaderHandler() {
-					public void handleHeader(final String hdrValue, final MessageCacheObject msg)
+					public void handleHeader(final String hdrValue, final ContainerMessage msg)
 							throws MessagingException {
 						try {
 							msg.setRecipients(RecipientType.BCC, InternetAddress.parse(hdrValue, false));
@@ -651,7 +633,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 				});
 			} else if (hdr.getName().equals(MessageHeaders.HDR_REPLY_TO)) {
 				itemHandler.hdrHandlers.put(MessageHeaders.HDR_REPLY_TO, new HeaderHandler() {
-					public void handleHeader(final String hdrValue, final MessageCacheObject msg)
+					public void handleHeader(final String hdrValue, final ContainerMessage msg)
 							throws MessagingException {
 						try {
 							msg.setReplyTo(InternetAddress.parse(hdrValue, true));
@@ -662,19 +644,19 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 				});
 			} else if (hdr.getName().equals(MessageHeaders.HDR_SUBJECT)) {
 				itemHandler.hdrHandlers.put(MessageHeaders.HDR_SUBJECT, new HeaderHandler() {
-					public void handleHeader(final String hdrValue, final MessageCacheObject msg) {
+					public void handleHeader(final String hdrValue, final ContainerMessage msg) {
 						try {
 							msg.setSubject(MimeUtility.decodeText(hdrValue));
 						} catch (final UnsupportedEncodingException e) {
 							LOG.error("Unsupported encoding in a message detected and monitored.", e);
 							MailInterfaceImpl.mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
-							msg.setSubject(MessageUtils.decodeMultiEncodedHeader(hdrValue));
+							msg.setSubject(MessageUtility.decodeMultiEncodedHeader(hdrValue));
 						}
 					}
 				});
 			} else if (hdr.getName().equals(MessageHeaders.HDR_DATE)) {
 				itemHandler.hdrHandlers.put(MessageHeaders.HDR_DATE, new HeaderHandler() {
-					public void handleHeader(final String hdrValue, final MessageCacheObject msg)
+					public void handleHeader(final String hdrValue, final ContainerMessage msg)
 							throws MessagingException {
 						try {
 							msg.setSentDate(mailDateFormat.parse(hdrValue));
@@ -685,35 +667,35 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 				});
 			} else if (hdr.getName().equals(MessageHeaders.HDR_X_PRIORITY)) {
 				itemHandler.hdrHandlers.put(MessageHeaders.HDR_X_PRIORITY, new HeaderHandler() {
-					public void handleHeader(final String hdrValue, final MessageCacheObject msg)
+					public void handleHeader(final String hdrValue, final ContainerMessage msg)
 							throws MessagingException {
 						msg.setHeader(MessageHeaders.HDR_X_PRIORITY, hdrValue);
 					}
 				});
 			} else if (hdr.getName().equals(MessageHeaders.HDR_MESSAGE_ID)) {
 				itemHandler.hdrHandlers.put(MessageHeaders.HDR_MESSAGE_ID, new HeaderHandler() {
-					public void handleHeader(final String hdrValue, final MessageCacheObject msg)
+					public void handleHeader(final String hdrValue, final ContainerMessage msg)
 							throws MessagingException {
 						msg.setHeader(MessageHeaders.HDR_MESSAGE_ID, hdrValue);
 					}
 				});
 			} else if (hdr.getName().equals(MessageHeaders.HDR_IN_REPLY_TO)) {
 				itemHandler.hdrHandlers.put(MessageHeaders.HDR_IN_REPLY_TO, new HeaderHandler() {
-					public void handleHeader(final String hdrValue, final MessageCacheObject msg)
+					public void handleHeader(final String hdrValue, final ContainerMessage msg)
 							throws MessagingException {
 						msg.setHeader(MessageHeaders.HDR_IN_REPLY_TO, hdrValue);
 					}
 				});
 			} else if (hdr.getName().equals(MessageHeaders.HDR_REFERENCES)) {
 				itemHandler.hdrHandlers.put(MessageHeaders.HDR_REFERENCES, new HeaderHandler() {
-					public void handleHeader(final String hdrValue, final MessageCacheObject msg)
+					public void handleHeader(final String hdrValue, final ContainerMessage msg)
 							throws MessagingException {
 						msg.setHeader(MessageHeaders.HDR_REFERENCES, hdrValue);
 					}
 				});
 			} else {
 				itemHandler.hdrHandlers.put(hdr.getName(), new HeaderHandler() {
-					public void handleHeader(final String hdrValue, final MessageCacheObject msg)
+					public void handleHeader(final String hdrValue, final ContainerMessage msg)
 							throws MessagingException {
 						msg.setHeader(hdr.getName(), hdrValue);
 					}
@@ -727,8 +709,8 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 		 * <code>com.openexchange.groupware.container.mail.MessageCacheObject</code>
 		 * instance
 		 */
-		public abstract void handleItem(final Item item, final MessageCacheObject msg) throws MessagingException,
-				OXException;
+		public abstract void handleItem(final Item item, final ContainerMessage msg) throws MessagingException,
+				MailException;
 	}
 
 	/**
@@ -748,14 +730,14 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 			if (item instanceof Flags) {
 				itemHandlers[j] = new FetchItemHandler() {
 					@Override
-					public void handleItem(final Item item, final MessageCacheObject msg) {
+					public void handleItem(final Item item, final ContainerMessage msg) {
 						msg.setFlags((Flags) item);
 					}
 				};
 			} else if (item instanceof ENVELOPE) {
 				itemHandlers[j] = new FetchItemHandler() {
 					@Override
-					public void handleItem(final Item item, final MessageCacheObject msg) throws MessagingException {
+					public void handleItem(final Item item, final ContainerMessage msg) throws MessagingException {
 						final ENVELOPE env = (ENVELOPE) item;
 						msg.setFrom(env.from);
 						msg.setRecipients(RecipientType.TO, env.to);
@@ -767,7 +749,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 						} catch (final UnsupportedEncodingException e) {
 							LOG.error("Unsupported encoding in a message detected and monitored.", e);
 							MailInterfaceImpl.mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
-							msg.setSubject(MessageUtils.decodeMultiEncodedHeader(env.subject));
+							msg.setSubject(MessageUtility.decodeMultiEncodedHeader(env.subject));
 						}
 						msg.setSentDate(env.date);
 					}
@@ -775,21 +757,21 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 			} else if (item instanceof INTERNALDATE) {
 				itemHandlers[j] = new FetchItemHandler() {
 					@Override
-					public void handleItem(final Item item, final MessageCacheObject msg) {
+					public void handleItem(final Item item, final ContainerMessage msg) {
 						msg.setReceivedDate(((INTERNALDATE) item).getDate());
 					}
 				};
 			} else if (item instanceof RFC822SIZE) {
 				itemHandlers[j] = new FetchItemHandler() {
 					@Override
-					public void handleItem(final Item item, final MessageCacheObject msg) {
+					public void handleItem(final Item item, final ContainerMessage msg) {
 						msg.setSize(((RFC822SIZE) item).size);
 					}
 				};
 			} else if (item instanceof BODYSTRUCTURE) {
 				itemHandlers[j] = new FetchItemHandler() {
 					@Override
-					public void handleItem(final Item item, final MessageCacheObject msg) throws OXException {
+					public void handleItem(final Item item, final ContainerMessage msg) throws MailException {
 						final BODYSTRUCTURE bs = (BODYSTRUCTURE) item;
 						msg.setBodystructure(bs);
 						final StringBuilder sb = new StringBuilder();
@@ -799,7 +781,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 						}
 						try {
 							msg.setContentType(new ContentType(sb.toString()));
-						} catch (final OXException e) {
+						} catch (final MailException e) {
 							if (LOG.isWarnEnabled()) {
 								LOG.warn(e.getMessage(), e);
 							}
@@ -808,7 +790,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 							 */
 							try {
 								msg.setContentType(new ContentType(sb.toString(), false));
-							} catch (final OXException ie) {
+							} catch (final MailException ie) {
 								LOG.error(ie.getMessage(), ie);
 								msg.setContentType(new ContentType(DEFAULT_CONTENT_TYPE));
 							}
@@ -818,15 +800,15 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 			} else if (item instanceof UID) {
 				itemHandlers[j] = new FetchItemHandler() {
 					@Override
-					public void handleItem(final Item item, final MessageCacheObject msg) {
+					public void handleItem(final Item item, final ContainerMessage msg) {
 						msg.setUid(((UID) item).uid);
 					}
 				};
 			} else if (item instanceof RFC822DATA || item instanceof BODY) {
 				itemHandlers[j] = new FetchItemHandler() {
 					@Override
-					public void handleItem(final Item item, final MessageCacheObject msg) throws MessagingException,
-							OXException {
+					public void handleItem(final Item item, final ContainerMessage msg) throws MessagingException,
+							MailException {
 						final InputStream headerStream;
 						if (item instanceof RFC822DATA) {
 							/*
@@ -865,7 +847,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 	private static final String EnvelopeCmd = "ENVELOPE INTERNALDATE RFC822.SIZE";
 
 	private static String getFetchCommand(final IMAPFolder imapFolder, final FetchProfile fp) {
-		final StringBuilder command = new StringBuilder();
+		final StringBuilder command = new StringBuilder(128);
 		boolean allHeaders = false;
 		final boolean envelope = (fp.contains(FetchProfile.Item.ENVELOPE));
 		if (envelope) {

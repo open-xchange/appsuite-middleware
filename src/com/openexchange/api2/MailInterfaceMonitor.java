@@ -49,33 +49,16 @@
 
 package com.openexchange.api2;
 
-import java.io.InputStream;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import javax.mail.Address;
-import javax.mail.AuthenticationFailedException;
-import javax.mail.Flags;
-import javax.mail.Folder;
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.Multipart;
-import javax.mail.Part;
-import javax.mail.Store;
-import javax.mail.internet.InternetAddress;
-
-import com.openexchange.ajax.Mail;
-import com.openexchange.imap.connection.DefaultIMAPConnection;
-import com.openexchange.tools.mail.ContentType;
-import com.sun.mail.imap.IMAPFolder;
+import com.openexchange.mail.MailConnection;
 
 /**
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
@@ -101,8 +84,6 @@ public class MailInterfaceMonitor implements MailInterfaceMonitorMBean {
 
 	private final AtomicInteger numFailedLogins = new AtomicInteger();
 
-	private final AtomicInteger numActive = new AtomicInteger();
-
 	private final Lock useTimeLock = new ReentrantLock();
 
 	private final Map<String, Integer> unsupportedEnc;
@@ -122,15 +103,11 @@ public class MailInterfaceMonitor implements MailInterfaceMonitorMBean {
 	 * @see com.openexchange.api2.MailInterfaceMonitorMBean#getNumActive()
 	 */
 	public int getNumActive() {
-		return numActive.get();
+		return MailConnection.getCounter();
 	}
 
 	public void changeNumActive(final boolean increment) {
-		if (increment) {
-			numActive.incrementAndGet();
-		} else if (numActive.get() > 0) {
-			numActive.decrementAndGet();
-		}
+		// Delete this method
 	}
 
 	/*
@@ -366,227 +343,6 @@ public class MailInterfaceMonitor implements MailInterfaceMonitorMBean {
 		} else {
 			unsupportedEnc.put(key, Integer.valueOf(num.intValue() + 1));
 		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.api2.MailInterfaceMonitorMBean#getMessage(java.lang.String,
-	 *      int, java.lang.String, java.lang.String, java.lang.String)
-	 */
-	public String getMessage(final String imapServer, final int imapPort, final String login, final String password,
-			final String msgUID) {
-		Mail.MailIdentifier mailIdentifier = null;
-		try {
-			mailIdentifier = new Mail.MailIdentifier(msgUID);
-		} catch (OXException e) {
-			return "Invalid Message UID. Please specify UID in correct pattern: [path-to-folder]/[UID] (e.g. INBOX/12)";
-		}
-		try {
-			final StringBuilder sb = new StringBuilder();
-			DefaultIMAPConnection dic = null;
-			Store store = null;
-			IMAPFolder f = null;
-			try {
-				final Properties props = System.getProperties();
-				props.put("mail.mime.base64.ignoreerrors", "true");
-				dic = new DefaultIMAPConnection();
-				dic.setProperties(props);
-				dic.setImapServer(imapServer, imapPort < 0 ? 143 : imapPort);
-				dic.setUsername(login);
-				dic.setPassword(password);
-				try {
-					dic.connect();
-					store = dic.getIMAPStore();
-				} catch (AuthenticationFailedException e) {
-					return "Wrong credentials";
-				}
-				f = (IMAPFolder) store.getFolder(mailIdentifier.getFolder());
-				f.open(Folder.READ_ONLY);
-				final Message msg = f.getMessageByUID(mailIdentifier.getMsgUID());
-				dumpMsg(sb, msg);
-			} finally {
-				if (f != null && f.isOpen()) {
-					f.close(false);
-				}
-				if (dic != null) {
-					dic.close();
-				}
-			}
-			return sb.toString();
-		} catch (MessagingException e) {
-			return e.getMessage();
-		} catch (Throwable t) {
-			return "Message could not be dumped: " + t.getMessage();
-		}
-	}
-
-	private final void dumpMsg(final StringBuilder sb, final Message msg) throws Exception {
-		dumpPart(msg, sb);
-	}
-
-	private static final String SEPERATOR = "---------------------------";
-
-	private static void dumpPart(final Part p, final StringBuilder out) throws Exception {
-		if (p instanceof Message) {
-			dumpEnvelope((Message) p, out);
-		}
-		/**
-		 * Dump input stream ..
-		 * 
-		 * InputStream is = p.getInputStream(); // If "is" is not already
-		 * buffered, wrap a BufferedInputStream // around it. if (!(is
-		 * instanceof BufferedInputStream)) is = new BufferedInputStream(is);
-		 * int c; while ((c = is.read()) != -1) System.out.write(c);
-		 * 
-		 */
-		final String ct = p.getContentType();
-		try {
-			pr("CONTENT-TYPE: " + (new ContentType(ct)).toString(), out);
-		} catch (OXException pex) {
-			pr("BAD CONTENT-TYPE: " + ct, out);
-		}
-		final String filename = p.getFileName();
-		if (filename != null) {
-			pr("FILENAME: " + filename, out);
-		}
-		/*
-		 * Using isMimeType to determine the content type avoids fetching the
-		 * actual content data until we need it.
-		 */
-		if (p.isMimeType("text/plain")) {
-			pr("This is plain text", out);
-			pr(SEPERATOR, out);
-			pr((String) p.getContent(), out);
-		} else if (p.isMimeType("multipart/*")) {
-			pr("This is a Multipart", out);
-			pr(SEPERATOR, out);
-			final Multipart mp = (Multipart) p.getContent();
-			level++;
-			final int count = mp.getCount();
-			for (int i = 0; i < count; i++) {
-				dumpPart(mp.getBodyPart(i), out);
-			}
-			level--;
-		} else if (p.isMimeType("message/rfc822")) {
-			pr("This is a Nested Message", out);
-			pr(SEPERATOR, out);
-			level++;
-			dumpPart((Part) p.getContent(), out);
-			level--;
-		} else {
-			/*
-			 * If we actually want to see the data, and it's not a MIME type we
-			 * know, fetch it and check its Java type.
-			 */
-			final Object o = p.getContent();
-			if (o instanceof String) {
-				pr("This is a string", out);
-				pr(SEPERATOR, out);
-				System.out.println((String) o);
-			} else if (o instanceof InputStream) {
-				pr("This is just an input stream", out);
-				pr(SEPERATOR, out);
-				final InputStream is = (InputStream) o;
-				int c;
-				while ((c = is.read()) != -1) {
-					System.out.write(c);
-				}
-			} else {
-				pr("This is an unknown type", out);
-				pr(SEPERATOR, out);
-				pr(o.toString(), out);
-			}
-		}
-	}
-
-	private static final void dumpEnvelope(final Message m, final StringBuilder out) throws Exception {
-		pr("This is the message envelope", out);
-		pr(SEPERATOR, out);
-		Address[] a;
-		// FROM
-		if ((a = m.getFrom()) != null) {
-			for (int j = 0; j < a.length; j++) {
-				pr("FROM: " + a[j].toString(), out);
-			}
-		}
-		// TO
-		if ((a = m.getRecipients(Message.RecipientType.TO)) != null) {
-			for (int j = 0; j < a.length; j++) {
-				pr("TO: " + a[j].toString(), out);
-				final InternetAddress ia = (InternetAddress) a[j];
-				if (ia.isGroup()) {
-					final InternetAddress[] aa = ia.getGroup(false);
-					for (int k = 0; k < aa.length; k++) {
-						pr("  GROUP: " + aa[k].toString(), out);
-					}
-				}
-			}
-		}
-		// SUBJECT
-		pr("SUBJECT: " + m.getSubject(), out);
-		// DATE
-		final Date d = m.getSentDate();
-		pr("SendDate: " + (d != null ? d.toString() : "UNKNOWN"), out);
-		// FLAGS
-		final Flags flags = m.getFlags();
-		final StringBuilder sb = new StringBuilder();
-		final Flags.Flag[] sf = flags.getSystemFlags(); // get the system flags
-		boolean first = true;
-		for (int i = 0; i < sf.length; i++) {
-			String s;
-			final Flags.Flag f = sf[i];
-			if (f == Flags.Flag.ANSWERED) {
-				s = "\\Answered";
-			} else if (f == Flags.Flag.DELETED) {
-				s = "\\Deleted";
-			} else if (f == Flags.Flag.DRAFT) {
-				s = "\\Draft";
-			} else if (f == Flags.Flag.FLAGGED) {
-				s = "\\Flagged";
-			} else if (f == Flags.Flag.RECENT) {
-				s = "\\Recent";
-			} else if (f == Flags.Flag.SEEN) {
-				s = "\\Seen";
-			} else {
-				continue; // skip it
-			}
-			if (first) {
-				first = false;
-			} else {
-				sb.append(' ');
-			}
-			sb.append(s);
-		}
-		final String[] uf = flags.getUserFlags(); // get the user flag strings
-		for (int i = 0; i < uf.length; i++) {
-			if (first) {
-				first = false;
-			} else {
-				sb.append(' ');
-			}
-			sb.append(uf[i]);
-		}
-		pr("FLAGS: " + sb.toString(), out);
-		// X-MAILER
-		final String[] hdrs = m.getHeader("X-Mailer");
-		if (hdrs != null) {
-			pr("X-Mailer: " + hdrs[0], out);
-		} else {
-			pr("X-Mailer NOT available", out);
-		}
-	}
-
-	private static String indentStr = "                                               ";
-
-	private static int level;
-
-	/**
-	 * Print a, possibly indented, string.
-	 */
-	private static final void pr(final String s, final StringBuilder sb) {
-		sb.append(indentStr.substring(0, level * 2));
-		sb.append(s).append('\n');
 	}
 
 }

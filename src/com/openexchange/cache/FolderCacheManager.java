@@ -54,6 +54,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -100,7 +101,7 @@ public class FolderCacheManager {
 
 	private static FolderCacheManager instance;
 
-	private static boolean initialized;
+	private static final AtomicBoolean initialized = new AtomicBoolean();
 
 	private final JCS folderCache;
 
@@ -130,7 +131,7 @@ public class FolderCacheManager {
 	}
 
 	public static boolean isInitialized() {
-		return initialized;
+		return initialized.get();
 	}
 
 	public static boolean isEnabled() {
@@ -141,12 +142,12 @@ public class FolderCacheManager {
 		if (!enabled) {
 			throw new FolderCacheNotEnabledException();
 		}
-		if (!initialized) {
+		if (!initialized.get()) {
 			LOCK_INIT.lock();
 			try {
 				if (instance == null) {
 					instance = new FolderCacheManager();
-					initialized = true;
+					initialized.set(true);
 				}
 			} finally {
 				LOCK_INIT.unlock();

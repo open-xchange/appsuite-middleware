@@ -49,9 +49,10 @@
 
 package com.openexchange.imap.command;
 
+import static com.openexchange.mail.MailInterfaceImpl.mailInterfaceMonitor;
+
 import javax.mail.MessagingException;
 
-import com.openexchange.api2.MailInterfaceImpl;
 import com.sun.mail.iap.CommandFailedException;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
@@ -59,7 +60,7 @@ import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.protocol.IMAPProtocol;
 
 /**
- * AbstractIMAPCommand
+ * {@link AbstractIMAPCommand}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
@@ -179,7 +180,7 @@ public abstract class AbstractIMAPCommand<T> {
 	public final T doCommand() throws MessagingException {
 		final long start = System.currentTimeMillis();
 		final Object obj = imapFolder.doCommand(protocolCommand);
-		MailInterfaceImpl.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+		mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 		return (T) obj;
 	}
 

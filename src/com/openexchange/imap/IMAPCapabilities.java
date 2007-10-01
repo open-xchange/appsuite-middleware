@@ -49,7 +49,6 @@
 
 package com.openexchange.imap;
 
-import com.openexchange.imap.IMAPProperties.BoolCapVal;
 
 /**
  * IMAPCapabilities
@@ -128,15 +127,12 @@ public class IMAPCapabilities {
 	}
 
 	/**
-	 * Sets ACL support to given value if ACL support is set to
-	 * {@link BoolCapVal#AUTO}. Otherwise the value of
-	 * {@link IMAPProperties#isSupportsACLs()} is taken.
+	 * Sets ACL support to given value
 	 * 
 	 * @param hasACL
 	 */
 	public void setACL(final boolean hasACL) {
-		this.hasACL = BoolCapVal.AUTO.equals(IMAPProperties.isSupportsACLsInternal()) ? hasACL : (BoolCapVal.TRUE
-				.equals(IMAPProperties.isSupportsACLsInternal()) ? true : false);
+		this.hasACL = hasACL;
 	}
 
 	public boolean hasIMAP4() {

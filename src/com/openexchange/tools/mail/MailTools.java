@@ -52,13 +52,15 @@ package com.openexchange.tools.mail;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.openexchange.mail.utils.MessageUtility;
+
 /**
  * MailTools
  * 
  * @author <a href="mailto:stefan.preuss@open-xchange.com">Stefan Preuss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @deprecated Use {@link MessageUtility} instead
  */
-
 public final class MailTools {
 
 	private static final String HTML_BR = "<br>";
@@ -211,7 +213,7 @@ public final class MailTools {
 		return content;
 	}
 
-	private static final Pattern PATTERN_TARGET = Pattern.compile("(<a.*target=\"?)([^\\s\">]+)(\"?.*</a>)",
+	private static final Pattern PATTERN_TARGET = Pattern.compile("(<a[^>]*?target=\"?)([^\\s\">]+)(\"?.*</a>)",
 			Pattern.CASE_INSENSITIVE);
 
 	private static final String STR_BLANK = "_blank";
@@ -229,6 +231,9 @@ public final class MailTools {
 		 * No target specified
 		 */
 		final int pos = anchorTag.indexOf('>');
+		if (pos == -1) {
+			return anchorTag;
+		}
 		final StringBuilder sb = new StringBuilder(128);
 		return sb.append(anchorTag.substring(0, pos)).append(" target=\"").append(STR_BLANK).append('"').append(
 				anchorTag.substring(pos)).toString();

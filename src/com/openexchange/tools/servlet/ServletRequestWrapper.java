@@ -67,9 +67,9 @@ import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletInputStream;
 import javax.servlet.ServletRequest;
 
-import com.openexchange.api2.OXException;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
+import com.openexchange.mail.MailException;
 import com.openexchange.tools.ajp13.AJPv13Exception;
 import com.openexchange.tools.ajp13.AJPv13Exception.AJPCode;
 import com.openexchange.tools.mail.ContentType;
@@ -175,7 +175,7 @@ public class ServletRequestWrapper implements ServletRequest {
 			final ContentType ct;
 			try {
 				ct = new ContentType(value);
-			} catch (OXException e) {
+			} catch (final MailException e) {
 				LOG.error(e.getMessage(), e);
 				throw new AJPv13Exception(AJPCode.INVALID_CONTENT_TYPE, value);
 			}

@@ -235,7 +235,7 @@ public final class AJPv13RequestHandler {
 		int l = 0;
 		for (final byte b : bytes) {
 			if (c == 16) {
-				sb.append('\n');
+				sb.append('\r').append('\n');
 				c = 0;
 				l += 16;
 				final String hex = Integer.toHexString(l).toUpperCase();
@@ -247,7 +247,7 @@ public final class AJPv13RequestHandler {
 			} else {
 				sb.append(' ');
 			}
-			final String s = Integer.toHexString(b).toUpperCase();
+			final String s = Integer.toHexString(b & 0xff).toUpperCase();
 			if (s.length() == 1) {
 				sb.append('0');
 			}

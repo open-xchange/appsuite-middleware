@@ -97,11 +97,11 @@ public class QuotedPrintable {
 
 	public static String decodeString(final String quotedPrintableStr, final String charset) throws IOException,
 			MessagingException {
-		final ByteArrayInputStream bais = new ByteArrayInputStream(quotedPrintableStr.getBytes(charset));
-		final InputStream inStream = MimeUtility.decode(bais, ENCODING_QP);
+		final InputStream inStream = MimeUtility.decode(new ByteArrayInputStream(quotedPrintableStr.getBytes(charset)),
+				ENCODING_QP);
 		final ByteArrayOutputStream decodedBytes = new ByteArrayOutputStream();
-		int k = -1, size = 512;
-		final byte[] buffer = new byte[size];
+		int k = -1;
+		final byte[] buffer = new byte[512];
 		while ((k = inStream.read(buffer)) != -1) {
 			decodedBytes.write(buffer, 0, k);
 		}

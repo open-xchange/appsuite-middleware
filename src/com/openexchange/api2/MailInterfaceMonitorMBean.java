@@ -136,12 +136,6 @@ public interface MailInterfaceMonitorMBean {
 	 * 
 	 */
 	void resetNumFailedLogins();
-
-	/**
-	 * 
-	 * @return a textual representation of given message
-	 */
-	String getMessage(String imapServer, int imapPort, String login, String password, String msgUID);
 	
 	/**
 	 * @return the occurrences of unsupported encoding exceptions as a

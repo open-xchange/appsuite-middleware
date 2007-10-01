@@ -53,13 +53,12 @@ import javax.mail.Flags;
 import javax.mail.MessagingException;
 import javax.mail.Flags.Flag;
 
-import com.openexchange.imap.OXMailException;
-import com.openexchange.imap.OXMailException.MailCode;
+import com.openexchange.imap.IMAPException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
 
 /**
- * FlagsIMAPCommand - Enables/disables message's system flags e.g. \SEEN or
+ * {@link FlagsIMAPCommand} - Enables/disables message's system flags e.g. \SEEN or
  * \DELETED
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
@@ -166,7 +165,7 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
 
 	public static final String FLAG_USER = "\\User";
 
-	private static final String getFlagString(final Flag systemFlag) throws MessagingException {
+	private static String getFlagString(final Flag systemFlag) throws MessagingException {
 		if (systemFlag.equals(Flags.Flag.ANSWERED)) {
 			return FLAG_ANSWERED;
 		} else if (systemFlag.equals(Flags.Flag.DELETED)) {
@@ -252,7 +251,7 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
 	@Override
 	protected void handleLastResponse(final Response lastResponse) throws MessagingException {
 		if (!lastResponse.isOK()) {
-			throw new MessagingException(OXMailException.getFormattedMessage(MailCode.PROTOCOL_ERROR,
+			throw new MessagingException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR,
 					"UID STORE failed: " + lastResponse.getRest()));
 		}
 	}

@@ -50,7 +50,7 @@
 package com.openexchange.groupware.infostore.utils;
 
 import com.openexchange.groupware.infostore.InfostoreConfig;
-import com.openexchange.imap.UserSettingMail;
+import com.openexchange.mail.usersetting.UserSettingMail;
 
 public class InfostoreConfigUtils {
 	private static long maxUploadSize = -1;

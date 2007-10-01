@@ -63,8 +63,8 @@ import com.openexchange.groupware.Component;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.imap.IMAPProperties;
-import com.openexchange.imap.spellcheck.SpellCheckConfig;
+import com.openexchange.mail.config.MailConfig;
+import com.openexchange.mail.spellcheck.SpellCheckConfig;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.text.spelling.OXAspellCheck;
 import com.openexchange.tools.text.spelling.OXSpellCheckResult;
@@ -97,7 +97,7 @@ public class AJAXSpellCheck {
 					"Dictionary (id=%1$s) does not hold a command. Please specify a command in corresponding \"spellcheck.cfg\" file." })
 	private String getCommand() throws AbstractOXException {
 		final String lang = session.getLanguage().toUpperCase();
-		final SpellCheckConfig scc = IMAPProperties.getSpellCheckConfig();
+		final SpellCheckConfig scc = MailConfig.getSpellCheckConfig();
 		if (scc == null) {
 			throw EXCEPTIONS.createException(1, EMPTY_MSG_ARGS);
 		}
@@ -117,10 +117,10 @@ public class AJAXSpellCheck {
 			msg={ "Missing SpellCheckConfig object.", "User dictionary could not be found.", "An I/O error occurred: %1$s." })
 	public AJAXSpellCheckResult[] checkText(final String text) throws AbstractOXException {
 		try {
-			if (IMAPProperties.getSpellCheckConfig() == null) {
+			if (MailConfig.getSpellCheckConfig() == null) {
 				throw EXCEPTIONS.createException(4, EMPTY_MSG_ARGS);
 			}
-			if (!IMAPProperties.getSpellCheckConfig().isEnabled()) {
+			if (!MailConfig.getSpellCheckConfig().isEnabled()) {
 				return new AJAXSpellCheckResult[] {};
 			}
 			final String command = getCommand();

@@ -49,28 +49,27 @@
 
 package com.openexchange.groupware.container.mail;
 
-import static com.openexchange.api2.MailInterfaceImpl.getDefaultIMAPProperties;
-import static com.openexchange.groupware.container.mail.parser.MessageUtils.parseAddressList;
+import static com.openexchange.mail.utils.MessageUtility.parseAddressList;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.Properties;
 import java.util.TimeZone;
 
 import javax.mail.MessagingException;
-import javax.mail.Session;
-import javax.mail.Transport;
 import javax.mail.Message.RecipientType;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
-import com.openexchange.api2.MailInterfaceImpl;
-import com.openexchange.api2.OXException;
-import com.openexchange.imap.IMAPProperties;
-import com.openexchange.imap.OXMailException;
-import com.openexchange.imap.OXMailException.MailCode;
+import com.openexchange.mail.MailConnection;
+import com.openexchange.mail.MailException;
+import com.openexchange.mail.config.MailConfig;
+import com.openexchange.mail.mime.MIMEDefaultSession;
+import com.openexchange.mail.mime.MIMEMailException;
+import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.mail.ContentType;
+import com.openexchange.tools.servlet.UnsynchronizedByteArrayOutputStream;
 
 /**
  * MailObject
@@ -98,7 +97,7 @@ public class MailObject {
 
 	private boolean requestReadReceipt;
 
-	private final SessionObject sessionObj;
+	private final SessionObject session;
 
 	private final int objectId;
 
@@ -106,37 +105,25 @@ public class MailObject {
 
 	private final int module;
 
-	private Session mailSession;
-
 	public MailObject(final SessionObject sessionObj, final int objectId, final int folderId, final int module) {
 		super();
-		this.sessionObj = sessionObj;
+		this.session = sessionObj;
 		this.objectId = objectId;
 		this.folderId = folderId;
 		this.module = module;
 	}
 
-	private final void createMailSession() throws OXException {
-		if (mailSession != null) {
-			return;
-		}
-		final Properties mailProperties = getDefaultIMAPProperties();
-		mailProperties.put("mail.smtp.host", sessionObj.getIMAPProperties().getSmtpServer());
-		mailProperties.put("mail.smtp.port", String.valueOf(sessionObj.getIMAPProperties().getSmtpPort()));
-		mailSession = Session.getDefaultInstance(mailProperties, null);
-	}
-
-	private final void validateMailObject() throws OXException {
+	private final void validateMailObject() throws MailException {
 		if (fromAddr == null || fromAddr.length() == 0) {
-			throw new OXMailException(MailCode.MISSING_FIELD, "From", "");
+			throw new MailException(MailException.Code.MISSING_FIELD, "From");
 		} else if (toAddrs == null || toAddrs.length == 0) {
-			throw new OXMailException(MailCode.MISSING_FIELD, "To", "");
+			throw new MailException(MailException.Code.MISSING_FIELD, "To");
 		} else if (contentType == null || contentType.length() == 0) {
-			throw new OXMailException(MailCode.MISSING_FIELD, "Content-Type", "");
+			throw new MailException(MailException.Code.MISSING_FIELD, "Content-Type");
 		} else if (subject == null) {
-			throw new OXMailException(MailCode.MISSING_FIELD, "Subject", "");
+			throw new MailException(MailException.Code.MISSING_FIELD, "Subject");
 		} else if (text == null) {
-			throw new OXMailException(MailCode.MISSING_FIELD, "Text", "");
+			throw new MailException(MailException.Code.MISSING_FIELD, "Text");
 		}
 	}
 
@@ -154,11 +141,10 @@ public class MailObject {
 
 	private final static String HEADER_X_MAILER = "X-Mailer";
 
-	public final void send() throws OXException {
+	public final void send() throws MailException {
 		try {
 			validateMailObject();
-			createMailSession();
-			final MimeMessage msg = new MimeMessage(mailSession);
+			final MimeMessage msg = new MimeMessage(MIMEDefaultSession.getDefaultSession());
 			/*
 			 * Set from
 			 */
@@ -194,7 +180,7 @@ public class MailObject {
 				/*
 				 * Ensure a charset is set
 				 */
-				ct.addParameter(STR_CHARSET, IMAPProperties.getDefaultMimeCharset());
+				ct.addParameter(STR_CHARSET, MailConfig.getDefaultMimeCharset());
 			}
 			/*
 			 * Set subject
@@ -213,10 +199,10 @@ public class MailObject {
 						msg.setText(text, ct.getParameter(STR_CHARSET));
 					}
 				} else {
-					throw new OXMailException(MailCode.UNSUPPORTED_MIME_TYPE, ct.toString());
+					throw new MailException(MailException.Code.UNSUPPORTED_MIME_TYPE, ct.toString());
 				}
 			} else {
-				throw new OXMailException(MailCode.UNSUPPORTED_MIME_TYPE, ct.toString());
+				throw new MailException(MailException.Code.UNSUPPORTED_MIME_TYPE, ct.toString());
 			}
 			/*
 			 * Disposition notification
@@ -248,36 +234,21 @@ public class MailObject {
 			 */
 			if (msg.getSentDate() == null) {
 				final long current = System.currentTimeMillis();
-				final TimeZone userTimeZone = TimeZone.getTimeZone(sessionObj.getUserObject().getTimeZone());
+				final TimeZone userTimeZone = TimeZone.getTimeZone(session.getUserObject().getTimeZone());
 				msg.setSentDate(new Date(current + userTimeZone.getOffset(current)));
 			}
 			/*
 			 * Finally send mail
 			 */
-			final Transport transport = mailSession.getTransport("smtp");
-			if (IMAPProperties.isSmtpAuth()) {
-				transport.connect(sessionObj.getIMAPProperties().getSmtpServer(), sessionObj.getIMAPProperties()
-						.getImapLogin(), MailInterfaceImpl.encodePassword(sessionObj.getIMAPProperties()
-						.getImapPassword()));
-			} else {
-				transport.connect();
-			}
-			MailInterfaceImpl.mailInterfaceMonitor.changeNumActive(true);
-			try {
-				final long start = System.currentTimeMillis();
-				msg.saveChanges();
-				transport.sendMessage(msg, msg.getAllRecipients());
-				MailInterfaceImpl.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-			} finally {
-				try {
-					transport.close();
-				} finally {
-					MailInterfaceImpl.mailInterfaceMonitor.changeNumActive(false);
-				}
-
-			}
+			final MailTransport transport = MailTransport.getInstance(session, MailConnection
+					.getInstance(session));
+			final UnsynchronizedByteArrayOutputStream bos = new UnsynchronizedByteArrayOutputStream();
+			msg.writeTo(bos);
+			transport.sendRawMessage(bos.toByteArray());
 		} catch (final MessagingException e) {
-			throw MailInterfaceImpl.handleMessagingException(e);
+			throw MIMEMailException.handleMessagingException(e);
+		} catch (final IOException e) {
+			throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
 		}
 	}
 

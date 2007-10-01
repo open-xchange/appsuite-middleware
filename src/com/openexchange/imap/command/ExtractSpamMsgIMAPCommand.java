@@ -49,8 +49,6 @@
 
 package com.openexchange.imap.command;
 
-import static com.openexchange.imap.IMAPProperties.getDefaultJavaMailProperties;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -59,9 +57,8 @@ import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.internet.MimeMessage;
 
-import com.openexchange.imap.IMAPPropertyException;
-import com.openexchange.imap.OXMailException;
-import com.openexchange.imap.OXMailException.MailCode;
+import com.openexchange.imap.IMAPException;
+import com.openexchange.mail.mime.MIMEDefaultSession;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.protocol.BODY;
@@ -100,14 +97,14 @@ public final class ExtractSpamMsgIMAPCommand extends AbstractIMAPCommand<Message
 
 	private int bodyIndex = -1;
 
-	public ExtractSpamMsgIMAPCommand(final IMAPFolder imapFolder, final long[] uids) throws IMAPPropertyException {
+	public ExtractSpamMsgIMAPCommand(final IMAPFolder imapFolder, final long[] uids) {
 		super(imapFolder);
 		this.uids = uids == null ? L1 : uids;
 		returnDefaultValue = (this.uids.length == 0);
 		this.length = this.uids.length;
 		args = length == 0 ? ARGS_EMPTY : IMAPNumArgSplitter.splitUIDArg(uids, true);
 		msgList = new ArrayList<Message>(length);
-		dummySession = Session.getDefaultInstance(getDefaultJavaMailProperties());
+		dummySession = MIMEDefaultSession.getDefaultSession();
 	}
 
 	/*
@@ -174,7 +171,7 @@ public final class ExtractSpamMsgIMAPCommand extends AbstractIMAPCommand<Message
 	@Override
 	protected void handleLastResponse(final Response lastResponse) throws MessagingException {
 		if (!lastResponse.isOK()) {
-			throw new MessagingException(OXMailException.getFormattedMessage(MailCode.PROTOCOL_ERROR,
+			throw new MessagingException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR,
 					"UID FETCH failed: " + lastResponse.getRest()));
 		}
 	}

@@ -134,6 +134,10 @@ public abstract class AbstractAgent {
 	 */
 	public void registerMBean(final String name, final Object mbean) throws Exception {
 		final ObjectName objectName = new ObjectName(name);
+		if (mbs.isRegistered(objectName)) {
+			printTrace(objectName.getCanonicalName() + " already registered");
+			return;
+		}
 		mbs.registerMBean(mbean, objectName);
 		printTrace(name + " registered");
 	}
@@ -154,6 +158,10 @@ public abstract class AbstractAgent {
 	 * Uniquely identify the MBeans and register them with the MBeanServer
 	 */
 	public void registerMBean(final ObjectName objectName, final Object mbean) throws Exception {
+		if (mbs.isRegistered(objectName)) {
+			printTrace(objectName.getCanonicalName() + " already registered");
+			return;
+		}
 		mbs.registerMBean(mbean, objectName);
 		printTrace(objectName.getCanonicalName() + " registered");
 	}
@@ -162,8 +170,10 @@ public abstract class AbstractAgent {
 	 * Unregister a MBean on the MBeanServer
 	 */
 	public void unregisterMBean(final ObjectName objectName) throws Exception {
-		mbs.unregisterMBean(objectName);
-		printTrace(objectName.getCanonicalName() + " unregistered");
+		if (mbs.isRegistered(objectName)) {
+			mbs.unregisterMBean(objectName);
+			printTrace(objectName.getCanonicalName() + " unregistered");
+		}
 	}
 
 	protected GaugeMonitor gm;

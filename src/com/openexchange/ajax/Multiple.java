@@ -77,14 +77,14 @@ import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api.OXPermissionException;
-import com.openexchange.api2.MailInterface;
-import com.openexchange.api2.MailInterfaceImpl;
 import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.json.OXJSONWriter;
+import com.openexchange.mail.MailException;
+import com.openexchange.mail.MailInterface;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderException;
@@ -133,7 +133,7 @@ public class Multiple extends SessionServlet {
 			LOG.error(exc.getMessage() + Tools.logHeaderForError(req), exc);
 			jsonArray = new JSONArray();
 		}
-		
+
 		final JSONArray respArr = new JSONArray();
 		try {
 
@@ -158,7 +158,7 @@ public class Multiple extends SessionServlet {
 			if (mi != null) {
 				try {
 					mi.close(true);
-				} catch (final OXException e) {
+				} catch (final MailException e) {
 					LOG.error(e.getMessage(), e);
 				}
 			}
@@ -619,7 +619,7 @@ public class Multiple extends SessionServlet {
 					final MailInterface mi;
 					tmp = req.getAttribute(ATTRIBUTE_MAIL_INTERFACE);
 					if (tmp == null) {
-						mi = MailInterfaceImpl.getInstance(sessionObj);
+						mi = MailInterface.getInstance(sessionObj);
 						req.setAttribute(ATTRIBUTE_MAIL_INTERFACE, mi);
 					} else {
 						mi = ((MailInterface) tmp);
@@ -636,7 +636,12 @@ public class Multiple extends SessionServlet {
 						}
 						return;
 					}
-				} catch (final OXException e) {
+				} catch (final MailException e) {
+					LOG.error(e.getMessage(), e);
+					jsonWriter.object();
+					Response.writeException(e, jsonWriter);
+					jsonWriter.endObject();
+				} catch (final OXPermissionException e) {
 					LOG.error(e.getMessage(), e);
 					jsonWriter.object();
 					Response.writeException(e, jsonWriter);

@@ -82,7 +82,8 @@ public final class AJPv13RequestBody extends AJPv13Request {
 		if (payloadData == null) {
 			throw new AJPv13Exception(AJPCode.MISSING_PAYLOAD_DATA);
 		}
-		if (payloadData.length == 0) {
+		final int chunkContentLength;
+		if (payloadData.length == 0 || (chunkContentLength = parseInt()) == 0) {
 			/*
 			 * Empty data package received
 			 */
@@ -119,7 +120,6 @@ public final class AJPv13RequestBody extends AJPv13Request {
 		/*
 		 * Parse current size
 		 */
-		final int chunkContentLength = parseInt();
 		ajpRequestHandler.increaseTotalRequestedContentLength(chunkContentLength);
 		final byte[] contentBytes = getByteSequence(chunkContentLength);
 		/*

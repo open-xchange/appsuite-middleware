@@ -55,6 +55,7 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Matcher;
@@ -73,7 +74,7 @@ public final class Html2TextConverter {
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(Html2TextConverter.class);
 
-	private static boolean initialized;
+	private static final AtomicBoolean initialized = new AtomicBoolean();
 
 	private static final Lock INIT_LOCK = new ReentrantLock();
 
@@ -96,7 +97,7 @@ public final class Html2TextConverter {
 	private static Properties htmlEntities;
 
 	private static void init() {
-		if (!initialized) {
+		if (!initialized.get()) {
 			INIT_LOCK.lock();
 			try {
 				if (null == htmlEntities) {
@@ -117,7 +118,7 @@ public final class Html2TextConverter {
 							}
 						}
 					}
-					initialized = true;
+					initialized.set(true);
 				}
 			} finally {
 				INIT_LOCK.unlock();

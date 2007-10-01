@@ -261,7 +261,7 @@ public final class OXServletInputStream extends ServletInputStream {
 				numOfFilledBytes += data.length;
 				remainingLen -= data.length;
 			}
-			return numOfFilledBytes;
+			return numOfFilledBytes == 0 ? -1 : numOfFilledBytes;
 		} finally {
 			MUTEX.unlock();
 		}

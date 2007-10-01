@@ -50,12 +50,17 @@
 package com.openexchange.tools.ajp13;
 
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.util.Enumeration;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import com.openexchange.configuration.ServerConfig;
+import com.openexchange.configuration.ServerConfig.Property;
 
 public class TestServlet extends HttpServlet {
 
@@ -111,10 +116,102 @@ public class TestServlet extends HttpServlet {
 			}
             page.append("<br>");
 		}
+		page.append("</p><p>The content: ").append(getBody(req));
         page.append("</p></body>\n</html>");
 		resp.setContentType("text/html; charset=UTF-8");
         final byte[] output = page.toString().getBytes("UTF-8");
 		resp.setContentLength(output.length);
 		resp.getOutputStream().write(output);
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected void doPut(final HttpServletRequest req,
+        final HttpServletResponse resp) throws ServletException, IOException {
+		resp.setStatus(HttpServletResponse.SC_OK);
+        final StringBuilder page = new StringBuilder();
+        page.append("<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n");
+        page.append("<html>\n");
+        page.append("<head><title>TestServlet's doGet Page</title></head>\n");
+        page.append("<body>\n");
+        page.append("<h1><blink>TestServlet's doGet Page</blink></h1><hr/>\n");
+        page.append("<p>This is a tiny paragraph with some text inside!</p>\n");
+        page.append("<p>Again a tiny paragraph with some text inside!</p>\n");
+        page.append("<ol><li>First list entry</li>");
+        page.append("<li>Sublist<ul><li>Foo</li><li>Bar</li></ul></li>");
+        page.append("<li>Third list entry</li></ol>\n");
+        page.append("<p><b>Parameters</b><br>");
+        Enumeration paramEnum = req.getParameterNames();
+		while (paramEnum.hasMoreElements()) {
+			final String parameterName = (String) paramEnum.nextElement();
+            page.append(parameterName);
+            page.append(": ");
+            page.append(req.getParameter(parameterName));
+            page.append("<br>");
+		}
+        page.append("</p><p><b>Headers</b><br>");
+        paramEnum = req.getHeaderNames();
+		while (paramEnum.hasMoreElements()) {
+			final String headerName = (String) paramEnum.nextElement();
+            page.append(headerName);
+            page.append(": ");
+            final Enumeration valueEnum = req.getHeaders(headerName);
+			while (valueEnum.hasMoreElements()) {
+                page.append(valueEnum.nextElement());
+                page.append(valueEnum.hasMoreElements() ? ", " : "");
+			}
+            page.append("<br>");
+		}
+		page.append("</p><p>The content: ").append(getBody(req));
+        page.append("</p></body>\n</html>");
+		resp.setContentType("text/html; charset=UTF-8");
+        final byte[] output = page.toString().getBytes("UTF-8");
+		resp.setContentLength(output.length);
+		resp.getOutputStream().write(output);
+	}
+	
+	/**
+	 * Returns the complete body as a string. Be carefull when getting big
+	 * request bodies.
+	 * 
+	 * @param req
+	 *            http servlet request.
+	 * @return a string with the complete body.
+	 * @throws IOException
+	 *             if an error occurs while reading the body.
+	 */
+	public static String getBody(final HttpServletRequest req) throws IOException {
+		InputStreamReader isr = null;
+		try {
+			int count = 0;
+			final char[] c = new char[8192];
+			final String charset = null == req.getCharacterEncoding() ? ServerConfig
+					.getProperty(Property.DefaultEncoding) : req.getCharacterEncoding();
+			isr = new InputStreamReader(req.getInputStream(), charset);
+			if ((count = isr.read(c)) > 0) {
+				final StringBuilder sb = new StringBuilder(16384);
+				do {
+					sb.append(c, 0, count);
+				} while ((count = isr.read(c)) > 0);
+				return sb.toString();
+			}
+			return "";
+		} catch (final UnsupportedEncodingException e) {
+			/*
+			 * Should never occur
+			 */
+			//LOG.error("Unsupported encoding in request", e);
+			return "";
+		} finally {
+			if (null != isr) {
+				try {
+					isr.close();
+				} catch (final IOException e) {
+					//LOG.error(e.getLocalizedMessage(), e);
+				}
+			}
+		}
 	}
 }

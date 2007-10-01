@@ -54,7 +54,7 @@ import com.openexchange.groupware.settings.AbstractMailFuncs;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.SettingSetup;
 import com.openexchange.groupware.settings.SharedValue;
-import com.openexchange.imap.UserSettingMail;
+import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.sessiond.SessionObject;
 
 /**

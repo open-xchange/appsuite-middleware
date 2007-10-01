@@ -61,7 +61,6 @@ import java.util.TimerTask;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.ContextException;
 import com.openexchange.groupware.contexts.ContextStorage;
@@ -69,9 +68,6 @@ import com.openexchange.groupware.contexts.LoginInfo;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.imap.IMAPPropertyException;
-import com.openexchange.imap.IMAPPropertiesFactory;
-import com.openexchange.imap.UserSettingMailStorage;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.server.ServerTimer;
 
@@ -245,13 +241,6 @@ public class SessionHandler extends TimerTask {
 
         sessionobject.setRandomToken(randomId);
         sessionobject.setSecret(sessionIdGenerator.createSecretId(loginName, client_ip));
-
-        // Load IMAP Info
-        try {
-            sessionobject.setIMAPProperties(IMAPPropertiesFactory.getImapProperties(sessionobject));
-        } catch (final IMAPPropertyException e) {
-            LOG.error("ERROR! IMAPPropertyException OCCURRED " + e.getMessage());
-        }
 
         if (sessions.containsKey(sessionId) && LOG.isDebugEnabled()) {
             //if (LOG.isDebugEnabled()) {

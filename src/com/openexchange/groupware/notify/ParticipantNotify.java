@@ -92,8 +92,9 @@ import com.openexchange.groupware.tasks.Task;
 import com.openexchange.i18n.StringHelper;
 import com.openexchange.i18n.StringTemplate;
 import com.openexchange.i18n.Template;
-import com.openexchange.imap.UserSettingMail;
-import com.openexchange.imap.UserSettingMailStorage;
+import com.openexchange.mail.MailException;
+import com.openexchange.mail.usersetting.UserSettingMail;
+import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.exceptions.LoggingLogic;
@@ -139,7 +140,7 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 		//System.out.println(folderId);
 		try {
 			mail.send();
-		} catch (final OXException e) {
+		} catch (final MailException e) {
 			LL.log(e);
 		}
 	}

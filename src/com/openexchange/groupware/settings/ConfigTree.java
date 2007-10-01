@@ -59,8 +59,6 @@ import java.util.TimeZone;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.api2.MailInterface;
-import com.openexchange.api2.MailInterfaceImpl;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.configuration.ParticipantConfig;
@@ -70,9 +68,11 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.settings.SettingException.Code;
-import com.openexchange.imap.IMAPPropertyException;
-import com.openexchange.imap.UserSettingMail;
-import com.openexchange.imap.UserSettingMailStorage;
+import com.openexchange.mail.MailException;
+import com.openexchange.mail.MailInterface;
+import com.openexchange.mail.config.MailConfigException;
+import com.openexchange.mail.usersetting.UserSettingMail;
+import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.server.Version;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
@@ -611,15 +611,15 @@ public final class ConfigTree {
                 final Setting setting) throws SettingException {
                 MailInterface mail = null;
                 try {
-                    mail = MailInterfaceImpl.getInstance(session);
+                    mail = MailInterface.getInstance(session);
                     setting.setSingleValue(mail.getInboxFolder());
-                } catch (OXException e) {
+                } catch (MailException e) {
                     throw new SettingException(e);
                 } finally {
                     if (mail != null) {
                         try {
                             mail.close(true);
-                        } catch (OXException e) {
+                        } catch (MailException e) {
                             LOG.error(e.getMessage(), e);
                         }
                     }
@@ -634,15 +634,15 @@ public final class ConfigTree {
                 final Setting setting) throws SettingException {
                 MailInterface mail = null;
                 try {
-                    mail = MailInterfaceImpl.getInstance(session);
+                    mail = MailInterface.getInstance(session);
                     setting.setSingleValue(mail.getDraftsFolder());
-                } catch (OXException e) {
+                } catch (MailException e) {
                     throw new SettingException(e);
                 } finally {
                     if (mail != null) {
                         try {
                             mail.close(true);
-                        } catch (OXException e) {
+                        } catch (MailException e) {
                             LOG.error(e.getMessage(), e);
                         }
                     }
@@ -657,15 +657,15 @@ public final class ConfigTree {
                 final Setting setting) throws SettingException {
                 MailInterface mail = null;
                 try {
-                    mail = MailInterfaceImpl.getInstance(session);
+                    mail = MailInterface.getInstance(session);
                     setting.setSingleValue(mail.getSentFolder());
-                } catch (OXException e) {
+                } catch (MailException e) {
                     throw new SettingException(e);
                 } finally {
                     if (mail != null) {
                         try {
                             mail.close(true);
-                        } catch (OXException e) {
+                        } catch (MailException e) {
                             LOG.error(e.getMessage(), e);
                         }
                     }
@@ -680,15 +680,15 @@ public final class ConfigTree {
                 final Setting setting) throws SettingException {
                 MailInterface mail = null;
                 try {
-                    mail = MailInterfaceImpl.getInstance(session);
+                    mail = MailInterface.getInstance(session);
                     setting.setSingleValue(mail.getSpamFolder());
-                } catch (OXException e) {
+                } catch (MailException e) {
                     throw new SettingException(e);
                 } finally {
                     if (mail != null) {
                         try {
                             mail.close(true);
-                        } catch (OXException e) {
+                        } catch (MailException e) {
                             LOG.error(e.getMessage(), e);
                         }
                     }
@@ -703,15 +703,15 @@ public final class ConfigTree {
                 final Setting setting) throws SettingException {
                 MailInterface mail = null;
                 try {
-                    mail = MailInterfaceImpl.getInstance(session);
+                    mail = MailInterface.getInstance(session);
                     setting.setSingleValue(mail.getTrashFolder());
-                } catch (OXException e) {
+                } catch (MailException e) {
                     throw new SettingException(e);
                 } finally {
                     if (mail != null) {
                         try {
                             mail.close(true);
-                        } catch (OXException e) {
+                        } catch (MailException e) {
                             LOG.error(e.getMessage(), e);
                         }
                     }
@@ -848,7 +848,7 @@ public final class ConfigTree {
                 final UserSettingMail settings = session.getUserSettingMail();
                 try {
                     setting.setSingleValue(settings.isSpamEnabled());
-                } catch (IMAPPropertyException e) {
+                } catch (final MailConfigException e) {
                     throw new SettingException(e);
                 }
             }
