@@ -148,8 +148,8 @@ public final class AliasCharsetProvider extends CharsetProvider {
 			 * Prepare supported charsets
 			 */
 			final Charset[] cs = new Charset[] {
-					new AliasCharset("BIG-5", new String[] { "big-5" }, Charset.forName("BIG5")),
-					new AliasCharset("UTF_8", new String[] { "utf_8" }, Charset.forName("UTF-8")) };
+					new AliasCharset("BIG-5", new String[] { "BIG_5" }, Charset.forName("BIG5")),
+					new AliasCharset("UTF_8", null, Charset.forName("UTF-8")) };
 			charsets = Collections.unmodifiableCollection(Arrays.asList(cs));
 			final Map<String, Charset> n2c = new HashMap<String, Charset>();
 			for (int i = 0; i < cs.length; i++) {
