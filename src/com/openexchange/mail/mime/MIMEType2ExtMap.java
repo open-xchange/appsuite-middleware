@@ -56,8 +56,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.net.URL;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -65,8 +67,6 @@ import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
-import com.openexchange.configuration.SystemConfig;
 
 /**
  * {@link MIMEType2ExtMap} - Maps MIME types to file extensions and vice versa.
@@ -78,7 +78,6 @@ import com.openexchange.configuration.SystemConfig;
  * <li>The file <i>.mime.types</i> in the user's home directory.</li>
  * <li>The file <i>&lt;java.home&gt;/lib/mime.types</i>.</li>
  * <li>The file or resources named <i>META-INF/mime.types</i>.</li>
- * <li>The file or resources specified through system config property <i>MimeTypeFile</i>.</li>
  * <li>The file or resource named <i>META-INF/mimetypes.default</i>.</li>
  * </ol>
  * 
@@ -105,6 +104,9 @@ public final class MIMEType2ExtMap {
 		super();
 	}
 
+	/**
+	 * Initializes MIME type file map
+	 */
 	public static void init() {
 		if (!initialized.get()) {
 			LOCK.lock();
@@ -119,10 +121,12 @@ public final class MIMEType2ExtMap {
 						final File file = new File(sb.append(homeDir).append(File.separatorChar).append(".mime.types")
 								.toString());
 						if (file.exists()) {
+							if (LOG.isInfoEnabled()) {
+								sb.setLength(0);
+								LOG.info(sb.append("Loading MIME type file \"").append(file.getPath()).append('"')
+										.toString());
+							}
 							loadInternal(file);
-						} else if (LOG.isInfoEnabled()) {
-							sb.setLength(0);
-							LOG.info(sb.append("MIME type file \"").append(file.getPath()).append("\" does not exits"));
 						}
 					}
 				}
@@ -133,47 +137,45 @@ public final class MIMEType2ExtMap {
 						final File file = new File(sb.append(javaHome).append(File.separatorChar).append("lib").append(
 								File.separator).append("mime.types").toString());
 						if (file.exists()) {
+							if (LOG.isInfoEnabled()) {
+								sb.setLength(0);
+								LOG.info(sb.append("Loading MIME type file \"").append(file.getPath()).append('"')
+										.toString());
+							}
 							loadInternal(file);
-						} else if (LOG.isInfoEnabled()) {
-							sb.setLength(0);
-							LOG.info(sb.append("MIME type file \"").append(file.getPath()).append("\" does not exits"));
 						}
 					}
 				}
 				{
-					final File file = new File("META-INF/mime.types");
-					if (file.exists()) {
-						loadInternal(file);
-					} else if (LOG.isInfoEnabled()) {
-						sb.setLength(0);
-						LOG.info(sb.append("MIME type file \"").append(file.getPath()).append("\" does not exits"));
-					}
-				}
-				{
-					final String mtfPath = SystemConfig.getProperty(SystemConfig.Property.MimeTypeFile);
-					if (null != mtfPath) {
-						final File file = new File(mtfPath);
-						if (file.exists()) {
-							loadInternal(file);
-						} else if (LOG.isInfoEnabled()) {
+					for (final Enumeration<URL> e = ClassLoader.getSystemResources("META-INF/mime.types"); e
+							.hasMoreElements();) {
+						final URL url = e.nextElement();
+						if (LOG.isInfoEnabled()) {
 							sb.setLength(0);
-							LOG.info(sb.append("MIME type file \"").append(file.getPath()).append("\" does not exits"));
+							LOG.info(sb.append("Loading MIME type file \"").append(url.getFile()).append('"')
+									.toString());
 						}
+						loadInternal(url);
 					}
 				}
 				{
-					final File file = new File("/META-INF/mimetypes.default");
-					if (file.exists()) {
-						loadInternal(file);
-					} else if (LOG.isInfoEnabled()) {
-						sb.setLength(0);
-						LOG.info(sb.append("MIME type file \"").append(file.getPath()).append("\" does not exits"));
+					for (final Enumeration<URL> e = ClassLoader.getSystemResources("/META-INF/mimetypes.default"); e
+							.hasMoreElements();) {
+						final URL url = e.nextElement();
+						if (LOG.isInfoEnabled()) {
+							sb.setLength(0);
+							LOG.info(sb.append("Loading MIME type file \"").append(url.getFile()).append('"')
+									.toString());
+						}
+						loadInternal(url);
 					}
 				}
 				initialized.set(true);
 				if (LOG.isInfoEnabled()) {
 					LOG.info("MIMEType2ExtMap successfully initialized");
 				}
+			} catch (final IOException e) {
+				LOG.error(e.getLocalizedMessage(), e);
 			} finally {
 				LOCK.unlock();
 			}
@@ -183,14 +185,15 @@ public final class MIMEType2ExtMap {
 	/**
 	 * Gets the MIME type associated with given file
 	 * 
-	 * @param file The file
+	 * @param file
+	 *            The file
 	 * @return The MIME type associated with given file extension or
 	 *         <code>application/octet-stream</code> if none found
 	 */
 	public static String getContentType(final File file) {
 		return getContentType(file.getName());
 	}
-	
+
 	/**
 	 * Gets the MIME type associated with given file name
 	 * 
@@ -204,18 +207,18 @@ public final class MIMEType2ExtMap {
 			init();
 		}
 		final int pos = fileName.lastIndexOf('.');
-        if (pos < 0) {
+		if (pos < 0) {
 			return MIMETypes.MIME_APPL_OCTET;
 		}
-        final String s1 = fileName.substring(pos + 1);
-        if(s1.length() == 0) {
+		final String s1 = fileName.substring(pos + 1);
+		if (s1.length() == 0) {
 			return MIMETypes.MIME_APPL_OCTET;
 		}
-        final String type = type_hash.get(s1.toLowerCase());
-        if (null == type) {
-        	return MIMETypes.MIME_APPL_OCTET;
-        }
-        return type;
+		final String type = type_hash.get(s1.toLowerCase());
+		if (null == type) {
+			return MIMETypes.MIME_APPL_OCTET;
+		}
+		return type;
 	}
 
 	/**
@@ -266,7 +269,7 @@ public final class MIMEType2ExtMap {
 	 * @param file
 	 *            The mime type file to load
 	 */
-	public static void loadInternal(final File file) {
+	private static void loadInternal(final File file) {
 		BufferedReader reader = null;
 		try {
 			reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), "iso-8859-1"));
@@ -288,10 +291,38 @@ public final class MIMEType2ExtMap {
 		}
 	}
 
-	private static void parse(final BufferedReader bufferedreader) throws IOException {
+	/**
+	 * Loads the mime type file specified through given url
+	 * 
+	 * @param url
+	 *            The URL to a mime type file
+	 */
+	private static void loadInternal(final URL url) {
+		BufferedReader reader = null;
+		try {
+			reader = new BufferedReader(new InputStreamReader(url.openStream(), "iso-8859-1"));
+			parse(reader);
+		} catch (final UnsupportedEncodingException e) {
+			LOG.error(e.getLocalizedMessage(), e);
+		} catch (final FileNotFoundException e) {
+			LOG.error(e.getLocalizedMessage(), e);
+		} catch (final IOException e) {
+			LOG.error(e.getLocalizedMessage(), e);
+		} finally {
+			if (reader != null) {
+				try {
+					reader.close();
+				} catch (final IOException e) {
+					LOG.error(e.getLocalizedMessage(), e);
+				}
+			}
+		}
+	}
+
+	private static void parse(final BufferedReader reader) throws IOException {
 		String line = null;
 		final StringBuilder strBuilder = new StringBuilder(64);
-		while ((line = bufferedreader.readLine()) != null) {
+		while ((line = reader.readLine()) != null) {
 			final int i = strBuilder.length();
 			strBuilder.append(line);
 			if (i > 0 && strBuilder.charAt(i - 1) == '\\') {
