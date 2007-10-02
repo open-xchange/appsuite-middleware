@@ -49,10 +49,10 @@
 
 package com.openexchange.mail.mime;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -72,7 +72,7 @@ public final class MimeTypeFileLineParser {
 
 	private String type;
 
-	private final Set<String> extensions;
+	private final List<String> extensions;
 
 	/**
 	 * Initializes a new MIME type file's line parser
@@ -83,7 +83,7 @@ public final class MimeTypeFileLineParser {
 	 */
 	public MimeTypeFileLineParser(final String entry) {
 		super();
-		extensions = new TreeSet<String>();
+		extensions = new ArrayList<String>();
 		parse(entry);
 	}
 
@@ -119,8 +119,8 @@ public final class MimeTypeFileLineParser {
 	 * 
 	 * @return the extensions
 	 */
-	public Set<String> getExtensions() {
-		return Collections.unmodifiableSet(extensions);
+	public List<String> getExtensions() {
+		return Collections.unmodifiableList(extensions);
 	}
 
 	/**

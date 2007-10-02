@@ -57,13 +57,12 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -95,7 +94,7 @@ public final class MIMEType2ExtMap {
 
 	private static final Map<String, String> type_hash = new HashMap<String, String>();
 
-	private static final Map<String, Set<String>> ext_hash = new HashMap<String, Set<String>>();
+	private static final Map<String, List<String>> ext_hash = new HashMap<String, List<String>>();
 
 	/**
 	 * No instance
@@ -159,7 +158,7 @@ public final class MIMEType2ExtMap {
 					}
 				}
 				{
-					for (final Enumeration<URL> e = ClassLoader.getSystemResources("/META-INF/mimetypes.default"); e
+					for (final Enumeration<URL> e = ClassLoader.getSystemResources("META-INF/mimetypes.default"); e
 							.hasMoreElements();) {
 						final URL url = e.nextElement();
 						if (LOG.isInfoEnabled()) {
@@ -221,20 +220,28 @@ public final class MIMEType2ExtMap {
 		return type;
 	}
 
+	private static final List<String> DEFAULT_EXT;
+
+	static {
+		final List<String> l = new ArrayList<String>(1);
+		l.add("dat");
+		DEFAULT_EXT = Collections.unmodifiableList(l);
+	}
+
 	/**
 	 * Gets the file extension for given MIME type
 	 * 
 	 * @param mimeType
 	 *            The MIME type
-	 * @return The file extension for given MIME type or <code>null</code> if
+	 * @return The file extension for given MIME type or <code>dat</code> if
 	 *         none found
 	 */
-	public static Collection<String> getFileExtension(final String mimeType) {
+	public static List<String> getFileExtensions(final String mimeType) {
 		if (!initialized.get()) {
 			init();
 		}
-		return ext_hash.containsKey(mimeType.toLowerCase()) ? Collections
-				.unmodifiableCollection(ext_hash.get(mimeType)) : null;
+		return ext_hash.containsKey(mimeType.toLowerCase()) ? Collections.unmodifiableList(ext_hash.get(mimeType))
+				: DEFAULT_EXT;
 	}
 
 	/**
@@ -346,7 +353,7 @@ public final class MIMEType2ExtMap {
 		if (entry.indexOf('=') > 0) {
 			final MimeTypeFileLineParser parser = new MimeTypeFileLineParser(entry);
 			final String type = parser.getType();
-			final Set<String> exts = parser.getExtensions();
+			final List<String> exts = parser.getExtensions();
 			if (type != null && exts != null) {
 				for (String ext : exts) {
 					type_hash.put(ext, type);
@@ -361,7 +368,7 @@ public final class MIMEType2ExtMap {
 			final String[] tokens = entry.split("[ \t\n\r\f]+");
 			if (tokens.length > 1) {
 				final String type = tokens[0].toLowerCase();
-				final Set<String> set = new TreeSet<String>();
+				final List<String> set = new ArrayList<String>();
 				for (int i = 1; i < tokens.length; i++) {
 					final String ext = tokens[i].toLowerCase();
 					set.add(ext);
