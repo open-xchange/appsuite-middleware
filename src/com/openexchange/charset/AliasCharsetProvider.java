@@ -155,8 +155,8 @@ public final class AliasCharsetProvider extends CharsetProvider {
 			for (int i = 0; i < cs.length; i++) {
 				final Charset c = cs[i];
 				n2c.put(c.name().toLowerCase(), c);
-				for (final Iterator<String> a = c.aliases().iterator(); a.hasNext();) {
-					n2c.put(a.next().toLowerCase(), c);
+				for (final Iterator<String> iter = c.aliases().iterator(); iter.hasNext();) {
+					n2c.put(iter.next().toLowerCase(), c);
 				}
 			}
 			name2charset = n2c;
