@@ -59,6 +59,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * {@link AliasCharsetProvider}
@@ -70,6 +73,10 @@ public final class AliasCharsetProvider extends CharsetProvider {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(AliasCharsetProvider.class);
+
+	private static final Lock LOCK = new ReentrantLock();
+
+	private static final AtomicBoolean initialized = new AtomicBoolean();
 
 	private static Map<String, Charset> name2charset;
 
@@ -97,7 +104,7 @@ public final class AliasCharsetProvider extends CharsetProvider {
 	 */
 	@Override
 	public Charset charsetForName(final String charsetName) {
-		if (name2charset == null) {
+		if (!initialized.get()) {
 			init();
 		}
 		/*
@@ -133,7 +140,7 @@ public final class AliasCharsetProvider extends CharsetProvider {
 	 */
 	@Override
 	public Iterator<Charset> charsets() {
-		if (charsets == null) {
+		if (!initialized.get()) {
 			init();
 		}
 		return charsets.iterator();
@@ -142,8 +149,12 @@ public final class AliasCharsetProvider extends CharsetProvider {
 	/**
 	 * Initializes this charset provider's data.
 	 */
-	void init() {
+	private void init() {
+		LOCK.lock();
 		try {
+			if (initialized.get()) {
+				return;
+			}
 			/*
 			 * Prepare supported charsets
 			 */
@@ -160,6 +171,7 @@ public final class AliasCharsetProvider extends CharsetProvider {
 				}
 			}
 			name2charset = n2c;
+			initialized.set(true);
 			if (LOG.isInfoEnabled()) {
 				LOG.info("Alias charset provider successfully initialized");
 			}
@@ -169,6 +181,8 @@ public final class AliasCharsetProvider extends CharsetProvider {
 			LOG.error(e.getLocalizedMessage(), e);
 		} catch (final IllegalArgumentException e) {
 			LOG.error(e.getLocalizedMessage(), e);
+		} finally {
+			LOCK.unlock();
 		}
 	}
 }

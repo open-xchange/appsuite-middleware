@@ -183,7 +183,7 @@ public final class MailMessageParser {
 				|| contentType.isMimeType(MIMETypes.MIME_TEXT_RICHTEXT)
 				|| contentType.isMimeType(MIMETypes.MIME_TEXT_RTF)) {
 			if (isInline) {
-				final String content = MessageUtility.readStream(mailPart, charset);
+				final String content = MessageUtility.readMailPart(mailPart, charset);
 				final UUEncodedMultiPart uuencodedMP = new UUEncodedMultiPart(content);
 				if (uuencodedMP.isUUEncoded()) {
 					/*
@@ -237,7 +237,7 @@ public final class MailMessageParser {
 				mailPart.setSequenceId(MailMessageParser.getSequenceId(prefix, partCount));
 			}
 			if (isInline) {
-				if (!handler.handleInlineHtml(MessageUtility.readStream(mailPart, charset), contentType, size,
+				if (!handler.handleInlineHtml(MessageUtility.readMailPart(mailPart, charset), contentType, size,
 						filename, mailPart.getSequenceId())) {
 					stop = true;
 					return;

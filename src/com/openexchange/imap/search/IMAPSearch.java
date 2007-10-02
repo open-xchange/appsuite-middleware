@@ -360,9 +360,9 @@ public final class IMAPSearch {
 	private static String getPartTextContent(final Part part) throws MailException, MessagingException, IOException {
 		final ContentType ct = new ContentType(part.getContentType());
 		if (ct.isMimeType("text/htm*")) {
-			return new Html2TextConverter().convert(MessageUtility.readPart(part, ct));
+			return new Html2TextConverter().convert(MessageUtility.readMimePart(part, ct));
 		} else if (ct.isMimeType("text/*")) {
-			return MessageUtility.readPart(part, ct);
+			return MessageUtility.readMimePart(part, ct);
 		}
 		return null;
 	}

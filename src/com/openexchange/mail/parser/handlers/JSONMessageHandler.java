@@ -274,7 +274,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
 					final String charset = part.getContentType().containsParameter(PARAM_CHARSET) ? part
 							.getContentType().getParameter(PARAM_CHARSET) : MailConfig.getDefaultMimeCharset();
 					jsonObject.put(MailJSONField.CONTENT.getKey(), MessageUtility.formatContentForDisplay(
-							MessageUtility.readStream(part, charset), part.getContentType().isMimeType(
+							MessageUtility.readMailPart(part, charset), part.getContentType().isMimeType(
 									MIMETypes.MIME_TEXT_HTM_ALL), session, mailPath, displayVersion));
 				}
 			} else {

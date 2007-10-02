@@ -522,7 +522,7 @@ public final class MimeReply {
 				if (partContentType.isMimeType(MIMETypes.MIME_TEXT_HTM_ALL) && MimeProcessingUtility.isInline(part)) {
 					if (retvalContentType.getPrimaryType() == null) {
 						retvalContentType.setContentType(partContentType);
-						textBuilder.append(MessageUtility.readPart(part, partContentType));
+						textBuilder.append(MessageUtility.readMimePart(part, partContentType));
 					} else {
 						final String text = MimeProcessingUtility.handleInlineTextPart(part, partContentType, usm);
 						MimeProcessingUtility.appendRightVersion(retvalContentType, partContentType, text, textBuilder);

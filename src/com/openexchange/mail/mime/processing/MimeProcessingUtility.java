@@ -114,12 +114,12 @@ public final class MimeProcessingUtility {
 			throws MessagingException, IOException, MailException {
 		if (contentType.isMimeType(MIMETypes.MIME_TEXT_HTM_ALL)) {
 			if (usm.isDisplayHtmlInlineContent()) {
-				return MessageUtility.readPart(textPart, contentType);
+				return MessageUtility.readMimePart(textPart, contentType);
 			}
 			contentType.setBaseType("text/plain");
-			return new Html2TextConverter().convertWithQuotes(MessageUtility.readPart(textPart, contentType));
+			return new Html2TextConverter().convertWithQuotes(MessageUtility.readMimePart(textPart, contentType));
 		} else if (contentType.isMimeType(MIMETypes.MIME_TEXT_PLAIN)) {
-			final String content = MessageUtility.readPart(textPart, contentType);
+			final String content = MessageUtility.readMimePart(textPart, contentType);
 			final UUEncodedMultiPart uuencodedMP = new UUEncodedMultiPart(content);
 			if (uuencodedMP.isUUEncoded()) {
 				/*
@@ -127,9 +127,9 @@ public final class MimeProcessingUtility {
 				 */
 				return uuencodedMP.getCleanText();
 			}
-			return MessageUtility.readPart(textPart, contentType);
+			return MessageUtility.readMimePart(textPart, contentType);
 		}
-		return MessageUtility.readPart(textPart, contentType);
+		return MessageUtility.readMimePart(textPart, contentType);
 	}
 
 	/**

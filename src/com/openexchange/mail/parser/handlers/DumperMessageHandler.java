@@ -112,7 +112,7 @@ public class DumperMessageHandler implements MailMessageHandler {
 		strBuilder.append("fileName=").append(fileName).append('\n');
 		strBuilder.append("sequenceId=").append(id).append('\n');
 		try {
-			strBuilder.append("Content:\n").append(MessageUtility.readStream(part, "US-ASCII"));
+			strBuilder.append("Content:\n").append(MessageUtility.readMailPart(part, "US-ASCII"));
 		} catch (final IOException e) {
 			LOG.error(e.getLocalizedMessage(), e);
 		}

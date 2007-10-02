@@ -217,7 +217,7 @@ public final class MimeForward {
 				if (originalContentType.getParameter(PARAM_CHARSET) == null) {
 					originalContentType.setParameter(PARAM_CHARSET, MailConfig.getDefaultMimeCharset());
 				}
-				forwardMsg.setText(generateForwardText(MessageUtility.readPart(originalMsg, originalContentType), session
+				forwardMsg.setText(generateForwardText(MessageUtility.readMimePart(originalMsg, originalContentType), session
 						.getLocale(), originalMsg, originalContentType.isMimeType(MIMETypes.MIME_TEXT_HTM_ALL)),
 						originalContentType.getParameter(PARAM_CHARSET), originalContentType.getSubType());
 				forwardMsg.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
@@ -266,7 +266,7 @@ public final class MimeForward {
 				partContentType.setContentType(part.getContentType());
 				if (partContentType.isMimeType(MIMETypes.MIME_TEXT_HTM_ALL) && MimeProcessingUtility.isInline(part)) {
 					retvalContentType.setContentType(partContentType);
-					return MessageUtility.readPart(part, partContentType);
+					return MessageUtility.readMimePart(part, partContentType);
 				} else if (partContentType.isMimeType(MIMETypes.MIME_MULTIPART_ALL)) {
 					final String text = getFirstSeenText((Multipart) part.getContent(), retvalContentType, usm);
 					if (text != null) {

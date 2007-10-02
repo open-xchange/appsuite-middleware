@@ -784,7 +784,7 @@ public final class MessageUtility {
 	private static final String STR_CHARSET = "charset";
 
 	/**
-	 * Reads the string out of part's input stream. On first try the input
+	 * Reads the string out of MIME part's input stream. On first try the input
 	 * stream retrieved by <code>javax.mail.Part.getInputStream()</code> is
 	 * used. If an I/O error occurs (<code>java.io.IOException</code>) then
 	 * the next try is with part's raw input stream. If everything fails an
@@ -799,7 +799,7 @@ public final class MessageUtility {
 	 * @throws MessagingException -
 	 *             if an error occurs in part's getter methods
 	 */
-	public static String readPart(final Part p, final ContentType ct) throws MessagingException {
+	public static String readMimePart(final Part p, final ContentType ct) throws MessagingException {
 		/*
 		 * Use specified charset if available else use default one
 		 */
@@ -857,7 +857,7 @@ public final class MessageUtility {
 	 * @throws IOException
 	 * @throws MailException
 	 */
-	public static String readStream(final MailPart mailPart, final String charset) throws IOException, MailException {
+	public static String readMailPart(final MailPart mailPart, final String charset) throws IOException, MailException {
 		return readStream(mailPart.getInputStream(), charset);
 	}
 
