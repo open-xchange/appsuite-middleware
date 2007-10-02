@@ -110,10 +110,10 @@ public abstract class MailPermission extends OCLPermission {
 							return;
 						}
 						clazz = Class.forName(className).asSubclass(MailPermission.class);
+						initialized.set(true);
 					} catch (final ClassNotFoundException e) {
 						throw new MailException(MailException.Code.INITIALIZATION_PROBLEM, e, new Object[0]);
 					}
-					initialized.set(true);
 				}
 			} finally {
 				LOCK_INIT.unlock();
@@ -140,17 +140,17 @@ public abstract class MailPermission extends OCLPermission {
 		 */
 		try {
 			return clazz.getConstructor(CONSTRUCTOR_ARGS).newInstance(new Object[] { session });
-		} catch (SecurityException e) {
+		} catch (final SecurityException e) {
 			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (NoSuchMethodException e) {
+		} catch (final NoSuchMethodException e) {
 			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (IllegalArgumentException e) {
+		} catch (final IllegalArgumentException e) {
 			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (InstantiationException e) {
+		} catch (final InstantiationException e) {
 			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (IllegalAccessException e) {
+		} catch (final IllegalAccessException e) {
 			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (InvocationTargetException e) {
+		} catch (final InvocationTargetException e) {
 			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
 		}
 	}
