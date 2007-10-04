@@ -77,7 +77,7 @@ import com.sun.mail.imap.Rights.Right;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public class IMAPFolderWorker {
+public abstract class IMAPFolderWorker {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(IMAPFolderWorker.class);
