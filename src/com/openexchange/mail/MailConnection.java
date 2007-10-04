@@ -214,6 +214,7 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 						/*
 						 * Apply new thread's trace information
 						 */
+						mailConnection.connectInternal();
 						return mailConnection;
 					}
 				}
