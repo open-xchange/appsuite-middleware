@@ -52,8 +52,6 @@ package com.openexchange.imap;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.util.Properties;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import javax.mail.MessagingException;
 import javax.mail.Session;
@@ -87,8 +85,6 @@ public final class IMAPConnection extends MailConnection<IMAPFolderStorage, IMAP
 
 	private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(IMAPConnection.class);
-
-	private static final transient Lock LOCK_CAPS = new ReentrantLock();
 
 	private static final String PROTOCOL_IMAP = "imap";
 
