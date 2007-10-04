@@ -74,8 +74,8 @@ import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.container.MailFolderObject;
-import com.openexchange.groupware.container.mail.JSONMessageObject;
+import com.openexchange.mail.MailListField;
+import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.tools.servlet.AjaxException;
 
 /**
@@ -106,11 +106,11 @@ public class AlwaysTest extends AbstractAJAXTest {
      * This attributes of mails are requested when a mail folder is listed.
      */
     private static final int[] listAttributes = new int[] {
-        JSONMessageObject.FIELD_ID, JSONMessageObject.FIELD_FOLDER_ID,
-        JSONMessageObject.FIELD_THREAD_LEVEL, JSONMessageObject.FIELD_ATTACHMENT,
-        JSONMessageObject.FIELD_FROM, JSONMessageObject.FIELD_SUBJECT,
-        JSONMessageObject.FIELD_RECEIVED_DATE, JSONMessageObject.FIELD_SIZE,
-        JSONMessageObject.FIELD_FLAGS, JSONMessageObject.FIELD_PRIORITY,
+        MailListField.ID.getField(), MailListField.FOLDER_ID.getField(),
+        MailListField.THREAD_LEVEL.getField(), MailListField.ATTACHMENT.getField(),
+        MailListField.FROM.getField(), MailListField.SUBJECT.getField(),
+        MailListField.RECEIVED_DATE.getField(), MailListField.SIZE.getField(),
+        MailListField.FLAGS.getField(), MailListField.PRIORITY.getField(),
         CommonObject.COLOR_LABEL
     };
 
@@ -201,7 +201,7 @@ public class AlwaysTest extends AbstractAJAXTest {
         while (iter.hasNext()) {
             final FolderObject fo = iter.next();
             if (fo.containsFullName() && fo.getFullName().equals(
-                MailFolderObject.DEFAULT_IMAP_FOLDER_ID)) {
+                MailFolder.DEFAULT_FOLDER_ID)) {
                 defaultIMAPFolder = fo;
                 break;
             }

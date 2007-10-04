@@ -62,9 +62,8 @@ import com.openexchange.api2.OXException;
 import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.imap.IMAPProperties;
-import com.openexchange.imap.OXMailException;
-import com.openexchange.imap.OXMailException.MailCode;
+import com.openexchange.mail.MailException;
+import com.openexchange.mail.config.MailConfig;
 import com.openexchange.server.DBPool;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.sessiond.SessionObject;
@@ -106,16 +105,16 @@ public class MessageFillerTest extends AbstractVCardTest {
 			} catch (final OXException oxExc) {
 				throw oxExc;
 			} catch (final Exception e) {
-				throw new OXMailException(MailCode.INTERNAL_ERROR, e, e.getMessage());
+				throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getMessage());
 			}
 			final VersitObject versitObj = converter.convertContact(contactObj, version);
 			final ByteArrayOutputStream os = new ByteArrayOutputStream();
 			final VersitDefinition def = Versit.getDefinition(mime);
-			final VersitDefinition.Writer w = def.getWriter(os, IMAPProperties.getDefaultMimeCharset());
+			final VersitDefinition.Writer w = def.getWriter(os, MailConfig.getDefaultMimeCharset());
 			def.write(w, versitObj);
 			w.flush();
 			os.flush();
-			return new String(os.toByteArray(), IMAPProperties.getDefaultMimeCharset());
+			return new String(os.toByteArray(), MailConfig.getDefaultMimeCharset());
 		} finally {
 			if (readCon != null) {
 				DBPool.closeReaderSilent(session.getContext(), readCon);

@@ -6,8 +6,7 @@ import java.util.Map;
 import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.ContextImpl;
-import com.openexchange.imap.UserSettingMail;
-import com.openexchange.imap.UserSettingMailStorage;
+import com.openexchange.mail.usersetting.UserSettingMail;
 
 /**
  * 

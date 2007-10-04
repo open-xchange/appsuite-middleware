@@ -28,7 +28,7 @@ import com.openexchange.ajax.parser.FolderParser;
 import com.openexchange.api2.OXException;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.container.MailFolderObject;
+import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.server.OCLPermission;
 import com.openexchange.tools.URLParameter;
 import com.openexchange.tools.servlet.AjaxException;
@@ -1033,7 +1033,7 @@ public class FolderTest extends AbstractAJAXTest {
 			FolderObject defaultIMAPFolder = null;
 			for (int i = 0; i < l.size(); i++) {
 				FolderObject fo = l.get(i);
-				if (fo.containsFullName() && fo.getFullName().equals(MailFolderObject.DEFAULT_IMAP_FOLDER_ID)) {
+				if (fo.containsFullName() && fo.getFullName().equals(MailFolder.DEFAULT_FOLDER_ID)) {
 					defaultIMAPFolder = fo;
 					break;
 				}

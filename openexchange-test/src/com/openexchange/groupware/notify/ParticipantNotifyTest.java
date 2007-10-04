@@ -44,7 +44,7 @@ import com.openexchange.groupware.notify.ParticipantNotify.LinkableState;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.i18n.StringTemplate;
 import com.openexchange.i18n.TemplateListResourceBundle;
-import com.openexchange.imap.UserSettingMail;
+import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.sessiond.SessionObject;
 
 public class ParticipantNotifyTest extends TestCase{

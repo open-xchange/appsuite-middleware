@@ -87,8 +87,7 @@ import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.groupware.ldap.Credentials;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.imap.IMAPProperties;
-import com.openexchange.imap.UserSettingMail;
+import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.server.OCLPermission;
 import com.openexchange.sessiond.SessionObject;
@@ -137,9 +136,6 @@ public class AbstractContactTest {
 		}
 		public String getHost() {
 			return delegateSessionObject.getHost();
-		}
-		public IMAPProperties getIMAPProperties() {
-			return delegateSessionObject.getIMAPProperties();
 		}
 		public String getLanguage() {
 			return delegateSessionObject.getLanguage();
@@ -206,9 +202,6 @@ public class AbstractContactTest {
 		}
 		public void setHost(String host) {
 			delegateSessionObject.setHost(host);
-		}
-		public void setIMAPProperties(IMAPProperties imapProperties) {
-			delegateSessionObject.setIMAPProperties(imapProperties);
 		}
 		public void setLanguage(String language) {
 			delegateSessionObject.setLanguage(language);
