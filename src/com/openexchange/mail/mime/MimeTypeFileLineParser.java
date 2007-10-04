@@ -79,7 +79,7 @@ public final class MimeTypeFileLineParser {
 	 * 
 	 * @param entry
 	 *            The MIME type file entry; e.g.
-	 *            <code>type=magnus-internal/cgi	exts=cgi,exe,bat</code>
+	 *            <code>type=magnus-internal/cgi&nbsp;&nbsp;&nbsp;&nbsp;exts=cgi,exe,bat</code>
 	 */
 	public MimeTypeFileLineParser(final String entry) {
 		super();
@@ -95,13 +95,15 @@ public final class MimeTypeFileLineParser {
 		int pos = -1;
 		if ((pos = entry.toLowerCase().indexOf(STR_TYPE)) != -1) {
 			final Matcher m = PAT_VAL.matcher(entry);
-			if (m.find(pos + 5)) {
+			final int start = pos + 5;
+			if (m.find(start) && m.start() == start) {
 				type = m.group();
 			}
 		}
 		if ((pos = entry.toLowerCase().indexOf(STR_EXTS)) != -1) {
 			final Matcher m = PAT_VAL.matcher(entry);
-			if (m.find(pos + 5)) {
+			final int start = pos + 5;
+			if (m.find(start) && m.start() == start) {
 				final String sExts = m.group();
 				final String[] exts;
 				if (sExts.charAt(0) == '"' && sExts.charAt(sExts.length() - 1) == '"') {
