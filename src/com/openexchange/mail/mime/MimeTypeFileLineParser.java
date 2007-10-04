@@ -107,7 +107,7 @@ public final class MimeTypeFileLineParser {
 				if (sExts.charAt(0) == '"' && sExts.charAt(sExts.length() - 1) == '"') {
 					exts = sExts.substring(1, sExts.length() - 1).split("[ \t\n\r\f]*,[ \t\n\r\f]*");
 				} else {
-					exts = m.group().split(" *, *");
+					exts = m.group().split("[ \t\n\r\f]*,[ \t\n\r\f]*");
 				}
 				extensions.addAll(Arrays.asList(exts));
 			}
