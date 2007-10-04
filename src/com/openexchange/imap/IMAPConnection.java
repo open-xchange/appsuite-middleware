@@ -251,7 +251,7 @@ public final class IMAPConnection extends MailConnection<IMAPFolderStorage, IMAP
 			/*
 			 * Check server's capabilities
 			 */
-			initializeCapabilities();
+			IMAPConfig.initializeCapabilities(imapStore);
 			/*
 			 * Increase counter
 			 */
@@ -386,42 +386,5 @@ public final class IMAPConnection extends MailConnection<IMAPFolderStorage, IMAP
 	 */
 	public Session getSession() {
 		return imapSession;
-	}
-
-	/**
-	 * Initializes IMAP server's capabilities if not done, yet
-	 * 
-	 * @param imapStore
-	 *            The IMAP store from which to fetch the capabilities
-	 * @throws MessagingException
-	 */
-	private void initializeCapabilities() throws MessagingException {
-		if (!IMAPConfig.isCapabilitiesLoaded()) {
-			LOCK_CAPS.lock();
-			try {
-				if (IMAPConfig.isCapabilitiesLoaded()) {
-					return;
-				}
-				final IMAPCapabilities imapCaps = new IMAPCapabilities();
-				imapCaps.setACL(imapStore.hasCapability(IMAPCapabilities.CAP_ACL));
-				imapCaps.setThreadReferences(imapStore.hasCapability(IMAPCapabilities.CAP_THREAD_REFERENCES));
-				imapCaps.setThreadOrderedSubject(imapStore.hasCapability(IMAPCapabilities.CAP_THREAD_ORDEREDSUBJECT));
-				imapCaps.setQuota(imapStore.hasCapability(IMAPCapabilities.CAP_QUOTA));
-				imapCaps.setSort(imapStore.hasCapability(IMAPCapabilities.CAP_SORT));
-				imapCaps.setIMAP4(imapStore.hasCapability(IMAPCapabilities.CAP_IMAP4));
-				imapCaps.setIMAP4rev1(imapStore.hasCapability(IMAPCapabilities.CAP_IMAP4_REV1));
-				imapCaps.setUIDPlus(imapStore.hasCapability(IMAPCapabilities.CAP_UIDPLUS));
-				try {
-					imapCaps.setHasSubscription(!IMAPConfig.isIgnoreSubscription());
-				} catch (final MailConfigException e) {
-					LOG.error(e.getMessage(), e);
-					imapCaps.setHasSubscription(false);
-				}
-				IMAPConfig.setImapCapabilities(imapCaps);
-				IMAPConfig.setCapabilitiesLoaded(true);
-			} finally {
-				LOCK_CAPS.unlock();
-			}
-		}
 	}
 }

@@ -59,12 +59,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import javax.mail.MessagingException;
+
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.imap.IMAPCapabilities;
 import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.sessiond.SessionObject;
+import com.sun.mail.imap.IMAPStore;
 
 /**
  * {@link IMAPConfig}
@@ -599,15 +602,6 @@ public final class IMAPConfig extends MailConfig {
 	}
 
 	/**
-	 * Sets if the IMAP capabilities are loaded
-	 * 
-	 * @param capabilitiesLoaded
-	 */
-	public static void setCapabilitiesLoaded(final boolean capabilitiesLoaded) {
-		IMAPConfig.capabilitiesLoaded.set(capabilitiesLoaded);
-	}
-
-	/**
 	 * Gets the IMAP capabilities
 	 * 
 	 * @return The IMAP capabilities
@@ -616,15 +610,46 @@ public final class IMAPConfig extends MailConfig {
 		return imapCapabilities;
 	}
 
+	private static final transient Lock LOCK_CAPS = new ReentrantLock();
+
 	/**
-	 * Sets the IMAP capabilities
+	 * Initializes IMAP server's capabilities if not done, yet
 	 * 
-	 * @param imapCapabilities
-	 *            The IMAP capabilities to set
+	 * @param imapStore
+	 *            The IMAP store from which to fetch the capabilities
+	 * @throws MailConfigException
+	 *             If IMAP capabilities cannot be initialized
 	 */
-	public static void setImapCapabilities(final IMAPCapabilities imapCapabilities) {
-		IMAPConfig.imapCapabilities = imapCapabilities;
-		MailConfig.setCapabilities(imapCapabilities.getCapabilities());
+	public static void initializeCapabilities(final IMAPStore imapStore) throws MailConfigException {
+		if (!capabilitiesLoaded.get()) {
+			LOCK_CAPS.lock();
+			try {
+				if (capabilitiesLoaded.get()) {
+					return;
+				}
+				final IMAPCapabilities imapCaps = new IMAPCapabilities();
+				imapCaps.setACL(imapStore.hasCapability(IMAPCapabilities.CAP_ACL));
+				imapCaps.setThreadReferences(imapStore.hasCapability(IMAPCapabilities.CAP_THREAD_REFERENCES));
+				imapCaps.setThreadOrderedSubject(imapStore.hasCapability(IMAPCapabilities.CAP_THREAD_ORDEREDSUBJECT));
+				imapCaps.setQuota(imapStore.hasCapability(IMAPCapabilities.CAP_QUOTA));
+				imapCaps.setSort(imapStore.hasCapability(IMAPCapabilities.CAP_SORT));
+				imapCaps.setIMAP4(imapStore.hasCapability(IMAPCapabilities.CAP_IMAP4));
+				imapCaps.setIMAP4rev1(imapStore.hasCapability(IMAPCapabilities.CAP_IMAP4_REV1));
+				imapCaps.setUIDPlus(imapStore.hasCapability(IMAPCapabilities.CAP_UIDPLUS));
+				try {
+					imapCaps.setHasSubscription(!IMAPConfig.isIgnoreSubscription());
+				} catch (final MailConfigException e) {
+					LOG.error(e.getMessage(), e);
+					imapCaps.setHasSubscription(false);
+				}
+				IMAPConfig.imapCapabilities = imapCaps;
+				capabilitiesLoaded.set(true);
+			} catch (final MessagingException e) {
+				throw new MailConfigException(e);
+			} finally {
+				LOCK_CAPS.unlock();
+			}
+		}
 	}
 
 	/**
