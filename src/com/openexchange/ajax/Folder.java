@@ -87,6 +87,7 @@ import com.openexchange.api2.RdbFolderSQLInterface;
 import com.openexchange.cache.FolderCacheManager;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
+import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.MailFolderObject;
@@ -1137,22 +1138,23 @@ public class Folder extends SessionServlet {
 			 * Check virtual list folders
 			 */
 			if (checkVirtualListFolders) {
-				if (!foldersqlinterface.getNonTreeVisiblePublicTaskFolders().hasNext()) {
+				final UserConfiguration uc = sessionObj.getUserConfiguration();
+				if (uc.hasTask() && !foldersqlinterface.getNonTreeVisiblePublicTaskFolders().hasNext()) {
 					final FolderObject virtualTasks = new FolderObject(FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID);
 					virtualTasks.setLastModified(DATE_0);
 					deletedQueue.add(virtualTasks);
 				}
-				if (!foldersqlinterface.getNonTreeVisiblePublicCalendarFolders().hasNext()) {
+				if (uc.hasCalendar() && !foldersqlinterface.getNonTreeVisiblePublicCalendarFolders().hasNext()) {
 					final FolderObject virtualCalendar = new FolderObject(FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID);
 					virtualCalendar.setLastModified(DATE_0);
 					deletedQueue.add(virtualCalendar);
 				}
-				if (!foldersqlinterface.getNonTreeVisiblePublicContactFolders().hasNext()) {
+				if (uc.hasContact() && !foldersqlinterface.getNonTreeVisiblePublicContactFolders().hasNext()) {
 					final FolderObject virtualContact = new FolderObject(FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID);
 					virtualContact.setLastModified(DATE_0);
 					deletedQueue.add(virtualContact);
 				}
-				if (!foldersqlinterface.getNonTreeVisiblePublicInfostoreFolders().hasNext()) {
+				if (uc.hasInfostore() && !foldersqlinterface.getNonTreeVisiblePublicInfostoreFolders().hasNext()) {
 					final FolderObject virtualInfostore = new FolderObject(
 							FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID);
 					virtualInfostore.setLastModified(DATE_0);

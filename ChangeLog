@@ -1,3 +1,8 @@
+* 2007-10-05 - thorben.betten@open-xchange.com
+
+ - Bugfix #9515: Additional check for user's module access prior to
+   updating virtual list folders
+
 * 2007-09-26 - marcus.klein@open-xchange.com
 
  - Bugfix #9638: Renaming infostore user folder if user is deleted.
