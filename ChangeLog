@@ -4,6 +4,8 @@
    updating virtual list folders
  - Bugfix #9664: Fixed reges to check against IMAP folder's user flag
    support
+ - Bugfix #9699: Removing only known entities from an IMAP folder's ACLs on
+   update/create operation
 
 * 2007-09-26 - marcus.klein@open-xchange.com
 

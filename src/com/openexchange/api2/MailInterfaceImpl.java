@@ -147,6 +147,7 @@ import com.openexchange.groupware.container.mail.parser.ReplyTextMessageHandler;
 import com.openexchange.groupware.container.mail.parser.SpamMessageHandler;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.MailStrings;
+import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
@@ -170,6 +171,8 @@ import com.openexchange.imap.connection.DefaultIMAPConnection;
 import com.openexchange.imap.threadsort.ThreadSortUtil;
 import com.openexchange.imap.threadsort.TreeNode;
 import com.openexchange.imap.user2imap.User2IMAP;
+import com.openexchange.imap.user2imap.User2IMAPInfo;
+import com.openexchange.imap.user2imap.User2IMAP.User2IMAPException;
 import com.openexchange.monitoring.MonitorAgent;
 import com.openexchange.server.Version;
 import com.openexchange.sessiond.SessionObject;
@@ -208,7 +211,7 @@ public class MailInterfaceImpl implements MailInterface {
 	private static final Log LOG = LogFactory.getLog(MailInterfaceImpl.class);
 
 	public static final MailInterfaceMonitor mailInterfaceMonitor;
-	
+
 	public static final int INDEX_DRAFTS = 0;
 
 	public static final int INDEX_SENT = 1;
@@ -1646,13 +1649,12 @@ public class MailInterfaceImpl implements MailInterface {
 							sortRange.append(',').append(retval[i].getMessageNumber());
 						}
 						final long start = System.currentTimeMillis();
-						retval = IMAPUtils.getServerSortList(imapCon.getImapFolder(), sortCol,
-								order == ORDER_DESC, sortRange);
+						retval = IMAPUtils.getServerSortList(imapCon.getImapFolder(), sortCol, order == ORDER_DESC,
+								sortRange);
 						mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 					} else {
 						final long start = System.currentTimeMillis();
-						retval = IMAPUtils.getServerSortList(imapCon.getImapFolder(), sortCol,
-								order == ORDER_DESC);
+						retval = IMAPUtils.getServerSortList(imapCon.getImapFolder(), sortCol, order == ORDER_DESC);
 						mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 					}
 					if (retval == null || retval.length == 0) {
@@ -1704,8 +1706,8 @@ public class MailInterfaceImpl implements MailInterface {
 					return SearchIteratorAdapter.createEmptyIterator();
 				}
 				final List<Message> msgList = Arrays.asList(retval);
-				Collections.sort(msgList, IMAPUtils.getComparator(sortCol, order == ORDER_DESC,
-						sessionObj.getLocale()));
+				Collections
+						.sort(msgList, IMAPUtils.getComparator(sortCol, order == ORDER_DESC, sessionObj.getLocale()));
 				msgList.toArray(retval);
 			}
 			if (fromToIndices != null && fromToIndices.length == 2) {
@@ -3136,8 +3138,7 @@ public class MailInterfaceImpl implements MailInterface {
 	 * @see com.openexchange.api2.MailInterface#sendMessage(com.openexchange.groupware.container.mail.JSONMessageObject,
 	 *      com.openexchange.groupware.upload.UploadEvent, int)
 	 */
-	public String sendMessage(final JSONMessageObject msgObj, final int sendType)
-			throws OXException {
+	public String sendMessage(final JSONMessageObject msgObj, final int sendType) throws OXException {
 		try {
 			init();
 			final SMTPMessage newSMTPMsg = new SMTPMessage(imapCon.getSession());
@@ -4691,8 +4692,7 @@ public class MailInterfaceImpl implements MailInterface {
 						}
 					}
 					if (destFolder.getFullName().startsWith(updateMe.getFullName())) {
-						throw new OXMailException(MailCode.NO_MOVE_TO_SUBFLD, updateMe.getName(), destFolder
-								.getName());
+						throw new OXMailException(MailCode.NO_MOVE_TO_SUBFLD, updateMe.getName(), destFolder.getName());
 					}
 					updateMe = moveFolder(updateMe, destFolder, newName);
 				}
@@ -4831,12 +4831,25 @@ public class MailInterfaceImpl implements MailInterface {
 						throw new OXMailException(MailCode.NO_ADMIN_ACL, getUserName(sessionObj),
 								prepareMailFolderParam(folderObj.getFullName()));
 					}
-					/*
-					 * Remove deleted ACLs
-					 */
 					final ACL[] removedACLs = getRemovedACLs(newACLs, oldACLs);
-					for (int i = 0; i < removedACLs.length; i++) {
-						updateMe.removeACL(removedACLs[i].getName());
+					if (removedACLs.length > 0) {
+						try {
+							/*
+							 * Remove deleted ACLs
+							 */
+							final User2IMAP user2IMAP = User2IMAP.getInstance(sessionObj.getUserObject());
+							final UserStorage userStorage = UserStorage.getInstance(sessionObj.getContext());
+							final User2IMAPInfo user2IMAPInfo = new MailFolderObject(updateMe, sessionObj);
+							for (int i = 0; i < removedACLs.length; i++) {
+								if (isKnownEntity(removedACLs[i].getName(), user2IMAP, userStorage, user2IMAPInfo)) {
+									updateMe.removeACL(removedACLs[i].getName());
+								}
+							}
+						} catch (final LdapException e) {
+							throw new OXMailException(e);
+						} catch (final User2IMAPException e) {
+							throw new OXMailException(e);
+						}
 					}
 					/*
 					 * Change existing ACLs according to new ACLs
@@ -4947,8 +4960,24 @@ public class MailInterfaceImpl implements MailInterface {
 						 * Remove other ACLs
 						 */
 						final ACL[] removedACLs = getRemovedACLs(newACLs, initialACLs);
-						for (int i = 0; i < removedACLs.length; i++) {
-							createMe.removeACL(removedACLs[i].getName());
+						if (removedACLs.length > 0) {
+							try {
+								/*
+								 * Remove deleted ACLs
+								 */
+								final User2IMAP user2IMAP = User2IMAP.getInstance(sessionObj.getUserObject());
+								final UserStorage userStorage = UserStorage.getInstance(sessionObj.getContext());
+								final User2IMAPInfo user2IMAPInfo = new MailFolderObject(createMe, sessionObj);
+								for (int i = 0; i < removedACLs.length; i++) {
+									if (isKnownEntity(removedACLs[i].getName(), user2IMAP, userStorage, user2IMAPInfo)) {
+										createMe.removeACL(removedACLs[i].getName());
+									}
+								}
+							} catch (final LdapException e) {
+								throw new OXMailException(e);
+							} catch (final User2IMAPException e) {
+								throw new OXMailException(e);
+							}
 						}
 					} catch (AbstractOXException e) {
 						throw new OXMailException(e);
@@ -5031,6 +5060,15 @@ public class MailInterfaceImpl implements MailInterface {
 			}
 		}
 		return retval.toArray(new ACL[retval.size()]);
+	}
+
+	private static final boolean isKnownEntity(final String entity, final User2IMAP user2IMAP,
+			final UserStorage userStorage, final User2IMAPInfo user2IMAPInfo) {
+		try {
+			return user2IMAP.getUserID(entity, userStorage, user2IMAPInfo) != -1;
+		} catch (final AbstractOXException e) {
+			return false;
+		}
 	}
 
 	private static final String STR_PAT = "p|P";
@@ -5378,7 +5416,8 @@ public class MailInterfaceImpl implements MailInterface {
 			oxme = new OXMailException(MailCode.SEARCH_ERROR, e, e.getMessage());
 		} else if (e instanceof SMTPSendFailedException) {
 			final SMTPSendFailedException exc = (SMTPSendFailedException) e;
-			if (exc.getReturnCode() == 552 || exc.getMessage().toLowerCase(Locale.ENGLISH).indexOf(ERR_MSG_TOO_LARGE) > -1) {
+			if (exc.getReturnCode() == 552
+					|| exc.getMessage().toLowerCase(Locale.ENGLISH).indexOf(ERR_MSG_TOO_LARGE) > -1) {
 				oxme = new OXMailException(MailCode.MESSAGE_TOO_LARGE, exc, new Object[0]);
 			} else {
 				oxme = new OXMailException(MailCode.SEND_FAILED, exc, Arrays.toString(exc.getInvalidAddresses()));

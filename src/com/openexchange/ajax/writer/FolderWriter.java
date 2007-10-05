@@ -433,8 +433,10 @@ public final class FolderWriter extends DataWriter {
 								jo.put(FolderFields.GROUP, imapPerm.isGroupPermission());
 								ja.put(jo);
 							} catch (final UserException e) {
-								LOG.error(new StringBuilder(128).append("Unmappable entity ").append(acls[j].getName())
+								if (LOG.isDebugEnabled()) {
+									LOG.debug(new StringBuilder(128).append("Unmappable entity ").append(acls[j].getName())
 										.append(" in folder ").append(folder.getFullName()), e);
+								}
 								/*imapPerm.parseRights(acls[j].getRights());
 								final JSONObject jo = new JSONObject();
 								jo.put(FolderFields.BITS, createPermissionBits(imapPerm));
