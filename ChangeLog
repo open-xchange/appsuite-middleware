@@ -1,3 +1,8 @@
+* 2007-09-17 - thorben.betten@open-xchange.com
+
+ - Bugfix #9664: Fixed check for IMAP server's user flag support
+ - Bugfix #9669: Fixed update of IMAP folder's ACLs
+
 * 2007-09-17 - martin.kauss@open-xchange.com
 
  - Fixed bug #9497. Recurring appointments with a start before 1970 caused a

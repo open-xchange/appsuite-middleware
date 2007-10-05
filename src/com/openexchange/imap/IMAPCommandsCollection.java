@@ -634,7 +634,7 @@ public final class IMAPCommandsCollection {
 		return true;
 	}
 
-	private static final Pattern PATTERN_PERMANENTFLAGS = Pattern.compile("(\\[PERMANENTFLAGS\\s\\()(.*)(\\)\\]\\s*)");
+	private static final Pattern PATTERN_PERMANENTFLAGS = Pattern.compile("(\\[PERMANENTFLAGS\\s\\()([^\\)\\]]*)(\\)\\]\\s*)");
 
 	private static final Pattern PATTERN_USER_FLAG = Pattern.compile("(?:\\\\\\*|(?:(^|\\s)([^\\\\]\\S+)($|\\s)))");
 
@@ -668,7 +668,7 @@ public final class IMAPCommandsCollection {
 								continue;
 							}
 							final Matcher matcher = PATTERN_PERMANENTFLAGS.matcher(((IMAPResponse) r[i]).getRest());
-							if (matcher.matches() && PATTERN_USER_FLAG.matcher(matcher.group(2)).find()) {
+							if (matcher.find() && PATTERN_USER_FLAG.matcher(matcher.group(2)).find()) {
 								retval = Boolean.TRUE;
 								break NextResp;
 							}
