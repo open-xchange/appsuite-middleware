@@ -2,6 +2,8 @@
 
  - Bugfix #9515: Additional check for user's module access prior to
    updating virtual list folders
+ - Bugfix #9664: Fixed reges to check against IMAP folder's user flag
+   support
 
 * 2007-09-26 - marcus.klein@open-xchange.com
 
