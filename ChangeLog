@@ -1,6 +1,6 @@
 * 2007-10-08 - thorben.betten@open-xchange.com
 
- - Proper check of intial ACls on mail folder creation
+ - Bugfix #9728: Proper check of intial ACls on mail folder creation
 
 * 2007-10-05 - thorben.betten@open-xchange.com
 
