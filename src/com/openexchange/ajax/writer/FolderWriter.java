@@ -67,6 +67,7 @@ import com.openexchange.api2.MailInterfaceImpl;
 import com.openexchange.api2.OXException;
 import com.openexchange.cache.FolderCacheManager;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.Component;
 import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.UserConfigurationException;
 import com.openexchange.groupware.UserConfigurationStorage;
@@ -432,19 +433,27 @@ public final class FolderWriter extends DataWriter {
 								jo.put(FolderFields.ENTITY, imapPerm.getEntity());
 								jo.put(FolderFields.GROUP, imapPerm.isGroupPermission());
 								ja.put(jo);
-							} catch (final UserException e) {
-								if (LOG.isDebugEnabled()) {
-									LOG.debug(new StringBuilder(128).append("Unmappable entity ").append(acls[j].getName())
-										.append(" in folder ").append(folder.getFullName()), e);
-								}
-								/*imapPerm.parseRights(acls[j].getRights());
-								final JSONObject jo = new JSONObject();
-								jo.put(FolderFields.BITS, createPermissionBits(imapPerm));
-								jo.put(FolderFields.ENTITY, acls[j].getName());
-								jo.put(FolderFields.GROUP, imapPerm.isGroupPermission());
-								ja.put(jo);*/
 							} catch (final AbstractOXException e) {
-								LOG.error(e.getMessage(), e);
+								if (e.getDetailNumber() == LdapException.Code.USER_NOT_FOUND.getDetailNumber()
+										&& Component.USER.equals(e.getComponent())) {
+									if (LOG.isDebugEnabled()) {
+										LOG.debug(new StringBuilder(128).append("Unmappable entity ").append(
+												acls[j].getName()).append(" in folder ").append(folder.getFullName()),
+												e);
+									}
+								} else {
+									LOG.error(e.getMessage(), e);
+								}
+								/*
+								 * imapPerm.parseRights(acls[j].getRights());
+								 * final JSONObject jo = new JSONObject();
+								 * jo.put(FolderFields.BITS,
+								 * createPermissionBits(imapPerm));
+								 * jo.put(FolderFields.ENTITY,
+								 * acls[j].getName());
+								 * jo.put(FolderFields.GROUP,
+								 * imapPerm.isGroupPermission()); ja.put(jo);
+								 */
 							}
 						}
 						jsonwriter.value(ja);
