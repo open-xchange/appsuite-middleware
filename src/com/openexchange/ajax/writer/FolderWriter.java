@@ -434,7 +434,8 @@ public final class FolderWriter extends DataWriter {
 								jo.put(FolderFields.GROUP, imapPerm.isGroupPermission());
 								ja.put(jo);
 							} catch (final AbstractOXException e) {
-								if (e.getDetailNumber() == LdapException.Code.USER_NOT_FOUND.getDetailNumber()
+								if ((e.getDetailNumber() == LdapException.Code.USER_NOT_FOUND.getDetailNumber() ||
+										e.getDetailNumber() == UserException.Code.USER_NOT_FOUND.getDetailNumber())
 										&& Component.USER.equals(e.getComponent())) {
 									if (LOG.isDebugEnabled()) {
 										LOG.debug(new StringBuilder(128).append("Unmappable entity ").append(
