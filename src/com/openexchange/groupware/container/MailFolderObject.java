@@ -52,6 +52,7 @@ package com.openexchange.groupware.container;
 import javax.mail.Folder;
 import javax.mail.MessagingException;
 
+import com.openexchange.api2.MailInterfaceImpl;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
@@ -594,7 +595,7 @@ public final class MailFolderObject implements User2IMAPInfo {
 		if (IMAPServer.CYRUS.equals(imapServer)) {
 			return EMPYT_ARGS;
 		} else if (IMAPServer.COURIER.equals(imapServer)) {
-			return new Object[] { Integer.valueOf(sessionUser), fullName, Character.valueOf(separator) };
+			return new Object[] { Integer.valueOf(sessionUser), MailInterfaceImpl.prepareMailFolderParam(fullName), Character.valueOf(separator) };
 		}
 		throw new User2IMAP.User2IMAPException(User2IMAP.User2IMAPException.Code.UNKNOWN_IMAP_SERVER, imapServer
 				.getName());

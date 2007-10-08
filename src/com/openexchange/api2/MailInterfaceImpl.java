@@ -4900,6 +4900,8 @@ public class MailInterfaceImpl implements MailInterface {
 				if (createMe.exists()) {
 					throw new OXMailException(MailCode.DUPLICATE_FOLDER, createMe.getFullName());
 				}
+				folderObj.setSeparator(createMe.getSeparator());
+				folderObj.setFullName(MailFolderObject.prepareFullname(createMe.getFullName(), createMe.getSeparator()));
 				final long start = System.currentTimeMillis();
 				try {
 					if (!createMe.create(Folder.HOLDS_MESSAGES | Folder.HOLDS_FOLDERS)) {
@@ -4924,14 +4926,7 @@ public class MailInterfaceImpl implements MailInterface {
 					if (equals(initialACLs, newACLs)) {
 						break ACLS;
 					}
-					boolean hasAdministerRight = false;
-					for (int i = 0; i < initialACLs.length && !hasAdministerRight; i++) {
-						if (sessionObj.getIMAPProperties().getImapLogin().equals(initialACLs[i].getName())
-								&& initialACLs[i].getRights().contains(Rights.Right.ADMINISTER)) {
-							hasAdministerRight = true;
-						}
-					}
-					if (!hasAdministerRight) {
+					if (!sessionObj.getCachedRights(createMe, true).contains(Rights.Right.ADMINISTER)) {
 						throw new OXMailException(MailCode.NO_ADMINISTER_ACCESS_ON_INITIAL, getUserName(sessionObj),
 								createMe.getFullName());
 					}
@@ -4982,6 +4977,10 @@ public class MailInterfaceImpl implements MailInterface {
 					} catch (AbstractOXException e) {
 						throw new OXMailException(e);
 					}
+					/*
+					 * Remove previously cached rights
+					 */
+					sessionObj.removeCachedRights(createMe);
 				}
 				retval = MailFolderObject.prepareFullname(createMe.getFullName(), createMe.getSeparator());
 			}
@@ -5505,7 +5504,7 @@ public class MailInterfaceImpl implements MailInterface {
 		return imapCon;
 	}
 
-	private final static String prepareMailFolderParam(final String folderStringArg) {
+	public final static String prepareMailFolderParam(final String folderStringArg) {
 		if (folderStringArg == null) {
 			return null;
 		} else if (MailFolderObject.DEFAULT_IMAP_FOLDER_ID.equals(folderStringArg)) {

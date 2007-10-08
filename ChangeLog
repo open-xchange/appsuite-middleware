@@ -1,3 +1,7 @@
+* 2007-10-08 - thorben.betten@open-xchange.com
+
+ - Proper check of intial ACls on mail folder creation
+
 * 2007-10-05 - thorben.betten@open-xchange.com
 
  - Bugfix #9515: Additional check for user's module access prior to
