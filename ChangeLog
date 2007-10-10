@@ -4,6 +4,7 @@
  - Bugfix #9750: Avoid annoying error logging whenever an ACL entity cannot
    be mapped to system user
  - Bugfix #9719: Returning proper instance of FolderObjectIterator
+ - Bugfix #9733: More informative error message if no folder admin specified
 
 * 2007-09-17 - thorben.betten@open-xchange.com
 
