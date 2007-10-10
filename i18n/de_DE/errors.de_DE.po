@@ -987,14 +987,46 @@
 # Antje Faber, 2007.
 # Antje Faber, 2007.
 # Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER.
 # Antje Faber, 2007.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: errors.de_DE\n"
+"Project-Id-Version: errors\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2007-09-20 10:46+0200\n"
+"PO-Revision-Date: 2007-10-10 17:07+0200\n"
 "Last-Translator: Antje Faber\n"
 "Language-Team:  <de@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -1112,8 +1144,13 @@ msgstr "Aktion %s wird nicht von %s unterstützt"
 msgid "Action type not supported : %d"
 msgstr "Aktionstyp wird nicht unterstützt : %d"
 
-msgid "An I/O error occured"
-msgstr "Es trat ein E/A-Fehler auf"
+msgid ""
+"Administration rights required. In the Rights tab add at least one user with "
+"administration rights."
+msgstr "Administrationsrechte benötigt. Fügen Sie im Reiter Rechte mindestens einen Benutzer mit Administrationsrechten hinzu."
+
+msgid "An I/O error occured %s"
+msgstr "Es trat ein E/A-Fehler auf: %s"
 
 msgid "An I/O error occured: %s"
 msgstr "Es trat ein E/A-Fehler auf: %s"
@@ -1240,11 +1277,17 @@ msgstr ""
 "Es besteht bereits ein Infostore-Ordner namens %s unterhalb des Ordners %s (%"
 "d) im Kontext %d. Bitte wählen Sie einen anderen Anzeigenamen."
 
+msgid "An internal error occured: %s"
+msgstr "Es trat ein interner Fehler auf: %s"
+
 msgid "An invalid SQL query was sent to the server."
 msgstr "Es wurde eine ungültige SQL-Anfrage an den Server geschickt."
 
 msgid "An uploaded file referenced by %s could not be found"
 msgstr "Keine hochgeladene Datei mit Verweis zu %s gefunden."
+
+msgid "Attachment %s not found inside message %s of mail folder %s"
+msgstr "Anlage %s nicht in Nachricht %s im E-Mail-Ordners %s gefunden."
 
 msgid "Attachments must contain a file."
 msgstr "Anlagen müssen eine Datei enthalten"
@@ -1404,6 +1447,9 @@ msgid "Cannot import this kind of data. Use method canImport() first."
 msgstr ""
 "Dieser Datentyp kann nicht importiert werden. Verwenden Sie erst die Methode "
 "canImport()."
+
+msgid "Cannot initialize the mail connection"
+msgstr "E-Mail-Verbindung kann nicht initialisiert werden"
 
 msgid "Cannot instantiate class %1$s."
 msgstr "Anlegen von Instanzen für Klasse %1$s nicht möglich"
@@ -2054,6 +2100,9 @@ msgstr "Hash-Algorithmus %s nicht gefunden"
 msgid "Header \"content-type\" does not indicate multipart content"
 msgstr "Header \"content-type\" zeigt keinen Multipart-Inhalt an"
 
+msgid "Header %s could not be properly parsed"
+msgstr "Header %s konnte nicht richtig analysiert werden."
+
 msgid "Html-2-Text conversion failed: %s"
 msgstr "Html-2-Text-Konvertierung fehlgeschlagen: %s"
 
@@ -2078,6 +2127,9 @@ msgid ""
 msgstr ""
 "IMAP-Suche aufgrund folgender Ursache fehlgeschlagen: %s Umschalten auf "
 "applikationsbasierte Suche"
+
+msgid "IMAP server does not support capability \"THREAD=REFERENCES\""
+msgstr "\"THREAD=REFERENCES\" nicht vom IMAP-Server unterstützt"
 
 msgid ""
 "IMAP sort failed due to following reason: %s Switching to application-based "
@@ -2178,6 +2230,9 @@ msgstr "Ungültige Entity-ID %s in den Rechten des Ordners %s im Kontext %s"
 msgid "Invalid integer value %s"
 msgstr "Ungültiger Ganzzahlenwert %s"
 
+msgid "Invalid message path: %s"
+msgstr "Ungültiger Nachrichtenpfad: %s"
+
 msgid "Invalid method on an expunged message: %s"
 msgstr "Ungültige Methode für gelöschte Nachricht: %s"
 
@@ -2186,6 +2241,9 @@ msgstr "Ungültige Nachricht. Multipart-Inhalte sind 0. "
 
 msgid "Invalid object ID %s"
 msgstr "Ungültige Objekt-ID %s"
+
+msgid "Invalid parameter name: %s"
+msgstr "Ungültiger Parametername: %s"
 
 msgid "Invalid parameter: %s"
 msgstr "Ungültiger Parameter: %s"
@@ -2210,6 +2268,9 @@ msgstr "Link ist nicht implementiert."
 
 msgid "Login not possible at the moment. Please try again later."
 msgstr "Anmelden ist im Moment nicht möglich. Bitte später erneut versuchen."
+
+msgid "Mail could not be moved to trash folder. Quota exceeded"
+msgstr "E-Mail konnte nicht in den Mülleimer verschoben werden. Quota überstiegen"
 
 msgid ""
 "Mail folder \"%s\" could not be created (maybe due to insufficient "
@@ -2243,6 +2304,9 @@ msgstr ""
 "E-Mail-Einstellungen für Benutzer %s konnten nicht im Kontext %d gefunden "
 "werden"
 
+msgid "Mail(s) %s could not be found in folder %s"
+msgstr "E-Mail(s) %s nicht im Ordner %s gefunden"
+
 msgid "Mandatory field last name is not set."
 msgstr "Pflichtfeld Nachname nicht gesetzt"
 
@@ -2269,6 +2333,11 @@ msgstr "Senden der Nachricht an folgende Empfänger fehlgeschlagen: %s"
 
 msgid "Message field %s cannot be handled"
 msgstr "Nachrichtenfeld %s kann nicht verarbeitet werden"
+
+msgid ""
+"Message has been successfully sent, but a copy could not be placed in your "
+"sent folder."
+msgstr "Nachricht erfolgreich versendet, jedoch konnte keine Kopie in Ihren Gesendet-Ordner gelegt werden."
 
 msgid ""
 "Message has been successfully sent, but a copy was not placed in your sent "
@@ -2310,6 +2379,9 @@ msgstr "Fehlende Daten für Rechtschreibprüfung"
 
 msgid "Missing default %s folder in user mail settings"
 msgstr "Fehlender Standard-%s-Ordner in den Benutzer-Maileinstellungen"
+
+msgid "Missing field %s"
+msgstr "Fehlendes Feld %s"
 
 msgid "Missing field %s in folder %s in context %s"
 msgstr "Fehlendes Feld %s im Ordner %s im Kontext %s"
@@ -2409,6 +2481,13 @@ msgstr ""
 "Ordner %s konnte auf Grund folgenden Fehlers nicht gelöscht werden: %s"
 
 msgid ""
+"Move partially completed. Source message(s) %s in folder %s could not be "
+"deleted due to following error: %s"
+msgstr ""
+"Verschieben teilweise abgeschlossen. Ursprungsmeldung(en) %s im "
+"Ordner %s konnte(n) auf Grund folgenden Fehlers nicht gelöscht werden: %s"
+
+msgid ""
 "Move/Copy failed. New message with UID %d could not be found in destination "
 "folder %s"
 msgstr ""
@@ -2454,9 +2533,6 @@ msgstr "Kein VCard für Import gefunden."
 msgid "No access to mail folder %s"
 msgstr "Kein Zugriff auf E-Mail-Ordner %s"
 
-msgid "No admin permission found"
-msgstr "Kein Adminrecht gefunden"
-
 msgid "No admin user found in context %s"
 msgstr "Kein Adminbenutzer im Kontext %s gefunden"
 
@@ -2471,6 +2547,9 @@ msgstr ""
 msgid "No administer permission specified for folder %s"
 msgstr "Keine Administrationsrechte für Ordner %s festgelegt"
 
+msgid "No attachment was found with id %s in message"
+msgstr "Keine Anlage mit der ID %s in Nachricht gefunden"
+
 msgid "No attachment was found with id %s in message %s"
 msgstr "Keine Anlage mit der ID %s in Nachricht %s gefunden"
 
@@ -2484,6 +2563,9 @@ msgstr ""
 
 msgid "No connection available to access mailbox"
 msgstr "Keine Verbindung zum Zugriff auf Mailbox verfügbar"
+
+msgid "No content available in mail part"
+msgstr "Kein Inhalt in Teil der E-Mail verfügbar"
 
 msgid "No create access to mail folder %s"
 msgstr "Kein Anlegezugriff auf E-Mail-Ordner %s"
@@ -2519,6 +2601,12 @@ msgstr "Kein keep-seen-Zugriff auf E-Mail-Ordner %s"
 msgid "No lookup access to mail folder %s"
 msgstr "Kein Lookup-Zugriff auf E-Mail-Ordner %s"
 
+msgid "No mail account exists for admin user in context %d"
+msgstr "Für den Admin-Benutzer ist kein E-Mail-Account im Kontext %d vorhanden."
+
+msgid "No mail module access permitted"
+msgstr "Zugriff auf E-Mail-Modul nicht erlaubt"
+
 msgid "No permission for modul: %s."
 msgstr "Keine Berechtigung für Modul: %s."
 
@@ -2533,6 +2621,9 @@ msgstr "Keine Zeile im Tabellen-Update gefunden"
 
 msgid "No send address could be found for user %s in user configuration"
 msgstr "Keine Sende-Adresse in der Benutzerkonfiguration für Benutzer %s gefunden"
+
+msgid "No send address could be found in user configuration"
+msgstr "Keine Sende-Adresse in der Benutzerkonfiguration gefunden"
 
 msgid "No servlet class name found for key \"%s\". Please check servlet mappings."
 msgstr ""
@@ -2556,6 +2647,9 @@ msgstr ""
 
 msgid "Not allowed to move default folder %s in context %s"
 msgstr "Keine Rechte, den Standardordner %s im Kontext %s zu verschieben"
+
+msgid "Not allowed to open folder %s due to missing read access"
+msgstr "Aufgrund fehlender Leserechte kann der Ordner %s nicht geöffnet werden."
 
 msgid "Not yet supported!"
 msgstr "Noch nicht unterstützt."
@@ -2679,6 +2773,13 @@ msgstr ""
 "Prozess wurde beim Warten auf eine freie IMAP-Verbindung unterbrochen. Bitte "
 "erneut versuchen."
 
+msgid ""
+"Process was interrupted while waiting for a free mail connection. Please try "
+"again."
+msgstr ""
+"Prozess wurde beim Warten auf eine freie E-Mail-Verbindung unterbrochen. Bitte "
+"erneut versuchen."
+
 msgid "Programming error - folder %s"
 msgstr "Programmierfehler - Ordner %s"
 
@@ -2688,6 +2789,9 @@ msgstr "Eigenschaft \"%s\" nicht festgelegt"
 msgid "Property %s is not an integer"
 msgstr "Eigenschaft %s ist keine Ganzzahl"
 
+msgid "Property error: %s"
+msgstr "Eigenschaftsfehler: %s"
+
 msgid "Public folder %s can only be moved to a public folder in context %s"
 msgstr ""
 "Der öffentliche Ordner %s darf nur im Kontext %s in einen öffentlichen "
@@ -2695,6 +2799,9 @@ msgstr ""
 
 msgid "Put into cache failed."
 msgstr "Legen in Cache fehlgeschlagen"
+
+msgid "Receipt acknowledgement cannot be sent: missing header %s in message %s"
+msgstr "Empfangsbestätigung kann nicht gesendet werden: Fehlender Header %s in Nachricht %s"
 
 msgid "Remove on cache failed"
 msgstr "Entfernen aus Cache fehlgeschlagen"
@@ -2788,6 +2895,9 @@ msgstr "Socket durch Webserver geschlossen"
 
 msgid "Some fields have values, that are too long"
 msgstr "Die Werte einiger Felder sind zu lang"
+
+msgid "Spam handler initialization failed: %s"
+msgstr "Initialisierung des Spam-Handlers fehlgeschlagen: %s"
 
 msgid "SpamAssassin not installed or its executable has not been found"
 msgstr "SpamAssassin ist nicht installiert oder die Executable wurde nicht gefunden."
@@ -2929,6 +3039,11 @@ msgstr ""
 "gültige Datei."
 
 msgid ""
+"The message part with sequence ID %s could not be found in message %s in "
+"folder %s"
+msgstr "Der Teil der Nachricht mit der Sequenz-ID %s konnte nicht in der Nachricht %s im Ordner %s gefunden werden."
+
+msgid ""
 "The message to send contains an invalid attachment %s: neither content nor "
 "attachment's filename is set"
 msgstr ""
@@ -2968,6 +3083,9 @@ msgid ""
 msgstr ""
 "Das von Ihnen angeforderte Objekt konnte nicht gefunden werden. Bitte erneut "
 "versuchen. Kontext %1$d Ordner %2$d Benutzer %3$d Objekt %4$d"
+
+msgid "The raw content's input stream of message %d in folder %s cannot be read"
+msgstr "Der Eingabe-Stream des Raw-Inhalts der Nachricht %d im Ordner %s kann nicht gelesen werden."
 
 msgid "The requested item does not exist."
 msgstr "Das angeforderte Objekt ist nicht vorhanden."
@@ -3078,7 +3196,8 @@ msgid ""
 "Unable to compare contacts for update. Make sure you have entered a valid "
 "display name. Contect %1$d Object %2$d"
 msgstr ""
-"Kontakte für die Aktualisierung können nicht verglichen werden. Stellen Sie sicher, dass Sie einen gültigen Anzeigenamen eingetragen haben. Kontext %1$d "
+"Kontakte für die Aktualisierung können nicht verglichen werden. Stellen Sie "
+"sicher, dass Sie einen gültigen Anzeigenamen eingetragen haben. Kontext %1$d "
 "Objekt %2$d"
 
 msgid ""
@@ -3373,6 +3492,9 @@ msgstr "Nicht analysierbares Header-Feld %s im Weiterleitung-Request-Paket"
 msgid "Unsupported MIME type %s"
 msgstr "Nicht unterstützter MIME-Typ %s"
 
+msgid "Unsupported charset-encoding: %s"
+msgstr "Nicht unterstützte charset-Kodierung: %s"
+
 msgid "Unsupported encoding."
 msgstr "Nicht unterstützte Kodierung."
 
@@ -3542,6 +3664,14 @@ msgstr "Validierung fehlgeschlagen: %s"
 msgid "Value for the recurrence is missing: %d."
 msgstr "Fehlender Wert für Wiederholung: %d."
 
+msgid "Versit attachment could not be saved due to an unsupported MIME type: %s"
+msgstr ""
+"Versit-Anlage konnte wegen eines nicht unterstützten MIME-Typs %s nicht "
+"gespeichert werden"
+
+msgid "Versit error: %s"
+msgstr "Versit-Fehler: %s"
+
 msgid "Versit object could not be saved"
 msgstr "Versit-Objekt konnte nicht gespeichert werden"
 
@@ -3641,7 +3771,9 @@ msgstr "Sie können die Sperre für dieses Dokument nicht aufheben."
 msgid ""
 "You do not have permission to create objects in this folder. %1$d in context "
 "%2$d with user %3$d"
-msgstr "Sie haben nicht die entsprechenden Berechtigungen zum Erstellen von Objekten in diesem Ordner %1$d im Kontext %2$d als Benutzer %3$d"
+msgstr ""
+"Sie haben nicht die entsprechenden Berechtigungen zum Erstellen von Objekten "
+"in diesem Ordner %1$d im Kontext %2$d als Benutzer %3$d"
 
 msgid ""
 "You do not have permission to delete objects from folder %1$d in context %2"
