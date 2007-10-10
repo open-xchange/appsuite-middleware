@@ -135,7 +135,7 @@ public final class MailInterfaceImpl extends MailInterface {
 		 */
 		mailConnection = MailConnection.getInstance(session);
 		if (!mailConnection.isConnected()) {
-			final MailConfig config = mailConnection.getMailConfig(session);
+			final MailConfig config = mailConnection.getMailConfig();
 			if (config.getError() != null) {
 				throw new MailException(config.getError());
 			}
@@ -491,6 +491,12 @@ public final class MailInterfaceImpl extends MailInterface {
 			throws MailException {
 		initConnection();
 		mailConnection.getMessageStorage().updateMessageFlags(folder, msgUID, flagBits, flagVal);
+	}
+
+	@Override
+	public MailConfig getMailConfig() throws MailException {
+		initConnection();
+		return mailConnection.getMailConfig();
 	}
 
 }

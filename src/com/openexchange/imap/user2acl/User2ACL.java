@@ -424,9 +424,7 @@ public abstract class User2ACL {
 
 	/**
 	 * Determines the user ID whose either ACL entity name or user name matches
-	 * given <code>pattern</code>. <b>NOTE:</b> this routine returns
-	 * <code>-1</code> if ACLs are not supported by underlying IMAP server or
-	 * if ACLs are disabled per configuration
+	 * given <code>pattern</code>.
 	 * 
 	 * @param pattern -
 	 *            the pattern for either IMAP login or user name

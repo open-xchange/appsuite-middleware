@@ -108,7 +108,7 @@ public final class IMAPConnection extends MailConnection<IMAPFolderStorage, IMAP
 
 	private StackTraceElement[] trace;
 
-	private transient MailConfig mailConfig;
+	private transient IMAPConfig imapConfig;
 
 	/**
 	 * Default constructor
@@ -131,7 +131,7 @@ public final class IMAPConnection extends MailConnection<IMAPFolderStorage, IMAP
 		decrement = false;
 		trace = null;
 		usingThread = null;
-		mailConfig = null;
+		imapConfig = null;
 	}
 
 	@Override
@@ -167,11 +167,15 @@ public final class IMAPConnection extends MailConnection<IMAPFolderStorage, IMAP
 	}
 
 	@Override
-	public MailConfig getMailConfig(final SessionObject session) throws MailException {
-		if (mailConfig == null) {
-			mailConfig = IMAPConfig.getImapConfig(session);
+	protected void initMailConfig(final SessionObject session) throws MailException {
+		if (imapConfig == null) {
+			imapConfig = IMAPConfig.getImapConfig(session);
 		}
-		return mailConfig;
+	}
+
+	@Override
+	public MailConfig getMailConfig() throws MailException {
+		return imapConfig;
 	}
 
 	@Override
@@ -247,7 +251,7 @@ public final class IMAPConnection extends MailConnection<IMAPFolderStorage, IMAP
 			/*
 			 * Check server's capabilities
 			 */
-			IMAPConfig.initializeCapabilities(imapStore);
+			imapConfig.initializeCapabilities(imapStore);
 			/*
 			 * Increase counter
 			 */
@@ -271,7 +275,7 @@ public final class IMAPConnection extends MailConnection<IMAPFolderStorage, IMAP
 	 * @see com.openexchange.mail.MailConnection#getFolderStorage()
 	 */
 	@Override
-	public IMAPFolderStorage getFolderStorage() throws IMAPException {
+	public IMAPFolderStorage getFolderStorage() throws MailException {
 		if (connected) {
 			if (null == folderStorage) {
 				folderStorage = new IMAPFolderStorage(imapStore, this, session);
@@ -287,7 +291,7 @@ public final class IMAPConnection extends MailConnection<IMAPFolderStorage, IMAP
 	 * @see com.openexchange.mail.MailConnection#getMessageStorage()
 	 */
 	@Override
-	public IMAPMessageStorage getMessageStorage() throws IMAPException {
+	public IMAPMessageStorage getMessageStorage() throws MailException {
 		if (connected) {
 			if (null == messageStorage) {
 				messageStorage = new IMAPMessageStorage(imapStore, this, session);
@@ -303,7 +307,7 @@ public final class IMAPConnection extends MailConnection<IMAPFolderStorage, IMAP
 	 * @see com.openexchange.mail.MailConnection#getLogicTools()
 	 */
 	@Override
-	public IMAPLogicTools getLogicTools() throws IMAPException {
+	public IMAPLogicTools getLogicTools() throws MailException {
 		if (connected) {
 			if (null == logicTools) {
 				logicTools = new IMAPLogicTools(imapStore, this, session);

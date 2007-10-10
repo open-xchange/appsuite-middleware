@@ -347,10 +347,10 @@ public final class ACLPermission extends MailPermission {
 	 * @throws AbstractOXException
 	 */
 	public void parseACL(final ACL acl, final User2ACLArgs user2aclArgs) throws AbstractOXException {
-		this.acl = acl;
 		setEntity(User2ACL.getInstance(session.getUserObject())
 				.getUserID(acl.getName(), getUserStorage(), user2aclArgs));
 		parseRights(acl.getRights());
+		this.acl = acl;
 	}
 
 	/**

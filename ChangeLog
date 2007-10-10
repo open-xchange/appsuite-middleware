@@ -1,3 +1,9 @@
+* 2007-10-10 - thorben.betten@open-xchange.com
+
+ - Bugfix #9751: Fixed non-appearing shared mail folders
+ - Bugfix #9750: Avoid annoying error logging whenever an ACL entity cannot
+   be mapped to system user
+
 * 2007-09-17 - thorben.betten@open-xchange.com
 
  - Bugfix #9664: Fixed check for IMAP server's user flag support

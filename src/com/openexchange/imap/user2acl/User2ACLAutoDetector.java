@@ -131,7 +131,7 @@ public final class User2ACLAutoDetector {
 			}
 		}
 		try {
-			if (!IMAPConfig.isSupportsACLs()) {
+			if (!IMAPConfig.isSupportsACLsConfig()) {
 				/*
 				 * Return fallback implementation
 				 */

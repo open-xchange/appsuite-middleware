@@ -54,7 +54,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -96,10 +98,6 @@ public final class IMAPConfig extends MailConfig {
 
 	private static boolean globalImapPropsLoaded;
 
-	private static final AtomicBoolean capabilitiesLoaded = new AtomicBoolean();
-
-	private static IMAPCapabilities imapCapabilities;
-
 	/*
 	 * Fields for global properties
 	 */
@@ -127,12 +125,18 @@ public final class IMAPConfig extends MailConfig {
 
 	private static String user2AclImpl;
 
+	private static Map<String, Boolean> newACLExtMap = new ConcurrentHashMap<String, Boolean>();
+
 	/*
 	 * User-specific fields
 	 */
 	private String imapServer;
 
 	private int imapPort;
+
+	private final AtomicBoolean capabilitiesLoaded = new AtomicBoolean();
+
+	private IMAPCapabilities imapCapabilities;
 
 	/**
 	 * Default constructor
@@ -500,7 +504,7 @@ public final class IMAPConfig extends MailConfig {
 	 * @return the imapSearch
 	 * @throws MailConfigException
 	 */
-	public static boolean isImapSearch() throws MailConfigException {
+	public boolean isImapSearch() throws MailConfigException {
 		loadGlobalImapProperties();
 		if (capabilitiesLoaded.get()) {
 			return (imapSearch && (imapCapabilities.hasIMAP4rev1() || imapCapabilities.hasIMAP4()));
@@ -525,7 +529,7 @@ public final class IMAPConfig extends MailConfig {
 	 * @return the imapSort
 	 * @throws MailConfigException
 	 */
-	public static boolean isImapSort() throws MailConfigException {
+	public boolean isImapSort() throws MailConfigException {
 		loadGlobalImapProperties();
 		if (capabilitiesLoaded.get()) {
 			return (imapSort && imapCapabilities.hasSort());
@@ -567,16 +571,13 @@ public final class IMAPConfig extends MailConfig {
 	}
 
 	/**
-	 * Gets the supportsACLs
+	 * Gets the global supportsACLs
 	 * 
-	 * @return the supportsACLs
+	 * @return the global supportsACLs
 	 * @throws MailConfigException
 	 */
-	public static boolean isSupportsACLs() throws MailConfigException {
+	public static boolean isSupportsACLsConfig() throws MailConfigException {
 		loadGlobalImapProperties();
-		if (capabilitiesLoaded.get() && BoolCapVal.AUTO.equals(supportsACLs)) {
-			return imapCapabilities.hasACL();
-		}
 		return BoolCapVal.TRUE.equals(supportsACLs) ? true : false;
 	}
 
@@ -592,12 +593,38 @@ public final class IMAPConfig extends MailConfig {
 	}
 
 	/**
+	 * Checks if given IMAP server implements newer ACL extension conforming to
+	 * RFC 4314
+	 * 
+	 * @param imapServer
+	 *            The IMAP server's host name or IP address
+	 * @return <code>true</code> if newer ACL extension is supported by IMAP
+	 *         server; otherwise <code>false</code>
+	 */
+	public static boolean hasNewACLExt(final String imapServer) {
+		return newACLExtMap.containsKey(imapServer) ? newACLExtMap.get(imapServer).booleanValue() : false;
+	}
+
+	/**
+	 * Remembers if given IMAP server supports newer ACL extension conforming to
+	 * RFC 4314
+	 * 
+	 * @param imapServer
+	 *            The IMAP server's host name or IP address
+	 * @param newACLExt
+	 *            Whether newer ACL extension is supported or not
+	 */
+	public static void setNewACLExt(final String imapServer, final boolean newACLExt) {
+		newACLExtMap.put(imapServer, Boolean.valueOf(newACLExt));
+	}
+
+	/**
 	 * Requests if the IMAP capabilities are loaded
 	 * 
 	 * @return <code>true</code> if IMAP capabilities are loaded; otherwise
 	 *         <code>false</code>
 	 */
-	public static boolean isCapabilitiesLoaded() {
+	public boolean isCapabilitiesLoaded() {
 		return capabilitiesLoaded.get();
 	}
 
@@ -606,11 +633,11 @@ public final class IMAPConfig extends MailConfig {
 	 * 
 	 * @return The IMAP capabilities
 	 */
-	public static IMAPCapabilities getImapCapabilities() {
+	public IMAPCapabilities getImapCapabilities() {
 		return imapCapabilities;
 	}
 
-	private static final transient Lock LOCK_CAPS = new ReentrantLock();
+	private final transient Lock lockCaps = new ReentrantLock();
 
 	/**
 	 * Initializes IMAP server's capabilities if not done, yet
@@ -620,9 +647,9 @@ public final class IMAPConfig extends MailConfig {
 	 * @throws MailConfigException
 	 *             If IMAP capabilities cannot be initialized
 	 */
-	public static void initializeCapabilities(final IMAPStore imapStore) throws MailConfigException {
+	public void initializeCapabilities(final IMAPStore imapStore) throws MailConfigException {
 		if (!capabilitiesLoaded.get()) {
-			LOCK_CAPS.lock();
+			lockCaps.lock();
 			try {
 				if (capabilitiesLoaded.get()) {
 					return;
@@ -642,16 +669,21 @@ public final class IMAPConfig extends MailConfig {
 					LOG.error(e.getMessage(), e);
 					imapCaps.setHasSubscription(false);
 				}
-				IMAPConfig.imapCapabilities = imapCaps;
+				imapCapabilities = imapCaps;
 				capabilitiesLoaded.set(true);
 			} catch (final MessagingException e) {
 				throw new MailConfigException(e);
 			} finally {
-				LOCK_CAPS.unlock();
+				lockCaps.unlock();
 			}
 		}
 	}
 
+	@Override
+	public int getCapabilities() {
+		return capabilitiesLoaded.get() ? imapCapabilities.getCapabilities() : 0;
+	}
+	
 	/**
 	 * Gets the imapPort
 	 * 
@@ -672,4 +704,17 @@ public final class IMAPConfig extends MailConfig {
 		return imapServer;
 	}
 
+	/**
+	 * Gets the supportsACLs
+	 * 
+	 * @return the supportsACLs
+	 * @throws MailConfigException
+	 */
+	public boolean isSupportsACLs() throws MailConfigException {
+		loadGlobalImapProperties();
+		if (capabilitiesLoaded.get() && BoolCapVal.AUTO.equals(supportsACLs)) {
+			return imapCapabilities.hasACL();
+		}
+		return BoolCapVal.TRUE.equals(supportsACLs) ? true : false;
+	}
 }

@@ -129,12 +129,12 @@ public final class IMAPSearch {
 	 */
 	public static Message[] searchMessages(final IMAPFolder imapFolder, final MailListField[] searchFields,
 			final String[] searchPatterns, final boolean linkWithOR, final MailListField[] fields,
-			final MailListField sortFieldArg, final Set<MailListField> usedFields) throws MessagingException,
+			final MailListField sortFieldArg, final Set<MailListField> usedFields, final IMAPConfig imapConfig) throws MessagingException,
 			MailException {
 		boolean applicationSearch = true;
 		Message[] msgs = null;
 		final MailListField sortField = sortFieldArg == null ? MailListField.RECEIVED_DATE : sortFieldArg;
-		if (IMAPConfig.isImapSearch()) {
+		if (imapConfig.isImapSearch()) {
 			try {
 				if (searchFields.length != searchPatterns.length) {
 					throw new IMAPException(IMAPException.Code.INVALID_SEARCH_PARAMS, Integer

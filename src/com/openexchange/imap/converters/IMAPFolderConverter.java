@@ -54,7 +54,9 @@ import static com.openexchange.mail.dataobjects.MailFolder.DEFAULT_FOLDER_ID;
 import javax.mail.MessagingException;
 
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.Component;
 import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.imap.ACLPermission;
 import com.openexchange.imap.IMAPException;
@@ -163,13 +165,45 @@ public final class IMAPFolderConverter {
 	 * @throws MailException
 	 *             If conversion fails
 	 */
-	public static MailFolder convertFolder(final IMAPFolder imapFolder, final SessionObject session)
-			throws MailException {
+	public static MailFolder convertFolder(final IMAPFolder imapFolder, final SessionObject session,
+			final IMAPConfig imapConfig) throws MailException {
 		try {
 			final MailFolder mailFolder = new MailFolder();
 			mailFolder.setRootFolder(imapFolder instanceof DefaultFolder);
 			mailFolder.setExists(imapFolder.exists());
-			final String[] attrs = imapFolder.getAttributes();
+			String[] attrs;
+			try {
+				attrs = imapFolder.getAttributes();
+			} catch (final NullPointerException e) {
+				/*
+				 * No attributes available. Try to determine them manually.
+				 */
+				attrs = new String[0];
+				ListInfo[] li = (ListInfo[]) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+					public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+						try {
+							return protocol.list("", new StringBuilder().append(imapFolder.getFullName()).append(
+									imapFolder.getSeparator()).append('%').toString());
+						} catch (final MessagingException e) {
+							LOG.error(e.getLocalizedMessage(), e);
+							throw new ProtocolException(e.getLocalizedMessage());
+						}
+					}
+				});
+				mailFolder.setSubfolders(hasChildren(li));
+				li = (ListInfo[]) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+					public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+						try {
+							return protocol.lsub("", new StringBuilder().append(imapFolder.getFullName()).append(
+									imapFolder.getSeparator()).append('%').toString());
+						} catch (final MessagingException e) {
+							LOG.error(e.getLocalizedMessage(), e);
+							throw new ProtocolException(e.getLocalizedMessage());
+						}
+					}
+				});
+				mailFolder.setSubscribedSubfolders(hasChildren(li));
+			}
 			Attribs: for (final String attribute : attrs) {
 				if (ATTRIBUTE_NON_EXISTENT.equalsIgnoreCase(attribute)) {
 					mailFolder.setNonExistent(true);
@@ -192,26 +226,30 @@ public final class IMAPFolderConverter {
 				mailFolder.setSubfolders(false);
 				mailFolder.setSubscribedSubfolders(false);
 			} else {
-				mailFolder.setSubfolders(false);
-				Attribs: for (final String attribute : attrs) {
-					if (ATTRIBUTE_HAS_CHILDREN.equalsIgnoreCase(attribute)) {
-						mailFolder.setSubfolders(true);
-						break Attribs;
+				if (!mailFolder.containsSubfolders()) {
+					mailFolder.setSubfolders(false);
+					Attribs: for (final String attribute : attrs) {
+						if (ATTRIBUTE_HAS_CHILDREN.equalsIgnoreCase(attribute)) {
+							mailFolder.setSubfolders(true);
+							break Attribs;
+						}
 					}
 				}
-				mailFolder.setSubscribedSubfolders(false);
-				if (mailFolder.hasSubfolders()) {
-					final ListInfo[] li = (ListInfo[]) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
-						public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
-							return protocol.lsub("", imapFolder.getFullName());
-						}
-					});
-					if (null != li) {
-						final String[] lsubAttrs = li[findName(li, imapFolder.getFullName())].attrs;
-						Attribs: for (final String attribute : lsubAttrs) {
-							if (ATTRIBUTE_HAS_CHILDREN.equalsIgnoreCase(attribute)) {
-								mailFolder.setSubscribedSubfolders(true);
-								break Attribs;
+				if (!mailFolder.containsSubscribedSubfolders()) {
+					mailFolder.setSubscribedSubfolders(false);
+					if (mailFolder.hasSubfolders()) {
+						final ListInfo[] li = (ListInfo[]) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+							public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+								return protocol.lsub("", imapFolder.getFullName());
+							}
+						});
+						if (null != li) {
+							final String[] lsubAttrs = li[findName(li, imapFolder.getFullName())].attrs;
+							Attribs: for (final String attribute : lsubAttrs) {
+								if (ATTRIBUTE_HAS_CHILDREN.equalsIgnoreCase(attribute)) {
+									mailFolder.setSubscribedSubfolders(true);
+									break Attribs;
+								}
 							}
 						}
 					}
@@ -221,10 +259,9 @@ public final class IMAPFolderConverter {
 					.setHoldsMessages(mailFolder.exists() ? ((imapFolder.getType() & javax.mail.Folder.HOLDS_MESSAGES) > 0)
 							: false);
 			final Rights ownRights = mailFolder.exists() && mailFolder.isHoldsMessages() ? getOwnRightsInternal(
-					imapFolder, session) : (Rights) RIGHTS_EMPTY.clone();
-			final UserStorage userStorage = UserStorage.getInstance(session.getContext());
+					imapFolder, session, imapConfig) : (Rights) RIGHTS_EMPTY.clone();
 			{
-				final ACLPermission imapPermission = new ACLPermission(session, userStorage);
+				final ACLPermission imapPermission = new ACLPermission(session);
 				imapPermission.setEntity(session.getUserObject().getId());
 				imapPermission.parseRights(ownRights);
 				mailFolder.setOwnPermission(imapPermission);
@@ -253,27 +290,14 @@ public final class IMAPFolderConverter {
 				mailFolder.setDeletedMessageCount(imapFolder.getDeletedMessageCount());
 			}
 			mailFolder.setSubscribed(imapFolder.isSubscribed());
-			if (IMAPConfig.isSupportsACLs() && mailFolder.isHoldsMessages() && mailFolder.exists()
+			if (imapConfig.isSupportsACLs() && mailFolder.isHoldsMessages() && mailFolder.exists()
 					&& (ownRights.contains(Rights.Right.READ) || ownRights.contains(Rights.Right.ADMINISTER))
 					&& !(imapFolder instanceof DefaultFolder)) {
 				try {
-					final ACL[] acls = imapFolder.getACL();
-					final User2ACLArgs info = new MyUser2ACLArgs(session.getUserObject().getId(), imapFolder
-							.getFullName(), imapFolder.getSeparator());
-					for (int j = 0; j < acls.length; j++) {
-						final ACLPermission imapPerm = new ACLPermission(session, userStorage);
-						imapPerm.parseACL(acls[j], info);
-						mailFolder.addPermission(imapPerm);
-					}
-				} catch (final MessagingException e) {
-					if (LOG.isWarnEnabled()) {
-						LOG.warn(new StringBuilder("ACL could not be requested for folder ").append(imapFolder
-								.getFullName()), e);
-					}
-					mailFolder.removePermissions();
+					applyACL2Permissions(imapFolder, session, imapConfig, mailFolder, ownRights);
 				} catch (final AbstractOXException e) {
 					if (LOG.isWarnEnabled()) {
-						LOG.warn("ACL could not be parsed", e);
+						LOG.warn("ACLs could not be parsed", e);
 					}
 					mailFolder.removePermissions();
 				}
@@ -288,22 +312,104 @@ public final class IMAPFolderConverter {
 			return mailFolder;
 		} catch (final MessagingException e) {
 			throw IMAPException.handleMessagingException(e);
-		} catch (final LdapException e) {
-			throw new IMAPException(e);
 		}
+	}
+
+	/**
+	 * Parses IMAP folder's ACLs to instances of {@link ACLPermission} and
+	 * applies them to specified mail folder
+	 * 
+	 * @param imapFolder
+	 *            The IMAP folder
+	 * @param session
+	 *            The session providing needed user data
+	 * @param imapConfig
+	 *            The user's IMAP configuration
+	 * @param mailFolder
+	 *            The mail folder
+	 * @param ownRights
+	 *            The rights granted to IMAP folder for session user
+	 * @throws AbstractOXException
+	 *             If ACLs cannot be mapped
+	 */
+	private static void applyACL2Permissions(final IMAPFolder imapFolder, final SessionObject session,
+			final IMAPConfig imapConfig, final MailFolder mailFolder, final Rights ownRights)
+			throws AbstractOXException {
+		if (IMAPConfig.hasNewACLExt(imapConfig.getServer()) && !ownRights.contains(Rights.Right.ADMINISTER)) {
+			addOwnACL(session, mailFolder, ownRights);
+		} else {
+			try {
+				final ACL[] acls = imapFolder.getACL();
+				final UserStorage userStorage = UserStorage.getInstance(session.getContext());
+				final User2ACLArgs args = new MyUser2ACLArgs(session.getUserObject().getId(), imapFolder.getFullName(),
+						imapFolder.getSeparator());
+				for (int j = 0; j < acls.length; j++) {
+					final ACLPermission aclPerm = new ACLPermission(session, userStorage);
+					try {
+						aclPerm.parseACL(acls[j], args);
+						mailFolder.addPermission(aclPerm);
+					} catch (final AbstractOXException e) {
+						if (isUnknownEntityError(e)) {
+							if (LOG.isDebugEnabled()) {
+								LOG.debug(new StringBuilder(128).append("Cannot map ACL entity named \"").append(
+										acls[j].getName()).append("\" to a system user").toString(), e);
+							}
+						} else {
+							throw e;
+						}
+					}
+				}
+			} catch (final MessagingException e) {
+				if (LOG.isWarnEnabled()) {
+					LOG.warn(new StringBuilder(256).append("ACLs could not be requested for folder ").append(
+							imapFolder.getFullName()).append(
+							". A newer ACL extension (RFC 4314) seems to be supported by IMAP server ").append(
+							imapConfig.getServer()).append(
+							" which denies GETACL command if no ADMINISTER right is granted."), e);
+				}
+				/*
+				 * Remember newer IMAP server's ACL extension
+				 */
+				IMAPConfig.setNewACLExt(imapConfig.getServer(), true);
+				addOwnACL(session, mailFolder, ownRights);
+			}
+		}
+	}
+
+	/**
+	 * Adds current user's rights granted to IMAP folder as an ACL
+	 * 
+	 * @param session
+	 *            The session prividing needed user data
+	 * @param mailFolder
+	 *            The mail folder to whom the ACL should be applied
+	 * @param ownRights
+	 *            The rights to add as an ACL
+	 */
+	private static void addOwnACL(final SessionObject session, final MailFolder mailFolder, final Rights ownRights) {
+		final ACLPermission aclPerm = new ACLPermission(session);
+		aclPerm.setEntity(session.getUserObject().getId());
+		aclPerm.parseRights(ownRights);
+		mailFolder.addPermission(aclPerm);
+	}
+
+	private static boolean isUnknownEntityError(final AbstractOXException e) {
+		return Component.USER.equals(e.getComponent())
+				&& (UserException.Code.USER_NOT_FOUND.getDetailNumber() == e.getDetailNumber() || LdapException.Code.USER_NOT_FOUND
+						.getDetailNumber() == e.getDetailNumber());
 	}
 
 	private static final String STR_MAILBOX_NOT_EXISTS = "NO Mailbox does not exist";
 
 	private static final String STR_FULL_RIGHTS = "acdilprsw";
 
-	private static Rights getOwnRightsInternal(final IMAPFolder folder, final SessionObject session)
-			throws MessagingException, MailConfigException {
+	private static Rights getOwnRightsInternal(final IMAPFolder folder, final SessionObject session,
+			final IMAPConfig imapConfig) throws MessagingException, MailConfigException {
 		if (folder instanceof DefaultFolder) {
 			return null;
 		}
 		final Rights retval;
-		if (IMAPConfig.isSupportsACLs()) {
+		if (imapConfig.isSupportsACLs()) {
 			try {
 				retval = RightsCache.getCachedRights(folder, true, session);
 			} catch (final MessagingException e) {
@@ -361,6 +467,28 @@ public final class IMAPFolderConverter {
 			return null;
 		}
 		return sb.append(parent.getSeparator()).append(parent.getFullName()).toString();
+	}
+
+	/**
+	 * Looks for attribute <code>\HasChildren</code> in provided attributes
+	 * 
+	 * @param li
+	 *            The list info
+	 * @return <code>true</code> if attribute <code>\HasChildren</code> is
+	 *         present; otherwise <code>false</code>
+	 */
+	private static boolean hasChildren(final ListInfo[] li) {
+		if (null != li) {
+			for (int i = 0; i < li.length; i++) {
+				final String[] tmpAttrs = li[i].attrs;
+				for (final String attribute : tmpAttrs) {
+					if (ATTRIBUTE_HAS_CHILDREN.equalsIgnoreCase(attribute)) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
 	}
 
 	/**

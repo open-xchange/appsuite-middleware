@@ -52,6 +52,8 @@ package com.openexchange.mail.cache;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.openexchange.cache.CacheKey;
+
 /**
  * {@link SessionMailCache} - Several cacheable data bound to a user
  * session
@@ -61,14 +63,14 @@ import java.util.Map;
  */
 public final class SessionMailCache {
 
-	private final Map<Object, Object> cache;
+	private final Map<CacheKey, Object> cache;
 
 	/**
 	 * Default constructor
 	 */
 	public SessionMailCache() {
 		super();
-		cache = new HashMap<Object, Object>();
+		cache = new HashMap<CacheKey, Object>();
 	}
 
 	/**

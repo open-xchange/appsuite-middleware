@@ -105,9 +105,9 @@ public final class FolderWriter {
 	 * @return The written JSON object
 	 * @throws MailException
 	 */
-	public static JSONObject writeMailFolder(final MailFolder folder) throws MailException {
+	public static JSONObject writeMailFolder(final MailFolder folder, final MailConfig mailConfig) throws MailException {
 		final JSONObject jsonObject = new JSONObject();
-		final MailFolderFieldWriter[] writers = getMailFolderFieldWriter(ALL_FLD_FIELDS);
+		final MailFolderFieldWriter[] writers = getMailFolderFieldWriter(ALL_FLD_FIELDS, mailConfig);
 		for (MailFolderFieldWriter writer : writers) {
 			writer.writeField(jsonObject, folder, true);
 		}
@@ -123,10 +123,12 @@ public final class FolderWriter {
 	 * 
 	 * @param fields
 	 *            The fields to write
+	 * @param mailConfig
+	 *            Current mail configuration
 	 * @return Appropriate field writers as an array of
 	 *         {@link MailFolderFieldWriter}
 	 */
-	public static MailFolderFieldWriter[] getMailFolderFieldWriter(final int[] fields) {
+	public static MailFolderFieldWriter[] getMailFolderFieldWriter(final int[] fields, final MailConfig mailConfig) {
 		final MailFolderFieldWriter[] retval = new MailFolderFieldWriter[fields.length];
 		for (int i = 0; i < retval.length; i++) {
 			Fields: switch (fields[i]) {
@@ -531,10 +533,10 @@ public final class FolderWriter {
 							 * Put value
 							 */
 							if (withKey) {
-								((JSONObject) jsonContainer).put(FolderFields.CAPABILITIES, Integer.valueOf(MailConfig
+								((JSONObject) jsonContainer).put(FolderFields.CAPABILITIES, Integer.valueOf(mailConfig
 										.getCapabilities()));
 							} else {
-								((JSONArray) jsonContainer).put(Integer.valueOf(MailConfig.getCapabilities()));
+								((JSONArray) jsonContainer).put(Integer.valueOf(mailConfig.getCapabilities()));
 							}
 						} catch (final JSONException e) {
 							throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());

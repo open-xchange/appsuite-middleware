@@ -140,9 +140,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 	 * @param imapStore
 	 *            The <b>connected</b> IMAP store that provides access to IMAP
 	 *            server
+	 * @throws MailException
 	 */
 	public IMAPMessageStorage(final IMAPStore imapStore, final IMAPConnection imapMailConnection,
-			final SessionObject session) {
+			final SessionObject session) throws MailException {
 		super(imapStore, imapMailConnection, session);
 		userId = session.getUserObject().getId();
 		ctx = session.getContext();
@@ -260,12 +261,13 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 				 * Preselect message list according to given search pattern
 				 */
 				msgs = IMAPSearch.searchMessages(imapFolder, searchFields, searchPatterns, linkSearchTermsWithOR,
-						fields, sortField, usedFields);
+						fields, sortField, usedFields, imapConfig);
 				if (msgs == null || msgs.length == 0) {
 					return EMPTY_RETVAL;
 				}
 			}
-			msgs = IMAPSort.sortMessages(imapFolder, msgs, fields, sortField, order, session.getLocale(), usedFields);
+			msgs = IMAPSort.sortMessages(imapFolder, msgs, fields, sortField, order, session.getLocale(), usedFields,
+					imapConfig);
 			if (fromToIndices != null && fromToIndices.length == 2) {
 				final int fromIndex = fromToIndices[0];
 				int toIndex = fromToIndices[1];
@@ -316,7 +318,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 			final MailListField[] searchFields, final String[] searchPatterns, final boolean linkSearchTermsWithOR,
 			final MailListField[] fields) throws MailException {
 		try {
-			if (!IMAPConfig.getImapCapabilities().hasThreadReferences()) {
+			if (!imapConfig.getImapCapabilities().hasThreadReferences()) {
 				throw new IMAPException(IMAPException.Code.THREAD_SORT_NOT_SUPPORTED);
 			}
 			final String fullname = prepareMailFolderParam(folder);
@@ -332,7 +334,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 				 * Preselect message list according to given search pattern
 				 */
 				msgs = IMAPSearch.searchMessages(imapFolder, searchFields, searchPatterns, linkSearchTermsWithOR,
-						fields, null, usedFields);
+						fields, null, usedFields, imapConfig);
 				if (msgs == null || msgs.length == 0) {
 					return EMPTY_RETVAL;
 				}
@@ -488,7 +490,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 			try {
 				if (!holdsMessages()) {
 					throw new IMAPException(IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, imapFolder.getFullName());
-				} else if (IMAPConfig.isSupportsACLs()
+				} else if (imapConfig.isSupportsACLs()
 						&& !RightsCache.getCachedRights(imapFolder, true, session).contains(Rights.Right.DELETE)) {
 					throw new IMAPException(IMAPException.Code.NO_DELETE_ACCESS, imapFolder.getFullName());
 				}
@@ -601,7 +603,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 			try {
 				if (!holdsMessages()) {
 					throw new IMAPException(IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, imapFolder.getFullName());
-				} else if (move && IMAPConfig.isSupportsACLs()
+				} else if (move && imapConfig.isSupportsACLs()
 						&& !RightsCache.getCachedRights(imapFolder, true, session).contains(Rights.Right.DELETE)) {
 					throw new IMAPException(IMAPException.Code.NO_DELETE_ACCESS, imapFolder.getFullName());
 				}
@@ -615,7 +617,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 			try {
 				if ((tmpFolder.getType() & Folder.HOLDS_MESSAGES) == 0) {
 					throw new IMAPException(IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, tmpFolder.getFullName());
-				} else if (IMAPConfig.isSupportsACLs()
+				} else if (imapConfig.isSupportsACLs()
 						&& !RightsCache.getCachedRights(tmpFolder, true, session).contains(Rights.Right.INSERT)) {
 					throw new IMAPException(IMAPException.Code.NO_INSERT_ACCESS, tmpFolder.getFullName());
 				}
@@ -707,7 +709,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 			try {
 				if (!holdsMessages()) {
 					throw new IMAPException(IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, imapFolder.getFullName());
-				} else if (IMAPConfig.isSupportsACLs()
+				} else if (imapConfig.isSupportsACLs()
 						&& !RightsCache.getCachedRights(imapFolder, true, session).contains(Rights.Right.INSERT)) {
 					throw new IMAPException(IMAPException.Code.NO_INSERT_ACCESS, imapFolder.getFullName());
 				}
@@ -759,31 +761,31 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 			final Rights myRights = RightsCache.getCachedRights(imapFolder, true, session);
 			final Flags affectedFlags = new Flags();
 			if (((flags & MailMessage.FLAG_ANSWERED) > 0)) {
-				if (IMAPConfig.isSupportsACLs() && !myRights.contains(Rights.Right.WRITE)) {
+				if (imapConfig.isSupportsACLs() && !myRights.contains(Rights.Right.WRITE)) {
 					throw new IMAPException(IMAPException.Code.NO_WRITE_ACCESS, imapFolder.getFullName());
 				}
 				affectedFlags.add(Flags.Flag.ANSWERED);
 			}
 			if (((flags & MailMessage.FLAG_DELETED) > 0)) {
-				if (IMAPConfig.isSupportsACLs() && !myRights.contains(Rights.Right.DELETE)) {
+				if (imapConfig.isSupportsACLs() && !myRights.contains(Rights.Right.DELETE)) {
 					throw new IMAPException(IMAPException.Code.NO_DELETE_ACCESS, imapFolder.getFullName());
 				}
 				affectedFlags.add(Flags.Flag.DELETED);
 			}
 			if (((flags & MailMessage.FLAG_DRAFT) > 0)) {
-				if (IMAPConfig.isSupportsACLs() && !myRights.contains(Rights.Right.WRITE)) {
+				if (imapConfig.isSupportsACLs() && !myRights.contains(Rights.Right.WRITE)) {
 					throw new IMAPException(IMAPException.Code.NO_WRITE_ACCESS, imapFolder.getFullName());
 				}
 				affectedFlags.add(Flags.Flag.DRAFT);
 			}
 			if (((flags & MailMessage.FLAG_FLAGGED) > 0)) {
-				if (IMAPConfig.isSupportsACLs() && !myRights.contains(Rights.Right.WRITE)) {
+				if (imapConfig.isSupportsACLs() && !myRights.contains(Rights.Right.WRITE)) {
 					throw new IMAPException(IMAPException.Code.NO_WRITE_ACCESS, imapFolder.getFullName());
 				}
 				affectedFlags.add(Flags.Flag.FLAGGED);
 			}
 			if (((flags & MailMessage.FLAG_SEEN) > 0)) {
-				if (IMAPConfig.isSupportsACLs() && !myRights.contains(Rights.Right.KEEP_SEEN)) {
+				if (imapConfig.isSupportsACLs() && !myRights.contains(Rights.Right.KEEP_SEEN)) {
 					throw new IMAPException(IMAPException.Code.NO_KEEP_SEEN_ACCESS, imapFolder.getFullName());
 				}
 				affectedFlags.add(Flags.Flag.SEEN);
@@ -861,7 +863,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 			try {
 				if (!holdsMessages()) {
 					throw new IMAPException(IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, imapFolder.getFullName());
-				} else if (IMAPConfig.isSupportsACLs()
+				} else if (imapConfig.isSupportsACLs()
 						&& !RightsCache.getCachedRights(imapFolder, true, session).contains(Rights.Right.WRITE)) {
 					throw new IMAPException(IMAPException.Code.NO_WRITE_ACCESS, imapFolder.getFullName());
 				}

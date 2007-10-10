@@ -94,9 +94,11 @@ public final class IMAPLogicTools extends IMAPFolderWorker implements MailLogicT
 
 	/**
 	 * Constructor
+	 * 
+	 * @throws MailException
 	 */
 	public IMAPLogicTools(final IMAPStore imapStore, final IMAPConnection imapMailConnection,
-			final SessionObject session) {
+			final SessionObject session) throws MailException {
 		super(imapStore, imapMailConnection, session);
 	}
 
@@ -157,7 +159,7 @@ public final class IMAPLogicTools extends IMAPFolderWorker implements MailLogicT
 		try {
 			imapFolder = setAndOpenFolder(imapFolder, folder == null ? STR_INBOX : prepareMailFolderParam(folder),
 					Folder.READ_ONLY);
-			if (!IMAPConfig.getImapCapabilities().hasQuota()) {
+			if (!imapConfig.getImapCapabilities().hasQuota()) {
 				return new long[] { UNLIMITED_QUOTA, UNLIMITED_QUOTA };
 			}
 			final Quota[] folderQuota;

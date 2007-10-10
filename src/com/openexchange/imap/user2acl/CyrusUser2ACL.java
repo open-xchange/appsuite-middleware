@@ -120,9 +120,7 @@ public final class CyrusUser2ACL extends User2ACL {
 	@Override
 	public int getUserID(final String pattern, final UserStorage userStorage, final User2ACLArgs user2AclArgs)
 			throws AbstractOXException {
-		if (!IMAPConfig.isSupportsACLs()) {
-			return -1;
-		} else if (AUTH_ID_ANYONE.equalsIgnoreCase(pattern)) {
+		if (AUTH_ID_ANYONE.equalsIgnoreCase(pattern)) {
 			return OCLPermission.ALL_GROUPS_AND_USERS;
 		} else if (CredSrc.USER_IMAPLOGIN.equals(IMAPConfig.getCredSrc())) {
 			/*

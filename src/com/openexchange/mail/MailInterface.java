@@ -50,6 +50,7 @@
 package com.openexchange.mail;
 
 import com.openexchange.groupware.container.CommonObject;
+import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -369,4 +370,8 @@ public abstract class MailInterface {
 	 */
 	public abstract String getConfirmedHamFolder() throws MailException;
 
+	/**
+	 * Returns user-specific mail configuration
+	 */
+	public abstract MailConfig getMailConfig() throws MailException;
 }

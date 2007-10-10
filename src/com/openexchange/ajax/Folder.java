@@ -617,7 +617,7 @@ public class Folder extends SessionServlet {
 								it = mailInterface.getRootFolders();
 								final int size = it.size();
 								final MailFolderFieldWriter[] mailFolderWriters = com.openexchange.mail.json.writer.FolderWriter
-										.getMailFolderFieldWriter(columns);
+										.getMailFolderFieldWriter(columns, mailInterface.getMailConfig());
 								for (int a = 0; a < size; a++) {
 									final MailFolder rootFolder = (MailFolder) it.next();
 									final JSONArray ja = new JSONArray();
@@ -832,14 +832,12 @@ public class Folder extends SessionServlet {
 				SearchIterator it = null;
 				MailInterface mailInterface = null;
 				try {
-					// final IMAPFolderFieldWriter[] writers =
-					// folderWriter.getIMAPFolderFieldWriter(columns);
+					mailInterface = MailInterface.getInstance(sessionObj);
 					final MailFolderFieldWriter[] writers = com.openexchange.mail.json.writer.FolderWriter
-							.getMailFolderFieldWriter(columns);
+							.getMailFolderFieldWriter(columns, mailInterface.getMailConfig());
 					/*
 					 * E-Mail folder
 					 */
-					mailInterface = MailInterface.getInstance(sessionObj);
 					it = mailInterface.getChildFolders(parentIdentifier, all);
 					final int size = it.size();
 					boolean inboxFound = false;
@@ -973,7 +971,7 @@ public class Folder extends SessionServlet {
 					 * Pre-Select field writers
 					 */
 					final MailFolderFieldWriter[] writers = com.openexchange.mail.json.writer.FolderWriter
-							.getMailFolderFieldWriter(columns);
+							.getMailFolderFieldWriter(columns, mailInterface.getMailConfig());
 					it = mailInterface.getPathToDefaultFolder(folderIdentifier);
 					final int size = it.size();
 					for (int i = 0; i < size; i++) {
@@ -1230,7 +1228,7 @@ public class Folder extends SessionServlet {
 					it = mailInterface.getRootFolders();
 					final int size2 = it.size();
 					final MailFolderFieldWriter[] mailFolderFieldWriters = com.openexchange.mail.json.writer.FolderWriter
-							.getMailFolderFieldWriter(columns);
+							.getMailFolderFieldWriter(columns, mailInterface.getMailConfig());
 					for (int a = 0; a < size2; a++) {
 						final MailFolder rootFolder = (MailFolder) it.next();
 						final JSONArray ja = new JSONArray();
@@ -1323,7 +1321,7 @@ public class Folder extends SessionServlet {
 					mailInterface = MailInterface.getInstance(sessionObj);
 					final MailFolder f = mailInterface.getFolder(folderIdentifier, true);
 					final MailFolderFieldWriter[] writers = com.openexchange.mail.json.writer.FolderWriter
-							.getMailFolderFieldWriter(columns);
+							.getMailFolderFieldWriter(columns, mailInterface.getMailConfig());
 					final JSONObject jo = new JSONObject();
 					for (MailFolderFieldWriter writer : writers) {
 						writer.writeField(jo, f, true);

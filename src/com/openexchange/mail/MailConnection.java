@@ -179,6 +179,7 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 					/*
 					 * Apply new thread's trace information
 					 */
+					mailConnection.initMailConfig(session);
 					mailConnection.connectInternal();
 					return mailConnection;
 				}
@@ -214,6 +215,7 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 						/*
 						 * Apply new thread's trace information
 						 */
+						mailConnection.initMailConfig(session);
 						mailConnection.connectInternal();
 						return mailConnection;
 					}
@@ -234,7 +236,10 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 		 * Create a new mail connection
 		 */
 		try {
-			return clazz.getConstructor(CONSTRUCTOR_ARGS).newInstance(new Object[] { session });
+			final MailConnection mailConnection = clazz.getConstructor(CONSTRUCTOR_ARGS).newInstance(
+					new Object[] { session });
+			mailConnection.initMailConfig(session);
+			return mailConnection;
 		} catch (SecurityException e) {
 			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
 		} catch (NoSuchMethodException e) {
@@ -519,16 +524,36 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 	}
 
 	/**
-	 * Gets the user-specific mail configuration with properly set login and
-	 * password
+	 * Initializes the user-specific mail configuration. Initialization of mail
+	 * configuration should happend only one time; meaning any subsequent
+	 * invocations should be treated as a no-op.
+	 * <p>
+	 * For example use the lazy creation pattern:
+	 * 
+	 * <pre>
+	 * ...
+	 * if (this.config == null) {
+	 *     this.config = new MyMailConfig(session);
+	 * }
+	 * ...
+	 * </pre>
 	 * 
 	 * @param session
 	 *            The session providing needed user data
+	 * @throws MailException
+	 *             If mail configuration cannot be initialized
+	 */
+	protected abstract void initMailConfig(SessionObject session) throws MailException;
+
+	/**
+	 * Gets the user-specific mail configuration with properly set login and
+	 * password
+	 * 
 	 * @return User-specific mail configuration
 	 * @throws MailException
 	 *             If mail configuration cannot be determined
 	 */
-	public abstract MailConfig getMailConfig(SessionObject session) throws MailException;
+	public abstract MailConfig getMailConfig() throws MailException;
 
 	/**
 	 * Releases all used resources prior to caching or closing a connection

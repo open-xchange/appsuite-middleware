@@ -228,8 +228,6 @@ public abstract class MailConfig {
 
 	private static Properties javaMailProperties;
 
-	private static int caps;
-
 	private static boolean watcherEnabled;
 
 	private static int watcherTime;
@@ -951,21 +949,6 @@ public abstract class MailConfig {
 	}
 
 	/**
-	 * @return Gets the encoded capabilities
-	 */
-	public static final int getCapabilities() {
-		return caps;
-	}
-
-	/**
-	 * @param caps
-	 *            The encoded capabilities
-	 */
-	protected static final void setCapabilities(final int caps) {
-		MailConfig.caps = caps;
-	}
-
-	/**
 	 * Gets the login
 	 * 
 	 * @return the login
@@ -992,6 +975,11 @@ public abstract class MailConfig {
 	 * @return The port of the server obtained via {@link #getServer()}
 	 */
 	public abstract int getPort();
+	
+	/**
+	 * @return Gets the encoded capabilities
+	 */
+	public abstract int getCapabilities();
 
 	/**
 	 * Gets occured error

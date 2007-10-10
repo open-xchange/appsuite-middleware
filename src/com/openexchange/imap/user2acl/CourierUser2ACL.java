@@ -150,9 +150,7 @@ public class CourierUser2ACL extends User2ACL {
 	@Override
 	public int getUserID(final String pattern, final UserStorage userStorage, final User2ACLArgs user2AclArgs)
 			throws AbstractOXException {
-		if (!IMAPConfig.isSupportsACLs()) {
-			return -1;
-		} else if (ALIAS_ANYONE.equalsIgnoreCase(pattern)) {
+		if (ALIAS_ANYONE.equalsIgnoreCase(pattern)) {
 			return OCLPermission.ALL_GROUPS_AND_USERS;
 		}
 		final Object[] args = user2AclArgs.getArguments(IMAPServer.COURIER);

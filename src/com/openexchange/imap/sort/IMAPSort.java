@@ -379,11 +379,11 @@ public final class IMAPSort {
 	 */
 	public static Message[] sortMessages(final IMAPFolder imapFolder, final Message[] filteredMessages,
 			final MailListField[] fields, final MailListField sortFieldArg, final OrderDirection orderDir,
-			final Locale locale, final Set<MailListField> usedFields) throws MailConfigException, MessagingException {
+			final Locale locale, final Set<MailListField> usedFields, final IMAPConfig imapConfig) throws MailConfigException, MessagingException {
 		boolean applicationSort = true;
 		Message[] msgs = null;
 		final MailListField sortField = sortFieldArg == null ? MailListField.RECEIVED_DATE : sortFieldArg;
-		if (IMAPConfig.isImapSort()) {
+		if (imapConfig.isImapSort()) {
 			try {
 				if (filteredMessages == null) {
 					final long start = System.currentTimeMillis();

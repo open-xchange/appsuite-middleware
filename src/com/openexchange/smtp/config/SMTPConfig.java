@@ -536,4 +536,14 @@ public final class SMTPConfig extends MailConfig {
 	public String getServer() {
 		return smtpServer;
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.mail.config.MailConfig#getCapabilities()
+	 */
+	@Override
+	public int getCapabilities() {
+		return 0;
+	}
 }

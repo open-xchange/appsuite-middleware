@@ -103,6 +103,8 @@ public abstract class IMAPFolderWorker {
 
 	protected final UserSettingMail usm;
 
+	protected final IMAPConfig imapConfig;
+
 	protected IMAPFolder imapFolder;
 
 	protected int holdsMessages = -1;
@@ -111,13 +113,17 @@ public abstract class IMAPFolderWorker {
 
 	/**
 	 * Default constructor
+	 * 
+	 * @throws MailException
 	 */
-	public IMAPFolderWorker(final IMAPStore imapStore, final IMAPConnection imapConnection, final SessionObject session) {
+	public IMAPFolderWorker(final IMAPStore imapStore, final IMAPConnection imapConnection, final SessionObject session)
+			throws MailException {
 		super();
 		this.imapStore = imapStore;
 		this.imapConnection = imapConnection;
 		this.session = session;
 		this.usm = session.getUserSettingMail();
+		this.imapConfig = (IMAPConfig) imapConnection.getMailConfig();
 	}
 
 	/**
@@ -169,7 +175,7 @@ public abstract class IMAPFolderWorker {
 				 * exist".
 				 */
 				return;
-			} else if (IMAPConfig.isSupportsACLs()) {
+			} else if (imapConfig.isSupportsACLs()) {
 				/*
 				 * Check \KEEP_SEEN right
 				 */
@@ -317,7 +323,7 @@ public abstract class IMAPFolderWorker {
 					if ((imapFolder.getType() & Folder.HOLDS_MESSAGES) == 0) { // NoSelect
 						throw new IMAPException(IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, imapFolder
 								.getFullName());
-					} else if (IMAPConfig.isSupportsACLs()
+					} else if (imapConfig.isSupportsACLs()
 							&& !RightsCache.getCachedRights(imapFolder, true, session).contains(Rights.Right.READ)) {
 						throw new IMAPException(IMAPException.Code.NO_FOLDER_OPEN, imapFolder.getFullName());
 					}
@@ -348,7 +354,7 @@ public abstract class IMAPFolderWorker {
 		try {
 			if ((retval.getType() & Folder.HOLDS_MESSAGES) == 0) { // NoSelect
 				throw new IMAPException(IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, retval.getFullName());
-			} else if (IMAPConfig.isSupportsACLs()
+			} else if (imapConfig.isSupportsACLs()
 					&& !RightsCache.getCachedRights(retval, true, session).contains(Rights.Right.READ)) {
 				throw new IMAPException(IMAPException.Code.NO_FOLDER_OPEN, retval.getFullName());
 			}
