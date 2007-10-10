@@ -2829,7 +2829,7 @@ msgstr "Aufgabe enthält ungültige Daten: \"%1$s\""
 
 msgid "Task with private flags cannot be moved to public folder %1$s (%2$d)."
 msgstr ""
-"Aufgabe mit Privatmarkierung (private flage) kann nicht in öffentlichen "
+"Aufgabe mit Privatmarkierung (private flag) kann nicht in öffentlichen "
 "Ordner verschoben werden %1$s (%2$d)."
 
 msgid "Tasks are disable for you (%d)."
