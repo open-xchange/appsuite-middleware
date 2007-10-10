@@ -181,4 +181,9 @@ public class NamespaceFolder extends IMAPFolder {
 		// Not applicable on DefaultFolder
 		throw new MethodNotSupportedException("Cannot expunge Default Folder");
 	}
+
+	@Override
+	public boolean exists() throws MessagingException {
+		return this.exists;
+	}
 }
