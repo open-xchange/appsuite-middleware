@@ -153,11 +153,12 @@ import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
 import com.openexchange.i18n.StringHelper;
 import com.openexchange.imap.IMAPCapabilities;
-import com.openexchange.imap.IMAPPropertyException;
 import com.openexchange.imap.IMAPProperties;
 import com.openexchange.imap.IMAPPropertiesFactory;
+import com.openexchange.imap.IMAPPropertyException;
 import com.openexchange.imap.IMAPUtils;
 import com.openexchange.imap.MessageHeaders;
+import com.openexchange.imap.NamespaceFolder;
 import com.openexchange.imap.OXMailException;
 import com.openexchange.imap.UserSettingMail;
 import com.openexchange.imap.OXMailException.MailCode;
@@ -3481,12 +3482,18 @@ public class MailInterfaceImpl implements MailInterface {
 		}
 	}
 
-	private final void checkAndCreateFolder(final IMAPFolder newFolder, final IMAPFolder parent)
+	private final void checkAndCreateFolder(final IMAPFolder newFolder, final IMAPFolder parentArg)
 			throws MessagingException, OXException {
 		if (newFolder.exists()) {
 			return;
-		} else if (!parent.exists()) {
-			throw new OXMailException(MailCode.FOLDER_NOT_FOUND, parent.getFullName());
+		}
+		IMAPFolder parent = parentArg;
+		if (!parent.exists()) {
+			final String fullname = parent.getFullName();
+			parent = checkForNamespaceFolder(fullname);
+			if (null == parent) {
+				throw new OXMailException(MailCode.FOLDER_NOT_FOUND, fullname);
+			}
 		}
 		try {
 			if ((parent.getType() & Folder.HOLDS_MESSAGES) == 0) {
@@ -4485,41 +4492,160 @@ public class MailInterfaceImpl implements MailInterface {
 		try {
 			init();
 			final String parentFolder = prepareMailFolderParam(parentFolderArg);
-			final IMAPFolder p;
+			IMAPFolder p;
 			if (parentFolder.equals(MailFolderObject.DEFAULT_IMAP_FOLDER_ID)) {
 				p = (IMAPFolder) imapCon.getIMAPStore().getDefaultFolder();
-				if (!p.exists()) {
-					throw new OXMailException(MailCode.FOLDER_NOT_FOUND, MailFolderObject.DEFAULT_IMAP_FOLDER_NAME);
+				final boolean subscribed = (!IMAPProperties.isIgnoreSubscription() && !all);
+				/*
+				 * Request subfolders the usual way
+				 */
+				final List<Folder> subfolders = new ArrayList<Folder>();
+				{
+					final IMAPFolder[] childFolders;
+					final long start = System.currentTimeMillis();
+					if (subscribed) {
+						childFolders = (IMAPFolder[]) p.listSubscribed(PATTERN_ALL);
+						mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+					} else {
+						childFolders = (IMAPFolder[]) p.list(PATTERN_ALL);
+						mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+					}
+					subfolders.addAll(Arrays.asList(childFolders));
 				}
-			} else {
-				p = (IMAPFolder) imapCon.getIMAPStore().getFolder(parentFolder);
-				canLookUpFolder(p);
-			}
-			final Folder[] childFolders;
-			final long start = System.currentTimeMillis();
-			if (IMAPProperties.isIgnoreSubscription() || all) {
-				childFolders = p.list(PATTERN_ALL);
-				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-			} else {
-				childFolders = p.listSubscribed(PATTERN_ALL);
-				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-			}
-			final List<MailFolderObject> list = new ArrayList<MailFolderObject>(childFolders.length);
-			for (int i = 0; i < childFolders.length; i++) {
-				final MailFolderObject mfo = new MailFolderObject((IMAPFolder) childFolders[i], sessionObj);
-				if (mfo.exists()) {
+				/*
+				 * Merge with namespace folders
+				 */
+				{
+					final List<Folder> personalNs = new ArrayList<Folder>(Arrays.asList(imapCon.getIMAPStore()
+							.getPersonalNamespaces()));
+					mergeWithNamespaceFolders(subfolders, personalNs, subscribed);
+				}
+				{
+					final List<Folder> otherNs = new ArrayList<Folder>(Arrays.asList(imapCon.getIMAPStore()
+							.getUserNamespaces(null)));
+					mergeWithNamespaceFolders(subfolders, otherNs, subscribed);
+				}
+				{
+					final List<Folder> sharedNs = new ArrayList<Folder>(Arrays.asList(imapCon.getIMAPStore()
+							.getSharedNamespaces()));
+					mergeWithNamespaceFolders(subfolders, sharedNs, subscribed);
+				}
+				/*
+				 * Output subfolders
+				 */
+				final List<MailFolderObject> list = new ArrayList<MailFolderObject>(subfolders.size());
+				for (Folder subfolder : subfolders) {
+					final MailFolderObject mfo = new MailFolderObject((IMAPFolder) subfolder, sessionObj);
 					list.add(mfo);
 				}
+				return new SearchIteratorAdapter(list.iterator(), list.size());
 			}
-			if (list.isEmpty()) {
-				return SearchIterator.EMPTY_ITERATOR;
+			p = (IMAPFolder) imapCon.getIMAPStore().getFolder(parentFolder);
+			if (p.exists()) {
+				canLookUpFolder(p);
+				return getSubfolderIterator(all, p);
 			}
-			return new SearchIteratorAdapter(list.iterator(), list.size());
+			p = checkForNamespaceFolder(parentFolder);
+			if (null != p) {
+				return getSubfolderIterator(all, p);
+			}
+			return SearchIteratorAdapter.EMPTY_ITERATOR;
 		} catch (final MessagingException e) {
 			throw handleMessagingException(e, sessionObj.getIMAPProperties(), sessionObj.getContext());
 		}
 	}
 
+	/**
+	 * Checks if given fullname matches a namespace folder
+	 * 
+	 * @param fullname
+	 *            The folder's fullname
+	 * @return The corresponding namespace folder or <code>null</code>
+	 * @throws MessagingException
+	 */
+	private IMAPFolder checkForNamespaceFolder(final String fullname) throws MessagingException {
+		/*
+		 * Check for namespace folder
+		 */
+		IMAPFolder retval = null;
+		{
+			final List<Folder> personalNs = new ArrayList<Folder>(Arrays.asList(imapCon.getIMAPStore().getPersonalNamespaces()));
+			for (Folder folder : personalNs) {
+				if (folder.getFullName().equals(fullname)) {
+					retval = new NamespaceFolder(imapCon.getIMAPStore(), fullname, folder.getSeparator());
+					break;
+				}
+			}
+		}
+		{
+			final List<Folder> otherNs = new ArrayList<Folder>(Arrays.asList(imapCon.getIMAPStore().getUserNamespaces(null)));
+			for (Folder folder : otherNs) {
+				if (folder.getFullName().equals(fullname)) {
+					retval = new NamespaceFolder(imapCon.getIMAPStore(), fullname, folder.getSeparator());
+					break;
+				}
+			}
+		}
+		{
+			final List<Folder> sharedNs = new ArrayList<Folder>(Arrays.asList(imapCon.getIMAPStore().getSharedNamespaces()));
+			for (Folder folder : sharedNs) {
+				if (folder.getFullName().equals(fullname)) {
+					retval = new NamespaceFolder(imapCon.getIMAPStore(), fullname, folder.getSeparator());
+					break;
+				}
+			}
+		}
+		return retval;
+	}
+
+	private final SearchIterator getSubfolderIterator(final boolean all, final IMAPFolder p)
+			throws IMAPPropertyException, MessagingException, OXException {
+		final Folder[] childFolders;
+		final long start = System.currentTimeMillis();
+		if (IMAPProperties.isIgnoreSubscription() || all) {
+			childFolders = p.list(PATTERN_ALL);
+			mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+		} else {
+			childFolders = p.listSubscribed(PATTERN_ALL);
+			mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+		}
+		final List<MailFolderObject> list = new ArrayList<MailFolderObject>(childFolders.length);
+		for (int i = 0; i < childFolders.length; i++) {
+			final MailFolderObject mfo = new MailFolderObject((IMAPFolder) childFolders[i], sessionObj);
+			if (mfo.exists()) {
+				list.add(mfo);
+			}
+		}
+		if (list.isEmpty()) {
+			return SearchIterator.EMPTY_ITERATOR;
+		}
+		return new SearchIteratorAdapter(list.iterator(), list.size());
+	}
+
+	private static final void mergeWithNamespaceFolders(final List<Folder> subfolders,
+			final List<Folder> namespaceFolders, final boolean subscribed) {
+		NextNSFolder: for (final Iterator<Folder> iter = namespaceFolders.iterator(); iter.hasNext();) {
+			final String nsFullname = iter.next().getFullName();
+			for (Folder subfolder : subfolders) {
+				if (nsFullname.equals(subfolder.getFullName())) {
+					/*
+					 * Namespace folder already contained in subfolder list
+					 */
+					iter.remove();
+					continue NextNSFolder;
+				}
+			}
+		}
+		if (subscribed) {
+			for (final Iterator<Folder> iter = namespaceFolders.iterator(); iter.hasNext();) {
+				if (!iter.next().isSubscribed()) {
+					iter.remove();
+				}
+			}
+		}
+		subfolders.addAll(namespaceFolders);
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -4559,11 +4685,15 @@ public class MailInterfaceImpl implements MailInterface {
 			if (folder.equals(MailFolderObject.DEFAULT_IMAP_FOLDER_ID)) {
 				return new MailFolderObject((IMAPFolder) imapCon.getIMAPStore().getDefaultFolder(), sessionObj);
 			}
-			final IMAPFolder retval = (IMAPFolder) imapCon.getIMAPStore().getFolder(folder);
+			IMAPFolder retval = (IMAPFolder) imapCon.getIMAPStore().getFolder(folder);
 			if (checkFolder) {
 				if (!retval.exists()) {
-					throw new OXMailException(MailCode.FOLDER_NOT_FOUND, folder);
-				} else if (IMAPProperties.isSupportsACLs() && ((retval.getType() & Folder.HOLDS_MESSAGES) > 0)) {
+					retval = checkForNamespaceFolder(folder);
+					if (null == retval) {
+						throw new OXMailException(MailCode.FOLDER_NOT_FOUND, folder);
+					}
+				}
+				if (IMAPProperties.isSupportsACLs() && ((retval.getType() & Folder.HOLDS_MESSAGES) > 0)) {
 					try {
 						if (!sessionObj.getCachedRights(retval, true).contains(Rights.Right.LOOKUP)) {
 							throw new OXMailException(MailCode.NO_LOOKUP_ACCESS, getUserName(sessionObj), retval
@@ -4595,8 +4725,12 @@ public class MailInterfaceImpl implements MailInterface {
 			final String defaultFolder = imapCon.getIMAPStore().getDefaultFolder().getFullName();
 			IMAPFolder f = (IMAPFolder) imapCon.getIMAPStore().getFolder(folder);
 			if (!f.exists()) {
-				throw new OXMailException(MailCode.FOLDER_NOT_FOUND, folder);
-			} else if (IMAPProperties.isSupportsACLs() && ((f.getType() & Folder.HOLDS_MESSAGES) > 0)) {
+				f = checkForNamespaceFolder(folder);
+				if (null == f) {
+					throw new OXMailException(MailCode.FOLDER_NOT_FOUND, folder);
+				}
+			}
+			if (IMAPProperties.isSupportsACLs() && ((f.getType() & Folder.HOLDS_MESSAGES) > 0)) {
 				try {
 					if (!sessionObj.getCachedRights(f, true).contains(Rights.Right.LOOKUP)) {
 						throw new OXMailException(MailCode.NO_LOOKUP_ACCESS, getUserName(sessionObj), f.getFullName());
@@ -4618,9 +4752,7 @@ public class MailInterfaceImpl implements MailInterface {
 
 	private final void canLookUpFolder(final IMAPFolder f) throws OXException {
 		try {
-			if (!f.exists()) {
-				throw new OXMailException(MailCode.FOLDER_NOT_FOUND, f.getFullName());
-			} else if (IMAPProperties.isSupportsACLs() && ((f.getType() & Folder.HOLDS_MESSAGES) > 0)) {
+			if (IMAPProperties.isSupportsACLs() && ((f.getType() & Folder.HOLDS_MESSAGES) > 0)) {
 				try {
 					if (!sessionObj.getCachedRights(f, true).contains(Rights.Right.LOOKUP)) {
 						throw new OXMailException(MailCode.NO_LOOKUP_ACCESS, getUserName(sessionObj), f.getFullName());
@@ -4670,11 +4802,14 @@ public class MailInterfaceImpl implements MailInterface {
 					if (isDefaultFolder(updateMe.getFullName())) {
 						throw new OXMailException(MailCode.NO_DEFAULT_FOLDER_UPDATE, updateMe.getFullName());
 					}
-					final IMAPFolder destFolder = ((IMAPFolder) (MailFolderObject.DEFAULT_IMAP_FOLDER_ID
+					IMAPFolder destFolder = ((IMAPFolder) (MailFolderObject.DEFAULT_IMAP_FOLDER_ID
 							.equals(newParent) ? imapCon.getIMAPStore().getDefaultFolder() : imapCon.getIMAPStore()
 							.getFolder(newParent)));
 					if (!destFolder.exists()) {
-						throw new OXMailException(MailCode.FOLDER_NOT_FOUND, newParent);
+						destFolder = checkForNamespaceFolder(newParent);
+						if (null == destFolder) {
+							throw new OXMailException(MailCode.FOLDER_NOT_FOUND, newParent);
+						}
 					}
 					if (destFolder instanceof DefaultFolder) {
 						if ((destFolder.getType() & Folder.HOLDS_FOLDERS) == 0) {
@@ -4873,12 +5008,16 @@ public class MailInterfaceImpl implements MailInterface {
 				 * Insert
 				 */
 				final String parentStr = prepareMailFolderParam(folderObj.getParentFullName());
-				final IMAPFolder parent = MailFolderObject.DEFAULT_IMAP_FOLDER_ID.equals(parentStr) ? (IMAPFolder) imapCon
+				IMAPFolder parent = MailFolderObject.DEFAULT_IMAP_FOLDER_ID.equals(parentStr) ? (IMAPFolder) imapCon
 						.getIMAPStore().getDefaultFolder()
 						: (IMAPFolder) imapCon.getIMAPStore().getFolder(parentStr);
 				if (!parent.exists()) {
-					throw new OXMailException(MailCode.FOLDER_NOT_FOUND, parentStr);
-				} else if ((parent.getType() & Folder.HOLDS_FOLDERS) == 0) {
+					parent = checkForNamespaceFolder(parentStr);
+					if (null == parent) {
+						throw new OXMailException(MailCode.FOLDER_NOT_FOUND, parentStr);
+					}
+				}
+				if ((parent.getType() & Folder.HOLDS_FOLDERS) == 0) {
 					throw new OXMailException(MailCode.FOLDER_DOES_NOT_HOLD_FOLDERS, parentStr);
 				} else if (parent instanceof DefaultFolder) {
 					if ((parent.getType() & Folder.HOLDS_FOLDERS) == 0) {
@@ -5210,15 +5349,19 @@ public class MailInterfaceImpl implements MailInterface {
 		return newFolder;
 	}
 
-	private final void deleteFolder(final IMAPFolder deleteMe) throws OXException, MessagingException {
-		if (deleteMe.getFullName().equalsIgnoreCase(STR_INBOX)) {
+	private final void deleteFolder(final IMAPFolder deleteMeArg) throws OXException, MessagingException {
+		if (deleteMeArg.getFullName().equalsIgnoreCase(STR_INBOX)) {
 			throw new OXMailException(MailCode.NO_FOLDER_DELETE, STR_INBOX);
 		}
-		if (isDefaultFolder(deleteMe.getFullName())) {
-			throw new OXMailException(MailCode.NO_DEFAULT_FOLDER_DELETE, deleteMe.getFullName());
+		if (isDefaultFolder(deleteMeArg.getFullName())) {
+			throw new OXMailException(MailCode.NO_DEFAULT_FOLDER_DELETE, deleteMeArg.getFullName());
 		}
+		IMAPFolder deleteMe = deleteMeArg;
 		if (!deleteMe.exists()) {
-			throw new OXMailException(MailCode.FOLDER_NOT_FOUND, deleteMe.getFullName());
+			deleteMe = checkForNamespaceFolder(deleteMe.getFullName());
+			if (null == deleteMe) {
+				throw new OXMailException(MailCode.FOLDER_NOT_FOUND, deleteMe.getFullName());
+			}
 		}
 		try {
 			if (IMAPProperties.isSupportsACLs() && ((deleteMe.getType() & Folder.HOLDS_MESSAGES) > 0)

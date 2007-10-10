@@ -154,7 +154,39 @@ public final class MailFolderObject implements User2IMAPInfo {
 			OXException {
 		this(session.getUserObject().getId());
 		exists = folder.exists();
-		final String[] attrs = folder.getAttributes();
+		String[] attrs;
+		try {
+			attrs = folder.getAttributes();
+		} catch (final NullPointerException e) {
+			/*
+			 * No attributes available. Try to determine them manually.
+			 */
+			attrs = new String[0];
+			ListInfo[] li = (ListInfo[]) folder.doCommand(new IMAPFolder.ProtocolCommand() {
+				public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+					try {
+						return protocol.list("", new StringBuilder().append(folder.getFullName()).append(
+								folder.getSeparator()).append('%').toString());
+					} catch (final MessagingException e) {
+						LOG.error(e.getLocalizedMessage(), e);
+						throw new ProtocolException(e.getLocalizedMessage());
+					}
+				}
+			});
+			hasSubfolders = hasChildren(li);
+			li = (ListInfo[]) folder.doCommand(new IMAPFolder.ProtocolCommand() {
+				public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+					try {
+						return protocol.lsub("", new StringBuilder().append(folder.getFullName()).append(
+								folder.getSeparator()).append('%').toString());
+					} catch (final MessagingException e) {
+						LOG.error(e.getLocalizedMessage(), e);
+						throw new ProtocolException(e.getLocalizedMessage());
+					}
+				}
+			});
+			hasSubscribedSubfolders = hasChildren(li);
+		}
 		Attribs: for (final String attribute : attrs) {
 			if (ATTRIBUTE_NON_EXISTENT.equalsIgnoreCase(attribute)) {
 				nonExistent = true;
@@ -172,26 +204,28 @@ public final class MailFolderObject implements User2IMAPInfo {
 			hasSubfolders = false;
 			hasSubscribedSubfolders = false;
 		} else {
-			hasSubfolders = false;
-			Attribs: for (final String attribute : attrs) {
-				if (ATTRIBUTE_HAS_CHILDREN.equalsIgnoreCase(attribute)) {
-					hasSubfolders = true;
-					break Attribs;
+			if (!hasSubfolders) {
+				Attribs: for (final String attribute : attrs) {
+					if (ATTRIBUTE_HAS_CHILDREN.equalsIgnoreCase(attribute)) {
+						hasSubfolders = true;
+						break Attribs;
+					}
 				}
 			}
-			hasSubscribedSubfolders = false;
-			if (hasSubfolders) {
-				final ListInfo[] li = (ListInfo[]) folder.doCommand(new IMAPFolder.ProtocolCommand() {
-					public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
-						return protocol.lsub("", folder.getFullName());
-					}
-				});
-				if (null != li) {
-					final String[] lsubAttrs = li[findName(li, folder.getFullName())].attrs;
-					Attribs: for (final String attribute : lsubAttrs) {
-						if (ATTRIBUTE_HAS_CHILDREN.equalsIgnoreCase(attribute)) {
-							hasSubscribedSubfolders = true;
-							break Attribs;
+			if (!hasSubscribedSubfolders) {
+				if (hasSubfolders) {
+					final ListInfo[] li = (ListInfo[]) folder.doCommand(new IMAPFolder.ProtocolCommand() {
+						public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+							return protocol.lsub("", folder.getFullName());
+						}
+					});
+					if (null != li) {
+						final String[] lsubAttrs = li[findName(li, folder.getFullName())].attrs;
+						Attribs: for (final String attribute : lsubAttrs) {
+							if (ATTRIBUTE_HAS_CHILDREN.equalsIgnoreCase(attribute)) {
+								hasSubscribedSubfolders = true;
+								break Attribs;
+							}
 						}
 					}
 				}
@@ -229,19 +263,42 @@ public final class MailFolderObject implements User2IMAPInfo {
 		if (IMAPProperties.isSupportsACLs() && holdsMessages && exists
 				&& (ownRights.contains(Rights.Right.READ) || ownRights.contains(Rights.Right.ADMINISTER))
 				&& !(folder instanceof DefaultFolder)) {
-			try {
-				acls = folder.getACL();
+			if (IMAPProperties.hasNewACLExt(session.getIMAPProperties().getImapServer())
+					&& !ownRights.contains(Rights.Right.ADMINISTER)) {
+				acls = new ACL[] { new ACL(session.getUserObject().getImapLogin(), ownRights) };
 				b_acls = true;
-			} catch (final MessagingException e) {
-				if (LOG.isWarnEnabled()) {
-					LOG.warn(new StringBuilder("ACL could not be requested for folder ").append(folder.getFullName()),
-							e);
+			} else {
+				try {
+					acls = folder.getACL();
+					b_acls = true;
+				} catch (final MessagingException e) {
+					if (LOG.isWarnEnabled()) {
+						LOG.warn(new StringBuilder("ACL could not be requested for folder ").append(
+								folder.getFullName()).append(
+								". A newer ACL extension (RFC 4314) seems to be supported by IMAP server ").append(
+								session.getIMAPProperties().getImapServer()), e);
+					}
+					IMAPProperties.setNewACLExt(session.getIMAPProperties().getImapServer(), true);
+					acls = new ACL[] { new ACL(session.getUserObject().getImapLogin(), ownRights) };
+					b_acls = true;
 				}
-				acls = null;
-				b_acls = false;
 			}
 		}
 		imapFolder = folder;
+	}
+
+	private static boolean hasChildren(final ListInfo[] li) {
+		if (null != li) {
+			for (int i = 0; i < li.length; i++) {
+				final String[] tmpAttrs = li[i].attrs;
+				for (final String attribute : tmpAttrs) {
+					if (ATTRIBUTE_HAS_CHILDREN.equalsIgnoreCase(attribute)) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -595,7 +652,8 @@ public final class MailFolderObject implements User2IMAPInfo {
 		if (IMAPServer.CYRUS.equals(imapServer)) {
 			return EMPYT_ARGS;
 		} else if (IMAPServer.COURIER.equals(imapServer)) {
-			return new Object[] { Integer.valueOf(sessionUser), MailInterfaceImpl.prepareMailFolderParam(fullName), Character.valueOf(separator) };
+			return new Object[] { Integer.valueOf(sessionUser), MailInterfaceImpl.prepareMailFolderParam(fullName),
+					Character.valueOf(separator) };
 		}
 		throw new User2IMAP.User2IMAPException(User2IMAP.User2IMAPException.Code.UNKNOWN_IMAP_SERVER, imapServer
 				.getName());

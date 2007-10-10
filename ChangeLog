@@ -1,3 +1,9 @@
+* 2007-10-10 - thorben.betten@open-xchange.com
+
+ - Bugfix #9751: Fixed non-appearing shared mail folders
+ - Bugfix #9750: Avoid annoying error logging whenever an ACL entity cannot
+   be mapped to system user
+
 * 2007-10-08 - thorben.betten@open-xchange.com
 
  - Bugfix #9728: Proper check of intial ACls on mail folder creation

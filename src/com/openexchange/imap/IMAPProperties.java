@@ -50,7 +50,9 @@
 package com.openexchange.imap;
 
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -100,7 +102,7 @@ public class IMAPProperties {
 	private static String smtpLocalhost;
 
 	private static int messageFetchLimit = 1000;
-	
+
 	private static boolean fastFetch;
 
 	private static int attachmentDisplaySizeLimit = 8192;
@@ -152,6 +154,8 @@ public class IMAPProperties {
 	private static int watcherFrequency;
 
 	private static int watcherTime;
+
+	private static Map<String, Boolean> newACLExtMap = new ConcurrentHashMap<String, Boolean>();
 
 	private static IMAPPropertiesFactory.IMAPCredSrc imapCredSrc;
 
@@ -482,7 +486,7 @@ public class IMAPProperties {
 	public static void setMessageFetchLimit(final int messageFetchLimit) {
 		IMAPProperties.messageFetchLimit = messageFetchLimit;
 	}
-	
+
 	public static boolean isFastFetch() throws IMAPPropertyException {
 		checkGlobalImapProperties();
 		return fastFetch;
@@ -877,6 +881,32 @@ public class IMAPProperties {
 		if (!globalPropertiesLoaded) {
 			IMAPPropertiesFactory.loadGlobalImapProperties();
 		}
+	}
+
+	/**
+	 * Checks if given IMAP server implements newer ACL extension conforming to
+	 * RFC4314
+	 * 
+	 * @param imapServer
+	 *            The IMAP server's host name or IP address
+	 * @return <code>true</code> if newer ACL extension is supported by IMAP
+	 *         server; otherwise <code>false</code>
+	 */
+	public static final boolean hasNewACLExt(final String imapServer) {
+		return newACLExtMap.containsKey(imapServer) ? newACLExtMap.get(imapServer).booleanValue() : false;
+	}
+
+	/**
+	 * Remembers if given IMAP server supports newer ACL extension conforming to
+	 * RFC4314
+	 * 
+	 * @param imapServer
+	 *            The IMAP server's host name or IP address
+	 * @param newACLExt
+	 *            Whether newer ACL extension is supported or not
+	 */
+	public static final void setNewACLExt(final String imapServer, final boolean newACLExt) {
+		newACLExtMap.put(imapServer, Boolean.valueOf(newACLExt));
 	}
 
 	/*
