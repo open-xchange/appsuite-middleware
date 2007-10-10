@@ -1,3 +1,7 @@
+* 2007-10-10 - choeger@open-xchange.com
+
+ - Bugfix ID#9767 [L3] changing admin password with disabled authentication does not work
+
 * 2007-10-08 - manuel.kraft@open-xchange.com
 
  - Bugfix ID#9616 Deleted users are not removed from Global Addressbook in Outlook
