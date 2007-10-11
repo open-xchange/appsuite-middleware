@@ -12,6 +12,9 @@
    
   - Removed unused imports
 
+  - Fixed bug #9599. By adding a new users the confirm message was
+    deleted for existing users. This has been fixed.
+
 * 2007-10-10 - thorben.betten@open-xchange.com
 
  - Bugfix #9751: Fixed non-appearing shared mail folders
