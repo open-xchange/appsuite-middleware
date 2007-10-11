@@ -1,3 +1,8 @@
+* 2007-10-11 - thorben.betten@open-xchange.com
+
+ - Bugfix #9769: Overriding IMAPFolder.exists() method in NamespaceFolder
+   to prevent a NPE on namespace folder update
+
 * 2007-10-10 - thorben.betten@open-xchange.com
 
  - Bugfix #9751: Fixed non-appearing shared mail folders
