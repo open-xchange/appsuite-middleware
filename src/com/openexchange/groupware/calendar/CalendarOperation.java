@@ -1025,7 +1025,7 @@ public class CalendarOperation implements SearchIterator {
                             }
                             if (!time_change) {
                                 np[a].setConfirm(op[bs].getConfirm());
-                                np[a].setConfirmMessage(null);
+                                np[a].setConfirmMessage(op[bs].getConfirmMessage());
                             } else {
                                 np[a].setConfirm(CalendarDataObject.NONE);
                                 np[a].setConfirmMessage(op[bs].getConfirmMessage());
