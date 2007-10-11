@@ -92,13 +92,13 @@ public abstract class GroupAbstraction extends ObjectNamingAbstraction {
     protected String groupName = null;
     
     protected void setAddMembersOption(final AdminParser admp,boolean required) {
-        addMemberOption = setShortLongOpt(admp,OPT_NAME_ADDMEMBERS, OPT_NAME_ADDMEMBERS_LONG, "userid(s)", "List of members to add to group", required);
+        addMemberOption = setShortLongOpt(admp,OPT_NAME_ADDMEMBERS, OPT_NAME_ADDMEMBERS_LONG, "userid(s)", "List of members to add to group, separated by comma", required);
 //        retval.setArgName(OPT_NAME_ADDMEMBERS_LONG);
         
     }
 
     protected void setRemoveMembersOption(final AdminParser admp,boolean required) {
-        removeMemberOption = setShortLongOpt(admp,OPT_NAME_REMOVEMEMBERS, OPT_NAME_REMOVEMEMBERS_LONG, "List of members to be removed from group", true, convertBooleantoTriState(required));
+        removeMemberOption = setShortLongOpt(admp,OPT_NAME_REMOVEMEMBERS, OPT_NAME_REMOVEMEMBERS_LONG, "List of members to be removed from group, separated by comma", true, convertBooleantoTriState(required));
     }
 
     protected void setGroupIdOption(final AdminParser admp, final NeededQuadState required) {
