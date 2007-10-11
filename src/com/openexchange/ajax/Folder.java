@@ -628,7 +628,7 @@ public class Folder extends SessionServlet {
 									}
 									jsonWriter.value(ja);
 								}
-							} catch (final OXException e) {
+							} catch (final MailException e) {
 								LOG.error(e.getMessage(), e);
 							} finally {
 								if (it != null) {
