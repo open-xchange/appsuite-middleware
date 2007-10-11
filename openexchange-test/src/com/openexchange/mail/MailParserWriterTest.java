@@ -155,7 +155,7 @@ public final class MailParserWriterTest extends AbstractMailTest {
 	}
 	
 	private static void writeFolder(final MailFolder f, final MailConnection mailConnection) throws MailException {
-		System.out.println(FolderWriter.writeMailFolder(f));
+		System.out.println(FolderWriter.writeMailFolder(f, mailConnection.getMailConfig()));
 		MailFolder[] flds = mailConnection.getFolderStorage().getSubfolders(f.getFullname(), true);
 		for (MailFolder folder : flds) {
 			writeFolder(folder, mailConnection);
