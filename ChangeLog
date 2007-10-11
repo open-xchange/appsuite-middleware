@@ -2,6 +2,8 @@
 
  - Bugfix #9756: Fallback implementation if UID EXPUNGE is not supported by
    IMAP server
+ - Bugfix #9787: Checking right table when looking for user's default
+   infostore folder on context deletion
 
 * 2007-10-11 - martin.kauss@open-xchange.com
 
