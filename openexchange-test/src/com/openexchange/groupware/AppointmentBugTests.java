@@ -2791,4 +2791,83 @@ public class AppointmentBugTests extends TestCase {
         }
     }
     
+    /*
+	1. Login to OX
+	2. Create a new appointment and add at least 5 participants
+	3. Now let the participants accept or deny this appointment and they must add a
+	confirmation comment!
+	4. Verify that appointment and the confirmation comments in calendar detail
+	view of the appointment
+	5. Press 'Edit' from panel 
+	6. Add 2 more (or at least one) new participant to this appointment
+	7. Press 'Save' and verify the 'Detail' -> 'Participant' tab
+	
+	Expected Results:
+	After you have added new participants the confirmations comments are still
+	visible and not lost.	
+    */
+    public void testBug9599() throws Throwable {
+        Context context = new ContextImpl(contextid);
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestSearch");      
+        int fid = AppointmentBugTests.getPrivateFolder(userid);
+
+        CalendarDataObject cdao = new CalendarDataObject();
+        cdao.setContext(so.getContext());
+        cdao.setParentFolderID(fid);
+        cdao.setTitle("testBug9599");
+        cdao.setIgnoreConflicts(true);
+        CalendarTest.fillDatesInDao(cdao);        
+        
+        Participants participants = new Participants();
+        String user2 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant3", "");
+        int userid2 = resolveUser(user2);
+        Participant p2 = new UserParticipant(userid2);
+        participants.add(p2);        
+        
+        
+        SessionObject so2 = SessionObjectWrapper.createSessionObject(userid2, getContext().getContextId(), "myTestSearch");
+        
+        cdao.setParticipants(participants.getList());           
+        
+        CalendarSql csql = new CalendarSql(so);
+        CalendarSql csql2 = new CalendarSql(so2);
+        
+        csql.insertAppointmentObject(cdao);
+        
+        int object_id = cdao.getObjectID();
+        assertTrue("Object was created", object_id > 0);
+        
+        String confirm_message = "jaja";
+        
+        csql.setUserConfirmation(object_id, userid, CalendarDataObject.ACCEPT, confirm_message);
+        csql2.setUserConfirmation(object_id, userid2, CalendarDataObject.ACCEPT, confirm_message);
+        
+        String user3 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant1", "");
+        int userid3 = resolveUser(user3);        
+        Participant p3 = new UserParticipant(userid3);
+        
+        participants.add(p3);
+        
+        CalendarDataObject update = new CalendarDataObject();
+        update.setContext(so.getContext());
+        update.setParticipants(participants.getList());
+        update.setIgnoreConflicts(true);
+        update.setObjectID(object_id);
+
+        csql.updateAppointmentObject(update, fid, new Date(SUPER_END));
+        
+        CalendarDataObject temp = csql.getObjectById(object_id, fid);
+        UserParticipant up[] = temp.getUsers();
+
+        for (int a = 0; a < up.length; a++) {
+            if (up[a].getIdentifier() == userid) {
+                assertEquals("Check confirm state for user "+up[a].getIdentifier(), AppointmentObject.ACCEPT, up[a].getConfirm());
+                assertEquals("Check confirm message for user "+up[a].getIdentifier(), confirm_message, up[a].getConfirmMessage());                
+            } else if (up[a].getIdentifier() == userid2) {
+                assertEquals("Check confirm state for user "+up[a].getIdentifier(), AppointmentObject.ACCEPT, up[a].getConfirm());
+                assertEquals("Check confirm message for user "+up[a].getIdentifier(), confirm_message, up[a].getConfirmMessage());                
+            }
+        }
+    }
+    
 }
