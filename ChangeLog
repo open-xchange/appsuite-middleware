@@ -2,6 +2,8 @@
 
  - Bugfix #9769: Overriding IMAPFolder.exists() method in NamespaceFolder
    to prevent a NPE on namespace folder update
+ - Bugfix #9756: Fallback implementation if UID EXPUNGE is not supported by
+   IMAP server
 
 * 2007-10-10 - thorben.betten@open-xchange.com
 

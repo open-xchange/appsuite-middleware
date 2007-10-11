@@ -59,9 +59,12 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -481,7 +484,8 @@ public class IMAPUtils {
 		return val;
 	}
 
-	private static final Pattern PATTERN_PERMANENTFLAGS = Pattern.compile("(\\[PERMANENTFLAGS\\s\\()([^\\)\\]]*)(\\)\\]\\s*)");
+	private static final Pattern PATTERN_PERMANENTFLAGS = Pattern
+			.compile("(\\[PERMANENTFLAGS\\s\\()([^\\)\\]]*)(\\)\\]\\s*)");
 
 	private static final Pattern PATTERN_USER_FLAG = Pattern.compile("(?:\\\\\\*|(?:(^|\\s)([^\\\\]\\S+)($|\\s)))");
 
@@ -1162,6 +1166,80 @@ public class IMAPUtils {
 					 * Obviously this folder is empty
 					 */
 					return true;
+				}
+				throw cfe;
+			}
+		}
+	}
+
+	private static final String FETCH_FLAGS = "FETCH 1:* (FLAGS UID)";
+	
+	private static final Pattern PATTERN_UID = Pattern.compile("uid\\s([0-9]+)");
+
+	/**
+	 * Gets all messages marked as deleted in given IMAP folder
+	 * 
+	 * @param imapFolder
+	 *            The IMAP folder
+	 * @param filter
+	 *            The filter whose elements are going to be removed from return
+	 *            value
+	 * @return All messages marked as deleted in given IMAP folder filtered by
+	 *         specified <code>filter</code>
+	 * @throws ProtocolException
+	 *             If a protocol error occurs
+	 */
+	public static final long[] getDeletedMessages(final IMAPFolder imapFolder, final long[] filter)
+			throws ProtocolException {
+		final IMAPProtocol p = imapFolder.getProtocol();
+		final Response[] r = p.command(FETCH_FLAGS, null);
+		final Response response = r[r.length - 1];
+		try {
+			if (response.isOK()) {
+				final Set<Long> set = new TreeSet<Long>();
+				for (int i = 0, len = r.length - 1; i < len; i++) {
+					if (!(r[i] instanceof IMAPResponse)) {
+						continue;
+					}
+					final IMAPResponse ir = (IMAPResponse) r[i];
+					String rest = null;
+					if (ir.keyEquals("FETCH") && (rest = ir.toString().toLowerCase()).indexOf("\\deleted") != -1) {
+						final Matcher m = PATTERN_UID.matcher(rest);
+						if (m.find()) {
+							set.add(Long.valueOf(m.group(1)));
+						}
+					}
+					r[i] = null;
+				}
+				if (filter != null && filter.length > 0) {
+					final Set<Long> tmp = new HashSet<Long>();
+					for (int i = 0; i < filter.length; i++) {
+						tmp.add(Long.valueOf(filter[i]));
+					}
+					set.removeAll(tmp);
+				}
+				final long[] retval = new long[set.size()];
+				int i = 0;
+				for (Long l : set) {
+					retval[i++] = l.longValue();
+				}
+				return retval;
+			}
+			throw new ProtocolException("FETCH command failed");
+		} finally {
+			/*
+			 * No invocation of notifyResponseHandlers() to avoid sequential (by
+			 * message) folder cache update
+			 */
+			/* p.notifyResponseHandlers(r); */
+			try {
+				p.handleResult(response);
+			} catch (final CommandFailedException cfe) {
+				if (cfe.getMessage().indexOf(ERR_01) != -1) {
+					/*
+					 * Obviously this folder is empty
+					 */
+					return new long[0];
 				}
 				throw cfe;
 			}

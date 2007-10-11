@@ -3822,9 +3822,36 @@ public class MailInterfaceImpl implements MailInterface {
 							imapCon.getImapFolder().close(false);
 							imapCon.resetImapFolder();
 						} catch (final ProtocolException e) {
-							throw new OXMailException(MailCode.MOVE_PARTIALLY_COMPLETED, e,
-									com.openexchange.tools.oxfolder.OXFolderManagerImpl.getUserName(sessionObj), Arrays
-											.toString(msgUIDs), imapCon.getImapFolder().getFullName(), e.getMessage());
+							if (LOG.isWarnEnabled()) {
+								LOG.warn("UID EXPUNGE failed: " + e.getLocalizedMessage(), e);
+							}
+							try {
+								/*
+								 * UID EXPUNGE does not work; perform fallback
+								 * actions
+								 */
+								final long[] storedUIDs = IMAPUtils
+										.getDeletedMessages(imapCon.getImapFolder(), msgUIDs);
+								if (storedUIDs.length > 0) {
+									new FlagsIMAPCommand(imapCon.getImapFolder(), storedUIDs, FLAGS_DELETED, false,
+											false).doCommand();
+									IMAPUtils.fastExpunge(imapCon.getImapFolder());
+									new FlagsIMAPCommand(imapCon.getImapFolder(), storedUIDs, FLAGS_DELETED, true,
+											false).doCommand();
+								} else {
+									IMAPUtils.fastExpunge(imapCon.getImapFolder());
+								}
+								/*
+								 * Force folder cache update through a close
+								 */
+								imapCon.getImapFolder().close(false);
+								imapCon.resetImapFolder();
+							} catch (final ProtocolException e1) {
+								throw new OXMailException(MailCode.MOVE_PARTIALLY_COMPLETED, e1,
+										com.openexchange.tools.oxfolder.OXFolderManagerImpl.getUserName(sessionObj),
+										Arrays.toString(msgUIDs), imapCon.getImapFolder().getFullName(), e1
+												.getMessage());
+							}
 						}
 					}
 					return res;
