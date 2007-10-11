@@ -16,6 +16,7 @@ import java.util.TimeZone;
 
 import junit.framework.TestCase;
 
+import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.event.EventConfigImpl;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarRecurringCollection;
@@ -1527,5 +1528,83 @@ public class CalendarRecurringTests extends TestCase {
         
     }
 
+    public void testCreateAndDeleteException() throws Throwable {
+        Context context = new ContextImpl(contextid);
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
+        
+        int folder_id = CalendarTest.getCalendarDefaultFolderForUser(userid, context);
+        
+        CalendarDataObject cdao = new CalendarDataObject();
+        cdao.setContext(so.getContext());
+        cdao.setParentFolderID(folder_id);
+        
+        CalendarTest.fillDatesInDao(cdao);
+        
+        cdao.setTitle("testCreateAndDeleteException");
+        cdao.setRecurrenceType(CalendarObject.DAILY);
+        cdao.setRecurrenceCalculator(1);
+        cdao.setInterval(1);
+        cdao.setDays(1);
+        
+        cdao.setIgnoreConflicts(true);
+        
+        CalendarSql csql = new CalendarSql(so);
+        csql.insertAppointmentObject(cdao);
+        int object_id = cdao.getObjectID();
+        Date last = cdao.getLastModified();
+        
+        CalendarDataObject update = new CalendarDataObject();
+        update.setContext(so.getContext());
+        update.setObjectID(object_id);
+        update.setIgnoreConflicts(true);
+        
+        
+        RecurringResults rss = CalendarRecurringCollection.calculateRecurring(cdao, 0, 0, 3);
+        RecurringResult rs = rss.getRecurringResult(0);
+        long new_start = rs.getStart()+3600000;
+        long new_end = rs.getEnd()+3600000;
+        
+        Date test_new_start_date = new Date(new_start);
+        Date test_new_end_date = new Date(new_end);
+        
+        update.setStartDate(test_new_start_date);
+        update.setEndDate(test_new_end_date);
+        
+        update.setTitle("testCreateAndDeleteException - Exception");
+        update.setRecurrencePosition(3);
+        
+        
+        csql.updateAppointmentObject(update, folder_id, new Date(SUPER_END));
+        assertTrue("Got a new object_id" , object_id != update.getObjectID());
+        
+        int exception_object_id = update.getObjectID();
+        
+        CalendarDataObject testobject = csql.getObjectById(exception_object_id, folder_id);
+        assertTrue("Got correct exception", 3 == testobject.getRecurrencePosition());
+        
+        // Now delete the existing exception with the global recurring instead
+        // with the direct delete command
+        
+        
+        CalendarDataObject delete = new CalendarDataObject();
+        delete.setContext(so.getContext());
+        delete.setObjectID(object_id);
+        delete.setIgnoreConflicts(true);        
+        Date changed_exceptions[] = testobject.getChangeException();
+        assertTrue("Got changed exceptions", changed_exceptions != null);
+        delete.setDeleteExceptions(new Date[] { changed_exceptions[0] });
+        
+        csql.updateAppointmentObject(delete, folder_id, new Date(SUPER_END));
+        
+        try {
+        	CalendarDataObject check_object = csql.getObjectById(exception_object_id, folder_id);
+        	fail("The exception still exists but should be deleted!");
+        } catch(OXObjectNotFoundException e) { 
+        	// this is what we want
+        	int x = 0;
+        }
+        
+    }    
+    
     
 }
