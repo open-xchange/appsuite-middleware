@@ -680,9 +680,37 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 					imapFolder.close(false);
 					resetIMAPFolder();
 				} catch (final ProtocolException e) {
-					throw new IMAPException(IMAPException.Code.MOVE_PARTIALLY_COMPLETED, e,
-							com.openexchange.tools.oxfolder.OXFolderManagerImpl.getUserName(session), Arrays
-									.toString(msgUIDs), imapFolder.getFullName(), e.getMessage());
+					if (LOG.isWarnEnabled()) {
+						LOG.warn(new StringBuilder("UID EXPUNGE failed: ").append(e.getLocalizedMessage()).toString(),
+								e);
+					}
+					/*
+					 * UID EXPUNGE did not work; perform fallback actions
+					 */
+					try {
+						final long[] excUIDs = IMAPCommandsCollection.getDeletedMessages(imapFolder, msgUIDs);
+						if (excUIDs.length > 0) {
+							/*
+							 * Temporary remove flag \Deleted, perform expunge &
+							 * restore flag \Deleted
+							 */
+							new FlagsIMAPCommand(imapFolder, excUIDs, FLAGS_DELETED, false, false).doCommand();
+							IMAPCommandsCollection.fastExpunge(imapFolder);
+							new FlagsIMAPCommand(imapFolder, excUIDs, FLAGS_DELETED, true, false).doCommand();
+						} else {
+							IMAPCommandsCollection.fastExpunge(imapFolder);
+						}
+						/*
+						 * Force folder cache update through a close
+						 */
+						imapFolder.close(false);
+						resetIMAPFolder();
+					} catch (final ProtocolException e1) {
+
+						throw new IMAPException(IMAPException.Code.MOVE_PARTIALLY_COMPLETED, e1,
+								com.openexchange.tools.oxfolder.OXFolderManagerImpl.getUserName(session), Arrays
+										.toString(msgUIDs), imapFolder.getFullName(), e1.getMessage());
+					}
 				}
 				try {
 					/*

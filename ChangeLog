@@ -1,3 +1,8 @@
+* 2007-10-11 - thorben.betten@open-xchange.com
+
+ - Bugfix #9756: Fallback implementation if UID EXPUNGE is not supported by
+   IMAP server
+
 * 2007-10-11 - martin.kauss@open-xchange.com
 
  - Fixed bug #7471. If an existing exception is deleted with the
