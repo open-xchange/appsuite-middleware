@@ -51,7 +51,6 @@ package com.openexchange.groupware.calendar;
 
 import java.sql.Connection;
 import java.sql.DataTruncation;
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -127,7 +126,7 @@ class CalendarMySQL implements CalendarSqlImp {
     private static final String PARTICIPANTS_IDENTIFIER_IS = " AND object_id = ";
     private static final String PARTICIPANTS_IDENTIFIER_IN = " AND object_id IN ";
     private static final String UNION = " UNION ";
-    
+
     private static final Log LOG = LogFactory.getLog(CalendarMySQL.class);
     
     

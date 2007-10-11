@@ -1289,8 +1289,21 @@ public class CalendarCommonCollection {
         long ndl = date.getTime()+offset;
         long off = ndl%CalendarRecurringCollection.MILLI_DAY;
         ndl -= off;
-        System.out.println(" GOT "+date+" and return "+new Date(ndl));
+        //System.out.println(" GOT "+date+" and return "+new Date(ndl));
         return ndl;
     }
+
+	public static boolean checkIfArrayKeyExistInArray(Object a[], Object b[]) {
+		if (a != null && b != null) {
+			Arrays.sort(b);
+			for (int x = 0; x < a.length; x++) {
+				if (Arrays.binarySearch(b, a[x]) >= 0) {
+					return true;
+				}
+			}				
+		}
+		return false;
+		
+	}
     
 }
