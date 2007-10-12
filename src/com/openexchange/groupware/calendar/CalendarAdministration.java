@@ -93,6 +93,8 @@ public class CalendarAdministration implements DeleteListener {
 	            deleteResource(deleteEvent, readcon, writecon);
 	        } else if (deleteEvent.getType() == DeleteEvent.TYPE_RESOURCE_GROUP) {
 	            deleteResourceGroup(deleteEvent, readcon, writecon);
+	        } else if (deleteEvent.getType() == DeleteEvent.TYPE_CONTEXT) {
+	            // nothing to do
 	        } else {
 	        	throw new DeleteFailedException(DeleteFailedException.Code.UNKNOWN_TYPE, Integer.valueOf(deleteEvent.getType()));
 	        }
