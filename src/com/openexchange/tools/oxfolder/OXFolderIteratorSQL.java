@@ -83,7 +83,6 @@ import com.openexchange.server.OCLPermission;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.iterator.FolderObjectIterator;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 
@@ -249,7 +248,7 @@ public final class OXFolderIteratorSQL {
 			}
 			final OCLPermission effectivePerm = parentFolder.getEffectiveUserPermission(userId, userConfig);
 			if (effectivePerm.getFolderPermission() < OCLPermission.READ_FOLDER) {
-				return SearchIteratorAdapter.createEmptyIterator();
+				return FolderObjectIterator.EMPTY_FOLDER_ITERATOR;
 			}
 			return getVisibleSubfoldersIterator(parentFolder, userId, groups, userConfig.getAccessibleModules(), ctx,
 					since);

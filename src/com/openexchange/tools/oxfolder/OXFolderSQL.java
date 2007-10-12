@@ -1412,13 +1412,13 @@ public class OXFolderSQL {
 
 	public static final void handleMailAdminFolders(final int mailAdmin, final String folderTable,
 			final String permTable, final Connection readConArg, final Connection writeConArg, final Context ctx)
-			throws DBPoolingException, SQLException, OXException {
+			throws DBPoolingException, SQLException {
 		handleEntityFolders(mailAdmin, null, -1L, folderTable, permTable, readConArg, writeConArg, ctx);
 	}
 
 	public static final void handleEntityFolders(final int entity, final int mailAdmin, final long lastModified,
 			final String folderTable, final String permTable, final Connection readConArg,
-			final Connection writeConArg, final Context ctx) throws DBPoolingException, SQLException, OXException {
+			final Connection writeConArg, final Context ctx) throws DBPoolingException, SQLException {
 		handleEntityFolders(entity, Integer.valueOf(mailAdmin), lastModified, folderTable, permTable, readConArg,
 				writeConArg, ctx);
 	}
@@ -1429,7 +1429,7 @@ public class OXFolderSQL {
 
 	private static final void handleEntityFolders(final int entity, final Integer mailAdmin, final long lastModified,
 			final String folderTable, final String permTable, final Connection readConArg,
-			final Connection writeConArg, final Context ctx) throws DBPoolingException, SQLException, OXException {
+			final Connection writeConArg, final Context ctx) throws DBPoolingException, SQLException {
 		Connection readCon = readConArg;
 		boolean closeReadCon = false;
 		PreparedStatement stmt = null;
@@ -1620,7 +1620,7 @@ public class OXFolderSQL {
 
 	private static final void reassignFolders(final Set<Integer> reassignFolders, final int entity,
 			final int mailAdmin, final long lastModified, final String folderTable, final Connection writeConArg,
-			final Context ctx) throws DBPoolingException, SQLException, OXException {
+			final Context ctx) throws DBPoolingException, SQLException {
 		Connection wc = writeConArg;
 		boolean closeWrite = false;
 		PreparedStatement stmt = null;
@@ -1635,12 +1635,11 @@ public class OXFolderSQL {
 				/*
 				 * Special handling for default infostore folder
 				 */
-				final OXFolderAccess access = new OXFolderAccess(wc, ctx);
 				boolean found = false;
 				for (int i = 0; i < size && !found; i++) {
 					final int fuid = iter.next().intValue();
-					if (access.isDefaultFolder(fuid) && (access.getFolderModule(fuid) == FolderObject.INFOSTORE)
-							&& (access.getFolderOwner(fuid) == entity)) {
+					final String fname;
+					if ((fname = isDefaultInfostoreFolder(fuid, entity, folderTable, wc, ctx)) != null) {
 						iter.remove();
 						size--;
 						stmt = wc.prepareStatement(SQL_REASSIGN_FOLDERS_WITH_NAME.replaceFirst(TMPL_FOLDER_TABLE,
@@ -1648,7 +1647,7 @@ public class OXFolderSQL {
 						stmt.setInt(1, mailAdmin);
 						stmt.setInt(2, mailAdmin);
 						stmt.setLong(3, lastModified);
-						stmt.setString(4, new StringBuilder(access.getFolderName(fuid)).append(fuid).toString());
+						stmt.setString(4, new StringBuilder(fname).append(fuid).toString());
 						stmt.setInt(5, ctx.getContextId());
 						stmt.setInt(6, fuid);
 						stmt.executeUpdate();
@@ -1677,6 +1676,29 @@ public class OXFolderSQL {
 			stmt.executeBatch();
 		} finally {
 			closeResources(null, stmt, closeWrite ? wc : null, false, ctx);
+		}
+	}
+
+	private static final String SQL_DEF_INF = "SELECT fname FROM #FOLDER# WHERE cid = ? AND fuid = ? AND module = ? AND created_from = ? AND default_flag = 1";
+
+	/**
+	 * @return The entity's default infostore folder's name if <code>true</code>;
+	 *         otherwise <code>null</code>
+	 */
+	private static String isDefaultInfostoreFolder(final int fuid, final int entity, final String folderTable,
+			final Connection con, final Context ctx) throws SQLException {
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		try {
+			stmt = con.prepareStatement(SQL_DEF_INF.replaceFirst(TMPL_FOLDER_TABLE, folderTable));
+			stmt.setInt(1, ctx.getContextId());
+			stmt.setInt(2, fuid);
+			stmt.setInt(3, FolderObject.INFOSTORE);
+			stmt.setInt(4, entity);
+			rs = stmt.executeQuery();
+			return rs.next() ? rs.getString(1) : null;
+		} finally {
+			closeResources(rs, stmt, null, true, ctx);
 		}
 	}
 

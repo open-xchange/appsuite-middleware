@@ -1,3 +1,8 @@
+* 2007-10-12 - thorben.betten@open-xchange.com
+
+ - Bugfix #9787: Checking right table when looking for user's default
+   infostore folder on context deletion
+
 * 2007-10-11 - thorben.betten@open-xchange.com
 
  - Bugfix #9769: Overriding IMAPFolder.exists() method in NamespaceFolder
