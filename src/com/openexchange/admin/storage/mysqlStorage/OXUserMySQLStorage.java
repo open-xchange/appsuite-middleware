@@ -212,7 +212,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.close();
             } else if (usrdata.getImapServer() != null) {
                 stmt = write_ox_con.prepareStatement("UPDATE user SET  imapserver = ? WHERE cid = ? AND id = ?");
-                stmt.setString(1, usrdata.getImapServer());
+                // TODO: This should be fixed in the future so that we don't split it up before we concatenate it here
+                stmt.setString(1, usrdata.getImapServer() + ":" + usrdata.getImapPort());
                 stmt.setInt(2, context_id);
                 stmt.setInt(3, user_id);
                 stmt.executeUpdate();
@@ -244,7 +245,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.close();
             } else if (usrdata.getSmtpServer() != null) {
                 stmt = write_ox_con.prepareStatement("UPDATE user SET  smtpserver = ? WHERE cid = ? AND id = ?");
-                stmt.setString(1, usrdata.getSmtpServer());
+                // TODO: This should be fixed in the future so that we don't split it up before we concatenate it here
+                stmt.setString(1, usrdata.getSmtpServer() + ":" + usrdata.getSmtpPort());
                 stmt.setInt(2, context_id);
                 stmt.setInt(3, user_id);
                 stmt.executeUpdate();
@@ -728,13 +730,15 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
                 // imap and smtp server
                 if (usrdata.getImapServer() != null) {
-                    stmt.setString(10, usrdata.getImapServer());
+                    // TODO: This should be fixed in the future so that we don't split it up before we concatenate it here
+                    stmt.setString(10, usrdata.getImapServer() + ":" + usrdata.getImapPort());
                 } else {
                     stmt.setString(10, DEFAULT_IMAP_SERVER_CREATE);
                 }
 
                 if (usrdata.getSmtpServer() != null) {
-                    stmt.setString(11, usrdata.getSmtpServer());
+                    // TODO: This should be fixed in the future so that we don't split it up before we concatenate it here
+                    stmt.setString(11, usrdata.getSmtpServer() + ":" + usrdata.getSmtpPort());
                 } else {
                     stmt.setString(11, DEFAULT_SMTP_SERVER_CREATE);
                 }
