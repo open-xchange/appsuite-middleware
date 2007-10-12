@@ -74,6 +74,8 @@ public class DeleteEvent extends EventObject {
 
 	public static final int TYPE_RESOURCE_GROUP = 4;
 
+	public static final int TYPE_CONTEXT = 5;
+
 	private static final long serialVersionUID = 2636570955675454470L;
 
 	private transient final Context ctx;

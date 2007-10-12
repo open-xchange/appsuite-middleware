@@ -81,7 +81,7 @@ public abstract class FileStorage {
     /**
      * Class implementing the file storage.
      */
-    public static Class< ? extends FileStorage> IMPL;
+    private static Class< ? extends FileStorage> impl;
 
     /**
      * Default number of files or directories per directory.
@@ -125,21 +125,22 @@ public abstract class FileStorage {
         super();
         if (!(args[0] instanceof Integer)) {
             throw new FileStorageException(FileStorageException.Code
-                .INVALID_PARAMETER, 0, args[0].getClass().getName());
+                .INVALID_PARAMETER, Integer.valueOf(0), args[0].getClass().getName());
         }
-        depth = (Integer) args[0];
+        depth = ((Integer) args[0]).intValue();
         if (!(args[1] instanceof Integer)) {
             throw new FileStorageException(FileStorageException.Code
-                .INVALID_PARAMETER, 1, args[1].getClass().getName());
+                .INVALID_PARAMETER, Integer.valueOf(1), args[1].getClass()
+                .getName());
         }
-        entries = (Integer) args[1];
+        entries = ((Integer) args[1]).intValue();
         if (depth < 1) {
             throw new FileStorageException(FileStorageException.Code
-                .INVALID_DEPTH, depth);
+                .INVALID_DEPTH, Integer.valueOf(depth));
         }
         if (entries < 1) {
             throw new FileStorageException(FileStorageException.Code
-                .INVALID_ENTRIES, entries);
+                .INVALID_ENTRIES, Integer.valueOf(entries));
         }
     }
     
@@ -174,8 +175,8 @@ public abstract class FileStorage {
         try {
             // Varargs sometimes cause strange looking code.
             final Object[] args = new Object[2 + initData.length];
-            args[0] = depth;
-            args[1] = entries;
+            args[0] = Integer.valueOf(depth);
+            args[1] = Integer.valueOf(entries);
             System.arraycopy(initData, 0, args, 2, initData.length);
             final Constructor< ? extends FileStorage> constructor = 
                 getImplementation().getConstructor(Object[].class);
@@ -206,7 +207,7 @@ public abstract class FileStorage {
 
     private static Class<? extends FileStorage> getImplementation()
         throws FileStorageException {
-        if (null == IMPL) {
+        if (null == impl) {
 //            final String className = ServerConfig.getProperty(
 //                Property.FileStorageImpl);
 //            if (null == className) {
@@ -220,9 +221,9 @@ public abstract class FileStorage {
 //                throw new FileStorageException(Code.CLASS_NOT_FOUND, className);
 //            }
 //            IMPL = (Class<? extends FileStorage>) clazz;
-            IMPL = QuotaFileStorage.class;
+            impl = QuotaFileStorage.class;
         }
-        return IMPL;
+        return impl;
     }
 
     /**
@@ -239,7 +240,7 @@ public abstract class FileStorage {
      * @return a complete list of files in this filestorage
      */
     public SortedSet<String> getFileList() throws FileStorageException {
-    	SortedSet<String> retval = new TreeSet<String>();
+    	final SortedSet<String> retval = new TreeSet<String>();
 
     	String nextentry = computeFirstEntry();
 
@@ -298,15 +299,15 @@ public abstract class FileStorage {
                 }
                 // No empty slot and no next free slot then scan for an unused slot.
                 if (nextentry == null) {
-                    final Set unused = scanForUnusedEntries();
+                    final Set<String> unused = scanForUnusedEntries();
                     if (unused.isEmpty()) {
                         throw new FileStorageException(FileStorageException.Code
                             .STORE_FULL);
                     }
-                    final Iterator iter = unused.iterator();
-                    nextentry = (String) iter.next();
+                    final Iterator<String> iter = unused.iterator();
+                    nextentry = iter.next();
                     while (iter.hasNext()) {
-                        state.addUnused((String) iter.next());
+                        state.addUnused(iter.next());
                     }
                 }
                 // Calculate next slot and store it.
@@ -357,6 +358,16 @@ public abstract class FileStorage {
             }
         }
         return retval;
+    }
+
+    /**
+     * This method removes the complete FileStorage and its elements.
+     * @throws FileStorageException if removing fails.
+     */
+    public void remove() throws FileStorageException {
+        lock(LOCK_TIMEOUT);
+        eliminate();
+        // no unlock here because everything is removed.
     }
 
     /**
@@ -610,6 +621,14 @@ public abstract class FileStorage {
      * @throws FileStorageException if an error occurs while checking if the file exists.
      */
     protected abstract boolean exists(String name) throws FileStorageException;
+
+    /**
+     * This method eliminates the complete storage of files including state
+     * files and parent directory. Before eliminating the storage, it will be
+     * locked to exclude other instances throwing ugly errors.
+     * @throws FileStorageException if eliminating fails.
+     */
+    protected abstract void eliminate() throws FileStorageException;
 
     /**
      * This method locks the file storage, so no other can destroy a file in the

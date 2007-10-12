@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.tools.file;
 
 import java.io.File;
@@ -63,6 +61,8 @@ import javax.activation.MimetypesFileTypeMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.openexchange.tools.file.FileStorageException.Code;
 
 /**
  * File storage implementation storing the files on a local directory.
@@ -203,6 +203,16 @@ public class LocalFileStorage extends FileStorage {
                         .IOERROR, e, e.getMessage());
                 }
             }
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void eliminate() throws FileStorageException {
+        if (!storage.delete()) {
+            throw new FileStorageException(Code.NOT_ELIMINATED);
         }
     }
 
