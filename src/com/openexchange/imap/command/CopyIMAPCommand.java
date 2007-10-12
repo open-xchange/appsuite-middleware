@@ -70,6 +70,9 @@ import com.sun.mail.imap.protocol.IMAPResponse;
  */
 public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
 
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(CopyIMAPCommand.class);
+
 	private static final long[] DEFAULT_RETVAL = new long[0];
 
 	private final boolean uid;
@@ -214,6 +217,8 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
 		}
 	}
 
+	private static final String COPYUID = "copyuid";
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -226,7 +231,7 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
 		} else if (!(response instanceof IMAPResponse)) {
 			return;
 		}
-		final IMAPResponse ir = (IMAPResponse) response;
+		final String resp = ((IMAPResponse) response).toString().toLowerCase();
 		/**
 		 * Parse response:
 		 * 
@@ -237,32 +242,38 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
 		 * * 45 EXISTS..* 2 RECENT..A4 OK [COPYUID 1185853191 7,32 44:45] Completed
 		 * </pre>
 		 */
-		UIDCopyResponse copyResp = null;
-		int atomCount = 0;
-		String next = null;
-		while ((next = ir.readAtom()) != null) {
-			switch (++atomCount) {
-			case 1:
-				if (!"[COPYUID".equals(next)) {
-					return;
-				}
-				copyResp = new UIDCopyResponse();
-				break;
-			case 3:
-				copyResp.src = next;
-				break;
-			case 4:
-				copyResp.dest = next.replaceFirst("\\]", "");
-				break;
-			default:
-				break;
+		int pos = -1;
+		if ((pos = resp.indexOf(COPYUID)) != -1) {
+			final COPYUIDResponse copyuidResp = new COPYUIDResponse();
+			/*
+			 * Find next starting ATOM in IMAP response
+			 */
+			pos += COPYUID.length();
+			while (Character.isWhitespace(resp.charAt(pos))) {
+				pos++;
 			}
+			/*
+			 * Split by ATOMs
+			 */
+			final String[] sa = resp.substring(pos).split("\\s+");
+			if (sa.length >= 3) {
+				for (int i = 1; i < sa.length; i++) {
+					if (i == 1) {
+						copyuidResp.src = sa[i];
+					} else if (i == 2) {
+						copyuidResp.dest = sa[i].replaceFirst("\\]", "");
+					}
+				}
+				copyuidResp.fillResponse(uids, retval);
+			} else {
+				LOG.error(new StringBuilder(128).append("Invalid COPYUID response: ").append(resp).toString());
+			}
+			proceed = false;
+		} else {
+			LOG.error(new StringBuilder(128)
+					.append("Required COPYUID response code not included in UID COPY command: ").append(resp)
+					.toString());
 		}
-		if (copyResp == null) {
-			return;
-		}
-		copyResp.fillResponse(uids, retval);
-		proceed = false;
 	}
 
 	/*
@@ -285,32 +296,25 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
 		return false;
 	}
 
-	private static final class UIDCopyResponse {
+	private static final class COPYUIDResponse {
 
 		private String src;
 
 		private String dest;
 
-		public UIDCopyResponse() {
+		public COPYUIDResponse() {
 			super();
 		}
 
-		public String getDest() {
-			return dest;
-		}
-
-		public void setDest(final String dest) {
-			this.dest = dest;
-		}
-
-		public String getSrc() {
-			return src;
-		}
-
-		public void setSrc(final String src) {
-			this.src = src;
-		}
-
+		/**
+		 * Fills given <code>retval</code> with UIDs from destination folder
+		 * while keeping order of source UIDs in <code>uids</code>
+		 * 
+		 * @param uids
+		 *            The source UIDs
+		 * @param retval
+		 *            The destination UIDs to fill
+		 */
 		public void fillResponse(final long[] uids, final long[] retval) {
 			final long[] srcArr = toLongArray(src);
 			final long[] destArr = toLongArray(dest);
@@ -326,9 +330,9 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
 			}
 		}
 
-		private static long[] toLongArray(final String s) {
+		private static long[] toLongArray(final String uidSet) {
 			final SmartLongArray arr = new SmartLongArray();
-			final String[] sa = s.split(" *, *");
+			final String[] sa = uidSet.split(" *, *");
 			Next: for (int i = 0; i < sa.length; i++) {
 				final int pos = sa[i].indexOf(':');
 				if (pos == -1) {
