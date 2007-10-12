@@ -448,14 +448,12 @@ public final class MailInterfaceImpl extends MailInterface {
 			/*
 			 * Update
 			 */
-			mailConnection.getFolderStorage().updateFolder(mailFolder.getFullname(), mailFolder);
-		} else {
-			/*
-			 * Insert
-			 */
-			mailConnection.getFolderStorage().createFolder(mailFolder);
+			return mailConnection.getFolderStorage().updateFolder(mailFolder.getFullname(), mailFolder);
 		}
-		return null;
+		/*
+		 * Insert
+		 */
+		return mailConnection.getFolderStorage().createFolder(mailFolder);
 	}
 
 	@Override

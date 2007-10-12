@@ -459,14 +459,7 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 				final ACL[] initialACLs = createMe.getACL();
 				final ACL[] newACLs = permissions2ACL(toCreate.getPermissions(), createMe);
 				if (!equals(initialACLs, newACLs)) {
-					boolean hasAdministerRight = false;
-					for (int i = 0; i < initialACLs.length && !hasAdministerRight; i++) {
-						if (imapConfig.getLogin().equals(initialACLs[i].getName())
-								&& initialACLs[i].getRights().contains(Rights.Right.ADMINISTER)) {
-							hasAdministerRight = true;
-						}
-					}
-					if (!hasAdministerRight) {
+					if (!createMe.myRights().contains(Rights.Right.ADMINISTER)) {
 						throw new IMAPException(IMAPException.Code.NO_ADMINISTER_ACCESS_ON_INITIAL, createMe
 								.getFullName());
 					}

@@ -57,7 +57,7 @@ import java.util.List;
 import javax.mail.Message;
 
 /**
- * IMAPNumArgSplitter
+ * {@link IMAPNumArgSplitter}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 

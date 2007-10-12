@@ -798,10 +798,7 @@ public final class IMAPCommandsCollection {
 		 */
 		final boolean quote = PATTERN_QUOTE_ARG.matcher(lfolder).find();
 		final boolean escape = PATTERN_ESCAPE_ARG.matcher(lfolder).find();
-		final StringBuilder sb = new StringBuilder(100);
-		if (quote) {
-			sb.append('"');
-		}
+		final StringBuilder sb = new StringBuilder(lfolder.length() + 8);
 		if (escape) {
 			sb.append(lfolder.replaceAll(REPLPAT_QUOTE, REPLACEMENT_QUOTE).replaceAll(REPLPAT_BACKSLASH,
 					REPLACEMENT_BACKSLASH));
@@ -809,6 +806,10 @@ public final class IMAPCommandsCollection {
 			sb.append(lfolder);
 		}
 		if (quote) {
+			/*
+			 * Surround with quotes
+			 */
+			sb.insert(0, '"');
 			sb.append('"');
 		}
 		return sb.toString();
