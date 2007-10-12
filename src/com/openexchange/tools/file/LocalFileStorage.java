@@ -211,7 +211,7 @@ public class LocalFileStorage extends FileStorage {
      */
     @Override
     protected void eliminate() throws FileStorageException {
-        if (!storage.delete()) {
+        if (storage.exists() && !storage.delete()) {
             throw new FileStorageException(Code.NOT_ELIMINATED);
         }
     }
