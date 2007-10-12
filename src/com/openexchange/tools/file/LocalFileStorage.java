@@ -211,11 +211,23 @@ public class LocalFileStorage extends FileStorage {
      */
     @Override
     protected void eliminate() throws FileStorageException {
-        if (storage.exists() && !storage.delete()) {
+        if (storage.exists() && !delete(storage)) {
             throw new FileStorageException(Code.NOT_ELIMINATED);
         }
     }
 
+    private static final boolean delete(final File file) {
+        boolean retval = true;
+        if (file.isDirectory()) {
+            for (File sub : file.listFiles()) {
+                retval &= delete(sub);
+            }
+        } else {
+            retval = file.delete();
+        }
+        return retval;
+    }
+    
     /**
      * {@inheritDoc}
      */
