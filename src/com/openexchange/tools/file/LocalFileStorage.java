@@ -222,6 +222,7 @@ public class LocalFileStorage extends FileStorage {
             for (File sub : file.listFiles()) {
                 retval &= delete(sub);
             }
+            retval &= file.delete();
         } else {
             retval = file.delete();
         }
