@@ -270,9 +270,9 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
 			}
 			proceed = false;
 		} else {
-			LOG.error(new StringBuilder(128)
-					.append("Required COPYUID response code not included in UID COPY command: ").append(resp)
-					.toString());
+			if (LOG.isWarnEnabled()) {
+				LOG.warn(new StringBuilder(128).append("Missing COPYUID response code: ").append(resp).toString());
+			}
 		}
 	}
 

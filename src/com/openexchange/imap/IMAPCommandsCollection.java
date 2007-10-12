@@ -783,22 +783,26 @@ public final class IMAPCommandsCollection {
 			+ MessageHeaders.HDR_X_OX_MARKER + ")])";
 
 	private static interface HeaderStream {
-		public InputStream getInputStream(Item fetchItem);
+		public InputStream getStream(Item fetchItem);
 	}
+
+	private static HeaderStream REV1HeaderStream = new HeaderStream() {
+		public InputStream getStream(final Item fetchItem) {
+			return ((BODY) fetchItem).getByteArrayInputStream();
+		}
+	};
+
+	private static HeaderStream RFCHeaderStream = new HeaderStream() {
+		public InputStream getStream(final Item fetchItem) {
+			return ((RFC822DATA) fetchItem).getByteArrayInputStream();
+		}
+	};
 
 	private static HeaderStream getHeaderStream(final boolean isREV1) {
 		if (isREV1) {
-			return new HeaderStream() {
-				public InputStream getInputStream(final Item fetchItem) {
-					return ((BODY) fetchItem).getByteArrayInputStream();
-				}
-			};
+			return REV1HeaderStream;
 		}
-		return new HeaderStream() {
-			public InputStream getInputStream(final Item fetchItem) {
-				return ((RFC822DATA) fetchItem).getByteArrayInputStream();
-			}
-		};
+		return RFCHeaderStream;
 	}
 
 	/**
@@ -861,7 +865,7 @@ public final class IMAPCommandsCollection {
 									headerStream = getHeaderStream(p.isREV1());
 								}
 								final InternetHeaders h = new InternetHeaders();
-								h.load(headerStream.getInputStream(fetchResponse.getItem(index)));
+								h.load(headerStream.getStream(fetchResponse.getItem(index)));
 								e = h.getAllHeaders();
 							}
 							if (e.hasMoreElements() && marker.equals(((Header) e.nextElement()).getValue())) {

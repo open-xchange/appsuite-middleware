@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.mime;
 
-
 /**
  * MessageHeaders
  * 
@@ -154,5 +153,9 @@ public final class MessageHeaders {
 	public static final String HDR_DISPOSITION = "Content-Disposition";
 
 	public static final HeaderName DISPOSITION = HeaderName.valueOf(HDR_DISPOSITION);
+
+	public static final String HDR_X_OX_MARKER = "X-OX-Marker";
+
+	public static final HeaderName X_OX_MARKER = HeaderName.valueOf(HDR_X_OX_MARKER);
 
 }

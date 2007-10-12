@@ -744,6 +744,8 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 						msg.setRecipients(RecipientType.CC, env.cc);
 						msg.setRecipients(RecipientType.BCC, env.bcc);
 						msg.setReplyTo(env.replyTo);
+						msg.setInReplyTo(env.inReplyTo);
+						msg.setMessageId(env.messageId);
 						try {
 							msg.setSubject(env.subject == null ? "" : MimeUtility.decodeText(env.subject));
 						} catch (final UnsupportedEncodingException e) {

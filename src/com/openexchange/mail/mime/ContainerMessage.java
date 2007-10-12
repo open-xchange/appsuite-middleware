@@ -70,6 +70,7 @@ import javax.mail.Multipart;
 import javax.mail.Store;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MailDateFormat;
+import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeUtility;
 
 import com.openexchange.mail.MailException;
@@ -129,11 +130,15 @@ public final class ContainerMessage extends Message implements Serializable {
 
 	private InternetAddress[] replyTo;
 
+	private String inReplyTo;
+
 	private String subject;
 
 	private Date date;
 
 	private Date receivedDate;
+
+	private String messageId;
 
 	/**
 	 * FLAS
@@ -191,7 +196,7 @@ public final class ContainerMessage extends Message implements Serializable {
 	 * Constructs a new <code>MessageCacheObject</code> instance from given
 	 * <b>PRE-FILLED</b> <code>Message</code> object
 	 */
-	public ContainerMessage(final Message msg, final long msgUID) throws MessagingException, MailException {
+	public ContainerMessage(final MimeMessage msg, final long msgUID) throws MessagingException, MailException {
 		super(msg.getFolder(), msg.getMessageNumber());
 		this.headers = new HashMap<String, String>();
 		this.seqNum = msg.getMessageNumber();
@@ -206,6 +211,8 @@ public final class ContainerMessage extends Message implements Serializable {
 			this.cc = (InternetAddress[]) msg.getRecipients(RecipientType.CC);
 			this.bcc = (InternetAddress[]) msg.getRecipients(RecipientType.BCC);
 			this.replyTo = msg.getReplyTo() == null ? null : (InternetAddress[]) msg.getReplyTo();
+			this.inReplyTo = msg.getHeader(MessageHeaders.HDR_IN_REPLY_TO, ",");
+			this.messageId = msg.getHeader(MessageHeaders.HDR_MESSAGE_ID, null);
 			this.subject = msg.getSubject();
 			this.date = msg.getSentDate();
 			this.receivedDate = msg.getReceivedDate();
@@ -541,6 +548,10 @@ public final class ContainerMessage extends Message implements Serializable {
 	public String[] getHeader(final String header_name) {
 		if (header_name.equalsIgnoreCase(MessageHeaders.HDR_X_PRIORITY)) {
 			return new String[] { String.valueOf(priority) };
+		} else if (header_name.equalsIgnoreCase(MessageHeaders.HDR_MESSAGE_ID)) {
+			return messageId != null ? messageId.split(SPLIT_COMMA) : headers
+					.containsKey(MessageHeaders.HDR_MESSAGE_ID) ? (messageId = headers
+					.get(MessageHeaders.HDR_MESSAGE_ID)).split(SPLIT_COMMA) : null;
 		}
 		return headers.containsKey(header_name) ? headers.get(header_name).split(SPLIT_COMMA) : null;
 	}
@@ -609,6 +620,27 @@ public final class ContainerMessage extends Message implements Serializable {
 	@Override
 	public void setReplyTo(final Address[] addresses) {
 		this.replyTo = (InternetAddress[]) addresses;
+	}
+
+	public String getInReplyTo() {
+		return inReplyTo != null ? inReplyTo
+				: headers.containsKey(MessageHeaders.HDR_IN_REPLY_TO) ? (inReplyTo = MessageHeaders.HDR_IN_REPLY_TO)
+						: null;
+	}
+
+	public void setInReplyTo(final String inReplyTo) {
+		this.inReplyTo = inReplyTo;
+	}
+
+	public String getMessageId() {
+		return messageId != null ? messageId
+				: headers.containsKey(MessageHeaders.HDR_MESSAGE_ID) ? (messageId = headers
+						.get(MessageHeaders.HDR_MESSAGE_ID)) : null;
+	}
+
+	public void setMessageId(final String messageId) {
+		this.messageId = messageId;
+		headers.put(MessageHeaders.HDR_MESSAGE_ID, messageId);
 	}
 
 	public int getThreadLevel() {

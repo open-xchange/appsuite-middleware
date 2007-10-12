@@ -57,6 +57,9 @@ import static com.openexchange.mail.dataobjects.MailFolder.DEFAULT_FOLDER_ID;
 import static com.openexchange.mail.utils.StorageUtility.prepareMailFolderParam;
 
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -91,6 +94,7 @@ import com.openexchange.mail.cache.MailMessageCache;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContainerMessage;
+import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.ImageMessageHandler;
@@ -595,7 +599,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 				throw new IMAPException(IMAPException.Code.NO_EQUAL_MOVE, prepareMailFolderParam(sourceFolderArg));
 			}
 			final String sourceFolder = prepareMailFolderParam(sourceFolderArg);
-			final String destFolder = prepareMailFolderParam(destFolderArg);
+			final String destFullname = prepareMailFolderParam(destFolderArg);
 			/*
 			 * Open and check user rights on source folder
 			 */
@@ -610,41 +614,47 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 			} catch (final MessagingException e) {
 				throw new IMAPException(IMAPException.Code.NO_ACCESS, imapFolder.getFullName());
 			}
-			/*
-			 * Open and check user rights on destination folder
-			 */
-			final IMAPFolder tmpFolder = setAndOpenFolder(destFolder, Folder.READ_ONLY);
-			try {
-				if ((tmpFolder.getType() & Folder.HOLDS_MESSAGES) == 0) {
-					throw new IMAPException(IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, tmpFolder.getFullName());
-				} else if (imapConfig.isSupportsACLs()
-						&& !RightsCache.getCachedRights(tmpFolder, true, session).contains(Rights.Right.INSERT)) {
-					throw new IMAPException(IMAPException.Code.NO_INSERT_ACCESS, tmpFolder.getFullName());
+			{
+				/*
+				 * Open and check user rights on destination folder
+				 */
+				final IMAPFolder destFolder = setAndOpenFolder(destFullname, Folder.READ_ONLY);
+				try {
+					if ((destFolder.getType() & Folder.HOLDS_MESSAGES) == 0) {
+						throw new IMAPException(IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, destFolder
+								.getFullName());
+					} else if (imapConfig.isSupportsACLs()
+							&& !RightsCache.getCachedRights(destFolder, true, session).contains(Rights.Right.INSERT)) {
+						throw new IMAPException(IMAPException.Code.NO_INSERT_ACCESS, destFolder.getFullName());
+					}
+				} catch (final MessagingException e) {
+					throw new IMAPException(IMAPException.Code.NO_ACCESS, destFolder.getFullName());
+				} finally {
+					destFolder.close(false);
 				}
-			} catch (final MessagingException e) {
-				throw new IMAPException(IMAPException.Code.NO_ACCESS, tmpFolder.getFullName());
-			} finally {
-				tmpFolder.close(false);
 			}
 			/*
 			 * Copy operation
 			 */
 			long start = System.currentTimeMillis();
-			final long[] res = new CopyIMAPCommand(imapFolder, msgUIDs, destFolder, false, fast).doCommand();
+			long[] res = new CopyIMAPCommand(imapFolder, msgUIDs, destFullname, false, fast).doCommand();
 			if (LOG.isInfoEnabled()) {
 				LOG.info(new StringBuilder(100).append(msgUIDs.length).append(" messages copied in ").append(
 						(System.currentTimeMillis() - start)).append("msec").toString());
 			}
-			/*
-			 * TODO: Should be moved to mail interface impl
-			 */
+			if (!fast && (res == null || res.length == 0 || res[0] == -1)) {
+				/*
+				 * Invalid UIDs
+				 */
+				res = getDestinationUIDs(msgUIDs, destFullname);
+			}
 			if (usm.isSpamEnabled()) {
 				/*
 				 * Spam related action
 				 */
 				final String spamFullName = prepareMailFolderParam(imapConnection.getFolderStorage().getSpamFolder());
 				final int spamAction = spamFullName.equals(imapFolder.getFullName()) ? SPAM_HAM : (spamFullName
-						.equals(destFolder) ? SPAM_SPAM : SPAM_NOOP);
+						.equals(destFullname) ? SPAM_SPAM : SPAM_NOOP);
 				if (spamAction != SPAM_NOOP) {
 					try {
 						handleSpamByUID(msgUIDs, spamAction == SPAM_SPAM, false, sourceFolder, Folder.READ_WRITE);
@@ -749,6 +759,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 			 */
 			final Message[] msgs = MIMEMessageConverter.convertMailMessages(mailMessages);
 			/*
+			 * Mark first message for later lookup
+			 */
+			final String hash = plainStringToMD5(String.valueOf(System.currentTimeMillis()));
+			msgs[0].setHeader(MessageHeaders.HDR_X_OX_MARKER, hash);
+			/*
 			 * ... and append them to folder
 			 */
 			try {
@@ -760,7 +775,29 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 			} catch (final OXCachingException e) {
 				LOG.error(e.getLocalizedMessage(), e);
 			}
-			return appendUID2Long(imapFolder.appendUIDMessages(msgs));
+			final AppendUID[] appendUIDs = imapFolder.appendUIDMessages(msgs);
+			if (appendUIDs != null && appendUIDs.length > 0 && appendUIDs[0] != null) {
+				/*
+				 * Assume a proper APPENDUID response code
+				 */
+				return appendUID2Long(imapFolder.appendUIDMessages(msgs));
+			}
+			/*
+			 * Missing APPENDUID
+			 */
+			if (LOG.isWarnEnabled()) {
+				LOG.warn("Missing APPENDUID response code");
+			}
+			final long[] retval = new long[msgs.length];
+			long uid = IMAPCommandsCollection.findMarker(hash, imapFolder);
+			if (uid != -1) {
+				for (int i = 0; i < retval.length; i++) {
+					retval[i] = uid++;
+				}
+			} else {
+				Arrays.fill(retval, -1L);
+			}
+			return retval;
 		} catch (final MessagingException e) {
 			throw IMAPException.handleMessagingException(e, imapConnection);
 		}
@@ -1014,6 +1051,60 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 		return index;
 	}
 
+	/**
+	 * Determines the corresponding UIDs in destination folder
+	 * 
+	 * @param msgUIDs
+	 *            The UIDs in source folder
+	 * @param destFullname
+	 *            The destination folder's fullname
+	 * @return The corresponding UIDs in destination folder
+	 * @throws MessagingException
+	 */
+	private long[] getDestinationUIDs(final long[] msgUIDs, final String destFullname) throws MessagingException {
+		/*
+		 * No COPYUID present in response code. Since UIDs are assigned in
+		 * strictly ascending order in the mailbox (refer to IMAPv4 rfc3501,
+		 * section 2.3.1.1), we can discover corresponding UIDs by selecting the
+		 * destination mailbox and detecting the location of messages placed in
+		 * the destination mailbox by using FETCH and/or SEARCH commands (e.g.,
+		 * for Message-ID or some unique marker placed in the message in an
+		 * APPEND).
+		 */
+		final long[] retval = new long[msgUIDs.length];
+		Arrays.fill(retval, -1L);
+		final String messageId;
+		{
+			int minIndex = 0;
+			long minVal = msgUIDs[0];
+			for (int i = 1; i < msgUIDs.length; i++) {
+				if (msgUIDs[i] < minVal) {
+					minIndex = i;
+					minVal = msgUIDs[i];
+				}
+			}
+			messageId = ((IMAPMessage) (imapFolder.getMessageByUID(msgUIDs[minIndex]))).getMessageID();
+		}
+		if (messageId != null) {
+			final IMAPFolder destFolder = (IMAPFolder) imapStore.getFolder(destFullname);
+			destFolder.open(Folder.READ_ONLY);
+			try {
+				/*
+				 * Find this message ID in destination folder
+				 */
+				long startUID = IMAPCommandsCollection.messageId2UID(messageId, destFolder);
+				if (startUID != -1) {
+					for (int i = 0; i < msgUIDs.length; i++) {
+						retval[i] = startUID++;
+					}
+				}
+			} finally {
+				destFolder.close(false);
+			}
+		}
+		return retval;
+	}
+
 	private void handleSpamByUID(final long[] msgUIDs, final boolean isSpam, final boolean move, final String fullname,
 			final int desiredMode) throws MessagingException, MailException {
 		/*
@@ -1076,4 +1167,43 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 		return retval;
 	}
 
+	private static final String ALG_MD5 = "MD5";
+
+	private static String plainStringToMD5(final String input) {
+		final MessageDigest md;
+		try {
+			/*
+			 * Choose MD5 (SHA1 is also possible)
+			 */
+			md = MessageDigest.getInstance(ALG_MD5);
+		} catch (final NoSuchAlgorithmException e) {
+			LOG.error("Unable to generate file ID", e);
+			return input;
+		}
+		/*
+		 * Reset
+		 */
+		md.reset();
+		/*
+		 * Update the digest
+		 */
+		try {
+			md.update(input.getBytes("UTF-8"));
+		} catch (final UnsupportedEncodingException e) {
+			/*
+			 * Should not occur since utf-8 is a known encoding in jsdk
+			 */
+			LOG.error("Unable to generate file ID", e);
+			return input;
+		}
+		/*
+		 * Here comes the hash
+		 */
+		final byte[] byteHash = md.digest();
+		final StringBuilder resultString = new StringBuilder();
+		for (int i = 0; i < byteHash.length; i++) {
+			resultString.append(Integer.toHexString(0xF0 & byteHash[i]).charAt(0));
+		}
+		return resultString.toString();
+	}
 }
