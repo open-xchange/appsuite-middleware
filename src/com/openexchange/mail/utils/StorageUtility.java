@@ -52,9 +52,7 @@ package com.openexchange.mail.utils;
 import static javax.mail.internet.MimeUtility.unfold;
 
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -73,7 +71,6 @@ import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.protocol.FetchResponse;
 import com.sun.mail.imap.protocol.IMAPProtocol;
-import com.sun.mail.imap.protocol.UIDSet;
 
 /**
  * {@link StorageUtility} - Offers general prurpose methods for both folder and
