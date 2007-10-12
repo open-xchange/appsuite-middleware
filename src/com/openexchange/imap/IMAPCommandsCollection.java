@@ -52,9 +52,11 @@ package com.openexchange.imap;
 import static com.openexchange.imap.sort.IMAPSort.getMessageComparator;
 import static com.openexchange.imap.utils.IMAPStorageUtility.getFetchProfile;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -63,14 +65,17 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.mail.Header;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Store;
+import javax.mail.internet.InternetHeaders;
 
 import com.openexchange.imap.command.FetchIMAPCommand;
 import com.openexchange.imap.command.IMAPNumArgSplitter;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailStorageUtils.OrderDirection;
+import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.tools.Collections.SmartIntArray;
 import com.sun.mail.iap.Argument;
 import com.sun.mail.iap.CommandFailedException;
@@ -78,8 +83,14 @@ import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.protocol.BASE64MailboxEncoder;
+import com.sun.mail.imap.protocol.BODY;
+import com.sun.mail.imap.protocol.ENVELOPE;
+import com.sun.mail.imap.protocol.FetchResponse;
 import com.sun.mail.imap.protocol.IMAPProtocol;
 import com.sun.mail.imap.protocol.IMAPResponse;
+import com.sun.mail.imap.protocol.Item;
+import com.sun.mail.imap.protocol.RFC822DATA;
+import com.sun.mail.imap.protocol.UID;
 
 /**
  * {@link IMAPCommandsCollection} - a collection of simple IMAP commands
@@ -593,8 +604,7 @@ public final class IMAPCommandsCollection {
 	 * @throws ProtocolException
 	 *             If a protocol error occurs
 	 */
-	public static long[] getDeletedMessages(final IMAPFolder imapFolder, final long[] filter)
-			throws ProtocolException {
+	public static long[] getDeletedMessages(final IMAPFolder imapFolder, final long[] filter) throws ProtocolException {
 		final IMAPProtocol p = imapFolder.getProtocol();
 		final Response[] r = p.command(FETCH_FLAGS, null);
 		final Response response = r[r.length - 1];
@@ -624,7 +634,7 @@ public final class IMAPCommandsCollection {
 				}
 				final long[] retval = new long[set.size()];
 				int i = 0;
-				for (Long l : set) {
+				for (final Long l : set) {
 					retval[i++] = l.longValue();
 				}
 				return retval;
@@ -764,6 +774,181 @@ public final class IMAPCommandsCollection {
 			}
 		});
 		return val.booleanValue();
+	}
+
+	private static final String COMMAND_FETCH_OXMARK_RFC = "FETCH *:1 (UID RFC822.HEADER.LINES ("
+			+ MessageHeaders.HDR_X_OX_MARKER + "))";
+
+	private static final String COMMAND_FETCH_OXMARK_REV1 = "FETCH *:1 (UID BODY.PEEK[HEADER.FIELDS ("
+			+ MessageHeaders.HDR_X_OX_MARKER + ")])";
+
+	private static interface HeaderStream {
+		public InputStream getInputStream(Item fetchItem);
+	}
+
+	private static HeaderStream getHeaderStream(final boolean isREV1) {
+		if (isREV1) {
+			return new HeaderStream() {
+				public InputStream getInputStream(final Item fetchItem) {
+					return ((BODY) fetchItem).getByteArrayInputStream();
+				}
+			};
+		}
+		return new HeaderStream() {
+			public InputStream getInputStream(final Item fetchItem) {
+				return ((RFC822DATA) fetchItem).getByteArrayInputStream();
+			}
+		};
+	}
+
+	/**
+	 * Searches the message whose {@link MessageHeaders#HDR_X_OX_MARKER} header
+	 * is set to specified marker
+	 * 
+	 * @param marker
+	 *            The marker to lookup
+	 * @param imapFolder
+	 *            The IMAP folder in which to search the message
+	 * @return The matching message's UID or <code>-1</code> if none found
+	 * @throws MessagingException
+	 */
+	public static long findMarker(final String marker, final IMAPFolder imapFolder) throws MessagingException {
+		if (marker == null || marker.length() == 0) {
+			return -1L;
+		}
+		final Long retval = (Long) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+			/*
+			 * (non-Javadoc)
+			 * 
+			 * @see com.sun.mail.imap.IMAPFolder$ProtocolCommand#doCommand(com.sun.mail.imap.protocol.IMAPProtocol)
+			 */
+			public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+				final Response[] r;
+				if (p.isREV1()) {
+					r = p.command(COMMAND_FETCH_OXMARK_REV1, null);
+				} else {
+					r = p.command(COMMAND_FETCH_OXMARK_RFC, null);
+				}
+				final Response response = r[r.length - 1];
+				final Long retval = Long.valueOf(-1L);
+				try {
+					if (response.isOK()) {
+						int index = -1;
+						HeaderStream headerStream = null;
+						for (int i = 0, len = r.length - 1; i < len; i++) {
+							if (!(r[i] instanceof FetchResponse)) {
+								continue;
+							}
+							final FetchResponse fetchResponse = (FetchResponse) r[i];
+							if (index == -1) {
+								/*
+								 * Remember index of header item
+								 */
+								final int count = fetchResponse.getItemCount();
+								for (int k = 0; k < count && index == -1; k++) {
+									if (BODY.class.isInstance(fetchResponse.getItem(k))
+											|| RFC822DATA.class.isInstance(fetchResponse.getItem(k))) {
+										index = k;
+									}
+								}
+								if (index == -1) {
+									throw new ProtocolException("No header item found in FETCH response");
+								}
+							}
+							final Enumeration e;
+							{
+								if (null == headerStream) {
+									headerStream = getHeaderStream(p.isREV1());
+								}
+								final InternetHeaders h = new InternetHeaders();
+								h.load(headerStream.getInputStream(fetchResponse.getItem(index)));
+								e = h.getAllHeaders();
+							}
+							if (e.hasMoreElements() && marker.equals(((Header) e.nextElement()).getValue())) {
+								return Long.valueOf(((UID) (index == 0 ? fetchResponse.getItem(1) : fetchResponse
+										.getItem(0))).uid);
+							}
+							r[i] = null;
+						}
+					}
+				} catch (final MessagingException e) {
+					final ProtocolException pex = new ProtocolException(e.getLocalizedMessage());
+					pex.setStackTrace(e.getStackTrace());
+					throw pex;
+				} finally {
+					// p.notifyResponseHandlers(r);
+					p.handleResult(response);
+				}
+				return retval;
+			}
+		});
+		return retval.longValue();
+	}
+
+	private static final String COMMAND_FETCH_ENV_UID = "FETCH *:1 (ENVELOPE UID)";
+
+	/**
+	 * Finds corresponding UID of message whose Message-ID header matches given
+	 * message ID
+	 * 
+	 * @param messageId
+	 *            The message ID
+	 * @param imapFolder
+	 *            The IMAP folder
+	 * @return The UID of matching message or <code>-1</code> if none found
+	 * @throws MessagingException
+	 */
+	public static long messageId2UID(final String messageId, final IMAPFolder imapFolder) throws MessagingException {
+		if (messageId == null || messageId.length() == 0) {
+			return -1L;
+		}
+		final Long retval = (Long) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+			/*
+			 * (non-Javadoc)
+			 * 
+			 * @see com.sun.mail.imap.IMAPFolder$ProtocolCommand#doCommand(com.sun.mail.imap.protocol.IMAPProtocol)
+			 */
+			public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+				final Response[] r = p.command(COMMAND_FETCH_ENV_UID, null);
+				final Response response = r[r.length - 1];
+				final Long retval = Long.valueOf(-1L);
+				try {
+					if (response.isOK()) {
+						int index = -1;
+						for (int i = 0, len = r.length - 1; i < len; i++) {
+							if (!(r[i] instanceof FetchResponse)) {
+								continue;
+							}
+							final FetchResponse fetchResponse = (FetchResponse) r[i];
+							if (index == -1) {
+								/*
+								 * Remember index of ENVELOPE item
+								 */
+								final int count = fetchResponse.getItemCount();
+								for (int k = 0; k < count && index == -1; k++) {
+									if (ENVELOPE.class.isInstance(fetchResponse.getItem(k))) {
+										index = k;
+									}
+								}
+								if (index == -1) {
+									throw new ProtocolException("No ENVELOPE item found in FETCH response");
+								}
+							}
+							if (messageId.equals(((ENVELOPE) fetchResponse.getItem(index)).messageId)) {
+								return Long.valueOf(((UID) (index == 0 ? fetchResponse.getItem(1) : fetchResponse
+										.getItem(0))).uid);
+							}
+							r[i] = null;
+						}
+					}
+				} finally {
+					// p.notifyResponseHandlers(r);
+					p.handleResult(response);
+				}
+				return retval;
+			}
+		});
+		return retval.longValue();
 	}
 
 	private static final Pattern PATTERN_QUOTE_ARG = Pattern.compile("[\\s\\*%\\(\\)\\{\\}\"\\\\]");
