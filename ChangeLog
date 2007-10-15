@@ -1,3 +1,9 @@
+* 2007-10-15 - martin.kauss@open-xchange.com
+
+ - Fixed bug #6335. Some characters caused problems while building XML.
+   Now we are throwing an error in the calendar if those characters are
+   found.
+
 * 2007-10-11 - thorben.betten@open-xchange.com
 
  - Bugfix #9756: Fallback implementation if UID EXPUNGE is not supported by
