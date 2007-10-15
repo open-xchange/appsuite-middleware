@@ -155,6 +155,21 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             // first fill the user_data hash to update user table
             write_ox_con = cache.getWRITEConnectionForContext(context_id);
             write_ox_con.setAutoCommit(false);
+            
+            // ########## Update login2user table if USERNAME_CHANGEABLE=true ##################
+            if(this.cache.getProperties().getUserProp(AdminProperties.User.USERNAME_CHANGEABLE, false) 
+                    && usrdata.getName()!=null
+                    && usrdata.getName().trim().length()>0){
+                
+                stmt = write_ox_con.prepareStatement("UPDATE login2user SET uid=? WHERE cid=? AND id=?");
+                stmt.setString(1, usrdata.getName().trim());
+                stmt.setInt(2, ctx.getId());
+                stmt.setInt(3, user_id);
+                stmt.executeUpdate();
+                stmt.close();
+                
+            }
+            // #################################################################
 
             if (usrdata.getPrimaryEmail() != null) {
                 stmt = write_ox_con.prepareStatement("UPDATE user SET mail = ? WHERE cid = ? AND id = ?");
