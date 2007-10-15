@@ -84,6 +84,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.groupware.IDGenerator;
 import com.openexchange.groupware.RdbUserConfigurationStorage;
 import com.openexchange.groupware.UserConfiguration;
+import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.contexts.ContextException;
 import com.openexchange.groupware.delete.DeleteEvent;
@@ -1582,15 +1583,13 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.setInt(2, user_id);
                 stmt.executeUpdate();
                 stmt.close();
+                
+                
+                
                 if (log.isDebugEnabled()) {
-                    log.debug("Delete user " + user_id + "(" + ctx.getId() + ") from contacts ...");
-                }
-                stmt = write_ox_con
-                        .prepareStatement("DELETE FROM prg_contacts WHERE cid = ? AND userid = ?");
-                stmt.setInt(1, ctx.getId());
-                stmt.setInt(2, user_id);
-                stmt.executeUpdate();
-                stmt.close();
+                    log.debug("Delete user " + user_id + "(" + ctx.getId() + ") from contacts via groupware API ...");
+                }                
+                Contacts.deleteContact(getContactIdByUserId(ctx.getId(),user_id,write_ox_con), ctx.getId(), write_ox_con);
 
             }
         } catch (final DeleteFailedException dex) {
@@ -1602,6 +1601,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         } catch (final SQLException sqle) {
             log.error("SQL Error", sqle);
             throw new StorageException(sqle);
+        } catch (OXException e) {
+            log.error("Delete contact via groupware API error", e);
+            throw new StorageException(e.toString());
         } finally {
             try {
                 if (stmt != null) {
@@ -1688,16 +1690,13 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.setInt(2, user_id);
                 stmt.executeUpdate();
                 stmt.close();
-                if (log.isDebugEnabled()) {
-                    log.debug("Delete user " + user_id + "(" + ctx.getId() + ") from contacts ...");
-                }
-                stmt = write_ox_con
-                .prepareStatement("DELETE FROM prg_contacts WHERE cid = ? AND userid = ?");
-                stmt.setInt(1, ctx.getId());
-                stmt.setInt(2, user_id);
-                stmt.executeUpdate();
-                stmt.close();
                 
+                if (log.isDebugEnabled()) {
+                    log.debug("Delete user " + user_id + "(" + ctx.getId() + ") from contacts via groupware API ...");
+                }
+                
+                Contacts.deleteContact(getContactIdByUserId(ctx.getId(),user_id,write_ox_con), ctx.getId(), write_ox_con);
+//                              
             }
         } catch (final DeleteFailedException dex) {
             log.error("Delete Error", dex);
@@ -1708,6 +1707,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         } catch (final SQLException sqle) {
             log.error("SQL Error", sqle);
             throw new StorageException(sqle);
+        } catch (OXException e) {
+            log.error("Delete contact via groupware API error", e);
+            throw new StorageException(e.toString());
         } finally {
             try {
                 if (stmt != null) {
@@ -1717,6 +1719,37 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 log.error("SQL Error closing statement on ox write connection!", e);
             }
         }
+    }
+    
+    private int getContactIdByUserId(int ctx,int user_id,Connection write_con) throws StorageException{
+        int retval = -1;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        
+        try {
+            stmt = write_con.prepareStatement("SELECT intfield01 FROM prg_contacts WHERE userid = ? AND  cid = ?");
+        
+            stmt.setInt(1, user_id);
+            stmt.setInt(2, ctx);
+            rs = stmt.executeQuery();
+            while(rs.next()){
+                retval = rs.getInt("intfield01");
+            }
+            rs.close();
+        } catch (SQLException e) {
+            log.error("SQL Error", e);
+            throw new StorageException(e);
+        }finally{
+            try {
+                if (stmt != null) {
+                    stmt.close();
+                }
+            } catch (final SQLException e) {
+                log.error("SQL Error closing statement on ox write connection!", e);
+            }
+        }
+        
+        return retval;
     }
 
     @Override

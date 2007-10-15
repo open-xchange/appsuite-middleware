@@ -120,10 +120,8 @@ public abstract class ChangeCore extends UserAbstraction {
             parseAndSetOptionalOptionsinUser(parser, usr);
 
             applyExtendedOptionsToUser(parser, usr);
-            
-            maincall(parser, oxusr, ctx, usr, auth);
 
-            // now change module access
+            // change module access
             // first load current module access rights from server
             UserModuleAccess access = oxusr.getModuleAccess(ctx, usr, auth);                    
             
@@ -133,6 +131,10 @@ public abstract class ChangeCore extends UserAbstraction {
             // apply changes in module access on server
             oxusr.changeModuleAccess(ctx, usr, access, auth);
 
+            // finally do change call last (must be done last because else we cannot
+            // change admin password
+            maincall(parser, oxusr, ctx, usr, auth);
+            
             displayChangedMessage(successtext, ctx.getId(), parser);
             sysexit(0);
         } catch (final Exception e) {

@@ -1,3 +1,20 @@
+* 2007-10-11 - dennis.sieben@open-xchange.com
+ 
+  - Bugfix ID#9777 no adequate description of parameters
+ 
+* 2007-10-10 - choeger@open-xchange.com
+
+ - Bugfix ID#9767 [L3] changing admin password with disabled authentication does not work
+
+* 2007-10-08 - manuel.kraft@open-xchange.com
+
+ - Bugfix ID#9616 Deleted users are not removed from Global Addressbook in Outlook
+
+* 2007-09-26 - choeger@open-xchange.com
+
+  - Bugfix ID#9582 osgi/config.ini does not exist on upgrading the
+  open-xchange-admin
+
 * 2007-09-20 - dennis.sieben@open-xchange.com
 
   - Bugfix ID#9592 Language is not in the output of listuser --csv CLT
