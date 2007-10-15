@@ -213,8 +213,11 @@ public class AdminCache {
      * @param adminCredentials the adminCredentials to set
      */
     public final void setAdminCredentials(Context ctx, String authMech, Credentials adminCredentials) {
-        this.adminCredentialsCache.put(ctx.getId(),adminCredentials);
-        this.adminAuthMechCache.put(ctx.getId(),authMech);
+        // only set if authentication is enabled
+        if( !this.contextAuthenticationDisabled ) {
+            this.adminCredentialsCache.put(ctx.getId(),adminCredentials);
+            this.adminAuthMechCache.put(ctx.getId(),authMech);
+        }
     }
 
     /**
