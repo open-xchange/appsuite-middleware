@@ -85,11 +85,10 @@ import com.openexchange.groupware.IDGenerator;
 import com.openexchange.groupware.RdbUserConfigurationStorage;
 import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.contact.Contacts;
-import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.contexts.ContextException;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
-import com.openexchange.imap.UserSettingMail;
+import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
 
