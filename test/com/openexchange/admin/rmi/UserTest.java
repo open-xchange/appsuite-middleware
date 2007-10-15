@@ -1360,7 +1360,6 @@ public class UserTest extends AbstractTest {
         assertEquals("FaxHome not equal", a.getFax_home(), b.getFax_home());
         assertEquals("FaxOther not equal", a.getFax_other(), b.getFax_other());
         assertEquals("ImapServer not equal", a.getImapServer(), b.getImapServer());
-        assertEquals("ImapPort not equal", a.getImapPort(), b.getImapPort());
         assertEquals("InstantMessenger not equal", a.getInstant_messenger1(), b.getInstant_messenger1());
         assertEquals("InstantMessenger2 not equal", a.getInstant_messenger2(), b.getInstant_messenger2());
         assertEquals("IpPhone not equal", a.getTelephone_ip(), b.getTelephone_ip());
@@ -1530,7 +1529,7 @@ public class UserTest extends AbstractTest {
         retval.setFax_business(usr.getFax_business()+change_suffix);
         retval.setFax_home(usr.getFax_home()+change_suffix);
         retval.setFax_other(usr.getFax_other()+change_suffix);
-        retval.setImapServer(usr.getImapServer() + change_suffix + ":" + usr.getImapPort());
+        retval.setImapServer(usr.getImapServer()+change_suffix);
         retval.setInstant_messenger1(usr.getInstant_messenger1()+change_suffix);
         retval.setInstant_messenger2(usr.getInstant_messenger2()+change_suffix);
         retval.setTelephone_ip(usr.getTelephone_ip()+change_suffix);

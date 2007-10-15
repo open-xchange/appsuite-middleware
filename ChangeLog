@@ -1,7 +1,3 @@
-* 2007-10-12 - dennis.sieben@open-xchange.com
- 
-  - Bugfix ID#9786 L3: IMAP port is stripped from commandline
- 
 * 2007-10-11 - dennis.sieben@open-xchange.com
  
   - Bugfix ID#9777 no adequate description of parameters
