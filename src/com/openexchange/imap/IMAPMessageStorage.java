@@ -469,7 +469,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 			 * Get ( & fetch) new messages
 			 */
 			final long start = System.currentTimeMillis();
-			final Message[] msgs = IMAPCommandsCollection.getNewMessages(imapFolder, fields, sortField, order, session
+			final Message[] msgs = IMAPCommandsCollection.getUnreadMessages(imapFolder, fields, sortField, order, session
 					.getLocale());
 			MailInterfaceImpl.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 			if (msgs == null) {

@@ -405,10 +405,23 @@ public final class IMAPCommandsCollection {
 	private static final String COMMAND_SEARCH = "SEARCH";
 
 	/**
-	 * Determines all messages in given folder which have the \UNSEEN flag set
-	 * and sorts them to criteria "REVERSE DATE"
+	 * Determines all unseen messages in specified folder and sorts them
+	 * according to given sort criteria
+	 * 
+	 * @param folder
+	 *            The IMAP folder
+	 * @param fields
+	 *            The desired fields
+	 * @param sortField
+	 *            The sort-by field
+	 * @param orderDir
+	 *            The order (ASC or DESC)
+	 * @param locale
+	 *            The user's locale
+	 * @return All unseen messages in specified folder
+	 * @throws MessagingException
 	 */
-	public static Message[] getNewMessages(final IMAPFolder folder, final MailListField[] fields,
+	public static Message[] getUnreadMessages(final IMAPFolder folder, final MailListField[] fields,
 			final MailListField sortField, final OrderDirection orderDir, final Locale locale)
 			throws MessagingException {
 		final IMAPFolder imapFolder = folder;
@@ -431,6 +444,7 @@ public final class IMAPCommandsCollection {
 						if (response.isOK()) {
 							for (int i = 0, len = r.length - 1; i < len; i++) {
 								if (!(r[i] instanceof IMAPResponse)) {
+									r[i] = null;
 									continue;
 								}
 								final IMAPResponse ir = (IMAPResponse) r[i];

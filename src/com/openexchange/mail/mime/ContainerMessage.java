@@ -685,6 +685,12 @@ public final class ContainerMessage extends Message implements Serializable {
 		return store.getFolder(folderFullname);
 	}
 
+	/**
+	 * {@link DummyAddress} - extends {@link InternetAddress}
+	 *
+	 * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+	 *
+	 */
 	public static final class DummyAddress extends InternetAddress {
 
 		private static final long serialVersionUID = -3276144799717449603L;

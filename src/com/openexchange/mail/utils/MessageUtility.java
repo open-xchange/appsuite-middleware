@@ -127,20 +127,21 @@ public final class MessageUtility {
 	 * @return The properly quoted personal for building an internet address
 	 *         according to RFC 822 syntax
 	 */
-	public static String quotePersonal(final String personal) {
+	public static String quotePersonal(final String personalArg) {
 		try {
+			final String personal = MimeUtility.encodeWord(personalArg);
 			if (PAT_QUOTED.matcher(personal).matches() ? false : PAT_QUOTABLE_CHAR.matcher(personal).find()) {
 				/*
 				 * Quote
 				 */
-				return new StringBuilder(personal.length()).append('"').append(
-						MimeUtility.encodeWord(personal.replaceAll("\"", "\\\\\\\""))).append('"').toString();
+				return new StringBuilder(personal.length() + 2).append('"').append(
+						personal.replaceAll("\"", "\\\\\\\"")).append('"').toString();
 			}
-			return MimeUtility.encodeWord(personal);
+			return personal;
 		} catch (final UnsupportedEncodingException e) {
 			LOG.error("Unsupported encoding in a message detected and monitored.", e);
 			mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
-			return personal;
+			return personalArg;
 		}
 	}
 
