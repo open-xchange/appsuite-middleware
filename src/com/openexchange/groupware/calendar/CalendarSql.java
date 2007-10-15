@@ -58,6 +58,7 @@ import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.data.Check;
 import com.openexchange.groupware.search.AppointmentSearchObject;
 import com.openexchange.server.DBPool;
 import com.openexchange.server.DBPoolingException;
@@ -429,6 +430,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                         OXFolderAccess ofa = new OXFolderAccess(sessionobject.getContext());
                         EffectivePermission oclp = ofa.getFolderPermission(cdao.getEffectiveFolderId(), sessionobject.getUserObject().getId(), sessionobject.getUserConfiguration());
                         if (oclp.canCreateObjects()) {
+                        	CalendarCommonCollection.checkForInvalidCharacters(cdao);
                             cdao.setActionFolder(cdao.getParentFolderID());
                             ConflictHandler ch = new ConflictHandler(cdao, sessionobject, true);
                             CalendarDataObject conflicts[] = ch.getConflicts();
@@ -515,6 +517,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                 CalendarOperation co = new CalendarOperation();
                 CalendarDataObject edao = cimp.loadObjectForUpdate(cdao, sessionobject, inFolder);
                 if (!co.prepareUpdateAction(cdao, edao, sessionobject.getUserObject().getId(), inFolder, sessionobject.getUserObject().getTimeZone())) {
+                	CalendarCommonCollection.checkForInvalidCharacters(cdao);
                     CalendarDataObject conflict_dao = CalendarCommonCollection.fillFieldsForConflictQuery(cdao, edao, false);
                     ConflictHandler ch = new ConflictHandler(conflict_dao, sessionobject, false);
                     CalendarDataObject conflicts[] = ch.getConflicts();
@@ -791,6 +794,13 @@ public class CalendarSql implements AppointmentSQLInterface {
     
     public void setUserConfirmation(int oid, int uid, int confirm, String confirm_message) throws OXException {
         if (sessionobject != null) {
+        	if (confirm_message != null) {
+        		String error = null;
+        		error = Check.containsInvalidChars(confirm_message);
+        		if (error != null) {
+        			throw new OXCalendarException(OXCalendarException.Code.INVALID_CHARACTER, "Confirm Message", error);
+        		}
+        	}
             cimp.setUserConfirmation(oid, uid, confirm, confirm_message, sessionobject);
         } else {
             throw new OXCalendarException(OXCalendarException.Code.ERROR_SESSIONOBJECT_IS_NULL);

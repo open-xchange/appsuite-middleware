@@ -69,6 +69,7 @@ import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.ReminderSQLInterface;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.IDGenerator;
 import com.openexchange.groupware.Types;
@@ -3068,7 +3069,13 @@ class CalendarMySQL implements CalendarSqlImp {
         ao.setObjectID(oid);
         ao.setParentFolderID(fid);
         CalendarCommonCollection.triggerEvent(so, CalendarOperation.DELETE, ao);
-        deleteAllReminderEntries(edao, oid, fid, so, readcon);
+        //deleteAllReminderEntries(edao, oid, fid, so, readcon);
+        final ReminderSQLInterface rsql = new ReminderHandler(so.getContext());
+        try {
+        	rsql.deleteReminder(oid, Types.APPOINTMENT);
+        } catch(AbstractOXException oxe) {
+        	// this is wanted if Code = Code.NOT_FOUND
+        }
     }
     
     
