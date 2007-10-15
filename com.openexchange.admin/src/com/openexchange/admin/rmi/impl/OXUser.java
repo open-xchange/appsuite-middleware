@@ -164,6 +164,10 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             throw e;
         }
     }
+    
+    private boolean usernameIsChangeable(){
+        return this.cache.getProperties().getUserProp(AdminProperties.User.USERNAME_CHANGEABLE, false);
+    }
 
     public void change(final Context ctx, final User usrdata, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         try {
@@ -185,7 +189,41 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                  log.error("Requested context " + ctx.getId() + " does not exist!", invalidCredentialsException);
                  throw invalidCredentialsException;
             }
-
+            
+            // ############## DO SOME CHECKS ONLY IF "USERNAME_CHANGEABLE" FEATURE IS ACTIVATED ##########
+            // the ID of the user MUST be set if USERNAME_CHANGEABLE=true, 
+            // else we cannot identify the correct user
+            if(usernameIsChangeable() && usrdata.getId() == null){
+                throw new InvalidDataException("Cannot resolve user!User id not sent but changing username is enabled!");
+            }
+            // do username checks if feature is active
+            if(usernameIsChangeable() && usrdata.getId() !=null && usrdata.getName()!=null){
+                // check new username 
+                if (prop.getUserProp(AdminProperties.User.CHECK_NOT_ALLOWED_CHARS, true)) {
+                    validateUserName(usrdata.getName());
+                }
+            
+                if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, true)) {
+                    usrdata.setName(usrdata.getName().toLowerCase());
+                }
+                
+                String current_name = tool.getUsernameByUserID(ctx, usrdata.getId()); // check for current name                 
+                if(!current_name.equals(usrdata.getName())){
+                    if (tool.existsUserName(ctx, usrdata.getName())) {
+                        throw new InvalidDataException("User " + usrdata.getName() + " already exists in this context");
+                    }
+                }
+                
+            }
+            // ########################## END OF FEATURE CHECKS ########################
+            
+            // ### IF USERNAME_CHANGEABLE=false BUT the client sents the username , show an error as of bug #9663 #####
+            if(!usernameIsChangeable() && usrdata.getName()!=null){
+                throw new InvalidDataException("Changing username is disabled!");
+            }
+            // #########################################################################
+            
+            
             setIdOrGetIDFromNameAndIdObject(ctx, usrdata);
 
             usrdata.testMandatoryCreateFieldsNull();
