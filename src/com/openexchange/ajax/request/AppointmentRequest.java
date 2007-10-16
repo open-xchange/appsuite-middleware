@@ -451,9 +451,11 @@ public class AppointmentRequest {
 			final int folderId = DataParser.checkInt(jObject, AJAXServlet.PARAMETER_FOLDERID);
 			
 			objectIdMap.put(Integer.valueOf(objectId), Integer.valueOf(folderId));
-			
-			if (jObject.has(CalendarFields.RECURRENCE_POSITION)) {
-				final int recurrencePosition = DataParser.checkInt(jObject, CalendarFields.RECURRENCE_POSITION);
+            
+            // This parameter name has to changed in the http api. For this release the json interface checks 
+            // the value "pos" in later releases the interface has to check the old value "recurrence_position"
+			if (jObject.has(CalendarFields.OLD_RECURRENCE_POSITION)) {
+				final int recurrencePosition = DataParser.checkInt(jObject, CalendarFields.OLD_RECURRENCE_POSITION);
 				ArrayList<Integer> recurrencePosList = null;
 				if (recurrencePositionMap.containsKey(Integer.valueOf(objectId))) {
 					recurrencePosList = recurrencePositionMap.get(Integer.valueOf(objectId));
