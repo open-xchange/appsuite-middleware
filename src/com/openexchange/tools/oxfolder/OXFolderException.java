@@ -196,12 +196,12 @@ public class OXFolderException extends OXException {
 		ONLY_PRIVATE_FOLDER_OWNER_ADMIN("Only folder owner may hold admin permission on a private folder",
 				Category.CODE_ERROR, 17),
 		/**
-		 * No admin permission found
+		 * Administration rights required. In the Rights tab add at least one user with administration rights.
 		 * <p>
 		 * No entity has been defined as admin
 		 * </p>
 		 */
-		NO_FOLDER_ADMIN("No admin permission found", Category.CODE_ERROR, 18),
+		NO_FOLDER_ADMIN("Administration rights required. In the Rights tab add at least one user with administration rights.", Category.CODE_ERROR, 18),
 		/**
 		 * Invalid object ID %s
 		 * <p>

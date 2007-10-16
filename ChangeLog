@@ -3,6 +3,8 @@
  - Bugfix #9501: Proper setting of IMAP timeout values in properties
  - Bugfix #9700: Applying sent order direction when displaying unread
    messages
+ - Bugfix #9733: Changed error message if no admin has been specified when
+   either creating or updating a folder's permissions
 
 * 2007-10-12 - marcus.klein@open-xchange.com
 
