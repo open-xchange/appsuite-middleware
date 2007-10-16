@@ -85,6 +85,7 @@ import javax.mail.search.RecipientStringTerm;
 import javax.mail.search.SearchTerm;
 import javax.mail.search.SubjectTerm;
 
+import com.openexchange.api2.MailInterfaceImpl;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.mail.JSONMessageObject;
 import com.openexchange.groupware.container.mail.MessageCacheObject.DummyAddress;
@@ -331,17 +332,17 @@ public class IMAPUtils {
 
 	private static final String COMMAND_SEARCH_UNSEEN = "SEARCH UNSEEN";
 
-	private static final String COMMAND_SORT = "SORT";
+	//private static final String COMMAND_SORT = "SORT";
 
-	private static final String COMMAND_SORT_REVERSE_DATE_PEFIX = "SORT (REVERSE DATE) UTF-8 ";
+	//private static final String COMMAND_SORT_REVERSE_DATE_PEFIX = "SORT (REVERSE DATE) UTF-8 ";
 
 	private static final int MAX_IMAP_CMD_LENGTH = 16384;
 
 	/**
 	 * Determines all messages in given folder which have the \UNSEEN flag set
-	 * and sorts them to criteria "REVERSE DATE"
+	 * and sorts them given criteria
 	 */
-	public static Message[] getNewMessages(final IMAPFolder folder, final int[] fields) throws MessagingException {
+	public static Message[] getNewMessages(final IMAPFolder folder, final int[] fields, final int sortCol, final int order) throws MessagingException {
 		final IMAPFolder imapFolder = folder;
 		final Message[] val = (Message[]) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 			/*
@@ -404,12 +405,12 @@ public class IMAPUtils {
 				final Message[] newMsgs;
 				try {
 					newMsgs = new FetchIMAPCommand(folder, newMsgSeqNums, fields,
-							JSONMessageObject.FIELD_RECEIVED_DATE, false, false).doCommand();
+							sortCol, false, false).doCommand();
 				} catch (final MessagingException e) {
 					throw new ProtocolException(e.getLocalizedMessage());
 				}
 				final List<Message> msgList = Arrays.asList(newMsgs);
-				Collections.sort(msgList, getComparator(JSONMessageObject.FIELD_RECEIVED_DATE, false, Locale.ENGLISH));
+				Collections.sort(msgList, getComparator(sortCol, order == MailInterfaceImpl.ORDER_DESC, Locale.ENGLISH));
 				return msgList.toArray(newMsgs);
 			}
 		});
