@@ -1,3 +1,12 @@
+* 2007-10-16 - sebastian.kauss@open-xchange.com
+
+ - Bugfix #9219: Reminder popups: Appointment reminder has wrong text
+ - Bugfix #9416: Calendar: Concurrency issue with Reminder
+                 confirmations - Bad error message
+ - Bugfix #9492: Calendar: Reminder appears again and again
+ - Bugfix #9514: Calendar: Reminder for recurring appointments shown
+                 more than once for each occurence
+
 * 2007-10-15 - martin.kauss@open-xchange.com
 
  - Fixed bug #6335. Some characters caused problems while building XML.
