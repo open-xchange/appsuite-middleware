@@ -69,7 +69,7 @@ public class ReminderObject extends SystemObject {
 	private Date date = null;
 	
 	private int objectId = 0;
-	
+    
 	private String targetId = null;
 	
 	private int module = 0;
@@ -79,6 +79,8 @@ public class ReminderObject extends SystemObject {
 	private String folder = null;
 	
 	private boolean isRecurrenceAppointment = false;
+    
+    private int recurrencePosition = 0;
 	
 	public ReminderObject() {
 		
@@ -170,4 +172,12 @@ public class ReminderObject extends SystemObject {
 	public Date getLastModified() {
 		return lastModified;
 	}
+    
+    public void setRecurrencePosition(final int recurrencePosition) {
+        this.recurrencePosition = recurrencePosition;
+    }
+    
+    public int getRecurrencePosition() {
+        return recurrencePosition;
+    }
 }
