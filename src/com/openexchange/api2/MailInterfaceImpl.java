@@ -559,11 +559,11 @@ public class MailInterfaceImpl implements MailInterface {
 			LOG.error(e.getMessage(), e);
 		}
 		if (IMAPProperties.getImapTimeout() > 0) {
-			IMAP_PROPS.put(PROP_MAIL_IMAP_TIMEOUT, Integer.valueOf(IMAPProperties.getImapTimeout()));
+			IMAP_PROPS.put(PROP_MAIL_IMAP_TIMEOUT, String.valueOf(IMAPProperties.getImapTimeout()));
 		}
 		if (IMAPProperties.getImapConnectionTimeout() > 0) {
 			IMAP_PROPS
-					.put(PROP_MAIL_IMAP_CONNECTIONTIMEOUT, Integer.valueOf(IMAPProperties.getImapConnectionTimeout()));
+					.put(PROP_MAIL_IMAP_CONNECTIONTIMEOUT, String.valueOf(IMAPProperties.getImapConnectionTimeout()));
 		}
 		IMAP_PROPS.put(PROP_MAIL_SMTP_AUTH, IMAPProperties.isSmtpAuth() ? STR_TRUE : STR_FALSE);
 	}
@@ -1494,7 +1494,7 @@ public class MailInterfaceImpl implements MailInterface {
 			boolean fetchMessages = true;
 			if (IMAPProperties.isCapabilitiesLoaded() && IMAPProperties.getImapCapabilities().hasSort()) {
 				final long start = System.currentTimeMillis();
-				newMsgs = IMAPUtils.getNewMessages(imapCon.getImapFolder(), fields);
+				newMsgs = IMAPUtils.getNewMessages(imapCon.getImapFolder(), fields, sortCol, order);
 				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 				tryAgain = false;
 				fetchMessages = false;
