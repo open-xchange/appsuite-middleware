@@ -59,5 +59,12 @@ public class DeleteVersionActionTest extends AbstractInfostoreActionTest {
 			assertResult("SELECT 1 FROM infostore_document WHERE cid = ? and infostore_id = ? and version_number = ?", getContext().getContextId(), doc.getId(), doc.getVersion());
 		}
 	}
+	
+	// Bug 9061
+	public void testPossibleToTryMoreThanOnce() throws Exception {
+		UndoableAction action = getAction();
+		action.perform();
+		action.perform();
+	}
 
 }
