@@ -46,4 +46,11 @@ public class DeleteDocumentActionTest extends AbstractInfostoreActionTest {
 			assertResult("SELECT 1 FROM infostore WHERE cid = ? and id = ?", getContext().getContextId(), doc.getId());
 		}
 	}
+	
+	// Bug 9061
+	public void testPossibleToTryMoreThanOnce() throws Exception {
+		UndoableAction action = getAction();
+		action.perform();
+		action.perform();
+	}
 }
