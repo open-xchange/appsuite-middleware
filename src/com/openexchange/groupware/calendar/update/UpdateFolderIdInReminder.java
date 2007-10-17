@@ -85,7 +85,7 @@ public class UpdateFolderIdInReminder implements UpdateTask {
     private static final String FIND_WITHOUT_REFERENCE = "SELECT reminder.object_id, reminder.cid, reminder.userid, reminder.folder FROM reminder LEFT JOIN prg_dates ON reminder.cid = prg_dates.cid AND reminder.target_id = prg_dates.intfield01 where reminder.module = 1 AND intfield01 is NULL";
     
     public int addedWithVersion() {
-        return 9;
+        return 10;
     }
     
     public int getPriority() {
