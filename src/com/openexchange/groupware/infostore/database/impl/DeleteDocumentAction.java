@@ -116,8 +116,17 @@ public class DeleteDocumentAction extends AbstractDocumentListAction {
 		if(getDocuments().size() == 0) {
 			return;
 		}
-		final UpdateBlock[] updates = new UpdateBlock[getDocuments().size()+1];
+		final UpdateBlock[] updates = new UpdateBlock[getDocuments().size()+2];
 		int i = 0;
+		updates[i++] = new Update(getQueryCatalog().getDelete(InfostoreQueryCatalog.Table.DEL_INFOSTORE, getDocuments())){
+
+			@Override
+			public void fillStatement() throws SQLException {
+				stmt.setInt(1, getContext().getContextId());
+			}
+			
+		};
+
 		for(final DocumentMetadata doc : getDocuments()) {
 			updates[i++] = new Update(getQueryCatalog().getDelDocumentInsert()) {
 
