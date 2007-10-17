@@ -117,8 +117,15 @@ public class DeleteVersionAction extends AbstractDocumentListAction {
 		if(getDocuments().size()==0) {
 			return;
 		}
-		final UpdateBlock[] updates = new UpdateBlock[getDocuments().size()+1];
-		int i = 0;
+		final UpdateBlock[] updates = new UpdateBlock[getDocuments().size()+2];
+		updates[0] = new Update(getQueryCatalog().getVersionDelete(InfostoreQueryCatalog.Table.DEL_INFOSTORE_DOCUMENT,getDocuments())) {
+			@Override
+			public void fillStatement() throws SQLException {
+				stmt.setInt(1, getContext().getContextId());
+			}
+		};
+		
+		int i = 1;
 		for(final DocumentMetadata doc : getDocuments()) {
 			updates[i++] = new Update(getQueryCatalog().getDelVersionInsert()) {
 

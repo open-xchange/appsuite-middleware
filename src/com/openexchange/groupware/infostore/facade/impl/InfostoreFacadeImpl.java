@@ -650,11 +650,13 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 		return nonNull.toArray(new Metadata[nonNull.size()]);
 	}
 
-	@OXThrowsMultiple(category = { Category.USER_INPUT, Category.USER_INPUT }, desc = {
+	@OXThrowsMultiple(category = { Category.USER_INPUT, Category.USER_INPUT, Category.USER_INPUT }, desc = {
 			"The user doesn't have the required write permissions to update the infoitem.",
-			"The user isn't allowed to create objects in the target folder when moving an infoitem." }, exceptionId = {
-			3, 4 }, msg = { "You are not allowed to update this item.",
-			"You are not allowed to create objects in the target folder." })
+			"The user isn't allowed to create objects in the target folder when moving an infoitem.",
+			"Need delete permissions in original folder to move an item"}, exceptionId = {
+			3, 4, 21 }, msg = { "You are not allowed to update this item.",
+			"You are not allowed to create objects in the target folder.",
+			"You are not allowed to delete objects in the source folder, so this document cannot be mo Tved."})
 	public void saveDocument(final DocumentMetadata document, final InputStream data,
 			final long sequenceNumber, Metadata[] modifiedColumns,
 			final SessionObject sessionObj) throws OXException {
@@ -678,11 +680,19 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 				if (!(isperm.canCreateObjects())) {
 					throw EXCEPTIONS.create(4);
 				}
+				
+				if(!infoPerm.canDeleteObject()) {
+					throw EXCEPTIONS.create(21);
+				}
 			}
 			
 			final DocumentMetadata oldDocument = checkWriteLock(document.getId(), sessionObj);
+			
+			
+			
 			document.setLastModified(new Date());
 			document.setModifiedBy(sessionObj.getUserObject().getId());
+			
 			
 			VALIDATION.validate(document);
 			

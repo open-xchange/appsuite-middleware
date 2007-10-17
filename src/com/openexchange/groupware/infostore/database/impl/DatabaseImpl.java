@@ -1570,6 +1570,9 @@ public class DatabaseImpl extends DBService {
 			final List<DocumentMetadata> documents = new ArrayList<DocumentMetadata>();
 			
 			SearchIterator iter = com.openexchange.groupware.infostore.database.impl.InfostoreIterator.allDocumentsWhere(" infostore.cid = "+ctx.getContextId(), Metadata.VALUES_ARRAY, getProvider(), ctx);
+			if(!iter.hasNext()) {
+				return; // Nothing to delete
+			}
 			while(iter.hasNext()) {
 				final DocumentMetadata metadata = (DocumentMetadata)iter.next();
 				documents.add(metadata);
@@ -1609,12 +1612,16 @@ public class DatabaseImpl extends DBService {
 				}
 			}
 						
-			final FileStorage fs = getFileStorage(ctx);
+			FileStorage fs = null;
 
 //			Remove the files. No rolling back from this point onward
 			
 			for(final DocumentMetadata version : versions) {
+				
 				if(null != version.getFilestoreLocation()) {
+					if(fs == null) {
+						fs = getFileStorage(ctx);
+					}
 					fs.deleteFile(version.getFilestoreLocation());
 				}
 			}
@@ -1701,12 +1708,15 @@ public class DatabaseImpl extends DBService {
 				
 			}
 						
-			final FileStorage fs = getFileStorage(ctx);
+			FileStorage fs = null;
 
 //			Remove the files. No rolling back from this point onward
 			
 			for(final DocumentMetadata version : versions) {
 				if(null != version.getFilestoreLocation()) {
+					if(null == fs) {
+						fs = getFileStorage(ctx);
+					}
 					fs.deleteFile(version.getFilestoreLocation());
 				}
 			}
