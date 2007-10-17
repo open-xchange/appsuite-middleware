@@ -77,7 +77,7 @@ public class UpdateFolderIdInReminder implements UpdateTask {
     private static final String DELETE_ZERO_REMINDERS = "DELETE from reminder WHERE module = " + Types.APPOINTMENT + " AND folder < 1";
     private static final String FIND_REMINDERS = "SELECT target_id, cid, userid, folder from reminder WHERE module = ?";
     private static final String FIND_CURRENT_USER_FOLDER = "SELECT pfid from prg_dates_members WHERE cid = ? AND member_uid = ? AND object_id = ?";
-    private static final String UPDATE_REMINDER = "UPDATE reminder SET folder = ? WHERE target_id = ? AND cid = ? AND user_id = ? and module = ?";
+    private static final String UPDATE_REMINDER = "UPDATE reminder SET folder = ? WHERE target_id = ? AND cid = ? AND userid = ? and module = ?";
     private static final String DELETE_REMINDER = "DELETE FROM reminder WHERE cid = ? AND target_id = ? AND userid = ? AND module = ?";
     private static final String CHECK_MAIN_OBJECT = "SELECT intfield01 FROM prg_dates WHERE cid = ? AND intfield01 = ?";
     private static final String DELETE_ENTRIES_MEMBERS = "DELETE FROM prg_dates_members WHERE cid = ? AND object_id = ?";
