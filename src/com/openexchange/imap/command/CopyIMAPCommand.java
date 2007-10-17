@@ -105,7 +105,7 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
 	 *            whether UIDs are sequential or not
 	 * @param fast -
 	 *            <code>true</code> to ignore corresponding UIDs of copied
-	 *            messages and {@link #getReturnVal()} returns <code>null</code>
+	 *            messages and return value is empty (array of length zero)
 	 */
 	public CopyIMAPCommand(final IMAPFolder imapFolder, final long[] uids, final String destFolderName,
 			final boolean isSequential, final boolean fast) {

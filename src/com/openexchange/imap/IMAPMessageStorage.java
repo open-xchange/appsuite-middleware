@@ -469,8 +469,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 			 * Get ( & fetch) new messages
 			 */
 			final long start = System.currentTimeMillis();
-			final Message[] msgs = IMAPCommandsCollection.getUnreadMessages(imapFolder, fields, sortField, order, session
-					.getLocale());
+			final Message[] msgs = IMAPCommandsCollection.getUnreadMessages(imapFolder, fields, sortField, order,
+					session.getLocale());
 			MailInterfaceImpl.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 			if (msgs == null) {
 				return EMPTY_RETVAL;
@@ -642,7 +642,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 				LOG.info(new StringBuilder(100).append(msgUIDs.length).append(" messages copied in ").append(
 						(System.currentTimeMillis() - start)).append("msec").toString());
 			}
-			if (!fast && (res == null || res.length == 0 || res[0] == -1)) {
+			if (!fast && (res == null || noUIDsAssigned(res, msgUIDs.length))) {
 				/*
 				 * Invalid UIDs
 				 */
@@ -1049,6 +1049,12 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 			index = createThreadSortMessages(currentNode.getChilds(), level + 1, msgs, index);
 		}
 		return index;
+	}
+
+	private static boolean noUIDsAssigned(final long[] arr, final int expectedLen) {
+		final long[] tmp = new long[expectedLen];
+		Arrays.fill(tmp, -1L);
+		return Arrays.equals(arr, tmp);
 	}
 
 	/**
