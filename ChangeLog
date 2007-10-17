@@ -1,3 +1,9 @@
+* 2007-10-17 - francisco.laguna@open-xchange.com
+ - Bugfix 9061: Delete entries in del_infostore_documents to overwrite them
+ - Bugfix 9555: Pay attention to delete permissions when moving infoitem
+ - Bugfix 9741: Don't create filestore unless necessary
+ 
+
 * 2007-10-16 - sebastian.kauss@open-xchange.com
 
  - Bugfix #9219: Reminder popups: Appointment reminder has wrong text

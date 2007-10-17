@@ -81,8 +81,9 @@ public abstract class FileStorage {
     /**
      * Class implementing the file storage.
      */
-    private static Class< ? extends FileStorage> impl;
-
+    public static Class< ? extends FileStorage> impl;
+    // public so it can be overidden in tests
+    
     /**
      * Default number of files or directories per directory.
      */
