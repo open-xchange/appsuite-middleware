@@ -165,7 +165,7 @@ public class EventQueue extends TimerTask {
 				callEvent(queue2);
 			}
 		} catch (Exception exc) {
-			LOG.error("run", exc);
+			LOG.error(exc.getMessage(), exc);
 		}
 	}
 	

@@ -201,6 +201,8 @@ public class AJPv13Watcher {
 								"    Total=").append(size).append(delimStr).toString());
 					}
 				}
+			} catch (final Exception e) {
+			    LOG.error(e.getMessage(), e);
 			} finally {
 				LOCK.unlock();
 			}

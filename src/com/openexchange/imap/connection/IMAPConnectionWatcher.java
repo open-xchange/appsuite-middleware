@@ -164,6 +164,8 @@ public final class IMAPConnectionWatcher {
 				}
 			} catch (final IMAPPropertyException e) {
 				LOG.error(e.getLocalizedMessage(), e);
+			} catch (final Exception e) {
+			    LOG.error(e.getMessage(), e);
 			}
 		}
 	}
