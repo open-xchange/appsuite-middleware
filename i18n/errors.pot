@@ -112,6 +112,11 @@ msgstr ""
 msgid "Action type not supported : %d"
 msgstr ""
 
+msgid ""
+"Administration rights required. In the Rights tab add at least one user with "
+"administration rights."
+msgstr ""
+
 msgid "An I/O error occurred: %1$s."
 msgstr ""
 
@@ -229,6 +234,9 @@ msgid "Attribute \"%s\" is not set in FolderObject instance %s in context %s"
 msgstr ""
 
 msgid "Bad character in field %2$s. Error: %1$s"
+msgstr ""
+
+msgid "Bad character in field %s. Error: %s"
 msgstr ""
 
 msgid "Bad value %s in parameter %s"
@@ -676,6 +684,9 @@ msgid ""
 msgstr ""
 
 msgid "Either key %s or key %s is mssing in message's JSON representation"
+msgstr ""
+
+msgid "Eliminating the FileStorage failed."
 msgstr ""
 
 msgid "Empty SEND_BODY_CHUNK package MUST NOT be sent"
@@ -1264,9 +1275,6 @@ msgid "No SpellCheckConfig loaded."
 msgstr ""
 
 msgid "No VCard to import found."
-msgstr ""
-
-msgid "No admin permission found"
 msgstr ""
 
 msgid "No admin user found in context %s"
@@ -2177,6 +2185,11 @@ msgid "You are not allowed to create tasks in folder %1$s (%2$d)."
 msgstr ""
 
 msgid "You are not allowed to delegate tasks."
+msgstr ""
+
+msgid ""
+"You are not allowed to delete objects in the source folder, so this document "
+"cannot be mo Tved."
 msgstr ""
 
 msgid "You are not allowed to delete the task."
