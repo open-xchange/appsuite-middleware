@@ -299,8 +299,13 @@
             <pathelement location="${lib.dir}/ox_server.jar"/>
             <pathelement location="${java.class.path}" />
         </path>
-        <apply executable="${java_apt}" dir="${basedir}" parallel="true" verbose="true" relative="false">
-            <arg value="-classpath" />
+        <exec executable="find" dir="${basedir}" output="${tmp.dir}/sources.txt">
+            <arg value="${src.dir}"/>
+            <arg value="-name"/>
+            <arg value="*.java"/>
+        </exec>
+        <exec executable="${java_apt}" dir="${basedir}">
+            <arg value="-cp" />
             <arg pathref="apt.classpath" />
             <arg value="-d" />
             <arg value="${build.dir}" />
@@ -308,10 +313,9 @@
             <arg value="-factory" />
             <arg value="com.openexchange.tools.exceptions.OXExceptionAnnotationFactory" />
             <arg value="-nocompile" />
-            <fileset dir="${src.dir}">
-                <include name="**/*.java"/>
-            </fileset>
-        </apply>
+            <arg value="@${tmp.dir}/sources.txt"/>
+        </exec>
+        <delete file="${tmp.dir}/sources.txt"/>
         <!--
         <java classname="com.sun.tools.apt.Main">
             <classpath>
