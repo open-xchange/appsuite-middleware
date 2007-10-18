@@ -151,6 +151,9 @@ public interface ContactSql {
 	public void iFtrashDistributionList(boolean delete, int id, int cid, Statement smt) throws SQLException;
 	public void iFtrashLinks(boolean delete,Statement smt, int id, int cid) throws SQLException;
 	public void iFtrashImage(boolean delete, Statement smt, int id, int cid) throws SQLException;
+	public void iFgiveUserContacToAdmin(final Statement smt, final int oid, final SessionObject so, final int admin_fid) throws SQLException;
 	public void iFtrashAllUserContacts(boolean delete, Statement del, int cid, int oid, int uid, ResultSet rs, SessionObject so) throws SQLException;
 	public void iFtrashAllUserContactsDeletedEntries(Statement del, int cid, int uid, SessionObject so) throws SQLException;
+	public void iFtrashAllUserContactsDeletedEntriesFromAdmin(Statement del, int cid, int uid) throws SQLException;
+	
 }
