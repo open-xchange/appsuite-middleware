@@ -57,6 +57,9 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.server.ServerTimer;
@@ -94,6 +97,7 @@ public final class AJAXUploadFile {
 		 */
 		@Override
 		public void run() {
+		    try {
 			if (file != null && !file.isDeleted() && !file.isBlockedForTimer()
 					&& ((System.currentTimeMillis() - file.getLastAccess()) >= IDLE_TIME_MILLIS)) {
 				ajaxUploadFiles.remove(id);
@@ -109,6 +113,9 @@ public final class AJAXUploadFile {
 				this.cancel();
 				ServerTimer.getTimer().purge();
 			}
+		    } catch (Exception e) {
+		        LOG.error(e.getMessage(), e);
+		    }
 		}
 
 	}

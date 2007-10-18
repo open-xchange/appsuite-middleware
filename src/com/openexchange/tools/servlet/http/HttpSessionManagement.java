@@ -184,6 +184,8 @@ public class HttpSessionManagement {
 						iter.remove();
 					}
 				}
+			} catch (final Exception e) {
+			    LOG.error(e.getMessage(), e);
 			} finally {
 				LOCK_REMOVER.unlock();
 				acquireLock = false;

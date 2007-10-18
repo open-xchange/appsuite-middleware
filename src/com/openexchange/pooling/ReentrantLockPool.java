@@ -565,9 +565,13 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
     private final TimerTask cleaner = new TimerTask() {
         @Override
         public void run() {
-            final Thread thread = new Thread(ReentrantLockPool.this);
-            thread.setName("PoolCleaner");
-            thread.start();
+            try {
+                final Thread thread = new Thread(ReentrantLockPool.this);
+                thread.setName("PoolCleaner");
+                thread.start();
+            } catch (Exception e) {
+                LOG.error(e.getMessage(), e);
+            }
         }
     };
 

@@ -172,9 +172,13 @@ public final class Pools implements Runnable {
     private static TimerTask cleaner = new TimerTask() {
         @Override
         public void run() {
-            final Thread thread = new Thread(new Pools());
-            thread.setName("PoolsCleaner");
-            thread.start();
+            try {
+                final Thread thread = new Thread(new Pools());
+                thread.setName("PoolsCleaner");
+                thread.start();
+            } catch (Exception e) {
+                LOG.error(e.getMessage(), e);
+            }
         }
     };
 

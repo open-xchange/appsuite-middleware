@@ -420,7 +420,6 @@ public class SessionHandler extends TimerTask {
                 LOG.debug("session timeout for id: " + iterator.next());
             }
         }
-
         prependContainer();
         MonitoringInfo.decrementNumberOfActiveSessions(sessionList.getLast().size());
         removeContainer();
@@ -459,7 +458,11 @@ public class SessionHandler extends TimerTask {
     }
 
     public void run() {
-        cleanUp();
+        try {
+            cleanUp();
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+        }
     }
 
     protected static class SessionIterator implements Iterator {

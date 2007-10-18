@@ -152,7 +152,7 @@ public class PushMulticastRequestTimer extends TimerTask {
 			final DatagramPacket datagramPacket = new DatagramPacket(MULTICAST_REQUEST_BYTES, MULTICAST_REQUEST_BYTES.length, multicastAddress, multicastPort);
 			multicastSocket.send(datagramPacket);
 		} catch (Exception exc) {
-			LOG.error("run", exc);
+			LOG.error(exc.getMessage(), exc);
 		}
 	}
 }

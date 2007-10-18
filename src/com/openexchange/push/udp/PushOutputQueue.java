@@ -194,7 +194,7 @@ public class PushOutputQueue extends TimerTask {
 				action(queue2);
 			}
 		} catch (final Exception exc) {
-			LOG.error("run", exc);
+			LOG.error(exc.getMessage(), exc);
 		}
 	}
 	
