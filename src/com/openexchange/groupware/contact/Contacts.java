@@ -95,6 +95,7 @@ import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.search.ContactSearchObject;
+import com.openexchange.groupware.tasks.SQL;
 import com.openexchange.server.DBPool;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.server.EffectivePermission;
@@ -219,8 +220,8 @@ public class Contacts implements DeleteListener {
 
 		final int origHeigh = bi.getHeight();
 		final int origWidth = bi.getWidth();
-		final int origType = bi.getType();
-
+		int origType = bi.getType();
+				
 		if (LOG.isDebugEnabled()) {
 			final StringBuilder logi = new StringBuilder(100).append("OUR IMAGE -> mime=").append(mime).append(" / type=").append(origType).append(" / width=").append(origWidth).append(" / height=").append(origHeigh).append(" / byte[] size=").append(img.length);
 			LOG.debug(logi.toString());
@@ -291,7 +292,11 @@ public class Contacts implements DeleteListener {
 					LOG.debug(new StringBuilder("IMAGE SCALE Picture Heigh "+origHeigh+" Width "+origWidth+" -> Scale down to Heigh "+sHd+" Width "+sWd+" Ratio "+ratio));
 				}
 			}
-		
+			
+			if (origType == 0){
+				origType = BufferedImage.TYPE_INT_RGB;
+			}
+			
 			final BufferedImage scaledBufferedImage = new BufferedImage(sWd, sHd, origType);
 			final Graphics2D g2d = scaledBufferedImage.createGraphics();
 			g2d.drawImage(bi, 0, 0, sWd, sHd, null);
@@ -1077,6 +1082,10 @@ public class Contacts implements DeleteListener {
 		return co;
 	}
 	
+	public static void deleteContact(final int id, final int cid, final Connection writecon) throws OXException {
+		deleteContact(id, cid, writecon, false);
+	}
+	
 	@OXThrows(
 			category=Category.CODE_ERROR,
 			desc="27",
@@ -1084,7 +1093,7 @@ public class Contacts implements DeleteListener {
 			msg="Unable to delete Contact: Context %1$d Contact %2$d"
 	)
 	
-	public static void deleteContact(final int id, final int cid, final Connection writecon) throws OXException {
+	public static void deleteContact(final int id, final int cid, final Connection writecon, boolean admin_delete) throws OXException {
 		Statement del = null;
 		try{
 			del = writecon.createStatement();
@@ -1093,8 +1102,12 @@ public class Contacts implements DeleteListener {
 			trashImage(id, cid, writecon, false);
 			
 			final ContactSql cs = new ContactMySql(null);
-			cs.iFdeleteContact(id,cid,del);
 			
+			if (admin_delete == false){
+				cs.iFdeleteContact(id,cid,del);
+			} else if (admin_delete == true){
+				cs.iFtrashAllUserContactsDeletedEntriesFromAdmin(del,cid,id);
+			}
 		} catch (final SQLException se) {
 			throw EXCEPTIONS.create(27,se,Integer.valueOf(cid),Integer.valueOf(id));
 			//throw new OXException("ERROR DURING CONTACT DELETE cid="+cid+" oid="+id, se);
@@ -2501,6 +2514,7 @@ public class Contacts implements DeleteListener {
 			int oid = 0;
 			int created_from = 0;
 			boolean delete =false;
+			int pflag = 0;
 
 			//writecon.setAutoCommit(false);	
 			
@@ -2511,34 +2525,76 @@ public class Contacts implements DeleteListener {
 				oid = rs.getInt(1);
 				fid = rs.getInt(5);
 				created_from = rs.getInt(6);
+				pflag = rs.getInt(7);
+				if (rs.wasNull())
+					pflag = 0;
 				
-				if (FolderCacheManager.isEnabled()){
-					contactFolder = FolderCacheManager.getInstance().getFolderObject(fid, true, so.getContext(), readcon);
-				}else{
-					contactFolder = FolderObject.loadFolderObjectFromDB(fid, so.getContext(), readcon);
-				}
-				if (contactFolder.getModule() != FolderObject.CONTACT) {
-					throw EXCEPTIONS.create(52, Integer.valueOf(so.getContext().getContextId()), Integer.valueOf(fid), Integer.valueOf(uid));
-					//throw new OXException("YOU TRY TO DELETE FROM A NON CONTACT FOLDER! cid="+so.getContext().getContextId()+" uid="+uid);
-				}
-				if (contactFolder.getType() == FolderObject.PRIVATE){
+				boolean folder_error = false;
+				
+				try{
+					if (FolderCacheManager.isEnabled()){
+						contactFolder = FolderCacheManager.getInstance().getFolderObject(fid, true, so.getContext(), readcon);
+					}else{
+						contactFolder = FolderObject.loadFolderObjectFromDB(fid, so.getContext(), readcon);
+					}
+					if (contactFolder.getModule() != FolderObject.CONTACT) {
+						throw EXCEPTIONS.create(52, Integer.valueOf(so.getContext().getContextId()), Integer.valueOf(fid), Integer.valueOf(uid));
+						//throw new OXException("YOU TRY TO DELETE FROM A NON CONTACT FOLDER! cid="+so.getContext().getContextId()+" uid="+uid);
+					}
+					if (contactFolder.getType() == FolderObject.PRIVATE){
+						delete = true;
+					}
+				} catch (Exception oe){
+					if (LOG.isWarnEnabled()){
+						LOG.warn("WARNING: During the delete process 'delete all contacts from one user', a contacts was found who has no folder."
+								+"This contact will be modified and can be found in the administrator address book." 
+								+"Context "+so.getContext().getContextId()+" Folder "+fid+" User"+uid+" Contact"+oid);
+					}
+					folder_error = true;
 					delete = true;
 				}
-				cs.iFtrashAllUserContacts(delete,del,so.getContext().getContextId(),oid,uid,rs,so);
 				
-				final ContactObject co = new ContactObject();
-				co.setCreatedBy(created_from);
-				co.setParentFolderID(fid);
-				co.setObjectID(oid);
-				ec.delete(co);
+				if (folder_error && pflag == 0){
+					try{
+						int mailadmin = so.getContext().getMailadmin();
+						final OXFolderAccess oxfs = new OXFolderAccess(readcon, so.getContext());
+						FolderObject xx = oxfs.getDefaultFolder(mailadmin, FolderObject.CONTACT);
+						
+						int admin_folder = xx.getObjectID();
+						cs.iFgiveUserContacToAdmin(del,oid,so, admin_folder);
+					} catch (Exception oxee){
+						oxee.printStackTrace();
+						LOG.error("ERROR: It was not possible to move this contact (without paren folder) to the admin address book!."
+								+"This contact will be deleted." 
+								+"Context "+so.getContext().getContextId()+" Folder "+fid+" User"+uid+" Contact"+oid);
+						
+						folder_error = false;
+					}
+				} else if (folder_error && pflag != 0){
+					folder_error = false;
+				}
 				
+				if (!folder_error){
+					cs.iFtrashAllUserContacts(delete,del,so.getContext().getContextId(),oid,uid,rs,so);
+					final ContactObject co = new ContactObject();
+					co.setCreatedBy(created_from);
+					co.setParentFolderID(fid);
+					co.setObjectID(oid);
+					ec.delete(co);
+				}
 			}
-			cs.iFtrashAllUserContactsDeletedEntries(del,so.getContext().getContextId(),uid,so);
+			if (uid == so.getContext().getMailadmin()){
+				cs.iFtrashAllUserContactsDeletedEntriesFromAdmin(del,so.getContext().getContextId(),uid);	
+			} else {
+				cs.iFtrashAllUserContactsDeletedEntries(del,so.getContext().getContextId(),uid,so);				
+			}
 			//writecon.commit();
 		} catch (final InvalidStateException ox) {
 			throw EXCEPTIONS.create(57, Integer.valueOf(so.getContext().getContextId()),Integer.valueOf(uid));
+			/*
 		} catch (final OXException ox) {
 			throw ox;
+			*/
 		} catch (final SQLException se) {
 			/*
 			try {
@@ -2624,7 +2680,7 @@ public class Contacts implements DeleteListener {
 	
 	private static void checkCharacters(ContactObject co) throws OXException {
 		for (int i=0;i < 650;i++){
-			if (mapping[i] != null) { 
+			if (mapping[i] != null && i != ContactObject.IMAGE1) { 
 				String error = null;
 				try{
 					error = Check.containsInvalidChars(mapping[i].getValueAsString(co));

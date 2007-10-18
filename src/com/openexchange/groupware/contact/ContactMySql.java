@@ -902,7 +902,14 @@ public class ContactMySql implements ContactSql {
 			LOG.debug(tmp.toString());
 		}
 		smt.execute(tmp.toString());
-
+	}
+	
+	public void iFgiveUserContacToAdmin(final Statement smt, final int oid, final SessionObject so, final int admin_fid) throws SQLException {
+		final StringBuilder tmp = new StringBuilder("UPDATE prg_contacts SET changed_from = "+so.getContext().getMailadmin()+", created_from = "+so.getContext().getMailadmin()+", changing_date = "+System.currentTimeMillis()+", fid = "+admin_fid+" WHERE intfield01 = "+oid+" and cid = "+so.getContext().getContextId());
+		if (LOG.isDebugEnabled()) {
+			LOG.debug(tmp.toString());
+		}
+		smt.execute(tmp.toString());
 	}
 	
 	public void iFtrashImage(final boolean delete, final Statement smt, final int id, final int cid) throws SQLException {
@@ -1006,6 +1013,13 @@ public class ContactMySql implements ContactSql {
 	
 	public void iFtrashAllUserContactsDeletedEntries(final Statement del, final int cid, final int uid, final SessionObject so) throws SQLException {
 		final StringBuilder tmp = new StringBuilder("UPDATE del_contacts SET changed_from = "+so.getContext().getMailadmin()+", created_from = "+so.getContext().getMailadmin()+", changing_date = "+System.currentTimeMillis()+" WHERE created_from = "+uid+" and cid = "+cid);
+		if (LOG.isDebugEnabled()) {
+			LOG.debug(tmp.toString());
+		}
+		del.execute(tmp.toString());
+	}
+	public void iFtrashAllUserContactsDeletedEntriesFromAdmin(final Statement del, final int cid, final int uid) throws SQLException {
+		final StringBuilder tmp = new StringBuilder("DELETE FROM del_contacts WHERE created_from = "+uid+" and cid = "+cid);
 		if (LOG.isDebugEnabled()) {
 			LOG.debug(tmp.toString());
 		}
