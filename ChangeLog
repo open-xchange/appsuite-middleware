@@ -1,5 +1,11 @@
 * 2007-10-18 - marcus.klein@open-xchange.com
 
+ - Bugfix #9800: Remaining entries inside del table after context delete
+ - Bugfix #9581: Delete of all user contacts during the delete user process
+   was not working if an unbound contacts occured.
+
+* 2007-10-18 - marcus.klein@open-xchange.com
+
  - Bugfix #9807: Catching all exceptions now in AJAX super servlet to prevent
    closed AJP sockets.
  - Bugfix #9804: Added mapping for charset x-unknown to US-ASCII.
