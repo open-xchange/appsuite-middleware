@@ -65,8 +65,7 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import sun.rmi.runtime.Log;
 
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -80,17 +79,7 @@ import com.openexchange.admin.storage.sqlStorage.OXUserSQLStorage;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.SHACrypt;
 import com.openexchange.admin.tools.UnixCrypt;
-import com.openexchange.api2.OXException;
-import com.openexchange.groupware.IDGenerator;
-import com.openexchange.groupware.RdbUserConfigurationStorage;
-import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.contact.Contacts;
-import com.openexchange.groupware.contexts.ContextException;
-import com.openexchange.groupware.delete.DeleteEvent;
-import com.openexchange.groupware.delete.DeleteFailedException;
-import com.openexchange.mail.usersetting.UserSettingMail;
-import com.openexchange.server.DBPoolingException;
-import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
 
 /**
  * @author cutmasta
@@ -1581,6 +1570,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 // delete from user_setting_admin if user is mailadmin
                 final OXToolStorageInterface tools = OXToolStorageInterface
                         .getInstance();
+                boolean is_admin = false;
                 if (user_id == tools.getAdminForContext(ctx, write_ox_con)) {
                     stmt = write_ox_con
                             .prepareStatement("DELETE FROM user_setting_admin WHERE cid = ? AND user = ?");
@@ -1588,6 +1578,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     stmt.setInt(2, user_id);
                     stmt.executeUpdate();
                     stmt.close();
+                    is_admin = true;
                 }
                 
                 // when table ready, enable this
@@ -1606,9 +1597,14 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 
                 if (log.isDebugEnabled()) {
                     log.debug("Delete user " + user_id + "(" + ctx.getId() + ") from contacts via groupware API ...");
-                }                
-                Contacts.deleteContact(getContactIdByUserId(ctx.getId(),user_id,write_ox_con), ctx.getId(), write_ox_con);
-
+                }             
+                
+                if(is_admin){
+                    Contacts.deleteContact(getContactIdByUserId(ctx.getId(),user_id,write_ox_con), ctx.getId(), write_ox_con,true);
+                }else{
+                    Contacts.deleteContact(getContactIdByUserId(ctx.getId(),user_id,write_ox_con), ctx.getId(), write_ox_con,false);
+                }
+                
             }
         } catch (final DeleteFailedException dex) {
             log.error("Delete Error", dex);
@@ -1688,6 +1684,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 // delete from user_setting_admin if user is mailadmin
                 final OXToolStorageInterface tools = OXToolStorageInterface
                 .getInstance();
+                boolean is_admin = false;
                 if (user_id == tools.getAdminForContext(ctx, write_ox_con)) {
                     stmt = write_ox_con
                     .prepareStatement("DELETE FROM user_setting_admin WHERE cid = ? AND user = ?");
@@ -1695,6 +1692,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     stmt.setInt(2, user_id);
                     stmt.executeUpdate();
                     stmt.close();
+                    is_admin = true;
                 }
                 
                 // when table ready, enable this
@@ -1713,8 +1711,12 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     log.debug("Delete user " + user_id + "(" + ctx.getId() + ") from contacts via groupware API ...");
                 }
                 
-                Contacts.deleteContact(getContactIdByUserId(ctx.getId(),user_id,write_ox_con), ctx.getId(), write_ox_con);
-//                              
+                if(is_admin){
+                    Contacts.deleteContact(getContactIdByUserId(ctx.getId(),user_id,write_ox_con), ctx.getId(), write_ox_con,true);
+                }else{
+                    Contacts.deleteContact(getContactIdByUserId(ctx.getId(),user_id,write_ox_con), ctx.getId(), write_ox_con,false);
+                }
+                
             }
         } catch (final DeleteFailedException dex) {
             log.error("Delete Error", dex);
