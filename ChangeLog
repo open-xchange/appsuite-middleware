@@ -1,6 +1,7 @@
 * 2007-10-18 - manuel.kraft@open-xchange.com
  
   - Bugfix ID#9800 Unable to delete Contact: Context 30 Contact 2 on delete context
+  - Bugfix ID#9857 Not closed SQL Statement when deleting user
 
 * 2007-10-12 - dennis.sieben@open-xchange.com
  
