@@ -63,7 +63,7 @@ Infostore=@oxgroupwaresysconfdir@/infostore.properties
 # the attachment subsystem.
 Attachment=@oxgroupwaresysconfdir@/attachment.properties
 
-# Location of the notfication.properties configuration file. This file 
+# Location of the notification.properties configuration file. This file 
 # configures certain assumptions about sending notifications
 Notification=@oxgroupwaresysconfdir@/notification.properties
 
