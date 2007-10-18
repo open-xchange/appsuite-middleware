@@ -2,6 +2,7 @@
 
  - Bugfix #9807: Catching all exceptions now in AJAX super servlet to prevent
    closed AJP sockets.
+ - Bugfix #9804: Added mapping for charset x-unknown to US-ASCII.
 
 * 2007-10-17 - martin.kauss@open-xchange.com
 
