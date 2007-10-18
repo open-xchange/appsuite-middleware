@@ -1,3 +1,7 @@
+* 2007-10-18 - manuel.kraft@open-xchange.com
+
+   - Bugfix ID#9860 Unable to delete Contact: Context 30 Contact 2 on delete context
+
 * 2007-10-15 - manuel.kraft@open-xchange.com
  
   - Bugfix ID#9806 [HEAD] username can't be changed
