@@ -1,3 +1,20 @@
+* 2007-10-18 - martin.kauss@open-xchange.com
+
+ - Fixed bug #9808. An update task failed because of a wrong where
+   clause. This has been fixed.
+   
+ - Fixed bug #6335. Some characters caused problems while building XML.
+   Now we are throwing an error in the calendar if those characters are
+   found.
+   
+ - Fixed bug #7471. If an existing exception is deleted with the
+   update method and the field delete_exception then this exeption
+   was just marked as deleted exception without a real delete.
+   This has been fixed.
+
+ - Fixed bug #9599. By adding a new users the confirm message was
+   deleted for existing users. This has been fixed.      
+
 * 2007-10-17 - francisco.laguna@open-xchange.com
  - Bugfix 9061: Delete entries in del_infostore_documents to overwrite them
  - Bugfix 9555: Pay attention to delete permissions when moving infoitem
