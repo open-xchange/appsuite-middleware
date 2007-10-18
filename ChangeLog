@@ -4,6 +4,7 @@
    closed AJP sockets.
  - Bugfix #9804: Added mapping for charset x-unknown to US-ASCII.
  - Bugfix #9793: Added fallbacks if some UIDPLUS extensions are not supported.
+ - Bugfix #9812: Fixed with fix for bug #9793.
 
 * 2007-10-18 - martin.kauss@open-xchange.com
 
