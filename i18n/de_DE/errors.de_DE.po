@@ -987,6 +987,9 @@
 # Antje Faber, 2007.
 # Antje Faber, 2007.
 # Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER.
 # Antje Faber, 2007.
 #
@@ -994,7 +997,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2007-09-20 10:46+0200\n"
+"PO-Revision-Date: 2007-10-18 12:41+0200\n"
 "Last-Translator: Antje Faber\n"
 "Language-Team:  <de@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -1028,9 +1031,6 @@ msgstr "Es trat ein DBPool-Fehler auf: %s"
 msgid "A DBPooling error occurred"
 msgstr "Es trat ein DBPooling-Fehler auf"
 
-msgid "A JSON error occured: %s"
-msgstr "Es trat ein JSON-Fehler auf: %s"
-
 msgid "A JSON error occurred: %s"
 msgstr "Es trat ein JSON-Fehler auf: %s"
 
@@ -1063,9 +1063,6 @@ msgstr "Eine Gruppe darf keine Administrationsrechte für einen privaten Ordner 
 
 msgid "A messaging error occurred: %s"
 msgstr "Es trat ein Messaging-Fehler auf: %s"
-
-msgid "A part's content could not be read from message %s in mail folder %s"
-msgstr "Ein Teil der Nachricht %s im E-Mail-Ordner %s konnte nicht gelesen werden."
 
 msgid ""
 "A part's content could not be read from message %s in mail folder %s of user "
@@ -1112,11 +1109,10 @@ msgstr "Aktion %s wird nicht von %s unterstützt"
 msgid "Action type not supported : %d"
 msgstr "Aktionstyp wird nicht unterstützt : %d"
 
-msgid "An I/O error occured"
-msgstr "Es trat ein E/A-Fehler auf"
-
-msgid "An I/O error occured: %s"
-msgstr "Es trat ein E/A-Fehler auf: %s"
+msgid ""
+"Administration rights required. In the Rights tab add at least one user with "
+"administration rights."
+msgstr "Administrationsrechte benötigt. Fügen Sie im Reiter Rechte mindestens einen Benutzer mit Administrationsrechten hinzu."
 
 msgid "An I/O error occurred: %1$s."
 msgstr "Es trat ein E/A-Fehler auf: %1$s."
@@ -1256,6 +1252,9 @@ msgstr ""
 
 msgid "Bad character in field %2$s. Error: %1$s"
 msgstr "Ungültiges Zeichen in Feld %2$s. Fehler: %1$s"
+
+msgid "Bad character in field %s. Error: %s"
+msgstr "Ungültiges Zeichen in Feld %s. Fehler: %s"
 
 msgid "Bad value %s in parameter %s"
 msgstr "Fehlerhafter Wert %s in Parameter %s"
@@ -1752,6 +1751,9 @@ msgstr ""
 msgid "Either key %s or key %s is mssing in message's JSON representation"
 msgstr "Entweder Key %s oder Key %s fehlt in der JSON-Darstellung der Nachricht"
 
+msgid "Eliminating the FileStorage failed."
+msgstr "Löschen des FileStorage fehlgeschlagen"
+
 msgid "Empty SEND_BODY_CHUNK package MUST NOT be sent"
 msgstr "Leeres SEND_BODY_CHUNK-Paket DARF NICHT geschickt werden"
 
@@ -1883,9 +1885,6 @@ msgid ""
 msgstr ""
 "An InfoStore-Einträge angehängte Dateien müssen eindeutige Namen haben. "
 "Dateiname: %s. Das andere Dokument mit diesem Dateinamen ist %s."
-
-msgid "Flag %s could not be changed due to following reason: %s"
-msgstr "Flag %s konnte aus folgendem Grund nicht geändert werden: %s"
 
 msgid ""
 "Flag %s could not be changed in message %d in folder %s due to following "
@@ -2066,9 +2065,6 @@ msgstr "IMAP-Befehl übersteigt max. erlaubte Länge von %d: %s"
 msgid "IMAP default folder %s could not be created"
 msgstr "Anlegen des IMAP-Standardordners %s fehlgeschlagen"
 
-msgid "IMAP folder read-only check failed"
-msgstr "Nur-Leseprüfung für IMAP-Ordner fehlgeschlagen"
-
 msgid "IMAP property error: %s"
 msgstr "Fehler in IMAP-Eigenschaften: %s"
 
@@ -2181,9 +2177,6 @@ msgstr "Ungültiger Ganzzahlenwert %s"
 msgid "Invalid method on an expunged message: %s"
 msgstr "Ungültige Methode für gelöschte Nachricht: %s"
 
-msgid "Invalid multipart content. Number of enclosed contents is 0"
-msgstr "Ungültige Nachricht. Multipart-Inhalte sind 0. "
-
 msgid "Invalid object ID %s"
 msgstr "Ungültige Objekt-ID %s"
 
@@ -2213,13 +2206,6 @@ msgstr "Anmelden ist im Moment nicht möglich. Bitte später erneut versuchen."
 
 msgid ""
 "Mail folder \"%s\" could not be created (maybe due to insufficient "
-"permission on parent folder %s)"
-msgstr ""
-"E-Mail-Ordner \"%s\" konnte nicht angelegt werden (evtl. aufgrund fehlender "
-"Berechtigungen im übergeordneten Ordner %s)"
-
-msgid ""
-"Mail folder \"%s\" could not be created (maybe due to insufficient "
 "permission on parental folder %s)"
 msgstr ""
 "E-Mail-Ordner \"%s\" konnte nicht angelegt werden (evtl. aufgrund fehlender "
@@ -2234,9 +2220,6 @@ msgid "Mail folder cannot be created. Name must not contain character '%s'"
 msgstr ""
 "E-Mail-Ordner kann nicht erstellt werden. Der Name darf nicht das Zeichen '%"
 "s' enthalten."
-
-msgid "Mail folder could not be found: %s"
-msgstr "E-Mail-Ordner konnte nicht gefunden werden: %s"
 
 msgid "Mail settings for user %s could not be found in context %d"
 msgstr ""
@@ -2267,9 +2250,6 @@ msgstr "Nachricht ist zu groß und konnte nicht gesendet werden"
 msgid "Message could not be sent to the following recipients: %s"
 msgstr "Senden der Nachricht an folgende Empfänger fehlgeschlagen: %s"
 
-msgid "Message field %s cannot be handled"
-msgstr "Nachrichtenfeld %s kann nicht verarbeitet werden"
-
 msgid ""
 "Message has been successfully sent, but a copy was not placed in your sent "
 "folder due to exceeded quota."
@@ -2284,9 +2264,6 @@ msgstr ""
 
 msgid "Message(s) %s could not be found in folder %s"
 msgstr "Nachricht(en) %s nicht im Ordner %s gefunden"
-
-msgid "Messaging error: %s"
-msgstr "Messaging-Fehler: %s"
 
 msgid "Method not supported: %s"
 msgstr "Methode nicht unterstützt: %s"
@@ -2328,9 +2305,6 @@ msgstr "Fehlender Key %s in der JSON-Darstellung der Nachricht"
 
 msgid "Missing parameter %s"
 msgstr "Fehlender Parameter %s"
-
-msgid "Missing parameter in mail connection: %s"
-msgstr "Fehlender Parameter in E-Mail-Verbindung: %s"
 
 msgid "Missing parameter: %s"
 msgstr "Fehlender Parameter: %s"
@@ -2451,25 +2425,13 @@ msgstr "Kein SpellCheckConfig geladen."
 msgid "No VCard to import found."
 msgstr "Kein VCard für Import gefunden."
 
-msgid "No access to mail folder %s"
-msgstr "Kein Zugriff auf E-Mail-Ordner %s"
-
-msgid "No admin permission found"
-msgstr "Kein Adminrecht gefunden"
-
 msgid "No admin user found in context %s"
 msgstr "Kein Adminbenutzer im Kontext %s gefunden"
-
-msgid "No administer access to mail folder %s"
-msgstr "Kein Administrationszugriff auf E-Mail-Ordner %s"
 
 msgid "No administer permission specified by user %s for folder %s"
 msgstr ""
 "Vom Benutzer %s wurden keine Adminstrationsrechte für den Ordner %s "
 "festgelegt."
-
-msgid "No administer permission specified for folder %s"
-msgstr "Keine Administrationsrechte für Ordner %s festgelegt"
 
 msgid "No attachment was found with id %s in message %s"
 msgstr "Keine Anlage mit der ID %s in Nachricht %s gefunden"
@@ -2481,12 +2443,6 @@ msgid "No changes found. No update requiered. Context %1$d Object %2$d"
 msgstr ""
 "Keine Änderungen gefunden. Keine Updates erforderlich. Kontext %1$d Objekt %2"
 "$d"
-
-msgid "No connection available to access mailbox"
-msgstr "Keine Verbindung zum Zugriff auf Mailbox verfügbar"
-
-msgid "No create access to mail folder %s"
-msgstr "Kein Anlegezugriff auf E-Mail-Ordner %s"
 
 msgid ""
 "No data provided from web server: input stream returned \"-1\" while reading "
@@ -2501,29 +2457,14 @@ msgstr "Kein Standard-Constructor für servlet class \"%s\" angegeben"
 msgid "No default folder could be found in module %s for user %s in context %s"
 msgstr "Kein Standardordner gefunden im Modul %s für Benutzer %s im Kontext %s"
 
-msgid "No delete access to mail folder %s"
-msgstr "Kein Löschzugriff auf den E-Mail-Ordner %s"
-
 msgid "No dictionary could be found for language: %1$s."
 msgstr "Kein Wörterbuch gefunden für Sprache: %1$s."
 
 msgid "No folder permission."
 msgstr "Keine Ordnerrechte"
 
-msgid "No insert access to mail folder %s"
-msgstr "Kein Einfügezugriff auf E-Mail-Ordner %s"
-
-msgid "No keep-seen access to mail folder %s"
-msgstr "Kein keep-seen-Zugriff auf E-Mail-Ordner %s"
-
-msgid "No lookup access to mail folder %s"
-msgstr "Kein Lookup-Zugriff auf E-Mail-Ordner %s"
-
 msgid "No permission for modul: %s."
 msgstr "Keine Berechtigung für Modul: %s."
-
-msgid "No read access to mail folder %s"
-msgstr "Kein Lesezugriff auf den E-Mail-Ordner %s"
 
 msgid "No route to host: server (%s) cannot be reached"
 msgstr "Keine Verbindung zum Host: Kein Zugriff auf Server (%s)"
@@ -2543,9 +2484,6 @@ msgid "No subfolder creation underneath shared folder %s in context %s"
 msgstr ""
 "Es kann kein Unterordner unterhalb des freigegebenen Ordners %s im Kontext %"
 "s erstellt werden"
-
-msgid "No write access to IMAP folder %s"
-msgstr "Kein Schreibzugriff auf IMAP-Ordner %s"
 
 msgid ""
 "Not allowed to change parent id of folder %s through an update call. Use "
@@ -2858,15 +2796,6 @@ msgstr ""
 msgid "The attribute %1$s has been truncated."
 msgstr "Das Attribut %1$s wurde abgeschnitten"
 
-msgid ""
-"The composed rights could not be applied to new folder %s due to missing "
-"administer right in its initial rights specified by IMAP server. However, "
-"the folder has been created."
-msgstr ""
-"Aufgrund fehlender Adminstrationsrechte in den vom IMAP-Server "
-"spezifizierten initialen Rechten konnten die erstellten Rechte nicht auf den "
-"neuen Ordner %s angewendet werden. Der Ordner wurde jedoch erstellt."
-
 msgid "The contact you requested is not valid."
 msgstr "Der von Ihnen angeforderte Kontakt ist ungültig."
 
@@ -2997,16 +2926,6 @@ msgstr "Kein(e) Empfänger für neue Nachricht angegeben"
 msgid ""
 "There was an issue in authenticating your E-Mail password. This may be "
 "because of a recent password change. To continue please logout now and then "
-"log back in with your most current password. (server=%s | user=%s)"
-msgstr ""
-"Bei der Authentifizierung Ihres E-Mail-Passwords trat ein Problem auf. Dies "
-"mag an einer kürzlichen Passwortänderung liegen. Zum Fortfahren melden Sie "
-"sich bitte ab und melden Sie sich dann mit Ihrem aktuellen Passwort wieder "
-"an. (Server=%s | Benutzer=%s)"
-
-msgid ""
-"There was an issue in authenticating your E-Mail password. This may be "
-"because of a recent password change. To continue please logout now and then "
 "log back in with your most current password. (server=%s, user=%s, context=%s)"
 msgstr ""
 "Bei der Authentifizierung Ihres E-Mail-Passwords trat ein Problem auf. Dies "
@@ -3078,7 +2997,8 @@ msgid ""
 "Unable to compare contacts for update. Make sure you have entered a valid "
 "display name. Contect %1$d Object %2$d"
 msgstr ""
-"Kontakte für die Aktualisierung können nicht verglichen werden. Stellen Sie sicher, dass Sie einen gültigen Anzeigenamen eingetragen haben. Kontext %1$d "
+"Kontakte für die Aktualisierung können nicht verglichen werden. Stellen Sie "
+"sicher, dass Sie einen gültigen Anzeigenamen eingetragen haben. Kontext %1$d "
 "Objekt %2$d"
 
 msgid ""
@@ -3310,9 +3230,6 @@ msgstr ""
 "Unerwarteter Status zum Löschen eines virtuellen Termins (Ausnahme). "
 "Benutzer-ID:Objekt-ID:Position %d:%d:%d"
 
-msgid "Unknow serach field: %s"
-msgstr "Unbekanntes Suchfeld: %s"
-
 msgid "Unknown (IMAP) folder open mode %d"
 msgstr "Unbekannter (IMAP) Ordner öffnen-Modus %d"
 
@@ -3336,9 +3253,6 @@ msgstr "Unbekannter Lösch-Event-Typ: %d"
 
 msgid "Unknown field: %d"
 msgstr "Unbekanntes Feld: %d"
-
-msgid "Unknown folder open mode %d"
-msgstr "Unbekannter Ordner öffnen-Modus %d"
 
 msgid "Unknown format: %s"
 msgstr "Unbekanntes Format: %s"
@@ -3560,12 +3474,6 @@ msgstr "Falscher Dateispeicher %1$d für Kontext %2$d. Benötigter Dateispeicher
 msgid "Wrong message %s header: %s"
 msgstr "Ungültiger Nachrichten %s Header: %s"
 
-msgid "Wrong message header: %s"
-msgstr "Ungültiger Nachrichten-Header: %s"
-
-msgid "Wrong or missing login data to access server %s."
-msgstr "Ungültige oder fehlende Login-Daten für den Server-Zugriff %s"
-
 msgid "Wrong or missing login data to access server %s: User: %s | Context: %s"
 msgstr ""
 "Ungültige oder fehlende Login-Daten für den Server-Zugriff %s: Benutzer: %s "
@@ -3579,6 +3487,11 @@ msgstr "Sie haben keine Berechtigung, Aufgaben im Ordner %1$s (%2$d) anzulegen."
 
 msgid "You are not allowed to delegate tasks."
 msgstr "Sie haben keine Berechtigung zum Delegieren von Aufgaben."
+
+msgid ""
+"You are not allowed to delete objects in the source folder, so this document "
+"cannot be mo Tved."
+msgstr "Sie haben keine Berechtigung, Objekte im Quellordner zu löschen. Das Dokument kann somit nicht verschoben werden."
 
 msgid "You are not allowed to delete the task."
 msgstr "Sie haben keine Berechtigung zum Löschen der Aufgabe."
@@ -3641,7 +3554,9 @@ msgstr "Sie können die Sperre für dieses Dokument nicht aufheben."
 msgid ""
 "You do not have permission to create objects in this folder. %1$d in context "
 "%2$d with user %3$d"
-msgstr "Sie haben nicht die entsprechenden Berechtigungen zum Erstellen von Objekten in diesem Ordner %1$d im Kontext %2$d als Benutzer %3$d"
+msgstr ""
+"Sie haben nicht die entsprechenden Berechtigungen zum Erstellen von Objekten "
+"in diesem Ordner %1$d im Kontext %2$d als Benutzer %3$d"
 
 msgid ""
 "You do not have permission to delete objects from folder %1$d in context %2"
