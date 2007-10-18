@@ -89,6 +89,7 @@ import com.openexchange.groupware.contexts.ContextImpl;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.reminder.ReminderObject;
+import com.openexchange.groupware.reminder.ReminderException.Code;
 import com.openexchange.groupware.search.AppointmentSearchObject;
 import com.openexchange.server.DBPool;
 import com.openexchange.server.DBPoolingException;
@@ -3075,6 +3076,9 @@ class CalendarMySQL implements CalendarSqlImp {
         	rsql.deleteReminder(oid, Types.APPOINTMENT);
         } catch(AbstractOXException oxe) {
         	// this is wanted if Code = Code.NOT_FOUND
+        	if (oxe.getDetailNumber() != Code.NOT_FOUND.getDetailNumber()) {
+        		throw new OXException(oxe);
+        	}
         }
     }
     
