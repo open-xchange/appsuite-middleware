@@ -70,6 +70,9 @@ import com.sun.mail.imap.protocol.IMAPResponse;
  * 
  */
 public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
+	
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(CopyIMAPCommand.class);
 
 	private static final long[] DEFAULT_RETVAL = new long[0];
 
@@ -215,6 +218,8 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
 		}
 	}
 
+	private static final String COPYUID = "copyuid";
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -227,7 +232,7 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
 		} else if (!(response instanceof IMAPResponse)) {
 			return;
 		}
-		final IMAPResponse ir = (IMAPResponse) response;
+		final String resp = ((IMAPResponse) response).toString().toLowerCase();
 		/**
 		 * Parse response:
 		 * 
@@ -238,32 +243,38 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
 		 * * 45 EXISTS..* 2 RECENT..A4 OK [COPYUID 1185853191 7,32 44:45] Completed
 		 * </pre>
 		 */
-		UIDCopyResponse copyResp = null;
-		int atomCount = 0;
-		String next = null;
-		while ((next = ir.readAtom()) != null) {
-			switch (++atomCount) {
-			case 1:
-				if (!"[COPYUID".equals(next)) {
-					return;
+		int pos = -1;
+		if ((pos = resp.indexOf(COPYUID)) != -1) {
+			final COPYUIDResponse copyuidResp = new COPYUIDResponse();
+			/*
+			 * Find next starting ATOM in IMAP response
+			 */
+			pos += COPYUID.length();
+			while (Character.isWhitespace(resp.charAt(pos))) {
+				pos++;
+			}
+			/*
+			 * Split by ATOMs
+			 */
+			final String[] sa = resp.substring(pos).split("\\s+");
+			if (sa.length >= 3) {
+				for (int i = 1; i < sa.length; i++) {
+					if (i == 1) {
+						copyuidResp.src = sa[i];
+					} else if (i == 2) {
+						copyuidResp.dest = sa[i].replaceFirst("\\]", "");
+					}
 				}
-				copyResp = new UIDCopyResponse();
-				break;
-			case 3:
-				copyResp.src = next;
-				break;
-			case 4:
-				copyResp.dest = next.replaceFirst("\\]", "");
-				break;
-			default:
-				break;
+				copyuidResp.fillResponse(uids, retval);
+			} else {
+				LOG.error(new StringBuilder(128).append("Invalid COPYUID response: ").append(resp).toString());
+			}
+			proceed = false;
+		} else {
+			if (LOG.isWarnEnabled()) {
+				LOG.warn(new StringBuilder(128).append("Missing COPYUID response code: ").append(resp).toString());
 			}
 		}
-		if (copyResp == null) {
-			return;
-		}
-		copyResp.fillResponse(uids, retval);
-		proceed = false;
 	}
 
 	/*
@@ -286,13 +297,13 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
 		return false;
 	}
 
-	private static final class UIDCopyResponse {
+	private static final class COPYUIDResponse {
 
 		private String src;
 
 		private String dest;
 
-		public UIDCopyResponse() {
+		public COPYUIDResponse() {
 			super();
 		}
 

@@ -3,6 +3,7 @@
  - Bugfix #9807: Catching all exceptions now in AJAX super servlet to prevent
    closed AJP sockets.
  - Bugfix #9804: Added mapping for charset x-unknown to US-ASCII.
+ - Bugfix #9793: Added fallbacks if some UIDPLUS extensions are not supported.
 
 * 2007-10-18 - martin.kauss@open-xchange.com
 

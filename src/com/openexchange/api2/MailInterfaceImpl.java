@@ -195,6 +195,7 @@ import com.sun.mail.imap.ACL;
 import com.sun.mail.imap.AppendUID;
 import com.sun.mail.imap.DefaultFolder;
 import com.sun.mail.imap.IMAPFolder;
+import com.sun.mail.imap.IMAPMessage;
 import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.imap.Rights;
 import com.sun.mail.imap.protocol.BODYSTRUCTURE;
@@ -3770,11 +3771,17 @@ public class MailInterfaceImpl implements MailInterface {
 			if (IMAPProperties.getImapCapabilities().hasUIDPlus()) {
 				long start = System.currentTimeMillis();
 				try {
-					final long[] res = new CopyIMAPCommand(imapCon.getImapFolder(), msgUIDs, destFolder, false, false)
+					long[] res = new CopyIMAPCommand(imapCon.getImapFolder(), msgUIDs, destFolder, false, false)
 							.doCommand();
 					if (LOG.isInfoEnabled()) {
 						LOG.info(new StringBuilder(100).append(msgUIDs.length).append(" messages copied in ").append(
 								(System.currentTimeMillis() - start)).append(STR_MSEC).toString());
+					}
+					if (res == null || noUIDsAssigned(res, msgUIDs.length)) {
+						/*
+						 * Invalid UIDs
+						 */
+						res = getDestinationUIDs(msgUIDs, destFolder);
 					}
 					if (usm.isSpamEnabled()) {
 						/*
@@ -3886,6 +3893,13 @@ public class MailInterfaceImpl implements MailInterface {
 				 */
 				uidNext = IMAPUtils.getUIDNext(tmpFolder);
 			}
+			final long start = System.currentTimeMillis();
+			new CopyIMAPCommand(imapCon.getImapFolder(), msgUIDs, destFolder, false, true).doCommand();
+			mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+			/*
+			 * Since UIDs must be assigned in strictly ascending order,
+			 * destination UIDs can be determined this way
+			 */
 			final long[] retval = new long[msgUIDs.length];
 			for (int i = 0; i < retval.length; i++) {
 				if (msgs[i] == null) {
@@ -3894,13 +3908,7 @@ public class MailInterfaceImpl implements MailInterface {
 					retval[i] = uidNext++;
 				}
 			}
-			final long start = System.currentTimeMillis();
-			try {
-				imapCon.getImapFolder().copyMessages(msgs, tmpFolder);
-			} finally {
-				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-			}
-			if (IMAPProperties.isSpamEnabled()) {
+			if (usm.isSpamEnabled()) {
 				/*
 				 * Spam related action
 				 */
@@ -3908,11 +3916,15 @@ public class MailInterfaceImpl implements MailInterface {
 				final int spamAction = spamFullName.equals(imapCon.getImapFolder().getFullName()) ? SPAM_HAM
 						: (spamFullName.equals(tmpFolder.getFullName()) ? SPAM_SPAM : SPAM_NOOP);
 				if (spamAction != SPAM_NOOP) {
-					for (int i = 0; i < msgs.length; i++) {
-						if (spamAction == SPAM_SPAM) {
-							handleSpam(msgs[i], true, false);
-						} else if (spamAction == SPAM_HAM) {
-							handleSpam(msgs[i], false, false);
+					try {
+						handleSpamUID(msgUIDs, spamAction == SPAM_SPAM, false);
+					} catch (final OXException e) {
+						if (LOG.isWarnEnabled()) {
+							LOG.warn(e.getMessage(), e);
+						}
+					} catch (final MessagingException e) {
+						if (LOG.isWarnEnabled()) {
+							LOG.warn(e.getMessage(), e);
 						}
 					}
 				}
@@ -3921,6 +3933,9 @@ public class MailInterfaceImpl implements MailInterface {
 			 * Delete source messages on move
 			 */
 			if (move) {
+				/*
+				 * Mark copied messages as deleted
+				 */
 				for (int i = 0; i < msgs.length; i++) {
 					if (msgs[i] != null) {
 						msgs[i].setFlags(FLAGS_DELETED, true);
@@ -3929,10 +3944,34 @@ public class MailInterfaceImpl implements MailInterface {
 				/*
 				 * Expunge "moved" messages immediately
 				 */
-				imapCon.getImapFolder().expunge(msgs);
+				try {
+					/*
+					 * UID EXPUNGE not supported due to missing UIDPLUS
+					 * extension; perform fallback actions
+					 */
+					final long[] storedUIDs = IMAPUtils.getDeletedMessages(imapCon.getImapFolder(), msgUIDs);
+					if (storedUIDs.length > 0) {
+						new FlagsIMAPCommand(imapCon.getImapFolder(), storedUIDs, FLAGS_DELETED, false, false)
+								.doCommand();
+						IMAPUtils.fastExpunge(imapCon.getImapFolder());
+						new FlagsIMAPCommand(imapCon.getImapFolder(), storedUIDs, FLAGS_DELETED, true, false)
+								.doCommand();
+					} else {
+						IMAPUtils.fastExpunge(imapCon.getImapFolder());
+					}
+					/*
+					 * Force folder cache update through a close
+					 */
+					imapCon.getImapFolder().close(false);
+					imapCon.resetImapFolder();
+				} catch (final ProtocolException e1) {
+					throw new OXMailException(MailCode.MOVE_PARTIALLY_COMPLETED, e1,
+							com.openexchange.tools.oxfolder.OXFolderManagerImpl.getUserName(sessionObj), Arrays
+									.toString(msgUIDs), imapCon.getImapFolder().getFullName(), e1.getMessage());
+				}
 			}
 			/*
-			 * Return new message id
+			 * Return new message ids
 			 */
 			return retval;
 		} catch (final MessagingException e) {
@@ -3940,6 +3979,67 @@ public class MailInterfaceImpl implements MailInterface {
 		}
 	}
 
+	/**
+	 * Determines the corresponding UIDs in destination folder
+	 * 
+	 * @param msgUIDs
+	 *            The UIDs in source folder
+	 * @param destFullname
+	 *            The destination folder's fullname
+	 * @return The corresponding UIDs in destination folder
+	 * @throws MessagingException
+	 */
+	private long[] getDestinationUIDs(final long[] msgUIDs, final String destFullname) throws MessagingException {
+		/*
+		 * No COPYUID present in response code. Since UIDs are assigned in
+		 * strictly ascending order in the mailbox (refer to IMAPv4 rfc3501,
+		 * section 2.3.1.1), we can discover corresponding UIDs by selecting the
+		 * destination mailbox and detecting the location of messages placed in
+		 * the destination mailbox by using FETCH and/or SEARCH commands (e.g.,
+		 * for Message-ID or some unique marker placed in the message in an
+		 * APPEND).
+		 */
+		final long[] retval = new long[msgUIDs.length];
+		Arrays.fill(retval, -1L);
+		final String messageId;
+		{
+			int minIndex = 0;
+			long minVal = msgUIDs[0];
+			for (int i = 1; i < msgUIDs.length; i++) {
+				if (msgUIDs[i] < minVal) {
+					minIndex = i;
+					minVal = msgUIDs[i];
+				}
+			}
+			messageId = ((IMAPMessage) (imapCon.getImapFolder().getMessageByUID(msgUIDs[minIndex]))).getMessageID();
+		}
+		if (messageId != null) {
+			final IMAPFolder destFolder = (IMAPFolder) imapCon.getImapFolder().getFolder(destFullname);
+			destFolder.open(Folder.READ_ONLY);
+			try {
+				/*
+				 * Find this message ID in destination folder
+				 */
+				long startUID = IMAPUtils.messageId2UID(messageId, destFolder);
+				if (startUID != -1) {
+					for (int i = 0; i < msgUIDs.length; i++) {
+						retval[i] = startUID++;
+					}
+				}
+			} finally {
+				destFolder.close(false);
+			}
+		}
+		return retval;
+	}
+
+	private static boolean noUIDsAssigned(final long[] arr, final int expectedLen) {
+		final long[] tmp = new long[expectedLen];
+		Arrays.fill(tmp, -1L);
+		return Arrays.equals(arr, tmp);
+	}
+	
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -4653,6 +4753,10 @@ public class MailInterfaceImpl implements MailInterface {
 			final List<Folder> namespaceFolders, final boolean subscribed) {
 		NextNSFolder: for (final Iterator<Folder> iter = namespaceFolders.iterator(); iter.hasNext();) {
 			final String nsFullname = iter.next().getFullName();
+			if (nsFullname == null || nsFullname.length() == 0) {
+				iter.remove();
+				continue NextNSFolder;
+			}
 			for (Folder subfolder : subfolders) {
 				if (nsFullname.equals(subfolder.getFullName())) {
 					/*

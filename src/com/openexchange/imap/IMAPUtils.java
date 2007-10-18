@@ -101,9 +101,11 @@ import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.imap.protocol.BASE64MailboxEncoder;
+import com.sun.mail.imap.protocol.ENVELOPE;
 import com.sun.mail.imap.protocol.FetchResponse;
 import com.sun.mail.imap.protocol.IMAPProtocol;
 import com.sun.mail.imap.protocol.IMAPResponse;
+import com.sun.mail.imap.protocol.UID;
 import com.sun.mail.imap.protocol.UIDSet;
 
 /**
@@ -483,6 +485,72 @@ public class IMAPUtils {
 			}
 		});
 		return val;
+	}
+
+	private static final String COMMAND_FETCH_ENV_UID = "FETCH *:1 (ENVELOPE UID)";
+
+	/**
+	 * Finds corresponding UID of message whose Message-ID header matches given
+	 * message ID
+	 * 
+	 * @param messageId
+	 *            The message ID
+	 * @param imapFolder
+	 *            The IMAP folder
+	 * @return The UID of matching message or <code>-1</code> if none found
+	 * @throws MessagingException
+	 */
+	public static long messageId2UID(final String messageId, final IMAPFolder imapFolder) throws MessagingException {
+		if (messageId == null || messageId.length() == 0) {
+			return -1L;
+		}
+		final Long retval = (Long) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+			/*
+			 * (non-Javadoc)
+			 * 
+			 * @see com.sun.mail.imap.IMAPFolder$ProtocolCommand#doCommand(com.sun.mail.imap.protocol.IMAPProtocol)
+			 */
+			public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+				final Response[] r = p.command(COMMAND_FETCH_ENV_UID, null);
+				final Response response = r[r.length - 1];
+				final Long retval = Long.valueOf(-1L);
+				try {
+					if (response.isOK()) {
+						int index = -1;
+						for (int i = 0, len = r.length - 1; i < len; i++) {
+							if (!(r[i] instanceof FetchResponse)) {
+								continue;
+							}
+							final FetchResponse fetchResponse = (FetchResponse) r[i];
+							if (index == -1) {
+								/*
+								 * Remember index of ENVELOPE item
+								 */
+								final int count = fetchResponse.getItemCount();
+								for (int k = 0; k < count && index == -1; k++) {
+									if (ENVELOPE.class.isInstance(fetchResponse.getItem(k))) {
+										index = k;
+									}
+								}
+								if (index == -1) {
+									throw new ProtocolException("No ENVELOPE item found in FETCH response");
+								}
+							}
+							if (messageId.equals(((ENVELOPE) fetchResponse.getItem(index)).messageId)) {
+								return Long.valueOf(((UID) (index == 0 ? fetchResponse.getItem(1) : fetchResponse
+										.getItem(0))).uid);
+							}
+							r[i] = null;
+						}
+					}
+				} finally {
+					// p.notifyResponseHandlers(r);
+					p.handleResult(response);
+				}
+				return retval;
+			}
+		});
+		return retval.longValue();
 	}
 
 	private static final Pattern PATTERN_PERMANENTFLAGS = Pattern
