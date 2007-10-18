@@ -140,6 +140,7 @@ public class OXCalendarException extends OXException {
         MOVE_TO_SHARED_FOLDER_NOT_SUPPORTED("Move not allowed to a shared folders if the private flag is set", 68, AbstractOXException.Category.USER_INPUT),
         RECURRING_EXCEPTION_PRIVATE_FLAG("You can not use different private flags for one element of a recurring appointment", 69, AbstractOXException.Category.USER_INPUT),
         PIVATE_FLAG_ONLY_IN_PRIVATE_FOLDER("You can not use the private flags in a non private folder", 70, AbstractOXException.Category.USER_INPUT),
+        INVALID_CHARACTER("Bad character in field %s. Error: %s", 71, AbstractOXException.Category.USER_INPUT),        
         ;
         
         /**

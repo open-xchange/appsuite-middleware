@@ -77,6 +77,7 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.Participants;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.data.Check;
 import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.server.DBPool;
 import com.openexchange.server.DBPoolingException;
@@ -1289,8 +1290,61 @@ public class CalendarCommonCollection {
         long ndl = date.getTime()+offset;
         long off = ndl%CalendarRecurringCollection.MILLI_DAY;
         ndl -= off;
-        System.out.println(" GOT "+date+" and return "+new Date(ndl));
+        //System.out.println(" GOT "+date+" and return "+new Date(ndl));
         return ndl;
     }
+
+	public static boolean checkIfArrayKeyExistInArray(Object a[], Object b[]) {
+		if (a != null && b != null) {
+			Arrays.sort(b);
+			for (int x = 0; x < a.length; x++) {
+				if (Arrays.binarySearch(b, a[x]) >= 0) {
+					return true;
+				}
+			}				
+		}
+		return false;		
+	}
+	
+	public static void checkForInvalidCharacters(CalendarDataObject cdao) throws OXException {
+		String error = null;
+		if (cdao.containsTitle() && cdao.getTitle() != null) {
+			error = Check.containsInvalidChars(cdao.getTitle());
+			if (error != null) {
+				throw new OXCalendarException(OXCalendarException.Code.INVALID_CHARACTER, "Title", error);
+			}
+		}
+		if (cdao.containsLocation() && cdao.getLocation() != null) {
+			error = Check.containsInvalidChars(cdao.getLocation());
+			if (error != null) {
+				throw new OXCalendarException(OXCalendarException.Code.INVALID_CHARACTER, "Location", error);
+			}
+		}
+		if (cdao.containsNote() && cdao.getNote() != null) {
+			error = Check.containsInvalidChars(cdao.getNote());
+			if (error != null) {
+				throw new OXCalendarException(OXCalendarException.Code.INVALID_CHARACTER, "Note", error);
+			}
+		}		
+		if (cdao.containsCategories() && cdao.getCategories() != null) {
+			error = Check.containsInvalidChars(cdao.getCategories());
+			if (error != null) {
+				throw new OXCalendarException(OXCalendarException.Code.INVALID_CHARACTER, "Tags", error);
+			}
+		}
+		if (cdao.containsUserParticipants() && cdao.getUsers() != null) {
+			UserParticipant up[] = cdao.getUsers();
+			for (int a = 0; a < up.length; a++) {
+				error = Check.containsInvalidChars(up[a].getDisplayName());
+				if (error != null) {
+					throw new OXCalendarException(OXCalendarException.Code.INVALID_CHARACTER, "Display Name", error);
+				}
+				error = Check.containsInvalidChars(up[a].getConfirmMessage());
+				if (error != null) {
+					throw new OXCalendarException(OXCalendarException.Code.INVALID_CHARACTER, "Confirm Message", error);
+				}				
+			}
+		}		
+	}
     
 }

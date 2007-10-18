@@ -51,7 +51,6 @@ package com.openexchange.groupware.calendar;
 
 import java.sql.Connection;
 import java.sql.DataTruncation;
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -70,6 +69,7 @@ import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.ReminderSQLInterface;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.IDGenerator;
 import com.openexchange.groupware.Types;
@@ -89,6 +89,7 @@ import com.openexchange.groupware.contexts.ContextImpl;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.reminder.ReminderObject;
+import com.openexchange.groupware.reminder.ReminderException.Code;
 import com.openexchange.groupware.search.AppointmentSearchObject;
 import com.openexchange.server.DBPool;
 import com.openexchange.server.DBPoolingException;
@@ -127,7 +128,7 @@ class CalendarMySQL implements CalendarSqlImp {
     private static final String PARTICIPANTS_IDENTIFIER_IS = " AND object_id = ";
     private static final String PARTICIPANTS_IDENTIFIER_IN = " AND object_id IN ";
     private static final String UNION = " UNION ";
-    
+
     private static final Log LOG = LogFactory.getLog(CalendarMySQL.class);
     
     
@@ -3069,7 +3070,16 @@ class CalendarMySQL implements CalendarSqlImp {
         ao.setObjectID(oid);
         ao.setParentFolderID(fid);
         CalendarCommonCollection.triggerEvent(so, CalendarOperation.DELETE, ao);
-        deleteAllReminderEntries(edao, oid, fid, so, readcon);
+        //deleteAllReminderEntries(edao, oid, fid, so, readcon);
+        final ReminderSQLInterface rsql = new ReminderHandler(so.getContext());
+        try {
+        	rsql.deleteReminder(oid, Types.APPOINTMENT);
+        } catch(AbstractOXException oxe) {
+        	// this is wanted if Code = Code.NOT_FOUND
+        	if (oxe.getDetailNumber() != Code.NOT_FOUND.getDetailNumber()) {
+        		throw new OXException(oxe);
+        	}
+        }
     }
     
     

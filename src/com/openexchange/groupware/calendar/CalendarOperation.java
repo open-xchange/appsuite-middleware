@@ -79,8 +79,6 @@ import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
-import com.openexchange.configuration.ServerConfig;
-import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 /**
@@ -1027,7 +1025,7 @@ public class CalendarOperation implements SearchIterator {
                             }
                             if (!time_change) {
                                 np[a].setConfirm(op[bs].getConfirm());
-                                np[a].setConfirmMessage(null);
+                                np[a].setConfirmMessage(op[bs].getConfirmMessage());
                             } else {
                                 np[a].setConfirm(CalendarDataObject.NONE);
                                 np[a].setConfirmMessage(op[bs].getConfirmMessage());

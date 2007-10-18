@@ -53,14 +53,10 @@ package com.openexchange.groupware.calendar;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.calendar.recurrence.RecurringCalculation;
 import com.openexchange.groupware.calendar.recurrence.RecurringException;
-import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.CalendarObject;
 
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.TimeZone;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -88,7 +84,7 @@ public final class CalendarRecurringCollection {
     public static final int RECURRING_CREATE_EXCEPTION = 5;
     public static final int CHANGE_RECURRING_TYPE = 6;
     
-static int MAXTC = 999;
+    static int MAXTC = 999;
     private static int NO_END_YEARS = 4;
     
     
@@ -286,8 +282,11 @@ static int MAXTC = 999;
                 rada = RECURRING_CREATE_EXCEPTION;
             } else if (cdao.containsRecurrenceDatePosition()) {
                 rada = RECURRING_CREATE_EXCEPTION;
-            }  else {
-                rada = RECURRING_NO_ACTION;
+            }
+            if (cdao.containsDeleteExceptions() && edao.containsChangeExceptions()) {
+            		if (CalendarCommonCollection.checkIfArrayKeyExistInArray(cdao.getDeleteException(), edao.getChangeException())) {
+            			rada = RECURRING_EXCEPTION_DELETE;
+            		}
             }
         }
         return rada;
