@@ -1,3 +1,8 @@
+* 2007-10-18 - marcus.klein@open-xchange.com
+
+ - Bugfix #9807: Catching all exceptions now in AJAX super servlet to prevent
+   closed AJP sockets.
+
 * 2007-10-17 - martin.kauss@open-xchange.com
 
  - Fixed bug #9808. An update task failed because of a wrong where

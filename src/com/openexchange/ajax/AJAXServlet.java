@@ -102,6 +102,10 @@ import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.UploadServletException;
 
+/**
+ * This is a super class of all AJAX servlets providing common methods.
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ */
 public abstract class AJAXServlet extends HttpServlet implements UploadRegistry {
 
 	protected static final transient List<UploadListener> registeredUploadListeners = new ArrayList<UploadListener>();
@@ -382,7 +386,27 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 	 */
 	protected static final String RESPONSE_ERROR = "Error while writing response object.";
 
-	public static boolean containsParameter(final HttpServletRequest req, final String name) {
+	/**
+     * The service method of HttpServlet is extended to catch bad exceptions and
+     * keep the AJP socket alive. Otherwise apache things in a balancer
+     * environment this AJP container is temporarily dead and redirects requests
+     * to other AJP containers. This will kill the users session.
+     */
+    @Override
+    protected void service(final HttpServletRequest req,
+        final HttpServletResponse resp) throws ServletException, IOException {
+        try {
+            super.service(req, resp);
+        } catch (ServletException e) {
+            throw e;
+        } catch (IOException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ServletException(e.getMessage(), e);
+        }
+    }
+
+    public static boolean containsParameter(final HttpServletRequest req, final String name) {
 		return (req.getParameter(name) != null);
 	}
 
