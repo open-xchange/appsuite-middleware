@@ -1,3 +1,8 @@
+* 2007-10-18 - martin.kauss@open-xchange.com
+
+ - Fixed bug #9772. One argument in an object not found exception was
+   missing. This has been fixed.
+
 * 2007-10-18 - marcus.klein@open-xchange.com
 
  - Bugfix #9800: Remaining entries inside del table after context delete
