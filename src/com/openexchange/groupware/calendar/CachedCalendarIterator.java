@@ -150,7 +150,7 @@ public class CachedCalendarIterator implements SearchIterator {
                 }
             }
         } else {
-            throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, com.openexchange.groupware.Component.APPOINTMENT);
+            throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, com.openexchange.groupware.Component.APPOINTMENT, "One requested element does not exists, the request size and the result size is different.");
         }
         return null;
     }
