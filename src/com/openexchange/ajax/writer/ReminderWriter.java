@@ -80,7 +80,7 @@ public class ReminderWriter extends DataWriter {
 		writeParameter(ReminderFields.ALARM, reminderObj.getDate(), timeZone, jsonObj);
 		writeParameter(ReminderFields.MODULE, reminderObj.getModule(), jsonObj);
 		writeParameter(ReminderFields.USER_ID, reminderObj.getUser(), jsonObj);
-		writeParameter(CalendarFields.RECURRENCE_POSITION, 0, jsonObj);
+		writeParameter(CalendarFields.RECURRENCE_POSITION, reminderObj.getRecurrencePosition(), jsonObj);
 		writeParameter(ReminderFields.SERVER_TIME, new Date(), timeZone, jsonObj);
 	}
 }
