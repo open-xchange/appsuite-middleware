@@ -466,7 +466,7 @@ public class UserTest extends AbstractTest {
         assertTrue("Expected to find added user in user list",founduser);
     }
 
-    @Test
+    @Test(expected=InvalidDataException.class)
     public void testChange() throws Exception {
         
         // get context to create an user
