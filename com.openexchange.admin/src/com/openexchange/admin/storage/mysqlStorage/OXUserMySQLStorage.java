@@ -65,7 +65,8 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import sun.rmi.runtime.Log;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -79,7 +80,17 @@ import com.openexchange.admin.storage.sqlStorage.OXUserSQLStorage;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.SHACrypt;
 import com.openexchange.admin.tools.UnixCrypt;
+import com.openexchange.api2.OXException;
+import com.openexchange.groupware.IDGenerator;
+import com.openexchange.groupware.RdbUserConfigurationStorage;
+import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.contact.Contacts;
+import com.openexchange.groupware.contexts.ContextException;
+import com.openexchange.groupware.delete.DeleteEvent;
+import com.openexchange.groupware.delete.DeleteFailedException;
+import com.openexchange.mail.usersetting.UserSettingMail;
+import com.openexchange.server.DBPoolingException;
+import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
 
 /**
  * @author cutmasta
