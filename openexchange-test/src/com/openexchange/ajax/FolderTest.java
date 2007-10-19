@@ -544,6 +544,42 @@ public class FolderTest extends AbstractAJAXTest {
 		throw new OXException("No Standard Infostore Folder found!");
 	}
 	
+	/*
+	public static void testGetMailInboxStatic(final WebConversation conversation, final String hostname, final String sessionId) {
+		try {
+			printTestStart("testGetMailInbox");
+			List<FolderObject> l = getSubfolders(conversation, hostname, sessionId, ""
+					+ FolderObject.SYSTEM_PRIVATE_FOLDER_ID, true);
+			FolderObject defaultIMAPFolder = null;
+			for (int i = 0; i < l.size(); i++) {
+				FolderObject fo = l.get(i);
+				if (fo.containsFullName() && fo.getFullName().equals(MailFolderObject.DEFAULT_IMAP_FOLDER_ID)) {
+					defaultIMAPFolder = fo;
+					break;
+				}
+			}
+			assertTrue(defaultIMAPFolder != null && defaultIMAPFolder.hasSubfolders());
+			l = getSubfolders(conversation, hostname, sessionId, defaultIMAPFolder.getFullName(),
+					true);
+			assertTrue(l != null && l.size() > 0);
+			FolderObject inboxFolder = null;
+			for (int i = 0; i < l.size() && (inboxFolder == null); i++) {
+				FolderObject fo = l.get(i);
+				if (fo.getFullName().endsWith("INBOX")) {
+					inboxFolder = fo;
+				}
+			}
+			assertTrue(inboxFolder != null);
+			Calendar cal = GregorianCalendar.getInstance();
+			getFolder(conversation, hostname, sessionId, inboxFolder.getFullName(), cal, true);
+			printTestEnd("testGetMailInbox");
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+	*/
+	
 	public static FolderObject getMyInfostoreFolder(final WebConversation conversation, final String hostname,
 			final String sessionId, final int loginId) throws MalformedURLException, IOException, SAXException,
 			JSONException, OXException {
