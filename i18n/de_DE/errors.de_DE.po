@@ -3177,7 +3177,7 @@ msgid ""
 msgstr ""
 "Das Kontaktfoto kann nicht skaliert werden. Es handelt sich entweder um "
 "einen nicht unterstützten Dateityp oder das Bild ist zu groß. Der MIME-Typ "
-"ist %1$s und die Bildgröße ist %2$d KB. Die maximal erlaubte Bildgröße ist %3"
+"ist %1$s und die Bildgröße ist %2$d. Die maximal erlaubte Bildgröße ist %3"
 "$d."
 
 msgid ""
