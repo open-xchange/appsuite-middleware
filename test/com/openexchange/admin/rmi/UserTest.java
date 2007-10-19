@@ -622,7 +622,7 @@ public class UserTest extends AbstractTest {
         compareUserSpecialForNulledAttributes(tmp_usr, user_single_change_loaded);
     }
     
-    @Test
+    @Test(expected=InvalidDataException.class)
     public void testChangeAllAllowedAttributesNull() throws Exception {
         // set all values to null in the user object and then call change, what
         // happens?
@@ -949,7 +949,7 @@ public class UserTest extends AbstractTest {
         
     }
     
-    @Test
+    @Test(expected=InvalidDataException.class)
     public void testChangeWithEmptyUserIdentifiedByName() throws Exception{
         // test a change with no data set ONLY username set and compare the data aftewards
           
@@ -993,7 +993,7 @@ public class UserTest extends AbstractTest {
         
     }
     
-    @Test
+    @Test(expected=InvalidDataException.class)
     public void testChangeIdentifiedByName() throws Exception{
         // test a change with data set  but identified by username and compare the data aftewards
         
