@@ -1054,6 +1054,10 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 			throw new IMAPException(IMAPException.Code.FOLDER_CREATION_FAILED, newFolder.getFullName(),
 					destFolder instanceof DefaultFolder ? DEFAULT_FOLDER_ID : destFolder.getFullName());
 		}
+		/*
+		 * Apply original subscription status
+		 */
+		newFolder.setSubscribed(toMove.isSubscribed());
 		if (imapConfig.isSupportsACLs()) {
 			/*
 			 * Copy ACLs
@@ -1061,7 +1065,6 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 			try {
 				newFolder.open(Folder.READ_WRITE);
 				try {
-					newFolder.setSubscribed(toMove.isSubscribed());
 					/*
 					 * Copy ACLs
 					 */
