@@ -2,6 +2,8 @@
 
  - Bugfix #9820: Fixed folder move operation if IMAP server does not
    support ACLs
+ - Bugfix #9794: Moving folder (incl. its subfolder tree) to trash folder
+   on folder deletion
 
 * 2007-10-19 - marcus.klein@open-xchange.com
 

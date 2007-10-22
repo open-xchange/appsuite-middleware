@@ -418,8 +418,8 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 			 * Insert
 			 */
 			final String parentFullname = prepareMailFolderParam(toCreate.getParentFullname());
-			IMAPFolder parent = DEFAULT_FOLDER_ID.equals(parentFullname) ? (IMAPFolder) imapStore
-					.getDefaultFolder() : (IMAPFolder) imapStore.getFolder(parentFullname);
+			IMAPFolder parent = DEFAULT_FOLDER_ID.equals(parentFullname) ? (IMAPFolder) imapStore.getDefaultFolder()
+					: (IMAPFolder) imapStore.getFolder(parentFullname);
 			if (!parent.exists()) {
 				parent = checkForNamespaceFolder(parentFullname);
 				if (null == parent) {
@@ -721,7 +721,34 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 					throw new IMAPException(IMAPException.Code.FOLDER_NOT_FOUND, fullname);
 				}
 			}
-			deleteFolder(deleteMe);
+			final String trashFullname = prepareMailFolderParam(getTrashFolder());
+			if (deleteMe.getParent().getFullName().equals(trashFullname)) {
+				/*
+				 * Delete permanently
+				 */
+				deleteFolder(deleteMe);
+			} else {
+				/*
+				 * Just move this folder to trash
+				 */
+				final String name = deleteMe.getName();
+				int appendix = 1;
+				final StringBuilder sb = new StringBuilder();
+				IMAPFolder newFolder = (IMAPFolder) imapStore.getFolder(sb.append(trashFullname).append(
+						deleteMe.getSeparator()).append(name).toString());
+				while (newFolder.exists()) {
+					/*
+					 * A folder of the same name already exists. Append
+					 * appropriate appendix to folder name and check existence
+					 * again.
+					 */
+					sb.setLength(0);
+					newFolder = (IMAPFolder) imapStore.getFolder(sb.append(trashFullname).append(
+							deleteMe.getSeparator()).append(name).append('_').append(++appendix).toString());
+				}
+				moveFolder(deleteMe, (IMAPFolder) imapStore.getFolder(trashFullname), newFolder, false);
+
+			}
 			return fullnameArg;
 		} catch (final MessagingException e) {
 			throw IMAPException.handleMessagingException(e, imapMailConnection);
@@ -979,6 +1006,18 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 
 	private IMAPFolder moveFolder(final IMAPFolder toMove, final IMAPFolder destFolder, final String folderName,
 			final boolean checkForDuplicate) throws MessagingException, MailException {
+		StringBuilder sb = new StringBuilder();
+		if (destFolder.getFullName().length() > 0) {
+			sb.append(destFolder.getFullName()).append(destFolder.getSeparator());
+		}
+		sb.append(folderName);
+		final IMAPFolder newFolder = (IMAPFolder) imapStore.getFolder(sb.toString());
+		sb = null;
+		return moveFolder(toMove, destFolder, newFolder, checkForDuplicate);
+	}
+
+	private IMAPFolder moveFolder(final IMAPFolder toMove, final IMAPFolder destFolder, final IMAPFolder newFolder,
+			final boolean checkForDuplicate) throws MessagingException, MailException {
 		if ((destFolder.getType() & Folder.HOLDS_FOLDERS) == 0) {
 			throw new IMAPException(IMAPException.Code.FOLDER_DOES_NOT_HOLD_FOLDERS, destFolder.getFullName());
 		}
@@ -998,15 +1037,8 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 		 * Move by creating a new folder, copying all messages and deleting old
 		 * folder
 		 */
-		StringBuilder sb = new StringBuilder();
-		if (destFolder.getFullName().length() > 0) {
-			sb.append(destFolder.getFullName()).append(destFolder.getSeparator());
-		}
-		sb.append(folderName);
-		final IMAPFolder newFolder = (IMAPFolder) imapStore.getFolder(sb.toString());
-		sb = null;
 		if (checkForDuplicate && newFolder.exists()) {
-			throw new IMAPException(IMAPException.Code.DUPLICATE_FOLDER, folderName);
+			throw new IMAPException(IMAPException.Code.DUPLICATE_FOLDER, newFolder.getName());
 		}
 		/*
 		 * Create new folder. NOTE: It's not possible to create a folder only
