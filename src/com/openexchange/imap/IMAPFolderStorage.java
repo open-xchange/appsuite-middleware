@@ -72,6 +72,7 @@ import javax.mail.ReadOnlyFolderException;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.imap.cache.NamespaceFoldersCache;
 import com.openexchange.imap.cache.RightsCache;
 import com.openexchange.imap.cache.UserFlagsCache;
 import com.openexchange.imap.command.CopyIMAPCommand;
@@ -138,7 +139,10 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 			if (DEFAULT_FOLDER_ID.equals(fullname)) {
 				return true;
 			}
-			return imapStore.getFolder(fullname).exists();
+			if (imapStore.getFolder(fullname).exists()) {
+				return true;
+			}
+			return (checkForNamespaceFolder(fullname) != null);
 		} catch (final MessagingException e) {
 			throw IMAPException.handleMessagingException(e, imapMailConnection);
 		}
@@ -202,16 +206,18 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 				 * Merge with namespace folders
 				 */
 				{
-					final List<Folder> personalNs = new ArrayList<Folder>(Arrays.asList(imapStore
-							.getPersonalNamespaces()));
+					final List<Folder> personalNs = new ArrayList<Folder>(Arrays.asList(NamespaceFoldersCache
+							.getPersonalNamespaces(imapStore, true, session)));
 					mergeWithNamespaceFolders(subfolders, personalNs, subscribed);
 				}
 				{
-					final List<Folder> otherNs = new ArrayList<Folder>(Arrays.asList(imapStore.getUserNamespaces(null)));
+					final List<Folder> otherNs = new ArrayList<Folder>(Arrays.asList(NamespaceFoldersCache
+							.getUserNamespaces(imapStore, true, session)));
 					mergeWithNamespaceFolders(subfolders, otherNs, subscribed);
 				}
 				{
-					final List<Folder> sharedNs = new ArrayList<Folder>(Arrays.asList(imapStore.getSharedNamespaces()));
+					final List<Folder> sharedNs = new ArrayList<Folder>(Arrays.asList(NamespaceFoldersCache
+							.getSharedNamespaces(imapStore, true, session)));
 					mergeWithNamespaceFolders(subfolders, sharedNs, subscribed);
 				}
 				/*
@@ -314,28 +320,28 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 		 */
 		IMAPFolder retval = null;
 		{
-			final List<Folder> personalNs = new ArrayList<Folder>(Arrays.asList(imapStore.getPersonalNamespaces()));
-			for (Folder folder : personalNs) {
-				if (folder.getFullName().equals(fullname)) {
-					retval = new NamespaceFolder(imapStore, fullname, folder.getSeparator());
+			final Folder[] personalFolders = NamespaceFoldersCache.getPersonalNamespaces(imapStore, true, session);
+			for (int i = 0; i < personalFolders.length; i++) {
+				if (personalFolders[i].getFullName().equals(fullname)) {
+					retval = new NamespaceFolder(imapStore, fullname, personalFolders[i].getSeparator());
 					break;
 				}
 			}
 		}
 		{
-			final List<Folder> otherNs = new ArrayList<Folder>(Arrays.asList(imapStore.getUserNamespaces(null)));
-			for (Folder folder : otherNs) {
-				if (folder.getFullName().equals(fullname)) {
-					retval = new NamespaceFolder(imapStore, fullname, folder.getSeparator());
+			final Folder[] userFolders = NamespaceFoldersCache.getUserNamespaces(imapStore, true, session);
+			for (int i = 0; i < userFolders.length; i++) {
+				if (userFolders[i].getFullName().equals(fullname)) {
+					retval = new NamespaceFolder(imapStore, fullname, userFolders[i].getSeparator());
 					break;
 				}
 			}
 		}
 		{
-			final List<Folder> sharedNs = new ArrayList<Folder>(Arrays.asList(imapStore.getSharedNamespaces()));
-			for (Folder folder : sharedNs) {
-				if (folder.getFullName().equals(fullname)) {
-					retval = new NamespaceFolder(imapStore, fullname, folder.getSeparator());
+			final Folder[] sharedFolders = NamespaceFoldersCache.getSharedNamespaces(imapStore, true, session);
+			for (int i = 0; i < sharedFolders.length; i++) {
+				if (sharedFolders[i].getFullName().equals(fullname)) {
+					retval = new NamespaceFolder(imapStore, fullname, sharedFolders[i].getSeparator());
 					break;
 				}
 			}
@@ -747,7 +753,6 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 							deleteMe.getSeparator()).append(name).append('_').append(++appendix).toString());
 				}
 				moveFolder(deleteMe, (IMAPFolder) imapStore.getFolder(trashFullname), newFolder, false);
-
 			}
 			return fullnameArg;
 		} catch (final MessagingException e) {

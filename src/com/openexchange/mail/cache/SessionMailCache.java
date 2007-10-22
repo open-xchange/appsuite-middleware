@@ -51,17 +51,33 @@ package com.openexchange.mail.cache;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import com.openexchange.cache.CacheKey;
 
 /**
- * {@link SessionMailCache} - Several cacheable data bound to a user
- * session
+ * {@link SessionMailCache} - Several cacheable data bound to a user session
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
 public final class SessionMailCache {
+
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(SessionMailCache.class);
+
+	private final Lock lock;
+
+	private final Condition clearCondition;
+
+	private final AtomicBoolean clearing;
+
+	private final Map<CacheKey, ReadWriteLock> lockMap;
 
 	private final Map<CacheKey, Object> cache;
 
@@ -70,7 +86,41 @@ public final class SessionMailCache {
 	 */
 	public SessionMailCache() {
 		super();
+		lock = new ReentrantLock();
+		clearCondition = lock.newCondition();
+		clearing = new AtomicBoolean();
+		lockMap = new HashMap<CacheKey, ReadWriteLock>();
 		cache = new HashMap<CacheKey, Object>();
+	}
+
+	private ReadWriteLock getKeyLock(final CacheKey key) {
+		if (clearing.get()) {
+			lock.lock();
+			try {
+				do {
+					try {
+						clearCondition.await();
+					} catch (final InterruptedException e) {
+						LOG.error(e.getLocalizedMessage(), e);
+					}
+				} while (clearing.get());
+			} finally {
+				lock.unlock();
+			}
+		}
+		ReadWriteLock l = lockMap.get(key);
+		if (l == null) {
+			lock.lock();
+			try {
+				if ((l = lockMap.get(key)) == null) {
+					l = new ReentrantReadWriteLock();
+					lockMap.put(key, l);
+				}
+			} finally {
+				lock.unlock();
+			}
+		}
+		return l;
 	}
 
 	/**
@@ -84,15 +134,20 @@ public final class SessionMailCache {
 	 *            The mail cache entry
 	 */
 	public void put(final SessionMailCacheEntry entry) {
-		if (null != entry.getValue()) {
-			cache.put(entry.getKey(), entry.getValue());
+		final Lock writeLock = getKeyLock(entry.getKey()).writeLock();
+		writeLock.lock();
+		try {
+			if (null != entry.getValue()) {
+				cache.put(entry.getKey(), entry.getValue());
+			}
+		} finally {
+			writeLock.unlock();
 		}
 	}
 
 	/**
-	 * Gets the entry acquired through
-	 * {@link SessionMailCacheEntry#getKey()}. If present it's applied to
-	 * <code>entry</code> via
+	 * Gets the entry acquired through {@link SessionMailCacheEntry#getKey()}.
+	 * If present it's applied to <code>entry</code> via
 	 * {@link SessionMailCacheEntry#setValue(Object)}
 	 * 
 	 * @param entry
@@ -100,13 +155,18 @@ public final class SessionMailCache {
 	 */
 	@SuppressWarnings("unchecked")
 	public void get(final SessionMailCacheEntry entry) {
-		entry.setValue(cache.get(entry.getKey()));
+		final Lock readLock = getKeyLock(entry.getKey()).readLock();
+		readLock.lock();
+		try {
+			entry.setValue(cache.get(entry.getKey()));
+		} finally {
+			readLock.unlock();
+		}
 	}
 
 	/**
-	 * Removes the entry acquired through
-	 * {@link SessionMailCacheEntry#getKey()}. If present it's applied to
-	 * <code>entry</code> via
+	 * Removes the entry acquired through {@link SessionMailCacheEntry#getKey()}.
+	 * If present it's applied to <code>entry</code> via
 	 * {@link SessionMailCacheEntry#setValue(Object)}
 	 * 
 	 * @param entry
@@ -114,13 +174,27 @@ public final class SessionMailCache {
 	 */
 	@SuppressWarnings("unchecked")
 	public void remove(final SessionMailCacheEntry entry) {
-		entry.setValue(cache.remove(entry.getKey()));
+		final Lock writeLock = getKeyLock(entry.getKey()).writeLock();
+		writeLock.lock();
+		try {
+			entry.setValue(cache.remove(entry.getKey()));
+		} finally {
+			writeLock.unlock();
+		}
 	}
 
 	/**
 	 * Clears all entries contained in cache
 	 */
 	public void clear() {
-		cache.clear();
+		clearing.set(true);
+		lock.lock();
+		try {
+			cache.clear();
+			clearing.set(false);
+			clearCondition.signalAll();
+		} finally {
+			lock.unlock();
+		}
 	}
 }

@@ -64,7 +64,11 @@ public enum MailCacheCode {
 	/**
 	 * User flags
 	 */
-	USER_FLAGS(2);
+	USER_FLAGS(2),
+	/**
+	 * Namespace folders
+	 */
+	NAMESPACE_FOLDERS(3);
 
 	private final int code;
 

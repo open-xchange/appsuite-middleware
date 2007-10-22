@@ -164,23 +164,21 @@ public final class MailConnectionWatcher {
 			try {
 				final StringBuilder sb = new StringBuilder(512);
 				final List<MailConnection> exceededCons = new ArrayList<MailConnection>();
-				{
-					for (final Iterator<Entry<MailConnection, Long>> iter = mailConnections.entrySet().iterator(); iter
-							.hasNext();) {
-						final Entry<MailConnection, Long> e = iter.next();
-						if (!e.getKey().isConnectedUnsafe()) {
-							/*
-							 * Remove closed connection from watcher
-							 */
-							iter.remove();
-						} else {
-							if ((System.currentTimeMillis() - e.getValue().longValue()) > MailConfig.getWatcherTime()) {
-								sb.setLength(0);
-								LOG.info(sb.append(
-										INFO_PREFIX.replaceFirst("#N#", String.valueOf(MailConfig.getWatcherTime())))
-										.append(e.getKey().getTrace()).toString());
-								exceededCons.add(e.getKey());
-							}
+				for (final Iterator<Entry<MailConnection, Long>> iter = mailConnections.entrySet().iterator(); iter
+						.hasNext();) {
+					final Entry<MailConnection, Long> e = iter.next();
+					if (!e.getKey().isConnectedUnsafe()) {
+						/*
+						 * Remove closed connection from watcher
+						 */
+						iter.remove();
+					} else {
+						if ((System.currentTimeMillis() - e.getValue().longValue()) > MailConfig.getWatcherTime()) {
+							sb.setLength(0);
+							LOG.info(sb.append(
+									INFO_PREFIX.replaceFirst("#N#", String.valueOf(MailConfig.getWatcherTime())))
+									.append(e.getKey().getTrace()).toString());
+							exceededCons.add(e.getKey());
 						}
 					}
 				}

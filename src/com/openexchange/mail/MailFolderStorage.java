@@ -190,7 +190,10 @@ public interface MailFolderStorage {
 	public String updateFolder(long id, MailFolder toUpdate) throws MailException;
 
 	/**
-	 * Deletes an existing mail folder identifed through given fullname.
+	 * Deletes an existing mail folder identifed through given fullname. If
+	 * folder is not located below default trash folder it is moved (including
+	 * subfolder tree) to default trash folder; otherwise it is deleted
+	 * permanently.
 	 * 
 	 * @param fullname
 	 *            The fullname of the mail folder to delete
@@ -200,7 +203,9 @@ public interface MailFolderStorage {
 	public String deleteFolder(String fullname) throws MailException;
 
 	/**
-	 * Deletes an existing mail folder identifed through given ID.
+	 * Deletes an existing mail folder identifed through given ID. If folder is
+	 * not located below default trash folder it is moved (including subfolder
+	 * tree) to default trash folder; otherwise it is deleted permanently.
 	 * 
 	 * @param id
 	 *            The ID of the mail folder to delete
