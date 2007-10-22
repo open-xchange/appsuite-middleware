@@ -656,7 +656,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 			"Need delete permissions in original folder to move an item"}, exceptionId = {
 			3, 4, 21 }, msg = { "You are not allowed to update this item.",
 			"You are not allowed to create objects in the target folder.",
-			"You are not allowed to delete objects in the source folder, so this document cannot be mo Tved."})
+			"You are not allowed to delete objects in the source folder, so this document cannot be moved."})
 	public void saveDocument(final DocumentMetadata document, final InputStream data,
 			final long sequenceNumber, Metadata[] modifiedColumns,
 			final SessionObject sessionObj) throws OXException {
