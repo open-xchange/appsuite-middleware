@@ -54,6 +54,7 @@ import static com.openexchange.mail.dataobjects.MailFolder.DEFAULT_FOLDER_ID;
 import static com.openexchange.mail.utils.StorageUtility.getDefaultFolderNames;
 import static com.openexchange.mail.utils.StorageUtility.prepareFullname;
 import static com.openexchange.mail.utils.StorageUtility.prepareMailFolderParam;
+import static java.util.regex.Matcher.quoteReplacement;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -978,7 +979,8 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 				getSubscriptionStatus(m, (IMAPFolder) folders[i], oldFullName, newFullName);
 			}
 		}
-		m.put(f.getFullName().replaceFirst(oldFullName, newFullName), Boolean.valueOf(f.isSubscribed()));
+		m.put(f.getFullName().replaceFirst(oldFullName, quoteReplacement(newFullName)), Boolean.valueOf(f
+				.isSubscribed()));
 	}
 
 	private static void applySubscriptionStatus(final IMAPFolder f, final Map<String, Boolean> m)

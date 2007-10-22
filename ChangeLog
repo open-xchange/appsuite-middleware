@@ -9,6 +9,8 @@
  - Bugfix #9794: Moving folder (incl. its subfolder tree) to trash folder
    on folder deletion
  - Loading namespace folder only one time per user session
+ - Bugfix #9852: Quoting replacement argument prior to invoking
+   String.replaceFirst()
 
 * 2007-10-19 - marcus.klein@open-xchange.com
 

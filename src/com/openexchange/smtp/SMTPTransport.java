@@ -52,6 +52,7 @@ package com.openexchange.smtp;
 import static com.openexchange.mail.MailInterfaceImpl.mailInterfaceMonitor;
 import static com.openexchange.mail.utils.MessageUtility.parseAddressList;
 import static com.openexchange.mail.utils.MessageUtility.performLineFolding;
+import static java.util.regex.Matcher.quoteReplacement;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -225,9 +226,10 @@ public final class SMTPTransport extends MailTransport<SMTPMailMessage> {
 			final MimeBodyPart text = new MimeBodyPart();
 			text.setText(performLineFolding(strHelper.getString(MailStrings.ACK_NOTIFICATION_TEXT).replaceFirst(
 					"#DATE#",
-					sentDate == null ? "" : DateFormat.getDateInstance(DateFormat.LONG, session.getLocale()).format(
-							sentDate)).replaceFirst("#RECIPIENT#", from).replaceFirst("#SUBJECT#", mail.getSubject()),
-					false, usm.getAutoLinebreak()), MailConfig.getDefaultMimeCharset());
+					sentDate == null ? "" : quoteReplacement(DateFormat.getDateInstance(DateFormat.LONG,
+							session.getLocale()).format(sentDate))).replaceFirst("#RECIPIENT#", quoteReplacement(from))
+					.replaceFirst("#SUBJECT#", quoteReplacement(mail.getSubject())), false, usm.getAutoLinebreak()),
+					MailConfig.getDefaultMimeCharset());
 			text.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
 			text.setHeader(MessageHeaders.HDR_CONTENT_TYPE, ct.toString());
 			mixedMultipart.addBodyPart(text);
@@ -237,8 +239,8 @@ public final class SMTPTransport extends MailTransport<SMTPMailMessage> {
 			ct.setContentType("message/disposition-notification; name=MDNPart1.txt; charset=UTF-8");
 			final MimeBodyPart ack = new MimeBodyPart();
 			final String msgId = mail.getHeader(MessageHeaders.HDR_MESSAGE_ID);
-			ack.setText(strHelper.getString(ACK_TEXT).replaceFirst("#FROM#", fromAddr).replaceFirst("#MSG ID#", msgId),
-					MailConfig.getDefaultMimeCharset());
+			ack.setText(strHelper.getString(ACK_TEXT).replaceFirst("#FROM#", quoteReplacement(fromAddr)).replaceFirst(
+					"#MSG ID#", quoteReplacement(msgId)), MailConfig.getDefaultMimeCharset());
 			ack.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
 			ack.setHeader(MessageHeaders.HDR_CONTENT_TYPE, ct.toString());
 			ack.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, "attachment; filename=MDNPart1.txt");
