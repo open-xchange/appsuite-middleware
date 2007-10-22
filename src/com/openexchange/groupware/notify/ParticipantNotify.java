@@ -269,7 +269,7 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 						sendMail = state.sendMail(userSettingMail) && obj.getModifiedBy() != p.id && (obj.getNotification() || p.id == obj.getCreatedBy() || forceNotifyOthers);
 						tz = p.timeZone;
 					} catch (final AbstractOXException e) {
-						LL.log(e);
+						LOG.debug("Could not load userSettingMail, so I'm assuming I can send a mail.",e);
 					}
 				} else {
 					sendMail = obj.getNotification() || (obj.getModifiedBy() != p.id && forceNotifyOthers);

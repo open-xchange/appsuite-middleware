@@ -1,3 +1,7 @@
+* 2007-10-22 - francisco.laguna@open-xchange.com
+
+ - Bugfix #9865: Less valiant logging for Notifications.
+
 * 2007-10-22 - thorben.betten@open-xchange.com
 
  - Bugfix #9820: Fixed folder move operation if IMAP server does not
