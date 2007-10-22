@@ -463,39 +463,41 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 			 */
 			IMAPCommandsCollection.forceSetSubscribed(imapStore, createMe.getFullName(), true);
 			if (imapConfig.isSupportsACLs() && toCreate.containsPermissions()) {
-				final ACL[] initialACLs = createMe.getACL();
-				final ACL[] newACLs = permissions2ACL(toCreate.getPermissions(), createMe);
-				if (!equals(initialACLs, newACLs)) {
-					if (!createMe.myRights().contains(Rights.Right.ADMINISTER)) {
-						throw new IMAPException(IMAPException.Code.NO_ADMINISTER_ACCESS_ON_INITIAL, createMe
-								.getFullName());
-					}
-					boolean adminFound = false;
-					for (int i = 0; i < newACLs.length && !adminFound; i++) {
-						if (newACLs[i].getRights().contains(Rights.Right.ADMINISTER)) {
-							adminFound = true;
+				final ACL[] initialACLs = getACLSafe(createMe);
+				if (initialACLs != null) {
+					final ACL[] newACLs = permissions2ACL(toCreate.getPermissions(), createMe);
+					if (!equals(initialACLs, newACLs)) {
+						if (!createMe.myRights().contains(Rights.Right.ADMINISTER)) {
+							throw new IMAPException(IMAPException.Code.NO_ADMINISTER_ACCESS_ON_INITIAL, createMe
+									.getFullName());
 						}
-					}
-					if (!adminFound) {
-						throw new IMAPException(IMAPException.Code.NO_ADMIN_ACL, createMe.getFullName());
-					}
-					/*
-					 * Apply new ACLs
-					 */
-					for (int i = 0; i < newACLs.length; i++) {
-						createMe.addACL(newACLs[i]);
-					}
-					/*
-					 * Remove other ACLs
-					 */
-					final ACL[] removedACLs = getRemovedACLs(newACLs, initialACLs);
-					if (removedACLs.length > 0) {
-						final UserStorage userStorage = UserStorage.getInstance(session.getContext());
-						final User2ACL user2ACL = User2ACL.getInstance(session.getUserObject());
-						final User2ACLArgs user2ACLArgs = IMAPFolderConverter.getUser2AclArgs(session, createMe);
-						for (int i = 0; i < removedACLs.length; i++) {
-							if (isKnownEntity(removedACLs[i].getName(), user2ACL, userStorage, user2ACLArgs)) {
-								createMe.removeACL(removedACLs[i].getName());
+						boolean adminFound = false;
+						for (int i = 0; i < newACLs.length && !adminFound; i++) {
+							if (newACLs[i].getRights().contains(Rights.Right.ADMINISTER)) {
+								adminFound = true;
+							}
+						}
+						if (!adminFound) {
+							throw new IMAPException(IMAPException.Code.NO_ADMIN_ACL, createMe.getFullName());
+						}
+						/*
+						 * Apply new ACLs
+						 */
+						for (int i = 0; i < newACLs.length; i++) {
+							createMe.addACL(newACLs[i]);
+						}
+						/*
+						 * Remove other ACLs
+						 */
+						final ACL[] removedACLs = getRemovedACLs(newACLs, initialACLs);
+						if (removedACLs.length > 0) {
+							final UserStorage userStorage = UserStorage.getInstance(session.getContext());
+							final User2ACL user2ACL = User2ACL.getInstance(session.getUserObject());
+							final User2ACLArgs user2ACLArgs = IMAPFolderConverter.getUser2AclArgs(session, createMe);
+							for (int i = 0; i < removedACLs.length; i++) {
+								if (isKnownEntity(removedACLs[i].getName(), user2ACL, userStorage, user2ACLArgs)) {
+									createMe.removeACL(removedACLs[i].getName());
+								}
 							}
 						}
 					}
@@ -646,57 +648,61 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 				}
 			}
 			if (imapConfig.isSupportsACLs() && toUpdate.containsPermissions()) {
-				final ACL[] oldACLs = updateMe.getACL();
-				final ACL[] newACLs = permissions2ACL(toUpdate.getPermissions(), updateMe);
-				if (!equals(oldACLs, newACLs)) {
-					/*
-					 * Default folder is affected, check if owner still holds
-					 * full rights
-					 */
-					if (isDefaultFolder(updateMe.getFullName()) && !stillHoldsFullRights(updateMe, newACLs, session)) {
-						throw new IMAPException(IMAPException.Code.NO_DEFAULT_FOLDER_UPDATE, updateMe.getFullName());
-					} else if (!RightsCache.getCachedRights(updateMe, true, session).contains(Rights.Right.ADMINISTER)) {
-						throw new IMAPException(IMAPException.Code.NO_ADMINISTER_ACCESS, updateMe.getFullName());
-					}
-					/*
-					 * Check new ACLs
-					 */
-					if (newACLs.length == 0) {
-						throw new IMAPException(IMAPException.Code.NO_ADMIN_ACL, updateMe.getFullName());
-					}
-					boolean adminFound = false;
-					for (int i = 0; i < newACLs.length && !adminFound; i++) {
-						if (newACLs[i].getRights().contains(Rights.Right.ADMINISTER)) {
-							adminFound = true;
+				final ACL[] oldACLs = getACLSafe(updateMe);
+				if (oldACLs != null) {
+					final ACL[] newACLs = permissions2ACL(toUpdate.getPermissions(), updateMe);
+					if (!equals(oldACLs, newACLs)) {
+						/*
+						 * Default folder is affected, check if owner still
+						 * holds full rights
+						 */
+						if (isDefaultFolder(updateMe.getFullName())
+								&& !stillHoldsFullRights(updateMe, newACLs, session)) {
+							throw new IMAPException(IMAPException.Code.NO_DEFAULT_FOLDER_UPDATE, updateMe.getFullName());
+						} else if (!RightsCache.getCachedRights(updateMe, true, session).contains(
+								Rights.Right.ADMINISTER)) {
+							throw new IMAPException(IMAPException.Code.NO_ADMINISTER_ACCESS, updateMe.getFullName());
 						}
-					}
-					if (!adminFound) {
-						throw new IMAPException(IMAPException.Code.NO_ADMIN_ACL, updateMe.getFullName());
-					}
-					/*
-					 * Remove deleted ACLs
-					 */
-					final ACL[] removedACLs = getRemovedACLs(newACLs, oldACLs);
-					if (removedACLs.length > 0) {
-						final UserStorage userStorage = UserStorage.getInstance(session.getContext());
-						final User2ACL user2ACL = User2ACL.getInstance(session.getUserObject());
-						final User2ACLArgs user2ACLArgs = IMAPFolderConverter.getUser2AclArgs(session, updateMe);
-						for (int i = 0; i < removedACLs.length; i++) {
-							if (isKnownEntity(removedACLs[i].getName(), user2ACL, userStorage, user2ACLArgs)) {
-								updateMe.removeACL(removedACLs[i].getName());
+						/*
+						 * Check new ACLs
+						 */
+						if (newACLs.length == 0) {
+							throw new IMAPException(IMAPException.Code.NO_ADMIN_ACL, updateMe.getFullName());
+						}
+						boolean adminFound = false;
+						for (int i = 0; i < newACLs.length && !adminFound; i++) {
+							if (newACLs[i].getRights().contains(Rights.Right.ADMINISTER)) {
+								adminFound = true;
 							}
 						}
+						if (!adminFound) {
+							throw new IMAPException(IMAPException.Code.NO_ADMIN_ACL, updateMe.getFullName());
+						}
+						/*
+						 * Remove deleted ACLs
+						 */
+						final ACL[] removedACLs = getRemovedACLs(newACLs, oldACLs);
+						if (removedACLs.length > 0) {
+							final UserStorage userStorage = UserStorage.getInstance(session.getContext());
+							final User2ACL user2ACL = User2ACL.getInstance(session.getUserObject());
+							final User2ACLArgs user2ACLArgs = IMAPFolderConverter.getUser2AclArgs(session, updateMe);
+							for (int i = 0; i < removedACLs.length; i++) {
+								if (isKnownEntity(removedACLs[i].getName(), user2ACL, userStorage, user2ACLArgs)) {
+									updateMe.removeACL(removedACLs[i].getName());
+								}
+							}
+						}
+						/*
+						 * Change existing ACLs according to new ACLs
+						 */
+						for (int i = 0; i < newACLs.length; i++) {
+							updateMe.addACL(newACLs[i]);
+						}
+						/*
+						 * Since the ACLs have changed remove cached rights
+						 */
+						RightsCache.removeCachedRights(updateMe, session);
 					}
-					/*
-					 * Change existing ACLs according to new ACLs
-					 */
-					for (int i = 0; i < newACLs.length; i++) {
-						updateMe.addACL(newACLs[i]);
-					}
-					/*
-					 * Since the ACLs have changed remove cached rights
-					 */
-					RightsCache.removeCachedRights(updateMe, session);
 				}
 			}
 			if (!IMAPConfig.isIgnoreSubscription() && toUpdate.containsSubscribed()) {
@@ -912,6 +918,24 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 	/*
 	 * ++++++++++++++++++ Helper methods ++++++++++++++++++
 	 */
+
+	/**
+	 * Get the ACL list of specified folder
+	 * 
+	 * @param imapFolder
+	 *            The IMAP folder
+	 * @return The ACL list or <code>null</code> if any error occured
+	 */
+	private static ACL[] getACLSafe(final IMAPFolder imapFolder) {
+		try {
+			return imapFolder.getACL();
+		} catch (final MessagingException e) {
+			if (LOG.isDebugEnabled()) {
+				LOG.debug(e.getLocalizedMessage(), e);
+			}
+			return null;
+		}
+	}
 
 	private void deleteFolder(final IMAPFolder deleteMe) throws MailException, MessagingException {
 		if (isDefaultFolder(deleteMe.getFullName())) {

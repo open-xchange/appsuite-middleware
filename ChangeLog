@@ -11,6 +11,10 @@
  - Loading namespace folder only one time per user session
  - Bugfix #9852: Quoting replacement argument prior to invoking
    String.replaceFirst()
+ - Bugfix #9922: Fetching ACL list in a safe manner when inserting or
+   updating an IMAP folder. All ACL related actions are suppressed if ACLs
+   cannot be obtained which is mostly the case in a missing ADMINISTER
+   right due to a newer ACL extension.
 
 * 2007-10-19 - marcus.klein@open-xchange.com
 
