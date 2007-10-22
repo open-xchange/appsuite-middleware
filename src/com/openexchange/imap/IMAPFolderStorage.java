@@ -1017,22 +1017,27 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 			throw new IMAPException(IMAPException.Code.FOLDER_CREATION_FAILED, newFolder.getFullName(),
 					destFolder instanceof DefaultFolder ? DEFAULT_FOLDER_ID : destFolder.getFullName());
 		}
-		try {
-			newFolder.open(Folder.READ_WRITE);
+		if (imapConfig.isSupportsACLs()) {
+			/*
+			 * Copy ACLs
+			 */
 			try {
-				newFolder.setSubscribed(toMove.isSubscribed());
-				/*
-				 * Copy ACLs
-				 */
-				final ACL[] acls = toMove.getACL();
-				for (int i = 0; i < acls.length; i++) {
-					newFolder.addACL(acls[i]);
+				newFolder.open(Folder.READ_WRITE);
+				try {
+					newFolder.setSubscribed(toMove.isSubscribed());
+					/*
+					 * Copy ACLs
+					 */
+					final ACL[] acls = toMove.getACL();
+					for (int i = 0; i < acls.length; i++) {
+						newFolder.addACL(acls[i]);
+					}
+				} finally {
+					newFolder.close(false);
 				}
-			} finally {
-				newFolder.close(false);
+			} catch (final ReadOnlyFolderException e) {
+				throw new IMAPException(IMAPException.Code.NO_WRITE_ACCESS, newFolder.getFullName());
 			}
-		} catch (final ReadOnlyFolderException e) {
-			throw new IMAPException(IMAPException.Code.NO_WRITE_ACCESS, newFolder.getFullName());
 		}
 		if ((toMoveType & Folder.HOLDS_MESSAGES) > 0) {
 			/*

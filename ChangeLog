@@ -1,3 +1,8 @@
+* 2007-10-22 - thorben.betten@open-xchange.com
+
+ - Bugfix #9820: Fixed folder move operation if IMAP server does not
+   support ACLs
+
 * 2007-10-19 - marcus.klein@open-xchange.com
 
  - Bugfix #9764: This issue is fixed with the fix for bug 9807.
