@@ -1,3 +1,7 @@
+* 2007-10-22 - ben.pahne@open-xchange.com
+  
+ - Bugfix #9902: Admin gets not deleted during delete context
+
 * 2007-10-18 - ben.pahne@open-xchange.com
 
  - Bugfix #9800: Remaining entries inside del table after context delete
