@@ -1,3 +1,7 @@
+* 2007-10-23 - dennis.sieben@open-xchange.com
+
+  - Bugfix ID#9620 RMI Api documentation lacks proper language handling description
+
 * 2007-10-23 - manuel.kraft@open-xchange.com
 
    - Bugfix ID#9938 [HEAD] cache does not get invalidated when users are added to or removed from groups
