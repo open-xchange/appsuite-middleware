@@ -1,3 +1,7 @@
+* 2007-10-23 - thorben.betten@open-xchange.com
+
+ - Bugfix #9914: Providing a charset in new String() constructor
+
 * 2007-10-23 - francisco.laguna@open-xchange.com
 
  - Bugfix #9865: Differentiate resources and users by trying to load them.
