@@ -51,6 +51,7 @@ package com.openexchange.admin.rmi.impl;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -306,6 +307,30 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             }
 
             oxGroup.change(ctx, grp);
+            
+            //JCS
+            User[] new_members = oxGroup.getMembers(ctx, grp.getId());
+            try {
+                
+                JCS cache = JCS.getInstance("User");
+                
+                if(new_members!=null){
+                    for (User user : new_members) {
+                        cache.remove(new CacheKey(ctx.getId(), user.getId()));
+                    }
+                }
+                
+                if (grp.getMembers() != null && grp.getMembers().length > 0) {
+                    for (Integer old_user_id : grp.getMembers()) {
+                        cache.remove(new CacheKey(ctx.getId(), old_user_id));
+                    }
+                }
+                
+            } catch (final CacheException e) {
+                log.error(e.getMessage(), e);
+            }
+            
+            
         } catch (final EnforceableDataObjectException e2) {
             final InvalidDataException invalidDataException = new InvalidDataException(e2.getMessage());
             log.error(invalidDataException.getMessage(), invalidDataException);
@@ -623,9 +648,31 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
                 }
             }
         }
-
-        try {
+                
+        try {        
+            
+            // remember the old members for later cache invalidation
+            List<User[]> del_groups_members = new ArrayList<User[]>();            
+            for (Group del_group : grp) {
+                del_groups_members.add(oxGroup.getMembers(ctx, del_group.getId()));
+            }
+            
             oxGroup.delete(ctx, grp);
+            
+            //JCS
+            try {
+                JCS cache = JCS.getInstance("User");
+                // invalidate each user/member entry from cache for each removed group
+                for(User[] membaz : del_groups_members){                
+                    for (User user : membaz) {
+                        cache.remove(new CacheKey(ctx.getId(), user.getId()));
+                    }                
+                }
+            } catch (final CacheException e) {
+                log.error(e.getMessage(), e);
+            }
+            // END OF JCS
+            
         } catch (final StorageException e) {
             log.error(e.getMessage(), e);
             throw e;
@@ -994,6 +1041,19 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
 
         final User[] user_objs = getUsersFromIds(member_ids);
         oxGroup.removeMember(ctx, grp_id, user_objs);
+        
+        
+        // JCS
+        try {
+            JCS cache = JCS.getInstance("User");
+            for (User user : user_objs) {
+                cache.remove(new CacheKey(ctx.getId(), user.getId()));
+            }
+        } catch (final CacheException e) {
+            log.error(e.getMessage(), e);
+        }
+        // END OF JCS
+        
     }
 
     public void removeMember(final Context ctx, final Group grp,
@@ -1038,6 +1098,18 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         }
 
         oxGroup.removeMember(ctx, grp_id, members);
+        
+        // JCS
+        try {
+            JCS cache = JCS.getInstance("User");
+            for (User user : members) {
+                cache.remove(new CacheKey(ctx.getId(), user.getId()));
+            }
+        } catch (final CacheException e) {
+            log.error(e.getMessage(), e);
+        }
+        // END OF JCS
+        
     }
 
     /**
