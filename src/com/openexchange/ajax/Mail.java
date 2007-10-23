@@ -1151,9 +1151,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 			tmp.append(fileName.replaceAll(" ", "_"));
 		} else {
 			try {
-				tmp
-						.append(new String(Helper.encodeFilename(fileName, STR_UTF8, internetExplorer).getBytes(
-								"US-ASCII"), "US-ASCII"));
+				tmp.append(Helper.encodeFilename(fileName, STR_UTF8, internetExplorer));
 			} catch (final UnsupportedEncodingException e) {
 				LOG.error("Unsupported encoding in a message detected and monitored.", e);
 				MailInterfaceImpl.mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
