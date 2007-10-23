@@ -357,7 +357,7 @@ public class ContactWriter extends CommonWriter {
 				}
 				break;
 			case ContactObject.NUMBER_OF_IMAGES:
-				writeValue(contactobject.getNumberOfImages());
+				writeValue(contactobject.getNumberOfImages(), jsonArray);
 				break;
 			case ContactObject.INFO:
 				writeValue(contactobject.getInfo(), jsonArray);
