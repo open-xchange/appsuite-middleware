@@ -2365,7 +2365,10 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
     }
 
     /**
-     * Sets the language for this user object
+     * Sets the language for this user object. Note: Locale distinguishes between languages and countries.
+     * Unfortunately you have to select the country to the corresponding language here. So e.g.
+     * Locale.GERMANY not Locale.GERMAN. The only possible values are Locale.GERMANY, Locale.US and 
+     * Locale.FRANCE at the moment.
      * 
      * @param language A {@link Locale} object containing the language setting
      */
