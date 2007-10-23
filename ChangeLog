@@ -1,6 +1,6 @@
 * 2007-10-23 - marcus.klein@open-xchange.com
 
- - Bugfix #9764: Removed throw of ServletException on a not cached Exception.
+ - Bugfix #9807: Removed throw of ServletException on a not catched Exception.
 
 * 2007-10-22 - ben.pahne@open-xchange.com
   
