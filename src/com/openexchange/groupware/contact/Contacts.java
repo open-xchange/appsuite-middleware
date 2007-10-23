@@ -1102,7 +1102,7 @@ public class Contacts implements DeleteListener {
 			if (admin_delete == false){
 				cs.iFdeleteContact(id,cid,del);
 			} else if (admin_delete == true){
-				cs.iFtrashAllUserContactsDeletedEntriesFromAdmin(del,cid,id);
+				cs.iFtrashTheAdmin(del,cid,id);
 			}
 		} catch (final SQLException se) {
 			throw EXCEPTIONS.create(27,se,Integer.valueOf(cid),Integer.valueOf(id));

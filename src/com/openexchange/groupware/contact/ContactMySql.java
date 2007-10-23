@@ -1025,4 +1025,13 @@ public class ContactMySql implements ContactSql {
 		}
 		del.execute(tmp.toString());
 	}
+	
+	public void iFtrashTheAdmin(final Statement del, final int cid, final int uid) throws SQLException {
+		final StringBuilder tmp = new StringBuilder("DELETE FROM del_contacts WHERE intfield01 = "+uid+" and cid = "+cid);
+		if (LOG.isDebugEnabled()) {
+			LOG.debug(tmp.toString());
+		}
+		del.execute(tmp.toString());
+	}
+	
 }
