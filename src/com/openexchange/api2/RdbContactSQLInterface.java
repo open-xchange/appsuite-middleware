@@ -556,6 +556,9 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 				cso.setDisplayName(searchpattern);
 				cso.setGivenName(searchpattern);
 				cso.setSurname(searchpattern);
+				cso.setEmail1(searchpattern);
+				cso.setEmail2(searchpattern);
+				cso.setEmail3(searchpattern);
 			}
 			
 			cs.setContactSearchObject(cso);

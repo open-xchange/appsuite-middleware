@@ -112,7 +112,7 @@ public class ContactWriter extends CommonWriter {
 		writeParameter(ContactFields.FAX_HOME, contactobject.getFaxHome(), jsonObj);
 		writeParameter(ContactFields.FAX_OTHER, contactobject.getFaxOther(), jsonObj);
 		if (contactobject.containsImage1()){
-			writeParameter(ContactFields.NUMBER_OF_IMAGES, 1, jsonObj);
+			writeParameter(ContactFields.NUMBER_OF_IMAGES, contactobject.getNumberOfImages(), jsonObj);
 		}
 		//writeParameter(ContactFields.IMAGE1, contactobject.getImage1());
 		writeParameter(ContactFields.INFO, contactobject.getInfo(), jsonObj);

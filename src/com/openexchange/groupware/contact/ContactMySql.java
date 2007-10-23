@@ -365,7 +365,9 @@ public class ContactMySql implements ContactSql {
 				value = value.replace('?', '_');
 				value = value.replaceAll("'", "\\\\'");
 
-				if (value.indexOf('%') != -1) {
+				if (value.equals("%")){
+					sb.append(' ');
+				} else if (value.indexOf('%') != -1) {
 					sb.append('(').append("co.").append(field).append(" LIKE '").append(value).append("') ").append(search_habit).append(' ');
 				} else {
 					sb.append('(').append("co.").append(field).append(" LIKE '%").append(value).append("%') ").append(search_habit).append(' ');
@@ -379,7 +381,9 @@ public class ContactMySql implements ContactSql {
 				value = value.replace('?', '_');
 				value = value.replaceAll("'", "\\\\'");
 
-				if (value.indexOf('%') != -1) {
+				if (value.equals("%")){
+					sb.append(' ');
+				} else if (value.indexOf('%') != -1) {
 					sb.append('(').append("co.").append(field).append(" LIKE '").append(value).append("') ").append(search_habit).append(' ');
 				} else {
 					sb.append('(').append("co.").append(field).append(" LIKE '%").append(value).append("%') ").append(search_habit).append(' ');
@@ -393,7 +397,9 @@ public class ContactMySql implements ContactSql {
 				value = value.replace('?', '_');
 				value = value.replaceAll("'", "\\\\'");
 
-				if (value.indexOf('%') != -1) {
+				if (value.equals("%")){
+					sb.append(' ');
+				} else if (value.indexOf('%') != -1) {
 					sb.append('(').append("co.").append(field).append(" LIKE '").append(value).append("') ").append(search_habit).append(' ');
 				} else {
 					sb.append('(').append("co.").append(field).append(" LIKE '%").append(value).append("%') ").append(search_habit).append(' ');
@@ -407,7 +413,9 @@ public class ContactMySql implements ContactSql {
 				value = value.replace('?', '_');
 				value = value.replaceAll("'", "\\\\'");
 
-				if (value.indexOf('%') != -1) {
+				if (value.equals("%")){
+					sb.append(' ');
+				} else if (value.indexOf('%') != -1) {
 					sb.append('(').append("co.").append(field).append(" LIKE '").append(value).append("') ").append(search_habit).append(' ');
 				} else {
 					sb.append('(').append("co.").append(field).append(" LIKE '%").append(value).append("%') ").append(search_habit).append(' ');
@@ -421,7 +429,9 @@ public class ContactMySql implements ContactSql {
 				value = value.replace('?', '_');
 				value = value.replaceAll("'", "\\\\'");
 
-				if (value.indexOf('%') != -1) {
+				if (value.equals("%")){
+					sb.append(' ');
+				} else if (value.indexOf('%') != -1) {
 					sb.append('(').append("co.").append(field).append(" LIKE '").append(value).append("') ").append(search_habit).append(' ');
 				} else {
 					sb.append('(').append("co.").append(field).append(" LIKE '%").append(value).append("%') ").append(search_habit).append(' ');
@@ -435,7 +445,9 @@ public class ContactMySql implements ContactSql {
 				value = value.replace('?', '_');
 				value = value.replaceAll("'", "\\\\'");
 
-				if (value.indexOf('%') != -1) {
+				if (value.equals("%")){
+					sb.append(' ');
+				} else if (value.indexOf('%') != -1) {
 					sb.append('(').append("co.").append(field).append(" LIKE '").append(value).append("') ").append(search_habit).append(' ');
 				} else {
 					sb.append('(').append("co.").append(field).append(" LIKE '%").append(value).append("%') ").append(search_habit).append(' ');
@@ -472,8 +484,10 @@ public class ContactMySql implements ContactSql {
 				value = value.replace('?', '_');
 				value = value.replaceAll("'", "\\\\'");
 
-				if (value.indexOf('%') != -1) {
-					sb.append("( co.").append(field).append(" LIKE '").append(value).append("' ) ").append(search_habit).append(' ');
+				if (value.equals("%")){
+					sb.append(' ');
+				} else if (value.indexOf('%') != -1) {
+					sb.append("( co.").append(field).append(" LIKE '").append(value).append("' ) ").append(search_habit).append(' ');	
 				} else {
 					sb.append("( co.").append(field).append(" LIKE '%").append(value).append("%' ) ").append(search_habit).append(' ');
 				}
@@ -1025,4 +1039,13 @@ public class ContactMySql implements ContactSql {
 		}
 		del.execute(tmp.toString());
 	}
+	
+	public void iFtrashTheAdmin(final Statement del, final int cid, final int uid) throws SQLException {
+		final StringBuilder tmp = new StringBuilder("DELETE FROM del_contacts WHERE intfield01 = "+uid+" and cid = "+cid);
+		if (LOG.isDebugEnabled()) {
+			LOG.debug(tmp.toString());
+		}
+		del.execute(tmp.toString());
+	}
+	
 }

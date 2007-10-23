@@ -363,6 +363,7 @@ public class ContactObject extends CommonObject
 	protected int defaultaddress;
 	protected byte[] image1;
 	protected Date image_last_modified;
+	protected int number_of_images;
 	protected String file_as;
 	protected String imageContentType;
 	protected boolean mark_as_distributionlist;
@@ -851,6 +852,10 @@ public class ContactObject extends CommonObject
 		return imageContentType;
 	}
 
+	public int getNumberOfImages(){
+		return number_of_images;
+	}
+	
 	public String getUserField01( ) 
 	{
 		return userfield01;
@@ -1542,6 +1547,7 @@ public class ContactObject extends CommonObject
 		this.image1 = image1;
 		b_containsImage = true;
 		b_image1 = true;
+		number_of_images++;
 	}
 
 	public void setImageContentType( final String imageContentType ) 
@@ -2046,6 +2052,7 @@ public class ContactObject extends CommonObject
 		image1 =null;
 		b_containsImage = false;
 		b_image1 = false;
+		number_of_images = 0;
 	}
 	
 	public void removeImageContentType( ) 

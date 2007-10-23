@@ -1106,7 +1106,7 @@ public class Contacts implements DeleteListener {
 			if (admin_delete == false){
 				cs.iFdeleteContact(id,cid,del);
 			} else if (admin_delete == true){
-				cs.iFtrashAllUserContactsDeletedEntriesFromAdmin(del,cid,id);
+				cs.iFtrashTheAdmin(del,cid,id);
 			}
 		} catch (final SQLException se) {
 			throw EXCEPTIONS.create(27,se,Integer.valueOf(cid),Integer.valueOf(id));
@@ -7109,6 +7109,36 @@ public class Contacts implements DeleteListener {
 		};
 		/**************** * intfield04 *  * *************/
 		mapping[ContactObject.IMAGE1_CONTENT_TYPE] = new mapper() {
+			public String getDBFieldName() {
+				return "intfield04";
+			}
+			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+				//
+			}
+			public boolean containsElement(final ContactObject co) {
+				return false;
+			}
+			public void fillPreparedStatement(final PreparedStatement ps, final int pos, final ContactObject co) throws SQLException{
+				// false
+			}
+			public boolean compare(final ContactObject co, final ContactObject original){		
+				return false;
+			}
+			public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
+				// nix	
+			}
+			public Object getData(final ResultSet rs, final int pos) throws SQLException {
+				return String.valueOf(rs.getInt(pos));
+			}
+			public String getValueAsString(final ContactObject co) {
+				return null;
+			}
+			public String getReadableTitle() {
+				return null;
+			}
+		};
+		/**************** * intfield04 *  * *************/
+		mapping[ContactObject.NUMBER_OF_IMAGES] = new mapper() {
 			public String getDBFieldName() {
 				return "intfield04";
 			}
