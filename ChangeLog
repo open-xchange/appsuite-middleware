@@ -1,3 +1,7 @@
+* 2007-10-23 - dennis.sieben@open-xchange.com
+
+  - Bugfix ID#9620 RMI Api documentation lacks proper language handling description
+
 * 2007-10-18 - manuel.kraft@open-xchange.com
  
   - Bugfix ID#9800 Unable to delete Contact: Context 30 Contact 2 on delete context
