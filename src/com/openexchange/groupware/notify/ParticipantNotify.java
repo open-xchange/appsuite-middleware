@@ -263,13 +263,13 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 				TimeZone tz = TimeZone.getDefault();
 				boolean sendMail = true;
 				
-				if(p.type != Participant.EXTERNAL_USER) {
+				if(isUser(sessionObj.getContext(), p)) {
 					try {
 						final UserSettingMail userSettingMail = getUserSettingMail(p.id, sessionObj.getContext());
 						sendMail = state.sendMail(userSettingMail) && obj.getModifiedBy() != p.id && (obj.getNotification() || p.id == obj.getCreatedBy() || forceNotifyOthers);
 						tz = p.timeZone;
 					} catch (final AbstractOXException e) {
-						LOG.debug("Could not load userSettingMail, so I'm assuming I can send a mail.",e);
+						LL.log(e);
 					}
 				} else {
 					sendMail = obj.getNotification() || (obj.getModifiedBy() != p.id && forceNotifyOthers);
@@ -306,6 +306,20 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 			sendMessage(mmsg.title, mmsg.message, mmsg.addresses, sessionObj, obj, mmsg.folderId, state, suppressOXReminderHeader);
 		}
 		
+	}
+
+	private boolean isUser(Context ctx, EmailableParticipant p) {
+		if(p.type == Participant.EXTERNAL_USER)
+			return false;
+		try {
+			return resolveUsers(ctx, p.id) != null;
+		} catch (LdapException x) {
+			if(x.getDetail() == LdapException.Detail.NOT_FOUND) {
+				return false;
+			}
+			LL.log(x);
+			return false;
+		}
 	}
 
 	private String list(final SortedSet<String> sSet) {
