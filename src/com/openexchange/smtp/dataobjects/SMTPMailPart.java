@@ -49,7 +49,6 @@
 
 package com.openexchange.smtp.dataobjects;
 
-import com.openexchange.mail.dataobjects.MailPart;
 
 /**
  * {@link SMTPMailPart}
@@ -57,7 +56,7 @@ import com.openexchange.mail.dataobjects.MailPart;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public abstract class SMTPMailPart extends MailPart {
+public interface SMTPMailPart {
 
 	/**
 	 * {@link SMTPPartType} - The different SMTP parts
@@ -83,13 +82,6 @@ public abstract class SMTPMailPart extends MailPart {
 		 * A referenced mail part
 		 */
 		REFERENCE;
-	}
-
-	/**
-	 * 
-	 */
-	public SMTPMailPart() {
-		super();
 	}
 
 	/**

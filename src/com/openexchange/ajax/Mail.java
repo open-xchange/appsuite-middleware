@@ -120,6 +120,7 @@ import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailStorageUtils.OrderDirection;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.dataobjects.TransportMailMessage;
 import com.openexchange.mail.json.parser.MessageParser;
 import com.openexchange.mail.json.writer.MessageWriter;
 import com.openexchange.mail.json.writer.MessageWriter.MailFieldWriter;
@@ -128,7 +129,6 @@ import com.openexchange.mail.transport.SendType;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.server.EffectivePermission;
 import com.openexchange.sessiond.SessionObject;
-import com.openexchange.smtp.dataobjects.SMTPMailMessage;
 import com.openexchange.tools.encoding.Helper;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -2224,7 +2224,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 						/*
 						 * Parse
 						 */
-						final SMTPMailMessage smtpMailMessage = MessageParser.parse(jsonMailObj, uploadEvent,
+						final TransportMailMessage transportMessage = MessageParser.parse(jsonMailObj, uploadEvent,
 								(SessionObject) uploadEvent.getParameter(UPLOAD_PARAM_SESSION));
 						/*
 						 * ... and send message
@@ -2233,7 +2233,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 								&& !jsonMailObj.isNull(PARAMETER_SEND_TYPE) ? SendType.getSendType(jsonMailObj
 								.getInt(PARAMETER_SEND_TYPE)) : SendType.NEW;
 						msgIdentifier = ((MailInterface) uploadEvent.getParameter(UPLOAD_PARAM_MAILINTERFACE))
-								.sendMessage(smtpMailMessage, sendType);
+								.sendMessage(transportMessage, sendType);
 					}
 					if (msgIdentifier == null) {
 						throw new MailException(MailException.Code.SEND_FAILED_UNKNOWN);

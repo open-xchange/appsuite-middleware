@@ -61,12 +61,12 @@ import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.dataobjects.TransportMailMessage;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.transport.SendType;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.monitoring.MonitorAgent;
 import com.openexchange.sessiond.SessionObject;
-import com.openexchange.smtp.dataobjects.SMTPMailMessage;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 
@@ -464,10 +464,10 @@ public final class MailInterfaceImpl extends MailInterface {
 	}
 
 	@Override
-	public String sendMessage(final SMTPMailMessage smtpMail, final SendType sendType) throws MailException {
+	public String sendMessage(final TransportMailMessage transportMail, final SendType sendType) throws MailException {
 		initConnection();
 		final MailTransport transport = MailTransport.getInstance(session, mailConnection);
-		return transport.sendMailMessage(smtpMail, sendType).toString();
+		return transport.sendMailMessage(transportMail, sendType).toString();
 	}
 
 	@Override

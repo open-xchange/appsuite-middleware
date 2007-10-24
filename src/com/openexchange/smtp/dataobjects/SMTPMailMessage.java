@@ -56,17 +56,19 @@ import java.util.List;
 import javax.activation.DataHandler;
 
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.dataobjects.TransportMailMessage;
+import com.openexchange.mail.transport.dataobjects.TextBodyMailPart;
 
 /**
- * {@link SMTPMailMessage} - Extends the {@link MailMessage} class by references
- * to enclosed parts that should be added as attachments on message transport
+ * {@link SMTPMailMessage} - Extends the {@link TransportMailMessage} class by
+ * references to enclosed parts that should be added as attachments on message
+ * transport
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class SMTPMailMessage extends MailMessage {
+public final class SMTPMailMessage extends TransportMailMessage {
 
 	private static final long serialVersionUID = 9031153888416594901L;
 
@@ -96,14 +98,9 @@ public final class SMTPMailMessage extends MailMessage {
 		return mailPart.getContent();
 	}
 
-	/**
-	 * Sets this SMTP message's body part
-	 * 
-	 * @param mailPart
-	 *            The SMTP body part
-	 */
-	public void setBodyPart(final SMTPBodyPart mailPart) {
-		this.mailPart = mailPart;
+	@Override
+	public void setBodyPart(final TextBodyMailPart mailPart) {
+		this.mailPart = (SMTPBodyPart) mailPart;
 	}
 
 	@Override
@@ -140,6 +137,7 @@ public final class SMTPMailMessage extends MailMessage {
 	 *            The index position
 	 * @return The removed part
 	 */
+	@Override
 	public MailPart removeEnclosedPart(final int index) {
 		return enclosedParts.remove(index);
 	}
@@ -150,6 +148,7 @@ public final class SMTPMailMessage extends MailMessage {
 	 * @param part
 	 *            The instance of {@link MailPart} to add
 	 */
+	@Override
 	public void addEnclosedPart(final MailPart part) {
 		enclosedParts.add(part);
 	}

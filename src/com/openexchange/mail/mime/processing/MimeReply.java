@@ -388,8 +388,9 @@ public final class MimeReply {
 
 	/**
 	 * Filters given address array against given filter set. All addresses
-	 * currently contained in filter set are removed and all adresses not
-	 * contained in filter set are added to filter set for future invocations
+	 * currently contained in filter set are removed from specified
+	 * <code>addrs</code> and all adresses not contained in filter set are
+	 * added to filter set for future invocations
 	 * 
 	 * @param filter
 	 *            The current address filter
@@ -463,8 +464,8 @@ public final class MimeReply {
 			{
 				final String nextLine = "\n\n";
 				if (isHtml) {
-					replyPrefix = MessageUtility.htmlFormat(new StringBuilder(replyPrefix.length() + 3).append(nextLine)
-							.append(replyPrefix).append(nextLine).toString());
+					replyPrefix = MessageUtility.htmlFormat(new StringBuilder(replyPrefix.length() + 3)
+							.append(nextLine).append(replyPrefix).append(nextLine).toString());
 				} else {
 					replyPrefix = new StringBuilder(replyPrefix.length() + 3).append(nextLine).append(replyPrefix)
 							.append(nextLine).toString();

@@ -77,6 +77,7 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMultipart;
 
 import com.openexchange.groupware.i18n.MailStrings;
+import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.i18n.StringHelper;
 import com.openexchange.mail.MailConnection;
 import com.openexchange.mail.MailException;
@@ -84,16 +85,25 @@ import com.openexchange.mail.MailPath;
 import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.dataobjects.TransportMailMessage;
 import com.openexchange.mail.mime.MIMESessionPropertyNames;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.transport.SendType;
+import com.openexchange.mail.transport.dataobjects.InfostoreDocumentMailPart;
+import com.openexchange.mail.transport.dataobjects.ReferencedMailPart;
+import com.openexchange.mail.transport.dataobjects.TextBodyMailPart;
+import com.openexchange.mail.transport.dataobjects.UploadFileMailPart;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.smtp.config.SMTPConfig;
 import com.openexchange.smtp.config.SMTPSessionProperties;
+import com.openexchange.smtp.dataobjects.SMTPBodyPart;
+import com.openexchange.smtp.dataobjects.SMTPDocumentPart;
+import com.openexchange.smtp.dataobjects.SMTPFilePart;
 import com.openexchange.smtp.dataobjects.SMTPMailMessage;
 import com.openexchange.smtp.dataobjects.SMTPMailPart;
 import com.openexchange.smtp.dataobjects.SMTPReferencedPart;
@@ -107,7 +117,7 @@ import com.sun.mail.smtp.SMTPMessage;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class SMTPTransport extends MailTransport<SMTPMailMessage> {
+public final class SMTPTransport extends MailTransport {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(SMTPTransport.class);
@@ -125,6 +135,14 @@ public final class SMTPTransport extends MailTransport<SMTPMailMessage> {
 	private final UserSettingMail usm;
 
 	private MailConfig transportConfig;
+
+	public SMTPTransport() {
+		super();
+		smtpSession = null;
+		mailConnection = null;
+		session = null;
+		usm = null;
+	}
 
 	/**
 	 * Constructor
@@ -344,12 +362,12 @@ public final class SMTPTransport extends MailTransport<SMTPMailMessage> {
 	 *      com.openexchange.mail.transport.SendType)
 	 */
 	@Override
-	@SuppressWarnings("null")
-	public MailPath sendMailMessage(final SMTPMailMessage mail, final SendType sendType) throws MailException {
+	public MailPath sendMailMessage(final TransportMailMessage transportMail, final SendType sendType)
+			throws MailException {
 		try {
 			long startTransport = System.currentTimeMillis();
 			final SMTPMessage smtpMessage = new SMTPMessage(smtpSession);
-			if ((mail.getFlags() & MailMessage.FLAG_DRAFT) == MailMessage.FLAG_DRAFT) {
+			if ((transportMail.getFlags() & MailMessage.FLAG_DRAFT) == MailMessage.FLAG_DRAFT) {
 				/*
 				 * A draft message
 				 */
@@ -358,7 +376,7 @@ public final class SMTPTransport extends MailTransport<SMTPMailMessage> {
 				 * Fill message
 				 */
 				final SMTPMessageFiller filler = new SMTPMessageFiller(session);
-				filler.fillMail(mail, smtpMessage);
+				filler.fillMail((SMTPMailMessage) transportMail, smtpMessage);
 				smtpMessage.setFlag(Flags.Flag.DRAFT, true);
 				smtpMessage.saveChanges();
 				/*
@@ -371,14 +389,14 @@ public final class SMTPTransport extends MailTransport<SMTPMailMessage> {
 				/*
 				 * Check for draft-edit operation: Delete old version
 				 */
-				if (mail.getMsgref() != null) {
-					final MailPath mailPath = new MailPath(mail.getMsgref());
+				if (transportMail.getMsgref() != null) {
+					final MailPath mailPath = new MailPath(transportMail.getMsgref());
 					if (mailConnection.getMessageStorage().getMessage(mailPath.getFolder(), mailPath.getUid())
 							.isDraft()) {
 						mailConnection.getMessageStorage().deleteMessages(mailPath.getFolder(),
 								new long[] { mailPath.getUid() }, true);
 					}
-					mail.setMsgref(null);
+					transportMail.setMsgref(null);
 				}
 				return new MailPath(draftFullname, uid);
 			}
@@ -391,11 +409,11 @@ public final class SMTPTransport extends MailTransport<SMTPMailMessage> {
 			final List<String> tempIds = new ArrayList<String>(5);
 			{
 				final MailMessage referencedMail;
-				if (mail.getMsgref() != null) {
-					mailPath = new MailPath(mail.getMsgref());
+				if (transportMail.getMsgref() != null) {
+					mailPath = new MailPath(transportMail.getMsgref());
 					referencedMail = mailConnection.getMessageStorage().getMessage(mailPath.getFolder(),
 							mailPath.getUid());
-					loadReferencedParts(mail, tempIds, referencedMail);
+					loadReferencedParts((SMTPMailMessage) transportMail, tempIds, referencedMail);
 					if (SendType.REPLY.equals(sendType)) {
 						checkMailConnection();
 						setReplyHeaders(referencedMail, smtpMessage);
@@ -413,9 +431,9 @@ public final class SMTPTransport extends MailTransport<SMTPMailMessage> {
 				 */
 				msgFiller = new SMTPMessageFiller(session);
 				if (SendType.FORWARD.equals(sendType) && usm.isForwardAsAttachment()) {
-					msgFiller.fillMail(mail, smtpMessage, sendType, referencedMail);
+					msgFiller.fillMail((SMTPMailMessage) transportMail, smtpMessage, sendType, referencedMail);
 				} else {
-					msgFiller.fillMail(mail, smtpMessage);
+					msgFiller.fillMail((SMTPMailMessage) transportMail, smtpMessage);
 				}
 			}
 			/*
@@ -425,7 +443,7 @@ public final class SMTPTransport extends MailTransport<SMTPMailMessage> {
 			if (allRecipients == null || allRecipients.length == 0) {
 				throw new SMTPException(SMTPException.Code.MISSING_RECIPIENTS);
 			}
-			setSendHeaders(mail, smtpMessage);
+			setSendHeaders((SMTPMailMessage) transportMail, smtpMessage);
 			if (LOG.isInfoEnabled()) {
 				LOG.info(new StringBuilder(128).append("SMTP mail prepared for transport in ").append(
 						System.currentTimeMillis() - startTransport).append("msec").toString());
@@ -625,5 +643,37 @@ public final class SMTPTransport extends MailTransport<SMTPMailMessage> {
 			}
 		}
 		return tmpPass;
+	}
+
+	@Override
+	protected TransportMailMessage getNewTransportMailMessageInternal() throws MailException {
+		return new SMTPMailMessage();
+	}
+
+	@Override
+	protected UploadFileMailPart getNewFilePartInternal(final UploadFile uploadFile) throws MailException {
+		return new SMTPFilePart(uploadFile);
+	}
+
+	@Override
+	protected InfostoreDocumentMailPart getNewDocumentPartInternal(final int documentId, final SessionObject session)
+			throws MailException {
+		return new SMTPDocumentPart(documentId, session);
+	}
+
+	@Override
+	protected ReferencedMailPart getNewReferencedPartInternal(final MailPart referencedPart, final SessionObject session)
+			throws MailException {
+		return new SMTPReferencedPart(referencedPart, session);
+	}
+
+	@Override
+	protected ReferencedMailPart getNewReferencedPartInternal(final String sequenceId) throws MailException {
+		return new SMTPReferencedPart(sequenceId);
+	}
+
+	@Override
+	protected TextBodyMailPart getNewTextBodyPartInternal(final String textBody) throws MailException {
+		return new SMTPBodyPart(textBody);
 	}
 }

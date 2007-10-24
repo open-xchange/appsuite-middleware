@@ -62,6 +62,7 @@ import com.openexchange.configuration.SystemConfig;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.config.MailConfigException;
+import com.openexchange.mail.transport.config.TransportConfig;
 import com.openexchange.sessiond.SessionObject;
 
 /**
@@ -70,7 +71,7 @@ import com.openexchange.sessiond.SessionObject;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class SMTPConfig extends MailConfig {
+public final class SMTPConfig extends TransportConfig {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(SMTPConfig.class);
@@ -105,8 +106,6 @@ public final class SMTPConfig extends MailConfig {
 	private static int smtpTimeout;
 
 	private static int smtpConnectionTimeout;
-
-	private static int smtpReferencedPartLimit;
 
 	/*
 	 * User-specific fields
@@ -291,7 +290,7 @@ public final class SMTPConfig extends MailConfig {
 	 *             If gloabal mail properties cannot be loaded
 	 */
 	private static void loadGlobalSmtpProperties(final boolean checkPropFile) throws MailConfigException {
-		loadGlobalMailProperties(checkPropFile);
+		loadGlobalTransportProperties(checkPropFile);
 		if (!globalSmtpPropsLoaded) {
 			GLOBAL_PROP_LOCK.lock();
 			try {
@@ -376,22 +375,6 @@ public final class SMTPConfig extends MailConfig {
 						smtpConnectionTimeout = 10000;
 						logBuilder.append("\tSMTP Timeout: Invalid value \"").append(smtpConTimeoutStr).append(
 								"\". Setting to fallback ").append(smtpConnectionTimeout).append('\n');
-
-					}
-				}
-
-				{
-					final String smtpReferencedPartLimitStr = smtpProperties.getProperty("smtpReferencedPartLimit",
-							"1048576").trim();
-					try {
-						smtpReferencedPartLimit = Integer.parseInt(smtpReferencedPartLimitStr);
-						logBuilder.append("\tSMTP Referenced Part Limit: ").append(smtpReferencedPartLimit)
-								.append('\n');
-					} catch (final NumberFormatException e) {
-						smtpReferencedPartLimit = 1048576;
-						logBuilder.append("\tSMTP Referenced Part Limit: Invalid value \"").append(
-								smtpReferencedPartLimitStr).append("\". Setting to fallback ").append(
-								smtpReferencedPartLimit).append('\n');
 
 					}
 				}
@@ -504,17 +487,6 @@ public final class SMTPConfig extends MailConfig {
 	public static int getSmtpTimeout() throws MailConfigException {
 		loadGlobalSmtpProperties();
 		return smtpTimeout;
-	}
-
-	/**
-	 * Gets the smtpReferencedPartLimit
-	 * 
-	 * @return The smtpReferencedPartLimit
-	 * @throws MailConfigException
-	 */
-	public static int getSmtpReferencedPartLimit() throws MailConfigException {
-		loadGlobalSmtpProperties();
-		return smtpReferencedPartLimit;
 	}
 
 	/**

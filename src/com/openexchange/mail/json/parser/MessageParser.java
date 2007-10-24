@@ -72,15 +72,13 @@ import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.dataobjects.TransportMailMessage;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMETypes;
+import com.openexchange.mail.transport.MailTransport;
+import com.openexchange.mail.transport.dataobjects.TextBodyMailPart;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.sessiond.SessionObject;
-import com.openexchange.smtp.dataobjects.SMTPBodyPart;
-import com.openexchange.smtp.dataobjects.SMTPDocumentPart;
-import com.openexchange.smtp.dataobjects.SMTPFilePart;
-import com.openexchange.smtp.dataobjects.SMTPMailMessage;
-import com.openexchange.smtp.dataobjects.SMTPReferencedPart;
 
 /**
  * {@link MessageParser}
@@ -101,7 +99,8 @@ public final class MessageParser {
 
 	/**
 	 * Completely parses given instance of {@link JSONObject} and given instance
-	 * of {@link UploadEvent} to a corresponding {@link SMTPMailMessage} object
+	 * of {@link UploadEvent} to a corresponding {@link TransportMailMessage}
+	 * object
 	 * 
 	 * @param jsonObj
 	 *            The JSON object
@@ -109,17 +108,17 @@ public final class MessageParser {
 	 *            The upload event containing the uploaded files to attach
 	 * @param session
 	 *            The session
-	 * @return A corresponding instance of {@link SMTPMailMessage}
+	 * @return A corresponding instance of {@link TransportMailMessage}
 	 * @throws MailException
 	 *             If parsing fails
 	 */
-	public static SMTPMailMessage parse(final JSONObject jsonObj, final UploadEvent uploadEvent,
+	public static TransportMailMessage parse(final JSONObject jsonObj, final UploadEvent uploadEvent,
 			final SessionObject session) throws MailException {
 		try {
 			/*
-			 * Parse SMTP message plus its text body
+			 * Parse transport message plus its text body
 			 */
-			final SMTPMailMessage smtpMail = parse(jsonObj, session);
+			final TransportMailMessage transportMail = parse(jsonObj, session);
 			{
 				/*
 				 * Uploaded files
@@ -133,7 +132,7 @@ public final class MessageParser {
 					 */
 					final UploadFile uf = uploadEvent.getUploadFileByFieldName(getFieldName(attachmentCounter++));
 					if (uf != null) {
-						smtpMail.addEnclosedPart(new SMTPFilePart(uf));
+						transportMail.addEnclosedPart(MailTransport.getNewFilePart(uf));
 						addedAttachments++;
 					}
 				}
@@ -146,10 +145,10 @@ public final class MessageParser {
 				final JSONArray ja = jsonObj.getJSONArray(MailJSONField.INFOSTORE_IDS.getKey());
 				final int length = ja.length();
 				for (int i = 0; i < length; i++) {
-					smtpMail.addEnclosedPart(new SMTPDocumentPart(ja.getInt(i), session));
+					transportMail.addEnclosedPart(MailTransport.getNewDocumentPart(ja.getInt(i), session));
 				}
 			}
-			return smtpMail;
+			return transportMail;
 		} catch (final JSONException e) {
 			throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
 		}
@@ -163,20 +162,21 @@ public final class MessageParser {
 
 	/**
 	 * Parses given instance of {@link JSONObject} on send operation and
-	 * generates a corresponding instance of {@link SMTPMailMessage}
+	 * generates a corresponding instance of {@link TransportMailMessage}
 	 * 
 	 * @param jsonObj
 	 *            The JSON object
 	 * @param session
 	 *            The session
-	 * @return A corresponding instance of {@link SMTPMailMessage}
+	 * @return A corresponding instance of {@link TransportMailMessage}
 	 * @throws MailException
 	 *             If parsing fails
 	 */
-	public static SMTPMailMessage parse(final JSONObject jsonObj, final SessionObject session) throws MailException {
-		final SMTPMailMessage smtpMail = new SMTPMailMessage();
-		parse(jsonObj, smtpMail, session);
-		return smtpMail;
+	public static TransportMailMessage parse(final JSONObject jsonObj, final SessionObject session)
+			throws MailException {
+		final TransportMailMessage transportMail = MailTransport.getNewTransportMailMessage();
+		parse(jsonObj, transportMail, session);
+		return transportMail;
 	}
 
 	/**
@@ -336,8 +336,8 @@ public final class MessageParser {
 			/*
 			 * Parse attachments
 			 */
-			if (mail instanceof SMTPMailMessage) {
-				final SMTPMailMessage smtpMail = (SMTPMailMessage) mail;
+			if (mail instanceof TransportMailMessage) {
+				final TransportMailMessage transportMail = (TransportMailMessage) mail;
 				if (jsonObj.has(MailJSONField.ATTACHMENTS.getKey())
 						&& !jsonObj.isNull(MailJSONField.ATTACHMENTS.getKey())) {
 					final JSONArray ja = jsonObj.getJSONArray(MailJSONField.ATTACHMENTS.getKey());
@@ -345,25 +345,26 @@ public final class MessageParser {
 					 * Parse body text
 					 */
 					final JSONObject tmp = ja.getJSONObject(0);
-					final SMTPBodyPart part = new SMTPBodyPart(tmp.getString(MailJSONField.CONTENT.getKey()));
+					final TextBodyMailPart part = MailTransport.getNewTextBodyPart(tmp.getString(MailJSONField.CONTENT
+							.getKey()));
 					part.setContentType(parseContentType(tmp.getString(MailJSONField.CONTENT_TYPE.getKey())));
 					mail.setContentType(part.getContentType());
-					smtpMail.setBodyPart(part);
+					transportMail.setBodyPart(part);
 					/*
 					 * Parse referenced parts
 					 */
 					final int len = ja.length();
-					if (len > 1 && smtpMail.getMsgref() != null) {
+					if (len > 1 && transportMail.getMsgref() != null) {
 						for (int i = 1; i < len; i++) {
-							smtpMail.addEnclosedPart(new SMTPReferencedPart(ja.getJSONObject(i).getString(
-									MailListField.ID.getKey())));
+							transportMail.addEnclosedPart(MailTransport.getNewReferencedPart(ja.getJSONObject(i)
+									.getString(MailListField.ID.getKey())));
 						}
 					}
 				} else {
-					final SMTPBodyPart part = new SMTPBodyPart("");
+					final TextBodyMailPart part = MailTransport.getNewTextBodyPart("");
 					part.setContentType("text/plain; charset=us-ascii");
 					mail.setContentType(part.getContentType());
-					smtpMail.setBodyPart(part);
+					transportMail.setBodyPart(part);
 				}
 			}
 			/*

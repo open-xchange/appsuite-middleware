@@ -223,7 +223,17 @@ public class MailException extends AbstractOXException {
 		 * Mail could not be moved to trash folder. Quota exceeded
 		 */
 		DELETE_FAILED_OVER_QUOTA("Mail could not be moved to trash folder. Quota exceeded",
-				Category.EXTERNAL_RESOURCE_FULL, 39);
+				Category.EXTERNAL_RESOURCE_FULL, 39),
+		/**
+		 * The message part with sequence ID %s could not be found in message %s
+		 * in folder %s
+		 */
+		PART_NOT_FOUND("The message part with sequence ID %s could not be found in message %s in folder %s",
+				Category.CODE_ERROR, 40),
+		/**
+		 * No content available in mail part
+		 */
+		NO_CONTENT("No content available in mail part", Category.CODE_ERROR, 41);
 
 		private final String message;
 

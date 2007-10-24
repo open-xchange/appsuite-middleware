@@ -1,3 +1,7 @@
+* 2007-10-24 - thorben.betten@open-xchange.com
+
+ - Mail transport's dataobjects made more abstract
+
 * 2007-10-24 - marcus.klein@open-xchange.com
 
  - Bugfix #9807: Removed throw of ServletException on a not catched Exception.

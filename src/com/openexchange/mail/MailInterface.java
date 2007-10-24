@@ -54,6 +54,7 @@ import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.dataobjects.TransportMailMessage;
 import com.openexchange.mail.transport.SendType;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.smtp.dataobjects.SMTPMailMessage;
@@ -233,7 +234,7 @@ public abstract class MailInterface {
 	 * and its possible file attachments contained in given instance of
 	 * <code>uploadEvent</code>.
 	 */
-	public abstract String sendMessage(SMTPMailMessage smtpMail, SendType sendType) throws MailException;
+	public abstract String sendMessage(TransportMailMessage transportMail, SendType sendType) throws MailException;
 
 	/**
 	 * Creates an instance of <code>JSONMessageObject</code> which contains

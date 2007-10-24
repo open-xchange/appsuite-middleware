@@ -261,7 +261,7 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 	 * @return A dummy instance
 	 * @throws MailException
 	 */
-	private static MailConnection getInstanceInternal() throws MailException {
+	private static final MailConnection getInstanceInternal() throws MailException {
 		/*
 		 * Create a new mail connection
 		 */
@@ -287,7 +287,7 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 	 * 
 	 * @return The class name of {@link MailPermission} implementation
 	 */
-	public static String getMailPermissionClass() {
+	public static final String getMailPermissionClass() {
 		try {
 			return MailConnection.getInstanceInternal().getMailPermissionClassInternal();
 		} catch (final MailException e) {

@@ -306,7 +306,7 @@ public abstract class MailMessage extends MailPart implements Serializable, Clon
 	/**
 	 * Default constructor
 	 */
-	public MailMessage() {
+	protected MailMessage() {
 		super();
 	}
 

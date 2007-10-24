@@ -47,43 +47,51 @@
  *
  */
 
-package com.openexchange.smtp.dataobjects;
+package com.openexchange.mail.dataobjects;
 
-import com.openexchange.mail.MailException;
-import com.openexchange.mail.transport.dataobjects.InfostoreDocumentMailPart;
-import com.openexchange.sessiond.SessionObject;
+import com.openexchange.mail.transport.dataobjects.TextBodyMailPart;
 
 /**
- * {@link SMTPDocumentPart}
+ * {@link TransportMailMessage} - Subclass of {@link MailPart} designed for
+ * composing a transport mail
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class SMTPDocumentPart extends InfostoreDocumentMailPart implements SMTPMailPart {
-
-	private static final long serialVersionUID = -2267358414476951363L;
+public abstract class TransportMailMessage extends MailMessage {
 
 	/**
-	 * Constructor
-	 * 
-	 * @param documentId
-	 *            The document's unique ID
-	 * @param session
-	 *            The session providing needed user data
-	 * @throws MailException
-	 *             If infostore document cannot be read
+	 * Default constructor
 	 */
-	public SMTPDocumentPart(final int documentId, final SessionObject session) throws MailException {
-		super(documentId, session);
+	protected TransportMailMessage() {
+		super();
 	}
 
-	/*
-	 * (non-Javadoc)
+	/**
+	 * Sets this transport message's body part
 	 * 
-	 * @see com.openexchange.mail.transport.smtp.dataobjects.SMTPMailPart#getType()
+	 * @param mailPart
+	 *            The body part
 	 */
-	public SMTPPartType getType() {
-		return SMTPMailPart.SMTPPartType.DOCUMENT;
-	}
+	public abstract void setBodyPart(TextBodyMailPart mailPart);
+
+	/**
+	 * Removes the enclosed part at the specified position. Shifts any
+	 * subsequent parts to the left (subtracts one from their indices). Returns
+	 * the part that was removed.
+	 * 
+	 * @param index
+	 *            The index position
+	 * @return The removed part
+	 */
+	public abstract MailPart removeEnclosedPart(int index);
+
+	/**
+	 * Adds an instance of {@link MailPart} to enclosed parts
+	 * 
+	 * @param part
+	 *            The instance of {@link MailPart} to add
+	 */
+	public abstract void addEnclosedPart(MailPart part);
 
 }

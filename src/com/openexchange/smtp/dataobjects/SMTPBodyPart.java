@@ -49,56 +49,29 @@
 
 package com.openexchange.smtp.dataobjects;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-
-import javax.activation.DataHandler;
-import javax.activation.DataSource;
-
-import com.openexchange.mail.MailException;
-import com.openexchange.mail.dataobjects.MailPart;
-import com.openexchange.mail.mime.datasource.MessageDataSource;
-import com.openexchange.smtp.SMTPException;
+import com.openexchange.mail.transport.dataobjects.TextBodyMailPart;
 
 /**
- * {@link SMTPBodyPart} - Designed to keep a mail's (text) body while offering
- * suitable implementation of {@link MailPart}
+ * {@link SMTPBodyPart}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class SMTPBodyPart extends SMTPMailPart {
+public final class SMTPBodyPart extends TextBodyMailPart implements SMTPMailPart {
 
 	/**
 	 * Serial version UID
 	 */
 	private static final long serialVersionUID = 9070060005849174055L;
 
-	private final String mailBody;
-
-	private transient DataSource dataSource;
-
 	/**
 	 * Constructor
+	 * 
+	 * @param mailBody
+	 *            The text body
 	 */
 	public SMTPBodyPart(final String mailBody) {
-		super();
-		this.mailBody = mailBody;
-	}
-
-	private DataSource getDataSource() throws SMTPException {
-		/*
-		 * Lazy creation
-		 */
-		if (null == dataSource) {
-			try {
-				dataSource = new MessageDataSource(mailBody, getContentType());
-			} catch (final UnsupportedEncodingException e) {
-				throw new SMTPException(SMTPException.Code.ENCODING_ERROR, e, e.getMessage());
-			}
-		}
-		return dataSource;
+		super(mailBody);
 	}
 
 	/*
@@ -106,72 +79,8 @@ public final class SMTPBodyPart extends SMTPMailPart {
 	 * 
 	 * @see com.openexchange.mail.transport.smtp.dataobjects.SMTPMailPart#getType()
 	 */
-	@Override
 	public SMTPPartType getType() {
 		return SMTPMailPart.SMTPPartType.BODY;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.dataobjects.MailPart#getContent()
-	 */
-	@Override
-	public Object getContent() throws MailException {
-		return mailBody;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.dataobjects.MailPart#getDataHandler()
-	 */
-	@Override
-	public DataHandler getDataHandler() throws MailException {
-		return new DataHandler(getDataSource());
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.dataobjects.MailPart#getEnclosedCount()
-	 */
-	@Override
-	public int getEnclosedCount() throws MailException {
-		return NO_ENCLOSED_PARTS;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.dataobjects.MailPart#getEnclosedMailPart(int)
-	 */
-	@Override
-	public MailPart getEnclosedMailPart(final int index) throws MailException {
-		return null;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.dataobjects.MailPart#getInputStream()
-	 */
-	@Override
-	public InputStream getInputStream() throws SMTPException {
-		try {
-			return getDataSource().getInputStream();
-		} catch (final IOException e) {
-			throw new SMTPException(SMTPException.Code.IO_ERROR, e, e.getLocalizedMessage());
-		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.dataobjects.MailPart#prepareForCaching()
-	 */
-	@Override
-	public void prepareForCaching() {
 	}
 
 }

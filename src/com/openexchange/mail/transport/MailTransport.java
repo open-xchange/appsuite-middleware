@@ -55,11 +55,17 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import com.openexchange.configuration.SystemConfig;
+import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.mail.MailConnection;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.config.MailConfig;
-import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.dataobjects.TransportMailMessage;
+import com.openexchange.mail.transport.dataobjects.InfostoreDocumentMailPart;
+import com.openexchange.mail.transport.dataobjects.ReferencedMailPart;
+import com.openexchange.mail.transport.dataobjects.TextBodyMailPart;
+import com.openexchange.mail.transport.dataobjects.UploadFileMailPart;
 import com.openexchange.sessiond.SessionObject;
 
 /**
@@ -68,7 +74,7 @@ import com.openexchange.sessiond.SessionObject;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public abstract class MailTransport<T extends MailMessage> {
+public abstract class MailTransport {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(MailTransport.class);
@@ -138,18 +144,165 @@ public abstract class MailTransport<T extends MailMessage> {
 		 */
 		try {
 			return clazz.getConstructor(CONSTRUCTOR_ARGS).newInstance(new Object[] { session, mailConnection });
-		} catch (SecurityException e) {
+		} catch (final SecurityException e) {
 			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (NoSuchMethodException e) {
+		} catch (final NoSuchMethodException e) {
 			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (IllegalArgumentException e) {
+		} catch (final IllegalArgumentException e) {
 			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (InstantiationException e) {
+		} catch (final InstantiationException e) {
 			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (IllegalAccessException e) {
+		} catch (final IllegalAccessException e) {
 			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (InvocationTargetException e) {
+		} catch (final InvocationTargetException e) {
 			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
+		}
+	}
+
+	private static final Class[] CONSTRUCTOR_ARGS_INTERNAL = new Class[0];
+
+	private static final Object[] INSTANCE_ARGS_INTERNAL = new Object[0];
+
+	private static MailTransport instance;
+
+	private static final AtomicBoolean internal = new AtomicBoolean();
+
+	private static final Lock LOCK_INTERNAL = new ReentrantLock();
+
+	private static final MailTransport getInstanceInternal() throws MailException {
+		if (!internal.get()) {
+			LOCK_INTERNAL.lock();
+			try {
+				if (!initialized.get()) {
+					init();
+				}
+				/*
+				 * Still not initialized
+				 */
+				if (!internal.get()) {
+					/*
+					 * Create a new mail transport
+					 */
+					try {
+						instance = clazz.getConstructor(CONSTRUCTOR_ARGS_INTERNAL).newInstance(INSTANCE_ARGS_INTERNAL);
+						internal.set(true);
+					} catch (final SecurityException e) {
+						throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
+					} catch (final NoSuchMethodException e) {
+						throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
+					} catch (final IllegalArgumentException e) {
+						throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
+					} catch (final InstantiationException e) {
+						throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
+					} catch (final IllegalAccessException e) {
+						throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
+					} catch (final InvocationTargetException e) {
+						throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
+					}
+				}
+			} finally {
+				LOCK_INTERNAL.unlock();
+			}
+		}
+		return instance;
+	}
+
+	/**
+	 * Gets a new instance of {@link TransportMailMessage}
+	 * 
+	 * @return A new instance of {@link TransportMailMessage}
+	 */
+	public static final TransportMailMessage getNewTransportMailMessage() {
+		try {
+			return MailTransport.getInstanceInternal().getNewTransportMailMessageInternal();
+		} catch (final MailException e) {
+			LOG.error(e.getLocalizedMessage(), e);
+			return null;
+		}
+	}
+
+	/**
+	 * Gets a new instance of {@link UploadFileMailPart}
+	 * 
+	 * @param uploadFile
+	 *            The upload file
+	 * @return A new instance of {@link UploadFileMailPart}
+	 */
+	public static final UploadFileMailPart getNewFilePart(final UploadFile uploadFile) {
+		try {
+			return MailTransport.getInstanceInternal().getNewFilePartInternal(uploadFile);
+		} catch (final MailException e) {
+			LOG.error(e.getLocalizedMessage(), e);
+			return null;
+		}
+	}
+
+	/**
+	 * Gets a new instance of {@link InfostoreDocumentMailPart}
+	 * 
+	 * @param documentId
+	 *            The infostore document's unique ID
+	 * @param session
+	 *            The session providing needed user data
+	 * @return A new instance of {@link InfostoreDocumentMailPart}
+	 */
+	public static final InfostoreDocumentMailPart getNewDocumentPart(final int documentId, final SessionObject session) {
+		try {
+			return MailTransport.getInstanceInternal().getNewDocumentPartInternal(documentId, session);
+		} catch (final MailException e) {
+			LOG.error(e.getLocalizedMessage(), e);
+			return null;
+		}
+	}
+
+	/**
+	 * Gets a new instance of {@link TextBodyMailPart}
+	 * 
+	 * @param textBody
+	 *            The text body
+	 * @return A new instance of {@link TextBodyMailPart}
+	 */
+	public static final TextBodyMailPart getNewTextBodyPart(final String textBody) {
+		try {
+			return MailTransport.getInstanceInternal().getNewTextBodyPartInternal(textBody);
+		} catch (final MailException e) {
+			LOG.error(e.getLocalizedMessage(), e);
+			return null;
+		}
+	}
+
+	/**
+	 * Gets a new instance of {@link ReferencedMailPart}
+	 * 
+	 * @param referencedPart
+	 *            The referenced part
+	 * @param session
+	 *            The session providing user data
+	 * @return A new instance of {@link ReferencedMailPart}
+	 */
+	public static final ReferencedMailPart getNewReferencedPart(final MailPart referencedPart,
+			final SessionObject session) {
+		try {
+			return MailTransport.getInstanceInternal().getNewReferencedPartInternal(referencedPart, session);
+		} catch (final MailException e) {
+			LOG.error(e.getLocalizedMessage(), e);
+			return null;
+		}
+	}
+
+	/**
+	 * Gets a new instance of {@link ReferencedMailPart}
+	 * 
+	 * @param sequenceId
+	 *            The sequence ID in referenced mail
+	 * @return A new instance of {@link ReferencedMailPart}
+	 */
+	public static final ReferencedMailPart getNewReferencedPart(final String sequenceId) {
+		try {
+			return MailTransport.getInstanceInternal().getNewReferencedPartInternal(sequenceId);
+		} catch (final MailException e) {
+			LOG.error(e.getLocalizedMessage(), e);
+			return null;
 		}
 	}
 
@@ -168,7 +321,7 @@ public abstract class MailTransport<T extends MailMessage> {
 	/**
 	 * Sends a mail message
 	 * 
-	 * @param mail
+	 * @param transportMail
 	 *            The mail message to send (containing necessary header data and
 	 *            body)
 	 * @param sendType
@@ -180,7 +333,8 @@ public abstract class MailTransport<T extends MailMessage> {
 	 * @throws MailException
 	 *             If transport fails
 	 */
-	public abstract MailPath sendMailMessage(T mail, SendType sendType) throws MailException;
+	public abstract MailPath sendMailMessage(TransportMailMessage transportMail, SendType sendType)
+			throws MailException;
 
 	/**
 	 * Sends specified message's raw ascii bytes. The given bytes are
@@ -213,4 +367,69 @@ public abstract class MailTransport<T extends MailMessage> {
 	 *             If transport fails
 	 */
 	public abstract void sendReceiptAck(String fullname, long msgUID, String fromAddr) throws MailException;
+
+	/**
+	 * Gets a new instance of {@link TransportMailMessage}
+	 * 
+	 * @return A new instance of {@link TransportMailMessage}
+	 * @throws MailException
+	 */
+	protected abstract TransportMailMessage getNewTransportMailMessageInternal() throws MailException;
+
+	/**
+	 * Gets a new instance of {@link UploadFileMailPart}
+	 * 
+	 * @param uploadFile
+	 *            The upload file
+	 * @return A new instance of {@link UploadFileMailPart}
+	 * @throws MailException
+	 */
+	protected abstract UploadFileMailPart getNewFilePartInternal(UploadFile uploadFile) throws MailException;
+
+	/**
+	 * Gets a new instance of {@link InfostoreDocumentMailPart}
+	 * 
+	 * @param documentId
+	 *            The infostore document's unique ID
+	 * @param session
+	 *            The session providing needed user data
+	 * @return A new instance of {@link InfostoreDocumentMailPart}
+	 * @throws MailException
+	 */
+	protected abstract InfostoreDocumentMailPart getNewDocumentPartInternal(int documentId, SessionObject session)
+			throws MailException;
+
+	/**
+	 * Gets a new instance of {@link TextBodyMailPart}
+	 * 
+	 * @param textBody
+	 *            The text body
+	 * @return A new instance of {@link TextBodyMailPart}
+	 * @throws MailException
+	 */
+	protected abstract TextBodyMailPart getNewTextBodyPartInternal(String textBody) throws MailException;
+
+	/**
+	 * Gets a new instance of {@link ReferencedMailPart}
+	 * 
+	 * @param referencedPart
+	 *            The referenced part
+	 * @param session
+	 *            The session providing user data
+	 * @return A new instance of {@link ReferencedMailPart}
+	 * @throws MailException
+	 */
+	protected abstract ReferencedMailPart getNewReferencedPartInternal(MailPart referencedPart, SessionObject session)
+			throws MailException;
+
+	/**
+	 * Gets a new instance of {@link ReferencedMailPart}
+	 * 
+	 * @param sequenceId
+	 *            The sequence ID in referenced mail
+	 * @return A new instance of {@link ReferencedMailPart}
+	 * @throws MailException
+	 */
+	protected abstract ReferencedMailPart getNewReferencedPartInternal(String sequenceId) throws MailException;
+
 }
