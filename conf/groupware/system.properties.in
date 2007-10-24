@@ -3,6 +3,9 @@
 # General mail config
 MailProperties=@oxgroupwaresysconfdir@/mail.properties
 
+# General transport config
+TransportProperties=@oxgroupwaresysconfdir@/transport.properties
+
 # JavaMail Properties
 JavaMailProperties=@oxgroupwaresysconfdir@/javamail.properties
 
