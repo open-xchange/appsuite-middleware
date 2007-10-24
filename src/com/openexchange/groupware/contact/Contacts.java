@@ -7113,7 +7113,10 @@ public class Contacts implements DeleteListener {
 				return "intfield04";
 			}
 			public void addToContactObject(final ResultSet rs, final int pos, final ContactObject co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
-				//
+				final int t = rs.getInt(pos);
+				if (!rs.wasNull()){
+					co.setNumberOfImages(t);
+				}
 			}
 			public boolean containsElement(final ContactObject co) {
 				return false;

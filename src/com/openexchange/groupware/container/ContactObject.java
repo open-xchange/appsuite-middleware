@@ -1556,6 +1556,11 @@ public class ContactObject extends CommonObject
 		bImageContentType = true;
 	}
 	
+	public void setNumberOfImages( final int number_of_images ) 
+	{
+		this.number_of_images = number_of_images;
+	}
+	
 	public void setNumberOfLinks( final int number_of_links ) 
 	{
 		this.number_of_links = number_of_links;
