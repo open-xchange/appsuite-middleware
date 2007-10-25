@@ -1,3 +1,13 @@
+* 2007-10-15 - choeger@open-xchange.com
+
+  - Bugfix ID#9790 L3: Filestore directory layout not physically deleted when context
+    is removed, only contained files
+
+* 2007-09-26 - choeger@open-xchange.com
+
+  - Bugfix ID#9614 initconfigdb "mysqladmin: connect to server at 'localhost'
+  failed" when database not local
+
 * 2007-09-25 - dennis.sieben@open-xchange.com
 
   - Bugfix ID#9569 showruntimestats shows "statistictools" as default usage

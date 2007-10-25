@@ -47,6 +47,9 @@ import com.openexchange.admin.tools.database.TableObject;
 import com.openexchange.admin.tools.database.TableRowObject;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.IDGenerator;
+import com.openexchange.groupware.contexts.ContextException;
+import com.openexchange.groupware.delete.DeleteEvent;
+import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
 
 /**
@@ -269,36 +272,11 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 oxres.deleteAllRecoveryData(ctx, write_ox_con);
 
                 write_ox_con.commit();
-                // } catch (SQLException exp) {
-                // log.error("Error processing deleteContext!Rollback starts!",
-                // exp);
-                // handleContextDeleteRollback(write_ox_con, con_write);
-                // throw exp;
-                // } catch (PoolException pexp) {
-                // log.error("Error processing deleteContext!Rollback starts!",
-                // pexp);
-                // handleContextDeleteRollback(write_ox_con, con_write);
-                // throw pexp;
-                // } catch (DBPoolingException pexp2) {
-                // log.error("Error processing deleteContext!Rollback starts!",
-                // pexp2);
-                // handleContextDeleteRollback(write_ox_con, con_write);
-                // throw pexp2;
-                // } catch (ContextException pexp3) {
-                // log.error("Error processing deleteContext!Rollback starts!",
-                // pexp3);
-                // handleContextDeleteRollback(write_ox_con, con_write);
-                // throw pexp3;
-                // } catch (DeleteFailedException pexp4) {
-                // log.error("Error processing deleteContext!Rollback starts!",
-                // pexp4);
-                // handleContextDeleteRollback(write_ox_con, con_write);
-                // throw pexp4;
-                // } catch (LdapException pexp5) {
-                // log.error("Error processing deleteContext!Rollback starts!",
-                // pexp5);
-                // handleContextDeleteRollback(write_ox_con, con_write);
-                // throw pexp5;
+
+                // delete on-disk filestore
+                final DeleteEvent delev = new DeleteEvent(this, ctx.getId(), DeleteEvent.TYPE_CONTEXT, ctx.getId());
+                AdminCache.delreg.fireDeleteEvent(delev, write_ox_con, write_ox_con);
+                
             } finally {
                 try {
                     if (write_ox_con != null) {
@@ -321,6 +299,14 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             log.error("Pool Error", e);
             this.oxcontextcommon.handleContextDeleteRollback(write_ox_con, con_write);
             throw new StorageException(e);
+        } catch (final ContextException e) {
+            log.error("Pool Error", e);
+            this.oxcontextcommon.handleContextDeleteRollback(write_ox_con, con_write);
+            throw new StorageException(e.toString());
+        } catch (final DeleteFailedException e) {
+            log.error("Pool Error", e);
+            this.oxcontextcommon.handleContextDeleteRollback(write_ox_con, con_write);
+            throw new StorageException(e.toString());
         } finally {
             closePreparedStatement(stmt);
 
