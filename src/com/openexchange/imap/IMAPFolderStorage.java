@@ -98,7 +98,7 @@ import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.imap.Rights;
 
 /**
- * IMAPFolderStorage
+ * {@link IMAPFolderStorage} - The IMAP folder storage implementation
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
