@@ -60,6 +60,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.webdav.lib.WebdavResource;
 
+import com.openexchange.tools.file.FileStorageException.Code;
+
 public class WebdavFileStorage extends FileStorage {
 	
 	private static final Log LOG = LogFactory.getLog(WebdavFileStorage.class);
@@ -258,7 +260,23 @@ public class WebdavFileStorage extends FileStorage {
         }
 	}
 
-	@Override
+	/**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void eliminate() throws FileStorageException {
+        // FIXME completely untested code. Maybe lock must be removed.
+        try {
+            final WebdavResource res = getResource("");
+            if (!res.deleteMethod()) {
+                throw new FileStorageException(Code.NOT_ELIMINATED);
+            }
+        } catch (IOException e) {
+            throw new FileStorageException(Code.IOERROR, e, e.getMessage());
+        }
+    }
+
+    @Override
 	protected void lock(final long timeout) throws FileStorageException {
         try {
     		if(lock.get()!=null) {

@@ -66,6 +66,7 @@ import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.attach.impl.AttachmentDelDelete;
 import com.openexchange.groupware.calendar.CalendarAdministration;
 import com.openexchange.groupware.contact.Contacts;
+import com.openexchange.groupware.filestore.FileStorageRemover;
 import com.openexchange.groupware.infostore.InfostoreDelete;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.tasks.TasksDelete;
@@ -121,6 +122,8 @@ public final class DeleteRegistry {
 		 * At last insert folder delete listener
 		 */
 		registerDeleteListener(new OXFolderDeleteListener());
+		// Remove FileStorage if context is deleted.
+		registerDeleteListener(new FileStorageRemover());
 	}
 
 	/**

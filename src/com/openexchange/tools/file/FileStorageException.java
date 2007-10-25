@@ -51,7 +51,6 @@ package com.openexchange.tools.file;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
-import com.openexchange.groupware.AbstractOXException.Category;
 
 /**
  * Exceptions of the FileStorage.
@@ -179,7 +178,12 @@ public class FileStorageException extends AbstractOXException {
          * Cannot create file %1$s.
          */
         CREATE_FAILED("Cannot create file %1$s.",
-            Category.SUBSYSTEM_OR_SERVICE_DOWN, 15);
+            Category.SUBSYSTEM_OR_SERVICE_DOWN, 15),
+        /**
+         * Eliminating the FileStorage failed.
+         */
+        NOT_ELIMINATED("Eliminating the FileStorage failed.", Category
+            .SUBSYSTEM_OR_SERVICE_DOWN, 16);
 
         /**
          * Message of the exception.

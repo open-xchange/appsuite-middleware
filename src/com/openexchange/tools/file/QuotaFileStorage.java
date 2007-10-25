@@ -334,7 +334,19 @@ public class QuotaFileStorage extends FileStorage {
 		}
 	}
 
-	@Override
+	/**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void eliminate() throws FileStorageException {
+        try {
+            delegate.eliminate();
+        } catch (final FileStorageException e) {
+            throw addContextInfo(e, ctx);
+        }
+    }
+
+    @Override
 	protected void lock(final long timeout) throws FileStorageException {
 		if(null == lockMode.get()) {
 			lockMode.set(new NormalLockMode(delegate, ctx));
