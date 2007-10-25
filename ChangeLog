@@ -2,6 +2,8 @@
 
  - Bugfix #9899: Reconstructing item handlers if order of fetch items
    changes during processing of FETCH response
+ - Bugfix #9939: Just sending END_RESPONSE package on ServletException to
+   keep the socket alive
 
 * 2007-10-24 - thorben.betten@open-xchange.com
 

@@ -266,6 +266,19 @@ public final class AJPv13Listener implements Runnable {
 						} catch (final IOException e1) {
 							LOG.error(e1.getMessage(), e1);
 						}
+					} catch (final ServletException e) {
+						LOG.error(e.getMessage(), e);
+						try {
+							/*
+							 * Send END_RESPONSE package
+							 */
+							writeEndResponse(client, false);
+							ajpCon.getAjpRequestHandler().setEndResponseSent(true);
+						} catch (final AJPv13Exception e1) {
+							LOG.error(e1.getMessage(), e1);
+						} catch (final IOException e1) {
+							LOG.error(e1.getMessage(), e1);
+						}
 					}
 					ajpCon.resetConnection(false);
 					AJPv13Server.ajpv13ListenerMonitor.decrementNumProcessing();
