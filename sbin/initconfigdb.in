@@ -186,14 +186,13 @@ drop database if exists \`${CONFIGDB_DBNAME}\`;
 GRANT ALL PRIVILEGES ON *.* TO '$CONFIGDB_USER'@'%' IDENTIFIED BY '$CONFIGDB_PASS' WITH GRANT OPTION;
 create database \`${CONFIGDB_DBNAME}\`;
 EOF
+    mysqladmin flush-privileges || die
 else
     cat<<EOF | mysql -h $CONFIGDB_HOST -P $CONFIGDB_PORT -u $CONFIGDB_USER -p${CONFIGDB_PASS} || die
 drop database if exists \`${CONFIGDB_DBNAME}\`;
 create database \`${CONFIGDB_DBNAME}\`;
 EOF
 fi
-
-mysqladmin flush-privileges || die
 
 cat $ADMINCONF/mysql/configdb.sql \
     | mysql -h $CONFIGDB_HOST -P $CONFIGDB_PORT -u $CONFIGDB_USER -p${CONFIGDB_PASS} ${CONFIGDB_DBNAME} || die
