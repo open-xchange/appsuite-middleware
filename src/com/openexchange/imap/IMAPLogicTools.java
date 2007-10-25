@@ -62,7 +62,6 @@ import javax.mail.Quota;
 import javax.mail.internet.MimeMessage;
 
 import com.openexchange.groupware.container.CommonObject;
-import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailLogicTools;
 import com.openexchange.mail.MailPath;
