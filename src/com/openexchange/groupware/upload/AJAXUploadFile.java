@@ -149,7 +149,7 @@ public final class AJAXUploadFile {
 
 	private TimerTask timerTask;
 
-	private boolean timerTaskStarted;
+	private final AtomicBoolean timerTaskStarted = new AtomicBoolean();
 
 	private final Lock timerTaskLock = new ReentrantLock();
 
@@ -224,7 +224,7 @@ public final class AJAXUploadFile {
 	 *            Session's map where the upload file is kept
 	 */
 	public void startTimerTask(final String id, final Map<String, AJAXUploadFile> ajaxUploadFiles) {
-		if (!timerTaskStarted) {
+		if (!timerTaskStarted.get()) {
 			timerTaskLock.lock();
 			try {
 				if (timerTask == null) {
@@ -233,7 +233,7 @@ public final class AJAXUploadFile {
 					 * Start timer task
 					 */
 					ServerTimer.getTimer().schedule(timerTask, 1000/* 1sec */, IDLE_TIME_MILLIS / 5);
-					timerTaskStarted = true;
+					timerTaskStarted.set(true);
 				}
 			} finally {
 				timerTaskLock.unlock();
@@ -249,7 +249,7 @@ public final class AJAXUploadFile {
 		/*
 		 * Prevent this upload file from being deleted by timer task
 		 */
-		if (timerTaskStarted) {
+		if (timerTaskStarted.get()) {
 			blockedForTimer.set(true);
 			timerTask.cancel();
 			/*
