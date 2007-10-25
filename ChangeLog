@@ -1,3 +1,8 @@
+* 2007-10-25 - thorben.betten@open-xchange.com
+
+ - Bugfix #9899: Reconstructing item handlers if order of fetch items
+   changes during processing of FETCH response
+
 * 2007-10-24 - thorben.betten@open-xchange.com
 
  - Mail transport's dataobjects made more abstract

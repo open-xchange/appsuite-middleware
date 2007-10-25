@@ -98,8 +98,8 @@ import com.sun.mail.imap.protocol.RFC822SIZE;
 import com.sun.mail.imap.protocol.UID;
 
 /**
- * {@link FetchIMAPCommand} - performs a prefetch of messages in given folder with only
- * those fields set that need to be present for display and sorting. A
+ * {@link FetchIMAPCommand} - performs a prefetch of messages in given folder
+ * with only those fields set that need to be present for display and sorting. A
  * corresponding instance of <code>javax.mail.FetchProfile</code> is going to
  * be generated from given fields.
  * 
@@ -381,15 +381,15 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 		} else if (!(currentReponse instanceof FetchResponse)) {
 			return;
 		}
-		final FetchResponse f = (FetchResponse) currentReponse;
+		final FetchResponse fetchResponse = (FetchResponse) currentReponse;
 		final int seqnum;
 		if (null != seqNumFetcher) {
 			seqnum = seqNumFetcher.getNextSeqNum(index);
-			if (seqnum != f.getNumber()) {
+			if (seqnum != fetchResponse.getNumber()) {
 				if (LOG.isWarnEnabled()) {
 					LOG.warn(new StringBuilder(256)
 							.append("Unexpected sequence number during FETCH command: Expected ").append(seqnum)
-							.append(" but was ").append(f.getNumber()).toString());
+							.append(" but was ").append(fetchResponse.getNumber()).toString());
 				}
 				/*
 				 * Continue with next response
@@ -397,35 +397,48 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 				return;
 			}
 		} else {
-			seqnum = f.getNumber();
+			seqnum = fetchResponse.getNumber();
 		}
-		final ContainerMessage msg = new ContainerMessage(imapFolder.getFullName(), imapFolder.getSeparator(),
-				seqnum);
-		final int itemCount = f.getItemCount();
-		if (itemHandlers == null) {
-			itemHandlers = createItemHandlers(itemCount, f);
+		final ContainerMessage msg = new ContainerMessage(imapFolder.getFullName(), imapFolder.getSeparator(), seqnum);
+		final int itemCount = fetchResponse.getItemCount();
+		if (itemHandlers == null || itemCount != itemHandlers.length) {
+			itemHandlers = createItemHandlers(itemCount, fetchResponse);
 		}
+		boolean repeatItem = true;
 		boolean error = false;
-		try {
-			for (int j = 0; j < itemCount; j++) {
-				itemHandlers[j].handleItem(f.getItem(j), msg);
+		do {
+			try {
+				for (int j = 0; j < itemCount; j++) {
+					itemHandlers[j].handleItem(fetchResponse.getItem(j), msg);
+				}
+				repeatItem = false;
+			} catch (final MessagingException e) {
+				/*
+				 * Discard corrupt message
+				 */
+				final MailException imapExc = IMAPException.handleMessagingException(e);
+				LOG.error(new StringBuilder(100).append("Message #").append(msg.getMessageNumber()).append(
+						" discarded: ").append(imapExc.getMessage()).toString(), imapExc);
+				error = true;
+				repeatItem = false;
+			} catch (final MailException e) {
+				/*
+				 * Discard corrupt message
+				 */
+				LOG.error(new StringBuilder(100).append("Message #").append(msg.getMessageNumber()).append(
+						" discarded: ").append(e.getMessage()).toString(), e);
+				error = true;
+				repeatItem = false;
+			} catch (final ClassCastException e) {
+				/*
+				 * Obviously the order of fetch items has changed during FETCH
+				 * response. Re-Build fetch item handlers according to current
+				 * untagged fetch response.
+				 */
+				itemHandlers = createItemHandlers(itemCount, fetchResponse);
+				repeatItem = true;
 			}
-		} catch (final MessagingException e) {
-			/*
-			 * Discard corrupt message
-			 */
-			final MailException imapExc = IMAPException.handleMessagingException(e);
-			LOG.error(new StringBuilder(100).append("Message #").append(msg.getMessageNumber()).append(" discarded: ")
-					.append(imapExc.getMessage()).toString(), imapExc);
-			error = true;
-		} catch (final MailException e) {
-			/*
-			 * Discard corrupt message
-			 */
-			LOG.error(new StringBuilder(100).append("Message #").append(msg.getMessageNumber()).append(" discarded: ")
-					.append(e.getMessage()).toString(), e);
-			error = true;
-		}
+		} while (repeatItem);
 		if (!error) {
 			retval.add(msg);
 		}
@@ -484,17 +497,12 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 			trimmedFields.add(Integer.valueOf(sortField));
 		}
 		try {
-			if (IMAPConfig.isFastFetch()) {
+			if (IMAPConfig.isFastFetch() && trimmedFields.removeAll(ENV_FIELDS)) {
 				/*
-				 * Check which fields are contained in fetch profile item
-				 * "ENVELOPE"
+				 * Some fields are contained in fetch profile item "ENVELOPE".
+				 * Add ENVELOPE since set of fields has changed.
 				 */
-				if (trimmedFields.removeAll(ENV_FIELDS)) {
-					/*
-					 * Add ENVELOPE since set of fields has changed
-					 */
-					retval.add(FetchProfile.Item.ENVELOPE);
-				}
+				retval.add(FetchProfile.Item.ENVELOPE);
 			}
 		} catch (final MailConfigException e) {
 			LOG.error(e.getMessage(), e);
@@ -705,9 +713,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 
 		/**
 		 * Handles given <code>com.sun.mail.imap.protocol.Item</code> instance
-		 * and applies it to given
-		 * <code>com.openexchange.groupware.container.mail.MessageCacheObject</code>
-		 * instance
+		 * and applies it to given {@link ContainerMessage} instance
 		 */
 		public abstract void handleItem(final Item item, final ContainerMessage msg) throws MessagingException,
 				MailException;
