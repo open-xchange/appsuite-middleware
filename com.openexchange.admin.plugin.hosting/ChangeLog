@@ -1,6 +1,6 @@
-* 2007-10-15 - choeger@open-xchange.com
+* 2007-10-25 - dennis.sieben@open-xchange.com
 
-  - Bugfix ID#9790 L3: Filestore directory layout not physically deleted when context
+  - Bugfix ID#9949 L3: Filestore directory layout not physically deleted when context
     is removed, only contained files
 
 * 2007-09-26 - choeger@open-xchange.com
