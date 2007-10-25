@@ -2,6 +2,7 @@
 
   - Bugfix ID#9949 L3: Filestore directory layout not physically deleted when context
     is removed, only contained files
+  - Bugfix ID#9948 No rollback when deleting a context
 
 * 2007-09-26 - choeger@open-xchange.com
 

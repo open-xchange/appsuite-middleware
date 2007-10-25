@@ -197,99 +197,90 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             con_write.setAutoCommit(false);
 
             write_ox_con = cache.getWRITEConnectionForContext(context_id);
-            try {
-                final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
-                // delete all users within this context except admin, admin must
-                // be the last user
-                final int admin_id = tool.getAdminForContext(ctx, write_ox_con);
 
-                write_ox_con.setAutoCommit(false);
+            final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
+            // delete all users within this context except admin, admin must
+            // be the last user
+            final int admin_id = tool.getAdminForContext(ctx, write_ox_con);
 
-                del_stmt = write_ox_con.prepareStatement("SELECT id FROM user WHERE cid = ? AND id != ?");
-                del_stmt.setInt(1, context_id);
-                del_stmt.setLong(2, admin_id);
-                final ResultSet r22 = del_stmt.executeQuery();
+            write_ox_con.setAutoCommit(false);
 
-                final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
-                final ArrayList<Integer> list = new ArrayList<Integer>();
-                while (r22.next()) {
-                    list.add(r22.getInt("id"));
-                }
-                r22.close();
-                del_stmt.close();
+            del_stmt = write_ox_con.prepareStatement("SELECT id FROM user WHERE cid = ? AND id != ?");
+            del_stmt.setInt(1, context_id);
+            del_stmt.setLong(2, admin_id);
+            final ResultSet r22 = del_stmt.executeQuery();
 
-                final int[] del_ids = new int[list.size()];
-                for (int i = 0; i < list.size(); i++) {
-                    del_ids[i] = list.get(i);
-                }
-                log.debug("Deleting users with ids " + del_ids + " from context " + context_id);
-                oxu.delete(ctx, del_ids, write_ox_con);
-
-                log.debug("Deleting admin (Id:" + admin_id + ") for context " + context_id);
-                oxu.delete(ctx, new int[] { admin_id }, write_ox_con);
-
-                // delete all folder stuff via groupware api
-                final OXFolderAdminHelper aa = new OXFolderAdminHelper();
-                log.debug("Deleting context folders via OX API ");
-                aa.deleteAllContextFolders(context_id, write_ox_con, write_ox_con);
-
-                log.debug("Deleting admin mapping for context " + context_id);
-                del_stmt = write_ox_con.prepareStatement("DELETE FROM user_setting_admin WHERE cid = ?");
-                del_stmt.setInt(1, context_id);
-                del_stmt.executeUpdate();
-                del_stmt.close();
-
-                log.debug("Deleting group members for context " + context_id);
-                // delete from members
-                del_stmt = write_ox_con.prepareStatement("DELETE FROM groups_member WHERE cid = ?");
-                del_stmt.setInt(1, context_id);
-                del_stmt.executeUpdate();
-                del_stmt.close();
-
-                log.debug("Deleting groups for context " + context_id);
-                // delete from groups
-                del_stmt = write_ox_con.prepareStatement("DELETE FROM groups WHERE cid = ?");
-                del_stmt.setInt(1, context_id);
-                del_stmt.executeUpdate();
-                del_stmt.close();
-
-                log.debug("Deleting resources for context " + context_id);
-                // delete from resource
-                del_stmt = write_ox_con.prepareStatement("DELETE FROM resource WHERE cid = ?");
-                del_stmt.setInt(1, context_id);
-                del_stmt.executeUpdate();
-                del_stmt.close();
-
-                // delete sequences
-                this.oxcontextcommon.deleteSequenceTables(context_id, write_ox_con);
-
-                // call ALL delete methods to delete from del_* tables
-                final OXGroupStorageInterface oxgroup = OXGroupStorageInterface.getInstance();
-                oxgroup.deleteAllRecoveryData(ctx, write_ox_con);
-                final OXUserStorageInterface oxuser = OXUserStorageInterface.getInstance();
-                oxuser.deleteAllRecoveryData(ctx, write_ox_con);
-                final OXResourceStorageInterface oxres = OXResourceStorageInterface.getInstance();
-                oxres.deleteAllRecoveryData(ctx, write_ox_con);
-
-                write_ox_con.commit();
-
-                // delete on-disk filestore
-                final DeleteEvent delev = new DeleteEvent(this, ctx.getId(), DeleteEvent.TYPE_CONTEXT, ctx.getId());
-                AdminCache.delreg.fireDeleteEvent(delev, write_ox_con, write_ox_con);
-                
-            } finally {
-                try {
-                    if (write_ox_con != null) {
-                        cache.pushOXDBWrite(context_id, write_ox_con);
-                    }
-                } catch (final Exception exp) {
-                    log.error("Error pushing ox write connection to pool!", exp);
-                }
+            final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
+            final ArrayList<Integer> list = new ArrayList<Integer>();
+            while (r22.next()) {
+                list.add(r22.getInt("id"));
             }
+            r22.close();
+            del_stmt.close();
+
+            final int[] del_ids = new int[list.size()];
+            for (int i = 0; i < list.size(); i++) {
+                del_ids[i] = list.get(i);
+            }
+            log.debug("Deleting users with ids " + del_ids + " from context " + context_id);
+            oxu.delete(ctx, del_ids, write_ox_con);
+
+            log.debug("Deleting admin (Id:" + admin_id + ") for context " + context_id);
+            oxu.delete(ctx, new int[] { admin_id }, write_ox_con);
+
+            // delete all folder stuff via groupware api
+            final OXFolderAdminHelper aa = new OXFolderAdminHelper();
+            log.debug("Deleting context folders via OX API ");
+            aa.deleteAllContextFolders(context_id, write_ox_con, write_ox_con);
+
+            log.debug("Deleting admin mapping for context " + context_id);
+            del_stmt = write_ox_con.prepareStatement("DELETE FROM user_setting_admin WHERE cid = ?");
+            del_stmt.setInt(1, context_id);
+            del_stmt.executeUpdate();
+            del_stmt.close();
+
+            log.debug("Deleting group members for context " + context_id);
+            // delete from members
+            del_stmt = write_ox_con.prepareStatement("DELETE FROM groups_member WHERE cid = ?");
+            del_stmt.setInt(1, context_id);
+            del_stmt.executeUpdate();
+            del_stmt.close();
+
+            log.debug("Deleting groups for context " + context_id);
+            // delete from groups
+            del_stmt = write_ox_con.prepareStatement("DELETE FROM groups WHERE cid = ?");
+            del_stmt.setInt(1, context_id);
+            del_stmt.executeUpdate();
+            del_stmt.close();
+
+            log.debug("Deleting resources for context " + context_id);
+            // delete from resource
+            del_stmt = write_ox_con.prepareStatement("DELETE FROM resource WHERE cid = ?");
+            del_stmt.setInt(1, context_id);
+            del_stmt.executeUpdate();
+            del_stmt.close();
+
+            // delete sequences
+            this.oxcontextcommon.deleteSequenceTables(context_id, write_ox_con);
+
+            // call ALL delete methods to delete from del_* tables
+            final OXGroupStorageInterface oxgroup = OXGroupStorageInterface.getInstance();
+            oxgroup.deleteAllRecoveryData(ctx, write_ox_con);
+            final OXUserStorageInterface oxuser = OXUserStorageInterface.getInstance();
+            oxuser.deleteAllRecoveryData(ctx, write_ox_con);
+            final OXResourceStorageInterface oxres = OXResourceStorageInterface.getInstance();
+            oxres.deleteAllRecoveryData(ctx, write_ox_con);
+
+
+            // delete on-disk filestore
+            final DeleteEvent delev = new DeleteEvent(this, ctx.getId(), DeleteEvent.TYPE_CONTEXT, ctx.getId());
+            AdminCache.delreg.fireDeleteEvent(delev, write_ox_con, write_ox_con);
+
 
             // execute deletecontextfromconfigdb
             this.oxcontextcommon.deleteContextFromConfigDB(con_write, context_id);
 
+            write_ox_con.commit();
             con_write.commit();
         } catch (final SQLException exp) {
             log.error("SQL Error", exp);
@@ -313,6 +304,14 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             closePreparedStatement(stmt2);
 
             closePreparedStatement(del_stmt);
+
+            try {
+                if (write_ox_con != null) {
+                    cache.pushOXDBWrite(context_id, write_ox_con);
+                }
+            } catch (final Exception exp) {
+                log.error("Error pushing ox write connection to pool!", exp);
+            }
 
             try {
                 if (con_write != null) {
