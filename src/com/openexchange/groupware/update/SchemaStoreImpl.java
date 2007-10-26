@@ -159,8 +159,8 @@ public class SchemaStoreImpl extends SchemaStore {
 		}
 	}
 
-	@OXThrowsMultiple(category = { Category.CODE_ERROR, Category.CODE_ERROR }, desc = { "", "" }, exceptionId = { 14,
-			15 }, msg = { "An SQL error occurred while creating table 'version': %1$s.",
+	@OXThrowsMultiple(category = { Category.CODE_ERROR, Category.CODE_ERROR }, desc = { "", "" }, exceptionId = { 30,
+			31 }, msg = { "An SQL error occurred while creating table 'version': %1$s.",
 			"A database error occurred while creating table 'version': %1$s." })
 	private static final void insertInitialEntry(final int contextId) throws SchemaException {
 		/*

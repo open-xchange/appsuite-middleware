@@ -1,3 +1,7 @@
+* 2007-10-26 - thorben.betten@open-xchange.com
+
+ - Bugfix #9980: Proper check for table 'version'
+
 * 2007-10-25 - thorben.betten@open-xchange.com
 
  - Bugfix #9899: Reconstructing item handlers if order of fetch items
