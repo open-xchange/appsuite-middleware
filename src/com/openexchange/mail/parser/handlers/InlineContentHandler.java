@@ -49,8 +49,6 @@
 
 package com.openexchange.mail.parser.handlers;
 
-import static com.openexchange.smtp.filler.SMTPMessageFiller.equalsCID;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -62,6 +60,7 @@ import javax.mail.internet.InternetAddress;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.mime.MIMEMessageUtility;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.parser.MailMessageHandler;
@@ -135,12 +134,17 @@ public final class InlineContentHandler implements MailMessageHandler {
 			String partCid = part.getContentId();
 			if (partCid == null || partCid.length() == 0) {
 				partCid = part.getHeader(MessageHeaders.HDR_CONTENT_ID);
-				if (partCid == null || partCid.length() == 0) {
-					return true;
-				}
+			}
+			partCid = partCid == null ? "" : partCid;
+			String realFilename = MIMEMessageUtility.getRealFilename(part);
+			realFilename = realFilename == null ? "" : realFilename;
+			if (partCid.length() == 0 && realFilename.length() == 0) {
+				return true;
 			}
 			for (int i = 0; i < size; i++) {
-				if (equalsCID(cids.get(i), partCid)) {
+				if (MIMEMessageUtility.equalsCID(cids.get(i), partCid)) {
+					inlineContents.add(i, part);
+				} else if (MIMEMessageUtility.equalsCID(cids.get(i), realFilename)) {
 					inlineContents.add(i, part);
 				}
 			}
@@ -222,13 +226,21 @@ public final class InlineContentHandler implements MailMessageHandler {
 	 * @see com.openexchange.mail.parser.MailMessageHandler#handleImagePart(com.openexchange.mail.dataobjects.MailPart,
 	 *      java.lang.String, java.lang.String, java.lang.String)
 	 */
-	public boolean handleImagePart(final MailPart part, final String imageCID, final String baseContentType,
+	public boolean handleImagePart(final MailPart part, final String imageCIDArg, final String baseContentType,
 			final String id) throws MailException {
+		String imageCID = imageCIDArg;
 		if (imageCID == null) {
+			imageCID = "";
+		}
+		String realFilename = MIMEMessageUtility.getRealFilename(part);
+		realFilename = realFilename == null ? "" : realFilename;
+		if (imageCID.length() == 0 && realFilename.length() == 0) {
 			return true;
 		}
 		for (int i = 0; i < size; i++) {
-			if (equalsCID(cids.get(i), imageCID)) {
+			if (MIMEMessageUtility.equalsCID(cids.get(i), imageCID)) {
+				inlineContents.add(i, part);
+			} else if (MIMEMessageUtility.equalsCID(cids.get(i), realFilename)) {
 				inlineContents.add(i, part);
 			}
 		}

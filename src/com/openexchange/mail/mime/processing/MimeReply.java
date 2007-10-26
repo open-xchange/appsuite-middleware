@@ -49,9 +49,6 @@
 
 package com.openexchange.mail.mime.processing;
 
-import static com.openexchange.smtp.filler.SMTPMessageFiller.getContentIDs;
-import static com.openexchange.smtp.filler.SMTPMessageFiller.hasEmbeddedImages;
-
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
@@ -86,6 +83,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.MIMEDefaultSession;
 import com.openexchange.mail.mime.MIMEMailException;
+import com.openexchange.mail.mime.MIMEMessageUtility;
 import com.openexchange.mail.mime.MIMESessionPropertyNames;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
@@ -333,7 +331,8 @@ public final class MimeReply {
 			 * Compose reply mail
 			 */
 			final MailMessage replyMail;
-			if (retvalContentType.isMimeType(MIMETypes.MIME_TEXT_HTM_ALL) && hasEmbeddedImages(replyText)) {
+			if (retvalContentType.isMimeType(MIMETypes.MIME_TEXT_HTM_ALL)
+					&& MIMEMessageUtility.hasEmbeddedImages(replyText)) {
 				/*
 				 * Prepare to append inline content
 				 */
@@ -352,7 +351,8 @@ public final class MimeReply {
 				/*
 				 * Append inline content
 				 */
-				appendInlineContent(originalMsg, (ComposedMailMessage) replyMail, getContentIDs(replyText));
+				appendInlineContent(originalMsg, (ComposedMailMessage) replyMail, MIMEMessageUtility
+						.getContentIDs(replyText));
 			} else {
 				/*
 				 * Set message's content directly to reply text

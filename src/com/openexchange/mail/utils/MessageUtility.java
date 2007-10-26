@@ -532,11 +532,13 @@ public final class MessageUtility {
 		return -1;
 	}
 
-	private static final Pattern IMG_PATTERN = Pattern.compile("(<img[^>]*>)", Pattern.CASE_INSENSITIVE
+	private static final Pattern IMG_PATTERN = Pattern.compile("<img[^>]*>", Pattern.CASE_INSENSITIVE
 			| Pattern.DOTALL);
 
 	private static final Pattern CID_PATTERN = Pattern.compile("cid:([^\\s>]*)|\"cid:([^\"]*)\"",
 			Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+	
+	private static final Pattern FILENAME_PATTERN = Pattern.compile("src=\"?([0-9a-z&&[^.\\s>\"]]+\\.[0-9a-z&&[^.\\s>\"]]+)\"?", Pattern.CASE_INSENSITIVE);
 
 	private static final String STR_AJAX_MAIL = "\"/ajax/mail?";
 
@@ -561,24 +563,27 @@ public final class MessageUtility {
 			if (imgMatcher.find()) {
 				final StringBuffer cidBuffer = new StringBuffer(256);
 				do {
-					final String foundImg = imgMatcher.group(1);
-					final Matcher cidMatcher = CID_PATTERN.matcher(foundImg);
-					cidBuffer.setLength(0);
-					if (cidMatcher.find()) {
-						final StringBuilder linkBuilder = new StringBuilder(256);
-						do {
-							final String cid = (cidMatcher.group(1) == null ? cidMatcher.group(2) : cidMatcher.group(1));
-							linkBuilder.setLength(0);
-							linkBuilder.append(STR_AJAX_MAIL).append(Mail.PARAMETER_SESSION).append('=').append(
+					final String imgTag = imgMatcher.group();
+					if (!replaceImgSrc(session, msgUID, imgTag, cidBuffer)) {
+						/*
+						 * No cid found, try with filename
+						 */
+						cidBuffer.setLength(0);
+						final Matcher m = FILENAME_PATTERN.matcher(imgTag);
+						if (m.find()) {
+							final StringBuilder linkBuilder = new StringBuilder(256);
+							final String filename = m.group(1);
+							linkBuilder.append("src=").append(STR_AJAX_MAIL).append(Mail.PARAMETER_SESSION).append('=').append(
 									session.getSecret()).append('&').append(Mail.PARAMETER_ACTION).append('=').append(
 									Mail.ACTION_MATTACH).append('&').append(Mail.PARAMETER_ID).append('=').append(
-									msgUID).append('&').append(Mail.PARAMETER_MAILCID).append('=').append(cid).append(
-									'"');
-							cidMatcher.appendReplacement(cidBuffer, Matcher.quoteReplacement(linkBuilder.toString()));
-						} while (cidMatcher.find());
+									msgUID).append('&').append(Mail.PARAMETER_MAILCID).append('=').append(filename)
+									.append('"');
+							m.appendReplacement(cidBuffer, Matcher.quoteReplacement(linkBuilder.toString()));
+						}
+						m.appendTail(cidBuffer);
 					}
-					cidMatcher.appendTail(cidBuffer);
 					imgMatcher.appendReplacement(sb, Matcher.quoteReplacement(cidBuffer.toString()));
+					cidBuffer.setLength(0);
 				} while (imgMatcher.find());
 			}
 			imgMatcher.appendTail(sb);
@@ -587,6 +592,27 @@ public final class MessageUtility {
 			LOG.warn("Unable to filter cid Images: " + e.getMessage());
 		}
 		return reval;
+	}
+
+	private static boolean replaceImgSrc(final SessionObject session, final String msgUID, final String imgTag, final StringBuffer cidBuffer) {
+		boolean retval = false;
+		final Matcher cidMatcher = CID_PATTERN.matcher(imgTag);
+		if (cidMatcher.find()) {
+			retval = true;
+			final StringBuilder linkBuilder = new StringBuilder(256);
+			do {
+				final String cid = (cidMatcher.group(1) == null ? cidMatcher.group(2) : cidMatcher.group(1));
+				linkBuilder.setLength(0);
+				linkBuilder.append(STR_AJAX_MAIL).append(Mail.PARAMETER_SESSION).append('=').append(
+						session.getSecret()).append('&').append(Mail.PARAMETER_ACTION).append('=').append(
+						Mail.ACTION_MATTACH).append('&').append(Mail.PARAMETER_ID).append('=').append(
+						msgUID).append('&').append(Mail.PARAMETER_MAILCID).append('=').append(cid).append(
+						'"');
+				cidMatcher.appendReplacement(cidBuffer, Matcher.quoteReplacement(linkBuilder.toString()));
+			} while (cidMatcher.find());
+		}
+		cidMatcher.appendTail(cidBuffer);
+		return retval;
 	}
 
 	private static final Pattern PATTERN_BLOCKQUOTE = Pattern.compile("(?:(<blockquote.*?>)|(</blockquote>))",

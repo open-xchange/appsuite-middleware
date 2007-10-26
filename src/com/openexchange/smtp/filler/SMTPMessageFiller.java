@@ -57,14 +57,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
@@ -93,6 +91,7 @@ import com.openexchange.mail.MailException;
 import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.mime.MIMEMessageUtility;
 import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
@@ -277,8 +276,8 @@ public final class SMTPMessageFiller {
 		 * Html content with embedded images
 		 */
 		final boolean embeddedImages = (sendMultipartAlternative || (mail.getContentType().isMimeType("text/htm")))
-				&& (hasEmbeddedImages((String) mail.getContent()) || hasReferencedLocalImages((String) mail
-						.getContent(), session));
+				&& (MIMEMessageUtility.hasEmbeddedImages((String) mail.getContent()) || MIMEMessageUtility
+						.hasReferencedLocalImages((String) mail.getContent(), session));
 		/*
 		 * Compose message
 		 */
@@ -568,7 +567,7 @@ public final class SMTPMessageFiller {
 			/*
 			 * Traverse Content-IDs
 			 */
-			final List<String> cidList = getContentIDs(mailBody);
+			final List<String> cidList = MIMEMessageUtility.getContentIDs(mailBody);
 			NextImg: for (String cid : cidList) {
 				/*
 				 * Get & remove inline image (to prevent it from be sent twice)
@@ -843,7 +842,7 @@ public final class SMTPMessageFiller {
 	private static String processReferencedLocalImages(final String htmlContent, final Multipart mp,
 			final SMTPMessageFiller msgFiller) throws MessagingException {
 		final StringBuffer sb = new StringBuffer(htmlContent.length());
-		final Matcher m = PATTERN_REF_IMG.matcher(htmlContent);
+		final Matcher m = MIMEMessageUtility.PATTERN_REF_IMG.matcher(htmlContent);
 		if (m.find()) {
 			msgFiller.uploadFileIDs = new HashSet<String>();
 			final StringBuilder tmp = new StringBuilder(128);
@@ -931,105 +930,16 @@ public final class SMTPMessageFiller {
 		return cid;
 	}
 
-	private static final Pattern PATTERN_EMBD_IMG = Pattern.compile("(<img.*src=\"cid:)([^\"]+)(\"[^/]*/?>)",
-			Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-
-	/**
-	 * Detects if given html content contains inlined images
-	 * <p>
-	 * Example:
-	 * 
-	 * <pre>
-	 * &lt;img src=&quot;cid:s345asd845@12drg&quot;&gt;
-	 * </pre>
-	 * 
-	 * @param htmlContent
-	 *            The html content
-	 * @return <code>true</code> if given html content contains inlined
-	 *         images; otherwise <code>false</code>
-	 */
-	public static boolean hasEmbeddedImages(final String htmlContent) {
-		return PATTERN_EMBD_IMG.matcher(htmlContent).find();
-	}
-
-	/**
-	 * Gathers all occuring content IDs in html content and returns them as a
-	 * list
-	 * 
-	 * @param htmlContent
-	 *            The html content
-	 * @return an instance of <code>{@link List}</code> containing all
-	 *         occuring content IDs
-	 */
-	public static List<String> getContentIDs(final String htmlContent) {
-		final List<String> retval = new ArrayList<String>();
-		final Matcher m = PATTERN_EMBD_IMG.matcher(htmlContent);
-		while (m.find()) {
-			retval.add(m.group(2));
-		}
-		return retval;
-	}
-
 	private static MailPart getAndRemoveImageAttachment(final String cid, final SMTPMailMessage mail)
 			throws MailException {
 		final int size = mail.getEnclosedCount();
 		for (int i = 0; i < size; i++) {
 			final MailPart enclosedPart = mail.getEnclosedMailPart(i);
-			if (enclosedPart.containsContentId() && equalsCID(cid, enclosedPart.getContentId())) {
+			if (enclosedPart.containsContentId() && MIMEMessageUtility.equalsCID(cid, enclosedPart.getContentId())) {
 				return mail.removeEnclosedPart(i);
 			}
 		}
 		return null;
 	}
 
-	/**
-	 * Compares the given vaslues of message header "Content-ID"
-	 * 
-	 * @param contentId1Arg
-	 *            The first content ID
-	 * @param contentId2Arg
-	 *            The second content ID
-	 * @return <code>true</code> if both are equal; otherwise
-	 *         <code>false</code>
-	 */
-	public static boolean equalsCID(final String contentId1Arg, final String contentId2Arg) {
-		if (null != contentId1Arg && null != contentId2Arg) {
-			final String contentId1 = contentId1Arg.charAt(0) == '<' ? contentId1Arg.substring(1, contentId1Arg
-					.length() - 1) : contentId1Arg;
-			final String contentId2 = contentId2Arg.charAt(0) == '<' ? contentId2Arg.substring(1, contentId2Arg
-					.length() - 1) : contentId2Arg;
-			return contentId1.equals(contentId2);
-		}
-		return false;
-	}
-
-	private static final Pattern PATTERN_REF_IMG = Pattern.compile(
-			"(<img[^/>]*?)(src=\")([^\"]+)(id=)([^\"&]+)(?:(&[^\"]+\")|(\"))([^/>]*/?>)", Pattern.CASE_INSENSITIVE
-					| Pattern.DOTALL);
-
-	/**
-	 * Detects if given html content contains references to local image files
-	 * <p>
-	 * Example:
-	 * 
-	 * <pre>
-	 * &lt;img src=&quot;[url-to-image]&amp;id=123dfr567zh&quot;&gt;
-	 * </pre>
-	 * 
-	 * @param htmlContent
-	 *            The html content
-	 * @param session
-	 *            The user session
-	 * @return <code>true</code> if given html content contains references to
-	 *         local image files; otherwise <code>false</code>
-	 */
-	public static boolean hasReferencedLocalImages(final String htmlContent, final SessionObject session) {
-		final Matcher m = PATTERN_REF_IMG.matcher(htmlContent);
-		while (m.find()) {
-			if (session.touchAJAXUploadFile(m.group(5))) {
-				return true;
-			}
-		}
-		return false;
-	}
 }

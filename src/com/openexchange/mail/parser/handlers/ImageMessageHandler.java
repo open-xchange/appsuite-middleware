@@ -59,6 +59,7 @@ import javax.mail.internet.InternetAddress;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.mime.MIMEMessageUtility;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.parser.MailMessageHandler;
@@ -86,8 +87,7 @@ public final class ImageMessageHandler implements MailMessageHandler {
 		if (cid == null || cid.length() == 0) {
 			throw new IllegalArgumentException("Image's Content-ID must not be null or empty");
 		}
-		this.cid = cid.charAt(0) == '<' ? cid : new StringBuilder(cid.length() + 2).append('<').append(cid).append('>')
-				.toString();
+		this.cid = cid;
 	}
 
 	/**
@@ -110,12 +110,23 @@ public final class ImageMessageHandler implements MailMessageHandler {
 				|| part.getContentType().isMimeType(MIMETypes.MIME_APPL_OCTET)) {
 			String cid = part.getContentId();
 			if (cid == null || cid.length() == 0) {
+				/*
+				 * Try to read from headers
+				 */
 				cid = part.getHeader(MessageHeaders.HDR_CONTENT_ID);
 				if (cid == null || cid.length() == 0) {
+					/*
+					 * Compare with filename
+					 */
+					final String realFilename = MIMEMessageUtility.getRealFilename(part);
+					if (MIMEMessageUtility.equalsCID(this.cid, realFilename)) {
+						imagePart = part;
+						return false;
+					}
 					return true;
 				}
 			}
-			if (this.cid.equalsIgnoreCase(cid)) {
+			if (MIMEMessageUtility.equalsCID(this.cid, cid)) {
 				imagePart = part;
 				return false;
 			}
@@ -187,10 +198,27 @@ public final class ImageMessageHandler implements MailMessageHandler {
 	public boolean handleImagePart(final MailPart part, final String imageCID, final String baseContentType,
 			final String id) throws MailException {
 		if (imageCID == null) {
+			/*
+			 * Compare with filename
+			 */
+			final String realFilename = MIMEMessageUtility.getRealFilename(part);
+			if (MIMEMessageUtility.equalsCID(this.cid, realFilename)) {
+				imagePart = part;
+				return false;
+			}
 			return true;
-		} else if (this.cid.equalsIgnoreCase(imageCID)) {
+		} else if (MIMEMessageUtility.equalsCID(this.cid, imageCID)) {
 			imagePart = part;
 			return false;
+		} else {
+			/*
+			 * Compare with filename
+			 */
+			final String realFilename = MIMEMessageUtility.getRealFilename(part);
+			if (MIMEMessageUtility.equalsCID(this.cid, realFilename)) {
+				imagePart = part;
+				return false;
+			}
 		}
 		return true;
 	}
