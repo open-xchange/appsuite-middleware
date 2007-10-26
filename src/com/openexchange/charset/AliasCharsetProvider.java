@@ -120,7 +120,8 @@ public final class AliasCharsetProvider extends CharsetProvider {
 				if (c == null) {
 					if (LOG.isErrorEnabled()) {
 						LOG.error(new StringBuilder(128).append("Unknown charset: ").append(charsetName).append(
-								"\nPlease add a proper delegate charset to AliasCharsetProvider"));
+								"\nPlease add a proper delegate charset to ").append(
+								AliasCharsetProvider.class.getName()));
 					}
 					c = FALLBACK;
 				}
