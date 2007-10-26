@@ -113,11 +113,17 @@ public final class AliasCharsetProvider extends CharsetProvider {
 		Charset c = name2charset.get(charsetName.toLowerCase());
 		try {
 			if (c == null) {
-				if (LOG.isErrorEnabled()) {
-					LOG.error(new StringBuilder(128).append("Unknown charset: ").append(charsetName).append(
-							"\nPlease add a proper delegate charset to AliasCharsetProvider"));
+				/*
+				 * Look-up in jcharset's supported charsets
+				 */
+				c = new net.freeutils.charset.CharsetProvider().charsetForName(charsetName);
+				if (c == null) {
+					if (LOG.isErrorEnabled()) {
+						LOG.error(new StringBuilder(128).append("Unknown charset: ").append(charsetName).append(
+								"\nPlease add a proper delegate charset to AliasCharsetProvider"));
+					}
+					c = FALLBACK;
 				}
-				c = FALLBACK;
 			}
 		} catch (final Exception e) {
 			/*
@@ -159,10 +165,9 @@ public final class AliasCharsetProvider extends CharsetProvider {
 			 * Prepare supported charsets
 			 */
 			final Charset[] cs = new Charset[] {
-			    new AliasCharset("BIG-5", new String[] { "BIG_5" }, Charset.forName("BIG5")),
-			    new AliasCharset("UTF_8", null, Charset.forName("UTF-8")),
-			    new AliasCharset("x-unknown", null, FALLBACK)
-			};
+					new AliasCharset("BIG-5", new String[] { "BIG_5" }, Charset.forName("BIG5")),
+					new AliasCharset("UTF_8", null, Charset.forName("UTF-8")),
+					new AliasCharset("x-unknown", null, FALLBACK) };
 			charsets = Collections.unmodifiableCollection(Arrays.asList(cs));
 			final Map<String, Charset> n2c = new HashMap<String, Charset>();
 			for (int i = 0; i < cs.length; i++) {
