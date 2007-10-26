@@ -49,6 +49,8 @@
 
 package com.openexchange.imap.command;
 
+import static com.openexchange.mail.utils.MessageUtility.decodeMultiEncodedHeader;
+
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
@@ -653,13 +655,20 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 			} else if (hdr.getName().equals(MessageHeaders.HDR_SUBJECT)) {
 				itemHandler.hdrHandlers.put(MessageHeaders.HDR_SUBJECT, new HeaderHandler() {
 					public void handleHeader(final String hdrValue, final ContainerMessage msg) {
-						try {
-							msg.setSubject(MimeUtility.decodeText(hdrValue));
-						} catch (final UnsupportedEncodingException e) {
-							LOG.error("Unsupported encoding in a message detected and monitored.", e);
-							MailInterfaceImpl.mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
-							msg.setSubject(MessageUtility.decodeMultiEncodedHeader(hdrValue));
+						String decVal = decodeMultiEncodedHeader(hdrValue);
+						if (decVal.indexOf("=?") == -1) {
+							/*
+							 * Something went wrong during decoding
+							 */
+							try {
+								decVal = MimeUtility.decodeText(MimeUtility.unfold(hdrValue));
+							} catch (final UnsupportedEncodingException e) {
+								LOG.error("Unsupported encoding in a message detected and monitored.", e);
+								MailInterfaceImpl.mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
+								decVal = hdrValue;
+							}
 						}
+						msg.setSubject(decVal);
 					}
 				});
 			} else if (hdr.getName().equals(MessageHeaders.HDR_DATE)) {

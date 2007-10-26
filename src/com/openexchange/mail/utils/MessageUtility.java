@@ -69,6 +69,7 @@ import javax.mail.internet.MimeUtility;
 import com.openexchange.ajax.Mail;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.mail.MailException;
+import com.openexchange.mail.MailInterfaceImpl;
 import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -234,6 +235,8 @@ public final class MessageUtility {
 					sb.append(Matcher.quoteReplacement(MimeUtility.decodeText(m.group())));
 					lastMatch = m.end();
 				} catch (final UnsupportedEncodingException e) {
+					LOG.error("Unsupported encoding in a message detected and monitored.", e);
+					MailInterfaceImpl.mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
 					sb.append(hdrVal.substring(lastMatch));
 				}
 			} while (m.find());
