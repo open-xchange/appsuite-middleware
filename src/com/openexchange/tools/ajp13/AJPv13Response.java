@@ -355,8 +355,12 @@ public class AJPv13Response {
 		 * num_headers (integer)
 		 */
 		final Map<String, List<String>> formattedCookies = servletResponse.getFormatedCookies();
+		String statusMsg = servletResponse.getStatusMsg();
+		if (null == statusMsg) {
+			statusMsg = "";
+		}
 		final int dataLength = getHeaderSizeInBytes(servletResponse) + getCookiesSizeInBytes(formattedCookies) + 5
-				+ servletResponse.getStatusMsg().length() + 2 + 1;
+				+ statusMsg.length() + 2 + 1;
 		if (dataLength + RESPONSE_PREFIX_LENGTH > MAX_PACKAGE_SIZE) {
 			throw new AJPv13MaxPackgeSizeException((dataLength + RESPONSE_PREFIX_LENGTH));
 		}
@@ -364,7 +368,7 @@ public class AJPv13Response {
 				+ RESPONSE_PREFIX_LENGTH);
 		fillStartBytes(SEND_HEADERS_PREFIX_CODE, dataLength, byteArray);
 		writeInt(servletResponse.getStatus(), byteArray);
-		writeString(servletResponse.getStatusMsg(), byteArray);
+		writeString(statusMsg, byteArray);
 		writeInt(servletResponse.getHeadersSize() + getNumOfCookieHeader(formattedCookies), byteArray);
 		final int headersSize = servletResponse.getHeadersSize();
 		final Iterator<String> iter = servletResponse.getHeaderNames();
@@ -586,12 +590,14 @@ public class AJPv13Response {
 		/*
 		 * Write string content and terminating '0'
 		 */
-		final char[] chars = strValue.toCharArray();
-		final byte[] bytes = new byte[strLength];
-		for (int i = 0; i < strLength; i++) {
-			bytes[i] = (byte) chars[i];
+		if (strLength > 0) {
+			final char[] chars = strValue.toCharArray();
+			final byte[] bytes = new byte[strLength];
+			for (int i = 0; i < strLength; i++) {
+				bytes[i] = (byte) chars[i];
+			}
+			byteArray.write(bytes, 0, strLength);
 		}
-		byteArray.write(bytes, 0, strLength);
 		byteArray.write(0);
 	}
 
