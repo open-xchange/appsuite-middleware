@@ -131,8 +131,8 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 throw new NoSuchContextException();
             }
 
-            if( tool.schemaBeingLockedOrNeedsUpdate(ctx) ) {
-                throw new DatabaseUpdateException("Database must be updated or currently is beeing updated");
+            if( tool.checkAndUpdateSchemaIfRequired(ctx) ) {
+                throw new DatabaseUpdateException("Database is locked or is now beeing updated, please try again later");
             }
 
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
@@ -404,8 +404,8 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             if (!tool.existsContext(ctx)) {
                 throw new NoSuchContextException();
             }
-            if( tool.schemaBeingLockedOrNeedsUpdate(ctx) ) {
-                throw new DatabaseUpdateException("Database must be updated or is currently beeing updated");
+            if( tool.checkAndUpdateSchemaIfRequired(ctx) ) {
+                throw new DatabaseUpdateException("Database is locked or is now beeing updated, please try again later");
             }
             if (!tool.isContextEnabled(ctx)) {
                 throw new OXContextException(OXContextException.CONTEXT_DISABLED);

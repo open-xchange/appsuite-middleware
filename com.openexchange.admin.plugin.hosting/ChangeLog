@@ -1,3 +1,7 @@
+* 2007-10-29 - choeger@open-xchange.com
+
+  - Bugfix ID#9986 Admin should uptate schema automatically
+
 * 2007-10-25 - dennis.sieben@open-xchange.com
 
   - Bugfix ID#9949 L3: Filestore directory layout not physically deleted when context
