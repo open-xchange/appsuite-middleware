@@ -276,6 +276,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 						}
 	)
 	public SearchIterator getContactsInFolder(final int folderId, final int from, final int to, final int order_field, final String orderMechanism, final int[] cols) throws OXException {
+		boolean error = false;
 		String orderDir = orderMechanism;
 		int orderBy = order_field;
 		if (orderBy == 0){
@@ -312,6 +313,8 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 		}
 		
 		SearchIterator si = null;
+		ResultSet rs = null;
+		Statement stmt = null;
 		try {
 			final ContactSql cs = new ContactMySql(sessionobject);
 			cs.setFolder(folderId);
@@ -331,9 +334,8 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 				}
 			}
 			
-			final Statement stmt = readCon.createStatement();
-			ResultSet rs = null;
-			
+			stmt = readCon.createStatement();
+
 			if (orderBy > 0){
 				final String order = " ORDER BY co." + Contacts.mapping[orderBy].getDBFieldName() + ' ' + orderDir + " LIMIT "	+ from + ',' + to + ' ';
 				cs.setOrder(order);
@@ -347,13 +349,37 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
             //return new PrefetchIterator(new ContactObjectIterator(rs, stmt, cols, false, readCon));
 			
 		} catch (SearchIteratorException e){
+			error = true;
 			throw EXCEPTIONS.create(11,e,Integer.valueOf(ctx.getContextId()), Integer.valueOf(folderId), Integer.valueOf(userId));
 		} catch (SQLException e) {
+			error = true;
 			throw EXCEPTIONS.create(12,e,Integer.valueOf(ctx.getContextId()), Integer.valueOf(folderId), Integer.valueOf(userId));
 		} catch (OXException e) {
+			error = true;
 			throw e;
 			//throw new OXException("Exception during getContactsInFolder() for User " + userId+ " in folder " + folderId +  " cid="+sessionobject.getContext().getContextId()+"\n:" + e.getMessage(),	e);
-		}
+		} finally {
+			if (error){
+				try{
+					if (rs != null){
+						rs.close();
+					}
+					if (stmt != null){
+						stmt.close();
+					}
+				} catch (SQLException sxe){
+					LOG.error("Unable to close Statement or ResultSet",sxe);
+				}
+				try{
+					if (readCon != null) {
+						DBPool.closeReaderSilent(sessionobject.getContext(), readCon);
+					}
+				} catch (Exception ex){
+					LOG.error("Unable to return Connection",ex);
+				}
+			}
+		}			
+		
 		return new PrefetchIterator(si);
 	}
 	
@@ -378,6 +404,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 						}
 	)
 	public SearchIterator getContactsByExtendedSearch(final ContactSearchObject searchobject,  final int order_field, final String orderMechanism, final int[] cols) throws OXException {
+		boolean error = false;
 		String orderDir = orderMechanism;
 		int orderBy = order_field;
 		if (orderBy == 0){
@@ -418,6 +445,8 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 		}
 		
 		SearchIterator si = null;
+		Statement stmt = null;
+		ResultSet rs = null;
 		try {
 			final ContactSql cs = new ContactMySql(sessionobject);
 			
@@ -450,22 +479,46 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 			
 			cs.setContactSearchObject(searchobject);
 			
-			final Statement stmt = readcon.createStatement();
-			ResultSet rs = null;
+			stmt = readcon.createStatement();
 			final String select = cs.iFgetColsString(cols).toString();
 			cs.setSelect(select);
 			rs = stmt.executeQuery(cs.getSqlCommand());
 			si = new ContactObjectIterator(rs, stmt, cols, false, readcon);
 		} catch (DBPoolingException e){
+			error = true;
 			throw EXCEPTIONS.create(19,e);
 		} catch (SearchIteratorException e){
+			error = true;
 			throw EXCEPTIONS.create(17,e,Integer.valueOf(ctx.getContextId()), Integer.valueOf(folderId), Integer.valueOf(userId));
 		} catch (SQLException e) {
+			error = true;
 			throw EXCEPTIONS.create(18,e,Integer.valueOf(ctx.getContextId()), Integer.valueOf(folderId), Integer.valueOf(userId));
 		} catch (OXException e) {
+			error = true;
 			throw e;
 			//throw new OXException("Exception during getContactsInFolder() for User " + userId	+ " in folder " + folderId + " cid="+sessionobject.getContext().getContextId()+ "\n:" + e.getMessage(),	e);
-		}
+		} finally {
+			if (error){
+				try{
+					if (rs != null){
+						rs.close();
+					}
+					if (stmt != null){
+						stmt.close();
+					}
+				} catch (SQLException sxe){
+					LOG.error("Unable to close Statement or ResultSet",sxe);
+				}
+				try{
+					if (readcon != null) {
+						DBPool.closeReaderSilent(sessionobject.getContext(), readcon);
+					}
+				} catch (Exception ex){
+					LOG.error("Unable to return Connection",ex);
+				}
+			}
+		}	
+
 		return new PrefetchIterator(si);
 	}
 	
@@ -488,6 +541,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 						}
 	)
 	public SearchIterator searchContacts(final String searchpattern, final boolean startletter, final int folderId, final int order_field, final String orderMechanism, final int[] cols) throws OXException {
+		boolean error = false;
 		String orderDir = orderMechanism;
 		int orderBy = order_field;
 		if (orderBy == 0){
@@ -527,6 +581,8 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 		}	
 
 		SearchIterator si = null;
+		Statement stmt = null;
+		ResultSet rs = null;
 		try {
 			final ContactSql cs = new ContactMySql(sessionobject);
 			cs.setFolder(folderId);
@@ -563,29 +619,43 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 			
 			cs.setContactSearchObject(cso);
 			
-			final Statement stmt = readcon.createStatement();
-			ResultSet rs = null;
+			stmt = readcon.createStatement();
 			final String select = cs.iFgetColsString(cols).toString();
 			cs.setSelect(select);
 			rs = stmt.executeQuery(cs.getSqlCommand());
 			si = new ContactObjectIterator(rs, stmt, cols, false, readcon);
 		} catch (SearchIteratorException e){
-			if (readcon != null) {
-				DBPool.closeReaderSilent(sessionobject.getContext(), readcon);
-			}
+			error = true;
 			throw EXCEPTIONS.create(24,e,Integer.valueOf(ctx.getContextId()), Integer.valueOf(folderId), Integer.valueOf(userId));
 		} catch (SQLException e) {
-			if (readcon != null) {
-				DBPool.closeReaderSilent(sessionobject.getContext(), readcon);
-			}
+			error = true;
 			throw EXCEPTIONS.create(25,e,Integer.valueOf(ctx.getContextId()), Integer.valueOf(folderId), Integer.valueOf(userId));
 		} catch (OXException e) {
-			if (readcon != null) {
-				DBPool.closeReaderSilent(sessionobject.getContext(), readcon);
-			}
+			error = true;
 			throw e;
 			//throw new OXException("Exception during getContactsInFolder() for User " + userId	+ " in folder " + folderId +  " cid="+sessionobject.getContext().getContextId()+"\n:" + e.getMessage(),	e);
-		}
+		} finally {
+			if (error){
+				try{
+					if (rs != null){
+						rs.close();
+					}
+					if (stmt != null){
+						stmt.close();
+					}
+				} catch (SQLException sxe){
+					LOG.error("Unable to close Statement or ResultSet",sxe);
+				}
+				try{
+					if (readcon != null) {
+						DBPool.closeReaderSilent(sessionobject.getContext(), readcon);
+					}
+				} catch (Exception ex){
+					LOG.error("Unable to return Connection",ex);
+				}
+			}
+		}	
+		
 		return new PrefetchIterator(si);		
 	}
 	
@@ -665,6 +735,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 						}
 	)
 	public SearchIterator getModifiedContactsInFolder(final int folderId, final int[] cols, final Date since) throws OXException {
+		boolean error = false;
 		Connection readCon = null;	
 		try{
 			readCon = DBPool.pickup(sessionobject.getContext());
@@ -693,6 +764,8 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 		}
 		
 		SearchIterator si = null;
+		Statement stmt = null;
+		ResultSet rs = null;
 		try {
 			final ContactSql cs = new ContactMySql(sessionobject);
 
@@ -715,21 +788,45 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 			}else{
 				cs.setFolder(folderId);
 			}
-			final Statement stmt = readCon.createStatement();
-			ResultSet rs = null;
+			
+			stmt = readCon.createStatement();
+
 			cs.getAllChangedSince(since.getTime());
 			final String select = cs.iFgetColsString(cols).toString();
 			cs.setSelect(select);
 			rs = stmt.executeQuery(cs.getSqlCommand());
 			si = new ContactObjectIterator(rs, stmt, cols, false, readCon);
 		} catch (SearchIteratorException e){
+			error = true;
 			throw EXCEPTIONS.create(34,Integer.valueOf(ctx.getContextId()), Integer.valueOf(folderId), Integer.valueOf(userId));
 		} catch (SQLException e){
+			error = true;
 			throw EXCEPTIONS.create(35,Integer.valueOf(ctx.getContextId()), Integer.valueOf(folderId), Integer.valueOf(userId));
 		} catch (OXException e) {
+			error = true;
 			throw e;
 			//throw new OXException(	"Exception during getContactsInFolder() for User " + userId+ " in folder " + folderId+ "(cid="+sessionobject.getContext().getContextId()+')',	e);
-		}
+		} finally {
+			if (error){
+				try{
+					if (rs != null){
+						rs.close();
+					}
+					if (stmt != null){
+						stmt.close();
+					}
+				} catch (SQLException sxe){
+					LOG.error("Unable to close Statement or ResultSet",sxe);
+				}
+				try{
+					if (readCon != null) {
+						DBPool.closeReaderSilent(sessionobject.getContext(), readCon);
+					}
+				} catch (Exception ex){
+					LOG.error("Unable to return Connection",ex);
+				}
+			}
+		}	
 		return new PrefetchIterator(si);
 	}
 
@@ -746,16 +843,19 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 						}
 	)
 	public SearchIterator getDeletedContactsInFolder(final int folderId, final int[] cols, final Date since) throws OXException {
+		boolean error = false;
 		SearchIterator si = null;
 		Connection readcon = null;
+		Statement stmt = null;
+		ResultSet rs = null;
 		try{
 			readcon = DBPool.pickup(sessionobject.getContext());
 			
 			final ContactSql cs = new ContactMySql(sessionobject);
 			cs.setFolder(folderId);
 
-			final Statement stmt = readcon.createStatement();
-			ResultSet rs = null;
+			stmt = readcon.createStatement();
+
 			cs.getAllChangedSince(since.getTime());
 			final String select = cs.iFgetColsStringFromDeleteTable(cols).toString();
 			cs.setSelect(select);
@@ -763,13 +863,36 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 			rs = stmt.executeQuery(cs.getSqlCommand());
 			si = new ContactObjectIterator(rs, stmt, cols, false, readcon);
 		} catch (SearchIteratorException e) {
+			error = true;
 			throw EXCEPTIONS.create(37,e,Integer.valueOf(ctx.getContextId()), Integer.valueOf(folderId), Integer.valueOf(userId));
 		} catch (DBPoolingException e) {
+			error = true;
 			throw EXCEPTIONS.create(36,e);
 		} catch (SQLException e) {
+			error = true;
 			throw EXCEPTIONS.create(38,e,Integer.valueOf(ctx.getContextId()), Integer.valueOf(folderId), Integer.valueOf(userId));
 			//throw new OXException("Exception during getDeletedContactsInFolder() for User " + userId+ " in folder " + folderId+ "(cid="+sessionobject.getContext().getContextId()+')',	e);
-		}
+		} finally {
+			if (error){
+				try{
+					if (rs != null){
+						rs.close();
+					}
+					if (stmt != null){
+						stmt.close();
+					}
+				} catch (SQLException sxe){
+					LOG.error("Unable to close Statement or ResultSet",sxe);
+				}
+				try{
+					if (readcon != null) {
+						DBPool.closeReaderSilent(sessionobject.getContext(), readcon);
+					}
+				} catch (Exception ex){
+					LOG.error("Unable to return Connection",ex);
+				}
+			}
+		}	
 		return new PrefetchIterator(si);
 	}
 
@@ -944,8 +1067,11 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 						}
 	)
 	public SearchIterator getObjectsById(final int[][] object_id, final int[] cols) throws OXException {
+		boolean error = false;
 		Connection readcon = null;
 		SearchIterator si = null;
+		Statement stmt = null;
+		ResultSet rs = null;
 		try{
 			readcon = DBPool.pickup(sessionobject.getContext());
 	
@@ -953,8 +1079,8 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 			contactSQL.setSelect(contactSQL.iFgetColsString(cols).toString());			
 			contactSQL.setObjectArray(object_id);			
 			
-			final Statement stmt = readcon.createStatement();
-			final ResultSet rs = stmt.executeQuery(contactSQL.getSqlCommand());
+			stmt = readcon.createStatement();
+			rs = stmt.executeQuery(contactSQL.getSqlCommand());
 			
 			if (object_id.length == 1 && !rs.first()){
 				throw EXCEPTIONS.createOXObjectNotFoundException(59);
@@ -964,12 +1090,35 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 			
 			si = new ContactObjectIterator(rs,stmt,cols,true,readcon);
 		} catch (DBPoolingException e) {
+			error = true;
 			throw EXCEPTIONS.create(47,e);
 		} catch (SearchIteratorException e) {
+			error = true;
 			throw EXCEPTIONS.create(48,e, Integer.valueOf(ctx.getContextId()), Integer.valueOf(userId));
 		} catch (SQLException e) {
+			error = true;
 			throw EXCEPTIONS.create(49,e, Integer.valueOf(ctx.getContextId()), Integer.valueOf(userId));
-		}
+		} finally {
+			if (error){
+				try{
+					if (rs != null){
+						rs.close();
+					}
+					if (stmt != null){
+						stmt.close();
+					}
+				} catch (SQLException sxe){
+					LOG.error("Unable to close Statement or ResultSet",sxe);
+				}
+				try{
+					if (readcon != null) {
+						DBPool.closeReaderSilent(sessionobject.getContext(), readcon);
+					}
+				} catch (Exception ex){
+					LOG.error("Unable to return Connection",ex);
+				}
+			}
+		}	
 		return new PrefetchIterator(si);
 	}
 	
