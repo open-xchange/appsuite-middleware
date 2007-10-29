@@ -114,7 +114,14 @@ public final class SMTPException extends MIMEMailException {
 		/**
 		 * No content available in mail part
 		 */
-		NO_CONTENT("No content available in mail part", Category.CODE_ERROR, 3010);
+		NO_CONTENT("No content available in mail part", Category.CODE_ERROR, 3010),
+		/**
+		 * Message has been successfully sent, but a copy could not be placed in
+		 * your sent folder due to exceeded quota.
+		 */
+		COPY_TO_SENT_FOLDER_FAILED_QUOTA(
+				"Message has been successfully sent, but a copy could not be placed in your sent folder due to exceeded quota.",
+				Category.EXTERNAL_RESOURCE_FULL, 3007);
 
 		private final String message;
 

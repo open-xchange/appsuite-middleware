@@ -494,6 +494,9 @@ public final class SMTPTransport extends MailTransport {
 			} catch (final SMTPException e) {
 				throw e;
 			} catch (final MailException e) {
+				if (e.getMessage().indexOf("quota") != -1) {
+					throw new SMTPException(SMTPException.Code.COPY_TO_SENT_FOLDER_FAILED_QUOTA, e, new Object[0]);
+				}
 				throw new SMTPException(SMTPException.Code.COPY_TO_SENT_FOLDER_FAILED, e, new Object[0]);
 			}
 			msgFiller.deleteReferencedUploadFiles();
