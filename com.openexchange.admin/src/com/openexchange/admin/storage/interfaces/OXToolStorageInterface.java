@@ -395,7 +395,7 @@ public abstract class OXToolStorageInterface {
     
     public abstract void primaryMailExists(final Context ctx, final String primary_mail) throws StorageException, InvalidDataException;
     
-    public abstract boolean schemaBeingLockedOrNeedsUpdate(final Context ctx) throws StorageException;
+    public abstract boolean checkAndUpdateSchemaIfRequired(final Context ctx) throws StorageException;
     
     public abstract boolean schemaBeingLockedOrNeedsUpdate(final int writePoolId, final String schema) throws StorageException;
 
@@ -406,4 +406,6 @@ public abstract class OXToolStorageInterface {
     public abstract boolean storeInUse(final int store_id) throws StorageException;
     
     public abstract void unsetUserSettingMailBit(final Context ctx, final User user, final int bit, final Connection con) throws StorageException;
+
+
 }
