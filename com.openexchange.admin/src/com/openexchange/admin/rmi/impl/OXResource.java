@@ -562,9 +562,9 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
      * @throws NoSuchContextException
      */
     private void checkSchemaBeingLocked(final Context ctx, final OXToolStorageInterface tools) throws StorageException, DatabaseUpdateException, NoSuchContextException {
-        if (tools.schemaBeingLockedOrNeedsUpdate(ctx)) {
+        if (tools.checkAndUpdateSchemaIfRequired(ctx)) {
             final DatabaseUpdateException databaseUpdateException = new DatabaseUpdateException(
-                    "Database must be updated or currently is beeing updated");
+                    "Database is locked or is now beeing updated, please try again later");
             log.error(databaseUpdateException.getMessage(), databaseUpdateException);
             throw databaseUpdateException;
         }

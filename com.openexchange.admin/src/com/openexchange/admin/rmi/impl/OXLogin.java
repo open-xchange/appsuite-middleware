@@ -71,6 +71,7 @@ import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
 import com.openexchange.groupware.contexts.ContextImpl;
 import com.openexchange.groupware.update.Updater;
@@ -145,16 +146,11 @@ public class OXLogin extends OXCommonImpl implements OXLoginInterface {
     private void triggerUpdateProcess(Context ctx) throws DatabaseUpdateException{
         // Check for update.
         try {
-            com.openexchange.groupware.contexts.Context ctxas = new ContextImpl(ctx.getId().intValue());
-            final Updater updater = Updater.getInstance();
-            if (updater.toUpdate(ctxas)){
-                updater.startUpdate(ctxas);
-                throw new DatabaseUpdateException("Database is just beeing updated. Try again.");
+            OXToolStorageInterface oxt = OXToolStorageInterface.getInstance();
+            if( oxt.checkAndUpdateSchemaIfRequired(ctx) ) {
+                throw new DatabaseUpdateException("Database is locked or is now beeing updated, please try again later");
             }
-            if (updater.isLocked(ctxas)) {
-                throw new DatabaseUpdateException("Database is just beeing updated. Try again.");
-            }
-        } catch (final UpdateException e) {
+        } catch (StorageException e) {
             log.error("Error running updateprocess",e);
             throw new DatabaseUpdateException(e.toString());
         }

@@ -243,6 +243,6 @@ public abstract class OXToolSQLStorage extends OXToolStorageInterface {
      * 
      * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#schemaBeingLockedOrNeedsUpdate(com.openexchange.admin.rmi.dataobjects.Context)
      */
-    public abstract boolean schemaBeingLockedOrNeedsUpdate(Context ctx) throws StorageException;
+    public abstract boolean checkAndUpdateSchemaIfRequired(Context ctx) throws StorageException;
 
 }
