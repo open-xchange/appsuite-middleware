@@ -10,6 +10,8 @@
    during a FETCH response from IMAP server
  - Bugfix #9906: Using safer Iterator.hasNext() method when traversing
    concurrent map. OXTimer is no more interrupted.
+ - Bugfix #9922: Fetch ACL list in a safe manner and abort all ACL related
+   actions if ACL cannot be determined
 
 * 2007-10-23 - marcus.klein@open-xchange.com
 

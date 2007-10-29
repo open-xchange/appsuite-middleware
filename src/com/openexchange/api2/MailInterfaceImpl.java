@@ -4931,9 +4931,9 @@ public class MailInterfaceImpl implements MailInterface {
 					if (isDefaultFolder(updateMe.getFullName())) {
 						throw new OXMailException(MailCode.NO_DEFAULT_FOLDER_UPDATE, updateMe.getFullName());
 					}
-					IMAPFolder destFolder = ((IMAPFolder) (MailFolderObject.DEFAULT_IMAP_FOLDER_ID
-							.equals(newParent) ? imapCon.getIMAPStore().getDefaultFolder() : imapCon.getIMAPStore()
-							.getFolder(newParent)));
+					IMAPFolder destFolder = ((IMAPFolder) (MailFolderObject.DEFAULT_IMAP_FOLDER_ID.equals(newParent) ? imapCon
+							.getIMAPStore().getDefaultFolder()
+							: imapCon.getIMAPStore().getFolder(newParent)));
 					if (!destFolder.exists()) {
 						destFolder = checkForNamespaceFolder(newParent);
 						if (null == destFolder) {
@@ -5052,79 +5052,81 @@ public class MailInterfaceImpl implements MailInterface {
 					 * Wrapper object contains rights. No simple rename but a
 					 * whole ACL re-set
 					 */
-					final ACL[] oldACLs = updateMe.getACL();
-					ACL[] newACLs;
-					try {
-						newACLs = folderObj.getACL();
-					} catch (AbstractOXException e) {
-						throw new OXMailException(e);
-					}
-					if (equals(oldACLs, newACLs)) {
-						break ACLS;
-					}
-					try {
-						/*
-						 * Default folder is affected, check if owner still
-						 * holds full rights
-						 */
-						if (isDefaultFolder(updateMe.getFullName())
-								&& !stillHoldsFullRights(updateMe, newACLs, sessionObj)) {
-							throw new OXMailException(MailCode.NO_DEFAULT_FOLDER_UPDATE, updateMe.getFullName());
+					final ACL[] oldACLs = getACLSafe(updateMe);
+					if (oldACLs != null) {
+						ACL[] newACLs;
+						try {
+							newACLs = folderObj.getACL();
+						} catch (AbstractOXException e) {
+							throw new OXMailException(e);
 						}
-					} catch (final AbstractOXException e) {
-						throw new OXMailException(e);
-					}
-					if (!sessionObj.getCachedRights(updateMe, true).contains(Rights.Right.ADMINISTER)) {
-						throw new OXMailException(MailCode.NO_ADMINISTER_ACCESS, getUserName(sessionObj), updateMe
-								.getFullName());
-					}
-					/*
-					 * Check new ACLs
-					 */
-					if (newACLs.length == 0) {
-						throw new OXMailException(MailCode.NO_ADMIN_ACL, getUserName(sessionObj),
-								prepareMailFolderParam(folderObj.getFullName()));
-					}
-					boolean adminFound = false;
-					for (int i = 0; i < newACLs.length && !adminFound; i++) {
-						if (newACLs[i].getRights().contains(Rights.Right.ADMINISTER)) {
-							adminFound = true;
+						if (equals(oldACLs, newACLs)) {
+							break ACLS;
 						}
-					}
-					if (!adminFound) {
-						throw new OXMailException(MailCode.NO_ADMIN_ACL, getUserName(sessionObj),
-								prepareMailFolderParam(folderObj.getFullName()));
-					}
-					final ACL[] removedACLs = getRemovedACLs(newACLs, oldACLs);
-					if (removedACLs.length > 0) {
 						try {
 							/*
-							 * Remove deleted ACLs
+							 * Default folder is affected, check if owner still
+							 * holds full rights
 							 */
-							final User2IMAP user2IMAP = User2IMAP.getInstance(sessionObj.getUserObject());
-							final UserStorage userStorage = UserStorage.getInstance(sessionObj.getContext());
-							final User2IMAPInfo user2IMAPInfo = new MailFolderObject(updateMe, sessionObj);
-							for (int i = 0; i < removedACLs.length; i++) {
-								if (isKnownEntity(removedACLs[i].getName(), user2IMAP, userStorage, user2IMAPInfo)) {
-									updateMe.removeACL(removedACLs[i].getName());
-								}
+							if (isDefaultFolder(updateMe.getFullName())
+									&& !stillHoldsFullRights(updateMe, newACLs, sessionObj)) {
+								throw new OXMailException(MailCode.NO_DEFAULT_FOLDER_UPDATE, updateMe.getFullName());
 							}
-						} catch (final LdapException e) {
-							throw new OXMailException(e);
-						} catch (final User2IMAPException e) {
+						} catch (final AbstractOXException e) {
 							throw new OXMailException(e);
 						}
+						if (!sessionObj.getCachedRights(updateMe, true).contains(Rights.Right.ADMINISTER)) {
+							throw new OXMailException(MailCode.NO_ADMINISTER_ACCESS, getUserName(sessionObj), updateMe
+									.getFullName());
+						}
+						/*
+						 * Check new ACLs
+						 */
+						if (newACLs.length == 0) {
+							throw new OXMailException(MailCode.NO_ADMIN_ACL, getUserName(sessionObj),
+									prepareMailFolderParam(folderObj.getFullName()));
+						}
+						boolean adminFound = false;
+						for (int i = 0; i < newACLs.length && !adminFound; i++) {
+							if (newACLs[i].getRights().contains(Rights.Right.ADMINISTER)) {
+								adminFound = true;
+							}
+						}
+						if (!adminFound) {
+							throw new OXMailException(MailCode.NO_ADMIN_ACL, getUserName(sessionObj),
+									prepareMailFolderParam(folderObj.getFullName()));
+						}
+						final ACL[] removedACLs = getRemovedACLs(newACLs, oldACLs);
+						if (removedACLs.length > 0) {
+							try {
+								/*
+								 * Remove deleted ACLs
+								 */
+								final User2IMAP user2IMAP = User2IMAP.getInstance(sessionObj.getUserObject());
+								final UserStorage userStorage = UserStorage.getInstance(sessionObj.getContext());
+								final User2IMAPInfo user2IMAPInfo = new MailFolderObject(updateMe, sessionObj);
+								for (int i = 0; i < removedACLs.length; i++) {
+									if (isKnownEntity(removedACLs[i].getName(), user2IMAP, userStorage, user2IMAPInfo)) {
+										updateMe.removeACL(removedACLs[i].getName());
+									}
+								}
+							} catch (final LdapException e) {
+								throw new OXMailException(e);
+							} catch (final User2IMAPException e) {
+								throw new OXMailException(e);
+							}
+						}
+						/*
+						 * Change existing ACLs according to new ACLs
+						 */
+						for (int i = 0; i < newACLs.length; i++) {
+							updateMe.addACL(newACLs[i]);
+						}
+						/*
+						 * Since the ACLs have changed remove cached rights
+						 */
+						sessionObj.removeCachedRights(updateMe);
 					}
-					/*
-					 * Change existing ACLs according to new ACLs
-					 */
-					for (int i = 0; i < newACLs.length; i++) {
-						updateMe.addACL(newACLs[i]);
-					}
-					/*
-					 * Since the ACLs have changed remove cached rights
-					 */
-					sessionObj.removeCachedRights(updateMe);
 				}
 				if (!IMAPProperties.isIgnoreSubscription() && folderObj.containsSubscribe()) {
 					updateMe.setSubscribed(folderObj.isSubscribed());
@@ -5138,8 +5140,7 @@ public class MailInterfaceImpl implements MailInterface {
 				 */
 				final String parentStr = prepareMailFolderParam(folderObj.getParentFullName());
 				IMAPFolder parent = MailFolderObject.DEFAULT_IMAP_FOLDER_ID.equals(parentStr) ? (IMAPFolder) imapCon
-						.getIMAPStore().getDefaultFolder()
-						: (IMAPFolder) imapCon.getIMAPStore().getFolder(parentStr);
+						.getIMAPStore().getDefaultFolder() : (IMAPFolder) imapCon.getIMAPStore().getFolder(parentStr);
 				if (!parent.exists()) {
 					parent = checkForNamespaceFolder(parentStr);
 					if (null == parent) {
@@ -5169,7 +5170,8 @@ public class MailInterfaceImpl implements MailInterface {
 					throw new OXMailException(MailCode.DUPLICATE_FOLDER, createMe.getFullName());
 				}
 				folderObj.setSeparator(createMe.getSeparator());
-				folderObj.setFullName(MailFolderObject.prepareFullname(createMe.getFullName(), createMe.getSeparator()));
+				folderObj
+						.setFullName(MailFolderObject.prepareFullname(createMe.getFullName(), createMe.getSeparator()));
 				final long start = System.currentTimeMillis();
 				try {
 					if (!createMe.create(Folder.HOLDS_MESSAGES | Folder.HOLDS_FOLDERS)) {
@@ -5184,77 +5186,96 @@ public class MailInterfaceImpl implements MailInterface {
 				}
 				ACLS: if ((folderObj.containsACLs() || folderObj.containsIMAPPermissions())
 						&& IMAPProperties.isSupportsACLs()) {
-					final ACL[] initialACLs = createMe.getACL();
-					ACL[] newACLs;
-					try {
-						newACLs = folderObj.getACL();
-					} catch (AbstractOXException e1) {
-						throw new OXMailException(e1);
-					}
-					if (equals(initialACLs, newACLs)) {
-						break ACLS;
-					}
-					if (!sessionObj.getCachedRights(createMe, true).contains(Rights.Right.ADMINISTER)) {
-						throw new OXMailException(MailCode.NO_ADMINISTER_ACCESS_ON_INITIAL, getUserName(sessionObj),
-								createMe.getFullName());
-					}
-					boolean adminFound = false;
-					for (int i = 0; i < newACLs.length && !adminFound; i++) {
-						if (newACLs[i].getRights().contains(Rights.Right.ADMINISTER)) {
-							adminFound = true;
+					final ACL[] initialACLs = getACLSafe(createMe);
+					if (initialACLs != null) {
+						ACL[] newACLs;
+						try {
+							newACLs = folderObj.getACL();
+						} catch (AbstractOXException e1) {
+							throw new OXMailException(e1);
 						}
-					}
-					if (!adminFound) {
-						throw new OXMailException(MailCode.NO_ADMIN_ACL, getUserName(sessionObj),
-								prepareMailFolderParam(folderObj.getFullName()));
-					}
-					/*
-					 * Wrapper object contains rights. Add new ACLs from
-					 * folderObj
-					 */
-					try {
-						/*
-						 * Apply new ACLs
-						 */
-						for (int i = 0; i < folderObj.getACL().length; i++) {
-							createMe.addACL(folderObj.getACL()[i]);
+						if (equals(initialACLs, newACLs)) {
+							break ACLS;
 						}
-						/*
-						 * Remove other ACLs
-						 */
-						final ACL[] removedACLs = getRemovedACLs(newACLs, initialACLs);
-						if (removedACLs.length > 0) {
-							try {
-								/*
-								 * Remove deleted ACLs
-								 */
-								final User2IMAP user2IMAP = User2IMAP.getInstance(sessionObj.getUserObject());
-								final UserStorage userStorage = UserStorage.getInstance(sessionObj.getContext());
-								final User2IMAPInfo user2IMAPInfo = new MailFolderObject(createMe, sessionObj);
-								for (int i = 0; i < removedACLs.length; i++) {
-									if (isKnownEntity(removedACLs[i].getName(), user2IMAP, userStorage, user2IMAPInfo)) {
-										createMe.removeACL(removedACLs[i].getName());
-									}
-								}
-							} catch (final LdapException e) {
-								throw new OXMailException(e);
-							} catch (final User2IMAPException e) {
-								throw new OXMailException(e);
+						if (!sessionObj.getCachedRights(createMe, true).contains(Rights.Right.ADMINISTER)) {
+							throw new OXMailException(MailCode.NO_ADMINISTER_ACCESS_ON_INITIAL,
+									getUserName(sessionObj), createMe.getFullName());
+						}
+						boolean adminFound = false;
+						for (int i = 0; i < newACLs.length && !adminFound; i++) {
+							if (newACLs[i].getRights().contains(Rights.Right.ADMINISTER)) {
+								adminFound = true;
 							}
 						}
-					} catch (AbstractOXException e) {
-						throw new OXMailException(e);
+						if (!adminFound) {
+							throw new OXMailException(MailCode.NO_ADMIN_ACL, getUserName(sessionObj),
+									prepareMailFolderParam(folderObj.getFullName()));
+						}
+						/*
+						 * Wrapper object contains rights. Add new ACLs from
+						 * folderObj
+						 */
+						try {
+							/*
+							 * Apply new ACLs
+							 */
+							for (int i = 0; i < folderObj.getACL().length; i++) {
+								createMe.addACL(folderObj.getACL()[i]);
+							}
+							/*
+							 * Remove other ACLs
+							 */
+							final ACL[] removedACLs = getRemovedACLs(newACLs, initialACLs);
+							if (removedACLs.length > 0) {
+								try {
+									/*
+									 * Remove deleted ACLs
+									 */
+									final User2IMAP user2IMAP = User2IMAP.getInstance(sessionObj.getUserObject());
+									final UserStorage userStorage = UserStorage.getInstance(sessionObj.getContext());
+									final User2IMAPInfo user2IMAPInfo = new MailFolderObject(createMe, sessionObj);
+									for (int i = 0; i < removedACLs.length; i++) {
+										if (isKnownEntity(removedACLs[i].getName(), user2IMAP, userStorage,
+												user2IMAPInfo)) {
+											createMe.removeACL(removedACLs[i].getName());
+										}
+									}
+								} catch (final LdapException e) {
+									throw new OXMailException(e);
+								} catch (final User2IMAPException e) {
+									throw new OXMailException(e);
+								}
+							}
+						} catch (AbstractOXException e) {
+							throw new OXMailException(e);
+						}
+						/*
+						 * Remove previously cached rights
+						 */
+						sessionObj.removeCachedRights(createMe);
 					}
-					/*
-					 * Remove previously cached rights
-					 */
-					sessionObj.removeCachedRights(createMe);
 				}
 				retval = MailFolderObject.prepareFullname(createMe.getFullName(), createMe.getSeparator());
 			}
 			return retval;
 		} catch (final MessagingException e) {
 			throw handleMessagingException(e, sessionObj.getIMAPProperties(), sessionObj.getContext());
+		}
+	}
+
+	/**
+	 * Get the ACL list of specified folder
+	 * 
+	 * @param imapFolder
+	 *            The IMAP folder
+	 * @return The ACL list or <code>null</code> if any error occured
+	 */
+	private static ACL[] getACLSafe(final IMAPFolder imapFolder) {
+
+		try {
+			return imapFolder.getACL();
+		} catch (final MessagingException e) {
+			return null;
 		}
 	}
 
