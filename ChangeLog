@@ -11,6 +11,8 @@
 
  - Bugfix #9957: Fixed error message on exceeded quota when placing a copy
    into sent folder during message transport
+ - Looking for QUOTA resource 'STORAGE' and logging other unsupported QUOTA
+   resources
 
 * 2007-10-26 - thorben.betten@open-xchange.com
 

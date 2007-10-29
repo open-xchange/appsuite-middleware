@@ -59,6 +59,7 @@ import java.util.List;
 import javax.mail.Folder;
 import javax.mail.MessagingException;
 import javax.mail.Quota;
+import javax.mail.Quota.Resource;
 import javax.mail.internet.MimeMessage;
 
 import com.openexchange.groupware.container.CommonObject;
@@ -154,6 +155,8 @@ public final class IMAPLogicTools extends IMAPFolderWorker implements MailLogicT
 		}
 	}
 
+	private static final String QUOTA_RES_STORAGE = "STORAGE";
+
 	public long[] getQuota(final String folder) throws MailException {
 		try {
 			imapFolder = setAndOpenFolder(imapFolder, folder == null ? STR_INBOX : prepareMailFolderParam(folder),
@@ -179,10 +182,71 @@ public final class IMAPLogicTools extends IMAPFolderWorker implements MailLogicT
 			if (resources.length == 0) {
 				return new long[] { UNLIMITED_QUOTA, UNLIMITED_QUOTA };
 			}
-			return new long[] { resources[0].limit, resources[0].usage };
+			Resource storageResource = null;
+			for (int i = 0; i < resources.length; i++) {
+				if (QUOTA_RES_STORAGE.equalsIgnoreCase(resources[i].name)) {
+					storageResource = resources[i];
+				}
+			}
+			if (null == storageResource) {
+				/*
+				 * No storage limitations
+				 */
+				if (LOG.isWarnEnabled()) {
+					logUnsupportedQuotaResources(resources, 0);
+				}
+				return new long[] { UNLIMITED_QUOTA, UNLIMITED_QUOTA };
+			}
+			if (resources.length > 1 && LOG.isWarnEnabled()) {
+				logUnsupportedQuotaResources(resources, 1);
+			}
+			return new long[] { storageResource.limit, storageResource.usage };
 		} catch (final MessagingException e) {
 			throw IMAPException.handleMessagingException(e, imapConnection);
 		}
+	}
+
+	/**
+	 * Logs unsupported QUOTA resources
+	 * 
+	 * @param resources
+	 *            The QUOTA resources
+	 */
+	private static void logUnsupportedQuotaResources(final Quota.Resource[] resources, final int start) {
+		final StringBuilder sb = new StringBuilder(128)
+				.append("Unsupported QUOTA resource(s) [<name> (<usage>/<limit>]:\n");
+		sb.append(resources[start].name).append(" (").append(resources[start].usage).append('/').append(
+				resources[start].limit).append(')');
+		for (int i = start + 1; i < resources.length; i++) {
+			sb.append(", ").append(resources[i].name).append(" (").append(resources[i].usage).append('/').append(
+					resources[i].limit).append(')');
+
+		}
+		LOG.warn(sb.toString());
+	}
+
+	/**
+	 * Get the QUOTA resource with the highest usage-per-limitation value
+	 * 
+	 * @param resources
+	 *            The QUOTA resources
+	 * @return The QUOTA resource with the highest usage to limitation relation
+	 */
+	private static Resource getMaxUsageResource(final Quota.Resource[] resources) {
+		final Resource maxUsageResource;
+		{
+			int index = 0;
+			long maxUsage = resources[0].usage / resources[0].limit;
+			for (int i = 1; i < resources.length; i++) {
+				final long tmp = resources[i].usage / resources[i].limit;
+				if (tmp > maxUsage) {
+					maxUsage = tmp;
+					index = i;
+				}
+			}
+			maxUsageResource = resources[index];
+		}
+		return maxUsageResource;
 	}
 
 	public CommonObject[] saveVersitAttachment(final String folder, final long msgUID, final String sequenceId)
