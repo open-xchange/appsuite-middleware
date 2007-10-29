@@ -47,7 +47,7 @@
  *
  */
 /*
- * $Id: OXLogin.java,v 1.21 2007/10/29 09:56:54 choeger Exp $
+ * $Id: OXLogin.java,v 1.22 2007/10/29 10:20:42 choeger Exp $
  */
 package com.openexchange.admin.rmi.impl;
 
@@ -73,9 +73,6 @@ import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
-import com.openexchange.groupware.contexts.ContextImpl;
-import com.openexchange.groupware.update.Updater;
-import com.openexchange.groupware.update.exception.UpdateException;
 
 /**
  * 
