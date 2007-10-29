@@ -1,3 +1,7 @@
+* 2007-10-29 - ben.pahne@open-xchange.com
+
+ - Fixed Bug 9975: Some connections didn't get closed during an error
+
 * 2007-10-29 - marcus.klein@open-xchange.com
 
  - Bugfix #9869: Set default upload quota to infinity.
