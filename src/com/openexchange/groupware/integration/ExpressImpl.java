@@ -61,9 +61,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.httpclient.Cookie;
-import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpConstants;
 import org.apache.commons.httpclient.HttpState;
 import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.httpclient.methods.PostMethod;
@@ -72,7 +70,6 @@ import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.configuration.SystemConfig.Property;
 import com.openexchange.tools.ajp13.AJPv13RequestHandler;
-import com.sun.tools.internal.ws.wsdl.document.http.HTTPConstants;
 
 /**
  * Implements the config jump to the user admin interface for OXExpress.
