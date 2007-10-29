@@ -13,6 +13,7 @@
    into sent folder during message transport
  - Looking for QUOTA resource 'STORAGE' and logging other unsupported QUOTA
    resources
+ - Updating message cache when selected mail is marked as seen
 
 * 2007-10-26 - thorben.betten@open-xchange.com
 

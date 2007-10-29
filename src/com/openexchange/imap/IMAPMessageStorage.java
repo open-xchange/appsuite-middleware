@@ -803,8 +803,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 		}
 	}
 
-	private static final MailListField[] FIELDS_FLAGS = new MailListField[] { MailListField.FLAGS };
-
 	public void updateMessageFlags(final String folder, final long[] msgUIDs, final int flagsArg, final boolean set)
 			throws MailException {
 		try {
@@ -823,7 +821,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 			/*
 			 * Set new flags...
 			 */
-			final Rights myRights = RightsCache.getCachedRights(imapFolder, true, session);
+			final Rights myRights = imapConfig.isSupportsACLs() ? RightsCache.getCachedRights(imapFolder, true, session) : null;
 			final Flags affectedFlags = new Flags();
 			if (((flags & MailMessage.FLAG_ANSWERED) > 0)) {
 				if (imapConfig.isSupportsACLs() && !myRights.contains(Rights.Right.WRITE)) {

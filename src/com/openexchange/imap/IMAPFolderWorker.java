@@ -58,10 +58,14 @@ import javax.mail.MessageRemovedException;
 import javax.mail.MessagingException;
 import javax.mail.ReadOnlyFolderException;
 
+import com.openexchange.cache.OXCachingException;
 import com.openexchange.imap.cache.RightsCache;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.mail.MailException;
+import com.openexchange.mail.MailListField;
+import com.openexchange.mail.cache.MailMessageCache;
 import com.openexchange.mail.config.MailConfigException;
+import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MIMESessionPropertyNames;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.sessiond.SessionObject;
@@ -91,6 +95,8 @@ public abstract class IMAPFolderWorker {
 	protected static final String STR_FALSE = "false";
 
 	protected static final Flags FLAGS_SEEN = new Flags(Flags.Flag.SEEN);
+
+	protected static final MailListField[] FIELDS_FLAGS = new MailListField[] { MailListField.FLAGS };
 
 	/*
 	 * Fields
@@ -218,6 +224,26 @@ public abstract class IMAPFolderWorker {
 				}
 			}
 			markAsSeen.setFlags(FLAGS_SEEN, true);
+			try {
+				if (MailMessageCache.getInstance().containsFolderMessages(imapFolder.getFullName(),
+						session.getUserObject().getId(), session.getContext())) {
+					/*
+					 * Update cache entry
+					 */
+					final long[] uid = new long[] { imapFolder.getUID(markAsSeen) };
+					final long start = System.currentTimeMillis();
+					MailMessageCache.getInstance().updateCachedMessages(uid, imapFolder.getFullName(),
+							session.getUserObject().getId(), session.getContext(), FIELDS_FLAGS,
+							new Object[] { Integer.valueOf(MailMessage.FLAG_SEEN) });
+					if (LOG.isInfoEnabled()) {
+						LOG.info(new StringBuilder(100).append(uid.length).append(" cached message(s) updated in ")
+								.append((System.currentTimeMillis() - start)).append("msec").toString());
+					}
+
+				}
+			} catch (final OXCachingException e) {
+				LOG.error(e.getLocalizedMessage(), e);
+			}
 		} catch (final MessageRemovedException e) {
 			if (LOG.isWarnEnabled()) {
 				LOG.warn(new StringBuilder(ERROR_KEEP_SEEN).append(e.getMessage()).toString(), e);
