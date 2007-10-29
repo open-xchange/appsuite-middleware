@@ -1,3 +1,8 @@
+* 2007-10-29 - thorben.betten@open-xchange.com
+
+ - Bugfix #9957: Fixed error message on exceeded quota when placing a copy
+   into sent folder during message transport
+
 * 2007-10-23 - marcus.klein@open-xchange.com
 
  - Bugfix #9807: Removed throw of ServletException on a not catched Exception.

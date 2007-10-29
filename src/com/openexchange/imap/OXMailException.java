@@ -471,7 +471,7 @@ public class OXMailException extends OXException {
 		 * Message has been successfully sent, but could not be copied to sent
 		 * folder due to exceeded quota
 		 */
-		COPY_TO_SENT_FOLDER_FAILED(
+		COPY_TO_SENT_FOLDER_FAILED_QUOTA(
 				"Message has been successfully sent, but a copy was not placed in your sent folder due to exceeded quota.",
 				Category.EXTERNAL_RESOURCE_FULL, 83),
 		/**
@@ -569,7 +569,14 @@ public class OXMailException extends OXException {
 		/**
 		 * Mail folder %s must not be moved to subsequent folder %s
 		 */
-		NO_MOVE_TO_SUBFLD("Mail folder %s must not be moved to subsequent folder %s", Category.PERMISSION, 105);
+		NO_MOVE_TO_SUBFLD("Mail folder %s must not be moved to subsequent folder %s", Category.PERMISSION, 105),
+		/**
+		 * Message has been successfully sent, but could not be copied to sent
+		 * folder
+		 */
+		COPY_TO_SENT_FOLDER_FAILED(
+				"Message has been successfully sent, but a copy was not placed in your sent folder.",
+				Category.EXTERNAL_RESOURCE_FULL, 106);
 
 		/**
 		 * Message of the exception.

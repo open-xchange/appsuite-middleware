@@ -3444,13 +3444,11 @@ public class MailInterfaceImpl implements MailInterface {
 				} catch (final MessagingException e) {
 					if (e.getNextException() instanceof CommandFailedException) {
 						final CommandFailedException exc = (CommandFailedException) e.getNextException();
-						if (exc.getMessage().indexOf("Over quota") > 1) {
-							throw new OXMailException(MailCode.COPY_TO_SENT_FOLDER_FAILED);
+						if (exc.getMessage().indexOf("quota") > 1) {
+							throw new OXMailException(MailCode.COPY_TO_SENT_FOLDER_FAILED_QUOTA);
 						}
 					}
-					LOG.error(new StringBuilder().append("Sent message could not be appended to default sent folder: ")
-							.append(e.getMessage()).toString(), e);
-					return STR_EMPTY;
+					throw new OXMailException(MailCode.COPY_TO_SENT_FOLDER_FAILED, e, new Object[0]);
 				} finally {
 					try {
 						sentFolder.close(false);
