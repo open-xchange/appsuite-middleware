@@ -1,6 +1,10 @@
+* 2007-10-29 - dennis.sieben@open-xchange.com
+
+  - Bugfix ID#9974 [HEAD] context deletion not to use any server api calls
+
 * 2007-10-29 - choeger@open-xchange.com
 
-  - Bugfix ID#9986 Admin should uptate schema automatically
+  - Bugfix ID#9986 Admin should update schema automatically
 
 * 2007-10-25 - dennis.sieben@open-xchange.com
 
