@@ -1,6 +1,7 @@
 * 2007-10-29 - marcus.klein@open-xchange.com
 
  - Bugfix #9869: Set default upload quota to infinity.
+ - Bugfix #9826: Properly set charset in Content-Type for configuration jump.
 
 * 2007-10-29 - thorben.betten@open-xchange.com
 

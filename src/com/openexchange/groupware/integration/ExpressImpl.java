@@ -109,7 +109,7 @@ public class ExpressImpl extends SetupLink {
         final String password = (String) values[pos++];
         final String protocol = (String) values[pos++];
         final String host = (String) values[pos++];
-        final int port = (Integer) values[pos++];
+        final int port = ((Integer) values[pos++]).intValue();
         final javax.servlet.http.Cookie[] cookies = (javax.servlet.http
             .Cookie[]) values[pos++];
         final URL urlInst;
@@ -128,6 +128,8 @@ public class ExpressImpl extends SetupLink {
                 cookie.getValue(), urlInst.getPath(), -1, false));
         }
         final PostMethod post = new PostMethod(url);
+        post.setRequestHeader("Content-Type", PostMethod
+            .FORM_URL_ENCODED_CONTENT_TYPE + "; charset=UTF-8");
         post.addParameter(new NameValuePair("loginUsername", userId));
         post.addParameter(new NameValuePair("loginPassword", password));
         try {
