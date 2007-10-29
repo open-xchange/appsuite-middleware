@@ -72,6 +72,7 @@ import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.sqlStorage.OXToolSQLStorage;
 import com.openexchange.admin.tools.AdminCache;
+import com.openexchange.groupware.contexts.ContextImpl;
 import com.openexchange.groupware.update.Updater;
 import com.openexchange.groupware.update.exception.UpdateException;
 
@@ -1415,7 +1416,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     }
 
     @Override
-    public boolean schemaBeingLockedOrNeedsUpdate(final Context ctx) throws StorageException {
+    public boolean checkAndUpdateSchemaIfRequired(final Context ctx) throws StorageException {
         Connection con = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -1432,7 +1433,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             schema = rs.getString("db_schema");
             writePoolId = rs.getInt("write_db_pool_id");
 
-            return schemaBeingLockedOrNeedsUpdate(writePoolId, schema);
+            return condCheckAndUpdateSchemaIfRequired(writePoolId, schema, true, ctx);
         } catch (final PoolException e) {
             log.error("Pool Error",e);
             throw new StorageException(e);
@@ -1451,22 +1452,46 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         }
     }
 
-    @Override
-    public boolean schemaBeingLockedOrNeedsUpdate(final int writePoolId, final String schema) throws StorageException {
+    private boolean condCheckAndUpdateSchemaIfRequired(final int writePoolId, final String schema, final boolean doupdate, final Context ctx) throws StorageException {
         Updater updater;
         try {
             updater = Updater.getInstance();
-            return updater.isLocked(schema, writePoolId) || updater.toUpdate(schema, writePoolId);
-        } catch (final UpdateException e) {
-            if (e.getDetailNumber() == 102) {
-                // no entry found in table, nobody has ever logged into this context
-                // this situation is mostly caused when we move contexts between dbms
-                log.debug("NO row was found in version table!\nThis is mostly caused when a context is moved between dbms!\nIf this is here not the case, report the error to the admin!",e);
+            if( updater.isLocked(schema, writePoolId) ) {
+                log.info("Another database update process is already running");
+                return true;
+            }
+            // we only reach this point, if no other thread is already locking us
+            final boolean needupdate = updater.toUpdate(schema, writePoolId); 
+            if( ! needupdate ) {
                 return false;
             }
-            log.error("UpdateCheck Error",e);
+            // we only reach this point, if we need an update
+            if( doupdate ) {
+                if( ctx == null ) {
+                    StorageException e = new StorageException("context must not be null when schema update should be done");
+                    log.error(e.getMessage(), e);
+                    throw e;
+                }
+                com.openexchange.groupware.contexts.Context ctxas = new ContextImpl(ctx.getId().intValue());
+                updater.startUpdate(ctxas);
+            }
+            // either with or without starting an update task, when we reach this point, we
+            // must return true
+            return true;
+        } catch (final UpdateException e) {
+            if (e.getDetailNumber() == 102) {
+                // NOTE: this situation should not happen!
+                // it can only happen, when a schema has not been initialized correctly!
+                log.debug("FATAL: this error must not happen",e);
+            }
+            log.error("Error in checking/updating schema",e);
             throw new StorageException(e.toString());
         }
+    }
+
+    @Override
+    public boolean schemaBeingLockedOrNeedsUpdate(final int writePoolId, final String schema) throws StorageException {
+        return condCheckAndUpdateSchemaIfRequired(writePoolId, schema, false, null);
     }
 
     /**
@@ -2040,4 +2065,5 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         tmp.setName(username);
         return existsUserName(ctx,tmp);
     }
+
 }
