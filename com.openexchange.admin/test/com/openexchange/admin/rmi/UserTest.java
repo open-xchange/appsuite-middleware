@@ -466,7 +466,7 @@ public class UserTest extends AbstractTest {
         assertTrue("Expected to find added user in user list",founduser);
     }
 
-    @Test(expected=InvalidDataException.class)
+    @Test
     public void testChange() throws Exception {
         
         // get context to create an user
@@ -622,12 +622,12 @@ public class UserTest extends AbstractTest {
         compareUserSpecialForNulledAttributes(tmp_usr, user_single_change_loaded);
     }
     
-    @Test(expected=InvalidDataException.class)
+    @Test
     public void testChangeAllAllowedAttributesNull() throws Exception {
         // set all values to null in the user object and then call change, what
         // happens?
         
-// get context to create an user
+        // get context to create an user
         final Credentials cred = DummyCredentials();
         final Context ctx = getTestContextObject(cred);
         
@@ -949,7 +949,7 @@ public class UserTest extends AbstractTest {
         
     }
     
-    @Test(expected=InvalidDataException.class)
+    @Test
     public void testChangeWithEmptyUserIdentifiedByName() throws Exception{
         // test a change with no data set ONLY username set and compare the data aftewards
           
@@ -993,7 +993,7 @@ public class UserTest extends AbstractTest {
         
     }
     
-    @Test(expected=InvalidDataException.class)
+    @Test
     public void testChangeIdentifiedByName() throws Exception{
         // test a change with data set  but identified by username and compare the data aftewards
         
