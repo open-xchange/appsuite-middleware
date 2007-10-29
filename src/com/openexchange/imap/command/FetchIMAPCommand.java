@@ -403,30 +403,44 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 		final MessageCacheObject msg = new MessageCacheObject(imapFolder.getFullName(), imapFolder.getSeparator(),
 				seqnum);
 		final int itemCount = f.getItemCount();
-		if (itemHandlers == null) {
+		if (itemHandlers == null || itemCount != itemHandlers.length) {
 			itemHandlers = createItemHandlers(itemCount, f);
 		}
+		boolean repeatItem = true;
 		boolean error = false;
-		try {
-			for (int j = 0; j < itemCount; j++) {
-				itemHandlers[j].handleItem(f.getItem(j), msg);
+		do {
+			try {
+				for (int j = 0; j < itemCount; j++) {
+					itemHandlers[j].handleItem(f.getItem(j), msg);
+				}
+				repeatItem = false;
+			} catch (final MessagingException e) {
+				/*
+				 * Discard corrupt message
+				 */
+				final OXMailException me = MailInterfaceImpl.handleMessagingException(e);
+				LOG.error(new StringBuilder(100).append("Message #").append(msg.getMessageNumber()).append(" discarded: ")
+						.append(me.getMessage()).toString(), me);
+				error = true;
+				repeatItem = false;
+			} catch (final OXException e) {
+				/*
+				 * Discard corrupt message
+				 */
+				LOG.error(new StringBuilder(100).append("Message #").append(msg.getMessageNumber()).append(" discarded: ")
+						.append(e.getMessage()).toString(), e);
+				error = true;
+				repeatItem = false;
+			} catch (final ClassCastException e) {
+				/*
+				 * Obviously the order of fetch items has changed during FETCH
+				 * response. Re-Build fetch item handlers according to current
+				 * untagged fetch response.
+				 */
+				itemHandlers = createItemHandlers(itemCount, f);
+				repeatItem = true;
 			}
-		} catch (final MessagingException e) {
-			/*
-			 * Discard corrupt message
-			 */
-			final OXMailException me = MailInterfaceImpl.handleMessagingException(e);
-			LOG.error(new StringBuilder(100).append("Message #").append(msg.getMessageNumber()).append(" discarded: ")
-					.append(me.getMessage()).toString(), me);
-			error = true;
-		} catch (final OXException e) {
-			/*
-			 * Discard corrupt message
-			 */
-			LOG.error(new StringBuilder(100).append("Message #").append(msg.getMessageNumber()).append(" discarded: ")
-					.append(e.getMessage()).toString(), e);
-			error = true;
-		}
+		} while (repeatItem);
 		if (!error) {
 			retval.add(msg);
 		}
