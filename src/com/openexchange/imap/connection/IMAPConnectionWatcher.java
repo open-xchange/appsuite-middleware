@@ -106,27 +106,17 @@ public final class IMAPConnectionWatcher {
 		 */
 		@Override
 		public void run() {
-			if (!LOG.isInfoEnabled()) {
-				/*
-				 * Not allowed to log
-				 */
-				return;
-			}
 			try {
 				final StringBuilder sb = new StringBuilder(512);
-				final Iterator<Entry<IMAPConnection, Long>> iter = imapCons.entrySet().iterator();
 				final List<IMAPConnection> exceededCons = new ArrayList<IMAPConnection>();
-				{
-					final int n = imapCons.size();
-					for (int i = 0; i < n; i++) {
-						final Entry<IMAPConnection, Long> e = iter.next();
-						if ((System.currentTimeMillis() - e.getValue().longValue()) > IMAPProperties.getWatcherTime()) {
-							sb.setLength(0);
-							LOG.info(sb.append(
-									INFO_PREFIX.replaceFirst("#N#", String.valueOf(IMAPProperties.getWatcherTime())))
-									.append(e.getKey().getTrace()).toString());
-							exceededCons.add(e.getKey());
-						}
+				for (final Iterator<Entry<IMAPConnection, Long>> iter = imapCons.entrySet().iterator(); iter.hasNext();) {
+					final Entry<IMAPConnection, Long> e = iter.next();
+					if ((System.currentTimeMillis() - e.getValue().longValue()) > IMAPProperties.getWatcherTime()) {
+						sb.setLength(0);
+						LOG.info(sb.append(
+								INFO_PREFIX.replaceFirst("#N#", String.valueOf(IMAPProperties.getWatcherTime())))
+								.append(e.getKey().getTrace()).toString());
+						exceededCons.add(e.getKey());
 					}
 				}
 				if (!exceededCons.isEmpty()) {
@@ -165,7 +155,7 @@ public final class IMAPConnectionWatcher {
 			} catch (final IMAPPropertyException e) {
 				LOG.error(e.getLocalizedMessage(), e);
 			} catch (final Exception e) {
-			    LOG.error(e.getMessage(), e);
+				LOG.error(e.getMessage(), e);
 			}
 		}
 	}

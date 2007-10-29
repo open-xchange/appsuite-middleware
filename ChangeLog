@@ -4,6 +4,8 @@
    into sent folder during message transport
  - Bugfix #9899: Re-building fetch item handlers if item order changes
    during a FETCH response from IMAP server
+ - Bugfix #9906: Using safer Iterator.hasNext() method when traversing
+   concurrent map. OXTimer is no more interrupted.
 
 * 2007-10-23 - marcus.klein@open-xchange.com
 
