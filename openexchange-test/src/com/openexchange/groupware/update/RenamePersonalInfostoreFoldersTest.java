@@ -23,41 +23,30 @@ import com.openexchange.server.DBPoolingException;
 
 import junit.framework.TestCase;
 
-public class RenamePersonalInfostoreFoldersTest extends TestCase {
+public class RenamePersonalInfostoreFoldersTest extends UpdateTest {
 
-	private Schema schema = null;
-	private UpdateTask updateTask = null;
-	private int existing_ctx_id = 0;
-	
-	private int user_id = -1;
-	
-	private int parent = FolderObject.SYSTEM_INFOSTORE_FOLDER_ID;
+    private UpdateTask updateTask = null;
+
+    private int parent = FolderObject.SYSTEM_INFOSTORE_FOLDER_ID;
 	private int module = FolderObject.INFOSTORE;
 	private int type = FolderObject.PUBLIC;
 	
 	private final int start_ids = 2000;
 	
 	private int idcount = start_ids;
-	
-	public void setUp() throws Exception {
-		Init.initDB();
-		Init.loadSystemProperties();
-		ContextStorage.init();
-		existing_ctx_id = ContextStorage.getInstance().getContextId("defaultcontext");
-		
-		schema = SchemaStore.getInstance(SchemaStoreImpl.class.getName()).getSchema(existing_ctx_id);
-		updateTask = new InfostoreRenamePersonalInfostoreFolders();
-		
-		user_id = ContextStorage.getInstance().getContext(existing_ctx_id).getMailadmin();
-		
-	}
-	
-	public void tearDown() throws Exception {
-		exec("DELETE FROM oxfolder_tree WHERE cid = ? and fuid >= ?", existing_ctx_id, start_ids);
-		Init.stopDB();
-	}
-	
-	public void createNameCollisions() throws DBPoolingException, SQLException {
+
+    public void setUp() throws Exception {
+        super.setUp();
+        updateTask = new InfostoreRenamePersonalInfostoreFolders();
+        
+    }
+
+    public void tearDown() throws Exception {
+        exec("DELETE FROM oxfolder_tree WHERE cid = ? and fuid >= ?", existing_ctx_id, start_ids);
+        super.tearDown();
+    }
+
+    public void createNameCollisions() throws DBPoolingException, SQLException {
 		for(int i = 0; i < 3; i++) { createFolder("test test"); }
 		createFolder("normal folder");
 		for(int i = 0; i < 2; i++) { createFolder("test2 test2"); }
@@ -174,28 +163,6 @@ public class RenamePersonalInfostoreFoldersTest extends TestCase {
 		}
 		return names;
 	}
-	
-	private final void exec(String sql, Object...args) throws DBPoolingException, SQLException {
-		Connection con = null;
-		PreparedStatement stmt = null;
-		
-		try {
-			con = Database.get(existing_ctx_id, true);
-			stmt = con.prepareStatement(sql);
-			int count = 1;
-			for(Object o : args) {
-				stmt.setObject(count++,o);
-			}
-			
-			stmt.executeUpdate();
-		} finally {
-			
-			if(null != stmt) {
-				stmt.close();
-			}
-			Database.back(existing_ctx_id, true, con);
-		}
-	}
-	
-	
+
+
 }

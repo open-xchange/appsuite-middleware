@@ -1,22 +1,8 @@
 package com.openexchange.groupware.attach;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-
 import com.openexchange.ajax.AbstractAJAXTest;
-import com.openexchange.api2.OXException;
-import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api.OXPermissionException;
+import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.UserConfiguration;
@@ -31,10 +17,14 @@ import com.openexchange.groupware.ldap.MockUser;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.results.Delta;
+import com.openexchange.groupware.results.TimedResult;
+import com.openexchange.groupware.tx.ConfigurableDBProvider;
 import com.openexchange.groupware.tx.DBPoolProvider;
 import com.openexchange.groupware.tx.DBProvider;
-import com.openexchange.groupware.tx.ConfigurableDBProvider;
 import com.openexchange.tools.iterator.SearchIterator;
+
+import java.io.*;
+import java.util.*;
 
 public class AttachmentBaseTest extends AbstractAttachmentTest {
 
@@ -77,8 +67,39 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
 	public void testUpdate() throws Exception {
 		doUpdate(22,22,22);
 	}
+
+    public void testDeleteAll() throws Exception {
+        int folderId = 22;
+        int attachedId = 22;
+        int moduleId = 22;
+        
+        AttachmentMetadata attachment = getAttachment(testFile,folderId, attachedId, moduleId,true);
+
 	
-	public void doNotExists(int folderId, int attachedId, int moduleId) throws Exception{
+		InputStream in = null;
+
+		try {
+		    for(int i = 0; i < 10; i++) {
+                AttachmentMetadata copy = new AttachmentImpl(attachment);
+                attachmentBase.attachToObject(copy,in = new FileInputStream(testFile),MODE.getContext(),MODE.getUser(), null);
+                clean.add(copy);
+
+            }
+		    clean.add(attachment);
+		 } finally {
+			 if(in != null)
+				 in.close();
+		 }
+
+        attachmentBase.deleteAll(MODE.getContext());
+
+
+        TimedResult res = attachmentBase.getAttachments(22,22,22,MODE.getContext(),MODE.getUser(), null);
+        assertFalse("All attachments should have been deleted", res.results().hasNext());
+        clean.clear();
+    }
+
+    public void doNotExists(int folderId, int attachedId, int moduleId) throws Exception{
 		try {
 			attachmentBase.getAttachment(folderId, attachedId, moduleId,Integer.MAX_VALUE,MODE.getContext(), MODE.getUser(),null);
 			fail("Got Wrong Exception");
