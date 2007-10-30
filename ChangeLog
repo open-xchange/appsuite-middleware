@@ -1,3 +1,7 @@
+* 2007-10-30 - sebastian.kauss@open-xchange.com
+
+ - Bugfix #9888: Reminder never disappears for recurring appointment
+
 * 2007-10-29 - marcus.klein@open-xchange.com
 
  - Bugfix #9869: Set default upload quota to infinity.
