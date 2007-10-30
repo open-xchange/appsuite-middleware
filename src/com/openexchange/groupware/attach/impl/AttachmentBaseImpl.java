@@ -49,49 +49,15 @@
 
 package com.openexchange.groupware.attach.impl;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedSet;
-import java.util.TreeSet;
-
-import javax.activation.MimetypesFileTypeMap;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
-import com.openexchange.groupware.IDGenerator;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrows;
-import com.openexchange.groupware.OXThrowsMultiple;
-import com.openexchange.groupware.Types;
-import com.openexchange.groupware.UserConfiguration;
+import com.openexchange.groupware.*;
 import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.attach.AttachmentAuthorization;
-import com.openexchange.groupware.attach.AttachmentBase;
-import com.openexchange.groupware.attach.AttachmentException;
-import com.openexchange.groupware.attach.AttachmentExceptionFactory;
-import com.openexchange.groupware.attach.AttachmentField;
-import com.openexchange.groupware.attach.AttachmentListener;
-import com.openexchange.groupware.attach.AttachmentMetadata;
-import com.openexchange.groupware.attach.Classes;
+import com.openexchange.groupware.Types;
+import com.openexchange.groupware.attach.*;
 import com.openexchange.groupware.attach.util.GetSwitch;
 import com.openexchange.groupware.attach.util.SetSwitch;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.data.Check;
-import com.openexchange.groupware.filestore.FilestoreException;
 import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.Delta;
@@ -103,7 +69,6 @@ import com.openexchange.groupware.tx.DBService;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.file.FileStorage;
-import com.openexchange.tools.file.FileStorageException;
 import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.file.SaveFileAction;
 import com.openexchange.tools.file.SaveFileWithQuotaAction;
@@ -111,6 +76,15 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.sql.DBUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import javax.activation.MimetypesFileTypeMap;
+import java.io.IOException;
+import java.io.InputStream;
+import java.sql.*;
+import java.util.*;
+import java.util.Date;
 
 
 @OXExceptionSource(
@@ -389,8 +363,58 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 	public void removeAuthorization(final AttachmentAuthorization authz, final int moduleId) {
 		getAuthorizors(moduleId).remove(authz);	
 	}
-	
-	private List<AttachmentAuthorization> getAuthorizors(final int moduleId){
+
+    @OXThrowsMultiple(
+			category = { Category.INTERNAL_ERROR, Category.CODE_ERROR },
+			desc = { "Could not delete files from filestore. Context: %d.", "Could not remove attachments from database. Context: %d."},
+			exceptionId = { 16,17 },
+			msg = { "Could not delete files from filestore. Context: %d.", "Could not remove attachments from database. Context: %d." }
+	)
+    public void deleteAll(Context context) throws OXException {
+        try {
+            removeFiles(context);
+        } catch (AbstractOXException e) {
+            LL.log(e);
+            throw EXCEPTIONS.create(16,e,context.getContextId());
+        }
+        try {
+            removeDatabaseEntries(context);
+        } catch (SQLException e) {
+            LOG.error("SQL Exception: ",e);
+            throw EXCEPTIONS.create(17,e,context.getContextId());
+        }
+
+    }
+
+    private void removeDatabaseEntries(Context context) throws TransactionException, SQLException {
+        Connection writeCon = null;
+        PreparedStatement stmt = null;
+        try {
+            writeCon = getWriteConnection(context);
+            stmt = writeCon.prepareStatement("DELETE FROM prg_attachment WHERE cid = ?");
+            stmt.setInt(1, context.getContextId());
+            stmt.executeUpdate();
+        } finally {
+            if(stmt != null) {
+                try {
+                    stmt.close();
+                } catch (SQLException e) {
+                    LOG.error("Can't close statement", e);
+                }
+            }
+            releaseWriteConnection(context,writeCon);
+        }
+
+    }
+
+    private void removeFiles(Context context) throws AbstractOXException {
+        FileStorage fs = getFileStorage(context);
+        for(String fileId : this.getAttachmentFileStoreLocationsperContext(context)){
+            fs.deleteFile(fileId);  
+        }
+    }
+
+    private List<AttachmentAuthorization> getAuthorizors(final int moduleId){
 		List<AttachmentAuthorization> authorizors = moduleAuthorizors.get(Integer.valueOf(moduleId));
 		if(authorizors == null) {
 			authorizors = new ArrayList<AttachmentAuthorization>();

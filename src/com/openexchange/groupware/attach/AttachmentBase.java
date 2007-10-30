@@ -129,5 +129,9 @@ public interface AttachmentBase extends Service {
 
 	public abstract void removeAuthorization(AttachmentAuthorization authz, int moduleId);
 
-	
+    /**
+     * Delete all Attachments in a Context.
+     * @param context
+     */
+    public abstract void deleteAll(Context context) throws OXException;
 }

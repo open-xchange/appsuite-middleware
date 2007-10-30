@@ -1,3 +1,8 @@
+* 2007-10-30 - francisco.laguna@open-xchange.com
+
+ - Bugfix #9943: Added DeleteListener that removes all attachments on a ContextDelete.
+   Added UpdateTask to clear leftover attachments.
+
 * 2007-10-30 - sebastian.kauss@open-xchange.com
 
  - Bugfix #9888: Reminder never disappears for recurring appointment
