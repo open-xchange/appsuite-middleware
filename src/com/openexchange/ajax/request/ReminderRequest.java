@@ -79,7 +79,9 @@ import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.servlet.AjaxException;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import org.json.JSONArray;
 
 public class ReminderRequest {
@@ -115,9 +117,9 @@ public class ReminderRequest {
         final int id = DataParser.checkInt(jData, AJAXServlet.PARAMETER_ID);
         final int recurrencePosition = DataParser.parseInt(jData, CalendarFields.RECURRENCE_POSITION);
         
-        final ReminderHandler reminderSql = new ReminderHandler(sessionObj);        
-		final JSONArray jsonArray = new JSONArray();
-		
+        final ReminderHandler reminderSql = new ReminderHandler(sessionObj);
+        final JSONArray jsonArray = new JSONArray();
+        
         try {
             int uid = sessionObj.getUserObject().getId();
             final ReminderObject reminder = reminderSql.loadReminder(id);
@@ -125,7 +127,7 @@ public class ReminderRequest {
                 if (reminder.isRecurrenceAppointment()) {
                     final int targetId = Integer.parseInt(reminder.getTargetId());
                     final int inFolder = Integer.parseInt(reminder.getFolder());
-
+                    
                     final ReminderObject nextReminder = getNextRecurringReminder(targetId, recurrencePosition, inFolder, sessionObj);
                     if (nextReminder != null) {
                         reminder.setDate(nextReminder.getDate());
@@ -134,26 +136,26 @@ public class ReminderRequest {
                         jsonResponseArray.put(id);
                         return jsonResponseArray;
                     } else {
-						reminderSql.deleteReminder(id);
-					}
+                        reminderSql.deleteReminder(id);
+                    }
                 } else {
-					reminderSql.deleteReminder(id);
-				}
+                    reminderSql.deleteReminder(id);
+                }
             }
         } catch(SQLException sqle) {
             throw new OXException("SQLException occurred", sqle);
         } catch(OXException oxe) {
-			LOG.debug(oxe.getMessage(), oxe);
-
-			if (oxe.getComponent().equals(Component.REMINDER) && oxe.getDetailNumber() == 9) {
-				jsonArray.put(id);
-				return jsonArray;
-			} else {			
-				throw oxe;
-			}
+            LOG.debug(oxe.getMessage(), oxe);
+            
+            if (oxe.getComponent().equals(Component.REMINDER) && oxe.getDetailNumber() == 9) {
+                jsonArray.put(id);
+                return jsonArray;
+            } else {
+                throw oxe;
+            }
         }
-	
-		return jsonArray;
+        
+        return jsonArray;
     }
     
     private JSONArray actionUpdates(final JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXException, SearchIteratorException, OXJSONException, AjaxException {
@@ -172,15 +174,15 @@ public class ReminderRequest {
                     final int targetId = Integer.parseInt(reminderObj.getTargetId());
                     final int inFolder = Integer.parseInt(reminderObj.getFolder());
                     
-//                    currently disabled because not used by the UI 
+//                    currently disabled because not used by the UI
 //                    final ReminderObject latestReminder = getLatestReminder(targetId, inFolder, sessionObj, end);
-//                    
+//
 //                    if (latestReminder == null) {
 //                        continue;
 //                    } else {
 //                        reminderObj.setDate(latestReminder.getDate());
 //                        reminderObj.setRecurrencePosition(latestReminder.getRecurrencePosition());
-//                    }  
+//                    }
                 }
                 
                 if (hasModulePermission(sessionObj, reminderObj)) {
@@ -219,15 +221,16 @@ public class ReminderRequest {
                 if (reminderObj.isRecurrenceAppointment()) {
                     final int targetId = Integer.parseInt(reminderObj.getTargetId());
                     final int inFolder = Integer.parseInt(reminderObj.getFolder());
-              
-                    final ReminderObject latestReminder = getLatestRecurringReminder(targetId, inFolder, sessionObj, end);
+                    final Date oldReminderDate = reminderObj.getDate();
+                    
+                    final ReminderObject latestReminder = getLatestRecurringReminder(targetId, inFolder, sessionObj, end, oldReminderDate);
                     
                     if (latestReminder == null) {
                         continue;
                     } else {
                         reminderObj.setDate(latestReminder.getDate());
                         reminderObj.setRecurrencePosition(latestReminder.getRecurrencePosition());
-                    }                        
+                    }
                 }
                 
                 if (hasModulePermission(sessionObj, reminderObj)) {
@@ -239,7 +242,7 @@ public class ReminderRequest {
             
             return jsonResponseArray;
         } catch (SQLException e) {
-	        throw new OXException("SQLException occurred", e);
+            throw new OXException("SQLException occurred", e);
         } finally {
             if (null != it) {
                 it.close();
@@ -259,10 +262,10 @@ public class ReminderRequest {
     }
     
     /**
-     * This method returns the lastest reminder object of the recurrence appointment. The reminder object contains only 
+     * This method returns the lastest reminder object of the recurrence appointment. The reminder object contains only
      * the alarm attribute and the recurrence position.
-     **/   
-    protected ReminderObject getLatestRecurringReminder(final int objectId, final int inFolder, final SessionObject sessionObj, final Date endRange) throws OXException, SQLException {
+     **/
+    protected ReminderObject getLatestRecurringReminder(final int objectId, final int inFolder, final SessionObject sessionObj, final Date endRange, final Date oldReminderDate) throws OXException, SQLException {
         final CalendarSql calendarSql = new CalendarSql(sessionObj);
         final CalendarDataObject calendarDataObject = calendarSql.getObjectById(objectId, inFolder);
         final int alarm = calendarDataObject.getAlarm();
@@ -275,28 +278,38 @@ public class ReminderRequest {
         
         final Date startRange = calendar.getTime();
         
-        final RecurringResults recurringResults = CalendarRecurringCollection.calculateRecurring(calendarDataObject, startRange.getTime(), endRange.getTime(), 0, 0, false);
-        if (recurringResults != null && recurringResults.size() >= 1) {
-            final RecurringResult recurringResult = recurringResults.getRecurringResult(recurringResults.size()-1);
-            final ReminderObject reminderObj = new ReminderObject();
-            reminderObj.setRecurrenceAppointment(true);
-            reminderObj.setRecurrencePosition(recurringResult.getPosition());
+        final RecurringResults recurringResults = CalendarRecurringCollection.calculateRecurring(calendarDataObject, startRange.getTime(),  endRange.getTime(), 0, 0, false);
+        if (recurringResults != null) {
+            final List<ReminderObject> reminderList = new ArrayList<ReminderObject>();
+            for (int a = 0; a < recurringResults.size(); a++) {
+                final RecurringResult recurringResult = recurringResults.getRecurringResult(a);
+                final ReminderObject reminderObj = new ReminderObject();
+                reminderObj.setRecurrenceAppointment(true);
+                reminderObj.setRecurrencePosition(recurringResult.getPosition());
+                
+                calendar.setTimeInMillis(recurringResult.getStart());
+                calendar.add(Calendar.MINUTE, 0-alarm);
+                
+                reminderObj.setDate(calendar.getTime());
+                
+                if (oldReminderDate.getTime() <= reminderObj.getDate().getTime()) {
+                    reminderList.add(reminderObj);
+                    // return reminderObj;
+                }
+            }
             
-            calendar.setTimeInMillis(recurringResult.getStart());
-            calendar.add(Calendar.MINUTE, 0-alarm);
-            
-            reminderObj.setDate(calendar.getTime());
-
-            return reminderObj;
+            if (reminderList.size() > 0) {
+                return reminderList.get(reminderList.size()-1);
+            }
         }
         
         return null;
     }
     
     /**
-     * This method returns the next reminder object of the recurrence appointment. The reminder object contains only 
+     * This method returns the next reminder object of the recurrence appointment. The reminder object contains only
      * the alarm attribute and the recurrence position.
-     **/   
+     **/
     protected ReminderObject getNextRecurringReminder(final int objectId, final int recurrencePosition, final int inFolder, final SessionObject sessionObj) throws OXException, SQLException {
         final CalendarSql calendarSql = new CalendarSql(sessionObj);
         final CalendarDataObject calendarDataObject = calendarSql.getObjectById(objectId, inFolder);
@@ -315,7 +328,7 @@ public class ReminderRequest {
             calendar.add(Calendar.MINUTE, 0-alarm);
             
             reminderObj.setDate(calendar.getTime());
-
+            
             return reminderObj;
         }
         
