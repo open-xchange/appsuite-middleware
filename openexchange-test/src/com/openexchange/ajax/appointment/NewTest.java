@@ -55,7 +55,10 @@ public class NewTest extends AppointmentTest {
 		c.set(Calendar.MILLISECOND, 0);
 		
 		Date start = c.getTime();
-		Date end = new Date(start.getTime()+dayInMillis);
+        
+        c.add(Calendar.DAY_OF_MONTH, 1);
+        
+		Date end = c.getTime();
 		
 		AppointmentObject appointmentObj = new AppointmentObject();
 		appointmentObj.setTitle("testFullTime");
@@ -80,7 +83,10 @@ public class NewTest extends AppointmentTest {
 		c.set(Calendar.MILLISECOND, 0);
 		
 		Date start = c.getTime();
-		Date end = new Date(start.getTime()+(dayInMillis*2));
+        
+        c.add(Calendar.DAY_OF_MONTH, 2);
+        
+		Date end = c.getTime();
 		
 		AppointmentObject appointmentObj = new AppointmentObject();
 		appointmentObj.setTitle("testFullTime");
