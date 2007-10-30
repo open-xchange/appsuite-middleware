@@ -55,6 +55,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -532,15 +533,17 @@ public final class MessageUtility {
 		return -1;
 	}
 
-	private static final Pattern IMG_PATTERN = Pattern.compile("<img[^>]*>", Pattern.CASE_INSENSITIVE
-			| Pattern.DOTALL);
+	private static final Pattern IMG_PATTERN = Pattern.compile("<img[^>]*>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
 	private static final Pattern CID_PATTERN = Pattern.compile("cid:([^\\s>]*)|\"cid:([^\"]*)\"",
 			Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-	
-	private static final Pattern FILENAME_PATTERN = Pattern.compile("src=\"?([0-9a-z&&[^.\\s>\"]]+\\.[0-9a-z&&[^.\\s>\"]]+)\"?", Pattern.CASE_INSENSITIVE);
+
+	private static final Pattern FILENAME_PATTERN = Pattern.compile(
+			"src=\"?([0-9a-z&&[^.\\s>\"]]+\\.[0-9a-z&&[^.\\s>\"]]+)\"?", Pattern.CASE_INSENSITIVE);
 
 	private static final String STR_AJAX_MAIL = "\"/ajax/mail?";
+
+	private static final String CHARSET_ISO8859 = "ISO-8859-1";
 
 	/**
 	 * Replaces all occurences of <code>&lt;img cid:&quot;[cid]&quot;...</code>
@@ -573,11 +576,11 @@ public final class MessageUtility {
 						if (m.find()) {
 							final StringBuilder linkBuilder = new StringBuilder(256);
 							final String filename = m.group(1);
-							linkBuilder.append("src=").append(STR_AJAX_MAIL).append(Mail.PARAMETER_SESSION).append('=').append(
-									session.getSecret()).append('&').append(Mail.PARAMETER_ACTION).append('=').append(
-									Mail.ACTION_MATTACH).append('&').append(Mail.PARAMETER_ID).append('=').append(
-									msgUID).append('&').append(Mail.PARAMETER_MAILCID).append('=').append(filename)
-									.append('"');
+							linkBuilder.append("src=").append(STR_AJAX_MAIL).append(Mail.PARAMETER_SESSION).append('=')
+									.append(session.getSecret()).append('&').append(Mail.PARAMETER_ACTION).append('=')
+									.append(Mail.ACTION_MATTACH).append('&').append(Mail.PARAMETER_ID).append('=')
+									.append(urlEncodeSafe(msgUID, CHARSET_ISO8859)).append('&').append(
+											Mail.PARAMETER_MAILCID).append('=').append(filename).append('"');
 							m.appendReplacement(cidBuffer, Matcher.quoteReplacement(linkBuilder.toString()));
 						}
 						m.appendTail(cidBuffer);
@@ -594,7 +597,8 @@ public final class MessageUtility {
 		return reval;
 	}
 
-	private static boolean replaceImgSrc(final SessionObject session, final String msgUID, final String imgTag, final StringBuffer cidBuffer) {
+	private static boolean replaceImgSrc(final SessionObject session, final String msgUID, final String imgTag,
+			final StringBuffer cidBuffer) {
 		boolean retval = false;
 		final Matcher cidMatcher = CID_PATTERN.matcher(imgTag);
 		if (cidMatcher.find()) {
@@ -603,16 +607,25 @@ public final class MessageUtility {
 			do {
 				final String cid = (cidMatcher.group(1) == null ? cidMatcher.group(2) : cidMatcher.group(1));
 				linkBuilder.setLength(0);
-				linkBuilder.append(STR_AJAX_MAIL).append(Mail.PARAMETER_SESSION).append('=').append(
-						session.getSecret()).append('&').append(Mail.PARAMETER_ACTION).append('=').append(
-						Mail.ACTION_MATTACH).append('&').append(Mail.PARAMETER_ID).append('=').append(
-						msgUID).append('&').append(Mail.PARAMETER_MAILCID).append('=').append(cid).append(
-						'"');
+				linkBuilder.append(STR_AJAX_MAIL).append(Mail.PARAMETER_SESSION).append('=')
+						.append(session.getSecret()).append('&').append(Mail.PARAMETER_ACTION).append('=').append(
+								Mail.ACTION_MATTACH).append('&').append(Mail.PARAMETER_ID).append('=').append(
+								urlEncodeSafe(msgUID, CHARSET_ISO8859)).append('&').append(Mail.PARAMETER_MAILCID)
+						.append('=').append(cid).append('"');
 				cidMatcher.appendReplacement(cidBuffer, Matcher.quoteReplacement(linkBuilder.toString()));
 			} while (cidMatcher.find());
 		}
 		cidMatcher.appendTail(cidBuffer);
 		return retval;
+	}
+
+	private static String urlEncodeSafe(final String text, final String charset) {
+		try {
+			return URLEncoder.encode(text, charset);
+		} catch (final UnsupportedEncodingException e) {
+			LOG.error(e.getLocalizedMessage(), e);
+			return text;
+		}
 	}
 
 	private static final Pattern PATTERN_BLOCKQUOTE = Pattern.compile("(?:(<blockquote.*?>)|(</blockquote>))",
