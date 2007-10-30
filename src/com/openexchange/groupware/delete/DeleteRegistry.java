@@ -49,20 +49,10 @@
 
 package com.openexchange.groupware.delete;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-
 import com.openexchange.ajax.spellcheck.AJAXUserDictionary;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.groupware.UserConfiguration;
+import com.openexchange.groupware.attach.impl.AttachmentContextDelete;
 import com.openexchange.groupware.attach.impl.AttachmentDelDelete;
 import com.openexchange.groupware.calendar.CalendarAdministration;
 import com.openexchange.groupware.contact.Contacts;
@@ -74,6 +64,13 @@ import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.tools.file.QuotaUsageDelete;
 import com.openexchange.tools.oxfolder.OXFolderDeleteListener;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * DeleteRegistry
@@ -117,7 +114,8 @@ public final class DeleteRegistry {
 		registerDeleteListener(new UserConfiguration());
 		registerDeleteListener(new UserSettingMail());
 		registerDeleteListener(new QuotaUsageDelete());
-		registerDeleteListener(new AttachmentDelDelete());
+        registerDeleteListener(new AttachmentContextDelete());
+        registerDeleteListener(new AttachmentDelDelete());
 		/*
 		 * At last insert folder delete listener
 		 */
