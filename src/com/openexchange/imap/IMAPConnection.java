@@ -246,9 +246,6 @@ public final class IMAPConnection extends MailConnection<IMAPFolderStorage, IMAP
 					LOG.error(e.getMessage(), e);
 				}
 			}
-			
-			tmpPass = "oxtest40";
-			
 			imapStore.connect(getMailServer(), getMailServerPort(), getLogin(), tmpPass);
 			connected = true;
 			/*
