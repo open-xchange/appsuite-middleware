@@ -236,7 +236,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
-            con = cache.getREADConnectionForContext(ctx.getId());
+            con = cache.getWRITEConnectionForContext(ctx.getId());
             ps = con.prepareStatement("SELECT field01 FROM prg_contacts WHERE cid = ? AND field01 = ?;");
             ps.setInt(1, ctx.getId());
             ps.setString(2, usr.getDisplay_name());
