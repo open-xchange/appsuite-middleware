@@ -1,3 +1,7 @@
+* 2007-10-31 - manuel.kraft@open-xchange.com
+
+   - Bugfix ID#10005 [HEAD] Connections to database not returned in admindaemon
+
 * 2007-10-29 - dennis.sieben@open-xchange.com
 
   - Bugfix ID#9983 Changing user by name isn't running any more
