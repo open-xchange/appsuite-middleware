@@ -1,3 +1,8 @@
+* 2007-10-31 - ben.pahne@open-xchange.com
+
+ - Bugfix #9996: Fixed replacing if special characters when converting
+   plain text to html
+
 * 2007-10-29 - ben.pahne@open-xchange.com
 
  - Fixed Bug 9975: Some connections didn't get closed during an error 

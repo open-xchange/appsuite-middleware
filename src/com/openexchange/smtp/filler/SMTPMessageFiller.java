@@ -312,7 +312,7 @@ public final class SMTPMessageFiller {
 					/*
 					 * Define text content
 					 */
-					text.setText(performLineFolding(converter.convertWithQuotes((String) mail.getContent()), false, usm
+					text.setText(performLineFolding(getConverter().convertWithQuotes((String) mail.getContent()), false, usm
 							.getAutoLinebreak()), SMTPConfig.getDefaultMimeCharset());
 					text.setHeader(MessageHeaders.HDR_MIME_VERSION, VERSION_1_0);
 					text.setHeader(MessageHeaders.HDR_CONTENT_TYPE, PAT_TEXT_CT.replaceFirst(REPLACE_CS, SMTPConfig
@@ -429,7 +429,7 @@ public final class SMTPMessageFiller {
 					/*
 					 * Convert html content to reguar text
 					 */
-					mailText = performLineFolding(converter.convertWithQuotes((String) mail.getContent()), false, usm
+					mailText = performLineFolding(getConverter().convertWithQuotes((String) mail.getContent()), false, usm
 							.getAutoLinebreak());
 				} else {
 					mailText = performLineFolding(replaceHTMLSimpleQuotesForDisplay(formatHrefLinks((String) mail
