@@ -326,7 +326,13 @@ public final class MailMessageParser {
 					 * keep the code structure to iterate over Multipart's child
 					 * objects.
 					 */
-					final Multipart mp = ContactHandler.convert(message);
+					final Multipart mp;
+					try {
+						mp = ContactHandler.convert(message);
+					} catch (final RuntimeException e) {
+						LOG.error("Invalid TNEF contact", e);
+						return;
+					}
 					final int mpsize = mp.getCount();
 					for (int i = 0; i < mpsize; i++) {
 						/*
@@ -346,7 +352,13 @@ public final class MailMessageParser {
 					 * Multipart object consists both the human readable text
 					 * part and machine readable part.
 					 */
-					final Multipart mp = ReadReceiptHandler.convert(message);
+					final Multipart mp;
+					try {
+						mp = ReadReceiptHandler.convert(message);
+					} catch (final RuntimeException e) {
+						LOG.error("Invalid TNEF read receipt", e);
+						return;
+					}
 					final int mpsize = mp.getCount();
 					for (int i = 0; i < mpsize; i++) {
 						/*

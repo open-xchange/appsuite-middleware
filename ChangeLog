@@ -2,6 +2,8 @@
 
  - Bugfix #9996: Fixed replacing if special characters when converting
    plain text to html
+ - Bugfix #9998: Catching runtime exception when converting TNEF read
+   receipt or TNEF contact to common multipart object
 
 * 2007-10-29 - ben.pahne@open-xchange.com
 
