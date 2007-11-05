@@ -113,7 +113,7 @@ public final class Database {
             poolId = assign.readPoolId;
         }
         try {
-            return Pools.getPool(poolId).get();
+            return getPools().getPool(poolId).get();
         } catch (PoolingException e) {
             throw new DBPoolingException(Code.NO_CONFIG_DB, e);
         }
@@ -162,7 +162,7 @@ public final class Database {
         throws DBPoolingException {
         final Connection con;
         try {
-            con = Pools.getPool(poolId).get();
+            con = getPools().getPool(poolId).get();
         } catch (PoolingException e) {
             throw new DBPoolingException(Code.NO_CONNECTION, e, Integer.valueOf(
                 poolId));
@@ -174,7 +174,7 @@ public final class Database {
             }
         } catch (SQLException e) {
             try {
-                Pools.getPool(poolId).back(con);
+                getPools().getPool(poolId).back(con);
             } catch (PoolingException e1) {
                 LOG.error(e1.getMessage(), e1);
             }
@@ -238,7 +238,7 @@ public final class Database {
      */
     public static void back(final int poolId, final Connection con) {
         try {
-            Pools.getPool(poolId).back(con);
+            getPools().getPool(poolId).back(con);
         } catch (PoolingException e) {
             final DBPoolingException exc = new DBPoolingException(
                 Code.RETURN_FAILED, e, Integer.valueOf(poolId));
@@ -265,7 +265,7 @@ public final class Database {
      * @param checkTime new check time.
      */
     public static void setCheckTime(final long checkTime) {
-        for (ConnectionPool pool : Pools.getPools()) {
+        for (ConnectionPool pool : getPools().getPools()) {
             pool.setCheckTime(checkTime);
         }
     }
@@ -280,7 +280,7 @@ public final class Database {
         int retval = -1;
         try {
             final int poolId = resolvePool(contextId, write);
-            final ConnectionPool pool = Pools.getPool(poolId);
+            final ConnectionPool pool = getPools().getPool(poolId);
             retval = pool.getNumActive() + pool.getNumIdle();
         } catch (DBPoolingException e) {
             LOG.error(e.getMessage(), e);
@@ -293,9 +293,13 @@ public final class Database {
      */
     public static int getNumConnections() {
         int connections = 0;
-        for (ConnectionPool pool : Pools.getPools()) {
+        for (ConnectionPool pool : getPools().getPools()) {
             connections += pool.getPoolSize();
         }
         return connections;
+    }
+
+    private static Pools getPools() {
+        return Pools.getInstance();
     }
 }

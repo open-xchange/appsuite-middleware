@@ -47,20 +47,24 @@
  *
  */
 
-
-
 package com.openexchange.database;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.server.DBPoolingException;
+import com.openexchange.server.Initialization;
 
 /**
  * This class contains the initialization for the database system.
+ * FIXME this class should be removed.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @deprecated since Initialization interface exists, all components should be
+ * started through {@link Starter#start()} or {@link Starter#adminStart()}.
  */
-public final class DatabaseInit {
+public final class DatabaseInit implements Initialization {
+
+    private static final DatabaseInit singleton = new DatabaseInit();
 
     /**
      * Logger.
@@ -77,12 +81,29 @@ public final class DatabaseInit {
     /**
      * Method for initializing the database system.
      * @throws DBPoolingException if initialization fails.
+     * @deprecated use {@link Starter#start()} for starting up the server.
      */
     public static void init() throws DBPoolingException {
-        Pools.init();
+        singleton.start();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void start() throws DBPoolingException {
+        Pools.getInstance().start();
         AssignmentStorage.init();
         if (LOG.isInfoEnabled()) {
-			LOG.info("Resolved server name \"" + Server.getServerName() + "\" to identifier " + Server.getServerId());
-		}
+            LOG.info("Resolved server name \"" + Server.getServerName()
+                + "\" to identifier " + Server.getServerId());
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void stop() {
+        // TODO Auto-generated method stub
+        Pools.getInstance().stop();
     }
 }

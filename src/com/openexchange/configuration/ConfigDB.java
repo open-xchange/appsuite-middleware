@@ -52,6 +52,9 @@ package com.openexchange.configuration;
 import java.util.Iterator;
 import java.util.Properties;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.configuration.ConfigurationException.Code;
 import com.openexchange.server.Initialization;
 import com.openexchange.tools.conf.AbstractConfig;
@@ -62,10 +65,15 @@ import com.openexchange.tools.conf.AbstractConfig;
  */
 public final class ConfigDB extends AbstractConfig implements Initialization {
 
+    private static ConfigDB singleton = new ConfigDB();
+
     private static final com.openexchange.configuration.SystemConfig.Property
         KEY = com.openexchange.configuration.SystemConfig.Property.CONFIGDB;
 
-    private static ConfigDB singleton = new ConfigDB();
+    /**
+     * Logger.
+     */
+    private static final Log LOG = LogFactory.getLog(ConfigDB.class);
 
     private Properties readProps = new Properties();
 
@@ -78,28 +86,28 @@ public final class ConfigDB extends AbstractConfig implements Initialization {
         super();
     }
 
-    public static boolean isWriteDefined() {
+    public boolean isWriteDefined() {
         return Boolean.parseBoolean(getProperty(Property.SEPERATE_WRITE,
             "false"));
     }
 
-    public static String getReadUrl() {
+    public String getReadUrl() {
         return getProperty(Property.READ_URL);
     }
 
-    public static Properties getReadProps() {
-        return getInstance().readProps;
+    public Properties getReadProps() {
+        return readProps;
     }
 
-    public static String getWriteUrl() {
+    public String getWriteUrl() {
         return getProperty(Property.WRITE_URL);
     }
 
-    public static Properties getWriteProps() {
-        return getInstance().writeProps;
+    public Properties getWriteProps() {
+        return writeProps;
     }
 
-    private static String getProperty(final Property property) {
+    private String getProperty(final Property property) {
         return getProperty(property, null);
     }
 
@@ -107,11 +115,11 @@ public final class ConfigDB extends AbstractConfig implements Initialization {
         T convert(String toConvert);
     }
 
-    private static <T> T getUniversal(final Property property, final T def,
+    private <T> T getUniversal(final Property property, final T def,
         final Convert<T> converter) {
         final T retval;
-        if (singleton.containsPropertyInternal(property.propertyName)) {
-            retval = converter.convert(singleton.getPropertyInternal(property
+        if (containsPropertyInternal(property.propertyName)) {
+            retval = converter.convert(getPropertyInternal(property
                 .propertyName));
         } else {
             retval = def;
@@ -119,7 +127,7 @@ public final class ConfigDB extends AbstractConfig implements Initialization {
         return retval;
     }
 
-    public static String getProperty(final Property property,
+    public String getProperty(final Property property,
         final String def) {
         return getUniversal(property, def, new Convert<String>() {
             public String convert(final String toConvert) {
@@ -128,7 +136,7 @@ public final class ConfigDB extends AbstractConfig implements Initialization {
         });
     }
 
-    public static int getInt(final Property property, final int def) {
+    public int getInt(final Property property, final int def) {
         return getUniversal(property, Integer.valueOf(def), new Convert<Integer>() {
             public Integer convert(final String toConvert) {
                 return Integer.valueOf(toConvert);
@@ -136,7 +144,7 @@ public final class ConfigDB extends AbstractConfig implements Initialization {
         }).intValue();
     }
 
-    public static long getLong(final Property property, final long def) {
+    public long getLong(final Property property, final long def) {
         return getUniversal(property, Long.valueOf(def), new Convert<Long>() {
             public Long convert(final String toConvert) {
                 return Long.valueOf(toConvert);
@@ -144,7 +152,7 @@ public final class ConfigDB extends AbstractConfig implements Initialization {
         }).longValue();
     }
 
-    public static boolean getBoolean(final Property property, final boolean def) {
+    public boolean getBoolean(final Property property, final boolean def) {
         return getUniversal(property, Boolean.valueOf(def), new Convert<Boolean>() {
             public Boolean convert(final String toConvert) {
                 return Boolean.valueOf(toConvert);
@@ -174,8 +182,16 @@ public final class ConfigDB extends AbstractConfig implements Initialization {
      * {@inheritDoc}
      */
     public void start() throws ConfigurationException {
-        singleton.loadPropertiesInternal();
+        if (isPropertiesLoadInternal()) {
+            LOG.error("Duplicate initialization of ConfigDB.");
+            return;
+        }
+        loadPropertiesInternal();
+        separateReadWrite();
+        loadDrivers();
+    }
 
+    private void separateReadWrite() {
         final Iterator<String> iter = keyIterator();
         while (iter.hasNext()) {
             final String key = iter.next();
@@ -194,6 +210,9 @@ public final class ConfigDB extends AbstractConfig implements Initialization {
                 writeProps.put(readKey, readValue);
             }
         }
+    }
+
+    private void loadDrivers() throws ConfigurationException {
         final String readDriverClass = getProperty(Property.READ_DRIVER_CLASS);
         if (null == readDriverClass) {
             throw new ConfigurationException(Code.PROPERTY_MISSING,

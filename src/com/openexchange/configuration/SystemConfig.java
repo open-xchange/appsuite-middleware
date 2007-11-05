@@ -49,6 +49,9 @@
 
 package com.openexchange.configuration;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.configuration.ConfigurationException.Code;
 import com.openexchange.server.Initialization;
 import com.openexchange.tools.conf.AbstractConfig;
@@ -62,15 +65,20 @@ public final class SystemConfig extends AbstractConfig implements
     Initialization {
 
     /**
+     * Singleton instance.
+     */
+    private static final SystemConfig singleton = new SystemConfig();
+
+    /**
+     * Logger.
+     */
+    private static final Log LOG = LogFactory.getLog(SystemConfig.class);
+
+    /**
      * Key of the system property that contains the file name of the
      * system.properties configuration file.
      */
     private static final String KEY = "openexchange.propfile";
-
-    /**
-     * Singleton instance.
-     */
-    private static final SystemConfig singleton = new SystemConfig();
 
     /**
      * Prevent instantiation.
@@ -128,7 +136,11 @@ public final class SystemConfig extends AbstractConfig implements
      * {@inheritDoc}
      */
     public void start() throws ConfigurationException {
-        singleton.loadPropertiesInternal();
+        if (isPropertiesLoadInternal()) {
+            LOG.error("Duplicate initialization of SystemConfig.");
+            return;
+        }
+        loadPropertiesInternal();
     }
 
     /**

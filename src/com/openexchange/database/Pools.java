@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.database;
 
 import java.util.ArrayList;
@@ -60,20 +58,22 @@ import java.util.TimerTask;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanRegistrationException;
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
 import javax.management.MalformedObjectNameException;
+import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.configuration.ConfigDB;
-import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.ConfigDB.Property;
 import com.openexchange.server.DBPoolingException;
+import com.openexchange.server.Initialization;
 import com.openexchange.server.ServerTimer;
 import com.openexchange.server.DBPoolingException.Code;
 
@@ -81,11 +81,18 @@ import com.openexchange.server.DBPoolingException.Code;
  * This class stores all connection pools. It also removes pools that are empty.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class Pools implements Runnable {
+public final class Pools implements Initialization, Runnable {
 
-    private static final String ERR_CANT_UNREGISTER_POOL_MBEAN = "Cannot unregister pool mbean.";
+    /**
+     * Singleton.
+     */
+    private static final Pools SINGLETON = new Pools();
 
-	/**
+    private static final String ERR_UNREGISTER = "Cannot unregister pool mbean.";
+
+    private static final String ERR_REGISTER = "Cannot register pool mbean.";
+
+    /**
      * Logger.
      */
     private static final Log LOG = LogFactory.getLog(Pools.class);
@@ -94,19 +101,19 @@ public final class Pools implements Runnable {
 
     public static final int CONFIGDB_WRITE_ID = -2;
 
-    private static ConnectionPool CONFIGDB_READ;
+    private ConnectionPool configDBRead;
 
-    private static ConnectionPool CONFIGDB_WRITE;
+    private ConnectionPool configDBWrite;
 
-    private static long cleanerInterval = 10000;
+    private long cleanerInterval = 10000;
 
-    private static final Map<Integer, ConnectionPool> POOLS =
+    private final Map<Integer, ConnectionPool> oxPools =
         new HashMap<Integer, ConnectionPool>();
 
-    private static final Lock lock = new ReentrantLock(true);
+    private final Lock poolsLock = new ReentrantLock(true);
 
     /**
-     * Prevent instantiation
+     * Prevent instantiation.
      */
     private Pools() {
         super();
@@ -115,38 +122,38 @@ public final class Pools implements Runnable {
     /**
      * @return an array with all connection pools.
      */
-    static ConnectionPool[] getPools() {
+    ConnectionPool[] getPools() {
         final List<ConnectionPool> pools = new ArrayList<ConnectionPool>();
-        pools.add(CONFIGDB_READ);
-        if (CONFIGDB_WRITE != CONFIGDB_READ) {
-            pools.add(CONFIGDB_WRITE);
+        pools.add(configDBRead);
+        if (configDBWrite != configDBRead) {
+            pools.add(configDBWrite);
         }
-        lock.lock();
+        poolsLock.lock();
         try {
-            pools.addAll(POOLS.values());
+            pools.addAll(oxPools.values());
         } finally {
-            lock.unlock();
+            poolsLock.unlock();
         }
         return pools.toArray(new ConnectionPool[pools.size()]);
     }
 
-    static ConnectionPool getPool(final int poolId) throws DBPoolingException {
-        if (null == CONFIGDB_READ) {
+    ConnectionPool getPool(final int poolId) throws DBPoolingException {
+        if (null == configDBRead) {
             throw new DBPoolingException(Code.NOT_INITIALIZED,
                 Pools.class.getName());
         }
         ConnectionPool retval;
         switch (poolId) {
         case CONFIGDB_READ_ID:
-            retval = CONFIGDB_READ;
+            retval = configDBRead;
             break;
         case CONFIGDB_WRITE_ID:
-            retval = CONFIGDB_WRITE;
+            retval = configDBWrite;
             break;
         default:
-            lock.lock();
+            poolsLock.lock();
             try {
-                retval = POOLS.get(Integer.valueOf(poolId));
+                retval = oxPools.get(Integer.valueOf(poolId));
                 if (null == retval) {
                     final ConnectionDataStorage.ConnectionData data =
                         ConnectionDataStorage.loadPoolData(poolId);
@@ -160,20 +167,20 @@ public final class Pools implements Runnable {
                     retval.registerCleaner(ServerTimer.getTimer(),
                         cleanerInterval);
                     registerMBean(createMBeanName(poolId), retval);
-                    POOLS.put(Integer.valueOf(poolId), retval);
+                    oxPools.put(Integer.valueOf(poolId), retval);
                 }
             } finally {
-                lock.unlock();
+                poolsLock.unlock();
             }
         }
         return retval;
     }
 
-    private static TimerTask cleaner = new TimerTask() {
+    private final TimerTask cleaner = new TimerTask() {
         @Override
         public void run() {
             try {
-                final Thread thread = new Thread(new Pools());
+                final Thread thread = new Thread(Pools.this);
                 thread.setName("PoolsCleaner");
                 thread.start();
             } catch (Exception e) {
@@ -187,14 +194,13 @@ public final class Pools implements Runnable {
      */
     public void run() {
         if (LOG.isTraceEnabled()) {
-			LOG.trace("Starting cleaner run.");
-		}
-        lock.lock();
+            LOG.trace("Starting cleaner run.");
+        }
+        poolsLock.lock();
         try {
-            final int size = POOLS.size();
             final Iterator<Map.Entry<Integer, ConnectionPool>> iter =
-                POOLS.entrySet().iterator();
-            for (int i = 0; i < size; i++) {
+                oxPools.entrySet().iterator();
+            while (iter.hasNext()) {
                 final Map.Entry<Integer, ConnectionPool> entry = iter.next();
                 final ConnectionPool pool = entry.getValue();
                 if (pool.isEmpty()) {
@@ -204,11 +210,11 @@ public final class Pools implements Runnable {
                 }
             }
         } finally {
-            lock.unlock();
+            poolsLock.unlock();
         }
         if (LOG.isTraceEnabled()) {
-			LOG.trace("Cleaner run ending.");
-		}
+            LOG.trace("Cleaner run ending.");
+        }
     }
 
     /**
@@ -223,24 +229,25 @@ public final class Pools implements Runnable {
      * Removes a pool from monitoring.
      * @param name Name of the pool to remove.
      */
-    private void unregisterMBean(final String name) {
+    private static void unregisterMBean(final String name) {
         // TODO finding correct mbean server
         try {
             final ObjectName objName = new ObjectName(
                 ConnectionPoolMBean.DOMAIN, "name", name);
-            final List servers = MBeanServerFactory.findMBeanServer(null);
+            final List<MBeanServer> servers = MBeanServerFactory
+                .findMBeanServer(null);
             if (servers.size() > 0) {
                 final MBeanServer server = (MBeanServer) servers.get(0);
                 server.unregisterMBean(objName);
             }
         } catch (MalformedObjectNameException e) {
-            LOG.error(ERR_CANT_UNREGISTER_POOL_MBEAN, e);
+            LOG.error(ERR_UNREGISTER, e);
         } catch (NullPointerException e) {
-            LOG.error(ERR_CANT_UNREGISTER_POOL_MBEAN, e);
+            LOG.error(ERR_UNREGISTER, e);
         } catch (InstanceNotFoundException e) {
-            LOG.error(ERR_CANT_UNREGISTER_POOL_MBEAN, e);
+            LOG.error(ERR_UNREGISTER, e);
         } catch (MBeanRegistrationException e) {
-            LOG.error(ERR_CANT_UNREGISTER_POOL_MBEAN, e);
+            LOG.error(ERR_UNREGISTER, e);
         }
     }
 
@@ -251,111 +258,143 @@ public final class Pools implements Runnable {
      */
     private static void registerMBean(final String name,
         final ConnectionPool pool) {
-        // TODO this doesn't work because I don't know where i'm running (admin
-        // or groupware)
+        // TODO finding correct mbean server
         try {
             final ObjectName objName = new ObjectName(
                 ConnectionPoolMBean.DOMAIN, "name", name);
-            final List servers = MBeanServerFactory.findMBeanServer(null);
+            final List<MBeanServer> servers = MBeanServerFactory
+                .findMBeanServer(null);
             if (servers.size() > 0) {
                 final MBeanServer server = (MBeanServer) servers.get(0);
                 server.registerMBean(pool, objName);
             }
-        } catch (Exception e) {
-            LOG.error("Cannot register pool mbean.", e);
+        } catch (MalformedObjectNameException e) {
+            LOG.error(ERR_REGISTER, e);
+        } catch (NullPointerException e) {
+            LOG.error(ERR_REGISTER, e);
+        } catch (InstanceAlreadyExistsException e) {
+            LOG.error(ERR_REGISTER, e);
+        } catch (MBeanRegistrationException e) {
+            LOG.error(ERR_REGISTER, e);
+        } catch (NotCompliantMBeanException e) {
+            LOG.error(ERR_REGISTER, e);
         }
     }
 
-    public static void init() throws DBPoolingException {
-        if (null != CONFIGDB_READ) {
+    /**
+     * @return the singleton instance.
+     */
+    public static Pools getInstance() {
+        return SINGLETON;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void start() throws DBPoolingException {
+        if (null != configDBRead) {
+            LOG.error("Duplicate startup of Pools.");
             return;
         }
-        try {
-            ConfigDB.init();
-        } catch (ConfigurationException e) {
-            throw new DBPoolingException(e);
-        }
-        cleanerInterval = ConfigDB.getLong(Property.CLEANER_INTERVAL,
+        initPoolConfig();
+        final ConfigDB configDB = ConfigDB.getInstance();
+        cleanerInterval = configDB.getLong(Property.CLEANER_INTERVAL,
             cleanerInterval);
         ServerTimer.getTimer().scheduleAtFixedRate(cleaner, cleanerInterval,
             cleanerInterval);
-        CONFIGDB_READ = new ConnectionPool(ConfigDB.getReadUrl(),
-            ConfigDB.getReadProps(), getConfig());
-        CONFIGDB_READ.registerCleaner(ServerTimer.getTimer(), cleanerInterval);
-        registerMBean("ConfigDB Read", CONFIGDB_READ);
-        if (ConfigDB.isWriteDefined()) {
-            CONFIGDB_WRITE = new ConnectionPool(ConfigDB.getWriteUrl(),
-                ConfigDB.getWriteProps(), getConfig());
-            CONFIGDB_WRITE.registerCleaner(ServerTimer.getTimer(),
+        configDBRead = new ConnectionPool(configDB.getReadUrl(),
+            configDB.getReadProps(), config);
+        configDBRead.registerCleaner(ServerTimer.getTimer(), cleanerInterval);
+        registerMBean("ConfigDB Read", configDBRead);
+        if (configDB.isWriteDefined()) {
+            configDBWrite = new ConnectionPool(configDB.getWriteUrl(),
+                configDB.getWriteProps(), config);
+            configDBWrite.registerCleaner(ServerTimer.getTimer(),
                 cleanerInterval);
-            registerMBean("ConfigDB Write", CONFIGDB_WRITE);
+            registerMBean("ConfigDB Write", configDBWrite);
         } else {
-            CONFIGDB_WRITE = CONFIGDB_READ;
+            configDBWrite = configDBRead;
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void stop() {
+        if (ConfigDB.getInstance().isWriteDefined()) {
+            unregisterMBean("ConfigDB Write");
+            configDBWrite.getCleanerTask().cancel();
+            configDBWrite.destroy();
+        }
+        configDBWrite = null;
+        unregisterMBean("ConfigDB Read");
+        configDBRead.getCleanerTask().cancel();
+        configDBRead.destroy();
+        configDBRead = null;
+        cleaner.cancel();
+        config = null;
     }
 
     /**
      * Pooling configuration.
      */
-    private static ConnectionPool.Config config;
+    private ConnectionPool.Config config;
 
     /**
      * Reads the pooling configuration from the configdb.properties file.
      * @return pooling information.
      */
-    private static ConnectionPool.Config getConfig() {
-        if (null == config) {
-            config = ConnectionPool.DEFAULT_CONFIG;
-            config.minIdle = ConfigDB.getInt(Property.MIN_IDLE, config.minIdle);
-            config.maxIdle = ConfigDB.getInt(Property.MAX_IDLE, config.maxIdle);
-            config.maxIdleTime = ConfigDB.getLong(Property.MAX_IDLE_TIME,
-                config.maxIdleTime);
-            config.maxActive = ConfigDB.getInt(Property.MAX_ACTIVE,
-                config.maxActive);
-            config.maxWait = ConfigDB.getLong(Property.MAX_WAIT,
-                config.maxWait);
-            config.maxLifeTime = ConfigDB.getLong(Property.MAX_LIFE_TIME,
-                config.maxLifeTime);
-            config.exhaustedAction = ConnectionPool.ExhaustedActions.valueOf(
-                ConfigDB.getProperty(Property.EXHAUSTED_ACTION,
-                    config.exhaustedAction.name()));
-            config.testOnActivate = ConfigDB.getBoolean(
-                Property.TEST_ON_ACTIVATE, config.testOnActivate);
-            config.testOnDeactivate = ConfigDB.getBoolean(
-                Property.TEST_ON_DEACTIVATE, config.testOnDeactivate);
-            config.testOnIdle = ConfigDB.getBoolean(
-                Property.TEST_ON_IDLE, config.testOnIdle);
-            config.testThreads = ConfigDB.getBoolean(
-                Property.TEST_THREADS, config.testThreads);
-            if (LOG.isInfoEnabled()) {
-	            final StringBuilder sb = new StringBuilder();
-	            sb.append("Database pooling options:\n");
-	            sb.append("\tMinimum idle connections: ");
-	            sb.append(config.minIdle);
-	            sb.append("\n\tMaximum idle connections: ");
-	            sb.append(config.maxIdle);
-	            sb.append("\n\tMaximum idle time: ");
-	            sb.append(config.maxIdleTime);
-	            sb.append("ms\n\tMaximum active connections: ");
-	            sb.append(config.maxActive);
-	            sb.append("\n\tMaximum wait time for a connection: ");
-	            sb.append(config.maxWait);
-	            sb.append("ms\n\tMaximum life time of a connection: ");
-	            sb.append(config.maxLifeTime);
-	            sb.append("ms\n\tAction if connections exhausted: ");
-	            sb.append(config.exhaustedAction.toString());
-	            sb.append("\n\tTest connections on activate  : ");
-	            sb.append(config.testOnActivate);
-	            sb.append("\n\tTest connections on deactivate: ");
-	            sb.append(config.testOnDeactivate);
-	            sb.append("\n\tTest idle connections         : ");
-	            sb.append(config.testOnIdle);
-	            sb.append("\n\tTest threads for bad connection usage (SLOW): ");
-	            sb.append(config.testThreads);
-	            LOG.info(sb.toString());
-            }
+    private void initPoolConfig() {
+        config = ConnectionPool.DEFAULT_CONFIG;
+        final ConfigDB configDB = ConfigDB.getInstance();
+        config.minIdle = configDB.getInt(Property.MIN_IDLE, config.minIdle);
+        config.maxIdle = configDB.getInt(Property.MAX_IDLE, config.maxIdle);
+        config.maxIdleTime = configDB.getLong(Property.MAX_IDLE_TIME,
+            config.maxIdleTime);
+        config.maxActive = configDB.getInt(Property.MAX_ACTIVE,
+            config.maxActive);
+        config.maxWait = configDB.getLong(Property.MAX_WAIT,
+            config.maxWait);
+        config.maxLifeTime = configDB.getLong(Property.MAX_LIFE_TIME,
+            config.maxLifeTime);
+        config.exhaustedAction = ConnectionPool.ExhaustedActions.valueOf(
+            configDB.getProperty(Property.EXHAUSTED_ACTION, config
+                .exhaustedAction.name()));
+        config.testOnActivate = configDB.getBoolean(Property.TEST_ON_ACTIVATE,
+            config.testOnActivate);
+        config.testOnDeactivate = configDB.getBoolean(
+            Property.TEST_ON_DEACTIVATE, config.testOnDeactivate);
+        config.testOnIdle = configDB.getBoolean(Property.TEST_ON_IDLE,
+            config.testOnIdle);
+        config.testThreads = configDB.getBoolean(Property.TEST_THREADS,
+            config.testThreads);
+        if (LOG.isInfoEnabled()) {
+            final StringBuilder sb = new StringBuilder();
+            sb.append("Database pooling options:\n");
+            sb.append("\tMinimum idle connections: ");
+            sb.append(config.minIdle);
+            sb.append("\n\tMaximum idle connections: ");
+            sb.append(config.maxIdle);
+            sb.append("\n\tMaximum idle time: ");
+            sb.append(config.maxIdleTime);
+            sb.append("ms\n\tMaximum active connections: ");
+            sb.append(config.maxActive);
+            sb.append("\n\tMaximum wait time for a connection: ");
+            sb.append(config.maxWait);
+            sb.append("ms\n\tMaximum life time of a connection: ");
+            sb.append(config.maxLifeTime);
+            sb.append("ms\n\tAction if connections exhausted: ");
+            sb.append(config.exhaustedAction.toString());
+            sb.append("\n\tTest connections on activate  : ");
+            sb.append(config.testOnActivate);
+            sb.append("\n\tTest connections on deactivate: ");
+            sb.append(config.testOnDeactivate);
+            sb.append("\n\tTest idle connections         : ");
+            sb.append(config.testOnIdle);
+            sb.append("\n\tTest threads for bad connection usage (SLOW): ");
+            sb.append(config.testThreads);
+            LOG.info(sb.toString());
         }
-        return config;
     }
 
     /**
@@ -363,9 +402,9 @@ public final class Pools implements Runnable {
      * @param data settings from the database.
      * @return pooling configuration.
      */
-    private static ConnectionPool.Config getConfig(
+    private ConnectionPool.Config getConfig(
         final ConnectionDataStorage.ConnectionData data) {
-        final ConnectionPool.Config retval = getConfig();
+        final ConnectionPool.Config retval = config.clone();
         retval.maxActive = data.max;
         retval.minIdle = data.min;
         if (data.block) {

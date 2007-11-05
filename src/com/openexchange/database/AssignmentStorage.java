@@ -233,7 +233,7 @@ public final class AssignmentStorage {
                 CONFIG_DB = new Assignment();
                 CONFIG_DB.contextId = 0;
                 CONFIG_DB.readPoolId = Pools.CONFIGDB_READ_ID;
-                if (ConfigDB.isWriteDefined()) {
+                if (ConfigDB.getInstance().isWriteDefined()) {
                     CONFIG_DB.writePoolId = Pools.CONFIGDB_WRITE_ID;
                 } else {
                     CONFIG_DB.writePoolId = Pools.CONFIGDB_READ_ID;

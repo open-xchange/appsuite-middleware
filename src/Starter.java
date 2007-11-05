@@ -54,7 +54,6 @@ import java.util.Stack;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.configuration.ConfigurationInit;
 import com.openexchange.database.DatabaseInit;
 import com.openexchange.database.Server;
 import com.openexchange.groupware.AbstractOXException;
@@ -102,7 +101,6 @@ public class Starter implements Initialization {
          */
         com.openexchange.groupware.notify.NotificationConfig.getInstance()
     };
-
 
     /**
      * This contains the components that must be started if the admin uses APIs

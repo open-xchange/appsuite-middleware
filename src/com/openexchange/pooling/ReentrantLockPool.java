@@ -731,7 +731,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
         }
     }
 
-    public static class Config {
+    public static class Config implements Cloneable {
         public int minIdle;
         public int maxIdle;
         public long maxIdleTime;
@@ -747,6 +747,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
          * Default constructor.
          */
         public Config() {
+            super();
             minIdle = 0;
             maxIdle = -1;
             maxIdleTime = 60000;
@@ -758,6 +759,18 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
             testOnDeactivate = true;
             testOnIdle = false;
             testThreads = false;
+        }
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public Config clone() {
+            try {
+                return (Config) super.clone();
+            } catch (CloneNotSupportedException e) {
+                // Will not appear!
+                throw new Error("Assertion failed!", e);
+            }
         }
     }
 }

@@ -59,7 +59,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.api2.OXException;
+import com.openexchange.configuration.ConfigDB;
 import com.openexchange.configuration.ConfigurationInit;
+import com.openexchange.configuration.SystemConfig;
 import com.openexchange.consistency.AttachmentProblemSolver;
 import com.openexchange.consistency.DBDelProblemSolver;
 import com.openexchange.consistency.DBProblemSolver;
@@ -410,11 +412,9 @@ public class Consistency {
 	}
 	
 	public void start(final String[] args) {
-		/*Properties p = System.getProperties();*/
-		/*String path = p.getProperty("user.dir");*/
-		//ComfireConfig.loadProperties(System.getProperty("openexchange.propfile"));
         try {
-            ConfigurationInit.init();
+            SystemConfig.getInstance().start();
+            ConfigDB.getInstance().start();
         } catch (AbstractOXException e) {
             LOG.error("Initializing the configuration failed.", e);
             System.exit(1);
