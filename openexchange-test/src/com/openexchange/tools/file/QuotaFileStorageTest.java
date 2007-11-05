@@ -29,8 +29,8 @@ public class QuotaFileStorageTest extends TestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        origImpl = FileStorage.IMPL;
-        FileStorage.IMPL = TestQuotaFileStorage.class;
+        origImpl = FileStorage.getImpl();
+        FileStorage.setImpl(TestQuotaFileStorage.class);
     }
 
     /**
@@ -38,7 +38,7 @@ public class QuotaFileStorageTest extends TestCase {
      */
     @Override
     protected void tearDown() throws Exception {
-        FileStorage.IMPL = origImpl;
+        FileStorage.setImpl(origImpl);
         super.tearDown();
     }
 

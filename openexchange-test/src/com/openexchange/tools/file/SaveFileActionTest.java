@@ -26,8 +26,8 @@ public class SaveFileActionTest extends AbstractActionTest {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        origImpl = FileStorage.IMPL;
-        FileStorage.IMPL = LocalFileStorage.class;
+        origImpl = FileStorage.getImpl();
+        FileStorage.setImpl(LocalFileStorage.class);
     }
 
     /**
@@ -35,7 +35,7 @@ public class SaveFileActionTest extends AbstractActionTest {
      */
     @Override
     protected void tearDown() throws Exception {
-        FileStorage.IMPL = origImpl;
+        FileStorage.setImpl(origImpl);
         super.tearDown();
     }
     

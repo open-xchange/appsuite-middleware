@@ -66,8 +66,8 @@ public class FileStorageTest extends TestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        origImpl = FileStorage.IMPL;
-        FileStorage.IMPL = LocalFileStorage.class;
+        origImpl = FileStorage.getImpl();
+        FileStorage.setImpl(LocalFileStorage.class);
     }
 
     /**
@@ -75,7 +75,7 @@ public class FileStorageTest extends TestCase {
      */
     @Override
     protected void tearDown() throws Exception {
-        FileStorage.IMPL = origImpl;
+        FileStorage.setImpl(origImpl);
         super.tearDown();
     }
 
@@ -88,7 +88,6 @@ public class FileStorageTest extends TestCase {
         final File tempFile = File.createTempFile("filestorage", ".tmp");
         tempFile.delete();
         LOG.trace(tempFile.getAbsolutePath());
-        FileStorage.IMPL = LocalFileStorage.class;
         final FileStorage storage = FileStorage.getInstance(tempFile);
         tempFile.delete();
         assertNotNull("Can't create file storage.", storage);
@@ -105,7 +104,6 @@ public class FileStorageTest extends TestCase {
         final String fileContent = RandomString.generateLetter(100);
         final ByteArrayInputStream baos = new ByteArrayInputStream(fileContent
             .getBytes("UTF-8"));
-        FileStorage.IMPL = LocalFileStorage.class;
         final FileStorage storage = FileStorage.getInstance(tempFile);
         final String identifier = storage.saveNewFile(baos);
         tempFile.delete();
@@ -119,7 +117,6 @@ public class FileStorageTest extends TestCase {
         final String fileContent = RandomString.generateLetter(100);
         final ByteArrayInputStream baos = new ByteArrayInputStream(fileContent
             .getBytes("UTF-8"));
-        FileStorage.IMPL = LocalFileStorage.class;
         final FileStorage storage = FileStorage.getInstance(tempFile);
         final String identifier = storage.saveNewFile(baos);
         rmdir(tempFile);
@@ -143,7 +140,6 @@ public class FileStorageTest extends TestCase {
     public final void testExceptionOnUnknown() throws Throwable {
     	final File tempFile = File.createTempFile("filestorage", ".tmp");
         tempFile.delete();
-        FileStorage.IMPL = LocalFileStorage.class;
         final FileStorage storage = FileStorage.getInstance(tempFile);
         try {
         	storage.getFile("00/00/01");
@@ -151,8 +147,6 @@ public class FileStorageTest extends TestCase {
         } catch (FileStorageException x) {
         	// Everything fine. Error is discovered.
         }
-        
-        
     }
 
 	private void rmdir(File tempFile) {
