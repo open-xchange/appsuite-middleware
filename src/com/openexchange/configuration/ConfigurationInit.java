@@ -54,14 +54,19 @@ import com.openexchange.server.Initialization;
 
 /**
  * This class contains the initialization for configuratons.
+ * FIXME remove this class.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @deprecated this class should not be used anymore. Use
+ * {@link Starter#start()} or {@link Starter#adminStart()}.
  */
 public final class ConfigurationInit implements Initialization {
+
+    private static final ConfigurationInit singleton = new ConfigurationInit();
 
     /**
      * Default constructor.
      */
-    public ConfigurationInit() {
+    private ConfigurationInit() {
         super();
     }
 
@@ -74,7 +79,7 @@ public final class ConfigurationInit implements Initialization {
      * a proper startup.
      */
     public static void init() throws AbstractOXException {
-        new ConfigurationInit().start();
+        singleton.start();
     }
 
     /**
@@ -82,7 +87,7 @@ public final class ConfigurationInit implements Initialization {
      */
     public void start() throws AbstractOXException {
         SystemConfig.getInstance().start();
-        ConfigDB.init();
+        ConfigDB.getInstance().start();
     }
 
     /**
@@ -90,5 +95,6 @@ public final class ConfigurationInit implements Initialization {
      */
     public void stop() throws AbstractOXException {
         SystemConfig.getInstance().stop();
+        ConfigDB.getInstance().stop();
     }
 }

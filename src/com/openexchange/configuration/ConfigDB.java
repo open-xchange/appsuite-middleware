@@ -47,30 +47,32 @@
  *
  */
 
-
-
 package com.openexchange.configuration;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.Properties;
-import java.util.Map.Entry;
 
 import com.openexchange.configuration.ConfigurationException.Code;
-import com.openexchange.tools.io.IOUtils;
+import com.openexchange.server.Initialization;
+import com.openexchange.tools.conf.AbstractConfig;
 
-public final class ConfigDB {
+/**
+ * Contains the settings for the ConfigDB.
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ */
+public final class ConfigDB extends AbstractConfig implements Initialization {
 
-    private static Properties props;
+    private static final com.openexchange.configuration.SystemConfig.Property
+        KEY = com.openexchange.configuration.SystemConfig.Property.CONFIGDB;
 
-    private static Properties readProps;
+    private static ConfigDB singleton = new ConfigDB();
 
-    private static Properties writeProps;
+    private Properties readProps = new Properties();
+
+    private Properties writeProps = new Properties();
 
     /**
-     * Prevent instantiation
+     * Prevent instantiation.
      */
     private ConfigDB() {
         super();
@@ -86,7 +88,7 @@ public final class ConfigDB {
     }
 
     public static Properties getReadProps() {
-        return readProps;
+        return getInstance().readProps;
     }
 
     public static String getWriteUrl() {
@@ -94,7 +96,7 @@ public final class ConfigDB {
     }
 
     public static Properties getWriteProps() {
-        return writeProps;
+        return getInstance().writeProps;
     }
 
     private static String getProperty(final Property property) {
@@ -108,8 +110,8 @@ public final class ConfigDB {
     private static <T> T getUniversal(final Property property, final T def,
         final Convert<T> converter) {
         final T retval;
-        if (props.containsKey(property.propertyName)) {
-            retval = converter.convert(props.getProperty(property
+        if (singleton.containsPropertyInternal(property.propertyName)) {
+            retval = converter.convert(singleton.getPropertyInternal(property
                 .propertyName));
         } else {
             retval = def;
@@ -150,48 +152,42 @@ public final class ConfigDB {
         }).booleanValue();
     }
 
+    /**
+     * Initializes settings for the ConfigDB.
+     * @throws ConfigurationException if the initialization fails.
+     * @deprecated since interface {@link Initialization} exists. This method
+     * should not be called all over the server. Other component should rely on
+     * a proper startup.
+     */
     public static void init() throws ConfigurationException {
-        if (null != props) {
-            return;
-        }
-        SystemConfig.init();
-        props = new Properties();
-        File propFile = null;
-        final String fileName = SystemConfig.getProperty(com.openexchange
-            .configuration.SystemConfig.Property.CONFIGDB);
-        if (null == fileName) {
-            throw new ConfigurationException(Code.PROPERTY_MISSING, com
-                .openexchange.configuration.SystemConfig.Property.CONFIGDB
-                .getPropertyName());
-        }
-        propFile = new File(fileName);
-        FileInputStream fis = null;
-        try {
-            fis = new FileInputStream(propFile);
-            props.load(fis);
-        } catch (IOException e) {
-            throw new ConfigurationException(Code.NOT_READABLE, e,
-                propFile.getAbsolutePath());
-        } finally {
-            IOUtils.closeStreamStuff(fis);
-        }
-        readProps = new Properties();
-        writeProps = new Properties();
-        final Iterator<Entry<Object, Object>> iter =
-            props.entrySet().iterator();
-        final int size = props.entrySet().size();
-        for (int k = 0; k < size; k++) {
-            final Entry<Object, Object> entry = iter.next();
-            final String key = (String) entry.getKey();
+        getInstance().start();
+    }
+
+    /**
+     * @return the singleton instance.
+     */
+    public static ConfigDB getInstance() {
+        return singleton;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void start() throws ConfigurationException {
+        singleton.loadPropertiesInternal();
+
+        final Iterator<String> iter = keyIterator();
+        while (iter.hasNext()) {
+            final String key = iter.next();
             if (key.startsWith("readProperty.")) {
-                final String value = (String) entry.getValue();
+                final String value = getPropertyInternal(key);
                 final int equalSignPos = value.indexOf('=');
                 final String readKey = value.substring(0, equalSignPos);
                 final String readValue = value.substring(equalSignPos + 1);
                 readProps.put(readKey, readValue);
             } else
             if (key.startsWith("writeProperty.")) {
-                final String value = (String) entry.getValue();
+                final String value = getPropertyInternal(key);
                 final int equalSignPos = value.indexOf('=');
                 final String readKey = value.substring(0, equalSignPos);
                 final String readValue = value.substring(equalSignPos + 1);
@@ -216,7 +212,7 @@ public final class ConfigDB {
             .WRITE_DRIVER_CLASS);
         if (null == writeDriverClass) {
             throw new ConfigurationException(Code.PROPERTY_MISSING,
-            Property.WRITE_DRIVER_CLASS.propertyName);
+                Property.WRITE_DRIVER_CLASS.propertyName);
         }
         try {
             Class.forName(writeDriverClass);
@@ -224,6 +220,28 @@ public final class ConfigDB {
             throw new ConfigurationException(Code.CLASS_NOT_FOUND, e,
                 writeDriverClass);
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void stop() {
+        clearProperties();
+        readProps = new Properties();
+        writeProps = new Properties();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected String getPropertyFileName() throws ConfigurationException {
+        final String fileName = SystemConfig.getProperty(KEY);
+        if (null == fileName) {
+            throw new ConfigurationException(Code.PROPERTY_MISSING,
+                KEY.getPropertyName());
+        }
+        return fileName;
     }
 
     /**

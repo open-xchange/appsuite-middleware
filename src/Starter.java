@@ -55,7 +55,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.configuration.ConfigurationInit;
-import com.openexchange.configuration.SystemConfig;
 import com.openexchange.database.DatabaseInit;
 import com.openexchange.database.Server;
 import com.openexchange.groupware.AbstractOXException;
@@ -78,7 +77,14 @@ public class Starter implements Initialization {
      * is done.
      */
     private final Initialization[] inits = new Initialization[] {
-        SystemConfig.getInstance()
+        /**
+         * system.properties.
+         */
+        com.openexchange.configuration.SystemConfig.getInstance(),
+        /**
+         * configdb.properties.
+         */
+        com.openexchange.configuration.ConfigDB.getInstance()
     };
 
     /**
@@ -86,7 +92,14 @@ public class Starter implements Initialization {
      * of the server.
      */
     private final Initialization[] adminInits = new Initialization[] {
-        SystemConfig.getInstance()
+        /**
+         * system.properties.
+         */
+        com.openexchange.configuration.SystemConfig.getInstance(),
+        /**
+         * configdb.properties.
+         */
+        com.openexchange.configuration.ConfigDB.getInstance()
     };
 
     private final Stack<Initialization> started = new Stack<Initialization>();
@@ -144,7 +157,6 @@ public class Starter implements Initialization {
                 init.start();
                 started.push(init);
             }
-            ConfigurationInit.init();
         } catch (final AbstractOXException e) {
             LOG.error("Initializing the configuration failed.", e);
             stop();

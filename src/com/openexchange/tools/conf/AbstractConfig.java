@@ -53,6 +53,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.Properties;
 
 import com.openexchange.configuration.ConfigurationException;
@@ -79,13 +80,23 @@ public abstract class AbstractConfig {
     }
 
     /**
+     * Checks if the properties contain a given key.
+     * @param key key to check for existance.
+     * @return <code>true</code> only if the properties are loaded and the key
+     * exists.
+     */
+    protected final boolean containsPropertyInternal(final String key) {
+        return props == null ? false : props.containsKey(key);
+    }
+
+    /**
      * Returns the value of the property with the specified key. This method
      * returns <code>null</code> if the property is not found.
      * @param key the property key.
      * @return the value of the property or <code>null</code> if the property
      * is not found.
      */
-    protected String getPropertyInternal(final String key) {
+    protected final String getPropertyInternal(final String key) {
         return getPropertyInternal(key, null);
     }
 
@@ -97,7 +108,8 @@ public abstract class AbstractConfig {
      * @return the property value or the default value if the property is not
      * defined.
      */
-    protected String getPropertyInternal(final String key, final String def) {
+    protected final String getPropertyInternal(final String key,
+        final String def) {
         return props == null ? null : props.getProperty(key, def);
     }
 
@@ -111,8 +123,8 @@ public abstract class AbstractConfig {
      * @param key the property name.
      * @return the <code>boolean</code> value of the property.
      */
-    protected boolean getBooleanInternal(final String key) {
-        return Boolean.parseBoolean(getPropertyInternal(key));
+    protected final boolean getBooleanInternal(final String key) {
+        return getBooleanInternal(key, null);
     }
 
     /**
@@ -125,7 +137,7 @@ public abstract class AbstractConfig {
     protected final boolean getBooleanInternal(final String key,
         final boolean def) {
         return getBooleanInternal(key, Boolean.valueOf(def).toString());
-        }
+    }
 
     /**
      * Returns the boolean value of the property. If the propery isn't set the
@@ -139,14 +151,32 @@ public abstract class AbstractConfig {
         String value = getPropertyInternal(key);
         if (null == value) {
             value = def;
-    }
+        }
         return Boolean.parseBoolean(value);
+    }
+
+    /**
+     * @return an iterator of the properties keys.
+     */
+    protected final Iterator<String> keyIterator() {
+        final Iterator<Object> iter = props.keySet().iterator();
+        return new Iterator<String>() {
+            public boolean hasNext() {
+                return iter.hasNext();
+            }
+            public String next() {
+                return (String) iter.next();
+            }
+            public void remove() {
+                iter.remove();
+            }
+        };
     }
 
     /**
      * @return if system.properties must be loaded.
      */
-    protected boolean isPropertiesLoadInternal() {
+    protected final boolean isPropertiesLoadInternal() {
         return (props != null);
     }
 
@@ -162,7 +192,8 @@ public abstract class AbstractConfig {
      * Loads the properties file by using the JVM system property defining the
      * path to the system.properties configuration file.
      */
-    protected void loadPropertiesInternal() throws ConfigurationException {
+    protected final void loadPropertiesInternal()
+        throws ConfigurationException {
         loadPropertiesInternal(getPropertyFileName());
     }
 
@@ -170,7 +201,7 @@ public abstract class AbstractConfig {
      * Loads the system.properties configuration file from the specified file.
      * @param propFileName name of the file containing the system.properties.
      */
-    protected void loadPropertiesInternal(final String propFileName)
+    protected final void loadPropertiesInternal(final String propFileName)
         throws ConfigurationException {
         if (null == propFileName) {
             throw new ConfigurationException(Code.NO_FILENAME);
@@ -190,7 +221,7 @@ public abstract class AbstractConfig {
      * Loads the system.properties configuration file from the specified file.
      * @param propFile file containing the system.properties.
      */
-    protected void loadProperties(final File propFile)
+    protected final void loadProperties(final File propFile)
         throws ConfigurationException {
         props = new Properties();
         FileInputStream fis = null;
@@ -217,7 +248,7 @@ public abstract class AbstractConfig {
     /**
      * Clears the properties.
      */
-    protected void clearProperties() {
+    protected final void clearProperties() {
         props = null;
     }
 }
