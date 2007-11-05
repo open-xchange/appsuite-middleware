@@ -1,19 +1,19 @@
 package com.openexchange.groupware;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
-
-import com.openexchange.configuration.ConfigurationInit;
+import com.openexchange.configuration.ConfigDB;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.database.DatabaseInit;
 import com.openexchange.groupware.contexts.ContextInit;
 import com.openexchange.sessiond.Sessiond;
 import com.openexchange.sessiond.SessiondConfigWrapper;
 import com.openexchange.sessiond.SessiondConnector;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
 
 /**
  * This class contains methods for initialising tests.
@@ -184,7 +184,8 @@ public final class Init {
             final String propFileName = testProps.getProperty(
                 "openexchange.propfile");
             System.setProperty("openexchange.propfile", propFileName); //FIXME 
-            ConfigurationInit.init();
+            SystemConfig.getInstance().start();
+            ConfigDB.getInstance().start();
             //ComfireConfig.loadProperties(propFileName);
 			systemPropertiesLoaded = true;
 		}
