@@ -62,7 +62,6 @@ import java.util.List;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.cache.FolderCacheManager;
-import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.FolderObject;
@@ -71,6 +70,7 @@ import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.tasks.Tasks;
 import com.openexchange.groupware.tx.DBPoolProvider;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.server.EffectivePermission;
 import com.openexchange.server.OCLPermission;

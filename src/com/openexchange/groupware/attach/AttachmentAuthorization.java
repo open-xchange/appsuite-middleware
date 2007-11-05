@@ -50,9 +50,9 @@
 package com.openexchange.groupware.attach;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 
 public interface AttachmentAuthorization {
 	public void checkMayAttach(int folderId, int objectId, User user, UserConfiguration userConfig, Context ctx) throws OXException;

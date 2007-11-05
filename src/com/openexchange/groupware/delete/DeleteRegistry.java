@@ -51,7 +51,6 @@ package com.openexchange.groupware.delete;
 
 import com.openexchange.ajax.spellcheck.AJAXUserDictionary;
 import com.openexchange.configuration.SystemConfig;
-import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.attach.impl.AttachmentContextDelete;
 import com.openexchange.groupware.attach.impl.AttachmentDelDelete;
 import com.openexchange.groupware.calendar.CalendarAdministration;
@@ -60,6 +59,7 @@ import com.openexchange.groupware.filestore.FileStorageRemover;
 import com.openexchange.groupware.infostore.InfostoreDelete;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.tasks.TasksDelete;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.tools.file.QuotaUsageDelete;

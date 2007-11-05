@@ -58,7 +58,6 @@ import java.util.Map;
 import java.util.Set;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentEvent;
 import com.openexchange.groupware.attach.AttachmentListener;
@@ -68,6 +67,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tx.AbstractUndoable;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.tx.UndoableAction;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 
 public abstract class AttachmentEventAction extends AbstractUndoable implements
 		UndoableAction {

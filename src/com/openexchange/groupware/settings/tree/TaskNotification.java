@@ -49,11 +49,11 @@
 
 package com.openexchange.groupware.settings.tree;
 
-import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.settings.AbstractMailFuncs;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.SettingSetup;
 import com.openexchange.groupware.settings.SharedValue;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.sessiond.SessionObject;
 

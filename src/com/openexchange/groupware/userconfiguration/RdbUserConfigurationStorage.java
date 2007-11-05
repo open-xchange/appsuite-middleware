@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.groupware;
+package com.openexchange.groupware.userconfiguration;
 
 import static com.openexchange.tools.sql.DBUtils.closeResources;
 
@@ -57,11 +57,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.UserConfigurationException.UserConfigurationCode;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.ContextImpl;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.userconfiguration.UserConfigurationException.UserConfigurationCode;
 import com.openexchange.server.DBPool;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.server.Initialization;

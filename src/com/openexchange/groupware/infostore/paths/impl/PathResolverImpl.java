@@ -65,7 +65,6 @@ import com.openexchange.cache.FolderCacheNotEnabledException;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.OXThrowsMultiple;
-import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -78,6 +77,7 @@ import com.openexchange.groupware.infostore.webdav.URLCache;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.tx.TransactionException;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.infostore.Classes;
 

@@ -59,13 +59,13 @@ import java.util.concurrent.locks.ReentrantLock;
 import javax.mail.Session;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.UserConfiguration;
-import com.openexchange.groupware.UserConfigurationException;
-import com.openexchange.groupware.UserConfigurationStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.Credentials;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.upload.AJAXUploadFile;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationException;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.mail.cache.SessionMailCache;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;

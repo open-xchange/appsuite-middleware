@@ -47,15 +47,9 @@
  *
  */
 
-package com.openexchange.groupware;
+package com.openexchange.groupware.userconfiguration;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-
-import com.openexchange.configuration.SystemConfig;
-import com.openexchange.configuration.SystemConfig.Property;
-import com.openexchange.groupware.UserConfigurationException.UserConfigurationCode;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.Initialization;
 
@@ -65,60 +59,9 @@ import com.openexchange.server.Initialization;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public abstract class UserConfigurationStorage implements Initialization {
-
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(UserConfigurationStorage.class);
-
-	private static enum UserConfigurationImpl {
-
-		/**
-		 * Caching
-		 */
-		CACHING("Caching", "com.openexchange.groupware.CachingUserConfigurationStorage"),
-		/**
-		 * Database
-		 */
-		DB("DB", "com.openexchange.groupware.RdbUserConfigurationStorage");
-
-		private final String alias;
-
-		private final String impl;
-
-		private UserConfigurationImpl(final String alias, final String impl) {
-			this.alias = alias;
-			this.impl = impl;
-		}
-
-		public String getAlias() {
-			return alias;
-		}
-
-		public String getImpl() {
-			return impl;
-		}
-	}
-
-	private static final String getUserConfigurationImpl(final String alias) {
-		final UserConfigurationImpl[] arr = UserConfigurationImpl.values();
-		for (int i = 0; i < arr.length; i++) {
-			if (arr[i].alias.equalsIgnoreCase(alias)) {
-				return arr[i].impl;
-			}
-		}
-		return null;
-	}
-
-	private static final AtomicBoolean initialized = new AtomicBoolean();
-
-	private static final Lock LOCK = new ReentrantLock();
+public abstract class UserConfigurationStorage {
 
 	private static UserConfigurationStorage singleton;
-
-	/**
-	 * Proxy attribute for the class implementing this interface.
-	 */
-	private static Class<? extends UserConfigurationStorage> implementingClass;
 
 	private boolean started;
 
@@ -138,41 +81,26 @@ public abstract class UserConfigurationStorage implements Initialization {
 	 *             on singleton instance instead
 	 */
 	public static final void init() throws UserConfigurationException {
-		initClass();
+		try {
+			UserConfigurationStorageInit.getInstance().start();
+		} catch (final UserConfigurationException e) {
+			throw e;
+		} catch (final AbstractOXException e) {
+			throw new UserConfigurationException(e);
+		}
 	}
 
 	/**
-	 * Initializes the user configuration storage implementation.
+	 * Sets the singleton instance of {@link UserConfigurationStorage}
 	 * 
-	 * @throws UserConfigurationException
-	 *             if initialization fails.
+	 * @param singleton
+	 *            The singleton instance
+	 * @throws AbstractOXException
+	 *             If singleton cannot be configured
 	 */
-	private static final void initClass() throws UserConfigurationException {
-		LOCK.lock();
-		try {
-			if (null != implementingClass) {
-				return;
-			}
-			final String classNameProp = SystemConfig.getProperty(Property.USER_CONF_STORAGE);
-			if (null == classNameProp) {
-				throw new UserConfigurationException(UserConfigurationCode.MISSING_SETTING, Property.USER_CONF_STORAGE
-						.getPropertyName());
-			}
-			try {
-				final String className = getUserConfigurationImpl(classNameProp);
-				implementingClass = Class.forName(className == null ? classNameProp : className).asSubclass(
-						UserConfigurationStorage.class);
-				if (LOG.isInfoEnabled()) {
-					LOG.info("UserConfigurationStorage implementation: " + implementingClass.getName());
-				}
-			} catch (final ClassNotFoundException e) {
-				throw new UserConfigurationException(UserConfigurationCode.CLASS_NOT_FOUND, e, classNameProp);
-			} catch (final ClassCastException e) {
-				throw new UserConfigurationException(UserConfigurationCode.CLASS_NOT_FOUND, e, classNameProp);
-			}
-		} finally {
-			LOCK.unlock();
-		}
+	static void setInstance(final UserConfigurationStorage singleton) throws AbstractOXException {
+		UserConfigurationStorage.singleton = singleton;
+		UserConfigurationStorage.singleton.start();
 	}
 
 	/**
@@ -180,28 +108,8 @@ public abstract class UserConfigurationStorage implements Initialization {
 	 * 
 	 * @return an instance implementing the
 	 *         <code>UserConfigurationStorage</code> interface
-	 * @throws UserConfigurationException
-	 *             if instantiation fails.
 	 */
-	public static final UserConfigurationStorage getInstance() throws UserConfigurationException {
-		if (!initialized.get()) {
-			LOCK.lock();
-			try {
-				if (singleton == null) {
-					try {
-						initClass();
-						singleton = implementingClass.newInstance();
-						initialized.set(true);
-					} catch (final InstantiationException e) {
-						throw new UserConfigurationException(UserConfigurationCode.INSTANTIATION_FAILED, e);
-					} catch (final IllegalAccessException e) {
-						throw new UserConfigurationException(UserConfigurationCode.INSTANTIATION_FAILED, e);
-					}
-				}
-			} finally {
-				LOCK.unlock();
-			}
-		}
+	public static final UserConfigurationStorage getInstance() {
 		return singleton;
 	}
 
@@ -219,7 +127,6 @@ public abstract class UserConfigurationStorage implements Initialization {
 		}
 		stopInternal();
 		singleton = null;
-		implementingClass = null;
 		started = false;
 	}
 

@@ -58,6 +58,7 @@ import com.openexchange.groupware.contact.ContactConfig;
 import com.openexchange.groupware.contexts.ContextInit;
 import com.openexchange.groupware.integration.SetupLink;
 import com.openexchange.groupware.settings.ConfigTree;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.push.udp.PushInit;
 import com.openexchange.sessiond.SessiondInit;
 

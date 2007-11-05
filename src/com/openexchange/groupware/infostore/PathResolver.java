@@ -51,10 +51,10 @@ package com.openexchange.groupware.infostore;
 
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tx.Service;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 
 public interface PathResolver extends Service {
 	public Resolved resolve(int relativeToFolder, String path, Context ctx, User user, UserConfiguration userConfig) throws OXException, OXObjectNotFoundException;

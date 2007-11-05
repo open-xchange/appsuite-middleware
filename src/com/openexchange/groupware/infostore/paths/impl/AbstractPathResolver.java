@@ -50,12 +50,12 @@
 package com.openexchange.groupware.infostore.paths.impl;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.PathResolver;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tx.DBService;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 
 public abstract class AbstractPathResolver extends DBService implements
 		PathResolver {

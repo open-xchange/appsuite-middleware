@@ -64,6 +64,7 @@ import com.openexchange.groupware.infostore.webdav.Lock;
 import com.openexchange.groupware.infostore.webdav.LockManagerImpl;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tx.DBProvider;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 
 public class FolderLockManagerImpl extends LockManagerImpl<FolderLock> implements
 		FolderLockManager {

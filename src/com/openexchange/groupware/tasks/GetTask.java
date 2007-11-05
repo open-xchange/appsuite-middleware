@@ -51,11 +51,11 @@ package com.openexchange.groupware.tasks;
 
 import java.util.Set;
 
-import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tasks.TaskException.Code;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 
 /**
  * This class collects all information for getting tasks. It is also able to

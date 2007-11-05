@@ -61,6 +61,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tx.DBProvider;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 
 public class FolderTreeUtilImpl implements FolderTreeUtil {
 

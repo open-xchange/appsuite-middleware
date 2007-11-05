@@ -53,12 +53,12 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.openexchange.groupware.UserConfiguration;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tasks.Mapping.Mapper;
 import com.openexchange.groupware.tasks.TaskException.Code;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 
 /**
  * This class contains the logic for updating tasks. It calculates what is to

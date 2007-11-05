@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.groupware;
+package com.openexchange.groupware.userconfiguration;
 
 import java.io.Serializable;
 import java.sql.Connection;
@@ -59,12 +59,12 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.ajax.spellcheck.AJAXUserDictionary;
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.UserConfigurationException.UserConfigurationCode;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.groupware.userconfiguration.UserConfigurationException.UserConfigurationCode;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.tools.Collections.SmartIntArray;
 
