@@ -78,15 +78,11 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 
 	private static final AtomicInteger COUNTER = new AtomicInteger();
 
-	private static final Lock LOCK_INIT = new ReentrantLock();
-
 	private static final Lock LOCK_CON = new ReentrantLock();
 
 	private static final Condition LOCK_CON_CONDITION = LOCK_CON.newCondition();
 
 	private static Class<? extends MailConnection> clazz;
-
-	private static final AtomicBoolean initialized = new AtomicBoolean();
 
 	protected final SessionObject session;
 
@@ -119,41 +115,8 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 		password = null;
 	}
 
-	/**
-	 * Initializes the mail connection
-	 * 
-	 * @throws MailException
-	 *             If implementing class cannot be found
-	 */
-	public static final void init() throws MailException {
-		if (!initialized.get()) {
-			LOCK_INIT.lock();
-			try {
-				if (clazz == null) {
-					final String className = SystemConfig.getProperty(SystemConfig.Property.MailProtocol);
-					try {
-						if (className == null) {
-							/*
-							 * Fallback
-							 */
-							if (LOG.isWarnEnabled()) {
-								LOG.warn("Using fallback \"com.openexchange.imap.IMAPConnection\"");
-							}
-							clazz = Class.forName("com.openexchange.imap.IMAPConnection").asSubclass(
-									MailConnection.class);
-							initialized.set(true);
-							return;
-						}
-						clazz = Class.forName(className).asSubclass(MailConnection.class);
-					} catch (final ClassNotFoundException e) {
-						throw new MailException(MailException.Code.INITIALIZATION_PROBLEM, e, new Object[0]);
-					}
-					initialized.set(true);
-				}
-			} finally {
-				LOCK_INIT.unlock();
-			}
-		}
+	static void setImplementingClass(final Class<? extends MailConnection> clazz) {
+		MailConnection.clazz = clazz;
 	}
 
 	private static final Class[] CONSTRUCTOR_ARGS = new Class[] { SessionObject.class };
@@ -169,9 +132,6 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 	 *             If instantiation fails or a caching error occurs
 	 */
 	public static final MailConnection getInstance(final SessionObject session) throws MailException {
-		if (!initialized.get()) {
-			init();
-		}
 		try {
 			if (MailConnectionCache.getInstance().containsMailConnection(session)) {
 				final MailConnection mailConnection = MailConnectionCache.getInstance().removeMailConnection(session);

@@ -87,6 +87,10 @@ public class Starter implements Initialization {
          */
         com.openexchange.database.DatabaseInit.getInstance(),
         /**
+         * Mail initialization
+         */
+        com.openexchange.mail.MailConnectionInit.getInstance(),
+        /**
          * Infostore Configuration
          */
         com.openexchange.groupware.infostore.InfostoreConfig.getInstance(),
