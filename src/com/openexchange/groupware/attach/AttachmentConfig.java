@@ -102,9 +102,9 @@ public class AttachmentConfig extends AbstractConfig implements Initialization {
     }
 
     public static String getProperty(final String key) {
-    	if(null == singleton) {
+    	if(!loaded || singleton == null) {
 			try {
-				init();
+				getInstance().start();
 			} catch (final ConfigurationException e) {
 				LOG.error("Can't init config",e);
 			}
@@ -113,21 +113,7 @@ public class AttachmentConfig extends AbstractConfig implements Initialization {
         return singleton.getPropertyInternal(key);
     }
 
-    /**
-     * @deprecated
-     */
-    public static void init() throws ConfigurationException {
-        getInstance().start();
-    }
-
-    /**
-     * @deprecated
-     */
-    public static void reinit() throws ConfigurationException {
-        getInstance().stop();
-        getInstance().start();
-    }
-    
+      
     public static long getMaxUploadSize() {
 		final String sizeS = getProperty(AttachmentProperty.MAX_UPLOAD_SIZE.name());
 		if (null == sizeS) {

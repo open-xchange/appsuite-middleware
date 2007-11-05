@@ -118,20 +118,6 @@ public class InfostoreConfig extends AbstractConfig implements Initialization {
 			
         return singleton.getPropertyInternal(key);
     }
-
-    /**
-    *  @Deprecated Use geInstance().start(); instead
-    */
-    public static void init() throws ConfigurationException {
-        getInstance().start();
-    }
-    /**
-    *  @Deprecated Use geInstance().stop(); getInstance().start(); instead
-    */
-    public static void reinit() throws ConfigurationException {
-        getInstance().stop();
-        getInstance().start();
-    }
     
     public static long getMaxUploadSize(){
     	final String sizeS = getProperty(InfoProperty.MAX_UPLOAD_SIZE.name());
@@ -154,7 +140,7 @@ public class InfostoreConfig extends AbstractConfig implements Initialization {
 	}
 
     public void start() throws ConfigurationException {
-        if (!loaded) {
+        if (!loaded || singleton == null) {
 			INIT_LOCK.lock();
             try {
 			    getInstance().loadPropertiesInternal();
