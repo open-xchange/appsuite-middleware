@@ -109,16 +109,18 @@ public abstract class UserConfigurationStorage implements Initialization {
 		return null;
 	}
 
-	private static final Lock INIT_LOCK = new ReentrantLock();
+	private static final AtomicBoolean initialized = new AtomicBoolean();
+
+	private static final Lock LOCK = new ReentrantLock();
+
+	private static UserConfigurationStorage singleton;
 
 	/**
 	 * Proxy attribute for the class implementing this interface.
 	 */
 	private static Class<? extends UserConfigurationStorage> implementingClass;
 
-	private static UserConfigurationStorage singleton;
-
-	private static final AtomicBoolean initialized = new AtomicBoolean();
+	private boolean started;
 
 	/**
 	 * Default constructor
@@ -132,9 +134,21 @@ public abstract class UserConfigurationStorage implements Initialization {
 	 * 
 	 * @throws UserConfigurationException
 	 *             if initialization fails.
+	 * @deprecated Use common {@link Initialization#start()}/{@link Initialization#stop()}
+	 *             on singleton instance instead
 	 */
 	public static final void init() throws UserConfigurationException {
-		INIT_LOCK.lock();
+		initClass();
+	}
+
+	/**
+	 * Initializes the user configuration storage implementation.
+	 * 
+	 * @throws UserConfigurationException
+	 *             if initialization fails.
+	 */
+	private static final void initClass() throws UserConfigurationException {
+		LOCK.lock();
 		try {
 			if (null != implementingClass) {
 				return;
@@ -157,7 +171,7 @@ public abstract class UserConfigurationStorage implements Initialization {
 				throw new UserConfigurationException(UserConfigurationCode.CLASS_NOT_FOUND, e, classNameProp);
 			}
 		} finally {
-			INIT_LOCK.unlock();
+			LOCK.unlock();
 		}
 	}
 
@@ -171,11 +185,11 @@ public abstract class UserConfigurationStorage implements Initialization {
 	 */
 	public static final UserConfigurationStorage getInstance() throws UserConfigurationException {
 		if (!initialized.get()) {
-			INIT_LOCK.lock();
+			LOCK.lock();
 			try {
 				if (singleton == null) {
 					try {
-						init();
+						initClass();
 						singleton = implementingClass.newInstance();
 						initialized.set(true);
 					} catch (final InstantiationException e) {
@@ -185,24 +199,44 @@ public abstract class UserConfigurationStorage implements Initialization {
 					}
 				}
 			} finally {
-				INIT_LOCK.unlock();
+				LOCK.unlock();
 			}
 		}
 		return singleton;
 	}
 
 	public final void start() throws AbstractOXException {
+		if (started) {
+			return;
+		}
 		startInternal();
+		started = true;
 	}
 
 	public final void stop() throws AbstractOXException {
+		if (!started) {
+			return;
+		}
 		stopInternal();
+		singleton = null;
+		implementingClass = null;
+		started = false;
 	}
 
+	/**
+	 * Perform necessary actions to start instance
+	 * 
+	 * @throws AbstractOXException
+	 */
 	protected abstract void startInternal() throws AbstractOXException;
-	
+
+	/**
+	 * Perform necessary actions to stop instance
+	 * 
+	 * @throws AbstractOXException
+	 */
 	protected abstract void stopInternal() throws AbstractOXException;
-	
+
 	/**
 	 * Determines the instance of <code>UserConfiguration</code> that
 	 * corresponds to given user ID
