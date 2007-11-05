@@ -49,8 +49,6 @@
 
 package com.openexchange.cache;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.sql.Connection;
 import java.util.HashMap;
 import java.util.Map;
@@ -116,12 +114,6 @@ public class FolderCacheManager {
 			Configuration.load();
 			folderCache = JCS.getInstance(FOLDER_CACHE_REGION_NAME);
 		} catch (final CacheException e) {
-			throw new OXFolderException(FolderCode.FOLDER_CACHE_INITIALIZATION_FAILED, e, FOLDER_CACHE_REGION_NAME, e
-					.getLocalizedMessage());
-		} catch (final FileNotFoundException e) {
-			throw new OXFolderException(FolderCode.FOLDER_CACHE_INITIALIZATION_FAILED, e, FOLDER_CACHE_REGION_NAME, e
-					.getLocalizedMessage());
-		} catch (final IOException e) {
 			throw new OXFolderException(FolderCode.FOLDER_CACHE_INITIALIZATION_FAILED, e, FOLDER_CACHE_REGION_NAME, e
 					.getLocalizedMessage());
 		} catch (final AbstractOXException e) {

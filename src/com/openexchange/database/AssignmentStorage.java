@@ -51,7 +51,6 @@ package com.openexchange.database;
 
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -69,6 +68,7 @@ import org.apache.jcs.access.exception.CacheException;
 import com.openexchange.cache.CacheKey;
 import com.openexchange.cache.Configuration;
 import com.openexchange.configuration.ConfigDB;
+import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.configuration.SystemConfig.Property;
 import com.openexchange.server.DBPoolingException;
@@ -247,7 +247,7 @@ public final class AssignmentStorage {
                     } catch (CacheException e) {
                         throw new DBPoolingException(DBPoolingException.Code
                             .NOT_INITIALIZED, e, CACHE_NAME);
-                    } catch (IOException e) {
+                    } catch (ConfigurationException e) {
                         throw new DBPoolingException(DBPoolingException.Code
                             .NOT_INITIALIZED, e, CACHE_NAME);
                     }

@@ -128,7 +128,11 @@ public class ConfigurationException extends AbstractOXException {
         /**
          * Property %s is not an integer
          */
-        PROPERTY_NOT_AN_INTEGER("Property %s is not an integer", Category.CODE_ERROR, 8);
+        PROPERTY_NOT_AN_INTEGER("Property %s is not an integer", Category.CODE_ERROR, 8),
+        /**
+         * An I/O error occured: %s
+         */
+        IO_ERROR("An I/O error occured: %s", Category.CODE_ERROR, 9);
 
         /**
          * Message of the exception.

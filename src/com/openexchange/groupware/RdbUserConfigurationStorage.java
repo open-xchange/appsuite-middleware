@@ -64,6 +64,7 @@ import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.DBPool;
 import com.openexchange.server.DBPoolingException;
+import com.openexchange.server.Initialization;
 
 /**
  * RdbUserConfigurationStorage
@@ -71,7 +72,7 @@ import com.openexchange.server.DBPoolingException;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public class RdbUserConfigurationStorage extends UserConfigurationStorage {
+public class RdbUserConfigurationStorage extends UserConfigurationStorage implements Initialization {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(RdbUserConfigurationStorage.class);
@@ -84,6 +85,20 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
 	 */
 	public RdbUserConfigurationStorage() {
 		super();
+	}
+
+	@Override
+	protected void startInternal() throws AbstractOXException {
+		/*
+		 * Nothing to start
+		 */
+	}
+
+	@Override
+	protected void stopInternal() throws AbstractOXException {
+		/*
+		 * Nothing to stop
+		 */
 	}
 
 	/*

@@ -51,8 +51,6 @@ package com.openexchange.mail.usersetting;
 
 import static com.openexchange.tools.sql.DBUtils.closeResources;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -112,14 +110,6 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 			cacheWriteLock = new ReentrantLock();
 			useCache = true;
 		} catch (final CacheException e) {
-			final UserConfigurationException ue = new UserConfigurationException(
-					UserConfigurationCode.CACHE_INITIALIZATION_FAILED, e, CACHE_REGION_NAME);
-			LOG.error(ue.getLocalizedMessage(), ue);
-		} catch (final FileNotFoundException e) {
-			final UserConfigurationException ue = new UserConfigurationException(
-					UserConfigurationCode.CACHE_INITIALIZATION_FAILED, e, CACHE_REGION_NAME);
-			LOG.error(ue.getLocalizedMessage(), ue);
-		} catch (final IOException e) {
 			final UserConfigurationException ue = new UserConfigurationException(
 					UserConfigurationCode.CACHE_INITIALIZATION_FAILED, e, CACHE_REGION_NAME);
 			LOG.error(ue.getLocalizedMessage(), ue);

@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.ldap;
 
-import java.io.IOException;
 import java.util.Date;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -63,6 +62,7 @@ import com.openexchange.cache.CacheKey;
 import com.openexchange.cache.Configuration;
 import com.openexchange.cache.dynamic.CacheProxy;
 import com.openexchange.cache.dynamic.OXObjectFactory;
+import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapException.Code;
@@ -244,11 +244,11 @@ public class CachingUserStorage extends UserStorage {
         try {
             Configuration.load();
             CACHE = JCS.getInstance("User");
-        } catch (IOException e) {
-            throw new RuntimeException("Cannot load cache configuration.", e);
         } catch (CacheException e) {
             throw new RuntimeException("Cannot create user cache.", e);
-        }
+        } catch (ConfigurationException e) {
+        	 throw new RuntimeException("Cannot load cache configuration.", e);
+		}
         CACHE_LOCK = new ReentrantLock(true);
     }
 }

@@ -57,6 +57,7 @@ import com.openexchange.configuration.SystemConfig;
 import com.openexchange.configuration.SystemConfig.Property;
 import com.openexchange.groupware.UserConfigurationException.UserConfigurationCode;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.server.Initialization;
 
 /**
  * UserConfigurationStorage
@@ -64,7 +65,7 @@ import com.openexchange.groupware.contexts.Context;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public abstract class UserConfigurationStorage {
+public abstract class UserConfigurationStorage implements Initialization {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(UserConfigurationStorage.class);
@@ -132,7 +133,7 @@ public abstract class UserConfigurationStorage {
 	 * @throws UserConfigurationException
 	 *             if initialization fails.
 	 */
-	public static void init() throws UserConfigurationException {
+	public static final void init() throws UserConfigurationException {
 		INIT_LOCK.lock();
 		try {
 			if (null != implementingClass) {
@@ -168,7 +169,7 @@ public abstract class UserConfigurationStorage {
 	 * @throws UserConfigurationException
 	 *             if instantiation fails.
 	 */
-	public static UserConfigurationStorage getInstance() throws UserConfigurationException {
+	public static final UserConfigurationStorage getInstance() throws UserConfigurationException {
 		if (!initialized.get()) {
 			INIT_LOCK.lock();
 			try {
@@ -190,6 +191,18 @@ public abstract class UserConfigurationStorage {
 		return singleton;
 	}
 
+	public final void start() throws AbstractOXException {
+		startInternal();
+	}
+
+	public final void stop() throws AbstractOXException {
+		stopInternal();
+	}
+
+	protected abstract void startInternal() throws AbstractOXException;
+	
+	protected abstract void stopInternal() throws AbstractOXException;
+	
 	/**
 	 * Determines the instance of <code>UserConfiguration</code> that
 	 * corresponds to given user ID

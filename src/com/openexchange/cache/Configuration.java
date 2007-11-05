@@ -53,6 +53,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -60,74 +61,144 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.jcs.engine.control.CompositeCacheManager;
 
+import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.SystemConfig;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.server.Initialization;
 
 /**
  * This class implements the configuration of the caching system.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class Configuration {
+public final class Configuration implements Initialization {
 
-    /**
-     * Remembers if the configuration has been loaded.
-     */
-    private static boolean loaded;
+	private static final Log LOG = LogFactory.getLog(Configuration.class);
 
-    private static CompositeCacheManager ccmInstance;
+	/**
+	 * Remembers if the configuration has been loaded.
+	 */
+	private static final AtomicBoolean loaded = new AtomicBoolean();
 
-    private static final String CACHE_CONF_FILE = "CACHECCF";
+	private static final Lock LOCK = new ReentrantLock();
 
-    private static final Lock LOCK = new ReentrantLock();
+	private static final String CACHE_CONF_FILE = "CACHECCF";
 
-    private static final Log LOG = LogFactory.getLog(Configuration.class);
+	private static Configuration instance;
 
-    /**
-     * Private constructor prevents instantiation.
-     */
-    private Configuration() {
-        super();
-    }
+	/**
+	 * The cache manager instance
+	 */
+	private CompositeCacheManager ccmInstance;
 
-    /**
-     * Loads the configuration for the caching system.
-     * @throws IOException if the configuration can't be loaded.
-     */
-    public static void load() throws IOException {
-        if (!loaded) {
-	    	LOCK.lock();
-	        try {
-	            if (ccmInstance == null) {
-	                configure();
-	                loaded = true;
-	            }
-	        } finally {
-	            LOCK.unlock();
-	        }
-        }
-    }
+	/**
+	 * Private constructor prevents instantiation.
+	 * 
+	 * @throws IOException
+	 *             If cache manager configuration fails
+	 */
+	private Configuration() {
+		super();
+	}
 
-    private static void configure() throws IOException {
-        FileInputStream fis = null;
-        try {
-            final String cacheConfigFile = SystemConfig.getProperty(CACHE_CONF_FILE);
-            if (cacheConfigFile == null) {
-                LOG.error(new StringBuilder().append("Missing property \"").append(CACHE_CONF_FILE).append(
-                        "\" in system.properties").toString());
-                return;
-            }
-            ccmInstance = CompositeCacheManager.getUnconfiguredInstance();
-            final Properties props = new Properties();
-            try {
-                props.load((fis = new FileInputStream(cacheConfigFile)));
-            } catch (FileNotFoundException fnfe) {
-                LOG.error("Missing cache configuration file", fnfe);
-            }
-            ccmInstance.configure(props);
-        } finally {
-            if (fis != null) {
-                fis.close();
-                fis = null;
-            }
-        }
-    }
+	/**
+	 * Initializes the singleton instance of {@link Configuration}
+	 * 
+	 * @return The singleton instance of {@link Configuration}
+	 */
+	public static Configuration getInstance() {
+		if (!loaded.get()) {
+			LOCK.lock();
+			try {
+				if (null == instance) {
+					instance = new Configuration();
+					loaded.set(true);
+				}
+			} finally {
+				LOCK.unlock();
+			}
+		}
+		return instance;
+	}
+
+	/**
+	 * Loads the configuration for the caching system.
+	 * 
+	 * @throws ConfigurationException
+	 *             if the configuration can't be loaded.
+	 * @deprecated Use common {@link Initialization#start()}/{@link Initialization#stop()}
+	 *             on singleton instead
+	 */
+	public static void load() throws ConfigurationException {
+		getInstance().configure();
+	}
+
+	private void configure() throws ConfigurationException {
+		if (null != ccmInstance) {
+			/*
+			 * Already invoked
+			 */
+			return;
+		}
+		FileInputStream fis = null;
+		try {
+			final String cacheConfigFile = SystemConfig.getProperty(CACHE_CONF_FILE);
+			if (cacheConfigFile == null) {
+				LOG.error(new StringBuilder().append("Missing property \"").append(CACHE_CONF_FILE).append(
+						"\" in system.properties").toString());
+				return;
+			}
+			ccmInstance = CompositeCacheManager.getUnconfiguredInstance();
+			final Properties props = new Properties();
+			try {
+				props.load((fis = new FileInputStream(cacheConfigFile)));
+			} catch (final FileNotFoundException e) {
+				throw new ConfigurationException(ConfigurationException.Code.FILE_NOT_FOUND, e, cacheConfigFile);
+			} catch (final IOException e) {
+				throw new ConfigurationException(ConfigurationException.Code.IO_ERROR, e, e.getLocalizedMessage());
+			}
+			ccmInstance.configure(props);
+		} finally {
+			if (fis != null) {
+				try {
+					fis.close();
+				} catch (final IOException e) {
+					LOG.error(e.getLocalizedMessage(), e);
+				}
+				fis = null;
+			}
+		}
+	}
+
+	/**
+	 * Delegates to {@link CompositeCacheManager#freeCache(String)}
+	 * 
+	 * @param cacheName
+	 *            The name of the cache region that ought to be freed
+	 */
+	public void freeCache(final String cacheName) {
+		if (null == ccmInstance) {
+			return;
+		}
+		ccmInstance.freeCache(cacheName);
+	}
+
+	/*
+	 * @see com.openexchange.server.Initialization#start()
+	 */
+	public void start() throws AbstractOXException {
+		configure();
+	}
+
+	/*
+	 * @see com.openexchange.server.Initialization#stop()
+	 */
+	public void stop() throws AbstractOXException {
+		if (null == ccmInstance) {
+			return;
+		}
+		ccmInstance.shutDown();
+		ccmInstance = null;
+	}
 }

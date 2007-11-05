@@ -49,8 +49,6 @@
 
 package com.openexchange.groupware;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -93,21 +91,27 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
 		this.delegateStorage = new RdbUserConfigurationStorage();
 		try {
 			ConfigurationInit.init();
-			Configuration.load();
+			Configuration.getInstance().start();
 			cache = JCS.getInstance(CACHE_REGION_NAME);
 		} catch (final CacheException e) {
-			throw new UserConfigurationException(UserConfigurationCode.CACHE_INITIALIZATION_FAILED, e,
-					CACHE_REGION_NAME);
-		} catch (final FileNotFoundException e) {
-			throw new UserConfigurationException(UserConfigurationCode.CACHE_INITIALIZATION_FAILED, e,
-					CACHE_REGION_NAME);
-		} catch (final IOException e) {
 			throw new UserConfigurationException(UserConfigurationCode.CACHE_INITIALIZATION_FAILED, e,
 					CACHE_REGION_NAME);
 		} catch (final AbstractOXException e) {
 			throw new UserConfigurationException(UserConfigurationCode.CACHE_INITIALIZATION_FAILED, e,
 					CACHE_REGION_NAME);
 		}
+	}
+
+	@Override
+	protected void startInternal() throws AbstractOXException {
+		/*
+		 * Nothing to start
+		 */
+	}
+
+	@Override
+	protected void stopInternal() throws AbstractOXException {
+		Configuration.getInstance().freeCache(CACHE_REGION_NAME);
 	}
 
 	/*

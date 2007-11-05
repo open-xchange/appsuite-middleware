@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.contexts;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -62,6 +61,7 @@ import org.apache.jcs.access.exception.CacheException;
 import com.openexchange.cache.Configuration;
 import com.openexchange.cache.dynamic.CacheProxy;
 import com.openexchange.cache.dynamic.OXObjectFactory;
+import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.ContextException.Code;
 import com.openexchange.groupware.update.Updater;
@@ -185,7 +185,7 @@ public class CachingContextStorage extends ContextStorage {
             cache = JCS.getInstance("Context");
         } catch (CacheException e) {
             throw new ContextException(ContextException.Code.CACHE_INIT, e);
-        } catch (IOException e) {
+        } catch (ConfigurationException e) {
             throw new ContextException(ContextException.Code.CACHE_INIT, e);
         }
     }
