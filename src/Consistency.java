@@ -292,7 +292,7 @@ public class Consistency {
 		final ContextStorage ctxstor = ContextStorage.getInstance();
 		List<Integer> list;
 		try {
-			list = AssignmentStorage.listContexts(database);
+			list = AssignmentStorage.getInstance().listContexts(database);
 			if (list.isEmpty()) {
 				if (LOG.isInfoEnabled()) {
 					LOG.info("There are no contexts which stored their " + "data in " + database);
@@ -420,10 +420,7 @@ public class Consistency {
             System.exit(1);
         }
         try {
-            if (LOG.isInfoEnabled()) {
-				LOG.info("Server name: " + Server.getServerName());
-			}
-            DatabaseInit.init();
+            DatabaseInit.getInstance().start();
         } catch (DBPoolingException e) {
             LOG.error("Initializing the database system failed.", e);
             System.exit(1);

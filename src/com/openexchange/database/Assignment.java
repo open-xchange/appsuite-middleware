@@ -72,8 +72,19 @@ public class Assignment implements Serializable {
 
     /**
      * Default constructor.
+     * @param contextId
+     * @param serverId
+     * @param readPoolId
+     * @param writePoolId
+     * @param schema
      */
-    Assignment() {
+    Assignment(final int contextId, final int serverId, final int readPoolId,
+        final int writePoolId, final String schema) {
         super();
+        this.contextId = contextId;
+        this.serverId = serverId;
+        this.readPoolId = readPoolId;
+        this.writePoolId = writePoolId;
+        this.schema = schema;
     }
 }

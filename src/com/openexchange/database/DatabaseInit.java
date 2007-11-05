@@ -57,10 +57,7 @@ import com.openexchange.server.Initialization;
 
 /**
  * This class contains the initialization for the database system.
- * FIXME this class should be removed.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
- * @deprecated since Initialization interface exists, all components should be
- * started through {@link Starter#start()} or {@link Starter#adminStart()}.
  */
 public final class DatabaseInit implements Initialization {
 
@@ -88,11 +85,18 @@ public final class DatabaseInit implements Initialization {
     }
 
     /**
+     * @return the singleton instance.
+     */
+    public static DatabaseInit getInstance() {
+        return singleton;
+    }
+
+    /**
      * {@inheritDoc}
      */
     public void start() throws DBPoolingException {
         Pools.getInstance().start();
-        AssignmentStorage.init();
+        AssignmentStorage.getInstance().start();
         if (LOG.isInfoEnabled()) {
             LOG.info("Resolved server name \"" + Server.getServerName()
                 + "\" to identifier " + Server.getServerId());
@@ -103,7 +107,7 @@ public final class DatabaseInit implements Initialization {
      * {@inheritDoc}
      */
     public void stop() {
-        // TODO Auto-generated method stub
+        AssignmentStorage.getInstance().stop();
         Pools.getInstance().stop();
     }
 }

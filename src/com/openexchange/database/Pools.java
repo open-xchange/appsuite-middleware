@@ -81,7 +81,7 @@ import com.openexchange.server.DBPoolingException.Code;
  * This class stores all connection pools. It also removes pools that are empty.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class Pools implements Initialization, Runnable {
+public final class Pools implements Runnable {
 
     /**
      * Singleton.
@@ -289,7 +289,9 @@ public final class Pools implements Initialization, Runnable {
     }
 
     /**
-     * {@inheritDoc}
+     * Initializes the default pool configuration and starts read and write
+     * pools for ConfigDB.
+     * @throws DBPoolingException
      */
     public void start() throws DBPoolingException {
         if (null != configDBRead) {
@@ -302,6 +304,7 @@ public final class Pools implements Initialization, Runnable {
             cleanerInterval);
         ServerTimer.getTimer().scheduleAtFixedRate(cleaner, cleanerInterval,
             cleanerInterval);
+        // TODO write createPool method.
         configDBRead = new ConnectionPool(configDB.getReadUrl(),
             configDB.getReadProps(), config);
         configDBRead.registerCleaner(ServerTimer.getTimer(), cleanerInterval);
@@ -321,6 +324,7 @@ public final class Pools implements Initialization, Runnable {
      * {@inheritDoc}
      */
     public void stop() {
+        // TODO write destroyPool method.
         if (ConfigDB.getInstance().isWriteDefined()) {
             unregisterMBean("ConfigDB Write");
             configDBWrite.getCleanerTask().cancel();

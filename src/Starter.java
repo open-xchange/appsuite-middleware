@@ -54,12 +54,9 @@ import java.util.Stack;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.database.DatabaseInit;
-import com.openexchange.database.Server;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.BackendServicesInit;
 import com.openexchange.groupware.GroupwareInit;
-import com.openexchange.server.DBPoolingException;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.Version;
 import com.openexchange.tools.servlet.http.HttpServletManager;
@@ -77,13 +74,18 @@ public class Starter implements Initialization {
      */
     private final Initialization[] inits = new Initialization[] {
         /**
-         * system.properties.
+         * Reads system.properties.
          */
         com.openexchange.configuration.SystemConfig.getInstance(),
         /**
-         * configdb.properties.
+         * Reads configdb.properties.
          */
-         com.openexchange.configuration.ConfigDB.getInstance(),
+        com.openexchange.configuration.ConfigDB.getInstance(),
+        /**
+         * Connection pools for ConfigDB and database assignments for contexts.
+         * Needs configured JCS and working JMX.
+         */
+        com.openexchange.database.DatabaseInit.getInstance(),
         /**
          * Infostore Configuration
          */
@@ -108,19 +110,17 @@ public class Starter implements Initialization {
      */
     private final Initialization[] adminInits = new Initialization[] {
         /**
-         * system.properties.
+         * Reads system.properties.
          */
         com.openexchange.configuration.SystemConfig.getInstance(),
         /**
-         * configdb.properties.
+         * Reads configdb.properties.
          */
         com.openexchange.configuration.ConfigDB.getInstance(),
-            
         /**
          * Notification Configuration
          */
         com.openexchange.groupware.notify.NotificationConfig.getInstance()
-
     };
 
     private final Stack<Initialization> started = new Stack<Initialization>();
@@ -203,22 +203,6 @@ public class Starter implements Initialization {
         if (LOG.isInfoEnabled()) {
             LOG.info("JMX server successfully initialized.");
         }
-
-        try {
-            if (LOG.isInfoEnabled()) {
-                LOG.info("Server name: " + Server.getServerName());
-            }
-            DatabaseInit.init();
-        } catch (final DBPoolingException e) {
-            LOG.error("Initializing the database system failed.", e);
-            System.exit(1);
-        }
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Database system successfully initialized");
-        }
-
-        // DBPool dbpool = new DBPool(ComfireConfig.getDBPool(),
-        // ComfireConfig.getWriteDBPool());
 
         // New server startup.
         try {

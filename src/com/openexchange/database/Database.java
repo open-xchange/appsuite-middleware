@@ -81,7 +81,7 @@ public final class Database {
 
     public static int resolvePool(final int contextId, final boolean write)
         throws DBPoolingException {
-        final Assignment assign = AssignmentStorage.getAssignment(contextId);
+        final Assignment assign = getAssignmentStorage().getAssignment(contextId);
         final int poolId;
         if (write) {
             poolId = assign.writePoolId;
@@ -93,7 +93,7 @@ public final class Database {
 
     public static String getSchema(final int contextId)
         throws DBPoolingException {
-        final Assignment assign = AssignmentStorage.getAssignment(contextId);
+        final Assignment assign = getAssignmentStorage().getAssignment(contextId);
         return assign.schema;
     }
 
@@ -105,7 +105,7 @@ public final class Database {
      */
     public static Connection get(final boolean write)
         throws DBPoolingException {
-        final Assignment assign = AssignmentStorage.getConfigDBAssignment();
+        final Assignment assign = getAssignmentStorage().getConfigDBAssignment();
         final int poolId;
         if (write) {
             poolId = assign.writePoolId;
@@ -141,7 +141,7 @@ public final class Database {
      */
     public static Connection get(final int contextId, final boolean write)
         throws DBPoolingException {
-        final Assignment assign = AssignmentStorage.getAssignment(contextId);
+        final Assignment assign = getAssignmentStorage().getAssignment(contextId);
         final int poolId;
         if (write) {
             poolId = assign.writePoolId;
@@ -190,7 +190,7 @@ public final class Database {
      */
     public static void back(final boolean write, final Connection con) {
         // TODO remove null check to produce more error messages
-        final Assignment assign = AssignmentStorage.getConfigDBAssignment();
+        final Assignment assign = getAssignmentStorage().getConfigDBAssignment();
         final int poolId;
         if (write) {
             poolId = assign.writePoolId;
@@ -255,7 +255,7 @@ public final class Database {
      * @throws DBPoolingException if resolving the server identifier fails.
      */
     public static void reset(final int contextId) throws DBPoolingException {
-        AssignmentStorage.removeAssignments(contextId);
+        getAssignmentStorage().removeAssignments(contextId);
     }
 
     /**
@@ -301,5 +301,9 @@ public final class Database {
 
     private static Pools getPools() {
         return Pools.getInstance();
+    }
+
+    private static AssignmentStorage getAssignmentStorage() {
+        return AssignmentStorage.getInstance();
     }
 }
