@@ -83,6 +83,7 @@ public abstract class UserConfigurationStorage {
 	public static final void init() throws UserConfigurationException {
 		try {
 			UserConfigurationStorageInit.getInstance().start();
+			UserConfigurationStorage.getInstance().start();
 		} catch (final UserConfigurationException e) {
 			throw e;
 		} catch (final AbstractOXException e) {
