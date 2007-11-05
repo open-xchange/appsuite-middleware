@@ -70,7 +70,7 @@ public final class SystemConfig extends AbstractConfig implements
     /**
      * Singleton instance.
      */
-    private static SystemConfig singleton;
+    private static final SystemConfig singleton = new SystemConfig();
 
     /**
      * Prevent instantiation.
@@ -121,11 +121,6 @@ public final class SystemConfig extends AbstractConfig implements
      * @return the singleton instance.
      */
     public static SystemConfig getInstance() {
-        synchronized (SystemConfig.class) {
-            if (null == singleton) {
-                singleton = new SystemConfig();
-            }
-        }
         return singleton;
     }
 
