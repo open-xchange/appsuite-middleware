@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.monitoring;
 
 import java.net.InetAddress;
@@ -58,9 +56,8 @@ import java.util.Stack;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 
-import com.openexchange.configuration.ConfigurationException;
-import com.openexchange.configuration.ServerConfig;
-import com.openexchange.configuration.ServerConfig.Property;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * 
@@ -72,27 +69,15 @@ public class MonitorAgent extends AbstractAgent {
 	/*
 	 * Static fields
 	 */
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MonitorAgent.class);
+	private static final Log LOG = LogFactory.getLog(MonitorAgent.class);
 	
-	private static final int JMX_PORT;
-	
-	private static final String JMX_BIND_ADDR = ServerConfig.getProperty(Property.JMX_BIND_ADDRESS);
-	
-	private static MonitorAgent instance;
-	
-	static {
-		int jmxPort;
-		try {
-			jmxPort = ServerConfig.getInteger(Property.JMX_PORT);
-		} catch (final ConfigurationException e) {
-			LOG.error(e.getLocalizedMessage(), e);
-			/*
-			 * Default
-			 */
-			jmxPort = 9999;
-		}
-		JMX_PORT = jmxPort;
-	}
+	private static final MonitorAgent instance = new MonitorAgent();;
+
+	public static final int DEFAULT_PORT = 9999;
+
+    private int jmxPort;
+    
+    private String jmxBindAddr;
 	
 	/*
 	 * Member fields
@@ -104,11 +89,6 @@ public class MonitorAgent extends AbstractAgent {
 	private boolean running;
 
 	public static void startMonitorAgent() {
-		synchronized (MonitorAgent.class) {
-			if (instance == null) {
-				instance = new MonitorAgent();
-			}
-		}
 		instance.run();
 	}
 	
@@ -122,10 +102,7 @@ public class MonitorAgent extends AbstractAgent {
 		instance.stop();
 	}
 
-    public static MonitorAgent getInstance() {
-    	if (instance == null) {
-    		startMonitorAgent();
-    	}
+    static MonitorAgent getInstance() {
         return instance;
     }
 	
@@ -197,13 +174,13 @@ public class MonitorAgent extends AbstractAgent {
 			 * Creates and exports a registry instance on the local host that
 			 * accepts requests on the specified port.
 			 */
-			addRMIRegistry(JMX_PORT, JMX_BIND_ADDR);
+			addRMIRegistry(jmxPort, jmxBindAddr);
 			/*
 			 * Create a JMX connector and start it
 			 */
-			final String ip = getIPAddress(JMX_BIND_ADDR.charAt(0) == '*' ? "localhost" : JMX_BIND_ADDR);
+			final String ip = getIPAddress(jmxBindAddr.charAt(0) == '*' ? "localhost" : jmxBindAddr);
 			jmxURL = new StringBuilder(100).append("service:jmx:rmi:///jndi/rmi://").append(
-					ip == null ? "localhost" : ip).append(':').append(JMX_PORT).append("/server").toString();
+					ip == null ? "localhost" : ip).append(':').append(jmxPort).append("/server").toString();
 			addConnector(jmxURL);
 			if (LOG.isInfoEnabled()) {
 				LOG.info(new StringBuilder(100).append(
@@ -307,5 +284,19 @@ public class MonitorAgent extends AbstractAgent {
 		 super.unregisterMBean(objectName);
 		 objectNames.remove(objectName);
 	 }
+
+    /**
+     * @param jmxPort the jmxPort to set
+     */
+    void setJmxPort(final int jmxPort) {
+        this.jmxPort = jmxPort;
+    }
+
+    /**
+     * @param jmxBindAddr the jmxBindAddr to set
+     */
+    void setJmxBindAddr(final String jmxBindAddr) {
+        this.jmxBindAddr = jmxBindAddr;
+    }
 
 }

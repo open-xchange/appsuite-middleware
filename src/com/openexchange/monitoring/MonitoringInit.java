@@ -47,25 +47,69 @@
  *
  */
 
+package com.openexchange.monitoring;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-package com.openexchange.groupware;
-
-import com.openexchange.monitoring.MonitorAgent;
-import com.openexchange.tools.ajp13.AJPv13Server;
+import com.openexchange.configuration.ConfigurationException;
+import com.openexchange.configuration.ServerConfig;
+import com.openexchange.configuration.ServerConfig.Property;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.server.Initialization;
 
 /**
- * BackendServicesInit
  * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class BackendServicesInit {
+public final class MonitoringInit implements Initialization {
 
-	private BackendServicesInit() {
-		super();
-	}
-	
-	public static final void initAJP() throws AbstractOXException {
-		AJPv13Server.startAJPServer();
-	}
+    private static final MonitoringInit singleton = new MonitoringInit();
+
+    /**
+     * Logger.
+     */
+    private static final Log LOG = LogFactory.getLog(MonitoringInit.class);
+
+    /**
+     * Prevent instantiation.
+     */
+    private MonitoringInit() {
+        super();
+    }
+
+    /**
+     * @return the singleton instance.
+     */
+    public static MonitoringInit getInstance() {
+        return singleton;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void start() throws AbstractOXException {
+        final MonitorAgent agent = MonitorAgent.getInstance();
+        int jmxPort;
+        try {
+            jmxPort = ServerConfig.getInteger(Property.JMX_PORT);
+        } catch (final ConfigurationException e) {
+            LOG.error(e.getMessage(), e);
+            jmxPort = MonitorAgent.DEFAULT_PORT;
+        }
+        agent.setJmxPort(jmxPort);
+        agent.setJmxBindAddr(ServerConfig.getProperty(Property.JMX_BIND_ADDRESS));
+        agent.run();
+        if (LOG.isInfoEnabled()) {
+            LOG.info("JMX server successfully initialized.");
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void stop() throws AbstractOXException {
+        final MonitorAgent agent = MonitorAgent.getInstance();
+        agent.stop();
+    }
 }

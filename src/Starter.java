@@ -82,8 +82,12 @@ public class Starter implements Initialization {
          */
         com.openexchange.configuration.ConfigDB.getInstance(),
         /**
+         * Starts the monitoring component.
+         */
+        com.openexchange.monitoring.MonitoringInit.getInstance(),
+        /**
          * Connection pools for ConfigDB and database assignments for contexts.
-         * Needs configured JCS and working JMX.
+         * Needs configured JCS.
          */
         com.openexchange.database.DatabaseInit.getInstance(),
         /**
@@ -196,16 +200,6 @@ public class Starter implements Initialization {
         } catch (AbstractOXException e1) {
             LOG.error("Initializing servlet instances failed.", e1);
             System.exit(1);
-        }
-        
-        try {
-            BackendServicesInit.initJMX();
-        } catch (final Exception e) {
-            LOG.error("Initializing the JMX server failed.", e);
-            System.exit(1);
-        }
-        if (LOG.isInfoEnabled()) {
-            LOG.info("JMX server successfully initialized.");
         }
 
         // New server startup.
