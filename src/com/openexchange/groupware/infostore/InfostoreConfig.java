@@ -49,21 +49,28 @@
 
 package com.openexchange.groupware.infostore;
 
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.configuration.SystemConfig.Property;
+import com.openexchange.server.Initialization;
 import com.openexchange.tools.conf.AbstractConfig;
+import com.openexchange.groupware.AbstractOXException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-public class InfostoreConfig extends AbstractConfig {
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
-	public static enum InfoProperty{
+
+/**
+ * DEPENDS ON: SystemConfig
+ */
+
+public class InfostoreConfig extends AbstractConfig implements Initialization {
+
+
+    public static enum InfoProperty{
 		MAX_UPLOAD_SIZE;
 	}
 	
@@ -74,6 +81,18 @@ public class InfostoreConfig extends AbstractConfig {
     private static InfostoreConfig singleton;
     
     private static final Lock INIT_LOCK = new ReentrantLock();
+
+    private static boolean loaded = false;
+
+
+    private InfostoreConfig() {}
+
+    public static InfostoreConfig getInstance() {
+        if(singleton != null)
+            return singleton;
+
+        return singleton = new InfostoreConfig();
+    }
 
     /**
      * {@inheritDoc}
@@ -89,9 +108,9 @@ public class InfostoreConfig extends AbstractConfig {
     }
 
     public static String getProperty(final String key) {
-    	if(null == singleton) {
+    	if(!loaded || singleton == null) {
 			try {
-				init();
+				getInstance().start();
 			} catch (final ConfigurationException e) {
 				LOG.error("Can't init config:",e);
 			}
@@ -99,28 +118,20 @@ public class InfostoreConfig extends AbstractConfig {
 			
         return singleton.getPropertyInternal(key);
     }
-    
-    public static void init() throws ConfigurationException {
-        reinit();
-    }
 
+    /**
+    *  @Deprecated Use geInstance().start(); instead
+    */
+    public static void init() throws ConfigurationException {
+        getInstance().start();
+    }
+    /**
+    *  @Deprecated Use geInstance().stop(); getInstance().start(); instead
+    */
     public static void reinit() throws ConfigurationException {
-		if (null == singleton) {
-			INIT_LOCK.lock();
-			try {
-				/*
-				 * Check for null again cause maybe another thread had
-				 * initialized in the meantime
-				 */
-				if (null == singleton) {
-					singleton = new InfostoreConfig();
-					singleton.loadPropertiesInternal();
-				}
-			} finally {
-				INIT_LOCK.unlock();
-			}
-		}
-	}
+        getInstance().stop();
+        getInstance().start();
+    }
     
     public static long getMaxUploadSize(){
     	final String sizeS = getProperty(InfoProperty.MAX_UPLOAD_SIZE.name());
@@ -141,5 +152,22 @@ public class InfostoreConfig extends AbstractConfig {
 		}
 		return Long.parseLong(sizeS);
 	}
+
+    public void start() throws ConfigurationException {
+        if (!loaded) {
+			INIT_LOCK.lock();
+            try {
+			    getInstance().loadPropertiesInternal();
+                loaded = true;
+            } finally {
+				INIT_LOCK.unlock();
+			}
+		}   
+    }
+
+    public void stop() throws ConfigurationException {
+        singleton = null;
+        loaded = false;
+    }
 
 }

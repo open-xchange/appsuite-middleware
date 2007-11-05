@@ -99,7 +99,18 @@ public class Starter implements Initialization {
         /**
          * configdb.properties.
          */
-        com.openexchange.configuration.ConfigDB.getInstance()
+        com.openexchange.configuration.ConfigDB.getInstance(),
+
+        /**
+         * Infostore Configuration
+         */
+        com.openexchange.groupware.infostore.InfostoreConfig.getInstance(),
+
+        /**
+         * Attachment Configuration
+         */
+        com.openexchange.groupware.attach.AttachmentConfig.getInstance()
+
     };
 
     private final Stack<Initialization> started = new Stack<Initialization>();

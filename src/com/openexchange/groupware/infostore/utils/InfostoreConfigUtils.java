@@ -53,13 +53,10 @@ import com.openexchange.groupware.infostore.InfostoreConfig;
 import com.openexchange.mail.usersetting.UserSettingMail;
 
 public class InfostoreConfigUtils {
-	private static long maxUploadSize = -1;
 
 	public static long determineRelevantUploadSize(final UserSettingMail userSettingMail) {
-		if (maxUploadSize == -1) {
-			maxUploadSize = InfostoreConfig.getMaxUploadSize();
-		}
-
+		long maxUploadSize = InfostoreConfig.getMaxUploadSize();
+		
 		long maxSize = 0;
 		maxSize = userSettingMail.getUploadQuota();
 

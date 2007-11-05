@@ -49,27 +49,44 @@
 
 package com.openexchange.groupware.attach;
 
+import com.openexchange.configuration.ConfigurationException;
+import com.openexchange.configuration.ConfigurationException.Code;
+import com.openexchange.configuration.ServerConfig;
+import com.openexchange.configuration.SystemConfig;
+import com.openexchange.configuration.SystemConfig.Property;
+import com.openexchange.server.Initialization;
+import com.openexchange.tools.conf.AbstractConfig;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.configuration.ConfigurationException;
-import com.openexchange.configuration.ServerConfig;
-import com.openexchange.configuration.SystemConfig;
-import com.openexchange.configuration.ConfigurationException.Code;
-import com.openexchange.configuration.SystemConfig.Property;
-import com.openexchange.tools.conf.AbstractConfig;
+import java.util.concurrent.locks.ReentrantLock;
 
-public class AttachmentConfig extends AbstractConfig {
+/**
+ * DEPENDS ON: SystemConfig
+ */
+public class AttachmentConfig extends AbstractConfig implements Initialization {
 
 	public static enum AttachmentProperty{
 		MAX_UPLOAD_SIZE;
 	}
-	
+
+    private static final ReentrantLock INIT_LOCK = new ReentrantLock();
+
     private static final Property KEY = Property.ATTACHMENT;
 
 	private static final Log LOG = LogFactory.getLog(AttachmentConfig.class);
     
     private static AttachmentConfig singleton;
+
+    private static boolean loaded = false;
+
+    private AttachmentConfig(){}
+
+    public static AttachmentConfig getInstance(){
+        if(singleton != null)
+            return singleton;
+        return singleton = new AttachmentConfig();
+    }
 
     /**
      * {@inheritDoc}
@@ -95,16 +112,20 @@ public class AttachmentConfig extends AbstractConfig {
 			
         return singleton.getPropertyInternal(key);
     }
-    
+
+    /**
+     * @deprecated
+     */
     public static void init() throws ConfigurationException {
-        if (null == singleton) {
-            reinit();
-        }
+        getInstance().start();
     }
 
+    /**
+     * @deprecated
+     */
     public static void reinit() throws ConfigurationException {
-        singleton = new AttachmentConfig();
-        singleton.loadPropertiesInternal();
+        getInstance().stop();
+        getInstance().start();
     }
     
     public static long getMaxUploadSize() {
@@ -127,4 +148,21 @@ public class AttachmentConfig extends AbstractConfig {
 		return Long.parseLong(sizeS);
 	}
 
+    public void start() throws ConfigurationException {
+        if(!loaded || singleton == null) {
+            INIT_LOCK.lock();
+            try {
+                getInstance().loadPropertiesInternal();
+                loaded = true;
+            } finally {
+                INIT_LOCK.unlock();
+            }
+        }
+    }
+
+    public void stop() throws ConfigurationException {
+        singleton = null;
+        loaded = false;
+    }
 }
+
