@@ -1371,11 +1371,31 @@ public class OXFolderSQL {
 			innerStmt.setInt(3, fuid);
 			innerRs = innerStmt.executeQuery();
 			if (!innerRs.next()) {
-				return null;
+				/*
+				 * Merged permission is entity's permission since no permission
+				 * is defined for admin
+				 */
+				innerRs.close();
+				innerStmt.close();
+				innerStmt = readCon.prepareStatement(SQL_REASSIGN_SEL_PERM.replaceFirst(TMPL_PERM_TABLE, permTable));
+				innerStmt.setInt(1, ctx.getContextId());
+				innerStmt.setInt(2, entity);
+				innerStmt.setInt(3, fuid);
+				innerRs = innerStmt.executeQuery();
+				if (!innerRs.next()) {
+					/*
+					 * Empty permission
+					 */
+					return new OCLPermission(mailAdmin, fuid);
+				}
+				final OCLPermission adminPerm = new OCLPermission(mailAdmin, fuid);
+				adminPerm.setAllPermission(innerRs.getInt(1), innerRs.getInt(2), innerRs.getInt(3), innerRs.getInt(4));
+				adminPerm.setFolderAdmin(innerRs.getInt(5) > 0);
+				return adminPerm;
 			}
-			final OCLPermission mailAdminPerm = new OCLPermission(mailAdmin, fuid);
-			mailAdminPerm.setAllPermission(innerRs.getInt(1), innerRs.getInt(2), innerRs.getInt(3), innerRs.getInt(4));
-			mailAdminPerm.setFolderAdmin(innerRs.getInt(5) > 0);
+			final OCLPermission adminPerm = new OCLPermission(mailAdmin, fuid);
+			adminPerm.setAllPermission(innerRs.getInt(1), innerRs.getInt(2), innerRs.getInt(3), innerRs.getInt(4));
+			adminPerm.setFolderAdmin(innerRs.getInt(5) > 0);
 			innerRs.close();
 			innerStmt.close();
 			innerStmt = readCon.prepareStatement(SQL_REASSIGN_SEL_PERM.replaceFirst(TMPL_PERM_TABLE, permTable));
@@ -1384,7 +1404,7 @@ public class OXFolderSQL {
 			innerStmt.setInt(3, fuid);
 			innerRs = innerStmt.executeQuery();
 			if (!innerRs.next()) {
-				return mailAdminPerm;
+				return adminPerm;
 			}
 			final OCLPermission entityPerm = new OCLPermission(entity, fuid);
 			entityPerm.setAllPermission(innerRs.getInt(1), innerRs.getInt(2), innerRs.getInt(3), innerRs.getInt(4));
@@ -1393,15 +1413,15 @@ public class OXFolderSQL {
 			 * Merge
 			 */
 			final OCLPermission mergedPerm = new OCLPermission(mailAdmin, fuid);
-			mergedPerm.setFolderPermission(Math.max(mailAdminPerm.getFolderPermission(), entityPerm
+			mergedPerm.setFolderPermission(Math.max(adminPerm.getFolderPermission(), entityPerm
 					.getFolderPermission()));
-			mergedPerm.setReadObjectPermission(Math.max(mailAdminPerm.getReadPermission(), entityPerm
+			mergedPerm.setReadObjectPermission(Math.max(adminPerm.getReadPermission(), entityPerm
 					.getReadPermission()));
-			mergedPerm.setWriteObjectPermission(Math.max(mailAdminPerm.getWritePermission(), entityPerm
+			mergedPerm.setWriteObjectPermission(Math.max(adminPerm.getWritePermission(), entityPerm
 					.getWritePermission()));
-			mergedPerm.setDeleteObjectPermission(Math.max(mailAdminPerm.getDeletePermission(), entityPerm
+			mergedPerm.setDeleteObjectPermission(Math.max(adminPerm.getDeletePermission(), entityPerm
 					.getDeletePermission()));
-			mergedPerm.setFolderAdmin(mailAdminPerm.isFolderAdmin() || entityPerm.isFolderAdmin());
+			mergedPerm.setFolderAdmin(adminPerm.isFolderAdmin() || entityPerm.isFolderAdmin());
 			return mergedPerm;
 		} finally {
 			closeResources(innerRs, innerStmt, closeRead ? readCon : null, true, ctx);
