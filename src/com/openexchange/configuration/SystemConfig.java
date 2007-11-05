@@ -50,6 +50,7 @@
 package com.openexchange.configuration;
 
 import com.openexchange.configuration.ConfigurationException.Code;
+import com.openexchange.server.Initialization;
 import com.openexchange.tools.conf.AbstractConfig;
 
 /**
@@ -57,7 +58,8 @@ import com.openexchange.tools.conf.AbstractConfig;
  * configuration file.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class SystemConfig extends AbstractConfig {
+public final class SystemConfig extends AbstractConfig implements
+    Initialization {
 
     /**
      * Key of the system property that contains the file name of the
@@ -71,7 +73,7 @@ public final class SystemConfig extends AbstractConfig {
     private static SystemConfig singleton;
 
     /**
-     * Prevent instantiation
+     * Prevent instantiation.
      */
     private SystemConfig() {
         super();
@@ -109,6 +111,51 @@ public final class SystemConfig extends AbstractConfig {
     }
 
     /**
+     * @return if system.properties must be loaded.
+     */
+    public static boolean isPropertiesLoad() {
+        return null != singleton && singleton.isPropertiesLoadInternal();
+    }
+
+    /**
+     * @return the singleton instance.
+     */
+    public static SystemConfig getInstance() {
+        synchronized (SystemConfig.class) {
+            if (null == singleton) {
+                singleton = new SystemConfig();
+            }
+        }
+        return singleton;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void start() throws ConfigurationException {
+        singleton.loadPropertiesInternal();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void stop() {
+        singleton.clearProperties();
+    }
+
+    /**
+     * Initializes the system configuration.
+     * FIXME this method should be removed.
+     * @throws ConfigurationException if initialization fails.
+     * @deprecated since interface {@link Initialization} exists. This method
+     * should not be called all over the server. Other component should rely on
+     * a proper startup.
+     */
+    public static void init() throws ConfigurationException {
+        getInstance().start();
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -118,32 +165,6 @@ public final class SystemConfig extends AbstractConfig {
             throw new ConfigurationException(Code.PROPERTY_MISSING, KEY);
         }
         return filename;
-    }
-
-    /**
-     * @return if system.properties must be loaded.
-     */
-    public static boolean isPropertiesLoad() {
-        return null != singleton && singleton.isPropertiesLoadInternal();
-    }
-
-    /**
-     * Initializes the system configuration.
-     * @throws ConfigurationException if initialization fails.
-     */
-    public static void init() throws ConfigurationException {
-        if (null == singleton) {
-            reinit();
-        }
-    }
-
-    /**
-     * Reloads system configuration.
-     * @throws ConfigurationException if reloading fails.
-     */
-    public static void reinit() throws ConfigurationException {
-        singleton = new SystemConfig();
-        singleton.loadPropertiesInternal();
     }
 
     /**
@@ -207,41 +228,41 @@ public final class SystemConfig extends AbstractConfig {
          */
         PARTICIPANT("Participant"),
         /**
-         * UserConfigurationStorage
+         * UserConfigurationStorage.
          */
         USER_CONF_STORAGE("UserConfigurationStorage"),
         /**
          * Config file for the login implementation.
          */
         LoginInfoConfig("LoginInfoConfig"),
-		/**
-		 * Directory in which all property files for servlet mapping are kept
-		 */
-		ServletMappingDir("ServletMappingDir"),
-		/**
-		 * Spring XML file with overrides for WebDAV 
-		 */
-		WebdavOverrides("WEBDAVOVERRIDES"),
-		/**
-		 * HTMLEntities.properties configuration file
-		 */
-		HTMLEntities("HTMLEntities"),
-		/**
-		 * Mime type file
-		 */
-		MimeTypeFile("MimeTypeFile"),
-		/**
-		 * Mail cache configuration file
-		 */
-		MailCacheConfig("MailCacheConfig"),
-		/**
-		 * Mail protocol
-		 */
-		MailProtocol("MailProtocol"),
-		/**
-		 * Mail transport protocol
-		 */
-		MailTransportProtocol("MailTransportProtocol");
+        /**
+         * Directory in which all property files for servlet mapping are kept.
+         */
+        ServletMappingDir("ServletMappingDir"),
+        /**
+         * Spring XML file with overrides for WebDAV.
+         */
+        WebdavOverrides("WEBDAVOVERRIDES"),
+        /**
+         * HTMLEntities.properties configuration file.
+         */
+        HTMLEntities("HTMLEntities"),
+        /**
+         * Mime type file.
+         */
+        MimeTypeFile("MimeTypeFile"),
+        /**
+         * Mail cache configuration file.
+         */
+        MailCacheConfig("MailCacheConfig"),
+        /**
+         * Mail protocol.
+         */
+        MailProtocol("MailProtocol"),
+        /**
+         * Mail transport protocol.
+         */
+        MailTransportProtocol("MailTransportProtocol");
 
         /**
          * Name of the property in the server.properties file.

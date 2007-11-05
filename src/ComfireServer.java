@@ -58,11 +58,7 @@
 public class ComfireServer {
 	
 	public static void main(final String args[]) {
-		if (args.length >= 0) {
-			new Starter(args);
-		} else {
-			System.out.println("Usage: ... must be written.");
-		}
+	    new Starter().start();
 		System.exit(0);
 	}
 }

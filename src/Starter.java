@@ -47,21 +47,22 @@
  *
  */
 
-
-
 import java.text.DecimalFormat;
 import java.util.Properties;
+import java.util.Stack;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.configuration.ConfigurationInit;
+import com.openexchange.configuration.SystemConfig;
 import com.openexchange.database.DatabaseInit;
 import com.openexchange.database.Server;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.BackendServicesInit;
 import com.openexchange.groupware.GroupwareInit;
 import com.openexchange.server.DBPoolingException;
+import com.openexchange.server.Initialization;
 import com.openexchange.server.Version;
 import com.openexchange.tools.servlet.http.HttpServletManager;
 
@@ -70,128 +71,172 @@ import com.openexchange.tools.servlet.http.HttpServletManager;
  * 
  * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
  */
+public class Starter implements Initialization {
 
-public class Starter {
+    /**
+     * This contains the components to be started if a normal groupware startup
+     * is done.
+     */
+    private final Initialization[] inits = new Initialization[] {
+        SystemConfig.getInstance()
+    };
+
+    /**
+     * This contains the components that must be started if the admin uses APIs
+     * of the server.
+     */
+    private final Initialization[] adminInits = new Initialization[] {
+        SystemConfig.getInstance()
+    };
+
+    private final Stack<Initialization> started = new Stack<Initialization>();
 
 	private static final Log LOG = LogFactory.getLog(Starter.class);
 
-	public Starter(final String args[]) {
+	/**
+	 * Default constructor.
+	 */
+	public Starter() {
+	    super();
+	}
 
-		if (LOG.isInfoEnabled()) {
-			LOG.info("Open-Xchange 6.0");
-			LOG.info("(c) Open-Xchange Inc. , Open-Xchange GmbH");
-		}
+    /**
+     * {@inheritDoc}
+     */
+    public void start() {
 
-		try {
-			final Properties p = System.getProperties();
-			if (LOG.isInfoEnabled()) {
-				LOG.info(p.getProperty("os.name") + ' ' + p.getProperty("os.arch") + ' ' + p.getProperty("os.version"));
-			}
-			if (LOG.isInfoEnabled()) {
-				LOG.info(p.getProperty("java.runtime.version"));
-			}
-			final long totalMemory = Runtime.getRuntime().totalMemory() / 1024;
-			if (LOG.isInfoEnabled()) {
-				LOG.info("VM Total Memory       : " + DecimalFormat.getNumberInstance().format(totalMemory) + " KB");
-			}
-			final long freeMemory = Runtime.getRuntime().freeMemory() / 1024;
-			if (LOG.isInfoEnabled()) {
-				LOG.info("VM Free Memory        : " + DecimalFormat.getNumberInstance().format(freeMemory) + " KB");
-			}
-			final long usedMemory = totalMemory - freeMemory;
-			if (LOG.isInfoEnabled()) {
-				LOG.info("VM Used Memory        : " + DecimalFormat.getNumberInstance().format(usedMemory) + " KB");
-			}
-		} catch (final Exception gee) {
-			LOG.error(gee.getMessage(), gee);
-		}
+        if (LOG.isInfoEnabled()) {
+            LOG.info("Open-Xchange 6.0");
+            LOG.info("(c) Open-Xchange Inc. , Open-Xchange GmbH");
+        }
 
-		if (LOG.isInfoEnabled()) {
-			LOG.info("System version : Open-Xchange Server [" + Version.BUILDNUMBER + "] initializing ...");
-			LOG.info("Server Footprint : " + AbstractOXException.SERVER_ID);
-		}
-
-		/* Config done */
         try {
+            final Properties p = System.getProperties();
+            if (LOG.isInfoEnabled()) {
+                LOG.info(p.getProperty("os.name") + ' ' + p.getProperty("os.arch") + ' ' + p.getProperty("os.version"));
+            }
+            if (LOG.isInfoEnabled()) {
+                LOG.info(p.getProperty("java.runtime.version"));
+            }
+            final long totalMemory = Runtime.getRuntime().totalMemory() / 1024;
+            if (LOG.isInfoEnabled()) {
+                LOG.info("VM Total Memory       : " + DecimalFormat.getNumberInstance().format(totalMemory) + " KB");
+            }
+            final long freeMemory = Runtime.getRuntime().freeMemory() / 1024;
+            if (LOG.isInfoEnabled()) {
+                LOG.info("VM Free Memory        : " + DecimalFormat.getNumberInstance().format(freeMemory) + " KB");
+            }
+            final long usedMemory = totalMemory - freeMemory;
+            if (LOG.isInfoEnabled()) {
+                LOG.info("VM Used Memory        : " + DecimalFormat.getNumberInstance().format(usedMemory) + " KB");
+            }
+        } catch (final Exception gee) {
+            LOG.error(gee.getMessage(), gee);
+        }
+
+        if (LOG.isInfoEnabled()) {
+            LOG.info("System version : Open-Xchange Server [" + Version.BUILDNUMBER + "] initializing ...");
+            LOG.info("Server Footprint : " + AbstractOXException.SERVER_ID);
+        }
+
+        try {
+            for (Initialization init : inits) {
+                init.start();
+                started.push(init);
+            }
             ConfigurationInit.init();
         } catch (final AbstractOXException e) {
             LOG.error("Initializing the configuration failed.", e);
+            stop();
             System.exit(1);
         }
-		
-		try {
-			if (LOG.isInfoEnabled()) {
-				LOG.info("Initializing servlet instances");
-			}
-			HttpServletManager.loadServletMapping();
-		} catch (AbstractOXException e1) {
-			LOG.error("Initializing servlet instances failed.", e1);
-			System.exit(1);
-		}
-		
-		try {
-        	BackendServicesInit.initJMX();
+        
+        try {
+            if (LOG.isInfoEnabled()) {
+                LOG.info("Initializing servlet instances");
+            }
+            HttpServletManager.loadServletMapping();
+        } catch (AbstractOXException e1) {
+            LOG.error("Initializing servlet instances failed.", e1);
+            System.exit(1);
+        }
+        
+        try {
+            BackendServicesInit.initJMX();
         } catch (final Exception e) {
             LOG.error("Initializing the JMX server failed.", e);
             System.exit(1);
         }
-		if (LOG.isInfoEnabled()) {
-			LOG.info("JMX server successfully initialized.");
-		}
+        if (LOG.isInfoEnabled()) {
+            LOG.info("JMX server successfully initialized.");
+        }
 
         try {
-        	if (LOG.isInfoEnabled()) {
-        		LOG.info("Server name: " + Server.getServerName());
-        	}
+            if (LOG.isInfoEnabled()) {
+                LOG.info("Server name: " + Server.getServerName());
+            }
             DatabaseInit.init();
         } catch (final DBPoolingException e) {
             LOG.error("Initializing the database system failed.", e);
             System.exit(1);
         }
-		if (LOG.isInfoEnabled()) {
-			LOG.info("Database system successfully initialized");
-		}
+        if (LOG.isInfoEnabled()) {
+            LOG.info("Database system successfully initialized");
+        }
 
         // DBPool dbpool = new DBPool(ComfireConfig.getDBPool(),
-		// ComfireConfig.getWriteDBPool());
+        // ComfireConfig.getWriteDBPool());
 
         // New server startup.
-		try {
+        try {
             GroupwareInit.init();
         } catch (final AbstractOXException e) {
             LOG.error("Initializing the groupware server failed.", e);
             System.exit(1);
         }
-		if (LOG.isInfoEnabled()) {
-			LOG.info("Groupware server successfully initialized.");
-		}
+        if (LOG.isInfoEnabled()) {
+            LOG.info("Groupware server successfully initialized.");
+        }
         
         try {
-        	BackendServicesInit.initAJP();
+            BackendServicesInit.initAJP();
         } catch (final AbstractOXException e) {
             LOG.error("Initializing the AJP server failed.", e);
             System.exit(1);
         }
-		if (LOG.isInfoEnabled()) {
-			LOG.info("AJP server successfully initialized.");
-		}
+        if (LOG.isInfoEnabled()) {
+            LOG.info("AJP server successfully initialized.");
+        }
         
         /*
          * TODO: Check property ENABLE_INTERNAL_USER_EDIT
          * OXFolderSQL.updateCtxAddrBookPermission(FolderCacheProperties.isEnableInternalUsersEdit())
          */
 
-		if (LOG.isInfoEnabled()) {
-			LOG.info("SYSTEM IS UP & RUNNING...");
-		}
-		
+        if (LOG.isInfoEnabled()) {
+            LOG.info("SYSTEM IS UP & RUNNING...");
+        }
+        
         // FIXME implement a server shutdown
-		try {
+        try {
             synchronized (Starter.class) {
                 Starter.class.wait();
             }
         } catch (final InterruptedException e) {
             LOG.error(e.getMessage(), e);
         }
-	}
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void stop() {
+        while (!started.isEmpty()) {
+            try {
+                started.pop().stop();
+            } catch (AbstractOXException e) {
+                LOG.error("Component shutdown failed.", e);
+            }
+        }
+    }
 }

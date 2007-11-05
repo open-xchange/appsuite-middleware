@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.tools.conf;
 
 import java.io.File;
@@ -88,7 +86,7 @@ public abstract class AbstractConfig {
      * is not found.
      */
     protected String getPropertyInternal(final String key) {
-        return props.getProperty(key);
+        return getPropertyInternal(key, null);
     }
 
     /**
@@ -100,9 +98,9 @@ public abstract class AbstractConfig {
      * defined.
      */
     protected String getPropertyInternal(final String key, final String def) {
-        return props.getProperty(key, def);
+        return props == null ? null : props.getProperty(key, def);
     }
-    
+
     /**
      * Returns <code>true</code> if and only if the property named by the
      * argument exists and is equal to the string <code>"true"</code>. The test
@@ -216,4 +214,10 @@ public abstract class AbstractConfig {
         }
     }
 
+    /**
+     * Clears the properties.
+     */
+    protected void clearProperties() {
+        props = null;
+    }
 }

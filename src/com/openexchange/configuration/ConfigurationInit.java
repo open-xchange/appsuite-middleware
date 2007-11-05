@@ -47,31 +47,48 @@
  *
  */
 
-
-
 package com.openexchange.configuration;
 
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.server.Initialization;
 
 /**
  * This class contains the initialization for configuratons.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class ConfigurationInit {
+public final class ConfigurationInit implements Initialization {
 
     /**
-     * Prevent instantiation
+     * Default constructor.
      */
-    private ConfigurationInit() {
+    public ConfigurationInit() {
         super();
     }
 
     /**
      * Method for initializing the configurations.
+     * FIXME this method should be removed.
      * @throws AbstractOXException if initialization fails.
+     * @deprecated since interface {@link Initialization} exists. This method
+     * should not be called all over the server. Other component should rely on
+     * a proper startup.
      */
     public static void init() throws AbstractOXException {
-        SystemConfig.init();
+        new ConfigurationInit().start();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void start() throws AbstractOXException {
+        SystemConfig.getInstance().start();
         ConfigDB.init();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void stop() throws AbstractOXException {
+        SystemConfig.getInstance().stop();
     }
 }
