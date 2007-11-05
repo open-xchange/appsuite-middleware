@@ -49,17 +49,19 @@
 
 package com.openexchange.groupware.notify;
 
+import com.openexchange.configuration.ConfigurationException;
+import com.openexchange.configuration.ConfigurationException.Code;
+import com.openexchange.configuration.SystemConfig;
+import com.openexchange.configuration.SystemConfig.Property;
+import com.openexchange.server.Initialization;
+import com.openexchange.tools.conf.AbstractConfig;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.configuration.ConfigurationException;
-import com.openexchange.configuration.SystemConfig;
-import com.openexchange.tools.conf.AbstractConfig;
-import com.openexchange.configuration.ConfigurationException.Code;
-import com.openexchange.configuration.SystemConfig.Property;
-
-
-public class NotificationConfig extends AbstractConfig {
+/**
+ * DEPENDS ON: SystemConfig
+ */
+public class NotificationConfig extends AbstractConfig implements Initialization {
 
 	private static final Log LOG = LogFactory.getLog(NotificationConfig.class);
 	
@@ -83,9 +85,13 @@ public class NotificationConfig extends AbstractConfig {
 		
 	}
 	
-	private static final NotificationConfig INSTANCE = new NotificationConfig();
-	
-	@Override
+	private static NotificationConfig INSTANCE = new NotificationConfig();
+
+    public static NotificationConfig getInstance() {
+        return INSTANCE;
+    }
+
+    @Override
 	protected String getPropertyFileName() throws ConfigurationException {
 		final String filename = SystemConfig.getProperty(KEY);
         if (null == filename) {
@@ -117,5 +123,15 @@ public class NotificationConfig extends AbstractConfig {
 		}
 		return Boolean.parseBoolean(boolVal);
 	}
+
+    public void start() throws ConfigurationException {
+        if(!INSTANCE.isPropertiesLoadInternal()) {
+			INSTANCE.loadPropertiesInternal();
+		}
+    }
+
+    public void stop() {
+        INSTANCE = new NotificationConfig();
+    }
 
 }

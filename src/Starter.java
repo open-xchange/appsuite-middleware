@@ -93,9 +93,14 @@ public class Starter implements Initialization {
         /**
          * Attachment Configuration
          */
-        com.openexchange.groupware.attach.AttachmentConfig.getInstance()
+        com.openexchange.groupware.attach.AttachmentConfig.getInstance(),
 
+        /**
+         * Notification Configuration
+         */
+        com.openexchange.groupware.notify.NotificationConfig.getInstance()
     };
+
 
     /**
      * This contains the components that must be started if the admin uses APIs
@@ -110,7 +115,11 @@ public class Starter implements Initialization {
          * configdb.properties.
          */
         com.openexchange.configuration.ConfigDB.getInstance(),
-
+            
+        /**
+         * Notification Configuration
+         */
+        com.openexchange.groupware.notify.NotificationConfig.getInstance()
 
     };
 
