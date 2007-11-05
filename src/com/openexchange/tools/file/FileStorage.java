@@ -86,12 +86,12 @@ public abstract class FileStorage {
     /**
      * Default number of files or directories per directory.
      */
-    protected static final int DEFAULT_FILES = 256;
+    public static final int DEFAULT_FILES = 256;
 
     /**
      * Default depth.
      */
-    protected static final int DEFAULT_DEPTH = 3;
+    public static final int DEFAULT_DEPTH = 3;
 
     /**
      * Lock timeout.
@@ -179,7 +179,7 @@ public abstract class FileStorage {
             args[1] = Integer.valueOf(entries);
             System.arraycopy(initData, 0, args, 2, initData.length);
             final Constructor< ? extends FileStorage> constructor = 
-                getImplementation().getConstructor(Object[].class);
+                getImpl().getConstructor(Object[].class);
             final FileStorage retval = constructor.newInstance(
                 new Object[] { args });
             retval.checkStorage();
@@ -205,25 +205,16 @@ public abstract class FileStorage {
         }
     }
 
-    private static Class<? extends FileStorage> getImplementation()
+    public static Class<? extends FileStorage> getImpl()
         throws FileStorageException {
         if (null == impl) {
-//            final String className = ServerConfig.getProperty(
-//                Property.FileStorageImpl);
-//            if (null == className) {
-//                throw new FileStorageException(Code.PROPERTY_MISSING,
-//                    Property.FileStorageImpl.name());
-//            }
-//            final Class clazz;
-//            try {
-//                clazz = Class.forName(className);
-//            } catch (ClassNotFoundException e) {
-//                throw new FileStorageException(Code.CLASS_NOT_FOUND, className);
-//            }
-//            IMPL = (Class<? extends FileStorage>) clazz;
             impl = QuotaFileStorage.class;
         }
         return impl;
+    }
+
+    public static void setImpl(Class<? extends FileStorage> impl) {
+        FileStorage.impl = impl;
     }
 
     /**
