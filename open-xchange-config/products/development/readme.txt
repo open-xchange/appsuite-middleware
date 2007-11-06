@@ -1,6 +1,6 @@
-Angenommener Zielpfad für Serverkonfiguration: /home/marcus/tmp/head
+Development Konfiguration liegt bei mir unter: /home/marcus/eclipse/head/open-xchange-config-development
 
-ant -Ddestdir="" -Dprefix="/home/marcus/tmp/head"
+ant aufrufen
 
 OX starten mit
 Projekt: open-xchange
@@ -9,5 +9,5 @@ VM arguments:
 -Xms193M
 -Xmx256M
 -XX:+UseConcMarkSweepGC
--Dopenexchange.propfile=/home/marcus/tmp/head/etc/groupware/system.properties
--Djava.util.logging.config.file=/home/marcus/tmp/head/etc/groupware/logging.properties
+-Dopenexchange.propfile=/home/marcus/eclipse/head/open-xchange-config-development/tmp/system.properties
+-Djava.util.logging.config.file=/home/marcus/eclipse/head/open-xchange-config-development/tmp/logging.properties
