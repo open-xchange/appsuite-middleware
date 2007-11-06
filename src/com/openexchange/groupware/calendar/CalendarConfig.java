@@ -53,6 +53,8 @@ import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.configuration.ConfigurationException.Code;
 import com.openexchange.configuration.SystemConfig.Property;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.server.Initialization;
 import com.openexchange.tools.conf.AbstractConfig;
 
 import org.apache.commons.logging.Log;
@@ -62,17 +64,24 @@ import org.apache.commons.logging.LogFactory;
  * Configuration class for calendar options.
  * <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class CalendarConfig extends AbstractConfig {
+public class CalendarConfig extends AbstractConfig implements Initialization {
+    
+    private static final CalendarConfig singleton = new CalendarConfig();
     
     private static final Property KEY = Property.CALENDAR;
-    
-    private static CalendarConfig singleton;
     
     private static final Log LOG = LogFactory.getLog(CalendarConfig.class);
     
     private static boolean solo_reminder_trigger_event = true;
     private static boolean check_and_remove_past_reminders = true;
-    
+
+    /**
+     * Prevent instantiation.
+     */
+    private CalendarConfig() {
+        super();
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -89,7 +98,41 @@ public class CalendarConfig extends AbstractConfig {
     public static String getProperty(final String key) {
         return singleton.getPropertyInternal(key);
     }
-    
+
+    /**
+     * @return the singleton instance.
+     */
+    public static final CalendarConfig getInstance() {
+        return singleton;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void start() throws AbstractOXException {
+        if (isPropertiesLoadInternal()) {
+            LOG.error("Duplicate initialization of CalendarConfig.");
+            return;
+        }
+        reinit();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void stop() throws AbstractOXException {
+        if (!isPropertiesLoadInternal()) {
+            LOG.error("Duplicate shutdown of CalendarConfig.");
+            return;
+        }
+        clearProperties();
+    }
+
+    /**
+     * FIXME remove this method.
+     * @throws ConfigurationException
+     * @deprecated use normal server startup through {@link Starter}.
+     */
     public static void init() throws ConfigurationException {
         if (null == singleton) {
             reinit();
@@ -97,7 +140,6 @@ public class CalendarConfig extends AbstractConfig {
     }
     
     public static void reinit() throws ConfigurationException {
-        singleton = new CalendarConfig();
         singleton.loadPropertiesInternal();
         String check_cached_iterator_fast_fetch = CalendarConfig.getProperty("CACHED_ITERATOR_FAST_FETCH");
         if (check_cached_iterator_fast_fetch != null) {

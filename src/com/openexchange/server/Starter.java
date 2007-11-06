@@ -80,13 +80,17 @@ public class Starter implements Initialization {
          */
         com.openexchange.configuration.ConfigDB.getInstance(),
         /**
-         * Starts the monitoring component.
+         * Reads the calendar.properties.
          */
-        com.openexchange.monitoring.MonitoringInit.getInstance(),
+        com.openexchange.groupware.calendar.CalendarConfig.getInstance(),
         /**
          * Sets the caching system JCS up.
          */
         com.openexchange.cache.Configuration.getInstance(),
+        /**
+         * Starts the monitoring component.
+         */
+        com.openexchange.monitoring.MonitoringInit.getInstance(),
         /**
          * Connection pools for ConfigDB and database assignments for contexts.
          */

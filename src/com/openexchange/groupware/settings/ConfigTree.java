@@ -244,6 +244,10 @@ public final class ConfigTree {
      * @throws SettingException if initializing doesn't work.
      */
     static void init() throws SettingException {
+        if (null != tree) {
+            LOG.error("Duplicate initialization of configuration tree.");
+            return;
+        }
         tree = new Setting("", true);
         tree.setId(-1);
 
@@ -902,6 +906,10 @@ public final class ConfigTree {
     }
 
     static void stop() {
+        if (null == tree) {
+            LOG.error("Duplicate shutdown of configuration tree.");
+            return;
+        }
         readers = null;
         tree = null;
     }

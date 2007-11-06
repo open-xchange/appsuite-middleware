@@ -50,7 +50,6 @@
 package com.openexchange.groupware;
 
 import com.openexchange.event.EventInit;
-import com.openexchange.groupware.calendar.CalendarConfig;
 import com.openexchange.groupware.configuration.ParticipantConfig;
 import com.openexchange.push.udp.PushInit;
 import com.openexchange.sessiond.SessiondInit;
@@ -73,7 +72,6 @@ public final class GroupwareInit {
      * @throws AbstractOXException if initialization fails.
      */
     public static void init() throws AbstractOXException {
-        CalendarConfig.init();
 		SessiondInit.init();
 		EventInit.init();
 		PushInit.init();
