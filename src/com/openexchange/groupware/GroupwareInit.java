@@ -85,7 +85,6 @@ public final class GroupwareInit {
         SetupLink.init();
         ConfigTree.init();
         CalendarConfig.init();
-        ContactConfig.init();
 		SessiondInit.init();
 		EventInit.init();
 		PushInit.init();
