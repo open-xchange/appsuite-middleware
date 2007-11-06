@@ -51,10 +51,6 @@ package com.openexchange.groupware.integration;
 
 import java.net.URL;
 
-import com.openexchange.configuration.SystemConfig;
-import com.openexchange.configuration.SystemConfig.Property;
-import com.openexchange.groupware.integration.SetupLinkException.Code;
-
 /**
  * This interface defines the methods that will be used to generate browser
  * links that redirect the user to the setup system.
@@ -62,10 +58,7 @@ import com.openexchange.groupware.integration.SetupLinkException.Code;
  */
 public abstract class SetupLink {
 
-    /**
-     * Implementing sub class.
-     */
-    private static Class< ? extends SetupLink> implementingClass;
+    private static SetupLink singleton;
 
     /**
      * Default constructor.
@@ -75,21 +68,10 @@ public abstract class SetupLink {
     }
 
     /**
-     * Factory method for an instance of SetupLink.
-     * @return an instance implementing the getLink() method.
-     * @throws SetupLinkException if instantiation fails.
+     * @return the singleton instance.
      */
-    public static SetupLink getInstance() throws SetupLinkException {
-        SetupLink instance = null;
-        try {
-            instance = implementingClass.newInstance();
-            instance.initialize();
-        } catch (InstantiationException e) {
-            throw new SetupLinkException(Code.INSTANTIATION_FAILED, e);
-        } catch (IllegalAccessException e) {
-            throw new SetupLinkException(Code.INSTANTIATION_FAILED, e);
-        }
-        return instance;
+    public static SetupLink getInstance() {
+        return singleton;
     }
 
     /**
@@ -107,29 +89,6 @@ public abstract class SetupLink {
      */
     protected abstract void initialize() throws SetupLinkException;
 
-    /**
-     * Initializes the login info implementation.
-     * @throws SetupLinkException if initialization fails.
-     */
-    public static void init() throws SetupLinkException {
-        if (null != implementingClass) {
-            return;
-        }
-        final String className = SystemConfig.getProperty(Property.SETUP_LINK);
-        if (null == className) {
-            throw new SetupLinkException(Code.MISSING_SETTING, Property
-                .SETUP_LINK.getPropertyName());
-        }
-        try {
-            implementingClass = Class.forName(className)
-                .asSubclass(SetupLink.class);
-        } catch (ClassNotFoundException e) {
-            throw new SetupLinkException(Code.CLASS_NOT_FOUND, e, className);
-        } catch (ClassCastException e) {
-            throw new SetupLinkException(Code.CLASS_NOT_FOUND, e, className);
-        }
-    }
-
     protected int getContextId(final Object... values) {
         return (Integer) values[0];
     }
@@ -140,5 +99,12 @@ public abstract class SetupLink {
 
     protected String getPassword(final Object... values) {
         return (String) values[2];
+    }
+
+    /**
+     * @param singleton the singleton to set
+     */
+    static void setSingleton(SetupLink singleton) {
+        SetupLink.singleton = singleton;
     }
 }

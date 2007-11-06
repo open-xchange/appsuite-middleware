@@ -116,6 +116,10 @@ public class Starter implements Initialization {
          */
         com.openexchange.groupware.userconfiguration.UserConfigurationStorageInit.getInstance(),
         /**
+         * Setup of SetupLink for Config Jump.
+         */
+        com.openexchange.groupware.integration.SetupLinkInit.getInstance(),
+        /**
          * Notification Configuration
          */
         com.openexchange.groupware.notify.NotificationConfig.getInstance()

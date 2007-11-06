@@ -47,45 +47,82 @@
  *
  */
 
+package com.openexchange.groupware.integration;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-package com.openexchange.groupware;
-
-import com.openexchange.event.EventInit;
-import com.openexchange.groupware.calendar.CalendarConfig;
-import com.openexchange.groupware.configuration.ParticipantConfig;
-import com.openexchange.groupware.contact.ContactConfig;
-import com.openexchange.groupware.contexts.ContextInit;
-import com.openexchange.groupware.integration.SetupLink;
-import com.openexchange.groupware.settings.ConfigTree;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.push.udp.PushInit;
-import com.openexchange.sessiond.SessiondInit;
+import com.openexchange.configuration.SystemConfig;
+import com.openexchange.configuration.SystemConfig.Property;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.integration.SetupLinkException.Code;
+import com.openexchange.server.Initialization;
 
 /**
- * This class contains the initialization for the groupware server.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class GroupwareInit {
+public final class SetupLinkInit implements Initialization {
+
+    private static final SetupLinkInit singleton = new SetupLinkInit();
 
     /**
-     * Prevent instantiation
+     * Logger.
      */
-    private GroupwareInit() {
+    private static final Log LOG = LogFactory.getLog(SetupLinkInit.class);
+
+    /**
+     * Prevent instantiation.
+     */
+    private SetupLinkInit() {
         super();
     }
 
     /**
-     * Method for initializing the groupware server.
-     * @throws AbstractOXException if initialization fails.
+     * @return the singleton instance.
      */
-    public static void init() throws AbstractOXException {
-        UserConfigurationStorage.init();
-        ConfigTree.init();
-        CalendarConfig.init();
-		SessiondInit.init();
-		EventInit.init();
-		PushInit.init();
-        ParticipantConfig.init();
+    public static SetupLinkInit getInstance() {
+        return singleton;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void start() throws AbstractOXException {
+        if (null != SetupLink.getInstance()) {
+            LOG.error("Duplicate initialization of SetupLink.");
+            return;
+        }
+        final String className = SystemConfig.getProperty(Property.SETUP_LINK);
+        if (null == className) {
+            throw new SetupLinkException(Code.MISSING_SETTING, Property
+                .SETUP_LINK.getPropertyName());
+        }
+        try {
+            final Class<? extends SetupLink> clazz = Class.forName(className)
+                .asSubclass(SetupLink.class);
+            final SetupLink instance = clazz.newInstance();
+            instance.initialize();
+            SetupLink.setSingleton(instance);
+        } catch (ClassNotFoundException e) {
+            throw new SetupLinkException(Code.CLASS_NOT_FOUND, e, className);
+        } catch (ClassCastException e) {
+            throw new SetupLinkException(Code.CLASS_NOT_FOUND, e, className);
+        } catch (InstantiationException e) {
+            throw new SetupLinkException(Code.INSTANTIATION_FAILED, e);
+        } catch (IllegalAccessException e) {
+            throw new SetupLinkException(Code.INSTANTIATION_FAILED, e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void stop() throws AbstractOXException {
+        if (null == SetupLink.getInstance()) {
+            LOG.error("Duplicate shutdown of SetupLink.");
+            return;
+        }
+        SetupLink.setSingleton(null);
     }
 }
