@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.openexchange.groupware.Init;
-import com.openexchange.groupware.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.ContextImpl;
 import com.openexchange.groupware.infostore.webdav.EntityLockManager;
@@ -33,7 +33,7 @@ public class EntityLockManagerTest extends TestCase {
 	
 	public void setUp() throws Exception {
         super.setUp();
-		Init.initDB();
+		Init.startServer();
 		user = UserStorage.getInstance(ctx).getUser(UserStorage.getInstance(ctx).getUserId(getUsername())); //FIXME
 		lockManager = new EntityLockManagerImpl(new DBPoolProvider(), "infostore_lock");
 		lockManager.startTransaction();
@@ -50,7 +50,7 @@ public class EntityLockManagerTest extends TestCase {
 		}
 		lockManager.commit();
 		lockManager.finish();
-        Init.stopDB();
+        Init.stopServer();
         super.tearDown();
 	}
 	

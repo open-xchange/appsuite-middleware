@@ -21,7 +21,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.Types;
-import com.openexchange.groupware.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.ExternalUserParticipant;

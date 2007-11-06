@@ -65,8 +65,13 @@ public class LoginTest extends TestCase {
      */
     protected void setUp() throws Exception {
         super.setUp();
-        Init.loadSystemProperties();
+        Init.startServer();
         ContextInit.init();
+    }
+
+    protected void tearDown() throws Exception {
+        Init.stopServer();
+        super.tearDown();
     }
 
     public void testLogin() throws Throwable {

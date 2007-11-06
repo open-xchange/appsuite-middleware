@@ -103,7 +103,7 @@ public class CalendarDeleteTest extends TestCase {
     protected void tearDown() throws Exception {
         if (init) {
             init = false;
-            Init.stopDB();
+            Init.stopServer();
         }
         super.tearDown();
     }

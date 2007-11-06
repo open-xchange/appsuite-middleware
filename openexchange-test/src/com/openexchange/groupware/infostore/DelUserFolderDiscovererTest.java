@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Set;
 
 import com.openexchange.groupware.Init;
-import com.openexchange.groupware.RdbUserConfigurationStorage;
-import com.openexchange.groupware.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.RdbUserConfigurationStorage;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.ContextStorage;
@@ -45,7 +45,7 @@ public class DelUserFolderDiscovererTest extends TestCase{
 	private FolderObject folderWithOtherEntity;
 	
 	public void setUp() throws Exception {
-		Init.initDB();
+		Init.startServer();
 		ctx = ContextStorage.getInstance().getContext(1); 
 		
 		String userNameA = Init.getAJAXProperty("login");
@@ -102,7 +102,7 @@ public class DelUserFolderDiscovererTest extends TestCase{
 //		Remove all folders
 		OXFolderManager manager = new OXFolderManagerImpl(session);
 		manager.deleteFolder(folderWithOtherEntity, true, System.currentTimeMillis());
-		Init.stopDB();
+		Init.stopServer();
 	}
 	
 	public void testDiscoverFolders() throws Exception{

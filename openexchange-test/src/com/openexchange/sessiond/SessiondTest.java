@@ -40,11 +40,8 @@ public class SessiondTest extends TestCase {
 			return ;
 		}
 		
-		Init.loadSystemProperties();
-		Init.initDB();
-        Init.initContext();
-		Init.initSessiond();
-		
+		Init.startServer();
+
 		Properties prop = Init.getTestProperties();
 		
 		String propfile = prop.getProperty(sessiondPropertiesFile);
@@ -76,7 +73,7 @@ public class SessiondTest extends TestCase {
     protected void tearDown() throws Exception {
         if (isInit) {
             isInit = false;
-            Init.stopDB();
+            Init.stopServer();
         }
         super.tearDown();
     }

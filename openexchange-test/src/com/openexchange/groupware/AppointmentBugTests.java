@@ -62,7 +62,7 @@ public class AppointmentBugTests extends TestCase {
     protected void tearDown() throws Exception {
         if (init) {
             init = false;
-            Init.stopDB();
+            Init.stopServer();
         }
         super.tearDown();
     }
@@ -79,7 +79,7 @@ public class AppointmentBugTests extends TestCase {
     
     public static int getUserId() throws Exception {
         if (!init) {
-            Init.initDB();
+            Init.startServer();
             init = true;
         }
         String user = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant2", "");        

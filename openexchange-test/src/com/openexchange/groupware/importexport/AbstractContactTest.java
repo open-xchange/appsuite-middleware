@@ -74,7 +74,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbContactSQLInterface;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Init;
-import com.openexchange.groupware.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.contact.ContactConfig;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.DataObject;
@@ -427,7 +427,7 @@ public class AbstractContactTest {
 
 	@BeforeClass
 	public static void initialize() throws SQLException, AbstractOXException {
-		Init.initDB();
+		Init.startServer();
 		ContactConfig.init();
 		ContextStorage.init();
 		final UserStorage uStorage = UserStorage.getInstance(new ContextImpl(1));
@@ -438,9 +438,10 @@ public class AbstractContactTest {
 	}
 	
 	@AfterClass
-	public static void debrief() throws OXException {
+	public static void debrief() throws AbstractOXException {
 		deleteTestFolder(folderId);
-	}
+        Init.stopServer();
+    }
 
 	public AbstractContactTest() {
 		super();
@@ -524,7 +525,7 @@ public class AbstractContactTest {
 	 * @throws AbstractOXException
 	 */
 	public static User getUserParticipant() throws AbstractOXException{
-		Init.initDB();
+		Init.startServer();
 		ContactConfig.init();
 		ContextStorage.init();
 		final UserStorage uStorage = UserStorage.getInstance(new ContextImpl(1));

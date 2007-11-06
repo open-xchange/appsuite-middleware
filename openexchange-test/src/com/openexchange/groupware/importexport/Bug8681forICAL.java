@@ -61,7 +61,7 @@ import junit.framework.JUnit4TestAdapter;
 import org.junit.Test;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;

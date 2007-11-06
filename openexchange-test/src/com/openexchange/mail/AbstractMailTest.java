@@ -94,7 +94,7 @@ public abstract class AbstractMailTest extends TestCase {
 			/*
 			 * Init
 			 */
-			Init.initDB();
+			Init.startServer();
 			/*
 			 * Init test environment
 			 */
@@ -111,7 +111,12 @@ public abstract class AbstractMailTest extends TestCase {
 		}
 	}
 
-	/**
+    @Override
+    protected void tearDown() throws Exception {
+        Init.stopServer();
+    }
+
+    /**
 	 * Gets the login
 	 *
 	 * @return the login

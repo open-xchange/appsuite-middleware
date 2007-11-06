@@ -13,11 +13,11 @@ public class SimpleDBPoolTest extends TestCase {
     
     protected void setUp() throws Exception {        
         super.setUp();
-        Init.initDB();
+        Init.startServer();
     }
     
     protected void tearDown() throws Exception {
-        Init.stopDB();
+        Init.stopServer();
         super.tearDown();
     }
     

@@ -8,7 +8,7 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import com.openexchange.groupware.Init;
-import com.openexchange.groupware.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.ContextImpl;
@@ -35,7 +35,7 @@ public class FolderTestCase extends TestCase {
 	
 	
 	public void setUp() throws Exception {
-		Init.initDB();
+		Init.startServer();
 		
 		session = SessionObjectWrapper.createSessionObject(UserStorage.getInstance(ctx).getUserId(getUsername()), ctx, getClass().getName());
 		user = session.getUserObject();
@@ -50,7 +50,7 @@ public class FolderTestCase extends TestCase {
 		for(FolderObject folderobject : clean) {
 			rm(folderobject.getObjectID());
 		}
-		Init.stopDB();
+		Init.stopServer();
 	}
 	
 	protected FolderObject mkdir(int parent, String name) throws SQLException, OXFolderPermissionException, Exception {

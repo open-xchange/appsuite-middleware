@@ -30,7 +30,7 @@ public class FolderLockManagerTest extends FolderTestCase{
 	
 	public void setUp() throws Exception {
 		super.setUp();
-		Init.initDB();
+		Init.startServer();
 		lockManager = new FolderLockManagerImpl(new DBPoolProvider());
 		lockManager.startTransaction();
 		
@@ -47,7 +47,8 @@ public class FolderLockManagerTest extends FolderTestCase{
 		}
 		lockManager.commit();
 		lockManager.finish();
-		super.tearDown();
+        Init.stopServer();
+        super.tearDown();
 	}
 	
 	

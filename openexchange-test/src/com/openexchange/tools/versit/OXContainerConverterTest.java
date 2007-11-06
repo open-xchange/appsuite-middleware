@@ -80,8 +80,16 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
  */
 public class OXContainerConverterTest extends TestCase {
 
-	public static SessionObject getSession() throws Exception {
-		Init.initDB();
+    public void setUp() throws Exception {
+        Init.startServer();
+    }
+
+    public void tearDown() throws Exception {
+        Init.stopServer();
+    }
+
+    public static SessionObject getSession() throws Exception {
+
 		ContactConfig.init();
 		ContextStorage.init();
 		final UserStorage uStorage = UserStorage.getInstance(new ContextImpl(1));
@@ -198,7 +206,7 @@ public class OXContainerConverterTest extends TestCase {
 	}
 	
 	public static User getUserParticipant() throws AbstractOXException{
-		Init.initDB();
+
 		ContactConfig.init();
 		ContextStorage.init();
 		final UserStorage uStorage = UserStorage.getInstance(new ContextImpl(1));

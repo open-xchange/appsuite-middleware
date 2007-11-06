@@ -49,20 +49,6 @@
 
 package com.openexchange.groupware.importexport;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import java.io.ByteArrayInputStream;
-import java.io.UnsupportedEncodingException;
-import java.sql.SQLException;
-import java.util.List;
-
-import junit.framework.JUnit4TestAdapter;
-
-import org.junit.After;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.OXException;
@@ -79,6 +65,18 @@ import com.openexchange.groupware.importexport.importers.ICalImporter;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.sessiond.SessionObjectWrapper;
+import junit.framework.JUnit4TestAdapter;
+import org.junit.After;
+import org.junit.AfterClass;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.io.ByteArrayInputStream;
+import java.io.UnsupportedEncodingException;
+import java.sql.SQLException;
+import java.util.List;
 
 public class Bug7470Test extends AbstractContactTest {
 	public final Format format = Format.ICAL;
@@ -92,7 +90,7 @@ public class Bug7470Test extends AbstractContactTest {
 	
 	@BeforeClass
 	public static void initialize() throws SQLException, AbstractOXException {
-		Init.initDB();
+		Init.startServer();
 		ContactConfig.init();
 		ContextStorage.init();
 		final UserStorage uStorage = UserStorage.getInstance(new ContextImpl(1));
@@ -101,8 +99,13 @@ public class Bug7470Test extends AbstractContactTest {
 		userId = sessObj.getUserObject().getId();
 		imp = new ICalImporter();
 	}
-	
-	@After
+
+    @AfterClass
+    public static void shutdown() throws AbstractOXException {
+        Init.stopServer();
+    }
+
+    @After
 	public void cleanUpAfterTest() throws OXException{
 		deleteTestFolder(folderId);
 	}

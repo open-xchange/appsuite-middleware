@@ -17,7 +17,7 @@ public class IndexTest extends TestCase {
 	private Connection con = null;
 	
 	public void setUp() throws Exception {
-		Init.initDB();
+		Init.startServer();
 		ContextStorage.init();
 		final ContextStorage ctxstor = ContextStorage.getInstance();
         final int contextId = ctxstor.getContextId("defaultcontext");
@@ -30,7 +30,7 @@ public class IndexTest extends TestCase {
 	public void tearDown() throws Exception {
 		_sql_update("DROP TABLE test_index");
 		DBPool.closeWriterSilent(ctx, con);
-		Init.stopDB();
+		Init.stopServer();
 	}
 	
 	public void testFindAllIndexes() throws Exception {

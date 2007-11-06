@@ -49,11 +49,6 @@
 
 package com.openexchange.groupware.importexport;
 
-import java.sql.SQLException;
-
-import org.junit.After;
-import org.junit.BeforeClass;
-
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Init;
@@ -63,6 +58,11 @@ import com.openexchange.groupware.contexts.ContextStorage;
 import com.openexchange.groupware.importexport.importers.ICalImporter;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.sessiond.SessionObjectWrapper;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+
+import java.sql.SQLException;
 
 public class AbstractICalImportTest extends AbstractContactTest {
 
@@ -70,7 +70,7 @@ public class AbstractICalImportTest extends AbstractContactTest {
 
 	@BeforeClass
 	public static void initialize() throws SQLException, AbstractOXException {
-		Init.initDB();
+		Init.startServer();
 		ContactConfig.init();
 		ContextStorage.init();
 		final UserStorage uStorage = UserStorage.getInstance(new ContextImpl(1));
@@ -80,7 +80,12 @@ public class AbstractICalImportTest extends AbstractContactTest {
 		imp = new ICalImporter();
 	}
 
-	public AbstractICalImportTest() {
+    @AfterClass
+    public static void shutdown() throws AbstractOXException {
+        Init.stopServer();
+    }
+
+    public AbstractICalImportTest() {
 		super();
 	}
 

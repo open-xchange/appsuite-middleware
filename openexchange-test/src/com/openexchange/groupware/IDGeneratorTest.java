@@ -46,7 +46,7 @@ public class IDGeneratorTest extends TestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        Init.initDB();
+        Init.startServer();
         ContextStorage cs = ContextStorage.getInstance();
         context = cs.getContext(cs.getContextId("defaultcontext"));
     }
@@ -56,7 +56,7 @@ public class IDGeneratorTest extends TestCase {
      */
     @Override
     protected void tearDown() throws Exception {
-        Init.stopDB();
+        Init.stopServer();
         super.tearDown();
     }
 

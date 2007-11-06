@@ -30,7 +30,7 @@ public abstract class AbstractAttachmentActionTest extends AbstractActionTest {
 	private DBProvider provider;
 	
 	public void setUp() throws Exception {
-		Init.initDB();
+		Init.startServer();
 		provider = new DBPoolProvider();
 		queryCatalog = new AttachmentQueryCatalog();
 		ctx = ContextStorage.getInstance().getContext(1);
@@ -41,7 +41,7 @@ public abstract class AbstractAttachmentActionTest extends AbstractActionTest {
 	}
 	
 	public void tearDown() throws Exception {
-		Init.stopDB();
+		Init.stopServer();
 	}
 
 	protected User getUser() {

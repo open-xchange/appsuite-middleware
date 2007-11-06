@@ -26,7 +26,7 @@ public class InfostoreDeleteTest extends TestCase {
 	int myFolder = 0;
 	
 	public void setUp() throws Exception {
-		Init.initDB();
+		Init.startServer();
 		Context ctx = ContextStorage.getInstance().getContext(1);
 		session = SessionObjectWrapper.createSessionObject(UserStorage.getInstance(ctx).getUserId("francisco"), ctx, "Blubb");
 		database = new InfostoreFacadeImpl(provider);
@@ -37,7 +37,7 @@ public class InfostoreDeleteTest extends TestCase {
 	}
 	
 	public void tearDown() throws Exception {
-		Init.stopDB();
+		Init.stopServer();
 	}
 	
 	public void testDeleteUser() throws Exception {

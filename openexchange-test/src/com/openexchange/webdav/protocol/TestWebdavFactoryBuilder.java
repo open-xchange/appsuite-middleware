@@ -56,15 +56,14 @@ public class TestWebdavFactoryBuilder {
 	public static void setUp() throws Exception {
 		if(mode == INFO) {
 			Init.loadTestProperties();
-			Init.loadSystemProperties();
-			Init.initDB();
+			Init.startServer();
 			ContextStorage.init();
 		}
 	}
 	
 	public static void tearDown() throws Exception {
 		if(mode == INFO)
-			Init.stopDB(); 
+			Init.stopServer(); 
 	}
 
 }

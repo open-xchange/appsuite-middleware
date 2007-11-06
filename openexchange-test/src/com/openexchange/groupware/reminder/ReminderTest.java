@@ -29,10 +29,8 @@ public class ReminderTest extends TestCase {
 			return ;
 		}
 		
-		Init.loadSystemProperties();
-		Init.initDB();
-		Init.initSessiond();
-		
+		Init.startServer();
+
 		sc = SessiondConnector.getInstance();
 		sessionObj = sc.addSession(Init.getAJAXProperty("login"), Init.getAJAXProperty("password"), "localhost");
 
@@ -52,7 +50,7 @@ public class ReminderTest extends TestCase {
     @Override
     protected void tearDown() throws Exception {
         if (isInit) {
-            Init.stopDB();
+            Init.stopServer();
         }
         super.tearDown();
     }

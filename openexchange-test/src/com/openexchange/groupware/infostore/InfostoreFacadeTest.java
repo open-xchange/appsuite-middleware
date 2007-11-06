@@ -8,7 +8,7 @@ import junit.framework.TestCase;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.Init;
-import com.openexchange.groupware.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.ContextStorage;
@@ -54,8 +54,7 @@ public class InfostoreFacadeTest extends TestCase {
 		cleanFolders = new ArrayList<FolderObject>();
 		
 		Init.loadTestProperties();
-		Init.loadSystemProperties();
-		Init.initDB();
+		Init.startServer();
 		ContextStorage.init();
 		
 		final ContextStorage ctxstor = ContextStorage.getInstance();
@@ -95,7 +94,7 @@ public class InfostoreFacadeTest extends TestCase {
 			oxma.deleteFolder(folder, false, System.currentTimeMillis());
 		}
 		
-		Init.stopDB();
+		Init.stopServer();
 	}
 	
 	// Bug 7012

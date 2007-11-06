@@ -8,7 +8,7 @@ import java.util.Map;
 import junit.framework.TestCase;
 
 import com.openexchange.groupware.Init;
-import com.openexchange.groupware.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.ContextImpl;
 import com.openexchange.groupware.infostore.webdav.PropertyStore;
@@ -32,7 +32,7 @@ public class PropertyStoreTest extends TestCase{
 	
 	public void setUp() throws Exception {
         super.setUp();
-		Init.initDB();
+		Init.startServer();
 		this.propertyStore = new PropertyStoreImpl(new DBPoolProvider(), "infostore_property");
 		
 		propertyStore.startTransaction();
@@ -61,7 +61,7 @@ public class PropertyStoreTest extends TestCase{
 		clean.clear();
 		propertyStore.commit();
 		propertyStore.finish();
-        Init.stopDB();
+        Init.stopServer();
         super.tearDown();
 	}
 	

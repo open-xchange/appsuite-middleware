@@ -35,10 +35,10 @@ public abstract class AbstractAttachmentTest extends TestCase {
 	
 	public static class INTEGRATION implements Mode {
 		public void setUp() throws Exception {
-	        Init.initDB();
+	        Init.startServer();
 		}
         public void tearDown() throws Exception {
-            Init.stopDB();
+            Init.stopServer();
         }
 	}
 	

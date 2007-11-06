@@ -94,7 +94,6 @@ public abstract class AbstractImportExportServletTest extends AbstractAJAXTest {
 	
 	public void setUp() throws Exception{
 		super.setUp();
-		Init.initDB();
 		ContactConfig.init();
 	//	final UserStorage uStorage = UserStorage.getInstance(new ContextImpl(1));
 	//  final int userId = uStorage.getUserId( Init.getAJAXProperty("login") );
@@ -102,7 +101,7 @@ public abstract class AbstractImportExportServletTest extends AbstractAJAXTest {
 	}
 	
 	public void tearDown() throws Exception{
-		super.tearDown();
+        super.tearDown();
 	}
 	
 	protected int getUserId_FIXME() throws MalformedURLException, OXException, IOException, SAXException, JSONException {

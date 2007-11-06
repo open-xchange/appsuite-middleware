@@ -8,7 +8,7 @@ import junit.framework.TestCase;
 
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.groupware.Init;
-import com.openexchange.groupware.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.ContextException;
@@ -54,7 +54,7 @@ public class PathResolverTest extends TestCase {
 	private UserConfiguration userConfig;
 	
 	public void setUp() throws Exception {
-		Init.initDB();
+		Init.startServer();
 		database.setTransactional(true);
 		ctx = getContext();
 		
@@ -92,7 +92,7 @@ public class PathResolverTest extends TestCase {
 		rmdir(id3);
 		rmdir(id2);
 		rmdir(id);
-		Init.stopDB();
+		Init.stopServer();
 	}
 
 	private void findRoot() throws Exception {

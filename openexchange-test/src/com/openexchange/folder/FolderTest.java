@@ -13,7 +13,7 @@ import com.openexchange.api2.FolderSQLInterface;
 import com.openexchange.api2.RdbFolderSQLInterface;
 import com.openexchange.cache.FolderCacheManager;
 import com.openexchange.groupware.Init;
-import com.openexchange.groupware.RdbUserConfigurationStorage;
+import com.openexchange.groupware.userconfiguration.RdbUserConfigurationStorage;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarRecurringCollection;
 import com.openexchange.groupware.calendar.CalendarSql;
@@ -70,7 +70,7 @@ public class FolderTest extends TestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		if (!init) {
-			Init.initDB();
+			Init.startServer();
 		}
 		ContextStorage.init();
 		/*
@@ -87,7 +87,7 @@ public class FolderTest extends TestCase {
 	protected void tearDown() throws Exception {
         if (init) {
             init = false;
-            Init.stopDB();
+            Init.stopServer();
         }
 		super.tearDown();
 	}

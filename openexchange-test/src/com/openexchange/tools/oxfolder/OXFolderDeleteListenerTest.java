@@ -37,7 +37,7 @@ public class OXFolderDeleteListenerTest extends TestCase {
 	List<FolderObject> clean = new LinkedList<FolderObject>();
 	
 	public void setUp() throws Exception {
-		Init.initDB();
+		Init.startServer();
 		ContextStorage.init();
 		Context ctx = ContextStorage.getInstance().getContext(1);
 		userWhichWillBeDeletedId = UserStorage.getInstance(ctx).getUserId("francisco");
@@ -56,7 +56,7 @@ public class OXFolderDeleteListenerTest extends TestCase {
 		for(FolderObject fo : clean) {
 			oxma.deleteFolder(fo, false, System.currentTimeMillis());
 		}
-		Init.stopDB();
+		Init.stopServer();
 	}
 	
 	// Bug 7503

@@ -9,7 +9,7 @@ import java.util.Date;
 import java.util.List;
 
 import com.openexchange.groupware.Init;
-import com.openexchange.groupware.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.ContextStorage;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
@@ -34,7 +34,7 @@ public abstract class AbstractInfostoreActionTest extends AbstractActionTest {
 	private InfostoreFacade infostore;
 
 	public void setUp() throws Exception {
-		Init.initDB();
+		Init.startServer();
 		ContextStorage.init();
 		provider = new DBPoolProvider();
 		queryCatalog = new InfostoreQueryCatalog();
@@ -45,7 +45,7 @@ public abstract class AbstractInfostoreActionTest extends AbstractActionTest {
 	}
 
 	public void tearDown() throws Exception {
-		Init.stopDB();
+		Init.stopServer();
 	}
 	
 	protected User getUser() {

@@ -49,13 +49,6 @@
 
 package com.openexchange.groupware.importexport;
 
-import java.sql.SQLException;
-
-import junit.framework.JUnit4TestAdapter;
-
-import org.junit.After;
-import org.junit.BeforeClass;
-
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Init;
@@ -65,6 +58,12 @@ import com.openexchange.groupware.contexts.ContextStorage;
 import com.openexchange.groupware.importexport.importers.VCardImporter;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.sessiond.SessionObjectWrapper;
+import junit.framework.JUnit4TestAdapter;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+
+import java.sql.SQLException;
 
 public class AbstractVCardTest extends AbstractContactTest {
 
@@ -78,7 +77,7 @@ public class AbstractVCardTest extends AbstractContactTest {
 
 	@BeforeClass
 	public static void initialize() throws SQLException, AbstractOXException {
-		Init.initDB();
+		Init.startServer();
 		ContactConfig.init();
 		ContextStorage.init();
 		final UserStorage uStorage = UserStorage.getInstance(new ContextImpl(1));
@@ -87,7 +86,12 @@ public class AbstractVCardTest extends AbstractContactTest {
 		userId = sessObj.getUserObject().getId();
 	}
 
-	public AbstractVCardTest() {
+    @AfterClass
+    public static void shutdown() throws AbstractOXException {
+        Init.stopServer();
+    }
+
+    public AbstractVCardTest() {
 		super();
 	}
 

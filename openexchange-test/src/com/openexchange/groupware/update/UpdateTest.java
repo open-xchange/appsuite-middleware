@@ -25,8 +25,7 @@ public class UpdateTest extends TestCase {
     private DBProvider provider;
 
     public void setUp() throws Exception {
-        Init.initDB();
-        Init.loadSystemProperties();
+        Init.startServer();
         ContextStorage.init();
 
         existing_ctx_id = ContextStorage.getInstance().getContextId("defaultcontext");
@@ -39,7 +38,7 @@ public class UpdateTest extends TestCase {
     }
 
     public void tearDown() throws Exception {
-        Init.stopDB();
+        Init.stopServer();
     }
 
     protected final void exec(String sql, Object...args) throws DBPoolingException, SQLException {

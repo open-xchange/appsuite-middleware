@@ -25,12 +25,12 @@ public class ComplexDBPoolTest extends TestCase {
     
     protected void setUp() throws Exception {        
         super.setUp();
-        Init.initDB();
+        Init.startServer();
         String user = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant2", "");
     }
     
     protected void tearDown() throws Exception {
-        Init.stopDB();
+        Init.stopServer();
         super.tearDown();
     }
     

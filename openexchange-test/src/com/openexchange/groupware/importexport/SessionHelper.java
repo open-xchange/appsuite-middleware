@@ -74,9 +74,6 @@ import com.openexchange.sessiond.SessionObjectWrapper;
 public class SessionHelper {
 
 	public static SessionObject getSession() throws SQLException, AbstractOXException{
-		Init.initDB();
-		ContactConfig.init();
-		ContextStorage.init();
 		final UserStorage uStorage = UserStorage.getInstance(new ContextImpl(1));
 	    final int userId = uStorage.getUserId( Init.getAJAXProperty("login") );
 	    return SessionObjectWrapper.createSessionObject(userId, 1, "sessionhelper");

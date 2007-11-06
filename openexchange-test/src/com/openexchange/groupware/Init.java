@@ -1,19 +1,21 @@
 package com.openexchange.groupware;
 
+import com.openexchange.configuration.ConfigDB;
+import com.openexchange.configuration.SystemConfig;
+import com.openexchange.database.DatabaseInit;
+import com.openexchange.groupware.contexts.ContextInit;
+import com.openexchange.server.Starter;
+import com.openexchange.server.Initialization;
+import com.openexchange.sessiond.Sessiond;
+import com.openexchange.sessiond.SessiondConfigWrapper;
+import com.openexchange.sessiond.SessiondConnector;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-
-import com.openexchange.configuration.ConfigDB;
-import com.openexchange.configuration.SystemConfig;
-import com.openexchange.database.DatabaseInit;
-import com.openexchange.groupware.contexts.ContextInit;
-import com.openexchange.sessiond.Sessiond;
-import com.openexchange.sessiond.SessiondConfigWrapper;
-import com.openexchange.sessiond.SessiondConnector;
 
 /**
  * This class contains methods for initialising tests.
@@ -49,7 +51,10 @@ public final class Init {
 
 	private static String[] ajaxPropFiles;
 
-	public static void loadTestProperties() {
+    private static final List<Initialization> started = new ArrayList<Initialization>();
+    private static boolean running;
+
+    public static void loadTestProperties() {
 		if (!testPropertiesLoaded) {
 			testProps = new Properties();
 			try {
@@ -178,7 +183,68 @@ public final class Init {
 		return getTestProperties().getProperty(key);
 	}
 
-	public static void loadSystemProperties() throws AbstractOXException {
+
+    private static final Initialization[] inits = new Initialization[] {
+        /**
+         * Reads system.properties.
+         */
+        com.openexchange.configuration.SystemConfig.getInstance(),
+        /**
+         * Reads configdb.properties.
+         */
+        com.openexchange.configuration.ConfigDB.getInstance(),
+        /**
+         * Starts the monitoring component.
+         */
+        com.openexchange.monitoring.MonitoringInit.getInstance(),
+        /**
+         * Connection pools for ConfigDB and database assignments for contexts.
+         * Needs configured JCS.
+         */
+        com.openexchange.database.DatabaseInit.getInstance(),
+        /**
+         * Mail initialization
+         */
+        com.openexchange.mail.MailInitialization.getInstance(),
+        /**
+         * Infostore Configuration
+         */
+        com.openexchange.groupware.infostore.InfostoreConfig.getInstance(),
+        /**
+         * Attachment Configuration
+         */
+        com.openexchange.groupware.attach.AttachmentConfig.getInstance(),
+        /**
+         * User configuration init
+         */
+        com.openexchange.groupware.userconfiguration.UserConfigurationStorageInit.getInstance(),
+        /**
+         * Notification Configuration
+         */
+        com.openexchange.groupware.notify.NotificationConfig.getInstance()
+    };
+
+    public static void startServer() throws AbstractOXException {
+        if(running)
+            return;
+        running = true;
+        loadTestProperties();
+        final String propFileName = testProps.getProperty(
+                "openexchange.propfile");
+        System.setProperty("openexchange.propfile", propFileName); 
+        for(Initialization init : inits) {
+            init.start();
+            started.add(init);
+        }
+        GroupwareInit.init();
+    }
+
+    public static void stopServer() throws AbstractOXException {
+        //for(Initialization init: started) { init.stop(); }
+    }
+
+    @Deprecated
+    public static void loadSystemProperties() throws AbstractOXException {
 		if (!systemPropertiesLoaded) {
 			loadTestProperties();
             final String propFileName = testProps.getProperty(
@@ -189,7 +255,8 @@ public final class Init {
 		}
 	}
 
-	public synchronized static void initDB() throws AbstractOXException {
+    @Deprecated
+    public synchronized static void initDB() throws AbstractOXException {
 		if (!dbInitialized) {
 			loadSystemProperties();
 	        ConfigDB.getInstance().start();
@@ -198,7 +265,8 @@ public final class Init {
 		}
 	}
 
-	public synchronized static void stopDB() throws Exception {
+    @Deprecated
+    public synchronized static void stopDB() throws Exception {
 		if (dbInitialized) {
 			dbInitialized = false;
 			DatabaseInit.getInstance().stop();
@@ -206,6 +274,7 @@ public final class Init {
 		}
 	}
 
+    @Deprecated
     public synchronized static void initContext() throws AbstractOXException {
         if (!contextInitialized) {
             loadSystemProperties();
@@ -213,8 +282,9 @@ public final class Init {
             contextInitialized = true;
         }
     }
-    
-	public static void initSessiond() throws Exception {
+
+    @Deprecated
+    public static void initSessiond() throws Exception {
 		if (!sessiondInit) {
 			String propfile = SystemConfig.getProperty("SESSIONDPROPERTIES");
 
