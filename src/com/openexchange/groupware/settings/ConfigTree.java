@@ -243,7 +243,7 @@ public final class ConfigTree {
      * Initializes the configuration tree.
      * @throws SettingException if initializing doesn't work.
      */
-    public static void init() throws SettingException {
+    static void init() throws SettingException {
         tree = new Setting("", true);
         tree.setId(-1);
 
@@ -899,5 +899,10 @@ public final class ConfigTree {
         }
         
         readers = Collections.unmodifiableMap(tmp);
+    }
+
+    static void stop() {
+        readers = null;
+        tree = null;
     }
 }

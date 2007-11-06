@@ -47,36 +47,44 @@
  *
  */
 
-package com.openexchange.groupware;
+package com.openexchange.groupware.settings;
 
-import com.openexchange.event.EventInit;
-import com.openexchange.groupware.calendar.CalendarConfig;
-import com.openexchange.groupware.configuration.ParticipantConfig;
-import com.openexchange.push.udp.PushInit;
-import com.openexchange.sessiond.SessiondInit;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.server.Initialization;
 
 /**
- * This class contains the initialization for the groupware server.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class GroupwareInit {
+public final class ConfigTreeInit implements Initialization {
+
+    private static final ConfigTreeInit singleton = new ConfigTreeInit();
 
     /**
-     * Prevent instantiation
+     * Prevent instantiation.
      */
-    private GroupwareInit() {
+    private ConfigTreeInit() {
         super();
     }
 
     /**
-     * Method for initializing the groupware server.
-     * @throws AbstractOXException if initialization fails.
+     * @return the singleton instance.
      */
-    public static void init() throws AbstractOXException {
-        CalendarConfig.init();
-		SessiondInit.init();
-		EventInit.init();
-		PushInit.init();
-        ParticipantConfig.init();
+    public static final ConfigTreeInit getInstance() {
+        return singleton;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void start() throws SettingException {
+        ConfigTree.init();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void stop() {
+        ConfigTree.stop();
     }
 }
