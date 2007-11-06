@@ -93,6 +93,7 @@ public final class MailInitialization implements Initialization {
 	 * @see com.openexchange.server.Initialization#stop()
 	 */
 	public void stop() throws AbstractOXException {
+		MailConnection.shutdown();
 		MailCacheConfiguration.getInstance().stop();
 		MailPermissionInit.getInstance().stop();
 		GlobalConfigInit.getInstance().stop();

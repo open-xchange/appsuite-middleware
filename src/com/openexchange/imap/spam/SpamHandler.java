@@ -125,6 +125,9 @@ public abstract class SpamHandler {
 		if (initialized.get()) {
 			LOCK.lock();
 			try {
+				if (!initialized.get()) {
+					return;
+				}
 				instance = null;
 				initialized.set(false);
 			} finally {

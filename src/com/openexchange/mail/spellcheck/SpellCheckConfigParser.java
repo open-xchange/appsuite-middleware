@@ -52,7 +52,6 @@ package com.openexchange.mail.spellcheck;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.xml.sax.Attributes;
@@ -62,18 +61,18 @@ import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 
 /**
- * SpellCheckConfigParser
+ * {@link SpellCheckConfigParser}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  *
  */
-public class SpellCheckConfigParser {
+public final class SpellCheckConfigParser {
 
 	public SpellCheckConfigParser() {
 		super();
 	}
 	
-	final public SpellCheckConfig parseSpellCheckConfig(final String spellCheckConfigStr) throws Exception {
+	public SpellCheckConfig parseSpellCheckConfig(final String spellCheckConfigStr) throws Exception {
 		final XMLReader reader = createXMLReader();
 		final SpellCheckConfig retval = new SpellCheckConfig();
 		reader.setContentHandler(new SpellCheckConfigHandler(retval));
@@ -81,11 +80,8 @@ public class SpellCheckConfigParser {
 		return retval;
 	}
 
-	final private XMLReader createXMLReader() throws Exception {
-		final SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
-		final SAXParser saxParser = saxParserFactory.newSAXParser();
-		final XMLReader parser = saxParser.getXMLReader();
-		return parser;
+	private XMLReader createXMLReader() throws Exception {
+		return SAXParserFactory.newInstance().newSAXParser().getXMLReader();
 	}
 	
 	final private class SpellCheckConfigHandler extends DefaultHandler {

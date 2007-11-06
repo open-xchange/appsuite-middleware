@@ -65,10 +65,8 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.apache.jcs.JCS;
 import org.apache.jcs.access.exception.CacheException;
 
-import com.openexchange.api2.OXException;
 import com.openexchange.cache.CacheKey;
 import com.openexchange.cache.Configuration;
-import com.openexchange.configuration.ConfigurationInit;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException;
@@ -104,8 +102,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 	protected CachingUserSettingMailStorage() {
 		super();
 		try {
-			ConfigurationInit.init();
-			Configuration.load();
+			Configuration.getInstance().start();
 			cache = JCS.getInstance(CACHE_REGION_NAME);
 			cacheWriteLock = new ReentrantLock();
 			useCache = true;
@@ -138,12 +135,12 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 	 *            the context
 	 * @param writeConArg -
 	 *            the writeable conenction; may be <code>null</code>
-	 * @throws OXException
+	 * @throws UserConfigurationException
 	 *             if user's mail settings could not be saved
 	 */
 	@Override
 	public void saveUserSettingMail(final UserSettingMail usm, final int user, final Context ctx,
-			final Connection writeConArg) throws OXException {
+			final Connection writeConArg) throws UserConfigurationException {
 		try {
 			Connection writeCon = writeConArg;
 			boolean closeCon = false;
@@ -215,12 +212,12 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 	 *            the context
 	 * @param writeConArg
 	 *            the writeable connection; may be <code>null</code>
-	 * @throws OXException -
+	 * @throws UserConfigurationException -
 	 *             if deletion fails
 	 */
 	@Override
 	public void deleteUserSettingMail(final int user, final Context ctx, final Connection writeConArg)
-			throws OXException {
+			throws UserConfigurationException {
 		try {
 			Connection writeCon = writeConArg;
 			boolean closeWriteCon = false;
@@ -284,12 +281,12 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 	 *            the context
 	 * @param readConArg
 	 *            the readable connection
-	 * @throws OXException
+	 * @throws UserConfigurationException
 	 *             if loading fails
 	 */
 	@Override
 	public UserSettingMail loadUserSettingMail(final int user, final Context ctx, final Connection readConArg)
-			throws OXException {
+			throws UserConfigurationException {
 		try {
 			UserSettingMail usm = useCache ? (UserSettingMail) cache.get(new CacheKey(ctx, user)) : null;
 			if (null != usm) {
@@ -369,7 +366,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 	private static final String SQL_LOAD_SIGNATURES = "SELECT id, signature FROM user_setting_mail_signature WHERE cid = ? AND user = ?";
 
 	private void loadSignatures(final UserSettingMail usm, final int user, final Context ctx,
-			final Connection readConArg) throws OXException {
+			final Connection readConArg) throws UserConfigurationException {
 		try {
 			Connection readCon = readConArg;
 			boolean closeCon = false;
@@ -477,7 +474,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 	private static final String SQL_INSERT_SIGNATURE = "INSERT INTO user_setting_mail_signature (cid, user, id, signature) VALUES (?, ?, ?, ?)";
 
 	private boolean saveSignatures(final UserSettingMail usm, final int user, final Context ctx,
-			final Connection writeConArg) throws OXException {
+			final Connection writeConArg) throws UserConfigurationException {
 		try {
 			Connection writeCon = writeConArg;
 			boolean closeCon = false;
@@ -553,7 +550,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 	 * @see com.openexchange.mail.usersetting.UserSettingMailStorage#clearStorage()
 	 */
 	@Override
-	public void clearStorage() throws OXException {
+	public void clearStorage() throws UserConfigurationException {
 		if (useCache) {
 			/*
 			 * Put clone into cache
@@ -577,7 +574,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 	 *      com.openexchange.groupware.contexts.Context)
 	 */
 	@Override
-	public void removeUserSettingMail(final int user, final Context ctx) throws OXException {
+	public void removeUserSettingMail(final int user, final Context ctx) throws UserConfigurationException {
 		if (useCache) {
 			/*
 			 * Put clone into cache
@@ -591,6 +588,11 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 				cacheWriteLock.unlock();
 			}
 		}
+	}
+
+	@Override
+	public void shutdownStorage() {
+		Configuration.getInstance().freeCache(CACHE_REGION_NAME);
 	}
 
 }

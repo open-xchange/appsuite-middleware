@@ -78,16 +78,18 @@ public final class MailConnectionWatcher {
 
 	private static final ConcurrentMap<MailConnection, Long> mailConnections = new ConcurrentHashMap<MailConnection, Long>();
 
-	private static final Lock INIT_LOCK = new ReentrantLock();
+	private static final Lock LOCK = new ReentrantLock();
 
 	private static final AtomicBoolean initialized = new AtomicBoolean();
+
+	private static WatcherTask watcherTask;
 
 	/**
 	 * Initializes and starts mail connection watcher if not done, yet
 	 */
 	public static void init() {
 		if (!initialized.get()) {
-			INIT_LOCK.lock();
+			LOCK.lock();
 			try {
 				if (initialized.get()) {
 					return;
@@ -96,14 +98,40 @@ public final class MailConnectionWatcher {
 					/*
 					 * Start task
 					 */
-					ServerTimer.getTimer().schedule(new WatcherTask(), 1000, MailConfig.getWatcherFrequency());
+					watcherTask = new WatcherTask();
+					ServerTimer.getTimer().schedule(watcherTask, 1000, MailConfig.getWatcherFrequency());
 					initialized.set(true);
 					if (LOG.isInfoEnabled()) {
 						LOG.info("Mail connection watcher successfully established and ready for tracing");
 					}
 				}
 			} finally {
-				INIT_LOCK.unlock();
+				LOCK.unlock();
+			}
+		}
+	}
+
+	/**
+	 * Stops mail connection watcher if currently running
+	 */
+	public static void stop() {
+		if (initialized.get()) {
+			LOCK.lock();
+			try {
+				if (!initialized.get()) {
+					return;
+				}
+				if (MailConfig.isWatcherEnabled()) {
+					watcherTask.cancel();
+					ServerTimer.getTimer().purge();
+					mailConnections.clear();
+					initialized.set(false);
+					if (LOG.isInfoEnabled()) {
+						LOG.info("Mail connection watcher successfully stopped");
+					}
+				}
+			} finally {
+				LOCK.unlock();
 			}
 		}
 	}
@@ -126,7 +154,8 @@ public final class MailConnectionWatcher {
 	 */
 	public static void addMailConnection(final MailConnection mailConnection) {
 		if (!initialized.get()) {
-			init();
+			LOG.error("Mail connection watcher is not running. Aborting addMailConnection()");
+			return;
 		}
 		if (!mailConnections.containsKey(mailConnection)) {
 			mailConnections.put(mailConnection, Long.valueOf(System.currentTimeMillis()));
@@ -140,6 +169,10 @@ public final class MailConnectionWatcher {
 	 *            The mail connection to remove
 	 */
 	public static void removeMailConnection(final MailConnection mailConnection) {
+		if (!initialized.get()) {
+			LOG.error("Mail connection watcher is not running. Aborting removeMailConnection()");
+			return;
+		}
 		mailConnections.remove(mailConnection);
 	}
 

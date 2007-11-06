@@ -61,6 +61,7 @@ import com.openexchange.mail.cache.MailConnectionCache;
 import com.openexchange.mail.config.GlobalMailConfig;
 import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.permission.MailPermission;
+import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.watcher.MailConnectionWatcher;
 import com.openexchange.sessiond.SessionObject;
 
@@ -145,6 +146,7 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 	 */
 	static void startup() throws MailException {
 		internalInstance.startupInternal();
+		MailConnectionWatcher.init();
 	}
 
 	/**
@@ -153,6 +155,8 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 	 * @throws MailException
 	 */
 	static void shutdown() throws MailException {
+		UserSettingMailStorage.releaseInstance();
+		MailConnectionWatcher.stop();
 		internalInstance.shutdownInternal();
 	}
 

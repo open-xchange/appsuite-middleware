@@ -54,12 +54,12 @@ import java.util.Iterator;
 import java.util.Map;
 
 /**
- * SpellCheckConfig
+ * {@link SpellCheckConfig}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public class SpellCheckConfig {
+public final class SpellCheckConfig {
 
 	private boolean enabled;
 
