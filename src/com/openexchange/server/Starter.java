@@ -1,4 +1,4 @@
-/*
+package com.openexchange.server;/*
  *
  *    OPEN-XCHANGE legal information
  *
@@ -62,7 +62,7 @@ import com.openexchange.server.Version;
 import com.openexchange.tools.servlet.http.HttpServletManager;
 
 /**
- * Starter
+ * com.openexchange.server.Starter
  * 
  * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
  */
