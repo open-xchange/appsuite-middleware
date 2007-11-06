@@ -1632,6 +1632,26 @@ class CalendarMySQL implements CalendarSqlImp {
                 }
             }
             CalendarCommonCollection.purgeExceptionFieldsFromObject(cdao);
+        } else if (rec_action == CalendarRecurringCollection.RECURRING_EXCEPTION_DELETE_EXISTING) {
+        	java.util.Date delete_exception_dates[] = cdao.getDeleteException();
+        	ArrayList<Integer> delete_exceptions = new ArrayList<Integer>();
+            final RecurringResults rrs  = CalendarRecurringCollection.calculateRecurring(edao, 0, 0, 0, 999, true);
+            if (rrs != null) {
+            	for (int a  = 0; a < delete_exception_dates.length; a++) {            	
+            		final int x = rrs.getPositionByLong(delete_exception_dates[a].getTime());
+            		delete_exceptions.add(x);
+            	}
+            	if (!delete_exceptions.isEmpty()) {
+            		final Object oids[] = delete_exceptions.toArray();
+            		ArrayList<Integer> real_ids = getDeletedExceptionList(null, so.getContext(), edao.getRecurrenceID(), StringCollection.getSqlInString(oids));
+            		final Object oids_to_delete[] = real_ids.toArray();
+            		deleteAllRecurringExceptions(StringCollection.getSqlInString(oids_to_delete), so, writecon);
+                    for (int a = 0; a < delete_exceptions.size(); a++) {
+                        triggerDeleteEvent(delete_exceptions.get(a), inFolder, so, null, null);
+                    }
+            	}
+            }
+            CalendarCommonCollection.purgeExceptionFieldsFromObject(cdao);            
         } else if (rec_action == CalendarRecurringCollection.RECURRING_CREATE_EXCEPTION) {
             // Because the GUI only sends changed fields, we have to create a merged object
             // from cdao and edao and then we force an insert!
@@ -3187,6 +3207,47 @@ class CalendarMySQL implements CalendarSqlImp {
         }
         return al;
     }
+
+    final ArrayList<Integer> getDeletedExceptionList(Connection readcon, final Context c, final int rec_id, final String sqlin) throws OXException {
+        boolean close_read = false;
+        ArrayList<Integer> al = null;
+        PreparedStatement prep = null;
+        ResultSet rs = null;
+        try {
+            if (readcon == null) {
+                readcon = DBPool.pickup(c);
+                close_read = true;
+            }
+            al = new ArrayList<Integer>(8);
+            final StringBuilder query = new StringBuilder(128);
+            query.append("select intfield01 FROM prg_dates pd WHERE intfield02 = ");
+            query.append(rec_id);
+            query.append(" AND cid = ");
+            query.append(c.getContextId());
+            query.append(" AND intfield01 != intfield02 AND intfield05 IN ");
+            query.append(sqlin);
+            prep = getPreparedStatement(readcon, query.toString());
+            rs = getResultSet(prep);
+            while (rs.next()) {
+                al.add(Integer.valueOf(rs.getInt(1)));
+            }
+        } catch(final SQLException sqle) {
+            throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
+        } catch(final DBPoolingException dbpe) {
+            throw new OXException(dbpe);
+        } finally {
+            CalendarCommonCollection.closeResultSet(rs);
+            CalendarCommonCollection.closePreparedStatement(prep);
+            if (close_read && readcon != null) {
+                try {
+                    DBPool.push(c, readcon);
+                } catch (final DBPoolingException dbpe) {
+                    LOG.error("DBPoolingException:getDeletedExceptionList (push) ", dbpe);
+                }
+            }
+        }
+        return al;
+    }    
     
     private final void deleteAllRecurringExceptions(final String inoids, final SessionObject so, final Connection writecon)  throws SQLException, OXException {
         PreparedStatement del_rights = null;

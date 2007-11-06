@@ -83,6 +83,7 @@ public final class CalendarRecurringCollection {
     public static final int RECURRING_FULL_DELETE = 4;
     public static final int RECURRING_CREATE_EXCEPTION = 5;
     public static final int CHANGE_RECURRING_TYPE = 6;
+    public static final int RECURRING_EXCEPTION_DELETE_EXISTING = 7;
     
     static int MAXTC = 999;
     private static int NO_END_YEARS = 4;
@@ -285,7 +286,7 @@ public final class CalendarRecurringCollection {
             }
             if (cdao.containsDeleteExceptions() && edao.containsChangeExceptions()) {
             		if (CalendarCommonCollection.checkIfArrayKeyExistInArray(cdao.getDeleteException(), edao.getChangeException())) {
-            			rada = RECURRING_EXCEPTION_DELETE;
+            			rada = RECURRING_EXCEPTION_DELETE_EXISTING;
             		}
             }
         }
