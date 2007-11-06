@@ -57,8 +57,6 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.BackendServicesInit;
 import com.openexchange.groupware.GroupwareInit;
-import com.openexchange.server.Initialization;
-import com.openexchange.server.Version;
 import com.openexchange.tools.servlet.http.HttpServletManager;
 
 /**
@@ -86,8 +84,11 @@ public class Starter implements Initialization {
          */
         com.openexchange.monitoring.MonitoringInit.getInstance(),
         /**
+         * Sets the caching system JCS up.
+         */
+        com.openexchange.cache.Configuration.getInstance(),
+        /**
          * Connection pools for ConfigDB and database assignments for contexts.
-         * Needs configured JCS.
          */
         com.openexchange.database.DatabaseInit.getInstance(),
         /**
@@ -125,6 +126,14 @@ public class Starter implements Initialization {
          * Reads configdb.properties.
          */
         com.openexchange.configuration.ConfigDB.getInstance(),
+        /**
+         * Sets the caching system JCS up.
+         */
+        com.openexchange.cache.Configuration.getInstance(),
+        /**
+         * Connection pools for ConfigDB and database assignments for contexts.
+         */
+        com.openexchange.database.DatabaseInit.getInstance(),
         /**
          * Notification Configuration
          */
