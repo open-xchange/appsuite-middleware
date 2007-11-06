@@ -117,7 +117,7 @@ public enum ContactField{
 	CITY_OTHER (539 , "field39" , "CITY_OTHER" , "City other" , "city_other"),
 	STATE_OTHER (598 , "field40" , "STATE_OTHER" , "State other" , "state_other"),
 	COUNTRY_OTHER (541 , "field41" , "COUNTRY_OTHER" , "Country other" , "country_other"),
-	TELEPHONE_ASSISTANT (568 , "field42" , "TELEPHONE_ASSISTANT" , "Telephone assostant" , "telephone_assistant"),
+	TELEPHONE_ASSISTANT (568 , "field42" , "TELEPHONE_ASSISTANT" , "Telephone assistant" , "telephone_assistant"),
 	TELEPHONE_BUSINESS1 (542 , "field43" , "TELEPHONE_BUSINESS1" , "Telephone business 1" , "telephone_business1"),
 	TELEPHONE_BUSINESS2 (543 , "field44" , "TELEPHONE_BUSINESS2" , "Telephone business 2" , "telephone_business2"),
 	FAX_BUSINESS (544 , "field45" , "FAX_BUSINESS" , "FAX business" , "fax_business"),
