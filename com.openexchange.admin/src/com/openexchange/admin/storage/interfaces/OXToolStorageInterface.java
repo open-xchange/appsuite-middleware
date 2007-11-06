@@ -385,6 +385,15 @@ public abstract class OXToolStorageInterface {
     
     public abstract boolean isContextEnabled(final Context ctx) throws StorageException;
     
+    /**
+     * This method checks if the display name of the given user object is already used in for a system user. This method doesn't check
+     * for display names in the contacts of the users
+     * 
+     * @param ctx
+     * @param usr
+     * @return
+     * @throws StorageException
+     */
     public abstract boolean existsDisplayName(final Context ctx, final User usr) throws StorageException;
     
     public abstract boolean isMasterDatabase(final int database_id) throws StorageException;

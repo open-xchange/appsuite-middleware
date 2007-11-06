@@ -72,6 +72,7 @@ import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.sqlStorage.OXToolSQLStorage;
 import com.openexchange.admin.tools.AdminCache;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.ContextImpl;
 import com.openexchange.groupware.update.Updater;
 import com.openexchange.groupware.update.exception.UpdateException;
@@ -237,9 +238,10 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         ResultSet rs = null;
         try {
             con = cache.getWRITEConnectionForContext(ctx.getId());
-            ps = con.prepareStatement("SELECT field01 FROM prg_contacts WHERE cid = ? AND field01 = ?;");
+            ps = con.prepareStatement("SELECT field01 FROM prg_contacts WHERE cid = ? AND field01 = ? AND fid = ?;");
             ps.setInt(1, ctx.getId());
             ps.setString(2, usr.getDisplay_name());
+            ps.setInt(3, FolderObject.SYSTEM_LDAP_FOLDER_ID);
             rs = ps.executeQuery();
             return rs.next();
         } catch (final SQLException e) {
