@@ -61,9 +61,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import com.openexchange.mail.MailConnection;
-import com.openexchange.mail.MailException;
 import com.openexchange.mail.config.MailConfig;
-import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.server.ServerTimer;
 
 /**
@@ -104,8 +102,6 @@ public final class MailConnectionWatcher {
 						LOG.info("Mail connection watcher successfully established and ready for tracing");
 					}
 				}
-			} catch (final MailConfigException e) {
-				LOG.error(e.getMessage(), e);
 			} finally {
 				INIT_LOCK.unlock();
 			}
@@ -161,49 +157,45 @@ public final class MailConnectionWatcher {
 		 */
 		@Override
 		public void run() {
-			try {
-				final StringBuilder sb = new StringBuilder(512);
-				final List<MailConnection> exceededCons = new ArrayList<MailConnection>();
-				for (final Iterator<Entry<MailConnection, Long>> iter = mailConnections.entrySet().iterator(); iter
-						.hasNext();) {
-					final Entry<MailConnection, Long> e = iter.next();
-					if (!e.getKey().isConnectedUnsafe()) {
-						/*
-						 * Remove closed connection from watcher
-						 */
-						iter.remove();
-					} else {
-						if ((System.currentTimeMillis() - e.getValue().longValue()) > MailConfig.getWatcherTime()) {
-							sb.setLength(0);
-							LOG.info(sb.append(
-									INFO_PREFIX.replaceFirst("#N#", String.valueOf(MailConfig.getWatcherTime())))
-									.append(e.getKey().getTrace()).toString());
-							exceededCons.add(e.getKey());
-						}
-					}
-				}
-				if (!exceededCons.isEmpty()) {
+			final StringBuilder sb = new StringBuilder(512);
+			final List<MailConnection> exceededCons = new ArrayList<MailConnection>();
+			for (final Iterator<Entry<MailConnection, Long>> iter = mailConnections.entrySet().iterator(); iter
+					.hasNext();) {
+				final Entry<MailConnection, Long> e = iter.next();
+				if (!e.getKey().isConnectedUnsafe()) {
 					/*
-					 * Remove/Close exceeded connections
+					 * Remove closed connection from watcher
 					 */
-					final int n = exceededCons.size();
-					for (int i = 0; i < n; i++) {
-						final MailConnection mailConnection = exceededCons.get(i);
-						try {
-							if (MailConfig.isWatcherShallClose()) {
-								sb.setLength(0);
-								sb.append(INFO_PREFIX2).append(mailConnection.toString());
-								mailConnection.close(false);
-								sb.append(INFO_PREFIX3);
-								LOG.info(sb.toString());
-							}
-						} finally {
-							mailConnections.remove(mailConnection);
-						}
+					iter.remove();
+				} else {
+					if ((System.currentTimeMillis() - e.getValue().longValue()) > MailConfig.getWatcherTime()) {
+						sb.setLength(0);
+						LOG.info(sb
+								.append(INFO_PREFIX.replaceFirst("#N#", String.valueOf(MailConfig.getWatcherTime())))
+								.append(e.getKey().getTrace()).toString());
+						exceededCons.add(e.getKey());
 					}
 				}
-			} catch (final MailException e) {
-				LOG.error(e.getLocalizedMessage(), e);
+			}
+			if (!exceededCons.isEmpty()) {
+				/*
+				 * Remove/Close exceeded connections
+				 */
+				final int n = exceededCons.size();
+				for (int i = 0; i < n; i++) {
+					final MailConnection mailConnection = exceededCons.get(i);
+					try {
+						if (MailConfig.isWatcherShallClose()) {
+							sb.setLength(0);
+							sb.append(INFO_PREFIX2).append(mailConnection.toString());
+							mailConnection.close(false);
+							sb.append(INFO_PREFIX3);
+							LOG.info(sb.toString());
+						}
+					} finally {
+						mailConnections.remove(mailConnection);
+					}
+				}
 			}
 		}
 	}

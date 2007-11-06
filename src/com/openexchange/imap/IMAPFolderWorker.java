@@ -64,7 +64,6 @@ import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.cache.MailMessageCache;
-import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MIMESessionPropertyNames;
 import com.openexchange.mail.usersetting.UserSettingMail;
@@ -250,11 +249,6 @@ public abstract class IMAPFolderWorker {
 			}
 			return;
 		} catch (final MessagingException e) {
-			if (LOG.isErrorEnabled()) {
-				LOG.error(new StringBuilder(ERROR_KEEP_SEEN).append(e.getMessage()).toString(), e);
-			}
-			return;
-		} catch (final MailConfigException e) {
 			if (LOG.isErrorEnabled()) {
 				LOG.error(new StringBuilder(ERROR_KEEP_SEEN).append(e.getMessage()).toString(), e);
 			}

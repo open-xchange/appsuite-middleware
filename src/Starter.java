@@ -93,7 +93,7 @@ public class Starter implements Initialization {
         /**
          * Mail initialization
          */
-        com.openexchange.mail.MailConnectionInit.getInstance(),
+        com.openexchange.mail.MailInitialization.getInstance(),
         /**
          * Infostore Configuration
          */

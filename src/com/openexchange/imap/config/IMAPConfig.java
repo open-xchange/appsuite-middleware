@@ -49,23 +49,15 @@
 
 package com.openexchange.imap.config;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.Map;
-import java.util.Properties;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.mail.MessagingException;
 
-import com.openexchange.configuration.SystemConfig;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.imap.IMAPCapabilities;
+import com.openexchange.mail.config.GlobalMailConfig;
 import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.sessiond.SessionObject;
@@ -78,54 +70,6 @@ import com.sun.mail.imap.IMAPStore;
  * 
  */
 public final class IMAPConfig extends MailConfig {
-
-	private static final String STR_TRUE = "true";
-
-	private static final String STR_FALSE = "false";
-
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(IMAPConfig.class);
-
-	private static final String PROPERTYNAME = "IMAPProperties";
-
-	private static final Lock GLOBAL_PROP_LOCK = new ReentrantLock();
-
-	private static String imapPropFile;
-
-	private static Properties imapProperties;
-
-	private static boolean imapPropsLoaded;
-
-	private static boolean globalImapPropsLoaded;
-
-	/*
-	 * Fields for global properties
-	 */
-	private static boolean imapSort;
-
-	private static boolean imapSearch;
-
-	private static boolean fastFetch;
-
-	private static boolean imapsEnabled;
-
-	private static int imapsPort;
-
-	private static BoolCapVal supportsACLs;
-
-	private static int imapTimeout;
-
-	private static int imapConnectionTimeout;
-
-	private static int imapConnectionIdleTime;
-
-	private static String spamHandlerClass;
-
-	private static String imapAuthEnc;
-
-	private static String user2AclImpl;
-
-	private static Map<String, Boolean> newACLExtMap = new ConcurrentHashMap<String, Boolean>();
 
 	/*
 	 * User-specific fields
@@ -157,14 +101,6 @@ public final class IMAPConfig extends MailConfig {
 	public static IMAPConfig getImapConfig(final SessionObject session) throws MailConfigException {
 		final IMAPConfig imapConf = new IMAPConfig();
 		fillLoginAndPassword(imapConf, session);
-		/*
-		 * Check IMAP prop file
-		 */
-		checkImapPropFile();
-		/*
-		 * Load global IMAP properties if not done, yet
-		 */
-		loadGlobalImapProperties(false);
 		/*
 		 * Fetch user object and create its IMAP properties
 		 */
@@ -219,293 +155,48 @@ public final class IMAPConfig extends MailConfig {
 	}
 
 	/**
-	 * Checks if the IMAP properties are loaded. The IMAP properties are loaded
-	 * if not done, yet.
-	 * 
-	 * @throws MailConfigException
-	 *             If IMAP properties are not defined or cannot be read from
-	 *             file
-	 */
-	private static void checkImapPropFile() throws MailConfigException {
-		checkMailPropFile();
-		/*
-		 * Load mail properties in a thread-safe manner
-		 */
-		if (!imapPropsLoaded) {
-			PROP_LOCK.lock();
-			try {
-				if (imapPropFile == null && (imapPropFile = SystemConfig.getProperty(PROPERTYNAME)) == null) {
-					throw new MailConfigException(new StringBuilder(50).append("Property \"").append(PROPERTYNAME)
-							.append("\" not defined in system.properties").toString());
-				}
-				if (imapProperties == null) {
-					loadImapProps();
-					imapPropsLoaded = true;
-				}
-			} finally {
-				PROP_LOCK.unlock();
-			}
-		}
-	}
-
-	private static void loadImapProps() throws MailConfigException {
-		imapProperties = new Properties();
-		FileInputStream fis = null;
-		try {
-			fis = new FileInputStream(new File(imapPropFile));
-			imapProperties.load(fis);
-			fis.close();
-			fis = null;
-		} catch (final FileNotFoundException e) {
-			imapProperties = null;
-			throw new MailConfigException(new StringBuilder(256).append("IMAP properties not found at location: ")
-					.append(imapPropFile).toString(), e);
-		} catch (final IOException e) {
-			imapProperties = null;
-			throw new MailConfigException(new StringBuilder(256).append(
-					"I/O error while reading IMAP properties from file \"").append(imapPropFile).append("\": ").append(
-					e.getMessage()).toString(), e);
-		} finally {
-			/*
-			 * Close FileInputStream
-			 */
-			if (fis != null) {
-				try {
-					fis.close();
-				} catch (final IOException e) {
-					LOG.error(e.getMessage(), e);
-				}
-			}
-		}
-	}
-
-	/**
-	 * Gets a copy of IMAP properties
-	 * 
-	 * @return A copy of IMAP properties
-	 * @throws MailConfigException
-	 *             If IMAP properties could not be checked
-	 */
-	public static Properties getImapProperties() throws MailConfigException {
-		checkImapPropFile();
-		final Properties retval = new Properties();
-		retval.putAll(getProperties());
-		retval.putAll((Properties) imapProperties.clone());
-		return retval;
-	}
-
-	/**
-	 * Loads global mail properties
-	 * 
-	 * @throws MailConfigException
-	 *             If gloabal mail properties cannot be loaded
-	 */
-	public static void loadGlobalImapProperties() throws MailConfigException {
-		loadGlobalImapProperties(true);
-	}
-
-	/**
-	 * Loads global mail properties
-	 * 
-	 * @param checkPropFile
-	 *            <code>true</code> to check for mail properties file;
-	 *            otherwise <code>false</code>
-	 * @throws MailConfigException
-	 *             If gloabal mail properties cannot be loaded
-	 */
-	private static void loadGlobalImapProperties(final boolean checkPropFile) throws MailConfigException {
-		loadGlobalMailProperties(checkPropFile);
-		if (!globalImapPropsLoaded) {
-			GLOBAL_PROP_LOCK.lock();
-			try {
-				if (globalImapPropsLoaded) {
-					return;
-				}
-				if (checkPropFile) {
-					checkImapPropFile();
-				}
-				final StringBuilder logBuilder = new StringBuilder(1024);
-				logBuilder.append("\nLoading global IMAP properties...\n");
-
-				{
-					final String imapSortStr = imapProperties.getProperty("imapSort", "application").trim();
-					imapSort = "imap".equalsIgnoreCase(imapSortStr);
-					logBuilder.append("\tIMAP-Sort: ").append(imapSort).append('\n');
-				}
-
-				{
-					final String imapSearchStr = imapProperties.getProperty("imapSearch", "imap").trim();
-					imapSearch = "imap".equalsIgnoreCase(imapSearchStr);
-					logBuilder.append("\tIMAP-Search: ").append(imapSearch).append('\n');
-				}
-
-				{
-					final String fastFetchStr = imapProperties.getProperty("imapFastFetch", STR_TRUE).trim();
-					fastFetch = Boolean.parseBoolean(fastFetchStr);
-					logBuilder.append("\tFast Fetch Enabled: ").append(fastFetch).append('\n');
-				}
-
-				{
-					final String imapSecStr = imapProperties.getProperty("imaps", STR_FALSE).trim();
-					imapsEnabled = Boolean.parseBoolean(imapSecStr);
-					logBuilder.append("\tIMAP/S enabled: ").append(imapsEnabled).append('\n');
-				}
-
-				{
-					final String imapSecPortStr = imapProperties.getProperty("imapsPort", "993").trim();
-					try {
-						imapsPort = Integer.parseInt(imapSecPortStr);
-						logBuilder.append("\tIMAP/S port: ").append(imapsPort).append('\n');
-					} catch (final NumberFormatException e) {
-						imapsPort = 993;
-						logBuilder.append("\tIMAP/S port: Invalid value \"").append(imapSecPortStr).append(
-								"\". Setting to fallback: ").append(imapsPort).append('\n');
-					}
-				}
-
-				{
-					final String supportsACLsStr = imapProperties.getProperty("imapSupportsACL", STR_FALSE).trim();
-					supportsACLs = BoolCapVal.parseBoolCapVal(supportsACLsStr);
-					logBuilder.append("\tSupport ACLs: ").append(supportsACLs).append('\n');
-				}
-
-				{
-					final String imapTimeoutStr = imapProperties.getProperty("imapTimeout", "0").trim();
-					try {
-						imapTimeout = Integer.parseInt(imapTimeoutStr);
-						logBuilder.append("\tIMAP Timeout: ").append(imapTimeout).append('\n');
-					} catch (final NumberFormatException e) {
-						imapTimeout = 0;
-						logBuilder.append("\tIMAP Timeout: Invalid value \"").append(imapTimeoutStr).append(
-								"\". Setting to fallback: ").append(imapTimeout).append('\n');
-					}
-				}
-
-				{
-					final String imapConTimeoutStr = imapProperties.getProperty("imapConnectionTimeout", "0").trim();
-					try {
-						imapConnectionTimeout = Integer.parseInt(imapConTimeoutStr);
-						logBuilder.append("\tIMAP Connection Timeout: ").append(imapConnectionTimeout).append('\n');
-					} catch (final NumberFormatException e) {
-						imapConnectionTimeout = 0;
-						logBuilder.append("\tIMAP Connection Timeout: Invalid value \"").append(imapConTimeoutStr)
-								.append("\". Setting to fallback: ").append(imapConnectionTimeout).append('\n');
-					}
-				}
-
-				{
-					final String maxConIdleTime = imapProperties.getProperty("maxIMAPConnectionIdleTime", "60000")
-							.trim();
-					try {
-						imapConnectionIdleTime = Integer.parseInt(maxConIdleTime);
-						logBuilder.append("\tMax IMAP Connection Idle Time: ").append(imapConnectionIdleTime).append(
-								'\n');
-					} catch (final NumberFormatException e) {
-						imapConnectionIdleTime = 60000;
-						logBuilder.append("\tMax IMAP Connection Idle Time: Invalid value \"").append(maxConIdleTime)
-								.append("\". Setting to fallback: ").append(imapConnectionIdleTime).append('\n');
-					}
-				}
-
-				{
-					spamHandlerClass = imapProperties.getProperty("spamHandlerClass",
-							"com.openexchange.mail.imap.spam.SpamAssassinSpamHandler").trim();
-					logBuilder.append("\tSpam Handler Class: ").append(spamHandlerClass).append('\n');
-				}
-
-				{
-					final String imapAuthEncStr = imapProperties.getProperty("imapAuthEnc", "UTF-8").trim();
-					if (Charset.isSupported(imapAuthEncStr)) {
-						imapAuthEnc = imapAuthEncStr;
-						logBuilder.append("\tAuthentication Encoding: ").append(imapAuthEnc).append('\n');
-					} else {
-						imapAuthEnc = "UTF-8";
-						logBuilder.append("\tAuthentication Encoding: Unsupported charset \"").append(imapAuthEncStr)
-								.append("\". Setting to fallback: ").append(imapAuthEnc).append('\n');
-					}
-				}
-
-				{
-					user2AclImpl = imapProperties.getProperty("User2ACLImpl");
-					if (null != user2AclImpl) {
-						user2AclImpl.trim();
-					}
-				}
-
-				/*
-				 * Switch flag
-				 */
-				globalImapPropsLoaded = true;
-				logBuilder.append("Global IMAP properties successfully loaded!");
-				if (LOG.isInfoEnabled()) {
-					LOG.info(logBuilder.toString());
-				}
-			} finally {
-				GLOBAL_PROP_LOCK.unlock();
-			}
-		}
-	}
-
-	/**
-	 * @return <code>true</code> if global IMAP properties have already been
-	 *         loaded; otherwise <code>false</code>
-	 */
-	public static boolean isGlobalImapPropsLoaded() {
-		return globalImapPropsLoaded;
-	}
-
-	/**
 	 * Gets the fastFetch
 	 * 
 	 * @return the fastFetch
-	 * @throws MailConfigException
 	 */
-	public static boolean isFastFetch() throws MailConfigException {
-		loadGlobalImapProperties();
-		return fastFetch;
+	public static boolean isFastFetch() {
+		return ((GlobalIMAPConfig) GlobalMailConfig.getInstance()).isFastFetch();
 	}
 
 	/**
 	 * Gets the imapAuthEnc
 	 * 
 	 * @return the imapAuthEnc
-	 * @throws MailConfigException
 	 */
-	public static String getImapAuthEnc() throws MailConfigException {
-		loadGlobalImapProperties();
-		return imapAuthEnc;
+	public static String getImapAuthEnc() {
+		return ((GlobalIMAPConfig) GlobalMailConfig.getInstance()).getImapAuthEnc();
 	}
 
 	/**
 	 * Gets the imapConnectionIdleTime
 	 * 
 	 * @return the imapConnectionIdleTime
-	 * @throws MailConfigException
 	 */
-	public static int getImapConnectionIdleTime() throws MailConfigException {
-		loadGlobalImapProperties();
-		return imapConnectionIdleTime;
+	public static int getImapConnectionIdleTime() {
+		return ((GlobalIMAPConfig) GlobalMailConfig.getInstance()).getImapConnectionIdleTime();
 	}
 
 	/**
 	 * Gets the imapConnectionTimeout
 	 * 
 	 * @return the imapConnectionTimeout
-	 * @throws MailConfigException
 	 */
-	public static int getImapConnectionTimeout() throws MailConfigException {
-		loadGlobalImapProperties();
-		return imapConnectionTimeout;
+	public static int getImapConnectionTimeout() {
+		return ((GlobalIMAPConfig) GlobalMailConfig.getInstance()).getImapConnectionTimeout();
 	}
 
 	/**
 	 * Gets the imapSearch
 	 * 
 	 * @return the imapSearch
-	 * @throws MailConfigException
 	 */
-	public boolean isImapSearch() throws MailConfigException {
-		loadGlobalImapProperties();
+	public boolean isImapSearch() {
+		final boolean imapSearch = ((GlobalIMAPConfig) GlobalMailConfig.getInstance()).isImapSearch();
 		if (capabilitiesLoaded.get()) {
 			return (imapSearch && (imapCapabilities.hasIMAP4rev1() || imapCapabilities.hasIMAP4()));
 		}
@@ -516,21 +207,18 @@ public final class IMAPConfig extends MailConfig {
 	 * Gets the imapsEnabled
 	 * 
 	 * @return the imapsEnabled
-	 * @throws MailConfigException
 	 */
-	public static boolean isImapsEnabled() throws MailConfigException {
-		loadGlobalImapProperties();
-		return imapsEnabled;
+	public static boolean isImapsEnabled() {
+		return ((GlobalIMAPConfig) GlobalMailConfig.getInstance()).isImapsEnabled();
 	}
 
 	/**
 	 * Gets the imapSort
 	 * 
 	 * @return the imapSort
-	 * @throws MailConfigException
 	 */
-	public boolean isImapSort() throws MailConfigException {
-		loadGlobalImapProperties();
+	public boolean isImapSort() {
+		final boolean imapSort = ((GlobalIMAPConfig) GlobalMailConfig.getInstance()).isImapSort();
 		if (capabilitiesLoaded.get()) {
 			return (imapSort && imapCapabilities.hasSort());
 		}
@@ -541,55 +229,46 @@ public final class IMAPConfig extends MailConfig {
 	 * Gets the imapsPort
 	 * 
 	 * @return the imapsPort
-	 * @throws MailConfigException
 	 */
-	public static int getImapsPort() throws MailConfigException {
-		loadGlobalImapProperties();
-		return imapsPort;
+	public static int getImapsPort() {
+		return ((GlobalIMAPConfig) GlobalMailConfig.getInstance()).getImapsPort();
 	}
 
 	/**
 	 * Gets the imapTimeout
 	 * 
 	 * @return the imapTimeout
-	 * @throws MailConfigException
 	 */
-	public static int getImapTimeout() throws MailConfigException {
-		loadGlobalImapProperties();
-		return imapTimeout;
+	public static int getImapTimeout() {
+		return ((GlobalIMAPConfig) GlobalMailConfig.getInstance()).getImapTimeout();
 	}
 
 	/**
 	 * Gets the spamHandlerClass
 	 * 
 	 * @return the spamHandlerClass
-	 * @throws MailConfigException
 	 */
-	public static String getSpamHandlerClass() throws MailConfigException {
-		loadGlobalImapProperties();
-		return spamHandlerClass;
+	public static String getSpamHandlerClass() {
+		return ((GlobalIMAPConfig) GlobalMailConfig.getInstance()).getSpamHandlerClass();
 	}
 
 	/**
 	 * Gets the global supportsACLs
 	 * 
 	 * @return the global supportsACLs
-	 * @throws MailConfigException
 	 */
-	public static boolean isSupportsACLsConfig() throws MailConfigException {
-		loadGlobalImapProperties();
-		return BoolCapVal.TRUE.equals(supportsACLs) ? true : false;
+	public static boolean isSupportsACLsConfig() {
+		return BoolCapVal.TRUE.equals(((GlobalIMAPConfig) GlobalMailConfig.getInstance()).getSupportsACLs()) ? true
+				: false;
 	}
 
 	/**
 	 * Gets the user2acl implementation's canonical class name
 	 * 
 	 * @return The user2acl implementation's canonical class name
-	 * @throws MailConfigException
 	 */
-	public static String getUser2AclImpl() throws MailConfigException {
-		loadGlobalImapProperties();
-		return user2AclImpl;
+	public static String getUser2AclImpl() {
+		return ((GlobalIMAPConfig) GlobalMailConfig.getInstance()).getUser2AclImpl();
 	}
 
 	/**
@@ -602,7 +281,10 @@ public final class IMAPConfig extends MailConfig {
 	 *         server; otherwise <code>false</code>
 	 */
 	public static boolean hasNewACLExt(final String imapServer) {
-		return newACLExtMap.containsKey(imapServer) ? newACLExtMap.get(imapServer).booleanValue() : false;
+		if (((GlobalIMAPConfig) GlobalMailConfig.getInstance()).getNewACLExtMap().containsKey(imapServer)) {
+			return ((GlobalIMAPConfig) GlobalMailConfig.getInstance()).getNewACLExtMap().get(imapServer).booleanValue();
+		}
+		return false;
 	}
 
 	/**
@@ -615,7 +297,8 @@ public final class IMAPConfig extends MailConfig {
 	 *            Whether newer ACL extension is supported or not
 	 */
 	public static void setNewACLExt(final String imapServer, final boolean newACLExt) {
-		newACLExtMap.put(imapServer, Boolean.valueOf(newACLExt));
+		((GlobalIMAPConfig) GlobalMailConfig.getInstance()).getNewACLExtMap().put(imapServer,
+				Boolean.valueOf(newACLExt));
 	}
 
 	/**
@@ -663,12 +346,7 @@ public final class IMAPConfig extends MailConfig {
 				imapCaps.setIMAP4(imapStore.hasCapability(IMAPCapabilities.CAP_IMAP4));
 				imapCaps.setIMAP4rev1(imapStore.hasCapability(IMAPCapabilities.CAP_IMAP4_REV1));
 				imapCaps.setUIDPlus(imapStore.hasCapability(IMAPCapabilities.CAP_UIDPLUS));
-				try {
-					imapCaps.setHasSubscription(!IMAPConfig.isIgnoreSubscription());
-				} catch (final MailConfigException e) {
-					LOG.error(e.getMessage(), e);
-					imapCaps.setHasSubscription(false);
-				}
+				imapCaps.setHasSubscription(!IMAPConfig.isIgnoreSubscription());
 				imapCapabilities = imapCaps;
 				capabilitiesLoaded.set(true);
 			} catch (final MessagingException e) {
@@ -683,7 +361,7 @@ public final class IMAPConfig extends MailConfig {
 	public int getCapabilities() {
 		return capabilitiesLoaded.get() ? imapCapabilities.getCapabilities() : 0;
 	}
-	
+
 	/**
 	 * Gets the imapPort
 	 * 
@@ -708,13 +386,13 @@ public final class IMAPConfig extends MailConfig {
 	 * Gets the supportsACLs
 	 * 
 	 * @return the supportsACLs
-	 * @throws MailConfigException
 	 */
-	public boolean isSupportsACLs() throws MailConfigException {
-		loadGlobalImapProperties();
-		if (capabilitiesLoaded.get() && BoolCapVal.AUTO.equals(supportsACLs)) {
+	public boolean isSupportsACLs() {
+		if (capabilitiesLoaded.get()
+				&& BoolCapVal.AUTO.equals(((GlobalIMAPConfig) GlobalMailConfig.getInstance()).getSupportsACLs())) {
 			return imapCapabilities.hasACL();
 		}
-		return BoolCapVal.TRUE.equals(supportsACLs) ? true : false;
+		return BoolCapVal.TRUE.equals(((GlobalIMAPConfig) GlobalMailConfig.getInstance()).getSupportsACLs()) ? true
+				: false;
 	}
 }

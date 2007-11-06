@@ -47,41 +47,66 @@
  *
  */
 
-package com.openexchange.mail;
+package com.openexchange.mail.permission;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import com.openexchange.server.OCLPermission;
-import com.openexchange.sessiond.SessionObject;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.mail.MailConnection;
+import com.openexchange.mail.MailException;
+import com.openexchange.server.Initialization;
 
 /**
- * {@link MailPermission}
+ * {@link MailPermissionInit}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public abstract class MailPermission extends OCLPermission {
+public final class MailPermissionInit implements Initialization {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(MailPermission.class);
+			.getLog(MailPermissionInit.class);
 
-	private static Class<? extends MailPermission> clazz;
+	private static final MailPermissionInit instance = new MailPermissionInit();
 
-	private static final AtomicBoolean initialized = new AtomicBoolean();
+	private final AtomicBoolean started = new AtomicBoolean();
 
-	private static final Lock LOCK_INIT = new ReentrantLock();
+	private final AtomicBoolean initialized = new AtomicBoolean();
 
-	protected final SessionObject session;
+	private final Lock initLock = new ReentrantLock();
 
 	/**
-	 * No instance
+	 * No instantiation
 	 */
-	protected MailPermission(final SessionObject session) {
+	private MailPermissionInit() {
 		super();
-		this.session = session;
+	}
+
+	/**
+	 * @return The singleton instance of {@link MailPermissionInit}
+	 */
+	public static MailPermissionInit getInstance() {
+		return instance;
+	}
+
+	public void start() throws AbstractOXException {
+		if (started.get()) {
+			LOG.error(this.getClass().getName() + " already started");
+			return;
+		}
+		init();
+		started.set(true);
+	}
+
+	public void stop() throws AbstractOXException {
+		if (!started.get()) {
+			LOG.error(this.getClass().getName() + " cannot be stopped since it has not been started before");
+			return;
+		}
+		initialized.set(false);
+		started.set(false);
 	}
 
 	/**
@@ -90,11 +115,11 @@ public abstract class MailPermission extends OCLPermission {
 	 * @throws MailException
 	 *             If implementing class cannot be found
 	 */
-	public static final void init() throws MailException {
+	private void init() throws MailException {
 		if (!initialized.get()) {
-			LOCK_INIT.lock();
+			initLock.lock();
 			try {
-				if (clazz == null) {
+				if (!initialized.get()) {
 					final String className = MailConnection.getMailPermissionClass();
 					try {
 						if (className == null) {
@@ -105,53 +130,23 @@ public abstract class MailPermission extends OCLPermission {
 								LOG.warn(new StringBuilder("Using fallback \"").append(
 										DefaultMailPermission.class.getName()).append('"').toString());
 							}
-							clazz = DefaultMailPermission.class;
+							final Class<? extends MailPermission> clazz = DefaultMailPermission.class;
+							MailPermission.initialzeMailPermission(clazz);
 							initialized.set(true);
 							return;
 						}
-						clazz = Class.forName(className).asSubclass(MailPermission.class);
+						final Class<? extends MailPermission> clazz = Class.forName(className).asSubclass(
+								MailPermission.class);
+						MailPermission.initialzeMailPermission(clazz);
 						initialized.set(true);
 					} catch (final ClassNotFoundException e) {
 						throw new MailException(MailException.Code.INITIALIZATION_PROBLEM, e, new Object[0]);
 					}
 				}
 			} finally {
-				LOCK_INIT.unlock();
+				initLock.unlock();
 			}
 		}
 	}
 
-	private static final Class[] CONSTRUCTOR_ARGS = new Class[] { SessionObject.class };
-
-	/**
-	 * Gets the proper mail permission implementation
-	 * 
-	 * @param session
-	 *            The session
-	 * @return The proper mail permission implementation
-	 * @throws MailException
-	 */
-	public static MailPermission getInstance(final SessionObject session) throws MailException {
-		if (!initialized.get()) {
-			init();
-		}
-		/*
-		 * Create a new mail permission
-		 */
-		try {
-			return clazz.getConstructor(CONSTRUCTOR_ARGS).newInstance(new Object[] { session });
-		} catch (final SecurityException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (final NoSuchMethodException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (final IllegalArgumentException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (final InstantiationException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (final IllegalAccessException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (final InvocationTargetException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		}
-	}
 }

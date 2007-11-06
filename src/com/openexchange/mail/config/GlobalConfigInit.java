@@ -47,79 +47,67 @@
  *
  */
 
-package com.openexchange.mail;
+package com.openexchange.mail.config;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import com.openexchange.configuration.SystemConfig;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.mail.MailConnection;
+import com.openexchange.mail.MailException;
+import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.server.Initialization;
 
 /**
- * {@link MailConnectionInit}
+ * {@link GlobalConfigInit}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class MailConnectionInit implements Initialization {
+public final class GlobalConfigInit implements Initialization {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(MailConnectionInit.class);
-
-	private static final MailConnectionInit instance = new MailConnectionInit();
+			.getLog(GlobalConfigInit.class);
 
 	private final AtomicBoolean started = new AtomicBoolean();
 
 	private final AtomicBoolean initialized = new AtomicBoolean();
 
+	private final AtomicBoolean initializedTransport = new AtomicBoolean();
+
 	private final Lock initLock = new ReentrantLock();
+
+	private static final GlobalConfigInit instance = new GlobalConfigInit();
 
 	/**
 	 * No instantiation
 	 */
-	private MailConnectionInit() {
+	private GlobalConfigInit() {
 		super();
 	}
 
-	public static MailConnectionInit getInstance() {
+	public static GlobalConfigInit getInstance() {
 		return instance;
 	}
 
-	/**
-	 * Initializes the mail connection class
-	 * 
-	 * @throws MailException
-	 *             If implementing class cannot be found
-	 */
-	private void initMailConnectionClass() throws MailException {
+	private void initGlobalMailConfigClass() throws MailException {
 		if (!initialized.get()) {
 			initLock.lock();
 			try {
 				if (!initialized.get()) {
-					final String className = SystemConfig.getProperty(SystemConfig.Property.MailProtocol);
+					final String className = MailConnection.getGlobalMailConfigClass();
 					try {
 						if (className == null) {
-							/*
-							 * Fallback
-							 */
-							if (LOG.isWarnEnabled()) {
-								LOG.warn("Using fallback \"com.openexchange.imap.IMAPConnection\"");
-							}
-							final Class<? extends MailConnection> clazz = Class.forName(
-									"com.openexchange.imap.IMAPConnection").asSubclass(MailConnection.class);
-							MailConnection.initializeMailConnection(clazz);
-							initialized.set(true);
-							return;
+							throw new MailConfigException("Missing global mail config class");
 						}
-						final Class<? extends MailConnection> clazz = Class.forName(className).asSubclass(
-								MailConnection.class);
-						MailConnection.initializeMailConnection(clazz);
+						final Class<? extends GlobalMailConfig> clazz = Class.forName(className).asSubclass(
+								GlobalMailConfig.class);
+						GlobalMailConfig.initializeGlobalMailConfig(clazz);
+						initialized.set(true);
 					} catch (final ClassNotFoundException e) {
 						throw new MailException(MailException.Code.INITIALIZATION_PROBLEM, e, new Object[0]);
 					}
-					initialized.set(true);
 				}
 			} finally {
 				initLock.unlock();
@@ -127,27 +115,47 @@ public final class MailConnectionInit implements Initialization {
 		}
 	}
 
-	/*
-	 * @see com.openexchange.server.Initialization#start()
-	 */
+	private void initGlobalTransportConfigClass() throws MailException {
+		if (!initializedTransport.get()) {
+			initLock.lock();
+			try {
+				if (!initializedTransport.get()) {
+					final String className = MailTransport.getGlobalTransportConfigClass();
+					try {
+						if (className == null) {
+							throw new MailConfigException("Missing global mail config class");
+						}
+						final Class<? extends GlobalTransportConfig> clazz = Class.forName(className).asSubclass(
+								GlobalTransportConfig.class);
+						GlobalTransportConfig.initializeGlobalTransportConfig(clazz);
+						initializedTransport.set(true);
+					} catch (final ClassNotFoundException e) {
+						throw new MailException(MailException.Code.INITIALIZATION_PROBLEM, e, new Object[0]);
+					}
+				}
+			} finally {
+				initLock.unlock();
+			}
+		}
+	}
+
 	public void start() throws AbstractOXException {
 		if (started.get()) {
 			LOG.error(this.getClass().getName() + " already started");
 			return;
 		}
-		initMailConnectionClass();
+		initGlobalMailConfigClass();
+		initGlobalTransportConfigClass();
 		started.set(true);
 	}
 
-	/*
-	 * @see com.openexchange.server.Initialization#stop()
-	 */
 	public void stop() throws AbstractOXException {
 		if (!started.get()) {
 			LOG.error(this.getClass().getName() + " cannot be stopped since it has not been started before");
 			return;
 		}
 		initialized.set(false);
+		initializedTransport.set(false);
 		started.set(false);
 	}
 

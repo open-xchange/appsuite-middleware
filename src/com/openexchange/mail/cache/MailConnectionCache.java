@@ -49,8 +49,6 @@
 
 package com.openexchange.mail.cache;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -66,7 +64,6 @@ import org.apache.jcs.engine.control.event.behavior.IElementEventHandler;
 
 import com.openexchange.cache.CacheKey;
 import com.openexchange.cache.OXCachingException;
-import com.openexchange.configuration.ConfigurationInit;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.mail.MailConnection;
@@ -117,8 +114,6 @@ public final class MailConnectionCache {
 	private MailConnectionCache() throws OXCachingException {
 		super();
 		try {
-			ConfigurationInit.init();
-			MailCacheConfiguration.load();
 			cache = JCS.getInstance(REGION_NAME);
 			/*
 			 * Add element event handler to default element attributes
@@ -128,15 +123,6 @@ public final class MailConnectionCache {
 			attributes.addElementEventHandler(eventHandler);
 			cache.setDefaultElementAttributes(attributes);
 		} catch (final CacheException e) {
-			LOG.error(e.getMessage(), e);
-			throw new OXCachingException(OXCachingException.Code.FAILED_INIT, e, REGION_NAME, e.getMessage());
-		} catch (final FileNotFoundException e) {
-			LOG.error(e.getMessage(), e);
-			throw new OXCachingException(OXCachingException.Code.FAILED_INIT, e, REGION_NAME, e.getMessage());
-		} catch (final IOException e) {
-			LOG.error(e.getMessage(), e);
-			throw new OXCachingException(OXCachingException.Code.FAILED_INIT, e, REGION_NAME, e.getMessage());
-		} catch (final AbstractOXException e) {
 			LOG.error(e.getMessage(), e);
 			throw new OXCachingException(OXCachingException.Code.FAILED_INIT, e, REGION_NAME, e.getMessage());
 		}

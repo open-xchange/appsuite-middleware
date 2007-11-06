@@ -49,11 +49,11 @@
 
 package com.openexchange.imap.sort;
 
-import static com.openexchange.mail.MailInterfaceImpl.mailInterfaceMonitor;
-import static com.openexchange.mail.utils.StorageUtility.EMPTY_MSGS;
 import static com.openexchange.imap.utils.IMAPStorageUtility.getCacheFetchProfile;
 import static com.openexchange.imap.utils.IMAPStorageUtility.getCacheFields;
 import static com.openexchange.imap.utils.IMAPStorageUtility.getFetchProfile;
+import static com.openexchange.mail.MailInterfaceImpl.mailInterfaceMonitor;
+import static com.openexchange.mail.utils.StorageUtility.EMPTY_MSGS;
 
 import java.text.Collator;
 import java.util.Arrays;
@@ -273,25 +273,15 @@ public final class IMAPSort {
 					}
 				};
 			case COLOR_LABEL:
-				try {
-					if (IMAPConfig.isUserFlagsEnabled()) {
-						return new FieldComparer(locale) {
-							@Override
-							public int compareFields(final Message msg1, final Message msg2) throws MessagingException {
-								final Integer cl1 = getColorFlag(msg1.getFlags().getUserFlags());
-								final Integer cl2 = getColorFlag(msg2.getFlags().getUserFlags());
-								return cl1.compareTo(cl2);
-							}
-						};
-					}
+				if (IMAPConfig.isUserFlagsEnabled()) {
 					return new FieldComparer(locale) {
 						@Override
-						public int compareFields(final Message msg1, final Message msg2) {
-							return 0;
+						public int compareFields(final Message msg1, final Message msg2) throws MessagingException {
+							final Integer cl1 = getColorFlag(msg1.getFlags().getUserFlags());
+							final Integer cl2 = getColorFlag(msg2.getFlags().getUserFlags());
+							return cl1.compareTo(cl2);
 						}
 					};
-				} catch (final MailConfigException e) {
-					LOG.error(e.getMessage(), e);
 				}
 				return new FieldComparer(locale) {
 					@Override
@@ -379,7 +369,8 @@ public final class IMAPSort {
 	 */
 	public static Message[] sortMessages(final IMAPFolder imapFolder, final Message[] filteredMessages,
 			final MailListField[] fields, final MailListField sortFieldArg, final OrderDirection orderDir,
-			final Locale locale, final Set<MailListField> usedFields, final IMAPConfig imapConfig) throws MailConfigException, MessagingException {
+			final Locale locale, final Set<MailListField> usedFields, final IMAPConfig imapConfig)
+			throws MailConfigException, MessagingException {
 		boolean applicationSort = true;
 		Message[] msgs = null;
 		final MailListField sortField = sortFieldArg == null ? MailListField.RECEIVED_DATE : sortFieldArg;

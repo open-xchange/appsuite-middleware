@@ -47,81 +47,53 @@
  *
  */
 
-package com.openexchange.mail.mime;
+package com.openexchange.mail;
 
-import java.util.Properties;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-
-import javax.mail.Session;
-
-import com.openexchange.mail.config.MailConfig;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.mail.cache.MailCacheConfiguration;
+import com.openexchange.mail.config.GlobalConfigInit;
+import com.openexchange.mail.permission.MailPermissionInit;
+import com.openexchange.server.Initialization;
 
 /**
- * {@link MIMEDefaultSession} - Provides access to default instance of
- * {@link Session}
+ * {@link MailInitialization}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class MIMEDefaultSession {
+public final class MailInitialization implements Initialization {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(MIMEDefaultSession.class);
+	private static final MailInitialization instance = new MailInitialization();
 
 	/**
-	 * No instance
+	 * No instantiation
 	 */
-	private MIMEDefaultSession() {
+	private MailInitialization() {
 		super();
 	}
 
-	private static final Lock LOCK = new ReentrantLock();
-
-	private static final AtomicBoolean initialized = new AtomicBoolean();
-
-	private static Session instance;
-
-	private static final String STR_TRUE = "true";
-
-	private static final String STR_FALSE = "false";
-
-	/**
-	 * Applies basic properties to system properties and instantiates the
-	 * singleton instance of {@link Session}
-	 * 
-	 * @return The default instance of {@link Session}
-	 */
-	public static Session getDefaultSession() {
-		if (!initialized.get()) {
-			LOCK.lock();
-			try {
-				if (null != instance) {
-					return instance;
-				}
-				/*
-				 * Define session properties
-				 */
-				System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS, STR_TRUE);
-				System.getProperties().put(MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT, STR_TRUE);
-				System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_ENCODEEOL_STRICT, STR_TRUE);
-				System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_DECODETEXT_STRICT, STR_FALSE);
-				System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET,
-						MailConfig.getDefaultMimeCharset());
-				if (MailConfig.getJavaMailProperties() != null) {
-					/*
-					 * Overwrite current JavaMail-Specific properties with the
-					 * ones defined in javamail.properties
-					 */
-					System.getProperties().putAll(MailConfig.getJavaMailProperties());
-				}
-				instance = Session.getInstance(((Properties) (System.getProperties().clone())), null);
-				initialized.set(true);
-			} finally {
-				LOCK.unlock();
-			}
-		}
+	public static MailInitialization getInstance() {
 		return instance;
 	}
+
+	/*
+	 * @see com.openexchange.server.Initialization#start()
+	 */
+	public void start() throws AbstractOXException {
+		MailConnectionInit.getInstance().start();
+		GlobalConfigInit.getInstance().start();
+		MailPermissionInit.getInstance().start();
+		MailCacheConfiguration.getInstance().start();
+	}
+
+	/*
+	 * @see com.openexchange.server.Initialization#stop()
+	 */
+	public void stop() throws AbstractOXException {
+		MailCacheConfiguration.getInstance().stop();
+		MailPermissionInit.getInstance().stop();
+		GlobalConfigInit.getInstance().stop();
+		MailConnectionInit.getInstance().stop();
+	}
+
 }

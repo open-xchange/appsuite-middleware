@@ -83,7 +83,6 @@ import com.openexchange.mail.MailConnection;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.config.MailConfig;
-import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.TransportMailMessage;
@@ -99,6 +98,7 @@ import com.openexchange.mail.transport.dataobjects.TextBodyMailPart;
 import com.openexchange.mail.transport.dataobjects.UploadFileMailPart;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.sessiond.SessionObject;
+import com.openexchange.smtp.config.GlobalSMTPConfig;
 import com.openexchange.smtp.config.SMTPConfig;
 import com.openexchange.smtp.config.SMTPSessionProperties;
 import com.openexchange.smtp.dataobjects.SMTPBodyPart;
@@ -641,8 +641,6 @@ public final class SMTPTransport extends MailTransport {
 			} catch (final UnsupportedEncodingException e) {
 				LOG.error("Unsupported encoding in a message detected and monitored.", e);
 				mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
-			} catch (final MailConfigException e) {
-				LOG.error(e.getMessage(), e);
 			}
 		}
 		return tmpPass;
@@ -678,5 +676,10 @@ public final class SMTPTransport extends MailTransport {
 	@Override
 	protected TextBodyMailPart getNewTextBodyPartInternal(final String textBody) throws MailException {
 		return new SMTPBodyPart(textBody);
+	}
+
+	@Override
+	protected String getGlobalTransportConfigClassInternal() {
+		return GlobalSMTPConfig.class.getName();
 	}
 }

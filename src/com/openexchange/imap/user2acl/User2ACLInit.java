@@ -56,7 +56,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.user2acl.User2ACL.User2ACLException;
-import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.server.Initialization;
 
 /**
@@ -162,8 +161,6 @@ public final class User2ACLInit implements Initialization {
 			}
 		} catch (final ClassNotFoundException e) {
 			throw new User2ACLException(User2ACLException.Code.CLASS_NOT_FOUND, e, EMPTY_ARGS);
-		} catch (final MailConfigException e) {
-			throw new User2ACLException(e);
 		} catch (final InstantiationException e) {
 			throw new User2ACLException(User2ACLException.Code.INSTANTIATION_FAILED, e, EMPTY_ARGS);
 		} catch (final IllegalAccessException e) {

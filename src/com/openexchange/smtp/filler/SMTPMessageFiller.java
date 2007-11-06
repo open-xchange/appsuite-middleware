@@ -312,8 +312,8 @@ public final class SMTPMessageFiller {
 					/*
 					 * Define text content
 					 */
-					text.setText(performLineFolding(getConverter().convertWithQuotes((String) mail.getContent()), false, usm
-							.getAutoLinebreak()), SMTPConfig.getDefaultMimeCharset());
+					text.setText(performLineFolding(getConverter().convertWithQuotes((String) mail.getContent()),
+							false, usm.getAutoLinebreak()), SMTPConfig.getDefaultMimeCharset());
 					text.setHeader(MessageHeaders.HDR_MIME_VERSION, VERSION_1_0);
 					text.setHeader(MessageHeaders.HDR_CONTENT_TYPE, PAT_TEXT_CT.replaceFirst(REPLACE_CS, SMTPConfig
 							.getDefaultMimeCharset()));
@@ -429,8 +429,8 @@ public final class SMTPMessageFiller {
 					/*
 					 * Convert html content to reguar text
 					 */
-					mailText = performLineFolding(getConverter().convertWithQuotes((String) mail.getContent()), false, usm
-							.getAutoLinebreak());
+					mailText = performLineFolding(getConverter().convertWithQuotes((String) mail.getContent()), false,
+							usm.getAutoLinebreak());
 				} else {
 					mailText = performLineFolding(replaceHTMLSimpleQuotesForDisplay(formatHrefLinks((String) mail
 							.getContent())), true, usm.getAutoLinebreak());
@@ -635,8 +635,6 @@ public final class SMTPMessageFiller {
 				messageBodyPart.setFileName(MimeUtility.encodeText(part.getFileName(), SMTPConfig
 						.getDefaultMimeCharset(), "Q"));
 			} catch (final UnsupportedEncodingException e) {
-				messageBodyPart.setFileName(part.getFileName());
-			} catch (final MailConfigException e) {
 				messageBodyPart.setFileName(part.getFileName());
 			}
 		}
@@ -904,8 +902,6 @@ public final class SMTPMessageFiller {
 		try {
 			fileName = MimeUtility.encodeText(uploadFile.getFileName(), SMTPConfig.getDefaultMimeCharset(), "Q");
 		} catch (final UnsupportedEncodingException e) {
-			fileName = uploadFile.getFileName();
-		} catch (final MailConfigException e) {
 			fileName = uploadFile.getFileName();
 		}
 		/*

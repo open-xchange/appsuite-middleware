@@ -47,81 +47,103 @@
  *
  */
 
-package com.openexchange.mail.mime;
+package com.openexchange.mail.transport;
 
-import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import javax.mail.Session;
-
-import com.openexchange.mail.config.MailConfig;
+import com.openexchange.configuration.SystemConfig;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.mail.MailException;
+import com.openexchange.server.Initialization;
 
 /**
- * {@link MIMEDefaultSession} - Provides access to default instance of
- * {@link Session}
+ * {@link MailTransportInit}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class MIMEDefaultSession {
+public final class MailTransportInit implements Initialization {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(MIMEDefaultSession.class);
+			.getLog(MailTransportInit.class);
+
+	private static final MailTransportInit instance = new MailTransportInit();
+
+	private final AtomicBoolean started = new AtomicBoolean();
+
+	private final AtomicBoolean initialized = new AtomicBoolean();
+
+	private final Lock initLock = new ReentrantLock();
 
 	/**
-	 * No instance
+	 * No instantiation
 	 */
-	private MIMEDefaultSession() {
+	private MailTransportInit() {
 		super();
 	}
 
-	private static final Lock LOCK = new ReentrantLock();
-
-	private static final AtomicBoolean initialized = new AtomicBoolean();
-
-	private static Session instance;
-
-	private static final String STR_TRUE = "true";
-
-	private static final String STR_FALSE = "false";
+	public static MailTransportInit getInstance() {
+		return instance;
+	}
 
 	/**
-	 * Applies basic properties to system properties and instantiates the
-	 * singleton instance of {@link Session}
+	 * Initializes the mail transport class
 	 * 
-	 * @return The default instance of {@link Session}
+	 * @throws MailException
+	 *             If implementing class cannot be found
 	 */
-	public static Session getDefaultSession() {
+	private void initMailTransportClass() throws MailException {
 		if (!initialized.get()) {
-			LOCK.lock();
+			initLock.lock();
 			try {
-				if (null != instance) {
-					return instance;
+				if (!initialized.get()) {
+					final String className = SystemConfig.getProperty(SystemConfig.Property.MailTransportProtocol);
+					try {
+						if (className == null) {
+							/*
+							 * Fallback
+							 */
+							if (LOG.isWarnEnabled()) {
+								LOG.warn("Using fallback \"com.openexchange.mail.transport.smtp.SMTPTransport\"");
+							}
+							final Class<? extends MailTransport> clazz = Class.forName(
+									"com.openexchange.mail.transport.smtp.SMTPTransport").asSubclass(
+									MailTransport.class);
+							MailTransport.setImplementingClass(clazz);
+							initialized.set(true);
+							return;
+						}
+						final Class<? extends MailTransport> clazz = Class.forName(className).asSubclass(
+								MailTransport.class);
+						MailTransport.setImplementingClass(clazz);
+					} catch (final ClassNotFoundException e) {
+						throw new MailException(MailException.Code.INITIALIZATION_PROBLEM, e, new Object[0]);
+					}
+					initialized.set(true);
 				}
-				/*
-				 * Define session properties
-				 */
-				System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS, STR_TRUE);
-				System.getProperties().put(MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT, STR_TRUE);
-				System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_ENCODEEOL_STRICT, STR_TRUE);
-				System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_DECODETEXT_STRICT, STR_FALSE);
-				System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET,
-						MailConfig.getDefaultMimeCharset());
-				if (MailConfig.getJavaMailProperties() != null) {
-					/*
-					 * Overwrite current JavaMail-Specific properties with the
-					 * ones defined in javamail.properties
-					 */
-					System.getProperties().putAll(MailConfig.getJavaMailProperties());
-				}
-				instance = Session.getInstance(((Properties) (System.getProperties().clone())), null);
-				initialized.set(true);
 			} finally {
-				LOCK.unlock();
+				initLock.unlock();
 			}
 		}
-		return instance;
+	}
+
+	public void start() throws AbstractOXException {
+		if (started.get()) {
+			LOG.error(this.getClass().getName() + " already started");
+			return;
+		}
+		initMailTransportClass();
+		started.set(true);
+	}
+
+	public void stop() throws AbstractOXException {
+		if (!started.get()) {
+			LOG.error(this.getClass().getName() + " cannot be stopped since it has not been started before");
+			return;
+		}
+		initialized.set(false);
+		started.set(false);
 	}
 }

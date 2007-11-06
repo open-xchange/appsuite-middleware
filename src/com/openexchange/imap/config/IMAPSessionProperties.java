@@ -68,9 +68,6 @@ import com.openexchange.mail.mime.MIMESessionPropertyNames;
  */
 public final class IMAPSessionProperties {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(IMAPSessionProperties.class);
-
 	private static final String STR_TRUE = "true";
 
 	private static final String STR_FALSE = "false";
@@ -160,40 +157,25 @@ public final class IMAPSessionProperties {
 		 * protocol objects. Timed out connections are closed and removed
 		 * (pruned) from the connection pool.
 		 */
-		sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_CONNECTIONPOOLTIMEOUT, "1000"); // 1
-		// sec
-		/*
-		 * Fill global IMAP Properties only once and switch flag
-		 */
-		if (!IMAPConfig.isGlobalImapPropsLoaded()) {
-			IMAPConfig.loadGlobalImapProperties();
-		}
-		try {
-			if (!sessionProperties.containsKey(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET)) {
-				sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET, IMAPConfig.getDefaultMimeCharset());
-				System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET, IMAPConfig.getDefaultMimeCharset());
-			}
-		} catch (final MailConfigException e1) {
-			LOG.error(e1.getMessage(), e1);
+		sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_CONNECTIONPOOLTIMEOUT, "1000");
+		if (!sessionProperties.containsKey(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET)) {
+			sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET, IMAPConfig.getDefaultMimeCharset());
+			System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET,
+					IMAPConfig.getDefaultMimeCharset());
 		}
 		/*
 		 * Following properties define if IMAPS should be enabled
 		 */
-		try {
-			if (IMAPConfig.isImapsEnabled()) {
-				sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_SOCKET_FACTORY_CLASS,
-						STR_SECURITY_FACTORY);
-				sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_SOCKET_FACTORY_PORT, String
-						.valueOf(IMAPConfig.getImapsPort()));
-				sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_SOCKET_FACTORY_FALLBACK, STR_FALSE);
-				sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_STARTTLS_ENABLE, STR_TRUE);
-				/*
-				 * Needed for JavaMail >= 1.4
-				 */
-				Security.setProperty(STR_SECURITY_PROVIDER, STR_SECURITY_FACTORY);
-			}
-		} catch (final MailConfigException e) {
-			LOG.error(e.getMessage(), e);
+		if (IMAPConfig.isImapsEnabled()) {
+			sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_SOCKET_FACTORY_CLASS, STR_SECURITY_FACTORY);
+			sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_SOCKET_FACTORY_PORT, String
+					.valueOf(IMAPConfig.getImapsPort()));
+			sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_SOCKET_FACTORY_FALLBACK, STR_FALSE);
+			sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_STARTTLS_ENABLE, STR_TRUE);
+			/*
+			 * Needed for JavaMail >= 1.4
+			 */
+			Security.setProperty(STR_SECURITY_PROVIDER, STR_SECURITY_FACTORY);
 		}
 		if (IMAPConfig.getImapTimeout() > 0) {
 			sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_TIMEOUT, String.valueOf(IMAPConfig
@@ -203,16 +185,12 @@ public final class IMAPSessionProperties {
 			sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_CONNECTIONTIMEOUT, String.valueOf(IMAPConfig
 					.getImapConnectionTimeout()));
 		}
-		try {
-			if (IMAPConfig.getJavaMailProperties() != null) {
-				/*
-				 * Overwrite current JavaMail-Specific properties with the ones
-				 * defined in javamail.properties
-				 */
-				sessionProperties.putAll(IMAPConfig.getJavaMailProperties());
-			}
-		} catch (final MailConfigException e) {
-			LOG.error(e.getMessage(), e);
+		if (IMAPConfig.getJavaMailProperties() != null) {
+			/*
+			 * Overwrite current JavaMail-Specific properties with the ones
+			 * defined in javamail.properties
+			 */
+			sessionProperties.putAll(IMAPConfig.getJavaMailProperties());
 		}
 	}
 }

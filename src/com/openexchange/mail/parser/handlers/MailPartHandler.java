@@ -62,10 +62,8 @@ import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.mail.internet.InternetAddress;
 
-import com.openexchange.configuration.ServerConfig;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.config.MailConfig;
-import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.UUEncodedAttachmentMailPart;
@@ -86,9 +84,6 @@ public final class MailPartHandler implements MailMessageHandler {
 
 	private static final class TextMailPart extends MailPart {
 
-		private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-				.getLog(TextMailPart.class);
-
 		private static final long serialVersionUID = 5622318721711740585L;
 
 		private final String text;
@@ -104,13 +99,7 @@ public final class MailPartHandler implements MailMessageHandler {
 			this.text = text;
 			setSize(text.length());
 			if (contentType.getParameter("charset") == null) {
-				try {
-					contentType.setParameter("charset", MailConfig.getDefaultMimeCharset());
-				} catch (final MailConfigException e) {
-					LOG.error(e.getLocalizedMessage(), e);
-					contentType
-							.setParameter("charset", ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding));
-				}
+				contentType.setParameter("charset", MailConfig.getDefaultMimeCharset());
 			}
 			setContentType(contentType);
 		}

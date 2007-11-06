@@ -56,13 +56,16 @@ import java.util.Properties;
 import javax.mail.MessagingException;
 import javax.mail.Session;
 
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.imap.config.GlobalIMAPConfig;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.config.IMAPSessionProperties;
+import com.openexchange.imap.user2acl.User2ACLInit;
+import com.openexchange.imap.user2acl.User2ACL.User2ACLException;
 import com.openexchange.mail.MailConnection;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailInterfaceImpl;
 import com.openexchange.mail.config.MailConfig;
-import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.mime.MIMESessionPropertyNames;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.sessiond.SessionObject;
@@ -242,8 +245,6 @@ public final class IMAPConnection extends MailConnection<IMAPFolderStorage, IMAP
 					tmpPass = new String(getPassword().getBytes(IMAPConfig.getImapAuthEnc()), CHARENC_ISO8859);
 				} catch (final UnsupportedEncodingException e) {
 					LOG.error(e.getMessage(), e);
-				} catch (final MailConfigException e) {
-					LOG.error(e.getMessage(), e);
 				}
 			}
 			imapStore.connect(getMailServer(), getMailServerPort(), getLogin(), tmpPass);
@@ -379,6 +380,16 @@ public final class IMAPConnection extends MailConnection<IMAPFolderStorage, IMAP
 		return ACLPermission.class.getName();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.mail.MailConnection#getMailPermissionClass()
+	 */
+	@Override
+	public String getGlobalMailConfigClassInternal() {
+		return GlobalIMAPConfig.class.getName();
+	}
+
 	/**
 	 * Gets used IMAP session
 	 * 
@@ -386,5 +397,18 @@ public final class IMAPConnection extends MailConnection<IMAPFolderStorage, IMAP
 	 */
 	public Session getSession() {
 		return imapSession;
+	}
+
+	@Override
+	protected void initialize() throws MailException {
+		try {
+			User2ACLInit.getInstance().start();
+		} catch (final User2ACLException e) {
+			throw new MailException(e);
+		} catch (final MailException e) {
+			throw e;
+		} catch (final AbstractOXException e) {
+			throw new MailException(e);
+		}
 	}
 }

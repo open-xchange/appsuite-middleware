@@ -50,15 +50,12 @@
 package com.openexchange.mail.transport;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
-import com.openexchange.configuration.SystemConfig;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.mail.MailConnection;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailPath;
+import com.openexchange.mail.config.GlobalTransportConfig;
 import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.TransportMailMessage;
@@ -79,46 +76,29 @@ public abstract class MailTransport {
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(MailTransport.class);
 
-	private static final Lock LOCK_INIT = new ReentrantLock();
-
 	private static Class<? extends MailTransport> clazz;
-
-	private static final AtomicBoolean initialized = new AtomicBoolean();
-
-	/**
-	 * Initializes the mail transport
-	 * 
-	 * @throws MailException
-	 *             If implementing class cannot be found
-	 */
-	public static final void init() throws MailException {
-		if (!initialized.get()) {
-			LOCK_INIT.lock();
-			try {
-				if (clazz == null) {
-					final String className = SystemConfig.getProperty(SystemConfig.Property.MailTransportProtocol);
-					try {
-						if (className == null) {
-							/*
-							 * Fallback
-							 */
-							if (LOG.isWarnEnabled()) {
-								LOG.warn("Using fallback \"com.openexchange.mail.transport.smtp.SMTPTransport\"");
-							}
-							clazz = Class.forName("com.openexchange.mail.transport.smtp.SMTPTransport").asSubclass(
-									MailTransport.class);
-							initialized.set(true);
-							return;
-						}
-						clazz = Class.forName(className).asSubclass(MailTransport.class);
-					} catch (final ClassNotFoundException e) {
-						throw new MailException(MailException.Code.INITIALIZATION_PROBLEM, e, new Object[0]);
-					}
-					initialized.set(true);
-				}
-			} finally {
-				LOCK_INIT.unlock();
-			}
+	
+	private static MailTransport internalInstance;
+	
+	static void setImplementingClass(final Class<? extends MailTransport> clazz) throws MailException {
+		MailTransport.clazz = clazz;
+		/*
+		 * Create internal instance
+		 */
+		try {
+			internalInstance = clazz.getConstructor(new Class[0]).newInstance(new Object[0]);
+		} catch (final SecurityException e) {
+			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
+		} catch (final NoSuchMethodException e) {
+			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
+		} catch (final IllegalArgumentException e) {
+			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
+		} catch (final InstantiationException e) {
+			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
+		} catch (final IllegalAccessException e) {
+			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
+		} catch (final InvocationTargetException e) {
+			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
 		}
 	}
 
@@ -136,9 +116,6 @@ public abstract class MailTransport {
 	 */
 	public static final MailTransport getInstance(final SessionObject session, final MailConnection mailConnection)
 			throws MailException {
-		if (!initialized.get()) {
-			init();
-		}
 		/*
 		 * Create a new mail transport
 		 */
@@ -159,52 +136,13 @@ public abstract class MailTransport {
 		}
 	}
 
-	private static final Class[] CONSTRUCTOR_ARGS_INTERNAL = new Class[0];
-
-	private static final Object[] INSTANCE_ARGS_INTERNAL = new Object[0];
-
-	private static MailTransport instance;
-
-	private static final AtomicBoolean internal = new AtomicBoolean();
-
-	private static final Lock LOCK_INTERNAL = new ReentrantLock();
-
-	private static final MailTransport getInstanceInternal() throws MailException {
-		if (!internal.get()) {
-			LOCK_INTERNAL.lock();
-			try {
-				if (!initialized.get()) {
-					init();
-				}
-				/*
-				 * Still not initialized
-				 */
-				if (!internal.get()) {
-					/*
-					 * Create a new mail transport
-					 */
-					try {
-						instance = clazz.getConstructor(CONSTRUCTOR_ARGS_INTERNAL).newInstance(INSTANCE_ARGS_INTERNAL);
-						internal.set(true);
-					} catch (final SecurityException e) {
-						throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-					} catch (final NoSuchMethodException e) {
-						throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-					} catch (final IllegalArgumentException e) {
-						throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-					} catch (final InstantiationException e) {
-						throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-					} catch (final IllegalAccessException e) {
-						throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-					} catch (final InvocationTargetException e) {
-						throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-					}
-				}
-			} finally {
-				LOCK_INTERNAL.unlock();
-			}
-		}
-		return instance;
+	/**
+	 * Gets the class name of {@link GlobalTransportConfig} implementation
+	 * 
+	 * @return The class name of {@link GlobalTransportConfig} implementation
+	 */
+	public static final String getGlobalTransportConfigClass() {
+		return internalInstance.getGlobalTransportConfigClassInternal();
 	}
 
 	/**
@@ -214,7 +152,7 @@ public abstract class MailTransport {
 	 */
 	public static final TransportMailMessage getNewTransportMailMessage() {
 		try {
-			return MailTransport.getInstanceInternal().getNewTransportMailMessageInternal();
+			return internalInstance.getNewTransportMailMessageInternal();
 		} catch (final MailException e) {
 			LOG.error(e.getLocalizedMessage(), e);
 			return null;
@@ -230,7 +168,7 @@ public abstract class MailTransport {
 	 */
 	public static final UploadFileMailPart getNewFilePart(final UploadFile uploadFile) {
 		try {
-			return MailTransport.getInstanceInternal().getNewFilePartInternal(uploadFile);
+			return internalInstance.getNewFilePartInternal(uploadFile);
 		} catch (final MailException e) {
 			LOG.error(e.getLocalizedMessage(), e);
 			return null;
@@ -248,7 +186,7 @@ public abstract class MailTransport {
 	 */
 	public static final InfostoreDocumentMailPart getNewDocumentPart(final int documentId, final SessionObject session) {
 		try {
-			return MailTransport.getInstanceInternal().getNewDocumentPartInternal(documentId, session);
+			return internalInstance.getNewDocumentPartInternal(documentId, session);
 		} catch (final MailException e) {
 			LOG.error(e.getLocalizedMessage(), e);
 			return null;
@@ -264,7 +202,7 @@ public abstract class MailTransport {
 	 */
 	public static final TextBodyMailPart getNewTextBodyPart(final String textBody) {
 		try {
-			return MailTransport.getInstanceInternal().getNewTextBodyPartInternal(textBody);
+			return internalInstance.getNewTextBodyPartInternal(textBody);
 		} catch (final MailException e) {
 			LOG.error(e.getLocalizedMessage(), e);
 			return null;
@@ -283,7 +221,7 @@ public abstract class MailTransport {
 	public static final ReferencedMailPart getNewReferencedPart(final MailPart referencedPart,
 			final SessionObject session) {
 		try {
-			return MailTransport.getInstanceInternal().getNewReferencedPartInternal(referencedPart, session);
+			return internalInstance.getNewReferencedPartInternal(referencedPart, session);
 		} catch (final MailException e) {
 			LOG.error(e.getLocalizedMessage(), e);
 			return null;
@@ -299,7 +237,7 @@ public abstract class MailTransport {
 	 */
 	public static final ReferencedMailPart getNewReferencedPart(final String sequenceId) {
 		try {
-			return MailTransport.getInstanceInternal().getNewReferencedPartInternal(sequenceId);
+			return internalInstance.getNewReferencedPartInternal(sequenceId);
 		} catch (final MailException e) {
 			LOG.error(e.getLocalizedMessage(), e);
 			return null;
@@ -367,6 +305,13 @@ public abstract class MailTransport {
 	 *             If transport fails
 	 */
 	public abstract void sendReceiptAck(String fullname, long msgUID, String fromAddr) throws MailException;
+
+	/**
+	 * Gets the name of {@link GlobalTransportConfig} implementation
+	 * 
+	 * @return The name of {@link GlobalTransportConfig} implementation
+	 */
+	protected abstract String getGlobalTransportConfigClassInternal();
 
 	/**
 	 * Gets a new instance of {@link TransportMailMessage}

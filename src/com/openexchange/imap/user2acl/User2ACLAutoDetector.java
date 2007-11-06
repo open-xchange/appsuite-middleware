@@ -61,7 +61,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.user2acl.User2ACL.User2ACLException;
 import com.openexchange.imap.user2acl.User2ACLInit.IMAPServer;
-import com.openexchange.mail.config.MailConfigException;
 
 /**
  * {@link User2ACLAutoDetector}
@@ -130,22 +129,18 @@ public final class User2ACLAutoDetector {
 				return iServers[i];
 			}
 		}
-		try {
-			if (!IMAPConfig.isSupportsACLsConfig()) {
-				/*
-				 * Return fallback implementation
-				 */
-				if (LOG.isWarnEnabled()) {
-					LOG.warn(new StringBuilder(512)
-						.append("No IMAP server found that corresponds to greeting:\r\n\"")
-						.append(info.replaceAll("\r?\n", ""))
-						.append("\"\r\nSince ACLs are disabled (through IMAP configuration) or not supported by IMAP server, \"")
-						.append(IMAPServer.CYRUS.getName()).append("\" is used as fallback."));
-				}
-				return IMAPServer.CYRUS;
+		if (!IMAPConfig.isSupportsACLsConfig()) {
+			/*
+			 * Return fallback implementation
+			 */
+			if (LOG.isWarnEnabled()) {
+				LOG.warn(new StringBuilder(512)
+					.append("No IMAP server found that corresponds to greeting:\r\n\"")
+					.append(info.replaceAll("\r?\n", ""))
+					.append("\"\r\nSince ACLs are disabled (through IMAP configuration) or not supported by IMAP server, \"")
+					.append(IMAPServer.CYRUS.getName()).append("\" is used as fallback."));
 			}
-		} catch (final MailConfigException e) {
-			throw new User2ACLException(e);
+			return IMAPServer.CYRUS;
 		}
 		throw new User2ACLException(User2ACLException.Code.UNKNOWN_IMAP_SERVER, info);
 	}

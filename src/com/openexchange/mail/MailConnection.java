@@ -51,17 +51,16 @@ package com.openexchange.mail;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Properties;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import com.openexchange.cache.OXCachingException;
-import com.openexchange.configuration.SystemConfig;
 import com.openexchange.mail.cache.MailConnectionCache;
+import com.openexchange.mail.config.GlobalMailConfig;
 import com.openexchange.mail.config.MailConfig;
-import com.openexchange.mail.config.MailConfigException;
+import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.mail.watcher.MailConnectionWatcher;
 import com.openexchange.sessiond.SessionObject;
 
@@ -83,6 +82,8 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 	private static final Condition LOCK_CON_CONDITION = LOCK_CON.newCondition();
 
 	private static Class<? extends MailConnection> clazz;
+
+	private static MailConnection internalInstance;
 
 	protected final SessionObject session;
 
@@ -115,8 +116,27 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 		password = null;
 	}
 
-	static void setImplementingClass(final Class<? extends MailConnection> clazz) {
+	static void initializeMailConnection(final Class<? extends MailConnection> clazz) throws MailException {
 		MailConnection.clazz = clazz;
+		/*
+		 * Create internal instance
+		 */
+		try {
+			internalInstance = clazz.getConstructor(CONSTRUCTOR_ARGS).newInstance(new Object[] { null });
+			internalInstance.initialize();
+		} catch (SecurityException e) {
+			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
+		} catch (NoSuchMethodException e) {
+			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
+		} catch (IllegalArgumentException e) {
+			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
+		} catch (InstantiationException e) {
+			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
+		} catch (IllegalAccessException e) {
+			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
+		} catch (InvocationTargetException e) {
+			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
+		}
 	}
 
 	private static final Class[] CONSTRUCTOR_ARGS = new Class[] { SessionObject.class };
@@ -216,30 +236,12 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 	}
 
 	/**
-	 * Create a dummy instance to access member methods
+	 * Gets the class name of {@link GlobalMailConfig} implementation
 	 * 
-	 * @return A dummy instance
-	 * @throws MailException
+	 * @return The class name of {@link GlobalMailConfig} implementation
 	 */
-	private static final MailConnection getInstanceInternal() throws MailException {
-		/*
-		 * Create a new mail connection
-		 */
-		try {
-			return clazz.getConstructor(CONSTRUCTOR_ARGS).newInstance(new Object[] { null });
-		} catch (SecurityException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (NoSuchMethodException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (IllegalArgumentException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (InstantiationException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (IllegalAccessException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (InvocationTargetException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		}
+	public static final String getGlobalMailConfigClass() {
+		return internalInstance.getGlobalMailConfigClassInternal();
 	}
 
 	/**
@@ -248,12 +250,7 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 	 * @return The class name of {@link MailPermission} implementation
 	 */
 	public static final String getMailPermissionClass() {
-		try {
-			return MailConnection.getInstanceInternal().getMailPermissionClassInternal();
-		} catch (final MailException e) {
-			LOG.error(e.getLocalizedMessage(), e);
-			return null;
-		}
+		return internalInstance.getMailPermissionClassInternal();
 	}
 
 	/**
@@ -458,28 +455,22 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 			}
 		} catch (final OXCachingException e) {
 			LOG.error(e.getLocalizedMessage(), e);
-		} catch (final MailConfigException e) {
-			LOG.error(e.getLocalizedMessage(), e);
 		}
 		/*
 		 * Close mail connection
 		 */
 		closeInternal();
 		MailConnectionWatcher.removeMailConnection(this);
-		try {
-			if (MailConfig.getMaxNumOfConnections() > 0) {
-				LOCK_CON.lock();
-				try {
-					LOCK_CON_CONDITION.signalAll();
-					if (LOG.isDebugEnabled()) {
-						LOG.debug("Sending signal to possible waiting threads");
-					}
-				} finally {
-					LOCK_CON.unlock();
+		if (MailConfig.getMaxNumOfConnections() > 0) {
+			LOCK_CON.lock();
+			try {
+				LOCK_CON_CONDITION.signalAll();
+				if (LOG.isDebugEnabled()) {
+					LOG.debug("Sending signal to possible waiting threads");
 				}
+			} finally {
+				LOCK_CON.unlock();
 			}
-		} catch (final MailConfigException e) {
-			LOG.error(e.getLocalizedMessage(), e);
 		}
 	}
 
@@ -583,10 +574,24 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 	public abstract String getTrace();
 
 	/**
+	 * Gets the name of {@link GlobalMailConfig} implementation
+	 * 
+	 * @return The name of {@link GlobalMailConfig} implementation
+	 */
+	protected abstract String getGlobalMailConfigClassInternal();
+
+	/**
 	 * Gets the name of {@link MailPermission} implementation
 	 * 
 	 * @return The name of {@link MailPermission} implementation
 	 */
 	protected abstract String getMailPermissionClassInternal();
 
+	/**
+	 * Trigger all necessary initializations
+	 * 
+	 * @throws MailException
+	 *             If initialization fails
+	 */
+	protected abstract void initialize() throws MailException;
 }

@@ -59,10 +59,8 @@ import java.io.UnsupportedEncodingException;
 
 import javax.activation.DataSource;
 
-import com.openexchange.configuration.ServerConfig;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.config.MailConfig;
-import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.tools.mail.ContentType;
 import com.openexchange.tools.servlet.UnsynchronizedByteArrayOutputStream;
 
@@ -81,18 +79,7 @@ public final class MessageDataSource implements DataSource {
 
 	private static final int DEFAULT_BUF_SIZE = 0x2000;
 
-	private static final String DEFAULT_ENCODING;
-
-	static {
-		String cs = null;
-		try {
-			cs = MailConfig.getDefaultMimeCharset();
-		} catch (final MailConfigException e) {
-			LOG.error(e.getLocalizedMessage(), e);
-			cs = ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding);
-		}
-		DEFAULT_ENCODING = cs;
-	}
+	private static final String DEFAULT_ENCODING = MailConfig.getDefaultMimeCharset();
 
 	private byte[] data;
 

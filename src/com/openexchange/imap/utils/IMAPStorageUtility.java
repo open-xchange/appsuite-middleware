@@ -62,7 +62,6 @@ import javax.mail.UIDFolder;
 
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.mail.MailListField;
-import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.protocol.UIDSet;
@@ -74,9 +73,6 @@ import com.sun.mail.imap.protocol.UIDSet;
  * 
  */
 public final class IMAPStorageUtility {
-
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(IMAPStorageUtility.class);
 
 	/**
 	 * No instance
@@ -212,7 +208,7 @@ public final class IMAPStorageUtility {
 		}
 		return set;
 	}
-	
+
 	/**
 	 * Turns given array of <code>long</code> into an array of
 	 * <code>com.sun.mail.imap.protocol.UIDSet</code> which in turn can be
@@ -253,7 +249,7 @@ public final class IMAPStorageUtility {
 		}
 		return sets.toArray(new UIDSet[sets.size()]);
 	}
-	
+
 	/**
 	 * Gets the appropriate IMAP fetch profile
 	 * 
@@ -316,18 +312,14 @@ public final class IMAPStorageUtility {
 		if (sortField != null) {
 			set.add(sortField);
 		}
-		try {
+		/*
+		 * Check which fields are contained in fetch profile item "ENVELOPE"
+		 */
+		if (IMAPConfig.isFastFetch() && set.removeAll(ENV_FIELDS)) {
 			/*
-			 * Check which fields are contained in fetch profile item "ENVELOPE"
+			 * Add ENVELOPE since set of fields has changed
 			 */
-			if (IMAPConfig.isFastFetch() && set.removeAll(ENV_FIELDS)) {
-				/*
-				 * Add ENVELOPE since set of fields has changed
-				 */
-				retval.add(FetchProfile.Item.ENVELOPE);
-			}
-		} catch (final MailConfigException e) {
-			LOG.error(e.getMessage(), e);
+			retval.add(FetchProfile.Item.ENVELOPE);
 		}
 		if (!set.isEmpty()) {
 			final int size = set.size();

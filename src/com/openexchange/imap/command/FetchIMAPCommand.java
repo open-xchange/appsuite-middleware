@@ -81,7 +81,6 @@ import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailInterfaceImpl;
 import com.openexchange.mail.MailListField;
-import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.mime.ContainerMessage;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.utils.MessageUtility;
@@ -498,16 +497,12 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 		if (sortField > -1) {
 			trimmedFields.add(Integer.valueOf(sortField));
 		}
-		try {
-			if (IMAPConfig.isFastFetch() && trimmedFields.removeAll(ENV_FIELDS)) {
-				/*
-				 * Some fields are contained in fetch profile item "ENVELOPE".
-				 * Add ENVELOPE since set of fields has changed.
-				 */
-				retval.add(FetchProfile.Item.ENVELOPE);
-			}
-		} catch (final MailConfigException e) {
-			LOG.error(e.getMessage(), e);
+		if (IMAPConfig.isFastFetch() && trimmedFields.removeAll(ENV_FIELDS)) {
+			/*
+			 * Some fields are contained in fetch profile item "ENVELOPE". Add
+			 * ENVELOPE since set of fields has changed.
+			 */
+			retval.add(FetchProfile.Item.ENVELOPE);
 		}
 		if (!trimmedFields.isEmpty()) {
 			/*

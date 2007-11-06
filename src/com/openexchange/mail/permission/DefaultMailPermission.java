@@ -47,81 +47,30 @@
  *
  */
 
-package com.openexchange.mail.mime;
+package com.openexchange.mail.permission;
 
-import java.util.Properties;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-
-import javax.mail.Session;
-
-import com.openexchange.mail.config.MailConfig;
+import com.openexchange.server.OCLPermission;
+import com.openexchange.sessiond.SessionObject;
 
 /**
- * {@link MIMEDefaultSession} - Provides access to default instance of
- * {@link Session}
+ * {@link DefaultMailPermission}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class MIMEDefaultSession {
+public final class DefaultMailPermission extends MailPermission {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(MIMEDefaultSession.class);
-
-	/**
-	 * No instance
-	 */
-	private MIMEDefaultSession() {
-		super();
-	}
-
-	private static final Lock LOCK = new ReentrantLock();
-
-	private static final AtomicBoolean initialized = new AtomicBoolean();
-
-	private static Session instance;
-
-	private static final String STR_TRUE = "true";
-
-	private static final String STR_FALSE = "false";
+	private static final long serialVersionUID = 8431208323912426087L;
 
 	/**
-	 * Applies basic properties to system properties and instantiates the
-	 * singleton instance of {@link Session}
-	 * 
-	 * @return The default instance of {@link Session}
+	 * Default constructor
 	 */
-	public static Session getDefaultSession() {
-		if (!initialized.get()) {
-			LOCK.lock();
-			try {
-				if (null != instance) {
-					return instance;
-				}
-				/*
-				 * Define session properties
-				 */
-				System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS, STR_TRUE);
-				System.getProperties().put(MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT, STR_TRUE);
-				System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_ENCODEEOL_STRICT, STR_TRUE);
-				System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_DECODETEXT_STRICT, STR_FALSE);
-				System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET,
-						MailConfig.getDefaultMimeCharset());
-				if (MailConfig.getJavaMailProperties() != null) {
-					/*
-					 * Overwrite current JavaMail-Specific properties with the
-					 * ones defined in javamail.properties
-					 */
-					System.getProperties().putAll(MailConfig.getJavaMailProperties());
-				}
-				instance = Session.getInstance(((Properties) (System.getProperties().clone())), null);
-				initialized.set(true);
-			} finally {
-				LOCK.unlock();
-			}
-		}
-		return instance;
+	public DefaultMailPermission(final SessionObject session) {
+		super(session);
+		setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
+				OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+		setFolderAdmin(true);
+		setGroupPermission(false);
 	}
+
 }

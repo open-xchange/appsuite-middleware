@@ -47,81 +47,66 @@
  *
  */
 
-package com.openexchange.mail.mime;
+package com.openexchange.mail.permission;
 
-import java.util.Properties;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.lang.reflect.InvocationTargetException;
 
-import javax.mail.Session;
-
-import com.openexchange.mail.config.MailConfig;
+import com.openexchange.mail.MailException;
+import com.openexchange.server.OCLPermission;
+import com.openexchange.sessiond.SessionObject;
 
 /**
- * {@link MIMEDefaultSession} - Provides access to default instance of
- * {@link Session}
+ * {@link MailPermission}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class MIMEDefaultSession {
+public abstract class MailPermission extends OCLPermission {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(MIMEDefaultSession.class);
+	private static Class<? extends MailPermission> clazz;
+
+	protected final SessionObject session;
 
 	/**
 	 * No instance
 	 */
-	private MIMEDefaultSession() {
+	protected MailPermission(final SessionObject session) {
 		super();
+		this.session = session;
 	}
 
-	private static final Lock LOCK = new ReentrantLock();
+	static void initialzeMailPermission(final Class<? extends MailPermission> clazz) {
+		MailPermission.clazz = clazz;
+	}
 
-	private static final AtomicBoolean initialized = new AtomicBoolean();
-
-	private static Session instance;
-
-	private static final String STR_TRUE = "true";
-
-	private static final String STR_FALSE = "false";
+	private static final Class[] CONSTRUCTOR_ARGS = new Class[] { SessionObject.class };
 
 	/**
-	 * Applies basic properties to system properties and instantiates the
-	 * singleton instance of {@link Session}
+	 * Gets the proper mail permission implementation
 	 * 
-	 * @return The default instance of {@link Session}
+	 * @param session
+	 *            The session
+	 * @return The proper mail permission implementation
+	 * @throws MailException
 	 */
-	public static Session getDefaultSession() {
-		if (!initialized.get()) {
-			LOCK.lock();
-			try {
-				if (null != instance) {
-					return instance;
-				}
-				/*
-				 * Define session properties
-				 */
-				System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS, STR_TRUE);
-				System.getProperties().put(MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT, STR_TRUE);
-				System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_ENCODEEOL_STRICT, STR_TRUE);
-				System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_DECODETEXT_STRICT, STR_FALSE);
-				System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET,
-						MailConfig.getDefaultMimeCharset());
-				if (MailConfig.getJavaMailProperties() != null) {
-					/*
-					 * Overwrite current JavaMail-Specific properties with the
-					 * ones defined in javamail.properties
-					 */
-					System.getProperties().putAll(MailConfig.getJavaMailProperties());
-				}
-				instance = Session.getInstance(((Properties) (System.getProperties().clone())), null);
-				initialized.set(true);
-			} finally {
-				LOCK.unlock();
-			}
+	public static MailPermission getInstance(final SessionObject session) throws MailException {
+		/*
+		 * Create a new mail permission
+		 */
+		try {
+			return clazz.getConstructor(CONSTRUCTOR_ARGS).newInstance(new Object[] { session });
+		} catch (final SecurityException e) {
+			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
+		} catch (final NoSuchMethodException e) {
+			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
+		} catch (final IllegalArgumentException e) {
+			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
+		} catch (final InstantiationException e) {
+			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
+		} catch (final IllegalAccessException e) {
+			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
+		} catch (final InvocationTargetException e) {
+			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
 		}
-		return instance;
 	}
 }

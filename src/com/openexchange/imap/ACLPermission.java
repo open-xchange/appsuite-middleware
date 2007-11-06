@@ -55,7 +55,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.imap.user2acl.User2ACL;
 import com.openexchange.imap.user2acl.User2ACLArgs;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.MailPermission;
+import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.server.OCLPermission;
 import com.openexchange.sessiond.SessionObject;
 import com.sun.mail.imap.ACL;

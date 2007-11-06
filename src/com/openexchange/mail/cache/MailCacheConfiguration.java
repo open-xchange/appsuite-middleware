@@ -59,7 +59,10 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.jcs.engine.control.CompositeCacheManager;
 
+import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.SystemConfig;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.server.Initialization;
 
 /**
  * {@link MailCacheConfiguration} - Loads the configuration for mail caches
@@ -67,7 +70,7 @@ import com.openexchange.configuration.SystemConfig;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class MailCacheConfiguration {
+public final class MailCacheConfiguration implements Initialization {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(MailCacheConfiguration.class);
@@ -77,7 +80,12 @@ public final class MailCacheConfiguration {
 	 */
 	private static final AtomicBoolean initialized = new AtomicBoolean();
 
-	private static CompositeCacheManager ccmInstance;
+	private static MailCacheConfiguration instance;
+
+	/**
+	 * The cache manager instance
+	 */
+	private CompositeCacheManager ccmInstance;
 
 	private static final Lock LOCK = new ReentrantLock();
 
@@ -89,26 +97,43 @@ public final class MailCacheConfiguration {
 	}
 
 	/**
-	 * Loads the configuration for the caching system.
+	 * Initializes the singleton instance of {@link MailCacheConfiguration}
 	 * 
-	 * @throws IOException
-	 *             if the configuration can't be loaded.
+	 * @return The singleton instance of {@link MailCacheConfiguration}
 	 */
-	public static void load() throws IOException {
+	public static MailCacheConfiguration getInstance() {
 		if (!initialized.get()) {
 			LOCK.lock();
 			try {
-				if (ccmInstance == null) {
-					configure();
+				if (null == instance) {
+					instance = new MailCacheConfiguration();
 					initialized.set(true);
 				}
 			} finally {
 				LOCK.unlock();
 			}
 		}
+		return instance;
 	}
 
-	private static void configure() throws IOException {
+	/**
+	 * Loads the configuration for the caching system.
+	 * 
+	 * @throws ConfigurationException
+	 *             if the configuration can't be loaded.
+	 * @deprecated Use common initialization instead
+	 */
+	public static void load() throws ConfigurationException {
+		getInstance().configure();
+	}
+
+	private void configure() throws ConfigurationException {
+		if (null != ccmInstance) {
+			/*
+			 * Already invoked
+			 */
+			return;
+		}
 		FileInputStream fis = null;
 		try {
 			final String cacheConfigFile = SystemConfig.getProperty(SystemConfig.Property.MailCacheConfig);
@@ -122,16 +147,52 @@ public final class MailCacheConfiguration {
 			final Properties props = new Properties();
 			try {
 				props.load((fis = new FileInputStream(cacheConfigFile)));
-			} catch (FileNotFoundException fnfe) {
-				LOG.error(new StringBuilder(256).append("Missing cache configuration file \"").append(cacheConfigFile)
-						.append('"').toString(), fnfe);
+			} catch (final FileNotFoundException e) {
+				throw new ConfigurationException(ConfigurationException.Code.FILE_NOT_FOUND, e, cacheConfigFile);
+			} catch (final IOException e) {
+				throw new ConfigurationException(ConfigurationException.Code.IO_ERROR, e, e.getLocalizedMessage());
 			}
 			ccmInstance.configure(props);
 		} finally {
 			if (fis != null) {
-				fis.close();
+				try {
+					fis.close();
+				} catch (final IOException e) {
+					LOG.error(e.getLocalizedMessage(), e);
+				}
 				fis = null;
 			}
 		}
+	}
+
+	/**
+	 * Delegates to {@link CompositeCacheManager#freeCache(String)}
+	 * 
+	 * @param cacheName
+	 *            The name of the cache region that ought to be freed
+	 */
+	public void freeCache(final String cacheName) {
+		if (null == ccmInstance) {
+			return;
+		}
+		ccmInstance.freeCache(cacheName);
+	}
+	
+	/*
+	 * @see com.openexchange.server.Initialization#start()
+	 */
+	public void start() throws AbstractOXException {
+		configure();
+	}
+
+	/*
+	 * @see com.openexchange.server.Initialization#stop()
+	 */
+	public void stop() throws AbstractOXException {
+		if (null == ccmInstance) {
+			return;
+		}
+		ccmInstance.shutDown();
+		ccmInstance = null;
 	}
 }

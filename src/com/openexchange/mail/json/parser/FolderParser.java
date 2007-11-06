@@ -61,8 +61,8 @@ import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.MailPermission;
 import com.openexchange.mail.dataobjects.MailFolder;
+import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.server.OCLPermission;
 import com.openexchange.sessiond.SessionObject;
 

@@ -79,7 +79,6 @@ import com.openexchange.configuration.SystemConfig;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailInterfaceImpl;
 import com.openexchange.mail.config.MailConfig;
-import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.sessiond.SessionObject;
@@ -190,8 +189,6 @@ public final class MessageUtility {
 			} catch (final UnsupportedEncodingException e) {
 				LOG.error("Unsupported encoding in a message detected and monitored.", e);
 				mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
-			} catch (final MailConfigException e) {
-				LOG.error(e.getMessage(), e);
 			}
 		}
 		return addrs;
@@ -437,18 +434,7 @@ public final class MessageUtility {
 		return retval;
 	}
 
-	private static final String[] COLORS;
-
-	static {
-		String[] tmp = null;
-		try {
-			tmp = MailConfig.getQuoteLineColors();
-		} catch (final MailConfigException e) {
-			LOG.error(e.getLocalizedMessage(), e);
-			tmp = new String[] { "#454545" };
-		}
-		COLORS = tmp;
-	}
+	private static final String[] COLORS = MailConfig.getQuoteLineColors();
 
 	private static final String DEFAULT_COLOR = "#0026ff";
 

@@ -47,30 +47,31 @@
  *
  */
 
-package com.openexchange.mail;
+package com.openexchange.mail.config;
 
-import com.openexchange.server.OCLPermission;
-import com.openexchange.sessiond.SessionObject;
 
 /**
- * {@link DefaultMailPermission}
+ * {@link TransportConfig} - The transport configuration
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class DefaultMailPermission extends MailPermission {
-
-	private static final long serialVersionUID = 8431208323912426087L;
+public abstract class TransportConfig extends MailConfig {
 
 	/**
 	 * Default constructor
 	 */
-	public DefaultMailPermission(final SessionObject session) {
-		super(session);
-		setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
-				OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
-		setFolderAdmin(true);
-		setGroupPermission(false);
+	protected TransportConfig() {
+		super();
+	}
+
+	/**
+	 * Gets the referencedPartLimit
+	 * 
+	 * @return The referencedPartLimit
+	 */
+	public static int getReferencedPartLimit() {
+		return GlobalTransportConfig.getTransportInstance().getReferencedPartLimit();
 	}
 
 }

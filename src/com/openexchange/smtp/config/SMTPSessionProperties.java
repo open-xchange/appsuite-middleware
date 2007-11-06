@@ -68,9 +68,6 @@ import com.openexchange.mail.mime.MIMESessionPropertyNames;
  */
 public final class SMTPSessionProperties {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(SMTPSessionProperties.class);
-
 	private static Properties sessionProperties;
 
 	private static final Lock LOCK = new ReentrantLock();
@@ -116,10 +113,8 @@ public final class SMTPSessionProperties {
 
 	/**
 	 * This method can only be exclusively accessed
-	 * 
-	 * @throws MailConfigException
 	 */
-	private static void initializeIMAPProperties() throws MailConfigException {
+	private static void initializeIMAPProperties() {
 		/*
 		 * Define imap properties
 		 */
@@ -144,61 +139,44 @@ public final class SMTPSessionProperties {
 			sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_DECODETEXT_STRICT, STR_FALSE);
 			System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_DECODETEXT_STRICT, STR_FALSE);
 		}
-		/*
-		 * Fill global IMAP Properties only once and switch flag
-		 */
-		if (!SMTPConfig.isGlobalSmtpPropsLoaded()) {
-			SMTPConfig.loadGlobalSmtpProperties();
-		}
-		try {
-			if (!sessionProperties.containsKey(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET)) {
-				sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET, SMTPConfig.getDefaultMimeCharset());
-				System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET, SMTPConfig.getDefaultMimeCharset());
-			}
-		} catch (final MailConfigException e1) {
-			LOG.error(e1.getMessage(), e1);
+		if (!sessionProperties.containsKey(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET)) {
+			sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET, SMTPConfig.getDefaultMimeCharset());
+			System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET,
+					SMTPConfig.getDefaultMimeCharset());
 		}
 		/*
 		 * Following properties define if SMTPS should be enabled
 		 */
-		try {
-			if (SMTPConfig.isSmtpsEnabled()) {
-				sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_SOCKET_FACTORY_CLASS, STR_SECURITY_FACTORY);
-				sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_SOCKET_FACTORY_PORT, String.valueOf(SMTPConfig
-						.getSmtpsPort()));
-				sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_SOCKET_FACTORY_FALLBACK, STR_FALSE);
-				sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_STARTTLS_ENABLE, STR_TRUE);
-				/*
-				 * Needed for JavaMail >= 1.4
-				 */
-				Security.setProperty(STR_SECURITY_PROVIDER, STR_SECURITY_FACTORY);
-			}
-		} catch (final MailConfigException e) {
-			LOG.error(e.getMessage(), e);
+		if (SMTPConfig.isSmtpsEnabled()) {
+			sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_SOCKET_FACTORY_CLASS, STR_SECURITY_FACTORY);
+			sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_SOCKET_FACTORY_PORT, String
+					.valueOf(SMTPConfig.getSmtpsPort()));
+			sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_SOCKET_FACTORY_FALLBACK, STR_FALSE);
+			sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_STARTTLS_ENABLE, STR_TRUE);
+			/*
+			 * Needed for JavaMail >= 1.4
+			 */
+			Security.setProperty(STR_SECURITY_PROVIDER, STR_SECURITY_FACTORY);
 		}
 		if (SMTPConfig.getSmtpLocalhost() != null) {
 			sessionProperties.put(MIMESessionPropertyNames.PROP_SMTPLOCALHOST, SMTPConfig.getSmtpLocalhost());
 		}
 		if (SMTPConfig.getSmtpTimeout() > 0) {
-			sessionProperties
-					.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_TIMEOUT, String.valueOf(SMTPConfig.getSmtpTimeout()));
+			sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_TIMEOUT, String.valueOf(SMTPConfig
+					.getSmtpTimeout()));
 		}
 		if (SMTPConfig.getSmtpConnectionTimeout() > 0) {
 			sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_CONNECTIONTIMEOUT, String.valueOf(SMTPConfig
 					.getSmtpConnectionTimeout()));
 		}
-		sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_AUTH, SMTPConfig.isSmtpAuth() ? STR_TRUE : STR_FALSE);
-		try {
-			if (SMTPConfig.getJavaMailProperties() != null) {
-				/*
-				 * Overwrite current JavaMail-Specific properties with the ones
-				 * defined in javamail.properties
-				 */
-				sessionProperties.putAll(SMTPConfig.getJavaMailProperties());
-			}
-		} catch (final MailConfigException e) {
-			LOG.error(e.getMessage(), e);
+		sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_AUTH, SMTPConfig.isSmtpAuth() ? STR_TRUE
+				: STR_FALSE);
+		if (SMTPConfig.getJavaMailProperties() != null) {
+			/*
+			 * Overwrite current JavaMail-Specific properties with the ones
+			 * defined in javamail.properties
+			 */
+			sessionProperties.putAll(SMTPConfig.getJavaMailProperties());
 		}
-
 	}
 }
