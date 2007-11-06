@@ -1,3 +1,8 @@
+* 2007-11-06 - dennis.sieben@open-xchange.com
+
+ - Bugfix #8919: [L3] 'checkconsistency' does not provide any usage information and
+   does not work as well
+
 * 2007-11-06 - thorben.betten@open-xchange.com
 
  - Bugfix #10034: Fixed moving of messages without UIDCOPY capability
