@@ -1,0 +1,72 @@
+<project name="Open-Xchange Development Config" default="default" basedir=".">
+
+    <description>
+        Open-Xchange Collaboration Suite Server Development Configuration
+    </description>
+
+    <!-- Customizable values -->
+    <!-- This values must be changed for defining other installation places -->
+    <property name="destdir" value=""/>
+    <property name="prefix" location="/opt/open-xchange"/>
+
+    <!-- Directories -->
+    <property name="tmp.dir" value="tmp"/>
+    <property name="conf.dir" value="conf"/>
+
+    <!-- Replacements -->
+    <property name="conf.install.dir" value="${prefix}/etc/groupware"/>
+    <property name="conf.install.copy.dir" location="${destdir}${conf.install.dir}"/>
+
+    <target name="prepare">
+        <mkdir dir="${tmp.dir}"/>
+    </target>
+
+    <target name="patchConfig" depends="prepare">
+        <property name="patch.conf.dir" value="${tmp.dir}/${conf.dir}"/>
+        <mkdir dir="${patch.conf.dir}"/>
+        <copy todir="${patch.conf.dir}" overwrite="true">
+            <fileset dir="${conf.dir}"/>
+        </copy>
+        <antcall target="patchConfigFiles">
+            <param name="conf.subst.patch" value="${conf.install.dir}"/>
+        </antcall>
+    </target>
+
+    <target name="installConfig" depends="patchConfig">
+        <mkdir dir="${conf.install.copy.dir}"/>
+        <copy todir="${conf.install.copy.dir}" overwrite="true">
+            <fileset dir="${patch.conf.dir}">
+            	<include name="**" />
+            </fileset>
+        </copy>
+    </target>
+
+    <target name="install" depends="installConfig"/>
+
+    <target name="default" depends="install"/>
+
+    <target name="clean">
+        <delete dir="${tmp.dir}"/>
+    </target>
+
+    <target name="patchConfigFiles">
+        <fail message="Define conf.subst.patch." unless="conf.subst.patch"/>
+        <antcall target="patchSessiondProperties"/>
+        <antcall target="patchSystemProperties"/>
+    </target>
+
+    <target name="patchSessiondProperties">
+        <move tofile="${patch.conf.dir}/sessiond.properties" file="${patch.conf.dir}/sessiond.properties.in" overwrite="true"/>
+        <replace file="${patch.conf.dir}/sessiond.properties">
+            <replacefilter token="@sessiondport@" value="33333"/>
+        </replace>
+    </target>
+
+    <target name="patchSystemProperties">
+        <move tofile="${patch.conf.dir}/system.properties" file="${patch.conf.dir}/system.properties.in" overwrite="true"/>
+        <replace file="${patch.conf.dir}/system.properties">
+            <replacefilter token="@oxgroupwaresysconfdir@" value="${conf.subst.patch}"/>
+        </replace>
+    </target>
+
+</project>

@@ -1,18 +1,44 @@
 # System Properties
 
+# General mail config
+MailProperties=@oxgroupwaresysconfdir@/mail.properties
+
+# General transport config
+TransportProperties=@oxgroupwaresysconfdir@/transport.properties
+
+# JavaMail Properties
+JavaMailProperties=@oxgroupwaresysconfdir@/javamail.properties
+
+# Name of the class implementing the mail connection
+MailProtocol=com.openexchange.imap.IMAPConnection
+# ... and its config
+IMAPProperties=@oxgroupwaresysconfdir@/imap.properties
+
+# Name of the class implementing the mail transport connection
+MailTransportProtocol=com.openexchange.smtp.SMTPTransport
+# ... and its config
+SMTPProperties=@oxgroupwaresysconfdir@/smtp.properties
+
+# Location of the MIME type file
+MimeTypeFile=@oxgroupwaresysconfdir@/mime.types
+
 # Name of the class that implements how the login information should be
 # processed.
 # * com.openexchange.groupware.contexts.RdbLoginInfo split only the login info
 #   by the @ sign and resolve context and user in database.
 LoginInfo=com.openexchange.groupware.contexts.RdbLoginInfo
 
+# Name of the class implementing the UserConfigurationStorage.
+# Currenlty known aliases: Caching, DB
+UserConfigurationStorage=Caching
+
 # Name of the class that implements how to get the link for the configuration
 # setup.
 SetupLink=com.openexchange.groupware.integration.EmptyImpl
 
-# Properties file that configures the LDAP context for authenticating against
-# LDAP.
-LDAP=@oxgroupwaresysconfdir@/ldaplogin.properties
+# Location of the configuration file for the user specific configuration jump.
+# The content of this file depends on the implementation of the SetupLink.
+ConfigJumpConf=@oxgroupwaresysconfdir@/configjump.properties
 
 # Switch for enabling caching in the groupware. Normally this should be set to
 # true or the database will get a lot more load.
@@ -40,13 +66,16 @@ Infostore=@oxgroupwaresysconfdir@/infostore.properties
 # the attachment subsystem.
 Attachment=@oxgroupwaresysconfdir@/attachment.properties
 
-# Location of the ntofication.properties configuration file. This file 
+# Location of the notification.properties configuration file. This file 
 # configures certain assumptions about sending notifications
 Notification=@oxgroupwaresysconfdir@/notification.properties
 
 # Location of the participant.properties configuration file. This file
 # configures certain options about participants.
 Participant=@oxgroupwaresysconfdir@/participant.properties
+
+# Directory in which all property files for servlet mapping are kept
+ServletMappingDir=@oxgroupwaresysconfdir@/servletmappings
 
 CONFIGPATH:@oxgroupwaresysconfdir@
 AJPPROPERTIES:@oxgroupwaresysconfdir@/ajp.properties
@@ -58,15 +87,17 @@ EVENTPROPERTIES:@oxgroupwaresysconfdir@/event.properties
 PUSHPROPERTIES:@oxgroupwaresysconfdir@/push.properties
 configDB=@oxgroupwaresysconfdir@/configdb.properties
 FOLDERCACHEPROPERTIES=@oxgroupwaresysconfdir@/foldercache.properties
-IMAPPROPERTIES=@oxgroupwaresysconfdir@/imap.properties
-JAVAMAILPROPERTIES=@oxgroupwaresysconfdir@/javamail.properties
 SPELLCHECKCFG=@oxgroupwaresysconfdir@/spellcheck.cfg
 
 UPDATETASKSCFG=@oxgroupwaresysconfdir@/updatetasks.cfg
 
 CalendarSQL=com.openexchange.groupware.calendar.CalendarMySQL
 
-# ERROR=1, WARN=3, INFO=5 (DEFAULT), DEBUG=10
-LOGLEVEL:5
+# Location of the HTMLEntities.properties configuration file. This file
+# contains the most HTML entities and maps them to their character value
+HTMLEntities=@oxgroupwaresysconfdir@/HTMLEntities.properties
+
+# Location of the configuration file for mail caches
+MailCacheConfig:@oxgroupwaresysconfdir@/mailcache.ccf
 
 SERVER_NAME=dev-prototyp
