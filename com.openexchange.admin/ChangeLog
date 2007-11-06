@@ -1,3 +1,7 @@
+* 2007-11-06 - dennis.sieben@open-xchange.com
+
+  - Bugfix ID#10072 L3: display name of contact blocks creation of new user
+  
 * 2007-10-31 - manuel.kraft@open-xchange.com
 
    - Bugfix ID#10005 [HEAD] Connections to database not returned in admindaemon
