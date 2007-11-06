@@ -1,3 +1,8 @@
+* 2007-11-06 - dennis.sieben@open-xchange.com
+
+ - Bugfix #8919: [L3] 'checkconsistency' does not provide any usage information and
+   does not work as well
+
 * 2007-10-31 - ben.pahne@open-xchange.com
 
  - Bugfix #9996: Fixed replacing if special characters when converting
