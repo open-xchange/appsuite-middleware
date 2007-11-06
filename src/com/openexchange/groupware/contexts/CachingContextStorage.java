@@ -179,17 +179,34 @@ public class CachingContextStorage extends ContextStorage {
      * Initializes the context cache.
      * @throws ContextException if the initialization fails.
      */
-    public static void initCache() throws ContextException {
+    public static void start() throws ContextException {
+        if (null != cache) {
+            LOG.error("Duplicate initialization of CachingContextStorage.");
+            return;
+        }
         try {
-            Configuration.load();
             cache = JCS.getInstance("Context");
         } catch (CacheException e) {
-            throw new ContextException(ContextException.Code.CACHE_INIT, e);
-        } catch (ConfigurationException e) {
-            throw new ContextException(ContextException.Code.CACHE_INIT, e);
+            throw new ContextException(Code.CACHE_INIT, e);
         }
     }
 
+    /**
+     * Shuts this class down.
+     */
+    public static void stop() {
+        if (null == cache) {
+            LOG.error("Duplicate shutdown of CachingContextStorage.");
+            return;
+        }
+        try {
+            cache.clear();
+        } catch (CacheException e) {
+            LOG.error("Problem while clearing cache.", e);
+        }
+        cache = null;
+    }
+    
     /**
      * {@inheritDoc}
      */

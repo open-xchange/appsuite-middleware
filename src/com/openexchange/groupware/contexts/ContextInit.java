@@ -47,31 +47,58 @@
  *
  */
 
-
-
 package com.openexchange.groupware.contexts;
 
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.server.Initialization;
+import com.openexchange.server.Starter;
+import com.openexchange.sessiond.LoginException;
 
 /**
  * This class contains the initialization for contexts.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class ContextInit {
+public final class ContextInit implements Initialization {
+
+    private static final ContextInit singleton = new ContextInit();
 
     /**
-     * Prevent instantiation
+     * Prevent instantiation.
      */
     private ContextInit() {
         super();
     }
 
     /**
+     * @return the singleton instance.
+     */
+    public static final ContextInit getInstance() {
+        return singleton;
+    }
+
+    /**
      * Method for initializing contexts.
+     * FIXME remove this method.
      * @throws AbstractOXException if initialization fails.
+     * @deprecated use normal {@link Starter} for starting up the server.
      */
     public static void init() throws AbstractOXException {
-        LoginInfo.init();
-        ContextStorage.init();
+        getInstance().start();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void start() throws LoginException, ContextException {
+        LoginInfo.start();
+        ContextStorage.start();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void stop() {
+        ContextStorage.stop();
+        LoginInfo.stop();
     }
 }

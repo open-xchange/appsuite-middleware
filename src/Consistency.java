@@ -47,8 +47,6 @@
  *
  */
 
-
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -60,7 +58,6 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.configuration.ConfigDB;
-import com.openexchange.configuration.ConfigurationInit;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.consistency.AttachmentProblemSolver;
 import com.openexchange.consistency.DBDelProblemSolver;
@@ -69,7 +66,6 @@ import com.openexchange.consistency.FileStoreProblemSolver;
 import com.openexchange.consistency.ProblemSolver;
 import com.openexchange.database.AssignmentStorage;
 import com.openexchange.database.DatabaseInit;
-import com.openexchange.database.Server;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.Attachments;
@@ -404,18 +400,8 @@ public class Consistency {
         try {
             SystemConfig.getInstance().start();
             ConfigDB.getInstance().start();
-        } catch (AbstractOXException e) {
-            erroroutput("Initializing the configuration failed.", e);
-            System.exit(1);
-        }
-        try {
             DatabaseInit.getInstance().start();
-        } catch (DBPoolingException e) {
-            erroroutput("Initializing the database system failed.", e);
-            System.exit(1);
-        }
-        try {
-            ContextInit.init();
+            ContextInit.getInstance().start();
         } catch (AbstractOXException e) {
             erroroutput("Initializing the context system failed.", e);
             System.exit(1);

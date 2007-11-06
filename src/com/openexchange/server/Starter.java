@@ -92,6 +92,10 @@ public class Starter implements Initialization {
          */
         com.openexchange.database.DatabaseInit.getInstance(),
         /**
+         * Setup of ContextStorage and LoginInfo.
+         */
+        com.openexchange.groupware.contexts.ContextInit.getInstance(),
+        /**
          * Mail initialization
          */
         com.openexchange.mail.MailInitialization.getInstance(),
@@ -138,6 +142,10 @@ public class Starter implements Initialization {
          * Connection pools for ConfigDB and database assignments for contexts.
          */
         com.openexchange.database.DatabaseInit.getInstance(),
+        /**
+         * Setup of ContextStorage and LoginInfo.
+         */
+        com.openexchange.groupware.contexts.ContextInit.getInstance(),
         /**
          * Notification Configuration
          */

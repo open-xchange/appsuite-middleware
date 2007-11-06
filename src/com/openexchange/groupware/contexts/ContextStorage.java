@@ -56,6 +56,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.groupware.update.Updater;
 import com.openexchange.groupware.update.exception.UpdateException;
+import com.openexchange.server.Starter;
 
 /**
  * This class defines the methods for accessing the storage of contexts.
@@ -175,10 +176,36 @@ public abstract class ContextStorage {
 
     /**
      * Initialization.
+     * FIXME remove this method.
      * @throws ContextException if initialization of contexts fails.
+     * @deprecated use normal server startup with {@link Starter}.
      */
     public static void init() throws ContextException {
-        CachingContextStorage.initCache();
+        start();
+    }
+
+    /**
+     * Initialization.
+     * @throws ContextException if initialization of contexts fails.
+     */
+    public static void start() throws ContextException {
+        if (null != impl) {
+            LOG.error("Duplicate initialization of ContextStorage.");
+            return;
+        }
+        CachingContextStorage.start();
         impl = new CachingContextStorage(new RdbContextStorage());
+    }
+
+    /**
+     * Shutdown.
+     */
+    public static void stop() {
+        if (null == impl) {
+            LOG.error("Duplicate shutdown of ContextStorage.");
+            return;
+        }
+        impl = null;
+        CachingContextStorage.stop();
     }
 }

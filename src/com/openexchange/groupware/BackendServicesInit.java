@@ -47,11 +47,8 @@
  *
  */
 
-
-
 package com.openexchange.groupware;
 
-import com.openexchange.monitoring.MonitorAgent;
 import com.openexchange.tools.ajp13.AJPv13Server;
 
 /**

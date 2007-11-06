@@ -80,7 +80,6 @@ public final class GroupwareInit {
      * @throws AbstractOXException if initialization fails.
      */
     public static void init() throws AbstractOXException {
-        ContextInit.init();
         UserConfigurationStorage.init();
         SetupLink.init();
         ConfigTree.init();

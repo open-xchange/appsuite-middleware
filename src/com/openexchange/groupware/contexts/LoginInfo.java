@@ -49,9 +49,13 @@
 
 package com.openexchange.groupware.contexts;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.configuration.SystemConfig.Property;
 import com.openexchange.sessiond.LoginException;
+import com.openexchange.sessiond.LoginException.Code;
 
 /**
  * This interface defines the methods for handling the login information. E.g.
@@ -63,6 +67,11 @@ import com.openexchange.sessiond.LoginException;
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public abstract class LoginInfo {
+
+    /**
+     * Logger.
+     */
+    private static final Log LOG = LogFactory.getLog(LoginInfo.class);
 
     /**
      * Reference to the class implementing the LoginInfo.
@@ -111,25 +120,32 @@ public abstract class LoginInfo {
      * Initializes the login info implementation.
      * @throws LoginException if initialization fails.
      */
-    public static void init() throws LoginException {
+    public static void start() throws LoginException {
         if (null != implementingClass) {
+            LOG.error("Duplicate initialization of LoginInfo.");
             return;
         }
         final String className = SystemConfig.getProperty(Property.LOGIN_INFO);
         if (null == className) {
-            throw new LoginException(LoginException.Code.MISSING_SETTING,
-                Property.LOGIN_INFO.getPropertyName());
+            throw new LoginException(Code.MISSING_SETTING, Property.LOGIN_INFO
+                .getPropertyName());
         }
         try {
-            implementingClass = Class.forName(className)
-                .asSubclass(LoginInfo.class);
+            implementingClass = Class.forName(className).asSubclass(LoginInfo
+                .class);
         } catch (ClassNotFoundException e) {
-            throw new LoginException(LoginException.Code.CLASS_NOT_FOUND, e,
-                className);
+            throw new LoginException(Code.CLASS_NOT_FOUND, e, className);
         } catch (ClassCastException e) {
-            throw new LoginException(LoginException.Code.CLASS_NOT_FOUND, e,
-                className);
+            throw new LoginException(Code.CLASS_NOT_FOUND, e, className);
         }
+    }
+
+    public static void stop() {
+        if (null == implementingClass) {
+            LOG.error("Duplicate shutdown of LoginInfo.");
+            return;
+        }
+        implementingClass = null;
     }
 
     /**
