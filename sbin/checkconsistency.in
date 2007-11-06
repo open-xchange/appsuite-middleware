@@ -36,5 +36,5 @@ CLASSPATH="-classpath $ALLCLASSES"
 pushd $OXPREFIX
 
 umask 066
-exec $JAVA_BIN $JAVA_OPTS $CLASSPATH Consistency "$@" > $CONSOLELOG 2>&1
+exec $JAVA_BIN $JAVA_OPTS $CLASSPATH Consistency "$@"
 
