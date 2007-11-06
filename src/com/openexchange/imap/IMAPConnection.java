@@ -400,9 +400,22 @@ public final class IMAPConnection extends MailConnection<IMAPFolderStorage, IMAP
 	}
 
 	@Override
-	protected void initialize() throws MailException {
+	protected void startupInternal() throws MailException {
 		try {
 			User2ACLInit.getInstance().start();
+		} catch (final User2ACLException e) {
+			throw new MailException(e);
+		} catch (final MailException e) {
+			throw e;
+		} catch (final AbstractOXException e) {
+			throw new MailException(e);
+		}
+	}
+	
+	@Override
+	protected void shutdownInternal() throws MailException {
+		try {
+			User2ACLInit.getInstance().stop();
 		} catch (final User2ACLException e) {
 			throw new MailException(e);
 		} catch (final MailException e) {

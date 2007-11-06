@@ -106,7 +106,7 @@ public final class GlobalIMAPConfig extends GlobalMailConfig {
 	/**
 	 * Initializes a new global IMAP config
 	 */
-	protected GlobalIMAPConfig() {
+	public GlobalIMAPConfig() {
 		super();
 	}
 

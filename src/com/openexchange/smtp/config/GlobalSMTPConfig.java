@@ -89,7 +89,7 @@ public final class GlobalSMTPConfig extends GlobalTransportConfig {
 	/**
 	 * No instantiation
 	 */
-	protected GlobalSMTPConfig() {
+	public GlobalSMTPConfig() {
 		super();
 	}
 

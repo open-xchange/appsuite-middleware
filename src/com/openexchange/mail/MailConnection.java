@@ -123,7 +123,6 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 		 */
 		try {
 			internalInstance = clazz.getConstructor(CONSTRUCTOR_ARGS).newInstance(new Object[] { null });
-			internalInstance.initialize();
 		} catch (SecurityException e) {
 			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
 		} catch (NoSuchMethodException e) {
@@ -137,6 +136,24 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 		} catch (InvocationTargetException e) {
 			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
 		}
+	}
+
+	/**
+	 * Triggers all implementation-specific startup actions
+	 * 
+	 * @throws MailException
+	 */
+	static void startup() throws MailException {
+		internalInstance.startupInternal();
+	}
+
+	/**
+	 * Triggers all implementation-specific shutdown actions
+	 * 
+	 * @throws MailException
+	 */
+	static void shutdown() throws MailException {
+		internalInstance.shutdownInternal();
 	}
 
 	private static final Class[] CONSTRUCTOR_ARGS = new Class[] { SessionObject.class };
@@ -588,10 +605,18 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 	protected abstract String getMailPermissionClassInternal();
 
 	/**
-	 * Trigger all necessary initializations
+	 * Trigger all necessary startup actions
 	 * 
 	 * @throws MailException
 	 *             If initialization fails
 	 */
-	protected abstract void initialize() throws MailException;
+	protected abstract void startupInternal() throws MailException;
+
+	/**
+	 * Trigger all necessary shutdown actions
+	 * 
+	 * @throws MailException
+	 *             If initialization fails
+	 */
+	protected abstract void shutdownInternal() throws MailException;
 }

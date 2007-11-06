@@ -81,9 +81,9 @@ public abstract class GlobalMailConfig {
 
 	private static final String STR_FALSE = "false";
 
-	private static final AtomicBoolean loaded = new AtomicBoolean();
-
 	private static GlobalMailConfig mailInstance;
+	
+	private final AtomicBoolean loaded = new AtomicBoolean();
 
 	/*
 	 * Fields for global properties
@@ -290,7 +290,6 @@ public abstract class GlobalMailConfig {
 			 * Add to system properties, too
 			 */
 			System.getProperties().setProperty("mail.mime.charset", defaultMimeCharset);
-			logBuilder.append("\tDefault MIME Charset: ").append(defaultMimeCharset).append('\n');
 		}
 
 		{
