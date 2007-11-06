@@ -65,7 +65,7 @@ import com.openexchange.imap.cache.UserFlagsCache;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.user2acl.User2ACL;
 import com.openexchange.imap.user2acl.User2ACLArgs;
-import com.openexchange.imap.user2acl.User2ACL.IMAPServer;
+import com.openexchange.imap.user2acl.User2ACLInit.IMAPServer;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.dataobjects.MailFolder;

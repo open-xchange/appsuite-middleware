@@ -50,7 +50,7 @@
 package com.openexchange.imap.user2acl;
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.imap.user2acl.User2ACL.IMAPServer;
+import com.openexchange.imap.user2acl.User2ACLInit.IMAPServer;
 
 /**
  * {@link User2ACLArgs} - Offers implementation-specific arguments for proper

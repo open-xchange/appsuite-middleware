@@ -59,7 +59,6 @@ import com.openexchange.groupware.Component;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.config.MailConfig.LoginType;
@@ -74,47 +73,6 @@ import com.openexchange.mail.config.MailConfig.LoginType;
 public abstract class User2ACL {
 
 	private static final Object[] EMPTY_ARGS = new Object[0];
-
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(User2ACL.class);
-
-	public static enum IMAPServer {
-		/**
-		 * Cyrus: <code>com.openexchange.imap.user2acl.CyrusUser2ACL</code>
-		 */
-		CYRUS("Cyrus", "com.openexchange.imap.user2acl.CyrusUser2ACL"),
-		/**
-		 * Courier: <code>com.openexchange.imap.user2acl.CourierUser2ACL</code>
-		 */
-		COURIER("Courier", "com.openexchange.imap.user2acl.CourierUser2ACL");
-
-		private final String name;
-
-		private final String impl;
-
-		private IMAPServer(final String name, final String impl) {
-			this.name = name;
-			this.impl = impl;
-		}
-
-		public String getName() {
-			return name;
-		}
-
-		public String getImpl() {
-			return impl;
-		}
-	}
-
-	private static final String getIMAPServerImpl(final String name) {
-		final IMAPServer[] imapServers = IMAPServer.values();
-		for (int i = 0; i < imapServers.length; i++) {
-			if (imapServers[i].getName().equalsIgnoreCase(name)) {
-				return imapServers[i].impl;
-			}
-		}
-		return null;
-	}
 
 	public static final class User2ACLException extends AbstractOXException {
 
@@ -246,13 +204,6 @@ public abstract class User2ACL {
 		}
 	}
 
-	/**
-	 * Proxy attribute for the class implementing this interface.
-	 */
-	private static Class<? extends User2ACL> implementingClass;
-
-	private static final Lock INIT_LOCK = new ReentrantLock();
-
 	private static final Lock INSTANCE_LOCK = new ReentrantLock();
 
 	/**
@@ -262,10 +213,13 @@ public abstract class User2ACL {
 
 	private static final AtomicBoolean instancialized = new AtomicBoolean();
 
-	private static final AtomicBoolean initialized = new AtomicBoolean();
-
 	protected User2ACL() {
 		super();
+	}
+
+	static void setInstance(final User2ACL singleton) {
+		User2ACL.singleton = singleton;
+		instancialized.set(true);
 	}
 
 	/**
@@ -277,32 +231,11 @@ public abstract class User2ACL {
 	 */
 	public static final User2ACL getInstance(final User sessionUser) throws User2ACLException {
 		if (!instancialized.get()) {
-			if (initialized.get() && null == implementingClass) {
-				/*
-				 * Already initialized and auto-detection turned on
-				 */
-				return getUser2ACLImpl(sessionUser);
-			}
 			INSTANCE_LOCK.lock();
 			try {
 				if (null == singleton) {
-					init();
-					try {
-						if (implementingClass == null) {
-							/*
-							 * Auto-detection turned on
-							 */
-							return getUser2ACLImpl(sessionUser);
-						}
-						singleton = implementingClass.newInstance();
-						instancialized.set(true);
-					} catch (final InstantiationException e) {
-						throw new User2ACLException(User2ACLException.Code.INSTANTIATION_FAILED, e, EMPTY_ARGS);
-					} catch (final IllegalAccessException e) {
-						throw new User2ACLException(User2ACLException.Code.INSTANTIATION_FAILED, e, EMPTY_ARGS);
-					} catch (final SecurityException e) {
-						throw new User2ACLException(User2ACLException.Code.INSTANTIATION_FAILED, e, EMPTY_ARGS);
-					}
+					singleton = getUser2ACLImpl(sessionUser);
+					instancialized.set(true);
 				}
 			} finally {
 				INSTANCE_LOCK.unlock();
@@ -350,40 +283,12 @@ public abstract class User2ACL {
 	 *             if initialization fails.
 	 */
 	public static final void init() throws User2ACLException {
-		if (!initialized.get()) {
-			INIT_LOCK.lock();
-			try {
-				if (null == implementingClass) {
-					final String classNameProp = IMAPConfig.getUser2AclImpl();
-					if (null == classNameProp || classNameProp.length() == 0) {
-						throw new User2ACLException(User2ACLException.Code.MISSING_SETTING, "User2ACLImpl");
-					}
-					if ("auto".equalsIgnoreCase(classNameProp)) {
-						/*
-						 * Try to detect dependent on IMAP server greeting
-						 */
-						implementingClass = null;
-						if (LOG.isInfoEnabled()) {
-							LOG.info("Auto-Detection for IMAP server implementation");
-						}
-						initialized.set(true);
-						return;
-					}
-					final String className = getIMAPServerImpl(classNameProp);
-					implementingClass = className == null ? Class.forName(classNameProp).asSubclass(User2ACL.class)
-							: Class.forName(className).asSubclass(User2ACL.class);
-					if (LOG.isInfoEnabled()) {
-						LOG.info("Used IMAP server implementation: " + implementingClass.getName());
-					}
-					initialized.set(true);
-				}
-			} catch (final ClassNotFoundException e) {
-				throw new User2ACLException(User2ACLException.Code.CLASS_NOT_FOUND, e, EMPTY_ARGS);
-			} catch (final MailConfigException e) {
-				throw new User2ACLException(e);
-			} finally {
-				INIT_LOCK.unlock();
-			}
+		try {
+			User2ACLInit.getInstance().start();
+		} catch (final User2ACLException e1) {
+			throw e1;
+		} catch (final AbstractOXException e1) {
+			throw new User2ACLException(e1);
 		}
 	}
 

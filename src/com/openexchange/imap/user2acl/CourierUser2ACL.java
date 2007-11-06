@@ -56,6 +56,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.imap.config.IMAPConfig;
+import com.openexchange.imap.user2acl.User2ACLInit.IMAPServer;
 import com.openexchange.mail.config.MailConfig.CredSrc;
 import com.openexchange.server.OCLPermission;
 

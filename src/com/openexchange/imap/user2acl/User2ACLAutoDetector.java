@@ -59,8 +59,8 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import com.openexchange.imap.config.IMAPConfig;
-import com.openexchange.imap.user2acl.User2ACL.IMAPServer;
 import com.openexchange.imap.user2acl.User2ACL.User2ACLException;
+import com.openexchange.imap.user2acl.User2ACLInit.IMAPServer;
 import com.openexchange.mail.config.MailConfigException;
 
 /**
