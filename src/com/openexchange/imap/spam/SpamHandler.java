@@ -86,6 +86,12 @@ public abstract class SpamHandler {
 
 	protected static final Flags FLAGS_DELETED = new Flags(Flags.Flag.DELETED);
 
+	/**
+	 * Gets the singleton instance of {@link SpamHandler}
+	 * 
+	 * @return The singleton instance of {@link SpamHandler}
+	 * @throws MailException
+	 */
 	public static final SpamHandler getInstance() throws MailException {
 		if (!initialized.get()) {
 			LOCK.lock();
@@ -96,8 +102,8 @@ public abstract class SpamHandler {
 						instance = new DefaultSpamHandler();
 					} else {
 						instance = Class.forName(clazz).asSubclass(SpamHandler.class).newInstance();
-						initialized.set(true);
 					}
+					initialized.set(true);
 				}
 			} catch (final InstantiationException e) {
 				throw new MailException(MailException.Code.SPAM_HANDLER_INIT_FAILED, e, e.getLocalizedMessage());
@@ -110,6 +116,21 @@ public abstract class SpamHandler {
 			}
 		}
 		return instance;
+	}
+
+	/**
+	 * Releases the singleton instance of {@link SpamHandler}
+	 */
+	public static final void releaseInstance() {
+		if (initialized.get()) {
+			LOCK.lock();
+			try {
+				instance = null;
+				initialized.set(false);
+			} finally {
+				LOCK.unlock();
+			}
+		}
 	}
 
 	/**

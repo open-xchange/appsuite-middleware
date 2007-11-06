@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.partmodifier;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -65,8 +64,6 @@ import com.openexchange.mail.dataobjects.MailPart;
 public abstract class PartModifier {
 
 	private static final Lock LOCK = new ReentrantLock();
-
-	private static final AtomicBoolean initialized = new AtomicBoolean();
 
 	private static PartModifier instance;
 
@@ -89,26 +86,23 @@ public abstract class PartModifier {
 	 *             If part modifier cannot be initialized
 	 */
 	public static final void init(final String className) throws MailException {
-		if (!initialized.get()) {
-			LOCK.lock();
-			try {
-				if (null == instance) {
-					try {
-						instance = (PartModifier) Class.forName(className).newInstance();
-						initialized.set(true);
-					} catch (ClassNotFoundException e) {
-						throw new MailException(MailException.Code.PART_MODIFIER_CREATION_FAILED, e, className);
-					} catch (InstantiationException e) {
-						throw new MailException(MailException.Code.PART_MODIFIER_CREATION_FAILED, e, className);
-					} catch (IllegalAccessException e) {
-						throw new MailException(MailException.Code.PART_MODIFIER_CREATION_FAILED, e, className);
-					} catch (Throwable e) {
-						throw new MailException(MailException.Code.PART_MODIFIER_CREATION_FAILED, e, className);
-					}
+		LOCK.lock();
+		try {
+			if (null == instance) {
+				try {
+					instance = (PartModifier) Class.forName(className).newInstance();
+				} catch (ClassNotFoundException e) {
+					throw new MailException(MailException.Code.PART_MODIFIER_CREATION_FAILED, e, className);
+				} catch (InstantiationException e) {
+					throw new MailException(MailException.Code.PART_MODIFIER_CREATION_FAILED, e, className);
+				} catch (IllegalAccessException e) {
+					throw new MailException(MailException.Code.PART_MODIFIER_CREATION_FAILED, e, className);
+				} catch (Throwable e) {
+					throw new MailException(MailException.Code.PART_MODIFIER_CREATION_FAILED, e, className);
 				}
-			} finally {
-				LOCK.unlock();
 			}
+		} finally {
+			LOCK.unlock();
 		}
 	}
 
