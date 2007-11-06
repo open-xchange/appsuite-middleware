@@ -94,7 +94,6 @@ import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.search.ContactSearchObject;
-import com.openexchange.groupware.tasks.SQL;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.server.DBPool;
 import com.openexchange.server.DBPoolingException;
