@@ -90,7 +90,6 @@ public class OXContainerConverterTest extends TestCase {
 
     public static SessionObject getSession() throws Exception {
 
-		ContactConfig.init();
 		ContextStorage.init();
 		final UserStorage uStorage = UserStorage.getInstance(new ContextImpl(1));
 		int userId = uStorage.getUserId( Init.getAJAXProperty("login") );
@@ -207,7 +206,6 @@ public class OXContainerConverterTest extends TestCase {
 	
 	public static User getUserParticipant() throws AbstractOXException{
 
-		ContactConfig.init();
 		ContextStorage.init();
 		final UserStorage uStorage = UserStorage.getInstance(new ContextImpl(1));
 		final int uid = uStorage.getUserId( Init.getAJAXProperty("user_participant1") );

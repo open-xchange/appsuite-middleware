@@ -428,7 +428,6 @@ public class AbstractContactTest {
 	@BeforeClass
 	public static void initialize() throws SQLException, AbstractOXException {
 		Init.startServer();
-		ContactConfig.init();
 		ContextStorage.init();
 		final UserStorage uStorage = UserStorage.getInstance(new ContextImpl(1));
 	    userId = uStorage.getUserId( Init.getAJAXProperty("login") );
@@ -526,7 +525,6 @@ public class AbstractContactTest {
 	 */
 	public static User getUserParticipant() throws AbstractOXException{
 		Init.startServer();
-		ContactConfig.init();
 		ContextStorage.init();
 		final UserStorage uStorage = UserStorage.getInstance(new ContextImpl(1));
 		final int uid = uStorage.getUserId( Init.getAJAXProperty("user_participant1") );

@@ -94,7 +94,6 @@ public abstract class AbstractImportExportServletTest extends AbstractAJAXTest {
 	
 	public void setUp() throws Exception{
 		super.setUp();
-		ContactConfig.init();
 	//	final UserStorage uStorage = UserStorage.getInstance(new ContextImpl(1));
 	//  final int userId = uStorage.getUserId( Init.getAJAXProperty("login") );
 	//	sessObj = SessionObjectWrapper.createSessionObject(userId, 1, "csv-roundtrip-test");

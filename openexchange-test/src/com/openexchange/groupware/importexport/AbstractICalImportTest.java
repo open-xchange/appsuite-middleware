@@ -71,7 +71,6 @@ public class AbstractICalImportTest extends AbstractContactTest {
 	@BeforeClass
 	public static void initialize() throws SQLException, AbstractOXException {
 		Init.startServer();
-		ContactConfig.init();
 		ContextStorage.init();
 		final UserStorage uStorage = UserStorage.getInstance(new ContextImpl(1));
 	    userId = uStorage.getUserId( Init.getAJAXProperty("login") );

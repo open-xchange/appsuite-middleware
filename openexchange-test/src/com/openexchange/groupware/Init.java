@@ -243,59 +243,6 @@ public final class Init {
         //for(Initialization init: started) { init.stop(); }
     }
 
-    @Deprecated
-    public static void loadSystemProperties() throws AbstractOXException {
-		if (!systemPropertiesLoaded) {
-			loadTestProperties();
-            final String propFileName = testProps.getProperty(
-                "openexchange.propfile");
-            System.setProperty("openexchange.propfile", propFileName); //FIXME
-            SystemConfig.getInstance().start();
-			systemPropertiesLoaded = true;
-		}
-	}
-
-    @Deprecated
-    public synchronized static void initDB() throws AbstractOXException {
-		if (!dbInitialized) {
-			loadSystemProperties();
-	        ConfigDB.getInstance().start();
-	        DatabaseInit.getInstance().start();
-			dbInitialized = true;
-		}
-	}
-
-    @Deprecated
-    public synchronized static void stopDB() throws Exception {
-		if (dbInitialized) {
-			dbInitialized = false;
-			DatabaseInit.getInstance().stop();
-			ConfigDB.getInstance().stop();
-		}
-	}
-
-    @Deprecated
-    public synchronized static void initContext() throws AbstractOXException {
-        if (!contextInitialized) {
-            loadSystemProperties();
-            ContextInit.init();
-            contextInitialized = true;
-        }
-    }
-
-    @Deprecated
-    public static void initSessiond() throws Exception {
-		if (!sessiondInit) {
-			String propfile = SystemConfig.getProperty("SESSIONDPROPERTIES");
-
-			SessiondConfigWrapper config = new SessiondConfigWrapper(propfile);
-			SessiondConnector.setConfig(config);
-			new Sessiond(config);
-
-			sessiondInit = true;
-		}
-	}
-
 	private static void loadInfostoreProperties() {
 		if (infostorePropertiesLoaded)
 			return;
