@@ -4012,7 +4012,7 @@ public class MailInterfaceImpl implements MailInterface {
 			messageId = ((IMAPMessage) (imapCon.getImapFolder().getMessageByUID(msgUIDs[minIndex]))).getMessageID();
 		}
 		if (messageId != null) {
-			final IMAPFolder destFolder = (IMAPFolder) imapCon.getImapFolder().getFolder(destFullname);
+			final IMAPFolder destFolder = (IMAPFolder) imapCon.getIMAPStore().getFolder(destFullname);
 			destFolder.open(Folder.READ_ONLY);
 			try {
 				/*

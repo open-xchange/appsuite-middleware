@@ -1,3 +1,7 @@
+* 2007-11-06 - thorben.betten@open-xchange.com
+
+ - Bugfix #10034: Fixed moving of messages without UIDCOPY capability
+
 * 2007-10-30 - francisco.laguna@open-xchange.com
 
  - Bugfix #9943: Added DeleteListener that removes all attachments on a ContextDelete.
