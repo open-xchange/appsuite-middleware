@@ -51,47 +51,76 @@
 
 package com.openexchange.groupware.contact;
 
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.SystemConfig;
-import com.openexchange.configuration.ConfigurationException.Code;
 import com.openexchange.configuration.SystemConfig.Property;
+import com.openexchange.server.Initialization;
 import com.openexchange.tools.conf.AbstractConfig;
 
 /**
  * Configuration class for contact options.
  * <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class ContactConfig extends AbstractConfig {
+public class ContactConfig extends AbstractConfig implements Initialization {
 
     private static final Property KEY = Property.CONTACT;
     
     private static ContactConfig singleton;
+    
+    private static final Lock INIT_LOCK = new ReentrantLock();
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
+    private static boolean loaded = false;
+    
+    private static final Log LOG = LogFactory.getLog(ContactConfig.class);
+    
     protected String getPropertyFileName() throws ConfigurationException {
         final String filename = SystemConfig.getProperty(KEY);
         if (null == filename) {
-            throw new ConfigurationException(Code.PROPERTY_MISSING,
-                KEY.getPropertyName());
+            throw new RuntimeException("Property " + KEY.getPropertyName()
+                + " is not defined in system.properties.");
         }
         return filename;
     }
 
+    public static ContactConfig getInstance() {
+        if(singleton != null)
+            return singleton;
+        return singleton = new ContactConfig();
+    }
+      
+    
     public static String getProperty(final String key) {
+    	if(!loaded || singleton == null) {
+			try {
+				getInstance().start();
+			} catch (final ConfigurationException e) {
+				LOG.error("Can't init config:",e);
+			}
+		}
+			
         return singleton.getPropertyInternal(key);
     }
-    
-    public static void init() throws ConfigurationException {
-        if (null == singleton) {
-            reinit();
-        }
+
+    public void start() throws ConfigurationException {
+        if (!loaded || singleton == null) {
+			INIT_LOCK.lock();
+            try {
+			    getInstance().loadPropertiesInternal();
+                loaded = true;
+            } finally {
+				INIT_LOCK.unlock();
+			}
+		}   
     }
 
-    public static void reinit() throws ConfigurationException {
-        singleton = new ContactConfig();
-        singleton.loadPropertiesInternal();
+    public void stop() throws ConfigurationException {
+        singleton = null;
+        loaded = false;
     }
 }
