@@ -66,7 +66,6 @@ public class LoginTest extends TestCase {
     protected void setUp() throws Exception {
         super.setUp();
         Init.startServer();
-        ContextInit.init();
     }
 
     protected void tearDown() throws Exception {
