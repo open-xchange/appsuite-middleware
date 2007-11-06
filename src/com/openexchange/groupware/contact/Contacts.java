@@ -4479,7 +4479,7 @@ public class Contacts implements DeleteListener {
 				return co.getTelephoneAssistant();
 			}
 			public String getReadableTitle() {
-				return "Telephone assostant";
+				return "Telephone assistant";
 			}
 		};				
 		/**************** * field43 *  * *************/
