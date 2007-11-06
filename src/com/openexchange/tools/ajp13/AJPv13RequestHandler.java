@@ -493,7 +493,7 @@ public final class AJPv13RequestHandler {
 		sb.append("Current Request: ").append(ajpRequest.getClass().getName()).append(delim);
 		sb.append("Content Length: ").append(bContentLength ? String.valueOf(contentLength) : "Not available").append(
 				delim);
-		sb.append("Sevlet triggered: ").append(serviceMethodCalled).append(delim);
+		sb.append("Servlet triggered: ").append(serviceMethodCalled).append(delim);
 		sb.append("Headers sent: ").append(headersSent).append(delim);
 		sb.append("End Response sent: ").append(endResponseSent).append(delim);
 		return sb.toString();

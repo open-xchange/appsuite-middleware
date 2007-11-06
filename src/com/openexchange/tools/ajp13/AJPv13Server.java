@@ -54,6 +54,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.text.DecimalFormat;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
@@ -66,7 +67,6 @@ import com.openexchange.tools.ajp13.monitoring.AJPv13ServerThreadsMonitor;
 import com.openexchange.tools.servlet.ServletConfigLoader;
 import com.openexchange.tools.servlet.ServletConfigWrapper;
 import com.openexchange.tools.servlet.ServletContextWrapper;
-import com.openexchange.tools.servlet.http.HttpServletManager;
 
 /**
  * 
@@ -97,7 +97,7 @@ public class AJPv13Server implements Runnable {
 
 	private Thread[] threadArr;
 
-	private boolean running;
+	private final AtomicBoolean running = new AtomicBoolean();
 
 	public static final ServletConfigLoader SERVLET_CONFIGS = new ServletConfigLoader();
 
@@ -170,7 +170,7 @@ public class AJPv13Server implements Runnable {
 	}
 
 	private void startServer() {
-		if (running) {
+		if (running.get()) {
 			if (LOG.isInfoEnabled()) {
 				LOG.info("AJPv13Server is already running...");
 			}
@@ -183,11 +183,11 @@ public class AJPv13Server implements Runnable {
 			threadArr[i].start();
 		}
 		ajpv13ServerThreadsMonitor.setNumActive(threadArr.length);
-		running = true;
+		running.set(true);
 	}
 
 	private void stopServer() {
-		if (!running && LOG.isInfoEnabled()) {
+		if (!running.get() && LOG.isInfoEnabled()) {
 			LOG.info("AJPv13Server is not running and thus does not need to be stopped");
 		}
 		/*
@@ -213,12 +213,11 @@ public class AJPv13Server implements Runnable {
 			}
 		}
 		ajpv13ServerThreadsMonitor.setNumActive(0);
-		running = false;
+		running.set(false);
 	}
 
 	private final void initializePools() {
 		resetPools();
-		HttpServletManager.createServlets();
 		AJPv13ListenerPool.initPool();
 		if (AJPv13Config.useAJPConnectionPool()) {
 			AJPv13ConnectionPool.initConnectionPool();
@@ -240,8 +239,7 @@ public class AJPv13Server implements Runnable {
 	}
 
 	private final void resetPools() {
-		if (running) {
-			HttpServletManager.clearServletPool();
+		if (running.get()) {
 			AJPv13ListenerPool.resetPool();
 			if (AJPv13Config.useAJPConnectionPool()) {
 				AJPv13ConnectionPool.resetConnectionPool();
@@ -253,7 +251,7 @@ public class AJPv13Server implements Runnable {
 	}
 
 	public final boolean isRunning() {
-		return running;
+		return running.get();
 	}
 
 	/*

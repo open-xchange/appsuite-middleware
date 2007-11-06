@@ -55,15 +55,18 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.openexchange.configuration.SystemConfig;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.server.Initialization;
 
 /**
  * AJPv13Config
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class AJPv13Config {
+public final class AJPv13Config implements Initialization {
 
 	// Final static fields
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
@@ -71,46 +74,106 @@ public class AJPv13Config {
 
 	private static final String AJP_PROP_FILE = "AJPPROPERTIES";
 
-	// Static fields
-	private static int serverThreadSize = 20;
+	private static AJPv13Config instance = new AJPv13Config();
 
-	private static int listenerPoolSize = 20;
+	private static AtomicBoolean started = new AtomicBoolean();
 
-	private static int listenerReadTimeout = 60000;
+	public static AJPv13Config getInstance() {
+		return instance;
+	}
 
-	private static int maxNumOfSockets = 50;
+	// fields
+	private AtomicBoolean initialized = new AtomicBoolean();
 
-	private static boolean modJK;
+	private int serverThreadSize = 20;
 
-	private static boolean connectionPool;
+	private int listenerPoolSize = 20;
 
-	private static int connectionPoolSize = 5;
+	private int listenerReadTimeout = 60000;
 
-	private static boolean requestHandlerPool;
+	private int maxNumOfSockets = 50;
 
-	private static int requestHandlerPoolSize = 5;
+	private boolean modJK;
 
-	private static boolean watcherEnabled;
+	private boolean connectionPool;
 
-	private static boolean watcherPermission;
+	private int connectionPoolSize = 5;
 
-	private static int watcherMaxRunningTime = 300000;
+	private boolean requestHandlerPool;
 
-	private static int watcherFrequency = 300000;
+	private int requestHandlerPoolSize = 5;
 
-	private static int servletPoolSize = 50;
+	private boolean watcherEnabled;
 
-	private static int port = 8009;
+	private boolean watcherPermission;
 
-	private static String jvmRoute;
+	private int watcherMaxRunningTime = 300000;
 
-	private static boolean checkMagicBytesStrict;
+	private int watcherFrequency = 300000;
 
-	private static String servletConfigs;
-	
-	private static InetAddress ajpBindAddr;
+	private int servletPoolSize = 50;
 
-	static {
+	private int port = 8009;
+
+	private String jvmRoute;
+
+	private boolean checkMagicBytesStrict;
+
+	private String servletConfigs;
+
+	private InetAddress ajpBindAddr;
+
+	public void start() throws AbstractOXException {
+		if (started.get()) {
+			LOG.error(this.getClass().getName() + " already started");
+			return;
+		}
+		init();
+		started.set(true);
+	}
+
+	public void stop() throws AbstractOXException {
+		if (!started.get()) {
+			LOG.error(this.getClass().getName() + " cannot be stopped since it has no been started before");
+			return;
+		}
+		reset();
+		started.set(false);
+	}
+
+	private void reset() {
+		if (!initialized.get()) {
+			return;
+		}
+		serverThreadSize = 20;
+		listenerPoolSize = 20;
+		listenerReadTimeout = 60000;
+		maxNumOfSockets = 50;
+		modJK = false;
+		connectionPool = false;
+		connectionPoolSize = 5;
+		requestHandlerPool = false;
+		requestHandlerPoolSize = 5;
+		watcherEnabled = false;
+		watcherPermission = false;
+		watcherMaxRunningTime = 300000;
+		watcherFrequency = 300000;
+		servletPoolSize = 50;
+		port = 8009;
+		jvmRoute = null;
+		checkMagicBytesStrict = false;
+		servletConfigs = null;
+		ajpBindAddr = null;
+		/*
+		 * Switch flag
+		 */
+		initialized.set(false);
+	}
+
+	private void init() throws AJPv13Exception {
+		if (initialized.get()) {
+			return;
+		}
 		final Properties ajpProperties = new Properties();
 		final String ajpPropFile = SystemConfig.getProperty(AJP_PROP_FILE);
 		if (ajpPropFile != null) {
@@ -129,11 +192,11 @@ public class AJPv13Config {
 				/*
 				 * AJP_PORT
 				 */
-				port = Integer.parseInt(ajpProperties.getProperty("AJP_PORT", "8009"));
+				port = Integer.parseInt(ajpProperties.getProperty("AJP_PORT", "8009").trim());
 				/*
 				 * AJP_SERVER_THREAD_SIZE
 				 */
-				serverThreadSize = Integer.parseInt(ajpProperties.getProperty("AJP_SERVER_THREAD_SIZE", "20"));
+				serverThreadSize = Integer.parseInt(ajpProperties.getProperty("AJP_SERVER_THREAD_SIZE", "20").trim());
 				if (serverThreadSize < 0) {
 					/*
 					 * At least one server thread should accept opened sockets
@@ -143,7 +206,7 @@ public class AJPv13Config {
 				/*
 				 * AJP_MAX_NUM_OF_SOCKETS
 				 */
-				maxNumOfSockets = Integer.parseInt(ajpProperties.getProperty("AJP_MAX_NUM_OF_SOCKETS", "50"));
+				maxNumOfSockets = Integer.parseInt(ajpProperties.getProperty("AJP_MAX_NUM_OF_SOCKETS", "50").trim());
 				if (maxNumOfSockets < 0) {
 					/*
 					 * Use default value on invalid property value
@@ -153,26 +216,29 @@ public class AJPv13Config {
 				/*
 				 * AJP_MOD_JK
 				 */
-				modJK = trueStr.regionMatches(true, 0, ajpProperties.getProperty("AJP_MOD_JK", falseStr), 0, 4);
+				modJK = trueStr.regionMatches(true, 0, ajpProperties.getProperty("AJP_MOD_JK", falseStr).trim(), 0, 4);
 				/*
 				 * AJP_LISTENER_POOL_SIZE
 				 */
-				listenerPoolSize = Integer.parseInt(ajpProperties.getProperty("AJP_LISTENER_POOL_SIZE", "20"));
+				listenerPoolSize = Integer.parseInt(ajpProperties.getProperty("AJP_LISTENER_POOL_SIZE", "20").trim());
 				if (listenerPoolSize < 0) {
 					listenerPoolSize = 0;
 				}
 				/*
 				 * AJP_LISTENER_READ_TIMEOUT
 				 */
-				listenerReadTimeout = Integer.parseInt(ajpProperties.getProperty("AJP_LISTENER_READ_TIMEOUT", "60000"));
+				listenerReadTimeout = Integer.parseInt(ajpProperties.getProperty("AJP_LISTENER_READ_TIMEOUT", "60000")
+						.trim());
 				if (listenerReadTimeout < 0) {
 					listenerReadTimeout = 0;
 				}
 				/*
 				 * AJP_CONNECTION_POOL / AJP_CONNECTION_POOL_SIZE
 				 */
-				connectionPool = trueStr.regionMatches(true, 0, ajpProperties.getProperty("AJP_CONNECTION_POOL", trueStr), 0, 4);
-				connectionPoolSize = Integer.parseInt(ajpProperties.getProperty("AJP_CONNECTION_POOL_SIZE", "5"));
+				connectionPool = trueStr.regionMatches(true, 0, ajpProperties.getProperty("AJP_CONNECTION_POOL",
+						trueStr).trim(), 0, 4);
+				connectionPoolSize = Integer
+						.parseInt(ajpProperties.getProperty("AJP_CONNECTION_POOL_SIZE", "5").trim());
 				if (connectionPoolSize < 0) {
 					connectionPoolSize = 0;
 				}
@@ -180,9 +246,9 @@ public class AJPv13Config {
 				 * AJP_REQUEST_HANDLER_POOL / AJP_REQUEST_HANDLER_POOL_SIZE
 				 */
 				requestHandlerPool = trueStr.regionMatches(true, 0, ajpProperties.getProperty(
-						"AJP_REQUEST_HANDLER_POOL", trueStr), 0, 4);
+						"AJP_REQUEST_HANDLER_POOL", trueStr).trim(), 0, 4);
 				requestHandlerPoolSize = Integer.parseInt(ajpProperties.getProperty("AJP_REQUEST_HANDLER_POOL_SIZE",
-						"5"));
+						"5").trim());
 				if (requestHandlerPoolSize < 0) {
 					requestHandlerPoolSize = 0;
 				}
@@ -190,31 +256,31 @@ public class AJPv13Config {
 				 * AJP_WATCHER_ENABLED
 				 */
 				watcherEnabled = trueStr.regionMatches(true, 0, ajpProperties.getProperty("AJP_WATCHER_ENABLED",
-						falseStr), 0, 4);
+						falseStr).trim(), 0, 4);
 				/*
 				 * AJP_WATCHER_PERMISSION
 				 */
 				watcherPermission = trueStr.regionMatches(true, 0, ajpProperties.getProperty("AJP_WATCHER_PERMISSION",
-						falseStr), 0, 4);
+						falseStr).trim(), 0, 4);
 				/*
 				 * AJP_WATCHER_MAX_RUNNING_TIME
 				 */
 				watcherMaxRunningTime = Integer.parseInt(ajpProperties.getProperty("AJP_WATCHER_MAX_RUNNING_TIME",
-						"30000"));
+						"30000").trim());
 				if (watcherMaxRunningTime < 0) {
 					watcherMaxRunningTime = 30000;
 				}
 				/*
 				 * AJP_WATCHER_FREQUENCY
 				 */
-				watcherFrequency = Integer.parseInt(ajpProperties.getProperty("AJP_WATCHER_FREQUENCY", "30000"));
+				watcherFrequency = Integer.parseInt(ajpProperties.getProperty("AJP_WATCHER_FREQUENCY", "30000").trim());
 				if (watcherFrequency < 0) {
 					watcherFrequency = 30000;
 				}
 				/*
 				 * SERVLET_POOL_SIZE
 				 */
-				servletPoolSize = Integer.parseInt(ajpProperties.getProperty("SERVLET_POOL_SIZE", "50"));
+				servletPoolSize = Integer.parseInt(ajpProperties.getProperty("SERVLET_POOL_SIZE", "50").trim());
 				if (servletPoolSize < 0) {
 					servletPoolSize = 1;
 				}
@@ -224,17 +290,19 @@ public class AJPv13Config {
 				jvmRoute = ajpProperties.getProperty("AJP_JVM_ROUTE");
 				if (jvmRoute == null) {
 					LOG.error(AJPv13Exception.AJPCode.MISSING_JVM_ROUTE.getMessage());
+				} else {
+					jvmRoute = jvmRoute.trim();
 				}
 				/*
 				 * AJP_CHECK_MAGIC_BYTES_STRICT
 				 */
 				checkMagicBytesStrict = trueStr.regionMatches(true, 0, ajpProperties.getProperty(
-						"AJP_CHECK_MAGIC_BYTES_STRICT", trueStr), 0, 4);
+						"AJP_CHECK_MAGIC_BYTES_STRICT", trueStr).trim(), 0, 4);
 				/*
 				 * AJP_SERVLET_CONFIG_DIR
 				 */
 				servletConfigs = ajpProperties.getProperty("AJP_SERVLET_CONFIG_DIR");
-				if (servletConfigs == null || "null".equalsIgnoreCase(servletConfigs)) {
+				if (servletConfigs == null || "null".equalsIgnoreCase((servletConfigs = servletConfigs.trim()))) {
 					servletConfigs = SystemConfig.getProperty("CONFIGPATH") + "/servletConfig";
 				}
 				final File servletConfigsFile = new File(servletConfigs);
@@ -244,17 +312,21 @@ public class AJPv13Config {
 				/*
 				 * AJP_BIND_ADDR
 				 */
-				final String bindAddr = ajpProperties.getProperty("AJP_BIND_ADDR", "localhost");
+				final String bindAddr = ajpProperties.getProperty("AJP_BIND_ADDR", "localhost").trim();
 				ajpBindAddr = bindAddr.charAt(0) == '*' ? null : InetAddress.getByName(ajpProperties.getProperty(
 						"AJP_BIND_ADDR", "localhost"));
+				/*
+				 * Switch flag
+				 */
+				initialized.set(true);
 				/*
 				 * Log info
 				 */
 				logInfo();
-			} catch (FileNotFoundException e) {
-				LOG.error(e.getMessage(), e);
-			} catch (IOException e) {
-				LOG.error(e.getMessage(), e);
+			} catch (final FileNotFoundException e) {
+				throw new AJPv13Exception(AJPv13Exception.AJPCode.FILE_NOT_FOUND, e, ajpPropFile);
+			} catch (final IOException e) {
+				throw new AJPv13Exception(AJPv13Exception.AJPCode.IO_ERROR, e, e.getLocalizedMessage());
 			}
 		}
 	}
@@ -263,25 +335,26 @@ public class AJPv13Config {
 		if (LOG.isInfoEnabled()) {
 			final StringBuilder logBuilder = new StringBuilder(1000);
 			logBuilder.append("\nAJP CONFIGURATION:\n");
-			logBuilder.append("\tAJP_PORT=").append(port).append('\n');
-			logBuilder.append("\tAJP_SERVER_THREAD_SIZE=").append(serverThreadSize).append('\n');
-			logBuilder.append("\tAJP_MAX_NUM_OF_SOCKETS=").append(maxNumOfSockets).append('\n');
-			logBuilder.append("\tAJP_MOD_JK=").append(modJK).append('\n');
-			logBuilder.append("\tAJP_LISTENER_POOL_SIZE=").append(listenerPoolSize).append('\n');
-			logBuilder.append("\tAJP_LISTENER_READ_TIMEOUT=").append(listenerReadTimeout).append('\n');
-			logBuilder.append("\tAJP_CONNECTION_POOL=").append(connectionPool).append('\n');
-			logBuilder.append("\tAJP_CONNECTION_POOL_SIZE=").append(connectionPoolSize).append('\n');
-			logBuilder.append("\tAJP_REQUEST_HANDLER_POOL=").append(requestHandlerPool).append('\n');
-			logBuilder.append("\tAJP_REQUEST_HANDLER_POOL_SIZE=").append(requestHandlerPoolSize).append('\n');
-			logBuilder.append("\tAJP_WATCHER_ENABLED=").append(watcherEnabled).append('\n');
-			logBuilder.append("\tAJP_WATCHER_PERMISSION=").append(watcherPermission).append('\n');
-			logBuilder.append("\tAJP_WATCHER_MAX_RUNNING_TIME=").append(watcherMaxRunningTime).append('\n');
-			logBuilder.append("\tAJP_WATCHER_FREQUENCY=").append(watcherFrequency).append('\n');
-			logBuilder.append("\tSERVLET_POOL_SIZE=").append(servletPoolSize).append('\n');
-			logBuilder.append("\tAJP_JVM_ROUTE=").append(jvmRoute).append('\n');
-			logBuilder.append("\tAJP_CHECK_MAGIC_BYTES_STRICT=").append(checkMagicBytesStrict).append('\n');
-			logBuilder.append("\tAJP_SERVLET_CONFIG_DIR=").append(servletConfigs).append('\n');
-			logBuilder.append("\tAJP_BIND_ADDR=").append(ajpBindAddr == null ? "* (all interfaces)" : ajpBindAddr.toString());
+			logBuilder.append("\tAJP_PORT=").append(instance.port).append('\n');
+			logBuilder.append("\tAJP_SERVER_THREAD_SIZE=").append(instance.serverThreadSize).append('\n');
+			logBuilder.append("\tAJP_MAX_NUM_OF_SOCKETS=").append(instance.maxNumOfSockets).append('\n');
+			logBuilder.append("\tAJP_MOD_JK=").append(instance.modJK).append('\n');
+			logBuilder.append("\tAJP_LISTENER_POOL_SIZE=").append(instance.listenerPoolSize).append('\n');
+			logBuilder.append("\tAJP_LISTENER_READ_TIMEOUT=").append(instance.listenerReadTimeout).append('\n');
+			logBuilder.append("\tAJP_CONNECTION_POOL=").append(instance.connectionPool).append('\n');
+			logBuilder.append("\tAJP_CONNECTION_POOL_SIZE=").append(instance.connectionPoolSize).append('\n');
+			logBuilder.append("\tAJP_REQUEST_HANDLER_POOL=").append(instance.requestHandlerPool).append('\n');
+			logBuilder.append("\tAJP_REQUEST_HANDLER_POOL_SIZE=").append(instance.requestHandlerPoolSize).append('\n');
+			logBuilder.append("\tAJP_WATCHER_ENABLED=").append(instance.watcherEnabled).append('\n');
+			logBuilder.append("\tAJP_WATCHER_PERMISSION=").append(instance.watcherPermission).append('\n');
+			logBuilder.append("\tAJP_WATCHER_MAX_RUNNING_TIME=").append(instance.watcherMaxRunningTime).append('\n');
+			logBuilder.append("\tAJP_WATCHER_FREQUENCY=").append(instance.watcherFrequency).append('\n');
+			logBuilder.append("\tSERVLET_POOL_SIZE=").append(instance.servletPoolSize).append('\n');
+			logBuilder.append("\tAJP_JVM_ROUTE=").append(instance.jvmRoute).append('\n');
+			logBuilder.append("\tAJP_CHECK_MAGIC_BYTES_STRICT=").append(instance.checkMagicBytesStrict).append('\n');
+			logBuilder.append("\tAJP_SERVLET_CONFIG_DIR=").append(instance.servletConfigs).append('\n');
+			logBuilder.append("\tAJP_BIND_ADDR=").append(
+					instance.ajpBindAddr == null ? "* (all interfaces)" : instance.ajpBindAddr.toString());
 			LOG.info(logBuilder.toString());
 		}
 	}
@@ -290,84 +363,84 @@ public class AJPv13Config {
 		super();
 	}
 
-	public static final int getAJPMaxNumOfSockets() {
-		return maxNumOfSockets;
+	public static int getAJPMaxNumOfSockets() {
+		return instance.maxNumOfSockets;
 	}
 
-	public static final boolean isAJPModJK() {
-		return modJK;
+	public static boolean isAJPModJK() {
+		return instance.modJK;
 	}
 
-	public static final int getAJPPort() {
-		return port;
+	public static int getAJPPort() {
+		return instance.port;
 	}
 
-	public static final int getAJPServerThreadSize() {
-		return serverThreadSize;
+	public static int getAJPServerThreadSize() {
+		return instance.serverThreadSize;
 	}
 
-	public static final int getAJPListenerPoolSize() {
-		return listenerPoolSize;
+	public static int getAJPListenerPoolSize() {
+		return instance.listenerPoolSize;
 	}
 
-	public static final int getAJPListenerReadTimeout() {
-		return listenerReadTimeout;
+	public static int getAJPListenerReadTimeout() {
+		return instance.listenerReadTimeout;
 	}
 
-	public static final boolean useAJPConnectionPool() {
-		return connectionPool;
+	public static boolean useAJPConnectionPool() {
+		return instance.connectionPool;
 	}
 
-	public static final int getAJPConnectionPoolSize() {
-		return connectionPoolSize;
+	public static int getAJPConnectionPoolSize() {
+		return instance.connectionPoolSize;
 	}
 
-	public static final boolean useAJPRequestHandlerPool() {
-		return requestHandlerPool;
+	public static boolean useAJPRequestHandlerPool() {
+		return instance.requestHandlerPool;
 	}
 
-	public static final int getAJPRequestHandlerPoolSize() {
-		return requestHandlerPoolSize;
+	public static int getAJPRequestHandlerPoolSize() {
+		return instance.requestHandlerPoolSize;
 	}
 
-	public static final boolean getAJPWatcherEnabled() {
-		return watcherEnabled;
+	public static boolean getAJPWatcherEnabled() {
+		return instance.watcherEnabled;
 	}
 
-	public static final boolean getAJPWatcherPermission() {
-		return watcherPermission;
+	public static boolean getAJPWatcherPermission() {
+		return instance.watcherPermission;
 	}
 
-	public static final int getAJPWatcherMaxRunningTime() {
-		return watcherMaxRunningTime;
+	public static int getAJPWatcherMaxRunningTime() {
+		return instance.watcherMaxRunningTime;
 	}
 
-	public static final int getAJPWatcherFrequency() {
-		return watcherFrequency;
+	public static int getAJPWatcherFrequency() {
+		return instance.watcherFrequency;
 	}
 
-	public static final int getServletPoolSize() {
-		return servletPoolSize;
+	public static int getServletPoolSize() {
+		return instance.servletPoolSize;
 	}
 
-	public static final String getJvmRoute() {
-		return jvmRoute;
+	public static String getJvmRoute() {
+		return instance.jvmRoute;
 	}
 
-	public static final boolean getCheckMagicBytesStrict() {
-		return checkMagicBytesStrict;
+	public static boolean getCheckMagicBytesStrict() {
+		return instance.checkMagicBytesStrict;
 	}
 
-	public static final String getServletConfigs() {
-		return servletConfigs;
+	public static String getServletConfigs() {
+		return instance.servletConfigs;
 	}
-	
+
 	/**
 	 * @return an instance if <code>java.net.InetAddress</code> if property
 	 *         AJP_BIND_ADDR is different to "*"; <code>null</code> otherwise
 	 */
-	public static final InetAddress getAJPBindAddress() {
-		return ajpBindAddr;
+	public static InetAddress getAJPBindAddress() {
+		return instance.ajpBindAddr;
 	}
 
 }

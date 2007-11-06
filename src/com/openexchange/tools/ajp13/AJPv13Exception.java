@@ -164,7 +164,11 @@ public class AJPv13Exception extends AbstractOXException {
 		 */
 		STARTUP_ERROR(
 				"AJP server socket could not be bound to port %d. Probably another process is already listening on this port.",
-				Category.SOCKET_CONNECTION, 21);
+				Category.SOCKET_CONNECTION, 21),
+		/**
+		 * File "%s" could not be found
+		 */
+		FILE_NOT_FOUND("File \"%s\" could not be found.", Category.CODE_ERROR, 22);
 
 		private final String message;
 

@@ -49,34 +49,21 @@
 
 package com.openexchange.tools.servlet.http;
 
-import static com.openexchange.tools.LocaleTools.toLowerCase;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FilenameFilter;
-import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Properties;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.regex.Pattern;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.SingleThreadModel;
 import javax.servlet.http.HttpServlet;
 
-import com.openexchange.configuration.SystemConfig;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.FIFOQueue;
 import com.openexchange.tools.ajp13.AJPv13Config;
 import com.openexchange.tools.ajp13.AJPv13Server;
-import com.openexchange.tools.servlet.OXServletException;
 
 /**
  * HttpServletManager
@@ -92,10 +79,6 @@ public class HttpServletManager {
 
 	private static Map<String, Constructor> servletConstructorMap;
 
-	private static final AtomicBoolean initialized = new AtomicBoolean();
-
-	private static final Lock INIT_LOCK = new ReentrantLock();
-
 	private static final ReadWriteLock RW_LOCK = new ReentrantReadWriteLock();
 
 	private static final Lock READ_LOCK = RW_LOCK.readLock();
@@ -106,6 +89,14 @@ public class HttpServletManager {
 		super();
 	}
 
+	/**
+	 * Determines the instance of {@link HttpServlet} that corresponds to given
+	 * ID. The ID is the servlet's path, e.g. <code>/servlet/path</code>
+	 * 
+	 * @param id
+	 *            The servlet's ID
+	 * @return The instance of {@link HttpServlet}
+	 */
 	public static HttpServlet getServlet(final String id) {
 		READ_LOCK.lock();
 		try {
@@ -162,6 +153,14 @@ public class HttpServletManager {
 		return null;
 	}
 
+	/**
+	 * Puts a servlet bound to given ID into this servlet manager's pool
+	 * 
+	 * @param id
+	 *            The servlet's ID
+	 * @param servletObj
+	 *            The servlet instance
+	 */
 	public static void putServlet(final String id, final HttpServlet servletObj) {
 		WRITE_LOCK.lock();
 		try {
@@ -179,6 +178,14 @@ public class HttpServletManager {
 		}
 	}
 
+	/**
+	 * Destroys the servlet that is bound to given ID.
+	 * 
+	 * @param id
+	 *            The servlet ID
+	 * @param servletObj
+	 *            The servlet instance
+	 */
 	public static final void destroyServlet(final String id, final HttpServlet servletObj) {
 		WRITE_LOCK.lock();
 		try {
@@ -190,23 +197,27 @@ public class HttpServletManager {
 				 */
 				return;
 			}
-			if (SERVLET_POOL.containsKey(id)) {
-				SERVLET_POOL.remove(id);
-			}
+			SERVLET_POOL.remove(id);
 		} finally {
 			WRITE_LOCK.unlock();
 		}
 	}
 
+	/**
+	 * @return An {@link Iterator} for servlet IDs
+	 */
 	public static Iterator<String> getServletKeysIterator() {
 		return servletConstructorMap.keySet().iterator();
 	}
 
+	/**
+	 * @return The number of servlet IDs
+	 */
 	public static int getNumberOfServletKeys() {
 		return servletConstructorMap.size();
 	}
 
-	public static void clearServletPool() {
+	private static void clearServletPool() {
 		WRITE_LOCK.lock();
 		try {
 			SERVLET_POOL.clear();
@@ -215,140 +226,19 @@ public class HttpServletManager {
 		}
 	}
 
-	public final static void loadServletMapping() throws AbstractOXException {
-		final String servletMappingDir = SystemConfig.getProperty(SystemConfig.Property.ServletMappingDir);
-		if (servletMappingDir == null) {
-			throw new OXServletException(OXServletException.Code.MISSING_SERVLET_DIR,
-					SystemConfig.Property.ServletMappingDir.getPropertyName());
-		}
-		loadServletMapping(servletMappingDir.trim());
+	final static void initHttpServletManager(final Map<String, Constructor> servletConstructorMap) {
+		HttpServletManager.servletConstructorMap = servletConstructorMap;
+		createServlets();
 	}
 
-	private final static String STR_PROPERTIES = ".properties";
-
-	private final static Class[] CLASS_ARR = new Class[] {};
-
-	public final static void loadServletMapping(final String servletMappingDir) throws AbstractOXException {
-		if (!initialized.get()) {
-			INIT_LOCK.lock();
-			try {
-				if (servletConstructorMap != null) {
-					/*
-					 * Ensure servlets are only initialized one time
-					 */
-					return;
-				}
-				final File dir = new File(servletMappingDir);
-				if (!dir.exists()) {
-					throw new OXServletException(OXServletException.Code.DIR_NOT_EXISTS, servletMappingDir);
-				} else if (!dir.isDirectory()) {
-					throw new OXServletException(OXServletException.Code.NO_DIRECTORY, servletMappingDir);
-				}
-				final File[] propFiles = dir.listFiles(new FilenameFilter() {
-					/*
-					 * (non-Javadoc)
-					 * 
-					 * @see java.io.FilenameFilter#accept(java.io.File,
-					 *      java.lang.String)
-					 */
-					public boolean accept(final File dir, final String name) {
-						return toLowerCase(name).endsWith(STR_PROPERTIES);
-
-					}
-				});
-				servletConstructorMap = new HashMap<String, Constructor>();
-				for (int i = 0; i < propFiles.length; i++) {
-					final File f = propFiles[i];
-
-					/*
-					 * Read properties from file
-					 */
-					Properties properties = null;
-					FileInputStream fis = null;
-					try {
-						fis = new FileInputStream(f);
-						properties = new Properties();
-						properties.load(fis);
-					} finally {
-						if (fis != null) {
-							fis.close();
-							fis = null;
-						}
-					}
-					/*
-					 * Initialize servlets' default constructor
-					 */
-					final int size = properties.keySet().size();
-					final Iterator<Object> iter = properties.keySet().iterator();
-					NextMapping: for (int k = 0; k < size; k++) {
-						String value = null;
-						try {
-							final String name = iter.next().toString();
-							if (!checkServletPath(name)) {
-								LOG.error(new StringBuilder("Invalid servlet path: ").append(name).toString());
-								continue NextMapping;
-							}
-							Object tmp = properties.get(name);
-							if (null == tmp || (value = tmp.toString().trim()).length() == 0) {
-								if (LOG.isWarnEnabled()) {
-									final OXServletException e = new OXServletException(
-											OXServletException.Code.NO_CLASS_NAME_FOUND, name);
-									LOG.warn(e.getLocalizedMessage(), e);
-								}
-								continue NextMapping;
-							}
-							tmp = null;
-							if (servletConstructorMap.containsKey(name)) {
-								final boolean isEqual = servletConstructorMap.get(name).toString().indexOf(value) != -1;
-								if (!isEqual && LOG.isWarnEnabled()) {
-									final OXServletException e = new OXServletException(
-											OXServletException.Code.ALREADY_PRESENT, name, servletConstructorMap
-													.get(name), value);
-									LOG.warn(e.getLocalizedMessage(), e);
-								}
-							} else {
-								servletConstructorMap.put(name, Class.forName(value).getConstructor(CLASS_ARR));
-							}
-						} catch (final SecurityException e) {
-							if (LOG.isWarnEnabled()) {
-								final OXServletException se = new OXServletException(
-										OXServletException.Code.SECURITY_ERR, e, value);
-								LOG.warn(se.getLocalizedMessage(), se);
-							}
-						} catch (final ClassNotFoundException e) {
-							if (LOG.isWarnEnabled()) {
-								final OXServletException se = new OXServletException(
-										OXServletException.Code.CLASS_NOT_FOUND, e, value);
-								LOG.warn(se.getLocalizedMessage(), se);
-							}
-						} catch (final NoSuchMethodException e) {
-							if (LOG.isWarnEnabled()) {
-								final OXServletException se = new OXServletException(
-										OXServletException.Code.NO_DEFAULT_CONSTRUCTOR, e, value);
-								LOG.warn(se.getLocalizedMessage(), se);
-							}
-						}
-					}
-				}
-				initialized.set(true);
-			} catch (final IOException exc) {
-				throw new OXServletException(OXServletException.Code.SERVLET_MAPPINGS_NOT_LOADED, exc, exc
-						.getLocalizedMessage());
-			} finally {
-				INIT_LOCK.unlock();
-			}
-		}
-	}
-	
-	private static final Pattern PATTERN_SERVLET_PATH = Pattern.compile("([\\p{ASCII}&&[^\\p{Blank}]]+)\\*?");
-	
-	private static boolean checkServletPath(final String servletPath) {
-		return PATTERN_SERVLET_PATH.matcher(servletPath).matches();
+	final static void releaseHttpServletManager() {
+		HttpServletManager.servletConstructorMap = null;
+		clearServletPool();
 	}
 
 	private static final Object[] INIT_ARGS = new Object[] {};
 
-	public static void createServlets() {
+	private static void createServlets() {
 		WRITE_LOCK.lock();
 		try {
 			for (final Iterator<Map.Entry<String, Constructor>> iter = servletConstructorMap.entrySet().iterator(); iter

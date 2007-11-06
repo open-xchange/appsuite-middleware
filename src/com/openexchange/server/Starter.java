@@ -55,9 +55,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.BackendServicesInit;
 import com.openexchange.groupware.GroupwareInit;
-import com.openexchange.tools.servlet.http.HttpServletManager;
 
 /**
  * com.openexchange.server.Starter
@@ -95,6 +93,14 @@ public class Starter implements Initialization {
          * Connection pools for ConfigDB and database assignments for contexts.
          */
         com.openexchange.database.DatabaseInit.getInstance(),
+        /**
+         * Starts AJP server
+         */
+        com.openexchange.groupware.BackendServicesInit.getInstance(),
+        /**
+         * Starts HTTP serlvet manager
+         */
+        com.openexchange.tools.servlet.http.HttpServletManagerInit.getInstance(),
         /**
          * Setup of ContextStorage and LoginInfo.
          */
@@ -224,16 +230,6 @@ public class Starter implements Initialization {
             stop();
             System.exit(1);
         }
-        
-        try {
-            if (LOG.isInfoEnabled()) {
-                LOG.info("Initializing servlet instances");
-            }
-            HttpServletManager.loadServletMapping();
-        } catch (AbstractOXException e1) {
-            LOG.error("Initializing servlet instances failed.", e1);
-            System.exit(1);
-        }
 
         // New server startup.
         try {
@@ -244,16 +240,6 @@ public class Starter implements Initialization {
         }
         if (LOG.isInfoEnabled()) {
             LOG.info("Groupware server successfully initialized.");
-        }
-        
-        try {
-            BackendServicesInit.initAJP();
-        } catch (final AbstractOXException e) {
-            LOG.error("Initializing the AJP server failed.", e);
-            System.exit(1);
-        }
-        if (LOG.isInfoEnabled()) {
-            LOG.info("AJP server successfully initialized.");
         }
         
         /*
