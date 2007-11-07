@@ -1,3 +1,7 @@
+* 2007-11-07 - thorben.betten@open-xchange.com
+
+ - Bugfix #9966: Proper error message on exceeded quota on mail server
+
 * 2007-11-06 - dennis.sieben@open-xchange.com
 
  - Bugfix #8919: [L3] 'checkconsistency' does not provide any usage information and

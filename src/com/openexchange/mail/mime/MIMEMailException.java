@@ -248,7 +248,11 @@ public class MIMEMailException extends MailException {
 		/**
 		 * Messaging error: %s
 		 */
-		MESSAGING_ERROR("Messaging error: %s", Category.CODE_ERROR, 1023);
+		MESSAGING_ERROR("Messaging error: %s", Category.CODE_ERROR, 1023),
+		/**
+		 * The quota on mail server is exceeded
+		 */
+		QUOTA_EXCEEDED("Mail server's quota is exceeded", Category.EXTERNAL_RESOURCE_FULL, 1024);
 
 		private final String message;
 
@@ -322,6 +326,8 @@ public class MIMEMailException extends MailException {
 	private static final String ERR_AUTH_FAILED = "bad authentication failed";
 
 	private static final String ERR_MSG_TOO_LARGE = "message too large";
+	
+	private static final String ERR_QUOTA = "quota";
 
 	/**
 	 * Handles given instance of {@link MessagingException} and creates an
@@ -425,6 +431,8 @@ public class MIMEMailException extends MailException {
 			return new MIMEMailException(Code.SOCKET_ERROR, e, e.getMessage());
 		} else if (e.getNextException() instanceof UnknownHostException) {
 			return new MIMEMailException(Code.UNKNOWN_HOST, e, e.getMessage());
+		} else if (e.getMessage().toLowerCase(Locale.ENGLISH).indexOf(ERR_QUOTA) != -1) {
+			return new MIMEMailException(Code.QUOTA_EXCEEDED, e, EMPTY_ARGS);
 		}
 		/*
 		 * Default case
