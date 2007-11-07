@@ -104,6 +104,25 @@ public final class MIMEType2ExtMap {
 	}
 
 	/**
+	 * Resets MIME type file map
+	 */
+	public static void reset() {
+		if (initialized.get()) {
+			LOCK.lock();
+			try {
+				if (!initialized.get()) {
+					return;
+				}
+				type_hash.clear();
+				ext_hash.clear();
+				initialized.set(false);
+			} finally {
+				LOCK.unlock();
+			}
+		}
+	}
+
+	/**
 	 * Initializes MIME type file map
 	 */
 	public static void init() {

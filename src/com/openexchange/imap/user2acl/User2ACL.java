@@ -51,8 +51,6 @@ package com.openexchange.imap.user2acl;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
@@ -60,7 +58,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mail.config.MailConfig;
-import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.config.MailConfig.LoginType;
 
 /**
@@ -72,9 +69,89 @@ import com.openexchange.mail.config.MailConfig.LoginType;
  */
 public abstract class User2ACL {
 
-	private static final Object[] EMPTY_ARGS = new Object[0];
-
 	public static final class User2ACLException extends AbstractOXException {
+
+		public static enum Code {
+
+			/**
+			 * Implementing class could not be found
+			 */
+			CLASS_NOT_FOUND("Implementing class could not be found", Category.CODE_ERROR, 2),
+			/**
+			 * An I/O error occured when creating the socket connection to IMAP
+			 * server (%s): %s
+			 */
+			CREATING_SOCKET_FAILED("An I/O error occured when creating the socket connection to IMAP server (%s): %s",
+					Category.SUBSYSTEM_OR_SERVICE_DOWN, 5),
+			/**
+			 * Instantiating the class failed.
+			 */
+			INSTANTIATION_FAILED("Instantiating the class failed.", Category.CODE_ERROR, 1),
+			/**
+			 * An I/O error occured: %s
+			 */
+			IO_ERROR("An I/O error occured: %s", Category.SUBSYSTEM_OR_SERVICE_DOWN, 6),
+			/**
+			 * Missing property %1$s in system.properties.
+			 */
+			MISSING_SETTING("Missing property %1$s in imap.properties.", Category.SETUP_ERROR, 3),
+			/**
+			 * Unknown IMAP server: %1$s
+			 */
+			UNKNOWN_IMAP_SERVER("Unknown IMAP server: %1$s", Category.CODE_ERROR, 4);
+
+			/**
+			 * Category of the exception.
+			 */
+			private final Category category;
+
+			/**
+			 * Message of the exception.
+			 */
+			private final String message;
+
+			/**
+			 * Detail number of the exception.
+			 */
+			private final int number;
+
+			/**
+			 * Default constructor.
+			 * 
+			 * @param message
+			 *            message.
+			 * @param category
+			 *            category.
+			 * @param detailNumber
+			 *            detail number.
+			 */
+			private Code(final String message, final Category category, final int detailNumber) {
+				this.message = message;
+				this.category = category;
+				this.number = detailNumber;
+			}
+
+			/**
+			 * @return the category.
+			 */
+			public Category getCategory() {
+				return category;
+			}
+
+			/**
+			 * @return the message.
+			 */
+			public String getMessage() {
+				return message;
+			}
+
+			/**
+			 * @return the number.
+			 */
+			public int getNumber() {
+				return number;
+			}
+		}
 
 		/**
 		 * serialVersionUID
@@ -120,145 +197,21 @@ public abstract class User2ACL {
 			super(Component.ACL_ERROR, code.category, code.number, code.message, cause);
 			setMessageArgs(messageArgs);
 		}
-
-		public static enum Code {
-
-			/**
-			 * Instantiating the class failed.
-			 */
-			INSTANTIATION_FAILED("Instantiating the class failed.", Category.CODE_ERROR, 1),
-			/**
-			 * Implementing class could not be found
-			 */
-			CLASS_NOT_FOUND("Implementing class could not be found", Category.CODE_ERROR, 2),
-			/**
-			 * Missing property %1$s in system.properties.
-			 */
-			MISSING_SETTING("Missing property %1$s in imap.properties.", Category.SETUP_ERROR, 3),
-			/**
-			 * Unknown IMAP server: %1$s
-			 */
-			UNKNOWN_IMAP_SERVER("Unknown IMAP server: %1$s", Category.CODE_ERROR, 4),
-			/**
-			 * An I/O error occured when creating the socket connection to IMAP
-			 * server (%s): %s
-			 */
-			CREATING_SOCKET_FAILED("An I/O error occured when creating the socket connection to IMAP server (%s): %s",
-					Category.SUBSYSTEM_OR_SERVICE_DOWN, 5),
-			/**
-			 * An I/O error occured: %s
-			 */
-			IO_ERROR("An I/O error occured: %s", Category.SUBSYSTEM_OR_SERVICE_DOWN, 6);
-
-			/**
-			 * Message of the exception.
-			 */
-			private final String message;
-
-			/**
-			 * Category of the exception.
-			 */
-			private final Category category;
-
-			/**
-			 * Detail number of the exception.
-			 */
-			private final int number;
-
-			/**
-			 * Default constructor.
-			 * 
-			 * @param message
-			 *            message.
-			 * @param category
-			 *            category.
-			 * @param detailNumber
-			 *            detail number.
-			 */
-			private Code(final String message, final Category category, final int detailNumber) {
-				this.message = message;
-				this.category = category;
-				this.number = detailNumber;
-			}
-
-			/**
-			 * @return the category.
-			 */
-			public Category getCategory() {
-				return category;
-			}
-
-			/**
-			 * @return the message.
-			 */
-			public String getMessage() {
-				return message;
-			}
-
-			/**
-			 * @return the number.
-			 */
-			public int getNumber() {
-				return number;
-			}
-		}
 	}
 
-	private static final Lock INSTANCE_LOCK = new ReentrantLock();
+	private static final Object[] EMPTY_ARGS = new Object[0];
+
+	private static final AtomicBoolean instancialized = new AtomicBoolean();
 
 	/**
 	 * Singleton
 	 */
 	private static User2ACL singleton;
 
-	private static final AtomicBoolean instancialized = new AtomicBoolean();
-
-	protected User2ACL() {
-		super();
-	}
-
-	static void setInstance(final User2ACL singleton) {
-		User2ACL.singleton = singleton;
-		instancialized.set(true);
-	}
-
-	/**
-	 * Creates a new instance implementing the {@link User2ACL} interface.
-	 * 
-	 * @return an instance implementing the {@link User2ACL} interface.
-	 * @throws User2ACLException
-	 *             if the instance can't be created.
-	 */
-	public static final User2ACL getInstance(final User sessionUser) throws User2ACLException {
-		if (!instancialized.get()) {
-			INSTANCE_LOCK.lock();
-			try {
-				if (null == singleton) {
-					singleton = getUser2ACLImpl(sessionUser);
-					instancialized.set(true);
-				}
-			} finally {
-				INSTANCE_LOCK.unlock();
-			}
-		}
-		return singleton;
-	}
-
-	private static final User2ACL getUser2ACLImpl(final User sessionUser) throws User2ACLException {
-		try {
-			final Object[] args = getIMAPServer(sessionUser);
-			return User2ACLAutoDetector.getUser2ACLImpl((String) args[0], ((Integer) args[1]).intValue());
-		} catch (final IOException e) {
-			throw new User2ACLException(User2ACLException.Code.IO_ERROR, e, e.getLocalizedMessage());
-		} catch (final MailConfigException e) {
-			throw new User2ACLException(e);
-		}
-	}
-
 	/**
 	 * @return IP/Hostname of IMAP server and its port
 	 */
-	private static final Object[] getIMAPServer(final User sessionUser) throws MailConfigException {
+	private static final Object[] getIMAPServer(final User sessionUser) {
 		final String imapServer;
 		if (LoginType.GLOBAL.equals(MailConfig.getLoginType())) {
 			imapServer = MailConfig.getMailServer();
@@ -277,19 +230,53 @@ public abstract class User2ACL {
 	}
 
 	/**
-	 * Initializes the {@link User2ACL} implementation.
+	 * Creates a new instance implementing the {@link User2ACL} interface.
 	 * 
+	 * @return an instance implementing the {@link User2ACL} interface.
 	 * @throws User2ACLException
-	 *             if initialization fails.
+	 *             if the instance can't be created.
 	 */
-	public static final void init() throws User2ACLException {
-		try {
-			User2ACLInit.getInstance().start();
-		} catch (final User2ACLException e1) {
-			throw e1;
-		} catch (final AbstractOXException e1) {
-			throw new User2ACLException(e1);
+	public static final User2ACL getInstance(final User sessionUser) throws User2ACLException {
+		if (!instancialized.get()) {
+			/*
+			 * Auto-detect dependent on user's IMAP settings
+			 */
+			return getUser2ACLImpl(sessionUser);
 		}
+		return singleton;
+	}
+
+	private static final User2ACL getUser2ACLImpl(final User sessionUser) throws User2ACLException {
+		try {
+			final Object[] args = getIMAPServer(sessionUser);
+			return User2ACLAutoDetector.getUser2ACLImpl((String) args[0], ((Integer) args[1]).intValue());
+		} catch (final IOException e) {
+			throw new User2ACLException(User2ACLException.Code.IO_ERROR, e, e.getLocalizedMessage());
+		}
+	}
+
+	/**
+	 * Resest user2acl
+	 */
+	final static void resetUser2ACL() {
+		singleton = null;
+		instancialized.set(false);
+		User2ACLAutoDetector.resetUser2ACLMappings();
+	}
+
+	/**
+	 * Only invoked if auto-detection is turned off
+	 * 
+	 * @param singleton
+	 *            The singleton instance of {@link User2ACL}
+	 */
+	final static void setInstance(final User2ACL singleton) {
+		User2ACL.singleton = singleton;
+		instancialized.set(true);
+	}
+
+	protected User2ACL() {
+		super();
 	}
 
 	/**

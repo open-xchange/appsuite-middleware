@@ -93,8 +93,15 @@ public final class User2ACLAutoDetector {
 	}
 
 	/**
-	 * Determines the {@link User2ACL} impl dependent on MAP server's
-	 * greeting, given the IMAP server's name
+	 * Resets the user2acl auto-detector
+	 */
+	static void resetUser2ACLMappings() {
+		map.clear();
+	}
+
+	/**
+	 * Determines the {@link User2ACL} impl dependent on MAP server's greeting,
+	 * given the IMAP server's name
 	 * 
 	 * <p>
 	 * The IMAP server name can either be a machine name, such as "<code>java.sun.com</code>",
@@ -104,16 +111,14 @@ public final class User2ACLAutoDetector {
 	 *            the IMAP server's name
 	 * @param imapPort -
 	 *            the IMAP server's port
-	 * @return the IMAP server's depending {@link User2ACL}
-	 *         implementation
+	 * @return the IMAP server's depending {@link User2ACL} implementation
 	 * @throws IOException -
 	 *             if an I/O error occurs
 	 * @throws User2ACLException -
 	 *             if a server greeting could not be mapped to a supported IMAP
 	 *             server
 	 */
-	public static User2ACL getUser2ACLImpl(final String imapServer, final int imapPort) throws IOException,
-			User2ACLException {
+	static User2ACL getUser2ACLImpl(final String imapServer, final int imapPort) throws IOException, User2ACLException {
 		final InetAddress key = InetAddress.getByName(imapServer);
 		User2ACL impl = map.get(key);
 		if (impl == null) {
@@ -129,16 +134,23 @@ public final class User2ACLAutoDetector {
 				return iServers[i];
 			}
 		}
+		/*
+		 * No known IMAP server found, check if ACLs are disabled anyway. If yes
+		 * user2acl is never used and can safely be mapped to default
+		 * implementation.
+		 */
 		if (!IMAPConfig.isSupportsACLsConfig()) {
 			/*
 			 * Return fallback implementation
 			 */
 			if (LOG.isWarnEnabled()) {
-				LOG.warn(new StringBuilder(512)
-					.append("No IMAP server found that corresponds to greeting:\r\n\"")
-					.append(info.replaceAll("\r?\n", ""))
-					.append("\"\r\nSince ACLs are disabled (through IMAP configuration) or not supported by IMAP server, \"")
-					.append(IMAPServer.CYRUS.getName()).append("\" is used as fallback."));
+				LOG
+						.warn(new StringBuilder(512)
+								.append("No IMAP server found that corresponds to greeting:\r\n\"")
+								.append(info.replaceAll("\r?\n", ""))
+								.append(
+										"\"\r\nSince ACLs are disabled (through IMAP configuration) or not supported by IMAP server, \"")
+								.append(IMAPServer.CYRUS.getName()).append("\" is used as fallback."));
 			}
 			return IMAPServer.CYRUS;
 		}

@@ -51,17 +51,12 @@ package com.openexchange.mail.utils;
 
 import static com.openexchange.mail.MailInterfaceImpl.mailInterfaceMonitor;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Properties;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -75,7 +70,6 @@ import javax.mail.internet.MimeUtility;
 
 import com.openexchange.ajax.Mail;
 import com.openexchange.configuration.ServerConfig;
-import com.openexchange.configuration.SystemConfig;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailInterfaceImpl;
 import com.openexchange.mail.config.MailConfig;
@@ -652,50 +646,45 @@ public final class MessageUtility {
 		return sb.toString();
 	}
 
-	private static final AtomicBoolean initialized = new AtomicBoolean();
-
 	private static Map<Character, String> htmlCharMap;
 
-	private static void initHtmlCharMap() {
-		synchronized (initialized) {
-			if (null == htmlCharMap) {
-				final Properties htmlEntities = new Properties();
-				InputStream in = null;
-				try {
-					in = new FileInputStream(SystemConfig.getProperty(SystemConfig.Property.HTMLEntities));
-					htmlEntities.load(in);
-				} catch (final IOException e) {
-					LOG.error(e.getLocalizedMessage(), e);
-					htmlCharMap = null;
-				} finally {
-					if (null != in) {
-						try {
-							in.close();
-						} catch (final IOException e) {
-							LOG.error(e.getLocalizedMessage(), e);
-						}
-					}
-				}
-				/*
-				 * Build up map
-				 */
-				htmlCharMap = new HashMap<Character, String>();
-				final Iterator<Map.Entry<Object, Object>> iter = htmlEntities.entrySet().iterator();
-				final int size = htmlEntities.size();
-				for (int i = 0; i < size; i++) {
-					final Map.Entry<Object, Object> entry = iter.next();
-					htmlCharMap.put(Character.valueOf((char) Integer.parseInt((String) entry.getValue())),
-							(String) entry.getKey());
-				}
-				initialized.set(true);
+	private static Map<String, Character> htmlEntityMap;
+
+	static void setMaps(final Map<Character, String> htmlCharMap, final Map<String, Character> htmlEntityMap) {
+		MessageUtility.htmlCharMap = htmlCharMap;
+		MessageUtility.htmlEntityMap = htmlEntityMap;
+	}
+
+	/**
+	 * Maps specified HTML entity - e.g. <code>&amp;uuml;</code> - to
+	 * corresponding ASCII character
+	 * 
+	 * @param entity
+	 *            The HTML entity
+	 * @return The corresponding ASCII character or <code>null</code>
+	 */
+	public static Character getHTMLEntity(final String entity) {
+		if (null == entity) {
+			return null;
+		}
+		String key = entity;
+		if (key.charAt(0) == '&') {
+			key = key.substring(1);
+		}
+		{
+			final int lastPos = key.length() - 1;
+			if (key.charAt(lastPos) == ';') {
+				key = key.substring(0, lastPos);
 			}
 		}
+		final Character tmp = htmlEntityMap.get(key);
+		if (tmp != null) {
+			return tmp;
+		}
+		return null;
 	}
 
 	private static String escape(final String s, final boolean withQuote) {
-		if (!initialized.get()) {
-			initHtmlCharMap();
-		}
 		final int len = s.length();
 		final StringBuilder sb = new StringBuilder(len);
 		/*
@@ -752,7 +741,7 @@ public final class MessageUtility {
 		return htmlFormat(plainText, true);
 	}
 
-	private static final Pattern PATTERN_HREF = Pattern
+	public static final Pattern PATTERN_HREF = Pattern
 			.compile(
 					"<a\\s+href[^>]+>.*?</a>|((?:https?://|ftp://|mailto:|news\\.|www\\.)(?:[-A-Z0-9+@#/%?=~_|!:,.;]|&amp;|&(?!\\w+;))*(?:[-A-Z0-9+@#/%=~_|]|&amp;|&(?!\\w+;)))",
 					Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);

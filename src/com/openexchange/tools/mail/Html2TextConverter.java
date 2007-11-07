@@ -49,19 +49,14 @@
 
 package com.openexchange.tools.mail;
 
-import java.io.FileInputStream;
+import static com.openexchange.mail.utils.MessageUtility.PATTERN_HREF;
+import static com.openexchange.mail.utils.MessageUtility.getHTMLEntity;
+
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
-import java.util.Properties;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import com.openexchange.configuration.SystemConfig;
 
 /**
  * Html2TextConverter
@@ -70,13 +65,6 @@ import com.openexchange.configuration.SystemConfig;
  * 
  */
 public final class Html2TextConverter {
-
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(Html2TextConverter.class);
-
-	private static final AtomicBoolean initialized = new AtomicBoolean();
-
-	private static final Lock INIT_LOCK = new ReentrantLock();
 
 	private static final String STR_EMPTY = "";
 
@@ -94,55 +82,13 @@ public final class Html2TextConverter {
 
 	private final StringBuilder anchorBuilder;
 
-	private static Properties htmlEntities;
-
-	private static void init() {
-		if (!initialized.get()) {
-			INIT_LOCK.lock();
-			try {
-				if (null == htmlEntities) {
-					htmlEntities = new Properties();
-					InputStream in = null;
-					try {
-						in = new FileInputStream(SystemConfig.getProperty(SystemConfig.Property.HTMLEntities));
-						htmlEntities.load(in);
-					} catch (final IOException e) {
-						LOG.error(e.getLocalizedMessage(), e);
-						htmlEntities = null;
-					} finally {
-						if (null != in) {
-							try {
-								in.close();
-							} catch (final IOException e) {
-								LOG.error(e.getLocalizedMessage(), e);
-							}
-						}
-					}
-					initialized.set(true);
-				}
-			} finally {
-				INIT_LOCK.unlock();
-			}
-		}
-	}
-
-	private static String getHTMLEntity(final String specialArg) {
-		final String special;
-		if (specialArg.charAt(specialArg.length() - 1) == ';') {
-			special = specialArg.substring(0, specialArg.length() - 1);
-		} else {
-			special = specialArg;
-		}
-		String tmp;
-		if (htmlEntities != null && (tmp = (String) htmlEntities.get(special)) != null) {
-			return String.valueOf((char) Integer.parseInt(tmp));
-		}
-		return null;
+	private static String getEntity(final String special) {
+		final Character c = getHTMLEntity(special);
+		return null == c ? null : String.valueOf(c.charValue());
 	}
 
 	public Html2TextConverter() {
 		super();
-		init();
 		anchorBuilder = new StringBuilder(100);
 	}
 
@@ -263,7 +209,7 @@ public final class Html2TextConverter {
 				} else if (c == '&') {
 					final String special = getSpecial(input);
 					if (special.length() > 0) {
-						final String tmp = getHTMLEntity(special);
+						final String tmp = getEntity(special);
 						if (tmp == null) {
 							text = '&' + special;
 						} else {
@@ -449,7 +395,7 @@ public final class Html2TextConverter {
 				sb.append(matcher.group(1));
 			}
 			matcher = PATTERN_SRC_CONTENT.matcher(t);
-			if (matcher.find() && MailTools.PATTERN_HREF.matcher(matcher.group(1)).matches()) {
+			if (matcher.find() && PATTERN_HREF.matcher(matcher.group(1)).matches()) {
 				sb.append(' ').append('[').append(matcher.group(1)).append(']');
 			}
 			result = sb.toString();
@@ -464,7 +410,7 @@ public final class Html2TextConverter {
 			}
 		} else if (isTag(t, "/a") && href.length() > 0) {
 			final String anchorTitle = anchorBuilder.toString();
-			if (!MailTools.PATTERN_HREF.matcher(anchorTitle).matches() && !href.equalsIgnoreCase(anchorTitle)) {
+			if (!PATTERN_HREF.matcher(anchorTitle).matches() && !href.equalsIgnoreCase(anchorTitle)) {
 				result = new StringBuilder(100).append(' ').append('[').append(href).append(']').toString();
 			}
 			href = STR_EMPTY;

@@ -66,56 +66,40 @@ import com.openexchange.server.Initialization;
  */
 public final class User2ACLInit implements Initialization {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(User2ACLInit.class);
-
-	private static User2ACLInit instance = new User2ACLInit();
-
-	private final AtomicBoolean started = new AtomicBoolean();
-
-	private final Lock lock;
-
-	private Class<? extends User2ACL> implementingClass;
-
-	/**
-	 * No instantiation
-	 */
-	private User2ACLInit() {
-		super();
-		lock = new ReentrantLock();
-	}
-
-	public static User2ACLInit getInstance() {
-		return instance;
-	}
-
 	public static enum IMAPServer {
-		/**
-		 * Cyrus: <code>com.openexchange.imap.user2acl.CyrusUser2ACL</code>
-		 */
-		CYRUS("Cyrus", "com.openexchange.imap.user2acl.CyrusUser2ACL"),
 		/**
 		 * Courier: <code>com.openexchange.imap.user2acl.CourierUser2ACL</code>
 		 */
-		COURIER("Courier", "com.openexchange.imap.user2acl.CourierUser2ACL");
-
-		private final String name;
+		COURIER("Courier", "com.openexchange.imap.user2acl.CourierUser2ACL"),
+		/**
+		 * Cyrus: <code>com.openexchange.imap.user2acl.CyrusUser2ACL</code>
+		 */
+		CYRUS("Cyrus", "com.openexchange.imap.user2acl.CyrusUser2ACL");
 
 		private final String impl;
+
+		private final String name;
 
 		private IMAPServer(final String name, final String impl) {
 			this.name = name;
 			this.impl = impl;
 		}
 
-		public String getName() {
-			return name;
-		}
-
 		public String getImpl() {
 			return impl;
 		}
+
+		public String getName() {
+			return name;
+		}
 	}
+
+	private static final Object[] EMPTY_ARGS = new Object[0];
+
+	private static User2ACLInit instance = new User2ACLInit();
+
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(User2ACLInit.class);
 
 	private static String getIMAPServerImpl(final String name) {
 		final IMAPServer[] imapServers = IMAPServer.values();
@@ -127,7 +111,26 @@ public final class User2ACLInit implements Initialization {
 		return null;
 	}
 
-	private static final Object[] EMPTY_ARGS = new Object[0];
+	/**
+	 * @return The singleton instance of {@link User2ACLInit}
+	 */
+	public static User2ACLInit getInstance() {
+		return instance;
+	}
+
+	private Class<? extends User2ACL> implementingClass;
+
+	private final Lock lock;
+
+	private final AtomicBoolean started = new AtomicBoolean();
+
+	/**
+	 * No instantiation
+	 */
+	private User2ACLInit() {
+		super();
+		lock = new ReentrantLock();
+	}
 
 	public void start() throws AbstractOXException {
 		if (started.get()) {
@@ -177,6 +180,7 @@ public final class User2ACLInit implements Initialization {
 			return;
 		}
 		implementingClass = null;
+		User2ACL.resetUser2ACL();
 		started.set(false);
 	}
 
