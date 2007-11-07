@@ -82,6 +82,10 @@ public class Starter implements Initialization {
          */
         com.openexchange.groupware.calendar.CalendarConfig.getInstance(),
         /**
+         * Reads the participant.properties.
+         */
+        com.openexchange.groupware.configuration.ParticipantConfig.getInstance(),
+        /**
          * Sets the caching system JCS up.
          */
         com.openexchange.cache.Configuration.getInstance(),
@@ -121,10 +125,6 @@ public class Starter implements Initialization {
          * Contact Configuration
          */
         com.openexchange.groupware.contact.ContactConfig.getInstance(),
-        /**
-         * Participant Configuration
-         */
-        com.openexchange.groupware.configuration.ParticipantConfig.getInstance(),
         /**
          * Attachment Configuration
          */
