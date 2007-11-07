@@ -106,6 +106,10 @@ public class Starter implements Initialization {
          */
         com.openexchange.groupware.contexts.ContextInit.getInstance(),
         /**
+         * Folder initialization
+         */
+        com.openexchange.tools.oxfolder.OXFolderProperties.getInstance(),
+        /**
          * Mail initialization
          */
         com.openexchange.mail.MailInitialization.getInstance(),

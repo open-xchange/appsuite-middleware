@@ -65,7 +65,6 @@ import java.util.Locale;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.cache.FolderCacheManager;
-import com.openexchange.cache.FolderCacheProperties;
 import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.FolderObject;
@@ -658,7 +657,7 @@ public class OXFolderTools {
 				" AND ot.created_from = ?)) OR ").append("((op.admin_flag = 1 AND op.permission_id = ?) OR (op.fp > ")
 				.append(OCLPermission.NO_PERMISSIONS).append(" AND op.permission_id IN ").append(permissionIds).append(
 						")))");
-		if (FolderCacheProperties.isIgnoreSharedAddressbook()) {
+		if (OXFolderProperties.isIgnoreSharedAddressbook()) {
 			retValBuilder.append(" AND (ot.fuid !=").append(FolderObject.SYSTEM_GLOBAL_FOLDER_ID).append(')');
 		}
 		if (accessibleModules != null) {
@@ -685,7 +684,7 @@ public class OXFolderTools {
 		final String sqlSelectStr = getSQLUserVisibleFolders(FolderObjectIterator.getFieldsForSQL("ot"),
 				StringCollection.getSqlInString(userId, memberInGroups), StringCollection
 						.getSqlInString(accessibleModules), "AND (ot.type = ?) AND (ot.parent = ?)",
-				FolderCacheProperties.isEnableDBGrouping() ? "GROUP BY ot.fuid" : null, "ORDER by ot.fuid");
+				OXFolderProperties.isEnableDBGrouping() ? "GROUP BY ot.fuid" : null, "ORDER by ot.fuid");
 		Connection readCon = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
@@ -757,7 +756,7 @@ public class OXFolderTools {
 				(since == null ? STR_EMPTY : " AND (changing_date >= ?)"));
 		final String sqlSelectStr = getSQLUserVisibleFolders(FolderObjectIterator.getFieldsForSQL("ot"),
 				StringCollection.getSqlInString(userId, groups), StringCollection.getSqlInString(accessibleModules),
-				condBuilder.toString(), FolderCacheProperties.isEnableDBGrouping() ? "GROUP BY ot.fuid" : null,
+				condBuilder.toString(), OXFolderProperties.isEnableDBGrouping() ? "GROUP BY ot.fuid" : null,
 				"ORDER by ot.fuid");
 		Connection readCon = null;
 		PreparedStatement stmt = null;
@@ -798,7 +797,7 @@ public class OXFolderTools {
 				") AND (ot.parent = ?)").append((since == null ? STR_EMPTY : " AND (changing_date >= ?)"));
 		final String sqlSelectStr = getSQLUserVisibleFolders(FolderObjectIterator.getFieldsForSQL("ot"),
 				StringCollection.getSqlInString(userId, groups), StringCollection.getSqlInString(accessibleModules),
-				condBuilder.toString(), FolderCacheProperties.isEnableDBGrouping() ? "GROUP BY ot.fuid" : null,
+				condBuilder.toString(), OXFolderProperties.isEnableDBGrouping() ? "GROUP BY ot.fuid" : null,
 				"ORDER by ot.fuid");
 		Connection readCon = null;
 		PreparedStatement stmt = null;
@@ -855,7 +854,7 @@ public class OXFolderTools {
 		condBuilder.append("AND (ot.parent = ?)").append((since == null ? STR_EMPTY : " AND (changing_date >= ?)"));
 		final String sqlSelectStr = getSQLUserVisibleFolders(FolderObjectIterator.getFieldsForSQL("ot"),
 				StringCollection.getSqlInString(userId, memberInGroups), StringCollection
-						.getSqlInString(accessibleModules), condBuilder.toString(), FolderCacheProperties
+						.getSqlInString(accessibleModules), condBuilder.toString(), OXFolderProperties
 						.isEnableDBGrouping() ? "GROUP BY ot.fuid" : null, "ORDER by ot.fuid");
 		Connection readCon = null;
 		PreparedStatement stmt = null;
@@ -900,7 +899,7 @@ public class OXFolderTools {
 		condBuilder.append(since == null ? STR_EMPTY : " AND (changing_date >= ?)");
 		final String sqlSelectStr = getSQLUserVisibleFolders(FolderObjectIterator.getFieldsForSQL("ot"),
 				StringCollection.getSqlInString(userId, memberInGroups), StringCollection
-						.getSqlInString(accessibleModules), condBuilder.toString(), FolderCacheProperties
+						.getSqlInString(accessibleModules), condBuilder.toString(), OXFolderProperties
 						.isEnableDBGrouping() ? "GROUP BY ot.fuid" : null, "ORDER BY ot.fuid");
 		Connection readCon = null;
 		PreparedStatement stmt = null;
@@ -1018,7 +1017,7 @@ public class OXFolderTools {
 							FolderObject.PRIVATE).append(") AND ot.type != ").append(FolderObject.PRIVATE).append(
 							" AND ot.module = ").append(module).append(" AND ot.module IN ").append(
 							StringCollection.getSqlInString(userConfig.getAccessibleModules())).append(
-							FolderCacheProperties.isEnableDBGrouping() ? " GROUP BY ot.fuid" : STR_EMPTY);
+							OXFolderProperties.isEnableDBGrouping() ? " GROUP BY ot.fuid" : STR_EMPTY);
 			stmt = readCon.prepareStatement(sb.toString());
 			stmt.setInt(1, ctx.getContextId());
 			stmt.setInt(2, ctx.getContextId());
@@ -1289,7 +1288,7 @@ public class OXFolderTools {
 			readCon = DBPool.pickup(ctx);
 			stmt = readCon.prepareStatement(getSQLUserVisibleFolders(FolderObjectIterator.getFieldsForSQL("ot"),
 					StringCollection.getSqlInString(userId, memberInGroups), StringCollection
-							.getSqlInString(accessibleModules), condBuilder.toString(), FolderCacheProperties
+							.getSqlInString(accessibleModules), condBuilder.toString(), OXFolderProperties
 							.isEnableDBGrouping() ? "GROUP BY ot.fuid" : null, "ORDER BY ot.fuid"));
 			stmt.setInt(1, ctx.getContextId());
 			stmt.setInt(2, ctx.getContextId());
@@ -1325,7 +1324,7 @@ public class OXFolderTools {
 			throws OXException, SearchIteratorException {
 		final String sqlSelectStr = getSQLUserVisibleFolders(FolderObjectIterator.getFieldsForSQL("ot"),
 				StringCollection.getSqlInString(userId, memberInGroups), StringCollection
-						.getSqlInString(accessibleModules), "AND (ot.module = ?)", FolderCacheProperties
+						.getSqlInString(accessibleModules), "AND (ot.module = ?)", OXFolderProperties
 						.isEnableDBGrouping() ? "GROUP BY ot.fuid" : null, "ORDER BY ot.fuid");
 		Connection readCon = readConArg;
 		boolean closeReadCon = false;
@@ -1374,7 +1373,7 @@ public class OXFolderTools {
 						"((op.admin_flag = 1 AND op.permission_id = ?) OR (op.fp > ? AND op.permission_id IN ").append(
 						StringCollection.getSqlInString(userId, memberInGroups)).append("))) AND (changing_date >= ?)")
 				.append(" AND (ot.module IN ").append(StringCollection.getSqlInString(accessibleModules)).append(")")
-				.append(FolderCacheProperties.isEnableDBGrouping() ? " GROUP BY ot.fuid" : STR_EMPTY).append(
+				.append(OXFolderProperties.isEnableDBGrouping() ? " GROUP BY ot.fuid" : STR_EMPTY).append(
 						" ORDER by ot.fuid");
 		Connection readCon = null;
 		PreparedStatement stmt = null;
@@ -1417,7 +1416,7 @@ public class OXFolderTools {
 		}
 		final String sqlSelectStr = getSQLUserVisibleFolders(FolderObjectIterator.getFieldsForSQL("ot"),
 				StringCollection.getSqlInString(userId, memberInGroups), StringCollection
-						.getSqlInString(accessibleModules), condBuilder.toString(), FolderCacheProperties
+						.getSqlInString(accessibleModules), condBuilder.toString(), OXFolderProperties
 						.isEnableDBGrouping() ? "GROUP BY ot.fuid" : null, "ORDER by ot.fuid");
 		Connection readCon = null;
 		PreparedStatement stmt = null;
@@ -1457,7 +1456,7 @@ public class OXFolderTools {
 			SearchIteratorException {
 		final String sqlSelectStr = new StringBuilder(300).append(SQL_SELECT_FOLDERS_START).append(
 				"AND (changing_date >= ?) AND (module IN ").append(FolderObject.SQL_IN_STR_STANDARD_MODULES).append(
-				") ").append(FolderCacheProperties.isEnableDBGrouping() ? "GROUP BY ot.fuid" : null).append(
+				") ").append(OXFolderProperties.isEnableDBGrouping() ? "GROUP BY ot.fuid" : null).append(
 				" ORDER by ot.fuid").toString();
 		Connection readCon = null;
 		PreparedStatement stmt = null;

@@ -66,12 +66,11 @@ import org.apache.jcs.engine.control.event.ElementEvent;
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.api2.OXException;
 import com.openexchange.cache.OXCachingException.Code;
-import com.openexchange.configuration.ConfigurationInit;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
+import com.openexchange.tools.oxfolder.OXFolderProperties;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 
 /**
@@ -88,8 +87,6 @@ public class FolderCacheManager {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(FolderCacheManager.class);
-
-	private static final boolean enabled = FolderCacheProperties.isEnableFolderCache();
 
 	private static final Lock LOCK_INIT = new ReentrantLock();
 
@@ -110,13 +107,8 @@ public class FolderCacheManager {
 	private FolderCacheManager() throws OXException {
 		super();
 		try {
-			ConfigurationInit.init();
-			Configuration.load();
 			folderCache = JCS.getInstance(FOLDER_CACHE_REGION_NAME);
 		} catch (final CacheException e) {
-			throw new OXFolderException(FolderCode.FOLDER_CACHE_INITIALIZATION_FAILED, e, FOLDER_CACHE_REGION_NAME, e
-					.getLocalizedMessage());
-		} catch (final AbstractOXException e) {
 			throw new OXFolderException(FolderCode.FOLDER_CACHE_INITIALIZATION_FAILED, e, FOLDER_CACHE_REGION_NAME, e
 					.getLocalizedMessage());
 		}
@@ -127,11 +119,11 @@ public class FolderCacheManager {
 	}
 
 	public static boolean isEnabled() {
-		return enabled;
+		return OXFolderProperties.isEnableFolderCache();
 	}
 
 	public static FolderCacheManager getInstance() throws FolderCacheNotEnabledException, OXException {
-		if (!enabled) {
+		if (!OXFolderProperties.isEnableFolderCache()) {
 			throw new FolderCacheNotEnabledException();
 		}
 		if (!initialized.get()) {
@@ -146,6 +138,24 @@ public class FolderCacheManager {
 			}
 		}
 		return instance;
+	}
+
+	public static void releaseInstance() {
+		if (!OXFolderProperties.isEnableFolderCache()) {
+			return;
+		}
+		if (initialized.get()) {
+			LOCK_INIT.lock();
+			try {
+				if (instance != null) {
+					instance = null;
+					Configuration.getInstance().freeCache(FOLDER_CACHE_REGION_NAME);
+					initialized.set(false);
+				}
+			} finally {
+				LOCK_INIT.unlock();
+			}
+		}
 	}
 
 	private static final ReadWriteLock getContextLock(final Context ctx) {

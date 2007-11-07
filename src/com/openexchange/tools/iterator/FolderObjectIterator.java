@@ -66,7 +66,6 @@ import org.apache.jcs.engine.behavior.IElementAttributes;
 import com.openexchange.api2.OXException;
 import com.openexchange.cache.FolderCacheManager;
 import com.openexchange.cache.FolderCacheNotEnabledException;
-import com.openexchange.cache.FolderCacheProperties;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.groupware.Component;
@@ -75,6 +74,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.DBPool;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.tools.iterator.SearchIteratorException.SearchIteratorCode;
+import com.openexchange.tools.oxfolder.OXFolderProperties;
 
 /**
  * FolderObjectIterator
@@ -218,7 +218,7 @@ public class FolderObjectIterator implements SearchIterator {
 	 */
 	public FolderObjectIterator(final ResultSet rs, final Statement stmt, final boolean remainInCache,
 			final Context ctx, final Connection readCon, final boolean closeCon) throws SearchIteratorException {
-		if (FolderCacheProperties.isEnableDBGrouping()) {
+		if (OXFolderProperties.isEnableDBGrouping()) {
 			this.folderIds = null;
 		} else {
 			this.folderIds = new HashSet<Integer>();
@@ -282,7 +282,7 @@ public class FolderObjectIterator implements SearchIterator {
 	private final FolderObject createFolderObjectFromSelectedEntry() throws SQLException, DBPoolingException {
 		// fname, fuid, module, type, creator
 		final int folderId = rs.getInt(1);
-		if (!FolderCacheProperties.isEnableDBGrouping()) {
+		if (!OXFolderProperties.isEnableDBGrouping()) {
 			if (folderIds.contains(Integer.valueOf(folderId))) {
 				return null;
 			}

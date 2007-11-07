@@ -62,18 +62,16 @@ import org.apache.jcs.JCS;
 import org.apache.jcs.access.exception.CacheException;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.configuration.ConfigurationInit;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 
 /**
- * FolderQueryCacheManager
+ * {@link FolderQueryCacheManager}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class FolderQueryCacheManager {
+public final class FolderQueryCacheManager {
 
 	private static final Map<Integer, ReadWriteLock> contextLocks = new HashMap<Integer, ReadWriteLock>();
 
@@ -89,7 +87,7 @@ public class FolderQueryCacheManager {
 
 	private final JCS folderQueryCache;
 
-	private static final ReadWriteLock getContextLock(final int cid) {
+	private static ReadWriteLock getContextLock(final int cid) {
 		final Integer key = Integer.valueOf(cid);
 		ReadWriteLock l = contextLocks.get(key);
 		if (l == null) {
@@ -109,23 +107,24 @@ public class FolderQueryCacheManager {
 	private FolderQueryCacheManager() throws OXException {
 		super();
 		try {
-			ConfigurationInit.init();
-			Configuration.load();
 			folderQueryCache = JCS.getInstance(REGION_NAME);
 		} catch (final CacheException e) {
-			throw new OXFolderException(FolderCode.FOLDER_CACHE_INITIALIZATION_FAILED, e, REGION_NAME, e
-					.getLocalizedMessage());
-		} catch (final AbstractOXException e) {
 			throw new OXFolderException(FolderCode.FOLDER_CACHE_INITIALIZATION_FAILED, e, REGION_NAME, e
 					.getLocalizedMessage());
 		}
 	}
 
-	public final static boolean isInitialized() {
+	public static boolean isInitialized() {
 		return initialized.get();
 	}
 
-	public final static FolderQueryCacheManager getInstance() throws OXException {
+	/**
+	 * @return The singleton instance of {@link FolderQueryCacheManager}
+	 * @throws OXException
+	 *             if instance of {@link FolderQueryCacheManager} cannot be
+	 *             initialized
+	 */
+	public static FolderQueryCacheManager getInstance() throws OXException {
 		if (!initialized.get()) {
 			LOCK_INIT.lock();
 			try {
@@ -141,12 +140,31 @@ public class FolderQueryCacheManager {
 	}
 
 	/**
+	 * Releases the singleton instance of {@link FolderQueryCacheManager} and
+	 * frees its cache resources through {@link Configuration#freeCache(String)}
+	 */
+	public static void releaseInstance() {
+		if (initialized.get()) {
+			LOCK_INIT.lock();
+			try {
+				if (instance != null) {
+					instance = null;
+					Configuration.getInstance().freeCache(REGION_NAME);
+					initialized.set(false);
+				}
+			} finally {
+				LOCK_INIT.unlock();
+			}
+		}
+	}
+
+	/**
 	 * Gets a query result from cache if present, otherwise <code>null</code>
 	 * is returned
 	 * 
 	 * @return query result if present, otherwise <code>null</code>
 	 */
-	public final LinkedList<Integer> getFolderQuery(final int queryNum, final SessionObject session) {
+	public LinkedList<Integer> getFolderQuery(final int queryNum, final SessionObject session) {
 		return getFolderQuery(queryNum, session.getUserObject().getId(), session.getContext().getContextId());
 	}
 
@@ -157,7 +175,7 @@ public class FolderQueryCacheManager {
 	 * @return query result if present, otherwise <code>null</code>
 	 */
 	@SuppressWarnings("unchecked")
-	public final LinkedList<Integer> getFolderQuery(final int queryNum, final int userId, final int cid) {
+	public LinkedList<Integer> getFolderQuery(final int queryNum, final int userId, final int cid) {
 		final Lock ctxReadLock = getContextLock(cid).readLock();
 		ctxReadLock.lock();
 		try {
@@ -176,7 +194,7 @@ public class FolderQueryCacheManager {
 	/**
 	 * Puts a query result into cache
 	 */
-	public final void putFolderQuery(final int queryNum, final LinkedList<Integer> q, final SessionObject session)
+	public void putFolderQuery(final int queryNum, final LinkedList<Integer> q, final SessionObject session)
 			throws OXException {
 		putFolderQuery(queryNum, q, session.getUserObject().getId(), session.getContext().getContextId());
 	}
@@ -184,7 +202,7 @@ public class FolderQueryCacheManager {
 	/**
 	 * Puts a query result into cache
 	 */
-	public final void putFolderQuery(final int queryNum, final LinkedList<Integer> q, final int userId, final int cid)
+	public void putFolderQuery(final int queryNum, final LinkedList<Integer> q, final int userId, final int cid)
 			throws OXException {
 		putFolderQuery(queryNum, q, userId, cid, false);
 	}
@@ -195,7 +213,7 @@ public class FolderQueryCacheManager {
 	 * given result is going to appended to existing one. Otherwise existing
 	 * entries are replaced.
 	 */
-	public final void putFolderQuery(final int queryNum, final LinkedList<Integer> q, final SessionObject session,
+	public void putFolderQuery(final int queryNum, final LinkedList<Integer> q, final SessionObject session,
 			final boolean append) throws OXException {
 		putFolderQuery(queryNum, q, session.getUserObject().getId(), session.getContext().getContextId(), append);
 	}
@@ -207,7 +225,7 @@ public class FolderQueryCacheManager {
 	 * entries are replaced.
 	 */
 	@SuppressWarnings("unchecked")
-	public final void putFolderQuery(final int queryNum, final LinkedList<Integer> q, final int userId, final int cid,
+	public void putFolderQuery(final int queryNum, final LinkedList<Integer> q, final int userId, final int cid,
 			final boolean append) throws OXException {
 		if (q == null) {
 			return;
@@ -242,14 +260,14 @@ public class FolderQueryCacheManager {
 	/**
 	 * Clears all cache entries belonging to given session's context
 	 */
-	public final void invalidateContextQueries(final SessionObject session) {
+	public void invalidateContextQueries(final SessionObject session) {
 		invalidateContextQueries(session.getContext().getContextId());
 	}
 
 	/**
 	 * Clears all cache entries belonging to given context
 	 */
-	public final void invalidateContextQueries(final int cid) {
+	public void invalidateContextQueries(final int cid) {
 		final Lock ctxWriteLock = getContextLock(cid).writeLock();
 		ctxWriteLock.lock();
 		try {
@@ -261,15 +279,15 @@ public class FolderQueryCacheManager {
 
 	private final static QueryCacheKey.Module MODULE = QueryCacheKey.Module.FOLDER;
 
-	private final static CacheKey createQueryKey(final int queryNum) {
+	private static CacheKey createQueryKey(final int queryNum) {
 		return new CacheKey(MODULE.getNum(), Integer.valueOf(queryNum));
 	}
 
-	private final static Integer createUserKey(final int userId) {
+	private static Integer createUserKey(final int userId) {
 		return Integer.valueOf(userId);
 	}
 
-	private final static String createContextKey(final int cid) {
+	private static String createContextKey(final int cid) {
 		return String.valueOf(cid);
 	}
 

@@ -67,7 +67,6 @@ import java.util.Set;
 import com.openexchange.api2.OXException;
 import com.openexchange.cache.FolderCacheManager;
 import com.openexchange.cache.FolderCacheNotEnabledException;
-import com.openexchange.cache.FolderCacheProperties;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.groupware.container.ContactObject;
@@ -253,7 +252,7 @@ public final class OXFolderAdminHelper {
 		/*
 		 * Insert system internal users folder aka 'Global Address Book'
 		 */
-		if (FolderCacheProperties.isEnableInternalUsersEdit()) {
+		if (OXFolderProperties.isEnableInternalUsersEdit()) {
 			systemPermission.setAllPermission(OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS,
 					OCLPermission.WRITE_OWN_OBJECTS, OCLPermission.NO_PERMISSIONS);
 		} else {

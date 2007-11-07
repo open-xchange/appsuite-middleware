@@ -174,7 +174,9 @@ public final class Configuration implements Initialization {
 	}
 
 	/**
-	 * Delegates to {@link CompositeCacheManager#freeCache(String)}
+	 * Delegates to {@link CompositeCacheManager#freeCache(String)}: The cache
+	 * identified through given <code>cacheName</code> is removed from cache
+	 * manager and all of its items are going to be disposed.
 	 * 
 	 * @param cacheName
 	 *            The name of the cache region that ought to be freed
