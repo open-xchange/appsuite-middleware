@@ -436,7 +436,7 @@ public class EventQueue extends TimerTask {
 	}
 
     /**
-     * Stops execution of events at the earliest possible moment, but still delivers all remaining evnets.
+     * Stops execution of events after the next run, still delivers all remaining evnets.
      * Method blocks until all remaining tasks have been completed
      */
     //TODO: Do we want a timeout here?
@@ -448,6 +448,8 @@ public class EventQueue extends TimerTask {
             }
             shuttingDown = true;
 
+            if(queue1.isEmpty() && queue2.isEmpty()) //Must not wait for next run.
+                return;
             ALL_EVENTS_PROCESSED.await();
         } catch (InterruptedException e) {
             LOG.error(e.getLocalizedMessage(),e);
