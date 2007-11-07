@@ -69,6 +69,10 @@ public class Starter implements Initialization {
      * is done.
      */
     private final Initialization[] inits = new Initialization[] {
+    	/**
+    	 * Staring SessionD
+    	 */
+    	com.openexchange.sessiond.SessiondInit.getInstance(),
         /**
          * Reads system.properties.
          */
