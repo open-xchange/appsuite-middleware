@@ -148,7 +148,11 @@ public class Starter implements Initialization {
         /**
          * Sets up the configuration tree.
          */
-        com.openexchange.groupware.settings.ConfigTreeInit.getInstance()
+        com.openexchange.groupware.settings.ConfigTreeInit.getInstance(),
+        /**
+         * Responsible for starting and stopping the EventQueue
+         */
+        new com.openexchange.event.EventInit()
     };
 
     /**

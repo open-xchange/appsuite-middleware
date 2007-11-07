@@ -60,6 +60,7 @@ import com.openexchange.groupware.infostore.webdav.PropertyStoreImpl;
 import com.openexchange.groupware.links.LinksEventHandler;
 import com.openexchange.groupware.notify.ParticipantNotify;
 import com.openexchange.groupware.tx.DBPoolProvider;
+import com.openexchange.server.Initialization;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -69,7 +70,7 @@ import org.apache.commons.logging.LogFactory;
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
 
-public class EventInit {
+public class EventInit implements Initialization {
 	
 	private static final Log LOG = LogFactory.getLog(EventInit.class);
     private boolean started;
