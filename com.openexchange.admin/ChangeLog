@@ -1,3 +1,7 @@
+* 2007-11-07 - manuel.kraft@open-xchange.com
+
+  - Bugfix ID#10050 Database leftovers of deleted contexts
+
 * 2007-11-06 - dennis.sieben@open-xchange.com
 
   - Bugfix ID#10072 L3: display name of contact blocks creation of new user

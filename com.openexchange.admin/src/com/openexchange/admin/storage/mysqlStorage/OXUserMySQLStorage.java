@@ -1077,40 +1077,16 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             if (log.isInfoEnabled()) {
             log.info("User " + id_for_client + " created!");
             }
-            write_ox_con.commit();
-            return id_for_client;
-
             
+            return id_for_client;
         }catch (final DataTruncation dt){
-            log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
-            try {
-                write_ox_con.rollback();
-                if (log.isDebugEnabled()) {
-                    log.debug("Rollback successfull for ox db write connection");
-                }
-            } catch (final SQLException ecp) {
-                log.error("Error rollback ox db write connection", ecp);
-            }
+            log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);            
             throw AdminCache.parseDataTruncation(dt);
         } catch (final SQLException e) {
-            log.error("SQL Error", e);
-            try {
-                write_ox_con.rollback();
-                if (log.isDebugEnabled()) {
-                    log.debug("Rollback successfull for ox db write connection");
-                }
-            } catch (final SQLException ecp) {
-                log.error("Error rollback ox db write connection", ecp);
-            }
+            log.error("SQL Error", e);            
             throw new StorageException(e);
         } catch (final OXException e) {
-            log.error("OX Error", e);
-            try {
-                write_ox_con.rollback();
-                log.debug("Rollback successfull for ox db write connection");
-            } catch (final SQLException ecp) {
-                log.error("Error rollback ox db write connection", ecp);
-            }
+            log.error("OX Error", e);           
             throw new StorageException(e.toString());
         } catch (final NoSuchAlgorithmException e) {
             // Here we throw without rollback, because at the point this
@@ -1123,31 +1099,13 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             // no database activity has happened
             throw new StorageException(e);
         } catch (final IllegalArgumentException e) {
-            log.error("IllegalArgument Error", e);
-            try {
-                write_ox_con.rollback();
-                log.debug("Rollback successfull for ox db write connection");
-            } catch (final SQLException ecp) {
-                log.error("Error rollback ox db write connection", ecp);
-            }
+            log.error("IllegalArgument Error", e);            
             throw new StorageException(e);
         } catch (final IllegalAccessException e) {
-            log.error("IllegalAccess Error", e);
-            try {
-                write_ox_con.rollback();
-                log.debug("Rollback successfull for ox db write connection");
-            } catch (final SQLException ecp) {
-                log.error("Error rollback ox db write connection", ecp);
-            }
+            log.error("IllegalAccess Error", e);           
             throw new StorageException(e);
         } catch (final InvocationTargetException e) {
-            log.error("InvocationTarget Error", e);
-            try {
-                write_ox_con.rollback();
-                log.debug("Rollback successfull for ox db write connection");
-            } catch (final SQLException ecp) {
-                log.error("Error rollback ox db write connection", ecp);
-            }
+            log.error("InvocationTarget Error", e);            
             throw new StorageException(e);
         } finally {
             closePreparedStatement(return_db_id);
@@ -1179,8 +1137,12 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 write_ox_con.commit();
             }
 
-            return create(ctx, usrdata, moduleAccess, write_ox_con,
+            int retval =  create(ctx, usrdata, moduleAccess, write_ox_con,
                     internal_user_id, contact_id, uid_number);
+            
+            write_ox_con.commit();
+            
+            return retval;
         }catch (final DataTruncation dt){
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             try {
