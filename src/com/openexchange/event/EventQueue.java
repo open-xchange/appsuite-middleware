@@ -51,14 +51,6 @@
 
 package com.openexchange.event;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.ContactObject;
@@ -66,6 +58,15 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.server.ServerTimer;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * EventQueue
@@ -97,8 +98,13 @@ public class EventQueue extends TimerTask {
 	private static List<ContactEvent> contactEventList = new ArrayList<ContactEvent>();
 	private static List<FolderEvent> folderEventList = new ArrayList<FolderEvent>();
 	private static List<InfostoreEvent> infostoreEventList = new ArrayList<InfostoreEvent>();
-	
-	public EventQueue(EventConfig config) {
+    private static boolean shuttingDown;
+
+    private static final ReentrantLock SHUTDOWN_LOCK = new ReentrantLock();
+    private static final Condition ALL_EVENTS_PROCESSED = SHUTDOWN_LOCK.newCondition();
+    private static boolean shutdownComplete;
+
+    public EventQueue(EventConfig config) {
 		delay = config.getEventQueueDelay();
 		
 		if (config.isEventQueueEnabled()) {
@@ -127,7 +133,11 @@ public class EventQueue extends TimerTask {
 	}
 	
 	public static void add(final EventObject eventObj) throws InvalidStateException {
-		if (LOG.isDebugEnabled()) {
+        if(shuttingDown) {
+            LOG.info("Shutting down event system, so no events are accepted. Throwing Invalid State Exception");
+            throw new InvalidStateException("Event system is being shut down and therefore does not accept new events.");
+        }
+        if (LOG.isDebugEnabled()) {
 			LOG.debug(new StringBuilder("add EventObject: ").append(eventObj));
 		}
 		
@@ -167,7 +177,17 @@ public class EventQueue extends TimerTask {
 		} catch (Exception exc) {
 			LOG.error(exc.getMessage(), exc);
 		}
-	}
+        if(shuttingDown && queue1.isEmpty() && queue2.isEmpty()) {
+            cancel(); //Stops this TimerTask
+            SHUTDOWN_LOCK.lock();
+            try {
+                shutdownComplete = true;
+                ALL_EVENTS_PROCESSED.signalAll();
+            } finally {
+                SHUTDOWN_LOCK.unlock();    
+            }
+        }
+    }
 	
 	protected static void callEvent(final List<EventObject> al) {
 		for (int a = 0; a < al.size(); a++) {
@@ -394,4 +414,55 @@ public class EventQueue extends TimerTask {
 	public static void addInfostoreEvent(final InfostoreEvent event) {
 		infostoreEventList.add(event);
 	}
+
+    public static void removeAppointmentEvent(final AppointmentEvent event) {
+		appointmentEventList.remove(event);
+	}
+
+	public static void removeTaskEvent(final TaskEvent event) {
+		taskEventList.remove(event);
+	}
+
+	public static void removeContactEvent(final ContactEvent event) {
+		contactEventList.remove(event);
+	}
+
+	public static void removeFolderEvent(final FolderEvent event) {
+		folderEventList.remove(event);
+	}
+
+	public static void removeInfostoreEvent(final InfostoreEvent event) {
+		infostoreEventList.remove(event);
+	}
+
+    /**
+     * Stops execution of events at the earliest possible moment, but still delivers all remaining evnets.
+     * Method blocks until all remaining tasks have been completed
+     */
+    //TODO: Do we want a timeout here?
+    public static void stop() {
+        SHUTDOWN_LOCK.lock();
+        try {
+            if(shutdownComplete) {
+                return;
+            }
+            shuttingDown = true;
+
+            ALL_EVENTS_PROCESSED.await();
+        } catch (InterruptedException e) {
+            LOG.error(e.getLocalizedMessage(),e);
+        } finally {
+            //Just in case another Thread also stopped the queue, we have to wake that one up as well
+            ALL_EVENTS_PROCESSED.signalAll();
+            SHUTDOWN_LOCK.unlock();
+        }
+    }
+
+    public static void clearAllListeners() {
+        appointmentEventList.clear();
+        taskEventList.clear();
+        contactEventList.clear();
+        folderEventList.clear();
+        infostoreEventList.clear();
+    }
 }

@@ -49,10 +49,8 @@
 
 package com.openexchange.event;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.configuration.SystemConfig;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.FolderLockManagerImpl;
 import com.openexchange.groupware.attach.AttachmentCleaner;
 import com.openexchange.groupware.infostore.webdav.EntityLockManagerImpl;
@@ -62,6 +60,8 @@ import com.openexchange.groupware.infostore.webdav.PropertyStoreImpl;
 import com.openexchange.groupware.links.LinksEventHandler;
 import com.openexchange.groupware.notify.ParticipantNotify;
 import com.openexchange.groupware.tx.DBPoolProvider;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * EventInit
@@ -72,13 +72,24 @@ import com.openexchange.groupware.tx.DBPoolProvider;
 public class EventInit {
 	
 	private static final Log LOG = LogFactory.getLog(EventInit.class);
-	
-	public EventInit() {
+    private boolean started;
+
+
+
+    public EventInit() {
 		super();
 	}
-	
-	public static void init() {
-		if (LOG.isInfoEnabled()) {
+
+    @Deprecated
+    public static void init() {
+
+	}
+
+    public void start() throws AbstractOXException {
+        if(started)
+            return;
+        started = true;
+        if (LOG.isInfoEnabled()) {
 			LOG.info("Parse Event properties");
 		}
 		final EventConfig eventConfig = new EventConfigImpl(SystemConfig.getProperty("EVENTPROPERTIES"));
@@ -87,14 +98,14 @@ public class EventInit {
 		if (LOG.isInfoEnabled()) {
 			LOG.info("Adding Notification Listener");
 		}
-		final ParticipantNotify notify = new ParticipantNotify();
+        ParticipantNotify notify = new ParticipantNotify();
 		EventQueue.addAppointmentEvent(notify);
 		EventQueue.addTaskEvent(notify);
 
 		if (LOG.isInfoEnabled()) {
 			LOG.info("Adding LinkEventHandler");
 		}
-		final LinksEventHandler linkHandler = new LinksEventHandler();
+        LinksEventHandler linkHandler = new LinksEventHandler();
 		EventQueue.addAppointmentEvent(linkHandler);
 		EventQueue.addContactEvent(linkHandler);
 		EventQueue.addTaskEvent(linkHandler);
@@ -103,23 +114,28 @@ public class EventInit {
 		if (LOG.isInfoEnabled()) {
 			LOG.info("Adding AttachmentCleaner");
 		}
-		final AttachmentCleaner attCleaner = new AttachmentCleaner();
+        AttachmentCleaner attCleaner = new AttachmentCleaner();
 		EventQueue.addAppointmentEvent(attCleaner);
 		EventQueue.addContactEvent(attCleaner);
 		EventQueue.addTaskEvent(attCleaner);
-		
+
 		if (LOG.isInfoEnabled()) {
 			LOG.info("Adding PropertiesCleaner");
 		}
-		final PropertyCleaner propertyCleaner = new PropertyCleaner(new PropertyStoreImpl(new DBPoolProvider(), "oxfolder_property"), new PropertyStoreImpl(new DBPoolProvider(), "infostore_property"));
+        PropertyCleaner propertyCleaner = new PropertyCleaner(new PropertyStoreImpl(new DBPoolProvider(), "oxfolder_property"), new PropertyStoreImpl(new DBPoolProvider(), "infostore_property"));
 		EventQueue.addFolderEvent(propertyCleaner);
 		EventQueue.addInfostoreEvent(propertyCleaner);
-		
+
 		if (LOG.isInfoEnabled()) {
 			LOG.info("Adding LockCleaner");
 		}
-		final LockCleaner lockCleaner = new LockCleaner(new FolderLockManagerImpl(new DBPoolProvider()), new EntityLockManagerImpl(new DBPoolProvider(), "infostore_lock"));
+        LockCleaner lockCleaner = new LockCleaner(new FolderLockManagerImpl(new DBPoolProvider()), new EntityLockManagerImpl(new DBPoolProvider(), "infostore_lock"));
 		EventQueue.addFolderEvent(lockCleaner);
 		EventQueue.addInfostoreEvent(lockCleaner);
-	}
+    }
+
+    public void stop() throws AbstractOXException {
+        EventQueue.stop();
+        EventQueue.clearAllListeners();
+    }
 }
