@@ -92,6 +92,8 @@ public final class Configuration implements Initialization {
 	 */
 	private CompositeCacheManager ccmInstance;
 
+	private final AtomicBoolean started = new AtomicBoolean();
+
 	/**
 	 * Private constructor prevents instantiation.
 	 * 
@@ -188,17 +190,25 @@ public final class Configuration implements Initialization {
 	 * @see com.openexchange.server.Initialization#start()
 	 */
 	public void start() throws AbstractOXException {
+		if (started.get()) {
+			LOG.error("JCS caching engine has already been started", new Throwable());
+		}
 		configure();
+		started.set(true);
 	}
 
 	/*
 	 * @see com.openexchange.server.Initialization#stop()
 	 */
 	public void stop() throws AbstractOXException {
+		if (!started.get()) {
+			LOG.error("JCS caching engine cannot be stopped since it has not been started before", new Throwable());
+		}
 		if (null == ccmInstance) {
 			return;
 		}
 		ccmInstance.shutDown();
 		ccmInstance = null;
+		started.set(false);
 	}
 }

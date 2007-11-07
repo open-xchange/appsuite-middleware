@@ -67,7 +67,6 @@ import org.apache.jcs.access.exception.CacheException;
 
 import com.openexchange.cache.CacheKey;
 import com.openexchange.cache.Configuration;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException.UserConfigurationCode;
@@ -102,15 +101,10 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 	protected CachingUserSettingMailStorage() {
 		super();
 		try {
-			Configuration.getInstance().start();
 			cache = JCS.getInstance(CACHE_REGION_NAME);
 			cacheWriteLock = new ReentrantLock();
 			useCache = true;
 		} catch (final CacheException e) {
-			final UserConfigurationException ue = new UserConfigurationException(
-					UserConfigurationCode.CACHE_INITIALIZATION_FAILED, e, CACHE_REGION_NAME);
-			LOG.error(ue.getLocalizedMessage(), ue);
-		} catch (final AbstractOXException e) {
 			final UserConfigurationException ue = new UserConfigurationException(
 					UserConfigurationCode.CACHE_INITIALIZATION_FAILED, e, CACHE_REGION_NAME);
 			LOG.error(ue.getLocalizedMessage(), ue);

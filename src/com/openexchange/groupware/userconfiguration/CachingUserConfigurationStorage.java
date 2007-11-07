@@ -57,7 +57,6 @@ import org.apache.jcs.access.exception.CacheException;
 
 import com.openexchange.cache.CacheKey;
 import com.openexchange.cache.Configuration;
-import com.openexchange.configuration.ConfigurationInit;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException.UserConfigurationCode;
@@ -91,13 +90,8 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
 		WRITE_LOCK = new ReentrantLock();
 		this.delegateStorage = new RdbUserConfigurationStorage();
 		try {
-			ConfigurationInit.init();
-			Configuration.getInstance().start();
 			cache = JCS.getInstance(CACHE_REGION_NAME);
 		} catch (final CacheException e) {
-			throw new UserConfigurationException(UserConfigurationCode.CACHE_INITIALIZATION_FAILED, e,
-					CACHE_REGION_NAME);
-		} catch (final AbstractOXException e) {
 			throw new UserConfigurationException(UserConfigurationCode.CACHE_INITIALIZATION_FAILED, e,
 					CACHE_REGION_NAME);
 		}
