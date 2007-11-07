@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange Server
+Bundle-SymbolicName: com.openexchange.server
+Bundle-Version: 6.5.0.0
+Bundle-Activator: com.openexchange.server.Activator
+Bundle-Vendor: Open-Xchange Inc.
+Import-Package: org.osgi.framework;version="1.3.0"
