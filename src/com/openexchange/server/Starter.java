@@ -78,6 +78,10 @@ public class Starter implements Initialization {
          */
         com.openexchange.configuration.ConfigDB.getInstance(),
         /**
+         * Read in update tasks
+         */
+        com.openexchange.groupware.update.UpdateTaskCollectionInit.getInstance(),
+        /**
          * Reads the calendar.properties.
          */
         com.openexchange.groupware.calendar.CalendarConfig.getInstance(),

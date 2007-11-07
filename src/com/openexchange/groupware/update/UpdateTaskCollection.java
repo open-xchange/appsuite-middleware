@@ -49,13 +49,6 @@
 
 package com.openexchange.groupware.update;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -65,19 +58,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import com.openexchange.configuration.SystemConfig;
-
 /**
  * 
- * UpdateTaskCollection
+ * {@link UpdateTaskCollection}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
 public class UpdateTaskCollection {
-
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(UpdateTaskCollection.class);
 
 	private UpdateTaskCollection() {
 		super();
@@ -87,71 +75,10 @@ public class UpdateTaskCollection {
 
 	private static final AtomicInteger version = new AtomicInteger(-1);
 
-	private static final String PROPERTYNAME = "UPDATETASKSCFG";
+	private static ArrayList<UpdateTask> updateTaskList;
 
-	private static final ArrayList<UpdateTask> updateTaskList = new ArrayList<UpdateTask>();
-
-	static {
-		final String propStr;
-		if ((propStr = SystemConfig.getProperty(PROPERTYNAME)) == null) {
-			LOG.error("Missing property 'UPDATETASKSCFG' in system.properties");
-		} else {
-			final File updateTasksFile = new File(propStr);
-			if (!updateTasksFile.exists() || !updateTasksFile.isFile()) {
-				LOG.error("Missing file " + propStr);
-			} else {
-				BufferedReader reader = null;
-				try {
-					final Class[] parameterTypes = new Class[] {};
-					final Object[] initArgs = new Object[] {};
-					reader = new BufferedReader(new InputStreamReader(new FileInputStream(updateTasksFile)));
-					String line = null;
-					while ((line = reader.readLine()) != null) {
-						final String l = line.trim();
-						if (l.length() == 0 || l.charAt(0) == '#') {
-							continue;
-						}
-						try {
-							updateTaskList.add((UpdateTask) Class.forName(l).getConstructor(parameterTypes)
-									.newInstance(initArgs));
-						} catch (ClassNotFoundException e) {
-							LOG.error(e.getMessage(), e);
-							continue;
-						} catch (IllegalArgumentException e) {
-							LOG.error(e.getMessage(), e);
-							continue;
-						} catch (SecurityException e) {
-							LOG.error(e.getMessage(), e);
-							continue;
-						} catch (InstantiationException e) {
-							LOG.error(e.getMessage(), e);
-							continue;
-						} catch (IllegalAccessException e) {
-							LOG.error(e.getMessage(), e);
-							continue;
-						} catch (InvocationTargetException e) {
-							LOG.error(e.getMessage(), e);
-							continue;
-						} catch (NoSuchMethodException e) {
-							LOG.error(e.getMessage(), e);
-							continue;
-						}
-					}
-				} catch (FileNotFoundException e) {
-					LOG.error(e.getMessage(), e);
-				} catch (IOException e) {
-					LOG.error(e.getMessage(), e);
-				} finally {
-					if (reader != null) {
-						try {
-							reader.close();
-						} catch (IOException e) {
-							LOG.error(e.getMessage(), e);
-						}
-					}
-				}
-			}
-		}
+	static void setUpdateTaskList(final ArrayList<UpdateTask> updateTaskList) {
+		UpdateTaskCollection.updateTaskList = updateTaskList;
 	}
 
 	/**
