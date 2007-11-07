@@ -49,12 +49,6 @@
 
 package com.openexchange.groupware.configuration;
 
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.configuration.ConfigurationException.Code;
@@ -78,23 +72,15 @@ public final class ParticipantConfig extends AbstractConfig implements Initializ
     /**
      * Singleton instance.
      */
-    private static ParticipantConfig SINGLETON;
+    private static final ParticipantConfig SINGLETON = new ParticipantConfig();
 
     /**
-     * Loaded boolean
+     * Prevent instantiation.
      */
-    private static boolean loaded = false;
-    
-    /**
-     * Locker
-     */
-    private static final Lock INIT_LOCK = new ReentrantLock();
-    
-    /**
-     * Logging
-     */
-    private static final Log LOG = LogFactory.getLog(ParticipantConfig.class);
-    
+    private ParticipantConfig() {
+        super();
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -114,13 +100,6 @@ public final class ParticipantConfig extends AbstractConfig implements Initializ
      * @return the value of the property.
      */
     public static boolean getProperty(final Property key) {
-    	if(!loaded || SINGLETON == null) {
-			try {
-				getInstance().start();
-			} catch (final ConfigurationException e) {
-				LOG.error("Can't init config:",e);
-			}
-		}
         return SINGLETON.getBooleanInternal(key.propertyName, key.defaultValue);
     }
 
@@ -155,26 +134,24 @@ public final class ParticipantConfig extends AbstractConfig implements Initializ
         }
     }
 
+    /**
+     * @return the singleton instance.
+     */
     public static ParticipantConfig getInstance() {
-        if(SINGLETON != null)
-            return SINGLETON;
-        return SINGLETON = new ParticipantConfig();
+        return SINGLETON;
     }
     
-	public void start() throws ConfigurationException {	
-        if (!loaded || SINGLETON == null) {
-			INIT_LOCK.lock();
-            try {
-			    getInstance().loadPropertiesInternal();
-                loaded = true;
-            } finally {
-				INIT_LOCK.unlock();
-			}
-		} 	
-	}
+    /**
+     * {@inheritDoc}
+     */
+    public void start() throws ConfigurationException {
+        loadPropertiesInternal();
+    }
 
-	public void stop() throws ConfigurationException {
-        SINGLETON = null;
-        loaded = false;
-	}
+    /**
+     * {@inheritDoc}
+     */
+    public void stop() {
+        clearProperties();
+    }
 }
