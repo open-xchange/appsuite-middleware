@@ -1,3 +1,7 @@
+* 2007-11-07 - manuel.kraft@open-xchange.com
+
+  - Bugfix ID#10050 Database leftovers of deleted contexts
+  
 * 2007-10-29 - manuel.kraft@open-xchange.com
  
   - Bugfix ID#9983 Changing user by name isn't running any more
