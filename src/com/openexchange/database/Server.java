@@ -110,11 +110,6 @@ public final class Server {
     }
 
     public static String getServerName() throws DBPoolingException {
-        try {
-            SystemConfig.init();
-        } catch (ConfigurationException e) {
-            throw new DBPoolingException(e);
-        }
         String prop = SystemConfig.getProperty(Property.SERVER_NAME);
         if (null != prop) {
             prop = prop.trim();

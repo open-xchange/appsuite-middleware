@@ -47,14 +47,14 @@
  *
  */
 
-
-
 package com.openexchange.push.udp;
 
+import java.io.IOException;
 import java.net.DatagramPacket;
-import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
+import java.net.SocketException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -66,17 +66,17 @@ import org.apache.commons.logging.LogFactory;
 
 public class PushMulticastSocket implements Runnable {
 	
+    private static final Log LOG = LogFactory.getLog(PushMulticastSocket.class);
+    
 	private Thread thread;
 
 	private static MulticastSocket multicastSocket;
  
-	private DatagramSocket datagramSocket;
+    private boolean running = true;
 	
-	private static int multicastPort;
+	private int multicastPort;
 	
-	private static InetAddress multicastAddress;
-	
-	private static final Log LOG = LogFactory.getLog(PushMulticastSocket.class);
+	private InetAddress multicastAddress;
 	
 	public PushMulticastSocket(PushConfigInterface config) {
 		multicastPort = config.getMultiCastPort();
@@ -104,7 +104,7 @@ public class PushMulticastSocket implements Runnable {
 	}
 	
 	public void run() {
-		while (thread != null) {
+		while (running) {
 			final DatagramPacket datagramPacket = new DatagramPacket(new byte[2048], 2048);
 			try {
 				multicastSocket.receive(datagramPacket);
@@ -115,12 +115,32 @@ public class PushMulticastSocket implements Runnable {
 				} else {
 					LOG.warn("recieved empty multicast package: " + datagramPacket);
 				}
-			} catch (Exception exc) {
-				LOG.error("run", exc);
-			}
+			} catch (SocketException e) {
+			    if (running) {
+			        LOG.error(e.getMessage(), e);
+			    }
+			} catch (IOException e) {
+                LOG.error(e.getMessage(), e);
+            }
 		}
 	}
-	
+
+	public void close() {
+	    running  = false;
+	    if (null != multicastSocket) {
+	        multicastSocket.close();
+	        multicastSocket = null;
+	    }
+	    if (null != thread) {
+    	    try {
+                thread.join();
+            } catch (InterruptedException e) {
+                LOG.error(e.getMessage(), e);
+            }
+            thread = null;
+	    }
+	}
+
 	public static MulticastSocket getPushMulticastSocket() {
 		return multicastSocket;
 	}

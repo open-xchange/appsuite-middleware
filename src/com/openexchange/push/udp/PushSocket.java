@@ -47,27 +47,26 @@
  *
  */
 
-
-
 package com.openexchange.push.udp;
 
+import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.SocketException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
  * PushSocket
- * 
- * 
- * 
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
-
 public class PushSocket implements Runnable {
 	
 	private Thread thread;
+
+    private boolean running = true;
 	
 	private static DatagramSocket datagramSocket;
 	
@@ -107,7 +106,7 @@ public class PushSocket implements Runnable {
 	 * @see java.lang.Runnable#run()
 	 */
 	public void run() {
-		while (thread != null) {
+		while (running) {
 			final DatagramPacket datagramPacket = new DatagramPacket(new byte[2048], 2048);
 			try {
 				datagramSocket.receive(datagramPacket);
@@ -118,12 +117,32 @@ public class PushSocket implements Runnable {
 				} else {
 					LOG.warn("recieved empty udp package: " + datagramSocket);
 				}
-			} catch (Exception exc) {
-				LOG.error("run", exc);
+			} catch (SocketException e) {
+			    if (running) {
+			        LOG.error(e.getMessage(), e);
+			    }
+			} catch (IOException e) {
+                LOG.error(e.getMessage(), e);
 			}
 		}
 	}
-	
+
+	public void close() {
+	    running  = false;
+	    if (null != datagramSocket) {
+	        datagramSocket.close();
+	        datagramSocket = null;
+	    }
+	    if (null != thread) {
+    	    try {
+                thread.join();
+            } catch (InterruptedException e) {
+                LOG.error(e.getMessage(), e);
+            }
+            thread = null;
+	    }
+	}
+
 	public static DatagramSocket getPushDatagramSocket() {
 		return datagramSocket;
 	}

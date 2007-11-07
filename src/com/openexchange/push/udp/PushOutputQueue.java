@@ -341,4 +341,19 @@ public class PushOutputQueue extends TimerTask {
 		}
 		return queue2.size();
 	}
+
+    public void close() {
+        cancel();
+        // empty both queues
+        try {
+            action(queue1);
+        } catch (final Exception e) {
+            LOG.error(e.getMessage(), e);
+        }
+        try {
+            action(queue2);
+        } catch (final Exception e) {
+            LOG.error(e.getMessage(), e);
+        }
+    }
 }

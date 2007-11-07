@@ -95,7 +95,7 @@ public final class SystemConfig extends AbstractConfig implements
      * is not found.
      */
     public static String getProperty(final String key) {
-        return singleton.getPropertyInternal(key);
+        return getProperty(key, null);
     }
 
     /**
@@ -269,7 +269,11 @@ public final class SystemConfig extends AbstractConfig implements
         /**
          * Mail transport protocol.
          */
-        MailTransportProtocol("MailTransportProtocol");
+        MailTransportProtocol("MailTransportProtocol"),
+        /**
+         * push component configuration file.
+         */
+        PUSH("PUSHPROPERTIES");
 
         /**
          * Name of the property in the server.properties file.

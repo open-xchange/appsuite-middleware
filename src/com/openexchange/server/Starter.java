@@ -56,6 +56,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.GroupwareInit;
+import com.openexchange.push.PushInit;
 
 /**
  * com.openexchange.server.Starter
@@ -69,10 +70,6 @@ public class Starter implements Initialization {
      * is done.
      */
     private final Initialization[] inits = new Initialization[] {
-    	/**
-    	 * Staring SessionD
-    	 */
-    	com.openexchange.sessiond.SessiondInit.getInstance(),
         /**
          * Reads system.properties.
          */
@@ -154,9 +151,17 @@ public class Starter implements Initialization {
          */
         com.openexchange.groupware.settings.ConfigTreeInit.getInstance(),
         /**
+         * Starting SessionD
+         */
+        com.openexchange.sessiond.SessiondInit.getInstance(),
+        /**
          * Responsible for starting and stopping the EventQueue
          */
-        new com.openexchange.event.EventInit()
+        new com.openexchange.event.EventInit(),
+        /**
+         * Initializes the push component.
+         */
+        com.openexchange.push.PushInit.getInstance()
     };
 
     /**

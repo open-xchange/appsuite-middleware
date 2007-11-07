@@ -50,7 +50,7 @@
 package com.openexchange.groupware;
 
 import com.openexchange.event.EventInit;
-import com.openexchange.push.udp.PushInit;
+import com.openexchange.sessiond.SessiondInit;
 
 /**
  * This class contains the initialization for the groupware server.
@@ -70,6 +70,5 @@ public final class GroupwareInit {
      * @throws AbstractOXException if initialization fails.
      */
     public static void init() throws AbstractOXException {
-		PushInit.init();
     }
 }

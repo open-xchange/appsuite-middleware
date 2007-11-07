@@ -101,7 +101,7 @@ public class SessiondInit implements Initialization {
 
 		if (LOG.isInfoEnabled()) {
 			LOG.info("Starting Sessiond");
-		}	
+		}
 		Sessiond.getInstance(config);
 	}
 
