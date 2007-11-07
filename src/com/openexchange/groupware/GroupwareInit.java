@@ -70,7 +70,6 @@ public final class GroupwareInit {
      * @throws AbstractOXException if initialization fails.
      */
     public static void init() throws AbstractOXException {
-		EventInit.init();
 		PushInit.init();
     }
 }
