@@ -58,18 +58,36 @@ package com.openexchange.sessiond;
 
 public class Sessiond {
 	
+	private static Sessiond singleton;
+	
+	private SessionHandler sessionHandler;
+	
+	private SocketHandler socketHandler;
+	
 	public Sessiond(SessiondConfig config) {
-		final SessionHandler sessionHandler = new SessionHandler(config);
+		sessionHandler = new SessionHandler(config);
 		sessionHandler.init();		
 
 		if (config.isServerSocketEnabled()) {
-			new SocketHandler(config);
+			socketHandler = new SocketHandler(config);
 		} 
 		
 		if (config.isServerObjectStreamSocketEnabled()) {
-			new SocketHandler(config);
+			socketHandler = new SocketHandler(config);
 		} 
 	}
+	
+    public static Sessiond getInstance(SessiondConfig config) {
+        if(singleton != null)
+            return singleton;
+        return singleton = new Sessiond(config);
+    }
+    
+    public void close(){
+    	sessionHandler.cancel();
+    	socketHandler.close();
+    }
+	
 } 
 
 

@@ -51,6 +51,7 @@
 
 package com.openexchange.sessiond;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -142,6 +143,8 @@ public class SocketHandler implements Runnable {
 		}
 	}
 	
+	private SessionRequest sessionReq;
+	
 	public void run() {
 		while (th != null) {
 			Socket socket = null;
@@ -170,10 +173,23 @@ public class SocketHandler implements Runnable {
 	}
 
 	private void doRequest(final Socket socket, final SessiondConfig config) {
-		final SessionRequest sessionReq = new SessionRequest(socket, config);
+		sessionReq = new SessionRequest(socket, config);
 		sessionReq.init();
 	}
 
+	public void close(){
+		
+		sessionReq.close();
+		
+		try {
+			th.interrupt();
+		
+			th.join();
+		} catch (InterruptedException ie){
+			LOG.info("Stopping Thread", ie);
+		}
+	}
+	
 //	private void doRequest(final SSLSocket sslSocket, final SessiondConfig config) {
 //		final SessionRequest sessionReq = new SessionRequest(sslSocket, config);
 //		sessionReq.init();

@@ -114,6 +114,22 @@ public class SessionRequest implements Runnable {
 		th.start();
 	}
 	
+	public void close(){
+		try {
+			th.interrupt();
+		
+			th.join();
+		} catch (InterruptedException ie){
+			LOG.info("Stopping Thread", ie);
+		}
+		try{
+			if (null != socket)
+				socket.close();
+		} catch (IOException ioe){
+			LOG.info("Closing Socket", ioe);
+		}
+	}
+	
 	private void endCon(final Socket s) {
 		try {
 			if (isSecureConnection) {

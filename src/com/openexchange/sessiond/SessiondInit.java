@@ -53,20 +53,24 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.configuration.SystemConfig;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.contact.ContactConfig;
+import com.openexchange.server.Initialization;
 
 /**
  * SessiondInit
  *
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
-public class SessiondInit {
+public class SessiondInit implements Initialization {
 	
 	private static final Log LOG = LogFactory.getLog(SessiondInit.class);
 	
-	public SessiondInit() {
-		super();
-	}
+	private SessiondConfigWrapper config;
 	
+	private static SessiondInit singleton = new SessiondInit();
+		
+	/*
 	public static void init() {
 		if (LOG.isInfoEnabled()) {
 			LOG.info("Parse Sessiond properties");
@@ -78,5 +82,32 @@ public class SessiondInit {
 			LOG.info("Starting Sessiond");
 		}
 		new Sessiond(config);
+	}
+	*/
+	
+    public static SessiondInit getInstance() {
+        if(singleton != null)
+            return singleton;
+        return singleton = new SessiondInit();
+    }
+	
+	public void start() throws AbstractOXException {
+		if (LOG.isInfoEnabled()) {
+			LOG.info("Parse Sessiond properties");
+		}
+		
+		config = new SessiondConfigWrapper(SystemConfig.getProperty("SESSIONDPROPERTIES"));
+		SessiondConnector.setConfig(config);
+
+		if (LOG.isInfoEnabled()) {
+			LOG.info("Starting Sessiond");
+		}	
+		Sessiond.getInstance(config);
+	}
+
+	public void stop() throws AbstractOXException {
+		SessiondConnector.getInstance().close();
+		Sessiond s = Sessiond.getInstance(config);
+		s.close();
 	}
 }
