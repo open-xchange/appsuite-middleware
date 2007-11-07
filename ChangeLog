@@ -1,3 +1,7 @@
+* 2007-11-07 - manuel.kraft@open-xchange.com
+
+  - Bugfix ID#10050 Database leftovers of deleted contexts
+
 * 2007-11-07 - thorben.betten@open-xchange.com
 
  - Bugfix #9966: Proper error message on exceeded quota on mail server
