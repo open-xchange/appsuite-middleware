@@ -75,6 +75,8 @@ public final class GroupwareInit {
 		SessiondInit.init();
 		EventInit.init();
 		PushInit.init();
-        ParticipantConfig.init();
+		
+		//Done by Fred
+        //ParticipantConfig.init();
     }
 }

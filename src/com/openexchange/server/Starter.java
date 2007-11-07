@@ -118,6 +118,10 @@ public class Starter implements Initialization {
          */
         com.openexchange.groupware.contact.ContactConfig.getInstance(),
         /**
+         * Participant Configuration
+         */
+        com.openexchange.groupware.configuration.ParticipantConfig.getInstance(),
+        /**
          * Attachment Configuration
          */
         com.openexchange.groupware.attach.AttachmentConfig.getInstance(),

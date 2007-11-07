@@ -49,9 +49,16 @@
 
 package com.openexchange.groupware.configuration;
 
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.configuration.ConfigurationException.Code;
+import com.openexchange.server.Initialization;
 import com.openexchange.tools.conf.AbstractConfig;
 
 /**
@@ -60,7 +67,7 @@ import com.openexchange.tools.conf.AbstractConfig;
  * participants.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class ParticipantConfig extends AbstractConfig {
+public final class ParticipantConfig extends AbstractConfig implements Initialization {
 
     /**
      * Property key in the system.properties file.
@@ -71,15 +78,23 @@ public final class ParticipantConfig extends AbstractConfig {
     /**
      * Singleton instance.
      */
-    private static final ParticipantConfig SINGLETON = new ParticipantConfig();
+    private static ParticipantConfig SINGLETON;
 
     /**
-     * Prevent instantiation
+     * Loaded boolean
      */
-    private ParticipantConfig() {
-        super();
-    }
-
+    private static boolean loaded = false;
+    
+    /**
+     * Locker
+     */
+    private static final Lock INIT_LOCK = new ReentrantLock();
+    
+    /**
+     * Logging
+     */
+    private static final Log LOG = LogFactory.getLog(ParticipantConfig.class);
+    
     /**
      * {@inheritDoc}
      */
@@ -92,21 +107,20 @@ public final class ParticipantConfig extends AbstractConfig {
         }
         return filename;
     }
-
-    /**
-     * Loads the participants.properties file.
-     * @throws ConfigurationException if loading fails.
-     */
-    public static void init() throws ConfigurationException {
-        SINGLETON.loadPropertiesInternal();
-    }
-
+    
     /**
      * Gets the value of a property from the file.
      * @param key name of the property.
      * @return the value of the property.
      */
     public static boolean getProperty(final Property key) {
+    	if(!loaded || SINGLETON == null) {
+			try {
+				getInstance().start();
+			} catch (final ConfigurationException e) {
+				LOG.error("Can't init config:",e);
+			}
+		}
         return SINGLETON.getBooleanInternal(key.propertyName, key.defaultValue);
     }
 
@@ -140,4 +154,27 @@ public final class ParticipantConfig extends AbstractConfig {
             this.defaultValue = value;
         }
     }
+
+    public static ParticipantConfig getInstance() {
+        if(SINGLETON != null)
+            return SINGLETON;
+        return SINGLETON = new ParticipantConfig();
+    }
+    
+	public void start() throws ConfigurationException {	
+        if (!loaded || SINGLETON == null) {
+			INIT_LOCK.lock();
+            try {
+			    getInstance().loadPropertiesInternal();
+                loaded = true;
+            } finally {
+				INIT_LOCK.unlock();
+			}
+		} 	
+	}
+
+	public void stop() throws ConfigurationException {
+        SINGLETON = null;
+        loaded = false;
+	}
 }
