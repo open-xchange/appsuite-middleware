@@ -50,7 +50,6 @@
 package com.openexchange.groupware;
 
 import com.openexchange.event.EventInit;
-import com.openexchange.groupware.configuration.ParticipantConfig;
 import com.openexchange.push.udp.PushInit;
 import com.openexchange.sessiond.SessiondInit;
 
@@ -75,8 +74,5 @@ public final class GroupwareInit {
 		SessiondInit.init();
 		EventInit.init();
 		PushInit.init();
-		
-		//Done by Fred
-        //ParticipantConfig.init();
     }
 }
