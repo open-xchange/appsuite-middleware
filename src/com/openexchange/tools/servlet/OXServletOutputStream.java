@@ -246,6 +246,9 @@ public final class OXServletOutputStream extends ServletOutputStream {
 				LOG.error(e.getMessage(), e);
 			}
 			throw new IOException(e.getMessage());
+		} catch (final IOException e) {
+			LOG.error(e.getMessage(), e);
+			throw e;
 		} catch (final Exception e) {
 			LOG.error(e.getMessage(), e);
 			throw new IOException(e.getMessage());
