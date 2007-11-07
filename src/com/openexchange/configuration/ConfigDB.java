@@ -67,8 +67,8 @@ public final class ConfigDB extends AbstractConfig implements Initialization {
 
     private static ConfigDB singleton = new ConfigDB();
 
-    private static final com.openexchange.configuration.SystemConfig.Property
-        KEY = com.openexchange.configuration.SystemConfig.Property.CONFIGDB;
+    private static final SystemConfig.Property KEY = SystemConfig.Property
+        .CONFIGDB;
 
     /**
      * Logger.
