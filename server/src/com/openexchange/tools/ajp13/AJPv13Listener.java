@@ -253,32 +253,43 @@ public final class AJPv13Listener implements Runnable {
 						}
 					} catch (final UploadServletException e) {
 						LOG.error(e.getMessage(), e);
-						try {
-							/*
-							 * Send call back
-							 */
-							writeSendHeaders(client, (HttpServletResponseWrapper) e.getRes());
-							writeSendBody(client, e.getData().getBytes("UTF-8"));
-							writeEndResponse(client, false);
-							ajpCon.getAjpRequestHandler().setEndResponseSent(true);
-						} catch (final AJPv13Exception e1) {
-							LOG.error(e1.getMessage(), e1);
-						} catch (final IOException e1) {
-							LOG.error(e1.getMessage(), e1);
-						}
+						/*
+						 * Send call back
+						 */
+						writeSendHeaders(client, (HttpServletResponseWrapper) e.getRes());
+						writeSendBody(client, e.getData().getBytes("UTF-8"));
+						writeEndResponse(client, false);
+						ajpCon.getAjpRequestHandler().setEndResponseSent(true);
 					} catch (final ServletException e) {
 						LOG.error(e.getMessage(), e);
-						try {
-							/*
-							 * Send END_RESPONSE package
-							 */
-							writeEndResponse(client, false);
-							ajpCon.getAjpRequestHandler().setEndResponseSent(true);
-						} catch (final AJPv13Exception e1) {
-							LOG.error(e1.getMessage(), e1);
-						} catch (final IOException e1) {
-							LOG.error(e1.getMessage(), e1);
+						closeAndKeepAlive();
+					} catch (final AJPv13SocketClosedException e) {
+						if (e.isError()) {
+							LOG.error(e.getMessage(), e);
+						} else {
+							if (LOG.isWarnEnabled()) {
+								LOG.warn(e.getMessage(), e);
+							}
 						}
+						closeAndKeepAlive();
+					} catch (final AJPv13InvalidByteSequenceException e) {
+						/*
+						 * TODO: We received invalid starting bytes. Maybe we should add
+						 * special treatment (kind of retry mechanism) for this error
+						 */
+						LOG.error(e.getMessage(), e);
+						closeAndKeepAlive();
+					} catch (final AbstractOXException e) {
+						LOG.error(e.getMessage(), e);
+						closeAndKeepAlive();
+					} catch (final Throwable e) {
+						/*
+						 * Catch Throwable to catch every Exception, even
+						 * RuntimeExceptions
+						 */
+						final AJPv13Exception wrapper = new AJPv13Exception(e);
+						LOG.error(wrapper.getMessage(), wrapper);
+						closeAndKeepAlive();
 					}
 					ajpCon.resetConnection(false);
 					AJPv13Server.ajpv13ListenerMonitor.decrementNumProcessing();
@@ -287,25 +298,7 @@ public final class AJPv13Listener implements Runnable {
 					processing = false;
 					client.getOutputStream().flush();
 				}
-			} catch (final ServletException e) {
-				final AJPv13Exception wrapper = new AJPv13Exception(e);
-				e.initCause(e.getRootCause());
-				LOG.error(wrapper.getMessage(), wrapper);
-			} catch (final AJPv13SocketClosedException e) {
-				if (e.isError()) {
-					LOG.error(e.getMessage(), e);
-				} else {
-					if (LOG.isWarnEnabled()) {
-						LOG.warn(e.getMessage(), e);
-					}
-				}
-			} catch (final AJPv13InvalidByteSequenceException e) {
-				/*
-				 * TODO: We received invalid starting bytes. Maybe we should add
-				 * special treatment (kind of retry mechanism) for this error
-				 */
-				LOG.error(e.getMessage(), e);
-			} catch (final AbstractOXException e) {
+			} catch (final AJPv13Exception e) {
 				LOG.error(e.getMessage(), e);
 			} catch (final Throwable e) {
 				/*
@@ -364,6 +357,14 @@ public final class AJPv13Listener implements Runnable {
 		}
 		changeNumberOfRunningAJPListeners(false);
 		AJPv13Watcher.removeListener(num);
+	}
+
+	private void closeAndKeepAlive() throws AJPv13Exception, IOException {
+		/*
+		 * Send END_RESPONSE package
+		 */
+		writeEndResponse(client, false);
+		ajpCon.getAjpRequestHandler().setEndResponseSent(true);
 	}
 	
 	/**
