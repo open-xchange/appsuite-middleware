@@ -1,3 +1,7 @@
+* 2007-11-08 - sebastian.kauss@open-xchange.com
+
+ - Fixed bug #10119 - API does not return deleted items properly
+
 * 2007-11-08 - martin.kauss@open-xchange.com
 
  * Fixed bug #10120. If a users creates a recurring appointment and an exception
