@@ -157,7 +157,7 @@ public final class MessageParser {
 	private static final String UPLOAD_FILE_ATTACHMENT_PREFIX = "file_";
 
 	private static String getFieldName(final int num) {
-		return new StringBuilder(10).append(UPLOAD_FILE_ATTACHMENT_PREFIX).append(num).toString();
+		return new StringBuilder(8).append(UPLOAD_FILE_ATTACHMENT_PREFIX).append(num).toString();
 	}
 
 	/**

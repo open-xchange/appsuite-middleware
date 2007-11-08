@@ -66,6 +66,7 @@ import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.smtp.dataobjects.SMTPFilePart;
 
@@ -114,7 +115,7 @@ public abstract class UploadFileMailPart extends MailPart {
 		 */
 		if (null == dataSource) {
 			try {
-				if (getContentType().isMimeType("text/*") && getContentType().getParameter(PARAM_CHARSET) == null) {
+				if (getContentType().getParameter(PARAM_CHARSET) == null) {
 					/*
 					 * Add system charset
 					 */
@@ -124,7 +125,7 @@ public abstract class UploadFileMailPart extends MailPart {
 				dataSource = new MessageDataSource(new FileInputStream(uploadFile), getContentType());
 			} catch (final IOException e) {
 				LOG.error(e.getLocalizedMessage(), e);
-				dataSource = new MessageDataSource(new byte[0], "application/octet-stream");
+				dataSource = new MessageDataSource(new byte[0], MIMETypes.MIME_APPL_OCTET);
 			}
 		}
 		return dataSource;
@@ -140,10 +141,10 @@ public abstract class UploadFileMailPart extends MailPart {
 		if (cachedContent != null) {
 			return cachedContent;
 		}
-		if (getContentType().isMimeType("text/*")) {
-			String charset = getContentType().getParameter("charset");
+		if (getContentType().isMimeType(MIMETypes.MIME_TEXT_ALL)) {
+			String charset = getContentType().getParameter(PARAM_CHARSET);
 			if (charset == null) {
-				charset = "US-ASCII";
+				charset = System.getProperty("file.encoding", MailConfig.getDefaultMimeCharset());
 			}
 			FileInputStream fis = null;
 			try {

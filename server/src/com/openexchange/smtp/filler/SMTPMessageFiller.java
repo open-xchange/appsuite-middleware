@@ -88,11 +88,11 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.upload.AJAXUploadFile;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.MIMEMessageUtility;
 import com.openexchange.mail.mime.MIMEType2ExtMap;
+import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.transport.SendType;
@@ -268,14 +268,14 @@ public final class SMTPMessageFiller {
 		final boolean sendMultipartAlternative;
 		if (mail.isDraft()) {
 			sendMultipartAlternative = false;
-			mail.setContentType("text/html");
+			mail.setContentType(MIMETypes.MIME_TEXT_HTML);
 		} else {
-			sendMultipartAlternative = mail.getContentType().isMimeType("multipart/alternative");
+			sendMultipartAlternative = mail.getContentType().isMimeType(MIMETypes.MIME_MULTIPART_ALTERNATIVE);
 		}
 		/*
 		 * Html content with embedded images
 		 */
-		final boolean embeddedImages = (sendMultipartAlternative || (mail.getContentType().isMimeType("text/htm")))
+		final boolean embeddedImages = (sendMultipartAlternative || (mail.getContentType().isMimeType(MIMETypes.MIME_TEXT_HTM_ALL)))
 				&& (MIMEMessageUtility.hasEmbeddedImages((String) mail.getContent()) || MIMEMessageUtility
 						.hasReferencedLocalImages((String) mail.getContent(), session));
 		/*
@@ -303,7 +303,7 @@ public final class SMTPMessageFiller {
 				 * Convert html content to regular text if mail text is demanded
 				 * to be text/plain
 				 */
-				if (mail.getContentType().isMimeType("text/plain")) {
+				if (mail.getContentType().isMimeType(MIMETypes.MIME_TEXT_PLAIN)) {
 					/*
 					 * Convert html content to reguar text. First: Create a body
 					 * part for text content
@@ -372,7 +372,7 @@ public final class SMTPMessageFiller {
 					/*
 					 * Define content
 					 */
-					vcardPart.setDataHandler(new DataHandler(new MessageDataSource(userVCard, "text/x-vcard")));
+					vcardPart.setDataHandler(new DataHandler(new MessageDataSource(userVCard, MIMETypes.MIME_TEXT_X_VCARD)));
 					vcardPart.setHeader(MessageHeaders.HDR_MIME_VERSION, VERSION_1_0);
 					vcardPart.setFileName(fileName);
 					/*
@@ -398,7 +398,7 @@ public final class SMTPMessageFiller {
 					{
 						final ByteArrayOutputStream out = new ByteArrayOutputStream();
 						originalMail.writeTo(out);
-						dataSource = new MessageDataSource(out.toByteArray(), "message/rfc822");
+						dataSource = new MessageDataSource(out.toByteArray(), MIMETypes.MIME_MESSAGE_RFC822);
 					}
 					final MimeBodyPart origMsgPart = new MimeBodyPart();
 					origMsgPart.setDataHandler(new DataHandler(dataSource));
@@ -418,8 +418,8 @@ public final class SMTPMessageFiller {
 		/*
 		 * Create a non-multipart message
 		 */
-		if (mail.getContentType().isMimeType("text/*")) {
-			final boolean isPlainText = mail.getContentType().isMimeType("text/plain");
+		if (mail.getContentType().isMimeType(MIMETypes.MIME_TEXT_ALL)) {
+			final boolean isPlainText = mail.getContentType().isMimeType(MIMETypes.MIME_TEXT_PLAIN);
 			if (mail.getContentType().getParameter(PARAM_CHARSET) == null) {
 				mail.getContentType().setParameter(PARAM_CHARSET, SMTPConfig.getDefaultMimeCharset());
 			}
@@ -498,7 +498,7 @@ public final class SMTPMessageFiller {
 				}
 				final VersitObject versitObj = converter.convertContact(contactObj, "2.1");
 				final ByteArrayOutputStream os = new ByteArrayOutputStream();
-				final VersitDefinition def = Versit.getDefinition("text/x-vcard");
+				final VersitDefinition def = Versit.getDefinition(MIMETypes.MIME_TEXT_X_VCARD);
 				final VersitDefinition.Writer w = def.getWriter(os, SMTPConfig.getDefaultMimeCharset());
 				def.write(w, versitObj);
 				w.flush();
@@ -609,12 +609,12 @@ public final class SMTPMessageFiller {
 	private void addMessageBodyPart(final Multipart mp, final MailPart part, final boolean inline)
 			throws MessagingException, MailException {
 		final MimeBodyPart messageBodyPart;
-		if (part.getContentType().isMimeType("text/*")) {
+		if (part.getContentType().isMimeType(MIMETypes.MIME_TEXT_ALL)) {
 			messageBodyPart = new MimeBodyPart();
 			messageBodyPart.setDataHandler(part.getDataHandler());
 			messageBodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, part.getContentType().toString());
 		} else {
-			if (part.getContentType().isMimeType("application/octet-stream") && part.getFileName() != null) {
+			if (part.getContentType().isMimeType(MIMETypes.MIME_APPL_OCTET) && part.getFileName() != null) {
 				/*
 				 * Try to determine MIME type
 				 */
@@ -643,6 +643,10 @@ public final class SMTPMessageFiller {
 		 */
 		messageBodyPart.setDisposition(inline ? Part.INLINE : Part.ATTACHMENT);
 		/*
+		 * Force base64 encoding to keep data as it is
+		 */
+		messageBodyPart.setHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC, "base64");
+		/*
 		 * Content-ID
 		 */
 		if (part.getContentId() != null) {
@@ -657,7 +661,7 @@ public final class SMTPMessageFiller {
 	}
 
 	private void setMessageHeaders(final SMTPMailMessage mail, final SMTPMessage smtpMessage)
-			throws MessagingException, MailConfigException {
+			throws MessagingException {
 		/*
 		 * Set from
 		 */
@@ -772,11 +776,9 @@ public final class SMTPMessageFiller {
 	 *            The session
 	 * @throws MessagingException
 	 *             If headers cannot be set
-	 * @throws MailConfigException
-	 *             If {@link SMTPConfig#isSmtpEnvelopeFrom()} cannot be invoked
 	 */
 	public static void fillCommonHeaders(final SMTPMessage smtpMessage, final SessionObject session)
-			throws MessagingException, MailConfigException {
+			throws MessagingException {
 		/*
 		 * Set mailer
 		 */
@@ -809,7 +811,7 @@ public final class SMTPMessageFiller {
 	}
 
 	private static BodyPart createHtmlBodyPart(final String htmlContent, final int linewrap)
-			throws MailConfigException, MessagingException {
+			throws MessagingException {
 		final String htmlCT = PAT_HTML_CT.replaceFirst(REPLACE_CS, SMTPConfig.getDefaultMimeCharset());
 		final MimeBodyPart html = new MimeBodyPart();
 		html.setContent(performLineFolding(replaceHTMLSimpleQuotesForDisplay(formatHrefLinks(htmlContent)), true,

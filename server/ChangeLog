@@ -1,3 +1,7 @@
+* 2007-11-08 - thorben.betten@open-xchange.com
+
+ - Bugfix #10053: Keeping orignal file data when attaching to mail
+
 * 2007-11-07 - manuel.kraft@open-xchange.com
 
   - Bugfix ID#10050 Database leftovers of deleted contexts
