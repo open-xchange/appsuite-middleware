@@ -1,3 +1,7 @@
+* 2007-11-08 - dennis.sieben@open-xchange.com
+
+  - Bugfix ID#10125 No rollback if filestore creation fails during createuser
+  
 * 2007-11-07 - manuel.kraft@open-xchange.com
 
   - Bugfix ID#10050 Database leftovers of deleted contexts
