@@ -1651,7 +1651,6 @@ class CalendarMySQL implements CalendarSqlImp {
                     }
             	}
             }
-            CalendarCommonCollection.purgeExceptionFieldsFromObject(cdao);            
         } else if (rec_action == CalendarRecurringCollection.RECURRING_CREATE_EXCEPTION) {
             // Because the GUI only sends changed fields, we have to create a merged object
             // from cdao and edao and then we force an insert!

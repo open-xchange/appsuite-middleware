@@ -1,3 +1,10 @@
+* 2007-11-08 - martin.kauss@open-xchange.com
+
+ * Fixed bug #10120. If a users creates a recurring appointment and an exception
+   and deletes afterwards the exception the whole sequence is gone. This bug
+   was produced in the bugfix phase and did never exist in a produvtive
+   environmen.
+
 * 2007-11-07 - manuel.kraft@open-xchange.com
 
   - Bugfix ID#10050 Database leftovers of deleted contexts
