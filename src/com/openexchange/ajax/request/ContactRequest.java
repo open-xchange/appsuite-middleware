@@ -180,9 +180,12 @@ public class ContactRequest {
 	public JSONArray actionUpdates(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, SearchIteratorException, OXException, OXJSONException, AjaxException {
 		final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
 		final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
-		
-		timestamp = new Date(0);
-		
+		final Date requestedTimestamp = DataParser.checkDate(jsonObj, AJAXServlet.PARAMETER_TIMESTAMP);
+        timestamp = new Date(requestedTimestamp.getTime());
+
+		final int folderId = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
+		final String ignore = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_IGNORE);
+        
 		Date lastModified = null;
 		
 		final JSONArray jsonResponseArray = new JSONArray();
@@ -190,10 +193,6 @@ public class ContactRequest {
 		SearchIterator it = null;
 		
 		try {
-			timestamp = DataParser.checkDate(jsonObj, AJAXServlet.PARAMETER_TIMESTAMP);
-			final int folderId = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
-			final String ignore = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_IGNORE);
-			
 			boolean bIgnoreDelete = false;
 			
 			if (ignore != null && ignore.indexOf("deleted") != -1) {
@@ -206,7 +205,7 @@ public class ContactRequest {
 			
 			final ContactWriter contactWriter = new ContactWriter(timeZone);
 			final ContactSQLInterface contactsql = new RdbContactSQLInterface(sessionObj);
-			it = contactsql.getModifiedContactsInFolder(folderId, internalColumns, timestamp);
+			it = contactsql.getModifiedContactsInFolder(folderId, internalColumns, requestedTimestamp);
 			while (it.hasNext()) {
 				final ContactObject contactObj = (ContactObject)it.next();
 				final JSONArray jsonContactArray = new JSONArray();
@@ -221,7 +220,7 @@ public class ContactRequest {
 			}
 			
 			if (!bIgnoreDelete) {
-				it = contactsql.getDeletedContactsInFolder(folderId, internalColumns, timestamp);
+				it = contactsql.getDeletedContactsInFolder(folderId, internalColumns, requestedTimestamp);
 				while (it.hasNext()) {
 					final ContactObject contactObj = (ContactObject)it.next();
 					

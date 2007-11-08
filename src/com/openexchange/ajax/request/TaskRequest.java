@@ -221,7 +221,8 @@ public class TaskRequest {
 	public JSONArray actionUpdates(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, SearchIteratorException, OXException, OXJSONException, AjaxException {
 		final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
 		final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
-		timestamp = DataParser.checkDate(jsonObj, AJAXServlet.PARAMETER_TIMESTAMP);
+		final Date requestedTimestamp = DataParser.checkDate(jsonObj, AJAXServlet.PARAMETER_TIMESTAMP);
+        timestamp = new Date(requestedTimestamp.getTime());
 		final int folderId = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
 		final String ignore = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_IGNORE);
 		
@@ -243,7 +244,7 @@ public class TaskRequest {
 			final TasksSQLInterface taskssql = new TasksSQLInterfaceImpl(sessionObj);
 			final TaskWriter taskWriter = new TaskWriter(timeZone);
 			
-			it = taskssql.getModifiedTasksInFolder(folderId, internalColumns, timestamp);
+			it = taskssql.getModifiedTasksInFolder(folderId, internalColumns, requestedTimestamp);
 			while (it.hasNext()) {
 				final Task taskObj = (Task)it.next();
 				
@@ -258,7 +259,7 @@ public class TaskRequest {
 			
 			if (!bIgnoreDelete) {
 				it.close();
-				it = taskssql.getDeletedTasksInFolder(folderId, internalColumns, timestamp);
+				it = taskssql.getDeletedTasksInFolder(folderId, internalColumns, requestedTimestamp);
 				while (it.hasNext()) {
 					final Task taskObj = (Task)it.next();
 					
