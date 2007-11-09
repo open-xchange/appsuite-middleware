@@ -275,15 +275,6 @@ public class Starter implements Initialization {
         if (LOG.isInfoEnabled()) {
             LOG.info("SYSTEM IS UP & RUNNING...");
         }
-        
-        // FIXME implement a server shutdown
-        try {
-            synchronized (Starter.class) {
-                Starter.class.wait();
-            }
-        } catch (final InterruptedException e) {
-            LOG.error(e.getMessage(), e);
-        }
     }
 
     /**
