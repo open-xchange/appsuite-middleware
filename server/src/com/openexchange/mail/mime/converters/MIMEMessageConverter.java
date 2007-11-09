@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.mime.converters;
 
+import static com.openexchange.mail.utils.MessageUtility.decodeMultiEncodedHeader;
 import static com.openexchange.mail.utils.StorageUtility.loadHeaders;
 
 import java.io.IOException;
@@ -79,9 +80,9 @@ import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.mime.ContainerMessage;
 import com.openexchange.mail.mime.MIMEDefaultSession;
 import com.openexchange.mail.mime.MIMETypes;
-import com.openexchange.mail.mime.ContainerMessage;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.dataobjects.MIMEMailMessage;
 import com.openexchange.mail.mime.dataobjects.MIMEMailPart;
@@ -612,7 +613,7 @@ public final class MIMEMessageConverter {
 				}
 			}
 			mail.removeHeader(MessageHeaders.HDR_DISP_NOT_TO);
-			mail.setFileName(msg.getFileName());
+			mail.setFileName(decodeMultiEncodedHeader(msg.getFileName()));
 			parseFlags(msg.getFlags(), mail);
 			parsePriority(mail.getHeader(MessageHeaders.HDR_X_PRIORITY), mail);
 			mail.removeHeader(MessageHeaders.HDR_X_PRIORITY);
@@ -658,7 +659,7 @@ public final class MIMEMessageConverter {
 				}
 			}
 			mailPart.setDisposition(part.getDisposition());
-			mailPart.setFileName(part.getFileName());
+			mailPart.setFileName(decodeMultiEncodedHeader(part.getFileName()));
 			int size = part.getSize();
 			if (size == -1) {
 				/*

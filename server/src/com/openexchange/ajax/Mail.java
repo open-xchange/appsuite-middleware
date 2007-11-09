@@ -93,7 +93,6 @@ import com.openexchange.ajax.parser.InfostoreParser;
 import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXException;
-import com.openexchange.cache.FolderCacheManager;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
@@ -133,6 +132,7 @@ import com.openexchange.tools.encoding.Helper;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.mail.ContentType;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 import com.openexchange.tools.servlet.UnsynchronizedByteArrayOutputStream;
@@ -1954,7 +1954,6 @@ public class Mail extends PermissionServlet implements UploadListener {
 			final String destFolderIdentifier = paramContainer.checkStringParam(PARAMETER_DESTINATION_FOLDER);
 			MailInterface mailInterface = mailInterfaceArg;
 			boolean closeMailInterface = false;
-			MailPart mailPart = null;
 			final InfostoreFacade db = Infostore.FACADE;
 			try {
 				if (!sessionObj.getUserConfiguration().hasInfostore()) {
@@ -1964,28 +1963,25 @@ public class Mail extends PermissionServlet implements UploadListener {
 					mailInterface = MailInterface.getInstance(sessionObj);
 					closeMailInterface = true;
 				}
-				mailPart = mailInterface.getMessageAttachment(mailPath.getFolder(), mailPath.getUid(), sequenceId,
-						false);
+				final MailPart mailPart = mailInterface.getMessageAttachment(mailPath.getFolder(), mailPath.getUid(),
+						sequenceId, false);
 				if (mailPart == null) {
 					throw new MailException(MailException.Code.NO_ATTACHMENT_FOUND, sequenceId, mailPath.toString());
 				}
 				final int destFolderID = Integer.parseInt(destFolderIdentifier);
-				final FolderObject folderObj;
-				if (FolderCacheManager.isEnabled()) {
-					folderObj = FolderCacheManager.getInstance().getFolderObject(destFolderID, true,
-							sessionObj.getContext(), null);
-				} else {
-					folderObj = FolderObject.loadFolderObjectFromDB(destFolderID, sessionObj.getContext());
-				}
-				final EffectivePermission p = folderObj.getEffectiveUserPermission(sessionObj.getUserObject().getId(),
-						sessionObj.getUserConfiguration());
-				if (!p.isFolderVisible()) {
-					throw new OXFolderException(FolderCode.NOT_VISIBLE, getFolderName(folderObj),
-							getUserName(sessionObj), Integer.valueOf(sessionObj.getContext().getContextId()));
-				}
-				if (!p.canWriteOwnObjects()) {
-					throw new OXFolderException(FolderCode.NO_WRITE_PERMISSION, getUserName(sessionObj),
-							getFolderName(folderObj), Integer.valueOf(sessionObj.getContext().getContextId()));
+				{
+					final FolderObject folderObj = new OXFolderAccess(sessionObj.getContext())
+							.getFolderObject(destFolderID);
+					final EffectivePermission p = folderObj.getEffectiveUserPermission(sessionObj.getUserObject()
+							.getId(), sessionObj.getUserConfiguration());
+					if (!p.isFolderVisible()) {
+						throw new OXFolderException(FolderCode.NOT_VISIBLE, getFolderName(folderObj),
+								getUserName(sessionObj), Integer.valueOf(sessionObj.getContext().getContextId()));
+					}
+					if (!p.canWriteOwnObjects()) {
+						throw new OXFolderException(FolderCode.NO_WRITE_PERMISSION, getUserName(sessionObj),
+								getFolderName(folderObj), Integer.valueOf(sessionObj.getContext().getContextId()));
+					}
 				}
 				/*
 				 * Create document's meta data
@@ -2001,7 +1997,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 				 * Since file's size given from IMAP server is just an
 				 * estimation and therefore does not exactly match the file's
 				 * size a future file access via webdav can fail because of the
-				 * size mismatch. Thus set the filesize to 0 to make the
+				 * size mismatch. Thus set the file size to 0 to make the
 				 * infostore measure the size.
 				 */
 				docMetaData.setFileSize(0);

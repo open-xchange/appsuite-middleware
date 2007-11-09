@@ -1,6 +1,8 @@
 * 2007-11-09 - thorben.betten@open-xchange.com
 
  - Bugfix #10117: Checking for duplicates on folder creation/update/rename
+ - Bugfix #10010: Decoding file attachment's file name when saving to
+   infostore
 
 * 2007-11-08 - thorben.betten@open-xchange.com
 
