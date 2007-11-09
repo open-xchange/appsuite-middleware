@@ -56,7 +56,6 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.GroupwareInit;
-import com.openexchange.push.PushInit;
 
 /**
  * com.openexchange.server.Starter
@@ -195,9 +194,9 @@ public class Starter implements Initialization {
         com.openexchange.groupware.notify.NotificationConfig.getInstance()
     };
 
-    private final Stack<Initialization> started = new Stack<Initialization>();
-
 	private static final Log LOG = LogFactory.getLog(Starter.class);
+
+    private final Stack<Initialization> started = new Stack<Initialization>();
 
 	/**
 	 * Default constructor.
