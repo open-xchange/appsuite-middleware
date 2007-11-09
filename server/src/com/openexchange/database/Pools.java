@@ -73,7 +73,6 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.configuration.ConfigDB;
 import com.openexchange.configuration.ConfigDB.Property;
 import com.openexchange.server.DBPoolingException;
-import com.openexchange.server.Initialization;
 import com.openexchange.server.ServerTimer;
 import com.openexchange.server.DBPoolingException.Code;
 
@@ -176,18 +175,35 @@ public final class Pools implements Runnable {
         return retval;
     }
 
-    private final TimerTask cleaner = new TimerTask() {
-        @Override
-        public void run() {
-            try {
-                final Thread thread = new Thread(Pools.this);
-                thread.setName("PoolsCleaner");
-                thread.start();
-            } catch (Exception e) {
-                LOG.error(e.getMessage(), e);
-            }
+    private TimerTask cleaner;
+
+    private void startCleaner() {
+        if (null != cleaner) {
+            throw new IllegalStateException("");
         }
-    };
+        cleaner =  new TimerTask() {
+            @Override
+            public void run() {
+                try {
+                    final Thread thread = new Thread(Pools.this);
+                    thread.setName("PoolsCleaner");
+                    thread.start();
+                } catch (Exception e) {
+                    LOG.error(e.getMessage(), e);
+                }
+            }
+        };
+        ServerTimer.getTimer().scheduleAtFixedRate(cleaner, cleanerInterval,
+            cleanerInterval);
+    }
+
+    private void stopCleaner() {
+        if (null == cleaner) {
+            throw new IllegalStateException("");
+        }
+        cleaner.cancel();
+        cleaner = null;
+    }
 
     /**
      * {@inheritDoc}
@@ -291,7 +307,7 @@ public final class Pools implements Runnable {
     /**
      * Initializes the default pool configuration and starts read and write
      * pools for ConfigDB.
-     * @throws DBPoolingException
+     * @throws DBPoolingException if starting fails.
      */
     public void start() throws DBPoolingException {
         if (null != configDBRead) {
@@ -302,8 +318,7 @@ public final class Pools implements Runnable {
         final ConfigDB configDB = ConfigDB.getInstance();
         cleanerInterval = configDB.getLong(Property.CLEANER_INTERVAL,
             cleanerInterval);
-        ServerTimer.getTimer().scheduleAtFixedRate(cleaner, cleanerInterval,
-            cleanerInterval);
+        startCleaner();
         // TODO write createPool method.
         configDBRead = new ConnectionPool(configDB.getReadUrl(),
             configDB.getReadProps(), config);
@@ -335,7 +350,7 @@ public final class Pools implements Runnable {
         configDBRead.getCleanerTask().cancel();
         configDBRead.destroy();
         configDBRead = null;
-        cleaner.cancel();
+        stopCleaner();
         config = null;
     }
 
@@ -346,7 +361,6 @@ public final class Pools implements Runnable {
 
     /**
      * Reads the pooling configuration from the configdb.properties file.
-     * @return pooling information.
      */
     private void initPoolConfig() {
         config = ConnectionPool.DEFAULT_CONFIG;

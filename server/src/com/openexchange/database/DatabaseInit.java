@@ -76,15 +76,6 @@ public final class DatabaseInit implements Initialization {
     }
 
     /**
-     * Method for initializing the database system.
-     * @throws DBPoolingException if initialization fails.
-     * @deprecated use {@link Starter#start()} for starting up the server.
-     */
-    public static void init() throws DBPoolingException {
-        singleton.start();
-    }
-
-    /**
      * @return the singleton instance.
      */
     public static DatabaseInit getInstance() {
