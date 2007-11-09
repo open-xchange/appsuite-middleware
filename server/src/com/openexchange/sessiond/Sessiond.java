@@ -51,12 +51,17 @@
 
 package com.openexchange.sessiond;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  * Sessiond
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
 
 public class Sessiond {
+	
+	private static final Log LOG = LogFactory.getLog(Sessiond.class);
 	
 	private static Sessiond singleton;
 	
@@ -84,8 +89,18 @@ public class Sessiond {
     }
     
     public void close(){
-    	sessionHandler.cancel();
-    	socketHandler.close();
+    	try{
+    		if (null != sessionHandler)
+    			sessionHandler.cancel();
+    	} catch (Exception e){
+    		LOG.error("Unable to close sessionHandler", e);
+    	}
+    	try{
+    		if (null != socketHandler)
+    			socketHandler.close();
+    	} catch (Exception e){
+    		LOG.error("Unable to close socketHandler", e);
+    	}
     }
 	
 } 
