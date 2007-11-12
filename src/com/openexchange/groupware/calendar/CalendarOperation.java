@@ -440,14 +440,19 @@ public class CalendarOperation implements SearchIterator {
                     } else {
                         cdao.setSharedFolderOwner(ofa.getFolderOwner(inFolder));
                     }
-                    if (!action && !cdao.containsUserParticipants()) {
-                        cdao.setUsers(edao.getUsers());
-                    }
+
                     UserParticipant up = new UserParticipant(cdao.getSharedFolderOwner());
                     if (action) {
                         up.setConfirm(CalendarDataObject.ACCEPT);
                     }
-                    CalendarCommonCollection.checkAndFillIfUserIsParticipant(cdao, up);
+                    if (action) {
+                    	CalendarCommonCollection.checkAndFillIfUserIsParticipant(cdao, up);
+                    } else {
+                    	if (!cdao.containsUserParticipants() && !CalendarCommonCollection.checkIfUserIsParticipant(edao, up)) {
+                    		cdao.setUsers(edao.getUsers());
+                    		CalendarCommonCollection.checkAndFillIfUserIsParticipant(cdao, up);
+                    	}
+                    }
                     
                 } else if (cdao.getFolderType() == FolderObject.PUBLIC) {
                     UserParticipant up = new UserParticipant(uid);

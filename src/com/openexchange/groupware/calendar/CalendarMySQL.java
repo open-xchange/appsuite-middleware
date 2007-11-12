@@ -1440,6 +1440,8 @@ class CalendarMySQL implements CalendarSqlImp {
                                 cdao.setGlobalFolderID(pfid);
                                 cdao.setPrivateFolderID(pfid);
                                 up.setPersonalFolderId(pfid);
+                            } else {
+                            	up.setPersonalFolderId(pfid);
                             }
                         } else {
                             throw new OXCalendarException(OXCalendarException.Code.NO_SHARED_FOLDER_OWNER);
@@ -1510,6 +1512,8 @@ class CalendarMySQL implements CalendarSqlImp {
                                 cdao.setGlobalFolderID(pfid);
                                 cdao.setPrivateFolderID(pfid);
                                 up.setPersonalFolderId(pfid);
+                            } else {
+                            	up.setPersonalFolderId(pfid);
                             }
                         } else {
                             throw new OXCalendarException(OXCalendarException.Code.NO_SHARED_FOLDER_OWNER);
@@ -2222,6 +2226,8 @@ class CalendarMySQL implements CalendarSqlImp {
                                             modified_userparticipants[a].setPersonalFolderId(cdao.getActionFolder());
                                         }
                                     }
+                                } else {
+                                	pu.setInt(3, modified_userparticipants[a].getPersonalFolderId());
                                 }
                             } else {
                                 throw new OXCalendarException(OXCalendarException.Code.NO_SHARED_FOLDER_OWNER);

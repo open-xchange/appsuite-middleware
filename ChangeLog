@@ -1,3 +1,9 @@
+* 2007-11-12 - martin.kauss@open-xchange.com
+
+ - Fixed bug #10061. If a user changes an appointment in a shared folder
+   all participants except the owner of the shared folder are remived.
+   This has been fixed.
+
 * 2007-11-08 - sebastian.kauss@open-xchange.com
 
  - Fixed bug #10119 - API does not return deleted items properly

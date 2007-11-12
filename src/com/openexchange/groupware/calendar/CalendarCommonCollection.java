@@ -327,6 +327,19 @@ public class CalendarCommonCollection {
         }
     }
     
+    static final boolean checkIfUserIsParticipant(final CalendarDataObject cdao, final UserParticipant up) {
+        final UserParticipant check[] = cdao.getUsers();
+        if (check != null && check.length > 0) {
+            Arrays.sort(check);
+            int x = Arrays.binarySearch(check, up);
+            if (x >= 0) {
+            	return true;
+            }
+        }
+        return false;
+    }    
+    
+    
     static final void checkAndFillIfUserIsParticipant(final CalendarDataObject cdao, final UserParticipant up) {
         final UserParticipant check[] = cdao.getUsers();
         if (check != null && check.length > 0) {
