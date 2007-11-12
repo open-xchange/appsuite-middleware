@@ -55,6 +55,7 @@ import static com.openexchange.groupware.container.mail.parser.MessageUtils.repl
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -696,17 +697,46 @@ public final class MessageFiller {
 				 */
 				final File uploadedFile = mao.getUniqueDiskFileName();
 				final MimeBodyPart messageBodyPart = new MimeBodyPart();
-				messageBodyPart.setDataHandler(new DataHandler(new FileDataSource(uploadedFile)));
-				try {
-					messageBodyPart.setFileName(MimeUtility.encodeText(mao.getFileName(), IMAPProperties
-							.getDefaultMimeCharset(), ENC_Q));
-				} catch (final UnsupportedEncodingException e) {
-					messageBodyPart.setFileName(mao.getFileName());
-				} catch (final IMAPPropertyException e) {
-					messageBodyPart.setFileName(mao.getFileName());
+				messageBodyPart.setDataHandler(new DataHandler(new MessageDataSource(new FileInputStream(uploadedFile),
+						mao.getContentType())));
+				{
+					final ContentType tmp = new ContentType(mao.getContentType());
+					if (tmp.getParameter("charset") == null) {
+						/*
+						 * Add system charset
+						 */
+						tmp.addParameter("charset", System.getProperty("file.encoding", IMAPProperties
+								.getDefaultMimeCharset()));
+					}
+					messageBodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, tmp.toString());
 				}
+				/*
+				 * Filename
+				 */
+				if (mao.getFileName() != null) {
+					try {
+						messageBodyPart.setFileName(MimeUtility.encodeText(mao.getFileName(), IMAPProperties
+								.getDefaultMimeCharset(), ENC_Q));
+					} catch (final UnsupportedEncodingException e) {
+						messageBodyPart.setFileName(mao.getFileName());
+					}
+				}
+				/*
+				 * Disposition
+				 */
 				messageBodyPart.setDisposition(mao.getDisposition() == null ? Part.ATTACHMENT : mao.getDisposition());
-				messageBodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, mao.getContentType());
+				/*
+				 * Force base64 encoding to keep data as it is
+				 */
+				messageBodyPart.setHeader("Content-Transfer-Encoding", "base64");
+				/*
+				 * Content-ID
+				 */
+				if (mao.getCid() != null) {
+					final String cid = mao.getCid().charAt(0) == '<' ? mao.getCid() : new StringBuilder(mao.getCid()
+							.length() + 2).append('<').append(mao.getCid()).append('>').toString();
+					messageBodyPart.setContentID(cid);
+				}
 				mp.addBodyPart(messageBodyPart);
 			} else if (mao.getInfostoreDocumentInputStream() != null) {
 				/*
@@ -721,16 +751,26 @@ public final class MessageFiller {
 					throw new OXMailException(MailCode.INTERNAL_ERROR, e.getMessage());
 				}
 				messageBodyPart.setDataHandler(new DataHandler(dataSource));
-				try {
-					messageBodyPart.setFileName(MimeUtility.encodeText(mao.getFileName(), IMAPProperties
-							.getDefaultMimeCharset(), ENC_Q));
-				} catch (final UnsupportedEncodingException e) {
-					messageBodyPart.setFileName(mao.getFileName());
-				} catch (final IMAPPropertyException e) {
-					messageBodyPart.setFileName(mao.getFileName());
-				}
-				messageBodyPart.setDisposition(mao.getDisposition() == null ? Part.ATTACHMENT : mao.getDisposition());
 				messageBodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, mao.getContentType());
+				/*
+				 * Filename
+				 */
+				if (mao.getFileName() != null) {
+					try {
+						messageBodyPart.setFileName(MimeUtility.encodeText(mao.getFileName(), IMAPProperties
+								.getDefaultMimeCharset(), ENC_Q));
+					} catch (final UnsupportedEncodingException e) {
+						messageBodyPart.setFileName(mao.getFileName());
+					}
+				}
+				/*
+				 * Disposition
+				 */
+				messageBodyPart.setDisposition(mao.getDisposition() == null ? Part.ATTACHMENT : mao.getDisposition());
+				/*
+				 * Force base64 encoding to keep data as it is
+				 */
+				messageBodyPart.setHeader("Content-Transfer-Encoding", "base64");
 				mp.addBodyPart(messageBodyPart);
 			} else if (msgObj.getMsgref() != null && mao.getFileName() != null && mao.getPositionInMail() != null) {
 				/*
