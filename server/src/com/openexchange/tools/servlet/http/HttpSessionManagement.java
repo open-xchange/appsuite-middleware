@@ -52,12 +52,10 @@ package com.openexchange.tools.servlet.http;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TimerTask;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.http.HttpSession;
 
@@ -73,11 +71,7 @@ public class HttpSessionManagement {
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(HttpSessionManagement.class);
 
-	private static Map<String, HttpSession> sessions = new HashMap<String, HttpSession>();
-
-	private static final Lock LOCK_REMOVER = new ReentrantLock();
-
-	private static boolean acquireLock;
+	private static Map<String, HttpSession> sessions = new ConcurrentHashMap<String, HttpSession>();
 
 	static {
 		ServerTimer.getTimer().schedule(new SessionRemover(), 100, 3600000);
@@ -88,46 +82,18 @@ public class HttpSessionManagement {
 	}
 
 	public static HttpSession getHttpSession(final String sessionId) {
-		if (acquireLock) {
-			try {
-				LOCK_REMOVER.lock();
-			} finally {
-				LOCK_REMOVER.unlock();
-			}
-		}
 		return sessions.get(sessionId);
 	}
 
 	public static void putHttpSession(final HttpSession httpSession) {
-		if (acquireLock) {
-			try {
-				LOCK_REMOVER.lock();
-			} finally {
-				LOCK_REMOVER.unlock();
-			}
-		}
 		sessions.put(httpSession.getId(), httpSession);
 	}
 
 	public static boolean containsHttpSession(final String sessionId) {
-		if (acquireLock) {
-			try {
-				LOCK_REMOVER.lock();
-			} finally {
-				LOCK_REMOVER.unlock();
-			}
-		}
 		return sessions.containsKey(sessionId);
 	}
 
 	public static void removeHttpSession(final String sessionId) {
-		if (acquireLock) {
-			try {
-				LOCK_REMOVER.lock();
-			} finally {
-				LOCK_REMOVER.unlock();
-			}
-		}
 		sessions.remove(sessionId);
 	}
 
@@ -149,6 +115,11 @@ public class HttpSessionManagement {
 	private static final char[] digits = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e',
 			'f' };
 
+	/**
+	 * Creates a unique ID
+	 * 
+	 * @return The unique ID
+	 */
 	public static final String getNewUniqueId() {
 		String retval = null;
 		try {
@@ -163,7 +134,7 @@ public class HttpSessionManagement {
 				result.append(digits[(b & 0x0f)]);
 			}
 			retval = result.toString();
-		} catch (NoSuchAlgorithmException e) {
+		} catch (final NoSuchAlgorithmException e) {
 			LOG.error(e.getMessage(), e);
 		}
 		return retval;
@@ -172,12 +143,9 @@ public class HttpSessionManagement {
 	private static class SessionRemover extends TimerTask {
 		@Override
 		public void run() {
-			acquireLock = true;
-			LOCK_REMOVER.lock();
 			try {
-				final int size = sessions.size();
-				final Iterator<Map.Entry<String, HttpSession>> iter = sessions.entrySet().iterator();
-				for (int i = 0; i < size; i++) {
+				for (final Iterator<Map.Entry<String, HttpSession>> iter = sessions.entrySet().iterator(); iter
+						.hasNext();) {
 					final Map.Entry<String, HttpSession> entry = iter.next();
 					if (isHttpSessionExpired(entry.getValue())) {
 						entry.getValue().invalidate();
@@ -185,10 +153,7 @@ public class HttpSessionManagement {
 					}
 				}
 			} catch (final Exception e) {
-			    LOG.error(e.getMessage(), e);
-			} finally {
-				LOCK_REMOVER.unlock();
-				acquireLock = false;
+				LOG.error(e.getMessage(), e);
 			}
 		}
 	}
