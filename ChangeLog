@@ -1,7 +1,7 @@
 * 2007-11-12 - thorben.betten@open-xchange.com
 
  - Bugfix #10121: Keep AJP connection alive on thrown error
- - Bugfix #10053: Forces to use base64 as 'Content-Tranfer-Encoding' header
+ - Bugfix #10053: Forces to use base64 as 'Content-Transfer-Encoding' header
    to ensure data is kept as it is.
  - Bugfix #10117: Properly checks for duplicate folders on create/update/rename
 
