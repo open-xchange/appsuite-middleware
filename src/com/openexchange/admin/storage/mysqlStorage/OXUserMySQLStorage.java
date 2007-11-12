@@ -1172,6 +1172,14 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 log.error("SQL Error rollback ox db write connection", ecp);
             }
             throw new StorageException(e);
+        } catch (final StorageException e) {
+            try {
+                write_ox_con.rollback();
+                log.debug("Rollback successfull for ox db write connection");
+            } catch (final SQLException ecp) {
+                log.error("SQL Error rollback ox db write connection", ecp);
+            }
+            throw e;
         } finally {
             try {
                 if (write_ox_con != null) {
