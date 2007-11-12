@@ -77,7 +77,7 @@ public class HttpServletManager {
 
 	private static final Map<String, FIFOQueue<HttpServlet>> SERVLET_POOL = new HashMap<String, FIFOQueue<HttpServlet>>();
 
-	private static Map<String, Constructor> servletConstructorMap;
+	private static Map<String, Constructor<?>> servletConstructorMap;
 
 	private static final ReadWriteLock RW_LOCK = new ReentrantReadWriteLock();
 
@@ -138,7 +138,7 @@ public class HttpServletManager {
 	 * @return
 	 */
 	private static HttpServlet createServletInstance(final String servletKey) {
-		final Constructor servletConstructor = servletConstructorMap.get(servletKey);
+		final Constructor<?> servletConstructor = servletConstructorMap.get(servletKey);
 		if (servletConstructor == null) {
 			return null;
 		}
@@ -226,7 +226,7 @@ public class HttpServletManager {
 		}
 	}
 
-	final static void initHttpServletManager(final Map<String, Constructor> servletConstructorMap) {
+	final static void initHttpServletManager(final Map<String, Constructor<?>> servletConstructorMap) {
 		HttpServletManager.servletConstructorMap = servletConstructorMap;
 		createServlets();
 	}
@@ -241,15 +241,15 @@ public class HttpServletManager {
 	private static void createServlets() {
 		WRITE_LOCK.lock();
 		try {
-			for (final Iterator<Map.Entry<String, Constructor>> iter = servletConstructorMap.entrySet().iterator(); iter
+			for (final Iterator<Map.Entry<String, Constructor<?>>> iter = servletConstructorMap.entrySet().iterator(); iter
 					.hasNext();) {
-				final Map.Entry<String, Constructor> entry = iter.next();
+				final Map.Entry<String, Constructor<?>> entry = iter.next();
 				final String servletKey = entry.getKey();
 				FIFOQueue<HttpServlet> servletQueue = null;
 				/*
 				 * Create a pool of servlet instances
 				 */
-				final Constructor servletConstructor = entry.getValue();
+				final Constructor<?> servletConstructor = entry.getValue();
 				if (servletConstructor == null) {
 					servletQueue = new FIFOQueue<HttpServlet>(HttpServlet.class, 1);
 					servletQueue.enqueue(new HttpErrorServlet("No Servlet Constructor found for " + servletKey));

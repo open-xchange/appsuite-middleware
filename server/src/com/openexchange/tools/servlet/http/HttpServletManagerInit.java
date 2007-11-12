@@ -180,7 +180,7 @@ public final class HttpServletManagerInit implements Initialization {
 
 					}
 				});
-				final Map<String, Constructor> servletConstructorMap = new HashMap<String, Constructor>();
+				final Map<String, Constructor<?>> servletConstructorMap = new HashMap<String, Constructor<?>>();
 				for (int i = 0; i < propFiles.length; i++) {
 					final File f = propFiles[i];
 
