@@ -67,6 +67,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import com.openexchange.configuration.SystemConfig;
+
 /**
  * {@link MIMEType2ExtMap} - Maps MIME types to file extensions and vice versa.
  * <p>
@@ -187,6 +189,21 @@ public final class MIMEType2ExtMap {
 						}
 						loadInternal(url);
 					}
+				}
+				{
+					String mimeTypesFile = SystemConfig.getProperty(SystemConfig.Property.MimeTypeFile);
+					if (mimeTypesFile != null && (mimeTypesFile = mimeTypesFile.trim()).length() > 0) {
+						final File file = new File(mimeTypesFile);
+						if (file.exists()) {
+							if (LOG.isInfoEnabled()) {
+								sb.setLength(0);
+								LOG.info(sb.append("Loading MIME type file \"").append(file.getPath()).append('"')
+										.toString());
+							}
+							loadInternal(file);
+						}
+					}
+
 				}
 				initialized.set(true);
 				if (LOG.isInfoEnabled()) {
