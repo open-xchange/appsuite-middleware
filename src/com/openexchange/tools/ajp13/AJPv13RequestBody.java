@@ -49,10 +49,10 @@
 
 package com.openexchange.tools.ajp13;
 
+import static com.openexchange.tools.ajp13.AJPv13ForwardRequest.parseQueryString;
+
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
@@ -151,23 +151,8 @@ public final class AJPv13RequestBody extends AJPv13Request {
 			if (charEnc == null) {
 				charEnc = ServerConfig.getProperty(Property.DefaultEncoding);
 			}
-			final String[] parameters = new String(contentBytes, charEnc).split(" *& *");
-			for (int i = 0; i < parameters.length; i++) {
-				final String parameterName = parameters[i].substring(0, parameters[i].indexOf('='));
-				final String parameterValue = decodeURL(parameters[i].substring(parameters[i].indexOf('=') + 1),
-						charEnc);
-				ajpRequestHandler.getServletRequestObj().setParameter(parameterName, parameterValue);
-			}
+			parseQueryString(ajpRequestHandler.getServletRequestObj(), new String(contentBytes, charEnc));
 		}
-	}
-
-	private static String decodeURL(final String encodedURL, final String characterEncoding) {
-		try {
-			return URLDecoder.decode(encodedURL, characterEncoding);
-		} catch (final UnsupportedEncodingException e) {
-			LOG.error(e);
-		}
-		return "";
 	}
 
 }

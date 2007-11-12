@@ -1,3 +1,7 @@
+* 2007-11-12 - thorben.betten@open-xchange.com
+
+ - Bugfix #10121: Keep AJP connection alive on thrown error
+
 * 2007-11-12 - martin.kauss@open-xchange.com
 
  - Fixed bug #10061. If a user changes an appointment in a shared folder

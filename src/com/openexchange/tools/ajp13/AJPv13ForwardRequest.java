@@ -334,7 +334,18 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 		return servletPath.length() == 1 && servletPath.charAt(0) == '*';
 	}
 
-	private static void parseQueryString(final HttpServletRequestWrapper servletRequest, final String queryStr)
+	/**
+	 * Parses a query string and puts resulting parameters into given servlet
+	 * request
+	 * 
+	 * @param servletRequest
+	 *            The servlet request
+	 * @param queryStr
+	 *            The query string to be parsed
+	 * @throws UnsupportedEncodingException
+	 *             If charset provided by servlet request is not supported
+	 */
+	static void parseQueryString(final HttpServletRequestWrapper servletRequest, final String queryStr)
 			throws UnsupportedEncodingException {
 		servletRequest.setQueryString(queryStr);
 		final String[] paramsNVPs = queryStr.split("&");
