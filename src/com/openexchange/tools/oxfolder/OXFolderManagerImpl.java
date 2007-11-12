@@ -521,6 +521,26 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 		checkPermissionsAgainstSessionUserConfig(folderObj, userConfig, ctx);
 		checkFolderPermissions(folderObj, user.getId(), ctx);
 		checkPermissionsAgainstUserConfigs(folderObj, ctx);
+		if (folderObj.containsFolderName()) {
+			/*
+			 * Check if duplicate folder exists
+			 */
+			try {
+				if (OXFolderSQL.lookUpFolder(storageObj.getParentFolderID(), folderObj.getFolderName(), folderObj
+						.getModule(), readCon, ctx) != -1) {
+					/*
+					 * A duplicate folder exists
+					 */
+					throw new OXFolderException(FolderCode.NO_DUPLICATE_FOLDER, getFolderName(new OXFolderAccess(
+							readCon, ctx).getFolderObject(storageObj.getParentFolderID())), Integer.valueOf(ctx
+							.getContextId()));
+				}
+			} catch (final SQLException e) {
+				throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(ctx.getContextId()));
+			} catch (final DBPoolingException e) {
+				throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
+			}
+		}
 		/*
 		 * Call SQL update
 		 */
@@ -587,8 +607,12 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 		try {
 			if (OXFolderSQL.lookUpFolder(storageObj.getParentFolderID(), folderObj.getFolderName(), storageObj
 					.getModule(), readCon, ctx) != -1) {
-				throw new OXFolderException(FolderCode.NO_DUPLICATE_FOLDER, getFolderName(storageObj
-						.getParentFolderID(), ctx), Integer.valueOf(ctx.getContextId()));
+				/*
+				 * A duplicate folder exists
+				 */
+				throw new OXFolderException(FolderCode.NO_DUPLICATE_FOLDER, getFolderName(new OXFolderAccess(
+						readCon, ctx).getFolderObject(storageObj.getParentFolderID())), Integer.valueOf(ctx
+						.getContextId()));
 			}
 		} catch (final DBPoolingException e) {
 			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
