@@ -8,6 +8,7 @@ OSGIPATH=@oxprefix@/@oxconfdir@/osgi
 #
 # JAVA_XTRAOPTS="-Djava.net.preferIPv4Stack=true -Xms50M -Xmx50M -Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger -Dlog4j.configuration=file:/opt/open-xchange/etc/admindaemon/log4j/log4j.xml -Dlog4j=/opt/open-xchange/lib/log4j-1.2.14.jar"
 JAVA_XTRAOPTS="-Djava.net.preferIPv4Stack=true -Xms50M -Xmx50M"
+JAVA_OXCMD_OPTS="-Djava.net.preferIPv4Stack=true"
 
 NRFILES="1024"
 

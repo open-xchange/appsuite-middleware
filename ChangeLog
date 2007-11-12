@@ -3,10 +3,6 @@
   - Bugfix ID#10049 L3: display name of contact blocks creation of new user
   - Bugfix ID#10118 No rollback if filestore creation fails during createuser
 
-* 2007-11-12 - choeger@open-xchange.com
-
-  - Bugfix ID#9835 [L3] hanging or long taking command line tools
-  
 * 2007-11-07 - manuel.kraft@open-xchange.com
 
   - Bugfix ID#10050 Database leftovers of deleted contexts
