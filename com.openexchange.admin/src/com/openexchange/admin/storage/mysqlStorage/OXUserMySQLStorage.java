@@ -624,7 +624,15 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             } catch (final SQLException e2) {
                 log.error("Error doing rollback", e2);
             }
-            throw new StorageException(e);       
+            throw new StorageException(e);
+        } catch (final RuntimeException e) {
+            log.error(e.getMessage(), e);
+            try {
+                write_ox_con.rollback();
+            } catch (final SQLException e2) {
+                log.error("Error doing rollback", e2);
+            }
+            throw e;
         } finally {
             try {
                 if (folder_update != null) {
@@ -1107,6 +1115,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         } catch (final InvocationTargetException e) {
             log.error("InvocationTarget Error", e);            
             throw new StorageException(e);
+        } catch (final RuntimeException e) {
+            log.error(e.getMessage(), e);
+            throw e;
         } finally {
             closePreparedStatement(return_db_id);
             closePreparedStatement(ps);
@@ -1180,6 +1191,16 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 log.error("SQL Error rollback ox db write connection", ecp);
             }
             throw e;
+        } catch (final RuntimeException e) {
+            log.error(e.getMessage(), e);
+            // rollback operations on ox db connection
+            try {
+                write_ox_con.rollback();
+                log.debug("Rollback successfull for ox db write connection");
+            } catch (final SQLException ecp) {
+                log.error("SQL Error rollback ox db write connection", ecp);
+            }
+            throw e;
         } finally {
             try {
                 if (write_ox_con != null) {
@@ -1221,6 +1242,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         } catch (final PoolException e) {
             log.error("Pool Error", e);
             throw new StorageException(e);
+        } catch (final RuntimeException e) {
+            log.error(e.getMessage(), e);
+            throw e;
         } finally {
             try {
                 if (stmt != null) {
@@ -1270,6 +1294,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         } catch (final PoolException e) {
             log.error("Pool Error", e);
             throw new StorageException(e);
+        } catch (final RuntimeException e) {
+            log.error(e.getMessage(), e);
+            throw e;
         } finally {
             try {
                 if (null != rs) {
@@ -1470,6 +1497,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         } catch (final CloneNotSupportedException e) {
             log.error("Error", e);
             throw new StorageException(e);
+        } catch (final RuntimeException e) {
+            log.error(e.getMessage(), e);
+            throw e;
         } finally {
             closePreparedStatement(stmt);
             closePreparedStatement(stmt2);
@@ -1790,6 +1820,14 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 log.error("Error rollback ox db write connection", ex);
             }
             throw new StorageException(sql);
+        } catch (final RuntimeException e) {
+            log.error(e.getMessage(), e);
+            try {
+                write_ox_con.rollback();
+            } catch (final SQLException ex) {
+                log.error("Error rollback ox db write connection", ex);
+            }
+            throw e;
         } finally {
             try {
                 if (write_ox_con != null) {
@@ -1837,6 +1875,14 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 log.error("Error rollback ox db write connection", ex);
             }
             throw new StorageException(sql);
+        } catch (final RuntimeException e) {
+            log.error(e.getMessage(), e);
+            try {
+                write_ox_con.rollback();
+            } catch (final SQLException ex) {
+                log.error("Error rollback ox db write connection", ex);
+            }
+            throw e;
         } finally {
             try {
                 if (write_ox_con != null) {
@@ -1876,6 +1922,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         } catch (final PoolException pole) {
             log.error("Pool Error", pole);
             throw new StorageException(pole);
+        } catch (final RuntimeException e) {
+            log.error(e.getMessage(), e);
+            throw e;
         } finally {
             try {
                 if (read_ox_con != null) {
