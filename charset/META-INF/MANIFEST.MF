@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange Charset
+Bundle-SymbolicName: com.openexchange.charset
+Bundle-Version: 6.5.0.0
+Bundle-Vendor: Open-Xchange Inc.
+Import-Package: org.apache.commons.logging,
+ org.apache.commons.logging.impl,
+ org.osgi.framework;version="1.3.0",
+ org.osgi.util.tracker;version="1.3.3"
+Bundle-Activator: com.openexchange.charset.osgi.Activator
