@@ -1,6 +1,7 @@
 * 2007-11-13 - dennis.sieben@open-xchange.com
 
   - Bugfix ID#10180 RuntimeExceptions aren't logged
+  - Bugfix ID#10188 Everytime a write connection is used it should be checked if a rollback is made there
   
 * 2007-11-12 - choeger@open-xchange.com
 
