@@ -51,8 +51,6 @@ package com.openexchange.charset.osgi;
 
 import java.lang.reflect.Field;
 import java.nio.charset.spi.CharsetProvider;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -70,7 +68,8 @@ import com.openexchange.charset.CollectionCharsetProvider;
  */
 public final class Activator implements BundleActivator, ServiceTrackerCustomizer {
 
-	private final Lock serviceTrackerLock;
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(Activator.class);
 
 	private CollectionCharsetProvider collectionCharsetProvider;
 
@@ -83,7 +82,6 @@ public final class Activator implements BundleActivator, ServiceTrackerCustomize
 	 */
 	public Activator() {
 		super();
-		serviceTrackerLock = new ReentrantLock();
 	}
 
 	/*
@@ -94,12 +92,7 @@ public final class Activator implements BundleActivator, ServiceTrackerCustomize
 	public Object addingService(final ServiceReference reference) {
 		final Object addedService = context.getService(reference);
 		if (addedService instanceof CharsetProvider) {
-			serviceTrackerLock.lock();
-			try {
-				collectionCharsetProvider.addCharsetProvider((CharsetProvider) addedService);
-			} finally {
-				serviceTrackerLock.unlock();
-			}
+			collectionCharsetProvider.addCharsetProvider((CharsetProvider) addedService);
 		}
 		return addedService;
 	}
@@ -142,6 +135,45 @@ public final class Activator implements BundleActivator, ServiceTrackerCustomize
 		extendedProviderField.set(null, collectionCharsetProvider);
 	}
 
+	/**
+	 * Restores field <code>java.nio.charset.Charset.extendedProvider</code>
+	 * 
+	 * @throws NoSuchFieldException
+	 *             If field "extendedProvider" does not exist
+	 * @throws IllegalAccessException
+	 *             If field "extendedProvider" is not accessible
+	 * @throws InstantiationException
+	 *             If original instance could not be instantiated
+	 */
+	private void restoreCharsetExtendedProvider() throws NoSuchFieldException, IllegalAccessException,
+			InstantiationException {
+		/*
+		 * Restore java.nio.charset.Charset class
+		 */
+		final Field extendedProviderField = java.nio.charset.Charset.class.getDeclaredField("extendedProvider");
+		extendedProviderField.setAccessible(true);
+		/*
+		 * Instantiate previous charset provider
+		 */
+		CharsetProvider extendedProvider = null;
+		try {
+			final Class<? extends CharsetProvider> epc = Class.forName("sun.nio.cs.ext.ExtendedCharsets").asSubclass(
+					CharsetProvider.class);
+			extendedProvider = epc.newInstance();
+		} catch (final ClassNotFoundException x) {
+			/*
+			 * Cannot occur: extended charsets not available (charsets.jar not
+			 * present)
+			 */
+			LOG.error("Extended charsets not available (charsets.jar not present)", x);
+			return;
+		}
+		/*
+		 * Restore field
+		 */
+		extendedProviderField.set(null, extendedProvider);
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -150,12 +182,7 @@ public final class Activator implements BundleActivator, ServiceTrackerCustomize
 	 */
 	public void removedService(final ServiceReference reference, final Object service) {
 		if (service instanceof CharsetProvider) {
-			serviceTrackerLock.lock();
-			try {
-				collectionCharsetProvider.removeCharsetProvider((CharsetProvider) service);
-			} finally {
-				serviceTrackerLock.unlock();
-			}
+			collectionCharsetProvider.removeCharsetProvider((CharsetProvider) service);
 		}
 	}
 
@@ -187,9 +214,16 @@ public final class Activator implements BundleActivator, ServiceTrackerCustomize
 	public void stop(final BundleContext context) throws Exception {
 		try {
 			serviceTracker.close();
+			/*
+			 * Restore original
+			 */
+			restoreCharsetExtendedProvider();
 		} catch (final Exception e) {
 			e.printStackTrace();
 			throw e;
+		} finally {
+			collectionCharsetProvider = null;
+			serviceTracker = null;
 		}
 	}
 
