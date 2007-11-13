@@ -51,6 +51,8 @@ package com.openexchange.charset.osgi;
 
 import java.lang.reflect.Field;
 import java.nio.charset.spi.CharsetProvider;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -68,6 +70,8 @@ import com.openexchange.charset.CollectionCharsetProvider;
  */
 public final class Activator implements BundleActivator, ServiceTrackerCustomizer {
 
+	private final Lock serviceTrackerLock;
+
 	private CollectionCharsetProvider collectionCharsetProvider;
 
 	private BundleContext context;
@@ -79,6 +83,7 @@ public final class Activator implements BundleActivator, ServiceTrackerCustomize
 	 */
 	public Activator() {
 		super();
+		serviceTrackerLock = new ReentrantLock();
 	}
 
 	/*
@@ -89,7 +94,12 @@ public final class Activator implements BundleActivator, ServiceTrackerCustomize
 	public Object addingService(final ServiceReference reference) {
 		final Object addedService = context.getService(reference);
 		if (addedService instanceof CharsetProvider) {
-			collectionCharsetProvider.addCharsetProvider((CharsetProvider) addedService);
+			serviceTrackerLock.lock();
+			try {
+				collectionCharsetProvider.addCharsetProvider((CharsetProvider) addedService);
+			} finally {
+				serviceTrackerLock.unlock();
+			}
 		}
 		return addedService;
 	}
@@ -101,11 +111,6 @@ public final class Activator implements BundleActivator, ServiceTrackerCustomize
 	 *      java.lang.Object)
 	 */
 	public void modifiedService(final ServiceReference reference, final Object service) {
-		if (service instanceof CharsetProvider) {
-			final CharsetProvider provider = (CharsetProvider) service;
-			collectionCharsetProvider.removeCharsetProvider(provider);
-			collectionCharsetProvider.addCharsetProvider(provider);
-		}
 	}
 
 	/**
@@ -145,8 +150,12 @@ public final class Activator implements BundleActivator, ServiceTrackerCustomize
 	 */
 	public void removedService(final ServiceReference reference, final Object service) {
 		if (service instanceof CharsetProvider) {
-			final CharsetProvider provider = (CharsetProvider) service;
-			collectionCharsetProvider.removeCharsetProvider(provider);
+			serviceTrackerLock.lock();
+			try {
+				collectionCharsetProvider.removeCharsetProvider((CharsetProvider) service);
+			} finally {
+				serviceTrackerLock.unlock();
+			}
 		}
 	}
 
