@@ -526,8 +526,9 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 			 * Check if duplicate folder exists
 			 */
 			try {
-				if (OXFolderSQL.lookUpFolder(storageObj.getParentFolderID(), folderObj.getFolderName(), folderObj
-						.getModule(), readCon, ctx) != -1) {
+			    final int folderId = OXFolderSQL.lookUpFolder(storageObj.getParentFolderID(), folderObj.getFolderName(), folderObj
+                    .getModule(), readCon, ctx);
+				if (folderId != -1 && folderId != folderObj.getObjectID()) {
 					/*
 					 * A duplicate folder exists
 					 */
@@ -605,8 +606,9 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 		 * Check for duplicate folder
 		 */
 		try {
-			if (OXFolderSQL.lookUpFolder(storageObj.getParentFolderID(), folderObj.getFolderName(), storageObj
-					.getModule(), readCon, ctx) != -1) {
+		    final int folderId = OXFolderSQL.lookUpFolder(storageObj.getParentFolderID(), folderObj.getFolderName(), storageObj
+                .getModule(), readCon, ctx);
+			if (folderId != -1 && folderId != folderObj.getObjectID()) {
 				/*
 				 * A duplicate folder exists
 				 */

@@ -1,3 +1,7 @@
+* 2007-11-13 - marcus.klein@open-xchange.com
+
+ - Bugfix #10117: Fixed moving problems.
+
 * 2007-11-09 - thorben.betten@open-xchange.com
 
  - Bugfix #10117: Checking for duplicates on folder creation/update/rename
