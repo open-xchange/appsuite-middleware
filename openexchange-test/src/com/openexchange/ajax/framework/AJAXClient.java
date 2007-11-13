@@ -50,6 +50,7 @@
 package com.openexchange.ajax.framework;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
@@ -123,6 +124,14 @@ public class AJAXClient {
             timeZone = TimeZone.getTimeZone(tzId);
         }
         return timeZone;
+    }
+
+    public Date getServerTime() throws AjaxException, IOException, SAXException,
+        JSONException {
+        long serverTime = ConfigTools.get(this, new GetRequest(
+            GetRequest.Tree.CurrentTime)).getLong();
+        serverTime -= getTimeZone().getOffset(serverTime);
+        return new Date(serverTime);
     }
 
     public Locale getLocale() throws AjaxException, IOException, SAXException,

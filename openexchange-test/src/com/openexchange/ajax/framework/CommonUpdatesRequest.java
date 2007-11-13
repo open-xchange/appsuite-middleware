@@ -77,6 +77,8 @@ public class CommonUpdatesRequest implements AJAXRequest {
 
     private final Date lastModified;
 
+    private final Ignore ignore;
+
     private final boolean failOnError;
 
     /**
@@ -85,6 +87,16 @@ public class CommonUpdatesRequest implements AJAXRequest {
     public CommonUpdatesRequest(final String servletPath, final int folderId,
         final int[] columns, final int sort, final Order order,
         final Date lastModified, final boolean failOnError) {
+        this(servletPath, folderId, columns, sort, order, lastModified,
+            Ignore.DELETED, failOnError);
+    }
+
+    /**
+     * Full constructor.
+     */
+    public CommonUpdatesRequest(final String servletPath, final int folderId,
+        final int[] columns, final int sort, final Order order,
+        final Date lastModified, final Ignore ignore, final boolean failOnError) {
         super();
         this.servletPath = servletPath;
         this.folderId = folderId;
@@ -92,9 +104,10 @@ public class CommonUpdatesRequest implements AJAXRequest {
         this.sort = sort;
         this.order = order;
         this.lastModified = lastModified;
+        this.ignore = ignore;
         this.failOnError = failOnError;
     }
-
+    
     /**
      * {@inheritDoc}
      */
@@ -131,7 +144,7 @@ public class CommonUpdatesRequest implements AJAXRequest {
                 .write(order)));
         }
         params.add(new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, lastModified));
-        params.add(new Parameter(AJAXServlet.PARAMETER_IGNORE, "deleted"));
+        params.add(new Parameter(AJAXServlet.PARAMETER_IGNORE, ignore.value));
         return params.toArray(new Parameter[params.size()]);
     }
 
@@ -140,5 +153,14 @@ public class CommonUpdatesRequest implements AJAXRequest {
      */
     public CommonUpdatesParser getParser() {
         return new CommonUpdatesParser(failOnError, columns);
+    }
+
+    public enum Ignore {
+        DELETED("deleted"),
+        NONE("none");
+        private final String value;
+        private Ignore(final String value) {
+            this.value = value;
+        }
     }
 }

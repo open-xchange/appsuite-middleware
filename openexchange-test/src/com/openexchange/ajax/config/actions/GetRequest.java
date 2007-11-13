@@ -112,7 +112,8 @@ public class GetRequest extends AbstractConfigRequest {
         PrivateContactFolder("/folder/contacts"),
         PrivateTaskFolder("/folder/tasks"),
         MaxUploadIdleTimeout("/maxUploadIdleTimeout"),
-        Language("/language");
+        Language("/language"),
+        CurrentTime("/currentTime");
         private String path;
         private Tree(final String path) {
             this.path=path;

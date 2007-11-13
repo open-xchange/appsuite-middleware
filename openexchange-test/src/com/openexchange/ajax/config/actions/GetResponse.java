@@ -75,11 +75,16 @@ public class GetResponse extends AbstractAJAXResponse {
 
     public int getInteger() {
         fetchValue();
-        return (Integer) value;
+        return ((Integer) value).intValue();
     }
 
     public String getString() {
         fetchValue();
         return (String) value;
+    }
+
+    public long getLong() {
+        fetchValue();
+        return ((Long) value).longValue();
     }
 }

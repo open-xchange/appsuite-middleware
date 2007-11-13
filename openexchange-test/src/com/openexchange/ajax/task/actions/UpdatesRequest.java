@@ -71,8 +71,13 @@ public final class UpdatesRequest extends CommonUpdatesRequest {
      */
     public UpdatesRequest(final int folderId, final int[] columns,
         final int sort, final Order order, final Date lastModified) {
-        super(AbstractTaskRequest.TASKS_URL, folderId, columns, sort, order,
-            lastModified, true);
+        this(folderId, columns, sort, order, lastModified, Ignore.DELETED);
     }
 
+    public UpdatesRequest(final int folderId, final int[] columns,
+        final int sort, final Order order, final Date lastModified,
+        final Ignore ignore) {
+        super(AbstractTaskRequest.TASKS_URL, folderId, columns, sort, order,
+            lastModified, ignore, true);
+    }
 }

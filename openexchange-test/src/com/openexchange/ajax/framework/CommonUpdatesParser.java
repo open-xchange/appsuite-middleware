@@ -82,10 +82,16 @@ public class CommonUpdatesParser extends AbstractAJAXParser {
             final JSONArray array = (JSONArray) retval.getData();
             final Object[][] values = new Object[array.length()][];
             for (int i = 0; i < array.length(); i++) {
-                final JSONArray inner = array.getJSONArray(i);
-                values[i] = new Object[inner.length()];
-                for (int j = 0; j < inner.length(); j++) {
-                    values[i][j] = inner.get(j);
+                try {
+                    // insert or update
+                    final JSONArray inner = array.getJSONArray(i);
+                    values[i] = new Object[inner.length()];
+                    for (int j = 0; j < inner.length(); j++) {
+                        values[i][j] = inner.get(j);
+                    }
+                } catch (JSONException e) {
+                    // delete
+                    values[i] = new Integer[] { Integer.valueOf(array.getInt(i)) };
                 }
             }
             retval.setArray(values);
