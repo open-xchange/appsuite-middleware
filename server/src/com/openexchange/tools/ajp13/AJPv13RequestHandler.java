@@ -188,7 +188,7 @@ public final class AJPv13RequestHandler {
 				magic = new int[] { ajpCon.getInputStream().read(), ajpCon.getInputStream().read() };
 			} catch (final SocketException e) {
 				throw new AJPv13SocketClosedException(AJPCode.SOCKET_CLOSED_BY_WEB_SERVER, false, e, Integer
-						.valueOf(ajpCon.getPackageNumber()));
+						.valueOf(ajpCon == null ? 1 : ajpCon.getPackageNumber()));
 			}
 			if (checkMagicBytes(magic)) {
 				dataLength = (ajpCon.getInputStream().read() << 8) + ajpCon.getInputStream().read();
