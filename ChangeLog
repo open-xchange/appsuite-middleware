@@ -1,3 +1,7 @@
+* 2007-11-13 - dennis.sieben@open-xchange.com
+
+  - Bugfix ID#10180 RuntimeExceptions aren't logged
+  
 * 2007-11-12 - choeger@open-xchange.com
 
   - Bugfix ID#9835 [L3] hanging or long taking command line tools
