@@ -1909,6 +1909,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         try {
             read_ox_con = cache.getREADConnectionForContext(ctx.getId());
             write_ox_con = cache.getWRITEConnectionForContext(ctx.getId());
+            write_ox_con.setAutoCommit(false);
 
             // first get all groups the user is in
             final int[] all_groups = getGroupsForUser(ctx, user_id, read_ox_con);
@@ -1916,14 +1917,30 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             changeLastModified(user_id, ctx, write_ox_con);
             myChangeInsertModuleAccess(ctx, user_id, moduleAccess, false,
                     read_ox_con, write_ox_con, all_groups);
+            write_ox_con.commit();
         } catch (final SQLException sqle) {
             log.error("SQL Error", sqle);
+            try {
+                write_ox_con.rollback();
+            } catch (final SQLException ex) {
+                log.error("Error rollback ox db write connection", ex);
+            }
             throw new StorageException(sqle);
         } catch (final PoolException pole) {
             log.error("Pool Error", pole);
+            try {
+                write_ox_con.rollback();
+            } catch (final SQLException ex) {
+                log.error("Error rollback ox db write connection", ex);
+            }
             throw new StorageException(pole);
         } catch (final RuntimeException e) {
             log.error(e.getMessage(), e);
+            try {
+                write_ox_con.rollback();
+            } catch (final SQLException ex) {
+                log.error("Error rollback ox db write connection", ex);
+            }
             throw e;
         } finally {
             try {
