@@ -96,8 +96,8 @@ public final class BundleProxyClassLoader extends ClassLoader {
 	 */
 
 	@Override
-	public Enumeration<URL> findResources(final String name) throws IOException {
-		return bundle.getResources(name);
+	public Class<?> findClass(final String name) throws ClassNotFoundException {
+		return bundle.loadClass(name);
 	}
 
 	@Override
@@ -106,8 +106,8 @@ public final class BundleProxyClassLoader extends ClassLoader {
 	}
 
 	@Override
-	public Class<?> findClass(final String name) throws ClassNotFoundException {
-		return bundle.loadClass(name);
+	public Enumeration<URL> findResources(final String name) throws IOException {
+		return bundle.getResources(name);
 	}
 
 	@Override

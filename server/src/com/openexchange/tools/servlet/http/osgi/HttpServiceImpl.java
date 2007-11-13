@@ -47,68 +47,86 @@
  *
  */
 
-package com.openexchange.server.osgi;
+package com.openexchange.tools.servlet.http.osgi;
 
-import java.nio.charset.spi.CharsetProvider;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Dictionary;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
+import javax.servlet.Servlet;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+
+import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
+import org.osgi.service.http.NamespaceException;
 
-import com.openexchange.charset.AliasCharsetProvider;
-import com.openexchange.server.Starter;
-import com.openexchange.tools.servlet.http.osgi.HttpServiceImpl;
+import com.openexchange.tools.servlet.http.HttpServletManager;
 
 /**
- * OSGi bundle activator for the server.
+ * {@link HttpServiceImpl}
  * 
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * 
  */
-public class Activator implements BundleActivator {
+public final class HttpServiceImpl implements HttpService {
 
-	private final Starter starter = new Starter();
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(HttpServiceImpl.class);
 
-	private final CharsetProvider charsetProvider = new AliasCharsetProvider();
-
-	private final HttpService httpService = new HttpServiceImpl();
-
-	private final List<ServiceRegistration> registrationList = new ArrayList<ServiceRegistration>();
+	private static final HttpContext standardContext = new HttpContextImpl();
 
 	/**
-	 * {@inheritDoc}
+	 * 
 	 */
-	public void start(final BundleContext context) throws Exception {
-		try {
-			starter.start();
-			/*
-			 * Register server's services
-			 */
-			registrationList.add(context.registerService(CharsetProvider.class.getName(), charsetProvider, null));
-			registrationList.add(context.registerService(HttpService.class.getName(), httpService, null));
-		} catch (final Exception e) {
-			// Try to stop what already has been started.
-			starter.stop();
-			throw e;
+	public HttpServiceImpl() {
+		super();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.osgi.service.http.HttpService#createDefaultHttpContext()
+	 */
+	public HttpContext createDefaultHttpContext() {
+		return standardContext;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.osgi.service.http.HttpService#registerResources(java.lang.String,
+	 *      java.lang.String, org.osgi.service.http.HttpContext)
+	 */
+	public void registerResources(final String alias, final String name, final HttpContext context)
+			throws NamespaceException {
+		if (LOG.isTraceEnabled()) {
+			LOG.trace("HttpServiceImpl.registerResources() not implemented");
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.osgi.service.http.HttpService#registerServlet(java.lang.String,
+	 *      javax.servlet.Servlet, java.util.Dictionary,
+	 *      org.osgi.service.http.HttpContext)
 	 */
-	public void stop(final BundleContext context) throws Exception {
+	@SuppressWarnings("unchecked")
+	public void registerServlet(final String alias, final Servlet servlet, final Dictionary initparams,
+			final HttpContext context) throws ServletException, NamespaceException {
 		try {
-			starter.stop();
-		} finally {
-			/*
-			 * Unregister server's services
-			 */
-			for (ServiceRegistration registration : registrationList) {
-				registration.unregister();
-			}
+			HttpServletManager.registerServlet(alias, (HttpServlet) servlet, initparams);
+		} catch (final ClassCastException e) {
+			throw new ServletException("Only http servlets are supported", e);
 		}
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.osgi.service.http.HttpService#unregister(java.lang.String)
+	 */
+	public void unregister(final String alias) {
+		HttpServletManager.unregisterServlet(alias);
+	}
+
 }

@@ -47,68 +47,59 @@
  *
  */
 
-package com.openexchange.server.osgi;
+package com.openexchange.tools.servlet.http.osgi;
 
-import java.nio.charset.spi.CharsetProvider;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.IOException;
+import java.net.URL;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.http.HttpService;
+import javax.activation.MimetypesFileTypeMap;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
-import com.openexchange.charset.AliasCharsetProvider;
-import com.openexchange.server.Starter;
-import com.openexchange.tools.servlet.http.osgi.HttpServiceImpl;
+import org.osgi.service.http.HttpContext;
 
 /**
- * OSGi bundle activator for the server.
+ * {@link HttpContextImpl}
  * 
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * 
  */
-public class Activator implements BundleActivator {
-
-	private final Starter starter = new Starter();
-
-	private final CharsetProvider charsetProvider = new AliasCharsetProvider();
-
-	private final HttpService httpService = new HttpServiceImpl();
-
-	private final List<ServiceRegistration> registrationList = new ArrayList<ServiceRegistration>();
+public final class HttpContextImpl implements HttpContext {
 
 	/**
-	 * {@inheritDoc}
+	 * 
 	 */
-	public void start(final BundleContext context) throws Exception {
-		try {
-			starter.start();
-			/*
-			 * Register server's services
-			 */
-			registrationList.add(context.registerService(CharsetProvider.class.getName(), charsetProvider, null));
-			registrationList.add(context.registerService(HttpService.class.getName(), httpService, null));
-		} catch (final Exception e) {
-			// Try to stop what already has been started.
-			starter.stop();
-			throw e;
-		}
+	public HttpContextImpl() {
+		super();
 	}
 
-	/**
-	 * {@inheritDoc}
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.osgi.service.http.HttpContext#getMimeType(java.lang.String)
 	 */
-	public void stop(final BundleContext context) throws Exception {
-		try {
-			starter.stop();
-		} finally {
-			/*
-			 * Unregister server's services
-			 */
-			for (ServiceRegistration registration : registrationList) {
-				registration.unregister();
-			}
-		}
+	public String getMimeType(final String name) {
+		return MimetypesFileTypeMap.getDefaultFileTypeMap().getContentType(name);
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.osgi.service.http.HttpContext#getResource(java.lang.String)
+	 */
+	public URL getResource(final String name) {
+		return null;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.osgi.service.http.HttpContext#handleSecurity(javax.servlet.http.HttpServletRequest,
+	 *      javax.servlet.http.HttpServletResponse)
+	 */
+	public boolean handleSecurity(final HttpServletRequest request, final HttpServletResponse response)
+			throws IOException {
+		return true;
+	}
+
 }

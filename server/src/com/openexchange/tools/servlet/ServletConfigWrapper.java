@@ -65,9 +65,9 @@ import javax.servlet.ServletContext;
 
 public class ServletConfigWrapper implements ServletConfig {
 
-	protected String servlet_name;
+	protected String servletName;
 
-	protected Map<String, String> init_parameter = new HashMap<String, String>();
+	protected Map<String, String> initParameter = new HashMap<String, String>();
 
 	ServletContextWrapper servletcontextwrapper;
 
@@ -76,11 +76,11 @@ public class ServletConfigWrapper implements ServletConfig {
 	}
 
 	public void setServletName(final String servlet_name) {
-		this.servlet_name = servlet_name;
+		this.servletName = servlet_name;
 	}
 
 	public void setInitParameter(final Map<String, String> init_parameter) {
-		this.init_parameter = init_parameter;
+		this.initParameter = init_parameter;
 	}
 
 	public ServletContextWrapper getServletcontextwrapper() {
@@ -97,7 +97,7 @@ public class ServletConfigWrapper implements ServletConfig {
 	 * @see javax.servlet.ServletConfig#getInitParameter(java.lang.String)
 	 */
 	public String getInitParameter(final String name) {
-		return init_parameter.get(name);
+		return initParameter.get(name);
 	}
 
 	/*
@@ -106,7 +106,7 @@ public class ServletConfigWrapper implements ServletConfig {
 	 * @see javax.servlet.ServletConfig#getServletName()
 	 */
 	public String getServletName() {
-		return servlet_name;
+		return servletName;
 	}
 
 	/*
@@ -123,8 +123,8 @@ public class ServletConfigWrapper implements ServletConfig {
 	 * 
 	 * @see javax.servlet.ServletConfig#getInitParameterNames()
 	 */
-	public Enumeration getInitParameterNames() {
-		return new IteratorEnumeration(init_parameter.keySet().iterator());
+	public Enumeration<String> getInitParameterNames() {
+		return new IteratorEnumeration<String>(initParameter.keySet().iterator());
 	}
 
 	/**
@@ -132,11 +132,11 @@ public class ServletConfigWrapper implements ServletConfig {
 	 * 
 	 * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
 	 */
-	private static class IteratorEnumeration implements Enumeration {
+	private static class IteratorEnumeration<E> implements Enumeration<E> {
 
-		private final Iterator iter;
+		private final Iterator<E> iter;
 
-		public IteratorEnumeration(final Iterator iter) {
+		public IteratorEnumeration(final Iterator<E> iter) {
 			this.iter = iter;
 		}
 
@@ -154,7 +154,7 @@ public class ServletConfigWrapper implements ServletConfig {
 		 * 
 		 * @see java.util.Enumeration#nextElement()
 		 */
-		public Object nextElement() {
+		public E nextElement() {
 			return iter.next();
 		}
 

@@ -50,6 +50,7 @@
 package com.openexchange.tools.servlet.http;
 
 import java.lang.reflect.Constructor;
+import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -58,6 +59,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
 import javax.servlet.SingleThreadModel;
 import javax.servlet.http.HttpServlet;
 
@@ -170,9 +172,65 @@ public class HttpServletManager {
 				}
 			} else {
 				final FIFOQueue<HttpServlet> servlets = new FIFOQueue<HttpServlet>(HttpServlet.class, 1);
+				final ServletConfig conf = AJPv13Server.SERVLET_CONFIGS.getConfig(servletObj.getClass()
+						.getCanonicalName(), id);
+				try {
+					servletObj.init(conf);
+				} catch (final ServletException e) {
+					LOG.error("Servlet cannot be put into pool", e);
+				}
 				servlets.enqueue(servletObj);
 				SERVLET_POOL.put(id, servlets);
 			}
+		} finally {
+			WRITE_LOCK.unlock();
+		}
+	}
+
+	/**
+	 * Registers a servlet if not already contained
+	 * 
+	 * @param id
+	 *            The servlet's ID or alias (e.g. <code>my/servlet</code>).
+	 *            Servlet's path without leading '/' character
+	 * @param servlet
+	 *            The servlet instance
+	 * @param initParams
+	 *            The servlet's init parameter
+	 * @throws ServletException
+	 *             If servlet's initialization fails
+	 */
+	public static final void registerServlet(final String id, final HttpServlet servlet,
+			final Dictionary<String, String> initParams) throws ServletException {
+		WRITE_LOCK.lock();
+		try {
+			final String path = id.charAt(0) == '/' ? id.substring(1) : id;
+			if (SERVLET_POOL.containsKey(path)) {
+				return;
+			}
+			AJPv13Server.SERVLET_CONFIGS.setConfig(servlet.getClass().getCanonicalName(), initParams);
+			final FIFOQueue<HttpServlet> servletQueue = new FIFOQueue<HttpServlet>(HttpServlet.class, 1);
+			final ServletConfig conf = AJPv13Server.SERVLET_CONFIGS.getConfig(servlet.getClass().getCanonicalName(),
+					path);
+			servlet.init(conf);
+			servletQueue.enqueue(servlet);
+			SERVLET_POOL.put(path, servletQueue);
+		} finally {
+			WRITE_LOCK.unlock();
+		}
+	}
+
+	/**
+	 * Unregisters the servlet bound to given ID from mapping.
+	 * 
+	 * @param id
+	 *            The servlet ID or alias
+	 */
+	public static final void unregisterServlet(final String id) {
+		WRITE_LOCK.lock();
+		try {
+			AJPv13Server.SERVLET_CONFIGS.removeConfig(SERVLET_POOL.get(id).dequeue().getClass().getCanonicalName());
+			SERVLET_POOL.remove(id);
 		} finally {
 			WRITE_LOCK.unlock();
 		}

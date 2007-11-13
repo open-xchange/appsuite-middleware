@@ -54,6 +54,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -82,7 +84,8 @@ import javax.servlet.ServletContext;
  * The discovery mechanism will ignore all wildcards in the paths (/some/path*
  * will be regarded as /some/path).
  * 
- * @author francisco.laguna@open-xchange.com
+ * @author <a href="mailto:francisco.laguna@open-xchange.com>Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
 public final class ServletConfigLoader {
@@ -91,7 +94,7 @@ public final class ServletConfigLoader {
 			.getLog(ServletConfigLoader.class);
 
 	/**
-	 * The usual file extension for property files
+	 * The file extension for property files
 	 */
 	private static final String FILEEXT_PROPERTIES = ".properties";
 
@@ -110,7 +113,7 @@ public final class ServletConfigLoader {
 	private transient ServletContext defaultContext;
 
 	private File directory;
-	
+
 	private Map<String, String> globalProps;
 
 	public ServletConfigLoader(final File directory) {
@@ -122,6 +125,14 @@ public final class ServletConfigLoader {
 		super();
 	}
 
+	/**
+	 * Gets the configuration for given servlet class and path. The returned
+	 * configuration contains ONLY the single servlet's class properties.
+	 * 
+	 * @param clazz
+	 *            The servlet canonical class name
+	 * @return The servlet configuration
+	 */
 	public ServletConfig getConfig(final String clazz) {
 		final ServletConfigWrapper conf = lookupByClass(clazz);
 		if (conf != null) {
@@ -130,6 +141,13 @@ public final class ServletConfigLoader {
 		return defaultConfig;
 	}
 
+	/**
+	 * Gets servlet's context
+	 * 
+	 * @param clazz
+	 *            The servlet canonical class name
+	 * @return The servlet context
+	 */
 	public ServletContext getContext(final String clazz) {
 		final ServletConfigWrapper conf = lookupByClass(clazz);
 		if (conf != null) {
@@ -138,6 +156,17 @@ public final class ServletConfigLoader {
 		return defaultContext;
 	}
 
+	/**
+	 * Gets the configuration for given servlet class and path. The returned
+	 * configuration contains both single servlet's class properties and path
+	 * properties.
+	 * 
+	 * @param clazz
+	 *            The servlet canonical class name
+	 * @param pathArg
+	 *            The servlet's path without leading '/' character
+	 * @return The servlet configuration
+	 */
 	public ServletConfig getConfig(final String clazz, final String pathArg) {
 		final String path = ignoreWildcards(pathArg);
 		final ServletConfigWrapper conf = lookupByClassAndPath(clazz, path);
@@ -147,6 +176,45 @@ public final class ServletConfigLoader {
 		return defaultConfig;
 	}
 
+	/**
+	 * Sets the configuration for given servlet class
+	 * 
+	 * @param clazz
+	 *            The servlet canonical class name
+	 * @param initParams
+	 *            The servlet's init parameters
+	 */
+	public void setConfig(final String clazz, final Dictionary<String, String> initParams) {
+		final int size = initParams.size();
+		final Map<String, String> map = new HashMap<String, String>(size);
+		final Enumeration<String> e = initParams.keys();
+		for (int i = 0; i < size; i++) {
+			final String key = e.nextElement();
+			map.put(key, initParams.get(key));
+		}
+		clazzProps.put(clazz, map);
+	}
+
+	/**
+	 * Removes the configuration for given servlet class
+	 * 
+	 * @param clazz
+	 *            The servlet canonical class name
+	 */
+	public void removeConfig(final String clazz) {
+		clazzProps.remove(clazz);
+	}
+
+	/**
+	 * Gets servlet's context whose servlet configuration contains both single
+	 * servlet's class properties and path properties.
+	 * 
+	 * @param clazz
+	 *            the servlet canonical class name
+	 * @param pathArg
+	 *            The servlet's path without leading '/' character
+	 * @return The servlet context
+	 */
 	public ServletContext getContext(final String clazz, final String pathArg) {
 		final String path = ignoreWildcards(pathArg);
 		final ServletConfigWrapper conf = lookupByClassAndPath(clazz, path);
@@ -156,10 +224,22 @@ public final class ServletConfigLoader {
 		return defaultContext;
 	}
 
+	/**
+	 * Sets the default servlet configuration
+	 * 
+	 * @param config
+	 *            The default configuration
+	 */
 	public void setDefaultConfig(final ServletConfig config) {
 		this.defaultConfig = config;
 	}
 
+	/**
+	 * Sets the default servlet context
+	 * 
+	 * @param context
+	 *            The default context
+	 */
 	public void setDefaultContext(final ServletContext context) {
 		this.defaultContext = context;
 	}
@@ -333,15 +413,26 @@ public final class ServletConfigLoader {
 		return path.replaceAll("\\*", "");
 	}
 
+	/**
+	 * Gets the directory in which all servlet configurations are kept
+	 * 
+	 * @return The configurations' directory
+	 */
 	public File getDirectory() {
 		return directory;
 	}
 
+	/**
+	 * Sets the directory in which all servlet configurations are kept
+	 * 
+	 * @param directory
+	 *            The configurations' directory
+	 */
 	public void setDirectory(final File directory) {
 		this.directory = directory;
 		globalProps = loadDirProps(this.directory);
 	}
-	
+
 	private static String getClassName(final String fullyQualifiedName) {
 		final int pos;
 		if ((pos = fullyQualifiedName.lastIndexOf('.')) > 0) {

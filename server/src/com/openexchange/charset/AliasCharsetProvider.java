@@ -50,18 +50,11 @@
 package com.openexchange.charset;
 
 import java.nio.charset.Charset;
-import java.nio.charset.IllegalCharsetNameException;
-import java.nio.charset.UnsupportedCharsetException;
 import java.nio.charset.spi.CharsetProvider;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * {@link AliasCharsetProvider}
@@ -71,18 +64,7 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public final class AliasCharsetProvider extends CharsetProvider {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(AliasCharsetProvider.class);
-
-	private static final Lock LOCK = new ReentrantLock();
-
-	private static final AtomicBoolean initialized = new AtomicBoolean();
-
 	private static Map<String, Charset> name2charset;
-
-	private static Collection<Charset> charsets;
-
-	private static final Charset FALLBACK = Charset.forName("US-ASCII");
 
 	/**
 	 * Default constructor
@@ -104,36 +86,10 @@ public final class AliasCharsetProvider extends CharsetProvider {
 	 */
 	@Override
 	public Charset charsetForName(final String charsetName) {
-		if (!initialized.get()) {
-			init();
-		}
 		/*
 		 * Get charset instance for given name (case insensitive)
 		 */
-		Charset c = name2charset.get(charsetName.toLowerCase());
-		try {
-			if (c == null) {
-				/*
-				 * Look-up in jcharset's supported charsets
-				 */
-				c = new net.freeutils.charset.CharsetProvider().charsetForName(charsetName);
-				if (c == null) {
-					if (LOG.isErrorEnabled()) {
-						LOG.error(new StringBuilder(128).append("Unknown charset: ").append(charsetName).append(
-								"\nPlease add a proper delegate charset to ").append(
-								AliasCharsetProvider.class.getName()));
-					}
-					c = FALLBACK;
-				}
-			}
-		} catch (final Exception e) {
-			/*
-			 * If we can't get an instance, we don't.
-			 */
-			LOG.error(e.getLocalizedMessage(), e);
-			c = null;
-		}
-		return c;
+		return name2charset.get(charsetName.toLowerCase());
 	}
 
 	/**
@@ -147,50 +103,22 @@ public final class AliasCharsetProvider extends CharsetProvider {
 	 */
 	@Override
 	public Iterator<Charset> charsets() {
-		if (!initialized.get()) {
-			init();
-		}
-		return charsets.iterator();
+		return name2charset.values().iterator();
 	}
 
-	/**
-	 * Initializes this charset provider's data.
-	 */
-	private void init() {
-		LOCK.lock();
-		try {
-			if (initialized.get()) {
-				return;
-			}
-			/*
-			 * Prepare supported charsets
-			 */
-			final Charset[] cs = new Charset[] {
-					new AliasCharset("BIG-5", new String[] { "BIG_5" }, Charset.forName("BIG5")),
-					new AliasCharset("UTF_8", null, Charset.forName("UTF-8")),
-					new AliasCharset("x-unknown", null, FALLBACK) };
-			charsets = Collections.unmodifiableCollection(Arrays.asList(cs));
-			final Map<String, Charset> n2c = new HashMap<String, Charset>();
-			for (int i = 0; i < cs.length; i++) {
-				final Charset c = cs[i];
-				n2c.put(c.name().toLowerCase(), c);
-				for (final Iterator<String> iter = c.aliases().iterator(); iter.hasNext();) {
-					n2c.put(iter.next().toLowerCase(), c);
-				}
-			}
-			name2charset = n2c;
-			initialized.set(true);
-			if (LOG.isInfoEnabled()) {
-				LOG.info("Alias charset provider successfully initialized");
-			}
-		} catch (final IllegalCharsetNameException e) {
-			LOG.error(e.getLocalizedMessage(), e);
-		} catch (final UnsupportedCharsetException e) {
-			LOG.error(e.getLocalizedMessage(), e);
-		} catch (final IllegalArgumentException e) {
-			LOG.error(e.getLocalizedMessage(), e);
-		} finally {
-			LOCK.unlock();
+	static {
+		/*
+		 * Prepare supported charsets
+		 */
+		final Charset[] cs = new Charset[] {
+				new AliasCharset("BIG-5", new String[] { "BIG_5" }, Charset.forName("BIG5")),
+				new AliasCharset("UTF_8", null, Charset.forName("UTF-8")),
+				new AliasCharset("x-unknown", null, Charset.forName("US-ASCII")) };
+		final Map<String, Charset> n2c = new HashMap<String, Charset>();
+		for (int i = 0; i < cs.length; i++) {
+			final Charset c = cs[i];
+			n2c.put(c.name().toLowerCase(), c);
 		}
+		name2charset = Collections.unmodifiableMap(n2c);
 	}
 }

@@ -80,59 +80,79 @@ public class ServletContextWrapper implements ServletContext {
 
 	public static final int OX_SERVLET_PATCH = 2;
 
+	/**
+	 * Return a context-relative path, beginning with a "/", that represents the
+	 * canonical version of the specified path after ".." and "." elements are
+	 * resolved out. If the specified path attempts to go outside the boundaries
+	 * of the current context (i.e. too many ".." path elements are present),
+	 * return <code>null</code> instead.
+	 * 
+	 * @param path
+	 *            Path to be normalized
+	 */
+	private static String normalize(final String path) {
+		if (path == null) {
+			return null;
+		}
+		String normalized = path;
+		/*
+		 * Normalize the slashes and add leading slash if necessary
+		 */
+		if (normalized.indexOf('\\') >= 0) {
+			normalized = normalized.replace('\\', '/');
+		}
+		/*
+		 * Resolve occurrences of "/../" in the normalized path
+		 */
+		while (true) {
+			final int index = normalized.indexOf("/../");
+			if (index < 0) {
+				break;
+			}
+			if (index == 0) {
+				/*
+				 * Trying to go outside our context
+				 */
+				return (null);
+			}
+			final int index2 = normalized.lastIndexOf('/', index - 1);
+			normalized = normalized.substring(0, index2) + normalized.substring(index + 3);
+		}
+		/*
+		 * Return the normalized path
+		 */
+		return (normalized);
+
+	}
+
+	/**
+	 * The context attributes for this context.
+	 */
 	protected Map<String, Object> attributes = new HashMap<String, Object>();
+
+	private String resourceDir;
 
 	private final ServletConfigWrapper servletconfigwrapper;
 
-	public ServletContextWrapper(ServletConfigWrapper servletconfigwrapper) {
+	public ServletContextWrapper(final ServletConfigWrapper servletconfigwrapper) {
 		this.servletconfigwrapper = servletconfigwrapper;
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see javax.servlet.ServletContext#setAttribute(java.lang.String,
-	 *      java.lang.Object)
+	 * @see javax.servlet.ServletContext#getAttribute(java.lang.String)
 	 */
-	public void setAttribute(final String name, final Object value) {
-		attributes.put(name, value);
+	public Object getAttribute(final String name) {
+		return attributes.get(name);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see javax.servlet.ServletContext#removeAttribute(java.lang.String)
+	 * @see javax.servlet.ServletContext#getAttributeNames()
 	 */
-	public void removeAttribute(final String name) {
-		attributes.remove(name);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.servlet.ServletContext#log(java.lang.String)
-	 */
-	public void log(final String string) {
-		if (LOG.isInfoEnabled()) {
-			LOG.info(string);
-		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.servlet.ServletContext#getMimeType(java.lang.String)
-	 */
-	public String getMimeType(final String fileName) {
-		return MimetypesFileTypeMap.getDefaultFileTypeMap().getContentType(fileName);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.servlet.ServletContext#getResourceAsStream(java.lang.String)
-	 */
-	public InputStream getResourceAsStream(final String string) {
+	public Enumeration<?> getAttributeNames() {
 		return null;
 	}
 
@@ -151,28 +171,55 @@ public class ServletContextWrapper implements ServletContext {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see javax.servlet.ServletContext#getAttribute(java.lang.String)
-	 */
-	public Object getAttribute(final String name) {
-		return attributes.get(name);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.servlet.ServletContext#getResourcePaths(java.lang.String)
-	 */
-	public Set getResourcePaths(final String string) {
-		return null;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
 	 * @see javax.servlet.ServletContext#getInitParameter(java.lang.String)
 	 */
 	public String getInitParameter(final String name) {
 		return servletconfigwrapper.getInitParameter(name);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.servlet.ServletContext#getInitParameterNames()
+	 */
+	public Enumeration<String> getInitParameterNames() {
+		return servletconfigwrapper.getInitParameterNames();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.servlet.ServletContext#getMajorVersion()
+	 */
+	public int getMajorVersion() {
+		return OX_SERVLET_MAJOR;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.servlet.ServletContext#getMimeType(java.lang.String)
+	 */
+	public String getMimeType(final String fileName) {
+		return MimetypesFileTypeMap.getDefaultFileTypeMap().getContentType(fileName);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.servlet.ServletContext#getMinorVersion()
+	 */
+	public int getMinorVersion() {
+		return OX_SERVLET_MINOR;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.servlet.ServletContext#getNamedDispatcher(java.lang.String)
+	 */
+	public RequestDispatcher getNamedDispatcher(final String string) {
+		return null;
 	}
 
 	/*
@@ -187,9 +234,9 @@ public class ServletContextWrapper implements ServletContext {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see javax.servlet.ServletContext#getServlet(java.lang.String)
+	 * @see javax.servlet.ServletContext#getRequestDispatcher(java.lang.String)
 	 */
-	public Servlet getServlet(final String string) throws ServletException {
+	public RequestDispatcher getRequestDispatcher(final String string) {
 		return null;
 	}
 
@@ -205,18 +252,63 @@ public class ServletContextWrapper implements ServletContext {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see javax.servlet.ServletContext#getRequestDispatcher(java.lang.String)
+	 * @see javax.servlet.ServletContext#getResourceAsStream(java.lang.String)
 	 */
-	public RequestDispatcher getRequestDispatcher(final String string) {
+	public InputStream getResourceAsStream(final String path) {
 		return null;
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see javax.servlet.ServletContext#getNamedDispatcher(java.lang.String)
+	 * @see javax.servlet.ServletContext#getResourcePaths(java.lang.String)
 	 */
-	public RequestDispatcher getNamedDispatcher(final String string) {
+	public Set<?> getResourcePaths(final String string) {
+		return null;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.servlet.ServletContext#getServerInfo()
+	 */
+	public String getServerInfo() {
+		return "THE SERVER INFO";
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.servlet.ServletContext#getServlet(java.lang.String)
+	 */
+	public Servlet getServlet(final String string) throws ServletException {
+		return null;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.servlet.ServletContext#getServletContextName()
+	 */
+	public String getServletContextName() {
+		return servletconfigwrapper.getServletName();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.servlet.ServletContext#getServletNames()
+	 */
+	public Enumeration<?> getServletNames() {
+		return null;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.servlet.ServletContext#getServlets()
+	 */
+	public Enumeration<?> getServlets() {
 		return null;
 	}
 
@@ -235,6 +327,17 @@ public class ServletContextWrapper implements ServletContext {
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see javax.servlet.ServletContext#log(java.lang.String)
+	 */
+	public void log(final String string) {
+		if (LOG.isInfoEnabled()) {
+			LOG.info(string);
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see javax.servlet.ServletContext#log(java.lang.String,
 	 *      java.lang.Throwable)
 	 */
@@ -247,73 +350,20 @@ public class ServletContextWrapper implements ServletContext {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see javax.servlet.ServletContext#getMajorVersion()
+	 * @see javax.servlet.ServletContext#removeAttribute(java.lang.String)
 	 */
-	public int getMajorVersion() {
-		return OX_SERVLET_MAJOR;
+	public void removeAttribute(final String name) {
+		attributes.remove(name);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see javax.servlet.ServletContext#getServlets()
+	 * @see javax.servlet.ServletContext#setAttribute(java.lang.String,
+	 *      java.lang.Object)
 	 */
-	public Enumeration getServlets() {
-		return null;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.servlet.ServletContext#getServletNames()
-	 */
-	public Enumeration getServletNames() {
-		return null;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.servlet.ServletContext#getAttributeNames()
-	 */
-	public Enumeration getAttributeNames() {
-		return null;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.servlet.ServletContext#getMinorVersion()
-	 */
-	public int getMinorVersion() {
-		return OX_SERVLET_MINOR;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.servlet.ServletContext#getServerInfo()
-	 */
-	public String getServerInfo() {
-		return "THE SERVER INFO";
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.servlet.ServletContext#getInitParameterNames()
-	 */
-	public Enumeration getInitParameterNames() {
-		return servletconfigwrapper.getInitParameterNames();
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.servlet.ServletContext#getServletContextName()
-	 */
-	public String getServletContextName() {
-		return servletconfigwrapper.getServletName();
+	public void setAttribute(final String name, final Object value) {
+		attributes.put(name, value);
 	}
 
 }
