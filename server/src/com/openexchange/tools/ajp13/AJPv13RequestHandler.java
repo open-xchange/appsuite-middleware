@@ -615,59 +615,154 @@ public final class AJPv13RequestHandler {
 		this.response = response;
 	}
 
+	/**
+	 * Gets the content length
+	 * 
+	 * @return The content length
+	 */
 	public int getContentLength() {
 		return contentLength;
 	}
 
+	/**
+	 * @return <code>true</code> if content length has been set; otherwise
+	 *         <code>false</code>
+	 */
 	public boolean containsContentLength() {
 		return this.bContentLength;
 	}
 
+	/**
+	 * Sets the request's content length
+	 * 
+	 * @param contentLength
+	 *            The content length
+	 */
 	public void setContentLength(final int contentLength) {
 		this.contentLength = contentLength;
 		this.bContentLength = true;
 	}
 
+	/**
+	 * Gets the total requested content length
+	 * 
+	 * @return The total requested content length
+	 */
 	public int getTotalRequestedContentLength() {
 		return totalRequestedContentLength;
 	}
 
+	/**
+	 * Increases the total requested content length by specified argument
+	 * 
+	 * @param increaseBy
+	 *            The value by which the total requested content length is
+	 *            increased
+	 */
 	public void increaseTotalRequestedContentLength(final int increaseBy) {
 		this.totalRequestedContentLength += increaseBy;
 	}
 
+	/**
+	 * Sets the total requested content length
+	 * 
+	 * @param totalRequestedContentLength
+	 *            The total requested content length
+	 */
 	public void setTotalRequestedContentLength(final int totalRequestedContentLength) {
 		this.totalRequestedContentLength = totalRequestedContentLength;
 	}
 
+	/**
+	 * Checks if HTTP headers have already been sent to web server
+	 * 
+	 * @return <code>true</code> if HTTP headers have already been sent to web
+	 *         server; otherwise <code>false</code>
+	 */
 	public boolean isHeadersSent() {
 		return headersSent;
 	}
 
+	/**
+	 * Sets if HTTP headers have already been sent to web server
+	 * 
+	 * @param headersSent
+	 *            <code>true</code> if HTTP headers have already been sent to
+	 *            web server; otherwise <code>false</code>
+	 */
 	public void setHeadersSent(final boolean headersSent) {
 		this.headersSent = headersSent;
 	}
 
+	/**
+	 * Checks if
+	 * {@link Servlet#service(javax.servlet.ServletRequest, javax.servlet.ServletResponse)}
+	 * has already been called
+	 * 
+	 * @return <code>true</code> if
+	 *         {@link Servlet#service(javax.servlet.ServletRequest, javax.servlet.ServletResponse)}
+	 *         has already been called; otherwise <code>false</code>
+	 */
 	public boolean isServiceMethodCalled() {
 		return serviceMethodCalled;
 	}
 
+	/**
+	 * Sets if
+	 * {@link Servlet#service(javax.servlet.ServletRequest, javax.servlet.ServletResponse)}
+	 * has already been called
+	 * 
+	 * @param serviceMethodCalled
+	 *            <code>true</code> if
+	 *            {@link Servlet#service(javax.servlet.ServletRequest, javax.servlet.ServletResponse)}
+	 *            has already been called; otherwise <code>false</code>
+	 */
 	public void setServiceMethodCalled(final boolean serviceMethodCalled) {
 		this.serviceMethodCalled = serviceMethodCalled;
 	}
 
+	/**
+	 * Checks if AJP's end response package has been sent to web server
+	 * 
+	 * @return <code>true</code> if AJP's end response package has been sent
+	 *         to web server; otherwise <code>false</code>
+	 */
 	public boolean isEndResponseSent() {
 		return endResponseSent;
 	}
 
+	/**
+	 * Sets the end response flag
+	 * 
+	 * @param endResponseSent
+	 *            <code>true</code> if AJP's end response package has been
+	 *            sent to web server; otherwise <code>false</code>
+	 */
 	public void setEndResponseSent(final boolean endResponseSent) {
 		this.endResponseSent = endResponseSent;
 	}
 
+	/**
+	 * Indicates if request content type equals
+	 * <code>application/x-www-form-urlencoded</code>
+	 * 
+	 * @return <code>true</code> if request content type equals
+	 *         <code>application/x-www-form-urlencoded</code>; otherwise
+	 *         <code>false</code>
+	 */
 	public boolean isFormData() {
 		return isFormData;
 	}
 
+	/**
+	 * Marks that requests content type equals
+	 * <code>application/x-www-form-urlencoded</code>
+	 * 
+	 * @param isFormData
+	 *            <code>true</code> if request content type equals
+	 *            <code>application/x-www-form-urlencoded</code>; otherwise
+	 *            <code>false</code>
+	 */
 	public void setFormData(final boolean isFormData) {
 		this.isFormData = isFormData;
 	}
@@ -676,6 +771,12 @@ public final class AJPv13RequestHandler {
 		return emptyDataPackageReceived;
 	}
 
+	/**
+	 * Gets the number of bytes that are left for being requested from web
+	 * server
+	 * 
+	 * @return The number of bytes that are left for being requested
+	 */
 	public int getNumOfBytesToRequestFor() {
 		int retval = contentLength - totalRequestedContentLength;
 		if (retval > AJPv13Response.MAX_INT_VALUE || retval < 0) {
@@ -689,9 +790,11 @@ public final class AJPv13RequestHandler {
 	}
 
 	/**
-	 * Amount of received data is equal to value of header "content-length"
+	 * Checks if amount of received data is equal to value of header
+	 * 'Content-Length'
 	 * 
-	 * @return
+	 * @return <code>true</code> if amount of received data is equal to value
+	 *         of header 'Content-Length'; otherwise <code>false</code>
 	 */
 	public boolean isAllDataRead() {
 		/*
@@ -703,9 +806,10 @@ public final class AJPv13RequestHandler {
 
 	/**
 	 * Indicates if servlet container still expects data from web server that is
-	 * amount of received data is less than value of header "content-length"
+	 * amount of received data is less than value of header 'Content-Length'
 	 * 
-	 * @return
+	 * @return <code>true</code> if servlet container still expects data from
+	 *         web server; otherwise <code>false</code>
 	 */
 	public boolean isMoreDataExpected() {
 		/*
@@ -715,6 +819,12 @@ public final class AJPv13RequestHandler {
 		return (contentLength != NOT_SET && totalRequestedContentLength < contentLength);
 	}
 
+	/**
+	 * Checks if header 'Content-Length' has not been set
+	 * 
+	 * @return <code>true</code> if header 'Content-Length' has not been set;
+	 *         otherwise <code>false</code>
+	 */
 	public boolean isNotSet() {
 		return (contentLength == NOT_SET);
 	}
