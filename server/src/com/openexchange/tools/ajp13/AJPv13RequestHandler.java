@@ -739,19 +739,45 @@ public final class AJPv13RequestHandler {
 		totalRequestedContentLength = contentLength;
 	}
 
+	/**
+	 * Gets the HTTP session ID
+	 * 
+	 * @return The HTTP session ID
+	 */
 	public String getHttpSessionId() {
 		return httpSessionId;
 	}
 
+	/**
+	 * Sets the HTTP session ID
+	 * 
+	 * @param httpSessionId
+	 *            The HTTP session ID
+	 * @param join
+	 *            <code>true</code> if the HTTP session has joined a previous
+	 *            HTTP session; otherwise <code>false</code>
+	 */
 	public void setHttpSessionId(final String httpSessionId, final boolean join) {
 		this.httpSessionId = httpSessionId;
 		this.httpSessionJoined = join;
 	}
 
+	/**
+	 * Checks if the HTTP session has joined a previous HTTP session
+	 * 
+	 * @return <code>true</code> if the HTTP session has joined a previous
+	 *         HTTP session; otherwise <code>false</code>
+	 */
 	public boolean isHttpSessionJoined() {
 		return httpSessionJoined;
 	}
 
+	/**
+	 * Gets the servlet path (which is not the request path). The servlet path
+	 * is defined in web server's configuration for either mod_jk or mod_proxy.
+	 * 
+	 * @return The servlet path
+	 */
 	public String getServletPath() {
 		return servletPath;
 	}
@@ -763,7 +789,7 @@ public final class AJPv13RequestHandler {
 	}
 
 	private static String toHexString(final int i) {
-		return new StringBuilder(4).append(i < 16 ? "0x0" : "0x").append(Integer.toHexString(i).toUpperCase())
+		return new StringBuilder(4).append(i < 16 ? "0x0" : "0x").append(Integer.toHexString(i & 0xff).toUpperCase())
 				.toString();
 	}
 }
