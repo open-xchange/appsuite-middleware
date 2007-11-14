@@ -53,6 +53,7 @@
 
     <!-- Install -->
     <target name="install" depends="jar">
+        <mkdir dir="${bundlesdir}"/>
         <copy todir="${bundlesdir}">
             <fileset dir="${tmp.dir}">
                 <include name="${Bundle-SymbolicName}_${Bundle-Version}.jar"/>
