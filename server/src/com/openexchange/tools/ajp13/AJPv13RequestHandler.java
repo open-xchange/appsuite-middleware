@@ -288,7 +288,7 @@ public final class AJPv13RequestHandler {
 					break;
 				default:
 					/*
-					 * Unknow prefix code in first package: Leave routine
+					 * Unknown prefix code in first package: Leave routine
 					 */
 					if (LOG.isWarnEnabled()) {
 						final AJPv13Exception ajpExc = new AJPv13UnknownPrefixCodeException(prefixCode);
@@ -499,6 +499,13 @@ public final class AJPv13RequestHandler {
 		return sb.toString();
 	}
 
+	/**
+	 * Sets this request hander's servlet reference to the one bound to given
+	 * path argument
+	 * 
+	 * @param pathArg
+	 *            The request path
+	 */
 	public void setServletInstance(final String pathArg) {
 		/*
 		 * Remove leading slash character
