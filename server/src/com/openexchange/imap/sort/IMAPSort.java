@@ -77,7 +77,6 @@ import com.openexchange.imap.command.FetchIMAPCommand;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailStorageUtils.OrderDirection;
-import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.utils.StorageUtility.DummyAddress;
 import com.sun.mail.imap.IMAPFolder;
@@ -364,13 +363,12 @@ public final class IMAPSort {
 	 * @param usedFields
 	 *            The set to fill with actually used fields
 	 * @return Sorted messages
-	 * @throws MailConfigException
 	 * @throws MessagingException
 	 */
 	public static Message[] sortMessages(final IMAPFolder imapFolder, final Message[] filteredMessages,
 			final MailListField[] fields, final MailListField sortFieldArg, final OrderDirection orderDir,
 			final Locale locale, final Set<MailListField> usedFields, final IMAPConfig imapConfig)
-			throws MailConfigException, MessagingException {
+			throws MessagingException {
 		boolean applicationSort = true;
 		Message[] msgs = null;
 		final MailListField sortField = sortFieldArg == null ? MailListField.RECEIVED_DATE : sortFieldArg;
@@ -393,17 +391,8 @@ public final class IMAPSort {
 						usedFields.addAll(Arrays.asList(fields));
 						usedFields.add(sortField);
 					}
-					msgs = new FetchIMAPCommand(imapFolder, msgs, fetchProfile, true, true).doCommand();
+					msgs = new FetchIMAPCommand(imapFolder, msgs, fetchProfile, false, true).doCommand();
 				} else {
-					/*
-					 * Define sequence of valid message numbers: e.g.:
-					 * 2,34,35,43,51
-					 */
-					final StringBuilder sortRange = new StringBuilder();
-					sortRange.append(filteredMessages[0].getMessageNumber());
-					for (int i = 1; i < filteredMessages.length; i++) {
-						sortRange.append(',').append(filteredMessages[i].getMessageNumber());
-					}
 					final long start = System.currentTimeMillis();
 					msgs = IMAPCommandsCollection.getServerSortList(imapFolder, getSortCritForIMAPCommand(sortField,
 							orderDir == OrderDirection.DESC), filteredMessages);

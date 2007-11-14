@@ -1,3 +1,7 @@
+* 2007-11-14 - thorben.betten@open-xchange.com
+
+ - Bugfix #10167: Fixed imap-based sort
+
 * 2007-11-13 - marcus.klein@open-xchange.com
 
  - Bugfix #10117: Fixed moving problems.
