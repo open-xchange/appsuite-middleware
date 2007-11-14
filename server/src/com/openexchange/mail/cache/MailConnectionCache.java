@@ -73,8 +73,8 @@ import com.openexchange.sessiond.SessionObject;
  * {@link MailConnectionCache} - a very volatile cache for already established
  * mail connections.
  * <p>
- * Only one connection can be cached per user and is dedicated to fasten sequent
- * mail requests<br>
+ * Only one connection can be cached per user and is dedicated to fasten
+ * sequential mail requests<br>
  * TODO: Maybe own cache implementation (+ timer thread) to reduce lock overhead
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
