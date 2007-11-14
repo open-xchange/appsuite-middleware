@@ -106,9 +106,6 @@ public class HttpServletManager {
 	 * @return The instance of {@link HttpServlet}
 	 */
 	public static HttpServlet getServlet(final String path, final StringBuilder pathStorage) {
-		if (null == pathStorage) {
-			throw new IllegalArgumentException("pathStorage");
-		}
 		READ_LOCK.lock();
 		try {
 			if (SERVLET_POOL.containsKey(path)) {
