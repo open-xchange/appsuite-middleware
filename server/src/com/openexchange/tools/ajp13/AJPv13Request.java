@@ -63,8 +63,8 @@ import javax.servlet.ServletException;
 public abstract class AJPv13Request {
 
 	/**
-	 * Max size of an incoming request body packets: 8192 (8K) - 4 bytes (0x12 +
-	 * 0x34 + data length integer)
+	 * Max size of an incoming request body: 8192 (8K) - 4 bytes (0x12 + 0x34 +
+	 * data length integer)
 	 * 
 	 * @value 8188
 	 */
