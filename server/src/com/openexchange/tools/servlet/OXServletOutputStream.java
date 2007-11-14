@@ -210,10 +210,10 @@ public final class OXServletOutputStream extends ServletOutputStream {
 		try {
 			if (!ajpCon.getAjpRequestHandler().isHeadersSent()) {
 				ajpCon.getOutputStream().write(
-						AJPv13Response.getSendHeadersBytes(ajpCon.getAjpRequestHandler().getServletResponseObj()));
+						AJPv13Response.getSendHeadersBytes(ajpCon.getAjpRequestHandler().getServletResponse()));
 				ajpCon.getOutputStream().flush();
 				ajpCon.getAjpRequestHandler().setHeadersSent(true);
-				ajpCon.getAjpRequestHandler().getServletResponseObj().setCommitted(true);
+				ajpCon.getAjpRequestHandler().getServletResponse().setCommitted(true);
 			}
 			/*
 			 * Send data cut into MAX_BODY_CHUNK_SIZE pieces
@@ -262,7 +262,7 @@ public final class OXServletOutputStream extends ServletOutputStream {
 	public void write(final char[] chars) throws IOException {
 		try {
 			final String s = new String(chars);
-			write(s.getBytes(ajpCon.getAjpRequestHandler().getServletResponseObj().getCharacterEncoding()));
+			write(s.getBytes(ajpCon.getAjpRequestHandler().getServletResponse().getCharacterEncoding()));
 		} catch (final UnsupportedEncodingException e) {
 			LOG.error(e.getMessage(), e);
 			throw new IOException(e.getMessage());

@@ -103,7 +103,7 @@ public final class AJPv13RequestBody extends AJPv13Request {
 				 * from web server
 				 */
 				ajpRequestHandler.makeEqual();
-				ajpRequestHandler.getServletRequestObj().getOXInputStream().setData(null);
+				ajpRequestHandler.getServletRequest().getOXInputStream().setData(null);
 				return;
 			}
 			/*
@@ -114,7 +114,7 @@ public final class AJPv13RequestBody extends AJPv13Request {
 			if (ajpRequestHandler.isNotSet() || ajpRequestHandler.isMoreDataReadThanExpected()) {
 				ajpRequestHandler.makeEqual();
 			}
-			ajpRequestHandler.getServletRequestObj().getOXInputStream().setData(null);
+			ajpRequestHandler.getServletRequest().getOXInputStream().setData(null);
 			return;
 		}
 		/*
@@ -125,7 +125,7 @@ public final class AJPv13RequestBody extends AJPv13Request {
 		/*
 		 * Add payload data to servlet's request input stream
 		 */
-		ajpRequestHandler.getServletRequestObj().getOXInputStream().setData(contentBytes);
+		ajpRequestHandler.getServletRequest().getOXInputStream().setData(contentBytes);
 		/*
 		 * Request Data is recognized as form data and all body chunks have
 		 * already been received. Then turn post data into request parameters.
@@ -147,11 +147,11 @@ public final class AJPv13RequestBody extends AJPv13Request {
 			/*
 			 * Turn form's post data into request parameters
 			 */
-			String charEnc = ajpRequestHandler.getServletRequestObj().getCharacterEncoding();
+			String charEnc = ajpRequestHandler.getServletRequest().getCharacterEncoding();
 			if (charEnc == null) {
 				charEnc = ServerConfig.getProperty(Property.DefaultEncoding);
 			}
-			parseQueryString(ajpRequestHandler.getServletRequestObj(), new String(contentBytes, charEnc));
+			parseQueryString(ajpRequestHandler.getServletRequest(), new String(contentBytes, charEnc));
 		}
 	}
 

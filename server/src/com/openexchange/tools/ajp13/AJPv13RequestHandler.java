@@ -54,6 +54,7 @@ import java.io.InputStream;
 import java.net.SocketException;
 import java.util.Arrays;
 
+import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 
@@ -118,15 +119,15 @@ public final class AJPv13RequestHandler {
 
 	public static final String JSESSIONID_URI = ";jsessionid=";
 
-	private HttpServlet servletInstance;
+	private HttpServlet servlet;
 
 	private String servletId;
 
 	private int connectionType = -1;
 
-	private HttpServletRequestWrapper servletRequestObj;
+	private HttpServletRequestWrapper request;
 
-	private HttpServletResponseWrapper servletResponseObj;
+	private HttpServletResponseWrapper response;
 
 	private AJPv13Request ajpRequest;
 
@@ -255,6 +256,14 @@ public final class AJPv13RequestHandler {
 		return sb.toString();
 	}
 
+	/**
+	 * Processes an incoming AJP package from web server. If first package of an
+	 * AJP cycle is processed its prefix code determines further handling. Any
+	 * subsequent packages are treated as data-only packages.
+	 * 
+	 * @throws AJPv13Exception
+	 *             If package processing fails
+	 */
 	public void processPackage() throws AJPv13Exception {
 		try {
 			if (state.equals(State.IDLE)) {
@@ -319,13 +328,13 @@ public final class AJPv13RequestHandler {
 			 * This condition is reached when no content-length header was
 			 * present in forward request package (transfer-encoding: chunked)
 			 */
-			servletRequestObj.getOXInputStream().setData(new byte[0]);
+			request.getOXInputStream().setData(new byte[0]);
 		} else if (contentLength == 0) {
 			/*
 			 * This condition is reached when content-length header's value is
 			 * set to '0'
 			 */
-			servletRequestObj.getOXInputStream().setData(null);
+			request.getOXInputStream().setData(null);
 		} else {
 			/*
 			 * Forward request is immediately followed by a data package
@@ -341,6 +350,17 @@ public final class AJPv13RequestHandler {
 		}
 	}
 
+	/**
+	 * Creates and writes the corresponding AJP response package to the formerly
+	 * received AJP package.
+	 * 
+	 * @throws AJPv13Exception
+	 *             If an AJP-related error occurs
+	 * @throws ServletException
+	 *             If
+	 *             {@link Servlet#service(javax.servlet.ServletRequest, javax.servlet.ServletResponse)}
+	 *             method invocation fails
+	 */
 	public void createResponse() throws AJPv13Exception, ServletException {
 		try {
 			if (ajpRequest == null) {
@@ -358,10 +378,21 @@ public final class AJPv13RequestHandler {
 		}
 	}
 
+	/**
+	 * Gets the AJP connection of this request handler
+	 * 
+	 * @return The AJP connection of this request handler
+	 */
 	public AJPv13Connection getAJPConnection() {
 		return ajpCon;
 	}
 
+	/**
+	 * Sets the AJP connection of this request handler
+	 * 
+	 * @param ajpCon
+	 *            The AJP connection
+	 */
 	public void setAJPConnection(final AJPv13Connection ajpCon) {
 		this.ajpCon = ajpCon;
 	}
@@ -423,13 +454,13 @@ public final class AJPv13RequestHandler {
 
 	private void releaseServlet() {
 		if (servletId != null) {
-			HttpServletManager.putServlet(servletId, servletInstance);
+			HttpServletManager.putServlet(servletId, servlet);
 			if (MonitoringInfo.UNKNOWN != connectionType) {
 				MonitoringInfo.decrementNumberOfConnections(connectionType);
 			}
 		}
 		servletId = null;
-		servletInstance = null;
+		servlet = null;
 	}
 
 	/**
@@ -443,23 +474,23 @@ public final class AJPv13RequestHandler {
 		releaseServlet();
 		connectionType = -1;
 		try {
-			if (servletRequestObj != null && servletRequestObj.getInputStream() != null) {
-				servletRequestObj.getInputStream().close();
-				servletRequestObj.removeInputStream();
+			if (request != null && request.getInputStream() != null) {
+				request.getInputStream().close();
+				request.removeInputStream();
 			}
 		} catch (final Exception e) {
 			LOG.error(e.getMessage(), e);
 		}
 		try {
-			if (!endResponseSent && servletResponseObj != null && servletResponseObj.getOXOutputStream() != null) {
-				servletResponseObj.getOXOutputStream().close();
-				servletResponseObj.removeOXOutputStream();
+			if (!endResponseSent && response != null && response.getOXOutputStream() != null) {
+				response.getOXOutputStream().close();
+				response.removeOXOutputStream();
 			}
 		} catch (final Exception e) {
 			LOG.error(e.getMessage(), e);
 		}
-		servletRequestObj = null;
-		servletResponseObj = null;
+		request = null;
+		response = null;
 		ajpRequest = null;
 		contentLength = 0;
 		bContentLength = false;
@@ -488,8 +519,7 @@ public final class AJPv13RequestHandler {
 		final String delim = " | ";
 		final StringBuilder sb = new StringBuilder(300);
 		sb.append("State: ").append(state.equals(State.IDLE) ? "IDLE" : "ASSIGNED").append(delim);
-		sb.append("Servlet: ").append(servletInstance == null ? "null" : servletInstance.getClass().getName()).append(
-				delim);
+		sb.append("Servlet: ").append(servlet == null ? "null" : servlet.getClass().getName()).append(delim);
 		sb.append("Current Request: ").append(ajpRequest.getClass().getName()).append(delim);
 		sb.append("Content Length: ").append(bContentLength ? String.valueOf(contentLength) : "Not available").append(
 				delim);
@@ -520,7 +550,7 @@ public final class AJPv13RequestHandler {
 		if (servletInst == null) {
 			servletInst = new HttpErrorServlet("No servlet bound to path/alias: " + path);
 		}
-		servletInstance = servletInst;
+		servlet = servletInst;
 		servletId = pathStorage.length() > 0 ? pathStorage.toString() : null;
 		if (null != servletId) {
 			servletPath = servletId.replaceFirst("\\*", ""); // path;
@@ -537,25 +567,52 @@ public final class AJPv13RequestHandler {
 		return path.substring(start, end);
 	}
 
-	public HttpServlet getServletInstance() {
-		return this.servletInstance;
+	/**
+	 * Gets the servlet reference
+	 * 
+	 * @return The servlet reference
+	 */
+	public HttpServlet getServlet() {
+		return this.servlet;
 	}
 
-	public HttpServletRequestWrapper getServletRequestObj() {
-		return servletRequestObj;
+	/**
+	 * Gets the servlet request
+	 * 
+	 * @return The servlet request
+	 */
+	public HttpServletRequestWrapper getServletRequest() {
+		return request;
 	}
 
-	public void setServletRequestObj(final HttpServletRequestWrapper servletRequestObj) {
-		this.servletRequestObj = servletRequestObj;
+	/**
+	 * Sets the servlet request
+	 * 
+	 * @param request
+	 *            The servlet request
+	 */
+	public void setServletRequest(final HttpServletRequestWrapper request) {
+		this.request = request;
 		supplyRequestWrapperWithServlet();
 	}
 
-	public HttpServletResponseWrapper getServletResponseObj() {
-		return servletResponseObj;
+	/**
+	 * Gets the servlet response
+	 * 
+	 * @return The servlet response
+	 */
+	public HttpServletResponseWrapper getServletResponse() {
+		return response;
 	}
 
-	public void setServletResponseObj(final HttpServletResponseWrapper servletResponseObj) {
-		this.servletResponseObj = servletResponseObj;
+	/**
+	 * Sets the servlet response
+	 * 
+	 * @param response
+	 *            The servlet response
+	 */
+	public void setServletResponse(final HttpServletResponseWrapper response) {
+		this.response = response;
 	}
 
 	public int getContentLength() {
@@ -699,17 +756,9 @@ public final class AJPv13RequestHandler {
 		return servletPath;
 	}
 
-	public String getServletId() {
-		return servletId;
-	}
-
-	public void setServletId(final String servletId) {
-		this.servletId = servletId;
-	}
-
 	private void supplyRequestWrapperWithServlet() {
-		if (servletRequestObj != null && servletInstance != null) {
-			servletRequestObj.setServletInstance(servletInstance);
+		if (request != null && servlet != null) {
+			request.setServletInstance(servlet);
 		}
 	}
 

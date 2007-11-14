@@ -304,8 +304,8 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 		/*
 		 * Apply request/response to ajp request handler
 		 */
-		ajpRequestHandler.setServletRequestObj(servletRequest);
-		ajpRequestHandler.setServletResponseObj(servletResponse);
+		ajpRequestHandler.setServletRequest(servletRequest);
+		ajpRequestHandler.setServletResponse(servletResponse);
 		/*
 		 * Create servlet instance dependent on requested URI
 		 */

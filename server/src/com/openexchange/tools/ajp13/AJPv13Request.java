@@ -89,11 +89,11 @@ public abstract class AJPv13Request {
 			 * Call servlet's service() method which will then request all
 			 * receivable data chunks from client through OXServletInputStream
 			 */
-			ajpRequestHandler.getServletInstance().service(ajpRequestHandler.getServletRequestObj(),
-					ajpRequestHandler.getServletResponseObj());
-			if (ajpRequestHandler.getServletResponseObj() != null) {
-				ajpRequestHandler.getServletResponseObj().flushBuffer();
-				ajpRequestHandler.getServletResponseObj().getOXOutputStream().flushByteBuffer();
+			ajpRequestHandler.getServlet().service(ajpRequestHandler.getServletRequest(),
+					ajpRequestHandler.getServletResponse());
+			if (ajpRequestHandler.getServletResponse() != null) {
+				ajpRequestHandler.getServletResponse().flushBuffer();
+				ajpRequestHandler.getServletResponse().getOXOutputStream().flushByteBuffer();
 			}
 			ajpRequestHandler.setServiceMethodCalled(true);
 		}
@@ -101,14 +101,14 @@ public abstract class AJPv13Request {
 		 * Send response headers first.
 		 */
 		if (!ajpRequestHandler.isHeadersSent()) {
-			writeResponse(AJPv13Response.getSendHeadersBytes(ajpRequestHandler.getServletResponseObj()), out, true);
+			writeResponse(AJPv13Response.getSendHeadersBytes(ajpRequestHandler.getServletResponse()), out, true);
 			ajpRequestHandler.setHeadersSent(true);
-			ajpRequestHandler.getServletResponseObj().setCommitted(true);
+			ajpRequestHandler.getServletResponse().setCommitted(true);
 		}
 		byte[] remainingData = null;
 		try {
-			remainingData = ajpRequestHandler.getServletResponseObj().getOXOutputStream().getData();
-			ajpRequestHandler.getServletResponseObj().getOXOutputStream().clearByteBuffer();
+			remainingData = ajpRequestHandler.getServletResponse().getOXOutputStream().getData();
+			ajpRequestHandler.getServletResponse().getOXOutputStream().clearByteBuffer();
 		} catch (final IOException e) {
 			remainingData = new byte[0];
 		}
