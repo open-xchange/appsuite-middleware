@@ -1,4 +1,4 @@
-<project name="Open-Xchange" default="default" basedir=".">
+<project name="Open-Xchange Groupware" default="default" basedir=".">
 
     <description>
         Open-Xchange Collaboration Suite Server
@@ -8,23 +8,31 @@
     <!-- This values must be changed for defining other installation places -->
     <property name="destdir" value=""/>
     <property name="prefix" location="/opt/open-xchange"/>
-    <property name="3rdlib" location="${prefix}/lib"/>
     <property name="log.install.dir" value="/var/log/open-xchange"/>
     <property name="distribution" value="debian"/>
     <property file="VERSION"/>
     <property file="PVERSION"/>
 
-    <!-- Directories -->
-    <property name="src.dir" location="src"/>
-    <property name="build.dir" location="build"/>
+    <!-- Constants -->
     <property name="tmp.dir" value="tmp"/>
-    <property name="lib.dir" location="lib"/>
     <property name="conf.dir" value="conf/groupware"/>
     <property name="i18n.dir" location="i18n"/>
     <property name="bin.dir" value="sbin"/>
 
+    <property name="buildnumber" value="${pversion}"/>
+
+    <property file="META-INF/MANIFEST.MF"/>
+    <property file="build.properties"/>
+
+    <fileset dir="." id="metainf">
+        <include name="META-INF/**"/>
+        <exclude name="CVS"/>
+    </fileset>
+
+    <!-- Install Constants -->
+    <property name="bundlesdir" value="${destdir}${prefix}/bundles"/>
+
     <!-- Replacements -->
-    <property name="ox_buildnumber" value="${pversion}"/>
     <property name="lib.install.dir" value="${prefix}/lib"/>
     <property name="lib.install.copy.dir" location="${destdir}${lib.install.dir}"/>
     <property name="conf.install.dir" value="${prefix}/etc/groupware"/>
@@ -35,65 +43,68 @@
 
     <!-- Replacements in Version.java.in -->
     <filterset id="version">
-        <filter token="ox_major" value="${ox_major}" />
-        <filter token="ox_minor" value="${ox_minor}" />
-        <filter token="ox_patch" value="${ox_patch}" />
-        <filter token="ox_buildnumber" value="${ox_buildnumber}" />
-        <filter token="ox_codename" value="${ox_codename}" />
-        <filter token="ox_name" value="${ox_name}" />
+        <filter token="replaceVersion" value="${Bundle-Version}" />
+        <filter token="replaceBuildnumber" value="${buildnumber}" />
+        <filter token="replaceCodename" value="${codename}" />
     </filterset>
 
+    <!-- Bundle dependencies -->
+    <property name="commonBundle" value="com.openexchange.common"/>
+
     <!-- JAR names for classpath -->
-    <property name="servletjar" value="servlet-api-2.4.jar" />
-    <property name="jdbcjar" value="mysql-connector-java-3.1.13-bin.jar" />
-    <property name="mailjar" value="mail.jar" />
+    <property name="osgijar" value="org.eclipse.osgi_3.3.0.v20070530.jar"/>
+    <property name="osgiservicesjar" value="org.eclipse.osgi.services_3.1.200.v20070605.jar"/>
+    <property name="servletjar" value="javax.servlet_2.4.0.v200706111738.jar" />
+    <property name="commonsloggingjar" value="org.apache.commons.logging_1.0.4.v200706111724.jar" />
     <property name="activationjar" value="activation.jar" />
-    <property name="jdomjar" value="jdom.jar" />
+    <property name="commonscodecjar" value="commons-codec-1.3.jar" />
+    <property name="commonsfileuploadjar" value="commons-fileupload.jar" />
+    <property name="commonshttpclientjar" value="commons-httpclient-2.0.2.jar" />
+    <property name="commonsiojar" value="commons-io.jar" />
+    <property name="jakartawebdavjar" value="jakarta-slide-webdavlib-2.1.jar" />
     <property name="jcsjar" value="jcs-1.2.7.9.2.jar" />
-    <property name="concurrentjar" value="concurrent.jar" />
-    <property name="loggingjar" value="commons-logging.jar" />
+    <property name="jdomjar" value="jdom.jar" />
     <property name="jsonjar" value="json.jar" />
-    <property name="fileuploadjar" value="commons-fileupload.jar" />
-    <property name="iojar" value="commons-io.jar" />
-    <property name="webdavjar" value="jakarta-slide-webdavlib-2.1.jar" />
-    <property name="httpclientjar" value="commons-httpclient-2.0.2.jar" />
-    <property name="tnefjar" value="tnef.jar" />
+    <property name="mailjar" value="mail.jar" />
+    <property name="mysqljdbcjar" value="mysql-connector-java-3.1.13-bin.jar" />
     <property name="springbeanjar" value="spring-beans_1.2.7.jar" />
     <property name="springcorejar" value="spring-core_1.2.7.jar" />
-    <property name="commonscodecjar" value="commons-codec-1.3.jar" />
-	<property name="jcharsetjar" value="jcharset-1.3.jar" />
+    <property name="tnefjar" value="tnef.jar" />
 
     <!-- Classpath -->
     <path id="project.classpath">
-        <pathelement location="${3rdlib}/${servletjar}"/>
-        <pathelement location="${3rdlib}/${jdbcjar}"/>
-        <pathelement location="${3rdlib}/${mailjar}"/>
-        <pathelement location="${3rdlib}/${activationjar}"/>
-        <pathelement location="${3rdlib}/${jdomjar}"/>
-        <pathelement location="${3rdlib}/${jcsjar}"/>
-        <pathelement location="${3rdlib}/${concurrentjar}"/>
-        <pathelement location="${3rdlib}/${loggingjar}"/>
-        <pathelement location="${3rdlib}/${jsonjar}"/>
-        <pathelement location="${3rdlib}/${fileuploadjar}"/>
-        <pathelement location="${3rdlib}/${iojar}"/>
-        <pathelement location="${3rdlib}/${webdavjar}"/>
-        <pathelement location="${3rdlib}/${httpclientjar}"/>
-        <pathelement location="${3rdlib}/${tnefjar}" />
-        <pathelement location="${3rdlib}/${springbeanjar}" />
-        <pathelement location="${3rdlib}/${springcorejar}" />
-        <pathelement location="${3rdlib}/${commonscodecjar}" />
-    	<pathelement location="${3rdlib}/${jcharsetjar}" />
+        <pathelement location="${bundlesdir}/${osgijar}"/>
+        <pathelement location="${bundlesdir}/${osgiservicesjar}"/>
+        <pathelement location="${bundlesdir}/${servletjar}"/>
+        <pathelement location="${bundlesdir}/${servletjar}"/>
+        <pathelement location="${bundlesdir}/${commonsloggingjar}"/>
+        <pathelement location="${bundlesdir}/${commonBundle}/lib/${activationjar}"/>
+        <pathelement location="${bundlesdir}/${commonBundle}/lib/${commonscodecjar}" />
+        <pathelement location="${bundlesdir}/${commonBundle}/lib/${commonsfileuploadjar}"/>
+        <pathelement location="${bundlesdir}/${commonBundle}/lib/${commonshttpclientjar}"/>
+        <pathelement location="${bundlesdir}/${commonBundle}/lib/${commonsiojar}"/>
+        <pathelement location="${bundlesdir}/${commonBundle}/lib/${jakartawebdavjar}"/>
+        <pathelement location="${bundlesdir}/${commonBundle}/lib/${jcsjar}"/>
+        <pathelement location="${bundlesdir}/${commonBundle}/lib/${jdomjar}"/>
+        <pathelement location="${bundlesdir}/${commonBundle}/lib/${jsonjar}"/>
+        <pathelement location="${bundlesdir}/${commonBundle}/lib/${mailjar}"/>
+        <pathelement location="${bundlesdir}/${commonBundle}/lib/${mysqljdbcjar}"/>
+        <pathelement location="${bundlesdir}/${commonBundle}/lib/${springbeanjar}" />
+        <pathelement location="${bundlesdir}/${commonBundle}/lib/${springcorejar}" />
+        <pathelement location="${bundlesdir}/${commonBundle}/lib/${tnefjar}" />
     </path>
 
     <!-- JARs for running server -->
-    <fileset dir="${lib.dir}" id="server-jars">
-        <include name="ox_server.jar"/>
+    <property name="serverJar" value="${Bundle-SymbolicName}_${Bundle-Version}.jar"/>
+    <fileset dir="${tmp.dir}" id="server-jars">
+        <include name="${serverJar}"/>
+        <!-- TODO -->
         <include name="ox_languages.jar"/>
     </fileset>
 
     <!-- I18N Properties -->
     <property name="xgettext" value="xgettext"/>
-    <fileset id="i18n.sources" dir="${src.dir}">
+    <fileset id="i18n.sources" dir="${source..}">
         <include name="com/openexchange/groupware/i18n/*.java"/>
     </fileset>
     <property name="msgfmt" value="msgfmt"/>
@@ -104,37 +115,32 @@
 	<property name="msgcmp" value="msgcmp"/>
 
     <!-- Compile -->
-
     <target name="prepare">
-        <mkdir dir="${build.dir}"/>
+        <mkdir dir="${output..}"/>
         <mkdir dir="${tmp.dir}"/>
-        <mkdir dir="${lib.dir}"/>
     </target>
 
     <target name="compile" depends="prepare,patchVersionJava">
-        <javac srcdir="${src.dir}" destdir="${build.dir}" debug="true"
+        <javac srcdir="${source..}" destdir="${output..}" debug="true"
             encoding="US-ASCII" source="1.5" compiler="javac1.5" target="1.5">
             <classpath refid="project.classpath" />
         </javac>
-        <copy todir="${build.dir}">
-            <fileset dir="${src.dir}">
-                <include name="META-INF/**"/>
-                <exclude name="CVS"/>
-            </fileset>
-        </copy>
     </target>
 
     <target name="jar" depends="compile">
-        <jar jarfile="${lib.dir}/ox_server.jar" basedir="${build.dir}" includes="**"/>
+        <jar jarfile="${tmp.dir}/${Bundle-SymbolicName}_${Bundle-Version}.jar">
+            <fileset refid="metainf"/>
+            <fileset dir="${output..}"/>
+        </jar>
     </target>
 
-    <target name="build" depends="compile,jar,create-lang-jar"/>
+    <target name="build" depends="jar,create-lang-jar"/>
 
     <!-- Install targets -->
 
     <target name="installJars" depends="build">
-        <mkdir dir="${lib.install.copy.dir}"/>
-        <copy todir="${lib.install.copy.dir}" overwrite="true">
+        <mkdir dir="${bundlesdir}"/>
+        <copy todir="${bundlesdir}" overwrite="true">
             <fileset refid="server-jars" />
         </copy>
     </target>
@@ -201,10 +207,9 @@
     <target name="default" depends="install"/>
 
     <target name="clean">
-        <delete dir="${lib.dir}"/>
         <delete dir="${tmp.dir}"/>
-        <delete dir="${build.dir}"/>
-        <delete file="${src.dir}/com/openexchange/server/Version.java"/>
+        <delete dir="${output..}"/>
+        <delete file="${source..}/com/openexchange/server/Version.java"/>
     </target>
 
     <!-- I18N Stuff -->
@@ -259,22 +264,23 @@
         <echo message="apt can't be found. Error codes cannot be read from server code." />
     </target>
 
+    <!-- TODO -->
     <target name="create-lang-jar" depends="check-msgfmt-executable,prepare" if="exists_msgfmt">
         <!-- FIXME Discover Files and languages dynamically -->
         <exec executable="${msgfmt}" dir="${basedir}">
-            <arg line="--java2 -d ${build.dir} -r com.openexchange.groupware.i18n.ServerMessages -l de_DE ${i18n.dir}/de_DE/server.de_DE.po" />
+            <arg line="--java2 -d ${output..} -r com.openexchange.groupware.i18n.ServerMessages -l de_DE ${i18n.dir}/de_DE/server.de_DE.po" />
         </exec>
         <exec executable="${msgfmt}" dir="${basedir}">
-            <arg line="--java2 -d ${build.dir} -r com.openexchange.groupware.i18n.ServerMessages -l de ${i18n.dir}/de_DE/server.de_DE.po" />
+            <arg line="--java2 -d ${output..} -r com.openexchange.groupware.i18n.ServerMessages -l de ${i18n.dir}/de_DE/server.de_DE.po" />
         </exec>
     	<!-- french -->
     	<exec executable="${msgfmt}" dir="${basedir}">
-            <arg line="--java2 -d ${build.dir} -r com.openexchange.groupware.i18n.ServerMessages -l fr_FR ${i18n.dir}/fr_FR/server.fr_FR.po" />
+            <arg line="--java2 -d ${output..} -r com.openexchange.groupware.i18n.ServerMessages -l fr_FR ${i18n.dir}/fr_FR/server.fr_FR.po" />
         </exec>
         <exec executable="${msgfmt}" dir="${basedir}">
-            <arg line="--java2 -d ${build.dir} -r com.openexchange.groupware.i18n.ServerMessages -l fr ${i18n.dir}/fr_FR/server.fr_FR.po" />
+            <arg line="--java2 -d ${output..} -r com.openexchange.groupware.i18n.ServerMessages -l fr ${i18n.dir}/fr_FR/server.fr_FR.po" />
         </exec>
-        <jar jarfile="${lib.dir}/ox_languages.jar" basedir="${build.dir}"
+        <jar jarfile="${tmp.dir}/${Bundle-SymbolicName}_languages.jar" basedir="${output..}"
             includes="com/openexchange/groupware/i18n/ServerMessages*" />
     </target>
 
@@ -298,11 +304,11 @@
         <echo message="Creating ${i18n.dir}/codesAnnotation.ser" />
         <path id="apt.classpath">
             <path refid="project.classpath" />
-            <pathelement location="${lib.dir}/ox_server.jar"/>
+            <path refid="server-jars"/>
             <pathelement location="${java.class.path}" />
         </path>
         <exec executable="find" dir="${basedir}" output="${tmp.dir}/sources.txt">
-            <arg value="${src.dir}"/>
+            <arg value="${source..}"/>
             <arg value="-name"/>
             <arg value="*.java"/>
         </exec>
@@ -310,7 +316,7 @@
             <arg value="-cp" />
             <arg pathref="apt.classpath" />
             <arg value="-d" />
-            <arg value="${build.dir}" />
+            <arg value="${output..}" />
             <arg value="-AerrorCodeProcessor=com.openexchange.tools.exceptions.SerializationProcessor" />
             <arg value="-factory" />
             <arg value="com.openexchange.tools.exceptions.OXExceptionAnnotationFactory" />
@@ -337,7 +343,7 @@
 
     <target name="create-server-pot" depends="check-i18n-executables" if="exists_xgettext">
         <echo message="Generating ${i18n.dir}/server.pot" />
-        <apply executable="${xgettext}" dir="${src.dir}" parallel="true" verbose="true" relative="true">
+        <apply executable="${xgettext}" dir="${source..}" parallel="true" verbose="true" relative="true">
             <arg value="-a" />
             <arg value="--language=Java" />
             <arg value="--output-dir=${i18n.dir}" />
@@ -355,7 +361,7 @@
         <echo message="Generating ${i18n.dir}/errors.pot" />
         <java classname="ProcessErrorCodes">
             <classpath>
-                <pathelement location="${build.dir}" />
+                <pathelement location="${output..}" />
                 <path refid="project.classpath" />
             </classpath>
             <sysproperty key="errorCodeProcessor" value="com.openexchange.tools.exceptions.JavaMessageCatalogBuilder" />
@@ -430,7 +436,7 @@
         <echo message="Creating ${i18n.dir}/codes.csv" />
         <java classname="ProcessErrorCodes">
             <classpath>
-                <pathelement location="${build.dir}" />
+                <pathelement location="${output..}" />
                 <path refid="project.classpath"/>
             </classpath>
             <sysproperty key="errorCodeProcessor" value="com.openexchange.tools.exceptions.CSVProcessor" />
@@ -444,7 +450,7 @@
         <echo message="Creating ${i18n.dir}/codes.js" />
         <java classname="ProcessErrorCodes">
             <classpath>
-                <pathelement location="${build.dir}" />
+                <pathelement location="${output..}" />
                 <path refid="project.classpath" />
             </classpath>
             <sysproperty key="errorCodeProcessor" value="com.openexchange.tools.exceptions.JSProcessor" />
@@ -455,11 +461,11 @@
         </java>
     </target>
 
-    <!-- Templates -->
+    <!-- Replacing in templates -->
 
     <target name="patchVersionJava">
-        <copy file="${src.dir}/com/openexchange/server/Version.java.in"
-            tofile="${src.dir}/com/openexchange/server/Version.java"
+        <copy file="${source..}/com/openexchange/server/Version.java.in"
+            tofile="${source..}/com/openexchange/server/Version.java"
             overwrite="yes">
             <filterset refid="version"/>
         </copy>
@@ -517,19 +523,19 @@
             <replacefilter token="@oxscriptconf@" value="${conf.subst.patch}/ox-scriptconf.sh"/>
             <replacefilter token="@prefix@" value="${prefix}"/>
             <replacefilter token="@consolelogfile@" value= "${log.install.dir}/open-xchange-console.log"/>
-            <replacefilter token="@jdbcjar@" value="${lib.subst.patch}/${jdbcjar}"/>
+            <replacefilter token="@mysqljdbcjar@" value="${lib.subst.patch}/${mysqljdbcjar}"/>
             <replacefilter token="@mailjar@" value="${lib.subst.patch}/${mailjar}"/>
             <replacefilter token="@activationjar@" value="${lib.subst.patch}/${activationjar}"/>
             <replacefilter token="@jdomjar@" value="${lib.subst.patch}/${jdomjar}"/>
             <replacefilter token="@servletjar@" value="${lib.subst.patch}/${servletjar}"/>
             <replacefilter token="@jcsjar@" value="${lib.subst.patch}/${jcsjar}"/>
             <replacefilter token="@concurrentjar@" value="${lib.subst.patch}/${concurrentjar}"/>
-            <replacefilter token="@loggingjar@" value="${lib.subst.patch}/${loggingjar}"/>
+            <replacefilter token="@commonsloggingjar@" value="${lib.subst.patch}/${commonsloggingjar}"/>
             <replacefilter token="@jsonjar@" value="${lib.subst.patch}/${jsonjar}"/>
-            <replacefilter token="@fileuploadjar@" value="${lib.subst.patch}/${fileuploadjar}"/>
-            <replacefilter token="@iojar@" value="${lib.subst.patch}/${iojar}" />
-            <replacefilter token="@webdavjar@" value="${lib.subst.patch}/${webdavjar}" />
-            <replacefilter token="@httpclientjar@" value="${lib.subst.patch}/${httpclientjar}" />
+            <replacefilter token="@commonsfileuploadjar@" value="${lib.subst.patch}/${commonsfileuploadjar}"/>
+            <replacefilter token="@commonsiojar@" value="${lib.subst.patch}/${commonsiojar}" />
+            <replacefilter token="@jakartawebdavjar@" value="${lib.subst.patch}/${jakartawebdavjar}" />
+            <replacefilter token="@commonshttpclientjar@" value="${lib.subst.patch}/${commonshttpclientjar}" />
             <replacefilter token="@jbossclientjar@" value="${lib.subst.patch}/${jbossclientjar}" />
             <replacefilter token="@oxadapterjar@" value="${lib.subst.patch}/${oxadapterjar}" />
             <replacefilter token="@oxgroupwarelibdir@" value="${lib.subst.patch}"/>
@@ -545,19 +551,19 @@
             <replacefilter token="@oxscriptconf@"    value="${conf.subst.patch}/ox-scriptconf.sh"/>
             <replacefilter token="@prefix@" value="${prefix}"/>
             <replacefilter token="@consolelogfile@" value= "${log.install.dir}/open-xchange-console.log"/>
-            <replacefilter token="@jdbcjar@"    value="${lib.subst.patch}/${jdbcjar}"/>
+            <replacefilter token="@mysqljdbcjar@"    value="${lib.subst.patch}/${mysqljdbcjar}"/>
             <replacefilter token="@mailjar@"    value="${lib.subst.patch}/${mailjar}"/>
             <replacefilter token="@activationjar@" value="${lib.subst.patch}/${activationjar}"/>
             <replacefilter token="@jdomjar@"    value="${lib.subst.patch}/${jdomjar}"/>
             <replacefilter token="@servletjar@"    value="${lib.subst.patch}/${servletjar}"/>
             <replacefilter token="@jcsjar@"    value="${lib.subst.patch}/${jcsjar}"/>
             <replacefilter token="@concurrentjar@"    value="${lib.subst.patch}/${concurrentjar}"/>
-            <replacefilter token="@loggingjar@"    value="${lib.subst.patch}/${loggingjar}"/>
+            <replacefilter token="@commonsloggingjar@"    value="${lib.subst.patch}/${commonsloggingjar}"/>
             <replacefilter token="@jsonjar@"    value="${lib.subst.patch}/${jsonjar}"/>
-            <replacefilter token="@fileuploadjar@" value="${lib.subst.patch}/${fileuploadjar}"/>
-            <replacefilter token="@iojar@" value="${lib.subst.patch}/${iojar}" />
-            <replacefilter token="@webdavjar@" value="${lib.subst.patch}/${webdavjar}" />
-            <replacefilter token="@httpclientjar@" value="${lib.subst.patch}/${httpclientjar}" />
+            <replacefilter token="@commonsfileuploadjar@" value="${lib.subst.patch}/${commonsfileuploadjar}"/>
+            <replacefilter token="@commonsiojar@" value="${lib.subst.patch}/${commonsiojar}" />
+            <replacefilter token="@jakartawebdavjar@" value="${lib.subst.patch}/${jakartawebdavjar}" />
+            <replacefilter token="@commonshttpclientjar@" value="${lib.subst.patch}/${commonshttpclientjar}" />
             <replacefilter token="@jbossclientjar@" value="${lib.subst.patch}/${jbossclientjar}" />
             <replacefilter token="@oxadapterjar@" value="${lib.subst.patch}/${oxadapterjar}" />
             <replacefilter token="@tnefjar@" value="${lib.subst.patch}/${tnefjar}"/>
