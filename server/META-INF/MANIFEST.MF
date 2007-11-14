@@ -50,6 +50,13 @@ Import-Package: com.mysql.jdbc;version="3.1.13",
  org.springframework.beans.factory.support,
  org.springframework.beans.factory.xml,
  org.springframework.core.io
-Export-Package: com.openexchange.groupware.importexport,
+Export-Package: com.openexchange.api2,
+ com.openexchange.cache,
+ com.openexchange.groupware.container,
+ com.openexchange.groupware.contexts,
+ com.openexchange.groupware.delete,
+ com.openexchange.groupware.importexport,
  com.openexchange.groupware.importexport.exporters,
- com.openexchange.groupware.importexport.importers
+ com.openexchange.groupware.importexport.importers,
+ com.openexchange.tools,
+ com.openexchange.tools.oxfolder
