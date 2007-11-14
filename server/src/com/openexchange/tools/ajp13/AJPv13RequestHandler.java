@@ -774,7 +774,7 @@ public final class AJPv13RequestHandler {
 
 	/**
 	 * Gets the servlet path (which is not the request path). The servlet path
-	 * is defined in web server's configuration for either mod_jk or mod_proxy.
+	 * is defined in servlet mapping configuration.
 	 * 
 	 * @return The servlet path
 	 */
