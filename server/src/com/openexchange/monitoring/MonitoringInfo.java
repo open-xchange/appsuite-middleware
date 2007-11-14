@@ -80,6 +80,11 @@ public class MonitoringInfo {
 	
 	private static final int SESSION = 7;
 	
+	/**
+	 * Unknown connection type
+	 */
+	public static final int UNKNOWN = -1;
+	
 	// Static fields
 	private static int numberOfOpenAJPSockets;
 	
@@ -236,7 +241,7 @@ public class MonitoringInfo {
 		} else if (pathInfo.startsWith(TYPE_ADMIN_UMIN)) {
 			return MonitoringInfo.AJAX;
 		} else {
-			return -1;
+			return UNKNOWN;
 		}
 	}
 	

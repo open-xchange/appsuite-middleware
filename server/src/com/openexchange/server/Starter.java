@@ -64,228 +64,257 @@ import com.openexchange.groupware.GroupwareInit;
  */
 public class Starter implements Initialization {
 
-    /**
-     * This contains the components to be started if a normal groupware startup
-     * is done.
-     */
-    private final Initialization[] inits = new Initialization[] {
-        /**
-         * Reads system.properties.
-         */
-        com.openexchange.configuration.SystemConfig.getInstance(),
-        /**
-         * Reads configdb.properties.
-         */
-        com.openexchange.configuration.ConfigDB.getInstance(),
-        /**
-         * Read in update tasks
-         */
-        com.openexchange.groupware.update.UpdateTaskCollectionInit.getInstance(),
-        /**
-         * Reads the calendar.properties.
-         */
-        com.openexchange.groupware.calendar.CalendarConfig.getInstance(),
-        /**
-         * Reads the participant.properties.
-         */
-        com.openexchange.groupware.configuration.ParticipantConfig.getInstance(),
-        /**
-         * Sets the caching system JCS up.
-         */
-        com.openexchange.cache.Configuration.getInstance(),
-        /**
-         * Starts the monitoring component.
-         */
-        com.openexchange.monitoring.MonitoringInit.getInstance(),
-        /**
-         * Connection pools for ConfigDB and database assignments for contexts.
-         */
-        com.openexchange.database.DatabaseInit.getInstance(),
-        /**
-         * Starts AJP server
-         */
-        com.openexchange.groupware.BackendServicesInit.getInstance(),
-        /**
-         * Starts HTTP serlvet manager
-         */
-        com.openexchange.tools.servlet.http.HttpServletManagerInit.getInstance(),
-        /**
-         * Setup of ContextStorage and LoginInfo.
-         */
-        com.openexchange.groupware.contexts.ContextInit.getInstance(),
-        /**
-         * Folder initialization
-         */
-        com.openexchange.tools.oxfolder.OXFolderProperties.getInstance(),
-        /**
-         * Mail initialization
-         */
-        com.openexchange.mail.MailInitialization.getInstance(),
-        /**
-         * Infostore Configuration
-         */
-        com.openexchange.groupware.infostore.InfostoreConfig.getInstance(),
-        /**
-         * Contact Configuration
-         */
-        com.openexchange.groupware.contact.ContactConfig.getInstance(),
-        /**
-         * Attachment Configuration
-         */
-        com.openexchange.groupware.attach.AttachmentConfig.getInstance(),
-        /**
-         * User configuration init
-         */
-        com.openexchange.groupware.userconfiguration.UserConfigurationStorageInit.getInstance(),
-        /**
-         * Setup of SetupLink for Config Jump.
-         */
-        com.openexchange.groupware.integration.SetupLinkInit.getInstance(),
-        /**
-         * Notification Configuration
-         */
-        com.openexchange.groupware.notify.NotificationConfig.getInstance(),
-        /**
-         * Sets up the configuration tree.
-         */
-        com.openexchange.groupware.settings.ConfigTreeInit.getInstance(),
-        /**
-         * Starting SessionD
-         */
-        com.openexchange.sessiond.SessiondInit.getInstance(),
-        /**
-         * Responsible for starting and stopping the EventQueue
-         */
-        new com.openexchange.event.EventInit(),
-        /**
-         * Initializes the push component.
-         */
-        com.openexchange.push.PushInit.getInstance()
-    };
+	/**
+	 * This contains the components to be started if a normal groupware startup
+	 * is done.
+	 */
+	private final Initialization[] inits = new Initialization[] {
+	/**
+	 * Reads system.properties.
+	 */
+	com.openexchange.configuration.SystemConfig.getInstance(),
+	/**
+	 * Reads configdb.properties.
+	 */
+	com.openexchange.configuration.ConfigDB.getInstance(),
+	/**
+	 * Read in update tasks
+	 */
+	com.openexchange.groupware.update.UpdateTaskCollectionInit.getInstance(),
+	/**
+	 * Reads the calendar.properties.
+	 */
+	com.openexchange.groupware.calendar.CalendarConfig.getInstance(),
+	/**
+	 * Reads the participant.properties.
+	 */
+	com.openexchange.groupware.configuration.ParticipantConfig.getInstance(),
+	/**
+	 * Sets the caching system JCS up.
+	 */
+	com.openexchange.cache.Configuration.getInstance(),
+	/**
+	 * Starts the monitoring component.
+	 */
+	com.openexchange.monitoring.MonitoringInit.getInstance(),
+	/**
+	 * Connection pools for ConfigDB and database assignments for contexts.
+	 */
+	com.openexchange.database.DatabaseInit.getInstance(),
+	/**
+	 * Starts AJP server
+	 */
+	com.openexchange.groupware.BackendServicesInit.getInstance(),
+	/**
+	 * Starts HTTP serlvet manager
+	 */
+	com.openexchange.tools.servlet.http.HttpServletManagerInit.getInstance(),
+	/**
+	 * Setup of ContextStorage and LoginInfo.
+	 */
+	com.openexchange.groupware.contexts.ContextInit.getInstance(),
+	/**
+	 * Folder initialization
+	 */
+	com.openexchange.tools.oxfolder.OXFolderProperties.getInstance(),
+	/**
+	 * Mail initialization
+	 */
+	com.openexchange.mail.MailInitialization.getInstance(),
+	/**
+	 * Infostore Configuration
+	 */
+	com.openexchange.groupware.infostore.InfostoreConfig.getInstance(),
+	/**
+	 * Contact Configuration
+	 */
+	com.openexchange.groupware.contact.ContactConfig.getInstance(),
+	/**
+	 * Attachment Configuration
+	 */
+	com.openexchange.groupware.attach.AttachmentConfig.getInstance(),
+	/**
+	 * User configuration init
+	 */
+	com.openexchange.groupware.userconfiguration.UserConfigurationStorageInit.getInstance(),
+	/**
+	 * Setup of SetupLink for Config Jump.
+	 */
+	com.openexchange.groupware.integration.SetupLinkInit.getInstance(),
+	/**
+	 * Notification Configuration
+	 */
+	com.openexchange.groupware.notify.NotificationConfig.getInstance(),
+	/**
+	 * Sets up the configuration tree.
+	 */
+	com.openexchange.groupware.settings.ConfigTreeInit.getInstance(),
+	/**
+	 * Starting SessionD
+	 */
+	com.openexchange.sessiond.SessiondInit.getInstance(),
+	/**
+	 * Responsible for starting and stopping the EventQueue
+	 */
+	new com.openexchange.event.EventInit(),
+	/**
+	 * Initializes the push component.
+	 */
+	com.openexchange.push.PushInit.getInstance() };
 
-    /**
-     * This contains the components that must be started if the admin uses APIs
-     * of the server.
-     */
-    private final Initialization[] adminInits = new Initialization[] {
-        /**
-         * Reads system.properties.
-         */
-        com.openexchange.configuration.SystemConfig.getInstance(),
-        /**
-         * Reads configdb.properties.
-         */
-        com.openexchange.configuration.ConfigDB.getInstance(),
-        /**
-         * Sets the caching system JCS up.
-         */
-        com.openexchange.cache.Configuration.getInstance(),
-        /**
-         * Connection pools for ConfigDB and database assignments for contexts.
-         */
-        com.openexchange.database.DatabaseInit.getInstance(),
-        /**
-         * Setup of ContextStorage and LoginInfo.
-         */
-        com.openexchange.groupware.contexts.ContextInit.getInstance(),
-        /**
-         * Notification Configuration
-         */
-        com.openexchange.groupware.notify.NotificationConfig.getInstance()
-    };
+	/**
+	 * This contains the components that must be started if the admin uses APIs
+	 * of the server.
+	 */
+	private final Initialization[] adminInits = new Initialization[] {
+	/**
+	 * Reads system.properties.
+	 */
+	com.openexchange.configuration.SystemConfig.getInstance(),
+	/**
+	 * Reads configdb.properties.
+	 */
+	com.openexchange.configuration.ConfigDB.getInstance(),
+	/**
+	 * Sets the caching system JCS up.
+	 */
+	com.openexchange.cache.Configuration.getInstance(),
+	/**
+	 * Connection pools for ConfigDB and database assignments for contexts.
+	 */
+	com.openexchange.database.DatabaseInit.getInstance(),
+	/**
+	 * Setup of ContextStorage and LoginInfo.
+	 */
+	com.openexchange.groupware.contexts.ContextInit.getInstance(),
+	/**
+	 * Notification Configuration
+	 */
+	com.openexchange.groupware.notify.NotificationConfig.getInstance() };
 
 	private static final Log LOG = LogFactory.getLog(Starter.class);
 
-    private final Stack<Initialization> started = new Stack<Initialization>();
+	private final Stack<Initialization> started = new Stack<Initialization>();
 
 	/**
 	 * Default constructor.
 	 */
 	public Starter() {
-	    super();
+		super();
 	}
 
-    /**
-     * {@inheritDoc}
-     */
-    public void start() {
+	/**
+	 * {@inheritDoc}
+	 */
+	public void start() {
 
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Open-Xchange 6.0");
-            LOG.info("(c) Open-Xchange Inc. , Open-Xchange GmbH");
-        }
+		dumbServerInfos();
 
-        try {
-            final Properties p = System.getProperties();
-            if (LOG.isInfoEnabled()) {
-                LOG.info(p.getProperty("os.name") + ' ' + p.getProperty("os.arch") + ' ' + p.getProperty("os.version"));
-            }
-            if (LOG.isInfoEnabled()) {
-                LOG.info(p.getProperty("java.runtime.version"));
-            }
-            final long totalMemory = Runtime.getRuntime().totalMemory() / 1024;
-            if (LOG.isInfoEnabled()) {
-                LOG.info("VM Total Memory       : " + DecimalFormat.getNumberInstance().format(totalMemory) + " KB");
-            }
-            final long freeMemory = Runtime.getRuntime().freeMemory() / 1024;
-            if (LOG.isInfoEnabled()) {
-                LOG.info("VM Free Memory        : " + DecimalFormat.getNumberInstance().format(freeMemory) + " KB");
-            }
-            final long usedMemory = totalMemory - freeMemory;
-            if (LOG.isInfoEnabled()) {
-                LOG.info("VM Used Memory        : " + DecimalFormat.getNumberInstance().format(usedMemory) + " KB");
-            }
-        } catch (final Exception gee) {
-            LOG.error(gee.getMessage(), gee);
-        }
+		try {
+			for (Initialization init : inits) {
+				init.start();
+				started.push(init);
+			}
+		} catch (final AbstractOXException e) {
+			LOG.error("Initializing the configuration failed.", e);
+			stop();
+			System.exit(1);
+		}
 
-        if (LOG.isInfoEnabled()) {
-            LOG.info("System version : Open-Xchange Server [" + Version.BUILDNUMBER + "] initializing ...");
-            LOG.info("Server Footprint : " + AbstractOXException.SERVER_ID);
-        }
+		// New server startup.
+		try {
+			GroupwareInit.init();
+		} catch (final AbstractOXException e) {
+			LOG.error("Initializing the groupware server failed.", e);
+			System.exit(1);
+		}
+		if (LOG.isInfoEnabled()) {
+			LOG.info("Groupware server successfully initialized.");
+		}
 
-        try {
-            for (Initialization init : inits) {
-                init.start();
-                started.push(init);
-            }
-        } catch (final AbstractOXException e) {
-            LOG.error("Initializing the configuration failed.", e);
-            stop();
-            System.exit(1);
-        }
+		/*
+		 * TODO: Check property ENABLE_INTERNAL_USER_EDIT
+		 * OXFolderSQL.updateCtxAddrBookPermission(FolderCacheProperties.isEnableInternalUsersEdit())
+		 */
 
-        // New server startup.
-        try {
-            GroupwareInit.init();
-        } catch (final AbstractOXException e) {
-            LOG.error("Initializing the groupware server failed.", e);
-            System.exit(1);
-        }
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Groupware server successfully initialized.");
-        }
-        
-        /*
-         * TODO: Check property ENABLE_INTERNAL_USER_EDIT
-         * OXFolderSQL.updateCtxAddrBookPermission(FolderCacheProperties.isEnableInternalUsersEdit())
-         */
+		if (LOG.isInfoEnabled()) {
+			LOG.info("SYSTEM IS UP & RUNNING...");
+		}
+	}
 
-        if (LOG.isInfoEnabled()) {
-            LOG.info("SYSTEM IS UP & RUNNING...");
-        }
-    }
+	/**
+	 * Start in admin mode
+	 */
+	public void adminStart() {
 
-    /**
-     * {@inheritDoc}
-     */
-    public void stop() {
-        while (!started.isEmpty()) {
-            try {
-                started.pop().stop();
-            } catch (AbstractOXException e) {
-                LOG.error("Component shutdown failed.", e);
-            }
-        }
-    }
+		dumbServerInfos();
+
+		try {
+			for (Initialization init : adminInits) {
+				init.start();
+				started.push(init);
+			}
+		} catch (final AbstractOXException e) {
+			LOG.error("Initializing the configuration failed.", e);
+			stop();
+			System.exit(1);
+		}
+
+		if (LOG.isInfoEnabled()) {
+			LOG.info("SYSTEM IS UP & RUNNING IN ADMIN MODE...");
+		}
+	}
+
+	/**
+	 * Dumb server informations
+	 */
+	private static final void dumbServerInfos() {
+		if (LOG.isInfoEnabled()) {
+			LOG.info("Open-Xchange 6.0");
+			LOG.info("(c) Open-Xchange Inc. , Open-Xchange GmbH");
+		}
+
+		try {
+			final Properties p = System.getProperties();
+			if (LOG.isInfoEnabled()) {
+				LOG.info(p.getProperty("os.name") + ' ' + p.getProperty("os.arch") + ' ' + p.getProperty("os.version"));
+			}
+			if (LOG.isInfoEnabled()) {
+				LOG.info(p.getProperty("java.runtime.version"));
+			}
+			final long totalMemory = Runtime.getRuntime().totalMemory() / 1024;
+			if (LOG.isInfoEnabled()) {
+				LOG.info("VM Total Memory       : " + DecimalFormat.getNumberInstance().format(totalMemory) + " KB");
+			}
+			final long freeMemory = Runtime.getRuntime().freeMemory() / 1024;
+			if (LOG.isInfoEnabled()) {
+				LOG.info("VM Free Memory        : " + DecimalFormat.getNumberInstance().format(freeMemory) + " KB");
+			}
+			final long usedMemory = totalMemory - freeMemory;
+			if (LOG.isInfoEnabled()) {
+				LOG.info("VM Used Memory        : " + DecimalFormat.getNumberInstance().format(usedMemory) + " KB");
+			}
+		} catch (final Exception gee) {
+			LOG.error(gee.getMessage(), gee);
+		}
+
+		if (LOG.isInfoEnabled()) {
+			LOG.info("System version : Open-Xchange Server [" + Version.BUILDNUMBER + "] initializing ...");
+			LOG.info("Server Footprint : " + AbstractOXException.SERVER_ID);
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void stop() {
+		while (!started.isEmpty()) {
+			try {
+				started.pop().stop();
+			} catch (AbstractOXException e) {
+				LOG.error("Component shutdown failed.", e);
+			}
+		}
+	}
+
 }

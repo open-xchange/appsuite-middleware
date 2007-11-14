@@ -53,8 +53,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.SocketException;
 import java.util.Arrays;
-import java.util.Iterator;
-import java.util.regex.Pattern;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -426,7 +424,9 @@ public final class AJPv13RequestHandler {
 	private void releaseServlet() {
 		if (servletId != null) {
 			HttpServletManager.putServlet(servletId, servletInstance);
-			MonitoringInfo.decrementNumberOfConnections(connectionType);
+			if (MonitoringInfo.UNKNOWN != connectionType) {
+				MonitoringInfo.decrementNumberOfConnections(connectionType);
+			}
 		}
 		servletId = null;
 		servletInstance = null;
@@ -499,47 +499,35 @@ public final class AJPv13RequestHandler {
 		return sb.toString();
 	}
 
-	public void setServletInstance(final String pathInfoArg) {
-		String pathInfo = pathInfoArg;
-		if (pathInfo.charAt(0) == '/') {
-			/*
-			 * Path must not start with a slash character
-			 */
-			pathInfo = pathInfo.substring(1, pathInfo.length());
+	public void setServletInstance(final String pathArg) {
+		/*
+		 * Remove leading slash character
+		 */
+		final String path = preparePath(pathArg);
+		connectionType = MonitoringInfo.getConnectionType(path);
+		/*
+		 * Lookup path in available servlet paths
+		 */
+		final StringBuilder pathStorage = new StringBuilder(16);
+		HttpServlet servletInst = HttpServletManager.getServlet(path, pathStorage);
+		if (servletInst == null) {
+			servletInst = new HttpErrorServlet("No servlet bound to path/alias: " + path);
 		}
-		connectionType = MonitoringInfo.getConnectionType(pathInfo);
-		String servletKey = null;
-
-		final Iterator<String> iter = HttpServletManager.getServletKeysIterator();
-		final int size = HttpServletManager.getNumberOfServletKeys();
-		boolean found = false;
-		for (int i = 0; i < size && !found; i++) {
-			String currentKey = iter.next();
-			if (currentKey.charAt(0) == '/') {
-				/*
-				 * Key must not start with a slash character
-				 */
-				currentKey = currentKey.substring(1, currentKey.length());
-			}
-			if (Pattern.compile(currentKey.replaceFirst("\\*", ".*"), Pattern.CASE_INSENSITIVE).matcher(pathInfo)
-					.matches()) {
-				servletPath = currentKey.replaceFirst("\\*", "");
-				servletKey = currentKey;
-				found = true;
-			}
+		servletInstance = servletInst;
+		servletId = pathStorage.length() > 0 ? pathStorage.toString() : null;
+		if (null != servletId) {
+			servletPath = servletId.replaceFirst("\\*", ""); // path;
 		}
-		if (servletKey == null) {
-			this.servletInstance = new HttpErrorServlet("Cannot find class mapping for " + pathInfo);
-		} else {
-			HttpServlet servletInst = HttpServletManager.getServlet(servletKey);
-			if (servletInst == null) {
-				servletInst = new HttpErrorServlet("No Servlet Constructor found for " + servletKey);
-			}
-			servletInstance = servletInst;
-			servletId = servletKey;
+		if (MonitoringInfo.UNKNOWN != connectionType) {
 			MonitoringInfo.incrementNumberOfConnections(connectionType);
 		}
 		supplyRequestWrapperWithServlet();
+	}
+
+	private static String preparePath(final String path) {
+		final int start = path.charAt(0) == '/' ? 1 : 0;
+		final int end = path.charAt(path.length() - 1) == '/' ? path.length() - 1 : path.length();
+		return path.substring(start, end);
 	}
 
 	public HttpServlet getServletInstance() {

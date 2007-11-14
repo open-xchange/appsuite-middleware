@@ -53,6 +53,7 @@ import java.nio.charset.spi.CharsetProvider;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -79,11 +80,27 @@ public class Activator implements BundleActivator {
 	private final List<ServiceRegistration> registrationList = new ArrayList<ServiceRegistration>();
 
 	/**
+	 * Bundle ID of admin.<br>
+	 * TODO: Maybe this should be read by config.ini
+	 */
+	private static final String BUNDLE_ID_ADMIN = "open_xchange_admin";
+
+	/**
 	 * {@inheritDoc}
 	 */
 	public void start(final BundleContext context) throws Exception {
 		try {
-			starter.start();
+			if (isAdminBundleInstalled(context)) {
+				/*
+				 * Start up server to only fit admin needs
+				 */
+				starter.adminStart();
+			} else {
+				/*
+				 * Start up server the usual way
+				 */
+				starter.start();
+			}
 			/*
 			 * Register server's services
 			 */
@@ -110,5 +127,27 @@ public class Activator implements BundleActivator {
 				registration.unregister();
 			}
 		}
+	}
+
+	/**
+	 * Determines if admin bundle is installed by iterating bundle context's
+	 * bundles whose status is set to {@link Bundle#INSTALLED} or
+	 * {@link Bundle#ACTIVE} and whose symbolic name equals
+	 * {@value #BUNDLE_ID_ADMIN}.
+	 * 
+	 * @param context
+	 *            The bundle context
+	 * @return <code>true</code> if admin bundle is installed; otherwise
+	 *         <code>false</code>
+	 */
+	private static final boolean isAdminBundleInstalled(final BundleContext context) {
+		final Bundle[] bundles = context.getBundles();
+		for (int i = 0; i < bundles.length; i++) {
+			if ((bundles[i].getState() == Bundle.INSTALLED || bundles[i].getState() == Bundle.ACTIVE)
+					&& BUNDLE_ID_ADMIN.equals(bundles[i].getSymbolicName())) {
+				return true;
+			}
+		}
+		return false;
 	}
 }
