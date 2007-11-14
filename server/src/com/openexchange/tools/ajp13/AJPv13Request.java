@@ -52,6 +52,7 @@ package com.openexchange.tools.ajp13;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
 /**
@@ -79,8 +80,34 @@ public abstract class AJPv13Request {
 		payloadDataIndex = 0;
 	}
 
+	/**
+	 * Process the AJP request
+	 * 
+	 * @param ajpRequestHandler
+	 *            The AJP request handler providing session data
+	 * @throws AJPv13Exception
+	 *             If an AJP error occurs
+	 * @throws IOException
+	 *             If an I/O error occurs
+	 */
 	public abstract void processRequest(AJPv13RequestHandler ajpRequestHandler) throws AJPv13Exception, IOException;
 
+	/**
+	 * Writes AJP response package
+	 * 
+	 * @param out
+	 *            The output stream to which data is written
+	 * @param ajpRequestHandler
+	 *            The AJP request handler providing session data
+	 * @throws AJPv13Exception
+	 *             If an AJP error occurs
+	 * @throws ServletException
+	 *             If an I/O error occurs
+	 * @throws IOException
+	 *             If invocation of
+	 *             {@link Servlet#service(javax.servlet.ServletRequest, javax.servlet.ServletResponse)}
+	 *             fails
+	 */
 	public void response(final OutputStream out, final AJPv13RequestHandler ajpRequestHandler) throws AJPv13Exception,
 			ServletException, IOException {
 		if (!ajpRequestHandler.isServiceMethodCalled()
@@ -143,8 +170,8 @@ public abstract class AJPv13Request {
 	/**
 	 * Writes array of <code>byte</code> into <code>out</code>
 	 */
-	protected final void writeResponse(final byte[] responseBytes, final OutputStream out, final boolean flushStream)
-			throws IOException {
+	protected static final void writeResponse(final byte[] responseBytes, final OutputStream out,
+			final boolean flushStream) throws IOException {
 		out.write(responseBytes);
 		if (flushStream) {
 			out.flush();
@@ -154,8 +181,8 @@ public abstract class AJPv13Request {
 	/**
 	 * Writes <code>response</code> instance into <code>out</code>
 	 */
-	protected final void writeResponse(final AJPv13Response response, final OutputStream out, final boolean flushStream)
-			throws IOException, AJPv13Exception {
+	protected static final void writeResponse(final AJPv13Response response, final OutputStream out,
+			final boolean flushStream) throws IOException, AJPv13Exception {
 		writeResponse(response.getResponseBytes(), out, flushStream);
 	}
 
@@ -172,10 +199,10 @@ public abstract class AJPv13Request {
 
 	protected final byte nextByte() {
 		return payloadData[payloadDataIndex++];
-//		if (payloadDataIndex < payloadData.length) {
-//			return payloadData[payloadDataIndex++];
-//		}
-//		return -1;
+		// if (payloadDataIndex < payloadData.length) {
+		// return payloadData[payloadDataIndex++];
+		// }
+		// return -1;
 	}
 
 	protected final boolean compareNextByte(final int compareTo) {
