@@ -227,7 +227,7 @@ public final class MailConnectionCache {
 	}
 
 	/**
-	 * Puts given mail conenction into cache if none user-bound connectiopn is
+	 * Puts given mail connection into cache if none user-bound connection is
 	 * already contained in cache
 	 * 
 	 * @param session
