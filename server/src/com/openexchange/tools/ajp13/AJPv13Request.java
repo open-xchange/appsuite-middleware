@@ -56,6 +56,7 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
 /**
+ * {@link AJPv13Request} - Abstract super class for AJP requests
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
