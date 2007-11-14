@@ -101,7 +101,7 @@ public final class MailInterfaceImpl extends MailInterface {
 	/*
 	 * Fields
 	 */
-	private MailConnection mailConnection;
+	private MailConnection<?, ?, ?> mailConnection;
 
 	private SessionObject session;
 
@@ -213,18 +213,18 @@ public final class MailInterfaceImpl extends MailInterface {
 	}
 
 	@Override
-	public SearchIterator getAllMessages(final String folder, final int sortCol, final int order, final int[] fields)
+	public SearchIterator<?> getAllMessages(final String folder, final int sortCol, final int order, final int[] fields)
 			throws MailException {
 		return getMessages(folder, null, sortCol, order, null, null, false, fields);
 	}
 
 	@Override
-	public SearchIterator getAllThreadedMessages(final String folder, final int[] fields) throws MailException {
+	public SearchIterator<?> getAllThreadedMessages(final String folder, final int[] fields) throws MailException {
 		return getThreadedMessages(folder, null, null, null, false, fields);
 	}
 
 	@Override
-	public SearchIterator getChildFolders(final String parentFolder, final boolean all) throws MailException {
+	public SearchIterator<?> getChildFolders(final String parentFolder, final boolean all) throws MailException {
 		initConnection();
 		return SearchIteratorAdapter.createArrayIterator(mailConnection.getFolderStorage().getSubfolders(parentFolder,
 				all));
@@ -332,7 +332,7 @@ public final class MailInterfaceImpl extends MailInterface {
 	}
 
 	@Override
-	public SearchIterator getMessages(final String folder, final int[] fromToIndices, final int sortCol,
+	public SearchIterator<?> getMessages(final String folder, final int[] fromToIndices, final int sortCol,
 			final int order, final int[] searchCols, final String[] searchPatterns,
 			final boolean linkSearchTermsWithOR, final int[] fields) throws MailException {
 		initConnection();
@@ -349,7 +349,7 @@ public final class MailInterfaceImpl extends MailInterface {
 	}
 
 	@Override
-	public SearchIterator getNewMessages(final String folder, final int sortCol, final int order, final int[] fields,
+	public SearchIterator<?> getNewMessages(final String folder, final int sortCol, final int order, final int[] fields,
 			final int limit) throws MailException {
 		initConnection();
 		return SearchIteratorAdapter.createArrayIterator(mailConnection.getMessageStorage().getUnreadMessages(folder,
@@ -358,7 +358,7 @@ public final class MailInterfaceImpl extends MailInterface {
 	}
 
 	@Override
-	public SearchIterator getPathToDefaultFolder(final String folder) throws MailException {
+	public SearchIterator<?> getPathToDefaultFolder(final String folder) throws MailException {
 		initConnection();
 		return SearchIteratorAdapter.createArrayIterator(mailConnection.getFolderStorage()
 				.getPath2DefaultFolder(folder));
@@ -390,7 +390,7 @@ public final class MailInterfaceImpl extends MailInterface {
 	}
 
 	@Override
-	public SearchIterator getRootFolders() throws MailException {
+	public SearchIterator<?> getRootFolders() throws MailException {
 		initConnection();
 		return SearchIteratorAdapter.createArrayIterator(new MailFolder[] { mailConnection.getFolderStorage()
 				.getRootFolder() });
@@ -415,7 +415,7 @@ public final class MailInterfaceImpl extends MailInterface {
 	}
 
 	@Override
-	public SearchIterator getThreadedMessages(final String folder, final int[] fromToIndices, final int[] searchCols,
+	public SearchIterator<?> getThreadedMessages(final String folder, final int[] fromToIndices, final int[] searchCols,
 			final String[] searchPatterns, final boolean linkSearchTermsWithOR, final int[] fields)
 			throws MailException {
 		initConnection();

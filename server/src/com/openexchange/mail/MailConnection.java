@@ -84,9 +84,9 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 
 	private static final Condition LOCK_CON_CONDITION = LOCK_CON.newCondition();
 
-	private static Class<? extends MailConnection> clazz;
+	private static Class<? extends MailConnection<?, ?, ?>> clazz;
 
-	private static MailConnection internalInstance;
+	private static MailConnection<?, ?, ?> internalInstance;
 
 	protected final SessionObject session;
 
@@ -119,7 +119,7 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 		password = null;
 	}
 
-	static void initializeMailConnection(final Class<? extends MailConnection> clazz) throws MailException {
+	static void initializeMailConnection(final Class<? extends MailConnection<?, ?, ?>> clazz) throws MailException {
 		MailConnection.clazz = clazz;
 		/*
 		 * Create internal instance
@@ -165,7 +165,7 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 		internalInstance.shutdownInternal();
 	}
 
-	private static final Class[] CONSTRUCTOR_ARGS = new Class[] { SessionObject.class };
+	private static final Class<?>[] CONSTRUCTOR_ARGS = new Class[] { SessionObject.class };
 
 	/**
 	 * Gets the proper instance of {@link MailConnection} parameterized with
@@ -177,10 +177,10 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 	 * @throws MailException
 	 *             If instantiation fails or a caching error occurs
 	 */
-	public static final MailConnection getInstance(final SessionObject session) throws MailException {
+	public static final MailConnection<?, ?, ?> getInstance(final SessionObject session) throws MailException {
 		try {
 			if (MailConnectionCache.getInstance().containsMailConnection(session)) {
-				final MailConnection mailConnection = MailConnectionCache.getInstance().removeMailConnection(session);
+				final MailConnection<?, ?, ?> mailConnection = MailConnectionCache.getInstance().removeMailConnection(session);
 				if (mailConnection != null) {
 					/*
 					 * Apply new thread's trace information
@@ -215,7 +215,7 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 				 * Try to fetch from cache again
 				 */
 				if (MailConnectionCache.getInstance().containsMailConnection(session)) {
-					final MailConnection mailConnection = MailConnectionCache.getInstance().removeMailConnection(
+					final MailConnection<?, ?, ?> mailConnection = MailConnectionCache.getInstance().removeMailConnection(
 							session);
 					if (mailConnection != null) {
 						/*
@@ -242,7 +242,7 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 		 * Create a new mail connection
 		 */
 		try {
-			final MailConnection mailConnection = clazz.getConstructor(CONSTRUCTOR_ARGS).newInstance(
+			final MailConnection<?, ?, ?> mailConnection = clazz.getConstructor(CONSTRUCTOR_ARGS).newInstance(
 					new Object[] { session });
 			mailConnection.initMailConfig(session);
 			return mailConnection;

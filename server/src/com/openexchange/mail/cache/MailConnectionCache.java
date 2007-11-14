@@ -64,7 +64,6 @@ import org.apache.jcs.engine.control.event.behavior.IElementEventHandler;
 
 import com.openexchange.cache.CacheKey;
 import com.openexchange.cache.OXCachingException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.mail.MailConnection;
 import com.openexchange.mail.cache.eventhandler.MailConnectionEventHandler;
@@ -182,7 +181,7 @@ public final class MailConnectionCache {
 	 * @throws OXCachingException
 	 *             If removing from cache fails
 	 */
-	public MailConnection removeMailConnection(final SessionObject session) throws OXCachingException {
+	public MailConnection<?, ?, ?> removeMailConnection(final SessionObject session) throws OXCachingException {
 		final CacheKey key = getUserKey(session.getUserObject().getId(), session.getContext());
 		final Lock readLock = getLock(key).readLock();
 		readLock.lock();
@@ -200,7 +199,7 @@ public final class MailConnectionCache {
 			final Lock writeLock = getLock(key).writeLock();
 			writeLock.lock();
 			try {
-				final MailConnection mailConnection = (MailConnection) cache.get(key);
+				final MailConnection<?, ?, ?> mailConnection = (MailConnection<?, ?, ?>) cache.get(key);
 				/*
 				 * Still available?
 				 */
@@ -240,7 +239,7 @@ public final class MailConnectionCache {
 	 * @throws OXCachingException
 	 *             If put into cache fails
 	 */
-	public boolean putMailConnection(final SessionObject session, final MailConnection mailConnection)
+	public boolean putMailConnection(final SessionObject session, final MailConnection<?, ?, ?> mailConnection)
 			throws OXCachingException {
 		final CacheKey key = getUserKey(session.getUserObject().getId(), session.getContext());
 		final Lock readLock = getLock(key).readLock();

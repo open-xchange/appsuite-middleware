@@ -93,6 +93,7 @@ public final class MailConnectionInit implements Initialization {
 	 * @throws MailException
 	 *             If implementing class cannot be found
 	 */
+	@SuppressWarnings("unchecked")
 	private void initMailConnectionClass() throws MailException {
 		if (!initialized.get()) {
 			initLock.lock();
@@ -107,14 +108,15 @@ public final class MailConnectionInit implements Initialization {
 							if (LOG.isWarnEnabled()) {
 								LOG.warn("Using fallback \"com.openexchange.imap.IMAPConnection\"");
 							}
-							final Class<? extends MailConnection> clazz = Class.forName(
-									"com.openexchange.imap.IMAPConnection").asSubclass(MailConnection.class);
+
+							final Class<? extends MailConnection<?, ?, ?>> clazz = (Class<? extends MailConnection<?, ?, ?>>) Class
+									.forName("com.openexchange.imap.IMAPConnection").asSubclass(MailConnection.class);
 							MailConnection.initializeMailConnection(clazz);
 							initialized.set(true);
 							return;
 						}
-						final Class<? extends MailConnection> clazz = Class.forName(className).asSubclass(
-								MailConnection.class);
+						final Class<? extends MailConnection<?, ?, ?>> clazz = (Class<? extends MailConnection<?, ?, ?>>) Class
+								.forName(className).asSubclass(MailConnection.class);
 						MailConnection.initializeMailConnection(clazz);
 					} catch (final ClassNotFoundException e) {
 						throw new MailException(MailException.Code.INITIALIZATION_PROBLEM, e, new Object[0]);
