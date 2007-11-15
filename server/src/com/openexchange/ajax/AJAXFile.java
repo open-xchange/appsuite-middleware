@@ -86,6 +86,7 @@ import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.upload.AJAXUploadFile;
+import com.openexchange.groupware.upload.ManagedUploadFile;
 import com.openexchange.groupware.upload.UploadException;
 import com.openexchange.groupware.upload.UploadQuotaChecker;
 import com.openexchange.groupware.upload.UploadException.UploadCode;
@@ -214,7 +215,7 @@ public final class AJAXFile extends PermissionServlet {
 			 * Fetch file from session
 			 */
 			final SessionObject session = getSessionObject(req);
-			final AJAXUploadFile uploadFile = session.getAJAXUploadFile(id);
+			final ManagedUploadFile uploadFile = session.getAJAXUploadFile(id);
 			if (uploadFile == null) {
 				throw new UploadException(UploadException.UploadCode.FILE_NOT_FOUND, ACTION_GET, id);
 			}

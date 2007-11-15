@@ -62,7 +62,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.Credentials;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.upload.AJAXUploadFile;
+import com.openexchange.groupware.upload.ManagedUploadFile;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
@@ -118,7 +118,7 @@ public class SessionObject {
 	
 	private final transient SessionMailCache mailCache;
 
-	private final transient Map<String, AJAXUploadFile> ajaxUploadFiles;
+	private final transient Map<String, ManagedUploadFile> ajaxUploadFiles;
 
 	private boolean mailFldsChecked;
 
@@ -129,7 +129,7 @@ public class SessionObject {
 	public SessionObject(final String sessionid) {
 		this.sessionid = sessionid;
 		mailCache = new SessionMailCache();
-		ajaxUploadFiles = new ConcurrentHashMap<String, AJAXUploadFile>();
+		ajaxUploadFiles = new ConcurrentHashMap<String, ManagedUploadFile>();
 		mailFldsLock = new ReentrantLock();
 		defaultMailFolders = new String[6];
 	}
@@ -147,8 +147,8 @@ public class SessionObject {
 	 * @return The uploaded file associated with given ID or <code>null</code>
 	 *         if none found
 	 */
-	public final AJAXUploadFile getAJAXUploadFile(final String id) {
-		final AJAXUploadFile uploadFile = ajaxUploadFiles.get(id);
+	public final ManagedUploadFile getAJAXUploadFile(final String id) {
+		final ManagedUploadFile uploadFile = ajaxUploadFiles.get(id);
 		if (null != uploadFile) {
 			uploadFile.touch();
 		}
@@ -165,7 +165,7 @@ public class SessionObject {
 	 *         successfully touched; otherwise <code>false</code>
 	 */
 	public final boolean touchAJAXUploadFile(final String id) {
-		final AJAXUploadFile uploadFile = ajaxUploadFiles.get(id);
+		final ManagedUploadFile uploadFile = ajaxUploadFiles.get(id);
 		if (null != uploadFile) {
 			uploadFile.touch();
 			return true;
@@ -181,7 +181,7 @@ public class SessionObject {
 	 * @param uploadFile
 	 *            The upload file (must not be <code>null</code>)
 	 */
-	public final void putAJAXUploadFile(final String id, final AJAXUploadFile uploadFile) {
+	public final void putAJAXUploadFile(final String id, final ManagedUploadFile uploadFile) {
 		ajaxUploadFiles.put(id, uploadFile);
 		uploadFile.startTimerTask(id, ajaxUploadFiles);
 		if (LOG.isInfoEnabled()) {
@@ -197,8 +197,8 @@ public class SessionObject {
 	 *            The ID
 	 * @return The removed uploaded file or <code>null</code> if none removed
 	 */
-	public final AJAXUploadFile removeAJAXUploadFile(final String id) {
-		final AJAXUploadFile uploadFile = ajaxUploadFiles.remove(id);
+	public final ManagedUploadFile removeAJAXUploadFile(final String id) {
+		final ManagedUploadFile uploadFile = ajaxUploadFiles.remove(id);
 		if (null != uploadFile) {
 			/*
 			 * Cancel timer task

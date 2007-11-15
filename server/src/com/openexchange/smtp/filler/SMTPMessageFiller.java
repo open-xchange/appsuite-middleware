@@ -86,7 +86,7 @@ import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.upload.AJAXUploadFile;
+import com.openexchange.groupware.upload.ManagedUploadFile;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -190,7 +190,7 @@ public final class SMTPMessageFiller {
 				sb = null;
 			}
 			for (int i = 0; i < size; i++) {
-				final AJAXUploadFile uploadFile = session.removeAJAXUploadFile(iter.next());
+				final ManagedUploadFile uploadFile = session.removeAJAXUploadFile(iter.next());
 				final String fileName = uploadFile.getFile().getName();
 				uploadFile.delete();
 				if (null != sb) {
@@ -848,7 +848,7 @@ public final class SMTPMessageFiller {
 			final StringBuilder tmp = new StringBuilder(128);
 			NextImg: do {
 				final String id = m.group(5);
-				final AJAXUploadFile uploadFile = msgFiller.session.getAJAXUploadFile(id);
+				final ManagedUploadFile uploadFile = msgFiller.session.getAJAXUploadFile(id);
 				if (uploadFile == null) {
 					if (LOG.isWarnEnabled()) {
 						tmp.setLength(0);
@@ -895,7 +895,7 @@ public final class SMTPMessageFiller {
 	 * @throws MessagingException
 	 *             If appending as body part fails
 	 */
-	private static String processLocalImage(final AJAXUploadFile uploadFile, final String id,
+	private static String processLocalImage(final ManagedUploadFile uploadFile, final String id,
 			final boolean appendBodyPart, final StringBuilder tmp, final Multipart mp) throws MessagingException {
 		/*
 		 * Determine filename

@@ -57,9 +57,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.server.ServerTimer;
@@ -70,13 +67,13 @@ import com.openexchange.server.ServerTimer;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class AJAXUploadFile {
+public final class AJAXUploadFile implements ManagedUploadFile {
 
 	private final class AJAXUploadFileTimerTask extends TimerTask {
 
 		private final AJAXUploadFile file;
 
-		private final Map<String, AJAXUploadFile> ajaxUploadFiles;
+		private final Map<String, ? extends ManagedUploadFile> ajaxUploadFiles;
 
 		private final String id;
 
@@ -84,7 +81,7 @@ public final class AJAXUploadFile {
 		 * Constructor
 		 */
 		public AJAXUploadFileTimerTask(final AJAXUploadFile file, final String id,
-				final Map<String, AJAXUploadFile> ajaxUploadFiles) {
+				final Map<String, ? extends ManagedUploadFile> ajaxUploadFiles) {
 			this.file = file;
 			this.ajaxUploadFiles = ajaxUploadFiles;
 			this.id = id;
@@ -223,7 +220,7 @@ public final class AJAXUploadFile {
 	 * @param ajaxUploadFiles
 	 *            Session's map where the upload file is kept
 	 */
-	public void startTimerTask(final String id, final Map<String, AJAXUploadFile> ajaxUploadFiles) {
+	public void startTimerTask(final String id, final Map<String, ? extends ManagedUploadFile> ajaxUploadFiles) {
 		if (!timerTaskStarted.get()) {
 			timerTaskLock.lock();
 			try {
