@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange Global
+Bundle-SymbolicName: com.openexchange.global
+Bundle-Version: 6.5.0.0
+Bundle-Vendor: Open-Xchange Inc.
+Export-Package: com.openexchange.cache.dynamic,
+ com.openexchange.groupware.contexts,
+ com.openexchange.groupware.ldap,
+ com.openexchange.groupware.upload,
+ com.openexchange.sessiond
