@@ -10,11 +10,6 @@
     <property file="META-INF/MANIFEST.MF"/>
     <property file="build.properties"/>
 
-    <fileset dir="lib" id="jarfiles">
-        <include name="*"/>
-        <exclude name="CVS"/>
-    </fileset>
-
     <!-- Install Constants -->
     <property name="bundlesdir" value="${destdir}${prefix}/bundles"/>
 
