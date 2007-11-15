@@ -178,7 +178,7 @@ public interface Session {
 	 * 
 	 * @return The user ID
 	 */
-	public int getUserID();
+	public int getUserId();
 
 	/**
 	 * Gets the user login
