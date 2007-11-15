@@ -163,6 +163,7 @@
             	<include name="**" />
                 <exclude name="oxfunctions.sh"/>
                 <exclude name="*.in"/>
+                <exclude name="CVS"/>
             </fileset>
         </copy>
     </target>
@@ -473,10 +474,20 @@
 
     <target name="patchConfigFiles">
         <fail message="Define conf.subst.patch." unless="conf.subst.patch"/>
+        <antcall target="patchOSGiIni"/>
         <antcall target="patchFileLoggingProperties"/>
         <antcall target="patchScriptConf"/>
         <antcall target="patchSessiondProperties"/>
         <antcall target="patchSystemProperties"/>
+    </target>
+
+    <target name="patchOSGiIni">
+        <fail message="Define bundlesdir." unless="bundlesdir"/>
+        <move tofile="${patch.conf.dir}/osgi/config.ini"
+            file="${patch.conf.dir}/osgi/config.ini.in" overwrite="true"/>
+        <replace file="${patch.conf.dir}/osgi/config.ini">
+            <replacefilter token="@bundlesdir@" value="${bundlesdir}"/>
+        </replace>
     </target>
 
     <target name="patchFileLoggingProperties">
