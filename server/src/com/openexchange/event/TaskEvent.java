@@ -52,7 +52,7 @@
 package com.openexchange.event;
 
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.sessiond.SessionObject;
+import com.openexchange.sessiond.impl.SessionObject;
 
 /**
  * TaskEvent

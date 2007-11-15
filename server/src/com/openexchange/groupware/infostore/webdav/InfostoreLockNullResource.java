@@ -69,7 +69,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.webdav.URLCache.Type;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.tx.TransactionException;
-import com.openexchange.sessiond.SessionHolder;
+import com.openexchange.sessiond.impl.SessionHolder;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavException;
 import com.openexchange.webdav.protocol.WebdavFactory;

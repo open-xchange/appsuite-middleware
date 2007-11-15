@@ -59,7 +59,7 @@ import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.tx.Service;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.sessiond.SessionObject;
+import com.openexchange.sessiond.impl.SessionObject;
 
 public interface InfostoreFacade extends Service{
 	/**

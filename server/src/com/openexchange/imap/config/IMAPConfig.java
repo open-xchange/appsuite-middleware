@@ -61,7 +61,7 @@ import com.openexchange.imap.IMAPCapabilities;
 import com.openexchange.mail.config.GlobalMailConfig;
 import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.config.MailConfigException;
-import com.openexchange.sessiond.SessionObject;
+import com.openexchange.sessiond.impl.SessionObject;
 import com.sun.mail.imap.IMAPStore;
 
 /**

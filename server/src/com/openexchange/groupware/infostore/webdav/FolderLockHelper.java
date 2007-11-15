@@ -54,8 +54,8 @@ import com.openexchange.groupware.FolderLock;
 import com.openexchange.groupware.FolderLockManager;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.sessiond.SessionHolder;
-import com.openexchange.sessiond.SessionObject;
+import com.openexchange.sessiond.impl.SessionHolder;
+import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.webdav.protocol.WebdavLock;
 
 public class FolderLockHelper extends LockHelper {

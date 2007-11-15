@@ -52,7 +52,9 @@ package com.openexchange.ajax;
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import com.openexchange.sessiond.SessionObject;
+
+import com.openexchange.sessiond.impl.SessionObject;
+
 import javax.servlet.ServletException;
 
 public abstract class PermissionServlet extends SessionServlet {

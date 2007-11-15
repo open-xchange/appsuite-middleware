@@ -51,7 +51,7 @@ package com.openexchange.smtp.dataobjects;
 
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.transport.dataobjects.InfostoreDocumentMailPart;
-import com.openexchange.sessiond.SessionObject;
+import com.openexchange.sessiond.impl.SessionObject;
 
 /**
  * {@link SMTPDocumentPart}

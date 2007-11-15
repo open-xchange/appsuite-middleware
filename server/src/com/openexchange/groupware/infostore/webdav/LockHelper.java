@@ -64,8 +64,8 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.sessiond.SessionHolder;
-import com.openexchange.sessiond.SessionObject;
+import com.openexchange.sessiond.impl.SessionHolder;
+import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.webdav.protocol.WebdavException;
 import com.openexchange.webdav.protocol.WebdavLock;
 

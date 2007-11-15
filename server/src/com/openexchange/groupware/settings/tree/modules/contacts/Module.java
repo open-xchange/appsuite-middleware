@@ -54,7 +54,7 @@ import com.openexchange.groupware.settings.tree.AbstractModules;
 import com.openexchange.groupware.settings.tree.Modules;
 import com.openexchange.groupware.settings.tree.modules.Contacts;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.sessiond.SessionObject;
+import com.openexchange.sessiond.impl.SessionObject;
 
 /**
  * Contains initialization for the modules configuration tree setting contacts.

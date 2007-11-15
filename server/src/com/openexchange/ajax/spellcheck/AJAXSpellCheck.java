@@ -66,7 +66,7 @@ import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.spellcheck.SpellCheckConfig;
-import com.openexchange.sessiond.SessionObject;
+import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.tools.text.spelling.OXAspellCheck;
 import com.openexchange.tools.text.spelling.OXSpellCheckResult;
 

@@ -112,7 +112,7 @@ public class Starter implements Initialization {
 	/**
 	 * Setup of ContextStorage and LoginInfo.
 	 */
-	com.openexchange.groupware.contexts.ContextInit.getInstance(),
+	com.openexchange.groupware.contexts.impl.ContextInit.getInstance(),
 	/**
 	 * Folder initialization
 	 */
@@ -152,7 +152,7 @@ public class Starter implements Initialization {
 	/**
 	 * Starting SessionD
 	 */
-	com.openexchange.sessiond.SessiondInit.getInstance(),
+	com.openexchange.sessiond.impl.SessiondInit.getInstance(),
 	/**
 	 * Responsible for starting and stopping the EventQueue
 	 */
@@ -186,7 +186,7 @@ public class Starter implements Initialization {
 	/**
 	 * Setup of ContextStorage and LoginInfo.
 	 */
-	com.openexchange.groupware.contexts.ContextInit.getInstance(),
+	com.openexchange.groupware.contexts.impl.ContextInit.getInstance(),
 	/**
 	 * Notification Configuration
 	 */

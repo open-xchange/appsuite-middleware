@@ -51,7 +51,7 @@ package com.openexchange.webdav.action;
 
 import com.openexchange.groupware.infostore.utils.InfostoreConfigUtils;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
-import com.openexchange.sessiond.SessionHolder;
+import com.openexchange.sessiond.impl.SessionHolder;
 
 public class OXWebdavMaxUploadSizeAction extends WebdavMaxUploadSizeAction {
 	private SessionHolder sessionHolder;

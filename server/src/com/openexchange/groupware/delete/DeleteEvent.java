@@ -52,11 +52,11 @@ package com.openexchange.groupware.delete;
 import java.util.EventObject;
 
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.ContextException;
-import com.openexchange.groupware.contexts.ContextStorage;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.LdapException;
-import com.openexchange.sessiond.SessionObject;
-import com.openexchange.sessiond.SessionObjectWrapper;
+import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.impl.SessionObjectWrapper;
 
 /**
  * DeleteEvent

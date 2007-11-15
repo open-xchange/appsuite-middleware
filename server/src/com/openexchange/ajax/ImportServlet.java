@@ -75,8 +75,8 @@ import com.openexchange.groupware.importexport.Format;
 import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionClasses;
 import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionFactory;
-import com.openexchange.groupware.upload.UploadEvent;
-import com.openexchange.groupware.upload.UploadFile;
+import com.openexchange.groupware.upload.impl.UploadEvent;
+import com.openexchange.groupware.upload.impl.UploadFile;
 import com.openexchange.tools.servlet.OXJSONException;
 
 @OXExceptionSource(

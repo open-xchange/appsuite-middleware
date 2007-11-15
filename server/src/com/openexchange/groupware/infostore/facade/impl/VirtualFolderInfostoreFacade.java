@@ -66,7 +66,7 @@ import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.results.TimedResultImpl;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.sessiond.SessionObject;
+import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.groupware.infostore.Classes;
 import com.openexchange.groupware.Component;

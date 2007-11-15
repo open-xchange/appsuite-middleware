@@ -67,7 +67,7 @@ import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.transport.SendType;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.monitoring.MonitorAgent;
-import com.openexchange.sessiond.SessionObject;
+import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 

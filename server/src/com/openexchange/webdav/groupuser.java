@@ -75,7 +75,7 @@ import org.jdom.Element;
 import org.jdom.Namespace;
 import org.jdom.output.XMLOutputter;
 import com.openexchange.server.Version;
-import com.openexchange.sessiond.SessionObject;
+import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.webdav.xml.GroupUserWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;

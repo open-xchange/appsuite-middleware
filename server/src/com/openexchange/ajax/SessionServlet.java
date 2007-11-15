@@ -68,11 +68,11 @@ import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.sessiond.SessionObject;
-import com.openexchange.sessiond.SessiondConnector;
 import com.openexchange.sessiond.exception.Classes;
 import com.openexchange.sessiond.exception.SessionException;
 import com.openexchange.sessiond.exception.SessionExceptionFactory;
+import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.impl.SessiondConnector;
 import com.openexchange.tools.servlet.http.Tools;
 
 /**

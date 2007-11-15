@@ -61,7 +61,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.groupware.container.DataObject;
-import com.openexchange.sessiond.SessionObject;
+import com.openexchange.sessiond.impl.SessionObject;
 
 /**
  * DataParser

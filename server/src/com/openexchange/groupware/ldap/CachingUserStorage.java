@@ -60,8 +60,8 @@ import org.apache.jcs.access.exception.CacheException;
 
 import com.openexchange.cache.CacheKey;
 import com.openexchange.cache.Configuration;
-import com.openexchange.cache.dynamic.CacheProxy;
-import com.openexchange.cache.dynamic.OXObjectFactory;
+import com.openexchange.cache.dynamic.impl.CacheProxy;
+import com.openexchange.cache.dynamic.impl.OXObjectFactory;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.contexts.Context;

@@ -55,7 +55,7 @@ import com.openexchange.mail.config.GlobalTransportConfig;
 import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.config.TransportConfig;
-import com.openexchange.sessiond.SessionObject;
+import com.openexchange.sessiond.impl.SessionObject;
 
 /**
  * {@link SMTPConfig}

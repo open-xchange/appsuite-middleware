@@ -1,0 +1,58 @@
+<project name="com.openexchange.global" default="install" basedir=".">
+
+    <!-- Customizable values -->
+    <property name="destdir" value=""/>
+    <property name="prefix" value="/opt/open-xchange"/>
+
+    <!-- Constants -->
+    <property name="tmp.dir" value="tmp"/>
+
+    <property file="META-INF/MANIFEST.MF"/>
+    <property file="build.properties"/>
+
+    <!-- Install Constants -->
+    <property name="bundlesdir" value="${destdir}${prefix}/bundles"/>
+
+    <!-- JAR names for classpath -->
+    <property name="osgijar" value="org.eclipse.osgi_3.3.0.v20070530.jar" />
+
+    <!-- Classpath -->
+    <path id="project.classpath">
+    </path>
+
+    <!-- Compile -->
+    <target name="prepare">
+        <mkdir dir="${output..}"/>
+        <mkdir dir="${tmp.dir}"/>
+    </target>
+
+    <target name="compile" depends="prepare">
+        <javac srcdir="${source..}" destdir="${output..}" debug="true"
+            encoding="US-ASCII" source="1.5" compiler="javac1.5" target="1.5">
+            <classpath refid="project.classpath" />
+        </javac>
+    </target>
+
+    <target name="jar" depends="prepare,compile">
+        <jar jarfile="${tmp.dir}/${Bundle-SymbolicName}_${Bundle-Version}.jar"
+            manifest="META-INF/MANIFEST.MF">
+            <fileset dir="${output..}"/>
+        </jar>
+    </target>
+
+    <!-- Install -->
+    <target name="install" depends="jar">
+        <mkdir dir="${bundlesdir}"/>
+        <copy todir="${bundlesdir}">
+            <fileset dir="${tmp.dir}">
+                <include name="${Bundle-SymbolicName}_${Bundle-Version}.jar"/>
+            </fileset>
+        </copy>
+    </target>
+
+    <target name="clean">
+        <delete dir="${output..}"/>
+        <delete dir="${tmp.dir}"/>
+    </target>
+
+</project>

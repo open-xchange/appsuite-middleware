@@ -74,7 +74,7 @@ import com.openexchange.mail.mime.processing.MimeReply;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.MailPartHandler;
 import com.openexchange.mail.versit.VersitUtility;
-import com.openexchange.sessiond.SessionObject;
+import com.openexchange.sessiond.impl.SessionObject;
 import com.sun.mail.iap.ParsingException;
 import com.sun.mail.imap.IMAPStore;
 

@@ -69,7 +69,7 @@ import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.server.Version;
-import com.openexchange.sessiond.SessionObject;
+import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.webdav.PermissionServlet;
 import com.openexchange.webdav.xml.fields.CommonFields;
 import com.openexchange.webdav.xml.fields.DataFields;

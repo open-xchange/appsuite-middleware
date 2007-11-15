@@ -68,7 +68,7 @@ import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.mime.MIMEDefaultSession;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.transport.MailTransport;
-import com.openexchange.sessiond.SessionObject;
+import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.tools.mail.ContentType;
 import com.openexchange.tools.servlet.UnsynchronizedByteArrayOutputStream;
 

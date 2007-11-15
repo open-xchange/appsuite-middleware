@@ -75,7 +75,7 @@ import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.sessiond.SessionObject;
+import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.webdav.xml.ContactParser;
 import com.openexchange.webdav.xml.ContactWriter;
 import com.openexchange.webdav.xml.DataParser;

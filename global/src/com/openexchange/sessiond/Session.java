@@ -52,7 +52,6 @@ package com.openexchange.sessiond;
 import java.util.Date;
 
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.Credentials;
 import com.openexchange.groupware.upload.ManagedUploadFile;
 
 /**
@@ -81,13 +80,6 @@ public interface Session {
 	 * @return The
 	 */
 	public Date getCreationtime();
-
-	/**
-	 * Gets the credentials
-	 * 
-	 * @return The credentials
-	 */
-	public Credentials getCredentials();
 
 	/**
 	 * Gets the host

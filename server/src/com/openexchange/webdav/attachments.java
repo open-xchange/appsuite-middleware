@@ -77,7 +77,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.groupware.attach.impl.AttachmentImpl;
-import com.openexchange.sessiond.SessionObject;
+import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.tools.webdav.OXServlet;
 import com.openexchange.webdav.xml.XmlServlet;
 import java.net.URLDecoder;

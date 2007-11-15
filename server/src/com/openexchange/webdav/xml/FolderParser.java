@@ -55,7 +55,7 @@ import com.openexchange.api.OXConflictException;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.OCLPermission;
-import com.openexchange.sessiond.SessionObject;
+import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.webdav.xml.fields.FolderFields;
 import java.util.ArrayList;
 import org.apache.commons.logging.Log;

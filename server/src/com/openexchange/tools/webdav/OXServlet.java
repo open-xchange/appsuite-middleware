@@ -61,16 +61,16 @@ import org.apache.commons.logging.LogFactory;
 import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
 
-import com.openexchange.groupware.contexts.ContextException;
-import com.openexchange.sessiond.InvalidCredentialsException;
-import com.openexchange.sessiond.LoginException;
-import com.openexchange.sessiond.MaxSessionLimitException;
-import com.openexchange.sessiond.PasswordExpiredException;
-import com.openexchange.sessiond.SessionObject;
-import com.openexchange.sessiond.SessiondConnector;
-import com.openexchange.sessiond.SessiondException;
-import com.openexchange.sessiond.UserNotActivatedException;
-import com.openexchange.sessiond.UserNotFoundException;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.sessiond.impl.InvalidCredentialsException;
+import com.openexchange.sessiond.impl.LoginException;
+import com.openexchange.sessiond.impl.MaxSessionLimitException;
+import com.openexchange.sessiond.impl.PasswordExpiredException;
+import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.impl.SessiondConnector;
+import com.openexchange.sessiond.impl.SessiondException;
+import com.openexchange.sessiond.impl.UserNotActivatedException;
+import com.openexchange.sessiond.impl.UserNotFoundException;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.encoding.Base64;
 

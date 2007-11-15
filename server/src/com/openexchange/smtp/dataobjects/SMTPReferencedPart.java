@@ -52,7 +52,7 @@ package com.openexchange.smtp.dataobjects;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.transport.dataobjects.ReferencedMailPart;
-import com.openexchange.sessiond.SessionObject;
+import com.openexchange.sessiond.impl.SessionObject;
 
 /**
  * {@link SMTPReferencedPart}

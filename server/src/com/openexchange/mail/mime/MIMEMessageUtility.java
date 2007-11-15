@@ -59,7 +59,7 @@ import javax.mail.internet.ParseException;
 
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailPart;
-import com.openexchange.sessiond.SessionObject;
+import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.tools.mail.ContentType;
 
 /**

@@ -56,7 +56,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.LinkEntryObject;
-import com.openexchange.sessiond.SessionObject;
+import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.tools.encoding.Base64;
 import com.openexchange.webdav.xml.fields.ContactFields;
 import java.util.ArrayList;

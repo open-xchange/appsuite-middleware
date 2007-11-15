@@ -75,7 +75,7 @@ import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.sessiond.SessionObject;
+import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.webdav.xml.AppointmentParser;
 import com.openexchange.webdav.xml.AppointmentWriter;
 import com.openexchange.webdav.xml.DataParser;

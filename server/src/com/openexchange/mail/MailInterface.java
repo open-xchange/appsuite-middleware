@@ -56,7 +56,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.TransportMailMessage;
 import com.openexchange.mail.transport.SendType;
-import com.openexchange.sessiond.SessionObject;
+import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.smtp.dataobjects.SMTPMailMessage;
 import com.openexchange.tools.iterator.SearchIterator;
 

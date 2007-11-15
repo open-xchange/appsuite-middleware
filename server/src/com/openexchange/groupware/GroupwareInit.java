@@ -50,7 +50,7 @@
 package com.openexchange.groupware;
 
 import com.openexchange.event.EventInit;
-import com.openexchange.sessiond.SessiondInit;
+import com.openexchange.sessiond.impl.SessiondInit;
 
 /**
  * This class contains the initialization for the groupware server.

@@ -8,8 +8,8 @@ import java.rmi.RemoteException;
 import com.openexchange.api2.OXException;
 import com.openexchange.cache.FolderCacheManager;
 import com.openexchange.cache.FolderCacheNotEnabledException;
-import com.openexchange.groupware.contexts.ContextException;
-import com.openexchange.groupware.contexts.ContextStorage;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 
 /*
 *

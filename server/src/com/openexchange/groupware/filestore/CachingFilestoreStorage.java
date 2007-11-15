@@ -57,8 +57,8 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.jcs.JCS;
 import org.apache.jcs.access.exception.CacheException;
 
-import com.openexchange.cache.dynamic.CacheProxy;
-import com.openexchange.cache.dynamic.OXObjectFactory;
+import com.openexchange.cache.dynamic.impl.CacheProxy;
+import com.openexchange.cache.dynamic.impl.OXObjectFactory;
 
 public class CachingFilestoreStorage extends FilestoreStorage {
 

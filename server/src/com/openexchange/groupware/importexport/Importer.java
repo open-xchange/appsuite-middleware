@@ -53,7 +53,8 @@ import java.io.InputStream;
 import java.util.List;
 
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
-import com.openexchange.sessiond.SessionObject;
+import com.openexchange.sessiond.impl.SessionObject;
+
 import java.util.Map;
 
 /**

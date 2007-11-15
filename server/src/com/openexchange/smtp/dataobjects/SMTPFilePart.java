@@ -49,7 +49,7 @@
 
 package com.openexchange.smtp.dataobjects;
 
-import com.openexchange.groupware.upload.UploadFile;
+import com.openexchange.groupware.upload.impl.UploadFile;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.transport.dataobjects.UploadFileMailPart;

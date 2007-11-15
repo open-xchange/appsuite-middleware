@@ -71,7 +71,7 @@ import javax.activation.DataHandler;
 import javax.activation.DataSource;
 
 import com.openexchange.configuration.ServerConfig;
-import com.openexchange.groupware.upload.AJAXUploadFile;
+import com.openexchange.groupware.upload.impl.AJAXUploadFile;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.config.MailConfigException;
@@ -82,7 +82,7 @@ import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.MailPartHandler;
-import com.openexchange.sessiond.SessionObject;
+import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.tools.servlet.UnsynchronizedByteArrayOutputStream;
 
 /**

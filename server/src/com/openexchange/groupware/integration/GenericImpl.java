@@ -58,8 +58,8 @@ import java.util.Set;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.groupware.configuration.GenericImplConfig;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.ContextException;
-import com.openexchange.groupware.contexts.ContextStorage;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 
 /**
  * Generic implementation of a config jump. Replaces some tags in the URL of

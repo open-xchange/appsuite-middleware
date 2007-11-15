@@ -62,7 +62,7 @@ import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.mail.internet.MimeUtility;
 
-import com.openexchange.groupware.upload.UploadFile;
+import com.openexchange.groupware.upload.impl.UploadFile;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.dataobjects.MailPart;

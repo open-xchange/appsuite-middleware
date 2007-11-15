@@ -52,7 +52,8 @@ package com.openexchange.webdav;
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import com.openexchange.sessiond.SessionObject;
+
+import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.tools.webdav.OXServlet;
 import javax.servlet.ServletException;
 

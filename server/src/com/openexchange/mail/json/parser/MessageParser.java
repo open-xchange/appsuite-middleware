@@ -67,8 +67,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.upload.UploadEvent;
-import com.openexchange.groupware.upload.UploadFile;
+import com.openexchange.groupware.upload.impl.UploadEvent;
+import com.openexchange.groupware.upload.impl.UploadFile;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
@@ -79,7 +79,7 @@ import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.transport.dataobjects.TextBodyMailPart;
 import com.openexchange.mail.utils.MessageUtility;
-import com.openexchange.sessiond.SessionObject;
+import com.openexchange.sessiond.impl.SessionObject;
 
 /**
  * {@link MessageParser}

@@ -51,7 +51,7 @@ package com.openexchange.mail.transport;
 
 import java.lang.reflect.InvocationTargetException;
 
-import com.openexchange.groupware.upload.UploadFile;
+import com.openexchange.groupware.upload.impl.UploadFile;
 import com.openexchange.mail.MailConnection;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailPath;
@@ -63,7 +63,7 @@ import com.openexchange.mail.transport.dataobjects.InfostoreDocumentMailPart;
 import com.openexchange.mail.transport.dataobjects.ReferencedMailPart;
 import com.openexchange.mail.transport.dataobjects.TextBodyMailPart;
 import com.openexchange.mail.transport.dataobjects.UploadFileMailPart;
-import com.openexchange.sessiond.SessionObject;
+import com.openexchange.sessiond.impl.SessionObject;
 
 /**
  * {@link MailTransport}

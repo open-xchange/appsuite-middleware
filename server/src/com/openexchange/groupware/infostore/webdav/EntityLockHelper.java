@@ -52,8 +52,8 @@ package com.openexchange.groupware.infostore.webdav;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.sessiond.SessionHolder;
-import com.openexchange.sessiond.SessionObject;
+import com.openexchange.sessiond.impl.SessionHolder;
+import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.webdav.protocol.WebdavLock;
 
 public class EntityLockHelper extends LockHelper {

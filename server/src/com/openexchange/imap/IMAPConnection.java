@@ -69,7 +69,7 @@ import com.openexchange.mail.MailInterfaceImpl;
 import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.mime.MIMESessionPropertyNames;
 import com.openexchange.monitoring.MonitoringInfo;
-import com.openexchange.sessiond.SessionObject;
+import com.openexchange.sessiond.impl.SessionObject;
 import com.sun.mail.imap.IMAPStore;
 
 /**

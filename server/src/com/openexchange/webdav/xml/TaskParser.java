@@ -58,7 +58,7 @@ import org.xmlpull.v1.XmlPullParser;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.sessiond.SessionObject;
+import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.webdav.xml.fields.TaskFields;
 import org.xmlpull.v1.XmlPullParserException;
 

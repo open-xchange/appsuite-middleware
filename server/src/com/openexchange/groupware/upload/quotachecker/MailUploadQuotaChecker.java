@@ -52,10 +52,10 @@ package com.openexchange.groupware.upload.quotachecker;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
-import com.openexchange.groupware.upload.UploadQuotaChecker;
+import com.openexchange.groupware.upload.impl.UploadQuotaChecker;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
-import com.openexchange.sessiond.SessionObject;
+import com.openexchange.sessiond.impl.SessionObject;
 
 /**
  * MailUploadQuotaChecker

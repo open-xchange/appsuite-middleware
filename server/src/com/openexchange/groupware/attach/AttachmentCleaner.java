@@ -68,7 +68,7 @@ import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tx.DBPoolProvider;
 import com.openexchange.groupware.tx.TransactionException;
-import com.openexchange.sessiond.SessionObject;
+import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;

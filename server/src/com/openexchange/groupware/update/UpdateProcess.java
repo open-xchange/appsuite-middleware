@@ -57,8 +57,8 @@ import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.database.ConfigDBStorage;
 import com.openexchange.database.Database;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.contexts.ContextException;
-import com.openexchange.groupware.contexts.ContextStorage;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.update.exception.SchemaException;
 import com.openexchange.server.DBPoolingException;
 

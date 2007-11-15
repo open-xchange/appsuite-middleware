@@ -74,7 +74,7 @@ import com.openexchange.groupware.settings.ConfigTree;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.settings.SettingStorage;
-import com.openexchange.sessiond.SessionObject;
+import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.tools.servlet.OXJSONException;
 
 /**

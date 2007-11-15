@@ -59,7 +59,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mail.partmodifier.PartModifier;
 import com.openexchange.mail.spellcheck.SpellCheckConfig;
-import com.openexchange.sessiond.SessionObject;
+import com.openexchange.sessiond.impl.SessionObject;
 
 /**
  * {@link MailConfig}

@@ -53,7 +53,7 @@ package com.openexchange.webdav.xml;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.AppointmentObject;
-import com.openexchange.sessiond.SessionObject;
+import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.webdav.xml.fields.AppointmentFields;
 import java.util.Date;
 import org.apache.commons.logging.Log;
