@@ -475,7 +475,8 @@ public class OXContainerConverter {
 	public OXContainerConverter(SessionObject session) {
 		super();
 		this.session = session;
-		this.timezone = TimeZone.getTimeZone(session.getUserObject().getTimeZone());
+		this.timezone = TimeZone.getTimeZone(UserStorage.getUser(session.getUserId(), session.getContext())
+				.getTimeZone());
 	}
 
 	public void close() {

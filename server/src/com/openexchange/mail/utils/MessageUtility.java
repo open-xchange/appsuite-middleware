@@ -75,6 +75,7 @@ import com.openexchange.mail.MailInterfaceImpl;
 import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.usersetting.UserSettingMail;
+import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.Collections.SmartIntArray;
 import com.openexchange.tools.mail.ContentType;
@@ -406,7 +407,8 @@ public final class MessageUtility {
 	 */
 	public static String formatContentForDisplay(final String content, final boolean isHtml,
 			final SessionObject session, final String mailPath, final boolean displayVersion) {
-		final UserSettingMail usm = session.getUserSettingMail();
+		final UserSettingMail usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(),
+				session.getContext());
 		String retval = content;
 		if (isHtml) {
 			/*

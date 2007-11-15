@@ -58,6 +58,7 @@ import org.jdom.Element;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.results.TimedResult;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.tools.iterator.SearchIterator;
 
 /**
@@ -90,7 +91,10 @@ public abstract class CommonWriter extends FolderChildWriter {
 		SearchIterator it = null;
 		try {
 			XmlServlet.attachmentBase.startTransaction();
-			final TimedResult tResult = XmlServlet.attachmentBase.getAttachments(commonobject.getParentFolderID(), commonobject.getObjectID(), getModule(), sessionObj.getContext(), sessionObj.getUserObject(), sessionObj.getUserConfiguration());
+			final TimedResult tResult = XmlServlet.attachmentBase.getAttachments(commonobject.getParentFolderID(),
+					commonobject.getObjectID(), getModule(), sessionObj.getContext(), getUser(),
+					UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
+							sessionObj.getContext()));
 			
 			it = tResult.results();
 			

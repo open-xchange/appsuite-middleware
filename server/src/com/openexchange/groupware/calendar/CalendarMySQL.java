@@ -1076,7 +1076,7 @@ class CalendarMySQL implements CalendarSqlImp {
             }
             
             insertParticipants(cdao, writecon);
-            insertUserParticipants(cdao, writecon, so.getUserObject().getId());
+            insertUserParticipants(cdao, writecon, so.getUserId());
             pst.executeUpdate();
         } finally {
             CalendarCommonCollection.closePreparedStatement(pst);
@@ -1643,9 +1643,9 @@ class CalendarMySQL implements CalendarSqlImp {
                 cdao.setRecurrenceCalculator(edao.getRecurrenceCalculator());
                 if (cdao.containsAlarm()) {
                     if (cdao.containsUserParticipants() && cdao.getUsers() != null) {
-                        CalendarCommonCollection.checkAndModifyAlarm(cdao, cdao.getUsers(), so.getUserObject().getId(), edao.getUsers());
+                        CalendarCommonCollection.checkAndModifyAlarm(cdao, cdao.getUsers(), so.getUserId(), edao.getUsers());
                     } else {
-                        CalendarCommonCollection.checkAndModifyAlarm(cdao, edao.getUsers(), so.getUserObject().getId(), edao.getUsers());
+                        CalendarCommonCollection.checkAndModifyAlarm(cdao, edao.getUsers(), so.getUserId(), edao.getUsers());
                     }
                     cdao.removeAlarm();
                 }
@@ -1801,7 +1801,7 @@ class CalendarMySQL implements CalendarSqlImp {
                             throw new SQLException("Error: Calendar: Update: Mapping for " + ucols[a] + " not implemented!");
                     }
                 }
-                updateParticipants(cdao, edao, so.getUserObject().getId(), so.getContext().getContextId(), writecon, cup);
+                updateParticipants(cdao, edao, so.getUserId(), so.getContext().getContextId(), writecon, cup);
                 final int ret = pst.executeUpdate();
                 if (ret == 0) {
                     throw new OXConcurrentModificationException(Component.APPOINTMENT, OXConcurrentModificationException.ConcurrentModificationCode.CONCURRENT_MODIFICATION);
@@ -2795,7 +2795,7 @@ class CalendarMySQL implements CalendarSqlImp {
         while (rs.next()) {
             final int oid = rs.getInt(1);
             final int owner = rs.getInt(2);
-            deleteSingleAppointment(so.getContext().getContextId(), oid, so.getUserObject().getId(), owner, fid, readcon, writecon, foldertype, so, CalendarRecurringCollection.RECURRING_NO_ACTION, null, null, null);
+            deleteSingleAppointment(so.getContext().getContextId(), oid, so.getUserId(), owner, fid, readcon, writecon, foldertype, so, CalendarRecurringCollection.RECURRING_NO_ACTION, null, null, null);
         }
     }
     

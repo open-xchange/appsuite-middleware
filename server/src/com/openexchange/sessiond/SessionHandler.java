@@ -237,7 +237,7 @@ public class SessionHandler extends TimerTask {
         sessionobject.setTimestamp(new Date());
         sessionobject.setLifetime(lifeTime);
         sessionobject.setContext(context);
-        sessionobject.setUserObject(u);
+        //sessionobject.setUserObject(u);
 
         sessionobject.setRandomToken(randomId);
         sessionobject.setSecret(sessionIdGenerator.createSecretId(loginName, client_ip));
@@ -447,11 +447,10 @@ public class SessionHandler extends TimerTask {
             return false;
         }
         try {
-            if (!context.isEnabled() || !session.getUserObject()
-                .isMailEnabled()) {
-                return false;
-            }
-        } catch (UndeclaredThrowableException e) {
+			if (!context.isEnabled() || !UserStorage.getUser(session.getUserId(), session.getContext()).isMailEnabled()) {
+				return false;
+			}
+		} catch (UndeclaredThrowableException e) {
             return false;
         }
         return true;

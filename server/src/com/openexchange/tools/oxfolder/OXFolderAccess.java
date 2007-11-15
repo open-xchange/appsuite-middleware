@@ -68,9 +68,11 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Tasks;
 import com.openexchange.groupware.tx.DBPoolProvider;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.server.EffectivePermission;
 import com.openexchange.server.OCLPermission;
@@ -125,7 +127,7 @@ public class OXFolderAccess {
 		}
 		return fo;
 	}
-	
+
 	/**
 	 * Creates a <code>java.util.List</code> of <code>FolderObject</code>
 	 * instances filles which match given folder IDs
@@ -147,7 +149,7 @@ public class OXFolderAccess {
 		}
 		return retval;
 	}
-	
+
 	/**
 	 * Creates a <code>java.util.List</code> of <code>FolderObject</code>
 	 * instances filles which match given folder IDs
@@ -188,7 +190,7 @@ public class OXFolderAccess {
 	public final int getFolderType(final int folderId, final int userId) throws OXException {
 		return getFolderObject(folderId).getType(userId);
 	}
-	
+
 	/**
 	 * Determines the <b>plain</b> folder type meaning the returned value is
 	 * either <code>FolderObject.PRIVATE</code> or
@@ -217,7 +219,7 @@ public class OXFolderAccess {
 	public final int getFolderModule(final int folderId) throws OXException {
 		return getFolderObject(folderId).getModule();
 	}
-	
+
 	/**
 	 * Determines folder owner
 	 * 
@@ -357,8 +359,9 @@ public class OXFolderAccess {
 	 */
 	public final boolean canDeleteAllObjectsInFolder(final FolderObject fo, final SessionObject session)
 			throws OXException {
-		final int userId = session.getUserObject().getId();
-		final UserConfiguration userConfig = session.getUserConfiguration();
+		final int userId = session.getUserId();
+		final UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(
+				session.getUserId(), session.getContext());
 		try {
 			/*
 			 * Check user permission on folder
@@ -394,10 +397,11 @@ public class OXFolderAccess {
 					break;
 				case FolderObject.INFOSTORE:
 					final InfostoreFacade db = new InfostoreFacadeImpl(new DBPoolProvider());
-					return !db.hasFolderForeignObjects(fo.getObjectID(), ctx, session.getUserObject(), userConfig);
+					return !db.hasFolderForeignObjects(fo.getObjectID(), ctx, UserStorage.getUser(session.getUserId(),
+							session.getContext()), userConfig);
 				default:
-					throw new OXFolderException(FolderCode.UNKNOWN_MODULE, folderModule2String(fo
-							.getModule()), Integer.valueOf(ctx.getContextId()));
+					throw new OXFolderException(FolderCode.UNKNOWN_MODULE, folderModule2String(fo.getModule()), Integer
+							.valueOf(ctx.getContextId()));
 				}
 			} else {
 				/*
@@ -418,8 +422,8 @@ public class OXFolderAccess {
 					final InfostoreFacade db = new InfostoreFacadeImpl(new DBPoolProvider());
 					return db.isFolderEmpty(fo.getObjectID(), session.getContext());
 				default:
-					throw new OXFolderException(FolderCode.UNKNOWN_MODULE, folderModule2String(fo
-							.getModule()), Integer.valueOf(ctx.getContextId()));
+					throw new OXFolderException(FolderCode.UNKNOWN_MODULE, folderModule2String(fo.getModule()), Integer
+							.valueOf(ctx.getContextId()));
 				}
 			}
 			return false;

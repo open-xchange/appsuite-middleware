@@ -52,6 +52,8 @@ package com.openexchange.groupware.infostore.webdav;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.FolderLock;
 import com.openexchange.groupware.FolderLockManager;
+import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.sessiond.SessionHolder;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.webdav.protocol.WebdavLock;
@@ -93,8 +95,8 @@ public class FolderLockHelper extends LockHelper {
 				lock.getDepth(), 
 				lock.getOwner(),
 				session.getContext(), 
-				session.getUserObject(),
-				session.getUserConfiguration());
+				UserStorage.getUser(session.getUserId(), session.getContext()),
+				UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()));
 	}
 
 	@Override

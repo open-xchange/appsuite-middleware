@@ -73,6 +73,8 @@ import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.calendar.OXCalendarException;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.webdav.xml.AppointmentParser;
 import com.openexchange.webdav.xml.AppointmentWriter;
@@ -160,7 +162,7 @@ public final class calendar extends XmlServlet {
 						appointmentsql.deleteAppointmentObject(appointmentobject, inFolder, lastModified);
 						break;
 					case DataParser.CONFIRM:
-						appointmentsql.setUserConfirmation(appointmentobject.getObjectID(), sessionObj.getUserObject().getId(), ap.getConfirm(), appointmentobject.getConfirmMessage());
+						appointmentsql.setUserConfirmation(appointmentobject.getObjectID(), sessionObj.getUserId(), ap.getConfirm(), appointmentobject.getConfirmMessage());
 						break;
 					default:
 						throw new OXConflictException("invalid method: " + method);
@@ -228,7 +230,8 @@ public final class calendar extends XmlServlet {
 	
 	@Override
 	protected boolean hasModulePermission(final SessionObject sessionObj) {
-		return (sessionObj.getUserConfiguration().hasWebDAVXML() && sessionObj.getUserConfiguration().hasCalendar());
+		final UserConfiguration uc = UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext());
+		return (uc.hasWebDAVXML() && uc.hasCalendar());
 	}
 }
 

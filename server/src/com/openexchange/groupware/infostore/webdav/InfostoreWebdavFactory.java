@@ -74,10 +74,12 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.PathResolver;
 import com.openexchange.groupware.infostore.Resolved;
 import com.openexchange.groupware.infostore.webdav.URLCache.Type;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.tx.DBProviderUser;
 import com.openexchange.groupware.tx.Service;
 import com.openexchange.groupware.tx.TransactionException;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.sessiond.SessionHolder;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -283,7 +285,9 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 		final Context ctx = sessionHolder.getSessionObject().getContext();
 		final SessionObject session = sessionHolder.getSessionObject();
 		try {
-			final Resolved resolved = resolver.resolve(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, url, session.getContext(), session.getUserObject(), session.getUserConfiguration());
+			final Resolved resolved = resolver.resolve(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, url, session
+					.getContext(), UserStorage.getUser(session.getUserId(), session.getContext()), UserConfigurationStorage.getInstance()
+					.getUserConfigurationSafe(session.getUserId(), session.getContext()));
 			if(resolved.isFolder()) {
 				
 				return loadCollection(url, resolved.getId(), s);
@@ -442,7 +446,12 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 		}
 		final State s = state.get();
 		final SessionObject session = sessionHolder.getSessionObject();
-		final SearchIterator iter = database.getDocuments(folderId, session.getContext(), session.getUserObject(), session.getUserConfiguration()).results();
+		final SearchIterator<?> iter = database.getDocuments(
+				folderId,
+				session.getContext(),
+				UserStorage.getUser(session.getUserId(), session.getContext()),
+				UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
+						session.getContext())).results();
 		final List<OXWebdavResource> retVal = new ArrayList<OXWebdavResource>();
 		
 		while(iter.hasNext()) {

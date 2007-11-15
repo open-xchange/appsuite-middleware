@@ -50,32 +50,22 @@
 package com.openexchange.sessiond;
 
 import java.util.Date;
-import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import javax.mail.Session;
 
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.Credentials;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.upload.ManagedUploadFile;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserConfigurationException;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.mail.cache.SessionMailCache;
-import com.openexchange.mail.usersetting.UserSettingMail;
-import com.openexchange.mail.usersetting.UserSettingMailStorage;
 
 /**
  * SessionObject
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class SessionObject {
+public class SessionObject implements com.openexchange.sessiond.Session {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(SessionObject.class);
@@ -110,106 +100,16 @@ public class SessionObject {
 
 	private Credentials cred;
 
-	private Map hm;
-
-	private User u;
-
 	private Session mailSession;
-	
-	private final transient SessionMailCache mailCache;
 
 	private final transient Map<String, ManagedUploadFile> ajaxUploadFiles;
 
-	private boolean mailFldsChecked;
-
-	private final Lock mailFldsLock;
-
-	private final String[] defaultMailFolders;
+	private final Map<String, Object> parameters;
 
 	public SessionObject(final String sessionid) {
 		this.sessionid = sessionid;
-		mailCache = new SessionMailCache();
+		parameters = new ConcurrentHashMap<String, Object>();
 		ajaxUploadFiles = new ConcurrentHashMap<String, ManagedUploadFile>();
-		mailFldsLock = new ReentrantLock();
-		defaultMailFolders = new String[6];
-	}
-	
-	public final SessionMailCache getMailCache() {
-		return mailCache;
-	}
-
-	/**
-	 * Gets the uploaded file associated with given ID and set its last access
-	 * timestamp to current time millis
-	 * 
-	 * @param id
-	 *            The id
-	 * @return The uploaded file associated with given ID or <code>null</code>
-	 *         if none found
-	 */
-	public final ManagedUploadFile getAJAXUploadFile(final String id) {
-		final ManagedUploadFile uploadFile = ajaxUploadFiles.get(id);
-		if (null != uploadFile) {
-			uploadFile.touch();
-		}
-		return uploadFile;
-	}
-
-	/**
-	 * Touches the uploaded file associated with given ID; meaning to set its
-	 * last access timestamp to current time millis
-	 * 
-	 * @param id
-	 *            The id
-	 * @return <code>true</code> if a matching upload file has been found and
-	 *         successfully touched; otherwise <code>false</code>
-	 */
-	public final boolean touchAJAXUploadFile(final String id) {
-		final ManagedUploadFile uploadFile = ajaxUploadFiles.get(id);
-		if (null != uploadFile) {
-			uploadFile.touch();
-			return true;
-		}
-		return false;
-	}
-
-	/**
-	 * Puts the uploaded file with ID as key and starts timer
-	 * 
-	 * @param id
-	 *            The ID (must not be <code>null</code>)
-	 * @param uploadFile
-	 *            The upload file (must not be <code>null</code>)
-	 */
-	public final void putAJAXUploadFile(final String id, final ManagedUploadFile uploadFile) {
-		ajaxUploadFiles.put(id, uploadFile);
-		uploadFile.startTimerTask(id, ajaxUploadFiles);
-		if (LOG.isInfoEnabled()) {
-			LOG.info(new StringBuilder(256).append("Upload file \"").append(uploadFile).append("\" with ID=")
-					.append(id).append(" added to session and timer task started").toString());
-		}
-	}
-
-	/**
-	 * Removes the uploaded file associated with given ID and stops timer task
-	 * 
-	 * @param id
-	 *            The ID
-	 * @return The removed uploaded file or <code>null</code> if none removed
-	 */
-	public final ManagedUploadFile removeAJAXUploadFile(final String id) {
-		final ManagedUploadFile uploadFile = ajaxUploadFiles.remove(id);
-		if (null != uploadFile) {
-			/*
-			 * Cancel timer task
-			 */
-			uploadFile.cancelTimerTask();
-			if (LOG.isInfoEnabled()) {
-				LOG.info(new StringBuilder(256).append("Upload file \"").append(uploadFile).append("\" with ID=")
-						.append(id).append(" removed from session and timer task canceled").toString());
-			}
-		}
-		return uploadFile;
 	}
 
 	public void setUsername(final String username) {
@@ -252,32 +152,12 @@ public class SessionObject {
 		this.context = context;
 	}
 
-	public void setDynamicMap(final Map hm) {
-		this.hm = hm;
-	}
-
-	public void setUserObject(final User u) {
-		this.u = u;
-	}
-
-	public void setMailFldsChecked(final boolean mailFldsChecked) {
-		this.mailFldsChecked = mailFldsChecked;
-	}
-
-	/**
-	 * Sets the default mail folder's fullname associated with given index
-	 * 
-	 * @param index
-	 *            The index
-	 * @param fullname
-	 *            The fullname
-	 */
-	public void setDefaultMailFolder(final int index, final String fullname) {
-		defaultMailFolders[index] = fullname;
-	}
-
 	public String getSessionID() {
 		return sessionid;
+	}
+
+	public int getUserId() {
+		return Integer.parseInt(username);
 	}
 
 	public String getUsername() {
@@ -294,18 +174,6 @@ public class SessionObject {
 
 	public String getLanguage() {
 		return language;
-	}
-
-	/**
-	 * Convenience method that just invokes {@link User#getLocale()}
-	 * 
-	 * @see com.openexchange.groupware.ldap.User#getLocale()
-	 * 
-	 * @return an instance of <code>java.util.Locale</code> or
-	 *         <code>null</code> if none present
-	 */
-	public Locale getLocale() {
-		return u == null ? null : u.getLocale();
 	}
 
 	public String getLocalIp() {
@@ -338,51 +206,6 @@ public class SessionObject {
 
 	public Credentials getCredentials() {
 		return cred;
-	}
-
-	public Map getDynamicMap() {
-		return hm;
-	}
-
-	public User getUserObject() {
-		return u;
-	}
-
-	public UserSettingMail getUserSettingMail() {
-		try {
-			return UserSettingMailStorage.getInstance().loadUserSettingMail(u.getId(), context);
-		} catch (final OXException e) {
-			LOG.error(e.getLocalizedMessage(), e);
-			return null;
-		}
-	}
-
-	public boolean isMailFldsChecked() {
-		return mailFldsChecked;
-	}
-
-	/**
-	 * Gets the default mail folder's fullname associated with given index
-	 * 
-	 * @param index
-	 *            The index
-	 * @return Default mail folder's fullname
-	 */
-	public String getDefaultMailFolder(final int index) {
-		return defaultMailFolders[index];
-	}
-
-	public Lock getMailFldsLock() {
-		return mailFldsLock;
-	}
-
-	public UserConfiguration getUserConfiguration() {
-		try {
-			return UserConfigurationStorage.getInstance().getUserConfiguration(u.getId(), u.getGroups(), context);
-		} catch (final UserConfigurationException e) {
-			LOG.error(e.getLocalizedMessage(), e);
-			return null;
-		}
 	}
 
 	public void setLoginName(final String loginName) {
@@ -418,6 +241,59 @@ public class SessionObject {
 
 	public void setSecret(final String secret) {
 		this.secret = secret;
+	}
+
+	public Object getParameter(final String name) {
+		return parameters.get(name);
+	}
+
+	public ManagedUploadFile getUploadedFile(final String id) {
+		final ManagedUploadFile uploadFile = ajaxUploadFiles.get(id);
+		if (null != uploadFile) {
+			uploadFile.touch();
+		}
+		return uploadFile;
+	}
+
+	public void putUploadedFile(final String id, final ManagedUploadFile uploadFile) {
+		ajaxUploadFiles.put(id, uploadFile);
+		uploadFile.startTimerTask(id, ajaxUploadFiles);
+		if (LOG.isInfoEnabled()) {
+			LOG.info(new StringBuilder(256).append("Upload file \"").append(uploadFile).append("\" with ID=")
+					.append(id).append(" added to session and timer task started").toString());
+		}
+	}
+
+	public ManagedUploadFile removeUploadedFile(final String id) {
+		final ManagedUploadFile uploadFile = ajaxUploadFiles.remove(id);
+		if (null != uploadFile) {
+			/*
+			 * Cancel timer task
+			 */
+			uploadFile.cancelTimerTask();
+			if (LOG.isInfoEnabled()) {
+				LOG.info(new StringBuilder(256).append("Upload file \"").append(uploadFile).append("\" with ID=")
+						.append(id).append(" removed from session and timer task canceled").toString());
+			}
+		}
+		return uploadFile;
+	}
+
+	public void removeUploadedFileOnly(final String id) {
+		// TODO Auto-generated method stub
+	}
+
+	public void setParameter(final String name, final Object value) {
+		parameters.put(name, value);
+	}
+
+	public boolean touchUploadedFile(final String id) {
+		final ManagedUploadFile uploadFile = ajaxUploadFiles.get(id);
+		if (null != uploadFile) {
+			uploadFile.touch();
+			return true;
+		}
+		return false;
 	}
 
 }

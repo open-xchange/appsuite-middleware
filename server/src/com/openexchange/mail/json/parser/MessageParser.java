@@ -66,6 +66,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.upload.UploadEvent;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.mail.MailException;
@@ -320,7 +321,8 @@ public final class MessageParser {
 				/*
 				 * Sent & received date
 				 */
-				final TimeZone timeZone = TimeZone.getTimeZone(session.getUserObject().getTimeZone());
+				final TimeZone timeZone = TimeZone.getTimeZone(UserStorage.getUser(session.getUserId(),
+						session.getContext()).getTimeZone());
 				if (jsonObj.has(MailJSONField.SENT_DATE.getKey()) && !jsonObj.isNull(MailJSONField.SENT_DATE.getKey())) {
 					final Date date = new Date(jsonObj.getLong(MailJSONField.SENT_DATE.getKey()));
 					final int offset = timeZone.getOffset(date.getTime());

@@ -69,10 +69,12 @@ import com.openexchange.groupware.attach.AttachmentField;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -87,14 +89,15 @@ public class AttachmentRequest extends CommonRequest {
 	private static final Log LOG = LogFactory.getLog(AttachmentRequest.class);
 	
 	private UserConfiguration userConfig;
-	private User user;
+	private final User user;
 	private Context ctx;
 
 	public AttachmentRequest(final SessionObject session, final JSONWriter w) {
 		super(w);
 		this.ctx = session.getContext();
-		this.user = session.getUserObject();
-		this.userConfig = session.getUserConfiguration();
+		this.user = UserStorage.getUser(session.getUserId(), session.getContext());
+		this.userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
+				session.getContext());
 	}
 	
 	public static boolean hasPermission(UserConfiguration userConfig) {

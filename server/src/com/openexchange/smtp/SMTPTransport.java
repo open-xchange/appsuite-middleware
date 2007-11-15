@@ -61,6 +61,7 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Properties;
 import java.util.TimeZone;
 
@@ -77,6 +78,8 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMultipart;
 
 import com.openexchange.groupware.i18n.MailStrings;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.i18n.StringHelper;
 import com.openexchange.mail.MailConnection;
@@ -97,6 +100,7 @@ import com.openexchange.mail.transport.dataobjects.ReferencedMailPart;
 import com.openexchange.mail.transport.dataobjects.TextBodyMailPart;
 import com.openexchange.mail.transport.dataobjects.UploadFileMailPart;
 import com.openexchange.mail.usersetting.UserSettingMail;
+import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.smtp.config.GlobalSMTPConfig;
 import com.openexchange.smtp.config.SMTPConfig;
@@ -128,7 +132,7 @@ public final class SMTPTransport extends MailTransport {
 
 	private final Session smtpSession;
 
-	private final MailConnection mailConnection;
+	private final MailConnection<?, ?, ?> mailConnection;
 
 	private final SessionObject session;
 
@@ -154,7 +158,8 @@ public final class SMTPTransport extends MailTransport {
 	 * @throws MailException
 	 *             If initialization fails
 	 */
-	public SMTPTransport(final SessionObject session, final MailConnection mailConnection) throws MailException {
+	public SMTPTransport(final SessionObject session, final MailConnection<?, ?, ?> mailConnection)
+			throws MailException {
 		super();
 		this.mailConnection = mailConnection;
 		final Properties smtpProps = SMTPSessionProperties.getDefaultSessionProperties();
@@ -166,7 +171,7 @@ public final class SMTPTransport extends MailTransport {
 		smtpProps.put(MIMESessionPropertyNames.PROP_SMTPPORT, String.valueOf(transportConfig.getPort()));
 		this.smtpSession = Session.getInstance(smtpProps, null);
 		this.session = session;
-		usm = session.getUserSettingMail();
+		usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), session.getContext());
 	}
 
 	private void checkMailConnection() throws MailException {
@@ -197,16 +202,17 @@ public final class SMTPTransport extends MailTransport {
 						Long.valueOf(msgUID));
 			}
 			final SMTPMessage smtpMessage = new SMTPMessage(smtpSession);
+			final User u = UserStorage.getUser(session.getUserId(), session.getContext());
 			/*
 			 * Set from
 			 */
 			final String from;
 			if (fromAddr != null) {
 				from = fromAddr;
-			} else if (usm.getSendAddr() == null && session.getUserObject().getMail() == null) {
+			} else if (usm.getSendAddr() == null && u.getMail() == null) {
 				throw new SMTPException(SMTPException.Code.NO_SEND_ADDRESS_FOUND);
 			} else {
-				from = usm.getSendAddr() == null ? session.getUserObject().getMail() : usm.getSendAddr();
+				from = usm.getSendAddr() == null ? u.getMail() : usm.getSendAddr();
 			}
 			smtpMessage.addFrom(parseAddressList(from, false));
 			/*
@@ -220,13 +226,14 @@ public final class SMTPTransport extends MailTransport {
 			/*
 			 * Subject
 			 */
-			final StringHelper strHelper = new StringHelper(session.getLocale());
+			final Locale locale = UserStorage.getUser(session.getUserId(), session.getContext()).getLocale();
+			final StringHelper strHelper = new StringHelper(locale);
 			smtpMessage.setSubject(strHelper.getString(MailStrings.ACK_SUBJECT));
 			/*
 			 * Sent date
 			 */
 			final Date date = new Date();
-			final int offset = TimeZone.getTimeZone(session.getUserObject().getTimeZone()).getOffset(date.getTime());
+			final int offset = TimeZone.getTimeZone(u.getTimeZone()).getOffset(date.getTime());
 			smtpMessage.setSentDate(new Date(System.currentTimeMillis() - offset));
 			/*
 			 * Set common headers
@@ -244,10 +251,10 @@ public final class SMTPTransport extends MailTransport {
 			final MimeBodyPart text = new MimeBodyPart();
 			text.setText(performLineFolding(strHelper.getString(MailStrings.ACK_NOTIFICATION_TEXT).replaceFirst(
 					"#DATE#",
-					sentDate == null ? "" : quoteReplacement(DateFormat.getDateInstance(DateFormat.LONG,
-							session.getLocale()).format(sentDate))).replaceFirst("#RECIPIENT#", quoteReplacement(from))
-					.replaceFirst("#SUBJECT#", quoteReplacement(mail.getSubject())), false, usm.getAutoLinebreak()),
-					MailConfig.getDefaultMimeCharset());
+					sentDate == null ? "" : quoteReplacement(DateFormat.getDateInstance(DateFormat.LONG, locale)
+							.format(sentDate))).replaceFirst("#RECIPIENT#", quoteReplacement(from)).replaceFirst(
+					"#SUBJECT#", quoteReplacement(mail.getSubject())), false, usm.getAutoLinebreak()), MailConfig
+					.getDefaultMimeCharset());
 			text.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
 			text.setHeader(MessageHeaders.HDR_CONTENT_TYPE, ct.toString());
 			mixedMultipart.addBodyPart(text);
@@ -478,7 +485,7 @@ public final class SMTPTransport extends MailTransport {
 				 */
 				msgFiller.deleteReferencedUploadFiles();
 				for (String id : tempIds) {
-					session.removeAJAXUploadFile(id);
+					session.removeUploadedFile(id);
 				}
 				return MailPath.NULL;
 			}
@@ -501,7 +508,7 @@ public final class SMTPTransport extends MailTransport {
 			}
 			msgFiller.deleteReferencedUploadFiles();
 			for (String id : tempIds) {
-				session.removeAJAXUploadFile(id);
+				session.removeUploadedFile(id);
 			}
 			final MailPath retval = new MailPath(sentFullname, uid);
 			if (LOG.isInfoEnabled()) {
@@ -570,7 +577,8 @@ public final class SMTPTransport extends MailTransport {
 		 */
 		final String subject;
 		if ((subject = newSMTPMsg.getSubject()) == null || subject.length() == 0) {
-			newSMTPMsg.setSubject(new StringHelper(session.getLocale()).getString(MailStrings.DEFAULT_SUBJECT));
+			newSMTPMsg.setSubject(new StringHelper(UserStorage.getUser(session.getUserId(), session.getContext())
+					.getLocale()).getString(MailStrings.DEFAULT_SUBJECT));
 		}
 	}
 

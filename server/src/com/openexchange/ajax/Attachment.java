@@ -86,14 +86,17 @@ import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.upload.UploadEvent;
 import com.openexchange.groupware.upload.UploadException;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.UploadException.UploadCode;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.mail.usersetting.UserSettingMail;
+import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.encoding.Helper;
 import com.openexchange.tools.servlet.UploadServletException;
@@ -136,7 +139,8 @@ public class Attachment extends PermissionServlet {
 	
 	@Override
 	protected boolean hasModulePermission(final SessionObject sessionObj) {
-		return AttachmentRequest.hasPermission(sessionObj.getUserConfiguration());
+		return AttachmentRequest.hasPermission(UserConfigurationStorage.getInstance().getUserConfigurationSafe(
+				sessionObj.getUserId(), sessionObj.getContext()));
 	}
 	
 	
@@ -151,9 +155,10 @@ public class Attachment extends PermissionServlet {
 			return ;
 		}
 		
-		final User user = session.getUserObject();
+		final User user = UserStorage.getUser(session.getUserId(), session.getContext());
 		final Context ctx = session.getContext();
-		final UserConfiguration userConfig = session.getUserConfiguration();
+		final UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(
+				session.getUserId(), session.getContext());
 		
 		if (ACTION_DOCUMENT.equals(action)) {
 			try {
@@ -227,19 +232,21 @@ public class Attachment extends PermissionServlet {
 			return ;
 		}
 		
-		final User user = session.getUserObject();
+		final User user = UserStorage.getUser(session.getUserId(), session.getContext());
 		final Context ctx = session.getContext();
-		final UserConfiguration userConfig = session.getUserConfiguration();
+		final UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(
+				session.getUserId(), session.getContext());
 		
 		try {
-			checkSize(req.getContentLength(), session.getUserSettingMail());
+			checkSize(req.getContentLength(), UserSettingMailStorage.getInstance().getUserSettingMail(
+					session.getUserId(), session.getContext()));
 			if (ACTION_ATTACH.equals(action)) {
 				UploadEvent upload = null;
 				try {
 					upload = processUpload(req);
 					final List<AttachmentMetadata> attachments = new ArrayList<AttachmentMetadata>();
 					final List<UploadFile> uploadFiles = new ArrayList<UploadFile>();
-					
+
 					long sum = 0;
 					final JSONObject json = new JSONObject();
 					final List<UploadFile> l = upload.getUploadFiles();
@@ -249,28 +256,30 @@ public class Attachment extends PermissionServlet {
 						final UploadFile uploadFile = iter.next();
 						final String fileField = uploadFile.getFieldName();
 						final int index = Integer.parseInt(fileField.substring(5));
-						final String obj = upload.getFormField(PREFIX_JSON+index);
+						final String obj = upload.getFormField(PREFIX_JSON + index);
 						if (obj == null || obj.length() == 0) {
 							continue;
 						}
 						json.reset();
 						json.parseJSONString(obj);
-						for(AttachmentField required : REQUIRED){
-							if(!json.has(required.getName())) {
-								missingParameter(required.getName(),res, true, action);
+						for (AttachmentField required : REQUIRED) {
+							if (!json.has(required.getName())) {
+								missingParameter(required.getName(), res, true, action);
 							}
 						}
-						
+
 						final AttachmentMetadata attachment = PARSER.getAttachmentMetadata(json.toString());
 						assureSize(index, attachments, uploadFiles);
-						
+
 						attachments.set(index, attachment);
 						uploadFiles.set(index, uploadFile);
 						sum += uploadFile.getSize();
-						checkSingleSize(uploadFile.getSize(), session.getUserSettingMail());
-						checkSize(sum, session.getUserSettingMail());
+						checkSingleSize(uploadFile.getSize(), UserSettingMailStorage.getInstance().getUserSettingMail(
+								session.getUserId(), session.getContext()));
+						checkSize(sum, UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(),
+								session.getContext()));
 					}
-					attach(res,attachments,uploadFiles,ctx,user,userConfig);
+					attach(res, attachments, uploadFiles, ctx, user, userConfig);
 				} finally {
 					if (upload != null) {
 						upload.cleanUp();

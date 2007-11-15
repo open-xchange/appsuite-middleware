@@ -84,6 +84,8 @@ import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.DBPool;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -226,12 +228,12 @@ public final class vcard extends PermissionServlet {
 			// get user-agent
 			user_agent = getUserAgent(req);
 			
-			principal = user_agent + '_' + sessionObj.getUserObject().getId();
+			principal = user_agent + '_' + sessionObj.getUserId();
 			
 			int contactfolder_id = getContactFolderID(req);
 			
 			if (contactfolder_id == 0) {
-				contactfolder_id = OXFolderTools.getContactDefaultFolder(sessionObj.getUserObject().getId(), context);
+				contactfolder_id = OXFolderTools.getContactDefaultFolder(sessionObj.getUserId(), context);
 			}
 			
 			int db_contactfolder_id = 0;
@@ -408,12 +410,12 @@ public final class vcard extends PermissionServlet {
 				throw new OXConflictException("missing header field: user-agent");
 			}
 			
-			principal = user_agent + '_' + sessionObj.getUserObject().getId();
+			principal = user_agent + '_' + sessionObj.getUserId();
 			
 			int contactfolder_id = getContactFolderID(req);
 			
 			if (contactfolder_id == 0) {
-				contactfolder_id = OXFolderTools.getContactDefaultFolder(sessionObj.getUserObject().getId(), context);
+				contactfolder_id = OXFolderTools.getContactDefaultFolder(sessionObj.getUserId(), context);
 			}
 			
 			if (contactfolder_id == FolderObject.SYSTEM_LDAP_FOLDER_ID) {
@@ -722,8 +724,10 @@ public final class vcard extends PermissionServlet {
 		}
 	}
 	
+	@Override
 	protected boolean hasModulePermission(final SessionObject sessionObj) {
-		return (sessionObj.getUserConfiguration().hasVCard() && sessionObj.getUserConfiguration().hasContact());
+		final UserConfiguration uc = UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext());
+		return (uc.hasVCard() && uc.hasContact());
 	}
 	
 }

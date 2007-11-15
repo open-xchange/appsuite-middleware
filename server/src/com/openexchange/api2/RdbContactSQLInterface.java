@@ -82,7 +82,10 @@ import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.search.ContactSearchObject;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.DBPool;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.server.EffectivePermission;
@@ -105,16 +108,19 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 	private final int[] memberInGroups;
 	private final Context ctx;
 	private final SessionObject sessionobject;
+	private final UserConfiguration userConfiguration;
 
 	private static final ContactExceptionFactory EXCEPTIONS = new ContactExceptionFactory(RdbContactSQLInterface.class);
 	
 	private static final Log LOG = LogFactory.getLog(RdbContactSQLInterface.class);
 	
 	public RdbContactSQLInterface(SessionObject sessionobject) {
-		this.userId = sessionobject.getUserObject().getId();
-		this.memberInGroups = sessionobject.getUserObject().getGroups();
+		this.userId = sessionobject.getUserId();
+		this.memberInGroups = UserStorage.getUser(sessionobject.getUserId(), sessionobject.getContext()).getGroups();
 		this.ctx = sessionobject.getContext();
 		this.sessionobject = sessionobject;
+		userConfiguration = UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionobject.getUserId(),
+				sessionobject.getContext());
 	}
 
 	@OXThrows(
@@ -154,7 +160,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 	public void updateContactObject(final ContactObject co, final int fid, final java.util.Date d) throws OXException, OXConcurrentModificationException, ContactException {
 
 		try{
-			Contacts.performContactStorageUpdate(co,fid,d,userId,memberInGroups,ctx,sessionobject.getUserConfiguration());
+			Contacts.performContactStorageUpdate(co,fid,d,userId,memberInGroups,ctx,userConfiguration);
 			final EventClient ec = new EventClient(sessionobject);
 			ec.modify(co);
 		}catch (ContactException ise){
@@ -216,7 +222,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 			
 		try {
 			final ContactSql contactSQL = new ContactMySql(sessionobject);
-			final EffectivePermission oclPerm = new OXFolderAccess(readCon, ctx).getFolderPermission(folderId, userId, sessionobject.getUserConfiguration());
+			final EffectivePermission oclPerm = new OXFolderAccess(readCon, ctx).getFolderPermission(folderId, userId, userConfiguration);
 			if (oclPerm.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {
 				throw EXCEPTIONS.createOXConflictException(4,Integer.valueOf(folderId), Integer.valueOf(ctx.getContextId()), Integer.valueOf(userId));
 				//throw new OXConflictException("NOT ALLOWED TO SEE FOLDER OBJECTS (cid="+sessionobject.getContext().getContextId()+" fid="+folderId+')');
@@ -275,7 +281,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 							"An error occurred during the load of folder objects. Context %1$d Folder %2$d User %3$d"
 						}
 	)
-	public SearchIterator getContactsInFolder(final int folderId, final int from, final int to, final int order_field, final String orderMechanism, final int[] cols) throws OXException {
+	public SearchIterator<?> getContactsInFolder(final int folderId, final int from, final int to, final int order_field, final String orderMechanism, final int[] cols) throws OXException {
 		boolean error = false;
 		String orderDir = orderMechanism;
 		int orderBy = order_field;
@@ -312,14 +318,14 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 			//throw new OXException("getContactsInFolder() called with a non-Contact-Folder! (cid="+sessionobject.getContext().getContextId()+" fid="+folderId+')');
 		}
 		
-		SearchIterator si = null;
+		SearchIterator<?> si = null;
 		ResultSet rs = null;
 		Statement stmt = null;
 		try {
 			final ContactSql cs = new ContactMySql(sessionobject);
 			cs.setFolder(folderId);
 
-			final EffectivePermission oclPerm = new OXFolderAccess(readCon, ctx).getFolderPermission(folderId, userId, sessionobject.getUserConfiguration());
+			final EffectivePermission oclPerm = new OXFolderAccess(readCon, ctx).getFolderPermission(folderId, userId, userConfiguration);
 			
 			if (oclPerm.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {
 				throw EXCEPTIONS.createOXConflictException(9,Integer.valueOf(folderId), Integer.valueOf(ctx.getContextId()), Integer.valueOf(userId));
@@ -403,7 +409,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 							ContactException.INIT_CONNECTION_FROM_DBPOOL
 						}
 	)
-	public SearchIterator getContactsByExtendedSearch(final ContactSearchObject searchobject,  final int order_field, final String orderMechanism, final int[] cols) throws OXException {
+	public SearchIterator<?> getContactsByExtendedSearch(final ContactSearchObject searchobject,  final int order_field, final String orderMechanism, final int[] cols) throws OXException {
 		boolean error = false;
 		String orderDir = orderMechanism;
 		int orderBy = order_field;
@@ -453,7 +459,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 			if (!(searchobject.isAllFolders() || searchobject.getEmailAutoComplete())){	
 				cs.setFolder(folderId);
 
-				final EffectivePermission oclPerm = new OXFolderAccess(readcon, ctx).getFolderPermission(folderId, userId, sessionobject.getUserConfiguration());
+				final EffectivePermission oclPerm = new OXFolderAccess(readcon, ctx).getFolderPermission(folderId, userId, userConfiguration);
 				if (oclPerm.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {
 					throw EXCEPTIONS.createOXConflictException(15,Integer.valueOf(folderId), Integer.valueOf(ctx.getContextId()), Integer.valueOf(userId));
 					//throw new OXConflictException("NOT ALLOWED TO SEE FOLDER OBJECTS (cid="+sessionobject.getContext().getContextId()+" fid="+folderId+')');
@@ -590,7 +596,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 			final String order = " ORDER BY co." + Contacts.mapping[orderBy].getDBFieldName() + ' ' + orderDir +  ' ';
 			cs.setOrder(order);
 			
-			final EffectivePermission oclPerm = new OXFolderAccess(readcon, ctx).getFolderPermission(folderId, userId, sessionobject.getUserConfiguration());
+			final EffectivePermission oclPerm = new OXFolderAccess(readcon, ctx).getFolderPermission(folderId, userId, userConfiguration);
 			if (oclPerm.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {
 				throw EXCEPTIONS.createOXConflictException(22,Integer.valueOf(folderId), Integer.valueOf(ctx.getContextId()), Integer.valueOf(userId));
 				//throw new OXConflictException("NOT ALLOWED TO SEE FOLDER OBJECTS (cid="+sessionobject.getContext().getContextId()+" fid="+folderId+')');
@@ -680,7 +686,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 		try{
 			readCon = DBPool.pickup(sessionobject.getContext());
 			if (objectId > 0){
-				co = Contacts.getContactById(objectId, userId, memberInGroups, ctx, sessionobject.getUserConfiguration(), readCon);							
+				co = Contacts.getContactById(objectId, userId, memberInGroups, ctx, userConfiguration, readCon);							
 			}else{
 				throw EXCEPTIONS.createOXObjectNotFoundException(26,Integer.valueOf(ctx.getContextId()), Integer.valueOf(fid), Integer.valueOf(userId), Integer.valueOf(objectId));
 				//throw new OXObjectNotFoundException("NO CONTACT FOUND! (cid="+sessionobject.getContext().getContextId()+" fid="+fid+')');
@@ -769,7 +775,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 		try {
 			final ContactSql cs = new ContactMySql(sessionobject);
 
-			final EffectivePermission oclPerm = new OXFolderAccess(readCon, ctx).getFolderPermission(folderId, userId, sessionobject.getUserConfiguration());
+			final EffectivePermission oclPerm = new OXFolderAccess(readCon, ctx).getFolderPermission(folderId, userId, userConfiguration);
 			if (oclPerm.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {
 				throw EXCEPTIONS.createOXConflictException(32,Integer.valueOf(folderId), Integer.valueOf(ctx.getContextId()), Integer.valueOf(userId));
 				//throw new OXConflictException("NOT ALLOWED TO SEE FOLDER OBJECTS (cid="+sessionobject.getContext().getContextId()+" fid="+folderId+')');
@@ -986,7 +992,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 				//throw new OXConflictException("NOT ALLOWED TO DELETE FOLDER OBJECTS CONTACT CUZ IT IS PRIVATE (cid="+sessionobject.getContext().getContextId()+" fid="+fid+" oid="+oid+')');
 			}
 			
-			oclPerm = new OXFolderAccess(readcon, ctx).getFolderPermission(fid, userId, sessionobject.getUserConfiguration());
+			oclPerm = new OXFolderAccess(readcon, ctx).getFolderPermission(fid, userId, userConfiguration);
 			if (oclPerm.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {
 				throw EXCEPTIONS.createOXPermissionException(58,Integer.valueOf(fuid), Integer.valueOf(ctx.getContextId()), Integer.valueOf(userId));
 				//throw new OXConflictException("NOT ALLOWED TO DELETE FOLDER OBJECTS (cid="+sessionobject.getContext().getContextId()+" fid="+fid+" oid="+oid+')');
@@ -1123,7 +1129,9 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 	}
 	
 	public static boolean performSecurityReadCheck(final int fid, final int created_from, final int user, final int[] group, final SessionObject so, final Connection readcon) {
-		return Contacts.performContactReadCheck(fid, created_from,user,group,so.getContext(),so.getUserConfiguration(),readcon);		
+		return Contacts.performContactReadCheck(fid, created_from, user, group, so.getContext(),
+				UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), so.getContext()),
+				readcon);		
 	}
 
 	@OXThrowsMultiple(
@@ -1157,8 +1165,9 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 			co.setObjectID(rs.getInt(cols.length + 7));
 
 			int cnt = 1;
-			for (int a=0;a<cols.length;a++){
-				Contacts.mapping[cols[a]].addToContactObject(rs, cnt, co, readCon, userId,memberInGroups,ctx, sessionobject.getUserConfiguration());
+			for (int a = 0; a < cols.length; a++) {
+				Contacts.mapping[cols[a]].addToContactObject(rs, cnt, co, readCon, userId, memberInGroups, ctx,
+						userConfiguration);
 				cnt++;
 			}
 

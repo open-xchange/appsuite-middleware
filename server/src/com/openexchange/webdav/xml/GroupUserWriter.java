@@ -289,7 +289,7 @@ public class GroupUserWriter extends ContactWriter {
 			addElementMemberInGroups(e, u);
 			addElementAliases(e, u);
 			
-			if (userId == sessionObj.getUserObject().getId()) {
+			if (userId == sessionObj.getUserId()) {
 				addElement("myidentity", true, e);
 				addElement("context_id", sessionObj.getContext().getContextId(), e);
 			}

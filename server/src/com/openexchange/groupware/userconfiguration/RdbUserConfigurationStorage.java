@@ -105,17 +105,6 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage implem
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.groupware.UserConfigurationStorage#getUserConfiguration(int)
-	 */
-	@Override
-	public UserConfiguration getUserConfiguration(final int userId, final Context ctx)
-			throws UserConfigurationException {
-		return getUserConfiguration(userId, null, ctx);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
 	 * @see com.openexchange.groupware.UserConfigurationStorage#getUserConfiguration(int,
 	 *      int[])
 	 */
@@ -428,8 +417,7 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage implem
 			rs = stmt.executeQuery();
 			if (rs.next()) {
 				if (groups == null) {
-					final UserStorage uStorage = UserStorage.getInstance(ctx);
-					groups = uStorage.getUser(userId).getGroups();
+					groups = UserStorage.getInstance(ctx).getUser(userId).getGroups();
 				}
 				return new UserConfiguration(rs.getInt(1), userId, groups, ctx);
 			}

@@ -78,6 +78,7 @@ import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionC
 import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionFactory;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.server.EffectivePermission;
 import com.openexchange.sessiond.SessionObject;
@@ -187,11 +188,11 @@ public class ICalExporter implements Exporter {
 		//check format of folder
 		int module = fo.getModule(); 
 		if (module == FolderObject.CALENDAR) {
-			if (!sessObj.getUserConfiguration().hasCalendar()) {
+			if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessObj.getUserId(), sessObj.getContext()).hasCalendar()) {
 				return false;
 			}
 		} else if (module == FolderObject.TASK) {
-			if (sessObj.getUserConfiguration().hasTask()) {
+			if (UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessObj.getUserId(), sessObj.getContext()).hasTask()) {
 				return false;
 			}
 		} else {
@@ -201,7 +202,7 @@ public class ICalExporter implements Exporter {
 		//check read access to folder
 		EffectivePermission perm;
 		try {
-			perm = fo.getEffectiveUserPermission(sessObj.getUserObject().getId(), sessObj.getUserConfiguration());
+			perm = fo.getEffectiveUserPermission(sessObj.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessObj.getUserId(), sessObj.getContext()));
 		} catch (final DBPoolingException e) {
 			throw importExportExceptionFactory.create(2, folder);
 		} catch (final SQLException e) {

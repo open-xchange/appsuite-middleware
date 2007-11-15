@@ -57,6 +57,8 @@ import com.openexchange.event.InfostoreEvent;
 import com.openexchange.groupware.FolderLockManager;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.sessiond.SessionObject;
 
 public class LockCleaner implements FolderEvent, InfostoreEvent {
@@ -74,7 +76,7 @@ public class LockCleaner implements FolderEvent, InfostoreEvent {
 	
 	public void folderDeleted(FolderObject folderObj, SessionObject sessionObj) {
 		try {
-			folderLockManager.removeAll(folderObj.getObjectID(), sessionObj.getContext(), sessionObj.getUserObject(), sessionObj.getUserConfiguration());
+			folderLockManager.removeAll(folderObj.getObjectID(), sessionObj.getContext(), UserStorage.getUser(sessionObj.getUserId(), sessionObj.getContext()), UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext()));
 		} catch (OXException e) {
 			LOG.fatal("Couldn't remove folder locks from folder "+folderObj.getObjectID()+" in context "+sessionObj.getContext().getContextId()+". Run the consistency tool.");
 		}
@@ -83,7 +85,7 @@ public class LockCleaner implements FolderEvent, InfostoreEvent {
 	
 	public void infoitemDeleted(DocumentMetadata metadata, SessionObject sessionObj) {
 		try {
-			infoLockManager.removeAll(metadata.getId(), sessionObj.getContext(), sessionObj.getUserObject(), sessionObj.getUserConfiguration());
+			infoLockManager.removeAll(metadata.getId(), sessionObj.getContext(), UserStorage.getUser(sessionObj.getUserId(), sessionObj.getContext()), UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext()));
 		} catch (OXException e) {
 			LOG.fatal("Couldn't remove locks from infoitem "+metadata.getId()+" in context "+sessionObj.getContext().getContextId()+". Run the consistency tool.");
 		}	

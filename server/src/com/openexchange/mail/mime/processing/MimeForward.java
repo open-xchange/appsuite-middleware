@@ -67,6 +67,7 @@ import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
 
 import com.openexchange.groupware.i18n.MailStrings;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.StringHelper;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.config.MailConfig;
@@ -81,6 +82,7 @@ import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.NonInlinePartHandler;
 import com.openexchange.mail.usersetting.UserSettingMail;
+import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.mail.ContentType;
@@ -127,7 +129,8 @@ public final class MimeForward {
 			/*
 			 * New MIME message with a dummy session
 			 */
-			final UserSettingMail usm = session.getUserSettingMail();
+			final UserSettingMail usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(),
+					session.getContext());
 			final MimeMessage forwardMsg = new MimeMessage(MIMEDefaultSession.getDefaultSession());
 			{
 				/*
@@ -135,8 +138,8 @@ public final class MimeForward {
 				 */
 				final String origSubject = MimeUtility.unfold(originalMsg.getHeader(MessageHeaders.HDR_SUBJECT, null));
 				if (origSubject != null) {
-					final String subjectPrefix = new StringHelper(session.getLocale())
-							.getString(MailStrings.FORWARD_SUBJECT_PREFIX);
+					final String subjectPrefix = new StringHelper(UserStorage.getUser(session.getUserId(),
+							session.getContext()).getLocale()).getString(MailStrings.FORWARD_SUBJECT_PREFIX);
 					final String subject = MessageUtility.decodeMultiEncodedHeader(origSubject.regionMatches(true, 0,
 							subjectPrefix, 0, subjectPrefix.length()) ? origSubject : new StringBuilder().append(
 							subjectPrefix).append(origSubject).toString());
@@ -195,7 +198,8 @@ public final class MimeForward {
 					 * Add appropriate text part prefixed with forward text
 					 */
 					final MimeBodyPart textPart = new MimeBodyPart();
-					textPart.setText(generateForwardText(firstSeenText, session.getLocale(), originalMsg, contentType
+					textPart.setText(generateForwardText(firstSeenText, UserStorage.getUser(session.getUserId(),
+							session.getContext()).getLocale(), originalMsg, contentType
 							.isMimeType(MIMETypes.MIME_TEXT_HTM_ALL)), contentType.getParameter(PARAM_CHARSET),
 							contentType.getSubType());
 					textPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
@@ -217,9 +221,10 @@ public final class MimeForward {
 				if (originalContentType.getParameter(PARAM_CHARSET) == null) {
 					originalContentType.setParameter(PARAM_CHARSET, MailConfig.getDefaultMimeCharset());
 				}
-				forwardMsg.setText(generateForwardText(MessageUtility.readMimePart(originalMsg, originalContentType), session
-						.getLocale(), originalMsg, originalContentType.isMimeType(MIMETypes.MIME_TEXT_HTM_ALL)),
-						originalContentType.getParameter(PARAM_CHARSET), originalContentType.getSubType());
+				forwardMsg.setText(generateForwardText(MessageUtility.readMimePart(originalMsg, originalContentType),
+						UserStorage.getUser(session.getUserId(), session.getContext()).getLocale(), originalMsg,
+						originalContentType.isMimeType(MIMETypes.MIME_TEXT_HTM_ALL)), originalContentType
+						.getParameter(PARAM_CHARSET), originalContentType.getSubType());
 				forwardMsg.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
 				forwardMsg.setHeader(MessageHeaders.HDR_CONTENT_TYPE, originalContentType.toString());
 				forwardMsg.saveChanges();
@@ -326,8 +331,8 @@ public final class MimeForward {
 		}
 		{
 			final InternetAddress[] to = (InternetAddress[]) msg.getRecipients(RecipientType.TO);
-			forwardPrefix = forwardPrefix.replaceFirst("#TO#", to == null || to.length == 0 ? "" : MimeProcessingUtility
-					.addrs2String(to));
+			forwardPrefix = forwardPrefix.replaceFirst("#TO#", to == null || to.length == 0 ? ""
+					: MimeProcessingUtility.addrs2String(to));
 		}
 		try {
 			forwardPrefix = forwardPrefix.replaceFirst("#DATE#", msg.getReceivedDate() == null ? "" : DateFormat
@@ -347,8 +352,8 @@ public final class MimeForward {
 			}
 			forwardPrefix = forwardPrefix.replaceFirst("#TIME#", "");
 		}
-		forwardPrefix = forwardPrefix
-				.replaceFirst("#SUBJECT#", MessageUtility.decodeMultiEncodedHeader(msg.getSubject()));
+		forwardPrefix = forwardPrefix.replaceFirst("#SUBJECT#", MessageUtility.decodeMultiEncodedHeader(msg
+				.getSubject()));
 		if (html) {
 			forwardPrefix = MessageUtility.htmlFormat(forwardPrefix);
 		}

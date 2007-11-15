@@ -53,7 +53,10 @@ package com.openexchange.webdav;
 
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentMetadata;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tx.TransactionException;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.webdav.xml.fields.DataFields;
 import java.io.IOException;
 import java.io.InputStream;
@@ -116,6 +119,7 @@ public final class attachments extends OXServlet {
 	
 	private static final Log LOG = LogFactory.getLog(attachments.class);
 	
+	@Override
 	public void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
 		log("PUT");
 		
@@ -161,7 +165,7 @@ public final class attachments extends OXServlet {
 			attachmentMeta.setId((req.getHeader(DataFields.OBJECT_ID) != null) ? objectId : AttachmentBase.NEW);
 			
 			attachmentBase.startTransaction();
-			attachmentBase.attachToObject(attachmentMeta, is, sessionObj.getContext(), sessionObj.getUserObject(), sessionObj.getUserConfiguration());
+			attachmentBase.attachToObject(attachmentMeta, is, sessionObj.getContext(), UserStorage.getUser(sessionObj.getUserId(), sessionObj.getContext()), UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext()));
 			attachmentBase.commit();
 			
 			objectId = attachmentMeta.getId();
@@ -241,6 +245,7 @@ public final class attachments extends OXServlet {
 		}
 	}
 	
+	@Override
 	public void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
 		log("GET");
 		
@@ -299,8 +304,9 @@ public final class attachments extends OXServlet {
 			}
 			
 			attachmentBase.startTransaction();
-			final AttachmentMetadata attachmentMeta = attachmentBase.getAttachment(folder_id, target_id, module, object_id, sessionObj.getContext(), sessionObj.getUserObject(), sessionObj.getUserConfiguration());
-			final InputStream is = attachmentBase.getAttachedFile(folder_id, target_id, module, object_id, sessionObj.getContext(), sessionObj.getUserObject(), sessionObj.getUserConfiguration());
+			final User u = UserStorage.getUser(sessionObj.getUserId(), sessionObj.getContext());
+			final AttachmentMetadata attachmentMeta = attachmentBase.getAttachment(folder_id, target_id, module, object_id, sessionObj.getContext(), u, UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext()));
+			final InputStream is = attachmentBase.getAttachedFile(folder_id, target_id, module, object_id, sessionObj.getContext(), u, UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext()));
 			attachmentBase.commit();
 			resp.setContentType(attachmentMeta.getFileMIMEType());
 			
@@ -323,6 +329,7 @@ public final class attachments extends OXServlet {
 		}
 	}
 	
+	@Override
 	public void doDelete(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
 		log("DELETE");
 		
@@ -338,7 +345,7 @@ public final class attachments extends OXServlet {
 			final int folderId = req.getIntHeader(TARGET_FOLDER_ID);
 			
 			attachmentBase.startTransaction();
-			attachmentBase.detachFromObject(folderId, targetId, module, new int[] { objectId }, sessionObj.getContext(), sessionObj.getUserObject(), sessionObj.getUserConfiguration());
+			attachmentBase.detachFromObject(folderId, targetId, module, new int[] { objectId }, sessionObj.getContext(), UserStorage.getUser(sessionObj.getUserId(), sessionObj.getContext()), UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext()));
 			attachmentBase.commit();
 			resp.setStatus(HttpServletResponse.SC_OK);
 		} catch (OXConflictException exc) {

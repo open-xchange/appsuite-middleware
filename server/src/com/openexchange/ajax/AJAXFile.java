@@ -183,7 +183,7 @@ public final class AJAXFile extends PermissionServlet {
 		 */
 		try {
 			final String id = paramContainer.checkStringParam(PARAMETER_ID);
-			if (!sessionObj.touchAJAXUploadFile(id)) {
+			if (!sessionObj.touchUploadedFile(id)) {
 				throw new UploadException(UploadCode.UPLOAD_FILE_NOT_FOUND, ACTION_KEEPALIVE, id);
 			}
 		} catch (final AbstractOXException e) {
@@ -215,7 +215,7 @@ public final class AJAXFile extends PermissionServlet {
 			 * Fetch file from session
 			 */
 			final SessionObject session = getSessionObject(req);
-			final ManagedUploadFile uploadFile = session.getAJAXUploadFile(id);
+			final ManagedUploadFile uploadFile = session.getUploadedFile(id);
 			if (uploadFile == null) {
 				throw new UploadException(UploadException.UploadCode.FILE_NOT_FOUND, ACTION_GET, id);
 			}
@@ -468,7 +468,7 @@ public final class AJAXFile extends PermissionServlet {
 		uploadFile.setContentType(fileItem.getContentType());
 		uploadFile.setSize(fileItem.getSize());
 		final String id = plainStringToMD5(tmpFile.getName());
-		session.putAJAXUploadFile(id, uploadFile);
+		session.putUploadedFile(id, uploadFile);
 		return id;
 	}
 	

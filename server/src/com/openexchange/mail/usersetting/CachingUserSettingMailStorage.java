@@ -128,7 +128,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 	 * @param ctx
 	 *            the context
 	 * @param writeConArg -
-	 *            the writeable conenction; may be <code>null</code>
+	 *            the writable connection; may be <code>null</code>
 	 * @throws UserConfigurationException
 	 *             if user's mail settings could not be saved
 	 */
@@ -205,7 +205,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 	 * @param ctx
 	 *            the context
 	 * @param writeConArg
-	 *            the writeable connection; may be <code>null</code>
+	 *            the writable connection; may be <code>null</code>
 	 * @throws UserConfigurationException -
 	 *             if deletion fails
 	 */
@@ -359,7 +359,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 
 	private static final String SQL_LOAD_SIGNATURES = "SELECT id, signature FROM user_setting_mail_signature WHERE cid = ? AND user = ?";
 
-	private void loadSignatures(final UserSettingMail usm, final int user, final Context ctx,
+	private static void loadSignatures(final UserSettingMail usm, final int user, final Context ctx,
 			final Connection readConArg) throws UserConfigurationException {
 		try {
 			Connection readCon = readConArg;
@@ -403,7 +403,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 		}
 	}
 
-	private PreparedStatement getUpdateStmt(final UserSettingMail usm, final int user, final Context ctx,
+	private static PreparedStatement getUpdateStmt(final UserSettingMail usm, final int user, final Context ctx,
 			final Connection writeCon) throws SQLException {
 		PreparedStatement stmt;
 		stmt = writeCon.prepareStatement(SQL_UPDATE);
@@ -434,7 +434,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 		return stmt;
 	}
 
-	private PreparedStatement getInsertStmt(final UserSettingMail usm, final int user, final Context ctx,
+	private static PreparedStatement getInsertStmt(final UserSettingMail usm, final int user, final Context ctx,
 			final Connection writeCon) throws SQLException {
 		PreparedStatement stmt;
 		stmt = writeCon.prepareStatement(SQL_INSERT);
@@ -467,7 +467,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 
 	private static final String SQL_INSERT_SIGNATURE = "INSERT INTO user_setting_mail_signature (cid, user, id, signature) VALUES (?, ?, ?, ?)";
 
-	private boolean saveSignatures(final UserSettingMail usm, final int user, final Context ctx,
+	private static boolean saveSignatures(final UserSettingMail usm, final int user, final Context ctx,
 			final Connection writeConArg) throws UserConfigurationException {
 		try {
 			Connection writeCon = writeConArg;
@@ -515,7 +515,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 		}
 	}
 
-	private String getDisplayMsgHeadersString(final UserSettingMail usm) {
+	private static String getDisplayMsgHeadersString(final UserSettingMail usm) {
 		final String[] displayMsgHeaders = usm.getDisplayMsgHeaders();
 		if (displayMsgHeaders == null || displayMsgHeaders.length == 0) {
 			return null;
@@ -528,7 +528,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 		return tmp.toString();
 	}
 
-	private void setDisplayMsgHeadersString(final UserSettingMail usm, final String displayMsgHeadersStr) {
+	private static void setDisplayMsgHeadersString(final UserSettingMail usm, final String displayMsgHeadersStr) {
 		if (displayMsgHeadersStr == null) {
 			usm.setDisplayMsgHeaders(null);
 			usm.setModifiedDuringSession(true);

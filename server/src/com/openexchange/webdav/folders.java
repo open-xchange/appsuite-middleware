@@ -59,6 +59,7 @@ import com.openexchange.api2.FolderSQLInterface;
 import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.api2.RdbFolderSQLInterface;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.oxfolder.OXFolderTools;
 import com.openexchange.webdav.xml.DataParser;
@@ -121,11 +122,11 @@ public final class folders extends XmlServlet {
 						if (folderobject.containsObjectID()) {
 							final int object_id = folderobject.getObjectID();
 							
-							if (object_id == OXFolderTools.getCalendarDefaultFolder(sessionObj.getUserObject().getId(), sessionObj.getContext())) {
+							if (object_id == OXFolderTools.getCalendarDefaultFolder(sessionObj.getUserId(), sessionObj.getContext())) {
 								folderobject.removeFolderName();
-							} else if (object_id == OXFolderTools.getContactDefaultFolder(sessionObj.getUserObject().getId(), sessionObj.getContext())) {
+							} else if (object_id == OXFolderTools.getContactDefaultFolder(sessionObj.getUserId(), sessionObj.getContext())) {
 								folderobject.removeFolderName();
-							} else if (object_id == OXFolderTools.getTaskDefaultFolder(sessionObj.getUserObject().getId(), sessionObj.getContext())) {
+							} else if (object_id == OXFolderTools.getTaskDefaultFolder(sessionObj.getUserId(), sessionObj.getContext())) {
 								folderobject.removeFolderName();
 							}
 						} else {
@@ -197,7 +198,7 @@ public final class folders extends XmlServlet {
 	
 	@Override
 	protected boolean hasModulePermission(final SessionObject sessionObj) {
-		return sessionObj.getUserConfiguration().hasWebDAVXML();
+		return UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext()).hasWebDAVXML();
 	}
 }
 

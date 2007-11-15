@@ -90,6 +90,7 @@ import com.openexchange.groupware.infostore.search.impl.SearchEngineImpl;
 import com.openexchange.groupware.infostore.utils.InfostoreConfigUtils;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tx.DBPoolProvider;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.upload.UploadEvent;
@@ -97,8 +98,10 @@ import com.openexchange.groupware.upload.UploadException;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.UploadException.UploadCode;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.mail.usersetting.UserSettingMail;
+import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.encoding.Helper;
 import com.openexchange.tools.exceptions.LoggingLogic;
@@ -106,7 +109,7 @@ import com.openexchange.tools.servlet.UploadServletException;
 import com.openexchange.tools.servlet.http.Tools;
 
 public class Infostore extends PermissionServlet {
-	
+
 	private static final String STR_JSON = "json";
 
 	private static final String STR_ERROR = "error";
@@ -117,61 +120,61 @@ public class Infostore extends PermissionServlet {
 
 	private static final long serialVersionUID = 2674990072903834660L;
 
-	private static  final InfostoreParser PARSER = new InfostoreParser();
+	private static final InfostoreParser PARSER = new InfostoreParser();
 
 	public static final InfostoreFacade VIRTUAL_FACADE = new VirtualFolderInfostoreFacade();
-	
-	public static  final InfostoreFacade FACADE = new InfostoreFacadeImpl(new DBPoolProvider());
-	static{
+
+	public static final InfostoreFacade FACADE = new InfostoreFacadeImpl(new DBPoolProvider());
+	static {
 		FACADE.setTransactional(true);
 	}
-	
-	public static  final SearchEngine SEARCH_ENGINE = new SearchEngineImpl(new DBPoolProvider());
+
+	public static final SearchEngine SEARCH_ENGINE = new SearchEngineImpl(new DBPoolProvider());
 	static {
 		SEARCH_ENGINE.setTransactional(true);
 	}
-	
-	
-//	public static final Exception2Message OXEXCEPTION_HANDLER = new InfostoreException2Message();
-	
+
+	// public static final Exception2Message OXEXCEPTION_HANDLER = new
+	// InfostoreException2Message();
+
 	private static final Log LOG = LogFactory.getLog(Infostore.class);
+
 	private static final LoggingLogic LL = LoggingLogic.getLoggingLogic(Infostore.class, LOG);
 
 	private long maxUploadSize = -1;
-	
-	//TODO: Better error handling
-	
-	
+
+	// TODO: Better error handling
+
 	@Override
 	protected boolean hasModulePermission(final SessionObject sessionObj) {
-		return InfostoreRequest.hasPermission(sessionObj.getUserConfiguration());
+		return InfostoreRequest.hasPermission(UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext()));
 	}
 
 	@Override
-	protected void doGet(final HttpServletRequest req, final HttpServletResponse res)
-		throws ServletException, IOException {
-		
+	protected void doGet(final HttpServletRequest req, final HttpServletResponse res) throws ServletException,
+			IOException {
+
 		final SessionObject sessionObj = getSessionObject(req);
-		
+
 		final Context ctx = sessionObj.getContext();
-		final User user = sessionObj.getUserObject();
-		final UserConfiguration userConfig = sessionObj.getUserConfiguration();
-		
+		final User user = UserStorage.getUser(sessionObj.getUserId(), sessionObj.getContext());
+		final UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext());
+
 		final String action = req.getParameter(PARAMETER_ACTION);
 		if (action == null) {
-			missingParameter(PARAMETER_ACTION,res, false, null);
+			missingParameter(PARAMETER_ACTION, res, false, null);
 			return;
 		}
 
-		if(action.equals(ACTION_DOCUMENT)){
-			if(req.getParameter(PARAMETER_ID) == null) {
+		if (action.equals(ACTION_DOCUMENT)) {
+			if (req.getParameter(PARAMETER_ID) == null) {
 				final Response resp = new Response();
-				resp.setException(new AbstractOXException("You must provide a value for "+PARAMETER_ID));
+				resp.setException(new AbstractOXException("You must provide a value for " + PARAMETER_ID));
 				final StringWriter w = new StringWriter();
 				try {
 					Response.write(resp, w);
 				} catch (JSONException e) {
-					//shouldn't happen
+					// shouldn't happen
 					throw new ServletException(e);
 				}
 				res.setContentType(MIME_TEXT_HTML);
@@ -184,20 +187,20 @@ public class Infostore extends PermissionServlet {
 				handleOXException(res, new AbstractOXException("Invalid number"), STR_ERROR, true, JS_FRAGMENT);
 				return;
 			}
-			
+
 			final String versionS = req.getParameter(PARAMETER_VERSION);
 			final int version = (versionS == null) ? InfostoreFacade.CURRENT_VERSION : Integer.valueOf(versionS);
-			
+
 			final String contentType = req.getParameter(PARAMETER_CONTENT_TYPE);
-			
-			document(res, isIE(req),isIE7(req), id, version, contentType, ctx, user, userConfig);
-			
+
+			document(res, isIE(req), isIE7(req), id, version, contentType, ctx, user, userConfig);
+
 			return;
 		}
 		final OXJSONWriter writer = new OXJSONWriter();
-		final InfostoreRequest request = new InfostoreRequest(sessionObj,writer);
+		final InfostoreRequest request = new InfostoreRequest(sessionObj, writer);
 		try {
-			if(!request.action(action,new ServletRequestAdapter(req,res))) {
+			if (!request.action(action, new ServletRequestAdapter(req, res))) {
 				unknownAction("GET", action, res, false);
 				return;
 			}
@@ -205,98 +208,99 @@ public class Infostore extends PermissionServlet {
 		} catch (final JSONException e) {
 			LOG.error(e.getLocalizedMessage(), e);
 		} catch (OXPermissionException e) {
-			LOG.error("Not possible, obviously: "+e.getLocalizedMessage(), e);
+			LOG.error("Not possible, obviously: " + e.getLocalizedMessage(), e);
 		}
 	}
 
-	
-
 	@Override
-	protected void doPut(final HttpServletRequest req, final HttpServletResponse res)
-			throws ServletException, IOException {
+	protected void doPut(final HttpServletRequest req, final HttpServletResponse res) throws ServletException,
+			IOException {
 		final SessionObject sessionObj = getSessionObject(req);
 
 		final String action = req.getParameter(PARAMETER_ACTION);
 		if (action == null) {
-			missingParameter(PARAMETER_ACTION,res, false, null);
+			missingParameter(PARAMETER_ACTION, res, false, null);
 			return;
 		}
 		final OXJSONWriter writer = new OXJSONWriter();
-		final InfostoreRequest request = new InfostoreRequest(sessionObj,writer);
+		final InfostoreRequest request = new InfostoreRequest(sessionObj, writer);
 		try {
-			if(!request.action(action,new ServletRequestAdapter(req,res))) {
+			if (!request.action(action, new ServletRequestAdapter(req, res))) {
 				unknownAction("PUT", action, res, false);
 				return;
 			}
-			if(writer.isJSONObject()) {
+			if (writer.isJSONObject()) {
 				Response.write(new Response((JSONObject) writer.getObject()), res.getWriter());
-			} else if(writer.isJSONArray()) {
+			} else if (writer.isJSONArray()) {
 				res.getWriter().print(writer.getObject().toString());
 			}
 		} catch (final JSONException e) {
 			LOG.error(e.getLocalizedMessage(), e);
 		} catch (OXPermissionException e) {
-			LOG.error("Not possible, obviously: "+e.getLocalizedMessage(), e);
+			LOG.error("Not possible, obviously: " + e.getLocalizedMessage(), e);
 		}
 	}
-	
+
 	@Override
-	protected void doPost(final HttpServletRequest req, final HttpServletResponse res)
-	throws ServletException, IOException {
-		
+	protected void doPost(final HttpServletRequest req, final HttpServletResponse res) throws ServletException,
+			IOException {
+
 		final SessionObject sessionObj = getSessionObject(req);
 
 		final Context ctx = sessionObj.getContext();
-		final User user = sessionObj.getUserObject();
-		final UserConfiguration userConfig = sessionObj.getUserConfiguration();
+		final User user = UserStorage.getUser(sessionObj.getUserId(), sessionObj.getContext());
+		final UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext());
 
 		final String action = req.getParameter(PARAMETER_ACTION);
 		if (action == null) {
-			missingParameter(PARAMETER_ACTION,res, true, "new");
+			missingParameter(PARAMETER_ACTION, res, true, "new");
 			return;
 		}
-		
+
 		try {
-			checkSize(req.getContentLength(), sessionObj.getUserSettingMail());
-			if(action.equals(ACTION_NEW) || action.equals(ACTION_UPDATE) || action.equals(ACTION_COPY)) {
+			checkSize(req.getContentLength(), UserSettingMailStorage.getInstance().getUserSettingMail(
+					sessionObj.getUserId(), sessionObj.getContext()));
+			if (action.equals(ACTION_NEW) || action.equals(ACTION_UPDATE) || action.equals(ACTION_COPY)) {
 				UploadEvent upload = null;
 				try {
 					upload = processUpload(req);
 					final UploadFile uploadFile = upload.getUploadFileByFieldName("file");
-					if(null != uploadFile) {
-						checkSize(uploadFile.getSize(), sessionObj.getUserSettingMail());
+					if (null != uploadFile) {
+						checkSize(uploadFile.getSize(), UserSettingMailStorage.getInstance().getUserSettingMail(
+								sessionObj.getUserId(), sessionObj.getContext()));
 					}
 					final String obj = upload.getFormField(STR_JSON);
-					if(obj == null) {
-						missingParameter(STR_JSON,res, true, action);
+					if (obj == null) {
+						missingParameter(STR_JSON, res, true, action);
 						return;
 					}
-					
-					
+
 					final DocumentMetadata metadata = PARSER.getDocumentMetadata(obj);
-					if(action.equals(ACTION_NEW)){
-						newDocument(metadata,res, uploadFile,ctx, user, userConfig, sessionObj);
+					if (action.equals(ACTION_NEW)) {
+						newDocument(metadata, res, uploadFile, ctx, user, userConfig, sessionObj);
 					} else {
-						if(!checkRequired(req,res,true, action, PARAMETER_ID, PARAMETER_TIMESTAMP)){
+						if (!checkRequired(req, res, true, action, PARAMETER_ID, PARAMETER_TIMESTAMP)) {
 							return;
 						}
 						final int id = Integer.parseInt(req.getParameter(PARAMETER_ID));
 						final long timestamp = Long.parseLong(req.getParameter(PARAMETER_TIMESTAMP));
-						
+
 						metadata.setId(id);
 						Metadata[] presentFields = null;
-						
+
 						try {
 							presentFields = PARSER.findPresentFields(obj);
 						} catch (UnknownMetadataException x) {
-							unknownColumn(res,"BODY",x.getColumnId(), true, action);
+							unknownColumn(res, "BODY", x.getColumnId(), true, action);
 							return;
 						}
-						
-						if(action.equals(ACTION_UPDATE)) {
-							update(res, id,metadata,timestamp,presentFields,uploadFile,ctx, user, userConfig, sessionObj);
+
+						if (action.equals(ACTION_UPDATE)) {
+							update(res, id, metadata, timestamp, presentFields, uploadFile, ctx, user, userConfig,
+									sessionObj);
 						} else {
-							copy(res,id,metadata,timestamp,presentFields,uploadFile,ctx, user, userConfig, sessionObj);
+							copy(res, id, metadata, timestamp, presentFields, uploadFile, ctx, user, userConfig,
+									sessionObj);
 						}
 					}
 				} finally {
@@ -304,7 +308,7 @@ public class Infostore extends PermissionServlet {
 						upload.cleanUp();
 					}
 				}
-			} 
+			}
 		} catch (OXException x) {
 			handleOXException(res, x, action, true, null);
 		} catch (UploadException x) {
@@ -312,60 +316,65 @@ public class Infostore extends PermissionServlet {
 			resp.setException(new AbstractOXException(x.getMessage())); // FIXME
 			try {
 				res.setContentType("text/html; charset=UTF-8");
-				
-				throw new UploadServletException(res, substitute(JS_FRAGMENT, STR_JSON, resp.getJSON().toString(), STR_ACTION,action),x.getMessage(),x);
+
+				throw new UploadServletException(res, substitute(JS_FRAGMENT, STR_JSON, resp.getJSON().toString(),
+						STR_ACTION, action), x.getMessage(), x);
 			} catch (JSONException e) {
-				LOG.error("Giving up",e);
+				LOG.error("Giving up", e);
 			}
 		} catch (JSONException e) {
-			handleOXException(res,e,action, true, null);
+			handleOXException(res, e, action, true, null);
 		}
 	}
 
 	private void checkSize(final long size, final UserSettingMail userSettingMail) throws UploadException {
 		long maxSize = InfostoreConfigUtils.determineRelevantUploadSize(userSettingMail);
-		if(maxSize == 0) {
+		if (maxSize == 0) {
 			return;
 		}
-		
-		if(size > maxSize) {
+
+		if (size > maxSize) {
 			throw new UploadException(UploadCode.MAX_UPLOAD_SIZE_EXCEEDED, null, size, maxSize);
 		}
 	}
 
 	// Response Methods
 
-	/*private void notImplemented(final String action, final HttpServletResponse res) throws IOException, ServletException {
-		sendErrorAsJS(res,"The action "+action+" isn't implemented yet");
-	}*/
+	/*
+	 * private void notImplemented(final String action, final
+	 * HttpServletResponse res) throws IOException, ServletException {
+	 * sendErrorAsJS(res,"The action "+action+" isn't implemented yet"); }
+	 */
 
 	// Handlers
-
-	protected void newDocument(final DocumentMetadata newDocument, final HttpServletResponse res, final UploadFile upload, final Context ctx, final User user, final UserConfiguration userConfig, final SessionObject sessionObj) {
-		//System.out.println("------> "+newDocument.getFolderId());
+	protected void newDocument(final DocumentMetadata newDocument, final HttpServletResponse res,
+			final UploadFile upload, final Context ctx, final User user, final UserConfiguration userConfig,
+			final SessionObject sessionObj) {
+		// System.out.println("------> "+newDocument.getFolderId());
 		res.setContentType(MIME_TEXT_HTML);
-		
+
 		final InfostoreFacade infostore = getInfostore(newDocument.getFolderId());
 		final SearchEngine searchEngine = getSearchEngine();
 		FileInputStream in = null;
 		try {
-			
+
 			infostore.startTransaction();
 			searchEngine.startTransaction();
-			
-			if(upload==null || upload.getTmpFile().length() == 0) {
-				infostore.saveDocumentMetadata(newDocument,System.currentTimeMillis(),sessionObj);
+
+			if (upload == null || upload.getTmpFile().length() == 0) {
+				infostore.saveDocumentMetadata(newDocument, System.currentTimeMillis(), sessionObj);
 			} else {
-				initMetadata(newDocument,upload);
-				infostore.saveDocument(newDocument,in = new FileInputStream(upload.getTmpFile()),System.currentTimeMillis(),sessionObj);
+				initMetadata(newDocument, upload);
+				infostore.saveDocument(newDocument, in = new FileInputStream(upload.getTmpFile()), System
+						.currentTimeMillis(), sessionObj);
 			}
-			//System.out.println("DONE SAVING: "+System.currentTimeMillis());
-			searchEngine.index(newDocument,ctx, user, userConfig);
-			
+			// System.out.println("DONE SAVING: "+System.currentTimeMillis());
+			searchEngine.index(newDocument, ctx, user, userConfig);
+
 			infostore.commit();
 			searchEngine.commit();
-	
-		} catch (OXException t){
+
+		} catch (OXException t) {
 			rollback(infostore, searchEngine, res, t, ACTION_NEW, true);
 			return;
 		} catch (FileNotFoundException e) {
@@ -376,24 +385,24 @@ public class Infostore extends PermissionServlet {
 				infostore.finish();
 				searchEngine.finish();
 			} catch (TransactionException e) {
-				LOG.debug("",e);
+				LOG.debug("", e);
 			}
-			if(in != null) {
+			if (in != null) {
 				try {
 					in.close();
 				} catch (IOException e) {
-					LOG.debug("",e);
+					LOG.debug("", e);
 				}
 			}
-			
+
 		}
 		PrintWriter w = null;
 		try {
 			w = res.getWriter();
 			final JSONObject obj = new JSONObject();
-			obj.put(Response.DATA,newDocument.getId());
-			w.print(substitute(JS_FRAGMENT, STR_JSON, obj.toString(),STR_ACTION,ACTION_NEW));
-			
+			obj.put(Response.DATA, newDocument.getId());
+			w.print(substitute(JS_FRAGMENT, STR_JSON, obj.toString(), STR_ACTION, ACTION_NEW));
+
 			w.flush();
 		} catch (IOException e) {
 			LOG.debug("", e);
@@ -403,44 +412,47 @@ public class Infostore extends PermissionServlet {
 			close(w);
 		}
 	}
-	
-	protected void update(final HttpServletResponse res, final int id, DocumentMetadata updated, final long timestamp, final Metadata[] presentFields, final UploadFile upload, final Context ctx, final User user, final UserConfiguration userConfig, final SessionObject sessionObj) {
-		
+
+	protected void update(final HttpServletResponse res, final int id, DocumentMetadata updated, final long timestamp,
+			final Metadata[] presentFields, final UploadFile upload, final Context ctx, final User user,
+			final UserConfiguration userConfig, final SessionObject sessionObj) {
+
 		boolean version = false;
-		for(Metadata m : presentFields) {
-			if(m.equals(Metadata.VERSION_LITERAL)){
+		for (Metadata m : presentFields) {
+			if (m.equals(Metadata.VERSION_LITERAL)) {
 				version = true;
 				break;
 			}
 		}
-		if(!version){
+		if (!version) {
 			updated.setVersion(InfostoreFacade.CURRENT_VERSION);
 		}
-		
+
 		res.setContentType(MIME_TEXT_HTML);
-		
+
 		final InfostoreFacade infostore = getInfostore(updated.getFolderId());
 		final SearchEngine searchEngine = getSearchEngine();
-		
+
 		try {
-			
+
 			infostore.startTransaction();
 			searchEngine.startTransaction();
-			
-			if(upload == null || upload.getTmpFile().length() == 0){
-				infostore.saveDocumentMetadata(updated,timestamp,presentFields,sessionObj);
+
+			if (upload == null || upload.getTmpFile().length() == 0) {
+				infostore.saveDocumentMetadata(updated, timestamp, presentFields, sessionObj);
 			} else {
-				initMetadata(updated,upload);
-				infostore.saveDocument(updated,new FileInputStream(upload.getTmpFile()),timestamp,presentFields,sessionObj);
+				initMetadata(updated, upload);
+				infostore.saveDocument(updated, new FileInputStream(upload.getTmpFile()), timestamp, presentFields,
+						sessionObj);
 			}
 			infostore.commit();
 			searchEngine.commit();
-			
-		} catch (OXException t){
+
+		} catch (OXException t) {
 			rollback(infostore, null, res, t, ACTION_UPDATE, true);
 			return;
 		} catch (FileNotFoundException e) {
-			rollback(infostore, null, res, e, ACTION_UPDATE,true);
+			rollback(infostore, null, res, e, ACTION_UPDATE, true);
 			return;
 		} finally {
 			try {
@@ -449,62 +461,63 @@ public class Infostore extends PermissionServlet {
 			} catch (TransactionException e) {
 				LOG.debug("", e);
 			}
-			
+
 		}
-				
+
 		PrintWriter w = null;
 		try {
 			w = res.getWriter();
-			w.write(substitute(JS_FRAGMENT,STR_JSON,"{}",STR_ACTION,ACTION_UPDATE));
+			w.write(substitute(JS_FRAGMENT, STR_JSON, "{}", STR_ACTION, ACTION_UPDATE));
 			close(w);
 		} catch (IOException e) {
 			LOG.warn(e);
 		}
 	}
-	
-	protected void copy(final HttpServletResponse res, final int id, final DocumentMetadata updated, final long timestamp, final Metadata[] presentFields, final UploadFile upload, final Context ctx, final User user, final UserConfiguration userConfig, final SessionObject sessionObj) {
+
+	protected void copy(final HttpServletResponse res, final int id, final DocumentMetadata updated,
+			final long timestamp, final Metadata[] presentFields, final UploadFile upload, final Context ctx,
+			final User user, final UserConfiguration userConfig, final SessionObject sessionObj) {
 
 		res.setContentType(MIME_TEXT_HTML);
-		
-		
+
 		final InfostoreFacade infostore = getInfostore();
 		final SearchEngine searchEngine = getSearchEngine();
 		DocumentMetadata metadata = null;
-		
+
 		try {
-			
+
 			infostore.startTransaction();
 			searchEngine.startTransaction();
-			
-			
-			metadata = new DocumentMetadataImpl(infostore.getDocumentMetadata(id,InfostoreFacade.CURRENT_VERSION,ctx, user, userConfig));
-			
-			
+
+			metadata = new DocumentMetadataImpl(infostore.getDocumentMetadata(id, InfostoreFacade.CURRENT_VERSION, ctx,
+					user, userConfig));
+
 			final SetSwitch set = new SetSwitch(metadata);
 			final GetSwitch get = new GetSwitch(updated);
-			for(Metadata field : presentFields) {
+			for (Metadata field : presentFields) {
 				final Object value = field.doSwitch(get);
 				set.setValue(value);
 				field.doSwitch(set);
 			}
 			metadata.setVersion(0);
 			metadata.setId(InfostoreFacade.NEW);
-			
-			if(upload == null){
-				if(metadata.getFileName() != null && !"".equals(metadata.getFileName())) {
-					infostore.saveDocument(metadata,infostore.getDocument(id,InfostoreFacade.CURRENT_VERSION,ctx, user, userConfig),metadata.getSequenceNumber(), sessionObj);
+
+			if (upload == null) {
+				if (metadata.getFileName() != null && !"".equals(metadata.getFileName())) {
+					infostore.saveDocument(metadata, infostore.getDocument(id, InfostoreFacade.CURRENT_VERSION, ctx,
+							user, userConfig), metadata.getSequenceNumber(), sessionObj);
 				} else {
-					infostore.saveDocumentMetadata(metadata,timestamp,sessionObj);
+					infostore.saveDocumentMetadata(metadata, timestamp, sessionObj);
 				}
 			} else {
-				initMetadata(metadata,upload);
-				infostore.saveDocument(metadata,new FileInputStream(upload.getTmpFile()),timestamp, sessionObj);
+				initMetadata(metadata, upload);
+				infostore.saveDocument(metadata, new FileInputStream(upload.getTmpFile()), timestamp, sessionObj);
 			}
-			searchEngine.index(metadata,ctx, user, userConfig);
-			
+			searchEngine.index(metadata, ctx, user, userConfig);
+
 			infostore.commit();
 			searchEngine.commit();
-		} catch (OXException t){
+		} catch (OXException t) {
 			rollback(infostore, searchEngine, res, t, ACTION_COPY, true);
 			return;
 		} catch (FileNotFoundException e) {
@@ -517,15 +530,15 @@ public class Infostore extends PermissionServlet {
 			} catch (TransactionException e) {
 				LOG.debug("", e);
 			}
-			
+
 		}
-				
+
 		PrintWriter w = null;
 		try {
 			w = res.getWriter();
 			final JSONObject obj = new JSONObject();
-			obj.put(Response.DATA,metadata.getId());
-			w.print(substitute(JS_FRAGMENT, STR_JSON, obj.toString(),STR_ACTION,ACTION_NEW));
+			obj.put(Response.DATA, metadata.getId());
+			w.print(substitute(JS_FRAGMENT, STR_JSON, obj.toString(), STR_ACTION, ACTION_NEW));
 			w.flush();
 		} catch (IOException e) {
 			LOG.debug("", e);
@@ -535,107 +548,113 @@ public class Infostore extends PermissionServlet {
 			close(w);
 		}
 	}
-	
-	protected void document(final HttpServletResponse res, final boolean ie,final boolean ie7, final int id, final int version, String contentType, final Context ctx, final User user, final UserConfiguration userConfig) throws IOException {
+
+	protected void document(final HttpServletResponse res, final boolean ie, final boolean ie7, final int id,
+			final int version, String contentType, final Context ctx, final User user,
+			final UserConfiguration userConfig) throws IOException {
 		final InfostoreFacade infostore = getInfostore();
 		OutputStream os = null;
 		InputStream documentData = null;
 		try {
-			final DocumentMetadata metadata = infostore.getDocumentMetadata(id,version,ctx, user, userConfig);
-			
-			documentData = infostore.getDocument(id,version,ctx, user, userConfig);
+			final DocumentMetadata metadata = infostore.getDocumentMetadata(id, version, ctx, user, userConfig);
+
+			documentData = infostore.getDocument(id, version, ctx, user, userConfig);
 			os = res.getOutputStream();
-			
+
 			res.setContentLength((int) metadata.getFileSize());
 			res.setContentType(contentType == null ? metadata.getFileMIMEType() : contentType);
-			if(contentType != null && contentType.equals(SAVE_AS_TYPE)) {
-				res.setHeader("Content-Disposition", "attachment; filename=\""+Helper.encodeFilename(metadata.getFileName(), "UTF-8" , ie)+"\"");
+			if (contentType != null && contentType.equals(SAVE_AS_TYPE)) {
+				res.setHeader("Content-Disposition", "attachment; filename=\""
+						+ Helper.encodeFilename(metadata.getFileName(), "UTF-8", ie) + "\"");
 			} else {
-				res.setHeader("Content-Disposition", "filename=\""+Helper.encodeFilename(metadata.getFileName(), "UTF-8" , ie)+"\"");	
+				res.setHeader("Content-Disposition", "filename=\""
+						+ Helper.encodeFilename(metadata.getFileName(), "UTF-8", ie) + "\"");
 			}
-			
+
 			// Browsers doesn't like the Pragma header the way we usually set
-            // this. Especially if files are sent to the browser. So removing
-            // pragma header
+			// this. Especially if files are sent to the browser. So removing
+			// pragma header
 			Tools.removeCachingHeader(res);
-			
+
 			final byte[] buffer = new byte[200];
 			int bytesRead = 0;
-			
-			while((bytesRead = documentData.read(buffer))!=-1){
-				os.write(buffer,0,bytesRead);
+
+			while ((bytesRead = documentData.read(buffer)) != -1) {
+				os.write(buffer, 0, bytesRead);
 				os.flush();
 			}
-			os=null;
-			
+			os = null;
+
 		} catch (OXException x) {
-			LOG.debug(x.getMessage(),x);
+			LOG.debug(x.getMessage(), x);
 			handleOXException(res, x, STR_ERROR, true, JS_FRAGMENT);
 			return;
 		} finally {
-			
-			if(os!=null){
+
+			if (os != null) {
 				try {
 					os.flush();
 				} catch (IOException e) {
-					LOG.debug("",e);
+					LOG.debug("", e);
 				}
 				try {
 					os.close();
 				} catch (IOException e) {
-					LOG.debug("",e);
+					LOG.debug("", e);
 				}
 			}
-			if(documentData!=null){
+			if (documentData != null) {
 				try {
 					documentData.close();
 				} catch (IOException e) {
-					LOG.debug("",e);
+					LOG.debug("", e);
 				}
 			}
 		}
 	}
-	
-	private final boolean handleOXException(final HttpServletResponse res, final Throwable t, final String action, final boolean post, final String fragmentOverride) {
+
+	private final boolean handleOXException(final HttpServletResponse res, final Throwable t, final String action,
+			final boolean post, final String fragmentOverride) {
 		res.setContentType("text/html; charset=UTF-8");
-		if(t instanceof AbstractOXException ) {
+		if (t instanceof AbstractOXException) {
 			final Response resp = new Response();
 			resp.setException((AbstractOXException) t);
 			Writer writer = null;
-			
+
 			try {
-				if(post) {
+				if (post) {
 					writer = new StringWriter();
 				} else {
 					writer = res.getWriter();
 				}
 				Response.write(resp, writer);
-				if(post) {
-					res.getWriter().write(substitute(fragmentOverride != null ? fragmentOverride : JS_FRAGMENT,STR_JSON,writer.toString(),STR_ACTION,action));
+				if (post) {
+					res.getWriter().write(
+							substitute(fragmentOverride != null ? fragmentOverride : JS_FRAGMENT, STR_JSON, writer
+									.toString(), STR_ACTION, action));
 				}
 			} catch (JSONException e) {
-				LOG.error("",t);
+				LOG.error("", t);
 			} catch (IOException e) {
-				LOG.error("",e);
+				LOG.error("", e);
 			}
-			
+
 			LL.log((AbstractOXException) t);
-			
+
 			return true;
 		}
 		return false;
 	}
 
-	
-	protected void sendErrorAsJS(final PrintWriter w, final String error, final String...errorParams) {
+	protected void sendErrorAsJS(final PrintWriter w, final String error, final String... errorParams) {
 		final StringBuilder commaSeperatedErrorParams = new StringBuilder();
-		for(String param : errorParams) {
+		for (String param : errorParams) {
 			commaSeperatedErrorParams.append('"');
 			commaSeperatedErrorParams.append(param);
 			commaSeperatedErrorParams.append('"');
 			commaSeperatedErrorParams.append(',');
 		}
-		commaSeperatedErrorParams.setLength(commaSeperatedErrorParams.length()-1);
+		commaSeperatedErrorParams.setLength(commaSeperatedErrorParams.length() - 1);
 		w.print("{ \"");
 		w.print(Response.ERROR);
 		w.print("\" : \"");
@@ -647,13 +666,13 @@ public class Infostore extends PermissionServlet {
 		w.print("}");
 		w.flush();
 	}
-	
+
 	// Helpers
-	
+
 	protected int[] parseIDList(final JSONArray array) throws JSONException {
 		int[] ids = new int[array.length()];
-		
-		for(int i = 0; i < array.length(); i++) {
+
+		for (int i = 0; i < array.length(); i++) {
 			final JSONObject tuple = array.getJSONObject(i);
 			try {
 				ids[i] = tuple.getInt(PARAMETER_ID);
@@ -662,73 +681,70 @@ public class Infostore extends PermissionServlet {
 			}
 		}
 		return ids;
-	} 
+	}
 
-	
 	protected void initMetadata(final DocumentMetadata metadata, final UploadFile upload) {
-		if(metadata.getFileName() == null || "".equals(metadata.getFileName())){
+		if (metadata.getFileName() == null || "".equals(metadata.getFileName())) {
 			String s = upload.getFileName();
 			// Try guessing the filename separator
-			if(s.contains("\\")){
-				s = s.substring(s.lastIndexOf('\\')+1);
-			} else if (s.contains("/")){
-				s = s.substring(s.lastIndexOf('/')+1);
+			if (s.contains("\\")) {
+				s = s.substring(s.lastIndexOf('\\') + 1);
+			} else if (s.contains("/")) {
+				s = s.substring(s.lastIndexOf('/') + 1);
 			}
 			metadata.setFileName(s);
 		}
-		if(metadata.getFileSize() <= 0){
+		if (metadata.getFileSize() <= 0) {
 			metadata.setFileSize(upload.getSize());
 		}
-		if(metadata.getFileMIMEType() == null || "".equals(metadata.getFileMIMEType())){
+		if (metadata.getFileMIMEType() == null || "".equals(metadata.getFileMIMEType())) {
 			metadata.setFileMIMEType(upload.getContentType());
 		}
 	}
-	
-	protected void rollback(final InfostoreFacade infostore, final SearchEngine searchEngine, final HttpServletResponse res, final Throwable t, final String action, final boolean post){
-		if(infostore != null) {
+
+	protected void rollback(final InfostoreFacade infostore, final SearchEngine searchEngine,
+			final HttpServletResponse res, final Throwable t, final String action, final boolean post) {
+		if (infostore != null) {
 			try {
 				infostore.rollback();
 			} catch (TransactionException e) {
 				LOG.error("", e);
 			}
 		}
-		if(searchEngine != null) {
+		if (searchEngine != null) {
 			try {
 				searchEngine.rollback();
 			} catch (TransactionException e) {
 				LOG.error("", e);
 			}
 		}
-		if(!handleOXException(res, t, action, post, null)){
+		if (!handleOXException(res, t, action, post, null)) {
 			try {
-				sendErrorAsJSHTML(res,t.toString(),action);
+				sendErrorAsJSHTML(res, t.toString(), action);
 				LOG.error("Got non OXException", t);
 			} catch (IOException e) {
 				LOG.error(e);
 			}
 		}
 	}
-	
+
 	// Errors
-	
-	
-	protected InfostoreFacade getInfostore(){
+
+	protected InfostoreFacade getInfostore() {
 		return FACADE;
 	}
-	
-	public static InfostoreFacade getInfostore(final long folderId){
-		if(folderId == FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID 
+
+	public static InfostoreFacade getInfostore(final long folderId) {
+		if (folderId == FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID
 				|| folderId == FolderObject.VIRTUAL_USER_INFOSTORE_FOLDER_ID
 				|| folderId == FolderObject.SYSTEM_INFOSTORE_FOLDER_ID) {
 			return VIRTUAL_FACADE;
 		}
 		return FACADE;
 	}
-	
-	
-	protected SearchEngine getSearchEngine(){
+
+	protected SearchEngine getSearchEngine() {
 		return SEARCH_ENGINE;
 	}
-	
-	
+
 }

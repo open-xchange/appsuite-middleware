@@ -56,6 +56,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.Map.Entry;
@@ -69,6 +70,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
@@ -83,6 +85,7 @@ import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.parser.MailMessageHandler;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.usersetting.UserSettingMail;
+import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.mail.ContentType;
@@ -146,7 +149,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
 	public JSONMessageHandler(final String mailPath, final boolean displayVersion, final SessionObject session) {
 		super();
 		this.session = session;
-		usm = session.getUserSettingMail();
+		usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), session.getContext());
 		this.displayVersion = displayVersion;
 		this.mailPath = mailPath;
 		jsonObject = new JSONObject();
@@ -166,7 +169,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
 	public JSONMessageHandler(final MailPath mailPath, final boolean displayVersion, final SessionObject session) {
 		super();
 		this.session = session;
-		usm = session.getUserSettingMail();
+		usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), session.getContext());
 		this.displayVersion = displayVersion;
 		this.mailPath = mailPath == MailPath.NULL ? "" : mailPath.toString();
 		jsonObject = new JSONObject();
@@ -197,7 +200,8 @@ public final class JSONMessageHandler implements MailMessageHandler {
 
 	private TimeZone getTimeZone() {
 		if (timeZone == null) {
-			timeZone = TimeZone.getTimeZone(session.getUserObject().getTimeZone());
+			timeZone = TimeZone.getTimeZone(UserStorage.getUser(session.getUserId(), session.getContext())
+					.getTimeZone());
 		}
 		return timeZone;
 	}
@@ -570,8 +574,9 @@ public final class JSONMessageHandler implements MailMessageHandler {
 			String contentType = MIMETypes.MIME_APPL_OCTET;
 			final String filename = part.getFileName();
 			try {
-				contentType = MIMEType2ExtMap.getContentType(
-						new File(filename.toLowerCase(session.getLocale())).getName()).toLowerCase(session.getLocale());
+				final Locale locale = UserStorage.getUser(session.getUserId(), session.getContext()).getLocale();
+				contentType = MIMEType2ExtMap.getContentType(new File(filename.toLowerCase(locale)).getName())
+						.toLowerCase(locale);
 			} catch (final Exception e) {
 				final Throwable t = new Throwable(new StringBuilder("Unable to fetch content/type for '").append(
 						filename).append("': ").append(e).toString());

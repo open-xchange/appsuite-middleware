@@ -55,6 +55,7 @@ import javax.management.ObjectName;
 import com.openexchange.api2.MailInterfaceMonitor;
 import com.openexchange.cache.OXCachingException;
 import com.openexchange.groupware.container.CommonObject;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.mail.MailStorageUtils.OrderDirection;
 import com.openexchange.mail.cache.MailMessageCache;
 import com.openexchange.mail.config.MailConfig;
@@ -116,9 +117,10 @@ public final class MailInterfaceImpl extends MailInterface {
 	 */
 	protected MailInterfaceImpl(final SessionObject session) throws MailException {
 		super();
-		if (!session.getUserConfiguration().hasWebMail()) {
+		if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext())
+				.hasWebMail()) {
 			throw new MailException(MailException.Code.NO_MAIL_ACCESS);
-		} else if (/* IMAPProperties.noAdminMailbox() && */session.getUserObject().getId() == session.getContext()
+		} else if (/* IMAPProperties.noAdminMailbox() && */session.getUserId() == session.getContext()
 				.getMailadmin()) {
 			throw new MailException(MailException.Code.ACCOUNT_DOES_NOT_EXIST, Integer.valueOf(session.getContext()
 					.getContextId()));
@@ -230,10 +232,20 @@ public final class MailInterfaceImpl extends MailInterface {
 				all));
 	}
 
+	private String getDefaultMailFolder(final int index) {
+		final String[] arr = (String[]) session.getParameter(MailSessionParameterNames.PARAM_DEF_FLD_ARR);
+		return arr == null ? null : arr[index];
+	}
+
+	private boolean isDefaultFoldersChecked() {
+		final Boolean b = (Boolean) session.getParameter(MailSessionParameterNames.PARAM_DEF_FLD_FLAG);
+		return b != null && b.booleanValue();
+	}
+
 	@Override
 	public String getConfirmedHamFolder() throws MailException {
-		if (session.isMailFldsChecked()) {
-			return session.getDefaultMailFolder(StorageUtility.INDEX_CONFIRMED_HAM);
+		if (isDefaultFoldersChecked()) {
+			return getDefaultMailFolder(StorageUtility.INDEX_CONFIRMED_HAM);
 		}
 		initConnection();
 		return mailConnection.getFolderStorage().getConfirmedHamFolder();
@@ -241,8 +253,8 @@ public final class MailInterfaceImpl extends MailInterface {
 
 	@Override
 	public String getConfirmedSpamFolder() throws MailException {
-		if (session.isMailFldsChecked()) {
-			return session.getDefaultMailFolder(StorageUtility.INDEX_CONFIRMED_SPAM);
+		if (isDefaultFoldersChecked()) {
+			return getDefaultMailFolder(StorageUtility.INDEX_CONFIRMED_SPAM);
 		}
 		initConnection();
 		return mailConnection.getFolderStorage().getConfirmedSpamFolder();
@@ -256,8 +268,8 @@ public final class MailInterfaceImpl extends MailInterface {
 
 	@Override
 	public String getDraftsFolder() throws MailException {
-		if (session.isMailFldsChecked()) {
-			return session.getDefaultMailFolder(StorageUtility.INDEX_DRAFTS);
+		if (isDefaultFoldersChecked()) {
+			return getDefaultMailFolder(StorageUtility.INDEX_DRAFTS);
 		}
 		initConnection();
 		return mailConnection.getFolderStorage().getDraftsFolder();
@@ -319,7 +331,7 @@ public final class MailInterfaceImpl extends MailInterface {
 		 */
 		final String fullname = StorageUtility.prepareMailFolderParam(folder);
 		try {
-			final int userId = session.getUserObject().getId();
+			final int userId = session.getUserId();
 			if (MailMessageCache.getInstance().containsFolderMessages(fullname, userId, session.getContext())) {
 				return MailMessageCache.getInstance().getMessages(uids, fullname, userId, session.getContext());
 			}
@@ -398,8 +410,8 @@ public final class MailInterfaceImpl extends MailInterface {
 
 	@Override
 	public String getSentFolder() throws MailException {
-		if (session.isMailFldsChecked()) {
-			return session.getDefaultMailFolder(StorageUtility.INDEX_SENT);
+		if (isDefaultFoldersChecked()) {
+			return getDefaultMailFolder(StorageUtility.INDEX_SENT);
 		}
 		initConnection();
 		return mailConnection.getFolderStorage().getSentFolder();
@@ -407,8 +419,8 @@ public final class MailInterfaceImpl extends MailInterface {
 
 	@Override
 	public String getSpamFolder() throws MailException {
-		if (session.isMailFldsChecked()) {
-			return session.getDefaultMailFolder(StorageUtility.INDEX_SPAM);
+		if (isDefaultFoldersChecked()) {
+			return getDefaultMailFolder(StorageUtility.INDEX_SPAM);
 		}
 		initConnection();
 		return mailConnection.getFolderStorage().getSpamFolder();
@@ -426,8 +438,8 @@ public final class MailInterfaceImpl extends MailInterface {
 
 	@Override
 	public String getTrashFolder() throws MailException {
-		if (session.isMailFldsChecked()) {
-			return session.getDefaultMailFolder(StorageUtility.INDEX_TRASH);
+		if (isDefaultFoldersChecked()) {
+			return getDefaultMailFolder(StorageUtility.INDEX_TRASH);
 		}
 		initConnection();
 		return mailConnection.getFolderStorage().getTrashFolder();

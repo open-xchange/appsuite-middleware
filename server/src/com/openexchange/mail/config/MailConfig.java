@@ -56,6 +56,7 @@ import java.util.Random;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mail.partmodifier.PartModifier;
 import com.openexchange.mail.spellcheck.SpellCheckConfig;
 import com.openexchange.sessiond.SessionObject;
@@ -176,7 +177,7 @@ public abstract class MailConfig {
 		/*
 		 * Fetch user object and create its mail properties
 		 */
-		final User user = session.getUserObject();
+		final User user = UserStorage.getUser(session.getUserId(), session.getContext());
 		if (LoginType.GLOBAL.equals(getLoginType())) {
 			final String masterPw = GlobalMailConfig.getInstance().getMasterPassword();
 			if (masterPw == null) {
@@ -217,7 +218,7 @@ public abstract class MailConfig {
 	 * @return The session-associated user's login
 	 */
 	private static final String getLocalMailLogin(final SessionObject session, final boolean lookUp) {
-		String login = lookUp ? session.getUserObject().getImapLogin() : null;
+		String login = lookUp ? UserStorage.getUser(session.getUserId(), session.getContext()).getImapLogin() : null;
 		if (login == null || login.length() == 0) {
 			login = session.getUserlogin() != null && session.getUserlogin().length() > 0 ? session.getUserlogin()
 					: session.getUsername();

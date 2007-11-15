@@ -58,12 +58,15 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 
 /**
- * UserSettingMailStorage - Access to {@link UserSettingMail}
+ * {@link UserSettingMailStorage} - Access to {@link UserSettingMail}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
 public abstract class UserSettingMailStorage {
+
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(UserSettingMailStorage.class);
 
 	private static final Lock INIT_LOCK = new ReentrantLock();
 
@@ -79,7 +82,9 @@ public abstract class UserSettingMailStorage {
 	}
 
 	/**
-	 * @return an instance of <code>UserSettingMailStorage</code>
+	 * Gets the singleton instance of {@link UserSettingMailStorage}
+	 * 
+	 * @return The singleton instance of {@link UserSettingMailStorage}
 	 */
 	public static final UserSettingMailStorage getInstance() {
 		if (!initialized.get()) {
@@ -115,6 +120,45 @@ public abstract class UserSettingMailStorage {
 	}
 
 	/**
+	 * A convenience method that returns
+	 * {@link #getUserSettingMail(int, Context, Connection)} with the connection
+	 * parameter set to <code>null</code>.
+	 * 
+	 * @param user
+	 *            The user ID
+	 * @param ctx
+	 *            The context
+	 * @return The instance of {@link UserSettingMail} which matches given user
+	 *         ID and context or <code>null</code> on exception
+	 */
+	public final UserSettingMail getUserSettingMail(final int user, final Context ctx) {
+		return getUserSettingMail(user, ctx, null);
+	}
+
+	/**
+	 * A convenience method that returns
+	 * {@link #loadUserSettingMail(int, Context, Connection)}. If an exception
+	 * is thrown in delegated method <code>null</code> is returned.
+	 * 
+	 * @param user
+	 *            The user ID
+	 * @param ctx
+	 *            The context
+	 * @param readCon
+	 *            The readable connection (may be <code>null</code>)
+	 * @return The instance of {@link UserSettingMail} which matches given user
+	 *         ID and context or <code>null</code> on exception
+	 */
+	public final UserSettingMail getUserSettingMail(final int user, final Context ctx, final Connection readCon) {
+		try {
+			return loadUserSettingMail(user, ctx, readCon);
+		} catch (final UserConfigurationException e) {
+			LOG.error(e.getLocalizedMessage(), e);
+			return null;
+		}
+	}
+
+	/**
 	 * Saves given user's mail settings to database
 	 * 
 	 * @param usm
@@ -141,7 +185,7 @@ public abstract class UserSettingMailStorage {
 	 * @param ctx
 	 *            the context
 	 * @param writeConArg -
-	 *            the writeable conenction; may be <code>null</code>
+	 *            the writable connection; may be <code>null</code>
 	 * @throws UserConfigurationException
 	 *             if user's mail settings could not be saved
 	 */
@@ -170,7 +214,7 @@ public abstract class UserSettingMailStorage {
 	 * @param ctx
 	 *            the context
 	 * @param writeConArg
-	 *            the writeable connection; may be <code>null</code>
+	 *            the writable connection; may be <code>null</code>
 	 * @throws UserConfigurationException -
 	 *             if deletion fails
 	 */
@@ -186,6 +230,8 @@ public abstract class UserSettingMailStorage {
 	 *            the user
 	 * @param ctx
 	 *            the context
+	 * @return The instance of {@link UserSettingMail} which matches given user
+	 *         ID and context
 	 * @throws UserConfigurationException
 	 *             if loading fails
 	 */
@@ -205,6 +251,8 @@ public abstract class UserSettingMailStorage {
 	 *            the context
 	 * @param readConArg
 	 *            the readable connection
+	 * @return The instance of {@link UserSettingMail} which matches given user
+	 *         ID and context
 	 * @throws UserConfigurationException
 	 *             if loading fails
 	 */

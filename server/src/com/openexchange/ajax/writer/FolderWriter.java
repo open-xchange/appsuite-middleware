@@ -65,8 +65,8 @@ import com.openexchange.cache.FolderCacheManager;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.server.OCLPermission;
@@ -109,12 +109,13 @@ public final class FolderWriter extends DataWriter {
 	public FolderWriter(final JSONWriter jw, final SessionObject session) {
 		super();
 		this.jsonwriter = jw;
-		this.userObj = session.getUserObject();
-		this.userConfig = session.getUserConfiguration();
+		this.userObj = UserStorage.getUser(session.getUserId(), session.getContext());
+		this.userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
+				session.getContext());
 		this.ctx = session.getContext();
 	}
 
-	private UserConfigurationStorage getUserConfigurationStorage() throws UserConfigurationException {
+	private UserConfigurationStorage getUserConfigurationStorage() {
 		if (userConfStorage == null) {
 			userConfStorage = UserConfigurationStorage.getInstance();
 		}
@@ -278,8 +279,8 @@ public final class FolderWriter extends DataWriter {
 						if (withKey) {
 							jsonwriter.key(FolderFields.MODULE);
 						}
-						jsonwriter.value(fo.containsModule() ? AJAXServlet.getModuleString(fo.getModule(), fo.getObjectID())
-								: JSONObject.NULL);
+						jsonwriter.value(fo.containsModule() ? AJAXServlet.getModuleString(fo.getModule(), fo
+								.getObjectID()) : JSONObject.NULL);
 					}
 				};
 				break Fields;

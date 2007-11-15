@@ -136,7 +136,7 @@ public class RdbSettingStorage extends SettingStorage {
                 throw new SettingException(Code.NO_WRITE, setting.getName());
             }
         } else {
-            final int userId = session.getUserObject().getId();
+            final int userId = session.getUserId();
             final boolean update = settingExists(userId, setting);
             Connection con;
             try {
@@ -190,7 +190,7 @@ public class RdbSettingStorage extends SettingStorage {
                     SELECT_VALUE);
                 int pos = 1;
                 stmt.setInt(pos++, ctx.getContextId());
-                stmt.setInt(pos++, session.getUserObject().getId());
+                stmt.setInt(pos++, session.getUserId());
                 stmt.setInt(pos++, setting.getId());
                 result = stmt.executeQuery();
                 if (result.next()) {

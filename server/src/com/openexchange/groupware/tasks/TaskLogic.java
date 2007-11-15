@@ -728,7 +728,7 @@ public final class TaskLogic {
     public static void deleteTask(final SessionObject session, final Task task,
         final Date lastModified) throws TaskException {
         final Context ctx = session.getContext();
-        final int userId = session.getUserObject().getId();
+        final int userId = session.getUserId();
         Connection con;
         try {
             con = DBPool.pickupWriteable(ctx);

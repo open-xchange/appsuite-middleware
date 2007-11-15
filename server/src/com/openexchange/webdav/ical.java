@@ -89,6 +89,8 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.DBPool;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -206,15 +208,15 @@ public final class ical extends PermissionServlet {
 		try {
 			user_agent = getUserAgent(req);
 			
-			principal = user_agent + '_' + sessionObj.getUserObject().getId();
+			principal = user_agent + '_' + sessionObj.getUserId();
 			
 			calendarfolder_id = getCalendarFolderID(req);
 			taskfolder_id = getTaskFolderID(req);
 			
 			if (calendarfolder_id == 0 && taskfolder_id == 0) {
 				final OXFolderAccess oAccess = new OXFolderAccess(context);
-				calendarfolder_id = oAccess.getDefaultFolder(sessionObj.getUserObject().getId(), FolderObject.CALENDAR).getObjectID();
-				taskfolder_id = oAccess.getDefaultFolder(sessionObj.getUserObject().getId(), FolderObject.TASK).getObjectID();
+				calendarfolder_id = oAccess.getDefaultFolder(sessionObj.getUserId(), FolderObject.CALENDAR).getObjectID();
+				taskfolder_id = oAccess.getDefaultFolder(sessionObj.getUserId(), FolderObject.TASK).getObjectID();
 				/*calendarfolder_id = OXFolderTools.getCalendarDefaultFolder(sessionObj.getUserObject().getId(), context);
 				taskfolder_id = OXFolderTools.getTaskDefaultFolder(sessionObj.getUserObject().getId(), context);*/
 			}
@@ -471,8 +473,8 @@ public final class ical extends PermissionServlet {
 			
 			if (calendarfolder_id == 0 && taskfolder_id == 0) {
 				final OXFolderAccess oAccess = new OXFolderAccess(context);
-				calendarfolder_id = oAccess.getDefaultFolder(sessionObj.getUserObject().getId(), FolderObject.CALENDAR).getObjectID();
-				taskfolder_id = oAccess.getDefaultFolder(sessionObj.getUserObject().getId(), FolderObject.TASK).getObjectID();
+				calendarfolder_id = oAccess.getDefaultFolder(sessionObj.getUserId(), FolderObject.CALENDAR).getObjectID();
+				taskfolder_id = oAccess.getDefaultFolder(sessionObj.getUserId(), FolderObject.TASK).getObjectID();
 				/*calendarfolder_id = OXFolderTools.getCalendarDefaultFolder(sessionObj.getUserObject().getId(), context);
 				taskfolder_id = OXFolderTools.getTaskDefaultFolder(sessionObj.getUserObject().getId(), context);*/
 			}
@@ -485,15 +487,15 @@ public final class ical extends PermissionServlet {
 				throw new OXConflictException("missing header field: user-agent");
 			}
 			
-			principal = user_agent + '_' + sessionObj.getUserObject().getId();
+			principal = user_agent + '_' + sessionObj.getUserId();
 			
 			calendarfolder_id = getCalendarFolderID(req);
 			taskfolder_id = getTaskFolderID(req);
 			
 			if (calendarfolder_id == 0 && taskfolder_id == 0) {
 				final OXFolderAccess oAccess = new OXFolderAccess(context);
-				calendarfolder_id = oAccess.getDefaultFolder(sessionObj.getUserObject().getId(), FolderObject.CALENDAR).getObjectID();
-				taskfolder_id = oAccess.getDefaultFolder(sessionObj.getUserObject().getId(), FolderObject.TASK).getObjectID();
+				calendarfolder_id = oAccess.getDefaultFolder(sessionObj.getUserId(), FolderObject.CALENDAR).getObjectID();
+				taskfolder_id = oAccess.getDefaultFolder(sessionObj.getUserId(), FolderObject.TASK).getObjectID();
 				/*calendarfolder_id = OXFolderTools.getCalendarDefaultFolder(sessionObj.getUserObject().getId(), context);
 				taskfolder_id = OXFolderTools.getTaskDefaultFolder(sessionObj.getUserObject().getId(), context);*/
 			}
@@ -900,6 +902,7 @@ public final class ical extends PermissionServlet {
 	
 	@Override
 	protected boolean hasModulePermission(final SessionObject sessionObj) {
-		return (sessionObj.getUserConfiguration().hasICal() && sessionObj.getUserConfiguration().hasCalendar() && sessionObj.getUserConfiguration().hasTask());
+		final UserConfiguration uc =  UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext());
+		return (uc.hasICal() && uc.hasCalendar() && uc.hasTask());
 	}
 }

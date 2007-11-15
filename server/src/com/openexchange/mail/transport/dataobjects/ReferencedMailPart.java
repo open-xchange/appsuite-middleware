@@ -245,7 +245,7 @@ public abstract class ReferencedMailPart extends MailPart {
 		}
 		final AJAXUploadFile uploadFile = new AJAXUploadFile(file, System.currentTimeMillis());
 		fileId = plainStringToMD5(file.getName());
-		session.putAJAXUploadFile(fileId, uploadFile);
+		session.putUploadedFile(fileId, uploadFile);
 		return totalBytes;
 	}
 

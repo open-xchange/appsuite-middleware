@@ -63,6 +63,7 @@ import com.openexchange.groupware.Component;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.spellcheck.SpellCheckConfig;
 import com.openexchange.sessiond.SessionObject;
@@ -79,9 +80,10 @@ import com.openexchange.tools.text.spelling.OXSpellCheckResult;
 public class AJAXSpellCheck {
 
 	private SessionObject session;
-	
-	private static final AJAXSpellCheckExceptionFactory EXCEPTIONS = new AJAXSpellCheckExceptionFactory(AJAXSpellCheck.class);
-	
+
+	private static final AJAXSpellCheckExceptionFactory EXCEPTIONS = new AJAXSpellCheckExceptionFactory(
+			AJAXSpellCheck.class);
+
 	private static final Object[] EMPTY_MSG_ARGS = new Object[0];
 
 	public AJAXSpellCheck(SessionObject session) {
@@ -89,12 +91,10 @@ public class AJAXSpellCheck {
 		this.session = session;
 	}
 
-	@OXThrowsMultiple(
-			category={ Category.SETUP_ERROR, Category.SETUP_ERROR, Category.SETUP_ERROR },
-			desc={ "", "", "" },
-			exceptionId={ 1, 2, 3 },
-			msg={ "No SpellCheckConfig loaded.", "No dictionary could be found for language: %1$s.",
-					"Dictionary (id=%1$s) does not hold a command. Please specify a command in corresponding \"spellcheck.cfg\" file." })
+	@OXThrowsMultiple(category = { Category.SETUP_ERROR, Category.SETUP_ERROR, Category.SETUP_ERROR }, desc = { "", "",
+			"" }, exceptionId = { 1, 2, 3 }, msg = { "No SpellCheckConfig loaded.",
+			"No dictionary could be found for language: %1$s.",
+			"Dictionary (id=%1$s) does not hold a command. Please specify a command in corresponding \"spellcheck.cfg\" file." })
 	private String getCommand() throws AbstractOXException {
 		final String lang = session.getLanguage().toUpperCase();
 		final SpellCheckConfig scc = MailConfig.getSpellCheckConfig();
@@ -111,10 +111,9 @@ public class AJAXSpellCheck {
 		return dicConfig.getCommand();
 	}
 
-	@OXThrowsMultiple(category={ Category.SETUP_ERROR, Category.SETUP_ERROR, Category.CODE_ERROR },
-			desc={ "", "", "" },
-			exceptionId={ 4, 5, 6 },
-			msg={ "Missing SpellCheckConfig object.", "User dictionary could not be found.", "An I/O error occurred: %1$s." })
+	@OXThrowsMultiple(category = { Category.SETUP_ERROR, Category.SETUP_ERROR, Category.CODE_ERROR }, desc = { "", "",
+			"" }, exceptionId = { 4, 5, 6 }, msg = { "Missing SpellCheckConfig object.",
+			"User dictionary could not be found.", "An I/O error occurred: %1$s." })
 	public AJAXSpellCheckResult[] checkText(final String text) throws AbstractOXException {
 		try {
 			if (MailConfig.getSpellCheckConfig() == null) {
@@ -124,7 +123,8 @@ public class AJAXSpellCheck {
 				return new AJAXSpellCheckResult[] {};
 			}
 			final String command = getCommand();
-			final AJAXUserDictionary userDic = session.getUserConfiguration().getUserDictionary();
+			final AJAXUserDictionary userDic = UserConfigurationStorage.getInstance().getUserConfigurationSafe(
+					session.getUserId(), session.getContext()).getUserDictionary();
 			if (userDic == null) {
 				throw EXCEPTIONS.createException(5, EMPTY_MSG_ARGS);
 			}

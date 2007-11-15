@@ -130,7 +130,7 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 		}
 		
 		final MailObject mail = new MailObject(session, obj.getObjectID(), folderId, state.getModule());
-		mail.setFromAddr(session.getUserObject().getMail());
+		mail.setFromAddr(UserStorage.getUser(session.getUserId(), session.getContext()).getMail());
 		mail.setToAddrs(name.toArray(new String[name.size()]));
 		mail.setText(message);
 		mail.setSubject(messageTitle);
@@ -214,7 +214,7 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 	}
 	
 	private void sendNotification(final CalendarObject obj, final SessionObject sessionObj, final String msgKey, final String titleKey, final State state, final boolean forceNotifyOthers, final boolean suppressOXReminderHeader) {
-		if(!obj.getNotification() && obj.getCreatedBy() == sessionObj.getUserObject().getId() && !forceNotifyOthers) {
+		if(!obj.getNotification() && obj.getCreatedBy() == sessionObj.getUserId() && !forceNotifyOthers) {
 			return;
 		}
 		if(obj.getParticipants() == null) {

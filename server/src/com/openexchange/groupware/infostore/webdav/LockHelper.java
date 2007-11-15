@@ -61,7 +61,9 @@ import javax.servlet.http.HttpServletResponse;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.sessiond.SessionHolder;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.webdav.protocol.WebdavException;
@@ -158,7 +160,7 @@ public abstract class LockHelper {
 		loadedLocks = true;
 		final SessionObject session = sessionHolder.getSessionObject();
 		try {
-			final List<Lock> locks = lockManager.findLocks(id, session.getContext(), session.getUserObject(), session.getUserConfiguration());
+			final List<Lock> locks = lockManager.findLocks(id, session.getContext(), UserStorage.getUser(session.getUserId(), session.getContext()), UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()));
 			final List<Lock> cleanedLocks = new ArrayList<Lock>();
 			for(final Lock lock : locks) {
 				if (!removedLockIDs.contains(Integer.valueOf(lock.getId()))) {
@@ -183,8 +185,8 @@ public abstract class LockHelper {
 		}
 		final SessionObject session = sessionHolder.getSessionObject();
 		final Context ctx = session.getContext();
-		final User user = session.getUserObject();
-		final UserConfiguration userConfig = session.getUserConfiguration();
+		final User user = UserStorage.getUser(session.getUserId(), session.getContext());
+		final UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext());
 		for(final int id : removedLockIDs) {
 			lockManager.unlock(id, ctx, user, userConfig);
 		}
@@ -194,11 +196,11 @@ public abstract class LockHelper {
 	
 	public void deleteLocks() throws OXException {
 		final SessionObject session = sessionHolder.getSessionObject();
-		lockManager.removeAll(id, session.getContext(), session.getUserObject(), session.getUserConfiguration());
+		lockManager.removeAll(id, session.getContext(), UserStorage.getUser(session.getUserId(), session.getContext()), UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()));
 	}
 
 	public void transferLock(final WebdavLock lock) throws OXException {
 		final SessionObject session = sessionHolder.getSessionObject();
-		lockManager.insertLock(id, toLock(lock), session.getContext(), session.getUserObject(), session.getUserConfiguration());
+		lockManager.insertLock(id, toLock(lock), session.getContext(), UserStorage.getUser(session.getUserId(), session.getContext()), UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()));
 	}
 }

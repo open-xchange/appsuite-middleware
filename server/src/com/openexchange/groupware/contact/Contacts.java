@@ -95,6 +95,7 @@ import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.DBPool;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.server.EffectivePermission;
@@ -377,7 +378,7 @@ public class Contacts implements DeleteListener {
 			}
 
 			final OXFolderAccess oxfs = new OXFolderAccess(readcon, so.getContext());
-			final EffectivePermission oclPerm = oxfs.getFolderPermission(fid, user, so.getUserConfiguration());
+			final EffectivePermission oclPerm = oxfs.getFolderPermission(fid, user, UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), so.getContext()));
 			
 				//OXFolderTools.getEffectiveFolderOCL(fid, user,group, so.getContext(),so.getUserConfiguration(), readcon);
 			if (oclPerm.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {
@@ -2318,7 +2319,7 @@ public class Contacts implements DeleteListener {
 					contactFolder = FolderObject.loadFolderObjectFromDB(fid, so.getContext(), readcon);
 				}
 				if (contactFolder.getModule() != FolderObject.CONTACT) {
-					throw EXCEPTIONS.createOXConflictException(42, Integer.valueOf(fid), Integer.valueOf(so.getContext().getContextId()), Integer.valueOf(so.getUserObject().getId()));
+					throw EXCEPTIONS.createOXConflictException(42, Integer.valueOf(fid), Integer.valueOf(so.getContext().getContextId()), Integer.valueOf(so.getUserId()));
 					//throw new OXException("YOU TRY TO DELETE FROM A NON CONTACT FOLDER! cid="+so.getContext().getContextId()+" fid="+fid);
 				}
 				if (contactFolder.getType() == FolderObject.PRIVATE){

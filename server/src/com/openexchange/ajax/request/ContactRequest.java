@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.request;
 
-import com.openexchange.tools.servlet.OXJSONException;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -58,7 +57,6 @@ import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONWriter;
 
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.ContactFields;
@@ -76,12 +74,15 @@ import com.openexchange.api2.RdbContactSQLInterface;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.search.ContactSearchObject;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.OXJSONException;
 
 public class ContactRequest {
 	
@@ -100,7 +101,7 @@ public class ContactRequest {
 	public ContactRequest(SessionObject sessionObj) {
 		this.sessionObj = sessionObj;
 		
-		final String sTimeZone = sessionObj.getUserObject().getTimeZone();
+		final String sTimeZone = UserStorage.getUser(sessionObj.getUserId(), sessionObj.getContext()).getTimeZone();
 		
 		timeZone = TimeZone.getTimeZone(sTimeZone);
 		if (LOG.isDebugEnabled()) {
@@ -110,7 +111,7 @@ public class ContactRequest {
 	}
 	
 	public Object action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXConcurrentModificationException, SearchIteratorException, AjaxException, OXException, OXJSONException {
-		if (!sessionObj.getUserConfiguration().hasContact()) {
+		if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext()).hasContact()) {
 			throw new OXPermissionException(OXPermissionException.Code.NoPermissionForModul, "contact");
 		}
 		

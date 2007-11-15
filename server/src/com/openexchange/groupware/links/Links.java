@@ -76,7 +76,9 @@ import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.LinkObject;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tx.DBPoolProvider;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.DBPool;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.sessiond.SessionObject;
@@ -113,7 +115,7 @@ public class Links {
 		
 		module[Types.APPOINTMENT] = new modules() {
 			public boolean isReadable(final int oid, final int fid, final int user, final int[] group, final SessionObject so) {
-				if (!so.getUserConfiguration().hasCalendar()){
+				if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), so.getContext()).hasCalendar()){
 					return false;
 				}
 				try{
@@ -123,7 +125,7 @@ public class Links {
 				}
 			}
 			public boolean hasModuleRights(final SessionObject so){
-				if (!so.getUserConfiguration().hasCalendar()){
+				if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), so.getContext()).hasCalendar()){
 					return false;
 				}
 				return true;
@@ -131,13 +133,13 @@ public class Links {
 		};
 		module[Types.TASK] = new modules() {
 			public boolean isReadable(final int oid, final int fid, final int user, final int[] group, final SessionObject so) {
-				if (!so.getUserConfiguration().hasTask()){
+				if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), so.getContext()).hasTask()){
 					return false;
 				}
 				return com.openexchange.groupware.tasks.Task2Links.checkMayReadTask(so, oid, fid);
 			}
 			public boolean hasModuleRights(final SessionObject so){
-				if (!so.getUserConfiguration().hasTask()){
+				if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), so.getContext()).hasTask()){
 					return false;
 				}
 				return true;
@@ -145,11 +147,11 @@ public class Links {
 		};
 		module[Types.CONTACT] = new modules() {
 			public boolean isReadable(final int oid, final int fid, final int user, final int[] group, final SessionObject so) {
-				if (!so.getUserConfiguration().hasContact()){
+				if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), so.getContext()).hasContact()){
 					return false;
 				}
 				try{
-					return Contacts.performContactReadCheckByID(oid, user, group, so.getContext(), so.getUserConfiguration());
+					return Contacts.performContactReadCheckByID(oid, user, group, so.getContext(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), so.getContext()));
 				} catch (Exception e) {
 					//System.out.println("UNABLE TO CHECK CONTACT READRIGHT FOR LINK");
 					LOG.error("UNABLE TO CHECK CONTACT READRIGHT FOR LINK",e);
@@ -157,7 +159,7 @@ public class Links {
 				}
 			}
 			public boolean hasModuleRights(final SessionObject so){
-				if (!so.getUserConfiguration().hasContact()){
+				if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), so.getContext()).hasContact()){
 					return false;
 				}
 				return true;
@@ -167,13 +169,13 @@ public class Links {
 			public boolean isReadable(final int oid, final int fid, final int user, final int[] group, final SessionObject so) {				
 				final InfostoreFacade DATABASE = new InfostoreFacadeImpl(new DBPoolProvider());
 				try {
-					return  DATABASE.exists(oid,InfostoreFacade.CURRENT_VERSION, so.getContext(), so.getUserObject(), so.getUserConfiguration());
+					return  DATABASE.exists(oid,InfostoreFacade.CURRENT_VERSION, so.getContext(), UserStorage.getUser(so.getUserId(), so.getContext()), UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), so.getContext()));
 				} catch (OXException e) {
 					return false;
 				}
 			}
 			public boolean hasModuleRights(final SessionObject so){
-				if (!so.getUserConfiguration().hasInfostore()){
+				if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), so.getContext()).hasInfostore()){
 					return false;
 				}
 				return true;

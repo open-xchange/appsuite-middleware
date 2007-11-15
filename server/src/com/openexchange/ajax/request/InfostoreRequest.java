@@ -85,10 +85,13 @@ import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.infostore.database.impl.GetSwitch;
 import com.openexchange.groupware.infostore.database.impl.SetSwitch;
 import com.openexchange.groupware.infostore.utils.Metadata;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -98,7 +101,11 @@ public class InfostoreRequest extends CommonRequest{
 	
 	private static final InfostoreParser PARSER = new InfostoreParser();
 	
-	private SessionObject sessionObj;
+	private final SessionObject sessionObj;
+	
+	private final User user;
+	
+	private final UserConfiguration userConfiguration;
 
 	private static final Log LOG = LogFactory.getLog(InfostoreRequest.class);
 	private static final LoggingLogic LL = LoggingLogic.getLoggingLogic(InfostoreRequest.class);
@@ -106,6 +113,9 @@ public class InfostoreRequest extends CommonRequest{
 	public InfostoreRequest(final SessionObject sessionObj, final JSONWriter w) {
 		super(w);
 		this.sessionObj = sessionObj;
+		userConfiguration = UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
+				sessionObj.getContext());
+		user = UserStorage.getUser(sessionObj.getUserId(), sessionObj.getContext());
 	}
 	
 	public static boolean hasPermission(UserConfiguration userConfig) {
@@ -114,7 +124,7 @@ public class InfostoreRequest extends CommonRequest{
 	
 		
 	public boolean action(final String action, final SimpleRequest req) throws OXPermissionException{
-		if (!hasPermission(sessionObj.getUserConfiguration())) {
+		if (!hasPermission(userConfiguration)) {
 			throw new OXPermissionException(OXPermissionException.Code.NoPermissionForModul, "infostore");
 		}
 		try {
@@ -425,13 +435,13 @@ public class InfostoreRequest extends CommonRequest{
 		SearchIterator iter = null;
 		try {
 			
-			result = infostore.getDocuments(ids,cols,sessionObj.getContext(), sessionObj.getUserObject(), sessionObj.getUserConfiguration());
+			result = infostore.getDocuments(ids,cols,sessionObj.getContext(), user, userConfiguration);
 			
 			iter = result.results();
 			
 			final InfostoreWriter iWriter = new InfostoreWriter(w);
 			iWriter.timedResult(result.sequenceNumber());
-			iWriter.writeMetadata(iter ,cols,TimeZone.getTimeZone(sessionObj.getUserObject().getTimeZone()));
+			iWriter.writeMetadata(iter ,cols,TimeZone.getTimeZone(user.getTimeZone()));
 			iWriter.endTimedResult();
 			
 		
@@ -450,7 +460,7 @@ public class InfostoreRequest extends CommonRequest{
 		DocumentMetadata dm = null;
 		try {
 			
-			dm = infostore.getDocumentMetadata(id,version,sessionObj.getContext(), sessionObj.getUserObject(), sessionObj.getUserConfiguration());
+			dm = infostore.getDocumentMetadata(id,version,sessionObj.getContext(), user, userConfiguration);
 			if(dm==null) {
 				sendErrorAsJS("Cannot find document: %s ", String.valueOf(id));
 			}
@@ -462,7 +472,7 @@ public class InfostoreRequest extends CommonRequest{
 		try {
 			final InfostoreWriter iWriter = new InfostoreWriter(w);
 			iWriter.timedResult(dm.getSequenceNumber());
-			iWriter.write(dm,TimeZone.getTimeZone(sessionObj.getUserObject().getTimeZone()));
+			iWriter.write(dm,TimeZone.getTimeZone(user.getTimeZone()));
 			iWriter.endTimedResult();
 		} catch (final JSONException e) {
 			LOG.error("", e);
@@ -476,8 +486,8 @@ public class InfostoreRequest extends CommonRequest{
 		try {
 			//SearchENgine?
 			infostore.startTransaction();
-			infostore.getDocumentMetadata(id,InfostoreFacade.CURRENT_VERSION,sessionObj.getContext(),sessionObj.getUserObject(),sessionObj.getUserConfiguration()).getSequenceNumber();
-			final TimedResult result = infostore.getVersions(id,new Metadata[]{Metadata.VERSION_LITERAL}, sessionObj.getContext(), sessionObj.getUserObject(), sessionObj.getUserConfiguration());
+			infostore.getDocumentMetadata(id,InfostoreFacade.CURRENT_VERSION,sessionObj.getContext(),user,userConfiguration).getSequenceNumber();
+			final TimedResult result = infostore.getVersions(id,new Metadata[]{Metadata.VERSION_LITERAL}, sessionObj.getContext(), user, userConfiguration);
 			if(timestamp > ts) {
 				throw new OXConflictException();
 			}
@@ -497,7 +507,7 @@ public class InfostoreRequest extends CommonRequest{
 				versionsArray[index++] = version;
 			}
 			infostore.removeVersion(id, versionsArray, sessionObj);
-			timestamp = infostore.getDocumentMetadata(id,InfostoreFacade.CURRENT_VERSION,sessionObj.getContext(),sessionObj.getUserObject(),sessionObj.getUserConfiguration()).getSequenceNumber();
+			timestamp = infostore.getDocumentMetadata(id,InfostoreFacade.CURRENT_VERSION,sessionObj.getContext(),user,userConfiguration).getSequenceNumber();
 			infostore.commit();
 			w.object();
 			w.key(Response.DATA).value(new JSONObject())
@@ -541,20 +551,20 @@ public class InfostoreRequest extends CommonRequest{
 		*/
 		final InfostoreFacade infostore = getInfostore(folderId);
 		TimedResult result = null;
-		SearchIterator iter = null;
+		SearchIterator<?> iter = null;
 		try {
 			
 			if(sortedBy == null) {
-				result = infostore.getDocuments(folderId,cols,sessionObj.getContext(), sessionObj.getUserObject(), sessionObj.getUserConfiguration());
+				result = infostore.getDocuments(folderId,cols,sessionObj.getContext(), user, userConfiguration);
 			} else {
-				result = infostore.getDocuments(folderId,cols,sortedBy,dir,sessionObj.getContext(), sessionObj.getUserObject(), sessionObj.getUserConfiguration());
+				result = infostore.getDocuments(folderId,cols,sortedBy,dir,sessionObj.getContext(), user, userConfiguration);
 			}
 			
 			iter = result.results();
 			
 			final InfostoreWriter iWriter = new InfostoreWriter(w);
 			iWriter.timedResult(result.sequenceNumber());
-			iWriter.writeMetadata(iter,cols,TimeZone.getTimeZone(sessionObj.getUserObject().getTimeZone()));
+			iWriter.writeMetadata(iter,cols,TimeZone.getTimeZone(user.getTimeZone()));
 			iWriter.endTimedResult();
 		
 		} catch (final Throwable t){
@@ -570,19 +580,19 @@ public class InfostoreRequest extends CommonRequest{
 	protected void versions(final int id, final Metadata[] cols, final Metadata sortedBy, final int dir) throws SearchIteratorException {
 		final InfostoreFacade infostore = getInfostore();
 		TimedResult result = null;
-		SearchIterator iter = null;
+		SearchIterator<?> iter = null;
 		try {
 			
 			if(sortedBy == null) {
-				result = infostore.getVersions(id,cols,sessionObj.getContext(), sessionObj.getUserObject(), sessionObj.getUserConfiguration());
+				result = infostore.getVersions(id,cols,sessionObj.getContext(), user, userConfiguration);
 			} else {
-				result = infostore.getVersions(id,cols,sortedBy,dir,sessionObj.getContext(), sessionObj.getUserObject(), sessionObj.getUserConfiguration());
+				result = infostore.getVersions(id,cols,sortedBy,dir,sessionObj.getContext(), user, userConfiguration);
 			}
 			iter = result.results();
 			iter.next(); // Skip version zero
 			final InfostoreWriter iWriter = new InfostoreWriter(w);
 			iWriter.timedResult(result.sequenceNumber());
-			iWriter.writeMetadata(iter,cols,TimeZone.getTimeZone(sessionObj.getUserObject().getTimeZone()));
+			iWriter.writeMetadata(iter,cols,TimeZone.getTimeZone(user.getTimeZone()));
 			iWriter.endTimedResult();
 		
 		} catch (final Throwable t){
@@ -600,16 +610,16 @@ public class InfostoreRequest extends CommonRequest{
 		Delta delta = null;
 		
 		
-		SearchIterator iter = null;
-		SearchIterator iter2 = null;
+		SearchIterator<?> iter = null;
+		SearchIterator<?> iter2 = null;
 		
 		try {
 			
 			
 			if(sortedBy == null) {
-				delta = infostore.getDelta(folderId,timestamp,cols,ignoreDelete,sessionObj.getContext(), sessionObj.getUserObject(), sessionObj.getUserConfiguration());
+				delta = infostore.getDelta(folderId,timestamp,cols,ignoreDelete,sessionObj.getContext(), user, userConfiguration);
 			} else {
-				delta = infostore.getDelta(folderId,timestamp,cols,sortedBy,dir,ignoreDelete,sessionObj.getContext(), sessionObj.getUserObject(), sessionObj.getUserConfiguration());
+				delta = infostore.getDelta(folderId,timestamp,cols,sortedBy,dir,ignoreDelete,sessionObj.getContext(), user, userConfiguration);
 			}
 			
 			iter = delta.results();
@@ -617,7 +627,7 @@ public class InfostoreRequest extends CommonRequest{
 			
 			final InfostoreWriter iWriter = new InfostoreWriter(w);
 			iWriter.timedResult(delta.sequenceNumber());
-			iWriter.writeDelta(iter, iter2, cols,ignoreDelete,TimeZone.getTimeZone(sessionObj.getUserObject().getTimeZone()));
+			iWriter.writeDelta(iter, iter2, cols,ignoreDelete,TimeZone.getTimeZone(user.getTimeZone()));
 			iWriter.endTimedResult();
 		
 		} catch (final Throwable t){
@@ -651,7 +661,7 @@ public class InfostoreRequest extends CommonRequest{
 				
 				for(final int id : ids) {
 					if(!notDeletedSet.contains(Integer.valueOf(id))){
-						searchEngine.unIndex0r(id,sessionObj.getContext(), sessionObj.getUserObject(), sessionObj.getUserConfiguration());
+						searchEngine.unIndex0r(id,sessionObj.getContext(), user, userConfiguration);
 					}
 				}
 				
@@ -705,7 +715,7 @@ public class InfostoreRequest extends CommonRequest{
 				
 				notDetached = infostore.removeVersion(objectId,ids,sessionObj);
 				
-				searchEngine.index(infostore.getDocumentMetadata(objectId, InfostoreFacade.CURRENT_VERSION,sessionObj.getContext(), sessionObj.getUserObject(), sessionObj.getUserConfiguration()), sessionObj.getContext(), sessionObj.getUserObject(), sessionObj.getUserConfiguration());
+				searchEngine.index(infostore.getDocumentMetadata(objectId, InfostoreFacade.CURRENT_VERSION,sessionObj.getContext(), user, userConfiguration), sessionObj.getContext(), user, userConfiguration);
 				
 				infostore.commit();
 				searchEngine.commit();
@@ -752,7 +762,7 @@ public class InfostoreRequest extends CommonRequest{
 			infostore.saveDocumentMetadata(newDocument,System.currentTimeMillis(),sessionObj);
 			infostore.commit();
 			//System.out.println("DONE SAVING: "+System.currentTimeMillis());
-			searchEngine.index(newDocument,sessionObj.getContext(), sessionObj.getUserObject(), sessionObj.getUserConfiguration());
+			searchEngine.index(newDocument,sessionObj.getContext(), user, userConfiguration);
 			searchEngine.commit();
 		} catch (final Throwable t){
 			try {
@@ -797,7 +807,7 @@ public class InfostoreRequest extends CommonRequest{
 			infostore.startTransaction();
 			searchEngine.startTransaction();
 			
-			final AttachmentMetadata att = attachmentBase.getAttachment(folderId,attachedId,moduleId,attachment,sessionObj.getContext(),sessionObj.getUserObject(), sessionObj.getUserConfiguration());
+			final AttachmentMetadata att = attachmentBase.getAttachment(folderId,attachedId,moduleId,attachment,sessionObj.getContext(),user, userConfiguration);
 			final com.openexchange.groupware.attach.util.GetSwitch get = new com.openexchange.groupware.attach.util.GetSwitch(att);
 			final SetSwitch set = new SetSwitch(newDocument);
 			
@@ -814,11 +824,11 @@ public class InfostoreRequest extends CommonRequest{
 				attachmentCompatible.doSwitch(set);
 			}
 			newDocument.setId(InfostoreFacade.NEW);
-			in = attachmentBase.getAttachedFile(folderId,attachedId,moduleId,attachment,sessionObj.getContext(), sessionObj.getUserObject(), sessionObj.getUserConfiguration());
+			in = attachmentBase.getAttachedFile(folderId,attachedId,moduleId,attachment,sessionObj.getContext(), user, userConfiguration);
 			infostore.saveDocument(newDocument,in, System.currentTimeMillis(),sessionObj); // FIXME violates encapsulation
 			
 			//System.out.println("DONE SAVING: "+System.currentTimeMillis());
-			searchEngine.index(newDocument,sessionObj.getContext(), sessionObj.getUserObject(), sessionObj.getUserConfiguration());
+			searchEngine.index(newDocument,sessionObj.getContext(), user, userConfiguration);
 			
 			infostore.commit();
 			searchEngine.commit();
@@ -916,7 +926,7 @@ public class InfostoreRequest extends CommonRequest{
 			searchEngine.startTransaction();
 			
 			
-			metadata = new DocumentMetadataImpl(infostore.getDocumentMetadata(id,InfostoreFacade.CURRENT_VERSION,sessionObj.getContext(), sessionObj.getUserObject(), sessionObj.getUserConfiguration()));
+			metadata = new DocumentMetadataImpl(infostore.getDocumentMetadata(id,InfostoreFacade.CURRENT_VERSION,sessionObj.getContext(), user, userConfiguration));
 			
 			
 			final SetSwitch set = new SetSwitch(metadata);
@@ -931,11 +941,11 @@ public class InfostoreRequest extends CommonRequest{
 			metadata.setId(InfostoreFacade.NEW);
 			
 			if(metadata.getFileName() != null && !"".equals(metadata.getFileName())) {
-				infostore.saveDocument(metadata,infostore.getDocument(id,InfostoreFacade.CURRENT_VERSION,sessionObj.getContext(), sessionObj.getUserObject(), sessionObj.getUserConfiguration()),metadata.getSequenceNumber(),sessionObj);
+				infostore.saveDocument(metadata,infostore.getDocument(id,InfostoreFacade.CURRENT_VERSION,sessionObj.getContext(), user, userConfiguration),metadata.getSequenceNumber(),sessionObj);
 			} else {
 				infostore.saveDocumentMetadata(metadata,timestamp,sessionObj);
 			}
-			searchEngine.index(metadata,sessionObj.getContext(), sessionObj.getUserObject(), sessionObj.getUserConfiguration());
+			searchEngine.index(metadata,sessionObj.getContext(), user, userConfiguration);
 			
 			infostore.commit();
 			searchEngine.commit();
@@ -1040,11 +1050,11 @@ public class InfostoreRequest extends CommonRequest{
 		try {
 			searchEngine.startTransaction();
 			
-			final SearchIterator results = searchEngine.search(query,cols,folderId,sortedBy,dir,start,end, sessionObj.getContext(), sessionObj.getUserObject(), sessionObj.getUserConfiguration());
+			final SearchIterator results = searchEngine.search(query,cols,folderId,sortedBy,dir,start,end, sessionObj.getContext(), user, userConfiguration);
 			
 			final InfostoreWriter iWriter = new InfostoreWriter(w);
 			iWriter.timedResult(System.currentTimeMillis());
-			iWriter.writeMetadata(results,cols,TimeZone.getTimeZone(sessionObj.getUserObject().getTimeZone()));
+			iWriter.writeMetadata(results,cols,TimeZone.getTimeZone(user.getTimeZone()));
 			iWriter.endTimedResult();
 			
 			searchEngine.commit();

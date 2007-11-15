@@ -54,6 +54,7 @@ import static com.openexchange.imap.IMAPCommandsCollection.supportsUserDefinedFl
 import javax.mail.MessagingException;
 
 import com.openexchange.cache.CacheKey;
+import com.openexchange.mail.cache.SessionMailCache;
 import com.openexchange.mail.cache.SessionMailCacheEntry;
 import com.openexchange.sessiond.SessionObject;
 import com.sun.mail.imap.IMAPFolder;
@@ -91,10 +92,11 @@ public final class UserFlagsCache {
 	public static boolean supportsUserFlags(final IMAPFolder f, final boolean load, final SessionObject session)
 			throws MessagingException {
 		final UserFlagCacheEntry entry = new UserFlagCacheEntry(f.getFullName());
-		session.getMailCache().get(entry);
+		final SessionMailCache mailCache = SessionMailCache.getInstance(session);
+		mailCache.get(entry);
 		if (load && null == entry.getValue()) {
 			entry.setValue(Boolean.valueOf(supportsUserDefinedFlags(f)));
-			session.getMailCache().put(entry);
+			mailCache.put(entry);
 		}
 		return entry.getValue() == null ? false : entry.getValue().booleanValue();
 	}
@@ -108,7 +110,7 @@ public final class UserFlagsCache {
 	 *            The session providing the session-bound cache
 	 */
 	public static void removeUserFlags(final IMAPFolder f, final SessionObject session) {
-		session.getMailCache().remove(new UserFlagCacheEntry(f.getFullName()));
+		SessionMailCache.getInstance(session).remove(new UserFlagCacheEntry(f.getFullName()));
 	}
 
 	private static final class UserFlagCacheEntry implements SessionMailCacheEntry<Boolean> {

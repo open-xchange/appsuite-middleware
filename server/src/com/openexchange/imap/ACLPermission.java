@@ -334,8 +334,8 @@ public final class ACLPermission extends MailPermission {
 		if (hasAnyRights) {
 			rights.add(RIGHTS_UNMAPPABLE);
 		}
-		return (acl = new ACL(User2ACL.getInstance(session.getUserObject()).getACLName(getEntity(), getUserStorage(),
-				user2aclArgs), rights));
+		return (acl = new ACL(User2ACL.getInstance(UserStorage.getUser(session.getUserId(), session.getContext()))
+				.getACLName(getEntity(), getUserStorage(), user2aclArgs), rights));
 	}
 
 	/**
@@ -347,8 +347,8 @@ public final class ACLPermission extends MailPermission {
 	 * @throws AbstractOXException
 	 */
 	public void parseACL(final ACL acl, final User2ACLArgs user2aclArgs) throws AbstractOXException {
-		setEntity(User2ACL.getInstance(session.getUserObject())
-				.getUserID(acl.getName(), getUserStorage(), user2aclArgs));
+		setEntity(User2ACL.getInstance(UserStorage.getUser(session.getUserId(), session.getContext())).getUserID(
+				acl.getName(), getUserStorage(), user2aclArgs));
 		parseRights(acl.getRights());
 		this.acl = acl;
 	}

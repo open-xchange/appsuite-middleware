@@ -92,6 +92,7 @@ import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.upload.UploadEvent;
 import com.openexchange.groupware.upload.UploadException;
 import com.openexchange.groupware.upload.UploadFile;
@@ -555,8 +556,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 	 * @param session
 	 * @return user's timezone
 	 */
-	protected TimeZone getUserTimeZone(final SessionObject session) {
-		return TimeZone.getTimeZone(session.getUserObject().getTimeZone());
+	protected static TimeZone getUserTimeZone(final SessionObject session) {
+		return TimeZone.getTimeZone(UserStorage.getUser(session.getUserId(), session.getContext()).getTimeZone());
 	}
 
 	/**
@@ -567,7 +568,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 	 * @param session
 	 * @return a <code>long</code> value with added time zone offset
 	 */
-	protected long sendTime(final Date d, final SessionObject session) {
+	protected static long sendTime(final Date d, final SessionObject session) {
 		return d.getTime() + getUserTimeZone(session).getOffset(d.getTime());
 	}
 
@@ -581,7 +582,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 	 * @return a <code>java.util.Date</code> instance with subtracted time
 	 *         zone offset
 	 */
-	protected Date parseTime(final long time, final SessionObject session) {
+	protected static Date parseTime(final long time, final SessionObject session) {
 		return new Date(time - getUserTimeZone(session).getOffset(time));
 	}
 
@@ -609,7 +610,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 		return uri;
 	}
 
-	protected JSONObject getResponseObject(final Object data, final Timestamp serverTimestamp, final String errorMsg,
+	protected static JSONObject getResponseObject(final Object data, final Timestamp serverTimestamp, final String errorMsg,
 			final String[] errorParams) throws JSONException {
 		final JSONObject retval = new JSONObject();
 		retval.put("data", data);

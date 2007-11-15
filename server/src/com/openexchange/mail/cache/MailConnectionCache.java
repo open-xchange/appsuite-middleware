@@ -182,7 +182,7 @@ public final class MailConnectionCache {
 	 *             If removing from cache fails
 	 */
 	public MailConnection<?, ?, ?> removeMailConnection(final SessionObject session) throws OXCachingException {
-		final CacheKey key = getUserKey(session.getUserObject().getId(), session.getContext());
+		final CacheKey key = getUserKey(session.getUserId(), session.getContext());
 		final Lock readLock = getLock(key).readLock();
 		readLock.lock();
 		try {
@@ -241,7 +241,7 @@ public final class MailConnectionCache {
 	 */
 	public boolean putMailConnection(final SessionObject session, final MailConnection<?, ?, ?> mailConnection)
 			throws OXCachingException {
-		final CacheKey key = getUserKey(session.getUserObject().getId(), session.getContext());
+		final CacheKey key = getUserKey(session.getUserId(), session.getContext());
 		final Lock readLock = getLock(key).readLock();
 		readLock.lock();
 		try {
@@ -294,7 +294,7 @@ public final class MailConnectionCache {
 	 *         present in cache; otherwise <code>false</code>
 	 */
 	public boolean containsMailConnection(final SessionObject session) {
-		final CacheKey key = getUserKey(session.getUserObject().getId(), session.getContext());
+		final CacheKey key = getUserKey(session.getUserId(), session.getContext());
 		final Lock readLock = getLock(key).readLock();
 		readLock.lock();
 		try {

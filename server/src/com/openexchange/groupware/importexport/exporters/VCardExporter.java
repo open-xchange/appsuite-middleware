@@ -69,6 +69,7 @@ import com.openexchange.groupware.importexport.Format;
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionClasses;
 import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionFactory;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.server.EffectivePermission;
 import com.openexchange.sessiond.SessionObject;
@@ -228,7 +229,7 @@ category={
 		}
 		//check format of folder
 		if ( fo.getModule() == FolderObject.CONTACT){
-			if (!sessObj.getUserConfiguration().hasContact()) {
+			if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessObj.getUserId(), sessObj.getContext()).hasContact()) {
 				return false;
 			}
 		} else {
@@ -237,7 +238,7 @@ category={
 		//check read access to folder
 		EffectivePermission perm;
 		try {
-			perm = fo.getEffectiveUserPermission(sessObj.getUserObject().getId(), sessObj.getUserConfiguration());
+			perm = fo.getEffectiveUserPermission(sessObj.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessObj.getUserId(), sessObj.getContext()));
 		} catch (DBPoolingException e) {
 			throw importExportExceptionFactory.create(2, folder);
 		} catch (SQLException e) {
@@ -262,8 +263,8 @@ category={
 			final VersitDefinition.Writer versitWriter = contactDef.getWriter(byteArrayOutputStream, "UTF-8");
 			final OXContainerConverter oxContainerConverter = new OXContainerConverter(sessObj);
 			
-			final TimeZone timeZone = TimeZone.getTimeZone(sessObj.getUserObject().getTimeZone());
-			final String mail = sessObj.getUserObject().getMail();
+			//final TimeZone timeZone = TimeZone.getTimeZone(sessObj.getUserObject().getTimeZone());
+			//final String mail = sessObj.getUserObject().getMail();
 			
 			final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj);
 			final SearchIterator searchIterator = contactSql.getModifiedContactsInFolder(Integer.parseInt(folder), fieldsToBeExported, new Date(0));

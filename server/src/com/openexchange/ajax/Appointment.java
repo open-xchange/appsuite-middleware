@@ -67,6 +67,7 @@ import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -210,6 +211,7 @@ public class Appointment extends DataServlet {
 	
 	@Override
 	protected boolean hasModulePermission(final SessionObject sessionObj) {
-		return sessionObj.getUserConfiguration().hasCalendar();
+		return UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
+				sessionObj.getContext()).hasCalendar();
 	}
 }

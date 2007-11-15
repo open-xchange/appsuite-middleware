@@ -78,6 +78,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.upload.UploadEvent;
 import com.openexchange.groupware.upload.UploadFile;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.Logging;
@@ -340,6 +341,7 @@ public class Contact extends DataServlet {
 	}
 	
 	protected boolean hasModulePermission(final SessionObject sessionObj) {
-		return sessionObj.getUserConfiguration().hasContact();
+		return UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
+				sessionObj.getContext()).hasContact();
 	}
 }

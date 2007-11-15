@@ -63,7 +63,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.locks.Lock;
 
 import javax.mail.Flags;
 import javax.mail.Folder;
@@ -84,8 +83,10 @@ import com.openexchange.imap.user2acl.User2ACL;
 import com.openexchange.imap.user2acl.User2ACLArgs;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailFolderStorage;
+import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.dataobjects.MailFolder;
+import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.server.OCLPermission;
 import com.openexchange.sessiond.SessionObject;
@@ -362,57 +363,75 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 		}
 	}
 
+	private boolean isDefaultFoldersChecked() {
+		final Boolean b = (Boolean) session.getParameter(MailSessionParameterNames.PARAM_DEF_FLD_FLAG);
+		return b != null && b.booleanValue();
+	}
+
+	private void setDefaultFoldersChecked(final boolean checked) {
+		session.setParameter(MailSessionParameterNames.PARAM_DEF_FLD_FLAG, Boolean.valueOf(checked));
+	}
+
+	private void setDefaultMailFolder(final int index, final String fullname) {
+		String[] arr = (String[]) session.getParameter(MailSessionParameterNames.PARAM_DEF_FLD_ARR);
+		if (null == arr) {
+			arr = new String[6];
+			session.setParameter(MailSessionParameterNames.PARAM_DEF_FLD_ARR, arr);
+		}
+		arr[index] = fullname;
+	}
+
 	public void checkDefaultFolders() throws MailException {
-		if (!session.isMailFldsChecked()) {
-			final Lock mailFldLock = session.getMailFldsLock();
-			mailFldLock.lock();
-			try {
-				if (session.isMailFldsChecked()) {
-					return;
-				}
-				/*
-				 * Get INBOX folder
-				 */
-				final Folder inboxFolder = imapStore.getFolder(STR_INBOX);
-				if (!inboxFolder.exists()) {
-					throw new IMAPException(IMAPException.Code.FOLDER_NOT_FOUND, STR_INBOX);
-				}
-				if (!inboxFolder.isSubscribed()) {
+		if (!isDefaultFoldersChecked()) {
+			synchronized (session) {
+				try {
+					if (isDefaultFoldersChecked()) {
+						return;
+					}
 					/*
-					 * Subscribe INBOX folder
+					 * Get INBOX folder
 					 */
-					inboxFolder.setSubscribed(true);
-				}
-				final boolean noInferiors = ((inboxFolder.getType() & Folder.HOLDS_FOLDERS) == 0);
-				final StringBuilder tmp = new StringBuilder(128);
-				/*
-				 * Determine where to create default folders and store as a
-				 * prefix for folder fullname
-				 */
-				if (!noInferiors
-						&& (!isAltNamespaceEnabled(imapStore) || IMAPConfig.isAllowNestedDefaultFolderOnAltNamespace())) {
+					final Folder inboxFolder = imapStore.getFolder(STR_INBOX);
+					if (!inboxFolder.exists()) {
+						throw new IMAPException(IMAPException.Code.FOLDER_NOT_FOUND, STR_INBOX);
+					}
+					if (!inboxFolder.isSubscribed()) {
+						/*
+						 * Subscribe INBOX folder
+						 */
+						inboxFolder.setSubscribed(true);
+					}
+					final boolean noInferiors = ((inboxFolder.getType() & Folder.HOLDS_FOLDERS) == 0);
+					final StringBuilder tmp = new StringBuilder(128);
 					/*
-					 * Only allow default folder below INBOX if inferiors are
-					 * permitted and either altNamespace is disabled or nested
-					 * default folder are explicitely allowed
+					 * Determine where to create default folders and store as a
+					 * prefix for folder fullname
 					 */
-					tmp.append(inboxFolder.getFullName()).append(inboxFolder.getSeparator());
+					if (!noInferiors
+							&& (!isAltNamespaceEnabled(imapStore) || IMAPConfig
+									.isAllowNestedDefaultFolderOnAltNamespace())) {
+						/*
+						 * Only allow default folder below INBOX if inferiors
+						 * are permitted and either altNamespace is disabled or
+						 * nested default folder are explicitly allowed
+						 */
+						tmp.append(inboxFolder.getFullName()).append(inboxFolder.getSeparator());
+					}
+					final String prefix = tmp.toString();
+					tmp.setLength(0);
+					final int type = (Folder.HOLDS_MESSAGES | Folder.HOLDS_FOLDERS);
+					/*
+					 * Check default folders
+					 */
+					final String[] defaultFolderNames = getDefaultFolderNames(UserSettingMailStorage.getInstance()
+							.getUserSettingMail(session.getUserId(), session.getContext()));
+					for (int i = 0; i < defaultFolderNames.length; i++) {
+						setDefaultMailFolder(i, checkDefaultFolder(prefix, defaultFolderNames[i], type, tmp));
+					}
+					setDefaultFoldersChecked(true);
+				} catch (final MessagingException e) {
+					throw IMAPException.handleMessagingException(e, imapMailConnection);
 				}
-				final String prefix = tmp.toString();
-				tmp.setLength(0);
-				final int type = (Folder.HOLDS_MESSAGES | Folder.HOLDS_FOLDERS);
-				/*
-				 * Check default folders
-				 */
-				final String[] defaultFolderNames = getDefaultFolderNames(session.getUserSettingMail());
-				for (int i = 0; i < defaultFolderNames.length; i++) {
-					session.setDefaultMailFolder(i, checkDefaultFolder(prefix, defaultFolderNames[i], type, tmp));
-				}
-				session.setMailFldsChecked(true);
-			} catch (final MessagingException e) {
-				throw IMAPException.handleMessagingException(e, imapMailConnection);
-			} finally {
-				mailFldLock.unlock();
 			}
 		}
 	}
@@ -492,7 +511,8 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 						final ACL[] removedACLs = getRemovedACLs(newACLs, initialACLs);
 						if (removedACLs.length > 0) {
 							final UserStorage userStorage = UserStorage.getInstance(session.getContext());
-							final User2ACL user2ACL = User2ACL.getInstance(session.getUserObject());
+							final User2ACL user2ACL = User2ACL.getInstance(UserStorage.getUser(session.getUserId(),
+									session.getContext()));
 							final User2ACLArgs user2ACLArgs = IMAPFolderConverter.getUser2AclArgs(session, createMe);
 							for (int i = 0; i < removedACLs.length; i++) {
 								if (isKnownEntity(removedACLs[i].getName(), user2ACL, userStorage, user2ACLArgs)) {
@@ -684,7 +704,8 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 						final ACL[] removedACLs = getRemovedACLs(newACLs, oldACLs);
 						if (removedACLs.length > 0) {
 							final UserStorage userStorage = UserStorage.getInstance(session.getContext());
-							final User2ACL user2ACL = User2ACL.getInstance(session.getUserObject());
+							final User2ACL user2ACL = User2ACL.getInstance(UserStorage.getUser(session.getUserId(),
+									session.getContext()));
 							final User2ACLArgs user2ACLArgs = IMAPFolderConverter.getUser2AclArgs(session, updateMe);
 							for (int i = 0; i < removedACLs.length; i++) {
 								if (isKnownEntity(removedACLs[i].getName(), user2ACL, userStorage, user2ACLArgs)) {
@@ -793,7 +814,9 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 			f.open(Folder.READ_WRITE);
 			try {
 				final String trashFullname = prepareMailFolderParam(getTrashFolder());
-				if (!session.getUserSettingMail().isHardDeleteMsgs() && !(f.getFullName().equals(trashFullname))) {
+				if (!UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), session.getContext())
+						.isHardDeleteMsgs()
+						&& !(f.getFullName().equals(trashFullname))) {
 					final IMAPFolder trashFolder = (IMAPFolder) imapStore.getFolder(trashFullname);
 					try {
 						final long start = System.currentTimeMillis();
@@ -977,9 +1000,10 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 		/*
 		 * Ensure that owner still holds full rights
 		 */
-		final String ownerACLName = User2ACL.getInstance(session.getUserObject()).getACLName(
-				session.getUserObject().getId(), session.getContext(),
-				IMAPFolderConverter.getUser2AclArgs(session, defaultFolder));
+		final String ownerACLName = User2ACL
+				.getInstance(UserStorage.getUser(session.getUserId(), session.getContext())).getACLName(
+						session.getUserId(), session.getContext(),
+						IMAPFolderConverter.getUser2AclArgs(session, defaultFolder));
 		for (int i = 0; i < newACLs.length; i++) {
 			if (newACLs[i].getName().equals(ownerACLName) && newACLs[i].getRights().contains(FULL_RIGHTS)) {
 				return true;
@@ -1160,14 +1184,19 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 				final Folder inbox = imapStore.getFolder(STR_INBOX);
 				return prepareFullname(inbox.getFullName(), inbox.getSeparator());
 			}
-			if (session.isMailFldsChecked()) {
-				return session.getDefaultMailFolder(index);
+			if (isDefaultFoldersChecked()) {
+				return getDefaultMailFolder(index);
 			}
 			checkDefaultFolders();
-			return session.getDefaultMailFolder(index);
+			return getDefaultMailFolder(index);
 		} catch (final MessagingException e) {
 			throw IMAPException.handleMessagingException(e, imapMailConnection);
 		}
+	}
+
+	private String getDefaultMailFolder(final int index) {
+		final String[] arr = (String[]) session.getParameter(MailSessionParameterNames.PARAM_DEF_FLD_ARR);
+		return arr == null ? null : arr[index];
 	}
 
 	private ACL[] permissions2ACL(final OCLPermission[] perms, final IMAPFolder imapFolder) throws AbstractOXException,

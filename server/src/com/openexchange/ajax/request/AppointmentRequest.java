@@ -51,6 +51,22 @@
 
 package com.openexchange.ajax.request;
 
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.TimeZone;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.AppointmentFields;
 import com.openexchange.ajax.fields.CalendarFields;
@@ -78,27 +94,17 @@ import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.Participants;
+import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.search.AppointmentSearchObject;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
  * AppointmentRequest
@@ -137,6 +143,8 @@ public class AppointmentRequest {
 	
 	private SessionObject sessionObj;
 	
+	private User user;
+	
 	private Date timestamp;
 	
 	private TimeZone timeZone;
@@ -145,8 +153,16 @@ public class AppointmentRequest {
 	
 	public AppointmentRequest(SessionObject sessionObj) {
 		this.sessionObj = sessionObj;
-		
-		final String sTimeZone = sessionObj.getUserObject().getTimeZone();
+		try {
+			user = UserStorage.getInstance(sessionObj.getContext()).getUser(sessionObj.getUserId());
+		} catch (LdapException e) {
+			/*
+			 * Cannot occur
+			 */
+			LOG.error(e.getLocalizedMessage(), e);
+			user = null;
+		}
+		final String sTimeZone = user.getTimeZone();
 		
 		timeZone = TimeZone.getTimeZone(sTimeZone);
 		if (LOG.isDebugEnabled()) {
@@ -160,7 +176,7 @@ public class AppointmentRequest {
 	}
 	
 	public Object action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, OXConflictException, OXException, JSONException, SearchIteratorException, AjaxException, OXJSONException {
-		if (!sessionObj.getUserConfiguration().hasCalendar()) {
+		if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext()).hasCalendar()) {
 			throw new OXPermissionException(OXPermissionException.Code.NoPermissionForModul, "calendar");
 		}
 		
@@ -317,7 +333,7 @@ public class AppointmentRequest {
 		try {
 			if (!bIgnoreModified) {
 				if (showAppointmentInAllFolders) {
-					it = appointmentsql.getModifiedAppointmentsBetween(sessionObj.getUserObject().getId(), start, end, _appointmentFields, timestamp, 0, null);
+					it = appointmentsql.getModifiedAppointmentsBetween(user.getId(), start, end, _appointmentFields, timestamp, 0, null);
 				} else {
 					if (start != null && end != null) {
 						it = appointmentsql.getModifiedAppointmentsInFolder(folderId, start, end, _appointmentFields, timestamp);
@@ -573,7 +589,7 @@ public class AppointmentRequest {
 	public JSONArray actionAll(final JSONObject jsonObj) throws SearchIteratorException, OXMandatoryFieldException, JSONException, OXException, OXJSONException, AjaxException {
 		timestamp = new Date(0);
 		
-		SearchIterator it = null;
+		SearchIterator<?> it = null;
 		
 		final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
 		final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
@@ -598,7 +614,7 @@ public class AppointmentRequest {
 		try {
 			final AppointmentSQLInterface appointmentsql = new CalendarSql(sessionObj);
 			if (showAppointmentInAllFolders) {
-				it = appointmentsql.getAppointmentsBetween(sessionObj.getUserObject().getId(), start, end, _appointmentFields, orderBy, orderDir);
+				it = appointmentsql.getAppointmentsBetween(user.getId(), start, end, _appointmentFields, orderBy, orderDir);
 			} else {
 				it = appointmentsql.getAppointmentsBetweenInFolder(folderId, _appointmentFields, start, end, orderBy, orderDir);
 			}
@@ -695,7 +711,7 @@ public class AppointmentRequest {
 		appointmentParser.parse(appointmentObj, jData);
 		
 		final AppointmentSQLInterface appointmentSql = new CalendarSql(sessionObj);
-		appointmentSql.setUserConfirmation(appointmentObj.getObjectID(), sessionObj.getUserObject().getId(), appointmentObj.getConfirm(), appointmentObj.getConfirmMessage());
+		appointmentSql.setUserConfirmation(appointmentObj.getObjectID(), user.getId(), appointmentObj.getConfirm(), appointmentObj.getConfirmMessage());
 		
 		return new JSONObject();
 	}

@@ -59,6 +59,8 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import com.openexchange.cache.CacheKey;
+import com.openexchange.mail.MailSessionParameterNames;
+import com.openexchange.sessiond.Session;
 
 /**
  * {@link SessionMailCache} - Several cacheable data bound to a user session
@@ -82,9 +84,26 @@ public final class SessionMailCache {
 	private final Map<CacheKey, Object> cache;
 
 	/**
+	 * Gets the session-bound mail cache
+	 * 
+	 * @param session
+	 *            The session whose mail cache shall be returned
+	 * @return The the session-bound mail cache
+	 */
+	public static SessionMailCache getInstance(final Session session) {
+		SessionMailCache mailCache = (SessionMailCache) session
+				.getParameter(MailSessionParameterNames.PARAM_MAIL_CACHE);
+		if (null == mailCache) {
+			mailCache = new SessionMailCache();
+			session.setParameter(MailSessionParameterNames.PARAM_MAIL_CACHE, mailCache);
+		}
+		return mailCache;
+	}
+
+	/**
 	 * Default constructor
 	 */
-	public SessionMailCache() {
+	private SessionMailCache() {
 		super();
 		lock = new ReentrantLock();
 		clearCondition = lock.newCondition();

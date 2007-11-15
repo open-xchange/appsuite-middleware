@@ -109,6 +109,7 @@ import com.openexchange.groupware.infostore.webdav.LockManager;
 import com.openexchange.groupware.infostore.webdav.LockManager.Scope;
 import com.openexchange.groupware.infostore.webdav.LockManager.Type;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.DeltaImpl;
 import com.openexchange.groupware.results.TimedResult;
@@ -119,6 +120,7 @@ import com.openexchange.groupware.tx.DBService;
 import com.openexchange.groupware.tx.ReuseReadConProvider;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.EffectivePermission;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.collections.Injector;
@@ -266,8 +268,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 	public void lock(final int id, final long diff, final SessionObject sessionObj)
 			throws OXException {
 		final EffectiveInfostorePermission infoPerm = security
-				.getInfostorePermission(id, sessionObj.getContext(), sessionObj
-						.getUserObject(), sessionObj.getUserConfiguration());
+				.getInfostorePermission(id, sessionObj.getContext(), getUser(sessionObj), getUserConfiguration(sessionObj));
 		if (!infoPerm.canWriteObject()) {
 			throw EXCEPTIONS.create(18);
 		}
@@ -279,22 +280,19 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 			timeout = System.currentTimeMillis() + diff;
 		}
 		lockManager.lock(id, timeout, Scope.EXCLUSIVE, Type.WRITE, sessionObj
-				.getUserlogin(), sessionObj.getContext(), sessionObj
-				.getUserObject(), sessionObj.getUserConfiguration());
+				.getUserlogin(), sessionObj.getContext(), getUser(sessionObj), getUserConfiguration(sessionObj));
 		touch(id, sessionObj);
 	}
 
 	@OXThrows(category = Category.USER_INPUT, desc = "The user does not have sufficient write permissions to unlock this infoitem.", exceptionId = 17, msg = "You need write permissions to unlock a document.")
 	public void unlock(final int id, final SessionObject sessionObj) throws OXException {
 		final EffectiveInfostorePermission infoPerm = security
-				.getInfostorePermission(id, sessionObj.getContext(), sessionObj
-						.getUserObject(), sessionObj.getUserConfiguration());
+				.getInfostorePermission(id, sessionObj.getContext(), getUser(sessionObj), getUserConfiguration(sessionObj));
 		if (!infoPerm.canWriteObject()) {
 			throw EXCEPTIONS.create(17);
 		}
 		checkMayUnlock(id, sessionObj);
-		lockManager.removeAll(id, sessionObj.getContext(), sessionObj
-				.getUserObject(), sessionObj.getUserConfiguration());
+		lockManager.removeAll(id, sessionObj.getContext(), getUser(sessionObj), getUserConfiguration(sessionObj));
 		touch(id, sessionObj);
 	}
 
@@ -305,7 +303,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 			final DocumentMetadata document = new DocumentMetadataImpl(oldDocument);
 
 			document.setLastModified(new Date());
-			document.setModifiedBy(sessionObj.getUserObject().getId());
+			document.setModifiedBy(sessionObj.getUserId());
 
 			final UpdateDocumentAction updateDocument = new UpdateDocumentAction();
 			updateDocument.setContext(sessionObj.getContext());
@@ -375,7 +373,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 		return document;
 	}
 
-	private SearchIterator lockedUntilIterator(final SearchIterator iter,
+	private SearchIterator<?> lockedUntilIterator(final SearchIterator<?> iter,
 			final Context ctx, final User user, final UserConfiguration userConfig)
 			throws SearchIteratorException, OXException {
 		final List<DocumentMetadata> list = new ArrayList<DocumentMetadata>();
@@ -398,11 +396,11 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 	@OXThrows(category = Category.CONCURRENT_MODIFICATION, desc = "The infoitem was locked by some other user. Only the user that locked the item (the one that modified the entry) can modify a locked infoitem.", exceptionId = 15, msg = "This document is locked.")
 	private void checkWriteLock(final DocumentMetadata document,
 			final SessionObject sessionObj) throws OXException {
-		if (document.getModifiedBy() == sessionObj.getUserObject().getId()) {
+		if (document.getModifiedBy() == sessionObj.getUserId()) {
 			return;
 		}
 		
-		if(lockManager.isLocked(document.getId(), sessionObj.getContext(), sessionObj.getUserObject(), sessionObj.getUserConfiguration())) {
+		if(lockManager.isLocked(document.getId(), sessionObj.getContext(), getUser(sessionObj), getUserConfiguration(sessionObj))) {
 			throw EXCEPTIONS.create(15);			
 		}
 		
@@ -413,13 +411,12 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 			throws OXException {
 		final DocumentMetadata document = load(id, CURRENT_VERSION,
 				sessionObj.getContext());
-		if (document.getCreatedBy() == sessionObj.getUserObject().getId()
-				|| document.getModifiedBy() == sessionObj.getUserObject()
-						.getId()) {
+		if (document.getCreatedBy() == sessionObj.getUserId()
+				|| document.getModifiedBy() == sessionObj.getUserId()) {
 			return;
 		}
 		final List<Lock> locks = lockManager.findLocks(id, sessionObj.getContext(),
-				sessionObj.getUserObject(), sessionObj.getUserConfiguration());
+				getUser(sessionObj), getUserConfiguration(sessionObj));
 		if (locks.size() > 0) {
 			throw EXCEPTIONS.create(16);
 		}
@@ -438,8 +435,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 		security.checkFolderId(document.getFolderId(), sessionObj.getContext());
 		if (document.getId() == InfostoreFacade.NEW) {
 			final EffectivePermission isperm = security.getFolderPermission(document
-					.getFolderId(), sessionObj.getContext(), sessionObj
-					.getUserObject(), sessionObj.getUserConfiguration());
+					.getFolderId(), sessionObj.getContext(), getUser(sessionObj), getUserConfiguration(sessionObj));
 			if (!isperm.canCreateObjects()) {
 				throw EXCEPTIONS.create(2);
 			}
@@ -462,11 +458,11 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 			}
 			document.setCreationDate(new Date(System.currentTimeMillis()));
 			document.setLastModified(document.getCreationDate());
-			document.setCreatedBy(sessionObj.getUserObject().getId());
-			document.setModifiedBy(sessionObj.getUserObject().getId());
+			document.setCreatedBy(sessionObj.getUserId());
+			document.setModifiedBy(sessionObj.getUserId());
 
 			// db.createDocument(document, data, sessionObj.getContext(),
-			// sessionObj.getUserObject(), sessionObj.getUserConfiguration());
+			// sessionObj.getUserObject(), getUserConfiguration(sessionObj));
 
 			if (null != data) {
 				document.setVersion(1);
@@ -663,8 +659,8 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 		try {
 			final EffectiveInfostorePermission infoPerm = security
 					.getInfostorePermission(document.getId(), sessionObj
-							.getContext(), sessionObj.getUserObject(),
-							sessionObj.getUserConfiguration());
+							.getContext(), getUser(sessionObj),
+							getUserConfiguration(sessionObj));
 			if (!infoPerm.canWriteObject()) {
 				throw EXCEPTIONS.create(3);
 			}
@@ -675,8 +671,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 						.getContext());
 				final EffectivePermission isperm = security.getFolderPermission(
 						document.getFolderId(), sessionObj.getContext(),
-						sessionObj.getUserObject(), sessionObj
-								.getUserConfiguration());
+						getUser(sessionObj), getUserConfiguration(sessionObj));
 				if (!(isperm.canCreateObjects())) {
 					throw EXCEPTIONS.create(4);
 				}
@@ -691,7 +686,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 			
 			
 			document.setLastModified(new Date());
-			document.setModifiedBy(sessionObj.getUserObject().getId());
+			document.setModifiedBy(sessionObj.getUserId());
 			
 			
 			VALIDATION.validate(document);
@@ -699,10 +694,10 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 			
 			// db.updateDocument(document, data, sequenceNumber,
 			// modifiedColumns, sessionObj.getContext(),
-			// sessionObj.getUserObject(), sessionObj.getUserConfiguration());
+			// sessionObj.getUserObject(), getUserConfiguration(sessionObj));
 
 			// db.createDocument(document, data, sessionObj.getContext(),
-			// sessionObj.getUserObject(), sessionObj.getUserConfiguration());
+			// sessionObj.getUserObject(), getUserConfiguration(sessionObj));
 			
 			final Set<Metadata> updatedCols = new HashSet<Metadata>(Arrays
 					.asList(modifiedColumns));
@@ -753,7 +748,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 						m.doSwitch(set);
 					}
 
-					document.setCreatedBy(sessionObj.getUserObject().getId());
+					document.setCreatedBy(sessionObj.getUserId());
 					document.setCreationDate(new Date());
 					Connection con = null;
 					try {
@@ -907,7 +902,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 
 		// Set<Integer> notDeleted = db.removeDocuments(deleteMe,
 		// timed.sequenceNumber(), sessionObj.getContext(),
-		// sessionObj.getUserObject(), sessionObj.getUserConfiguration());
+		// sessionObj.getUserObject(), getUserConfiguration(sessionObj));
 
 		final DeleteVersionAction deleteVersion = new DeleteVersionAction();
 		deleteVersion.setContext(sessionObj.getContext());
@@ -1016,12 +1011,11 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 				EffectivePermission p = perms.get(Long.valueOf(m.getFolderId()));
 				if (p == null) {
 					p = security.getFolderPermission(m.getFolderId(), sessionObj
-							.getContext(), sessionObj.getUserObject(), sessionObj
-							.getUserConfiguration());
+							.getContext(), getUser(sessionObj), getUserConfiguration(sessionObj));
 					perms.put(Long.valueOf(m.getFolderId()), p);
 				}
 				final EffectiveInfostorePermission infoPerm = new EffectiveInfostorePermission(
-						p, m, sessionObj.getUserObject());
+						p, m, getUser(sessionObj));
 				if (!infoPerm.canDeleteObject()) {
 					rejected.add(m);
 					rejectedIds.add(Integer.valueOf(m.getId()));
@@ -1069,8 +1063,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 			return versionId;
 		}
 		final EffectiveInfostorePermission infoPerm = security
-				.getInfostorePermission(id, sessionObj.getContext(), sessionObj
-						.getUserObject(), sessionObj.getUserConfiguration());
+				.getInfostorePermission(id, sessionObj.getContext(), getUser(sessionObj), getUserConfiguration(sessionObj));
 		if (!infoPerm.canDeleteObject()) {
 			throw EXCEPTIONS.create(6);
 		}
@@ -1126,7 +1119,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 		final DocumentMetadata update = new DocumentMetadataImpl(metadata);
 
 		update.setLastModified(now);
-		update.setModifiedBy(sessionObj.getUserObject().getId());
+		update.setModifiedBy(sessionObj.getUserId());
 
 		final Set<Metadata> updatedFields = new HashSet<Metadata>();
 		updatedFields.add(Metadata.LAST_MODIFIED_LITERAL);
@@ -1515,6 +1508,15 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 		if (lockManager instanceof DBService) {
 			((DBService) lockManager).setProvider(provider);
 		}
+	}
+
+	private static final UserConfiguration getUserConfiguration(final SessionObject sessionObj) {
+		return UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
+				sessionObj.getContext());
+	}
+
+	private static final User getUser(final SessionObject sessionObj) {
+		return UserStorage.getUser(sessionObj.getUserId(), sessionObj.getContext());
 	}
 
 	private final class LockTimedResult implements TimedResult {

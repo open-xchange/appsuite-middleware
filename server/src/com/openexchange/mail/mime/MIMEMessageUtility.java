@@ -173,7 +173,7 @@ public final class MIMEMessageUtility {
 	public static boolean hasReferencedLocalImages(final String htmlContent, final SessionObject session) {
 		final Matcher m = PATTERN_REF_IMG.matcher(htmlContent);
 		while (m.find()) {
-			if (session.touchAJAXUploadFile(m.group(5))) {
+			if (session.touchUploadedFile(m.group(5))) {
 				return true;
 			}
 		}

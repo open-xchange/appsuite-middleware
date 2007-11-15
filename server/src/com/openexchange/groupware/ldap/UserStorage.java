@@ -61,6 +61,9 @@ import com.openexchange.groupware.ldap.UnixCrypt;
  */
 public abstract class UserStorage {
 
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(UserStorage.class);
+
     /**
      * Attribute name of alias.
      */
@@ -263,6 +266,22 @@ public abstract class UserStorage {
         }
         return LdapUtility.getInstance(implementingClass, context);
     }
+
+    /**
+     * Reads the data from a user from the underlying persistent data storage.
+     * 
+     * @param uid User identifier.
+     * @param context Context.
+     * @return a user object or <code>null</code> on exception.
+     */
+    public static User getUser(final int uid, final Context context) {
+		try {
+			return getInstance(context).getUser(uid);
+		} catch (final LdapException e) {
+			LOG.error(e.getLocalizedMessage(), e);
+			return null;
+		}
+	}
 
     static {
         try {

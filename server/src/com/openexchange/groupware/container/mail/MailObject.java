@@ -61,6 +61,7 @@ import javax.mail.Message.RecipientType;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mail.MailConnection;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.config.MailConfig;
@@ -234,7 +235,8 @@ public class MailObject {
 			 */
 			if (msg.getSentDate() == null) {
 				final long current = System.currentTimeMillis();
-				final TimeZone userTimeZone = TimeZone.getTimeZone(session.getUserObject().getTimeZone());
+				final TimeZone userTimeZone = TimeZone.getTimeZone(UserStorage.getUser(session.getUserId(),
+						session.getContext()).getTimeZone());
 				msg.setSentDate(new Date(current + userTimeZone.getOffset(current)));
 			}
 			/*

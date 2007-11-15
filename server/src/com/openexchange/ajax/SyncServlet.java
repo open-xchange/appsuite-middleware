@@ -76,6 +76,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.mail.MailInterface;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
@@ -113,7 +114,8 @@ public class SyncServlet extends PermissionServlet {
 	 */
 	@Override
 	protected boolean hasModulePermission(final SessionObject sessionObj) {
-		return sessionObj.getUserConfiguration().hasSyncML();
+		return UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
+				sessionObj.getContext()).hasSyncML();
 	}
 
 	/*
@@ -240,7 +242,8 @@ public class SyncServlet extends PermissionServlet {
 						folderSyncInterface.clearFolder(delFolderObj, timestamp);
 						lastModified = Math.max(lastModified, delFolderObj.getLastModified().getTime());
 					} else {
-						if (sessionObj.getUserConfiguration().hasWebMail()) {
+						if (UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
+								sessionObj.getContext()).hasWebMail()) {
 							if (mailInterface == null) {
 								mailInterface = MailInterface.getInstance(sessionObj);
 							}

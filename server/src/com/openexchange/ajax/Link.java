@@ -54,6 +54,7 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.request.LinkRequest;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
@@ -79,6 +80,7 @@ public class Link extends DataServlet {
 	 */
 	private static final long serialVersionUID = 8612709224269281439L;
 	
+	@Override
 	protected void doGet(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
 		final Response response = new Response();
 		final StringWriter sw = new StringWriter();
@@ -124,6 +126,7 @@ public class Link extends DataServlet {
 
 	}
 	
+	@Override
 	protected void doPut(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
 		Response response = new Response();
 
@@ -188,7 +191,9 @@ public class Link extends DataServlet {
 		writeResponse(response, httpServletResponse);
 	}
 	
+	@Override
 	protected boolean hasModulePermission(final SessionObject sessionObj) {
-		return sessionObj.getUserConfiguration().hasContact();
+		return UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
+				sessionObj.getContext()).hasContact();
 	}
 }

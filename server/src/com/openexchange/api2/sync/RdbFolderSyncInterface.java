@@ -62,6 +62,10 @@ import com.openexchange.groupware.Component;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.server.EffectivePermission;
 import com.openexchange.sessiond.SessionObject;
@@ -74,14 +78,14 @@ import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 
 /**
  * RdbFolderSyncInterface
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- *
+ * 
  */
 public class RdbFolderSyncInterface implements FolderSyncInterface {
-	
+
 	private static final String STR_EMPTY = "";
-	
+
 	/*
 	 * Members
 	 */
@@ -91,33 +95,40 @@ public class RdbFolderSyncInterface implements FolderSyncInterface {
 
 	private final Context ctx;
 
-	private final SessionObject sessionObj;
+	private final SessionObject session;
+
+	private final User user;
 
 	private final OXFolderAccess oxfolderAccess;
-	
+
+	private final UserConfiguration userConfiguration;
+
 	public RdbFolderSyncInterface(final SessionObject sessionObj) {
 		this(sessionObj, null);
 	}
-	
-	public RdbFolderSyncInterface(final SessionObject sessionObj, final OXFolderAccess oxfolderAccess) {
+
+	public RdbFolderSyncInterface(final SessionObject session, final OXFolderAccess oxfolderAccess) {
 		super();
-		this.sessionObj = sessionObj;
-		this.userId = sessionObj.getUserObject().getId();
-		this.groups = sessionObj.getUserObject().getGroups();
-		this.ctx = sessionObj.getContext();
+		this.session = session;
+		user = UserStorage.getUser(session.getUserId(), session.getContext());
+		this.userId = user.getId();
+		this.groups = user.getGroups();
+		this.ctx = session.getContext();
 		this.oxfolderAccess = oxfolderAccess == null ? new OXFolderAccess(ctx) : oxfolderAccess;
+		userConfiguration = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
+				session.getContext());
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * 
 	 * @see com.openexchange.api2.sync.FolderSyncInterface#deleteFolderContent(int)
 	 */
 	public int clearFolder(final FolderObject folderobject, final Date clientLastModified) throws OXException {
 		try {
-			if (folderobject.getType() == FolderObject.PUBLIC
-					&& !sessionObj.getUserConfiguration().hasFullPublicFolderAccess()) {
-				throw new OXFolderException(FolderCode.NO_PUBLIC_FOLDER_WRITE_ACCESS,
-						getUserName(sessionObj), getFolderName(folderobject), Integer.valueOf(ctx.getContextId()));
+			if (folderobject.getType() == FolderObject.PUBLIC && !userConfiguration.hasFullPublicFolderAccess()) {
+				throw new OXFolderException(FolderCode.NO_PUBLIC_FOLDER_WRITE_ACCESS, getUserName(session, user),
+						getFolderName(folderobject), Integer.valueOf(ctx.getContextId()));
 			}
 			if (!folderobject.exists(ctx)) {
 				throw new OXFolderNotFoundException(folderobject.getObjectID(), ctx.getContextId());
@@ -127,22 +138,22 @@ public class RdbFolderSyncInterface implements FolderSyncInterface {
 				throw new OXConcurrentModificationException(Component.FOLDER,
 						OXFolderException.DETAIL_NUMBER_CONCURRENT_MODIFICATION, new Object[0]);
 			}
-			final EffectivePermission effectivePerm = folderobject.getEffectiveUserPermission(userId, sessionObj
-					.getUserConfiguration());
+			final EffectivePermission effectivePerm = folderobject
+					.getEffectiveUserPermission(userId, userConfiguration);
 			if (!effectivePerm.hasModuleAccess(folderobject.getModule())) {
-				throw new OXFolderException(FolderCode.NO_MODULE_ACCESS, getUserName(sessionObj),
+				throw new OXFolderException(FolderCode.NO_MODULE_ACCESS, getUserName(session, user),
 						folderModule2String(folderobject.getModule()), Integer.valueOf(ctx.getContextId()));
 			}
 			if (!effectivePerm.isFolderVisible()) {
 				if (!effectivePerm.getUnderlyingPermission().isFolderVisible()) {
-					throw new OXFolderPermissionException(FolderCode.NOT_VISIBLE,
-							getFolderName(folderobject), getUserName(sessionObj), Integer.valueOf(ctx.getContextId()));
+					throw new OXFolderPermissionException(FolderCode.NOT_VISIBLE, getFolderName(folderobject),
+							getUserName(session, user), Integer.valueOf(ctx.getContextId()));
 				}
 				throw new OXFolderException(FolderCode.NOT_VISIBLE, Category.USER_CONFIGURATION,
-						getFolderName(folderobject), getUserName(sessionObj), Integer.valueOf(ctx.getContextId()));
+						getFolderName(folderobject), getUserName(session, user), Integer.valueOf(ctx.getContextId()));
 			}
 			final long lastModified = System.currentTimeMillis();
-			new OXFolderManagerImpl(sessionObj, oxfolderAccess).clearFolder(folderobject, false, lastModified);
+			new OXFolderManagerImpl(session, oxfolderAccess).clearFolder(folderobject, false, lastModified);
 			return folderobject.getObjectID();
 		} catch (final DBPoolingException e) {
 			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));

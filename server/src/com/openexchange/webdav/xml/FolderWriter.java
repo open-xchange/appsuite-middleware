@@ -95,8 +95,7 @@ public class FolderWriter extends FolderChildWriter {
 	
 	public FolderWriter(final SessionObject sessionObj) {
 		this.sessionObj = sessionObj;
-		
-		userId = sessionObj.getUserObject().getId();
+		userId = sessionObj.getUserId();
 	}
 	
 	public void startWriter(final int objectId,  final OutputStream os) throws Exception {

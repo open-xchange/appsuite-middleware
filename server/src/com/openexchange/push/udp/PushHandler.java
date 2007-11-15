@@ -106,62 +106,62 @@ public class PushHandler implements AppointmentEvent, ContactEvent, TaskEvent, F
 	
 	public void appointmentCreated(final AppointmentObject appointmentObj, final SessionObject sessionObj) {
 		final int[] users = getAffectedUsers4Object(appointmentObj.getParentFolderID(), sessionObj, new HashSet<Integer>());
-		event(sessionObj.getUserObject().getId(), appointmentObj.getObjectID(), appointmentObj.getParentFolderID(), users, Types.APPOINTMENT, sessionObj);
+		event(sessionObj.getUserId(), appointmentObj.getObjectID(), appointmentObj.getParentFolderID(), users, Types.APPOINTMENT, sessionObj);
 	}
 	
 	public void appointmentModified(final AppointmentObject appointmentObj, final SessionObject sessionObj) {
 		final int[] users = getAffectedUsers4Object(appointmentObj.getParentFolderID(), sessionObj, new HashSet<Integer>());
-		event(sessionObj.getUserObject().getId(), appointmentObj.getObjectID(), appointmentObj.getParentFolderID(), users, Types.APPOINTMENT, sessionObj);
+		event(sessionObj.getUserId(), appointmentObj.getObjectID(), appointmentObj.getParentFolderID(), users, Types.APPOINTMENT, sessionObj);
 	}
 	
 	public void appointmentDeleted(final AppointmentObject appointmentObj, final SessionObject sessionObj) {
 		final int[] users = getAffectedUsers4Object(appointmentObj.getParentFolderID(), sessionObj, new HashSet<Integer>());
-		event(sessionObj.getUserObject().getId(), appointmentObj.getObjectID(), appointmentObj.getParentFolderID(), users, Types.APPOINTMENT, sessionObj);
+		event(sessionObj.getUserId(), appointmentObj.getObjectID(), appointmentObj.getParentFolderID(), users, Types.APPOINTMENT, sessionObj);
 	}
 	
 	public void contactCreated(final ContactObject contactObj, final SessionObject sessionObj) {
 		final int[] users = getAffectedUsers4Object(contactObj.getParentFolderID(), sessionObj, new HashSet<Integer>());
-		event(sessionObj.getUserObject().getId(), contactObj.getObjectID(), contactObj.getParentFolderID(), users, Types.CONTACT, sessionObj);
+		event(sessionObj.getUserId(), contactObj.getObjectID(), contactObj.getParentFolderID(), users, Types.CONTACT, sessionObj);
 	}
 	
 	public void contactModified(final ContactObject contactObj, final SessionObject sessionObj) {
 		final int[] users = getAffectedUsers4Object(contactObj.getParentFolderID(), sessionObj, new HashSet<Integer>());
-		event(sessionObj.getUserObject().getId(), contactObj.getObjectID(), contactObj.getParentFolderID(), users, Types.CONTACT, sessionObj);
+		event(sessionObj.getUserId(), contactObj.getObjectID(), contactObj.getParentFolderID(), users, Types.CONTACT, sessionObj);
 	}
 	
 	public void contactDeleted(final ContactObject contactObj, final SessionObject sessionObj) {
 		final int[] users = getAffectedUsers4Object(contactObj.getParentFolderID(), sessionObj, new HashSet<Integer>());
-		event(sessionObj.getUserObject().getId(), contactObj.getObjectID(), contactObj.getParentFolderID(), users, Types.CONTACT, sessionObj);
+		event(sessionObj.getUserId(), contactObj.getObjectID(), contactObj.getParentFolderID(), users, Types.CONTACT, sessionObj);
 	}
 	
 	public void taskCreated(final Task taskObj, final SessionObject sessionObj) {
 		final int[] users = getAffectedUsers4Object(taskObj.getParentFolderID(), sessionObj, new HashSet<Integer>());
-		event(sessionObj.getUserObject().getId(), taskObj.getObjectID(), taskObj.getParentFolderID(), users, Types.TASK, sessionObj);
+		event(sessionObj.getUserId(), taskObj.getObjectID(), taskObj.getParentFolderID(), users, Types.TASK, sessionObj);
 	}
 	
 	public void taskModified(final Task taskObj, final SessionObject sessionObj) {
 		final int[] users = getAffectedUsers4Object(taskObj.getParentFolderID(), sessionObj, new HashSet<Integer>());
-		event(sessionObj.getUserObject().getId(), taskObj.getObjectID(), taskObj.getParentFolderID(), users, Types.TASK, sessionObj);
+		event(sessionObj.getUserId(), taskObj.getObjectID(), taskObj.getParentFolderID(), users, Types.TASK, sessionObj);
 	}
 	
 	public void taskDeleted(final Task taskObj, final SessionObject sessionObj) {
 		final int[] users = getAffectedUsers4Object(taskObj.getParentFolderID(), sessionObj, new HashSet<Integer>());
-		event(sessionObj.getUserObject().getId(), taskObj.getObjectID(), taskObj.getParentFolderID(), users, Types.TASK, sessionObj);
+		event(sessionObj.getUserId(), taskObj.getObjectID(), taskObj.getParentFolderID(), users, Types.TASK, sessionObj);
 	}
 	
 	public void folderCreated(final FolderObject folderObj, final SessionObject sessionObj) {
 		final int[] users = getAffectedUsers4Folder(folderObj, sessionObj, new HashSet<Integer>());
-		event(sessionObj.getUserObject().getId(), folderObj.getObjectID(), folderObj.getParentFolderID(), users, Types.TASK, sessionObj);
+		event(sessionObj.getUserId(), folderObj.getObjectID(), folderObj.getParentFolderID(), users, Types.TASK, sessionObj);
 	}
 	
 	public void folderModified(final FolderObject folderObj, final SessionObject sessionObj) {
 		final int[] users = getAffectedUsers4Folder(folderObj, sessionObj, new HashSet<Integer>());
-		event(sessionObj.getUserObject().getId(), folderObj.getObjectID(), folderObj.getParentFolderID(), users, Types.TASK, sessionObj);
+		event(sessionObj.getUserId(), folderObj.getObjectID(), folderObj.getParentFolderID(), users, Types.TASK, sessionObj);
 	}
 	
 	public void folderDeleted(final FolderObject folderObj, final SessionObject sessionObj) {
 		final int[] users = getAffectedUsers4Folder(folderObj, sessionObj, new HashSet<Integer>());
-		event(sessionObj.getUserObject().getId(), folderObj.getObjectID(), folderObj.getParentFolderID(), users, Types.TASK, sessionObj);
+		event(sessionObj.getUserId(), folderObj.getObjectID(), folderObj.getParentFolderID(), users, Types.TASK, sessionObj);
 	}
 	
 	protected int[] getAffectedUsers4Object(final int folderId, final SessionObject sessionObj, final Set<Integer> hs) {

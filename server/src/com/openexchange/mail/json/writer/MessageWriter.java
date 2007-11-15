@@ -64,6 +64,7 @@ import org.json.JSONObject;
 
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailInterfaceImpl;
 import com.openexchange.mail.MailJSONField;
@@ -301,15 +302,16 @@ public final class MessageWriter {
 							if (withKey) {
 								if (mail.containsSentDate() && mail.getSentDate() != null) {
 									((JSONObject) jsonContainer).put(MailJSONField.SENT_DATE.getKey(), addUserTimezone(
-											mail.getSentDate().getTime(), TimeZone.getTimeZone(session.getUserObject()
-													.getTimeZone())));
+											mail.getSentDate().getTime(), TimeZone.getTimeZone(UserStorage.getUser(
+													session.getUserId(), session.getContext()).getTimeZone())));
 								} else {
 									((JSONObject) jsonContainer).put(MailJSONField.SENT_DATE.getKey(), JSONObject.NULL);
 								}
 							} else {
 								if (mail.containsSentDate() && mail.getSentDate() != null) {
 									((JSONArray) jsonContainer).put(addUserTimezone(mail.getSentDate().getTime(),
-											TimeZone.getTimeZone(session.getUserObject().getTimeZone())));
+											TimeZone.getTimeZone(UserStorage.getUser(session.getUserId(),
+													session.getContext()).getTimeZone())));
 								} else {
 									((JSONArray) jsonContainer).put(JSONObject.NULL);
 								}
@@ -329,7 +331,8 @@ public final class MessageWriter {
 								if (mail.containsReceivedDate() && mail.getReceivedDate() != null) {
 									((JSONObject) jsonContainer).put(MailJSONField.RECEIVED_DATE.getKey(),
 											addUserTimezone(mail.getReceivedDate().getTime(), TimeZone
-													.getTimeZone(session.getUserObject().getTimeZone())));
+													.getTimeZone(UserStorage.getUser(session.getUserId(),
+															session.getContext()).getTimeZone())));
 								} else {
 									((JSONObject) jsonContainer).put(MailJSONField.RECEIVED_DATE.getKey(),
 											JSONObject.NULL);
@@ -337,7 +340,8 @@ public final class MessageWriter {
 							} else {
 								if (mail.containsReceivedDate() && mail.getReceivedDate() != null) {
 									((JSONArray) jsonContainer).put(addUserTimezone(mail.getReceivedDate().getTime(),
-											TimeZone.getTimeZone(session.getUserObject().getTimeZone())));
+											TimeZone.getTimeZone(UserStorage.getUser(session.getUserId(),
+													session.getContext()).getTimeZone())));
 								} else {
 									((JSONArray) jsonContainer).put(JSONObject.NULL);
 								}

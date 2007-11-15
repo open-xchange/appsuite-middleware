@@ -143,7 +143,7 @@ public class CalendarOperation implements SearchIterator {
                 cdao.setPrivateFlag(setBooleanToInt(i++, load_resultset));
                 if (check_permissions && !CalendarCommonCollection.checkPermissions(cdao, so, readcon, check_special_action, action_folder)) {
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug(StringCollection.convertArraytoString(new Object[] { "Permission Exception 1 (fid!inFolder) for user:oid:fid:inFolder ", so.getUserObject().getId(), ":",oid,":",inFolder,":",action }));
+                        LOG.debug(StringCollection.convertArraytoString(new Object[] { "Permission Exception 1 (fid!inFolder) for user:oid:fid:inFolder ", so.getUserId(), ":",oid,":",inFolder,":",action }));
                     }
                     throw new OXPermissionException(new OXCalendarException(OXCalendarException.Code.LOAD_PERMISSION_EXCEPTION_1));
                 }
@@ -159,17 +159,17 @@ public class CalendarOperation implements SearchIterator {
                 cdao.setNote(setString(i++, load_resultset));
                 cdao.setFullTime(setBooleanToInt(i++, load_resultset));
                 cdao.setCategories(setString(i++, load_resultset));
-                cdao.setUsers(cimp.getUserParticipants(cdao, readcon, so.getUserObject().getId()).getUsers());
+                cdao.setUsers(cimp.getUserParticipants(cdao, readcon, so.getUserId()).getUsers());
                 cdao.setParticipants(cimp.getParticipants(cdao, readcon).getList());
                 if (check_permissions && cdao.getEffectiveFolderId() != inFolder) {
                     if (cdao.getFolderType() != FolderObject.SHARED && check_special_action == action) {
                         if (LOG.isDebugEnabled()) {
-                            LOG.debug(StringCollection.convertArraytoString(new Object[] { "Permission Exception 2 (fid!inFolder) for user:oid:fid:inFolder ", so.getUserObject().getId(), ":",oid,":",inFolder,":",action }));
+                            LOG.debug(StringCollection.convertArraytoString(new Object[] { "Permission Exception 2 (fid!inFolder) for user:oid:fid:inFolder ", so.getUserId(), ":",oid,":",inFolder,":",action }));
                         }
                         throw new OXPermissionException(new OXCalendarException(OXCalendarException.Code.LOAD_PERMISSION_EXCEPTION_2));
                     } else if (action_folder != inFolder && check_special_action == action) {
                         if (LOG.isDebugEnabled()) {
-                            LOG.debug(StringCollection.convertArraytoString(new Object[] { "Permission Exception 3 (fid!inFolder) for user:oid:fid:inFolder ", so.getUserObject().getId(), ":",oid,":",inFolder,":",action }));
+                            LOG.debug(StringCollection.convertArraytoString(new Object[] { "Permission Exception 3 (fid!inFolder) for user:oid:fid:inFolder ", so.getUserId(), ":",oid,":",inFolder,":",action }));
                         }
                         throw new OXPermissionException(new OXCalendarException(OXCalendarException.Code.LOAD_PERMISSION_EXCEPTION_3));
                     }
@@ -177,7 +177,7 @@ public class CalendarOperation implements SearchIterator {
                 if (check_permissions && action == UPDATE && inFolder != action_folder) {
                     if (!CalendarCommonCollection.checkPermissions(cdao, so, readcon, DELETE, inFolder)) { // Move means to check delete
                         if (LOG.isDebugEnabled()) {
-                            LOG.debug(StringCollection.convertArraytoString(new Object[] { "Permission Exception 4 (fid!inFolder) for user:oid:fid:inFolder ", so.getUserObject().getId(), ":",oid,":",inFolder,":",action }));
+                            LOG.debug(StringCollection.convertArraytoString(new Object[] { "Permission Exception 4 (fid!inFolder) for user:oid:fid:inFolder ", so.getUserId(), ":",oid,":",inFolder,":",action }));
                         }
                         throw new OXPermissionException(new OXCalendarException(OXCalendarException.Code.LOAD_PERMISSION_EXCEPTION_4));
                     }
@@ -830,7 +830,7 @@ public class CalendarOperation implements SearchIterator {
                 }
                  */
                 if (check_folder_id != cdao.getParentFolderID()) {
-                    throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, com.openexchange.groupware.Component.APPOINTMENT, "Object not found : uid:oid:fid:InFolder "+so.getUserObject().getId() + ":"+ cdao.getObjectID() + ":"+cdao.getParentFolderID()+":"+check_folder_id);
+                    throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, com.openexchange.groupware.Component.APPOINTMENT, "Object not found : uid:oid:fid:InFolder "+so.getUserId() + ":"+ cdao.getObjectID() + ":"+cdao.getParentFolderID()+":"+check_folder_id);
                 }
                 
                 if (!CalendarCommonCollection.checkPermissions(cdao, so, readcon, CalendarOperation.READ, check_folder_id)) {
@@ -849,7 +849,7 @@ public class CalendarOperation implements SearchIterator {
                     }
                     
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug(StringCollection.convertArraytoString(new Object[] { "Permission Exception (fid!inFolder) for user:oid:fid:cols ", so.getUserObject().getId(), ":", cdao.getObjectID(),":",oids[index][1],":",colss.toString() }));
+                        LOG.debug(StringCollection.convertArraytoString(new Object[] { "Permission Exception (fid!inFolder) for user:oid:fid:cols ", so.getUserId(), ":", cdao.getObjectID(),":",oids[index][1],":",colss.toString() }));
                     }
                     throw new OXPermissionException(new OXCalendarException(OXCalendarException.Code.LOAD_PERMISSION_EXCEPTION_5));
                 }
@@ -870,7 +870,7 @@ public class CalendarOperation implements SearchIterator {
         this.readcon = readcon;
         this.from = from;
         this.to = to;
-        this.uid = so.getUserObject().getId();
+        this.uid = so.getUserId();
         this.so = so;
         if (from != 0 && to != 0) {
             rs.absolute(from);

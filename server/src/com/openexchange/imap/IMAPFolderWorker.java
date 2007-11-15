@@ -67,6 +67,7 @@ import com.openexchange.mail.cache.MailMessageCache;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MIMESessionPropertyNames;
 import com.openexchange.mail.usersetting.UserSettingMail;
+import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.sessiond.SessionObject;
 import com.sun.mail.imap.DefaultFolder;
 import com.sun.mail.imap.IMAPFolder;
@@ -127,7 +128,7 @@ public abstract class IMAPFolderWorker {
 		this.imapStore = imapStore;
 		this.imapConnection = imapConnection;
 		this.session = session;
-		this.usm = session.getUserSettingMail();
+		this.usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), session.getContext());
 		this.imapConfig = (IMAPConfig) imapConnection.getMailConfig();
 	}
 
@@ -225,14 +226,14 @@ public abstract class IMAPFolderWorker {
 			markAsSeen.setFlags(FLAGS_SEEN, true);
 			try {
 				if (MailMessageCache.getInstance().containsFolderMessages(imapFolder.getFullName(),
-						session.getUserObject().getId(), session.getContext())) {
+						session.getUserId(), session.getContext())) {
 					/*
 					 * Update cache entry
 					 */
 					final long[] uid = new long[] { imapFolder.getUID(markAsSeen) };
 					final long start = System.currentTimeMillis();
 					MailMessageCache.getInstance().updateCachedMessages(uid, imapFolder.getFullName(),
-							session.getUserObject().getId(), session.getContext(), FIELDS_FLAGS,
+							session.getUserId(), session.getContext(), FIELDS_FLAGS,
 							new Object[] { Integer.valueOf(MailMessage.FLAG_SEEN) });
 					if (LOG.isInfoEnabled()) {
 						LOG.info(new StringBuilder(100).append(uid.length).append(" cached message(s) updated in ")

@@ -85,7 +85,9 @@ import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.impl.AbstractResource;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.infostore.Classes;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tx.TransactionException;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 
 
 @OXExceptionSource(
@@ -231,7 +233,9 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 	public InputStream getBody() throws WebdavException {
 		final SessionObject session = sessionHolder.getSessionObject();
 		try {
-			return database.getDocument(id, InfostoreFacade.CURRENT_VERSION, session.getContext(), session.getUserObject(), session.getUserConfiguration());
+			return database.getDocument(id, InfostoreFacade.CURRENT_VERSION, session.getContext(), UserStorage.getUser(
+					session.getUserId(), session.getContext()), UserConfigurationStorage.getInstance()
+					.getUserConfigurationSafe(session.getUserId(), session.getContext()));
 		} catch (final Exception e) {
 			throw new WebdavException(e.getMessage(), e, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
@@ -504,11 +508,14 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 		final SessionObject session = sessionHolder.getSessionObject();
 		
 		try {
-			final DocumentMetadata metadata = database.getDocumentMetadata(id, InfostoreFacade.CURRENT_VERSION, session.getContext(), session.getUserObject(), session.getUserConfiguration());
+			final DocumentMetadata metadata = database.getDocumentMetadata(id, InfostoreFacade.CURRENT_VERSION, session
+					.getContext(), UserStorage.getUser(session.getUserId(), session.getContext()),
+					UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
+							session.getContext()));
 			final SetSwitch set = new SetSwitch(this.metadata);
 			final GetSwitch get = new GetSwitch(metadata);
-			
-			for(final Metadata m : toLoad) {
+
+			for (final Metadata m : toLoad) {
 				set.setValue(m.doSwitch(get));
 				m.doSwitch(set);
 			}

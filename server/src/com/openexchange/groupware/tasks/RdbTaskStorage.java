@@ -234,7 +234,7 @@ public class RdbTaskStorage extends TaskStorage {
         final TaskSearchObject search, final int orderBy, final String orderDir,
         final int[] columns, final List<Integer> all, final List<Integer> own,
         final List<Integer> shared) throws TaskException {
-        final int userId = session.getUserObject().getId();
+        final int userId = session.getUserId();
         final StringBuilder sql = new StringBuilder();
         sql.append("SELECT ");
         sql.append(SQL.getFields(columns, true));
@@ -528,7 +528,7 @@ public class RdbTaskStorage extends TaskStorage {
             int pos = 1;
             stmt.setInt(pos++, ctx.getContextId());
             stmt.setInt(pos++, folderId);
-            final int userId = session.getUserObject().getId();
+            final int userId = session.getUserId();
             stmt.setInt(pos++, userId);
             final ResultSet result = stmt.executeQuery();
             if (result.next()) {

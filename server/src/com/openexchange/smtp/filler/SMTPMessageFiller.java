@@ -87,6 +87,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.upload.ManagedUploadFile;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -97,6 +98,7 @@ import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.transport.SendType;
 import com.openexchange.mail.usersetting.UserSettingMail;
+import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.server.DBPool;
 import com.openexchange.server.Version;
 import com.openexchange.sessiond.SessionObject;
@@ -165,7 +167,7 @@ public final class SMTPMessageFiller {
 	public SMTPMessageFiller(final SessionObject session) {
 		super();
 		this.session = session;
-		usm = session.getUserSettingMail();
+		usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), session.getContext());
 	}
 
 	private Html2TextConverter getConverter() {
@@ -190,7 +192,7 @@ public final class SMTPMessageFiller {
 				sb = null;
 			}
 			for (int i = 0; i < size; i++) {
-				final ManagedUploadFile uploadFile = session.removeAJAXUploadFile(iter.next());
+				final ManagedUploadFile uploadFile = session.removeUploadedFile(iter.next());
 				final String fileName = uploadFile.getFile().getName();
 				uploadFile.delete();
 				if (null != sb) {
@@ -275,7 +277,8 @@ public final class SMTPMessageFiller {
 		/*
 		 * Html content with embedded images
 		 */
-		final boolean embeddedImages = (sendMultipartAlternative || (mail.getContentType().isMimeType(MIMETypes.MIME_TEXT_HTM_ALL)))
+		final boolean embeddedImages = (sendMultipartAlternative || (mail.getContentType()
+				.isMimeType(MIMETypes.MIME_TEXT_HTM_ALL)))
 				&& (MIMEMessageUtility.hasEmbeddedImages((String) mail.getContent()) || MIMEMessageUtility
 						.hasReferencedLocalImages((String) mail.getContent(), session));
 		/*
@@ -348,9 +351,9 @@ public final class SMTPMessageFiller {
 			 * Append VCard
 			 */
 			AppendVCard: if (mail.isAppendVCard()) {
-				final String fileName = MimeUtility.encodeText(new StringBuilder(session.getUserObject()
-						.getDisplayName().replaceAll(" +", "")).append(".vcf").toString(), SMTPConfig
-						.getDefaultMimeCharset(), "Q");
+				final String fileName = MimeUtility.encodeText(new StringBuilder(UserStorage.getUser(
+						session.getUserId(), session.getContext()).getDisplayName().replaceAll(" +", ""))
+						.append(".vcf").toString(), SMTPConfig.getDefaultMimeCharset(), "Q");
 				for (int i = 0; i < size; i++) {
 					final MailPart part = mail.getEnclosedMailPart(i);
 					if (fileName.equalsIgnoreCase(part.getFileName())) {
@@ -372,7 +375,8 @@ public final class SMTPMessageFiller {
 					/*
 					 * Define content
 					 */
-					vcardPart.setDataHandler(new DataHandler(new MessageDataSource(userVCard, MIMETypes.MIME_TEXT_X_VCARD)));
+					vcardPart.setDataHandler(new DataHandler(new MessageDataSource(userVCard,
+							MIMETypes.MIME_TEXT_X_VCARD)));
 					vcardPart.setHeader(MessageHeaders.HDR_MIME_VERSION, VERSION_1_0);
 					vcardPart.setFileName(fileName);
 					/*
@@ -481,7 +485,7 @@ public final class SMTPMessageFiller {
 	}
 
 	private String getUserVCard() throws SMTPException {
-		final User userObj = session.getUserObject();
+		final User userObj = UserStorage.getUser(session.getUserId(), session.getContext());
 		final OXContainerConverter converter = new OXContainerConverter(session);
 		Connection readCon = null;
 		try {
@@ -490,7 +494,8 @@ public final class SMTPMessageFiller {
 				ContactObject contactObj = null;
 				try {
 					contactObj = Contacts.getContactById(userObj.getContactId(), userObj.getId(), userObj.getGroups(),
-							session.getContext(), session.getUserConfiguration(), readCon);
+							session.getContext(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(
+									session.getUserId(), session.getContext()), readCon);
 				} catch (final OXException oxExc) {
 					throw new SMTPException(oxExc);
 				} catch (final Exception e) {
@@ -660,8 +665,7 @@ public final class SMTPMessageFiller {
 		mp.addBodyPart(messageBodyPart);
 	}
 
-	private void setMessageHeaders(final SMTPMailMessage mail, final SMTPMessage smtpMessage)
-			throws MessagingException {
+	private void setMessageHeaders(final SMTPMailMessage mail, final SMTPMessage smtpMessage) throws MessagingException {
 		/*
 		 * Set from
 		 */
@@ -806,12 +810,11 @@ public final class SMTPMessageFiller {
 			/*
 			 * Set ENVELOPE-FROM in SMTP message to user's primary email address
 			 */
-			smtpMessage.setEnvelopeFrom(session.getUserObject().getMail());
+			smtpMessage.setEnvelopeFrom(UserStorage.getUser(session.getUserId(), session.getContext()).getMail());
 		}
 	}
 
-	private static BodyPart createHtmlBodyPart(final String htmlContent, final int linewrap)
-			throws MessagingException {
+	private static BodyPart createHtmlBodyPart(final String htmlContent, final int linewrap) throws MessagingException {
 		final String htmlCT = PAT_HTML_CT.replaceFirst(REPLACE_CS, SMTPConfig.getDefaultMimeCharset());
 		final MimeBodyPart html = new MimeBodyPart();
 		html.setContent(performLineFolding(replaceHTMLSimpleQuotesForDisplay(formatHrefLinks(htmlContent)), true,
@@ -848,7 +851,7 @@ public final class SMTPMessageFiller {
 			final StringBuilder tmp = new StringBuilder(128);
 			NextImg: do {
 				final String id = m.group(5);
-				final ManagedUploadFile uploadFile = msgFiller.session.getAJAXUploadFile(id);
+				final ManagedUploadFile uploadFile = msgFiller.session.getUploadedFile(id);
 				if (uploadFile == null) {
 					if (LOG.isWarnEnabled()) {
 						tmp.setLength(0);

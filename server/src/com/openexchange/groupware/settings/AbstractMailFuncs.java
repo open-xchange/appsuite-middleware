@@ -51,6 +51,7 @@ package com.openexchange.groupware.settings;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.sessiond.SessionObject;
@@ -72,16 +73,19 @@ public abstract class AbstractMailFuncs implements SharedValue {
      */
     public void getValue(final SessionObject session,
         final Setting setting) {
-        final UserConfiguration userConf = session.getUserConfiguration();
-        if (userConf.hasWebMail()) {
-            setting.setSingleValue(isSet(session.getUserSettingMail()));
-        }
-    }
+		final UserConfiguration userConf = UserConfigurationStorage.getInstance().getUserConfigurationSafe(
+				session.getUserId(), session.getContext());
+		if (userConf.hasWebMail()) {
+			setting.setSingleValue(isSet(UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(),
+					session.getContext())));
+		}
+	}
 
     /**
-     * @param settings in this mail settings the bit will be requested.
-     * @return the value of the bit.
-     */
+	 * @param settings
+	 *            in this mail settings the bit will be requested.
+	 * @return the value of the bit.
+	 */
     protected abstract Object isSet(UserSettingMail settings);
 
     /**
@@ -94,16 +98,17 @@ public abstract class AbstractMailFuncs implements SharedValue {
     /**
 	 * {@inheritDoc}
 	 */
-	public void writeValue(final SessionObject session,
-        final Setting setting) throws SettingException {
-        final UserSettingMail settings = session.getUserSettingMail();
-        setValue(settings, (String) setting.getSingleValue());
-        try {
-        	UserSettingMailStorage.getInstance().saveUserSettingMail(settings, session.getUserObject().getId(), session.getContext());
-        } catch (OXException e) {
-            throw new SettingException(e);
-        }
-    }
+	public void writeValue(final SessionObject session, final Setting setting) throws SettingException {
+		final UserSettingMail settings = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(),
+				session.getContext());
+		setValue(settings, (String) setting.getSingleValue());
+		try {
+			UserSettingMailStorage.getInstance().saveUserSettingMail(settings, session.getUserId(),
+					session.getContext());
+		} catch (OXException e) {
+			throw new SettingException(e);
+		}
+	}
 
 	/**
 	 * @param settings

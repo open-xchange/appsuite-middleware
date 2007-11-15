@@ -64,6 +64,9 @@ import com.openexchange.ajax.Infostore;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -103,8 +106,10 @@ public abstract class InfostoreDocumentMailPart extends MailPart {
 		super();
 		try {
 			final InfostoreFacade db = Infostore.FACADE;
+			final User u = UserStorage.getUser(session.getUserId(), session.getContext());
 			final DocumentMetadata docMeta = db.getDocumentMetadata(documentId, InfostoreFacade.CURRENT_VERSION,
-					session.getContext(), session.getUserObject(), session.getUserConfiguration());
+					session.getContext(), u, UserConfigurationStorage.getInstance().getUserConfigurationSafe(
+							session.getUserId(), session.getContext()));
 			setSize(docMeta.getFileSize());
 			final String docMIMEType = docMeta.getFileMIMEType();
 			setContentType(docMIMEType == null || docMIMEType.length() == 0 ? MIMETypes.MIME_APPL_OCTET : docMeta
@@ -114,8 +119,9 @@ public abstract class InfostoreDocumentMailPart extends MailPart {
 			} catch (final UnsupportedEncodingException e) {
 				setFileName(docMeta.getFileName());
 			}
-			docInputSream = db.getDocument(documentId, InfostoreFacade.CURRENT_VERSION, session.getContext(), session
-					.getUserObject(), session.getUserConfiguration());
+			docInputSream = db.getDocument(documentId, InfostoreFacade.CURRENT_VERSION, session.getContext(), u,
+					UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
+							session.getContext()));
 		} catch (final OXException e) {
 			throw new MailException(e);
 		}

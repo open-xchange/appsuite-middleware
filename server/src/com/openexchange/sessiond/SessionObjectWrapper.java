@@ -53,7 +53,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.ContextException;
 import com.openexchange.groupware.contexts.ContextStorage;
 import com.openexchange.groupware.ldap.LdapException;
-import com.openexchange.groupware.ldap.UserStorage;
 
 /**
  * SessionObjectWrapper
@@ -104,7 +103,7 @@ public class SessionObjectWrapper {
 			final String sessionobjectidentifier) throws LdapException {
 		final SessionObject so = new SessionObject(sessionobjectidentifier);
 		so.setContext(ctx);
-		so.setUserObject(UserStorage.getInstance(ctx).getUser(user_id));
+		//so.setUserObject(UserStorage.getInstance(ctx).getUser(user_id));
 		return so;
 	}
 

@@ -69,7 +69,7 @@ import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.json.OXJSONWriter;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
@@ -87,10 +87,10 @@ public class Tasks extends DataServlet {
 	
 	private static final Log LOG = LogFactory.getLog(Tasks.class);
 	
+	@Override
 	protected void doGet(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
 		final Response response = new Response();
 		try {
-			final OXJSONWriter sw = new OXJSONWriter();
 			final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
 			final SessionObject sessionObj = getSessionObject(httpServletRequest);
 			final JSONObject jsonObj;
@@ -149,10 +149,10 @@ public class Tasks extends DataServlet {
 		writeResponse(response, httpServletResponse);
 	}
 
+	@Override
 	protected void doPut(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
 		final Response response = new Response();
 		try {
-			final OXJSONWriter sw = new OXJSONWriter();
 			final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
 			final SessionObject sessionObj = getSessionObject(httpServletRequest);
 			
@@ -171,14 +171,14 @@ public class Tasks extends DataServlet {
 				}
 				
 				if (data.charAt(0) == '[') {
-					JSONArray jsonDataArray = new JSONArray(data);
+					final JSONArray jsonDataArray = new JSONArray(data);
 					jsonObj.put(PARAMETER_DATA, jsonDataArray);
 				
 					final Object responseObj = taskRequest.action(action, jsonObj);
 					response.setTimestamp(taskRequest.getTimestamp());
 					response.setData(responseObj);
 				} else if (data.charAt(0) == '{') {
-					JSONObject jsonDataObject = new JSONObject(data);
+					final JSONObject jsonDataObject = new JSONObject(data);
 					jsonObj.put(PARAMETER_DATA, jsonDataObject);
 
 					final Object responseObj = taskRequest.action(action, jsonObj);
@@ -218,6 +218,7 @@ public class Tasks extends DataServlet {
 	}
 	
 	protected boolean hasModulePermission(final SessionObject sessionObj) {
-		return sessionObj.getUserConfiguration().hasTask();
+		return UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
+				sessionObj.getContext()).hasTask();
 	}
 }

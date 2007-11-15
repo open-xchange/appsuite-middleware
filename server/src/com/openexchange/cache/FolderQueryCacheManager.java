@@ -165,7 +165,7 @@ public final class FolderQueryCacheManager {
 	 * @return query result if present, otherwise <code>null</code>
 	 */
 	public LinkedList<Integer> getFolderQuery(final int queryNum, final SessionObject session) {
-		return getFolderQuery(queryNum, session.getUserObject().getId(), session.getContext().getContextId());
+		return getFolderQuery(queryNum, session.getUserId(), session.getContext().getContextId());
 	}
 
 	/**
@@ -196,7 +196,7 @@ public final class FolderQueryCacheManager {
 	 */
 	public void putFolderQuery(final int queryNum, final LinkedList<Integer> q, final SessionObject session)
 			throws OXException {
-		putFolderQuery(queryNum, q, session.getUserObject().getId(), session.getContext().getContextId());
+		putFolderQuery(queryNum, q, session.getUserId(), session.getContext().getContextId());
 	}
 
 	/**
@@ -215,7 +215,7 @@ public final class FolderQueryCacheManager {
 	 */
 	public void putFolderQuery(final int queryNum, final LinkedList<Integer> q, final SessionObject session,
 			final boolean append) throws OXException {
-		putFolderQuery(queryNum, q, session.getUserObject().getId(), session.getContext().getContextId(), append);
+		putFolderQuery(queryNum, q, session.getUserId(), session.getContext().getContextId(), append);
 	}
 
 	/**

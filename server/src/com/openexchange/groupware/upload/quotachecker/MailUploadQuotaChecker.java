@@ -53,6 +53,8 @@ import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.groupware.upload.UploadQuotaChecker;
+import com.openexchange.mail.usersetting.UserSettingMail;
+import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.sessiond.SessionObject;
 
 /**
@@ -62,7 +64,7 @@ import com.openexchange.sessiond.SessionObject;
  * 
  */
 public final class MailUploadQuotaChecker extends UploadQuotaChecker {
-	
+
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(MailUploadQuotaChecker.class);
 
@@ -72,9 +74,11 @@ public final class MailUploadQuotaChecker extends UploadQuotaChecker {
 
 	public MailUploadQuotaChecker(final SessionObject session) {
 		super();
-		if (session.getUserSettingMail().getUploadQuota() > 0) {
-			uploadQuota = session.getUserSettingMail().getUploadQuota();
-		} else if (session.getUserSettingMail().getUploadQuota() == 0) {
+		UserSettingMail settings = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(),
+				session.getContext());
+		if (settings.getUploadQuota() > 0) {
+			uploadQuota = settings.getUploadQuota();
+		} else if (settings.getUploadQuota() == 0) {
 			uploadQuota = -1;
 		} else {
 			/*
@@ -93,8 +97,7 @@ public final class MailUploadQuotaChecker extends UploadQuotaChecker {
 				uploadQuota = -1;
 			}
 		}
-		uploadQuotaPerFile = session.getUserSettingMail().getUploadQuotaPerFile() > 0 ? session.getUserSettingMail()
-				.getUploadQuotaPerFile() : -1;
+		uploadQuotaPerFile = settings.getUploadQuotaPerFile() > 0 ? settings.getUploadQuotaPerFile() : -1;
 	}
 
 	/*

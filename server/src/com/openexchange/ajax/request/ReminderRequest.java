@@ -73,8 +73,11 @@ import com.openexchange.groupware.calendar.CalendarRecurringCollection;
 import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.calendar.RecurringResult;
 import com.openexchange.groupware.calendar.RecurringResults;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.reminder.ReminderObject;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -86,6 +89,8 @@ public class ReminderRequest {
     
     private SessionObject sessionObj;
     
+    private final User userObj;
+    
     private Date timestamp;
     
     private static final Log LOG = LogFactory.getLog(ReminderRequest.class);
@@ -96,6 +101,7 @@ public class ReminderRequest {
     
     public ReminderRequest(final SessionObject sessionObj) {
         this.sessionObj = sessionObj;
+        userObj = UserStorage.getUser(sessionObj.getUserId(), sessionObj.getContext());
     }
     
     public Object action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, OXException, JSONException, SearchIteratorException, AjaxException, OXJSONException {
@@ -119,7 +125,7 @@ public class ReminderRequest {
 		final JSONArray jsonArray = new JSONArray();
 		
         try {
-            int uid = sessionObj.getUserObject().getId();
+            int uid = userObj.getId();
             final ReminderObject reminder = reminderSql.loadReminder(id);
             if (reminder != null) {
                 if (reminder.isRecurrenceAppointment()) {
@@ -160,12 +166,12 @@ public class ReminderRequest {
         timestamp = DataParser.checkDate(jsonObject, AJAXServlet.PARAMETER_TIMESTAMP);
         
         final ReminderSQLInterface reminderSql = new ReminderHandler(sessionObj);
-        final SearchIterator it = reminderSql.listModifiedReminder(sessionObj.getUserObject().getId(), timestamp);
+        final SearchIterator it = reminderSql.listModifiedReminder(userObj.getId(), timestamp);
         
         final JSONArray jsonResponseArray = new JSONArray();
         try {
             while (it.hasNext()) {
-                final ReminderWriter reminderWriter = new ReminderWriter(TimeZone.getTimeZone(sessionObj.getUserObject().getTimeZone()));
+                final ReminderWriter reminderWriter = new ReminderWriter(TimeZone.getTimeZone(userObj.getTimeZone()));
                 final ReminderObject reminderObj = (ReminderObject)it.next();
                 
                 if (reminderObj.isRecurrenceAppointment()) {
@@ -209,11 +215,11 @@ public class ReminderRequest {
         
         try {
             final ReminderSQLInterface reminderSql = new ReminderHandler(sessionObj);
-            it = reminderSql.listReminder(sessionObj.getUserObject().getId(), end);
+            it = reminderSql.listReminder(userObj.getId(), end);
             
             
             while (it.hasNext()) {
-                final ReminderWriter reminderWriter = new ReminderWriter(TimeZone.getTimeZone(sessionObj.getUserObject().getTimeZone()));
+                final ReminderWriter reminderWriter = new ReminderWriter(TimeZone.getTimeZone(userObj.getTimeZone()));
                 final ReminderObject reminderObj = (ReminderObject)it.next();
                 
                 if (reminderObj.isRecurrenceAppointment()) {
@@ -248,26 +254,29 @@ public class ReminderRequest {
     }
     
     protected boolean hasModulePermission(SessionObject sessionObj, ReminderObject reminderObj) {
-        switch (reminderObj.getModule()) {
-            case Types.APPOINTMENT:
-                return sessionObj.getUserConfiguration().hasCalendar();
-            case Types.TASK:
-                return sessionObj.getUserConfiguration().hasTask();
-            default:
-                return true;
-        }
-    }
+		switch (reminderObj.getModule()) {
+		case Types.APPOINTMENT:
+			return UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
+					sessionObj.getContext()).hasCalendar();
+		case Types.TASK:
+			return UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
+					sessionObj.getContext()).hasTask();
+		default:
+			return true;
+		}
+	}
     
     /**
-     * This method returns the lastest reminder object of the recurrence appointment. The reminder object contains only 
-     * the alarm attribute and the recurrence position.
-     **/   
+	 * This method returns the lastest reminder object of the recurrence
+	 * appointment. The reminder object contains only the alarm attribute and
+	 * the recurrence position.
+	 */   
     protected ReminderObject getLatestRecurringReminder(final int objectId, final int inFolder, final SessionObject sessionObj, final Date endRange) throws OXException, SQLException {
         final CalendarSql calendarSql = new CalendarSql(sessionObj);
         final CalendarDataObject calendarDataObject = calendarSql.getObjectById(objectId, inFolder);
         final int alarm = calendarDataObject.getAlarm();
         
-        final TimeZone timeZone = TimeZone.getTimeZone(sessionObj.getUserObject().getTimeZone());
+        final TimeZone timeZone = TimeZone.getTimeZone(userObj.getTimeZone());
         final Calendar calendar = Calendar.getInstance(timeZone);
         calendar.setTime(endRange);
         
@@ -309,7 +318,7 @@ public class ReminderRequest {
             reminderObj.setRecurrenceAppointment(true);
             reminderObj.setRecurrencePosition(recurringResult.getPosition());
             
-            final TimeZone timeZone = TimeZone.getTimeZone(sessionObj.getUserObject().getTimeZone());
+            final TimeZone timeZone = TimeZone.getTimeZone(userObj.getTimeZone());
             final Calendar calendar = Calendar.getInstance(timeZone);
             calendar.setTimeInMillis(recurringResult.getStart());
             calendar.add(Calendar.MINUTE, 0-alarm);

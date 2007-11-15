@@ -53,6 +53,7 @@ import javax.mail.Folder;
 import javax.mail.MessagingException;
 
 import com.openexchange.cache.CacheKey;
+import com.openexchange.mail.cache.SessionMailCache;
 import com.openexchange.mail.cache.SessionMailCacheEntry;
 import com.openexchange.sessiond.SessionObject;
 import com.sun.mail.imap.IMAPStore;
@@ -97,10 +98,11 @@ public final class NamespaceFoldersCache {
 	public static Folder[] getPersonalNamespaces(final IMAPStore imapStore, final boolean load,
 			final SessionObject session) throws MessagingException {
 		final NamespaceFoldersCacheEntry entry = new NamespaceFoldersCacheEntry(NS_PERSONAL);
-		session.getMailCache().get(entry);
+		final SessionMailCache mailCache = SessionMailCache.getInstance(session);
+		mailCache.get(entry);
 		if (load && null == entry.getValue()) {
 			entry.setValue(imapStore.getPersonalNamespaces());
-			session.getMailCache().put(entry);
+			mailCache.put(entry);
 		}
 		return entry.getValue();
 	}
@@ -124,10 +126,11 @@ public final class NamespaceFoldersCache {
 	public static Folder[] getUserNamespaces(final IMAPStore imapStore, final boolean load, final SessionObject session)
 			throws MessagingException {
 		final NamespaceFoldersCacheEntry entry = new NamespaceFoldersCacheEntry(NS_USER);
-		session.getMailCache().get(entry);
+		final SessionMailCache mailCache = SessionMailCache.getInstance(session);
+		mailCache.get(entry);
 		if (load && null == entry.getValue()) {
 			entry.setValue(imapStore.getUserNamespaces(null));
-			session.getMailCache().put(entry);
+			mailCache.put(entry);
 		}
 		return entry.getValue();
 	}
@@ -151,10 +154,11 @@ public final class NamespaceFoldersCache {
 	public static Folder[] getSharedNamespaces(final IMAPStore imapStore, final boolean load,
 			final SessionObject session) throws MessagingException {
 		final NamespaceFoldersCacheEntry entry = new NamespaceFoldersCacheEntry(NS_SHARED);
-		session.getMailCache().get(entry);
+		final SessionMailCache mailCache = SessionMailCache.getInstance(session);
+		mailCache.get(entry);
 		if (load && null == entry.getValue()) {
 			entry.setValue(imapStore.getSharedNamespaces());
-			session.getMailCache().put(entry);
+			mailCache.put(entry);
 		}
 		return entry.getValue();
 	}

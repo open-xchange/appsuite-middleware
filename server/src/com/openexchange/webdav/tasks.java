@@ -61,6 +61,8 @@ import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.webdav.xml.DataParser;
 import com.openexchange.webdav.xml.TaskParser;
@@ -145,7 +147,7 @@ public final class tasks extends XmlServlet {
 						tasksql.deleteTaskObject(taskobject.getObjectID(), inFolder, lastModified);
 						break;
 					case DataParser.CONFIRM:
-						tasksql.setUserConfirmation(taskobject.getObjectID(), sessionObj.getUserObject().getId(), taskparser.getConfirm(), null);
+						tasksql.setUserConfirmation(taskobject.getObjectID(), sessionObj.getUserId(), taskparser.getConfirm(), null);
 						break;
 					default:
 						throw new OXConflictException("invalid method: " + method);
@@ -202,8 +204,10 @@ public final class tasks extends XmlServlet {
 		taskwriter.startWriter(bModified, bDelete, bList, folderId, lastsync, os);
 	}
 	
+	@Override
 	protected boolean hasModulePermission(final SessionObject sessionObj) {
-		return (sessionObj.getUserConfiguration().hasWebDAVXML() && sessionObj.getUserConfiguration().hasTask());
+		final UserConfiguration uc = UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext());
+		return (uc.hasWebDAVXML() && uc.hasTask());
 	}
 }
 

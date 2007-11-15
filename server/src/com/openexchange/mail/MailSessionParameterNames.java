@@ -47,51 +47,35 @@
  *
  */
 
-package com.openexchange.groupware.settings.tree.modules.calendar;
-
-import com.openexchange.groupware.settings.SettingSetup;
-import com.openexchange.groupware.settings.tree.AbstractModules;
-import com.openexchange.groupware.settings.tree.Modules;
-import com.openexchange.groupware.settings.tree.modules.Calendar;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.sessiond.SessionObject;
+package com.openexchange.mail;
 
 /**
- * Contains initialization for the modules configuration tree setting
- * calendar_freebusy.
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * {@link MailSessionParameterNames}
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * 
  */
-public class CalendarFreeBusy extends AbstractModules {
+public final class MailSessionParameterNames {
 
-    /**
-     * Default constructor.
-     */
-    public CalendarFreeBusy() {
-        super();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected SettingSetup[] getParents() {
-        return new SettingSetup[] { new Modules(), new Calendar() };
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected String getName() {
-        return "calendar_freebusy";
-    }
-
-    /**
-	 * {@inheritDoc}
+	/**
+	 * No instantiation
 	 */
-	@Override
-	protected boolean getModule(final SessionObject session) {
-		return UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
-				session.getContext()).hasFreeBusy();
+	private MailSessionParameterNames() {
+		super();
 	}
+
+	/**
+	 * Default folder flag
+	 */
+	public static final String PARAM_DEF_FLD_FLAG = "mail.deffldflag";
+
+	/**
+	 * Default folder array
+	 */
+	public static final String PARAM_DEF_FLD_ARR = "mail.deffldarr";
+
+	/**
+	 * Session mail cache
+	 */
+	public static final String PARAM_MAIL_CACHE = "mail.mailcache";
 }

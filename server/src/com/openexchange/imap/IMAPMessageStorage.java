@@ -74,6 +74,7 @@ import javax.mail.MessagingException;
 
 import com.openexchange.cache.OXCachingException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.imap.cache.RightsCache;
 import com.openexchange.imap.cache.UserFlagsCache;
 import com.openexchange.imap.command.CopyIMAPCommand;
@@ -149,7 +150,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 	public IMAPMessageStorage(final IMAPStore imapStore, final IMAPConnection imapMailConnection,
 			final SessionObject session) throws MailException {
 		super(imapStore, imapMailConnection, session);
-		userId = session.getUserObject().getId();
+		userId = session.getUserId();
 		ctx = session.getContext();
 	}
 
@@ -270,8 +271,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 					return EMPTY_RETVAL;
 				}
 			}
-			msgs = IMAPSort.sortMessages(imapFolder, msgs, fields, sortField, order, session.getLocale(), usedFields,
-					imapConfig);
+			msgs = IMAPSort.sortMessages(imapFolder, msgs, fields, sortField, order, UserStorage.getUser(
+					session.getUserId(), session.getContext()).getLocale(), usedFields, imapConfig);
 			if (fromToIndices != null && fromToIndices.length == 2) {
 				final int fromIndex = fromToIndices[0];
 				int toIndex = fromToIndices[1];
@@ -470,7 +471,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 			 */
 			final long start = System.currentTimeMillis();
 			final Message[] msgs = IMAPCommandsCollection.getUnreadMessages(imapFolder, fields, sortField, order,
-					session.getLocale());
+					UserStorage.getUser(session.getUserId(), session.getContext()).getLocale());
 			MailInterfaceImpl.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 			if (msgs == null) {
 				return EMPTY_RETVAL;
@@ -716,10 +717,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 						imapFolder.close(false);
 						resetIMAPFolder();
 					} catch (final ProtocolException e1) {
-
 						throw new IMAPException(IMAPException.Code.MOVE_PARTIALLY_COMPLETED, e1,
-								com.openexchange.tools.oxfolder.OXFolderManagerImpl.getUserName(session), Arrays
-										.toString(msgUIDs), imapFolder.getFullName(), e1.getMessage());
+								com.openexchange.tools.oxfolder.OXFolderManagerImpl.getUserName(session, UserStorage
+										.getUser(session.getUserId(), session.getContext())), Arrays.toString(msgUIDs),
+								imapFolder.getFullName(), e1.getMessage());
 					}
 				}
 				try {
@@ -821,7 +822,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 			/*
 			 * Set new flags...
 			 */
-			final Rights myRights = imapConfig.isSupportsACLs() ? RightsCache.getCachedRights(imapFolder, true, session) : null;
+			final Rights myRights = imapConfig.isSupportsACLs() ? RightsCache
+					.getCachedRights(imapFolder, true, session) : null;
 			final Flags affectedFlags = new Flags();
 			if (((flags & MailMessage.FLAG_ANSWERED) > 0)) {
 				if (imapConfig.isSupportsACLs() && !myRights.contains(Rights.Right.WRITE)) {

@@ -61,6 +61,9 @@ import com.openexchange.server.Initialization;
  */
 public abstract class UserConfigurationStorage {
 
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(UserConfigurationStorage.class);
+
 	private static UserConfigurationStorage singleton;
 
 	private boolean started;
@@ -131,6 +134,64 @@ public abstract class UserConfigurationStorage {
 	}
 
 	/**
+	 * A convenience method that invokes
+	 * {@link #getUserConfigurationSafe(int, int[], Context)} with the group
+	 * parameter set to <code>null</code>
+	 * 
+	 * @param userId
+	 *            The user ID
+	 * @param ctx
+	 *            The context
+	 * @return The corresponding instance of {@link UserConfiguration} or
+	 *         <code>null</code> on exception
+	 * @see #getUserConfigurationSafe(int, int[], Context)
+	 */
+	public final UserConfiguration getUserConfigurationSafe(final int userId, final Context ctx) {
+		return getUserConfigurationSafe(userId, null, ctx);
+	}
+
+	/**
+	 * A convenience method that invokes
+	 * {@link #getUserConfiguration(int, int[], Context)}. If an exception
+	 * occurs <code>null</code> is returned
+	 * 
+	 * @param userId
+	 *            The user ID
+	 * @param groups
+	 *            The user's groups
+	 * @param ctx
+	 *            The contexts
+	 * @return The corresponding instance of {@link UserConfiguration} or
+	 *         <code>null</code> on exception
+	 */
+	public final UserConfiguration getUserConfigurationSafe(final int userId, final int[] groups, final Context ctx) {
+		try {
+			return UserConfigurationStorage.getInstance().getUserConfiguration(userId, groups, ctx);
+		} catch (final UserConfigurationException e) {
+			LOG.error(e.getLocalizedMessage(), e);
+			return null;
+		}
+	}
+
+	/**
+	 * Determines the instance of <code>UserConfiguration</code> that
+	 * corresponds to given user ID.
+	 * 
+	 * @param userId -
+	 *            the user ID
+	 * @param ctx -
+	 *            the context
+	 * @return the instance of <code>UserConfiguration</code>
+	 * @throws UserConfigurationException -
+	 *             if user's configuration could not be determined
+	 * @see #getUserConfiguration(int, int[], Context)
+	 */
+	public final UserConfiguration getUserConfiguration(final int userId, final Context ctx)
+			throws UserConfigurationException {
+		return getUserConfiguration(userId, null, ctx);
+	}
+
+	/**
 	 * Perform necessary actions to start instance
 	 * 
 	 * @throws AbstractOXException
@@ -143,20 +204,6 @@ public abstract class UserConfigurationStorage {
 	 * @throws AbstractOXException
 	 */
 	protected abstract void stopInternal() throws AbstractOXException;
-
-	/**
-	 * Determines the instance of <code>UserConfiguration</code> that
-	 * corresponds to given user ID
-	 * 
-	 * @param userId -
-	 *            the user ID
-	 * @param ctx -
-	 *            the context
-	 * @return the instance of <code>UserConfiguration</code>
-	 * @throws UserConfigurationException -
-	 *             if user's configuration could not be determined
-	 */
-	public abstract UserConfiguration getUserConfiguration(int userId, Context ctx) throws UserConfigurationException;
 
 	/**
 	 * Determines the instance of <code>UserConfiguration</code> that

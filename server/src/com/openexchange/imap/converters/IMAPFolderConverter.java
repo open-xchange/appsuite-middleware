@@ -67,9 +67,12 @@ import com.openexchange.imap.user2acl.User2ACL;
 import com.openexchange.imap.user2acl.User2ACLArgs;
 import com.openexchange.imap.user2acl.User2ACLInit.IMAPServer;
 import com.openexchange.mail.MailException;
+import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.dataobjects.MailFolder;
+import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.StorageUtility;
+import com.openexchange.sessiond.Session;
 import com.openexchange.sessiond.SessionObject;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.imap.ACL;
@@ -148,7 +151,7 @@ public final class IMAPFolderConverter {
 	 */
 	public static User2ACLArgs getUser2AclArgs(final SessionObject session, final IMAPFolder imapFolder)
 			throws MessagingException {
-		return new MyUser2ACLArgs(session.getUserObject().getId(), imapFolder.getFullName(), imapFolder.getSeparator());
+		return new MyUser2ACLArgs(session.getUserId(), imapFolder.getFullName(), imapFolder.getSeparator());
 	}
 
 	private static final String STR_INBOX = "INBOX";
@@ -262,7 +265,7 @@ public final class IMAPFolderConverter {
 					imapFolder, session, imapConfig) : (Rights) RIGHTS_EMPTY.clone();
 			{
 				final ACLPermission imapPermission = new ACLPermission(session);
-				imapPermission.setEntity(session.getUserObject().getId());
+				imapPermission.setEntity(session.getUserId());
 				imapPermission.parseRights(ownRights);
 				mailFolder.setOwnPermission(imapPermission);
 			}
@@ -272,10 +275,11 @@ public final class IMAPFolderConverter {
 				 */
 				if (STR_INBOX.equals(imapFolder.getFullName())) {
 					mailFolder.setDefaulFolder(true);
-				} else if (session.isMailFldsChecked()) {
-					final int len = session.getUserSettingMail().isSpamEnabled() ? 6 : 4;
+				} else if (isDefaultFoldersChecked(session)) {
+					final int len = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(),
+							session.getContext()).isSpamEnabled() ? 6 : 4;
 					for (int i = 0; (i < len) && !mailFolder.isDefaulFolder(); i++) {
-						if (mailFolder.getFullname().equals(session.getDefaultMailFolder(i))) {
+						if (mailFolder.getFullname().equals(getDefaultMailFolder(i, session))) {
 							mailFolder.setDefaulFolder(true);
 						}
 					}
@@ -315,6 +319,16 @@ public final class IMAPFolderConverter {
 		}
 	}
 
+	private static boolean isDefaultFoldersChecked(final Session session) {
+		final Boolean b = (Boolean) session.getParameter(MailSessionParameterNames.PARAM_DEF_FLD_FLAG);
+		return b != null && b.booleanValue();
+	}
+
+	private static String getDefaultMailFolder(final int index, final Session session) {
+		final String[] arr = (String[]) session.getParameter(MailSessionParameterNames.PARAM_DEF_FLD_ARR);
+		return arr == null ? null : arr[index];
+	}
+
 	/**
 	 * Parses IMAP folder's ACLs to instances of {@link ACLPermission} and
 	 * applies them to specified mail folder
@@ -341,8 +355,8 @@ public final class IMAPFolderConverter {
 			try {
 				final ACL[] acls = imapFolder.getACL();
 				final UserStorage userStorage = UserStorage.getInstance(session.getContext());
-				final User2ACLArgs args = new MyUser2ACLArgs(session.getUserObject().getId(), imapFolder.getFullName(),
-						imapFolder.getSeparator());
+				final User2ACLArgs args = new MyUser2ACLArgs(session.getUserId(), imapFolder.getFullName(), imapFolder
+						.getSeparator());
 				for (int j = 0; j < acls.length; j++) {
 					final ACLPermission aclPerm = new ACLPermission(session, userStorage);
 					try {
@@ -388,7 +402,7 @@ public final class IMAPFolderConverter {
 	 */
 	private static void addOwnACL(final SessionObject session, final MailFolder mailFolder, final Rights ownRights) {
 		final ACLPermission aclPerm = new ACLPermission(session);
-		aclPerm.setEntity(session.getUserObject().getId());
+		aclPerm.setEntity(session.getUserId());
 		aclPerm.parseRights(ownRights);
 		mailFolder.addPermission(aclPerm);
 	}

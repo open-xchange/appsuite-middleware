@@ -81,6 +81,7 @@ import com.openexchange.groupware.importexport.Importer;
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionClasses;
 import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionFactory;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.server.EffectivePermission;
 import com.openexchange.sessiond.SessionObject;
@@ -141,7 +142,7 @@ import com.openexchange.tools.versit.filetokenizer.VCardTokenizer;
 		if (!format.equals(Format.VCARD)) {
 			return false;
 		}
-		if(! sessObj.getUserConfiguration().hasContact() ){
+		if(!UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessObj.getUserId(), sessObj.getContext()).hasContact() ){
 			throw importExportExceptionFactory.create(7, new OXPermissionException(OXPermissionException.Code.NoPermissionForModul, "Contacts") );
 		}
 		final Iterator iterator = folders.iterator();
@@ -164,7 +165,7 @@ import com.openexchange.tools.versit.filetokenizer.VCardTokenizer;
 			
 			//check format of folder
 			if ( fo.getModule() == FolderObject.CONTACT){
-				if (!sessObj.getUserConfiguration().hasContact()) {
+				if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessObj.getUserId(), sessObj.getContext()).hasContact()) {
 					return false;
 				}
 			} else {
@@ -173,7 +174,8 @@ import com.openexchange.tools.versit.filetokenizer.VCardTokenizer;
 			//check read access to folder
 			EffectivePermission perm;
 			try {
-				perm = fo.getEffectiveUserPermission(sessObj.getUserObject().getId(), sessObj.getUserConfiguration());
+				perm = fo.getEffectiveUserPermission(sessObj.getUserId(), UserConfigurationStorage
+						.getInstance().getUserConfigurationSafe(sessObj.getUserId(), sessObj.getContext()));
 			} catch (DBPoolingException e) {
 				throw importExportExceptionFactory.create(1, folder);
 			} catch (SQLException e) {

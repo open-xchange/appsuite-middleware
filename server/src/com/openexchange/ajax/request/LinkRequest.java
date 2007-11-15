@@ -65,6 +65,8 @@ import com.openexchange.api2.LinkSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbLinkSQLInterface;
 import com.openexchange.groupware.container.LinkObject;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.servlet.AjaxException;
 
@@ -74,12 +76,14 @@ public class LinkRequest {
 	
 	private SessionObject sessionObj;
 	
+	private final User user;
+	
 	final JSONWriter jsonWriter;
 
 	public LinkRequest(final SessionObject sessionObj, final Writer pw) {
 		this.sessionObj = sessionObj;
 		this.jsonWriter = new JSONWriter(pw);
-		
+		user = UserStorage.getUser(sessionObj.getUserId(), sessionObj.getContext());
 	}
 	
 	public void action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, OXException, JSONException, AjaxException, OXJSONException {
@@ -99,8 +103,8 @@ public class LinkRequest {
 		final int folder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_INFOLDER);
 		final int type = DataParser.checkInt(jsonObj, PARAMETER_MODULE);
 
-		final int user = sessionObj.getUserObject().getId();
-		final int[] group =	sessionObj.getUserObject().getGroups();
+		final int user = this.user.getId();
+		final int[] group =	this.user.getGroups();
 		
 		final LinkSQLInterface linksql = new RdbLinkSQLInterface();
 		
@@ -136,8 +140,8 @@ public class LinkRequest {
 
 	public void actionNew(final JSONObject jsonObj) throws JSONException, OXException, AjaxException {
 		final LinkObject lo = new LinkObject();
-		final int user = sessionObj.getUserObject().getId();
-		final int[] group =	sessionObj.getUserObject().getGroups();
+		final int user = this.user.getId();
+		final int[] group =	this.user.getGroups();
 		final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
 
 		
@@ -174,8 +178,8 @@ public class LinkRequest {
 		final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
 		final int folder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_INFOLDER);
 		final int type = DataParser.checkInt(jsonObj, PARAMETER_MODULE);
-		final int user = sessionObj.getUserObject().getId();
-		final int[] group =	sessionObj.getUserObject().getGroups();
+		final int user = this.user.getId();
+		final int[] group =	this.user.getGroups();
 		final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
 		
 		final JSONArray jo = jData.getJSONArray(DATA);

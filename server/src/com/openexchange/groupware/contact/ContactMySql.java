@@ -66,6 +66,7 @@ import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.search.ContactSearchObject;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.server.EffectivePermission;
 import com.openexchange.sessiond.SessionObject;
@@ -119,7 +120,7 @@ public class ContactMySql implements ContactSql {
 		if (so != null){
 			this.ctx = so.getContext();
 			this.so = so;
-			this.user = so.getUserConfiguration().getUserId();
+			this.user = so.getUserId();
 		}
 	}
 
@@ -696,7 +697,7 @@ public class ContactMySql implements ContactSql {
 		
 		SearchIterator si;
 		try{
-			si = OXFolderTools.getAllVisibleFoldersIteratorOfModule(user, group, so.getUserConfiguration().getAccessibleModules(), FolderObject.CONTACT, so.getContext());
+			si = OXFolderTools.getAllVisibleFoldersIteratorOfModule(user, group, UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), so.getContext()).getAccessibleModules(), FolderObject.CONTACT, so.getContext());
 		} catch (OXException e){
 			throw e;
 		}
@@ -711,7 +712,7 @@ public class ContactMySql implements ContactSql {
         
         while (si.hasNext()) {
             fo  = (FolderObject)si.next();
-            oclp = fo.getEffectiveUserPermission(user, so.getUserConfiguration());            
+            oclp = fo.getEffectiveUserPermission(user, UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), so.getContext()));            
            
             if (!oclp.canReadAllObjects() && oclp.canReadOwnObjects()){
             	tmp = new StringBuilder(Integer.toString(fo.getObjectID())).append(',');

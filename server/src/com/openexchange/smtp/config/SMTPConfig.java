@@ -50,6 +50,7 @@
 package com.openexchange.smtp.config;
 
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mail.config.GlobalTransportConfig;
 import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.config.MailConfigException;
@@ -93,7 +94,7 @@ public final class SMTPConfig extends TransportConfig {
 		/*
 		 * Fetch user object and create its IMAP properties
 		 */
-		final User user = session.getUserObject();
+		final User user = UserStorage.getUser(session.getUserId(), session.getContext());
 		if (LoginType.GLOBAL.equals(getLoginType())) {
 			String smtpServer = MailConfig.getTransportServer();
 			if (smtpServer == null) {

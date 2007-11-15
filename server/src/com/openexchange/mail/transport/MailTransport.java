@@ -77,9 +77,9 @@ public abstract class MailTransport {
 			.getLog(MailTransport.class);
 
 	private static Class<? extends MailTransport> clazz;
-	
+
 	private static MailTransport internalInstance;
-	
+
 	static void setImplementingClass(final Class<? extends MailTransport> clazz) throws MailException {
 		MailTransport.clazz = clazz;
 		/*
@@ -102,7 +102,7 @@ public abstract class MailTransport {
 		}
 	}
 
-	private static final Class[] CONSTRUCTOR_ARGS = new Class[] { SessionObject.class, MailConnection.class };
+	private static final Class<?>[] CONSTRUCTOR_ARGS = new Class[] { SessionObject.class, MailConnection.class };
 
 	/**
 	 * Gets the proper instance of {@link MailTransport} parameterized with
@@ -114,8 +114,8 @@ public abstract class MailTransport {
 	 * @throws MailException
 	 *             If instantiation fails
 	 */
-	public static final MailTransport getInstance(final SessionObject session, final MailConnection mailConnection)
-			throws MailException {
+	public static final MailTransport getInstance(final SessionObject session,
+			final MailConnection<?, ?, ?> mailConnection) throws MailException {
 		/*
 		 * Create a new mail transport
 		 */

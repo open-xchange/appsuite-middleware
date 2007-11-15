@@ -59,7 +59,6 @@ import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONWriter;
 
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.CalendarFields;
@@ -80,9 +79,12 @@ import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.Participants;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -127,6 +129,8 @@ public class TaskRequest {
 	
 	private SessionObject sessionObj;
 	
+	private final User userObj;
+	
 	private Date timestamp;
 	
 	private TimeZone timeZone;
@@ -135,8 +139,9 @@ public class TaskRequest {
 	
 	public TaskRequest(SessionObject sessionObj) {
 		this.sessionObj = sessionObj;
+		userObj = UserStorage.getUser(sessionObj.getUserId(), sessionObj.getContext());
 		
-		final String sTimeZone = sessionObj.getUserObject().getTimeZone();
+		final String sTimeZone = userObj.getTimeZone();
 		
 		timeZone = TimeZone.getTimeZone(sTimeZone);
 		if (LOG.isDebugEnabled()) {
@@ -150,7 +155,8 @@ public class TaskRequest {
 	}
 
 	public Object action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXObjectNotFoundException, OXConflictException, OXPermissionException, OXFolderNotFoundException, SearchIteratorException, AjaxException, OXException, OXJSONException {
-		if (!sessionObj.getUserConfiguration().hasTask()) {
+		if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
+				sessionObj.getContext()).hasTask()) {
 			throw new OXPermissionException(OXPermissionException.Code.NoPermissionForModul, "task");
 		}
 		
@@ -408,7 +414,7 @@ public class TaskRequest {
 		taskParser.parse(taskObj, jData);
 		
 		final TasksSQLInterface taskSql = new TasksSQLInterfaceImpl(sessionObj);
-		taskSql.setUserConfirmation(taskObj.getObjectID(), sessionObj.getUserObject().getId(), taskObj.getConfirm(), taskObj.getConfirmMessage());
+		taskSql.setUserConfirmation(taskObj.getObjectID(), userObj.getId(), taskObj.getConfirm(), taskObj.getConfirmMessage());
 
 		return new JSONObject();
 	}

@@ -50,6 +50,9 @@
 package com.openexchange.groupware.calendar;
 
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.DBPool;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.sessiond.SessionObject;
@@ -74,6 +77,7 @@ public class ConflictHandler {
     private SessionObject so;
     private boolean action = true;
     private int current_results;
+    private User u;
     
     private Date rs;
     private Date re;
@@ -90,8 +94,15 @@ public class ConflictHandler {
         this.action = action;
     }
     
+    private final User getUser() {
+    	if (null == u) {
+    		u = UserStorage.getUser(so.getUserId(), so.getContext());
+    	}
+    	return u;
+    }
+    
     public CalendarDataObject[] getConflicts() throws OXException {
-        if (cdao.getShownAs() == CalendarDataObject.FREE || !so.getUserConfiguration().hasConflictHandling()) {
+        if (cdao.getShownAs() == CalendarDataObject.FREE || !UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), so.getContext()).hasConflictHandling()) {
             return NO_CONFLICTS; // According to bug #5267 and modularisation concept
         } else if (!action && !cdao.containsStartDate() && !cdao.containsEndDate() && !cdao.containsParticipants() && !cdao.containsRecurrenceType()) {
             if (LOG.isDebugEnabled()) {
@@ -166,22 +177,22 @@ public class ConflictHandler {
         }
         final CalendarSqlImp calendarsqlimp = CalendarSql.getCalendarSqlImplementation();
         Connection readcon = null;
-        SearchIterator si = null;
+        SearchIterator<?> si = null;
         ResultSet rs = null;
         PreparedStatement prep = null;
         PreparedStatement private_folder_information = null;
         boolean close_connection = true;
         try {
             readcon = DBPool.pickup(so.getContext());            
-            long whole_day_start = CalendarCommonCollection.getUserTimeUTCDate(start, so.getUserObject().getTimeZone());
-            long whole_day_end = CalendarCommonCollection.getUserTimeUTCDate(end, so.getUserObject().getTimeZone());
+            long whole_day_start = CalendarCommonCollection.getUserTimeUTCDate(start, getUser().getTimeZone());
+            long whole_day_end = CalendarCommonCollection.getUserTimeUTCDate(end, getUser().getTimeZone());
             if (whole_day_end <= whole_day_start) {
                 whole_day_end = whole_day_start+CalendarRecurringCollection.MILLI_DAY;
             }
             prep = calendarsqlimp.getConflicts(so.getContext(), start, end, new Date(whole_day_start), new Date(whole_day_end), readcon, sql_in, true);
             private_folder_information = calendarsqlimp.getConflicts(so.getContext(), start, end, null, null, readcon, sql_in, false);
             rs = calendarsqlimp.getResultSet(prep);
-            si = new FreeBusyResults(rs, prep, so.getContext(), so.getUserObject().getId(), so.getUserObject().getGroups(), so.getUserConfiguration(), readcon, true, cdao.getUsers(), private_folder_information);
+            si = new FreeBusyResults(rs, prep, so.getContext(), getUser().getId(), getUser().getGroups(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), so.getContext()), readcon, true, cdao.getUsers(), private_folder_information);
             ArrayList<CalendarDataObject> li = null;
             while (si.hasNext()) {
                 final CalendarDataObject conflict_dao = (CalendarDataObject) si.next();
@@ -250,22 +261,22 @@ public class ConflictHandler {
         }
         final CalendarSqlImp calendarsqlimp = CalendarSql.getCalendarSqlImplementation();
         Connection readcon = null;
-        SearchIterator si = null;
+        SearchIterator<?> si = null;
         ResultSet rs = null;
         PreparedStatement prep  = null;
         PreparedStatement private_folder_information = null;
         boolean close_connection = true;
         try {
             readcon = DBPool.pickup(so.getContext());
-            long whole_day_start = CalendarCommonCollection.getUserTimeUTCDate(start, so.getUserObject().getTimeZone());
-            long whole_day_end = CalendarCommonCollection.getUserTimeUTCDate(end, so.getUserObject().getTimeZone());
+            long whole_day_start = CalendarCommonCollection.getUserTimeUTCDate(start, getUser().getTimeZone());
+            long whole_day_end = CalendarCommonCollection.getUserTimeUTCDate(end, getUser().getTimeZone());
             if (whole_day_end <= whole_day_start) {
                 whole_day_end = whole_day_start+CalendarRecurringCollection.MILLI_DAY;
             }
             prep = calendarsqlimp.getResourceConflicts(so.getContext(), start, end, new Date(whole_day_start), new Date(whole_day_end), readcon, sql_in);
             private_folder_information = calendarsqlimp.getResourceConflictsPrivateFolderInformation(so.getContext(), start, end, new Date(whole_day_start), new Date(whole_day_end), readcon, sql_in);
             rs = calendarsqlimp.getResultSet(prep);
-            si = new FreeBusyResults(rs, prep, so.getContext(), so.getUserObject().getId(), so.getUserObject().getGroups(), so.getUserConfiguration(), readcon, true, cdao.getParticipants(), private_folder_information);
+            si = new FreeBusyResults(rs, prep, so.getContext(), getUser().getId(), getUser().getGroups(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), so.getContext()), readcon, true, cdao.getParticipants(), private_folder_information);
             ArrayList<CalendarDataObject> li = null;
             while (si.hasNext()) {
                 final CalendarDataObject conflict_dao = (CalendarDataObject)si.next();

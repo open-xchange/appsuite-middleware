@@ -51,6 +51,18 @@
 
 package com.openexchange.webdav;
 
+import java.io.OutputStream;
+import java.util.Date;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.jdom.output.XMLOutputter;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api.OXObjectNotFoundException;
@@ -61,20 +73,13 @@ import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbContactSQLInterface;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.webdav.xml.ContactParser;
 import com.openexchange.webdav.xml.ContactWriter;
 import com.openexchange.webdav.xml.DataParser;
 import com.openexchange.webdav.xml.XmlServlet;
-import java.io.OutputStream;
-import java.util.Date;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.jdom.output.XMLOutputter;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
 
 /**
  * contacts
@@ -196,7 +201,8 @@ public final class contacts extends XmlServlet {
 	}
 	
 	protected boolean hasModulePermission(final SessionObject sessionObj) {
-		return (sessionObj.getUserConfiguration().hasWebDAVXML() && sessionObj.getUserConfiguration().hasContact());
+		final UserConfiguration uc = UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext());
+		return (uc.hasWebDAVXML() && uc.hasContact());
 	}
 }
 

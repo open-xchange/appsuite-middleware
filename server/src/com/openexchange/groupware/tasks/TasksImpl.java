@@ -120,7 +120,7 @@ final class TasksImpl extends Tasks {
         final ParticipantStorage partStor = ParticipantStorage.getInstance();
         final FolderStorage foldStor = FolderStorage.getInstance();
         final Context ctx = session.getContext();
-        final int userId = session.getUserObject().getId();
+        final int userId = session.getUserId();
         final List<Integer> deleteTask = new ArrayList<Integer>();
         final List<UpdateData> removeParticipant = new ArrayList<UpdateData>();
         TaskIterator iter = null;

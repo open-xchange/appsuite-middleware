@@ -109,17 +109,6 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
 		Configuration.getInstance().freeCache(CACHE_REGION_NAME);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.groupware.UserConfigurationStorage#getUserConfiguration(int)
-	 */
-	@Override
-	public UserConfiguration getUserConfiguration(final int userId, final Context ctx)
-			throws UserConfigurationException {
-		return getUserConfiguration(userId, null, ctx);
-	}
-
 	private static final CacheKey getKey(final int userId, final Context ctx) {
 		return new CacheKey(ctx, userId);
 	}

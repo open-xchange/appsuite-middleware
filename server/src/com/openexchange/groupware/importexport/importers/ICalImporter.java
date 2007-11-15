@@ -83,6 +83,7 @@ import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionF
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TaskField;
 import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.server.EffectivePermission;
 import com.openexchange.sessiond.SessionObject;
@@ -172,11 +173,11 @@ public class ICalImporter extends AbstractImporter implements Importer {
 			//check format of folder
 			int module = fo.getModule(); 
 			if (module == FolderObject.CALENDAR) {
-				if (!sessObj.getUserConfiguration().hasCalendar()) {
+				if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessObj.getUserId(), sessObj.getContext()).hasCalendar()) {
 					return false;
 				}
 			} else if (module == FolderObject.TASK) {
-				if (!sessObj.getUserConfiguration().hasTask()) {
+				if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessObj.getUserId(), sessObj.getContext()).hasTask()) {
 					return false;
 				}
 			} else {
@@ -186,7 +187,7 @@ public class ICalImporter extends AbstractImporter implements Importer {
 			//check read access to folder
 			EffectivePermission perm;
 			try {
-				perm = fo.getEffectiveUserPermission(sessObj.getUserObject().getId(), sessObj.getUserConfiguration());
+				perm = fo.getEffectiveUserPermission(sessObj.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessObj.getUserId(), sessObj.getContext()));
 			} catch (DBPoolingException e) {
 				throw EXCEPTIONS.create(0, folder);
 			} catch (SQLException e) {
@@ -231,7 +232,7 @@ public class ICalImporter extends AbstractImporter implements Importer {
 		AppointmentSQLInterface appointmentInterface = null;
 		
 		if (importAppointment) {
-			if(! sessObj.getUserConfiguration().hasCalendar() ){
+			if(!UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessObj.getUserId(), sessObj.getContext()).hasCalendar() ){
 				throw EXCEPTIONS.create(7, new OXPermissionException(OXPermissionException.Code.NoPermissionForModul, "Calendar") );
 			}
 			appointmentInterface = new CalendarSql(sessObj);
@@ -240,7 +241,7 @@ public class ICalImporter extends AbstractImporter implements Importer {
 		TasksSQLInterface taskInterface = null;
 		
 		if (importTask) {
-			if(! sessObj.getUserConfiguration().hasTask() ){
+			if(!UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessObj.getUserId(), sessObj.getContext()).hasTask() ){
 				throw EXCEPTIONS.create(8, new OXPermissionException(OXPermissionException.Code.NoPermissionForModul, "Task") );
 			}
 			taskInterface = new TasksSQLInterfaceImpl(sessObj);

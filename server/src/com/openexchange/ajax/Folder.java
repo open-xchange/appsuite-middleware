@@ -89,11 +89,14 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.i18n.Groups;
 import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.i18n.StringHelper;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailInterface;
+import com.openexchange.mail.cache.SessionMailCache;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.json.writer.FolderWriter.MailFolderFieldWriter;
 import com.openexchange.server.OCLPermission;
@@ -315,7 +318,8 @@ public class Folder extends SessionServlet {
 							OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
 					rootFolder.setPermissionsAsArray(new OCLPermission[] { (OCLPermission) perm.clone() });
 				} else if (rootFolder.getObjectID() == FolderObject.SYSTEM_SHARED_FOLDER_ID
-						&& !sessionObj.getUserConfiguration().hasFullSharedFolderAccess()) {
+						&& !UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
+								sessionObj.getContext()).hasFullSharedFolderAccess()) {
 					/*
 					 * User does not hold READ_CREATE_SHARED_FOLDERS in user
 					 * configuration; mark system shared folder to have no
@@ -329,7 +333,8 @@ public class Folder extends SessionServlet {
 				try {
 					for (final FolderFieldWriter ffw : writers) {
 						ffw.writeField(jsonWriter, rootFolder, false, FolderObject.getFolderString(rootFolder
-								.getObjectID(), sessionObj.getLocale()), hasSubfolder);
+								.getObjectID(), UserStorage.getUser(sessionObj.getUserId(), sessionObj.getContext())
+								.getLocale()), hasSubfolder);
 					}
 				} finally {
 					jsonWriter.endArray();
@@ -384,7 +389,8 @@ public class Folder extends SessionServlet {
 		 * Some variables
 		 */
 		final Response response = new Response();
-		final StringHelper strHelper = new StringHelper(sessionObj.getLocale());
+		final StringHelper strHelper = new StringHelper(UserStorage.getUser(sessionObj.getUserId(),
+				sessionObj.getContext()).getLocale());
 		final OXJSONWriter jsonWriter = new OXJSONWriter();
 		Date lastModifiedDate = null;
 		/*
@@ -517,8 +523,10 @@ public class Folder extends SessionServlet {
 						}
 					}
 				} else if (parentId == FolderObject.SYSTEM_INFOSTORE_FOLDER_ID) {
-					if (!sessionObj.getUserConfiguration().hasInfostore()) {
-						throw new OXFolderException(FolderCode.NO_MODULE_ACCESS, getUserName(sessionObj),
+					if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
+							sessionObj.getContext()).hasInfostore()) {
+						throw new OXFolderException(FolderCode.NO_MODULE_ACCESS, getUserName(sessionObj, UserStorage
+								.getUser(sessionObj.getUserId(), sessionObj.getContext())),
 								folderModule2String(FolderObject.INFOSTORE), Integer.valueOf(sessionObj.getContext()
 										.getContextId()));
 					}
@@ -540,20 +548,22 @@ public class Folder extends SessionServlet {
 							OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
 					final FolderObject virtualUserstoreFolder = FolderObject.createVirtualFolderObject(
 							FolderObject.VIRTUAL_USER_INFOSTORE_FOLDER_ID, FolderObject.getFolderString(
-									FolderObject.VIRTUAL_USER_INFOSTORE_FOLDER_ID, sessionObj.getLocale()),
+									FolderObject.VIRTUAL_USER_INFOSTORE_FOLDER_ID, UserStorage.getUser(
+											sessionObj.getUserId(), sessionObj.getContext()).getLocale()),
 							FolderObject.INFOSTORE, true, FolderObject.SYSTEM_TYPE, virtualPerm);
 					folderWriter.writeOXFolderFieldsAsArray(columns, virtualUserstoreFolder);
 					/*
 					 * Append virtual root folder for non-tree visible infostore
 					 * folders
 					 */
-					SearchIterator it = null;
+					SearchIterator<?> it = null;
 					try {
 						it = foldersqlinterface.getNonTreeVisiblePublicInfostoreFolders();
 						if (it.hasNext()) {
 							final FolderObject virtualListFolder = FolderObject.createVirtualFolderObject(
 									FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID, FolderObject.getFolderString(
-											FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID, sessionObj.getLocale()),
+											FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID, UserStorage.getUser(
+													sessionObj.getUserId(), sessionObj.getContext()).getLocale()),
 									FolderObject.INFOSTORE, true, FolderObject.SYSTEM_TYPE);
 							folderWriter.writeOXFolderFieldsAsArray(columns, virtualListFolder);
 						}
@@ -609,9 +619,11 @@ public class Folder extends SessionServlet {
 						/*
 						 * Append mail inbox to system 'private' folder
 						 */
-						if (sessionObj.getUserConfiguration().hasWebMail() && !ignoreMailfolder) {
+						if (UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
+								sessionObj.getContext()).hasWebMail()
+								&& !ignoreMailfolder) {
 							MailInterface mailInterface = null;
-							SearchIterator it = null;
+							SearchIterator<?> it = null;
 							try {
 								mailInterface = MailInterface.getInstance(sessionObj);
 								it = mailInterface.getRootFolders();
@@ -623,8 +635,8 @@ public class Folder extends SessionServlet {
 									final JSONArray ja = new JSONArray();
 									for (int i = 0; i < mailFolderWriters.length; i++) {
 										mailFolderWriters[i].writeField(ja, rootFolder, false,
-												MailFolder.DEFAULT_FOLDER_NAME, 1,
-												MailFolder.DEFAULT_FOLDER_ID, FolderObject.SYSTEM_MODULE, false);
+												MailFolder.DEFAULT_FOLDER_NAME, 1, MailFolder.DEFAULT_FOLDER_ID,
+												FolderObject.SYSTEM_MODULE, false);
 									}
 									jsonWriter.value(ja);
 								}
@@ -653,7 +665,8 @@ public class Folder extends SessionServlet {
 							final FolderObject internalUsers = foldersqlinterface
 									.getFolderById(FolderObject.SYSTEM_LDAP_FOLDER_ID);
 							folderWriter.writeOXFolderFieldsAsArray(columns, internalUsers, FolderObject
-									.getFolderString(internalUsers.getObjectID(), sessionObj.getLocale()), -1);
+									.getFolderString(internalUsers.getObjectID(), UserStorage.getUser(
+											sessionObj.getUserId(), sessionObj.getContext()).getLocale()), -1);
 						} catch (final OXException e) {
 							/*
 							 * Internal users folder not visible to current user
@@ -679,7 +692,8 @@ public class Folder extends SessionServlet {
 						}
 					}
 					if (isSystemPrivateFolder) {
-						if (sessionObj.getUserConfiguration().hasInfostore()) {
+						if (UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
+								sessionObj.getContext()).hasInfostore()) {
 							/*
 							 * Append linked 'MyInfostore'
 							 */
@@ -694,12 +708,13 @@ public class Folder extends SessionServlet {
 						 * Append virtual root folder for non-tree visible
 						 * infostore folders
 						 */
-						SearchIterator it = null;
+						SearchIterator<?> it = null;
 						try {
 							if ((it = foldersqlinterface.getNonTreeVisiblePublicCalendarFolders()).hasNext()) {
 								final FolderObject virtualListFolder = FolderObject.createVirtualFolderObject(
 										FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID, FolderObject.getFolderString(
-												FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID, sessionObj.getLocale()),
+												FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID, UserStorage.getUser(
+														sessionObj.getUserId(), sessionObj.getContext()).getLocale()),
 										FolderObject.SYSTEM_MODULE, true, FolderObject.SYSTEM_TYPE);
 								if (FolderCacheManager.isInitialized()) {
 									FolderCacheManager.getInstance().putFolderObject(virtualListFolder,
@@ -730,7 +745,8 @@ public class Folder extends SessionServlet {
 							if ((it = foldersqlinterface.getNonTreeVisiblePublicContactFolders()).hasNext()) {
 								final FolderObject virtualListFolder = FolderObject.createVirtualFolderObject(
 										FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID, FolderObject.getFolderString(
-												FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID, sessionObj.getLocale()),
+												FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID, UserStorage.getUser(
+														sessionObj.getUserId(), sessionObj.getContext()).getLocale()),
 										FolderObject.SYSTEM_MODULE, true, FolderObject.SYSTEM_TYPE);
 								if (FolderCacheManager.isInitialized()) {
 									FolderCacheManager.getInstance().putFolderObject(virtualListFolder,
@@ -761,7 +777,8 @@ public class Folder extends SessionServlet {
 							if ((it = foldersqlinterface.getNonTreeVisiblePublicTaskFolders()).hasNext()) {
 								final FolderObject virtualListFolder = FolderObject.createVirtualFolderObject(
 										FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID, FolderObject.getFolderString(
-												FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID, sessionObj.getLocale()),
+												FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID, UserStorage.getUser(
+														sessionObj.getUserId(), sessionObj.getContext()).getLocale()),
 										FolderObject.SYSTEM_MODULE, true, FolderObject.SYSTEM_TYPE);
 								if (FolderCacheManager.isInitialized()) {
 									FolderCacheManager.getInstance().putFolderObject(virtualListFolder,
@@ -829,7 +846,7 @@ public class Folder extends SessionServlet {
 				 * status, shall be included
 				 */
 				final boolean all = (STRING_1.equals(paramContainer.getStringParam(PARAMETER_ALL)));
-				SearchIterator it = null;
+				SearchIterator<?> it = null;
 				MailInterface mailInterface = null;
 				try {
 					mailInterface = MailInterface.getInstance(sessionObj);
@@ -964,7 +981,7 @@ public class Folder extends SessionServlet {
 				}
 			} else {
 				MailInterface mailInterface = null;
-				SearchIterator it = null;
+				SearchIterator<?> it = null;
 				try {
 					mailInterface = MailInterface.getInstance(sessionObj);
 					/*
@@ -1008,7 +1025,8 @@ public class Folder extends SessionServlet {
 								sessionObj.getContext());
 					}
 					folderWriter.writeOXFolderFieldsAsArray(columns, privateFolder, FolderObject.getFolderString(
-							FolderObject.SYSTEM_PRIVATE_FOLDER_ID, sessionObj.getLocale()), -1);
+							FolderObject.SYSTEM_PRIVATE_FOLDER_ID, UserStorage.getUser(sessionObj.getUserId(),
+									sessionObj.getContext()).getLocale()), -1);
 				} finally {
 					if (it != null) {
 						it.close();
@@ -1109,12 +1127,17 @@ public class Folder extends SessionServlet {
 			Iterator<FolderObject> iter = q.iterator();
 			for (int i = 0; i < size; i++) {
 				final FolderObject fo = iter.next();
-				if (fo.isVisible(sessionObj.getUserObject().getId(), sessionObj.getUserConfiguration())) {
-					if (fo.isShared(sessionObj.getUserObject().getId())) {
+				final User u = UserStorage.getUser(sessionObj.getUserId(), sessionObj.getContext());
+				if (fo.isVisible(u.getId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(
+						sessionObj.getUserId(), sessionObj.getContext()))) {
+					if (fo.isShared(u.getId())) {
 						addSystemSharedFolder = true;
 					} else if (FolderObject.PUBLIC == fo.getType()) {
-						if (access.getFolderPermission(fo.getParentFolderID(), sessionObj.getUserObject().getId(),
-								sessionObj.getUserConfiguration()).isFolderVisible()) {
+						if (access.getFolderPermission(
+								fo.getParentFolderID(),
+								u.getId(),
+								UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
+										sessionObj.getContext())).isFolderVisible()) {
 							/*
 							 * Parent is already visible: Add real parent
 							 */
@@ -1140,25 +1163,29 @@ public class Folder extends SessionServlet {
 			 * Check virtual list folders
 			 */
 			if (checkVirtualListFolders) {
-				if (sessionObj.getUserConfiguration().hasTask()
+				if (UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
+						sessionObj.getContext()).hasTask()
 						&& !foldersqlinterface.getNonTreeVisiblePublicTaskFolders().hasNext()) {
 					final FolderObject virtualTasks = new FolderObject(FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID);
 					virtualTasks.setLastModified(DATE_0);
 					deletedQueue.add(virtualTasks);
 				}
-				if (sessionObj.getUserConfiguration().hasCalendar()
+				if (UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
+						sessionObj.getContext()).hasCalendar()
 						&& !foldersqlinterface.getNonTreeVisiblePublicCalendarFolders().hasNext()) {
 					final FolderObject virtualCalendar = new FolderObject(FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID);
 					virtualCalendar.setLastModified(DATE_0);
 					deletedQueue.add(virtualCalendar);
 				}
-				if (sessionObj.getUserConfiguration().hasContact()
+				if (UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
+						sessionObj.getContext()).hasContact()
 						&& !foldersqlinterface.getNonTreeVisiblePublicContactFolders().hasNext()) {
 					final FolderObject virtualContact = new FolderObject(FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID);
 					virtualContact.setLastModified(DATE_0);
 					deletedQueue.add(virtualContact);
 				}
-				if (sessionObj.getUserConfiguration().hasInfostore()
+				if (UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
+						sessionObj.getContext()).hasInfostore()
 						&& !foldersqlinterface.getNonTreeVisiblePublicInfostoreFolders().hasNext()) {
 					final FolderObject virtualInfostore = new FolderObject(
 							FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID);
@@ -1172,7 +1199,7 @@ public class Folder extends SessionServlet {
 			if (addSystemSharedFolder) {
 				final FolderObject sharedFolder = access.getFolderObject(FolderObject.SYSTEM_SHARED_FOLDER_ID);
 				sharedFolder.setFolderName(FolderObject.getFolderString(FolderObject.SYSTEM_SHARED_FOLDER_ID,
-						sessionObj.getLocale()));
+						UserStorage.getUser(sessionObj.getUserId(), sessionObj.getContext()).getLocale()));
 				updatedQueue.add(sharedFolder);
 			}
 			/*
@@ -1217,12 +1244,12 @@ public class Folder extends SessionServlet {
 				/*
 				 * Clean session caches
 				 */
-				sessionObj.getMailCache().clear();
+				SessionMailCache.getInstance(sessionObj).clear();
 				/*
 				 * Append mail folders
 				 */
 				MailInterface mailInterface = null;
-				SearchIterator it = null;
+				SearchIterator<?> it = null;
 				try {
 					mailInterface = MailInterface.getInstance(sessionObj);
 					it = mailInterface.getRootFolders();
@@ -1392,7 +1419,8 @@ public class Folder extends SessionServlet {
 				timestamp = paramContainer.checkDateParam(PARAMETER_TIMESTAMP);
 				final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(sessionObj);
 				FolderObject fo = new FolderObject(updateFolderId);
-				new FolderParser(sessionObj.getUserConfiguration()).parse(fo, jsonObj);
+				new FolderParser(UserConfigurationStorage.getInstance().getUserConfigurationSafe(
+						sessionObj.getUserId(), sessionObj.getContext())).parse(fo, jsonObj);
 				fo = foldersqlinterface.saveFolderObject(fo, timestamp);
 				retval = String.valueOf(fo.getObjectID());
 				lastModifiedDate = fo.getLastModified();
@@ -1470,7 +1498,8 @@ public class Folder extends SessionServlet {
 				final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(sessionObj);
 				FolderObject fo = new FolderObject();
 				fo.setParentFolderID(parentFolderId);
-				new FolderParser(sessionObj.getUserConfiguration()).parse(fo, jsonObj);
+				new FolderParser(UserConfigurationStorage.getInstance().getUserConfigurationSafe(
+						sessionObj.getUserId(), sessionObj.getContext())).parse(fo, jsonObj);
 				fo = foldersqlinterface.saveFolderObject(fo, null);
 				retval = String.valueOf(fo.getObjectID());
 				lastModifiedDate = fo.getLastModified();
@@ -1572,7 +1601,8 @@ public class Folder extends SessionServlet {
 						foldersqlinterface.deleteFolderObject(delFolderObj, timestamp);
 						lastModified = Math.max(lastModified, delFolderObj.getLastModified().getTime());
 					} else {
-						if (sessionObj.getUserConfiguration().hasWebMail()) {
+						if (UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
+								sessionObj.getContext()).hasWebMail()) {
 							if (mailInterface == null) {
 								mailInterface = MailInterface.getInstance(sessionObj);
 							}

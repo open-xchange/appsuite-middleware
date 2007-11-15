@@ -74,6 +74,7 @@ import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
 
 import com.openexchange.groupware.i18n.MailStrings;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.StringHelper;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailInterfaceImpl;
@@ -91,6 +92,7 @@ import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.InlineContentHandler;
 import com.openexchange.mail.usersetting.UserSettingMail;
+import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.mail.ContentType;
@@ -141,7 +143,8 @@ public final class MimeReply {
 	public static MailMessage getReplyMail(final MimeMessage originalMsg, final boolean replyAll,
 			final SessionObject session, final Session mailSession) throws MailException {
 		try {
-			final UserSettingMail usm = session.getUserSettingMail();
+			final UserSettingMail usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(),
+					session.getContext());
 			/*
 			 * New MIME message with a dummy session
 			 */
@@ -214,7 +217,7 @@ public final class MimeReply {
 				/*
 				 * Add user's aliases to filter
 				 */
-				final String[] userAddrs = session.getUserObject().getAliases();
+				final String[] userAddrs = UserStorage.getUser(session.getUserId(), session.getContext()).getAliases();
 				if (userAddrs != null && userAddrs.length > 0) {
 					final StringBuilder addrBuilder = new StringBuilder();
 					addrBuilder.append(userAddrs[0]);
@@ -316,8 +319,9 @@ public final class MimeReply {
 			final String replyText;
 			{
 				final List<String> list = new ArrayList<String>();
-				generateReplyText(originalMsg, retvalContentType, new StringHelper(session.getLocale()), session
-						.getLocale(), usm, mailSession, list);
+				final Locale locale = UserStorage.getUser(session.getUserId(), session.getContext()).getLocale();
+				generateReplyText(originalMsg, retvalContentType, new StringHelper(locale), locale, usm, mailSession,
+						list);
 				final StringBuilder replyTextBuilder = new StringBuilder(8192 * 2);
 				for (int i = list.size() - 1; i >= 0; i--) {
 					replyTextBuilder.append(list.get(i));

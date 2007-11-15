@@ -104,11 +104,13 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.utils.Metadata;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.upload.UploadEvent;
 import com.openexchange.groupware.upload.UploadException;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.UploadListener;
 import com.openexchange.groupware.upload.UploadRegistry;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailInterface;
@@ -126,6 +128,7 @@ import com.openexchange.mail.json.writer.MessageWriter.MailFieldWriter;
 import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.mail.transport.SendType;
 import com.openexchange.mail.usersetting.UserSettingMail;
+import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.server.EffectivePermission;
 import com.openexchange.sessiond.SessionObject;
 import com.openexchange.tools.encoding.Helper;
@@ -452,7 +455,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 		 * Start response
 		 */
 		jsonWriter.array();
-		SearchIterator it = null;
+		SearchIterator<?> it = null;
 		try {
 			/*
 			 * Read in parameters
@@ -831,7 +834,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 		 * Start response
 		 */
 		jsonWriter.array();
-		SearchIterator it = null;
+		SearchIterator<?> it = null;
 		try {
 			/*
 			 * Read in parameters
@@ -1278,7 +1281,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 		 * Start response
 		 */
 		jsonWriter.array();
-		SearchIterator it = null;
+		SearchIterator<?> it = null;
 		try {
 			/*
 			 * Read in parameters
@@ -1956,7 +1959,8 @@ public class Mail extends PermissionServlet implements UploadListener {
 			boolean closeMailInterface = false;
 			final InfostoreFacade db = Infostore.FACADE;
 			try {
-				if (!sessionObj.getUserConfiguration().hasInfostore()) {
+				if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
+						sessionObj.getContext()).hasInfostore()) {
 					throw new OXPermissionException(new MailException(MailException.Code.NO_MAIL_ACCESS));
 				}
 				if (mailInterface == null) {
@@ -1972,15 +1976,18 @@ public class Mail extends PermissionServlet implements UploadListener {
 				{
 					final FolderObject folderObj = new OXFolderAccess(sessionObj.getContext())
 							.getFolderObject(destFolderID);
-					final EffectivePermission p = folderObj.getEffectiveUserPermission(sessionObj.getUserObject()
-							.getId(), sessionObj.getUserConfiguration());
+					final EffectivePermission p = folderObj.getEffectiveUserPermission(sessionObj.getUserId(),
+							UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
+									sessionObj.getContext()));
 					if (!p.isFolderVisible()) {
-						throw new OXFolderException(FolderCode.NOT_VISIBLE, getFolderName(folderObj),
-								getUserName(sessionObj), Integer.valueOf(sessionObj.getContext().getContextId()));
+						throw new OXFolderException(FolderCode.NOT_VISIBLE, getFolderName(folderObj), getUserName(
+								sessionObj, UserStorage.getUser(sessionObj.getUserId(), sessionObj.getContext())),
+								Integer.valueOf(sessionObj.getContext().getContextId()));
 					}
 					if (!p.canWriteOwnObjects()) {
-						throw new OXFolderException(FolderCode.NO_WRITE_PERMISSION, getUserName(sessionObj),
-								getFolderName(folderObj), Integer.valueOf(sessionObj.getContext().getContextId()));
+						throw new OXFolderException(FolderCode.NO_WRITE_PERMISSION, getUserName(sessionObj, UserStorage
+								.getUser(sessionObj.getUserId(), sessionObj.getContext())), getFolderName(folderObj),
+								Integer.valueOf(sessionObj.getContext().getContextId()));
 					}
 				}
 				/*
@@ -2140,7 +2147,8 @@ public class Mail extends PermissionServlet implements UploadListener {
 					 * Append UploadListener instances
 					 */
 					((UploadListener) this).getRegistry().addUploadListener(
-							new UploadQuotaChecker(sessionObj.getUserSettingMail(), resp, actionStr));
+							new UploadQuotaChecker(UserSettingMailStorage.getInstance().getUserSettingMail(
+									sessionObj.getUserId(), sessionObj.getContext()), resp, actionStr));
 					((UploadListener) this).getRegistry().addUploadListener(MAIL_SERVLET);
 					/*
 					 * Create and fire upload event
@@ -2275,7 +2283,8 @@ public class Mail extends PermissionServlet implements UploadListener {
 
 	@Override
 	protected boolean hasModulePermission(final SessionObject sessionObj) {
-		return sessionObj.getUserConfiguration().hasWebMail();
+		return UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
+				sessionObj.getContext()).hasWebMail();
 	}
 
 	private static class SmartLongArray implements Cloneable {

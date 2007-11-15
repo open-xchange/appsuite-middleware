@@ -54,6 +54,7 @@ import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.SettingSetup;
 import com.openexchange.groupware.settings.SharedValue;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.sessiond.SessionObject;
 
@@ -90,8 +91,9 @@ public class TaskNotification implements SettingSetup {
     public SharedValue getSharedValue() {
         return new AbstractMailFuncs() {
             public boolean isAvailable(final SessionObject session) {
-                final UserConfiguration config = session.getUserConfiguration();
-                return config.hasWebMail() && config.hasTask();
+                final UserConfiguration config = UserConfigurationStorage.getInstance().getUserConfigurationSafe(
+						session.getUserId(), session.getContext());
+				return config.hasWebMail() && config.hasTask();
             }
             @Override
             protected Object isSet(final UserSettingMail settings) {
