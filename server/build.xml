@@ -134,7 +134,8 @@
         </jar>
     </target>
 
-    <target name="build" depends="jar,create-lang-jar"/>
+    <!-- TODO add create-lang-jar -->
+    <target name="build" depends="jar"/>
 
     <!-- Install targets -->
 
