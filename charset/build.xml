@@ -15,11 +15,6 @@
         <exclude name="CVS"/>
     </fileset>
 
-    <fileset dir="." id="metainf">
-        <include name="META-INF/**"/>
-        <exclude name="CVS"/>
-    </fileset>
-
     <!-- Install Constants -->
     <property name="bundlesdir" value="${destdir}${prefix}/bundles"/>
 
@@ -45,8 +40,8 @@
     </target>
 
     <target name="jar" depends="prepare,compile">
-        <jar jarfile="${tmp.dir}/${Bundle-SymbolicName}_${Bundle-Version}.jar">
-            <fileset refid="metainf"/>
+        <jar jarfile="${tmp.dir}/${Bundle-SymbolicName}_${Bundle-Version}.jar"
+            manifest="META-INF/MANIFEST.MF">
             <fileset dir="${output..}"/>
         </jar>
     </target>

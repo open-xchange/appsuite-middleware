@@ -128,8 +128,8 @@
     </target>
 
     <target name="jar" depends="compile">
-        <jar jarfile="${tmp.dir}/${Bundle-SymbolicName}_${Bundle-Version}.jar">
-            <fileset refid="metainf"/>
+        <jar jarfile="${tmp.dir}/${Bundle-SymbolicName}_${Bundle-Version}.jar"
+            manifest="META-INF/MANIFEST.MF">
             <fileset dir="${output..}"/>
         </jar>
     </target>
