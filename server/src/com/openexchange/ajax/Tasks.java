@@ -70,7 +70,7 @@ import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
 import com.openexchange.tools.servlet.AjaxException;
@@ -92,7 +92,7 @@ public class Tasks extends DataServlet {
 		final Response response = new Response();
 		try {
 			final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
-			final SessionObject sessionObj = getSessionObject(httpServletRequest);
+			final Session sessionObj = getSessionObject(httpServletRequest);
 			final JSONObject jsonObj;
 			try {			
 				 jsonObj = convertParameter2JSONObject(httpServletRequest);
@@ -154,7 +154,7 @@ public class Tasks extends DataServlet {
 		final Response response = new Response();
 		try {
 			final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
-			final SessionObject sessionObj = getSessionObject(httpServletRequest);
+			final Session sessionObj = getSessionObject(httpServletRequest);
 			
 			final String data = getBody(httpServletRequest);
 			if (data.length() > 0) {
@@ -217,7 +217,7 @@ public class Tasks extends DataServlet {
 		writeResponse(response, httpServletResponse);
 	}
 	
-	protected boolean hasModulePermission(final SessionObject sessionObj) {
+	protected boolean hasModulePermission(final Session sessionObj) {
 		return UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
 				sessionObj.getContext()).hasTask();
 	}

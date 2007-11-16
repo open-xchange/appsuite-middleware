@@ -50,16 +50,6 @@
 package com.openexchange.ajax;
 
 
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.request.LinkRequest;
-import com.openexchange.api.OXConflictException;
-import com.openexchange.api2.OXException;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.sessiond.impl.SessionObject;
-import com.openexchange.tools.servlet.AjaxException;
-import com.openexchange.tools.servlet.OXJSONException;
-import com.openexchange.tools.servlet.http.Tools;
-
 import java.io.IOException;
 import java.io.StringWriter;
 
@@ -70,6 +60,16 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.request.LinkRequest;
+import com.openexchange.api.OXConflictException;
+import com.openexchange.api2.OXException;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.sessiond.Session;
+import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.OXJSONException;
+import com.openexchange.tools.servlet.http.Tools;
 
 public class Link extends DataServlet {
 	
@@ -86,7 +86,7 @@ public class Link extends DataServlet {
 		final StringWriter sw = new StringWriter();
 
 		try {
-			final SessionObject sessionObj = getSessionObject(httpServletRequest);
+			final Session sessionObj = getSessionObject(httpServletRequest);
 			final String action = getAction(httpServletRequest);
 			JSONObject jsonObj;
 			
@@ -140,7 +140,7 @@ public class Link extends DataServlet {
 
 			final String action = getAction(httpServletRequest);
 
-			final SessionObject sessionObj = getSessionObject(httpServletRequest);
+			final Session sessionObj = getSessionObject(httpServletRequest);
 			
 			final String data = getBody(httpServletRequest);
 			
@@ -192,7 +192,7 @@ public class Link extends DataServlet {
 	}
 	
 	@Override
-	protected boolean hasModulePermission(final SessionObject sessionObj) {
+	protected boolean hasModulePermission(final Session sessionObj) {
 		return UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
 				sessionObj.getContext()).hasContact();
 	}

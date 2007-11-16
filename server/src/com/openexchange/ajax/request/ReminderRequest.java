@@ -49,14 +49,14 @@
 
 package com.openexchange.ajax.request;
 
-import com.openexchange.groupware.Component;
-import com.openexchange.tools.servlet.OXJSONException;
 import java.sql.SQLException;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -67,6 +67,7 @@ import com.openexchange.ajax.writer.ReminderWriter;
 import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.ReminderSQLInterface;
+import com.openexchange.groupware.Component;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarRecurringCollection;
@@ -78,16 +79,15 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.servlet.AjaxException;
-import java.util.Calendar;
-import org.json.JSONArray;
+import com.openexchange.tools.servlet.OXJSONException;
 
 public class ReminderRequest {
     
-    private SessionObject sessionObj;
+    private Session sessionObj;
     
     private final User userObj;
     
@@ -99,7 +99,7 @@ public class ReminderRequest {
         return timestamp;
     }
     
-    public ReminderRequest(final SessionObject sessionObj) {
+    public ReminderRequest(final Session sessionObj) {
         this.sessionObj = sessionObj;
         userObj = UserStorage.getUser(sessionObj.getUserId(), sessionObj.getContext());
     }
@@ -253,7 +253,7 @@ public class ReminderRequest {
         }
     }
     
-    protected boolean hasModulePermission(SessionObject sessionObj, ReminderObject reminderObj) {
+    protected boolean hasModulePermission(Session sessionObj, ReminderObject reminderObj) {
 		switch (reminderObj.getModule()) {
 		case Types.APPOINTMENT:
 			return UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
@@ -271,7 +271,7 @@ public class ReminderRequest {
 	 * appointment. The reminder object contains only the alarm attribute and
 	 * the recurrence position.
 	 */   
-    protected ReminderObject getLatestRecurringReminder(final int objectId, final int inFolder, final SessionObject sessionObj, final Date endRange) throws OXException, SQLException {
+    protected ReminderObject getLatestRecurringReminder(final int objectId, final int inFolder, final Session sessionObj, final Date endRange) throws OXException, SQLException {
         final CalendarSql calendarSql = new CalendarSql(sessionObj);
         final CalendarDataObject calendarDataObject = calendarSql.getObjectById(objectId, inFolder);
         final int alarm = calendarDataObject.getAlarm();
@@ -306,7 +306,7 @@ public class ReminderRequest {
      * This method returns the next reminder object of the recurrence appointment. The reminder object contains only 
      * the alarm attribute and the recurrence position.
      **/   
-    protected ReminderObject getNextRecurringReminder(final int objectId, final int recurrencePosition, final int inFolder, final SessionObject sessionObj) throws OXException, SQLException {
+    protected ReminderObject getNextRecurringReminder(final int objectId, final int recurrencePosition, final int inFolder, final Session sessionObj) throws OXException, SQLException {
         final CalendarSql calendarSql = new CalendarSql(sessionObj);
         final CalendarDataObject calendarDataObject = calendarSql.getObjectById(objectId, inFolder);
         final int alarm = calendarDataObject.getAlarm();

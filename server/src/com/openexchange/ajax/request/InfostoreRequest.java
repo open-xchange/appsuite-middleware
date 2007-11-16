@@ -92,7 +92,7 @@ import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -101,7 +101,7 @@ public class InfostoreRequest extends CommonRequest{
 	
 	private static final InfostoreParser PARSER = new InfostoreParser();
 	
-	private final SessionObject sessionObj;
+	private final Session sessionObj;
 	
 	private final User user;
 	
@@ -110,7 +110,7 @@ public class InfostoreRequest extends CommonRequest{
 	private static final Log LOG = LogFactory.getLog(InfostoreRequest.class);
 	private static final LoggingLogic LL = LoggingLogic.getLoggingLogic(InfostoreRequest.class);
 	
-	public InfostoreRequest(final SessionObject sessionObj, final JSONWriter w) {
+	public InfostoreRequest(final Session sessionObj, final JSONWriter w) {
 		super(w);
 		this.sessionObj = sessionObj;
 		userConfiguration = UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),

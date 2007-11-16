@@ -51,7 +51,7 @@ package com.openexchange.groupware.upload.impl;
 
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.upload.quotachecker.MailUploadQuotaChecker;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 
 /**
  * UploadQuotaChecker
@@ -88,7 +88,7 @@ public abstract class UploadQuotaChecker {
 	 * @throws UploadException
 	 *             If the module is unknwon
 	 */
-	public static final UploadQuotaChecker getUploadQuotaChecker(final int module, final SessionObject session)
+	public static final UploadQuotaChecker getUploadQuotaChecker(final int module, final Session session)
 			throws UploadException {
 		switch (module) {
 		case FolderObject.MAIL:

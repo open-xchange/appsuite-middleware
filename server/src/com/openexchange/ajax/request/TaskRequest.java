@@ -85,7 +85,7 @@ import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -127,7 +127,7 @@ public class TaskRequest {
 		Task.COLOR_LABEL
 	};
 	
-	private SessionObject sessionObj;
+	private Session sessionObj;
 	
 	private final User userObj;
 	
@@ -137,7 +137,7 @@ public class TaskRequest {
 	
 	private static final Log LOG = LogFactory.getLog(TaskRequest.class);
 	
-	public TaskRequest(SessionObject sessionObj) {
+	public TaskRequest(Session sessionObj) {
 		this.sessionObj = sessionObj;
 		userObj = UserStorage.getUser(sessionObj.getUserId(), sessionObj.getContext());
 		

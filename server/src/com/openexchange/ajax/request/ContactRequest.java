@@ -77,7 +77,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -86,7 +86,7 @@ import com.openexchange.tools.servlet.OXJSONException;
 
 public class ContactRequest {
 	
-	final SessionObject sessionObj;
+	final Session sessionObj;
 	
 	final TimeZone timeZone;
 	
@@ -98,7 +98,7 @@ public class ContactRequest {
 		return timestamp;
 	}
 
-	public ContactRequest(SessionObject sessionObj) {
+	public ContactRequest(Session sessionObj) {
 		this.sessionObj = sessionObj;
 		
 		final String sTimeZone = UserStorage.getUser(sessionObj.getUserId(), sessionObj.getContext()).getTimeZone();

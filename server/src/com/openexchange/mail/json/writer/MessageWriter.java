@@ -75,7 +75,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.JSONMessageHandler;
 import com.openexchange.mail.utils.MessageUtility;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 
 /**
  * {@link MessageWriter} - Writes {@link MailMessage} instances as JSON strings
@@ -109,7 +109,7 @@ public final class MessageWriter {
 	 * @throws MailException
 	 */
 	public static JSONObject writeMailMessage(final MailMessage mail, final boolean displayVersion,
-			final SessionObject session) throws MailException {
+			final Session session) throws MailException {
 		final MailPath mailPath;
 		if (mail.getFolder() != null && mail.getMailId() != 0) {
 			mailPath = new MailPath(mail.getFolder(), mail.getMailId());
@@ -136,7 +136,7 @@ public final class MessageWriter {
 	 *            The session
 	 * @return Appropriate field writers as an array of {@link MailFieldWriter}
 	 */
-	public static MailFieldWriter[] getMailFieldWriter(final MailListField[] fields, final SessionObject session) {
+	public static MailFieldWriter[] getMailFieldWriter(final MailListField[] fields, final Session session) {
 		final MailFieldWriter[] retval = new MailFieldWriter[fields.length];
 		for (int i = 0; i < fields.length; i++) {
 			Fields: switch (fields[i]) {

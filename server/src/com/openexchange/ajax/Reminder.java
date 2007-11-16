@@ -66,8 +66,7 @@ import com.openexchange.ajax.request.ReminderRequest;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api2.OXException;
-import com.openexchange.json.OXJSONWriter;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
@@ -85,7 +84,7 @@ public class Reminder extends DataServlet {
 		Response response = new Response();
 		try {
 			final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
-			final SessionObject sessionObj = getSessionObject(httpServletRequest);
+			final Session sessionObj = getSessionObject(httpServletRequest);
 			JSONObject jsonObj;
 			
 			try {
@@ -133,7 +132,7 @@ public class Reminder extends DataServlet {
 		final Response response = new Response();
 		try {
 			final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
-			final SessionObject sessionObj = getSessionObject(httpServletRequest);
+			final Session sessionObj = getSessionObject(httpServletRequest);
 			
 			final String data = getBody(httpServletRequest);
 			JSONObject jsonObj;
@@ -191,7 +190,7 @@ public class Reminder extends DataServlet {
 		writeResponse(response, httpServletResponse);
 	}
 	
-	protected boolean hasModulePermission(final SessionObject sessionObj) {
+	protected boolean hasModulePermission(final Session sessionObj) {
 		return true;
 	}
 }

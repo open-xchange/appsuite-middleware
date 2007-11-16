@@ -67,7 +67,7 @@ import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.transport.SendType;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.monitoring.MonitorAgent;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 
@@ -104,7 +104,7 @@ public final class MailInterfaceImpl extends MailInterface {
 	 */
 	private MailConnection<?, ?, ?> mailConnection;
 
-	private SessionObject session;
+	private Session session;
 
 	private boolean init;
 
@@ -115,7 +115,7 @@ public final class MailInterfaceImpl extends MailInterface {
 	 *             If user has no mail access or properties cannot be
 	 *             successfully loaded
 	 */
-	protected MailInterfaceImpl(final SessionObject session) throws MailException {
+	protected MailInterfaceImpl(final Session session) throws MailException {
 		super();
 		if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext())
 				.hasWebMail()) {

@@ -49,8 +49,6 @@
 
 package com.openexchange.ajax.parser;
 
-import com.openexchange.tools.servlet.AjaxException;
-import com.openexchange.tools.servlet.OXJSONException;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -61,7 +59,9 @@ import org.json.JSONObject;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.groupware.container.DataObject;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
+import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.OXJSONException;
 
 /**
  * DataParser
@@ -78,7 +78,7 @@ public abstract class DataParser {
 	
 	protected TimeZone timeZone;
 	
-	protected SessionObject sessionObj;
+	protected Session sessionObj;
 
     /**
      * Default old constructor.
@@ -106,7 +106,7 @@ public abstract class DataParser {
      * @param sessionObj Session object.
      */
     protected DataParser(final boolean parseAll, final TimeZone timeZone,
-        final SessionObject sessionObj) {
+        final Session sessionObj) {
         super();
         this.parseAll = parseAll;
         this.timeZone = timeZone;

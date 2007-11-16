@@ -97,7 +97,7 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.encoding.Helper;
 import com.openexchange.tools.servlet.UploadServletException;
 import com.openexchange.tools.servlet.http.Tools;
@@ -138,7 +138,7 @@ public class Attachment extends PermissionServlet {
 	private long maxUploadSize = -2;
 	
 	@Override
-	protected boolean hasModulePermission(final SessionObject sessionObj) {
+	protected boolean hasModulePermission(final Session sessionObj) {
 		return AttachmentRequest.hasPermission(UserConfigurationStorage.getInstance().getUserConfigurationSafe(
 				sessionObj.getUserId(), sessionObj.getContext()));
 	}
@@ -147,7 +147,7 @@ public class Attachment extends PermissionServlet {
 	@Override
 	protected void doGet(final HttpServletRequest req, final HttpServletResponse res)
 	throws ServletException, IOException {
-		final SessionObject session = getSessionObject(req);
+		final Session session = getSessionObject(req);
 		
 		final String action = req.getParameter(PARAMETER_ACTION);
 		if(action == null) {
@@ -199,7 +199,7 @@ public class Attachment extends PermissionServlet {
 	@Override
 	protected void doPut(final HttpServletRequest req, final HttpServletResponse res)
 	throws ServletException, IOException {
-		final SessionObject session = getSessionObject(req);
+		final Session session = getSessionObject(req);
 		
 		final String action = req.getParameter(PARAMETER_ACTION);
 		if(action == null) {
@@ -224,7 +224,7 @@ public class Attachment extends PermissionServlet {
 		
 		res.setContentType(MIME_TEXT_HTML);
 		
-		final SessionObject session = getSessionObject(req);
+		final Session session = getSessionObject(req);
 		
 		final String action = req.getParameter(PARAMETER_ACTION);
 		if(action == null) {

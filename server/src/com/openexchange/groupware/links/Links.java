@@ -81,7 +81,7 @@ import com.openexchange.groupware.tx.DBPoolProvider;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.DBPool;
 import com.openexchange.server.DBPoolingException;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 
 /**
  Links
@@ -102,8 +102,8 @@ public class Links {
 	public static modules[] module;	
 	
 	public static interface modules {
-		boolean isReadable(int oid, int folder, int user, int[] group, SessionObject so);
-		boolean hasModuleRights(SessionObject so);
+		boolean isReadable(int oid, int folder, int user, int[] group, Session so);
+		boolean hasModuleRights(Session so);
 	}
 	
 	/*
@@ -114,7 +114,7 @@ public class Links {
 		module = new modules[138];
 		
 		module[Types.APPOINTMENT] = new modules() {
-			public boolean isReadable(final int oid, final int fid, final int user, final int[] group, final SessionObject so) {
+			public boolean isReadable(final int oid, final int fid, final int user, final int[] group, final Session so) {
 				if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), so.getContext()).hasCalendar()){
 					return false;
 				}
@@ -124,7 +124,7 @@ public class Links {
 					return false;
 				}
 			}
-			public boolean hasModuleRights(final SessionObject so){
+			public boolean hasModuleRights(final Session so){
 				if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), so.getContext()).hasCalendar()){
 					return false;
 				}
@@ -132,13 +132,13 @@ public class Links {
 			}
 		};
 		module[Types.TASK] = new modules() {
-			public boolean isReadable(final int oid, final int fid, final int user, final int[] group, final SessionObject so) {
+			public boolean isReadable(final int oid, final int fid, final int user, final int[] group, final Session so) {
 				if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), so.getContext()).hasTask()){
 					return false;
 				}
 				return com.openexchange.groupware.tasks.Task2Links.checkMayReadTask(so, oid, fid);
 			}
-			public boolean hasModuleRights(final SessionObject so){
+			public boolean hasModuleRights(final Session so){
 				if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), so.getContext()).hasTask()){
 					return false;
 				}
@@ -146,7 +146,7 @@ public class Links {
 			}
 		};
 		module[Types.CONTACT] = new modules() {
-			public boolean isReadable(final int oid, final int fid, final int user, final int[] group, final SessionObject so) {
+			public boolean isReadable(final int oid, final int fid, final int user, final int[] group, final Session so) {
 				if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), so.getContext()).hasContact()){
 					return false;
 				}
@@ -158,7 +158,7 @@ public class Links {
 					return false;
 				}
 			}
-			public boolean hasModuleRights(final SessionObject so){
+			public boolean hasModuleRights(final Session so){
 				if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), so.getContext()).hasContact()){
 					return false;
 				}
@@ -166,7 +166,7 @@ public class Links {
 			}
 		};
 		module[Types.INFOSTORE] = new modules() {
-			public boolean isReadable(final int oid, final int fid, final int user, final int[] group, final SessionObject so) {				
+			public boolean isReadable(final int oid, final int fid, final int user, final int[] group, final Session so) {				
 				final InfostoreFacade DATABASE = new InfostoreFacadeImpl(new DBPoolProvider());
 				try {
 					return  DATABASE.exists(oid,InfostoreFacade.CURRENT_VERSION, so.getContext(), UserStorage.getUser(so.getUserId(), so.getContext()), UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), so.getContext()));
@@ -174,7 +174,7 @@ public class Links {
 					return false;
 				}
 			}
-			public boolean hasModuleRights(final SessionObject so){
+			public boolean hasModuleRights(final Session so){
 				if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), so.getContext()).hasInfostore()){
 					return false;
 				}
@@ -183,10 +183,10 @@ public class Links {
 		};
 		/*
 		module[Types.PROJECT] = new modules() {
-			public boolean isReadable(int oid, int fid, int user, int[] group, SessionObject so) {
+			public boolean isReadable(int oid, int fid, int user, int[] group, Session so) {
 				return false;
 			}
-			public boolean hasModuleRights(SessionObject so){
+			public boolean hasModuleRights(Session so){
 				if (!so.getUserConfiguration().hasProject()){
 					return false;
 				}else{
@@ -195,14 +195,14 @@ public class Links {
 			}
 		};
 		module[Types.FORUM] = new modules() {
-			public boolean isReadable(int oid, int fid, int user, int[] group, SessionObject so) {
+			public boolean isReadable(int oid, int fid, int user, int[] group, Session so) {
 				if (!so.getUserConfiguration().hasForum()){
 					return false;
 				}else{
 					return true;
 				}
 			}
-			public boolean hasModuleRights(SessionObject so){
+			public boolean hasModuleRights(Session so){
 				if (!so.getUserConfiguration().hasForum()){
 					return false;
 				}else{
@@ -211,14 +211,14 @@ public class Links {
 			}
 		};
 		module[Types.PINBOARD] = new modules() {
-			public boolean isReadable(int oid, int fid, int user, int[] group, SessionObject so) {
+			public boolean isReadable(int oid, int fid, int user, int[] group, Session so) {
 				if (!so.getUserConfiguration().hasPinboardWriteAccess()){
 					return false;
 				}else{
 					return true;
 				}
 			}
-			public boolean hasModuleRights(SessionObject so){
+			public boolean hasModuleRights(Session so){
 				if (!so.getUserConfiguration().hasPinboardWriteAccess()){
 					return false;
 				}else{
@@ -227,14 +227,14 @@ public class Links {
 			}
 		};
 		module[Types.EMAIL] = new modules() {
-			public boolean isReadable(int oid, int fid, int user, int[] group, SessionObject so) {
+			public boolean isReadable(int oid, int fid, int user, int[] group, Session so) {
 				if (!so.getUserConfiguration().hasWebMail()){
 					return false;
 				}else{
 					return true;
 				}
 			}
-			public boolean hasModuleRights(SessionObject so){
+			public boolean hasModuleRights(Session so){
 				if (!so.getUserConfiguration().hasWebMail()){
 					return false;
 				}else{
@@ -265,7 +265,7 @@ public class Links {
 					"An error occurred. Unable to save this linking between those two objects. 1. Object %1$d Folder %2$d 2. Object %3$d Folder %4$d Context %5$d"
 					}
 	)
-	public static void performLinkStorage(final LinkObject l, final int user, final int[] group, final SessionObject so, final Connection writecon) throws OXException{
+	public static void performLinkStorage(final LinkObject l, final int user, final int[] group, final Session so, final Connection writecon) throws OXException{
 		
 		if (!module[l.getFirstType()].isReadable(l.getFirstId(),l.getFirstFolder(),user,group,so) || !module[l.getSecondType()].isReadable(l.getSecondId(),l.getSecondFolder(), user, group, so)){
 			throw EXCEPTIONS.create(0,l.getFirstId(),l.getFirstFolder(),l.getSecondId(),l.getSecondFolder(),so.getContext().getContextId());
@@ -347,7 +347,7 @@ public class Links {
 					"An error occurred. Unable to load some links for this objects. 1. Object %1$d 2. Object %2$d Context %3$d"
 					}
 	)
-	public static LinkObject getLinkFromObject(final int first_id, final int first_type, final int second_id, final int second_type, final int user, final int[] group, final SessionObject so, final Connection readcon) throws OXException {
+	public static LinkObject getLinkFromObject(final int first_id, final int first_type, final int second_id, final int second_type, final int user, final int[] group, final Session so, final Connection readcon) throws OXException {
 
 		if (!module[first_type].hasModuleRights(so) || !module[second_type].hasModuleRights(so)){
 			throw EXCEPTIONS.create(5,first_id,second_id,so.getContext().getContextId());
@@ -399,7 +399,7 @@ public class Links {
 			exceptionId=9,
 			msg="Unable to load all links from this objects. Object %1$d Folder %2$d User %3$d Context %4$d"
 	)
-	public static LinkObject[] getAllLinksFromObject(final int id, final int type, final int folder, final int user, final int[] group, final SessionObject so, final Connection readcon) throws OXException {
+	public static LinkObject[] getAllLinksFromObject(final int id, final int type, final int folder, final int user, final int[] group, final Session so, final Connection readcon) throws OXException {
 		LinkObject[] los = null;
 		Statement stmt = null;
 		ResultSet rs = null;
@@ -463,7 +463,7 @@ public class Links {
 					"An error occurred. Unable to delete some links from this objects. Object %1$d Folder %2$d Context %3$d"
 					}
 	)
-	public static int[][] deleteLinkFromObject(final int id, final int type, final int folder, final int[][] data, final int user, final int[] group, final SessionObject so, final Connection readcon, final Connection writecon) throws OXException {
+	public static int[][] deleteLinkFromObject(final int id, final int type, final int folder, final int[][] data, final int user, final int[] group, final Session so, final Connection readcon, final Connection writecon) throws OXException {
 		Statement smt = null;
 		Statement del = null;
 		ResultSet rs = null;

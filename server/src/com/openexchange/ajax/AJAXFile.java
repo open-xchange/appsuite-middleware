@@ -92,7 +92,7 @@ import com.openexchange.groupware.upload.impl.UploadQuotaChecker;
 import com.openexchange.groupware.upload.impl.UploadException.UploadCode;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.mime.MIMEType2ExtMap;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.mail.ContentType;
 import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.servlet.UploadServletException;
@@ -173,7 +173,7 @@ public final class AJAXFile extends PermissionServlet {
 		}
 	}
 
-	private Response actionKeepAlive(final SessionObject sessionObj, final ParamContainer paramContainer) {
+	private Response actionKeepAlive(final Session sessionObj, final ParamContainer paramContainer) {
 		/*
 		 * Some variables
 		 */
@@ -214,7 +214,7 @@ public final class AJAXFile extends PermissionServlet {
 			/*
 			 * Fetch file from session
 			 */
-			final SessionObject session = getSessionObject(req);
+			final Session session = getSessionObject(req);
 			final ManagedUploadFile uploadFile = session.getUploadedFile(id);
 			if (uploadFile == null) {
 				throw new UploadException(UploadException.UploadCode.FILE_NOT_FOUND, ACTION_GET, id);
@@ -334,7 +334,7 @@ public final class AJAXFile extends PermissionServlet {
 				if (fileTypeFilter == null) {
 					throw new UploadException(UploadException.UploadCode.MISSING_PARAM, null, PARAMETER_TYPE);
 				}
-				final SessionObject sessionObj = getSessionObject(req);
+				final Session sessionObj = getSessionObject(req);
 				final UploadQuotaChecker checker = UploadQuotaChecker.getUploadQuotaChecker(
 						getModuleInteger(moduleParam), sessionObj);
 				upload.setSizeMax(checker.getQuotaMax());
@@ -459,7 +459,7 @@ public final class AJAXFile extends PermissionServlet {
 
 	private static final String FILE_PREFIX = "openexchange";
 
-	private static String processFileItem(final FileItem fileItem, final SessionObject session) throws Exception {
+	private static String processFileItem(final FileItem fileItem, final Session session) throws Exception {
 		final File tmpFile = File.createTempFile(FILE_PREFIX, null, UPLOAD_DIR);
 		tmpFile.deleteOnExit();
 		fileItem.write(tmpFile);
@@ -515,10 +515,10 @@ public final class AJAXFile extends PermissionServlet {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.ajax.PermissionServlet#hasModulePermission(com.openexchange.sessiond.SessionObject)
+	 * @see com.openexchange.ajax.PermissionServlet#hasModulePermission(com.openexchange.sessiond.Session)
 	 */
 	@Override
-	protected boolean hasModulePermission(final SessionObject sessionObj) {
+	protected boolean hasModulePermission(final Session sessionObj) {
 		return true;
 	}
 

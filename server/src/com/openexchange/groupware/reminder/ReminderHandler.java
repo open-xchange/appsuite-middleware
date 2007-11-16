@@ -73,7 +73,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.reminder.ReminderException.Code;
 import com.openexchange.server.DBPool;
 import com.openexchange.server.DBPoolingException;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.iterator.SearchIteratorException.SearchIteratorCode;
@@ -118,7 +118,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 	
 	//private static final transient Log LOG = LogFactory.getLog(ReminderHandler.class);
 	
-	public ReminderHandler(final SessionObject sessionObj) {
+	public ReminderHandler(final Session sessionObj) {
 		context = sessionObj.getContext();
 	}
 	

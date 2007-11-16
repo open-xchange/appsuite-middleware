@@ -87,7 +87,7 @@ import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.MessageUtility;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.mail.ContentType;
 import com.openexchange.tools.mail.Enriched2HtmlConverter;
 import com.openexchange.tools.mail.Html2TextConverter;
@@ -109,7 +109,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
 	 */
 	private static final String PARAM_CHARSET = "charset";
 
-	private final SessionObject session;
+	private final Session session;
 
 	private TimeZone timeZone;
 
@@ -146,7 +146,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
 	 * @param session
 	 *            The session
 	 */
-	public JSONMessageHandler(final String mailPath, final boolean displayVersion, final SessionObject session) {
+	public JSONMessageHandler(final String mailPath, final boolean displayVersion, final Session session) {
 		super();
 		this.session = session;
 		usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), session.getContext());
@@ -166,7 +166,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
 	 * @param session
 	 *            The session
 	 */
-	public JSONMessageHandler(final MailPath mailPath, final boolean displayVersion, final SessionObject session) {
+	public JSONMessageHandler(final MailPath mailPath, final boolean displayVersion, final Session session) {
 		super();
 		this.session = session;
 		usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), session.getContext());

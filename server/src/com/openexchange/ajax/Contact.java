@@ -80,7 +80,7 @@ import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadFile;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.json.OXJSONWriter;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.Logging;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
@@ -100,7 +100,7 @@ public class Contact extends DataServlet {
 		final Response response = new Response();
 		try {
 			final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
-			final SessionObject sessionObj = getSessionObject(httpServletRequest);
+			final Session sessionObj = getSessionObject(httpServletRequest);
 			
 			JSONObject jsonObj = null;
 			try {
@@ -172,7 +172,7 @@ public class Contact extends DataServlet {
 		final Response response = new Response();
 		try {
 			final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
-			final SessionObject sessionObj = getSessionObject(httpServletRequest);
+			final Session sessionObj = getSessionObject(httpServletRequest);
 			
 			final String data = getBody(httpServletRequest);
 			if (data.length() > 0) {
@@ -231,7 +231,7 @@ public class Contact extends DataServlet {
 		final Response response = new Response();
 		String action = ACTION_ERROR;
 		try {
-			final SessionObject sessionObj = getSessionObject(httpServletRequest);
+			final Session sessionObj = getSessionObject(httpServletRequest);
 			action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
 			if (action.equals(ACTION_NEW)) {
 				UploadEvent upload = null;
@@ -340,7 +340,7 @@ public class Contact extends DataServlet {
 		
 	}
 	
-	protected boolean hasModulePermission(final SessionObject sessionObj) {
+	protected boolean hasModulePermission(final Session sessionObj) {
 		return UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
 				sessionObj.getContext()).hasContact();
 	}

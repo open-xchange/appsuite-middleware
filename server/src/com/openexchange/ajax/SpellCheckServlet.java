@@ -69,7 +69,7 @@ import com.openexchange.ajax.spellcheck.AJAXSpellCheck;
 import com.openexchange.ajax.spellcheck.AJAXUserDictionaryException;
 import com.openexchange.ajax.spellcheck.AJAXUserDictionaryException.DictionaryCode;
 import com.openexchange.api.OXConflictException;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 
 /**
  * SpellCheckServlet
@@ -97,7 +97,7 @@ public class SpellCheckServlet extends PermissionServlet {
 			return;
 		}
 		final PrintWriter w = resp.getWriter();
-		SessionObject sessionObj = null;
+		Session sessionObj = null;
 		JSONWriter jw = null;
 		boolean closeObject = false;
 		try {
@@ -145,7 +145,7 @@ public class SpellCheckServlet extends PermissionServlet {
 	}
 
 	@Override
-	protected boolean hasModulePermission(final SessionObject sessionObj) {
+	protected boolean hasModulePermission(final Session sessionObj) {
 		return true;
 	}
 

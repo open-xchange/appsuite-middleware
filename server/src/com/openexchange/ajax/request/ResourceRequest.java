@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.request;
 
-import com.openexchange.tools.servlet.OXJSONException;
 import java.util.Date;
 
 import org.apache.commons.logging.Log;
@@ -57,7 +56,6 @@ import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONWriter;
 
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.DataFields;
@@ -69,20 +67,21 @@ import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.ResourceStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.OXJSONException;
 
 public class ResourceRequest {
 	
-	private SessionObject sessionObj;
+	private Session sessionObj;
 	
 	private Date timestamp;
 	
 	private static final Log LOG = LogFactory.getLog(AppointmentRequest.class);
 	
-	public ResourceRequest(SessionObject sessionObj) {
+	public ResourceRequest(Session sessionObj) {
 		this.sessionObj = sessionObj;
 	}
 	

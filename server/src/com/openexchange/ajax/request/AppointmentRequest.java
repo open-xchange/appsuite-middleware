@@ -99,7 +99,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.search.AppointmentSearchObject;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -141,7 +141,7 @@ public class AppointmentRequest {
 		CalendarDataObject.TIMEZONE
 	};
 	
-	private SessionObject sessionObj;
+	private Session sessionObj;
 	
 	private User user;
 	
@@ -151,7 +151,7 @@ public class AppointmentRequest {
 	
 	private static final Log LOG = LogFactory.getLog(AppointmentRequest.class);
 	
-	public AppointmentRequest(SessionObject sessionObj) {
+	public AppointmentRequest(Session sessionObj) {
 		this.sessionObj = sessionObj;
 		try {
 			user = UserStorage.getInstance(sessionObj.getContext()).getUser(sessionObj.getUserId());

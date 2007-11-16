@@ -78,7 +78,7 @@ import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.mail.MailInterface;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
@@ -110,10 +110,10 @@ public class SyncServlet extends PermissionServlet {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.ajax.PermissionServlet#hasModulePermission(com.openexchange.sessiond.SessionObject)
+	 * @see com.openexchange.ajax.PermissionServlet#hasModulePermission(com.openexchange.sessiond.Session)
 	 */
 	@Override
-	protected boolean hasModulePermission(final SessionObject sessionObj) {
+	protected boolean hasModulePermission(final Session sessionObj) {
 		return UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
 				sessionObj.getContext()).hasSyncML();
 	}
@@ -189,7 +189,7 @@ public class SyncServlet extends PermissionServlet {
 		}
 	}
 
-	private final void actionPutClearFolderContent(final SessionObject sessionObj, final Writer writer,
+	private final void actionPutClearFolderContent(final Session sessionObj, final Writer writer,
 			final String body, final ParamContainer paramContainer) throws JSONException {
 		/*
 		 * Some variables

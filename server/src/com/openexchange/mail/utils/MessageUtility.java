@@ -76,7 +76,7 @@ import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.Collections.SmartIntArray;
 import com.openexchange.tools.mail.ContentType;
 import com.openexchange.tools.mail.Html2TextConverter;
@@ -406,7 +406,7 @@ public final class MessageUtility {
 	 * @return The formatted content
 	 */
 	public static String formatContentForDisplay(final String content, final boolean isHtml,
-			final SessionObject session, final String mailPath, final boolean displayVersion) {
+			final Session session, final String mailPath, final boolean displayVersion) {
 		final UserSettingMail usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(),
 				session.getContext());
 		String retval = content;
@@ -547,7 +547,7 @@ public final class MessageUtility {
 	 *            The message's unique path in mailbox
 	 * @return The html content with all inline images replaced with valid links
 	 */
-	public static String filterInlineImages(final String content, final SessionObject session, final String msgUID) {
+	public static String filterInlineImages(final String content, final Session session, final String msgUID) {
 		String reval = content;
 		try {
 			final Matcher imgMatcher = IMG_PATTERN.matcher(reval);
@@ -586,7 +586,7 @@ public final class MessageUtility {
 		return reval;
 	}
 
-	private static boolean replaceImgSrc(final SessionObject session, final String msgUID, final String imgTag,
+	private static boolean replaceImgSrc(final Session session, final String msgUID, final String imgTag,
 			final StringBuffer cidBuffer) {
 		boolean retval = false;
 		final Matcher cidMatcher = CID_PATTERN.matcher(imgTag);

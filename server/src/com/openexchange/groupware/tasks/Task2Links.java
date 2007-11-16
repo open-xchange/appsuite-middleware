@@ -57,7 +57,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 
 /**
  * This class implements the method that are necessary for linking tasks.
@@ -86,7 +86,7 @@ public final class Task2Links {
      * @return <code>true</code> if the task may be read, <code>false</code>
      * otherwise.
      */
-    public static boolean checkMayReadTask(final SessionObject session,
+    public static boolean checkMayReadTask(final Session session,
         final int taskId, final int folderId) {
         final Context ctx = session.getContext();
         final User user = UserStorage.getUser(session.getUserId(), session.getContext());

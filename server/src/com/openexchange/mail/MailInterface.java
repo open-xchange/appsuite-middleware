@@ -56,8 +56,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.TransportMailMessage;
 import com.openexchange.mail.transport.SendType;
-import com.openexchange.sessiond.impl.SessionObject;
-import com.openexchange.smtp.dataobjects.SMTPMailMessage;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 
 /**
@@ -87,7 +86,7 @@ public abstract class MailInterface {
 	 * @return An instance of {@link MailInterface}
 	 * @throws MailException
 	 */
-	public static final MailInterface getInstance(final SessionObject session) throws MailException {
+	public static final MailInterface getInstance(final Session session) throws MailException {
 		return new MailInterfaceImpl(session);
 	}
 

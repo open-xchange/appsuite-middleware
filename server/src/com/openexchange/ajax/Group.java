@@ -65,8 +65,7 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.request.GroupRequest;
 import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.groupware.ldap.LdapException;
-import com.openexchange.json.OXJSONWriter;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
@@ -83,7 +82,7 @@ public class Group extends DataServlet {
 		final Response response = new Response();
 		try {
 			final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
-			final SessionObject sessionObj = getSessionObject(httpServletRequest);
+			final Session sessionObj = getSessionObject(httpServletRequest);
 			JSONObject jsonObj;
 			
 			try {	
@@ -129,7 +128,7 @@ public class Group extends DataServlet {
 		final Response response = new Response();
 		try {
 			final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
-			final SessionObject sessionObj = getSessionObject(httpServletRequest);
+			final Session sessionObj = getSessionObject(httpServletRequest);
 			
 			final String data = getBody(httpServletRequest);
 			JSONObject jsonObj;
@@ -194,7 +193,7 @@ public class Group extends DataServlet {
 		writeResponse(response, httpServletResponse);
 	}
 	
-	protected boolean hasModulePermission(final SessionObject sessionObj) {
+	protected boolean hasModulePermission(final Session sessionObj) {
 		return true;
 	}
 }

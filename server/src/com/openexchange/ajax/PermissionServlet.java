@@ -50,12 +50,12 @@
 package com.openexchange.ajax;
 
 import java.io.IOException;
+
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.openexchange.sessiond.impl.SessionObject;
-
-import javax.servlet.ServletException;
+import com.openexchange.sessiond.Session;
 
 public abstract class PermissionServlet extends SessionServlet {
 
@@ -87,7 +87,7 @@ public abstract class PermissionServlet extends SessionServlet {
         // FIXME this needs a major rewrite. Executing everything before checking permissions isn't useful.
 		super.service(req, resp);
 
-		final SessionObject sessionObj = getSessionObject(req);
+		final Session sessionObj = getSessionObject(req);
 		
 		if (sessionObj != null && !hasModulePermission(sessionObj)) {
 			resp.sendError(HttpServletResponse.SC_FORBIDDEN, "No Permission");
@@ -95,5 +95,5 @@ public abstract class PermissionServlet extends SessionServlet {
 		} 
 	}
 	
-	protected abstract boolean hasModulePermission(SessionObject sessionObj);
+	protected abstract boolean hasModulePermission(Session sessionObj);
 }

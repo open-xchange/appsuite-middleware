@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.request;
 
-import com.openexchange.tools.servlet.OXJSONException;
 import java.util.Date;
 
 import org.json.JSONArray;
@@ -64,18 +63,19 @@ import com.openexchange.ajax.writer.GroupWriter;
 import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.groupware.ldap.GroupStorage;
 import com.openexchange.groupware.ldap.LdapException;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.OXJSONException;
 
 public class GroupRequest {
 	
-	private SessionObject sessionObj;
+	private Session sessionObj;
 	
 	private Date timestamp;
 	
-	public GroupRequest(SessionObject sessionObj) {
+	public GroupRequest(Session sessionObj) {
 		this.sessionObj = sessionObj;
 	}
 	

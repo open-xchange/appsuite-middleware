@@ -60,7 +60,7 @@ import com.openexchange.groupware.container.LinkObject;
 import com.openexchange.groupware.links.Links;
 import com.openexchange.server.DBPool;
 import com.openexchange.server.DBPoolingException;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 
 /**
  * LinkSQLInterface
@@ -71,7 +71,7 @@ public class RdbLinkSQLInterface implements LinkSQLInterface {
 	
 	private static final Log LOG = LogFactory.getLog(RdbLinkSQLInterface.class);
 	
-	public LinkObject[] getLinksOfObject(final int objectId, final int type, final int folder, final int user, final int[] group, final SessionObject sessionobject) throws OXException {
+	public LinkObject[] getLinksOfObject(final int objectId, final int type, final int folder, final int user, final int[] group, final Session sessionobject) throws OXException {
 		LinkObject[] lo = null;
 		Connection readcon = null;
 		try{
@@ -90,7 +90,7 @@ public class RdbLinkSQLInterface implements LinkSQLInterface {
 		return lo;
 	}
 
-	public void saveLink(final LinkObject l, final int user, final int[] group, final SessionObject so) throws OXException {
+	public void saveLink(final LinkObject l, final int user, final int[] group, final Session so) throws OXException {
 		Connection writecon = null;
 		try{
 			writecon = DBPool.pickupWriteable(so.getContext());
@@ -107,7 +107,7 @@ public class RdbLinkSQLInterface implements LinkSQLInterface {
 		}
 	}
 
-	public int[][] deleteLinks(final int id, final int type, final int folder, final int[][] data, final int user, final int[] group, final SessionObject sessionobject) throws OXException {
+	public int[][] deleteLinks(final int id, final int type, final int folder, final int[][] data, final int user, final int[] group, final Session sessionobject) throws OXException {
 
 		int[][] resp = null;
 		Connection writecon = null;

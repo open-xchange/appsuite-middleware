@@ -51,8 +51,8 @@ package com.openexchange.ajax.request;
 
 import static com.openexchange.ajax.container.Response.DATA;
 
-import com.openexchange.tools.servlet.OXJSONException;
 import java.io.Writer;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -67,20 +67,21 @@ import com.openexchange.api2.RdbLinkSQLInterface;
 import com.openexchange.groupware.container.LinkObject;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.OXJSONException;
 
 public class LinkRequest {
 	
 	private static final String PARAMETER_MODULE = "module";
 	
-	private SessionObject sessionObj;
+	private Session sessionObj;
 	
 	private final User user;
 	
 	final JSONWriter jsonWriter;
 
-	public LinkRequest(final SessionObject sessionObj, final Writer pw) {
+	public LinkRequest(final Session sessionObj, final Writer pw) {
 		this.sessionObj = sessionObj;
 		this.jsonWriter = new JSONWriter(pw);
 		user = UserStorage.getUser(sessionObj.getUserId(), sessionObj.getContext());

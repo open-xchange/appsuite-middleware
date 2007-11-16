@@ -63,10 +63,11 @@ import com.openexchange.groupware.Component;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.spellcheck.SpellCheckConfig;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.text.spelling.OXAspellCheck;
 import com.openexchange.tools.text.spelling.OXSpellCheckResult;
 
@@ -79,14 +80,14 @@ import com.openexchange.tools.text.spelling.OXSpellCheckResult;
 @OXExceptionSource(classId = AJAXSpellCheckExceptionClasses.AJAX_SPELL_CHECK, component = Component.SPELLCHECK)
 public class AJAXSpellCheck {
 
-	private SessionObject session;
+	private Session session;
 
 	private static final AJAXSpellCheckExceptionFactory EXCEPTIONS = new AJAXSpellCheckExceptionFactory(
 			AJAXSpellCheck.class);
 
 	private static final Object[] EMPTY_MSG_ARGS = new Object[0];
 
-	public AJAXSpellCheck(SessionObject session) {
+	public AJAXSpellCheck(Session session) {
 		super();
 		this.session = session;
 	}
@@ -96,7 +97,7 @@ public class AJAXSpellCheck {
 			"No dictionary could be found for language: %1$s.",
 			"Dictionary (id=%1$s) does not hold a command. Please specify a command in corresponding \"spellcheck.cfg\" file." })
 	private String getCommand() throws AbstractOXException {
-		final String lang = session.getLanguage().toUpperCase();
+		final String lang = UserStorage.getUser(session.getUserId(), session.getContext()).getLocale().getLanguage().toUpperCase();
 		final SpellCheckConfig scc = MailConfig.getSpellCheckConfig();
 		if (scc == null) {
 			throw EXCEPTIONS.createException(1, EMPTY_MSG_ARGS);
@@ -143,11 +144,11 @@ public class AJAXSpellCheck {
 				int lineCount = 0;
 				while ((line = br.readLine()) != null) {
 					lineCount++;
-					final List results = oac.parseLine(line);
+					final List<OXSpellCheckResult> results = oac.parseLine(line);
 					final int size = results.size();
 					for (int a = 0; a < size; a++) {
 						final AJAXSpellCheckResult ascr = new AJAXSpellCheckResult();
-						final OXSpellCheckResult oscr = (OXSpellCheckResult) results.get(a);
+						final OXSpellCheckResult oscr = results.get(a);
 						ascr.setLineNumber(lineCount);
 						ascr.setOffset(oscr.getOffset());
 						ascr.setOriginalWord(oscr.getOriginalWord());

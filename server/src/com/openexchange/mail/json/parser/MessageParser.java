@@ -79,7 +79,7 @@ import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.transport.dataobjects.TextBodyMailPart;
 import com.openexchange.mail.utils.MessageUtility;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 
 /**
  * {@link MessageParser}
@@ -114,7 +114,7 @@ public final class MessageParser {
 	 *             If parsing fails
 	 */
 	public static TransportMailMessage parse(final JSONObject jsonObj, final UploadEvent uploadEvent,
-			final SessionObject session) throws MailException {
+			final Session session) throws MailException {
 		try {
 			/*
 			 * Parse transport message plus its text body
@@ -173,7 +173,7 @@ public final class MessageParser {
 	 * @throws MailException
 	 *             If parsing fails
 	 */
-	public static TransportMailMessage parse(final JSONObject jsonObj, final SessionObject session)
+	public static TransportMailMessage parse(final JSONObject jsonObj, final Session session)
 			throws MailException {
 		final TransportMailMessage transportMail = MailTransport.getNewTransportMailMessage();
 		parse(jsonObj, transportMail, session);
@@ -193,7 +193,7 @@ public final class MessageParser {
 	 * @throws MailException
 	 *             If parsing fails
 	 */
-	public static void parse(final JSONObject jsonObj, final MailMessage mail, final SessionObject session)
+	public static void parse(final JSONObject jsonObj, final MailMessage mail, final Session session)
 			throws MailException {
 		try {
 			/*

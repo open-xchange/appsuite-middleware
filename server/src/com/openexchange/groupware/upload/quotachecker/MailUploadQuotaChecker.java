@@ -55,7 +55,7 @@ import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.groupware.upload.impl.UploadQuotaChecker;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 
 /**
  * MailUploadQuotaChecker
@@ -72,7 +72,7 @@ public final class MailUploadQuotaChecker extends UploadQuotaChecker {
 
 	private final long uploadQuotaPerFile;
 
-	public MailUploadQuotaChecker(final SessionObject session) {
+	public MailUploadQuotaChecker(final Session session) {
 		super();
 		UserSettingMail settings = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(),
 				session.getContext());

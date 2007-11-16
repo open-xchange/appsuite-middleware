@@ -51,16 +51,16 @@
 
 package com.openexchange.ajax.parser;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.fields.DistributionListFields;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.LinkEntryObject;
-import com.openexchange.sessiond.impl.SessionObject;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
+import com.openexchange.sessiond.Session;
 
 /**
  * ContactParser
@@ -75,7 +75,7 @@ public class ContactParser extends CommonParser {
 
 	}
 
-	public ContactParser(SessionObject sessionObj) {
+	public ContactParser(Session sessionObj) {
 		this.sessionObj = sessionObj;
 	}
 	

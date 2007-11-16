@@ -50,7 +50,7 @@
 package com.openexchange.api2;
 
 import com.openexchange.groupware.container.LinkObject;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 
 /**
  * LinkSQLInterface
@@ -59,10 +59,10 @@ import com.openexchange.sessiond.impl.SessionObject;
  */
 public interface LinkSQLInterface {
 	
-	public LinkObject[] getLinksOfObject(int objectId, int type, int folder, int user, int[] group, SessionObject so) throws OXException;
+	public LinkObject[] getLinksOfObject(int objectId, int type, int folder, int user, int[] group, Session so) throws OXException;
 	
-	public void saveLink(LinkObject l, int user, int[] group, SessionObject so) throws OXException;
+	public void saveLink(LinkObject l, int user, int[] group, Session so) throws OXException;
 	
-	public int[][] deleteLinks(int id, int type, int folder, int[][] del,int user, int[] group,SessionObject so) throws OXException;
+	public int[][] deleteLinks(int id, int type, int folder, int[][] del,int user, int[] group,Session so) throws OXException;
 	
 }
