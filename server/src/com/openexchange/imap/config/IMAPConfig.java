@@ -105,7 +105,7 @@ public final class IMAPConfig extends MailConfig {
 		/*
 		 * Fetch user object and create its IMAP properties
 		 */
-		final User user = UserStorage.getUser(session.getUserId(), session.getContext());
+		final User user = UserStorage.getStorageUser(session.getUserId(), session.getContext());
 		if (LoginType.GLOBAL.equals(getLoginType())) {
 			String imapServer = MailConfig.getMailServer();
 			if (imapServer == null) {

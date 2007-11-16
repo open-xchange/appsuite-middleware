@@ -216,7 +216,7 @@ public final class MimeReply {
 				/*
 				 * Add user's aliases to filter
 				 */
-				final String[] userAddrs = UserStorage.getUser(session.getUserId(), session.getContext()).getAliases();
+				final String[] userAddrs = UserStorage.getStorageUser(session.getUserId(), session.getContext()).getAliases();
 				if (userAddrs != null && userAddrs.length > 0) {
 					final StringBuilder addrBuilder = new StringBuilder();
 					addrBuilder.append(userAddrs[0]);
@@ -318,7 +318,7 @@ public final class MimeReply {
 			final String replyText;
 			{
 				final List<String> list = new ArrayList<String>();
-				final Locale locale = UserStorage.getUser(session.getUserId(), session.getContext()).getLocale();
+				final Locale locale = UserStorage.getStorageUser(session.getUserId(), session.getContext()).getLocale();
 				generateReplyText(originalMsg, retvalContentType, new StringHelper(locale), locale, usm, mailSession,
 						list);
 				final StringBuilder replyTextBuilder = new StringBuilder(8192 * 2);

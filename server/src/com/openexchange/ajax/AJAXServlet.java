@@ -557,7 +557,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 	 * @return user's timezone
 	 */
 	protected static TimeZone getUserTimeZone(final Session session) {
-		return TimeZone.getTimeZone(UserStorage.getUser(session.getUserId(), session.getContext()).getTimeZone());
+		return TimeZone.getTimeZone(UserStorage.getStorageUser(session.getUserId(), session.getContext()).getTimeZone());
 	}
 
 	/**

@@ -120,7 +120,7 @@ public class CalendarSql implements AppointmentSQLInterface {
     
     private final User getUser() {
     	if (null == user) {
-    		user = UserStorage.getUser(session.getUserId(), session.getContext());
+    		user = UserStorage.getStorageUser(session.getUserId(), session.getContext());
     	}
     	return user;
     }

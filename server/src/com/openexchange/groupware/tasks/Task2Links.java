@@ -89,7 +89,7 @@ public final class Task2Links {
     public static boolean checkMayReadTask(final Session session,
         final int taskId, final int folderId) {
         final Context ctx = session.getContext();
-        final User user = UserStorage.getUser(session.getUserId(), session.getContext());
+        final User user = UserStorage.getStorageUser(session.getUserId(), session.getContext());
         final FolderObject folder;
         final Task task;
         try {

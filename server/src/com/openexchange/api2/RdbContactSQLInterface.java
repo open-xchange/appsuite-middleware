@@ -116,7 +116,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 	
 	public RdbContactSQLInterface(final Session session) {
 		this.userId = session.getUserId();
-		this.memberInGroups = UserStorage.getUser(session.getUserId(), session.getContext()).getGroups();
+		this.memberInGroups = UserStorage.getStorageUser(session.getUserId(), session.getContext()).getGroups();
 		this.ctx = session.getContext();
 		this.session = session;
 		userConfiguration = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),

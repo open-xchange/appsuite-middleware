@@ -84,7 +84,7 @@ public class LinkRequest {
 	public LinkRequest(final Session sessionObj, final Writer pw) {
 		this.sessionObj = sessionObj;
 		this.jsonWriter = new JSONWriter(pw);
-		user = UserStorage.getUser(sessionObj.getUserId(), sessionObj.getContext());
+		user = UserStorage.getStorageUser(sessionObj.getUserId(), sessionObj.getContext());
 	}
 	
 	public void action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, OXException, JSONException, AjaxException, OXJSONException {

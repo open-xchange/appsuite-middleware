@@ -106,7 +106,7 @@ public abstract class InfostoreDocumentMailPart extends MailPart {
 		super();
 		try {
 			final InfostoreFacade db = Infostore.FACADE;
-			final User u = UserStorage.getUser(session.getUserId(), session.getContext());
+			final User u = UserStorage.getStorageUser(session.getUserId(), session.getContext());
 			final DocumentMetadata docMeta = db.getDocumentMetadata(documentId, InfostoreFacade.CURRENT_VERSION,
 					session.getContext(), u, UserConfigurationStorage.getInstance().getUserConfigurationSafe(
 							session.getUserId(), session.getContext()));

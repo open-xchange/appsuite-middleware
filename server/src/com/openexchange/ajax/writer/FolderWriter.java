@@ -109,7 +109,7 @@ public final class FolderWriter extends DataWriter {
 	public FolderWriter(final JSONWriter jw, final Session session) {
 		super();
 		this.jsonwriter = jw;
-		this.userObj = UserStorage.getUser(session.getUserId(), session.getContext());
+		this.userObj = UserStorage.getStorageUser(session.getUserId(), session.getContext());
 		this.userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
 				session.getContext());
 		this.ctx = session.getContext();

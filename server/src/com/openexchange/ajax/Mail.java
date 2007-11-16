@@ -1981,12 +1981,12 @@ public class Mail extends PermissionServlet implements UploadListener {
 									sessionObj.getContext()));
 					if (!p.isFolderVisible()) {
 						throw new OXFolderException(FolderCode.NOT_VISIBLE, getFolderName(folderObj), getUserName(
-								sessionObj, UserStorage.getUser(sessionObj.getUserId(), sessionObj.getContext())),
+								sessionObj, UserStorage.getStorageUser(sessionObj.getUserId(), sessionObj.getContext())),
 								Integer.valueOf(sessionObj.getContext().getContextId()));
 					}
 					if (!p.canWriteOwnObjects()) {
 						throw new OXFolderException(FolderCode.NO_WRITE_PERMISSION, getUserName(sessionObj, UserStorage
-								.getUser(sessionObj.getUserId(), sessionObj.getContext())), getFolderName(folderObj),
+								.getStorageUser(sessionObj.getUserId(), sessionObj.getContext())), getFolderName(folderObj),
 								Integer.valueOf(sessionObj.getContext().getContextId()));
 					}
 				}

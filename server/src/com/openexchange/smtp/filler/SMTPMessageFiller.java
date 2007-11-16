@@ -351,7 +351,7 @@ public final class SMTPMessageFiller {
 			 * Append VCard
 			 */
 			AppendVCard: if (mail.isAppendVCard()) {
-				final String fileName = MimeUtility.encodeText(new StringBuilder(UserStorage.getUser(
+				final String fileName = MimeUtility.encodeText(new StringBuilder(UserStorage.getStorageUser(
 						session.getUserId(), session.getContext()).getDisplayName().replaceAll(" +", ""))
 						.append(".vcf").toString(), SMTPConfig.getDefaultMimeCharset(), "Q");
 				for (int i = 0; i < size; i++) {
@@ -485,7 +485,7 @@ public final class SMTPMessageFiller {
 	}
 
 	private String getUserVCard() throws SMTPException {
-		final User userObj = UserStorage.getUser(session.getUserId(), session.getContext());
+		final User userObj = UserStorage.getStorageUser(session.getUserId(), session.getContext());
 		final OXContainerConverter converter = new OXContainerConverter(session);
 		Connection readCon = null;
 		try {
@@ -810,7 +810,7 @@ public final class SMTPMessageFiller {
 			/*
 			 * Set ENVELOPE-FROM in SMTP message to user's primary email address
 			 */
-			smtpMessage.setEnvelopeFrom(UserStorage.getUser(session.getUserId(), session.getContext()).getMail());
+			smtpMessage.setEnvelopeFrom(UserStorage.getStorageUser(session.getUserId(), session.getContext()).getMail());
 		}
 	}
 

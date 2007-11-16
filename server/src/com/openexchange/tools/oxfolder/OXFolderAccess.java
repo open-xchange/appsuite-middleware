@@ -397,7 +397,7 @@ public class OXFolderAccess {
 					break;
 				case FolderObject.INFOSTORE:
 					final InfostoreFacade db = new InfostoreFacadeImpl(new DBPoolProvider());
-					return !db.hasFolderForeignObjects(fo.getObjectID(), ctx, UserStorage.getUser(session.getUserId(),
+					return !db.hasFolderForeignObjects(fo.getObjectID(), ctx, UserStorage.getStorageUser(session.getUserId(),
 							session.getContext()), userConfig);
 				default:
 					throw new OXFolderException(FolderCode.UNKNOWN_MODULE, folderModule2String(fo.getModule()), Integer

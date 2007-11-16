@@ -129,7 +129,7 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 		}
 		
 		final MailObject mail = new MailObject(session, obj.getObjectID(), folderId, state.getModule());
-		mail.setFromAddr(UserStorage.getUser(session.getUserId(), session.getContext()).getMail());
+		mail.setFromAddr(UserStorage.getStorageUser(session.getUserId(), session.getContext()).getMail());
 		mail.setToAddrs(name.toArray(new String[name.size()]));
 		mail.setText(message);
 		mail.setSubject(messageTitle);

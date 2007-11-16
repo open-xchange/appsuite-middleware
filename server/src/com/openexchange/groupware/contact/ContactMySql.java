@@ -295,7 +295,7 @@ public class ContactMySql implements ContactSql {
 			}
 
 			/*********************** * search ranges * ***********************/ 
-			final String language = UserStorage.getUser(so.getUserId(), so.getContext()).getLocale().getLanguage();
+			final String language = UserStorage.getStorageUser(so.getUserId(), so.getContext()).getLocale().getLanguage();
 			
 			if(cso.getAnniversaryRange() != null && cso.getAnniversaryRange().length > 0){
 				final Date[] d = cso.getAnniversaryRange();

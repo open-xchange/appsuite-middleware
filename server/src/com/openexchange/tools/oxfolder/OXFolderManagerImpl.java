@@ -153,7 +153,7 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 		this.ctx = session.getContext();
 		this.userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
 				session.getContext());
-		this.user = UserStorage.getUser(session.getUserId(), session.getContext());
+		this.user = UserStorage.getStorageUser(session.getUserId(), session.getContext());
 		this.readCon = readCon;
 		this.writeCon = writeCon;
 		this.oxfolderAccess = oxfolderAccess;

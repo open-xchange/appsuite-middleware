@@ -94,7 +94,7 @@ public final class SMTPConfig extends TransportConfig {
 		/*
 		 * Fetch user object and create its IMAP properties
 		 */
-		final User user = UserStorage.getUser(session.getUserId(), session.getContext());
+		final User user = UserStorage.getStorageUser(session.getUserId(), session.getContext());
 		if (LoginType.GLOBAL.equals(getLoginType())) {
 			String smtpServer = MailConfig.getTransportServer();
 			if (smtpServer == null) {

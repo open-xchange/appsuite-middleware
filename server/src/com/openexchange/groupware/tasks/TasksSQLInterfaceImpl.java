@@ -116,7 +116,7 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
      */
     public int getNumberOfTasks(final int folderId) throws OXException {
         final Context ctx = session.getContext();
-        final User user = UserStorage.getUser(session.getUserId(), session.getContext());
+        final User user = UserStorage.getStorageUser(session.getUserId(), session.getContext());
         final int userId = user.getId();
         FolderObject folder;
         try {
@@ -149,7 +149,7 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
         final int[] columns) throws OXException {
         boolean onlyOwn;
         final Context ctx = session.getContext();
-        final User user = UserStorage.getUser(session.getUserId(), session.getContext());
+        final User user = UserStorage.getStorageUser(session.getUserId(), session.getContext());
         final int userId = user.getId();
         FolderObject folder;
         try {
@@ -177,7 +177,7 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
     public Task getTaskById(final int taskId, final int folderId)
         throws OXException {
         final Context ctx = session.getContext();
-        final User user = UserStorage.getUser(session.getUserId(), session.getContext());
+        final User user = UserStorage.getStorageUser(session.getUserId(), session.getContext());
         final UserConfiguration userConfig = getUserConfiguration();
         final GetTask get = new GetTask(ctx, user, userConfig, folderId, taskId,
             StorageType.ACTIVE);
@@ -194,7 +194,7 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
     public SearchIterator getModifiedTasksInFolder(final int folderId,
         final int[] columns, final Date since) throws OXException {
         final Context ctx = session.getContext();
-        final User user = UserStorage.getUser(session.getUserId(), session.getContext());
+        final User user = UserStorage.getStorageUser(session.getUserId(), session.getContext());
         final int userId = session.getUserId();
         FolderObject folder;
         try {
@@ -223,7 +223,7 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
     public SearchIterator getDeletedTasksInFolder(final int folderId,
         final int[] columns, final Date since) throws OXException {
         final Context ctx = session.getContext();
-        final User user = UserStorage.getUser(session.getUserId(), session.getContext());
+        final User user = UserStorage.getStorageUser(session.getUserId(), session.getContext());
         final int userId = user.getId();
         FolderObject folder;
         try {
@@ -254,7 +254,7 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
         final Context ctx = session.getContext();
         final Set<TaskParticipant> parts;
         try {
-            final User user = UserStorage.getUser(session.getUserId(), session.getContext());
+            final User user = UserStorage.getStorageUser(session.getUserId(), session.getContext());
             final int userId = user.getId();
             parts = TaskLogic.createParticipants(ctx, task.getParticipants());
             TaskLogic.checkNewTask(task, userId, getUserConfiguration(),
@@ -306,7 +306,7 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
     public void updateTaskObject(final Task task, final int folderId,
         final Date lastRead) throws OXException {
         final Context ctx = session.getContext();
-        final User user = UserStorage.getUser(session.getUserId(), session.getContext());
+        final User user = UserStorage.getStorageUser(session.getUserId(), session.getContext());
         final UserConfiguration userConfig = getUserConfiguration();
         final FolderObject folder;
         try {
@@ -390,7 +390,7 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
         final FolderStorage foldStor = FolderStorage.getInstance();
         final FolderObject folder;
         final Context ctx = session.getContext();
-        final User user = UserStorage.getUser(session.getUserId(), session.getContext());
+        final User user = UserStorage.getStorageUser(session.getUserId(), session.getContext());
         final Task task;
         try {
             // Check if folder exists
@@ -447,7 +447,7 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
     public SearchIterator getTasksByExtendedSearch(
         final TaskSearchObject search, final int orderBy, final String orderDir,
         final int[] columns) throws OXException {
-        final User user = UserStorage.getUser(session.getUserId(), session.getContext());
+        final User user = UserStorage.getStorageUser(session.getUserId(), session.getContext());
         List<Integer> all = new ArrayList<Integer>();
         List<Integer> own = new ArrayList<Integer>();
         List<Integer> shared = new ArrayList<Integer>();

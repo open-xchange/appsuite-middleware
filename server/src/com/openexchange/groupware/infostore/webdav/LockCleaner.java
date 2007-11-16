@@ -76,7 +76,7 @@ public class LockCleaner implements FolderEvent, InfostoreEvent {
 	
 	public void folderDeleted(FolderObject folderObj, Session sessionObj) {
 		try {
-			folderLockManager.removeAll(folderObj.getObjectID(), sessionObj.getContext(), UserStorage.getUser(sessionObj.getUserId(), sessionObj.getContext()), UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext()));
+			folderLockManager.removeAll(folderObj.getObjectID(), sessionObj.getContext(), UserStorage.getStorageUser(sessionObj.getUserId(), sessionObj.getContext()), UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext()));
 		} catch (OXException e) {
 			LOG.fatal("Couldn't remove folder locks from folder "+folderObj.getObjectID()+" in context "+sessionObj.getContext().getContextId()+". Run the consistency tool.");
 		}
@@ -85,7 +85,7 @@ public class LockCleaner implements FolderEvent, InfostoreEvent {
 	
 	public void infoitemDeleted(DocumentMetadata metadata, Session sessionObj) {
 		try {
-			infoLockManager.removeAll(metadata.getId(), sessionObj.getContext(), UserStorage.getUser(sessionObj.getUserId(), sessionObj.getContext()), UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext()));
+			infoLockManager.removeAll(metadata.getId(), sessionObj.getContext(), UserStorage.getStorageUser(sessionObj.getUserId(), sessionObj.getContext()), UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext()));
 		} catch (OXException e) {
 			LOG.fatal("Couldn't remove locks from infoitem "+metadata.getId()+" in context "+sessionObj.getContext().getContextId()+". Run the consistency tool.");
 		}	

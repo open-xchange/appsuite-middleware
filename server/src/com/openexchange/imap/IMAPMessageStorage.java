@@ -271,7 +271,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 					return EMPTY_RETVAL;
 				}
 			}
-			msgs = IMAPSort.sortMessages(imapFolder, msgs, fields, sortField, order, UserStorage.getUser(
+			msgs = IMAPSort.sortMessages(imapFolder, msgs, fields, sortField, order, UserStorage.getStorageUser(
 					session.getUserId(), session.getContext()).getLocale(), usedFields, imapConfig);
 			if (fromToIndices != null && fromToIndices.length == 2) {
 				final int fromIndex = fromToIndices[0];
@@ -471,7 +471,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 			 */
 			final long start = System.currentTimeMillis();
 			final Message[] msgs = IMAPCommandsCollection.getUnreadMessages(imapFolder, fields, sortField, order,
-					UserStorage.getUser(session.getUserId(), session.getContext()).getLocale());
+					UserStorage.getStorageUser(session.getUserId(), session.getContext()).getLocale());
 			MailInterfaceImpl.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 			if (msgs == null) {
 				return EMPTY_RETVAL;
@@ -719,7 +719,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 					} catch (final ProtocolException e1) {
 						throw new IMAPException(IMAPException.Code.MOVE_PARTIALLY_COMPLETED, e1,
 								com.openexchange.tools.oxfolder.OXFolderManagerImpl.getUserName(session, UserStorage
-										.getUser(session.getUserId(), session.getContext())), Arrays.toString(msgUIDs),
+										.getStorageUser(session.getUserId(), session.getContext())), Arrays.toString(msgUIDs),
 								imapFolder.getFullName(), e1.getMessage());
 					}
 				}

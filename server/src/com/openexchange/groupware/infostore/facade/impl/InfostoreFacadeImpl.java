@@ -1516,7 +1516,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 	}
 
 	private static final User getUser(final Session sessionObj) {
-		return UserStorage.getUser(sessionObj.getUserId(), sessionObj.getContext());
+		return UserStorage.getStorageUser(sessionObj.getUserId(), sessionObj.getContext());
 	}
 
 	private final class LockTimedResult implements TimedResult {

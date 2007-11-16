@@ -97,7 +97,7 @@ public class AJAXSpellCheck {
 			"No dictionary could be found for language: %1$s.",
 			"Dictionary (id=%1$s) does not hold a command. Please specify a command in corresponding \"spellcheck.cfg\" file." })
 	private String getCommand() throws AbstractOXException {
-		final String lang = UserStorage.getUser(session.getUserId(), session.getContext()).getLocale().getLanguage().toUpperCase();
+		final String lang = UserStorage.getStorageUser(session.getUserId(), session.getContext()).getLocale().getLanguage().toUpperCase();
 		final SpellCheckConfig scc = MailConfig.getSpellCheckConfig();
 		if (scc == null) {
 			throw EXCEPTIONS.createException(1, EMPTY_MSG_ARGS);

@@ -96,7 +96,7 @@ public class ConflictHandler {
     
     private final User getUser() {
     	if (null == u) {
-    		u = UserStorage.getUser(so.getUserId(), so.getContext());
+    		u = UserStorage.getStorageUser(so.getUserId(), so.getContext());
     	}
     	return u;
     }

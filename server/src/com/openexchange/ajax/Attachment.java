@@ -155,7 +155,7 @@ public class Attachment extends PermissionServlet {
 			return ;
 		}
 		
-		final User user = UserStorage.getUser(session.getUserId(), session.getContext());
+		final User user = UserStorage.getStorageUser(session.getUserId(), session.getContext());
 		final Context ctx = session.getContext();
 		final UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(
 				session.getUserId(), session.getContext());
@@ -232,7 +232,7 @@ public class Attachment extends PermissionServlet {
 			return ;
 		}
 		
-		final User user = UserStorage.getUser(session.getUserId(), session.getContext());
+		final User user = UserStorage.getStorageUser(session.getUserId(), session.getContext());
 		final Context ctx = session.getContext();
 		final UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(
 				session.getUserId(), session.getContext());

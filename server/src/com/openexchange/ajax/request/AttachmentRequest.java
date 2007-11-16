@@ -95,7 +95,7 @@ public class AttachmentRequest extends CommonRequest {
 	public AttachmentRequest(final Session session, final JSONWriter w) {
 		super(w);
 		this.ctx = session.getContext();
-		this.user = UserStorage.getUser(session.getUserId(), session.getContext());
+		this.user = UserStorage.getStorageUser(session.getUserId(), session.getContext());
 		this.userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
 				session.getContext());
 	}

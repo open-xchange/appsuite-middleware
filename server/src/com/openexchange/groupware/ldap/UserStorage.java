@@ -274,7 +274,7 @@ public abstract class UserStorage {
      * @param context Context.
      * @return a user object or <code>null</code> on exception.
      */
-    public static User getUser(final int uid, final Context context) {
+    public static User getStorageUser(final int uid, final Context context) {
 		try {
 			return getInstance(context).getUser(uid);
 		} catch (final LdapException e) {

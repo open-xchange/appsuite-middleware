@@ -567,7 +567,7 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 		
 		final ArrayList<OCLPermission> newPerms = new ArrayList<OCLPermission>();
 
-		final User owner = UserStorage.getUser(sessionHolder.getSessionObject().getUserId(), sessionHolder.getSessionObject().getContext());
+		final User owner = UserStorage.getStorageUser(sessionHolder.getSessionObject().getUserId(), sessionHolder.getSessionObject().getContext());
 		
 		for(final OCLPermission perm : copyPerms) {
 			if(perm.getEntity() != owner.getId()){
@@ -608,7 +608,7 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 				loadFolder();
 			}
 			final Session session = sessionHolder.getSessionObject();
-			final User user = UserStorage.getUser(session.getUserId(), session.getContext());
+			final User user = UserStorage.getStorageUser(session.getUserId(), session.getContext());
 			final UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext());
 			final Context ctx = session.getContext();
 			

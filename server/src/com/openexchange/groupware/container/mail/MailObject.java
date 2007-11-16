@@ -235,7 +235,7 @@ public class MailObject {
 			 */
 			if (msg.getSentDate() == null) {
 				final long current = System.currentTimeMillis();
-				final TimeZone userTimeZone = TimeZone.getTimeZone(UserStorage.getUser(session.getUserId(),
+				final TimeZone userTimeZone = TimeZone.getTimeZone(UserStorage.getStorageUser(session.getUserId(),
 						session.getContext()).getTimeZone());
 				msg.setSentDate(new Date(current + userTimeZone.getOffset(current)));
 			}

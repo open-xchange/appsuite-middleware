@@ -157,7 +157,7 @@ public class Infostore extends PermissionServlet {
 		final Session sessionObj = getSessionObject(req);
 
 		final Context ctx = sessionObj.getContext();
-		final User user = UserStorage.getUser(sessionObj.getUserId(), sessionObj.getContext());
+		final User user = UserStorage.getStorageUser(sessionObj.getUserId(), sessionObj.getContext());
 		final UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext());
 
 		final String action = req.getParameter(PARAMETER_ACTION);
@@ -248,7 +248,7 @@ public class Infostore extends PermissionServlet {
 		final Session sessionObj = getSessionObject(req);
 
 		final Context ctx = sessionObj.getContext();
-		final User user = UserStorage.getUser(sessionObj.getUserId(), sessionObj.getContext());
+		final User user = UserStorage.getStorageUser(sessionObj.getUserId(), sessionObj.getContext());
 		final UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext());
 
 		final String action = req.getParameter(PARAMETER_ACTION);

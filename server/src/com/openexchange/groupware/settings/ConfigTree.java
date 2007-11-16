@@ -393,14 +393,14 @@ public final class ConfigTree {
             }
             public void getValue(final Session session,
                 final Setting setting) {
-                setting.setSingleValue(Integer.valueOf(UserStorage.getUser(session.getUserId(), session.getContext())
+                setting.setSingleValue(Integer.valueOf(UserStorage.getStorageUser(session.getUserId(), session.getContext())
                     .getContactId()));
             }
         });
         tmp.put(language.getPath(), new AbstractUserFuncs() {
             public void getValue(final Session session,
                 final Setting setting) {
-                setting.setSingleValue(UserStorage.getUser(session.getUserId(), session.getContext())
+                setting.setSingleValue(UserStorage.getStorageUser(session.getUserId(), session.getContext())
                     .getPreferredLanguage());
             }
             public boolean isAvailable(final Session session) {
@@ -416,7 +416,7 @@ public final class ConfigTree {
         tmp.put(timezone.getPath(), new AbstractUserFuncs() {
             public void getValue(final Session session,
                 final Setting setting) {
-                setting.setSingleValue(UserStorage.getUser(session.getUserId(), session.getContext()).getTimeZone());
+                setting.setSingleValue(UserStorage.getStorageUser(session.getUserId(), session.getContext()).getTimeZone());
             }
             public boolean isAvailable(final Session session) {
                 return true;
@@ -474,7 +474,7 @@ public final class ConfigTree {
             public void getValue(final Session session,
                 final Setting setting) {
                 long time = System.currentTimeMillis();
-                final TimeZone zone = TimeZone.getTimeZone(UserStorage.getUser(session.getUserId(),
+                final TimeZone zone = TimeZone.getTimeZone(UserStorage.getStorageUser(session.getUserId(),
 						session.getContext()).getTimeZone());
 				time  += zone.getOffset(time);
                 setting.setSingleValue(time);
@@ -555,7 +555,7 @@ public final class ConfigTree {
         tmp.put(defaultaddress.getPath(), new AbstractUserFuncs() {
             public void getValue(final Session session,
                 final Setting setting) {
-                setting.setSingleValue(UserStorage.getUser(session.getUserId(), session.getContext()).getMail());
+                setting.setSingleValue(UserStorage.getStorageUser(session.getUserId(), session.getContext()).getMail());
             }
             public boolean isAvailable(final Session session) {
 				return UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
@@ -573,9 +573,9 @@ public final class ConfigTree {
         tmp.put(addresses.getPath(), new AbstractUserFuncs() {
             public void getValue(final Session session,
                 final Setting setting) {
-                final String[] aliases = UserStorage.getUser(session.getUserId(), session.getContext()).getAliases();
+                final String[] aliases = UserStorage.getStorageUser(session.getUserId(), session.getContext()).getAliases();
                 if (null != aliases) {
-                    for (String alias : UserStorage.getUser(session.getUserId(), session.getContext()).getAliases()) {
+                    for (String alias : UserStorage.getStorageUser(session.getUserId(), session.getContext()).getAliases()) {
                         setting.addMultiValue(alias);
                     }
                 }

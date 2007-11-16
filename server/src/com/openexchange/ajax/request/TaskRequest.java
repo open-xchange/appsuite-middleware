@@ -139,7 +139,7 @@ public class TaskRequest {
 	
 	public TaskRequest(Session sessionObj) {
 		this.sessionObj = sessionObj;
-		userObj = UserStorage.getUser(sessionObj.getUserId(), sessionObj.getContext());
+		userObj = UserStorage.getStorageUser(sessionObj.getUserId(), sessionObj.getContext());
 		
 		final String sTimeZone = userObj.getTimeZone();
 		

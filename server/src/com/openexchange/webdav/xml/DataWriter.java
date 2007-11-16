@@ -86,7 +86,7 @@ public class DataWriter {
 	
 	protected User getUser() {
 		if (null == userObj) {
-			userObj = UserStorage.getUser(sessionObj.getUserId(), sessionObj.getContext());
+			userObj = UserStorage.getStorageUser(sessionObj.getUserId(), sessionObj.getContext());
 		}
 		return userObj;
 	}

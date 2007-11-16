@@ -169,7 +169,7 @@ public class Links {
 			public boolean isReadable(final int oid, final int fid, final int user, final int[] group, final Session so) {				
 				final InfostoreFacade DATABASE = new InfostoreFacadeImpl(new DBPoolProvider());
 				try {
-					return  DATABASE.exists(oid,InfostoreFacade.CURRENT_VERSION, so.getContext(), UserStorage.getUser(so.getUserId(), so.getContext()), UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), so.getContext()));
+					return  DATABASE.exists(oid,InfostoreFacade.CURRENT_VERSION, so.getContext(), UserStorage.getStorageUser(so.getUserId(), so.getContext()), UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), so.getContext()));
 				} catch (OXException e) {
 					return false;
 				}

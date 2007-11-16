@@ -233,7 +233,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 	public InputStream getBody() throws WebdavException {
 		final Session session = sessionHolder.getSessionObject();
 		try {
-			return database.getDocument(id, InfostoreFacade.CURRENT_VERSION, session.getContext(), UserStorage.getUser(
+			return database.getDocument(id, InfostoreFacade.CURRENT_VERSION, session.getContext(), UserStorage.getStorageUser(
 					session.getUserId(), session.getContext()), UserConfigurationStorage.getInstance()
 					.getUserConfigurationSafe(session.getUserId(), session.getContext()));
 		} catch (final Exception e) {
@@ -509,7 +509,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 		
 		try {
 			final DocumentMetadata metadata = database.getDocumentMetadata(id, InfostoreFacade.CURRENT_VERSION, session
-					.getContext(), UserStorage.getUser(session.getUserId(), session.getContext()),
+					.getContext(), UserStorage.getStorageUser(session.getUserId(), session.getContext()),
 					UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
 							session.getContext()));
 			final SetSwitch set = new SetSwitch(this.metadata);

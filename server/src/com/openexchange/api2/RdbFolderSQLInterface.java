@@ -164,7 +164,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 		this.sessionObj = sessionObj;
 		userConfiguration = UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
 				sessionObj.getContext());
-		user = UserStorage.getUser(sessionObj.getUserId(), sessionObj.getContext());
+		user = UserStorage.getStorageUser(sessionObj.getUserId(), sessionObj.getContext());
 		this.userId = user.getId();
 		this.groups = user.getGroups();
 		this.ctx = sessionObj.getContext();
@@ -407,7 +407,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 		final int userId;
 		final int[] groups;
 		{
-			final User u = UserStorage.getUser(session.getUserId(), session.getContext());
+			final User u = UserStorage.getStorageUser(session.getUserId(), session.getContext());
 			userId = u.getId();
 			groups = u.getGroups();
 		}
@@ -590,7 +590,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 			if (parentId == FolderObject.SYSTEM_SHARED_FOLDER_ID && !userConfiguration.hasFullSharedFolderAccess()) {
 				throw new OXFolderPermissionException(FolderCode.NO_SHARED_FOLDER_ACCESS,
 						getUserName(sessionObj, user), FolderObject.getFolderString(
-								FolderObject.SYSTEM_SHARED_FOLDER_ID, UserStorage.getUser(sessionObj.getUserId(),
+								FolderObject.SYSTEM_SHARED_FOLDER_ID, UserStorage.getStorageUser(sessionObj.getUserId(),
 										sessionObj.getContext()).getLocale()), Integer.valueOf(ctx.getContextId()));
 			} else if (oxfolderAccess.isFolderShared(parentId, userId)) {
 				return FolderObjectIterator.EMPTY_FOLDER_ITERATOR;
@@ -632,7 +632,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 	 */
 	public SearchIterator<?> getPathToRoot(final int folderId) throws OXException {
 		try {
-			return OXFolderIteratorSQL.getFoldersOnPathToRoot(folderId, userId, userConfiguration, UserStorage.getUser(
+			return OXFolderIteratorSQL.getFoldersOnPathToRoot(folderId, userId, userConfiguration, UserStorage.getStorageUser(
 					sessionObj.getUserId(), sessionObj.getContext()).getLocale(), ctx);
 		} catch (final OXException e) {
 			throw e;

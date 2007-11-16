@@ -448,7 +448,7 @@ public class SessionHandler extends TimerTask {
             return false;
         }
         try {
-			if (!context.isEnabled() || !UserStorage.getUser(session.getUserId(), session.getContext()).isMailEnabled()) {
+			if (!context.isEnabled() || !UserStorage.getStorageUser(session.getUserId(), session.getContext()).isMailEnabled()) {
 				return false;
 			}
 		} catch (UndeclaredThrowableException e) {

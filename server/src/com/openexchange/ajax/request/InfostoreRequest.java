@@ -115,7 +115,7 @@ public class InfostoreRequest extends CommonRequest{
 		this.sessionObj = sessionObj;
 		userConfiguration = UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
 				sessionObj.getContext());
-		user = UserStorage.getUser(sessionObj.getUserId(), sessionObj.getContext());
+		user = UserStorage.getStorageUser(sessionObj.getUserId(), sessionObj.getContext());
 	}
 	
 	public static boolean hasPermission(UserConfiguration userConfig) {

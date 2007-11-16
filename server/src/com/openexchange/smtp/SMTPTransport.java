@@ -201,7 +201,7 @@ public final class SMTPTransport extends MailTransport {
 						Long.valueOf(msgUID));
 			}
 			final SMTPMessage smtpMessage = new SMTPMessage(smtpSession);
-			final User u = UserStorage.getUser(session.getUserId(), session.getContext());
+			final User u = UserStorage.getStorageUser(session.getUserId(), session.getContext());
 			/*
 			 * Set from
 			 */
@@ -225,7 +225,7 @@ public final class SMTPTransport extends MailTransport {
 			/*
 			 * Subject
 			 */
-			final Locale locale = UserStorage.getUser(session.getUserId(), session.getContext()).getLocale();
+			final Locale locale = UserStorage.getStorageUser(session.getUserId(), session.getContext()).getLocale();
 			final StringHelper strHelper = new StringHelper(locale);
 			smtpMessage.setSubject(strHelper.getString(MailStrings.ACK_SUBJECT));
 			/*
@@ -576,7 +576,7 @@ public final class SMTPTransport extends MailTransport {
 		 */
 		final String subject;
 		if ((subject = newSMTPMsg.getSubject()) == null || subject.length() == 0) {
-			newSMTPMsg.setSubject(new StringHelper(UserStorage.getUser(session.getUserId(), session.getContext())
+			newSMTPMsg.setSubject(new StringHelper(UserStorage.getStorageUser(session.getUserId(), session.getContext())
 					.getLocale()).getString(MailStrings.DEFAULT_SUBJECT));
 		}
 	}

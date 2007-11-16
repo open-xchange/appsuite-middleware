@@ -286,7 +286,7 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 		final Session session = sessionHolder.getSessionObject();
 		try {
 			final Resolved resolved = resolver.resolve(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, url, session
-					.getContext(), UserStorage.getUser(session.getUserId(), session.getContext()), UserConfigurationStorage.getInstance()
+					.getContext(), UserStorage.getStorageUser(session.getUserId(), session.getContext()), UserConfigurationStorage.getInstance()
 					.getUserConfigurationSafe(session.getUserId(), session.getContext()));
 			if(resolved.isFolder()) {
 				
@@ -449,7 +449,7 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 		final SearchIterator<?> iter = database.getDocuments(
 				folderId,
 				session.getContext(),
-				UserStorage.getUser(session.getUserId(), session.getContext()),
+				UserStorage.getStorageUser(session.getUserId(), session.getContext()),
 				UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
 						session.getContext())).results();
 		final List<OXWebdavResource> retVal = new ArrayList<OXWebdavResource>();

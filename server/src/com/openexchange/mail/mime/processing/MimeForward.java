@@ -137,7 +137,7 @@ public final class MimeForward {
 				 */
 				final String origSubject = MimeUtility.unfold(originalMsg.getHeader(MessageHeaders.HDR_SUBJECT, null));
 				if (origSubject != null) {
-					final String subjectPrefix = new StringHelper(UserStorage.getUser(session.getUserId(),
+					final String subjectPrefix = new StringHelper(UserStorage.getStorageUser(session.getUserId(),
 							session.getContext()).getLocale()).getString(MailStrings.FORWARD_SUBJECT_PREFIX);
 					final String subject = MessageUtility.decodeMultiEncodedHeader(origSubject.regionMatches(true, 0,
 							subjectPrefix, 0, subjectPrefix.length()) ? origSubject : new StringBuilder().append(
@@ -197,7 +197,7 @@ public final class MimeForward {
 					 * Add appropriate text part prefixed with forward text
 					 */
 					final MimeBodyPart textPart = new MimeBodyPart();
-					textPart.setText(generateForwardText(firstSeenText, UserStorage.getUser(session.getUserId(),
+					textPart.setText(generateForwardText(firstSeenText, UserStorage.getStorageUser(session.getUserId(),
 							session.getContext()).getLocale(), originalMsg, contentType
 							.isMimeType(MIMETypes.MIME_TEXT_HTM_ALL)), contentType.getParameter(PARAM_CHARSET),
 							contentType.getSubType());
@@ -221,7 +221,7 @@ public final class MimeForward {
 					originalContentType.setParameter(PARAM_CHARSET, MailConfig.getDefaultMimeCharset());
 				}
 				forwardMsg.setText(generateForwardText(MessageUtility.readMimePart(originalMsg, originalContentType),
-						UserStorage.getUser(session.getUserId(), session.getContext()).getLocale(), originalMsg,
+						UserStorage.getStorageUser(session.getUserId(), session.getContext()).getLocale(), originalMsg,
 						originalContentType.isMimeType(MIMETypes.MIME_TEXT_HTM_ALL)), originalContentType
 						.getParameter(PARAM_CHARSET), originalContentType.getSubType());
 				forwardMsg.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");

@@ -101,7 +101,7 @@ public class ContactRequest {
 	public ContactRequest(Session sessionObj) {
 		this.sessionObj = sessionObj;
 		
-		final String sTimeZone = UserStorage.getUser(sessionObj.getUserId(), sessionObj.getContext()).getTimeZone();
+		final String sTimeZone = UserStorage.getStorageUser(sessionObj.getUserId(), sessionObj.getContext()).getTimeZone();
 		
 		timeZone = TimeZone.getTimeZone(sTimeZone);
 		if (LOG.isDebugEnabled()) {

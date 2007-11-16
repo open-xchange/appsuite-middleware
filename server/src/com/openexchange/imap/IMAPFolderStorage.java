@@ -511,7 +511,7 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 						final ACL[] removedACLs = getRemovedACLs(newACLs, initialACLs);
 						if (removedACLs.length > 0) {
 							final UserStorage userStorage = UserStorage.getInstance(session.getContext());
-							final User2ACL user2ACL = User2ACL.getInstance(UserStorage.getUser(session.getUserId(),
+							final User2ACL user2ACL = User2ACL.getInstance(UserStorage.getStorageUser(session.getUserId(),
 									session.getContext()));
 							final User2ACLArgs user2ACLArgs = IMAPFolderConverter.getUser2AclArgs(session, createMe);
 							for (int i = 0; i < removedACLs.length; i++) {
@@ -704,7 +704,7 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 						final ACL[] removedACLs = getRemovedACLs(newACLs, oldACLs);
 						if (removedACLs.length > 0) {
 							final UserStorage userStorage = UserStorage.getInstance(session.getContext());
-							final User2ACL user2ACL = User2ACL.getInstance(UserStorage.getUser(session.getUserId(),
+							final User2ACL user2ACL = User2ACL.getInstance(UserStorage.getStorageUser(session.getUserId(),
 									session.getContext()));
 							final User2ACLArgs user2ACLArgs = IMAPFolderConverter.getUser2AclArgs(session, updateMe);
 							for (int i = 0; i < removedACLs.length; i++) {
@@ -1001,7 +1001,7 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 		 * Ensure that owner still holds full rights
 		 */
 		final String ownerACLName = User2ACL
-				.getInstance(UserStorage.getUser(session.getUserId(), session.getContext())).getACLName(
+				.getInstance(UserStorage.getStorageUser(session.getUserId(), session.getContext())).getACLName(
 						session.getUserId(), session.getContext(),
 						IMAPFolderConverter.getUser2AclArgs(session, defaultFolder));
 		for (int i = 0; i < newACLs.length; i++) {

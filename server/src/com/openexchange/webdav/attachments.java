@@ -165,7 +165,7 @@ public final class attachments extends OXServlet {
 			attachmentMeta.setId((req.getHeader(DataFields.OBJECT_ID) != null) ? objectId : AttachmentBase.NEW);
 			
 			attachmentBase.startTransaction();
-			attachmentBase.attachToObject(attachmentMeta, is, sessionObj.getContext(), UserStorage.getUser(sessionObj.getUserId(), sessionObj.getContext()), UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext()));
+			attachmentBase.attachToObject(attachmentMeta, is, sessionObj.getContext(), UserStorage.getStorageUser(sessionObj.getUserId(), sessionObj.getContext()), UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext()));
 			attachmentBase.commit();
 			
 			objectId = attachmentMeta.getId();
@@ -304,7 +304,7 @@ public final class attachments extends OXServlet {
 			}
 			
 			attachmentBase.startTransaction();
-			final User u = UserStorage.getUser(sessionObj.getUserId(), sessionObj.getContext());
+			final User u = UserStorage.getStorageUser(sessionObj.getUserId(), sessionObj.getContext());
 			final AttachmentMetadata attachmentMeta = attachmentBase.getAttachment(folder_id, target_id, module, object_id, sessionObj.getContext(), u, UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext()));
 			final InputStream is = attachmentBase.getAttachedFile(folder_id, target_id, module, object_id, sessionObj.getContext(), u, UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext()));
 			attachmentBase.commit();
@@ -345,7 +345,7 @@ public final class attachments extends OXServlet {
 			final int folderId = req.getIntHeader(TARGET_FOLDER_ID);
 			
 			attachmentBase.startTransaction();
-			attachmentBase.detachFromObject(folderId, targetId, module, new int[] { objectId }, sessionObj.getContext(), UserStorage.getUser(sessionObj.getUserId(), sessionObj.getContext()), UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext()));
+			attachmentBase.detachFromObject(folderId, targetId, module, new int[] { objectId }, sessionObj.getContext(), UserStorage.getStorageUser(sessionObj.getUserId(), sessionObj.getContext()), UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext()));
 			attachmentBase.commit();
 			resp.setStatus(HttpServletResponse.SC_OK);
 		} catch (OXConflictException exc) {

@@ -101,7 +101,7 @@ public class ReminderRequest {
     
     public ReminderRequest(final Session sessionObj) {
         this.sessionObj = sessionObj;
-        userObj = UserStorage.getUser(sessionObj.getUserId(), sessionObj.getContext());
+        userObj = UserStorage.getStorageUser(sessionObj.getUserId(), sessionObj.getContext());
     }
     
     public Object action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, OXException, JSONException, SearchIteratorException, AjaxException, OXJSONException {
