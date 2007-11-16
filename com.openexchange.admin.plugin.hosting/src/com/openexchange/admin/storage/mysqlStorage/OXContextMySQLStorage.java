@@ -899,7 +899,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 }
                 rs2.close();
                 stmt2.close();
-                cache.pushOXDBRead(context_id, oxdb_read);
+                
 
                 quota_used /= Math.pow(2, 20);
                 // set used quota in context setup
