@@ -524,9 +524,9 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 		checkPermissionsAgainstSessionUserConfig(folderObj, userConfig, ctx);
 		checkFolderPermissions(folderObj, user.getId(), ctx);
 		checkPermissionsAgainstUserConfigs(folderObj, ctx);
-		if (folderObj.containsFolderName()) {
+		if (folderObj.containsFolderName() && !storageObj.getFolderName().equals(folderObj.getFolderName())) {
 			/*
-			 * Check if duplicate folder exists
+			 * Rename: Check if duplicate folder exists
 			 */
 			try {
 				final int folderId = OXFolderSQL.lookUpFolderOnUpdate(folderObj.getObjectID(), storageObj
