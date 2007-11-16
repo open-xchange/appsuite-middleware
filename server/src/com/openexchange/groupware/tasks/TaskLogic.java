@@ -51,8 +51,6 @@ package com.openexchange.groupware.tasks;
 
 import static com.openexchange.tools.sql.DBUtils.rollback;
 
-import com.openexchange.api2.OXException;
-
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -66,11 +64,12 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.openexchange.api2.OXException;
 import com.openexchange.event.EventClient;
 import com.openexchange.event.InvalidStateException;
-import com.openexchange.groupware.calendar.CalendarRecurringCollection;
 import com.openexchange.groupware.IDGenerator;
 import com.openexchange.groupware.Types;
+import com.openexchange.groupware.calendar.CalendarRecurringCollection;
 import com.openexchange.groupware.calendar.RecurringResult;
 import com.openexchange.groupware.calendar.RecurringResults;
 import com.openexchange.groupware.container.ExternalUserParticipant;
@@ -88,7 +87,7 @@ import com.openexchange.groupware.tasks.TaskParticipant.Type;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.server.DBPool;
 import com.openexchange.server.DBPoolingException;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 
 /**
  * This class contains logic methods for the tasks.
@@ -725,7 +724,7 @@ public final class TaskLogic {
      * @param lastModified last modification timestamp for concurrent conflicts.
      * @throws TaskException if an exception occurs.
      */
-    public static void deleteTask(final SessionObject session, final Task task,
+    public static void deleteTask(final Session session, final Task task,
         final Date lastModified) throws TaskException {
         final Context ctx = session.getContext();
         final int userId = session.getUserId();
@@ -798,7 +797,7 @@ public final class TaskLogic {
      * @param task Task object.
      * @throws TaskException if an exception occurs.
      */
-    static void informDelete(final SessionObject session, final Task task)
+    static void informDelete(final Session session, final Task task)
         throws TaskException {
         Reminder.deleteReminder(session.getContext(), task);
         try {
@@ -818,7 +817,7 @@ public final class TaskLogic {
      * {@link StorageType#DELETED}).
      * @throws TaskException if an exception occurs.
      */
-    public static void removeTask(final SessionObject session,
+    public static void removeTask(final Session session,
         final Connection writeCon, final int folderId, final int taskId,
         final StorageType type) throws TaskException {
         final Context ctx = session.getContext();

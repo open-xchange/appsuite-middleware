@@ -100,7 +100,7 @@ import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.ImageMessageHandler;
 import com.openexchange.mail.parser.handlers.MailPartHandler;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.sun.mail.iap.CommandFailedException;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.imap.AppendUID;
@@ -147,8 +147,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 	 *            server
 	 * @throws MailException
 	 */
-	public IMAPMessageStorage(final IMAPStore imapStore, final IMAPConnection imapMailConnection,
-			final SessionObject session) throws MailException {
+	public IMAPMessageStorage(final IMAPStore imapStore, final IMAPConnection imapMailConnection, final Session session)
+			throws MailException {
 		super(imapStore, imapMailConnection, session);
 		userId = session.getUserId();
 		ctx = session.getContext();

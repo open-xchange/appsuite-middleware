@@ -87,7 +87,7 @@ import com.openexchange.server.DBPool;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.server.EffectivePermission;
 import com.openexchange.server.OCLPermission;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 
@@ -109,7 +109,7 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 
 	private final User user;
 
-	private final SessionObject session;
+	private final Session session;
 
 	private OXFolderAccess oxfolderAccess;
 
@@ -117,36 +117,36 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 			.getLog(OXFolderManagerImpl.class);
 
 	/**
-	 * Constructor which only uses <code>SessionObject</code>. Optional
+	 * Constructor which only uses <code>Session</code>. Optional
 	 * connections are going to be set to <code>null</code>.
 	 */
-	public OXFolderManagerImpl(final SessionObject session) {
+	public OXFolderManagerImpl(final Session session) {
 		this(session, null, null);
 	}
 
 	/**
-	 * Constructor which only uses <code>SessionObject</code> and
+	 * Constructor which only uses <code>Session</code> and
 	 * <code>OXFolderAccess</code>. Optional connection are going to be set
 	 * to <code>null</code>.
 	 */
-	public OXFolderManagerImpl(final SessionObject session, final OXFolderAccess oxfolderAccess) {
+	public OXFolderManagerImpl(final Session session, final OXFolderAccess oxfolderAccess) {
 		this(session, oxfolderAccess, null, null);
 	}
 
 	/**
-	 * Constructor which uses <code>SessionObject</code> and also uses a
+	 * Constructor which uses <code>Session</code> and also uses a
 	 * readable and a writable <code>Connection</code>.
 	 */
-	public OXFolderManagerImpl(final SessionObject session, final Connection readCon, final Connection writeCon) {
+	public OXFolderManagerImpl(final Session session, final Connection readCon, final Connection writeCon) {
 		this(session, null, readCon, writeCon);
 	}
 
 	/**
-	 * Constructor which uses <code>SessionObject</code>,
+	 * Constructor which uses <code>Session</code>,
 	 * <code>OXFolderAccess</code> and also uses a readable and a writable
 	 * <code>Connection</code>.
 	 */
-	public OXFolderManagerImpl(final SessionObject session, final OXFolderAccess oxfolderAccess,
+	public OXFolderManagerImpl(final Session session, final OXFolderAccess oxfolderAccess,
 			final Connection readCon, final Connection writeCon) {
 		super();
 		this.session = session;
@@ -1516,7 +1516,7 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 		}
 	}
 
-	public static String getUserName(final SessionObject sessionObj, final User u) {
+	public static String getUserName(final Session sessionObj, final User u) {
 		if (sessionObj == null) {
 			return "";
 		}

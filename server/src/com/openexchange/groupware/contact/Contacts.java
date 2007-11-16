@@ -100,7 +100,7 @@ import com.openexchange.server.DBPool;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.server.EffectivePermission;
 import com.openexchange.server.OCLPermission;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.groupware.data.Check;
@@ -352,7 +352,7 @@ public class Contacts implements DeleteListener {
 							"Mandatory field last name is not set."
 						}
 	)
-	public static void performContactStorageInsert(final ContactObject co, final int user,final int[] group, final SessionObject so) throws OXConflictException, OXException {
+	public static void performContactStorageInsert(final ContactObject co, final int user,final int[] group, final Session so) throws OXConflictException, OXException {
 		
 		final StringBuilder insert_fields = new StringBuilder();
 		final StringBuilder insert_values = new StringBuilder();
@@ -2204,7 +2204,7 @@ public class Contacts implements DeleteListener {
 			exceptionId=40,
 			msg="Unable to perform contact folder check for readable content: Context %1$d Folder %2$d"
 	)
-	public static boolean containsForeignObjectInFolder(final int fid, final int uid, final SessionObject so) throws OXException, DBPoolingException {
+	public static boolean containsForeignObjectInFolder(final int fid, final int uid, final Session so) throws OXException, DBPoolingException {
 		Connection readCon = null;
 		ResultSet rs = null;
 		Statement st = null;
@@ -2283,7 +2283,7 @@ public class Contacts implements DeleteListener {
 		}
 	} 
 	
-	public static void deleteContactsFromFolder(final int fid, final int user, final int[] group, final SessionObject so, final Connection readcon, final Connection writecon) throws OXException {
+	public static void deleteContactsFromFolder(final int fid, final int user, final int[] group, final Session so, final Connection readcon, final Connection writecon) throws OXException {
 		trashContactsFromFolder(fid, so, readcon, writecon, true);
 	}	
 	
@@ -2301,7 +2301,7 @@ public class Contacts implements DeleteListener {
 							"Unable to trigger object Events: Context %1$d Folder %2$d"
 						}
 	)
-	public static void trashContactsFromFolder(final int fid, final SessionObject so, final Connection readcon, final Connection writecon, boolean delit) throws OXException {
+	public static void trashContactsFromFolder(final int fid, final Session so, final Connection readcon, final Connection writecon, boolean delit) throws OXException {
 
 		Statement read = null; 
 		Statement del = null;
@@ -2496,7 +2496,7 @@ public class Contacts implements DeleteListener {
 							"Unable to trigger object Events: Context %1$d User %2$d"
 						}
 	)
-	public static void trashAllUserContacts(final int uid, final SessionObject so, final Connection readcon, final Connection writecon) throws OXException {
+	public static void trashAllUserContacts(final int uid, final Session so, final Connection readcon, final Connection writecon) throws OXException {
 		Statement read = null; 
 		Statement del = null;
 		ResultSet rs = null;

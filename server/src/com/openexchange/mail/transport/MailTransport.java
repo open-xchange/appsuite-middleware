@@ -63,7 +63,7 @@ import com.openexchange.mail.transport.dataobjects.InfostoreDocumentMailPart;
 import com.openexchange.mail.transport.dataobjects.ReferencedMailPart;
 import com.openexchange.mail.transport.dataobjects.TextBodyMailPart;
 import com.openexchange.mail.transport.dataobjects.UploadFileMailPart;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 
 /**
  * {@link MailTransport}
@@ -102,7 +102,7 @@ public abstract class MailTransport {
 		}
 	}
 
-	private static final Class<?>[] CONSTRUCTOR_ARGS = new Class[] { SessionObject.class, MailConnection.class };
+	private static final Class<?>[] CONSTRUCTOR_ARGS = new Class[] { Session.class, MailConnection.class };
 
 	/**
 	 * Gets the proper instance of {@link MailTransport} parameterized with
@@ -114,7 +114,7 @@ public abstract class MailTransport {
 	 * @throws MailException
 	 *             If instantiation fails
 	 */
-	public static final MailTransport getInstance(final SessionObject session,
+	public static final MailTransport getInstance(final Session session,
 			final MailConnection<?, ?, ?> mailConnection) throws MailException {
 		/*
 		 * Create a new mail transport
@@ -184,7 +184,7 @@ public abstract class MailTransport {
 	 *            The session providing needed user data
 	 * @return A new instance of {@link InfostoreDocumentMailPart}
 	 */
-	public static final InfostoreDocumentMailPart getNewDocumentPart(final int documentId, final SessionObject session) {
+	public static final InfostoreDocumentMailPart getNewDocumentPart(final int documentId, final Session session) {
 		try {
 			return internalInstance.getNewDocumentPartInternal(documentId, session);
 		} catch (final MailException e) {
@@ -219,7 +219,7 @@ public abstract class MailTransport {
 	 * @return A new instance of {@link ReferencedMailPart}
 	 */
 	public static final ReferencedMailPart getNewReferencedPart(final MailPart referencedPart,
-			final SessionObject session) {
+			final Session session) {
 		try {
 			return internalInstance.getNewReferencedPartInternal(referencedPart, session);
 		} catch (final MailException e) {
@@ -254,7 +254,7 @@ public abstract class MailTransport {
 	 * @throws MailException
 	 *             If transport configuration cannot be determined
 	 */
-	public abstract MailConfig getTransportConfig(SessionObject session) throws MailException;
+	public abstract MailConfig getTransportConfig(Session session) throws MailException;
 
 	/**
 	 * Sends a mail message
@@ -341,7 +341,7 @@ public abstract class MailTransport {
 	 * @return A new instance of {@link InfostoreDocumentMailPart}
 	 * @throws MailException
 	 */
-	protected abstract InfostoreDocumentMailPart getNewDocumentPartInternal(int documentId, SessionObject session)
+	protected abstract InfostoreDocumentMailPart getNewDocumentPartInternal(int documentId, Session session)
 			throws MailException;
 
 	/**
@@ -364,7 +364,7 @@ public abstract class MailTransport {
 	 * @return A new instance of {@link ReferencedMailPart}
 	 * @throws MailException
 	 */
-	protected abstract ReferencedMailPart getNewReferencedPartInternal(MailPart referencedPart, SessionObject session)
+	protected abstract ReferencedMailPart getNewReferencedPartInternal(MailPart referencedPart, Session session)
 			throws MailException;
 
 	/**

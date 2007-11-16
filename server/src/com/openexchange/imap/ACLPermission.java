@@ -57,7 +57,7 @@ import com.openexchange.imap.user2acl.User2ACLArgs;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.server.OCLPermission;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.sun.mail.imap.ACL;
 import com.sun.mail.imap.Rights;
 
@@ -85,7 +85,7 @@ public final class ACLPermission extends MailPermission {
 	 * @param sessionUser
 	 *            The session user
 	 */
-	public ACLPermission(final SessionObject session) {
+	public ACLPermission(final Session session) {
 		super(session);
 	}
 
@@ -97,7 +97,7 @@ public final class ACLPermission extends MailPermission {
 	 * @param userStorage
 	 *            The user storage
 	 */
-	public ACLPermission(final SessionObject session, final UserStorage userStorage) {
+	public ACLPermission(final Session session, final UserStorage userStorage) {
 		super(session);
 		this.userStorage = userStorage;
 	}

@@ -74,7 +74,7 @@ import com.openexchange.mail.mime.processing.MimeReply;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.MailPartHandler;
 import com.openexchange.mail.versit.VersitUtility;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.sun.mail.iap.ParsingException;
 import com.sun.mail.imap.IMAPStore;
 
@@ -98,7 +98,7 @@ public final class IMAPLogicTools extends IMAPFolderWorker implements MailLogicT
 	 * @throws MailException
 	 */
 	public IMAPLogicTools(final IMAPStore imapStore, final IMAPConnection imapMailConnection,
-			final SessionObject session) throws MailException {
+			final Session session) throws MailException {
 		super(imapStore, imapMailConnection, session);
 	}
 

@@ -68,12 +68,10 @@ import com.openexchange.imap.user2acl.User2ACLArgs;
 import com.openexchange.imap.user2acl.User2ACLInit.IMAPServer;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailSessionParameterNames;
-import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.sessiond.Session;
-import com.openexchange.sessiond.impl.SessionObject;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.imap.ACL;
 import com.sun.mail.imap.DefaultFolder;
@@ -149,7 +147,7 @@ public final class IMAPFolderConverter {
 	 * @throws MessagingException
 	 *             If IMAP folder's attributes cannot be accessed
 	 */
-	public static User2ACLArgs getUser2AclArgs(final SessionObject session, final IMAPFolder imapFolder)
+	public static User2ACLArgs getUser2AclArgs(final Session session, final IMAPFolder imapFolder)
 			throws MessagingException {
 		return new MyUser2ACLArgs(session.getUserId(), imapFolder.getFullName(), imapFolder.getSeparator());
 	}
@@ -168,7 +166,7 @@ public final class IMAPFolderConverter {
 	 * @throws MailException
 	 *             If conversion fails
 	 */
-	public static MailFolder convertFolder(final IMAPFolder imapFolder, final SessionObject session,
+	public static MailFolder convertFolder(final IMAPFolder imapFolder, final Session session,
 			final IMAPConfig imapConfig) throws MailException {
 		try {
 			final MailFolder mailFolder = new MailFolder();
@@ -346,7 +344,7 @@ public final class IMAPFolderConverter {
 	 * @throws AbstractOXException
 	 *             If ACLs cannot be mapped
 	 */
-	private static void applyACL2Permissions(final IMAPFolder imapFolder, final SessionObject session,
+	private static void applyACL2Permissions(final IMAPFolder imapFolder, final Session session,
 			final IMAPConfig imapConfig, final MailFolder mailFolder, final Rights ownRights)
 			throws AbstractOXException {
 		if (IMAPConfig.hasNewACLExt(imapConfig.getServer()) && !ownRights.contains(Rights.Right.ADMINISTER)) {
@@ -394,13 +392,13 @@ public final class IMAPFolderConverter {
 	 * Adds current user's rights granted to IMAP folder as an ACL
 	 * 
 	 * @param session
-	 *            The session prividing needed user data
+	 *            The session providing needed user data
 	 * @param mailFolder
 	 *            The mail folder to whom the ACL should be applied
 	 * @param ownRights
 	 *            The rights to add as an ACL
 	 */
-	private static void addOwnACL(final SessionObject session, final MailFolder mailFolder, final Rights ownRights) {
+	private static void addOwnACL(final Session session, final MailFolder mailFolder, final Rights ownRights) {
 		final ACLPermission aclPerm = new ACLPermission(session);
 		aclPerm.setEntity(session.getUserId());
 		aclPerm.parseRights(ownRights);
@@ -417,8 +415,8 @@ public final class IMAPFolderConverter {
 
 	private static final String STR_FULL_RIGHTS = "acdilprsw";
 
-	private static Rights getOwnRightsInternal(final IMAPFolder folder, final SessionObject session,
-			final IMAPConfig imapConfig) throws MessagingException, MailConfigException {
+	private static Rights getOwnRightsInternal(final IMAPFolder folder, final Session session,
+			final IMAPConfig imapConfig) throws MessagingException {
 		if (folder instanceof DefaultFolder) {
 			return null;
 		}

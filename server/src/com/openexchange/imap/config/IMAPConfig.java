@@ -61,7 +61,7 @@ import com.openexchange.imap.IMAPCapabilities;
 import com.openexchange.mail.config.GlobalMailConfig;
 import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.config.MailConfigException;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.sun.mail.imap.IMAPStore;
 
 /**
@@ -99,7 +99,7 @@ public final class IMAPConfig extends MailConfig {
 	 * @throws MailConfigException
 	 *             If user-specific IMAP configuration cannot be determined
 	 */
-	public static IMAPConfig getImapConfig(final SessionObject session) throws MailConfigException {
+	public static IMAPConfig getImapConfig(final Session session) throws MailConfigException {
 		final IMAPConfig imapConf = new IMAPConfig();
 		fillLoginAndPassword(imapConf, session);
 		/*

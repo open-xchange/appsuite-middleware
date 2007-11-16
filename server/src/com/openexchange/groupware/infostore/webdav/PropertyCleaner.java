@@ -59,7 +59,7 @@ import com.openexchange.groupware.Component;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.tx.TransactionException;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.exceptions.LoggingLogic;
 
 public class PropertyCleaner implements FolderEvent, InfostoreEvent {
@@ -76,11 +76,11 @@ public class PropertyCleaner implements FolderEvent, InfostoreEvent {
 		
 	}
 
-	public void folderCreated(final FolderObject folderObj, final SessionObject sessionObj) {
+	public void folderCreated(final FolderObject folderObj, final Session sessionObj) {
 
 	}
 
-	public void folderDeleted(final FolderObject folderObj, final SessionObject sessionObj) {
+	public void folderDeleted(final FolderObject folderObj, final Session sessionObj) {
 		try {
 			folderProperties.startTransaction();
 			folderProperties.removeAll(folderObj.getObjectID(), sessionObj.getContext());
@@ -101,17 +101,17 @@ public class PropertyCleaner implements FolderEvent, InfostoreEvent {
 		}
 	}
 
-	public void folderModified(final FolderObject folderObj, final SessionObject sessionObj) {
+	public void folderModified(final FolderObject folderObj, final Session sessionObj) {
 
 	}
 
 	public void infoitemCreated(final DocumentMetadata metadata,
-			final SessionObject sessionObject) {
+			final Session sessionObject) {
 
 	}
 
 	public void infoitemDeleted(final DocumentMetadata metadata,
-			final SessionObject sessionObject) {
+			final Session sessionObject) {
 		try {
 			infoProperties.startTransaction();
 			infoProperties.removeAll(metadata.getId(), sessionObject.getContext());
@@ -133,7 +133,7 @@ public class PropertyCleaner implements FolderEvent, InfostoreEvent {
 	}
 
 	public void infoitemModified(final DocumentMetadata metadata,
-			final SessionObject sessionObj) {
+			final Session sessionObj) {
 		
 	}
 

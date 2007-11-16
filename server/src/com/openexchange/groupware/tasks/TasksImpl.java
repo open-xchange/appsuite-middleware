@@ -61,7 +61,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.iterator.SearchIteratorException;
 
 /**
@@ -91,7 +91,7 @@ final class TasksImpl extends Tasks {
      * {@inheritDoc}
      */
     @Override
-    public boolean containsNotSelfCreatedTasks(final SessionObject session,
+    public boolean containsNotSelfCreatedTasks(final Session session,
         final int folderId) throws OXException {
         try {
             return TaskStorage.getInstance().containsNotSelfCreatedTasks(
@@ -105,7 +105,7 @@ final class TasksImpl extends Tasks {
      * {@inheritDoc}
      */
     @Override
-    public boolean containsNotSelfCreatedTasks(final SessionObject session,
+    public boolean containsNotSelfCreatedTasks(final Session session,
         final Connection con, final int folderId) throws OXException {
         return containsNotSelfCreatedTasks(session, folderId);
     }
@@ -114,7 +114,7 @@ final class TasksImpl extends Tasks {
      * {@inheritDoc}
      */
     @Override
-    public void deleteTasksInFolder(final SessionObject session,
+    public void deleteTasksInFolder(final Session session,
         final int folderId) throws OXException {
         final TaskStorage storage = TaskStorage.getInstance();
         final ParticipantStorage partStor = ParticipantStorage.getInstance();

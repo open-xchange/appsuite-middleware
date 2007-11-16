@@ -67,7 +67,7 @@ import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.dataobjects.MailPart;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
@@ -113,7 +113,7 @@ public final class VersitUtility {
 	 *             If mail part's data cannot be parsed
 	 */
 	public static void saveVCard(final MailPart versitPart, final List<CommonObject> retvalList,
-			final SessionObject session) throws MailException, IOException {
+			final Session session) throws MailException, IOException {
 		/*
 		 * Define versit reader
 		 */
@@ -179,7 +179,7 @@ public final class VersitUtility {
 	 *             If mail part cannot be saved
 	 */
 	public static void saveICal(final MailPart versitPart, final List<CommonObject> retvalList,
-			final SessionObject session) throws MailException, IOException {
+			final Session session) throws MailException, IOException {
 		/*
 		 * Define versit reader
 		 */

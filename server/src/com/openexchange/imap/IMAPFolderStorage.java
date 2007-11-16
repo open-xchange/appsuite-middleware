@@ -89,7 +89,7 @@ import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.server.OCLPermission;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.sun.mail.iap.CommandFailedException;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.imap.ACL;
@@ -122,12 +122,12 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 
 	private final transient IMAPConnection imapMailConnection;
 
-	private final transient SessionObject session;
+	private final transient Session session;
 
 	private final transient IMAPConfig imapConfig;
 
-	public IMAPFolderStorage(final IMAPStore imapStore, final IMAPConnection imapMailConnection,
-			final SessionObject session) throws MailException {
+	public IMAPFolderStorage(final IMAPStore imapStore, final IMAPConnection imapMailConnection, final Session session)
+			throws MailException {
 		super();
 		this.imapStore = imapStore;
 		this.imapMailConnection = imapMailConnection;
@@ -996,7 +996,7 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 	private static final transient Rights FULL_RIGHTS = new Rights("lrswipcda");
 
 	private static boolean stillHoldsFullRights(final IMAPFolder defaultFolder, final ACL[] newACLs,
-			final SessionObject session) throws AbstractOXException, MessagingException {
+			final Session session) throws AbstractOXException, MessagingException {
 		/*
 		 * Ensure that owner still holds full rights
 		 */

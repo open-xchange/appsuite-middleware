@@ -53,7 +53,7 @@ import java.lang.reflect.InvocationTargetException;
 
 import com.openexchange.mail.MailException;
 import com.openexchange.server.OCLPermission;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 
 /**
  * {@link MailPermission}
@@ -65,12 +65,12 @@ public abstract class MailPermission extends OCLPermission {
 
 	private static Class<? extends MailPermission> clazz;
 
-	protected final SessionObject session;
+	protected final Session session;
 
 	/**
 	 * No instance
 	 */
-	protected MailPermission(final SessionObject session) {
+	protected MailPermission(final Session session) {
 		super();
 		this.session = session;
 	}
@@ -79,7 +79,7 @@ public abstract class MailPermission extends OCLPermission {
 		MailPermission.clazz = clazz;
 	}
 
-	private static final Class[] CONSTRUCTOR_ARGS = new Class[] { SessionObject.class };
+	private static final Class[] CONSTRUCTOR_ARGS = new Class[] { Session.class };
 
 	/**
 	 * Gets the proper mail permission implementation
@@ -89,7 +89,7 @@ public abstract class MailPermission extends OCLPermission {
 	 * @return The proper mail permission implementation
 	 * @throws MailException
 	 */
-	public static MailPermission getInstance(final SessionObject session) throws MailException {
+	public static MailPermission getInstance(final Session session) throws MailException {
 		/*
 		 * Create a new mail permission
 		 */

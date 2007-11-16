@@ -65,7 +65,6 @@ import javax.mail.BodyPart;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
-import javax.mail.Session;
 import javax.mail.Message.RecipientType;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
@@ -94,7 +93,7 @@ import com.openexchange.mail.parser.handlers.InlineContentHandler;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.MessageUtility;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.mail.ContentType;
 
 /**
@@ -141,7 +140,7 @@ public final class MimeReply {
 	 *             If reply mail cannot be composed
 	 */
 	public static MailMessage getReplyMail(final MimeMessage originalMsg, final boolean replyAll,
-			final SessionObject session, final Session mailSession) throws MailException {
+			final Session session, final javax.mail.Session mailSession) throws MailException {
 		try {
 			final UserSettingMail usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(),
 					session.getContext());
@@ -434,8 +433,9 @@ public final class MimeReply {
 	 * @throws IOException
 	 */
 	private static boolean generateReplyText(final Message msg, final ContentType retvalContentType,
-			final StringHelper strHelper, final Locale locale, final UserSettingMail usm, final Session mailSession,
-			final List<String> replyTexts) throws MailException, MessagingException, IOException {
+			final StringHelper strHelper, final Locale locale, final UserSettingMail usm,
+			final javax.mail.Session mailSession, final List<String> replyTexts) throws MailException,
+			MessagingException, IOException {
 		final StringBuilder textBuilder = new StringBuilder(8192);
 		final ContentType contentType = new ContentType(msg.getContentType());
 		boolean found = false;
@@ -510,8 +510,8 @@ public final class MimeReply {
 	 */
 	private static boolean gatherAllTextContents(final Multipart mp, final ContentType mpContentType,
 			final ContentType retvalContentType, final StringBuilder textBuilder, final StringHelper strHelper,
-			final UserSettingMail usm, final Session mailSession, final Locale locale, final List<String> replyTexts)
-			throws MailException, MessagingException, IOException {
+			final UserSettingMail usm, final javax.mail.Session mailSession, final Locale locale,
+			final List<String> replyTexts) throws MailException, MessagingException, IOException {
 		final int count = mp.getCount();
 		final ContentType partContentType = new ContentType();
 		boolean found = false;

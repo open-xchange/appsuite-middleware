@@ -75,7 +75,7 @@ import com.openexchange.groupware.ldap.GroupStorage;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.server.DBPool;
 import com.openexchange.server.DBPoolingException;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -106,7 +106,7 @@ public class CalendarOperation implements SearchIterator {
     private CalendarSqlImp cimp;
     private Connection readcon;
     private int from, to, uid;
-    private SessionObject so;
+    private Session so;
     private boolean strict;
     private int requested_folder;
     
@@ -120,11 +120,11 @@ public class CalendarOperation implements SearchIterator {
     
     private int oids[][];
     
-    final CalendarDataObject loadAppointment(final ResultSet load_resultset, final int oid, final int inFolder, final CalendarSqlImp cimp, final Connection readcon, final SessionObject so, final int action, final int action_folder) throws SQLException, OXObjectNotFoundException, OXPermissionException, OXException {
+    final CalendarDataObject loadAppointment(final ResultSet load_resultset, final int oid, final int inFolder, final CalendarSqlImp cimp, final Connection readcon, final Session so, final int action, final int action_folder) throws SQLException, OXObjectNotFoundException, OXPermissionException, OXException {
         return loadAppointment(load_resultset, oid, inFolder, cimp, readcon, so, action, action_folder, true);
     }
     
-    protected final CalendarDataObject loadAppointment(final ResultSet load_resultset, final int oid, final int inFolder, final CalendarSqlImp cimp, final Connection readcon, final SessionObject so, final int action, final int action_folder, final boolean check_permissions) throws SQLException, OXObjectNotFoundException, OXPermissionException, OXException {
+    protected final CalendarDataObject loadAppointment(final ResultSet load_resultset, final int oid, final int inFolder, final CalendarSqlImp cimp, final Connection readcon, final Session so, final int action, final int action_folder, final boolean check_permissions) throws SQLException, OXObjectNotFoundException, OXPermissionException, OXException {
         final CalendarDataObject cdao = new CalendarDataObject();
         cdao.setObjectID(oid);
         cdao.setContext(so.getContext());
@@ -861,7 +861,7 @@ public class CalendarOperation implements SearchIterator {
         return null;
     }
     
-    public final SearchIterator setResultSet(final ResultSet rs, final PreparedStatement prep, final int[] cols, final CalendarSqlImp cimp, final Connection readcon, final int from, final int to, final SessionObject so) throws SQLException {
+    public final SearchIterator setResultSet(final ResultSet rs, final PreparedStatement prep, final int[] cols, final CalendarSqlImp cimp, final Connection readcon, final int from, final int to, final Session so) throws SQLException {
         this.co_rs = rs;
         this.prep = prep;
         this.cols = cols;

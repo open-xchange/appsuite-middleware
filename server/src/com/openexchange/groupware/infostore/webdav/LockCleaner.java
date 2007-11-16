@@ -59,7 +59,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 
 public class LockCleaner implements FolderEvent, InfostoreEvent {
 
@@ -74,7 +74,7 @@ public class LockCleaner implements FolderEvent, InfostoreEvent {
 	}
 
 	
-	public void folderDeleted(FolderObject folderObj, SessionObject sessionObj) {
+	public void folderDeleted(FolderObject folderObj, Session sessionObj) {
 		try {
 			folderLockManager.removeAll(folderObj.getObjectID(), sessionObj.getContext(), UserStorage.getUser(sessionObj.getUserId(), sessionObj.getContext()), UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext()));
 		} catch (OXException e) {
@@ -83,7 +83,7 @@ public class LockCleaner implements FolderEvent, InfostoreEvent {
 	}
 
 	
-	public void infoitemDeleted(DocumentMetadata metadata, SessionObject sessionObj) {
+	public void infoitemDeleted(DocumentMetadata metadata, Session sessionObj) {
 		try {
 			infoLockManager.removeAll(metadata.getId(), sessionObj.getContext(), UserStorage.getUser(sessionObj.getUserId(), sessionObj.getContext()), UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext()));
 		} catch (OXException e) {
@@ -91,19 +91,19 @@ public class LockCleaner implements FolderEvent, InfostoreEvent {
 		}	
 	}
 
-	public void folderCreated(FolderObject folderObj, SessionObject sessionObj) {
+	public void folderCreated(FolderObject folderObj, Session sessionObj) {
 		
 	}
 	
-	public void folderModified(FolderObject folderObj, SessionObject sessionObj) {
+	public void folderModified(FolderObject folderObj, Session sessionObj) {
 		
 	}
 
-	public void infoitemCreated(DocumentMetadata metadata, SessionObject sessionObject) {
+	public void infoitemCreated(DocumentMetadata metadata, Session sessionObject) {
 		
 	}
 	
-	public void infoitemModified(DocumentMetadata metadata, SessionObject sessionObject) {
+	public void infoitemModified(DocumentMetadata metadata, Session sessionObject) {
 		
 	}
 

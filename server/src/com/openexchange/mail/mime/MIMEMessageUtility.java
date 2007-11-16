@@ -59,7 +59,7 @@ import javax.mail.internet.ParseException;
 
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailPart;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.mail.ContentType;
 
 /**
@@ -170,7 +170,7 @@ public final class MIMEMessageUtility {
 	 * @return <code>true</code> if given html content contains references to
 	 *         local image files; otherwise <code>false</code>
 	 */
-	public static boolean hasReferencedLocalImages(final String htmlContent, final SessionObject session) {
+	public static boolean hasReferencedLocalImages(final String htmlContent, final Session session) {
 		final Matcher m = PATTERN_REF_IMG.matcher(htmlContent);
 		while (m.find()) {
 			if (session.touchUploadedFile(m.group(5))) {

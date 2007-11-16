@@ -52,7 +52,7 @@
 package com.openexchange.event;
 
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 
 /**
  * TaskEvent
@@ -62,11 +62,11 @@ import com.openexchange.sessiond.impl.SessionObject;
 
 public interface TaskEvent {
 	
-    public void taskCreated(Task taskObj, SessionObject sessionObj);
+    public void taskCreated(Task taskObj, Session sessionObj);
 	
-    public void taskModified(Task taskObj, SessionObject sessionObj);
+    public void taskModified(Task taskObj, Session sessionObj);
 		
-    public void taskDeleted(Task taskObj, SessionObject sessionObj);
+    public void taskDeleted(Task taskObj, Session sessionObj);
 	
 }
 

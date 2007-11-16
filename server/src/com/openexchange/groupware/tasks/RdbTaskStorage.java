@@ -71,7 +71,7 @@ import com.openexchange.groupware.tasks.Mapping.Mapper;
 import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.server.DBPool;
 import com.openexchange.server.DBPoolingException;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -230,7 +230,7 @@ public class RdbTaskStorage extends TaskStorage {
      * {@inheritDoc}
      */
     @Override
-    SearchIterator search(final SessionObject session,
+    SearchIterator search(final Session session,
         final TaskSearchObject search, final int orderBy, final String orderDir,
         final int[] columns, final List<Integer> all, final List<Integer> own,
         final List<Integer> shared) throws TaskException {
@@ -510,7 +510,7 @@ public class RdbTaskStorage extends TaskStorage {
      * {@inheritDoc}
      */
     @Override
-    public boolean containsNotSelfCreatedTasks(final SessionObject session,
+    public boolean containsNotSelfCreatedTasks(final Session session,
         final int folderId) throws TaskException {
         final String sql = "SELECT COUNT(id) FROM task JOIN task_folder "
             + "USING (cid,id) WHERE task.cid=? AND folder=? AND "

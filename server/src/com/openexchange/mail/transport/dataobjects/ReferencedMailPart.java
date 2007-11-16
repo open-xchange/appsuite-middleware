@@ -82,7 +82,8 @@ import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.MailPartHandler;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
+import com.openexchange.smtp.SMTPException;
 import com.openexchange.tools.servlet.UnsynchronizedByteArrayOutputStream;
 
 /**
@@ -119,7 +120,7 @@ public abstract class ReferencedMailPart extends MailPart {
 	 * @throws MailException
 	 *             If a mail error occurs
 	 */
-	public ReferencedMailPart(final MailPart referencedPart, final SessionObject session) throws MailException {
+	public ReferencedMailPart(final MailPart referencedPart, final Session session) throws MailException {
 		try {
 			handleReferencedPart(referencedPart, session);
 		} catch (final IOException e) {
@@ -149,7 +150,7 @@ public abstract class ReferencedMailPart extends MailPart {
 	 * @throws SMTPException
 	 *             If referenced part cannot be loaded
 	 */
-	public String loadReferencedPart(final MailMessage referencedMail, final SessionObject session)
+	public String loadReferencedPart(final MailMessage referencedMail, final Session session)
 			throws MailException {
 		return loadReferencedPart(null, referencedMail, session);
 	}
@@ -165,7 +166,7 @@ public abstract class ReferencedMailPart extends MailPart {
 	 *             If referenced part cannot be loaded
 	 */
 	public String loadReferencedPart(final MailMessageParser parserArg, final MailMessage referencedMail,
-			final SessionObject session) throws MailException {
+			final Session session) throws MailException {
 		if (null != data || null != file) {
 			return null;
 		}
@@ -191,7 +192,7 @@ public abstract class ReferencedMailPart extends MailPart {
 		}
 	}
 
-	private String handleReferencedPart(final MailPart referencedPart, final SessionObject session)
+	private String handleReferencedPart(final MailPart referencedPart, final Session session)
 			throws MailException, IOException {
 		final long size = referencedPart.getSize();
 		if (size <= TransportConfig.getReferencedPartLimit()) {
@@ -211,7 +212,7 @@ public abstract class ReferencedMailPart extends MailPart {
 
 	private static final String FILE_PREFIX = "openexchange";
 
-	private int copy2File(final MailPart referencedPart, final SessionObject session) throws MailException, IOException {
+	private int copy2File(final MailPart referencedPart, final Session session) throws MailException, IOException {
 		int totalBytes = 0;
 		{
 			final BufferedInputStream in;

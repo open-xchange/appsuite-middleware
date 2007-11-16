@@ -52,7 +52,7 @@
 package com.openexchange.event;
 
 import com.openexchange.groupware.container.ContactObject;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 
 /**
  * ContactEvent
@@ -62,11 +62,11 @@ import com.openexchange.sessiond.impl.SessionObject;
 
 public interface ContactEvent {
 	
-    public void contactCreated(ContactObject contactObj, SessionObject sessionObj);
+    public void contactCreated(ContactObject contactObj, Session sessionObj);
 	
-    public void contactModified(ContactObject contactObj, SessionObject sessionObj);
+    public void contactModified(ContactObject contactObj, Session sessionObj);
 		
-    public void contactDeleted(ContactObject contactObj, SessionObject sessionObj);
+    public void contactDeleted(ContactObject contactObj, Session sessionObj);
 	
 }
 

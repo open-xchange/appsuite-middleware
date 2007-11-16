@@ -72,7 +72,7 @@ import com.openexchange.groupware.ldap.GroupStorage;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.server.OCLPermission;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 
 /**
  * PushHandler
@@ -91,7 +91,7 @@ public class PushHandler implements AppointmentEvent, ContactEvent, TaskEvent, F
 
 	}
 	
-	public static void event(final int userId, final int objectId, final int folderId, final int[] users, final int module, final SessionObject sessionObj) {
+	public static void event(final int userId, final int objectId, final int folderId, final int[] users, final int module, final Session sessionObj) {
 		if (users == null) {
 			return ;
 		}
@@ -104,67 +104,67 @@ public class PushHandler implements AppointmentEvent, ContactEvent, TaskEvent, F
 		}
 	}
 	
-	public void appointmentCreated(final AppointmentObject appointmentObj, final SessionObject sessionObj) {
+	public void appointmentCreated(final AppointmentObject appointmentObj, final Session sessionObj) {
 		final int[] users = getAffectedUsers4Object(appointmentObj.getParentFolderID(), sessionObj, new HashSet<Integer>());
 		event(sessionObj.getUserId(), appointmentObj.getObjectID(), appointmentObj.getParentFolderID(), users, Types.APPOINTMENT, sessionObj);
 	}
 	
-	public void appointmentModified(final AppointmentObject appointmentObj, final SessionObject sessionObj) {
+	public void appointmentModified(final AppointmentObject appointmentObj, final Session sessionObj) {
 		final int[] users = getAffectedUsers4Object(appointmentObj.getParentFolderID(), sessionObj, new HashSet<Integer>());
 		event(sessionObj.getUserId(), appointmentObj.getObjectID(), appointmentObj.getParentFolderID(), users, Types.APPOINTMENT, sessionObj);
 	}
 	
-	public void appointmentDeleted(final AppointmentObject appointmentObj, final SessionObject sessionObj) {
+	public void appointmentDeleted(final AppointmentObject appointmentObj, final Session sessionObj) {
 		final int[] users = getAffectedUsers4Object(appointmentObj.getParentFolderID(), sessionObj, new HashSet<Integer>());
 		event(sessionObj.getUserId(), appointmentObj.getObjectID(), appointmentObj.getParentFolderID(), users, Types.APPOINTMENT, sessionObj);
 	}
 	
-	public void contactCreated(final ContactObject contactObj, final SessionObject sessionObj) {
+	public void contactCreated(final ContactObject contactObj, final Session sessionObj) {
 		final int[] users = getAffectedUsers4Object(contactObj.getParentFolderID(), sessionObj, new HashSet<Integer>());
 		event(sessionObj.getUserId(), contactObj.getObjectID(), contactObj.getParentFolderID(), users, Types.CONTACT, sessionObj);
 	}
 	
-	public void contactModified(final ContactObject contactObj, final SessionObject sessionObj) {
+	public void contactModified(final ContactObject contactObj, final Session sessionObj) {
 		final int[] users = getAffectedUsers4Object(contactObj.getParentFolderID(), sessionObj, new HashSet<Integer>());
 		event(sessionObj.getUserId(), contactObj.getObjectID(), contactObj.getParentFolderID(), users, Types.CONTACT, sessionObj);
 	}
 	
-	public void contactDeleted(final ContactObject contactObj, final SessionObject sessionObj) {
+	public void contactDeleted(final ContactObject contactObj, final Session sessionObj) {
 		final int[] users = getAffectedUsers4Object(contactObj.getParentFolderID(), sessionObj, new HashSet<Integer>());
 		event(sessionObj.getUserId(), contactObj.getObjectID(), contactObj.getParentFolderID(), users, Types.CONTACT, sessionObj);
 	}
 	
-	public void taskCreated(final Task taskObj, final SessionObject sessionObj) {
+	public void taskCreated(final Task taskObj, final Session sessionObj) {
 		final int[] users = getAffectedUsers4Object(taskObj.getParentFolderID(), sessionObj, new HashSet<Integer>());
 		event(sessionObj.getUserId(), taskObj.getObjectID(), taskObj.getParentFolderID(), users, Types.TASK, sessionObj);
 	}
 	
-	public void taskModified(final Task taskObj, final SessionObject sessionObj) {
+	public void taskModified(final Task taskObj, final Session sessionObj) {
 		final int[] users = getAffectedUsers4Object(taskObj.getParentFolderID(), sessionObj, new HashSet<Integer>());
 		event(sessionObj.getUserId(), taskObj.getObjectID(), taskObj.getParentFolderID(), users, Types.TASK, sessionObj);
 	}
 	
-	public void taskDeleted(final Task taskObj, final SessionObject sessionObj) {
+	public void taskDeleted(final Task taskObj, final Session sessionObj) {
 		final int[] users = getAffectedUsers4Object(taskObj.getParentFolderID(), sessionObj, new HashSet<Integer>());
 		event(sessionObj.getUserId(), taskObj.getObjectID(), taskObj.getParentFolderID(), users, Types.TASK, sessionObj);
 	}
 	
-	public void folderCreated(final FolderObject folderObj, final SessionObject sessionObj) {
+	public void folderCreated(final FolderObject folderObj, final Session sessionObj) {
 		final int[] users = getAffectedUsers4Folder(folderObj, sessionObj, new HashSet<Integer>());
 		event(sessionObj.getUserId(), folderObj.getObjectID(), folderObj.getParentFolderID(), users, Types.TASK, sessionObj);
 	}
 	
-	public void folderModified(final FolderObject folderObj, final SessionObject sessionObj) {
+	public void folderModified(final FolderObject folderObj, final Session sessionObj) {
 		final int[] users = getAffectedUsers4Folder(folderObj, sessionObj, new HashSet<Integer>());
 		event(sessionObj.getUserId(), folderObj.getObjectID(), folderObj.getParentFolderID(), users, Types.TASK, sessionObj);
 	}
 	
-	public void folderDeleted(final FolderObject folderObj, final SessionObject sessionObj) {
+	public void folderDeleted(final FolderObject folderObj, final Session sessionObj) {
 		final int[] users = getAffectedUsers4Folder(folderObj, sessionObj, new HashSet<Integer>());
 		event(sessionObj.getUserId(), folderObj.getObjectID(), folderObj.getParentFolderID(), users, Types.TASK, sessionObj);
 	}
 	
-	protected int[] getAffectedUsers4Object(final int folderId, final SessionObject sessionObj, final Set<Integer> hs) {
+	protected int[] getAffectedUsers4Object(final int folderId, final Session sessionObj, final Set<Integer> hs) {
 		if (folderId == 0) {
 			return null;
 		}
@@ -196,7 +196,7 @@ public class PushHandler implements AppointmentEvent, ContactEvent, TaskEvent, F
 		return null;
 	}
 	
-	protected int[] getAffectedUsers4Folder(final FolderObject folderObj, final SessionObject sessionObj, final Set<Integer> hs) {
+	protected int[] getAffectedUsers4Folder(final FolderObject folderObj, final Session sessionObj, final Set<Integer> hs) {
 		try {
 			groupStorage = GroupStorage.getInstance(sessionObj.getContext(), true);
 			

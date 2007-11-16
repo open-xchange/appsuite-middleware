@@ -59,7 +59,7 @@ import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.tx.Service;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 
 public interface InfostoreFacade extends Service{
 	/**
@@ -74,16 +74,16 @@ public interface InfostoreFacade extends Service{
 	public boolean exists(int id, int version, Context ctx, User user, UserConfiguration userConfig) throws OXException;
 	
 	public DocumentMetadata getDocumentMetadata(int id, int version, Context ctx, User user, UserConfiguration userConfig) throws OXException;
-	public void saveDocumentMetadata(DocumentMetadata document, long sequenceNumber, SessionObject sessionObj) throws OXException ; // No modifiedColumns means all columns
-	public void saveDocumentMetadata(DocumentMetadata document, long sequenceNumber, Metadata[] modifiedColumns, SessionObject sessionObj) throws OXException ;
+	public void saveDocumentMetadata(DocumentMetadata document, long sequenceNumber, Session sessionObj) throws OXException ; // No modifiedColumns means all columns
+	public void saveDocumentMetadata(DocumentMetadata document, long sequenceNumber, Metadata[] modifiedColumns, Session sessionObj) throws OXException ;
 	
 	public InputStream getDocument(int id, int version, Context ctx, User user, UserConfiguration userConfig) throws OXException;
-	public void saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, SessionObject sessionObj) throws OXException ;
-	public void saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, SessionObject sessionObj) throws OXException ;
+	public void saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Session sessionObj) throws OXException ;
+	public void saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, Session sessionObj) throws OXException ;
 	
-	public void removeDocument(long folderId, long date, SessionObject sessionObj) throws OXException;
-	public int[] removeDocument(int id[], long date, SessionObject sessionObj) throws OXException;
-	public int[] removeVersion(int id, int[] versionId, SessionObject sessionObj) throws OXException;
+	public void removeDocument(long folderId, long date, Session sessionObj) throws OXException;
+	public int[] removeDocument(int id[], long date, Session sessionObj) throws OXException;
+	public int[] removeVersion(int id, int[] versionId, Session sessionObj) throws OXException;
 	
 	public TimedResult getDocuments(long folderId, Context ctx, User user, UserConfiguration userConfig) throws OXException;
 	public TimedResult getDocuments(long folderId, Metadata[] columns, Context ctx, User user, UserConfiguration userConfig) throws OXException;
@@ -109,9 +109,9 @@ public interface InfostoreFacade extends Service{
 	public boolean hasFolderForeignObjects(long folderId, Context ctx, User user, UserConfiguration userConfig) throws OXException;
 	public boolean isFolderEmpty(long folderId, Context ctx) throws OXException;
 
-	public void removeUser(int id, Context context, SessionObject session) throws OXException;
+	public void removeUser(int id, Context context, Session session) throws OXException;
 
-	public void unlock(int id, SessionObject sessionObj) throws OXException;
+	public void unlock(int id, Session sessionObj) throws OXException;
 
-	public void lock(int id, long diff, SessionObject sessionObj) throws OXException;
+	public void lock(int id, long diff, Session sessionObj) throws OXException;
 }

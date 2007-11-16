@@ -62,7 +62,7 @@ import org.apache.jcs.JCS;
 import org.apache.jcs.access.exception.CacheException;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 
@@ -164,7 +164,7 @@ public final class FolderQueryCacheManager {
 	 * 
 	 * @return query result if present, otherwise <code>null</code>
 	 */
-	public LinkedList<Integer> getFolderQuery(final int queryNum, final SessionObject session) {
+	public LinkedList<Integer> getFolderQuery(final int queryNum, final Session session) {
 		return getFolderQuery(queryNum, session.getUserId(), session.getContext().getContextId());
 	}
 
@@ -194,7 +194,7 @@ public final class FolderQueryCacheManager {
 	/**
 	 * Puts a query result into cache
 	 */
-	public void putFolderQuery(final int queryNum, final LinkedList<Integer> q, final SessionObject session)
+	public void putFolderQuery(final int queryNum, final LinkedList<Integer> q, final Session session)
 			throws OXException {
 		putFolderQuery(queryNum, q, session.getUserId(), session.getContext().getContextId());
 	}
@@ -213,7 +213,7 @@ public final class FolderQueryCacheManager {
 	 * given result is going to appended to existing one. Otherwise existing
 	 * entries are replaced.
 	 */
-	public void putFolderQuery(final int queryNum, final LinkedList<Integer> q, final SessionObject session,
+	public void putFolderQuery(final int queryNum, final LinkedList<Integer> q, final Session session,
 			final boolean append) throws OXException {
 		putFolderQuery(queryNum, q, session.getUserId(), session.getContext().getContextId(), append);
 	}
@@ -260,7 +260,7 @@ public final class FolderQueryCacheManager {
 	/**
 	 * Clears all cache entries belonging to given session's context
 	 */
-	public void invalidateContextQueries(final SessionObject session) {
+	public void invalidateContextQueries(final Session session) {
 		invalidateContextQueries(session.getContext().getContextId());
 	}
 

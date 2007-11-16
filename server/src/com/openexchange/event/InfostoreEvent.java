@@ -50,14 +50,14 @@
 package com.openexchange.event;
 
 import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 
 public interface InfostoreEvent {
 
-	public void infoitemCreated(DocumentMetadata metadata, SessionObject sessionObject);
+	public void infoitemCreated(DocumentMetadata metadata, Session sessionObject);
 
-	public void infoitemModified(DocumentMetadata metadata, SessionObject sessionObject);
+	public void infoitemModified(DocumentMetadata metadata, Session sessionObject);
 
-	public void infoitemDeleted(DocumentMetadata metadata, SessionObject sessionObject);
+	public void infoitemDeleted(DocumentMetadata metadata, Session sessionObject);
 	
 }

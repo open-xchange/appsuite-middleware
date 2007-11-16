@@ -54,7 +54,7 @@ import javax.mail.MessagingException;
 import com.openexchange.cache.CacheKey;
 import com.openexchange.mail.cache.SessionMailCache;
 import com.openexchange.mail.cache.SessionMailCacheEntry;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.Rights;
 
@@ -87,7 +87,7 @@ public final class RightsCache {
 	 * @throws MessagingException
 	 *             If <code>MYRIGHTS</code> command fails
 	 */
-	public static Rights getCachedRights(final IMAPFolder f, final boolean load, final SessionObject session)
+	public static Rights getCachedRights(final IMAPFolder f, final boolean load, final Session session)
 			throws MessagingException {
 		final RightsCacheEntry entry = new RightsCacheEntry(f.getFullName());
 		final SessionMailCache mailCache = SessionMailCache.getInstance(session);
@@ -108,7 +108,7 @@ public final class RightsCache {
 	 * @param session
 	 *            The session providing the session-bound cache
 	 */
-	public static void removeCachedRights(final IMAPFolder f, final SessionObject session) {
+	public static void removeCachedRights(final IMAPFolder f, final Session session) {
 		SessionMailCache.getInstance(session).remove(new RightsCacheEntry(f.getFullName()));
 	}
 

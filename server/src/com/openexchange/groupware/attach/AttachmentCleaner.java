@@ -52,9 +52,6 @@ package com.openexchange.groupware.attach;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.api2.OXException;
 import com.openexchange.event.AppointmentEvent;
 import com.openexchange.event.ContactEvent;
@@ -68,7 +65,7 @@ import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tx.DBPoolProvider;
 import com.openexchange.groupware.tx.TransactionException;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -81,56 +78,56 @@ public class AttachmentCleaner implements AppointmentEvent, TaskEvent,
 	private static final LoggingLogic LL = LoggingLogic.getLoggingLogic(AttachmentCleaner.class);
 	
 	public final void appointmentDeleted(final AppointmentObject appointmentObj,
-			final SessionObject sessionObj) {
+			final Session sessionObj) {
 		deleteAttachments(appointmentObj.getParentFolderID(), appointmentObj.getObjectID(), Types.APPOINTMENT, sessionObj );
 	}
 	
-	public final void taskDeleted(final Task taskObj, final SessionObject sessionObj) {
+	public final void taskDeleted(final Task taskObj, final Session sessionObj) {
 	
 		deleteAttachments(taskObj.getParentFolderID(), taskObj.getObjectID(), Types.TASK, sessionObj);
 	}
 	
 	public final void contactDeleted(final ContactObject contactObj,
-			final SessionObject sessionObj) {
+			final Session sessionObj) {
 		deleteAttachments(contactObj.getParentFolderID(), contactObj.getObjectID(), Types.CONTACT, sessionObj);
 		
 	}
 
 	public final void appointmentCreated(final AppointmentObject appointmentObj,
-			final SessionObject sessionObj) {
+			final Session sessionObj) {
 		// TODO Auto-generated method stub
 
 	}
 
 	public final void appointmentModified(final AppointmentObject appointmentObj,
-			final SessionObject sessionObj) {
+			final Session sessionObj) {
 		// TODO Auto-generated method stub
 
 	}	
 
-	public final void taskCreated(final Task taskObj, final SessionObject sessionObj) {
+	public final void taskCreated(final Task taskObj, final Session sessionObj) {
 		// TODO Auto-generated method stub
 
 	}
 
-	public final void taskModified(final Task taskObj, final SessionObject sessionObj) {
+	public final void taskModified(final Task taskObj, final Session sessionObj) {
 		// TODO Auto-generated method stub
 
 	}
 
 	public final void contactCreated(final ContactObject contactObj,
-			final SessionObject sessionObj) {
+			final Session sessionObj) {
 		// TODO Auto-generated method stub
 
 	}
 
 	public final void contactModified(final ContactObject contactObj,
-			final SessionObject sessionObj) {
+			final Session sessionObj) {
 		// TODO Auto-generated method stub
 
 	}
 	
-	private final void deleteAttachments(final int parentFolderID, final int objectID, final int type, final SessionObject sessionObj) {
+	private final void deleteAttachments(final int parentFolderID, final int objectID, final int type, final Session sessionObj) {
 		SearchIterator iter = null;
 		try {
 			ATTACHMENT_BASE.startTransaction();

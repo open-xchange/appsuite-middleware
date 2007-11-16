@@ -65,11 +65,12 @@ import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.server.EffectivePermission;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.date.FormatDate;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -114,9 +115,9 @@ public class ContactMySql implements ContactSql {
 	private int objectID;
 	
 	Context ctx;
-	SessionObject so;
+	Session so;
 	
-	public ContactMySql(SessionObject so) {
+	public ContactMySql(final Session so) {
 		if (so != null){
 			this.ctx = so.getContext();
 			this.so = so;
@@ -294,12 +295,13 @@ public class ContactMySql implements ContactSql {
 			}
 
 			/*********************** * search ranges * ***********************/ 
+			final String language = UserStorage.getUser(so.getUserId(), so.getContext()).getLocale().getLanguage();
 			
 			if(cso.getAnniversaryRange() != null && cso.getAnniversaryRange().length > 0){
 				final Date[] d = cso.getAnniversaryRange();
 				try {
-					final String a = new FormatDate(so.getLanguage().toLowerCase(), so.getLanguage().toUpperCase()).formatDateForPostgres(d[0], false);
-					final String b = new FormatDate(so.getLanguage().toLowerCase(), so.getLanguage().toUpperCase()).formatDateForPostgres(d[0], false);
+					final String a = new FormatDate(language.toLowerCase(), language.toUpperCase()).formatDateForPostgres(d[0], false);
+					final String b = new FormatDate(language.toLowerCase(), language.toUpperCase()).formatDateForPostgres(d[0], false);
 					sb.append(getRangeSearch(Contacts.mapping[ContactObject.ANNIVERSARY].getDBFieldName(),a,b,search_habit));
 				} catch (Exception e) {
 					LOG.error("Could not Format Anniversary Date for Range Search! ",e);
@@ -308,8 +310,8 @@ public class ContactMySql implements ContactSql {
 			if(cso.getBirthdayRange() != null && cso.getBirthdayRange().length > 0){			
 				final Date[] d = cso.getBirthdayRange();
 				try {
-					final String a = new FormatDate(so.getLanguage().toLowerCase(), so.getLanguage().toUpperCase()).formatDateForPostgres(d[0], false);
-					final String b = new FormatDate(so.getLanguage().toLowerCase(), so.getLanguage().toUpperCase()).formatDateForPostgres(d[0], false);
+					final String a = new FormatDate(language.toLowerCase(), language.toUpperCase()).formatDateForPostgres(d[0], false);
+					final String b = new FormatDate(language.toLowerCase(), language.toUpperCase()).formatDateForPostgres(d[0], false);
 					sb.append(getRangeSearch(Contacts.mapping[ContactObject.BIRTHDAY].getDBFieldName(),a,b,search_habit));
 				} catch (Exception e) {
 					LOG.error("Could not Format Birthday Date for Range Search! ",e);
@@ -322,8 +324,8 @@ public class ContactMySql implements ContactSql {
 			if(cso.getCreationDateRange() != null && cso.getCreationDateRange().length > 0){			
 				final Date[] d = cso.getCreationDateRange();
 				try {
-					final String a = new FormatDate(so.getLanguage().toLowerCase(), so.getLanguage().toUpperCase()).formatDateForPostgres(d[0], false);
-					final String b = new FormatDate(so.getLanguage().toLowerCase(), so.getLanguage().toUpperCase()).formatDateForPostgres(d[0], false);
+					final String a = new FormatDate(language.toLowerCase(), language.toUpperCase()).formatDateForPostgres(d[0], false);
+					final String b = new FormatDate(language.toLowerCase(), language.toUpperCase()).formatDateForPostgres(d[0], false);
 					sb.append(getRangeSearch(Contacts.mapping[ContactObject.CREATION_DATE].getDBFieldName(),a,b,search_habit));
 				} catch (Exception e) {
 					LOG.error("Could not Format Creating_Date Date for Range Search! ",e);
@@ -332,8 +334,8 @@ public class ContactMySql implements ContactSql {
 			if(cso.getLastModifiedRange() != null && cso.getLastModifiedRange().length > 0){			
 				final Date[] d = cso.getLastModifiedRange();
 				try {
-					final String a = new FormatDate(so.getLanguage().toLowerCase(), so.getLanguage().toUpperCase()).formatDateForPostgres(d[0], false);
-					final String b = new FormatDate(so.getLanguage().toLowerCase(), so.getLanguage().toUpperCase()).formatDateForPostgres(d[0], false);
+					final String a = new FormatDate(language.toLowerCase(), language.toUpperCase()).formatDateForPostgres(d[0], false);
+					final String b = new FormatDate(language.toLowerCase(), language.toUpperCase()).formatDateForPostgres(d[0], false);
 					sb.append(getRangeSearch(Contacts.mapping[ContactObject.LAST_MODIFIED].getDBFieldName(),a,b,search_habit));
 				} catch (Exception e) {
 					LOG.error("Could not Format LastModified Date for Range Search! ",e);
@@ -693,7 +695,7 @@ public class ContactMySql implements ContactSql {
 		return sb.toString();
 	}
 
-	public StringBuilder buildAllFolderSearchString(final int user, final int[] group, final SessionObject so, final Connection readcon) throws SQLException, DBPoolingException, OXException, SearchIteratorException{
+	public StringBuilder buildAllFolderSearchString(final int user, final int[] group, final Session so, final Connection readcon) throws SQLException, DBPoolingException, OXException, SearchIteratorException{
 		
 		SearchIterator si;
 		try{
@@ -919,7 +921,7 @@ public class ContactMySql implements ContactSql {
 		smt.execute(tmp.toString());
 	}
 	
-	public void iFgiveUserContacToAdmin(final Statement smt, final int oid, final SessionObject so, final int admin_fid) throws SQLException {
+	public void iFgiveUserContacToAdmin(final Statement smt, final int oid, final Session so, final int admin_fid) throws SQLException {
 		final StringBuilder tmp = new StringBuilder("UPDATE prg_contacts SET changed_from = "+so.getContext().getMailadmin()+", created_from = "+so.getContext().getMailadmin()+", changing_date = "+System.currentTimeMillis()+", fid = "+admin_fid+" WHERE intfield01 = "+oid+" and cid = "+so.getContext().getContextId());
 		if (LOG.isDebugEnabled()) {
 			LOG.debug(tmp.toString());
@@ -950,7 +952,7 @@ public class ContactMySql implements ContactSql {
 		}
 	}
 	
-	public void iFtrashAllUserContacts(final boolean delete, final Statement del, final int cid, final int oid, final int uid, final ResultSet rs, final SessionObject so) throws SQLException {
+	public void iFtrashAllUserContacts(final boolean delete, final Statement del, final int cid, final int oid, final int uid, final ResultSet rs, final Session so) throws SQLException {
 		
 		StringBuilder tmp;
 		
@@ -1026,7 +1028,7 @@ public class ContactMySql implements ContactSql {
 		}
 	}
 	
-	public void iFtrashAllUserContactsDeletedEntries(final Statement del, final int cid, final int uid, final SessionObject so) throws SQLException {
+	public void iFtrashAllUserContactsDeletedEntries(final Statement del, final int cid, final int uid, final Session so) throws SQLException {
 		final StringBuilder tmp = new StringBuilder("UPDATE del_contacts SET changed_from = "+so.getContext().getMailadmin()+", created_from = "+so.getContext().getMailadmin()+", changing_date = "+System.currentTimeMillis()+" WHERE created_from = "+uid+" and cid = "+cid);
 		if (LOG.isDebugEnabled()) {
 			LOG.debug(tmp.toString());

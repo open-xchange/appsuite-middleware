@@ -68,7 +68,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MIMESessionPropertyNames;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.sun.mail.imap.DefaultFolder;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
@@ -103,7 +103,7 @@ public abstract class IMAPFolderWorker {
 	 */
 	protected final transient IMAPStore imapStore;
 
-	protected final SessionObject session;
+	protected final Session session;
 
 	protected final IMAPConnection imapConnection;
 
@@ -122,7 +122,7 @@ public abstract class IMAPFolderWorker {
 	 * 
 	 * @throws MailException
 	 */
-	public IMAPFolderWorker(final IMAPStore imapStore, final IMAPConnection imapConnection, final SessionObject session)
+	public IMAPFolderWorker(final IMAPStore imapStore, final IMAPConnection imapConnection, final Session session)
 			throws MailException {
 		super();
 		this.imapStore = imapStore;

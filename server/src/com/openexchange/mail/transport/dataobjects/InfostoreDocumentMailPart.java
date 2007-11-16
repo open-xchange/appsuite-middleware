@@ -72,7 +72,7 @@ import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 
 /**
  * {@link InfostoreDocumentMailPart} - A {@link MailPart} implementation that
@@ -102,7 +102,7 @@ public abstract class InfostoreDocumentMailPart extends MailPart {
 	 * @throws MailException
 	 *             If infostore document cannot be read
 	 */
-	public InfostoreDocumentMailPart(final int documentId, final SessionObject session) throws MailException {
+	public InfostoreDocumentMailPart(final int documentId, final Session session) throws MailException {
 		super();
 		try {
 			final InfostoreFacade db = Infostore.FACADE;

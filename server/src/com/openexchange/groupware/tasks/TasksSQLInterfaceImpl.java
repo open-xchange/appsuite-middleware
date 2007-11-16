@@ -71,7 +71,8 @@ import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.groupware.tasks.mapping.Status;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.server.DBPoolingException;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.Arrays;
 import com.openexchange.tools.iterator.ArrayIterator;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -94,13 +95,13 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
     /**
      * Reference to the context.
      */
-    private final transient SessionObject session;
+    private final transient Session session;
 
     /**
      * Default constructor.
      * @param session Session.
      */
-    public TasksSQLInterfaceImpl(final SessionObject session) {
+    public TasksSQLInterfaceImpl(final Session session) {
         super();
         this.session = session;
     }

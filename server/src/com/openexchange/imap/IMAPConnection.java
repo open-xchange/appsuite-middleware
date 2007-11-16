@@ -54,7 +54,6 @@ import java.io.UnsupportedEncodingException;
 import java.util.Properties;
 
 import javax.mail.MessagingException;
-import javax.mail.Session;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.imap.config.GlobalIMAPConfig;
@@ -69,7 +68,7 @@ import com.openexchange.mail.MailInterfaceImpl;
 import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.mime.MIMESessionPropertyNames;
 import com.openexchange.monitoring.MonitoringInfo;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.sun.mail.imap.IMAPStore;
 
 /**
@@ -102,7 +101,7 @@ public final class IMAPConnection extends MailConnection<IMAPFolderStorage, IMAP
 
 	private transient IMAPStore imapStore;
 
-	private transient Session imapSession;
+	private transient javax.mail.Session imapSession;
 
 	private boolean connected;
 
@@ -117,7 +116,7 @@ public final class IMAPConnection extends MailConnection<IMAPFolderStorage, IMAP
 	/**
 	 * Default constructor
 	 */
-	public IMAPConnection(final SessionObject session) {
+	public IMAPConnection(final Session session) {
 		super(session);
 		setMailServer("localhost");
 		setMailServerPort(143);
@@ -171,7 +170,7 @@ public final class IMAPConnection extends MailConnection<IMAPFolderStorage, IMAP
 	}
 
 	@Override
-	protected void initMailConfig(final SessionObject session) throws MailException {
+	protected void initMailConfig(final Session session) throws MailException {
 		if (imapConfig == null) {
 			imapConfig = IMAPConfig.getImapConfig(session);
 		}
@@ -227,7 +226,7 @@ public final class IMAPConnection extends MailConnection<IMAPFolderStorage, IMAP
 				imapProps.putAll(getMailProperties());
 			}
 			if (imapSession == null) {
-				imapSession = Session.getInstance(imapProps, null);
+				imapSession = javax.mail.Session.getInstance(imapProps, null);
 			}
 			/*
 			 * Check if debug should be enabled
@@ -396,7 +395,7 @@ public final class IMAPConnection extends MailConnection<IMAPFolderStorage, IMAP
 	 * 
 	 * @return The IMAP session
 	 */
-	public Session getSession() {
+	public javax.mail.Session getSession() {
 		return imapSession;
 	}
 

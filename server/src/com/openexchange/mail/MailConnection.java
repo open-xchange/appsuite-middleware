@@ -65,7 +65,7 @@ import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.MessageUtilityInit;
 import com.openexchange.mail.watcher.MailConnectionWatcher;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 
 /**
  * {@link MailConnection}
@@ -88,7 +88,7 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 
 	private static MailConnection<?, ?, ?> internalInstance;
 
-	protected final SessionObject session;
+	protected final Session session;
 
 	private Properties mailProperties;
 
@@ -103,7 +103,7 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 	/**
 	 * Friendly instantiation
 	 */
-	protected MailConnection(final SessionObject session) {
+	protected MailConnection(final Session session) {
 		super();
 		this.session = session;
 	}
@@ -165,7 +165,7 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 		internalInstance.shutdownInternal();
 	}
 
-	private static final Class<?>[] CONSTRUCTOR_ARGS = new Class[] { SessionObject.class };
+	private static final Class<?>[] CONSTRUCTOR_ARGS = new Class[] { Session.class };
 
 	/**
 	 * Gets the proper instance of {@link MailConnection} parameterized with
@@ -177,7 +177,7 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 	 * @throws MailException
 	 *             If instantiation fails or a caching error occurs
 	 */
-	public static final MailConnection<?, ?, ?> getInstance(final SessionObject session) throws MailException {
+	public static final MailConnection<?, ?, ?> getInstance(final Session session) throws MailException {
 		try {
 			if (MailConnectionCache.getInstance().containsMailConnection(session)) {
 				final MailConnection<?, ?, ?> mailConnection = MailConnectionCache.getInstance().removeMailConnection(session);
@@ -425,7 +425,7 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 	 * apply new thread information to mail connection watcher.
 	 * 
 	 * @throws MailException
-	 *             If the connection could not be established for variuos
+	 *             If the connection could not be established for various
 	 *             reasons
 	 */
 	public final void connect() throws MailException {
@@ -520,7 +520,7 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 	 * @throws MailException
 	 *             If mail configuration cannot be initialized
 	 */
-	protected abstract void initMailConfig(SessionObject session) throws MailException;
+	protected abstract void initMailConfig(Session session) throws MailException;
 
 	/**
 	 * Gets the user-specific mail configuration with properly set login and

@@ -53,7 +53,7 @@ import java.sql.Connection;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 
 /**
  * Interface for accessing methods of the tasks module.
@@ -91,13 +91,13 @@ public abstract class Tasks {
      * otherwise.
      * @throws OXException if an error occurs.
      */
-    public abstract boolean containsNotSelfCreatedTasks(SessionObject session,
+    public abstract boolean containsNotSelfCreatedTasks(Session session,
         int folderId) throws OXException;
 
-    public abstract boolean containsNotSelfCreatedTasks(SessionObject session,
+    public abstract boolean containsNotSelfCreatedTasks(Session session,
         Connection con, int folderId) throws OXException;
 
-    public abstract void deleteTasksInFolder(SessionObject session,
+    public abstract void deleteTasksInFolder(Session session,
         int folderId) throws OXException;
 
     /**

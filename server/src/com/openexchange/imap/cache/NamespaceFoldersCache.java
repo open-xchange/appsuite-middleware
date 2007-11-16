@@ -55,7 +55,7 @@ import javax.mail.MessagingException;
 import com.openexchange.cache.CacheKey;
 import com.openexchange.mail.cache.SessionMailCache;
 import com.openexchange.mail.cache.SessionMailCacheEntry;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.sun.mail.imap.IMAPStore;
 
 /**
@@ -95,8 +95,8 @@ public final class NamespaceFoldersCache {
 	 * @throws MessagingException
 	 *             If <code>NAMESPACE</code> command fails
 	 */
-	public static Folder[] getPersonalNamespaces(final IMAPStore imapStore, final boolean load,
-			final SessionObject session) throws MessagingException {
+	public static Folder[] getPersonalNamespaces(final IMAPStore imapStore, final boolean load, final Session session)
+			throws MessagingException {
 		final NamespaceFoldersCacheEntry entry = new NamespaceFoldersCacheEntry(NS_PERSONAL);
 		final SessionMailCache mailCache = SessionMailCache.getInstance(session);
 		mailCache.get(entry);
@@ -123,7 +123,7 @@ public final class NamespaceFoldersCache {
 	 * @throws MessagingException
 	 *             If <code>NAMESPACE</code> command fails
 	 */
-	public static Folder[] getUserNamespaces(final IMAPStore imapStore, final boolean load, final SessionObject session)
+	public static Folder[] getUserNamespaces(final IMAPStore imapStore, final boolean load, final Session session)
 			throws MessagingException {
 		final NamespaceFoldersCacheEntry entry = new NamespaceFoldersCacheEntry(NS_USER);
 		final SessionMailCache mailCache = SessionMailCache.getInstance(session);
@@ -151,8 +151,8 @@ public final class NamespaceFoldersCache {
 	 * @throws MessagingException
 	 *             If <code>NAMESPACE</code> command fails
 	 */
-	public static Folder[] getSharedNamespaces(final IMAPStore imapStore, final boolean load,
-			final SessionObject session) throws MessagingException {
+	public static Folder[] getSharedNamespaces(final IMAPStore imapStore, final boolean load, final Session session)
+			throws MessagingException {
 		final NamespaceFoldersCacheEntry entry = new NamespaceFoldersCacheEntry(NS_SHARED);
 		final SessionMailCache mailCache = SessionMailCache.getInstance(session);
 		mailCache.get(entry);

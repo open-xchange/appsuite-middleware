@@ -52,14 +52,13 @@ package com.openexchange.groupware.tasks;
 import java.sql.Connection;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.server.DBPool;
 import com.openexchange.server.DBPoolingException;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 
 /**
@@ -188,7 +187,7 @@ abstract class TaskStorage {
      * @return an iterator for all found tasks.
      * @throws TaskException if an error occurs.
      */
-    abstract SearchIterator search(SessionObject session,
+    abstract SearchIterator search(Session session,
         TaskSearchObject search, int orderBy, String orderDir, int[] columns,
         List<Integer> all, List<Integer> own, List<Integer> shared)
         throws TaskException;
@@ -228,7 +227,7 @@ abstract class TaskStorage {
         }
     }
 
-    public abstract boolean containsNotSelfCreatedTasks(SessionObject session,
+    public abstract boolean containsNotSelfCreatedTasks(Session session,
         int folderId) throws TaskException;
 
 }

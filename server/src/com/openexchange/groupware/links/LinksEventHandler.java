@@ -59,19 +59,17 @@ import java.sql.Statement;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-
 import com.openexchange.event.AppointmentEvent;
 import com.openexchange.event.ContactEvent;
 import com.openexchange.event.InfostoreEvent;
 import com.openexchange.event.TaskEvent;
-
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.server.DBPool;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 
 /**
  Links
@@ -86,59 +84,59 @@ public class LinksEventHandler  implements AppointmentEvent, TaskEvent, ContactE
 	
 	public LinksEventHandler (){	}
 
-	public void appointmentCreated(final AppointmentObject appointmentObj, final SessionObject sessionObj) {
+	public void appointmentCreated(final AppointmentObject appointmentObj, final Session sessionObj) {
 		//  nix
 	}
 
-	public void appointmentModified(final AppointmentObject appointmentObj, final SessionObject sessionObj) {
+	public void appointmentModified(final AppointmentObject appointmentObj, final Session sessionObj) {
 		updateLink(appointmentObj.getObjectID(),Types.APPOINTMENT,appointmentObj.getParentFolderID(),sessionObj);
 	}
 
-	public void appointmentDeleted(final AppointmentObject appointmentObj, final SessionObject sessionObj) {
+	public void appointmentDeleted(final AppointmentObject appointmentObj, final Session sessionObj) {
 		deleteLink(appointmentObj.getObjectID(),Types.APPOINTMENT,appointmentObj.getParentFolderID(),sessionObj);
 	}
 
-	public void taskCreated(final Task taskObj, final SessionObject sessionObj) {
+	public void taskCreated(final Task taskObj, final Session sessionObj) {
 		// nix
 	}
 
-	public void taskModified(final Task taskObj, final SessionObject sessionObj) {
+	public void taskModified(final Task taskObj, final Session sessionObj) {
 		updateLink(taskObj.getObjectID(),Types.TASK,taskObj.getParentFolderID(),sessionObj);
 	}
 
-	public void taskDeleted(final Task taskObj, final SessionObject sessionObj) {
+	public void taskDeleted(final Task taskObj, final Session sessionObj) {
 		deleteLink(taskObj.getObjectID(),Types.TASK,taskObj.getParentFolderID(),sessionObj);
 	}
 
-	public void contactCreated(final ContactObject contactObj, final SessionObject sessionObj) {
+	public void contactCreated(final ContactObject contactObj, final Session sessionObj) {
 		// nix
 	}
 
-	public void contactModified(final ContactObject contactObj, final SessionObject sessionObj) {
+	public void contactModified(final ContactObject contactObj, final Session sessionObj) {
 		updateLink(contactObj.getObjectID(),Types.CONTACT,contactObj.getParentFolderID(),sessionObj);
 	}
 
-	public void contactDeleted(final ContactObject contactObj, final SessionObject sessionObj) {
+	public void contactDeleted(final ContactObject contactObj, final Session sessionObj) {
 		deleteLink(contactObj.getObjectID(),Types.CONTACT,contactObj.getParentFolderID(),sessionObj);
 	}
 
-	public void infoitemCreated(final DocumentMetadata metadata, final SessionObject sessionObject) {
+	public void infoitemCreated(final DocumentMetadata metadata, final Session sessionObject) {
 		// nix
 	}
 
-	public void infoitemModified(final DocumentMetadata metadata, final SessionObject sessionObject) {
+	public void infoitemModified(final DocumentMetadata metadata, final Session sessionObject) {
 		// BOESE TODO
 		final int x = Integer.parseInt(metadata.getFolderId()+"");
 		updateLink(metadata.getId(),Types.INFOSTORE,x,sessionObject);
 	}
 
-	public void infoitemDeleted(final DocumentMetadata metadata, final SessionObject sessionObject) {
+	public void infoitemDeleted(final DocumentMetadata metadata, final Session sessionObject) {
 		// BOESE TODO
 		final int x = Integer.parseInt(metadata.getFolderId()+"");
 		deleteLink(metadata.getId(),Types.INFOSTORE,x,sessionObject);
 	}
 	
-	public void deleteLink(final int id, final int type, final int fid, final SessionObject so){
+	public void deleteLink(final int id, final int type, final int fid, final Session so){
 		Connection writecon = null;
 		Statement del = null;
 		
@@ -175,7 +173,7 @@ public class LinksEventHandler  implements AppointmentEvent, TaskEvent, ContactE
 			
 	}
 	
-	public void updateLink(final int id, final int type, final int fid, final SessionObject so){
+	public void updateLink(final int id, final int type, final int fid, final Session so){
 		Connection readcon = null;
 		Statement smt = null;
 		ResultSet rs = null;

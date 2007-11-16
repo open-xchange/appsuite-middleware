@@ -83,7 +83,7 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.DBPool;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.server.EffectivePermission;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -158,7 +158,7 @@ public class CalendarCommonCollection {
     }
     
     
-    public static final boolean checkPermissions(final CalendarDataObject cdao, final SessionObject so, final Connection readcon, final int action, final int inFolder) throws OXException {
+    public static final boolean checkPermissions(final CalendarDataObject cdao, final Session so, final Connection readcon, final int action, final int inFolder) throws OXException {
         try {
             final OXFolderAccess access = new OXFolderAccess(readcon, cdao.getContext());
             cdao.setFolderType(access.getFolderType(inFolder, so.getUserId()));
@@ -268,7 +268,7 @@ public class CalendarCommonCollection {
         return false;
     }
     
-    public static final boolean getReadPermission(final int oid, final int fid, final SessionObject so) throws OXException {
+    public static final boolean getReadPermission(final int oid, final int fid, final Session so) throws OXException {
         try {
             final OXFolderAccess access = new OXFolderAccess(so.getContext());
             final int type = access.getFolderType(fid, so.getUserId());
@@ -288,7 +288,7 @@ public class CalendarCommonCollection {
         }
     }
     
-    public static final boolean getWritePermission(final int oid, final int fid, final SessionObject so) throws OXException {
+    public static final boolean getWritePermission(final int oid, final int fid, final Session so) throws OXException {
         try {
             final OXFolderAccess access = new OXFolderAccess(so.getContext());
             final int type = access.getFolderType(fid, so.getUserId());
@@ -308,7 +308,7 @@ public class CalendarCommonCollection {
         }
     }
     
-    private static final boolean loadObjectAndCheckPermisions(final int oid, final int fid, final SessionObject so, final int type) throws Exception {
+    private static final boolean loadObjectAndCheckPermisions(final int oid, final int fid, final Session so, final int type) throws Exception {
         Connection readcon = null;
         try {
             readcon = DBPool.pickup(so.getContext());
@@ -449,11 +449,11 @@ public class CalendarCommonCollection {
         }
     }
     
-    public static final Date getNextReminderDate(final int oid, final int fid, final SessionObject so) throws OXException, SQLException {
+    public static final Date getNextReminderDate(final int oid, final int fid, final Session so) throws OXException, SQLException {
         return getNextReminderDate(oid, fid, so, 0L);
     }
     
-    public static final Date getNextReminderDate(final int oid, final int fid, final SessionObject so, long last) throws OXException, SQLException {
+    public static final Date getNextReminderDate(final int oid, final int fid, final Session so, long last) throws OXException, SQLException {
         final CalendarSql csql = new CalendarSql(so);
         final CalendarDataObject cdao = csql.getObjectById(oid, fid);
         final int alarm = cdao.getAlarm();
@@ -565,8 +565,8 @@ public class CalendarCommonCollection {
         return ncols;
     }
     
-    public static final void triggerEvent(final SessionObject sessionobject, final int action, final AppointmentObject appointmentobject) throws OXException {
-        final EventClient eventclient = new EventClient(sessionobject);
+    public static final void triggerEvent(final Session session, final int action, final AppointmentObject appointmentobject) throws OXException {
+        final EventClient eventclient = new EventClient(session);
         switch (action) {
             case CalendarOperation.INSERT:
                 try {

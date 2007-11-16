@@ -76,7 +76,7 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.server.EffectivePermission;
 import com.openexchange.server.OCLPermission;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 
 /**
@@ -357,7 +357,7 @@ public class OXFolderAccess {
 	 * @return
 	 * @throws OXException
 	 */
-	public final boolean canDeleteAllObjectsInFolder(final FolderObject fo, final SessionObject session)
+	public final boolean canDeleteAllObjectsInFolder(final FolderObject fo, final Session session)
 			throws OXException {
 		final int userId = session.getUserId();
 		final UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(

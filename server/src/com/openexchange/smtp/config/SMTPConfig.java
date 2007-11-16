@@ -55,7 +55,7 @@ import com.openexchange.mail.config.GlobalTransportConfig;
 import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.config.TransportConfig;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 
 /**
  * {@link SMTPConfig}
@@ -88,7 +88,7 @@ public final class SMTPConfig extends TransportConfig {
 	 * @throws MailConfigException
 	 *             If user-specific IMAP configuration cannot be determined
 	 */
-	public static SMTPConfig getSmtpConfig(final SessionObject session) throws MailConfigException {
+	public static SMTPConfig getSmtpConfig(final Session session) throws MailConfigException {
 		final SMTPConfig smtpConf = new SMTPConfig();
 		fillLoginAndPassword(smtpConf, session);
 		/*

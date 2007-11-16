@@ -56,7 +56,7 @@ import javax.mail.MessagingException;
 import com.openexchange.cache.CacheKey;
 import com.openexchange.mail.cache.SessionMailCache;
 import com.openexchange.mail.cache.SessionMailCacheEntry;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.sun.mail.imap.IMAPFolder;
 
 /**
@@ -89,7 +89,7 @@ public final class UserFlagsCache {
 	 * @throws MessagingException
 	 *             If <code>SELECT</code> command fails
 	 */
-	public static boolean supportsUserFlags(final IMAPFolder f, final boolean load, final SessionObject session)
+	public static boolean supportsUserFlags(final IMAPFolder f, final boolean load, final Session session)
 			throws MessagingException {
 		final UserFlagCacheEntry entry = new UserFlagCacheEntry(f.getFullName());
 		final SessionMailCache mailCache = SessionMailCache.getInstance(session);
@@ -109,7 +109,7 @@ public final class UserFlagsCache {
 	 * @param session
 	 *            The session providing the session-bound cache
 	 */
-	public static void removeUserFlags(final IMAPFolder f, final SessionObject session) {
+	public static void removeUserFlags(final IMAPFolder f, final Session session) {
 		SessionMailCache.getInstance(session).remove(new UserFlagCacheEntry(f.getFullName()));
 	}
 

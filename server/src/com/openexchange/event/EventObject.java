@@ -57,7 +57,7 @@ import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 
 import java.util.Date;
 
@@ -75,35 +75,35 @@ public class EventObject {
 	
 	private Object obj;
 	
-	private SessionObject sessionObj;
+	private Session session;
 	
 	private Date creationDate;
 	
-	public EventObject(final AppointmentObject obj, final int action, final SessionObject sessionObj) {
-		init(obj, Types.APPOINTMENT, action, sessionObj);
+	public EventObject(final AppointmentObject obj, final int action, final Session session) {
+		init(obj, Types.APPOINTMENT, action, session);
 	}
 	
-	public EventObject(final Task obj, final int action, final SessionObject sessionObj) {
-		init(obj, Types.TASK, action, sessionObj);
+	public EventObject(final Task obj, final int action, final Session session) {
+		init(obj, Types.TASK, action, session);
 	}
 	
-	public EventObject(final ContactObject obj, final int action, final SessionObject sessionObj) {
-		init(obj, Types.CONTACT, action, sessionObj);
+	public EventObject(final ContactObject obj, final int action, final Session session) {
+		init(obj, Types.CONTACT, action, session);
 	}
 	
-	public EventObject(final FolderObject obj, final int action, final SessionObject sessionObj) {
-		init(obj, Types.FOLDER, action, sessionObj);
+	public EventObject(final FolderObject obj, final int action, final Session session) {
+		init(obj, Types.FOLDER, action, session);
 	}
 	
-	public EventObject(final DocumentMetadata obj, final int action, final SessionObject sessionObj) {
-		init(obj, Types.INFOSTORE, action, sessionObj);
+	public EventObject(final DocumentMetadata obj, final int action, final Session session) {
+		init(obj, Types.INFOSTORE, action, session);
 	}
 	
-	private void init(final Object obj, final int module, final int action, final SessionObject sessionObj) {
+	private void init(final Object obj, final int module, final int action, final Session session) {
 		this.obj = obj;
 		this.module = module;
 		this.action = action;
-		this.sessionObj = sessionObj;
+		this.session = session;
 		creationDate = new Date();
 	}
 	
@@ -119,8 +119,8 @@ public class EventObject {
 		return obj;
 	}
 
-	public SessionObject getSessionObject() {
-		return sessionObj;
+	public Session getSessionObject() {
+		return session;
 	}
 
 	public Date getCreationDate() {

@@ -52,7 +52,7 @@
 package com.openexchange.event;
 
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 
 /**
  * FolderEvent
@@ -62,11 +62,11 @@ import com.openexchange.sessiond.impl.SessionObject;
 
 public interface FolderEvent {
 	
-    public void folderCreated(FolderObject folderObj, SessionObject sessionObj);
+    public void folderCreated(FolderObject folderObj, Session sessionObj);
 	
-    public void folderModified(FolderObject folderObj, SessionObject sessionObj);
+    public void folderModified(FolderObject folderObj, Session sessionObj);
 		
-    public void folderDeleted(FolderObject folderObj, SessionObject sessionObj);
+    public void folderDeleted(FolderObject folderObj, Session sessionObj);
 	
 }
 

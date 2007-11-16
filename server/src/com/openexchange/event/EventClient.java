@@ -54,7 +54,7 @@ import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 
 /**
  * EventClient
@@ -67,84 +67,84 @@ public class EventClient {
 	public static final int CHANGED = 6;
 	public static final int DELETED = 7;
 	
-	private SessionObject sessionObj;
+	private final Session session;
 	
-	public EventClient(SessionObject sessionObj) {
-		this.sessionObj = sessionObj;
+	public EventClient(final Session session) {
+		this.session = session;
 	}
 
 	public void create(final AppointmentObject appointmentObj) throws InvalidStateException {
-		final EventObject eventObject = new EventObject(appointmentObj, CREATED, sessionObj);
+		final EventObject eventObject = new EventObject(appointmentObj, CREATED, session);
 		EventQueue.add(eventObject);
 	}
 
 	public void modify(final AppointmentObject appointmentObj) throws InvalidStateException {
-		final EventObject eventObject = new EventObject(appointmentObj, CHANGED, sessionObj);
+		final EventObject eventObject = new EventObject(appointmentObj, CHANGED, session);
 		EventQueue.add(eventObject);
 	}
 
 	public void delete(final AppointmentObject appointmentObj) throws InvalidStateException {
-		final EventObject eventObject = new EventObject(appointmentObj, DELETED, sessionObj);
+		final EventObject eventObject = new EventObject(appointmentObj, DELETED, session);
 		EventQueue.add(eventObject);
 	}
 
     public void create(final Task taskObj) throws InvalidStateException {
-		final EventObject eventObject = new EventObject(taskObj, CREATED, sessionObj);
+		final EventObject eventObject = new EventObject(taskObj, CREATED, session);
 		EventQueue.add(eventObject);
 	}
 
     public void modify(final Task taskObj) throws InvalidStateException {
-		final EventObject eventObject = new EventObject(taskObj, CHANGED, sessionObj);
+		final EventObject eventObject = new EventObject(taskObj, CHANGED, session);
 		EventQueue.add(eventObject);
 	}
 
     public void delete(final Task taskObj) throws InvalidStateException {
-		final EventObject eventObject = new EventObject(taskObj, DELETED, sessionObj);
+		final EventObject eventObject = new EventObject(taskObj, DELETED, session);
 		EventQueue.add(eventObject);
 	}
 
 	public void create(final ContactObject contactObj) throws InvalidStateException {
-		final EventObject eventObject = new EventObject(contactObj, CREATED, sessionObj);
+		final EventObject eventObject = new EventObject(contactObj, CREATED, session);
 		EventQueue.add(eventObject);
 	}
 
 	public void modify(final ContactObject contactObj) throws InvalidStateException {
-		final EventObject eventObject = new EventObject(contactObj, CHANGED, sessionObj);
+		final EventObject eventObject = new EventObject(contactObj, CHANGED, session);
 		EventQueue.add(eventObject);
 	}
 
 	public void delete(final ContactObject contactObj) throws InvalidStateException {
-		final EventObject eventObject = new EventObject(contactObj, DELETED, sessionObj);
+		final EventObject eventObject = new EventObject(contactObj, DELETED, session);
 		EventQueue.add(eventObject);
 	}
 
 	public void create(final FolderObject folderObj) throws InvalidStateException {
-		final EventObject eventObject = new EventObject(folderObj, CREATED, sessionObj);
+		final EventObject eventObject = new EventObject(folderObj, CREATED, session);
 		EventQueue.add(eventObject);
 	}
 
 	public void modify(final FolderObject folderObj) throws InvalidStateException {
-		final EventObject eventObject = new EventObject(folderObj, CHANGED, sessionObj);
+		final EventObject eventObject = new EventObject(folderObj, CHANGED, session);
 		EventQueue.add(eventObject);
 	}
 
 	public void delete(final FolderObject folderObj) throws InvalidStateException {
-		final EventObject eventObject = new EventObject(folderObj, DELETED, sessionObj);
+		final EventObject eventObject = new EventObject(folderObj, DELETED, session);
 		EventQueue.add(eventObject);
 	}
 
 	public void create(final DocumentMetadata document) throws InvalidStateException {
-		final EventObject eventObject = new EventObject(document, CREATED, sessionObj);
+		final EventObject eventObject = new EventObject(document, CREATED, session);
 		EventQueue.add(eventObject);	
 	}
 
 	public void modify(final DocumentMetadata document) throws InvalidStateException {
-		final EventObject eventObject = new EventObject(document, CHANGED, sessionObj);
+		final EventObject eventObject = new EventObject(document, CHANGED, session);
 		EventQueue.add(eventObject);
 	}
 
 	public void delete(final DocumentMetadata document) throws InvalidStateException {
-		final EventObject eventObject = new EventObject(document, DELETED, sessionObj);
+		final EventObject eventObject = new EventObject(document, DELETED, session);
 		EventQueue.add(eventObject);
 	}
 }

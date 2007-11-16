@@ -75,7 +75,7 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.server.EffectivePermission;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.iterator.FolderObjectIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -145,7 +145,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 
 	private final Context ctx;
 
-	private final SessionObject sessionObj;
+	private final Session sessionObj;
 
 	private final User user;
 
@@ -156,11 +156,11 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 	/**
 	 * @param sessionObj
 	 */
-	public RdbFolderSQLInterface(final SessionObject sessionObj) {
+	public RdbFolderSQLInterface(final Session sessionObj) {
 		this(sessionObj, null);
 	}
 
-	public RdbFolderSQLInterface(final SessionObject sessionObj, final OXFolderAccess oxfolderAccess) {
+	public RdbFolderSQLInterface(final Session sessionObj, final OXFolderAccess oxfolderAccess) {
 		this.sessionObj = sessionObj;
 		userConfiguration = UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
 				sessionObj.getContext());
@@ -397,7 +397,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 	 * @throws OXException
 	 *             If a caching error occurs
 	 */
-	private static final void loadNonTreeVisibleFoldersIntoQueryCache(final SessionObject session,
+	private static final void loadNonTreeVisibleFoldersIntoQueryCache(final Session session,
 			UserConfiguration userConfiguration) throws SearchIteratorException, OXException {
 		/*
 		 * Fetch queue from iterator (which implicitly puts referenced objects

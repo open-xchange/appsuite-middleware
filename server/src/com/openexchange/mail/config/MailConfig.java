@@ -59,7 +59,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mail.partmodifier.PartModifier;
 import com.openexchange.mail.spellcheck.SpellCheckConfig;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 
 /**
  * {@link MailConfig}
@@ -172,7 +172,7 @@ public abstract class MailConfig {
 	 *            The session providing needed user data
 	 * @throws MailConfigException
 	 */
-	protected static final void fillLoginAndPassword(final MailConfig mailConfig, final SessionObject session)
+	protected static final void fillLoginAndPassword(final MailConfig mailConfig, final Session session)
 			throws MailConfigException {
 		/*
 		 * Fetch user object and create its mail properties
@@ -217,11 +217,11 @@ public abstract class MailConfig {
 	 *            not
 	 * @return The session-associated user's login
 	 */
-	private static final String getLocalMailLogin(final SessionObject session, final boolean lookUp) {
+	private static final String getLocalMailLogin(final Session session, final boolean lookUp) {
 		String login = lookUp ? UserStorage.getUser(session.getUserId(), session.getContext()).getImapLogin() : null;
 		if (login == null || login.length() == 0) {
 			login = session.getUserlogin() != null && session.getUserlogin().length() > 0 ? session.getUserlogin()
-					: session.getUsername();
+					: String.valueOf(session.getUserId());
 		}
 		return login;
 	}

@@ -51,7 +51,7 @@ package com.openexchange.smtp.dataobjects;
 
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.transport.dataobjects.InfostoreDocumentMailPart;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 
 /**
  * {@link SMTPDocumentPart}
@@ -73,7 +73,7 @@ public final class SMTPDocumentPart extends InfostoreDocumentMailPart implements
 	 * @throws MailException
 	 *             If infostore document cannot be read
 	 */
-	public SMTPDocumentPart(final int documentId, final SessionObject session) throws MailException {
+	public SMTPDocumentPart(final int documentId, final Session session) throws MailException {
 		super(documentId, session);
 	}
 

@@ -52,7 +52,7 @@
 package com.openexchange.event;
 
 import com.openexchange.groupware.container.AppointmentObject;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 
 /**
  * AppointmentEvent
@@ -62,11 +62,11 @@ import com.openexchange.sessiond.impl.SessionObject;
 
 public interface AppointmentEvent {
 	
-    public void appointmentCreated(AppointmentObject appointmentObj, SessionObject sessionObj);
+    public void appointmentCreated(AppointmentObject appointmentObj, Session sessionObj);
 	
-    public void appointmentModified(AppointmentObject appointmentObj, SessionObject sessionObj);
+    public void appointmentModified(AppointmentObject appointmentObj, Session sessionObj);
 		
-    public void appointmentDeleted(AppointmentObject appointmentObj, SessionObject sessionObj);
+    public void appointmentDeleted(AppointmentObject appointmentObj, Session sessionObj);
 	
 }
 

@@ -55,7 +55,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.DBPool;
 import com.openexchange.server.DBPoolingException;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import java.sql.Connection;
@@ -74,7 +74,7 @@ import org.apache.commons.logging.LogFactory;
 public class ConflictHandler {
     
     private CalendarDataObject cdao;
-    private SessionObject so;
+    private Session so;
     private boolean action = true;
     private int current_results;
     private User u;
@@ -88,7 +88,7 @@ public class ConflictHandler {
     
     private static final Log LOG = LogFactory.getLog(ConflictHandler.class);
     
-    public ConflictHandler(final CalendarDataObject cdao, final SessionObject so, final boolean action) {
+    public ConflictHandler(final CalendarDataObject cdao, final Session so, final boolean action) {
         this.cdao = cdao;
         this.so = so;
         this.action = action;

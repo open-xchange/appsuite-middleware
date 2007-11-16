@@ -68,7 +68,7 @@ import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.mime.MIMEDefaultSession;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.transport.MailTransport;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.mail.ContentType;
 import com.openexchange.tools.servlet.UnsynchronizedByteArrayOutputStream;
 
@@ -98,7 +98,7 @@ public class MailObject {
 
 	private boolean requestReadReceipt;
 
-	private final SessionObject session;
+	private final Session session;
 
 	private final int objectId;
 
@@ -106,7 +106,7 @@ public class MailObject {
 
 	private final int module;
 
-	public MailObject(final SessionObject sessionObj, final int objectId, final int folderId, final int module) {
+	public MailObject(final Session sessionObj, final int objectId, final int folderId, final int module) {
 		super();
 		this.session = sessionObj;
 		this.objectId = objectId;

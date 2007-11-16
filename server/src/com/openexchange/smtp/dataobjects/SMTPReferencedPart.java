@@ -52,7 +52,7 @@ package com.openexchange.smtp.dataobjects;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.transport.dataobjects.ReferencedMailPart;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 
 /**
  * {@link SMTPReferencedPart}
@@ -70,7 +70,7 @@ public final class SMTPReferencedPart extends ReferencedMailPart implements SMTP
 	 * @throws MailException
 	 *             If a mail error occurs
 	 */
-	public SMTPReferencedPart(final MailPart referencedPart, final SessionObject session) throws MailException {
+	public SMTPReferencedPart(final MailPart referencedPart, final Session session) throws MailException {
 		super(referencedPart, session);
 	}
 

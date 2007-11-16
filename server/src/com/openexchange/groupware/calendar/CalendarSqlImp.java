@@ -49,23 +49,22 @@
 
 package com.openexchange.groupware.calendar;
 
-import com.openexchange.api.OXObjectNotFoundException;
-import com.openexchange.api.OXPermissionException;
-import com.openexchange.api2.OXException;
-import com.openexchange.groupware.*;
-import com.openexchange.groupware.container.Participants;
-import com.openexchange.groupware.ldap.LdapException;
-import com.openexchange.groupware.search.AppointmentSearchObject;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.sessiond.impl.SessionObject;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
+
+import com.openexchange.api.OXObjectNotFoundException;
+import com.openexchange.api.OXPermissionException;
+import com.openexchange.api2.OXException;
+import com.openexchange.groupware.container.Participants;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.groupware.search.AppointmentSearchObject;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.sessiond.Session;
 
 
 /**
@@ -121,17 +120,17 @@ public interface CalendarSqlImp {
     
     public Participants getParticipants(CalendarDataObject cdao, Connection readcon) throws SQLException;
     
-    public CalendarDataObject[] insertAppointment(CalendarDataObject cdao, Connection writecon, SessionObject so) throws SQLException, LdapException, Exception;
+    public CalendarDataObject[] insertAppointment(CalendarDataObject cdao, Connection writecon, Session so) throws SQLException, LdapException, Exception;
     
-    public CalendarDataObject[] updateAppointment(CalendarDataObject cdao, CalendarDataObject edao, Connection writecon, SessionObject so, int inFolder, Date clientLastModified) throws SQLException, LdapException, OXObjectNotFoundException, OXPermissionException, OXException;
+    public CalendarDataObject[] updateAppointment(CalendarDataObject cdao, CalendarDataObject edao, Connection writecon, Session so, int inFolder, Date clientLastModified) throws SQLException, LdapException, OXObjectNotFoundException, OXPermissionException, OXException;
     
-    public CalendarDataObject loadObjectForUpdate(CalendarDataObject cdao, SessionObject so, int inFolder) throws SQLException, LdapException, OXObjectNotFoundException, OXPermissionException, OXException;
+    public CalendarDataObject loadObjectForUpdate(CalendarDataObject cdao, Session so, int inFolder) throws SQLException, LdapException, OXObjectNotFoundException, OXPermissionException, OXException;
     
-    public void deleteAppointment(int uid, CalendarDataObject cdao, Connection writecon, SessionObject so, int inFolder, Date clientLastModified) throws SQLException, OXObjectNotFoundException, OXPermissionException, OXException;
+    public void deleteAppointment(int uid, CalendarDataObject cdao, Connection writecon, Session so, int inFolder, Date clientLastModified) throws SQLException, OXObjectNotFoundException, OXPermissionException, OXException;
     
-    public void deleteAppointmentsInFolder(SessionObject so, ResultSet objects, Connection readcon, Connection writecon, int foldertype, int fid) throws SQLException, OXObjectNotFoundException, OXPermissionException, OXException;
+    public void deleteAppointmentsInFolder(Session so, ResultSet objects, Connection readcon, Connection writecon, int foldertype, int fid) throws SQLException, OXObjectNotFoundException, OXPermissionException, OXException;
     
-    public void setUserConfirmation(int oid, int uid, int confirm, String confirm_message, SessionObject so) throws OXException;
+    public void setUserConfirmation(int oid, int uid, int confirm, String confirm_message, Session so) throws OXException;
     
     public boolean checkIfFolderContainsForeignObjects(int uid, int fid, Context c, Connection readcon, int foldertype) throws SQLException;
     

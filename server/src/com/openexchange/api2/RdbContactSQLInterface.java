@@ -90,7 +90,7 @@ import com.openexchange.server.DBPool;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.server.EffectivePermission;
 import com.openexchange.server.OCLPermission;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.iterator.PrefetchIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -107,20 +107,20 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 	private final int userId;
 	private final int[] memberInGroups;
 	private final Context ctx;
-	private final SessionObject sessionobject;
+	private final Session session;
 	private final UserConfiguration userConfiguration;
 
 	private static final ContactExceptionFactory EXCEPTIONS = new ContactExceptionFactory(RdbContactSQLInterface.class);
 	
 	private static final Log LOG = LogFactory.getLog(RdbContactSQLInterface.class);
 	
-	public RdbContactSQLInterface(SessionObject sessionobject) {
-		this.userId = sessionobject.getUserId();
-		this.memberInGroups = UserStorage.getUser(sessionobject.getUserId(), sessionobject.getContext()).getGroups();
-		this.ctx = sessionobject.getContext();
-		this.sessionobject = sessionobject;
-		userConfiguration = UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionobject.getUserId(),
-				sessionobject.getContext());
+	public RdbContactSQLInterface(final Session session) {
+		this.userId = session.getUserId();
+		this.memberInGroups = UserStorage.getUser(session.getUserId(), session.getContext()).getGroups();
+		this.ctx = session.getContext();
+		this.session = session;
+		userConfiguration = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
+				session.getContext());
 	}
 
 	@OXThrows(
@@ -131,8 +131,8 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 	)
 	public void insertContactObject(final ContactObject co) throws OXException {
 		try{
-			Contacts.performContactStorageInsert(co,userId,memberInGroups,sessionobject);
-			final EventClient ec = new EventClient(sessionobject);
+			Contacts.performContactStorageInsert(co,userId,memberInGroups,session);
+			final EventClient ec = new EventClient(session);
 			ec.create(co);
 			/*
 			ContactObject coo = new ContactObject();
@@ -161,7 +161,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 
 		try{
 			Contacts.performContactStorageUpdate(co,fid,d,userId,memberInGroups,ctx,userConfiguration);
-			final EventClient ec = new EventClient(sessionobject);
+			final EventClient ec = new EventClient(session);
 			ec.modify(co);
 		}catch (ContactException ise){
 			throw ise;
@@ -197,7 +197,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 	public int getNumberOfContacts(final int folderId) throws OXException {
 		Connection readCon = null;
 		try {
-			readCon = DBPool.pickup(sessionobject.getContext());
+			readCon = DBPool.pickup(session.getContext());
 			
 			FolderObject contactFolder;
 			if (FolderCacheManager.isEnabled()){
@@ -212,7 +212,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 			
 		} catch (OXException e) {
 			if (readCon != null) {
-				DBPool.closeReaderSilent(sessionobject.getContext(), readCon);
+				DBPool.closeReaderSilent(session.getContext(), readCon);
 			}
 			throw e;
 			//throw new OXException("getNumberOfContacts() called with a non-Contact-Folder! (cid="+sessionobject.getContext().getContextId()+" fid="+folderId+')');
@@ -221,7 +221,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 		}	
 			
 		try {
-			final ContactSql contactSQL = new ContactMySql(sessionobject);
+			final ContactSql contactSQL = new ContactMySql(session);
 			final EffectivePermission oclPerm = new OXFolderAccess(readCon, ctx).getFolderPermission(folderId, userId, userConfiguration);
 			if (oclPerm.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {
 				throw EXCEPTIONS.createOXConflictException(4,Integer.valueOf(folderId), Integer.valueOf(ctx.getContextId()), Integer.valueOf(userId));
@@ -257,7 +257,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 			throw e;
 		}  finally {
 			if (readCon != null) {
-				DBPool.closeReaderSilent(sessionobject.getContext(), readCon);
+				DBPool.closeReaderSilent(session.getContext(), readCon);
 			}
 		}
 	}
@@ -293,7 +293,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 		}
 		Connection readCon = null;	
 		try{
-			readCon = DBPool.pickup(sessionobject.getContext());
+			readCon = DBPool.pickup(session.getContext());
 		} catch (DBPoolingException e) {
 			throw EXCEPTIONS.create(7,e);
 			//throw new OXException("UNABLE TO GET READ CONNECTION", e);
@@ -312,7 +312,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 			}
 		} catch (OXException e) {
 			if (readCon != null) {
-				DBPool.closeReaderSilent(sessionobject.getContext(), readCon);
+				DBPool.closeReaderSilent(session.getContext(), readCon);
 			}
 			throw e;
 			//throw new OXException("getContactsInFolder() called with a non-Contact-Folder! (cid="+sessionobject.getContext().getContextId()+" fid="+folderId+')');
@@ -322,7 +322,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 		ResultSet rs = null;
 		Statement stmt = null;
 		try {
-			final ContactSql cs = new ContactMySql(sessionobject);
+			final ContactSql cs = new ContactMySql(session);
 			cs.setFolder(folderId);
 
 			final EffectivePermission oclPerm = new OXFolderAccess(readCon, ctx).getFolderPermission(folderId, userId, userConfiguration);
@@ -378,7 +378,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 				}
 				try{
 					if (readCon != null) {
-						DBPool.closeReaderSilent(sessionobject.getContext(), readCon);
+						DBPool.closeReaderSilent(session.getContext(), readCon);
 					}
 				} catch (Exception ex){
 					LOG.error("Unable to return Connection",ex);
@@ -421,7 +421,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 		}
 		Connection readcon = null;	
 		try{
-			readcon = DBPool.pickup(sessionobject.getContext());
+			readcon = DBPool.pickup(session.getContext());
 		} catch (DBPoolingException e) {
 			throw EXCEPTIONS.create(13,e);
 			//throw new OXException("UNABLE TO GET READ CONNECTION", e);
@@ -443,7 +443,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 				}
 			} catch (OXException e) {
 				if (readcon != null) {
-					DBPool.closeReaderSilent(sessionobject.getContext(), readcon);
+					DBPool.closeReaderSilent(session.getContext(), readcon);
 				}
 				throw e;
 				//throw new OXException("getContactsInFolder() called with a non-Contact-Folder! (cid="+sessionobject.getContext().getContextId()+" fid="+folderId+')');
@@ -454,7 +454,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 		Statement stmt = null;
 		ResultSet rs = null;
 		try {
-			final ContactSql cs = new ContactMySql(sessionobject);
+			final ContactSql cs = new ContactMySql(session);
 			
 			if (!(searchobject.isAllFolders() || searchobject.getEmailAutoComplete())){	
 				cs.setFolder(folderId);
@@ -473,9 +473,9 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 					}
 				}
 			}else if (searchobject.isAllFolders()){
-				searchobject.setAllFolderSQLINString(cs.buildAllFolderSearchString(userId,memberInGroups,sessionobject,readcon).toString());
+				searchobject.setAllFolderSQLINString(cs.buildAllFolderSearchString(userId,memberInGroups,session,readcon).toString());
 			} else if (searchobject.getEmailAutoComplete()){
-				final OXFolderAccess oxfs = new OXFolderAccess(readcon, sessionobject.getContext());
+				final OXFolderAccess oxfs = new OXFolderAccess(readcon, session.getContext());
 				FolderObject user_private_folder = oxfs.getDefaultFolder(userId, FolderObject.CONTACT);
 				searchobject.setEmailAutoCompleteFolder(user_private_folder.getObjectID());
 			}
@@ -517,7 +517,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 				}
 				try{
 					if (readcon != null) {
-						DBPool.closeReaderSilent(sessionobject.getContext(), readcon);
+						DBPool.closeReaderSilent(session.getContext(), readcon);
 					}
 				} catch (Exception ex){
 					LOG.error("Unable to return Connection",ex);
@@ -558,10 +558,10 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 		}
 		Connection readcon = null;	
 		try{
-			readcon = DBPool.pickup(sessionobject.getContext());
+			readcon = DBPool.pickup(session.getContext());
 		} catch (DBPoolingException e) {
 			if (readcon != null) {
-				DBPool.closeReaderSilent(sessionobject.getContext(), readcon);
+				DBPool.closeReaderSilent(session.getContext(), readcon);
 			}
 			throw EXCEPTIONS.create(20,e);
 			//throw new OXException("UNABLE TO GET READ CONNECTION", e);
@@ -580,7 +580,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 			}
 		} catch (OXException e) {
 			if (readcon != null) {
-				DBPool.closeReaderSilent(sessionobject.getContext(), readcon);
+				DBPool.closeReaderSilent(session.getContext(), readcon);
 			}
 			throw e;
 			//throw new OXException("getContactsInFolder() called with a non-Contact-Folder! (cid="+sessionobject.getContext().getContextId()+" fid="+folderId+')');
@@ -590,7 +590,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 		Statement stmt = null;
 		ResultSet rs = null;
 		try {
-			final ContactSql cs = new ContactMySql(sessionobject);
+			final ContactSql cs = new ContactMySql(session);
 			cs.setFolder(folderId);
 			cs.setSearchHabit(" OR ");
 			final String order = " ORDER BY co." + Contacts.mapping[orderBy].getDBFieldName() + ' ' + orderDir +  ' ';
@@ -654,7 +654,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 				}
 				try{
 					if (readcon != null) {
-						DBPool.closeReaderSilent(sessionobject.getContext(), readcon);
+						DBPool.closeReaderSilent(session.getContext(), readcon);
 					}
 				} catch (Exception ex){
 					LOG.error("Unable to return Connection",ex);
@@ -684,7 +684,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 		Connection readCon = null;	
 		ContactObject co = null;
 		try{
-			readCon = DBPool.pickup(sessionobject.getContext());
+			readCon = DBPool.pickup(session.getContext());
 			if (objectId > 0){
 				co = Contacts.getContactById(objectId, userId, memberInGroups, ctx, userConfiguration, readCon);							
 			}else{
@@ -705,7 +705,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 				//throw new OXException("getObjectById() called with a non-Contact-Folder! (cid="+sessionobject.getContext().getContextId()+" fid="+fid+')');
 			}
 		
-			if (!performSecurityReadCheck(folderId,co.getCreatedBy(), userId, memberInGroups,sessionobject, readCon)){
+			if (!performSecurityReadCheck(folderId,co.getCreatedBy(), userId, memberInGroups,session, readCon)){
 				throw EXCEPTIONS.createOXConflictException(28,Integer.valueOf(folderId), Integer.valueOf(ctx.getContextId()), Integer.valueOf(userId));
 				//throw new OXConflictException("NOT ALLOWED TO SEE OBJECTS");	
 			}
@@ -716,7 +716,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 			//throw new OXException("UNABLE TO LOAD CONTACT BY ID - CHECK RIGHTS (cid="+sessionobject.getContext().getContextId()+" fid="+fid+" oid="+objectId+')', e);
 		}  finally {
 			if (readCon != null) {
-				DBPool.closeReaderSilent(sessionobject.getContext(), readCon);
+				DBPool.closeReaderSilent(session.getContext(), readCon);
 			}			
 		}
 		return co;
@@ -744,7 +744,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 		boolean error = false;
 		Connection readCon = null;	
 		try{
-			readCon = DBPool.pickup(sessionobject.getContext());
+			readCon = DBPool.pickup(session.getContext());
 		} catch (Exception e) {
 			throw EXCEPTIONS.create(30,e);
 			//throw new OXException("UNABLE TO GET READ CONNECTION", e);
@@ -763,7 +763,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 			}
 		} catch (OXException e) {
 			if (readCon != null) {
-				DBPool.closeReaderSilent(sessionobject.getContext(), readCon);
+				DBPool.closeReaderSilent(session.getContext(), readCon);
 			}
 			throw e;
 			//throw new OXException("getModifiedContactsInFolder() called with a non-Contact-Folder! (cid="+sessionobject.getContext().getContextId()+" fid="+folderId+')');
@@ -773,7 +773,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 		Statement stmt = null;
 		ResultSet rs = null;
 		try {
-			final ContactSql cs = new ContactMySql(sessionobject);
+			final ContactSql cs = new ContactMySql(session);
 
 			final EffectivePermission oclPerm = new OXFolderAccess(readCon, ctx).getFolderPermission(folderId, userId, userConfiguration);
 			if (oclPerm.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {
@@ -826,7 +826,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 				}
 				try{
 					if (readCon != null) {
-						DBPool.closeReaderSilent(sessionobject.getContext(), readCon);
+						DBPool.closeReaderSilent(session.getContext(), readCon);
 					}
 				} catch (Exception ex){
 					LOG.error("Unable to return Connection",ex);
@@ -855,9 +855,9 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 		Statement stmt = null;
 		ResultSet rs = null;
 		try{
-			readcon = DBPool.pickup(sessionobject.getContext());
+			readcon = DBPool.pickup(session.getContext());
 			
-			final ContactSql cs = new ContactMySql(sessionobject);
+			final ContactSql cs = new ContactMySql(session);
 			cs.setFolder(folderId);
 
 			stmt = readcon.createStatement();
@@ -892,7 +892,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 				}
 				try{
 					if (readcon != null) {
-						DBPool.closeReaderSilent(sessionobject.getContext(), readcon);
+						DBPool.closeReaderSilent(session.getContext(), readcon);
 					}
 				} catch (Exception ex){
 					LOG.error("Unable to return Connection",ex);
@@ -937,14 +937,14 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 		Statement smt = null;
 		ResultSet rs = null;
 		try{
-			readcon = DBPool.pickup(sessionobject.getContext());
+			readcon = DBPool.pickup(session.getContext());
 			
 			int fid = 0;
 			boolean pflag = false;
 			Date changing_date = null;
-			final ContactSql cs = new ContactMySql(sessionobject);
+			final ContactSql cs = new ContactMySql(session);
 			smt = readcon.createStatement();
-			rs = smt.executeQuery(cs.iFdeleteContactObject(oid,sessionobject.getContext().getContextId()));
+			rs = smt.executeQuery(cs.iFdeleteContactObject(oid,session.getContext().getContextId()));
 			if (rs.next()){
 				fid = rs.getInt(1);
 				created_from = rs.getInt(2);
@@ -986,7 +986,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 			}
 			
 			if ((contactFolder.getType() != FolderObject.PRIVATE) && pflag){
-				LOG.debug(new StringBuilder("Here is a contact in a non PRIVATE folder with a set private flag -> (cid="+sessionobject.getContext().getContextId()+" fid="+fid+" oid="+oid+')'));
+				LOG.debug(new StringBuilder("Here is a contact in a non PRIVATE folder with a set private flag -> (cid="+session.getContext().getContextId()+" fid="+fid+" oid="+oid+')'));
 			} else if ((contactFolder.getType() == FolderObject.PRIVATE) && pflag && created_from != userId){
 				throw EXCEPTIONS.createOXPermissionException(42,Integer.valueOf(fuid), Integer.valueOf(ctx.getContextId()), Integer.valueOf(userId));
 				//throw new OXConflictException("NOT ALLOWED TO DELETE FOLDER OBJECTS CONTACT CUZ IT IS PRIVATE (cid="+sessionobject.getContext().getContextId()+" fid="+fid+" oid="+oid+')');
@@ -1004,7 +1004,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 			throw xe;
 			//throw new OXObjectNotFoundException("NOT ALLOWED TO DELETE FOLDER OBJECTS CUZ NO OBJECT FOUND (cid="+sessionobject.getContext().getContextId()+" fid="+fuid+" oid="+oid+')',xe);		
 		}catch (SQLException e){
-			throw EXCEPTIONS.create(44,e,Integer.valueOf(sessionobject.getContext().getContextId()), Integer.valueOf(fuid), Integer.valueOf(userId), Integer.valueOf(oid));
+			throw EXCEPTIONS.create(44,e,Integer.valueOf(session.getContext().getContextId()), Integer.valueOf(fuid), Integer.valueOf(userId), Integer.valueOf(oid));
 			//throw new OXConflictException("NOT ALLOWED TO DELETE FOLDER OBJECT (cid="+sessionobject.getContext().getContextId()+" fid="+fuid+" oid="+oid+')', e);	
 		}catch (OXException e){
 			throw e;
@@ -1022,7 +1022,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 			}
 			try{
 				if (readcon != null) {
-					DBPool.closeReaderSilent(sessionobject.getContext(), readcon);
+					DBPool.closeReaderSilent(session.getContext(), readcon);
 				}
 			} catch (Exception ex){
 				LOG.error("Unable to return Connection",ex);
@@ -1030,19 +1030,19 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 		}
 
 		try{
-			writecon = DBPool.pickupWriteable(sessionobject.getContext());
+			writecon = DBPool.pickupWriteable(session.getContext());
 			
 			if (oclPerm.canDeleteAllObjects()) {
-				Contacts.deleteContact(oid, sessionobject.getContext().getContextId(), writecon);	
+				Contacts.deleteContact(oid, session.getContext().getContextId(), writecon);	
 			} else {
 				if (oclPerm.canDeleteOwnObjects() && created_from == userId){
-					Contacts.deleteContact(oid, sessionobject.getContext().getContextId(), writecon);	
+					Contacts.deleteContact(oid, session.getContext().getContextId(), writecon);	
 				}else{
 					throw EXCEPTIONS.createOXConflictException(46,Integer.valueOf(fuid), Integer.valueOf(ctx.getContextId()), Integer.valueOf(userId));
 					//throw new OXConflictException("NOT ALLOWED TO DELETE FOLDER OBJECTS (cid="+sessionobject.getContext().getContextId()+" fid="+fuid+" oid="+oid+')');					
 				}
 			}
-			final EventClient ec = new EventClient(sessionobject);
+			final EventClient ec = new EventClient(session);
 			ec.delete(co);
 		} catch (InvalidStateException ise){
 			throw EXCEPTIONS.create(56,ise);
@@ -1053,7 +1053,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 			//throw new OXConflictException("NOT ALLOWED TO DELETE FOLDER OBJECT (cid="+sessionobject.getContext().getContextId()+" fid="+fuid+" oid="+oid+')', e);			
 		} finally {
 			if (writecon != null) {
-				DBPool.closeWriterSilent(sessionobject.getContext(), writecon);
+				DBPool.closeWriterSilent(session.getContext(), writecon);
 			}
 		}
 	}
@@ -1079,9 +1079,9 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 		Statement stmt = null;
 		ResultSet rs = null;
 		try{
-			readcon = DBPool.pickup(sessionobject.getContext());
+			readcon = DBPool.pickup(session.getContext());
 	
-			final ContactSql contactSQL = new ContactMySql(sessionobject);
+			final ContactSql contactSQL = new ContactMySql(session);
 			contactSQL.setSelect(contactSQL.iFgetColsString(cols).toString());			
 			contactSQL.setObjectArray(object_id);			
 			
@@ -1118,7 +1118,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 				}
 				try{
 					if (readcon != null) {
-						DBPool.closeReaderSilent(sessionobject.getContext(), readcon);
+						DBPool.closeReaderSilent(session.getContext(), readcon);
 					}
 				} catch (Exception ex){
 					LOG.error("Unable to return Connection",ex);
@@ -1128,7 +1128,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 		return new PrefetchIterator(si);
 	}
 	
-	public static boolean performSecurityReadCheck(final int fid, final int created_from, final int user, final int[] group, final SessionObject so, final Connection readcon) {
+	public static boolean performSecurityReadCheck(final int fid, final int created_from, final int user, final int[] group, final Session so, final Connection readcon) {
 		return Contacts.performContactReadCheck(fid, created_from, user, group, so.getContext(),
 				UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), so.getContext()),
 				readcon);		
@@ -1173,7 +1173,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 
 			if (!co.containsInternalUserId()){		
 				co.setParentFolderID(rs.getInt(cols.length+1));
-				if (check && !performSecurityReadCheck(co.getParentFolderID(), co.getCreatedBy(),userId,memberInGroups,sessionobject,readCon)){
+				if (check && !performSecurityReadCheck(co.getParentFolderID(), co.getCreatedBy(),userId,memberInGroups,session,readCon)){
 					throw EXCEPTIONS.createOXConflictException(50,Integer.valueOf(ctx.getContextId()), Integer.valueOf(userId));
 				}
 			}
@@ -1257,7 +1257,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 				//throw new SearchIteratorException("UNABLE TO CLOSE SEARCHITERATOR STATEMENT! (cid="+sessionobject.getContext().getContextId()+')',e);
 			}
 			if (readcon != null) {
-				DBPool.closeReaderSilent(sessionobject.getContext(), readcon);
+				DBPool.closeReaderSilent(session.getContext(), readcon);
 			}
 		}
 		

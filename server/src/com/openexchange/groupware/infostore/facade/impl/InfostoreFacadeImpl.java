@@ -122,7 +122,7 @@ import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.EffectivePermission;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.collections.Injector;
 import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.file.FileStorage;
@@ -225,13 +225,13 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 	}
 
 	public void saveDocumentMetadata(final DocumentMetadata document,
-			final long sequenceNumber, final SessionObject sessionObj) throws OXException {
+			final long sequenceNumber, final Session sessionObj) throws OXException {
 		saveDocument(document, null, sequenceNumber, sessionObj);
 	}
 
 	public void saveDocumentMetadata(final DocumentMetadata document,
 			final long sequenceNumber, final Metadata[] modifiedColumns,
-			final SessionObject sessionObj) throws OXException {
+			final Session sessionObj) throws OXException {
 		saveDocument(document, null, sequenceNumber, modifiedColumns,
 				sessionObj);
 	}
@@ -265,7 +265,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 	}
 
 	@OXThrows(category = Category.USER_INPUT, desc = "The user does not have sufficient write permissions to lock this infoitem.", exceptionId = 18, msg = "You need write permissions to lock a document.")
-	public void lock(final int id, final long diff, final SessionObject sessionObj)
+	public void lock(final int id, final long diff, final Session sessionObj)
 			throws OXException {
 		final EffectiveInfostorePermission infoPerm = security
 				.getInfostorePermission(id, sessionObj.getContext(), getUser(sessionObj), getUserConfiguration(sessionObj));
@@ -285,7 +285,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 	}
 
 	@OXThrows(category = Category.USER_INPUT, desc = "The user does not have sufficient write permissions to unlock this infoitem.", exceptionId = 17, msg = "You need write permissions to unlock a document.")
-	public void unlock(final int id, final SessionObject sessionObj) throws OXException {
+	public void unlock(final int id, final Session sessionObj) throws OXException {
 		final EffectiveInfostorePermission infoPerm = security
 				.getInfostorePermission(id, sessionObj.getContext(), getUser(sessionObj), getUserConfiguration(sessionObj));
 		if (!infoPerm.canWriteObject()) {
@@ -296,7 +296,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 		touch(id, sessionObj);
 	}
 
-	private void touch(final int id, final SessionObject sessionObj) throws OXException {
+	private void touch(final int id, final Session sessionObj) throws OXException {
 		try {
 			final DocumentMetadata oldDocument = load(id, CURRENT_VERSION, sessionObj
 							.getContext());
@@ -385,7 +385,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 		return new SearchIteratorAdapter(list.iterator());
 	}
 
-	private DocumentMetadata checkWriteLock(final int id, final SessionObject sessionObj)
+	private DocumentMetadata checkWriteLock(final int id, final Session sessionObj)
 			throws OXException {
 		final DocumentMetadata document = load(id, CURRENT_VERSION,
 				sessionObj.getContext());
@@ -395,7 +395,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 
 	@OXThrows(category = Category.CONCURRENT_MODIFICATION, desc = "The infoitem was locked by some other user. Only the user that locked the item (the one that modified the entry) can modify a locked infoitem.", exceptionId = 15, msg = "This document is locked.")
 	private void checkWriteLock(final DocumentMetadata document,
-			final SessionObject sessionObj) throws OXException {
+			final Session sessionObj) throws OXException {
 		if (document.getModifiedBy() == sessionObj.getUserId()) {
 			return;
 		}
@@ -407,7 +407,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 	}
 
 	@OXThrows(category = Category.CONCURRENT_MODIFICATION, desc = "The infoitem was locked by some other user. Only the user that locked the item and the creator of the item can unlock a locked infoitem.", exceptionId = 16, msg = "You cannot unlock this document.")
-	private void checkMayUnlock(final int id, final SessionObject sessionObj)
+	private void checkMayUnlock(final int id, final Session sessionObj)
 			throws OXException {
 		final DocumentMetadata document = load(id, CURRENT_VERSION,
 				sessionObj.getContext());
@@ -431,7 +431,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 			"You do not have sufficient permissions to create objects in this folder.",
 			"The file store could not be reached.", "Could not generate new ID." })
 	public void saveDocument(final DocumentMetadata document, final InputStream data,
-			final long sequenceNumber, final SessionObject sessionObj) throws OXException {
+			final long sequenceNumber, final Session sessionObj) throws OXException {
 		security.checkFolderId(document.getFolderId(), sessionObj.getContext());
 		if (document.getId() == InfostoreFacade.NEW) {
 			final EffectivePermission isperm = security.getFolderPermission(document
@@ -655,7 +655,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 			"You are not allowed to delete objects in the source folder, so this document cannot be mo Tved."})
 	public void saveDocument(final DocumentMetadata document, final InputStream data,
 			final long sequenceNumber, Metadata[] modifiedColumns,
-			final SessionObject sessionObj) throws OXException {
+			final Session sessionObj) throws OXException {
 		try {
 			final EffectiveInfostorePermission infoPerm = security
 					.getInfostorePermission(document.getId(), sessionObj
@@ -841,7 +841,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 	}
 
 	public void removeDocument(final long folderId, final long date,
-			final SessionObject sessionObj) throws OXException {
+			final Session sessionObj) throws OXException {
 		final DBProvider reuseProvider = new ReuseReadConProvider(getProvider());
 		try {
 			final List<DocumentMetadata> allVersions = InfostoreIterator
@@ -861,7 +861,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 	@OXThrows(category = Category.CONCURRENT_MODIFICATION, desc = "Not all infoitems in the given folder could be deleted. This may be due to the infoitems being modified since the last request, or the objects might not even exist anymore or the user doesn't have enough delete permissions on certain objects.", exceptionId = 5, msg = "Could not delete all objects.")
 	private void removeDocuments(final List<DocumentMetadata> allDocuments,
 			final List<DocumentMetadata> allVersions, final long date,
-			final SessionObject sessionObj, final List<DocumentMetadata> rejected)
+			final Session sessionObj, final List<DocumentMetadata> rejected)
 			throws OXException {
 		final List<DocumentMetadata> delDocs = new ArrayList<DocumentMetadata>();
 		final List<DocumentMetadata> delVers = new ArrayList<DocumentMetadata>();
@@ -965,7 +965,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 	}
 
 	public int[] removeDocument(final int[] id, final long date,
-			final SessionObject sessionObj) throws OXException {
+			final Session sessionObj) throws OXException {
 		final StringBuilder ids = new StringBuilder().append('(');
 		for (final int i : id) {
 			ids.append(i).append(',');
@@ -1049,7 +1049,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 	}
 
 	@OXThrows(category = Category.USER_INPUT, desc = "The user must be allowed to delete the object in order to delete a version of it.", exceptionId = 6, msg = "You do not have sufficient permission to delete this version.")
-	public int[] removeVersion(final int id, final int[] versionId, final SessionObject sessionObj)
+	public int[] removeVersion(final int id, final int[] versionId, final Session sessionObj)
 			throws OXException { 
 		if (versionId.length <= 0) {
 			return versionId;
@@ -1395,7 +1395,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 		return db.isFolderEmpty(folderId, ctx);
 	}
 
-	public void removeUser(final int id, final Context ctx, final SessionObject session) throws OXException {
+	public void removeUser(final int id, final Context ctx, final Session session) throws OXException {
 		db.removeUser(id, ctx, session, lockManager);
 	}
 
@@ -1510,12 +1510,12 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 		}
 	}
 
-	private static final UserConfiguration getUserConfiguration(final SessionObject sessionObj) {
+	private static final UserConfiguration getUserConfiguration(final Session sessionObj) {
 		return UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
 				sessionObj.getContext());
 	}
 
-	private static final User getUser(final SessionObject sessionObj) {
+	private static final User getUser(final Session sessionObj) {
 		return UserStorage.getUser(sessionObj.getUserId(), sessionObj.getContext());
 	}
 

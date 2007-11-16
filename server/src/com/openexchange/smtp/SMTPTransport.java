@@ -69,7 +69,6 @@ import javax.mail.Address;
 import javax.mail.Flags;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
-import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.Message.RecipientType;
 import javax.mail.internet.AddressException;
@@ -101,7 +100,7 @@ import com.openexchange.mail.transport.dataobjects.TextBodyMailPart;
 import com.openexchange.mail.transport.dataobjects.UploadFileMailPart;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.smtp.config.GlobalSMTPConfig;
 import com.openexchange.smtp.config.SMTPConfig;
 import com.openexchange.smtp.config.SMTPSessionProperties;
@@ -130,11 +129,11 @@ public final class SMTPTransport extends MailTransport {
 
 	private static final String PROTOCOL_SMTP = "smtp";
 
-	private final Session smtpSession;
+	private final javax.mail.Session smtpSession;
 
 	private final MailConnection<?, ?, ?> mailConnection;
 
-	private final SessionObject session;
+	private final Session session;
 
 	private final UserSettingMail usm;
 
@@ -158,7 +157,7 @@ public final class SMTPTransport extends MailTransport {
 	 * @throws MailException
 	 *             If initialization fails
 	 */
-	public SMTPTransport(final SessionObject session, final MailConnection<?, ?, ?> mailConnection)
+	public SMTPTransport(final Session session, final MailConnection<?, ?, ?> mailConnection)
 			throws MailException {
 		super();
 		this.mailConnection = mailConnection;
@@ -169,7 +168,7 @@ public final class SMTPTransport extends MailTransport {
 		}
 		smtpProps.put(MIMESessionPropertyNames.PROP_SMTPHOST, transportConfig.getServer());
 		smtpProps.put(MIMESessionPropertyNames.PROP_SMTPPORT, String.valueOf(transportConfig.getPort()));
-		this.smtpSession = Session.getInstance(smtpProps, null);
+		this.smtpSession = javax.mail.Session.getInstance(smtpProps, null);
 		this.session = session;
 		usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), session.getContext());
 	}
@@ -181,7 +180,7 @@ public final class SMTPTransport extends MailTransport {
 	}
 
 	@Override
-	public MailConfig getTransportConfig(final SessionObject session) throws MailException {
+	public MailConfig getTransportConfig(final Session session) throws MailException {
 		if (transportConfig == null) {
 			transportConfig = SMTPConfig.getSmtpConfig(session);
 		}
@@ -301,7 +300,7 @@ public final class SMTPTransport extends MailTransport {
 	@Override
 	public MailPath sendRawMessage(final byte[] asciiBytes) throws MailException {
 		try {
-			final SMTPMessage smtpMessage = new SMTPMessage(Session.getInstance(SMTPSessionProperties
+			final SMTPMessage smtpMessage = new SMTPMessage(javax.mail.Session.getInstance(SMTPSessionProperties
 					.getDefaultSessionProperties(), null), new ByteArrayInputStream(asciiBytes));
 			/*
 			 * Check recipients
@@ -665,13 +664,13 @@ public final class SMTPTransport extends MailTransport {
 	}
 
 	@Override
-	protected InfostoreDocumentMailPart getNewDocumentPartInternal(final int documentId, final SessionObject session)
+	protected InfostoreDocumentMailPart getNewDocumentPartInternal(final int documentId, final Session session)
 			throws MailException {
 		return new SMTPDocumentPart(documentId, session);
 	}
 
 	@Override
-	protected ReferencedMailPart getNewReferencedPartInternal(final MailPart referencedPart, final SessionObject session)
+	protected ReferencedMailPart getNewReferencedPartInternal(final MailPart referencedPart, final Session session)
 			throws MailException {
 		return new SMTPReferencedPart(referencedPart, session);
 	}

@@ -84,7 +84,7 @@ import com.openexchange.mail.parser.handlers.NonInlinePartHandler;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.MessageUtility;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.mail.ContentType;
 
 /**
@@ -123,8 +123,7 @@ public final class MimeForward {
 	 * @throws MailException
 	 *             If forward mail cannot be composed
 	 */
-	public static MailMessage getFowardMail(final MimeMessage originalMsg, final SessionObject session)
-			throws MailException {
+	public static MailMessage getFowardMail(final MimeMessage originalMsg, final Session session) throws MailException {
 		try {
 			/*
 			 * New MIME message with a dummy session

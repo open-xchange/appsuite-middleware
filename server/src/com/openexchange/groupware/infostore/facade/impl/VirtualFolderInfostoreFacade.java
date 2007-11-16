@@ -52,9 +52,12 @@ package com.openexchange.groupware.infostore.facade.impl;
 import java.io.InputStream;
 
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.Component;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrows;
+import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.infostore.Classes;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
 import com.openexchange.groupware.infostore.InfostoreFacade;
@@ -66,11 +69,8 @@ import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.results.TimedResultImpl;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
-import com.openexchange.groupware.infostore.Classes;
-import com.openexchange.groupware.Component;
-import com.openexchange.groupware.AbstractOXException.Category;
 
 @OXExceptionSource(
 		classId = Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_FACADE_IMPL_VIRTUALFOLDERINFOSTOREFACADE, 
@@ -162,53 +162,53 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
 		return true;
 	}
 
-	public void lock(final int id, final long diff, final SessionObject sessionObj)
+	public void lock(final int id, final long diff, final Session sessionObj)
 			throws OXException {
 		virtualFolder();
 	}
 
 	public void removeDocument(final long folderId, final long date,
-			final SessionObject sessionObj) throws OXException {
+			final Session sessionObj) throws OXException {
 		virtualFolder();
 	}
 
-	public int[] removeDocument(final int[] id, final long date, final SessionObject sessionObj)
+	public int[] removeDocument(final int[] id, final long date, final Session sessionObj)
 			throws OXException {
 		return id;
 	}
 
-	public void removeUser(final int id, final Context context, final SessionObject session) throws OXException {
+	public void removeUser(final int id, final Context context, final Session session) throws OXException {
 		
 	}
 
-	public int[] removeVersion(final int id, final int[] versionId, final SessionObject sessionObj)
+	public int[] removeVersion(final int id, final int[] versionId, final Session sessionObj)
 			throws OXException {
 		return versionId;
 	}
 
 	public void saveDocument(final DocumentMetadata document, final InputStream data,
-			final long sequenceNumber, final SessionObject sessionObj) throws OXException {
+			final long sequenceNumber, final Session sessionObj) throws OXException {
 		virtualFolder();
 	}
 
 	public void saveDocument(final DocumentMetadata document, final InputStream data,
 			final long sequenceNumber, final Metadata[] modifiedColumns,
-			final SessionObject sessionObj) throws OXException {
+			final Session sessionObj) throws OXException {
 		virtualFolder();
 	}
 
 	public void saveDocumentMetadata(final DocumentMetadata document,
-			final long sequenceNumber, final SessionObject sessionObj) throws OXException {
+			final long sequenceNumber, final Session sessionObj) throws OXException {
 		virtualFolder();
 	}
 
 	public void saveDocumentMetadata(final DocumentMetadata document,
 			final long sequenceNumber, final Metadata[] modifiedColumns,
-			final SessionObject sessionObj) throws OXException {
+			final Session sessionObj) throws OXException {
 		virtualFolder();
 	}
 	
-	public void unlock(final int id, final SessionObject sessionObj) throws OXException {
+	public void unlock(final int id, final Session sessionObj) throws OXException {
 		
 	}
 

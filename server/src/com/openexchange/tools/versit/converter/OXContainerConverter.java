@@ -85,7 +85,7 @@ import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.versit.Parameter;
 import com.openexchange.tools.versit.ParameterValue;
 import com.openexchange.tools.versit.Property;
@@ -153,7 +153,7 @@ public class OXContainerConverter {
 	private static Method getSetMethod(final Class containerObjClass, final String methodName, final Class typeClass) {
 		try {
 			return containerObjClass.getMethod(methodName, new Class[] { typeClass });
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOG.error(e);
 			return null;
 		}
@@ -446,7 +446,7 @@ public class OXContainerConverter {
 		String domain = "localhost";
 		try {
 			domain = InetAddress.getLocalHost().getCanonicalHostName();
-		} catch (UnknownHostException e) {
+		} catch (final UnknownHostException e) {
 			LOG.error(e.getMessage(), e);
 		}
 		atdomain = new StringBuilder().append('@').append(domain).toString();
@@ -455,7 +455,7 @@ public class OXContainerConverter {
 	// ------------------------ END Prepare converter class
 	// -------------------------------------
 
-	private final SessionObject session;
+	private final Session session;
 
 	private final TimeZone timezone;
 
@@ -465,14 +465,14 @@ public class OXContainerConverter {
 
 	private boolean sendFloating;
 
-	public OXContainerConverter(TimeZone timezone, String organizerMailAddress) {
+	public OXContainerConverter(final TimeZone timezone, final String organizerMailAddress) {
 		super();
 		this.timezone = timezone;
 		this.organizerMailAddress = organizerMailAddress;
 		session = null;
 	}
 
-	public OXContainerConverter(SessionObject session) {
+	public OXContainerConverter(final Session session) {
 		super();
 		this.session = session;
 		this.timezone = TimeZone.getTimeZone(UserStorage.getUser(session.getUserId(), session.getContext())
@@ -602,7 +602,7 @@ public class OXContainerConverter {
 			// VALARM
 			AddAlarms(taskContainer, object);
 			return taskContainer;
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOG.error(e);
 			throw new ConverterException(e);
 		}
@@ -718,7 +718,7 @@ public class OXContainerConverter {
 			appContainer.setCategories(cats.toString());
 		}
 		if (exdates.size() != 0) {
-			Date[] dates = new Date[exdates.size()];
+			final Date[] dates = new Date[exdates.size()];
 			for (int i = 0; i < dates.length; i++) {
 				dates[i] = ((DateTimeValue) exdates.get(i)).calendar.getTime();
 			}
@@ -765,7 +765,7 @@ public class OXContainerConverter {
 			if (property.getValue() instanceof byte[]) {
 				try {
 					value = new BASE64Encoding().encode(new String((byte[]) property.getValue(), "ISO-8859-1"));
-				} catch (IOException e) {
+				} catch (final IOException e) {
 					final ConverterException ce = new ConverterException(e.getMessage());
 					ce.initCause(e);
 					throw ce;
@@ -775,7 +775,7 @@ public class OXContainerConverter {
 			}
 			try {
 				contactContainer.setImage1(value.getBytes("ISO-8859-1"));
-			} catch (UnsupportedEncodingException e) {
+			} catch (final UnsupportedEncodingException e) {
 				LOG.error("Image could not be set", e);
 			}
 		}
@@ -883,7 +883,7 @@ public class OXContainerConverter {
 				if (type != null) {
 					isWork = false;
 					for (int j = 0; j < type.getValueCount(); j++) {
-						String value = type.getValue(j).getText();
+						final String value = type.getValue(j).getText();
 						isHome |= value.equalsIgnoreCase("home");
 						isWork |= value.equalsIgnoreCase("work");
 					}
@@ -924,7 +924,7 @@ public class OXContainerConverter {
 				final Parameter type = property.getParameter("TYPE");
 				if (type != null) {
 					for (int j = 0; j < type.getValueCount(); j++) {
-						String value = type.getValue(j).getText();
+						final String value = type.getValue(j).getText();
 						if (idx == WORK) {
 							if (value.equalsIgnoreCase("work")) {
 								idx = WORK;
@@ -950,7 +950,7 @@ public class OXContainerConverter {
 				if (!isVoice && !isFax) {
 					isVoice = true;
 				}
-				Object value = property.getValue();
+				final Object value = property.getValue();
 				if (isVoice) {
 					ComplexProperty(contactContainer, phones[idx][VOICE], index[idx][VOICE], value);
 				}
@@ -960,14 +960,14 @@ public class OXContainerConverter {
 			}
 			// EMAIL
 			else if (property.name.equals("EMAIL")) {
-				String value = property.getValue().toString();
+				final String value = property.getValue().toString();
 				//fix for: 7249
 				boolean isProperEmailAddress = value != null && value.length() > 0;
 				if(isProperEmailAddress){
 					try {
-						InternetAddress  ia = new InternetAddress(value);
+						final InternetAddress  ia = new InternetAddress(value);
 						ia.validate();
-					} catch (AddressException e) {
+					} catch (final AddressException e) {
 						isProperEmailAddress = false;
 					}
 				} 
@@ -1009,7 +1009,7 @@ public class OXContainerConverter {
 				return true;
 			}
 			return false;
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new ConverterException(e);
 		}
 	}
@@ -1024,7 +1024,7 @@ public class OXContainerConverter {
 			final Object[] args = { property.getValue().toString() };
 			setStringMethod.invoke(containerObj, args);
 			return true;
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new ConverterException(e);
 		}
 	}
@@ -1036,7 +1036,7 @@ public class OXContainerConverter {
 			if (property == null) {
 				return false;
 			}
-			String privacy = (String) property.getValue();
+			final String privacy = (String) property.getValue();
 			
 			boolean isPrivate = false;
 			if("PRIVATE".equals(privacy)){
@@ -1048,9 +1048,9 @@ public class OXContainerConverter {
 			final Object[] args = { isPrivate };
 			setPrivacyMethod.invoke(containerObj, args);
 			return false;
-		} catch (ConverterPrivacyException e){
+		} catch (final ConverterPrivacyException e){
 			throw e;
-		} catch (Exception e){
+		} catch (final Exception e){
 			throw new ConverterException(e);
 		}
 	}
@@ -1071,7 +1071,7 @@ public class OXContainerConverter {
 			final Object[] args = { date.calendar.getTime() };
 			setDateMethod.invoke(containerObj, args);
 			return true;
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new ConverterException(e);
 		}
 	}
@@ -1097,7 +1097,7 @@ public class OXContainerConverter {
 			final Object[] args = { cal.getTime() };
 			setDateMethod.invoke(containerObj, args);
 			return true;
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new ConverterException(e);
 		}
 	}
@@ -1119,7 +1119,7 @@ public class OXContainerConverter {
 				participant.setDisplayName(mail);
 			}
 			calContainerObj.addParticipant(participant);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new ConverterException(e);
 		}
 	}
@@ -1131,12 +1131,12 @@ public class OXContainerConverter {
 	 * @param mail - Mail address as string
 	 * @return true if is internal user, false otherwise
 	 */
-	public boolean isInternalUser(String mail) {
+	public boolean isInternalUser(final String mail) {
 		try {
 			final UserStorage us = UserStorage.getInstance(session.getContext());
 			final User uo = us.searchUser(mail);
 			return uo != null;
-		} catch (LdapException e){
+		} catch (final LdapException e){
 			return false;
 		}
 	}
@@ -1149,7 +1149,7 @@ public class OXContainerConverter {
 	 * Should only be called after using <code>isInternalUser</code> or
 	 * you have to live with the LdapException.
 	 */
-	public User getInternalUser(String mail) throws LdapException {
+	public User getInternalUser(final String mail) throws LdapException {
 		final UserStorage us = UserStorage.getInstance(session.getContext());
 		return us.searchUser(mail);
 	}
@@ -1314,7 +1314,7 @@ public class OXContainerConverter {
 			}
 			final Object[] args = { sb.toString() };
 			setMethod.invoke(containerObj, args);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new ConverterException(e);
 		}
 	}
@@ -1327,7 +1327,7 @@ public class OXContainerConverter {
 			}
 			final Object[] args = { value };
 			phones[index[0]++].invoke(containerObj, args);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new ConverterException(e);
 		}
 	}
@@ -1559,7 +1559,7 @@ public class OXContainerConverter {
 		if (contact.getImage1() != null) {
 			try {
 				s = new String(contact.getImage1(), "ISO-8859-1");
-			} catch (UnsupportedEncodingException e2) {
+			} catch (final UnsupportedEncodingException e2) {
 				LOG.error(e2);
 				throw new ConverterException(e2);
 			}
@@ -1567,13 +1567,13 @@ public class OXContainerConverter {
 		if (s != null) {
 			try {
 				addProperty(object, "PHOTO", "VALUE", new String[] { "URI" }, new URI(s));
-			} catch (URISyntaxException e) {
+			} catch (final URISyntaxException e) {
 				try {
 					final Parameter type = new Parameter("TYPE");
 					type.addValue(new ParameterValue("JPEG"));
 					addProperty(object, "PHOTO", "ENCODING", new String[] { "B" },
 							(new BASE64Encoding()).decode(s).getBytes("ISO-8859-1")).addParameter(type);
-				} catch (IOException e1) {
+				} catch (final IOException e1) {
 					final ConverterException ce = new ConverterException(e.getMessage());
 					ce.initCause(e1);
 					throw ce;
@@ -1668,7 +1668,7 @@ public class OXContainerConverter {
 			adr.add(makeList(getPostalCode(postalCode, contactContainer)));
 			adr.add(makeList(getCountry(country, contactContainer)));
 			addProperty(object, "ADR", "TYPE", type, adr);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new ConverterException(e);
 		}
 	}
@@ -1751,8 +1751,8 @@ public class OXContainerConverter {
 
 		private final Object array;
 
-		public ArrayIterator(Object array) {
-			Class type = array.getClass();
+		public ArrayIterator(final Object array) {
+			final Class type = array.getClass();
 			if (!type.isArray()) {
 				throw new IllegalArgumentException("MailInterface.ArrayIterator:\tInvalid type: " + type);
 			}
@@ -1869,14 +1869,14 @@ public class OXContainerConverter {
 			if (address != null) {
 				try {
 					property.setValue(new URI("mailto:" + address));
-				} catch (URISyntaxException e) {
+				} catch (final URISyntaxException e) {
 					final ConverterException ce = new ConverterException(e.getMessage());
 					ce.initCause(e);
 					throw ce;
 				}
 				object.addProperty(property);
 			}
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOG.error(e);
 			throw new ConverterException(e);
 		}
@@ -1894,14 +1894,14 @@ public class OXContainerConverter {
 			if (address != null) {
 				try {
 					property.setValue(new URI("mailto:" + address));
-				} catch (URISyntaxException e) {
+				} catch (final URISyntaxException e) {
 					final ConverterException ce = new ConverterException(e.getMessage());
 					ce.initCause(e);
 					throw ce;
 				}
 				object.addProperty(property);
 			}
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOG.error(e);
 			throw new ConverterException(e);
 		}

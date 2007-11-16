@@ -67,7 +67,7 @@ import com.openexchange.cache.OXCachingException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.mail.MailConnection;
 import com.openexchange.mail.cache.eventhandler.MailConnectionEventHandler;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 
 /**
  * {@link MailConnectionCache} - a very volatile cache for already established
@@ -181,7 +181,7 @@ public final class MailConnectionCache {
 	 * @throws OXCachingException
 	 *             If removing from cache fails
 	 */
-	public MailConnection<?, ?, ?> removeMailConnection(final SessionObject session) throws OXCachingException {
+	public MailConnection<?, ?, ?> removeMailConnection(final Session session) throws OXCachingException {
 		final CacheKey key = getUserKey(session.getUserId(), session.getContext());
 		final Lock readLock = getLock(key).readLock();
 		readLock.lock();
@@ -239,7 +239,7 @@ public final class MailConnectionCache {
 	 * @throws OXCachingException
 	 *             If put into cache fails
 	 */
-	public boolean putMailConnection(final SessionObject session, final MailConnection<?, ?, ?> mailConnection)
+	public boolean putMailConnection(final Session session, final MailConnection<?, ?, ?> mailConnection)
 			throws OXCachingException {
 		final CacheKey key = getUserKey(session.getUserId(), session.getContext());
 		final Lock readLock = getLock(key).readLock();
@@ -293,7 +293,7 @@ public final class MailConnectionCache {
 	 * @return <code>true</code> if a user-bound mail connection is already
 	 *         present in cache; otherwise <code>false</code>
 	 */
-	public boolean containsMailConnection(final SessionObject session) {
+	public boolean containsMailConnection(final Session session) {
 		final CacheKey key = getUserKey(session.getUserId(), session.getContext());
 		final Lock readLock = getLock(key).readLock();
 		readLock.lock();
